@@ -92,7 +92,7 @@ your the server-application stateless), but it contains the actual client-state 
 
 ### Pages
 
-As you micht have noticed, the waether-widget's HTML is only a fragement. It is intended to be displayed on a HTML-page.
+As you micht have noticed, the weather-widget's HTML is only a fragement. It is intended to be displayed on a HTML-page.
 In XIS-Remote, a page with @Page. It's like a component on top level. Main difference is, it can be accessed by an url.
 Compoents might contain a hierachy if components in a real life web-application. As an example, it may be sufficient to
 have one page with 2 div-containers to add some content:
@@ -102,8 +102,8 @@ MainPage.html
 ```
 <html>
     <head>
-        <script type="text/javascript" src="xis-remote-generated.js"></script>
-         <link rel="stylesheet" href="styles.css"> 
+        <script type="text/javascript" src="/resources/public/xis-remote-generated.js"></script>
+         <link rel="stylesheet" href="/resources/public/styles.css"> 
     </head>
     <body>
         <div id="widget"/>
@@ -145,7 +145,9 @@ In this example, the main-page displays the weather-widget and the news-componen
 instance can be uses as a parameter in annotated methods. Bounded fields of the parameters (@Binding) will contain the
 actual client-state.
 
+**Instantiating page-components on your own is not recommended (no injection).**
+
 If the value of a field annotated with @Binding is a Page-Component (annotated with @PageComponent), it will be
-displayed in the bounded container. Before rendering, all methods annotated with @OnInit are called.
+displayed in the bounded container. Before rendering, all methods of these components annotated with @OnInit are called.
 
 A component (@PageComponent) might contain other components in the same way.
