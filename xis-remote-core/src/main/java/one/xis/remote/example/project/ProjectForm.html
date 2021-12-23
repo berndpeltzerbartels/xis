@@ -1,0 +1,15 @@
+<form>
+    <input name="name" value="${name}" data-binding="projectName"/><br/>
+    <span class="${class-name}">Name</span>
+    <span class="error">${message-name}</span>
+
+    <div>
+        <select multiple="multiple" name="" data-binding="userIds">
+            <option data-binding="users" data-item="user" id="${user.id}">${user.firstName} ${user.lastName}</option>
+        </select>
+
+    </div>
+
+    <button onclick="saveProject()">Speichern</button>
+
+</form>
