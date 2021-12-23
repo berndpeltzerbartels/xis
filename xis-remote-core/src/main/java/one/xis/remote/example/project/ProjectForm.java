@@ -8,17 +8,17 @@ import one.xis.remote.example.user.UserService;
 import java.util.ArrayList;
 import java.util.List;
 
-@Container
+@PageComponent
 public class ProjectForm {
 
     private ProjectService projectService;
 
     private UserService userService;
 
-    @Container
+    @PageComponent
     private MainPage mainPage;
 
-    @Container
+    @PageComponent
     private ProjectDetails projectDetails;
 
     @UserId

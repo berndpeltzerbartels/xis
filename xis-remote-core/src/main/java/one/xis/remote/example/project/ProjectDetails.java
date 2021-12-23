@@ -3,7 +3,7 @@ package one.xis.remote.example.project;
 import one.xis.remote.*;
 import one.xis.remote.example.MainPage;
 
-@Container
+@PageComponent
 public abstract class ProjectDetails {
 
     private ProjectService projectService;
@@ -18,7 +18,7 @@ public abstract class ProjectDetails {
     @UserId
     private String userId;
 
-    @Container
+    @PageComponent
     private ProjectForm projectForm;
 
     @OnEvent

@@ -7,6 +7,6 @@ import java.lang.annotation.Target;
 
 @Target({ElementType.TYPE, ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.SOURCE)
-public @interface Container {
-    String value() default "";
+public @interface Page {
+    String value(); // url
 }

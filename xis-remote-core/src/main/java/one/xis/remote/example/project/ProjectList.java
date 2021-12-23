@@ -5,7 +5,7 @@ import one.xis.remote.example.MainPage;
 
 import java.util.List;
 
-@Container
+@PageComponent
 public class ProjectList {
 
     private ProjectService projectService;
@@ -16,10 +16,10 @@ public class ProjectList {
     @UserId
     private String userId;
 
-    @Container
+    @PageComponent
     private MainPage mainPage;
 
-    @Container
+    @PageComponent
     private ProjectDetails projectDetails;
 
     @OnInit

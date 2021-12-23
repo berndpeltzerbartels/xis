@@ -1,9 +1,9 @@
 package one.xis.remote.example.login;
 
-import one.xis.remote.Container;
 import one.xis.remote.Method;
+import one.xis.remote.PageComponent;
 
-@Container
+@PageComponent
 public class Login {
 
     @Method

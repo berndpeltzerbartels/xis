@@ -1,11 +1,11 @@
 package one.xis.remote.example;
 
 import one.xis.remote.Binding;
-import one.xis.remote.Container;
+import one.xis.remote.PageComponent;
 
 import java.util.List;
 
-@Container
+@PageComponent
 public interface MainPage {
 
     void setMainContent(@Binding("main") Object content, Object... args);
