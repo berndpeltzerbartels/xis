@@ -1,4 +1,8 @@
 rootProject.name = 'xis-remote'
 include 'xis-remote-spring'
 include 'xis-remote-core'
+include 'xis-remote-validation'
+include 'xis-remote-processor'
+include 'xis-test-suite'
+include 'xis-remote-test-suite'
 
