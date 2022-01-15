@@ -6,5 +6,5 @@ include 'xis-remote-processor'
 include 'xis-test-suite'
 include 'xis-remote-test-suite'
 include 'xis-remote-template'
-include 'xis-utils'
+include 'xis-helper'
 

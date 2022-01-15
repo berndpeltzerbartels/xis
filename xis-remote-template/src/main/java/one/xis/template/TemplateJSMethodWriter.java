@@ -1,0 +1,181 @@
+package one.xis.template;
+
+import lombok.NonNull;
+import one.xis.template.TemplateModel.*;
+
+import java.io.IOException;
+import java.util.*;
+
+public class TemplateJSMethodWriter {
+
+    private static Map<Class<? extends TemplateElement>, ElementWriter> writers = new HashMap<>();
+
+    static {
+        writers.put(IfElement.class, new IfElementWriter());
+        writers.put(ForElement.class, new ForElementWriter());
+        writers.put(MixedContent.class, new MixedContentWriter());
+        writers.put(XmlElement.class, new XmlElementWriter());
+        writers.put(TemplateModel.StaticContent.class, new StaticContentWriter());
+        writers.put(TemplateModel.Expression.class, new ExpressionWriter());
+    }
+
+    private interface ElementWriter<E extends TemplateElement> {
+
+        void doWrite(E e, Appendable out) throws IOException;
+
+    }
+
+
+    void writeContentMethod(TemplateModel templateModel, Appendable out) throws IOException {
+        writeMethodHead(out);
+        writeVariables(templateModel.getDataVarNames(), out);
+        writeElements(List.of(templateModel.getRoot()), out);
+        out.append("return content;\n");
+    }
+
+    @SuppressWarnings("unchecked")
+    static <E extends TemplateElement> void writeElements(List<TemplateElement> elements, Appendable out) throws IOException {
+        for (TemplateElement e : elements) {
+            ElementWriter<E> writer = (ElementWriter<E>) writerFor(e.getClass());
+            writer.doWrite((E) e, out);
+        }
+    }
+
+    @NonNull
+    @SuppressWarnings("unchecked")
+    private static <E extends TemplateElement> ElementWriter<E> writerFor(Class<E> e) {
+        return Optional.ofNullable(writers.get(e.getClass())).orElseThrow(() -> new IllegalStateException("no writer for " + e));
+    }
+
+
+    private void writeMethodHead(Appendable out) throws IOException {
+        out.append("function createContent(data) {");
+    }
+
+
+    private void writeVariables(Collection<String> names, Appendable out) throws IOException {
+        out.append("var content = \"\";\n");
+        for (String varName : names) {
+            out.append("var ");
+            out.append(varName);
+            out.append("=data.");
+            out.append(varName);
+            out.append(";");
+            out.append("\n");
+        }
+    }
+
+    private static class IfElementWriter implements ElementWriter<IfElement> {
+
+        @Override
+        public void doWrite(IfElement e, Appendable out) throws IOException {
+            out.append("if (");
+            out.append(e.getCondition());
+            out.append("){");
+            writeElements(e.getChildElements(), out);
+            out.append("}");
+        }
+    }
+
+    private static class ForElementWriter implements ElementWriter<ForElement> {
+
+        @Override
+        public void doWrite(ForElement e, Appendable out) throws IOException {
+            out.append("for (var ");
+            out.append(e.getIndexVarName());
+            out.append("=0;");
+            out.append(e.getIndexVarName());
+            out.append("<");
+            out.append(e.getArrayVarName());
+            out.append(".length;");
+            out.append(e.getIndexVarName());
+            out.append("++){\n");
+            out.append("var ");
+            out.append(e.getElementVarName());
+            out.append("=");
+            out.append(e.getArrayVarName());
+            out.append("[");
+            out.append(e.getIndexVarName());
+            out.append("];\n");
+            writeElements(e.getChildElements(), out);
+            out.append("}");
+        }
+    }
+
+    private static class MixedContentWriter implements ElementWriter<MixedContent> {
+
+        @Override
+        public void doWrite(MixedContent content, Appendable out) throws IOException {
+            for (ContentElement contentElement : content.getContentElements()) {
+                write(contentElement, out);
+            }
+        }
+
+        @SuppressWarnings("unchecked")
+        private <E extends ContentElement> void write(ContentElement e, Appendable out) throws IOException {
+            ElementWriter<E> writer = (ElementWriter<E>) writerFor(e.getClass());
+            writer.doWrite((E) e, out);
+        }
+    }
+
+    private static class XmlElementWriter implements ElementWriter<XmlElement> {
+
+        @Override
+        public void doWrite(XmlElement xmlElement, Appendable out) throws IOException {
+            writeStartTag(xmlElement, out);
+            writeElements(xmlElement.getChildElements(), out);
+            writeEndTag(xmlElement, out);
+        }
+
+        private void writeStartTag(XmlElement e, Appendable out) throws IOException {
+            ElementWriter<MixedContent> mixedContentWriter = writerFor(MixedContent.class);
+            out.append("content+=");
+            out.append("\"<");
+            out.append(e.getTagName());
+            Iterator<Map.Entry<MixedContent, MixedContent>> iterator = e.getAttributes().entrySet().iterator();
+            while (iterator.hasNext()) {
+                Map.Entry<MixedContent, MixedContent> entry = iterator.next();
+                MixedContent name = entry.getKey();
+                MixedContent value = entry.getValue();
+                out.append(" ");
+                mixedContentWriter.doWrite(name, out);
+                out.append("=\\\"");
+                mixedContentWriter.doWrite(value, out);
+                out.append("\\\"");
+            }
+            out.append(">\";\n");
+        }
+
+        private void writeEndTag(XmlElement e, Appendable out) throws IOException {
+            out.append("content+=");
+            out.append("\"</");
+            out.append(e.getTagName());
+            out.append(">\";\n");
+        }
+
+    }
+
+    private static class StaticContentWriter implements ElementWriter<TemplateModel.StaticContent> {
+
+        @Override
+        public void doWrite(TemplateModel.StaticContent content, Appendable out) throws IOException {
+            for (String line : content.getLines()) {
+                out.append("content+=");
+                out.append("\"");
+                out.append(line);
+                out.append("\";\n");
+            }
+        }
+    }
+
+    private static class ExpressionWriter implements ElementWriter<TemplateModel.Expression> {
+
+        @Override
+        public void doWrite(TemplateModel.Expression expression, Appendable out) throws IOException {
+            out.append("content+=");
+            out.append(expression.getContent());
+            out.append(";\n");
+        }
+    }
+
+}

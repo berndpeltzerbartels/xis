@@ -13,7 +13,7 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok:1.18.12'
 
     implementation 'org.projectlombok:lombok:1.18.12'
-    implementation project(':xis-utils')
+    implementation project(':xis-helper')
 
     implementation group: 'com.squareup', name: 'javapoet', version: '1.12.1'
 

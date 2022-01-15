@@ -1,4 +1,4 @@
-package one.xis.remote.javascript;
+package one.xis.template;
 
 import org.w3c.dom.Element;
 
