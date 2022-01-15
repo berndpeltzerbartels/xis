@@ -13,6 +13,7 @@ dependencies {
     annotationProcessor group: 'com.google.auto.service', name: 'auto-service', version: '1.0-rc7'
     annotationProcessor 'org.projectlombok:lombok:1.18.12'
 
+    implementation project(':xis-utils')
     implementation group: 'com.google.auto.service', name: 'auto-service', version: '1.0-rc7'
     implementation 'org.projectlombok:lombok:1.18.12'
 
