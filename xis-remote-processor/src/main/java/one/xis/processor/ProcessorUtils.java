@@ -16,17 +16,16 @@ import java.util.Iterator;
 import java.util.List;
 
 
-public class ProcessorUtils {
+class ProcessorUtils {
     private final ProcessingEnvironment environment;
     private static File sourceDir;
 
-    public ProcessorUtils(ProcessingEnvironment environment) {
+    ProcessorUtils(ProcessingEnvironment environment) {
         this.environment = environment;
         if (sourceDir == null) {
             sourceDir = getSourceLocation();
         }
     }
-
 
     @SneakyThrows
     PrintWriter writer(String path) {
