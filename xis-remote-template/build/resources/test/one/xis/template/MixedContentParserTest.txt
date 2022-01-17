@@ -1,0 +1,6 @@
+Das ist das ${Nikolaus.Haus}
+bla
+bla
+
+${format(x)} bla
+X_${a.b.c}

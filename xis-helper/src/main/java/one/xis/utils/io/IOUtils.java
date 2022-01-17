@@ -11,11 +11,16 @@ public class IOUtils {
         return ClassLoader.getSystemResourceAsStream(resourcePath);
     }
 
+    public InputStream getResourceForClass(Class<?> aClass, String resourcName) {
+        String path = aClass.getPackageName().replace('.', '/') + '/' + resourcName;
+        return aClass.getClassLoader().getResourceAsStream(path);
+    }
+
     public String getContent(File file, String encoding) throws IOException {
         return getContent(new FileInputStream(file), encoding);
     }
 
-    private String getContent(InputStream inputStream, String charset) throws IOException {
+    public String getContent(InputStream inputStream, String charset) throws IOException {
         StringBuilder resultStringBuilder = new StringBuilder();
         try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, charset))) {
             String line;

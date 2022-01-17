@@ -75,6 +75,15 @@ public class TemplateModel {
     @Data
     static class StaticContent implements TemplateElement, ContentElement {
         private final List<String> lines;
+
+        StaticContent(String s) {
+            lines = List.of(s);
+        }
+
+        StaticContent(List<String> lines) {
+            this.lines = lines;
+        }
+        
     }
 
     @Data

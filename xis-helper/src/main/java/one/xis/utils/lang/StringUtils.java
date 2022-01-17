@@ -2,15 +2,25 @@ package one.xis.utils.lang;
 
 import lombok.experimental.UtilityClass;
 
+import java.util.Arrays;
+import java.util.stream.Stream;
+
 @UtilityClass
 public class StringUtils {
 
-    public boolean isEmpty(String s) {
-        return s == null || s.isEmpty();
+    public boolean isEmpty(CharSequence s) {
+        return s == null || s.length() == 0;
     }
 
-    public boolean isNotEmpty(String s) {
+    public boolean isNotEmpty(CharSequence s) {
         return !isEmpty(s);
+    }
+
+    public Stream<String> splitToLines(CharSequence sequence) {
+        if (sequence == null) {
+            return Stream.empty();
+        }
+        return Arrays.stream(sequence.toString().split("[\\n\\r]+"));
     }
 
     public String trimNullSafe(String s) {
