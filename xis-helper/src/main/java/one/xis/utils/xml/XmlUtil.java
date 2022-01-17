@@ -3,7 +3,11 @@ package one.xis.utils.xml;
 
 import lombok.experimental.UtilityClass;
 import org.w3c.dom.*;
+import org.xml.sax.SAXException;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -12,6 +16,15 @@ import java.util.stream.Stream;
 
 @UtilityClass
 public class XmlUtil {
+
+
+    public Document loadDocument(File file) throws IOException, SAXException {
+        return new XmlLoader().loadDocument(file);
+    }
+
+    public Document loadDocument(InputStream in) throws IOException, SAXException {
+        return new XmlLoader().loadDocument(in);
+    }
 
     public Optional<Element> getElementByTagName(Element parent, String tagName) {
         NodeList nodeList = parent.getElementsByTagName(tagName);

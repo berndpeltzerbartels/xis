@@ -13,28 +13,26 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class MixedContentParserTest {
-
-
+class TextContentParserTest {
+    
     @Test
     @DisplayName("Content with embedded expression")
     void parse() {
-        List<ContentElement> result = new MixedContentParser("123${a.b}456").parse();
+        List<ContentElement> result = new MixedContentParser("123${a.b}456").parse().getContentElements();
         assertThat(result).containsExactly(new StaticContent("123"), new Expression("a.b"), new StaticContent(List.of("456")));
     }
-
 
     @Test
     @DisplayName("Expressions only")
     void parse1() {
-        List<ContentElement> result = new MixedContentParser("${a}${a.b}").parse();
+        List<ContentElement> result = new MixedContentParser("${a}${a.b}").parse().getContentElements();
         assertThat(result).containsExactly(new Expression("a"), new Expression("a.b"));
     }
 
     @Test
     @DisplayName("Escapes")
     void parse2() {
-        List<ContentElement> result = new MixedContentParser("\\${a}${a.b}").parse();
+        List<ContentElement> result = new MixedContentParser("\\${a}${a.b}").parse().getContentElements();
         assertThat(result).containsExactly(new StaticContent("${a}"), new Expression("a.b"));
     }
 
@@ -44,7 +42,7 @@ class MixedContentParserTest {
     void parse3() throws IOException {
         InputStream in = IOUtils.getResourceForClass(getClass(), "MixedContentParserTest.txt");
         String text = IOUtils.getContent(in, "UTF-8");
-        List<ContentElement> result = new MixedContentParser(text).parse();
+        List<ContentElement> result = new MixedContentParser(text).parse().getContentElements();
 
         assertThat(result).containsExactly(new StaticContent("Das ist das "),//
                 new Expression("Nikolaus.Haus"),//

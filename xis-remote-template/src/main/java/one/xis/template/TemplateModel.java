@@ -50,14 +50,14 @@ public class TemplateModel {
      * Contains static strings and expressions.
      */
     @Data
-    public static class MixedContent implements TemplateElement {
+    public static class TextContent implements TemplateElement {
         private final List<ContentElement> contentElements;
     }
 
     @Data
     public static class XmlElement implements TemplateElement {
         private final String tagName;
-        private final Map<MixedContent, MixedContent> attributes;
+        private final Map<String, TextContent> attributes;
         private final List<TemplateElement> childElements;
     }
 
@@ -83,7 +83,7 @@ public class TemplateModel {
         StaticContent(List<String> lines) {
             this.lines = lines;
         }
-        
+
     }
 
     @Data

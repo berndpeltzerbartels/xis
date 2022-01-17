@@ -6,14 +6,14 @@ import one.xis.template.TemplateModel.*;
 import java.io.IOException;
 import java.util.*;
 
-public class TemplateJSMethodWriter {
+public class TemplateJavascriptWriter {
 
     private static Map<Class<? extends TemplateElement>, ElementWriter> writers = new HashMap<>();
 
     static {
         writers.put(IfElement.class, new IfElementWriter());
         writers.put(ForElement.class, new ForElementWriter());
-        writers.put(MixedContent.class, new MixedContentWriter());
+        writers.put(TextContent.class, new MixedContentWriter());
         writers.put(XmlElement.class, new XmlElementWriter());
         writers.put(TemplateModel.StaticContent.class, new StaticContentWriter());
         writers.put(TemplateModel.Expression.class, new ExpressionWriter());
@@ -102,10 +102,10 @@ public class TemplateJSMethodWriter {
         }
     }
 
-    private static class MixedContentWriter implements ElementWriter<MixedContent> {
+    private static class MixedContentWriter implements ElementWriter<TextContent> {
 
         @Override
-        public void doWrite(MixedContent content, Appendable out) throws IOException {
+        public void doWrite(TextContent content, Appendable out) throws IOException {
             for (ContentElement contentElement : content.getContentElements()) {
                 write(contentElement, out);
             }
@@ -128,19 +128,19 @@ public class TemplateJSMethodWriter {
         }
 
         private void writeStartTag(XmlElement e, Appendable out) throws IOException {
-            ElementWriter<MixedContent> mixedContentWriter = writerFor(MixedContent.class);
+            ElementWriter<TextContent> textContentWriter = writerFor(TextContent.class);
             out.append("content+=");
             out.append("\"<");
             out.append(e.getTagName());
-            Iterator<Map.Entry<MixedContent, MixedContent>> iterator = e.getAttributes().entrySet().iterator();
+            Iterator<Map.Entry<String, TextContent>> iterator = e.getAttributes().entrySet().iterator();
             while (iterator.hasNext()) {
-                Map.Entry<MixedContent, MixedContent> entry = iterator.next();
-                MixedContent name = entry.getKey();
-                MixedContent value = entry.getValue();
+                Map.Entry<String, TextContent> entry = iterator.next();
+                String name = entry.getKey();
+                TextContent value = entry.getValue();
                 out.append(" ");
-                mixedContentWriter.doWrite(name, out);
+                out.append(name);
                 out.append("=\\\"");
-                mixedContentWriter.doWrite(value, out);
+                textContentWriter.doWrite(value, out);
                 out.append("\\\"");
             }
             out.append(">\";\n");

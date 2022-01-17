@@ -9,6 +9,7 @@ import org.w3c.dom.Node;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -16,13 +17,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TemplateParser {
 
-    private final Document document;
-    private final Collection<String> vars;
     private int varIndex = 0;
     private static final String ATTR_IF = "data-if";
     private static final String ATTR_FOR = "data-for";
     private static final String ATTR_LOOP_INDEX = "data-index";
-
 
     TemplateModel parse(Document document, Collection<String> dataVarNames) throws TemplateSynthaxException, IOException {
         return new TemplateModel(dataVarNames, parseElement(document.getDocumentElement()));
@@ -62,8 +60,14 @@ public class TemplateParser {
         return XmlUtil.getChildNodes(src).map(this::parse).collect(Collectors.toList());
     }
 
-    private Map<MixedContent, MixedContent> parseAttributes(Element src) {
-        return null;
+    private Map<String, TextContent> parseAttributes(Element src) {
+        Map<String, TextContent> contentMap = new HashMap<>();
+        XmlUtil.getAttributes(src).forEach((name, value) -> contentMap.put(name, textContent(value)));
+        return contentMap;
+    }
+
+    private TextContent textContent(String src) {
+        return new MixedContentParser(src).parse();
     }
 
     private String getIndexVarName(Element e) {

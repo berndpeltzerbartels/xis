@@ -4,6 +4,7 @@ import lombok.Data;
 import one.xis.template.TemplateModel.ContentElement;
 import one.xis.template.TemplateModel.Expression;
 import one.xis.template.TemplateModel.StaticContent;
+import one.xis.template.TemplateModel.TextContent;
 import one.xis.utils.lang.StringUtils;
 
 import java.util.ArrayList;
@@ -16,13 +17,13 @@ class MixedContentParser {
     private final String source;
     private int position = 0;
 
-    List<ContentElement> parse() {
+    TextContent parse() {
         List<ContentElement> contentElements = new ArrayList<>();
         while (isValidPosition(position)) {
             parseStaticContent(contentElements);
             parseVariable(contentElements);
         }
-        return contentElements;
+        return new TextContent(contentElements);
     }
 
     private void parseVariable(List<ContentElement> contentElements) {
