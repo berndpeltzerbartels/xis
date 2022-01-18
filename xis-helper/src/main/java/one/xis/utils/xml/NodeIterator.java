@@ -23,14 +23,14 @@ public class NodeIterator implements Iterator<Node> {
 
     @Override
     public Node next() {
-        if (index > nodeList.getLength()) {
+        if (index >= nodeList.getLength()) {
             throw new NoSuchElementException(this + ": next");
         }
         return nodeList.item(index++);
     }
 
     public Stream<Node> asStream() {
-        Spliterator<Node> nodeSpliterator = Spliterators.spliteratorUnknownSize(this, Spliterator.ORDERED);
+        Spliterator<Node> nodeSpliterator = Spliterators.spliterator(this, nodeList.getLength(), Spliterator.ORDERED);
         return StreamSupport.stream(nodeSpliterator, false);
     }
 }

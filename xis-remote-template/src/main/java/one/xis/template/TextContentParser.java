@@ -13,7 +13,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Data
-class MixedContentParser {
+class TextContentParser {
     private final String source;
     private int position = 0;
 

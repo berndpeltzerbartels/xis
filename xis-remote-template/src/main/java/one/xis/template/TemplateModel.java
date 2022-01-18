@@ -2,30 +2,32 @@ package one.xis.template;
 
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Data
 public class TemplateModel {
 
     private final Collection<String> dataVarNames;
-    private final XmlElement root;
+    private final TemplateElement root;
 
     public interface TemplateElement {
     }
 
 
-    public interface Container {
+    public interface Container extends TemplateElement {
         List<TemplateElement> getElements();
 
         void addElement(TemplateElement e);
     }
 
     @Data
-    public static class IfElement implements TemplateElement, Container {
+    public static class IfElement implements Container {
         private final String condition;
-        private final List<TemplateElement> childElements;
+        private final List<TemplateElement> childElements = new ArrayList<>();
 
         @Override
         public List<TemplateElement> getElements() {
@@ -36,14 +38,34 @@ public class TemplateModel {
         public void addElement(TemplateElement e) {
             childElements.add(e);
         }
+
+        @Override
+        public String toString() {
+            return "if(" + condition + ")";
+        }
     }
 
     @Data
-    public static class ForElement implements TemplateElement {
+    public static class ForElement implements Container {
         private final String arrayVarName;
         private final String elementVarName;
         private final String indexVarName;
-        private final List<TemplateElement> childElements;
+        private final List<TemplateElement> childElements = new ArrayList<>();
+
+        @Override
+        public List<TemplateElement> getElements() {
+            return childElements;
+        }
+
+        @Override
+        public void addElement(TemplateElement e) {
+            childElements.add(e);
+        }
+
+        @Override
+        public String toString() {
+            return "for(" + elementVarName + ":" + arrayVarName + ")";
+        }
     }
 
     /**
@@ -52,13 +74,33 @@ public class TemplateModel {
     @Data
     public static class TextContent implements TemplateElement {
         private final List<ContentElement> contentElements;
+
+        @Override
+        public String toString() {
+            return contentElements.stream().map(ContentElement::toString).collect(Collectors.joining(""));
+        }
     }
 
     @Data
-    public static class XmlElement implements TemplateElement {
+    public static class XmlElement implements Container {
         private final String tagName;
         private final Map<String, TextContent> attributes;
-        private final List<TemplateElement> childElements;
+        private final List<TemplateElement> childElements = new ArrayList<>();
+
+        @Override
+        public List<TemplateElement> getElements() {
+            return childElements;
+        }
+
+        @Override
+        public void addElement(TemplateElement e) {
+            childElements.add(e);
+        }
+
+        @Override
+        public String toString() {
+            return "<" + tagName + ">";
+        }
     }
 
     /**
@@ -84,10 +126,21 @@ public class TemplateModel {
             this.lines = lines;
         }
 
+        @Override
+        public String toString() {
+            return lines.stream().collect(Collectors.joining("\\\n"));
+        }
     }
 
     @Data
     static class Expression implements TemplateElement, ContentElement {
         private final String content;
+
+        @Override
+        public String toString() {
+            return "<%=" + content + ">";
+        }
     }
+
+
 }

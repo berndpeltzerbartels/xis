@@ -23,7 +23,11 @@ public class XmlUtil {
     }
 
     public Document loadDocument(InputStream in) throws IOException, SAXException {
-        return new XmlLoader().loadDocument(in);
+        try {
+            return new XmlLoader().loadDocument(in);
+        } finally {
+            in.close();
+        }
     }
 
     public Optional<Element> getElementByTagName(Element parent, String tagName) {
