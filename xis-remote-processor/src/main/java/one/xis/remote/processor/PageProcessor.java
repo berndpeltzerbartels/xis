@@ -19,7 +19,7 @@ import java.io.PrintWriter;
 public class PageProcessor extends AnnotationProcessor {
 
     @Override
-    void doProcess(Element e, TypeElement annotation, RoundEnvironment roundEnv) throws Exception {
+    public void doProcess(Element e, TypeElement annotation, RoundEnvironment roundEnv) throws Exception {
 
         String packageName = javaModelUtils.getPackageName((TypeElement) e);
         File htmlFile = processorUtils.getFileInSourceFolder(packageName, e.getSimpleName() + ".html");
@@ -28,7 +28,7 @@ public class PageProcessor extends AnnotationProcessor {
     }
 
     @Override
-    void finish() {
+    public void finish() {
         writeJavascript();
     }
 

@@ -1,8 +1,8 @@
 package one.xis.template;
 
-import one.xis.template.TemplateModel.ContentElement;
 import one.xis.template.TemplateModel.Expression;
-import one.xis.template.TemplateModel.StaticContent;
+import one.xis.template.TemplateModel.StaticText;
+import one.xis.template.TemplateModel.TextElement;
 import one.xis.utils.io.IOUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,22 +18,22 @@ class TextContentParserTest {
     @Test
     @DisplayName("Content with embedded expression")
     void parse() {
-        List<ContentElement> result = new TextContentParser("123${a.b}456").parse().getContentElements();
-        assertThat(result).containsExactly(new StaticContent("123"), new Expression("a.b"), new StaticContent(List.of("456")));
+        List<TextElement> result = new TextContentParser("123${a.b}456").parse().getTextElements();
+        assertThat(result).containsExactly(new StaticText("123"), new Expression("a.b"), new StaticText(List.of("456")));
     }
 
     @Test
     @DisplayName("Expressions only")
     void parse1() {
-        List<ContentElement> result = new TextContentParser("${a}${a.b}").parse().getContentElements();
+        List<TextElement> result = new TextContentParser("${a}${a.b}").parse().getTextElements();
         assertThat(result).containsExactly(new Expression("a"), new Expression("a.b"));
     }
 
     @Test
     @DisplayName("Escapes")
     void parse2() {
-        List<ContentElement> result = new TextContentParser("\\${a}${a.b}").parse().getContentElements();
-        assertThat(result).containsExactly(new StaticContent("${a}"), new Expression("a.b"));
+        List<TextElement> result = new TextContentParser("\\${a}${a.b}").parse().getTextElements();
+        assertThat(result).containsExactly(new StaticText("${a}"), new Expression("a.b"));
     }
 
 
@@ -42,13 +42,13 @@ class TextContentParserTest {
     void parse3() throws IOException {
         InputStream in = IOUtils.getResourceForClass(getClass(), "MixedContentParserTest.txt");
         String text = IOUtils.getContent(in, "UTF-8");
-        List<ContentElement> result = new TextContentParser(text).parse().getContentElements();
+        List<TextElement> result = new TextContentParser(text).parse().getTextElements();
 
-        assertThat(result).containsExactly(new StaticContent("Das ist das "),//
+        assertThat(result).containsExactly(new StaticText("Das ist das "),//
                 new Expression("Nikolaus.Haus"),//
-                new StaticContent(List.of("bla", "bla")),//
+                new StaticText(List.of("bla", "bla")),//
                 new Expression("format(x)"),//
-                new StaticContent(List.of("bla", "X_")),//
+                new StaticText(List.of("bla", "X_")),//
                 new Expression("a.b.c"));
     }
 }

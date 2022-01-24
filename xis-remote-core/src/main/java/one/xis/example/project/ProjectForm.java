@@ -1,9 +1,9 @@
 package one.xis.example.project;
 
-import one.xis.*;
 import one.xis.example.MainPage;
 import one.xis.example.user.User;
 import one.xis.example.user.UserService;
+import one.xis.remote.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,12 +14,6 @@ public class ProjectForm {
     private ProjectService projectService;
 
     private UserService userService;
-
-    @Widget
-    private MainPage mainPage;
-
-    @Widget
-    private ProjectDetails projectDetails;
 
     @UserId
     private String userId;
@@ -35,13 +29,13 @@ public class ProjectForm {
     private List<User> users;
 
     @Method
-    void save() {
+    void save(MainPage mainPage, ProjectDetails projectDetails) {
         if (validate()) {
-            saveAndRedirect();
+            saveAndRedirect(mainPage, projectDetails);
         }
     }
 
-    private void saveAndRedirect() {
+    private void saveAndRedirect(MainPage mainPage, ProjectDetails projectDetails) {
         Project project = projectService.getProject(projectId, userId);
         project.setName(projectName);
         projectService.save(project);

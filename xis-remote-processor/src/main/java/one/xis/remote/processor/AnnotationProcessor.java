@@ -8,7 +8,7 @@ import javax.lang.model.element.TypeElement;
 import java.util.Set;
 
 
-abstract class AnnotationProcessor extends AbstractProcessor {
+public abstract class AnnotationProcessor extends AbstractProcessor {
 
     protected ProcessorUtils processorUtils;
     protected JavaModelUtils javaModelUtils;
@@ -47,9 +47,9 @@ abstract class AnnotationProcessor extends AbstractProcessor {
         return false;
     }
 
-    abstract void doProcess(Element element, TypeElement annotation, RoundEnvironment roundEnv) throws Exception;
+    public abstract void doProcess(Element element, TypeElement annotation, RoundEnvironment roundEnv) throws Exception;
 
-    abstract void finish();
+    public abstract void finish();
 }
 
 

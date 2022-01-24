@@ -1,4 +1,4 @@
-package one.xis;
+package one.xis.remote;
 
 import java.lang.annotation.*;
 
@@ -10,8 +10,8 @@ import java.lang.annotation.*;
  * to find its name.
  */
 @Documented
-@Target({ElementType.PARAMETER, ElementType.TYPE})
+@Target({ElementType.PARAMETER, ElementType.FIELD})
 @Retention(RetentionPolicy.SOURCE)
-public @interface State {
+public @interface ClientState {
     String value() default "";
 }

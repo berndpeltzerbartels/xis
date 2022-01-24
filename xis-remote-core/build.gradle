@@ -10,10 +10,15 @@ repositories {
 }
 
 dependencies {
+
+    annotationProcessor 'org.projectlombok:lombok:1.18.12'
+
     implementation group: 'net.bytebuddy', name: 'byte-buddy', version: '1.10.22'
     implementation group: 'net.bytebuddy', name: 'byte-buddy-agent', version: '1.11.19'
     // https://mvnrepository.com/artifact/org.reflections/reflections
     implementation group: 'org.reflections', name: 'reflections', version: '0.9.10'
+
+    implementation 'org.projectlombok:lombok:1.18.12'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'

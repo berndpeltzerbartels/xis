@@ -1,7 +1,7 @@
 package one.xis.example;
 
-import one.xis.Variable;
-import one.xis.Widget;
+import one.xis.remote.Variable;
+import one.xis.remote.Widget;
 
 import java.util.List;
 

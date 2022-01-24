@@ -1,4 +1,4 @@
-package one.xis;
+package one.xis.remote;
 
 import java.util.List;
 import java.util.function.Predicate;

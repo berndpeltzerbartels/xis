@@ -1,4 +1,4 @@
-package one.xis;
+package one.xis.remote;
 
 import java.lang.annotation.*;
 
@@ -13,7 +13,7 @@ import java.lang.annotation.*;
  * <ul>
  *     <li>user-id, @see @{@link UserId}</li>
  *     <li>client-id, @see @{@link ClientId}</li>
- *     <li>state, @see {@link State}</li>
+ *     <li>state, @see {@link ClientState}</li>
  *     <li>container, @see {@link Widget}</li>
  * </ul>
  *

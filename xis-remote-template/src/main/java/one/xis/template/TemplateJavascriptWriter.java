@@ -15,7 +15,7 @@ public class TemplateJavascriptWriter {
         writers.put(ForElement.class, new ForElementWriter());
         writers.put(TextContent.class, new MixedContentWriter());
         writers.put(XmlElement.class, new XmlElementWriter());
-        writers.put(TemplateModel.StaticContent.class, new StaticContentWriter());
+        writers.put(StaticText.class, new StaticContentWriter());
         writers.put(TemplateModel.Expression.class, new ExpressionWriter());
     }
 
@@ -106,13 +106,13 @@ public class TemplateJavascriptWriter {
 
         @Override
         public void doWrite(TextContent content, Appendable out) throws IOException {
-            for (ContentElement contentElement : content.getContentElements()) {
-                write(contentElement, out);
+            for (TextElement textElement : content.getTextElements()) {
+                write(textElement, out);
             }
         }
 
         @SuppressWarnings("unchecked")
-        private <E extends ContentElement> void write(ContentElement e, Appendable out) throws IOException {
+        private <E extends TextElement> void write(TextElement e, Appendable out) throws IOException {
             ElementWriter<E> writer = (ElementWriter<E>) writerFor(e.getClass());
             writer.doWrite((E) e, out);
         }
@@ -155,10 +155,10 @@ public class TemplateJavascriptWriter {
 
     }
 
-    private static class StaticContentWriter implements ElementWriter<TemplateModel.StaticContent> {
+    private static class StaticContentWriter implements ElementWriter<StaticText> {
 
         @Override
-        public void doWrite(TemplateModel.StaticContent content, Appendable out) throws IOException {
+        public void doWrite(StaticText content, Appendable out) throws IOException {
             for (String line : content.getLines()) {
                 out.append("content+=");
                 out.append("\"");

@@ -1,4 +1,4 @@
-package one.xis;
+package one.xis.remote;
 
 public class Containers {
 

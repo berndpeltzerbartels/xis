@@ -26,7 +26,7 @@ public class MainProcessor extends AnnotationProcessor {
     }
 
     @Override
-    void doProcess(Element element, TypeElement annotationType, RoundEnvironment roundEnv) throws ValidationException {
+    public void doProcess(Element element, TypeElement annotationType, RoundEnvironment roundEnv) throws ValidationException {
         doProcessType((TypeElement) element, annotationType, roundEnv);
     }
 
@@ -66,7 +66,7 @@ public class MainProcessor extends AnnotationProcessor {
 
 
     @Override
-    void finish() {
+    public void finish() {
 
     }
 }

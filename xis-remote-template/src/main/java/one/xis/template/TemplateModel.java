@@ -3,7 +3,6 @@ package one.xis.template;
 import lombok.Data;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -11,7 +10,6 @@ import java.util.stream.Collectors;
 @Data
 public class TemplateModel {
 
-    private final Collection<String> dataVarNames;
     private final TemplateElement root;
 
     public interface TemplateElement {
@@ -73,11 +71,11 @@ public class TemplateModel {
      */
     @Data
     public static class TextContent implements TemplateElement {
-        private final List<ContentElement> contentElements;
+        private final List<TextElement> textElements;
 
         @Override
         public String toString() {
-            return contentElements.stream().map(ContentElement::toString).collect(Collectors.joining(""));
+            return textElements.stream().map(TextElement::toString).collect(Collectors.joining(""));
         }
     }
 
@@ -104,25 +102,26 @@ public class TemplateModel {
     }
 
     /**
+     * Textcontent, might be static text or expression (variable-output)
+     * Found in:
      * <ul>
-     * <li>Body-conent of elements</li>
-     * <li>Attributes-Keys</li>
-     * <li>Attributes-Keys</li>
+     * <li>Body-Content of XML-elements</li>
+     * <li>XML-attributes-values</li>
      * </ul>
      */
-    public interface ContentElement extends TemplateElement {
+    public interface TextElement extends TemplateElement {
     }
 
 
     @Data
-    static class StaticContent implements TemplateElement, ContentElement {
+    static class StaticText implements TemplateElement, TextElement {
         private final List<String> lines;
 
-        StaticContent(String s) {
+        StaticText(String s) {
             lines = List.of(s);
         }
 
-        StaticContent(List<String> lines) {
+        StaticText(List<String> lines) {
             this.lines = lines;
         }
 
@@ -133,7 +132,7 @@ public class TemplateModel {
     }
 
     @Data
-    static class Expression implements TemplateElement, ContentElement {
+    static class Expression implements TemplateElement, TextElement {
         private final String content;
 
         @Override

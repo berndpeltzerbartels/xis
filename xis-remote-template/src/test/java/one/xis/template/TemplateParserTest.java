@@ -10,7 +10,6 @@ import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
-import java.util.Set;
 
 import static one.xis.template.TemplateTestUtil.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -23,7 +22,7 @@ class TemplateParserTest {
     void parseTemplate1() throws IOException, SAXException, TemplateSynthaxException {
         Document document = XmlUtil.loadDocument(IOUtils.getResourceForClass(getClass(), "Template1.html"));
 
-        TemplateModel model = parser.parse(document, Set.of("items"));
+        TemplateModel model = parser.parse(document);
 
         IfElement ifElement = assertRootIsIf(model, "notEmpty(items)");
         XmlElement ul = assertContainsXml(ifElement, "ul");
@@ -38,8 +37,8 @@ class TemplateParserTest {
     void parseTemplate2() throws IOException, SAXException, TemplateSynthaxException {
         Document document = XmlUtil.loadDocument(IOUtils.getResourceForClass(getClass(), "Template2.html"));
 
-        TemplateModel model = parser.parse(document, Set.of("items"));
-        
+        TemplateModel model = parser.parse(document);
+
 
     }
 

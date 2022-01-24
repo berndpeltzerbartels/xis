@@ -1,7 +1,7 @@
 package one.xis.example.project;
 
-import one.xis.*;
 import one.xis.example.MainPage;
+import one.xis.remote.*;
 
 @Widget
 public abstract class ProjectDetails {
@@ -18,13 +18,10 @@ public abstract class ProjectDetails {
     @UserId
     private String userId;
 
-    @Widget
-    private ProjectForm projectForm;
-
     @OnEvent
-    void onEditClicked(MainPage index) {
+    void onEditClicked(MainPage mainPage, ProjectForm projectForm) {
         projectService.getProject(id, userId);
-        index.setMainContent(projectForm);
+        mainPage.setMainContent(projectForm);
     }
 
     public void setProject(Project project) {

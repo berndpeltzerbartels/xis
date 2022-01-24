@@ -10,7 +10,10 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 
 @RequiredArgsConstructor
@@ -22,8 +25,8 @@ public class TemplateParser {
     private static final String ATTR_LOOP_INDEX = "data-index";
     private static final Set<String> OPERATOR_ATTRIBUTES = Set.of(ATTR_FOR, ATTR_IF, ATTR_LOOP_INDEX);
 
-    TemplateModel parse(Document document, Collection<String> dataVarNames) throws TemplateSynthaxException, IOException {
-        return new TemplateModel(dataVarNames, parseElement(document.getDocumentElement()));
+    public TemplateModel parse(Document document) throws TemplateSynthaxException, IOException {
+        return new TemplateModel(parseElement(document.getDocumentElement()));
     }
 
     private TemplateElement parse(Node node) {
