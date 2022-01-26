@@ -9,7 +9,7 @@ import java.util.List;
 public class JSForStatement implements JSBlockStatement {
     private final String arrayVar;
     private final String itemVar;
-    private final String idnexVar;
+    private final String indexVar;
 
     private final List<JSStatement> statements = new ArrayList<>();
 

@@ -12,7 +12,7 @@ public class JSClass implements JSElement {
     private final String className;
     private final List<String> constructorParameters;
     private final Collection<JSField> fields = new HashSet<>();
-    private final Collection<JSFunction> methods = new HashSet<>();
+    private final Collection<JSMethod> methods = new HashSet<>();
 
     public JSField addField(String name) {
         JSField field = new JSField(name);

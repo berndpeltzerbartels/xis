@@ -1,8 +1,8 @@
 package one.xis.remote.javascript;
 
-import lombok.RequiredArgsConstructor;
+import lombok.Data;
 
-@RequiredArgsConstructor
+@Data
 public class JSAppend implements JSStatement {
     private final JSAssignable assignable;
     private final String expression;

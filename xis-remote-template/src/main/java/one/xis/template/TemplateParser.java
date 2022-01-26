@@ -23,8 +23,8 @@ public class TemplateParser {
     private static final String ATTR_LOOP_INDEX = "data-index";
     private static final Set<String> OPERATOR_ATTRIBUTES = Set.of(ATTR_FOR, ATTR_IF, ATTR_LOOP_INDEX);
 
-    public TemplateModel parse(Document document) throws TemplateSynthaxException, IOException {
-        return new TemplateModel(parseElement(document.getDocumentElement()));
+    public TemplateModel parse(Document document, String name) throws TemplateSynthaxException, IOException {
+        return new TemplateModel(parseElement(document.getDocumentElement()), name);
     }
 
     private TemplateElement parse(Node node) {
