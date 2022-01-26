@@ -2,13 +2,13 @@
 <head></head>
 <body>
 
-<li data-for="project : projects">
-<li>
-    <strong data-out="project.name">${project.name} ${project.disciption} ${dateFormat(project.statDate)}</strong>
-    <a onclick="editProject(${project.id})" href="#"></a>
+<ul data-for="project : projects">
+    <li>
+        <strong data-out="project.name">${project.name} ${project.disciption} ${dateFormat(project.statDate)}</strong>
+        <a onclick="editProject(${project.id})" href="#"></a>
 
-</li>
-
+    </li>
+</ul>
 
 </body>
 </html>

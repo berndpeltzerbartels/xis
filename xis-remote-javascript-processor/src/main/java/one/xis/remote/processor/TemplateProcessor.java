@@ -1,12 +1,12 @@
 package one.xis.remote.processor;
 
 import com.google.auto.service.AutoService;
+import one.xis.remote.javascript.JSAst;
+import one.xis.remote.javascript.JavascriptWriter;
 import one.xis.template.TemplateModel;
 import one.xis.template.TemplateParser;
-import one.xis.template.TemplateSynthaxException;
 import one.xis.utils.xml.XmlUtil;
 import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
@@ -16,6 +16,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.stream.Collectors;
 
 @AutoService(Processor.class)
 @SupportedAnnotationTypes({"one.xis.remote.Page", "one.xis.remote.Widget", "one.xis.remote.ClientState"})
@@ -26,6 +27,7 @@ public class TemplateProcessor extends AnnotationProcessor {
     private TemplateContextFactory templateContextFactory;
     private TypeElement clientState;
     private Collection<TemplateContext> templateContexts;
+    private Collection<String> stateVariables = new HashSet<>(); // TODO
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
@@ -63,12 +65,11 @@ public class TemplateProcessor extends AnnotationProcessor {
 
 
     private void writeJavaScript() throws Exception {
-        Appendable writer = processorUtils.writer("/public/resources/xis-remote.js");
+        Appendable writer = processorUtils.writer("public/resources/xis-remote.js");
         try {
             writeStateVariables(writer);
-            for (TemplateContext context : templateContexts) {
-                writeJavaScript(context, writer);
-            }
+            writeJavaScript(writer);
+
         } finally {
             close(writer);
         }
@@ -80,12 +81,16 @@ public class TemplateProcessor extends AnnotationProcessor {
         }
     }
 
-    private void writeJavaScript(TemplateContext context, Appendable writer) throws Exception {
-        writeJavaScript(templateModel(context), writer);
+    private void writeJavaScript(Appendable writer) throws Exception {
+        writeJavaScript(templateModels(), writer);
     }
 
-    private void writeJavaScript(TemplateModel model, Appendable writer) {
+    private void writeJavaScript(Collection<TemplateModel> models, Appendable writer) {
+        writeJavaScript(new JSAstParser().parse(models, stateVariables), writer);
+    }
 
+    private void writeJavaScript(JSAst jsAst, Appendable writer) {
+        new JavascriptWriter(writer).write(jsAst);
     }
 
 
@@ -93,8 +98,16 @@ public class TemplateProcessor extends AnnotationProcessor {
 
     }
 
-    private TemplateModel templateModel(TemplateContext context) throws IOException, SAXException, TemplateSynthaxException {
-        Document document = XmlUtil.loadDocument(context.getHtmlFile());
-        return templateParser.parse(document);
+    private Collection<TemplateModel> templateModels() {
+        return templateContexts.stream().map(this::templateModel).collect(Collectors.toSet());
+    }
+
+    private TemplateModel templateModel(TemplateContext context) {
+        try {
+            Document document = XmlUtil.loadDocument(context.getHtmlFile());
+            return templateParser.parse(document, context.getSimpleClassName()); // TODO may be an alias is better to avoid duplicates
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

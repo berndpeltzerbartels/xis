@@ -8,7 +8,7 @@ import one.xis.utils.lang.StringUtils;
 import java.util.Collection;
 import java.util.Collections;
 
-public class JSAstParser {
+class JSAstParser {
 
     JSAst parse(Collection<TemplateModel> templateModels, Collection<String> stateVars) {
         JSAst ast = new JSAst();

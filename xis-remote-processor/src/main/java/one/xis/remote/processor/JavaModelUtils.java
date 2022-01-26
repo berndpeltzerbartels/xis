@@ -51,4 +51,8 @@ class JavaModelUtils {
     String getPackageName(TypeElement typeElement) {
         return ((PackageElement) typeElement.getEnclosingElement()).getQualifiedName().toString();
     }
+
+    String getSimpleName(TypeElement typeElement) {
+        return typeElement.getSimpleName().toString();
+    }
 }

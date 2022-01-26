@@ -7,6 +7,7 @@ import java.io.File;
 @Data
 class TemplateContext {
     private final String packageName;
+    private final String simpleClassName;
     private final File htmlFile;
 
 }

@@ -95,6 +95,15 @@ public class JavascriptWriter {
         newLine();
         indent = 1;
         writeStatements(method.getStatements());
+        if (method.getReturnVar() != null) {
+            append("return ");
+            if (method.getReturnVar() instanceof JSField) {
+                append("this.");
+            }
+            append(method.getReturnVar().getName());
+            append(";");
+            newLine();
+        }
         indent = 0;
         append("};");
 
@@ -198,6 +207,12 @@ public class JavascriptWriter {
         newLine();
         indent = 1;
         writeStatements(function.getStatements());
+        if (function.getReturnVar() != null) {
+            append("return ");
+            append(function.getReturnVar().getName());
+            append(";");
+            newLine();
+        }
         indent = 0;
         append("};");
     }

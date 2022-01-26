@@ -14,9 +14,10 @@ class TemplateContextFactory {
     }
 
     TemplateContext templateContext(TypeElement element) {
-        String packageName = javaModelUtils.getPackageName((TypeElement) element);
+        String packageName = javaModelUtils.getPackageName(element);
+        String className = javaModelUtils.getSimpleName(element);
         File htmlFile = processorUtils.getFileInSourceFolder(packageName, element.getSimpleName() + ".html");
-        return new TemplateContext(packageName, htmlFile);
+        return new TemplateContext(packageName, className, htmlFile);
     }
 
 }

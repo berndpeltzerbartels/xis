@@ -1,13 +1,8 @@
 package one.xis.remote.javascript;
 
-import lombok.AccessLevel;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+public class JSField extends JSVar {
 
-@Getter
-@EqualsAndHashCode
-@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
-public class JSField implements JSAssignable {
-    private final String name;
+    public JSField(String name) {
+        super(name);
+    }
 }

@@ -8,8 +8,8 @@ public class JSMethod extends JSFunction {
         super(name, parameters);
     }
 
-    void setReturnField(String varName) {
-        this.returnVar = "this." + varName;
+    void setReturnField(JSField field) {
+        this.returnVar = field;
     }
 
 

@@ -34,7 +34,7 @@ class ProcessorUtils {
 
     @SneakyThrows
     FileObject fileObject(String path) {
-        return environment.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", "public/resources/" + path);
+        return environment.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", path);
     }
 
     // Hack for gradle problem when using StandardLocation.SOURCE_PATH

@@ -10,8 +10,9 @@ repositories {
 }
 
 dependencies {
-    annotationProcessor project(':xis-remote-processor')
+    annotationProcessor project(':xis-remote-javascript-processor')
     implementation project(':xis-remote-core')
+    
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
 }
