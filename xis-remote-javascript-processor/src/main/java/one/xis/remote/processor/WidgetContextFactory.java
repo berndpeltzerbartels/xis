@@ -4,20 +4,20 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.TypeElement;
 import java.io.File;
 
-class TemplateContextFactory {
+class WidgetContextFactory {
     private final JavaModelUtils javaModelUtils;
     private final ProcessorUtils processorUtils;
 
-    TemplateContextFactory(ProcessingEnvironment environment) {
+    WidgetContextFactory(ProcessingEnvironment environment) {
         javaModelUtils = new JavaModelUtils(environment);
         processorUtils = new ProcessorUtils(environment);
     }
 
-    TemplateContext templateContext(TypeElement element) {
+    WidgetContext templateContext(TypeElement element) {
         String packageName = javaModelUtils.getPackageName(element);
         String className = javaModelUtils.getSimpleName(element);
         File htmlFile = processorUtils.getFileInSourceFolder(packageName, element.getSimpleName() + ".html");
-        return new TemplateContext(packageName, className, htmlFile);
+        return new WidgetContext(packageName, className, htmlFile);
     }
 
 }

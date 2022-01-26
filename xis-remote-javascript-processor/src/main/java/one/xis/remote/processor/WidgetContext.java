@@ -5,7 +5,7 @@ import lombok.Data;
 import java.io.File;
 
 @Data
-class TemplateContext {
+class WidgetContext {
     private final String packageName;
     private final String simpleClassName;
     private final File htmlFile;

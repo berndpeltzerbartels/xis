@@ -19,29 +19,28 @@ import java.util.HashSet;
 import java.util.stream.Collectors;
 
 @AutoService(Processor.class)
-@SupportedAnnotationTypes({"one.xis.remote.Page", "one.xis.remote.Widget", "one.xis.remote.ClientState"})
+@SupportedAnnotationTypes({"one.xis.remote.Widget", "one.xis.remote.ClientState"})
 @SupportedSourceVersion(SourceVersion.RELEASE_11)
-public class TemplateProcessor extends AnnotationProcessor {
+public class WidgetProcessor extends AnnotationProcessor {
 
     private final TemplateParser templateParser = new TemplateParser();
-    private TemplateContextFactory templateContextFactory;
-    private TypeElement clientState;
-    private Collection<TemplateContext> templateContexts;
+    private WidgetContextFactory widgetContextFactory;
+    private Collection<WidgetContext> widgetContexts;
     private Collection<String> stateVariables = new HashSet<>(); // TODO
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
-        this.templateContextFactory = new TemplateContextFactory(processingEnv);
-        this.templateContexts = new HashSet<>();
+        this.widgetContextFactory = new WidgetContextFactory(processingEnv);
+        this.widgetContexts = new HashSet<>();
     }
 
     @Override
-    public void doProcess(Element element, TypeElement annotation, RoundEnvironment roundEnv) throws Exception {
+    public void doProcess(Element element, TypeElement annotation, RoundEnvironment roundEnv) {
         if (isClientStateAnnotation(annotation)) {
-            doProcessClientState(element, annotation, roundEnv);
+            doProcessClientState(element);
         } else {
-            doProcessTemplate(element, annotation, roundEnv);
+            doProcessTemplate(element);
         }
     }
 
@@ -49,14 +48,13 @@ public class TemplateProcessor extends AnnotationProcessor {
         return annotation.getQualifiedName().toString().equals("one.xis.remote.ClientState");
     }
 
-    private void doProcessTemplate(Element element, TypeElement annotation, RoundEnvironment roundEnv) throws Exception {
-        templateContexts.add(templateContextFactory.templateContext((TypeElement) element));
+    private void doProcessTemplate(Element element) {
+        widgetContexts.add(widgetContextFactory.templateContext((TypeElement) element));
     }
 
-    private void doProcessClientState(Element element, TypeElement annotation, RoundEnvironment roundEnv) throws Exception {
+    private void doProcessClientState(Element element) {
         stateVariables.addAll(javaModelUtils.getFieldNames((TypeElement) element));
     }
-
 
     @Override
     public void finish() throws Exception {
@@ -67,7 +65,6 @@ public class TemplateProcessor extends AnnotationProcessor {
     private void writeJavaScript() throws Exception {
         Appendable writer = processorUtils.writer("public/resources/xis-remote.js");
         try {
-            writeStateVariables(writer);
             writeJavaScript(writer);
 
         } finally {
@@ -81,7 +78,7 @@ public class TemplateProcessor extends AnnotationProcessor {
         }
     }
 
-    private void writeJavaScript(Appendable writer) throws Exception {
+    private void writeJavaScript(Appendable writer) {
         writeJavaScript(templateModels(), writer);
     }
 
@@ -94,20 +91,16 @@ public class TemplateProcessor extends AnnotationProcessor {
     }
 
 
-    private void writeStateVariables(Appendable writer) {
-
-    }
-
     private Collection<TemplateModel> templateModels() {
-        return templateContexts.stream().map(this::templateModel).collect(Collectors.toSet());
+        return widgetContexts.stream().map(this::templateModel).collect(Collectors.toSet());
     }
 
-    private TemplateModel templateModel(TemplateContext context) {
+    private TemplateModel templateModel(WidgetContext context) {
         try {
             Document document = XmlUtil.loadDocument(context.getHtmlFile());
             return templateParser.parse(document, context.getSimpleClassName()); // TODO may be an alias is better to avoid duplicates
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException(e); //TODO caucht and loggged =
         }
     }
 }
