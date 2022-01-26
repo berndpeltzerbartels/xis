@@ -18,12 +18,14 @@ class TextContentParser {
     private int position = 0;
 
     TextContent parse() {
+        TextContent textContent = new TextContent();
         List<TextElement> textElements = new ArrayList<>();
         while (isValidPosition(position)) {
             parseStaticContent(textElements);
             parseVariable(textElements);
         }
-        return new TextContent(textElements);
+        textContent.addAllElements(textElements);
+        return textContent;
     }
 
     private void parseVariable(List<TextElement> contentElements) {

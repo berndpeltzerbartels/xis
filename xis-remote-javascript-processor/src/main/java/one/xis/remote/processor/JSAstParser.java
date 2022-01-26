@@ -43,6 +43,9 @@ public class JSAstParser {
             evaluateGetContentMethod(getContent, (ForElement) element, contentVar);
         } else if (element instanceof XmlElement) {
             evaluateGetContentMethod(getContent, (XmlElement) element, contentVar);
+        } else if (element instanceof TextContent) {
+            evaluateGetContentMethod(getContent, (TextContent) element, contentVar);
+
         } else {
             throw new IllegalArgumentException();
         }
@@ -94,19 +97,22 @@ public class JSAstParser {
         for (String attrName : element.getAttributes().keySet()) {
             TextContent attributeValue = element.getAttributes().get(attrName);
             getContent.addStatement(new JSAppend(contentVar, " " + attrName + "=\""));
-            evaluateTextContent(getContent, attributeValue, contentVar);
+            evaluateGetContentMethod(getContent, attributeValue, contentVar);
             getContent.addStatement(new JSAppend(contentVar, " " + attrName + "\""));
-
         }
     }
 
-    private void evaluateTextContent(JSMethod getContent, TextContent textContent, JSVar contentVar) {
-        evaluateGetContentMethod(getContent, textContent, contentVar);
+    private void evaluateGetContentMethod(JSMethod getContent, TextContent textContent, JSVar contentVar) {
+        textContent.getTextElements().forEach(element -> {
+            if (element instanceof StaticText) {
+                evaluateGetContentMethod(getContent, (StaticText) element, contentVar);
+            } else if (element instanceof Expression) {
+                evaluateGetContentMethod(getContent, (Expression) element, contentVar);
+            }
+        });
     }
 
     private static String escaped(String s) {
         return StringUtils.escape(s, '\'');
     }
-
-
 }

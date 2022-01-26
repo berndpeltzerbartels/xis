@@ -14,7 +14,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class TextContentParserTest {
-    
+
     @Test
     @DisplayName("Content with embedded expression")
     void parse() {
