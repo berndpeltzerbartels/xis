@@ -25,12 +25,13 @@ public abstract class AnnotationProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        if (roundEnv.processingOver()) {
-            finish();
-            logger.info("processing over");
-        } else {
-            logger.info("process");
-            try {
+        try {
+            if (roundEnv.processingOver()) {
+                finish();
+                logger.info("processing over");
+            } else {
+                logger.info("process");
+
                 for (Element element : roundEnv.getRootElements()) {
                     for (TypeElement annotation : annotations) {
                         if (javaModelUtils.hasAnnotation(element, annotation)) {
@@ -38,18 +39,19 @@ public abstract class AnnotationProcessor extends AbstractProcessor {
                         }
                     }
                 }
-            } catch (ValidationException e) {
-                logger.error(e);
-            } catch (Exception e) {
-                logger.error(e);
             }
+        } catch (ValidationException e) {
+            logger.error(e);
+        } catch (Exception e) {
+            logger.error(e);
         }
+
         return false;
     }
 
     public abstract void doProcess(Element element, TypeElement annotation, RoundEnvironment roundEnv) throws Exception;
 
-    public abstract void finish();
+    public abstract void finish() throws Exception;
 }
 
 

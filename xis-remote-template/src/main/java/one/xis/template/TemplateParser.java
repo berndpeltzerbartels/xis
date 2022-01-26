@@ -1,6 +1,5 @@
 package one.xis.template;
 
-import lombok.RequiredArgsConstructor;
 import one.xis.template.TemplateModel.*;
 import one.xis.utils.lang.StringUtils;
 import one.xis.utils.xml.XmlUtil;
@@ -16,7 +15,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
-@RequiredArgsConstructor
 public class TemplateParser {
 
     private int varIndex = 0;

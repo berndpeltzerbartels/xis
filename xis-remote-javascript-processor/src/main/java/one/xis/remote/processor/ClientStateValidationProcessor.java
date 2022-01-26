@@ -1,8 +1,6 @@
-package one.xis.remote.javascript;
+package one.xis.remote.processor;
 
 import com.google.auto.service.AutoService;
-import one.xis.remote.processor.AnnotationProcessor;
-import one.xis.template.TemplateParser;
 
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
@@ -15,13 +13,11 @@ import javax.lang.model.element.TypeElement;
 @AutoService(Processor.class)
 @SupportedAnnotationTypes({"one.xis.remote.ClientState"})
 @SupportedSourceVersion(SourceVersion.RELEASE_11)
-public class JavascriptProcessor extends AnnotationProcessor {
-
-    private final TemplateParser templateParser = new TemplateParser();
+public class ClientStateValidationProcessor extends AnnotationProcessor {
 
     @Override
     public void doProcess(Element element, TypeElement annotation, RoundEnvironment roundEnv) throws Exception {
-        
+
     }
 
     @Override

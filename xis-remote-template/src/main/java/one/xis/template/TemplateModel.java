@@ -11,8 +11,10 @@ import java.util.stream.Collectors;
 public class TemplateModel {
 
     private final TemplateElement root;
+    private final String name;
 
     public interface TemplateElement {
+
     }
 
 
