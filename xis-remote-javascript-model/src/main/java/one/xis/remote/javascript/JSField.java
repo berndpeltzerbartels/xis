@@ -10,5 +10,4 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public class JSField implements JSAssignable {
     private final String name;
-    private final JSClass parent;
 }

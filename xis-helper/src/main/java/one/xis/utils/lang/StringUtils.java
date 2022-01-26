@@ -6,7 +6,10 @@ import java.util.Arrays;
 import java.util.stream.Stream;
 
 @UtilityClass
+@SuppressWarnings("unused")
 public class StringUtils {
+
+    private static final String ESCAPE = Character.toString('\\');
 
     public boolean isEmpty(CharSequence s) {
         return s == null || s.length() == 0;
@@ -32,6 +35,10 @@ public class StringUtils {
             return null;
         }
         return s.trim();
+    }
+
+    public String escape(String s, char toEscape) {
+        return s.replace(Character.toString(toEscape), ESCAPE + toEscape);
     }
 
 }

@@ -9,4 +9,5 @@ include 'xis-remote-template'
 include 'xis-helper'
 include 'xis-remote-javascript-processor'
 include 'xis-remote-javascript-model'
+include 'XIS-remote-dom'
 

@@ -116,7 +116,7 @@ public class TemplateModel {
 
 
     @Data
-    static class StaticText implements TemplateElement, TextElement {
+    public static class StaticText implements TextElement {
         private final List<String> lines;
 
         StaticText(String s) {
@@ -134,7 +134,7 @@ public class TemplateModel {
     }
 
     @Data
-    static class Expression implements TemplateElement, TextElement {
+    public static class Expression implements TextElement {
         private final String content;
 
         @Override

@@ -4,34 +4,20 @@ import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Data
-public class JSFunction {
+public class JSFunction implements JSElement {
     private final String name;
-    private final List<JSVar> parameters;
+    private final List<String> parameters;
     private final List<JSStatement> statements = new ArrayList<>();
+    protected JSVar returnVar;
 
-    protected JSAssignable returnValue;
-
-    JSStatement add(JSStatement statement) {
+    public <S extends JSStatement> S addStatement(S statement) {
         statements.add(statement);
         return statement;
     }
 
-    void setReturnVar(String varName) {
-        this.returnValue = getParameterByName(varName).orElseGet(() -> getStatementByVarName(varName).orElseThrow(() -> new IllegalStateException("invalid return value: " + varName)));
+    public void setReturnVar(JSVar varName) {
+        this.returnVar = varName;
     }
-
-    protected Optional<JSVar> getParameterByName(String name) {
-        return parameters.stream().filter(param -> param.getName().equals(name)).findFirst();
-    }
-
-    protected Optional<JSVar> getStatementByVarName(String name) {
-        return statements.stream().filter(JSVar.class::isInstance)
-                .map(JSVar.class::cast)
-                .filter(v -> v.getName().equals(name))
-                .findFirst();
-    }
-
 }
