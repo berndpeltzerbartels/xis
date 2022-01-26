@@ -15,4 +15,5 @@ public class JSIfStatement implements JSBlockStatement {
     public void addStatement(JSStatement statement) {
         statements.add(statement);
     }
+    
 }

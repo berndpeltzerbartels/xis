@@ -19,103 +19,106 @@ class JSAstParser {
     private void addTemplateClass(TemplateModel templateModel, JSAst ast, Collection<String> stateFields) {
         JSClass templateClass = ast.addClass(templateModel.getName(), Collections.singletonList("state"));
         JSMethod getContent = templateClass.addMethod("getContent");
-        evaluateGetContentMethod(getContent, templateModel, stateFields);
+        evaluate(getContent, templateModel, stateFields);
     }
 
-    private void evaluateGetContentMethod(JSMethod getContent, TemplateModel model, Collection<String> stateFields) {
-        JSVar contentVar = getContent.addStatement(new JSVar("content"));
+    private void evaluate(JSMethod getContent, TemplateModel model, Collection<String> stateFields) {
+        JSVar contentVar = new JSVar("content");
+        getContent.addStatement(contentVar);
         getContent.addStatement(new JSAssignment(contentVar, staticString("")));
         for (String field : stateFields) {
-            JSVar jsVar = getContent.addStatement(new JSVar(field));
-            getContent.addStatement(new JSAssignment(jsVar, "this.state." + field));
+            JSVar stateVar = new JSVar(field);
+            getContent.addStatement(stateVar);
+            getContent.addStatement(new JSAssignment(stateVar, "this.state." + field));
         }
-        evaluateGetContentMethod(getContent, model.getRoot(), contentVar);
+        evaluate(getContent, model.getRoot(), contentVar);
         getContent.setReturnVar(contentVar);
     }
 
-    private void evaluateGetContentMethod(JSMethod getContent, TemplateElement element, JSVar contentVar) {
+    private void evaluate(JSStatementHolder getContent, TemplateElement element, JSVar contentVar) {
         if (element instanceof StaticText) {
-            evaluateGetContentMethod(getContent, (StaticText) element, contentVar);
+            evaluateStaticText(getContent, (StaticText) element, contentVar);
         } else if (element instanceof Expression) {
-            evaluateGetContentMethod(getContent, (Expression) element, contentVar);
+            evaluateExpression(getContent, (Expression) element, contentVar);
         } else if (element instanceof IfElement) {
-            evaluateGetContentMethod(getContent, (IfElement) element, contentVar);
+            evaluateIf(getContent, (IfElement) element, contentVar);
         } else if (element instanceof ForElement) {
-            evaluateGetContentMethod(getContent, (ForElement) element, contentVar);
+            evaluateFor(getContent, (ForElement) element, contentVar);
         } else if (element instanceof XmlElement) {
-            evaluateGetContentMethod(getContent, (XmlElement) element, contentVar);
+            evaluateXmlElement(getContent, (XmlElement) element, contentVar);
         } else if (element instanceof TextContent) {
-            evaluateGetContentMethod(getContent, (TextContent) element, contentVar);
+            evaluateTextContent(getContent, (TextContent) element, contentVar);
 
         } else {
             throw new IllegalArgumentException();
         }
     }
 
-    private void evaluateGetContentMethod(JSMethod getContent, StaticText element, JSVar contentVar) {
+    private void evaluateStaticText(JSStatementHolder getContent, StaticText element, JSVar contentVar) {
         for (String line : element.getLines()) {
             getContent.addStatement(new JSAppend(contentVar, staticString(line)));
         }
     }
 
-    private void evaluateGetContentMethod(JSMethod getContent, Expression element, JSVar contentVar) {
-        getContent.addStatement(new JSAppend(contentVar, element.getContent()));
+    private void evaluateExpression(JSStatementHolder holder, Expression element, JSVar contentVar) {
+        holder.addStatement(new JSAppend(contentVar, element.getContent()));
     }
 
-    private void evaluateGetContentMethod(JSMethod getContent, IfElement element, JSVar contentVar) {
-        getContent.addStatement(new JSIfStatement(element.getCondition()));
-        element.getChildElements().forEach(child -> evaluateGetContentMethod(getContent, child, contentVar));
+    private void evaluateIf(JSStatementHolder holder, IfElement element, JSVar contentVar) {
+        holder.addStatement(new JSIfStatement(element.getCondition()));
+        element.getChildElements().forEach(child -> evaluate(holder, child, contentVar));
     }
 
-    private void evaluateGetContentMethod(JSMethod getContent, ForElement element, JSVar contentVar) {
-        getContent.addStatement(new JSForStatement(element.getArrayVarName(), element.getElementVarName(), element.getIndexVarName()));
-        element.getChildElements().forEach(child -> evaluateGetContentMethod(getContent, child, contentVar));
+    private void evaluateFor(JSStatementHolder holder, ForElement element, JSVar contentVar) {
+        JSForStatement forStatement = new JSForStatement(element.getArrayVarName(), element.getElementVarName(), element.getIndexVarName());
+        holder.addStatement(forStatement);
+        element.getChildElements().forEach(child -> evaluate(forStatement, child, contentVar));
     }
 
-    private void evaluateGetContentMethod(JSMethod getContent, XmlElement element, JSVar contentVar) {
+    private void evaluateXmlElement(JSStatementHolder holder, XmlElement element, JSVar contentVar) {
         if (element.getChildElements().isEmpty()) {
-            evaluateEmptyTag(getContent, element, contentVar);
+            evaluateEmptyTag(holder, element, contentVar);
         } else {
-            evaluateContainerTag(getContent, element, contentVar);
+            evaluateContainerTag(holder, element, contentVar);
         }
     }
 
-    private void evaluateEmptyTag(JSMethod getContent, XmlElement element, JSVar contentVar) {
+    private void evaluateEmptyTag(JSStatementHolder holder, XmlElement element, JSVar contentVar) {
         if (element.getAttributes().isEmpty()) {
-            getContent.addStatement(new JSAppend(contentVar, staticString("<" + element.getTagName() + "/>")));
+            holder.addStatement(new JSAppend(contentVar, staticString("<" + element.getTagName() + "/>")));
         } else {
-            getContent.addStatement(new JSAppend(contentVar, staticString("<" + element.getTagName())));
-            evaluateAttributes(getContent, element, contentVar);
-            getContent.addStatement(new JSAppend(contentVar, staticString("/>")));
+            holder.addStatement(new JSAppend(contentVar, staticString("<" + element.getTagName())));
+            evaluateAttributes(holder, element, contentVar);
+            holder.addStatement(new JSAppend(contentVar, staticString("/>")));
         }
     }
 
-    private void evaluateContainerTag(JSMethod getContent, XmlElement element, JSVar contentVar) {
+    private void evaluateContainerTag(JSStatementHolder holder, XmlElement element, JSVar contentVar) {
         if (element.getAttributes().isEmpty()) {
-            getContent.addStatement(new JSAppend(contentVar, staticString("<" + element.getTagName() + ">")));
+            holder.addStatement(new JSAppend(contentVar, staticString("<" + element.getTagName() + ">")));
         } else {
-            getContent.addStatement(new JSAppend(contentVar, staticString("<" + element.getTagName())));
-            evaluateAttributes(getContent, element, contentVar);
-            getContent.addStatement(new JSAppend(contentVar, staticString(">")));
+            holder.addStatement(new JSAppend(contentVar, staticString("<" + element.getTagName())));
+            evaluateAttributes(holder, element, contentVar);
+            holder.addStatement(new JSAppend(contentVar, staticString(">")));
         }
-        element.getChildElements().forEach(child -> evaluateGetContentMethod(getContent, child, contentVar));
-        getContent.addStatement(new JSAppend(contentVar, staticString("</" + element.getTagName() + ">")));
+        element.getChildElements().forEach(child -> evaluate(holder, child, contentVar));
+        holder.addStatement(new JSAppend(contentVar, staticString("</" + element.getTagName() + ">")));
     }
 
-    private void evaluateAttributes(JSMethod getContent, XmlElement element, JSVar contentVar) {
+    private void evaluateAttributes(JSStatementHolder holder, XmlElement element, JSVar contentVar) {
         for (String attrName : element.getAttributes().keySet()) {
             TextContent attributeValue = element.getAttributes().get(attrName);
-            getContent.addStatement(new JSAppend(contentVar, staticString(" " + attrName + "=\"")));
-            evaluateGetContentMethod(getContent, attributeValue, contentVar);
+            holder.addStatement(new JSAppend(contentVar, staticString(" " + attrName + "=\"")));
+            evaluateTextContent(holder, attributeValue, contentVar);
         }
     }
 
-    private void evaluateGetContentMethod(JSMethod getContent, TextContent textContent, JSVar contentVar) {
+    private void evaluateTextContent(JSStatementHolder holder, TextContent textContent, JSVar contentVar) {
         textContent.getTextElements().forEach(element -> {
             if (element instanceof StaticText) {
-                evaluateGetContentMethod(getContent, (StaticText) element, contentVar);
+                evaluateStaticText(holder, (StaticText) element, contentVar);
             } else if (element instanceof Expression) {
-                evaluateGetContentMethod(getContent, (Expression) element, contentVar);
+                evaluateExpression(holder, (Expression) element, contentVar);
             }
         });
     }

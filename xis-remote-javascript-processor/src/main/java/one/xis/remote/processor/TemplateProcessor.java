@@ -54,7 +54,7 @@ public class TemplateProcessor extends AnnotationProcessor {
     }
 
     private void doProcessClientState(Element element, TypeElement annotation, RoundEnvironment roundEnv) throws Exception {
-
+        stateVariables.addAll(javaModelUtils.getFieldNames((TypeElement) element));
     }
 
 

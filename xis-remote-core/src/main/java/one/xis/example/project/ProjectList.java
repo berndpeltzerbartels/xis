@@ -9,8 +9,7 @@ import java.util.List;
 public class ProjectList {
 
     private ProjectService projectService;
-
-    @ClientState
+    
     private List<Project> projects;
 
     @UserId

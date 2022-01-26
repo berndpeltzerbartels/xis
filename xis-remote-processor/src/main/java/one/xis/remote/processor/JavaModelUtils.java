@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.*;
 import javax.lang.model.type.TypeMirror;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @RequiredArgsConstructor
@@ -54,5 +56,16 @@ class JavaModelUtils {
 
     String getSimpleName(TypeElement typeElement) {
         return typeElement.getSimpleName().toString();
+    }
+
+
+    Set<String> getFieldNames(TypeElement typeElement) {
+        return typeElement.getEnclosedElements().stream()
+                .filter(e -> e.getKind() == ElementKind.FIELD)
+                .filter(VariableElement.class::isInstance)
+                .map(VariableElement.class::cast)
+                .map(VariableElement::getSimpleName)
+                .map(Name::toString)
+                .collect(Collectors.toSet());
     }
 }

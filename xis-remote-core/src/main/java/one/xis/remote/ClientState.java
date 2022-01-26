@@ -10,7 +10,7 @@ import java.lang.annotation.*;
  * to find its name.
  */
 @Documented
-@Target({ElementType.PARAMETER, ElementType.FIELD})
+@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
 public @interface ClientState {
     String value() default "";
