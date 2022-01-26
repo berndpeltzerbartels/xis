@@ -14,9 +14,6 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok:1.18.12'
 
     implementation project(':xis-helper')
-    implementation project(':xis-remote-template')
-    implementation project(':xis-remote-javascript-model')
-    implementation project(':xis-remote-processor')
     implementation group: 'com.google.auto.service', name: 'auto-service', version: '1.0-rc7'
     implementation 'org.projectlombok:lombok:1.18.12'
 
@@ -32,9 +29,6 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.2'
     testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.16.1'
     testImplementation 'com.google.testing.compile:compile-testing:0.11'
-
-    implementation 'com.google.dagger:dagger:2.40.5'
-    annotationProcessor 'com.google.dagger:dagger-compiler:2.40.5'
 }
 
 test {

@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-    annotationProcessor project(':xis-remote-javascript-processor')
+    annotationProcessor project(':xis-remote-processor')
     implementation project(':xis-remote-core')
 
     annotationProcessor 'org.projectlombok:lombok:1.18.12'

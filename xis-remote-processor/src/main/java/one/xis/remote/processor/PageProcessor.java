@@ -11,31 +11,20 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import java.io.File;
-import java.io.PrintWriter;
 
 @AutoService(Processor.class)
-@SupportedAnnotationTypes({"one.xis.Page"})
+@SupportedAnnotationTypes({"one.xis.remote.Page"})
 @SupportedSourceVersion(SourceVersion.RELEASE_11)
 public class PageProcessor extends AnnotationProcessor {
-
     @Override
-    public void doProcess(Element e, TypeElement annotation, RoundEnvironment roundEnv) throws Exception {
-
-        String packageName = javaModelUtils.getPackageName((TypeElement) e);
-        File htmlFile = processorUtils.getFileInSourceFolder(packageName, e.getSimpleName() + ".html");
+    public void doProcess(Element element, TypeElement annotation, RoundEnvironment roundEnv) throws Exception {
+        String packageName = javaModelUtils.getPackageName((TypeElement) element);
+        File htmlFile = processorUtils.getFileInSourceFolder(packageName, element.getSimpleName() + ".html");
         String content = IOUtils.getContent(htmlFile, "UTF-8");
-
     }
 
     @Override
-    public void finish() {
-        writeJavascript();
-    }
+    public void finish() throws Exception {
 
-    private void writeJavascript() {
-        try (PrintWriter out = processorUtils.writer("test123.js")) {
-            out.println("function test(){}");
-        }
     }
-
 }
