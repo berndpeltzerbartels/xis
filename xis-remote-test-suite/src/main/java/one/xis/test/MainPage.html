@@ -4,7 +4,7 @@
 
 <ul data-for="project : projects">
     <li>
-        <strong data-out="project.name">${project.name} ${project.disciption} ${dateFormat(project.statDate)}</strong>
+        <strong>${project.name} ${project.disciption} ${dateFormat(project.startDate)}</strong>
         <a onclick="editProject(${project.id})" href="#"></a>
 
     </li>

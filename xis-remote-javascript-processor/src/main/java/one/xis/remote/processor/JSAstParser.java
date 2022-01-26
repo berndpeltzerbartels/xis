@@ -24,6 +24,7 @@ class JSAstParser {
 
     private void evaluateGetContentMethod(JSMethod getContent, TemplateModel model, Collection<String> stateFields) {
         JSVar contentVar = getContent.addStatement(new JSVar("content"));
+        getContent.addStatement(new JSAssignment(contentVar, staticString("")));
         for (String field : stateFields) {
             JSVar jsVar = getContent.addStatement(new JSVar(field));
             getContent.addStatement(new JSAssignment(jsVar, "this.state." + field));
@@ -53,7 +54,7 @@ class JSAstParser {
 
     private void evaluateGetContentMethod(JSMethod getContent, StaticText element, JSVar contentVar) {
         for (String line : element.getLines()) {
-            getContent.addStatement(new JSAppend(contentVar, "'" + escaped(line) + "'"));
+            getContent.addStatement(new JSAppend(contentVar, staticString(line)));
         }
     }
 
@@ -80,25 +81,32 @@ class JSAstParser {
     }
 
     private void evaluateEmptyTag(JSMethod getContent, XmlElement element, JSVar contentVar) {
-        getContent.addStatement(new JSAppend(contentVar, "<" + element.getTagName()));
-        evaluateAttributes(getContent, element, contentVar);
-        getContent.addStatement(new JSAppend(contentVar, "/>"));
+        if (element.getAttributes().isEmpty()) {
+            getContent.addStatement(new JSAppend(contentVar, staticString("<" + element.getTagName() + "/>")));
+        } else {
+            getContent.addStatement(new JSAppend(contentVar, staticString("<" + element.getTagName())));
+            evaluateAttributes(getContent, element, contentVar);
+            getContent.addStatement(new JSAppend(contentVar, staticString("/>")));
+        }
     }
 
     private void evaluateContainerTag(JSMethod getContent, XmlElement element, JSVar contentVar) {
-        getContent.addStatement(new JSAppend(contentVar, "<" + element.getTagName()));
-        evaluateAttributes(getContent, element, contentVar);
-        getContent.addStatement(new JSAppend(contentVar, ">"));
+        if (element.getAttributes().isEmpty()) {
+            getContent.addStatement(new JSAppend(contentVar, staticString("<" + element.getTagName() + ">")));
+        } else {
+            getContent.addStatement(new JSAppend(contentVar, staticString("<" + element.getTagName())));
+            evaluateAttributes(getContent, element, contentVar);
+            getContent.addStatement(new JSAppend(contentVar, staticString(">")));
+        }
         element.getChildElements().forEach(child -> evaluateGetContentMethod(getContent, child, contentVar));
-        getContent.addStatement(new JSAppend(contentVar, "</" + element.getTagName() + ">"));
+        getContent.addStatement(new JSAppend(contentVar, staticString("</" + element.getTagName() + ">")));
     }
 
     private void evaluateAttributes(JSMethod getContent, XmlElement element, JSVar contentVar) {
         for (String attrName : element.getAttributes().keySet()) {
             TextContent attributeValue = element.getAttributes().get(attrName);
-            getContent.addStatement(new JSAppend(contentVar, " " + attrName + "=\""));
+            getContent.addStatement(new JSAppend(contentVar, staticString(" " + attrName + "=\"")));
             evaluateGetContentMethod(getContent, attributeValue, contentVar);
-            getContent.addStatement(new JSAppend(contentVar, " " + attrName + "\""));
         }
     }
 
@@ -110,6 +118,10 @@ class JSAstParser {
                 evaluateGetContentMethod(getContent, (Expression) element, contentVar);
             }
         });
+    }
+
+    private static String staticString(String s) {
+        return "'" + escaped(s) + "'";
     }
 
     private static String escaped(String s) {

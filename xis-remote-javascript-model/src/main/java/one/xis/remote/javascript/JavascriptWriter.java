@@ -25,13 +25,15 @@ public class JavascriptWriter {
         } else {
             throw new IllegalStateException();
         }
+        newLine();
+        newLine();
     }
 
     private void newLine() {
         append("\n");
         try {
             for (int i = 0; i < indent; i++) {
-                appendable.append(" ");
+                appendable.append("\t");
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -46,7 +48,6 @@ public class JavascriptWriter {
         }
     }
 
-
     private void writeClass(JSClass jsClass) {
         writeConstructor(jsClass);
         writeMethods(jsClass, jsClass.getMethods());
@@ -59,9 +60,9 @@ public class JavascriptWriter {
         append("(");
         append(String.join(", ", jsClass.getConstructorParameters()));
         append(") {");
-        newLine();
-        indent = 1;
 
+        indent = 1;
+        newLine();
         for (String param : jsClass.getConstructorParameters()) {
             append("this.");
             append(param);
@@ -79,7 +80,10 @@ public class JavascriptWriter {
         }
 
         indent = 0;
+        newLine();
         append("};");
+        newLine();
+
     }
 
     private void writeMethods(JSClass jsClass, Collection<JSMethod> methods) {
@@ -87,15 +91,17 @@ public class JavascriptWriter {
     }
 
     private void writeMethod(JSClass jsClass, JSMethod method) {
-        indent = 0;
         append(jsClass.getClassName());
-        append(".prototype = function(");
+        append(".prototype.");
+        append(method.getName());
+        append(" = function(");
         append(String.join(", ", method.getParameters()));
         append(") {");
         newLine();
         indent = 1;
         writeStatements(method.getStatements());
         if (method.getReturnVar() != null) {
+            newLine();
             append("return ");
             if (method.getReturnVar() instanceof JSField) {
                 append("this.");
@@ -105,7 +111,10 @@ public class JavascriptWriter {
             newLine();
         }
         indent = 0;
+        newLine();
         append("};");
+        newLine();
+        newLine();
 
     }
 
@@ -114,6 +123,7 @@ public class JavascriptWriter {
     }
 
     private void writeStatement(JSStatement statement) {
+        newLine();
         if (statement instanceof JSAppend) {
             writeStatement((JSAppend) statement);
         } else if (statement instanceof JSAssignment) {
@@ -125,7 +135,7 @@ public class JavascriptWriter {
         } else if (statement instanceof JSForStatement) {
             writeStatement((JSForStatement) statement);
         }
-        newLine();
+
     }
 
     private void writeStatement(JSAppend statement) {
@@ -177,8 +187,9 @@ public class JavascriptWriter {
         append(".length; ");
         append(forStatement.getIndexVar());
         append("++) {");
-        newLine();
+
         indent++;
+        newLine();
 
         append(" var ");
         append(forStatement.getItemVar());
@@ -190,6 +201,7 @@ public class JavascriptWriter {
         newLine();
         writeStatements(forStatement.getStatements());
         indent--;
+        newLine();
         append("}");
     }
 
@@ -208,12 +220,13 @@ public class JavascriptWriter {
         indent = 1;
         writeStatements(function.getStatements());
         if (function.getReturnVar() != null) {
+            newLine();
             append("return ");
             append(function.getReturnVar().getName());
             append(";");
-            newLine();
         }
         indent = 0;
+        newLine();
         append("};");
     }
 

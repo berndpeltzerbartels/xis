@@ -48,7 +48,7 @@ class TextContentParserTest {
                 new Expression("Nikolaus.Haus"),//
                 new StaticText(List.of("bla", "bla")),//
                 new Expression("format(x)"),//
-                new StaticText(List.of("bla", "X_")),//
+                new StaticText(List.of(" bla", "X_")),//
                 new Expression("a.b.c"));
     }
 }
