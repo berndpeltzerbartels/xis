@@ -19,7 +19,7 @@ public class JSObjectInstance implements JSValue {
     public void writeJS(PrintWriter writer) {
         writer.append("var ");
         writer.append(name);
-        writer.append("= {");
+        writer.append("={");
         Iterator<JSField> fieldIterator = fields.iterator();
 
         while (fieldIterator.hasNext()) {
@@ -47,6 +47,10 @@ public class JSObjectInstance implements JSValue {
 
     public JSField addField(String name, String defaultValue) {
         return addField(new JSField(name, defaultValue));
+    }
+
+    public JSField addStringField(String name, String defaultValue) {
+        return addField(new JSField(name, "'" + defaultValue + "'"));
     }
 
     public JSField addField(JSField field) {

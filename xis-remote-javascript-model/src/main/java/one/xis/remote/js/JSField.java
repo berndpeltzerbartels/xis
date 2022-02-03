@@ -14,7 +14,6 @@ public class JSField implements JSValue {
         writer.append(name);
         writer.append(":");
         writer.append(defaultValue);
-        writer.append(";");
     }
 
     @Override

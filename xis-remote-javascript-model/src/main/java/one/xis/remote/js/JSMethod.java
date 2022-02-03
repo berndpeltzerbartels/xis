@@ -34,7 +34,10 @@ public class JSMethod implements JSElement {
         writer.append(parameters.stream().map(JSValue::getName).collect(Collectors.joining(",")));
         writer.append(")");
         writer.append("{");
-        statements.forEach(statements -> statements.writeJS(writer));
+        statements.forEach(statements -> {
+            statements.writeJS(writer);
+            writer.append(";");
+        });
         if (returnValue != null) {
             writer.write("return ");
             returnValue.writeReferenceJS(writer);

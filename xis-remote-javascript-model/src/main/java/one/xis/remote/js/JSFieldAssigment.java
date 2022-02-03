@@ -30,6 +30,5 @@ public class JSFieldAssigment implements JSStatement {
         } else if (methodCall != null) {
             methodCall.writeJS(writer);
         }
-        writer.write(";");
     }
 }
