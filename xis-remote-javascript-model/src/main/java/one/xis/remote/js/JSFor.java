@@ -10,8 +10,6 @@ import java.util.List;
 public class JSFor implements JSBlockStatement {
     private final List<JSStatement> statements = new ArrayList<>();
     private final JSValue arrayValue;
-    private final String itemVarName;
-    private final String itemNrVarName;
     private final String itemIndexVarName;
 
     @Override
