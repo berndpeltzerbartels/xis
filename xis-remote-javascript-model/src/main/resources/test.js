@@ -127,9 +127,11 @@ var categoryTitle = {
     refresh: function(parent) {
         //${categoryNumber}. ${category.title}
         var e = parent.getElement();
-        appendText(e, parent.getValue('categoryNumber'));
-        appendText(e, '. ');
-        appendText(e, parent.getValue('category').title); // ${category.title}
+        var text = '';
+        text += parent.getValue('categoryNumber');
+        text += ' ';
+        text += parent.getValue('category').title;
+        e.innerText = text;
     },
     getValue: function(name) {
         return this.parent.getValue(name);
@@ -225,14 +227,6 @@ function appendElement(parent, tagName, attributes=[]) {
     var child = createElement(tagName, attributes);
     parent.appendChild(child);
     return child;
-}
-
-function appendText(parent, content) {
-    if (!parent.innerText) {
-        parent.innerText = content;
-    } else {
-        parent.innerText += content;
-    }
 }
 
 function createElement(tagName, attributes=[]) {
