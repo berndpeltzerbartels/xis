@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 public class JSObjectInstance implements JSValue {
     private final String name;
     private final Collection<JSField> fields = new ArrayList<>();
-    private final Collection<JSMethod> methods = new ArrayList<>();
+    private final Collection<JSMethodDeclaration> methods = new ArrayList<>();
 
     @Override
     public void writeJS(PrintWriter writer) {
@@ -58,11 +58,11 @@ public class JSObjectInstance implements JSValue {
     }
 
 
-    public JSMethod addMethod(String name, String... parameterNames) {
-        return addMethod(new JSMethod(name, Arrays.stream(parameterNames).map(JSParameter::new).collect(Collectors.toList())));
+    public JSMethodDeclaration addMethod(String name, String... parameterNames) {
+        return addMethod(new JSMethodDeclaration(name, Arrays.stream(parameterNames).map(JSParameter::new).collect(Collectors.toList())));
     }
 
-    public JSMethod addMethod(JSMethod method) {
+    public JSMethodDeclaration addMethod(JSMethodDeclaration method) {
         methods.add(method);
         return method;
     }

@@ -7,7 +7,7 @@ import javax.script.ScriptException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class JSFunctionTest {
+class JSFunctionTest {
     private JSFunction jsFunction;
 
     @BeforeEach

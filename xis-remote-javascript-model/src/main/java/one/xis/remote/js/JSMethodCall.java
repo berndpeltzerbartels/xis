@@ -7,10 +7,10 @@ import java.util.stream.Collectors;
 
 public class JSMethodCall implements JSStatement {
     private final JSObjectInstance objectInstance;
-    private final JSMethod method;
+    private final JSMethodDeclaration method;
     private final List<JSValue> args;
 
-    public JSMethodCall(JSObjectInstance objectInstance, JSMethod method, JSValue... args) {
+    public JSMethodCall(JSObjectInstance objectInstance, JSMethodDeclaration method, JSValue... args) {
         this.objectInstance = objectInstance;
         this.method = method;
         this.args = Arrays.asList(args);

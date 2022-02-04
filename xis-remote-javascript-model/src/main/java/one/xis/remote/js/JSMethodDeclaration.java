@@ -9,17 +9,17 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Data
-public class JSMethod implements JSElement {
+public class JSMethodDeclaration implements JSElement {
     private final String name;
     private final List<JSParameter> parameters;
     private final List<JSStatement> statements = new ArrayList<>();
 
-    public JSMethod(String name) {
+    public JSMethodDeclaration(String name) {
         this.name = name;
         this.parameters = Collections.emptyList();
     }
 
-    public JSMethod(String name, List<JSParameter> parameters) {
+    public JSMethodDeclaration(String name, List<JSParameter> parameters) {
         this.name = name;
         this.parameters = parameters;
     }

@@ -29,15 +29,11 @@ class JSForTest {
                 .append(";")
                 .append("result;")
                 .toString();
-
     }
 
     @Test
     void writeJS() throws ScriptException {
         Object result = JSUtil.execute(javascript);
-
         assertThat(result).isEqualTo(15);
-
-
     }
 }

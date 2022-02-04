@@ -8,7 +8,7 @@ import javax.script.ScriptException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class JSObjectInstanceTest {
+class JSObjectInstanceTest {
 
     private static final String INSTANCE_NAME = "instance";
     private static final String FIELD_NAME = "field";
@@ -28,7 +28,7 @@ public class JSObjectInstanceTest {
         objectInstance = new JSObjectInstance(INSTANCE_NAME);
         var field = objectInstance.addField(FIELD_NAME, FIELD_DEFAULT_VALUE);
         var method = objectInstance.addMethod(METHOD_NAME, METHOD_PARAM_NAME1, METHOD_PARAM_NAME2);
-        method.addStatement(new JSFieldAssigment(field, method.getParameters().get(0)));
+        method.addStatement(new JSAssigment(field, method.getParameters().get(0)));
         var rv = new JSVar("rv");
         method.addStatement(new JSVarDeclaration(rv, METHOD_PARAM_NAME1 + "+" + METHOD_PARAM_NAME2));
         method.addStatement(new JSReturnStatement(rv));
