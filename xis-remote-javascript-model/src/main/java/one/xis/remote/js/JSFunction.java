@@ -13,7 +13,6 @@ public class JSFunction implements JSElement {
     private final String name;
     private final List<JSParameter> parameters;
     private final List<JSStatement> statements = new ArrayList<>();
-    private JSValue returnValue;
 
     public JSFunction(String name, String... parameters) {
         this.name = name;
@@ -37,11 +36,6 @@ public class JSFunction implements JSElement {
             statements.writeJS(writer);
             writer.append(";");
         });
-        if (returnValue != null) {
-            writer.write("return ");
-            returnValue.writeReferenceJS(writer);
-            writer.write(";");
-        }
         writer.append("}");
     }
 

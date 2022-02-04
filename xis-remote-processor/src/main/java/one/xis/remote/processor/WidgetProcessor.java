@@ -1,8 +1,6 @@
 package one.xis.remote.processor;
 
 import com.google.auto.service.AutoService;
-import one.xis.remote.javascript.JSAst;
-import one.xis.remote.javascript.JavascriptWriter;
 import one.xis.template.TemplateModel;
 import one.xis.template.TemplateParser;
 import one.xis.utils.xml.XmlUtil;
@@ -83,13 +81,9 @@ public class WidgetProcessor extends AnnotationProcessor {
     }
 
     private void writeJavaScript(Collection<TemplateModel> models, Appendable writer) {
-        writeJavaScript(new JSAstParser().parse(models, stateVariables), writer);
+        //writeJavaScript(new JSAstParser().parse(models, stateVariables), writer);
     }
-
-    private void writeJavaScript(JSAst jsAst, Appendable writer) {
-        new JavascriptWriter(writer).write(jsAst);
-    }
-
+    
 
     private Collection<TemplateModel> templateModels() {
         return widgetContexts.stream().map(this::templateModel).collect(Collectors.toSet());

@@ -13,7 +13,6 @@ public class JSMethod implements JSElement {
     private final String name;
     private final List<JSParameter> parameters;
     private final List<JSStatement> statements = new ArrayList<>();
-    private JSValue returnValue;
 
     public JSMethod(String name) {
         this.name = name;
@@ -38,11 +37,6 @@ public class JSMethod implements JSElement {
             statements.writeJS(writer);
             writer.append(";");
         });
-        if (returnValue != null) {
-            writer.write("return ");
-            returnValue.writeReferenceJS(writer);
-            writer.write(";");
-        }
         writer.append("}");
     }
 

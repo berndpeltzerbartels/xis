@@ -1,13 +1,10 @@
 package one.xis.remote.js;
 
 
-import one.xis.utils.js.JSUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import javax.script.ScriptException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -29,23 +26,21 @@ public class JSObjectInstanceTest {
     @BeforeEach
     void init() {
         objectInstance = new JSObjectInstance(INSTANCE_NAME);
-        JSField field = objectInstance.addField(FIELD_NAME, FIELD_DEFAULT_VALUE);
-        JSMethod method = objectInstance.addMethod(METHOD_NAME, METHOD_PARAM_NAME1, METHOD_PARAM_NAME2);
+        var field = objectInstance.addField(FIELD_NAME, FIELD_DEFAULT_VALUE);
+        var method = objectInstance.addMethod(METHOD_NAME, METHOD_PARAM_NAME1, METHOD_PARAM_NAME2);
         method.addStatement(new JSFieldAssigment(field, method.getParameters().get(0)));
-        JSVar rv = new JSVar("rv");
+        var rv = new JSVar("rv");
         method.addStatement(new JSVarDeclaration(rv, METHOD_PARAM_NAME1 + "+" + METHOD_PARAM_NAME2));
-        method.setReturnValue(rv);
+        method.addStatement(new JSReturnStatement(rv));
     }
 
 
     @Test
     void writeJs() throws ScriptException {
-        StringWriter writer = new StringWriter();
-        objectInstance.writeJS(new PrintWriter(writer));
-        String js = writer + CALL_TEST_METHOD;
+        String js = JSUtil.javascript(objectInstance) + CALL_TEST_METHOD;
 
         // We call the method
-        Object result = JSUtil.compile(js).eval();
+        var result = JSUtil.execute(js);
 
         assertThat(result).isEqualTo(8);
     }

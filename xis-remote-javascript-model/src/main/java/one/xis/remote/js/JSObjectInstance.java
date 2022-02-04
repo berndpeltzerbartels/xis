@@ -6,7 +6,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.stream.Collectors;
 
 @Data
@@ -20,7 +19,7 @@ public class JSObjectInstance implements JSValue {
         writer.append("var ");
         writer.append(name);
         writer.append("={");
-        Iterator<JSField> fieldIterator = fields.iterator();
+        var fieldIterator = fields.iterator();
 
         while (fieldIterator.hasNext()) {
             fieldIterator.next().writeJS(writer);
@@ -33,7 +32,7 @@ public class JSObjectInstance implements JSValue {
             writer.append(",");
         }
 
-        Iterator<JSMethod> methodIterator = methods.iterator();
+        var methodIterator = methods.iterator();
         while (methodIterator.hasNext()) {
             methodIterator.next().writeJS(writer);
             if (methodIterator.hasNext()) {

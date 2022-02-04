@@ -12,80 +12,197 @@ var categories = [
 
 ];
 
-function Variables() {
-    this.values = [[]];
-    this.level = 0;
+
+
+
+var widget = {
+
+    values : {'categories': categories},
+
+    getValue: function(name) {
+        return this.values[name];
+    },
+
+    show: function(container) {
+        clearChildNodes(container);
+        this.element = container;
+        categoriesH3.show(this);
+        // Children:
+        categoriesFor.show(this);
+    },
+    getElement() {
+        return this.element;
+    }
+
+
 }
 
-Variables.prototype.levelUp = function() {
-    this.level++;
-    if (!this.values[this.level]) {
-        this.values[this.level] = [];
+
+var categoriesH3 = {
+    show: function(parent) {
+        this.parent = parent;
+        this.element = appendElement(parent.getElement(), 'h3');
+        categoriesText.show(this);
+    },
+    getValue: function(name) {
+        return this.parent.getValue(name);
+    },
+    getElement() {
+        return this.element;
     }
 }
 
 
-Variables.prototype.levelDown = function() {
-    if (this.level > 0)
-        this.level--;
-}
-
-
-Variables.prototype.setValue = function(varName, value) {
-    this.values[this.level][varName] = value;
-}
-
-Variables.prototype.getValue = function(varName) {
-    return this.values[this.level][varName];
-}
-
-
-
-
-function Widget() {
-
-}
-
-/**
- * 
- * @param {Element} parent 
- * @param {Number} level 
- * @param {String} variableName 
- * @param {function} funct 
- */
-function IfControl(parent, level, variableName, funct = undefined ) {
-    this.parent = parent;
-    this.level = level;
-    this.variableName = variableName;
-    this.funct = funct;
-    this.childControls = [];
-    this.childElements = [];
-    this.create();
-}
-
-IfControl.prototype.show = function() {
-    nodeListToArray(element.childElements).forEach(e => showElement(e));
-}
-
-
-IfControl.prototype.hide = function() {
-    nodeListToArray(element.childElements).forEach(e => hideElement(e));
-}
-
-
-IfControl.prototype.evaluate = function(contextVars) {
-    var value = contextVars.getValue(this.variableName, this.level);
-    if (this.funct) {
-        value = this.funct(value);
+var categoriesText = {
+    show: function(parent) {
+        this.parent = parent;
+        appendText(parent.getElement(), 'Kategorien')
+    },
+    getValue: function(name) {
+        return this.parent.getValue(name);
+    },
+    getElement() {
+        return this.parent.getElement();
     }
-    if (value) {
-        this.show();
-    } else {
-        this.hide();
-    }
-    this.childControls.forEach(control => control.evaluate(contextVars));
-};
+}
 
+var categoriesFor = {
+    names: ['i', 'categoryNumber','category'],
+    show: function(parent) {
+        this.parent = parent;
+        this.variables = [];
+        var array = parent.getValue('categories');
+        for (var index = 0; index < array.length; index++) {
+            this.variables['i'] = index;
+            this.variables['categoryNumber'] = index + 1;
+            this.variables['category'] = array[index];
+
+            categoryDiv.show(this);
+           
+
+        }
+    },
+    getValue: function(name) {
+        if (this.names.indexOf(name) != -1) { // may be, we want to return undefined !!!
+            return this.variables[name];
+        }
+        return this.parent.getValue(name);
+    },
+    getElement() {
+        return this.parent.getElement();
+    }
+
+}
+
+
+var categoryDiv =  {
+    show: function(parent) {
+        this.parent = parent;
+        this.element = appendElement(parent.getElement(), 'div');
+        categoryH4.show(this);
+        productsFor.show(this);
+    },
+    getValue: function(name) {
+        return this.parent.getValue(name);
+    },
+    getElement() {
+        return this.element;
+    }
+}
+
+
+var categoryH4 = {
+    show: function(parent) {
+        this.parent = parent;
+        this.element = appendElement(parent.getElement(), 'h4');
+        categoryTitle.show(this);
+    },
+    getValue: function(name) {
+        return this.parent.getValue(name);
+    },
+    getElement() {
+        return this.element;
+    }
+}
+
+
+var categoryTitle = {
+    show: function(parent) {
+        //${categoryNumber}. ${category.title}
+        var e = parent.getElement();
+        appendText(e, parent.getValue('categoryNumber'));
+        appendText(e, '. ');
+        appendText(e, parent.getValue('category').title); // ${category.title}
+    },
+    getValue: function(name) {
+        return this.parent.getValue(name);
+    },
+    getElement() {
+        return this.parent.getElement();
+    }
+}
+
+var productsFor = {
+    names: ['i', 'productNumber','product'],
+    show: function(parent) {
+        this.parent = parent;
+        this.variables = [];
+        var array = parent.getValue('category').products;
+        for (var index = 0; index < array.length; index++) {
+            this.variables['i'] = index;
+            this.variables['productNumber'] = index + 1;
+            this.variables['product'] = array[index];
+
+            productDiv.show(this);
+
+        }
+    },
+    getValue: function(name) {
+        if (this.names.indexOf(name) != -1) { // may be, we want to return undefined !!!
+            return this.variables[name];
+        }
+        return this.parent.getValue(name);
+    },
+    getElement() {
+        return this.parent.getElement();
+    }
+
+}
+
+var productDiv =  {
+    show: function(parent) {
+        this.parent = parent;
+        this.element = appendElement(parent.getElement(), 'div');   
+        productDetails.show(this);
+    },
+    getValue: function(name) {
+        return this.parent.getValue(name);
+    },
+    getElement() {
+        return this.element;
+    }
+}
+
+
+// text-content
+var productDetails = {
+    show: function(parent) {
+        var e = parent.getElement();
+        appendText(e, parent.getValue('product').title);
+        appendText(e, ' ');
+        appendText(e, parent.getValue('product').price);
+        appendText(e, ' EUR');
+    },
+    getValue: function(name) {
+        return this.parent.getValue(name);
+    },
+    getElement() {
+        return this.parent.getElement();
+    }
+}
+
+
+// Util Functions
 
 function byId(id) {
     return document.getElementById(id);
@@ -99,6 +216,24 @@ function hideElement(element) {
 
 function showElement(element) {
     element.style.display = 'display: block';
+}
+
+function clearChildNodes(parent) {
+
+}
+
+function appendElement(parent, tagName, attributes=[]) {
+    var child = createElement(tagName, attributes);
+    parent.appendChild(child);
+    return child;
+}
+
+function appendText(parent, content) {
+    if (!parent.innerText) {
+        parent.innerText = content;
+    } else {
+        parent.innerText += content;
+    }
 }
 
 function createElement(tagName, attributes=[]) {
@@ -122,9 +257,6 @@ function notEmpty(value) {
 }
 
 
-var root = byId('list');
-var ifCategories = new IfControl(root, 0, 'categories', notEmpty);
-
-ifCategories.create = function() {
-
+function buttonClicked() {
+    widget.show(byId('content'));
 }
