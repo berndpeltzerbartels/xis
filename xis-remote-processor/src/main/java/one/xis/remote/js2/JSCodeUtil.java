@@ -25,12 +25,15 @@ class JSCodeUtil {
         return asStreamOfStrings(parts).collect(Collectors.toList());
     }
 
-    private static String asString(Object o) {
+    static String asString(Object o) {
         if (o == null) {
             return "undefined";
         }
         if (o instanceof JSStatementPart) {
             return ((JSStatementPart) o).getRef();
+        }
+        if (o instanceof JSString) {
+            return ((JSString) o).getContent();
         }
         return o.toString();
     }

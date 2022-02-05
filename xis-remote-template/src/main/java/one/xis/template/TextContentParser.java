@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 class TextContentParser {
     private final String source;
     private int position = 0;
+    private final ExpressionParser expressionParser = new ExpressionParser();
 
     TextContent parse() {
         TextContent textContent = new TextContent();
@@ -37,8 +38,9 @@ class TextContentParser {
     }
 
     private Optional<Expression> expression(StringBuilder builder) {
-        return StringUtils.isEmpty(builder) ? Optional.empty() : Optional.of(new Expression(builder.toString()));
+        return StringUtils.isEmpty(builder) ? Optional.empty() : Optional.of(expressionParser.parse(builder.toString()));
     }
+
 
     private void parseStaticContent(List<TextElement> textElements) {
         StringBuilder stringBuilder = new StringBuilder();

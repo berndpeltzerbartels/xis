@@ -12,14 +12,14 @@ import java.util.List;
 class JSFunctionDeclaration {
     private final String name;
     private List<String> parameterNames = new ArrayList<>();
-    private final List<JSStatement2> statements = new ArrayList<>();
+    private final List<JSStatement> statements = new ArrayList<>();
 
     JSFunctionDeclaration(String name, List<String> parameterNames) {
         this.name = name;
         this.parameterNames.addAll(parameterNames);
     }
 
-    JSFunctionDeclaration addStatement(JSStatement2 statement) {
+    JSFunctionDeclaration addStatement(JSStatement statement) {
         statements.add(statement);
         return this;
     }

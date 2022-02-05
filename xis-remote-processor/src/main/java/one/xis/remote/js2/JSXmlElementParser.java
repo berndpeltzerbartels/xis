@@ -7,13 +7,15 @@ import one.xis.template.XmlElement;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static one.xis.remote.js2.DefaultFunctions.*;
 import static one.xis.remote.js2.JSCodeUtil.asJsArray;
 import static one.xis.remote.js2.UniqueNameProvider.nextName;
 
 class JSXmlElementParser extends JSTreeParser<XmlElement> {
+
+    private static final JSExpressionParser EXPR_PARSER = new JSExpressionParser();
+
     public JSXmlElementParser(JSScript script) {
         super(script);
     }
@@ -46,8 +48,8 @@ class JSXmlElementParser extends JSTreeParser<XmlElement> {
         return new JSFunctionCall(appendElement, parameters);
     }
 
-    private List<JSStatement2> createEvalAttrsStatements(XmlElement element, JSMethodDeclaration getValue) {
-        List<JSStatement2> statements = new ArrayList<>();
+    private List<JSStatement> createEvalAttrsStatements(XmlElement element, JSMethodDeclaration getValue) {
+        List<JSStatement> statements = new ArrayList<>();
         statements.add(new JSCode2("var rv=[]"));
         for (String attrName : element.getAttributes().keySet()) {
             JSArrayElement arrayElement = new JSArrayElement("rv", new JSString(attrName));
@@ -57,17 +59,7 @@ class JSXmlElementParser extends JSTreeParser<XmlElement> {
                     ((StaticText) textElement).getLines().forEach(line -> statements.add(new JSCode2(arrayElement, "+=", new JSString(line))));
                 } else if (textElement instanceof Expression) {
                     Expression expression = (Expression) textElement;
-                    if (expression.getFunction() == null) {
-                        JSFunctionDeclaration functionDeclaration = new JSFunctionDeclaration(expression.getFunction(), expression.getVars());
-                        List<JSStatement2> parameters = expression.getVars().stream()
-                                .map(varName -> new JSMethodCall(getValue, new JSString(varName)))
-                                .collect(Collectors.toList());
-                        JSFunctionCall functionCall = new JSFunctionCall(functionDeclaration, parameters);
-                        statements.add(new JSCode2(arrayElement, "+=", functionCall));
-                    } else {
-                        JSMethodCall methodCall = new JSMethodCall(getValue, new JSString(expression.getContent()));
-                        statements.add(new JSCode2(arrayElement, "+=", methodCall));
-                    }
+                    statements.add(EXPR_PARSER.parse(expression, getValue));
                 }
             }
         }

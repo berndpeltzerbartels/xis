@@ -7,7 +7,7 @@ import java.util.List;
 import static one.xis.remote.js2.JSCodeUtil.asStrings;
 
 @Getter
-class JSMethodCall implements JSStatement2 {
+class JSMethodCall implements JSStatement {
     private final JSMethodDeclaration methodDeclaration;
     private final List<String> params;
 

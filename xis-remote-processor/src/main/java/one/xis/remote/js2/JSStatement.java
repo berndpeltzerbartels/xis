@@ -1,5 +1,5 @@
 package one.xis.remote.js2;
 
-interface JSStatement2 {
+interface JSStatement {
 
 }

@@ -16,21 +16,21 @@ class TextContentParserTest {
     @DisplayName("Content with embedded expression")
     void parse() {
         List<TextElement> result = new TextContentParser("123${a.b}456").parse().getTextElements();
-        assertThat(result).containsExactly(new StaticText("123"), new Expression("a.b"), new StaticText(List.of("456")));
+        assertThat(result).containsExactly(new StaticText("123"), expression("a.b"), new StaticText(List.of("456")));
     }
 
     @Test
     @DisplayName("Expressions only")
     void parse1() {
         List<TextElement> result = new TextContentParser("${a}${a.b}").parse().getTextElements();
-        assertThat(result).containsExactly(new Expression("a"), new Expression("a.b"));
+        assertThat(result).containsExactly(expression("a"), expression("a.b"));
     }
 
     @Test
     @DisplayName("Escapes")
     void parse2() {
         List<TextElement> result = new TextContentParser("\\${a}${a.b}").parse().getTextElements();
-        assertThat(result).containsExactly(new StaticText("${a}"), new Expression("a.b"));
+        assertThat(result).containsExactly(new StaticText("${a}"), expression("a.b"));
     }
 
 
@@ -42,10 +42,15 @@ class TextContentParserTest {
         List<TextElement> result = new TextContentParser(text).parse().getTextElements();
 
         assertThat(result).containsExactly(new StaticText("Das ist das "),//
-                new Expression("Nikolaus.Haus"),//
+                expression("Nikolaus.Haus"),//
                 new StaticText(List.of("bla", "bla")),//
-                new Expression("format(x)"),//
+                expression("format(x)"),//
                 new StaticText(List.of(" bla", "X_")),//
-                new Expression("a.b.c"));
+                expression("a.b.c"));
+    }
+
+
+    private Expression expression(String src) {
+        return new ExpressionParser().parse(src);
     }
 }

@@ -10,14 +10,14 @@ import java.util.List;
 class JSMethodDeclaration implements JSObjectMember {
     private final String name;
     private List<String> parameterNames = new ArrayList<>();
-    private final List<JSStatement2> statements = new ArrayList<>();
+    private final List<JSStatement> statements = new ArrayList<>();
 
     JSMethodDeclaration(String name, List<String> parameterNames) {
         this.name = name;
         this.parameterNames.addAll(parameterNames);
     }
 
-    JSMethodDeclaration addStatement(JSStatement2 statement) {
+    JSMethodDeclaration addStatement(JSStatement statement) {
         statements.add(statement);
         return this;
     }
@@ -33,7 +33,7 @@ class JSMethodDeclaration implements JSObjectMember {
     }
 
 
-    public JSMethodDeclaration addStatements(List<JSStatement2> statementList) {
+    public JSMethodDeclaration addStatements(List<JSStatement> statementList) {
         statements.addAll(statementList);
         return this;
     }
