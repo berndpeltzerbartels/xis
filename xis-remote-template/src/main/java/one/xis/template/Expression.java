@@ -15,7 +15,7 @@ public class Expression implements TextElement {
     private final List<String> vars;
     private final String function;
 
-    private static final Pattern PATTERN_WITH_FKT = Pattern.compile("[\\w]+\\(?[\\w,\\.]+\\)?");
+    private static final Pattern PATTERN_WITH_FKT = Pattern.compile("([\\w]+)\\(([\\w,\\.]+)\\)");
 
     public Expression(String content) {
         this.content = content;
