@@ -1,25 +1,18 @@
 package one.xis.remote.js;
 
-import one.xis.template.Container;
 import one.xis.template.TemplateElement;
-import one.xis.template.TemplateModel;
-import one.xis.utils.lang.MapperUtil;
-import one.xis.utils.lang.StringUtils;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static one.xis.remote.js.JavacriptRootParser.REFRESH_CHILDREN_FKT;
 import static one.xis.remote.js.UniqueNameProvider.nextName;
 
-class JavascriptWidgetParser {
-    private final TemplateModel root;
+class JavascriptWidgetParser extends JavascriptParser {
+    private final TemplateElement root;
     private final JSScript result;
     private final JSObject widget;
     private final JSArrayField valuesField;
     private final JSField elementField;
 
-    JavascriptWidgetParser(TemplateModel root, JSScript result) {
+    JavascriptWidgetParser(TemplateElement root, JSScript result) {
         this.root = root;
         this.result = result;
         this.widget = new JSObject(nextName());
@@ -27,25 +20,15 @@ class JavascriptWidgetParser {
         this.elementField = this.widget.addField(new JSField("element"));
     }
 
-    String parse() {
-        JavascriptParser<TemplateElement> parser = JavascriptParser.parser(root);
-        JSObject object = parser.parse(root);
-        List<JSObject> children = new ArrayList<>();
-        if (root instanceof Container) {
-            parse((Container) root).forEach(children::add);
-        } else {
-            children.add(parse(root));
-        }
-        children.forEach(result::addObject);
-        createMethods(MapperUtil.map(children, JSObject::getName));
-        return widget.getName();
+    @Override
+    public JSObject parse() {
+        JavascriptParser parser = JavascriptParser.parser(root, result);
+        JSObject object = parser.parse();
+        result.addObject(object);
+        return widget;
     }
 
-    private JSObject parse(TemplateElement element) {
-        return JavascriptParser.parser(element).parse(element);
-    }
-
-    private void createMethods(List<String> childNames) {
+    private void createMethods(String childNames) {
         widget.addMethod(createGetValue());
         widget.addMethod(createRefresh(childNames));
         widget.addMethod(createGetElement());
@@ -64,12 +47,12 @@ class JavascriptWidgetParser {
         return getElement;
     }
 
-    private JSMethod createRefresh(List<String> childNames) {
+    private JSMethod createRefresh(String childName) {
         var parent = new JSParameter("parent");
         var refresh = new JSMethod("refresh", parent);
         var children = new JSVar(nextName());
         refresh.addStatement(new JSCode("this", ".", elementField.getName(), "=", parent.getName()));
-        refresh.addStatement(new JSVarDeclaration(children, "[" + StringUtils.join(childNames, ",") + "]"));
+        refresh.addStatement(new JSVarDeclaration(children, "[" + childName + "]"));
         refresh.addStatement(new JSFunctionCall(REFRESH_CHILDREN_FKT, parent, children));
         return refresh;
     }
