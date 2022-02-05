@@ -2,7 +2,7 @@ package one.xis.template;
 
 import org.w3c.dom.Element;
 
-public class TemplateSynthaxException extends Exception {
+public class TemplateSynthaxException extends RuntimeException {
     public TemplateSynthaxException(String message) {
         super(message);
     }

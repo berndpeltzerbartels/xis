@@ -7,6 +7,7 @@ import one.xis.template.XmlElement;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static one.xis.remote.js2.DefaultFunctions.*;
 import static one.xis.remote.js2.JSCodeUtil.asJsArray;
@@ -25,9 +26,10 @@ class JSXmlElementParser extends JSTreeParser<XmlElement> {
         JSFieldDeclaration valuesField = widget.addField("values");
         JSFieldDeclaration elementField = widget.addField("element");
 
-        JSMethodDeclaration evalAttrs = widget.addMethod("evalAttr").addStatements(createEvalAttrsStatements(element));
+        JSMethodDeclaration getValue = widget.addMethod("getValue", "name").addStatement(new JSReturn(new JSArrayElement(valuesField, "name")));
+        JSMethodDeclaration evalAttrs = widget.addMethod("evalAttr").addStatements(createEvalAttrsStatements(element, getValue));
         widget.addMethod("getElement").addStatement(new JSReturn(elementField));
-        widget.addMethod("getValue", "name").addStatement(new JSReturn(new JSArrayElement(valuesField, "name")));
+
         widget.addMethod("refresh", "parent")
                 .addStatement(new JSCode2(parentField, "=", "parent"))
                 .addStatement(new JSCode2(elementField, "=", createAppendElement(element, parentField, evalAttrs)))
@@ -44,7 +46,7 @@ class JSXmlElementParser extends JSTreeParser<XmlElement> {
         return new JSFunctionCall(appendElement, parameters);
     }
 
-    private List<JSStatement2> createEvalAttrsStatements(XmlElement element) {
+    private List<JSStatement2> createEvalAttrsStatements(XmlElement element, JSMethodDeclaration getValue) {
         List<JSStatement2> statements = new ArrayList<>();
         statements.add(new JSCode2("var rv=[]"));
         for (String attrName : element.getAttributes().keySet()) {
@@ -54,7 +56,18 @@ class JSXmlElementParser extends JSTreeParser<XmlElement> {
                 if (textElement instanceof StaticText) {
                     ((StaticText) textElement).getLines().forEach(line -> statements.add(new JSCode2(arrayElement, "+=", new JSString(line))));
                 } else if (textElement instanceof Expression) {
-                    // statements.add(new JSCode2(arrayElement, "+=", new JSFunctionCall(evalExpr, )));
+                    Expression expression = (Expression) textElement;
+                    if (expression.getFunction() == null) {
+                        JSFunctionDeclaration functionDeclaration = new JSFunctionDeclaration(expression.getFunction(), expression.getVars());
+                        List<JSStatement2> parameters = expression.getVars().stream()
+                                .map(varName -> new JSMethodCall(getValue, new JSString(varName)))
+                                .collect(Collectors.toList());
+                        JSFunctionCall functionCall = new JSFunctionCall(functionDeclaration, parameters);
+                        statements.add(new JSCode2(arrayElement, "+=", functionCall));
+                    } else {
+                        JSMethodCall methodCall = new JSMethodCall(getValue, new JSString(expression.getContent()));
+                        statements.add(new JSCode2(arrayElement, "+=", methodCall));
+                    }
                 }
             }
         }

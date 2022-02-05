@@ -15,4 +15,8 @@ class JSFunctionCall implements JSStatement2 {
         this.functionDeclatation = functionDeclatation;
         this.params = asStrings(paramters);
     }
+
+    JSFunctionCall(JSFunctionDeclaration functionDeclatation, List<Object> paramters) {
+        this(functionDeclatation, paramters.toArray());
+    }
 }
