@@ -9,12 +9,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class JSAssigmentTest {
 
-    private JSObjectInstance objectInstance;
+    private JSObject objectInstance;
 
 
     @BeforeEach
     void init() {
-        objectInstance = new JSObjectInstance("o");
+        objectInstance = new JSObject("o");
         JSField field = objectInstance.addField("field", "123");
         objectInstance.addMethod("change").addStatement(new JSAssigment(field, "456"));
     }

@@ -8,14 +8,204 @@ var categories = [
     {title: 'Bad', products:[
         {title: 'Vorleger', price: 12.5},
         {title: 'Klobürste', price: 12.5}
+    ]},
+    {title: 'Küche', products:[
+        {title: 'Kochtopf', price: 12.5},
+        {title: 'Braftpfanne', price: 12.5},
+        {title: 'Topflappen', price: 12.5},
+        {title: 'Espressokocher', price: 12.5}
+    ]},
+    {title: 'Bad', products:[
+        {title: 'Vorleger', price: 12.5},
+        {title: 'Klobürste', price: 12.5}
+    ]},
+    {title: 'Küche', products:[
+        {title: 'Kochtopf', price: 12.5},
+        {title: 'Braftpfanne', price: 12.5},
+        {title: 'Topflappen', price: 12.5},
+        {title: 'Espressokocher', price: 12.5}
+    ]},
+    {title: 'Bad', products:[
+        {title: 'Vorleger', price: 12.5},
+        {title: 'Klobürste', price: 12.5}
+    ]},
+    {title: 'Küche', products:[
+        {title: 'Kochtopf', price: 12.5},
+        {title: 'Braftpfanne', price: 12.5},
+        {title: 'Topflappen', price: 12.5},
+        {title: 'Espressokocher', price: 12.5}
+    ]},
+    {title: 'Bad', products:[
+        {title: 'Vorleger', price: 12.5},
+        {title: 'Klobürste', price: 12.5}
+    ]},
+    {title: 'Küche', products:[
+        {title: 'Kochtopf', price: 12.5},
+        {title: 'Braftpfanne', price: 12.5},
+        {title: 'Topflappen', price: 12.5},
+        {title: 'Espressokocher', price: 12.5}
+    ]},
+    {title: 'Bad', products:[
+        {title: 'Vorleger', price: 12.5},
+        {title: 'Klobürste', price: 12.5}
+    ]},
+    {title: 'Küche', products:[
+        {title: 'Kochtopf', price: 12.5},
+        {title: 'Braftpfanne', price: 12.5},
+        {title: 'Topflappen', price: 12.5},
+        {title: 'Espressokocher', price: 12.5}
+    ]},
+    {title: 'Bad', products:[
+        {title: 'Vorleger', price: 12.5},
+        {title: 'Klobürste', price: 12.5}
+    ]},
+    {title: 'Küche', products:[
+        {title: 'Kochtopf', price: 12.5},
+        {title: 'Braftpfanne', price: 12.5},
+        {title: 'Topflappen', price: 12.5},
+        {title: 'Espressokocher', price: 12.5}
+    ]},
+    {title: 'Bad', products:[
+        {title: 'Vorleger', price: 12.5},
+        {title: 'Klobürste', price: 12.5}
+    ]},
+    {title: 'Küche', products:[
+        {title: 'Kochtopf', price: 12.5},
+        {title: 'Braftpfanne', price: 12.5},
+        {title: 'Topflappen', price: 12.5},
+        {title: 'Espressokocher', price: 12.5}
+    ]},
+    {title: 'Bad', products:[
+        {title: 'Vorleger', price: 12.5},
+        {title: 'Klobürste', price: 12.5}
+    ]},
+    {title: 'Küche', products:[
+        {title: 'Kochtopf', price: 12.5},
+        {title: 'Braftpfanne', price: 12.5},
+        {title: 'Topflappen', price: 12.5},
+        {title: 'Espressokocher', price: 12.5}
+    ]},
+    {title: 'Bad', products:[
+        {title: 'Vorleger', price: 12.5},
+        {title: 'Klobürste', price: 12.5}
+    ]},
+    {title: 'Küche', products:[
+        {title: 'Kochtopf', price: 12.5},
+        {title: 'Braftpfanne', price: 12.5},
+        {title: 'Topflappen', price: 12.5},
+        {title: 'Espressokocher', price: 12.5}
+    ]},
+    {title: 'Bad', products:[
+        {title: 'Vorleger', price: 12.5},
+        {title: 'Klobürste', price: 12.5}
+    ]},
+    {title: 'Küche', products:[
+        {title: 'Kochtopf', price: 12.5},
+        {title: 'Braftpfanne', price: 12.5},
+        {title: 'Topflappen', price: 12.5},
+        {title: 'Espressokocher', price: 12.5}
+    ]},
+    {title: 'Bad', products:[
+        {title: 'Vorleger', price: 12.5},
+        {title: 'Klobürste', price: 12.5}
+    ]},
+    {title: 'Küche', products:[
+        {title: 'Kochtopf', price: 12.5},
+        {title: 'Braftpfanne', price: 12.5},
+        {title: 'Topflappen', price: 12.5},
+        {title: 'Espressokocher', price: 12.5}
+    ]},
+    {title: 'Bad', products:[
+        {title: 'Vorleger', price: 12.5},
+        {title: 'Klobürste', price: 12.5}
+    ]},
+    {title: 'Küche', products:[
+        {title: 'Kochtopf', price: 12.5},
+        {title: 'Braftpfanne', price: 12.5},
+        {title: 'Topflappen', price: 12.5},
+        {title: 'Espressokocher', price: 12.5}
+    ]},
+    {title: 'Bad', products:[
+        {title: 'Vorleger', price: 12.5},
+        {title: 'Klobürste', price: 12.5}
+    ]},
+    {title: 'Küche', products:[
+        {title: 'Kochtopf', price: 12.5},
+        {title: 'Braftpfanne', price: 12.5},
+        {title: 'Topflappen', price: 12.5},
+        {title: 'Espressokocher', price: 12.5}
+    ]},
+    {title: 'Bad', products:[
+        {title: 'Vorleger', price: 12.5},
+        {title: 'Klobürste', price: 12.5}
+    ]},
+    {title: 'Küche', products:[
+        {title: 'Kochtopf', price: 12.5},
+        {title: 'Braftpfanne', price: 12.5},
+        {title: 'Topflappen', price: 12.5},
+        {title: 'Espressokocher', price: 12.5}
+    ]},
+    {title: 'Bad', products:[
+        {title: 'Vorleger', price: 12.5},
+        {title: 'Klobürste', price: 12.5}
+    ]},
+    {title: 'Küche', products:[
+        {title: 'Kochtopf', price: 12.5},
+        {title: 'Braftpfanne', price: 12.5},
+        {title: 'Topflappen', price: 12.5},
+        {title: 'Espressokocher', price: 12.5}
+    ]},
+    {title: 'Bad', products:[
+        {title: 'Vorleger', price: 12.5},
+        {title: 'Klobürste', price: 12.5}
+    ]},
+    {title: 'Küche', products:[
+        {title: 'Kochtopf', price: 12.5},
+        {title: 'Braftpfanne', price: 12.5},
+        {title: 'Topflappen', price: 12.5},
+        {title: 'Espressokocher', price: 12.5}
+    ]},
+    {title: 'Bad', products:[
+        {title: 'Vorleger', price: 12.5},
+        {title: 'Klobürste', price: 12.5}
+    ]},
+    {title: 'Küche', products:[
+        {title: 'Kochtopf', price: 12.5},
+        {title: 'Braftpfanne', price: 12.5},
+        {title: 'Topflappen', price: 12.5},
+        {title: 'Espressokocher', price: 12.5}
+    ]},
+    {title: 'Bad', products:[
+        {title: 'Vorleger', price: 12.5},
+        {title: 'Klobürste', price: 12.5}
+    ]},
+    {title: 'Küche', products:[
+        {title: 'Kochtopf', price: 12.5},
+        {title: 'Braftpfanne', price: 12.5},
+        {title: 'Topflappen', price: 12.5},
+        {title: 'Espressokocher', price: 12.5}
+    ]},
+    {title: 'Bad', products:[
+        {title: 'Vorleger', price: 12.5},
+        {title: 'Klobürste', price: 12.5}
+    ]},
+    {title: 'Küche', products:[
+        {title: 'Kochtopf', price: 12.5},
+        {title: 'Braftpfanne', price: 12.5},
+        {title: 'Topflappen', price: 12.5},
+        {title: 'Espressokocher', price: 12.5}
+    ]},
+    {title: 'Bad', products:[
+        {title: 'Vorleger', price: 12.5},
+        {title: 'Klobürste', price: 12.5}
     ]}
 
 ];
 
 
-function refreshAll(o, elements) {
-    for (var i = 0; i < elements.length; i++) {
-        elements[i].refresh(o);
+function refreshChildren(parent, children) {
+    for (var i = 0; i < children.length; i++) {
+        children[i].refresh(parent);
     }
 }
 
@@ -26,10 +216,9 @@ var widget = {
     },
 
     refresh: function(container) {
-        debugger;
         clearChildNodes(container);
         this.element = container;
-        refreshAll(this, [categoriesH3, categoriesFor]);
+        refreshChildren(this, [categoriesH3, categoriesFor]);
     },
     getElement() {
         return this.element;
@@ -43,7 +232,7 @@ var categoriesH3 = {
     refresh: function(parent) {
         this.parent = parent;
         this.element = appendElement(parent.getElement(), 'h3');
-        refreshAll(this, [categoriesText]);
+        refreshChildren(this, [categoriesText]);
     },
     getValue: function(name) {
         return this.parent.getValue(name);
@@ -77,7 +266,7 @@ var categoriesFor = {
             this.variables['i'] = index;
             this.variables['categoryNumber'] = index + 1;
             this.variables['category'] = array[index];  
-            refreshAll(this, [categoryDiv]);
+            refreshChildren(this, [categoryDiv]);
         }
     },
     getValue: function(name) {
@@ -97,7 +286,7 @@ var categoryDiv =  {
     refresh: function(parent) {
         this.parent = parent;
         this.element = appendElement(parent.getElement(), 'div');
-        refreshAll(this, [categoryH4, productsFor]);
+        refreshChildren(this, [categoryH4, productsFor]);
     },
     getValue: function(name) {
         return this.parent.getValue(name);
@@ -112,7 +301,7 @@ var categoryH4 = {
     refresh: function(parent) {
         this.parent = parent;
         this.element = appendElement(parent.getElement(), 'h4');
-        refreshAll(this, [categoryTitle]);
+        refreshChildren(this, [categoryTitle]);
     },
     getValue: function(name) {
         return this.parent.getValue(name);
@@ -127,11 +316,9 @@ var categoryTitle = {
     refresh: function(parent) {
         //${categoryNumber}. ${category.title}
         var e = parent.getElement();
-        var text = '';
-        text += parent.getValue('categoryNumber');
-        text += ' ';
-        text += parent.getValue('category').title;
-        e.innerText = text;
+        appendText(e, parent.getValue('categoryNumber'));
+        appendText(e, '. ');
+        appendText(e, parent.getValue('category').title); // ${category.title}
     },
     getValue: function(name) {
         return this.parent.getValue(name);
@@ -151,7 +338,7 @@ var productsFor = {
             this.variables['i'] = index;
             this.variables['productNumber'] = index + 1;
             this.variables['product'] = array[index];
-            refreshAll(this, [productDiv]);
+            refreshChildren(this, [productDiv]);
         }
     },
     getValue: function(name) {
@@ -170,7 +357,7 @@ var productDiv =  {
     refresh: function(parent) {
         this.parent = parent;
         this.element = appendElement(parent.getElement(), 'div');   
-        refreshAll(this, [productDetails]);
+        refreshChildren(this, [productDetails]);
     },
     getValue: function(name) {
         return this.parent.getValue(name);
@@ -229,6 +416,14 @@ function appendElement(parent, tagName, attributes=[]) {
     return child;
 }
 
+function appendText(parent, content) {
+    if (!parent.innerText) {
+        parent.innerText = content;
+    } else {
+        parent.innerText += content;
+    }
+}
+
 function createElement(tagName, attributes=[]) {
     var e = document.createElement(tagName);
     for (var name in attributes) {
@@ -252,4 +447,437 @@ function notEmpty(value) {
 
 function buttonClicked() {
     widget.refresh(byId('content'));
+    setTimeout(() => {
+    
+    
+        categories = [
+            {title: 'Küche', products:[
+                {title: 'Kochtopf', price: 8},
+                {title: 'Braftpfanne', price: 8},
+                {title: 'Topflappen', price: 8},
+                {title: 'Espressokocher', price: 8}
+            ]},
+            {title: 'Bad', products:[
+                {title: 'Vorleger', price: 8},
+                {title: 'Klobürste', price: 8}
+            ]},
+            {title: 'Küche', products:[
+                {title: 'Kochtopf', price: 8},
+                {title: 'Braftpfanne', price: 8},
+                {title: 'Topflappen', price: 8},
+                {title: 'Espressokocher', price: 8}
+            ]},
+            {title: 'Bad', products:[
+                {title: 'Vorleger', price: 8},
+                {title: 'Klobürste', price: 8}
+            ]},
+            {title: 'Küche', products:[
+                {title: 'Kochtopf', price: 8},
+                {title: 'Braftpfanne', price: 8},
+                {title: 'Topflappen', price: 8},
+                {title: 'Espressokocher', price: 8}
+            ]},
+            {title: 'Bad', products:[
+                {title: 'Vorleger', price: 8},
+                {title: 'Klobürste', price: 8}
+            ]},
+            {title: 'Küche', products:[
+                {title: 'Kochtopf', price: 2.5},
+                {title: 'Braftpfanne', price: 132.5},
+                {title: 'Topflappen', price: 12.5},
+                {title: 'Espressokocher', price: 12.5}
+            ]},
+            {title: 'Bad', products:[
+                {title: 'Vorleger', price: 12.5},
+                {title: 'Klobürste', price: 12.5}
+            ]},
+            {title: 'Küche', products:[
+                {title: 'Kochtopf', price: 12.5},
+                {title: 'Braftpfanne', price: 32.5},
+                {title: 'Topflappen', price: 12.5},
+                {title: 'Espressokocher', price: 12.5}
+            ]},
+            {title: 'Bad', products:[
+                {title: 'Vorleger', price: 52.5},
+                {title: 'Klobürste', price: 12.5}
+            ]},
+            {title: 'Küche', products:[
+                {title: 'Kochtopf', price: 12.5},
+                {title: 'Braftpfanne', price: 12.5},
+                {title: 'Topflappen', price: 12.5},
+                {title: 'Espressokocher', price: 12.5}
+            ]},
+            {title: 'Bad', products:[
+                {title: 'Vorleger', price: 12.5},
+                {title: 'Klobürste', price: 12.5}
+            ]},
+            {title: 'Küche', products:[
+                {title: 'Kochtopf', price: 12.5},
+                {title: 'Braftpfanne', price: 12.5},
+                {title: 'Topflappen', price: 12.5},
+                {title: 'Espressokocher', price: 12.5}
+            ]},
+            {title: 'Bad', products:[
+                {title: 'Vorleger', price: 12.5},
+                {title: 'Klobürste', price: 12.5}
+            ]},
+            {title: 'Küche', products:[
+                {title: 'Kochtopf', price: 12.5},
+                {title: 'Braftpfanne', price: 12.5},
+                {title: 'Topflappen', price: 12.5},
+                {title: 'Espressokocher', price: 12.5}
+            ]},
+            {title: 'Bad', products:[
+                {title: 'Vorleger', price: 12.5},
+                {title: 'Klobürste', price: 12.5}
+            ]},
+            {title: 'Küche', products:[
+                {title: 'Kochtopf', price: 12.5},
+                {title: 'Braftpfanne', price: 12.5},
+                {title: 'Topflappen', price: 12.5},
+                {title: 'Espressokocher', price: 12.5}
+            ]},
+            {title: 'Bad', products:[
+                {title: 'Vorleger', price: 12.5},
+                {title: 'Klobürste', price: 12.5}
+            ]},
+            {title: 'Küche', products:[
+                {title: 'Kochtopf', price: 12.5},
+                {title: 'Braftpfanne', price: 12.5},
+                {title: 'Topflappen', price: 12.5},
+                {title: 'Espressokocher', price: 12.5}
+            ]},
+            {title: 'Bad', products:[
+                {title: 'Vorleger', price: 12.5},
+                {title: 'Klobürste', price: 12.5}
+            ]},
+            {title: 'Küche', products:[
+                {title: 'Kochtopf', price: 12.5},
+                {title: 'Braftpfanne', price: 12.5},
+                {title: 'Topflappen', price: 12.5},
+                {title: 'Espressokocher', price: 12.5}
+            ]},
+            {title: 'Bad', products:[
+                {title: 'Vorleger', price: 12.5},
+                {title: 'Klobürste', price: 12.5}
+            ]},
+            {title: 'Küche', products:[
+                {title: 'Kochtopf', price: 12.5},
+                {title: 'Braftpfanne', price: 12.5},
+                {title: 'Topflappen', price: 12.5},
+                {title: 'Espressokocher', price: 12.5}
+            ]},
+            {title: 'Bad', products:[
+                {title: 'Vorleger', price: 12.5},
+                {title: 'Klobürste', price: 12.5}
+            ]},
+            {title: 'Küche', products:[
+                {title: 'Kochtopf', price: 12.5},
+                {title: 'Braftpfanne', price: 12.5},
+                {title: 'Topflappen', price: 12.5},
+                {title: 'Espressokocher', price: 12.5}
+            ]},
+            {title: 'Bad', products:[
+                {title: 'Vorleger', price: 12.5},
+                {title: 'Klobürste', price: 12.5}
+            ]},
+            {title: 'Küche', products:[
+                {title: 'Kochtopf', price: 12.5},
+                {title: 'Braftpfanne', price: 12.5},
+                {title: 'Topflappen', price: 12.5},
+                {title: 'Espressokocher', price: 12.5}
+            ]},
+            {title: 'Bad', products:[
+                {title: 'Vorleger', price: 12.5},
+                {title: 'Klobürste', price: 12.5}
+            ]},
+            {title: 'Küche', products:[
+                {title: 'Kochtopf', price: 12.5},
+                {title: 'Braftpfanne', price: 12.5},
+                {title: 'Topflappen', price: 12.5},
+                {title: 'Espressokocher', price: 12.5}
+            ]},
+            {title: 'Bad', products:[
+                {title: 'Vorleger', price: 12.5},
+                {title: 'Klobürste', price: 12.5}
+            ]},
+            {title: 'Küche', products:[
+                {title: 'Kochtopf', price: 12.5},
+                {title: 'Braftpfanne', price: 12.5},
+                {title: 'Topflappen', price: 12.5},
+                {title: 'Espressokocher', price: 12.5}
+            ]},
+            {title: 'Bad', products:[
+                {title: 'Vorleger', price: 12.5},
+                {title: 'Klobürste', price: 12.5}
+            ]},
+            {title: 'Küche', products:[
+                {title: 'Kochtopf', price: 12.5},
+                {title: 'Braftpfanne', price: 12.5},
+                {title: 'Topflappen', price: 12.5},
+                {title: 'Espressokocher', price: 12.5}
+            ]},
+            {title: 'Bad', products:[
+                {title: 'Vorleger', price: 12.5},
+                {title: 'Klobürste', price: 12.5}
+            ]},
+            {title: 'Küche', products:[
+                {title: 'Kochtopf', price: 12.5},
+                {title: 'Braftpfanne', price: 12.5},
+                {title: 'Topflappen', price: 12.5},
+                {title: 'Espressokocher', price: 12.5}
+            ]},
+            {title: 'Bad', products:[
+                {title: 'Vorleger', price: 12.5},
+                {title: 'Klobürste', price: 12.5}
+            ]},
+            {title: 'Küche', products:[
+                {title: 'Kochtopf', price: 12.5},
+                {title: 'Braftpfanne', price: 12.5},
+                {title: 'Topflappen', price: 12.5},
+                {title: 'Espressokocher', price: 12.5}
+            ]},
+            {title: 'Bad', products:[
+                {title: 'Vorleger', price: 12.5},
+                {title: 'Klobürste', price: 12.5}
+            ]},
+            {title: 'Küche', products:[
+                {title: 'Kochtopf', price: 12.5},
+                {title: 'Braftpfanne', price: 12.5},
+                {title: 'Topflappen', price: 12.5},
+                {title: 'Espressokocher', price: 12.5}
+            ]},
+            {title: 'Bad', products:[
+                {title: 'Vorleger', price: 12.5},
+                {title: 'Klobürste', price: 12.5}
+            ]},
+            {title: 'Bad', products:[
+                {title: 'Vorleger', price: 12.5},
+                {title: 'Klobürste', price: 12.5}
+            ]},
+            {title: 'Küche', products:[
+                {title: 'Kochtopf', price: 12.5},
+                {title: 'Braftpfanne', price: 12.5},
+                {title: 'Topflappen', price: 12.5},
+                {title: 'Espressokocher', price: 12.5}
+            ]},
+            {title: 'Bad', products:[
+                {title: 'Vorleger', price: 12.5},
+                {title: 'Klobürste', price: 12.5}
+            ]},
+            {title: 'Küche', products:[
+                {title: 'Kochtopf', price: 12.5},
+                {title: 'Braftpfanne', price: 12.5},
+                {title: 'Topflappen', price: 12.5},
+                {title: 'Espressokocher', price: 12.5}
+            ]},
+            {title: 'Bad', products:[
+                {title: 'Vorleger', price: 12.5},
+                {title: 'Klobürste', price: 12.5}
+            ]},
+            {title: 'Küche', products:[
+                {title: 'Kochtopf', price: 12.5},
+                {title: 'Braftpfanne', price: 12.5},
+                {title: 'Topflappen', price: 12.5},
+                {title: 'Espressokocher', price: 12.5}
+            ]},
+            {title: 'Bad', products:[
+                {title: 'Vorleger', price: 12.5},
+                {title: 'Klobürste', price: 12.5}
+            ]},
+            {title: 'Küche', products:[
+                {title: 'Kochtopf', price: 12.5},
+                {title: 'Braftpfanne', price: 12.5},
+                {title: 'Topflappen', price: 12.5},
+                {title: 'Espressokocher', price: 12.5}
+            ]},
+            {title: 'Bad', products:[
+                {title: 'Vorleger', price: 12.5},
+                {title: 'Klobürste', price: 12.5}
+            ]},
+            {title: 'Küche', products:[
+                {title: 'Kochtopf', price: 12.5},
+                {title: 'Braftpfanne', price: 12.5},
+                {title: 'Topflappen', price: 12.5},
+                {title: 'Espressokocher', price: 12.5}
+            ]},
+            {title: 'Bad', products:[
+                {title: 'Vorleger', price: 12.5},
+                {title: 'Klobürste', price: 12.5}
+            ]},
+            {title: 'Küche', products:[
+                {title: 'Kochtopf', price: 12.5},
+                {title: 'Braftpfanne', price: 12.5},
+                {title: 'Topflappen', price: 12.5},
+                {title: 'Espressokocher', price: 12.5}
+            ]},
+            {title: 'Bad', products:[
+                {title: 'Vorleger', price: 12.5},
+                {title: 'Klobürste', price: 12.5}
+            ]},
+            {title: 'Küche', products:[
+                {title: 'Kochtopf', price: 12.5},
+                {title: 'Braftpfanne', price: 12.5},
+                {title: 'Topflappen', price: 12.5},
+                {title: 'Espressokocher', price: 12.5}
+            ]},
+            {title: 'Bad', products:[
+                {title: 'Vorleger', price: 12.5},
+                {title: 'Klobürste', price: 12.5}
+            ]},
+            {title: 'Bad', products:[
+                {title: 'Vorleger', price: 12.5},
+                {title: 'Klobürste', price: 12.5}
+            ]},
+            {title: 'Küche', products:[
+                {title: 'Kochtopf', price: 12.5},
+                {title: 'Braftpfanne', price: 12.5},
+                {title: 'Topflappen', price: 12.5},
+                {title: 'Espressokocher', price: 12.5}
+            ]},
+            {title: 'Bad', products:[
+                {title: 'Vorleger', price: 12.5},
+                {title: 'Klobürste', price: 12.5}
+            ]},
+            {title: 'Küche', products:[
+                {title: 'Kochtopf', price: 12.5},
+                {title: 'Braftpfanne', price: 12.5},
+                {title: 'Topflappen', price: 12.5},
+                {title: 'Espressokocher', price: 12.5}
+            ]},
+            {title: 'Bad', products:[
+                {title: 'Vorleger', price: 12.5},
+                {title: 'Klobürste', price: 12.5}
+            ]},
+            {title: 'Küche', products:[
+                {title: 'Kochtopf', price: 12.5},
+                {title: 'Braftpfanne', price: 12.5},
+                {title: 'Topflappen', price: 12.5},
+                {title: 'Espressokocher', price: 12.5}
+            ]},
+            {title: 'Bad', products:[
+                {title: 'Vorleger', price: 12.5},
+                {title: 'Klobürste', price: 12.5}
+            ]},
+            {title: 'Küche', products:[
+                {title: 'Kochtopf', price: 12.5},
+                {title: 'Braftpfanne', price: 12.5},
+                {title: 'Topflappen', price: 12.5},
+                {title: 'Espressokocher', price: 12.5}
+            ]},
+            {title: 'Bad', products:[
+                {title: 'Vorleger', price: 12.5},
+                {title: 'Klobürste', price: 12.5}
+            ]},
+            {title: 'Küche', products:[
+                {title: 'Kochtopf', price: 12.5},
+                {title: 'Braftpfanne', price: 12.5},
+                {title: 'Topflappen', price: 12.5},
+                {title: 'Espressokocher', price: 12.5}
+            ]},
+            {title: 'Bad', products:[
+                {title: 'Vorleger', price: 12.5},
+                {title: 'Klobürste', price: 12.5}
+            ]},
+            {title: 'Küche', products:[
+                {title: 'Kochtopf', price: 12.5},
+                {title: 'Braftpfanne', price: 12.5},
+                {title: 'Topflappen', price: 12.5},
+                {title: 'Espressokocher', price: 12.5}
+            ]},
+            {title: 'Bad', products:[
+                {title: 'Vorleger', price: 12.5},
+                {title: 'Klobürste', price: 12.5}
+            ]},
+            {title: 'Küche', products:[
+                {title: 'Kochtopf', price: 12.5},
+                {title: 'Braftpfanne', price: 12.5},
+                {title: 'Topflappen', price: 12.5},
+                {title: 'Espressokocher', price: 12.5}
+            ]},
+            {title: 'Bad', products:[
+                {title: 'Vorleger', price: 12.5},
+                {title: 'Klobürste', price: 12.5}
+            ]},
+            {title: 'Bad', products:[
+                {title: 'Vorleger', price: 12.5},
+                {title: 'Klobürste', price: 12.5}
+            ]},
+            {title: 'Küche', products:[
+                {title: 'Kochtopf', price: 12.5},
+                {title: 'Braftpfanne', price: 12.5},
+                {title: 'Topflappen', price: 12.5},
+                {title: 'Espressokocher', price: 12.5}
+            ]},
+            {title: 'Bad', products:[
+                {title: 'Vorleger', price: 12.5},
+                {title: 'Klobürste', price: 12.5}
+            ]},
+            {title: 'Küche', products:[
+                {title: 'Kochtopf', price: 12.5},
+                {title: 'Braftpfanne', price: 12.5},
+                {title: 'Topflappen', price: 12.5},
+                {title: 'Espressokocher', price: 12.5}
+            ]},
+            {title: 'Bad', products:[
+                {title: 'Vorleger', price: 12.5},
+                {title: 'Klobürste', price: 12.5}
+            ]},
+            {title: 'Küche', products:[
+                {title: 'Kochtopf', price: 12.5},
+                {title: 'Braftpfanne', price: 12.5},
+                {title: 'Topflappen', price: 12.5},
+                {title: 'Espressokocher', price: 12.5}
+            ]},
+            {title: 'Bad', products:[
+                {title: 'Vorleger', price: 12.5},
+                {title: 'Klobürste', price: 12.5}
+            ]},
+            {title: 'Küche', products:[
+                {title: 'Kochtopf', price: 12.5},
+                {title: 'Braftpfanne', price: 12.5},
+                {title: 'Topflappen', price: 12.5},
+                {title: 'Espressokocher', price: 12.5}
+            ]},
+            {title: 'Bad', products:[
+                {title: 'Vorleger', price: 12.5},
+                {title: 'Klobürste', price: 12.5}
+            ]},
+            {title: 'Küche', products:[
+                {title: 'Kochtopf', price: 12.5},
+                {title: 'Braftpfanne', price: 12.5},
+                {title: 'Topflappen', price: 12.5},
+                {title: 'Espressokocher', price: 12.5}
+            ]},
+            {title: 'Bad', products:[
+                {title: 'Vorleger', price: 12.5},
+                {title: 'Klobürste', price: 12.5}
+            ]},
+            {title: 'Küche', products:[
+                {title: 'Kochtopf', price: 12.5},
+                {title: 'Braftpfanne', price: 12.5},
+                {title: 'Topflappen', price: 12.5},
+                {title: 'Espressokocher', price: 12.5}
+            ]},
+            {title: 'Bad', products:[
+                {title: 'Vorleger', price: 12.5},
+                {title: 'Klobürste', price: 12.5}
+            ]},
+            {title: 'Küche', products:[
+                {title: 'Kochtopf', price: 12.5},
+                {title: 'Braftpfanne', price: 12.5},
+                {title: 'Topflappen', price: 12.5},
+                {title: 'Espressokocher', price: 12.5}
+            ]},
+            {title: 'Bad', products:[
+                {title: 'Vorleger', price: 12.5},
+                {title: 'Klobürste', price: 12.5}
+            ]}
+        
+        ];
+        widget.values = {'categories': categories}; 
+        widget.refresh(byId('content'));
+    
+    
+    }, 1000);
 }

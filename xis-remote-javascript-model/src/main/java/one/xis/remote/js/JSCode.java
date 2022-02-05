@@ -1,12 +1,13 @@
 package one.xis.remote.js;
 
-import lombok.RequiredArgsConstructor;
-
 import java.io.PrintWriter;
 
-@RequiredArgsConstructor
 public class JSCode implements JSStatement {
     private final String js;
+
+    public JSCode(String... code) {
+        js = String.join("", code);
+    }
 
     @Override
     public void writeJS(PrintWriter writer) {

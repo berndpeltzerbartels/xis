@@ -7,13 +7,13 @@ import javax.script.ScriptException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class JSMethodDeclarationTest {
+class JSMethodTest {
 
-    private JSObjectInstance objectInstance;
-    
+    private JSObject objectInstance;
+
     @BeforeEach
     void init() {
-        objectInstance = new JSObjectInstance("o");
+        objectInstance = new JSObject("o");
         objectInstance.addField("field", "123");
         objectInstance.addMethod("up").addStatement(new JSCode("this.field++"));
     }

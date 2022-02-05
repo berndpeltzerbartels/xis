@@ -21,11 +21,11 @@ class JSObjectInstanceTest {
     private static final int PARAM2 = 5;
     private static final String CALL_TEST_METHOD = INSTANCE_NAME + "." + METHOD_NAME + "(" + PARAM1 + "," + PARAM2 + ");";
 
-    private JSObjectInstance objectInstance;
+    private JSObject objectInstance;
 
     @BeforeEach
     void init() {
-        objectInstance = new JSObjectInstance(INSTANCE_NAME);
+        objectInstance = new JSObject(INSTANCE_NAME);
         var field = objectInstance.addField(FIELD_NAME, FIELD_DEFAULT_VALUE);
         var method = objectInstance.addMethod(METHOD_NAME, METHOD_PARAM_NAME1, METHOD_PARAM_NAME2);
         method.addStatement(new JSAssigment(field, method.getParameters().get(0)));

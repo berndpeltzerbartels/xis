@@ -18,7 +18,7 @@ class JSScriptTest {
 
 
     private JSFunction jsFunction;
-    private JSObjectInstance objectInstance;
+    private JSObject objectInstance;
 
     @BeforeEach
     void createFunction() {
@@ -33,7 +33,7 @@ class JSScriptTest {
 
     @BeforeEach
     void createObjectInstance() {
-        objectInstance = new JSObjectInstance(INSTANCE_NAME);
+        objectInstance = new JSObject(INSTANCE_NAME);
         var field = objectInstance.addField(FIELD_NAME, FIELD_DEFAULT_VALUE);
         var method = objectInstance.addMethod(METHOD_NAME, METHOD_PARAM_NAME1, METHOD_PARAM_NAME2);
         method.addStatement(new JSAssigment(field, method.getParameters().get(0)));
@@ -45,7 +45,7 @@ class JSScriptTest {
     @Test
     void writeJS() throws ScriptException {
         var script = new JSScript();
-        script.addObjectInstance(objectInstance);
+        script.addObject(objectInstance);
         script.addFunction(jsFunction);
 
         var js = JSUtil.javascript(script) + ";add(instance.test(3,7), 6);";

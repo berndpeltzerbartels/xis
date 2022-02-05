@@ -9,10 +9,10 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 @Data
-public class JSObjectInstance implements JSValue {
+public class JSObject implements JSValue {
     private final String name;
     private final Collection<JSField> fields = new ArrayList<>();
-    private final Collection<JSMethodDeclaration> methods = new ArrayList<>();
+    private final Collection<JSMethod> methods = new ArrayList<>();
 
     @Override
     public void writeJS(PrintWriter writer) {
@@ -52,17 +52,17 @@ public class JSObjectInstance implements JSValue {
         return addField(new JSField(name, "'" + defaultValue + "'"));
     }
 
-    public JSField addField(JSField field) {
+    public <F extends JSField> F addField(F field) {
         fields.add(field);
         return field;
     }
 
 
-    public JSMethodDeclaration addMethod(String name, String... parameterNames) {
-        return addMethod(new JSMethodDeclaration(name, Arrays.stream(parameterNames).map(JSParameter::new).collect(Collectors.toList())));
+    public JSMethod addMethod(String name, String... parameterNames) {
+        return addMethod(new JSMethod(name, Arrays.stream(parameterNames).map(JSParameter::new).collect(Collectors.toList())));
     }
 
-    public JSMethodDeclaration addMethod(JSMethodDeclaration method) {
+    public JSMethod addMethod(JSMethod method) {
         methods.add(method);
         return method;
     }

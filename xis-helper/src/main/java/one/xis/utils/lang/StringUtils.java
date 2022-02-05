@@ -3,6 +3,9 @@ package one.xis.utils.lang;
 import lombok.experimental.UtilityClass;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @UtilityClass
@@ -39,6 +42,10 @@ public class StringUtils {
 
     public String escape(String s, char toEscape) {
         return s.replace(Character.toString(toEscape), ESCAPE + toEscape);
+    }
+
+    public String join(Collection<?> collection, String delimiter) {
+        return collection.stream().map(Objects::toString).collect(Collectors.joining(delimiter));
     }
 
 }

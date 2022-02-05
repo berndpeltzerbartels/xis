@@ -1,6 +1,5 @@
 package one.xis.template;
 
-import one.xis.template.TemplateModel.*;
 import one.xis.utils.io.IOUtils;
 import one.xis.utils.xml.XmlUtil;
 import org.junit.jupiter.api.BeforeEach;

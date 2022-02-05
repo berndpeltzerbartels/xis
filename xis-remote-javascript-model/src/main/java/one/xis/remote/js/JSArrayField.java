@@ -1,17 +1,16 @@
 package one.xis.remote.js;
 
-import lombok.Data;
-
 import java.io.PrintWriter;
 
-@Data
-public class JSField implements JSValue {
-    protected final String name;
-    protected final String defaultValue;
 
-    public JSField(String name) {
-        this.name = name;
-        this.defaultValue = "undefined";
+public class JSArrayField extends JSField implements JSArray {
+
+    public JSArrayField(String name, String defaultValue) {
+        super(name, defaultValue);
+    }
+
+    public JSArrayField(String name) {
+        super(name, "[]");
     }
 
     @Override

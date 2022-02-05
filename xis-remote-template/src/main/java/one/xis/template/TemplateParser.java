@@ -1,6 +1,5 @@
 package one.xis.template;
 
-import one.xis.template.TemplateModel.*;
 import one.xis.utils.lang.StringUtils;
 import one.xis.utils.xml.XmlUtil;
 import org.w3c.dom.CharacterData;

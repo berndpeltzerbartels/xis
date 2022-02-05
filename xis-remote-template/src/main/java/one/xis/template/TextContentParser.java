@@ -1,10 +1,6 @@
 package one.xis.template;
 
 import lombok.Data;
-import one.xis.template.TemplateModel.Expression;
-import one.xis.template.TemplateModel.StaticText;
-import one.xis.template.TemplateModel.TextContent;
-import one.xis.template.TemplateModel.TextElement;
 import one.xis.utils.lang.StringUtils;
 
 import java.util.ArrayList;

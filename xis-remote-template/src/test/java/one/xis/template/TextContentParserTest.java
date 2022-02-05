@@ -1,8 +1,5 @@
 package one.xis.template;
 
-import one.xis.template.TemplateModel.Expression;
-import one.xis.template.TemplateModel.StaticText;
-import one.xis.template.TemplateModel.TextElement;
 import one.xis.utils.io.IOUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

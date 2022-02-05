@@ -4,24 +4,30 @@ import lombok.Data;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Data
-public class JSMethodDeclaration implements JSElement {
+public class JSMethod implements JSElement {
     private final String name;
     private final List<JSParameter> parameters;
     private final List<JSStatement> statements = new ArrayList<>();
 
-    public JSMethodDeclaration(String name) {
+    public JSMethod(String name) {
         this.name = name;
         this.parameters = Collections.emptyList();
     }
 
-    public JSMethodDeclaration(String name, List<JSParameter> parameters) {
+    public JSMethod(String name, List<JSParameter> parameters) {
         this.name = name;
         this.parameters = parameters;
+    }
+
+    public JSMethod(String name, JSParameter... parameters) {
+        this.name = name;
+        this.parameters = Arrays.asList(parameters);
     }
 
 
@@ -40,7 +46,8 @@ public class JSMethodDeclaration implements JSElement {
         writer.append("}");
     }
 
-    public void addStatement(JSStatement statement) {
+    public JSStatement addStatement(JSStatement statement) {
         statements.add(statement);
+        return statement;
     }
 }
