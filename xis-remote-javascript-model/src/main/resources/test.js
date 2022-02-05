@@ -356,7 +356,7 @@ var productsFor = {
 var productDiv =  {
     refresh: function(parent) {
         this.parent = parent;
-        this.element = appendElement(parent.getElement(), 'div');   
+        this.element = appendElement(parent.getElement(), 'div', this.evalAttr());   
         refreshChildren(this, [productDetails]);
     },
     getValue: function(name) {
@@ -364,7 +364,18 @@ var productDiv =  {
     },
     getElement() {
         return this.element;
+    },
+    evalAttr: function() {
+        var rv = [];
+        
+        rv['class'] = '';     
+        rv['class'] += 'prod_';
+        rv['class'] += when(this.getValue('product').active, 'active', 'inactive');
+
+
+        return rv;
     }
+
 }
 
 
@@ -377,7 +388,8 @@ var productDetails = {
         text += ' ';
         text += parent.getValue('product').price;
         text += ' EUR';
-        e.innerText = text;
+        if (text != e.innerText)
+            e.innerText = text;
     },
     getValue: function(name) {
         return this.parent.getValue(name);
@@ -405,9 +417,9 @@ function showElement(element) {
 }
 
 function clearChildNodes(element) {
-    while(element.firstChild) {
-        element.removeChild(element.lastChild);
-    }
+                while(element.firstChild) {
+                    element.removeChild(element.lastChild);
+                }
 }
 
 function appendElement(parent, tagName, attributes=[]) {

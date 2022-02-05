@@ -1,10 +1,12 @@
 package one.xis.template;
 
-import lombok.Data;
 
-@Data
 public class Expression implements TextElement {
     private final String content;
+
+    public Expression(String content) {
+        this.content = content;
+    }
 
     @Override
     public String toString() {
