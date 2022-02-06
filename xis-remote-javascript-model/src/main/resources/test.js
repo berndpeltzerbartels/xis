@@ -202,25 +202,127 @@ var categories = [
 
 ];
 
+/*
+setChildFactories(widget, [categoriesH3, categoriesFor]);
+setChildFactories(categoriesH3, [categoriesText]);
+setChildFactories(categoriesText, []);
+setChildFactories(categoriesFor, [categoryDiv]);
+setChildFactories(categoryDiv, [[categoryH4, productsFor]]);
+setChildFactories(categoryH4, [categoryTitle]);
+setChildFactories(categoryTitle, []);
+setChildFactories(productsFor, [productDiv]);
+setChildFactories(productDiv, [productDetails]);
+setChildFactories(productDetails, []);
+*/
 
-function refreshChildren(parent, children) {
-    for (var i = 0; i < children.length; i++) {
-        children[i].refresh(parent);
+class CatWidget {
+
+    children = [];
+
+    evaluate(values) {
+        
+    }
+
+    evaluateChildren(values) {
+        for (child in this.children) {
+            child.evaluate();
+        }
+    }
+
+    appendChildren() {
+
+    }
+
+
+
+
+}
+
+
+
+class CatFor {
+
+    rows = [];
+    index;
+    varname = 'categories';
+    element;
+
+    constructor(index) {
+        this.element = createElement('div');
+        this.index = index;
+    }
+
+    evaluate(values) {
+        var arr = values[this.varname][index];
+        this.doSize(arr.length);
+        for (var i = 0; i < this.rows.length; i++) {
+           var children = this.rows[i];
+           var data = values[i];
+           for (var j = 0; j < row.length; j++) {
+                children[j].update();
+           }
+        }
+
+
+    }
+
+    doSize(size) {
+        while(this.rowCount() > size) {
+            this.removeRow();
+        }
+        while(this.appendRow() < size) {
+            this.appendRow();
+        }
+    }
+
+    rowCount() {
+        return this.rows.length;
+    }
+
+
+    appendRow() {
+        var children = this.createChildren();
+        for (var i = 0; i < children.length; i++) {
+            this.element.appendChild(children[i].node);
+        }
+        this.rows.push(children);
+    }
+
+    removeRow() {
+        if (this.rows.length > 0) {
+            var children = this.rows.pop();
+            for (var i = 0; i < children.length; i++) {
+                this.element.removeChild(children[i].node);     
+            }
+        }
+    }
+
+    createChildren(index) {
+        return [new CatH3(index)];
     }
 }
 
+
+
+class CatH3 {
+
+}
+
+
 var widget = {
+    nodes:[],
+    childFactories:[],
     values : {'categories': categories},
     getValue: function(name) {
         return this.values[name];
     },
 
-    refresh: function(container) {
+    evaluate: function(container) {
         clearChildNodes(container);
         this.element = container;
-        refreshChildren(this, [categoriesH3, categoriesFor]);
+        evaluateChildren(this);
     },
-    getElement() {
+    getNode() {
         return this.element;
     }
 
@@ -229,36 +331,43 @@ var widget = {
 
 
 var categoriesH3 = {
-    refresh: function(parent) {
+    nodes:[],
+    childFactories:[],
+    evaluate: function(parent) {
         this.parent = parent;
-        this.element = appendElement(parent.getElement(), 'h3');
-        refreshChildren(this, [categoriesText]);
+        if (!this.element)
+            this.element = appendElement(parent.getNode(), 'h3');
+        evaluateChildren(this);
     },
     getValue: function(name) {
         return this.parent.getValue(name);
     },
-    getElement() {
+    getNode() {
         return this.element;
     }
 }
 
-
+// Nicht so machen !!! Immer wie einen Text mit Expression behandeln
 var categoriesText = {
-    refresh: function(parent) {
+    nodes:[],
+    childFactories:[],
+    evaluate: function(parent) {
         this.parent = parent;
-        parent.getElement().innerText = 'Kategorien';
+        parent.getNode().innerText = 'Kategorien';
     },
     getValue: function(name) {
         return this.parent.getValue(name);
     },
-    getElement() {
-        return this.parent.getElement();
+    getNode() {
+        return this.parent.getNode();
     }
 }
 
 var categoriesFor = {
+    nodes:[],
+    childFactories:[],
     names: ['i', 'categoryNumber','category'],
-    refresh: function(parent) {
+    evaluate: function(parent) {
         this.parent = parent;
         this.variables = [];
         var array = parent.getValue('categories');
@@ -266,7 +375,7 @@ var categoriesFor = {
             this.variables['i'] = index;
             this.variables['categoryNumber'] = index + 1;
             this.variables['category'] = array[index];  
-            refreshChildren(this, [categoryDiv]);
+            evaluateChildren(this);
         }
     },
     getValue: function(name) {
@@ -275,47 +384,60 @@ var categoriesFor = {
         }
         return this.parent.getValue(name);
     },
-    getElement() {
-        return this.parent.getElement();
+    getNode() {
+        return this.parent.getNode();
     }
 
 }
 
 
 var categoryDiv =  {
-    refresh: function(parent) {
+    nodes:[],
+    childFactories:[],
+    evaluate: function(parent) {
         this.parent = parent;
-        this.element = appendElement(parent.getElement(), 'div');
-        refreshChildren(this, [categoryH4, productsFor]);
+        this.element = appendElement(parent.getNode(), 'div');
+        evaluateChildren(this);
     },
     getValue: function(name) {
         return this.parent.getValue(name);
     },
-    getElement() {
+    getNode() {
         return this.element;
     }
 }
 
 
+class CAtH4 {
+    constructor() {}
+
+
+}
+
 var categoryH4 = {
-    refresh: function(parent) {
+    nodes:[],
+    childFactories:[],
+    evaluate: function(parent) {
         this.parent = parent;
-        this.element = appendElement(parent.getElement(), 'h4');
-        refreshChildren(this, [categoryTitle]);
+        this.element = appendElement(parent.getNode(), 'h4');
+        evaluateChildren(this);
     },
     getValue: function(name) {
         return this.parent.getValue(name);
     },
-    getElement() {
+    getNode() {
         return this.element;
     }
 }
 
 
 var categoryTitle = {
-    refresh: function(parent) {
+    nodes:[],
+    childFactories:[],
+    evaluate: function(parent) {
         //${categoryNumber}. ${category.title}
-        var e = parent.getElement();
+        // NICHT VERWENDEN ! Text als Ganzes setzen
+        var e = parent.getNode();
         appendText(e, parent.getValue('categoryNumber'));
         appendText(e, '. ');
         appendText(e, parent.getValue('category').title); // ${category.title}
@@ -323,23 +445,36 @@ var categoryTitle = {
     getValue: function(name) {
         return this.parent.getValue(name);
     },
-    getElement() {
-        return this.parent.getElement();
+    getNode() {
+        return this.parent.getNode();
     }
 }
 
 var productsFor = {
-    names: ['i', 'productNumber','product'],
-    refresh: function(parent) {
-        this.parent = parent;
+    nodes:[],
+    parentFactory:undefined,
+    childFactories:[],
+    currentCount: 0,
+    varNames: ['i', 'productNumber','product'],
+    
+    evaluate: function(parent) {
+        this.parentFactory = parent;
         this.variables = [];
         var array = parent.getValue('category').products;
+        var remove = 0;
+        if (this.prvArr) {
+            remove = Math.max(0, this.prvArr.length - array.length);
+        }
         for (var index = 0; index < array.length; index++) {
             this.variables['i'] = index;
             this.variables['productNumber'] = index + 1;
             this.variables['product'] = array[index];
-            refreshChildren(this, [productDiv]);
+            evaluateChildren(this);
         }
+        this.prvArr = array;
+    },
+    updateChildCount: function(count) {
+       updateIterationCount(this, count);
     },
     getValue: function(name) {
         if (this.names.indexOf(name) != -1) { // may be, we want to return undefined !!!
@@ -347,22 +482,36 @@ var productsFor = {
         }
         return this.parent.getValue(name);
     },
-    getElement() {
-        return this.parent.getElement();
+    getNode() {
+        return this.parent.getNode();
     }
 
 }
 
 var productDiv =  {
-    refresh: function(parent) {
+    elements:[],
+    childFactories:[],
+    parent: undefined,
+    updateChildCount: function(count) {
+        updateNodeCount(this, count);
+    },
+    create: function() {
+
+    },
+    appendNode: function() {},
+    removeNode: function() {
+        var element = this.elements.pop();
+        this.
+    },
+    evaluate: function(parent) {
         this.parent = parent;
-        this.element = appendElement(parent.getElement(), 'div', this.evalAttr());   
-        refreshChildren(this, [productDetails]);
+        this.element = appendElement(parent.getNode(), 'div', this.evalAttr());   
+        evaluateChildren(this);
     },
     getValue: function(name) {
         return this.parent.getValue(name);
     },
-    getElement() {
+    getNode() {
         return this.element;
     },
     evalAttr: function() {
@@ -381,29 +530,56 @@ var productDiv =  {
 
 // text-content
 var productDetails = {
-    refresh: function(parent) {
-        var e = parent.getElement();
+    nodes:[],
+    childFactories:[],
+    parentFactory: undefined,
+    evaluate: function(parent) {
+        var e = parent.getNode();
         var text = '';
         text += parent.getValue('product').title;
         text += ' ';
         text += parent.getValue('product').price;
         text += ' EUR';
-        if (text != e.innerText)
-            e.innerText = text;
+        if (text != e.innerText) e.innerText = text;
     },
     getValue: function(name) {
         return this.parent.getValue(name);
     },
-    getElement() {
-        return this.parent.getElement();
+    getNode() {
+        return this.parent.getNode();
+    }
+}
+/////////////////////////////////////////////////////////////////// Initialize CHildren /////////////////////////////////////////////
+setChildFactories(widget, [categoriesH3, categoriesFor]);
+setChildFactories(categoriesH3, [categoriesText]);
+setChildFactories(categoriesText, []);
+setChildFactories(categoriesFor, [categoryDiv]);
+setChildFactories(categoryDiv, [[categoryH4, productsFor]]);
+setChildFactories(categoryH4, [categoryTitle]);
+setChildFactories(categoryTitle, []);
+setChildFactories(productsFor, [productDiv]);
+setChildFactories(productDiv, [productDetails]);
+setChildFactories(productDetails, []);
+
+/////////////////////////////////////////////////////////////////// Util Functions /////////////////////////////////////////////
+
+
+
+function setChildFactories(factory, childFactories) {
+    factory.childFactories = childFactories;
+    for (var i = 0; i < childFactories.length; i++) {
+        childFactories[i].parent = factory;
     }
 }
 
-
-// Util Functions
+function evaluateChildren(parent) {
+    for (var i = 0; i < parent.childFactories.length; i++) {
+        parent.childFactories[i].evaluate(parent);
+    }
+}
 
 function byId(id) {
-    return document.getElementById(id);
+    return document.getNodeById(id);
 }
 
 
@@ -420,6 +596,21 @@ function clearChildNodes(element) {
                 while(element.firstChild) {
                     element.removeChild(element.lastChild);
                 }
+}
+
+function updateIterationCount(iteration, count) {
+    while(iteration.currentCount < count) {
+        for (var i = 0; i< iteration.childFactories.length; i++) {
+            iteration.childFactories[i].appendNode();
+            iteration.currentCount++;
+        }
+    }
+    while(iteration.currentCount > count) {
+        for (var i = 0; i< iteration.childFactories.length; i++) {
+            iteration.childFactories[i].removeNode();
+            iteration.currentCount--;
+        }
+    }
 }
 
 function appendElement(parent, tagName, attributes=[]) {
@@ -458,7 +649,7 @@ function notEmpty(value) {
 
 
 function buttonClicked() {
-    widget.refresh(byId('content'));
+    widget.evaluate(byId('content'));
     setTimeout(() => {
     
     
@@ -888,7 +1079,7 @@ function buttonClicked() {
         
         ];
         widget.values = {'categories': categories}; 
-        widget.refresh(byId('content'));
+        widget.evaluate(byId('content'));
     
     
     }, 1000);
