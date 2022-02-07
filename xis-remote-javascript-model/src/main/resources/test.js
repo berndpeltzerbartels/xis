@@ -205,9 +205,8 @@ var categories = [
 
 class CatWidget {
 
-    constructor(element, state) {
+    constructor(element) {
         this.element = element;
-        this.state = state;
         this.children = appendChildren(this, [new CatH3(this), new CatForDiv(this)]);
     }
 
@@ -215,8 +214,9 @@ class CatWidget {
         return isArray(this.data[name]) ? this.data[name][index] : this.data[name]; 
     }
 
-    update() {
-       this.children.forEach(child => child.update());
+    update(state) {
+        this.state = state;
+        this.children.forEach(child => child.update());
     }
     
 }
@@ -427,7 +427,8 @@ function isArray(o) {
 }
 
 function buttonClicked() {
-    widget.evaluate(byId('content'));
+    var widget = new CatWidget(byId('content'));
+    widget.update(categories);
     setTimeout(() => {
     
     
@@ -856,8 +857,7 @@ function buttonClicked() {
             ]}
         
         ];
-        widget.values = {'categories': categories}; 
-        widget.evaluate(byId('content'));
+        widget.update(categories);
     
     
     }, 1000);
