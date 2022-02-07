@@ -202,76 +202,163 @@ var categories = [
 
 ];
 
-/*
-setChildFactories(widget, [categoriesH3, categoriesFor]);
-setChildFactories(categoriesH3, [categoriesText]);
-setChildFactories(categoriesText, []);
-setChildFactories(categoriesFor, [categoryDiv]);
-setChildFactories(categoryDiv, [[categoryH4, productsFor]]);
-setChildFactories(categoryH4, [categoryTitle]);
-setChildFactories(categoryTitle, []);
-setChildFactories(productsFor, [productDiv]);
-setChildFactories(productDiv, [productDetails]);
-setChildFactories(productDetails, []);
-*/
 
 class CatWidget {
 
-    children = [];
-
-    evaluate(values) {
-        
+    constructor(element, state) {
+        this.element = element;
+        this.state = state;
+        this.children = appendChildren(this, [new CatH3(this), new CatForDiv(this)]);
     }
 
-    evaluateChildren(values) {
-        for (child in this.children) {
-            child.evaluate();
-        }
+    getValue(name, index) {
+        return isArray(this.data[name]) ? this.data[name][index] : this.data[name]; 
     }
 
-    appendChildren() {
+    update() {
+       this.children.forEach(child => child.update());
+    }
+    
+}
 
+
+class CatH3 {
+    constructor(parentProvider) {
+        this.parentProvider = parentProvider;
+        this.element = createElement('h3');
+        this.children = [];
+        // static content:
+        this.element.innerText = 'Kategorien';
     }
 
+    update() {
+        // static content
+    }
 
+}
 
+class CatForDiv extends Loop {
+
+    constructor(parentProvider) {
+        this.parentProvider = parentProvider;
+        this.element = createElement('div');
+        this.arrayVarName = 'categories';
+        this.itemVarName = 'category';
+        this.indexVarname = 'caegoryIndex';
+        this.numberVarname = 'categorytNumber';
+    }
+
+    createChildren() {
+        return [new CatDiv(this)];
+    }
+
+}
+
+class CatDiv {
+    constructor(parentProvider) {
+        this.parentProvider = parentProvider;
+        this.element = createElement('div');
+        this.children = appendChildren(this, [new CatH4(parentProvider)]);
+    }
+
+    update() {
+       this.children.forEach(child => child.update());
+    }
 
 }
 
 
-
-class CatFor {
-
-    rows = [];
-    index;
-    varname = 'categories';
-    element;
-
-    constructor(index) {
+class CatH4 {
+    constructor(parentProvider) {
+        this.parentProvider = parentProvider;
         this.element = createElement('div');
-        this.index = index;
+        this.children = [];
     }
 
-    evaluate(values) {
-        var arr = values[this.varname][index];
-        this.doSize(arr.length);
-        for (var i = 0; i < this.rows.length; i++) {
-           var children = this.rows[i];
-           var data = values[i];
-           for (var j = 0; j < row.length; j++) {
-                children[j].update();
-           }
+    update() {
+        var text = '';
+        text += this.parentProvider.getValue('categoryNumber');
+        text += '. ';
+        text += this.parentProvider.getValue('category').name;
+        if (this.element.innerText != text) {
+            this.element.innerText = text;
         }
+    }
+}
 
-
+class ProdForUl extends Loop {
+    constructor(parentProvider) {
+        this.parentProvider = parentProvider;
+        this.element = createElement('ul');
+        this.arrayVarName = 'products';
+        this.itemVarName = 'product';
+        this.indexVarname = 'productIndex';
+        this.numberVarname = 'productNumber';
     }
 
-    doSize(size) {
+    createChildren() {
+        return  [new ProdLi(index, this)];
+    }
+}
+
+
+class ProdLi{
+    constructor(parentProvider) {
+        this.parentProvider = parentProvider;
+        this.element = createElement('li');
+        this.children = [];
+    }
+
+    update() {
+        var text = '';
+        text += this.parentProvider.getValue('product').name;
+        text += ' ';
+        text += this.parentProvider.getValue('product').price;
+        text += ' EUR';
+        if (this.element.innerText != text) {
+            this.element.innerText = text;
+        }
+    }
+}
+
+class Loop {
+
+    getValue(name) {
+        if (name == this.arrayVarName) {
+            return this.data;
+        }
+        if (name == this.itemVarName) {
+            return this.item;
+        }
+        if (name == this.indexVarname) {
+            return this.itemIndex;
+        }
+        if (name == this.numberVarname) {
+            return this.itemIndex + 1;
+        }
+        return this.parentProvider.getValue(name);
+    }
+
+
+    update() {
+        this.data = this.valueProvider.getValue(this.arrayVarName);
+        this.resize(this.data.length);
+        for (var i = 0; i < this.data.length; i++) {
+            this.itemIndex = i;
+            this.item = this.data[i];
+            var children = this.rows[i];
+            for (var j = 0; j < row.length; j++) {
+                children[j].update();
+            }
+        }
+    }
+
+    resize(size) {
+        while(this.rowCount() < size) {
+            this.appendRow();
+        }
         while(this.rowCount() > size) {
             this.removeRow();
-        }
-        while(this.appendRow() < size) {
-            this.appendRow();
         }
     }
 
@@ -297,334 +384,21 @@ class CatFor {
         }
     }
 
-    createChildren(index) {
-        return [new CatH3(index)];
-    }
 }
-
-
-
-class CatH3 {
-
-}
-
-
-var widget = {
-    nodes:[],
-    childFactories:[],
-    values : {'categories': categories},
-    getValue: function(name) {
-        return this.values[name];
-    },
-
-    evaluate: function(container) {
-        clearChildNodes(container);
-        this.element = container;
-        evaluateChildren(this);
-    },
-    getNode() {
-        return this.element;
-    }
-
-
-}
-
-
-var categoriesH3 = {
-    nodes:[],
-    childFactories:[],
-    evaluate: function(parent) {
-        this.parent = parent;
-        if (!this.element)
-            this.element = appendElement(parent.getNode(), 'h3');
-        evaluateChildren(this);
-    },
-    getValue: function(name) {
-        return this.parent.getValue(name);
-    },
-    getNode() {
-        return this.element;
-    }
-}
-
-// Nicht so machen !!! Immer wie einen Text mit Expression behandeln
-var categoriesText = {
-    nodes:[],
-    childFactories:[],
-    evaluate: function(parent) {
-        this.parent = parent;
-        parent.getNode().innerText = 'Kategorien';
-    },
-    getValue: function(name) {
-        return this.parent.getValue(name);
-    },
-    getNode() {
-        return this.parent.getNode();
-    }
-}
-
-var categoriesFor = {
-    nodes:[],
-    childFactories:[],
-    names: ['i', 'categoryNumber','category'],
-    evaluate: function(parent) {
-        this.parent = parent;
-        this.variables = [];
-        var array = parent.getValue('categories');
-        for (var index = 0; index < array.length; index++) {
-            this.variables['i'] = index;
-            this.variables['categoryNumber'] = index + 1;
-            this.variables['category'] = array[index];  
-            evaluateChildren(this);
-        }
-    },
-    getValue: function(name) {
-        if (this.names.indexOf(name) != -1) { // may be, we want to return undefined !!!
-            return this.variables[name];
-        }
-        return this.parent.getValue(name);
-    },
-    getNode() {
-        return this.parent.getNode();
-    }
-
-}
-
-
-var categoryDiv =  {
-    nodes:[],
-    childFactories:[],
-    evaluate: function(parent) {
-        this.parent = parent;
-        this.element = appendElement(parent.getNode(), 'div');
-        evaluateChildren(this);
-    },
-    getValue: function(name) {
-        return this.parent.getValue(name);
-    },
-    getNode() {
-        return this.element;
-    }
-}
-
-
-class CAtH4 {
-    constructor() {}
-
-
-}
-
-var categoryH4 = {
-    nodes:[],
-    childFactories:[],
-    evaluate: function(parent) {
-        this.parent = parent;
-        this.element = appendElement(parent.getNode(), 'h4');
-        evaluateChildren(this);
-    },
-    getValue: function(name) {
-        return this.parent.getValue(name);
-    },
-    getNode() {
-        return this.element;
-    }
-}
-
-
-var categoryTitle = {
-    nodes:[],
-    childFactories:[],
-    evaluate: function(parent) {
-        //${categoryNumber}. ${category.title}
-        // NICHT VERWENDEN ! Text als Ganzes setzen
-        var e = parent.getNode();
-        appendText(e, parent.getValue('categoryNumber'));
-        appendText(e, '. ');
-        appendText(e, parent.getValue('category').title); // ${category.title}
-    },
-    getValue: function(name) {
-        return this.parent.getValue(name);
-    },
-    getNode() {
-        return this.parent.getNode();
-    }
-}
-
-var productsFor = {
-    nodes:[],
-    parentFactory:undefined,
-    childFactories:[],
-    currentCount: 0,
-    varNames: ['i', 'productNumber','product'],
-    
-    evaluate: function(parent) {
-        this.parentFactory = parent;
-        this.variables = [];
-        var array = parent.getValue('category').products;
-        var remove = 0;
-        if (this.prvArr) {
-            remove = Math.max(0, this.prvArr.length - array.length);
-        }
-        for (var index = 0; index < array.length; index++) {
-            this.variables['i'] = index;
-            this.variables['productNumber'] = index + 1;
-            this.variables['product'] = array[index];
-            evaluateChildren(this);
-        }
-        this.prvArr = array;
-    },
-    updateChildCount: function(count) {
-       updateIterationCount(this, count);
-    },
-    getValue: function(name) {
-        if (this.names.indexOf(name) != -1) { // may be, we want to return undefined !!!
-            return this.variables[name];
-        }
-        return this.parent.getValue(name);
-    },
-    getNode() {
-        return this.parent.getNode();
-    }
-
-}
-
-var productDiv =  {
-    elements:[],
-    childFactories:[],
-    parent: undefined,
-    updateChildCount: function(count) {
-        updateNodeCount(this, count);
-    },
-    create: function() {
-
-    },
-    appendNode: function() {},
-    removeNode: function() {
-        var element = this.elements.pop();
-        this.
-    },
-    evaluate: function(parent) {
-        this.parent = parent;
-        this.element = appendElement(parent.getNode(), 'div', this.evalAttr());   
-        evaluateChildren(this);
-    },
-    getValue: function(name) {
-        return this.parent.getValue(name);
-    },
-    getNode() {
-        return this.element;
-    },
-    evalAttr: function() {
-        var rv = [];
-        
-        rv['class'] = '';     
-        rv['class'] += 'prod_';
-        rv['class'] += when(this.getValue('product').active, 'active', 'inactive');
-
-
-        return rv;
-    }
-
-}
-
-
-// text-content
-var productDetails = {
-    nodes:[],
-    childFactories:[],
-    parentFactory: undefined,
-    evaluate: function(parent) {
-        var e = parent.getNode();
-        var text = '';
-        text += parent.getValue('product').title;
-        text += ' ';
-        text += parent.getValue('product').price;
-        text += ' EUR';
-        if (text != e.innerText) e.innerText = text;
-    },
-    getValue: function(name) {
-        return this.parent.getValue(name);
-    },
-    getNode() {
-        return this.parent.getNode();
-    }
-}
-/////////////////////////////////////////////////////////////////// Initialize CHildren /////////////////////////////////////////////
-setChildFactories(widget, [categoriesH3, categoriesFor]);
-setChildFactories(categoriesH3, [categoriesText]);
-setChildFactories(categoriesText, []);
-setChildFactories(categoriesFor, [categoryDiv]);
-setChildFactories(categoryDiv, [[categoryH4, productsFor]]);
-setChildFactories(categoryH4, [categoryTitle]);
-setChildFactories(categoryTitle, []);
-setChildFactories(productsFor, [productDiv]);
-setChildFactories(productDiv, [productDetails]);
-setChildFactories(productDetails, []);
 
 /////////////////////////////////////////////////////////////////// Util Functions /////////////////////////////////////////////
 
-
-
-function setChildFactories(factory, childFactories) {
-    factory.childFactories = childFactories;
-    for (var i = 0; i < childFactories.length; i++) {
-        childFactories[i].parent = factory;
-    }
-}
-
-function evaluateChildren(parent) {
-    for (var i = 0; i < parent.childFactories.length; i++) {
-        parent.childFactories[i].evaluate(parent);
-    }
-}
 
 function byId(id) {
     return document.getNodeById(id);
 }
 
 
-function hideElement(element) {
-    console.log('hide');
-    element.style = 'display: none';
-}
-
-function showElement(element) {
-    element.style.display = 'display: block';
-}
-
-function clearChildNodes(element) {
-                while(element.firstChild) {
-                    element.removeChild(element.lastChild);
-                }
-}
-
-function updateIterationCount(iteration, count) {
-    while(iteration.currentCount < count) {
-        for (var i = 0; i< iteration.childFactories.length; i++) {
-            iteration.childFactories[i].appendNode();
-            iteration.currentCount++;
-        }
+function appendChildren(obj, childObjects) {
+    for (var i = 0; i < childObjects.length; i++) {
+        obj.element.appendChild(childObjects[i].element);
     }
-    while(iteration.currentCount > count) {
-        for (var i = 0; i< iteration.childFactories.length; i++) {
-            iteration.childFactories[i].removeNode();
-            iteration.currentCount--;
-        }
-    }
-}
-
-function appendElement(parent, tagName, attributes=[]) {
-    var child = createElement(tagName, attributes);
-    parent.appendChild(child);
-    return child;
-}
-
-function appendText(parent, content) {
-    if (!parent.innerText) {
-        parent.innerText = content;
-    } else {
-        parent.innerText += content;
-    }
+    return childObjects;
 }
 
 function createElement(tagName, attributes=[]) {
@@ -647,6 +421,10 @@ function notEmpty(value) {
     return value && value.length > 0;
 }
 
+
+function isArray(o) {
+    return o.constructor == Array;
+}
 
 function buttonClicked() {
     widget.evaluate(byId('content'));
