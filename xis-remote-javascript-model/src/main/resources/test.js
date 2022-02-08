@@ -477,7 +477,7 @@ class ProdLi {
         var text = '';
         text += getValue(this.parentProvider, ['product', 'title']);
         text += ' ';
-        text += getValue(this.parentProvider, ['product', 'title']);
+        text += getValue(this.parentProvider, ['product', 'price']);
         text += ' EUR';
         if (this.element.innerText != text) {
             this.element.innerText = text;
