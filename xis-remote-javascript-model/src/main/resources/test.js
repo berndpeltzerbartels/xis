@@ -283,9 +283,9 @@ var categories = [
 ];
 
 
-function createElement(tagName, attributes = []) {
+function createElement(tagName, attributes = {}) {
     var e = document.createElement(tagName);
-    for (var name of attributes) {
+    for (var name of Object.keys(attributes)) {
         e.setAttribute(name, attributes[name]);
     }
     return e;
@@ -309,11 +309,6 @@ class LoopAttributes {
 
 
 class XISElement {
-
-    parent;
-    element;
-    children = [];
-    names = [];
 
     constructor() {
         this.element = this.createElement();
@@ -351,7 +346,6 @@ class XISElement {
         // abstract
     }
 
-
     createChildren() {
         // abstract
      return [];
@@ -366,9 +360,6 @@ class XISElement {
 
 class XISTextNode {
     
-    node;
-    parent;
-
     constructor() {
         this.node = createTextNode();
     }
@@ -377,7 +368,6 @@ class XISTextNode {
         this.parent = parent;
         this.parent.element.appendChild(this.node);
     }
-
 
     update() {
         var text = this.getText();
@@ -389,22 +379,14 @@ class XISTextNode {
     getText() {
         // abstract
     }
-
 }
 
 class XISLoopElement {
 
-    parent;
-    loopAttributes;
-    element;
-    loop;
-    names = [];
-    values = [];
-    rows = [];
-
     constructor(loopAttributes) {
         this.loopAttributes = loopAttributes;
         this.element = this.createElement();
+        this.rows = [];
     }
 
     init(parent) {
@@ -604,7 +586,7 @@ class CategoryH4 extends XISElement{
     }
 
     createElement() {
-        return createElement('h4');
+        return createElement('h4', {style: 'color:red'});
     }
 }
 
