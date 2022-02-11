@@ -283,53 +283,189 @@ var categories = [
 ];
 
 
-class Loop {
-    constructor(parentProvider, element, arrayPath, itemVarName, indexVarName, numberVarname) {
-        this.parentProvider = parentProvider;
-        this.element = element;
-        this.arrayPath = arrayPath;
-        this.itemVarName = itemVarName;
-        this.indexVarname = indexVarName;
-        this.numberVarname = numberVarname;
-        this.rows = [];
-        
+function createElement(tagName, attributes = []) {
+    var e = document.createElement(tagName);
+    for (var name in attributes) {
+        e.setAttribute(name, attributes[name]);
+    }
+    return e;
+}
+
+
+
+function createTextNode() {
+    return document.createTextNode('');
+}
+
+
+
+class LoopAttributes {
+    arrayPath = [];
+    itemVarName;
+    indexVarName;
+    numberVarName;
+
+    getNames() {
+        return [this.itemVarName, this.indexVarName, this.numberVarName];
+    }
+}
+
+
+
+class XISElement {
+
+    parent;
+    element;
+    children = [];
+    names = [];
+
+    constructor() {
+        this.element = this.createElement();
+        this.init();
     }
 
-    getValue(name) {
-        if (name == this.arrayVarName) {
-            return this.data;
+    init(parent) {
+        this.parent = parent;
+        this.parent.appendChild(this.element);
+        for (var child in this.children) {
+            child.init(this);
         }
-        if (name == this.itemVarName) {
-            return this.item;
-        }
-        if (name == this.indexVarname) {
-            return this.itemIndex;
-        }
-        if (name == this.numberVarname) {
-            return this.itemIndex + 1;
-        }
-        return this.parentProvider.getValue(name);
     }
 
-    getArray() {
-        var rv = this.parentProvider.getValue(this.arrayPath[0]);
-        for (var i = 1; i < this.arrayPath.length; i++) {
-            rv = rv[this.arrayPath[i]];
-        }
-        return rv;
+    getValue(path) {
+        return this.parent.getValue(path);
     }
 
     update() {
-        this.data = this.getArray();
-        this.resize(this.data.length);
-        for (var i = 0; i < this.data.length; i++) {
-            this.itemIndex = i;
-            this.item = this.data[i];
-            var children = this.rows[i];
-            for (var j = 0; j < children.length; j++) {
-                children[j].update();
+        if (this.evalIf()) {
+            for (var child in this.children) {
+                child.update();
+            }
+        } else {
+            this.unlink();
+        }
+    }
+
+    evalIf() {
+        return true;
+    }
+
+
+    createElement() {
+        // abstract
+    }
+
+
+    createChildren() {
+        // abstract
+     return [];
+    }
+
+    unlink() {
+        this.parent.removeChild(this.element);
+    }
+
+}
+
+
+class XISTextNode {
+    
+    node;
+
+    constructor() {
+        this.node = createTextNode();
+    }
+
+    init(element) {
+        element.appendChild(this.node);
+    }
+
+
+    update() {
+        var text = this.getText();
+        if (this.node.nodeValue != text) {
+            this.node.nodeValue = text;
+        }
+    }
+
+    getText() {
+        // abstract
+    }
+
+}
+
+class XISLoopElement {
+
+    parent;
+    loopAttributes;
+    element;
+    loop;
+    names = [];
+    values = [];
+    rows = [];
+
+    constructor(loopAttributes) {
+        this.loopAttributes = loopAttributes;
+        this.element = this.createElement();
+    }
+
+    init(parent) {
+        this.parent = parent;
+        this.parent.element.appendChild(this.element);
+        this.names = this.loopAttributes.getNames();
+    }
+
+    createElement() {
+        // abstract
+    }
+
+    createChildren() {
+           // abstract
+        return [];
+    }
+
+    unlink() {
+        this.parent.removeChild(this.element);
+    }
+
+    update() {
+        if (this.evalIf) {
+
+        } else {
+            this.data = this.getArray();
+            this.resize(this.data.length);
+            for (var i = 0; i < this.data.length; i++) {
+                this.values  = [];
+                this.values[this.loopAttributes.itemVarName] = this.data[i];
+                this.values[this.loopAttributes.indexVarName] = i;
+                this.values[this.loopAttributes.numberVarName] = i + 1;
+                var children = this.rows[i];
+                for (var j = 0; j < children.length; j++) {
+                    children[j].update();
+                }
             }
         }
+    }
+
+    getValue(path) {
+        var name = path[0];
+        if (this.names.indexOf(name) != -1) {
+            var rv = this.values[name];
+            for (var i = 1; i < path.length; i++) {
+                if (!rv) {
+                    return undefined;
+                }
+                rv = rv[path[i]];
+            }
+            return rv;
+        }
+        if (this.parent) {
+            return getValue(this.parent, path);
+        }
+    }
+
+    getArray() {
+        return this.parent.getValue(this.loopAttributes.arrayPath);
     }
 
     resize(size) {
@@ -363,6 +499,54 @@ class Loop {
         }
     }
 
+    evalIf() {
+        return true;
+    }
+
+
+} 
+
+class Widget {
+    
+    element;
+    children;
+    values;
+
+    constructor() {
+        this.children = this.createChildren();
+    }
+
+    init(element) {
+        this.element = element;
+        this.parent.appendChild(this.element);
+        for (var child in this.children) {
+            child.init(this);
+        }
+    }
+
+    update(values) {
+        this.values = values;
+        for (var child in this.children) {
+            child.update();
+        }
+    }
+
+    getValue(path) {
+        var name = path[0];
+        var rv = this.values[name];
+        for (var i = 1; i < path.length; i++) {
+            if (!rv) {
+                return undefined;
+            }
+            rv = rv[path[i]];
+        }
+        return rv;
+    }
+
+    createChildren() {
+        // abstract
+     return [];
+    }
 }
 
 
