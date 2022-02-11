@@ -285,7 +285,7 @@ var categories = [
 
 function createElement(tagName, attributes = []) {
     var e = document.createElement(tagName);
-    for (var name in attributes) {
+    for (var name of attributes) {
         e.setAttribute(name, attributes[name]);
     }
     return e;
@@ -304,10 +304,6 @@ class LoopAttributes {
     itemVarName;
     indexVarName;
     numberVarName;
-
-    getNames() {
-        return [this.itemVarName, this.indexVarName, this.numberVarName];
-    }
 }
 
 
@@ -321,13 +317,13 @@ class XISElement {
 
     constructor() {
         this.element = this.createElement();
-        this.init();
+        this.children = this.createChildren();
     }
 
     init(parent) {
         this.parent = parent;
-        this.parent.appendChild(this.element);
-        for (var child in this.children) {
+        this.parent.element.appendChild(this.element);
+        for (var child of this.children) {
             child.init(this);
         }
     }
@@ -338,7 +334,7 @@ class XISElement {
 
     update() {
         if (this.evalIf()) {
-            for (var child in this.children) {
+            for (var child of this.children) {
                 child.update();
             }
         } else {
@@ -371,13 +367,15 @@ class XISElement {
 class XISTextNode {
     
     node;
+    parent;
 
     constructor() {
         this.node = createTextNode();
     }
 
-    init(element) {
-        element.appendChild(this.node);
+    init(parent) {
+        this.parent = parent;
+        this.parent.element.appendChild(this.node);
     }
 
 
@@ -412,7 +410,7 @@ class XISLoopElement {
     init(parent) {
         this.parent = parent;
         this.parent.element.appendChild(this.element);
-        this.names = this.loopAttributes.getNames();
+        this.names = [this.loopAttributes .itemVarName, this.loopAttributes .indexVarName, this.loopAttributes .numberVarName];
     }
 
     createElement() {
@@ -429,9 +427,9 @@ class XISLoopElement {
     }
 
     update() {
-        if (this.evalIf) {
-
-        } else {
+        this.data = [];
+        this.values = [];
+        if (this.evalIf()) {
             this.data = this.getArray();
             this.resize(this.data.length);
             for (var i = 0; i < this.data.length; i++) {
@@ -460,7 +458,7 @@ class XISLoopElement {
             return rv;
         }
         if (this.parent) {
-            return getValue(this.parent, path);
+            return this.parent.getValue(path);
         }
     }
 
@@ -485,7 +483,7 @@ class XISLoopElement {
     appendRow() {
         var children = this.createChildren();
         for (var i = 0; i < children.length; i++) {
-            this.element.appendChild(children[i].element);
+            children[i].init(this);
         }
         this.rows.push(children);
     }
@@ -506,7 +504,7 @@ class XISLoopElement {
 
 } 
 
-class Widget {
+class XISWidget {
     
     element;
     children;
@@ -517,16 +515,16 @@ class Widget {
     }
 
     init(element) {
+        debugger;
         this.element = element;
-        this.parent.appendChild(this.element);
-        for (var child in this.children) {
+        for (var child of this.children) {
             child.init(this);
         }
     }
 
     update(values) {
         this.values = values;
-        for (var child in this.children) {
+        for (var child of this.children) {
             child.update();
         }
     }
@@ -550,198 +548,141 @@ class Widget {
 }
 
 
-class CatWidget {
+class CategoryWidget  extends XISWidget {
 
-    constructor(element) {
-        this.element = element;
-        this.children = appendChildren(this, [new CatH3(this), new CatForDiv(this)]);
+    createChildren() {
+        return [new WidgetHeadline(), new CategoryDiv()];
+    }
+}
+
+
+class WidgetHeadline extends XISElement {
+
+    createElement() {
+       return createElement('h3');
     }
 
-    getValue(name) {
-        return this.state[name];
+    createChildren() {
+        return [new WidgetHeadlineContent()];
+    }
+}
+
+
+class WidgetHeadlineContent extends XISTextNode {
+    getText() {
+        var text = '';
+        text += 'Kategorien';
+        return text;
+    }
+}
+
+class CategoryDiv extends XISLoopElement {
+
+    constructor() {
+        super({arrayPath: ['categories'],
+            itemVarName: 'category',
+            indexVarName: 'categoryIndex',
+            numberVarName: 'categoryNumber'});
     }
 
-    update(state) {
+    createChildren() {
+        return [new CategoryH4(), new ProductUl()];
+    }
+
+    createElement() {
+        return createElement('div');
+    }
+
+}
+
+
+
+class CategoryH4 extends XISElement{
+
+    createChildren() {
+        return [new CategoryHeadline()];
+    }
+
+    createElement() {
+        return createElement('h4');
+    }
+}
+
+
+class CategoryHeadline extends XISTextNode {
+
+    getText() {
         debugger;
-        this.state = state;
-        this.children.forEach(child => child.update());
-    }
-
-}
-
-
-class CatH3 {
-    constructor(parentProvider) {
-        this.parentProvider = parentProvider;
-        this.element = createElement('h3');
-        this.children = [];
-        // static content:
-        this.element.innerText = 'Kategorien';
-    }
-
-    update() {
-        // static content
-    }
-
-}
-
-class CatForDiv extends Loop {
-
-    constructor(parentProvider) {
-        super(parentProvider,
-            createElement('div'),
-            ['categories'],
-            'category',
-            'categoryIndex',
-            'categoryNumber');
-    }
-
-    createChildren() {
-        return [new CatDiv(this)];
-    }
-
-}
-
-class CatDiv {
-    constructor(parentProvider) {
-        this.parentProvider = parentProvider;
-        this.element = createElement('div');
-        this.children = appendChildren(this, [new CatH4(parentProvider), new ProdForUl(parentProvider)]);
-    }
-
-    update() {
-        this.children.forEach(child => child.update());
-    }
-
-}
-
-
-class CatH4 {
-    constructor(parentProvider) {
-        this.parentProvider = parentProvider;
-        this.element = createElement('div');
-        this.children = [];
-    }
-
-    update() {
         var text = '';
-        text += this.parentProvider.getValue('categoryNumber');
-        text += '. ';
-        text += getValue(this.parentProvider, ['category', 'title']);
-        if (this.element.innerText != text) {
-            this.element.innerText = text;
-        }
-    }
-}
-
-class ProdForUl extends Loop {
-    constructor(parentProvider) {
-        super(parentProvider,
-            createElement('ul'),
-            ['category','products'],
-            'product',
-            'productIndex',
-            'productNumber');
-    }
-
-    createChildren() {
-        return [new ProdLi(this)];
-    }
-}
-
-
-class ProdLi {
-    constructor(parentProvider) {
-        this.parentProvider = parentProvider;
-        this.element = createElement('li');
-        this.children = [];
-    }
-
-    update() {
-        var text = '';
-        text += getValue(this.parentProvider, ['product', 'title']);
+        text +=  this.parent.getValue(['categoryNumber']); 
         text += ' ';
-        text += getValue(this.parentProvider, ['product', 'price']);
-        text += ' EUR';
-        if (this.element.innerText != text) {
-            this.element.innerText = text;
-        }
+        text +=  this.parent.getValue(['category', 'title']);   
+        return text;
     }
+
+}
+
+class ProductUl extends XISLoopElement {
+
+    constructor() {
+        super({arrayPath: ['category','products'],
+        itemVarName: 'product',
+        indexVarName: 'productIndex',
+        numberVarName: 'productNumber'});
+    }
+
+    createChildren() {
+        return [new ProductLi(this)];
+    }
+
+    createElement() {
+        return createElement('ul');
+    }
+}
+
+
+class ProductLi extends XISElement {
+    
+
+    createChildren() {
+        return [new ProductDetails()];
+    }
+
+    createElement() {
+        return createElement('ul');
+    }
+}
+
+
+class ProductDetails extends XISTextNode {
+
+    getText() {
+        var text = '';
+        text += this.parent.getValue(['product', 'title']);
+        text += ' ';
+        text += this.parent.getValue(['product', 'price']);
+        text += ' EUR';
+        return text;
+    }
+}
+
+class CategoryListWidget extends XISWidget {
+
 }
 
 /////////////////////////////////////////////////////////////////// Util Functions /////////////////////////////////////////////
 
-function getValue(provider, path) {
-    var rv = provider.getValue(path[0]);
-    for (var i = 1; i < path.length; i++) {
-        rv = rv[path[i]];
-    }
-    return rv;
-}
+
 
 function byId(id) {
     return document.getElementById(id);
 }
 
 
-function appendChildren(obj, childObjects) {
-    for (var i = 0; i < childObjects.length; i++) {
-        obj.element.appendChild(childObjects[i].element);
-    }
-    return childObjects;
-}
+var widget = new CategoryWidget();
+widget.init(byId('content'));
 
-function createElement(tagName, attributes = []) {
-    var e = document.createElement(tagName);
-    for (var name in attributes) {
-        e.setAttribute(name, attributes[name]);
-    }
-    return e;
-}
-
-function nodeListToArray(nodeList) {
-    var rv = [];
-    for (var i = 0; i < nodeList.length; i++) {
-        rv.push(nodeList.item(i));
-    }
-    return rv;
-}
-
-function notEmpty(value) {
-    return value && value.length > 0;
-}
-
-
-function isArray(o) {
-    return o.constructor == Array;
-}
 
 function buttonClicked() {
-    var widget = new CatWidget(byId('content'));
-    widget.update({categories: categories});
-    setTimeout(() => {
-
-
-        categories = [
-            {
-                title: 'Küche', products: [
-                    { title: 'Kochtopf', price: 8 },
-                    { title: 'Braftpfanne', price: 8 },
-                    { title: 'Topflappen', price: 8 },
-                    { title: 'Espressokocher', price: 8 }
-                ]
-            },
-            {
-                title: 'Bad', products: [
-                    { title: 'Vorleger', price: 8 },
-                    { title: 'Klobürste', price: 8 }
-                ]
-            },
-            
-
-        ];
-        widget.update({categories: categories});
-
-
-    }, 1000);
+   widget.update({categories: categories});
 }
