@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 import static one.xis.utils.xml.XmlUtil.getAttributes;
 import static one.xis.utils.xml.XmlUtil.getChildNodes;
 
-class TemplateParser {
+public class TemplateParser {
 
     private final ExpressionParser expressionParser = new ExpressionParser();
     private int varIndex = 0;
@@ -22,7 +22,7 @@ class TemplateParser {
     private static final String ATTR_LOOP_NUMBER = "data-number";
 
 
-    Model parse(Document document, String name) {
+    public Model parse(Document document, String name) {
         return new Model(parse(document.getDocumentElement()));
     }
 
