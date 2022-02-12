@@ -8,6 +8,7 @@ include 'xis-remote-test-suite'
 include 'xis-remote-template'
 include 'xis-helper'
 include 'xis-remote-processor'
-include 'xis-remote-javascript-model'
+include 'xis-javascript'
 include 'XIS-remote-dom'
+include 'xis-servlet'
 

@@ -1,4 +1,4 @@
-package one.xis.remote.js;
+package one.xis.js;
 
 import org.junit.jupiter.api.Test;
 

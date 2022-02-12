@@ -355,6 +355,19 @@ class XISElement {
         this.parent.removeChild(this.element);
     }
 
+    attrVal(name) {
+        var val = '';
+        switch (name) {
+            case 'style':
+                val += 'color:red';
+                break;
+            case 'onmouseover':
+                val += fkt(this.parent.getValue('bla')); 
+                break;
+        }
+        return val;
+    }
+
 }
 
 
