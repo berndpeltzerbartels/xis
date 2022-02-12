@@ -1,7 +1,7 @@
 package one.xis.remote.js2;
 
 import lombok.RequiredArgsConstructor;
-import one.xis.template.TemplateModel;
+import one.xis.template1.TemplateModel;
 
 @RequiredArgsConstructor
 class JSTemplateParser {

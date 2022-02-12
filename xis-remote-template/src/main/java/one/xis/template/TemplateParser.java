@@ -1,103 +1,106 @@
 package one.xis.template;
 
 import one.xis.utils.lang.StringUtils;
-import one.xis.utils.xml.XmlUtil;
-import org.w3c.dom.CharacterData;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.Text;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Set;
+import java.util.List;
 import java.util.stream.Stream;
 
-public class TemplateParser {
+import static one.xis.utils.xml.XmlUtil.getAttributes;
+import static one.xis.utils.xml.XmlUtil.getChildNodes;
 
+class TemplateParser {
+
+    private final ExpressionParser expressionParser = new ExpressionParser();
     private int varIndex = 0;
     private static final String ATTR_IF = "data-if";
     private static final String ATTR_FOR = "data-for";
     private static final String ATTR_LOOP_INDEX = "data-index";
-    private static final Set<String> OPERATOR_ATTRIBUTES = Set.of(ATTR_FOR, ATTR_IF, ATTR_LOOP_INDEX);
+    private static final String ATTR_LOOP_NUMBER = "data-number";
 
-    public TemplateModel parse(Document document, String name) throws TemplateSynthaxException, IOException {
-        return new TemplateModel(parseElement(document.getDocumentElement()), name);
+
+    Model parse(Document document, String name) {
+        return new Model(parse(document.getDocumentElement()));
     }
 
-    private TemplateElement parse(Node node) {
+    private Stream<ModelNode> parseChildren(Element parent) {
+        return getChildNodes(parent)
+                .filter(this::filterNode)
+                .map(this::parse);
+    }
+
+    private boolean filterNode(Node node) {
+        return node instanceof Element || node instanceof Text;
+    }
+
+    private ModelNode parse(Node node) {
         if (node instanceof Element) {
-            return parseElement((Element) node);
+            return parse((Element) node);
+        } else {
+            return parseText((Text) node);
         }
-        if (node instanceof CharacterData) {
-            CharacterData data = (CharacterData) node;
-            return parseTextContent(data.getData());
+    }
+
+    private ModelElement parse(Element element) {
+        var modelElement = new ModelElement(element.getTagName());
+        getAttributes(element).forEach((name, rawValue) -> addAttribute(name, rawValue, modelElement));
+        parseFrameworkAttributes(element, modelElement);
+        parseChildren(element).forEach(modelElement::addChild);
+        return modelElement;
+    }
+
+    private void addAttribute(String name, String rawValue, ModelElement target) {
+        List<MixedContent> contentList = new MixedContentParser(rawValue).parse();
+        if (contentList.size() == 1 && contentList.get(0) instanceof StaticContent) {
+            target.addStaticAttribute(name, ((StaticContent) contentList.get(0)).getContent());
+        } else {
+            target.addMutableAttribute(name, new MutableAttribute(new MixedContentParser(rawValue).parse()));
         }
-        return null;
     }
 
+    private TextNode parseText(Text text) {
+        return parseText(text.getTextContent());
+    }
 
-    private Container parseElement(Element e) {
-        LinkedList<Container> hierarchy = new LinkedList<>();
-        if (StringUtils.isNotEmpty(e.getAttribute(ATTR_IF))) {
-            hierarchy.add(parseIf(e));
+    private TextNode parseText(String text) {
+        return new TextNode(new MixedContentParser(text).parse());
+    }
+
+    private void parseFrameworkAttributes(Element element, ModelElement target) {
+        var attributes = getAttributes(element);
+        if (attributes.containsKey(ATTR_IF)) {
+            target.setIfCondition(parseIf(attributes.get(ATTR_IF)));
         }
-        hierarchy.add(new XmlElement(e.getTagName(), parseAttributes(e)));
-        if (StringUtils.isNotEmpty(e.getAttribute(ATTR_FOR))) {
-            hierarchy.add(parseFor(e));
+        if (attributes.containsKey(ATTR_FOR)) {
+            target.setLoop(parseFor(attributes.get(ATTR_FOR), element));
         }
+    }
 
-        Container first = hierarchy.getFirst();
-        Container last = hierarchy.getLast();
+    private IfCondition parseIf(String src) {
+        return new IfCondition(expressionParser.parse(src));
+    }
 
-        Container parent = hierarchy.removeFirst();
-        while (!hierarchy.isEmpty()) {
-            Container child = hierarchy.removeFirst();
-            parent.addElement(child);
-            parent = child;
+    private ForLoop parseFor(String dataFor, Element src) {
+        var dataForArray = dataFor.split(":");
+        if (dataForArray.length != 2) {
+            throw new TemplateSynthaxException("illegal loop-attribute:" + ATTR_FOR + "=" + dataFor);
         }
-
-        parseChildren(e).forEach(last::addElement);
-        return first;
-    }
-
-
-    private Stream<TemplateElement> parseChildren(Element src) {
-        return XmlUtil.getChildNodes(src).map(this::parse);
-    }
-
-
-    private IfElement parseIf(Element src) {
-        return new IfElement(src.getAttribute(ATTR_IF));
-    }
-
-    private ForElement parseFor(Element src) {
-        String[] array = src.getAttribute("data-for").split(":");
-        // TODO lenght == 2 !
-        return new ForElement(array[1], array[0], getIndexVarName(src));
-    }
-
-
-    private Map<String, TextContent> parseAttributes(Element src) {
-        Map<String, TextContent> contentMap = new HashMap<>();
-        XmlUtil.getAttributes(src).forEach((name, value) -> contentMap.put(name, parseTextContent(value)));
-        OPERATOR_ATTRIBUTES.forEach(attr -> contentMap.remove(attr));
-        return contentMap;
-    }
-
-    private TextContent parseTextContent(String src) {
-        return new TextContentParser(src).parse();
+        return new ForLoop(expressionParser.parse(dataForArray[1]), dataForArray[0], getIndexVarName(src), getNumberVarName(src));
     }
 
     private String getIndexVarName(Element e) {
         return StringUtils.isNotEmpty(e.getAttribute(ATTR_LOOP_INDEX)) ? e.getAttribute(ATTR_LOOP_INDEX) : nextVarName();
     }
 
+    private String getNumberVarName(Element e) {
+        return StringUtils.isNotEmpty(e.getAttribute(ATTR_LOOP_NUMBER)) ? e.getAttribute(ATTR_LOOP_NUMBER) : nextVarName();
+    }
 
     private String nextVarName() {
         return "var" + (varIndex++);
     }
-
 
 }

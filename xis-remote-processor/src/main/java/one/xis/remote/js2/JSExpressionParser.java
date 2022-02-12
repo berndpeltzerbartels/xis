@@ -1,9 +1,9 @@
 package one.xis.remote.js2;
 
-import one.xis.template.Expression;
 import one.xis.template.ExpressionArg;
 import one.xis.template.ExpressionString;
 import one.xis.template.ExpressionVar;
+import one.xis.template1.Expression;
 import one.xis.utils.lang.CollectionUtils;
 
 import java.util.List;

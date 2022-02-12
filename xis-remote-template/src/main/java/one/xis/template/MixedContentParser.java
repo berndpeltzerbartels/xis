@@ -1,6 +1,6 @@
 package one.xis.template;
 
-import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import one.xis.utils.lang.StringUtils;
 
 import java.util.ArrayList;
@@ -8,24 +8,23 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Data
-class TextContentParser {
+@RequiredArgsConstructor
+class MixedContentParser {
+
     private final String source;
     private int position = 0;
     private final ExpressionParser expressionParser = new ExpressionParser();
 
-    TextContent parse() {
-        TextContent textContent = new TextContent();
-        List<TextElement> textElements = new ArrayList<>();
+    List<MixedContent> parse() {
+        List<MixedContent> contentList = new ArrayList<>();
         while (isValidPosition(position)) {
-            parseStaticContent(textElements);
-            parseVariable(textElements);
+            parseStaticContent(contentList);
+            parseVariable(contentList);
         }
-        textContent.addAllElements(textElements);
-        return textContent;
+        return contentList;
     }
 
-    private void parseVariable(List<TextElement> contentElements) {
+    private void parseVariable(List<MixedContent> contentList) {
         StringBuilder stringBuilder = new StringBuilder();
         while (isValidPosition(position)) {
             char c = charAt(position);
@@ -34,15 +33,15 @@ class TextContentParser {
             }
             stringBuilder.append(c);
         }
-        expression(stringBuilder).ifPresent(contentElements::add);
+        expression(stringBuilder).ifPresent(contentList::add);
     }
 
-    private Optional<Expression> expression(StringBuilder builder) {
-        return StringUtils.isEmpty(builder) ? Optional.empty() : Optional.of(expressionParser.parse(builder.toString()));
+    private Optional<ExpressionContent> expression(StringBuilder builder) {
+        return StringUtils.isEmpty(builder) ? Optional.empty() : Optional.of(new ExpressionContent(expressionParser.parse(builder.toString())));
     }
 
 
-    private void parseStaticContent(List<TextElement> textElements) {
+    private void parseStaticContent(List<MixedContent> contentList) {
         StringBuilder stringBuilder = new StringBuilder();
         boolean escaping = false;
         while (isValidPosition(position)) {
@@ -61,14 +60,14 @@ class TextContentParser {
             escaping = false;
             stringBuilder.append(c);
         }
-        staticContent(stringBuilder).ifPresent(textElements::add);
+        staticContent(stringBuilder).forEach(contentList::add);
     }
 
-    private Optional<StaticText> staticContent(StringBuilder builder) {
-        List<String> lines = StringUtils.splitToLines(builder)
+    private List<StaticContent> staticContent(StringBuilder builder) {
+        return StringUtils.splitToLines(builder)
                 .filter(StringUtils::isNotEmpty)
+                .map(StaticContent::new)
                 .collect(Collectors.toList());
-        return lines.isEmpty() ? Optional.empty() : Optional.of(new StaticText(lines));
     }
 
     private char charAt(int pos) {
@@ -96,4 +95,5 @@ class TextContentParser {
     private boolean isExpressionEnd(int pos) {
         return charAt(pos) == '}';
     }
+
 }

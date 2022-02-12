@@ -1,16 +1,17 @@
 package one.xis.template;
 
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-class ExpressionParser {
+public class ExpressionParser {
 
-    private static final Pattern PATTERN_WITH_FKT = Pattern.compile("([\\w]+)\\(([\\w,\\.' \t]+)\\)");
+    private static final Pattern PATTERN_WITH_FKT = Pattern.compile("([\\w]+)\\(([^\\)]*)\\)");
 
-    Expression parse(String content) {
+    public Expression parse(String content) {
         List<ExpressionArg> functionArgs;
         Matcher matcher = PATTERN_WITH_FKT.matcher(content);
         if (matcher.find()) {
@@ -29,9 +30,6 @@ class ExpressionParser {
     }
 
     private void validateArg(String arg) {
-        if (!arg.matches("'?[\\w+\\.]+'?") || arg.contains("..") || arg.startsWith(".") || arg.endsWith(".")) {
-            throw new TemplateSynthaxException(arg);
-        }
         int i = 0;
         if (arg.startsWith("'")) {
             i++;
@@ -42,13 +40,26 @@ class ExpressionParser {
         if (i == 1) {
             throw new TemplateSynthaxException("unmatched \"'\" in " + arg);
         }
+        if (arg.startsWith("'") && arg.endsWith("'")) {
+            return;
+        }
+        if (!arg.matches("'?[\\w+\\.]+'?") || arg.contains("..") || arg.startsWith(".") || arg.endsWith(".")) {
+            throw new TemplateSynthaxException(arg);
+        }
     }
 
     private ExpressionArg toExpressionVar(String s) {
         if (s.startsWith("'") && s.endsWith("'")) {
-            return new ExpressionString(s.substring(1, s.length() - 2));
+            return new ExpressionString(s.substring(1, s.length() - 1).replace("\'", "'"));
+        }
+        if (s.matches("[\\d\\.]+")) {
+            return new ExpressionConstant(s);
         }
         return new ExpressionVar(s);
+    }
+
+    private List<ExpressionArg> parseFunctionArgs(String source) {
+        return null;
     }
 
 }

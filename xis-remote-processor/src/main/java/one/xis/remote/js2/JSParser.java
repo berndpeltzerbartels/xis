@@ -1,9 +1,9 @@
 package one.xis.remote.js2;
 
-import one.xis.template.Container;
-import one.xis.template.TemplateElement;
-import one.xis.template.TemplateModel;
-import one.xis.template.XmlElement;
+import one.xis.template1.Container;
+import one.xis.template1.TemplateElement;
+import one.xis.template1.TemplateModel;
+import one.xis.template1.XmlElement;
 
 interface JSParser<T extends TemplateElement> {
 

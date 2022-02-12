@@ -1,9 +1,9 @@
 package one.xis.remote.js2;
 
-import one.xis.template.Expression;
-import one.xis.template.StaticText;
-import one.xis.template.TextElement;
-import one.xis.template.XmlElement;
+import one.xis.template1.Expression;
+import one.xis.template1.StaticText;
+import one.xis.template1.TextElement;
+import one.xis.template1.XmlElement;
 
 import java.util.ArrayList;
 import java.util.List;

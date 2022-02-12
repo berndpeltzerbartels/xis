@@ -1,6 +1,6 @@
 package one.xis.remote.js2;
 
-import one.xis.template.TemplateModel;
+import one.xis.template1.TemplateModel;
 
 import java.util.List;
 

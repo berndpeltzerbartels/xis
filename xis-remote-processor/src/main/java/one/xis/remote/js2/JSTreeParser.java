@@ -1,8 +1,8 @@
 package one.xis.remote.js2;
 
 import lombok.RequiredArgsConstructor;
-import one.xis.template.Container;
-import one.xis.template.TemplateElement;
+import one.xis.template1.Container;
+import one.xis.template1.TemplateElement;
 
 import java.util.List;
 import java.util.stream.Collectors;
