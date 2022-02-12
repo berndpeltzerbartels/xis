@@ -30,7 +30,7 @@ class TemplateParserTest {
 
         @Test
         void parse() throws TemplateSynthaxException, IOException {
-            Model model = parser.parse(document, "test");
+            TemplateModel model = parser.parse(document, "test");
 
             ModelElement root = model.getRoot();
             assertThat(root.getElementName()).isEqualTo("ul");

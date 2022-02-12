@@ -1,7 +1,7 @@
 package one.xis.remote.processor;
 
 import com.google.auto.service.AutoService;
-import one.xis.template.Model;
+import one.xis.template.TemplateModel;
 import one.xis.template.TemplateParser;
 import one.xis.utils.xml.XmlUtil;
 import org.w3c.dom.Document;
@@ -80,16 +80,16 @@ public class WidgetProcessor extends AnnotationProcessor {
         writeJavaScript(templateModels(), writer);
     }
 
-    private void writeJavaScript(Collection<Model> models, Appendable writer) {
+    private void writeJavaScript(Collection<TemplateModel> models, Appendable writer) {
         //writeJavaScript(new JSAstParser().parse(models, stateVariables), writer);
     }
 
 
-    private Collection<Model> templateModels() {
+    private Collection<TemplateModel> templateModels() {
         return widgetContexts.stream().map(this::templateModel).collect(Collectors.toSet());
     }
 
-    private Model templateModel(WidgetContext context) {
+    private TemplateModel templateModel(WidgetContext context) {
         try {
             Document document = XmlUtil.loadDocument(context.getHtmlFile());
             return templateParser.parse(document, context.getSimpleClassName()); // TODO may be an alias is better to avoid duplicates

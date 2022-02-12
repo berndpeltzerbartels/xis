@@ -22,8 +22,8 @@ public class TemplateParser {
     private static final String ATTR_LOOP_NUMBER = "data-number";
 
 
-    public Model parse(Document document, String name) {
-        return new Model(parse(document.getDocumentElement()));
+    public TemplateModel parse(Document document, String name) {
+        return new TemplateModel(parse(document.getDocumentElement()));
     }
 
     private Stream<ModelNode> parseChildren(Element parent) {

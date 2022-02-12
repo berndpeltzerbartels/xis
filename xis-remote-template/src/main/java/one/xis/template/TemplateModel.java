@@ -3,6 +3,6 @@ package one.xis.template;
 import lombok.Data;
 
 @Data
-public class Model {
+public class TemplateModel {
     private final ModelElement root;
 }
