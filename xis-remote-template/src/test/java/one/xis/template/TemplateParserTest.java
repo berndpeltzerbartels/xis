@@ -107,6 +107,15 @@ class TemplateParserTest {
             assertThat(((ExpressionContent) href.getContents().get(1)).getExpression().getContent()).isEqualTo("product.id");
             assertThat(((StaticContent) href.getContents().get(2)).getContent()).isEqualTo(".html");
 
+
+            assertThat(anchor.getChildren()).hasSize(1);
+            assertThat(anchor.getChildren().get(0)).isInstanceOf(TextNode.class);
+
+            TextNode node = (TextNode) anchor.getChildren().get(0);
+            assertThat(node.getContents()).hasSize(1);
+            assertThat(node.getContents().get(0)).isInstanceOf(StaticContent.class);
+            StaticContent staticContent = (StaticContent) node.getContents().get(0);
+            assertThat(staticContent.getContent()).isEqualTo("Details");
         }
     }
 
