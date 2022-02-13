@@ -1,10 +1,10 @@
 package one.xis.js;
 
-import one.xis.template.TemplateModel;
+import one.xis.template.WidgetModel;
 
 public class XISObjectParser {
 
-    public XISWidget parse(TemplateModel model) {
+    public XISWidget parse(WidgetModel model) {
 
         return null;
     }

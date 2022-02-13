@@ -30,7 +30,7 @@ class XISElement {
         return this.parent.getValue(path);
     }
 
-    update() {
+    updateAll() {
         if (this.evalIf()) {
             this.updateAttributes();
             this.updateChildren();
@@ -41,12 +41,13 @@ class XISElement {
 
     updateChildren() {
         for (var child of this.children) {
-            child.update();
+            child.updateAll();
         }
     }
 
     updateAttributes() {
         // abstract
+        /*
         var attr = '';
 
         attr = '';
@@ -55,8 +56,10 @@ class XISElement {
             this.element.setAttribute('style', attr);
         }
 
-        // etc
-        // this.element.setAttribute()
+        ...
+        
+        this.element.setAttribute()
+        */
     }
 
     evalIf() {
@@ -76,20 +79,6 @@ class XISElement {
     unlink() {
         this.parent.removeChild(this.element);
     }
-
-    attrVal(name) {
-        var val = '';
-        switch (name) {
-            case 'style':
-                val += 'color:red';
-                break;
-            case 'onmouseover':
-                val += fkt(this.parent.getValue('bla'));
-                break;
-        }
-        return val;
-    }
-
 }
 
 
@@ -104,7 +93,7 @@ class XISTextNode {
         this.parent.element.appendChild(this.node);
     }
 
-    update() {
+    updateAll() {
         var text = this.getText();
         if (this.node.nodeValue != text) {
             this.node.nodeValue = text;
@@ -143,7 +132,7 @@ class XISLoopElement {
         this.parent.removeChild(this.element);
     }
 
-    update() {
+    updateAll() {
          if (this.evalIf()) {
                     this.updateAttributes();
                     this.updateChildren();
@@ -166,7 +155,7 @@ class XISLoopElement {
                 this.values[this.loopAttributes.numberVarName] = i + 1;
                 var children = this.rows[i];
                 for (var j = 0; j < children.length; j++) {
-                    children[j].update();
+                    children[j].updateAll();
                 }
             }
         }
@@ -247,34 +236,30 @@ class XISLoopElement {
     }
 }
 
-class XISWidget {
+class XISRoot {
 
-    element;
-    children;
-    values;
-
-    constructor() {
-        this.children = this.createChildren();
+    constructor(clientState) {
+        this.clientState = clientState;
+        this.element = this.createElement();
     }
 
-    init(element) {
-        debugger;
-        this.element = element;
-        for (var child of this.children) {
-            child.init(this);
-        }
+    init(parentElement) {
+        this.parentElement = parentElement;
+        this.parentElement.appendChild(this.element);
     }
 
-    update(values) {
-        this.values = values;
-        for (var child of this.children) {
-            child.update();
-        }
+    setWidget(widget) {
+       if (this.widget) {
+           this.element.removeChild(this.widget.element);
+       }
+       this.widget = widget;
+       this.widget.init(this);
+       this.widget.updateAll();
     }
 
     getValue(path) {
         var name = path[0];
-        var rv = this.values[name];
+        var rv = this.clientState[name];
         for (var i = 1; i < path.length; i++) {
             if (!rv) {
                 return undefined;
@@ -284,9 +269,75 @@ class XISWidget {
         return rv;
     }
 
-    createChildren() {
+    createElement() {
         // abstract
-     return [];
     }
+
+}
+
+class XISContainer {
+
+    constructor() {
+        this.element = this.createElement();
+    }
+
+    init(parent) {
+        this.parent = parent;
+        this.parent.element.appendChild(this.element);
+    }
+
+    setWidget(widget) {
+        if (this.widget) {
+            this.element.removeChild(this.widget.element);
+        }
+        this.widget = widget;
+        this.widget.init(this);
+        this.widget.updateAll();
+    }
+
+    getValue(path) {
+        return this.parent.getValue(path);
+    }
+
+    updateAll() {
+        if (this.evalIf()) {
+            this.updateAttributes();
+            this.widget.updateAll();
+
+        } else {
+            this.unlink();
+        }
+    }
+
+    updateAttributes() {
+        // abstract
+        /*
+        var attr = '';
+
+        attr = '';
+        attr += this.parent.getValue('');
+        if (attr != this.element.getAttribute('style')) {
+            this.element.setAttribute('style', attr);
+        }
+
+        ...
+        
+        this.element.setAttribute()
+        */
+    }
+
+    evalIf() {
+        return true;
+    }
+
+
+    createElement() {
+        // abstract
+    }
+
+    unlink() {
+        this.parent.removeChild(this.element);
+    }
+
 }
 

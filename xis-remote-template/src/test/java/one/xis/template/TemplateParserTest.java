@@ -30,18 +30,17 @@ class TemplateParserTest {
 
         @Test
         void parse() throws TemplateSynthaxException, IOException {
-            TemplateModel model = parser.parse(document, "test");
+            var widgetModel = parser.parse(document, "test");
 
-            ModelElement root = model.getRoot();
-            assertThat(root.getElementName()).isEqualTo("ul");
-            assertThat(root.getLoop()).isNotNull();
-            assertThat(root.getLoop().getItemVarName()).isEqualTo("item");
-            assertThat(root.getLoop().getIndexVarName()).isEqualTo("i");
-            assertThat(root.getLoop().getNumberVarName()).isEqualTo("number");
-            assertThat(root.getLoop().getArraySource().getVars()).hasSize(1);
-            assertThat(root.getLoop().getArraySource().getVars().get(0)).isEqualTo(new ExpressionVar("items"));
+            assertThat(widgetModel.getElementName()).isEqualTo("ul");
+            assertThat(widgetModel.getLoop()).isNotNull();
+            assertThat(widgetModel.getLoop().getItemVarName()).isEqualTo("item");
+            assertThat(widgetModel.getLoop().getIndexVarName()).isEqualTo("i");
+            assertThat(widgetModel.getLoop().getNumberVarName()).isEqualTo("number");
+            assertThat(widgetModel.getLoop().getArraySource().getVars()).hasSize(1);
+            assertThat(widgetModel.getLoop().getArraySource().getVars().get(0)).isEqualTo(new ExpressionVar("items"));
 
-            var childElements = root.getChildren().stream().filter(ModelElement.class::isInstance).map(ModelElement.class::cast).collect(Collectors.toList());
+            var childElements = widgetModel.getChildren().stream().filter(ModelElement.class::isInstance).map(ModelElement.class::cast).collect(Collectors.toList());
             assertThat(childElements).hasSize(1);
             var li = childElements.get(0);
             assertThat(li.getElementName()).isEqualTo("li");
@@ -71,16 +70,15 @@ class TemplateParserTest {
 
         @Test
         void parse() throws TemplateSynthaxException, IOException {
-            var model = parser.parse(document, "test");
+            var widgetModel = parser.parse(document, "test");
 
-            var root = model.getRoot();
-            assertThat(root.getElementName()).isEqualTo("div");
+            assertThat(widgetModel.getElementName()).isEqualTo("div");
 
-            var ifCondition = root.getIfCondition();
+            var ifCondition = widgetModel.getIfCondition();
             assertThat(ifCondition.getExpression().getVars()).hasSize(1);
             assertThat(ifCondition.getExpression().getVars().get(0)).isEqualTo(new ExpressionVar("visible"));
 
-            List<ModelElement> childElements = root.getChildren().stream().filter(ModelElement.class::isInstance).map(ModelElement.class::cast).collect(Collectors.toList());
+            List<ModelElement> childElements = widgetModel.getChildren().stream().filter(ModelElement.class::isInstance).map(ModelElement.class::cast).collect(Collectors.toList());
 
             assertThat(childElements).hasSize(2);
 

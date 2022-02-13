@@ -499,34 +499,30 @@ class XISLoopElement {
 
 } 
 
-class XISWidget {
+class XISRoot {
     
-    element;
-    children;
-    values;
-
-    constructor() {
-        this.children = this.createChildren();
+    constructor(clientState) {
+        this.clientState = clientState;
+        this.element = this.createElement();
     }
 
-    init(element) {
-        debugger;
-        this.element = element;
-        for (var child of this.children) {
-            child.init(this);
-        }
+    init(parentElement) {
+        this.parentElement = parentElement;
+        this.parentElement.appendChild(this.element);
     }
 
-    update(values) {
-        this.values = values;
-        for (var child of this.children) {
-            child.update();
-        }
+    setWidget(widget) {
+       if (this.widget) {
+           this.element.removeChild(this.widget.element);
+       }
+       this.widget = widget;
+       this.widget.init(this);
+       this.widget.update();     
     }
 
     getValue(path) {
         var name = path[0];
-        var rv = this.values[name];
+        var rv = this.clientState[name];
         for (var i = 1; i < path.length; i++) {
             if (!rv) {
                 return undefined;
@@ -536,14 +532,19 @@ class XISWidget {
         return rv;
     }
 
-    createChildren() {
+    createElement() {
         // abstract
-     return [];
     }
+
 }
 
 
-class CategoryWidget  extends XISWidget {
+class XISContainer {
+
+
+}
+
+class CategoryWidget  extends XISRoot {
 
     createChildren() {
         return [new WidgetHeadline(), new CategoryDiv()];
@@ -661,7 +662,7 @@ class ProductDetails extends XISTextNode {
     }
 }
 
-class CategoryListWidget extends XISWidget {
+class CategoryListWidget extends XISRoot {
 
 }
 
@@ -675,7 +676,7 @@ function byId(id) {
 
 
 var widget = new CategoryWidget();
-widget.init(byId('content'));
+widgeinit(byId('content'));
 
 
 function buttonClicked() {

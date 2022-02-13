@@ -25,9 +25,9 @@ class JSResourceLoader {
 
 
     private static String getJavascript() {
-        return IOUtils.getResourceAsString("xis-functions.js")
-                .concat(IOUtils.getResourceAsString("xis-classes.js")
-                        .concat(IOUtils.getResourceAsString("xis-generated.js")));
+        return IOUtils.getResourceAsString("xis-template-functions.js") +
+                IOUtils.getResourceAsString("xis-template-classes.js") +
+                IOUtils.getResourceAsString("xis-generated.js");
     }
 
     private static long getLastModified() {

@@ -46,6 +46,10 @@ public class XmlUtil {
         return new NodeIterator(parent.getChildNodes()).asStream();
     }
 
+    public Stream<Element> getChildElements(Element parent) {
+        return new NodeIterator(parent.getChildNodes()).asStream().filter(Element.class::isInstance).map(Element.class::cast);
+    }
+
     public Stream<Element> getElementsByTagName(Element parent, String tagName) {
         return new NodeIterator(parent.getElementsByTagName(tagName)).asStream().filter(Element.class::isInstance).map(Element.class::cast);
     }

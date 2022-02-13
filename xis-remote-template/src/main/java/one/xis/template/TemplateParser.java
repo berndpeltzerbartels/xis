@@ -9,8 +9,7 @@ import org.w3c.dom.Text;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static one.xis.utils.xml.XmlUtil.getAttributes;
-import static one.xis.utils.xml.XmlUtil.getChildNodes;
+import static one.xis.utils.xml.XmlUtil.*;
 
 public class TemplateParser {
 
@@ -20,10 +19,11 @@ public class TemplateParser {
     private static final String ATTR_FOR = "data-for";
     private static final String ATTR_LOOP_INDEX = "data-index";
     private static final String ATTR_LOOP_NUMBER = "data-number";
+    private static final String ATTR_CONTAINER_ID = "data-container-id";
+    private static final String ATTR_CONTAINER_WIDGET = "data-container-widget";
 
-
-    public TemplateModel parse(Document document, String name) {
-        return new TemplateModel(parse(document.getDocumentElement()));
+    public WidgetModel parse(Document document, String name) {
+        return new WidgetModel(name, parse(document.getDocumentElement()));
     }
 
     private Stream<ModelNode> parseChildren(Element parent) {
@@ -38,10 +38,31 @@ public class TemplateParser {
 
     private ModelNode parse(Node node) {
         if (node instanceof Element) {
-            return parse((Element) node);
+            if (isContainer((Element) node)) {
+                return parseContainer((Element) node);
+            } else {
+                return parse((Element) node);
+            }
         } else {
             return parseText((Text) node);
         }
+    }
+
+    private boolean isContainer(Element element) {
+        return element.hasAttribute(ATTR_CONTAINER_ID);
+    }
+
+    private ContainerElement parseContainer(Element element) {
+        var containerElement = new ContainerElement(element.getTagName(), element.getAttribute(ATTR_CONTAINER_ID), element.getAttribute(ATTR_CONTAINER_WIDGET));
+        getAttributes(element).forEach((name, rawValue) -> addAttribute(name, rawValue, containerElement));
+        parseFrameworkAttributes(element, containerElement);
+        if (getChildElements(element).count() > 0) {
+            throw new TemplateSynthaxException(String.format("elements with attribute \"%s\" must have no content", ATTR_CONTAINER_ID));
+        }
+        if (element.hasAttribute(ATTR_FOR)) {
+            throw new TemplateSynthaxException(String.format("elements with attribute \"%s\" must not have attribute \"%s\"", ATTR_CONTAINER_ID, ATTR_FOR));
+        }
+        return containerElement;
     }
 
     private ModelElement parse(Element element) {
@@ -49,10 +70,13 @@ public class TemplateParser {
         getAttributes(element).forEach((name, rawValue) -> addAttribute(name, rawValue, modelElement));
         parseFrameworkAttributes(element, modelElement);
         parseChildren(element).forEach(modelElement::addChild);
+        if (element.hasAttribute(ATTR_CONTAINER_WIDGET)) {
+            throw new TemplateSynthaxException(String.format("elements with attribute \"%s\" must have a container-id (attribute \"%s\")", ATTR_CONTAINER_WIDGET, ATTR_CONTAINER_ID));
+        }
         return modelElement;
     }
 
-    private void addAttribute(String name, String rawValue, ModelElement target) {
+    private void addAttribute(String name, String rawValue, ElementBase target) {
         List<MixedContent> contentList = new MixedContentParser(rawValue).parse();
         if (contentList.size() == 1 && contentList.get(0) instanceof StaticContent) {
             target.addStaticAttribute(name, ((StaticContent) contentList.get(0)).getContent());
@@ -69,13 +93,13 @@ public class TemplateParser {
         return new TextNode(new MixedContentParser(text).parse());
     }
 
-    private void parseFrameworkAttributes(Element element, ModelElement target) {
+    private void parseFrameworkAttributes(Element element, ElementBase target) {
         var attributes = getAttributes(element);
         if (attributes.containsKey(ATTR_IF)) {
             target.setIfCondition(parseIf(attributes.get(ATTR_IF)));
         }
         if (attributes.containsKey(ATTR_FOR)) {
-            target.setLoop(parseFor(attributes.get(ATTR_FOR), element));
+            target.setLoop(parseLoop(attributes.get(ATTR_FOR), element));
         }
     }
 
@@ -83,7 +107,7 @@ public class TemplateParser {
         return new IfCondition(expressionParser.parse(src));
     }
 
-    private ForLoop parseFor(String dataFor, Element src) {
+    private ForLoop parseLoop(String dataFor, Element src) {
         var dataForArray = dataFor.split(":");
         if (dataForArray.length != 2) {
             throw new TemplateSynthaxException("illegal loop-attribute:" + ATTR_FOR + "=" + dataFor);
