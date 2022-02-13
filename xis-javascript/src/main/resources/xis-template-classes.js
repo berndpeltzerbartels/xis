@@ -30,7 +30,7 @@ class XISElement {
         return this.parent.getValue(path);
     }
 
-    updateAll() {
+    update() {
         if (this.evalIf()) {
             this.updateAttributes();
             this.updateChildren();
@@ -41,7 +41,7 @@ class XISElement {
 
     updateChildren() {
         for (var child of this.children) {
-            child.updateAll();
+            child.update();
         }
     }
 
@@ -73,7 +73,7 @@ class XISElement {
 
     createChildren() {
         // abstract
-     return [];
+        return [];
     }
 
     unlink() {
@@ -93,15 +93,19 @@ class XISTextNode {
         this.parent.element.appendChild(this.node);
     }
 
-    updateAll() {
-        var text = this.getText();
-        if (this.node.nodeValue != text) {
-            this.node.nodeValue = text;
-        }
+    update() {
+     var text = this.getText();
+             if (this.node.nodeValue != text) {
+                 this.node.nodeValue = text;
+             }
+    }
+
+    updateText() {
+
     }
 
     getText() {
-        // abstract
+        // abstract. USE VALUE FIELD !!!
     }
 }
 
@@ -116,7 +120,7 @@ class XISLoopElement {
     init(parent) {
         this.parent = parent;
         this.parent.element.appendChild(this.element);
-        this.names = [this.loopAttributes .itemVarName, this.loopAttributes .indexVarName, this.loopAttributes .numberVarName];
+        this.names = [this.loopAttributes.itemVarName, this.loopAttributes.indexVarName, this.loopAttributes.numberVarName];
     }
 
     createElement() {
@@ -124,7 +128,7 @@ class XISLoopElement {
     }
 
     createChildren() {
-           // abstract
+        // abstract
         return [];
     }
 
@@ -132,31 +136,29 @@ class XISLoopElement {
         this.parent.removeChild(this.element);
     }
 
-    updateAll() {
-         if (this.evalIf()) {
-                    this.updateAttributes();
-                    this.updateChildren();
-                } else {
-                    this.unlinkAll();
-                }
+    update() {
+        if (this.evalIf()) {
+            this.data = this.getArray();
+            this.updateAttributes();
+            this.updateAllChildren();
+        } else {
+            this.unlinkAll();
+        }
     }
 
 
-    updateChildren() {
+    updateAllChildren() {
         this.data = [];
         this.values = [];
-        if (this.evalIf()) {
-            this.data = this.getArray();
-            this.resize(this.data.length);
-            for (var i = 0; i < this.data.length; i++) {
-                this.values  = [];
-                this.values[this.loopAttributes.itemVarName] = this.data[i];
-                this.values[this.loopAttributes.indexVarName] = i;
-                this.values[this.loopAttributes.numberVarName] = i + 1;
-                var children = this.rows[i];
-                for (var j = 0; j < children.length; j++) {
-                    children[j].updateAll();
-                }
+        this.resize(this.data.length);
+        for (var i = 0; i < this.data.length; i++) {
+            this.values = [];
+            this.values[this.loopAttributes.itemVarName] = this.data[i];
+            this.values[this.loopAttributes.indexVarName] = i;
+            this.values[this.loopAttributes.numberVarName] = i + 1;
+            var children = this.rows[i];
+            for (var j = 0; j < children.length; j++) {
+                children[j].update();
             }
         }
     }
@@ -238,8 +240,7 @@ class XISLoopElement {
 
 class XISRoot {
 
-    constructor(clientState) {
-        this.clientState = clientState;
+    constructor() {
         this.element = this.createElement();
     }
 
@@ -248,13 +249,18 @@ class XISRoot {
         this.parentElement.appendChild(this.element);
     }
 
+    update(clientState) {
+        this.clientState = clientState;
+        this.widget.update();
+    }
+
+
     setWidget(widget) {
-       if (this.widget) {
-           this.element.removeChild(this.widget.element);
-       }
-       this.widget = widget;
-       this.widget.init(this);
-       this.widget.updateAll();
+        if (this.widget) {
+            this.element.removeChild(this.widget.element);
+        }
+        this.widget = widget;
+        this.widget.init(this);
     }
 
     getValue(path) {
@@ -292,17 +298,17 @@ class XISContainer {
         }
         this.widget = widget;
         this.widget.init(this);
-        this.widget.updateAll();
+        this.widget.update();
     }
 
     getValue(path) {
         return this.parent.getValue(path);
     }
 
-    updateAll() {
+    update() {
         if (this.evalIf()) {
             this.updateAttributes();
-            this.widget.updateAll();
+            this.widget.update();
 
         } else {
             this.unlink();
@@ -338,6 +344,5 @@ class XISContainer {
     unlink() {
         this.parent.removeChild(this.element);
     }
-
 }
 

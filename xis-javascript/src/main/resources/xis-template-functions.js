@@ -28,3 +28,7 @@ function createTextNode() {
 function byId(id) {
     return document.getElementById(id);
 }
+
+function lastElement(arr) {
+    return arr[arr.length -1];
+}
