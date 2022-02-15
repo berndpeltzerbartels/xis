@@ -1,0 +1,10 @@
+package one.xis.template;
+
+import lombok.Data;
+
+import java.util.List;
+
+@Data
+class MutableTextNode implements TextNode {
+    private final List<MixedContent> content;
+}

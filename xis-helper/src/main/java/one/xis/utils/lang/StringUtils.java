@@ -29,8 +29,8 @@ public class StringUtils {
         return Arrays.stream(sequence.toString().split("[\\n\\r]+"));
     }
 
-    public boolean isLineBreaksOnly(String s) {
-        return s.matches("[\n\r]+");
+    public boolean isSeparatorsOnly(String s) {
+        return s.matches("[\n\r ]+");
     }
 
     public String trimNullSafe(String s) {

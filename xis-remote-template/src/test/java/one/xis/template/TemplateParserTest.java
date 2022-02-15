@@ -85,12 +85,12 @@ class TemplateParserTest {
             var h4 = childElements.get(0);
             assertThat(h4.getChildren()).hasSize(1);
             assertThat(h4.getChildren().get(0)).isInstanceOf(TextNode.class);
-            var h4TextNode = (TextNode) h4.getChildren().get(0);
-            assertThat(h4TextNode.getContents()).hasSize(2);
-            assertThat(h4TextNode.getContents().get(0)).isEqualTo(new StaticContent("Details Of "));
-            assertThat(h4TextNode.getContents().get(1)).isInstanceOf(ExpressionContent.class);
+            var h4TextNode = (MutableTextNode) h4.getChildren().get(0);
+            assertThat(h4TextNode.getContent()).hasSize(2);
+            assertThat(h4TextNode.getContent().get(0)).isEqualTo(new StaticContent("Details Of "));
+            assertThat(h4TextNode.getContent().get(1)).isInstanceOf(ExpressionContent.class);
 
-            ExpressionContent expressionContent = (ExpressionContent) h4TextNode.getContents().get(1);
+            ExpressionContent expressionContent = (ExpressionContent) h4TextNode.getContent().get(1);
             assertThat(expressionContent.getExpression().getContent()).isEqualTo("product.name");
 
 
@@ -109,11 +109,8 @@ class TemplateParserTest {
             assertThat(anchor.getChildren()).hasSize(1);
             assertThat(anchor.getChildren().get(0)).isInstanceOf(TextNode.class);
 
-            TextNode node = (TextNode) anchor.getChildren().get(0);
-            assertThat(node.getContents()).hasSize(1);
-            assertThat(node.getContents().get(0)).isInstanceOf(StaticContent.class);
-            StaticContent staticContent = (StaticContent) node.getContents().get(0);
-            assertThat(staticContent.getContent()).isEqualTo("Details");
+            var node = (StaticTextNode) anchor.getChildren().get(0);
+            assertThat(node.getContent()).isEqualTo("Details");
         }
     }
 

@@ -1,19 +1,18 @@
 package one.xis.template;
 
 import lombok.Getter;
+import lombok.experimental.Delegate;
 
-public class WidgetModel extends ModelElement {
+public class WidgetModel {
 
     @Getter
     private final String name;
 
-    WidgetModel(String name, String elementName) {
-        super(elementName);
-        this.name = name;
-    }
+    @Delegate
+    private final ModelElement modelElement;
 
     WidgetModel(String name, ModelElement modelElement) {
-        super(modelElement.getElementName());
+        this.modelElement = modelElement;
         this.name = name;
     }
 }

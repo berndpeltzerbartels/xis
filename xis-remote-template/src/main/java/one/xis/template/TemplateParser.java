@@ -7,6 +7,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.Text;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import static one.xis.utils.xml.XmlUtil.*;
@@ -29,7 +30,8 @@ public class TemplateParser {
     private Stream<ModelNode> parseChildren(Element parent) {
         return getChildNodes(parent)
                 .filter(this::filterNode)
-                .map(this::parse);
+                .map(this::parse)
+                .filter(Objects::nonNull);
     }
 
     private boolean filterNode(Node node) {
@@ -90,7 +92,14 @@ public class TemplateParser {
     }
 
     private TextNode parseText(String text) {
-        return new TextNode(new MixedContentParser(text).parse());
+        if (StringUtils.isSeparatorsOnly(text)) {
+            return null;
+        }
+        List<MixedContent> mixedContents = new MixedContentParser(text).parse();
+        if (mixedContents.stream().noneMatch(ExpressionContent.class::isInstance)) {
+            return new StaticTextNode(text);
+        }
+        return new MutableTextNode(mixedContents);
     }
 
     private void parseFrameworkAttributes(Element element, ElementBase target) {
