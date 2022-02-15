@@ -82,7 +82,7 @@ class XISElement {
 }
 
 
-class XISTextNode {
+class XISMutableTextNode {
 
     constructor() {
         this.node = createTextNode();
@@ -94,20 +94,40 @@ class XISTextNode {
     }
 
     update() {
-     var text = this.getText();
-             if (this.node.nodeValue != text) {
-                 this.node.nodeValue = text;
-             }
-    }
-
-    updateText() {
-
+         var text = this.getText();
+         if (this.node.nodeValue != text) {
+             this.node.nodeValue = text;
+         }
     }
 
     getText() {
         // abstract. USE VALUE FIELD !!!
     }
 }
+
+
+class XISStaticTextNode {
+
+    constructor() {
+        this.node = createTextNode();
+        this.node.nodeValue = this.getText();
+    }
+
+    init(parent) {
+        this.parent = parent;
+        this.parent.element.appendChild(this.node);
+    }
+
+    update() {
+        // Nothing to to
+    }
+
+    getText() {
+        // abstract. USE VALUE FIELD !!!
+    }
+}
+
+
 
 class XISLoopElement {
 
