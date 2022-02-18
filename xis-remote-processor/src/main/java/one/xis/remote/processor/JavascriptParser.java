@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import one.xis.js.*;
 import one.xis.template.*;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,12 +16,7 @@ class JavascriptParser {
     private static long currentNameId = 1;
 
     void parse(WidgetModel widgetModel) {
-
-        List<JSContructorCall> childContructorCalls = new ArrayList<>();
-
-        JSClass widgetClass = new JSClass(widgetModel.getName()).derrivedFrom(XIS_ROOT);
-        JSMethod createChildren = widgetClass.overrideMethod("createChildren");
-        createChildren.addStatement(new JSReturn(new JSArray(childContructorCalls)));
+        script.addDeclaration(toClass(widgetModel));
     }
 
     private List<JSContructorCall> evalulateChildren(ModelElement parent) {
