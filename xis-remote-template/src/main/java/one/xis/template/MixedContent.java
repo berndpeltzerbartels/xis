@@ -1,4 +1,4 @@
 package one.xis.template;
 
-interface MixedContent {
+public interface MixedContent {
 }

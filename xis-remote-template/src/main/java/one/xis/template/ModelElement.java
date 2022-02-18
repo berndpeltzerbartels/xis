@@ -22,4 +22,9 @@ public class ModelElement extends ElementBase {
     public String toString() {
         return "<" + getElementName() + ">";
     }
+
+    @Override
+    public void accept(WidgetModelVisitor visitor) {
+        visitor.visitElement(this);
+    }
 }

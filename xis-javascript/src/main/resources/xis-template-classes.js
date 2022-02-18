@@ -131,16 +131,20 @@ class XISStaticTextNode {
 
 class XISLoopElement {
 
-    constructor(loopAttributes) {
-        this.loopAttributes = loopAttributes;
+    constructor() {
         this.element = this.createElement();
         this.rows = [];
     }
 
+    getLoopAttributes() {
+        // abstract
+    }
+
     init(parent) {
+        loopAttributes = this.getLoopAttributes();
         this.parent = parent;
         this.parent.element.appendChild(this.element);
-        this.names = [this.loopAttributes.itemVarName, this.loopAttributes.indexVarName, this.loopAttributes.numberVarName];
+        this.names = [loopAttributes.itemVarName, loopAttributes.indexVarName, loopAttributes.numberVarName];
     }
 
     createElement() {
@@ -274,14 +278,6 @@ class XISRoot {
         this.widget.update();
     }
 
-
-    setWidget(widget) {
-        if (this.widget) {
-            this.element.removeChild(this.widget.element);
-        }
-        this.widget = widget;
-        this.widget.init(this);
-    }
 
     getValue(path) {
         var name = path[0];

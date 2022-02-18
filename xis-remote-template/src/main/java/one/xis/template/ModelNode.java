@@ -1,4 +1,6 @@
 package one.xis.template;
 
-interface ModelNode {
+public interface ModelNode {
+
+    void accept(WidgetModelVisitor visitor);
 }

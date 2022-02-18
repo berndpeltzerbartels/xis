@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Data
-abstract class ElementBase implements ModelNode {
+public abstract class ElementBase implements ModelNode {
     private final String elementName;
     private final Map<String, MutableAttribute> mutableAttributes = new HashMap<>();
     private final Map<String, String> staticAttributes = new HashMap<>();
@@ -25,4 +25,5 @@ abstract class ElementBase implements ModelNode {
     public String toString() {
         return "<" + elementName + ">";
     }
+
 }
