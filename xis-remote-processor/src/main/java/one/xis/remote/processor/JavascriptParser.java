@@ -26,7 +26,11 @@ class JavascriptParser {
     }
 
     private List<JSContructorCall> evalulateChildren(ModelElement parent) {
-        return parent.getChildren().stream().map(this::toClass).map(JSContructorCall::new).collect(Collectors.toList());
+        List<JSClass> jsClasses = parent.getChildren().stream()
+                .map(this::toClass).collect(Collectors.toList());
+        script.addDeclarations(jsClasses);
+        return jsClasses.stream().map(JSContructorCall::new)
+                .collect(Collectors.toList());
     }
 
     private JSClass toClass(ModelNode node) {
@@ -84,8 +88,8 @@ class JavascriptParser {
 
     private JSClass toClass(ContainerElement containerElement) {
         JSClass containerClass = new JSClass(nextName()).derrivedFrom(XIS_CONTAINER);
-        containerClass.addField("containerId", containerElement.getContainerId());
-        containerClass.addField("defaultWidgetId", containerElement.getDefaultWidgetId());
+        containerClass.addField("containerId", new JSString(containerElement.getContainerId()));
+        containerClass.addField("defaultWidgetId", new JSString(containerElement.getDefaultWidgetId()));
         return containerClass;
     }
 

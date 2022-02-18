@@ -3,6 +3,7 @@ package one.xis.js;
 import lombok.Value;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Value
@@ -14,6 +15,11 @@ public class JSScript implements JSContext {
     public void addDeclaration(JSDeclaration declaration) {
         declarations.add(declaration);
     }
+
+    public <D extends JSDeclaration> void addDeclarations(Collection<D> declarations) {
+        declarations.addAll(declarations);
+    }
+
 
     public void addFunction(JSFunction jsFunction) {
         funtionDeclarations.add(jsFunction);

@@ -55,10 +55,6 @@ public class JSClass implements JSDeclaration {
         return method;
     }
 
-    public JSClass addField(String name, String value) {
-        return this;
-    }
-
     public JSClass addField(String name, JSValue value) {
         return this;
     }
