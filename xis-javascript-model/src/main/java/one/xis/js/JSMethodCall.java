@@ -8,7 +8,7 @@ public class JSMethodCall implements JSContext, JSValue, JSStatement {
     JSMethod method;
     JSValue[] args;
 
-    JSMethodCall(JSContext parent, JSMethod method, JSValue... args) {
+    public JSMethodCall(JSContext parent, JSMethod method, JSValue... args) {
         this.parent = parent;
         this.method = method;
         this.args = args;

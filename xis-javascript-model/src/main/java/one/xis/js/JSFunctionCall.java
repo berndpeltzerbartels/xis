@@ -16,7 +16,7 @@ public class JSFunctionCall implements JSValue, JSStatement {
         this.args.addAll(Arrays.asList(args));
     }
 
-    public JSFunctionCall withParam(JSValue value) {
+    public JSFunctionCall addParam(JSValue value) {
         args.add(value);
         return this;
     }

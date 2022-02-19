@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Value
-public class JSMethod {
-    JSObject owner;
+public class JSMethod implements JSContext {
+    JSClass owner;
     String name;
     List<JSStatement> statements = new ArrayList<>();
 

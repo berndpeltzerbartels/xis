@@ -8,7 +8,6 @@ public class XISClasses {
     public static final JSClass XIS_CONTAINER = new JSClass("XISContainer");
     public static final JSClass XIS_STATIC_TEXT_NODE = new JSClass("XISStaticTextNode");
     public static final JSClass XIS_MUTABLE_TEXT_NODE = new JSClass("XISMutableTextNode");
-    public static final JSClass XIS_LOOP = new JSClass("XISLoop");
 
 
     static {
@@ -17,14 +16,13 @@ public class XISClasses {
                 .addMethod("update", 1)
                 .addAbstractMethod("createElement", 0)
                 .addMethod("getValue", 1);
-        /*
 
-         */
         XIS_ELEMENT.addMethod("init", 1)
                 .addMethod("getValue", 1)
                 .addMethod("update", 0)
                 .addMethod("updateChildren", 0)
                 .addAbstractMethod("updateAttributes", 0)
+                .addMethod("updateAttribute", 2)
                 .addMethod("evalIf", 0)
                 .addAbstractMethod("createElement", 0)
                 .addAbstractMethod("createChildren", 0)
@@ -39,6 +37,7 @@ public class XISClasses {
                 .addMethod("updateAllChildren", 0)
                 .addMethod("unlinkAll", 0)
                 .addAbstractMethod("updateAttributes", 0)
+                .addMethod("updateAttribute", 2)
                 .addMethod("getValue", 1)
                 .addMethod("getArray", 0)
                 .addMethod("resize", 1)
@@ -52,17 +51,20 @@ public class XISClasses {
                 .addMethod("getValue", 1)
                 .addMethod("update", 0)
                 .addAbstractMethod("updateAttributes", 0)
+                .addMethod("updateAttribute", 2)
                 .addMethod("evalIf", 0)
                 .addAbstractMethod("createElement", 0)
                 .addMethod("unlink", 0);
 
         XIS_STATIC_TEXT_NODE.addMethod("init", 1)
                 .addMethod("update", 1)
-                .addAbstractMethod("getText", 0);
+                .addAbstractMethod("getText", 0)
+                .addMethod("getValue", 1);
 
         XIS_MUTABLE_TEXT_NODE.addMethod("init", 1)
                 .addMethod("update", 1)
-                .addAbstractMethod("getText", 0);
+                .addAbstractMethod("getText", 0)
+                .addMethod("getValue", 1);
 
     }
 

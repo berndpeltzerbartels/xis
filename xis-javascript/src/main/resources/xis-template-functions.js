@@ -1,17 +1,7 @@
 
-function createElement(tagName, attributes = {}) {
-    var e = document.createElement(tagName);
-    for (var name of Object.keys(attributes)) {
-        e.setAttribute(name, attributes[name]);
-    }
-    return e;
+function append(orig, value) {
+    orig += value;
 }
-
-
-function createTextNode() {
-    return document.createTextNode('');
-}
-
 
 function createElement(tagName, attributes = {}) {
     var e = document.createElement(tagName);
@@ -25,10 +15,3 @@ function createTextNode() {
     return document.createTextNode('');
 }
 
-function byId(id) {
-    return document.getElementById(id);
-}
-
-function lastElement(arr) {
-    return arr[arr.length -1];
-}

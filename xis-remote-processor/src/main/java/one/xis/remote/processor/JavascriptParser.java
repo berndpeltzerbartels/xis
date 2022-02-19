@@ -6,9 +6,11 @@ import one.xis.template.*;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static one.xis.js.XISClasses.*;
+import static one.xis.js.XISFunctions.APPEND;
 
 @RequiredArgsConstructor
 class JavascriptParser {
@@ -42,7 +44,6 @@ class JavascriptParser {
         throw new IllegalArgumentException("node=" + node);
     }
 
-
     private JSClass toClass(WidgetModel model) {
         JSClass widgetClass = new JSClass(model.getName()).derrivedFrom(XIS_ROOT);
         JSMethod createChildren = widgetClass.overrideMethod("createChildren");
@@ -61,8 +62,8 @@ class JavascriptParser {
         JSClass elementClass = new JSClass(nextName()).derrivedFrom(XIS_ELEMENT);
         JSMethod createChildren = elementClass.overrideMethod("createChildren");
         createChildren.addStatement(new JSReturn(new JSArray(evalulateChildren(element))));
-        JSMethod createElement = elementClass.overrideMethod("createElement");
-        createElement.addStatement(new JSReturn(new JSFunctionCall(JSFunctions.CREATE_ELEMENT).withParam(new JSString(element.getElementName()))));
+        overrideCreateElement(elementClass, element);
+        overrideUpdateAttributes(elementClass, element);
         return elementClass;
     }
 
@@ -84,6 +85,8 @@ class JavascriptParser {
         JSClass containerClass = new JSClass(nextName()).derrivedFrom(XIS_CONTAINER);
         containerClass.addField("containerId", new JSString(containerElement.getContainerId()));
         containerClass.addField("defaultWidgetId", new JSString(containerElement.getDefaultWidgetId()));
+        overrideCreateElement(containerClass, containerElement);
+        overrideUpdateAttributes(containerClass, containerElement);
         return containerClass;
     }
 
@@ -91,23 +94,9 @@ class JavascriptParser {
         JSClass textNode = new JSClass(nextName()).derrivedFrom(XIS_STATIC_TEXT_NODE);
         JSMethod getText = textNode.overrideMethod("getText");
         JSVar text = new JSVar("text");
-        getText.addStatement(new JSVarAssignment(text, new JSString("")));
-        for (MixedContent content : mutableTextNode.getContent()) {
-            if (content instanceof StaticContent) {
-                getText.addStatement(new JSPlusEquals(text, new JSString(((StaticContent) content).getContent())));
-            } else if (content instanceof ExpressionContent) {
-                JSCode methodCall = new JSCode()
-                        .append(textNode.getField("parent"))
-                        .append(".")
-                        .append(textNode.getMethod("getValue"))
-                        .append("('")
-                        .append(((ExpressionContent) content).getExpression())
-                        .append("')");
-                getText.addStatement(new JSPlusEquals(text, methodCall));
-            }
-        }
+        MixedContentMethodStatements mixedContentMethodStatements = new MixedContentMethodStatements(getText, text);
+        mixedContentMethodStatements.addStatements(mutableTextNode.getContent());
         getText.addStatement(new JSReturn(text));
-        // do not override "update()" for this class
         return textNode;
     }
 
@@ -117,6 +106,106 @@ class JavascriptParser {
         getText.addStatement(new JSReturn(new JSString(staticTextNode.getContent())));
         textNode.overrideMethod("update"); // Nothing to do, here
         return textNode;
+    }
+
+    private JSFunctionCall getCreateElementFunctionCall(ElementBase element) {
+        JSFunctionCall createElementFunctionCall = new JSFunctionCall(JSFunctions.CREATE_ELEMENT).addParam(new JSString(element.getElementName()));
+        if (!element.getStaticAttributes().isEmpty()) {
+            createElementFunctionCall.addParam(staticAttributes(element.getStaticAttributes()));
+        }
+        return createElementFunctionCall;
+    }
+
+    private JSJsonValue staticAttributes(Map<String, String> attributesMap) {
+        JSJsonValue attributes = new JSJsonValue();
+        attributesMap.forEach((key, value) -> attributes.addField(key, new JSString(value)));
+        return attributes;
+    }
+
+    private void overrideCreateElement(JSClass jsClass, ElementBase element) {
+        JSMethod createElement = jsClass.overrideMethod("createElement");
+        createElement.addStatement(new JSReturn(getCreateElementFunctionCall(element)));
+    }
+
+
+    private void overrideUpdateAttributes(JSClass jsClass, ElementBase elementBase) {
+        JSMethod updateAttributes = jsClass.overrideMethod("updateAttributes");
+        elementBase.getMutableAttributes().entrySet().forEach(e -> {
+            JSVar text = new JSVar(nextName());
+            updateAttributes.addStatement(new JSVarAssignment(text, new JSString("")));
+
+            MixedContentMethodStatements mixedContentMethodStatements = new MixedContentMethodStatements(updateAttributes, text);
+            mixedContentMethodStatements.addStatements(e.getValue().getContents());
+
+            JSMethodCall updateAttribute = new JSMethodCall(updateAttributes, jsClass.getMethod("updateAttribute"), new JSString(e.getKey()), text);
+            updateAttributes.addStatement(updateAttribute);
+        });
+    }
+
+    @RequiredArgsConstructor
+    private static class MixedContentMethodStatements {
+        private final JSMethod method;
+        private final JSVar text;
+
+        void addStatements(List<MixedContent> mixedContentList) {
+            method.addStatement(new JSVarAssignment(text, new JSString("")));
+            mixedContentList.forEach(this::addStatements);
+            method.addStatement(new JSReturn(text));
+        }
+
+        private void addStatements(MixedContent mixedContent) {
+            if (mixedContent instanceof StaticContent) {
+                addStaticContentStatements((StaticContent) mixedContent);
+            } else if (mixedContent instanceof ExpressionContent) {
+                addExpressionContentStatements((ExpressionContent) mixedContent);
+            }
+        }
+
+        private void addStaticContentStatements(StaticContent staticContent) {
+            method.addStatement(new JSFunctionCall(APPEND, text, new JSString(staticContent.getContent())));
+        }
+
+        private void addExpressionContentStatements(ExpressionContent expressionContent) {
+            Expression expression = expressionContent.getExpression();
+            if (expression.getFunction() != null) {
+                addExpressionWithFunctionStatements(expression);
+            } else {
+                addExpressionWithoutFunctionStatements(expression);
+            }
+        }
+
+        private void addExpressionWithFunctionStatements(Expression expression) {
+            JSFunction fkt = XISFunctions.getFunction(expression.getFunction());
+            JSFunctionCall fktCall = new JSFunctionCall(fkt);
+            for (ExpressionArg arg : expression.getVars()) {
+                if (arg instanceof ExpressionConstant) {
+                    fktCall.addParam(new JSConstant(((ExpressionConstant) arg).getContent()));
+                } else if (arg instanceof ExpressionString) {
+                    fktCall.addParam(new JSString(((ExpressionString) arg).getContent()));
+                } else if (arg instanceof ExpressionVar) {
+                    JSMethod getValue = method.getOwner().getMethod("getValue");
+                    JSArray variablePath = JSArray.arrayOfStrings(((ExpressionVar) arg).getPath());
+                    JSMethodCall getValueMethodCall = new JSMethodCall(method, getValue, variablePath);
+                    fktCall.addParam(getValueMethodCall);
+                }
+            }
+            method.addStatement(new JSFunctionCall(APPEND, text, fktCall));
+        }
+
+        private void addExpressionWithoutFunctionStatements(Expression expression) {
+            for (ExpressionArg arg : expression.getVars()) {
+                if (arg instanceof ExpressionConstant) {
+                    method.addStatement(new JSFunctionCall(APPEND, text, new JSConstant(((ExpressionConstant) arg).getContent())));
+                } else if (arg instanceof ExpressionString) {
+                    method.addStatement(new JSFunctionCall(APPEND, text, new JSString(((ExpressionString) arg).getContent())));
+                } else if (arg instanceof ExpressionVar) {
+                    JSMethod getValue = method.getOwner().getMethod("getValue");
+                    JSArray variablePath = JSArray.arrayOfStrings(((ExpressionVar) arg).getPath());
+                    JSMethodCall getValueMethodCall = new JSMethodCall(method, getValue, variablePath);
+                    method.addStatement(new JSFunctionCall(APPEND, text, getValueMethodCall));
+                }
+            }
+        }
     }
 
     private String nextName() {

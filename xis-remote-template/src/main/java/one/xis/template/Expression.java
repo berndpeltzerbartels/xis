@@ -4,6 +4,12 @@ import lombok.Data;
 
 import java.util.List;
 
+/**
+ * A Template Variable
+ * <p>
+ * Examples: $|
+ * </p>
+ */
 @Data
 public class Expression {
     private final String content;

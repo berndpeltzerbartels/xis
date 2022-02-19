@@ -17,4 +17,11 @@ public class CollectionUtils {
         return iterator.next();
     }
 
+    public <T> T onlyElement(Collection<T> coll) {
+        if (coll.size() > 0) {
+            throw new IllegalStateException(coll.size() + " elements instead of one");
+        }
+        return first(coll);
+    }
+
 }

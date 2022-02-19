@@ -9,6 +9,6 @@ include 'xis-remote-template'
 include 'xis-helper'
 include 'xis-remote-processor'
 include 'xis-javascript'
-include 'XIS-remote-dom'
+include 'xis-javascript-model'
 include 'xis-servlet'
 

@@ -11,6 +11,7 @@ repositories {
 
 dependencies {
     implementation project(':xis-helper')
+    implementation project(':xis-javascript-model')
     implementation project(':xis-remote-template')
 
     annotationProcessor 'org.projectlombok:lombok:1.18.12'

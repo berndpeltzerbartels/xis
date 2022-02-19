@@ -1,16 +1,4 @@
 
-
-/************************** LoopAttributes ********************************************/
-
-class LoopAttributes {
-    arrayPath = [];
-    itemVarName;
-    indexVarName;
-    numberVarName;
-}
-
-/************************** XISElement ********************************************/
-
 class XISElement {
 
     constructor() {
@@ -47,19 +35,10 @@ class XISElement {
 
     updateAttributes() {
         // abstract
-        /*
-        var attr = '';
+    }
 
-        attr = '';
-        attr += this.parent.getValue('');
-        if (attr != this.element.getAttribute('style')) {
-            this.element.setAttribute('style', attr);
-        }
-
-        ...
-        
-        this.element.setAttribute()
-        */
+    upateAttribute(name, value) {
+        this.element.setAttribute(name, value);
     }
 
     evalIf() {
@@ -102,6 +81,10 @@ class XISMutableTextNode {
 
     getText() {
         // abstract. USE VALUE FIELD !!!
+    }
+
+    getValue(name) {
+        return this.parent.getValue(name);
     }
 }
 
@@ -193,16 +176,10 @@ class XISLoopElement {
 
     updateAttributes() {
         // abstract
-        var attr = '';
+    }
 
-        attr = '';
-        attr += this.getValue(''); // NOT PARENT, HERE !!!!
-        if (attr != this.element.getAttribute('style')) {
-            this.element.setAttribute('style', attr);
-        }
-
-        // etc
-        // this.element.setAttribute()
+   upateAttribute(name, value) {
+        this.element.setAttribute(name, value);
     }
 
     getValue(path) {
@@ -333,19 +310,10 @@ class XISContainer {
 
     updateAttributes() {
         // abstract
-        /*
-        var attr = '';
+    }
 
-        attr = '';
-        attr += this.parent.getValue('');
-        if (attr != this.element.getAttribute('style')) {
-            this.element.setAttribute('style', attr);
-        }
-
-        ...
-        
-        this.element.setAttribute()
-        */
+    upateAttribute(name, value) {
+        this.element.setAttribute(name, value);
     }
 
     evalIf() {
