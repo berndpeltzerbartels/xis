@@ -11,6 +11,7 @@ public class JSMethod implements JSContext {
     String name;
     List<JSStatement> statements = new ArrayList<>();
 
+    // TODO validate number of args
     public void addStatement(JSStatement statement) {
         statements.add(statement);
     }

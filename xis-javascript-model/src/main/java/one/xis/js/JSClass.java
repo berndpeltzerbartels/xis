@@ -1,11 +1,17 @@
 package one.xis.js;
 
-import lombok.Value;
+import lombok.Data;
 
-@Value
-public class JSClass implements JSDeclaration {
-    String className;
-    JSClass superClass;
+import java.util.HashMap;
+import java.util.Map;
+
+@Data
+public class JSClass implements JSDeclaration, JSContext {
+    private final String className;
+    private JSClass superClass;
+    private final Map<String, JSMethod> methods = new HashMap<>();
+    private final Map<String, JSMethod> abstractMethods = new HashMap<>();
+    private final Map<String, JSField> fields = new HashMap<>();
 
     public JSClass(String className) {
         this.className = className;
@@ -17,77 +23,52 @@ public class JSClass implements JSDeclaration {
         this.superClass = superClass;
     }
 
-    public static JSClass anonymous() {
-        return new JSClass(null, null);
-    }
 
     public JSClass addMethod(String name, int args) {
+        methods.put(name, new JSMethod(this, name, args));
         return this;
     }
 
     public JSClass addAbstractMethod(String name, int args) {
+        abstractMethods.put(name, new JSMethod(this, name, args));
         return this;
     }
 
 
     public JSMethod getMethod(String name) {
-        return null; // TODO throw Exception if not present
-    }
-
-    public JSObject createVar(String name) {
-        return new JSObject(name, this);
-    }
-
-    public JSMethod overrideMethod(String name) {
-        return null;
-    }
-
-    public JSObject newInstance(JSArg... args) {
-
-        return null;
-    }
-
-    public JSClass derrivedFrom(JSClass jsClass) {
-        return this;
-    }
-
-    public JSMethod overrideMethod(JSMethod method) {
+        JSMethod method = abstractMethods.get(name);
+        if (method == null) {
+            throw new NoSuchMethodError(name);
+        }
         return method;
     }
 
+
+    public JSMethod overrideMethod(String name) {
+        JSMethod method = abstractMethods.get(name);
+        if (method == null) {
+            method = methods.get(name);
+        }
+        if (method == null) {
+            throw new NoSuchMethodError(name);
+        }
+        return method;
+    }
+
+
+    public JSClass derrivedFrom(JSClass jsClass) {
+        superClass = jsClass;
+        return this;
+    }
+
     public JSClass addField(String name, JSValue value) {
+        JSField field = new JSField(this, name);
+        field.setValue(value);
+        fields.put(name, field);
         return this;
     }
 
     public JSField getField(String name) {
-        return null;
+        return fields.get(name);
     }
-
-    @Value
-    public static class JSClassBuilder {
-        String name;
-
-        public JSClassBuilder derrivedFrom(JSClass jsClass) {
-            return this;
-        }
-
-        public JSClassBuilder overrideMethod(JSMethod method) {
-            return this;
-        }
-
-        public JSClassBuilder addField(String name, String value) {
-            return this;
-        }
-
-        public JSClassBuilder addField(String name, JSObject value) {
-            return this;
-        }
-
-        public JSObject build() {
-            return null;
-        }
-
-    }
-
-
 }

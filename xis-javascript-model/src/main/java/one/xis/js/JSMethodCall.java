@@ -12,5 +12,6 @@ public class JSMethodCall implements JSContext, JSValue, JSStatement {
         this.parent = parent;
         this.method = method;
         this.args = args;
+        // TODO validate number of args
     }
 }
