@@ -1,4 +1,4 @@
-# XIS-Remote #
+# XIS #
 
 XIS-Remote allows you to create your single-page web-application with Spring-backend easily by hiding the
 commununication-layer, based on HTTP and socket.io, behind some simple abstractions. By using XIS-Remote, you will save
