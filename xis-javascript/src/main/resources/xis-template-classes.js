@@ -60,6 +60,56 @@ class XISElement {
     }
 }
 
+class XISElementGroup {
+
+    constructor() {
+        this.root = this.createTree();
+        this.children = this.createChildren();
+        this.leafElements = [];
+    }
+
+    init(parent) {
+        this.parent = parent;
+        this.parent.element.appendChild(this.root);
+        for (var leaf of this.leafElements) {
+           for (var node of leaf.children) {
+                node.init(leaf);
+           }
+        }
+    }
+
+    createTree() {
+        // abstract, build tree and set leaf-elements
+    }
+
+    addLeafELement(element) {
+        this.leafElements.push(element);
+    }
+
+
+    update() {
+        this.updateAttributes();
+        this.updateLeafElements();
+    }
+
+    updateLeafElements() {
+        for (var leaf of this.leafElements) {
+            leaf.update();
+        }
+    }
+
+    updateAttributes() {
+        // abstract: update all elements with variable attributes
+    }
+
+    getValue(path) {
+        return this.parent.getValue(path);
+    }
+
+
+
+}
+
 
 class XISMutableTextNode {
 

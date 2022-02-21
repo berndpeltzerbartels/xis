@@ -3,7 +3,7 @@ package one.xis.js;
 import lombok.Value;
 
 /**
- * A varisble-name or a number.
+ * A variable-name or a number.
  */
 @Value
 public class JSConstant implements JSValue {

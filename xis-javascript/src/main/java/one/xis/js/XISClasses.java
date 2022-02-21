@@ -8,6 +8,7 @@ public class XISClasses {
     public static final JSClass XIS_CONTAINER = new JSClass("XISContainer");
     public static final JSClass XIS_STATIC_TEXT_NODE = new JSClass("XISStaticTextNode");
     public static final JSClass XIS_MUTABLE_TEXT_NODE = new JSClass("XISMutableTextNode");
+    public static final JSClass XIS_ELEMENT_GROUP = new JSClass("XISElementGroup");
 
 
     static {
@@ -27,6 +28,15 @@ public class XISClasses {
                 .addAbstractMethod("createElement", 0)
                 .addAbstractMethod("createChildren", 0)
                 .addMethod("unlink", 0);
+
+        XIS_ELEMENT_GROUP.addMethod("init", 1)
+                .addMethod("createTree", 0)
+                .addMethod("addLeafElement", 1)
+                .addMethod("update", 0)
+                .addMethod("updateLeafElements", 0)
+                .addAbstractMethod("updateAttributes", 0)
+                .addMethod("getValue", 1);
+
 
         XIS_LOOP_ELEMENT.addMethod("init", 1)
                 .addAbstractMethod("getLoopAttributes", 0)
