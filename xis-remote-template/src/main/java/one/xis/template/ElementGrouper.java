@@ -1,5 +1,5 @@
 package one.xis.template;
 
-public interface ModelNode {
+class ElementGrouper {
 
 }

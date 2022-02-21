@@ -35,7 +35,7 @@ class ExpressionParserTest {
         assertThat(result.getContent()).isEqualTo("format(x.y, 'DE')");
         assertThat(result.getVars()).hasSize(2);
         assertThat(result.getVars().get(0)).isEqualTo(new ExpressionVar("x.y"));
-        assertThat(result.getVars().get(1)).isEqualTo(new ExpressionString("'DE')"));
+        assertThat(result.getVars().get(1)).isEqualTo(new ExpressionString("DE"));
         assertThat(result.getFunction()).isEqualTo("format");
     }
 }

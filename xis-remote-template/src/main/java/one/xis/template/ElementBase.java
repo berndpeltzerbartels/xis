@@ -1,6 +1,7 @@
 package one.xis.template;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,6 +20,10 @@ public abstract class ElementBase implements ModelNode {
 
     void addStaticAttribute(String name, String content) {
         staticAttributes.put(name, content);
+    }
+
+    boolean isDynamic() {
+        return ifCondition != null || loop != null;
     }
 
     @Override

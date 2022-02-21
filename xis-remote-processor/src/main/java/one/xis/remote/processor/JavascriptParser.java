@@ -21,7 +21,7 @@ class JavascriptParser {
         script.addDeclaration(toClass(widgetModel));
     }
 
-    private List<JSContructorCall> evalulateChildren(ModelElement parent) {
+    private List<JSContructorCall> evaluateChildren(TemplateElement parent) {
         List<JSClass> jsClasses = parent.getChildren().stream()
                 .map(this::toClass).collect(Collectors.toList());
         script.addDeclarations(jsClasses);
@@ -32,8 +32,8 @@ class JavascriptParser {
     private JSClass toClass(ModelNode node) {
         if (node instanceof WidgetModel) {
             return toClass((WidgetModel) node);
-        } else if (node instanceof ModelElement) {
-            return toClass((ModelElement) node);
+        } else if (node instanceof TemplateElement) {
+            return toClass((TemplateElement) node);
         } else if (node instanceof ContainerElement) {
             return toClass((ContainerElement) node);
         } else if (node instanceof MutableTextNode) {
@@ -47,27 +47,27 @@ class JavascriptParser {
     private JSClass toClass(WidgetModel model) {
         JSClass widgetClass = new JSClass(model.getName()).derrivedFrom(XIS_ROOT);
         JSMethod createChildren = widgetClass.overrideMethod("createChildren");
-        createChildren.addStatement(new JSReturn(new JSArray(evalulateChildren(model))));
+        createChildren.addStatement(new JSReturn(new JSArray(evaluateChildren(model))));
         return widgetClass;
     }
 
-    private JSClass toClass(ModelElement element) {
+    private JSClass toClass(TemplateElement element) {
         if (element.getLoop() == null) {
             return toElementClassWithoutLoop(element);
         }
         return toElementClassWitLoop(element);
     }
 
-    private JSClass toElementClassWithoutLoop(ModelElement element) {
+    private JSClass toElementClassWithoutLoop(TemplateElement element) {
         JSClass elementClass = new JSClass(nextName()).derrivedFrom(XIS_ELEMENT);
         JSMethod createChildren = elementClass.overrideMethod("createChildren");
-        createChildren.addStatement(new JSReturn(new JSArray(evalulateChildren(element))));
+        createChildren.addStatement(new JSReturn(new JSArray(evaluateChildren(element))));
         overrideCreateElement(elementClass, element);
         overrideUpdateAttributes(elementClass, element);
         return elementClass;
     }
 
-    private JSClass toElementClassWitLoop(ModelElement element) {
+    private JSClass toElementClassWitLoop(TemplateElement element) {
         JSClass elementClass = toElementClassWithoutLoop(element);
         ForLoop loop = element.getLoop();
         JSJsonValue loopAttributes = new JSJsonValue();

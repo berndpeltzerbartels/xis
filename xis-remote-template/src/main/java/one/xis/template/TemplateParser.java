@@ -67,8 +67,8 @@ public class TemplateParser {
         return containerElement;
     }
 
-    private ModelElement parse(Element element) {
-        var modelElement = new ModelElement(element.getTagName());
+    private TemplateElement parse(Element element) {
+        var modelElement = new TemplateElement(element.getTagName());
         getAttributes(element).forEach((name, rawValue) -> addAttribute(name, rawValue, modelElement));
         parseFrameworkAttributes(element, modelElement);
         parseChildren(element).forEach(modelElement::addChild);

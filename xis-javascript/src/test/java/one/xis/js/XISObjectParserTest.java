@@ -11,7 +11,7 @@ class XISObjectParserTest {
         @BeforeEach
         void setUp() {
             // Testfactory in same package
-            //WidgetModel model = new WidgetModel("", new ModelElement("div"));
+            //WidgetModel model = new WidgetModel("", new TemplateElement("div"));
             //model.getRoot().setIfCondition(new IfCondition(new Expression("")));
         }
 

@@ -40,7 +40,7 @@ class TemplateParserTest {
             assertThat(widgetModel.getLoop().getArraySource().getVars()).hasSize(1);
             assertThat(widgetModel.getLoop().getArraySource().getVars().get(0)).isEqualTo(new ExpressionVar("items"));
 
-            var childElements = widgetModel.getChildren().stream().filter(ModelElement.class::isInstance).map(ModelElement.class::cast).collect(Collectors.toList());
+            var childElements = widgetModel.getChildren().stream().filter(TemplateElement.class::isInstance).map(TemplateElement.class::cast).collect(Collectors.toList());
             assertThat(childElements).hasSize(1);
             var li = childElements.get(0);
             assertThat(li.getElementName()).isEqualTo("li");
@@ -78,7 +78,7 @@ class TemplateParserTest {
             assertThat(ifCondition.getExpression().getVars()).hasSize(1);
             assertThat(ifCondition.getExpression().getVars().get(0)).isEqualTo(new ExpressionVar("visible"));
 
-            List<ModelElement> childElements = widgetModel.getChildren().stream().filter(ModelElement.class::isInstance).map(ModelElement.class::cast).collect(Collectors.toList());
+            List<TemplateElement> childElements = widgetModel.getChildren().stream().filter(TemplateElement.class::isInstance).map(TemplateElement.class::cast).collect(Collectors.toList());
 
             assertThat(childElements).hasSize(2);
 

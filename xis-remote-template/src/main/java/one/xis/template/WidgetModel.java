@@ -3,26 +3,18 @@ package one.xis.template;
 import lombok.Getter;
 import lombok.experimental.Delegate;
 
-public class WidgetModel extends ModelElement {
+public class WidgetModel extends TemplateElement {
 
     @Getter
     private final String name;
 
-    @Delegate(excludes = Excludes.class)
-    private final ModelElement modelElement;
+    @Delegate
+    private final TemplateElement element;
 
-    private interface Excludes {
-        void accept(WidgetModelVisitor visitor);
-    }
 
-    public WidgetModel(String name, ModelElement modelElement) {
+    public WidgetModel(String name, TemplateElement element) {
         super(name);
-        this.modelElement = modelElement;
+        this.element = element;
         this.name = name;
-    }
-
-    @Override
-    public void accept(WidgetModelVisitor visitor) {
-        visitor.visitModel(this);
     }
 }

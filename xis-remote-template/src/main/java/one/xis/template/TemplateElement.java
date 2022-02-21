@@ -6,11 +6,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class ModelElement extends ElementBase {
+public class TemplateElement extends ElementBase {
     @Getter
     private final List<ModelNode> children = new ArrayList<>();
 
-    public ModelElement(String elementName) {
+    public TemplateElement(String elementName) {
         super(elementName);
     }
 
@@ -21,10 +21,5 @@ public class ModelElement extends ElementBase {
     @Override
     public String toString() {
         return "<" + getElementName() + ">";
-    }
-
-    @Override
-    public void accept(WidgetModelVisitor visitor) {
-        visitor.visitElement(this);
     }
 }

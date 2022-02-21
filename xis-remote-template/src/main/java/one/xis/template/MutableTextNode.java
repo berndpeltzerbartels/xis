@@ -7,9 +7,4 @@ import java.util.List;
 @Data
 public class MutableTextNode implements TextNode {
     private final List<MixedContent> content;
-
-    @Override
-    public void accept(WidgetModelVisitor visitor) {
-        visitor.visitMutableTextNode(this);
-    }
 }
