@@ -1,6 +1,6 @@
 package one.xis.js;
 
-public class XISFunctions {
+public class Functions {
 
     public static final JSFunction APPEND = new JSFunction("append", 2, 2);
 

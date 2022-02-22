@@ -6,16 +6,17 @@ class XISElement {
         this.children = this.createChildren();
     }
 
-    init(parent) {
+    init(parent, valueHolder) {
         this.parent = parent;
+        this.valueHolder = valueHolder;
         this.parent.element.appendChild(this.element);
         for (var child of this.children) {
-            child.init(this);
+            child.init(this, valueHolder);
         }
     }
 
     getValue(path) {
-        return this.parent.getValue(path);
+        return this.valueHolder.getValue(path);
     }
 
     update() {
@@ -117,8 +118,9 @@ class XISMutableTextNode {
         this.node = createTextNode();
     }
 
-    init(parent) {
+    init(parent, valueHolder) {
         this.parent = parent;
+        this.valueHolder = valueHolder;
         this.parent.element.appendChild(this.node);
     }
 
@@ -134,7 +136,7 @@ class XISMutableTextNode {
     }
 
     getValue(name) {
-        return this.parent.getValue(name);
+        return this.valueHolder.getValue(name);
     }
 }
 
@@ -173,9 +175,10 @@ class XISLoopElement {
         // abstract
     }
 
-    init(parent) {
+    init(parent, valueHolder) {
         loopAttributes = this.getLoopAttributes();
         this.parent = parent;
+        this.valueHolder = valueHolder;
         this.parent.element.appendChild(this.element);
         this.names = [loopAttributes.itemVarName, loopAttributes.indexVarName, loopAttributes.numberVarName];
     }
@@ -244,8 +247,8 @@ class XISLoopElement {
             }
             return rv;
         }
-        if (this.parent) {
-            return this.parent.getValue(path);
+        if (this.valueHolder) {
+            return this.valueHolder.getValue(path);
         }
     }
 
@@ -270,7 +273,7 @@ class XISLoopElement {
     appendRow() {
         var children = this.createChildren();
         for (var i = 0; i < children.length; i++) {
-            children[i].init(this);
+            children[i].init(this, this);
         }
         this.rows.push(children);
     }
@@ -322,6 +325,11 @@ class XISRoot {
         // abstract
     }
 
+    createChildren() {
+        // abstract
+        return [];
+    }
+
 }
 
 class XISContainer {
@@ -330,8 +338,9 @@ class XISContainer {
         this.element = this.createElement();
     }
 
-    init(parent) {
+    init(parent, valueHolder) {
         this.parent = parent;
+        this.valueHolder = valueHolder;
         this.parent.element.appendChild(this.element);
     }
 
@@ -340,12 +349,12 @@ class XISContainer {
             this.element.removeChild(this.widget.element);
         }
         this.widget = widget;
-        this.widget.init(this);
+        this.widget.init(this, this.valueHolder);
         this.widget.update();
     }
 
     getValue(path) {
-        return this.parent.getValue(path);
+        return this.valueHolder.getValue(path);
     }
 
     update() {

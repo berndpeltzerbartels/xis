@@ -2,25 +2,25 @@ package one.xis.js;
 
 import one.xis.utils.io.IOUtils;
 
-class JSResourceLoader {
+class JavascriptResourceLoader {
 
     private static String javascript;
     private static long lastModified;
-    private static JSResource jsResource;
+    private static JavascriptResource XISResource;
 
     static {
         javascript = getJavascript();
         lastModified = getLastModified();
-        jsResource = new JSResource(lastModified, javascript);
+        XISResource = new JavascriptResource(lastModified, javascript);
     }
 
-    public static synchronized JSResource getJsResource() {
+    public static synchronized JavascriptResource getResource() {
         if (getLastModified() > lastModified) {
             javascript = getJavascript();
             lastModified = getLastModified();
-            jsResource = new JSResource(lastModified, javascript);
+            XISResource = new JavascriptResource(lastModified, javascript);
         }
-        return jsResource;
+        return XISResource;
     }
 
 

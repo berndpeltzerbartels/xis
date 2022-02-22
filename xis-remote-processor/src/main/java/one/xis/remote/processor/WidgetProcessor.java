@@ -1,6 +1,9 @@
 package one.xis.remote.processor;
 
 import com.google.auto.service.AutoService;
+import one.xis.js.ES5JSWriter;
+import one.xis.js.JSScript;
+import one.xis.js.JavascriptParser;
 import one.xis.template.TemplateParser;
 import one.xis.template.WidgetModel;
 import one.xis.utils.xml.XmlUtil;
@@ -12,6 +15,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.stream.Collectors;
@@ -61,7 +65,7 @@ public class WidgetProcessor extends AnnotationProcessor {
 
 
     private void writeJavaScript() throws Exception {
-        Appendable writer = processorUtils.writer("public/resources/xis-remote.js");
+        PrintWriter writer = processorUtils.writer("public/resources/xis-remote.js");
         try {
             writeJavaScript(writer);
 
@@ -76,11 +80,15 @@ public class WidgetProcessor extends AnnotationProcessor {
         }
     }
 
-    private void writeJavaScript(Appendable writer) {
+    private void writeJavaScript(PrintWriter writer) {
         writeJavaScript(widgetModels(), writer);
     }
 
-    private void writeJavaScript(Collection<WidgetModel> models, Appendable writer) {
+    private void writeJavaScript(Collection<WidgetModel> models, PrintWriter writer) {
+        JSScript script = new JSScript();
+        JavascriptParser parser = new JavascriptParser(script);
+        models.forEach(parser::parse);
+        new ES5JSWriter(writer).write(script);
         //writeJavaScript(new JSAstParser().parse(models, stateVariables), writer);
     }
 

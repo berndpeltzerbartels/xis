@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Data
-public class JSObject implements JSValue {
+public class JSObject implements JSValue, JSContext {
     private final String name;
     private final JSClass jsClass;
     private final Map<String, JSValue> fields = new HashMap<>();

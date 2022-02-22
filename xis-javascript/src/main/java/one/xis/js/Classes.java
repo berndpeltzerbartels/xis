@@ -1,6 +1,6 @@
 package one.xis.js;
 
-public class XISClasses {
+public class Classes {
 
     public static final JSClass XIS_ROOT = new JSClass("XISRoot"); // TODO check javascript
     public static final JSClass XIS_ELEMENT = new JSClass("XISElement");
@@ -8,7 +8,7 @@ public class XISClasses {
     public static final JSClass XIS_CONTAINER = new JSClass("XISContainer");
     public static final JSClass XIS_STATIC_TEXT_NODE = new JSClass("XISStaticTextNode");
     public static final JSClass XIS_MUTABLE_TEXT_NODE = new JSClass("XISMutableTextNode");
-    public static final JSClass XIS_ELEMENT_GROUP = new JSClass("XISElementGroup");
+    //public static final JSClass XIS_ELEMENT_GROUP = new JSClass("XISElementGroup");
 
 
     static {
@@ -16,9 +16,10 @@ public class XISClasses {
         XIS_ROOT.addMethod("init", 1)
                 .addMethod("update", 1)
                 .addAbstractMethod("createElement", 0)
+                .addAbstractMethod("createChildren", 0)
                 .addMethod("getValue", 1);
 
-        XIS_ELEMENT.addMethod("init", 1)
+        XIS_ELEMENT.addMethod("init", 2)
                 .addMethod("getValue", 1)
                 .addMethod("update", 0)
                 .addMethod("updateChildren", 0)
@@ -29,16 +30,18 @@ public class XISClasses {
                 .addAbstractMethod("createChildren", 0)
                 .addMethod("unlink", 0);
 
-        XIS_ELEMENT_GROUP.addMethod("init", 1)
+        /*
+        XIS_ELEMENT_GROUP.addMethod("init", 2)
                 .addMethod("createTree", 0)
                 .addMethod("addLeafElement", 1)
                 .addMethod("update", 0)
                 .addMethod("updateLeafElements", 0)
                 .addAbstractMethod("updateAttributes", 0)
                 .addMethod("getValue", 1);
+        */
 
 
-        XIS_LOOP_ELEMENT.addMethod("init", 1)
+        XIS_LOOP_ELEMENT.addMethod("init", 2)
                 .addAbstractMethod("getLoopAttributes", 0)
                 .addAbstractMethod("createElement", 0)
                 .addAbstractMethod("creaetChildren", 0)
@@ -56,7 +59,7 @@ public class XISClasses {
                 .addMethod("removeRow", 0)
                 .addMethod("evalIf", 0);
 
-        XIS_CONTAINER.addMethod("init", 1)
+        XIS_CONTAINER.addMethod("init", 2)
                 .addMethod("setWidget", 1)
                 .addMethod("getValue", 1)
                 .addMethod("update", 0)
@@ -66,12 +69,12 @@ public class XISClasses {
                 .addAbstractMethod("createElement", 0)
                 .addMethod("unlink", 0);
 
-        XIS_STATIC_TEXT_NODE.addMethod("init", 1)
+        XIS_STATIC_TEXT_NODE.addMethod("init", 2)
                 .addMethod("update", 1)
                 .addAbstractMethod("getText", 0)
                 .addMethod("getValue", 1);
 
-        XIS_MUTABLE_TEXT_NODE.addMethod("init", 1)
+        XIS_MUTABLE_TEXT_NODE.addMethod("init", 1) // ONE ARG HERE !
                 .addMethod("update", 1)
                 .addAbstractMethod("getText", 0)
                 .addMethod("getValue", 1);

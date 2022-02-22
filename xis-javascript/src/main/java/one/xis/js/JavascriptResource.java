@@ -3,7 +3,7 @@ package one.xis.js;
 import lombok.Data;
 
 @Data
-public class JSResource {
+public class JavascriptResource {
 
     private final long lastModified;
     private final String javascript;

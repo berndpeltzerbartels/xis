@@ -1,7 +1,6 @@
-package one.xis.remote.processor;
+package one.xis.js;
 
 import lombok.RequiredArgsConstructor;
-import one.xis.js.*;
 import one.xis.template.*;
 
 import java.util.Arrays;
@@ -9,15 +8,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static one.xis.js.XISClasses.*;
-import static one.xis.js.XISFunctions.APPEND;
+import static one.xis.js.Classes.*;
+import static one.xis.js.Functions.APPEND;
 
 @RequiredArgsConstructor
-class JavascriptParser {
+public class JavascriptParser {
     private final JSScript script;
     private static long currentNameId = 1;
 
-    void parse(WidgetModel widgetModel) {
+    public void parse(WidgetModel widgetModel) {
         script.addDeclaration(toClass(widgetModel));
     }
 
@@ -175,7 +174,7 @@ class JavascriptParser {
         }
 
         private void addExpressionWithFunctionStatements(Expression expression) {
-            JSFunction fkt = XISFunctions.getFunction(expression.getFunction());
+            JSFunction fkt = Functions.getFunction(expression.getFunction());
             JSFunctionCall fktCall = new JSFunctionCall(fkt);
             for (ExpressionArg arg : expression.getVars()) {
                 if (arg instanceof ExpressionConstant) {

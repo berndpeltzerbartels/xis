@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Data
-public class JSArray implements JSValue {
+public class JSArray implements JSValue, JSContext {
     private final List<? extends JSValue> elements;
 
     public JSArray(JSValue... elements) {
