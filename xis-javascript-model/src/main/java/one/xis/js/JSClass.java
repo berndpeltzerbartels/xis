@@ -33,7 +33,7 @@ public class JSClass implements JSDeclaration, JSContext {
             method = superClass.getMethod(name);
         }
         if (method == null) {
-            throw new NoSuchMethodError(name);
+            throw new NoSuchJSMethodError(className + "#" + name);
         }
         return method;
     }
