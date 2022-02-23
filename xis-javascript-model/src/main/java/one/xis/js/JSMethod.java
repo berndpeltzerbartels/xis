@@ -9,14 +9,8 @@ import java.util.List;
 public class JSMethod implements JSContext {
     JSClass owner;
     String name;
-    String[] args;
+    int args;
     List<JSStatement> statements = new ArrayList<>();
-
-    public JSMethod(JSClass owner, String name, String... args) {
-        this.owner = owner;
-        this.name = name;
-        this.args = args;
-    }
 
     // TODO validate number of args
     public void addStatement(JSStatement statement) {

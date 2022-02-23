@@ -1,8 +1,6 @@
 package one.xis.js;
 
 import java.io.PrintWriter;
-import java.util.Arrays;
-import java.util.stream.Collectors;
 
 public class ES5JSWriter extends JSWriter {
 
@@ -16,7 +14,7 @@ public class ES5JSWriter extends JSWriter {
         writer.append(jsClass.getClassName());
         writer.append("{");
         writeConstructor(jsClass, writer);
-        jsClass.getMethods().values().forEach(method -> writeMethodDeclaration(method, writer));
+        jsClass.getOverriddenMethods().values().forEach(method -> writeMethodDeclaration(method, writer));
         writer.append("}");
     }
 
@@ -37,16 +35,14 @@ public class ES5JSWriter extends JSWriter {
 
 
     private void writeMethodDeclaration(JSMethod method, PrintWriter writer) {
+        if (method.getArgs() != 0) {
+            throw new UnsupportedOperationException("overridden method with parameters is currently not supported");
+        }
         writer.write(method.getName());
         writer.write("(");
-        Arrays.stream(method.getArgs()).collect(Collectors.joining(","));
         writer.write("){");
-
+        method.getStatements().forEach(statement -> writeStatement(statement, writer));
         writer.write("}");
     }
 
-    @Override
-    protected void writeFunctionDeclaration(JSFunction function, PrintWriter writer) {
-
-    }
 }

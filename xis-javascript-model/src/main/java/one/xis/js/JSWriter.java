@@ -17,17 +17,12 @@ public abstract class JSWriter {
     }
 
     private void writeDeclaration(JSDeclaration declaration) {
-        if (declaration instanceof JSFunction) {
-            writeFunctionDeclaration((JSFunction) declaration, writer);
-        } else if (declaration instanceof JSClass) {
+        if (declaration instanceof JSClass) {
             writeClassDeclaration((JSClass) declaration, writer);
         }
     }
 
     protected abstract void writeClassDeclaration(JSClass declaration, PrintWriter writer);
-
-    protected abstract void writeFunctionDeclaration(JSFunction function, PrintWriter writer);
-
 
     protected void writeValue(JSValue value, PrintWriter writer) {
         if (value instanceof JSConstant) {
@@ -148,5 +143,68 @@ public abstract class JSWriter {
         writer.write("'");
     }
 
+    protected void writeVarAssignmentStatement(JSVarAssignment statement, PrintWriter writer) {
+        writer.write("var ");
+        writer.write(statement.getJsVar().getName());
+        writer.write("=");
+        writeValue(statement.getValue(), writer);
+        writer.write(";");
+    }
 
+    protected void writeReturnStatement(JSReturn statement, PrintWriter writer) {
+        writer.write("return ");
+        writeValue(statement.getValue(), writer);
+        writer.write(";");
+    }
+
+
+    protected void writeFunctionCallStatement(JSFunctionCall statement, PrintWriter writer) {
+        writer.write(statement.getJsFunction().getName());
+        writer.write("(");
+        Iterator<JSValue> valueIterator = statement.getArgs().iterator();
+        while (valueIterator.hasNext()) {
+            writeValue(valueIterator.next(), writer);
+            if (valueIterator.hasNext()) {
+                writer.write(",");
+            }
+        }
+        writer.write(")");
+        writer.write(";");
+    }
+
+
+    protected void writeMethodCallStatement(JSMethodCall statement, PrintWriter writer) {
+        if (statement.getParent() instanceof JSObject) {
+            JSObject object = (JSObject) statement.getParent();
+            writer.write(object.getName());
+        } else {
+            writer.write("this");
+        }
+        writer.write(statement.getMethod().getName());
+        writer.write("(");
+        Iterator<JSValue> valueIterator = Arrays.stream(statement.getArgs()).iterator();
+        while (valueIterator.hasNext()) {
+            writeValue(valueIterator.next(), writer);
+            if (valueIterator.hasNext()) {
+                writer.write(",");
+            }
+        }
+        writer.write(")");
+        writer.write(";");
+    }
+
+
+    protected void writeStatement(JSStatement statement, PrintWriter writer) {
+        if (statement instanceof JSVarAssignment) {
+            writeVarAssignmentStatement((JSVarAssignment) statement, writer);
+        } else if (statement instanceof JSReturn) {
+            writeReturnStatement((JSReturn) statement, writer);
+        } else if (statement instanceof JSFunctionCall) {
+            writeFunctionCallStatement((JSFunctionCall) statement, writer);
+        } else if (statement instanceof JSMethodCall) {
+            writeMethodCallStatement((JSMethodCall) statement, writer);
+        } else {
+            throw new UnsupportedOperationException("write " + statement);
+        }
+    }
 }
