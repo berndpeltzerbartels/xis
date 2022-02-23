@@ -1,7 +1,5 @@
 package one.xis.utils.io;
 
-import lombok.experimental.UtilityClass;
-
 import java.io.*;
 
 public class IOUtils {
@@ -14,28 +12,33 @@ public class IOUtils {
         }
     }
 
-    public  static String getResourceAsString(String resourcePath) {
+    public static String getResourceAsString(String resourcePath) {
         return getContent(getResourceAsStream(resourcePath), "UTF-8");
     }
 
-    public  static InputStream getResourceAsStream(String resourcePath) {
-        return ClassLoader.getSystemResourceAsStream(resourcePath);
+    public static InputStream getResourceAsStream(String resourcePath) {
+        InputStream in = ClassLoader.getSystemResourceAsStream(resourcePath);
+        if (in == null) {
+            throw new NoSuchResourceException(resourcePath);
+        }
+        return in;
     }
 
-    public  static InputStream getResourceForClass(Class<?> aClass, String resourcName) {
+    public static InputStream getResourceForClass(Class<?> aClass, String resourcName) {
         String path = aClass.getPackageName().replace('.', '/') + '/' + resourcName;
         return aClass.getClassLoader().getResourceAsStream(path);
     }
 
-    public  static String getContent(File file, String encoding) {
+    public static String getContent(File file, String encoding) {
         try {
+
             return getContent(new FileInputStream(file), encoding);
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public static  String getContent(InputStream inputStream, String charset) {
+    public static String getContent(InputStream inputStream, String charset) {
         StringBuilder resultStringBuilder = new StringBuilder();
         try {
             try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, charset))) {

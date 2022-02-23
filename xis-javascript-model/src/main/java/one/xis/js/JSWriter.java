@@ -114,7 +114,7 @@ public abstract class JSWriter {
             JSObject object = (JSObject) methodCall.getParent();
             writer.write(object.getName());
         } else {
-            writer.write("this");
+            writer.write("this.");
         }
         writer.write(".");
         writer.write(methodCall.getMethod().getName());
@@ -178,7 +178,7 @@ public abstract class JSWriter {
             JSObject object = (JSObject) statement.getParent();
             writer.write(object.getName());
         } else {
-            writer.write("this");
+            writer.write("this.");
         }
         writer.write(statement.getMethod().getName());
         writer.write("(");

@@ -19,7 +19,7 @@ public class JSSuperClass extends JSClass {
         methods.put(name, new JSMethod(this, name, args));
         return this;
     }
-    
+
     public JSSuperClass addAbstractMethod(String name) {
         // We are using abstract methods, without parematers only
         abstractMethods.put(name, new JSMethod(this, name, 0));
@@ -29,7 +29,7 @@ public class JSSuperClass extends JSClass {
 
     @Override
     public JSMethod getMethod(String name) {
-        JSMethod method = abstractMethods.get(name);
+        JSMethod method = methods.get(name);
         if (method == null) {
             throw new NoSuchMethodError(name);
         }
@@ -47,6 +47,14 @@ public class JSSuperClass extends JSClass {
             throw new NoSuchMethodError(name);
         }
         return method;
+    }
+
+
+    public Map<String, JSMethod> getAllMethods() {
+        Map<String, JSMethod> methodMap = new HashMap<>();
+        methodMap.putAll(methods);
+        methodMap.putAll(abstractMethods);
+        return methodMap;
     }
 
 }

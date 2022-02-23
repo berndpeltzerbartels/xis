@@ -3,7 +3,7 @@ package one.xis.template;
 import lombok.Getter;
 import lombok.experimental.Delegate;
 
-public class WidgetModel extends TemplateElement {
+public class WidgetModel implements ChildHolder {
 
     @Getter
     private final String name;
@@ -13,7 +13,6 @@ public class WidgetModel extends TemplateElement {
 
 
     public WidgetModel(String name, TemplateElement element) {
-        super(name);
         this.element = element;
         this.name = name;
     }

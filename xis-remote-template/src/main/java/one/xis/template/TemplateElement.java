@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class TemplateElement extends ElementBase {
+public class TemplateElement extends ElementBase implements ChildHolder {
     @Getter
     private final List<ModelNode> children = new ArrayList<>();
 

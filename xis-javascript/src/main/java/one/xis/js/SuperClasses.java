@@ -1,6 +1,6 @@
 package one.xis.js;
 
-public class Classes {
+public class SuperClasses {
 
     public static final JSSuperClass XIS_ROOT = new JSSuperClass("XISRoot"); // TODO check javascript
     public static final JSSuperClass XIS_ELEMENT = new JSSuperClass("XISElement");
@@ -71,8 +71,7 @@ public class Classes {
 
         XIS_STATIC_TEXT_NODE.addMethod("init", 2)
                 .addMethod("update", 1)
-                .addAbstractMethod("getText")
-                .addMethod("getValue", 1);
+                .addAbstractMethod("getText");
 
         XIS_MUTABLE_TEXT_NODE.addMethod("init", 1) // ONE ARG HERE !
                 .addMethod("update", 1)

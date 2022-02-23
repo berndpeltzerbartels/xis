@@ -43,6 +43,7 @@ public abstract class AnnotationProcessor extends AbstractProcessor {
         } catch (ValidationException e) {
             logger.error(e);
         } catch (Exception e) {
+            e.printStackTrace();
             logger.error(e);
         }
 

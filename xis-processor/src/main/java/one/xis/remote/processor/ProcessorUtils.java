@@ -3,6 +3,7 @@ package one.xis.remote.processor;
 import lombok.SneakyThrows;
 
 import javax.annotation.processing.ProcessingEnvironment;
+import javax.lang.model.element.Element;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 import java.io.File;
@@ -28,13 +29,13 @@ class ProcessorUtils {
     }
 
     @SneakyThrows
-    PrintWriter writer(String path) {
-        return new PrintWriter(fileObject(path).openOutputStream(), false, StandardCharsets.UTF_8);
+    PrintWriter writer(String path, Element... originatingElements) {
+        return new PrintWriter(fileObject(path, originatingElements).openOutputStream(), false, StandardCharsets.UTF_8);
     }
 
     @SneakyThrows
-    FileObject fileObject(String path) {
-        return environment.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", path);
+    FileObject fileObject(String path, Element... originatingElements) {
+        return environment.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", path, originatingElements);
     }
 
     // Hack for gradle problem when using StandardLocation.SOURCE_PATH
@@ -67,17 +68,29 @@ class ProcessorUtils {
 
     private File getBuildDir() {
         try {
-            FileObject dummy = environment.getFiler().createSourceFile("dummy");
-            File file = new File(dummy.toUri().toURL().getFile());
+            FileObject dummy = environment.getFiler().createSourceFile("Dummy");
+            File dummyFile = new File(dummy.toUri().toURL().getFile());
+            File file = dummyFile;
             while (file != null && !file.getName().equals("build")) {
                 file = file.getParentFile();
             }
             if (file == null) {
                 throw new FileNotFoundException("can not find build-directory");
             }
+            writeDummyClass(dummy);
             return file;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+
+    private void writeDummyClass(FileObject dummyFileObject) {
+        try (PrintWriter writer = new PrintWriter(dummyFileObject.openWriter())) {
+            writer.write("class Dummy {}");
+        } catch (IOException e) {
+            throw new RuntimeException("Dummy hack failed");
+        }
+
     }
 }

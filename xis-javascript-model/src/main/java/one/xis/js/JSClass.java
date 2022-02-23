@@ -33,7 +33,7 @@ public class JSClass implements JSDeclaration, JSContext {
             method = superClass.getMethod(name);
         }
         if (method == null) {
-            throw new NoSuchJSMethodError(className + "#" + name);
+            throw new NoSuchJavascriptMethodError(className + "#" + name);
         }
         return method;
     }
@@ -45,10 +45,11 @@ public class JSClass implements JSDeclaration, JSContext {
             method = superClass.getMethod(name);
         }
         if (method == null) {
-            throw new NoSuchMethodError(name);
+            throw new NoSuchJavascriptMethodError(superClass.getClassName() + "#" + name);
         }
-        overriddenMethods.put(method.getName(), method);
-        return method;
+        JSMethod overriddenMethod = new JSMethod(this, name, method.getArgs());
+        overriddenMethods.put(name, overriddenMethod);
+        return overriddenMethod;
     }
 
 

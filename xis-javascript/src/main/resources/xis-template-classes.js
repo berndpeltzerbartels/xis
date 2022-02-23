@@ -1,25 +1,23 @@
 
-class XISElement {
+function XISElement() {
+    this.element = this.createElement();
+    this.children = this.createChildren();
+}
 
-    constructor() {
-        this.element = this.createElement();
-        this.children = this.createChildren();
-    }
-
-    init(parent, valueHolder) {
+XISElement.prototype.init = function(parent, valueHolder) {
         this.parent = parent;
         this.valueHolder = valueHolder;
         this.parent.element.appendChild(this.element);
-        for (var child of this.children) {
-            child.init(this, valueHolder);
+        for (var i = 0; i < this.children.length; i++) {
+            this.children[i].init(this, valueHolder);
         }
     }
 
-    getValue(path) {
+XISElement.prototype.getValue = function(path) {
         return this.valueHolder.getValue(path);
     }
 
-    update() {
+ XISElement.prototype.update = function() {
         if (this.evalIf()) {
             this.updateAttributes();
             this.updateChildren();
@@ -28,154 +26,97 @@ class XISElement {
         }
     }
 
-    updateChildren() {
-        for (var child of this.children) {
-            child.update();
+ XISElement.prototype.updateChildren = function() {
+       for (var i = 0; i < this.children.length; i++) {
+            this.children[i].update();
         }
     }
 
-    updateAttributes() {
+XISElement.prototype.updateAttributes = function() {
         // abstract
     }
 
-    upateAttribute(name, value) {
+XISElement.prototype.upateAttribute = function(name, value) {
         this.element.setAttribute(name, value);
     }
 
-    evalIf() {
+XISElement.prototype.evalIf = function() {
         return true;
     }
 
 
-    createElement() {
+XISElement.prototype.createElement = function() {
         // abstract
     }
 
-    createChildren() {
+ XISElement.prototype.createChildren = function() {
         // abstract
         return [];
     }
 
-    unlink() {
+ XISElement.prototype.unlink = function() {
         this.parent.removeChild(this.element);
     }
-}
-
-class XISElementGroup {
-
-    constructor() {
-        this.root = this.createTree();
-        this.children = this.createChildren();
-        this.leafElements = [];
-    }
-
-    init(parent) {
-        this.parent = parent;
-        this.parent.element.appendChild(this.root);
-        for (var leaf of this.leafElements) {
-           for (var node of leaf.children) {
-                node.init(leaf);
-           }
-        }
-    }
-
-    createTree() {
-        // abstract, build tree and set leaf-elements
-    }
-
-    addLeafELement(element) {
-        this.leafElements.push(element);
-    }
 
 
-    update() {
-        this.updateAttributes();
-        this.updateLeafElements();
-    }
-
-    updateLeafElements() {
-        for (var leaf of this.leafElements) {
-            leaf.update();
-        }
-    }
-
-    updateAttributes() {
-        // abstract: update all elements with variable attributes
-    }
-
-    getValue(path) {
-        return this.parent.getValue(path);
-    }
-
-
-
-}
-
-
-class XISMutableTextNode {
-
-    constructor() {
+function XISMutableTextNode() {
         this.node = createTextNode();
     }
 
-    init(parent, valueHolder) {
+XISMutableTextNode.prototype.init = function(parent, valueHolder) {
         this.parent = parent;
         this.valueHolder = valueHolder;
         this.parent.element.appendChild(this.node);
     }
 
-    update() {
+XISMutableTextNode.prototype.update = function() {
          var text = this.getText();
          if (this.node.nodeValue != text) {
              this.node.nodeValue = text;
          }
     }
 
-    getText() {
+XISMutableTextNode.prototype.getText = function() {
         // abstract. USE VALUE FIELD !!!
     }
 
-    getValue(name) {
+XISMutableTextNode.prototype.getValue = function(name) {
         return this.valueHolder.getValue(name);
     }
-}
 
 
-class XISStaticTextNode {
 
-    constructor() {
+function XISStaticTextNode() {
         this.node = createTextNode();
         this.node.nodeValue = this.getText();
     }
 
-    init(parent) {
+XISStaticTextNode.prototype.init = function(parent) {
         this.parent = parent;
         this.parent.element.appendChild(this.node);
     }
 
-    update() {
+XISStaticTextNode.prototype.update = function() {
         // Nothing to to
     }
 
-    getText() {
+XISStaticTextNode.prototype.getText = function() {
         // abstract. USE VALUE FIELD !!!
     }
-}
 
 
 
-class XISLoopElement {
 
-    constructor() {
+function XISLoopElement() {
         this.element = this.createElement();
         this.rows = [];
     }
 
-    getLoopAttributes() {
+XISLoopElement.prototype.getLoopAttributes = function() {
         // abstract
     }
 
-    init(parent, valueHolder) {
+XISLoopElement.prototype.init = function(parent, valueHolder) {
         loopAttributes = this.getLoopAttributes();
         this.parent = parent;
         this.valueHolder = valueHolder;
@@ -183,20 +124,20 @@ class XISLoopElement {
         this.names = [loopAttributes.itemVarName, loopAttributes.indexVarName, loopAttributes.numberVarName];
     }
 
-    createElement() {
+XISLoopElement.prototype.createElement = function() {
         // abstract
     }
 
-    createChildren() {
+XISLoopElement.prototype.createChildren = function() {
         // abstract
         return [];
     }
 
-    unlink() {
+XISLoopElement.prototype.unlink = function() {
         this.parent.removeChild(this.element);
     }
 
-    update() {
+XISLoopElement.prototype.update = function() {
         if (this.evalIf()) {
             this.data = this.getArray();
             this.updateAttributes();
@@ -207,7 +148,7 @@ class XISLoopElement {
     }
 
 
-    updateAllChildren() {
+XISLoopElement.prototype.updateAllChildren = function() {
         this.data = [];
         this.values = [];
         this.resize(this.data.length);
@@ -223,19 +164,19 @@ class XISLoopElement {
         }
     }
 
-    unlinkAll() {
+XISLoopElement.prototype.unlinkAll = function() {
         this.resize(0);
     }
 
-    updateAttributes() {
+XISLoopElement.prototype.updateAttributes = function() {
         // abstract
     }
 
-   upateAttribute(name, value) {
+XISLoopElement.prototype.upateAttribute = function(name, value) {
         this.element.setAttribute(name, value);
     }
 
-    getValue(path) {
+XISLoopElement.prototype.getValue = function(path) {
         var name = path[0];
         if (this.names.indexOf(name) != -1) {
             var rv = this.values[name];
@@ -252,11 +193,11 @@ class XISLoopElement {
         }
     }
 
-    getArray() {
+XISLoopElement.prototype.getArray = function() {
         return this.parent.getValue(this.loopAttributes.arrayPath);
     }
 
-    resize(size) {
+XISLoopElement.prototype.resize = function(size) {
         while (this.rowCount() < size) {
             this.appendRow();
         }
@@ -265,12 +206,12 @@ class XISLoopElement {
         }
     }
 
-    rowCount() {
+XISLoopElement.prototype.rowCount = function() {
         return this.rows.length;
     }
 
 
-    appendRow() {
+XISLoopElement.prototype.appendRow = function() {
         var children = this.createChildren();
         for (var i = 0; i < children.length; i++) {
             children[i].init(this, this);
@@ -278,7 +219,7 @@ class XISLoopElement {
         this.rows.push(children);
     }
 
-    removeRow() {
+XISLoopElement.prototype. removeRow = function() {
         if (this.rows.length > 0) {
             var children = this.rows.pop();
             for (var i = 0; i < children.length; i++) {
@@ -287,29 +228,27 @@ class XISLoopElement {
         }
     }
 
-    evalIf() {
+XISLoopElement.prototype.evalIf = function() {
         return true;
     }
-}
 
-class XISRoot {
 
-    constructor() {
+function XISRoot() {
         this.element = this.createElement();
     }
 
-    init(parentElement) {
+XISRoot.prototype.init = function(parentElement) {
         this.parentElement = parentElement;
         this.parentElement.appendChild(this.element);
     }
 
-    update(clientState) {
+XISRoot.prototype.update = function(clientState) {
         this.clientState = clientState;
         this.widget.update();
     }
 
 
-    getValue(path) {
+XISRoot.prototype.getValue = function(path) {
         var name = path[0];
         var rv = this.clientState[name];
         for (var i = 1; i < path.length; i++) {
@@ -321,30 +260,26 @@ class XISRoot {
         return rv;
     }
 
-    createElement() {
+XISRoot.prototype.createElement = function() {
         // abstract
     }
 
-    createChildren() {
+XISRoot.prototype.createChildren = function() {
         // abstract
         return [];
     }
 
-}
-
-class XISContainer {
-
-    constructor() {
+function XISContainer() {
         this.element = this.createElement();
     }
 
-    init(parent, valueHolder) {
+XISContainer.prototype.init = function(parent, valueHolder) {
         this.parent = parent;
         this.valueHolder = valueHolder;
         this.parent.element.appendChild(this.element);
     }
 
-    setWidget(widget) {
+XISContainer.prototype.setWidget = function(widget) {
         if (this.widget) {
             this.element.removeChild(this.widget.element);
         }
@@ -353,11 +288,11 @@ class XISContainer {
         this.widget.update();
     }
 
-    getValue(path) {
+XISContainer.prototype.getValue = function(path) {
         return this.valueHolder.getValue(path);
     }
 
-    update() {
+XISContainer.prototype.update = function() {
         if (this.evalIf()) {
             this.updateAttributes();
             this.widget.update();
@@ -367,25 +302,25 @@ class XISContainer {
         }
     }
 
-    updateAttributes() {
+XISContainer.prototype.updateAttributes = function() {
         // abstract
     }
 
-    upateAttribute(name, value) {
+XISContainer.prototype.upateAttribute = function(name, value) {
         this.element.setAttribute(name, value);
     }
 
-    evalIf() {
+XISContainer.prototype.evalIf = function() {
         return true;
     }
 
 
-    createElement() {
+XISContainer.prototype.createElement = function() {
         // abstract
     }
 
-    unlink() {
+XISContainer.prototype.unlink = function() {
         this.parent.removeChild(this.element);
     }
-}
+
 

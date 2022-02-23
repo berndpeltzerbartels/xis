@@ -17,4 +17,8 @@ public class JSMethod implements JSContext {
         statements.add(statement);
     }
 
+    @Override
+    public String toString() {
+        return owner.getClassName() + "#" + name + "(...)";
+    }
 }

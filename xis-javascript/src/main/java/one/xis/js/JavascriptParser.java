@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static one.xis.js.Classes.*;
 import static one.xis.js.Functions.APPEND;
+import static one.xis.js.SuperClasses.*;
 
 @RequiredArgsConstructor
 public class JavascriptParser {
@@ -18,15 +18,17 @@ public class JavascriptParser {
 
     public void parse(WidgetModel widgetModel) {
         script.addDeclaration(toClass(widgetModel));
+        evaluateChildren(widgetModel);
     }
 
-    private List<JSContructorCall> evaluateChildren(TemplateElement parent) {
+    private List<JSContructorCall> evaluateChildren(ChildHolder parent) {
         List<JSClass> jsClasses = parent.getChildren().stream()
                 .map(this::toClass).collect(Collectors.toList());
         script.addDeclarations(jsClasses);
         return jsClasses.stream().map(JSContructorCall::new)
                 .collect(Collectors.toList());
     }
+
 
     private JSClass toClass(ModelNode node) {
         if (node instanceof WidgetModel) {
@@ -90,7 +92,7 @@ public class JavascriptParser {
     }
 
     private JSClass toClass(MutableTextNode mutableTextNode) {
-        JSClass textNode = new JSClass(nextName()).derrivedFrom(XIS_STATIC_TEXT_NODE);
+        JSClass textNode = new JSClass(nextName()).derrivedFrom(XIS_MUTABLE_TEXT_NODE);
         JSMethod getText = textNode.overrideMethod("getText");
         JSVar text = new JSVar("text");
         MixedContentMethodStatements mixedContentMethodStatements = new MixedContentMethodStatements(getText, text);
