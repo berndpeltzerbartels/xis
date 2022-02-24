@@ -277,13 +277,16 @@ XISContainer.prototype.init = function(parent, valueHolder) {
         this.parent = parent;
         this.valueHolder = valueHolder;
         this.parent.element.appendChild(this.element);
+        if (this.defaultWidgetId) {
+            this.setWidget(this.defaultWidgetId);
+        }
     }
 
-XISContainer.prototype.setWidget = function(widgetName) {
+XISContainer.prototype.setWidget = function(widgetId) {
         if (this.widget) {
             this.element.removeChild(this.widget.element);
         }
-        this.widget = widgets.getWidgetByName(widgetName);
+        this.widget = widgets.getWidget(widgetId);
         this.widget.init(this, this.valueHolder);
         this.widget.update();
     }
@@ -333,6 +336,6 @@ function XISWidgets() {
     this.widgets = [];
 }
 
-XISWidget.prototype.getWidgetByName = function(name) {
-return this.widgets[name];
+XISWidget.prototype.getWidget = function(widgetId) {
+return this.widgets[widgetId];
 }

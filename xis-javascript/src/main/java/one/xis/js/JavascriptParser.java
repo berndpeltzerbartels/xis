@@ -96,7 +96,8 @@ public class JavascriptParser {
     private JSClass toClass(ContainerElement containerElement) {
         JSClass containerClass = new JSClass(nextName()).derrivedFrom(XIS_CONTAINER);
         containerClass.addField("containerId", new JSString(containerElement.getContainerId()));
-        containerClass.addField("defaultWidgetId", new JSString(containerElement.getDefaultWidgetId()));
+        JSValue defaultWidgetId = containerElement.getDefaultWidgetId() != null ? new JSString(containerElement.getDefaultWidgetId()) : new JSUndefined();
+        containerClass.addField("defaultWidgetId", defaultWidgetId);
         overrideCreateElement(containerClass, containerElement);
         overrideUpdateAttributes(containerClass, containerElement);
         return containerClass;

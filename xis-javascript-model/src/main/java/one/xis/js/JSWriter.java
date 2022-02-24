@@ -46,10 +46,16 @@ public abstract class JSWriter {
             writeConstrcutorCallValue((JSContructorCall) value, writer);
         } else if (value instanceof JSString) {
             writeStringValue((JSString) value, writer);
+        } else if (value instanceof JSUndefined) {
+            writeUndefinedValue(writer);
         } else {
             throw new UnsupportedOperationException("write " + value);
         }
 
+    }
+
+    private void writeUndefinedValue(PrintWriter writer) {
+        writer.print("undefined");
     }
 
     protected void writeConstantValue(JSConstant jsConstant, PrintWriter writer) {

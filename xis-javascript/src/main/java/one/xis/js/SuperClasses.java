@@ -79,8 +79,7 @@ public class SuperClasses {
                 .addAbstractMethod("getText")
                 .addMethod("getValue", 1);
 
-        XIS_WIDGETS.addAbstractMethod("getWidgets")
-                .addMethod("getWidgetByName", 1);
+        XIS_WIDGETS.addMethod("getWidget", 1);
 
     }
 
