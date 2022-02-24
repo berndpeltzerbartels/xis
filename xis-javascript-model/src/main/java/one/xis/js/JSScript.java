@@ -19,4 +19,8 @@ public class JSScript implements JSContext {
         declarations.addAll(decls);
     }
 
+    public void addStatement(JSStatement statement) {
+        statements.add(statement);
+    }
+
 }

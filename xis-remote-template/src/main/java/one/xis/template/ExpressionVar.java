@@ -10,6 +10,6 @@ public class ExpressionVar implements ExpressionArg {
     private final String varName;
 
     public List<String> getPath() {
-        return Arrays.asList(varName.split("."));
+        return Arrays.asList(varName.split("\\."));
     }
 }

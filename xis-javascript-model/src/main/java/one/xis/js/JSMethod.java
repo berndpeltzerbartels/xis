@@ -4,6 +4,7 @@ import lombok.Value;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Value
 public class JSMethod implements JSContext {
@@ -20,5 +21,10 @@ public class JSMethod implements JSContext {
     @Override
     public String toString() {
         return owner.getClassName() + "#" + name + "(...)";
+    }
+    
+    @Override
+    public int hashCode() {
+        return Objects.hash(owner.getClassName(), name);
     }
 }

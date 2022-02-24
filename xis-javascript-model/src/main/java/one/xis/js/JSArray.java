@@ -22,4 +22,8 @@ public class JSArray implements JSValue, JSContext {
     public static JSArray arrayOfStrings(List<String> strings) {
         return new JSArray(strings.stream().map(JSString::new).collect(Collectors.toList()));
     }
+
+    public static JSArray arrayOfValues(List<JSValue> values) {
+        return new JSArray(values);
+    }
 }

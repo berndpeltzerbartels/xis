@@ -8,6 +8,7 @@ public class SuperClasses {
     public static final JSSuperClass XIS_CONTAINER = new JSSuperClass("XISContainer");
     public static final JSSuperClass XIS_STATIC_TEXT_NODE = new JSSuperClass("XISStaticTextNode");
     public static final JSSuperClass XIS_MUTABLE_TEXT_NODE = new JSSuperClass("XISMutableTextNode");
+    public static final JSSuperClass XIS_WIDGETS = new JSSuperClass("XISWidgets");
     //public static final JSSuperClass XIS_ELEMENT_GROUP = new JSSuperClass("XISElementGroup");
 
 
@@ -70,13 +71,16 @@ public class SuperClasses {
                 .addMethod("unlink", 0);
 
         XIS_STATIC_TEXT_NODE.addMethod("init", 2)
-                .addMethod("update", 1)
+                .addMethod("update", 0)
                 .addAbstractMethod("getText");
 
         XIS_MUTABLE_TEXT_NODE.addMethod("init", 1) // ONE ARG HERE !
-                .addMethod("update", 1)
+                .addMethod("update", 0)
                 .addAbstractMethod("getText")
                 .addMethod("getValue", 1);
+
+        XIS_WIDGETS.addAbstractMethod("getWidgets")
+                .addMethod("getWidgetByName", 1);
 
     }
 

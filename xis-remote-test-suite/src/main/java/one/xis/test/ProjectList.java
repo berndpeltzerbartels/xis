@@ -4,4 +4,5 @@ import one.xis.remote.Widget;
 
 @Widget
 public class ProjectList {
+    private int i;
 }

@@ -3,9 +3,7 @@ package one.xis.js;
 import lombok.RequiredArgsConstructor;
 import one.xis.template.*;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static one.xis.js.Functions.APPEND;
@@ -15,10 +13,22 @@ import static one.xis.js.SuperClasses.*;
 public class JavascriptParser {
     private final JSScript script;
     private static long currentNameId = 1;
+    private final Collection<JSClass> rootClasses = new HashSet<>();
 
     public void parse(WidgetModel widgetModel) {
         script.addDeclaration(toClass(widgetModel));
         evaluateChildren(widgetModel);
+        JSClass widgets = widgetsClass();
+        script.addDeclaration(widgets);
+        script.addStatement(new JSVarAssignment(new JSVar("widgets"), new JSContructorCall(widgets)));
+    }
+
+    private JSClass widgetsClass() {
+        JSClass widgestClass = new JSClass(nextName()).derrivedFrom(XIS_WIDGETS);
+        JSJsonValue widgets = new JSJsonValue();
+        rootClasses.forEach(root -> widgets.addField(root.getClassName(), new JSContructorCall(root)));
+        widgestClass.addField("widgets", widgets);
+        return widgestClass;
     }
 
     private List<JSContructorCall> evaluateChildren(ChildHolder parent) {
@@ -49,6 +59,7 @@ public class JavascriptParser {
         JSClass widgetClass = new JSClass(model.getName()).derrivedFrom(XIS_ROOT);
         JSMethod createChildren = widgetClass.overrideMethod("createChildren");
         createChildren.addStatement(new JSReturn(new JSArray(evaluateChildren(model))));
+        rootClasses.add(widgetClass);
         return widgetClass;
     }
 
@@ -133,7 +144,6 @@ public class JavascriptParser {
         JSMethod updateAttributes = jsClass.overrideMethod("updateAttributes");
         elementBase.getMutableAttributes().entrySet().forEach(e -> {
             JSVar text = new JSVar(nextName());
-            updateAttributes.addStatement(new JSVarAssignment(text, new JSString("")));
 
             MixedContentMethodStatements mixedContentMethodStatements = new MixedContentMethodStatements(updateAttributes, text);
             mixedContentMethodStatements.addStatements(e.getValue().getContents());
@@ -151,7 +161,6 @@ public class JavascriptParser {
         void addStatements(List<MixedContent> mixedContentList) {
             method.addStatement(new JSVarAssignment(text, new JSString("")));
             mixedContentList.forEach(this::addStatements);
-            method.addStatement(new JSReturn(text));
         }
 
         private void addStatements(MixedContent mixedContent) {
