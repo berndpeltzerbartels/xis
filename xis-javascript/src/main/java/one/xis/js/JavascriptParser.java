@@ -59,6 +59,7 @@ public class JavascriptParser {
         JSClass widgetClass = new JSClass(model.getName()).derrivedFrom(XIS_ROOT);
         JSMethod createChildren = widgetClass.overrideMethod("createChildren");
         createChildren.addStatement(new JSReturn(new JSArray(evaluateChildren(model))));
+        overrideCreateElement(widgetClass, model);
         rootClasses.add(widgetClass);
         return widgetClass;
     }
@@ -80,7 +81,11 @@ public class JavascriptParser {
     }
 
     private JSClass toElementClassWitLoop(TemplateElement element) {
-        JSClass elementClass = toElementClassWithoutLoop(element);
+        JSClass elementClass = new JSClass(nextName()).derrivedFrom(XIS_LOOP_ELEMENT);
+        JSMethod createChildren = elementClass.overrideMethod("createChildren");
+        createChildren.addStatement(new JSReturn(new JSArray(evaluateChildren(element))));
+        overrideCreateElement(elementClass, element);
+        overrideUpdateAttributes(elementClass, element);
         ForLoop loop = element.getLoop();
         JSJsonValue loopAttributes = new JSJsonValue();
         List<JSString> arrayPath = Arrays.stream(loop.getArraySource().getContent().split(".")).map(JSString::new).collect(Collectors.toList());
@@ -121,7 +126,7 @@ public class JavascriptParser {
         return textNode;
     }
 
-    private JSFunctionCall getCreateElementFunctionCall(ElementBase element) {
+    private JSFunctionCall getCreateElementFunctionCall(ElementWithAttributes element) {
         JSFunctionCall createElementFunctionCall = new JSFunctionCall(JSFunctions.CREATE_ELEMENT).addParam(new JSString(element.getElementName()));
         if (!element.getStaticAttributes().isEmpty()) {
             createElementFunctionCall.addParam(staticAttributes(element.getStaticAttributes()));
@@ -135,7 +140,7 @@ public class JavascriptParser {
         return attributes;
     }
 
-    private void overrideCreateElement(JSClass jsClass, ElementBase element) {
+    private void overrideCreateElement(JSClass jsClass, ElementWithAttributes element) {
         JSMethod createElement = jsClass.overrideMethod("createElement");
         createElement.addStatement(new JSReturn(getCreateElementFunctionCall(element)));
     }

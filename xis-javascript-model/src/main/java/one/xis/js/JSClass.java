@@ -44,9 +44,6 @@ public class JSClass implements JSDeclaration, JSContext {
         if (method == null) {
             method = superClass.getMethod(name);
         }
-        if (method == null) {
-            throw new NoSuchJavascriptMethodError(superClass.getClassName() + "#" + name);
-        }
         JSMethod overriddenMethod = new JSMethod(this, name, method.getArgs());
         overriddenMethods.put(name, overriddenMethod);
         return overriddenMethod;

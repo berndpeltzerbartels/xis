@@ -12,9 +12,13 @@ repositories {
 dependencies {
     annotationProcessor project(':xis-remote-processor')
     implementation project(':xis-remote-core')
+    implementation project(':xis-remote-spring')
+    implementation project(':xis-servlet')
 
     annotationProcessor 'org.projectlombok:lombok:1.18.12'
     implementation 'org.projectlombok:lombok:1.18.12'
+
+    implementation 'org.springframework.boot:spring-boot-starter-web:2.6.4'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'

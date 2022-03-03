@@ -46,8 +46,7 @@ public abstract class AnnotationProcessor extends AbstractProcessor {
             e.printStackTrace();
             logger.error(e);
         }
-
-        return false;
+        return true;
     }
 
     public abstract void doProcess(Element element, TypeElement annotation, RoundEnvironment roundEnv) throws Exception;

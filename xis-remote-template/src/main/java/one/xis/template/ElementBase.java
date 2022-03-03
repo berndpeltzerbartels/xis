@@ -1,13 +1,12 @@
 package one.xis.template;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @Data
-public abstract class ElementBase implements ModelNode {
+public abstract class ElementBase implements ModelNode, ElementWithAttributes {
     private final String elementName;
     private final Map<String, MutableAttribute> mutableAttributes = new HashMap<>();
     private final Map<String, String> staticAttributes = new HashMap<>();

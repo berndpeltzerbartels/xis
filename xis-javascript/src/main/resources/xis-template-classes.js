@@ -336,6 +336,13 @@ function XISWidgets() {
     this.widgets = [];
 }
 
-XISWidget.prototype.getWidget = function(widgetId) {
+XISWidgets.prototype.getWidget = function(widgetId) {
 return this.widgets[widgetId];
+}
+
+
+XISWidgets.prototype.bind = function(widgetId, element) {
+    var widget = this.getWidget(widgetId);// XISRoot
+    widget.init(element);
+    return widget;
 }

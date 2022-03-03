@@ -9,7 +9,6 @@ public class SuperClasses {
     public static final JSSuperClass XIS_STATIC_TEXT_NODE = new JSSuperClass("XISStaticTextNode");
     public static final JSSuperClass XIS_MUTABLE_TEXT_NODE = new JSSuperClass("XISMutableTextNode");
     public static final JSSuperClass XIS_WIDGETS = new JSSuperClass("XISWidgets");
-    //public static final JSSuperClass XIS_ELEMENT_GROUP = new JSSuperClass("XISElementGroup");
 
 
     static {
@@ -31,21 +30,10 @@ public class SuperClasses {
                 .addAbstractMethod("createChildren")
                 .addMethod("unlink", 0);
 
-        /*
-        XIS_ELEMENT_GROUP.addMethod("init", 2)
-                .addMethod("createTree", 0)
-                .addMethod("addLeafElement", 1)
-                .addMethod("update", 0)
-                .addMethod("updateLeafElements", 0)
-                .addAbstractMethod("updateAttributes", 0)
-                .addMethod("getValue", 1);
-        */
-
-
         XIS_LOOP_ELEMENT.addMethod("init", 2)
                 .addAbstractMethod("getLoopAttributes")
                 .addAbstractMethod("createElement")
-                .addAbstractMethod("creaetChildren")
+                .addAbstractMethod("createChildren")
                 .addMethod("unlink", 0)
                 .addMethod("update", 0)
                 .addMethod("updateAllChildren", 0)
@@ -79,7 +67,8 @@ public class SuperClasses {
                 .addAbstractMethod("getText")
                 .addMethod("getValue", 1);
 
-        XIS_WIDGETS.addMethod("getWidget", 1);
+        XIS_WIDGETS.addMethod("getWidget", 1)
+                .addMethod("bind", 2);
 
     }
 

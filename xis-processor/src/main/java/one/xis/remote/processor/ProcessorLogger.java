@@ -2,6 +2,7 @@ package one.xis.remote.processor;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import one.xis.utils.lang.ExceptionUtils;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.Processor;
@@ -17,11 +18,11 @@ class ProcessorLogger {
     }
 
     void error(@NonNull Throwable t) {
-        environment.getMessager().printMessage(Diagnostic.Kind.ERROR, getProcessorPrefix() + t);
+        environment.getMessager().printMessage(Diagnostic.Kind.ERROR, getProcessorPrefix() + t + "\n" + ExceptionUtils.getStackTrace(t));
     }
 
     void error(String message, @NonNull Throwable t) {
-        environment.getMessager().printMessage(Diagnostic.Kind.ERROR, getProcessorPrefix() + message + ":" + message);
+        environment.getMessager().printMessage(Diagnostic.Kind.ERROR, getProcessorPrefix() + message + ":" + "\n" + ExceptionUtils.getStackTrace(t));
     }
 
     void error(String message) {

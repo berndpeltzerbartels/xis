@@ -31,7 +31,7 @@ public class JSSuperClass extends JSClass {
     public JSMethod getMethod(String name) {
         JSMethod method = methods.get(name);
         if (method == null) {
-            throw new NoSuchMethodError(name);
+            throw new NoSuchJavascriptMethodError(name);
         }
         return method;
     }
@@ -44,7 +44,7 @@ public class JSSuperClass extends JSClass {
             method = methods.get(name);
         }
         if (method == null) {
-            throw new NoSuchMethodError(name);
+            throw new NoSuchJavascriptMethodError(name);
         }
         return method;
     }

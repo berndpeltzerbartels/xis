@@ -19,14 +19,13 @@ import java.util.HashSet;
 import java.util.stream.Collectors;
 
 @AutoService(Processor.class)
-@SupportedAnnotationTypes({"one.xis.remote.Widget", "one.xis.remote.ClientState"})
+@SupportedAnnotationTypes({"one.xis.remote.Widget"})
 @SupportedSourceVersion(SourceVersion.RELEASE_11)
 public class WidgetProcessor extends AnnotationProcessor {
 
     private final TemplateParser templateParser = new TemplateParser();
     private WidgetContextFactory widgetContextFactory;
     private Collection<WidgetContext> widgetContexts;
-    private Collection<String> stateVariables = new HashSet<>(); // TODO
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
@@ -37,33 +36,16 @@ public class WidgetProcessor extends AnnotationProcessor {
 
     @Override
     public void doProcess(Element element, TypeElement annotation, RoundEnvironment roundEnv) {
-        if (isClientStateAnnotation(annotation)) {
-            doProcessClientState(element);
-        } else {
-            doProcessTemplate(element);
-        }
-    }
-
-    private boolean isClientStateAnnotation(TypeElement annotation) {
-        return annotation.getQualifiedName().toString().equals("one.xis.remote.ClientState");
-    }
-
-    private void doProcessTemplate(Element element) {
         widgetContexts.add(widgetContextFactory.templateContext((TypeElement) element));
-    }
-
-    private void doProcessClientState(Element element) {
-        stateVariables.addAll(javaModelUtils.getFieldNames((TypeElement) element));
     }
 
     @Override
     public void finish() throws Exception {
         writeJavaScript();
     }
-
-
+    
     private void writeJavaScript() throws Exception {
-        try (PrintWriter writer = processorUtils.writer("public/resources/xis-remote.js")) { // TODO originating elements: all Component-classes !
+        try (PrintWriter writer = processorUtils.writer("public/resources/widgets.js")) { // TODO originating elements: all Component-classes !
             writeJavaScript(writer);
         }
     }
@@ -77,9 +59,7 @@ public class WidgetProcessor extends AnnotationProcessor {
         JavascriptParser parser = new JavascriptParser(script);
         models.forEach(parser::parse);
         new OldSchoolJSWriter(writer).write(script);
-        //writeJavaScript(new JSAstParser().parse(models, stateVariables), writer);
     }
-
 
     private Collection<WidgetModel> widgetModels() {
         return widgetContexts.stream().map(this::widgetModel).collect(Collectors.toSet());

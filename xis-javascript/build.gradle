@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-    implementation project(':xis-helper')
+    implementation project(':xis-util')
     implementation project(':xis-javascript-model')
     implementation project(':xis-remote-template')
 

@@ -1,0 +1,21 @@
+<div>
+    <table>
+        <thead></thead>
+        <tbody data-for="category:categrories">
+        <tr>
+            <th colspan="3">${category.title}</th>
+        </tr>
+        <table data-for="product:category.products" data-index="i">
+            <tr>
+                <td>${i}.</td>
+                <td>${product.title}</td>
+                <td>${product.price}</td>
+
+            </tr>
+        </table>
+        </tbody>
+
+    </table>
+
+
+</div>

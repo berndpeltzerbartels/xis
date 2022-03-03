@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.*;
 import javax.lang.model.type.TypeMirror;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -48,6 +49,15 @@ class JavaModelUtils {
                 .filter(this::isAnnotation)
                 .filter(TypeElement.class::isInstance)
                 .map(TypeElement.class::cast);
+    }
+
+    Optional<TypeElement> getAnnotation(String qualifiedName, Element e) {
+        return e.getAnnotationMirrors().stream()
+                .map(this::asElement)
+                .filter(this::isAnnotation)
+                .map(TypeElement.class::cast)
+                .filter(anno -> anno.getQualifiedName().toString().equals(qualifiedName))
+                .findFirst();
     }
 
     String getPackageName(TypeElement typeElement) {
