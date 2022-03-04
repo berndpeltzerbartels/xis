@@ -43,7 +43,7 @@ public class WidgetProcessor extends AnnotationProcessor {
     public void finish() throws Exception {
         writeJavaScript();
     }
-    
+
     private void writeJavaScript() throws Exception {
         try (PrintWriter writer = processorUtils.writer("public/resources/widgets.js")) { // TODO originating elements: all Component-classes !
             writeJavaScript(writer);
@@ -57,7 +57,7 @@ public class WidgetProcessor extends AnnotationProcessor {
     private void writeJavaScript(Collection<WidgetModel> models, PrintWriter writer) {
         JSScript script = new JSScript();
         JavascriptParser parser = new JavascriptParser(script);
-        models.forEach(parser::parse);
+        parser.parse(models);
         new OldSchoolJSWriter(writer).write(script);
     }
 

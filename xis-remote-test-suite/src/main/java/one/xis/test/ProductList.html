@@ -1,21 +1,14 @@
 <div>
-    <table>
-        <thead></thead>
-        <tbody data-for="category:categrories">
-        <tr>
-            <th colspan="3">${category.title}</th>
-        </tr>
-        <table data-for="product:category.products" data-index="i">
-            <tr>
-                <td>${i}.</td>
-                <td>${product.title}</td>
-                <td>${product.price}</td>
-
-            </tr>
-        </table>
-        </tbody>
-
-    </table>
-
-
+    <h4>Unsere Angebote zu Toppreisen</h4>
+    <ul data-for="category:categories">
+        <li>${category.title}
+            <ul data-for="product:category.products" data-number="i">
+                <li>
+                    <span>${i}. </span>
+                    <span>${product.title} </span>
+                    <span>${product.price} EUR</span>
+                </li>
+            </ul>
+        </li>
+    </ul>
 </div>

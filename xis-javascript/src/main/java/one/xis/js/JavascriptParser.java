@@ -6,8 +6,7 @@ import one.xis.template.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static one.xis.js.Functions.APPEND;
-import static one.xis.js.SuperClasses.*;
+import static one.xis.js.Classes.*;
 
 @RequiredArgsConstructor
 public class JavascriptParser {
@@ -15,12 +14,16 @@ public class JavascriptParser {
     private static long currentNameId = 1;
     private final Collection<JSClass> rootClasses = new HashSet<>();
 
-    public void parse(WidgetModel widgetModel) {
-        script.addDeclaration(toClass(widgetModel));
-        evaluateChildren(widgetModel);
+    public void parse(Collection<WidgetModel> widgetModels) {
+        widgetModels.forEach(this::parse);
         JSClass widgets = widgetsClass();
         script.addDeclaration(widgets);
         script.addStatement(new JSVarAssignment(new JSVar("widgets"), new JSContructorCall(widgets)));
+    }
+
+    private void parse(WidgetModel widgetModel) {
+        script.addDeclaration(toClass(widgetModel));
+        evaluateChildren(widgetModel);
     }
 
     private JSClass widgetsClass() {
@@ -57,9 +60,8 @@ public class JavascriptParser {
 
     private JSClass toClass(WidgetModel model) {
         JSClass widgetClass = new JSClass(model.getName()).derrivedFrom(XIS_ROOT);
-        JSMethod createChildren = widgetClass.overrideMethod("createChildren");
-        createChildren.addStatement(new JSReturn(new JSArray(evaluateChildren(model))));
-        overrideCreateElement(widgetClass, model);
+        addChildrenField(model, widgetClass);
+        addElementField(model, widgetClass);
         rootClasses.add(widgetClass);
         return widgetClass;
     }
@@ -73,9 +75,8 @@ public class JavascriptParser {
 
     private JSClass toElementClassWithoutLoop(TemplateElement element) {
         JSClass elementClass = new JSClass(nextName()).derrivedFrom(XIS_ELEMENT);
-        JSMethod createChildren = elementClass.overrideMethod("createChildren");
-        createChildren.addStatement(new JSReturn(new JSArray(evaluateChildren(element))));
-        overrideCreateElement(elementClass, element);
+        addChildrenField(element, elementClass);
+        addElementField(element, elementClass);
         overrideUpdateAttributes(elementClass, element);
         return elementClass;
     }
@@ -84,17 +85,17 @@ public class JavascriptParser {
         JSClass elementClass = new JSClass(nextName()).derrivedFrom(XIS_LOOP_ELEMENT);
         JSMethod createChildren = elementClass.overrideMethod("createChildren");
         createChildren.addStatement(new JSReturn(new JSArray(evaluateChildren(element))));
-        overrideCreateElement(elementClass, element);
+        addElementField(element, elementClass);
+        elementClass.addField("rows", new JSArray());
         overrideUpdateAttributes(elementClass, element);
         ForLoop loop = element.getLoop();
         JSJsonValue loopAttributes = new JSJsonValue();
-        List<JSString> arrayPath = Arrays.stream(loop.getArraySource().getContent().split(".")).map(JSString::new).collect(Collectors.toList());
+        List<JSString> arrayPath = Arrays.stream(loop.getArraySource().getContent().split("\\.")).map(JSString::new).collect(Collectors.toList());
         loopAttributes.addField("indexVarName", new JSString(loop.getIndexVarName()));
         loopAttributes.addField("itemVarName", new JSString(loop.getItemVarName()));
         loopAttributes.addField("numberVarName", new JSString(loop.getNumberVarName()));
-        loopAttributes.addField("indexVarName", new JSArray(arrayPath));
-        JSMethod getLoopAttributes = elementClass.overrideMethod("getLoopAttributes");
-        getLoopAttributes.addStatement(new JSReturn(loopAttributes));
+        loopAttributes.addField("arrayPath", new JSArray(arrayPath));
+        elementClass.addField("loopAttributes", loopAttributes);
         return elementClass;
     }
 
@@ -103,13 +104,14 @@ public class JavascriptParser {
         containerClass.addField("containerId", new JSString(containerElement.getContainerId()));
         JSValue defaultWidgetId = containerElement.getDefaultWidgetId() != null ? new JSString(containerElement.getDefaultWidgetId()) : new JSUndefined();
         containerClass.addField("defaultWidgetId", defaultWidgetId);
-        overrideCreateElement(containerClass, containerElement);
+        addElementField(containerElement, containerClass);
         overrideUpdateAttributes(containerClass, containerElement);
         return containerClass;
     }
 
     private JSClass toClass(MutableTextNode mutableTextNode) {
         JSClass textNode = new JSClass(nextName()).derrivedFrom(XIS_MUTABLE_TEXT_NODE);
+        textNode.addField("node", new JSFunctionCall(Functions.CREATE_TEXT_NODE, new JSString("")));
         JSMethod getText = textNode.overrideMethod("getText");
         JSVar text = new JSVar("text");
         MixedContentMethodStatements mixedContentMethodStatements = new MixedContentMethodStatements(getText, text);
@@ -120,14 +122,21 @@ public class JavascriptParser {
 
     private JSClass toClass(StaticTextNode staticTextNode) {
         JSClass textNode = new JSClass(nextName()).derrivedFrom(XIS_STATIC_TEXT_NODE);
-        JSMethod getText = textNode.overrideMethod("getText");
-        getText.addStatement(new JSReturn(new JSString(staticTextNode.getContent())));
+        textNode.addField("node", new JSFunctionCall(Functions.CREATE_TEXT_NODE, new JSString(staticTextNode.getContent())));
         textNode.overrideMethod("update"); // Nothing to do, here
         return textNode;
     }
 
+    private void addElementField(ElementWithAttributes element, JSClass jsClass) {
+        jsClass.addField("element", getCreateElementFunctionCall(element));
+    }
+
+    private void addChildrenField(ChildHolder childHolder, JSClass jsClass) {
+        jsClass.addField("children", new JSArray(evaluateChildren(childHolder)));
+    }
+
     private JSFunctionCall getCreateElementFunctionCall(ElementWithAttributes element) {
-        JSFunctionCall createElementFunctionCall = new JSFunctionCall(JSFunctions.CREATE_ELEMENT).addParam(new JSString(element.getElementName()));
+        JSFunctionCall createElementFunctionCall = new JSFunctionCall(Functions.CREATE_ELEMENT).addParam(new JSString(element.getElementName()));
         if (!element.getStaticAttributes().isEmpty()) {
             createElementFunctionCall.addParam(staticAttributes(element.getStaticAttributes()));
         }
@@ -139,12 +148,6 @@ public class JavascriptParser {
         attributesMap.forEach((key, value) -> attributes.addField(key, new JSString(value)));
         return attributes;
     }
-
-    private void overrideCreateElement(JSClass jsClass, ElementWithAttributes element) {
-        JSMethod createElement = jsClass.overrideMethod("createElement");
-        createElement.addStatement(new JSReturn(getCreateElementFunctionCall(element)));
-    }
-
 
     private void overrideUpdateAttributes(JSClass jsClass, ElementBase elementBase) {
         JSMethod updateAttributes = jsClass.overrideMethod("updateAttributes");
@@ -178,7 +181,7 @@ public class JavascriptParser {
         }
 
         private void addStaticContentStatements(StaticContent staticContent) {
-            method.addStatement(new JSFunctionCall(APPEND, text, new JSString(staticContent.getContent())));
+            method.addStatement(new JSStringAppend(text, new JSString(staticContent.getContent())));
         }
 
         private void addExpressionContentStatements(ExpressionContent expressionContent) {
@@ -205,20 +208,20 @@ public class JavascriptParser {
                     fktCall.addParam(getValueMethodCall);
                 }
             }
-            method.addStatement(new JSFunctionCall(APPEND, text, fktCall));
+            method.addStatement(new JSStringAppend(text, fktCall));
         }
 
         private void addExpressionWithoutFunctionStatements(Expression expression) {
             for (ExpressionArg arg : expression.getVars()) {
                 if (arg instanceof ExpressionConstant) {
-                    method.addStatement(new JSFunctionCall(APPEND, text, new JSConstant(((ExpressionConstant) arg).getContent())));
+                    method.addStatement(new JSStringAppend(text, new JSConstant(((ExpressionConstant) arg).getContent())));
                 } else if (arg instanceof ExpressionString) {
-                    method.addStatement(new JSFunctionCall(APPEND, text, new JSString(((ExpressionString) arg).getContent())));
+                    method.addStatement(new JSStringAppend(text, new JSString(((ExpressionString) arg).getContent())));
                 } else if (arg instanceof ExpressionVar) {
                     JSMethod getValue = method.getOwner().getMethod("getValue");
                     JSArray variablePath = JSArray.arrayOfStrings(((ExpressionVar) arg).getPath());
                     JSMethodCall getValueMethodCall = new JSMethodCall(method, getValue, variablePath);
-                    method.addStatement(new JSFunctionCall(APPEND, text, getValueMethodCall));
+                    method.addStatement(new JSStringAppend(text, getValueMethodCall));
                 }
             }
         }

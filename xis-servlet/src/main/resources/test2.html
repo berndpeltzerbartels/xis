@@ -1,0 +1,70 @@
+<html>
+<head>
+
+    <script type="text/javascript">
+
+        function A(){
+        };
+
+        A.prototype.bind = function() {
+           this.field = this.make();
+           return this;
+        }
+
+        A.prototype.make = function() {
+           return 1;
+        }
+
+        function B() {};
+
+        B.prototype = new A();
+
+        B.prototype.make = function() {
+           return 2;
+        }
+        var b = Object.create(B.prototype)
+        b.bind();
+        console.log(b.field);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </script>
+</head>
+<body>
+<h4>Kitchen</h4>
+<div id="content"></div>
+
+</body>
+
+</html>

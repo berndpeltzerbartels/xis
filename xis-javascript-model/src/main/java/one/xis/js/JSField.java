@@ -1,6 +1,5 @@
 package one.xis.js;
 
-
 import lombok.Data;
 
 @Data

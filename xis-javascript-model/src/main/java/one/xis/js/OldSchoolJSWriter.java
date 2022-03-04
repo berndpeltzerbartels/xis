@@ -17,7 +17,6 @@ public class OldSchoolJSWriter extends JSWriter {
             writer.print(jsClass.getSuperClass().getClassName());
             writer.println("();");
         }
-        jsClass.getOverriddenMethods().values().forEach(method -> writeMethodDeclaration(method, writer));
     }
 
     private void writeConstructor(JSClass jsClass, PrintWriter writer) {
@@ -32,7 +31,16 @@ public class OldSchoolJSWriter extends JSWriter {
             writeValue(field.getValue(), writer);
             writer.print(";");
         });
-        writer.println("};");
+
+        jsClass.getOverriddenMethods().values().forEach(method -> {
+            writer.print("this.");
+            writer.print(method.getName());
+            writer.print("=");
+            writer.print("function(){");
+            method.getStatements().forEach(statement -> writeStatement(statement, writer));
+            writer.print("};");
+        });
+        writer.print("};");
 
     }
 

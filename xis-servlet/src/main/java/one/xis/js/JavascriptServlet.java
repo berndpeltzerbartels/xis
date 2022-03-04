@@ -6,7 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-@WebServlet(urlPatterns = "/__xis.js")
+@WebServlet(urlPatterns = "/xis.js")
 class JavascriptServlet extends HttpServlet {
 
     @Override

@@ -5,6 +5,7 @@ import lombok.experimental.NonFinal;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 @Data
 @NonFinal
@@ -64,5 +65,10 @@ public class JSClass implements JSDeclaration, JSContext {
 
     public JSField getField(String name) {
         return fields.get(name);
+    }
+    
+    @Override
+    public int hashCode() {
+        return Objects.hash(className);
     }
 }

@@ -67,7 +67,9 @@ public abstract class JSWriter {
         Iterator<Map.Entry<String, JSValue>> fields = value.getFields().entrySet().iterator();
         while (fields.hasNext()) {
             Map.Entry<String, JSValue> field = fields.next();
+            writer.write("'");
             writer.write(field.getKey());
+            writer.write("'");
             writer.write(":");
             writeValue(field.getValue(), writer);
             if (fields.hasNext()) {
@@ -150,6 +152,13 @@ public abstract class JSWriter {
         writer.write("'");
     }
 
+    protected void witeJSStringAppend(JSStringAppend statement, PrintWriter writer) {
+        writer.write(statement.getVariable().getName());
+        writer.write("+=");
+        writeValue(statement.getValue(), writer);
+        writer.write(";");
+    }
+
     protected void writeVarAssignmentStatement(JSVarAssignment statement, PrintWriter writer) {
         writer.write("var ");
         writer.write(statement.getJsVar().getName());
@@ -203,7 +212,9 @@ public abstract class JSWriter {
 
 
     protected void writeStatement(JSStatement statement, PrintWriter writer) {
-        if (statement instanceof JSVarAssignment) {
+        if (statement instanceof JSStringAppend) {
+            witeJSStringAppend((JSStringAppend) statement, writer);
+        } else if (statement instanceof JSVarAssignment) {
             writeVarAssignmentStatement((JSVarAssignment) statement, writer);
         } else if (statement instanceof JSReturn) {
             writeReturnStatement((JSReturn) statement, writer);
@@ -215,4 +226,6 @@ public abstract class JSWriter {
             throw new UnsupportedOperationException("write " + statement);
         }
     }
+
+
 }

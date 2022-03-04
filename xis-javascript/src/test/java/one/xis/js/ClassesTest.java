@@ -14,7 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 
 @SuppressWarnings({"deprecation", "removal"})
-class SuperClassesTest {
+class ClassesTest {
 
     @Test
     void allCompiles() throws ScriptException {
@@ -34,7 +34,7 @@ class SuperClassesTest {
         ScriptObjectMirror mirror = (ScriptObjectMirror) script.eval();
 
         Set<String> methodsMirror = methods(mirror, "element", "children");
-        Set<String> methodsJSSuperClass = methods(SuperClasses.XIS_ELEMENT);
+        Set<String> methodsJSSuperClass = methods(Classes.XIS_ELEMENT);
 
         assertThat(methodsMirror).hasSameSizeAs(methodsJSSuperClass);
         assertThat(methodsMirror).containsAll(methodsMirror);

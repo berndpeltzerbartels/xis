@@ -1,8 +1,4 @@
 
-function append(orig, value) {
-    orig += value;
-}
-
 function createElement(tagName, attributes) {
     if (!attributes) attributes = {};
     var e = document.createElement(tagName);
@@ -14,7 +10,7 @@ function createElement(tagName, attributes) {
     return e;
 }
 
-function createTextNode() {
-    return document.createTextNode('');
+function createTextNode(content) {
+    return document.createTextNode(content);
 }
 

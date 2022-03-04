@@ -1,6 +1,6 @@
 package one.xis.js;
 
-public class SuperClasses {
+public class Classes {
 
     public static final JSSuperClass XIS_ROOT = new JSSuperClass("XISRoot"); // TODO check javascript
     public static final JSSuperClass XIS_ELEMENT = new JSSuperClass("XISElement");
@@ -10,29 +10,24 @@ public class SuperClasses {
     public static final JSSuperClass XIS_MUTABLE_TEXT_NODE = new JSSuperClass("XISMutableTextNode");
     public static final JSSuperClass XIS_WIDGETS = new JSSuperClass("XISWidgets");
 
-
     static {
 
         XIS_ROOT.addMethod("init", 1)
                 .addMethod("update", 1)
-                .addAbstractMethod("createElement")
-                .addAbstractMethod("createChildren")
+                .addMethod("initChildren", 0)
                 .addMethod("getValue", 1);
 
         XIS_ELEMENT.addMethod("init", 2)
                 .addMethod("getValue", 1)
                 .addMethod("update", 0)
+                .addMethod("initChildren", 0)
                 .addMethod("updateChildren", 0)
                 .addAbstractMethod("updateAttributes")
                 .addMethod("updateAttribute", 2)
                 .addMethod("evalIf", 0)
-                .addAbstractMethod("createElement")
-                .addAbstractMethod("createChildren")
                 .addMethod("unlink", 0);
 
         XIS_LOOP_ELEMENT.addMethod("init", 2)
-                .addAbstractMethod("getLoopAttributes")
-                .addAbstractMethod("createElement")
                 .addAbstractMethod("createChildren")
                 .addMethod("unlink", 0)
                 .addMethod("update", 0)
@@ -55,12 +50,10 @@ public class SuperClasses {
                 .addAbstractMethod("updateAttributes")
                 .addMethod("updateAttribute", 2)
                 .addMethod("evalIf", 0)
-                .addAbstractMethod("createElement")
                 .addMethod("unlink", 0);
 
         XIS_STATIC_TEXT_NODE.addMethod("init", 2)
-                .addMethod("update", 0)
-                .addAbstractMethod("getText");
+                .addMethod("update", 0);
 
         XIS_MUTABLE_TEXT_NODE.addMethod("init", 1) // ONE ARG HERE !
                 .addMethod("update", 0)
@@ -69,7 +62,6 @@ public class SuperClasses {
 
         XIS_WIDGETS.addMethod("getWidget", 1)
                 .addMethod("bind", 2);
-
     }
 
 }

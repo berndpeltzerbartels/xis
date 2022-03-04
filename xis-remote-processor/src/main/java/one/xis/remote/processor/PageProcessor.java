@@ -55,7 +55,7 @@ public class PageProcessor extends AnnotationProcessor {
     private void writeJavaScript(Collection<WidgetModel> models, PrintWriter writer) {
         JSScript script = new JSScript();
         JavascriptParser parser = new JavascriptParser(script);
-        models.forEach(parser::parse);
+        parser.parse(models);
         new OldSchoolJSWriter(writer).write(script);
     }
 
