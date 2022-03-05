@@ -6,12 +6,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Data
-public abstract class ElementBase implements ModelNode, ElementWithAttributes {
+public abstract class ElementBase extends ChildHolderBase implements ModelNode, ElementWithAttributes {
     private final String elementName;
     private final Map<String, MutableAttribute> mutableAttributes = new HashMap<>();
     private final Map<String, String> staticAttributes = new HashMap<>();
-    private IfCondition ifCondition;
-    private ForLoop loop;
+    private IfBlock ifBlock; // TODO own class
 
     void addMutableAttribute(String name, MutableAttribute content) {
         mutableAttributes.put(name, content);
@@ -19,10 +18,6 @@ public abstract class ElementBase implements ModelNode, ElementWithAttributes {
 
     void addStaticAttribute(String name, String content) {
         staticAttributes.put(name, content);
-    }
-
-    boolean isDynamic() {
-        return ifCondition != null || loop != null;
     }
 
     @Override

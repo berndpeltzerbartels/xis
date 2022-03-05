@@ -14,15 +14,18 @@ public class JSClass implements JSDeclaration, JSContext {
     private JSSuperClass superClass;
     private final Map<String, JSField> fields = new HashMap<>();
     private final Map<String, JSMethod> overriddenMethods = new HashMap<>();
+    private final JSConstructor constructor;
 
     public JSClass(String className) {
         this.className = className;
         this.superClass = null;
+        this.constructor = new JSConstructor(this);
     }
 
     public JSClass(String className, JSSuperClass superClass) {
         this.className = className;
         this.superClass = superClass;
+        this.constructor = new JSConstructor(this);
     }
 
     public JSMethod getMethod(String name) {
@@ -66,7 +69,7 @@ public class JSClass implements JSDeclaration, JSContext {
     public JSField getField(String name) {
         return fields.get(name);
     }
-    
+
     @Override
     public int hashCode() {
         return Objects.hash(className);

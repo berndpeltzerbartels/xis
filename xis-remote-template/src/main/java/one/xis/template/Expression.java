@@ -18,6 +18,6 @@ public class Expression {
 
     @Override
     public String toString() {
-        return "<%=" + content + ">";
+        return content;
     }
 }

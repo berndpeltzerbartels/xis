@@ -4,12 +4,19 @@ import lombok.Value;
 
 @Value
 public class JSMethodCall implements JSContext, JSValue, JSStatement {
-    JSContext parent;
+    JSVar owner;
     JSMethod method;
     JSValue[] args;
 
-    public JSMethodCall(JSContext parent, JSMethod method, JSValue... args) {
-        this.parent = parent;
+    public JSMethodCall(JSVar owner, JSMethod method, JSValue... args) {
+        this.owner = owner;
+        this.method = method;
+        this.args = args;
+        // TODO validate number of args
+    }
+
+    public JSMethodCall(JSMethod method, JSValue... args) {
+        this.owner = null;
         this.method = method;
         this.args = args;
         // TODO validate number of args

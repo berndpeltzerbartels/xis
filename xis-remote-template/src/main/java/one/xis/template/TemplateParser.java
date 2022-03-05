@@ -18,13 +18,14 @@ public class TemplateParser {
     private int varIndex = 0;
     private static final String ATTR_IF = "data-if";
     private static final String ATTR_FOR = "data-for";
+    private static final String ATTR_REPEAT = "data-repeat";
     private static final String ATTR_LOOP_INDEX = "data-index";
     private static final String ATTR_LOOP_NUMBER = "data-number";
     private static final String ATTR_CONTAINER_ID = "data-container-id";
     private static final String ATTR_CONTAINER_WIDGET = "data-container-widget";
 
     public WidgetModel parse(Document document, String name) {
-        return new WidgetModel(name, parse(document.getDocumentElement()));
+        return new WidgetModel(name, parseElement(document.getDocumentElement()));
     }
 
     private Stream<ModelNode> parseChildren(Element parent) {
@@ -40,10 +41,15 @@ public class TemplateParser {
 
     private ModelNode parse(Node node) {
         if (node instanceof Element) {
-            if (isContainer((Element) node)) {
+            Element element = (Element) node;
+            if (hasIfAttribute(element)) {
+                return parseIf(element);
+            } else if (hasRepeatAttribute(element)) {
+                return parseRepeat(element);
+            } else if (isContainer((Element) node)) {
                 return parseContainer((Element) node);
             } else {
-                return parse((Element) node);
+                return parseElement((Element) node);
             }
         } else {
             return parseText((Text) node);
@@ -54,23 +60,39 @@ public class TemplateParser {
         return element.hasAttribute(ATTR_CONTAINER_ID);
     }
 
-    private ContainerElement parseContainer(Element element) {
+    private boolean hasIfAttribute(Element element) {
+        return element.hasAttribute(ATTR_IF);
+    }
+
+    private boolean hasForAttribute(Element element) {
+        return element.hasAttribute(ATTR_FOR);
+    }
+
+    private boolean hasRepeatAttribute(Element element) {
+        return element.hasAttribute(ATTR_REPEAT);
+    }
+
+    private ModelNode parseContainer(Element element) {
         var containerElement = new ContainerElement(element.getTagName(), element.getAttribute(ATTR_CONTAINER_ID), element.getAttribute(ATTR_CONTAINER_WIDGET));
         getAttributes(element).forEach((name, rawValue) -> addAttribute(name, rawValue, containerElement));
-        parseFrameworkAttributes(element, containerElement);
-        if (getChildElements(element).count() > 0) {
+        if (getChildElements(element).findAny().isPresent()) {
             throw new TemplateSynthaxException(String.format("elements with attribute \"%s\" must have no content", ATTR_CONTAINER_ID));
         }
         if (element.hasAttribute(ATTR_FOR)) {
             throw new TemplateSynthaxException(String.format("elements with attribute \"%s\" must not have attribute \"%s\"", ATTR_CONTAINER_ID, ATTR_FOR));
         }
+        if (element.hasAttribute(ATTR_REPEAT)) {
+            throw new TemplateSynthaxException(String.format("elements with attribute \"%s\" must not have attribute \"%s\"", ATTR_CONTAINER_ID, ATTR_REPEAT));
+        }
         return containerElement;
     }
 
-    private TemplateElement parse(Element element) {
+    private ModelNode parseElement(Element element) {
+        if (hasForAttribute(element)) {
+            return parseFor(element);
+        }
         var modelElement = new TemplateElement(element.getTagName());
         getAttributes(element).forEach((name, rawValue) -> addAttribute(name, rawValue, modelElement));
-        parseFrameworkAttributes(element, modelElement);
         parseChildren(element).forEach(modelElement::addChild);
         if (element.hasAttribute(ATTR_CONTAINER_WIDGET)) {
             throw new TemplateSynthaxException(String.format("elements with attribute \"%s\" must have a container-id (attribute \"%s\")", ATTR_CONTAINER_WIDGET, ATTR_CONTAINER_ID));
@@ -102,26 +124,33 @@ public class TemplateParser {
         return new MutableTextNode(mixedContents);
     }
 
-    private void parseFrameworkAttributes(Element element, ElementBase target) {
-        var attributes = getAttributes(element);
-        if (attributes.containsKey(ATTR_IF)) {
-            target.setIfCondition(parseIf(attributes.get(ATTR_IF)));
-        }
-        if (attributes.containsKey(ATTR_FOR)) {
-            target.setLoop(parseLoop(attributes.get(ATTR_FOR), element));
-        }
+    private IfBlock parseIf(Element element) {
+        String src = element.getAttribute(ATTR_IF);
+        IfBlock ifBlock = new IfBlock(expressionParser.parse(src));
+        parseChildren(element).forEach(ifBlock::addChild);
+        return ifBlock;
     }
 
-    private IfCondition parseIf(String src) {
-        return new IfCondition(expressionParser.parse(src));
-    }
-
-    private ForLoop parseLoop(String dataFor, Element src) {
+    private Loop parseFor(Element element) {
+        String dataFor = element.getAttribute(ATTR_FOR);
         var dataForArray = dataFor.split(":");
         if (dataForArray.length != 2) {
             throw new TemplateSynthaxException("illegal loop-attribute:" + ATTR_FOR + "=" + dataFor);
         }
-        return new ForLoop(expressionParser.parse(dataForArray[1]), dataForArray[0], getIndexVarName(src), getNumberVarName(src));
+        Loop loop = new Loop(expressionParser.parse(dataForArray[1].trim()), dataForArray[0].trim(), getIndexVarName(element), getNumberVarName(element), dataFor);
+        parseChildren(element).forEach(loop::addChild);
+        return loop;
+    }
+
+    private Loop parseRepeat(Element element) {
+        String repeat = element.getAttribute(ATTR_REPEAT);
+        var dataForArray = repeat.split(":");
+        if (dataForArray.length != 2) {
+            throw new TemplateSynthaxException("illegal repeat-attribute:" + ATTR_REPEAT + "=" + repeat);
+        }
+        Loop loop = new Loop(expressionParser.parse(dataForArray[1]), dataForArray[0], getIndexVarName(element), getNumberVarName(element), repeat);
+        loop.addChild(parseElement(element));
+        return loop;
     }
 
     private String getIndexVarName(Element e) {

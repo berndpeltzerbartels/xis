@@ -2,8 +2,12 @@ package one.xis.js;
 
 import lombok.RequiredArgsConstructor;
 import one.xis.template.*;
+import one.xis.utils.lang.CollectionUtils;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static one.xis.js.Classes.*;
@@ -22,8 +26,10 @@ public class JavascriptParser {
     }
 
     private void parse(WidgetModel widgetModel) {
-        script.addDeclaration(toClass(widgetModel));
-        evaluateChildren(widgetModel);
+        JSClass widgetClass = new JSClass(widgetModel.getName()).derrivedFrom(XIS_ROOT);
+        JSClass rootClass = toClass(widgetModel.getRootNode());
+        widgetClass.addField("root", new JSContructorCall(rootClass));
+        rootClasses.add(widgetClass);
     }
 
     private JSClass widgetsClass() {
@@ -42,11 +48,8 @@ public class JavascriptParser {
                 .collect(Collectors.toList());
     }
 
-
     private JSClass toClass(ModelNode node) {
-        if (node instanceof WidgetModel) {
-            return toClass((WidgetModel) node);
-        } else if (node instanceof TemplateElement) {
+        if (node instanceof TemplateElement) {
             return toClass((TemplateElement) node);
         } else if (node instanceof ContainerElement) {
             return toClass((ContainerElement) node);
@@ -54,48 +57,19 @@ public class JavascriptParser {
             return toClass((MutableTextNode) node);
         } else if (node instanceof StaticTextNode) {
             return toClass((StaticTextNode) node);
+        } else if (node instanceof Loop) {
+            return toClass((Loop) node);
+        } else if (node instanceof IfBlock) {
+            return toClass((IfBlock) node);
         }
         throw new IllegalArgumentException("node=" + node);
     }
 
-    private JSClass toClass(WidgetModel model) {
-        JSClass widgetClass = new JSClass(model.getName()).derrivedFrom(XIS_ROOT);
-        addChildrenField(model, widgetClass);
-        addElementField(model, widgetClass);
-        rootClasses.add(widgetClass);
-        return widgetClass;
-    }
-
     private JSClass toClass(TemplateElement element) {
-        if (element.getLoop() == null) {
-            return toElementClassWithoutLoop(element);
-        }
-        return toElementClassWitLoop(element);
-    }
-
-    private JSClass toElementClassWithoutLoop(TemplateElement element) {
         JSClass elementClass = new JSClass(nextName()).derrivedFrom(XIS_ELEMENT);
         addChildrenField(element, elementClass);
         addElementField(element, elementClass);
         overrideUpdateAttributes(elementClass, element);
-        return elementClass;
-    }
-
-    private JSClass toElementClassWitLoop(TemplateElement element) {
-        JSClass elementClass = new JSClass(nextName()).derrivedFrom(XIS_LOOP_ELEMENT);
-        JSMethod createChildren = elementClass.overrideMethod("createChildren");
-        createChildren.addStatement(new JSReturn(new JSArray(evaluateChildren(element))));
-        addElementField(element, elementClass);
-        elementClass.addField("rows", new JSArray());
-        overrideUpdateAttributes(elementClass, element);
-        ForLoop loop = element.getLoop();
-        JSJsonValue loopAttributes = new JSJsonValue();
-        List<JSString> arrayPath = Arrays.stream(loop.getArraySource().getContent().split("\\.")).map(JSString::new).collect(Collectors.toList());
-        loopAttributes.addField("indexVarName", new JSString(loop.getIndexVarName()));
-        loopAttributes.addField("itemVarName", new JSString(loop.getItemVarName()));
-        loopAttributes.addField("numberVarName", new JSString(loop.getNumberVarName()));
-        loopAttributes.addField("arrayPath", new JSArray(arrayPath));
-        elementClass.addField("loopAttributes", loopAttributes);
         return elementClass;
     }
 
@@ -127,6 +101,36 @@ public class JavascriptParser {
         return textNode;
     }
 
+    private JSClass toClass(Loop loop) {
+        JSClass loopClass = new JSClass(nextName()).derrivedFrom(XIS_LOOP);
+
+        JSJsonValue loopAttributes = new JSJsonValue();
+        loopAttributes.addField("indexVarName", new JSString(loop.getIndexVarName()));
+        loopAttributes.addField("itemVarName", new JSString(loop.getItemVarName()));
+        loopAttributes.addField("numberVarName", new JSString(loop.getNumberVarName()));
+        loopClass.addField("loopAttributes", loopAttributes);
+
+        JSMethod getValue = loopClass.getMethod("getValue");
+        JSMethod getArray = loopClass.overrideMethod("getArray");
+        ExpressionEval expressionEval = new ExpressionEval(getValue);
+        getArray.addStatement(new JSReturn(expressionEval.getEvaluator(loop.getArraySource())));
+
+        return loopClass;
+    }
+
+    private JSClass toClass(IfBlock ifBlock) {
+        JSClass ifClass = new JSClass(nextName()).derrivedFrom(XIS_IF);
+        ifClass.addField("children", new JSArray(evaluateChildren(ifBlock)));
+
+        JSMethod getValue = ifClass.getMethod("getValue");
+        JSMethod evaluateCondition = ifClass.overrideMethod("evaluateCondition");
+
+        ExpressionEval expressionEval = new ExpressionEval(getValue);
+        evaluateCondition.addStatement(new JSReturn(expressionEval.getEvaluator(ifBlock.getExpression())));
+
+        return ifClass;
+    }
+
     private void addElementField(ElementWithAttributes element, JSClass jsClass) {
         jsClass.addField("element", getCreateElementFunctionCall(element));
     }
@@ -151,15 +155,80 @@ public class JavascriptParser {
 
     private void overrideUpdateAttributes(JSClass jsClass, ElementBase elementBase) {
         JSMethod updateAttributes = jsClass.overrideMethod("updateAttributes");
-        elementBase.getMutableAttributes().entrySet().forEach(e -> {
+        elementBase.getMutableAttributes().forEach((key, value) -> {
             JSVar text = new JSVar(nextName());
 
             MixedContentMethodStatements mixedContentMethodStatements = new MixedContentMethodStatements(updateAttributes, text);
-            mixedContentMethodStatements.addStatements(e.getValue().getContents());
+            mixedContentMethodStatements.addStatements(value.getContents());
 
-            JSMethodCall updateAttribute = new JSMethodCall(updateAttributes, jsClass.getMethod("updateAttribute"), new JSString(e.getKey()), text);
+            JSMethodCall updateAttribute = new JSMethodCall(jsClass.getMethod("updateAttribute"), new JSString(key), text);
             updateAttributes.addStatement(updateAttribute);
         });
+    }
+
+    private static JSFunctionCall expressionWithFunction(Expression expression, JSClass owner) {
+        JSFunction fkt = Functions.getFunction(expression.getFunction());
+        JSFunctionCall fktCall = new JSFunctionCall(fkt);
+        for (ExpressionArg arg : expression.getVars()) {
+            if (arg instanceof ExpressionConstant) {
+                fktCall.addParam(new JSConstant(((ExpressionConstant) arg).getContent()));
+            } else if (arg instanceof ExpressionString) {
+                fktCall.addParam(new JSString(((ExpressionString) arg).getContent()));
+            } else if (arg instanceof ExpressionVar) {
+                JSMethod getValue = owner.getMethod("getValue");
+                JSArray variablePath = JSArray.arrayOfStrings(((ExpressionVar) arg).getPath());
+                JSMethodCall getValueMethodCall = new JSMethodCall(getValue, variablePath);
+                fktCall.addParam(getValueMethodCall);
+            }
+        }
+        return fktCall;
+    }
+
+    @RequiredArgsConstructor
+    private static class ExpressionEval {
+        private final JSMethod getValue;
+
+        JSValue getEvaluator(Expression expression) {
+            if (expression.getFunction() != null) {
+                return expressionWithFunction(expression);
+            }
+            return expressionWithoutFunction(expression);
+        }
+
+        private JSFunctionCall expressionWithFunction(Expression expression) {
+            JSFunction fkt = Functions.getFunction(expression.getFunction());
+            JSFunctionCall fktCall = new JSFunctionCall(fkt);
+            for (ExpressionArg arg : expression.getVars()) {
+                if (arg instanceof ExpressionConstant) {
+                    fktCall.addParam(new JSConstant(((ExpressionConstant) arg).getContent()));
+                } else if (arg instanceof ExpressionString) {
+                    fktCall.addParam(new JSString(((ExpressionString) arg).getContent()));
+                } else if (arg instanceof ExpressionVar) {
+                    JSArray variablePath = JSArray.arrayOfStrings(((ExpressionVar) arg).getPath());
+                    JSMethodCall getValueMethodCall = new JSMethodCall(getValue, variablePath);
+                    fktCall.addParam(getValueMethodCall);
+                }
+            }
+            return fktCall;
+        }
+
+        private JSValue expressionWithoutFunction(Expression expression) {
+            ExpressionArg arg = CollectionUtils.onlyElement(expression.getVars(), () -> new TemplateSynthaxException("expected exactly one value in " + expression));
+            return expressionWithoutFunction(arg);
+        }
+
+        private JSValue expressionWithoutFunction(ExpressionArg arg) {
+            if (arg instanceof ExpressionConstant) {
+                return new JSConstant(((ExpressionConstant) arg).getContent());
+            } else if (arg instanceof ExpressionString) {
+                return new JSString(((ExpressionString) arg).getContent());
+            } else if (arg instanceof ExpressionVar) {
+                JSArray variablePath = JSArray.arrayOfStrings(((ExpressionVar) arg).getPath());
+                return new JSMethodCall(getValue, variablePath);
+            } else {
+                throw new IllegalArgumentException("expression-arg: " + arg);
+            }
+        }
     }
 
     @RequiredArgsConstructor
@@ -194,20 +263,7 @@ public class JavascriptParser {
         }
 
         private void addExpressionWithFunctionStatements(Expression expression) {
-            JSFunction fkt = Functions.getFunction(expression.getFunction());
-            JSFunctionCall fktCall = new JSFunctionCall(fkt);
-            for (ExpressionArg arg : expression.getVars()) {
-                if (arg instanceof ExpressionConstant) {
-                    fktCall.addParam(new JSConstant(((ExpressionConstant) arg).getContent()));
-                } else if (arg instanceof ExpressionString) {
-                    fktCall.addParam(new JSString(((ExpressionString) arg).getContent()));
-                } else if (arg instanceof ExpressionVar) {
-                    JSMethod getValue = method.getOwner().getMethod("getValue");
-                    JSArray variablePath = JSArray.arrayOfStrings(((ExpressionVar) arg).getPath());
-                    JSMethodCall getValueMethodCall = new JSMethodCall(method, getValue, variablePath);
-                    fktCall.addParam(getValueMethodCall);
-                }
-            }
+            JSFunctionCall fktCall = expressionWithFunction(expression, method.getOwner());
             method.addStatement(new JSStringAppend(text, fktCall));
         }
 
@@ -220,7 +276,7 @@ public class JavascriptParser {
                 } else if (arg instanceof ExpressionVar) {
                     JSMethod getValue = method.getOwner().getMethod("getValue");
                     JSArray variablePath = JSArray.arrayOfStrings(((ExpressionVar) arg).getPath());
-                    JSMethodCall getValueMethodCall = new JSMethodCall(method, getValue, variablePath);
+                    JSMethodCall getValueMethodCall = new JSMethodCall(getValue, variablePath);
                     method.addStatement(new JSStringAppend(text, getValueMethodCall));
                 }
             }
@@ -230,5 +286,4 @@ public class JavascriptParser {
     private String nextName() {
         return "n" + (currentNameId++);
     }
-
 }

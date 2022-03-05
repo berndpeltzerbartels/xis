@@ -3,6 +3,7 @@ package one.xis.template;
 import java.util.List;
 
 public interface ChildHolder {
-    List<ModelNode> getChildren();
+    void addChild(ModelNode child);
 
+    List<ModelNode> getChildren();
 }

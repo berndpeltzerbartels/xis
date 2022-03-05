@@ -34,8 +34,6 @@ public abstract class JSWriter {
             writeFunctionCallValue((JSFunctionCall) value, writer);
         } else if (value instanceof JSArray) {
             writeArrayValue((JSArray) value, writer);
-        } else if (value instanceof JSObject) {
-            writeObjectValue((JSObject) value, writer);
         } else if (value instanceof JSField) {
             writeFieldValue((JSField) value, writer);
         } else if (value instanceof JSVar) {
@@ -104,10 +102,6 @@ public abstract class JSWriter {
         writer.write("]");
     }
 
-    protected void writeObjectValue(JSObject object, PrintWriter writer) {
-        writer.write(object.getName());
-    }
-
     protected void writeFieldValue(JSField field, PrintWriter writer) {
         writer.write("this.");
         writer.write(field.getName());
@@ -119,9 +113,8 @@ public abstract class JSWriter {
 
 
     protected void writeMethodCallValue(JSMethodCall methodCall, PrintWriter writer) {
-        if (methodCall.getParent() instanceof JSObject) {
-            JSObject object = (JSObject) methodCall.getParent();
-            writer.write(object.getName());
+        if (methodCall.getOwner() != null) {
+            writer.write(methodCall.getOwner().getName());
         } else {
             writer.write("this");
         }
@@ -190,9 +183,8 @@ public abstract class JSWriter {
 
 
     protected void writeMethodCallStatement(JSMethodCall statement, PrintWriter writer) {
-        if (statement.getParent() instanceof JSObject) {
-            JSObject object = (JSObject) statement.getParent();
-            writer.write(object.getName());
+        if (statement.getOwner() != null) {
+            writer.write(statement.getOwner().getName());
         } else {
             writer.write("this");
         }
