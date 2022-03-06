@@ -1,12 +1,13 @@
 package one.xis.js;
 
+import lombok.EqualsAndHashCode;
 import lombok.Value;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Value
+@EqualsAndHashCode(callSuper = false)
 public class JSMethod implements JSContext {
     JSClass owner;
     String name;
@@ -22,9 +23,5 @@ public class JSMethod implements JSContext {
     public String toString() {
         return owner.getClassName() + "#" + name + "(...)";
     }
-    
-    @Override
-    public int hashCode() {
-        return Objects.hash(owner.getClassName(), name);
-    }
+
 }

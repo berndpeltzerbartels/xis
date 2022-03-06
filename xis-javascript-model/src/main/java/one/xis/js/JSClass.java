@@ -60,6 +60,9 @@ public class JSClass implements JSDeclaration, JSContext {
     }
 
     public JSClass addField(String name, JSValue value) {
+        if (fields.containsKey(name)) {
+            throw new IllegalStateException("field already exists: " + name);
+        }
         JSField field = new JSField(this, name);
         field.setValue(value);
         fields.put(name, field);
@@ -70,8 +73,29 @@ public class JSClass implements JSDeclaration, JSContext {
         return fields.get(name);
     }
 
+
+    @Override
+    public String toString() {
+        return "JSClass{" +
+                "className='" + className + '\'' +
+                '}';
+    }
+
+    // TODO remove equals and hashcode, but check Lombok causes StackOverflowException (rekursice call)
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        JSClass jsClass = (JSClass) o;
+        return Objects.equals(className, jsClass.className) && Objects.equals(superClass, jsClass.superClass);
+    }
+
     @Override
     public int hashCode() {
-        return Objects.hash(className);
+        return Objects.hash(className, superClass);
     }
 }

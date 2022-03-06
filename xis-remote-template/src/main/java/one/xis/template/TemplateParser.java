@@ -1,16 +1,19 @@
 package one.xis.template;
 
 import one.xis.utils.lang.StringUtils;
+import one.xis.utils.xml.XmlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.Text;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import static one.xis.utils.xml.XmlUtil.*;
+import static one.xis.utils.xml.XmlUtil.getAttributes;
+import static one.xis.utils.xml.XmlUtil.getChildNodes;
 
 public class TemplateParser {
 
@@ -41,64 +44,65 @@ public class TemplateParser {
 
     private ModelNode parse(Node node) {
         if (node instanceof Element) {
-            Element element = (Element) node;
-            if (hasIfAttribute(element)) {
-                return parseIf(element);
-            } else if (hasRepeatAttribute(element)) {
-                return parseRepeat(element);
-            } else if (isContainer((Element) node)) {
-                return parseContainer((Element) node);
-            } else {
-                return parseElement((Element) node);
-            }
+            return parseElement((Element) node);
         } else {
             return parseText((Text) node);
         }
     }
 
-    private boolean isContainer(Element element) {
-        return element.hasAttribute(ATTR_CONTAINER_ID);
+    @SuppressWarnings("all")
+    private ChildHolder parseElement(Element element) {
+        LinkedList<ChildHolder> result = new LinkedList<>();
+        if (hasIfAttribute(element)) {
+            result.add(parseIf(element));
+        }
+        if (hasRepeatAttribute(element)) {
+            result.add(parseRepeat(element));
+        }
+        var modelElement = isContainer(element) ? toContainerElement(element) : toTemplateElement(element);
+        result.add(modelElement);
+        if (hasForAttribute(element)) {
+            result.add(parseFor(element));
+        }
+        ChildHolder last = result.stream().reduce((e1, e2) -> {
+            e1.addChild(e2);
+            return e2;
+        }).orElseThrow();
+        getAttributes(element).forEach((name, rawValue) -> addAttribute(name, rawValue, modelElement));
+        parseChildren(element).forEach(last::addChild);
+        return result.getFirst();
     }
 
-    private boolean hasIfAttribute(Element element) {
-        return element.hasAttribute(ATTR_IF);
-    }
-
-    private boolean hasForAttribute(Element element) {
-        return element.hasAttribute(ATTR_FOR);
-    }
-
-    private boolean hasRepeatAttribute(Element element) {
-        return element.hasAttribute(ATTR_REPEAT);
-    }
-
-    private ModelNode parseContainer(Element element) {
-        var containerElement = new ContainerElement(element.getTagName(), element.getAttribute(ATTR_CONTAINER_ID), element.getAttribute(ATTR_CONTAINER_WIDGET));
-        getAttributes(element).forEach((name, rawValue) -> addAttribute(name, rawValue, containerElement));
-        if (getChildElements(element).findAny().isPresent()) {
+    private ContainerElement toContainerElement(Element element) {
+        ContainerElement containerElement = new ContainerElement(element.getTagName(), getMandatoryAttribute(ATTR_CONTAINER_ID, element), element.getAttribute(ATTR_CONTAINER_WIDGET));
+        if (element.getChildNodes().getLength() != 0) {
             throw new TemplateSynthaxException(String.format("elements with attribute \"%s\" must have no content", ATTR_CONTAINER_ID));
-        }
-        if (element.hasAttribute(ATTR_FOR)) {
-            throw new TemplateSynthaxException(String.format("elements with attribute \"%s\" must not have attribute \"%s\"", ATTR_CONTAINER_ID, ATTR_FOR));
-        }
-        if (element.hasAttribute(ATTR_REPEAT)) {
-            throw new TemplateSynthaxException(String.format("elements with attribute \"%s\" must not have attribute \"%s\"", ATTR_CONTAINER_ID, ATTR_REPEAT));
         }
         return containerElement;
     }
 
-    private ModelNode parseElement(Element element) {
-        if (hasForAttribute(element)) {
-            return parseFor(element);
-        }
-        var modelElement = new TemplateElement(element.getTagName());
-        getAttributes(element).forEach((name, rawValue) -> addAttribute(name, rawValue, modelElement));
-        parseChildren(element).forEach(modelElement::addChild);
-        if (element.hasAttribute(ATTR_CONTAINER_WIDGET)) {
-            throw new TemplateSynthaxException(String.format("elements with attribute \"%s\" must have a container-id (attribute \"%s\")", ATTR_CONTAINER_WIDGET, ATTR_CONTAINER_ID));
-        }
-        return modelElement;
+    private TemplateElement toTemplateElement(Element element) {
+        return new TemplateElement(element.getTagName());
     }
+
+    private String getMandatoryAttribute(String name, Element element) {
+        if (!element.hasAttribute(name)) {
+            throw new TemplateSynthaxException(elementToString(element) + " must have attribute " + name);
+        }
+        return element.getAttribute(name);
+    }
+
+    private String elementToString(Element element) {
+        StringBuilder builder = new StringBuilder()
+                .append("<")
+                .append(element.getTagName());
+        XmlUtil.getAttributes(element).forEach((name, value) -> {
+            builder.append(name).append("=").append("\"").append(value).append("\"");
+        });
+        return builder.append("/>").toString();
+
+    }
+
 
     private void addAttribute(String name, String rawValue, ElementBase target) {
         List<MixedContent> contentList = new MixedContentParser(rawValue).parse();
@@ -126,32 +130,27 @@ public class TemplateParser {
 
     private IfBlock parseIf(Element element) {
         String src = element.getAttribute(ATTR_IF);
-        IfBlock ifBlock = new IfBlock(expressionParser.parse(src));
-        parseChildren(element).forEach(ifBlock::addChild);
-        return ifBlock;
+        return new IfBlock(expressionParser.parse(src));
     }
 
     private Loop parseFor(Element element) {
         String dataFor = element.getAttribute(ATTR_FOR);
-        var dataForArray = dataFor.split(":");
-        if (dataForArray.length != 2) {
-            throw new TemplateSynthaxException("illegal loop-attribute:" + ATTR_FOR + "=" + dataFor);
-        }
-        Loop loop = new Loop(expressionParser.parse(dataForArray[1].trim()), dataForArray[0].trim(), getIndexVarName(element), getNumberVarName(element), dataFor);
-        parseChildren(element).forEach(loop::addChild);
-        return loop;
+        return loop(dataFor, element);
     }
 
     private Loop parseRepeat(Element element) {
         String repeat = element.getAttribute(ATTR_REPEAT);
-        var dataForArray = repeat.split(":");
-        if (dataForArray.length != 2) {
-            throw new TemplateSynthaxException("illegal repeat-attribute:" + ATTR_REPEAT + "=" + repeat);
-        }
-        Loop loop = new Loop(expressionParser.parse(dataForArray[1]), dataForArray[0], getIndexVarName(element), getNumberVarName(element), repeat);
-        loop.addChild(parseElement(element));
-        return loop;
+        return loop(repeat, element);
     }
+
+    private Loop loop(String loopSource, Element element) {
+        var dataForArray = loopSource.split(":");
+        if (dataForArray.length != 2) {
+            throw new TemplateSynthaxException("illegal attribute:" + ATTR_REPEAT + "=" + loopSource);
+        }
+        return new Loop(expressionParser.parse(dataForArray[1]), dataForArray[0], getIndexVarName(element), getNumberVarName(element), loopSource);
+    }
+
 
     private String getIndexVarName(Element e) {
         return StringUtils.isNotEmpty(e.getAttribute(ATTR_LOOP_INDEX)) ? e.getAttribute(ATTR_LOOP_INDEX) : nextVarName();
@@ -159,6 +158,22 @@ public class TemplateParser {
 
     private String getNumberVarName(Element e) {
         return StringUtils.isNotEmpty(e.getAttribute(ATTR_LOOP_NUMBER)) ? e.getAttribute(ATTR_LOOP_NUMBER) : nextVarName();
+    }
+
+    private boolean isContainer(Element element) {
+        return element.hasAttribute(ATTR_CONTAINER_ID);
+    }
+
+    private boolean hasIfAttribute(Element element) {
+        return element.hasAttribute(ATTR_IF);
+    }
+
+    private boolean hasForAttribute(Element element) {
+        return element.hasAttribute(ATTR_FOR);
+    }
+
+    private boolean hasRepeatAttribute(Element element) {
+        return element.hasAttribute(ATTR_REPEAT);
     }
 
     private String nextVarName() {

@@ -16,37 +16,41 @@ import static one.xis.js.Classes.*;
 public class JavascriptParser {
     private final JSScript script;
     private static long currentNameId = 1;
-    private final Collection<JSClass> rootClasses = new HashSet<>();
+    private final Collection<JSClass> childClasses = new HashSet<>();
 
     public void parse(Collection<WidgetModel> widgetModels) {
-        widgetModels.forEach(this::parse);
-        JSClass widgets = widgetsClass();
-        script.addDeclaration(widgets);
-        script.addStatement(new JSVarAssignment(new JSVar("widgets"), new JSContructorCall(widgets)));
+        List<JSClass> widgetClasses = widgetModels.stream().map(this::parse).collect(Collectors.toList());
+        script.addDeclarations(childClasses);
+        script.addDeclarations(widgetClasses);
+        JSClass widgetsClass = widgetsClass(widgetClasses);
+        script.addDeclaration(widgetsClass);
+        script.addStatement(new JSVarAssignment(new JSVar("widgets"), new JSContructorCall(widgetsClass)));
     }
 
-    private void parse(WidgetModel widgetModel) {
+    private JSClass parse(WidgetModel widgetModel) {
         JSClass widgetClass = new JSClass(widgetModel.getName()).derrivedFrom(XIS_ROOT);
-        JSClass rootClass = toClass(widgetModel.getRootNode());
-        widgetClass.addField("root", new JSContructorCall(rootClass));
-        rootClasses.add(widgetClass);
+        JSClass widgetRootClass = toClass(widgetModel.getRootNode());
+        widgetClass.addField("root", new JSContructorCall(widgetRootClass));
+        return widgetClass;
     }
 
-    private JSClass widgetsClass() {
-        JSClass widgestClass = new JSClass(nextName()).derrivedFrom(XIS_WIDGETS);
+    private JSClass widgetsClass(List<JSClass> widgetClasses) {
+        JSClass widgestClass = derrivedClass(XIS_WIDGETS);
         JSJsonValue widgets = new JSJsonValue();
-        rootClasses.forEach(root -> widgets.addField(root.getClassName(), new JSContructorCall(root)));
+        widgetClasses.forEach(root -> widgets.addField(root.getClassName(), new JSContructorCall(root)));
         widgestClass.addField("widgets", widgets);
         return widgestClass;
     }
 
     private List<JSContructorCall> evaluateChildren(ChildHolder parent) {
-        List<JSClass> jsClasses = parent.getChildren().stream()
-                .map(this::toClass).collect(Collectors.toList());
-        script.addDeclarations(jsClasses);
-        return jsClasses.stream().map(JSContructorCall::new)
+        List<JSClass> classes = parent.getChildren().stream()
+                .map(this::toClass)
+                .collect(Collectors.toList());
+        childClasses.addAll(classes);
+        return classes.stream().map(JSContructorCall::new)
                 .collect(Collectors.toList());
     }
+
 
     private JSClass toClass(ModelNode node) {
         if (node instanceof TemplateElement) {
@@ -66,7 +70,7 @@ public class JavascriptParser {
     }
 
     private JSClass toClass(TemplateElement element) {
-        JSClass elementClass = new JSClass(nextName()).derrivedFrom(XIS_ELEMENT);
+        JSClass elementClass = derrivedClass(XIS_ELEMENT);
         addChildrenField(element, elementClass);
         addElementField(element, elementClass);
         overrideUpdateAttributes(elementClass, element);
@@ -74,7 +78,7 @@ public class JavascriptParser {
     }
 
     private JSClass toClass(ContainerElement containerElement) {
-        JSClass containerClass = new JSClass(nextName()).derrivedFrom(XIS_CONTAINER);
+        JSClass containerClass = derrivedClass(XIS_CONTAINER);
         containerClass.addField("containerId", new JSString(containerElement.getContainerId()));
         JSValue defaultWidgetId = containerElement.getDefaultWidgetId() != null ? new JSString(containerElement.getDefaultWidgetId()) : new JSUndefined();
         containerClass.addField("defaultWidgetId", defaultWidgetId);
@@ -84,7 +88,7 @@ public class JavascriptParser {
     }
 
     private JSClass toClass(MutableTextNode mutableTextNode) {
-        JSClass textNode = new JSClass(nextName()).derrivedFrom(XIS_MUTABLE_TEXT_NODE);
+        JSClass textNode = derrivedClass(XIS_MUTABLE_TEXT_NODE);
         textNode.addField("node", new JSFunctionCall(Functions.CREATE_TEXT_NODE, new JSString("")));
         JSMethod getText = textNode.overrideMethod("getText");
         JSVar text = new JSVar("text");
@@ -95,14 +99,14 @@ public class JavascriptParser {
     }
 
     private JSClass toClass(StaticTextNode staticTextNode) {
-        JSClass textNode = new JSClass(nextName()).derrivedFrom(XIS_STATIC_TEXT_NODE);
+        JSClass textNode = derrivedClass(XIS_STATIC_TEXT_NODE);
         textNode.addField("node", new JSFunctionCall(Functions.CREATE_TEXT_NODE, new JSString(staticTextNode.getContent())));
         textNode.overrideMethod("update"); // Nothing to do, here
         return textNode;
     }
 
     private JSClass toClass(Loop loop) {
-        JSClass loopClass = new JSClass(nextName()).derrivedFrom(XIS_LOOP);
+        JSClass loopClass = derrivedClass(XIS_LOOP);
 
         JSJsonValue loopAttributes = new JSJsonValue();
         loopAttributes.addField("indexVarName", new JSString(loop.getIndexVarName()));
@@ -115,12 +119,12 @@ public class JavascriptParser {
         ExpressionEval expressionEval = new ExpressionEval(getValue);
         getArray.addStatement(new JSReturn(expressionEval.getEvaluator(loop.getArraySource())));
 
+        addChildrenField(loop, loopClass);
         return loopClass;
     }
 
     private JSClass toClass(IfBlock ifBlock) {
-        JSClass ifClass = new JSClass(nextName()).derrivedFrom(XIS_IF);
-        ifClass.addField("children", new JSArray(evaluateChildren(ifBlock)));
+        JSClass ifClass = derrivedClass(XIS_IF);
 
         JSMethod getValue = ifClass.getMethod("getValue");
         JSMethod evaluateCondition = ifClass.overrideMethod("evaluateCondition");
@@ -128,6 +132,7 @@ public class JavascriptParser {
         ExpressionEval expressionEval = new ExpressionEval(getValue);
         evaluateCondition.addStatement(new JSReturn(expressionEval.getEvaluator(ifBlock.getExpression())));
 
+        addChildrenField(ifBlock, ifClass);
         return ifClass;
     }
 
@@ -281,6 +286,10 @@ public class JavascriptParser {
                 }
             }
         }
+    }
+
+    private JSClass derrivedClass(JSSuperClass superClass) {
+        return new JSClass(nextName()).derrivedFrom(superClass);
     }
 
     private String nextName() {

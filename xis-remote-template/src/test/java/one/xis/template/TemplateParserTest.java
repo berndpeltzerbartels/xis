@@ -1,6 +1,8 @@
 package one.xis.template;
 
 import one.xis.utils.io.IOUtils;
+import one.xis.utils.lang.ClassUtils;
+import one.xis.utils.lang.CollectionUtils;
 import one.xis.utils.xml.XmlUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -9,8 +11,6 @@ import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -32,28 +32,28 @@ class TemplateParserTest {
         void parse() throws TemplateSynthaxException, IOException {
             var widgetModel = parser.parse(document, "test");
 
-            assertThat(widgetModel.getElementName()).isEqualTo("ul");
-            assertThat(widgetModel.getLoop()).isNotNull();
-            assertThat(widgetModel.getLoop().getItemVarName()).isEqualTo("item");
-            assertThat(widgetModel.getLoop().getIndexVarName()).isEqualTo("i");
-            assertThat(widgetModel.getLoop().getNumberVarName()).isEqualTo("number");
-            assertThat(widgetModel.getLoop().getArraySource().getVars()).hasSize(1);
-            assertThat(widgetModel.getLoop().getArraySource().getVars().get(0)).isEqualTo(new ExpressionVar("items"));
+            IfBlock ifBlock = ClassUtils.cast(widgetModel.getRootNode(), IfBlock.class);
+            TemplateElement ul = onlyChild(ifBlock, TemplateElement.class);
+            assertThat(ul.getElementName()).isEqualTo("ul");
 
-            var childElements = widgetModel.getChildren().stream().filter(TemplateElement.class::isInstance).map(TemplateElement.class::cast).collect(Collectors.toList());
-            assertThat(childElements).hasSize(1);
-            var li = childElements.get(0);
+            Loop loop = onlyChild(ul, Loop.class);
+            TemplateElement li = onlyChild(loop, TemplateElement.class);
             assertThat(li.getElementName()).isEqualTo("li");
-            assertThat(li.getMutableAttributes().get("class")).isNotNull();
 
-            List<MixedContent> classAttributeContent = li.getMutableAttributes().get("class").getContents();
-            assertThat(classAttributeContent).hasSize(1);
-            assertThat(classAttributeContent.get(0)).isInstanceOf(ExpressionContent.class);
-            ExpressionContent classAttributeExprContent = (ExpressionContent) classAttributeContent.get(0);
-            Expression classAttribute = classAttributeExprContent.getExpression();
-            assertThat(classAttribute.getFunction()).isEqualTo("oddOrEven");
-            assertThat(classAttribute.getVars()).hasSize(1);
-            assertThat(classAttribute.getVars().get(0)).isEqualTo(new ExpressionVar("i"));
+            MutableTextNode mutableTextNode = onlyChild(li, MutableTextNode.class);
+            MixedContent mixedContent = CollectionUtils.onlyElement(mutableTextNode.getContent());
+            ExpressionContent expressionContent = ClassUtils.cast(mixedContent, ExpressionContent.class);
+            assertThat(expressionContent.getExpression().getFunction()).isNull();
+
+            ExpressionArg arg = CollectionUtils.onlyElement(expressionContent.getExpression().getVars());
+            ExpressionVar expressionVar = ClassUtils.cast(arg, ExpressionVar.class);
+            assertThat(expressionVar.getVarName()).isEqualTo("item.name");
+
+            MutableAttribute mutableAttribute = CollectionUtils.onlyElement(li.getMutableAttributes().values());
+            ExpressionContent classAttribute = ClassUtils.cast(CollectionUtils.onlyElement(mutableAttribute.getContents()), ExpressionContent.class);
+            assertThat(classAttribute.getExpression().getFunction()).isEqualTo("oddOrEven");
+            ExpressionArg expressionArg = CollectionUtils.onlyElement(classAttribute.getExpression().getVars());
+            assertThat(ClassUtils.cast(expressionArg, ExpressionVar.class).getVarName()).isEqualTo("i");
         }
     }
 
@@ -67,52 +67,41 @@ class TemplateParserTest {
         void prepareDocument() throws IOException, SAXException {
             document = XmlUtil.loadDocument(IOUtils.getResourceForClass(getClass(), "Template2.html"));
         }
-
+        
         @Test
         void parse() throws TemplateSynthaxException, IOException {
             var widgetModel = parser.parse(document, "test");
 
-            assertThat(widgetModel.getElementName()).isEqualTo("div");
+            var loop = ClassUtils.cast(widgetModel.getRootNode(), Loop.class);
+            var div = onlyChild(loop, TemplateElement.class);
+            assertThat(div.getElementName()).isEqualTo("div");
 
-            var ifCondition = widgetModel.getIfCondition();
-            assertThat(ifCondition.getExpression().getVars()).hasSize(1);
-            assertThat(ifCondition.getExpression().getVars().get(0)).isEqualTo(new ExpressionVar("visible"));
+            var h4 = ClassUtils.cast(div.getChildren().get(0), TemplateElement.class);
+            assertThat(h4.getElementName()).isEqualTo("h4");
 
-            List<TemplateElement> childElements = widgetModel.getChildren().stream().filter(TemplateElement.class::isInstance).map(TemplateElement.class::cast).collect(Collectors.toList());
-
-            assertThat(childElements).hasSize(2);
-
-            var h4 = childElements.get(0);
-            assertThat(h4.getChildren()).hasSize(1);
-            assertThat(h4.getChildren().get(0)).isInstanceOf(TextNode.class);
             var h4TextNode = (MutableTextNode) h4.getChildren().get(0);
             assertThat(h4TextNode.getContent()).hasSize(2);
             assertThat(h4TextNode.getContent().get(0)).isEqualTo(new StaticContent("Details Of "));
             assertThat(h4TextNode.getContent().get(1)).isInstanceOf(ExpressionContent.class);
 
-            ExpressionContent expressionContent = (ExpressionContent) h4TextNode.getContent().get(1);
-            assertThat(expressionContent.getExpression().getContent()).isEqualTo("product.name");
 
+            var anchor = ClassUtils.cast(div.getChildren().get(1), TemplateElement.class);
+            assertThat(anchor.getElementName()).isEqualTo("a");
 
-            var anchor = childElements.get(1);
-            MutableAttribute href = anchor.getMutableAttributes().get("href");
+            var href = anchor.getMutableAttributes().get("href");
             assertThat(href.getContents()).hasSize(3);
-            assertThat(href.getContents().get(0)).isInstanceOf(StaticContent.class);
-            assertThat(href.getContents().get(1)).isInstanceOf(ExpressionContent.class);
-            assertThat(href.getContents().get(2)).isInstanceOf(StaticContent.class);
+            assertThat(ClassUtils.cast(href.getContents().get(0), StaticContent.class).getContent()).isEqualTo("/products/");
+            assertThat(ClassUtils.cast(href.getContents().get(1), ExpressionContent.class).getExpression().getContent()).isEqualTo("product.id");
+            assertThat(ClassUtils.cast(href.getContents().get(2), StaticContent.class).getContent()).isEqualTo(".html");
 
-            assertThat(((StaticContent) href.getContents().get(0)).getContent()).isEqualTo("/products/");
-            assertThat(((ExpressionContent) href.getContents().get(1)).getExpression().getContent()).isEqualTo("product.id");
-            assertThat(((StaticContent) href.getContents().get(2)).getContent()).isEqualTo(".html");
-
-
-            assertThat(anchor.getChildren()).hasSize(1);
-            assertThat(anchor.getChildren().get(0)).isInstanceOf(TextNode.class);
-
-            var node = (StaticTextNode) anchor.getChildren().get(0);
-            assertThat(node.getContent()).isEqualTo("Details");
         }
     }
 
+    @SuppressWarnings("unchecked")
+    private <T> T onlyChild(ChildHolder childHolder, Class<T> childType) {
+        assertThat(childHolder.getChildren()).hasSize(1);
+        assertThat(childHolder.getChildren().get(0)).isInstanceOf(childType);
+        return (T) childHolder.getChildren().get(0);
+    }
 
 }
