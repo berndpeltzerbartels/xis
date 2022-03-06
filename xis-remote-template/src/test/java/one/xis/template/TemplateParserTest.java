@@ -1,7 +1,6 @@
 package one.xis.template;
 
 import one.xis.utils.io.IOUtils;
-import one.xis.utils.lang.ClassUtils;
 import one.xis.utils.lang.CollectionUtils;
 import one.xis.utils.xml.XmlUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,6 +11,7 @@ import org.xml.sax.SAXException;
 
 import java.io.IOException;
 
+import static one.xis.utils.lang.ClassUtils.cast;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -73,7 +73,7 @@ class TemplateParserTest {
         void parse() throws TemplateSynthaxException, IOException {
             var widgetModel = parser.parse(document, "test");
 
-            IfBlock ifBlock = ClassUtils.cast(widgetModel.getRootNode(), IfBlock.class);
+            IfBlock ifBlock = cast(widgetModel.getRootNode(), IfBlock.class);
             TemplateElement ul = onlyChild(ifBlock, TemplateElement.class);
             assertThat(ul.getElementName()).isEqualTo("ul");
 
@@ -83,18 +83,18 @@ class TemplateParserTest {
 
             MutableTextNode mutableTextNode = onlyChild(li, MutableTextNode.class);
             MixedContent mixedContent = CollectionUtils.onlyElement(mutableTextNode.getContent());
-            ExpressionContent expressionContent = ClassUtils.cast(mixedContent, ExpressionContent.class);
+            ExpressionContent expressionContent = cast(mixedContent, ExpressionContent.class);
             assertThat(expressionContent.getExpression().getFunction()).isNull();
 
             ExpressionArg arg = CollectionUtils.onlyElement(expressionContent.getExpression().getVars());
-            ExpressionVar expressionVar = ClassUtils.cast(arg, ExpressionVar.class);
+            ExpressionVar expressionVar = cast(arg, ExpressionVar.class);
             assertThat(expressionVar.getVarName()).isEqualTo("item.name");
 
             MutableAttribute mutableAttribute = CollectionUtils.onlyElement(li.getMutableAttributes().values());
-            ExpressionContent classAttribute = ClassUtils.cast(CollectionUtils.onlyElement(mutableAttribute.getContents()), ExpressionContent.class);
+            ExpressionContent classAttribute = cast(CollectionUtils.onlyElement(mutableAttribute.getContents()), ExpressionContent.class);
             assertThat(classAttribute.getExpression().getFunction()).isEqualTo("oddOrEven");
             ExpressionArg expressionArg = CollectionUtils.onlyElement(classAttribute.getExpression().getVars());
-            assertThat(ClassUtils.cast(expressionArg, ExpressionVar.class).getVarName()).isEqualTo("i");
+            assertThat(cast(expressionArg, ExpressionVar.class).getVarName()).isEqualTo("i");
         }
     }
 
@@ -113,11 +113,11 @@ class TemplateParserTest {
         void parse() throws TemplateSynthaxException, IOException {
             var widgetModel = parser.parse(document, "test");
 
-            var loop = ClassUtils.cast(widgetModel.getRootNode(), Loop.class);
+            var loop = cast(widgetModel.getRootNode(), Loop.class);
             var div = onlyChild(loop, TemplateElement.class);
             assertThat(div.getElementName()).isEqualTo("div");
 
-            var h4 = ClassUtils.cast(div.getChildren().get(0), TemplateElement.class);
+            var h4 = cast(div.getChildren().get(0), TemplateElement.class);
             assertThat(h4.getElementName()).isEqualTo("h4");
 
             var h4TextNode = (MutableTextNode) h4.getChildren().get(0);
@@ -126,14 +126,14 @@ class TemplateParserTest {
             assertThat(h4TextNode.getContent().get(1)).isInstanceOf(ExpressionContent.class);
 
 
-            var anchor = ClassUtils.cast(div.getChildren().get(1), TemplateElement.class);
+            var anchor = cast(div.getChildren().get(1), TemplateElement.class);
             assertThat(anchor.getElementName()).isEqualTo("a");
 
             var href = anchor.getMutableAttributes().get("href");
             assertThat(href.getContents()).hasSize(3);
-            assertThat(ClassUtils.cast(href.getContents().get(0), StaticContent.class).getContent()).isEqualTo("/products/");
-            assertThat(ClassUtils.cast(href.getContents().get(1), ExpressionContent.class).getExpression().getContent()).isEqualTo("product.id");
-            assertThat(ClassUtils.cast(href.getContents().get(2), StaticContent.class).getContent()).isEqualTo(".html");
+            assertThat(cast(href.getContents().get(0), StaticContent.class).getContent()).isEqualTo("/products/");
+            assertThat(cast(href.getContents().get(1), ExpressionContent.class).getExpression().getContent()).isEqualTo("product.id");
+            assertThat(cast(href.getContents().get(2), StaticContent.class).getContent()).isEqualTo(".html");
 
         }
     }
