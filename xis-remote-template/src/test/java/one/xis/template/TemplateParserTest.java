@@ -7,16 +7,57 @@ import one.xis.utils.xml.XmlUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.w3c.dom.Document;
+import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class TemplateParserTest {
 
     private final TemplateParser parser = new TemplateParser();
+
+    @Nested
+    class SimpleElementTest {
+        private Document document;
+
+        @BeforeEach
+        void init() {
+            Attr attr = mock(Attr.class);
+            when(attr.getName()).thenReturn("class");
+            when(attr.getValue()).thenReturn("gold");
+
+            NamedNodeMap namedNodeMap = mock(NamedNodeMap.class);
+            when(namedNodeMap.getLength()).thenReturn(1);
+            when(namedNodeMap.item(0)).thenReturn(attr);
+
+            Element element = mock(Element.class);
+            when(element.getTagName()).thenReturn("div");
+            when(element.getAttributes()).thenReturn(namedNodeMap);
+
+            NodeList childNodes = mock(NodeList.class);
+            when(childNodes.getLength()).thenReturn(0);
+            when(element.getChildNodes()).thenReturn(childNodes);
+
+            document = mock(Document.class);
+            when(document.getDocumentElement()).thenReturn(element);
+        }
+
+        @Test
+        void element() {
+            WidgetModel widgetModel = new TemplateParser().parse(document, "123");
+
+            TemplateElement element = (TemplateElement) widgetModel.getRootNode();
+            assertThat(element.getElementName()).isEqualTo("div");
+            assertThat(element.getStaticAttributes()).containsKey("class");
+            assertThat(element.getStaticAttributes().get("class")).isEqualTo("gold");
+        }
+
+
+    }
 
     @Nested
     class ParseTemplate1 {
@@ -67,7 +108,7 @@ class TemplateParserTest {
         void prepareDocument() throws IOException, SAXException {
             document = XmlUtil.loadDocument(IOUtils.getResourceForClass(getClass(), "Template2.html"));
         }
-        
+
         @Test
         void parse() throws TemplateSynthaxException, IOException {
             var widgetModel = parser.parse(document, "test");
