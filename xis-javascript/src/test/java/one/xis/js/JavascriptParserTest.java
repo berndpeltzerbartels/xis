@@ -24,7 +24,7 @@ class JavascriptParserTest {
         void setUp() {
             script = new JSScript();
             parser = new JavascriptParser(script);
-            widgetModel = new WidgetModel("widget", new TemplateElement("div"));
+            widgetModel = new WidgetModel("testWidget", new TemplateElement("div"));
         }
 
         @Test

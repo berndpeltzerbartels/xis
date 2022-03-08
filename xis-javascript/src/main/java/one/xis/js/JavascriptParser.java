@@ -16,19 +16,18 @@ import static one.xis.js.Classes.*;
 public class JavascriptParser {
     private final JSScript script;
     private static long currentNameId = 1;
-    private final Collection<JSClass> childClasses = new HashSet<>();
+    private final Collection<JSClass> classes = new HashSet<>();
 
     public void parse(Collection<WidgetModel> widgetModels) {
         List<JSClass> widgetClasses = widgetModels.stream().map(this::parse).collect(Collectors.toList());
-        script.addDeclarations(childClasses);
-        script.addDeclarations(widgetClasses);
+        script.addDeclarations(classes);
         JSClass widgetsClass = widgetsClass(widgetClasses);
         script.addDeclaration(widgetsClass);
         script.addStatement(new JSVarAssignment(new JSVar("widgets"), new JSContructorCall(widgetsClass)));
     }
 
     private JSClass parse(WidgetModel widgetModel) {
-        JSClass widgetClass = new JSClass(widgetModel.getName()).derrivedFrom(XIS_ROOT);
+        JSClass widgetClass = derrivedClass(widgetModel.getName(), XIS_ROOT);
         JSClass widgetRootClass = toClass(widgetModel.getRootNode());
         widgetClass.addField("root", new JSContructorCall(widgetRootClass));
         return widgetClass;
@@ -46,7 +45,7 @@ public class JavascriptParser {
         List<JSClass> classes = parent.getChildren().stream()
                 .map(this::toClass)
                 .collect(Collectors.toList());
-        childClasses.addAll(classes);
+        this.classes.addAll(classes);
         return classes.stream().map(JSContructorCall::new)
                 .collect(Collectors.toList());
     }
@@ -289,7 +288,14 @@ public class JavascriptParser {
     }
 
     private JSClass derrivedClass(JSSuperClass superClass) {
-        return new JSClass(nextName()).derrivedFrom(superClass);
+        return derrivedClass(nextName(), superClass);
+    }
+
+
+    private JSClass derrivedClass(String className, JSSuperClass superClass) {
+        JSClass jsClass = new JSClass(className).derrivedFrom(superClass);
+        classes.add(jsClass);
+        return jsClass;
     }
 
     private String nextName() {
