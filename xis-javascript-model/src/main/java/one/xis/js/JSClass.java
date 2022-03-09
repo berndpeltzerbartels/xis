@@ -43,16 +43,15 @@ public class JSClass implements JSDeclaration, JSContext {
     }
 
 
-    public JSMethod overrideMethod(String name) {
+    public JSMethod overrideAbstractMethod(String name) {
         JSMethod method = superClass.getAbstractMethods().get(name);
         if (method == null) {
-            method = superClass.getMethod(name);
+            throw new IllegalStateException("no abstract method with name: " + name);
         }
         JSMethod overriddenMethod = new JSMethod(this, name, method.getArgs());
         overriddenMethods.put(name, overriddenMethod);
         return overriddenMethod;
     }
-
 
     public JSClass derrivedFrom(JSSuperClass jsClass) {
         superClass = jsClass;
@@ -76,9 +75,13 @@ public class JSClass implements JSDeclaration, JSContext {
 
     @Override
     public String toString() {
-        return "JSClass{" +
-                "className='" + className + '\'' +
-                '}';
+        StringBuilder sb = new StringBuilder()
+                .append("JSClass{className=\"")
+                .append(className).append("\"");
+        if (superClass != null) {
+            sb.append(", superClass=\"").append(superClass.getClassName()).append("\"");
+        }
+        return sb.append('}').toString();
     }
 
     // TODO remove equals and hashcode, but check Lombok causes StackOverflowException (rekursice call)

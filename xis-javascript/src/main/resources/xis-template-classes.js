@@ -245,43 +245,24 @@ XISLoop.prototype.appendRow = function () {
     this.rows.push(children);
 }
 
-XISLoop.prototype.removeRow = function () {
-    if (this.rows.length > 0) {
-        var children = this.rows.pop();
-        for (var i = 0; i < children.length; i++) {
-            this.element.removeChild(children[i].element);
-        }
-    }
+XISLoop.prototype.createChildren = function() {
+ // abstract
 }
 
 
-function XISRoot() { }
+function XISWidget() { }
 
-XISRoot.prototype.init = function (parentElement) {
+XISWidget.prototype.init = function (parentElement) {
     this.parentElement = parentElement;
-    this.parentElement.appendChild(this.element);
-    this.initChildren();
+    this.root.init(this.parentElement, this);
 }
 
-XISRoot.prototype.update = function (data) {
+XISWidget.prototype.update = function (data) {
     this.data = data;
-    this.updateChildren();
+    this.root.update();
 }
 
-XISRoot.prototype.updateChildren = function () {
-    for (var i = 0; i < this.children.length; i++) {
-        this.children[i].update();
-    }
-}
-
-XISRoot.prototype.initChildren = function () {
-    for (var i = 0; i < this.children.length; i++) {
-        this.children[i].init(this.element, this);
-    }
-}
-
-
-XISRoot.prototype.getValue = function (path) {
+XISWidget.prototype.getValue = function (path) {
     var name = path[0];
     var rv = this.data[name];
     for (var i = 1; i < path.length; i++) {
@@ -350,7 +331,7 @@ XISWidgets.prototype.getWidget = function (widgetId) {
 
 
 XISWidgets.prototype.bind = function (widgetId, element) {
-    var widget = this.getWidget(widgetId);// XISRoot
+    var widget = this.getWidget(widgetId);// XISWidget
     widget.init(element);
     return widget;
 }

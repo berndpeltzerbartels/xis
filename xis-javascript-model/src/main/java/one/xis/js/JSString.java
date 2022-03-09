@@ -8,4 +8,9 @@ import lombok.Value;
 @Value
 public class JSString implements JSValue {
     String content;
+
+    @Override
+    public String toString() {
+        return content;
+    }
 }

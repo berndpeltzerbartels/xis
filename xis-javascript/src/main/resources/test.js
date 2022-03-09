@@ -503,7 +503,6 @@ class XISRoot {
     
     constructor(clientState) {
         this.clientState = clientState;
-        this.element = this.createElement();
     }
 
     init(parentElement) {

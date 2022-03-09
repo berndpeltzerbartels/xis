@@ -19,7 +19,7 @@ public class JavascriptParser {
     private final Collection<JSClass> classes = new HashSet<>();
 
     public void parse(Collection<WidgetModel> widgetModels) {
-        List<JSClass> widgetClasses = widgetModels.stream().map(this::parse).collect(Collectors.toList());
+        Map<String, JSClass> widgetClasses = widgetModels.stream().collect(Collectors.toMap(WidgetModel::getName, this::parse));
         script.addDeclarations(classes);
         JSClass widgetsClass = widgetsClass(widgetClasses);
         script.addDeclaration(widgetsClass);
@@ -27,18 +27,18 @@ public class JavascriptParser {
     }
 
     private JSClass parse(WidgetModel widgetModel) {
-        JSClass widgetClass = derrivedClass(widgetModel.getName(), XIS_ROOT);
+        JSClass widgetClass = derrivedClass(XIS_WIDGET);
         JSClass widgetRootClass = toClass(widgetModel.getRootNode());
         widgetClass.addField("root", new JSContructorCall(widgetRootClass));
         return widgetClass;
     }
 
-    private JSClass widgetsClass(List<JSClass> widgetClasses) {
-        JSClass widgestClass = derrivedClass(XIS_WIDGETS);
+    private JSClass widgetsClass(Map<String, JSClass> widgetClasses) {
+        JSClass widgetsClass = derrivedClass(XIS_WIDGETS);
         JSJsonValue widgets = new JSJsonValue();
-        widgetClasses.forEach(root -> widgets.addField(root.getClassName(), new JSContructorCall(root)));
-        widgestClass.addField("widgets", widgets);
-        return widgestClass;
+        widgetClasses.forEach((name, widgetClass) -> widgets.addField(name, new JSContructorCall(widgetClass)));
+        widgetsClass.addField("widgets", widgets);
+        return widgetsClass;
     }
 
     private List<JSContructorCall> evaluateChildren(ChildHolder parent) {
@@ -89,7 +89,7 @@ public class JavascriptParser {
     private JSClass toClass(MutableTextNode mutableTextNode) {
         JSClass textNode = derrivedClass(XIS_MUTABLE_TEXT_NODE);
         textNode.addField("node", new JSFunctionCall(Functions.CREATE_TEXT_NODE, new JSString("")));
-        JSMethod getText = textNode.overrideMethod("getText");
+        JSMethod getText = textNode.overrideAbstractMethod("getText");
         JSVar text = new JSVar("text");
         MixedContentMethodStatements mixedContentMethodStatements = new MixedContentMethodStatements(getText, text);
         mixedContentMethodStatements.addStatements(mutableTextNode.getContent());
@@ -100,7 +100,6 @@ public class JavascriptParser {
     private JSClass toClass(StaticTextNode staticTextNode) {
         JSClass textNode = derrivedClass(XIS_STATIC_TEXT_NODE);
         textNode.addField("node", new JSFunctionCall(Functions.CREATE_TEXT_NODE, new JSString(staticTextNode.getContent())));
-        textNode.overrideMethod("update"); // Nothing to do, here
         return textNode;
     }
 
@@ -114,11 +113,14 @@ public class JavascriptParser {
         loopClass.addField("loopAttributes", loopAttributes);
 
         JSMethod getValue = loopClass.getMethod("getValue");
-        JSMethod getArray = loopClass.overrideMethod("getArray");
+        JSMethod getArray = loopClass.overrideAbstractMethod("getArray");
+        JSMethod createChilderen = loopClass.overrideAbstractMethod("createChildren");
+        createChilderen.addStatement(new JSReturn(new JSArray(evaluateChildren(loop))));
+
         ExpressionEval expressionEval = new ExpressionEval(getValue);
         getArray.addStatement(new JSReturn(expressionEval.getEvaluator(loop.getArraySource())));
 
-        addChildrenField(loop, loopClass);
+        loopClass.addField("rows", new JSArray());
         return loopClass;
     }
 
@@ -126,7 +128,7 @@ public class JavascriptParser {
         JSClass ifClass = derrivedClass(XIS_IF);
 
         JSMethod getValue = ifClass.getMethod("getValue");
-        JSMethod evaluateCondition = ifClass.overrideMethod("evaluateCondition");
+        JSMethod evaluateCondition = ifClass.overrideAbstractMethod("evaluateCondition");
 
         ExpressionEval expressionEval = new ExpressionEval(getValue);
         evaluateCondition.addStatement(new JSReturn(expressionEval.getEvaluator(ifBlock.getExpression())));
@@ -158,7 +160,7 @@ public class JavascriptParser {
     }
 
     private void overrideUpdateAttributes(JSClass jsClass, ElementBase elementBase) {
-        JSMethod updateAttributes = jsClass.overrideMethod("updateAttributes");
+        JSMethod updateAttributes = jsClass.overrideAbstractMethod("updateAttributes");
         elementBase.getMutableAttributes().forEach((key, value) -> {
             JSVar text = new JSVar(nextName());
 

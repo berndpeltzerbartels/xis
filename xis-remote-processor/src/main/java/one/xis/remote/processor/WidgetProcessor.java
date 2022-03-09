@@ -2,6 +2,7 @@ package one.xis.remote.processor;
 
 import com.google.auto.service.AutoService;
 import one.xis.js.JSScript;
+import one.xis.js.JSScriptValidator;
 import one.xis.js.JavascriptParser;
 import one.xis.js.OldSchoolJSWriter;
 import one.xis.template.TemplateParser;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 public class WidgetProcessor extends AnnotationProcessor {
 
     private final TemplateParser templateParser = new TemplateParser();
+    private final JSScriptValidator scriptValidator = new JSScriptValidator();
     private WidgetContextFactory widgetContextFactory;
     private Collection<WidgetContext> widgetContexts;
 
@@ -58,6 +60,7 @@ public class WidgetProcessor extends AnnotationProcessor {
         JSScript script = new JSScript();
         JavascriptParser parser = new JavascriptParser(script);
         parser.parse(models);
+        scriptValidator.validate(script);
         new OldSchoolJSWriter(writer).write(script);
     }
 
