@@ -193,6 +193,18 @@ class JavascriptParserTest {
                     .extracting(JSContructorCall.class::cast)
                     .extracting(JSContructorCall::getJsClass)
                     .isEqualTo(loopClass);
+
+            assertThat(loopClass.getOverriddenMethods().get("createChildren"))
+                    .extracting(JSMethod::getStatements)
+                    .extracting(CollectionUtils::onlyElement)
+                    .extracting(JSReturn.class::cast)
+                    .extracting(JSReturn::getValue)
+                    .extracting(JSArray.class::cast)
+                    .extracting(JSArray::getElements)
+                    .extracting(CollectionUtils::onlyElement)
+                    .extracting(JSContructorCall.class::cast)
+                    .extracting(JSContructorCall::getJsClass)
+                    .isEqualTo(div);
         }
     }
 

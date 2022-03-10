@@ -186,7 +186,7 @@ XISLoop.prototype.rowCount = function () {
 XISLoop.prototype.appendRow = function () {
     var children = this.createChildren();
     for (var i = 0; i < children.length; i++) {
-        children[i].init(this.element, this);
+        children[i].init(this.parent, this);
     }
     this.rows.push(children);
 }
@@ -199,56 +199,6 @@ XISLoop.prototype.removeRow = function () {
         }
     }
 }
-
-
-
-XISLoop.prototype.getValue = function (path) {
-    var name = path[0];
-    if (this.names.indexOf(name) != -1) {
-        var rv = this.values[name];
-        for (var i = 1; i < path.length; i++) {
-            if (!rv) {
-                return undefined;
-            }
-            rv = rv[path[i]];
-        }
-        return rv;
-    }
-    if (this.valueHolder) {
-        return this.valueHolder.getValue(path);
-    }
-}
-
-XISLoop.prototype.getArray = function () {
-    return this.valueHolder.getValue(this.loopAttributes.arrayPath);
-}
-
-XISLoop.prototype.resize = function (size) {
-    while (this.rowCount() < size) {
-        this.appendRow();
-    }
-    while (this.rowCount() > size) {
-        this.removeRow();
-    }
-}
-
-XISLoop.prototype.rowCount = function () {
-    return this.rows.length;
-}
-
-
-XISLoop.prototype.appendRow = function () {
-    var children = this.createChildren();
-    for (var i = 0; i < children.length; i++) {
-        children[i].init(this.element, this);
-    }
-    this.rows.push(children);
-}
-
-XISLoop.prototype.createChildren = function() {
- // abstract
-}
-
 
 function XISWidget() { }
 

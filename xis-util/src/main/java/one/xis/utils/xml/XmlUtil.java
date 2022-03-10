@@ -8,7 +8,7 @@ import org.xml.sax.SAXException;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -55,7 +55,7 @@ public class XmlUtil {
     }
 
     public Map<String, String> getAttributes(Element e) {
-        Map<String, String> map = new HashMap<>();
+        Map<String, String> map = new LinkedHashMap<>();
         NamedNodeMap namedNodeMap = e.getAttributes();
         for (int i = 0; i < namedNodeMap.getLength(); i++) {
             Node node = namedNodeMap.item(i);
