@@ -1,8 +1,8 @@
 package one.xis.remote.processor;
 
 import one.xis.js.JSScript;
+import one.xis.js.JSWriter;
 import one.xis.js.JavascriptParser;
-import one.xis.js.OldSchoolJSWriter;
 import one.xis.template.WidgetModel;
 import one.xis.utils.xml.XmlUtil;
 import org.w3c.dom.Document;
@@ -56,7 +56,7 @@ public class PageProcessor extends AnnotationProcessor {
         JSScript script = new JSScript();
         JavascriptParser parser = new JavascriptParser(script);
         parser.parse(models);
-        new OldSchoolJSWriter(writer).write(script);
+        new JSWriter(writer).write(script);
     }
 
     private Collection<WidgetModel> widgetModels() {

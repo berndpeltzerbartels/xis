@@ -3,8 +3,8 @@ package one.xis.remote.processor;
 import com.google.auto.service.AutoService;
 import one.xis.js.JSScript;
 import one.xis.js.JSScriptValidator;
+import one.xis.js.JSWriter;
 import one.xis.js.JavascriptParser;
-import one.xis.js.OldSchoolJSWriter;
 import one.xis.template.TemplateParser;
 import one.xis.template.WidgetModel;
 import one.xis.utils.xml.XmlUtil;
@@ -61,7 +61,7 @@ public class WidgetProcessor extends AnnotationProcessor {
         JavascriptParser parser = new JavascriptParser(script);
         parser.parse(models);
         scriptValidator.validate(script);
-        new OldSchoolJSWriter(writer).write(script);
+        new JSWriter(writer).write(script);
     }
 
     private Collection<WidgetModel> widgetModels() {

@@ -6,10 +6,12 @@ import one.xis.utils.xml.XmlUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.w3c.dom.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
+import java.util.Map;
 
 import static one.xis.utils.lang.ClassUtils.cast;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,22 +28,7 @@ class TemplateParserTest {
 
         @BeforeEach
         void init() {
-            Attr attr = mock(Attr.class);
-            when(attr.getName()).thenReturn("class");
-            when(attr.getValue()).thenReturn("gold");
-
-            NamedNodeMap namedNodeMap = mock(NamedNodeMap.class);
-            when(namedNodeMap.getLength()).thenReturn(1);
-            when(namedNodeMap.item(0)).thenReturn(attr);
-
-            Element element = mock(Element.class);
-            when(element.getTagName()).thenReturn("div");
-            when(element.getAttributes()).thenReturn(namedNodeMap);
-
-            NodeList childNodes = mock(NodeList.class);
-            when(childNodes.getLength()).thenReturn(0);
-            when(element.getChildNodes()).thenReturn(childNodes);
-
+            Element element = TemplateTestUtil.mockElement("div", Map.of("class", "gold"));
             document = mock(Document.class);
             when(document.getDocumentElement()).thenReturn(element);
         }
@@ -55,8 +42,33 @@ class TemplateParserTest {
             assertThat(element.getStaticAttributes()).containsKey("class");
             assertThat(element.getStaticAttributes().get("class")).isEqualTo("gold");
         }
+    }
 
+    @Nested
+    class ElementWithControlsTest {
+        private Document document;
 
+        @BeforeEach
+        void init() {
+            Element element = TemplateTestUtil.mockElement("div", Map.of("data-if", "condition", "data-repeat", "x:y", "data-for", "a:b"));
+            document = mock(Document.class);
+            when(document.getDocumentElement()).thenReturn(element);
+        }
+
+        @Test
+        void element() {
+            WidgetModel widgetModel = new TemplateParser().parse(document, "123");
+
+            assertThat(widgetModel.getRootNode()).isInstanceOf(IfBlock.class);
+            IfBlock ifBlock = (IfBlock) widgetModel.getRootNode();
+
+            assertThat(CollectionUtils.onlyElement(ifBlock.getChildren())).isInstanceOf(Loop.class);
+            Loop loop = (Loop) CollectionUtils.onlyElement(ifBlock.getChildren());
+
+            assertThat(CollectionUtils.onlyElement(loop.getChildren())).isInstanceOf(TemplateElement.class);
+            TemplateElement div = (TemplateElement) CollectionUtils.onlyElement(loop.getChildren());
+            assertThat(div.getElementName()).isEqualTo("div");
+        }
     }
 
     @Nested
@@ -144,5 +156,4 @@ class TemplateParserTest {
         assertThat(childHolder.getChildren().get(0)).isInstanceOf(childType);
         return (T) childHolder.getChildren().get(0);
     }
-
 }
