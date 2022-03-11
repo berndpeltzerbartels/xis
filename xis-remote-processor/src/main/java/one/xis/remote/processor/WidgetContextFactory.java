@@ -3,6 +3,7 @@ package one.xis.remote.processor;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.TypeElement;
 import java.io.File;
+import java.util.Optional;
 
 class WidgetContextFactory {
     private final JavaModelUtils javaModelUtils;
@@ -17,7 +18,14 @@ class WidgetContextFactory {
         String packageName = javaModelUtils.getPackageName(element);
         String className = javaModelUtils.getSimpleName(element);
         File htmlFile = processorUtils.getFileInSourceFolder(packageName, element.getSimpleName() + ".html");
-        return new WidgetContext(packageName, className, htmlFile);
+        String httpPath = getHttpPath(element).orElse(null);
+        return new WidgetContext(packageName, className, htmlFile, httpPath);
+    }
+    
+    private Optional<String> getHttpPath(TypeElement element) {
+        return javaModelUtils.getAnnotationMirror("one.xis.remote.Page", element)
+                .map(mirror -> javaModelUtils.getAnnotationValue(mirror, "value"))
+                .map(String.class::cast);
     }
 
 }

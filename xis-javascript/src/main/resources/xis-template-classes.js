@@ -22,11 +22,13 @@ XISElement.prototype.updateChildren = function () {
         this.children[i].update();
     }
 }
+
 XISElement.prototype.initChildren = function () {
     for (var i = 0; i < this.children.length; i++) {
         this.children[i].init(this.element, this.valueHolder);
     }
 }
+
 XISElement.prototype.updateAttributes = function () {
     // abstract
 }
@@ -38,6 +40,7 @@ XISElement.prototype.updateAttribute = function (name, value) {
 XISElement.prototype.unlink = function () {
     this.parent.removeChild(this.element);
 }
+
 
 
 function XISMutableTextNode() {
@@ -79,13 +82,13 @@ XISStaticTextNode.prototype.update = function () {
 }
 
 
+
 function XISIf() { }
 
 XISIf.prototype.init = function (parent, valueHolder) {
     this.parent = parent;
     this.valueHolder = valueHolder;
 }
-
 
 XISIf.prototype.update = function () {
     if (this.evaluateCondition()) {
@@ -126,12 +129,10 @@ XISLoop.prototype.init = function (parent, valueHolder) {
     this.names = [this.loopAttributes.itemVarName, this.loopAttributes.indexVarName, this.loopAttributes.numberVarName];
 }
 
-
 XISLoop.prototype.update = function () {
     this.data = this.getArray();
     this.updateChildren();
 }
-
 
 XISLoop.prototype.updateChildren = function () {
     this.values = [];
@@ -270,18 +271,61 @@ XISContainer.prototype.getWidgets = function () {
 }
 
 
-
 function XISWidgets() {
     this.widgets = [];
+    this.widgetsByPath = {};
 }
 
 XISWidgets.prototype.getWidget = function (widgetId) {
     return this.widgets[widgetId];
 }
 
+XISWidgets.prototype.getWidgetByPath = function (path) {
+    for (var i = 0; i < this.widgets.length; i++) {
+        var widget = this.widgets[i];
+        if (widget.path && widget.path == path) {
+            return widget;
+        }
+    }
+}
 
 XISWidgets.prototype.bind = function (widgetId, element) {
-    var widget = this.getWidget(widgetId);// XISWidget
+    var widget = this.getWidget(widgetId);
     widget.init(element);
     return widget;
 }
+
+
+
+function XISPages() {
+    // hier Seiten. DIESE NICHT MEHR IN WIDGETS !!!
+}
+
+// TODO Wie widget, aber das element ist 
+// document.getElementsByTagName('html').item(heu8reka9 
+// So wie es hier ist, brauch man nur eine Seiter für alles
+// Der gesamte Inhalt ist Widget
+function XISPage() {}
+
+XISPage.prototype.init = function() {
+    this.element = document.getElementsByTagName('html').item(0);
+    this.path = window.location.pathname;
+    this.widget = widgets.getWidgetByPath(httpPath);
+    this.widget.init(this.element);
+}
+
+XISPage.prototype.getData = function() {
+
+}
+
+/*
+function transformToAssocArray( prmstr ) {
+    var params = {};
+    var prmarr = prmstr.split("&");
+    for ( var i = 0; i < prmarr.length; i++) {
+        var tmparr = prmarr[i].split("=");
+        params[tmparr[0]] = tmparr[1];
+    }
+    return params;
+}
+*/

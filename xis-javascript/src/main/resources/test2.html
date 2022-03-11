@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+
+
+<script language="JavaScript" src="test.js"></script>
+<script language="JavaScript">
+
+    function el(name) {
+        return document.createElement(name);
+    }
+    // Script auf dem Server schreiben  
+
+   
+    
+    var html = document.getElementsByTagName('html').item(0);
+
+    var head = el('head');
+    var title = el('title');
+    body = el('body');
+    h1 = el('h1');
+
+    html.appendChild(head);
+    head.appendChild(title);
+    title.innerText = 'Huhu !';
+
+    html.appendChild(body);
+    body.appendChild(h1);
+    h1.innerText = 'Yeaaah !';
+
+    // Nur den Body als widget 
+</script>
+
+</html>

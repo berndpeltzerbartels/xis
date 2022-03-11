@@ -3,6 +3,7 @@ package one.xis.js;
 import lombok.RequiredArgsConstructor;
 import one.xis.template.*;
 import one.xis.utils.lang.CollectionUtils;
+import one.xis.utils.lang.StringUtils;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -30,6 +31,7 @@ public class JavascriptParser {
         JSClass widgetClass = derrivedClass(XIS_WIDGET);
         JSClass widgetRootClass = toClass(widgetModel.getRootNode());
         widgetClass.addField("root", new JSContructorCall(widgetRootClass));
+        widgetClass.addField("path", StringUtils.isEmpty(widgetModel.getPath()) ? new JSUndefined() : new JSString(widgetModel.getPath()));
         return widgetClass;
     }
 

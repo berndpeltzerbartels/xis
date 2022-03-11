@@ -27,8 +27,8 @@ public class TemplateParser {
     private static final String ATTR_CONTAINER_ID = "data-container-id";
     private static final String ATTR_CONTAINER_WIDGET = "data-container-widget";
 
-    public WidgetModel parse(Document document, String name) {
-        return new WidgetModel(name, parseElement(document.getDocumentElement()));
+    public WidgetModel parse(Document document, String name, String httpPath) {
+        return new WidgetModel(name, parseElement(document.getDocumentElement()), httpPath);
     }
 
     private Stream<ModelNode> parseChildren(Element parent) {

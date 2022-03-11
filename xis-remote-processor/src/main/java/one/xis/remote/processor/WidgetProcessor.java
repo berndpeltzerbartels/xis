@@ -20,7 +20,7 @@ import java.util.HashSet;
 import java.util.stream.Collectors;
 
 @AutoService(Processor.class)
-@SupportedAnnotationTypes({"one.xis.remote.Widget"})
+@SupportedAnnotationTypes({"one.xis.remote.Widget", "one.xis.remote.Page"})
 @SupportedSourceVersion(SourceVersion.RELEASE_11)
 public class WidgetProcessor extends AnnotationProcessor {
 
@@ -71,7 +71,7 @@ public class WidgetProcessor extends AnnotationProcessor {
     private WidgetModel widgetModel(WidgetContext context) {
         try {
             Document document = XmlUtil.loadDocument(context.getHtmlFile());
-            return templateParser.parse(document, context.getSimpleClassName()); // TODO may be an alias is better to avoid duplicates
+            return templateParser.parse(document, context.getSimpleClassName(), context.getHttpPath()); // TODO may be an alias is better to avoid duplicates
         } catch (Exception e) {
             throw new RuntimeException(e); //TODO caught and loggged
         }

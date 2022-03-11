@@ -35,7 +35,7 @@ class TemplateParserTest {
 
         @Test
         void element() {
-            WidgetModel widgetModel = new TemplateParser().parse(document, "123");
+            WidgetModel widgetModel = new TemplateParser().parse(document, "123", "");
 
             TemplateElement element = (TemplateElement) widgetModel.getRootNode();
             assertThat(element.getElementName()).isEqualTo("div");
@@ -57,7 +57,7 @@ class TemplateParserTest {
 
         @Test
         void element() {
-            WidgetModel widgetModel = new TemplateParser().parse(document, "123");
+            WidgetModel widgetModel = new TemplateParser().parse(document, "123", "");
 
             assertThat(widgetModel.getRootNode()).isInstanceOf(IfBlock.class);
             IfBlock ifBlock = (IfBlock) widgetModel.getRootNode();
@@ -83,7 +83,7 @@ class TemplateParserTest {
 
         @Test
         void parse() throws TemplateSynthaxException, IOException {
-            var widgetModel = parser.parse(document, "test");
+            var widgetModel = parser.parse(document, "test", "");
 
             IfBlock ifBlock = cast(widgetModel.getRootNode(), IfBlock.class);
             TemplateElement ul = onlyChild(ifBlock, TemplateElement.class);
@@ -123,7 +123,7 @@ class TemplateParserTest {
 
         @Test
         void parse() throws TemplateSynthaxException, IOException {
-            var widgetModel = parser.parse(document, "test");
+            var widgetModel = parser.parse(document, "test", "");
 
             var loop = cast(widgetModel.getRootNode(), Loop.class);
             var div = onlyChild(loop, TemplateElement.class);

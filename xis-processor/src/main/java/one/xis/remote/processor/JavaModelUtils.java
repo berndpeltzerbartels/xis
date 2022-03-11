@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.*;
 import javax.lang.model.type.TypeMirror;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -58,6 +59,20 @@ class JavaModelUtils {
                 .map(TypeElement.class::cast)
                 .filter(anno -> anno.getQualifiedName().toString().equals(qualifiedName))
                 .findFirst();
+    }
+
+    Optional<AnnotationMirror> getAnnotationMirror(String qualifiedName, Element e) {
+        // TODO hier filtern und in getAnnotation konvertieren
+        return getAnnotation(qualifiedName, e).map(TypeElement::asType).map(AnnotationMirror.class::cast);
+    }
+
+    Object getAnnotationValue(AnnotationMirror mirror, String key) {
+        return getAnnotationValues(mirror).get(key);
+    }
+
+    Map<String, Object> getAnnotationValues(AnnotationMirror mirror) {
+        return mirror.getElementValues().entrySet().stream()
+                .collect(Collectors.toMap(e -> e.getKey().getSimpleName().toString(), e -> e.getValue().getValue()));
     }
 
     String getPackageName(TypeElement typeElement) {
