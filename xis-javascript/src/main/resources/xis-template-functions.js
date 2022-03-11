@@ -1,4 +1,3 @@
-
 function createElement(tagName, attributes) {
     if (!attributes) attributes = {};
     var e = document.createElement(tagName);

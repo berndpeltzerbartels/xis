@@ -78,7 +78,7 @@ public class TemplateProcessor extends AnnotationProcessor {
     }
 
     private Collection<WidgetModel> widgetModels() {
-        return pageAttributes.stream().map(this::widgetModel).collect(Collectors.toSet());
+        return widgetAttributes.stream().map(this::widgetModel).collect(Collectors.toSet());
     }
 
 

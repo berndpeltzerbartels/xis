@@ -4,8 +4,10 @@ import lombok.RequiredArgsConstructor;
 import one.xis.template.*;
 import one.xis.utils.lang.CollectionUtils;
 
-import java.util.*;
-import java.util.function.Predicate;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static one.xis.js.Classes.*;
@@ -42,8 +44,7 @@ public class JavascriptParser {
         widgetClass.addField("root", new JSContructorCall(widgetRootClass));
         return widgetClass;
     }
-
-
+    
     private JSClass parse(PageModel pageModel) {
         var pageClass = derrivedClass(XIS_PAGE);
         addChildrenField(pageModel, pageClass);
@@ -53,49 +54,20 @@ public class JavascriptParser {
         return pageClass;
     }
 
-    private JSClass widgetsClass(Map<String, JSClass> allWidgetClasses) {
+    private JSClass widgetsClass(Map<String, JSClass> simpleWidgetClasses) {
         var widgetsClass = derrivedClass(XIS_WIDGETS);
         var widgets = new JSJsonValue();
-        simpleWidgetClasses(allWidgetClasses).forEach((name, widgetClass) -> widgets.addField(name, new JSContructorCall(widgetClass)));
+        simpleWidgetClasses.forEach((name, widgetClass) -> widgets.addField(name, new JSContructorCall(widgetClass)));
         widgetsClass.addField("widgets", widgets);
         return widgetsClass;
     }
 
-    private JSClass pagesClass(Map<String, JSClass> allWidgetClasses) {
+    private JSClass pagesClass(Map<String, JSClass> pageWidgetClasses) {
         var widgetsClass = derrivedClass(XIS_PAGES);
         var widgets = new JSJsonValue();
-        pageWidgetClasses(allWidgetClasses).forEach((path, widgetClass) -> widgets.addField(path, new JSContructorCall(widgetClass)));
+        pageWidgetClasses.forEach((path, widgetClass) -> widgets.addField(path, new JSContructorCall(widgetClass)));
         widgetsClass.addField("pageWidgets", widgets);
         return widgetsClass;
-    }
-
-
-    private Map<String, JSClass> simpleWidgetClasses(Map<String, JSClass> allWidgets) {
-        return allWidgets.entrySet().stream()
-                .filter(isPageWidgetEntry().negate())
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-    }
-
-    private Map<String, JSClass> pageWidgetClasses(Map<String, JSClass> allWidgets) {
-        return allWidgets.entrySet().stream()
-                .filter(isPageWidgetEntry())
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-    }
-
-    private Predicate<Map.Entry<String, JSClass>> isPageWidgetEntry() {
-        return entry -> isPageWidget(entry.getValue());
-    }
-
-    private boolean isPageWidget(JSClass jsClass) {
-        if (!XIS_WIDGET.equals(jsClass.getSuperClass())) {
-            return false;
-        }
-        var fieldValue = getFieldValue(jsClass, "path");
-        return fieldValue.map(JSString.class::isInstance).orElse(false);
-    }
-
-    private Optional<JSValue> getFieldValue(JSClass jsClass, String fieldName) {
-        return Optional.ofNullable(jsClass.getField(fieldName)).map(JSField::getValue);
     }
 
     private List<JSContructorCall> evaluateChildren(ChildHolder parent) {
@@ -216,7 +188,7 @@ public class JavascriptParser {
         return attributes;
     }
 
-    private void overrideUpdateAttributes(JSClass jsClass, ElementBase elementBase) {
+    private void overrideUpdateAttributes(JSClass jsClass, ElementWithAttributes elementBase) {
         var updateAttributes = jsClass.overrideAbstractMethod("updateAttributes");
         elementBase.getMutableAttributes().forEach((key, value) -> {
             JSVar text = new JSVar(nextName());

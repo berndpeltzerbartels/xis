@@ -1,4 +1,3 @@
-
 function XISElement() { }
 
 XISElement.prototype.init = function (parent, valueHolder) {
@@ -203,9 +202,9 @@ XISLoop.prototype.removeRow = function () {
 
 function XISWidget() { }
 
-XISWidget.prototype.init = function (parentElement) {
+XISWidget.prototype.init = function (parentElement, valueHolder) {
     this.parentElement = parentElement;
-    this.root.init(this.parentElement, this);
+    this.root.init(this.parentElement, valueHolder);
 }
 
 XISWidget.prototype.update = function (data) {
@@ -213,31 +212,23 @@ XISWidget.prototype.update = function (data) {
     this.root.update();
 }
 
-XISWidget.prototype.getValue = function (path) {
-    var name = path[0];
-    var rv = this.data[name];
-    for (var i = 1; i < path.length; i++) {
-        if (!rv) {
-            return undefined;
-        }
-        rv = rv[path[i]];
-    }
-    return rv;
-}
-
-
-
 function XISPage() { }
 
 XISPage.prototype.init = function () {
-    this.element = document.getRootNode();
-    setAttibutes(this.element, this.staticAttributes);
+    this.element = document.getRootNode().childNodes.item(0);
+    setAttributes(this.element, this.staticAttributes);
     this.initChildren();
 }
 
 XISPage.prototype.initChildren = function () {
     for (var i = 0; i < this.children.length; i++) {
-        this.children[i].init(this.element, this.valueHolder);
+        this.children[i].init(this.element, this);
+    }
+}
+
+XISPage.prototype.updateChildren = function () {
+    for (var i = 0; i < this.children.length; i++) {
+        this.children[i].update();
     }
 }
 
@@ -281,7 +272,7 @@ XISContainer.prototype.setWidget = function (widgetId) {
     }
     this.widget = widgets.getWidget(widgetId);
     this.widget.init(this.element, this.valueHolder);
-    this.widget.update();
+    //   this.widget.update();
 }
 
 XISContainer.prototype.getValue = function (path) {
