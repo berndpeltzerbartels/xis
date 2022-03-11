@@ -32,10 +32,17 @@ public class TemplateParser {
     }
 
     public PageModel parsePage(Document document, String path) {
+        var pageModel = new PageModel(path);
         var root = document.getDocumentElement();
-        var element = toTemplateElement(root);
-        parseChildren(root).forEach(element::addChild);
-        return new PageModel(path, root.getTagName(), element);
+        var headElement = XmlUtil.getElementByTagName(root, "head").orElseThrow();
+        var bodyElement = XmlUtil.getElementByTagName(root, "body").orElseThrow();
+        var headTemplateElement = toTemplateElement(headElement);
+        var bodyTemplateElement = toTemplateElement(bodyElement);
+        parseChildren(headElement).forEach(headTemplateElement::addChild);
+        parseChildren(bodyElement).forEach(bodyTemplateElement::addChild);
+        pageModel.setHead(headTemplateElement);
+        pageModel.setBody(bodyTemplateElement);
+        return pageModel;
     }
 
     private Stream<ModelNode> parseChildren(Element parent) {

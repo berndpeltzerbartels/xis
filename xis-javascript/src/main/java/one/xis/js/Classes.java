@@ -39,9 +39,7 @@ public class Classes {
                 .addMethod("update", 1)
                 .addMethod("getValue", 1)
                 .addMethod("initChildren", 0)
-                .addAbstractMethod("updateAttributes")
-                .addAbstractField("children")
-                .addAbstractField("staticAttributes")
+                .addMethod("updateChildren", 0)
                 .addAbstractField("path");
 
         XIS_WIDGET.addMethod("init", 1)

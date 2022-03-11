@@ -1,6 +1,43 @@
 <html>
-<script type="text/javascript" src="/xis.js"></script>
+<head>
 
+    <script type="text/javascript" src="/xis.js"></script>
+    <script type="text/javascript">
+
+        function setWidget1() {
+             var page = pages.getPageWidgetByPath('/product.html');
+        page.init();
+        page.update({'categories': categories});
+        }
+
+         function setWidget2() {
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </script>
+</head>
+<body>
+<form action="#">
+    <button onclick="setWidget1()">1</button>
+    <button onclick="setWidget2()">2</button>
+</form>
+
+</body>
 <script type="text/javascript">
 
 var categories = [
@@ -286,10 +323,22 @@ var categories = [
     }
 
 ];
-        debugger;
-        var page = pages.getPageWidgetByPath('/products.html');
-        page.init();
-        page.update({'categories': categories});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

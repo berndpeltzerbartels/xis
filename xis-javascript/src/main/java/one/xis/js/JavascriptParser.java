@@ -44,12 +44,13 @@ public class JavascriptParser {
         widgetClass.addField("root", new JSContructorCall(widgetRootClass));
         return widgetClass;
     }
-    
+
     private JSClass parse(PageModel pageModel) {
         var pageClass = derrivedClass(XIS_PAGE);
-        addChildrenField(pageModel, pageClass);
-        overrideUpdateAttributes(pageClass, pageModel);
-        pageClass.addField("staticAttributes", staticAttributes(pageModel.getStaticAttributes()));
+        var headClass = toClass(pageModel.getHead());
+        var bodyClass = toClass(pageModel.getBody());
+        pageClass.addField("head", new JSContructorCall(headClass));
+        pageClass.addField("body", new JSContructorCall(bodyClass));
         pageClass.addField("path", new JSString(pageModel.getPath()));
         return pageClass;
     }

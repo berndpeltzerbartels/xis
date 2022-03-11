@@ -41,7 +41,6 @@ XISElement.prototype.unlink = function () {
 }
 
 
-
 function XISMutableTextNode() {
     this.node = createTextNode('');
 }
@@ -215,31 +214,28 @@ XISWidget.prototype.update = function (data) {
 function XISPage() { }
 
 XISPage.prototype.init = function () {
-    this.element = document.getRootNode().childNodes.item(0);
-    setAttributes(this.element, this.staticAttributes);
+    this.head.element = document.getElementsByTagName('head').item(0);
+    this.body.element = document.getElementsByTagName('body').item(0);
+    this.head.valueHolder = this;
+    this.body.valueHolder = this;
+    this.head.unlink = function() {}
+    this.body.unlink = function() {}
     this.initChildren();
 }
 
 XISPage.prototype.initChildren = function () {
-    for (var i = 0; i < this.children.length; i++) {
-        this.children[i].init(this.element, this);
-    }
+    this.head.initChildren();
+    this.body.initChildren();
 }
 
 XISPage.prototype.updateChildren = function () {
-    for (var i = 0; i < this.children.length; i++) {
-        this.children[i].update();
-    }
+    this.head.update();
+    this.body.update();
 }
 
 XISPage.prototype.update = function (data) {
     this.data = data;
-    this.updateAttributes();
     this.updateChildren();
-}
-
-XISPage.prototype.updateAttributes = function () {
-    // abstract
 }
 
 XISPage.prototype.getValue = function (path) {
@@ -272,7 +268,6 @@ XISContainer.prototype.setWidget = function (widgetId) {
     }
     this.widget = widgets.getWidget(widgetId);
     this.widget.init(this.element, this.valueHolder);
-    //   this.widget.update();
 }
 
 XISContainer.prototype.getValue = function (path) {
@@ -280,8 +275,10 @@ XISContainer.prototype.getValue = function (path) {
 }
 
 XISContainer.prototype.update = function () {
-        this.updateAttributes();
+    this.updateAttributes();
+    if (this.widget) {
         this.widget.update();
+    }
 }
 
 XISContainer.prototype.updateAttributes = function () {
