@@ -3,29 +3,34 @@ package one.xis.remote.processor;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.TypeElement;
 import java.io.File;
-import java.util.Optional;
 
-class WidgetContextFactory {
+class TemplateAttributesFactory {
     private final JavaModelUtils javaModelUtils;
     private final ProcessorUtils processorUtils;
 
-    WidgetContextFactory(ProcessingEnvironment environment) {
+    TemplateAttributesFactory(ProcessingEnvironment environment) {
         javaModelUtils = new JavaModelUtils(environment);
         processorUtils = new ProcessorUtils(environment);
     }
 
-    WidgetContext templateContext(TypeElement element) {
+    PageAttributes pageAttributes(TypeElement element) {
         String packageName = javaModelUtils.getPackageName(element);
         String className = javaModelUtils.getSimpleName(element);
         File htmlFile = processorUtils.getFileInSourceFolder(packageName, element.getSimpleName() + ".html");
-        String httpPath = getHttpPath(element).orElse(null);
-        return new WidgetContext(packageName, className, htmlFile, httpPath);
+        return new PageAttributes(packageName, className, htmlFile, getHttpPath(element));
     }
-    
-    private Optional<String> getHttpPath(TypeElement element) {
+
+    WidgetAttributes widgetAttributes(TypeElement element) {
+        String packageName = javaModelUtils.getPackageName(element);
+        String className = javaModelUtils.getSimpleName(element);
+        File htmlFile = processorUtils.getFileInSourceFolder(packageName, element.getSimpleName() + ".html");
+        return new WidgetAttributes(packageName, className, htmlFile);
+    }
+
+    private String getHttpPath(TypeElement element) {
         return javaModelUtils.getAnnotationMirror("one.xis.remote.Page", element)
                 .map(mirror -> javaModelUtils.getAnnotationValue(mirror, "value"))
-                .map(String.class::cast);
+                .map(String.class::cast).orElseThrow();
     }
 
 }

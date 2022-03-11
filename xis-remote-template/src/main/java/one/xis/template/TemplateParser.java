@@ -27,11 +27,15 @@ public class TemplateParser {
     static final String ATTR_CONTAINER_ID = "data-container-id";
     static final String ATTR_CONTAINER_WIDGET = "data-container-widget";
 
-    public WidgetModel parse(Document document, String name, String httpPath) {
-        if (!StringUtils.isNotEmpty(httpPath)) {
-            validatePageTemplateRoot(document);
-        }
-        return new WidgetModel(name, parseElement(document.getDocumentElement()), httpPath);
+    public WidgetModel parseWidget(Document document, String name) {
+        return new WidgetModel(name, parseElement(document.getDocumentElement()));
+    }
+
+    public PageModel parsePage(Document document, String path) {
+        var root = document.getDocumentElement();
+        var element = toTemplateElement(root);
+        parseChildren(root).forEach(element::addChild);
+        return new PageModel(path, root.getTagName(), element);
     }
 
     private Stream<ModelNode> parseChildren(Element parent) {
@@ -55,7 +59,7 @@ public class TemplateParser {
 
     @SuppressWarnings("all")
     private ChildHolder parseElement(Element element) {
-        LinkedList<ChildHolder> result = new LinkedList<>();
+        var result = new LinkedList<ChildHolder>();
         if (hasIfAttribute(element)) {
             result.add(parseIf(element));
         }
@@ -67,17 +71,20 @@ public class TemplateParser {
         if (hasForAttribute(element)) {
             result.add(parseFor(element));
         }
-        ChildHolder last = result.stream().reduce((e1, e2) -> {
-            e1.addChild(e2);
-            return e2;
-        }).orElseThrow();
-        getAttributes(element).forEach((name, rawValue) -> addAttribute(name, rawValue, modelElement));
+        var last = createHierarchy(result);
         parseChildren(element).forEach(last::addChild);
         return result.getFirst();
     }
 
+    private ChildHolder createHierarchy(List<ChildHolder> childHolders) {
+        return childHolders.stream().reduce((e1, e2) -> {
+            e1.addChild(e2);
+            return e2;
+        }).orElseThrow();
+    }
+
     private ContainerElement toContainerElement(Element element) {
-        ContainerElement containerElement = new ContainerElement(element.getTagName(), getMandatoryAttribute(ATTR_CONTAINER_ID, element), element.getAttribute(ATTR_CONTAINER_WIDGET));
+        var containerElement = new ContainerElement(element.getTagName(), getMandatoryAttribute(ATTR_CONTAINER_ID, element), element.getAttribute(ATTR_CONTAINER_WIDGET));
         if (element.getChildNodes().getLength() != 0) {
             throw new TemplateSynthaxException(String.format("elements with attribute \"%s\" must have no content", ATTR_CONTAINER_ID));
         }
@@ -85,7 +92,9 @@ public class TemplateParser {
     }
 
     private TemplateElement toTemplateElement(Element element) {
-        return new TemplateElement(element.getTagName());
+        var templateElement = new TemplateElement(element.getTagName());
+        getAttributes(element).forEach((name, rawValue) -> addAttribute(name, rawValue, templateElement));
+        return templateElement;
     }
 
     private String getMandatoryAttribute(String name, Element element) {
@@ -96,7 +105,7 @@ public class TemplateParser {
     }
 
     private String elementToString(Element element) {
-        StringBuilder builder = new StringBuilder()
+        var builder = new StringBuilder()
                 .append("<")
                 .append(element.getTagName());
         XmlUtil.getAttributes(element).forEach((name, value) -> {
@@ -106,7 +115,7 @@ public class TemplateParser {
     }
 
     private void addAttribute(String name, String rawValue, ElementBase target) {
-        List<MixedContent> contentList = new MixedContentParser(rawValue).parse();
+        var contentList = new MixedContentParser(rawValue).parse();
         if (contentList.size() == 1 && contentList.get(0) instanceof StaticContent) {
             target.addStaticAttribute(name, ((StaticContent) contentList.get(0)).getContent());
         } else {
@@ -122,7 +131,7 @@ public class TemplateParser {
         if (StringUtils.isSeparatorsOnly(text)) {
             return null;
         }
-        List<MixedContent> mixedContents = new MixedContentParser(text).parse();
+        var mixedContents = new MixedContentParser(text).parse();
         if (mixedContents.stream().noneMatch(ExpressionContent.class::isInstance)) {
             return new StaticTextNode(text);
         }
@@ -130,17 +139,17 @@ public class TemplateParser {
     }
 
     private IfBlock parseIf(Element element) {
-        String src = element.getAttribute(ATTR_IF);
+        var src = element.getAttribute(ATTR_IF);
         return new IfBlock(expressionParser.parse(src));
     }
 
     private Loop parseFor(Element element) {
-        String dataFor = element.getAttribute(ATTR_FOR);
+        var dataFor = element.getAttribute(ATTR_FOR);
         return loop(dataFor, element);
     }
 
     private Loop parseRepeat(Element element) {
-        String repeat = element.getAttribute(ATTR_REPEAT);
+        var repeat = element.getAttribute(ATTR_REPEAT);
         return loop(repeat, element);
     }
 
@@ -178,15 +187,5 @@ public class TemplateParser {
 
     private String nextVarName() {
         return "var" + (varIndex++);
-    }
-
-    private void validatePageTemplateRoot(Document document) {
-        var root = document.getDocumentElement();
-        if (root.hasAttribute(ATTR_IF)) {
-            throw new TemplateSynthaxException("top-level elements of a page must not have " + ATTR_IF);
-        }
-        if (root.hasAttribute(ATTR_REPEAT)) {
-            throw new TemplateSynthaxException("top-level elements of a page must not have " + ATTR_REPEAT);
-        }
     }
 }

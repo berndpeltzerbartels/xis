@@ -8,6 +8,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -22,7 +23,7 @@ class JavascriptParserTest {
 
     @Nested
     @DisplayName("Simple widget with one element")
-    class SimpleElementTest {
+    class SimpleElementWidgetTest {
 
         private WidgetModel widgetModel;
         private JSScript script;
@@ -37,7 +38,7 @@ class JavascriptParserTest {
 
         @Test
         void parse() {
-            parser.parse(Set.of(widgetModel));
+            parser.parse(Collections.emptySet(), Set.of(widgetModel));
 
             JSClass widgets = declaredCLasses(script)
                     .filter(c -> isDerrivedFrom(c, "XISWidgets"))
@@ -90,7 +91,7 @@ class JavascriptParserTest {
 
         @Test
         void parse() {
-            parser.parse(List.of(widgetModel1, widgetModel2));
+            parser.parse(Collections.emptySet(), List.of(widgetModel1, widgetModel2));
 
             JSClass widgets = declaredCLasses(script)
                     .filter(c -> isDerrivedFrom(c, "XISWidgets"))
@@ -122,7 +123,7 @@ class JavascriptParserTest {
 
     @Nested
     @DisplayName("If-block and loop with element")
-    class IfAndForLoopTest {
+    class IfAndForLoopWidgetTest {
 
         private WidgetModel widgetModel;
         private JSScript script;
@@ -146,7 +147,7 @@ class JavascriptParserTest {
 
         @Test
         void parse() {
-            parser.parse(Set.of(widgetModel));
+            parser.parse(Collections.emptySet(), Set.of(widgetModel));
 
             JSClass ifClass = declaredCLasses(script)
                     .filter(c -> isDerrivedFrom(c, "XISIf"))
@@ -208,6 +209,7 @@ class JavascriptParserTest {
         }
     }
 
+    // TODO page tests
     private boolean isDerrivedFrom(JSClass jsClass, String superClassName) {
         return jsClass.getSuperClass().getClassName().equals(superClassName);
     }

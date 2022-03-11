@@ -47,8 +47,7 @@ public class Classes {
         XIS_WIDGET.addMethod("init", 1)
                 .addMethod("update", 1)
                 .addMethod("getValue", 1)
-                .addAbstractField("root")
-                .addAbstractField("path");
+                .addAbstractField("root");
 
         XIS_ELEMENT.addMethod("init", 2)
                 .addMethod("getValue", 1)

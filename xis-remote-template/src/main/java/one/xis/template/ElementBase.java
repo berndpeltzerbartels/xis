@@ -12,7 +12,6 @@ public abstract class ElementBase extends ChildHolderBase implements ModelNode, 
     private final String elementName;
     private final Map<String, MutableAttribute> mutableAttributes = new HashMap<>();
     private final Map<String, String> staticAttributes = new HashMap<>();
-    private IfBlock ifBlock; // TODO own class
 
     void addMutableAttribute(String name, MutableAttribute content) {
         mutableAttributes.put(name, content);

@@ -3,7 +3,6 @@ package one.xis.js;
 import lombok.RequiredArgsConstructor;
 import one.xis.template.*;
 import one.xis.utils.lang.CollectionUtils;
-import one.xis.utils.lang.StringUtils;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -17,12 +16,13 @@ public class JavascriptParser {
     private static long currentNameId = 1;
     private final Collection<JSClass> classes = new HashSet<>();
 
-    public void parse(Collection<WidgetModel> widgetModels) {
-        var allWidgetClasses = widgetModels.stream().collect(Collectors.toMap(WidgetModel::getName, this::parse));
+    public void parse(Collection<PageModel> pageModels, Collection<WidgetModel> widgetModels) {
+        var widgetsClasses = widgetModels.stream().collect(Collectors.toMap(WidgetModel::getName, this::parse));
+        var pageClasses = pageModels.stream().collect(Collectors.toMap(PageModel::getPath, this::parse));
         script.addDeclarations(classes);
 
-        var widgetsClass = widgetsClass(allWidgetClasses);
-        var pagesClass = pagesClass(allWidgetClasses);
+        var widgetsClass = widgetsClass(widgetsClasses);
+        var pagesClass = pagesClass(pageClasses);
 
         script.addDeclaration(widgetsClass);
         script.addDeclaration(pagesClass);
@@ -40,8 +40,17 @@ public class JavascriptParser {
         var widgetClass = derrivedClass(XIS_WIDGET);
         var widgetRootClass = toClass(widgetModel.getRootNode());
         widgetClass.addField("root", new JSContructorCall(widgetRootClass));
-        widgetClass.addField("path", StringUtils.isEmpty(widgetModel.getPath()) ? new JSUndefined() : new JSString(widgetModel.getPath()));
         return widgetClass;
+    }
+
+
+    private JSClass parse(PageModel pageModel) {
+        var pageClass = derrivedClass(XIS_PAGE);
+        addChildrenField(pageModel, pageClass);
+        overrideUpdateAttributes(pageClass, pageModel);
+        pageClass.addField("staticAttributes", staticAttributes(pageModel.getStaticAttributes()));
+        pageClass.addField("path", new JSString(pageModel.getPath()));
+        return pageClass;
     }
 
     private JSClass widgetsClass(Map<String, JSClass> allWidgetClasses) {
@@ -55,7 +64,7 @@ public class JavascriptParser {
     private JSClass pagesClass(Map<String, JSClass> allWidgetClasses) {
         var widgetsClass = derrivedClass(XIS_PAGES);
         var widgets = new JSJsonValue();
-        pageWidgetClasses(allWidgetClasses).forEach((name, widgetClass) -> widgets.addField(name, new JSContructorCall(widgetClass)));
+        pageWidgetClasses(allWidgetClasses).forEach((path, widgetClass) -> widgets.addField(path, new JSContructorCall(widgetClass)));
         widgetsClass.addField("pageWidgets", widgets);
         return widgetsClass;
     }

@@ -1,9 +1,11 @@
 package one.xis.remote.processor;
 
 import lombok.RequiredArgsConstructor;
+import one.xis.utils.lang.ClassUtils;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.*;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import java.util.Map;
 import java.util.Optional;
@@ -53,17 +55,24 @@ class JavaModelUtils {
     }
 
     Optional<TypeElement> getAnnotation(String qualifiedName, Element e) {
+        return getAnnotationMirror(qualifiedName, e)
+                .map(AnnotationMirror::getAnnotationType)
+                .map(DeclaredType::asElement)
+                .map(TypeElement.class::cast);
+    }
+
+    Stream<AnnotationMirror> getAnnotationMirrors(String qualifiedName, Element e) {
         return e.getAnnotationMirrors().stream()
-                .map(this::asElement)
-                .filter(this::isAnnotation)
-                .map(TypeElement.class::cast)
-                .filter(anno -> anno.getQualifiedName().toString().equals(qualifiedName))
-                .findFirst();
+                .filter(mirror -> getQualifiedName(mirror).equals(qualifiedName))
+                .map(AnnotationMirror.class::cast);
     }
 
     Optional<AnnotationMirror> getAnnotationMirror(String qualifiedName, Element e) {
-        // TODO hier filtern und in getAnnotation konvertieren
-        return getAnnotation(qualifiedName, e).map(TypeElement::asType).map(AnnotationMirror.class::cast);
+        return getAnnotationMirrors(qualifiedName, e).findFirst();
+    }
+
+    private String getQualifiedName(AnnotationMirror mirror) {
+        return binaryName(ClassUtils.cast(mirror.getAnnotationType().asElement(), TypeElement.class));
     }
 
     Object getAnnotationValue(AnnotationMirror mirror, String key) {

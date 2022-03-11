@@ -5,10 +5,8 @@ import lombok.Data;
 import java.io.File;
 
 @Data
-class WidgetContext {
+class WidgetAttributes implements TemplateAttributes {
     private final String packageName;
     private final String simpleClassName;
     private final File htmlFile;
-    private final String httpPath;
-
 }
