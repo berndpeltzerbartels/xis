@@ -5,10 +5,8 @@ import one.xis.template.*;
 import one.xis.utils.lang.CollectionUtils;
 import one.xis.utils.lang.StringUtils;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static one.xis.js.Classes.*;
@@ -20,31 +18,79 @@ public class JavascriptParser {
     private final Collection<JSClass> classes = new HashSet<>();
 
     public void parse(Collection<WidgetModel> widgetModels) {
-        Map<String, JSClass> widgetClasses = widgetModels.stream().collect(Collectors.toMap(WidgetModel::getName, this::parse));
+        var allWidgetClasses = widgetModels.stream().collect(Collectors.toMap(WidgetModel::getName, this::parse));
         script.addDeclarations(classes);
-        JSClass widgetsClass = widgetsClass(widgetClasses);
+
+        var widgetsClass = widgetsClass(allWidgetClasses);
+        var pagesClass = pagesClass(allWidgetClasses);
+
         script.addDeclaration(widgetsClass);
-        script.addStatement(new JSVarAssignment(new JSVar("widgets"), new JSContructorCall(widgetsClass)));
+        script.addDeclaration(pagesClass);
+
+        createGlobalVar("widgets", widgetsClass);
+        createGlobalVar("pages", pagesClass);
+    }
+
+
+    private void createGlobalVar(String name, JSClass jsClass) {
+        script.addStatement(new JSVarAssignment(new JSVar(name), new JSContructorCall(jsClass)));
     }
 
     private JSClass parse(WidgetModel widgetModel) {
-        JSClass widgetClass = derrivedClass(XIS_WIDGET);
-        JSClass widgetRootClass = toClass(widgetModel.getRootNode());
+        var widgetClass = derrivedClass(XIS_WIDGET);
+        var widgetRootClass = toClass(widgetModel.getRootNode());
         widgetClass.addField("root", new JSContructorCall(widgetRootClass));
         widgetClass.addField("path", StringUtils.isEmpty(widgetModel.getPath()) ? new JSUndefined() : new JSString(widgetModel.getPath()));
         return widgetClass;
     }
 
-    private JSClass widgetsClass(Map<String, JSClass> widgetClasses) {
-        JSClass widgetsClass = derrivedClass(XIS_WIDGETS);
-        JSJsonValue widgets = new JSJsonValue();
-        widgetClasses.forEach((name, widgetClass) -> widgets.addField(name, new JSContructorCall(widgetClass)));
+    private JSClass widgetsClass(Map<String, JSClass> allWidgetClasses) {
+        var widgetsClass = derrivedClass(XIS_WIDGETS);
+        var widgets = new JSJsonValue();
+        simpleWidgetClasses(allWidgetClasses).forEach((name, widgetClass) -> widgets.addField(name, new JSContructorCall(widgetClass)));
         widgetsClass.addField("widgets", widgets);
         return widgetsClass;
     }
 
+    private JSClass pagesClass(Map<String, JSClass> allWidgetClasses) {
+        var widgetsClass = derrivedClass(XIS_PAGES);
+        var widgets = new JSJsonValue();
+        pageWidgetClasses(allWidgetClasses).forEach((name, widgetClass) -> widgets.addField(name, new JSContructorCall(widgetClass)));
+        widgetsClass.addField("pageWidgets", widgets);
+        return widgetsClass;
+    }
+
+
+    private Map<String, JSClass> simpleWidgetClasses(Map<String, JSClass> allWidgets) {
+        return allWidgets.entrySet().stream()
+                .filter(isPageWidgetEntry().negate())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    private Map<String, JSClass> pageWidgetClasses(Map<String, JSClass> allWidgets) {
+        return allWidgets.entrySet().stream()
+                .filter(isPageWidgetEntry())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    private Predicate<Map.Entry<String, JSClass>> isPageWidgetEntry() {
+        return entry -> isPageWidget(entry.getValue());
+    }
+
+    private boolean isPageWidget(JSClass jsClass) {
+        if (!XIS_WIDGET.equals(jsClass.getSuperClass())) {
+            return false;
+        }
+        var fieldValue = getFieldValue(jsClass, "path");
+        return fieldValue.map(JSString.class::isInstance).orElse(false);
+    }
+
+    private Optional<JSValue> getFieldValue(JSClass jsClass, String fieldName) {
+        return Optional.ofNullable(jsClass.getField(fieldName)).map(JSField::getValue);
+    }
+
     private List<JSContructorCall> evaluateChildren(ChildHolder parent) {
-        List<JSClass> classes = parent.getChildren().stream()
+        var classes = parent.getChildren().stream()
                 .map(this::toClass)
                 .collect(Collectors.toList());
         this.classes.addAll(classes);
@@ -71,7 +117,7 @@ public class JavascriptParser {
     }
 
     private JSClass toClass(TemplateElement element) {
-        JSClass elementClass = derrivedClass(XIS_ELEMENT);
+        var elementClass = derrivedClass(XIS_ELEMENT);
         addChildrenField(element, elementClass);
         addElementField(element, elementClass);
         overrideUpdateAttributes(elementClass, element);
@@ -79,9 +125,9 @@ public class JavascriptParser {
     }
 
     private JSClass toClass(ContainerElement containerElement) {
-        JSClass containerClass = derrivedClass(XIS_CONTAINER);
+        var containerClass = derrivedClass(XIS_CONTAINER);
         containerClass.addField("containerId", new JSString(containerElement.getContainerId()));
-        JSValue defaultWidgetId = containerElement.getDefaultWidgetId() != null ? new JSString(containerElement.getDefaultWidgetId()) : new JSUndefined();
+        var defaultWidgetId = containerElement.getDefaultWidgetId() != null ? new JSString(containerElement.getDefaultWidgetId()) : new JSUndefined();
         containerClass.addField("defaultWidgetId", defaultWidgetId);
         addElementField(containerElement, containerClass);
         overrideUpdateAttributes(containerClass, containerElement);
@@ -89,37 +135,37 @@ public class JavascriptParser {
     }
 
     private JSClass toClass(MutableTextNode mutableTextNode) {
-        JSClass textNode = derrivedClass(XIS_MUTABLE_TEXT_NODE);
+        var textNode = derrivedClass(XIS_MUTABLE_TEXT_NODE);
         textNode.addField("node", new JSFunctionCall(Functions.CREATE_TEXT_NODE, new JSString("")));
         JSMethod getText = textNode.overrideAbstractMethod("getText");
-        JSVar text = new JSVar("text");
-        MixedContentMethodStatements mixedContentMethodStatements = new MixedContentMethodStatements(getText, text);
+        var text = new JSVar("text");
+        var mixedContentMethodStatements = new MixedContentMethodStatements(getText, text);
         mixedContentMethodStatements.addStatements(mutableTextNode.getContent());
         getText.addStatement(new JSReturn(text));
         return textNode;
     }
 
     private JSClass toClass(StaticTextNode staticTextNode) {
-        JSClass textNode = derrivedClass(XIS_STATIC_TEXT_NODE);
+        var textNode = derrivedClass(XIS_STATIC_TEXT_NODE);
         textNode.addField("node", new JSFunctionCall(Functions.CREATE_TEXT_NODE, new JSString(staticTextNode.getContent())));
         return textNode;
     }
 
     private JSClass toClass(Loop loop) {
-        JSClass loopClass = derrivedClass(XIS_LOOP);
+        var loopClass = derrivedClass(XIS_LOOP);
 
-        JSJsonValue loopAttributes = new JSJsonValue();
+        var loopAttributes = new JSJsonValue();
         loopAttributes.addField("indexVarName", new JSString(loop.getIndexVarName()));
         loopAttributes.addField("itemVarName", new JSString(loop.getItemVarName()));
         loopAttributes.addField("numberVarName", new JSString(loop.getNumberVarName()));
         loopClass.addField("loopAttributes", loopAttributes);
 
-        JSMethod getValue = loopClass.getMethod("getValue");
-        JSMethod getArray = loopClass.overrideAbstractMethod("getArray");
-        JSMethod createChilderen = loopClass.overrideAbstractMethod("createChildren");
+        var getValue = loopClass.getMethod("getValue");
+        var getArray = loopClass.overrideAbstractMethod("getArray");
+        var createChilderen = loopClass.overrideAbstractMethod("createChildren");
         createChilderen.addStatement(new JSReturn(new JSArray(evaluateChildren(loop))));
 
-        ExpressionEval expressionEval = new ExpressionEval(getValue);
+        var expressionEval = new ExpressionEval(getValue);
         getArray.addStatement(new JSReturn(expressionEval.getEvaluator(loop.getArraySource())));
 
         loopClass.addField("rows", new JSArray());
@@ -127,12 +173,12 @@ public class JavascriptParser {
     }
 
     private JSClass toClass(IfBlock ifBlock) {
-        JSClass ifClass = derrivedClass(XIS_IF);
+        var ifClass = derrivedClass(XIS_IF);
 
-        JSMethod getValue = ifClass.getMethod("getValue");
-        JSMethod evaluateCondition = ifClass.overrideAbstractMethod("evaluateCondition");
+        var getValue = ifClass.getMethod("getValue");
+        var evaluateCondition = ifClass.overrideAbstractMethod("evaluateCondition");
 
-        ExpressionEval expressionEval = new ExpressionEval(getValue);
+        var expressionEval = new ExpressionEval(getValue);
         evaluateCondition.addStatement(new JSReturn(expressionEval.getEvaluator(ifBlock.getExpression())));
 
         addChildrenField(ifBlock, ifClass);
@@ -148,7 +194,7 @@ public class JavascriptParser {
     }
 
     private JSFunctionCall getCreateElementFunctionCall(ElementWithAttributes element) {
-        JSFunctionCall createElementFunctionCall = new JSFunctionCall(Functions.CREATE_ELEMENT).addParam(new JSString(element.getElementName()));
+        var createElementFunctionCall = new JSFunctionCall(Functions.CREATE_ELEMENT).addParam(new JSString(element.getElementName()));
         if (!element.getStaticAttributes().isEmpty()) {
             createElementFunctionCall.addParam(staticAttributes(element.getStaticAttributes()));
         }
@@ -156,13 +202,13 @@ public class JavascriptParser {
     }
 
     private JSJsonValue staticAttributes(Map<String, String> attributesMap) {
-        JSJsonValue attributes = new JSJsonValue();
+        var attributes = new JSJsonValue();
         attributesMap.forEach((key, value) -> attributes.addField(key, new JSString(value)));
         return attributes;
     }
 
     private void overrideUpdateAttributes(JSClass jsClass, ElementBase elementBase) {
-        JSMethod updateAttributes = jsClass.overrideAbstractMethod("updateAttributes");
+        var updateAttributes = jsClass.overrideAbstractMethod("updateAttributes");
         elementBase.getMutableAttributes().forEach((key, value) -> {
             JSVar text = new JSVar(nextName());
 
@@ -175,8 +221,8 @@ public class JavascriptParser {
     }
 
     private static JSFunctionCall expressionWithFunction(Expression expression, JSClass owner) {
-        JSFunction fkt = Functions.getFunction(expression.getFunction());
-        JSFunctionCall fktCall = new JSFunctionCall(fkt);
+        var fkt = Functions.getFunction(expression.getFunction());
+        var fktCall = new JSFunctionCall(fkt);
         for (ExpressionArg arg : expression.getVars()) {
             if (arg instanceof ExpressionConstant) {
                 fktCall.addParam(new JSConstant(((ExpressionConstant) arg).getContent()));
@@ -204,8 +250,8 @@ public class JavascriptParser {
         }
 
         private JSFunctionCall expressionWithFunction(Expression expression) {
-            JSFunction fkt = Functions.getFunction(expression.getFunction());
-            JSFunctionCall fktCall = new JSFunctionCall(fkt);
+            var fkt = Functions.getFunction(expression.getFunction());
+            var fktCall = new JSFunctionCall(fkt);
             for (ExpressionArg arg : expression.getVars()) {
                 if (arg instanceof ExpressionConstant) {
                     fktCall.addParam(new JSConstant(((ExpressionConstant) arg).getContent()));
@@ -221,7 +267,7 @@ public class JavascriptParser {
         }
 
         private JSValue expressionWithoutFunction(Expression expression) {
-            ExpressionArg arg = CollectionUtils.onlyElement(expression.getVars(), () -> new TemplateSynthaxException("expected exactly one value in " + expression));
+            var arg = CollectionUtils.onlyElement(expression.getVars(), () -> new TemplateSynthaxException("expected exactly one value in " + expression));
             return expressionWithoutFunction(arg);
         }
 
@@ -262,7 +308,7 @@ public class JavascriptParser {
         }
 
         private void addExpressionContentStatements(ExpressionContent expressionContent) {
-            Expression expression = expressionContent.getExpression();
+            var expression = expressionContent.getExpression();
             if (expression.getFunction() != null) {
                 addExpressionWithFunctionStatements(expression);
             } else {
@@ -271,7 +317,7 @@ public class JavascriptParser {
         }
 
         private void addExpressionWithFunctionStatements(Expression expression) {
-            JSFunctionCall fktCall = expressionWithFunction(expression, method.getOwner());
+            var fktCall = expressionWithFunction(expression, method.getOwner());
             method.addStatement(new JSStringAppend(text, fktCall));
         }
 
@@ -282,9 +328,9 @@ public class JavascriptParser {
                 } else if (arg instanceof ExpressionString) {
                     method.addStatement(new JSStringAppend(text, new JSString(((ExpressionString) arg).getContent())));
                 } else if (arg instanceof ExpressionVar) {
-                    JSMethod getValue = method.getOwner().getMethod("getValue");
-                    JSArray variablePath = JSArray.arrayOfStrings(((ExpressionVar) arg).getPath());
-                    JSMethodCall getValueMethodCall = new JSMethodCall(getValue, variablePath);
+                    var getValue = method.getOwner().getMethod("getValue");
+                    var variablePath = JSArray.arrayOfStrings(((ExpressionVar) arg).getPath());
+                    var getValueMethodCall = new JSMethodCall(getValue, variablePath);
                     method.addStatement(new JSStringAppend(text, getValueMethodCall));
                 }
             }
@@ -297,7 +343,7 @@ public class JavascriptParser {
 
 
     private JSClass derrivedClass(String className, JSSuperClass superClass) {
-        JSClass jsClass = new JSClass(className).derrivedFrom(superClass);
+        var jsClass = new JSClass(className).derrivedFrom(superClass);
         classes.add(jsClass);
         return jsClass;
     }

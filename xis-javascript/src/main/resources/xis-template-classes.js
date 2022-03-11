@@ -13,8 +13,8 @@ XISElement.prototype.getValue = function (path) {
 }
 
 XISElement.prototype.update = function () {
-        this.updateAttributes();
-        this.updateChildren();
+    this.updateAttributes();
+    this.updateChildren();
 }
 
 XISElement.prototype.updateChildren = function () {
@@ -225,6 +225,45 @@ XISWidget.prototype.getValue = function (path) {
     return rv;
 }
 
+
+
+function XISPage() { }
+
+XISPage.prototype.init = function () {
+    this.element = document.getRootNode();
+    setAttibutes(this.element, this.staticAttributes);
+    this.initChildren();
+}
+
+XISPage.prototype.initChildren = function () {
+    for (var i = 0; i < this.children.length; i++) {
+        this.children[i].init(this.element, this.valueHolder);
+    }
+}
+
+XISPage.prototype.update = function (data) {
+    this.data = data;
+    this.updateAttributes();
+    this.updateChildren();
+}
+
+XISPage.prototype.updateAttributes = function () {
+    // abstract
+}
+
+XISPage.prototype.getValue = function (path) {
+    var name = path[0];
+    var rv = this.data[name];
+    for (var i = 1; i < path.length; i++) {
+        if (!rv) {
+            return undefined;
+        }
+        rv = rv[path[i]];
+    }
+    return rv;
+}
+
+
 function XISContainer() { }
 
 XISContainer.prototype.init = function (parent, valueHolder) {
@@ -297,28 +336,29 @@ XISWidgets.prototype.bind = function (widgetId, element) {
 
 
 
-function XISPages() {
-    // hier Seiten. DIESE NICHT MEHR IN WIDGETS !!!
+function XISPages() {}
+
+
+XISPages.prototype.bind = function(path) {
+    var root = document.getRootNode();
+    var pageWidget = this.getPageWidgetByPath(path);
+
 }
 
-// TODO Wie widget, aber das element ist 
-// document.getElementsByTagName('html').item(heu8reka9 
-// So wie es hier ist, brauch man nur eine Seiter für alles
-// Der gesamte Inhalt ist Widget
-function XISPage() {}
-
-XISPage.prototype.init = function() {
-    this.element = document.getElementsByTagName('html').item(0);
-    this.path = window.location.pathname;
-    this.widget = widgets.getWidgetByPath(httpPath);
-    this.widget.init(this.element);
+XISPages.prototype.getPageWidgetByPath = function(path) {
+    return this.pageWidgets[path];
 }
 
-XISPage.prototype.getData = function() {
+XISPages.prototype.getData = function() {
 
 }
 
 /*
+
+    this.element = document.getElementsByTagName('html').item(0);
+    this.path = window.location.pathname;
+    this.widget = widgets.getWidgetByPath(httpPath);
+    this.widget.init(this.element);
 function transformToAssocArray( prmstr ) {
     var params = {};
     var prmarr = prmstr.split("&");

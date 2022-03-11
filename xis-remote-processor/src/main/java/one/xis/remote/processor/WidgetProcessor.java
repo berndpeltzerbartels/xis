@@ -71,6 +71,7 @@ public class WidgetProcessor extends AnnotationProcessor {
     private WidgetModel widgetModel(WidgetContext context) {
         try {
             Document document = XmlUtil.loadDocument(context.getHtmlFile());
+            new Templ
             return templateParser.parse(document, context.getSimpleClassName(), context.getHttpPath()); // TODO may be an alias is better to avoid duplicates
         } catch (Exception e) {
             throw new RuntimeException(e); //TODO caught and loggged

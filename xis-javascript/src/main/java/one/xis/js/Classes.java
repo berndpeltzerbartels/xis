@@ -2,12 +2,14 @@ package one.xis.js;
 
 public class Classes {
 
+    public static final JSSuperClass XIS_PAGE = new JSSuperClass("XISPage");
     public static final JSSuperClass XIS_WIDGET = new JSSuperClass("XISWidget"); // TODO check javascript
     public static final JSSuperClass XIS_ELEMENT = new JSSuperClass("XISElement");
     public static final JSSuperClass XIS_CONTAINER = new JSSuperClass("XISContainer");
     public static final JSSuperClass XIS_STATIC_TEXT_NODE = new JSSuperClass("XISStaticTextNode");
     public static final JSSuperClass XIS_MUTABLE_TEXT_NODE = new JSSuperClass("XISMutableTextNode");
     public static final JSSuperClass XIS_WIDGETS = new JSSuperClass("XISWidgets");
+    public static final JSSuperClass XIS_PAGES = new JSSuperClass("XISPages");
     public static final JSSuperClass XIS_LOOP = new JSSuperClass("XISLoop");
     public static final JSSuperClass XIS_IF = new JSSuperClass("XISIf");
 
@@ -32,6 +34,15 @@ public class Classes {
                 .addMethod("appendRow", 0)
                 .addMethod("removeRow", 0)
                 .addAbstractField("rows");
+
+        XIS_PAGE.addMethod("init", 1)
+                .addMethod("update", 1)
+                .addMethod("getValue", 1)
+                .addMethod("initChildren", 0)
+                .addAbstractMethod("updateAttributes")
+                .addAbstractField("children")
+                .addAbstractField("staticAttributes")
+                .addAbstractField("path");
 
         XIS_WIDGET.addMethod("init", 1)
                 .addMethod("update", 1)
@@ -71,6 +82,11 @@ public class Classes {
                 .addMethod("bind", 2)
                 .addAbstractField("widgets")
                 .addMethod("getWidgetByPath", 1);
+
+        XIS_PAGES.addMethod("getPage", 1)
+                .addMethod("bind", 2)
+                .addAbstractField("pageWidgets")
+                .addMethod("getPageWidgetByPath", 1);
     }
 
 }

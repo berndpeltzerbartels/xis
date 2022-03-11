@@ -19,15 +19,18 @@ public class TemplateParser {
 
     private final ExpressionParser expressionParser = new ExpressionParser();
     private int varIndex = 0;
-    private static final String ATTR_IF = "data-if";
-    private static final String ATTR_FOR = "data-for";
-    private static final String ATTR_REPEAT = "data-repeat";
-    private static final String ATTR_LOOP_INDEX = "data-index";
-    private static final String ATTR_LOOP_NUMBER = "data-number";
-    private static final String ATTR_CONTAINER_ID = "data-container-id";
-    private static final String ATTR_CONTAINER_WIDGET = "data-container-widget";
+    static final String ATTR_IF = "data-if";
+    static final String ATTR_FOR = "data-for";
+    static final String ATTR_REPEAT = "data-repeat";
+    static final String ATTR_LOOP_INDEX = "data-index";
+    static final String ATTR_LOOP_NUMBER = "data-number";
+    static final String ATTR_CONTAINER_ID = "data-container-id";
+    static final String ATTR_CONTAINER_WIDGET = "data-container-widget";
 
     public WidgetModel parse(Document document, String name, String httpPath) {
+        if (!StringUtils.isNotEmpty(httpPath)) {
+            validatePageTemplateRoot(document);
+        }
         return new WidgetModel(name, parseElement(document.getDocumentElement()), httpPath);
     }
 
@@ -100,9 +103,7 @@ public class TemplateParser {
             builder.append(name).append("=").append("\"").append(value).append("\"");
         });
         return builder.append("/>").toString();
-
     }
-
 
     private void addAttribute(String name, String rawValue, ElementBase target) {
         List<MixedContent> contentList = new MixedContentParser(rawValue).parse();
@@ -151,7 +152,6 @@ public class TemplateParser {
         return new Loop(expressionParser.parse(dataForArray[1]), dataForArray[0], getIndexVarName(element), getNumberVarName(element), loopSource);
     }
 
-
     private String getIndexVarName(Element e) {
         return StringUtils.isNotEmpty(e.getAttribute(ATTR_LOOP_INDEX)) ? e.getAttribute(ATTR_LOOP_INDEX) : nextVarName();
     }
@@ -180,4 +180,13 @@ public class TemplateParser {
         return "var" + (varIndex++);
     }
 
+    private void validatePageTemplateRoot(Document document) {
+        var root = document.getDocumentElement();
+        if (root.hasAttribute(ATTR_IF)) {
+            throw new TemplateSynthaxException("top-level elements of a page must not have " + ATTR_IF);
+        }
+        if (root.hasAttribute(ATTR_REPEAT)) {
+            throw new TemplateSynthaxException("top-level elements of a page must not have " + ATTR_REPEAT);
+        }
+    }
 }

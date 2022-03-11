@@ -34,7 +34,7 @@ class TemplateParserTest {
         }
 
         @Test
-        void element() {
+        void parse() {
             WidgetModel widgetModel = new TemplateParser().parse(document, "123", "");
 
             TemplateElement element = (TemplateElement) widgetModel.getRootNode();
@@ -56,7 +56,7 @@ class TemplateParserTest {
         }
 
         @Test
-        void element() {
+        void parse() {
             WidgetModel widgetModel = new TemplateParser().parse(document, "123", "");
 
             assertThat(widgetModel.getRootNode()).isInstanceOf(IfBlock.class);
