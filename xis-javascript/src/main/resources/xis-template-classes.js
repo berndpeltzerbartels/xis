@@ -9,7 +9,7 @@ XISElement.prototype.init = function (parent, valueHolder) {
     }
 }
 
-XISElement.prototype.getValue = function (path) {
+XISElement.prototype.val = function (path) {
     return this.valueHolder.getValue(path);
 }
 
@@ -64,7 +64,7 @@ XISMutableTextNode.prototype.getText = function () {
     // abstract. USE VALUE FIELD !!!
 }
 
-XISMutableTextNode.prototype.getValue = function (name) {
+XISMutableTextNode.prototype.val = function (name) {
     return this.valueHolder.getValue(name);
 }
 
@@ -101,7 +101,7 @@ XISIf.prototype.update = function () {
 }
 
 XISIf.prototype.evaluateCondition = function () {
-    return this.getValue(this.path); // TODO evaluate any expression
+    return this.val(this.path); // TODO evaluate any expression
 }
 
 XISIf.prototype.initChildren = function() {
@@ -116,7 +116,7 @@ XISIf.prototype.unlinkChildren = function() {
     }
 }
 
-XISIf.prototype.getValue = function(path) {
+XISIf.prototype.val = function(path) {
     return this.valueHolder.getValue(path);
 }
 
@@ -166,6 +166,10 @@ XISLoop.prototype.getValue = function (path) {
     }
 }
 
+XISLoop.prototype.val = function(path) {
+    return this.getValue(path);
+}
+
 XISLoop.prototype.getArray = function () {
     return this.valueHolder.getValue(this.loopAttributes.arrayPath);
 }
@@ -207,23 +211,23 @@ XISWidget.prototype.init = function () {
     this.element = createElement('div');
     this.valueHolder = { getValue: function(path){return undefined}};
     this.root.init(this.element, this);
+    this.childNodes = nodeListToArray(this.element.childNodes);
 }
 
 XISWidget.prototype.bind = function(parentElement, valueHolder) {
     debugger;
+    this.parentElement = parentElement;
     this.valueHolder = valueHolder;
-    var childNodes = this.element.childNodes;
-    for (var i = 0; i < childNodes.length; i++) {
-        parentElement.appendChild(childNodes[i]);
+    for (var i = 0; i < this.childNodes.length; i++) {
+        parentElement.appendChild(this.childNodes[i]);
     }
 }
 
 
 XISWidget.prototype.unbind = function() {
     this.valueHolder = { getValue: function(path){return undefined}};
-    var childNodes = this.parentElement.childNodes;
-    for (var i = 0; i < childNodes.length; i++) {
-        parentNode.removeChild(childNodes[i]);
+    for (var i = 0; i < this.childNodes.length; i++) {
+        this.parentElement.removeChild(this.childNodes[i]);
     }
 }
 
@@ -288,9 +292,9 @@ XISContainer.prototype.init = function (parent, valueHolder) {
 
 XISContainer.prototype.setWidget = function (widgetId) {
     if (this.widget) {
-        this.widget.unbind();
+        this.widget.unbind(); // TODO check widgetId. May be it's the same
     }
-    this.widget = widgets.getWidget(widgetId);
+    this.widget = __widgets.getWidget(widgetId);
     if (!this.widget.initialized) {
         this.widget.initialized = true;
         this.widget.init();
@@ -298,7 +302,14 @@ XISContainer.prototype.setWidget = function (widgetId) {
     this.widget.bind(this.element, this.valueHolder);
 }
 
-XISContainer.prototype.getValue = function (path) {
+XISContainer.prototype.clear = function() {
+    if (this.widget) {
+        this.widget.unbind();
+        this.widget = undefined;
+    }
+}
+
+XISContainer.prototype.val = function (path) {
     return this.valueHolder.getValue(path);
 }
 
@@ -328,21 +339,12 @@ XISContainer.prototype.getWidgets = function () {
 
 function XISWidgets() {
     this.widgets = [];
-    this.widgetsByPath = {};
 }
 
 XISWidgets.prototype.getWidget = function (widgetId) {
     return this.widgets[widgetId];
 }
 
-XISWidgets.prototype.getWidgetByPath = function (path) {
-    for (var i = 0; i < this.widgets.length; i++) {
-        var widget = this.widgets[i];
-        if (widget.path && widget.path == path) {
-            return widget;
-        }
-    }
-}
 
 XISWidgets.prototype.bind = function (widgetId, element) {
     var widget = this.getWidget(widgetId);
@@ -351,37 +353,16 @@ XISWidgets.prototype.bind = function (widgetId, element) {
 }
 
 
+function XISContainers() {
+    this.containers = [];
+}
+
+XISContainers.prototype.getContainer = function (containerId) {
+    return this.containers[containerId];
+}
 
 function XISPages() {}
 
-
-XISPages.prototype.bind = function(path) {
-    var root = document.getRootNode();
-    var pageWidget = this.getPageWidgetByPath(path);
-
-}
-
-XISPages.prototype.getPageWidgetByPath = function(path) {
+XISPages.prototype.getPageByPath = function(path) {
     return this.pageWidgets[path];
 }
-
-XISPages.prototype.getData = function() {
-
-}
-
-/*
-
-    this.element = document.getElementsByTagName('html').item(0);
-    this.path = window.location.pathname;
-    this.widget = widgets.getWidgetByPath(httpPath);
-    this.widget.init(this.element);
-function transformToAssocArray( prmstr ) {
-    var params = {};
-    var prmarr = prmstr.split("&");
-    for ( var i = 0; i < prmarr.length; i++) {
-        var tmparr = prmarr[i].split("=");
-        params[tmparr[0]] = tmparr[1];
-    }
-    return params;
-}
-*/

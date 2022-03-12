@@ -27,7 +27,6 @@ function n10(){this.rows=[];this.loopAttributes={'numberVarName':'i','itemVarNam
 function n8(){this.node=createTextNode('');this.getText=function(){var text='';text+=this.getValue(['category','title']);text+='            ';return text;};};n8.prototype=new XISMutableTextNode();
 function n53(){this.children=[new n54()];this.element=createElement('body');this.updateAttributes=function(){};};n53.prototype=new XISElement();
 function n41(){this.children=[new n42()];this.element=createElement('td');this.updateAttributes=function(){};};n41.prototype=new XISElement();
-function n54(){this.defaultWidgetId='ProductList';this.containerId='main';this.element=createElement('div');this.updateAttributes=function(){};};n54.prototype=new XISContainer();
 function n29(){this.root=new n30();};n29.prototype=new XISWidget();
 function n45(){this.children=[new n46()];this.element=createElement('td');this.updateAttributes=function(){};};n45.prototype=new XISElement();
 function n33(){this.children=[new n34()];this.element=createElement('table');this.updateAttributes=function(){};};n33.prototype=new XISElement();
@@ -38,7 +37,7 @@ function n49(){this.children=[new n50()];this.element=createElement('body',{'sty
 function n37(){this.children=[new n38()];this.element=createElement('td',{'colspan':'3'});this.updateAttributes=function(){};};n37.prototype=new XISElement();
 function n44(){this.node=createTextNode('');this.getText=function(){var text='';text+=this.getValue(['product','title']);return text;};};n44.prototype=new XISMutableTextNode();
 function n1(){this.root=new n2();};n1.prototype=new XISWidget();
-function n50(){this.defaultWidgetId='ProductList';this.containerId='main';this.element=createElement('div');this.updateAttributes=function(){};};n50.prototype=new XISContainer();
+function n50(){this.defaultWidgetId='ProductList';this.containerId='product-container';this.element=createElement('div');this.updateAttributes=function(){};};n50.prototype=new XISContainer();
 function n51(){this.head=new n52();this.path='/';this.body=new n53();};n51.prototype=new XISPage();
 function n6(){this.rows=[];this.loopAttributes={'numberVarName':'var1','itemVarName':'category','indexVarName':'var0'};this.getArray=function(){return this.getValue(['categories']);};this.createChildren=function(){return [new n7()];};};n6.prototype=new XISLoop();
 function n46(){this.node=createTextNode('');this.getText=function(){var text='';text+=this.getValue(['product','price']);text+=' EUR';return text;};};n46.prototype=new XISMutableTextNode();
@@ -49,8 +48,10 @@ function n39(){this.rows=[];this.loopAttributes={'numberVarName':'productNumber'
 function n30(){this.children=[new n31(),new n33()];this.element=createElement('div');this.updateAttributes=function(){};};n30.prototype=new XISElement();
 function n18(){this.root=new n19();};n18.prototype=new XISWidget();
 function n34(){this.children=[new n35()];this.element=createElement('tbody',{'data-number':'categoryNumber','data-for':'category:categories'});this.updateAttributes=function(){};};n34.prototype=new XISElement();
+function n54(){this.children=[];this.element=createElement('div',{'data-container-widget':'ProductList','data-container':'main'});this.updateAttributes=function(){};};n54.prototype=new XISElement();
 function n26(){this.children=[new n27()];this.element=createElement('a',{'href':'#'});this.updateAttributes=function(){var n28='';n28+=this.getValue(['project','id']);this.updateAttribute('onclick',n28);};};n26.prototype=new XISElement();
 function n14(){this.children=[new n15()];this.element=createElement('span');this.updateAttributes=function(){};};n14.prototype=new XISElement();
 function n55(){this.widgets={'ProductList':new n1(),'ProductList2':new n29(),'ProjectList':new n18()};};n55.prototype=new XISWidgets();
 function n56(){this.pageWidgets={'/product.html':new n47(),'/':new n51()};};n56.prototype=new XISPages();
-var widgets=new n55();var pages=new n56();
+function n57(){this.containers={'product-container':new n50()};};n57.prototype=new XISContainers();
+var __widgets=new n55();var __pages=new n56();var __containers=new n57();

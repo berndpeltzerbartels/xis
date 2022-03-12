@@ -1,22 +1,25 @@
 package one.xis.js;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import one.xis.template.*;
 import one.xis.utils.lang.CollectionUtils;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static one.xis.js.Classes.*;
 
 @RequiredArgsConstructor
 public class JavascriptParser {
-    private final JSScript script;
+
+    @Getter
+    private final JSScript script = new JSScript();
     private static long currentNameId = 1;
     private final Collection<JSClass> classes = new HashSet<>();
+
+    @Getter
+    private final Map<String, JSClass> containerClasses = new HashMap<>();
 
     public void parse(Collection<PageModel> pageModels, Collection<WidgetModel> widgetModels) {
         var widgetsClasses = widgetModels.stream().collect(Collectors.toMap(WidgetModel::getName, this::parse));
@@ -25,12 +28,15 @@ public class JavascriptParser {
 
         var widgetsClass = widgetsClass(widgetsClasses);
         var pagesClass = pagesClass(pageClasses);
+        var containersClass = containersClass();
 
         script.addDeclaration(widgetsClass);
         script.addDeclaration(pagesClass);
+        script.addDeclaration(containersClass);
 
-        createGlobalVar("widgets", widgetsClass);
-        createGlobalVar("pages", pagesClass);
+        createGlobalVar("__widgets", widgetsClass);
+        createGlobalVar("__pages", pagesClass);
+        createGlobalVar("__containers", containersClass);
     }
 
 
@@ -63,10 +69,20 @@ public class JavascriptParser {
         return widgetsClass;
     }
 
+
+    private JSClass containersClass() {
+        var containersClass = derrivedClass(XIS_CONTAINERS);
+        var containers = new JSJsonValue();
+        containerClasses.forEach((name, containerClass) -> containers.addField(name, new JSContructorCall(containerClass)));
+        containersClass.addField("containers", containers);
+        return containersClass;
+    }
+
+
     private JSClass pagesClass(Map<String, JSClass> pageWidgetClasses) {
         var widgetsClass = derrivedClass(XIS_PAGES);
         var widgets = new JSJsonValue();
-        pageWidgetClasses.forEach((path, widgetClass) -> widgets.addField(path, new JSContructorCall(widgetClass)));
+        pageWidgetClasses.forEach((path, pageClass) -> widgets.addField(path, new JSContructorCall(pageClass)));
         widgetsClass.addField("pageWidgets", widgets);
         return widgetsClass;
     }
@@ -113,6 +129,7 @@ public class JavascriptParser {
         containerClass.addField("defaultWidgetId", defaultWidgetId);
         addElementField(containerElement, containerClass);
         overrideUpdateAttributes(containerClass, containerElement);
+        containerClasses.put(containerElement.getContainerId(), containerClass);
         return containerClass;
     }
 
@@ -157,10 +174,10 @@ public class JavascriptParser {
     private JSClass toClass(IfBlock ifBlock) {
         var ifClass = derrivedClass(XIS_IF);
 
-        var getValue = ifClass.getMethod("getValue");
+        var valueMethod = ifClass.getMethod("val");
         var evaluateCondition = ifClass.overrideAbstractMethod("evaluateCondition");
 
-        var expressionEval = new ExpressionEval(getValue);
+        var expressionEval = new ExpressionEval(valueMethod);
         evaluateCondition.addStatement(new JSReturn(expressionEval.getEvaluator(ifBlock.getExpression())));
 
         addChildrenField(ifBlock, ifClass);
@@ -211,7 +228,7 @@ public class JavascriptParser {
             } else if (arg instanceof ExpressionString) {
                 fktCall.addParam(new JSString(((ExpressionString) arg).getContent()));
             } else if (arg instanceof ExpressionVar) {
-                JSMethod getValue = owner.getMethod("getValue");
+                JSMethod getValue = owner.getMethod("val");
                 JSArray variablePath = JSArray.arrayOfStrings(((ExpressionVar) arg).getPath());
                 JSMethodCall getValueMethodCall = new JSMethodCall(getValue, variablePath);
                 fktCall.addParam(getValueMethodCall);
@@ -310,7 +327,7 @@ public class JavascriptParser {
                 } else if (arg instanceof ExpressionString) {
                     method.addStatement(new JSStringAppend(text, new JSString(((ExpressionString) arg).getContent())));
                 } else if (arg instanceof ExpressionVar) {
-                    var getValue = method.getOwner().getMethod("getValue");
+                    var getValue = method.getOwner().getMethod("val");
                     var variablePath = JSArray.arrayOfStrings(((ExpressionVar) arg).getPath());
                     var getValueMethodCall = new JSMethodCall(getValue, variablePath);
                     method.addStatement(new JSStringAppend(text, getValueMethodCall));

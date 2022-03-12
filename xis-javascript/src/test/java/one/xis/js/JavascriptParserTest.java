@@ -26,13 +26,11 @@ class JavascriptParserTest {
     class SimpleElementWidgetTest {
 
         private WidgetModel widgetModel;
-        private JSScript script;
         private JavascriptParser parser;
 
         @BeforeEach
         void setUp() {
-            script = new JSScript();
-            parser = new JavascriptParser(script);
+            parser = new JavascriptParser();
             widgetModel = new WidgetModel(WIDGET_NAME, new TemplateElement("div"));
         }
 
@@ -40,15 +38,15 @@ class JavascriptParserTest {
         void parse() {
             parser.parse(Collections.emptySet(), Set.of(widgetModel));
 
-            JSClass widgets = declaredCLasses(script)
+            JSClass widgets = declaredCLasses(parser.getScript())
                     .filter(c -> isDerrivedFrom(c, "XISWidgets"))
                     .collect(CollectorUtils.onlyElement());
 
-            JSClass widget = declaredCLasses(script)
+            JSClass widget = declaredCLasses(parser.getScript())
                     .filter(c -> isDerrivedFrom(c, "XISWidget"))
                     .collect(CollectorUtils.onlyElement());
 
-            JSClass div = declaredCLasses(script)
+            JSClass div = declaredCLasses(parser.getScript())
                     .filter(c -> isDerrivedFrom(c, "XISElement"))
                     .collect(CollectorUtils.onlyElement());
 
@@ -78,13 +76,11 @@ class JavascriptParserTest {
 
         private WidgetModel widgetModel1;
         private WidgetModel widgetModel2;
-        private JSScript script;
         private JavascriptParser parser;
 
         @BeforeEach
         void setUp() {
-            script = new JSScript();
-            parser = new JavascriptParser(script);
+            parser = new JavascriptParser();
             widgetModel1 = new WidgetModel(WIDGET_NAME, new TemplateElement("div"));
             widgetModel2 = new WidgetModel(WIDGET_NAME2, new TemplateElement("span"));
         }
@@ -93,7 +89,7 @@ class JavascriptParserTest {
         void parse() {
             parser.parse(Collections.emptySet(), List.of(widgetModel1, widgetModel2));
 
-            JSClass widgets = declaredCLasses(script)
+            JSClass widgets = declaredCLasses(parser.getScript())
                     .filter(c -> isDerrivedFrom(c, "XISWidgets"))
                     .collect(CollectorUtils.onlyElement());
 
@@ -126,7 +122,6 @@ class JavascriptParserTest {
     class IfAndForLoopWidgetTest {
 
         private WidgetModel widgetModel;
-        private JSScript script;
         private JavascriptParser parser;
 
         @BeforeEach
@@ -140,8 +135,7 @@ class JavascriptParserTest {
             loop.addChild(templateElement);
             widgetModel = new WidgetModel(WIDGET_NAME, ifBlock);
 
-            script = new JSScript();
-            parser = new JavascriptParser(script);
+            parser = new JavascriptParser();
 
         }
 
@@ -149,23 +143,23 @@ class JavascriptParserTest {
         void parse() {
             parser.parse(Collections.emptySet(), Set.of(widgetModel));
 
-            JSClass ifClass = declaredCLasses(script)
+            JSClass ifClass = declaredCLasses(parser.getScript())
                     .filter(c -> isDerrivedFrom(c, "XISIf"))
                     .collect(CollectorUtils.onlyElement());
 
-            JSClass loopClass = declaredCLasses(script)
+            JSClass loopClass = declaredCLasses(parser.getScript())
                     .filter(c -> isDerrivedFrom(c, "XISLoop"))
                     .collect(CollectorUtils.onlyElement());
 
-            JSClass widgets = declaredCLasses(script)
+            JSClass widgets = declaredCLasses(parser.getScript())
                     .filter(c -> isDerrivedFrom(c, "XISWidgets"))
                     .collect(CollectorUtils.onlyElement());
 
-            JSClass widget = declaredCLasses(script)
+            JSClass widget = declaredCLasses(parser.getScript())
                     .filter(c -> isDerrivedFrom(c, "XISWidget"))
                     .collect(CollectorUtils.onlyElement());
 
-            JSClass div = declaredCLasses(script)
+            JSClass div = declaredCLasses(parser.getScript())
                     .filter(c -> isDerrivedFrom(c, "XISElement"))
                     .collect(CollectorUtils.onlyElement());
 

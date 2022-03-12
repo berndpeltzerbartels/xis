@@ -25,7 +25,7 @@ public class JSScriptValidator {
         Set<String> methods = new HashSet<>(superClass.getAbstractMethods().keySet());
         methods.removeAll(jsClass.getOverriddenMethods().keySet());
         if (!methods.isEmpty()) {
-            throw new JSValidationException("methods must be overridden: " + methods.stream().collect(Collectors.joining(", ")));
+            throw new JSValidationException("one or more methods are unimplemented: " + methods.stream().collect(Collectors.joining(", ")));
         }
     }
 
@@ -33,7 +33,7 @@ public class JSScriptValidator {
         Set<String> fields = new HashSet<>(superClass.getAbstractFields());
         fields.removeAll(jsClass.getFields().keySet());
         if (!fields.isEmpty()) {
-            throw new JSValidationException("fields must be set: " + fields.stream().collect(Collectors.joining(", ")));
+            throw new JSValidationException("missing field declaration(s): " + fields.stream().collect(Collectors.joining(", ")));
         }
     }
 }

@@ -2,44 +2,11 @@
 <head>
 
     <script type="text/javascript" src="/xis.js"></script>
-    <script type="text/javascript">
-
-        function setWidget1() {
-             var page = pages.getPageWidgetByPath('/product.html');
-        page.init();
-        page.update({'categories': categories});
-        }
-
-         function setWidget2() {
-         var page = pages.getPageWidgetByPath('/product.html');
-        page.init();
-        page.update({'categories': categories});
-        }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    </script>
 </head>
 <body>
 <form action="#">
-    <button onclick="setWidget1()">1</button>
-    <button onclick="setWidget2()">2</button>
+    <button onclick="openWidget()">1</button>
+    <button onclick="closeWidget()">2</button>
 </form>
 
 </body>
@@ -328,6 +295,95 @@ var categories = [
     }
 
 ];
+
+
+var page = __pages.getPageByPath('/product.html');
+page.init();
+
+function openWidget() {
+    var productContainer = __containers.getContainer('product-container');
+
+    productContainer.setWidget('ProductList');
+    page.update({'categories': categories});
+
+}
+
+function closeWidget() {
+    var container = __containers.getContainer('product-container');
+    container.clear();
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
