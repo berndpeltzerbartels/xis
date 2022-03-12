@@ -43,6 +43,8 @@ public class Classes {
                 .addAbstractField("path");
 
         XIS_WIDGET.addMethod("init", 1)
+                .addMethod("bind", 2)
+                .addMethod("unbind", 2)
                 .addMethod("update", 1)
                 .addMethod("getValue", 1)
                 .addAbstractField("root");
