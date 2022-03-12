@@ -11,7 +11,12 @@
         }
 
          function setWidget2() {
+         var page = pages.getPageWidgetByPath('/product.html');
+        page.init();
+        page.update({'categories': categories});
         }
+
+
 
 
 
@@ -323,6 +328,8 @@ var categories = [
     }
 
 ];
+
+
 
 
 

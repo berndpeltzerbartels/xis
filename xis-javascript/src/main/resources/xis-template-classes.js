@@ -3,8 +3,10 @@ function XISElement() { }
 XISElement.prototype.init = function (parent, valueHolder) {
     this.parent = parent;
     this.valueHolder = valueHolder;
-    this.parent.appendChild(this.element);
-    this.initChildren();
+    if (!this.element.parentNode) {
+        this.parent.appendChild(this.element);
+        this.initChildren();
+    }
 }
 
 XISElement.prototype.getValue = function (path) {
@@ -267,7 +269,11 @@ XISContainer.prototype.setWidget = function (widgetId) {
         this.element.removeChild(this.widget.element);
     }
     this.widget = widgets.getWidget(widgetId);
-    this.widget.init(this.element, this.valueHolder);
+    if (!this.widget.initialized) {
+        this.widget.initialized = true;
+        this.widget.init(this.element, this.valueHolder);
+    }
+    
 }
 
 XISContainer.prototype.getValue = function (path) {
