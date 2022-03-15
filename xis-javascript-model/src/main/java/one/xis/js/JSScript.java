@@ -10,6 +10,7 @@ import java.util.List;
 public class JSScript implements JSContext {
     List<JSDeclaration> declarations = new ArrayList<>();
     List<JSStatement> statements = new ArrayList<>();
+    List<JSVarAssignment> globalVars = new ArrayList<>();
 
     public void addDeclaration(JSDeclaration declaration) {
         declarations.add(declaration);
@@ -22,5 +23,15 @@ public class JSScript implements JSContext {
     public void addStatement(JSStatement statement) {
         statements.add(statement);
     }
+
+    public JSVar addSingleton(JSVar jsVar, JSClass jsClass) {
+        globalVars.add(new JSVarAssignment(jsVar, new JSContructorCall(jsClass)));
+        return jsVar;
+    }
+
+    public JSVar addSingleton(String name, JSClass jsClass) {
+        return addSingleton(new JSVar(name), jsClass);
+    }
+
 
 }

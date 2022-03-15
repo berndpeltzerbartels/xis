@@ -14,7 +14,12 @@ public class JSWriter {
 
     public void write(JSScript script) {
         script.getDeclarations().forEach(this::writeDeclaration);
+        script.getGlobalVars().forEach(this::writeGlobalVar);
         script.getStatements().forEach(statement -> this.writeStatement(statement, writer));
+    }
+
+    private void writeGlobalVar(JSVarAssignment varAssignment) {
+        writeVarAssignmentStatement(varAssignment, writer);
     }
 
     private void writeDeclaration(JSDeclaration declaration) {
