@@ -5,7 +5,7 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class Loop extends ChildHolderBase implements ModelNode {
+public class Loop extends ChildHolderBase implements ModelNode, PathNode {
 
     private final Expression arraySource;
     private final String itemVarName;

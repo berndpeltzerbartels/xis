@@ -84,11 +84,11 @@ public class Classes {
                 .addAbstractField("widgets");
 
         XIS_CONTAINERS.addMethod("getContainer", 1)
-                .addMethod("bind", 2)
-                .addAbstractField("containers");
+                .addMethod("addContainer", 1)
+                .addMethod("bind", 2);
 
         XIS_PAGES.addMethod("getPage", 1)
-                .addAbstractField("pageWidgets")
+                .addAbstractField("pages")
                 .addMethod("getPageByPath", 1);
     }
 

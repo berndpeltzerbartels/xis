@@ -5,7 +5,10 @@ import lombok.RequiredArgsConstructor;
 import one.xis.template.*;
 import one.xis.utils.lang.CollectionUtils;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static one.xis.js.Classes.*;
@@ -18,12 +21,9 @@ public class JavascriptParser {
     private static long currentNameId = 1;
     private final Collection<JSClass> classes = new HashSet<>();
 
-    @Getter
-    private final Map<String, JSClass> containerClasses = new HashMap<>();
-
     public void parse(Collection<PageModel> pageModels, Collection<WidgetModel> widgetModels) {
-        var widgetsClasses = widgetModels.stream().collect(Collectors.toMap(WidgetModel::getName, this::parse));
-        var pageClasses = pageModels.stream().collect(Collectors.toMap(PageModel::getPath, this::parse));
+        var widgetsClasses = widgetModels.stream().collect(Collectors.toMap(WidgetModel::getName, this::parseWidgetModel));
+        var pageClasses = pageModels.stream().collect(Collectors.toMap(PageModel::getPath, this::parsePageModel));
         script.addDeclarations(classes);
 
         var widgetsClass = widgetsClass(widgetsClasses);
@@ -44,14 +44,15 @@ public class JavascriptParser {
         script.addStatement(new JSVarAssignment(new JSVar(name), new JSContructorCall(jsClass)));
     }
 
-    private JSClass parse(WidgetModel widgetModel) {
+    private JSClass parseWidgetModel(WidgetModel widgetModel) {
         var widgetClass = derrivedClass(XIS_WIDGET);
         var widgetRootClass = toClass(widgetModel.getRootNode());
         widgetClass.addField("root", new JSContructorCall(widgetRootClass));
+        widgetClass.addField("name", new JSString(widgetModel.getName()));
         return widgetClass;
     }
 
-    private JSClass parse(PageModel pageModel) {
+    private JSClass parsePageModel(PageModel pageModel) {
         var pageClass = derrivedClass(XIS_PAGE);
         var headClass = toClass(pageModel.getHead());
         var bodyClass = toClass(pageModel.getBody());
@@ -73,7 +74,7 @@ public class JavascriptParser {
     private JSClass containersClass() {
         var containersClass = derrivedClass(XIS_CONTAINERS);
         var containers = new JSJsonValue();
-        containerClasses.forEach((name, containerClass) -> containers.addField(name, new JSContructorCall(containerClass)));
+        //containerClasses.forEach((name, containerClass) -> containers.addField(name, new JSContructorCall(containerClass)));
         containersClass.addField("containers", containers);
         return containersClass;
     }
@@ -83,7 +84,7 @@ public class JavascriptParser {
         var widgetsClass = derrivedClass(XIS_PAGES);
         var widgets = new JSJsonValue();
         pageWidgetClasses.forEach((path, pageClass) -> widgets.addField(path, new JSContructorCall(pageClass)));
-        widgetsClass.addField("pageWidgets", widgets);
+        widgetsClass.addField("pages", widgets);
         return widgetsClass;
     }
 
@@ -95,7 +96,6 @@ public class JavascriptParser {
         return classes.stream().map(JSContructorCall::new)
                 .collect(Collectors.toList());
     }
-
 
     private JSClass toClass(ModelNode node) {
         if (node instanceof TemplateElement) {
@@ -129,7 +129,6 @@ public class JavascriptParser {
         containerClass.addField("defaultWidgetId", defaultWidgetId);
         addElementField(containerElement, containerClass);
         overrideUpdateAttributes(containerClass, containerElement);
-        containerClasses.put(containerElement.getContainerId(), containerClass);
         return containerClass;
     }
 

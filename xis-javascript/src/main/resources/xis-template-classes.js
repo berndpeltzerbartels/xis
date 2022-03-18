@@ -1,3 +1,4 @@
+
 function XISElement() { }
 
 XISElement.prototype.init = function (parent, valueHolder) {
@@ -205,11 +206,11 @@ XISLoop.prototype.removeRow = function () {
     }
 }
 
-function XISWidget() { }
+function XISWidget() {}
 
 XISWidget.prototype.init = function () {
     this.element = createElement('div');
-    this.valueHolder = { getValue: function(path){return undefined}};
+    this.valueHolder = { getValue: function(path){return undefined;}};
     this.root.init(this.element, this);
     this.childNodes = nodeListToArray(this.element.childNodes);
 }
@@ -239,7 +240,7 @@ XISWidget.prototype.update = function () {
     this.root.update();
 }
 
-function XISPage() { }
+function XISPage() {}
 
 XISPage.prototype.init = function () {
     this.head.element = document.getElementsByTagName('head').item(0);
@@ -279,7 +280,7 @@ XISPage.prototype.getValue = function (path) {
 }
 
 
-function XISContainer() { }
+function XISContainer() {}
 
 XISContainer.prototype.init = function (parent, valueHolder) {
     this.parent = parent;
@@ -288,6 +289,7 @@ XISContainer.prototype.init = function (parent, valueHolder) {
     if (this.defaultWidgetId) {
         this.setWidget(this.defaultWidgetId);
     }
+    __containers.addContainer(this);
 }
 
 XISContainer.prototype.setWidget = function (widgetId) {
@@ -338,31 +340,43 @@ XISContainer.prototype.getWidgets = function () {
 
 
 function XISWidgets() {
-    this.widgets = [];
+    this.widgets = {};
 }
 
-XISWidgets.prototype.getWidget = function (widgetId) {
-    return this.widgets[widgetId];
+XISWidgets.prototype.addWidget = function(widget) {
+    this.widgets[widget.name] = widget;
+}
+
+XISWidgets.prototype.getWidget = function (widgetName) {
+    return this.widgets[widgetName];
 }
 
 
-XISWidgets.prototype.bind = function (widgetId, element) {
-    var widget = this.getWidget(widgetId);
+XISWidgets.prototype.bind = function (widgetName, element) {
+    var widget = this.getWidget(widgetName);
     widget.init(element);
     return widget;
 }
 
 
-function XISContainers() {
-    this.containers = [];
+function XISContainers() {}
+
+XISContainers.prototype.addContainer = function (container) {
+    return this.containers[container.containerId] = container;
 }
 
 XISContainers.prototype.getContainer = function (containerId) {
     return this.containers[containerId];
 }
 
-function XISPages() {}
+function XISPages() {
+    this.pages = {};
+}
+
+XISPages.prototype.addPage = function(page) {
+    this.pages[page.path] = path;
+}
 
 XISPages.prototype.getPageByPath = function(path) {
-    return this.pageWidgets[path];
+    return this.pages[path];
 }

@@ -1,11 +1,9 @@
 package one.xis.template;
 
-import lombok.Data;
 import lombok.Getter;
-import lombok.Value;
 
 @Getter
-public class ContainerElement extends ElementBase {
+public class ContainerElement extends ElementBase implements PathNode {
     private final String containerId;
     private final String defaultWidgetId;
 
