@@ -9,9 +9,14 @@ import java.io.IOException;
 @WebServlet(urlPatterns = "/xis.js")
 class JavascriptServlet extends HttpServlet {
 
+    private JavascriptResource resource;
+
+    JavascriptServlet() {
+        resource = JavascriptResources.getResource();
+    }
+    
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        JavascriptResource resource = JavascriptResourceLoader.getResource();
         long ifModifiedSince = request.getDateHeader("If-Modified-Since");
         String ifNoneMatch = request.getHeader("If-None-Match");
         if (ifModifiedSince > -1 && !response.isCommitted() && ifModifiedSince == resource.getLastModified()) {

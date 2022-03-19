@@ -115,9 +115,7 @@ public class TemplateParser {
         var builder = new StringBuilder()
                 .append("<")
                 .append(element.getTagName());
-        XmlUtil.getAttributes(element).forEach((name, value) -> {
-            builder.append(name).append("=").append("\"").append(value).append("\"");
-        });
+        XmlUtil.getAttributes(element).forEach((name, value) -> builder.append(name).append("=").append("\"").append(value).append("\""));
         return builder.append("/>").toString();
     }
 

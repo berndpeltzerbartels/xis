@@ -1,16 +1,14 @@
 package one.xis.remote.processor;
 
-import lombok.Getter;
+import lombok.Value;
 
 import java.io.File;
 
 
-@Getter
-class PageAttributes extends WidgetAttributes {
-    private final String httpPath;
+@Value
+class PageAttributes implements TemplateAttributes {
+    String htmlFilePath;
+    String httpPath;
+    File htmlFile;
 
-    public PageAttributes(String packageName, String simpleClassName, File htmlFile, String httpPath) {
-        super(packageName, simpleClassName, htmlFile);
-        this.httpPath = httpPath;
-    }
 }

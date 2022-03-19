@@ -1,6 +1,8 @@
 package one.xis.utils.io;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class IOUtils {
 
@@ -27,6 +29,19 @@ public class IOUtils {
     public static InputStream getResourceForClass(Class<?> aClass, String resourcName) {
         String path = aClass.getPackageName().replace('.', '/') + '/' + resourcName;
         return aClass.getClassLoader().getResourceAsStream(path);
+    }
+
+    public static List<String> getContentLines(InputStream inputStream, String charset) {
+        List<String> lines = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, charset))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                lines.add(line);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return lines;
     }
 
     public static String getContent(File file, String encoding) {

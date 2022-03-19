@@ -3,7 +3,7 @@ package one.xis.template;
 import lombok.Getter;
 
 @Getter
-public class ContainerElement extends ElementBase implements PathNode {
+public class ContainerElement extends ElementBase {
     private final String containerId;
     private final String defaultWidgetId;
 

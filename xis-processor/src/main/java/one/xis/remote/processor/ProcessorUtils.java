@@ -11,10 +11,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 
 class ProcessorUtils {
@@ -31,6 +28,10 @@ class ProcessorUtils {
     @SneakyThrows
     PrintWriter writer(String path, Element... originatingElements) {
         return new PrintWriter(fileObject(path, originatingElements).openOutputStream(), false, StandardCharsets.UTF_8);
+    }
+
+    PrintWriter writer(String path, Collection<Element> originatingElements) {
+        return writer(path, originatingElements.toArray(new Element[originatingElements.size()]));
     }
 
     @SneakyThrows

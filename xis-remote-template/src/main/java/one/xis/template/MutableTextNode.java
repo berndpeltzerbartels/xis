@@ -5,6 +5,6 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class MutableTextNode implements TextNode, PathNode {
+public class MutableTextNode implements TextNode {
     private final List<MixedContent> content;
 }

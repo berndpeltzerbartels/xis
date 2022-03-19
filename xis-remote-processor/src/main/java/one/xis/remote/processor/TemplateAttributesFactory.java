@@ -1,8 +1,11 @@
 package one.xis.remote.processor;
 
+import one.xis.utils.lang.StringUtils;
+
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.TypeElement;
 import java.io.File;
+import java.util.Optional;
 
 class TemplateAttributesFactory {
     private final JavaModelUtils javaModelUtils;
@@ -14,23 +17,37 @@ class TemplateAttributesFactory {
     }
 
     PageAttributes pageAttributes(TypeElement element) {
-        String packageName = javaModelUtils.getPackageName(element);
-        String className = javaModelUtils.getSimpleName(element);
-        File htmlFile = processorUtils.getFileInSourceFolder(packageName, element.getSimpleName() + ".html");
-        return new PageAttributes(packageName, className, htmlFile, getHttpPath(element));
+        return new PageAttributes(htmlFilePath(element), getHttpPath(element), htmlFile(element));
     }
 
     WidgetAttributes widgetAttributes(TypeElement element) {
+        String className = javaModelUtils.getSimpleName(element);
+        String widgetName = getWidgetNameByAnnotation(element).orElse(className);
+        return new WidgetAttributes(widgetName, htmlFilePath(element), htmlFile(element));
+    }
+
+    private String htmlFilePath(TypeElement element) {
         String packageName = javaModelUtils.getPackageName(element);
         String className = javaModelUtils.getSimpleName(element);
-        File htmlFile = processorUtils.getFileInSourceFolder(packageName, element.getSimpleName() + ".html");
-        return new WidgetAttributes(packageName, className, htmlFile);
+        return String.format("%s/%s.html", packageName.replace('.', '/'), className);
+    }
+
+    private File htmlFile(TypeElement element) {
+        String packageName = javaModelUtils.getPackageName(element);
+        String className = javaModelUtils.getSimpleName(element);
+        return processorUtils.getFileInSourceFolder(packageName, className + ".html");
     }
 
     private String getHttpPath(TypeElement element) {
         return javaModelUtils.getAnnotationMirror("one.xis.remote.Page", element)
                 .map(mirror -> javaModelUtils.getAnnotationValue(mirror, "value"))
                 .map(String.class::cast).orElseThrow();
+    }
+
+    private Optional<String> getWidgetNameByAnnotation(TypeElement element) {
+        return javaModelUtils.getAnnotationMirror("one.xis.remote.Widget", element)
+                .map(mirror -> javaModelUtils.getAnnotationValue(mirror, "value"))
+                .map(String.class::cast).filter(StringUtils::isNotEmpty);
     }
 
 }

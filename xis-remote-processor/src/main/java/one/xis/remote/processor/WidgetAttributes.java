@@ -1,12 +1,12 @@
 package one.xis.remote.processor;
 
-import lombok.Data;
+import lombok.Value;
 
 import java.io.File;
 
-@Data
+@Value
 class WidgetAttributes implements TemplateAttributes {
-    private final String packageName;
-    private final String simpleClassName;
-    private final File htmlFile;
+    String name;
+    String htmlFilePath;
+    File htmlFile;
 }

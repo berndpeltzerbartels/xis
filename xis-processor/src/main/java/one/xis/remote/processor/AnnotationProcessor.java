@@ -31,9 +31,8 @@ public abstract class AnnotationProcessor extends AbstractProcessor {
                 logger.info("processing over");
             } else {
                 logger.info("process");
-
-                for (Element element : roundEnv.getRootElements()) {
-                    for (TypeElement annotation : annotations) {
+                for (TypeElement annotation : annotations) {
+                    for (Element element : roundEnv.getElementsAnnotatedWith(annotation)) {
                         if (javaModelUtils.hasAnnotation(element, annotation)) {
                             doProcess(element, annotation, roundEnv);
                         }
