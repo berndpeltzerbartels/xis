@@ -127,7 +127,7 @@ function XISLoop() { }
 XISLoop.prototype.init = function (parent, valueHolder) {
     this.parent = parent;
     this.valueHolder = valueHolder;
-    this.names = [this.loopAttributes.itemVarName, this.loopAttributes.indexVarName, this.loopAttributes.numberVarName];
+    this.varNames = [this.loopAttributes.itemVarName, this.loopAttributes.indexVarName, this.loopAttributes.numberVarName];
 }
 
 XISLoop.prototype.update = function () {
@@ -152,7 +152,7 @@ XISLoop.prototype.updateChildren = function () {
 
 XISLoop.prototype.getValue = function (path) {
     var name = path[0];
-    if (this.names.indexOf(name) != -1) {
+    if (this.varNames.indexOf(name) != -1) {
         var rv = this.values[name];
         for (var i = 1; i < path.length; i++) {
             if (!rv) {
@@ -216,7 +216,6 @@ XISWidget.prototype.init = function () {
 }
 
 XISWidget.prototype.bind = function(parentElement, valueHolder) {
-    debugger;
     this.parentElement = parentElement;
     this.valueHolder = valueHolder;
     for (var i = 0; i < this.childNodes.length; i++) {
@@ -233,7 +232,31 @@ XISWidget.prototype.unbind = function() {
 }
 
 XISWidget.prototype.getValue = function (path) {
+    var name = path[0];
+    if (this.varNames.indexOf(name) != -1) {
+        var rv = this.values[name];
+        for (var i = 1; i < path.length; i++) {
+            if (!rv) {
+                return undefined;
+            }
+            rv = rv[path[i]];
+        }
+        return rv;
+    }
     return this.valueHolder.getValue(path);
+}
+
+XISWidget.prototype.getState = function() {
+    // TODO
+    return {};
+}
+
+XISWidget.prototype.updateData = function (data) {
+    this.varNames = Object.keys(data);
+    this.values = {};
+    for (var i = 0; i < this.varNames.length; i++) {
+        this.values[this.varNames[i]] = data[this.varNames[i]];
+    }
 }
 
 XISWidget.prototype.update = function () {
@@ -292,16 +315,23 @@ XISContainer.prototype.init = function (parent, valueHolder) {
     __containers.addContainer(this);
 }
 
-XISContainer.prototype.setWidget = function (widgetId) {
+XISContainer.prototype.setWidget = function (widgetName) {
     if (this.widget) {
-        this.widget.unbind(); // TODO check widgetId. May be it's the same
+        if (this.widget.name == widgetName) {
+            __lifecycleService.onDisplayWidget(this.widget);
+            return;
+        }
+        __lifecycleService.onHideWidget(this.widget);
+        this.widget.unbind();
     }
-    this.widget = __widgets.getWidget(widgetId);
+    this.widget = __widgets.getWidget(widgetName);
     if (!this.widget.initialized) {
         this.widget.initialized = true;
         this.widget.init();
+        __lifecycleService.onInitWidget(this.widget);
     }
     this.widget.bind(this.element, this.valueHolder);
+    __lifecycleService.onDisplayWidget(this.widget);
 }
 
 XISContainer.prototype.clear = function() {
@@ -380,3 +410,4 @@ XISPages.prototype.addPage = function(page) {
 XISPages.prototype.getPageByPath = function(path) {
     return this.pages[path];
 }
+

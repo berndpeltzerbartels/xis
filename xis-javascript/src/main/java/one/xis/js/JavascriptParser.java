@@ -29,14 +29,17 @@ public class JavascriptParser {
         var widgetsClass = widgetsClass(widgetsClasses);
         var pagesClass = pagesClass(pageClasses);
         var containersClass = containersClass();
+        var lifecycleClass = lifecycleClass();
 
         script.addDeclaration(widgetsClass);
         script.addDeclaration(pagesClass);
         script.addDeclaration(containersClass);
+        script.addDeclaration(lifecycleClass);
 
         createGlobalVar("__widgets", widgetsClass);
         createGlobalVar("__pages", pagesClass);
         createGlobalVar("__containers", containersClass);
+        createGlobalVar("__lifecycleService", lifecycleClass);
     }
 
 
@@ -79,6 +82,9 @@ public class JavascriptParser {
         return containersClass;
     }
 
+    private JSClass lifecycleClass() {
+        return derrivedClass(XIS_LIFECYCLE_SERVICE);
+    }
 
     private JSClass pagesClass(Map<String, JSClass> pageWidgetClasses) {
         var widgetsClass = derrivedClass(XIS_PAGES);

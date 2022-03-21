@@ -20,7 +20,7 @@ class PageServlet extends HttpServlet {
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
         System.out.println(config.getServletContext().getRealPath("/"));
-        html = IOUtils.getResourceAsString("test.html");
+        html = IOUtils.getResourceAsString("main.html");
     }
 
     @Override

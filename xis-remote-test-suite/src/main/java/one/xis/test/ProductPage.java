@@ -2,6 +2,6 @@ package one.xis.test;
 
 import one.xis.remote.Page;
 
-@Page("/product.html")
+@Page("/products.html")
 public class ProductPage {
 }

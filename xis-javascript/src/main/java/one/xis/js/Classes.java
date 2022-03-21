@@ -13,6 +13,7 @@ public class Classes {
     public static final JSSuperClass XIS_PAGES = new JSSuperClass("XISPages");
     public static final JSSuperClass XIS_LOOP = new JSSuperClass("XISLoop");
     public static final JSSuperClass XIS_IF = new JSSuperClass("XISIf");
+    public static final JSSuperClass XIS_LIFECYCLE_SERVICE = new JSSuperClass("XISLifecycleService");
 
     static {
 
@@ -47,7 +48,8 @@ public class Classes {
         XIS_WIDGET.addMethod("init", 1)
                 .addMethod("bind", 2)
                 .addMethod("unbind", 2)
-                .addMethod("update", 1)
+                .addMethod("update", 0)
+                .addMethod("updateData", 1)
                 .addMethod("getValue", 1)
                 .addAbstractField("root");
 
@@ -90,6 +92,10 @@ public class Classes {
         XIS_PAGES.addMethod("getPage", 1)
                 .addAbstractField("pages")
                 .addMethod("getPageByPath", 1);
+
+        XIS_LIFECYCLE_SERVICE.addMethod("onInitWidget", 1)
+                .addMethod("onDisplayWidget", 1)
+                .addMethod("onHideWidget", 1);
     }
 
 }

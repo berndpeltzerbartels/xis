@@ -10,6 +10,7 @@ class JavascriptResources {
     static String getJavascript() {
         return IOUtils.getResourceAsString("xis-template-functions.js") +
                 IOUtils.getResourceAsString("xis-template-classes.js") +
+                IOUtils.getResourceAsString("xis-middleware-classes.js") +
                 generator.generateJavascript();
     }
 

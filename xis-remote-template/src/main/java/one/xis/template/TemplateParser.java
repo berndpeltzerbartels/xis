@@ -25,7 +25,7 @@ public class TemplateParser {
     static final String ATTR_LOOP_INDEX = "data-index";
     static final String ATTR_LOOP_NUMBER = "data-number";
     static final String ATTR_CONTAINER_ID = "data-container-id";
-    static final String ATTR_CONTAINER_WIDGET = "data-container-widget";
+    static final String ATTR_CONTAINER_WIDGET = "data-widget";
 
     public WidgetModel parseWidget(Document document, String name) {
         return new WidgetModel(name, parseElement(document.getDocumentElement()));
