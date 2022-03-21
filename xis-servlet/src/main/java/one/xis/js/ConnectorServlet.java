@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-@WebServlet(urlPatterns = "/__xis")
+@WebServlet(urlPatterns = "/__xis.con")
 class ConnectorServlet extends HttpServlet {
 
     private String json;
@@ -22,7 +22,7 @@ class ConnectorServlet extends HttpServlet {
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("application/json; charset=utf-8");
-        //response.setContentLength(json.length());
+        response.setContentLength(json.getBytes("utf-8").length);
         try (PrintWriter out = response.getWriter()) {
             out.println(json);
         }

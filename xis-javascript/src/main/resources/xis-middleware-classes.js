@@ -64,7 +64,7 @@ XISRemoteService.prototype.onHideWidget= function(widget) {
 }
 
 XISRemoteService.prototype.send = function(message, callback) {
-    this.httpClient.post('/__xis', message, callback);
+    this.httpClient.post('/__xis.con', message, callback);
 }
 
 XISRemoteService.prototype.createOnInitWidgetMessage = function(widget) {
