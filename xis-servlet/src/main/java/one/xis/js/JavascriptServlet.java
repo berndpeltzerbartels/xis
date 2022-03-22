@@ -20,9 +20,9 @@ class JavascriptServlet extends HttpServlet {
         long ifModifiedSince = request.getDateHeader("If-Modified-Since");
         String ifNoneMatch = request.getHeader("If-None-Match");
         if (ifModifiedSince > -1 && !response.isCommitted() && ifModifiedSince == resource.getLastModified()) {
-            response.setStatus(HttpServletResponse.SC_NOT_MODIFIED); // TODO testen
+            response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
         } else if (ifNoneMatch != null && ifNoneMatch.equals(Long.toString(resource.getLastModified()))) {
-            response.setStatus(HttpServletResponse.SC_NOT_MODIFIED); // TODO  testen
+            response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
         } else {
             response.setContentType("application/javascript");
             response.setContentLength(resource.getJavascript().length());

@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-@WebServlet(urlPatterns = "/__xis.con")
+@WebServlet
 class ConnectorServlet extends HttpServlet {
 
     private String json;
