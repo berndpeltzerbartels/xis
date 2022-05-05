@@ -206,6 +206,11 @@ XISLoop.prototype.removeRow = function () {
     }
 }
 
+XISLoop.prototype.appendData = function(parent) {
+    this.valueHolder.appendData(this.loopAttributes.arrayPath)
+    parent[this.loopAttributes.arrayPath] = {}
+}
+
 function XISWidget() {}
 
 XISWidget.prototype.init = function () {
@@ -410,4 +415,8 @@ XISPages.prototype.addPage = function(page) {
 XISPages.prototype.getPageByPath = function(path) {
     return this.pages[path];
 }
+
+
+
+
 

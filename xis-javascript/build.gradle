@@ -14,12 +14,34 @@ dependencies {
     implementation project(':xis-javascript-model')
     implementation project(':xis-remote-template')
 
+    implementation 'com.eclipsesource.j2v8:j2v8_linux_x86_64:4.6.0'
+
     annotationProcessor 'org.projectlombok:lombok:1.18.12'
     implementation 'org.projectlombok:lombok:1.18.12'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
     testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.16.1'
 }
+
+
+tasks.register('create-js') {
+    doLast {
+        def javescriptDir = new File('build/javascript')
+        javescriptDir.mkdirs()
+
+        def javescriptFile = new File(javescriptDir, 'xis.js')
+        javescriptFile.write('') // truncate output if needed
+        fileTree('src/main/resources/js/classes').forEach({ file ->
+            println "Javascript-Class : ${file}"
+            javescriptFile << "\n/**----------------------------------------------------${file.name}--------------------------------------------------*//\n"
+            javescriptFile << file.text
+        })
+        println 'Huhu !'
+    }
+}
+
+
+classes.dependsOn 'create-js'
 
 test {
     useJUnitPlatform()
