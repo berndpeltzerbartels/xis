@@ -1,0 +1,12 @@
+repositories {
+    mavenCentral()
+}
+
+
+dependencies {
+
+    // https://mvnrepository.com/artifact/org.graalvm.js/js-scriptengine
+    implementation 'org.graalvm.js:js-scriptengine:22.1.0'
+    implementation 'org.graalvm.truffle:truffle-api:22.1.0'
+    implementation 'org.graalvm.js:js:22.1.0'
+}
