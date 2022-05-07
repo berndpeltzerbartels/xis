@@ -1,23 +1,23 @@
 /**
- * A html-element with framework-attributes.
+ * An HTML-element
  */
-class XISElement extends XISTemplateElement {
+class XISElement extends XISTemplateObject {
 
-    constructor(parent) {
-        super(parent);
+    /**
+     * @param {XISTemplateObject} parent 
+     * @param {XISValueHolder} valueHolder
+     */
+    constructor(parent, valueHolder) {
+        super(parent, valueHolder);
         this.element = this.createElement();
         this.children = this.createChildren();
-        this.visible = false;
     }
 
     /**
      * @override
      */
     render() {
-        if (!this.visible) {
-            this.parent.element.appendChild(this.element);
-            this.visible = true;
-        }
+        this.parent.element.appendChild(this.element);
         this.updateAttribues();
         this.children.forEach(child => child.render());
 
@@ -29,7 +29,7 @@ class XISElement extends XISTemplateElement {
 
     /**
      * @override
-     * @param {*} childElement 
+     * @param {Node} childElement 
      */
     appendChild(childElement) {
         this.element.appendChild(childElement);
@@ -37,7 +37,7 @@ class XISElement extends XISTemplateElement {
 
     /**
      * @override
-     * @param {*} childElement 
+     * @param {Node} childElement 
      */
     removeChild(childElement) {
         this.element.removeChild(childElement);

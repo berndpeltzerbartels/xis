@@ -8,7 +8,7 @@ import javax.script.*;
 public class JSUtil {
 
     public CompiledScript compile(String javascript) throws ScriptException {
-        ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
+        ScriptEngine engine = new ScriptEngineManager().getEngineByName("graal.js");
         Compilable compiler = (Compilable) engine;
         return compiler.compile(javascript);
     }

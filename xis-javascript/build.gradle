@@ -34,4 +34,4 @@ test {
     useJUnitPlatform()
 }
 
-apply plugin: JSPlugin
+apply plugin: JavascriptPlugin

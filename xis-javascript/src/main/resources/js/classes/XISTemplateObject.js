@@ -1,12 +1,12 @@
-class XISTemplateElement {
+class XISTemplateObject {
 
-    constructor(parent, valueHolder) {
+      /**
+     * @param {XISTemplateObject} parent 
+     * @param {XISValueHolder} valueHolder
+     */
+    init(parent, valueHolder) {
         this.parent = parent;
         this.valueHolder = valueHolder;
-    }
-
-    createElement() {
-        throw new Error('abstract method');
     }
 
     createChildren() {

@@ -1,2 +1,2 @@
-class XISIf {
+class XISIf extends XISTemplateObject {
 }
