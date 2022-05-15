@@ -1,21 +1,25 @@
 class XISLoop extends XISValueHolder{
 
     /**
-     * 
      * @param {XISTemplateObject} parent 
-     * @param {XISLoopAttributes} loopAttributes 
      */
-    constructor(parent, loopAttributes) {
-        super(this, [
-            loopAttributes.numberVarname,
-            loopAttributes.indexVarName,
-            loopAttributes.itemVarName
-        ]);
+    constructor(parent) {
+        super(parent.getValueHolder());
+        this.container = parent.getContainer();
         this.parent = parent;
-        this.loopAttributes = loopAttributes;
+        this.loopAttributes = this.getLoopAttributes();
+        this.setVarnames( [
+            this.loopAttributes.numberVarname,
+            this.loopAttributes.indexVarName,
+            this.loopAttributes.itemVarName
+        ]);
         this.rows = [];
     }
 
+
+    getLoopAttributes() {
+        throw new Error('abstract method');
+    }
     /**
      * @override
      */
@@ -60,4 +64,20 @@ class XISLoop extends XISValueHolder{
       createChildren() {
         throw new Error('abstract method');
     }
+
+    /**
+     * @override
+     * @returns {XISValueHolder}
+     */
+     getValueHolder() {
+        return this;
+     }
+ 
+     /**
+      * @override
+      * @returns {XISContainer}
+      */
+     getContainer() {
+         return this.container;
+     }
 }

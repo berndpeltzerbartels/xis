@@ -7,8 +7,10 @@ class XISElement extends XISTemplateObject {
      * @param {XISTemplateObject} parent 
      * @param {XISValueHolder} valueHolder
      */
-    constructor(parent, valueHolder) {
-        super(parent, valueHolder);
+    constructor(parent) {
+        super(parent);
+        this.valueHolder = parent.getValueHolder();
+        this.container = parent.getContainer();
         this.element = this.createElement();
         this.children = this.createChildren();
     }
@@ -20,7 +22,10 @@ class XISElement extends XISTemplateObject {
         this.parent.element.appendChild(this.element);
         this.updateAttribues();
         this.children.forEach(child => child.render());
+    }
 
+    unlink() {
+        this.parent.getElement().removeChild(this.element);
     }
 
     updateAttribues() {
@@ -62,5 +67,22 @@ class XISElement extends XISTemplateObject {
     createChildren() {
         throw new Error('abstract method');
     }
+
+    /**
+     * @override
+     * @returns {XISValueHolder}
+     */
+    getValueHolder() {
+       return this.valueHolder;
+    }
+
+    /**
+     * @override
+     * @returns {XISContainer}
+     */
+    getContainer() {
+        return this.container;
+    }
+
 
 }

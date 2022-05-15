@@ -1,3 +1,5 @@
+package one.xis.gradle;
+
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.gradle.api.Plugin;
@@ -46,7 +48,7 @@ public class JavascriptPlugin implements Plugin<Project> {
     private Collection<File> getOutfiles(Project project) {
         String outFilesRaw = (String) project.findProperty("javascript.outfiles");
         if (outFilesRaw == null) {
-            throw new IllegalStateException("missing mandatory property 'javascript.outfiles'");
+            return Collections.emptySet();
         }
         return Arrays.stream(outFilesRaw.split(",")).map(String::trim).map(path -> new File(project.getProjectDir(), path)).collect(Collectors.toList());
     }
@@ -154,9 +156,14 @@ public class JavascriptPlugin implements Plugin<Project> {
         }
 
         private void evaluateDir(File dir) {
-            for (File f : Objects.requireNonNull(dir.listFiles())) {
-                evaluate(f);
+            File[] files = dir.listFiles();
+            if (files != null) {
+                for (File f : files) {
+                    evaluate(f);
+                }
+
             }
+
         }
 
     }

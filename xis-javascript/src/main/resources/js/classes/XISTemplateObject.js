@@ -2,24 +2,29 @@ class XISTemplateObject {
 
       /**
      * @param {XISTemplateObject} parent 
-     * @param {XISValueHolder} valueHolder
      */
-    init(parent, valueHolder) {
+    constructor(parent) {
         this.parent = parent;
-        this.valueHolder = valueHolder;
+    }
+
+    getValueHolder() {
+        throw new Error('abstract method');
+    }
+
+    getContainer() {
+        throw new Error('abstract method');
     }
 
     createChildren() {
         throw new Error('abstract method');
     }
 
-
     render() {
         throw new Error('abstract method');
     }
 
-    getValue(path) {
-        return this.valueHolder.getValue(path);
+    getValueHolder() {
+        throw new Error('abstract method');
     }
 
     appendChild(childElement) {
@@ -29,5 +34,14 @@ class XISTemplateObject {
     removeChild(childElement) {
         throw new Error('abstract method');
     }
+
+    getElement() {
+        throw new Error('abstract method');
+    }
+
+    unlink() {
+        throw new Error('abstract method');
+    }
+
 
 }

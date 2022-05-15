@@ -13,4 +13,6 @@ include 'xis-javascript-model'
 include 'xis-servlet'
 include 'xis-page'
 include 'xis-resources'
+include 'xis-gradle-plugin'
+
 

@@ -1,9 +1,16 @@
 class XISWidget {
 
-
-    constructor(data) {
-
+    constructor() {
+        this.element = createElement('div');
+        this.children = this.createChildren();
+        this.valueHolder = { getValue: function(path){return undefined;}};
     }
+
+    init() {
+        this.root.init(this.element, this);
+        this.childNodes = nodeListToArray(this.element.childNodes);
+    }
+
 
     createChildren() {
         

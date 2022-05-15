@@ -22,7 +22,7 @@ public class IOUtils {
     public static InputStream getResourceAsStream(String resourcePath) {
         InputStream in = ClassLoader.getSystemResourceAsStream(resourcePath);
         if (in == null) {
-            throw new NoSuchResourceException(resourcePath);
+            throw new RuntimeException("not found:" + resourcePath);
         }
         return in;
     }
@@ -30,6 +30,14 @@ public class IOUtils {
     public static InputStream getResourceForClass(Class<?> aClass, String resourcName) {
         String path = aClass.getPackageName().replace('.', '/') + '/' + resourcName;
         return aClass.getClassLoader().getResourceAsStream(path);
+    }
+
+    public static List<String> getContentLines(File file, String charset) {
+        try {
+            return getContentLines(new FileInputStream(file), charset);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static List<String> getContentLines(InputStream inputStream, String charset) {
@@ -72,7 +80,7 @@ public class IOUtils {
     public static PrintWriter printWriter(File file) {
         return printWriter(file, StandardCharsets.UTF_8.name());
     }
-    
+
     public static PrintWriter printWriter(File file, String charset) {
         try {
             return new PrintWriter(new OutputStreamWriter(new FileOutputStream(file), charset));

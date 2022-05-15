@@ -2,7 +2,7 @@
  * Element for displaying widgets
  */
 
-class XISContainer extends XISTemplateObject123 {
+class XISContainer extends XISTemplateObject {
 
     /**
     * @param {String} defaultWidgetId (nullable)
@@ -23,6 +23,15 @@ class XISContainer extends XISTemplateObject123 {
         if (this.defaultWidgetId) {
             this.setWidget(this.defaultWidgetId);
         }
+    }
+
+
+    /**
+     * @override
+     * @returns {XISContainer}
+     */
+    getContainer() {
+        return this;
     }
 
     createElement() {

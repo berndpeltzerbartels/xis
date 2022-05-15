@@ -1,3 +1,7 @@
+plugins {
+    id 'java-gradle-plugin'
+}
+
 repositories {
     mavenCentral()
 }
@@ -12,4 +16,12 @@ dependencies {
 
     annotationProcessor 'org.projectlombok:lombok:1.18.12'
     implementation 'org.projectlombok:lombok:1.18.12'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.7.0'
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '2.1.0'
+    testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.16.1'
+    testImplementation 'org.mockito:mockito-junit-jupiter:4.5.1'
+
 }

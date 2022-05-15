@@ -11,6 +11,6 @@ class JSUtilTest {
     @Test
     void compile() throws ScriptException {
         String js = "var i = 1; var j= 2; i+j";
-        assertThat(JSUtil.compile(js).eval()).isEqualTo(3D);
+        assertThat(JSUtil.compile(js).eval()).isEqualTo(3);
     }
 }

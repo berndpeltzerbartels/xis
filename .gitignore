@@ -51,3 +51,4 @@ Thumbs.db
 .gradle
 build
 
+/xis-javascript/src/main/resources/xis-api.js

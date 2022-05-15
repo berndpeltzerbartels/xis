@@ -20,6 +20,11 @@ dependencies {
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+
+    implementation 'org.graalvm.js:js-scriptengine:22.1.0'
+    implementation 'org.graalvm.truffle:truffle-api:22.1.0'
+    implementation 'org.graalvm.js:js:22.1.0'
+    
 }
 
 test {

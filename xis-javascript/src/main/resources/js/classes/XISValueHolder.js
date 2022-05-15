@@ -2,14 +2,16 @@ class XISValueHolder extends XISTemplateObject {
 
     /**
      * @param {XISValueHolder} parentValueHolder
-     * @param {Array<String>} varNames
      */
-    constructor(parentValueHolder, varNames) {
+    constructor(parentValueHolder) {
         this.parentValueHolder = parentValueHolder;
         this.varNames = varNames;
         this.values = {};
     }
-
+    
+    setVarnames(varNames) {
+        this.varNames = varNames;
+    }
     /**
      * @param {Array<String>} path 
      */

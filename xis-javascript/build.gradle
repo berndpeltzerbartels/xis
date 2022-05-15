@@ -1,5 +1,8 @@
+import one.xis.gradle.JavascriptPlugin
+
 plugins {
     id 'java'
+    id 'javascript-plugin'
 }
 
 group 'org.example'
