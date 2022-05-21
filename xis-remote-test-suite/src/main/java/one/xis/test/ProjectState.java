@@ -1,7 +1,7 @@
 package one.xis.test;
 
 import lombok.Data;
-import one.xis.remote.ClientState;
+import one.xis.ClientState;
 
 import java.util.List;
 

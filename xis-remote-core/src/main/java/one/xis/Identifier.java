@@ -1,4 +1,4 @@
-package one.xis.remote;
+package one.xis;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,6 +7,6 @@ import java.lang.annotation.Target;
 
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.SOURCE)
-public @interface Variable {
+public @interface Identifier {
     String value() default "";
 }

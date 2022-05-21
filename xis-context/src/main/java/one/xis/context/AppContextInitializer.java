@@ -4,15 +4,33 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.reflections.Reflections;
+import org.reflections.scanners.FieldAnnotationsScanner;
+import org.reflections.scanners.SubTypesScanner;
+import org.reflections.scanners.TypeAnnotationsScanner;
 
 import java.lang.reflect.*;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-@SuppressWarnings("unchecked")
-class ApplicationContextInitializer implements Runnable {
+public class AppContextInitializer implements Runnable {
 
-    private Reflections reflections = new Reflections();
+    private final Reflections reflections;
+
+    public AppContextInitializer(Class<?> basePackageClass) {
+        this(basePackageClass.getPackageName());
+    }
+
+    public AppContextInitializer(String basePackage) {
+        reflections = new Reflections(basePackage, new SubTypesScanner(),
+                new TypeAnnotationsScanner(),
+                new FieldAnnotationsScanner());
+    }
+    
+    @Getter
+    private Set<Object> singletons;
 
     @Override
     public void run() {
@@ -22,6 +40,7 @@ class ApplicationContextInitializer implements Runnable {
         instantiation.createInstances();
         fieldInjection.doInjection();
         initInvokers.invokeAll();
+        singletons = instantiation.getSingletons();
     }
 
     @Getter
@@ -29,7 +48,7 @@ class ApplicationContextInitializer implements Runnable {
         private final Set<DependencyField> dependencyFields;
 
         FieldInjection() {
-            dependencyFields = reflections.getFieldsAnnotatedWith(XISInject.class).stream().map(DependencyField::new).collect(Collectors.toSet());
+            dependencyFields = reflections.getFieldsAnnotatedWith(Inj.class).stream().map(DependencyField::new).collect(Collectors.toSet());
         }
 
         void onComponentCreated(Object o) {
@@ -59,7 +78,7 @@ class ApplicationContextInitializer implements Runnable {
 
         private void findInitMethods(Class<?> c) {
             Arrays.stream(c.getDeclaredMethods())
-                    .filter(m -> m.isAnnotationPresent(XISInit.class))
+                    .filter(m -> m.isAnnotationPresent(Init.class))
                     .map(InitInvoker::new).forEach(invokers::add);
         }
     }
@@ -76,7 +95,17 @@ class ApplicationContextInitializer implements Runnable {
         }
 
         void invoke() {
+            owners.forEach(this::invoke);
+        }
 
+        private void invoke(Object owner) {
+            try {
+                method.invoke(owner);
+            } catch (IllegalAccessException e) {
+                throw new AppContextException(e);
+            } catch (InvocationTargetException e) {
+                throw new AppContextException(e);
+            }
         }
     }
 
@@ -92,7 +121,7 @@ class ApplicationContextInitializer implements Runnable {
             }
             if (field.getType().isInstance(o)) {
                 if (fieldValue != null) {
-                    throw new ApplicationContextException("ambigious candidates for " + field);
+                    throw new AppContextException("ambigious candidates for " + field);
                 }
                 fieldValue = o;
             }
@@ -100,7 +129,7 @@ class ApplicationContextInitializer implements Runnable {
 
         void doInjection() {
             if (fieldValue == null) {
-                throw new ApplicationContextException("no candidate for " + field);
+                throw new AppContextException("no candidate for " + field);
             }
             if (owners.isEmpty()) {
                 throw new IllegalStateException();
@@ -127,7 +156,7 @@ class ApplicationContextInitializer implements Runnable {
         Instantiation(FieldInjection fieldInjection, InitInvocation initInvocation) {
             this.fieldInjection = fieldInjection;
             this.initInvocation = initInvocation;
-            instantitors = reflections.getTypesAnnotatedWith(XISComponent.class).stream()//
+            instantitors = reflections.getTypesAnnotatedWith(Comp.class).stream()//
                     .map(this::createInstantitor)//
                     .collect(Collectors.toSet());
         }
@@ -160,14 +189,14 @@ class ApplicationContextInitializer implements Runnable {
     static class Instantitor {
         private final Class<?> type;
         private List<Class<?>> parameterTypes;
-        private List<Object> parameters;
+        private Object[] parameters;
         private Constructor<?> constructor;
         private int missingParameters;
 
         void init() {
             constructor = getConstructor();
             parameterTypes = List.of(constructor.getParameterTypes());
-            parameters = new ArrayList<>(parameters.size());
+            parameters = new Object[parameterTypes.size()];
             missingParameters = parameterTypes.size();
         }
 
@@ -178,10 +207,10 @@ class ApplicationContextInitializer implements Runnable {
         private void setParameters(Object o) {
             for (int i = 0; i < parameterTypes.size(); i++) {
                 if (parameterTypes.get(i).isInstance(o)) {
-                    if (parameters.get(i) != null) {
-                        throw new ApplicationContextException("ambigious candidates of type " + parameterTypes.get(i).getName() + " in constructor of " + type);
+                    if (parameters[i] != null) {
+                        throw new AppContextException("ambigious candidates of type " + parameterTypes.get(i).getName() + " in constructor of " + type);
                     }
-                    parameters.set(i, o);
+                    parameters[i] = o;
                     missingParameters--;
                 }
             }
@@ -195,11 +224,11 @@ class ApplicationContextInitializer implements Runnable {
             List<Constructor<?>> constructors = Arrays.stream(type.getDeclaredConstructors()).filter(this::nonPrivate).collect(Collectors.toList());
             switch (constructors.size()) {
                 case 0:
-                    throw new ApplicationContextException("no accessible constructor for " + type);
+                    throw new AppContextException("no accessible constructor for " + type);
                 case 1:
                     return constructors.get(0);
                 default:
-                    throw new ApplicationContextException("too many constructors for " + type);
+                    throw new AppContextException("too many constructors for " + type);
             }
         }
 
@@ -210,7 +239,7 @@ class ApplicationContextInitializer implements Runnable {
         @SneakyThrows
         Object createInstance() {
             constructor.setAccessible(true);
-            return constructor.newInstance(parameters.toArray());
+            return constructor.newInstance(parameters);
         }
     }
 }

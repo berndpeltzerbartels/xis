@@ -11,7 +11,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 
 @AutoService(Processor.class)
-@SupportedAnnotationTypes({"one.xis.remote.ClientState"})
+@SupportedAnnotationTypes({"one.xis.ClientState"})
 @SupportedSourceVersion(SourceVersion.RELEASE_11)
 public class ClientStateValidationProcessor extends AnnotationProcessor {
 

@@ -39,13 +39,13 @@ class TemplateAttributesFactory {
     }
 
     private String getHttpPath(TypeElement element) {
-        return javaModelUtils.getAnnotationMirror("one.xis.remote.Page", element)
+        return javaModelUtils.getAnnotationMirror("one.xis.Page", element)
                 .map(mirror -> javaModelUtils.getAnnotationValue(mirror, "value"))
                 .map(String.class::cast).orElseThrow();
     }
 
     private Optional<String> getWidgetNameByAnnotation(TypeElement element) {
-        return javaModelUtils.getAnnotationMirror("one.xis.remote.Widget", element)
+        return javaModelUtils.getAnnotationMirror("one.xis.Widget", element)
                 .map(mirror -> javaModelUtils.getAnnotationValue(mirror, "value"))
                 .map(String.class::cast).filter(StringUtils::isNotEmpty);
     }

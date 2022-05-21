@@ -1,4 +1,4 @@
-package one.xis.remote;
+package one.xis;
 
 import java.lang.annotation.*;
 

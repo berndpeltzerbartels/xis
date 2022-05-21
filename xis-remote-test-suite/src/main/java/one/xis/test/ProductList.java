@@ -1,6 +1,6 @@
 package one.xis.test;
 
-import one.xis.remote.Widget;
+import one.xis.Widget;
 
 @Widget
 class ProductList {

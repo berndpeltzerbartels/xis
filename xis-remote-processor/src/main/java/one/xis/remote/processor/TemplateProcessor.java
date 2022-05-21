@@ -1,7 +1,7 @@
 package one.xis.remote.processor;
 
 import com.google.auto.service.AutoService;
-import one.xis.remote.Page;
+import one.xis.Page;
 import one.xis.utils.io.IOUtils;
 
 import javax.annotation.processing.*;
@@ -13,7 +13,7 @@ import java.util.Collection;
 import java.util.HashSet;
 
 @AutoService(Processor.class)
-@SupportedAnnotationTypes({"one.xis.remote.Widget", "one.xis.remote.Page"})
+@SupportedAnnotationTypes({"one.xis.Widget", "one.xis.Page"})
 @SupportedSourceVersion(SourceVersion.RELEASE_11)
 public class TemplateProcessor extends AnnotationProcessor {
 

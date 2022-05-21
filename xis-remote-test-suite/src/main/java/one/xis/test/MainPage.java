@@ -1,6 +1,6 @@
 package one.xis.test;
 
-import one.xis.remote.Page;
+import one.xis.Page;
 
 @Page("/")
 public class MainPage {
