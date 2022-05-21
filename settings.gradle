@@ -14,5 +14,7 @@ include 'xis-servlet'
 include 'xis-page'
 include 'xis-resources'
 include 'xis-gradle-plugin'
-
+include 'xis-widgets'
+include 'xis-widgets'
+include 'xis-context'
 

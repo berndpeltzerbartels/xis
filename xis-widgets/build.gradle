@@ -2,17 +2,19 @@ plugins {
     id 'java'
 }
 
+group 'org.example'
+version '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
+    implementation project(':xis-util')
+    implementation project(':xis-resources')
+    implementation 'org.reflections:reflections:0.10.2'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
-
-// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-web
-    implementation 'org.springframework.boot:spring-boot-starter-web:2.6.4'
 }
 
 test {
