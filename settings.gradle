@@ -17,4 +17,5 @@ include 'xis-gradle-plugin'
 include 'xis-widgets'
 include 'xis-spring'
 include 'xis-context'
+include 'xis-context-test'
 

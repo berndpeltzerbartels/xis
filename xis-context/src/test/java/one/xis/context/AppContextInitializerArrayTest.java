@@ -2,15 +2,17 @@ package one.xis.context;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class AppContextInitializerTest {
+class AppContextInitializerArrayTest {
+
 
     @Test
-    void run() {
-        AppContextInitializer initializer = new AppContextInitializer(getClass());
+    void arrayField() {
+        AppContextInitializer initializer = new AppContextInitializer(new TestReflection(Comp1.class, Comp2.class, Comp3.class));
         initializer.run();
 
         Set<Object> singletons = initializer.getSingletons();
@@ -19,9 +21,14 @@ class AppContextInitializerTest {
         Comp2 comp2 = singletons.stream().filter(Comp2.class::isInstance).map(Comp2.class::cast).findFirst().orElseThrow();
         Comp3 comp3 = singletons.stream().filter(Comp3.class::isInstance).map(Comp3.class::cast).findFirst().orElseThrow();
 
-        assertThat(comp1.comp2).isEqualTo(comp2);
-        assertThat(comp2.comp1).isEqualTo(comp1);
-        assertThat(comp3.comp2).isEqualTo(comp2);
+        assertThat(comp1.arr.length).isEqualTo(2);
+        assertThat(Arrays.asList(comp1.arr)).contains(comp2, comp3);
+
+
+    }
+
+    interface Interf1 {
+
     }
 
 
@@ -29,33 +36,16 @@ class AppContextInitializerTest {
     static class Comp1 {
 
         @Inj
-        Comp2 comp2;
-
-        int value;
-
-        @Init
-        void init() {
-            value = comp2.testValue();
-        }
+        Interf1[] arr;
     }
 
     @Comp
-    static class Comp2 {
+    static class Comp2 implements Interf1 {
 
-        @Inj
-        Comp1 comp1;
-
-        int testValue() {
-            return 2;
-        }
     }
 
     @Comp
-    static class Comp3 {
-        private final Comp2 comp2;
+    static class Comp3 implements Interf1 {
 
-        Comp3(Comp2 comp2) {
-            this.comp2 = comp2;
-        }
     }
 }

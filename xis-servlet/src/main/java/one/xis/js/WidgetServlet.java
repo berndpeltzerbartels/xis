@@ -1,6 +1,7 @@
 package one.xis.js;
 
 
+import one.xis.context.Inj;
 import one.xis.resource.Resource;
 import one.xis.servlet.ResourceServlet;
 import one.xis.widget.Widgets;
@@ -11,10 +12,11 @@ import javax.servlet.http.HttpServletRequest;
 @WebServlet(urlPatterns = "/widget.js")
 class WidgetServlet extends ResourceServlet {
 
-    private Widgets widgets = new Widgets();
-    
+    @Inj
+    private Widgets widgets;
+
     @Override
-    protected Resource getResource(HttpServletRequest request) {
+    protected Resource<String> getResource(HttpServletRequest request) {
         return widgets.getWidgetJs(request.getParameter("urn"));
     }
 }
