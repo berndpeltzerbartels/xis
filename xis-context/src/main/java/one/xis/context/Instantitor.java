@@ -9,22 +9,20 @@ import java.lang.reflect.Executable;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 class Instantitor {
     @Getter
     private final Class<?> type;
-    private List<Class<?>> parameterTypes;
-    private Object[] parameters;
+    private List<ConstructorParameter> parameters;
     private Constructor<?> constructor;
     private int missingParameters;
 
     void init() {
-        constructor = checkConstructorParames(getConstructor());
-        parameterTypes = List.of(constructor.getParameterTypes());
-        parameters = new Object[parameterTypes.size()];
-        missingParameters = parameterTypes.size();
+        constructor = getConstructor();
+        parameters = Arrays.stream(constructor.getParameters()).map(ConstructorParameter::create).collect(Collectors.toList());
     }
 
     void onComponentCreated(Object o) {
@@ -32,12 +30,8 @@ class Instantitor {
     }
 
     private void setParameters(Object o) {
-        for (int i = 0; i < parameterTypes.size(); i++) {
-            if (parameterTypes.get(i).isInstance(o)) {
-                if (parameters[i] != null) {
-                    throw new AppContextException("ambigious candidates of type " + parameterTypes.get(i).getName() + " in constructor of " + type);
-                }
-                parameters[i] = o;
+        for (int i = 0; i < parameters.size(); i++) {
+            if (parameters.get(i).onComponentCreated(o)) {
                 missingParameters--;
             }
         }
@@ -59,16 +53,6 @@ class Instantitor {
         }
     }
 
-    private Constructor<?> checkConstructorParames(Constructor<?> constructor) {
-        for (int i = 0; i < constructor.getParameterTypes().length; i++) {
-            Class<?> clazz = constructor.getParameterTypes()[i];
-            if (!clazz.isAnnotationPresent(Comp.class)) {
-                throw new AppContextException(constructor + ": parameter nr " + (i + 1) + "is not annotated with " + Comp.class.getName());
-            }
-        }
-        return constructor;
-    }
-
     private boolean nonPrivate(Executable accessibleObject) {
         return !Modifier.isPrivate(accessibleObject.getModifiers());
     }
@@ -76,6 +60,16 @@ class Instantitor {
     @SneakyThrows
     Object createInstance() {
         constructor.setAccessible(true);
-        return constructor.newInstance(parameters);
+        return constructor.newInstance(getParameterValues());
+    }
+
+    private Object[] getParameterValues() {
+        return parameters.stream().map(ConstructorParameter::getValue).toArray();
+    }
+
+    void populateSingletonClasses(Set<Class<?>> singletonClasses) {
+        parameters.stream().filter(MultiValueParameter.class::isInstance)
+                .map(MultiValueParameter.class::cast)
+                .forEach(parameter -> parameter.populateSingletonClasses(singletonClasses));
     }
 }

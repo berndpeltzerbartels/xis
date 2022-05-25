@@ -1,5 +1,6 @@
 package one.xis.context;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -34,6 +35,7 @@ class ArrayDependencyField implements DependencyField {
 
     @Override
     public void doInjection() {
-        owners.forEach(owner -> inject(owner, field, fieldValues));
+        Object[] arr = (Object[]) Array.newInstance(elementType, fieldValues.size());
+        owners.forEach(owner -> inject(owner, field, fieldValues.toArray(arr)));
     }
 }

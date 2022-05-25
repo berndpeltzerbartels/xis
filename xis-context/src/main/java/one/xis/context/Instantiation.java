@@ -18,12 +18,28 @@ class Instantiation {
     Instantiation(FieldInjection fieldInjection, InitMethodInvocation initMethodInvocation, AppReflection reflections) {
         this.fieldInjection = fieldInjection;
         this.initMethodInvocation = initMethodInvocation;
-        instantitors = reflections.getTypesAnnotatedWith(Comp.class).stream()//
-                .map(this::createInstantitor)//
+        this.instantitors = createInstantiators(reflections);
+        populateSingletonClasses();
+    }
+
+    private Set<Instantitor> createInstantiators(AppReflection reflections) {
+        return reflections.getTypesAnnotatedWith(Comp.class).stream()//
+                .map(this::createInstantiator)//
                 .collect(Collectors.toSet());
     }
 
-    private Instantitor createInstantitor(Class<?> aClass) {
+    private void populateSingletonClasses() {
+        Set<Class<?>> singletonClasses = getSingletonClasses();
+        instantitors.forEach(instantitor -> instantitor.populateSingletonClasses(singletonClasses));
+
+
+    }
+
+    private Set<Class<?>> getSingletonClasses() {
+        return instantitors.stream().map(Instantitor::getType).collect(Collectors.toSet());
+    }
+
+    private Instantitor createInstantiator(Class<?> aClass) {
         Instantitor instantitor = new Instantitor(aClass);
         instantitor.init();
         return instantitor;

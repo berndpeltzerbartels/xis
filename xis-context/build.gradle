@@ -11,9 +11,11 @@ repositories {
 
 dependencies {
 
+    implementation project(':xis-util')
     implementation group: 'org.reflections', name: 'reflections', version: '0.9.10'
 
     annotationProcessor 'org.projectlombok:lombok:1.18.12'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.12'
 
     implementation 'org.projectlombok:lombok:1.18.12'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'

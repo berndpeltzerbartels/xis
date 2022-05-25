@@ -13,6 +13,7 @@ class CollectionDependencyField implements DependencyField {
     private final Class<?> elementType;
     private final Field field;
 
+    @SuppressWarnings("unchecked")
     CollectionDependencyField(Field field) {
         this.field = field;
         this.fieldValues = createCollection((Class<? extends Collection>) field.getType());
@@ -36,7 +37,7 @@ class CollectionDependencyField implements DependencyField {
 
     private Class<?> actualTypeParameter(Field field) {
         if (!ParameterizedType.class.isInstance(field.getGenericType())) {
-            throw new AppContextException(field + ": collection-dependecy-fields must have genreriy type parameter");
+            throw new AppContextException(field + ": collection-dependency-fields must have generic type parameter");
         }
         ParameterizedType collType = (ParameterizedType) field.getGenericType();
         return (Class<?>) collType.getActualTypeArguments()[0];

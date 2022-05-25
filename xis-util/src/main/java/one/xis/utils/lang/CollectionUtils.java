@@ -4,8 +4,10 @@ import lombok.experimental.UtilityClass;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 @UtilityClass
 public class CollectionUtils {
@@ -31,5 +33,14 @@ public class CollectionUtils {
         }
         return first(coll);
     }
+
+    public <T> List<T> elementsOfClass(Collection<Object> coll, Class<T> clazz) {
+        return coll.stream().filter(clazz::isInstance).map(clazz::cast).collect(Collectors.toList());
+    }
+
+    public <T> T elementOfClass(Collection<Object> coll, Class<T> clazz) {
+        return coll.stream().filter(clazz::isInstance).map(clazz::cast).collect(CollectorUtils.onlyElement());
+    }
+
 
 }
