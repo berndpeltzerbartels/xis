@@ -12,6 +12,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Creates a singleton. Each singelton-type has an instance of {@link Instantitor}.
+ */
 @RequiredArgsConstructor
 class Instantitor {
     @Getter

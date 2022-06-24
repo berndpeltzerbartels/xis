@@ -17,6 +17,11 @@ class ArrayParameter extends MultiValueParameter {
 
     @Override
     Object getValue() {
-        return Array.newInstance(getElementType(), getValues().size());
+        var arr = (Object[]) Array.newInstance(getElementType(), getValues().size());
+        var index = 0;
+        for (Object o : getValues()) {
+            arr[index++] = o;
+        }
+        return arr;
     }
 }

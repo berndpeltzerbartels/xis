@@ -13,7 +13,7 @@ public class Widgets {
     private final Map<String, Resource> widgetsJavascriptById = new HashMap<>();
     private final Reflections reflections = new Reflections();
 
-    public Resource getWidgetJs(String urn) {
+    public Resource<String> getWidgetJs(String urn) {
         return widgetsJavascriptById.computeIfAbsent(urn, this::createWidgetJs);
     }
 
