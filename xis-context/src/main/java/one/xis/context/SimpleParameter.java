@@ -12,12 +12,15 @@ class SimpleParameter extends ConstructorParameter {
     private Object value;
 
     @Override
-    public boolean onComponentCreated(Object o) {
+    public void onComponentCreated(Object o) {
         if (type.isInstance(o)) {
             value = o;
-            return true;
+
         }
-        return false;
     }
 
+    @Override
+    boolean isComplete() {
+        return value != null;
+    }
 }

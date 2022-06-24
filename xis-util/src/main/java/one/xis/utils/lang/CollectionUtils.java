@@ -38,7 +38,7 @@ public class CollectionUtils {
         return coll.stream().filter(clazz::isInstance).map(clazz::cast).collect(Collectors.toList());
     }
 
-    public <T> T elementOfClass(Collection<Object> coll, Class<T> clazz) {
+    public <T> T findElementOfType(Collection<Object> coll, Class<T> clazz) {
         return coll.stream().filter(clazz::isInstance).map(clazz::cast).collect(CollectorUtils.onlyElement());
     }
 

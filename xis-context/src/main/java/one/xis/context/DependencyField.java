@@ -5,8 +5,7 @@ import lombok.SneakyThrows;
 import java.lang.reflect.Field;
 import java.util.Collection;
 
-public interface DependencyField {
-    void onComponentCreated(Object o);
+public interface DependencyField extends ComponentCreationListener {
 
     void doInjection();
 

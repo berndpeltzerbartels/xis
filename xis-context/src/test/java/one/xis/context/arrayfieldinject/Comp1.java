@@ -1,4 +1,4 @@
-package one.xis.context.arrayfield;
+package one.xis.context.arrayfieldinject;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -9,8 +9,6 @@ import one.xis.context.Inj;
 @Getter
 @RequiredArgsConstructor
 class Comp1 {
-    private final Interf1[] field1;
-
     @Inj
-    private final Interf1[] field2;
+    private Interf1[] field;
 }

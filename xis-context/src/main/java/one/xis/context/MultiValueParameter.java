@@ -25,12 +25,15 @@ abstract class MultiValueParameter extends ConstructorParameter {
     }
 
     @Override
-    public boolean onComponentCreated(Object o) {
+    public void onComponentCreated(Object o) {
         if (candidateClasses.remove(o.getClass())) { // no subtypes, here
             values.add(o);
-            return candidateClasses.isEmpty();
         }
-        return false;
+    }
+
+    @Override
+    boolean isComplete() {
+        return candidateClasses.isEmpty();
     }
 
 

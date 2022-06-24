@@ -3,8 +3,7 @@ package one.xis.context;
 import java.lang.reflect.Parameter;
 import java.util.Collection;
 
-public abstract class ConstructorParameter {
-    abstract boolean onComponentCreated(Object o);
+public abstract class ConstructorParameter implements ComponentCreationListener {
 
     static ConstructorParameter create(Parameter parameter) {
         if (parameter.getType().isArray()) {
@@ -17,4 +16,7 @@ public abstract class ConstructorParameter {
     }
 
     abstract Object getValue();
+
+
+    abstract boolean isComplete();
 }

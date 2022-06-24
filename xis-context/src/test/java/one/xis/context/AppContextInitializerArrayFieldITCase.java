@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.Set;
 
+import static one.xis.utils.lang.CollectionUtils.findElementOfType;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class AppContextInitializerArrayFieldITCase {
@@ -17,9 +18,9 @@ class AppContextInitializerArrayFieldITCase {
 
         Set<Object> singletons = initializer.getSingletons();
 
-        Comp1 comp1 = singletons.stream().filter(Comp1.class::isInstance).map(Comp1.class::cast).findFirst().orElseThrow();
-        Comp2 comp2 = singletons.stream().filter(Comp2.class::isInstance).map(Comp2.class::cast).findFirst().orElseThrow();
-        Comp3 comp3 = singletons.stream().filter(Comp3.class::isInstance).map(Comp3.class::cast).findFirst().orElseThrow();
+        Comp1 comp1 = findElementOfType(singletons, Comp1.class);
+        Comp2 comp2 = findElementOfType(singletons, Comp2.class);
+        Comp3 comp3 = findElementOfType(singletons, Comp3.class);
 
         assertThat(comp1.arr.length).isEqualTo(2);
         assertThat(Arrays.asList(comp1.arr)).contains(comp2, comp3);

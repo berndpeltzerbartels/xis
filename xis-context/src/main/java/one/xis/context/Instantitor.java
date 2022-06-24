@@ -16,29 +16,31 @@ import java.util.stream.Collectors;
 class Instantitor {
     @Getter
     private final Class<?> type;
-    private List<ConstructorParameter> parameters;
+    private List<ConstructorParameter> constructorParameters;
     private Constructor<?> constructor;
-    private int missingParameters;
+    private int missingConstructorParameters;
 
     void init() {
         constructor = getConstructor();
-        parameters = Arrays.stream(constructor.getParameters()).map(ConstructorParameter::create).collect(Collectors.toList());
+        constructorParameters = Arrays.stream(constructor.getParameters()).map(ConstructorParameter::create).collect(Collectors.toList());
+        missingConstructorParameters = constructorParameters.size();
     }
 
     void onComponentCreated(Object o) {
-        setParameters(o);
+        setConstructorParameters(o);
     }
 
-    private void setParameters(Object o) {
-        for (int i = 0; i < parameters.size(); i++) {
-            if (parameters.get(i).onComponentCreated(o)) {
-                missingParameters--;
+    private void setConstructorParameters(Object o) {
+        for (int i = 0; i < constructorParameters.size(); i++) {
+            constructorParameters.get(i).onComponentCreated(o);
+            if (constructorParameters.get(i).isComplete()) {
+                missingConstructorParameters--;
             }
         }
     }
 
     boolean isParameterCompleted() {
-        return missingParameters < 1;
+        return missingConstructorParameters < 1;
     }
 
     private Constructor<?> getConstructor() {
@@ -64,11 +66,11 @@ class Instantitor {
     }
 
     private Object[] getParameterValues() {
-        return parameters.stream().map(ConstructorParameter::getValue).toArray();
+        return constructorParameters.stream().map(ConstructorParameter::getValue).toArray();
     }
 
     void populateSingletonClasses(Set<Class<?>> singletonClasses) {
-        parameters.stream().filter(MultiValueParameter.class::isInstance)
+        constructorParameters.stream().filter(MultiValueParameter.class::isInstance)
                 .map(MultiValueParameter.class::cast)
                 .forEach(parameter -> parameter.populateSingletonClasses(singletonClasses));
     }

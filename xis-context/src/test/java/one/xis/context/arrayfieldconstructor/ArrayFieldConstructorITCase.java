@@ -1,4 +1,4 @@
-package one.xis.context.simplefield;
+package one.xis.context.arrayfieldconstructor;
 
 import one.xis.context.AppContextInitializer;
 import org.junit.jupiter.api.Test;
@@ -8,10 +8,12 @@ import java.util.Set;
 import static one.xis.utils.lang.CollectionUtils.findElementOfType;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class SimpleFieldITCase {
+class ArrayFieldConstructorITCase {
+
 
     @Test
-    void simpleFieldTest() {
+    void arrayField() {
+
         AppContextInitializer initializer = new AppContextInitializer(getClass());
         initializer.run();
 
@@ -25,9 +27,7 @@ class SimpleFieldITCase {
         assertThat(comp2).isNotNull();
         assertThat(comp3).isNotNull();
 
-        assertThat(comp1.getComp2()).isNotNull();
-        assertThat(comp2.getComp3()).isNotNull();
+        assertThat(comp1.getField()).containsExactlyInAnyOrder(comp2, comp3);
 
     }
-
 }
