@@ -2,13 +2,13 @@ package one.xis.context.arrayfieldinject;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import one.xis.context.Comp;
-import one.xis.context.Inj;
+import one.xis.context.XISComponent;
+import one.xis.context.XISInject;
 
-@Comp
+@XISComponent
 @Getter
 @RequiredArgsConstructor
 class Comp1 {
-    @Inj
+    @XISInject
     private Interf1[] field;
 }

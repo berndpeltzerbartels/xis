@@ -1,23 +1,26 @@
 package one.xis.widget;
 
-import one.xis.context.Comp;
+import lombok.RequiredArgsConstructor;
+import one.xis.context.XISComponent;
+import one.xis.resource.InMemoryResource;
 import one.xis.resource.Resource;
-import org.reflections.Reflections;
 
 import java.util.HashMap;
 import java.util.Map;
 
-@Comp
+@XISComponent
+@RequiredArgsConstructor
 public class Widgets {
 
-    private final Map<String, Resource> widgetsJavascriptById = new HashMap<>();
-    private final Reflections reflections = new Reflections();
+    private final WidgetCompiler widgetCompiler;
 
-    public Resource<String> getWidgetJs(String urn) {
-        return widgetsJavascriptById.computeIfAbsent(urn, this::createWidgetJs);
+    private final Map<String, Resource> widgets = new HashMap<>();
+
+    public Resource getWidgetJs(String widgetClass) {
+        return widgets.computeIfAbsent(widgetClass, this::createWidgetJs);
     }
 
-    private Resource<String> createWidgetJs(String urn) {
-        return null;
+    private Resource createWidgetJs(String widgetClass) {
+        return new InMemoryResource(widgetCompiler.compile(widgetClass), " text/javascript;charset=UTF-8", System.currentTimeMillis());
     }
 }

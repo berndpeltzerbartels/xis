@@ -1,7 +1,7 @@
 package one.xis.context.arrayfieldconstructor;
 
-import one.xis.context.Comp;
+import one.xis.context.XISComponent;
 
-@Comp
+@XISComponent
 class Comp2 implements Interf1 {
 }

@@ -6,7 +6,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface Comp {
-    Priority priority() default Priority.DEFAULT;
+@Target(ElementType.METHOD)
+public @interface XISInit {
 }

@@ -23,7 +23,7 @@ class Instantiation {
     }
 
     private Set<Instantitor> createInstantiators(AppReflection reflections) {
-        return reflections.getTypesAnnotatedWith(Comp.class).stream()//
+        return reflections.getTypesAnnotatedWith(XISComponent.class).stream()//
                 .map(this::createInstantiator)//
                 .collect(Collectors.toSet());
     }

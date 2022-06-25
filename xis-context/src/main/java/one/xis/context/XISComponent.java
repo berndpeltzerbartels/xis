@@ -6,6 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.FIELD)
-public @interface Inj {
+@Target(ElementType.TYPE)
+public @interface XISComponent {
+    Priority priority() default Priority.DEFAULT;
 }

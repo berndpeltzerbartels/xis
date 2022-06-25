@@ -33,19 +33,19 @@ class AppContextInitializerArrayFieldITCase {
     }
 
 
-    @Comp
+    @XISComponent
     static class Comp1 {
 
-        @Inj
+        @XISInject
         Interf1[] arr;
     }
 
-    @Comp
+    @XISComponent
     static class Comp2 implements Interf1 {
 
     }
 
-    @Comp
+    @XISComponent
     static class Comp3 implements Interf1 {
 
     }

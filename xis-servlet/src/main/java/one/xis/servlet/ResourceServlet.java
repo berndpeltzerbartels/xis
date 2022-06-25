@@ -9,7 +9,8 @@ import java.io.IOException;
 
 public abstract class ResourceServlet extends HttpServlet {
 
-    protected void serviceResource(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    @Override
+    protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
         Resource resource = getResource(request);
         long ifModifiedSince = request.getDateHeader("If-Modified-Since");
         String ifNoneMatch = request.getHeader("If-None-Match");

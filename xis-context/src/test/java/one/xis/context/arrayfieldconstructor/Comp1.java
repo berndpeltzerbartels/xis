@@ -2,9 +2,9 @@ package one.xis.context.arrayfieldconstructor;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import one.xis.context.Comp;
+import one.xis.context.XISComponent;
 
-@Comp
+@XISComponent
 @Getter
 @RequiredArgsConstructor
 class Comp1 {

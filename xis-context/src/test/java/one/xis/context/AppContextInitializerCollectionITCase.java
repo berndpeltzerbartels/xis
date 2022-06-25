@@ -32,19 +32,19 @@ class AppContextInitializerCollectionITCase {
     }
 
 
-    @Comp
+    @XISComponent
     static class Comp1 {
 
-        @Inj
+        @XISInject
         LinkedList<Interf1> linkedList;
     }
 
-    @Comp
+    @XISComponent
     static class Comp2 implements Interf1 {
 
     }
 
-    @Comp
+    @XISComponent
     static class Comp3 implements Interf1 {
 
     }

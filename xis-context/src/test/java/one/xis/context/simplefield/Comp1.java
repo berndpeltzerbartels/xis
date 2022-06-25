@@ -2,12 +2,12 @@ package one.xis.context.simplefield;
 
 
 import lombok.Getter;
-import one.xis.context.Comp;
-import one.xis.context.Inj;
+import one.xis.context.XISComponent;
+import one.xis.context.XISInject;
 
-@Comp
+@XISComponent
 @Getter
 class Comp1 {
-    @Inj
+    @XISInject
     private Comp2 comp2;
 }

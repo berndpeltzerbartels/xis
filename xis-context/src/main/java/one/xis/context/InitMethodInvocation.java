@@ -22,7 +22,7 @@ class InitMethodInvocation {
 
     private void findInitMethods(Class<?> c) {
         Arrays.stream(c.getDeclaredMethods())
-                .filter(m -> m.isAnnotationPresent(Init.class))
+                .filter(m -> m.isAnnotationPresent(XISInit.class))
                 .map(InitMethodInvoker::new).forEach(invokers::add);
     }
 }
