@@ -1,12 +1,10 @@
 package one.xis.resource;
 
-public interface Resource {
+public interface ResourceFile {
 
     int getLenght();
 
     String getContent();
-
-    String getContentType();
 
     long getLastModified();
 }
