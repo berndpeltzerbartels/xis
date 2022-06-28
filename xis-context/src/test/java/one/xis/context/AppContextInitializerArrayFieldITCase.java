@@ -14,7 +14,7 @@ class AppContextInitializerArrayFieldITCase {
     @Test
     void arrayField() {
         AppContextInitializer initializer = new AppContextInitializer(new TestReflection(Comp1.class, Comp2.class, Comp3.class));
-        initializer.run();
+        initializer.initializeContext();
 
         Set<Object> singletons = initializer.getSingletons();
 

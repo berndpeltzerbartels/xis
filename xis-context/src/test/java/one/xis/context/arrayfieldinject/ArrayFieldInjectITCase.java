@@ -15,7 +15,7 @@ class ArrayFieldInjectITCase {
     void arrayField() {
 
         AppContextInitializer initializer = new AppContextInitializer(getClass());
-        initializer.run();
+        initializer.initializeContext();
 
         Set<Object> singletons = initializer.getSingletons();
 

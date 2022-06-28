@@ -6,8 +6,26 @@ import java.net.URI;
 
 public class Test {
 
+    static void test(Object lock) {
+        System.out.println("run: " + lock);
+        synchronized (lock) {
+            try {
+                Thread.sleep(5000L);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        System.out.println("ready: " + lock);
+
+    }
+
     public static void main(String[] args) throws Exception {
-        new Resource(args[0]);
+        Object lock1 = "1";
+        Object lock2 = "2";
+        new Thread(() -> test(lock1)).start();
+        new Thread(() -> test(lock1)).start();
+        new Thread(() -> test(lock2)).start();
+        // new Resource(args[0]);
     }
 
     static class Resource {

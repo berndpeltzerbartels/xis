@@ -4,7 +4,7 @@ import lombok.Getter;
 
 import java.util.Set;
 
-public class AppContextInitializer implements Runnable {
+public class AppContextInitializer {
 
     private final AppReflection reflections;
 
@@ -23,8 +23,7 @@ public class AppContextInitializer implements Runnable {
     @Getter
     private Set<Object> singletons;
 
-    @Override
-    public void run() {
+    public void initializeContext() {
         FieldInjection fieldInjection = new FieldInjection(reflections);
         InitMethodInvocation initInvokers = new InitMethodInvocation();
         Instantiation instantiation = new Instantiation(fieldInjection, initInvokers, reflections);

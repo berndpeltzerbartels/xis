@@ -1,6 +1,6 @@
 package one.xis.spring;
 
-import one.xis.context.AppContextInitializer;
+import one.xis.context.AppContext;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -10,7 +10,6 @@ class SpringContextAdapter {
 
     @PostConstruct
     void init() {
-        AppContextInitializer initializer = new AppContextInitializer("one.xis");
-        new Thread(initializer).start();
+        AppContext.getInstance("one.xis");
     }
 }
