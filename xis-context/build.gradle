@@ -12,6 +12,7 @@ repositories {
 dependencies {
 
     implementation project(':xis-util')
+
     implementation group: 'org.reflections', name: 'reflections', version: '0.9.10'
 
     annotationProcessor 'org.projectlombok:lombok:1.18.12'
@@ -22,6 +23,8 @@ dependencies {
     testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.16.1'
 
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+
+    testImplementation project(':xis-context-test')
 }
 
 test {

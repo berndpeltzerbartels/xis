@@ -13,11 +13,6 @@ public class TestContextInitializer {
     @Getter
     private Set<Object> singletons;
 
-    public TestContextInitializer(Collection<Object> mocks, Class<?>... singletonClasses) {
-        reflections = new TestReflection(singletonClasses);
-        this.mocks = mocks;
-    }
-
     public TestContextInitializer(Collection<Object> mocks, Set<Class<?>> singletonClasses) {
         reflections = new TestReflection(singletonClasses);
         this.mocks = mocks;

@@ -1,6 +1,11 @@
 package one.xis.context;
 
+import org.reflections.Reflections;
+import org.reflections.scanners.SubTypesScanner;
+import org.reflections.scanners.TypeAnnotationsScanner;
+
 import java.lang.annotation.Annotation;
+import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -9,20 +14,18 @@ import java.util.stream.Stream;
 class TestReflection implements AppReflection {
 
     private final Set<Class<?>> classes;
-    private final Set<Class<? extends Annotation>> annotationClasses = new HashSet<>();
+    private final Set<Class<? extends Annotation>> annotationClasses;
+
+    @SuppressWarnings("unchecked")
+    TestReflection(Set<Class<?>> classes) {
+        this.classes = classes;
+        this.annotationClasses = new Reflections("one.xis", new TypeAnnotationsScanner(), new SubTypesScanner()).getTypesAnnotatedWith(Target.class).stream()
+                .filter(Class::isAnnotation)
+                .map(c -> (Class<? extends Annotation>) c).collect(Collectors.toSet());
+    }
 
     TestReflection(Class<?>... classes) {
         this(Arrays.stream(classes).collect(Collectors.toSet()));
-    }
-
-    TestReflection(Set<Class<?>> classes) {
-        this.classes = classes;
-        this.annotationClasses.addAll(classes.stream()//
-                .map(Class::getAnnotations)
-                .flatMap(Arrays::stream)//
-                .map(Annotation::annotationType)//
-                .collect(Collectors.toSet()));
-
     }
 
     @Override
@@ -34,11 +37,11 @@ class TestReflection implements AppReflection {
 
     @Override
     public Set<Class<?>> getTypesAnnotatedWith(Class<? extends Annotation> annotation) {
-        Set<Class<? extends Annotation>> annotations = getAllAnnotations(annotation);
+        Set<Class<? extends Annotation>> annotations = getPrimaryAndSecondaryAnnotations(annotation);
         return classes.stream().filter(c -> isAnnotatedWithAtLeastOne(c, annotations)).collect(Collectors.toSet());
     }
 
-    private Set<Class<? extends Annotation>> getAllAnnotations(Class<? extends Annotation> primaryAnnotation) {
+    private Set<Class<? extends Annotation>> getPrimaryAndSecondaryAnnotations(Class<? extends Annotation> primaryAnnotation) {
         Set<Class<? extends Annotation>> annotations = new HashSet<>(getAnnotatedAnnotations(primaryAnnotation));
         annotations.add(primaryAnnotation);
         return Collections.unmodifiableSet(annotations);

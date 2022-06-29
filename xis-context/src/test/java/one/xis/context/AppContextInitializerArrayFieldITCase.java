@@ -11,7 +11,7 @@ class AppContextInitializerArrayFieldITCase {
 
     @Test
     void arrayField() {
-        AppContext appContext = TestContextFactory.create(Comp1.class, Comp2.class, Comp3.class);
+        TestContext appContext = TestContext.builder().withSingletons(Comp1.class, Comp2.class, Comp3.class).build();
 
         Comp1 comp1 = appContext.getSingleton(Comp1.class);
         Comp2 comp2 = appContext.getSingleton(Comp2.class);
