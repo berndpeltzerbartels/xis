@@ -10,7 +10,7 @@ class FieldInjection {
     private final Set<DependencyField> dependencyFields;
 
     FieldInjection(AppReflection reflections) {
-        dependencyFields = reflections.getFieldsAnnotatedWith(XISInject.class).stream().map(DependencyField::getWrapperInstance).collect(Collectors.toSet());
+        dependencyFields = reflections.getFieldsAnnotatedWith(XISInject.class).stream().map(DependencyField::getInstanceForField).collect(Collectors.toSet());
     }
 
     void onComponentCreated(Object o) {

@@ -1,23 +1,24 @@
 package one.xis.context;
 
-import lombok.RequiredArgsConstructor;
-
 import java.lang.reflect.Field;
 import java.util.HashSet;
 import java.util.Set;
 
-@RequiredArgsConstructor
-class SimpleDependencyField implements DependencyField {
+
+class SimpleDependencyField extends DependencyField {
     private final Set<Object> owners = new HashSet<>();
     private Object fieldValue;
-    private final Field field;
+
+    SimpleDependencyField(Field field) {
+        super(field, field.getType());
+    }
 
     @Override
     public void onComponentCreated(Object o) {
         if (field.getDeclaringClass().isInstance(o)) {
             owners.add(o);
         }
-        if (field.getType().isInstance(o)) {
+        if (isMatchingFieldValue(o)) {
             if (fieldValue != null) {
                 throw new AppContextException("ambigious candidates for " + field);
             }

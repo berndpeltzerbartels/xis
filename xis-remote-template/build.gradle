@@ -18,6 +18,7 @@ dependencies {
 
     implementation 'org.projectlombok:lombok:1.18.12'
     implementation project(':xis-util')
+    implementation project(':xis-context')
 
     implementation group: 'com.squareup', name: 'javapoet', version: '1.12.1'
 

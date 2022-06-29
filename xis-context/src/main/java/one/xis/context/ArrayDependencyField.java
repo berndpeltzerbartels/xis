@@ -7,19 +7,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-class ArrayDependencyField implements DependencyField {
+class ArrayDependencyField extends DependencyField {
     private final Set<Object> owners = new HashSet<>();
     private final List<Object> fieldValues;
-    private final Class<?> elementType;
-    private final Field field;
 
     ArrayDependencyField(Field field) {
-        this.field = field;
+        super(field, elementType(field));
         this.fieldValues = new ArrayList<>();
-        elementType = elementType(field);
     }
 
-    Class<?> elementType(Field field) {
+    private static Class<?> elementType(Field field) {
         return field.getType().getComponentType();
     }
 
@@ -28,7 +25,7 @@ class ArrayDependencyField implements DependencyField {
         if (field.getDeclaringClass().isInstance(o)) {
             owners.add(o);
         }
-        if (elementType.isInstance(o)) {
+        if (isMatchingFieldValue(o)) {
             fieldValues.add(o);
         }
     }

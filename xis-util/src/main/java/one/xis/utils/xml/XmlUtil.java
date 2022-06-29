@@ -22,6 +22,10 @@ public class XmlUtil {
         return new XmlLoader().loadDocument(file);
     }
 
+    public Document loadDocument(String xml) throws IOException, SAXException {
+        return new XmlLoader().loadDocument(xml);
+    }
+
     public Document loadDocument(InputStream in) throws IOException, SAXException {
         try {
             return new XmlLoader().loadDocument(in);

@@ -2,22 +2,17 @@ package one.xis.context;
 
 import lombok.SneakyThrows;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.*;
 import java.util.*;
 
-class CollectionDependencyField implements DependencyField {
+class CollectionDependencyField extends DependencyField {
     private final Set<Object> owners = new HashSet<>();
     private final Collection<Object> fieldValues;
-    private final Class<?> elementType;
-    private final Field field;
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     CollectionDependencyField(Field field) {
-        this.field = field;
+        super(field, actualTypeParameter(field));
         this.fieldValues = createCollection((Class<? extends Collection>) field.getType());
-        elementType = actualTypeParameter(field);
     }
 
     @SneakyThrows
@@ -35,12 +30,21 @@ class CollectionDependencyField implements DependencyField {
         throw new AppContextException("unsupported field type: " + collType);
     }
 
-    private Class<?> actualTypeParameter(Field field) {
-        if (!ParameterizedType.class.isInstance(field.getGenericType())) {
+    private static Class<?> actualTypeParameter(Field field) {
+        if (!(field.getGenericType() instanceof ParameterizedType)) {
             throw new AppContextException(field + ": collection-dependency-fields must have generic type parameter");
         }
         ParameterizedType collType = (ParameterizedType) field.getGenericType();
-        return (Class<?>) collType.getActualTypeArguments()[0];
+        Type actualType = collType.getActualTypeArguments()[0];
+        if (actualType instanceof WildcardType) {
+            // TODO this will not always work
+            WildcardType wildcardType = (WildcardType) actualType;
+            return (Class<?>) wildcardType.getUpperBounds()[0];
+
+        } else if (actualType instanceof Class) {
+            return (Class<?>) collType.getActualTypeArguments()[0];
+        }
+        throw new IllegalStateException(); // should never happen
     }
 
     @Override
@@ -48,7 +52,7 @@ class CollectionDependencyField implements DependencyField {
         if (field.getDeclaringClass().isInstance(o)) {
             owners.add(o);
         }
-        if (elementType.isInstance(o)) {
+        if (isMatchingFieldValue(o)) {
             fieldValues.add(o);
         }
     }

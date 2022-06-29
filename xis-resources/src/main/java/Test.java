@@ -23,8 +23,9 @@ public class Test {
         Object lock1 = "1";
         Object lock2 = "2";
         new Thread(() -> test(lock1)).start();
-        new Thread(() -> test(lock1)).start();
         new Thread(() -> test(lock2)).start();
+        new Thread(() -> test(lock1)).start();
+
         // new Resource(args[0]);
     }
 

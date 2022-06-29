@@ -1,4 +1,4 @@
-package one.xis.context.arrayfieldconstructor;
+package one.xis.context.collectionfieldinject;
 
 import one.xis.context.XISComponent;
 

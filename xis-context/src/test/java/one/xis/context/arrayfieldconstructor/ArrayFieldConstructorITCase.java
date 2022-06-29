@@ -19,15 +19,15 @@ class ArrayFieldConstructorITCase {
 
         Set<Object> singletons = initializer.getSingletons();
 
-        Comp1 comp1 = findElementOfType(singletons, Comp1.class);
+        ComponentWithArrayField componentWithArrayField = findElementOfType(singletons, ComponentWithArrayField.class);
         Comp2 comp2 = findElementOfType(singletons, Comp2.class);
-        Comp3 comp3 = findElementOfType(singletons, Comp3.class);
+        Comp1 comp1 = findElementOfType(singletons, Comp1.class);
 
-        assertThat(comp1).isNotNull();
+        assertThat(componentWithArrayField).isNotNull();
         assertThat(comp2).isNotNull();
-        assertThat(comp3).isNotNull();
+        assertThat(comp1).isNotNull();
 
-        assertThat(comp1.getField()).containsExactlyInAnyOrder(comp2, comp3);
+        assertThat(componentWithArrayField.getField()).containsExactlyInAnyOrder(comp2, comp1);
 
     }
 }

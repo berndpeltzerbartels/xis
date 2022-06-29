@@ -1,13 +1,16 @@
 package one.xis.template;
 
 
+import one.xis.context.XISComponent;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class ExpressionParser {
+@XISComponent
+public class ExpressionParser { // TODO must this be public ?
 
     private static final Pattern PATTERN_WITH_FKT = Pattern.compile("([\\w]+)\\(([^\\)]*)\\)");
 

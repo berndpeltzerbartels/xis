@@ -1,5 +1,7 @@
 package one.xis.template;
 
+import lombok.RequiredArgsConstructor;
+import one.xis.context.XISComponent;
 import one.xis.utils.lang.StringUtils;
 import one.xis.utils.xml.XmlUtil;
 import org.w3c.dom.Document;
@@ -15,9 +17,12 @@ import java.util.stream.Stream;
 import static one.xis.utils.xml.XmlUtil.getAttributes;
 import static one.xis.utils.xml.XmlUtil.getChildNodes;
 
+@XISComponent
+@RequiredArgsConstructor
 public class TemplateParser {
 
-    private final ExpressionParser expressionParser = new ExpressionParser();
+    private final ExpressionParser expressionParser;
+    
     private int varIndex = 0;
     static final String ATTR_IF = "data-if";
     static final String ATTR_FOR = "data-for";

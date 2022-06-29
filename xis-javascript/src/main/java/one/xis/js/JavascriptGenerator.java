@@ -1,5 +1,6 @@
 package one.xis.js;
 
+import one.xis.template.ExpressionParser;
 import one.xis.template.PageModel;
 import one.xis.template.TemplateParser;
 import one.xis.template.WidgetModel;
@@ -18,7 +19,7 @@ class JavascriptGenerator {
     private static final String WIDGET_INFO_PATH = "META-INF/xis/widgets";
     private static final String PAGES_INFO_PATH = "META-INF/xis/pages";
 
-    private final TemplateParser templateParser = new TemplateParser();
+    private final TemplateParser templateParser = new TemplateParser(new ExpressionParser());
     private final JavascriptParser javascriptParser = new JavascriptParser();
 
     String generateJavascript() {
