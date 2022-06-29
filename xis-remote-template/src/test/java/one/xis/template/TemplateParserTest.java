@@ -20,8 +20,6 @@ import static org.mockito.Mockito.when;
 
 class TemplateParserTest {
 
-    private final TemplateParser parser = new TemplateParser();
-
     @Nested
     class SimpleElementTest {
         private Document document;
@@ -35,7 +33,7 @@ class TemplateParserTest {
 
         @Test
         void parse() {
-            WidgetModel widgetModel = new TemplateParser().parseWidget(document, "123");
+            WidgetModel widgetModel = new TemplateParser(new ExpressionParser()).parseWidget(document, "123");
 
             TemplateElement element = (TemplateElement) widgetModel.getRootNode();
             assertThat(element.getElementName()).isEqualTo("div");
@@ -47,6 +45,7 @@ class TemplateParserTest {
     @Nested
     class ElementWithControlsTest {
         private Document document;
+        private final TemplateParser parser = new TemplateParser(new ExpressionParser());
 
         @BeforeEach
         void init() {
@@ -57,7 +56,7 @@ class TemplateParserTest {
 
         @Test
         void parse() {
-            WidgetModel widgetModel = new TemplateParser().parseWidget(document, "123");
+            WidgetModel widgetModel = new TemplateParser(new ExpressionParser()).parseWidget(document, "123");
 
             assertThat(widgetModel.getRootNode()).isInstanceOf(IfBlock.class);
             IfBlock ifBlock = (IfBlock) widgetModel.getRootNode();
@@ -75,6 +74,7 @@ class TemplateParserTest {
     class ParseTemplate1 {
 
         private Document document;
+        private final TemplateParser parser = new TemplateParser(new ExpressionParser());
 
         @BeforeEach
         void prepareDocument() throws IOException, SAXException {
@@ -115,6 +115,7 @@ class TemplateParserTest {
     class ParseTemplate2 {
 
         private Document document;
+        private final TemplateParser parser = new TemplateParser(new ExpressionParser());
 
         @BeforeEach
         void prepareDocument() throws IOException, SAXException {

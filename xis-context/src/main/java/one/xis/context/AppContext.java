@@ -1,6 +1,7 @@
 package one.xis.context;
 
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import one.xis.utils.lang.CollectorUtils;
@@ -11,7 +12,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class AppContext {
 
-    private final Collection<Object> singeltons;
+    @Getter
+    private final Collection<Object> singletons;
     private static final Map<AppContextKey, AppContext> CONTEXT_MAP = new ConcurrentHashMap<>();
 
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
@@ -23,7 +25,7 @@ public class AppContext {
     }
 
     public <T> T getSingleton(Class<T> type) {
-        return singeltons.stream().filter(type::isInstance).map(type::cast).collect(CollectorUtils.onlyElement());
+        return singletons.stream().filter(type::isInstance).map(type::cast).collect(CollectorUtils.onlyElement());
     }
 
     @ToString
@@ -39,9 +41,10 @@ public class AppContext {
 
     }
 
-    private AppContext(String packageName) {
+    AppContext(String packageName) {
         AppContextInitializer initializer = new AppContextInitializer(packageName);
         initializer.initializeContext();
-        singeltons = initializer.getSingletons();
+        singletons = initializer.getSingletons();
     }
+
 }

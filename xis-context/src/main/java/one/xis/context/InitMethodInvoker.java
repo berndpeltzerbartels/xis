@@ -24,6 +24,7 @@ class InitMethodInvoker {
 
     private void invoke(Object owner) {
         try {
+            method.setAccessible(true);
             method.invoke(owner);
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new AppContextException(e);

@@ -13,10 +13,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Creates a singleton. Each singelton-type has an instance of {@link Instantitor}.
+ * Instantiates a singleton. Each singelton-type has an instance of {@link SingtelonInstantitor}.
  */
 @RequiredArgsConstructor
-class Instantitor {
+class SingtelonInstantitor {
     @Getter
     private final Class<?> type;
     private List<ConstructorParameter> constructorParameters;
@@ -34,10 +34,12 @@ class Instantitor {
     }
 
     private void setConstructorParameters(Object o) {
-        for (int i = 0; i < constructorParameters.size(); i++) {
-            constructorParameters.get(i).onComponentCreated(o);
-            if (constructorParameters.get(i).isComplete()) {
-                missingConstructorParameters--;
+        for (ConstructorParameter constructorParameter : constructorParameters) {
+            if (!constructorParameter.isComplete()) {
+                constructorParameter.onComponentCreated(o);
+                if (constructorParameter.isComplete()) {
+                    missingConstructorParameters--;
+                }
             }
         }
     }
@@ -72,9 +74,9 @@ class Instantitor {
         return constructorParameters.stream().map(ConstructorParameter::getValue).toArray();
     }
 
-    void populateSingletonClasses(Set<Class<?>> singletonClasses) {
+    void registerSingletonClasses(Set<Class<?>> singletonClasses) {
         constructorParameters.stream().filter(MultiValueParameter.class::isInstance)
                 .map(MultiValueParameter.class::cast)
-                .forEach(parameter -> parameter.populateSingletonClasses(singletonClasses));
+                .forEach(parameter -> parameter.registerSingletonClasses(singletonClasses));
     }
 }

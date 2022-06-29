@@ -20,7 +20,7 @@ abstract class MultiValueParameter extends ConstructorParameter {
         this.elementType = findElementType(parameter);
     }
 
-    void populateSingletonClasses(Collection<Class<?>> allSingeltonClasses) {
+    void registerSingletonClasses(Collection<Class<?>> allSingeltonClasses) {
         candidateClasses = allSingeltonClasses.stream().filter(elementType::isAssignableFrom).collect(Collectors.toSet());
     }
 

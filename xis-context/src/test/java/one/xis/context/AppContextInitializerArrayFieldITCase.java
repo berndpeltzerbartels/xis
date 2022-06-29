@@ -3,9 +3,7 @@ package one.xis.context;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
-import java.util.Set;
 
-import static one.xis.utils.lang.CollectionUtils.findElementOfType;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class AppContextInitializerArrayFieldITCase {
@@ -13,14 +11,11 @@ class AppContextInitializerArrayFieldITCase {
 
     @Test
     void arrayField() {
-        AppContextInitializer initializer = new AppContextInitializer(new TestReflection(Comp1.class, Comp2.class, Comp3.class));
-        initializer.initializeContext();
+        AppContext appContext = TestContextFactory.create(Comp1.class, Comp2.class, Comp3.class);
 
-        Set<Object> singletons = initializer.getSingletons();
-
-        Comp1 comp1 = findElementOfType(singletons, Comp1.class);
-        Comp2 comp2 = findElementOfType(singletons, Comp2.class);
-        Comp3 comp3 = findElementOfType(singletons, Comp3.class);
+        Comp1 comp1 = appContext.getSingleton(Comp1.class);
+        Comp2 comp2 = appContext.getSingleton(Comp2.class);
+        Comp3 comp3 = appContext.getSingleton(Comp3.class);
 
         assertThat(comp1.arr.length).isEqualTo(2);
         assertThat(Arrays.asList(comp1.arr)).contains(comp2, comp3);
