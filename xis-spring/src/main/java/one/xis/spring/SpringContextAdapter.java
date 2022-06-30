@@ -1,44 +1,43 @@
 package one.xis.spring;
 
+import one.xis.Page;
 import one.xis.Widget;
 import one.xis.context.AppContext;
 import one.xis.widget.Widgets;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.util.Collection;
 
 @Component
-class SpringContextAdapter {
+class SpringContextAdapter implements BeanPostProcessor {
 
-    @Widget
-    private Collection<Object> widgetControllers;
+    private Widgets widgets;
 
     @PostConstruct
     void init() {
-        AppContext appContext = getXISAppContext();
-        initWidgets(appContext);
+        AppContext appContext = getAppContext();
+        widgets = appContext.getSingleton(Widgets.class);
     }
 
-    private void initWidgets(AppContext appContext) {
-        Widgets widgets = getWidgets(appContext);
-        registerWidgets(widgets);
-    }
-
-    private void registerWidgets(Widgets widgets) {
-        widgetControllers.forEach(controller -> widgets.addWidget(getWidgetId(controller), controller));
-    }
-
-    private Widgets getWidgets(AppContext appContext) {
-        return appContext.getSingleton(Widgets.class);
-    }
-
-    private AppContext getXISAppContext() {
+    private AppContext getAppContext() {
         return AppContext.getInstance("one.xis");
     }
 
     private String getWidgetId(Object widgetController) {
         String annoValue = widgetController.getClass().getAnnotation(Widget.class).value();
         return annoValue.isEmpty() ? widgetController.getClass().getName() : annoValue;
+    }
+
+    @Override
+    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+        if (bean.getClass().isAnnotationPresent(Widget.class)) {
+            widgets.addWidget(getWidgetId(bean), bean);
+        }
+        if (bean.getClass().isAnnotationPresent(Page.class)) {
+            //widgets.addWidget(getWidgetId(bean), bean);
+        }
+        return bean;
     }
 }
