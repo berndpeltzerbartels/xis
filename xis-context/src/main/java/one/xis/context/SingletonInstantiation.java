@@ -3,6 +3,7 @@ package one.xis.context;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -14,12 +15,12 @@ class SingletonInstantiation {
     private final FieldInjection fieldInjection;
     private final InitMethodInvocation initMethodInvocation;
     private final AppReflection reflections;
+    protected final Collection<Object> additionalSingeltons;
 
     @Getter
     private final Set<Object> singletons = new HashSet<>();
 
-
-    void init() {
+    void initInstantiation() {
         this.instantitors = createInstantiators(reflections);
         populateSingletonClasses();
     }
@@ -32,12 +33,17 @@ class SingletonInstantiation {
     }
 
     private void populateSingletonClasses() {
-        Set<Class<?>> singletonClasses = getSingletonClasses();
+        Set<Class<?>> singletonClasses = new HashSet<>(getSingletonClasses());
+        singletonClasses.addAll(getAdditionalSingletonClasses());
         instantitors.forEach(instantitor -> instantitor.registerSingletonClasses(singletonClasses));
     }
 
     protected Set<Class<?>> getSingletonClasses() {
         return instantitors.stream().map(SingtelonInstantitor::getType).collect(Collectors.toSet());
+    }
+
+    protected Set<Class<?>> getAdditionalSingletonClasses() {
+        return additionalSingeltons.stream().map(Object::getClass).collect(Collectors.toSet());
     }
 
     private SingtelonInstantitor createInstantiator(Class<?> aClass) {
@@ -52,10 +58,10 @@ class SingletonInstantiation {
 
     private void createInstance(SingtelonInstantitor instantitor) {
         instantitors.remove(instantitor);
-        onComponentCreated(instantitor.createInstance());
+        populateComponent(instantitor.createInstance());
     }
 
-    void onComponentCreated(Object o) {
+    private void populateComponent(Object o) {
         singletons.add(o);
         fieldInjection.onComponentCreated(o);
         initMethodInvocation.onComponentCreated(o);
@@ -70,5 +76,9 @@ class SingletonInstantiation {
                     .map(Class::getName)//
                     .collect(Collectors.joining(", ")));
         }
+    }
+
+    void populateAddionalSingletons() {
+        additionalSingeltons.forEach(this::populateComponent);
     }
 }

@@ -2,6 +2,7 @@ package one.xis.widget;
 
 import one.xis.context.TestContext;
 import one.xis.resource.ReloadableResourceFile;
+import one.xis.resource.ResourceFiles;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -14,38 +15,31 @@ class WidgetsTest {
     private Widgets widgets;
     private WidgetCompiler widgetCompiler;
     private WidgetFactory widgetFactory;
-    private TestContext testContext;
     private ReloadableResourceFile resourceFile;
 
-    private static final String WIDGET_ID = TestController.class.getName();
-
-    @one.xis.Widget
-    static class TestController {
-
-    }
+    private static final String WIDGET_ID = "xyz";
 
 
     @BeforeEach
     void init() {
-        widgetFactory = mock(WidgetFactory.class);
+        Object widgetController = new Object();
+
+        ResourceFiles resourceFiles = mock(ResourceFiles.class);
+        widgetFactory = new WidgetFactory(resourceFiles);
         widgetCompiler = mock(WidgetCompiler.class);
         resourceFile = mock(ReloadableResourceFile.class);
 
-        Widget widget = mock(Widget.class);
-        when(widget.getId()).thenReturn(WIDGET_ID);
-
+        when(resourceFiles.getByPath(any())).thenReturn(resourceFile);
         when(resourceFile.getContent()).thenReturn("");
-        when(widgetFactory.createWidget(any())).thenReturn(widget);
 
-
-        testContext = TestContext.builder()//
+        TestContext testContext = TestContext.builder()//
                 .withSingleton(Widgets.class)//
-                .withSingleton(TestController.class)//
                 .withMockedSingleton(widgetFactory)//
                 .withMockedSingletons(widgetCompiler)//
                 .build();
 
         widgets = testContext.getSingleton(Widgets.class);
+        widgets.addWidget(WIDGET_ID, widgetController);
     }
 
     @Nested
@@ -62,38 +56,24 @@ class WidgetsTest {
 
             assertThat(widget).isNotNull();
             verify(widgetCompiler, times(1)).compile(any());
-            verify(widgetFactory, times(1)).createWidget(any());
-
         }
     }
 
 
     @Nested
-    class DoNotRecreateWidget {
+    class RecompileWidget {
+
         @BeforeEach
         void init() {
-
+            when(resourceFile.isObsolete()).thenReturn(true);
         }
 
         @Test
         void getWidget() {
+            Widget widget = widgets.getWidget(WIDGET_ID);
 
-        }
-    }
-
-
-    @Nested
-    class ReloadWidget {
-
-        @BeforeEach
-        void init() {
-
-
-        }
-
-        @Test
-        void getWidget() {
-
+            assertThat(widget).isNotNull();
+            verify(widgetCompiler, times(2)).compile(any());
         }
     }
 }

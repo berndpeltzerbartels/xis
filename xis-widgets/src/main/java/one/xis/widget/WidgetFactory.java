@@ -1,6 +1,7 @@
 package one.xis.widget;
 
 
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
 import one.xis.resource.ResourceFile;
@@ -12,7 +13,7 @@ class WidgetFactory {
 
     private final ResourceFiles resourceFiles;
 
-    Widget createWidget(Object widgetController) {
+    Widget createWidget(@NonNull Object widgetController) {
         return new Widget(widgetController, getHtmlTemplateResource(widgetController.getClass()));
     }
 

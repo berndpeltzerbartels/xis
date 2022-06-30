@@ -2,14 +2,10 @@ package one.xis.widget;
 
 import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
-import one.xis.context.XISInit;
-import one.xis.context.XISInject;
 import one.xis.resource.ReloadableResourceFile;
 
-import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @XISComponent
 @RequiredArgsConstructor
@@ -17,16 +13,10 @@ public class Widgets {
 
     private final WidgetFactory widgetFactory;
     private final WidgetCompiler widgetCompiler;
-    private Map<String, Widget> widgetMap;
+    private final Map<String, Widget> widgetMap = new HashMap<>();
 
-    @XISInject(annotatedWith = one.xis.Widget.class)
-    private Collection<Object> widgetControllers;
-
-    @XISInit
-    void createWidgets() {
-        widgetMap = widgetControllers.stream()//
-                .map(this::createWidget)//
-                .collect(Collectors.toUnmodifiableMap(Widget::getId, Function.identity()));
+    public void addWidget(String widgetId, Object widgetController) {
+        widgetMap.put(widgetId, createWidget(widgetController));
     }
 
     public Widget getWidget(String widgetId) {
