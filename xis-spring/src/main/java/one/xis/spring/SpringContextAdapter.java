@@ -3,6 +3,7 @@ package one.xis.spring;
 import one.xis.Page;
 import one.xis.Widget;
 import one.xis.context.AppContext;
+import one.xis.widget.WidgetUtil;
 import one.xis.widget.Widgets;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -26,8 +27,7 @@ class SpringContextAdapter implements BeanPostProcessor {
     }
 
     private String getWidgetId(Object widgetController) {
-        String annoValue = widgetController.getClass().getAnnotation(Widget.class).value();
-        return annoValue.isEmpty() ? widgetController.getClass().getName() : annoValue;
+        return WidgetUtil.getWidgetId(widgetController);
     }
 
     @Override

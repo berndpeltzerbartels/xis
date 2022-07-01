@@ -19,6 +19,9 @@ dependencies {
     // https://mvnrepository.com/artifact/org.reflections/reflections
     implementation group: 'org.reflections', name: 'reflections', version: '0.9.10'
 
+    // https://mvnrepository.com/artifact/jakarta.inject/jakarta.inject-api
+    implementation 'jakarta.inject:jakarta.inject-api:2.0.1'
+
     implementation 'org.projectlombok:lombok:1.18.12'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
