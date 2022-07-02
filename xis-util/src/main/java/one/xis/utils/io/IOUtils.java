@@ -72,7 +72,7 @@ public class IOUtils {
     public static PrintWriter printWriter(File file) {
         return printWriter(file, StandardCharsets.UTF_8.name());
     }
-    
+
     public static PrintWriter printWriter(File file, String charset) {
         try {
             return new PrintWriter(new OutputStreamWriter(new FileOutputStream(file), charset));
@@ -80,4 +80,6 @@ public class IOUtils {
             throw new RuntimeException(e);
         }
     }
+
+
 }

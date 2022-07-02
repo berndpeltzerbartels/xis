@@ -8,15 +8,16 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Instantiates a singleton. Each singelton-type has an instance of {@link SingtelonInstantitor}.
+ * Instantiates a singleton. Each singelton-type has an instance of {@link SingtelonInstantiator}.
  */
 @RequiredArgsConstructor
-class SingtelonInstantitor {
+class SingtelonInstantiator {
     @Getter
     private final Class<?> type;
     private List<ConstructorParameter> constructorParameters;
@@ -78,5 +79,9 @@ class SingtelonInstantitor {
         constructorParameters.stream().filter(MultiValueParameter.class::isInstance)
                 .map(MultiValueParameter.class::cast)
                 .forEach(parameter -> parameter.registerSingletonClasses(singletonClasses));
+    }
+
+    Collection<ConstructorParameter> getUnsatisfiedConstructorParameters() {
+        return constructorParameters.stream().filter(constructorParameter -> !constructorParameter.isComplete()).collect(Collectors.toSet());
     }
 }

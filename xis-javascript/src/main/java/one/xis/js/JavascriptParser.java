@@ -21,8 +21,8 @@ public class JavascriptParser {
     private static long currentNameId = 1;
     private final Collection<JSClass> classes = new HashSet<>();
 
-    public void parse(Collection<PageModel> pageModels, Collection<WidgetModel> widgetModels) {
-        var widgetsClasses = widgetModels.stream().collect(Collectors.toMap(WidgetModel::getName, this::parseWidgetModel));
+    public void parse(Collection<PageModel> pageModels, Collection<WidgetTemplateModel> widgetTemplateModels) {
+        var widgetsClasses = widgetTemplateModels.stream().collect(Collectors.toMap(WidgetTemplateModel::getWidgetClassName, this::parseWidgetModel));
         var pageClasses = pageModels.stream().collect(Collectors.toMap(PageModel::getPath, this::parsePageModel));
         script.addDeclarations(classes);
 
@@ -47,11 +47,11 @@ public class JavascriptParser {
         script.addStatement(new JSVarAssignment(new JSVar(name), new JSContructorCall(jsClass)));
     }
 
-    private JSClass parseWidgetModel(WidgetModel widgetModel) {
+    private JSClass parseWidgetModel(WidgetTemplateModel widgetTemplateModel) {
         var widgetClass = derrivedClass(XIS_WIDGET);
-        var widgetRootClass = toClass(widgetModel.getRootNode());
+        var widgetRootClass = toClass(widgetTemplateModel.getRootNode());
         widgetClass.addField("root", new JSContructorCall(widgetRootClass));
-        widgetClass.addField("name", new JSString(widgetModel.getName()));
+        widgetClass.addField("name", new JSString(widgetTemplateModel.getWidgetClassName()));
         return widgetClass;
     }
 

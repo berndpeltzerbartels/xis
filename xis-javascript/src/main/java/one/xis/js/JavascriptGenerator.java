@@ -3,7 +3,7 @@ package one.xis.js;
 import one.xis.template.ExpressionParser;
 import one.xis.template.PageModel;
 import one.xis.template.TemplateParser;
-import one.xis.template.WidgetModel;
+import one.xis.template.WidgetTemplateModel;
 import one.xis.utils.io.IOUtils;
 import one.xis.utils.xml.XmlUtil;
 import org.w3c.dom.Document;
@@ -33,12 +33,12 @@ class JavascriptGenerator {
 
     private JSScript createScriptModel() {
         Collection<PageModel> pageModels = pageModels();
-        Collection<WidgetModel> widgetModels = widgetModels();
-        javascriptParser.parse(pageModels, widgetModels);
+        Collection<WidgetTemplateModel> widgetTemplateModels = widgetModels();
+        javascriptParser.parse(pageModels, widgetTemplateModels);
         return javascriptParser.getScript();
     }
 
-    private Collection<WidgetModel> widgetModels() {
+    private Collection<WidgetTemplateModel> widgetModels() {
         return lines(WIDGET_INFO_PATH)
                 .map(line -> line.split(":"))
                 .map(arr -> widgetModel(arr[0], arr[1]))
@@ -56,8 +56,8 @@ class JavascriptGenerator {
         return IOUtils.getContentLines(IOUtils.getResourceAsStream(resource), "utf-8").stream();
     }
 
-    private WidgetModel widgetModel(String name, String resource) {
-        return templateParser.parseWidget(loadDocument(resource), name);
+    private WidgetTemplateModel widgetModel(String name, String resource) {
+        return templateParser.parseWidgetTemplate(loadDocument(resource), name);
     }
 
     private PageModel pageModel(String path, String resource) {

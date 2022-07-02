@@ -17,6 +17,7 @@ abstract class MultiValueParameter extends ConstructorParameter {
     private Set<?> candidateClasses;
 
     MultiValueParameter(Parameter parameter) {
+        super(parameter.getName());
         this.elementType = findElementType(parameter);
     }
 

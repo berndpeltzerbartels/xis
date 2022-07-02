@@ -20,11 +20,11 @@ public class Widget implements ResourceFile {
         this.htmlResourceFile = htmlResourceFile;
     }
 
-    String getId() {
+    String getClassName() {
         return widgetController.getClass().getName();
     }
 
-    String getHtmlTemplate() {
+    String getTemplateHtml() {
         return htmlResourceFile.getContent();
     }
 
@@ -42,5 +42,5 @@ public class Widget implements ResourceFile {
     public long getLastModified() {
         return htmlResourceFile.getLastModified();
     }
-    
+
 }

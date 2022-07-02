@@ -44,7 +44,7 @@ public class Widgets {
     }
 
     private Widget compileWidget(Widget widget) {
-        widget.setJavascript(widgetCompiler.compile(widget.getHtmlTemplate()));
+        widgetCompiler.compile(widget);
         return widget;
     }
 

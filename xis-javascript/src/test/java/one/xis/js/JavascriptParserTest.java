@@ -25,18 +25,18 @@ class JavascriptParserTest {
     @DisplayName("Simple widget with one element")
     class SimpleElementWidgetTest {
 
-        private WidgetModel widgetModel;
+        private WidgetTemplateModel widgetTemplateModel;
         private JavascriptParser parser;
 
         @BeforeEach
         void setUp() {
             parser = new JavascriptParser();
-            widgetModel = new WidgetModel(WIDGET_NAME, new TemplateElement("div"));
+            widgetTemplateModel = new WidgetTemplateModel(WIDGET_NAME, new TemplateElement("div"));
         }
 
         @Test
         void parse() {
-            parser.parse(Collections.emptySet(), Set.of(widgetModel));
+            parser.parse(Collections.emptySet(), Set.of(widgetTemplateModel));
 
             JSClass widgets = declaredCLasses(parser.getScript())
                     .filter(c -> isDerrivedFrom(c, "XISWidgets"))
@@ -74,20 +74,20 @@ class JavascriptParserTest {
 
         private static final String WIDGET_NAME2 = "testWidget2";
 
-        private WidgetModel widgetModel1;
-        private WidgetModel widgetModel2;
+        private WidgetTemplateModel widgetTemplateModel1;
+        private WidgetTemplateModel widgetTemplateModel2;
         private JavascriptParser parser;
 
         @BeforeEach
         void setUp() {
             parser = new JavascriptParser();
-            widgetModel1 = new WidgetModel(WIDGET_NAME, new TemplateElement("div"));
-            widgetModel2 = new WidgetModel(WIDGET_NAME2, new TemplateElement("span"));
+            widgetTemplateModel1 = new WidgetTemplateModel(WIDGET_NAME, new TemplateElement("div"));
+            widgetTemplateModel2 = new WidgetTemplateModel(WIDGET_NAME2, new TemplateElement("span"));
         }
 
         @Test
         void parse() {
-            parser.parse(Collections.emptySet(), List.of(widgetModel1, widgetModel2));
+            parser.parse(Collections.emptySet(), List.of(widgetTemplateModel1, widgetTemplateModel2));
 
             JSClass widgets = declaredCLasses(parser.getScript())
                     .filter(c -> isDerrivedFrom(c, "XISWidgets"))
@@ -121,7 +121,7 @@ class JavascriptParserTest {
     @DisplayName("If-block and loop with element")
     class IfAndForLoopWidgetTest {
 
-        private WidgetModel widgetModel;
+        private WidgetTemplateModel widgetTemplateModel;
         private JavascriptParser parser;
 
         @BeforeEach
@@ -133,7 +133,7 @@ class JavascriptParserTest {
 
             ifBlock.addChild(loop);
             loop.addChild(templateElement);
-            widgetModel = new WidgetModel(WIDGET_NAME, ifBlock);
+            widgetTemplateModel = new WidgetTemplateModel(WIDGET_NAME, ifBlock);
 
             parser = new JavascriptParser();
 
@@ -141,7 +141,7 @@ class JavascriptParserTest {
 
         @Test
         void parse() {
-            parser.parse(Collections.emptySet(), Set.of(widgetModel));
+            parser.parse(Collections.emptySet(), Set.of(widgetTemplateModel));
 
             JSClass ifClass = declaredCLasses(parser.getScript())
                     .filter(c -> isDerrivedFrom(c, "XISIf"))

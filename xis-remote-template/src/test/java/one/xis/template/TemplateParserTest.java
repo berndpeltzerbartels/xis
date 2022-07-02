@@ -33,9 +33,9 @@ class TemplateParserTest {
 
         @Test
         void parse() {
-            WidgetModel widgetModel = new TemplateParser(new ExpressionParser()).parseWidget(document, "123");
+            WidgetTemplateModel widgetTemplateModel = new TemplateParser(new ExpressionParser()).parseWidgetTemplate(document, "123");
 
-            TemplateElement element = (TemplateElement) widgetModel.getRootNode();
+            TemplateElement element = (TemplateElement) widgetTemplateModel.getRootNode();
             assertThat(element.getElementName()).isEqualTo("div");
             assertThat(element.getStaticAttributes()).containsKey("class");
             assertThat(element.getStaticAttributes().get("class")).isEqualTo("gold");
@@ -56,10 +56,10 @@ class TemplateParserTest {
 
         @Test
         void parse() {
-            WidgetModel widgetModel = new TemplateParser(new ExpressionParser()).parseWidget(document, "123");
+            WidgetTemplateModel widgetTemplateModel = new TemplateParser(new ExpressionParser()).parseWidgetTemplate(document, "123");
 
-            assertThat(widgetModel.getRootNode()).isInstanceOf(IfBlock.class);
-            IfBlock ifBlock = (IfBlock) widgetModel.getRootNode();
+            assertThat(widgetTemplateModel.getRootNode()).isInstanceOf(IfBlock.class);
+            IfBlock ifBlock = (IfBlock) widgetTemplateModel.getRootNode();
 
             assertThat(CollectionUtils.onlyElement(ifBlock.getChildren())).isInstanceOf(Loop.class);
             Loop loop = (Loop) CollectionUtils.onlyElement(ifBlock.getChildren());
@@ -83,7 +83,7 @@ class TemplateParserTest {
 
         @Test
         void parse() throws TemplateSynthaxException, IOException {
-            var widgetModel = parser.parseWidget(document, "test");
+            var widgetModel = parser.parseWidgetTemplate(document, "test");
 
             IfBlock ifBlock = cast(widgetModel.getRootNode(), IfBlock.class);
             TemplateElement ul = onlyChild(ifBlock, TemplateElement.class);
@@ -124,7 +124,7 @@ class TemplateParserTest {
 
         @Test
         void parse() throws TemplateSynthaxException, IOException {
-            var widgetModel = parser.parseWidget(document, "test");
+            var widgetModel = parser.parseWidgetTemplate(document, "test");
 
             var loop = cast(widgetModel.getRootNode(), Loop.class);
             var div = onlyChild(loop, TemplateElement.class);

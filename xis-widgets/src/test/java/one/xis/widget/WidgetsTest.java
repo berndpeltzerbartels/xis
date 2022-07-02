@@ -55,7 +55,7 @@ class WidgetsTest {
             Widget widget = widgets.getWidget(WIDGET_ID);
 
             assertThat(widget).isNotNull();
-            verify(widgetCompiler, times(1)).compile(any());
+            verify(widgetCompiler, times(1)).compile(eq(widget));
         }
     }
 
@@ -73,7 +73,7 @@ class WidgetsTest {
             Widget widget = widgets.getWidget(WIDGET_ID);
 
             assertThat(widget).isNotNull();
-            verify(widgetCompiler, times(2)).compile(any());
+            verify(widgetCompiler, times(2)).compile(eq(widget));
         }
     }
 }

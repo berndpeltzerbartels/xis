@@ -1,15 +1,18 @@
 package one.xis.context;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor
 class SimpleParameter extends ConstructorParameter {
 
     private final Class<?> type;
 
     @Getter
     private Object value;
+
+    SimpleParameter(Class<?> type, String name) {
+        super(name);
+        this.type = type;
+    }
 
     @Override
     public void onComponentCreated(Object o) {
@@ -22,5 +25,10 @@ class SimpleParameter extends ConstructorParameter {
     @Override
     boolean isComplete() {
         return value != null;
+    }
+
+    @Override
+    Class<?> getElementType() {
+        return type;
     }
 }

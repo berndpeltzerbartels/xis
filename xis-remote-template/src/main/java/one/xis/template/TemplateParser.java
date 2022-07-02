@@ -22,7 +22,7 @@ import static one.xis.utils.xml.XmlUtil.getChildNodes;
 public class TemplateParser {
 
     private final ExpressionParser expressionParser;
-    
+
     private int varIndex = 0;
     static final String ATTR_IF = "data-if";
     static final String ATTR_FOR = "data-for";
@@ -32,8 +32,8 @@ public class TemplateParser {
     static final String ATTR_CONTAINER_ID = "data-container-id";
     static final String ATTR_CONTAINER_WIDGET = "data-widget";
 
-    public WidgetModel parseWidget(Document document, String name) {
-        return new WidgetModel(name, parseElement(document.getDocumentElement()));
+    public WidgetTemplateModel parseWidgetTemplate(Document document, String widgetClassName) {
+        return new WidgetTemplateModel(widgetClassName, parseElement(document.getDocumentElement()));
     }
 
     public PageModel parsePage(Document document, String path) {
