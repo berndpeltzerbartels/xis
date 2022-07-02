@@ -1,26 +1,27 @@
-package one.xis.js;
+package one.xis.spring.servlet;
 
 
-import one.xis.XISContext;
-import one.xis.servlet.ResourceServlet;
+import one.xis.context.AppContext;
 import one.xis.widget.Widget;
 import one.xis.widget.Widgets;
 
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 
-@WebServlet(urlPatterns = "/widget.js")
+@WebServlet(urlPatterns = "/xis/widget/*")
 class WidgetServlet extends ResourceServlet<Widget> {
 
     private Widgets widgets;
 
     @Override
     public void init() {
-        widgets = XISContext.getInstance().getSingleton(Widgets.class);
+        widgets = AppContext.getInstance("one.xis").getSingleton(Widgets.class);
     }
 
     @Override
     protected Widget getResource(HttpServletRequest request) {
-        return widgets.getWidget(request.getParameter("id"));
+        String uri = request.getRequestURI();
+        String urn = uri.substring(uri.lastIndexOf('/') + 1);
+        return widgets.getWidget(urn);
     }
 }

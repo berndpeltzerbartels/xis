@@ -1,6 +1,4 @@
-package one.xis.js;
-
-import one.xis.utils.io.IOUtils;
+package one.xis.spring.servlet;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -14,10 +12,6 @@ import java.io.PrintWriter;
 class ConnectorServlet extends HttpServlet {
 
     private String json;
-
-    ConnectorServlet() {
-        json = IOUtils.getResourceAsString("categories.json");
-    }
 
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

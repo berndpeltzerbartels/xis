@@ -1,7 +1,6 @@
-package one.xis.js;
+package one.xis.spring.servlet;
 
 import one.xis.resource.ResourceFile;
-import one.xis.servlet.ResourceServlet;
 
 import javax.servlet.http.HttpServletRequest;
 

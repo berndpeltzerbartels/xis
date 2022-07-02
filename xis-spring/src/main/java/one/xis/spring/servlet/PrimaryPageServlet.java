@@ -1,4 +1,4 @@
-package one.xis.js;
+package one.xis.spring.servlet;
 
 import one.xis.utils.io.IOUtils;
 

@@ -5,6 +5,7 @@ import one.xis.Widget;
 import one.xis.context.AppContext;
 import one.xis.widget.Widgets;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.stereotype.Component;
 
@@ -15,14 +16,12 @@ class SpringContextAdapter implements BeanPostProcessor {
 
     private Widgets widgets;
 
+    @Autowired
+    private AppContext xisAppContext;
+
     @PostConstruct
     void init() {
-        AppContext appContext = getAppContext();
-        widgets = appContext.getSingleton(Widgets.class);
-    }
-
-    private AppContext getAppContext() {
-        return AppContext.getInstance("one.xis");
+        widgets = xisAppContext.getSingleton(Widgets.class);
     }
 
     @Override
