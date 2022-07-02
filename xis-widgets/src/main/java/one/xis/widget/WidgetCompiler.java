@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
 import one.xis.js.JSScript;
 import one.xis.js.JSWriter;
+import one.xis.js.JavascriptParser;
 import one.xis.template.TemplateParser;
 import one.xis.template.TemplateSynthaxException;
 import one.xis.template.WidgetTemplateModel;
@@ -19,6 +20,8 @@ import java.io.IOException;
 class WidgetCompiler {
 
     private final TemplateParser templateParser;
+    private final JavascriptParser javascriptParser;
+    private final Iterable<String> iterable;
 
     void compile(@NonNull Widget widget) {
         Document templateXml = htmlToDocument(widget.getClassName(), widget.getTemplateHtml());
@@ -48,7 +51,7 @@ class WidgetCompiler {
     }
 
     private JSScript templateModelToScriptModel(WidgetTemplateModel templateModel) {
-        return new JSScript();
+        return javascriptParser.parseWidgetModel(templateModel);
     }
 
     private String toScriptSource(JSScript script) {

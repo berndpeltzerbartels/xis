@@ -2,6 +2,7 @@ package one.xis.js;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import one.xis.context.XISComponent;
 import one.xis.template.*;
 import one.xis.utils.lang.CollectionUtils;
 
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 
 import static one.xis.js.Classes.*;
 
+@XISComponent
 @RequiredArgsConstructor
 public class JavascriptParser {
 
@@ -22,7 +24,7 @@ public class JavascriptParser {
     private final Collection<JSClass> classes = new HashSet<>();
 
     public void parse(Collection<PageModel> pageModels, Collection<WidgetTemplateModel> widgetTemplateModels) {
-        var widgetsClasses = widgetTemplateModels.stream().collect(Collectors.toMap(WidgetTemplateModel::getWidgetClassName, this::parseWidgetModel));
+        var widgetsClasses = widgetTemplateModels.stream().collect(Collectors.toMap(WidgetTemplateModel::getWidgetClassName, this::toClass));
         var pageClasses = pageModels.stream().collect(Collectors.toMap(PageModel::getPath, this::parsePageModel));
         script.addDeclarations(classes);
 
@@ -47,7 +49,14 @@ public class JavascriptParser {
         script.addStatement(new JSVarAssignment(new JSVar(name), new JSContructorCall(jsClass)));
     }
 
-    private JSClass parseWidgetModel(WidgetTemplateModel widgetTemplateModel) {
+    public JSScript parseWidgetModel(WidgetTemplateModel widgetTemplateModel) {
+        JSClass widgetClass = toClass(widgetTemplateModel);
+        JSScript script = new JSScript();
+        script.addDeclaration(widgetClass);
+        return script;
+    }
+
+    private JSClass toClass(WidgetTemplateModel widgetTemplateModel) {
         var widgetClass = derrivedClass(XIS_WIDGET);
         var widgetRootClass = toClass(widgetTemplateModel.getRootNode());
         widgetClass.addField("root", new JSContructorCall(widgetRootClass));

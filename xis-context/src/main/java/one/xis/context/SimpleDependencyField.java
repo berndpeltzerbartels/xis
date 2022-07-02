@@ -29,7 +29,7 @@ class SimpleDependencyField extends DependencyField {
     @Override
     public void doInjection() {
         if (fieldValue == null) {
-            throw new AppContextException("no candidate for " + field);
+            throw new AppContextException("unsatisfied dependency in " + field);
         }
         if (owners.isEmpty()) {
             throw new IllegalStateException();

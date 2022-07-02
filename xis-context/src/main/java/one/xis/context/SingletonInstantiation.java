@@ -1,17 +1,19 @@
 package one.xis.context;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@RequiredArgsConstructor
 class SingletonInstantiation {
 
-    private Set<SingtelonInstantiator> singtelonInstantiators;
+    @Getter
+    private final Set<SingletonInstantiator> singletonInstantiators;
+
+    @Getter
+    private Set<SingletonInstantiator> unusedSingletonInstantiators;
     private final FieldInjection fieldInjection;
     private final InitMethodInvocation initMethodInvocation;
     private final AppReflection reflections;
@@ -20,44 +22,52 @@ class SingletonInstantiation {
     @Getter
     private final Set<Object> singletons = new HashSet<>();
 
-    void initInstantiation() {
-        this.singtelonInstantiators = createInstantiators(reflections);
+    SingletonInstantiation(FieldInjection fieldInjection, InitMethodInvocation initMethodInvocation, AppReflection reflections, Collection<Object> additionalSingeltons) {
+        this.fieldInjection = fieldInjection;
+        this.initMethodInvocation = initMethodInvocation;
+        this.reflections = reflections;
+        this.additionalSingeltons = additionalSingeltons;
+        this.singletonInstantiators = createInstantiators(reflections);
+        this.unusedSingletonInstantiators = new HashSet<>(singletonInstantiators);
+    }
+
+    void runInstantiation() {
         populateSingletonClasses();
     }
 
-    private Set<SingtelonInstantiator> createInstantiators(AppReflection reflections) {
+    private Set<SingletonInstantiator> createInstantiators(AppReflection reflections) {
         return reflections.getTypesAnnotatedWith(XISComponent.class).stream()// also includes custom component-annotations
                 .filter(c -> !c.isAnnotation())//
                 .map(this::createInstantiator)//
-                .collect(Collectors.toSet());
+                .collect(Collectors.toUnmodifiableSet());
     }
 
     private void populateSingletonClasses() {
         Set<Class<?>> singletonClasses = new HashSet<>(getSingletonClasses());
         singletonClasses.addAll(getAdditionalSingletonClasses());
-        singtelonInstantiators.forEach(instantitor -> instantitor.registerSingletonClasses(singletonClasses));
+        singletonInstantiators.forEach(instantitor -> instantitor.registerSingletonClasses(singletonClasses));
     }
 
     protected Set<Class<?>> getSingletonClasses() {
-        return singtelonInstantiators.stream().map(SingtelonInstantiator::getType).collect(Collectors.toSet());
+        return singletonInstantiators.stream().map(SingletonInstantiator::getType).collect(Collectors.toSet());
     }
 
     protected Set<Class<?>> getAdditionalSingletonClasses() {
         return additionalSingeltons.stream().map(Object::getClass).collect(Collectors.toSet());
     }
 
-    private SingtelonInstantiator createInstantiator(Class<?> aClass) {
-        SingtelonInstantiator instantitor = new SingtelonInstantiator(aClass);
+    private SingletonInstantiator createInstantiator(Class<?> aClass) {
+        SingletonInstantiator instantitor = new SingletonInstantiator(aClass);
         instantitor.init();
         return instantitor;
     }
 
     void createInstances() {
-        singtelonInstantiators.stream().filter(SingtelonInstantiator::isParameterCompleted).findFirst().ifPresent(this::createInstance);
+        unusedSingletonInstantiators.stream().filter(SingletonInstantiator::isParameterCompleted).findFirst().ifPresent(this::createInstance);
     }
 
-    private void createInstance(SingtelonInstantiator instantitor) {
-        singtelonInstantiators.remove(instantitor);
+    private void createInstance(SingletonInstantiator instantitor) {
+        unusedSingletonInstantiators.remove(instantitor); // TODO ConcurrentModificationException ?
         populateComponent(instantitor.createInstance());
     }
 
@@ -65,17 +75,12 @@ class SingletonInstantiation {
         singletons.add(o);
         fieldInjection.onComponentCreated(o);
         initMethodInvocation.onComponentCreated(o);
-        singtelonInstantiators.forEach(instantitor -> instantitor.onComponentCreated(o));
+        singletonInstantiators.forEach(instantitor -> instantitor.onComponentCreated(o));
         createInstances();
     }
 
     void postCheck() {
-        if (!singtelonInstantiators.isEmpty()) { // TODO Unsatified DependencyException instead, fixe Inatatiator to kow missing constructor-parameters
-            throw new AppContextException("not created: " + singtelonInstantiators.stream()//
-                    .map(SingtelonInstantiator::getType)//
-                    .map(Class::getName)//
-                    .collect(Collectors.joining(", ")));
-        }
+        new SingletonInstantiationPostCheck(this).check();
     }
 
     void populateAddionalSingletons() {

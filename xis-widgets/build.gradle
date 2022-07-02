@@ -18,6 +18,7 @@ dependencies {
     implementation project(':xis-util')
     implementation project(':xis-resources')
     implementation project(':xis-context')
+    implementation project(':xis-javascript')
     implementation project(':xis-javascript-model')
     implementation project(':xis-remote-template')
     implementation project(':xis-remote-core')

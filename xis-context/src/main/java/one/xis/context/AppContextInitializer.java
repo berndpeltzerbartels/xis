@@ -41,10 +41,10 @@ public class AppContextInitializer {
 
     public void initializeContext() {
         SingletonInstantiation singletonInstantiation = singletonInstantiation();
-        singletonInstantiation.initInstantiation();
+        singletonInstantiation.runInstantiation();
         singletonInstantiation.populateAddionalSingletons();
         singletonInstantiation.createInstances();
-        singletonInstantiation.postCheck();
+        postCheck(singletonInstantiation);
         fieldInjection.doInjection();
         initInvokers.invokeAll();
         singletons = singletonInstantiation.getSingletons();
@@ -54,4 +54,7 @@ public class AppContextInitializer {
         return new SingletonInstantiation(fieldInjection, initInvokers, reflections, additionalSingeltons);
     }
 
+    private void postCheck(SingletonInstantiation singletonInstantiation) {
+        new SingletonInstantiationPostCheck(singletonInstantiation).check();
+    }
 }

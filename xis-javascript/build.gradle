@@ -19,6 +19,7 @@ dependencies {
 
     // https://mvnrepository.com/artifact/org.gradle/api
     implementation project(':xis-util')
+    implementation project(':xis-context')
     implementation project(':xis-javascript-model')
     implementation project(':xis-remote-template')
 
