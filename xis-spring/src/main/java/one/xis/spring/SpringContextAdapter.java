@@ -3,7 +3,6 @@ package one.xis.spring;
 import one.xis.Page;
 import one.xis.Widget;
 import one.xis.context.AppContext;
-import one.xis.widget.WidgetUtil;
 import one.xis.widget.Widgets;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -26,14 +25,10 @@ class SpringContextAdapter implements BeanPostProcessor {
         return AppContext.getInstance("one.xis");
     }
 
-    private String getWidgetId(Object widgetController) {
-        return WidgetUtil.getWidgetId(widgetController);
-    }
-
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         if (bean.getClass().isAnnotationPresent(Widget.class)) {
-            widgets.addWidget(getWidgetId(bean), bean);
+            widgets.addWidget(bean.getClass().getName(), bean);
         }
         if (bean.getClass().isAnnotationPresent(Page.class)) {
             //widgets.addWidget(getWidgetId(bean), bean);

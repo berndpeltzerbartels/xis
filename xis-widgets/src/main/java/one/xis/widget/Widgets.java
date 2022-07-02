@@ -15,14 +15,15 @@ public class Widgets {
     private final WidgetCompiler widgetCompiler;
     private final Map<String, Widget> widgetMap = new HashMap<>();
 
-    public void addWidget(String widgetId, Object widgetController) {
-        widgetMap.put(widgetId, createWidget(widgetController));
+    public void addWidget(String widgetClass, Object widgetController) {
+        widgetMap.put(widgetClass, createWidget(widgetController));
     }
 
-    public Widget getWidget(String widgetId) {
-        Widget widget = widgetMap.get(widgetId);
+    public Widget getWidget(String widgetUrn) {
+        String widgetClass = widgetUrn.replace(':', '.');
+        Widget widget = widgetMap.get(widgetClass);
         if (widget == null) {
-            throw new IllegalStateException("no such widget: " + widgetId);
+            throw new IllegalStateException("no such widget: " + widgetUrn);
         }
         return compileIfObsolete(widget);
     }

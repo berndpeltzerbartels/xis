@@ -4,6 +4,13 @@ package one.xis.micronaut
 import one.xis.Widget
 
 @Widget
-@Singleton
 class TestWidget {
+
+    TestWidget() {
+        System.out.println("Huhu !");
+    }
+
+    void test() {
+        System.out.println("test")
+    }
 }

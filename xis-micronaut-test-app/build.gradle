@@ -44,3 +44,12 @@ micronaut {
         annotations("hello.world.*")
     }
 }
+
+
+sourceSets {
+    main {
+        resources {
+            srcDir 'src/main/groovy'
+        }
+    }
+}
