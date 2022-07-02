@@ -13,6 +13,9 @@ public class Widget implements ResourceFile {
     private final ResourceFile htmlResourceFile;
 
     @Setter(AccessLevel.PACKAGE)
+    private boolean compiled;
+
+    @Setter(AccessLevel.PACKAGE)
     private String javascript;
 
     Widget(@NonNull Object widgetController, @NonNull ResourceFile htmlResourceFile) {

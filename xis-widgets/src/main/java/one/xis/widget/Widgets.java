@@ -31,7 +31,7 @@ public class Widgets {
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
     private Widget compileIfObsolete(Widget widget) {
         synchronized (widget) {
-            if (isObsolete(widget)) {
+            if (isObsolete(widget) || !widget.isCompiled()) {
                 reloadHtml(widget);
                 compileWidget(widget);
             }

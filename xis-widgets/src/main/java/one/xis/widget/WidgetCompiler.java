@@ -21,13 +21,14 @@ class WidgetCompiler {
 
     private final TemplateParser templateParser;
     private final JavascriptParser javascriptParser;
-    private final Iterable<String> iterable;
 
     void compile(@NonNull Widget widget) {
+        widget.setCompiled(false);
         Document templateXml = htmlToDocument(widget.getClassName(), widget.getTemplateHtml());
         WidgetTemplateModel templateModel = documentToTemplateModel(widget.getClassName(), templateXml);
         JSScript script = templateModelToScriptModel(templateModel);
         widget.setJavascript(toScriptSource(script));
+        widget.setCompiled(true);
     }
 
     private WidgetTemplateModel documentToTemplateModel(String widgetClassName, Document document) {
