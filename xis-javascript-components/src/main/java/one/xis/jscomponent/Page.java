@@ -16,7 +16,7 @@ class Page implements ResourceFile, JavascriptComponent {
 
     @Setter
     private String javascript;
-
+    
     Page(@NonNull Object pageController, @NonNull ResourceFile htmlResourceFile) {
         this.pageController = pageController;
         this.htmlResourceFile = htmlResourceFile;
@@ -36,5 +36,4 @@ class Page implements ResourceFile, JavascriptComponent {
     public long getLastModified() {
         return htmlResourceFile.getLastModified();
     }
-
 }

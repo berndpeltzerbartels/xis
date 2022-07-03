@@ -39,8 +39,8 @@ public class TemplateParser {
     public PageTemplateModel parsePageTemplate(Document document, String path) {
         var pageModel = new PageTemplateModel(path);
         var root = document.getDocumentElement();
-        var headElement = XmlUtil.getElementByTagName(root, "head").orElseThrow();
-        var bodyElement = XmlUtil.getElementByTagName(root, "body").orElseThrow();
+        var headElement = XmlUtil.getElementByTagName(root, "head").orElseThrow(() -> new TemplateSynthaxException(path + " must have head-tag")); // TODO create if not present
+        var bodyElement = XmlUtil.getElementByTagName(root, "body").orElseThrow(() -> new TemplateSynthaxException(path + " must have body-tag"));  // TODO create if not present
         var headTemplateElement = toTemplateElement(headElement);
         var bodyTemplateElement = toTemplateElement(bodyElement);
         parseChildren(headElement).forEach(headTemplateElement::addChild);

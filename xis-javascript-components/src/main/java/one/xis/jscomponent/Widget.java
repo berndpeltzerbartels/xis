@@ -36,5 +36,5 @@ class Widget implements ResourceFile, JavascriptComponent {
     public long getLastModified() {
         return htmlResourceFile.getLastModified();
     }
-
+    
 }

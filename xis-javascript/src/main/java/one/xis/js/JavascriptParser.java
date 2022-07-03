@@ -57,7 +57,7 @@ public class JavascriptParser {
     }
 
     public JSScript parseTemplateModel(PageTemplateModel widgetTemplateModel) {
-        return null; // TODO
+        return new JSScript(); // TODO
     }
 
     private JSClass toClass(WidgetTemplateModel widgetTemplateModel) {

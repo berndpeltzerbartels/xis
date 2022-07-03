@@ -7,21 +7,21 @@ import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 
 @Controller
-class WidgetController {
+class PageController {
 
     @Inject
     private MicronautContextAdapter contextAdapter;
-    
-    private Widgets widgets;
+
+    private Pages pages;
 
     @PostConstruct
     void init() {
-        widgets = contextAdapter.getWidgets();
+        pages = contextAdapter.getPages();
     }
 
-    @Get(produces = "text/javascript", uri = "/xis/widget/{widgetUrn}")
-    String getWidget(@PathVariable("widgetUrn") String widgetUrn) {
-        return widgets.get(widgetUrn).getJavascript();
+    @Get(produces = "text/javascript", uri = "/xis/page/{pageUrn}")
+    String getPage(@PathVariable("pageUrn") String pageUrn) {
+        return pages.get(pageUrn).getJavascript();
     }
 
 }

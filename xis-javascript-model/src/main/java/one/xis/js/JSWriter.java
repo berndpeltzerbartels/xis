@@ -1,5 +1,6 @@
 package one.xis.js;
 
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import one.xis.utils.lang.StringUtils;
 
@@ -12,7 +13,7 @@ import java.util.Map;
 public class JSWriter {
     private final Appendable writer;
 
-    public void write(JSScript script) {
+    public void write(@NonNull JSScript script) {
         script.getDeclarations().forEach(this::writeDeclaration);
         script.getGlobalVars().forEach(this::writeGlobalVar);
         script.getStatements().forEach(statement -> this.writeStatement(statement, writer));

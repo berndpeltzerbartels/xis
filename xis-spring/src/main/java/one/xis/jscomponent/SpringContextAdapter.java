@@ -3,34 +3,60 @@ package one.xis.jscomponent;
 import one.xis.Page;
 import one.xis.Widget;
 import one.xis.context.AppContext;
+import one.xis.resource.ResourceFiles;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 
 @Component
-class SpringContextAdapter implements BeanPostProcessor {
+public class SpringContextAdapter implements BeanPostProcessor {
 
     private Widgets widgets;
-
-    @Autowired
-    private AppContext xisAppContext;
+    private Pages pages;
 
     @PostConstruct
     void init() {
-        widgets = xisAppContext.getSingleton(Widgets.class);
+        pages = pages();
+        widgets = widgets();
     }
 
     @Override
-    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+    public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
         if (bean.getClass().isAnnotationPresent(Widget.class)) {
-            widgets.add(bean.getClass().getName(), bean);
+            widgets.add(beanName, bean);
         }
         if (bean.getClass().isAnnotationPresent(Page.class)) {
-            //widgets.addWidget(getWidgetId(bean), bean);
+            pages.add(beanName, bean);
         }
         return bean;
     }
+
+    @Bean
+    AppContext appContext() {
+        return AppContext.getInstance("one.xis");
+    }
+
+    @Bean
+    Widgets widgets() {
+        return appContext().getSingleton(Widgets.class);
+    }
+
+    @Bean
+    Pages pages() {
+        return appContext().getSingleton(Pages.class);
+    }
+
+    @Bean
+    ResourceFiles resourceFiles() {
+        return appContext().getSingleton(ResourceFiles.class);
+    }
+
+    @Bean
+    RootPage rootPage() {
+        return appContext().getSingleton(RootPage.class);
+    }
+
 }

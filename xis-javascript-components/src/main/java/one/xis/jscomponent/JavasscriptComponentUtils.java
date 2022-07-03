@@ -1,5 +1,6 @@
 package one.xis.jscomponent;
 
+import lombok.NonNull;
 import one.xis.js.JSScript;
 import one.xis.js.JSWriter;
 import one.xis.template.TemplateSynthaxException;
@@ -11,7 +12,7 @@ import java.io.IOException;
 
 class JavasscriptComponentUtils {
 
-    static String javaScriptModelAsCode(JSScript script) {
+    static String javaScriptModelAsCode(@NonNull JSScript script) {
         StringBuilder builder = new StringBuilder();
         JSWriter jsWriter = new JSWriter(builder);
         jsWriter.write(script);
@@ -20,6 +21,10 @@ class JavasscriptComponentUtils {
 
     static String urnToClassName(String urn) {
         return urn.replace(':', '.');
+    }
+
+    static String nameToUrn(String name) {
+        return name.replace('.', ':');
     }
 
     static Document htmlToDocument(String controllerClass, String htmlSource) {

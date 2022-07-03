@@ -17,7 +17,7 @@ class Widgets extends JavascriptComponents<Widget> {
     }
 
     @Override
-    protected String compile(String className, ResourceFile resourceFile) {
-        return widgetCompiler.compile(className, resourceFile);
+    protected String compile(String name, ResourceFile resourceFile) {
+        return widgetCompiler.compile(name, resourceFile);
     }
 }

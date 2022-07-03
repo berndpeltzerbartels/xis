@@ -17,7 +17,7 @@ class Pages extends JavascriptComponents<Page> {
     }
 
     @Override
-    protected String compile(String className, ResourceFile resourceFile) {
-        return pageCompiler.compile(className, resourceFile);
+    protected String compile(String name, ResourceFile resourceFile) {
+        return pageCompiler.compile(name, resourceFile);
     }
 }

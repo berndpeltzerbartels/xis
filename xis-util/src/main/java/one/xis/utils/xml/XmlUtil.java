@@ -5,6 +5,7 @@ import lombok.experimental.UtilityClass;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
+import javax.xml.transform.TransformerException;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -71,4 +72,7 @@ public class XmlUtil {
         return map;
     }
 
+    public static String asString(Document document) throws TransformerException {
+        return new XmlSerializer().serialize(document.getDocumentElement());
+    }
 }
