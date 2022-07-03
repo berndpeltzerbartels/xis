@@ -10,7 +10,7 @@ repositories {
 dependencies {
 
     implementation project(':xis-context')
-    implementation project(':xis-widgets')
+    implementation project(':xis-javascript-components')
     implementation project(':xis-resources')
     implementation project(':xis-remote-core')
     implementation project(':xis-util')

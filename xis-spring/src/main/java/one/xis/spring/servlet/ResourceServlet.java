@@ -7,7 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-public abstract class ResourceServlet<R extends ResourceFile> extends HttpServlet {
+public abstract class ResourceServlet extends HttpServlet {
 
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -19,7 +19,7 @@ public abstract class ResourceServlet<R extends ResourceFile> extends HttpServle
         } else if (ifNoneMatch != null && ifNoneMatch.equals(Long.toString(resource.getLastModified()))) {
             response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
         } else {
-            response.setContentType("application/javascript");
+            response.setContentType(getContentType());
             response.setContentLength(resource.getLenght());
             response.setDateHeader("Last-Modified", resource.getLastModified());
             response.setHeader("ETag", Long.toString(resource.getLastModified()));
@@ -28,5 +28,7 @@ public abstract class ResourceServlet<R extends ResourceFile> extends HttpServle
         }
     }
 
-    protected abstract R getResource(HttpServletRequest request);
+    protected abstract ResourceFile getResource(HttpServletRequest request);
+
+    protected abstract String getContentType();
 }

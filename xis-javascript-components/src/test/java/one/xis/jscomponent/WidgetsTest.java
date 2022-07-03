@@ -1,4 +1,4 @@
-package one.xis.widget;
+package one.xis.jscomponent;
 
 import one.xis.context.TestContext;
 import one.xis.resource.ReloadableResourceFile;
@@ -39,7 +39,7 @@ class WidgetsTest {
                 .build();
 
         widgets = testContext.getSingleton(Widgets.class);
-        widgets.addWidget(WIDGET_ID, widgetController);
+        widgets.add(WIDGET_ID, widgetController);
     }
 
     @Nested
@@ -52,10 +52,10 @@ class WidgetsTest {
 
         @Test
         void getWidget() {
-            Widget widget = widgets.getWidget(WIDGET_ID);
+            Widget widget = widgets.get(WIDGET_ID);
 
             assertThat(widget).isNotNull();
-            verify(widgetCompiler, times(1)).compile(eq(widget));
+            verify(widgetCompiler, times(1)).compile(anyString(), eq(resourceFile));
         }
     }
 
@@ -70,10 +70,10 @@ class WidgetsTest {
 
         @Test
         void getWidget() {
-            Widget widget = widgets.getWidget(WIDGET_ID);
+            Widget widget = widgets.get(WIDGET_ID);
 
             assertThat(widget).isNotNull();
-            verify(widgetCompiler, times(2)).compile(eq(widget));
+            verify(widgetCompiler, times(2)).compile(anyString(), eq(resourceFile));
         }
     }
 }

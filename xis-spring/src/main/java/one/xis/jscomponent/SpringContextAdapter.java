@@ -1,9 +1,8 @@
-package one.xis.spring;
+package one.xis.jscomponent;
 
 import one.xis.Page;
 import one.xis.Widget;
 import one.xis.context.AppContext;
-import one.xis.widget.Widgets;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -27,7 +26,7 @@ class SpringContextAdapter implements BeanPostProcessor {
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         if (bean.getClass().isAnnotationPresent(Widget.class)) {
-            widgets.addWidget(bean.getClass().getName(), bean);
+            widgets.add(bean.getClass().getName(), bean);
         }
         if (bean.getClass().isAnnotationPresent(Page.class)) {
             //widgets.addWidget(getWidgetId(bean), bean);

@@ -1,15 +1,15 @@
-package one.xis.spring.servlet;
+package one.xis.jscomponent;
 
 
 import one.xis.context.AppContext;
-import one.xis.widget.Widget;
-import one.xis.widget.Widgets;
+import one.xis.resource.ResourceFile;
+import one.xis.spring.servlet.ResourceServlet;
 
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 
 @WebServlet(urlPatterns = "/xis/widget/*")
-class WidgetServlet extends ResourceServlet<Widget> {
+class WidgetServlet extends ResourceServlet {
 
     private Widgets widgets;
 
@@ -19,9 +19,14 @@ class WidgetServlet extends ResourceServlet<Widget> {
     }
 
     @Override
-    protected Widget getResource(HttpServletRequest request) {
+    protected ResourceFile getResource(HttpServletRequest request) {
         String uri = request.getRequestURI();
         String urn = uri.substring(uri.lastIndexOf('/') + 1);
-        return widgets.getWidget(urn);
+        return widgets.get(urn);
+    }
+
+    @Override
+    protected String getContentType() {
+        return "text/javascript";
     }
 }

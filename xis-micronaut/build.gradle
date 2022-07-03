@@ -19,7 +19,7 @@ dependencies {
 
     implementation project(':xis-remote-core')
     implementation project(':xis-context')
-    implementation project(':xis-widgets')
+    implementation project(':xis-javascript-components')
     implementation project(':xis-resources')
 
     implementation 'org.codehaus.groovy:groovy-all:3.0.11'

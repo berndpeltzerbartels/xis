@@ -1,4 +1,4 @@
-package one.xis.micronaut;
+package one.xis.jscomponent;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Singleton;

@@ -1,34 +1,25 @@
-package one.xis.widget;
+package one.xis.jscomponent;
 
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import one.xis.resource.ResourceFile;
 
 @Getter
-public class Widget implements ResourceFile {
+class Widget implements ResourceFile, JavascriptComponent {
 
     private final Object widgetController;
     private final ResourceFile htmlResourceFile;
 
-    @Setter(AccessLevel.PACKAGE)
+    @Setter
     private boolean compiled;
 
-    @Setter(AccessLevel.PACKAGE)
+    @Setter
     private String javascript;
 
     Widget(@NonNull Object widgetController, @NonNull ResourceFile htmlResourceFile) {
         this.widgetController = widgetController;
         this.htmlResourceFile = htmlResourceFile;
-    }
-
-    String getClassName() {
-        return widgetController.getClass().getName();
-    }
-
-    String getTemplateHtml() {
-        return htmlResourceFile.getContent();
     }
 
     @Override

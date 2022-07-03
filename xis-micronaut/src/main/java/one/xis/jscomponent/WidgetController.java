@@ -1,4 +1,4 @@
-package one.xis.micronaut;
+package one.xis.jscomponent;
 
 import io.micronaut.context.BeanContext;
 import io.micronaut.http.annotation.Controller;
@@ -9,10 +9,9 @@ import io.micronaut.inject.qualifiers.Qualifiers;
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 import one.xis.Widget;
-import one.xis.widget.Widgets;
 
 @Controller
-public class WidgetController {
+class WidgetController {
 
     private Widgets widgets;
 
@@ -29,12 +28,12 @@ public class WidgetController {
         beanContext.getBeanDefinitions(Qualifiers.byStereotype(Widget.class)).stream()//
                 .map(BeanDefinition::getBeanType)
                 .map(beanContext::getBean)
-                .forEach(bean -> widgets.addWidget(bean.getClass().getName(), bean));
+                .forEach(bean -> widgets.add(bean.getClass().getName(), bean));
     }
 
     @Get(produces = "text/javascript", uri = "/xis/widget/{widgetUrn}")
     String getWidget(@PathVariable("widgetUrn") String widgetUrn) {
-        return widgets.getWidget(widgetUrn).getJavascript();
+        return widgets.get(widgetUrn).getJavascript();
     }
 
 }

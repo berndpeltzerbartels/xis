@@ -10,4 +10,9 @@ class PageServlet extends ResourceServlet {
     protected ResourceFile getResource(HttpServletRequest request) {
         return null;
     }
+
+    @Override
+    protected String getContentType() {
+        return "text/javascript";
+    }
 }
