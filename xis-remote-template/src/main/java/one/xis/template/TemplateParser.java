@@ -36,8 +36,8 @@ public class TemplateParser {
         return new WidgetTemplateModel(widgetClassName, parseElement(document.getDocumentElement()));
     }
 
-    public PageModel parsePage(Document document, String path) {
-        var pageModel = new PageModel(path);
+    public PageTemplateModel parsePageTemplate(Document document, String path) {
+        var pageModel = new PageTemplateModel(path);
         var root = document.getDocumentElement();
         var headElement = XmlUtil.getElementByTagName(root, "head").orElseThrow();
         var bodyElement = XmlUtil.getElementByTagName(root, "body").orElseThrow();

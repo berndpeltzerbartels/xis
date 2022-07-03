@@ -1,7 +1,7 @@
 package one.xis.js;
 
 import one.xis.template.ExpressionParser;
-import one.xis.template.PageModel;
+import one.xis.template.PageTemplateModel;
 import one.xis.template.TemplateParser;
 import one.xis.template.WidgetTemplateModel;
 import one.xis.utils.io.IOUtils;
@@ -32,9 +32,9 @@ class JavascriptGenerator {
     }
 
     private JSScript createScriptModel() {
-        Collection<PageModel> pageModels = pageModels();
+        Collection<PageTemplateModel> pageTemplateModels = pageModels();
         Collection<WidgetTemplateModel> widgetTemplateModels = widgetModels();
-        javascriptParser.parse(pageModels, widgetTemplateModels);
+        javascriptParser.parse(pageTemplateModels, widgetTemplateModels);
         return javascriptParser.getScript();
     }
 
@@ -45,7 +45,7 @@ class JavascriptGenerator {
                 .collect(Collectors.toSet());
     }
 
-    private Collection<PageModel> pageModels() {
+    private Collection<PageTemplateModel> pageModels() {
         return lines(PAGES_INFO_PATH)
                 .map(line -> line.split(":"))
                 .map(arr -> pageModel(arr[0], arr[1]))
@@ -60,8 +60,8 @@ class JavascriptGenerator {
         return templateParser.parseWidgetTemplate(loadDocument(resource), name);
     }
 
-    private PageModel pageModel(String path, String resource) {
-        return templateParser.parsePage(loadDocument(resource), path); // TODO may be an alias is better to avoid duplicates
+    private PageTemplateModel pageModel(String path, String resource) {
+        return templateParser.parsePageTemplate(loadDocument(resource), path); // TODO may be an alias is better to avoid duplicates
     }
 
     private Document loadDocument(String resource) {

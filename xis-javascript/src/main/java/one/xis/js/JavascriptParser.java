@@ -23,9 +23,9 @@ public class JavascriptParser {
     private static long currentNameId = 1;
     private final Collection<JSClass> classes = new HashSet<>();
 
-    public void parse(Collection<PageModel> pageModels, Collection<WidgetTemplateModel> widgetTemplateModels) {
+    public void parse(Collection<PageTemplateModel> pageTemplateModels, Collection<WidgetTemplateModel> widgetTemplateModels) {
         var widgetsClasses = widgetTemplateModels.stream().collect(Collectors.toMap(WidgetTemplateModel::getWidgetClassName, this::toClass));
-        var pageClasses = pageModels.stream().collect(Collectors.toMap(PageModel::getPath, this::parsePageModel));
+        var pageClasses = pageTemplateModels.stream().collect(Collectors.toMap(PageTemplateModel::getPath, this::parsePageModel));
         script.addDeclarations(classes);
 
         var widgetsClass = widgetsClass(widgetsClasses);
@@ -56,6 +56,10 @@ public class JavascriptParser {
         return script;
     }
 
+    public JSScript parseTemplateModel(PageTemplateModel widgetTemplateModel) {
+        return null; // TODO
+    }
+
     private JSClass toClass(WidgetTemplateModel widgetTemplateModel) {
         var widgetClass = derrivedClass(XIS_WIDGET);
         var widgetRootClass = toClass(widgetTemplateModel.getRootNode());
@@ -64,13 +68,13 @@ public class JavascriptParser {
         return widgetClass;
     }
 
-    private JSClass parsePageModel(PageModel pageModel) {
+    private JSClass parsePageModel(PageTemplateModel pageTemplateModel) {
         var pageClass = derrivedClass(XIS_PAGE);
-        var headClass = toClass(pageModel.getHead());
-        var bodyClass = toClass(pageModel.getBody());
+        var headClass = toClass(pageTemplateModel.getHead());
+        var bodyClass = toClass(pageTemplateModel.getBody());
         pageClass.addField("head", new JSContructorCall(headClass));
         pageClass.addField("body", new JSContructorCall(bodyClass));
-        pageClass.addField("path", new JSString(pageModel.getPath()));
+        pageClass.addField("path", new JSString(pageTemplateModel.getPath()));
         return pageClass;
     }
 

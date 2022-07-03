@@ -10,11 +10,11 @@ import static one.xis.jscomponent.JavasscriptComponentUtils.getHtmlTemplatePath;
 
 @XISComponent
 @RequiredArgsConstructor
-class WidgetFactory {
+class PageFactory {
 
     private final ResourceFiles resourceFiles;
 
-    Widget createWidget(@NonNull Object widgetController) {
-        return new Widget(widgetController, resourceFiles.getByPath(getHtmlTemplatePath(widgetController.getClass())));
+    Page createPage(@NonNull Object pageController) {
+        return new Page(pageController, resourceFiles.getByPath(getHtmlTemplatePath(pageController.getClass())));
     }
 }
