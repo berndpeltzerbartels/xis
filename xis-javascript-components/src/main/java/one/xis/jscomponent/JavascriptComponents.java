@@ -7,8 +7,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import static one.xis.jscomponent.JavasscriptComponentUtils.urnToClassName;
-
 abstract class JavascriptComponents<C extends JavascriptComponent> {
     private final Map<String, C> components = new HashMap<>();
 
@@ -16,20 +14,29 @@ abstract class JavascriptComponents<C extends JavascriptComponent> {
 
     protected abstract String compile(String name, ResourceFile resourceFile);
 
+    @SuppressWarnings("unused")
+    protected String createKey(String name, Object controller) {
+        return name;
+    }
+
     public C add(String name, Object controller) {
+        String key = createKey(name, controller);
         C component = createComponent(controller);
-        compile(name, component);
-        components.put(name, component);
+        compile(key, component);
+        components.put(key, component);
         return component;
     }
 
-    public C get(String urn) {
-        String name = urnToClassName(urn);
-        C component = components.get(name);
+    public C get(String key) {
+        C component = components.get(key);
         if (component == null) {
-            throw new IllegalStateException("no such element: " + urn);
+            throw new IllegalStateException("no such element: " + key);
         }
-        return compileIfObsolete(name, component);
+        return compileIfObsolete(key, component);
+    }
+
+    public Map<String, C> getAll() {
+        return components;
     }
 
     public Collection<String> getNames() {
@@ -37,19 +44,19 @@ abstract class JavascriptComponents<C extends JavascriptComponent> {
     }
 
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
-    private C compileIfObsolete(String name, C component) {
+    private C compileIfObsolete(String key, C component) {
         synchronized (component) {
             if (isObsolete(component) || !component.isCompiled()) {
-                compile(name, component);
+                compile(key, component);
             }
             return component;
         }
     }
 
-    private void compile(String name, C component) {
+    private void compile(String key, C component) {
         component.setCompiled(false);
         reloadHtml(component);
-        String javascript = compile(name, component.getHtmlResourceFile());
+        String javascript = compile(key, component.getHtmlResourceFile());
         component.setJavascript(javascript);
         component.setCompiled(true);
     }

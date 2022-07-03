@@ -30,6 +30,7 @@ class RootPage {
         Document document = getRootPageDocument();
         Element head = getHead(document);
         addApiScriptTag(head);
+        addGlobalsScriptTag(head);
         addPagesScriptTags(head);
         addWidgetScriptTags(head);
         addInitializerScriptTag(head);
@@ -64,6 +65,10 @@ class RootPage {
 
     private void addInitializerScriptTag(Element head) {
         addScriptTag(head, "/xis/xis-initializer.js");
+    }
+
+    private void addGlobalsScriptTag(Element head) {
+        addScriptTag(head, "/xis/xis-globals.js");
     }
 
     private void addCustomScriptTag(Element head) {

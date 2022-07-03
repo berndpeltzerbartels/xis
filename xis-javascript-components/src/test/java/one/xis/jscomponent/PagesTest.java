@@ -17,12 +17,14 @@ class PagesTest {
     private PageFactory pageFactory;
     private ReloadableResourceFile resourceFile;
 
-    private static final String PAGE_ID = "xyz";
+    @one.xis.Page(path = "/test.html")
+    class PageController {
 
+    }
 
     @BeforeEach
     void init() {
-        Object pageController = new Object();
+        PageController pageController = new PageController();
 
         ResourceFiles resourceFiles = mock(ResourceFiles.class);
         pageFactory = new PageFactory(resourceFiles);
@@ -39,7 +41,7 @@ class PagesTest {
                 .build();
 
         pages = testContext.getSingleton(Pages.class);
-        pages.add(PAGE_ID, pageController);
+        pages.add(pageController.getClass().getName(), pageController);
     }
 
     @Nested
@@ -52,7 +54,7 @@ class PagesTest {
 
         @Test
         void getPage() {
-            Page page = pages.get(PAGE_ID);
+            Page page = pages.get("/test.html");
 
             assertThat(page).isNotNull();
             verify(pageCompiler, times(1)).compile(anyString(), eq(resourceFile));
@@ -70,7 +72,7 @@ class PagesTest {
 
         @Test
         void getPage() {
-            Page page = pages.get(PAGE_ID);
+            Page page = pages.get("/test.html");
 
             assertThat(page).isNotNull();
             verify(pageCompiler, times(2)).compile(anyString(), eq(resourceFile));

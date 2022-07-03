@@ -30,6 +30,11 @@ class StaticResourceController {
         return resourceFiles.getByPath("xis-initializer.js").getContent();
     }
 
+    @Get("/xis/xis-globals.js")
+    String getGlobals() {
+        return resourceFiles.getByPath("xis-globals.js").getContent();
+    }
+    
     @Get("/xis/custom-script.js")
     String getCustomScript() {
         if (resourceFiles.exists(RootPage.CUSTOM_SCRIPT)) {

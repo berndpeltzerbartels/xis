@@ -15,4 +15,7 @@ import java.lang.annotation.Target;
 @Singleton // for micronaut
 @Component // for spring
 public @interface Page {
+    String path();
+
+    String title() default "";
 }

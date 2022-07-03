@@ -38,6 +38,7 @@ class JavasscriptComponentUtils {
     static String getHtmlTemplatePath(Class<?> controllerClass) {
         return controllerClass.getName().replace('.', '/') + ".html";
     }
+    
 
     private static Document htmlToDocument(String htmlSource) throws SAXException {
         try {
