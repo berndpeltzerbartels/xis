@@ -26,4 +26,8 @@ public class ResourceFiles {
             return new DevelopmentResource(new File(uri));
         }
     }
+
+    public boolean exists(String path) {
+        return ClassLoader.getSystemClassLoader().getResource(path) != null;
+    }
 }

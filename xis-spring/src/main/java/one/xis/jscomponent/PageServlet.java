@@ -22,6 +22,6 @@ class PageServlet extends ResourceServlet {
 
     @Override
     protected String getContentType() {
-        return "text/javascript";
+        return "text/javascript; charset=utf-8";
     }
 }

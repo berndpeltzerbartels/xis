@@ -11,7 +11,7 @@ class WidgetController {
 
     @Inject
     private MicronautContextAdapter contextAdapter;
-    
+
     private Widgets widgets;
 
     @PostConstruct
@@ -19,7 +19,7 @@ class WidgetController {
         widgets = contextAdapter.getWidgets();
     }
 
-    @Get(produces = "text/javascript", uri = "/xis/widget/{widgetUrn}")
+    @Get(produces = "text/javascript; charset=utf-8", uri = "/xis/widget/{widgetUrn}")
     String getWidget(@PathVariable("widgetUrn") String widgetUrn) {
         return widgets.get(widgetUrn).getJavascript();
     }

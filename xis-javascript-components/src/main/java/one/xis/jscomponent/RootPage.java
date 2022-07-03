@@ -17,6 +17,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 class RootPage {
 
+    public static final String CUSTOM_SCRIPT = "custom-script.js";
     private final Pages pages;
     private final Widgets widgets;
     private final ResourceFiles resourceFiles;
@@ -28,8 +29,11 @@ class RootPage {
     void createContent() {
         Document document = getRootPageDocument();
         Element head = getHead(document);
+        addApiScriptTag(head);
         addPagesScriptTags(head);
         addWidgetScriptTags(head);
+        addInitializerScriptTag(head);
+        addCustomScriptTag(head);
         content = XmlUtil.asString(document);
     }
 
@@ -52,6 +56,18 @@ class RootPage {
 
     private void addScriptTag(Element head, String src) {
         head.appendChild(createScriptTag(head.getOwnerDocument(), src));
+    }
+
+    private void addApiScriptTag(Element head) {
+        addScriptTag(head, "/xis/xis-api.js");
+    }
+
+    private void addInitializerScriptTag(Element head) {
+        addScriptTag(head, "/xis/xis-initializer.js");
+    }
+
+    private void addCustomScriptTag(Element head) {
+        addScriptTag(head, "/xis/custom-script.js");
     }
 
     private Element createScriptTag(Document document, String src) {

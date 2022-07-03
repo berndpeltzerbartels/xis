@@ -7,4 +7,6 @@ public interface ResourceFile {
     String getContent();
 
     long getLastModified();
+
+    ResourceFile EMPTY_FILE = new EmptyResourceFile();
 }
