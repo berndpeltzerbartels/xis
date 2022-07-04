@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import one.xis.context.XISComponent;
+import one.xis.path.PathUtils;
 import one.xis.resource.ResourceFile;
 import one.xis.resource.ResourceFiles;
 import one.xis.utils.xml.XmlUtil;
@@ -48,7 +49,7 @@ class RootPage {
     }
 
     private void addPagesScriptTags(Element head) {
-        pages.getNames().stream().map(JavasscriptComponentUtils::nameToUrn).forEach(urn -> addScriptTag(head, "/xis/page/" + urn));
+        pages.getNames().forEach(urn -> addScriptTag(head, PathUtils.appendPath("/xis/page/", urn)));
     }
 
     private void addWidgetScriptTags(Element head) {

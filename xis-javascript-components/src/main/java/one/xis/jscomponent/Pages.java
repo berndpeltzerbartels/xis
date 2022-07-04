@@ -1,12 +1,16 @@
 package one.xis.jscomponent;
 
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
 import one.xis.resource.ResourceFile;
 
 import java.util.HashSet;
 import java.util.Set;
+
+import static one.xis.jscomponent.JavasscriptComponentUtils.pathToUrn;
+import static one.xis.jscomponent.JavasscriptComponentUtils.validatePath;
+import static one.xis.path.PathUtils.stripSuffix;
+import static one.xis.path.PathUtils.stripTrailingSlash;
 
 @XISComponent
 @RequiredArgsConstructor
@@ -30,22 +34,26 @@ class Pages extends JavascriptComponents<Page> {
     @Override
     protected String createKey(String name, Object pageController) {
         String path = getPath(pageController);
-        validatePath(path, pageController);
-        return path;
+        validatePath(path);
+        String normalizedPath = normalizePath(path);
+        validateNotDuplicate(normalizedPath);
+        return pathToUrn(normalizedPath);
+    }
+
+    private String normalizePath(String path) {
+        String normalizedPath = stripSuffix(path);
+        return stripTrailingSlash(normalizedPath);
     }
 
     private String getPath(Object pageController) {
         return pageController.getClass().getAnnotation(one.xis.Page.class).path();
     }
 
-    private void validatePath(@NonNull String path, @NonNull Object pageController) {
-        if (pathsForValidation.contains(path)) {
-            throw new DuplicateKeyException(String.format("there is more than one page with path '%s'", path));
+    private void validateNotDuplicate(String normalizedPath) {
+        if (pathsForValidation.contains(normalizedPath)) {
+            throw new IllegalStateException("there is more tham one page with path " + normalizedPath);
         }
-        pathsForValidation.add(path);
-        if (!path.endsWith(".html")) {
-            throw new IllegalStateException("path in " + pageController.getClass() + " must have suffix 'html'");
-        }
+        pathsForValidation.add(normalizedPath);
     }
 
 }

@@ -1,5 +1,6 @@
 package one.xis.utils.lang;
 
+import lombok.NonNull;
 import lombok.experimental.UtilityClass;
 
 import java.util.Arrays;
@@ -46,6 +47,30 @@ public class StringUtils {
 
     public String join(Collection<?> collection, String delimiter) {
         return collection.stream().map(Objects::toString).collect(Collectors.joining(delimiter));
+    }
+
+    public int getNumberOfOccurences(String src, char c) {
+        int count = 0;
+        for (int i = 0; i < src.length(); i++) {
+            if (src.charAt(i) == c) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    public String removeLastChar(@NonNull String s) {
+        if (s.isEmpty()) {
+            throw new IllegalArgumentException("can no remove last char of empty string");
+        }
+        return s.substring(0, s.length() - 1);
+    }
+
+    public String removeFirstChar(@NonNull String s) {
+        if (s.isEmpty()) {
+            throw new IllegalArgumentException("can no remove last char of empty string");
+        }
+        return s.substring(1);
     }
 
 }
