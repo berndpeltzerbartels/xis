@@ -1,4 +1,4 @@
-package one.xis.micronaut
+package micronaut.example
 
 import io.micronaut.context.annotation.Import
 import io.micronaut.runtime.Micronaut

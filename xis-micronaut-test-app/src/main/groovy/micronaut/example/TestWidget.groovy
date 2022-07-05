@@ -1,4 +1,4 @@
-package one.xis.micronaut
+package micronaut.example
 
 
 import one.xis.Widget

@@ -1,4 +1,4 @@
-package one.xis.micronaut;
+package micronaut.example;
 
 import io.micronaut.context.BeanContext;
 import io.micronaut.context.event.ApplicationEventListener;
