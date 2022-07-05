@@ -39,7 +39,7 @@ abstract class JavascriptComponents<C extends JavascriptComponent> {
         return components;
     }
 
-    public Collection<String> getNames() {
+    public Collection<String> getKeys() {
         return components.keySet();
     }
 

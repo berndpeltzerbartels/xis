@@ -4,8 +4,6 @@ import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
 import one.xis.resource.ResourceFile;
 
-import static one.xis.jscomponent.JavasscriptComponentUtils.urnToClassName;
-
 @XISComponent
 @RequiredArgsConstructor
 class Widgets extends JavascriptComponents<Widget> {
@@ -14,10 +12,10 @@ class Widgets extends JavascriptComponents<Widget> {
     private final WidgetCompiler widgetCompiler;
 
     @Override
-    public Widget get(String urn) {
-        return super.get(urnToClassName(urn));
+    protected String createKey(String name, Object controller) {
+        return name.replace('.', ':');
     }
-
+    
     @Override
     protected Widget createComponent(Object controller) {
         return widgetFactory.createWidget(controller);
@@ -27,5 +25,5 @@ class Widgets extends JavascriptComponents<Widget> {
     protected String compile(String name, ResourceFile resourceFile) {
         return widgetCompiler.compile(name, resourceFile);
     }
-    
+
 }

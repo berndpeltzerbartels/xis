@@ -49,11 +49,11 @@ class RootPage {
     }
 
     private void addPagesScriptTags(Element head) {
-        pages.getNames().forEach(urn -> addScriptTag(head, PathUtils.appendPath("/xis/page/", urn)));
+        pages.getKeys().forEach(key -> addScriptTag(head, PathUtils.appendPath("/xis/page/", key)));
     }
 
     private void addWidgetScriptTags(Element head) {
-        widgets.getNames().stream().map(JavasscriptComponentUtils::nameToUrn).forEach(urn -> addScriptTag(head, "/xis/widget/" + urn));
+        widgets.getKeys().forEach(key -> addScriptTag(head, "/xis/widget/" + key));
     }
 
     private void addScriptTag(Element head, String src) {
