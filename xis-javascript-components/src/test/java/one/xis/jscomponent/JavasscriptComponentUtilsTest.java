@@ -1,5 +1,6 @@
 package one.xis.jscomponent;
 
+import one.xis.jsc.JavasscriptComponentUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

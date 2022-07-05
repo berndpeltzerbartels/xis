@@ -1,4 +1,4 @@
-package one.xis.jscomponent;
+package one.xis.jsc;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;

@@ -1,4 +1,4 @@
-package one.xis.jscomponent;
+package one.xis.jsc;
 
 import one.xis.resource.ResourceFile;
 import one.xis.spring.servlet.ResourceServlet;

@@ -1,4 +1,4 @@
-package one.xis.jscomponent;
+package one.xis.jsc;
 
 import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
@@ -7,8 +7,6 @@ import one.xis.resource.ResourceFile;
 import java.util.HashSet;
 import java.util.Set;
 
-import static one.xis.jscomponent.JavasscriptComponentUtils.pathToUrn;
-import static one.xis.jscomponent.JavasscriptComponentUtils.validatePath;
 import static one.xis.path.PathUtils.stripSuffix;
 import static one.xis.path.PathUtils.stripTrailingSlash;
 
@@ -34,10 +32,10 @@ class Pages extends JavascriptComponents<Page> {
     @Override
     protected String createKey(String name, Object pageController) {
         String path = getPath(pageController);
-        validatePath(path);
+        JavasscriptComponentUtils.validatePath(path);
         String normalizedPath = normalizePath(path);
         validateNotDuplicate(normalizedPath);
-        return pathToUrn(normalizedPath);
+        return JavasscriptComponentUtils.pathToUrn(normalizedPath);
     }
 
     private String normalizePath(String path) {

@@ -1,4 +1,4 @@
-package one.xis.jscomponent;
+package one.xis.jsc;
 
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;

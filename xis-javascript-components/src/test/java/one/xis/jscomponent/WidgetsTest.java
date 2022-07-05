@@ -1,6 +1,10 @@
 package one.xis.jscomponent;
 
 import one.xis.context.TestContext;
+import one.xis.jsc.Widget;
+import one.xis.jsc.WidgetCompiler;
+import one.xis.jsc.WidgetFactory;
+import one.xis.jsc.Widgets;
 import one.xis.resource.ReloadableResourceFile;
 import one.xis.resource.ResourceFiles;
 import org.junit.jupiter.api.BeforeEach;

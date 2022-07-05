@@ -1,4 +1,4 @@
-package one.xis.jscomponent;
+package one.xis.jsc;
 
 import io.micronaut.context.BeanContext;
 import io.micronaut.inject.BeanDefinition;

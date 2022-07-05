@@ -1,4 +1,4 @@
-package one.xis.jscomponent;
+package one.xis.jsc;
 
 import lombok.Getter;
 import lombok.NonNull;
@@ -6,9 +6,9 @@ import lombok.Setter;
 import one.xis.resource.ResourceFile;
 
 @Getter
-class Page implements ResourceFile, JavascriptComponent {
+class Widget implements ResourceFile, JavascriptComponent {
 
-    private final Object pageController;
+    private final Object widgetController;
     private final ResourceFile htmlResourceFile;
 
     @Setter
@@ -16,9 +16,9 @@ class Page implements ResourceFile, JavascriptComponent {
 
     @Setter
     private String javascript;
-    
-    Page(@NonNull Object pageController, @NonNull ResourceFile htmlResourceFile) {
-        this.pageController = pageController;
+
+    Widget(@NonNull Object widgetController, @NonNull ResourceFile htmlResourceFile) {
+        this.widgetController = widgetController;
         this.htmlResourceFile = htmlResourceFile;
     }
 
@@ -36,4 +36,5 @@ class Page implements ResourceFile, JavascriptComponent {
     public long getLastModified() {
         return htmlResourceFile.getLastModified();
     }
+
 }

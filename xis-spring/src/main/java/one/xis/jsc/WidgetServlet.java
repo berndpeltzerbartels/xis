@@ -1,22 +1,24 @@
-package one.xis.jscomponent;
+package one.xis.jsc;
+
 
 import one.xis.resource.ResourceFile;
-import one.xis.resource.ResourceFiles;
 import one.xis.spring.servlet.ResourceServlet;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 
-@WebServlet("/xis/xis-initializer.js")
-class InitializerServlet extends ResourceServlet {
+@WebServlet(urlPatterns = "/xis/widget/*")
+class WidgetServlet extends ResourceServlet {
 
     @Autowired
-    private ResourceFiles resourceFiles;
+    private Widgets widgets;
 
     @Override
     protected ResourceFile getResource(HttpServletRequest request) {
-        return resourceFiles.getByPath("xis-initializer.js");
+        String uri = request.getRequestURI();
+        String urn = uri.substring(uri.lastIndexOf('/') + 1);
+        return widgets.get(urn);
     }
 
     @Override

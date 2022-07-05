@@ -1,4 +1,4 @@
-package one.xis.jscomponent;
+package one.xis.jsc;
 
 import one.xis.resource.ResourceFile;
 import one.xis.resource.ResourceFiles;
@@ -8,15 +8,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 
-@WebServlet("/xis/xis-globals.js")
-class GlobalsServlet extends ResourceServlet {
+@WebServlet("/xis/xis-api.js")
+class ApiServlet extends ResourceServlet {
 
     @Autowired
     private ResourceFiles resourceFiles;
 
     @Override
     protected ResourceFile getResource(HttpServletRequest request) {
-        return resourceFiles.getByPath("xis-initializer.js");
+        return resourceFiles.getByPath("xis-api.js");
     }
 
     @Override

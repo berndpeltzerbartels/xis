@@ -1,4 +1,4 @@
-package one.xis.jscomponent;
+package one.xis.jsc;
 
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
@@ -34,7 +34,7 @@ class StaticResourceController {
     String getGlobals() {
         return resourceFiles.getByPath("xis-globals.js").getContent();
     }
-    
+
     @Get("/xis/custom-script.js")
     String getCustomScript() {
         if (resourceFiles.exists(RootPage.CUSTOM_SCRIPT)) {

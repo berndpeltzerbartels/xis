@@ -1,4 +1,4 @@
-package one.xis.jscomponent;
+package one.xis.jsc;
 
 import one.xis.Page;
 import one.xis.Widget;

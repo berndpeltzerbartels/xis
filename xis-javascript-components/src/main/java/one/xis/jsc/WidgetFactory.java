@@ -1,12 +1,10 @@
-package one.xis.jscomponent;
+package one.xis.jsc;
 
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
 import one.xis.resource.ResourceFiles;
-
-import static one.xis.jscomponent.JavasscriptComponentUtils.getHtmlTemplatePath;
 
 @XISComponent
 @RequiredArgsConstructor
@@ -15,6 +13,6 @@ class WidgetFactory {
     private final ResourceFiles resourceFiles;
 
     Widget createWidget(@NonNull Object widgetController) {
-        return new Widget(widgetController, resourceFiles.getByPath(getHtmlTemplatePath(widgetController.getClass())));
+        return new Widget(widgetController, resourceFiles.getByPath(JavasscriptComponentUtils.getHtmlTemplatePath(widgetController.getClass())));
     }
 }
