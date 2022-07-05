@@ -1,10 +1,6 @@
-package one.xis.jscomponent;
+package one.xis.jsc;
 
 import one.xis.context.TestContext;
-import one.xis.jsc.Page;
-import one.xis.jsc.PageCompiler;
-import one.xis.jsc.PageFactory;
-import one.xis.jsc.Pages;
 import one.xis.resource.ReloadableResourceFile;
 import one.xis.resource.ResourceFiles;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,7 +17,7 @@ class PagesTest {
     private PageFactory pageFactory;
     private ReloadableResourceFile resourceFile;
 
-    @one.xis.Page(path = "/test.html")
+    @one.xis.Page(path = "/xyz/test.html")
     class PageController {
 
     }
@@ -58,7 +54,7 @@ class PagesTest {
 
         @Test
         void getPage() {
-            Page page = pages.get("/test.html");
+            Page page = pages.get("xyz:test");
 
             assertThat(page).isNotNull();
             verify(pageCompiler, times(1)).compile(anyString(), eq(resourceFile));
@@ -76,7 +72,7 @@ class PagesTest {
 
         @Test
         void getPage() {
-            Page page = pages.get("/test.html");
+            Page page = pages.get("xyz:test");
 
             assertThat(page).isNotNull();
             verify(pageCompiler, times(2)).compile(anyString(), eq(resourceFile));

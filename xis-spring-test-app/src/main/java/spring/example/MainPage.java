@@ -1,4 +1,4 @@
-package one.xis.test;
+package spring.example;
 
 import one.xis.Page;
 

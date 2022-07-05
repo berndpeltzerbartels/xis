@@ -1,9 +1,10 @@
-package one.xis.test;
+package spring.example;
 
 import one.xis.Widget;
 import org.springframework.stereotype.Component;
 
 @Widget
 @Component
-class ProductList {
+public class ProjectList {
+    private int i;
 }

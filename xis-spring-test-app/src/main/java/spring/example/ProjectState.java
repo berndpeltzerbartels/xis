@@ -1,4 +1,4 @@
-package one.xis.test;
+package spring.example;
 
 import lombok.Data;
 import one.xis.ClientState;

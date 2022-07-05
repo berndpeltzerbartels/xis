@@ -1,4 +1,4 @@
-package one.xis.spring.servlet;
+package one.xis.jsc;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
