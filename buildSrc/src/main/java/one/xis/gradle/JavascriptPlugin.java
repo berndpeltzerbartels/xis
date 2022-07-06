@@ -1,7 +1,5 @@
 package one.xis.gradle;
 
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 
@@ -10,10 +8,11 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import java.io.*;
 import java.nio.file.Files;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Objects;
 import java.util.stream.Collectors;
-
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import java.util.stream.Stream;
 
 /**
  * Writes all javascript-sources into a single file and compiles the result
@@ -28,49 +27,30 @@ public class JavascriptPlugin implements Plugin<Project> {
 
     @Override
     public void apply(Project project) {
-        List<JavascriptSrc> javascriptSources = getJavascriptSources(project);
-        compile(javascriptSources);
-        File jsOutfile = getJSOutfile(project);
-        writeAllJsToFile(javascriptSources, jsOutfile);
-        compile(jsOutfile);
-        getOutfiles(project).forEach(file -> copyContent(jsOutfile, file));
+        findJsSrcFolders(project).forEach(folder -> processJsSrcFolder(folder, project));
     }
 
-    private void copyContent(File jsOutfile, File file) {
-        file.getParentFile().mkdirs();
-        try {
-            Files.copy(jsOutfile.toPath(), file.toPath(), REPLACE_EXISTING);
-        } catch (IOException e) {
-            throw new RuntimeException("can not copy file to " + file.getAbsolutePath());
+    private void processJsSrcFolder(File jsSrcDir, Project project) {
+        File jsOutFile = getJSOutfile(jsSrcDir, project);
+        copyJsToFile(getJsFiles(jsSrcDir), jsOutFile);
+        compile(jsOutFile);
+    }
+
+    private void copyJsToFile(Collection<File> jsSrcFiles, File jsOutFile) {
+        try (PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(jsOutFile)))) {
+            jsSrcFiles.forEach(file -> {
+                String content = readContent(file);
+                out.println(content);
+                out.println();
+            });
+
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    private Collection<File> getOutfiles(Project project) {
-        String outFilesRaw = (String) project.findProperty("javascript.outfiles");
-        if (outFilesRaw == null) {
-            return Collections.emptySet();
-        }
-        return Arrays.stream(outFilesRaw.split(",")).map(String::trim).map(path -> new File(project.getProjectDir(), path)).collect(Collectors.toList());
-    }
-
-    private void writeAllJsToFile(List<JavascriptSrc> javascriptSources, File jsOutfile) {
-        new JavascriptWriter(jsOutfile).writeAllToFile(javascriptSources);
-    }
-
-    private List<JavascriptSrc> getJavascriptSources(Project project) {
-        return new JavascripSrcCollector(getJsSrcRoot(project)).findSources();
-    }
-
-    private void compile(List<JavascriptSrc> sources) {
-        sources.forEach(this::compile);
-    }
-
-    private void compile(JavascriptSrc src) {
-        try {
-            compiler.compile(src.getContent());
-        } catch (ScriptException e) {
-            throw new RuntimeException("Compilation failed for " + src.getFile().getAbsolutePath(), e);
-        }
+    private Collection<File> getJsFiles(File jsSrcDir) {
+        return Arrays.stream(Objects.requireNonNull(jsSrcDir.listFiles((dir, name) -> name.endsWith(".js")))).collect(Collectors.toSet());
     }
 
     private void compile(File jsFile) {
@@ -89,12 +69,12 @@ public class JavascriptPlugin implements Plugin<Project> {
         return new File(project.getProjectDir(), "src/main/resources/js");
     }
 
-    private File getJSOutfile(Project project) {
+    private File getJSOutfile(File jsSrcDir, Project project) {
         File javascriptDir = new File(project.getBuildDir(), "javascript");
         if (!javascriptDir.exists() && !javascriptDir.mkdirs()) {
             throw new IllegalStateException("can not create " + javascriptDir.getAbsolutePath());
         }
-        return new File(javascriptDir, "xis-api.js");
+        return new File(javascriptDir, jsSrcDir.getName() + ".js");
     }
 
     private static String readContent(File file) {
@@ -105,80 +85,14 @@ public class JavascriptPlugin implements Plugin<Project> {
         }
     }
 
-    @RequiredArgsConstructor
-    private static class JavascriptWriter {
-        private final File jsOutfile;
-
-        void writeAllToFile(List<JavascriptSrc> sources) {
-            try (PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(jsOutfile)))) {
-                writeAllJsToFile(sources, out);
-            } catch (FileNotFoundException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        private void writeAllJsToFile(List<JavascriptSrc> sources, PrintWriter out) {
-            sources.forEach(src -> writeJsToFile(src, out));
-        }
-
-        private void writeJsToFile(JavascriptSrc source, PrintWriter out) {
-            out.print("/*-----------------------------------------");
-            out.print(source.getFile().getName());
-            out.println("-----------------------------------------*/");
-            out.println(source.getContent());
-        }
-
+    private Stream<File> findJsSrcFolders(Project project) {
+        return Arrays.stream(getJsSrcRoot(project).listFiles()).filter(Objects::nonNull).filter(this::isJsSrcFolder);
     }
 
-    private static class JavascripSrcCollector {
-        private final File srcRoot;
-        private final List<JavascriptSrc> sources = new ArrayList<>();
-
-        JavascripSrcCollector(File srcRoot) {
-            this.srcRoot = srcRoot;
+    private boolean isJsSrcFolder(File folder) {
+        if (!folder.isDirectory()) {
+            return false;
         }
-
-        List<JavascriptSrc> findSources() {
-            evaluateDir(srcRoot);
-            return sources;
-        }
-
-        private void evaluate(File file) {
-            if (file.isDirectory()) {
-                evaluateDir(file);
-            } else if (file.getName().endsWith(".js")) {
-                addSource(file);
-            }
-        }
-
-        private void addSource(File file) {
-            this.sources.add(new JavascriptSrc(file));
-        }
-
-        private void evaluateDir(File dir) {
-            File[] files = dir.listFiles();
-            if (files != null) {
-                for (File f : files) {
-                    evaluate(f);
-                }
-
-            }
-
-        }
-
+        return Arrays.stream(folder.listFiles()).filter(File::isFile).anyMatch(file -> file.getName().endsWith(".js"));
     }
-
-    @Data
-    private static class JavascriptSrc {
-        private final File file;
-        private final String content;
-
-        JavascriptSrc(File file) {
-            this.file = file;
-            this.content = readContent(file);
-        }
-
-
-    }
-
 }
