@@ -20,11 +20,21 @@ class StaticResourceController {
         resourceFiles = contextAdapter.getResourceFiles();
     }
 
-    @Get("/xis/xis-api.js")
-    String getApi() {
-        return resourceFiles.getByPath("xis-api.js").getContent();
+    @Get("/xis/functions.js")
+    String getFunctions() {
+        return resourceFiles.getByPath("functions.js").getContent();
     }
 
+    @Get("/xis/base-classes.js")
+    String getBaseClasses() {
+        return resourceFiles.getByPath("base-classes.js").getContent();
+    }
+
+    @Get("/xis/classes.js")
+    String getApi() {
+        return resourceFiles.getByPath("classes.js").getContent();
+    }
+    
     @Get("/xis/xis-initializer.js")
     String getPageInitializer() {
         return resourceFiles.getByPath("xis-initializer.js").getContent();

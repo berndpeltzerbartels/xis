@@ -30,7 +30,9 @@ class RootPage {
     void createContent() {
         Document document = getRootPageDocument();
         Element head = getHead(document);
-        addApiScriptTag(head);
+        addFunctionsScriptTag(head);
+        addBaseClassesScriptTag(head);
+        addClassesScriptTag(head);
         addGlobalsScriptTag(head);
         addPagesScriptTags(head);
         addWidgetScriptTags(head);
@@ -60,8 +62,16 @@ class RootPage {
         head.appendChild(createScriptTag(head.getOwnerDocument(), src));
     }
 
-    private void addApiScriptTag(Element head) {
-        addScriptTag(head, "/xis/xis-api.js");
+    private void addFunctionsScriptTag(Element head) {
+        addScriptTag(head, "/xis/functions.js");
+    }
+
+    private void addBaseClassesScriptTag(Element head) {
+        addScriptTag(head, "/xis/base-classes.js");
+    }
+
+    private void addClassesScriptTag(Element head) {
+        addScriptTag(head, "/xis/classes.js");
     }
 
     private void addInitializerScriptTag(Element head) {
