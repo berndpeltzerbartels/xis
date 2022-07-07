@@ -9,7 +9,7 @@ import one.xis.resource.ResourceFile;
 import one.xis.resource.ResourceFiles;
 
 @Controller(produces = "text/javascript; charset=utf-8")
-class StaticResourceController {
+class StaticJsResourceController {
 
     @Inject
     private MicronautContextAdapter contextAdapter;
@@ -20,32 +20,32 @@ class StaticResourceController {
         resourceFiles = contextAdapter.getResourceFiles();
     }
 
-    @Get("/xis/functions.js")
+    @Get("/xis/api/functions.js")
     String getFunctions() {
-        return resourceFiles.getByPath("functions.js").getContent();
+        return resourceFiles.getByPath("js/functions.js").getContent();
     }
 
-    @Get("/xis/base-classes.js")
+    @Get("/xis/api/base-classes.js")
     String getBaseClasses() {
-        return resourceFiles.getByPath("base-classes.js").getContent();
+        return resourceFiles.getByPath("js/base-classes.js").getContent();
     }
 
-    @Get("/xis/classes.js")
+    @Get("/xis/api/classes.js")
     String getApi() {
-        return resourceFiles.getByPath("classes.js").getContent();
+        return resourceFiles.getByPath("js/classes.js").getContent();
     }
-    
-    @Get("/xis/xis-initializer.js")
+
+    @Get("/xis/api/xis-initializer.js")
     String getPageInitializer() {
-        return resourceFiles.getByPath("xis-initializer.js").getContent();
+        return resourceFiles.getByPath("js/xis-initializer.js").getContent();
     }
 
-    @Get("/xis/xis-globals.js")
+    @Get("/xis/api/xis-globals.js")
     String getGlobals() {
-        return resourceFiles.getByPath("xis-globals.js").getContent();
+        return resourceFiles.getByPath("js/xis-globals.js").getContent();
     }
 
-    @Get("/xis/custom-script.js")
+    @Get("/xis/api/custom-script.js")
     String getCustomScript() {
         if (resourceFiles.exists(RootPage.CUSTOM_SCRIPT)) {
             ResourceFile customScript = resourceFiles.getByPath(RootPage.CUSTOM_SCRIPT);

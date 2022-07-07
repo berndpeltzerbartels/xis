@@ -63,27 +63,27 @@ class RootPage {
     }
 
     private void addFunctionsScriptTag(Element head) {
-        addScriptTag(head, "/xis/functions.js");
+        addScriptTag(head, "/xis/api/functions.js");
     }
 
     private void addBaseClassesScriptTag(Element head) {
-        addScriptTag(head, "/xis/base-classes.js");
+        addScriptTag(head, "/xis/api/base-classes.js");
     }
 
     private void addClassesScriptTag(Element head) {
-        addScriptTag(head, "/xis/classes.js");
+        addScriptTag(head, "/xis/api/classes.js");
     }
 
     private void addInitializerScriptTag(Element head) {
-        addScriptTag(head, "/xis/xis-initializer.js");
+        addScriptTag(head, "/xis/api/xis-initializer.js");
     }
 
     private void addGlobalsScriptTag(Element head) {
-        addScriptTag(head, "/xis/xis-globals.js");
+        addScriptTag(head, "/xis/api/xis-globals.js");
     }
 
     private void addCustomScriptTag(Element head) {
-        addScriptTag(head, "/xis/custom-script.js");
+        addScriptTag(head, "/xis/api/custom-script.js");
     }
 
     private Element createScriptTag(Document document, String src) {

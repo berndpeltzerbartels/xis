@@ -21,6 +21,7 @@ dependencies {
     implementation project(':xis-context')
     implementation project(':xis-javascript-components')
     implementation project(':xis-resources')
+    implementation project(':xis-javascript')
 
     implementation 'org.codehaus.groovy:groovy-all:3.0.11'
 
