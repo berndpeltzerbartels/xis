@@ -10,7 +10,7 @@ import java.net.URL;
 @XISComponent
 public class ResourceFiles {
     public ResourceFile getByPath(String path) {
-        URL url = ClassLoader.getSystemClassLoader().getResource(path);
+        URL url = ClassLoader.getSystemClassLoader().getResource(removeTrailingSlah(path));
         if (url == null) {
             throw new NoSuchResourceException(path);
         }
@@ -29,5 +29,12 @@ public class ResourceFiles {
 
     public boolean exists(String path) {
         return ClassLoader.getSystemClassLoader().getResource(path) != null;
+    }
+
+    private String removeTrailingSlah(String path) {
+        if (path.startsWith("/")) {
+            return path.substring(1);
+        }
+        return path;
     }
 }

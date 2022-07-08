@@ -25,14 +25,19 @@ class StaticJsResourceController {
         return resourceFiles.getByPath("js/functions.js").getContent();
     }
 
-    @Get("/xis/api/base-classes.js")
-    String getBaseClasses() {
-        return resourceFiles.getByPath("js/base-classes.js").getContent();
+    @Get("/xis/api/classes1.js")
+    String getClasses1() {
+        return resourceFiles.getByPath("js/classes1.js").getContent();
     }
 
-    @Get("/xis/api/classes.js")
-    String getApi() {
-        return resourceFiles.getByPath("js/classes.js").getContent();
+    @Get("/xis/api/classes2.js")
+    String getClasses2() {
+        return resourceFiles.getByPath("js/classes2.js").getContent();
+    }
+
+    @Get("/xis/api/classes3.js")
+    String getClasses3() {
+        return resourceFiles.getByPath("js/classes3.js").getContent();
     }
 
     @Get("/xis/api/xis-initializer.js")
