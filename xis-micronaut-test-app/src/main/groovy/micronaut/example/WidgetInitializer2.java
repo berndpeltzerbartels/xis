@@ -7,14 +7,13 @@ import io.micronaut.inject.BeanDefinition;
 import io.micronaut.inject.qualifiers.Qualifiers;
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
 import one.xis.Widget;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
 
 
-@Singleton
+//@Singleton
 public class WidgetInitializer2 implements ApplicationEventListener<ServiceReadyEvent> {
 
     @Inject

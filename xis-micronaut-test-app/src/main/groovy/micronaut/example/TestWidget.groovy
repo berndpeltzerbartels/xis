@@ -7,7 +7,7 @@ import one.xis.Widget
 class TestWidget {
 
     TestWidget() {
-        System.out.println("Huhu !");
+        System.out.println("Huhu !")
     }
 
     void test() {

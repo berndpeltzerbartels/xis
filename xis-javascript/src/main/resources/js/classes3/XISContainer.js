@@ -1,7 +1,6 @@
 /**
  * Element for displaying widgets
  */
-
 class XISContainer extends XISTemplateObject {
 
     /**

@@ -1,0 +1,14 @@
+<div>
+    <h4>Unsere besonders schönen Angebote zu absoluten Toppreisen</h4>
+    <ul data-for="category:categories">
+        <li>${category.title}
+            <ul data-for="product:category.products" data-number="i">
+                <li>
+                    <span>${i}. </span>
+                    <span>${product.title} </span>
+                    <span>${product.price} EUR</span>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</div>
