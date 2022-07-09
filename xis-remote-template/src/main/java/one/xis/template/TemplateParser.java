@@ -9,11 +9,10 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.Text;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.toMap;
 import static one.xis.utils.xml.XmlUtil.getAttributes;
 import static one.xis.utils.xml.XmlUtil.getChildNodes;
 
@@ -29,25 +28,35 @@ public class TemplateParser {
     static final String ATTR_REPEAT = "data-repeat";
     static final String ATTR_LOOP_INDEX = "data-index";
     static final String ATTR_LOOP_NUMBER = "data-number";
-    static final String ATTR_CONTAINER_ID = "data-container-id";
+    static final String ATTR_CONTAINER = "data-container";
     static final String ATTR_CONTAINER_WIDGET = "data-widget";
 
+    static final Set<String> DATA_ATTRIBUTES = Set.of(ATTR_IF, ATTR_FOR, ATTR_REPEAT, ATTR_LOOP_INDEX, ATTR_LOOP_NUMBER, ATTR_CONTAINER, ATTR_CONTAINER_WIDGET);
+
     public WidgetTemplateModel parseWidgetTemplate(Document document, String widgetClassName) {
-        return new WidgetTemplateModel(widgetClassName, parseElement(document.getDocumentElement()));
+        try {
+            return new WidgetTemplateModel(widgetClassName, parseElement(document.getDocumentElement()));
+        } catch (TemplateSynthaxException e) {
+            throw new TemplateSynthaxException(String.format("Parsing failed for widget '%s': %s", widgetClassName, e.getMessage()));
+        }
     }
 
     public PageTemplateModel parsePageTemplate(Document document, String path) {
-        var pageModel = new PageTemplateModel(path);
-        var root = document.getDocumentElement();
-        var headElement = XmlUtil.getElementByTagName(root, "head").orElseThrow(() -> new TemplateSynthaxException(path + " must have head-tag")); // TODO create if not present
-        var bodyElement = XmlUtil.getElementByTagName(root, "body").orElseThrow(() -> new TemplateSynthaxException(path + " must have body-tag"));  // TODO create if not present
-        var headTemplateElement = toTemplateElement(headElement);
-        var bodyTemplateElement = toTemplateElement(bodyElement);
-        parseChildren(headElement).forEach(headTemplateElement::addChild);
-        parseChildren(bodyElement).forEach(bodyTemplateElement::addChild);
-        pageModel.setHead(headTemplateElement);
-        pageModel.setBody(bodyTemplateElement);
-        return pageModel;
+        try {
+            var pageModel = new PageTemplateModel(path);
+            var root = document.getDocumentElement();
+            var headElement = XmlUtil.getElementByTagName(root, "head").orElseThrow(() -> new TemplateSynthaxException(path + " must have head-tag")); // TODO create if not present
+            var bodyElement = XmlUtil.getElementByTagName(root, "body").orElseThrow(() -> new TemplateSynthaxException(path + " must have body-tag"));  // TODO create if not present
+            var headTemplateElement = toTemplateElement(headElement);
+            var bodyTemplateElement = toTemplateElement(bodyElement);
+            parseChildren(headElement).forEach(headTemplateElement::addChild);
+            parseChildren(bodyElement).forEach(bodyTemplateElement::addChild);
+            pageModel.setHead(headTemplateElement);
+            pageModel.setBody(bodyTemplateElement);
+            return pageModel;
+        } catch (TemplateSynthaxException e) {
+            throw new TemplateSynthaxException(String.format("Parsing failed for page '%s': %s", path, e.getMessage()));
+        }
     }
 
     private Stream<ModelNode> parseChildren(Element parent) {
@@ -72,20 +81,38 @@ public class TemplateParser {
     @SuppressWarnings("all")
     private ChildHolder parseElement(Element element) {
         var result = new LinkedList<ChildHolder>();
-        if (hasIfAttribute(element)) {
+        Map<String, String> dataAttributes = getDataAttributes(element);
+        if (dataAttributes.containsKey(ATTR_IF)) {
             result.add(parseIf(element));
         }
-        if (hasRepeatAttribute(element)) {
+        if (dataAttributes.containsKey(ATTR_REPEAT)) {
             result.add(parseRepeat(element));
         }
         var modelElement = isContainer(element) ? toContainerElement(element) : toTemplateElement(element);
         result.add(modelElement);
-        if (hasForAttribute(element)) {
+        if (dataAttributes.containsKey(ATTR_FOR)) {
             result.add(parseFor(element));
         }
         var last = createHierarchy(result);
         parseChildren(element).forEach(last::addChild);
         return result.getFirst();
+    }
+
+    private Map<String, String> getDataAttributes(Element element) {
+        return XmlUtil.getAttributes(element).entrySet().stream()
+                .filter(e -> e.getKey().startsWith("data-"))
+                .peek(e -> throwExceptionForUnknown(e.getKey()))
+                .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+
+    private void throwExceptionForUnknown(String dataAttrName) {
+        if (!dataAttrName.startsWith("data-")) {
+            throw new IllegalStateException();
+        }
+        if (!DATA_ATTRIBUTES.contains(dataAttrName)) {
+            throw new TemplateSynthaxException(String.format("Unknown data-attribute: '%s'", dataAttrName));
+        }
     }
 
     private ChildHolder createHierarchy(List<ChildHolder> childHolders) {
@@ -96,9 +123,9 @@ public class TemplateParser {
     }
 
     private ContainerElement toContainerElement(Element element) {
-        var containerElement = new ContainerElement(element.getTagName(), getMandatoryAttribute(ATTR_CONTAINER_ID, element), element.getAttribute(ATTR_CONTAINER_WIDGET));
+        var containerElement = new ContainerElement(element.getTagName(), getMandatoryAttribute(ATTR_CONTAINER, element), element.getAttribute(ATTR_CONTAINER_WIDGET));
         if (element.getChildNodes().getLength() != 0) {
-            throw new TemplateSynthaxException(String.format("elements with attribute \"%s\" must have no content", ATTR_CONTAINER_ID));
+            throw new TemplateSynthaxException(String.format("elements with attribute \"%s\" must have no content", ATTR_CONTAINER));
         }
         return containerElement;
     }
@@ -180,19 +207,7 @@ public class TemplateParser {
     }
 
     private boolean isContainer(Element element) {
-        return element.hasAttribute(ATTR_CONTAINER_ID);
-    }
-
-    private boolean hasIfAttribute(Element element) {
-        return element.hasAttribute(ATTR_IF);
-    }
-
-    private boolean hasForAttribute(Element element) {
-        return element.hasAttribute(ATTR_FOR);
-    }
-
-    private boolean hasRepeatAttribute(Element element) {
-        return element.hasAttribute(ATTR_REPEAT);
+        return element.hasAttribute(ATTR_CONTAINER);
     }
 
     private String nextVarName() {

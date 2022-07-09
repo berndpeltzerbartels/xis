@@ -1,24 +1,11 @@
 package one.xis.js;
 
-import one.xis.template.*;
-import one.xis.utils.lang.CollectionUtils;
-import one.xis.utils.lang.CollectorUtils;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Stream;
-
-import static one.xis.utils.lang.ClassUtils.cast;
-import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("Parse template-models to javascript")
 class JavascriptParserTest {
 
+    /*
     private static final String WIDGET_NAME = "testWidget";
 
     @Nested
@@ -214,4 +201,6 @@ class JavascriptParserTest {
                 .filter(JSClass.class::isInstance)
                 .map(JSClass.class::cast);
     }
+
+     */
 }

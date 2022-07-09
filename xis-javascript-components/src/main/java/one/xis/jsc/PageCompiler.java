@@ -15,7 +15,6 @@ import org.w3c.dom.Document;
 class PageCompiler {
 
     private final TemplateParser templateParser;
-    private final JavascriptParser javascriptParser;
 
     String compile(@NonNull String pageClass, ResourceFile htmlTemplate) {
         PageTemplateModel templateModel = parseWidgetTemplate(pageClass, JavasscriptComponentUtils.htmlToDocument(pageClass, htmlTemplate.getContent()));
@@ -28,7 +27,9 @@ class PageCompiler {
     }
 
     private JSScript templateModelToScriptModel(PageTemplateModel templateModel) {
-        return javascriptParser.parseTemplateModel(templateModel);
+        JavascriptParser parser = new JavascriptParser();
+        parser.parseTemplateModel(templateModel);
+        return parser.getScript();
     }
 
 }

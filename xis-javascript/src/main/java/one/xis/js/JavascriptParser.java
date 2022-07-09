@@ -2,62 +2,34 @@ package one.xis.js;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import one.xis.context.XISComponent;
 import one.xis.template.*;
 import one.xis.utils.lang.CollectionUtils;
 
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import static one.xis.js.Classes.*;
 
-@XISComponent
 @RequiredArgsConstructor
 public class JavascriptParser {
 
     @Getter
     private final JSScript script = new JSScript();
     private static long currentNameId = 1;
-    private final Collection<JSClass> classes = new HashSet<>();
 
-    public void parse(Collection<PageTemplateModel> pageTemplateModels, Collection<WidgetTemplateModel> widgetTemplateModels) {
-        var widgetsClasses = widgetTemplateModels.stream().collect(Collectors.toMap(WidgetTemplateModel::getWidgetClassName, this::toClass));
-        var pageClasses = pageTemplateModels.stream().collect(Collectors.toMap(PageTemplateModel::getPath, this::parsePageModel));
-        script.addDeclarations(classes);
-
-        var widgetsClass = widgetsClass(widgetsClasses);
-        var pagesClass = pagesClass(pageClasses);
-        var containersClass = containersClass();
-        var lifecycleClass = lifecycleClass();
-
-        script.addDeclaration(widgetsClass);
-        script.addDeclaration(pagesClass);
-        script.addDeclaration(containersClass);
-        script.addDeclaration(lifecycleClass);
-
-        createGlobalVar("__widgets", widgetsClass);
-        createGlobalVar("__pages", pagesClass);
-        createGlobalVar("__containers", containersClass);
-        createGlobalVar("__lifecycleService", lifecycleClass);
-    }
-
-
-    private void createGlobalVar(String name, JSClass jsClass) {
-        script.addStatement(new JSVarAssignment(new JSVar(name), new JSContructorCall(jsClass)));
-    }
-
-    public JSScript parseWidgetModel(WidgetTemplateModel widgetTemplateModel) {
+    public void parseTemplateModel(WidgetTemplateModel widgetTemplateModel) {
         JSClass widgetClass = toClass(widgetTemplateModel);
-        JSScript script = new JSScript();
         script.addDeclaration(widgetClass);
-        return script;
     }
 
-    public JSScript parseTemplateModel(PageTemplateModel widgetTemplateModel) {
-        return new JSScript(); // TODO
+    public void parseTemplateModel(PageTemplateModel pageTemplateModel) {
+        var pageClass = derrivedClass(XIS_PAGE);
+        var headClass = toClass(pageTemplateModel.getHead());
+        var bodyClass = toClass(pageTemplateModel.getBody());
+        pageClass.addField("head", new JSContructorCall(headClass));
+        pageClass.addField("body", new JSContructorCall(bodyClass));
+        pageClass.addField("path", new JSString(pageTemplateModel.getPath()));
     }
 
     private JSClass toClass(WidgetTemplateModel widgetTemplateModel) {
@@ -78,41 +50,10 @@ public class JavascriptParser {
         return pageClass;
     }
 
-    private JSClass widgetsClass(Map<String, JSClass> simpleWidgetClasses) {
-        var widgetsClass = derrivedClass(XIS_WIDGETS);
-        var widgets = new JSJsonValue();
-        simpleWidgetClasses.forEach((name, widgetClass) -> widgets.addField(name, new JSContructorCall(widgetClass)));
-        widgetsClass.addField("widgets", widgets);
-        return widgetsClass;
-    }
-
-
-    private JSClass containersClass() {
-        var containersClass = derrivedClass(XIS_CONTAINERS);
-        var containers = new JSJsonValue();
-        //containerClasses.forEach((name, containerClass) -> containers.addField(name, new JSContructorCall(containerClass)));
-        containersClass.addField("containers", containers);
-        return containersClass;
-    }
-
-    private JSClass lifecycleClass() {
-        return derrivedClass(XIS_LIFECYCLE_SERVICE);
-    }
-
-    private JSClass pagesClass(Map<String, JSClass> pageWidgetClasses) {
-        var widgetsClass = derrivedClass(XIS_PAGES);
-        var widgets = new JSJsonValue();
-        pageWidgetClasses.forEach((path, pageClass) -> widgets.addField(path, new JSContructorCall(pageClass)));
-        widgetsClass.addField("pages", widgets);
-        return widgetsClass;
-    }
-
     private List<JSContructorCall> evaluateChildren(ChildHolder parent) {
-        var classes = parent.getChildren().stream()
+        return parent.getChildren().stream()
                 .map(this::toClass)
-                .collect(Collectors.toList());
-        this.classes.addAll(classes);
-        return classes.stream().map(JSContructorCall::new)
+                .map(JSContructorCall::new)
                 .collect(Collectors.toList());
     }
 
@@ -361,7 +302,7 @@ public class JavascriptParser {
 
     private JSClass derrivedClass(String className, JSSuperClass superClass) {
         var jsClass = new JSClass(className).derrivedFrom(superClass);
-        classes.add(jsClass);
+        script.addDeclaration(jsClass);
         return jsClass;
     }
 

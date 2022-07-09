@@ -84,7 +84,7 @@ public class JSClass implements JSDeclaration, JSContext {
         return sb.append('}').toString();
     }
 
-    // TODO remove equals and hashcode, but check Lombok causes StackOverflowException (rekursice call)
+    // TODO remove equals and hashcode, but check Lombok causes StackOverflowException (rekursive call)
     @Override
     public boolean equals(Object o) {
         if (this == o) {
