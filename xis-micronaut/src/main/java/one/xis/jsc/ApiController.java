@@ -9,7 +9,7 @@ import one.xis.resource.ResourceFile;
 import one.xis.resource.ResourceFiles;
 
 @Controller(produces = "text/javascript; charset=utf-8")
-class StaticJsResourceController {
+class ApiController {
 
     @Inject
     private MicronautContextAdapter contextAdapter;

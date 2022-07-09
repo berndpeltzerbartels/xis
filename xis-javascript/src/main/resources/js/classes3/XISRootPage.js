@@ -1,6 +1,7 @@
-class XISRootPage {
+class XISRootPage extends XISValueHolder {
 
     constructor(client) {
+        super(undefined);
         this.client = client;
         this.head = getElementByTagName('head');
         this.title = getElementByTagName('title');
@@ -9,18 +10,18 @@ class XISRootPage {
 
     bindPage(page) {
         this.page = page;
-        this.data = this.client.onBindPage(this.page);
+        this.setValues(this.client.onInitPage(this.page));
         this.setBodyAttributes(this.page);
-        this.page.bindHead(this.head);
-        this.page.bindBody(this.body);
+        this.page.bindHeadContent(this.head);
+        this.page.bindBodyContent(this.body);
     }
 
     unbindPage() {
         if (this.page) {
             this.removeBodyAttributes();
-            this.page.unbindHead(this.head);
+            this.page.unbindHeadContent(this.head);
             this.removeBodyAttributes();
-            this.page.unbindBody(this.body);
+            this.page.unbindBodyContent(this.body);
             this.page = undefined;
         }
     }

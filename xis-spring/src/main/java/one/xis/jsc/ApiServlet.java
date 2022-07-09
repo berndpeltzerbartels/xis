@@ -10,7 +10,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 
 @WebServlet("/xis/api/*")
-class StaticJsResourceServlet extends ResourceServlet {
+class ApiServlet extends ResourceServlet {
 
     @Autowired
     private ResourceFiles resourceFiles;
@@ -29,7 +29,7 @@ class StaticJsResourceServlet extends ResourceServlet {
     protected String getContentType() {
         return "text/javascript; charset=utf-8";
     }
-    
+
     private ResourceFile getCustomerScipt() {
         if (resourceFiles.exists(RootPage.CUSTOM_SCRIPT)) {
             ResourceFile customScript = resourceFiles.getByPath(RootPage.CUSTOM_SCRIPT);

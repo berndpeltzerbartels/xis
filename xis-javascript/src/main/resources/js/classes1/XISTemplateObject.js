@@ -7,6 +7,10 @@ class XISTemplateObject {
         this.parent = parent;
     }
 
+    onDataChanged() {
+
+    }
+
     getValueHolder() {
         throw new Error('abstract method');
     }
