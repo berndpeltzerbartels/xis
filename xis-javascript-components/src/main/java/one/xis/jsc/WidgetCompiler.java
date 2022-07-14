@@ -16,19 +16,19 @@ class WidgetCompiler {
 
     private final TemplateParser templateParser;
 
-    String compile(@NonNull String widgetClass, ResourceFile htmlTemplate) {
-        WidgetTemplateModel templateModel = parseWidgetTemplate(widgetClass, JavasscriptComponentUtils.htmlToDocument(widgetClass, htmlTemplate.getContent()));
-        JSScript script = templateModelToScriptModel(templateModel);
-        return JavasscriptComponentUtils.javaScriptModelAsCode(script);
+    String compile(@NonNull String widgetClass, ResourceFile htmlTemplate, String javascriptClass) {
+        WidgetTemplateModel templateModel = parseWidgetTemplate(widgetClass, JavascriptComponentUtils.htmlToDocument(widgetClass, htmlTemplate.getContent()));
+        JSScript script = templateModelToScriptModel(templateModel, javascriptClass);
+        return JavascriptComponentUtils.javaScriptModelAsCode(script);
     }
 
     private WidgetTemplateModel parseWidgetTemplate(String widgetClassName, Document document) {
         return templateParser.parseWidgetTemplate(document, widgetClassName);
     }
 
-    private JSScript templateModelToScriptModel(WidgetTemplateModel templateModel) {
+    private JSScript templateModelToScriptModel(WidgetTemplateModel templateModel, String javascriptClass) {
         JavascriptParser parser = new JavascriptParser();
-        parser.parseTemplateModel(templateModel);
+        parser.parseTemplateModel(templateModel, javascriptClass);
         return parser.getScript();
     }
 

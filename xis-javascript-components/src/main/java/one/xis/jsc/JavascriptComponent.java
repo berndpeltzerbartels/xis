@@ -11,4 +11,6 @@ interface JavascriptComponent {
     ResourceFile getHtmlResourceFile();
 
     void setCompiled(boolean compiled);
+    
+    String getJavascriptClass();
 }

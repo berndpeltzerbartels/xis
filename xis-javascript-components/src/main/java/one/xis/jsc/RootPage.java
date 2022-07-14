@@ -80,7 +80,7 @@ class RootPage {
     }
 
     private void addInitializerScriptTag(Element head) {
-        addScriptTag(head, "/xis/api/xis-initializer.js");
+        addScriptTag(head, "/xis/xis-initializer.js");
     }
 
     private void addGlobalsScriptTag(Element head) {

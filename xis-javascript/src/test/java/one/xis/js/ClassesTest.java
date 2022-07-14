@@ -16,8 +16,7 @@ class ClassesTest {
         String classes2 = IOUtils.getResourceAsString("js/classes2.js");
         String classes3 = IOUtils.getResourceAsString("js/classes3.js");
         String globals = IOUtils.getResourceAsString("js/xis-globals.js");
-        String initializer = IOUtils.getResourceAsString("js/xis-initializer.js");
 
-        JSUtil.compile(functions + classes1 + classes2 + classes3 + globals + initializer);
+        JSUtil.compile(functions + classes1 + classes2 + classes3 + globals);
     }
 }

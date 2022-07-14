@@ -14,7 +14,7 @@ import java.io.IOException;
 import static one.xis.path.PathUtils.getFile;
 import static one.xis.path.PathUtils.getSuffix;
 
-class JavasscriptComponentUtils {
+class JavascriptComponentUtils {
 
     static String javaScriptModelAsCode(@NonNull JSScript script) {
         StringBuilder builder = new StringBuilder();

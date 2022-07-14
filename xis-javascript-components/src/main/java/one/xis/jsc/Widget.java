@@ -10,6 +10,7 @@ class Widget implements ResourceFile, JavascriptComponent {
 
     private final Object widgetController;
     private final ResourceFile htmlResourceFile;
+    private final String javascriptClass;
 
     @Setter
     private boolean compiled;
@@ -17,9 +18,10 @@ class Widget implements ResourceFile, JavascriptComponent {
     @Setter
     private String javascript;
 
-    Widget(@NonNull Object widgetController, @NonNull ResourceFile htmlResourceFile) {
+    Widget(@NonNull Object widgetController, @NonNull ResourceFile htmlResourceFile, String javascriptClass) {
         this.widgetController = widgetController;
         this.htmlResourceFile = htmlResourceFile;
+        this.javascriptClass = javascriptClass;
     }
 
     @Override

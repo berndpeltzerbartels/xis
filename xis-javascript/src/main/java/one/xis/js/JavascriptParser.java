@@ -18,13 +18,13 @@ public class JavascriptParser {
     private final JSScript script = new JSScript();
     private static long currentNameId = 1;
 
-    public void parseTemplateModel(WidgetTemplateModel widgetTemplateModel) {
-        JSClass widgetClass = toClass(widgetTemplateModel);
+    public void parseTemplateModel(WidgetTemplateModel widgetTemplateModel, String javascriptClassName) {
+        JSClass widgetClass = toClass(widgetTemplateModel, javascriptClassName);
         script.addDeclaration(widgetClass);
     }
 
-    public void parseTemplateModel(PageTemplateModel pageTemplateModel) {
-        var pageClass = derrivedClass(XIS_PAGE);
+    public void parseTemplateModel(PageTemplateModel pageTemplateModel, String javascriptClassName) {
+        var pageClass = derrivedClass(javascriptClassName, XIS_PAGE);
         var headClass = toClass(pageTemplateModel.getHead());
         var bodyClass = toClass(pageTemplateModel.getBody());
         pageClass.addField("head", new JSContructorCall(headClass));
@@ -32,8 +32,8 @@ public class JavascriptParser {
         pageClass.addField("path", new JSString(pageTemplateModel.getPath()));
     }
 
-    private JSClass toClass(WidgetTemplateModel widgetTemplateModel) {
-        var widgetClass = derrivedClass(XIS_WIDGET);
+    private JSClass toClass(WidgetTemplateModel widgetTemplateModel, String javascriptClassName) {
+        var widgetClass = derrivedClass(javascriptClassName, XIS_WIDGET);
         var widgetRootClass = toClass(widgetTemplateModel.getRootNode());
         widgetClass.addField("root", new JSContructorCall(widgetRootClass));
         widgetClass.addField("name", new JSString(widgetTemplateModel.getWidgetClassName()));

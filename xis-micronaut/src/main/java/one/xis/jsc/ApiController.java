@@ -40,11 +40,6 @@ class ApiController {
         return resourceFiles.getByPath("js/classes3.js").getContent();
     }
 
-    @Get("/xis/api/xis-initializer.js")
-    String getPageInitializer() {
-        return resourceFiles.getByPath("js/xis-initializer.js").getContent();
-    }
-
     @Get("/xis/api/xis-globals.js")
     String getGlobals() {
         return resourceFiles.getByPath("js/xis-globals.js").getContent();

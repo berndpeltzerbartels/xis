@@ -15,15 +15,15 @@ class Widgets extends JavascriptComponents<Widget> {
     protected String createKey(String name, Object controller) {
         return name.replace('.', ':');
     }
-    
+
     @Override
     protected Widget createComponent(Object controller) {
         return widgetFactory.createWidget(controller);
     }
 
     @Override
-    protected String compile(String name, ResourceFile resourceFile) {
-        return widgetCompiler.compile(name, resourceFile);
+    protected String compile(String name, ResourceFile resourceFile, String javascriptClassName) {
+        return widgetCompiler.compile(name, resourceFile, javascriptClassName);
     }
 
 }

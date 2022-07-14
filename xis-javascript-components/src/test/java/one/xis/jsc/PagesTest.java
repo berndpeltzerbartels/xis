@@ -57,7 +57,7 @@ class PagesTest {
             Page page = pages.get("xyz:test");
 
             assertThat(page).isNotNull();
-            verify(pageCompiler, times(1)).compile(anyString(), eq(resourceFile));
+            verify(pageCompiler, times(1)).compile(anyString(), eq(resourceFile), anyString());
         }
     }
 
@@ -75,7 +75,7 @@ class PagesTest {
             Page page = pages.get("xyz:test");
 
             assertThat(page).isNotNull();
-            verify(pageCompiler, times(2)).compile(anyString(), eq(resourceFile));
+            verify(pageCompiler, times(2)).compile(anyString(), eq(resourceFile), anyString());
         }
     }
 }

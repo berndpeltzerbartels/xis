@@ -25,17 +25,17 @@ class Pages extends JavascriptComponents<Page> {
     }
 
     @Override
-    protected String compile(String name, ResourceFile resourceFile) {
-        return pageCompiler.compile(name, resourceFile);
+    protected String compile(String key, ResourceFile resourceFile, String javascriptClassName) {
+        return pageCompiler.compile(key, resourceFile, javascriptClassName);
     }
 
     @Override
     protected String createKey(String name, Object pageController) {
         String path = getPath(pageController);
-        JavasscriptComponentUtils.validatePath(path);
+        JavascriptComponentUtils.validatePath(path);
         String normalizedPath = normalizePath(path);
         validateNotDuplicate(normalizedPath);
-        return JavasscriptComponentUtils.pathToUrn(normalizedPath);
+        return JavascriptComponentUtils.pathToUrn(normalizedPath);
     }
 
     private String normalizePath(String path) {

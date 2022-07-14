@@ -11,8 +11,13 @@ import one.xis.resource.ResourceFiles;
 class WidgetFactory {
 
     private final ResourceFiles resourceFiles;
+    private int nameIndex;
 
     Widget createWidget(@NonNull Object widgetController) {
-        return new Widget(widgetController, resourceFiles.getByPath(JavasscriptComponentUtils.getHtmlTemplatePath(widgetController.getClass())));
+        return new Widget(widgetController, resourceFiles.getByPath(JavascriptComponentUtils.getHtmlTemplatePath(widgetController.getClass())), javascriptClass());
+    }
+
+    private String javascriptClass() {
+        return "w" + nameIndex++;
     }
 }

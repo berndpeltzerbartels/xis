@@ -10,6 +10,7 @@ class Page implements ResourceFile, JavascriptComponent {
 
     private final Object pageController;
     private final ResourceFile htmlResourceFile;
+    private final String javascriptClass;
 
     @Setter
     private boolean compiled;
@@ -17,9 +18,10 @@ class Page implements ResourceFile, JavascriptComponent {
     @Setter
     private String javascript;
 
-    Page(@NonNull Object pageController, @NonNull ResourceFile htmlResourceFile) {
+    Page(@NonNull Object pageController, @NonNull ResourceFile htmlResourceFile, String javascriptClass) {
         this.pageController = pageController;
         this.htmlResourceFile = htmlResourceFile;
+        this.javascriptClass = javascriptClass;
     }
 
     @Override

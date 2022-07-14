@@ -12,7 +12,7 @@ abstract class JavascriptComponents<C extends JavascriptComponent> {
 
     protected abstract C createComponent(Object controller);
 
-    protected abstract String compile(String name, ResourceFile resourceFile);
+    protected abstract String compile(String key, ResourceFile resourceFile, String javascriptClassName);
 
     @SuppressWarnings("unused")
     protected String createKey(String name, Object controller) {
@@ -56,7 +56,7 @@ abstract class JavascriptComponents<C extends JavascriptComponent> {
     private void compile(String key, C component) {
         component.setCompiled(false);
         reloadHtml(component);
-        String javascript = compile(key, component.getHtmlResourceFile());
+        String javascript = compile(key, component.getHtmlResourceFile(), component.getJavascriptClass());
         component.setJavascript(javascript);
         component.setCompiled(true);
     }

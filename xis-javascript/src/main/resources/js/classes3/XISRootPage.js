@@ -11,9 +11,12 @@ class XISRootPage extends XISValueHolder {
     bindPage(page) {
         this.page = page;
         this.setValues(this.client.onInitPage(this.page));
+        this.page.refresh();
+
         this.setBodyAttributes(this.page);
         this.page.bindHeadContent(this.head);
         this.page.bindBodyContent(this.body);
+
     }
 
     unbindPage() {
@@ -37,14 +40,10 @@ class XISRootPage extends XISValueHolder {
     }
 
     setBodyAttributes(page) {
-        for (var attribute of page.bodyAttributes) {
-            this.body.setAttribute(attribute.name, attribute.value);
-        }
+       page.setBodyAttributes(this.body);
     }
 
     removeBodyAttributes() {
-        for (var attribute of this.page.bodyAttributes) {
-            this.body.removeAttribute(attribute.name);
-        }
+        this.page.removeBodyAttributes(this.body);
     }
 }
