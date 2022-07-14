@@ -13,13 +13,13 @@ import java.io.PrintWriter;
 class InitializerServlet extends HttpServlet {
 
     @Autowired
-    private Initializer initializer;
+    private InitializerScript initializerScript;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("text/javascript; charset=utf-8");
         PrintWriter out = response.getWriter();
-        out.println(initializer.getContent());
+        out.println(initializerScript.getContent());
         out.flush();
     }
 

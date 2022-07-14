@@ -22,8 +22,8 @@ class PageCompiler {
         return JavascriptComponentUtils.javaScriptModelAsCode(script);
     }
 
-    private PageTemplateModel parseWidgetTemplate(String path, Document document) {
-        return templateParser.parsePageTemplate(document, path);
+    private PageTemplateModel parseWidgetTemplate(String key, Document document) {
+        return templateParser.parsePageTemplate(document, key);
     }
 
     private JSScript templateModelToScriptModel(PageTemplateModel templateModel, String javascriptClassName) {

@@ -59,4 +59,9 @@ public class SpringContextAdapter implements BeanPostProcessor {
         return appContext().getSingleton(RootPage.class);
     }
 
+    @Bean
+    InitializerScript initializer() {
+        return appContext().getSingleton(InitializerScript.class);
+    }
+
 }

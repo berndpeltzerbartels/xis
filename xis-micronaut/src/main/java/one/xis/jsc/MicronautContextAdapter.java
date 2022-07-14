@@ -24,6 +24,7 @@ class MicronautContextAdapter {
     private Widgets widgets;
     private RootPage rootPage;
     private ResourceFiles resourceFiles;
+    private InitializerScript initializerScript;
 
     @PostConstruct
     void init() {
@@ -32,6 +33,8 @@ class MicronautContextAdapter {
         widgets = appContext.getSingleton(Widgets.class);
         rootPage = appContext.getSingleton(RootPage.class);
         resourceFiles = appContext.getSingleton(ResourceFiles.class);
+        initializerScript = appContext.getSingleton(InitializerScript.class);
+
 
         beanContext.getBeanDefinitions(Qualifiers.byStereotype(Page.class)).stream()//
                 .map(BeanDefinition::getBeanType)

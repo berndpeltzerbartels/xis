@@ -41,12 +41,12 @@ public class TemplateParser {
         }
     }
 
-    public PageTemplateModel parsePageTemplate(Document document, String path) {
+    public PageTemplateModel parsePageTemplate(Document document, String key) {
         try {
-            var pageModel = new PageTemplateModel(path);
+            var pageModel = new PageTemplateModel(key);
             var root = document.getDocumentElement();
-            var headElement = XmlUtil.getElementByTagName(root, "head").orElseThrow(() -> new TemplateSynthaxException(path + " must have head-tag")); // TODO create if not present
-            var bodyElement = XmlUtil.getElementByTagName(root, "body").orElseThrow(() -> new TemplateSynthaxException(path + " must have body-tag"));  // TODO create if not present
+            var headElement = XmlUtil.getElementByTagName(root, "head").orElseThrow(() -> new TemplateSynthaxException(key + " must have head-tag")); // TODO create if not present
+            var bodyElement = XmlUtil.getElementByTagName(root, "body").orElseThrow(() -> new TemplateSynthaxException(key + " must have body-tag"));  // TODO create if not present
             var headTemplateElement = toTemplateElement(headElement);
             var bodyTemplateElement = toTemplateElement(bodyElement);
             parseChildren(headElement).forEach(headTemplateElement::addChild);
@@ -55,7 +55,7 @@ public class TemplateParser {
             pageModel.setBody(bodyTemplateElement);
             return pageModel;
         } catch (TemplateSynthaxException e) {
-            throw new TemplateSynthaxException(String.format("Parsing failed for page '%s': %s", path, e.getMessage()));
+            throw new TemplateSynthaxException(String.format("Parsing failed for page '%s': %s", key, e.getMessage()));
         }
     }
 
