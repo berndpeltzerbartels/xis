@@ -54,7 +54,8 @@ public class JSWriter {
         writer.append("){");
         if (jsClass.getSuperClass() != null) {
             writer.append("super(");
-            writer.append(String.join(", ", jsClass.getSuperClass().getConstructor().getArgs()));
+            // We allow args only for super-contructor
+            writer.append(String.join(", ", jsClass.getConstructor().getArgs()));
             writer.append(");");
         }
         jsClass.getFields().values().forEach(field -> {

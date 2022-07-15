@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.experimental.NonFinal;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -22,11 +23,12 @@ public class JSClass implements JSDeclaration, JSContext {
         this.constructor = new JSConstructor(args);
     }
 
-    public JSClass(String className, JSSuperClass superClass) {
+    public JSClass(String className, List<String> args) {
         this.className = className;
-        this.superClass = superClass;
-        this.constructor = new JSConstructor();
+        this.superClass = null;
+        this.constructor = new JSConstructor(args.stream().toArray(String[]::new));
     }
+
 
     public JSMethod getMethod(String name) {
         JSMethod method = overriddenMethods.get(name);
@@ -55,6 +57,9 @@ public class JSClass implements JSDeclaration, JSContext {
 
     public JSClass derrivedFrom(JSSuperClass jsClass) {
         superClass = jsClass;
+        if (superClass.getConstructor().getArgs().size() != getConstructor().getArgs().size()) {
+            throw new IllegalStateException(className + ": number of contructor args must match number of args in supercontructor for " + jsClass.getClassName());
+        }
         return this;
     }
 

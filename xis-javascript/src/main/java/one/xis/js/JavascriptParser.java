@@ -26,8 +26,8 @@ public class JavascriptParser {
         var pageClass = derrivedClass(javascriptClassName, XIS_PAGE);
         var headClass = toClass(pageTemplateModel.getHead());
         var bodyClass = toClass(pageTemplateModel.getBody());
-        pageClass.addField("head", new JSContructorCall(headClass));
-        pageClass.addField("body", new JSContructorCall(bodyClass));
+        pageClass.addField("head", new JSContructorCall(headClass, "this"));
+        pageClass.addField("body", new JSContructorCall(bodyClass, "this"));
     }
 
     private JSClass toClass(WidgetTemplateModel widgetTemplateModel, String javascriptClassName) {
@@ -38,20 +38,10 @@ public class JavascriptParser {
         return widgetClass;
     }
 
-    private JSClass parsePageModel(PageTemplateModel pageTemplateModel) {
-        var pageClass = derrivedClass(XIS_PAGE);
-        var headClass = toClass(pageTemplateModel.getHead());
-        var bodyClass = toClass(pageTemplateModel.getBody());
-        pageClass.addField("head", new JSContructorCall(headClass));
-        pageClass.addField("body", new JSContructorCall(bodyClass));
-        pageClass.addField("path", new JSString(pageTemplateModel.getKey()));
-        return pageClass;
-    }
-
     private List<JSContructorCall> evaluateChildren(ChildHolder parent) {
         return parent.getChildren().stream()
                 .map(this::toClass)
-                .map(JSContructorCall::new)
+                .map(jsClass -> new JSContructorCall(jsClass, "this"))
                 .collect(Collectors.toList());
     }
 
@@ -299,7 +289,7 @@ public class JavascriptParser {
 
 
     private JSClass derrivedClass(String className, JSSuperClass superClass) {
-        var jsClass = new JSClass(className).derrivedFrom(superClass);
+        var jsClass = new JSClass(className, superClass.getConstructor().getArgs()).derrivedFrom(superClass);
         script.addClassDeclaration(jsClass);
         return jsClass;
     }

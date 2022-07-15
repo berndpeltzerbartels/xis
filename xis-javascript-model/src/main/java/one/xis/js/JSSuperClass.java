@@ -11,12 +11,12 @@ public class JSSuperClass extends JSClass {
     private final Map<String, JSMethod> abstractMethods = new HashMap<>();
     private final Set<String> abstractFields = new HashSet<>();
 
-    public JSSuperClass(String className) {
-        super(className);
+    public JSSuperClass(String className, String... constructorArgs) {
+        super(className, constructorArgs);
     }
 
     public JSSuperClass addMethod(String name, int args) {
-        methods.put(name, new JSMethod(this, name, unspecifiedArgNames(args))); // TODO named args ?
+        methods.put(name, new JSMethod(this, name, unspecifiedArgNames(args))); // TODO remove unspecified ?
         return this;
     }
 

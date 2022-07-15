@@ -12,4 +12,5 @@ public class JSConstructor implements JSContext {
     JSConstructor(String... args) {
         this.args = Arrays.asList(args);
     }
+
 }

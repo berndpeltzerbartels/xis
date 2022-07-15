@@ -4,10 +4,10 @@ public class Classes {
 
     public static final JSSuperClass XIS_PAGE = new JSSuperClass("XISPage");
     public static final JSSuperClass XIS_WIDGET = new JSSuperClass("XISWidget"); // TODO check javascript
-    public static final JSSuperClass XIS_ELEMENT = new JSSuperClass("XISElement");
-    public static final JSSuperClass XIS_CONTAINER = new JSSuperClass("XISContainer");
+    public static final JSSuperClass XIS_ELEMENT = new JSSuperClass("XISElement", "parent");
+    public static final JSSuperClass XIS_CONTAINER = new JSSuperClass("XISContainer", "parent");
     public static final JSSuperClass XIS_STATIC_TEXT_NODE = new JSSuperClass("XISStaticTextNode");
-    public static final JSSuperClass XIS_MUTABLE_TEXT_NODE = new JSSuperClass("XISMutableTextNode");
+    public static final JSSuperClass XIS_MUTABLE_TEXT_NODE = new JSSuperClass("XISMutableTextNode", "parent");
     public static final JSSuperClass XIS_WIDGETS = new JSSuperClass("XISWidgets");
     public static final JSSuperClass XIS_CONTAINERS = new JSSuperClass("XISContainers");
     public static final JSSuperClass XIS_PAGES = new JSSuperClass("XISPages");
