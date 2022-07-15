@@ -16,16 +16,16 @@ public class JSClass implements JSDeclaration, JSContext {
     private final Map<String, JSMethod> overriddenMethods = new HashMap<>();
     private final JSConstructor constructor;
 
-    public JSClass(String className) {
+    public JSClass(String className, String... args) {
         this.className = className;
         this.superClass = null;
-        this.constructor = new JSConstructor(this);
+        this.constructor = new JSConstructor(args);
     }
 
     public JSClass(String className, JSSuperClass superClass) {
         this.className = className;
         this.superClass = superClass;
-        this.constructor = new JSConstructor(this);
+        this.constructor = new JSConstructor();
     }
 
     public JSMethod getMethod(String name) {

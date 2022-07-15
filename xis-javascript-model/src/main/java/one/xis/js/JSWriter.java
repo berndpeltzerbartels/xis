@@ -49,7 +49,14 @@ public class JSWriter {
     }
 
     private void writeConstructor(JSClass jsClass, Appendable writer) throws IOException {
-        writer.append("constructor(){");
+        writer.append("constructor(");
+        writer.append(String.join(", ", jsClass.getConstructor().getArgs()));
+        writer.append("){");
+        if (jsClass.getSuperClass() != null) {
+            writer.append("super(");
+            writer.append(String.join(", ", jsClass.getSuperClass().getConstructor().getArgs()));
+            writer.append(");");
+        }
         jsClass.getFields().values().forEach(field -> {
             try {
                 writer.append("this.");

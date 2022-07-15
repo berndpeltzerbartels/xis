@@ -28,7 +28,6 @@ public class JavascriptParser {
         var bodyClass = toClass(pageTemplateModel.getBody());
         pageClass.addField("head", new JSContructorCall(headClass));
         pageClass.addField("body", new JSContructorCall(bodyClass));
-        pageClass.addField("path", new JSString(pageTemplateModel.getKey()));
     }
 
     private JSClass toClass(WidgetTemplateModel widgetTemplateModel, String javascriptClassName) {
