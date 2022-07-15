@@ -18,6 +18,6 @@ class WidgetFactory {
     }
 
     private String javascriptClass() {
-        return "w" + nameIndex++;
+        return "W" + nameIndex++;
     }
 }

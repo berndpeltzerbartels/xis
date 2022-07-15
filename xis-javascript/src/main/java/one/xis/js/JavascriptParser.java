@@ -19,8 +19,7 @@ public class JavascriptParser {
     private static long currentNameId = 1;
 
     public void parseTemplateModel(WidgetTemplateModel widgetTemplateModel, String javascriptClassName) {
-        JSClass widgetClass = toClass(widgetTemplateModel, javascriptClassName);
-        script.addDeclaration(widgetClass);
+        toClass(widgetTemplateModel, javascriptClassName);
     }
 
     public void parseTemplateModel(PageTemplateModel pageTemplateModel, String javascriptClassName) {
@@ -168,7 +167,7 @@ public class JavascriptParser {
     private void overrideUpdateAttributes(JSClass jsClass, ElementWithAttributes elementBase) {
         var updateAttributes = jsClass.overrideAbstractMethod("updateAttributes");
         elementBase.getMutableAttributes().forEach((key, value) -> {
-            JSVar text = new JSVar(nextName());
+            JSVar text = new JSVar(nextVarName());
 
             MixedContentMethodStatements mixedContentMethodStatements = new MixedContentMethodStatements(updateAttributes, text);
             mixedContentMethodStatements.addStatements(value.getContents());
@@ -296,17 +295,21 @@ public class JavascriptParser {
     }
 
     private JSClass derrivedClass(JSSuperClass superClass) {
-        return derrivedClass(nextName(), superClass);
+        return derrivedClass(nextClassName(), superClass);
     }
 
 
     private JSClass derrivedClass(String className, JSSuperClass superClass) {
         var jsClass = new JSClass(className).derrivedFrom(superClass);
-        script.addDeclaration(jsClass);
+        script.addClassDeclaration(jsClass);
         return jsClass;
     }
 
-    private String nextName() {
-        return "n" + (currentNameId++);
+    private String nextClassName() {
+        return "C" + (currentNameId++);
+    }
+
+    private String nextVarName() {
+        return "v" + (currentNameId++);
     }
 }

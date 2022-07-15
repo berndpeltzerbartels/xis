@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 public class JSScriptValidator {
 
     public void validate(JSScript script) {
-        script.getDeclarations().stream()
+        script.getClassDeclarations().stream()
                 .filter(JSClass.class::isInstance)
                 .map(JSClass.class::cast)
                 .forEach(this::validate);

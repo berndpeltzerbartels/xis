@@ -2,10 +2,7 @@ package one.xis.js;
 
 import lombok.Getter;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 
 @Getter
@@ -19,13 +16,13 @@ public class JSSuperClass extends JSClass {
     }
 
     public JSSuperClass addMethod(String name, int args) {
-        methods.put(name, new JSMethod(this, name, args));
+        methods.put(name, new JSMethod(this, name, unspecifiedArgNames(args))); // TODO named args ?
         return this;
     }
 
     public JSSuperClass addAbstractMethod(String name) {
         // We are using abstract methods, without parematers only
-        abstractMethods.put(name, new JSMethod(this, name, 0));
+        abstractMethods.put(name, new JSMethod(this, name, Collections.emptyList()));
         return this;
     }
 
@@ -64,6 +61,16 @@ public class JSSuperClass extends JSClass {
         methodMap.putAll(methods);
         methodMap.putAll(abstractMethods);
         return methodMap;
+    }
+
+
+    private List<String> unspecifiedArgNames(int count) {
+        int index = 1;
+        List<String> args = new ArrayList<>();
+        while (args.size() < count) {
+            args.add("arg" + index++);
+        }
+        return args;
     }
 
 }

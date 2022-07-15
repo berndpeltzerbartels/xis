@@ -18,9 +18,9 @@ class PageFactory {
     Page createPage(@NonNull Object pageController) {
         return new Page(pageController, resourceFiles.getByPath(getHtmlTemplatePath(pageController.getClass())), javascriptClass());
     }
-    
+
     private String javascriptClass() {
-        return "p" + nameIndex++;
+        return "P" + nameIndex++;
     }
 
 }

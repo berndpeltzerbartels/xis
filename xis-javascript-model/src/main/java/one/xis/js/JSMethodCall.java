@@ -25,7 +25,7 @@ public class JSMethodCall implements JSContext, JSValue, JSStatement {
 
     private void validateArgs() {
         JSMethod declaredMethod = method.getOwner().getMethod(method.getName());
-        if (args.length != declaredMethod.getArgs()) {
+        if (args.length != declaredMethod.getArgs().size()) {
             throw new IllegalStateException(String.format("method %s in %s requires %d args instead of %d", declaredMethod.getName(), declaredMethod.getOwner().getClassName(), declaredMethod.getArgs(), args.length));
         }
     }

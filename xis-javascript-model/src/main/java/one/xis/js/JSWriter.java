@@ -8,13 +8,14 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class JSWriter {
     private final Appendable writer;
 
     public void write(@NonNull JSScript script) {
-        script.getDeclarations().forEach(this::writeDeclaration);
+        script.getClassDeclarations().forEach(this::writeDeclaration);
         script.getGlobalVars().forEach(this::writeGlobalVar);
         script.getStatements().forEach(statement -> this.writeStatement(statement, writer));
     }
@@ -27,32 +28,28 @@ public class JSWriter {
         }
     }
 
-    private void writeDeclaration(JSDeclaration declaration) {
-        if (declaration instanceof JSClass) {
-            try {
-                writeClassDeclaration((JSClass) declaration, writer);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+    private void writeDeclaration(JSClass declaration) {
+        try {
+            writeClassDeclaration(declaration, writer);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
     private void writeClassDeclaration(JSClass jsClass, Appendable writer) throws IOException {
-        writeConstructor(jsClass, writer);
+        writer.append("class ");
+        writer.append(jsClass.getClassName());
         if (jsClass.getSuperClass() != null) {
-            writer.append(jsClass.getClassName());
-            writer.append(".prototype=new ");
+            writer.append(" extends ");
             writer.append(jsClass.getSuperClass().getClassName());
-            writer.append("();");
-            writer.append("\n");
         }
+        writer.append(" { ");
+        writeConstructor(jsClass, writer);
+        writer.append("}\n");
     }
 
     private void writeConstructor(JSClass jsClass, Appendable writer) throws IOException {
-        writer.append("function ");
-        writer.append(jsClass.getClassName());
-        writer.append("(){");
-
+        writer.append("constructor(){");
         jsClass.getFields().values().forEach(field -> {
             try {
                 writer.append("this.");
@@ -64,36 +61,28 @@ public class JSWriter {
                 throw new RuntimeException(e);
             }
         });
-
-        jsClass.getOverriddenMethods().values().forEach(method -> {
-            try {
-                writer.append("this.");
-                writer.append(method.getName());
-                writer.append("=");
-                writer.append("function(){");
-                method.getStatements().forEach(statement -> writeStatement(statement, writer));
-                writer.append("};");
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        });
         writer.append("};");
 
     }
 
 
-    private void writeMethodDeclaration(JSMethod method, Appendable writer) throws IOException {
-        if (method.getArgs() != 0) {
-            throw new UnsupportedOperationException("overridden method with parameters is currently not supported");
+    private void writeOverriddenMethods(JSClass jsClass) {
+        jsClass.getOverriddenMethods().values().forEach(method -> writeMethodDeclaration(method, writer));
+    }
+
+
+    private void writeMethodDeclaration(JSMethod method, Appendable writer) {
+        try {
+            writer.append(method.getName());
+            writer.append("(");
+            writer.append(method.getArgs().stream().collect(Collectors.joining(", ")));
+            writer.append("){");
+            method.getStatements().forEach(statement -> writeStatement(statement, writer));
+            writer.append("};");
+            writer.append("\n");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-        writer.append(method.getOwner().getClassName());
-        writer.append(".prototype.");
-        writer.append(method.getName());
-        writer.append("=function(");
-        writer.append("){");
-        method.getStatements().forEach(statement -> writeStatement(statement, writer));
-        writer.append("};");
-        writer.append("\n");
     }
 
 

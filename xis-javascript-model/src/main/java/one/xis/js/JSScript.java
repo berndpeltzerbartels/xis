@@ -3,21 +3,16 @@ package one.xis.js;
 import lombok.Value;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 @Value
 public class JSScript implements JSContext {
-    List<JSDeclaration> declarations = new ArrayList<>();
+    List<JSClass> classDeclarations = new ArrayList<>();
     List<JSStatement> statements = new ArrayList<>();
     List<JSVarAssignment> globalVars = new ArrayList<>();
 
-    public void addDeclaration(JSDeclaration declaration) {
-        declarations.add(declaration);
-    }
-
-    public <D extends JSDeclaration> void addDeclarations(Collection<D> decls) {
-        declarations.addAll(decls);
+    public void addClassDeclaration(JSClass declaration) {
+        classDeclarations.add(declaration);
     }
 
     public void addStatement(JSStatement statement) {
