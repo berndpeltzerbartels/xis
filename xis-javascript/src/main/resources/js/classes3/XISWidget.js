@@ -1,6 +1,7 @@
-class XISWidget {
+class XISWidget extends XISValueHolder{
 
     constructor() {
+        super(undefined);
         this.element = createElement('div');
         this.children = this.createChildren();
         this.valueHolder = { getValue: function(path){return undefined;}};

@@ -1,11 +1,11 @@
 class XISTemplateObject {
 
-      /**
-     * @param {XISTemplateObject} parent 
-     */
-    constructor(parent) {
-        this.parent = parent;
+
+
+    getValueHolder() {
+        throw new Error('abstract method');
     }
+
 
     onDataChanged() {
 

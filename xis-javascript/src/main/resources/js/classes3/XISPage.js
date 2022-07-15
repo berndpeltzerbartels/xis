@@ -65,6 +65,15 @@ class XISPage {
         }
      }
 
+
+     setValueHolder(rootPage) {
+        this.valueHolder = rootPage;
+     }
+
+     getValueHolder() {
+         return this.valueHolder;
+     }
+
     /**
     * Creates Childclasses, not Elements.
     */

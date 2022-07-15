@@ -5,7 +5,6 @@ class XISElement extends XISTemplateObject {
 
     /**
      * @param {XISTemplateObject} parent 
-     * @param {XISValueHolder} valueHolder
      */
     constructor(parent) {
         super(parent);

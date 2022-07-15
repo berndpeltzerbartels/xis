@@ -4,9 +4,11 @@
 class XISContainer extends XISTemplateObject {
 
     /**
+    * @param {XISTemplateObject} parent 
     * @param {String} defaultWidgetId (nullable)
     */
-    constructor(defaultWidgetId) {
+    constructor(parent, defaultWidgetId) {
+        super(parent);
         this.defaultWidgetId = defaultWidgetId;
         this.element = createElement();
         //     __containers.addContainer(this); ?

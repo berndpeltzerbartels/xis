@@ -5,8 +5,8 @@ class XISLoop extends XISValueHolder{
      */
     constructor(parent) {
         super(parent.getValueHolder());
-        this.container = parent.getContainer();
         this.parent = parent;
+        this.container = parent.getContainer();
         this.loopAttributes = this.getLoopAttributes();
         this.setVarnames( [
             this.loopAttributes.numberVarname,
