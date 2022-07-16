@@ -1,18 +1,15 @@
 class XISWidgets {
 
-
-    getWidget(id) {
-        var widget = this.getAllWidgets()[id];
-        widget.init();
-        return widget;
+    constructor() {
+        this.widgets = {};
     }
 
+    addWidget(key, widget) {
+        this.widgets[key] = widget;
+    }
 
-    /**
-     * @returns {any}
-     */
-    getAllWidgets() {
-        throw new Error('abstract method');
+    getWidget(key) {
+        return this.widgets[key];
     }
     
 }

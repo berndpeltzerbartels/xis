@@ -1,4 +1,4 @@
-class XISLoop extends XISValueHolder{
+class XISLoop extends XISValueHolder {
 
     /**
      * @param {XISTemplateObject} parent 
@@ -6,24 +6,18 @@ class XISLoop extends XISValueHolder{
     constructor(parent) {
         super(parent.getValueHolder());
         this.parent = parent;
-        this.container = parent.getContainer();
-        this.loopAttributes = this.getLoopAttributes();
-        this.setVarnames( [
-            this.loopAttributes.numberVarname,
-            this.loopAttributes.indexVarName,
-            this.loopAttributes.itemVarName
-        ]);
         this.rows = [];
     }
 
-
-    getLoopAttributes() {
-        throw new Error('abstract method');
-    }
     /**
      * @override
      */
     render() {
+        this.setVarnames([
+            this.loopAttributes.numberVarname,
+            this.loopAttributes.indexVarName,
+            this.loopAttributes.itemVarName
+        ]);
         var arr = this.getArray();
         this.updateRowCount(arr.length);
         for (var rowIndex = 0; rowIndex < arr.length; rowIndex++) {
@@ -55,13 +49,13 @@ class XISLoop extends XISValueHolder{
     }
 
 
-     /**
-     * Creates the child-objects (not Dom-Elements)
-     * 
-     * @override
-     * @returns {Array}
-     */
-      createChildren() {
+    /**
+    * Creates the child-objects (not Dom-Elements)
+    * 
+    * @override
+    * @returns {Array}
+    */
+    createChildren() {
         throw new Error('abstract method');
     }
 
@@ -69,15 +63,15 @@ class XISLoop extends XISValueHolder{
      * @override
      * @returns {XISValueHolder}
      */
-     getValueHolder() {
+    getValueHolder() {
         return this;
-     }
- 
-     /**
-      * @override
-      * @returns {XISContainer}
-      */
-     getContainer() {
-         return this.container;
-     }
+    }
+
+    /**
+     * @override
+     * @returns {XISContainer}
+     */
+    getContainer() {
+        return this.container;
+    }
 }

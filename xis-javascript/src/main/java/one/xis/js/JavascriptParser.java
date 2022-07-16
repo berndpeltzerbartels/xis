@@ -33,7 +33,7 @@ public class JavascriptParser {
     private JSClass toClass(WidgetTemplateModel widgetTemplateModel, String javascriptClassName) {
         var widgetClass = derrivedClass(javascriptClassName, XIS_WIDGET);
         var widgetRootClass = toClass(widgetTemplateModel.getRootNode());
-        widgetClass.addField("root", new JSContructorCall(widgetRootClass));
+        widgetClass.addField("root", new JSContructorCall(widgetRootClass, "this"));
         widgetClass.addField("name", new JSString(widgetTemplateModel.getWidgetClassName()));
         return widgetClass;
     }

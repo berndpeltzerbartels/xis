@@ -9,9 +9,6 @@ class XISElement extends XISTemplateObject {
     constructor(parent) {
         super(parent);
         this.valueHolder = parent.getValueHolder();
-        this.container = parent.getContainer();
-        this.element = this.createElement();
-        this.children = this.createChildren();
     }
 
     /**
@@ -45,26 +42,6 @@ class XISElement extends XISTemplateObject {
      */
     removeChild(childElement) {
         this.element.removeChild(childElement);
-    }
-
-    /**
-     * Creates the DOM-Element.
-     * 
-     * @override
-     * @returns {any}
-     */
-    createElement() {
-        throw new Error('abstract method');
-    }
-
-    /**
-     * Creates the child-objects (not Dom-Elements)
-     * 
-     * @override
-     * @returns {Array}
-     */
-    createChildren() {
-        throw new Error('abstract method');
     }
 
     /**

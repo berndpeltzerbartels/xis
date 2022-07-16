@@ -1,11 +1,11 @@
 package one.xis.js;
 
-import lombok.Data;
+import lombok.Getter;
 
 import java.util.Arrays;
 import java.util.List;
 
-@Data
+@Getter
 public class JSConstructor implements JSContext {
     private final List<String> args;
 

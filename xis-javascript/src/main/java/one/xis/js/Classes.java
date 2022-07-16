@@ -11,8 +11,8 @@ public class Classes {
     public static final JSSuperClass XIS_WIDGETS = new JSSuperClass("XISWidgets");
     public static final JSSuperClass XIS_CONTAINERS = new JSSuperClass("XISContainers");
     public static final JSSuperClass XIS_PAGES = new JSSuperClass("XISPages");
-    public static final JSSuperClass XIS_LOOP = new JSSuperClass("XISLoop");
-    public static final JSSuperClass XIS_IF = new JSSuperClass("XISIf");
+    public static final JSSuperClass XIS_LOOP = new JSSuperClass("XISLoop", "parent");
+    public static final JSSuperClass XIS_IF = new JSSuperClass("XISIf", "parent");
     public static final JSSuperClass XIS_LIFECYCLE_SERVICE = new JSSuperClass("XISLifecycleService");
 
     static {

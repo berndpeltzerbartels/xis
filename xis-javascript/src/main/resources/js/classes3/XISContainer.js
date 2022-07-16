@@ -8,9 +8,6 @@ class XISContainer extends XISTemplateObject {
     */
     constructor(parent) {
         super(parent);
-        this.defaultWidgetId = defaultWidgetId;
-        this.element = createElement();
-        //     __containers.addContainer(this); ?
     }
 
     /**
@@ -32,10 +29,6 @@ class XISContainer extends XISTemplateObject {
      */
     getContainer() {
         return this;
-    }
-
-    createElement() {
-        throw new Error('createElement is abstract in ' + this);
     }
 
     setWidget(widgetName) {

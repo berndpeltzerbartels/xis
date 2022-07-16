@@ -26,7 +26,7 @@ public class JSClass implements JSDeclaration, JSContext {
     public JSClass(String className, List<String> args) {
         this.className = className;
         this.superClass = null;
-        this.constructor = new JSConstructor(args.stream().toArray(String[]::new));
+        this.constructor = new JSConstructor(args.toArray(String[]::new));
     }
 
 

@@ -205,6 +205,7 @@ public class JSWriter {
         writer.append("new ");
         writer.append(contructorCall.getJsClass().getClassName());
         writer.append("(");
+        writer.append(String.join(",", contructorCall.getContructorParams()));
         writer.append(")");
     }
 
