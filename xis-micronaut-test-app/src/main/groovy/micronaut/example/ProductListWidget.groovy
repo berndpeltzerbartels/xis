@@ -3,5 +3,10 @@ package micronaut.example
 import one.xis.Widget
 
 @Widget
-class ProductList {
+class ProductListWidget {
+
+
+    def init() {
+
+    }
 }

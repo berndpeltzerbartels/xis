@@ -1,5 +1,9 @@
 class XISRootPage extends XISValueHolder {
 
+    /**
+     * 
+     * @param {XISClient} client 
+     */
     constructor(client) {
         super(undefined);
         this.client = client;
@@ -11,7 +15,7 @@ class XISRootPage extends XISValueHolder {
     bindPage(page) {
         this.page = page;
         this.page.setValueHolder(this);
-        this.setValues(this.client.onInitPage(this.page));
+        this.setValues(this.client.createPageModel(this.page));
         this.page.refresh();
 
         this.setBodyAttributes(this.page);
