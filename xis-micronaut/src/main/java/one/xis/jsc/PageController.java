@@ -19,9 +19,9 @@ class PageController {
         pages = contextAdapter.getPages();
     }
 
-    @Get(produces = "text/javascript; charset=utf-8", uri = "/xis/page/{pageUrn}")
-    String getPage(@PathVariable("pageUrn") String pageUrn) {
-        return pages.get(pageUrn).getJavascript();
+    @Get(produces = "text/javascript; charset=utf-8", uri = "/xis/page/{pageId}")
+    String getPage(@PathVariable("pageId") String pageId) {
+        return pages.get(pageId).getJavascript();
     }
 
 }

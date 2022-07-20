@@ -41,7 +41,7 @@ class PagesTest {
                 .build();
 
         pages = testContext.getSingleton(Pages.class);
-        pages.add(pageController.getClass().getName(), pageController);
+        pages.add(pageController);
     }
 
     @Nested

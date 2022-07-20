@@ -39,12 +39,12 @@ class MicronautContextAdapter {
         beanContext.getBeanDefinitions(Qualifiers.byStereotype(Page.class)).stream()//
                 .map(BeanDefinition::getBeanType)
                 .map(beanContext::getBean)
-                .forEach(bean -> pages.add(bean.getClass().getName(), bean));
+                .forEach(bean -> pages.add(bean));
 
         beanContext.getBeanDefinitions(Qualifiers.byStereotype(Widget.class)).stream()//
                 .map(BeanDefinition::getBeanType)
                 .map(beanContext::getBean)
-                .forEach(bean -> widgets.add(bean.getClass().getName(), bean));
+                .forEach(bean -> widgets.add(bean));
     }
 
 

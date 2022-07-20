@@ -30,7 +30,7 @@ class Pages extends JavascriptComponents<Page> {
     }
 
     @Override
-    protected String createKey(String name, Object pageController) {
+    protected String createKey(Object pageController) {
         String path = getPath(pageController);
         JavascriptComponentUtils.validatePath(path);
         String normalizedPath = normalizePath(path);

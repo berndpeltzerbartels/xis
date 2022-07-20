@@ -17,8 +17,8 @@ class WidgetServlet extends ResourceServlet {
     @Override
     protected ResourceFile getResource(HttpServletRequest request) {
         String key = request.getRequestURI();
-        String urn = key.substring(key.lastIndexOf('/') + 1);
-        return widgets.get(urn);
+        String widgetId = key.substring(key.lastIndexOf('/') + 1);
+        return widgets.get(widgetId);
     }
 
     @Override

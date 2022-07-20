@@ -26,10 +26,10 @@ public class SpringContextAdapter implements BeanPostProcessor {
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
         if (bean.getClass().isAnnotationPresent(Widget.class)) {
-            widgets.add(beanName, bean);
+            widgets.add(bean);
         }
         if (bean.getClass().isAnnotationPresent(Page.class)) {
-            pages.add(beanName, bean);
+            pages.add(bean);
         }
         return bean;
     }

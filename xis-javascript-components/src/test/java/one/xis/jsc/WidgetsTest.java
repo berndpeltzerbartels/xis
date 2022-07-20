@@ -17,12 +17,14 @@ class WidgetsTest {
     private WidgetFactory widgetFactory;
     private ReloadableResourceFile resourceFile;
 
-    private static final String WIDGET_ID = "xyz";
+    @one.xis.Widget("xyz")
+    static class WidgetController {
 
+    }
 
     @BeforeEach
     void init() {
-        Object widgetController = new Object();
+
 
         ResourceFiles resourceFiles = mock(ResourceFiles.class);
         widgetFactory = new WidgetFactory(resourceFiles);
@@ -39,7 +41,7 @@ class WidgetsTest {
                 .build();
 
         widgets = testContext.getSingleton(Widgets.class);
-        widgets.add(WIDGET_ID, widgetController);
+        widgets.add(new WidgetController());
     }
 
     @Nested
@@ -52,7 +54,7 @@ class WidgetsTest {
 
         @Test
         void getWidget() {
-            Widget widget = widgets.get(WIDGET_ID);
+            Widget widget = widgets.get("xyz");
 
             assertThat(widget).isNotNull();
             verify(widgetCompiler, times(1)).compile(anyString(), eq(resourceFile), anyString());
@@ -70,7 +72,7 @@ class WidgetsTest {
 
         @Test
         void getWidget() {
-            Widget widget = widgets.get(WIDGET_ID);
+            Widget widget = widgets.get("xyz");
 
             assertThat(widget).isNotNull();
             verify(widgetCompiler, times(2)).compile(anyString(), eq(resourceFile), anyString());

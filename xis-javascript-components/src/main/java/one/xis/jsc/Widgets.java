@@ -12,8 +12,10 @@ class Widgets extends JavascriptComponents<Widget> {
     private final WidgetCompiler widgetCompiler;
 
     @Override
-    protected String createKey(String name, Object controller) {
-        return name.replace('.', ':');
+    protected String createKey(Object controller) {
+        var controllerClass = controller.getClass();
+        String alias = controllerClass.getAnnotation(one.xis.Widget.class).value();
+        return alias.isEmpty() ? controllerClass.getSimpleName() : alias;
     }
 
     @Override

@@ -19,9 +19,9 @@ class WidgetController {
         widgets = contextAdapter.getWidgets();
     }
 
-    @Get(produces = "text/javascript; charset=utf-8", uri = "/xis/widget/{widgetUrn}")
-    String getWidget(@PathVariable("widgetUrn") String widgetUrn) {
-        return widgets.get(widgetUrn).getJavascript();
+    @Get(produces = "text/javascript; charset=utf-8", uri = "/xis/widget/{widgetId}")
+    String getWidget(@PathVariable("widgetId") String widgetId) {
+        return widgets.get(widgetId).getJavascript();
     }
 
 }
