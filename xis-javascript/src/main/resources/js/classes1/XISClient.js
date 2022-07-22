@@ -20,7 +20,7 @@ class XISClient {
      * @returns {any} data-model from backend
      */
     loadPageModel(rootPage, page) {
-        this.restClient.post('/xis/connector/load-model', {pageId: page.id, clientId: this.clientId, token: this.token}), data => {
+        this.restClient.post(page.server + '/xis/connector/load-model', {pageId: page.id, clientId: this.clientId, token: this.token}), data => {
             page.processData(data);
             rootPage.refresh(page);
         };

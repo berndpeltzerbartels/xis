@@ -29,6 +29,7 @@ public class JavascriptParser {
         pageClass.addField("head", new JSContructorCall(headClass, "this"));
         pageClass.addField("body", new JSContructorCall(bodyClass, "this"));
         pageClass.addField("id", new JSString(pageTemplateModel.getKey()));
+        pageClass.addField("server", new JSString("")); // empty = this server TODO method parameter
     }
 
     private JSClass toClass(WidgetTemplateModel widgetTemplateModel, String javascriptClassName) {
@@ -36,6 +37,7 @@ public class JavascriptParser {
         var widgetRootClass = toClass(widgetTemplateModel.getRootNode());
         widgetClass.addField("root", new JSContructorCall(widgetRootClass, "this"));
         widgetClass.addField("id", new JSString(widgetTemplateModel.getWidgetClassName()));
+        widgetClass.addField("server", new JSString("")); // empty = this server TODO method parameter
         return widgetClass;
     }
 
@@ -197,8 +199,8 @@ public class JavascriptParser {
         }
 
         private JSFunctionCall expressionWithFunction(Expression expression) {
-            var fkt = Functions.getFunction(expression.getFunction());
-            var fktCall = new JSFunctionCall(fkt);
+            var jsFunction = Functions.getFunction(expression.getFunction());
+            var fktCall = new JSFunctionCall(jsFunction);
             for (ExpressionArg arg : expression.getVars()) {
                 if (arg instanceof ExpressionConstant) {
                     fktCall.addParam(new JSConstant(((ExpressionConstant) arg).getContent()));
