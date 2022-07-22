@@ -4,8 +4,10 @@ import java.lang.annotation.*;
 
 /**
  * Parameters annotated with {@link ClientId} must be of type {@link String}
- * as long no custom ClientIdFactory was created.
- * Value is submitted with any request from client.
+ * with 12 characters.
+ * <p>
+ * Value is submitted with any request from client and stored in local storage of the browser.
+ * <p>
  * In contrary to {@link UserId}, this value does not require a login.
  */
 @Documented

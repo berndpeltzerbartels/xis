@@ -6,7 +6,11 @@ class XISClient {
      */
     constructor(rest) {
         this.rest = rest;
-        this.clientId = randomString(12);
+        this.clientId = localStorage.getItem('xis-client-id');
+        if (!this.clientId) {
+            this.clientId = randomString(12);
+            localStorage.setItem('xis-client-id', this.clientId);
+        }
     }
 
     /**
