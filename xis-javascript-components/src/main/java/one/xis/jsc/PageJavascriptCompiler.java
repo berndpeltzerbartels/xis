@@ -12,7 +12,7 @@ import org.w3c.dom.Document;
 
 @XISComponent
 @RequiredArgsConstructor
-class PageCompiler {
+class PageJavascriptCompiler {
 
     private final TemplateParser templateParser;
 

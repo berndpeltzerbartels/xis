@@ -12,7 +12,7 @@ import org.w3c.dom.Document;
 
 @XISComponent
 @RequiredArgsConstructor
-class WidgetCompiler {
+class WidgetJavascriptCompiler {
 
     private final TemplateParser templateParser;
 

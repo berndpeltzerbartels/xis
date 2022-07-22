@@ -12,16 +12,16 @@ class PageController {
     @Inject
     private MicronautContextAdapter contextAdapter;
 
-    private Pages pages;
+    private PageJavascripts pageJavascripts;
 
     @PostConstruct
     void init() {
-        pages = contextAdapter.getPages();
+        pageJavascripts = contextAdapter.getPageJavascripts();
     }
 
     @Get(produces = "text/javascript; charset=utf-8", uri = "/xis/page/{pageId}")
     String getPage(@PathVariable("pageId") String pageId) {
-        return pages.get(pageId).getJavascript();
+        return pageJavascripts.get(pageId).getJavascript();
     }
 
 }

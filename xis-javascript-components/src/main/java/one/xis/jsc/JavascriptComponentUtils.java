@@ -60,7 +60,7 @@ class JavascriptComponentUtils {
         }
         String suffix = getSuffix(path);
         if (suffix != null && !"html".equals(suffix)) {
-            throw new IllegalStateException(String.format("path '%s' in @Page must have suffix 'html' or no one", path));
+            throw new IllegalStateException(String.format("path '%s' in @PageJavascript must have suffix 'html' or no one", path));
         }
     }
 

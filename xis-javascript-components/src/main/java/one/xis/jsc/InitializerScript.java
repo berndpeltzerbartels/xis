@@ -7,7 +7,7 @@ import one.xis.context.XISComponent;
 @RequiredArgsConstructor
 class InitializerScript {
 
-    private final Pages pages;
+    private final PageJavascripts pageJavascripts;
     private final Widgets widgets;
 
     String getContent() {
@@ -16,21 +16,21 @@ class InitializerScript {
 
     private String getPagesRegistrationJs() {
         StringBuilder s = new StringBuilder();
-        pages.getAll().forEach((key, page) -> s.append(getPageRegistrationJs(key, page)));
+        pageJavascripts.getAll().forEach((key, pageJavascript) -> s.append(getPageRegistrationJs(key, pageJavascript)));
         return s.toString();
     }
 
     private String getWidgetsRegistrationJs() {
         StringBuilder s = new StringBuilder();
-        widgets.getAll().forEach((key, widget) -> s.append(getWidgetRegistrationJs(key, widget)));
+        widgets.getAll().forEach((key, widgetJavascript) -> s.append(getWidgetRegistrationJs(key, widgetJavascript)));
         return s.toString();
     }
 
-    private String getPageRegistrationJs(String key, Page page) {
-        return String.format("pages.addPage('%s', new %s());\n", key, page.getJavascriptClass());
+    private String getPageRegistrationJs(String key, PageJavascript pageJavascript) {
+        return String.format("pageJavascripts.addPage('%s', new %s());\n", key, pageJavascript.getJavascriptClass());
     }
 
-    private String getWidgetRegistrationJs(String key, Widget widget) {
-        return String.format("widgets.addWidget('%s', new %s());\n", key, widget.getJavascriptClass());
+    private String getWidgetRegistrationJs(String key, WidgetJavascript widgetJavascript) {
+        return String.format("widgets.addWidget('%s', new %s());\n", key, widgetJavascript.getJavascriptClass());
     }
 }

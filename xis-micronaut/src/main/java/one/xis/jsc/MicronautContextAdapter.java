@@ -20,7 +20,7 @@ class MicronautContextAdapter {
     private BeanContext beanContext;
 
     private AppContext appContext;
-    private Pages pages;
+    private PageJavascripts pageJavascripts;
     private Widgets widgets;
     private RootPage rootPage;
     private ResourceFiles resourceFiles;
@@ -29,7 +29,7 @@ class MicronautContextAdapter {
     @PostConstruct
     void init() {
         appContext = AppContext.getInstance("one.xis");
-        pages = appContext.getSingleton(Pages.class);
+        pageJavascripts = appContext.getSingleton(PageJavascripts.class);
         widgets = appContext.getSingleton(Widgets.class);
         rootPage = appContext.getSingleton(RootPage.class);
         resourceFiles = appContext.getSingleton(ResourceFiles.class);
@@ -39,7 +39,7 @@ class MicronautContextAdapter {
         beanContext.getBeanDefinitions(Qualifiers.byStereotype(Page.class)).stream()//
                 .map(BeanDefinition::getBeanType)
                 .map(beanContext::getBean)
-                .forEach(bean -> pages.add(bean));
+                .forEach(bean -> pageJavascripts.add(bean));
 
         beanContext.getBeanDefinitions(Qualifiers.byStereotype(Widget.class)).stream()//
                 .map(BeanDefinition::getBeanType)

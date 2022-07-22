@@ -15,11 +15,11 @@ import javax.annotation.PostConstruct;
 public class SpringContextAdapter implements BeanPostProcessor {
 
     private Widgets widgets;
-    private Pages pages;
+    private PageJavascripts pageJavascripts;
 
     @PostConstruct
     void init() {
-        pages = pages();
+        pageJavascripts = pages();
         widgets = widgets();
     }
 
@@ -29,7 +29,7 @@ public class SpringContextAdapter implements BeanPostProcessor {
             widgets.add(bean);
         }
         if (bean.getClass().isAnnotationPresent(Page.class)) {
-            pages.add(bean);
+            pageJavascripts.add(bean);
         }
         return bean;
     }
@@ -45,8 +45,8 @@ public class SpringContextAdapter implements BeanPostProcessor {
     }
 
     @Bean
-    Pages pages() {
-        return appContext().getSingleton(Pages.class);
+    PageJavascripts pages() {
+        return appContext().getSingleton(PageJavascripts.class);
     }
 
     @Bean

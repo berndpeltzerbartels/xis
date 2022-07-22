@@ -15,8 +15,8 @@ class PageFactory {
     private final ResourceFiles resourceFiles;
     private int nameIndex;
 
-    Page createPage(@NonNull Object pageController) {
-        return new Page(resourceFiles.getByPath(getHtmlTemplatePath(pageController.getClass())), javascriptClass());
+    PageJavascript createPage(@NonNull Object pageController) {
+        return new PageJavascript(resourceFiles.getByPath(getHtmlTemplatePath(pageController.getClass())), javascriptClass());
     }
 
     private String javascriptClass() {

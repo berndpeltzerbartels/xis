@@ -6,8 +6,9 @@ import lombok.Setter;
 import one.xis.resource.ResourceFile;
 
 @Getter
-class Page implements ResourceFile, JavascriptComponent {
+class WidgetJavascript implements ResourceFile, JavascriptComponent {
 
+    private final Object widgetController;
     private final ResourceFile htmlResourceFile;
     private final String javascriptClass;
 
@@ -17,7 +18,8 @@ class Page implements ResourceFile, JavascriptComponent {
     @Setter
     private String javascript;
 
-    Page(@NonNull ResourceFile htmlResourceFile, String javascriptClass) {
+    WidgetJavascript(@NonNull Object widgetController, @NonNull ResourceFile htmlResourceFile, String javascriptClass) {
+        this.widgetController = widgetController;
         this.htmlResourceFile = htmlResourceFile;
         this.javascriptClass = javascriptClass;
     }
@@ -36,4 +38,5 @@ class Page implements ResourceFile, JavascriptComponent {
     public long getLastModified() {
         return htmlResourceFile.getLastModified();
     }
+
 }

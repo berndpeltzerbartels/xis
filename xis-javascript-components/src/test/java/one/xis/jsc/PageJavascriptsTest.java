@@ -10,10 +10,10 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-class PagesTest {
+class PageJavascriptsTest {
 
-    private Pages pages;
-    private PageCompiler pageCompiler;
+    private PageJavascripts pageJavascripts;
+    private PageJavascriptCompiler pageJavascriptCompiler;
     private PageFactory pageFactory;
     private ReloadableResourceFile resourceFile;
 
@@ -28,20 +28,20 @@ class PagesTest {
 
         ResourceFiles resourceFiles = mock(ResourceFiles.class);
         pageFactory = new PageFactory(resourceFiles);
-        pageCompiler = mock(PageCompiler.class);
+        pageJavascriptCompiler = mock(PageJavascriptCompiler.class);
         resourceFile = mock(ReloadableResourceFile.class);
 
         when(resourceFiles.getByPath(any())).thenReturn(resourceFile);
         when(resourceFile.getContent()).thenReturn("");
 
         TestContext testContext = TestContext.builder()//
-                .withSingleton(Pages.class)//
+                .withSingleton(PageJavascripts.class)//
                 .withMockedSingleton(pageFactory)//
-                .withMockedSingletons(pageCompiler)//
+                .withMockedSingletons(pageJavascriptCompiler)//
                 .build();
 
-        pages = testContext.getSingleton(Pages.class);
-        pages.add(pageController);
+        pageJavascripts = testContext.getSingleton(PageJavascripts.class);
+        pageJavascripts.add(pageController);
     }
 
     @Nested
@@ -54,10 +54,10 @@ class PagesTest {
 
         @Test
         void getPage() {
-            Page page = pages.get("xyz:test");
+            PageJavascript pageJavascript = pageJavascripts.get("xyz:test");
 
-            assertThat(page).isNotNull();
-            verify(pageCompiler, times(1)).compile(anyString(), eq(resourceFile), anyString());
+            assertThat(pageJavascript).isNotNull();
+            verify(pageJavascriptCompiler, times(1)).compile(anyString(), eq(resourceFile), anyString());
         }
     }
 
@@ -72,10 +72,10 @@ class PagesTest {
 
         @Test
         void getPage() {
-            Page page = pages.get("xyz:test");
+            PageJavascript pageJavascript = pageJavascripts.get("xyz:test");
 
-            assertThat(page).isNotNull();
-            verify(pageCompiler, times(2)).compile(anyString(), eq(resourceFile), anyString());
+            assertThat(pageJavascript).isNotNull();
+            verify(pageJavascriptCompiler, times(2)).compile(anyString(), eq(resourceFile), anyString());
         }
     }
 }

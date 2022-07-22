@@ -12,21 +12,21 @@ import static one.xis.path.PathUtils.stripTrailingSlash;
 
 @XISComponent
 @RequiredArgsConstructor
-class Pages extends JavascriptComponents<Page> {
+public class PageJavascripts extends JavascriptComponents<PageJavascript> {
 
     private final PageFactory pageFactory;
-    private final PageCompiler pageCompiler;
+    private final PageJavascriptCompiler pageJavascriptCompiler;
 
     private final Set<String> pathsForValidation = new HashSet<>();
 
     @Override
-    protected Page createComponent(Object controller) {
+    protected PageJavascript createComponent(Object controller) {
         return pageFactory.createPage(controller);
     }
 
     @Override
     protected String compile(String key, ResourceFile resourceFile, String javascriptClassName) {
-        return pageCompiler.compile(key, resourceFile, javascriptClassName);
+        return pageJavascriptCompiler.compile(key, resourceFile, javascriptClassName);
     }
 
     @Override

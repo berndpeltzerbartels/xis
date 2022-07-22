@@ -6,10 +6,10 @@ import one.xis.resource.ResourceFile;
 
 @XISComponent
 @RequiredArgsConstructor
-class Widgets extends JavascriptComponents<Widget> {
+class Widgets extends JavascriptComponents<WidgetJavascript> {
 
     private final WidgetFactory widgetFactory;
-    private final WidgetCompiler widgetCompiler;
+    private final WidgetJavascriptCompiler widgetJavascriptCompiler;
 
     @Override
     protected String createKey(Object controller) {
@@ -19,13 +19,13 @@ class Widgets extends JavascriptComponents<Widget> {
     }
 
     @Override
-    protected Widget createComponent(Object controller) {
+    protected WidgetJavascript createComponent(Object controller) {
         return widgetFactory.createWidget(controller);
     }
 
     @Override
     protected String compile(String name, ResourceFile resourceFile, String javascriptClassName) {
-        return widgetCompiler.compile(name, resourceFile, javascriptClassName);
+        return widgetJavascriptCompiler.compile(name, resourceFile, javascriptClassName);
     }
 
 }

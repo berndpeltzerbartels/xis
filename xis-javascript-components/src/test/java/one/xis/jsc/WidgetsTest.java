@@ -13,7 +13,7 @@ import static org.mockito.Mockito.*;
 class WidgetsTest {
 
     private Widgets widgets;
-    private WidgetCompiler widgetCompiler;
+    private WidgetJavascriptCompiler widgetJavascriptCompiler;
     private WidgetFactory widgetFactory;
     private ReloadableResourceFile resourceFile;
 
@@ -28,7 +28,7 @@ class WidgetsTest {
 
         ResourceFiles resourceFiles = mock(ResourceFiles.class);
         widgetFactory = new WidgetFactory(resourceFiles);
-        widgetCompiler = mock(WidgetCompiler.class);
+        widgetJavascriptCompiler = mock(WidgetJavascriptCompiler.class);
         resourceFile = mock(ReloadableResourceFile.class);
 
         when(resourceFiles.getByPath(any())).thenReturn(resourceFile);
@@ -37,7 +37,7 @@ class WidgetsTest {
         TestContext testContext = TestContext.builder()//
                 .withSingleton(Widgets.class)//
                 .withMockedSingleton(widgetFactory)//
-                .withMockedSingletons(widgetCompiler)//
+                .withMockedSingletons(widgetJavascriptCompiler)//
                 .build();
 
         widgets = testContext.getSingleton(Widgets.class);
@@ -54,10 +54,10 @@ class WidgetsTest {
 
         @Test
         void getWidget() {
-            Widget widget = widgets.get("xyz");
+            WidgetJavascript widgetJavascript = widgets.get("xyz");
 
-            assertThat(widget).isNotNull();
-            verify(widgetCompiler, times(1)).compile(anyString(), eq(resourceFile), anyString());
+            assertThat(widgetJavascript).isNotNull();
+            verify(widgetJavascriptCompiler, times(1)).compile(anyString(), eq(resourceFile), anyString());
         }
     }
 
@@ -72,10 +72,10 @@ class WidgetsTest {
 
         @Test
         void getWidget() {
-            Widget widget = widgets.get("xyz");
+            WidgetJavascript widgetJavascript = widgets.get("xyz");
 
-            assertThat(widget).isNotNull();
-            verify(widgetCompiler, times(2)).compile(anyString(), eq(resourceFile), anyString());
+            assertThat(widgetJavascript).isNotNull();
+            verify(widgetJavascriptCompiler, times(2)).compile(anyString(), eq(resourceFile), anyString());
         }
     }
 }

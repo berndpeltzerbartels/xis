@@ -11,13 +11,13 @@ import javax.servlet.http.HttpServletRequest;
 class PageServlet extends ResourceServlet {
 
     @Autowired
-    private Pages pages;
+    private PageJavascripts pageJavascripts;
 
     @Override
     protected ResourceFile getResource(HttpServletRequest request) {
         String uri = request.getRequestURI();
         String key = uri.substring(uri.lastIndexOf('/') + 1);
-        return pages.get(key);
+        return pageJavascripts.get(key);
     }
 
     @Override

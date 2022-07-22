@@ -19,7 +19,7 @@ import java.io.IOException;
 class RootPage {
 
     public static final String CUSTOM_SCRIPT = "custom-script.js";
-    private final Pages pages;
+    private final PageJavascripts pageJavascripts;
     private final Widgets widgets;
     private final ResourceFiles resourceFiles;
 
@@ -52,7 +52,7 @@ class RootPage {
     }
 
     private void addPagesScriptTags(Element head) {
-        pages.getKeys().forEach(key -> addScriptTag(head, PathUtils.appendPath("/xis/page/", key)));
+        pageJavascripts.getKeys().forEach(key -> addScriptTag(head, PathUtils.appendPath("/xis/page/", key)));
     }
 
     private void addWidgetScriptTags(Element head) {
