@@ -1,6 +1,13 @@
-class XISRest {
+class XISRestClient {
 
-    get(uri, handler, parameters) {
+    /**
+     * @param {XISErrorHandler} errorHandler 
+     */
+    constructor(errorHandler) {
+        this.errorHandler = errorHandler;
+    }
+
+    get(uri, handler, parameters, handler) {
         var address = uri;
         if (parameters) {
             address += '?'
@@ -24,9 +31,11 @@ class XISRest {
         xmlHttp.onreadystatechange = function() { 
             // TODO Handle errors and "304 NOT MODIFIED"
             // TODO Add headers to allow 304
+            // Readystaet == 4 for 304 ?
             if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
-                handler(xmlHttp.responseText);
+                handler(JSON.parse(xmlHttp.responseText));
             }
+            // TODO use errorhandler
         }
         xmlHttp.open(method, uri, true); // true for asynchronous 
         xmlHttp.send(payload);

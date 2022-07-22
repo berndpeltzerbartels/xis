@@ -1,4 +1,4 @@
-class XISPage {
+class XISPage extends XISValueHolder {
 
     /**
      * Used in RootPage
@@ -65,14 +65,14 @@ class XISPage {
         }
      }
 
-
-     setValueHolder(rootPage) {
-        this.valueHolder = rootPage;
+     /**
+      * @param {any} data 
+      */
+     processData(data) {
+        this.setValues(data);
+        this.refresh();
      }
 
-     getValueHolder() {
-         return this.valueHolder;
-     }
 
     /**
     * Creates Childclasses, not Elements.

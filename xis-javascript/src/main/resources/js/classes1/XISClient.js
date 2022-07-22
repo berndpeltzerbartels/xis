@@ -2,10 +2,11 @@ class XISClient {
 
     /**
      * 
-     * @param {XISRest} rest 
+     * @param {XISRestClient} restClient 
      */
-    constructor(rest) {
-        this.rest = rest;
+    constructor(restClient) {
+        this.restClient = restClient;
+        this.token = localStorage.getItem('xis-token');
         this.clientId = localStorage.getItem('xis-client-id');
         if (!this.clientId) {
             this.clientId = randomString(12);
@@ -14,11 +15,15 @@ class XISClient {
     }
 
     /**
+     * @param {XISRootPage} rootPage
      * @param {XISPage} page 
      * @returns {any} data-model from backend
      */
-    loadPageModel(page) {
-        this.rest.get('/xis/connector/load-model', {pageId: page.id, clientId: this.clientId});
+    loadPageModel(rootPage, page) {
+        this.restClient.post('/xis/connector/load-model', {pageId: page.id, clientId: this.clientId, token: this.token}), data => {
+            page.processData(data);
+            rootPage.refresh(page);
+        };
     } 
 
 }

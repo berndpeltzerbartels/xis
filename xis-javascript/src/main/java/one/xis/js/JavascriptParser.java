@@ -28,13 +28,14 @@ public class JavascriptParser {
         var bodyClass = toClass(pageTemplateModel.getBody());
         pageClass.addField("head", new JSContructorCall(headClass, "this"));
         pageClass.addField("body", new JSContructorCall(bodyClass, "this"));
+        pageClass.addField("id", new JSString(pageTemplateModel.getKey()));
     }
 
     private JSClass toClass(WidgetTemplateModel widgetTemplateModel, String javascriptClassName) {
         var widgetClass = derrivedClass(javascriptClassName, XIS_WIDGET);
         var widgetRootClass = toClass(widgetTemplateModel.getRootNode());
         widgetClass.addField("root", new JSContructorCall(widgetRootClass, "this"));
-        widgetClass.addField("name", new JSString(widgetTemplateModel.getWidgetClassName()));
+        widgetClass.addField("id", new JSString(widgetTemplateModel.getWidgetClassName()));
         return widgetClass;
     }
 

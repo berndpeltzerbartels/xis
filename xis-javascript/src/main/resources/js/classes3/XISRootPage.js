@@ -1,11 +1,10 @@
-class XISRootPage extends XISValueHolder {
+class XISRootPage  {
 
     /**
      * 
      * @param {XISClient} client 
      */
     constructor(client) {
-        super(undefined);
         this.client = client;
         this.head = getElementByTagName('head');
         this.title = getElementByTagName('title');
@@ -14,14 +13,12 @@ class XISRootPage extends XISValueHolder {
 
     bindPage(page) {
         this.page = page;
-        this.page.setValueHolder(this);
-        this.setValues(this.client.loadPageModel(this.page));
-        this.page.refresh();
+        this.client.loadPageModel(this, this.page);
+    }
 
-        this.setBodyAttributes(this.page);
-        this.page.bindHeadContent(this.head);
-        this.page.bindBodyContent(this.body);
-
+    refresh(page) {
+        page.bindHeadContent(this.head);
+        page.bindBodyContent(this.body);
     }
 
     unbindPage() {
