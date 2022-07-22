@@ -21,6 +21,9 @@ abstract class JavascriptComponents<C extends JavascriptComponent> {
         String key = createKey(controller);
         C component = createComponent(controller);
         compile(key, component);
+        if (components.containsKey(key)) {
+            throw new DuplicateKeyException(this, key);
+        }
         components.put(key, component);
         return component;
     }

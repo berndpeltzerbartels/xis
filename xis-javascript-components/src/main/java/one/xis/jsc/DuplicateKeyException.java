@@ -1,7 +1,7 @@
 package one.xis.jsc;
 
 class DuplicateKeyException extends RuntimeException {
-    DuplicateKeyException(String message) {
-        super(message);
+    DuplicateKeyException(JavascriptComponents<?> components, String key) {
+        super(components.getClass().getSimpleName() + ": There is more than one object having the key " + key);
     }
 }
