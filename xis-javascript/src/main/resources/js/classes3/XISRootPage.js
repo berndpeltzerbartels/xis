@@ -15,7 +15,7 @@ class XISRootPage extends XISValueHolder {
     bindPage(page) {
         this.page = page;
         this.page.setValueHolder(this);
-        this.setValues(this.client.createPageModel(this.page));
+        this.setValues(this.client.loadPageModel(this.page));
         this.page.refresh();
 
         this.setBodyAttributes(this.page);
