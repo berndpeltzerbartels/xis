@@ -8,7 +8,6 @@ import one.xis.resource.ResourceFile;
 @Getter
 class Page implements ResourceFile, JavascriptComponent {
 
-    private final Object pageController;
     private final ResourceFile htmlResourceFile;
     private final String javascriptClass;
 
@@ -18,8 +17,7 @@ class Page implements ResourceFile, JavascriptComponent {
     @Setter
     private String javascript;
 
-    Page(@NonNull Object pageController, @NonNull ResourceFile htmlResourceFile, String javascriptClass) {
-        this.pageController = pageController;
+    Page(@NonNull ResourceFile htmlResourceFile, String javascriptClass) {
         this.htmlResourceFile = htmlResourceFile;
         this.javascriptClass = javascriptClass;
     }

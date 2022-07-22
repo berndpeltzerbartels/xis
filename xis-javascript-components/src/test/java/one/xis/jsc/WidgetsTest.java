@@ -18,7 +18,7 @@ class WidgetsTest {
     private ReloadableResourceFile resourceFile;
 
     @one.xis.Widget("xyz")
-    static class WidgetController {
+    static class TestWidget {
 
     }
 
@@ -41,7 +41,7 @@ class WidgetsTest {
                 .build();
 
         widgets = testContext.getSingleton(Widgets.class);
-        widgets.add(new WidgetController());
+        widgets.add(new TestWidget());
     }
 
     @Nested

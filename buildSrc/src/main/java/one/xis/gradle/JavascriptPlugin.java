@@ -32,6 +32,8 @@ public class JavascriptPlugin implements Plugin<Project> {
 
     private void processJsSrcDir(File jsSrcDir, Project project) {
         File jsOutFile = getJSOutDir(jsSrcDir, project);
+        Collection<File> jsFiles = getJsFiles(jsSrcDir);
+        jsFiles.forEach(this::compile);
         copyJsToFile(getJsFiles(jsSrcDir), jsOutFile);
         compile(jsOutFile);
     }
@@ -57,7 +59,7 @@ public class JavascriptPlugin implements Plugin<Project> {
         try {
             compiler.compile(readContent(jsFile));
         } catch (ScriptException e) {
-            throw new RuntimeException("Compilation failed for " + jsFile.getAbsolutePath(), e);
+            throw new RuntimeException("Compilation failed for " + jsFile.getAbsolutePath() + ": " + e.getMessage());
         }
     }
 

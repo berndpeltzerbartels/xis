@@ -16,7 +16,7 @@ class PageFactory {
     private int nameIndex;
 
     Page createPage(@NonNull Object pageController) {
-        return new Page(pageController, resourceFiles.getByPath(getHtmlTemplatePath(pageController.getClass())), javascriptClass());
+        return new Page(resourceFiles.getByPath(getHtmlTemplatePath(pageController.getClass())), javascriptClass());
     }
 
     private String javascriptClass() {

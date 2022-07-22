@@ -7,7 +7,7 @@ class XISRestClient {
         this.errorHandler = errorHandler;
     }
 
-    get(uri, handler, parameters, handler) {
+    get(uri, parameters, handler) {
         var address = uri;
         if (parameters) {
             address += '?'

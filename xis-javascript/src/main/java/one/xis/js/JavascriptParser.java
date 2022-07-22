@@ -170,8 +170,8 @@ public class JavascriptParser {
     }
 
     private static JSFunctionCall expressionWithFunction(Expression expression, JSClass owner) {
-        var fkt = Functions.getFunction(expression.getFunction());
-        var fktCall = new JSFunctionCall(fkt);
+        var jsFunction = Functions.getFunction(expression.getFunction());
+        var fktCall = new JSFunctionCall(jsFunction);
         for (ExpressionArg arg : expression.getVars()) {
             if (arg instanceof ExpressionConstant) {
                 fktCall.addParam(new JSConstant(((ExpressionConstant) arg).getContent()));
