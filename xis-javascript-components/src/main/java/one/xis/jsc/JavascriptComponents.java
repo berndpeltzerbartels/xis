@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-abstract class JavascriptComponents<C extends JavascriptComponent> {
+public abstract class JavascriptComponents<C extends JavascriptComponent> {
     private final Map<String, C> components = new HashMap<>();
 
     protected abstract C createComponent(Object controller);

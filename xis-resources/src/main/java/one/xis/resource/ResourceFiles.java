@@ -10,7 +10,8 @@ import java.net.URL;
 @XISComponent
 public class ResourceFiles {
     public ResourceFile getByPath(String path) {
-        URL url = ClassLoader.getSystemClassLoader().getResource(removeTrailingSlah(path));
+        String resourcePath = removeTrailingSlah(path);
+        URL url = ClassLoader.getSystemClassLoader().getResource(resourcePath);
         if (url == null) {
             throw new NoSuchResourceException(path);
         }
@@ -21,7 +22,7 @@ public class ResourceFiles {
             throw new RuntimeException(e);
         }
         if (uri.getScheme().equals("jar")) {
-            return new ArchivedResource(path);
+            return new ArchivedResource(resourcePath);
         } else {
             return new DevelopmentResource(new File(uri));
         }

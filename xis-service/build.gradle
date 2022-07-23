@@ -10,14 +10,13 @@ repositories {
 }
 
 dependencies {
-    implementation project(':xis-remote-core')
+    compileOnly project(':xis-remote-core')
     implementation project(':xis-context')
     implementation project(':xis-javascript-components')
     implementation project(':xis-resources')
-    implementation project(':xis-javascript')
+    implementation project(':xis-controllers')
 
     implementation 'org.codehaus.groovy:groovy-all:3.0.11'
-
     annotationProcessor 'org.projectlombok:lombok:1.18.12'
 
     implementation 'org.projectlombok:lombok:1.18.12'

@@ -14,33 +14,33 @@ import java.io.IOException;
 import static one.xis.path.PathUtils.getFile;
 import static one.xis.path.PathUtils.getSuffix;
 
-class JavascriptComponentUtils {
+public class JavascriptComponentUtils {
 
-    static String javaScriptModelAsCode(@NonNull JSScript script) {
+    public static String javaScriptModelAsCode(@NonNull JSScript script) {
         StringBuilder builder = new StringBuilder();
         JSWriter jsWriter = new JSWriter(builder);
         jsWriter.write(script);
         return builder.toString();
     }
 
-    static String urnToClassName(String urn) {
+    public static String urnToClassName(String urn) {
         return urn.replace(':', '.');
     }
 
-    static String nameToUrn(String name) {
+    public static String nameToUrn(String name) {
         return name.replace('.', ':');
     }
 
-    static String pathToUrn(String name) {
+    public static String pathToUrn(String name) {
         return name.replace('/', ':');
     }
 
-    static String urnToPath(String name) {
+    public static String urnToPath(String name) {
         return name.replace(':', '/');
     }
 
 
-    static Document htmlToDocument(String controllerClass, String htmlSource) {
+    public static Document htmlToDocument(String controllerClass, String htmlSource) {
         try {
             return htmlToDocument(htmlSource);
         } catch (SAXException e) {
@@ -48,12 +48,12 @@ class JavascriptComponentUtils {
         }
     }
 
-    static String getHtmlTemplatePath(Class<?> controllerClass) {
+    public static String getHtmlTemplatePath(Class<?> controllerClass) {
         return controllerClass.getName().replace('.', '/') + ".html";
     }
 
 
-    static void validatePath(String path) {
+    public static void validatePath(String path) {
         String file = getFile(path);
         if (StringUtils.getNumberOfOccurences(file, '.') > 1) {
             throw new IllegalStateException(String.format("file in path '%s' must not have more than one occurences of '.'", path));

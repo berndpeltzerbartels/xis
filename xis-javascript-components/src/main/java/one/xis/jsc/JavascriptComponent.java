@@ -2,7 +2,7 @@ package one.xis.jsc;
 
 import one.xis.resource.ResourceFile;
 
-interface JavascriptComponent {
+public interface JavascriptComponent {
 
     boolean isCompiled();
 
@@ -11,6 +11,6 @@ interface JavascriptComponent {
     ResourceFile getHtmlResourceFile();
 
     void setCompiled(boolean compiled);
-    
+
     String getJavascriptClass();
 }
