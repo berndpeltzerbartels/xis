@@ -13,6 +13,10 @@ public class WidgetJavascript implements ResourceFile, JavascriptComponent {
     private final ResourceFile htmlResourceFile;
     private final String javascriptClass;
 
+
+    @Setter
+    private String key;
+
     @Setter
     private boolean compiled;
 

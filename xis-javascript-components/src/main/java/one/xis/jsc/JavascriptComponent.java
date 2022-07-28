@@ -13,4 +13,8 @@ public interface JavascriptComponent {
     void setCompiled(boolean compiled);
 
     String getJavascriptClass();
+
+    void setKey(String key);
+
+    String getKey();
 }

@@ -21,5 +21,4 @@ include 'xis-micronaut'
 include 'xis-micronaut-test-app'
 include 'xis-controllers'
 include 'xis-service'
-include 'xis-datamodel'
 

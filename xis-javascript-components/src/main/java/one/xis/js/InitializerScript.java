@@ -15,7 +15,9 @@ class InitializerScript {
     private final WidgetJavascripts widgetJavascripts;
 
     String getContent() {
-        return getPagesRegistrationJs() + getWidgetsRegistrationJs();
+        return getPagesRegistrationJs() +
+                getWidgetsRegistrationJs() +
+                getWelcomPageJs();
     }
 
     private String getPagesRegistrationJs() {
@@ -31,10 +33,17 @@ class InitializerScript {
     }
 
     private String getPageRegistrationJs(String key, PageJavascript pageJavascript) {
-        return String.format("pageJavascripts.addPage('%s', new %s());\n", key, pageJavascript.getJavascriptClass());
+        return String.format("pages.addPage('%s', new %s());\n", key, pageJavascript.getJavascriptClass());
     }
 
     private String getWidgetRegistrationJs(String key, WidgetJavascript widgetJavascript) {
-        return String.format("widgetJavascripts.addWidget('%s', new %s());\n", key, widgetJavascript.getJavascriptClass());
+        return String.format("widgets.addWidget('%s', new %s());\n", key, widgetJavascript.getJavascriptClass());
+    }
+
+    private String getWelcomPageJs() {
+        if (pageJavascripts.getWelcomePage() != null) {
+            return String.format("pages.setWelcomePage('%s');\n", pageJavascripts.getWelcomePage().getKey());
+        }
+        return "";
     }
 }

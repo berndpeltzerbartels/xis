@@ -17,5 +17,7 @@ import java.lang.annotation.Target;
 public @interface Page {
     String path();
 
+    boolean welcomePage() default false;
+
     String title() default "";
 }

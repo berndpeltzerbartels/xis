@@ -13,6 +13,9 @@ public class PageJavascript implements ResourceFile, JavascriptComponent {
     private final String javascriptClass;
 
     @Setter
+    private String key;
+
+    @Setter
     private boolean compiled;
 
     @Setter

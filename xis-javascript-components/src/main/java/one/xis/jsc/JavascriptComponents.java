@@ -20,7 +20,8 @@ public abstract class JavascriptComponents<C extends JavascriptComponent> {
     public C add(Object controller) {
         String key = createKey(controller);
         C component = createComponent(controller);
-        compile(key, component);
+        component.setKey(key);
+        compile(component);
         if (components.containsKey(key)) {
             throw new DuplicateKeyException(this, key);
         }
@@ -33,7 +34,7 @@ public abstract class JavascriptComponents<C extends JavascriptComponent> {
         if (component == null) {
             throw new IllegalStateException("no such element: " + key);
         }
-        return compileIfObsolete(key, component);
+        return compileIfObsolete(component);
     }
 
     public Map<String, C> getAll() {
@@ -45,19 +46,19 @@ public abstract class JavascriptComponents<C extends JavascriptComponent> {
     }
 
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
-    private C compileIfObsolete(String key, C component) {
+    private C compileIfObsolete(C component) {
         synchronized (component) {
             if (isObsolete(component) || !component.isCompiled()) {
-                compile(key, component);
+                compile(component);
             }
             return component;
         }
     }
 
-    private void compile(String key, C component) {
+    private void compile(C component) {
         component.setCompiled(false);
         reloadHtml(component);
-        String javascript = compile(key, component.getHtmlResourceFile(), component.getJavascriptClass());
+        String javascript = compile(component.getKey(), component.getHtmlResourceFile(), component.getJavascriptClass());
         component.setJavascript(javascript);
         component.setCompiled(true);
     }

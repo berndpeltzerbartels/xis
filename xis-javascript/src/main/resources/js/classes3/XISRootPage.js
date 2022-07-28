@@ -6,9 +6,6 @@ class XISRootPage  {
      */
     constructor(client) {
         this.client = client;
-        this.head = getElementByTagName('head');
-        this.title = getElementByTagName('title');
-        this.body = getElementByTagName('body');
     }
 
     bindPage(page) {
@@ -17,35 +14,35 @@ class XISRootPage  {
     }
 
     refresh(page) {
-        page.bindHeadContent(this.head);
-        page.bindBodyContent(this.body);
+        page.bindHeadContent(getElementByTagName('head'));
+        page.bindBodyContent(getElementByTagName('body'));
     }
 
     unbindPage() {
         if (this.page) {
             this.removeBodyAttributes();
-            this.page.unbindHeadContent(this.head);
+            this.page.unbindHeadContent(getElementByTagName('head'));
             this.removeBodyAttributes();
-            this.page.unbindBodyContent(this.body);
+            this.page.unbindBodyContent(getElementByTagName('body'));
             this.page = undefined;
         }
     }
 
     setPageTitle(page) {
-        this.title.innerText = page.title;
+        getElementByTagName('title').innerText = page.title;
     }
 
     addHeadTags(page) {
         for (var tag of page.headTags) {
-            this.head.appendChild(tag);
+            getElementByTagName('head').appendChild(tag);
         }
     }
 
     setBodyAttributes(page) {
-       page.setBodyAttributes(this.body);
+       page.setBodyAttributes(getElementByTagName('title'));
     }
 
     removeBodyAttributes() {
-        this.page.removeBodyAttributes(this.body);
+        this.page.removeBodyAttributes(getElementByTagName('title'));
     }
 }

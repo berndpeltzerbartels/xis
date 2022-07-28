@@ -27,7 +27,8 @@ class XISPage extends XISValueHolder {
      * @param {Element} head 
      */
     bindHeadContent(head) {
-        var nodeList = this.head.childNodes();
+        debugger;
+        var nodeList = this.head.element.children;
         for (var i = 0; i < nodeList.length; i++) {
             head.appendChild(nodeList.item(i));
         }
@@ -38,7 +39,8 @@ class XISPage extends XISValueHolder {
      * @param {Element} body 
      */
     bindBodyContent(body) {
-        var nodeList = this.body.childNodes();
+        debugger;
+        var nodeList = this.body.element.children;
         for (var i = 0; i < nodeList.length; i++) {
             body.appendChild(nodeList.item(i));
         }
