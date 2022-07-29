@@ -15,6 +15,7 @@ class XISContainer extends XISTemplateObject {
     * @param {XISValueHolder} valueHolder
     */
     init(parent, valueHolder) {
+        // TODO vermutlich nicht in Gebrauch
         super.init(parent, valueHolder);
         parent.appendChild(this.element);
         if (this.defaultWidgetId) {
@@ -22,6 +23,9 @@ class XISContainer extends XISTemplateObject {
         }
     }
 
+    refresh() {
+        // TODO
+    }
 
     /**
      * @override
@@ -32,6 +36,7 @@ class XISContainer extends XISTemplateObject {
     }
 
     setWidget(widgetName) {
+        // TODO
         if (this.widget) {
             if (this.widget.name == widgetName) {
                 __lifecycleService.onDisplayWidget(this.widget);

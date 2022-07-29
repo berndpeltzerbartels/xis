@@ -45,6 +45,7 @@ public class JSWriter {
         }
         writer.append(" { ");
         writeConstructor(jsClass, writer);
+        writeOverriddenMethods(jsClass, writer);
         writer.append("}\n");
     }
 
@@ -69,12 +70,12 @@ public class JSWriter {
                 throw new RuntimeException(e);
             }
         });
-        writer.append("};");
+        writer.append("} ");
 
     }
 
 
-    private void writeOverriddenMethods(JSClass jsClass) {
+    private void writeOverriddenMethods(JSClass jsClass, Appendable writer) {
         jsClass.getOverriddenMethods().values().forEach(method -> writeMethodDeclaration(method, writer));
     }
 
@@ -86,8 +87,7 @@ public class JSWriter {
             writer.append(method.getArgs().stream().collect(Collectors.joining(", ")));
             writer.append("){");
             method.getStatements().forEach(statement -> writeStatement(statement, writer));
-            writer.append("};");
-            writer.append("\n");
+            writer.append("} ");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

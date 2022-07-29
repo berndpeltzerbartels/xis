@@ -14,17 +14,17 @@ class XISElement extends XISTemplateObject {
     /**
      * @override
      */
-    render() {
+    refresh() {
         this.parent.element.appendChild(this.element);
-        this.updateAttribues();
-        this.children.forEach(child => child.render());
+        this.updateAttributes();
+        this.children.forEach(child => child.refresh());
     }
 
     unlink() {
         this.parent.getElement().removeChild(this.element);
     }
 
-    updateAttribues() {
+    updateAttributes() {
         throw new Error('abstract method');
     }
 

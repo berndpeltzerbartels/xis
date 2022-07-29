@@ -1,9 +1,25 @@
 class XISTemplateObject {
 
 
+    /**
+     * 
+     * @param {XISTemplateObject} parent 
+     */
+    constructor(parent) {
+        this.parent = parent;
+    }
 
+
+    /**
+     * @returns {XISValueHolder}
+     */
     getValueHolder() {
         throw new Error('abstract method');
+    }
+
+
+    val(path) {
+        return this.getValueHolder().getValue(path);
     }
 
 

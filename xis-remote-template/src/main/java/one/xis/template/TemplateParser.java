@@ -47,8 +47,8 @@ public class TemplateParser {
             var root = document.getDocumentElement();
             var headElement = XmlUtil.getElementByTagName(root, "head").orElseThrow(() -> new TemplateSynthaxException(key + " must have head-tag")); // TODO create if not present
             var bodyElement = XmlUtil.getElementByTagName(root, "body").orElseThrow(() -> new TemplateSynthaxException(key + " must have body-tag"));  // TODO create if not present
-            var headTemplateElement = toTemplateElement(headElement);
-            var bodyTemplateElement = toTemplateElement(bodyElement);
+            var headTemplateElement = toTemplateHeadElement(headElement);
+            var bodyTemplateElement = toTemplateBodyElement(bodyElement);
             parseChildren(headElement).forEach(headTemplateElement::addChild);
             parseChildren(bodyElement).forEach(bodyTemplateElement::addChild);
             pageModel.setHead(headTemplateElement);
@@ -132,6 +132,18 @@ public class TemplateParser {
 
     private TemplateElement toTemplateElement(Element element) {
         var templateElement = new TemplateElement(element.getTagName());
+        getAttributes(element).forEach((name, rawValue) -> addAttribute(name, rawValue, templateElement));
+        return templateElement;
+    }
+
+    private TemplateHeadElement toTemplateHeadElement(Element element) {
+        var templateElement = new TemplateHeadElement();
+        getAttributes(element).forEach((name, rawValue) -> addAttribute(name, rawValue, templateElement));
+        return templateElement;
+    }
+
+    private TemplateBodyElement toTemplateBodyElement(Element element) {
+        var templateElement = new TemplateBodyElement();
         getAttributes(element).forEach((name, rawValue) -> addAttribute(name, rawValue, templateElement));
         return templateElement;
     }

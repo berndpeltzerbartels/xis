@@ -5,6 +5,8 @@ public class Classes {
     public static final JSSuperClass XIS_PAGE = new JSSuperClass("XISPage");
     public static final JSSuperClass XIS_WIDGET = new JSSuperClass("XISWidget"); // TODO check javascript
     public static final JSSuperClass XIS_ELEMENT = new JSSuperClass("XISElement", "parent");
+    public static final JSSuperClass XIS_HEAD_ELEMENT = new JSSuperClass("XISHead", "parent");
+    public static final JSSuperClass XIS_BODY_ELEMENT = new JSSuperClass("XISBody", "parent");
     public static final JSSuperClass XIS_CONTAINER = new JSSuperClass("XISContainer", "parent");
     public static final JSSuperClass XIS_STATIC_TEXT_NODE = new JSSuperClass("XISStaticTextNode");
     public static final JSSuperClass XIS_MUTABLE_TEXT_NODE = new JSSuperClass("XISMutableTextNode", "parent");
@@ -54,6 +56,27 @@ public class Classes {
                 .addAbstractField("root");
 
         XIS_ELEMENT.addMethod("init", 2)
+                .addMethod("val", 1)
+                .addMethod("update", 0)
+                .addMethod("initChildren", 0)
+                .addMethod("updateChildren", 0)
+                .addAbstractMethod("updateAttributes")
+                .addMethod("updateAttribute", 2)
+                .addMethod("unlink", 0)
+                .addAbstractField("children");
+
+        XIS_HEAD_ELEMENT.addMethod("init", 2)
+                .addMethod("val", 1)
+                .addMethod("update", 0)
+                .addMethod("initChildren", 0)
+                .addMethod("updateChildren", 0)
+                .addAbstractMethod("updateAttributes")
+                .addMethod("updateAttribute", 2)
+                .addMethod("unlink", 0)
+                .addAbstractField("children");
+
+
+        XIS_BODY_ELEMENT.addMethod("init", 2)
                 .addMethod("val", 1)
                 .addMethod("update", 0)
                 .addMethod("initChildren", 0)

@@ -1,36 +1,56 @@
 class XISPage extends XISValueHolder {
 
+    constructor() {
+        super(undefined);
+        this.headChildNodes = [];
+    }
+
+
+    refresh(rootHead, rootBody) {
+        this.head.refresh();
+        this.body.refresh();
+        this.removeBodyAttributes(rootBody);
+        this.unbindHeadContent(rootHead);
+        this.unbindBodyContent(rootBody);
+        this.setBodyAttributes(rootBody);
+        this.bindHeadContent(rootHead);
+        this.bindBodyContent(rootBody);
+    }
+
+
     /**
-     * Used in RootPage
+     * We do not remove all childnodes but only those ones from this page.
+     * Otherwise we would remove all script-tags.
+     * 
      * @param {Element} head 
      */
     unbindHeadContent(head) {
-        var nodeList = this.head.childNodes();
-        for (var i = 0; i < nodeList.length; i++) {
-            head.removeChild(nodeList.item(i));
+        debugger;
+        while (this.headChildNodes.length > 0) {
+            var child = this.headChildNodes.pop();
+            head.removeChild(child);
         }
     }
 
     /**
-    * Used in RootPage
+     * here we cann remove all, because body is empty on root-page.
     * @param {Element} body 
     */
     unbindBodyContent(body) {
-        var nodeList = this.body.childNodes();
+        var nodeList = body.childNodes;
         for (var i = 0; i < nodeList.length; i++) {
             body.removeChild(nodeList.item(i));
         }
     }
 
     /**
-     * Used in RootPage
      * @param {Element} head 
      */
     bindHeadContent(head) {
         debugger;
-        var nodeList = this.head.element.children;
+        var nodeList = this.head.element.childNodes;
         for (var i = 0; i < nodeList.length; i++) {
-            head.appendChild(nodeList.item(i));
+            this.headChildNodes.push(head.appendChild(nodeList.item(i)));
         }
     }
 
@@ -40,7 +60,7 @@ class XISPage extends XISValueHolder {
      */
     bindBodyContent(body) {
         debugger;
-        var nodeList = this.body.element.children;
+        var nodeList = this.body.element.childNodes;
         for (var i = 0; i < nodeList.length; i++) {
             body.appendChild(nodeList.item(i));
         }
@@ -51,8 +71,8 @@ class XISPage extends XISValueHolder {
      * @param {Element} bodyTag 
      */
     setBodyAttributes(bodyTag) {
-       for (var name of this.body.getAttributeNames()) {
-           var value = this.body.getAttribute(name);
+       for (var name of this.body.element.getAttributeNames()) {
+           var value = this.body.element.getAttribute(name);
            bodyTag.setAttribute(name, value);
        }
      }
@@ -62,7 +82,7 @@ class XISPage extends XISValueHolder {
      * @param {Element} bodyTag 
      */
      removeBodyAttributes(bodyTag) {
-        for (var name of this.body.getAttributeNames()) {
+        for (var name of this.body.element.getAttributeNames()) {
             bodyTag.removeAttribute(name);
         }
      }
@@ -78,18 +98,12 @@ class XISPage extends XISValueHolder {
 
     /**
     * Creates Childclasses, not Elements.
-    */
+    
     createChildren() {
        this.createHeadElement();
        this.createBodyElement();
     }
+*/
 
-    /**
-    * Called when data changed. Tree is reloaded.
-    */
-    refresh() {
-        this.head.refresh();
-        this.body.refresh();
-    }
 
 }

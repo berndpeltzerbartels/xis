@@ -73,6 +73,22 @@ public class JavascriptParser {
         return elementClass;
     }
 
+    private JSClass toClass(TemplateHeadElement element) {
+        var elementClass = derrivedClass(XIS_HEAD_ELEMENT);
+        addChildrenField(element, elementClass);
+        addElementField(element, elementClass);
+        overrideUpdateAttributes(elementClass, element);
+        return elementClass;
+    }
+
+    private JSClass toClass(TemplateBodyElement element) {
+        var elementClass = derrivedClass(XIS_BODY_ELEMENT);
+        addChildrenField(element, elementClass);
+        addElementField(element, elementClass);
+        overrideUpdateAttributes(elementClass, element);
+        return elementClass;
+    }
+
     private JSClass toClass(ContainerElement containerElement) {
         var containerClass = derrivedClass(XIS_CONTAINER);
         containerClass.addField("containerId", new JSString(containerElement.getContainerId()));
