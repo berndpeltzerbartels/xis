@@ -1,10 +1,26 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Huhu!</title>
+    <title></title>
     <script type="text/javascript">
         console.log(window.location.pathname);
         window.history.pushState({}, "Title", "/index.html");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -21,8 +37,28 @@
 <h4>main.html</h4>
 </body>
 <script type="text/javascript">
+    rootPage.init(); // this one first
+    pages.init();
+    // widgets.init();
+
 
     rootPage.bindPage(pages.getPage(document.location.pathname));
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

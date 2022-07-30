@@ -8,7 +8,9 @@ class XISHead extends XISElement {
     // TODO Kann ein Script vielleicht Variablen haben ? Ist das zu kompliziert ?
 
     init() {
+        debugger;
         this.children.forEach(child => child.init());
+        this.title = this.children.find(child => child.element.localName == 'title');
     }
 
 

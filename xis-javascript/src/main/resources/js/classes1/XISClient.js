@@ -15,20 +15,20 @@ class XISClient {
     }
 
     /**
-     * @param {XISRootPage} rootPage
+     * @public
      * @param {XISPage} page 
      * @returns {any} data-model from backend
      */
-    loadPageModel(rootPage) {
-        var pageId = rootPage.page.id;
+    onBind(page) {
         /*
-        this.restClient.post(page.server + '/xis/connector/load-model', {pageId: page.id, clientId: this.clientId, token: this.token}), data => {
+        this.restClient.post(page.server + '/xis/connector/init', {pageId: page.id, clientId: this.clientId, token: this.token}), data => {
             page.processData(data);
             rootPage.refresh(page);
         };
         */
        debugger;
-        rootPage.refresh(); // TODO remove debugcode
+        page.setValues({title: 'Juchu!'});    
+        page.refresh(); // TODO remove debugcode
     } 
 
 }

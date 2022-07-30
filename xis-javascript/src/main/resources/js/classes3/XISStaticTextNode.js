@@ -1,11 +1,17 @@
-class XISStaticTextNode {
+class XISStaticTextNode extends XISTemplateObject {
+
+    constructor(parent) {
+        super(parent);
+    }
 
     init() {
-        // noop
+        debugger;
+        this.parent.element.appendChild(this.node);
+
     }
 
     refresh() {
         // noop
     }
-    
+
 }

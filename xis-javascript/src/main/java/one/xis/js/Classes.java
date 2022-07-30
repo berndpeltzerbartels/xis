@@ -8,7 +8,7 @@ public class Classes {
     public static final JSSuperClass XIS_HEAD_ELEMENT = new JSSuperClass("XISHead", "parent");
     public static final JSSuperClass XIS_BODY_ELEMENT = new JSSuperClass("XISBody", "parent");
     public static final JSSuperClass XIS_CONTAINER = new JSSuperClass("XISContainer", "parent");
-    public static final JSSuperClass XIS_STATIC_TEXT_NODE = new JSSuperClass("XISStaticTextNode");
+    public static final JSSuperClass XIS_STATIC_TEXT_NODE = new JSSuperClass("XISStaticTextNode", "parent");
     public static final JSSuperClass XIS_MUTABLE_TEXT_NODE = new JSSuperClass("XISMutableTextNode", "parent");
     public static final JSSuperClass XIS_WIDGETS = new JSSuperClass("XISWidgets");
     public static final JSSuperClass XIS_CONTAINERS = new JSSuperClass("XISContainers");

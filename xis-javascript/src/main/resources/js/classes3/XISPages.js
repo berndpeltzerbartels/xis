@@ -19,8 +19,9 @@ class XISPages {
     }
 
     init() {
-        Object.keys(this.pages) // Object.values(any) is not supported in many browsers
-        .map(key => this.pages[key])
+        var pages = this.pages;
+        Object.keys(pages) // Object.values(any) is not supported in many browsers
+        .map(key => pages[key])
         .forEach(page => page.init());
     }
 

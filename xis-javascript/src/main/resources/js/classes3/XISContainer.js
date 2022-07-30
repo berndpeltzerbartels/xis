@@ -15,6 +15,7 @@ class XISContainer extends XISTemplateObject {
     * @param {XISValueHolder} valueHolder
     */
     init() {
+        this.parent.element.appendChild(this.element);
        // TODO
     }
 
