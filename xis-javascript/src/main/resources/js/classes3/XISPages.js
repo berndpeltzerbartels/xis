@@ -18,6 +18,12 @@ class XISPages {
         this.welcomePage = this.pages[key];
     }
 
+    init() {
+        Object.keys(this.pages) // Object.values(any) is not supported in many browsers
+        .map(key => this.pages[key])
+        .forEach(page => page.init());
+    }
+
     /**
      * 
      * @param {string} uri 

@@ -17,7 +17,8 @@ class InitializerScript {
     String getContent() {
         return getPagesRegistrationJs() +
                 getWidgetsRegistrationJs() +
-                getWelcomPageJs();
+                getWelcomPageJs() +
+                getInitPagesJs();
     }
 
     private String getPagesRegistrationJs() {
@@ -45,5 +46,9 @@ class InitializerScript {
             return String.format("pages.setWelcomePage('%s');\n", pageJavascripts.getWelcomePage().getKey());
         }
         return "";
+    }
+
+    private String getInitPagesJs() {
+        return "pages.init();";
     }
 }

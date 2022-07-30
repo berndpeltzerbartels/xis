@@ -1,7 +1,11 @@
 class XISBody extends XISElement {
 
-    bind(parent) {
-        // noop
+    constructor(parent) {
+        super(parent);
+    }
+
+    init() {
+        this.children.forEach(child => child.init());
     }
 
     refresh() {

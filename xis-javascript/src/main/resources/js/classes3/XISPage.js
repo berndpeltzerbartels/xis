@@ -6,6 +6,12 @@ class XISPage extends XISValueHolder {
     }
 
 
+    init() {
+        this.head.init();
+        this.body.init();
+    }
+
+
     refresh(rootHead, rootBody) {
         this.head.refresh();
         this.body.refresh();

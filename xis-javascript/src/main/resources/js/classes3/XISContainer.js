@@ -14,13 +14,8 @@ class XISContainer extends XISTemplateObject {
     * @param {XISTemplateObject} parent 
     * @param {XISValueHolder} valueHolder
     */
-    init(parent, valueHolder) {
-        // TODO vermutlich nicht in Gebrauch
-        super.init(parent, valueHolder);
-        parent.appendChild(this.element);
-        if (this.defaultWidgetId) {
-            this.setWidget(this.defaultWidgetId);
-        }
+    init() {
+       // TODO
     }
 
     refresh() {
