@@ -4,12 +4,18 @@ class XISValueHolder extends XISTemplateObject {
      * @param {XISTemplateObject} parent (nullable)
      */
     constructor(parent) {
-        super();
-        if (parent) {
-            this.parentValueHolder = parent.getValueHolder();
-        }
+        super(parent);
         this.varNames = [];
         this.values = {};
+    }
+
+
+    /**
+     * @public
+     * @override
+     */
+    getValueHolder() {
+        return this;
     }
     
     setVarnames(varNames) {
@@ -42,11 +48,4 @@ class XISValueHolder extends XISTemplateObject {
         return this.parentValueHolder.getValue(path);
       
     }
-
-
-    getValueHolder() {
-        return this;
-    }
-
-
 }

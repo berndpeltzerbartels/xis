@@ -7,7 +7,7 @@ class XISContainer extends XISTemplateObject {
     * @param {XISTemplateObject} parent
     */
     constructor(parent) {
-        super(parent);
+        super(parent, parent.getValueHolder());
     }
 
     /**

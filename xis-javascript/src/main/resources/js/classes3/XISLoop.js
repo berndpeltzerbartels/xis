@@ -4,7 +4,7 @@ class XISLoop extends XISValueHolder {
      * @param {XISTemplateObject} parent 
      */
     constructor(parent) {
-        super(parent.getValueHolder());
+        super(parent);
         this.parent = parent;
         this.rows = [];
     }
@@ -57,14 +57,6 @@ class XISLoop extends XISValueHolder {
     */
     createChildren() {
         throw new Error('abstract method');
-    }
-
-    /**
-     * @override
-     * @returns {XISValueHolder}
-     */
-    getValueHolder() {
-        return this;
     }
 
     /**

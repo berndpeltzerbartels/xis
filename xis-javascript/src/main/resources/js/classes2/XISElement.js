@@ -7,8 +7,7 @@ class XISElement extends XISTemplateObject {
      * @param {XISTemplateObject} parent 
      */
     constructor(parent) {
-        super(parent);
-        this.valueHolder = parent.getValueHolder();
+        super(parent, parent.getValueHolder());
     }
 
     init() {
@@ -46,14 +45,6 @@ class XISElement extends XISTemplateObject {
      */
     removeChild(childElement) {
         this.element.removeChild(childElement);
-    }
-
-    /**
-     * @override
-     * @returns {XISValueHolder}
-     */
-    getValueHolder() {
-       return this.valueHolder;
     }
 
     /**

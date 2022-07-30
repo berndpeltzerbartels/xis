@@ -14,7 +14,7 @@ class XISTemplateObject {
      * @returns {XISValueHolder}
      */
     getValueHolder() {
-        throw new Error('abstract method');
+       return this.parent.getValueHolder();
     }
 
 
@@ -27,10 +27,6 @@ class XISTemplateObject {
 
     }
 
-    getValueHolder() {
-        throw new Error('abstract method');
-    }
-
     getContainer() {
         throw new Error('abstract method');
     }
@@ -40,10 +36,6 @@ class XISTemplateObject {
     }
 
     render() {
-        throw new Error('abstract method');
-    }
-
-    getValueHolder() {
         throw new Error('abstract method');
     }
 

@@ -4,7 +4,7 @@ class XISIf extends XISTemplateObject {
      * @param {XISTemplateObject} parent 
      */
     constructor(parent) {
-        super(parent);
+        super(parent, parent.getValueHolder());
         this.valueHolder = parent.getValueHolder();
         this.container = parent.getContainer();
         this.path = this.getPath();
@@ -43,15 +43,6 @@ class XISIf extends XISTemplateObject {
         for (child of this.children) {
             child.unlink();
         }
-    }
-
-
-    /**
-     * @override
-     * @returns {XISValueHolder}
-     */
-    getValueHolder() {
-        return this.valueHolder;
     }
 
     /**
