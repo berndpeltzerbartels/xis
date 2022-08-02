@@ -27,7 +27,7 @@ class XISClient {
         };
         */
        debugger;
-        page.setValues({title: 'Juchu!'});    
+        page.setValues({title: 'Juchu!', 'font-size':'10px', 'font-family':'Arial'});    
         page.refresh(); // TODO remove debugcode
     } 
 

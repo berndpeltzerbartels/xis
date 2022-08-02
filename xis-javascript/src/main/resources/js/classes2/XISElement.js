@@ -31,6 +31,10 @@ class XISElement extends XISTemplateObject {
         throw new Error('abstract method');
     }
 
+    updateAttribute(name, value) {
+        this.element.setAttribute(name, value);
+    }
+
     /**
      * @override
      * @param {Node} childElement 
