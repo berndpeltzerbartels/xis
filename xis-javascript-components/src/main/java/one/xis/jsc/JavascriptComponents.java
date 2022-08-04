@@ -14,11 +14,7 @@ public abstract class JavascriptComponents<C extends JavascriptComponent> {
 
     protected abstract String compile(String key, ResourceFile resourceFile, String javascriptClassName);
 
-    @SuppressWarnings("unused")
-    protected abstract String createKey(Object controller);
-
-    public C add(Object controller) {
-        String key = createKey(controller);
+    public C add(String key, Object controller) {
         C component = createComponent(controller);
         component.setKey(key);
         compile(component);

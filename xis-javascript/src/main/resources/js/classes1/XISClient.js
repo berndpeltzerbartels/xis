@@ -19,7 +19,7 @@ class XISClient {
      * @param {XISPage} page 
      * @returns {any} data-model from backend
      */
-    onBind(page) {
+    init(page) {
         /*
         this.restClient.post(page.server + '/xis/connector/init', {pageId: page.id, clientId: this.clientId, token: this.token}), data => {
             page.processData(data);

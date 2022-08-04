@@ -41,7 +41,7 @@ class PageJavascriptsTest {
                 .build();
 
         pageJavascripts = testContext.getSingleton(PageJavascripts.class);
-        pageJavascripts.add(pageController);
+        pageJavascripts.add("xyz:test", pageController);
     }
 
     @Nested

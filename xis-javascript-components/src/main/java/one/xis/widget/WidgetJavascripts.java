@@ -12,14 +12,7 @@ public class WidgetJavascripts extends JavascriptComponents<WidgetJavascript> {
     // TODO remove "public"
     private final WidgetFactory widgetFactory;
     private final WidgetJavascriptCompiler widgetJavascriptCompiler;
-
-    @Override
-    protected String createKey(Object controller) {
-        var controllerClass = controller.getClass();
-        String alias = controllerClass.getAnnotation(one.xis.Widget.class).value();
-        return alias.isEmpty() ? controllerClass.getSimpleName() : alias;
-    }
-
+    
     @Override
     protected WidgetJavascript createComponent(Object controller) {
         return widgetFactory.createWidget(controller);

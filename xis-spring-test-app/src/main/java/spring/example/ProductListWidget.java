@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 
 @Widget
 @Component
-// TODO Widget's simple-name must be unique. Allow using an alias in @Widget
 class ProductListWidget {
 
     @Autowired
@@ -31,7 +30,7 @@ class ProductListWidget {
     }
 
     @OnAction("categorySelected")
-    void categorySelected(@Param long categoryId, @Model ProductListData productListData) {
+    void categorySelected(@Param long categoryId, ProductListData productListData) {
         productListData.setCategoryId(categoryId);
         productListData.setProducts(productService.getByCategory(categoryId));
     }

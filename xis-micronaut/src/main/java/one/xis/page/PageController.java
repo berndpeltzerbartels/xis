@@ -23,5 +23,5 @@ class PageController {
     String getPage(@PathVariable("pageId") String pageId) {
         return pageService.getPage(pageId).getContent();
     }
-
+    
 }

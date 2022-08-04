@@ -39,7 +39,7 @@ class WidgetJavascriptsTest {
                 .build();
 
         widgetJavascripts = testContext.getSingleton(WidgetJavascripts.class);
-        widgetJavascripts.add(new TestWidget());
+        widgetJavascripts.add("xyz", new TestWidget());
     }
 
     @Nested

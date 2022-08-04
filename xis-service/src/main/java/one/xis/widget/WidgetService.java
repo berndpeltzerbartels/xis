@@ -12,11 +12,20 @@ public class WidgetService {
     private final WidgetControllers widgetControllers;
 
     public void addWidgetConroller(Object controller) {
-        widgetJavascripts.add(controller);
-        widgetControllers.add(controller);
+        String key = createKey(controller);
+        widgetJavascripts.add(key, controller);
+        widgetControllers.add(key, controller);
     }
 
     public ResourceFile getWidgetJavascript(String id) {
         return widgetJavascripts.get(id);
     }
+
+
+    private String createKey(Object controller) {
+        var controllerClass = controller.getClass();
+        String alias = controllerClass.getAnnotation(one.xis.Widget.class).value();
+        return alias.isEmpty() ? controllerClass.getSimpleName() : alias;
+    }
+
 }

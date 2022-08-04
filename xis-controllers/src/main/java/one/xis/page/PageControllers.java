@@ -5,7 +5,7 @@ import one.xis.context.XISComponent;
 @XISComponent
 class PageControllers {
 
-    void add(Object controller) {
-        
+    void add(String key, Object controller) {
+
     }
 }
