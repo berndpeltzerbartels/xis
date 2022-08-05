@@ -2,7 +2,6 @@ package one.xis.js;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import one.xis.context.XISComponent;
 import one.xis.resource.ReloadableResourceFile;
 import one.xis.template.TemplateModel;
 import one.xis.template.TemplateSynthaxException;
@@ -12,7 +11,6 @@ import org.xml.sax.SAXException;
 
 import java.io.IOException;
 
-@XISComponent
 @RequiredArgsConstructor
 public abstract class JavascriptComponentCompiler<C extends JavascriptComponent, M extends TemplateModel> {
     public C compileIfObsolete(C pageJavascript) {

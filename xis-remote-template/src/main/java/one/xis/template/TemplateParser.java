@@ -1,5 +1,6 @@
 package one.xis.template;
 
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
 import one.xis.utils.lang.StringUtils;
@@ -33,7 +34,7 @@ public class TemplateParser {
 
     static final Set<String> DATA_ATTRIBUTES = Set.of(ATTR_IF, ATTR_FOR, ATTR_REPEAT, ATTR_LOOP_INDEX, ATTR_LOOP_NUMBER, ATTR_CONTAINER, ATTR_CONTAINER_WIDGET);
 
-    public WidgetTemplateModel parseWidgetTemplate(Document document, String widgetClassName) {
+    public WidgetTemplateModel parseWidgetTemplate(@NonNull Document document, @NonNull String widgetClassName) {
         try {
             return new WidgetTemplateModel(widgetClassName, parseElement(document.getDocumentElement()));
         } catch (TemplateSynthaxException e) {
@@ -41,7 +42,7 @@ public class TemplateParser {
         }
     }
 
-    public PageTemplateModel parsePageTemplate(Document document, String controllerClass) {
+    public PageTemplateModel parsePageTemplate(@NonNull Document document, @NonNull String controllerClass) {
         try {
             var pageModel = new PageTemplateModel(controllerClass);
             var root = document.getDocumentElement();

@@ -21,7 +21,12 @@ class PageMetaDataFactory {
                 .javascriptClassname(javascriptClass())
                 .path(path)
                 .welcomePage(isWelcomePage(controller))
+                .controllerClass(controllerClass(controller))
                 .build();
+    }
+
+    private String controllerClass(Object controller) {
+        return controller.getClass().getName(); // TODO Proxies
     }
 
     private String path(Object controller) {

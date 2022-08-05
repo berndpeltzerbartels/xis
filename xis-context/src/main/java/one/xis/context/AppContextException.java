@@ -8,4 +8,8 @@ class AppContextException extends RuntimeException {
     AppContextException(Throwable cause) {
         super(cause);
     }
+
+    AppContextException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

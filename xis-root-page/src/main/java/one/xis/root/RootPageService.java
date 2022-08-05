@@ -15,9 +15,10 @@ public class RootPageService {
 
     private final ResourceFiles resourceFiles;
     private final InitializerScript initializerScript;
+    private final RootPage rootPage;
 
     private static final Collection<String> RESOURCES = Set.of("functions.js", "classes1.js", "classes2.js", "classes3.js", "xis-globals.js", "custom-script.js");
-    private RootPage rootPage;
+
 
     public void createRootContent() {
         rootPage.createContent();

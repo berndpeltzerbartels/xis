@@ -1,5 +1,6 @@
 package one.xis.page;
 
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
 import one.xis.js.JSScript;
@@ -16,12 +17,12 @@ class PageJavascriptCompiler extends JavascriptComponentCompiler<PageJavascript,
     private final TemplateParser templateParser;
 
     @Override
-    protected PageTemplateModel parseWidgetTemplate(String controllerClass, Document document) {
+    protected PageTemplateModel parseWidgetTemplate(@NonNull String controllerClass, @NonNull Document document) {
         return templateParser.parsePageTemplate(document, controllerClass);
     }
 
     @Override
-    protected JSScript templateModelToScriptModel(PageTemplateModel templateModel, String javascriptClassName) {
+    protected JSScript templateModelToScriptModel(@NonNull PageTemplateModel templateModel, @NonNull String javascriptClassName) {
         var parser = new JavascriptParser();
         parser.parseTemplateModel(templateModel, javascriptClassName);
         return parser.getScript();

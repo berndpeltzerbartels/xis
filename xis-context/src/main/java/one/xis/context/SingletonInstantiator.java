@@ -69,7 +69,11 @@ class SingletonInstantiator {
     @SneakyThrows
     Object createInstance() {
         constructor.setAccessible(true);
-        return constructor.newInstance(getParameterValues());
+        try {
+            return constructor.newInstance(getParameterValues());
+        } catch (Exception e) {
+            throw new AppContextException("failed to create instance of " + constructor.getDeclaringClass(), e);
+        }
     }
 
     private Object[] getParameterValues() {

@@ -41,7 +41,7 @@ public class StringUtils {
         return s.trim();
     }
 
-    public String escape(String s, char toEscape) {
+    public String escape(@NonNull String s, char toEscape) {
         return s.replace(Character.toString(toEscape), ESCAPE + toEscape);
     }
 
