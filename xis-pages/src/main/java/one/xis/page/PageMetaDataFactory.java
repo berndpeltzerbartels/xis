@@ -57,7 +57,7 @@ class PageMetaDataFactory {
         return pathToUrn(path);
     }
 
-    public static String pathToUrn(String name) {
-        return "page" + name.replace('/', ':');
+    public static String pathToUrn(String path) {
+        return "page" + path.replace('/', ':');
     }
 }
