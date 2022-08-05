@@ -50,7 +50,7 @@ class PageJavascripts {
     }
 
     private PageJavascript createPageJavascript(PageMetaData pageMetaData) {
-        var pageJavascipt = new PageJavascript(pageMetaData.getHtmlTemplate(), pageMetaData.getJavascriptClassname(), pageMetaData.getControllerClass());
+        var pageJavascipt = new PageJavascript(pageMetaData.getHtmlTemplate(), pageMetaData.getJavascriptClassname(), pageMetaData.getControllerClass(), pageMetaData.getPath());
         pageJavascriptCompiler.compile(pageJavascipt);
         return pageJavascipt;
     }
@@ -60,7 +60,7 @@ class PageJavascripts {
         return pageJavascriptsById.keySet();
     }
 
-    Map<String, PageJavascript> getAll() {
-        return pageJavascriptsById;
+    Map<String, PageJavascript> getPagesByPath() {
+        return pageJavascriptsByPath;
     }
 }

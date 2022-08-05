@@ -39,7 +39,7 @@ public abstract class JavascriptComponentCompiler<C extends JavascriptComponent,
     private String doCompile(C component) {
         var controllerClass = component.getControllerClassName();
         var templateModel = parseWidgetTemplate(controllerClass, htmlToDocument(controllerClass, component.getHtmlResourceFile().getContent()));
-        var script = templateModelToScriptModel(templateModel, component.getControllerClassName());
+        var script = templateModelToScriptModel(templateModel, component.getJavascriptClass());
         return javaScriptModelAsCode(script);
     }
 

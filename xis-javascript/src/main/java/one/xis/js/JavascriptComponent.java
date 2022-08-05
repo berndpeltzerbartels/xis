@@ -14,9 +14,5 @@ public interface JavascriptComponent {
 
     String getJavascriptClass();
 
-    void setKey(String key);
-
-    String getKey();
-    
     String getControllerClassName();
 }

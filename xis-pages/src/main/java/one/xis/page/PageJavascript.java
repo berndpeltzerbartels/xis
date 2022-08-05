@@ -13,7 +13,7 @@ public class PageJavascript implements ResourceFile, JavascriptComponent {
     private final ResourceFile htmlResourceFile;
     private final String javascriptClass;
     private final String controllerClassName;
-    private String key;
+    private final String path;
     private boolean compiled;
     private String javascript;
 

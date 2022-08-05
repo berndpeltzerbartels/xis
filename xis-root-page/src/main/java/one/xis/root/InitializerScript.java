@@ -1,5 +1,6 @@
 package one.xis.root;
 
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
 import one.xis.page.PageJavascript;
@@ -22,7 +23,7 @@ class InitializerScript {
 
     private String getPagesRegistrationJs() {
         StringBuilder s = new StringBuilder();
-        pageService.getAllPageJavascripts().forEach((key, pageJavascript) -> s.append(getPageRegistrationJs(key, pageJavascript)));
+        pageService.getPagesByPath().forEach((key, pageJavascript) -> s.append(getPageRegistrationJs(key, pageJavascript)));
         return s.toString();
     }
 
@@ -32,17 +33,17 @@ class InitializerScript {
         return s.toString();
     }
 
-    private String getPageRegistrationJs(String key, PageJavascript pageJavascript) {
-        return String.format("pages.addPage('%s', new %s());\n", key, pageJavascript.getJavascriptClass());
+    private String getPageRegistrationJs(@NonNull String path, PageJavascript pageJavascript) {
+        return String.format("pages.addPage('%s', new %s());\n", path, pageJavascript.getJavascriptClass());
     }
 
-    private String getWidgetRegistrationJs(String key, WidgetJavascript widgetJavascript) {
+    private String getWidgetRegistrationJs(@NonNull String key, WidgetJavascript widgetJavascript) {
         return String.format("widgets.addWidget('%s', new %s());\n", key, widgetJavascript.getJavascriptClass());
     }
 
     private String getWelcomPageJs() {
         if (pageService.getWelcomePageJavascript() != null) {
-            return String.format("pages.setWelcomePage('%s');\n", pageService.getWelcomePageJavascript().getKey());
+            return String.format("pages.setWelcomePage('%s');\n", pageService.getWelcomePageJavascript().getPath());
         }
         return "";
     }

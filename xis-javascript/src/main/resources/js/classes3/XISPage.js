@@ -14,7 +14,7 @@ class XISPage extends XISValueHolder {
      */
     bind(rootPage) {
         this.rootPage = rootPage;
-        client.onBind(this);
+        client.init(this);
     }
 
     /**

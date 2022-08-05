@@ -30,8 +30,8 @@ public class PageService {
         return pageJavascripts.getIds();
     }
 
-    public Map<String, PageJavascript> getAllPageJavascripts() {
-        return pageJavascripts.getAll();
+    public Map<String, PageJavascript> getPagesByPath() {
+        return pageJavascripts.getPagesByPath();
     }
 
     public PageJavascript getWelcomePageJavascript() {

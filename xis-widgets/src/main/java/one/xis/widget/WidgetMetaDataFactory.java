@@ -25,7 +25,7 @@ class WidgetMetaDataFactory {
     }
 
     private String javascriptClass() {
-        return "P" + nameIndex++;
+        return "W" + nameIndex++;
     }
 
     private String id(Object controller) {
