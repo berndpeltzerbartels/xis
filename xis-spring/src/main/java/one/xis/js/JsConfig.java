@@ -1,6 +1,7 @@
 package one.xis.js;
 
 import one.xis.context.AppContext;
+import one.xis.root.RootPageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,16 +13,16 @@ class JsConfig {
 
     @Autowired
     private AppContext appContext;
-    private ApiJavascriptService apiJavascriptService;
+    private RootPageService rootPageService;
 
     @PostConstruct
     void init() {
-        apiJavascriptService = appContext.getSingleton(ApiJavascriptService.class);
+        rootPageService = appContext.getSingleton(RootPageService.class);
     }
 
     @Bean
-    ApiJavascriptService apiJavascriptService() {
-        return apiJavascriptService;
+    RootPageService apiJavascriptService() {
+        return rootPageService;
     }
 
 }

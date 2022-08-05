@@ -1,5 +1,6 @@
 package one.xis.js;
 
+import one.xis.root.RootPageService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.annotation.WebServlet;
@@ -13,13 +14,13 @@ import java.io.PrintWriter;
 class InitializerServlet extends HttpServlet {
 
     @Autowired
-    private ApiJavascriptService apiJavascriptService;
+    private RootPageService rootPageService;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("text/javascript; charset=utf-8");
         PrintWriter out = response.getWriter();
-        out.println(apiJavascriptService.getInitializerScipt());
+        out.println(rootPageService.getInitializerScipt());
         out.flush();
     }
 

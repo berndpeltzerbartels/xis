@@ -6,24 +6,25 @@ import io.micronaut.http.annotation.PathVariable;
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 import one.xis.micronaut.MicronautContextAdapter;
+import one.xis.root.RootPageService;
 
 @Controller(produces = "text/javascript; charset=utf-8")
 class ApiJsController {
 
     @Inject
     private MicronautContextAdapter adapter;
-    private ApiJavascriptService apiJavascriptService;
+    private RootPageService rootPageService;
 
     @PostConstruct
     void init() {
-        apiJavascriptService = adapter.getApiJavascriptService();
+        rootPageService = adapter.getRootPageService();
     }
 
     @Get("/xis/api/{file}")
     String getJavascript(@PathVariable("file") String file) {
         if (file.equals("custom-script.js")) {
-            return apiJavascriptService.getCustomJavascript().getContent();
+            return rootPageService.getCustomJavascript().getContent();
         }
-        return apiJavascriptService.getJavascriptResource(file).getContent();
+        return rootPageService.getJavascriptResource(file).getContent();
     }
 }

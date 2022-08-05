@@ -1,6 +1,7 @@
 package one.xis.js;
 
 import one.xis.resource.ResourceFile;
+import one.xis.root.RootPageService;
 import one.xis.servlet.ResourceServlet;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -11,13 +12,13 @@ import javax.servlet.http.HttpServletRequest;
 class ApiJsServlet extends ResourceServlet {
 
     @Autowired
-    private ApiJavascriptService apiJavascriptService;
+    private RootPageService rootPageService;
 
     @Override
     protected ResourceFile getResource(HttpServletRequest request) {
         String uri = request.getRequestURI();
         String file = uri.substring(uri.lastIndexOf('/') + 1);
-        return apiJavascriptService.getJavascriptResource(file);
+        return rootPageService.getJavascriptResource(file);
     }
 
     @Override

@@ -10,8 +10,8 @@ import lombok.Getter;
 import one.xis.Page;
 import one.xis.Widget;
 import one.xis.context.AppContext;
-import one.xis.js.ApiJavascriptService;
 import one.xis.page.PageService;
+import one.xis.root.RootPageService;
 import one.xis.widget.WidgetService;
 
 @Singleton
@@ -22,14 +22,14 @@ public class MicronautContextAdapter {
     private BeanContext beanContext;
 
     private AppContext appContext;
-    private ApiJavascriptService apiJavascriptService;
+    private RootPageService rootPageService;
     private PageService pageService;
     private WidgetService widgetService;
 
     @PostConstruct
     void init() {
         appContext = AppContext.getInstance("one.xis");
-        apiJavascriptService = appContext.getSingleton(ApiJavascriptService.class);
+        rootPageService = appContext.getSingleton(RootPageService.class);
         pageService = appContext.getSingleton(PageService.class);
         widgetService = appContext.getSingleton(WidgetService.class);
 

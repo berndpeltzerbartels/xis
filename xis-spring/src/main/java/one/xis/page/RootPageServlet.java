@@ -1,5 +1,6 @@
 package one.xis.page;
 
+import one.xis.root.RootPageService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.ServletException;
@@ -14,14 +15,14 @@ import java.io.PrintWriter;
 class RootPageServlet extends HttpServlet {
 
     @Autowired
-    private PageService pageService;
+    private RootPageService pageService;
 
     @Override
     public void init() throws ServletException {
         pageService.createRootContent();
         super.init();
     }
-    
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("text/html; charset=utf-8");

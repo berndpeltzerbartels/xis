@@ -41,12 +41,12 @@ public class TemplateParser {
         }
     }
 
-    public PageTemplateModel parsePageTemplate(Document document, String key) {
+    public PageTemplateModel parsePageTemplate(Document document, String controllerClass) {
         try {
-            var pageModel = new PageTemplateModel(key);
+            var pageModel = new PageTemplateModel(controllerClass);
             var root = document.getDocumentElement();
-            var headElement = XmlUtil.getElementByTagName(root, "head").orElseThrow(() -> new TemplateSynthaxException(key + " must have head-tag")); // TODO create if not present
-            var bodyElement = XmlUtil.getElementByTagName(root, "body").orElseThrow(() -> new TemplateSynthaxException(key + " must have body-tag"));  // TODO create if not present
+            var headElement = XmlUtil.getElementByTagName(root, "head").orElseThrow(() -> new TemplateSynthaxException(controllerClass + " must have head-tag")); // TODO create if not present
+            var bodyElement = XmlUtil.getElementByTagName(root, "body").orElseThrow(() -> new TemplateSynthaxException(controllerClass + " must have body-tag"));  // TODO create if not present
             var headTemplateElement = toTemplateHeadElement(headElement);
             var bodyTemplateElement = toTemplateBodyElement(bodyElement);
             parseChildren(headElement).forEach(headTemplateElement::addChild);
@@ -55,7 +55,7 @@ public class TemplateParser {
             pageModel.setBody(bodyTemplateElement);
             return pageModel;
         } catch (TemplateSynthaxException e) {
-            throw new TemplateSynthaxException(String.format("Parsing failed for page '%s': %s", key, e.getMessage()));
+            throw new TemplateSynthaxException(String.format("Parsing failed for page '%s': %s", controllerClass, e.getMessage()));
         }
     }
 

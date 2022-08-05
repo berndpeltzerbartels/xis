@@ -1,0 +1,29 @@
+plugins {
+    id 'java'
+}
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compileOnly project(':xis-remote-core')
+    implementation project(':xis-context')
+    implementation project(':xis-javascript')
+    implementation project(':xis-javascript-model')
+    implementation project(':xis-resources')
+    implementation project(':xis-controllers')
+    implementation project(':xis-util')
+    implementation project(':xis-remote-template')
+
+    annotationProcessor 'org.projectlombok:lombok:1.18.12'
+
+    implementation 'org.projectlombok:lombok:1.18.12'
+}
+
+test {
+    useJUnitPlatform()
+}

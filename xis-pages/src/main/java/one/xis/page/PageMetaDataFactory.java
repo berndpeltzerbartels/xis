@@ -1,0 +1,58 @@
+package one.xis.page;
+
+import lombok.RequiredArgsConstructor;
+import one.xis.Page;
+import one.xis.context.XISComponent;
+import one.xis.path.PathUtils;
+import one.xis.resource.ResourceFiles;
+
+@XISComponent
+@RequiredArgsConstructor
+class PageMetaDataFactory {
+
+    private final ResourceFiles resourceFiles;
+    private static int nameIndex;
+
+    PageMetaData createMetaData(Object controller) {
+        String path = path(controller);
+        return PageMetaData.builder()
+                .id(id(path))
+                .htmlTemplate(resourceFiles.getByPath(getHtmlTemplatePath(controller)))
+                .javascriptClassname(javascriptClass())
+                .path(path)
+                .welcomePage(isWelcomePage(controller))
+                .build();
+    }
+
+    private String path(Object controller) {
+        String path = controller.getClass().getAnnotation(one.xis.Page.class).path();
+        if (PathUtils.hasSuffix(path)) {
+            String suffix = PathUtils.getSuffix(path);
+            if (!suffix.equals("html")) {
+                throw new IllegalStateException(controller.getClass() + ": illegal suffix: " + suffix + ". Suffix must be empty or '.html'");
+            }
+            return path;
+        }
+        return path + ".html";
+    }
+
+    private boolean isWelcomePage(Object controller) {
+        return controller.getClass().getAnnotation(Page.class).welcomePage();
+    }
+
+    public String getHtmlTemplatePath(Object controller) {
+        return controller.getClass().getName().replace('.', '/') + ".html";
+    }
+
+    private String javascriptClass() {
+        return "P" + nameIndex++;
+    }
+
+    protected String id(String path) {
+        return pathToUrn(path);
+    }
+
+    public static String pathToUrn(String name) {
+        return "page:" + name.replace('/', ':');
+    }
+}

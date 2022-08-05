@@ -5,22 +5,23 @@ import io.micronaut.http.annotation.Get;
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 import one.xis.micronaut.MicronautContextAdapter;
+import one.xis.root.RootPageService;
 
 @Controller
 class InitializerController {
 
     @Inject
     private MicronautContextAdapter adapter;
-    private ApiJavascriptService apiJavascriptService;
+    private RootPageService rootPageService;
 
     @PostConstruct
     void init() {
-        apiJavascriptService = adapter.getApiJavascriptService();
+        rootPageService = adapter.getRootPageService();
     }
 
     @Get(produces = "text/javascript; charset=utf-8", uri = "/xis/initializer.js")
     String getInitializerJs() {
-        return apiJavascriptService.getInitializerScipt();
+        return rootPageService.getInitializerScipt();
     }
 
 }

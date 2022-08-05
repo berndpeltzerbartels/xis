@@ -25,6 +25,18 @@ public class PathUtils {
         return path.substring(0, j);
     }
 
+    public boolean hasSuffix(String path) {
+        int i = path.lastIndexOf('/');
+        int j = path.lastIndexOf('.');
+        if (j == -1) {
+            return false;
+        }
+        if (i > j) {
+            return false;
+        }
+        return true;
+    }
+
     public String stripTrailingSlash(String path) {
         if (path.startsWith("/")) {
             return path.substring(1);
