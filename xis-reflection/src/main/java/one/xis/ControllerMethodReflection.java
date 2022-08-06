@@ -16,7 +16,7 @@ class ControllerMethodReflection {
 
     Map<Class<? extends Annotation>, Collection<Method>> methodsByAnnotation(Object controller) {
         Map<Class<? extends Annotation>, Collection<Method>> map = new HashMap<>();
-        MethodUtils.callableMethods(controller).forEach(m -> {
+        MethodUtils.unprotectedMethods(controller).forEach(m -> {
             //methodAnnotations.stream().filter(m::isAnnotationPresent)
         });
         return map;

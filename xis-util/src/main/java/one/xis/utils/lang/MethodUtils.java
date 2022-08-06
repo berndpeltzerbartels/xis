@@ -12,9 +12,13 @@ import java.util.stream.Stream;
 @UtilityClass
 public class MethodUtils {
 
-    public Collection<Method> callableMethods(Object obj) {
+    public Collection<Method> unprotectedMethods(Object obj) {
+        return methods(obj).stream().filter(MethodUtils::unprotected).collect(Collectors.toList());
+    }
+
+    public Collection<Method> methods(Object obj) {
         Map<String, Method> methods = new HashMap<>();
-        hierarchy(obj.getClass()).forEach(c -> callableMethods(c).forEach(m -> methods.put(methodSignature(m), m)));
+        hierarchy(obj.getClass()).forEach(c -> methods(c).forEach(m -> methods.put(methodSignature(m), m)));
         return methods.values();
     }
 
@@ -28,8 +32,8 @@ public class MethodUtils {
         return classes;
     }
 
-    private Stream<Method> callableMethods(Class<?> declaringClass) {
-        return declaredMethods(declaringClass).filter(MethodUtils::unprotected);
+    private Stream<Method> methods(Class<?> declaringClass) {
+        return declaredMethods(declaringClass);
     }
 
     private boolean unprotected(Method method) {
