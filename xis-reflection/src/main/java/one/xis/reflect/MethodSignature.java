@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 @Getter
 @EqualsAndHashCode
 @RequiredArgsConstructor
-class MethodSignature {
+public class MethodSignature {
     private final String name;
     private final List<Class<?>> parameterTypes;
     private final String signature;
@@ -29,7 +29,7 @@ class MethodSignature {
         return Arrays.stream(method.getParameters()).map(Parameter::getType).collect(Collectors.toUnmodifiableList());
     }
 
-    public boolean matches(Method method) {
+    public boolean matches(Method method) { // TODO Move logic away from model like class ?
         if (!method.getName().equals(name)) {
             return false;
         }

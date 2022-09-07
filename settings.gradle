@@ -21,4 +21,5 @@ include 'xis-reflection'
 include 'xis-pages'
 include 'xis-widgets'
 include 'xis-root-page'
+include 'xis-client-model'
 

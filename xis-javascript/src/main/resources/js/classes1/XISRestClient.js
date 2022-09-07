@@ -4,41 +4,22 @@ class XISRestClient {
      * @param {XISErrorHandler} errorHandler 
      */
     constructor(errorHandler) {
+        this.httpClient = new XISHttpClient(errorHandler);
         this.errorHandler = errorHandler;
-    }
-
-    get(uri, parameters, handler) {
-        var address = uri;
-        if (parameters) {
-            address += '?'
-            for(var name of Object.keys(parameters))  {
-                address += name;
-                address += '=';
-                address += encodeURI(parameters[name]);
-            }
+        this.headers =  {
+            'Accept': '"application/json',
+            'Content-Type': 'application/json'
         }
-       this.doRequest(address, 'GET', null, handler); 
     }
 
+    /**
+     * @param {string} uri
+     * @param {any} payload
+     * @param {Function} handler 
+     */
     post(uri, payload, handler) {
-        this.doRequest(uri, 'GET', JSON.stringify(payload), handler); 
+        this.httpClient.post(uri, this.headers, payload, handler);        
     }
-
-    doRequest(uri, method, payload, handler) {
-        var xmlHttp = new XMLHttpRequest();
-        xmlHttp.setRequestHeader("Accept", "application/json");
-        xmlHttp.setRequestHeader("Content-Type", "application/json");
-        xmlHttp.onreadystatechange = function() { 
-            // TODO Handle errors and "304 NOT MODIFIED"
-            // TODO Add headers to allow 304
-            // Readystaet == 4 for 304 ?
-            if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
-                handler(JSON.parse(xmlHttp.responseText));
-            }
-            // TODO use errorhandler
-        }
-        xmlHttp.open(method, uri, true); // true for asynchronous 
-        xmlHttp.send(payload);
-    }
-
+  
+    
 }
