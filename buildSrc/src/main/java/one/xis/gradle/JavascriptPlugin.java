@@ -31,7 +31,7 @@ public class JavascriptPlugin implements Plugin<Project> {
     }
 
     private void processJsSrcDir(File jsSrcDir, Project project) {
-        File jsOutFile = getJSOutDir(jsSrcDir, project);
+        File jsOutFile = getJSOutFile(jsSrcDir, project);
         Collection<File> jsFiles = getJsFiles(jsSrcDir);
         jsFiles.forEach(this::compile);
         copyJsToFile(getJsFiles(jsSrcDir), jsOutFile);
@@ -71,7 +71,7 @@ public class JavascriptPlugin implements Plugin<Project> {
         return new File(project.getProjectDir(), "src/main/resources/js");
     }
 
-    private File getJSOutDir(File jsSrcDir, Project project) {
+    private File getJSOutFile(File jsSrcDir, Project project) {
         File javascriptDir = new File(project.getBuildDir(), "/resources/main/js");
         if (!javascriptDir.exists() && !javascriptDir.mkdirs()) {
             throw new IllegalStateException("can not create " + javascriptDir.getAbsolutePath());
@@ -88,7 +88,8 @@ public class JavascriptPlugin implements Plugin<Project> {
     }
 
     private Stream<File> findJsSrcDirs(Project project) {
-        return Arrays.stream(getJsSrcRoot(project).listFiles()).filter(Objects::nonNull).filter(this::isJsSrcDir);
+        return Arrays.stream(Objects.requireNonNull(getJsSrcRoot(project).listFiles()))//
+                .filter(this::isJsSrcDir);
     }
 
     private boolean isJsSrcDir(File folder) {

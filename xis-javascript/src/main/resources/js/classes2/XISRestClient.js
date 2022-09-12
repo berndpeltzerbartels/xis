@@ -7,7 +7,7 @@ class XISRestClient {
         this.httpClient = new XISHttpClient(errorHandler);
         this.errorHandler = errorHandler;
         this.headers =  {
-            'Accept': '"application/json',
+            'Accept': 'application/json',
             'Content-Type': 'application/json'
         }
     }

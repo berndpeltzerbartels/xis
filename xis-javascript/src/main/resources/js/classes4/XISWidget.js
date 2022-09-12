@@ -1,4 +1,4 @@
-class XISWidget extends XISValueHolder{
+class XISWidget extends XISVisible {
 
     constructor() {
         super(undefined);

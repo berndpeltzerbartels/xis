@@ -36,6 +36,7 @@ public class RootPage {
         addClasses1ScriptTag(head);
         addClasses2ScriptTag(head);
         addClasses3ScriptTag(head);
+        addClasses4ScriptTag(head);
         addGlobalsScriptTag(head);
         addPagesScriptTags(head);
         addWidgetScriptTags(head);
@@ -79,6 +80,10 @@ public class RootPage {
 
     private void addClasses3ScriptTag(Element head) {
         addScriptTag(head, "/xis/api/classes3.js");
+    }
+
+    private void addClasses4ScriptTag(Element head) {
+        addScriptTag(head, "/xis/api/classes4.js");
     }
 
     private void addInitializerScriptTag(Element head) {

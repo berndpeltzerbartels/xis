@@ -1,5 +1,5 @@
 
-class XISPage extends XISValueHolder {
+class XISPage extends XISVisible {
 
     constructor() {
         super(undefined);

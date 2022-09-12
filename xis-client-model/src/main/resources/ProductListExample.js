@@ -4,8 +4,8 @@ class ProductListClient extends XISClient {
      * 
      * @param {XISRestClient} restClient 
      */
-    constructor(restClient) {
-        super(restClient); // TODO Better to do everything socket.io ?
+    constructor(errorHandler) {
+        super(errorHandler); // TODO Better to do everything socket.io ?
     }
 
     init() {

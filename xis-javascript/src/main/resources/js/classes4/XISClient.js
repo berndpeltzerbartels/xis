@@ -1,11 +1,10 @@
 class XISClient {
 
     /**
-     * 
-     * @param {XISRestClient} restClient 
+     * @param {XISErrorHandler} errorHandler 
      */
-    constructor(restClient) {
-        this.restClient = restClient;
+    constructor(errorHandler) {
+        this.restClient = new XISRestClient(errorHandler);
         this.token = localStorage.getItem('xis-token');
         this.clientId = localStorage.getItem('xis-client-id');
         if (!this.clientId) {
@@ -20,12 +19,12 @@ class XISClient {
      * @returns {any} data-model from backend
      */
     init(page) {
-        /*
+
         this.restClient.post(page.server + '/xis/connector/init', {pageId: page.id, clientId: this.clientId, token: this.token}), data => {
             page.processData(data);
             rootPage.refresh(page);
         };
-        */
+    
        debugger;
         page.setValues({title: 'Juchu!', 'font-size':'10px', 'font-family':'Arial'});    
         page.refresh(); // TODO remove debugcode
