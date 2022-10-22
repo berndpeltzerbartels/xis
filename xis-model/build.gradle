@@ -11,8 +11,8 @@ repositories {
 
 dependencies {
 
-    //implementation project(':xis-reflection')
-
+    implementation project(':xis-remote-core')
+    implementation project(':xis-util')
     implementation 'org.projectlombok:lombok:1.18.12'
     annotationProcessor 'org.projectlombok:lombok:1.18.12'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.12'
@@ -20,6 +20,9 @@ dependencies {
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+
+    annotationProcessor 'org.projectlombok:lombok:1.18.12'
+    compileOnly 'org.projectlombok:lombok:1.18.12'
 }
 
 test {

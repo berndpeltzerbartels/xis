@@ -5,8 +5,6 @@ import org.junit.jupiter.api.Test;
 
 import javax.script.ScriptException;
 
-
-@SuppressWarnings({"deprecation", "removal"})
 class ClassesTest {
 
     @Test
@@ -18,6 +16,6 @@ class ClassesTest {
         String classes4 = IOUtils.getResourceAsString("js/classes4.js");
         String globals = IOUtils.getResourceAsString("js/xis-globals.js");
 
-        JSUtil.compile(functions + classes1 + classes2 + classes3 + globals);
+        JSUtil.compile(functions + classes1 + classes2 + classes3 + classes4 + globals);
     }
 }
