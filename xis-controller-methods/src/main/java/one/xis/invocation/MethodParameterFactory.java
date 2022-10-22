@@ -3,6 +3,7 @@ package one.xis.invocation;
 import one.xis.ClientId;
 import one.xis.Model;
 import one.xis.Token;
+import one.xis.UserId;
 import one.xis.context.XISComponent;
 
 import java.lang.annotation.Annotation;
@@ -16,10 +17,10 @@ import java.util.stream.Collectors;
 @XISComponent
 class MethodParameterFactory {
 
-    Set<Class<? extends Annotation>> PARAMETER_ANNOTATIONS = Set.of(ClientId.class, Token.class);
-    
+    Set<Class<? extends Annotation>> PARAMETER_ANNOTATIONS = Set.of(ClientId.class, UserId.class, Token.class);
+
     MethodParameter create(Parameter parameter) {
-        return getParamAnnotation(parameter).map(annotation -> createByAnnotation(parameter, annotation)).orElseGet(() -> createModelParameter(parameter));
+        return getParamAnnotation(parameter).map(this::createByAnnotation).orElseGet(() -> createModelParameter(parameter));
     }
 
 
@@ -31,20 +32,27 @@ class MethodParameterFactory {
             case 1:
                 return Optional.of(annotationList.get(0));
             default:
-                throw new IllegalStateException(parameter + " has contradictory annotations");
+                throw new IllegalStateException(parameter + " has contradictory annotations:" + annotationListAsString(annotationList));
         }
+    }
+
+    private String annotationListAsString(List<Annotation> annotations) {
+        return annotations.stream().map(Annotation::annotationType).map(Class::getSimpleName).collect(Collectors.joining(", "));
     }
 
     private boolean isParamAnnotation(Annotation annotation) {
         return PARAMETER_ANNOTATIONS.contains(annotation.annotationType());
     }
 
-    private MethodParameter createByAnnotation(Parameter parameter, Annotation annotation) {
+    private MethodParameter createByAnnotation(Annotation annotation) {
         if (annotation.annotationType() == ClientId.class) {
-            return new ClientIdParameter(parameter);
+            return new ClientIdParameter();
         }
         if (annotation.annotationType() == Token.class) {
-            return new TokenParamter(parameter);
+            return new TokenParamter();
+        }
+        if (annotation.annotationType() == UserId.class) {
+            return new UserIdParameter();
         }
         throw new IllegalStateException();
     }

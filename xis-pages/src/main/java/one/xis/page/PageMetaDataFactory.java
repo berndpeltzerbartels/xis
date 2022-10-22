@@ -18,7 +18,7 @@ class PageMetaDataFactory {
         return PageMetaData.builder()
                 .id(id(path))
                 .htmlTemplate(resourceFiles.getByPath(getHtmlTemplatePath(controller)))
-                .javascriptClassname(javascriptClass())
+                .javascriptClassname(uniqueJavascriptClassName())
                 .path(path)
                 .welcomePage(isWelcomePage(controller))
                 .controllerClass(controllerClass(controller))
@@ -26,7 +26,7 @@ class PageMetaDataFactory {
     }
 
     private String controllerClass(Object controller) {
-        return controller.getClass().getName(); // TODO Proxies
+        return controller.getClass().getName(); // TODO String Proxies ?
     }
 
     private String path(Object controller) {
@@ -34,7 +34,7 @@ class PageMetaDataFactory {
         if (PathUtils.hasSuffix(path)) {
             String suffix = PathUtils.getSuffix(path);
             if (!suffix.equals("html")) {
-                throw new IllegalStateException(controller.getClass() + ": illegal suffix: " + suffix + ". Suffix must be empty or '.html'");
+                throw new IllegalStateException(controller.getClass() + ": illegal suffix in path-attribute of @Page-annotation: " + suffix + ". Suffix must be empty or '.html'");
             }
             return path;
         }
@@ -49,7 +49,7 @@ class PageMetaDataFactory {
         return controller.getClass().getName().replace('.', '/') + ".html";
     }
 
-    private String javascriptClass() {
+    private String uniqueJavascriptClassName() {
         return "P" + nameIndex++;
     }
 

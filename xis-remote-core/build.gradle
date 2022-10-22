@@ -14,6 +14,7 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok:1.18.12'
 
     implementation project(':xis-context')
+    implementation project(':xis-model')
     //implementation group: 'net.bytebuddy', name: 'byte-buddy', version: '1.10.22'
     //implementation group: 'net.bytebuddy', name: 'byte-buddy-agent', version: '1.11.19'
     implementation('org.springframework:spring-context:5.3.20')

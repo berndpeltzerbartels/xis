@@ -17,7 +17,7 @@ public class RootPageService {
     private final InitializerScript initializerScript;
     private final RootPage rootPage;
 
-    private static final Collection<String> RESOURCES = Set.of("functions.js", "classes1.js", "classes2.js", "classes3.js", "classes4.js", "xis-globals.js", "custom-script.js");
+    private static final Collection<String> JS_RESOURCES = Set.of("functions.js", "classes1.js", "classes2.js", "classes3.js", "classes4.js", "xis-globals.js", "custom-script.js");
 
 
     public void createRootContent() {
@@ -29,7 +29,7 @@ public class RootPageService {
     }
 
     public ResourceFile getJavascriptResource(String file) {
-        if (!RESOURCES.contains(file)) {
+        if (!JS_RESOURCES.contains(file)) {
             throw new IllegalArgumentException("not a resource: " + file);
         }
         if (file.equals("custom-script.js")) {

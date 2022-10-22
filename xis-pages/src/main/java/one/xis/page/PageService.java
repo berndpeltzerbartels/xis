@@ -18,7 +18,7 @@ public class PageService {
     public void addPageController(Object controller) {
         var metaData = pageMetaDataFactory.createMetaData(controller);
         pageJavascripts.createScript(metaData);
-        pageControllers.add(metaData);
+        pageControllers.addControllerWrapper(controller, metaData);
     }
 
     public PageJavascript getPage(String id) {

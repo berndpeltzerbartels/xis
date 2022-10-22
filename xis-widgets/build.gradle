@@ -11,12 +11,12 @@ repositories {
 
 dependencies {
 
-    compileOnly project(':xis-remote-core')
+    //compileOnly project(':xis-remote-core')
     implementation project(':xis-context')
     implementation project(':xis-javascript')
     implementation project(':xis-javascript-model')
     implementation project(':xis-resources')
-    implementation project(':xis-reflection')
+    //implementation project(':xis-controller-methods')
     implementation project(':xis-util')
     implementation project(':xis-remote-template')
 

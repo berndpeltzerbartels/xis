@@ -15,7 +15,7 @@ class WidgetMetaDataFactory {
         return WidgetMetaData.builder()
                 .id(id(controller))
                 .htmlTemplate(resourceFiles.getByPath(getHtmlTemplatePath(controller)))
-                .javascriptClassname(javascriptClass())
+                .javascriptClassname(uniqueJavascriptClassName())
                 .controllerClass(controllerClass(controller))
                 .build();
     }
@@ -24,7 +24,7 @@ class WidgetMetaDataFactory {
         return controller.getClass().getName().replace('.', '/') + ".html";
     }
 
-    private String javascriptClass() {
+    private String uniqueJavascriptClassName() {
         return "W" + nameIndex++;
     }
 

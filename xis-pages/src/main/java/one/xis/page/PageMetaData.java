@@ -12,7 +12,6 @@ class PageMetaData {
     private final boolean welcomePage;
     private final ResourceFile htmlTemplate;
     private final String javascriptClassname;
-    private final Object controller;
     private final String controllerClass;
 
 }

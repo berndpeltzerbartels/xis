@@ -5,7 +5,7 @@ import one.xis.context.XISComponent;
 @XISComponent
 class PageControllers {
 
-    void add(PageMetaData metaData) {
+    void addControllerWrapper(Object pageController, PageMetaData metaData) {
 
     }
 }

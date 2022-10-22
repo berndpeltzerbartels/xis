@@ -1,28 +1,33 @@
 package one.xis.utils.lang;
 
-import lombok.experimental.UtilityClass;
-
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@UtilityClass
 public class MethodUtils {
 
-    public Collection<Method> unprotectedMethods(Object obj) {
-        return methods(obj).stream().filter(MethodUtils::unprotected).collect(Collectors.toList());
+    public static final Predicate<Method> NON_PRIVATE = method -> !Modifier.isPrivate(method.getModifiers());
+
+    public static <A extends Annotation> Predicate<Method> annotatedWith(Class<A> annotationClass) {
+        return method -> method.isAnnotationPresent(annotationClass);
     }
 
-    public Collection<Method> methods(Object obj) {
+    public static Collection<Method> methods(Object obj) {
         Map<String, Method> methods = new HashMap<>();
         hierarchy(obj.getClass()).forEach(c -> methods(c).forEach(m -> methods.put(methodSignature(m), m)));
         return methods.values();
     }
 
-    private List<Class<?>> hierarchy(Class<?> c) {
+    public static String methodSignature(Method method) {
+        return String.format("%s(%s)", method.getName(), parameterString(method));
+    }
+
+    private static List<Class<?>> hierarchy(Class<?> c) {
         List<Class<?>> classes = new ArrayList<>();
         while (c != null && c.equals(Object.class)) {
             classes.add(c);
@@ -32,20 +37,12 @@ public class MethodUtils {
         return classes;
     }
 
-    private Stream<Method> methods(Class<?> declaringClass) {
+    private static Stream<Method> methods(Class<?> declaringClass) {
         return declaredMethods(declaringClass);
     }
-
-    private boolean unprotected(Method method) {
-        return !Modifier.isPrivate(method.getModifiers()) && !Modifier.isProtected(method.getModifiers());
-    }
-
-    private Stream<Method> declaredMethods(Class<?> type) {
+    
+    private static Stream<Method> declaredMethods(Class<?> type) {
         return Arrays.stream(type.getDeclaredMethods());
-    }
-
-    public String methodSignature(Method method) {
-        return String.format("%s(%s)", method.getName(), parameterString(method));
     }
 
     private static String parameterString(Method method) {
