@@ -11,8 +11,7 @@ class ModelParameter implements MethodParameter {
     private final Class<?> modelType;
 
     @Override
-    public void setValue(Request request) {
-
+    public Object value(Request request) {
+        return null;
     }
-
 }

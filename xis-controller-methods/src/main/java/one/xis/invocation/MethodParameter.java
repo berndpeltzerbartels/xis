@@ -4,6 +4,6 @@ import one.xis.Request;
 
 interface MethodParameter {
 
-    void setValue(Request request);
+    Object value(Request request);
 
 }

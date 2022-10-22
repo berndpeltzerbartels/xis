@@ -5,7 +5,7 @@ import one.xis.Request;
 class TokenParamter implements MethodParameter {
 
     @Override
-    public void setValue(Request request) {
-        
+    public Object value(Request request) {
+        return null;
     }
 }
