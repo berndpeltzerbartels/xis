@@ -18,7 +18,7 @@ dependencies {
     implementation project(':xis-context')
     implementation project(':xis-remote-core')
 
-    //implementation project(':xis-model')
+    implementation project(':xis-model')
 
     implementation 'org.reflections:reflections:0.10.2'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
