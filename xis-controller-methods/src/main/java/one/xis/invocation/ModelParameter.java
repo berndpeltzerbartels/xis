@@ -1,9 +1,10 @@
 package one.xis.invocation;
 
-import java.lang.reflect.Parameter;
+import lombok.RequiredArgsConstructor;
 
-public class ModelParameter implements MethodParameter {
-    ModelParameter(Parameter parameter) {
+@RequiredArgsConstructor
+class ModelParameter implements MethodParameter {
+    private final String id;
+    private final Class<?> modelType;
 
-    }
 }

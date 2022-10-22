@@ -5,6 +5,7 @@ import one.xis.Model;
 import one.xis.Token;
 import one.xis.UserId;
 import one.xis.context.XISComponent;
+import one.xis.utils.reflect.AnnotationUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Parameter;
@@ -58,10 +59,9 @@ class MethodParameterFactory {
     }
 
     private MethodParameter createModelParameter(Parameter parameter) {
-        if (!parameter.getType().isAnnotationPresent(Model.class)) {
-            throw new IllegalStateException(parameter + ": looks like it should be a model-parameter, but the paramter-type is not annotated wit @Model");
-        }
-        return null;
+        Model modelAnnotation = AnnotationUtils.getAnnotationOrThrow(parameter.getType(), Model.class);
+        String id = modelAnnotation.value().isEmpty() ? parameter.getType().getName() : modelAnnotation.value();
+        return new ModelParameter(id, parameter.getType());
     }
 
 }
