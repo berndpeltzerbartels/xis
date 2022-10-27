@@ -3,6 +3,7 @@ package one.xis.page;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
+import one.xis.js.JSClass;
 import one.xis.js.JSScript;
 import one.xis.js.JavascriptComponentCompiler;
 import one.xis.js.JavascriptTemplateParser;
@@ -23,7 +24,7 @@ class PageJavascriptCompiler extends JavascriptComponentCompiler<PageJavascript,
     }
 
     @Override
-    protected void parseTemplateModelIntoScriptModel(@NonNull PageTemplateModel templateModel, @NonNull String javascriptClassName, JSScript script) {
-        javascriptTemplateParser.parseTemplateModel(templateModel, javascriptClassName, script);
+    protected JSClass parseTemplateModelIntoScriptModel(@NonNull PageTemplateModel templateModel, @NonNull String javascriptClassName, JSScript script) {
+        return javascriptTemplateParser.parseTemplateModel(templateModel, javascriptClassName, script);
     }
 }

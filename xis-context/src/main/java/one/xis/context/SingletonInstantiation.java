@@ -13,7 +13,7 @@ class SingletonInstantiation {
     private final Set<SingletonInstantiator> singletonInstantiators;
 
     @Getter
-    private Set<SingletonInstantiator> unusedSingletonInstantiators;
+    private final Set<SingletonInstantiator> unusedSingletonInstantiators;
     private final FieldInjection fieldInjection;
     private final InitMethodInvocation initMethodInvocation;
     private final AppReflection reflections;
@@ -36,7 +36,7 @@ class SingletonInstantiation {
     }
 
     private Set<SingletonInstantiator> createInstantiators(AppReflection reflections) {
-        return reflections.getTypesAnnotatedWith(XISComponent.class).stream()// also includes custom component-annotations
+        return reflections.getTypesAnnotatedWith(XISComponent.class).stream()// includes types having custom component-annotations, too
                 .filter(c -> !c.isAnnotation())//
                 .map(this::createInstantiator)//
                 .collect(Collectors.toUnmodifiableSet());

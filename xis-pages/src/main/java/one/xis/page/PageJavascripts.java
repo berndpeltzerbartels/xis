@@ -50,7 +50,11 @@ class PageJavascripts {
     }
 
     private PageJavascript createPageJavascript(PageMetaData pageMetaData) {
-        var pageJavascipt = new PageJavascript(pageMetaData.getHtmlTemplate(), pageMetaData.getJavascriptClassname(), pageMetaData.getControllerClassName(), pageMetaData.getPath());
+        var pageJavascipt = PageJavascript.builder()
+                .htmlResourceFile(pageMetaData.getHtmlTemplate())
+                .controllerModel(pageMetaData.getControllerModel())
+                .path(pageMetaData.getPath())
+                .build();
         pageJavascriptCompiler.compile(pageJavascipt);
         return pageJavascipt;
     }

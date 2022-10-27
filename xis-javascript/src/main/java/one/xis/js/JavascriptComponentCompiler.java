@@ -2,6 +2,7 @@ package one.xis.js;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import one.xis.controller.ControllerModel;
 import one.xis.resource.ReloadableResourceFile;
 import one.xis.template.TemplateModel;
 import one.xis.template.TemplateSynthaxException;
@@ -13,34 +14,36 @@ import java.io.IOException;
 
 @RequiredArgsConstructor
 public abstract class JavascriptComponentCompiler<C extends JavascriptComponent, M extends TemplateModel> {
-    
-    public C compileIfObsolete(C pageJavascript) {
-        synchronized (pageJavascript) {
-            if (!pageJavascript.isCompiled()) {
-                compile(pageJavascript);
+
+    @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
+    public C compileIfObsolete(C javascriptComponent) {
+        synchronized (javascriptComponent) {
+            if (!javascriptComponent.isCompiled()) {
+                compile(javascriptComponent);
             }
-            if (pageJavascript.getHtmlResourceFile() instanceof ReloadableResourceFile) {
-                if (isObsolete(pageJavascript)) {
-                    compile(pageJavascript);
+            if (javascriptComponent.getHtmlResourceFile() instanceof ReloadableResourceFile) {
+                if (isObsolete(javascriptComponent)) {
+                    compile(javascriptComponent);
                 }
             }
-            return pageJavascript;
+            return javascriptComponent;
         }
     }
 
-    public void compile(C pageJavascript) {
-        pageJavascript.setCompiled(false);
-        reloadHtml(pageJavascript);
-        var javascript = doCompile(pageJavascript);
-        pageJavascript.setJavascript(javascript);
-        pageJavascript.setCompiled(true);
+    public void compile(C javascriptComponent) {
+        javascriptComponent.setCompiled(false);
+        reloadHtml(javascriptComponent);
+        var javascript = doCompile(javascriptComponent);
+        javascriptComponent.setJavascript(javascript);
+        javascriptComponent.setCompiled(true);
     }
 
     private String doCompile(C component) {
         var controllerClass = component.getControllerClassName();
         var templateModel = parseWidgetTemplate(controllerClass, htmlToDocument(controllerClass, component.getHtmlResourceFile().getContent()));
         var script = new JSScript();
-        parseTemplateModelIntoScriptModel(templateModel, component.getJavascriptClass(), script);
+        var javacriptComponentClass = parseTemplateModelIntoScriptModel(templateModel, component.getJavascriptClass(), script);
+        addRemoteMethods(javacriptComponentClass, component.getControllerModel());
         return javaScriptModelAsCode(script);
     }
 
@@ -63,7 +66,11 @@ public abstract class JavascriptComponentCompiler<C extends JavascriptComponent,
 
     protected abstract M parseWidgetTemplate(String controllerClass, Document document);
 
-    protected abstract void parseTemplateModelIntoScriptModel(M templateModel, String javascriptClassName, JSScript script);
+    protected abstract JSClass parseTemplateModelIntoScriptModel(M templateModel, String javascriptClassName, JSScript script);
+
+    private void addRemoteMethods(JSClass javascriptComponentClass, ControllerModel controllerModel) {
+        // TODO
+    }
 
     private String javaScriptModelAsCode(@NonNull JSScript script) {
         var builder = new StringBuilder();

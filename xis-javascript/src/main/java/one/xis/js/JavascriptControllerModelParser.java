@@ -1,14 +1,13 @@
 package one.xis.js;
 
-import lombok.RequiredArgsConstructor;
+import one.xis.context.XISComponent;
 import one.xis.controller.ControllerModel;
 
-@RequiredArgsConstructor
+@XISComponent
 class JavascriptControllerModelParser {
-    private final JSScript script;
 
-    public void parseControllerModel(ControllerModel controllerModel) {
-        
+    public JSClass parseControllerModel(ControllerModel controllerModel, JSScript script) {
+        return null;
     }
 
 }

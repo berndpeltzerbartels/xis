@@ -16,11 +16,11 @@ public class JavascriptTemplateParser {
 
     private static long currentNameId = 1;
 
-    public void parseTemplateModel(WidgetTemplateModel widgetTemplateModel, String javascriptClassName, JSScript script) {
-        toClass(widgetTemplateModel, javascriptClassName, script);
+    public JSClass parseTemplateModel(WidgetTemplateModel widgetTemplateModel, String javascriptClassName, JSScript script) {
+        return toClass(widgetTemplateModel, javascriptClassName, script);
     }
 
-    public void parseTemplateModel(PageTemplateModel pageTemplateModel, String javascriptClassName, JSScript script) {
+    public JSClass parseTemplateModel(PageTemplateModel pageTemplateModel, String javascriptClassName, JSScript script) {
         var pageClass = derrivedClass(javascriptClassName, XIS_PAGE, script);
         var headClass = toClass(pageTemplateModel.getHead(), script);
         var bodyClass = toClass(pageTemplateModel.getBody(), script);
@@ -28,6 +28,7 @@ public class JavascriptTemplateParser {
         pageClass.addField("body", new JSContructorCall(bodyClass, "this"));
         pageClass.addField("id", new JSString(pageTemplateModel.getKey()));
         pageClass.addField("server", new JSString("")); // empty = this server TODO method parameter
+        return pageClass;
     }
 
     private JSClass toClass(WidgetTemplateModel widgetTemplateModel, String javascriptClassName, JSScript script) {

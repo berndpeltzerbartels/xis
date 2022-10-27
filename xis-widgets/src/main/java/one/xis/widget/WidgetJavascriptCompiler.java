@@ -2,6 +2,7 @@ package one.xis.widget;
 
 import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
+import one.xis.js.JSClass;
 import one.xis.js.JSScript;
 import one.xis.js.JavascriptComponentCompiler;
 import one.xis.js.JavascriptTemplateParser;
@@ -22,7 +23,7 @@ class WidgetJavascriptCompiler extends JavascriptComponentCompiler<WidgetJavascr
     }
 
     @Override
-    protected void parseTemplateModelIntoScriptModel(WidgetTemplateModel templateModel, String javascriptClassName, JSScript script) {
-        javascriptTemplateParser.parseTemplateModel(templateModel, javascriptClassName, script);
+    protected JSClass parseTemplateModelIntoScriptModel(WidgetTemplateModel templateModel, String javascriptClassName, JSScript script) {
+        return javascriptTemplateParser.parseTemplateModel(templateModel, javascriptClassName, script);
     }
 }
