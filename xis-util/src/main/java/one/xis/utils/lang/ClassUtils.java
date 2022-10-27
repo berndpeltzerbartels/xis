@@ -18,5 +18,4 @@ public class ClassUtils {
     public <T, R extends T> R cast(T obj, Class<R> target) {
         return cast(obj, target, () -> new ClassCastException(obj.getClass() + " can not be casted to " + target));
     }
-
 }

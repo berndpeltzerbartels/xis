@@ -1,8 +1,8 @@
-package one.xis.invocation;
+package one.xis.controller;
 
 import one.xis.Request;
 
-interface MethodParameter {
+public interface MethodParameter {
 
     Object value(Request request);
 

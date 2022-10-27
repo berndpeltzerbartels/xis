@@ -1,4 +1,4 @@
-package one.xis.invocation;
+package one.xis.controller;
 
 import one.xis.ClientId;
 import one.xis.Model;
@@ -8,6 +8,7 @@ import one.xis.context.XISComponent;
 import one.xis.utils.reflect.AnnotationUtils;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.List;
@@ -20,7 +21,11 @@ class MethodParameterFactory {
 
     Set<Class<? extends Annotation>> PARAMETER_ANNOTATIONS = Set.of(ClientId.class, UserId.class, Token.class);
 
-    MethodParameter create(Parameter parameter) {
+    List<MethodParameter> methodParameters(Method method) {
+        return Arrays.stream(method.getParameters()).map(this::methodParameter).collect(Collectors.toList());
+    }
+
+    MethodParameter methodParameter(Parameter parameter) {
         return getParamAnnotation(parameter).map(this::createByAnnotation).orElseGet(() -> createModelParameter(parameter));
     }
 

@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
 import one.xis.js.JSScript;
 import one.xis.js.JavascriptComponentCompiler;
-import one.xis.js.JavascriptParser;
+import one.xis.js.JavascriptTemplateParser;
 import one.xis.template.TemplateParser;
 import one.xis.template.WidgetTemplateModel;
 import org.w3c.dom.Document;
@@ -14,6 +14,7 @@ import org.w3c.dom.Document;
 class WidgetJavascriptCompiler extends JavascriptComponentCompiler<WidgetJavascript, WidgetTemplateModel> {
 
     private final TemplateParser templateParser;
+    private final JavascriptTemplateParser javascriptTemplateParser;
 
     @Override
     protected WidgetTemplateModel parseWidgetTemplate(String controllerClass, Document document) {
@@ -21,9 +22,7 @@ class WidgetJavascriptCompiler extends JavascriptComponentCompiler<WidgetJavascr
     }
 
     @Override
-    protected JSScript templateModelToScriptModel(WidgetTemplateModel templateModel, String javascriptClassName) {
-        var parser = new JavascriptParser();
-        parser.parseTemplateModel(templateModel, javascriptClassName);
-        return parser.getScript();
+    protected void parseTemplateModelIntoScriptModel(WidgetTemplateModel templateModel, String javascriptClassName, JSScript script) {
+        javascriptTemplateParser.parseTemplateModel(templateModel, javascriptClassName, script);
     }
 }

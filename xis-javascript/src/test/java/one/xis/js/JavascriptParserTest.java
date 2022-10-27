@@ -13,11 +13,11 @@ class JavascriptParserTest {
     class SimpleElementWidgetTest {
 
         private WidgetTemplateModel widgetTemplateModel;
-        private JavascriptParser parser;
+        private JavascriptTemplateParser parser;
 
         @BeforeEach
         void setUp() {
-            parser = new JavascriptParser();
+            parser = new JavascriptTemplateParser();
             widgetTemplateModel = new WidgetTemplateModel(WIDGET_NAME, new TemplateElement("div"));
         }
 
@@ -63,11 +63,11 @@ class JavascriptParserTest {
 
         private WidgetTemplateModel widgetTemplateModel1;
         private WidgetTemplateModel widgetTemplateModel2;
-        private JavascriptParser parser;
+        private JavascriptTemplateParser parser;
 
         @BeforeEach
         void setUp() {
-            parser = new JavascriptParser();
+            parser = new JavascriptTemplateParser();
             widgetTemplateModel1 = new WidgetTemplateModel(WIDGET_NAME, new TemplateElement("div"));
             widgetTemplateModel2 = new WidgetTemplateModel(WIDGET_NAME2, new TemplateElement("span"));
         }
@@ -109,7 +109,7 @@ class JavascriptParserTest {
     class IfAndForLoopWidgetTest {
 
         private WidgetTemplateModel widgetTemplateModel;
-        private JavascriptParser parser;
+        private JavascriptTemplateParser parser;
 
         @BeforeEach
         void setUp() {
@@ -122,7 +122,7 @@ class JavascriptParserTest {
             loop.addChild(templateElement);
             widgetTemplateModel = new WidgetTemplateModel(WIDGET_NAME, ifBlock);
 
-            parser = new JavascriptParser();
+            parser = new JavascriptTemplateParser();
 
         }
 

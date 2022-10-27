@@ -18,23 +18,23 @@ class WidgetJavascripts {
     private final WidgetJavascriptCompiler widgetJavascriptCompiler;
 
     private WidgetJavascript createWidgetJavascript(WidgetMetaData widgetMetaData) {
-        var pageJavascipt = new WidgetJavascript(widgetMetaData.getHtmlTemplate(), widgetMetaData.getJavascriptClassname(), widgetMetaData.getControllerClass());
-        widgetJavascriptCompiler.compile(pageJavascipt);
-        return pageJavascipt;
+        var widgetJavascript = new WidgetJavascript(widgetMetaData.getHtmlTemplate(), widgetMetaData.getJavascriptClassname(), widgetMetaData.getControllerModel().getControllerClassName());
+        widgetJavascriptCompiler.compile(widgetJavascript);
+        return widgetJavascript;
     }
 
     public WidgetJavascript add(WidgetMetaData widgetMetaData) {
-        WidgetJavascript widgetJavascript = createWidgetJavascript(widgetMetaData);
+        var widgetJavascript = createWidgetJavascript(widgetMetaData);
         widgetJavascripts.put(widgetMetaData.getId(), widgetJavascript);
         return widgetJavascript;
     }
 
     public WidgetJavascript getById(String id) {
-        WidgetJavascript pageJavascript = widgetJavascripts.get(id);
-        synchronized (pageJavascript) {
-            widgetJavascriptCompiler.compileIfObsolete(pageJavascript);
+        var widgetJavascript = widgetJavascripts.get(id);
+        synchronized (widgetJavascript) {
+            widgetJavascriptCompiler.compileIfObsolete(widgetJavascript);
         }
-        return pageJavascript;
+        return widgetJavascript;
     }
 
     Collection<String> getIds() {

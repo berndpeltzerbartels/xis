@@ -1,7 +1,7 @@
 package one.xis.js;
 
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import one.xis.context.XISComponent;
 import one.xis.template.*;
 import one.xis.utils.lang.CollectionUtils;
 
@@ -11,86 +11,84 @@ import java.util.stream.Collectors;
 
 import static one.xis.js.Classes.*;
 
-@RequiredArgsConstructor
-public class JavascriptParser {
+@XISComponent
+public class JavascriptTemplateParser {
 
-    @Getter
-    private final JSScript script = new JSScript();
     private static long currentNameId = 1;
 
-    public void parseTemplateModel(WidgetTemplateModel widgetTemplateModel, String javascriptClassName) {
-        toClass(widgetTemplateModel, javascriptClassName);
+    public void parseTemplateModel(WidgetTemplateModel widgetTemplateModel, String javascriptClassName, JSScript script) {
+        toClass(widgetTemplateModel, javascriptClassName, script);
     }
 
-    public void parseTemplateModel(PageTemplateModel pageTemplateModel, String javascriptClassName) {
-        var pageClass = derrivedClass(javascriptClassName, XIS_PAGE);
-        var headClass = toClass(pageTemplateModel.getHead());
-        var bodyClass = toClass(pageTemplateModel.getBody());
+    public void parseTemplateModel(PageTemplateModel pageTemplateModel, String javascriptClassName, JSScript script) {
+        var pageClass = derrivedClass(javascriptClassName, XIS_PAGE, script);
+        var headClass = toClass(pageTemplateModel.getHead(), script);
+        var bodyClass = toClass(pageTemplateModel.getBody(), script);
         pageClass.addField("head", new JSContructorCall(headClass, "this"));
         pageClass.addField("body", new JSContructorCall(bodyClass, "this"));
         pageClass.addField("id", new JSString(pageTemplateModel.getKey()));
         pageClass.addField("server", new JSString("")); // empty = this server TODO method parameter
     }
 
-    private JSClass toClass(WidgetTemplateModel widgetTemplateModel, String javascriptClassName) {
-        var widgetClass = derrivedClass(javascriptClassName, XIS_WIDGET);
-        var widgetRootClass = toClass(widgetTemplateModel.getRootNode());
+    private JSClass toClass(WidgetTemplateModel widgetTemplateModel, String javascriptClassName, JSScript script) {
+        var widgetClass = derrivedClass(javascriptClassName, XIS_WIDGET, script);
+        var widgetRootClass = toClass(widgetTemplateModel.getRootNode(), script);
         widgetClass.addField("root", new JSContructorCall(widgetRootClass, "this"));
         widgetClass.addField("id", new JSString(widgetTemplateModel.getWidgetClassName()));
         widgetClass.addField("server", new JSString("")); // empty = this server TODO method parameter
         return widgetClass;
     }
 
-    private List<JSContructorCall> evaluateChildren(ChildHolder parent) {
+    private List<JSContructorCall> evaluateChildren(ChildHolder parent, JSScript script) {
         return parent.getChildren().stream()
-                .map(this::toClass)
+                .map(node -> toClass(node, script))
                 .map(jsClass -> new JSContructorCall(jsClass, "this"))
                 .collect(Collectors.toList());
     }
 
-    private JSClass toClass(ModelNode node) {
+    private JSClass toClass(ModelNode node, JSScript script) {
         if (node instanceof TemplateElement) {
-            return toClass((TemplateElement) node);
+            return toClass((TemplateElement) node, script);
         } else if (node instanceof ContainerElement) {
-            return toClass((ContainerElement) node);
+            return toClass((ContainerElement) node, script);
         } else if (node instanceof MutableTextNode) {
-            return toClass((MutableTextNode) node);
+            return toClass((MutableTextNode) node, script);
         } else if (node instanceof StaticTextNode) {
-            return toClass((StaticTextNode) node);
+            return toClass((StaticTextNode) node, script);
         } else if (node instanceof Loop) {
-            return toClass((Loop) node);
+            return toClass((Loop) node, script);
         } else if (node instanceof IfBlock) {
-            return toClass((IfBlock) node);
+            return toClass((IfBlock) node, script);
         }
         throw new IllegalArgumentException("node=" + node);
     }
 
-    private JSClass toClass(TemplateElement element) {
-        var elementClass = derrivedClass(XIS_ELEMENT);
-        addChildrenField(element, elementClass);
+    private JSClass toClass(TemplateElement element, JSScript script) {
+        var elementClass = derrivedClass(XIS_ELEMENT, script);
+        addChildrenField(element, elementClass, script);
         addElementField(element, elementClass);
         overrideUpdateAttributes(elementClass, element);
         return elementClass;
     }
 
-    private JSClass toClass(TemplateHeadElement element) {
-        var elementClass = derrivedClass(XIS_HEAD_ELEMENT);
-        addChildrenField(element, elementClass);
+    private JSClass toClass(TemplateHeadElement element, JSScript script) {
+        var elementClass = derrivedClass(XIS_HEAD_ELEMENT, script);
+        addChildrenField(element, elementClass, script);
         addElementField(element, elementClass);
         overrideUpdateAttributes(elementClass, element);
         return elementClass;
     }
 
-    private JSClass toClass(TemplateBodyElement element) {
-        var elementClass = derrivedClass(XIS_BODY_ELEMENT);
-        addChildrenField(element, elementClass);
+    private JSClass toClass(TemplateBodyElement element, JSScript script) {
+        var elementClass = derrivedClass(XIS_BODY_ELEMENT, script);
+        addChildrenField(element, elementClass, script);
         addElementField(element, elementClass);
         overrideUpdateAttributes(elementClass, element);
         return elementClass;
     }
 
-    private JSClass toClass(ContainerElement containerElement) {
-        var containerClass = derrivedClass(XIS_CONTAINER);
+    private JSClass toClass(ContainerElement containerElement, JSScript script) {
+        var containerClass = derrivedClass(XIS_CONTAINER, script);
         containerClass.addField("containerId", new JSString(containerElement.getContainerId()));
         var defaultWidgetId = containerElement.getDefaultWidgetId() != null ? new JSString(containerElement.getDefaultWidgetId()) : new JSUndefined();
         containerClass.addField("defaultWidgetId", defaultWidgetId);
@@ -99,8 +97,8 @@ public class JavascriptParser {
         return containerClass;
     }
 
-    private JSClass toClass(MutableTextNode mutableTextNode) {
-        var textNode = derrivedClass(XIS_MUTABLE_TEXT_NODE);
+    private JSClass toClass(MutableTextNode mutableTextNode, JSScript script) {
+        var textNode = derrivedClass(XIS_MUTABLE_TEXT_NODE, script);
         textNode.addField("node", new JSFunctionCall(Functions.CREATE_TEXT_NODE, new JSString("")));
         JSMethod getText = textNode.overrideAbstractMethod("getText");
         var text = new JSVar("text");
@@ -110,14 +108,14 @@ public class JavascriptParser {
         return textNode;
     }
 
-    private JSClass toClass(StaticTextNode staticTextNode) {
-        var textNode = derrivedClass(XIS_STATIC_TEXT_NODE);
+    private JSClass toClass(StaticTextNode staticTextNode, JSScript script) {
+        var textNode = derrivedClass(XIS_STATIC_TEXT_NODE, script);
         textNode.addField("node", new JSFunctionCall(Functions.CREATE_TEXT_NODE, new JSString(staticTextNode.getContent())));
         return textNode;
     }
 
-    private JSClass toClass(Loop loop) {
-        var loopClass = derrivedClass(XIS_LOOP);
+    private JSClass toClass(Loop loop, JSScript script) {
+        var loopClass = derrivedClass(XIS_LOOP, script);
 
         var loopAttributes = new JSJsonValue();
         loopAttributes.addField("indexVarName", new JSString(loop.getIndexVarName()));
@@ -128,7 +126,7 @@ public class JavascriptParser {
         var getValue = loopClass.getMethod("getValue");
         var getArray = loopClass.overrideAbstractMethod("getArray");
         var createChilderen = loopClass.overrideAbstractMethod("createChildren");
-        createChilderen.addStatement(new JSReturn(new JSArray(evaluateChildren(loop))));
+        createChilderen.addStatement(new JSReturn(new JSArray(evaluateChildren(loop, script))));
 
         var expressionEval = new ExpressionEval(getValue);
         getArray.addStatement(new JSReturn(expressionEval.getEvaluator(loop.getArraySource())));
@@ -137,8 +135,8 @@ public class JavascriptParser {
         return loopClass;
     }
 
-    private JSClass toClass(IfBlock ifBlock) {
-        var ifClass = derrivedClass(XIS_IF);
+    private JSClass toClass(IfBlock ifBlock, JSScript script) {
+        var ifClass = derrivedClass(XIS_IF, script);
 
         var valueMethod = ifClass.getMethod("val");
         var evaluateCondition = ifClass.overrideAbstractMethod("evaluateCondition");
@@ -146,7 +144,7 @@ public class JavascriptParser {
         var expressionEval = new ExpressionEval(valueMethod);
         evaluateCondition.addStatement(new JSReturn(expressionEval.getEvaluator(ifBlock.getExpression())));
 
-        addChildrenField(ifBlock, ifClass);
+        addChildrenField(ifBlock, ifClass, script);
         return ifClass;
     }
 
@@ -154,8 +152,8 @@ public class JavascriptParser {
         jsClass.addField("element", getCreateElementFunctionCall(element));
     }
 
-    private void addChildrenField(ChildHolder childHolder, JSClass jsClass) {
-        jsClass.addField("children", new JSArray(evaluateChildren(childHolder)));
+    private void addChildrenField(ChildHolder childHolder, JSClass jsClass, JSScript script) {
+        jsClass.addField("children", new JSArray(evaluateChildren(childHolder, script)));
     }
 
     private JSFunctionCall getCreateElementFunctionCall(ElementWithAttributes element) {
@@ -302,12 +300,12 @@ public class JavascriptParser {
         }
     }
 
-    private JSClass derrivedClass(JSSuperClass superClass) {
-        return derrivedClass(nextClassName(), superClass);
+    private JSClass derrivedClass(JSSuperClass superClass, JSScript script) {
+        return derrivedClass(nextClassName(), superClass, script);
     }
 
 
-    private JSClass derrivedClass(String className, JSSuperClass superClass) {
+    private JSClass derrivedClass(String className, JSSuperClass superClass, JSScript script) {
         var jsClass = new JSClass(className, superClass.getConstructor().getArgs()).derrivedFrom(superClass);
         script.addClassDeclaration(jsClass);
         return jsClass;

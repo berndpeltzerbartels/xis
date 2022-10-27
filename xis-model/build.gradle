@@ -10,9 +10,7 @@ repositories {
 }
 
 dependencies {
-
-    implementation project(':xis-remote-core')
-    implementation project(':xis-util')
+    
     implementation 'org.projectlombok:lombok:1.18.12'
     annotationProcessor 'org.projectlombok:lombok:1.18.12'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.12'

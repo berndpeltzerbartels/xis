@@ -1,4 +1,4 @@
-package one.xis.invocation;
+package one.xis.controller;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

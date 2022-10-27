@@ -18,6 +18,7 @@ dependencies {
     //implementation project(':xis-controller-methods')
     implementation project(':xis-util')
     implementation project(':xis-remote-template')
+    implementation project(':xis-controller-model')
 
     compileOnly project(':xis-remote-core')
 

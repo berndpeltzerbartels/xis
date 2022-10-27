@@ -1,5 +1,7 @@
 package one.xis.utils.lang;
 
+import lombok.NonNull;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -17,9 +19,13 @@ public class MethodUtils {
         return method -> method.isAnnotationPresent(annotationClass);
     }
 
-    public static Collection<Method> methods(Object obj) {
+    public static Collection<Method> methods(@NonNull Object obj) {
+        return methods(obj.getClass());
+    }
+
+    public static Collection<Method> methods(@NonNull Class<?> clazz) {
         Map<String, Method> methods = new HashMap<>();
-        hierarchy(obj.getClass()).forEach(c -> methods(c).forEach(m -> methods.put(methodSignature(m), m)));
+        hierarchy(clazz).forEach(c -> declaredMethods(c).forEach(m -> methods.put(methodSignature(m), m)));
         return methods.values();
     }
 
@@ -37,10 +43,6 @@ public class MethodUtils {
         return classes;
     }
 
-    private static Stream<Method> methods(Class<?> declaringClass) {
-        return declaredMethods(declaringClass);
-    }
-    
     private static Stream<Method> declaredMethods(Class<?> type) {
         return Arrays.stream(type.getDeclaredMethods());
     }

@@ -13,13 +13,13 @@ import java.io.IOException;
 
 @RequiredArgsConstructor
 public abstract class JavascriptComponentCompiler<C extends JavascriptComponent, M extends TemplateModel> {
+    
     public C compileIfObsolete(C pageJavascript) {
         synchronized (pageJavascript) {
             if (!pageJavascript.isCompiled()) {
                 compile(pageJavascript);
             }
             if (pageJavascript.getHtmlResourceFile() instanceof ReloadableResourceFile) {
-                ReloadableResourceFile reloadableResourceFile = (ReloadableResourceFile) pageJavascript.getHtmlResourceFile();
                 if (isObsolete(pageJavascript)) {
                     compile(pageJavascript);
                 }
@@ -39,7 +39,8 @@ public abstract class JavascriptComponentCompiler<C extends JavascriptComponent,
     private String doCompile(C component) {
         var controllerClass = component.getControllerClassName();
         var templateModel = parseWidgetTemplate(controllerClass, htmlToDocument(controllerClass, component.getHtmlResourceFile().getContent()));
-        var script = templateModelToScriptModel(templateModel, component.getJavascriptClass());
+        var script = new JSScript();
+        parseTemplateModelIntoScriptModel(templateModel, component.getJavascriptClass(), script);
         return javaScriptModelAsCode(script);
     }
 
@@ -62,7 +63,7 @@ public abstract class JavascriptComponentCompiler<C extends JavascriptComponent,
 
     protected abstract M parseWidgetTemplate(String controllerClass, Document document);
 
-    protected abstract JSScript templateModelToScriptModel(M templateModel, String javascriptClassName);
+    protected abstract void parseTemplateModelIntoScriptModel(M templateModel, String javascriptClassName, JSScript script);
 
     private String javaScriptModelAsCode(@NonNull JSScript script) {
         var builder = new StringBuilder();

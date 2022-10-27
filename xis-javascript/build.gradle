@@ -23,6 +23,7 @@ dependencies {
     implementation project(':xis-javascript-model')
     implementation project(':xis-remote-template')
     implementation project(':xis-resources')
+    implementation project(':xis-controller-model')
 
     implementation 'com.eclipsesource.j2v8:j2v8_linux_x86_64:4.6.0'
 

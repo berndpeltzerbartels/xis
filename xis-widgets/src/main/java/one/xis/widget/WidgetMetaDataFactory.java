@@ -2,6 +2,8 @@ package one.xis.widget;
 
 import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
+import one.xis.controller.ControllerModel;
+import one.xis.controller.ControllerModelFactory;
 import one.xis.resource.ResourceFiles;
 
 @XISComponent
@@ -9,6 +11,7 @@ import one.xis.resource.ResourceFiles;
 class WidgetMetaDataFactory {
 
     private final ResourceFiles resourceFiles;
+    private final ControllerModelFactory controllerModelFactory;
     private static int nameIndex;
 
     WidgetMetaData createMetaData(Object controller) {
@@ -16,7 +19,7 @@ class WidgetMetaDataFactory {
                 .id(id(controller))
                 .htmlTemplate(resourceFiles.getByPath(getHtmlTemplatePath(controller)))
                 .javascriptClassname(uniqueJavascriptClassName())
-                .controllerClass(controllerClass(controller))
+                .controllerModel(controllerModel(controllerClass(controller)))
                 .build();
     }
 
@@ -29,11 +32,15 @@ class WidgetMetaDataFactory {
     }
 
     private String id(Object controller) {
-        return pathToUrn(controllerClass(controller));
+        return pathToUrn(controllerClass(controller).getName());
     }
 
-    private String controllerClass(Object controller) {
-        return controller.getClass().getName(); // TODO Proxies
+    private Class<?> controllerClass(Object controller) {
+        return controller.getClass(); // TODO Proxies
+    }
+
+    private ControllerModel controllerModel(Class<?> controllerClass) {
+        return controllerModelFactory.controllerModel(controllerClass);
     }
 
     private String pathToUrn(String name) {
