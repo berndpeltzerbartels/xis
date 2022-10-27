@@ -17,20 +17,20 @@ public class AppContext {
     private final Collection<Object> singletons;
     private static final Map<AppContextKey, AppContext> CONTEXT_MAP = new ConcurrentHashMap<>();
 
-    public static AppContext getInstance(String packageName) {
-        return getInstance(packageName, Collections.emptySet());
+    public static AppContext getInstance(String rootPackageName) {
+        return getInstance(rootPackageName, Collections.emptySet());
     }
 
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
-    public static AppContext getInstance(String packageName, Collection<Object> externalSingletons) {
-        AppContextKey appContextKey = AppContextKey.getKey(packageName);
+    public static AppContext getInstance(String rootPackageName, Collection<Object> externalSingletons) {
+        AppContextKey appContextKey = AppContextKey.getKey(rootPackageName);
         synchronized (appContextKey) {
-            return CONTEXT_MAP.computeIfAbsent(appContextKey, key -> new AppContext(packageName, externalSingletons));
+            return CONTEXT_MAP.computeIfAbsent(appContextKey, key -> new AppContext(rootPackageName, externalSingletons));
         }
     }
 
-    public static AppContext getExistingInstance(String packageName) {
-        return CONTEXT_MAP.get(AppContextKey.getKey(packageName));
+    public static AppContext getExistingInstance(String rootPackageName) {
+        return CONTEXT_MAP.get(AppContextKey.getKey(rootPackageName));
     }
 
     public <T> T getSingleton(Class<T> type) {
