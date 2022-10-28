@@ -6,7 +6,6 @@ import one.xis.common.RequestContext;
 import one.xis.utils.lang.ClassUtils;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.stream.Collectors;
 
 @Data
 public class ControllerWrapper {
@@ -14,10 +13,9 @@ public class ControllerWrapper {
     private final ControllerModel controllerModel;
 
     public Object invokeInit(RequestContext context) {
-        var initMethods = controllerModel.getAnnotatedMethods(InitModel.class).collect(Collectors.toSet());
         var model = createModelInstance();
         context.setState(model);
-        initMethods.forEach(m -> invoke(m, context));
+        controllerModel.getAnnotatedMethods(InitModel.class).forEach(m -> invoke(m, context));
         return model;
     }
 
