@@ -12,6 +12,6 @@ class PageControllerWrapperFactory {
 
     PageControllerWrapper createWrapper(Object controller) {
         var controllerModel = modelFactory.controllerModel(controller.getClass());
-        return null;
+        return new PageControllerWrapper(controller, controllerModel);
     }
 }

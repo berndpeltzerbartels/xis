@@ -12,6 +12,6 @@ class WidgetControllerWrapperFactory {
 
     WidgetControllerWrapper createWrapper(Object controller) {
         var model = modelFactory.controllerModel(controller.getClass());
-        return null;
+        return new WidgetControllerWrapper(controller, model);
     }
 }

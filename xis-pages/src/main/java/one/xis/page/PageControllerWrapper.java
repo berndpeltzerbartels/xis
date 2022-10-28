@@ -6,14 +6,8 @@ import one.xis.controller.ControllerWrapper;
 
 class PageControllerWrapper extends ControllerWrapper {
 
-    PageControllerWrapper(Object contoller, ControllerModel controllerModel, Class<?> modelType) {
-        super(contoller, controllerModel, modelType);
+    PageControllerWrapper(Object contoller, ControllerModel controllerModel) {
+        super(contoller, controllerModel);
     }
-
-
-    Object createModelInstance() {
-        return null;
-    }
-
 
 }

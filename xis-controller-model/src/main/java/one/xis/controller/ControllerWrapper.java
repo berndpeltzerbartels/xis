@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 public class ControllerWrapper {
     private final Object contoller;
     private final ControllerModel controllerModel;
-    private final Class<?> modelType;
 
     public Object invokeInit(RequestContext context) {
         var initMethods = controllerModel.getAnnotatedMethods(InitModel.class).collect(Collectors.toSet());
