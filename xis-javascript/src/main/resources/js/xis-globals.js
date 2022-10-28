@@ -1,5 +1,5 @@
 var errorHandler = new XISErrorHandler();
-var restClient = new XISRestClient(errorHandler);
+var client = new XISClient(errorHandler);
 var rootPage = new XISRootPage();
 var pages = new XISPages();
 var widgets = new XISWidgets();

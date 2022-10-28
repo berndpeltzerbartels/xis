@@ -18,8 +18,6 @@ dependencies {
     implementation project(':xis-context')
     implementation project(':xis-remote-core')
 
-    implementation project(':xis-model')
-
     implementation 'org.reflections:reflections:0.10.2'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.16.1'

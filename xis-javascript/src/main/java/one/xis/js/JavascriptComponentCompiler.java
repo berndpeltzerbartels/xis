@@ -40,9 +40,10 @@ public abstract class JavascriptComponentCompiler<C extends JavascriptComponent,
 
     private String doCompile(C component) {
         var controllerClass = component.getControllerClassName();
-        var templateModel = parseWidgetTemplate(controllerClass, htmlToDocument(controllerClass, component.getHtmlResourceFile().getContent()));
+        var templateModel = parseTemplate(controllerClass, htmlToDocument(controllerClass, component.getHtmlResourceFile().getContent()));
         var script = new JSScript();
         var javacriptComponentClass = parseTemplateModelIntoScriptModel(templateModel, component.getJavascriptClass(), script);
+        addJavaClassIdField(javacriptComponentClass, controllerClass);
         addRemoteMethods(javacriptComponentClass, component.getControllerModel());
         return javaScriptModelAsCode(script);
     }
@@ -64,14 +65,17 @@ public abstract class JavascriptComponentCompiler<C extends JavascriptComponent,
         return false;
     }
 
-    protected abstract M parseWidgetTemplate(String controllerClass, Document document);
+    protected abstract M parseTemplate(String controllerClass, Document document);
 
     protected abstract JSClass parseTemplateModelIntoScriptModel(M templateModel, String javascriptClassName, JSScript script);
 
-    private void addRemoteMethods(JSClass javascriptComponentClass, ControllerModel controllerModel) {
-        // TODO
-    }
+    protected abstract void addRemoteMethods(JSClass component, ControllerModel controllerModel);
 
+
+    private void addJavaClassIdField(JSClass component, String controllerClass) {
+        component.addField("javaClassId", new JSString(controllerClass));
+    }
+    
     private String javaScriptModelAsCode(@NonNull JSScript script) {
         var builder = new StringBuilder();
         var jsWriter = new JSWriter(builder);

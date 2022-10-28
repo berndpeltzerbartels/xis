@@ -21,5 +21,6 @@ include 'xis-controller-model'
 include 'xis-pages'
 include 'xis-widgets'
 include 'xis-root-page'
-include 'xis-model'
+include 'xis-connector'
+include 'xis-common'
 

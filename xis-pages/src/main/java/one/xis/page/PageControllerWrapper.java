@@ -1,10 +1,22 @@
 package one.xis.page;
 
-import lombok.Builder;
+import one.xis.common.RequestContext;
+import one.xis.controller.ControllerWrapper;
 
-@Builder
-class PageControllerWrapper {
-    private final Object contoller;
+
+class PageControllerWrapper extends ControllerWrapper {
+
+    public PageControllerWrapper(Object contoller, Class<?> modelType) {
+        super(contoller, modelType);
+    }
+
+    Object invokeInit(RequestContext context) {
+        return null;
+    }
+
+    Object createModelInstance() {
+        return null;
+    }
 
 
 }

@@ -1,6 +1,7 @@
 package one.xis.page;
 
 import lombok.RequiredArgsConstructor;
+import one.xis.common.RequestContext;
 import one.xis.context.XISComponent;
 
 import java.util.Collection;
@@ -21,6 +22,11 @@ public class PageService {
         pageControllers.addControllerWrapper(controller, metaData);
     }
 
+    public Object invokeInit(RequestContext context) {
+        var wrapper = pageControllers.getPageControllerWrapper(context.getJavaClassId());
+        return wrapper.invokeInit(context);
+    }
+
     public PageJavascript getPage(String id) {
         return pageJavascripts.getById(id);
     }
@@ -37,4 +43,5 @@ public class PageService {
     public PageJavascript getWelcomePageJavascript() {
         return pageJavascripts.getWelcomePage(); // TODO validate there must be exactly one
     }
+
 }

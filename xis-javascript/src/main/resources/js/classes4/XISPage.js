@@ -6,6 +6,7 @@ class XISPage extends XISVisible {
         this.rootPage = undefined;
         this.headChildNodes = [];
         this.bodyChildNodes = [];
+        this.type = 'page';
     }
 
     /**
@@ -23,6 +24,14 @@ class XISPage extends XISVisible {
     init() {
         this.head.init();
         this.body.init();
+    }
+
+    sendInit() {
+       throw new Error('abstract method');
+    }
+
+    updateState(newState) {
+        // TODO - ncht abstract
     }
 
     /**

@@ -1,6 +1,7 @@
 package one.xis.widget;
 
 import lombok.RequiredArgsConstructor;
+import one.xis.common.RequestContext;
 import one.xis.context.XISComponent;
 
 import java.util.Collection;
@@ -17,7 +18,12 @@ public class WidgetService {
     public void addWidgetConroller(Object controller) {
         WidgetMetaData widgetMetaData = widgetMetaDataFactory.createMetaData(controller);
         widgetJavascripts.add(widgetMetaData);
-        widgetControllers.add(widgetMetaData);
+        widgetControllers.addWidgetController(controller, widgetMetaData);
+    }
+
+    public Object invokeInit(RequestContext context) {
+        var wrapper = widgetControllers.getWidgetControllerWrapper(context.getJavaClassId());
+        return wrapper.invokeInit(context);
     }
 
     public WidgetJavascript getWidgetJavascript(String id) {

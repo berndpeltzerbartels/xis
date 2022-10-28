@@ -2,6 +2,7 @@ package one.xis.controller;
 
 
 import lombok.Builder;
+import lombok.Getter;
 import one.xis.reflect.MethodSignature;
 
 import java.lang.annotation.Annotation;
@@ -12,6 +13,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Builder
+@Getter
 public class ControllerMethod {
     private final MethodSignature methodSignature;
     private final List<MethodParameter> methodParameters;

@@ -7,6 +7,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import lombok.Getter;
+import one.xis.ConnectorService;
 import one.xis.Page;
 import one.xis.Widget;
 import one.xis.context.AppContext;
@@ -25,6 +26,7 @@ public class MicronautContextAdapter {
     private RootPageService rootPageService;
     private PageService pageService;
     private WidgetService widgetService;
+    private ConnectorService connectorService;
 
     @PostConstruct
     void init() {
@@ -32,6 +34,8 @@ public class MicronautContextAdapter {
         rootPageService = appContext.getSingleton(RootPageService.class);
         pageService = appContext.getSingleton(PageService.class);
         widgetService = appContext.getSingleton(WidgetService.class);
+        connectorService = appContext.getSingleton(ConnectorService.class);
+
 
         beanContext.getBeanDefinitions(Qualifiers.byStereotype(Page.class)).stream()//
                 .map(BeanDefinition::getBeanType)

@@ -15,10 +15,11 @@ dependencies {
     implementation project(':xis-javascript')
     implementation project(':xis-javascript-model')
     implementation project(':xis-resources')
-    //implementation project(':xis-controller-methods')
+    implementation project(':xis-controller-model')
     implementation project(':xis-util')
     implementation project(':xis-remote-template')
-    implementation project(':xis-controller-model')
+    implementation project(':xis-common')
+
 
     compileOnly project(':xis-remote-core')
 

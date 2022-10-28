@@ -10,7 +10,11 @@ repositories {
 }
 
 dependencies {
-    
+    implementation project(':xis-context')
+    implementation project(':xis-widgets')
+    implementation project(':xis-pages')
+    implementation project(':xis-common')
+
     implementation 'org.projectlombok:lombok:1.18.12'
     annotationProcessor 'org.projectlombok:lombok:1.18.12'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.12'

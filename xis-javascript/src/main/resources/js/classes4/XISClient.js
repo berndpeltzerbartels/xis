@@ -13,6 +13,23 @@ class XISClient {
         }
     }
 
+    callRemoteInit(signatures, component) {
+        this.callRemote(signatures, component);
+    }
+
+    callRemote(signatures, component, issue){
+        var message = {
+            signatures: signatures,
+            state: component.state,
+            clientId: this.clientId,
+            token: this.token,
+            issue: issue,
+            javaClassId: component.javaClassId,
+            componentType: component.type
+        };
+        this.restClient.post('/xis/connector', message, response => component.updateState(response.model));
+    }
+
     /**
      * @public
      * @param {XISPage} page 

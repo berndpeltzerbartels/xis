@@ -8,4 +8,8 @@ class PageControllers {
     void addControllerWrapper(Object pageController, PageMetaData metaData) {
 
     }
+    
+    PageControllerWrapper getPageControllerWrapper(String id) {
+        return null;
+    }
 }

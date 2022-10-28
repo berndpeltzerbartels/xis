@@ -45,6 +45,8 @@ public class Classes {
                 .addMethod("getValue", 1)
                 .addMethod("initChildren", 0)
                 .addMethod("updateChildren", 0)
+                .addMethod("updateState", 1)
+                .addAbstractMethod("sendInit")
                 .addAbstractField("path");
 
         XIS_WIDGET.addMethod("init", 1)
@@ -53,6 +55,8 @@ public class Classes {
                 .addMethod("update", 0)
                 .addMethod("updateData", 1)
                 .addMethod("getValue", 1)
+                .addMethod("updateState", 1)
+                .addAbstractMethod("sendInit")
                 .addAbstractField("root");
 
         XIS_ELEMENT.addMethod("init", 2)
