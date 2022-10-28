@@ -22,7 +22,7 @@ public class ConnectorService {
     }
 
     private ConnectorResponse handlePageMessage(ConnectorRequest request) {
-        Object model = pageService.invokeInit(request);
+        var model = pageService.invokeInit(request);
         return new ConnectorResponse(model);
     }
 

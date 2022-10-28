@@ -46,7 +46,7 @@ public class ControllerMethod {
     }
 
     Object[] getArgs(RequestContext context) {
-        List<Object> args = new ArrayList<>();
+        var args = new ArrayList<>();
         for (MethodParameter parameter : getMethodParameters()) {
             if (parameter instanceof ModelParameter) {
                 args.add(context.getState());

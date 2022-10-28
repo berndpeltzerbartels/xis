@@ -6,7 +6,6 @@ import one.xis.common.RequestContext;
 import one.xis.utils.lang.ClassUtils;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.stream.Collectors;
 
 @Data
@@ -24,7 +23,7 @@ public class ControllerWrapper {
     }
 
     private Object invoke(ControllerMethod controllerMethod, RequestContext context) {
-        Method method = controllerMethod.getMethod(contoller);
+        var method = controllerMethod.getMethod(contoller);
         try {
             return method.invoke(contoller, controllerMethod.getArgs(context));
         } catch (IllegalAccessException | InvocationTargetException e) {

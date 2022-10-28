@@ -3,7 +3,10 @@ package one.xis.controller;
 import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @XISComponent
@@ -27,7 +30,7 @@ public class ControllerModelFactory {
     }
 
     private Class<?> modelType(Collection<ControllerMethod> controllerMethods) {
-        Set<Class<?>> modelTypes = controllerMethods.stream()
+        var modelTypes = controllerMethods.stream()
                 .map(ControllerMethod::getMethodParameters)
                 .flatMap(List::stream)
                 .filter(ModelParameter.class::isInstance)
