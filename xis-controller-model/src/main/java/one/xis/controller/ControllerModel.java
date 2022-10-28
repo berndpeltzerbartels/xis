@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 public class ControllerModel {
     private final Class<?> controllerClass;
     private final Collection<ControllerMethod> controllerMethods;
+    private final Class<?> modelType;
 
     public <A extends Annotation> Stream<ControllerMethod> getAnnotatedMethods(Class<A> annotationClass) {
         return controllerMethods.stream().filter(controllerMethod -> controllerMethod.annotation(annotationClass).isPresent());

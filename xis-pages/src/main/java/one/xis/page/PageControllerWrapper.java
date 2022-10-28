@@ -1,18 +1,15 @@
 package one.xis.page;
 
-import one.xis.common.RequestContext;
+import one.xis.controller.ControllerModel;
 import one.xis.controller.ControllerWrapper;
 
 
 class PageControllerWrapper extends ControllerWrapper {
 
-    public PageControllerWrapper(Object contoller, Class<?> modelType) {
-        super(contoller, modelType);
+    PageControllerWrapper(Object contoller, ControllerModel controllerModel, Class<?> modelType) {
+        super(contoller, controllerModel, modelType);
     }
 
-    Object invokeInit(RequestContext context) {
-        return null;
-    }
 
     Object createModelInstance() {
         return null;

@@ -7,6 +7,7 @@ import one.xis.utils.lang.MethodUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -27,7 +28,14 @@ class ControllerMethodFactory {
                 .methodSignature(MethodSignature.from(method))
                 .methodParameters(methodParameters(method))
                 .methodAnnotations(methodAnnotations(method))
+                .returnType(method.getReturnType())
+                .name(method.getName())
+                .parameterTypes(parameterTypes(method))
                 .build();
+    }
+
+    private Class<?>[] parameterTypes(Method method) {
+        return Arrays.stream(method.getParameters()).map(Parameter::getType).toArray(Class<?>[]::new);
     }
 
     private Collection<Annotation> methodAnnotations(Method method) {

@@ -1,6 +1,6 @@
 package one.xis.js;
 
-import one.xis.Init;
+import one.xis.InitModel;
 import one.xis.context.XISComponent;
 import one.xis.controller.ControllerMethod;
 import one.xis.controller.ControllerModel;
@@ -27,7 +27,7 @@ public class JavascriptControllerModelParser {
 
 
     private JSString[] getInitMethodSignatures(ControllerModel controllerModel) {
-        return controllerModel.getAnnotatedMethods(Init.class)
+        return controllerModel.getAnnotatedMethods(InitModel.class)
                 .map(ControllerMethod::getMethodSignature)
                 .map(MethodSignature::toString)
                 .map(JSString::new)
