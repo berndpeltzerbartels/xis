@@ -34,7 +34,7 @@ public class AppContext {
     }
 
     public <T> T getSingleton(Class<T> type) {
-        return singletons.stream().filter(type::isInstance).map(type::cast).collect(CollectorUtils.onlyElement());
+        return singletons.stream().filter(type::isInstance).map(type::cast).collect(CollectorUtils.toOnlyElement());
     }
 
     @ToString

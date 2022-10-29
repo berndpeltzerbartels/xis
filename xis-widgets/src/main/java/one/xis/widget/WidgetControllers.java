@@ -1,6 +1,7 @@
 package one.xis.widget;
 
 import one.xis.context.XISComponent;
+import one.xis.controller.ControllerWrapper;
 
 @XISComponent
 class WidgetControllers {
@@ -9,7 +10,7 @@ class WidgetControllers {
 
     }
 
-    WidgetControllerWrapper getWidgetControllerWrapper(String javaClassId) {
+    ControllerWrapper getWidgetControllerWrapper(String javaClassId) {
         return null;
     }
 }

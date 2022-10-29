@@ -1,6 +1,7 @@
 package one.xis.page;
 
 import one.xis.context.XISComponent;
+import one.xis.controller.ControllerWrapper;
 
 @XISComponent
 class PageControllers {
@@ -8,8 +9,8 @@ class PageControllers {
     void addControllerWrapper(Object pageController, PageMetaData metaData) {
 
     }
-    
-    PageControllerWrapper getPageControllerWrapper(String id) {
+
+    ControllerWrapper getPageControllerWrapper(String id) {
         return null;
     }
 }

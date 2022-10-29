@@ -1,11 +1,17 @@
 package one.xis.common;
 
+import java.util.Map;
+
 public interface RequestContext {
     RequestIssue getIssue();
 
-    java.util.List<String> getSignatures();
+    void setModel(Object model);
 
-    Object getState();
+    Object getModel();
+
+    String getAction();
+
+    Object getState(String name);
 
     String getClientId();
 
@@ -17,9 +23,9 @@ public interface RequestContext {
 
     void setIssue(RequestIssue issue);
 
-    void setSignatures(java.util.List<String> signatures);
+    void setAction(String action);
 
-    void setState(Object state);
+    void setStates(Map<String, Object> states);
 
     void setClientId(String clientId);
 

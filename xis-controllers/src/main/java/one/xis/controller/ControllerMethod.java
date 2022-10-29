@@ -49,11 +49,13 @@ public class ControllerMethod {
         var args = new ArrayList<>();
         for (MethodParameter parameter : getMethodParameters()) {
             if (parameter instanceof ModelParameter) {
-                args.add(context.getState());
+                args.add(context.getModel());
             } else if (parameter instanceof UserIdParameter) {
                 args.add(getUserId(context.getToken()));
             } else if (parameter instanceof TokenParamter) {
                 args.add(context.getToken());
+            } else if (parameter instanceof StateParameter) {
+                args.add(context.getState(((StateParameter) parameter).getName()));
             } else {
                 throw new IllegalStateException();
             }

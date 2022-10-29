@@ -30,7 +30,7 @@ class ProductListWidget {
     }
 
     @OnAction("categorySelected")
-    void categorySelected(@Param long categoryId, ProductListData productListData) {
+    void categorySelected(@Param long categoryId, @Model ProductListData productListData) {
         productListData.setCategoryId(categoryId);
         productListData.setProducts(productService.getByCategory(categoryId));
     }
