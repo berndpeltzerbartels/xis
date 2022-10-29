@@ -13,21 +13,20 @@ class XISClient {
         }
     }
 
-    callRemoteInit(signatures, component) {
+    callGetModelRemote(component) {
         this.callRemote(signatures, component);
     }
 
-    callRemote(signatures, component, issue){
+    callRemote(component, issue){
         var message = {
-            signatures: signatures,
-            state: component.state,
+            model: component.state,
             clientId: this.clientId,
             token: this.token,
             issue: issue,
             javaClassId: component.javaClassId,
             componentType: component.type
         };
-        this.restClient.post('/xis/connector', message, response => component.updateState(response.model));
+        this.restClient.post('/xis/connector', message, response => component.processData(response.model));
     }
 
     /**

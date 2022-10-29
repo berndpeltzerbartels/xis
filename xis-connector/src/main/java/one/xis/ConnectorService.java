@@ -1,14 +1,17 @@
 package one.xis;
 
 import lombok.RequiredArgsConstructor;
+import one.xis.common.RequestIssue;
 import one.xis.context.XISComponent;
 import one.xis.page.PageService;
+import one.xis.widget.WidgetService;
 
 @XISComponent
 @RequiredArgsConstructor
 public class ConnectorService {
 
     private final PageService pageService;
+    private final WidgetService widgetService;
 
     public ConnectorResponse handleMessage(ConnectorRequest request) {
         switch (request.getComponentType()) {
@@ -22,11 +25,24 @@ public class ConnectorService {
     }
 
     private ConnectorResponse handlePageMessage(ConnectorRequest request) {
-        var model = pageService.invokeInit(request);
-        return new ConnectorResponse(model);
+        switch (request.getIssue()) {
+            case MODEL:
+                return new ConnectorResponse(pageService.invokeGetModel(request), RequestIssue.MODEL);
+            case ACTION:
+                return new ConnectorResponse(pageService.invokeAction(request), RequestIssue.ACTION);
+            default:
+                throw new IllegalStateException();
+        }
     }
 
     private ConnectorResponse handleWidgetMessage(ConnectorRequest request) {
-        return null;
+        switch (request.getIssue()) {
+            case MODEL:
+                return new ConnectorResponse(widgetService.invokeGetModel(request), RequestIssue.MODEL);
+            case ACTION:
+                return new ConnectorResponse(widgetService.invokeAction(request), RequestIssue.ACTION);
+            default:
+                throw new IllegalStateException();
+        }
     }
 }

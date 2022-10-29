@@ -11,12 +11,22 @@ import java.util.function.Function;
 @Builder
 public class ControllerWrapper {
     private final Object contoller;
-    private final String modelMethodSignature;
     private final Map<String, Method> methodsByActions;
     private final Map<String, Function<RequestContext, Object[]>> argumentMappers;
 
-    public Object invokeInit(RequestContext context) {
-        return invoke(modelMethodSignature, context);
+    public Object invokeGetModel(RequestContext context) {
+        return invoke("GetModel", context);
+    }
+
+    public Class<?> invokeAction(RequestContext context) {
+        Object actionResult = invoke(context.getAction(), context);
+        if (actionResult == null) {
+            return null;
+        }
+        if (actionResult instanceof Class) {
+            return (Class<?>) actionResult;
+        }
+        throw new IllegalStateException();
     }
 
     public Object invoke(String action, RequestContext context) {

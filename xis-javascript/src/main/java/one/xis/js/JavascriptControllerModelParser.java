@@ -16,7 +16,7 @@ public class JavascriptControllerModelParser {
     }
 
     private void overrideSendInit(ControllerModel controllerModel, JSClass component) {
-        var sendInit = component.overrideAbstractMethod("sendInit");
+        var sendInit = component.overrideAbstractMethod("loadModel");
         var initMethodSignatures = new JSVar("signatures");
         sendInit.addStatement(new JSVarAssignment(initMethodSignatures, new JSArray(getInitMethodSignatures(controllerModel))));
         var callRemoteInitArgs = new JSVar[]{initMethodSignatures, new JSVar("this")};

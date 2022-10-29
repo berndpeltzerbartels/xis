@@ -15,17 +15,22 @@ public class PageService {
     private final PageControllers pageControllers;
     private final PageMetaDataFactory pageMetaDataFactory;
 
-    // TODO remove all "public" ?
     public void addPageController(Object controller) {
         var metaData = pageMetaDataFactory.createMetaData(controller);
         pageJavascripts.createScript(metaData);
         pageControllers.addControllerWrapper(controller, metaData);
     }
 
-    public Object invokeInit(RequestContext context) {
+    public Object invokeGetModel(RequestContext context) {
         var wrapper = pageControllers.getPageControllerWrapper(context.getJavaClassId());
-        return wrapper.invokeInit(context);
+        return wrapper.invokeGetModel(context);
     }
+
+    public Class<?> invokeAction(RequestContext context) {
+        var wrapper = pageControllers.getPageControllerWrapper(context.getJavaClassId());
+        return wrapper.invokeAction(context);
+    }
+
 
     public PageJavascript getPage(String id) {
         return pageJavascripts.getById(id);

@@ -21,9 +21,14 @@ public class WidgetService {
         widgetControllers.addWidgetController(controller, widgetMetaData);
     }
 
-    public Object invokeInit(RequestContext context) {
+    public Object invokeGetModel(RequestContext context) {
         var wrapper = widgetControllers.getWidgetControllerWrapper(context.getJavaClassId());
-        return wrapper.invokeInit(context);
+        return wrapper.invokeGetModel(context);
+    }
+
+    public Class<?> invokeAction(RequestContext context) {
+        var wrapper = widgetControllers.getWidgetControllerWrapper(context.getJavaClassId());
+        return wrapper.invokeAction(context);
     }
 
     public WidgetJavascript getWidgetJavascript(String id) {

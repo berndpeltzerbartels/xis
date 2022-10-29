@@ -9,6 +9,9 @@ class XISTemplateObject {
         this.parent = parent;
     }
 
+    refresh() {
+        throw new Error('abstract method');
+    }
 
     /**
      * @returns {XISValueHolder}

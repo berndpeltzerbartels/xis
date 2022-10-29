@@ -14,7 +14,7 @@ class ConnectorController {
     private ConnectorService connectorService;
 
     @PostMapping("/xis/connector")
-    ConnectorResponse handleWidgetMessage(ConnectorRequest request) {
+    ConnectorResponse handleMessage(ConnectorRequest request) {
         return connectorService.handleMessage(request);
     }
 }
