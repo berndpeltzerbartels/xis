@@ -18,6 +18,6 @@ public class ControllerWrapperFactory {
     private Optional<Method> getModelFactoryMethod(Object controller, ControllerModel controllerModel) {
         return controllerModel.getAnnotatedMethods(Model.class)
                 .map(controllerMethod -> controllerMethod.getMethod(controller))
-                .collect(CollectorUtils.toOnlyOptional(list -> new IllegalStateException(controller + "contains more than one methods annotated with @Model")));
+                .collect(CollectorUtils.toOnlyOptional(list -> new IllegalStateException(controller + " contains more than one methods annotated with @Model")));
     }
 }

@@ -9,4 +9,5 @@ class MethodParameters {
     void addParameter(MethodParameter parameter) {
         parameters.add(parameter);
     }
+
 }

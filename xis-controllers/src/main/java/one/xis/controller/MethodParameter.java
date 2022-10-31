@@ -1,6 +1,12 @@
 package one.xis.controller;
 
 
-public interface MethodParameter {
-    
+import one.xis.dto.Request;
+
+public interface MethodParameter<T> {
+
+    T valueFromRequest(Request request);
+
+    T getValue();
+
 }

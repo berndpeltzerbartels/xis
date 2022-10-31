@@ -3,7 +3,7 @@ package one.xis.controller;
 
 import lombok.Builder;
 import lombok.Getter;
-import one.xis.common.RequestContext;
+import one.xis.dto.RequestContext;
 import one.xis.reflect.MethodSignature;
 
 import java.lang.annotation.Annotation;

@@ -1,0 +1,10 @@
+package one.xis.dto;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class ActionRequest extends Request {
+    private String action;
+}

@@ -1,8 +1,10 @@
 package one.xis.page;
 
 import lombok.RequiredArgsConstructor;
-import one.xis.common.RequestContext;
+import one.xis.InvocationResult;
 import one.xis.context.XISComponent;
+import one.xis.dto.ActionRequest;
+import one.xis.dto.ModelRequest;
 
 import java.util.Collection;
 import java.util.Map;
@@ -21,14 +23,14 @@ public class PageService {
         pageControllers.addControllerWrapper(controller, metaData);
     }
 
-    public Object invokeGetModel(RequestContext context) {
-        var wrapper = pageControllers.getPageControllerWrapper(context.getJavaClassId());
-        return wrapper.invokeGetModel(context);
+    public InvocationResult invokeGetModel(ModelRequest request) {
+        var wrapper = pageControllers.getPageControllerWrapper(request.getControllerId());
+        return wrapper.invokeGetModel(request);
     }
 
-    public Class<?> invokeAction(RequestContext context) {
-        var wrapper = pageControllers.getPageControllerWrapper(context.getJavaClassId());
-        return wrapper.invokeAction(context);
+    public Class<?> invokeAction(ActionRequest request) {
+        var wrapper = pageControllers.getPageControllerWrapper(request.getControllerId());
+        return wrapper.invokeAction(request);
     }
 
 

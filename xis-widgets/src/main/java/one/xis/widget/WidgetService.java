@@ -1,8 +1,8 @@
 package one.xis.widget;
 
 import lombok.RequiredArgsConstructor;
-import one.xis.common.RequestContext;
 import one.xis.context.XISComponent;
+import one.xis.dto.RequestContext;
 
 import java.util.Collection;
 import java.util.Map;

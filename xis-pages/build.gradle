@@ -18,7 +18,8 @@ dependencies {
     implementation project(':xis-controllers')
     implementation project(':xis-util')
     implementation project(':xis-remote-template')
-    implementation project(':xis-common')
+    implementation project(':xis-dto')
+    implementation project(':xis-entities')
 
 
     compileOnly project(':xis-remote-core')
