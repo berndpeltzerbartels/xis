@@ -2,7 +2,9 @@ package one.xis.controller;
 
 import lombok.Builder;
 import lombok.Data;
+import one.xis.GetModelResult;
 import one.xis.InvocationResult;
+import one.xis.Model;
 import one.xis.dto.ModelRequest;
 import one.xis.dto.Request;
 import one.xis.dto.RequestContext;
@@ -11,18 +13,32 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
 @Builder
 public class ControllerWrapper {
     private final Object contoller;
-    private final Map<String, Method> methodsByActions;
-    private final Map<String, Function<RequestContext, Object[]>> argumentMappers;
+    private final Map<String, ControllerMethodWrapper> methodsByActions;
+    private final List<ControllerMethodWrapper> modelMethodWrappers;
 
 
-    public Object invokeGetModel(RequestContext context) {
-        return invoke("GetModel", context);
+    public GetModelResult invokeGetModel(Request request) {
+        var result = new GetModelResult();
+        modelMethodWrappers.forEach(controllerMethodWrapper -> {
+            InvocationResult methodResult = controllerMethodWrapper.invoke(request);
+            result.getModel().putAll(methodResult.getModel());
+            result.getClientState().putAll(methodResult.getClientState());
+            if (methodResult.getReturnValue() != null) {
+                result.getModel().put(getKey(controllerMethodWrapper.getMethod(), controllerMethodWrapper.getMethod().getAnnotation(Model.class)), methodResult.getReturnValue());
+            }
+        }
+        return result;
+    }
+
+    private String getKey(Method method, Model annotation) {
+        return annotation.value().isEmpty() ? method.getReturnType().getSimpleName() : annotation.value();
     }
 
     public Class<?> invokeAction(RequestContext context) {

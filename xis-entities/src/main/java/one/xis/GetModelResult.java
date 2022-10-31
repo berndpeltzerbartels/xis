@@ -6,10 +6,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Data
-public class InvocationResult {
+public class GetModelResult {
     private Map<String, Object> model = new HashMap<>();
     private Map<String, Object> clientState = new HashMap<>();
-    private Object returnValue;
 
     public void addModel(String name, Object value) {
         model.put(name, value);
