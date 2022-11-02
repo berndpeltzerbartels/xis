@@ -23,6 +23,7 @@ dependencies {
     implementation project(':xis-widgets')
     implementation project(':xis-root-page')
     implementation project(':xis-ajax')
+    implementation project(':xis-dto')
 
     implementation project(':xis-resources')
     implementation project(':xis-javascript')

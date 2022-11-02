@@ -3,8 +3,6 @@ package one.xis.widget;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
-import one.xis.controller.ControllerWrapper;
-import one.xis.controller.ControllerWrapperFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,15 +10,14 @@ import java.util.Map;
 @XISComponent
 @RequiredArgsConstructor
 class WidgetControllers {
+    
+    private final Map<String, Object> controllerWrappers = new HashMap<>();
 
-    private final ControllerWrapperFactory wrapperFactory;
-    private final Map<String, ControllerWrapper> controllerWrappers = new HashMap<>();
-
-    void addWidgetController(Object pageController, WidgetMetaData metaData) {
-        controllerWrappers.put(metaData.getId(), wrapperFactory.createControllerWrapper(pageController, metaData.getControllerModel()));
+    void addController(Object widgetController, WidgetMetaData metaData) {
+        controllerWrappers.put(metaData.getId(), widgetController);
     }
 
-    ControllerWrapper getWidgetControllerWrapper(@NonNull String id) {
+    Object getWidgetController(@NonNull String id) {
         return controllerWrappers.get(id);
     }
 }

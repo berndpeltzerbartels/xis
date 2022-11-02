@@ -5,9 +5,11 @@ import io.micronaut.http.annotation.Post;
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 import one.ajax.AjaxService;
-import one.ajax.ConnectorRequest;
-import one.ajax.ConnectorResponse;
 import one.micronaut.micronaut.MicronautContextAdapter;
+import one.xis.dto.ActionRequest;
+import one.xis.dto.ActionResponse;
+import one.xis.dto.InitialResponse;
+import one.xis.dto.ModelRequest;
 
 @Controller
 class AjaxController {
@@ -21,9 +23,25 @@ class AjaxController {
         ajaxService = adapter.getAjaxService();
     }
 
-    @Post(consumes = "application/json", produces = "application/json", uri = "/xis/connector")
-    ConnectorResponse handleMessage(ConnectorRequest request) {
-        return ajaxService.handleMessage(request);
+
+    @Post(consumes = "application/json", produces = "application/json", uri = "/xis/page/model")
+    InitialResponse handlePageModelRequest(ModelRequest request) {
+        return ajaxService.handlePageInitialRequest(request);
+    }
+
+    @Post(consumes = "application/json", produces = "application/json", uri = "/xis/page/action")
+    ActionResponse handlePageActionRequest(ActionRequest request) {
+        return ajaxService.handlePageActionRequest(request);
+    }
+
+    @Post(consumes = "application/json", produces = "application/json", uri = "/xis/widget/model")
+    InitialResponse handleWidgetModelRequest(ModelRequest request) {
+        return ajaxService.handlePageInitialRequest(request);
+    }
+
+    @Post(consumes = "application/json", produces = "application/json", uri = "/xis/page/action")
+    ActionResponse handleWidgetActionRequest(ActionRequest request) {
+        return ajaxService.handlePageActionRequest(request);
     }
 
 }

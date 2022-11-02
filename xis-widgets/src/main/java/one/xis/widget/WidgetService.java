@@ -2,9 +2,14 @@ package one.xis.widget;
 
 import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
-import one.xis.dto.RequestContext;
+import one.xis.controller.ControllerInvocationService;
+import one.xis.dto.ActionRequest;
+import one.xis.dto.ActionResponse;
+import one.xis.dto.InitialResponse;
+import one.xis.dto.ModelRequest;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 @XISComponent
@@ -14,21 +19,24 @@ public class WidgetService {
     private final WidgetJavascripts widgetJavascripts;
     private final WidgetControllers widgetControllers;
     private final WidgetMetaDataFactory widgetMetaDataFactory;
+    private final ControllerInvocationService invocationService;
+    private final Map<Object, WidgetMetaData> widgetMetaDataMap = new HashMap<>();
 
     public void addWidgetConroller(Object controller) {
-        WidgetMetaData widgetMetaData = widgetMetaDataFactory.createMetaData(controller);
+        var widgetMetaData = widgetMetaDataMap.computeIfAbsent(controller, widgetMetaDataFactory::createMetaData);
         widgetJavascripts.add(widgetMetaData);
-        widgetControllers.addWidgetController(controller, widgetMetaData);
+        widgetControllers.addController(controller, widgetMetaData);
     }
 
-    public Object invokeGetModel(RequestContext context) {
-        var wrapper = widgetControllers.getWidgetControllerWrapper(context.getJavaClassId());
-        return wrapper.invokeGetModel(context);
+    public InitialResponse invokeInitial(ModelRequest request) {
+        var controller = widgetControllers.getWidgetController(request.getControllerId());
+        return invocationService.invokeInitial(controller, request);
     }
 
-    public Class<?> invokeAction(RequestContext context) {
-        var wrapper = widgetControllers.getWidgetControllerWrapper(context.getJavaClassId());
-        return wrapper.invokeAction(context);
+    public ActionResponse invokeAction(ActionRequest request) {
+        var controller = widgetControllers.getWidgetController(request.getControllerId());
+        var javascriptClassname = getJavascriptClassname(controller);
+        return invocationService.invokeForAction(controller, request, request.getAction(), javascriptClassname);
     }
 
     public WidgetJavascript getWidgetJavascript(String id) {
@@ -41,5 +49,10 @@ public class WidgetService {
 
     public Map<String, WidgetJavascript> getAllWidgetJavascripts() {
         return widgetJavascripts.getWidgetJavascripts();
+    }
+
+
+    private String getJavascriptClassname(Object controller) {
+        return widgetMetaDataMap.get(controller).getJavascriptClassname();
     }
 }

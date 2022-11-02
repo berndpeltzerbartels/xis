@@ -2,7 +2,6 @@ package one.xis.widget;
 
 import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
-import one.xis.controller.ControllerModel;
 import one.xis.js.*;
 import one.xis.template.TemplateParser;
 import one.xis.template.WidgetTemplateModel;
@@ -27,7 +26,7 @@ class WidgetJavascriptCompiler extends JavascriptComponentCompiler<WidgetJavascr
     }
 
     @Override
-    protected void addRemoteMethods(JSClass component, ControllerModel controllerModel) {
-        controllerModelParser.parseControllerModel(controllerModel, component);
+    protected void addRemoteMethods(JSClass component, Class<?> controllerClass) {
+        controllerModelParser.parseControllerModel(controllerClass, component);
     }
 }

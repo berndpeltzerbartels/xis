@@ -3,8 +3,6 @@ package one.xis.page;
 import lombok.RequiredArgsConstructor;
 import one.xis.Page;
 import one.xis.context.XISComponent;
-import one.xis.controller.ControllerModel;
-import one.xis.controller.ControllerModelFactory;
 import one.xis.path.PathUtils;
 import one.xis.resource.ResourceFiles;
 
@@ -13,7 +11,6 @@ import one.xis.resource.ResourceFiles;
 class PageMetaDataFactory {
 
     private final ResourceFiles resourceFiles;
-    private final ControllerModelFactory controllerModelFactory;
     private static int nameIndex;
 
     PageMetaData createMetaData(Object controller) {
@@ -24,13 +21,10 @@ class PageMetaDataFactory {
                 .javascriptClassname(uniqueJavascriptClassName())
                 .path(path)
                 .welcomePage(isWelcomePage(controller))
-                .controllerModel(controllerModel(controllerClass(controller)))
+                .controllerClass(controllerClass(controller))
                 .build();
     }
 
-    private ControllerModel controllerModel(Class<?> controllerClass) {
-        return controllerModelFactory.controllerModel(controllerClass);
-    }
 
     private Class<?> controllerClass(Object controller) {
         return controller.getClass();

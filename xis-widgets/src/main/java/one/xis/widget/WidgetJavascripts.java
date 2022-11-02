@@ -20,7 +20,7 @@ class WidgetJavascripts {
     private WidgetJavascript createWidgetJavascript(WidgetMetaData widgetMetaData) {
         var widgetJavascript = WidgetJavascript.builder()
                 .javascriptClass(widgetMetaData.getJavascriptClassname())
-                .controllerModel(widgetMetaData.getControllerModel())
+                .controllerClass(widgetMetaData.getControllerClass())
                 .build();
         widgetJavascriptCompiler.compile(widgetJavascript);
         return widgetJavascript;

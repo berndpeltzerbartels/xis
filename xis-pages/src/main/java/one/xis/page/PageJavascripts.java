@@ -52,7 +52,7 @@ class PageJavascripts {
     private PageJavascript createPageJavascript(PageMetaData pageMetaData) {
         var pageJavascipt = PageJavascript.builder()
                 .htmlResourceFile(pageMetaData.getHtmlTemplate())
-                .controllerModel(pageMetaData.getControllerModel())
+                .controllerClass(pageMetaData.getControllerClass())
                 .path(pageMetaData.getPath())
                 .build();
         pageJavascriptCompiler.compile(pageJavascipt);

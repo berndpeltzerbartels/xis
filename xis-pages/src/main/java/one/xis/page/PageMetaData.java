@@ -2,7 +2,6 @@ package one.xis.page;
 
 import lombok.Builder;
 import lombok.Getter;
-import one.xis.controller.ControllerModel;
 import one.xis.resource.ResourceFile;
 
 @Builder
@@ -13,9 +12,9 @@ class PageMetaData {
     private final boolean welcomePage;
     private final ResourceFile htmlTemplate;
     private final String javascriptClassname;
-    private final ControllerModel controllerModel;
+    private final Class<?> controllerClass;
 
     public String getControllerClassName() {
-        return controllerModel.getControllerClassName();
+        return controllerClass.getName();
     }
 }

@@ -1,27 +1,30 @@
 package one.xis.controller;
 
 import one.xis.context.XISComponent;
+import one.xis.dto.ActionResponse;
+import one.xis.dto.InitialResponse;
 import one.xis.dto.Request;
-import one.xis.dto.Response;
 
 @XISComponent
 public class ControllerInvocationService {
 
-    public Response invokeInitial(Object controller, Request request) {
+    public InitialResponse invokeInitial(Object controller, Request request) {
         var invoker = new ControllerInitializeInvoker(controller, request);
         invoker.invokeInitial();
-        var response = new Response();
+        var response = new InitialResponse();
         response.setClientState(invoker.getClientState());
         response.setComponentModel(invoker.getComponentModel());
         return response;
     }
 
-    public Response invokeForAction(Object controller, Request request, String action) {
+    public ActionResponse invokeForAction(Object controller, Request request, String action, String javascriptClassName) {
         var invoker = new ControllerActionInvoker(controller, request);
-        invoker.invokeForAction(action);
-        var response = new Response();
+        var nextControllerClass = invoker.invokeForAction(action);
+        var response = new ActionResponse();
         response.setClientState(invoker.getClientState());
         response.setComponentModel(invoker.getComponentModel());
+        response.setNextController(nextControllerClass);
+        response.setNextComponent(javascriptClassName);
         return response;
     }
 }

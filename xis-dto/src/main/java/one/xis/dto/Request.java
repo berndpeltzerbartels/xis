@@ -13,6 +13,6 @@ public class Request {
     private String controllerId;
     private String componentId;
     private Date timestamp;
-    private Object componentModel;
+    private Map<String, Object> componentModel;
     private Map<String, Object> clientState;
 }

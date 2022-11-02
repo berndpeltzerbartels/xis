@@ -1,7 +1,6 @@
 package one.xis.controller;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import one.xis.*;
 import one.xis.dto.Request;
 import one.xis.utils.lang.ClassUtils;
@@ -12,7 +11,6 @@ import java.lang.reflect.Parameter;
 import java.util.HashMap;
 import java.util.Map;
 
-@RequiredArgsConstructor
 abstract class ControllerMethodInvoker {
 
     protected final Request request;
@@ -24,6 +22,12 @@ abstract class ControllerMethodInvoker {
 
     @Getter
     protected final Map<String, Object> componentModel = new HashMap<>();
+
+    protected ControllerMethodInvoker(Request request, Object controller) {
+        this.request = request;
+        this.controller = controller;
+        this.clientState.putAll(request.getClientState());
+    }
 
     // TODO COnvert primitives String etc
     protected Object paramValue(Parameter parameter) {
