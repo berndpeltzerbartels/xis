@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 
-@Target({ElementType.PARAMETER, ElementType.TYPE, ElementType.METHOD})
+@Target({ElementType.PARAMETER, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface State {
     /**

@@ -8,5 +8,5 @@ import java.util.Map;
 public class Response {
     private String componentId;
     private Object componentModel;// TODO only edited objects
-    private Map<String, Object> updatedClientState; // TODO only edited objects
+    private Map<String, Object> clientState; // TODO only edited objects
 }

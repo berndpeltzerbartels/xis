@@ -2,7 +2,6 @@ package one.xis.js;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import one.xis.controller.ControllerModel;
 import one.xis.resource.ReloadableResourceFile;
 import one.xis.template.TemplateModel;
 import one.xis.template.TemplateSynthaxException;
@@ -44,7 +43,7 @@ public abstract class JavascriptComponentCompiler<C extends JavascriptComponent,
         var script = new JSScript();
         var javacriptComponentClass = parseTemplateModelIntoScriptModel(templateModel, component.getJavascriptClass(), script);
         addJavaClassIdField(javacriptComponentClass, controllerClass);
-        addRemoteMethods(javacriptComponentClass, component.getControllerModel());
+        addRemoteMethods(javacriptComponentClass, component.getControllerClass());
         return javaScriptModelAsCode(script);
     }
 
@@ -69,13 +68,13 @@ public abstract class JavascriptComponentCompiler<C extends JavascriptComponent,
 
     protected abstract JSClass parseTemplateModelIntoScriptModel(M templateModel, String javascriptClassName, JSScript script);
 
-    protected abstract void addRemoteMethods(JSClass component, ControllerModel controllerModel);
+    protected abstract void addRemoteMethods(JSClass component, Class<?> controllerClass);
 
 
     private void addJavaClassIdField(JSClass component, String controllerClass) {
         component.addField("javaClassId", new JSString(controllerClass));
     }
-    
+
     private String javaScriptModelAsCode(@NonNull JSScript script) {
         var builder = new StringBuilder();
         var jsWriter = new JSWriter(builder);

@@ -1,6 +1,5 @@
 package one.xis.js;
 
-import one.xis.controller.ControllerModel;
 import one.xis.resource.ResourceFile;
 
 public interface JavascriptComponent {
@@ -15,9 +14,9 @@ public interface JavascriptComponent {
 
     String getJavascriptClass();
 
-    ControllerModel getControllerModel();
+    Class<?> getControllerClass();
 
     default String getControllerClassName() {
-        return getControllerModel().getControllerClassName();
+        return getControllerClass().getName();
     }
 }
