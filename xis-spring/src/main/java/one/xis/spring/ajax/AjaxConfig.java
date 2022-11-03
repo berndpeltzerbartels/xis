@@ -1,7 +1,7 @@
-package one.spring.js;
+package one.xis.spring.ajax;
 
+import one.ajax.AjaxService;
 import one.xis.context.AppContext;
-import one.xis.root.RootPageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,21 +9,19 @@ import org.springframework.context.annotation.Configuration;
 import javax.annotation.PostConstruct;
 
 @Configuration
-class JsConfig {
+class AjaxConfig {
 
     @Autowired
     private AppContext appContext;
-    private RootPageService rootPageService;
+    private AjaxService ajaxService;
 
     @PostConstruct
     void init() {
-        rootPageService = appContext.getSingleton(RootPageService.class);
+        ajaxService = appContext.getSingleton(AjaxService.class);
     }
 
     @Bean
-    RootPageService apiJavascriptService() {
-        return rootPageService;
+    AjaxService connectorService() {
+        return ajaxService;
     }
-
 }
-

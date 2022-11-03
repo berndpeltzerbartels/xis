@@ -1,24 +1,24 @@
-package one.spring.js;
+package one.xis.spring.page;
 
-import one.spring.servlet.ResourceServlet;
+import one.xis.page.PageService;
 import one.xis.resource.ResourceFile;
-import one.xis.root.RootPageService;
+import one.xis.spring.servlet.ResourceServlet;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 
-@WebServlet("/xis/api/*")
-class ApiJsServlet extends ResourceServlet {
+@WebServlet(urlPatterns = "/one/xis/page/*")
+class PageServlet extends ResourceServlet {
 
     @Autowired
-    private RootPageService rootPageService;
+    private PageService pageService;
 
     @Override
     protected ResourceFile getResource(HttpServletRequest request) {
         String uri = request.getRequestURI();
-        String file = uri.substring(uri.lastIndexOf('/') + 1);
-        return rootPageService.getJavascriptResource(file);
+        String key = uri.substring(uri.lastIndexOf('/') + 1);
+        return pageService.getPage(key);
     }
 
     @Override

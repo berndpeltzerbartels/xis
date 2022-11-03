@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import one.xis.Model;
 import one.xis.State;
-import one.xis.dto.Request;
+import one.xis.dto.InitialRequest;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -19,7 +19,7 @@ class ControllerInitializeInvoker extends ControllerMethodInvoker {
 
     private final Set<Method> initialMethodsAvailable;
 
-    ControllerInitializeInvoker(@NonNull Object controller, @NonNull Request request) {
+    ControllerInitializeInvoker(@NonNull Object controller, @NonNull InitialRequest request) {
         super(request, controller);
         this.initialMethodsAvailable = getInitializerMethods(controller.getClass()).collect(Collectors.toSet());
     }

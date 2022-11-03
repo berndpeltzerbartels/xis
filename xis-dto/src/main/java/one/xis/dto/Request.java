@@ -6,7 +6,7 @@ import java.util.Date;
 import java.util.Map;
 
 @Data
-public class Request {
+public abstract class Request {
     private String clientId;
     private String token;
     private String controllerId;

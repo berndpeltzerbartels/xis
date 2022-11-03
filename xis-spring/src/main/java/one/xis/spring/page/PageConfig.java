@@ -1,8 +1,8 @@
-package one.spring.widget;
+package one.xis.spring.page;
 
-import one.xis.Widget;
+import one.xis.Page;
 import one.xis.context.AppContext;
-import one.xis.widget.WidgetService;
+import one.xis.page.PageService;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -12,26 +12,26 @@ import org.springframework.context.annotation.Configuration;
 import javax.annotation.PostConstruct;
 
 @Configuration
-class WidgetConfig implements BeanPostProcessor {
+class PageConfig implements BeanPostProcessor {
 
     @Autowired
     private AppContext appContext;
-    private WidgetService widgetService;
+    private PageService pageService;
 
     @PostConstruct
     void init() {
-        widgetService = appContext.getSingleton(WidgetService.class);
+        pageService = appContext.getSingleton(PageService.class);
     }
 
     @Bean
-    WidgetService widgetService() {
-        return widgetService;
+    PageService pageService() {
+        return pageService;
     }
 
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-        if (bean.getClass().isAnnotationPresent(Widget.class)) {
-            widgetService.addWidgetConroller(bean);
+        if (bean.getClass().isAnnotationPresent(Page.class)) {
+            pageService.addPageController(bean);
         }
         return bean;
     }

@@ -8,8 +8,8 @@ import one.ajax.AjaxService;
 import one.micronaut.micronaut.MicronautContextAdapter;
 import one.xis.dto.ActionRequest;
 import one.xis.dto.ActionResponse;
+import one.xis.dto.InitialRequest;
 import one.xis.dto.InitialResponse;
-import one.xis.dto.ModelRequest;
 
 @Controller
 class AjaxController {
@@ -25,7 +25,7 @@ class AjaxController {
 
 
     @Post(consumes = "application/json", produces = "application/json", uri = "/xis/page/model")
-    InitialResponse handlePageModelRequest(ModelRequest request) {
+    InitialResponse handlePageModelRequest(InitialRequest request) {
         return ajaxService.handlePageInitialRequest(request);
     }
 
@@ -35,7 +35,7 @@ class AjaxController {
     }
 
     @Post(consumes = "application/json", produces = "application/json", uri = "/xis/widget/model")
-    InitialResponse handleWidgetModelRequest(ModelRequest request) {
+    InitialResponse handleWidgetModelRequest(InitialRequest request) {
         return ajaxService.handleWidgetInitialRequest(request);
     }
 

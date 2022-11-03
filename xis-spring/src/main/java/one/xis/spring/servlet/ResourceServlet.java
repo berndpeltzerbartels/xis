@@ -1,4 +1,4 @@
-package one.spring.servlet;
+package one.xis.spring.servlet;
 
 import one.xis.resource.ResourceFile;
 

@@ -1,4 +1,4 @@
-package one.spring.spring;
+package one.xis.spring;
 
 import one.xis.context.AppContext;
 import org.springframework.boot.web.servlet.ServletComponentScan;

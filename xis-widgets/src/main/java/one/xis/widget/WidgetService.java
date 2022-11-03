@@ -5,8 +5,8 @@ import one.xis.context.XISComponent;
 import one.xis.controller.ControllerInvocationService;
 import one.xis.dto.ActionRequest;
 import one.xis.dto.ActionResponse;
+import one.xis.dto.InitialRequest;
 import one.xis.dto.InitialResponse;
-import one.xis.dto.ModelRequest;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -28,7 +28,7 @@ public class WidgetService {
         widgetControllers.addController(controller, widgetMetaData);
     }
 
-    public InitialResponse invokeInitial(ModelRequest request) {
+    public InitialResponse invokeInitial(InitialRequest request) {
         var controller = widgetControllers.getWidgetController(request.getControllerId());
         return invocationService.invokeInitial(controller, request);
     }
