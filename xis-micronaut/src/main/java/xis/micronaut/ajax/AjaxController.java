@@ -1,15 +1,15 @@
-package one.micronaut.ajax;
+package xis.micronaut.ajax;
 
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Post;
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
-import one.ajax.AjaxService;
-import one.micronaut.micronaut.MicronautContextAdapter;
 import one.xis.dto.ActionRequest;
 import one.xis.dto.ActionResponse;
 import one.xis.dto.InitialRequest;
 import one.xis.dto.InitialResponse;
+import xis.ajax.AjaxService;
+import xis.micronaut.MicronautContextAdapter;
 
 @Controller
 class AjaxController {

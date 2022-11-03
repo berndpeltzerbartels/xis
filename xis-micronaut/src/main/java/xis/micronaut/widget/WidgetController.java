@@ -1,12 +1,12 @@
-package one.micronaut.widget;
+package xis.micronaut.widget;
 
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
 import io.micronaut.http.annotation.PathVariable;
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
-import one.micronaut.micronaut.MicronautContextAdapter;
 import one.xis.widget.WidgetService;
+import xis.micronaut.MicronautContextAdapter;
 
 @Controller
 class WidgetController {

@@ -1,11 +1,11 @@
-package one.micronaut.js;
+package xis.micronaut.js;
 
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
-import one.micronaut.micronaut.MicronautContextAdapter;
 import one.xis.root.RootPageService;
+import xis.micronaut.MicronautContextAdapter;
 
 @Controller
 class InitializerController {

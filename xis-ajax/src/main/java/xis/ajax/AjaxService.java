@@ -1,4 +1,4 @@
-package one.ajax;
+package xis.ajax;
 
 import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;

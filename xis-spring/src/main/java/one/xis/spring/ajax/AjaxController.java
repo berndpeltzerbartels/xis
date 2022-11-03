@@ -1,6 +1,5 @@
 package one.xis.spring.ajax;
 
-import one.ajax.AjaxService;
 import one.xis.dto.ActionRequest;
 import one.xis.dto.ActionResponse;
 import one.xis.dto.InitialRequest;
@@ -8,6 +7,7 @@ import one.xis.dto.InitialResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
+import xis.ajax.AjaxService;
 
 @Controller
 class AjaxController {
