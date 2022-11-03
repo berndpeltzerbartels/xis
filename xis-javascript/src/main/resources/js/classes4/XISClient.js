@@ -55,7 +55,7 @@ class XISClient {
      * @param {String} url 
      */
      sendModelRequest(component, url) {
-        var request = this.createBasicRequest();
+        var request = this.createBasicRequest(component);
         request.clientState = this.filteredClientState(component.initClientKeys);
         this.restClient.post(url, request, response => {
             component.processData(response.componentState);
@@ -70,7 +70,7 @@ class XISClient {
      * @param {String} url 
      */
     sendActionRequest(component, action, url) {
-        var request = this.createBasicRequest();
+        var request = this.createBasicRequest(component);
         request.clientState = this.filteredClientState(component.actionClientKeys[action]);
         request.componentState = this.filteredComponentState(component.actionCompKeys[action]);
         this.restClient.post(url, request,response => {

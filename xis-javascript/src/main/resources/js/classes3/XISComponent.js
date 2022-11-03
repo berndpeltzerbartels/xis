@@ -5,6 +5,7 @@ class XISComponent extends XISValueHolder {
      * @param {XISTemplateObject} parent
      */
     constructor(parent) {
+        super(parent);
         this.parent = parent;
         this.state = {};
     }
