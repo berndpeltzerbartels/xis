@@ -18,7 +18,7 @@ class XISClient {
      * @param {XISPage} page 
      */
     sendPageModelRequest(page) {
-        this.sendModelRequest(page, '/xis/page/model');
+        this.sendModelRequest(page, '/xis/ajax/page/model');
     }
 
     /**
@@ -26,7 +26,7 @@ class XISClient {
      * @param {XISWidget} widget 
      */
     sendWidgetRequest(widget) {
-        this.sendModelRequest(widget, '/xis/page/model');
+        this.sendModelRequest(widget, '/xis/ajax/page/model');
     }
 
 
@@ -36,7 +36,7 @@ class XISClient {
      * @param {*} action 
      */
     sendPageActionRequest(page, action) {
-        this.sendActionRequest(page, action, '/xis/page/action');
+        this.sendActionRequest(page, action, '/xis/ajax/page/action');
     }
 
     /**
@@ -45,7 +45,7 @@ class XISClient {
      * @param {String} action 
      */
     sendWidgetActionRequest(widget, action) {
-        this.sendActionRequest(widget, action, '/xis/widget/action');
+        this.sendActionRequest(widget, action, '/xis/ajax/widget/action');
     }
 
 
@@ -73,7 +73,7 @@ class XISClient {
         var request = this.createBasicRequest();
         request.clientState = this.filteredClientState(component.actionClientKeys[action]);
         request.componentState = this.filteredComponentState(component.actionCompKeys[action]);
-        this.restClient.post(url, request, response => {
+        this.restClient.post(url, request,response => {
             component.processData(response.componentState);
             clientState.processData(response.clientState);
             if (response.nextComponent) {

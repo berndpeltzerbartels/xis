@@ -1,4 +1,4 @@
-package xis.micronaut;
+package one.xis.micronaut;
 
 import io.micronaut.context.BeanContext;
 import io.micronaut.inject.BeanDefinition;
@@ -9,11 +9,11 @@ import jakarta.inject.Singleton;
 import lombok.Getter;
 import one.xis.Page;
 import one.xis.Widget;
+import one.xis.ajax.AjaxService;
 import one.xis.context.AppContext;
 import one.xis.page.PageService;
 import one.xis.root.RootPageService;
 import one.xis.widget.WidgetService;
-import xis.ajax.AjaxService;
 
 @Singleton
 @Getter

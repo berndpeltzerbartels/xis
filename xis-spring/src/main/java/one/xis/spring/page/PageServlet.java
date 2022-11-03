@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 
-@WebServlet(urlPatterns = "/one/xis/page/*")
+@WebServlet(urlPatterns = "/xis/page/*")
 class PageServlet extends ResourceServlet {
 
     @Autowired

@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 
-@WebServlet("/one/xis/api/*")
+@WebServlet("/xis/api/*")
 class ApiJsServlet extends ResourceServlet {
 
     @Autowired

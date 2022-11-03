@@ -21,6 +21,8 @@ class WidgetJavascripts {
         var widgetJavascript = WidgetJavascript.builder()
                 .javascriptClass(widgetMetaData.getJavascriptClassname())
                 .controllerClass(widgetMetaData.getControllerClass())
+                .htmlResourceFile(widgetMetaData.getHtmlTemplate())
+                .javascriptClass(widgetMetaData.getJavascriptClassname())
                 .build();
         widgetJavascriptCompiler.compile(widgetJavascript);
         return widgetJavascript;

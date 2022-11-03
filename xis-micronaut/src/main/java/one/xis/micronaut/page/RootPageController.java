@@ -1,12 +1,12 @@
-package xis.micronaut.page;
+package one.xis.micronaut.page;
 
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
 import io.micronaut.http.annotation.PathVariable;
 import jakarta.inject.Inject;
+import one.xis.micronaut.MicronautContextAdapter;
 import one.xis.root.RootPageService;
-import xis.micronaut.MicronautContextAdapter;
 
 import java.util.Optional;
 

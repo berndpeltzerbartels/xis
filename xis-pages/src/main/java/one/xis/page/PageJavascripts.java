@@ -54,6 +54,7 @@ class PageJavascripts {
                 .htmlResourceFile(pageMetaData.getHtmlTemplate())
                 .controllerClass(pageMetaData.getControllerClass())
                 .path(pageMetaData.getPath())
+                .javascriptClass(pageMetaData.getJavascriptClassname())
                 .build();
         pageJavascriptCompiler.compile(pageJavascipt);
         return pageJavascipt;

@@ -1,12 +1,12 @@
-package xis.micronaut.page;
+package one.xis.micronaut.page;
 
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
 import io.micronaut.http.annotation.PathVariable;
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
+import one.xis.micronaut.MicronautContextAdapter;
 import one.xis.page.PageService;
-import xis.micronaut.MicronautContextAdapter;
 
 @Controller
 class PageController {

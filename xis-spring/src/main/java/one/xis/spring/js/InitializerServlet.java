@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-@WebServlet(urlPatterns = "/one/xis/initializer.js")
+@WebServlet(urlPatterns = "/xis/initializer.js")
 class InitializerServlet extends HttpServlet {
 
     @Autowired

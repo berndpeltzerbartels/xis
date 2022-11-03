@@ -1,12 +1,12 @@
-package xis.micronaut.js;
+package one.xis.micronaut.js;
 
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
 import io.micronaut.http.annotation.PathVariable;
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
+import one.xis.micronaut.MicronautContextAdapter;
 import one.xis.root.RootPageService;
-import xis.micronaut.MicronautContextAdapter;
 
 @Controller(produces = "text/javascript; charset=utf-8")
 class ApiJsController {

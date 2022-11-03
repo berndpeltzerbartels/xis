@@ -23,7 +23,7 @@ public abstract class JavascriptComponentCompiler<C extends JavascriptComponent,
             }
             if (javascriptComponent.getHtmlResourceFile() instanceof ReloadableResourceFile) {
                 if (isObsolete(javascriptComponent)) {
-                    compile(javascriptComponent);
+                    recompile(javascriptComponent);
                 }
             }
             return javascriptComponent;
@@ -32,10 +32,16 @@ public abstract class JavascriptComponentCompiler<C extends JavascriptComponent,
 
     public void compile(C javascriptComponent) {
         javascriptComponent.setCompiled(false);
-        reloadHtml(javascriptComponent);
         var javascript = doCompile(javascriptComponent);
         javascriptComponent.setJavascript(javascript);
         javascriptComponent.setCompiled(true);
+    }
+
+    private void recompile(C javascriptComponent) {
+        if (javascriptComponent.getHtmlResourceFile() instanceof ReloadableResourceFile) {
+            reloadHtml(javascriptComponent);
+        }
+        compile(javascriptComponent);
     }
 
     private String doCompile(C component) {

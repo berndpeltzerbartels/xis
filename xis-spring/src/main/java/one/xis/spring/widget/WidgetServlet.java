@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 
-@WebServlet(urlPatterns = "/one/xis/widget/*")
+@WebServlet(urlPatterns = "/xis/widget/*")
 class WidgetServlet extends ResourceServlet {
 
     @Autowired
