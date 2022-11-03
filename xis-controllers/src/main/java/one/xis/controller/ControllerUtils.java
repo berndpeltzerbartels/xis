@@ -1,8 +1,7 @@
 package one.xis.controller;
 
-import one.xis.Model;
-import one.xis.OnAction;
-import one.xis.State;
+import lombok.NonNull;
+import one.xis.*;
 import one.xis.utils.lang.MethodUtils;
 
 import java.lang.annotation.Annotation;
@@ -58,4 +57,24 @@ public class ControllerUtils {
         return annotation.value().isEmpty() ? method.getName() : annotation.value();
     }
 
+    @NonNull
+    public static String getControllerId(Class<?> controllerClass) {
+        if (controllerClass.isAnnotationPresent(Widget.class)) {
+            return getWidgetControllerId(controllerClass);
+        }
+        if (controllerClass.isAnnotationPresent(Page.class)) {
+            return getPageControllerId(controllerClass);
+        }
+        throw new IllegalStateException();
+    }
+
+    public static String getWidgetControllerId(Class<?> controllerClass) {
+        var annotation = controllerClass.getAnnotation(Widget.class);
+        return annotation.value().isEmpty() ? controllerClass.getSimpleName() : annotation.value();
+    }
+
+    public static String getPageControllerId(Class<?> controllerClass) {
+        var annotation = controllerClass.getAnnotation(Page.class);
+        return annotation.path().isEmpty() ? controllerClass.getSimpleName() : annotation.path();
+    }
 }

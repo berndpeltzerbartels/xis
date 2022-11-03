@@ -2,6 +2,7 @@ package one.xis.js;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import one.xis.controller.ControllerUtils;
 import one.xis.resource.ReloadableResourceFile;
 import one.xis.template.TemplateModel;
 import one.xis.template.TemplateSynthaxException;
@@ -42,8 +43,9 @@ public abstract class JavascriptComponentCompiler<C extends JavascriptComponent,
         var templateModel = parseTemplate(controllerClass, htmlToDocument(controllerClass, component.getHtmlResourceFile().getContent()));
         var script = new JSScript();
         var javacriptComponentClass = parseTemplateModelIntoScriptModel(templateModel, component.getJavascriptClass(), script);
-        addJavaClassIdField(javacriptComponentClass, controllerClass);
-        addRemoteMethods(javacriptComponentClass, component.getControllerClass());
+        addControllerIdField(javacriptComponentClass, component.getControllerClass());
+        addMessageAttributes(javacriptComponentClass, component.getControllerClass());
+        addComponentIdField(javacriptComponentClass);
         return javaScriptModelAsCode(script);
     }
 
@@ -68,11 +70,15 @@ public abstract class JavascriptComponentCompiler<C extends JavascriptComponent,
 
     protected abstract JSClass parseTemplateModelIntoScriptModel(M templateModel, String javascriptClassName, JSScript script);
 
-    protected abstract void addRemoteMethods(JSClass component, Class<?> controllerClass);
+    protected abstract void addMessageAttributes(JSClass component, Class<?> controllerClass);
 
 
-    private void addJavaClassIdField(JSClass component, String controllerClass) {
-        component.addField("javaClassId", new JSString(controllerClass));
+    private void addControllerIdField(JSClass component, Class<?> controllerClass) {
+        component.addField("controllerId", new JSString(ControllerUtils.getControllerId(controllerClass)));
+    }
+
+    private void addComponentIdField(JSClass component) {
+        component.addField("componentId", new JSString(component.getClassName()));
     }
 
     private String javaScriptModelAsCode(@NonNull JSScript script) {

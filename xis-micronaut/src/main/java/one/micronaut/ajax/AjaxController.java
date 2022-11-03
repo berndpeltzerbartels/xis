@@ -36,12 +36,12 @@ class AjaxController {
 
     @Post(consumes = "application/json", produces = "application/json", uri = "/xis/widget/model")
     InitialResponse handleWidgetModelRequest(ModelRequest request) {
-        return ajaxService.handlePageInitialRequest(request);
+        return ajaxService.handleWidgetInitialRequest(request);
     }
 
-    @Post(consumes = "application/json", produces = "application/json", uri = "/xis/page/action")
+    @Post(consumes = "application/json", produces = "application/json", uri = "/xis/widget/action")
     ActionResponse handleWidgetActionRequest(ActionRequest request) {
-        return ajaxService.handlePageActionRequest(request);
+        return ajaxService.handleWidgetActionRequest(request);
     }
 
 }

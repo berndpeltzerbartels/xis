@@ -47,6 +47,7 @@ public class Classes {
                 .addMethod("updateChildren", 0)
                 .addMethod("updateState", 1)
                 .addAbstractMethod("loadModel")
+                .addMethod("replace", 1)
                 .addAbstractField("path");
 
         XIS_WIDGET.addMethod("init", 1)
@@ -56,6 +57,7 @@ public class Classes {
                 .addMethod("updateData", 1)
                 .addMethod("getValue", 1)
                 .addMethod("updateState", 1)
+                .addMethod("replace", 1)
                 .addAbstractMethod("loadModel")
                 .addAbstractField("root");
 
@@ -91,7 +93,8 @@ public class Classes {
                 .addAbstractField("children");
 
         XIS_CONTAINER.addMethod("init", 2)
-                .addMethod("setWidget", 1)
+                .addMethod("bindWidget", 1)
+                .addMethod("unbindWidget", 0)
                 .addMethod("getValue", 1)
                 .addMethod("update", 0)
                 .addAbstractMethod("updateAttributes")

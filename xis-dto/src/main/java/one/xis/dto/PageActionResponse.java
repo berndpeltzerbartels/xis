@@ -6,5 +6,5 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class PageActionResponse extends Response {
-    private String nexrPageuri;
+    private String nextPageuri;
 }

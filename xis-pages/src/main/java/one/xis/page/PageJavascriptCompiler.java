@@ -28,7 +28,7 @@ class PageJavascriptCompiler extends JavascriptComponentCompiler<PageJavascript,
 
 
     @Override
-    protected void addRemoteMethods(JSClass component, Class<?> controllerClass) {
+    protected void addMessageAttributes(JSClass component, Class<?> controllerClass) {
         controllerModelParser.parseControllerModel(controllerClass, component);
     }
 }

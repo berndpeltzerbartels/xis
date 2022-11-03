@@ -13,37 +13,117 @@ class XISClient {
         }
     }
 
-    callGetModelRemote(component) {
-        this.callRemote(signatures, component);
-    }
-
-    callRemote(component, issue){
-        var message = {
-            model: component.state,
-            clientId: this.clientId,
-            token: this.token,
-            issue: issue,
-            javaClassId: component.javaClassId,
-            componentType: component.type
-        };
-        this.restClient.post('/xis/connector', message, response => component.processData(response.model));
+    /**
+     * 
+     * @param {XISPage} page 
+     */
+    sendPageModelRequest(page) {
+        this.sendModelRequest(page, '/xis/page/model');
     }
 
     /**
-     * @public
-     * @param {XISPage} page 
-     * @returns {any} data-model from backend
+     * 
+     * @param {XISWidget} widget 
      */
-    init(page) {
+    sendWidgetRequest(widget) {
+        this.sendModelRequest(widget, '/xis/page/model');
+    }
 
-        this.restClient.post(page.server + '/xis/connector/init', {pageId: page.id, clientId: this.clientId, token: this.token}), data => {
-            page.processData(data);
-            rootPage.refresh(page);
+
+    /**
+     * 
+     * @param {XISPage} page 
+     * @param {*} action 
+     */
+    sendPageActionRequest(page, action) {
+        this.sendActionRequest(page, action, '/xis/page/action');
+    }
+
+    /**
+     * 
+     * @param {XISWidget} widget 
+     * @param {String} action 
+     */
+    sendWidgetActionRequest(widget, action) {
+        this.sendActionRequest(widget, action, '/xis/widget/action');
+    }
+
+
+    /**
+     * @private
+     * @param {XISComponent} component 
+     * @param {String} url 
+     */
+     sendModelRequest(component, url) {
+        var request = this.createBasicRequest();
+        request.clientState = this.filteredClientState(component.initClientKeys);
+        this.restClient.post(url, request, response => {
+            component.processData(response.componentState);
+            clientState.processData(response.clientState);
+        });
+    }
+
+    /**
+     * @private
+     * @param {XISComponent} component 
+     * @param {String} action 
+     * @param {String} url 
+     */
+    sendActionRequest(component, action, url) {
+        var request = this.createBasicRequest();
+        request.clientState = this.filteredClientState(component.actionClientKeys[action]);
+        request.componentState = this.filteredComponentState(component.actionCompKeys[action]);
+        this.restClient.post(url, request, response => {
+            component.processData(response.componentState);
+            clientState.processData(response.clientState);
+            if (response.nextComponent) {
+                component.replace(response.nextComponent);
+            }
+        });
+    }
+
+    /**
+     * @private
+     * @param {XISComponent} component 
+     * @returns {any}
+     */
+    createBasicRequest(component) {
+        return {
+            model: component.state,
+            clientId: this.clientId,
+            token: this.token,
+            controllerId: component.controllerId,
+            componentId: component.componentId,
+            timestamp: new Date(),
         };
-    
-       debugger;
-        page.setValues({title: 'Juchu!', 'font-size':'10px', 'font-family':'Arial'});    
-        page.refresh(); // TODO remove debugcode
-    } 
+    }
 
+
+    /**
+     * @private
+     * @param keys {array}
+     * @returns {any} 
+     */
+     filteredClientState(keys) {
+        var state = {};
+        for (key in keys) {
+            state[key] = clientState.getValue(key);
+        }
+        return state;
+    }
+
+
+    /**
+     * @private
+     * @param {XISComponent} component
+     * @param {array} keys 
+     * @returns {any} 
+     */
+     filteredComponentState(component, keys) {
+        var state = {};
+        for (key in keys) {
+            state[key] = component.getValue(key);
+        }
+        return state;
+    }
 }

@@ -11,9 +11,9 @@ import java.util.stream.Stream;
 public class JavascriptControllerModelParser {
 
     public void parseControllerModel(Class<?> controllerClass, JSClass component) {
-        component.addField("initialClientStateKeys", initialClientStateKeys(controllerClass));
-        component.addField("actionClientStateKeys", actionClientStateKeys(controllerClass));
-        component.addField("actionComponentStateKeys", actionComponentStateKeys(controllerClass));
+        component.addField("initClientKeys", initialClientStateKeys(controllerClass));
+        component.addField("actionClientKeys", actionClientStateKeys(controllerClass));
+        component.addField("actionCompKeys", actionComponentStateKeys(controllerClass));
     }
 
     private JSArray initialClientStateKeys(Class<?> controllerClass) {
@@ -22,7 +22,7 @@ public class JavascriptControllerModelParser {
                 .map(JSString::new)
                 .toArray(JSString[]::new));
     }
-    
+
     private JSObject actionClientStateKeys(Class<?> controllerClass) {
         var object = new JSObject();
         ControllerUtils.getActionMethods(controllerClass)

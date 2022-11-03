@@ -1,5 +1,5 @@
 
-class XISPage extends XISVisible {
+class XISPage extends XISComponent {
 
     constructor() {
         super(undefined);
@@ -16,7 +16,13 @@ class XISPage extends XISVisible {
      */
     bind(rootPage) {
         this.rootPage = rootPage;
-        client.init(this);
+        client.sendPageModelRequest(this);
+    }
+
+    replace(uri) {
+        var page = pages.getPage(uri);
+        this.rootPage.unbindPage();
+        page.bind(this.rootPage);
     }
 
     /**

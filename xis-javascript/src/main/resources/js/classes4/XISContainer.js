@@ -31,24 +31,13 @@ class XISContainer extends XISTemplateObject {
         return this;
     }
 
-    setWidget(widgetName) {
+    bindWidget(widget) {
         // TODO
-        if (this.widget) {
-            if (this.widget.name == widgetName) {
-                __lifecycleService.onDisplayWidget(this.widget);
-                return;
-            }
-            __lifecycleService.onHideWidget(this.widget);
-            this.widget.unbind();
-        }
-        this.widget = __widgets.getWidget(widgetName);
-        if (!this.widget.initialized) {
-            this.widget.initialized = true;
-            this.widget.init();
-            __lifecycleService.onInitWidget(this.widget);
-        }
-        this.widget.bind(this.element, this.valueHolder);
-        __lifecycleService.onDisplayWidget(this.widget);
+        
+    }
+
+    unbindWidget() {
+        
     }
 
     update() {

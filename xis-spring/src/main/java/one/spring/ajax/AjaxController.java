@@ -27,7 +27,7 @@ class AjaxController {
 
     @PostMapping("/xis/widget/model")
     InitialResponse handleWidgetModelRequest(ModelRequest request) {
-        return ajaxService.handlePageInitialRequest(request);
+        return ajaxService.handleWidgetInitialRequest(request);
     }
 
     @PostMapping("/xis/widget/action")

@@ -10,13 +10,22 @@ class XISComponent extends XISValueHolder {
     }
 
     loadModel() {
-       throw new Error('abstract method');
+        throw new Error('abstract method');
     }
 
     processData(data) {
         this.state = data;
         this.setValues(data);
         this.refresh();
+    }
+
+
+    getInitClientKeys() {
+        throw new Error('abstract method');
+    }
+
+    replace(another) {
+        throw new Error('abstract method');
     }
 
 }

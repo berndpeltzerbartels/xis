@@ -15,4 +15,5 @@ import java.lang.annotation.Target;
 @Singleton // for micronaut
 @Component // for spring
 public @interface Widget {
+    String value() default "";
 }
