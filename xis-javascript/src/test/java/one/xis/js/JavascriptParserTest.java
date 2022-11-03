@@ -40,8 +40,8 @@ class JavascriptParserTest {
             JSField widgetsField = widgets.getField("widgets");
 
             assertThat(widgetsField).extracting(JSField::getValue)
-                    .extracting(JSJsonValue.class::cast)
-                    .extracting(JSJsonValue::getFields)
+                    .extracting(JSObject.class::cast)
+                    .extracting(JSObject::getFields)
                     .extracting(fields -> fields.get(WIDGET_NAME))
                     .extracting(JSContructorCall.class::cast)
                     .extracting(JSContructorCall::getJsClass)
@@ -81,7 +81,7 @@ class JavascriptParserTest {
                     .collect(CollectorUtils.onlyElement());
 
 
-            JSJsonValue widgetsJson = (JSJsonValue) widgets.getField("widgets").getValue();
+            JSObject widgetsJson = (JSObject) widgets.getField("widgets").getValue();
             JSClass root1 = cast(widgetsJson.getFields().get(WIDGET_NAME), JSContructorCall.class).getJsClass();
             JSClass root2 = cast(widgetsJson.getFields().get(WIDGET_NAME2), JSContructorCall.class).getJsClass();
 
@@ -153,8 +153,8 @@ class JavascriptParserTest {
             JSField widgetsField = widgets.getField("widgets");
 
             assertThat(widgetsField).extracting(JSField::getValue)
-                    .extracting(JSJsonValue.class::cast)
-                    .extracting(JSJsonValue::getFields)
+                    .extracting(JSObject.class::cast)
+                    .extracting(JSObject::getFields)
                     .extracting(fields -> fields.get(WIDGET_NAME))
                     .extracting(JSContructorCall.class::cast)
                     .extracting(JSContructorCall::getJsClass)

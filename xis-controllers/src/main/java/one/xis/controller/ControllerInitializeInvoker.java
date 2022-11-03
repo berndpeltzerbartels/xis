@@ -2,26 +2,26 @@ package one.xis.controller;
 
 
 import lombok.Getter;
+import lombok.NonNull;
 import one.xis.Model;
 import one.xis.State;
 import one.xis.dto.Request;
-import one.xis.utils.lang.MethodUtils;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static one.xis.controller.ControllerUtils.*;
+
 @Getter
 class ControllerInitializeInvoker extends ControllerMethodInvoker {
 
     private final Set<Method> initialMethodsAvailable;
 
-    ControllerInitializeInvoker(Object controller, Request request) {
+    ControllerInitializeInvoker(@NonNull Object controller, @NonNull Request request) {
         super(request, controller);
-        this.initialMethodsAvailable = MethodUtils.methods(controller).stream()
-                .filter(method -> method.isAnnotationPresent(Model.class))
-                .collect(Collectors.toSet());
+        this.initialMethodsAvailable = getInitializerMethods(controller.getClass()).collect(Collectors.toSet());
     }
 
     void invokeInitial() {
@@ -29,7 +29,7 @@ class ControllerInitializeInvoker extends ControllerMethodInvoker {
         while ((method = nextMethod()) != null) {
             Object returnValue = invoke(method);
             if (method.isAnnotationPresent(Model.class)) {
-                componentModel.put(getModelKey(method), returnValue);
+                componentState.put(getModelKey(method), returnValue);
             }
             if (method.isAnnotationPresent(State.class)) {
                 clientState.put(getStateKey(method), returnValue);
@@ -54,7 +54,7 @@ class ControllerInitializeInvoker extends ControllerMethodInvoker {
     private boolean isInvocable(Method method) {
         for (Parameter parameter : method.getParameters()) {
             if (parameter.isAnnotationPresent(Model.class)) {
-                if (!componentModel.containsKey(getModelKey(method))) {
+                if (!componentState.containsKey(getModelKey(method))) {
                     return false;
                 }
             }

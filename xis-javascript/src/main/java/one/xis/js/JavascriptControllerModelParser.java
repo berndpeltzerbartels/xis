@@ -1,25 +1,66 @@
 package one.xis.js;
 
+import one.xis.OnAction;
 import one.xis.context.XISComponent;
+import one.xis.controller.ControllerUtils;
 
-import java.util.List;
+import java.lang.reflect.Method;
+import java.util.stream.Stream;
 
 @XISComponent
 public class JavascriptControllerModelParser {
 
     public void parseControllerModel(Class<?> controllerClass, JSClass component) {
-        overrideSendInit(controllerClass, component);
+        component.addField("initialClientStateKeys", initialClientStateKeys(controllerClass));
+        component.addField("actionClientStateKeys", actionClientStateKeys(controllerClass));
+        component.addField("actionComponentStateKeys", actionComponentStateKeys(controllerClass));
     }
 
-    private void overrideSendInit(Class<?> controllerClass, JSClass component) {
-        // TODO
-        var sendInit = component.overrideAbstractMethod("loadModel");
-        var initMethodSignatures = new JSVar("signatures");
-        //sendInit.addStatement(new JSVarAssignment(initMethodSignatures, new JSArray(getInitMethodSignatures(controllerClass))));
-        var callRemoteInitArgs = new JSVar[]{initMethodSignatures, new JSVar("this")};
-        var callRemoteInitMethod = new JSMethod(new JSClass("XISClient"), "callRemoteInit", List.of("signatures", "component"));
-        var callRemoteInitMethodCall = new JSMethodCall(callRemoteInitMethod, callRemoteInitArgs);
-        sendInit.addStatement(callRemoteInitMethodCall);
+    private JSArray initialClientStateKeys(Class<?> controllerClass) {
+        return new JSArray(ControllerUtils.getInitializerMethods(controllerClass)
+                .flatMap(this::getClientStateParameterKeys)
+                .map(JSString::new)
+                .toArray(JSString[]::new));
+    }
+    
+    private JSObject actionClientStateKeys(Class<?> controllerClass) {
+        var object = new JSObject();
+        ControllerUtils.getActionMethods(controllerClass)
+                .forEach(method -> {
+                    var action = method.getAnnotation(OnAction.class).value();
+                    object.addField(action, getClientStateParameterKeyArray(method));
+                });
+
+        return object;
+    }
+
+    private JSObject actionComponentStateKeys(Class<?> controllerClass) {
+        var object = new JSObject();
+        ControllerUtils.getActionMethods(controllerClass)
+                .forEach(method -> {
+                    var action = method.getAnnotation(OnAction.class).value();
+                    object.addField(action, getComponentStateParameterKeyArray(method));
+                });
+
+        return object;
+    }
+
+    private JSArray getClientStateParameterKeyArray(Method method) {
+        return new JSArray(getClientStateParameterKeys(method)
+                .map(JSString::new)
+                .toArray(JSString[]::new));
+    }
+
+    private Stream<String> getClientStateParameterKeys(Method method) {
+        return ControllerUtils.getStateParamters(method)
+                .map(ControllerUtils::getStateKey);
+    }
+
+    private JSArray getComponentStateParameterKeyArray(Method method) {
+        return new JSArray(ControllerUtils.getModelParamters(method)
+                .map(ControllerUtils::getModelKey)
+                .map(JSString::new)
+                .toArray(JSString[]::new));
     }
 
 

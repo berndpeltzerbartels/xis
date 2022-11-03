@@ -97,8 +97,8 @@ public class JSWriter {
     private void writeValue(JSValue value, Appendable writer) throws IOException {
         if (value instanceof JSConstant) {
             writeConstantValue((JSConstant) value, writer);
-        } else if (value instanceof JSJsonValue) {
-            writeJsonValue((JSJsonValue) value, writer);
+        } else if (value instanceof JSObject) {
+            writeJsonValue((JSObject) value, writer);
         } else if (value instanceof JSFunctionCall) {
             writeFunctionCallValue((JSFunctionCall) value, writer);
         } else if (value instanceof JSArray) {
@@ -129,7 +129,7 @@ public class JSWriter {
         writer.append(jsConstant.getContent());
     }
 
-    private void writeJsonValue(JSJsonValue value, Appendable writer) throws IOException {
+    private void writeJsonValue(JSObject value, Appendable writer) throws IOException {
         writer.append("{");
         Iterator<Map.Entry<String, JSValue>> fields = value.getFields().entrySet().iterator();
         while (fields.hasNext()) {

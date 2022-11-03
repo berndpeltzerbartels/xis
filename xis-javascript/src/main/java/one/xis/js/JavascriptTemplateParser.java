@@ -118,7 +118,7 @@ public class JavascriptTemplateParser {
     private JSClass toClass(Loop loop, JSScript script) {
         var loopClass = derrivedClass(XIS_LOOP, script);
 
-        var loopAttributes = new JSJsonValue();
+        var loopAttributes = new JSObject();
         loopAttributes.addField("indexVarName", new JSString(loop.getIndexVarName()));
         loopAttributes.addField("itemVarName", new JSString(loop.getItemVarName()));
         loopAttributes.addField("numberVarName", new JSString(loop.getNumberVarName()));
@@ -165,8 +165,8 @@ public class JavascriptTemplateParser {
         return createElementFunctionCall;
     }
 
-    private JSJsonValue staticAttributes(Map<String, String> attributesMap) {
-        var attributes = new JSJsonValue();
+    private JSObject staticAttributes(Map<String, String> attributesMap) {
+        var attributes = new JSObject();
         attributesMap.forEach((key, value) -> attributes.addField(key, new JSString(value)));
         return attributes;
     }

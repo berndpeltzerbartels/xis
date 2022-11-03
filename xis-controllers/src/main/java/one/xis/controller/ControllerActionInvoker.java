@@ -1,27 +1,26 @@
 package one.xis.controller;
 
+import lombok.NonNull;
 import one.xis.OnAction;
 import one.xis.dto.Request;
 import one.xis.utils.lang.CollectorUtils;
-import one.xis.utils.lang.MethodUtils;
 
 import java.lang.reflect.Method;
 import java.util.Set;
-import java.util.stream.Collectors;
+
+import static one.xis.controller.ControllerUtils.getActionMethods;
 
 class ControllerActionInvoker extends ControllerMethodInvoker {
 
     private final Set<Method> actionMethodsAvailable;
 
-    ControllerActionInvoker(Object controller, Request request) {
+    ControllerActionInvoker(@NonNull Object controller, @NonNull Request request) {
         super(request, controller);
-        actionMethodsAvailable = MethodUtils.methods(controller).stream()
-                .filter(method -> method.isAnnotationPresent(OnAction.class))
-                .collect(Collectors.toSet());
-        this.componentModel.putAll(request.getComponentModel());
+        actionMethodsAvailable = getActionMethods(controller.getClass());
+        this.componentState.putAll(request.getComponentModel());
     }
-    
-    Class<?> invokeForAction(String action) {
+
+    Class<?> invokeForAction(@NonNull String action) {
         return (Class<?>) invoke(matchingMethod(action));
     }
 
