@@ -14,10 +14,10 @@ class PageControllers {
     private final Map<String, Object> controllers = new HashMap<>();
 
     void addController(Object pageController, PageMetaData metaData) {
-        controllers.put(metaData.getPath(), pageController);
+        controllers.put(metaData.getControllerClass().getName(), pageController);
     }
 
-    Object getPageController(@NonNull String path) {
-        return controllers.get(path);
+    Object getPageController(@NonNull String controllerClassName) {
+        return controllers.get(controllerClassName);
     }
 }

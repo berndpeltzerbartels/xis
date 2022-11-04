@@ -7,8 +7,8 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ComponentScan(basePackages = {"one.xis.spring.js", "one.xis.spring.page", "one.xis.spring.widget"})
-@ServletComponentScan(basePackages = {"one.xis.spring.js", "one.xis.spring.page", "one.xis.spring.widget"})
+@ComponentScan(basePackages = {"one.xis.spring"})
+@ServletComponentScan(basePackages = {"one.xis.spring"})
 public class SpringContextAdapter {
 
     @Bean

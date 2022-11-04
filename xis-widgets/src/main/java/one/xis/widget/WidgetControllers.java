@@ -10,14 +10,14 @@ import java.util.Map;
 @XISComponent
 @RequiredArgsConstructor
 class WidgetControllers {
-    
+
     private final Map<String, Object> controllerWrappers = new HashMap<>();
 
     void addController(Object widgetController, WidgetMetaData metaData) {
-        controllerWrappers.put(metaData.getId(), widgetController);
+        controllerWrappers.put(metaData.getControllerClass().getName(), widgetController);
     }
 
-    Object getWidgetController(@NonNull String id) {
-        return controllerWrappers.get(id);
+    Object getWidgetController(@NonNull String className) {
+        return controllerWrappers.get(className);
     }
 }

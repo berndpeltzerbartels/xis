@@ -7,14 +7,9 @@ import one.xis.resource.ResourceFile;
 @Builder
 @Getter
 class PageMetaData {
-    private final String id;
     private final String path;
     private final boolean welcomePage;
     private final ResourceFile htmlTemplate;
     private final String javascriptClassname;
     private final Class<?> controllerClass;
-
-    public String getControllerClassName() {
-        return controllerClass.getName();
-    }
 }

@@ -24,7 +24,7 @@ public class PathUtils {
         }
         return path.substring(0, j);
     }
-
+    
     public boolean hasSuffix(String path) {
         int i = path.lastIndexOf('/');
         int j = path.lastIndexOf('.');

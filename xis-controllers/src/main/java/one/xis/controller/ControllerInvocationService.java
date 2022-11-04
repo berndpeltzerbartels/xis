@@ -16,6 +16,7 @@ public class ControllerInvocationService {
         var response = new InitialResponse();
         response.setClientState(invoker.getClientState());
         response.setComponentState(invoker.getComponentState());
+        response.setControllerClass(controller.getClass().getName());
         return response;
     }
 
@@ -27,6 +28,7 @@ public class ControllerInvocationService {
         response.setComponentState(invoker.getComponentState());
         response.setNextController(nextControllerClass);
         response.setNextComponent(javascriptClassName);
+        response.setControllerClass(controller.getClass().getName());
         return response;
     }
 }

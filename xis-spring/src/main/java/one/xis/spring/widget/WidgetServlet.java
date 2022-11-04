@@ -1,6 +1,7 @@
 package one.xis.spring.widget;
 
 
+import one.xis.path.PathUtils;
 import one.xis.resource.ResourceFile;
 import one.xis.spring.servlet.ResourceServlet;
 import one.xis.widget.WidgetService;
@@ -18,7 +19,7 @@ class WidgetServlet extends ResourceServlet {
     @Override
     protected ResourceFile getResource(HttpServletRequest request) {
         String key = request.getRequestURI();
-        String widgetId = key.substring(key.lastIndexOf('/') + 1);
+        String widgetId = PathUtils.stripSuffix(key.substring(key.lastIndexOf('/') + 1));
         return widgetService.getWidgetJavascript(widgetId);
     }
 

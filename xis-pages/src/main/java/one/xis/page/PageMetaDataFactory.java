@@ -16,7 +16,6 @@ class PageMetaDataFactory {
     PageMetaData createMetaData(Object controller) {
         String path = path(controller);
         return PageMetaData.builder()
-                .id(id(path))
                 .htmlTemplate(resourceFiles.getByPath(getHtmlTemplatePath(controller)))
                 .javascriptClassname(uniqueJavascriptClassName())
                 .path(path)
@@ -53,12 +52,5 @@ class PageMetaDataFactory {
     private String uniqueJavascriptClassName() {
         return "P" + nameIndex++;
     }
-
-    protected String id(String path) {
-        return pathToUrn(path);
-    }
-
-    public static String pathToUrn(String path) {
-        return "page" + path.replace('/', ':');
-    }
+    
 }

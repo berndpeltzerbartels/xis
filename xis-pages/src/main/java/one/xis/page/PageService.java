@@ -29,12 +29,12 @@ public class PageService {
     }
 
     public InitialResponse invokeInitial(InitialRequest request) {
-        var controller = pageControllers.getPageController(request.getControllerId());
+        var controller = pageControllers.getPageController(request.getControllerClass());
         return invocationService.invokeInitial(controller, request);
     }
 
     public ActionResponse invokeAction(ActionRequest request) {
-        var controller = pageControllers.getPageController(request.getControllerId());
+        var controller = pageControllers.getPageController(request.getControllerClass());
         var javascriptClassname = getJavascriptClassname(controller);
         return invocationService.invokeForAction(controller, request, request.getAction(), javascriptClassname);
     }
@@ -44,12 +44,12 @@ public class PageService {
     }
 
     public PageJavascript getPage(String id) {
-        return pageJavascripts.getById(id);
+        return pageJavascripts.getByControllerClass(id);
     }
 
 
-    public Collection<String> getIds() {
-        return pageJavascripts.getIds();
+    public Collection<String> getClassnames() {
+        return pageJavascripts.getClassnames();
     }
 
     public Map<String, PageJavascript> getPagesByPath() {

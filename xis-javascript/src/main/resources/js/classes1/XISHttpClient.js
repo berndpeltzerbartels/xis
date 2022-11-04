@@ -23,7 +23,7 @@ class XISHttpClient  {
     post(uri, headers, payload, handler) {
         var payloadJson = JSON.stringify(payload);
         headers['Content-length'] = payloadJson.length;
-        this.doRequest(uri, headers, 'GET', payloadJson, handler); 
+        this.doRequest(uri, headers, 'POST', payloadJson, handler); 
     }
 
     /**
@@ -36,6 +36,7 @@ class XISHttpClient  {
      */
     doRequest(uri, headers, method, payload, handler) {
         var xmlHttp = new XMLHttpRequest();
+        xmlHttp.open(method, uri, true); // true for asynchronous
         for (var name of Object.keys(headers)) {
             xmlHttp.setRequestHeader(name, headers[name]);
         }
@@ -48,7 +49,6 @@ class XISHttpClient  {
             }
             // TODO use errorhandler
         }
-        xmlHttp.open(method, uri, true); // true for asynchronous 
         xmlHttp.send(payload);
     }
 

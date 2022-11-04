@@ -55,11 +55,11 @@ public class RootPage {
     }
 
     private void addPagesScriptTags(Element head) {
-        pageService.getIds().forEach(key -> addScriptTag(head, PathUtils.appendPath("/xis/page/", key)));
+        pageService.getClassnames().forEach(key -> addScriptTag(head, PathUtils.appendPath("/xis/page/", key) + ".js"));
     }
 
     private void addWidgetScriptTags(Element head) {
-        widgetJavascripts.getIds().forEach(key -> addScriptTag(head, "/xis/widget/" + key));
+        widgetJavascripts.getIds().forEach(key -> addScriptTag(head, PathUtils.appendPath("/xis/widget/", key) + ".js"));
     }
 
     private void addScriptTag(Element head, String src) {

@@ -9,7 +9,7 @@ import java.util.Map;
 public abstract class Request {
     private String clientId;
     private String token;
-    private String controllerId;
+    private String controllerClass;
     private String componentId;
     private Date timestamp;
     private Map<String, Object> clientState;

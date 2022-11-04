@@ -1,6 +1,7 @@
 package one.xis.resource;
 
 
+import lombok.extern.slf4j.Slf4j;
 import one.xis.utils.io.IOUtils;
 
 import java.io.File;
@@ -10,6 +11,7 @@ import java.io.File;
  * This is intended to allow changes to the resource to have effect without
  * restart.
  */
+@Slf4j
 class DevelopmentResource implements ReloadableResourceFile {
 
     private final File file;
@@ -44,6 +46,7 @@ class DevelopmentResource implements ReloadableResourceFile {
 
     @Override
     public void reload() {
+        log.info("loading {}", file.getAbsolutePath());
         content = IOUtils.getContent(file, "utf-8");
         lastModified = file.lastModified();
     }

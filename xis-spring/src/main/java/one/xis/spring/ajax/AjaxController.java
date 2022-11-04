@@ -8,6 +8,7 @@ import one.xis.dto.InitialResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @Controller
 class AjaxController {
@@ -16,22 +17,22 @@ class AjaxController {
     private AjaxService ajaxService;
 
     @PostMapping("/xis/ajax/page/model")
-    InitialResponse handlePageModelRequest(InitialRequest request) {
+    InitialResponse handlePageModelRequest(@RequestBody InitialRequest request) {
         return ajaxService.handlePageInitialRequest(request);
     }
 
     @PostMapping("/xis/ajax/page/action")
-    ActionResponse handlePageActionRequest(ActionRequest request) {
+    ActionResponse handlePageActionRequest(@RequestBody ActionRequest request) {
         return ajaxService.handlePageActionRequest(request);
     }
 
     @PostMapping("/xis/ajax/widget/model")
-    InitialResponse handleWidgetModelRequest(InitialRequest request) {
+    InitialResponse handleWidgetModelRequest(@RequestBody InitialRequest request) {
         return ajaxService.handleWidgetInitialRequest(request);
     }
 
     @PostMapping("/xis/ajax/widget/action")
-    ActionResponse handleWidgetActionRequest(ActionRequest request) {
+    ActionResponse handleWidgetActionRequest(@RequestBody ActionRequest request) {
         return ajaxService.handlePageActionRequest(request);
     }
 }

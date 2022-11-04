@@ -12,7 +12,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 class PageJavascripts {
 
-    private final Map<String, PageJavascript> pageJavascriptsById = new HashMap<>();
+    private final Map<String, PageJavascript> pageJavascriptsByClassname = new HashMap<>();
     private final Map<String, PageJavascript> pageJavascriptsByPath = new HashMap<>();
 
     private final PageJavascriptCompiler pageJavascriptCompiler;
@@ -28,21 +28,13 @@ class PageJavascripts {
             }
             welcomePage = pageJavascript;
         }
-        pageJavascriptsById.put(pageMetaData.getId(), pageJavascript);
+        pageJavascriptsByClassname.put(pageMetaData.getControllerClass().getName(), pageJavascript);
         pageJavascriptsByPath.put(pageMetaData.getPath(), pageJavascript);
         return pageJavascript;
     }
 
-    public PageJavascript getById(String id) {
-        PageJavascript pageJavascript = pageJavascriptsById.get(id);
-        synchronized (pageJavascript) {
-            pageJavascriptCompiler.compileIfObsolete(pageJavascript);
-        }
-        return pageJavascript;
-    }
-
-    public PageJavascript getByPath(String path) {
-        PageJavascript pageJavascript = pageJavascriptsByPath.get(path);
+    public PageJavascript getByControllerClass(String id) {
+        PageJavascript pageJavascript = pageJavascriptsByClassname.get(id);
         synchronized (pageJavascript) {
             pageJavascriptCompiler.compileIfObsolete(pageJavascript);
         }
@@ -61,8 +53,8 @@ class PageJavascripts {
     }
 
 
-    Collection<String> getIds() {
-        return pageJavascriptsById.keySet();
+    Collection<String> getClassnames() {
+        return pageJavascriptsByClassname.keySet();
     }
 
     Map<String, PageJavascript> getPagesByPath() {

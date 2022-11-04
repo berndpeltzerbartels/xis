@@ -13,7 +13,6 @@ class WidgetMetaDataFactory {
 
     WidgetMetaData createMetaData(Object controller) {
         return WidgetMetaData.builder()
-                .id(id(controller))
                 .htmlTemplate(resourceFiles.getByPath(getHtmlTemplatePath(controller)))
                 .javascriptClassname(uniqueJavascriptClassName())
                 .controllerClass(controllerClass(controller))
@@ -28,15 +27,7 @@ class WidgetMetaDataFactory {
         return "W" + nameIndex++;
     }
 
-    private String id(Object controller) {
-        return pathToUrn(controllerClass(controller).getName());
-    }
-
     private Class<?> controllerClass(Object controller) {
         return controller.getClass(); // TODO Proxies
-    }
-
-    private String pathToUrn(String name) {
-        return "widget:" + name.replace('/', ':');
     }
 }

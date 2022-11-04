@@ -29,18 +29,18 @@ public class WidgetService {
     }
 
     public InitialResponse invokeInitial(InitialRequest request) {
-        var controller = widgetControllers.getWidgetController(request.getControllerId());
+        var controller = widgetControllers.getWidgetController(request.getControllerClass());
         return invocationService.invokeInitial(controller, request);
     }
 
     public ActionResponse invokeAction(ActionRequest request) {
-        var controller = widgetControllers.getWidgetController(request.getControllerId());
+        var controller = widgetControllers.getWidgetController(request.getControllerClass());
         var javascriptClassname = getJavascriptClassname(controller);
         return invocationService.invokeForAction(controller, request, request.getAction(), javascriptClassname);
     }
 
-    public WidgetJavascript getWidgetJavascript(String id) {
-        return widgetJavascripts.getById(id);
+    public WidgetJavascript getWidgetJavascript(String className) {
+        return widgetJavascripts.getByControllerClass(className);
     }
 
     public Collection<String> getIds() {

@@ -54,13 +54,14 @@ class XISClient {
      * @param {XISComponent} component 
      * @param {String} url 
      */
-     sendModelRequest(component, url) {
+    sendModelRequest(component, url) {
         var request = this.createBasicRequest(component);
         request.clientState = this.filteredClientState(component.initClientKeys);
         this.restClient.post(url, request, response => {
             component.processData(response.componentState);
             clientState.processData(response.clientState);
         });
+
     }
 
     /**
@@ -73,7 +74,7 @@ class XISClient {
         var request = this.createBasicRequest(component);
         request.clientState = this.filteredClientState(component.actionClientKeys[action]);
         request.componentState = this.filteredComponentState(component.actionCompKeys[action]);
-        this.restClient.post(url, request,response => {
+        this.restClient.post(url, request, response => {
             component.processData(response.componentState);
             clientState.processData(response.clientState);
             if (response.nextComponent) {
@@ -92,10 +93,14 @@ class XISClient {
             model: component.state,
             clientId: this.clientId,
             token: this.token,
-            controllerId: component.controllerId,
+            controllerClass: component.controllerClass,
             componentId: component.componentId,
             timestamp: new Date(),
         };
+    }
+
+    isEmpty(obj) {
+        return Object.keys(obj).length == 0;
     }
 
 
@@ -104,7 +109,7 @@ class XISClient {
      * @param keys {array}
      * @returns {any} 
      */
-     filteredClientState(keys) {
+    filteredClientState(keys) {
         var state = {};
         for (key in keys) {
             state[key] = clientState.getValue(key);
@@ -119,7 +124,7 @@ class XISClient {
      * @param {array} keys 
      * @returns {any} 
      */
-     filteredComponentState(component, keys) {
+    filteredComponentState(component, keys) {
         var state = {};
         for (key in keys) {
             state[key] = component.getValue(key);

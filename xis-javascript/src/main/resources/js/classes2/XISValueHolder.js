@@ -15,7 +15,7 @@ class XISValueHolder extends XISTemplateObject {
      * @override
      */
     getValueHolder() {
-        return this;
+        return this
     }
     
     setVarnames(varNames) {

@@ -30,12 +30,12 @@ class WidgetJavascripts {
 
     public WidgetJavascript add(WidgetMetaData widgetMetaData) {
         var widgetJavascript = createWidgetJavascript(widgetMetaData);
-        widgetJavascripts.put(widgetMetaData.getId(), widgetJavascript);
+        widgetJavascripts.put(widgetMetaData.getControllerClass().getName(), widgetJavascript);
         return widgetJavascript;
     }
 
-    public WidgetJavascript getById(String id) {
-        var widgetJavascript = widgetJavascripts.get(id);
+    public WidgetJavascript getByControllerClass(String controllerClass) {
+        var widgetJavascript = widgetJavascripts.get(controllerClass);
         synchronized (widgetJavascript) {
             widgetJavascriptCompiler.compileIfObsolete(widgetJavascript);
         }

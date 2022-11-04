@@ -2,7 +2,7 @@ package one.xis.js;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import one.xis.controller.ControllerUtils;
+import lombok.extern.slf4j.Slf4j;
 import one.xis.resource.ReloadableResourceFile;
 import one.xis.template.TemplateModel;
 import one.xis.template.TemplateSynthaxException;
@@ -12,6 +12,7 @@ import org.xml.sax.SAXException;
 
 import java.io.IOException;
 
+@Slf4j
 @RequiredArgsConstructor
 public abstract class JavascriptComponentCompiler<C extends JavascriptComponent, M extends TemplateModel> {
 
@@ -45,6 +46,7 @@ public abstract class JavascriptComponentCompiler<C extends JavascriptComponent,
     }
 
     private String doCompile(C component) {
+        log.info("compile template for {}", component.getControllerClass());
         var controllerClass = component.getControllerClassName();
         var templateModel = parseTemplate(controllerClass, htmlToDocument(controllerClass, component.getHtmlResourceFile().getContent()));
         var script = new JSScript();
@@ -80,7 +82,7 @@ public abstract class JavascriptComponentCompiler<C extends JavascriptComponent,
 
 
     private void addControllerIdField(JSClass component, Class<?> controllerClass) {
-        component.addField("controllerId", new JSString(ControllerUtils.getControllerId(controllerClass)));
+        component.addField("controllerClass", new JSString(controllerClass.getName()));
     }
 
     private void addComponentIdField(JSClass component) {

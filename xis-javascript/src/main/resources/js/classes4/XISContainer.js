@@ -11,16 +11,22 @@ class XISContainer extends XISTemplateObject {
     }
 
     /**
-    * @param {XISTemplateObject} parent 
-    * @param {XISValueHolder} valueHolder
-    */
+     * @public
+     */
     init() {
-        this.parent.element.appendChild(this.element);
+        if (this.defaultWidgetId) {
+            var widget = widgets.getWidget(this.defaultWidgetId);
+            this.bindWidget(widget);     
+        }
+      //  this.parent.element.appendChild(this.element);
        // TODO
     }
 
     refresh() {
-        // TODO
+        this.updateAttributes();
+        if (this.widget) {
+            this.widget.refresh();
+        }
     }
 
     /**
@@ -32,12 +38,15 @@ class XISContainer extends XISTemplateObject {
     }
 
     bindWidget(widget) {
-        // TODO
-        
+        this.widget = widget;
+        this.element.appendChild(widget.element);
+        this.widget.refresh();    
     }
 
     unbindWidget() {
-        
+        if (this.widget) {
+            this.element.removeChild(this.widget.element);    
+        }     
     }
 
     update() {

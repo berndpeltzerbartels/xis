@@ -16,13 +16,31 @@ class XISPage extends XISComponent {
      */
     bind(rootPage) {
         this.rootPage = rootPage;
-        client.sendPageModelRequest(this);
+        if (this.hasClientStateVariablesOnInit()) {
+            client.sendPageModelRequest(this); // calls refresh
+        } else {
+            this.refresh();
+        }
+
     }
 
+    /**
+     * @public
+     * @param {String} uri 
+     */
     replace(uri) {
         var page = pages.getPage(uri);
         this.rootPage.unbindPage();
         page.bind(this.rootPage);
+    }
+
+
+    /**
+     * @private
+     * @returns {boolean} client-state is updated on page-initialization 
+     */
+    hasClientStateVariablesOnInit() {
+        return Object.keys(this.initClientKeys).length > 0;
     }
 
     /**
@@ -32,11 +50,6 @@ class XISPage extends XISComponent {
         this.head.init();
         this.body.init();
     }
-
-    updateState(newState) {
-        // TODO - ncht abstract
-    }
-
     /**
      * @public
      */
@@ -66,16 +79,15 @@ class XISPage extends XISComponent {
      * @private
      */
     bindHeadContent() {
-        debugger;
         var nodeList = this.head.element.childNodes;
         for (var i = 0; i < nodeList.length; i++) {
             var child = nodeList.item(i);
-            if (child.localName == 'title') {   
-               this.rootPage.title.innerText = child.innerText;     
+            if (child.localName == 'title') {
+                this.rootPage.title.innerText = child.innerText;
             } else {
-                this.headChildNodes.push(this.rootPage.head.appendChild(child));     
+                this.headChildNodes.push(this.rootPage.head.appendChild(child));
             }
-           
+
         }
     }
 
@@ -83,7 +95,6 @@ class XISPage extends XISComponent {
     * @private 
     */
     bindBodyContent() {
-        debugger;
         var nodeList = this.body.element.childNodes;
         for (var i = 0; i < nodeList.length; i++) {
             this.bodyChildNodes.push(this.rootPage.body.appendChild(nodeList.item(i)));
@@ -97,10 +108,11 @@ class XISPage extends XISComponent {
      * @private
      */
     unbindHeadContent() {
-        debugger;
         while (this.headChildNodes.length > 0) {
             var child = this.headChildNodes.pop();
-            this.rootPage.head.removeChild(child);
+            if (child.localName != 'title') {
+                this.rootPage.head.removeChild(child);
+            }
         }
     }
 

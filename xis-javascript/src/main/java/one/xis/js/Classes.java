@@ -47,6 +47,7 @@ public class Classes {
                 .addMethod("updateChildren", 0)
                 .addMethod("updateState", 1)
                 .addAbstractMethod("loadModel")
+
                 .addMethod("replace", 1)
                 .addAbstractField("path");
 

@@ -1,6 +1,7 @@
 package one.xis.spring.page;
 
 import one.xis.page.PageService;
+import one.xis.path.PathUtils;
 import one.xis.resource.ResourceFile;
 import one.xis.spring.servlet.ResourceServlet;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +18,7 @@ class PageServlet extends ResourceServlet {
     @Override
     protected ResourceFile getResource(HttpServletRequest request) {
         String uri = request.getRequestURI();
-        String key = uri.substring(uri.lastIndexOf('/') + 1);
+        String key = PathUtils.stripSuffix(uri.substring(uri.lastIndexOf('/') + 1));
         return pageService.getPage(key);
     }
 
