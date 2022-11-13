@@ -8,6 +8,7 @@ class XISContainer extends XISTemplateObject {
     */
     constructor(parent) {
         super(parent, parent.getValueHolder());
+        this.className = 'XISContainer';
     }
 
     /**
@@ -39,7 +40,8 @@ class XISContainer extends XISTemplateObject {
 
     bindWidget(widget) {
         this.widget = widget;
-        this.element.appendChild(widget.element);
+        if (widget.root)
+            this.element.appendChild(widget.root.element);
         this.widget.refresh();    
     }
 

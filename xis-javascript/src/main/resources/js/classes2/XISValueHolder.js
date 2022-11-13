@@ -5,6 +5,7 @@ class XISValueHolder extends XISTemplateObject {
      */
     constructor(parent) {
         super(parent);
+        this.className = 'XISValueHolder';
         this.varNames = [];
         this.values = {};
     }

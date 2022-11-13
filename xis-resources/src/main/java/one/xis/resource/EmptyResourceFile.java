@@ -12,7 +12,7 @@ class EmptyResourceFile implements ResourceFile {
     }
 
     @Override
-    public int getLenght() {
+    public int getLength() {
         return 0;
     }
 

@@ -1,22 +1,22 @@
 class XISWidgets {
 
     constructor() {
+        this.className = 'XISWidgets';
         this.widgets = {};
     }
 
-    init() {
-        var widgets = this.widgets;
-        Object.keys(widgets) // Object.values(any) is not supported in many browsers
-        .map(key => widgets[key])
-        .forEach(widget => widget.init());
-    }
 
     addWidget(key, widget) {
         this.widgets[key] = widget;
     }
 
     getWidget(key) {
-        return this.widgets[key];
+        var widget =  this.widgets[key];
+        if (!widget.initialized) {
+            widget.init();
+            widget.initialized = true;
+        }
+        return widget;
     }
     
 }

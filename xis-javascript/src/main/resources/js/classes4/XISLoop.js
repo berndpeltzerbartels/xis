@@ -5,8 +5,13 @@ class XISLoop extends XISValueHolder {
      */
     constructor(parent) {
         super(parent);
+        this.className = 'XISLoop';
         this.parent = parent;
         this.rows = [];
+    }
+
+    init() {
+        // noop
     }
 
     /**

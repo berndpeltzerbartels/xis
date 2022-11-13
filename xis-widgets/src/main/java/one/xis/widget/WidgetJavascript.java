@@ -19,7 +19,7 @@ public class WidgetJavascript implements ResourceFile, JavascriptComponent {
     private String javascript;
 
     @Override
-    public int getLenght() {
+    public int getLength() {
         return javascript.length();
     }
 

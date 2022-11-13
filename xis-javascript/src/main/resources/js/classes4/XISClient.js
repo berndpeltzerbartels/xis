@@ -4,6 +4,7 @@ class XISClient {
      * @param {XISErrorHandler} errorHandler 
      */
     constructor(errorHandler) {
+        this.className = 'XISClient';
         this.restClient = new XISRestClient(errorHandler);
         this.token = localStorage.getItem('xis-token');
         this.clientId = localStorage.getItem('xis-client-id');

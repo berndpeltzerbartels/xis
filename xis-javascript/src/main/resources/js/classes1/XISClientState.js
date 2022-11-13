@@ -1,6 +1,7 @@
 class XISClientState {
 
     constructor() {
+        this.className = 'XISClientState';
         this.state = {};
     }
 

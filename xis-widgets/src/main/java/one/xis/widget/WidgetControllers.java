@@ -11,13 +11,13 @@ import java.util.Map;
 @RequiredArgsConstructor
 class WidgetControllers {
 
-    private final Map<String, Object> controllerWrappers = new HashMap<>();
+    private final Map<String, Object> controllers = new HashMap<>();
 
     void addController(Object widgetController, WidgetMetaData metaData) {
-        controllerWrappers.put(metaData.getControllerClass().getName(), widgetController);
+        controllers.put(metaData.getControllerClass().getName(), widgetController);
     }
 
     Object getWidgetController(@NonNull String className) {
-        return controllerWrappers.get(className);
+        return controllers.get(className);
     }
 }

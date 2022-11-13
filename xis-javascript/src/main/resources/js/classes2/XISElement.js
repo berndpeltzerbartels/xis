@@ -8,10 +8,13 @@ class XISElement extends XISTemplateObject {
      */
     constructor(parent) {
         super(parent, parent.getValueHolder());
+        this.className = 'XISElement';
     }
 
     init() {
-        this.parent.element.appendChild(this.element);
+        if (this.parent.element) { // null if parent is page or widget
+            this.parent.element.appendChild(this.element);
+        }
         this.children.forEach(child => child.init());
     }
 

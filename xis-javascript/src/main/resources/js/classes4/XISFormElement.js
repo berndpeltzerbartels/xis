@@ -5,6 +5,7 @@ class XISFormElement {
      * @param {XISForm} form 
      */
     constructor(form) {
+        this.className = 'XISFormElement';
         this.form = form;
     }
 

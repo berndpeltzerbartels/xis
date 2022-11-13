@@ -20,7 +20,7 @@ public abstract class ResourceServlet extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
         } else {
             response.setContentType(getContentType());
-            response.setContentLength(resource.getLenght());
+            response.setContentLength(resource.getLength());
             response.setDateHeader("Last-Modified", resource.getLastModified());
             response.setHeader("ETag", Long.toString(resource.getLastModified()));
             response.getWriter().print(resource.getContent());

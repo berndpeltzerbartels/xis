@@ -8,6 +8,7 @@ class XISMutableTextNode extends XISTemplateObject{
 
     constructor(parent) {
         super(parent);
+        this.className = 'XISMutableTextNode';
     }
 
     init() {

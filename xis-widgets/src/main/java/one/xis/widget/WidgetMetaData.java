@@ -10,4 +10,5 @@ class WidgetMetaData {
     private final ResourceFile htmlTemplate;
     private final String javascriptClassname;
     private final Class<?> controllerClass;
+    private final String key;
 }

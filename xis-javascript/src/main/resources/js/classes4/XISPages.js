@@ -1,6 +1,7 @@
 class XISPages {
 
     constructor() {
+        this.className = 'XISPages';
         this.pages = {};
         this.welcomePage = undefined;
     }
@@ -10,20 +11,10 @@ class XISPages {
         this.pages[key] = page;
     }
 
-    getPage(key) {
-        return this.pages[key];
-    }
-
     setWelcomePage(key) {
         this.welcomePage = this.pages[key];
     }
 
-    init() {
-        var pages = this.pages;
-        Object.keys(pages) // Object.values(any) is not supported in many browsers
-        .map(key => pages[key])
-        .forEach(page => page.init());
-    }
 
     /**
      * 
@@ -38,10 +29,13 @@ class XISPages {
             uri = uri.substring(0, uri.length - 5);
         }
         var key = uri.replace('/', ':');
-        if (this.pages[key]) {
-            return this.pages[key];
+       
+        var page = this.pages[key] ? this.pages[key] : this.welcomePage;
+        if (!page.initialized){
+            page.init();
+            page.initialized = true;        
         }
-        return this.welcomePage;
+        return page;
     }
         
 }

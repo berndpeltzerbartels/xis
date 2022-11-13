@@ -2,14 +2,14 @@ class XISWidget extends XISComponent {
 
     constructor() {
         super(undefined);
-        this.type = 'widget';
+        this.className = 'XISWidget';
 
     }
 
     replace(id) {
         var container = this.parent;
         var widget = widgets.getWidget(id);
-        // TOD check if widget id is the same
+        // TODO check if widget id is the same
         container.unbindWidget();
         container.bindWidget(widget);
     }
@@ -17,7 +17,6 @@ class XISWidget extends XISComponent {
      * @public
      */
     init() {
-        this.root.init(this.element, this);
-        this.childNodes = nodeListToArray(this.element.childNodes);
+        this.root.init();
     }
 }

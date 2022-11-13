@@ -6,6 +6,7 @@ class XISComponent extends XISValueHolder {
      */
     constructor(parent) {
         super(parent);
+        this.className = 'XISComponent';
         this.parent = parent;
         this.state = {};
     }

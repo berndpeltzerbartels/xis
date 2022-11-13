@@ -4,6 +4,7 @@ class XISRestClient {
      * @param {XISErrorHandler} errorHandler 
      */
     constructor(errorHandler) {
+        this.className = 'XISRestClient';
         this.httpClient = new XISHttpClient(errorHandler);
         this.errorHandler = errorHandler;
         this.headers =  {

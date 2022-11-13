@@ -31,7 +31,7 @@ class WidgetConfig implements BeanPostProcessor {
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
         if (bean.getClass().isAnnotationPresent(Widget.class)) {
-            widgetService.addWidgetConroller(bean);
+            widgetService.t(bean);
         }
         return bean;
     }

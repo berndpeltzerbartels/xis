@@ -1,6 +1,7 @@
 class XISForm {
 
     constructor() {
+        this.className = 'XISForm';
         this.lockingElements = new XISArrayList();
     }
 

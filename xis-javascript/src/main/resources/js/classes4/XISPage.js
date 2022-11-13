@@ -3,6 +3,7 @@ class XISPage extends XISComponent {
 
     constructor() {
         super(undefined);
+        this.className = 'XISPage';
         this.rootPage = undefined;
         this.headChildNodes = [];
         this.bodyChildNodes = [];
@@ -18,10 +19,7 @@ class XISPage extends XISComponent {
         this.rootPage = rootPage;
         if (this.hasClientStateVariablesOnInit()) {
             client.sendPageModelRequest(this); // calls refresh
-        } else {
-            this.refresh();
-        }
-
+        } 
     }
 
     /**

@@ -5,12 +5,19 @@ class XISIf extends XISTemplateObject {
      */
     constructor(parent) {
         super(parent, parent.getValueHolder());
+        this.className = 'XISIf';
         this.valueHolder = parent.getValueHolder();
         this.container = parent.getContainer();
         this.path = this.getPath();
         this.element = this.createElement();
         this.children = this.createChildren();
     }
+
+
+    init() {
+        // noop
+    }
+
 
     /**
      * @override

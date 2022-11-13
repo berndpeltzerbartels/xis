@@ -2,6 +2,7 @@ class XISBody extends XISElement {
 
     constructor(parent) {
         super(parent);
+        this.className = 'XISBody';
     }
 
     init() {

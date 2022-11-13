@@ -2,6 +2,7 @@ class XISHead extends XISElement {
 
     constructor(parent) {
         super(parent);
+        this.className = 'XIShead';
     }
 
     // TODO Das ist komplizierte. Uaser definded styles uns Scripts sollen hinzugefügt werden, während der Title nur aktualisiert werden darf.

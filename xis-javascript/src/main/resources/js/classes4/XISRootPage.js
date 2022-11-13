@@ -5,6 +5,7 @@ class XISRootPage  {
      * @param {XISClient} client 
      */
     constructor(client) {
+        this.className = 'XISRootPage';
         this.client = client;
     }
 

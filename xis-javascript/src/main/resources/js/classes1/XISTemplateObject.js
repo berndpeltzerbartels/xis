@@ -6,6 +6,7 @@ class XISTemplateObject {
      * @param {XISTemplateObject} parent 
      */
     constructor(parent) {
+        this.className = 'XISTemplateObject';
         this.parent = parent;
     }
 

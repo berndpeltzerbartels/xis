@@ -4,7 +4,8 @@ class XISHttpClient  {
      * @param {Function} errorHandler 
      */
     constructor(errorHandler) {
-      this.errorHandler = errorHandler;      
+        this.className = 'XISHttpClient';
+        this.errorHandler = errorHandler;      
     }
 
     get(uri, headers, parameters, handler) {

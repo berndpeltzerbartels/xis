@@ -2,7 +2,7 @@ package one.xis.resource;
 
 public interface ResourceFile {
 
-    int getLenght();
+    int getLength();
 
     String getContent();
 

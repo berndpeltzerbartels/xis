@@ -1,6 +1,7 @@
 class XISContainers {
 
     constructor() {
+        this.className = 'XISContainers';
         this.container = {};
     }
 

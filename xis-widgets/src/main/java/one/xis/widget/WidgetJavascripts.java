@@ -3,6 +3,7 @@ package one.xis.widget;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
+import one.xis.controller.ControllerUtils;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -30,12 +31,12 @@ class WidgetJavascripts {
 
     public WidgetJavascript add(WidgetMetaData widgetMetaData) {
         var widgetJavascript = createWidgetJavascript(widgetMetaData);
-        widgetJavascripts.put(widgetMetaData.getControllerClass().getName(), widgetJavascript);
+        widgetJavascripts.put(widgetMetaData.getKey(), widgetJavascript);
         return widgetJavascript;
     }
 
-    public WidgetJavascript getByControllerClass(String controllerClass) {
-        var widgetJavascript = widgetJavascripts.get(controllerClass);
+    public WidgetJavascript getByControllerClass(String widgetKey) {
+        var widgetJavascript = widgetJavascripts.get(widgetKey);
         synchronized (widgetJavascript) {
             widgetJavascriptCompiler.compileIfObsolete(widgetJavascript);
         }

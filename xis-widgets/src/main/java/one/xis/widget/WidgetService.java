@@ -22,7 +22,7 @@ public class WidgetService {
     private final ControllerInvocationService invocationService;
     private final Map<Object, WidgetMetaData> widgetMetaDataMap = new HashMap<>();
 
-    public void addWidgetConroller(Object controller) {
+    public void t(Object controller) {
         var widgetMetaData = widgetMetaDataMap.computeIfAbsent(controller, widgetMetaDataFactory::createMetaData);
         widgetJavascripts.add(widgetMetaData);
         widgetControllers.addController(controller, widgetMetaData);
@@ -39,8 +39,8 @@ public class WidgetService {
         return invocationService.invokeForAction(controller, request, request.getAction(), javascriptClassname);
     }
 
-    public WidgetJavascript getWidgetJavascript(String className) {
-        return widgetJavascripts.getByControllerClass(className);
+    public WidgetJavascript getWidgetJavascript(String widgetKey) {
+        return widgetJavascripts.getByControllerClass(widgetKey);
     }
 
     public Collection<String> getIds() {

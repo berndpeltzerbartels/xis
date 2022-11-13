@@ -2,6 +2,7 @@ package one.xis.widget;
 
 import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
+import one.xis.controller.ControllerUtils;
 import one.xis.resource.ResourceFiles;
 
 @XISComponent
@@ -16,6 +17,7 @@ class WidgetMetaDataFactory {
                 .htmlTemplate(resourceFiles.getByPath(getHtmlTemplatePath(controller)))
                 .javascriptClassname(uniqueJavascriptClassName())
                 .controllerClass(controllerClass(controller))
+                .key(ControllerUtils.getWidgetControllerId(controllerClass(controller)))
                 .build();
     }
 
