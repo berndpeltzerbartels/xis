@@ -23,8 +23,10 @@ public abstract class JavascriptComponentCompiler<C extends JavascriptComponent,
                 compile(javascriptComponent);
             }
             if (javascriptComponent.getHtmlResourceFile() instanceof ReloadableResourceFile) {
-                if (isObsolete(javascriptComponent)) {
-                    recompile(javascriptComponent);
+                var reloadableResourceFile  = (ReloadableResourceFile) javascriptComponent.getHtmlResourceFile();
+                if (reloadableResourceFile.isObsolete()) {
+                    reloadableResourceFile.reload();
+                    compile(javascriptComponent);
                 }
             }
             return javascriptComponent;
@@ -36,13 +38,6 @@ public abstract class JavascriptComponentCompiler<C extends JavascriptComponent,
         var javascript = doCompile(javascriptComponent);
         javascriptComponent.setJavascript(javascript);
         javascriptComponent.setCompiled(true);
-    }
-
-    private void recompile(C javascriptComponent) {
-        if (javascriptComponent.getHtmlResourceFile() instanceof ReloadableResourceFile) {
-            reloadHtml(javascriptComponent);
-        }
-        compile(javascriptComponent);
     }
 
     private String doCompile(C component) {
@@ -57,22 +52,6 @@ public abstract class JavascriptComponentCompiler<C extends JavascriptComponent,
         return javaScriptModelAsCode(script);
     }
 
-    private void reloadHtml(C pageJavascript) {
-        if (pageJavascript.getHtmlResourceFile() instanceof ReloadableResourceFile) {
-            var reloadableResourceFile = (ReloadableResourceFile) pageJavascript.getHtmlResourceFile();
-            reloadableResourceFile.reload();
-        } else {
-            throw new IllegalStateException();
-        }
-    }
-
-    private boolean isObsolete(C pageJavascript) {
-        if (pageJavascript.getHtmlResourceFile() instanceof ReloadableResourceFile) {
-            var reloadableResourceFile = (ReloadableResourceFile) pageJavascript.getHtmlResourceFile();
-            return reloadableResourceFile.isObsolete();
-        }
-        return false;
-    }
 
     protected abstract M parseTemplate(String controllerClass, Document document);
 
