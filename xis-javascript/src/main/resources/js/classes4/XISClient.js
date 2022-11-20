@@ -14,8 +14,13 @@ class XISClient {
         }
     }
 
+    send(phase, data, handler) {
+        // TODO
+
+    }
+
     /**
-     * 
+     * TODO remove following:
      * @param {XISPage} page 
      */
     sendPageModelRequest(page) {

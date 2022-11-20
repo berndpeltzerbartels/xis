@@ -7,7 +7,6 @@ class XISPage extends XISComponent {
         this.rootPage = undefined;
         this.headChildNodes = [];
         this.bodyChildNodes = [];
-        this.type = 'page';
         this.state = {};
     }
 
@@ -19,7 +18,7 @@ class XISPage extends XISComponent {
         this.rootPage = rootPage;
         if (this.hasClientStateVariablesOnInit()) {
             client.sendPageModelRequest(this); // calls refresh
-        } 
+        }
     }
 
     /**
@@ -45,9 +44,44 @@ class XISPage extends XISComponent {
      * @public
      */
     init() {
+        super.init();
         this.head.init();
         this.body.init();
     }
+
+    destroy() {
+        super.destroy();
+        this.head.destroy();
+        this.body.destroy();
+    }
+
+    show() {
+        super.show();
+        this.head.show();
+        this.body.show();
+    }
+
+    hide() {
+        super.hide();
+        this.head.hide();
+        this.body.hide();
+    }
+
+    /**
+     * @public
+     */
+    getHead() {
+        return this.rootPage.head;
+    }
+
+    /**
+     * @public
+     */
+    getBody() {
+        return this.rootPage.body;
+    }
+
+
     /**
      * @public
      */

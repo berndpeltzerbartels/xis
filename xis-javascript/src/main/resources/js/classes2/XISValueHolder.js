@@ -18,7 +18,7 @@ class XISValueHolder extends XISTemplateObject {
     getValueHolder() {
         return this
     }
-    
+
     setVarnames(varNames) {
         this.varNames = varNames;
     }
@@ -27,11 +27,11 @@ class XISValueHolder extends XISTemplateObject {
         this.values = values;
         this.setVarnames(Object.keys(this.values));
     }
-    
+
     /**
      * @param {Array<String>} path 
      */
-     getValue(path) {
+    getValue(path) {
         var name = path[0];
         if (this.varNames.indexOf(name) != -1) {
             var rv = this.values[name];
@@ -44,9 +44,10 @@ class XISValueHolder extends XISTemplateObject {
             return rv;
         }
         if (!this.parentValueHolder) {
-           throw new Error('no value for path ' + arrayToString(path));     
+            throw new Error('no value for path ' + arrayToString(path));
         }
         return this.parentValueHolder.getValue(path);
-      
     }
+
+
 }

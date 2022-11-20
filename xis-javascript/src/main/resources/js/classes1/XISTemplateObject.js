@@ -10,15 +10,37 @@ class XISTemplateObject {
         this.parent = parent;
     }
 
+    getParentElement() {
+        if (this.parent) {
+            return this.parent.getParentElement()
+        }
+    }
+
+    init() {
+        this.children.forEach(child.init());
+    }
+
+    destroy() {
+        this.children.forEach(child.destroy());
+    }
+
+    show() {
+        this.children.forEach(child.show());
+    }
+
+    hide() {
+        this.children.forEach(child.hide());
+    }
+
     refresh() {
-        throw new Error('abstract method');
+        this.children.forEach(child.refresh());
     }
 
     /**
      * @returns {XISValueHolder}
      */
     getValueHolder() {
-       return this.parent.getValueHolder();
+        return this.parent.getValueHolder();
     }
 
 
@@ -26,6 +48,9 @@ class XISTemplateObject {
         return this.getValueHolder().getValue(path);
     }
 
+    getChildren() {
+        return this.children;
+    }
 
     onDataChanged() {
 

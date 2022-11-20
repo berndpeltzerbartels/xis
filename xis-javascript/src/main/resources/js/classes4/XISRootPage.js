@@ -1,4 +1,4 @@
-class XISRootPage  {
+class XISRootPage {
 
     /**
      * 
@@ -12,10 +12,17 @@ class XISRootPage  {
     /**
      * @public
      */
-    init() {
+    onMainPageLoaded() {
         this.head = getElementByTagName('head');
         this.body = getElementByTagName('body');
         this.title = getChildByName(this.head, 'title');
+    }
+
+    onMainPageUnloaded() {
+        if (this.page) {
+            this.page.hide();
+            this.page.destroy(); // TODO Check if method is the same to avoid duplicate invocation on server-side
+        }
     }
 
     /**
@@ -26,6 +33,7 @@ class XISRootPage  {
     bindPage(page) {
         this.page = page;
         this.page.bind(this);
+        this.page.show();
     }
 
     /**
@@ -34,6 +42,7 @@ class XISRootPage  {
     unbindPage() {
         if (this.page) {
             this.page.unbind();
+            this.page.hide();
             this.page = undefined;
         }
     }

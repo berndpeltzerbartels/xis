@@ -1,16 +1,27 @@
 class XISBody extends XISElement {
 
-    constructor(parent) {
-        super(parent);
+    /**
+     * 
+     * @param {XISPage} parentPage 
+     */
+    constructor(parentPage) {
+        super(parentPage);
         this.className = 'XISBody';
     }
-
-    init() {
-        this.children.forEach(child => child.init());
+    
+    /**
+     * @public
+     * @override
+     */
+    createElement() {
+        return this.createElement('body'); // dummy to keep child-nodes
     }
 
-    refresh() {
-        this.updateAttributes();
-        this.children.forEach(child => child.refresh());
+    /**
+     * @public
+     * @override
+     */
+    getParentElement() {
+        return this.element;
     }
 }

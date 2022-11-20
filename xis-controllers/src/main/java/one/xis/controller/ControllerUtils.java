@@ -18,6 +18,11 @@ public class ControllerUtils {
         return getAnnotatedMethods(controllerClass, Model.class);
     }
 
+    public static Stream<Method> getOnShowMethods(Class<?> controllerClass) {
+        return getAnnotatedMethods(controllerClass, OnShow.class);
+    }
+
+
     public static Set<Method> getActionMethods(Class<?> controllerClass) {
         return getAnnotatedMethods(controllerClass, OnAction.class).collect(Collectors.toSet());
     }

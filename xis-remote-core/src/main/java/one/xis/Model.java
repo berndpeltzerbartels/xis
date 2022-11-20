@@ -6,13 +6,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 
-@Target({ElementType.PARAMETER, ElementType.TYPE, ElementType.METHOD})
+@Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Model {
     /**
      * An optional id of the model instance. Must be set, in case
      * of the model-class is not identifiable by its type, e.g.
-     * the model is jaust a string.
+     * the model is just a string.
      *
      * @return the id of the model
      */

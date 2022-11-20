@@ -7,23 +7,43 @@ class XISElement extends XISTemplateObject {
      * @param {XISTemplateObject} parent 
      */
     constructor(parent) {
-        super(parent, parent.getValueHolder());
+        super(parent);
         this.className = 'XISElement';
     }
 
-    init() {
-        if (this.parent.element) { // null if parent is page or widget
-            this.parent.element.appendChild(this.element);
-        }
-        this.children.forEach(child => child.init());
+    /**
+     * @public
+     * @override
+     */
+    createElement() { // TODO add this to java-model
+        throw new Error('abstract method');
     }
 
     /**
+     * @public
+     * @override
+     */
+    getParentElement() {
+       return this.element;
+    }
+
+    /**
+     * @public
+     * @override
+     */
+    init() {
+        this.element = this.createElement(); 
+        this.parent.element.appendChild(this.element);
+        super.init();
+    }
+
+    /**
+     * @public
      * @override
      */
     refresh() {
         this.updateAttributes();
-        this.children.forEach(child => child.refresh());
+        super.refresh();
     }
 
     unlink() {

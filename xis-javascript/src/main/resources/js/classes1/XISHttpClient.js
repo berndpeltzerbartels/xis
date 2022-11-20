@@ -1,30 +1,30 @@
-class XISHttpClient  {
-    
+class XISHttpClient {
+
     /**
      * @param {Function} errorHandler 
      */
     constructor(errorHandler) {
         this.className = 'XISHttpClient';
-        this.errorHandler = errorHandler;      
+        this.errorHandler = errorHandler;
     }
 
     get(uri, headers, parameters, handler) {
         var address = uri;
         if (parameters) {
             address += '?'
-            for(var name of Object.keys(parameters))  {
+            for (var name of Object.keys(parameters)) {
                 address += name;
                 address += '=';
                 address += encodeURI(parameters[name]);
             }
         }
-       this.doRequest(address, headers, 'GET', null, handler); 
+        this.doRequest(address, headers, 'GET', null, handler);
     }
 
     post(uri, headers, payload, handler) {
         var payloadJson = JSON.stringify(payload);
         headers['Content-length'] = payloadJson.length;
-        this.doRequest(uri, headers, 'POST', payloadJson, handler); 
+        this.doRequest(uri, headers, 'POST', payloadJson, handler);
     }
 
     /**
@@ -41,11 +41,11 @@ class XISHttpClient  {
         for (var name of Object.keys(headers)) {
             xmlHttp.setRequestHeader(name, headers[name]);
         }
-        xmlHttp.onreadystatechange = function() { 
+        xmlHttp.onreadystatechange = function () {
             // TODO Handle errors and "304 NOT MODIFIED"
             // TODO Add headers to allow 304
             // Readystaet == 4 for 304 ?
-            if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+            if (xmlHttp.readyState == 4 && xmlHttp.status == 200) { // TODO In Java 204 if there is no server-method
                 handler(JSON.parse(xmlHttp.responseText));
             }
             // TODO use errorhandler
@@ -53,5 +53,5 @@ class XISHttpClient  {
         xmlHttp.send(payload);
     }
 
-    
+
 }
