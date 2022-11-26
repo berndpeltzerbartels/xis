@@ -6,6 +6,7 @@ import one.xis.dto.ActionRequest;
 import one.xis.dto.InitialRequest;
 import one.xis.utils.lang.CollectorUtils;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 import java.util.Set;
 
@@ -26,6 +27,7 @@ class ControllerActionInvoker extends ControllerMethodInvoker {
         actionMethodsAvailable = getActionMethods(controller.getClass());
     }
 
+    @Nullable
     Class<?> invokeForAction(@NonNull String action) {
         return (Class<?>) invoke(matchingMethod(action));
     }

@@ -1,5 +1,6 @@
 package one.xis.page;
 
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
 import one.xis.controller.ControllerInvocationService;
@@ -20,10 +21,10 @@ public class PageService {
     private final PageControllers pageControllers;
     private final PageMetaDataFactory pageMetaDataFactory;
     private final ControllerInvocationService invocationService;
-    private final Map<Object, PageMetaData> pageMetaDataMap = new HashMap<>();
+    private final Map<Class<?>, PageMetaData> pageMetaDataMap = new HashMap<>();
 
-    public void addPageController(Object controller) {
-        var metaData = pageMetaDataMap.computeIfAbsent(controller, pageMetaDataFactory::createMetaData);
+    public void addPageController(@NonNull Object controller) {
+        var metaData = pageMetaDataMap.computeIfAbsent(controller.getClass(), pageMetaDataFactory::createMetaData);
         pageJavascripts.createScript(metaData);
         pageControllers.addController(controller, metaData);
     }
@@ -38,9 +39,10 @@ public class PageService {
         var javascriptClassname = getJavascriptClassname(controller);
         return invocationService.invokeForAction(controller, request, request.getAction(), javascriptClassname);
     }
+    
 
     private String getJavascriptClassname(Object controller) {
-        return pageMetaDataMap.get(controller).getJavascriptClassname();
+        return pageMetaDataMap.get(controller.getClass()).getJavascriptClassname();
     }
 
     public PageJavascript getPage(String id) {

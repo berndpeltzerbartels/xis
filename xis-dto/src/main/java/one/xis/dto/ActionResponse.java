@@ -6,6 +6,6 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class ActionResponse extends Response {
-    Class<?> nextController;
-    String nextComponent;
+    String nextPagePath;
+    String nextWidget;
 }

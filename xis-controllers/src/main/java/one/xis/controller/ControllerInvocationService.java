@@ -26,9 +26,17 @@ public class ControllerInvocationService {
         var response = new ActionResponse();
         response.setClientState(invoker.getClientState());
         response.setComponentState(invoker.getComponentState());
-        response.setNextController(nextControllerClass);
-        response.setNextComponent(javascriptClassName);
         response.setControllerClass(controller.getClass().getName());
+        if (nextControllerClass != null) {
+            if (ControllerUtils.isPageControllerClass(nextControllerClass)) {
+                response.setNextPagePath(ControllerUtils.getPageControllerPath(nextControllerClass));
+            } else if (ControllerUtils.isWidgetControllerClass(nextControllerClass)) {
+                if (ControllerUtils.isPageControllerClass(controller.getClass())) {
+                    throw new IllegalStateException("methods of page-controllers must not return widget-classes");
+                }
+                response.setNextWidget(ControllerUtils.getWidgetControllerId(nextControllerClass));
+            }
+        }
         return response;
     }
 }

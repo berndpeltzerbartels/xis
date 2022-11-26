@@ -6,7 +6,7 @@ import one.xis.resource.ResourceFile;
 
 @Builder
 @Getter
-class WidgetMetaData {
+public class WidgetMetaData {
     private final ResourceFile htmlTemplate;
     private final String javascriptClassname;
     private final Class<?> controllerClass;

@@ -66,13 +66,22 @@ public class ControllerUtils {
         return annotation.value().isEmpty() ? method.getName() : annotation.value();
     }
 
+    public static boolean isPageControllerClass(@NonNull Class<?> controllerClass) {
+        return controllerClass.isAnnotationPresent(Page.class);
+    }
+
+
+    public static boolean isWidgetControllerClass(@NonNull Class<?> controllerClass) {
+        return controllerClass.isAnnotationPresent(Widget.class);
+    }
+
     @NonNull
     public static String getControllerId(Class<?> controllerClass) {
         if (controllerClass.isAnnotationPresent(Widget.class)) {
             return getWidgetControllerId(controllerClass);
         }
         if (controllerClass.isAnnotationPresent(Page.class)) {
-            return getPageControllerId(controllerClass);
+            return getPageControllerPath(controllerClass);
         }
         throw new IllegalStateException();
     }
@@ -82,8 +91,7 @@ public class ControllerUtils {
         return annotation.value().isEmpty() ? controllerClass.getSimpleName() : annotation.value();
     }
 
-    public static String getPageControllerId(Class<?> controllerClass) {
-        var annotation = controllerClass.getAnnotation(Page.class);
-        return annotation.path().isEmpty() ? controllerClass.getSimpleName() : annotation.path();
+    public static String getPageControllerPath(Class<?> controllerClass) {
+        return controllerClass.getAnnotation(Page.class).path();
     }
 }

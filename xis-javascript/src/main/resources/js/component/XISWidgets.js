@@ -11,12 +11,12 @@ class XISWidgets {
     }
 
     getWidget(key) {
-        var widget =  this.widgets[key];
+        var widget = this.widgets[key];
         if (!widget.initialized) {
             widget.init();
             widget.initialized = true;
         }
         return widget;
     }
-    
+
 }

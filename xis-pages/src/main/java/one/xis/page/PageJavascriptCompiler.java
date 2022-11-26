@@ -22,7 +22,7 @@ class PageJavascriptCompiler extends JavascriptComponentCompiler<PageJavascript,
     }
 
     @Override
-    protected JSClass parseTemplateModelIntoScriptModel(@NonNull PageTemplateModel templateModel, @NonNull String javascriptClassName, JSScript script) {
+    protected JSClass parseTemplateModelIntoScriptModel(@NonNull PageTemplateModel templateModel, @NonNull String javascriptClassName, @NonNull JSScript script) {
         return javascriptTemplateParser.parseTemplateModel(templateModel, javascriptClassName, script);
     }
 

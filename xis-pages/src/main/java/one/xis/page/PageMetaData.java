@@ -6,7 +6,7 @@ import one.xis.resource.ResourceFile;
 
 @Builder
 @Getter
-class PageMetaData {
+public class PageMetaData {
     private final String path;
     private final boolean welcomePage;
     private final ResourceFile htmlTemplate;
