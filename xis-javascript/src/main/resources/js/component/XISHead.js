@@ -2,7 +2,7 @@ class XISHead extends XISElement {
 
     constructor(parentPage) {
         super(parentPage);
-        this.className = 'XIShead';
+        this.className = 'XISHead';
     }
 
 

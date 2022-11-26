@@ -6,10 +6,8 @@ class XISValueHolder extends XISTemplateObject {
     constructor(parent) {
         super(parent);
         this.className = 'XISValueHolder';
-        this.varNames = [];
-        this.values = {};
+        this.values = new XISMap();
     }
-
 
     /**
      * @public
@@ -19,13 +17,21 @@ class XISValueHolder extends XISTemplateObject {
         return this
     }
 
-    setVarnames(varNames) {
-        this.varNames = varNames;
+    /**
+     * @public
+     * @returns {XISMap}
+     */
+    getValues() {
+        return this.values;
     }
 
-    setValues(values) {
-        this.values = values;
-        this.setVarnames(Object.keys(this.values));
+    // TODO remove this method
+    setVarnames(varNames) {
+        throw new Error('remove this method');
+    }
+
+    addValues(values) {
+        this.values.putAll(values);
     }
 
     /**
@@ -33,8 +39,8 @@ class XISValueHolder extends XISTemplateObject {
      */
     getValue(path) {
         var name = path[0];
-        if (this.varNames.indexOf(name) != -1) {
-            var rv = this.values[name];
+        if (indexOf(this.values.keys()) != -1) {
+            var rv = this.values.get(name);
             for (var i = 1; i < path.length; i++) {
                 if (!rv) {
                     return undefined;

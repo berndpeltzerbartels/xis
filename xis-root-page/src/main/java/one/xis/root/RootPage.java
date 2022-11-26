@@ -33,10 +33,7 @@ public class RootPage {
         Document document = getRootPageDocument();
         Element head = getHead(document);
         addFunctionsScriptTag(head);
-        addClasses1ScriptTag(head);
-        addClasses2ScriptTag(head);
-        addClasses3ScriptTag(head);
-        addClasses4ScriptTag(head);
+        addApiScriptTag(head);
         addGlobalsScriptTag(head);
         addPagesScriptTags(head);
         addWidgetScriptTags(head);
@@ -70,22 +67,10 @@ public class RootPage {
         addScriptTag(head, "/xis/api/functions.js");
     }
 
-    private void addClasses1ScriptTag(Element head) {
-        addScriptTag(head, "/xis/api/classes1.js");
+    private void addApiScriptTag(Element head) {
+        addScriptTag(head, "/xis/api/xis.js");
     }
-
-    private void addClasses2ScriptTag(Element head) {
-        addScriptTag(head, "/xis/api/classes2.js");
-    }
-
-    private void addClasses3ScriptTag(Element head) {
-        addScriptTag(head, "/xis/api/classes3.js");
-    }
-
-    private void addClasses4ScriptTag(Element head) {
-        addScriptTag(head, "/xis/api/classes4.js");
-    }
-
+    
     private void addInitializerScriptTag(Element head) {
         addScriptTag(head, "/xis/initializer.js");
     }

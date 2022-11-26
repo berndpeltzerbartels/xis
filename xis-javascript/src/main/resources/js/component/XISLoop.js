@@ -26,6 +26,8 @@ class XISLoop extends XISValueHolder {
         var arr = this.getArray();
         this.updateRowCount(arr.length);
         for (var rowIndex = 0; rowIndex < arr.length; rowIndex++) {
+            // TODO Eventuell ist es besser getValue zu modifizieren (this als 2 Parameter) so dass man hier erkennt wer etwas will
+            // man findet dann den Child Index
             this.values[this.loopAttributes.itemVarName] = arr[rowIndex];
             this.values[this.loopAttributes.indexVarName] = rowIndex;
             this.values[this.loopAttributes.numberVarName] = rowIndex + 1;

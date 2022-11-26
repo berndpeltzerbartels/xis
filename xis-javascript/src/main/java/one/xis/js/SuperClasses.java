@@ -1,6 +1,6 @@
 package one.xis.js;
 
-public class Classes {
+public class SuperClasses {
 
     public static final JSSuperClass XIS_PAGE = new JSSuperClass("XISPage");
     public static final JSSuperClass XIS_WIDGET = new JSSuperClass("XISWidget"); // TODO check javascript
@@ -20,6 +20,7 @@ public class Classes {
     static {
 
         XIS_IF.addMethod("init", 2)
+                .addAbstractMethod("getClassName")
                 .addMethod("update", 0)
                 .addAbstractMethod("evaluateCondition")
                 .addMethod("initChildren", 0)
@@ -28,6 +29,7 @@ public class Classes {
                 .addAbstractField("children");
 
         XIS_LOOP.addMethod("init", 2)
+                .addAbstractMethod("getClassName")
                 .addMethod("update", 0)
                 .addMethod("updateChildren", 0)
                 .addAbstractMethod("createChildren")
@@ -41,6 +43,7 @@ public class Classes {
                 .addAbstractField("rows");
 
         XIS_PAGE.addMethod("init", 1)
+                .addAbstractMethod("getClassName")
                 .addMethod("update", 1)
                 .addMethod("getValue", 1)
                 .addMethod("initChildren", 0)
@@ -52,6 +55,7 @@ public class Classes {
                 .addAbstractField("path");
 
         XIS_WIDGET.addMethod("init", 1)
+                .addAbstractMethod("getClassName")
                 .addMethod("bind", 2)
                 .addMethod("unbind", 2)
                 .addMethod("update", 0)
@@ -63,6 +67,7 @@ public class Classes {
                 .addAbstractField("root");
 
         XIS_ELEMENT.addMethod("init", 2)
+                .addAbstractMethod("getClassName")
                 .addMethod("val", 1)
                 .addMethod("update", 0)
                 .addMethod("initChildren", 0)
@@ -73,6 +78,7 @@ public class Classes {
                 .addAbstractField("children");
 
         XIS_HEAD_ELEMENT.addMethod("init", 2)
+                .addAbstractMethod("getClassName")
                 .addMethod("val", 1)
                 .addMethod("update", 0)
                 .addMethod("initChildren", 0)
@@ -84,6 +90,7 @@ public class Classes {
 
 
         XIS_BODY_ELEMENT.addMethod("init", 2)
+                .addAbstractMethod("getClassName")
                 .addMethod("val", 1)
                 .addMethod("update", 0)
                 .addMethod("initChildren", 0)
@@ -94,6 +101,7 @@ public class Classes {
                 .addAbstractField("children");
 
         XIS_CONTAINER.addMethod("init", 2)
+                .addAbstractMethod("getClassName")
                 .addMethod("bindWidget", 1)
                 .addMethod("unbindWidget", 0)
                 .addMethod("getValue", 1)
@@ -103,24 +111,29 @@ public class Classes {
                 .addMethod("unlink", 0);
 
         XIS_STATIC_TEXT_NODE.addMethod("init", 2)
+                .addAbstractMethod("getClassName")
                 .addMethod("update", 0)
                 .addAbstractField("node");
 
         XIS_MUTABLE_TEXT_NODE.addMethod("init", 1) // ONE ARG HERE !
+                .addAbstractMethod("getClassName")
                 .addMethod("update", 0)
                 .addAbstractMethod("getText")
                 .addMethod("val", 1)
                 .addAbstractField("node");
 
         XIS_WIDGETS.addMethod("getWidget", 1)
+                .addAbstractMethod("getClassName")
                 .addMethod("bind", 2)
                 .addAbstractField("widgets");
 
         XIS_CONTAINERS.addMethod("getContainer", 1)
+                .addAbstractMethod("getClassName")
                 .addMethod("addContainer", 1)
                 .addMethod("bind", 2);
 
         XIS_PAGES.addMethod("getPage", 1)
+                .addAbstractMethod("getClassName")
                 .addAbstractField("pages")
                 .addMethod("getPageByPath", 1);
 

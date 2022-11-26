@@ -1,14 +1,17 @@
 package one.xis.js;
 
-import lombok.Data;
-
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Data
+
 public class JSArray implements JSValue, JSContext {
-    private final List<? extends JSValue> elements;
+    private final List<Object> elements;
+
+    public JSArray() {
+        elements = new ArrayList<>();
+    }
 
     public JSArray(JSValue... elements) {
         this.elements = Arrays.asList(elements);
@@ -16,7 +19,7 @@ public class JSArray implements JSValue, JSContext {
 
 
     public JSArray(List<? extends JSValue> elements) {
-        this.elements = elements;
+        this.elements = new ArrayList<>(elements);
     }
 
     public static JSArray arrayOfStrings(List<String> strings) {
@@ -24,6 +27,16 @@ public class JSArray implements JSValue, JSContext {
     }
 
     public static JSArray arrayOfValues(List<JSValue> values) {
-        return new JSArray(values);
+        var array = new JSArray();
+        array.elements.addAll(values);
+        return array;
+    }
+
+    public void addElement(JSValue value) {
+        elements.add(value);
+    }
+
+    List<JSValue> getElements() {
+        return elements.stream().map(JSValue.class::cast).collect(Collectors.toList());
     }
 }

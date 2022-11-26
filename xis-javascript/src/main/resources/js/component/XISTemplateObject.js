@@ -32,6 +32,7 @@ class XISTemplateObject {
         this.children.forEach(child.hide());
     }
 
+    // TODE: Kann refresh wegen show ganz verschwinden ?
     refresh() {
         this.children.forEach(child.refresh());
     }

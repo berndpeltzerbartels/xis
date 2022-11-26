@@ -12,13 +12,58 @@ class XISClient {
             this.clientId = randomString(12);
             localStorage.setItem('xis-client-id', this.clientId);
         }
+        this.messageStack = [];
+        this.mesageComponents = [];
     }
 
-    send(phase, data, handler) {
-        // TODO
-
+    addActionMessage(component, action, data, parameters) {
+        this.mesageComponents.push(component);
+        this.messageStack.push({
+            componentType: component.className,
+            type: 'action',
+            data: data,
+            actionKey: action,
+            parameters: parameters
+        });
     }
 
+    addPhaseMessage(component, phase, data, parameters) {
+        this.mesageComponents.push(component);
+        this.messageStack.push({
+            componentType: component.className,
+            type: 'phase',
+            data: data,
+            phase: phase,
+            parameters: parameters
+        });
+    }
+
+    submit() {
+        var client = this;
+        var request = {
+            messages: client.messageStack
+        };
+        this.restClient.post('/xis/ajax', this.getRequestHeaders(), request, response => {
+            for (var i = 0; i < this.messageStack.length; i++) {
+                var message = response.messages[i];
+                client.mesageComponents[i].processResponse(message.data);
+            }
+        });
+        this.mesageComponents = {};
+        this.messageStack = {};
+    }
+
+    /**
+     * @private
+     * @returns {any}
+     */
+    getRequestHeaders() {
+        return {
+            clientId: client.clientId,
+            token: client.token,
+            timestamp: new Date()
+        }
+    }
     /**
      * TODO remove following:
      * @param {XISPage} page 

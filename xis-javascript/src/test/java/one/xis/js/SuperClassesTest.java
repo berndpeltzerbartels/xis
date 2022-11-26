@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import javax.script.ScriptException;
 
-class ClassesTest {
+class SuperClassesTest {
 
     @Test
     void allCompiles() throws ScriptException {

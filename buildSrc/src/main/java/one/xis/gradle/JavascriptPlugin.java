@@ -7,12 +7,8 @@ import javax.script.Compilable;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import java.io.*;
-import java.nio.file.Files;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Writes all javascript-sources into a single file and compiles the result
@@ -27,22 +23,27 @@ public class JavascriptPlugin implements Plugin<Project> {
 
     @Override
     public void apply(Project project) {
-        findJsSrcDirs(project).forEach(folder -> processJsSrcDir(folder, project));
+        var jsFiles = FileUtils.files(getJsSrcRoot(project), "js").stream()
+                .map(this::toJSFile)
+                .collect(Collectors.toSet());
+        var sortedJsFiles = JSFileSorter.sort(jsFiles);
+        var outFile = new File(project.getBuildDir(), "/resources/main/js/xis.js");
+        writeJsToFile(sortedJsFiles, outFile);
+        compile(outFile);
     }
 
-    private void processJsSrcDir(File jsSrcDir, Project project) {
-        File jsOutFile = getJSOutFile(jsSrcDir, project);
-        Collection<File> jsFiles = getJsFiles(jsSrcDir);
-        jsFiles.forEach(this::compile);
-        copyJsToFile(getJsFiles(jsSrcDir), jsOutFile);
-        compile(jsOutFile);
+    private JSFile toJSFile(File file) {
+        var content = FileUtils.getContent(file, "utf-8");
+        var analyzer = new JsContentAnalyzer(content);
+        analyzer.analyze();
+        return new JSFile(file, content, analyzer.getDeclaredClasses(), analyzer.getSuperClasses());
     }
 
-    private void copyJsToFile(Collection<File> jsSrcFiles, File jsOutFile) {
+    private void writeJsToFile(Collection<JSFile> jsSrcFiles, File jsOutFile) {
         try (PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(jsOutFile)))) {
             jsSrcFiles.forEach(file -> {
-                String content = readContent(file);
-                out.println(content);
+                System.out.println("add script content: " + file.getFile().getName());
+                out.println(file.getContent());
                 out.println();
             });
 
@@ -51,13 +52,9 @@ public class JavascriptPlugin implements Plugin<Project> {
         }
     }
 
-    private Collection<File> getJsFiles(File jsSrcDir) {
-        return Arrays.stream(Objects.requireNonNull(jsSrcDir.listFiles((dir, name) -> name.endsWith(".js")))).collect(Collectors.toSet());
-    }
-
     private void compile(File jsFile) {
         try {
-            compiler.compile(readContent(jsFile));
+            compiler.compile(FileUtils.getContent(jsFile, "utf-8"));
         } catch (ScriptException e) {
             throw new RuntimeException("Compilation failed for " + jsFile.getAbsolutePath() + ": " + e.getMessage());
         }
@@ -71,31 +68,4 @@ public class JavascriptPlugin implements Plugin<Project> {
         return new File(project.getProjectDir(), "src/main/resources/js");
     }
 
-    private File getJSOutFile(File jsSrcDir, Project project) {
-        File javascriptDir = new File(project.getBuildDir(), "/resources/main/js");
-        if (!javascriptDir.exists() && !javascriptDir.mkdirs()) {
-            throw new IllegalStateException("can not create " + javascriptDir.getAbsolutePath());
-        }
-        return new File(javascriptDir, jsSrcDir.getName() + ".js");
-    }
-
-    private static String readContent(File file) {
-        try {
-            return Files.readString(file.toPath());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private Stream<File> findJsSrcDirs(Project project) {
-        return Arrays.stream(Objects.requireNonNull(getJsSrcRoot(project).listFiles()))//
-                .filter(this::isJsSrcDir);
-    }
-
-    private boolean isJsSrcDir(File folder) {
-        if (!folder.isDirectory()) {
-            return false;
-        }
-        return Arrays.stream(folder.listFiles()).filter(File::isFile).anyMatch(file -> file.getName().endsWith(".js"));
-    }
 }

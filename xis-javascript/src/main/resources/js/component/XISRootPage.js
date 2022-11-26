@@ -7,6 +7,7 @@ class XISRootPage {
     constructor(client) {
         this.className = 'XISRootPage';
         this.client = client;
+
     }
 
     /**
@@ -18,10 +19,15 @@ class XISRootPage {
         this.title = getChildByName(this.head, 'title');
     }
 
+    /**
+     * @public
+     */
     onMainPageUnloaded() {
         if (this.page) {
             this.page.hide();
-            this.page.destroy(); // TODO Check if method is the same to avoid duplicate invocation on server-side
+            this.page.destroy();
+            this.page = undefined;
+            this.client.submit();
         }
     }
 
@@ -34,6 +40,7 @@ class XISRootPage {
         this.page = page;
         this.page.bind(this);
         this.page.show();
+        this.client.submit();
     }
 
     /**
@@ -44,6 +51,7 @@ class XISRootPage {
             this.page.unbind();
             this.page.hide();
             this.page = undefined;
+            this.client.submit();
         }
     }
 }

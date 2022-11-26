@@ -5,9 +5,11 @@ class XISContainer extends XISTemplateObject {
 
     /**
     * @param {XISTemplateObject} parent
+    * @param {XISWidgets} widgets
     */
-    constructor(parent) {
+    constructor(parent, widgets) {
         super(parent);
+        this.widgets = widgets;
         this.className = 'XISContainer';
     }
 
@@ -17,7 +19,7 @@ class XISContainer extends XISTemplateObject {
      */
     init() {
         if (this.defaultWidgetId) {
-            var widget = widgets.getWidget(this.defaultWidgetId);
+            var widget = this.widgets.getWidget(this.defaultWidgetId);
             this.bindWidget(widget);
         }
     }
@@ -63,6 +65,10 @@ class XISContainer extends XISTemplateObject {
         return this;
     }
 
+    /**
+     * @public
+     * @param {XISWidget} widget 
+     */
     bindWidget(widget) {
         if (this.widget && this.widget != widget) {
             this.widget = widget;
@@ -73,9 +79,14 @@ class XISContainer extends XISTemplateObject {
         }
     }
 
+    /**
+    * @public
+    * @param {XISWidget} widget 
+    */
     unbindWidget() {
         if (this.widget) {
             this.getParentElement().removeChild(this.widget.root.element);
+            this.widget.hide();
         }
     }
 

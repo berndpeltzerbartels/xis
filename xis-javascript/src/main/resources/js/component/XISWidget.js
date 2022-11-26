@@ -6,6 +6,20 @@ class XISWidget extends XISComponent {
 
     }
 
+    /**
+     * @public
+     * @override
+     * @param {any} data 
+     */
+    addValues(data) {
+        super.addValues(data);
+        this.setValues(parent.getParameters());
+    }
+
+    /**
+     * @public
+     * @param {string} id 
+     */
     replace(id) {
         var container = this.parent;
         var widget = widgets.getWidget(id);

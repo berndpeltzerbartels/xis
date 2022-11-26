@@ -1,11 +1,11 @@
-class XISList {
+class XISCollection {
 
     /**
      * 
      * @param {Array} arr 
      */
     constructor(arr) {
-        this.className = 'XISList';
+        this.className = 'XISCollection';
         if (arr) {
             this.arr = arr;
         } else {
@@ -14,28 +14,28 @@ class XISList {
     }
 
     add(obj) {
-        this.arr.push(obj);
+        throw new Error('abstract method');
     }
 
     addAll(arr) {
         for (var e of arr) {
-            this.arr.push(e);
+            this.add(e);
         }
     }
 
     contains(obj) {
-        this.arr.indexOf(obj) != -1;      
+        indexOf(this.arr, obj) != -1;
     }
 
     remove(obj) {
-        var index = this.arr.indexOf(obj);
+        var index = indexOf(this.arr, obj);
         if (index !== -1) {
             return this.arr.splice(index, 1);
         }
     }
 
     indexOf(obj) {
-        return this.arr.indexOf(obj);
+        return indexOf(this.arr, obj);
     }
 
     isEmpty() {

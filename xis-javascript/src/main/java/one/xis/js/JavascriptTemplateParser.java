@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static one.xis.js.Classes.*;
+import static one.xis.js.SuperClasses.*;
 
 @XISComponent
 public class JavascriptTemplateParser {
@@ -308,6 +308,8 @@ public class JavascriptTemplateParser {
 
     private JSClass derrivedClass(String className, JSSuperClass superClass, JSScript script) {
         var jsClass = new JSClass(className, superClass.getConstructor().getArgs()).derrivedFrom(superClass);
+        addGetClassNameMethod(jsClass, className);
+        addGetSuperClassNameMethod(jsClass, superClass);
         script.addClassDeclaration(jsClass);
         return jsClass;
     }
@@ -318,5 +320,15 @@ public class JavascriptTemplateParser {
 
     private String nextVarName() {
         return "v" + (currentNameId++);
+    }
+
+    private void addGetClassNameMethod(JSClass owner, String className) {
+        var getClassName = owner.overrideAbstractMethod("getClassName");
+        getClassName.addStatement(new JSReturn(new JSString(className)));
+    }
+
+    private void addGetSuperClassNameMethod(JSClass owner, JSClass superClass) {
+        var getSuperClassName = owner.overrideAbstractMethod("getSuperClassName");
+        getSuperClassName.addStatement(new JSReturn(new JSString(superClass.getClassName())));
     }
 }

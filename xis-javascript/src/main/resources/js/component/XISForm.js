@@ -1,8 +1,12 @@
 class XISForm {
 
-    constructor() {
+    /**
+     * @param {XISComponent} component 
+     */
+    constructor(component) {
+        this.component = component;
         this.className = 'XISForm';
-        this.lockingElements = new XISArrayList();
+        this.lockingElements = new XISSet();
     }
 
     lock(formElement) {
@@ -13,9 +17,9 @@ class XISForm {
         this.lockingElements.remove(formElement);
     }
 
-    submit() {
+    submit(action) {
         if (this.lockingElements.isEmpty()) {
-
+            this.component.onAction(action);
         }
     }
 }

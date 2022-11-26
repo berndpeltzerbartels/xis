@@ -161,7 +161,7 @@ public class JSWriter {
 
     private void writeArrayValue(JSArray array, Appendable writer) throws IOException {
         writer.append("[");
-        Iterator<? extends JSValue> args = array.getElements().iterator();
+        Iterator<JSValue> args = array.getElements().iterator();
         while (args.hasNext()) {
             writeValue(args.next(), writer);
             if (args.hasNext()) {

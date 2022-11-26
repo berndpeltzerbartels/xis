@@ -16,9 +16,6 @@ class XISPage extends XISComponent {
      */
     bind(rootPage) {
         this.rootPage = rootPage;
-        if (this.hasClientStateVariablesOnInit()) {
-            client.sendPageModelRequest(this); // calls refresh
-        }
     }
 
     /**
@@ -31,15 +28,6 @@ class XISPage extends XISComponent {
         page.bind(this.rootPage);
     }
 
-
-    /**
-     * @private
-     * @returns {boolean} client-state is updated on page-initialization 
-     */
-    hasClientStateVariablesOnInit() {
-        return Object.keys(this.initClientKeys).length > 0;
-    }
-
     /**
      * @public
      */
@@ -49,18 +37,27 @@ class XISPage extends XISComponent {
         this.body.init();
     }
 
+    /**
+     * @public
+     */
     destroy() {
         super.destroy();
         this.head.destroy();
         this.body.destroy();
     }
 
+    /**
+     * @public
+     */
     show() {
         super.show();
         this.head.show();
         this.body.show();
     }
 
+    /**
+     * @public
+     */
     hide() {
         super.hide();
         this.head.hide();

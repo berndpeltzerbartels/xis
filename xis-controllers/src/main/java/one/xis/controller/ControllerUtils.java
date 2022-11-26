@@ -22,6 +22,10 @@ public class ControllerUtils {
         return getAnnotatedMethods(controllerClass, OnShow.class);
     }
 
+    public static Stream<Method> getOnHideMethods(Class<?> controllerClass) {
+        return getAnnotatedMethods(controllerClass, OnHide.class);
+    }
+
 
     public static Set<Method> getActionMethods(Class<?> controllerClass) {
         return getAnnotatedMethods(controllerClass, OnAction.class).collect(Collectors.toSet());
@@ -32,7 +36,7 @@ public class ControllerUtils {
                 .filter(parameter -> parameter.isAnnotationPresent(Model.class));
     }
 
-    public static Stream<Parameter> getStateParamters(Method method) {
+    public static Stream<Parameter> getClientStateParamters(Method method) {
         return Arrays.stream(method.getParameters())
                 .filter(parameter -> parameter.isAnnotationPresent(State.class));
     }
