@@ -9,7 +9,7 @@ import org.w3c.dom.Document;
 
 @XISComponent
 @RequiredArgsConstructor
-class WidgetJavascriptCompiler extends JavascriptComponentCompiler<WidgetJavascript, WidgetTemplateModel> {
+class WidgetJavascriptCompiler extends JavascriptComponentCompiler<WidgetComponent, WidgetTemplateModel> {
 
     private final TemplateParser templateParser;
     private final JavascriptTemplateParser javascriptTemplateParser;

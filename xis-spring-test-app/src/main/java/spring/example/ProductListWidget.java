@@ -17,7 +17,8 @@ class ProductListWidget {
     @Autowired
     private BasketService basketService;
 
-    @Model
+    @OnInit
+    @ComponentState
     ProductListData createProductList() {
         var productListData = new ProductListData();
         productListData.setProductCategories(productCategoryService.allCategories());
@@ -30,7 +31,7 @@ class ProductListWidget {
     }
 
     @OnAction("categorySelected")
-    void categorySelected(@Param long categoryId, @Model ProductListData productListData) {
+    void categorySelected(@Param long categoryId, @ComponentState ProductListData productListData) {
         productListData.setCategoryId(categoryId);
         productListData.setProducts(productService.getByCategory(categoryId));
     }

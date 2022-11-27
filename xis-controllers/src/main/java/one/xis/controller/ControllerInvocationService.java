@@ -1,42 +1,71 @@
 package one.xis.controller;
 
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import one.xis.OnDestroy;
+import one.xis.OnHide;
+import one.xis.OnInit;
+import one.xis.OnShow;
+import one.xis.ajax.AjaxResponseMessage;
+import one.xis.ajax.InvocationContext;
+import one.xis.ajax.Phase;
 import one.xis.context.XISComponent;
-import one.xis.dto.ActionRequest;
-import one.xis.dto.ActionResponse;
-import one.xis.dto.InitialRequest;
-import one.xis.dto.InitialResponse;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.util.Collection;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @XISComponent
+@RequiredArgsConstructor
 public class ControllerInvocationService {
 
-    public InitialResponse invokeInitial(@NonNull Object controller, @NonNull InitialRequest request) {
-        var invoker = new ControllerInitializeInvoker(controller, request);
-        invoker.invokeInitial();
-        var response = new InitialResponse();
-        response.setClientState(invoker.getClientState());
-        response.setComponentState(invoker.getComponentState());
-        response.setControllerClass(controller.getClass().getName());
-        return response;
+    private final ControllerParameterProvider parameterProvider;
+
+    public Collection<AjaxResponseMessage> invokeController(@NonNull Object controller, @NonNull InvocationContext invocationContext) {
+        return getAnnotatedMethods(controller, getPhaseAnnotation(invocationContext.getPhase()))
+                .map(method -> invokeControllerMethod(controller, method, invocationContext))
+                .collect(Collectors.toSet());
     }
 
-    public ActionResponse invokeForAction(@NonNull Object controller, @NonNull ActionRequest request, @NonNull String action, @NonNull String javascriptClassName) {
-        var invoker = new ControllerActionInvoker(controller, request);
-        var nextControllerClass = invoker.invokeForAction(action);
-        var response = new ActionResponse();
-        response.setClientState(invoker.getClientState());
-        response.setComponentState(invoker.getComponentState());
-        response.setControllerClass(controller.getClass().getName());
-        if (nextControllerClass != null) {
-            if (ControllerUtils.isPageControllerClass(nextControllerClass)) {
-                response.setNextPagePath(ControllerUtils.getPageControllerPath(nextControllerClass));
-            } else if (ControllerUtils.isWidgetControllerClass(nextControllerClass)) {
-                if (ControllerUtils.isPageControllerClass(controller.getClass())) {
-                    throw new IllegalStateException("methods of page-controllers must not return widget-classes");
-                }
-                response.setNextWidget(ControllerUtils.getWidgetControllerId(nextControllerClass));
-            }
-        }
-        return response;
+    private AjaxResponseMessage invokeControllerMethod(@NonNull Object controller, @NonNull Method method, @NonNull InvocationContext invocationContext) {
+        return null; // TODO
     }
+
+
+    private Class<? extends Annotation> getPhaseAnnotation(Phase phase) {
+        switch (phase) {
+            case SHOW:
+                return OnShow.class;
+            case HIDE:
+                return OnHide.class;
+            case INIT:
+                return OnInit.class;
+            case DESTROY:
+                return OnDestroy.class;
+            default:
+                throw new IllegalArgumentException();
+        }
+    }
+
+
+    private Object[] prepareArgs(@NonNull Method method, @NonNull InvocationContext invocationContext) {
+        var rv = new Object[method.getParameters().length];
+        for (int i = 0; i < rv.length; i++) {
+            rv[i] = paramValue(method.getParameters()[i], invocationContext);
+        }
+        return rv;
+    }
+
+    private Object paramValue(@NonNull Parameter parameter, @NonNull InvocationContext invocationContext) {
+        return parameterProvider.paramValue(parameter, invocationContext);
+    }
+
+
+    private Stream<Method> getAnnotatedMethods(Object controller, Class<? extends Annotation> annotationClass) {
+        return ControllerUtils.getAnnotatedMethods(controller.getClass(), annotationClass);
+    }
+
 }

@@ -1,6 +1,6 @@
 # XIS #
 
-XIS-Remote allows you to create your single-pageJavascript web-application with Spring-backend easily by hiding the
+XIS-Remote allows you to create your single-pageComponent web-application with Spring-backend easily by hiding the
 commununication-layer, based on HTTP and socket.io, behind some simple abstractions. By using XIS-Remote, you will save
 all the code you normally have to write for restful-services or sending websocket-messages, handling client state,
 reducers, effects and so on. All these things are running behind the scenes as generated Java-code and generated
@@ -29,29 +29,29 @@ src
 ```
 
 Intention was, inside your Java-code you feel like to be on client-side, but of course you are not. Getting values from
-the pageJavascript or placing data on it is done by socket.io automatically.
+the pageComponent or placing data on it is done by socket.io automatically.
 
 As a consequence, a component is not a singleton (because we have several clients). It is just in request scope (to keep
 your server-application stateless), but it contains the actual client-state (by using @Binding- annotated fields).
 
-In XIS-Remote, we have two kinds of components. Pages and widgets on one hand side and pageJavascript-components on the
+In XIS-Remote, we have two kinds of components. Pages and widgets on one hand side and pageComponent-components on the
 other.
 
 ### Pages and Widgets
 
 When you create a component to be loaded by an HTTP-URL, you have to annotate the java-classes with @Page or @Widget,
 where in fact @Widget is just an alias for @Page, just to show, the corresponding HTML is just a fragment and intended
-to be diplayed on an HTML-pageJavascript. With the annotation, you define an URL to access such kind of components.
+to be diplayed on an HTML-pageComponent. With the annotation, you define an URL to access such kind of components.
 
 #### Widget
 
-A widgetJavascript has to be annotated wiht @Widget. There are several ways to load a some HTML at runtime and we will
+A widgetComponent has to be annotated wiht @Widget. There are several ways to load a some HTML at runtime and we will
 discuss it later.
 
 Example: WeatherWidget.java
 
 ```
-@Widget("/weather/weather.widgetJavascript")
+@Widget("/weather/weather.widgetComponent")
 class WeatherWidget {
     
     @Autowired
@@ -102,7 +102,7 @@ WeatherWidget.html:
 
 #### Pages
 
-Because a pageJavascript is something like a root element, it is responsible to load the generated javascript. URL is
+Because a pageComponent is something like a root element, it is responsible to load the generated javascript. URL is
 `/resources/public/xis-remote-generated.js`.
 
 MainPage.html
@@ -114,7 +114,7 @@ MainPage.html
          <link rel="stylesheet" href="/resources/public/styles.css"> 
     </head>
     <body>
-        <div data-id="widgetJavascript"/>
+        <div data-id="widgetComponent"/>
         <div data-id="mainContent"/>
     </body>
 </html>
@@ -127,19 +127,19 @@ MainPage.java
 public class MainPage {
 
     @Binding
-    private Object widgetJavascript;
+    private Object widgetComponent;
     
     @Binding
     private Object mainContent;
       
     @OnInit
     void init(WeatherWidget weatherWidget, News news) {
-        if (widgetJavascript == null) widgetJavascript = weatherWidget;
+        if (widgetComponent == null) widgetComponent = weatherWidget;
         if (mainContent == null) mainContent = news;
     }
 
-    public void setWidget(Object widgetJavascript) {
-        this.widgetJavascript = widgetJavascript;
+    public void setWidget(Object widgetComponent) {
+        this.widgetComponent = widgetComponent;
     }
     
     public void setMainContent(Object mainContent) {
@@ -149,20 +149,20 @@ public class MainPage {
 }
 ```
 
-The setters allow set change the content of the two div-containers. The parameter has to be a pageJavascript-component.
-You might also use pageJavascript-components inside pageJavascript-components.
+The setters allow set change the content of the two div-containers. The parameter has to be a pageComponent-component.
+You might also use pageComponent-components inside pageComponent-components.
 
 ### Page-Components
 
 Sorrily "@Component" is used by Spring. To avoid confusion, I named it @PageComponent. In contrary to pages or widgets,
-the pageJavascript-component is not associated with a URL, because it's loaded dynamically by the java-code of a
-pageJavascript or widgetJavascript or an upper pageJavascript-component in the way you know from MainPage-example above.
+the pageComponent-component is not associated with a URL, because it's loaded dynamically by the java-code of a
+pageComponent or widgetComponent or an upper pageComponent-component in the way you know from MainPage-example above.
 
-In this example, the main-pageJavascript displays the weather-widgetJavascript and the news-component, initially. As you
+In this example, the main-pageComponent displays the weather-widgetComponent and the news-component, initially. As you
 see, a component instance can be uses as a parameter in annotated methods. Bounded fields of the parameters (@Binding)
 will contain the actual values from client.
 
-**Instantiating pageJavascript-components on your own is not recommended (no injection).**
+**Instantiating pageComponent-components on your own is not recommended (no injection).**
 
 If the value of a field annotated with @Binding is a Page-Component (annotated with @PageComponent), it will be
 displayed in the bounded container. Before rendering, all methods of these components annotated with @OnInit are called.

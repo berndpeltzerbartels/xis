@@ -20,9 +20,9 @@ class PageController {
         pageService = adapter.getPageService();
     }
 
-    @Get(produces = "text/javascript; charset=utf-8", uri = "/xis/page/{pageId}.js")
-    String getPage(@PathVariable("pageId") String pageId) {
-        return pageService.getPage(pageId).getContent();
+    @Get(produces = "text/javascript; charset=utf-8", uri = "/xis/page/{jsClassName}.js")
+    String getPage(@PathVariable("jsClassName") String jsClassname) {
+        return pageService.getPage(jsClassname).getContent();
     }
 
 }

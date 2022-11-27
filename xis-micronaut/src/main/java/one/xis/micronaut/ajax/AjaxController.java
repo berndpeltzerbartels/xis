@@ -1,14 +1,13 @@
 package one.xis.micronaut.ajax;
 
+import io.micronaut.http.HttpHeaders;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Post;
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
+import one.xis.ajax.AjaxRequest;
+import one.xis.ajax.AjaxResponse;
 import one.xis.ajax.AjaxService;
-import one.xis.dto.ActionRequest;
-import one.xis.dto.ActionResponse;
-import one.xis.dto.InitialRequest;
-import one.xis.dto.InitialResponse;
 import one.xis.micronaut.MicronautContextAdapter;
 
 @Controller
@@ -23,25 +22,8 @@ class AjaxController {
         ajaxService = adapter.getAjaxService();
     }
 
-
-    @Post(consumes = "application/json", produces = "application/json", uri = "/xis/ajax/page/model")
-    InitialResponse handlePageModelRequest(InitialRequest request) {
-        return ajaxService.handlePageInitialRequest(request);
+    @Post(consumes = "application/json", produces = "application/json", uri = "/xis/ajax/page")
+    AjaxResponse handleRequest(AjaxRequest request, HttpHeaders headers) {
+        return ajaxService.handleRequest(request, headers.get(AjaxService.CLIENT_ID_HEADER_NAME), headers.get(HttpHeaders.AUTHORIZATION));
     }
-
-    @Post(consumes = "application/json", produces = "application/json", uri = "/xis/ajax/page/action")
-    ActionResponse handlePageActionRequest(ActionRequest request) {
-        return ajaxService.handlePageActionRequest(request);
-    }
-
-    @Post(consumes = "application/json", produces = "application/json", uri = "/xis/ajax/widget/model")
-    InitialResponse handleWidgetModelRequest(InitialRequest request) {
-        return ajaxService.handleWidgetInitialRequest(request);
-    }
-
-    @Post(consumes = "application/json", produces = "application/json", uri = "/xis/ajax/widget/action")
-    ActionResponse handleWidgetActionRequest(ActionRequest request) {
-        return ajaxService.handleWidgetActionRequest(request);
-    }
-
 }

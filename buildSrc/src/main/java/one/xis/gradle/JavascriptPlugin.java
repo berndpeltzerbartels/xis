@@ -27,9 +27,16 @@ public class JavascriptPlugin implements Plugin<Project> {
                 .map(this::toJSFile)
                 .collect(Collectors.toSet());
         var sortedJsFiles = JSFileSorter.sort(jsFiles);
-        var outFile = new File(project.getBuildDir(), "/resources/main/js/xis.js");
+        var outFile = getOutFile(project);
         writeJsToFile(sortedJsFiles, outFile);
         compile(outFile);
+    }
+
+
+    private File getOutFile(Project project) {
+        var outDir = new File(project.getBuildDir(), "/resources/main/js");
+        outDir.mkdirs();
+        return new File(outDir, "xis.js");
     }
 
     private JSFile toJSFile(File file) {

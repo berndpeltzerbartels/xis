@@ -2,12 +2,10 @@ package one.xis.page;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import one.xis.ajax.AjaxResponseMessage;
+import one.xis.ajax.InvocationContext;
 import one.xis.context.XISComponent;
 import one.xis.controller.ControllerInvocationService;
-import one.xis.dto.ActionRequest;
-import one.xis.dto.ActionResponse;
-import one.xis.dto.InitialRequest;
-import one.xis.dto.InitialResponse;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -17,7 +15,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class PageService {
 
-    private final PageJavascripts pageJavascripts;
+    private final PageComponents pageComponents;
     private final PageControllers pageControllers;
     private final PageMetaDataFactory pageMetaDataFactory;
     private final ControllerInvocationService invocationService;
@@ -25,41 +23,34 @@ public class PageService {
 
     public void addPageController(@NonNull Object controller) {
         var metaData = pageMetaDataMap.computeIfAbsent(controller.getClass(), pageMetaDataFactory::createMetaData);
-        pageJavascripts.createScript(metaData);
+        pageComponents.createScript(metaData);
         pageControllers.addController(controller, metaData);
     }
 
-    public InitialResponse invokeInitial(InitialRequest request) {
-        var controller = pageControllers.getPageController(request.getControllerClass());
-        return invocationService.invokeInitial(controller, request);
+    public Collection<AjaxResponseMessage> invokeController(InvocationContext invocationContext) {
+        var controller = pageControllers.getPageController(invocationContext.getComponentClass());
+        return invocationService.invokeController(controller, invocationContext);
     }
-
-    public ActionResponse invokeAction(ActionRequest request) {
-        var controller = pageControllers.getPageController(request.getControllerClass());
-        var javascriptClassname = getJavascriptClassname(controller);
-        return invocationService.invokeForAction(controller, request, request.getAction(), javascriptClassname);
-    }
-    
 
     private String getJavascriptClassname(Object controller) {
         return pageMetaDataMap.get(controller.getClass()).getJavascriptClassname();
     }
 
-    public PageJavascript getPage(String id) {
-        return pageJavascripts.getByControllerClass(id);
+    public PageComponent getPage(String jsClassname) {
+        return pageComponents.getByComponentClass(jsClassname);
     }
 
 
     public Collection<String> getClassnames() {
-        return pageJavascripts.getClassnames();
+        return pageComponents.getClassnames();
     }
 
-    public Map<String, PageJavascript> getPagesByPath() {
-        return pageJavascripts.getPagesByPath();
+    public Map<String, PageComponent> getPagesByPath() {
+        return pageComponents.getPagesByPath();
     }
 
-    public PageJavascript getWelcomePageJavascript() {
-        return pageJavascripts.getWelcomePage(); // TODO validate there must be exactly one
+    public PageComponent getWelcomePageJavascript() {
+        return pageComponents.getWelcomePageComponent(); // TODO validate there must be exactly one
     }
 
 }

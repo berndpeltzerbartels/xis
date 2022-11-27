@@ -45,6 +45,6 @@ public class MicronautContextAdapter {
         beanContext.getBeanDefinitions(Qualifiers.byStereotype(Widget.class)).stream()//
                 .map(BeanDefinition::getBeanType)
                 .map(beanContext::getBean)
-                .forEach(bean -> widgetService.t(bean));
+                .forEach(bean -> widgetService.addWidgetConroller(bean));
     }
 }

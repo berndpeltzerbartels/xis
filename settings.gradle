@@ -22,6 +22,7 @@ include 'xis-pages'
 include 'xis-widgets'
 include 'xis-root-page'
 include 'xis-ajax'
-include 'xis-dto'
+include 'xis-ajax-entities'
 include 'xis-entities'
+include 'xis-security'
 

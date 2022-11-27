@@ -94,7 +94,7 @@ public class JavascriptControllerModelParser {
 
     private Stream<String> getClientStateParameterKeys(Method method) {
         return ControllerUtils.getClientStateParamters(method)
-                .map(ControllerUtils::getStateKey);
+                .map(ControllerUtils::getClientAttributeKey);
     }
 
     private JSArray getComponentStateParameterKeyArray(Method method) {

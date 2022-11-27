@@ -4,7 +4,7 @@ class XISTree {
      * @public
      */
     constructor() {
-        this.className = 'XISState';
+        this.className = 'XISTree';
         this.data = {};
     }
 

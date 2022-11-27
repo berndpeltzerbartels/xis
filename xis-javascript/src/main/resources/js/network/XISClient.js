@@ -19,7 +19,8 @@ class XISClient {
     addActionMessage(component, action, data, parameters) {
         this.mesageComponents.push(component);
         this.messageStack.push({
-            componentType: component.className,
+            componentClass: component.className,
+            componentType: component.type,
             type: 'action',
             data: data,
             actionKey: action,
@@ -30,27 +31,34 @@ class XISClient {
     addPhaseMessage(component, phase, data, parameters) {
         this.mesageComponents.push(component);
         this.messageStack.push({
-            componentType: component.className,
+            componentClass: component.className,
+            componentType: component.type,
             type: 'phase',
             data: data,
             phase: phase,
-            parameters: parameters
+            componentParameters: parameters
         });
     }
 
     submit() {
         var client = this;
         var request = {
-            messages: client.messageStack
+            messages: client.messageStack,
+            urlParameters: client.getUrlParameters(),
+            timestamp: new Date()
         };
         this.restClient.post('/xis/ajax', this.getRequestHeaders(), request, response => {
             for (var i = 0; i < this.messageStack.length; i++) {
                 var message = response.messages[i];
-                client.mesageComponents[i].processResponse(message.data);
+                client.mesageComponents[i].processResponse(message.componentState);
             }
         });
         this.mesageComponents = {};
         this.messageStack = {};
+    }
+
+    getUrlParameters() {
+        return {};// TODO
     }
 
     /**

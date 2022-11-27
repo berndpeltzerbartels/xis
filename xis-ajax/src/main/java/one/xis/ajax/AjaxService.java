@@ -2,10 +2,6 @@ package one.xis.ajax;
 
 import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
-import one.xis.dto.ActionRequest;
-import one.xis.dto.ActionResponse;
-import one.xis.dto.InitialRequest;
-import one.xis.dto.InitialResponse;
 import one.xis.page.PageService;
 import one.xis.widget.WidgetService;
 
@@ -13,24 +9,27 @@ import one.xis.widget.WidgetService;
 @RequiredArgsConstructor
 public class AjaxService {
 
+    public static final String CLIENT_ID_HEADER_NAME = "X-XIS-CLIENT-ID";
+
     private final PageService pageService;
     private final WidgetService widgetService;
+    private final AjaxRequestContextFactory requestContextFactory;
 
-    public InitialResponse handlePageInitialRequest(InitialRequest initialRequest) {
-        return pageService.invokeInitial(initialRequest);
+    public AjaxResponse handleRequest(AjaxRequest request, String clientId, String authorization) {
+        var response = new AjaxResponse();
+        var requestContext = requestContextFactory.createContext(request, clientId, authorization);
+        requestContext.getInvocationContexts().forEach(invocationContext -> {
+            switch (request.getComponentType()) {
+                case WIDGET:
+                    response.addResponseMessages(widgetService.invokeController(invocationContext));
+                    break;
+                case PAGE:
+                    response.addResponseMessages(pageService.invokeController(invocationContext));
+                    break;
+                default:
+                    throw new IllegalArgumentException();
+            }
+        });
+        return response;
     }
-
-    public ActionResponse handlePageActionRequest(ActionRequest request) {
-        return pageService.invokeAction(request);
-    }
-
-    public InitialResponse handleWidgetInitialRequest(InitialRequest initialRequest) {
-        return widgetService.invokeInitial(initialRequest);
-    }
-
-
-    public ActionResponse handleWidgetActionRequest(ActionRequest request) {
-        return widgetService.invokeAction(request);
-    }
-
 }

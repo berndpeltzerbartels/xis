@@ -8,6 +8,7 @@ class XISPage extends XISComponent {
         this.headChildNodes = [];
         this.bodyChildNodes = [];
         this.state = {};
+        this.componentType = 'PAGE';
     }
 
     /**

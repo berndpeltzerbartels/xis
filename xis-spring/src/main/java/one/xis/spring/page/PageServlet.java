@@ -18,8 +18,8 @@ class PageServlet extends ResourceServlet {
     @Override
     protected ResourceFile getResource(HttpServletRequest request) {
         String uri = request.getRequestURI();
-        String path = PathUtils.stripSuffix(uri.substring(uri.lastIndexOf('/') + 1));
-        return pageService.getPage(path);
+        String jsClassname = PathUtils.stripSuffix(uri.substring(uri.lastIndexOf('/') + 1));
+        return pageService.getPage(jsClassname);
     }
 
     @Override

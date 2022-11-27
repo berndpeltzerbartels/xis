@@ -38,7 +38,7 @@ public class ControllerUtils {
 
     public static Stream<Parameter> getClientStateParamters(Method method) {
         return Arrays.stream(method.getParameters())
-                .filter(parameter -> parameter.isAnnotationPresent(State.class));
+                .filter(parameter -> parameter.isAnnotationPresent(ClientAttribute.class));
     }
 
     public static <A extends Annotation> Stream<Method> getAnnotatedMethods(Class<?> controllerClass, Class<A> annotationClass) {
@@ -46,8 +46,8 @@ public class ControllerUtils {
                 .filter(method -> method.isAnnotationPresent(annotationClass));
     }
 
-    public static String getStateKey(Parameter parameter) {
-        var annotation = parameter.getAnnotation(State.class);
+    public static String getClientAttributeKey(Parameter parameter) {
+        var annotation = parameter.getAnnotation(ClientAttribute.class);
         return annotation.value().isEmpty() ? parameter.getName() : annotation.value();
     }
 
@@ -56,14 +56,14 @@ public class ControllerUtils {
         return annotation.value().isEmpty() ? parameter.getName() : annotation.value();
     }
 
-    public static String getStateKey(java.lang.reflect.Method method) {
-        var annotation = method.getAnnotation(State.class);
+    public static String getClientAttributeKey(java.lang.reflect.Method method) {
+        var annotation = method.getAnnotation(ClientAttribute.class);
         return annotation.value().isEmpty() ? method.getName() : annotation.value();
     }
 
     public static String getModelKey(Method method) {
         var annotation = method.getAnnotation(Model.class);
-        return annotation.value().isEmpty() ? method.getName() : annotation.value();
+        return annotation.value().isEmpty() ? method.getReturnType().getSimpleName() : annotation.value();
     }
 
     public static boolean isPageControllerClass(@NonNull Class<?> controllerClass) {

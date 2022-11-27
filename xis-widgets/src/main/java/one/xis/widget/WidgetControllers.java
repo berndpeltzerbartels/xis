@@ -14,7 +14,7 @@ class WidgetControllers {
     private final Map<String, Object> controllers = new HashMap<>();
 
     void addController(Object widgetController, WidgetMetaData metaData) {
-        controllers.put(metaData.getControllerClass().getName(), widgetController);
+        controllers.put(metaData.getJavascriptClassname(), widgetController);
     }
 
     Object getWidgetController(@NonNull String className) {

@@ -3,6 +3,7 @@ class XISWidget extends XISComponent {
     constructor() {
         super(undefined);
         this.className = 'XISWidget';
+        this.componentType = 'WIDGET';
 
     }
 
