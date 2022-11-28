@@ -23,7 +23,7 @@ public class JavascriptPlugin implements Plugin<Project> {
 
     @Override
     public void apply(Project project) {
-        var jsFiles = FileUtils.files(getJsSrcRoot(project), "js").stream()
+        var jsFiles = FileUtils.files(getJsApiSrcRoot(project), "js").stream()
                 .map(this::toJSFile)
                 .collect(Collectors.toSet());
         var sortedJsFiles = JSFileSorter.sort(jsFiles);
@@ -71,8 +71,8 @@ public class JavascriptPlugin implements Plugin<Project> {
         return (Compilable) new ScriptEngineManager().getEngineByName("graal.js");
     }
 
-    private File getJsSrcRoot(Project project) {
-        return new File(project.getProjectDir(), "src/main/resources/js");
+    private File getJsApiSrcRoot(Project project) {
+        return new File(project.getProjectDir(), "src/main/resources/js/api");
     }
 
 }

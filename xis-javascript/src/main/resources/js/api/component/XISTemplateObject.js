@@ -53,9 +53,6 @@ class XISTemplateObject {
         return this.children;
     }
 
-    onDataChanged() {
-
-    }
 
     getContainer() {
         throw new Error('abstract method');

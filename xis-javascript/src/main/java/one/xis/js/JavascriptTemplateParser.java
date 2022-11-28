@@ -308,8 +308,6 @@ public class JavascriptTemplateParser {
 
     private JSClass derrivedClass(String className, JSSuperClass superClass, JSScript script) {
         var jsClass = new JSClass(className, superClass.getConstructor().getArgs()).derrivedFrom(superClass);
-        addGetClassNameMethod(jsClass, className);
-        addGetSuperClassNameMethod(jsClass, superClass);
         script.addClassDeclaration(jsClass);
         return jsClass;
     }
@@ -322,13 +320,5 @@ public class JavascriptTemplateParser {
         return "v" + (currentNameId++);
     }
 
-    private void addGetClassNameMethod(JSClass owner, String className) {
-        var getClassName = owner.overrideAbstractMethod("getClassName");
-        getClassName.addStatement(new JSReturn(new JSString(className)));
-    }
 
-    private void addGetSuperClassNameMethod(JSClass owner, JSClass superClass) {
-        var getSuperClassName = owner.overrideAbstractMethod("getSuperClassName");
-        getSuperClassName.addStatement(new JSReturn(new JSString(superClass.getClassName())));
-    }
 }

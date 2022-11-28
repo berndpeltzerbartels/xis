@@ -22,7 +22,7 @@ class PageController {
 
     @Get(produces = "text/javascript; charset=utf-8", uri = "/xis/page/{jsClassName}.js")
     String getPage(@PathVariable("jsClassName") String jsClassname) {
-        return pageService.getPage(jsClassname).getContent();
+        return pageService.getPageComponent(jsClassname).getContent();
     }
 
 }

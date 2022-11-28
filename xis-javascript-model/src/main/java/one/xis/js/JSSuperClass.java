@@ -15,20 +15,41 @@ public class JSSuperClass extends JSClass {
         super(className, constructorArgs);
     }
 
+    public JSSuperClass(String className, JSSuperClass superClass, String... constructorArgs) {
+        super(className, constructorArgs);
+        abstractMethods.putAll(superClass.getAbstractMethods());
+        methods.putAll(superClass.getMethods());
+        methods.forEach(abstractMethods::remove);
+    }
+
     public JSSuperClass addMethod(String name, int args) {
         methods.put(name, new JSMethod(this, name, unspecifiedArgNames(args))); // TODO remove unspecified ?
         return this;
     }
 
+    public JSSuperClass addMethod(String name) {
+        return addMethod(name, 0);
+    }
+
     public JSSuperClass addAbstractMethod(String name) {
+        return addAbstractMethod(name, 0);
+    }
+
+    public JSSuperClass addAbstractMethod(String name, int args) {
         // We are using abstract methods, without parematers only
-        abstractMethods.put(name, new JSMethod(this, name, Collections.emptyList()));
+        abstractMethods.put(name, new JSMethod(this, name, unspecifiedArgNames(args)));
         return this;
     }
 
     public JSSuperClass addAbstractField(String name) {
         // We are using abstract methods, without parematers only
         abstractFields.add(name);
+        return this;
+    }
+
+    JSSuperClass superClass(JSSuperClass superClass) {
+        abstractFields.addAll(superClass.getAbstractFields());
+        abstractMethods.putAll(superClass.abstractMethods);
         return this;
     }
 

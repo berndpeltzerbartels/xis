@@ -20,7 +20,7 @@ class WidgetServlet extends ResourceServlet {
     protected ResourceFile getResource(HttpServletRequest request) {
         String key = request.getRequestURI();
         String jsClassname = PathUtils.stripSuffix(key.substring(key.lastIndexOf('/') + 1));
-        return widgetService.getWidgetJavascript(jsClassname);
+        return widgetService.getWidgetComponent(jsClassname);
     }
 
     @Override

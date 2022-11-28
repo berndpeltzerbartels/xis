@@ -1,8 +1,8 @@
 
 class XISPage extends XISComponent {
 
-    constructor() {
-        super(undefined);
+    constructor(client) {
+        super(undefined, client);
         this.className = 'XISPage';
         this.rootPage = undefined;
         this.headChildNodes = [];

@@ -31,7 +31,7 @@ public class WidgetService {
         return invocationService.invokeController(controller, invocationContext);
     }
 
-    public WidgetComponent getWidgetJavascript(String jsClassname) {
+    public WidgetComponent getWidgetComponent(String jsClassname) {
         return widgetComponents.getByComponentClass(jsClassname);
     }
 

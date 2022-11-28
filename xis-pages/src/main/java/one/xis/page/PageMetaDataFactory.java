@@ -13,44 +13,39 @@ class PageMetaDataFactory {
     private final ResourceFiles resourceFiles;
     private static int nameIndex;
 
-    PageMetaData createMetaData(Object controller) {
-        String path = path(controller);
+    PageMetaData createMetaData(Class<?> controllerClass) {
+        String path = path(controllerClass);
         return PageMetaData.builder()
-                .htmlTemplate(resourceFiles.getByPath(getHtmlTemplatePath(controller)))
+                .htmlTemplate(resourceFiles.getByPath(getHtmlTemplatePath(controllerClass)))
                 .javascriptClassname(uniqueJavascriptClassName())
                 .path(path)
-                .welcomePage(isWelcomePage(controller))
-                .controllerClass(controllerClass(controller))
+                .welcomePage(isWelcomePage(controllerClass))
+                .controllerClass(controllerClass)
                 .build();
     }
 
-
-    private Class<?> controllerClass(Object controller) {
-        return controller.getClass();
-    }
-
-    private String path(Object controller) {
-        String path = controller.getClass().getAnnotation(one.xis.Page.class).path();
+    private String path(Class<?> controllerClass) {
+        String path = controllerClass.getAnnotation(Page.class).path();
         if (PathUtils.hasSuffix(path)) {
             String suffix = PathUtils.getSuffix(path);
             if (!suffix.equals("html")) {
-                throw new IllegalStateException(controller.getClass() + ": illegal suffix in path-attribute of @Page-annotation: " + suffix + ". Suffix must be empty or '.html'");
+                throw new IllegalStateException(controllerClass + ": illegal suffix in path-attribute of @Page-annotation: " + suffix + ". Suffix must be empty or '.html'");
             }
             return path;
         }
         return path + ".html";
     }
 
-    private boolean isWelcomePage(Object controller) {
-        return controller.getClass().getAnnotation(Page.class).welcomePage();
+    private boolean isWelcomePage(Class<?> controllerClass) {
+        return controllerClass.getAnnotation(Page.class).welcomePage();
     }
 
-    public String getHtmlTemplatePath(Object controller) {
-        return controller.getClass().getName().replace('.', '/') + ".html";
+    public String getHtmlTemplatePath(Class<?> controllerClass) {
+        return controllerClass.getName().replace('.', '/') + ".html";
     }
 
     private String uniqueJavascriptClassName() {
         return "P" + nameIndex++;
     }
-    
+
 }

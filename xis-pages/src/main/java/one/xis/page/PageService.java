@@ -36,7 +36,7 @@ public class PageService {
         return pageMetaDataMap.get(controller.getClass()).getJavascriptClassname();
     }
 
-    public PageComponent getPage(String jsClassname) {
+    public PageComponent getPageComponent(String jsClassname) {
         return pageComponents.getByComponentClass(jsClassname);
     }
 

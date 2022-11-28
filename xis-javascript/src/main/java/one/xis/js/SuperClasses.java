@@ -2,22 +2,85 @@ package one.xis.js;
 
 public class SuperClasses {
 
-    public static final JSSuperClass XIS_PAGE = new JSSuperClass("XISPage");
-    public static final JSSuperClass XIS_WIDGET = new JSSuperClass("XISWidget"); // TODO check javascript
-    public static final JSSuperClass XIS_ELEMENT = new JSSuperClass("XISElement", "parent");
-    public static final JSSuperClass XIS_HEAD_ELEMENT = new JSSuperClass("XISHead", "parent");
-    public static final JSSuperClass XIS_BODY_ELEMENT = new JSSuperClass("XISBody", "parent");
+
     public static final JSSuperClass XIS_CONTAINER = new JSSuperClass("XISContainer", "parent");
     public static final JSSuperClass XIS_STATIC_TEXT_NODE = new JSSuperClass("XISStaticTextNode", "parent");
     public static final JSSuperClass XIS_MUTABLE_TEXT_NODE = new JSSuperClass("XISMutableTextNode", "parent");
-    public static final JSSuperClass XIS_WIDGETS = new JSSuperClass("XISWidgets");
-    public static final JSSuperClass XIS_CONTAINERS = new JSSuperClass("XISContainers");
-    public static final JSSuperClass XIS_PAGES = new JSSuperClass("XISPages");
     public static final JSSuperClass XIS_LOOP = new JSSuperClass("XISLoop", "parent");
     public static final JSSuperClass XIS_IF = new JSSuperClass("XISIf", "parent");
-    public static final JSSuperClass XIS_LIFECYCLE_SERVICE = new JSSuperClass("XISLifecycleService");
+
+    public static final JSSuperClass XIS_HEAD_ELEMENT = new JSSuperClass("XISHead", "parent");
+    public static final JSSuperClass XIS_BODY_ELEMENT = new JSSuperClass("XISBody", "parent");
+
+
+    public static final JSSuperClass XIS_TEMPLATE_OBJECT = new JSSuperClass("XISTemplateObject", "parent");
+    public static final JSSuperClass XIS_VALUE_HOLDER = new JSSuperClass("XISValueHolder", XIS_TEMPLATE_OBJECT, "parent");
+    public static final JSSuperClass XIS_COMPONENT = new JSSuperClass("XISComponent", XIS_VALUE_HOLDER, "parent", "client");
+    public static final JSSuperClass XIS_PAGE = new JSSuperClass("XISPage", XIS_COMPONENT, "client");
+    public static final JSSuperClass XIS_WIDGET = new JSSuperClass("XISWidget", XIS_COMPONENT, "parent", "client");
+    public static final JSSuperClass XIS_ELEMENT = new JSSuperClass("XISElement", "parent"); // TODO check javascript
 
     static {
+
+        XIS_TEMPLATE_OBJECT.addMethod("getParentElement")
+                .addMethod("init", 0)
+                .addMethod("destroy", 0)
+                .addMethod("show", 0)
+                .addMethod("hide", 0)
+                .addMethod("getValueHolder")
+                .addMethod("val", 1)
+                .addMethod("getChildren")
+                .addAbstractMethod("")
+                .addAbstractMethod("getContainer")
+                .addAbstractMethod("createChildren")
+                .addAbstractMethod("render")
+                .addAbstractMethod("appendChild", 1)
+                .addAbstractMethod("removeChild", 1)
+                .addAbstractMethod("getElement")
+                .addAbstractMethod("unlink");
+
+
+        XIS_VALUE_HOLDER.addMethod("getValueHolder")
+                .addMethod("getValues")
+                .addMethod("addValues")
+                .addMethod("getValue", 1);
+
+
+        XIS_COMPONENT.addMethod("init", 0)
+                .addMethod("destroy", 0)
+                .addMethod("show", 0)
+                .addMethod("hide", 0)
+                .addMethod("processResponse", 1)
+                .addMethod("onAction", 1)
+                .addMethod("getActionData", 1)
+                .addMethod("getPhaseData", 0)
+                .addMethod("addPhaseMessage", 1)
+                .addMethod("getParameters")
+                .addAbstractMethod("getParameterNames")
+                .addAbstractMethod("getActionStateKeys", 1)
+                .addAbstractMethod("getPhaseStateKeys", 1)
+                .addAbstractMethod("replace", 2);
+
+        XIS_PAGE.addMethod("bind", 1)
+                .addMethod("replace", 1)
+                .addMethod("init")
+                .addMethod("destroy")
+                .addMethod("show")
+                .addMethod("hide")
+                .addMethod("getHead")
+                .addMethod("getBody")
+                .addMethod("unbind")
+                .addMethod("refresh")
+                .addMethod("bindHeadContent")
+                .addMethod("bindBodyContent")
+                .addMethod("unbindHeadContent", 1)
+                .addMethod("unbindBodyContent", 0)
+                .addMethod("setBodyAttributes", 0)
+                .addMethod("removeBodyAttributes", 1);
+
+        XIS_WIDGET.addMethod("init", 1)
+                .addMethod("addValues", 2)
+                .addMethod("replace", 1);
 
         XIS_IF.addMethod("init", 2)
                 .addAbstractMethod("getClassName")
@@ -41,30 +104,6 @@ public class SuperClasses {
                 .addMethod("appendRow", 0)
                 .addMethod("removeRow", 0)
                 .addAbstractField("rows");
-
-        XIS_PAGE.addMethod("init", 1)
-                .addAbstractMethod("getClassName")
-                .addMethod("update", 1)
-                .addMethod("getValue", 1)
-                .addMethod("initChildren", 0)
-                .addMethod("updateChildren", 0)
-                .addMethod("updateState", 1)
-                .addAbstractMethod("loadModel")
-
-                .addMethod("replace", 1)
-                .addAbstractField("path");
-
-        XIS_WIDGET.addMethod("init", 1)
-                .addAbstractMethod("getClassName")
-                .addMethod("bind", 2)
-                .addMethod("unbind", 2)
-                .addMethod("update", 0)
-                .addMethod("updateData", 1)
-                .addMethod("getValue", 1)
-                .addMethod("updateState", 1)
-                .addMethod("replace", 1)
-                .addAbstractMethod("loadModel")
-                .addAbstractField("root");
 
         XIS_ELEMENT.addMethod("init", 2)
                 .addAbstractMethod("getClassName")
@@ -122,24 +161,6 @@ public class SuperClasses {
                 .addMethod("val", 1)
                 .addAbstractField("node");
 
-        XIS_WIDGETS.addMethod("getWidget", 1)
-                .addAbstractMethod("getClassName")
-                .addMethod("bind", 2)
-                .addAbstractField("widgets");
-
-        XIS_CONTAINERS.addMethod("getContainer", 1)
-                .addAbstractMethod("getClassName")
-                .addMethod("addContainer", 1)
-                .addMethod("bind", 2);
-
-        XIS_PAGES.addMethod("getPage", 1)
-                .addAbstractMethod("getClassName")
-                .addAbstractField("pages")
-                .addMethod("getPageByPath", 1);
-
-        XIS_LIFECYCLE_SERVICE.addMethod("onInitWidget", 1)
-                .addMethod("onDisplayWidget", 1)
-                .addMethod("onHideWidget", 1);
     }
 
 }
