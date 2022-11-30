@@ -17,7 +17,7 @@ public class RootPageService {
     private final InitializerScript initializerScript;
     private final RootPage rootPage;
 
-    private static final Collection<String> JS_RESOURCES = Set.of("xis.js", "xis-globals.js", "custom-script.js");
+    private static final Collection<String> JS_RESOURCES = Set.of("xis.js", "js/xis-globals.js", "custom-script.js");
 
 
     public void createRootContent() {

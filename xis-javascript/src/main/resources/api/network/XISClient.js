@@ -3,7 +3,7 @@ class XISClient {
     /**
      * @param {XISErrorHandler} errorHandler 
      */
-    constructor(errorHandler) {
+    constructor(localStorage, errorHandler) {
         this.className = 'XISClient';
         this.restClient = new XISRestClient(errorHandler);
         this.token = localStorage.getItem('xis-token');

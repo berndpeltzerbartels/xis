@@ -2,7 +2,7 @@ plugins {
     id 'java'
 }
 
-group 'org.example'
+group 'one.xis'
 version '1.0-SNAPSHOT'
 
 repositories {
@@ -27,6 +27,11 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok:1.18.12'
 
     implementation 'org.projectlombok:lombok:1.18.12'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.0'
+    testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.16.1'
+    testImplementation project(':xis-remote-core')
 }
 
 test {

@@ -36,6 +36,14 @@ dependencies {
 
 }
 
+tasks.getByName("distZip").enabled = false
+tasks.getByName("distTar").enabled = false
+tasks.getByName("startShadowScripts").enabled = false
+tasks.getByName("shadowJar").enabled = false
+tasks.getByName("shadowDistTar").enabled = false
+tasks.getByName("shadowDistZip").enabled = false
+tasks.getByName("assemble").enabled = false
+
 
 application {
     mainClass.set("one.xis.micronaut.Application")

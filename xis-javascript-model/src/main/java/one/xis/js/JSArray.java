@@ -14,7 +14,7 @@ public class JSArray implements JSValue, JSContext {
     }
 
     public JSArray(JSValue... elements) {
-        this.elements = Arrays.asList(elements);
+        this.elements = Arrays.asList((Object[]) elements);
     }
 
 

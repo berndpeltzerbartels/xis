@@ -10,6 +10,7 @@ import java.io.*;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
+
 /**
  * Writes all javascript-sources into a single file and compiles the result
  */
@@ -28,14 +29,25 @@ public class JavascriptPlugin implements Plugin<Project> {
                 .collect(Collectors.toSet());
         var sortedJsFiles = JSFileSorter.sort(jsFiles);
         var outFile = getOutFile(project);
+        printfln("js-outfile: '%s'", outFile);
         writeJsToFile(sortedJsFiles, outFile);
-        compile(outFile);
+        compileAndEval(outFile);
     }
 
 
     private File getOutFile(Project project) {
-        var outDir = new File(project.getBuildDir(), "/resources/main/js");
-        outDir.mkdirs();
+        var outDir = new File(project.getProjectDir(), "src/main/resources/js");
+        if (!outDir.exists()) {
+            printfln("creating %s", outDir);
+            if (!outDir.mkdirs()) {
+                throw new RuntimeException("can not create " + outDir);
+            }
+        } else {
+            printfln("already present: %s", outDir);
+        }
+        if (!outDir.isDirectory()) {
+            throw new RuntimeException("not a directory: " + outDir);
+        }
         return new File(outDir, "xis.js");
     }
 
@@ -47,11 +59,11 @@ public class JavascriptPlugin implements Plugin<Project> {
     }
 
     private void writeJsToFile(Collection<JSFile> jsSrcFiles, File jsOutFile) {
-        try (PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(jsOutFile)))) {
+        try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(jsOutFile)))) {
             jsSrcFiles.forEach(file -> {
-                System.out.println("add script content: " + file.getFile().getName());
-                out.println(file.getContent());
-                out.println();
+                printfln("add script content: %s", file.getFile().getName());
+                writer.println(file.getContent());
+
             });
 
         } catch (FileNotFoundException e) {
@@ -59,12 +71,14 @@ public class JavascriptPlugin implements Plugin<Project> {
         }
     }
 
-    private void compile(File jsFile) {
+    private void compileAndEval(File jsFile) {
         try {
-            compiler.compile(FileUtils.getContent(jsFile, "utf-8"));
+            var script = compiler.compile(FileUtils.getContent(jsFile, "utf-8"));
+            script.eval();
         } catch (ScriptException e) {
             throw new RuntimeException("Compilation failed for " + jsFile.getAbsolutePath() + ": " + e.getMessage());
         }
+
     }
 
     private Compilable getCompiler() {
@@ -72,7 +86,12 @@ public class JavascriptPlugin implements Plugin<Project> {
     }
 
     private File getJsApiSrcRoot(Project project) {
-        return new File(project.getProjectDir(), "src/main/resources/js/api");
+        return new File(project.getProjectDir(), "src/main/resources/api");
+    }
+
+    private void printfln(String pattern, Object... args) {
+        System.out.printf(pattern, args);
+        System.out.println();
     }
 
 }

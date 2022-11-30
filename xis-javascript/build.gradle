@@ -5,12 +5,14 @@ plugins {
     id 'javascript-plugin'
 }
 
-group 'org.example'
+group 'one.xis'
 version '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
 }
+
+apply plugin: JavascriptPlugin
 
 dependencies {
 
@@ -45,4 +47,3 @@ test {
     useJUnitPlatform()
 }
 
-apply plugin: JavascriptPlugin

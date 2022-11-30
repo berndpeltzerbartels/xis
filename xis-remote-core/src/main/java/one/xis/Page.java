@@ -18,6 +18,4 @@ public @interface Page {
     String path();
 
     boolean welcomePage() default false;
-
-    String title() default "";
 }

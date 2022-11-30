@@ -36,8 +36,12 @@ public class PageService {
         return pageMetaDataMap.get(controller.getClass()).getJavascriptClassname();
     }
 
-    public PageComponent getPageComponent(String jsClassname) {
+    public PageComponent getPageComponentByJsClass(String jsClassname) {
         return pageComponents.getByComponentClass(jsClassname);
+    }
+
+    public PageComponent getPageComponentByPath(String path) {
+        return pageComponents.getPageComponentsByPath().get(path);
     }
 
 
@@ -45,8 +49,8 @@ public class PageService {
         return pageComponents.getClassnames();
     }
 
-    public Map<String, PageComponent> getPagesByPath() {
-        return pageComponents.getPagesByPath();
+    public Map<String, PageComponent> getPageComponentsByPath() {
+        return pageComponents.getPageComponentsByPath();
     }
 
     public PageComponent getWelcomePageJavascript() {

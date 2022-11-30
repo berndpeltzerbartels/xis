@@ -8,16 +8,14 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+@Getter
 @XISComponent
 @RequiredArgsConstructor
 class PageComponents {
 
-    private final Map<String, PageComponent> pageJavascriptsByClassname = new HashMap<>();
-    private final Map<String, PageComponent> pageJavascriptsByPath = new HashMap<>();
-
+    private final Map<String, PageComponent> pageComponentsByClassname = new HashMap<>();
+    private final Map<String, PageComponent> pageComponentsByPath = new HashMap<>();
     private final PageComponentCompiler pageComponentCompiler;
-
-    @Getter
     private PageComponent welcomePageComponent;
 
     PageComponent createScript(PageMetaData pageMetaData) {
@@ -28,13 +26,13 @@ class PageComponents {
             }
             welcomePageComponent = pageComponent;
         }
-        pageJavascriptsByClassname.put(pageMetaData.getControllerClass().getName(), pageComponent);
-        pageJavascriptsByPath.put(pageMetaData.getPath(), pageComponent);
+        pageComponentsByClassname.put(pageMetaData.getControllerClass().getName(), pageComponent);
+        pageComponentsByPath.put(pageMetaData.getPath(), pageComponent);
         return pageComponent;
     }
 
     public PageComponent getByComponentClass(String jsClassname) {
-        PageComponent pageComponent = pageJavascriptsByClassname.get(jsClassname);
+        PageComponent pageComponent = pageComponentsByClassname.get(jsClassname);
         synchronized (pageComponent) {
             pageComponentCompiler.compileIfObsolete(pageComponent);
         }
@@ -51,13 +49,9 @@ class PageComponents {
         pageComponentCompiler.compile(pageComponent);
         return pageComponent;
     }
-
-
+    
     Collection<String> getClassnames() {
-        return pageJavascriptsByClassname.keySet();
+        return pageComponentsByClassname.keySet();
     }
 
-    Map<String, PageComponent> getPagesByPath() {
-        return pageJavascriptsByPath;
-    }
 }

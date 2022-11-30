@@ -23,7 +23,7 @@ class InitializerScript {
 
     private String getPagesRegistrationJs() {
         StringBuilder s = new StringBuilder();
-        pageService.getPagesByPath().forEach((key, pageComponent) -> s.append(getPageRegistrationJs(key, pageComponent)));
+        pageService.getPageComponentsByPath().forEach((key, pageComponent) -> s.append(getPageRegistrationJs(key, pageComponent)));
         return s.toString();
     }
 

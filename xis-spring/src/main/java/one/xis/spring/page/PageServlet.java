@@ -19,7 +19,7 @@ class PageServlet extends ResourceServlet {
     protected ResourceFile getResource(HttpServletRequest request) {
         String uri = request.getRequestURI();
         String jsClassname = PathUtils.stripSuffix(uri.substring(uri.lastIndexOf('/') + 1));
-        return pageService.getPageComponent(jsClassname);
+        return pageService.getPageComponentByJsClass(jsClassname);
     }
 
     @Override
