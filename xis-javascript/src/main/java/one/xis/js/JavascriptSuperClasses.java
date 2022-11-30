@@ -18,7 +18,7 @@ public class JavascriptSuperClasses {
             .addMethod("init", 2)
             .addAbstractMethod("getClassName")
             .addMethod("update", 0)
-            .addAbstractField("node");
+            .addAbstractMethod("createNode");
 
     public static final JSSuperClass XIS_MUTABLE_TEXT_NODE = new JSSuperClass("XISMutableTextNode", "parent")
             .addMethod("init", 1) // ONE ARG HERE !
@@ -26,7 +26,7 @@ public class JavascriptSuperClasses {
             .addMethod("update", 0)
             .addAbstractMethod("getText")
             .addMethod("val", 1)
-            .addAbstractField("node");
+            .addAbstractMethod("createNode");
 
 
     public static final JSSuperClass XIS_LOOP = new JSSuperClass("XISLoop", "parent")
@@ -41,8 +41,7 @@ public class JavascriptSuperClasses {
             .addMethod("resize", 1)
             .addMethod("rowCount", 0)
             .addMethod("appendRow", 0)
-            .addMethod("removeRow", 0)
-            .addAbstractField("rows");
+            .addMethod("removeRow", 0);
 
 
     public static final JSSuperClass XIS_IF = new JSSuperClass("XISIf", "parent").addMethod("init", 2)
@@ -51,8 +50,7 @@ public class JavascriptSuperClasses {
             .addAbstractMethod("evaluateCondition")
             .addMethod("initChildren", 0)
             .addMethod("unlinkChildren", 0)
-            .addMethod("val", 1)
-            .addAbstractField("children");
+            .addMethod("val", 1);
 
     public static final JSSuperClass XIS_ELEMENT = new JSSuperClass("XISElement", "parent")
             .addMethod("createElement")

@@ -25,4 +25,9 @@ class XISMutableTextNode extends XISTemplateObject{
         throw new Error('abstract method');
     }
 
+
+    createNode() {
+        throw new Error('abstract method');
+    }
+
 }

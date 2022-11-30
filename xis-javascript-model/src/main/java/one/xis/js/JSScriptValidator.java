@@ -5,7 +5,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class JSScriptValidator {
-
+    // TODO use it
     public void validate(JSScript script) {
         script.getClassDeclarations().stream()
                 .filter(JSClass.class::isInstance)
@@ -17,7 +17,6 @@ public class JSScriptValidator {
     private void validate(JSClass jsClass) {
         if (jsClass.getSuperClass() != null) {
             validateAbstractMethodsOverridden(jsClass, jsClass.getSuperClass());
-            validateAbstractFields(jsClass, jsClass.getSuperClass());
         }
     }
 
@@ -29,11 +28,5 @@ public class JSScriptValidator {
         }
     }
 
-    private void validateAbstractFields(JSClass jsClass, JSSuperClass superClass) {
-        Set<String> fields = new HashSet<>(superClass.getAbstractFields());
-        fields.removeAll(jsClass.getFields().keySet());
-        if (!fields.isEmpty()) {
-            throw new JSValidationException("missing field declaration(s): " + fields.stream().collect(Collectors.joining(", ")));
-        }
-    }
+
 }

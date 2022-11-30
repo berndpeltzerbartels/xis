@@ -2,14 +2,16 @@ package one.xis.js;
 
 import lombok.Getter;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 @Getter
 public class JSSuperClass extends JSClass {
     private final Map<String, JSMethod> methods = new HashMap<>();
     private final Map<String, JSMethod> abstractMethods = new HashMap<>();
-    private final Set<String> abstractFields = new HashSet<>();
 
     public JSSuperClass(String className, String... constructorArgs) {
         super(className, constructorArgs);
@@ -40,19 +42,6 @@ public class JSSuperClass extends JSClass {
         abstractMethods.put(name, new JSMethod(this, name, unspecifiedArgNames(args)));
         return this;
     }
-
-    public JSSuperClass addAbstractField(String name) {
-        // We are using abstract methods, without parematers only
-        abstractFields.add(name);
-        return this;
-    }
-
-    JSSuperClass superClass(JSSuperClass superClass) {
-        abstractFields.addAll(superClass.getAbstractFields());
-        abstractMethods.putAll(superClass.abstractMethods);
-        return this;
-    }
-
 
     @Override
     public JSMethod getMethod(String name) {

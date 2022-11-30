@@ -100,7 +100,8 @@ public class JavascriptTemplateParser {
 
     private JSClass toClass(MutableTextNode mutableTextNode, JSScript script) {
         var textNode = derrivedClass(XIS_MUTABLE_TEXT_NODE, script);
-        textNode.addField("node", new JSFunctionCall(Functions.CREATE_TEXT_NODE, new JSString("")));
+        var createNode = textNode.overrideAbstractMethod("createNode");
+        createNode.addStatement(new JSReturn(new JSFunctionCall(Functions.CREATE_TEXT_NODE, new JSString(""))));
         JSMethod getText = textNode.overrideAbstractMethod("getText");
         var text = new JSVar("text");
         var mixedContentMethodStatements = new MixedContentMethodStatements(getText, text);
@@ -111,7 +112,8 @@ public class JavascriptTemplateParser {
 
     private JSClass toClass(StaticTextNode staticTextNode, JSScript script) {
         var textNode = derrivedClass(XIS_STATIC_TEXT_NODE, script);
-        textNode.addField("node", new JSFunctionCall(Functions.CREATE_TEXT_NODE, new JSString(staticTextNode.getContent())));
+        var createNode = textNode.overrideAbstractMethod("createNode");
+        createNode.addStatement(new JSReturn(new JSFunctionCall(Functions.CREATE_TEXT_NODE, new JSString(staticTextNode.getContent()))));
         return textNode;
     }
 
