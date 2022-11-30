@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static one.xis.js.SuperClasses.*;
+import static one.xis.js.JavascriptSuperClasses.*;
 
 @XISComponent
 public class JavascriptTemplateParser {

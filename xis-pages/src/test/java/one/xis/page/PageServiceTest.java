@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 
 import javax.script.ScriptException;
 
-;
 
 //@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class PageServiceTest {
