@@ -9,5 +9,5 @@ import java.lang.annotation.Target;
 @Target({ElementType.PARAMETER, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ComponentState {
-    String value() default ""; // TODO implement usage
+    String value() default "";
 }

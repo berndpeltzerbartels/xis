@@ -285,12 +285,20 @@ public class JSWriter {
                 writeFunctionCallStatement((JSFunctionCall) statement, writer);
             } else if (statement instanceof JSMethodCall) {
                 writeMethodCallStatement((JSMethodCall) statement, writer);
+            } else if (statement instanceof JSCustomStatement) {
+                writeCustomStatement((JSCustomStatement) statement, writer);
             } else {
                 throw new UnsupportedOperationException("append " + statement);
             }
-        } catch (IOException e) {
+        } catch (
+                IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void writeCustomStatement(JSCustomStatement statement, Appendable writer) throws IOException {
+        writer.append(statement.getCode());
+        writer.append(";");
     }
 
 

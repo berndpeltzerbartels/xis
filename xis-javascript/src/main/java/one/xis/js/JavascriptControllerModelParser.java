@@ -13,26 +13,48 @@ import java.util.stream.Stream;
 public class JavascriptControllerModelParser {
 
     public void parseControllerModel(Class<?> controllerClass, JSClass component) {
-        var keyObjCompState = new JSObject();
-        keyObjCompState.addField("init", initialClientStateKeyArray(controllerClass));
-        keyObjCompState.addField("show", getComponentStateKeysOnShow(controllerClass));
-        keyObjCompState.addField("action", actionComponentStateKeys(controllerClass));
-        component.addField("compKeys", keyObjCompState);
-
-        var keyObjClientState = new JSObject();
-        keyObjClientState.addField("init", initialClientStateKeyArray(controllerClass));
-        keyObjClientState.addField("show", getComponentStateKeysOnShow(controllerClass));
-        keyObjClientState.addField("action", actionComponentStateKeys(controllerClass));
-        component.addField("clientStateKeys", keyObjClientState);
-
+        overrideGetPhaseStateKeys(controllerClass, component);
+        overrideGetAcrtionStateKeys(controllerClass, component);
     }
 
-    private JSArray initialClientStateKeyArray(Class<?> controllerClass) {
-        return new JSArray(ControllerUtils.getInitializerMethods(controllerClass)
-                .flatMap(this::getClientStateParameterKeys)
+    private void overrideGetPhaseStateKeys(Class<?> controllerClass, JSClass component) {
+        var getPhaseStateKeys = component.overrideAbstractMethod("getPhaseStateKeys");
+        var keyMapVar = new JSVar("keyMap");
+        var keyMap = new JSObject();
+        keyMap.addField("init", initComponentStateKeyArray(controllerClass));
+        keyMap.addField("destroy", destroyCompoentStateKeyArray(controllerClass));
+        keyMap.addField("show", showCompoentStateKeyArray(controllerClass));
+        keyMap.addField("hide", hideCompoentStateKeyArray(controllerClass));
+        getPhaseStateKeys.addStatement(new JSVarAssignment(keyMapVar, keyMap));
+        getPhaseStateKeys.addStatement(new JSCustomStatement(String.format("return %s[%s]", keyMapVar.getName(), getPhaseStateKeys.getArgs().get(0))));
+    }
+
+    private void overrideGetAcrtionStateKeys(Class<?> controllerClass, JSClass component) {
+        var getActionStateKeys = component.overrideAbstractMethod("getPhaseStateKeys");
+    }
+
+    private JSArray initComponentStateKeyArray(Class<?> controllerClass) {
+        return componentStateArray(ControllerUtils.getOnInitMethods(controllerClass));
+    }
+
+    private JSArray destroyCompoentStateKeyArray(Class<?> controllerClass) {
+        return componentStateArray(ControllerUtils.getOnDestroyMethods(controllerClass));
+    }
+
+    private JSArray showCompoentStateKeyArray(Class<?> controllerClass) {
+        return componentStateArray(ControllerUtils.getOnShowMethods(controllerClass));
+    }
+
+    private JSArray hideCompoentStateKeyArray(Class<?> controllerClass) {
+        return componentStateArray(ControllerUtils.getOnHideMethods(controllerClass));
+    }
+
+    private JSArray componentStateArray(Stream<Method> methods) {
+        return new JSArray(methods.flatMap(this::getComponentStateParameterKeys)
                 .map(JSString::new)
                 .toArray(JSString[]::new));
     }
+
 
     private void overrideGetComponentStateKeysOnShowMethod(JSClass owner, Class<?> controllerClass) {
         JSMethod getComponentStateKeysOnShow = owner.getMethod("getOnShowComponentStateKeys");
@@ -47,14 +69,14 @@ public class JavascriptControllerModelParser {
 
     private JSArray getComponentStateKeysOnShow(Class<?> controllerClass) {
         return new JSArray(ControllerUtils.getOnShowMethods(controllerClass)
-                .flatMap(this::getClientStateParameterKeys)
+                .flatMap(this::getComponentStateParameterKeys)
                 .map(JSString::new)
                 .toArray(JSString[]::new));
     }
 
     private JSArray getComponentStateKeysOnHide(Class<?> controllerClass) {
         return new JSArray(ControllerUtils.getOnHideMethods(controllerClass)
-                .flatMap(this::getClientStateParameterKeys)
+                .flatMap(this::getComponentStateParameterKeys)
                 .map(JSString::new)
                 .toArray(JSString[]::new));
     }
@@ -87,13 +109,13 @@ public class JavascriptControllerModelParser {
     }
 
     private JSArray getClientStateParameterKeyArray(Method method) {
-        return new JSArray(getClientStateParameterKeys(method)
+        return new JSArray(getComponentStateParameterKeys(method)
                 .map(JSString::new)
                 .toArray(JSString[]::new));
     }
 
-    private Stream<String> getClientStateParameterKeys(Method method) {
-        return ControllerUtils.getClientStateParamters(method)
+    private Stream<String> getComponentStateParameterKeys(Method method) {
+        return ControllerUtils.getComponentStateParamters(method)
                 .map(ControllerUtils::getClientAttributeKey);
     }
 

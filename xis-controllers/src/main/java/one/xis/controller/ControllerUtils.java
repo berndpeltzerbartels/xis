@@ -14,8 +14,12 @@ import java.util.stream.Stream;
 
 public class ControllerUtils {
 
-    public static Stream<Method> getInitializerMethods(Class<?> controllerClass) {
-        return getAnnotatedMethods(controllerClass, Model.class);
+    public static Stream<Method> getOnInitMethods(Class<?> controllerClass) {
+        return getAnnotatedMethods(controllerClass, OnInit.class);
+    }
+
+    public static Stream<Method> getOnDestroyMethods(Class<?> controllerClass) {
+        return getAnnotatedMethods(controllerClass, OnDestroy.class);
     }
 
     public static Stream<Method> getOnShowMethods(Class<?> controllerClass) {
@@ -36,9 +40,9 @@ public class ControllerUtils {
                 .filter(parameter -> parameter.isAnnotationPresent(Model.class));
     }
 
-    public static Stream<Parameter> getClientStateParamters(Method method) {
+    public static Stream<Parameter> getComponentStateParamters(Method method) {
         return Arrays.stream(method.getParameters())
-                .filter(parameter -> parameter.isAnnotationPresent(ClientAttribute.class));
+                .filter(parameter -> parameter.isAnnotationPresent(ComponentState.class));
     }
 
     public static <A extends Annotation> Stream<Method> getAnnotatedMethods(Class<?> controllerClass, Class<A> annotationClass) {
