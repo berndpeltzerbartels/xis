@@ -9,12 +9,12 @@ import one.xis.utils.io.IOUtils;
  */
 @Slf4j
 @Getter
-class ArchivedResource implements ResourceFile {
+class StaticResource implements ResourceFile {
 
     private final String content;
     private final long lastModified;
 
-    ArchivedResource(String resource) {
+    StaticResource(String resource) {
         log.info("loading {}", resource);
         content = IOUtils.getResourceAsString(resource);
         lastModified = System.currentTimeMillis();

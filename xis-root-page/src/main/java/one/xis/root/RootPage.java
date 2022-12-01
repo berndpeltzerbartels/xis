@@ -32,7 +32,6 @@ public class RootPage {
     void createContent() {
         Document document = getRootPageDocument();
         Element head = getHead(document);
-        addFunctionsScriptTag(head);
         addApiScriptTag(head);
         addGlobalsScriptTag(head);
         addPagesScriptTags(head);

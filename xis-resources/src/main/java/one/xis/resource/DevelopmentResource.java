@@ -25,7 +25,7 @@ class DevelopmentResource implements ReloadableResourceFile {
 
     @Override
     public int getLength() {
-        return content.length();
+        return (int) file.length();
     }
 
 

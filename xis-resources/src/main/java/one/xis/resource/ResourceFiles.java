@@ -22,7 +22,7 @@ public class ResourceFiles {
             throw new RuntimeException(e);
         }
         if (uri.getScheme().equals("jar")) {
-            return new ArchivedResource(resourcePath);
+            return new StaticResource(resourcePath);
         } else {
             return new DevelopmentResource(new File(uri));
         }

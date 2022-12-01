@@ -1,10 +1,14 @@
 class XISWidget extends XISComponent {
 
-    constructor(parent, client) {
-        super(parent, client);
+    constructor(client) {
+        super(client);
         this.className = 'XISWidget';
         this.componentType = 'WIDGET';
+    }
 
+
+   setParent(parent) {
+        this.parent = parent;
     }
 
         /**

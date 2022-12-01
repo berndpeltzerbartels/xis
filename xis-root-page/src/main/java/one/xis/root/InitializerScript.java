@@ -34,11 +34,11 @@ class InitializerScript {
     }
 
     private String getPageRegistrationJs(@NonNull String path, PageComponent pageComponent) {
-        return String.format("pages.addPage('%s', new %s());\n", path, pageComponent.getJavascriptClass());
+        return String.format("pages.addPage('%s', new %s(client));\n", path, pageComponent.getJavascriptClass());
     }
 
     private String getWidgetRegistrationJs(@NonNull String key, WidgetComponent widgetComponent) {
-        return String.format("widgets.addWidget('%s', new %s());\n", key, widgetComponent.getJavascriptClass());
+        return String.format("widgets.addWidget('%s', new %s(client));\n", key, widgetComponent.getJavascriptClass());
     }
 
     private String getWelcomPageJs() {

@@ -135,7 +135,7 @@ public class JavascriptSuperClasses {
             .addMethod("setBodyAttributes", 0)
             .addMethod("removeBodyAttributes", 1);
 
-    public static final JSSuperClass XIS_WIDGET = new JSSuperClass("XISWidget", XIS_COMPONENT, "parent", "client")
+    public static final JSSuperClass XIS_WIDGET = new JSSuperClass("XISWidget", XIS_COMPONENT, "client")
             .addMethod("init", 1)
             .addMethod("addValues", 2)
             .addMethod("replace", 1);

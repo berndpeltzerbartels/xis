@@ -75,6 +75,7 @@ class XISContainer extends XISTemplateObject {
             if (widget.root) {
                 this.getParentElement().appendChild(widget.root.element);
             }
+            this.widget.setParent(this);
             this.widget.show();
         }
     }
@@ -87,6 +88,7 @@ class XISContainer extends XISTemplateObject {
         if (this.widget) {
             this.getParentElement().removeChild(this.widget.root.element);
             this.widget.hide();
+            this.widget.setParent(undefined);
         }
     }
 

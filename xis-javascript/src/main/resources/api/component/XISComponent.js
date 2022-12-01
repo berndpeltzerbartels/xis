@@ -1,15 +1,14 @@
 class XISComponent extends XISValueHolder {
 
     /**
-    *
-    * @param {XISTemplateObject} parent
     * @param {XISClient} client
+    * @param {XISTemplateObject} parent
+
     */
-    constructor(parent, client) {
-        super(parent);
+    constructor(client) {
+        super(undefined);
         this.client = client;
         this.className = 'XISComponent';
-        this.parent = parent;
         this.state = {};
     }
 
