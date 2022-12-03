@@ -32,6 +32,9 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.0'
     testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.16.1'
     testImplementation project(':xis-remote-core')
+
+    testImplementation project(':xis-context-test')
+    testImplementation('org.mockito:mockito-core:4.8.0')
 }
 
 test {

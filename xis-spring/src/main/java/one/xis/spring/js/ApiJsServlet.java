@@ -1,6 +1,6 @@
 package one.xis.spring.js;
 
-import one.xis.resource.ResourceFile;
+import one.xis.resource.Resource;
 import one.xis.root.RootPageService;
 import one.xis.spring.servlet.ResourceServlet;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +15,7 @@ class ApiJsServlet extends ResourceServlet {
     private RootPageService rootPageService;
 
     @Override
-    protected ResourceFile getResource(HttpServletRequest request) {
+    protected Resource getResource(HttpServletRequest request) {
         String uri = request.getRequestURI();
         String file = uri.substring(uri.lastIndexOf('/') + 1);
         return rootPageService.getJavascriptResource(file);

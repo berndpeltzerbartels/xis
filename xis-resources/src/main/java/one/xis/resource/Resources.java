@@ -8,8 +8,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 
 @XISComponent
-public class ResourceFiles {
-    public ResourceFile getByPath(String path) {
+public class Resources {
+    public Resource getByPath(String path) {
         String resourcePath = removeTrailingSlah(path);
         URL url = ClassLoader.getSystemClassLoader().getResource(resourcePath);
         if (url == null) {

@@ -23,7 +23,7 @@ public class PageService {
 
     public void addPageController(@NonNull Object controller) {
         var metaData = pageMetaDataMap.computeIfAbsent(controller.getClass(), pageMetaDataFactory::createMetaData);
-        pageComponents.createScript(metaData);
+        pageComponents.createPageComponent(metaData);
         pageControllers.addController(controller, metaData);
     }
 

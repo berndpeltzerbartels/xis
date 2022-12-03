@@ -9,7 +9,7 @@ import javax.script.ScriptException;
 
 
 //@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class PageServiceTest {
+class MinimalPageITCase {
 
     private PageService pageService;
 
@@ -20,11 +20,11 @@ class PageServiceTest {
     }
 
     @Test
-    void mimimalPage() throws ScriptException {
+    void compiles() throws ScriptException {
         pageService.addPageController(new MinimalPage());
         var pageComponent = pageService.getPageComponentByPath("/MinimalPage.html");
-        var script = pageComponent.getJavascript();
 
+        var script = pageComponent.getJavascript();
         var compiledScript = JSTestUtil.compileWithApi(script);
         compiledScript.eval();
     }

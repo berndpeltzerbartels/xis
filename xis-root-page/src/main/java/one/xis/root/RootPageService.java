@@ -2,9 +2,9 @@ package one.xis.root;
 
 import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
-import one.xis.resource.ReloadableResourceFile;
-import one.xis.resource.ResourceFile;
-import one.xis.resource.ResourceFiles;
+import one.xis.resource.ReloadableResource;
+import one.xis.resource.Resource;
+import one.xis.resource.Resources;
 
 import java.util.Collection;
 import java.util.Set;
@@ -13,7 +13,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class RootPageService {
 
-    private final ResourceFiles resourceFiles;
+    private final Resources resources;
     private final InitializerScript initializerScript;
     private final RootPage rootPage;
 
@@ -28,32 +28,32 @@ public class RootPageService {
         return rootPage.getContent();
     }
 
-    public ResourceFile getJavascriptResource(String file) {
+    public Resource getJavascriptResource(String file) {
         if (!JS_RESOURCES.contains(file)) {
             throw new IllegalArgumentException("forbidden resource: " + file);
         }
         if (file.equals("custom-script.js")) {
             return getCustomJavascript();
         }
-        return resourceFiles.getByPath("js/" + file);
+        return resources.getByPath("js/" + file);
     }
 
     public String getInitializerScipt() {
         return initializerScript.getContent();
     }
 
-    public ResourceFile getCustomJavascript() {
-        if (resourceFiles.exists(RootPage.CUSTOM_SCRIPT)) {
-            ResourceFile customScript = resourceFiles.getByPath(RootPage.CUSTOM_SCRIPT);
-            if (customScript instanceof ReloadableResourceFile) {
-                ReloadableResourceFile reloadableResourceFile = (ReloadableResourceFile) customScript;
+    public Resource getCustomJavascript() {
+        if (resources.exists(RootPage.CUSTOM_SCRIPT)) {
+            Resource customScript = resources.getByPath(RootPage.CUSTOM_SCRIPT);
+            if (customScript instanceof ReloadableResource) {
+                ReloadableResource reloadableResourceFile = (ReloadableResource) customScript;
                 if (reloadableResourceFile.isObsolete()) {
                     reloadableResourceFile.reload();
                 }
             }
             return customScript;
         }
-        return ResourceFile.EMPTY_FILE;
+        return Resource.EMPTY;
     }
 
 }

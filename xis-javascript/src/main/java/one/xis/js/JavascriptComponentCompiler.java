@@ -3,7 +3,7 @@ package one.xis.js;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import one.xis.resource.ReloadableResourceFile;
+import one.xis.resource.ReloadableResource;
 import one.xis.template.TemplateModel;
 import one.xis.template.TemplateSynthaxException;
 import one.xis.utils.xml.XmlUtil;
@@ -22,8 +22,8 @@ public abstract class JavascriptComponentCompiler<C extends JavascriptComponent,
             if (!javascriptComponent.isCompiled()) {
                 compile(javascriptComponent);
             }
-            if (javascriptComponent.getHtmlResourceFile() instanceof ReloadableResourceFile) {
-                var reloadableResourceFile  = (ReloadableResourceFile) javascriptComponent.getHtmlResourceFile();
+            if (javascriptComponent.getHtmlResource() instanceof ReloadableResource) {
+                var reloadableResourceFile = (ReloadableResource) javascriptComponent.getHtmlResource();
                 if (reloadableResourceFile.isObsolete()) {
                     reloadableResourceFile.reload();
                     compile(javascriptComponent);
@@ -35,21 +35,21 @@ public abstract class JavascriptComponentCompiler<C extends JavascriptComponent,
 
     public void compile(C javascriptComponent) {
         javascriptComponent.setCompiled(false);
-        var javascript = doCompile(javascriptComponent);
-        javascriptComponent.setJavascript(javascript);
+        var javascriptModel = doCompile(javascriptComponent);
+        javascriptComponent.setJavascript(javaScriptModelAsCode(javascriptModel));
         javascriptComponent.setCompiled(true);
     }
 
-    private String doCompile(C component) {
+    public JSScript doCompile(C component) {
         log.info("compile template for {}", component.getControllerClass());
         var controllerClass = component.getControllerClassName();
-        var templateModel = parseTemplate(controllerClass, htmlToDocument(controllerClass, component.getHtmlResourceFile().getContent()));
+        var templateModel = parseTemplate(controllerClass, htmlToDocument(controllerClass, component.getHtmlResource().getContent()));
         var script = new JSScript();
         var javacriptComponentClass = parseTemplateModelIntoScriptModel(templateModel, component.getJavascriptClass(), script);
         addControllerIdField(javacriptComponentClass, component.getControllerClass());
         addMessageAttributes(javacriptComponentClass, component.getControllerClass());
         addComponentIdField(javacriptComponentClass);
-        return javaScriptModelAsCode(script);
+        return script;
     }
 
 
@@ -90,6 +90,4 @@ public abstract class JavascriptComponentCompiler<C extends JavascriptComponent,
             throw new RuntimeException(e);
         }
     }
-
-
 }

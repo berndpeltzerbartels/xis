@@ -18,8 +18,8 @@ class PageComponents {
     private final PageComponentCompiler pageComponentCompiler;
     private PageComponent welcomePageComponent;
 
-    PageComponent createScript(PageMetaData pageMetaData) {
-        PageComponent pageComponent = createPageJavascript(pageMetaData);
+    PageComponent createPageComponent(PageMetaData pageMetaData) {
+        PageComponent pageComponent = createComponent(pageMetaData);
         if (pageMetaData.isWelcomePage()) {
             if (welcomePageComponent != null) {
                 throw new IllegalStateException("more then one welcome-page defined (@Page(welcomePage=true))");
@@ -39,9 +39,9 @@ class PageComponents {
         return pageComponent;
     }
 
-    private PageComponent createPageJavascript(PageMetaData pageMetaData) {
+    private PageComponent createComponent(PageMetaData pageMetaData) {
         var pageComponent = PageComponent.builder()
-                .htmlResourceFile(pageMetaData.getHtmlTemplate())
+                .htmlResource(pageMetaData.getHtmlTemplate())
                 .controllerClass(pageMetaData.getControllerClass())
                 .path(pageMetaData.getPath())
                 .javascriptClass(pageMetaData.getJavascriptClassname())
@@ -49,7 +49,7 @@ class PageComponents {
         pageComponentCompiler.compile(pageComponent);
         return pageComponent;
     }
-    
+
     Collection<String> getClassnames() {
         return pageComponentsByClassname.keySet();
     }

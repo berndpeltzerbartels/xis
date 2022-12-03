@@ -1,6 +1,6 @@
 package one.xis.js;
 
-import one.xis.resource.ResourceFile;
+import one.xis.resource.Resource;
 
 /**
  * Representation of the client-side part of acomponent,
@@ -22,7 +22,7 @@ public interface JavascriptComponent {
      * @return Location for the template of this
      * component
      */
-    ResourceFile getHtmlResourceFile();
+    Resource getHtmlResource();
 
     /**
      * @param compiled

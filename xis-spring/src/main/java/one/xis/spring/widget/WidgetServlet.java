@@ -2,7 +2,7 @@ package one.xis.spring.widget;
 
 
 import one.xis.path.PathUtils;
-import one.xis.resource.ResourceFile;
+import one.xis.resource.Resource;
 import one.xis.spring.servlet.ResourceServlet;
 import one.xis.widget.WidgetService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,7 @@ class WidgetServlet extends ResourceServlet {
     private WidgetService widgetService;
 
     @Override
-    protected ResourceFile getResource(HttpServletRequest request) {
+    protected Resource getResource(HttpServletRequest request) {
         String key = request.getRequestURI();
         String jsClassname = PathUtils.stripSuffix(key.substring(key.lastIndexOf('/') + 1));
         return widgetService.getWidgetComponent(jsClassname);

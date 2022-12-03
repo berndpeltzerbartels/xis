@@ -2,12 +2,12 @@ package one.xis.resource;
 
 import lombok.Getter;
 
-class EmptyResourceFile implements ResourceFile {
+class EmptyResource implements Resource {
 
     @Getter
     private final long lastModified;
 
-    EmptyResourceFile() {
+    EmptyResource() {
         lastModified = System.currentTimeMillis();
     }
 

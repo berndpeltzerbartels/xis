@@ -1,6 +1,6 @@
 package one.xis.resource;
 
-public interface ResourceFile {
+public interface Resource {
 
     int getLength();
 
@@ -8,5 +8,5 @@ public interface ResourceFile {
 
     long getLastModified();
 
-    ResourceFile EMPTY_FILE = new EmptyResourceFile();
+    Resource EMPTY = new EmptyResource();
 }

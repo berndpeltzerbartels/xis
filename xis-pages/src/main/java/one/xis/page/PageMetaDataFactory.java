@@ -4,19 +4,19 @@ import lombok.RequiredArgsConstructor;
 import one.xis.Page;
 import one.xis.context.XISComponent;
 import one.xis.path.PathUtils;
-import one.xis.resource.ResourceFiles;
+import one.xis.resource.Resources;
 
 @XISComponent
 @RequiredArgsConstructor
 class PageMetaDataFactory {
 
-    private final ResourceFiles resourceFiles;
+    private final Resources resources;
     private static int nameIndex;
 
     PageMetaData createMetaData(Class<?> controllerClass) {
         String path = path(controllerClass);
         return PageMetaData.builder()
-                .htmlTemplate(resourceFiles.getByPath(getHtmlTemplatePath(controllerClass)))
+                .htmlTemplate(resources.getByPath(getHtmlTemplatePath(controllerClass)))
                 .javascriptClassname(uniqueJavascriptClassName())
                 .path(path)
                 .welcomePage(isWelcomePage(controllerClass))

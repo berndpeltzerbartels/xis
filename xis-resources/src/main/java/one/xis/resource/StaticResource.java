@@ -9,7 +9,7 @@ import one.xis.utils.io.IOUtils;
  */
 @Slf4j
 @Getter
-class StaticResource implements ResourceFile {
+class StaticResource implements Resource {
 
     private final String content;
     private final long lastModified;

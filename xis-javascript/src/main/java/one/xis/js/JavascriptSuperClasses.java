@@ -2,7 +2,6 @@ package one.xis.js;
 
 public class JavascriptSuperClasses {
 
-
     public static final JSSuperClass XIS_CONTAINER = new JSSuperClass("XISContainer", "parent")
             .addMethod("init", 2)
             .addAbstractMethod("getClassName")
@@ -87,7 +86,6 @@ public class JavascriptSuperClasses {
             .addMethod("getValueHolder")
             .addMethod("val", 1)
             .addMethod("getChildren")
-            .addAbstractMethod("")
             .addAbstractMethod("getContainer")
             .addAbstractMethod("createChildren")
             .addAbstractMethod("render")
@@ -114,7 +112,10 @@ public class JavascriptSuperClasses {
             .addMethod("getParameters")
             .addAbstractMethod("getParameterNames")
             .addAbstractMethod("getActionStateKeys", 1)
-            .addAbstractMethod("getPhaseStateKeys", 1)
+            .addAbstractMethod("getOnShowStateKeys", 1)
+            .addAbstractMethod("getOnHideStateKeys", 1)
+            .addAbstractMethod("getOnInitStateKeys", 1)
+            .addAbstractMethod("getOnDestroyStateKeys", 1)
             .addAbstractMethod("replace", 2);
 
     public static final JSSuperClass XIS_PAGE = new JSSuperClass("XISPage", XIS_COMPONENT, "client")

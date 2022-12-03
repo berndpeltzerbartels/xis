@@ -1,6 +1,6 @@
 package one.xis.spring.servlet;
 
-import one.xis.resource.ResourceFile;
+import one.xis.resource.Resource;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -11,7 +11,7 @@ public abstract class ResourceServlet extends HttpServlet {
 
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        ResourceFile resource = getResource(request);
+        Resource resource = getResource(request);
         long ifModifiedSince = request.getDateHeader("If-Modified-Since");
         String ifNoneMatch = request.getHeader("If-None-Match");
         if (ifModifiedSince > -1 && !response.isCommitted() && ifModifiedSince == resource.getLastModified()) {
@@ -28,7 +28,7 @@ public abstract class ResourceServlet extends HttpServlet {
         }
     }
 
-    protected abstract ResourceFile getResource(HttpServletRequest request);
+    protected abstract Resource getResource(HttpServletRequest request);
 
     protected abstract String getContentType();
 }

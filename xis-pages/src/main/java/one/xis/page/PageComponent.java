@@ -4,13 +4,13 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import one.xis.js.JavascriptComponent;
-import one.xis.resource.ResourceFile;
+import one.xis.resource.Resource;
 
 @Getter
 @Setter
 @Builder
-public class PageComponent implements ResourceFile, JavascriptComponent {
-    private final ResourceFile htmlResourceFile;
+public class PageComponent implements Resource, JavascriptComponent {
+    private final Resource htmlResource;
     private final String javascriptClass;
     private final String path;
     private final Class<?> controllerClass;
@@ -29,6 +29,6 @@ public class PageComponent implements ResourceFile, JavascriptComponent {
 
     @Override
     public long getLastModified() {
-        return htmlResourceFile.getLastModified();
+        return htmlResource.getLastModified();
     }
 }

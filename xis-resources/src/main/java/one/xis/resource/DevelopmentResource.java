@@ -12,7 +12,7 @@ import java.io.File;
  * restart.
  */
 @Slf4j
-class DevelopmentResource implements ReloadableResourceFile {
+class DevelopmentResource implements ReloadableResource {
 
     private final File file;
     private String content;

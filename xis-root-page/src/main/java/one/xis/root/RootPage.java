@@ -6,8 +6,8 @@ import lombok.SneakyThrows;
 import one.xis.context.XISComponent;
 import one.xis.page.PageService;
 import one.xis.path.PathUtils;
-import one.xis.resource.ResourceFile;
-import one.xis.resource.ResourceFiles;
+import one.xis.resource.Resource;
+import one.xis.resource.Resources;
 import one.xis.utils.xml.XmlUtil;
 import one.xis.widget.WidgetService;
 import org.w3c.dom.Document;
@@ -23,7 +23,7 @@ public class RootPage {
     public static final String CUSTOM_SCRIPT = "custom-script.js";
     private final PageService pageService;
     private final WidgetService widgetJavascripts;
-    private final ResourceFiles resourceFiles;
+    private final Resources resources;
 
     @Getter
     private String content;
@@ -46,7 +46,7 @@ public class RootPage {
     }
 
     private Document getRootPageDocument() throws IOException, SAXException {
-        ResourceFile rootPageResource = resourceFiles.getByPath("main.html");
+        Resource rootPageResource = resources.getByPath("main.html");
         return XmlUtil.loadDocument(rootPageResource.getContent());
     }
 

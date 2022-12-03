@@ -1,6 +1,6 @@
 package one.xis.resource;
 
-public interface ReloadableResourceFile extends ResourceFile {
+public interface ReloadableResource extends Resource {
 
     boolean isObsolete();
 
