@@ -126,8 +126,24 @@ class XISComponent extends XISValueHolder {
      * @protected
      * @param {String} phase 
      */
-    getPhaseStateKeys(phase) {
+    getOnShowStateKeys() {
         throw new Error('abstract method');
+    }
+
+    getOnDestroyStateKeys() {
+     throw new Error('abstract method');
+    }
+
+    getOnHideStateKeys() {
+     throw new Error('abstract method');
+    }
+
+    getOnInitStateKeys() {
+     throw new Error('abstract method');
+    }
+
+    getOnDestroyStateKeys() {
+     throw new Error('abstract method');
     }
 
     /**

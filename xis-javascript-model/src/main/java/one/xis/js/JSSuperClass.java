@@ -10,6 +10,8 @@ import java.util.Map;
 
 @Getter
 public class JSSuperClass extends JSClass {
+    private final Map<String, JSMethod> declaredMethods = new HashMap<>();
+    private final Map<String, JSMethod> declaredAbstractMethods = new HashMap<>();
     private final Map<String, JSMethod> methods = new HashMap<>();
     private final Map<String, JSMethod> abstractMethods = new HashMap<>();
 
@@ -25,7 +27,9 @@ public class JSSuperClass extends JSClass {
     }
 
     public JSSuperClass addMethod(String name, int args) {
-        methods.put(name, new JSMethod(this, name, unspecifiedArgNames(args))); // TODO remove unspecified ?
+        var method = new JSMethod(this, name, unspecifiedArgNames(args)); // TODO remove unspecified ?
+        methods.put(name, method);
+        declaredMethods.put(name, method);
         return this;
     }
 
@@ -39,7 +43,9 @@ public class JSSuperClass extends JSClass {
 
     public JSSuperClass addAbstractMethod(String name, int args) {
         // We are using abstract methods, without parematers only
-        abstractMethods.put(name, new JSMethod(this, name, unspecifiedArgNames(args)));
+        var method = new JSMethod(this, name, unspecifiedArgNames(args));
+        abstractMethods.put(name, method);
+        declaredAbstractMethods.put(name, method);
         return this;
     }
 

@@ -107,15 +107,15 @@ public class JavascriptSuperClasses {
             .addMethod("processResponse", 1)
             .addMethod("onAction", 1)
             .addMethod("getActionData", 1)
-            .addMethod("getPhaseData", 0)
+            .addMethod("getPhaseData", 1)
             .addMethod("addPhaseMessage", 1)
             .addMethod("getParameters")
             .addAbstractMethod("getParameterNames")
             .addAbstractMethod("getActionStateKeys", 1)
-            .addAbstractMethod("getOnShowStateKeys", 1)
-            .addAbstractMethod("getOnHideStateKeys", 1)
-            .addAbstractMethod("getOnInitStateKeys", 1)
-            .addAbstractMethod("getOnDestroyStateKeys", 1)
+            .addAbstractMethod("getOnShowStateKeys", 0)
+            .addAbstractMethod("getOnHideStateKeys", 0)
+            .addAbstractMethod("getOnInitStateKeys", 0)
+            .addAbstractMethod("getOnDestroyStateKeys", 0)
             .addAbstractMethod("replace", 2);
 
     public static final JSSuperClass XIS_PAGE = new JSSuperClass("XISPage", XIS_COMPONENT, "client")
@@ -137,7 +137,7 @@ public class JavascriptSuperClasses {
             .addMethod("removeBodyAttributes", 1);
 
     public static final JSSuperClass XIS_WIDGET = new JSSuperClass("XISWidget", XIS_COMPONENT, "client")
-            .addMethod("init", 1)
-            .addMethod("addValues", 2)
+            .addMethod("init")
+            .addMethod("addValues", 1)
             .addMethod("replace", 1);
 }
