@@ -44,6 +44,10 @@ class XISTemplateObject {
         return this.parent.getValueHolder();
     }
 
+    getValue(key) {
+        return this.getValueHolder().getValue(key);
+    }
+
 
     val(path) {
         return this.getValueHolder().getValue(path);
@@ -55,10 +59,6 @@ class XISTemplateObject {
 
 
     getContainer() {
-        throw new Error('abstract method');
-    }
-
-    createChildren() {
         throw new Error('abstract method');
     }
 

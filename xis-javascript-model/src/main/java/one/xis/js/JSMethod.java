@@ -7,7 +7,7 @@ import java.util.List;
 
 @Value
 public class JSMethod implements JSContext {
-    JSClass owner;
+    JSClass declaringClass;
     String name;
     List<String> args;
     List<JSStatement> statements = new ArrayList<>();
@@ -19,7 +19,7 @@ public class JSMethod implements JSContext {
 
     @Override
     public String toString() {
-        return owner.getClassName() + "#" + name + "(...)";
+        return declaringClass.getClassName() + "#" + name + "(...)";
     }
 
 
@@ -38,7 +38,7 @@ public class JSMethod implements JSContext {
         if (!method.name.equals(name)) {
             return false;
         }
-        if (!method.owner.equals(owner)) {
+        if (!method.declaringClass.equals(declaringClass)) {
             return false;
         }
         return true;

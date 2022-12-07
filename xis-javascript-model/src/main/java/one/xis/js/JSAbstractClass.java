@@ -9,39 +9,51 @@ import java.util.Map;
 
 
 @Getter
-public class JSSuperClass extends JSClass {
+public class JSAbstractClass extends JSClass {
     private final Map<String, JSMethod> declaredMethods = new HashMap<>();
     private final Map<String, JSMethod> declaredAbstractMethods = new HashMap<>();
     private final Map<String, JSMethod> methods = new HashMap<>();
     private final Map<String, JSMethod> abstractMethods = new HashMap<>();
+    private final Map<String, JSField> declaredAbstractFields = new HashMap<>();
+    private final Map<String, JSField> abstractFields = new HashMap<>();
+    private final Map<String, JSField> fields = new HashMap<>();
+    private final String className;
+    private final String[] constructorArgs;
 
-    public JSSuperClass(String className, String... constructorArgs) {
+    public JSAbstractClass(String className, String... constructorArgs) {
         super(className, constructorArgs);
+        this.className = className;
+        this.constructorArgs = constructorArgs;
     }
 
-    public JSSuperClass(String className, JSSuperClass superClass, String... constructorArgs) {
-        super(className, constructorArgs);
+
+    public JSAbstractClass superClass(JSAbstractClass superClass) {
         abstractMethods.putAll(superClass.getAbstractMethods());
         methods.putAll(superClass.getMethods());
-        methods.forEach(abstractMethods::remove);
+        methods.keySet().forEach(abstractMethods::remove);
+        abstractFields.putAll(superClass.getAbstractFields());
+        fields.putAll(superClass.getFields());
+        fields.keySet().forEach(abstractFields::remove);
+        return this;
     }
 
-    public JSSuperClass addMethod(String name, int args) {
+
+    public JSAbstractClass addDeclaredMethod(String name, int args) {
         var method = new JSMethod(this, name, unspecifiedArgNames(args)); // TODO remove unspecified ?
         methods.put(name, method);
         declaredMethods.put(name, method);
         return this;
     }
 
-    public JSSuperClass addMethod(String name) {
-        return addMethod(name, 0);
+    public JSAbstractClass addDeclaredMethod(String name) {
+        return addDeclaredMethod(name, 0);
     }
 
-    public JSSuperClass addAbstractMethod(String name) {
+    public JSAbstractClass addAbstractMethod(String name) {
         return addAbstractMethod(name, 0);
     }
 
-    public JSSuperClass addAbstractMethod(String name, int args) {
+    public JSAbstractClass addAbstractMethod(String name, int args) {
         // We are using abstract methods, without parematers only
         var method = new JSMethod(this, name, unspecifiedArgNames(args));
         abstractMethods.put(name, method);
@@ -49,9 +61,16 @@ public class JSSuperClass extends JSClass {
         return this;
     }
 
+    public JSAbstractClass addAbstractField(String name) {
+        var field = new JSField(this, name);
+        this.abstractFields.put(name, field);
+        this.declaredAbstractFields.put(name, field);
+        return this;
+    }
+
     @Override
     public JSMethod getMethod(String name) {
-        JSMethod method = methods.get(name);
+        var method = methods.get(name);
         if (method == null) {
             throw new NoSuchJavascriptMethodError(name);
         }
@@ -61,10 +80,7 @@ public class JSSuperClass extends JSClass {
 
     @Override
     public JSMethod overrideAbstractMethod(String name) {
-        JSMethod method = abstractMethods.get(name);
-        if (method == null) {
-            method = methods.get(name);
-        }
+        var method = abstractMethods.get(name);
         if (method == null) {
             throw new NoSuchJavascriptMethodError(name);
         }

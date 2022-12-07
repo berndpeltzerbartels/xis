@@ -65,6 +65,7 @@ class XISContainer extends XISTemplateObject {
         return this;
     }
 
+
     /**
      * @public
      * @param {XISWidget} widget 

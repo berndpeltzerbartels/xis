@@ -75,24 +75,20 @@ class XISComponent extends XISValueHolder {
     }
 
     /**
-     * 
-     * @param {any} phase 
-     * @returns {any}
-     */
-    getPhaseData(phase) {
-        var data = {};
-        for (key in this.getPhaseStateKeys(phase)) {
-            data[key] = this.state[key];
-        }
-        return data;
-    }
-
-    /**
      * @private
      * @param {String} phase 
      */
     addPhaseMessage(phase) {
         this.client.addPhaseMessage(this, phase, this.getPhaseData(phase), this.getParameters());
+    }
+
+    /**
+    * @private
+    */
+    getPhaseData(phase) {
+        switch(phase) {
+            case 'show': return this.get
+        }
     }
 
 
@@ -153,6 +149,10 @@ class XISComponent extends XISValueHolder {
      */
     replace(another, parameters) {
         throw new Error('abstract method');
+    }
+
+    getParameterNames() {
+        // TODO
     }
 
 }

@@ -182,11 +182,7 @@ public class JSWriter {
 
 
     private void writeMethodCallValue(JSMethodCall methodCall, Appendable writer) throws IOException {
-        if (methodCall.getOwner() != null) {
-            writer.append(methodCall.getOwner().getName());
-        } else {
-            writer.append("this");
-        }
+        writer.append("this");
         writer.append(".");
         writer.append(methodCall.getMethod().getName());
         writer.append("(");
@@ -253,11 +249,7 @@ public class JSWriter {
 
 
     private void writeMethodCallStatement(JSMethodCall statement, Appendable writer) throws IOException {
-        if (statement.getOwner() != null) {
-            writer.append(statement.getOwner().getName());
-        } else {
-            writer.append("this");
-        }
+        writer.append("this");
         writer.append(".");
         writer.append(statement.getMethod().getName());
         writer.append("(");

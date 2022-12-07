@@ -1,6 +1,6 @@
 package one.xis.page;
 
-import one.xis.js.AbstractMethodValidator;
+import one.xis.js.JSScriptValidator;
 import org.junit.jupiter.api.Test;
 
 class MinimalPageAbstractMethodTest {
@@ -12,6 +12,6 @@ class MinimalPageAbstractMethodTest {
         var component = PageComponentTestUtil.createPageComponent("one/xis/page/MinimalPage.html", MinimalPage.class);
         var script = context.getSingleton(PageComponentCompiler.class).doCompile(component);
 
-        AbstractMethodValidator.validateOverridingComplete(script);
+        JSScriptValidator.validate(script);
     }
 }

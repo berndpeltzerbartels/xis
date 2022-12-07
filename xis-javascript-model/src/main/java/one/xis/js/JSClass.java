@@ -12,9 +12,10 @@ import java.util.Objects;
 @NonFinal
 public class JSClass implements JSDeclaration, JSContext {
     private final String className;
-    private JSSuperClass superClass;
+    private JSAbstractClass superClass;
     private final Map<String, JSField> fields = new HashMap<>();
     private final Map<String, JSMethod> overriddenMethods = new HashMap<>();
+    private final Map<String, JSField> overriddenFields = new HashMap<>();
     private final JSConstructor constructor;
 
     public JSClass(String className, String... args) {
@@ -29,12 +30,8 @@ public class JSClass implements JSDeclaration, JSContext {
         this.constructor = new JSConstructor(args.toArray(String[]::new));
     }
 
-
     public JSMethod getMethod(String name) {
         JSMethod method = overriddenMethods.get(name);
-        if (method == null) {
-            method = superClass.getAbstractMethods().get(name);
-        }
         if (method == null) {
             method = superClass.getMethod(name);
         }
@@ -50,12 +47,20 @@ public class JSClass implements JSDeclaration, JSContext {
         if (method == null) {
             throw new IllegalStateException("no abstract method with name: " + name);
         }
-        JSMethod overriddenMethod = new JSMethod(this, name, method.getArgs());
-        overriddenMethods.put(name, overriddenMethod);
-        return overriddenMethod;
+        overriddenMethods.put(name, method);
+        return method;
     }
 
-    public JSClass derrivedFrom(JSSuperClass jsClass) {
+    public JSField overrideAbstractField(String name) {
+        var field = superClass.getAbstractFields().get(name);
+        if (field == null) {
+            throw new IllegalStateException("no abstract field with name: " + name);
+        }
+        overriddenFields.put(name, field);
+        return field;
+    }
+
+    public JSClass derrivedFrom(JSAbstractClass jsClass) {
         superClass = jsClass;
         if (superClass.getConstructor().getArgs().size() != getConstructor().getArgs().size()) {
             throw new IllegalStateException(className + ": number of contructor args must match number of args in supercontructor for " + jsClass.getClassName());

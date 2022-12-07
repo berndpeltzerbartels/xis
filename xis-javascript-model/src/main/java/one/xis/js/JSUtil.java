@@ -31,7 +31,7 @@ public class JSUtil {
         }
     }
 
-    private void validateAbstractMethodsOverridden(JSClass jsClass, JSSuperClass superClass) {
+    private void validateAbstractMethodsOverridden(JSClass jsClass, JSAbstractClass superClass) {
         Set<String> methods = new HashSet<>(superClass.getAbstractMethods().keySet());
         methods.removeAll(jsClass.getOverriddenMethods().keySet());
         if (!methods.isEmpty()) {
@@ -40,7 +40,7 @@ public class JSUtil {
     }
 
 
-    private String getErrorMessageMissingOverride(JSSuperClass superClass, Set<String> notOverrideMethods) {
+    private String getErrorMessageMissingOverride(JSAbstractClass superClass, Set<String> notOverrideMethods) {
         return String.format("Subclasses of %s do not override %s", superClass.getClassName(), String.join(", ", notOverrideMethods));
     }
 

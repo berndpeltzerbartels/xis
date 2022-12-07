@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static one.xis.js.JavascriptSuperClasses.*;
+import static one.xis.js.JavascriptAbstractClasses.*;
 
 @XISComponent
 public class JavascriptTemplateParser {
@@ -283,7 +283,7 @@ public class JavascriptTemplateParser {
         }
 
         private void addExpressionWithFunctionStatements(Expression expression) {
-            var fktCall = expressionWithFunction(expression, method.getOwner());
+            var fktCall = expressionWithFunction(expression, method.getDeclaringClass());
             method.addStatement(new JSStringAppend(text, fktCall));
         }
 
@@ -294,7 +294,7 @@ public class JavascriptTemplateParser {
                 } else if (arg instanceof ExpressionString) {
                     method.addStatement(new JSStringAppend(text, new JSString(((ExpressionString) arg).getContent())));
                 } else if (arg instanceof ExpressionVar) {
-                    var getValue = method.getOwner().getMethod("val");
+                    var getValue = method.getDeclaringClass().getMethod("val");
                     var variablePath = JSArray.arrayOfStrings(((ExpressionVar) arg).getPath());
                     var getValueMethodCall = new JSMethodCall(getValue, variablePath);
                     method.addStatement(new JSStringAppend(text, getValueMethodCall));
@@ -303,12 +303,12 @@ public class JavascriptTemplateParser {
         }
     }
 
-    private JSClass derrivedClass(JSSuperClass superClass, JSScript script) {
+    private JSClass derrivedClass(JSAbstractClass superClass, JSScript script) {
         return derrivedClass(nextClassName(), superClass, script);
     }
 
 
-    private JSClass derrivedClass(String className, JSSuperClass superClass, JSScript script) {
+    private JSClass derrivedClass(String className, JSAbstractClass superClass, JSScript script) {
         var jsClass = new JSClass(className, superClass.getConstructor().getArgs()).derrivedFrom(superClass);
         script.addClassDeclaration(jsClass);
         return jsClass;
