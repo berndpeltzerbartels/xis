@@ -10,12 +10,6 @@ class XISTemplateObject {
         this.parent = parent;
     }
 
-    getParentElement() {
-        if (this.parent) {
-            return this.parent.getParentElement()
-        }
-    }
-
     init() {
         this.children.forEach(child.init());
     }
@@ -44,6 +38,14 @@ class XISTemplateObject {
         return this.parent.getValueHolder();
     }
 
+    /**
+     * @returns {Node}
+     */
+    getElement() {
+        return this.parent.getELement();
+    }
+
+
     getValue(key) {
         return this.getValueHolder().getValue(key);
     }
@@ -55,31 +57,6 @@ class XISTemplateObject {
 
     getChildren() {
         return this.children;
-    }
-
-
-    getContainer() {
-        throw new Error('abstract method');
-    }
-
-    render() {
-        throw new Error('abstract method');
-    }
-
-    appendChild(childElement) {
-        throw new Error('abstract method');
-    }
-
-    removeChild(childElement) {
-        throw new Error('abstract method');
-    }
-
-    getElement() {
-        throw new Error('abstract method');
-    }
-
-    unlink() {
-        throw new Error('abstract method');
     }
 
 

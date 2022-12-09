@@ -1,7 +1,6 @@
 package one.xis.js;
 
 import lombok.RequiredArgsConstructor;
-import one.xis.context.XISComponent;
 import one.xis.template.*;
 import one.xis.utils.lang.CollectionUtils;
 
@@ -11,34 +10,12 @@ import java.util.stream.Collectors;
 
 import static one.xis.js.JavascriptAbstractClasses.*;
 
-@XISComponent
-public class JavascriptTemplateParser {
+public abstract class JavascriptTemplateParser<M extends TemplateModel> {
 
     private static long currentNameId = 1;
 
-    public JSClass parseTemplateModel(WidgetTemplateModel widgetTemplateModel, String javascriptClassName, JSScript script) {
-        return toClass(widgetTemplateModel, javascriptClassName, script);
-    }
+    public abstract JSClass parseTemplateModel(M model, String javascriptClassName, JSScript script);
 
-    public JSClass parseTemplateModel(PageTemplateModel pageTemplateModel, String javascriptClassName, JSScript script) {
-        var pageClass = derrivedClass(javascriptClassName, XIS_PAGE, script);
-        var headClass = toClass(pageTemplateModel.getHead(), script);
-        var bodyClass = toClass(pageTemplateModel.getBody(), script);
-        pageClass.addField("head", new JSContructorCall(headClass, "this"));
-        pageClass.addField("body", new JSContructorCall(bodyClass, "this"));
-        pageClass.addField("id", new JSString(pageTemplateModel.getKey()));
-        pageClass.addField("server", new JSString("")); // empty = this server TODO method parameter
-        return pageClass;
-    }
-
-    private JSClass toClass(WidgetTemplateModel widgetTemplateModel, String javascriptClassName, JSScript script) {
-        var widgetClass = derrivedClass(javascriptClassName, XIS_WIDGET, script);
-        var widgetRootClass = toClass(widgetTemplateModel.getRootNode(), script);
-        widgetClass.addField("root", new JSContructorCall(widgetRootClass, "this"));
-        widgetClass.addField("id", new JSString(widgetTemplateModel.getWidgetJavascriptClassName()));
-        widgetClass.addField("server", new JSString("")); // empty = this server TODO method parameter
-        return widgetClass;
-    }
 
     private List<JSContructorCall> evaluateChildren(ChildHolder parent, JSScript script) {
         return parent.getChildren().stream()
@@ -47,7 +24,7 @@ public class JavascriptTemplateParser {
                 .collect(Collectors.toList());
     }
 
-    private JSClass toClass(ModelNode node, JSScript script) {
+    protected JSClass toClass(ModelNode node, JSScript script) {
         if (node instanceof TemplateElement) {
             return toClass((TemplateElement) node, script);
         } else if (node instanceof ContainerElement) {
@@ -72,7 +49,7 @@ public class JavascriptTemplateParser {
         return elementClass;
     }
 
-    private JSClass toClass(TemplateHeadElement element, JSScript script) {
+    protected JSClass toClass(TemplateHeadElement element, JSScript script) {
         var elementClass = derrivedClass(XIS_HEAD_ELEMENT, script);
         addChildrenField(element, elementClass, script);
         addElementField(element, elementClass);
@@ -80,7 +57,7 @@ public class JavascriptTemplateParser {
         return elementClass;
     }
 
-    private JSClass toClass(TemplateBodyElement element, JSScript script) {
+    protected JSClass toClass(TemplateBodyElement element, JSScript script) {
         var elementClass = derrivedClass(XIS_BODY_ELEMENT, script);
         addChildrenField(element, elementClass, script);
         addElementField(element, elementClass);
@@ -308,7 +285,7 @@ public class JavascriptTemplateParser {
     }
 
 
-    private JSClass derrivedClass(String className, JSAbstractClass superClass, JSScript script) {
+    protected JSClass derrivedClass(String className, JSAbstractClass superClass, JSScript script) {
         var jsClass = new JSClass(className, superClass.getConstructor().getArgs()).derrivedFrom(superClass);
         script.addClassDeclaration(jsClass);
         return jsClass;

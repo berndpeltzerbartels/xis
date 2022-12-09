@@ -27,6 +27,8 @@ dependencies {
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+    testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.16.1'
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '2.1.0'
 }
 
 test {

@@ -2,7 +2,6 @@ package one.xis.template;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import one.xis.context.XISComponent;
 import one.xis.utils.lang.StringUtils;
 import one.xis.utils.xml.XmlUtil;
 import org.w3c.dom.Document;
@@ -17,9 +16,8 @@ import static java.util.stream.Collectors.toMap;
 import static one.xis.utils.xml.XmlUtil.getAttributes;
 import static one.xis.utils.xml.XmlUtil.getChildNodes;
 
-@XISComponent
 @RequiredArgsConstructor
-public class TemplateParser {
+public abstract class TemplateDocumentParser<M extends TemplateModel> {
 
     private final ExpressionParser expressionParser;
 
@@ -34,33 +32,9 @@ public class TemplateParser {
 
     static final Set<String> DATA_ATTRIBUTES = Set.of(ATTR_IF, ATTR_FOR, ATTR_REPEAT, ATTR_LOOP_INDEX, ATTR_LOOP_NUMBER, ATTR_CONTAINER, ATTR_CONTAINER_WIDGET);
 
-    public WidgetTemplateModel parseWidgetTemplate(@NonNull Document document, @NonNull String widgetClassName) {
-        try {
-            return new WidgetTemplateModel(widgetClassName, parseElement(document.getDocumentElement()));
-        } catch (TemplateSynthaxException e) {
-            throw new TemplateSynthaxException(String.format("Parsing failed for widget '%s': %s", widgetClassName, e.getMessage()));
-        }
-    }
+    public abstract M parseTemplate(@NonNull Document document, @NonNull String widgetClassName);
 
-    public PageTemplateModel parsePageTemplate(@NonNull Document document, @NonNull String controllerClass) {
-        try {
-            var pageModel = new PageTemplateModel(controllerClass);
-            var root = document.getDocumentElement();
-            var headElement = XmlUtil.getElementByTagName(root, "head").orElseThrow(() -> new TemplateSynthaxException(controllerClass + " must have head-tag")); // TODO create if not present
-            var bodyElement = XmlUtil.getElementByTagName(root, "body").orElseThrow(() -> new TemplateSynthaxException(controllerClass + " must have body-tag"));  // TODO create if not present
-            var headTemplateElement = toTemplateHeadElement(headElement);
-            var bodyTemplateElement = toTemplateBodyElement(bodyElement);
-            parseChildren(headElement).forEach(headTemplateElement::addChild);
-            parseChildren(bodyElement).forEach(bodyTemplateElement::addChild);
-            pageModel.setHead(headTemplateElement);
-            pageModel.setBody(bodyTemplateElement);
-            return pageModel;
-        } catch (TemplateSynthaxException e) {
-            throw new TemplateSynthaxException(String.format("Parsing failed for page '%s': %s", controllerClass, e.getMessage()));
-        }
-    }
-
-    private Stream<ModelNode> parseChildren(Element parent) {
+    protected Stream<ModelNode> parseChildren(Element parent) {
         return getChildNodes(parent)
                 .filter(this::filterNode)
                 .map(this::parse)
@@ -80,7 +54,7 @@ public class TemplateParser {
     }
 
     @SuppressWarnings("all")
-    private ChildHolder parseElement(Element element) {
+    protected ChildHolder parseElement(Element element) {
         var result = new LinkedList<ChildHolder>();
         Map<String, String> dataAttributes = getDataAttributes(element);
         if (dataAttributes.containsKey(ATTR_IF)) {
@@ -137,17 +111,6 @@ public class TemplateParser {
         return templateElement;
     }
 
-    private TemplateHeadElement toTemplateHeadElement(Element element) {
-        var templateElement = new TemplateHeadElement();
-        getAttributes(element).forEach((name, rawValue) -> addAttribute(name, rawValue, templateElement));
-        return templateElement;
-    }
-
-    private TemplateBodyElement toTemplateBodyElement(Element element) {
-        var templateElement = new TemplateBodyElement();
-        getAttributes(element).forEach((name, rawValue) -> addAttribute(name, rawValue, templateElement));
-        return templateElement;
-    }
 
     private String getMandatoryAttribute(String name, Element element) {
         if (!element.hasAttribute(name)) {
@@ -164,7 +127,7 @@ public class TemplateParser {
         return builder.append("/>").toString();
     }
 
-    private void addAttribute(String name, String rawValue, ElementBase target) {
+    protected void addAttribute(String name, String rawValue, ElementBase target) {
         var contentList = new MixedContentParser(rawValue).parse();
         if (contentList.size() == 1 && contentList.get(0) instanceof StaticContent) {
             target.addStaticAttribute(name, ((StaticContent) contentList.get(0)).getContent());

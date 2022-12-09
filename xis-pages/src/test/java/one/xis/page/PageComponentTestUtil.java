@@ -4,10 +4,8 @@ import one.xis.context.TestContext;
 import one.xis.context.TestContextBuilder;
 import one.xis.controller.ControllerInvocationService;
 import one.xis.js.JavascriptControllerModelParser;
-import one.xis.js.JavascriptTemplateParser;
 import one.xis.resource.ClassPathResource;
 import one.xis.template.ExpressionParser;
-import one.xis.template.TemplateParser;
 
 import static org.mockito.Mockito.mock;
 
@@ -16,9 +14,9 @@ class PageComponentTestUtil {
     static TestContext createCompileTestContext(Class<?> controllerClass, Object... objects) {
         return new TestContextBuilder()
                 .withSingletonClass(PageComponentCompiler.class)
-                .withSingletonClass(TemplateParser.class)
+                .withSingletonClass(PageTemplateDocumentParser.class)
                 .withSingletonClass(ExpressionParser.class)
-                .withSingletonClass(JavascriptTemplateParser.class)
+                .withSingletonClass(PageJavascriptTemplateParser.class)
                 .withSingletonClass(JavascriptControllerModelParser.class)
                 .withSingletonClass(PageComponents.class)
                 .withSingletonClass(PageService.class)

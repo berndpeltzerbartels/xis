@@ -105,6 +105,26 @@ class XISPage extends XISComponent {
         this.bindBodyContent();
     }
 
+    appendChild(child) {
+        // noop
+    }
+
+
+    getContainer() {
+        throw new Error('unsupported opreation');
+    }
+
+    unlink() {
+        throw new Error('unsupported operation');
+    }
+
+    getElement() {
+      throw new Error('unsupported operation');
+    }
+
+    getParameterNames () {
+        return []; // TODO
+    }
     /**
      * @private
      */
@@ -176,5 +196,26 @@ class XISPage extends XISComponent {
             this.rootPage.body.removeAttribute(name);
         }
     }
+
+       getContainer() {
+            throw new Error('abstract method');
+        }
+
+        appendChild(childElement) {
+            throw new Error('abstract method');
+        }
+
+        removeChild(childElement) {
+            throw new Error('abstract method');
+        }
+
+        getElement() {
+            throw new Error('abstract method');
+        }
+
+        unlink() {
+            throw new Error('abstract method');
+        }
+
 
 }

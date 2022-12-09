@@ -8,7 +8,7 @@ class XISBody extends XISElement {
         super(parentPage);
         this.className = 'XISBody';
     }
-    
+
     /**
      * @public
      * @override
@@ -21,7 +21,7 @@ class XISBody extends XISElement {
      * @public
      * @override
      */
-    getParentElement() {
+    getElement() {
         return this.element;
     }
 }

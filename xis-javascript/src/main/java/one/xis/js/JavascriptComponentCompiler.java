@@ -4,6 +4,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import one.xis.resource.ReloadableResource;
+import one.xis.template.TemplateDocumentParser;
 import one.xis.template.TemplateModel;
 import one.xis.template.TemplateSynthaxException;
 import one.xis.utils.xml.XmlUtil;
@@ -15,6 +16,10 @@ import java.io.IOException;
 @Slf4j
 @RequiredArgsConstructor
 public abstract class JavascriptComponentCompiler<C extends JavascriptComponent, M extends TemplateModel> {
+
+    private final TemplateDocumentParser<M> documentParser;
+    private final JavascriptTemplateParser<M> templateParser;
+    private final JavascriptControllerModelParser controllerModelParser;
 
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
     public C compileIfObsolete(C javascriptComponent) {
@@ -53,12 +58,17 @@ public abstract class JavascriptComponentCompiler<C extends JavascriptComponent,
     }
 
 
-    protected abstract M parseTemplate(String controllerClass, Document document);
+    private M parseTemplate(String controllerClass, Document document) {
+        return documentParser.parseTemplate(document, controllerClass);
+    }
 
-    protected abstract JSClass parseTemplateModelIntoScriptModel(M templateModel, String javascriptClassName, JSScript script);
+    private JSClass parseTemplateModelIntoScriptModel(M templateModel, String javascriptClassName, JSScript script) {
+        return templateParser.parseTemplateModel(templateModel, javascriptClassName, script);
+    }
 
-    protected abstract void addMessageAttributes(JSClass component, Class<?> controllerClass);
-
+    private void addMessageAttributes(JSClass component, Class<?> controllerClass) {
+        controllerModelParser.parseControllerModel(controllerClass, component);
+    }
 
     private void addControllerIdField(JSClass component, Class<?> controllerClass) {
         component.addField("controllerClass", new JSString(controllerClass.getName()));

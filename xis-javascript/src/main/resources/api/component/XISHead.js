@@ -14,17 +14,17 @@ class XISHead extends XISElement {
      * @public
      * @override
      */
-    getParentElement() {
+    getElement() {
         return this.element;
     }
 
     // TODO Das ist komplizierte. User definded styles uns Scripts sollen hinzugefügt werden, während der Title nur aktualisiert werden darf.
     // TODO Kann ein Script vielleicht Variablen haben ? Ist das zu kompliziert ?
 
-     /**
-     * @public
-     * @override
-     */
+    /**
+    * @public
+    * @override
+    */
     init() {
         super.init();
         this.title = this.children.find(child => child.element.localName == 'title');
@@ -47,7 +47,7 @@ class XISHead extends XISElement {
     /**
      * @public
      * @override
-     */    
+     */
     hide() {
         super.hide();
         if (this.title) {
@@ -58,7 +58,7 @@ class XISHead extends XISElement {
     /**
      * @public
      * @override
-     */    
+     */
     destroy() {
         super.destroy();
         if (this.title) {

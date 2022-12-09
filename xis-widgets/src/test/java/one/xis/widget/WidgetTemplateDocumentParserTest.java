@@ -1,5 +1,6 @@
-package one.xis.template;
+package one.xis.widget;
 
+import one.xis.template.*;
 import one.xis.utils.io.IOUtils;
 import one.xis.utils.lang.CollectionUtils;
 import one.xis.utils.xml.XmlUtil;
@@ -18,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class TemplateParserTest {
+class WidgetTemplateDocumentParserTest {
 
     @Nested
     class SimpleElementTest {
@@ -33,7 +34,7 @@ class TemplateParserTest {
 
         @Test
         void parse() {
-            WidgetTemplateModel widgetTemplateModel = new TemplateParser(new ExpressionParser()).parseWidgetTemplate(document, "123");
+            WidgetTemplateModel widgetTemplateModel = new WidgetTemplateDocumentParser(new ExpressionParser()).parseTemplate(document, "123");
 
             TemplateElement element = (TemplateElement) widgetTemplateModel.getRootNode();
             assertThat(element.getElementName()).isEqualTo("div");
@@ -45,7 +46,7 @@ class TemplateParserTest {
     @Nested
     class ElementWithControlsTest {
         private Document document;
-        private final TemplateParser parser = new TemplateParser(new ExpressionParser());
+        private final WidgetTemplateDocumentParser parser = new WidgetTemplateDocumentParser(new ExpressionParser());
 
         @BeforeEach
         void init() {
@@ -56,7 +57,7 @@ class TemplateParserTest {
 
         @Test
         void parse() {
-            WidgetTemplateModel widgetTemplateModel = new TemplateParser(new ExpressionParser()).parseWidgetTemplate(document, "123");
+            WidgetTemplateModel widgetTemplateModel = new WidgetTemplateDocumentParser(new ExpressionParser()).parseTemplate(document, "123");
 
             assertThat(widgetTemplateModel.getRootNode()).isInstanceOf(IfBlock.class);
             IfBlock ifBlock = (IfBlock) widgetTemplateModel.getRootNode();
@@ -74,7 +75,7 @@ class TemplateParserTest {
     class ParseTemplate1 {
 
         private Document document;
-        private final TemplateParser parser = new TemplateParser(new ExpressionParser());
+        private final WidgetTemplateDocumentParser parser = new WidgetTemplateDocumentParser(new ExpressionParser());
 
         @BeforeEach
         void prepareDocument() throws IOException, SAXException {
@@ -83,7 +84,7 @@ class TemplateParserTest {
 
         @Test
         void parse() throws TemplateSynthaxException, IOException {
-            var widgetModel = parser.parseWidgetTemplate(document, "test");
+            var widgetModel = parser.parseTemplate(document, "test");
 
             IfBlock ifBlock = cast(widgetModel.getRootNode(), IfBlock.class);
             TemplateElement ul = onlyChild(ifBlock, TemplateElement.class);
@@ -115,7 +116,7 @@ class TemplateParserTest {
     class ParseTemplate2 {
 
         private Document document;
-        private final TemplateParser parser = new TemplateParser(new ExpressionParser());
+        private final WidgetTemplateDocumentParser parser = new WidgetTemplateDocumentParser(new ExpressionParser());
 
         @BeforeEach
         void prepareDocument() throws IOException, SAXException {
@@ -124,7 +125,7 @@ class TemplateParserTest {
 
         @Test
         void parse() throws TemplateSynthaxException, IOException {
-            var widgetModel = parser.parseWidgetTemplate(document, "test");
+            var widgetModel = parser.parseTemplate(document, "test");
 
             var loop = cast(widgetModel.getRootNode(), Loop.class);
             var div = onlyChild(loop, TemplateElement.class);

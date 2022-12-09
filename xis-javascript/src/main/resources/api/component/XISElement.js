@@ -23,16 +23,8 @@ class XISElement extends XISTemplateObject {
      * @public
      * @override
      */
-    getParentElement() {
-       return this.element;
-    }
-
-    /**
-     * @public
-     * @override
-     */
     init() {
-        this.element = this.createElement(); 
+        this.element = this.createElement();
         this.parent.element.appendChild(this.element);
         super.init();
     }

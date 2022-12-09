@@ -17,6 +17,7 @@ public class JSClass implements JSDeclaration, JSContext {
     private final Map<String, JSMethod> overriddenMethods = new HashMap<>();
     private final Map<String, JSField> overriddenFields = new HashMap<>();
     private final JSConstructor constructor;
+    private final Map<String, JSMethod> methods = new HashMap<>();
 
     public JSClass(String className, String... args) {
         this.className = className;
@@ -65,6 +66,7 @@ public class JSClass implements JSDeclaration, JSContext {
         if (superClass.getConstructor().getArgs().size() != getConstructor().getArgs().size()) {
             throw new IllegalStateException(className + ": number of contructor args must match number of args in supercontructor for " + jsClass.getClassName());
         }
+
         return this;
     }
 

@@ -15,7 +15,7 @@ class WidgetComponents {
     @Getter
     private final Map<String, WidgetComponent> widgetJavascripts = new HashMap<>();
 
-    private final WidgetJavascriptCompiler widgetJavascriptCompiler;
+    private final WidgetComponentCompiler widgetComponentCompiler;
 
     private WidgetComponent createWidgetJavascript(WidgetMetaData widgetMetaData) {
         var widgetJavascript = WidgetComponent.builder()
@@ -24,7 +24,7 @@ class WidgetComponents {
                 .htmlResource(widgetMetaData.getHtmlTemplate())
                 .javascriptClass(widgetMetaData.getJavascriptClassname())
                 .build();
-        widgetJavascriptCompiler.compile(widgetJavascript);
+        widgetComponentCompiler.compile(widgetJavascript);
         return widgetJavascript;
     }
 
@@ -37,7 +37,7 @@ class WidgetComponents {
     public WidgetComponent getByComponentClass(String jsClassname) {
         var widgetJavascript = widgetJavascripts.get(jsClassname);
         synchronized (widgetJavascript) {
-            widgetJavascriptCompiler.compileIfObsolete(widgetJavascript);
+            widgetComponentCompiler.compileIfObsolete(widgetJavascript);
         }
         return widgetJavascript;
     }

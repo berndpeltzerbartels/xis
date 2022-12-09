@@ -5,8 +5,8 @@ import one.xis.utils.xml.XmlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import static one.xis.template.TemplateParser.ATTR_IF;
-import static one.xis.template.TemplateParser.ATTR_REPEAT;
+import static one.xis.template.TemplateDocumentParser.ATTR_IF;
+import static one.xis.template.TemplateDocumentParser.ATTR_REPEAT;
 
 @RequiredArgsConstructor
 public class TemplateDocumentValidator {

@@ -2,7 +2,7 @@ package one.xis.js;
 
 public class JavascriptAbstractClasses {
 
-    public static final JSAbstractClass XIS_TEMPLATE_OBJECT = new JSAbstractClass("XISTemplateObject", "parent").addDeclaredMethod("getParentElement")
+    public static final JSAbstractClass XIS_TEMPLATE_OBJECT = new JSAbstractClass("XISTemplateObject", "parent")
             .addAbstractField("className")
             .addDeclaredMethod("init", 0)
             .addDeclaredMethod("destroy", 0)
@@ -13,12 +13,7 @@ public class JavascriptAbstractClasses {
             .addDeclaredMethod("getValue", 1)
             .addDeclaredMethod("val", 1)
             .addDeclaredMethod("getChildren")
-            .addAbstractMethod("getContainer")
-            .addAbstractMethod("render")
-            .addAbstractMethod("appendChild", 1)
-            .addAbstractMethod("removeChild", 1)
-            .addAbstractMethod("getElement")
-            .addAbstractMethod("unlink");
+            .addDeclaredMethod("getElement");
 
     public static final JSAbstractClass XIS_CONTAINER = new JSAbstractClass("XISContainer", "parent")
             .addDeclaredMethod("init")
@@ -63,7 +58,6 @@ public class JavascriptAbstractClasses {
 
     public static final JSAbstractClass XIS_ELEMENT = new JSAbstractClass("XISElement", "parent")
             .addDeclaredMethod("createElement")
-            .addDeclaredMethod("getParentElement")
             .addDeclaredMethod("init")
             .addDeclaredMethod("unlink", 0)
             .addAbstractMethod("updateAttributes")
@@ -77,7 +71,6 @@ public class JavascriptAbstractClasses {
     public static final JSAbstractClass XIS_HEAD_ELEMENT = new JSAbstractClass("XISHead", "parent")
             .addDeclaredMethod("init", 2)
             .addDeclaredMethod("createElement")
-            .addDeclaredMethod("getParentElement")
             .addDeclaredMethod("init", 0)
             .addDeclaredMethod("show", 0)
             .addDeclaredMethod("hide", 0)
@@ -105,7 +98,7 @@ public class JavascriptAbstractClasses {
             .addDeclaredMethod("getPhaseData", 1)
             .addDeclaredMethod("addPhaseMessage", 1)
             .addDeclaredMethod("getParameters")
-            .addAbstractMethod("getParameterNames")
+            .addDeclaredMethod("getParameterNames") // TODO  remove and implement
             .addAbstractMethod("getActionStateKeys", 1)
             .addAbstractMethod("getOnShowStateKeys", 0)
             .addAbstractMethod("getOnHideStateKeys", 0)

@@ -86,7 +86,7 @@ class XISComponent extends XISValueHolder {
     * @private
     */
     getPhaseData(phase) {
-        switch(phase) {
+        switch (phase) {
             case 'show': return this.get
         }
     }
@@ -127,19 +127,19 @@ class XISComponent extends XISValueHolder {
     }
 
     getOnDestroyStateKeys() {
-     throw new Error('abstract method');
+        throw new Error('abstract method');
     }
 
     getOnHideStateKeys() {
-     throw new Error('abstract method');
+        throw new Error('abstract method');
     }
 
     getOnInitStateKeys() {
-     throw new Error('abstract method');
+        throw new Error('abstract method');
     }
 
     getOnDestroyStateKeys() {
-     throw new Error('abstract method');
+        throw new Error('abstract method');
     }
 
     /**
@@ -153,6 +153,7 @@ class XISComponent extends XISValueHolder {
 
     getParameterNames() {
         // TODO
+        return [];
     }
 
 }
