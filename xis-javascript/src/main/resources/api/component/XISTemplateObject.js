@@ -50,11 +50,6 @@ class XISTemplateObject {
         return this.getValueHolder().getValue(key);
     }
 
-
-    val(path) {
-        return this.getValueHolder().getValue(path);
-    }
-
     getChildren() {
         return this.children;
     }

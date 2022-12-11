@@ -79,11 +79,11 @@ class JavascriptAbstractClassesTest {
     }
 
 
-    private void checkClass(JSAbstractClass superClass) {
+    private void checkClass(JSSuperClass superClass) {
         checkClass(superClass, IOUtils.getResourceAsString("api/component/" + superClass.getClassName() + ".js"));
     }
 
-    private void checkClass(JSAbstractClass superClass, String script) {
+    private void checkClass(JSSuperClass superClass, String script) {
         checkClassDeclaration(superClass, script);
         checkDeclaredMethods(superClass, script);
         checkAbstractMethods(superClass, script);
@@ -98,22 +98,22 @@ class JavascriptAbstractClassesTest {
         }
     }
 
-    private void checkClassDeclaration(JSAbstractClass superClass, String script) {
+    private void checkClassDeclaration(JSSuperClass superClass, String script) {
         if (!classDeclarationFound(superClass, script)) {
             throw new AssertionFailedError("class declaration not found: " + superClass.getClassName());
         }
     }
 
-    private boolean classDeclarationFound(JSAbstractClass superClass, String script) {
+    private boolean classDeclarationFound(JSSuperClass superClass, String script) {
         return Pattern.compile(".*class\\s" + superClass.getClassName() + ".*").matcher(script).find();
     }
 
-    private void checkDeclaredMethods(JSAbstractClass superClass, String script) {
+    private void checkDeclaredMethods(JSSuperClass superClass, String script) {
         superClass.getDeclaredMethods().values()
                 .forEach(method -> checkDeclaredMethod(method.getName(), method.getArgs().size(), script));
     }
 
-    private void checkAbstractMethods(JSAbstractClass superClass, String script) {
+    private void checkAbstractMethods(JSSuperClass superClass, String script) {
         superClass.getDeclaredAbstractMethods().values()
                 .forEach(method -> checkAbstractMethod(method.getName(), method.getArgs().size(), script));
     }

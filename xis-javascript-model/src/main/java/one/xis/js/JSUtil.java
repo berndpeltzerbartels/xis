@@ -10,10 +10,18 @@ import java.util.Set;
 public class JSUtil {
 
     public CompiledScript compile(String javascript) throws ScriptException {
+        return compile(javascript, null);
+    }
+
+    public CompiledScript compile(String javascript, Bindings bindings) throws ScriptException {
         ScriptEngine engine = new ScriptEngineManager().getEngineByName("graal.js");
+        if (bindings != null) {
+            engine.setBindings(bindings, ScriptContext.ENGINE_SCOPE);
+        }
         Compilable compiler = (Compilable) engine;
         return compiler.compile(javascript);
     }
+
 
     public Object execute(String js) throws ScriptException {
         return compile(js).eval();
@@ -31,7 +39,7 @@ public class JSUtil {
         }
     }
 
-    private void validateAbstractMethodsOverridden(JSClass jsClass, JSAbstractClass superClass) {
+    private void validateAbstractMethodsOverridden(JSClass jsClass, JSSuperClass superClass) {
         Set<String> methods = new HashSet<>(superClass.getAbstractMethods().keySet());
         methods.removeAll(jsClass.getOverriddenMethods().keySet());
         if (!methods.isEmpty()) {
@@ -40,7 +48,7 @@ public class JSUtil {
     }
 
 
-    private String getErrorMessageMissingOverride(JSAbstractClass superClass, Set<String> notOverrideMethods) {
+    private String getErrorMessageMissingOverride(JSSuperClass superClass, Set<String> notOverrideMethods) {
         return String.format("Subclasses of %s do not override %s", superClass.getClassName(), String.join(", ", notOverrideMethods));
     }
 

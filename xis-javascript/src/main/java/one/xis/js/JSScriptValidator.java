@@ -31,7 +31,7 @@ public class JSScriptValidator {
         }
     }
 
-    private static void validateAbstractMethodsOverridden(JSClass jsClass, JSAbstractClass superClass) {
+    private static void validateAbstractMethodsOverridden(JSClass jsClass, JSSuperClass superClass) {
         Set<String> methods = new HashSet<>(superClass.getAbstractMethods().keySet());
         methods.removeAll(jsClass.getOverriddenMethods().keySet());
         if (!methods.isEmpty()) {
@@ -39,7 +39,7 @@ public class JSScriptValidator {
         }
     }
 
-    private static void validateAbstractFielddsOverridden(JSClass jsClass, JSAbstractClass superClass) {
+    private static void validateAbstractFielddsOverridden(JSClass jsClass, JSSuperClass superClass) {
         Set<String> methods = new HashSet<>(superClass.getAbstractMethods().keySet());
         methods.removeAll(jsClass.getOverriddenMethods().keySet());
         if (!methods.isEmpty()) {

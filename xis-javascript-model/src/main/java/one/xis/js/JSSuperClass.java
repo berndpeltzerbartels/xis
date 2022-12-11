@@ -9,7 +9,7 @@ import java.util.Map;
 
 
 @Getter
-public class JSAbstractClass extends JSClass {
+public class JSSuperClass extends JSClass {
     private final Map<String, JSMethod> declaredMethods = new HashMap<>();
     private final Map<String, JSMethod> declaredAbstractMethods = new HashMap<>();
     private final Map<String, JSMethod> methods = new HashMap<>();
@@ -20,14 +20,14 @@ public class JSAbstractClass extends JSClass {
     private final String className;
     private final String[] constructorArgs;
 
-    public JSAbstractClass(String className, String... constructorArgs) {
+    public JSSuperClass(String className, String... constructorArgs) {
         super(className, constructorArgs);
         this.className = className;
         this.constructorArgs = constructorArgs;
     }
 
 
-    public JSAbstractClass superClass(JSAbstractClass superClass) {
+    public JSSuperClass superClass(JSSuperClass superClass) {
         abstractMethods.putAll(superClass.getAbstractMethods());
         methods.putAll(superClass.getMethods());
         methods.keySet().forEach(abstractMethods::remove);
@@ -38,22 +38,22 @@ public class JSAbstractClass extends JSClass {
     }
 
 
-    public JSAbstractClass addDeclaredMethod(String name, int args) {
+    public JSSuperClass addDeclaredMethod(String name, int args) {
         var method = new JSMethod(this, name, unspecifiedArgNames(args)); // TODO remove unspecified ?
         methods.put(name, method);
         declaredMethods.put(name, method);
         return this;
     }
 
-    public JSAbstractClass addDeclaredMethod(String name) {
+    public JSSuperClass addDeclaredMethod(String name) {
         return addDeclaredMethod(name, 0);
     }
 
-    public JSAbstractClass addAbstractMethod(String name) {
+    public JSSuperClass addAbstractMethod(String name) {
         return addAbstractMethod(name, 0);
     }
 
-    public JSAbstractClass addAbstractMethod(String name, int args) {
+    public JSSuperClass addAbstractMethod(String name, int args) {
         // We are using abstract methods, without parematers only
         var method = new JSMethod(this, name, unspecifiedArgNames(args));
         abstractMethods.put(name, method);
@@ -61,7 +61,7 @@ public class JSAbstractClass extends JSClass {
         return this;
     }
 
-    public JSAbstractClass addAbstractField(String name) {
+    public JSSuperClass addAbstractField(String name) {
         var field = new JSField(this, name);
         this.abstractFields.put(name, field);
         this.declaredAbstractFields.put(name, field);

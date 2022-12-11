@@ -12,7 +12,7 @@ import java.util.Objects;
 @NonFinal
 public class JSClass implements JSDeclaration, JSContext {
     private final String className;
-    private JSAbstractClass superClass;
+    private JSSuperClass superClass;
     private final Map<String, JSField> fields = new HashMap<>();
     private final Map<String, JSMethod> overriddenMethods = new HashMap<>();
     private final Map<String, JSField> overriddenFields = new HashMap<>();
@@ -61,7 +61,7 @@ public class JSClass implements JSDeclaration, JSContext {
         return field;
     }
 
-    public JSClass derrivedFrom(JSAbstractClass jsClass) {
+    public JSClass derrivedFrom(JSSuperClass jsClass) {
         superClass = jsClass;
         if (superClass.getConstructor().getArgs().size() != getConstructor().getArgs().size()) {
             throw new IllegalStateException(className + ": number of contructor args must match number of args in supercontructor for " + jsClass.getClassName());

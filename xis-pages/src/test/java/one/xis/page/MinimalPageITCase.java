@@ -6,6 +6,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import javax.script.ScriptException;
+import javax.script.SimpleBindings;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 
 //@TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -20,14 +23,26 @@ class MinimalPageITCase {
     }
 
     @Test
-    void compiles() throws ScriptException {
+    void compiles() throws ScriptException, ParserConfigurationException {
         pageService.addPageController(new MinimalPage());
         var pageComponent = pageService.getPageComponentByPath("/MinimalPage.html");
 
         var script = pageComponent.getJavascript();
-        var compiledScript = JSTestUtil.compileWithApi(script);
-        compiledScript.eval();
+
+        var builder = DocumentBuilderFactory.newDefaultInstance().newDocumentBuilder();
+        var document = builder.newDocument();
+        var bindings = new SimpleBindings();
+        bindings.put("document", document);
+        bindings.put("polyglot.js.allowHostAccess", true);
+
+
+        var compiledScript = JSTestUtil.compileWithApi(script + " new P0();", bindings);
+        var result = compiledScript.eval();
     }
 
+
+    class Document {
+
+    }
 
 }

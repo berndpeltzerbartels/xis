@@ -118,7 +118,7 @@ public abstract class JavascriptTemplateParser<M extends TemplateModel> {
     private JSClass toClass(IfBlock ifBlock, JSScript script) {
         var ifClass = derrivedClass(XIS_IF, script);
 
-        var valueMethod = ifClass.getMethod("val");
+        var valueMethod = ifClass.getMethod("getValue");
         var evaluateCondition = ifClass.overrideAbstractMethod("evaluateCondition");
 
         var expressionEval = new ExpressionEval(valueMethod);
@@ -172,7 +172,7 @@ public abstract class JavascriptTemplateParser<M extends TemplateModel> {
             } else if (arg instanceof ExpressionString) {
                 fktCall.addParam(new JSString(((ExpressionString) arg).getContent()));
             } else if (arg instanceof ExpressionVar) {
-                JSMethod getValue = owner.getMethod("val");
+                JSMethod getValue = owner.getMethod("getValue");
                 JSArray variablePath = JSArray.arrayOfStrings(((ExpressionVar) arg).getPath());
                 JSMethodCall getValueMethodCall = new JSMethodCall(getValue, variablePath);
                 fktCall.addParam(getValueMethodCall);
@@ -271,7 +271,7 @@ public abstract class JavascriptTemplateParser<M extends TemplateModel> {
                 } else if (arg instanceof ExpressionString) {
                     method.addStatement(new JSStringAppend(text, new JSString(((ExpressionString) arg).getContent())));
                 } else if (arg instanceof ExpressionVar) {
-                    var getValue = method.getDeclaringClass().getMethod("val");
+                    var getValue = method.getDeclaringClass().getMethod("getValue");
                     var variablePath = JSArray.arrayOfStrings(((ExpressionVar) arg).getPath());
                     var getValueMethodCall = new JSMethodCall(getValue, variablePath);
                     method.addStatement(new JSStringAppend(text, getValueMethodCall));
@@ -280,12 +280,12 @@ public abstract class JavascriptTemplateParser<M extends TemplateModel> {
         }
     }
 
-    private JSClass derrivedClass(JSAbstractClass superClass, JSScript script) {
+    private JSClass derrivedClass(JSSuperClass superClass, JSScript script) {
         return derrivedClass(nextClassName(), superClass, script);
     }
 
 
-    protected JSClass derrivedClass(String className, JSAbstractClass superClass, JSScript script) {
+    protected JSClass derrivedClass(String className, JSSuperClass superClass, JSScript script) {
         var jsClass = new JSClass(className, superClass.getConstructor().getArgs()).derrivedFrom(superClass);
         script.addClassDeclaration(jsClass);
         return jsClass;
