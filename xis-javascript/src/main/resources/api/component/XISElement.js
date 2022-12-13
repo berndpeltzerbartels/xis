@@ -23,13 +23,9 @@ class XISElement extends XISTemplateObject {
      * @public
      * @override
      */
-    init() {
-        if (this.parent) { // null, if parent is a widget or a page
-            var element = this.parent.getElement();
-            if (element) {
-                this.parent.getElement().appendChild(this.element);
-            }
-        }
+    init() { //TODO return {} if there is no element in parent
+        // TODO have widget as parent
+        this.parent.getElement().appendChild(this.element);
         super.init();
     }
 

@@ -16,6 +16,13 @@ class XISClient {
         this.mesageComponents = [];
     }
 
+
+    sendPhaseMessage(phase, component, data, parameters, callback) {
+
+    }
+
+
+
     addActionMessage(component, action, data, parameters) {
         this.mesageComponents.push(component);
         this.messageStack.push({

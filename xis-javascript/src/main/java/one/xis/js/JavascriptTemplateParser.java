@@ -132,7 +132,7 @@ public abstract class JavascriptTemplateParser<M extends TemplateModel> {
         jsClass.addField("element", getCreateElementFunctionCall(element));
     }
 
-    private void addChildrenField(ChildHolder childHolder, JSClass jsClass, JSScript script) {
+    protected void addChildrenField(ChildHolder childHolder, JSClass jsClass, JSScript script) {
         jsClass.addField("children", new JSArray(evaluateChildren(childHolder, script)));
     }
 

@@ -26,11 +26,8 @@ class XISHead extends XISElement {
     * @override
     */
     init() {
-        //super.init();
         this.title = this.children.find(child => child.element.localName == 'title');
-        if (this.title) {
-            this.title.init();
-        }
+        super.init();
     }
 
     /**

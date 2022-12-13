@@ -14,11 +14,6 @@ class XISIf extends XISTemplateObject {
     }
 
 
-    init() {
-        // noop
-    }
-
-
     /**
      * @override
      */

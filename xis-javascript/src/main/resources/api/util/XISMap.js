@@ -37,4 +37,8 @@ class XISMap {
         return Object.keys(this.data);
     }
 
+    containsKey(key) {
+        return this.data[key] !== undefined;
+    }
+
 }

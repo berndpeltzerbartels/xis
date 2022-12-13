@@ -19,6 +19,7 @@ class XISContainer extends XISTemplateObject {
         if (this.defaultWidgetId) {
             var widget = widgets.getWidget(this.defaultWidgetId);
             this.bindWidget(widget);
+            widget.init();
         }
     }
 

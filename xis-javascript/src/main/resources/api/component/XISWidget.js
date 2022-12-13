@@ -7,16 +7,16 @@ class XISWidget extends XISComponent {
     }
 
 
-   setParent(parent) {
+    setParent(parent) {
         this.parent = parent;
     }
 
-        /**
-         * @public
-         */
-        init() {
-            this.root.init();
-        }
+    /**
+     * @public
+     */
+    init() {
+        this.root.init();
+    }
 
     /**
      * @public

@@ -33,6 +33,8 @@ class XISPage extends XISComponent {
      * @public
      */
     init() {
+        var page = this;
+        this.client.init();
         this.head.init();
         this.body.init();
     }
