@@ -14,14 +14,23 @@ class XISBody extends XISElement {
      * @override
      */
     createElement() {
-        return this.createElement('body'); // dummy to keep child-nodes
+        return createElement('body'); // dummy to keep child-nodes
     }
 
-    /**
-     * @public
-     * @override
-     */
-    getElement() {
-        return this.element;
+
+    init() {
+        this.children.forEach(child => child.init());
+    }
+
+    destroy() {
+        this.children.forEach(child => child.destroy());
+    }
+
+    show() {
+        this.children.forEach(child => child.show());
+    }
+
+    hide() {
+        this.children.forEach(child => child.hide());
     }
 }

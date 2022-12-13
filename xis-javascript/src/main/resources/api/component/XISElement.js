@@ -24,8 +24,12 @@ class XISElement extends XISTemplateObject {
      * @override
      */
     init() {
-        this.element = this.createElement();
-        this.parent.element.appendChild(this.element);
+        if (this.parent) { // null, if parent is a widget or a page
+            var element = this.parent.getElement();
+            if (element) {
+                this.parent.getElement().appendChild(this.element);
+            }
+        }
         super.init();
     }
 
@@ -39,7 +43,7 @@ class XISElement extends XISTemplateObject {
     }
 
     unlink() {
-        this.parent.element.removeChild(this.element);
+        this.parent.getElement().removeChild(this.element);
     }
 
     updateAttributes() {
@@ -66,6 +70,10 @@ class XISElement extends XISTemplateObject {
         this.element.removeChild(childElement);
     }
 
+    getElement() {
+        return this.element;
+    }
+
     /**
      * @override
      * @returns {XISContainer}
@@ -73,6 +81,7 @@ class XISElement extends XISTemplateObject {
     getContainer() {
         return this.container;
     }
+
 
 
 }

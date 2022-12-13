@@ -4,15 +4,16 @@
  * <div>My name is ${name}</div>
  *
  */
-class XISMutableTextNode extends XISTemplateObject{
+class XISMutableTextNode extends XISTemplateObject {
 
     constructor(parent) {
         super(parent);
         this.className = 'XISMutableTextNode';
+        this.node = this.createNode();
     }
 
     init() {
-        this.parent.element.appendChild(this.node);
+        this.parent.getElement().appendChild(this.node);
     }
 
     refresh() {

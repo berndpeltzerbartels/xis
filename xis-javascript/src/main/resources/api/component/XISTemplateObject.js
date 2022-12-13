@@ -11,24 +11,24 @@ class XISTemplateObject {
     }
 
     init() {
-        this.children.forEach(child.init());
+        this.children.forEach(child => child.init());
     }
 
     destroy() {
-        this.children.forEach(child.destroy());
+        this.children.forEach(child => child.destroy());
     }
 
     show() {
-        this.children.forEach(child.show());
+        this.children.forEach(child => child.show());
     }
 
     hide() {
-        this.children.forEach(child.hide());
+        this.children.forEach(child => child.hide());
     }
 
     // TODE: Kann refresh wegen show ganz verschwinden ?
     refresh() {
-        this.children.forEach(child.refresh());
+        this.children.forEach(child => child.refresh());
     }
 
     /**
@@ -53,6 +53,4 @@ class XISTemplateObject {
     getChildren() {
         return this.children;
     }
-
-
 }

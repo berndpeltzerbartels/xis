@@ -22,4 +22,14 @@ public class JSTestUtil {
         return JSUtil.compile(LOCAL_STORAGE + api + globals + javascript, bindings);
     }
 
+    public CompiledScript compile(String javascript) throws ScriptException {
+        return compile(javascript, null);
+    }
+
+    public CompiledScript compile(String javascript, Bindings bindings) throws ScriptException {
+        var api = IOUtils.getResourceAsString("js/xis.js");
+        var globals = IOUtils.getResourceAsString("js/xis-globals.js");
+        return JSUtil.compile(javascript, bindings);
+    }
+
 }

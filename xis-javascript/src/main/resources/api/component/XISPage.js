@@ -33,7 +33,6 @@ class XISPage extends XISComponent {
      * @public
      */
     init() {
-        super.init();
         this.head.init();
         this.body.init();
     }
@@ -42,7 +41,6 @@ class XISPage extends XISComponent {
      * @public
      */
     destroy() {
-        super.destroy();
         this.head.destroy();
         this.body.destroy();
     }
@@ -51,7 +49,6 @@ class XISPage extends XISComponent {
      * @public
      */
     show() {
-        super.show();
         this.head.show();
         this.body.show();
     }
@@ -60,7 +57,6 @@ class XISPage extends XISComponent {
      * @public
      */
     hide() {
-        super.hide();
         this.head.hide();
         this.body.hide();
     }
@@ -119,10 +115,10 @@ class XISPage extends XISComponent {
     }
 
     getElement() {
-      throw new Error('unsupported operation');
+        throw new Error('unsupported operation');
     }
 
-    getParameterNames () {
+    getParameterNames() {
         return []; // TODO
     }
     /**
@@ -197,25 +193,25 @@ class XISPage extends XISComponent {
         }
     }
 
-       getContainer() {
-            throw new Error('abstract method');
-        }
+    getContainer() {
+        throw new Error('abstract method');
+    }
 
-        appendChild(childElement) {
-            throw new Error('abstract method');
-        }
+    appendChild(childElement) {
+        throw new Error('abstract method');
+    }
 
-        removeChild(childElement) {
-            throw new Error('abstract method');
-        }
+    removeChild(childElement) {
+        throw new Error('abstract method');
+    }
 
-        getElement() {
-            throw new Error('abstract method');
-        }
+    getElement() {
+        throw new Error('abstract method');
+    }
 
-        unlink() {
-            throw new Error('abstract method');
-        }
+    unlink() {
+        throw new Error('abstract method');
+    }
 
 
 }

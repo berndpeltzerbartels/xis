@@ -40,6 +40,21 @@ class MinimalPageITCase {
         var result = compiledScript.eval();
     }
 
+    @Test
+    void returnTest() throws ParserConfigurationException, ScriptException {
+        var builder = DocumentBuilderFactory.newDefaultInstance().newDocumentBuilder();
+        var document = builder.newDocument();
+        String script = "document.appendChild(document.createElement('bla'));";
+
+        var bindings = new SimpleBindings();
+        bindings.put("document", document);
+        bindings.put("polyglot.js.allowHostAccess", true);
+
+        var compiledScript = JSTestUtil.compile(script, bindings);
+        var result = compiledScript.eval();
+
+    }
+
 
     class Document {
 

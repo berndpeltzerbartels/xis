@@ -98,6 +98,7 @@ public abstract class TemplateDocumentParser<M extends TemplateModel> {
     }
 
     private ContainerElement toContainerElement(Element element) {
+        // TODO : validate the widget id exists in:
         var containerElement = new ContainerElement(element.getTagName(), getMandatoryAttribute(ATTR_CONTAINER, element), element.getAttribute(ATTR_CONTAINER_WIDGET));
         if (element.getChildNodes().getLength() != 0) {
             throw new TemplateSynthaxException(String.format("elements with attribute \"%s\" must have no content", ATTR_CONTAINER));

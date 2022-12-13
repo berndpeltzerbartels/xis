@@ -7,7 +7,7 @@ class XISHead extends XISElement {
 
 
     createElement() {
-        return this.createElement('head'); // dummy to keep child-nodes
+        return createElement('head'); // dummy to keep child-nodes
     }
 
     /**
@@ -26,7 +26,7 @@ class XISHead extends XISElement {
     * @override
     */
     init() {
-        super.init();
+        //super.init();
         this.title = this.children.find(child => child.element.localName == 'title');
         if (this.title) {
             this.title.init();

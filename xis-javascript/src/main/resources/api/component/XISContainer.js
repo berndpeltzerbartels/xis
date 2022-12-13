@@ -5,11 +5,9 @@ class XISContainer extends XISTemplateObject {
 
     /**
     * @param {XISTemplateObject} parent
-    * @param {XISWidgets} widgets
     */
-    constructor(parent, widgets) {
+    constructor(parent) {
         super(parent);
-        this.widgets = widgets;
         this.className = 'XISContainer';
     }
 
@@ -19,7 +17,7 @@ class XISContainer extends XISTemplateObject {
      */
     init() {
         if (this.defaultWidgetId) {
-            var widget = this.widgets.getWidget(this.defaultWidgetId);
+            var widget = widgets.getWidget(this.defaultWidgetId);
             this.bindWidget(widget);
         }
     }

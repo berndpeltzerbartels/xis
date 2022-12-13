@@ -14,13 +14,6 @@ public class JavascriptAbstractClasses {
             .addDeclaredMethod("getChildren")
             .addDeclaredMethod("getElement");
 
-    public static final JSSuperClass XIS_CONTAINER = new JSSuperClass("XISContainer", "parent")
-            .addDeclaredMethod("init")
-            .addDeclaredMethod("bindWidget", 1)
-            .addDeclaredMethod("unbindWidget", 0)
-            .addDeclaredMethod("update", 0)
-            .addDeclaredMethod("unlink", 0)
-            .superClass(XIS_TEMPLATE_OBJECT);
 
     public static final JSSuperClass XIS_STATIC_TEXT_NODE = new JSSuperClass("XISStaticTextNode", "parent")
             .addDeclaredMethod("init")
@@ -31,7 +24,8 @@ public class JavascriptAbstractClasses {
             .addDeclaredMethod("init") // ONE ARG HERE !
             .addDeclaredMethod("refresh", 0)
             .addAbstractMethod("getText")
-            .addAbstractMethod("createNode");
+            .addAbstractMethod("createNode")
+            .superClass(XIS_TEMPLATE_OBJECT);
 
 
     public static final JSSuperClass XIS_LOOP = new JSSuperClass("XISLoop", "parent")
@@ -63,6 +57,17 @@ public class JavascriptAbstractClasses {
             .addDeclaredMethod("removeChild", 1)
             .addDeclaredMethod("getContainer", 0)
             .superClass(XIS_TEMPLATE_OBJECT); // TODO check javascript
+
+    public static final JSSuperClass XIS_CONTAINER = new JSSuperClass("XISContainer", "parent")
+            .addDeclaredMethod("init")
+            .addDeclaredMethod("destroy")
+            .addDeclaredMethod("show")
+            .addDeclaredMethod("hide")
+            .addDeclaredMethod("bindWidget", 1)
+            .addDeclaredMethod("unbindWidget", 0)
+            .addDeclaredMethod("update", 0)
+            .addDeclaredMethod("unlink", 0)
+            .superClass(XIS_ELEMENT);
 
 
     public static final JSSuperClass XIS_HEAD_ELEMENT = new JSSuperClass("XISHead", "parent")
