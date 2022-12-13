@@ -1,7 +1,7 @@
 /**
  * Element for displaying widgets
  */
-class XISContainer extends XISTemplateObject {
+class XISContainer extends XISElement {
 
     /**
     * @param {XISTemplateObject} parent
@@ -19,8 +19,8 @@ class XISContainer extends XISTemplateObject {
         if (this.defaultWidgetId) {
             var widget = widgets.getWidget(this.defaultWidgetId);
             this.bindWidget(widget);
-            widget.init();
         }
+        super.init();
     }
 
     /**
@@ -31,6 +31,7 @@ class XISContainer extends XISTemplateObject {
         if (this.widget) {
             this.widget.destroy();
         }
+        super.destroy();
     }
 
 
@@ -42,6 +43,7 @@ class XISContainer extends XISTemplateObject {
         if (this.widget) {
             this.widget.show();
         }
+        super.show();
     }
 
     /**
@@ -52,6 +54,7 @@ class XISContainer extends XISTemplateObject {
         if (this.widget) {
             this.widget.hide();
         }
+        super.hide();
     }
 
 
@@ -75,7 +78,7 @@ class XISContainer extends XISTemplateObject {
             if (widget.root) {
                 this.getElement().appendChild(widget.root.element);
             }
-            this.widget.setParent(this);
+            this.widget.bind(this);
             this.widget.show();
         }
     }

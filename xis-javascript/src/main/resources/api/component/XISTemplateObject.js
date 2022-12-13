@@ -53,4 +53,5 @@ class XISTemplateObject {
     getChildren() {
         return this.children;
     }
+
 }

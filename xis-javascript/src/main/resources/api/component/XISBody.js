@@ -33,4 +33,5 @@ class XISBody extends XISElement {
     hide() {
         this.children.forEach(child => child.hide());
     }
+
 }

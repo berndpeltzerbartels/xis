@@ -27,7 +27,7 @@ class XISRootPage {
             this.page.hide();
             this.page.destroy();
             this.page = undefined;
-            this.client.submit();
+
         }
     }
 
@@ -40,7 +40,7 @@ class XISRootPage {
         this.page = page;
         this.page.bind(this);
         this.page.show();
-        this.client.submit();
+        this.page.refresh();
     }
 
     /**
@@ -51,7 +51,6 @@ class XISRootPage {
             this.page.unbind();
             this.page.hide();
             this.page = undefined;
-            this.client.submit();
         }
     }
 }

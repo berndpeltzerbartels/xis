@@ -18,7 +18,7 @@ class WidgetJavascriptTemplateParser extends JavascriptTemplateParser<WidgetTemp
         var widgetClass = derrivedClass(javascriptClassName, XIS_WIDGET, script);
         var widgetRootClass = toClass(widgetTemplateModel.getRootNode(), script);
         widgetClass.addField("root", new JSContructorCall(widgetRootClass, "this"));
-        widgetClass.addField("root", new JSContructorCall(widgetRootClass, "this"));
+        widgetClass.addField("children", new JSArray(new JSMethodCall(XIS_WIDGET.getMethod("getRoot"))));
         widgetClass.addField("id", new JSString(widgetTemplateModel.getWidgetJavascriptClassName()));
         widgetClass.addField("server", new JSString("")); // empty = this server TODO method parameter
         return widgetClass;

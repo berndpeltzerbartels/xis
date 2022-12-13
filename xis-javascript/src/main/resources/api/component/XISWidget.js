@@ -6,26 +6,18 @@ class XISWidget extends XISComponent {
         this.componentType = 'WIDGET';
     }
 
-
-    setParent(parent) {
-        this.parent = parent;
+    getRoot() {
+        return this.root; // used in generated code
     }
 
-    /**
-     * @public
-     */
-    init() {
-        this.root.init();
+    bind(container) {
+        container.getElement().appendChild(this.root.element);
+        this.root.show();
     }
 
-    /**
-     * @public
-     * @override
-     * @param {any} data 
-     */
-    addValues(data) {
-        super.addValues(data);
-        this.setValues(parent.getParameters());
+    unbind(container) {
+        container.getElement().removeChild(this.root.element);
+        this.root.hide();
     }
 
     /**

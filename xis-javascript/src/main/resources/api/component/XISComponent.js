@@ -262,6 +262,10 @@ class XISComponent extends XISValueHolder {
         throw new Error('abstract method');
     }
 
+    bind(parent) {
+        throw new Error('abstract method');
+    }
+
     /**
      * @protected
      * @param {XISComponent} another 
