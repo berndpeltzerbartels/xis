@@ -16,7 +16,8 @@ class XISComponent extends XISValueHolder {
     /**
     * @public
     */
-    init() {        var component = this;
+    init() {
+        var component = this;
         this.handlePhase('init', component.initTree);
     }
 
@@ -156,7 +157,7 @@ class XISComponent extends XISValueHolder {
     * @protected
     */
     isActiveAction(action) {
-        throw new Error('abstract method: isActiveAction(action)');
+        return this.getActiveActions().indexOf(action) != -1;
     }
 
 
@@ -183,7 +184,7 @@ class XISComponent extends XISValueHolder {
      */
     getComponentData(keys) {
         var data = {};
-        for (key of keys) {
+        for (var key of keys) {
             data[key] = this.getComponentValue(key);
         }
         return data;
@@ -218,7 +219,7 @@ class XISComponent extends XISValueHolder {
      */
     getParameters() {
         var parameters = {};
-        for (key in this.getParameterNames()) {
+        for (var key in this.getParameterNames()) {
             parameters[key] = parent.getValue(key);
         }
         return parameters
@@ -243,10 +244,17 @@ class XISComponent extends XISValueHolder {
         throw new Error('abstract method: getActionStateKeys(action)');
     }
 
+    /**
+     * @protected
+     * @returns {Array<String>}
+     */
     getActiveActions() {
         throw new Error('abstract method: getActiveActions()');
     }
 
+    getActivePhases() {
+        throw new Error('abstract method: getActivePhases()');
+    }
 
     /**
      * @protected

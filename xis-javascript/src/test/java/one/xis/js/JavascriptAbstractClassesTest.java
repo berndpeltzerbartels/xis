@@ -1,6 +1,7 @@
 package one.xis.js;
 
 import one.xis.utils.io.IOUtils;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
 
@@ -14,66 +15,79 @@ class JavascriptAbstractClassesTest {
 
 
     @Test
+    @DisplayName("XISTemplateObject")
     void templateObject() {
         checkClass(JavascriptAbstractClasses.XIS_TEMPLATE_OBJECT);
     }
 
     @Test
+    @DisplayName("XISComponent")
     void component() {
         checkClass(JavascriptAbstractClasses.XIS_COMPONENT);
     }
 
     @Test
+    @DisplayName("XISWidget")
     void widget() {
         checkClass(JavascriptAbstractClasses.XIS_WIDGET);
     }
 
     @Test
+    @DisplayName("XISPage")
     void page() {
         checkClass(JavascriptAbstractClasses.XIS_PAGE);
     }
 
     @Test
+    @DisplayName("XISConteiner")
     void container() {
         checkClass(JavascriptAbstractClasses.XIS_CONTAINER);
     }
 
     @Test
+    @DisplayName("XISElement")
     void element() {
         checkClass(JavascriptAbstractClasses.XIS_ELEMENT);
     }
 
     @Test
+    @DisplayName("XISHead")
     void headElement() {
-        checkClass(JavascriptAbstractClasses.XIS_HEAD_ELEMENT);
+        checkClass(JavascriptAbstractClasses.XIS_HEAD);
     }
 
     @Test
+    @DisplayName("XISBody")
     void bodyElement() {
-        checkClass(JavascriptAbstractClasses.XIS_BODY_ELEMENT);
+        checkClass(JavascriptAbstractClasses.XIS_BODY);
     }
 
     @Test
+    @DisplayName("XISValueHolder")
     void valueHolder() {
         checkClass(JavascriptAbstractClasses.XIS_VALUE_HOLDER);
     }
 
     @Test
+    @DisplayName("XISStaticTextNode")
     void staticTextNode() {
         checkClass(JavascriptAbstractClasses.XIS_STATIC_TEXT_NODE);
     }
 
     @Test
+    @DisplayName("XISMutableTextNode")
     void mutableTextNode() {
         checkClass(JavascriptAbstractClasses.XIS_MUTABLE_TEXT_NODE);
     }
 
     @Test
+    @DisplayName("XISIf")
     void ifOperator() {
         // TODO checkClass(JavascriptAbstractClasses.XIS_IF);
     }
 
     @Test
+    @DisplayName("XISLoop")
     void loop() {
         // TODO checkClass(JavascriptAbstractClasses.XIS_LOOP);
     }
@@ -120,33 +134,56 @@ class JavascriptAbstractClassesTest {
 
 
     private void checkDeclaredMethod(String methodName, int args, String script) {
-        if (!containsDeclaredMethod(methodName, args, script)) {
-            throw new AssertionFailedError("method not found or number of args wrong: " + methodName);
+        if (!containsDeclaredMethodWithoutArgs(methodName, args, script)) {
+            throw new AssertionFailedError("method not found: " + methodName);
+        }
+        if (!containsDeclaredMethodWithArgs(methodName, args, script)) {
+            throw new AssertionFailedError("wrong number of args: " + methodName);
         }
     }
 
     private void checkAbstractMethod(String methodName, int args, String script) {
-        if (!containsAbstractMethod(methodName, args, script)) {
-            throw new AssertionFailedError("abstract method not found or number of args wrong: " + methodName);
+        if (!containsAbstractMethodWithoutArgs(methodName, args, script)) {
+            throw new AssertionFailedError("abstract method not found: " + methodName);
+        }
+        if (!containsAbstractMethodWithArgs(methodName, args, script)) {
+            throw new AssertionFailedError("wrong number of args wrong: " + methodName);
         }
     }
 
-    private boolean containsDeclaredMethod(String methodName, int args, String script) {
-        return patternForMethod(methodName, args).matcher(script).find();
+    private boolean containsDeclaredMethodWithoutArgs(String methodName, int args, String script) {
+        return patternForMethodWithArgs(methodName, args).matcher(script).find();
     }
 
-    private boolean containsAbstractMethod(String methodName, int args, String script) {
-        return patternForAbstractMethod(methodName, args).matcher(script).find();
-
+    private boolean containsAbstractMethodWithoutArgs(String methodName, int args, String script) {
+        return patternForAbstractMethodWithArgs(methodName, args).matcher(script).find();
     }
 
-    private Pattern patternForMethod(String methodName, int args) {
+    private boolean containsDeclaredMethodWithArgs(String methodName, int args, String script) {
+        return patternForMethodWithArgs(methodName, args).matcher(script).find();
+    }
+
+    private boolean containsAbstractMethodWithArgs(String methodName, int args, String script) {
+        return patternForAbstractMethodWithArgs(methodName, args).matcher(script).find();
+    }
+
+    private Pattern patternForMethodWithArgs(String methodName, int args) {
         return Pattern.compile(".*" + methodName + "\\(\\s*" + argPattern(args) + "\\s*\\)\\s*\\{.*", Pattern.MULTILINE);
     }
 
 
-    private Pattern patternForAbstractMethod(String methodName, int args) {
+    private Pattern patternForAbstractMethodWithArgs(String methodName, int args) {
         return Pattern.compile(".*" + methodName + "\\(\\s*" + argPattern(args) + "\\s*\\)\\s*\\{(\\s+throw\\s+new\\s+Error\\(['\"]abstract.*)", Pattern.MULTILINE);
+    }
+
+
+    private Pattern patternForMethodWithoutArgs(String methodName, int args) {
+        return Pattern.compile(".*" + methodName + "\\([^\\)]*\\)\\s*\\{.*", Pattern.MULTILINE);
+    }
+
+
+    private Pattern patternForAbstractMethodWithoutArgs(String methodName, int args) {
+        return Pattern.compile(".*" + methodName + "\\([^\\)]*\\)\\s*\\{(\\s+throw\\s+new\\s+Error\\(['\"]abstract.*)", Pattern.MULTILINE);
     }
 
 

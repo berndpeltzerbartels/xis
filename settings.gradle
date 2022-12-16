@@ -25,4 +25,5 @@ include 'xis-ajax'
 include 'xis-ajax-entities'
 include 'xis-entities'
 include 'xis-security'
+include 'xis-frontend-test'
 

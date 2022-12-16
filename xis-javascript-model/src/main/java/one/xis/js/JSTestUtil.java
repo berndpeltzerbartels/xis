@@ -1,11 +1,12 @@
 package one.xis.js;
 
 import lombok.experimental.UtilityClass;
-import one.xis.utils.io.IOUtils;
 
 import javax.script.Bindings;
 import javax.script.CompiledScript;
 import javax.script.ScriptException;
+
+import static one.xis.utils.io.IOUtils.getResourceAsString;
 
 @UtilityClass
 public class JSTestUtil {
@@ -17,8 +18,8 @@ public class JSTestUtil {
     }
 
     public CompiledScript compileWithApi(String javascript, Bindings bindings) throws ScriptException {
-        var api = IOUtils.getResourceAsString("js/xis.js");
-        var globals = IOUtils.getResourceAsString("js/xis-globals.js");
+        var api = getResourceAsString("js/xis.js");
+        var globals = getResourceAsString("js/xis-globals.js");
         return JSUtil.compile(LOCAL_STORAGE + api + globals + javascript, bindings);
     }
 
@@ -27,9 +28,10 @@ public class JSTestUtil {
     }
 
     public CompiledScript compile(String javascript, Bindings bindings) throws ScriptException {
-        var api = IOUtils.getResourceAsString("js/xis.js");
-        var globals = IOUtils.getResourceAsString("js/xis-globals.js");
+        var api = getResourceAsString("js/xis.js");
+        var globals = getResourceAsString("js/xis-globals.js");
         return JSUtil.compile(javascript, bindings);
     }
+    
 
 }

@@ -20,6 +20,12 @@ public class CollectionUtils {
         return iterator.next();
     }
 
+    public <T> T removeOne(Collection<T> coll) {
+        var first = first(coll);
+        coll.remove(first);
+        return first;
+    }
+
     public <T> T onlyElement(Collection<T> coll) {
         if (coll.size() != 1) {
             throw new IllegalStateException(coll.size() + " elements instead of one");

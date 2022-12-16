@@ -70,7 +70,7 @@ public class JavascriptAbstractClasses {
             .superClass(XIS_ELEMENT);
 
 
-    public static final JSSuperClass XIS_HEAD_ELEMENT = new JSSuperClass("XISHead", "parent")
+    public static final JSSuperClass XIS_HEAD = new JSSuperClass("XISHead", "parent")
             .addDeclaredMethod("init", 2)
             .addDeclaredMethod("createElement")
             .addDeclaredMethod("init", 0)
@@ -79,7 +79,7 @@ public class JavascriptAbstractClasses {
             .addDeclaredMethod("refresh")
             .superClass(XIS_ELEMENT);
 
-    public static final JSSuperClass XIS_BODY_ELEMENT = new JSSuperClass("XISBody", "parent")
+    public static final JSSuperClass XIS_BODY = new JSSuperClass("XISBody", "parent")
             .addDeclaredMethod("createElement")
             .superClass(XIS_ELEMENT);
 
@@ -100,6 +100,8 @@ public class JavascriptAbstractClasses {
             .addDeclaredMethod("sendPhaseMessage", 3)
             .addDeclaredMethod("getParameters")
             .addDeclaredMethod("getParameterNames") // TODO  remove and implement
+            .addAbstractMethod("getActiveActions")
+            .addAbstractMethod("getActivePhases")
             .addAbstractMethod("getActionStateKeys", 1)
             .addAbstractMethod("getOnShowStateKeys", 0)
             .addAbstractMethod("getOnHideStateKeys", 0)

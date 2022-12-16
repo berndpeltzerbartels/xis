@@ -37,12 +37,12 @@ class TestReflection implements AppReflection {
 
     @Override
     public Set<Class<?>> getTypesAnnotatedWith(Class<? extends Annotation> annotation) {
-        Set<Class<? extends Annotation>> annotations = getPrimaryAndSecondaryAnnotations(annotation);
+        var annotations = getPrimaryAndSecondaryAnnotations(annotation);
         return classes.stream().filter(c -> isAnnotatedWithAtLeastOne(c, annotations)).collect(Collectors.toSet());
     }
 
     private Set<Class<? extends Annotation>> getPrimaryAndSecondaryAnnotations(Class<? extends Annotation> primaryAnnotation) {
-        Set<Class<? extends Annotation>> annotations = new HashSet<>(getAnnotatedAnnotations(primaryAnnotation));
+        var annotations = new HashSet<Class<? extends Annotation>>(getAnnotatedAnnotations(primaryAnnotation));
         annotations.add(primaryAnnotation);
         return Collections.unmodifiableSet(annotations);
     }
@@ -65,8 +65,8 @@ class TestReflection implements AppReflection {
     }
 
     private <A extends Annotation> Collection<Field> getFieldsAnnotatedWith(Class<?> owner, Class<A> anno) {
-        Collection<Field> fields = new HashSet<>();
-        Class<?> c = owner;
+        var fields = new HashSet<Field>();
+        var c = owner;
         while (c != null && !c.equals(Object.class)) {
             fields.addAll(Arrays.stream(c.getDeclaredFields()).filter(field -> field.isAnnotationPresent(anno)).collect(Collectors.toSet()));
             c = c.getSuperclass();

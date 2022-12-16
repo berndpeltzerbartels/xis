@@ -1,17 +1,11 @@
 package one.xis.context;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import one.xis.utils.lang.CollectorUtils;
 
 import java.util.Collection;
 
-@RequiredArgsConstructor
-public class TestContext implements AppContext {
-
-    public static TestContextBuilder builder() {
-        return new TestContextBuilder();
-    }
+public class AppContextImpl implements AppContext {
 
     @Getter
     private final Collection<Object> singletons;
@@ -20,4 +14,11 @@ public class TestContext implements AppContext {
     public <T> T getSingleton(Class<T> type) {
         return singletons.stream().filter(type::isInstance).map(type::cast).collect(CollectorUtils.toOnlyElement());
     }
+
+    AppContextImpl(String packageName, Collection<Object> externalSingletons) {
+        AppContextInitializer initializer = new AppContextInitializer(packageName, externalSingletons);
+        initializer.initializeContext();
+        singletons = initializer.getSingletons();
+    }
+
 }

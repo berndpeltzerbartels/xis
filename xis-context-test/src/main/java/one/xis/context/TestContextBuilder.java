@@ -21,14 +21,14 @@ public class TestContextBuilder {
 
     public TestContextBuilder withSingleton(Object singleton) {
         if (singleton instanceof Class) {
-            throw new IllegalArgumentException("use withSingeltonClass(es) for adding  classes to context");
+            return withSingletonClass((Class<?>) singleton);
         }
         singletons.add(singleton);
         return this;
     }
 
     public TestContextBuilder withSingletons(Object... mocks) {
-        Arrays.stream(mocks).forEach(this::withSingleton); // validates each one
+        Arrays.stream(mocks).forEach(this::withSingleton);
         return this;
     }
 

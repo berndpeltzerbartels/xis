@@ -50,7 +50,7 @@ public abstract class JavascriptTemplateParser<M extends TemplateModel> {
     }
 
     protected JSClass toClass(TemplateHeadElement element, JSScript script) {
-        var elementClass = derrivedClass(XIS_HEAD_ELEMENT, script);
+        var elementClass = derrivedClass(XIS_HEAD, script);
         addChildrenField(element, elementClass, script);
         addElementField(element, elementClass);
         overrideUpdateAttributes(elementClass, element);
@@ -58,7 +58,7 @@ public abstract class JavascriptTemplateParser<M extends TemplateModel> {
     }
 
     protected JSClass toClass(TemplateBodyElement element, JSScript script) {
-        var elementClass = derrivedClass(XIS_BODY_ELEMENT, script);
+        var elementClass = derrivedClass(XIS_BODY, script);
         addChildrenField(element, elementClass, script);
         addElementField(element, elementClass);
         overrideUpdateAttributes(elementClass, element);
