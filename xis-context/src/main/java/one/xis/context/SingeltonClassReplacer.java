@@ -18,7 +18,7 @@ class SingeltonClassReplacer {
             var replacementClass = CollectionUtils.removeOne(replacements);
             var classToReplace = classToReplace(replacementClass);
             if (!rv.contains(classToReplace)) {
-                throw new IllegalStateException("there is no singelton to do the replacement defined in @XISComponent-annotation in " + replacementClass);
+                throw new IllegalStateException("there is no singleton to do the replacement defined in @XISComponent-annotation in " + replacementClass);
             }
             rv.remove(classToReplace);
             replacements.remove(replacementClass);
