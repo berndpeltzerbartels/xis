@@ -14,7 +14,7 @@ class XISCollection {
     }
 
     add(obj) {
-        throw new Error('abstract method');
+        throw new Error('abstract method: add(obj)');
     }
 
     addAll(arr) {

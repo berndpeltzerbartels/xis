@@ -16,14 +16,8 @@ class XISComponent extends XISValueHolder {
     /**
     * @public
     */
-    init() {
-        if (this.isActivePhase('init')) {
-            var component = this;
-            var data = this.getComponentData(this.getOnInitStateKeys());
-            this.sendPhaseMessage('init', data, () => component.initTree());
-        } else {
-            this.initTree();
-        }
+    init() {        var component = this;
+        this.handlePhase('init', component.initTree);
     }
 
 
@@ -31,13 +25,8 @@ class XISComponent extends XISValueHolder {
      * @public
      */
     destroy() {
-        if (this.isActivePhase('destroy')) {
-            var component = this;
-            var data = this.getComponentData(this.getOnDestroyStateKeys());
-            this.sendPhaseMessage('destroy', data, () => component.destroyTree());
-        } else {
-            this.destroyTree();
-        }
+        var component = this;
+        this.handlePhase('destroy', component.destroyTree);
     }
 
 
@@ -45,13 +34,8 @@ class XISComponent extends XISValueHolder {
      * @public
      */
     show() {
-        if (this.isActivePhase('show')) {
-            var component = this;
-            var data = this.getComponentData(this.getOnShowStateKeys());
-            this.sendPhaseMessage('show', data, () => component.showTree());
-        } else {
-            this.showTree();
-        }
+        var component = this;
+        this.handlePhase('destroy', component.showTree);
     }
 
 
@@ -59,13 +43,39 @@ class XISComponent extends XISValueHolder {
      * @public
      */
     hide() {
-        if (this.isActivePhase('hide')) {
+        var component = this;
+        this.handlePhase('hide', component.hideTree);
+    }
+
+
+    handlePhase(phase, treeInvoker) {
+        if (this.isActivePhase(phase)) {
             var component = this;
-            var data = this.getComponentData(this.getOnHideStateKeys());
-            this.sendPhaseMessage('hide', data, () => component.hideTree());
+            var data = this.getPhaseData(phase);
+            this.sendPhaseMessage(phase, data, treeInvoker);
         } else {
-            this.hideTree();
+            treeInvoker();
         }
+    }
+
+    /**
+     * @private
+     * @param {String} phase 
+     * @returns 
+     */
+    getPhaseData(phase) {
+        var keys = [];
+        switch (phase) {
+            case 'init': keys = this.getOnInitStateKeys();
+                break;
+            case 'destroy': keys = this.getOnDestroyStateKeys();
+                break;
+            case 'show': keys = this.getOnShowStateKeys();
+                break;
+            case 'hide': keys = this.getOnHideStateKeys();
+                break;
+        }
+        return this.getComponentData(keys);
     }
 
 
@@ -138,15 +148,15 @@ class XISComponent extends XISValueHolder {
     * @protected
     */
     isActivePhase(phase) {
-        throw new Error('abstract method');
+        throw new Error('abstract method: isActivePhase(phase)');
     }
 
 
     /**
     * @protected
     */
-    isActiveAction(phase) {
-        throw new Error('abstract method');
+    isActiveAction(action) {
+        throw new Error('abstract method: isActiveAction(action)');
     }
 
 
@@ -230,11 +240,11 @@ class XISComponent extends XISValueHolder {
      * @param {String} action 
      */
     getActionStateKeys(action) {
-        throw new Error('abstract method');
+        throw new Error('abstract method: getActionStateKeys(action)');
     }
 
     getActiveActions() {
-        throw new Error('abstract method');
+        throw new Error('abstract method: getActiveActions()');
     }
 
 
@@ -243,27 +253,27 @@ class XISComponent extends XISValueHolder {
      * @param {String} phase 
      */
     getOnShowStateKeys() {
-        throw new Error('abstract method');
+        throw new Error('abstract method: getOnShowStateKeys()');
     }
 
     getOnDestroyStateKeys() {
-        throw new Error('abstract method');
+        throw new Error('abstract method: getOnDestroyStateKeys()');
     }
 
     getOnHideStateKeys() {
-        throw new Error('abstract method');
+        throw new Error('abstract method: getOnHideStateKeys()');
     }
 
     getOnInitStateKeys() {
-        throw new Error('abstract method');
+        throw new Error('abstract method: getOnInitStateKeys()');
     }
 
     getOnDestroyStateKeys() {
-        throw new Error('abstract method');
+        throw new Error('abstract method: getOnDestroyStateKeys()');
     }
 
     bind(parent) {
-        throw new Error('abstract method');
+        throw new Error('abstract method: bind()');
     }
 
     /**
@@ -272,7 +282,7 @@ class XISComponent extends XISValueHolder {
      * @param {any} parameters 
      */
     replace(another, parameters) {
-        throw new Error('abstract method');
+        throw new Error('abstract method:  replace(another, parameters)');
     }
 
 }

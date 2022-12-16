@@ -196,23 +196,23 @@ class XISPage extends XISComponent {
     }
 
     getContainer() {
-        throw new Error('abstract method');
+        throw new Error('abstract method: getContainer()');
     }
 
     appendChild(childElement) {
-        throw new Error('abstract method');
+        throw new Error('abstract method: appendChild(childElement');
     }
 
     removeChild(childElement) {
-        throw new Error('abstract method');
+        throw new Error('abstract method: removeChild(childElement)');
     }
 
     getElement() {
-        throw new Error('abstract method');
+        throw new Error('abstract method: getElement()');
     }
 
     unlink() {
-        throw new Error('abstract method');
+        throw new Error('abstract method: unlink()');
     }
 
 

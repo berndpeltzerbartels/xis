@@ -94,11 +94,10 @@ public class JavascriptAbstractClasses {
             .addDeclaredMethod("destroy", 0)
             .addDeclaredMethod("show", 0)
             .addDeclaredMethod("hide", 0)
-            .addDeclaredMethod("processResponse", 1)
             .addDeclaredMethod("onAction", 1)
             .addDeclaredMethod("getActionData", 1)
             .addDeclaredMethod("getPhaseData", 1)
-            .addDeclaredMethod("addPhaseMessage", 1)
+            .addDeclaredMethod("sendPhaseMessage", 3)
             .addDeclaredMethod("getParameters")
             .addDeclaredMethod("getParameterNames") // TODO  remove and implement
             .addAbstractMethod("getActionStateKeys", 1)
@@ -129,8 +128,9 @@ public class JavascriptAbstractClasses {
             .superClass(XIS_COMPONENT);
 
     public static final JSSuperClass XIS_WIDGET = new JSSuperClass("XISWidget", "client")
-            .addDeclaredMethod("init")
-            .addDeclaredMethod("addValues", 1)
+            .addDeclaredMethod("bind", 1)
+            .addDeclaredMethod("unbind", 1)
             .addDeclaredMethod("replace", 1)
+            .addDeclaredMethod("getRoot")
             .superClass(XIS_COMPONENT);
 }

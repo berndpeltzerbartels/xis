@@ -16,7 +16,7 @@ class XISElement extends XISTemplateObject {
      * @override
      */
     createElement() { // TODO add this to java-model
-        throw new Error('abstract method');
+        throw new Error('abstract method: createElement()');
     }
 
     /**
@@ -43,7 +43,7 @@ class XISElement extends XISTemplateObject {
     }
 
     updateAttributes() {
-        throw new Error('abstract method');
+        throw new Error('abstract method: updateAttributes()');
     }
 
     updateAttribute(name, value) {

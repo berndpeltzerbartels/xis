@@ -18,7 +18,7 @@ class XISStaticTextNode extends XISTemplateObject {
     }
 
     createNode() {
-        throw new Error('abstract method');
+        throw new Error('abstract method: createNode()');
     }
 
 }

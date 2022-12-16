@@ -63,7 +63,7 @@ class XISLoop extends XISValueHolder {
     * @returns {Array}
     */
     createChildren() {
-        throw new Error('abstract method');
+        throw new Error('abstract method: createChildren()');
     }
 
     /**

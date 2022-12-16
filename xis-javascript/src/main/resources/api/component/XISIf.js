@@ -29,11 +29,11 @@ class XISIf extends XISTemplateObject {
 
 
     evaluateCondition() {
-        throw new Error("abstract method");
+        throw new Error("abstract method: evaluateCondition()");
     }
 
     getPath() {
-        throw new Error("abstract method");
+        throw new Error("abstract method: getPath()");
     }
 
 
