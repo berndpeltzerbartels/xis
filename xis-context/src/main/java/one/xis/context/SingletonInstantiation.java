@@ -18,15 +18,17 @@ class SingletonInstantiation {
     private final InitMethodInvocation initMethodInvocation;
     private final SingeltonClassReplacer classReplacer;
     protected final Collection<Object> additionalSingeltons;
+    protected final Collection<Class<?>> additionalClasses;
 
     @Getter
     private final Set<Object> singletons = new HashSet<>();
 
-    SingletonInstantiation(FieldInjection fieldInjection, InitMethodInvocation initMethodInvocation, AppReflection reflections, Collection<Object> additionalSingeltons) {
+    SingletonInstantiation(FieldInjection fieldInjection, InitMethodInvocation initMethodInvocation, AppReflection reflections, Collection<Object> additionalSingeltons, Collection<Class<?>> additionalClasses) {
         this.fieldInjection = fieldInjection;
         this.initMethodInvocation = initMethodInvocation;
         this.classReplacer = new SingeltonClassReplacer();
         this.additionalSingeltons = additionalSingeltons;
+        this.additionalClasses = additionalClasses;
         this.singletonInstantiators = createInstantiators(reflections);
         this.unusedSingletonInstantiators = new HashSet<>(singletonInstantiators);
     }
@@ -43,6 +45,7 @@ class SingletonInstantiation {
 
     private Set<Class<?>> classesToInstantiate(AppReflection reflections) {
         var candidates = getComponentClasses(reflections);
+        candidates.addAll(additionalClasses);
         return classReplacer.doReplacement(candidates);
     }
 

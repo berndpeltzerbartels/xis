@@ -1,12 +1,12 @@
 class XISRestClient {
 
     /**
-     * @param {XISErrorHandler} errorHandler 
+     * 
+     * @param {XISHttpClient} httpClient 
      */
-    constructor(errorHandler) {
+    constructor(httpClient) {
         this.className = 'XISRestClient';
-        this.httpClient = new XISHttpClient(errorHandler);
-        this.errorHandler = errorHandler;
+        this.httpClient = httpClient;
         this.headers = {
             'Accept': 'application/json',
             'Content-Type': 'application/json'

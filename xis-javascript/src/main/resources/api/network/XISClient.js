@@ -1,11 +1,13 @@
 class XISClient {
 
     /**
-     * @param {XISErrorHandler} errorHandler 
+     * 
+     * @param {*} localStorage 
+     * @param {*} restClient 
      */
-    constructor(localStorage, errorHandler) {
+    constructor(localStorage, restClient) {
         this.className = 'XISClient';
-        this.restClient = new XISRestClient(errorHandler);
+        this.restClient = restClient;
         this.token = localStorage.getItem('xis-token');
         this.clientId = localStorage.getItem('xis-client-id');
         if (!this.clientId) {

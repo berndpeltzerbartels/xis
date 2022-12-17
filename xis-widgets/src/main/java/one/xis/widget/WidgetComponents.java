@@ -13,7 +13,7 @@ import java.util.Map;
 class WidgetComponents {
 
     @Getter
-    private final Map<String, WidgetComponent> widgetJavascripts = new HashMap<>();
+    private final Map<String, WidgetComponent> widgetComponentsByKey = new HashMap<>();
 
     private final WidgetComponentCompiler widgetComponentCompiler;
 
@@ -28,14 +28,17 @@ class WidgetComponents {
         return widgetJavascript;
     }
 
-    public WidgetComponent add(WidgetMetaData widgetMetaData) {
+    WidgetComponent add(WidgetMetaData widgetMetaData) {
         var widgetJavascript = createWidgetJavascript(widgetMetaData);
-        widgetJavascripts.put(widgetMetaData.getKey(), widgetJavascript);
+        if (widgetComponentsByKey.containsKey(widgetMetaData.getKey())) {
+            throw new IllegalStateException("there is more than one widget with key " + widgetMetaData.getKey());
+        }
+        widgetComponentsByKey.put(widgetMetaData.getKey(), widgetJavascript);
         return widgetJavascript;
     }
 
-    public WidgetComponent getByComponentClass(String jsClassname) {
-        var widgetJavascript = widgetJavascripts.get(jsClassname);
+    WidgetComponent getByKey(String key) {
+        var widgetJavascript = widgetComponentsByKey.get(key);
         synchronized (widgetJavascript) {
             widgetComponentCompiler.compileIfObsolete(widgetJavascript);
         }
@@ -43,7 +46,7 @@ class WidgetComponents {
     }
 
     Collection<String> getJsClassnames() {
-        return widgetJavascripts.keySet();
+        return widgetComponentsByKey.keySet();
     }
 
 }

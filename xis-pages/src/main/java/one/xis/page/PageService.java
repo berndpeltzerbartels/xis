@@ -40,8 +40,12 @@ public class PageService {
         return pageComponents.getByComponentClass(jsClassname);
     }
 
+    public PageComponent getPageComponentByControllerClass(Class<?> controllerClass) {
+        return pageComponents.getByControllerClass(controllerClass);
+    }
+
     public PageComponent getPageComponentByPath(String path) {
-        return pageComponents.getPageComponentsByPath().get(path);
+        return pageComponents.getByPath(path);
     }
 
 

@@ -1,8 +1,8 @@
 package one.xis.page;
 
 import one.xis.context.AppContext;
+import one.xis.it.IntTester;
 import one.xis.js.JSTestUtil;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import javax.script.ScriptException;
@@ -16,13 +16,13 @@ class MinimalPageITCase {
 
     private PageService pageService;
 
-    @BeforeEach
+    //@BeforeEach
     void createContext() {
         var context = AppContext.getInstance("one.xis");
         pageService = context.getSingleton(PageService.class);
     }
 
-    @Test
+    // @Test
     void compiles() throws ScriptException, ParserConfigurationException {
         pageService.addPageController(new MinimalPage());
         var pageComponent = pageService.getPageComponentByPath("/MinimalPage.html");
@@ -40,7 +40,7 @@ class MinimalPageITCase {
         var result = compiledScript.eval();
     }
 
-    @Test
+    // @Test
     void returnTest() throws ParserConfigurationException, ScriptException {
         var builder = DocumentBuilderFactory.newDefaultInstance().newDocumentBuilder();
         var document = builder.newDocument();
@@ -52,6 +52,17 @@ class MinimalPageITCase {
 
         var compiledScript = JSTestUtil.compile(script, bindings);
         var result = compiledScript.eval();
+
+    }
+
+    @Test
+    void show() {
+        var tester = IntTester.builder(MinimalPage.class).build();
+
+        tester.invokeShow();
+
+        var document = tester.getDocument();
+
 
     }
 

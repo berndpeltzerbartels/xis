@@ -31,8 +31,8 @@ public class WidgetService {
         return invocationService.invokeController(controller, invocationContext);
     }
 
-    public WidgetComponent getWidgetComponent(String jsClassname) {
-        return widgetComponents.getByComponentClass(jsClassname);
+    public WidgetComponent getWidgetComponentByKey(String key) {
+        return widgetComponents.getByKey(key);
     }
 
     public Collection<String> getClassnames() {
@@ -40,7 +40,7 @@ public class WidgetService {
     }
 
     public Map<String, WidgetComponent> getAllWidgetJavascripts() {
-        return widgetComponents.getWidgetJavascripts();
+        return widgetComponents.getWidgetComponentsByKey();
     }
 
 

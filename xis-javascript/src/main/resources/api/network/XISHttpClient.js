@@ -8,19 +8,6 @@ class XISHttpClient {
         this.errorHandler = errorHandler;
     }
 
-    get(uri, headers, parameters, handler) {
-        var address = uri;
-        if (parameters) {
-            address += '?'
-            for (var name of Object.keys(parameters)) {
-                address += name;
-                address += '=';
-                address += encodeURI(parameters[name]);
-            }
-        }
-        this.doRequest(address, headers, 'GET', null, handler);
-    }
-
     post(uri, headers, payload, handler) {
         var payloadJson = JSON.stringify(payload);
         headers['Content-length'] = payloadJson.length;
