@@ -1,6 +1,7 @@
 package one.xis.page;
 
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
 
@@ -35,7 +36,7 @@ class PageComponents {
         return pageComponent;
     }
 
-    PageComponent getByComponentClass(String jsClassname) {
+    PageComponent getByComponentClass(@NonNull String jsClassname) {
         PageComponent pageComponent = pageComponentsByComponentClassname.get(jsClassname);
         synchronized (pageComponent) {
             pageComponentCompiler.compileIfObsolete(pageComponent);
@@ -43,7 +44,7 @@ class PageComponents {
         return pageComponent;
     }
 
-    PageComponent getByControllerClass(Class<?> controllerClass) {
+    PageComponent getByControllerClass(@NonNull Class<?> controllerClass) {
         PageComponent pageComponent = pageComponentsByControllerClass.get(controllerClass);
         synchronized (pageComponent) {
             pageComponentCompiler.compileIfObsolete(pageComponent);
@@ -51,7 +52,7 @@ class PageComponents {
         return pageComponent;
     }
 
-    PageComponent getByPath(String path) {
+    PageComponent getByPath(@NonNull String path) {
         if (path.endsWith(".html")) {
             throw new IllegalArgumentException(path + " must have suffix .html");
         }

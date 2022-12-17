@@ -64,8 +64,11 @@ public class IntTesterBuilder {
         return JSTestUtil.compile(script.toString(), bindings);
     }
 
+    // TODO the same fpr widgets identifies by @Widget
     private void addPageControllerScript(AppContext appContext, StringBuilder script) {
         var pageService = appContext.getSingleton(PageService.class);
+        var controller = appContext.getSingleton(controllerClass);
+        pageService.addPageController(controller);
         var component = pageService.getPageComponentByControllerClass(controllerClass);
         script.append(component.getJavascript());
     }
