@@ -1,7 +1,7 @@
 package one.xis.page;
 
 import one.xis.context.AppContext;
-import one.xis.it.IntTester;
+import one.xis.context.IntTester;
 import one.xis.js.JSTestUtil;
 import org.junit.jupiter.api.Test;
 

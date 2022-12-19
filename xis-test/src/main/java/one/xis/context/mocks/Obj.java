@@ -1,4 +1,4 @@
-package one.xis.mocks;
+package one.xis.context.mocks;
 
 import java.util.HashMap;
 

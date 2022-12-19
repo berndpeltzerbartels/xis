@@ -6,9 +6,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 
+
 public class AppContextInitializer {
 
-    protected final AppReflection reflections;
+    protected final ClassReflection reflections;
     protected final Collection<Object> additionalSingeltons;
     protected final FieldInjection fieldInjection;
     protected final InitMethodInvocation initInvokers;
@@ -18,30 +19,34 @@ public class AppContextInitializer {
     protected final Collection<Class<?>> additionalClasses;
 
     public AppContextInitializer(Class<?> basePackageClass) {
-        this(basePackageClass.getPackageName(), Collections.emptySet());
+        this(new DefaultClassReflection(basePackageClass.getPackageName()), Collections.emptySet(), Collections.emptySet());
     }
 
     public AppContextInitializer(String basePackage, Collection<Class<?>> additionalClasses, Collection<Object> additionalSingeltons) {
-        this(new DefaultAppReflection(basePackage), additionalClasses, additionalSingeltons);
+        this(new DefaultClassReflection(basePackage), additionalClasses, additionalSingeltons);
     }
 
     public AppContextInitializer(String basePackage, Collection<Object> additionalSingeltons) {
-        this(new DefaultAppReflection(basePackage), Collections.emptySet(), additionalSingeltons);
+        this(new DefaultClassReflection(basePackage), Collections.emptySet(), additionalSingeltons);
     }
 
-    public AppContextInitializer(AppReflection reflections, Collection<Object> additionalSingeltons) {
-        this(reflections, Collections.emptySet(), additionalSingeltons);
+    public AppContextInitializer(ClassReflection classReflection, Collection<Object> additionalSingeltons) {
+        this(classReflection, Collections.emptySet(), additionalSingeltons);
     }
 
-    public AppContextInitializer(AppReflection reflections) {
+    AppContextInitializer(Collection<Object> mocks, Collection<Class<?>> singletonClasses) {
+        this(new NoopClassReflection(), singletonClasses, mocks);
+    }
+
+    public AppContextInitializer(ClassReflection reflections) {
         this(reflections, Collections.emptySet(), Collections.emptySet());
     }
 
-    public AppContextInitializer(AppReflection reflections, Collection<Class<?>> additionalClasses, Collection<Object> additionalSingeltons) {
-        this.reflections = reflections;
+    public AppContextInitializer(ClassReflection classReflection, Collection<Class<?>> additionalClasses, Collection<Object> additionalSingeltons) {
+        this.reflections = classReflection;
         this.additionalClasses = additionalClasses;
         this.additionalSingeltons = additionalSingeltons;
-        fieldInjection = new FieldInjection(reflections);
+        fieldInjection = new FieldInjection(classReflection, additionalClasses, additionalSingeltons);
         initInvokers = new InitMethodInvocation();
     }
 

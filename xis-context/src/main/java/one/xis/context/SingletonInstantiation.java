@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-class SingletonInstantiation {
+public class SingletonInstantiation {
 
     @Getter
     private final Set<SingletonInstantiator> singletonInstantiators;
@@ -23,7 +23,7 @@ class SingletonInstantiation {
     @Getter
     private final Set<Object> singletons = new HashSet<>();
 
-    SingletonInstantiation(FieldInjection fieldInjection, InitMethodInvocation initMethodInvocation, AppReflection reflections, Collection<Object> additionalSingeltons, Collection<Class<?>> additionalClasses) {
+    SingletonInstantiation(FieldInjection fieldInjection, InitMethodInvocation initMethodInvocation, ClassReflection reflections, Collection<Object> additionalSingeltons, Collection<Class<?>> additionalClasses) {
         this.fieldInjection = fieldInjection;
         this.initMethodInvocation = initMethodInvocation;
         this.classReplacer = new SingeltonClassReplacer();
@@ -37,27 +37,23 @@ class SingletonInstantiation {
         populateSingletonClasses();
     }
 
-    private Set<SingletonInstantiator> createInstantiators(AppReflection reflections) {
+    private Set<SingletonInstantiator> createInstantiators(ClassReflection reflections) {
         return classesToInstantiate(reflections).stream()
                 .map(this::createInstantiator)//
                 .collect(Collectors.toUnmodifiableSet());
     }
 
-    private Set<Class<?>> classesToInstantiate(AppReflection reflections) {
+    private Set<Class<?>> classesToInstantiate(ClassReflection reflections) {
         var candidates = getComponentClasses(reflections);
         candidates.addAll(additionalClasses);
         return classReplacer.doReplacement(candidates);
     }
 
 
-    private Set<Class<?>> getComponentClasses(AppReflection reflections) {
+    private Set<Class<?>> getComponentClasses(ClassReflection reflections) {
         return reflections.getTypesAnnotatedWith(XISComponent.class).stream()// includes types having custom component-annotations, too
                 .filter(c -> !c.isAnnotation())
                 .collect(Collectors.toSet());
-    }
-
-    private boolean isReplacement(Class<?> singletonClass) {
-        return !singletonClass.getAnnotation(XISComponent.class).replacementFor().equals(None.class);
     }
 
     private void populateSingletonClasses() {

@@ -9,15 +9,15 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.Set;
 
-class DefaultAppReflection implements AppReflection {
+class DefaultClassReflection implements ClassReflection {
 
     private final Reflections reflections;
 
-    DefaultAppReflection(Class<?> basePackageClass) {
+    DefaultClassReflection(Class<?> basePackageClass) {
         this(basePackageClass.getPackageName());
     }
 
-    DefaultAppReflection(String basePackage) {
+    DefaultClassReflection(String basePackage) {
         reflections = new Reflections(basePackage, new SubTypesScanner(),
                 new TypeAnnotationsScanner(),
                 new FieldAnnotationsScanner());

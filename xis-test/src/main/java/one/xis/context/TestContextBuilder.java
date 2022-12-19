@@ -32,10 +32,10 @@ public class TestContextBuilder {
         return this;
     }
 
-    public TestContext build() {
-        TestContextInitializer initializer = new TestContextInitializer(singletons, singletonClasses);
+    public AppContext build() {
+        AppContextInitializer initializer = new AppContextInitializer(singletons, singletonClasses);
         initializer.initializeContext();
-        return new TestContext(initializer.getSingletons());
+        return new AppContextImpl(singletons, singletonClasses);
     }
 
 }

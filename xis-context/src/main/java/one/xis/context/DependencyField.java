@@ -68,4 +68,10 @@ public abstract class DependencyField implements ComponentCreationListener {
         }
         return new SimpleDependencyField(field);
     }
+
+    static DependencyField getInstanceForObject(Field field, Object owner) {
+        var dependencyField = getInstanceForField(field);
+        dependencyField.onComponentCreated(owner);
+        return dependencyField;
+    }
 }

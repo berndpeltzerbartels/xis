@@ -1,13 +1,11 @@
-package one.xis.it;
+package one.xis.context;
 
 import one.xis.ajax.AjaxService;
-import one.xis.context.AppContext;
-import one.xis.context.TestContext;
+import one.xis.context.mocks.Document;
+import one.xis.context.mocks.HttpClient;
+import one.xis.context.mocks.HttpMock;
+import one.xis.context.mocks.LocalStorage;
 import one.xis.js.JSTestUtil;
-import one.xis.mocks.Document;
-import one.xis.mocks.HttpClient;
-import one.xis.mocks.HttpMock;
-import one.xis.mocks.LocalStorage;
 import one.xis.page.PageService;
 
 import javax.script.Bindings;
@@ -41,7 +39,7 @@ public class IntTesterBuilder {
     }
 
     public IntTester build() {
-        var context = new TestContext("one.xis", classes, singletons);
+        var context = AppContext.getInstance("one.xis", singletons, classes);
         var document = new Document();
         var httpMock = new HttpMock(context.getSingleton(AjaxService.class));
         CompiledScript script;

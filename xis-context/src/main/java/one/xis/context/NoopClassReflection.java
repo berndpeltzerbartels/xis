@@ -6,7 +6,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 
-class NoopReflection implements AppReflection {
+class NoopClassReflection implements ClassReflection {
     @Override
     public <A extends Annotation> Collection<Field> getFieldsAnnotatedWith(Class<A> anno) {
         return Collections.emptySet();
@@ -14,6 +14,6 @@ class NoopReflection implements AppReflection {
 
     @Override
     public Set<Class<?>> getTypesAnnotatedWith(Class<? extends Annotation> annotation) {
-        return null;
+        return Collections.emptySet();
     }
 }

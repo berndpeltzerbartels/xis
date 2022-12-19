@@ -2,6 +2,7 @@ package one.xis.context;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.Set;
 
@@ -12,7 +13,7 @@ class AppContextInitializerCollectionITCase {
 
     @Test
     void linkedListField() {
-        AppContextInitializer initializer = new AppContextInitializer(new TestReflection(Comp1.class, Comp2.class, Comp3.class));
+        AppContextInitializer initializer = new AppContextInitializer(Collections.emptySet(), Set.of(Comp1.class, Comp2.class, Comp3.class));
         initializer.initializeContext();
 
         Set<Object> singletons = initializer.getSingletons();

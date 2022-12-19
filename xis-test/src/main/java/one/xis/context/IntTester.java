@@ -1,9 +1,8 @@
-package one.xis.it;
+package one.xis.context;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import one.xis.context.AppContext;
-import one.xis.mocks.Document;
+import one.xis.context.mocks.Document;
 
 import javax.script.CompiledScript;
 

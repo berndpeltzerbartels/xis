@@ -1,4 +1,4 @@
-package one.xis.mocks;
+package one.xis.context.mocks;
 
 import lombok.RequiredArgsConstructor;
 import one.xis.ajax.AjaxRequest;

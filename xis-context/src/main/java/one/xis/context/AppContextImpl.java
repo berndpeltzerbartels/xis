@@ -15,8 +15,14 @@ public class AppContextImpl implements AppContext {
         return singletons.stream().filter(type::isInstance).map(type::cast).collect(CollectorUtils.toOnlyElement());
     }
 
-    AppContextImpl(String packageName, Collection<Object> externalSingletons) {
-        AppContextInitializer initializer = new AppContextInitializer(packageName, externalSingletons);
+    AppContextImpl(String packageName, Collection<Object> externalSingletons, Collection<Class<?>> externalClasses) {
+        AppContextInitializer initializer = new AppContextInitializer(packageName, externalClasses, externalSingletons);
+        initializer.initializeContext();
+        singletons = initializer.getSingletons();
+    }
+
+    AppContextImpl(Collection<Object> externalSingletons, Collection<Class<?>> externalClasses) {
+        AppContextInitializer initializer = new AppContextInitializer(externalSingletons, externalClasses);
         initializer.initializeContext();
         singletons = initializer.getSingletons();
     }

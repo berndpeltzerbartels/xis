@@ -1,6 +1,6 @@
 package one.xis.page;
 
-import one.xis.context.TestContext;
+import one.xis.context.AppContext;
 import one.xis.context.TestContextBuilder;
 import one.xis.controller.ControllerInvocationService;
 import one.xis.js.JavascriptControllerModelParser;
@@ -11,7 +11,7 @@ import static org.mockito.Mockito.mock;
 
 class PageComponentTestUtil {
 
-    static TestContext createCompileTestContext(Class<?> controllerClass, Object... objects) {
+    static AppContext createCompileTestContext(Class<?> controllerClass, Object... objects) {
         return new TestContextBuilder()
                 .withSingletonClass(PageComponentCompiler.class)
                 .withSingletonClass(PageTemplateDocumentParser.class)

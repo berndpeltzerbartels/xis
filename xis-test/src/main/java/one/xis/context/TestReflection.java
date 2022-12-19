@@ -11,7 +11,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-class TestReflection implements AppReflection {
+class TestReflection implements ClassReflection {
 
     private final Set<Class<?>> classes;
     private final Set<Class<? extends Annotation>> annotationClasses;

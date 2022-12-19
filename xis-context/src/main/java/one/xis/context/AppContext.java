@@ -19,9 +19,14 @@ public interface AppContext {
 
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
     static AppContext getInstance(String rootPackageName, Collection<Object> externalSingletons) {
+        return getInstance(rootPackageName, externalSingletons, Collections.emptySet());
+    }
+    
+
+    static AppContext getInstance(String rootPackageName, Collection<Object> externalSingletons, Collection<Class<?>> externalClasses) {
         AppContextKey appContextKey = AppContextKey.getKey(rootPackageName);
         synchronized (appContextKey) {
-            return CONTEXT_MAP.computeIfAbsent(appContextKey, key -> new AppContextImpl(rootPackageName, externalSingletons));
+            return CONTEXT_MAP.computeIfAbsent(appContextKey, key -> new AppContextImpl(rootPackageName, externalSingletons, externalClasses));
         }
     }
 

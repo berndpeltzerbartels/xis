@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 class TestSingletonInstantiation extends SingletonInstantiation {
 
-    TestSingletonInstantiation(FieldInjection fieldInjection, InitMethodInvocation initMethodInvocation, AppReflection reflections, Collection<Object> mocks, Collection<Class<?>> classes) {
+    TestSingletonInstantiation(FieldInjection fieldInjection, InitMethodInvocation initMethodInvocation, ClassReflection reflections, Collection<Object> mocks, Collection<Class<?>> classes) {
         super(fieldInjection, initMethodInvocation, reflections, mocks, classes);
     }
 

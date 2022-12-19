@@ -22,7 +22,7 @@ class WidgetController {
 
 
     @Get(produces = "text/javascript; charset=utf-8", uri = "/xis/widget/{key}.js")
-    String getWidget(@PathVariable("jsClassname") String key) {
+    String getWidget(@PathVariable("key") String key) {
         return widgetService.getWidgetComponentByKey(key).getContent();
     }
 
