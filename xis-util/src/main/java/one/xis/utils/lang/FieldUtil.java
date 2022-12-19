@@ -32,7 +32,7 @@ public class FieldUtil {
         Class<?> c = clazz;
         while (c != null && !c.equals(Object.class)) {
             fields.addAll(getDeclaredFields(c));
-            c = clazz.getSuperclass();
+            c = c.getSuperclass();
         }
         return Collections.unmodifiableSet(fields);
     }

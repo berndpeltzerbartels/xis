@@ -18,7 +18,7 @@ class XISComponent extends XISValueHolder {
     */
     init() {
         var component = this;
-        this.handlePhase('init', component.initTree);
+        this.handlePhase('init', () => component.initTree());
     }
 
 
@@ -27,7 +27,7 @@ class XISComponent extends XISValueHolder {
      */
     destroy() {
         var component = this;
-        this.handlePhase('destroy', component.destroyTree);
+        this.handlePhase('destroy', () => component.destroyTree());
     }
 
 
@@ -36,7 +36,7 @@ class XISComponent extends XISValueHolder {
      */
     show() {
         var component = this;
-        this.handlePhase('destroy', component.showTree);
+        this.handlePhase('show', () => component.showTree());
     }
 
 
@@ -45,13 +45,12 @@ class XISComponent extends XISValueHolder {
      */
     hide() {
         var component = this;
-        this.handlePhase('hide', component.hideTree);
+        this.handlePhase('hide', () => component.hideTree());
     }
 
 
     handlePhase(phase, treeInvoker) {
         if (this.isActivePhase(phase)) {
-            var component = this;
             var data = this.getPhaseData(phase);
             this.sendPhaseMessage(phase, data, treeInvoker);
         } else {
@@ -102,7 +101,7 @@ class XISComponent extends XISValueHolder {
      * @private
      */
     initTree() {
-        this.getChildren().forach(child => {
+        this.getChildren().forEach(child => {
             child.init();
             child.refresh();
         });
@@ -113,7 +112,7 @@ class XISComponent extends XISValueHolder {
      * @private
      */
     destroyTree() {
-        this.getChildren().forach(child => {
+        this.getChildren().forEach(child => {
             child.destroy();
             child.refresh();
         });
@@ -123,7 +122,7 @@ class XISComponent extends XISValueHolder {
      * @private
      */
     showTree() {
-        this.getChildren().forach(child => {
+        this.getChildren().forEach(child => {
             child.show();
             child.refresh();
         });
@@ -133,14 +132,14 @@ class XISComponent extends XISValueHolder {
     * @private
     */
     hideTree() {
-        this.getChildren().forach(child => {
+        this.getChildren().forEach(child => {
             child.hide();
             child.refresh();
         });
     }
 
     refeshTree() {
-        this.getChildren().forach(child => {
+        this.getChildren().forEach(child => {
             child.refresh();
         });
     }
@@ -149,7 +148,7 @@ class XISComponent extends XISValueHolder {
     * @protected
     */
     isActivePhase(phase) {
-        throw new Error('abstract method: isActivePhase(phase)');
+        return this.getActivePhases().indexOf(phase) != -1;
     }
 
 

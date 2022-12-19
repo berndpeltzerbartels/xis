@@ -33,8 +33,7 @@ class XISPage extends XISComponent {
      * @public
      */
     init() {
-        var page = this;
-        this.client.init();
+        // TODO load data 
         this.head.init();
         this.body.init();
     }
@@ -43,6 +42,7 @@ class XISPage extends XISComponent {
      * @public
      */
     destroy() {
+        // TODO load data 
         this.head.destroy();
         this.body.destroy();
     }
@@ -51,6 +51,7 @@ class XISPage extends XISComponent {
      * @public
      */
     show() {
+        // TODO load data 
         this.head.show();
         this.body.show();
     }
@@ -59,6 +60,7 @@ class XISPage extends XISComponent {
      * @public
      */
     hide() {
+        // TODO load data 
         this.head.hide();
         this.body.hide();
     }

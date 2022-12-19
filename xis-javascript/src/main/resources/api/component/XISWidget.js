@@ -4,20 +4,25 @@ class XISWidget extends XISComponent {
         super(client);
         this.className = 'XISWidget';
         this.componentType = 'WIDGET';
+        this.element = createElement('div');
     }
 
-    getRoot() {
-        return this.root; // used in generated code
+    getElement() {
+        return this.element;
     }
 
     bind(container) {
-        container.getElement().appendChild(this.root.element);
-        this.root.show();
+        this.element.children.forEach(element => {
+            container.getElement().appendChild(element);
+        });
+        super.show();
     }
 
     unbind(container) {
-        container.getElement().removeChild(this.root.element);
-        this.root.hide();
+        this.element.children.forEach(element => {
+            container.getElement().removeChild(element);
+        });
+        super.hide();
     }
 
     /**

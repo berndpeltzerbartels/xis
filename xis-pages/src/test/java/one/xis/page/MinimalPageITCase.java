@@ -1,7 +1,7 @@
 package one.xis.page;
 
 import one.xis.context.AppContext;
-import one.xis.context.IntTester;
+import one.xis.context.IntegrationTester;
 import one.xis.js.JSTestUtil;
 import org.junit.jupiter.api.Test;
 
@@ -57,7 +57,7 @@ class MinimalPageITCase {
 
     @Test
     void show() {
-        var tester = IntTester.builder(MinimalPage.class).build();
+        var tester = IntegrationTester.builder(MinimalPage.class).build();
 
         tester.invokeShow();
 

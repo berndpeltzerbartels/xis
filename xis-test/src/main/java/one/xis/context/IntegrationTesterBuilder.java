@@ -1,10 +1,7 @@
 package one.xis.context;
 
 import one.xis.ajax.AjaxService;
-import one.xis.context.mocks.Document;
-import one.xis.context.mocks.HttpClient;
-import one.xis.context.mocks.HttpMock;
-import one.xis.context.mocks.LocalStorage;
+import one.xis.context.mocks.*;
 import one.xis.js.JSTestUtil;
 import one.xis.page.PageService;
 
@@ -15,22 +12,22 @@ import javax.script.SimpleBindings;
 import java.util.HashSet;
 import java.util.Set;
 
-public class IntTesterBuilder {
+public class IntegrationTesterBuilder {
     private final Set<Class<?>> classes = new HashSet<>();
     private final Set<Object> singletons = new HashSet<>();
     private final Class<?> controllerClass;
 
-    IntTesterBuilder(Class<?> controllerClass) {
+    IntegrationTesterBuilder(Class<?> controllerClass) {
         this.controllerClass = controllerClass;
         classes.add(controllerClass);
     }
 
-    public IntTesterBuilder withClass(Class<?> c) {
+    public IntegrationTesterBuilder withClass(Class<?> c) {
         classes.add(c);
         return this;
     }
 
-    public IntTesterBuilder withSingleton(Object singleton) {
+    public IntegrationTesterBuilder withSingleton(Object singleton) {
         if (singleton instanceof Class) {
             return withClass((Class<?>) singleton);
         }
@@ -38,7 +35,7 @@ public class IntTesterBuilder {
         return this;
     }
 
-    public IntTester build() {
+    public IntegrationTester build() {
         var context = AppContext.getInstance("one.xis", singletons, classes);
         var document = new Document();
         var httpMock = new HttpMock(context.getSingleton(AjaxService.class));
@@ -48,7 +45,7 @@ public class IntTesterBuilder {
         } catch (ScriptException e) {
             throw new RuntimeException(e);
         }
-        return new IntTester(script, context, document);
+        return new IntegrationTester(script, context, document);
     }
 
 
@@ -75,6 +72,7 @@ public class IntTesterBuilder {
         bindings.put("localStorage", new LocalStorage());
         bindings.put("document", document);
         bindings.put("httpClient", new HttpClient(httpMock));
+        bindings.put("pages", new XISPages());
     }
 
     private void addGlobalsInScript(StringBuilder srcipt) {
@@ -82,7 +80,6 @@ public class IntTesterBuilder {
         srcipt.append("var restClient = new XISRestClient(httpClient);");
         srcipt.append("var client = new XISClient(localStorage, restClient);");
         srcipt.append("var rootPage = new XISRootPage();");
-        srcipt.append("var pages = new XISPages();");
         srcipt.append("var widgets = new XISWidgets();");
         srcipt.append("var containers = new XISContainers();"); // TODO do we need this ?
         srcipt.append("var clientAttributes = new XISClientAttributes();");

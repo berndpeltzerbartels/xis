@@ -27,7 +27,7 @@ class XISHead extends XISElement {
     */
     init() {
         this.title = this.children.find(child => child.element.localName == 'title');
-        this.children.array.forEach(child => child.init());
+        this.children.forEach(child => child.init());
     }
 
     /**

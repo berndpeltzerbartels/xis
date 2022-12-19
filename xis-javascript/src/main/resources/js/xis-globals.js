@@ -1,5 +1,5 @@
 var errorHandler = new XISErrorHandler();
-var httpClient = new XISHttpCLient(errorHandler);
+var httpClient = new XISHttpClient(errorHandler);
 var restClient = new XISRestClient(httpClient);
 var client = new XISClient(localStorage, restClient);
 var rootPage = new XISRootPage();

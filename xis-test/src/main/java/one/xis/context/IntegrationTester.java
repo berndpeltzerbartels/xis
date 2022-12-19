@@ -7,7 +7,7 @@ import one.xis.context.mocks.Document;
 import javax.script.CompiledScript;
 
 @RequiredArgsConstructor
-public class IntTester {
+public class IntegrationTester {
 
     private final CompiledScript compiledScript;
     private final AppContext appContext;
@@ -15,8 +15,8 @@ public class IntTester {
     @Getter
     private final Document document;
 
-    public static IntTesterBuilder builder(Class<?> controllerClass) {
-        return new IntTesterBuilder(controllerClass);
+    public static IntegrationTesterBuilder builder(Class<?> controllerClass) {
+        return new IntegrationTesterBuilder(controllerClass);
     }
 
     public void invokeShow() {

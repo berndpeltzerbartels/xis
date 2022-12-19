@@ -6,6 +6,7 @@ class XISStaticTextNode extends XISTemplateObject {
     constructor(parent) {
         super(parent, parent.getValueHolder());
         this.className = 'XISStaticTextNode';
+        this.node = this.createNode();
     }
 
     init() {
