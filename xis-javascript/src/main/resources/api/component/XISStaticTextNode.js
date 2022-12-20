@@ -9,11 +9,6 @@ class XISStaticTextNode extends XISTemplateObject {
         this.node = this.createNode();
     }
 
-    init() {
-        this.parent.element.appendChild(this.node);
-
-    }
-
     refresh() {
         // noop
     }
@@ -21,5 +16,26 @@ class XISStaticTextNode extends XISTemplateObject {
     createNode() {
         throw new Error('abstract method: createNode()');
     }
+
+    init() {
+        this.bind();
+    }
+
+    bind() {
+        this.parent.getElement().appendChild(this.node);
+    }
+
+    destroy() {
+
+    }
+
+    show() {
+
+    }
+
+    hide() {
+
+    }
+
 
 }

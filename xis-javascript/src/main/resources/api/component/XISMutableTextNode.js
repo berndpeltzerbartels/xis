@@ -13,7 +13,23 @@ class XISMutableTextNode extends XISTemplateObject {
     }
 
     init() {
+        this.bind();
+    }
+
+    bind() {
         this.parent.getElement().appendChild(this.node);
+    }
+
+    destroy() {
+
+    }
+
+    show() {
+
+    }
+
+    hide() {
+
     }
 
     refresh() {

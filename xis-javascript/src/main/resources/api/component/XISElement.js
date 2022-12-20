@@ -23,10 +23,13 @@ class XISElement extends XISTemplateObject {
      * @public
      * @override
      */
-    init() { //TODO return {} if there is no element in parent
-        // TODO have widget as parent
-        this.parent.getElement().appendChild(this.element);
+    init() {
+        this.bind();
         super.init();
+    }
+
+    bind() {
+        this.parent.getElement().appendChild(this.element);
     }
 
     /**

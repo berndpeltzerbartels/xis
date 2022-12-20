@@ -14,9 +14,9 @@ class XISRootPage {
      * @public
      */
     onMainPageLoaded() {
-        this.head = getElementByTagName('head');
-        this.body = getElementByTagName('body');
-        this.title = getChildByName(this.head, 'title');
+        this.headElement = getElementByTagName('head');
+        this.bodyElement = getElementByTagName('body');
+        this.titleElement = getChildByName(this.headElement, 'title');
     }
 
     /**

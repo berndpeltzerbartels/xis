@@ -68,21 +68,6 @@ class XISPage extends XISComponent {
     /**
      * @public
      */
-    getHead() {
-        return this.rootPage.head;
-    }
-
-    /**
-     * @public
-     */
-    getBody() {
-        return this.rootPage.body;
-    }
-
-
-    /**
-     * @public
-     */
     unbind() {
         this.unbindHeadContent();
         this.unbindBodyContent();
@@ -133,9 +118,9 @@ class XISPage extends XISComponent {
         for (var i = 0; i < nodeList.length; i++) {
             var child = nodeList.item(i);
             if (child.localName == 'title') {
-                this.rootPage.title.innerText = child.innerText;
+                this.rootPage.titleElement.innerText = child.innerText;
             } else {
-                this.headChildNodes.push(this.rootPage.head.appendChild(child));
+                this.headChildNodes.push(this.rootPage.headElement.appendChild(child));
             }
 
         }
@@ -147,7 +132,7 @@ class XISPage extends XISComponent {
     bindBodyContent() {
         var nodeList = this.body.element.childNodes;
         for (var i = 0; i < nodeList.length; i++) {
-            this.bodyChildNodes.push(this.rootPage.body.appendChild(nodeList.item(i)));
+            this.bodyChildNodes.push(this.rootPage.bodyElement.appendChild(nodeList.item(i)));
         }
     }
 
@@ -161,7 +146,7 @@ class XISPage extends XISComponent {
         while (this.headChildNodes.length > 0) {
             var child = this.headChildNodes.pop();
             if (child.localName != 'title') {
-                this.rootPage.head.removeChild(child);
+                this.rootPage.headElement.removeChild(child);
             }
         }
     }
@@ -172,7 +157,7 @@ class XISPage extends XISComponent {
     unbindBodyContent() {
         while (this.bodyChildNodes.length > 0) {
             var child = this.bodyChildNodes.pop();
-            this.rootPage.body.removeChild(child);
+            this.rootPage.bodyElement.removeChild(child);
         }
     }
 
@@ -183,7 +168,7 @@ class XISPage extends XISComponent {
     setBodyAttributes() {
         for (var name of this.body.element.getAttributeNames()) {
             var value = this.body.element.getAttribute(name);
-            this.rootPage.body.setAttribute(name, value);
+            this.rootPage.bodyElement.setAttribute(name, value);
         }
     }
 
@@ -193,7 +178,7 @@ class XISPage extends XISComponent {
      */
     removeBodyAttributes() {
         for (var name of this.body.element.getAttributeNames()) {
-            this.rootPage.body.removeAttribute(name);
+            this.rootPage.bodyElement.removeAttribute(name);
         }
     }
 

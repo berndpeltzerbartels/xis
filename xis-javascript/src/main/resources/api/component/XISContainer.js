@@ -9,6 +9,7 @@ class XISContainer extends XISElement {
     constructor(parent) {
         super(parent);
         this.className = 'XISContainer';
+        this.children = [];
     }
 
     /**
@@ -73,13 +74,12 @@ class XISContainer extends XISElement {
      * @param {XISWidget} widget 
      */
     bindWidget(widget) {
+        this.children.forEach(child => child.unlink()); // remove placeholder
         if (this.widget && this.widget != widget) {
             this.widget = widget;
-            if (widget.root) {
-                this.getElement().appendChild(widget.root.element);
-            }
             this.widget.bind(this);
             this.widget.show();
+            this.children = [this.widget];
         }
     }
 
@@ -93,6 +93,7 @@ class XISContainer extends XISElement {
             this.widget.hide();
             this.widget.setParent(undefined);
         }
+        this.children.forEach(child => child.bind()); // restore placeholder
     }
 
     update() {
