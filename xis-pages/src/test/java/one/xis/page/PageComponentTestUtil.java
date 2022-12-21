@@ -21,10 +21,10 @@ class PageComponentTestUtil {
                 .withSingletonClass(PageComponents.class)
                 .withSingletonClass(PageService.class)
                 .withSingletonClass(PageControllers.class)
-                .withSingleton(mock(PageMetaDataFactory.class))
-                .withSingleton(mock(ControllerInvocationService.class))
+                .withMock(mock(PageMetaDataFactory.class))
+                .withMock(mock(ControllerInvocationService.class))
                 .withSingletonClass(controllerClass)
-                .withSingletons(objects)
+                .withMocks(objects)
                 .build();
     }
 

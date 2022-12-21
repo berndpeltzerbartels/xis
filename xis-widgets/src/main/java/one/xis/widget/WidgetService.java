@@ -20,10 +20,11 @@ public class WidgetService {
     private final ControllerInvocationService invocationService;
     private final Map<Object, WidgetMetaData> widgetMetaDataMap = new HashMap<>();
 
-    public void addWidgetConroller(Object controller) {
+    public WidgetComponent addWidgetConroller(Object controller) {
         var widgetMetaData = widgetMetaDataMap.computeIfAbsent(controller, widgetMetaDataFactory::createMetaData);
-        widgetComponents.add(widgetMetaData);
+        var component = widgetComponents.addWidget(widgetMetaData);
         widgetControllers.addController(controller, widgetMetaData);
+        return component;
     }
 
     public Collection<AjaxResponseMessage> invokeController(InvocationContext invocationContext) {

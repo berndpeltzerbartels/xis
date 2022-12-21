@@ -1,10 +1,16 @@
 package one.xis.context;
 
+import lombok.RequiredArgsConstructor;
+import one.xis.utils.reflect.AnnotationUtils;
+
+import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+@RequiredArgsConstructor
 class InitMethodInvocation {
+    private final Set<Class<? extends Annotation>> annotations;
     private final Set<InitMethodInvoker> invokers = new HashSet<>();
 
     void onComponentCreated(Object o) {
@@ -17,12 +23,12 @@ class InitMethodInvocation {
     }
 
     void invokeAll() {
-        invokers.forEach(initMethodInvoker -> initMethodInvoker.invoke());
+        invokers.forEach(InitMethodInvoker::invoke);
     }
 
     private void findInitMethods(Class<?> c) {
         Arrays.stream(c.getDeclaredMethods())
-                .filter(m -> m.isAnnotationPresent(XISInit.class))
+                .filter(m -> AnnotationUtils.hasAtLeasOneAnnotation(m, annotations))
                 .map(InitMethodInvoker::new).forEach(invokers::add);
     }
 }

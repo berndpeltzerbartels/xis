@@ -21,10 +21,11 @@ public class PageService {
     private final ControllerInvocationService invocationService;
     private final Map<Class<?>, PageMetaData> pageMetaDataMap = new HashMap<>();
 
-    public void addPageController(@NonNull Object controller) {
+    public PageComponent addPageController(@NonNull Object controller) {
         var metaData = pageMetaDataMap.computeIfAbsent(controller.getClass(), pageMetaDataFactory::createMetaData);
-        pageComponents.createPageComponent(metaData);
+        var component = pageComponents.createPageComponent(metaData);
         pageControllers.addController(controller, metaData);
+        return component;
     }
 
     public Collection<AjaxResponseMessage> invokeController(InvocationContext invocationContext) {

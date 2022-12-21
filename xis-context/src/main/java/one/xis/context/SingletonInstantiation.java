@@ -23,7 +23,7 @@ public class SingletonInstantiation {
     @Getter
     private final Set<Object> singletons = new HashSet<>();
 
-    SingletonInstantiation(FieldInjection fieldInjection, InitMethodInvocation initMethodInvocation, ClassReflection reflections, Collection<Object> additionalSingeltons, Collection<Class<?>> additionalClasses) {
+    SingletonInstantiation(FieldInjection fieldInjection, InitMethodInvocation initMethodInvocation, Reflection reflections, Collection<Object> additionalSingeltons, Collection<Class<?>> additionalClasses) {
         this.fieldInjection = fieldInjection;
         this.initMethodInvocation = initMethodInvocation;
         this.classReplacer = new SingeltonClassReplacer();
@@ -37,21 +37,21 @@ public class SingletonInstantiation {
         populateSingletonClasses();
     }
 
-    private Set<SingletonInstantiator> createInstantiators(ClassReflection reflections) {
+    private Set<SingletonInstantiator> createInstantiators(Reflection reflections) {
         return classesToInstantiate(reflections).stream()
                 .map(this::createInstantiator)//
                 .collect(Collectors.toUnmodifiableSet());
     }
 
-    private Set<Class<?>> classesToInstantiate(ClassReflection reflections) {
+    private Set<Class<?>> classesToInstantiate(Reflection reflections) {
         var candidates = getComponentClasses(reflections);
         candidates.addAll(additionalClasses);
         return classReplacer.doReplacement(candidates);
     }
 
 
-    private Set<Class<?>> getComponentClasses(ClassReflection reflections) {
-        return reflections.getTypesAnnotatedWith(XISComponent.class).stream()// includes types having custom component-annotations, too
+    private Set<Class<?>> getComponentClasses(Reflection reflections) {
+        return reflections.getComponentTypes().stream()// includes types having custom component-annotations, too
                 .filter(c -> !c.isAnnotation())
                 .collect(Collectors.toSet());
     }

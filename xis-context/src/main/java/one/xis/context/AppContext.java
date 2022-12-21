@@ -4,8 +4,6 @@ import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -13,21 +11,16 @@ public interface AppContext {
 
     Map<AppContextKey, AppContext> CONTEXT_MAP = new ConcurrentHashMap<>();
 
-    static AppContext getInstance(String rootPackageName) {
-        return getInstance(rootPackageName, Collections.emptySet());
-    }
-
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
-    static AppContext getInstance(String rootPackageName, Collection<Object> externalSingletons) {
-        return getInstance(rootPackageName, externalSingletons, Collections.emptySet());
-    }
-    
-
-    static AppContext getInstance(String rootPackageName, Collection<Object> externalSingletons, Collection<Class<?>> externalClasses) {
+    static AppContext getInstance(String rootPackageName) {
         AppContextKey appContextKey = AppContextKey.getKey(rootPackageName);
         synchronized (appContextKey) {
-            return CONTEXT_MAP.computeIfAbsent(appContextKey, key -> new AppContextImpl(rootPackageName, externalSingletons, externalClasses));
+            return CONTEXT_MAP.computeIfAbsent(appContextKey, key -> createContext(rootPackageName));
         }
+    }
+
+    private static AppContext createContext(String rootPackageName) {
+        return new AppContextInitializer(rootPackageName).initializeContext();
     }
 
     <T> T getSingleton(Class<T> type);

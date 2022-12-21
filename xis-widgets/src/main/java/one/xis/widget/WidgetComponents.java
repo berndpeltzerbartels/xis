@@ -28,7 +28,7 @@ class WidgetComponents {
         return widgetJavascript;
     }
 
-    WidgetComponent add(WidgetMetaData widgetMetaData) {
+    WidgetComponent addWidget(WidgetMetaData widgetMetaData) {
         var widgetJavascript = createWidgetJavascript(widgetMetaData);
         if (widgetComponentsByKey.containsKey(widgetMetaData.getKey())) {
             throw new IllegalStateException("there is more than one widget with key " + widgetMetaData.getKey());

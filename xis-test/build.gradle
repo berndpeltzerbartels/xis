@@ -15,6 +15,7 @@ dependencies {
     implementation 'org.projectlombok:lombok:1.18.12'
     implementation project(':xis-context')
     implementation project(':xis-util')
+    implementation project(':xis-remote-core')
     implementation project(':xis-javascript-model')
     implementation project(':xis-ajax')
     implementation project(':xis-ajax-entities')
