@@ -19,7 +19,7 @@ import javax.script.ScriptException;
 import javax.script.SimpleBindings;
 
 public class TestFrontendInvokerFactory {
-
+    
     private final AppContext appContext;
     private final Class<?> controllerClass;
     private final Document document;

@@ -2,9 +2,8 @@ package one.xis.context;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.Collections;
+import java.util.Collection;
 import java.util.LinkedList;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -13,10 +12,11 @@ class AppContextInitializerCollectionITCase {
 
     @Test
     void linkedListField() {
-        AppContextInitializer initializer = new AppContextInitializer(Collections.emptySet(), Set.of(Comp1.class, Comp2.class, Comp3.class));
-        initializer.initializeContext();
-
-        Set<Object> singletons = initializer.getSingletons();
+        var context = new TestContextBuilder()
+                .withSingletonClasses(Comp1.class, Comp2.class, Comp3.class)
+                .build();
+        
+        Collection<Object> singletons = context.getSingletons();
 
         Comp1 comp1 = singletons.stream().filter(Comp1.class::isInstance).map(Comp1.class::cast).findFirst().orElseThrow();
         Comp2 comp2 = singletons.stream().filter(Comp2.class::isInstance).map(Comp2.class::cast).findFirst().orElseThrow();

@@ -60,9 +60,6 @@ public class JavascriptAbstractClasses {
 
     public static final JSSuperClass XIS_CONTAINER = new JSSuperClass("XISContainer", "parent")
             .addDeclaredMethod("init")
-            .addDeclaredMethod("destroy")
-            .addDeclaredMethod("show")
-            .addDeclaredMethod("hide")
             .addDeclaredMethod("bindWidget", 1)
             .addDeclaredMethod("unbindWidget", 0)
             .addDeclaredMethod("update", 0)
@@ -71,16 +68,9 @@ public class JavascriptAbstractClasses {
 
 
     public static final JSSuperClass XIS_HEAD = new JSSuperClass("XISHead", "parent")
-            .addDeclaredMethod("init", 2)
-            .addDeclaredMethod("createElement")
-            .addDeclaredMethod("init", 0)
-            .addDeclaredMethod("show", 0)
-            .addDeclaredMethod("hide", 0)
-            .addDeclaredMethod("refresh")
             .superClass(XIS_ELEMENT);
 
     public static final JSSuperClass XIS_BODY = new JSSuperClass("XISBody", "parent")
-            .addDeclaredMethod("createElement")
             .superClass(XIS_ELEMENT);
 
     public static final JSSuperClass XIS_VALUE_HOLDER = new JSSuperClass("XISValueHolder", "parent").addDeclaredMethod("getValueHolder")
@@ -117,8 +107,6 @@ public class JavascriptAbstractClasses {
             .addDeclaredMethod("destroy")
             .addDeclaredMethod("show")
             .addDeclaredMethod("hide")
-            .addDeclaredMethod("getHead")
-            .addDeclaredMethod("getBody")
             .addDeclaredMethod("unbind")
             .addDeclaredMethod("refresh")
             .addDeclaredMethod("bindHeadContent")
@@ -133,6 +121,5 @@ public class JavascriptAbstractClasses {
             .addDeclaredMethod("bind", 1)
             .addDeclaredMethod("unbind", 1)
             .addDeclaredMethod("replace", 1)
-            .addDeclaredMethod("getRoot")
             .superClass(XIS_COMPONENT);
 }
