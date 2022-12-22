@@ -36,28 +36,17 @@ public class TestFrontendInvokerFactory {
         this.localStorage = new LocalStorage();
         this.http = new HttpMock(appContext.getSingleton(AjaxService.class));
         this.script = new StringBuilder();
-        init();
     }
 
 
-    public TestFrontendInvoker invoker(Class<?> controllerClass) {
+    TestFrontendInvoker createInvoker() {
         try {
             compiledScript = compiledScript();
         } catch (ScriptException e) {
             throw new RuntimeException(e);
         }
-
+        return new TestFrontendInvoker(compiledScript, appContext, document, http, localStorage);
     }
-
-    public void reset() {
-        init();
-    }
-
-
-    private void init() {
-
-    }
-
 
     private CompiledScript compiledScript() throws ScriptException {
         var bindings = new SimpleBindings();
@@ -75,16 +64,30 @@ public class TestFrontendInvokerFactory {
         var pageService = appContext.getSingleton(PageService.class);
         appContext.getSingletons().stream().filter(o -> o.getClass().isAnnotationPresent(Page.class))
                 .map(pageService::addPageController)
-                .map(PageComponent::getJavascript)
-                .forEach(script::append);
+                .forEach(this::activatePageController);
+    }
+
+    private void activatePageController(PageComponent component) {
+        script.append(component.getJavascript())
+                .append(String.format("pages.addPage('%s', new %s(client));", component.getPath(), component.getJavascriptClass()));
+        if (component.getControllerClass().equals(controllerClass)) {
+            script.append(String.format("var testObject = pages.getPage('%s')", component.getPath()));
+        }
     }
 
     private void activateWidgetControllers() {
         var widgetService = appContext.getSingleton(WidgetService.class);
         appContext.getSingletons().stream().filter(o -> o.getClass().isAnnotationPresent(Widget.class))
                 .map(widgetService::addWidgetConroller)
-                .map(WidgetComponent::getJavascript)
-                .forEach(script::append);
+                .forEach(this::activateWidgetController);
+    }
+
+    private void activateWidgetController(WidgetComponent component) {
+        script.append(component.getJavascript())
+                .append(String.format("widgets.addWidget('%s', new %s(client));", component.getKey(), component.getJavascriptClass()));
+        if (component.getControllerClass().equals(controllerClass)) {
+            script.append(String.format("var testObject = widgets.getWidget('%s')", component.getKey()));
+        }
     }
 
     private void addGlobalsToBindings(Bindings bindings) {
