@@ -12,10 +12,8 @@ class AppContextInitializerCollectionITCase {
 
     @Test
     void linkedListField() {
-        var context = new TestContextBuilder()
-                .withSingletonClasses(Comp1.class, Comp2.class, Comp3.class)
-                .build();
-        
+        var context = new AppContextInitializer(Comp1.class, Comp2.class, Comp3.class).initializeContext();
+
         Collection<Object> singletons = context.getSingletons();
 
         Comp1 comp1 = singletons.stream().filter(Comp1.class::isInstance).map(Comp1.class::cast).findFirst().orElseThrow();

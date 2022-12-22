@@ -3,6 +3,7 @@ package one.xis.context;
 import lombok.Getter;
 
 import java.lang.annotation.Annotation;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
@@ -50,6 +51,10 @@ public class AppContextInitializer {
         this.additionalSingeltons = additionalSingeltons;
         this.fieldInjection = new FieldInjection(reflection, additionalClasses, additionalSingeltons);
         this.initInvokers = new InitMethodInvocation(beanInitAnnotation);
+    }
+
+    public AppContextInitializer(Class<?>... classes) {
+        this(new NoScanReflection(Collections.emptySet(), Arrays.asList(classes)));
     }
 
     public AppContext initializeContext() {
