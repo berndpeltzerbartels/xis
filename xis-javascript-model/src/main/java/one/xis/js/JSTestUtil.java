@@ -18,9 +18,17 @@ public class JSTestUtil {
     }
 
     public CompiledScript compileWithApi(String javascript, Bindings bindings) throws ScriptException {
-        var api = getResourceAsString("js/xis.js");
-        var globals = getResourceAsString("js/xis-globals.js");
+        var api = getApiResourceAsString();
+        var globals = getGlobalsResourceAsString();
         return JSUtil.compile(LOCAL_STORAGE + api + globals + javascript, bindings);
+    }
+
+    public String getApiResourceAsString() {
+        return getResourceAsString("js/xis.js");
+    }
+
+    public String getGlobalsResourceAsString() {
+        return getResourceAsString("js/xis-globals.js");
     }
 
     public CompiledScript compile(String javascript) throws ScriptException {
@@ -32,6 +40,6 @@ public class JSTestUtil {
         var globals = getResourceAsString("js/xis-globals.js");
         return JSUtil.compile(javascript, bindings);
     }
-    
+
 
 }

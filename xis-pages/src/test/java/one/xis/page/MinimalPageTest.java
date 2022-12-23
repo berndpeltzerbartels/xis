@@ -1,6 +1,8 @@
 package one.xis.page;
 
 import one.xis.context.AppContext;
+import one.xis.context.IntegrationTestInvoker;
+import one.xis.context.XISComponent;
 import one.xis.js.JSTestUtil;
 import org.junit.jupiter.api.Test;
 
@@ -11,7 +13,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 
 //@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class MinimalPageITCase {
+class MinimalPageTest {
 
     private PageService pageService;
 
@@ -55,9 +57,26 @@ class MinimalPageITCase {
     }
 
     @Test
-    void show() {
+    void show() throws ScriptException {
+
+        var invoker = IntegrationTestInvoker.builder(MinimalPage.class).withComponentAnnotation(XISComponent.class).build();
+
+        invoker.invokeInit();
+
+        var document = invoker.getDocument();
+        
+
+
         /*
-        var tester = TestFrontendInvoker.builder(MinimalPage.class).build();
+        var context = new IntegrationTestContext()
+                .withSingletonClass(MinimalPage.class)
+                .build();
+        */
+
+        // var invoker = IntegrationTestInvoker.forController(MinimalPage.class, context);
+
+        /*
+        var tester = IntegrationTestInvoker.builder(MinimalPage.class).build();
 
         tester.invokeShow();
 
@@ -65,10 +84,6 @@ class MinimalPageITCase {
     */
 
     }
-
-
-    class Document {
-
-    }
+    
 
 }

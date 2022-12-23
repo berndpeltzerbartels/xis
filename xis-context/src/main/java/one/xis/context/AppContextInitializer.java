@@ -41,11 +41,23 @@ public class AppContextInitializer {
                 Set.of(XISInit.class));
     }
 
+    public AppContextInitializer(Set<String> packagesToScan,
+                                 Set<Class<?>> additionalClasses,
+                                 Set<Object> additionalSingeltons) {
+        this(new DefaultReflection(packagesToScan,
+                        Set.of(XISComponent.class),
+                        Set.of(XISInject.class)),
+                additionalClasses,
+                additionalSingeltons,
+                Set.of(XISInit.class));
 
-    public AppContextInitializer(Reflection reflection,
-                                 Collection<Class<?>> additionalClasses,
-                                 Collection<Object> additionalSingeltons,
-                                 Set<Class<? extends Annotation>> beanInitAnnotation) {
+    }
+
+
+    AppContextInitializer(Reflection reflection,
+                          Collection<Class<?>> additionalClasses,
+                          Collection<Object> additionalSingeltons,
+                          Set<Class<? extends Annotation>> beanInitAnnotation) {
         this.reflection = reflection;
         this.additionalClasses = additionalClasses;
         this.additionalSingeltons = additionalSingeltons;
@@ -55,6 +67,10 @@ public class AppContextInitializer {
 
     public AppContextInitializer(Class<?>... classes) {
         this(new NoScanReflection(Collections.emptySet(), Arrays.asList(classes)));
+    }
+
+    public AppContextInitializer(Set<String> packagesToScan, Set<Class<?>> singletonClasses, Set<Object> mocks, Set<Class<? extends Annotation>> beanInitAnnotation) {
+        this(new CompositeReflection(new DefaultReflection(packagesToScan), new NoScanReflection(mocks, singletonClasses)), singletonClasses, mocks, beanInitAnnotation);
     }
 
     public AppContext initializeContext() {

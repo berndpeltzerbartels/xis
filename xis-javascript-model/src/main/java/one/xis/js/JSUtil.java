@@ -4,6 +4,7 @@ import lombok.experimental.UtilityClass;
 
 import javax.script.*;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 @UtilityClass
@@ -13,11 +14,12 @@ public class JSUtil {
         return compile(javascript, null);
     }
 
-    public CompiledScript compile(String javascript, Bindings bindings) throws ScriptException {
+    public CompiledScript compile(String javascript, Map<String, Object> bindingMap) throws ScriptException {
         ScriptEngine engine = new ScriptEngineManager().getEngineByName("graal.js");
-        if (bindings != null) {
-            engine.setBindings(bindings, ScriptContext.ENGINE_SCOPE);
-        }
+        var bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
+        bindings.put("polyglot.js.allowHostClassLookup", true);
+        bindings.put("polyglot.js.allowHostAccess", true);
+        bindings.putAll(bindingMap);
         Compilable compiler = (Compilable) engine;
         return compiler.compile(javascript);
     }
