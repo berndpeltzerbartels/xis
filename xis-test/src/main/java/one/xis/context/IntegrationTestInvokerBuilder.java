@@ -87,6 +87,11 @@ public class IntegrationTestInvokerBuilder implements ContextBuilder<Integration
         addGlobalsToBindings(httpMock);
         activatePageControllers(context);
         activateWidgetControllers(context);
+        addInitialMethodCall();
+    }
+
+    private void addInitialMethodCall() {
+        script.append("rootPage.onMainPageLoaded();\n");
     }
 
     private void addApi() {

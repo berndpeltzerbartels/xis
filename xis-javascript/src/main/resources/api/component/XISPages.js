@@ -21,6 +21,7 @@ class XISPages {
      * @param {string} uri 
      */
     getPage(uri) {
+        console.log('getPage ' + uri);
         if (uri.startsWith('/')) {
             uri = uri.substring(1);
         }
@@ -29,13 +30,14 @@ class XISPages {
             uri = uri.substring(0, uri.length - 5);
         }
         var key = uri.replace('/', ':');
-       
+
         var page = this.pages[key] ? this.pages[key] : this.welcomePage;
-        if (!page.initialized){
+        if (!page.initialized) {
+            console.log('page.init');
             page.init();
-            page.initialized = true;        
+            page.initialized = true;
         }
         return page;
     }
-        
+
 }

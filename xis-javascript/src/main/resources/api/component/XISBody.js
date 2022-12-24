@@ -1,4 +1,4 @@
-class XISBody extends XISElement {
+class XISBody extends XISTemplateObject {
 
     /**
      * 
@@ -7,15 +7,23 @@ class XISBody extends XISElement {
     constructor(parentPage) {
         super(parentPage);
         this.className = 'XISBody';
+        this.childNodes = [];
     }
 
-    /**
-    * @public
-    * @override
-    */
-    init() {
-        // Do not bind to parent, here
-        this.children.forEach(child => child.init());
+
+    appendChildNode(node) {
+        this.childNodes.push(node);
     }
 
+    removeChildNode(node) {
+        //TODO  this.childNodes.push(node);
+    }
+
+    bind(rootPage) {
+        this.childNodes.forEach(node => rootPage.bodyElement.appendChild(node));
+    }
+
+    unbind(rootPage) {
+        this.childNodes.forEach(node => rootPage.bodyElement.appendChild(node));
+    }
 }

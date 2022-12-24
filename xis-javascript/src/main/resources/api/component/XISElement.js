@@ -19,17 +19,20 @@ class XISElement extends XISTemplateObject {
         throw new Error('abstract method: createElement()');
     }
 
+    bind() {
+        this.parent.appendChildNode(this.element);
+    }
     /**
      * @public
      * @override
      */
     init() {
-        this.bind();
+        this.parent.appendChildNode(this.element);
         super.init();
     }
 
-    bind() {
-        this.parent.getElement().appendChild(this.element);
+    appendChildNode(node) {
+        this.element.appendChild(node);
     }
 
     /**
@@ -42,7 +45,7 @@ class XISElement extends XISTemplateObject {
     }
 
     unlink() {
-        this.parent.getElement().removeChild(this.element);
+        this.parent.removeChildNode(this.element);
     }
 
     updateAttributes() {
@@ -69,8 +72,8 @@ class XISElement extends XISTemplateObject {
         this.element.removeChild(childElement);
     }
 
-    getElement() {
-        return this.element;
+    getNodes() {
+        return [this.element];
     }
 
     /**

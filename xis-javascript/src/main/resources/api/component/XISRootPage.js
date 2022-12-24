@@ -48,7 +48,7 @@ class XISRootPage {
      */
     unbindPage() {
         if (this.page) {
-            this.page.unbind();
+            this.page.unbind(this);
             this.page.hide();
             this.page = undefined;
         }

@@ -12,7 +12,6 @@ class XISComponent extends XISValueHolder {
         this.state = {};
         this.subscribeToActions();
     }
-
     /**
     * @public
     */

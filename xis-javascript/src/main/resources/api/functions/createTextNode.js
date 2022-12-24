@@ -1,3 +1,3 @@
-function textNode(content) {
+function createTextNode(content) {
     return document.createTextNode(content);
 }

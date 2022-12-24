@@ -5,8 +5,6 @@ class XISPage extends XISComponent {
         super(client);
         this.className = 'XISPage';
         this.rootPage = undefined;
-        this.headChildNodes = [];
-        this.bodyChildNodes = [];
         this.state = {};
         this.componentType = 'PAGE';
     }
@@ -16,7 +14,13 @@ class XISPage extends XISComponent {
      * @param {XISRootPage} rootPage 
      */
     bind(rootPage) {
-        this.rootPage = rootPage;
+        this.head.bind(rootPage);
+        this.body.bind(rootPage)
+    }
+
+    unbind(rootPage) {
+        this.head.unbind(rootPage);
+        this.body.unbind(rootPage)
     }
 
     /**
@@ -110,56 +114,7 @@ class XISPage extends XISComponent {
     getParameterNames() {
         return []; // TODO
     }
-    /**
-     * @private
-     */
-    bindHeadContent() {
-        var nodeList = this.head.element.childNodes;
-        for (var i = 0; i < nodeList.length; i++) {
-            var child = nodeList.item(i);
-            if (child.localName == 'title') {
-                this.rootPage.titleElement.innerText = child.innerText;
-            } else {
-                this.headChildNodes.push(this.rootPage.headElement.appendChild(child));
-            }
 
-        }
-    }
-
-    /**
-    * @private 
-    */
-    bindBodyContent() {
-        var nodeList = this.body.element.childNodes;
-        for (var i = 0; i < nodeList.length; i++) {
-            this.bodyChildNodes.push(this.rootPage.bodyElement.appendChild(nodeList.item(i)));
-        }
-    }
-
-    /**
-     * We do not remove all childnodes but only those ones from this page.
-     * Otherwise we would remove all script-tags.
-     * 
-     * @private
-     */
-    unbindHeadContent() {
-        while (this.headChildNodes.length > 0) {
-            var child = this.headChildNodes.pop();
-            if (child.localName != 'title') {
-                this.rootPage.headElement.removeChild(child);
-            }
-        }
-    }
-
-    /**
-     * @private
-    */
-    unbindBodyContent() {
-        while (this.bodyChildNodes.length > 0) {
-            var child = this.bodyChildNodes.pop();
-            this.rootPage.bodyElement.removeChild(child);
-        }
-    }
 
     /**
      * Set html-attributes of this page's body to given body-tag.

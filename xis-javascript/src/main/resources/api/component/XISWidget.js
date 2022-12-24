@@ -7,6 +7,11 @@ class XISWidget extends XISComponent {
         this.element = createElement('div');
     }
 
+
+    getNodes() {
+        return [this.element];
+    }
+
     getElement() {
         return this.element;
     }

@@ -10,6 +10,11 @@ class XISTemplateObject {
         this.parent = parent;
     }
 
+    bind() {
+        this.children.forEach(child => child.bind());
+    }
+
+
     init() {
         this.children.forEach(child => child.init());
     }
@@ -37,14 +42,6 @@ class XISTemplateObject {
     getValueHolder() {
         return this.parent.getValueHolder();
     }
-
-    /**
-     * @returns {Node}
-     */
-    getElement() {
-        return this.parent.getELement();
-    }
-
 
     getValue(key) {
         return this.getValueHolder().getValue(key);
