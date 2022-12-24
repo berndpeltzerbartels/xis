@@ -34,6 +34,7 @@
         }
 
         function decorateElement(element) {
+            addDataPath(element);
             addRefreshMethod(element);
             addGetDataValueMethod(element);
         }
@@ -41,10 +42,16 @@
         function addRefreshMethod(element) {
             element.refresh = () => {
                 forAttribute(element, 'data-content', (element, attributeValue) => {
-                    element.innerText = element.getDataValue(splitToArray(attributeValue));
+                    element.innerText = element.getDataValue(this.dataPath);
                 });
                 forChildElements(element, child => child.refresh());
             };
+        }
+
+        function addDataPath(element) {
+            forAttribute(element, 'data-content', (element, path) => {
+                element.dataPath = splitToArray(path);
+            });
         }
 
         function addGetDataValueMethod(element) {
