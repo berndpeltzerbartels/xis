@@ -75,9 +75,7 @@ class Repeat {
             if (e.refreshContent && !e.refreshContent(data)) {
                 continue;
             }
-            if (isElement(e))
-                e.refreshChildElements(data);
-
+            e.refreshChildElements(data);
         }
         return true;
     }
@@ -309,12 +307,14 @@ function doSplit(string, separatorChar) {
 function init(element) {
     element.repeats = [];
     ifAttributePresent(element, 'data-show', e => {
+        e.selfRefresh = true;
         addRefreshShow(e);
     });
     ifAttributePresent(element, 'data-content', e => {
         addRefreshContent(element);
     });
     ifAttributePresent(element, 'data-repeat', e => {
+        e.selfRefresh = true;
         addRepeat(element);
     });
     addRefesh(element);
@@ -343,16 +343,17 @@ function addRefesh(element) {
         for (var repeat of element.repeats) {
             repeat.refresh(data);
         }
-        if (element.refreshContent && !element.refreshContent(data)) {
-            return;
+        if (element.refreshContent) {
+            element.refreshContent(data);
         }
         if (element.repeats.length == 0 && !element.refreshShow) {
             element.refreshChildElements(data);
         }
-
-
     }
-    element.refreshChildElements = data => forChildElements(element, child => child.refresh(data));
+    element.refreshChildElements = data => forChildElements(element, child => {
+        if (!child.selfRefresh)
+            child.refresh(data);
+    });
 
 }
 function initPage() {
