@@ -3,138 +3,15 @@
 
 <head>
     <title data-content="title"></title>
-    <script type="text/javascript">
-
-        function evalPage() {
-            debugger;
-            var html = document.getElementsByTagName('html').item(0);
-            evalNode(html);
-            html.data = { "title": 'bla' };
-
-            html.refresh();
-        }
-
-
-
-        function evalNode(node) {
-            if (isElement(node)) {
-                decorateElement(node);
-                forChildElements(node, child => evalNode(child));
-            }
-        }
-
-        function nodeListToArray(nodeList) {
-            console.log('node-list:' + nodeList);
-            console.log('node-list-length:' + nodeList.length);
-            var arr = [];
-            for (var i = 0; i < nodeList.length; i++) {
-                arr.push(nodeList.item(i));
-            }
-            return arr;
-        }
-
-        function decorateElement(element) {
-            addDataPath(element);
-            addRefreshMethod(element);
-            addGetDataValueMethod(element);
-        }
-
-        function addRefreshMethod(element) {
-            element.refresh = () => {
-                forAttribute(element, 'data-content', (element, attributeValue) => {
-                    element.innerText = element.getDataValue(this.dataPath);
-                });
-                forChildElements(element, child => child.refresh());
-            };
-        }
-
-        function addDataPath(element) {
-            forAttribute(element, 'data-content', (element, path) => {
-                element.dataPath = splitToArray(path);
-            });
-        }
-
-        function addGetDataValueMethod(element) {
-            element.getDataValue = (path) => {
-                if (element.data) {
-                    debugger;
-                    var dataNode = element.data;
-                    for (var i = 0; i < path.length; i++) {
-                        var key = path[i];
-                        if (dataNode[key]) {
-                            dataNode = dataNode[key];
-                        } else {
-                            return undefined;
-                        }
-                    }
-                    return dataNode;
-                }
-                if (element.parentNode) {
-                    return element.parentNode.getDataValue(path);
-                }
-            };
-        }
-
-
-        function forAttribute(element, attributeName, biConsumer) {
-            var attributeValue = element.getAttribute(attributeName);
-            if (attributeValue) {
-                biConsumer(element, attributeValue);
-            }
-        }
-
-
-        function forElements(nodeList, consumer) {
-            for (var i = 0; i < nodeList.length; i++) {
-                var node = nodeList.item(i);
-                if (isElement(node)) {
-                    consumer(node);
-                }
-            }
-        }
-
-
-        function forChildElements(parent, consumer) {
-            toArray(parent.childNodes).filter(n => isElement(n)).forEach(e => consumer(e));
-        }
-
-
-        function toArray(nodeList) {
-            console.log('node-list:' + nodeList);
-            console.log('node-list-length:' + nodeList.length);
-            var arr = [];
-            for (var i = 0; i < nodeList.length; i++) {
-                arr.push(nodeList.item(i));
-            }
-            return arr;
-        }
-
-        function isElement(node) {
-            return node instanceof HTMLElement;
-        }
-
-        function splitToArray(string, separatorChar) {
-            var rv = [];
-            var buffer = '';
-            for (var i = 0; i < string.length; i++) {
-                var c = string.charAt(i);
-                if (c === separatorChar) {
-                    rv.push(buffer);
-                    buffer = '';
-                } else {
-                    buffer += c;
-                }
-            }
-            rv.push(buffer);
-            return rv;
-        }
-
-
-    </script>
+    <script src="api.js"></script>
 </head>
 
-<body onload="evalPage();">
+<body onload="initPage();">
+
     <div data-key="title"></div>
+    <ul>
+        <li data-repeat="items:item" data-content="item.name"></li>
+    </ul>
 </body>
 
 

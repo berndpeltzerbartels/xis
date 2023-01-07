@@ -33,6 +33,10 @@ class XISPage extends XISComponent {
         page.bind(this.rootPage);
     }
 
+    bind() {
+        
+    }
+
     /**
      * @public
      */
