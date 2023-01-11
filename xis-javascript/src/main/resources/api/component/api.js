@@ -3,6 +3,7 @@ class Repeat {
 
     constructor(element) {
         this.element = element;
+        this.element.explicitRefresh = true;
         this.parent = element.parentNode;
         this.nodeAfter = this.element.nextSibling;
         this.elementCache = [element];
@@ -10,14 +11,6 @@ class Repeat {
         this.varName = undefined;
         this.attributeName = 'data-repeat';
         this.init();
-    }
-
-    childIndex(child) {
-        for (var i = 0; i < this.parent.childNodes.length; i++) {
-            if (this.parent.childNodes.item(i) === child) {
-                return i;
-            }
-        }
     }
 
     resizeCache(size) {
@@ -28,13 +21,14 @@ class Repeat {
     }
 
     cloneNode(element) {
-        var clone = cloneElement(element);
+        var clone = shallowCloneElement(element);
         clone.removeAttribute(this.attributeName);
         for (var i = 0; i < element.childNodes.length; i++) {
             var child = element.childNodes.item(i);
             clone.appendChild(cloneAndInitTree(child));
         }
         initElement(clone);
+        clone.explicitRefresh = true;
         return clone;
     }
 
@@ -204,7 +198,7 @@ class ScriptExpression {
     }
 
     stringTokenAsString(token) {
-        return token.content;
+        return '\"' + token.content + '\"';
     }
 
     varTokenAsString(token) {
@@ -384,7 +378,6 @@ function doSplit(string, separatorChar) {
 function cloneNode(element) {
     var e = cloneAndInitElement(element);
     e.removeAttribute('data-repeat');
-    e.selfRefresh = true;
     return e;
 }
 
@@ -403,7 +396,7 @@ function initTree(node) {
 
 function cloneTree(node) {
     if (isElement(node)) {
-        var clone = cloneElement(node);
+        var clone = shallowCloneElement(node);
         for (var i = 0; i < node.childNodes.length; i++) {
             var child = node.childNodes.item(i);
             clone.appendChild(cloneTree(child));
@@ -416,7 +409,7 @@ function cloneTree(node) {
 
 function cloneAndInitTree(node) {
     if (isElement(node)) {
-        var clone = initElement(cloneElement(node));
+        var clone = initElement(shallowCloneElement(node));
         for (var i = 0; i < node.childNodes.length; i++) {
             var child = node.childNodes.item(i);
             clone.appendChild(cloneAndInitTree(child));
@@ -442,7 +435,7 @@ function initElement(element) {
     return element;
 }
 
-function cloneElement(element) {
+function shallowCloneElement(element) {
     var newElement = document.createElement(element.localName);
     for (var attrName of element.getAttributeNames()) {
         newElement.setAttribute(attrName, element.getAttribute(attrName));
@@ -451,7 +444,7 @@ function cloneElement(element) {
 }
 
 function cloneTextNode(node) {
-    return document.createTextNode(node.innerText);
+    return document.createTextNode(node.textContent);
 }
 
 
@@ -504,8 +497,9 @@ function addRefesh(element) {
         element.refreshChildren(data);
     }
     element.refreshChildren = data => forChildNodes(element, child => {
-        if (!child.selfRefresh && child.refresh)
+        if (!child.explicitRefresh && child.refresh) {
             child.refresh(data);
+        }
     });
 
 }
