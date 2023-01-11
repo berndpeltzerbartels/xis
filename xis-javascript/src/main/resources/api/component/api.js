@@ -1,6 +1,3 @@
-function defaultRefresh(element, data) {
-    forChildElements(element, e => e.refresh(data))
-}
 
 class Repeat {
 
@@ -12,6 +9,7 @@ class Repeat {
         this.arrayPath = [];
         this.varName = undefined;
         this.attributeName = 'data-repeat';
+        this.element.selfRefresh = true;
         this.init();
     }
 
@@ -33,6 +31,7 @@ class Repeat {
     cloneNode(element) {
         var e = element.cloneNode();
         e.removeAttribute('data-repeat');
+        e.selfRefresh = true;
         if (isElement(element)) {
             init(e);
         }
@@ -52,8 +51,6 @@ class Repeat {
         var dataArray = parentData.getValue(this.arrayPath);
         this.clearChildren();
         this.resizeCache(dataArray.length);
-        forChildElements(this.parent, child => child.refresh()); // refresh others
-
         var behind;
         var i = 0;
         for (var i = dataArray.length - 1; i > -1; i--) {
@@ -75,11 +72,14 @@ class Repeat {
             if (e.refreshContent && !e.refreshContent(data)) {
                 continue;
             }
-            e.refreshChildElements(data);
+            e.refreshChildren(data);
         }
         return true;
     }
 
+    /**
+     * @private
+     */
     init() {
         var repeatAttribute = this.element.getAttribute(this.attributeName);
         var arr = doSplit(repeatAttribute, ':');
@@ -88,7 +88,13 @@ class Repeat {
     }
 }
 
+/**
+ * Representation of an attribute containing an expression deciding 
+ * show or hide the tag and its content.
+ * 
+ */
 class Show {
+
     constructor(element) {
         this.element = element;
         this.parent = element.parentNode;
@@ -128,17 +134,28 @@ class Show {
     }
 }
 
-class Content {
+/**
+ * Representation of an attribute for displaying data.
+ */
+class Out {
     constructor(element) {
         this.element = element;
-        this.attributeName = 'data-content';
+        this.attributeName = 'data-out';
         this.init();
     }
 
+    /**
+     * @private
+     */
     init() {
         this.expression = new ScriptExpression('${' + this.element.getAttribute(this.attributeName) + '}');
     }
 
+    /**
+     * @public
+     * @param {Data} data 
+     * @returns 
+     */
     refresh(data) {
         var content = this.expression.evaluate(data);
         this.element.innerText = content;
@@ -146,7 +163,25 @@ class Content {
     }
 }
 
+class ContentNode {
 
+    /**
+     * 
+     * @param {Text} textNode 
+     */
+    constructor(textNode) {
+        this.node = textNode;
+        this.expression = new ScriptExpression(node.nodeValue);
+    }
+
+    refresh(data) {
+        this.node.nodeValue = this.expression.evaluate(data);
+    }
+}
+
+/**
+ * Javascriptcode container $-Variables (${...})
+ */
 class ScriptExpression {
 
     constructor(src) {
@@ -182,6 +217,17 @@ class ScriptExpression {
         var buff = '';
         for (var i = 0; i < this.src.length; i++) {
             var ch = this.src.charAt(i);
+            if (ch == '\\') {
+                // escaped
+                buff += ch;
+                i++;
+                if (this.src.length > i) {
+                    buff += this.src.charAt(i);
+                    continue;
+                } else {
+                    break;
+                }
+            }
             if (ch == '}' && readVar) {
                 if (buff.length > 0) {
                     rv.push({ type: 'var', content: buff });
@@ -213,17 +259,23 @@ class ScriptExpression {
 
 
 
-
+/**
+ * Hierarchical page-data
+ */
 class Data {
 
+    /**
+     * 
+     * @param {any} values 
+     */
     constructor(values) {
         this.values = values;
         this.parentData = undefined;
     }
     /**
      * 
-     * @param {Element} element 
-     * @returns 
+     * @param {Array}
+     * @returns {any}
      */
     getValue(path) {
         var dataNode = this.values;
@@ -232,6 +284,7 @@ class Data {
             if (dataNode[key]) {
                 dataNode = dataNode[key];
             } else {
+                dataNode = undefined;
                 break;
             }
         }
@@ -241,6 +294,11 @@ class Data {
         return dataNode;
     }
 
+    /**
+     * 
+     * @param {String} key 
+     * @param {any} value 
+     */
     setValue(key, value) {
         this.values[key] = value;
     }
@@ -253,29 +311,38 @@ class Data {
  * @param {String} attributeName 
  * @param {attributeCallback} 
  */
-function ifAttributePresent(element, attributeName, attributeCallback) {
+function forAttribute(element, attributeName, attributeCallback) {
     var attributeValue = element.getAttribute(attributeName);
     if (attributeValue) {
-        attributeCallback(element, attributeValue);
+        attributeCallback(attributeValue);
     }
 }
 
 
-function forElements(nodeList, consumer) {
-    for (var i = 0; i < nodeList.length; i++) {
-        var node = nodeList.item(i);
-        if (isElement(node)) {
-            consumer(node);
-        }
-    }
-}
-
-
+/**
+ * 
+ * @param {Element} parent 
+ * @param {*} consumer TODO
+ */
 function forChildElements(parent, consumer) {
     toArray(parent.childNodes).filter(n => isElement(n)).forEach(e => consumer(e));
 }
 
+/**
+ * 
+ * @param {Element} parent 
+ * @param {*} consumer TODO
+ */
+function forChildNodes(parent, consumer) {
+    toArray(parent.childNodes).forEach(e => consumer(e));
+}
 
+
+
+/**
+ * @param {NodeList} nodeList 
+ * @returns {Array}
+ */
 function toArray(nodeList) {
     var arr = [];
     for (var i = 0; i < nodeList.length; i++) {
@@ -284,10 +351,20 @@ function toArray(nodeList) {
     return arr;
 }
 
+/** 
+ * @param {Node} node 
+ * @returns {boolean}
+ */
 function isElement(node) {
     return node instanceof HTMLElement;
 }
 
+/**
+ * 
+ * @param {String} string 
+ * @param {String} separatorChar 
+ * @returns 
+ */
 function doSplit(string, separatorChar) {
     var rv = [];
     var buffer = '';
@@ -304,37 +381,64 @@ function doSplit(string, separatorChar) {
     return rv;
 }
 
-function init(element) {
-    element.repeats = [];
-    ifAttributePresent(element, 'data-show', e => {
-        e.selfRefresh = true;
-        addRefreshShow(e);
-    });
-    ifAttributePresent(element, 'data-content', e => {
-        addRefreshContent(element);
-    });
-    ifAttributePresent(element, 'data-repeat', e => {
-        e.selfRefresh = true;
-        addRepeat(element);
-    });
-    addRefesh(element);
-    forChildElements(element, child => init(child));
+/**
+ * 
+ * @param {Element} node 
+ */
+function init(node) {
+    if (isElement(node)) {
+        node.repeats = [];
+        forAttribute(node, 'data-show', attr => {
+            addRefreshShow(node);
+        });
+        forAttribute(node, 'data-out', attr => {
+            addRefreshOut(node);
+        });
+        forAttribute(node, 'data-repeat', attr => {
+            addRepeat(node);
+        });
+        addRefesh(node);
+    } else {
+        if (node.nodeValue.indexOf('${') != -1) {
+            initTextNode(node);
+        }
+    }
+    forChildNodes(node, child => init(child));
 }
 
+
+function initTextNode(node) {
+    node.expression = new ScriptExpression(node.nodeValue);
+    node.refresh = data => node.nodeValue = node.expression.evaluate(data);
+}
+
+
+/**
+ * @param {Element} e 
+ */
 function addRefreshShow(e) {
     e.show = new Show(element);
     e.refreshShow = data => e.show.refresh(data);
 }
 
-function addRefreshContent(e) {
-    e.content = new Content(e);
+/**
+ * @param {Element} e 
+ */
+function addRefreshOut(e) {
+    e.content = new Out(e);
     e.refreshContent = data => e.content.refresh(data);
 }
 
+/**
+ * @param {Element} e 
+ */
 function addRepeat(e) {
     e.parentNode.repeats.push(new Repeat(e));
 }
 
+/**
+ * @param {Element} e 
+ */
 function addRefesh(element) {
     element.refresh = data => {
         if (element.refreshShow && !element.refreshShow(data)) {
@@ -346,16 +450,17 @@ function addRefesh(element) {
         if (element.refreshContent) {
             element.refreshContent(data);
         }
-        if (element.repeats.length == 0 && !element.refreshShow) {
-            element.refreshChildElements(data);
-        }
+        element.refreshChildren(data);
     }
-    element.refreshChildElements = data => forChildElements(element, child => {
-        if (!child.selfRefresh)
+    element.refreshChildren = data => forChildNodes(element, child => {
+        if (!child.selfRefresh && child.refresh)
             child.refresh(data);
     });
 
 }
+/**
+ * 
+ */
 function initPage() {
     var html = document.getElementsByTagName('html').item(0);
     init(html);
