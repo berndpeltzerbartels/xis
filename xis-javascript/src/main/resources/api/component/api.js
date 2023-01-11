@@ -9,7 +9,6 @@ class Repeat {
         this.arrayPath = [];
         this.varName = undefined;
         this.attributeName = 'data-repeat';
-        this.element.selfRefresh = true;
         this.init();
     }
 
@@ -29,13 +28,14 @@ class Repeat {
     }
 
     cloneNode(element) {
-        var e = element.cloneNode();
-        e.removeAttribute('data-repeat');
-        e.selfRefresh = true;
-        if (isElement(element)) {
-            init(e);
+        var clone = cloneElement(element);
+        clone.removeAttribute(this.attributeName);
+        for (var i = 0; i < element.childNodes.length; i++) {
+            var child = element.childNodes.item(i);
+            clone.appendChild(cloneAndInitTree(child));
         }
-        return e;
+        initElement(clone);
+        return clone;
     }
 
 
@@ -381,35 +381,86 @@ function doSplit(string, separatorChar) {
     return rv;
 }
 
+function cloneNode(element) {
+    var e = cloneAndInitElement(element);
+    e.removeAttribute('data-repeat');
+    e.selfRefresh = true;
+    return e;
+}
+
 /**
  * 
  * @param {Element} node 
  */
-function init(node) {
+function initTree(node) {
     if (isElement(node)) {
-        node.repeats = [];
-        forAttribute(node, 'data-show', attr => {
-            addRefreshShow(node);
-        });
-        forAttribute(node, 'data-out', attr => {
-            addRefreshOut(node);
-        });
-        forAttribute(node, 'data-repeat', attr => {
-            addRepeat(node);
-        });
-        addRefesh(node);
+        initElement(node);
     } else {
-        if (node.nodeValue.indexOf('${') != -1) {
-            initTextNode(node);
-        }
+        initTextNode(node);
     }
-    forChildNodes(node, child => init(child));
+    forChildNodes(node, child => initTree(child));
+}
+
+function cloneTree(node) {
+    if (isElement(node)) {
+        var clone = cloneElement(node);
+        for (var i = 0; i < node.childNodes.length; i++) {
+            var child = node.childNodes.item(i);
+            clone.appendChild(cloneTree(child));
+        }
+        return clone;
+    } else {
+        return cloneTextNode(node);
+    }
+}
+
+function cloneAndInitTree(node) {
+    if (isElement(node)) {
+        var clone = initElement(cloneElement(node));
+        for (var i = 0; i < node.childNodes.length; i++) {
+            var child = node.childNodes.item(i);
+            clone.appendChild(cloneAndInitTree(child));
+        }
+        return clone;
+    } else {
+        return initTextNode(cloneTextNode(node));
+    }
+}
+
+function initElement(element) {
+    element.repeats = [];
+    forAttribute(element, 'data-show', _ => {
+        addRefreshShow(element);
+    });
+    forAttribute(element, 'data-out', _ => {
+        addRefreshOut(element);
+    });
+    forAttribute(element, 'data-repeat', _ => {
+        addRepeat(element);
+    });
+    addRefesh(element);
+    return element;
+}
+
+function cloneElement(element) {
+    var newElement = document.createElement(element.localName);
+    for (var attrName of element.getAttributeNames()) {
+        newElement.setAttribute(attrName, element.getAttribute(attrName));
+    }
+    return newElement;
+}
+
+function cloneTextNode(node) {
+    return document.createTextNode(node.innerText);
 }
 
 
 function initTextNode(node) {
-    node.expression = new ScriptExpression(node.nodeValue);
-    node.refresh = data => node.nodeValue = node.expression.evaluate(data);
+    if (node.nodeValue.indexOf('${') != -1) {
+        node.expression = new ScriptExpression(node.nodeValue);
+        node.refresh = data => node.nodeValue = node.expression.evaluate(data);
+    }
+    return node;
 }
 
 
@@ -463,7 +514,7 @@ function addRefesh(element) {
  */
 function initPage() {
     var html = document.getElementsByTagName('html').item(0);
-    init(html);
+    initTree(html);
     html.refresh(new Data({
         title: 'bla', items: [{ name: 'name1' }, { name: 'name2' },]
     }));
