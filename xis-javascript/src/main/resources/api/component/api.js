@@ -51,6 +51,7 @@ class Repeat {
             var dataValue = dataArray[i];
             data.setValue(this.varName, dataValue);
             var e = this.elementCache[i];
+            e.refreshChildren(data);
             if (!behind) {
                 behind = this.nodeAfter;
             }
@@ -66,7 +67,6 @@ class Repeat {
             if (e.refreshContent && !e.refreshContent(data)) {
                 continue;
             }
-            e.refreshChildren(data);
         }
         return true;
     }
