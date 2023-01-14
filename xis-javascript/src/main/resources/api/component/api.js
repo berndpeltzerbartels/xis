@@ -1,30 +1,53 @@
+/**
+ * A function called with an element as parameter without any return
+ * @callback elementConsumer
+ * @param {Element} element
+ */
 
+/**
+ * A function called with a anode as parameter without any return
+ * @callback nodeConsumer
+ * @param {Element} element
+ */
+
+
+
+/**
+ * Representation of the repeat-attribute.
+ *
+ * @public
+ *
+ */
 class Repeat {
 
+    /**
+     * @param {Element} element
+     */
     constructor(element) {
         this.element = element;
         this.element.explicitRefresh = true;
         this.parent = element.parentNode;
-        this.nodeAfter = this.element.nextSibling;
-        this.elementCache = [element];
+        this.nodeBehind = this.element.nextSibling;
+        this.boundElements = [this.element];
         this.arrayPath = [];
         this.varName = undefined;
-        this.attributeName = 'data-repeat';
+        this.attributeName = attributeName(element, 'repeat')
         this.init();
     }
 
-    resizeCache(size) {
-        while (this.elementCache.length < size) {
-            var e = this.cloneNode(this.element);
-            this.elementCache.push(e);
-        }
-    }
-
-    cloneNode(element) {
-        var clone = shallowCloneElement(element);
+    /**
+     * Creates a deep clone of an element.
+     * The repeat attribute is removed, so the clones do not create
+     * repeats.
+     *
+     * @private
+     * @returns {Element}
+     */
+    clonedElement() {
+        var clone = shallowCloneElement(this.element);
         clone.removeAttribute(this.attributeName);
-        for (var i = 0; i < element.childNodes.length; i++) {
-            var child = element.childNodes.item(i);
+        for (var i = 0; i < this.element.childNodes.length; i++) {
+            var child = this.element.childNodes.item(i);
             clone.appendChild(cloneAndInitTree(child));
         }
         initElement(clone);
@@ -32,35 +55,40 @@ class Repeat {
         return clone;
     }
 
-
-    clearChildren() {
-        for (var i = 0; i < this.elementCache.length; i++) {
-            this.parent.removeChild(this.elementCache[i]);
-        }
-    }
-
+    /**
+     * Refreshes the childnodes of this loop. To keep context, it
+     * declares an own data-object for this repeat, where the given
+     * data-object will be an ancestor.
+     *
+     * @public
+     * @param {Data} parentData
+     * @returns
+     */
     refresh(parentData) {
         var data = new Data({});
         data.parentData = parentData;
         var dataArray = parentData.getValue(this.arrayPath);
-        this.clearChildren();
-        this.resizeCache(dataArray.length);
-        var behind;
-        var i = 0;
-        for (var i = dataArray.length - 1; i > -1; i--) {
-            var dataValue = dataArray[i];
+        var indexName = this.varName + '-index';
+        var index = 0;
+        var e;
+        var behind = this.nodeBehind;
+        while (index < dataArray.length) {
+            var dataValue = dataArray[index];
             data.setValue(this.varName, dataValue);
-            var e = this.elementCache[i];
-            e.refreshChildren(data);
-            if (!behind) {
-                behind = this.nodeAfter;
-            }
-            if (behind) {
-                this.parent.insertBefore(e, behind);
+            data.setValue(indexName, 'index:' + index);
+            if (this.boundElements.length <= index) {
+                e = this.clonedElement();
+                if (!behind) {
+                    this.parent.appendChild(e);
+                } else {
+                    this.parent.insertBefore(e, behind);
+                }
+                this.boundElements.push(e);
             } else {
-                this.parent.appendChild(e);
+                e = this.boundElements[index];
             }
-            behind = e;
+            index++
+            e.refreshChildren(data);
             if (e.refreshShow && !e.refreshShow(data)) {
                 continue;
             }
@@ -89,20 +117,34 @@ class Repeat {
  */
 class Show {
 
+    /**
+     *
+     * @param {Element} element
+     */
     constructor(element) {
         this.element = element;
         this.parent = element.parentNode;
         this.nodeAfter = this.element.nextSibling;
         this.visible = true;
-        this.attributeName = 'data-show';
+        this.attributeName = attributeName(element, 'show');
         this.init();
     }
 
+    /**
+     * @private
+     */
     init() {
         var ifAttribute = this.element.getAttribute(this.attributeName);
         this.expression = new ScriptExpression(ifAttribute);
     }
 
+    /**
+     * Invokes new decision, the children and deeper children will
+     * be displayed.
+     *
+     * @param {*} data
+     * @returns
+     */
     refresh(data) {
         var state = this.expression.evaluate(data);
         if (state) this.doShow();
@@ -110,6 +152,10 @@ class Show {
         return state;
     }
 
+    /**
+     * @private
+     * Causes this element to be visible, in case it's currently hidden.
+     */
     doShow() {
         if (!this.visible) {
             if (this.nodeAfter) {
@@ -122,6 +168,11 @@ class Show {
         forChildElements(this.parent, child => child.refresh());
 
     }
+
+    /**
+     * @private
+     * Hides this element, in case it is curently visible.
+     */
     doHide() {
         this.parent.removeChild(this.element);
         this.visible = false;
@@ -134,7 +185,7 @@ class Show {
 class Out {
     constructor(element) {
         this.element = element;
-        this.attributeName = 'data-out';
+        this.attributeName = attributeName(element, 'out');
         this.init();
     }
 
@@ -146,6 +197,7 @@ class Out {
     }
 
     /**
+     * Re-builds the content of this tag.
      * @public
      * @param {Data} data 
      * @returns 
@@ -157,6 +209,9 @@ class Out {
     }
 }
 
+/**
+ * Represents a textnode
+ */
 class ContentNode {
 
     /**
@@ -168,6 +223,10 @@ class ContentNode {
         this.expression = new ScriptExpression(node.nodeValue);
     }
 
+    /**
+     * @public
+     * @param {Data} data
+     */
     refresh(data) {
         this.node.nodeValue = this.expression.evaluate(data);
     }
@@ -185,26 +244,67 @@ class ScriptExpression {
         this.parseScript();
     }
 
+    /**
+     * Evaluates the script for the given data.
+     *
+     * @param {Data} data
+     * @returns
+     */
     evaluate(data) {
         return eval(this.script);
     }
 
+    /**
+     * Creates a script object by parsing a textnode.
+     * @private
+     */
     parseScript() {
         this.script = this.tokens().map(token => this.tokenAsString(token)).join('+');
     }
 
+
+    /**
+     * Creates an expression to replace a variable inside a text by it's value
+     * or just return static content of a token.
+     *
+     * @param {any} token
+     * @returns
+     */
     tokenAsString(token) {
         return token.type == 'var' ? this.varTokenAsString(token) : this.stringTokenAsString(token);
     }
 
+    /**
+     * The content of the text token might contain immutable text,
+     * represented by a token-object of type 'string'. This method
+     * returns the static content of this token in quotation marks.
+     *
+     * parse
+     * @param {any} token
+     * @returns {string} content of the token
+     */
     stringTokenAsString(token) {
         return '\"' + token.content + '\"';
     }
 
+    /**
+     * Creates some javascript-code to replace variables
+     * inside a text.
+     *
+     * @private
+     * @param {any} token
+     * @returns
+     */
     varTokenAsString(token) {
         return 'data.getValue(' + this.arrayAsString(doSplit(token.content, '.')) + ')';
     }
 
+    /**
+     * Splits the content of this node into an array containing variable tokens
+     * or tokens containing static text.
+     * @private
+     * @returns {Array<any>}
+     */
     tokens() {
         var rv = [];
         var readVar = false;
@@ -268,7 +368,7 @@ class Data {
     }
     /**
      * 
-     * @param {Array}
+     * @param {Array} path the path of the data value
      * @returns {any}
      */
     getValue(path) {
@@ -298,6 +398,22 @@ class Data {
     }
 }
 
+/**
+ * The attribute for the given short-name in use.
+ * 
+ * @param {Element} element 
+ * @param {string} name 
+ * @returns the short name or the name prefixed with 'data-'
+ */
+function attributeName(element, name) {
+    var attr = element.getAttribute(name);
+    if (attr) {
+        return name;
+    }
+    name = 'data-' + name;
+    return element.getAttribute(name) ? name : undefined;
+}
+
 
 /**
  * 
@@ -314,9 +430,9 @@ function forAttribute(element, attributeName, attributeCallback) {
 
 
 /**
- * 
+ * @public
  * @param {Element} parent 
- * @param {*} consumer TODO
+ * @param {elementConsumer} will be executed for each element
  */
 function forChildElements(parent, consumer) {
     toArray(parent.childNodes).filter(n => isElement(n)).forEach(e => consumer(e));
@@ -324,8 +440,9 @@ function forChildElements(parent, consumer) {
 
 /**
  * 
- * @param {Element} parent 
- * @param {*} consumer TODO
+ * @public
+ * @param {Element} parent
+ * @param {nodeConsumer} will be executed for each node
  */
 function forChildNodes(parent, consumer) {
     toArray(parent.childNodes).forEach(e => consumer(e));
@@ -334,7 +451,10 @@ function forChildNodes(parent, consumer) {
 
 
 /**
- * @param {NodeList} nodeList 
+ * Maps a NodeList to an array.
+ *
+ * @public
+ * @param {NodeList} nodeList
  * @returns {Array}
  */
 function toArray(nodeList) {
@@ -374,16 +494,13 @@ function doSplit(string, separatorChar) {
     rv.push(buffer);
     return rv;
 }
-
-function cloneNode(element) {
-    var e = cloneAndInitElement(element);
-    e.removeAttribute('data-repeat');
-    return e;
-}
-
 /**
  * 
- * @param {Element} node 
+ * Initialzes the giben tree or subtree, which means
+ * adding some methods to the dom element.
+ *
+ * @public
+ * @param {Element} node
  */
 function initTree(node) {
     if (isElement(node)) {
@@ -394,6 +511,12 @@ function initTree(node) {
     forChildNodes(node, child => initTree(child));
 }
 
+/**
+ * Creates a deep clone of the given node.
+ *
+ * @param {Node} node
+ * @returns
+ */
 function cloneTree(node) {
     if (isElement(node)) {
         var clone = shallowCloneElement(node);
@@ -407,6 +530,13 @@ function cloneTree(node) {
     }
 }
 
+/**
+ * Creates a deep clone of the given node and runs initialization,
+ * which means adding some methods to the dom element.
+ *
+ * @param {Node} node
+ * @returns
+ */
 function cloneAndInitTree(node) {
     if (isElement(node)) {
         var clone = initElement(shallowCloneElement(node));
@@ -419,6 +549,14 @@ function cloneAndInitTree(node) {
         return initTextNode(cloneTextNode(node));
     }
 }
+
+/**
+ * Runs initialization for an element, which means adding some methods
+ * to the dom element.
+ *
+ * @param {Element} element
+ * @returns
+ */
 
 function initElement(element) {
     element.repeats = [];
@@ -444,7 +582,12 @@ function shallowCloneElement(element) {
 }
 
 function cloneTextNode(node) {
-    return document.createTextNode(node.textContent);
+    var clonedNode = document.createTextNode(node.textContent);
+    if (node.expression) {
+        clonedNode.expression = node.expression;
+        clonedNode.refresh = data => clonedNode.nodeValue = clonedNode.expression.evaluate(data);
+    }
+    return clonedNode;
 }
 
 
@@ -510,7 +653,29 @@ function initPage() {
     var html = document.getElementsByTagName('html').item(0);
     initTree(html);
     html.refresh(new Data({
-        title: 'bla', items: [{ name: 'name1' }, { name: 'name2' },]
+        title: 'bla', items: [{ name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' },
+        { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' },
+        { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' },
+        { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' },
+        { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' },
+        { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' },
+        { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' },
+        { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' },
+        { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' },
+        { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' },
+        { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' },
+        { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' },
+        { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' },
+        { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' },
+        { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' },
+        { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' },
+        { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' },
+        { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' },
+        { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' },
+        { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' },
+        { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' },
+        { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' },
+        ]
     }));
 
 }
