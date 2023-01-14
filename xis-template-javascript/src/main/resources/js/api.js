@@ -268,6 +268,7 @@ class VarToken {
 class SignatureToken {
 
     constructor(src) {
+        console.log('st-src:' + src);
         this.src = src;
         this.start = 0;
         this.end = this.src.length - 1;
@@ -277,7 +278,7 @@ class SignatureToken {
     }
 
     tryParse() {
-
+        return this.parse();
     }
 
     parse() {
@@ -289,13 +290,17 @@ class SignatureToken {
         if (endChar !== ')') {
             return false;
         }
+        var buff = '';
         while (this.start++ < this.end) {
             ch = this.src.charAt(this.start);
             if (ch == ',') {
                 continue;
             }
-            var substr = this.src.substring(this.start, this.end + 1);
-            var token = StringToken(substr);
+            console.log(`Start: ${this.start}`);
+            console.log(`End: ${this.end}`);
+            var substr = this.src.substring(this.start, this.end);
+            console.log(`Substr: ${substr}`);
+            var token = new StringToken(substr);
             if (token.tryParse()) {
                 this.parameterTokens.push(token);
                 this.start += token.end;
@@ -321,6 +326,7 @@ class SignatureToken {
             }
             throw new Error('unable to parse "' + substr + '\"');
         }
+        return true;
     }
 
 
@@ -337,30 +343,38 @@ class FunctionToken {
     }
 
     tryParse() {
-        if (this.parse) {
+        if (this.parse()) {
             var substr = this.src.substring(this.start, this.end + 1);
-            this.signatureToken = new SignatureToken(substr);
-            if (!signatureToken.tryParse()) {
-                throw new Error('exprected signature but found "' + substr + '"');
-            }
+            console.log('substr:' + substr);
+            //this.signatureToken = new SignatureToken(substr);
+            //if (!this.signatureToken.tryParse()) {
+            //  throw new Error('exprected signature but found "' + substr + '"');
+            //}
+            return this.functionName.length > 0;
         }
+        return false;
     }
 
     parse() {
+        var endChar = this.src.charAt(this.end);
+        console.log(endChar);
+        if (endChar !== ')') {
+            return false;
+        }
         while (this.start < this.end) {
             var ch = this.src.charAt(this.start);
-            var endChar = this.src.charAt(this.end);
-            if (endChar !== ')') {
-                return false;
-            }
+            console.log(ch);
             if (ch == '$' || ch == '{' || ch == '}') {
                 return false;
             } else if (ch == '(') {
-                return this.functionName.length > 0;
+                ch++;
+                break;
+            } else {
+                this.functionName += ch;
             }
-            this.functionName += ch;
             this.start++;
         }
+        return true;
     }
 }
 
