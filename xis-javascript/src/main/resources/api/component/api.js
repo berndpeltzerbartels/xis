@@ -10,7 +10,11 @@
  * @param {Element} element
  */
 
-
+/**
+ * A function called with an element as parameter without any return
+ * @callback attributeCallback
+ * @param {Element}
+ */
 
 /**
  * Representation of the repeat-attribute.
@@ -422,9 +426,9 @@ function attributeName(element, name) {
  * @param {attributeCallback} 
  */
 function forAttribute(element, attributeName, attributeCallback) {
-    var attributeValue = element.getAttribute(attributeName);
+    var attributeValue = element.getAttribute(attributeName) || element.getAttribute('data-' + attributeName);
     if (attributeValue) {
-        attributeCallback(attributeValue);
+        attributeCallback(element);
     }
 }
 
@@ -560,15 +564,9 @@ function cloneAndInitTree(node) {
 
 function initElement(element) {
     element.repeats = [];
-    forAttribute(element, 'data-show', _ => {
-        addRefreshShow(element);
-    });
-    forAttribute(element, 'data-out', _ => {
-        addRefreshOut(element);
-    });
-    forAttribute(element, 'data-repeat', _ => {
-        addRepeat(element);
-    });
+    forAttribute(element, 'show', addRefreshOut);
+    forAttribute(element, 'out', addRefreshOut);
+    forAttribute(element, 'repeat', addRepeat);
     addRefesh(element);
     return element;
 }
