@@ -1,6 +1,6 @@
 package one.xis.page;
 
-import one.xis.js.JSScriptValidator;
+import one.xis.test.js.JSScriptValidator;
 import org.junit.jupiter.api.Test;
 
 class MinimalPageAbstractMethodTest {

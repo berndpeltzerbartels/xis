@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title data-content="title"></title>
+    <script src="api.js"></script>
+</head>
+
+<body onload="initPage();">
+
+    <div data-key="title"></div>
+    <ul>
+        <li data-repeat="items:item">Der Name ist: ${item.name}</li>
+        <li data-repeat="items:item" out="identity(item.name)">test</li>
+    </ul>
+
+    <table>
+        <tbody>
+            <tr repeat="items:item">
+                <td>${item-index}</td>
+                <td>${item.name}</td>
+            </tr>
+        </tbody>
+    </table>
+
+</body>
+
+
+</html>

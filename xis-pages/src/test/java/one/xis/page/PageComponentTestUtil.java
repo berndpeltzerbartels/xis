@@ -3,9 +3,9 @@ package one.xis.page;
 import one.xis.context.AppContext;
 import one.xis.context.TestContextBuilder;
 import one.xis.controller.ControllerInvocationService;
-import one.xis.js.JavascriptControllerModelParser;
 import one.xis.resource.ClassPathResource;
 import one.xis.template.ExpressionParser;
+import one.xis.test.js.JavascriptControllerModelParser;
 
 import static org.mockito.Mockito.mock;
 

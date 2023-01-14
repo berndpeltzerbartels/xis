@@ -1,9 +1,9 @@
 package one.xis.page;
 
 import one.xis.context.AppContext;
-import one.xis.context.IntegrationTestInvoker;
 import one.xis.context.XISComponent;
-import one.xis.js.JSTestUtil;
+import one.xis.test.IntegrationTestInvoker;
+import one.xis.test.JSTestUtil;
 import org.junit.jupiter.api.Test;
 
 import javax.script.ScriptException;
@@ -84,6 +84,6 @@ class MinimalPageTest {
     */
 
     }
-    
+
 
 }

@@ -1,10 +1,10 @@
 package one.xis.widget;
 
 import one.xis.context.XISComponent;
-import one.xis.js.*;
 import one.xis.template.WidgetTemplateModel;
+import one.xis.test.js.*;
 
-import static one.xis.js.JavascriptAbstractClasses.XIS_WIDGET;
+import static one.xis.test.js.JavascriptAbstractClasses.XIS_WIDGET;
 
 @XISComponent
 class WidgetJavascriptTemplateParser extends JavascriptTemplateParser<WidgetTemplateModel> {

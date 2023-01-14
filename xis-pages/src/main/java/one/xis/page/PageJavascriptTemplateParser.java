@@ -1,10 +1,10 @@
 package one.xis.page;
 
 import one.xis.context.XISComponent;
-import one.xis.js.*;
 import one.xis.template.PageTemplateModel;
+import one.xis.test.js.*;
 
-import static one.xis.js.JavascriptAbstractClasses.XIS_PAGE;
+import static one.xis.test.js.JavascriptAbstractClasses.XIS_PAGE;
 
 @XISComponent
 class PageJavascriptTemplateParser extends JavascriptTemplateParser<PageTemplateModel> {

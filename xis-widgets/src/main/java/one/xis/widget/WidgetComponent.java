@@ -3,8 +3,8 @@ package one.xis.widget;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import one.xis.js.JavascriptComponent;
 import one.xis.resource.Resource;
+import one.xis.test.js.JavascriptComponent;
 
 @Getter
 @Setter
