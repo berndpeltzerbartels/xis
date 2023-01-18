@@ -237,96 +237,266 @@ class ContentNode {
 }
 
 class StringToken {
-    tryParse() {
 
+    constructor(src) {
+        this.src = src;
+        console.log('src:' + this.src);
+        this.start = 0;
+        this.end = 0;
+        this.length = undefined;
+        this.string = '';
+        this.buff = '';
+    }
+
+
+    tryParse() {
+        if (this.parse()) {
+            this.length = this.end + 1;
+            return true;
+        }
+        return false;
     }
 
     parse() {
-        //TODO check if "," is escaped
+        console.log('src:' + this.src);
+        if (this.src.length == 0) {
+            return false;
+        }
+        if (this.src.charAt(0) !== '\'') {
+            return false;
+        }
+        this.end++;
+        while (this.end < this.src.length) {
+            var ch = this.src.charAt(this.end);
+            console.log('ch=' + ch);
+            var nextChar = this.end + 1 < this.src.length ? this.src.charAt(this.end + 1) : undefined;
+            if (ch == '\\' && nextChar == '\'') {
+                this.end++;
+                continue;
+            }
+            if (ch == '\'') {
+                break;
+            }
+            this.string += ch;
+            this.end++;
+
+        }
+        return this.string.length > 0;
+
+    }
+
+    toScript() {
+        var script = '\'';
+        script += this.string;
+        script += '\'';
+        return script;
     }
 }
 
 class NumberToken {
-    tryParse() {
 
+    constructor(src) {
+        this.src = src;
+        this.start = 0;
+        this.end = 0;
+        this.dots = 0;
+        this.number = '';
+        this.negative = false;
+        this.length = undefined;
+        this.buff = '';
+    }
+
+    tryParse() {
+        if (this.parse()) {
+            this.number = this.dots > 0 ? parseFloat(this.buff) : parseInt(this.buff);
+            if (this.negative) {
+                this.number = this.number * -1;
+            }
+            this.length = this.end + 1;
+            return true;
+        }
+        return false;
     }
 
     parse() {
+        if (this.src.length == 0) {
+            return false;
+        }
+        if (this.src.charAt(0) == '-') {
+            this.negative = true;
+            this.end++;
+        }
+        for (; this.end < this.src.length; this.end++) {
+            var ch = this.src.charAt(this.end);
+            if (ch >= 0 && ch <= 9) {
+                this.buff += ch;
+                continue;
+            }
+            if (ch == '.') {
+                if (this.dots > 0) {
+                    return false;
+                }
+                this.dots++;
+                this.buff += ch;
+                continue;
+            }
+            break;
+        }
+        this.end--;
+        return this.buff.length > 0;
+    }
+
+    toScript() {
+        return '' + this.number;
     }
 }
 
-
 class VarToken {
-    tryParse() {
 
+    constructor(src) {
+        this.src = src;
+        this.start = 0;
+        this.end = 0;
+        this.varPath = [];
+        this.type = undefined;
+        this.length = undefined;
+    }
+
+    tryParse() {
+        if (this.parse()) {
+            this.length = this.end + 1;
+            return true;
+        }
+        return false;
     }
 
     parse() {
+        if (this.src.length == 0) {
+            return false;
+        }
+        var ch = this.src.charAt(this.end);
+        if (ch >= '0' && ch <= '9') {
+            return false;
+        }
+        var buff = '';
+        for (var i = 0; i < this.src.length; i++) {
+            this.end = i;
+            var ch = this.src.charAt(i);
+            if (isWhitespace(ch) || ch == ',') {
+                this.end--;
+                break;
+            }
+            if (ch == '.') {
+                if (buff.length > 0) {
+                    this.varPath.push(buff);
+                    buff = '';
+                    continue;
+                }
+                return false;
+            }
+            buff += ch;
+        }
+        if (buff.length > 0) {
+            this.varPath.push(buff);
+        }
+        return this.varPath.length > 0;
+    }
+
+    toScript() {
+        var script = '';
+        return script;
     }
 }
 
 class SignatureToken {
 
     constructor(src) {
-        console.log('st-src:' + src);
         this.src = src;
         this.start = 0;
         this.end = this.src.length - 1;
         this.type = undefined;
         this.parameterTokens = [];
-        this.functionName = '';
+        this.length = undefined;
     }
 
     tryParse() {
-        return this.parse();
+        if (this.parse()) {
+            this.length = this.src.length;
+            return true;
+        }
+        return false;
     }
 
     parse() {
         var ch = this.src.charAt(this.start);
-        var endChar = this.src.charAt(this.end);
         if (ch != '(') {
             return false;
         }
-        if (endChar !== ')') {
-            return false;
-        }
-        var buff = '';
-        while (this.start++ < this.end) {
-            ch = this.src.charAt(this.start);
-            if (ch == ',') {
+        this.start++;
+        while (this.start < this.end) {
+            var ch = this.src.charAt(this.start);
+            switch (ch) {
+                case ')': return true;
+                case ',': {
+                    this.start++;
+                    continue;
+                }
+                default: {
+                    this.skipWiteSpaces();
+                    var token = this.parseParameter();
+                    if (!token) {
+                        return false;
+                    }
+                    this.parameterTokens.push(token);
+                    this.start += token.length
+                    this.skipWiteSpaces();
+                }
+            }
+            if (this.src.charAt(this.start) == ',') {
                 continue;
             }
-            console.log(`Start: ${this.start}`);
-            console.log(`End: ${this.end}`);
-            var substr = this.src.substring(this.start, this.end);
-            console.log(`Substr: ${substr}`);
-            var token = new StringToken(substr);
-            if (token.tryParse()) {
-                this.parameterTokens.push(token);
-                this.start += token.end;
-                continue;
-            }
-            var token = new NumberToken(substr);
-            if (token.tryParse()) {
-                this.parameterTokens.push(token);
-                this.start += token.end;
-                continue;
-            }
-            var token = new VarToken(substr);
-            if (token.tryParse()) {
-                this.parameterTokens.push(token);
-                this.start += token.end;
-                continue;
-            }
-            var token = new FunctionToken(substr);
-            if (token.tryParse()) {
-                this.parameterTokens.push(token);
-                this.start += token.end;
-                continue;
-            }
-            throw new Error('unable to parse "' + substr + '\"');
         }
         return true;
+    }
+
+
+    skipWiteSpaces() {
+        while (this.start < this.end) {
+            var ch = this.src.charAt(this.start);
+            if (isWhitespace(ch)) {
+                this.start++;
+                continue;
+            }
+            break;
+
+        }
+    }
+
+
+    parseParameter() {
+        var src = this.src.substring(this.start);
+        var token = new StringToken(src);
+        if (token.tryParse()) {
+            return token;
+        }
+        token = new NumberToken(src);
+        if (token.tryParse()) {
+            return token;
+        }
+        token = new VarToken(src);
+        if (token.tryParse()) {
+            return token;
+        }
+        token = new FunctionToken(src);
+        if (token.tryParse()) {
+            return token;
+        }
+        return false;
+
+    }
+
+    toScript() {
+        return this.parameterTokens.map(token => token.toScript()).join(',');
     }
 
 
@@ -346,10 +516,11 @@ class FunctionToken {
         if (this.parse()) {
             var substr = this.src.substring(this.start, this.end + 1);
             console.log('substr:' + substr);
-            //this.signatureToken = new SignatureToken(substr);
-            //if (!this.signatureToken.tryParse()) {
-            //  throw new Error('exprected signature but found "' + substr + '"');
-            //}
+            this.signatureToken = new SignatureToken(substr);
+            if (!this.signatureToken.tryParse()) {
+                return false;
+            }
+            this.length = this.functionName.length + this.signatureToken.length;
             return this.functionName.length > 0;
         }
         return false;
@@ -362,21 +533,34 @@ class FunctionToken {
             return false;
         }
         while (this.start < this.end) {
-            var ch = this.src.charAt(this.start);
+            var ch = this.src.charAt(this.start++);
             console.log(ch);
             if (ch == '$' || ch == '{' || ch == '}') {
                 return false;
             } else if (ch == '(') {
-                ch++;
+                this.start--;
                 break;
             } else {
                 this.functionName += ch;
             }
-            this.start++;
         }
         return true;
     }
+
+    toScript() {
+        var script = this.functionName;
+        script += '(';
+        script += this.signatureToken.toScript();
+        script += ')';
+        return script;
+    }
 }
+
+
+function isWhitespace(ch) {
+    return ch == ' ' || ch == "\t" || ch == "\n" || ch == "\r";
+}
+
 
 class ScriptExpression2 {
 
@@ -403,109 +587,24 @@ class ScriptExpression2 {
      * @private
      */
     parseScript() {
-        this.script = this.tokens().map(token => this.tokenAsString(token)).join('+');
+        var rootToken = this.rootToken();
+        this.script = rootToken.toScript();
     }
 
 
-    /**
-     * Creates an expression to replace a variable inside a text by it's value
-     * or just return static content of a token.
-     *
-     * @param {any} token
-     * @returns
-     */
-    tokenAsString(token) {
-        return token.type == 'var' ? this.varTokenAsString(token) : this.stringTokenAsString(token);
-    }
-
-    /**
-     * The content of the text token might contain immutable text,
-     * represented by a token-object of type 'string'. This method
-     * returns the static content of this token in quotation marks.
-     *
-     * parse
-     * @param {any} token
-     * @returns {string} content of the token
-     */
-    stringTokenAsString(token) {
-        return '\"' + token.content + '\"';
-    }
-
-    /**
-     * Creates some javascript-code to replace variables
-     * inside a text.
-     *
-     * @private
-     * @param {any} token
-     * @returns
-     */
-    varTokenAsString(token) {
-        return 'data.getValue(' + this.arrayAsString(doSplit(token.content, '.')) + ')';
-    }
-
-    parse() {
-
-    }
-
-    /**
-     * Splits the content of this node into an array containing variable tokens
-     * or tokens containing static text.
-     * @private
-     * @returns {Array<any>}
-     */
-    tokens() {
-        var rv = [];
-        var readVar = false;
-        var buff = '';
-        for (var i = 0; i < this.src.length; i++) {
-            var ch = this.src.charAt(i);
-            if (ch == '\\') {
-                // escaped
-                buff += ch;
-                i++;
-                if (this.src.length > i) {
-                    buff += this.src.charAt(i);
-                    continue;
-                } else {
-                    break;
-                }
-            }
-
-            if (ch == '$' || ch == '}') {
-                if (buff.length > 0) {
-                    rv.push(this.parseToken(buff));
-                }
-
-            }
-            if (ch == '}') {
-                if (buff.length > 0) {
-                    rv.push(this.parseToken(buff));
-                }
-
-            }
-            if (ch == '$' && !readVar && i + 1 < this.src.length && this.src.charAt(i + 1) == '{') {
-                if (buff.length > 0)
-                    rv.push({ type: 'string', content: buff });
-                buff = '';
-                readVar = true;
-                i++;
-                continue;
-            }
-            buff += ch;
+    rootToken() {
+        var token = new VarToken(this.src);
+        if (token.tryParse()) {
+            return token;
         }
-        if (buff.length > 0) {
-            rv.push({ type: 'string', content: buff });
+        token = new FunctionToken(this.src);
+        if (token.tryParse()) {
+            return token;
         }
-        return rv;
+        throw new Error('unable to parse: ' + this.src);
     }
 
-    parseToken(token) {
 
-    }
-
-    arrayAsString(arr) {
-        return "['" + arr.join("','") + "']";
-    }
 }
 
 /**
@@ -953,3 +1052,6 @@ function initPage() {
     }));
 
 }
+
+
+new VarToken('x1.x2').tryParse();
