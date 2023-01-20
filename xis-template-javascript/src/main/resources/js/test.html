@@ -4,6 +4,13 @@
 <head>
     <title data-content="title"></title>
     <script src="api.js"></script>
+
+    <script type="text/javascript">
+
+        function identity(o) {
+            return o;
+        }
+    </script>
 </head>
 
 <body onload="initPage();">
@@ -17,8 +24,8 @@
     <table>
         <tbody>
             <tr repeat="items:item">
-                <td>${item-index}</td>
-                <td>${item.name}</td>
+                <td>INDEX:${item-index}</td>
+                <td>NAME:${item.name}</td>
             </tr>
         </tbody>
     </table>

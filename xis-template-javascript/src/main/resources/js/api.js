@@ -197,7 +197,8 @@ class Out {
      * @private
      */
     init() {
-        this.expression = new ScriptExpression('${' + this.element.getAttribute(this.attributeName) + '}');
+        this.expression = new ScriptExpression(this.element.getAttribute(this.attributeName));
+        this.expression.tryParse();
     }
 
     /**
@@ -224,7 +225,7 @@ class ContentNode {
      */
     constructor(textNode) {
         this.node = textNode;
-        this.expression = new ScriptExpression(node.nodeValue);
+        this.textContent = new TextWithVars(node.nodeValue);
     }
 
     /**
@@ -232,11 +233,11 @@ class ContentNode {
      * @param {Data} data
      */
     refresh(data) {
-        this.node.nodeValue = this.expression.evaluate(data);
+        this.node.nodeValue = this.textContent.evaluate(data);
     }
 }
 
-class StringToken {
+class StringParameterToken {
 
     constructor(src) {
         this.src = src;
@@ -255,6 +256,10 @@ class StringToken {
             return true;
         }
         return false;
+    }
+
+    length() {
+        return this.length;
     }
 
     parse() {
@@ -293,7 +298,7 @@ class StringToken {
     }
 }
 
-class NumberToken {
+class NumberParameterToken {
 
     constructor(src) {
         this.src = src;
@@ -316,6 +321,10 @@ class NumberToken {
             return true;
         }
         return false;
+    }
+
+    length() {
+        return this.length;
     }
 
     parse() {
@@ -351,7 +360,7 @@ class NumberToken {
     }
 }
 
-class VarToken {
+class VarParameterToken {
 
     constructor(src) {
         this.src = src;
@@ -370,6 +379,10 @@ class VarToken {
         return false;
     }
 
+    length() {
+        return this.length;
+    }
+
     parse() {
         if (this.src.length == 0) {
             return false;
@@ -379,9 +392,8 @@ class VarToken {
             return false;
         }
         var buff = '';
-        for (var i = 0; i < this.src.length; i++) {
-            this.end = i;
-            var ch = this.src.charAt(i);
+        for (; this.end < this.src.length; this.end++) {
+            var ch = this.src.charAt(this.end);
             if (isWhitespace(ch) || ch == ',') {
                 this.end--;
                 break;
@@ -394,6 +406,14 @@ class VarToken {
                 }
                 return false;
             }
+            if (ch == ')') {
+                this.end--;
+                break;
+            }
+            if (ch == '(') {
+                this.end--;
+                return false;
+            }
             buff += ch;
         }
         if (buff.length > 0) {
@@ -403,7 +423,9 @@ class VarToken {
     }
 
     toScript() {
-        var script = '';
+        var script = 'data.getValue(';
+        script += arrayAsString(this.varPath);
+        script += ')';
         return script;
     }
 }
@@ -425,6 +447,10 @@ class SignatureToken {
             return true;
         }
         return false;
+    }
+
+    length() {
+        return this.length;
     }
 
     parse() {
@@ -475,15 +501,15 @@ class SignatureToken {
 
     parseParameter() {
         var src = this.src.substring(this.start);
-        var token = new StringToken(src);
+        var token = new StringParameterToken(src);
         if (token.tryParse()) {
             return token;
         }
-        token = new NumberToken(src);
+        token = new NumberParameterToken(src);
         if (token.tryParse()) {
             return token;
         }
-        token = new VarToken(src);
+        token = new VarParameterToken(src);
         if (token.tryParse()) {
             return token;
         }
@@ -515,7 +541,6 @@ class FunctionToken {
     tryParse() {
         if (this.parse()) {
             var substr = this.src.substring(this.start, this.end + 1);
-            console.log('substr:' + substr);
             this.signatureToken = new SignatureToken(substr);
             if (!this.signatureToken.tryParse()) {
                 return false;
@@ -524,6 +549,10 @@ class FunctionToken {
             return this.functionName.length > 0;
         }
         return false;
+    }
+
+    length() {
+        return this.length;
     }
 
     parse() {
@@ -562,14 +591,13 @@ function isWhitespace(ch) {
 }
 
 
-class ScriptExpression2 {
+class ScriptExpression {
 
     constructor(src) {
         this.src = src;
         this.start = 0;
         this.end = this.src.length - 1;
         this.script = '';
-        this.parseScript();
     }
 
     /**
@@ -586,14 +614,18 @@ class ScriptExpression2 {
      * Creates a script object by parsing a textnode.
      * @private
      */
-    parseScript() {
+    tryParse() {
         var rootToken = this.rootToken();
-        this.script = rootToken.toScript();
+        if (rootToken) {
+            this.script = rootToken.toScript();
+            return true;
+        }
+        return false;
     }
 
 
     rootToken() {
-        var token = new VarToken(this.src);
+        var token = new VarParameterToken(this.src);
         if (token.tryParse()) {
             return token;
         }
@@ -601,132 +633,124 @@ class ScriptExpression2 {
         if (token.tryParse()) {
             return token;
         }
-        throw new Error('unable to parse: ' + this.src);
+        return false;
     }
 
 
 }
 
-/**
- * Javascriptcode container $-Variables (${...})
- */
-class ScriptExpression {
+
+class CharIterator {
 
     constructor(src) {
         this.src = src;
-        this.pos = 0;
-        this.script = '';
-        this.parseScript();
+        this.index = -1;
     }
 
-    /**
-     * Evaluates the script for the given data.
-     *
-     * @param {Data} data
-     * @returns
-     */
+    hasNext() {
+        return this.index + 1 < this.src.length;
+    }
+
+    current() {
+        return this.src[this.index];
+    }
+
+
+    next() {
+        this.index++;
+        return this.src[this.index];
+    }
+
+
+    beforeCurrent() {
+        return this.index - 1 > -1 ? this.src[this.index - 1] : undefined;
+    }
+
+    afterCurrent() {
+        return this.index + 1 < this.src.length ? this.src[this.index + 1] : undefined;
+    }
+
+}
+
+class TextWithVars {
+
+    constructor(src) {
+        this.chars = new CharIterator(src);
+        this.parts = [];
+    }
+
+    parse() {
+        this.readText();
+    }
+
     evaluate(data) {
-        return eval(this.script);
-    }
-
-    /**
-     * Creates a script object by parsing a textnode.
-     * @private
-     */
-    parseScript() {
-        this.script = this.tokens().map(token => this.tokenAsString(token)).join('+');
+        return this.parts.map(part => part.asString(data)).join();
     }
 
 
-    /**
-     * Creates an expression to replace a variable inside a text by it's value
-     * or just return static content of a token.
-     *
-     * @param {any} token
-     * @returns
-     */
-    tokenAsString(token) {
-        return token.type == 'var' ? this.varTokenAsString(token) : this.stringTokenAsString(token);
-    }
-
-    /**
-     * The content of the text token might contain immutable text,
-     * represented by a token-object of type 'string'. This method
-     * returns the static content of this token in quotation marks.
-     *
-     * parse
-     * @param {any} token
-     * @returns {string} content of the token
-     */
-    stringTokenAsString(token) {
-        return '\"' + token.content + '\"';
-    }
-
-    /**
-     * Creates some javascript-code to replace variables
-     * inside a text.
-     *
-     * @private
-     * @param {any} token
-     * @returns
-     */
-    varTokenAsString(token) {
-        return 'data.getValue(' + this.arrayAsString(doSplit(token.content, '.')) + ')';
-    }
-
-    /**
-     * Splits the content of this node into an array containing variable tokens
-     * or tokens containing static text.
-     * @private
-     * @returns {Array<any>}
-     */
-    tokens() {
-        var rv = [];
-        var readVar = false;
+    readText() {
         var buff = '';
-        for (var i = 0; i < this.src.length; i++) {
-            var ch = this.src.charAt(i);
-            if (ch == '\\') {
-                // escaped
-                buff += ch;
-                i++;
-                if (this.src.length > i) {
-                    buff += this.src.charAt(i);
-                    continue;
-                } else {
-                    break;
-                }
-            }
-            if (ch == '}' && readVar) {
+        while (this.chars.hasNext()) {
+            var currentChar = this.chars.next();
+            if (currentChar == '$' && this.chars.afterCurrent() == '{') {
                 if (buff.length > 0) {
-                    rv.push({ type: 'var', content: buff });
-                    buff = '';
-                    readVar = false;
-                    continue;
+                    this.parts.push(this.createTextPart(buff));
                 }
-            }
-            if (ch == '$' && !readVar && i + 1 < this.src.length && this.src.charAt(i + 1) == '{') {
-                if (buff.length > 0)
-                    rv.push({ type: 'string', content: buff });
+                this.chars.next();
+                this.readVar();
                 buff = '';
-                readVar = true;
-                i++;
                 continue;
             }
-            buff += ch;
+            buff += currentChar;
         }
-        if (buff.length > 0) {
-            rv.push({ type: 'string', content: buff });
-        }
-        return rv;
+
     }
 
-    arrayAsString(arr) {
-        return "['" + arr.join("','") + "']";
+    readVar() {
+        var buff = '';
+        while (this.chars.hasNext()) {
+            var currentChar = this.chars.next();
+            if (currentChar == '}' && this.chars.beforeCurrent() != '\\') {
+                if (buff.length > 0) {
+                    var varPart = this.tryCreateVarPart(buff);
+                    if (varPart) {
+                        this.parts.push(varPart);
+                    } else {
+                        this.parts.push(this.createTextPart(buff));
+                    }
+                }
+                return;
+            }
+            buff += currentChar;
+        }
+    }
+
+    createTextPart(text) {
+        return {
+            text: text,
+            asString: function (data) {
+                return this.text;
+            }
+        };
+    }
+
+    tryCreateVarPart(src) {
+        var expression = new ScriptExpression(src);
+        if (expression.tryParse()) {
+            return {
+                expression: expression,
+                asString: function (data) {
+                    return this.expression.evaluate(data);
+                }
+            };
+        }
+        return false;
     }
 }
 
-
+function arrayAsString(arr) {
+    return "['" + arr.join("','") + "']";
+}
 
 /**
  * Hierarchical page-data
@@ -962,8 +986,10 @@ function cloneTextNode(node) {
 
 function initTextNode(node) {
     if (node.nodeValue.indexOf('${') != -1) {
-        node.expression = new ScriptExpression(node.nodeValue);
-        node.refresh = data => node.nodeValue = node.expression.evaluate(data);
+        var textWithVars = new TextWithVars(node.nodeValue);
+        textWithVars.parse();
+        node.textWithVars = textWithVars;
+        node.refresh = data => node.nodeValue = node.textWithVars.evaluate(data);
     }
     return node;
 }
@@ -1054,4 +1080,4 @@ function initPage() {
 }
 
 
-new VarToken('x1.x2').tryParse();
+//console.log(new TextContent('Heute ist ${format(date)}').parse());
