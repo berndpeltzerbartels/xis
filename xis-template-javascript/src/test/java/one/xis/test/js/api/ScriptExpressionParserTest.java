@@ -5,14 +5,14 @@ import org.junit.jupiter.api.Test;
 
 import javax.script.ScriptException;
 
-class ScriptExpressionTest {
+class ScriptExpressionParserTest {
 
     @Test
     void simpleVariable() throws ScriptException {
         JavaScript.builder()
                 .withApi()
                 .withScript("var data = new Data({test: 123});")
-                .withScript("new ScriptExpression('${test}').evaluate(data);")
+                .withScript("new ScriptExpressionParser('${test}').evaluate(data);")
                 .build().assertResultEquals(123);
     }
 
@@ -21,7 +21,7 @@ class ScriptExpressionTest {
         JavaScript.builder()
                 .withApi()
                 .withScript("var data = new Data({appointment: {location: 'Office'}});")
-                .withScript("new ScriptExpression('${appointment.location}').evaluate(data);")
+                .withScript("new ScriptExpressionParser('${appointment.location}').tryParse().evaluate(data);")
                 .build().assertResultEquals("Office");
     }
 
@@ -30,7 +30,7 @@ class ScriptExpressionTest {
         JavaScript.builder()
                 .withApi()
                 .withScript("var data = new Data({saint: 'Nikolaus'});")
-                .withScript("new ScriptExpression('Das ist das Haus vom ${saint}').evaluate(data);")
+                .withScript("new ScriptExpressionParser('Das ist das Haus vom ${saint}').tryParse().evaluate(data);")
                 .build().assertResultEquals("Das ist das Haus vom Nikolaus");
     }
 
@@ -38,7 +38,7 @@ class ScriptExpressionTest {
     void variableWithFunction() throws ScriptException {
         JavaScript.builder()
                 .withApi()
-                .withScript("new ScriptExpression('${formatDate(appointment.state)').script;")
+                .withScript("new ScriptExpressionParser('${formatDate(appointment.state)').tryParse().script;")
                 .build().assertResultEquals("formatDate(data.getValue());");
     }
 
