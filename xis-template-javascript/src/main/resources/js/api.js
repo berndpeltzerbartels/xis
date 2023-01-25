@@ -32,7 +32,8 @@ class Repeat {
         this.element.explicitRefresh = true;
         this.parent = element.parentNode;
         this.nodeBehind = this.element.nextSibling;
-        this.boundElements = [this.element];
+        this.boundElements = [];
+        this.parent.removeChild(element);
         this.arrayPath = [];
         this.varName = undefined;
         this.attributeName = attributeName(element, 'repeat')
@@ -139,7 +140,7 @@ class Show {
      */
     init() {
         var ifAttribute = this.element.getAttribute(this.attributeName);
-        this.expression = new ScriptExpression(ifAttribute);
+        this.expression = new ScriptExpressionParser(ifAttribute).tryParse();
     }
 
     /**
@@ -197,8 +198,7 @@ class Out {
      * @private
      */
     init() {
-        this.expression = new ScriptExpression(this.element.getAttribute(this.attributeName));
-        this.expression.tryParse();
+        this.expression = new ScriptExpressionParser(this.element.getAttribute(this.attributeName)).tryParse();
     }
 
     /**
@@ -225,7 +225,7 @@ class ContentNode {
      */
     constructor(textNode) {
         this.node = textNode;
-        this.textContent = new TextWithVars(node.nodeValue);
+        this.textContent = new TextWithVarsParser(node.nodeValue).parse();
     }
 
     /**
@@ -239,21 +239,34 @@ class ContentNode {
 
 class StringParameterToken {
 
+    constructor(string, length) {
+        this.string = string;
+        this.lenght = length;
+    }
+
+    toScript() {
+        var script = '\'';
+        script += this.string;
+        script += '\'';
+        return script;
+    }
+}
+
+class StringParameterTokenParser {
+
     constructor(src) {
         this.src = src;
         console.log('src:' + this.src);
         this.start = 0;
         this.end = 0;
-        this.length = undefined;
         this.string = '';
         this.buff = '';
     }
 
-
     tryParse() {
         if (this.parse()) {
-            this.length = this.end + 1;
-            return true;
+            var length = this.end + 1;
+            return new StringParameterToken(this.string, length);
         }
         return false;
     }
@@ -290,35 +303,40 @@ class StringParameterToken {
 
     }
 
+}
+
+
+class NumberParameterToken {
+
+    constructor(number, length) {
+        this.number = number;
+        this.length = length;
+    }
+
     toScript() {
-        var script = '\'';
-        script += this.string;
-        script += '\'';
-        return script;
+        return '' + this.number;
     }
 }
 
-class NumberParameterToken {
+class NumberParameterTokenParser {
 
     constructor(src) {
         this.src = src;
         this.start = 0;
         this.end = 0;
         this.dots = 0;
-        this.number = '';
         this.negative = false;
-        this.length = undefined;
         this.buff = '';
     }
 
     tryParse() {
         if (this.parse()) {
-            this.number = this.dots > 0 ? parseFloat(this.buff) : parseInt(this.buff);
+            var number = this.dots > 0 ? parseFloat(this.buff) : parseInt(this.buff);
             if (this.negative) {
-                this.number = this.number * -1;
+                number *= -1;
             }
-            this.length = this.end + 1;
-            return true;
+            var length = this.end + 1;
+            return new NumberParameterToken(number, length);
         }
         return false;
     }
@@ -355,26 +373,39 @@ class NumberParameterToken {
         return this.buff.length > 0;
     }
 
-    toScript() {
-        return '' + this.number;
-    }
+
 }
 
+
 class VarParameterToken {
+
+    constructor(varPath, length) {
+        this.varPath = varPath;
+        this.length = length;
+    }
+
+    toScript() {
+        var script = 'data.getValue(';
+        script += arrayAsString(this.varPath);
+        script += ')';
+        return script;
+    }
+
+}
+
+class VarParameterTokenParser {
 
     constructor(src) {
         this.src = src;
         this.start = 0;
         this.end = 0;
         this.varPath = [];
-        this.type = undefined;
-        this.length = undefined;
     }
 
     tryParse() {
         if (this.parse()) {
-            this.length = this.end + 1;
-            return true;
+            var length = this.end + 1;
+            return new VarParameterToken(this.varPath, length);
         }
         return false;
     }
@@ -422,15 +453,25 @@ class VarParameterToken {
         return this.varPath.length > 0;
     }
 
-    toScript() {
-        var script = 'data.getValue(';
-        script += arrayAsString(this.varPath);
-        script += ')';
-        return script;
-    }
+
 }
 
-class SignatureToken {
+
+class ParameterListToken {
+
+    constructor(parameterTokens, length) {
+        this.parameterTokens = parameterTokens;
+        this.length = length;
+    }
+
+    toScript() {
+        return this.parameterTokens.map(token => token.toScript()).join(',');
+    }
+
+}
+
+
+class ParameterListTokenParser {
 
     constructor(src) {
         this.src = src;
@@ -438,13 +479,12 @@ class SignatureToken {
         this.end = this.src.length - 1;
         this.type = undefined;
         this.parameterTokens = [];
-        this.length = undefined;
     }
 
     tryParse() {
         if (this.parse()) {
-            this.length = this.src.length;
-            return true;
+            var length = this.src.length;
+            return new ParameterListToken(this.parameterTokens, length);
         }
         return false;
     }
@@ -501,52 +541,60 @@ class SignatureToken {
 
     parseParameter() {
         var src = this.src.substring(this.start);
-        var token = new StringParameterToken(src);
-        if (token.tryParse()) {
+        var parser = new StringParameterTokenParser(src);
+        var token = parser.tryParse();
+        if (token) {
             return token;
         }
-        token = new NumberParameterToken(src);
-        if (token.tryParse()) {
+        parser = new NumberParameterTokenParser(src);
+        token = parser.tryParse();
+        if (token) {
             return token;
         }
-        token = new VarParameterToken(src);
-        if (token.tryParse()) {
+        parser = new VarParameterTokenParser(src);
+        token = parser.tryParse();
+        if (token) {
             return token;
         }
-        token = new FunctionToken(src);
-        if (token.tryParse()) {
-            return token;
-        }
-        return false;
-
+        return new FunctionTokenParser(src).tryParse();
     }
-
-    toScript() {
-        return this.parameterTokens.map(token => token.toScript()).join(',');
-    }
-
-
 }
 
 class FunctionToken {
+
+    constructor(functionName, parameterListToken) {
+        this.functionName = functionName;
+        this.parameterListToken = parameterListToken;
+        this.length = functionName.length + this.parameterListToken.length;
+    }
+
+    toScript() {
+        var script = this.functionName;
+        script += '(';
+        script += this.parameterListToken.toScript();
+        script += ')';
+        return script;
+    }
+}
+
+class FunctionTokenParser {
+
     constructor(src) {
         this.src = src;
         this.start = 0;
         this.end = this.src.length - 1;
-        this.type = undefined;
-        this.signatureToken = undefined;
         this.functionName = '';
     }
 
     tryParse() {
         if (this.parse()) {
             var substr = this.src.substring(this.start, this.end + 1);
-            this.signatureToken = new SignatureToken(substr);
-            if (!this.signatureToken.tryParse()) {
+            var parameterListTokenParser = new ParameterListTokenParser(substr);
+            var parameterListToken = parameterListTokenParser.tryParse();
+            if (!parameterListToken || this.functionName.length == 0) {
                 return false;
             }
-            this.length = this.functionName.length + this.signatureToken.length;
-            return this.functionName.length > 0;
+            return new FunctionToken(this.functionName, parameterListToken);
         }
         return false;
     }
@@ -576,13 +624,7 @@ class FunctionToken {
         return true;
     }
 
-    toScript() {
-        var script = this.functionName;
-        script += '(';
-        script += this.signatureToken.toScript();
-        script += ')';
-        return script;
-    }
+
 }
 
 
@@ -593,22 +635,30 @@ function isWhitespace(ch) {
 
 class ScriptExpression {
 
+    constructor(script) {
+        this.script = script;
+    }
+
+    /**
+    * Evaluates the script for the given data.
+    *
+    * @param {Data} data
+    * @returns
+    */
+    evaluate(data) {
+        return eval(this.script);
+    }
+
+}
+
+class ScriptExpressionParser {
+
     constructor(src) {
         this.src = src;
         this.start = 0;
         this.end = this.src.length - 1;
-        this.script = '';
     }
 
-    /**
-     * Evaluates the script for the given data.
-     *
-     * @param {Data} data
-     * @returns
-     */
-    evaluate(data) {
-        return eval(this.script);
-    }
 
     /**
      * Creates a script object by parsing a textnode.
@@ -617,23 +667,20 @@ class ScriptExpression {
     tryParse() {
         var rootToken = this.rootToken();
         if (rootToken) {
-            this.script = rootToken.toScript();
-            return true;
+            var script = rootToken.toScript();
+            return new ScriptExpression(script);
         }
         return false;
     }
 
 
     rootToken() {
-        var token = new VarParameterToken(this.src);
-        if (token.tryParse()) {
+        var parser = new VarParameterTokenParser(this.src);
+        var token = parser.tryParse();
+        if (token) {
             return token;
         }
-        token = new FunctionToken(this.src);
-        if (token.tryParse()) {
-            return token;
-        }
-        return false;
+        return new FunctionTokenParser(this.src).tryParse();
     }
 
 
@@ -672,7 +719,22 @@ class CharIterator {
 
 }
 
+
+
 class TextWithVars {
+
+    constructor(parts) {
+        this.parts = parts;
+    }
+
+
+    evaluate(data) {
+        return this.parts.map(part => part.asString(data)).reduce((s1, s2) => s1 + s2);
+    }
+
+}
+
+class TextWithVarsParser {
 
     constructor(src) {
         this.chars = new CharIterator(src);
@@ -681,10 +743,7 @@ class TextWithVars {
 
     parse() {
         this.readText();
-    }
-
-    evaluate(data) {
-        return this.parts.map(part => part.asString(data)).join();
+        return new TextWithVars(this.parts);
     }
 
 
@@ -735,8 +794,8 @@ class TextWithVars {
     }
 
     tryCreateVarPart(src) {
-        var expression = new ScriptExpression(src);
-        if (expression.tryParse()) {
+        var expression = new ScriptExpressionParser(src).tryParse();
+        if (expression) {
             return {
                 expression: expression,
                 asString: function (data) {
@@ -895,7 +954,7 @@ function doSplit(string, separatorChar) {
 }
 /**
  * 
- * Initialzes the giben tree or subtree, which means
+ * Initialzes the given tree or subtree, which means
  * adding some methods to the dom element.
  *
  * @public
@@ -986,8 +1045,7 @@ function cloneTextNode(node) {
 
 function initTextNode(node) {
     if (node.nodeValue.indexOf('${') != -1) {
-        var textWithVars = new TextWithVars(node.nodeValue);
-        textWithVars.parse();
+        var textWithVars = new TextWithVarsParser(node.nodeValue).parse();
         node.textWithVars = textWithVars;
         node.refresh = data => node.nodeValue = node.textWithVars.evaluate(data);
     }
