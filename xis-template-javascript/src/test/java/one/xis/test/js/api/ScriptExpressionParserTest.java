@@ -12,7 +12,7 @@ class ScriptExpressionParserTest {
         JavaScript.builder()
                 .withApi()
                 .withScript("var data = new Data({test: 123});")
-                .withScript("new ScriptExpressionParser('${test}').evaluate(data);")
+                .withScript("new ScriptExpressionParser('test').tryParse().evaluate(data);")
                 .build().assertResultEquals(123);
     }
 
@@ -21,25 +21,17 @@ class ScriptExpressionParserTest {
         JavaScript.builder()
                 .withApi()
                 .withScript("var data = new Data({appointment: {location: 'Office'}});")
-                .withScript("new ScriptExpressionParser('${appointment.location}').tryParse().evaluate(data);")
+                .withScript("new ScriptExpressionParser('appointment.location').tryParse().evaluate(data);")
                 .build().assertResultEquals("Office");
     }
 
-    @Test
-    void textWithVariable() throws ScriptException {
-        JavaScript.builder()
-                .withApi()
-                .withScript("var data = new Data({saint: 'Nikolaus'});")
-                .withScript("new ScriptExpressionParser('Das ist das Haus vom ${saint}').tryParse().evaluate(data);")
-                .build().assertResultEquals("Das ist das Haus vom Nikolaus");
-    }
 
     @Test
     void variableWithFunction() throws ScriptException {
         JavaScript.builder()
                 .withApi()
-                .withScript("new ScriptExpressionParser('${formatDate(appointment.state)').tryParse().script;")
-                .build().assertResultEquals("formatDate(data.getValue());");
+                .withScript("new ScriptExpressionParser('formatDate(appointment.state)').tryParse().script;")
+                .build().assertResultEquals("formatDate(data.getValue(['appointment','state']))");
     }
 
 

@@ -42,6 +42,12 @@ public class JavaScript {
         return compiledScript.eval();
     }
 
+
+    public <T> T runForObject(Class<T> clazz) throws ScriptException {
+        return clazz.cast(compiledScript.eval());
+    }
+
+
     public Map<String, Object> runForMap() throws ScriptException {
         return run(Map.class);
     }

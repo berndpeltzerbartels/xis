@@ -8,25 +8,18 @@ import javax.script.ScriptException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class SignatureTokenTest {
+class ParameterListTokenParserTest {
 
     @Test
     void signatureWithoutParameter() throws ScriptException {
         var console = new Console();
         var script = JavaScript.builder()
                 .withApi()
-                .withScript("var result = {};")
-                .withScript("var token = new SignatureToken('()');")
-                .withScript("result['success'] = token.tryParse();")
-                .withScript("result['token'] = token;")
-                .withScript("result['parameterCount'] = token.parameterTokens.length;")
-                .withScript("result")
+                .withScript("new ParameterListTokenParser('()').tryParse().parameterTokens.length;")
                 .withBinding("console", console)
                 .build();
 
-        var result = script.runForMap();
-        assertThat(result).containsEntry("success", true);
-        assertThat(result).containsEntry("parameterCount", 0);
+        assertThat(script.runForObject(Integer.class)).isEqualTo(0);
     }
 
 
@@ -36,16 +29,15 @@ class SignatureTokenTest {
         var script = JavaScript.builder()
                 .withApi()
                 .withScript("var result = {};")
-                .withScript("var token = new SignatureToken('(123)');")
-                .withScript("result['success'] = token.tryParse();")
-                .withScript("result['token'] = token;")
-                .withScript("result['numberParam'] = token.parameterTokens[0].number;")
+                .withScript("var listToken = new ParameterListTokenParser('(123)').tryParse();")
+                .withScript("result.size = listToken.parameterTokens.length")
+                .withScript("result.numberParam = listToken.parameterTokens[0].number")
                 .withScript("result")
                 .withBinding("console", console)
                 .build();
 
         var result = script.runForMap();
-        assertThat(result).containsEntry("success", true);
+        assertThat(result).containsEntry("size", 1);
         assertThat(result).containsEntry("numberParam", 123);
     }
 
@@ -56,9 +48,9 @@ class SignatureTokenTest {
         var script = JavaScript.builder()
                 .withApi()
                 .withScript("var result = {};")
-                .withScript("var token = new SignatureToken('(123,\\'bla\\')');")
-                .withScript("result['success'] = token.tryParse();")
-                .withScript("result['token'] = token;")
+                .withScript("var token = new ParameterListTokenParser('(123,\\'bla\\')').tryParse();")
+                .withScript("result['size'] = token.parameterTokens.length;")
+                .withScript("result['token'] = token.parameterTokens.length;")
                 .withScript("result['numberParam'] = token.parameterTokens[0].number;")
                 .withScript("result['stringParam'] = token.parameterTokens[1].string;")
                 .withScript("result")
@@ -66,7 +58,7 @@ class SignatureTokenTest {
                 .build();
 
         var result = script.runForMap();
-        assertThat(result).containsEntry("success", true);
+        assertThat(result).containsEntry("size", 2);
         assertThat(result).containsEntry("numberParam", 123);
         assertThat(result).containsEntry("stringParam", "bla");
     }
@@ -78,9 +70,9 @@ class SignatureTokenTest {
         var script = JavaScript.builder()
                 .withApi()
                 .withScript("var result = {};")
-                .withScript("var token = new SignatureToken('( 123 , \\'bla\\' )');")
-                .withScript("result['success'] = token.tryParse();")
-                .withScript("result['token'] = token;")
+                .withScript("var token = new ParameterListTokenParser('( 123, \\'bla\\' )').tryParse();")
+                .withScript("result['size'] = token.parameterTokens.length;")
+                .withScript("result['token'] = token.parameterTokens.length;")
                 .withScript("result['numberParam'] = token.parameterTokens[0].number;")
                 .withScript("result['stringParam'] = token.parameterTokens[1].string;")
                 .withScript("result")
@@ -88,7 +80,7 @@ class SignatureTokenTest {
                 .build();
 
         var result = script.runForMap();
-        assertThat(result).containsEntry("success", true);
+        assertThat(result).containsEntry("size", 2);
         assertThat(result).containsEntry("numberParam", 123);
         assertThat(result).containsEntry("stringParam", "bla");
     }

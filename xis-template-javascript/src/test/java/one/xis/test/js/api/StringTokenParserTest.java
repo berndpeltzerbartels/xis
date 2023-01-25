@@ -8,8 +8,7 @@ import javax.script.ScriptException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class StringTokenTest {
-
+class StringTokenParserTest {
 
     @Test
     void stringToken() throws ScriptException {
@@ -19,17 +18,11 @@ class StringTokenTest {
                 .withScript("var result = {};")
                 .withScript("var text = \"'abc123'\";")
                 .withScript("console.log(text);")
-                .withScript("var token = new StringToken(text);")
-                .withScript("result['success'] = token.tryParse();")
-                .withScript("result['string'] = token.string;")
-                .withScript("result['endIndex'] = token.end;")
-                .withScript("result")
+                .withScript("new StringParameterTokenParser(text).tryParse();")
                 .withBinding("console", console)
                 .build();
 
         var result = script.runForMap();
-        assertThat(result).containsEntry("success", true);
         assertThat(result).containsEntry("string", "abc123");
-        assertThat(result).containsEntry("endIndex", 7); // 2 for quotation marks
     }
 }
