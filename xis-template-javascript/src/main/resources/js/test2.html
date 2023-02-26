@@ -18,7 +18,8 @@
         function square(arg) {
             return arg * arg;
         }
-        new ExpressionParser().parse('sum(sqrt(x), y)');
+        var expr = new ExpressionParser().parse('sum(square(x), y)');
+        console.log(expr.evaluate(new Data({ x: 2, y: 10 })));
 
     </script>
 </head>
