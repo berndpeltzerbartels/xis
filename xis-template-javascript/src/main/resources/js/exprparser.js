@@ -258,6 +258,7 @@ class TreeParser {
             } else {
                 return false;
             }
+            node = token2.next;
         }
         return new Variable(path);
     }

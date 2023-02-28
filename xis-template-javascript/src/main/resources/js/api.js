@@ -73,7 +73,7 @@ class Repeat {
         var data = new Data({});
         data.parentData = parentData;
         var dataArray = parentData.getValue(this.arrayPath);
-        var indexName = this.varName + '-index';
+        var indexName = this.varName + '_index';
         var index = 0;
         var e;
         var behind = this.nodeBehind;
@@ -120,7 +120,7 @@ class Repeat {
  * show or hide the tag and its content.
  * 
  */
-class Show {
+class ShowAttribute {
 
     /**
      *
@@ -140,7 +140,7 @@ class Show {
      */
     init() {
         var ifAttribute = this.element.getAttribute(this.attributeName);
-        this.expression = new ScriptExpressionParser(ifAttribute).tryParse();
+        this.expression = new ExpressionParser().parse(ifAttribute);
     }
 
     /**
@@ -187,18 +187,18 @@ class Show {
 /**
  * Representation of an attribute for displaying data.
  */
-class Out {
+class OutAttribute {
+
     constructor(element) {
         this.element = element;
         this.attributeName = attributeName(element, 'out');
-        this.init();
     }
 
     /**
-     * @private
+     * @public
      */
     init() {
-        this.expression = new ScriptExpressionParser(this.element.getAttribute(this.attributeName)).tryParse();
+        this.expression = new ExpressionParser().parse(this.element.getAttribute(this.attributeName));
     }
 
     /**
@@ -212,478 +212,11 @@ class Out {
         this.element.innerText = content;
         return true;
     }
-}
 
-/**
- * Represents a textnode
- */
-class ContentNode {
 
-    /**
-     * 
-     * @param {Text} textNode 
-     */
-    constructor(textNode) {
-        this.node = textNode;
-        this.textContent = new TextWithVarsParser(node.nodeValue).parse();
-    }
-
-    /**
-     * @public
-     * @param {Data} data
-     */
-    refresh(data) {
-        this.node.nodeValue = this.textContent.evaluate(data);
-    }
-}
-
-class StringParameterToken {
-
-    constructor(string, length) {
-        this.string = string;
-        this.lenght = length;
-    }
-
-    toScript() {
-        var script = '\'';
-        script += this.string;
-        script += '\'';
-        return script;
-    }
-}
-
-class StringParameterTokenParser {
-
-    constructor(src) {
-        this.src = src;
-        console.log('src:' + this.src);
-        this.start = 0;
-        this.end = 0;
-        this.string = '';
-        this.buff = '';
-    }
-
-    tryParse() {
-        if (this.parse()) {
-            var length = this.end + 1;
-            return new StringParameterToken(this.string, length);
-        }
-        return false;
-    }
-
-    length() {
-        return this.length;
-    }
-
-    parse() {
-        console.log('src:' + this.src);
-        if (this.src.length == 0) {
-            return false;
-        }
-        if (this.src.charAt(0) !== '\'') {
-            return false;
-        }
-        this.end++;
-        while (this.end < this.src.length) {
-            var ch = this.src.charAt(this.end);
-            console.log('ch=' + ch);
-            var nextChar = this.end + 1 < this.src.length ? this.src.charAt(this.end + 1) : undefined;
-            if (ch == '\\' && nextChar == '\'') {
-                this.end++;
-                continue;
-            }
-            if (ch == '\'') {
-                break;
-            }
-            this.string += ch;
-            this.end++;
-
-        }
-        return this.string.length > 0;
+    cloneAttribute(e) {
 
     }
-
-}
-
-
-class NumberParameterToken {
-
-    constructor(number, length) {
-        this.number = number;
-        this.length = length;
-    }
-
-    toScript() {
-        return '' + this.number;
-    }
-}
-
-class NumberParameterTokenParser {
-
-    constructor(src) {
-        this.src = src;
-        this.start = 0;
-        this.end = 0;
-        this.dots = 0;
-        this.negative = false;
-        this.buff = '';
-    }
-
-    tryParse() {
-        if (this.parse()) {
-            var number = this.dots > 0 ? parseFloat(this.buff) : parseInt(this.buff);
-            if (this.negative) {
-                number *= -1;
-            }
-            var length = this.end + 1;
-            return new NumberParameterToken(number, length);
-        }
-        return false;
-    }
-
-    length() {
-        return this.length;
-    }
-
-    parse() {
-        if (this.src.length == 0) {
-            return false;
-        }
-        if (this.src.charAt(0) == '-') {
-            this.negative = true;
-            this.end++;
-        }
-        for (; this.end < this.src.length; this.end++) {
-            var ch = this.src.charAt(this.end);
-            if (ch >= 0 && ch <= 9) {
-                this.buff += ch;
-                continue;
-            }
-            if (ch == '.') {
-                if (this.dots > 0) {
-                    return false;
-                }
-                this.dots++;
-                this.buff += ch;
-                continue;
-            }
-            break;
-        }
-        this.end--;
-        return this.buff.length > 0;
-    }
-
-
-}
-
-
-class VarParameterToken {
-
-    constructor(varPath, length) {
-        this.varPath = varPath;
-        this.length = length;
-    }
-
-    toScript() {
-        var script = 'data.getValue(';
-        script += arrayAsString(this.varPath);
-        script += ')';
-        return script;
-    }
-
-}
-
-class VarParameterTokenParser {
-
-    constructor(src) {
-        this.src = src;
-        this.start = 0;
-        this.end = 0;
-        this.varPath = [];
-    }
-
-    tryParse() {
-        if (this.parse()) {
-            var length = this.end + 1;
-            return new VarParameterToken(this.varPath, length);
-        }
-        return false;
-    }
-
-    length() {
-        return this.length;
-    }
-
-    parse() {
-        if (this.src.length == 0) {
-            return false;
-        }
-        var ch = this.src.charAt(this.end);
-        if (ch >= '0' && ch <= '9') {
-            return false;
-        }
-        var buff = '';
-        for (; this.end < this.src.length; this.end++) {
-            var ch = this.src.charAt(this.end);
-            if (isWhitespace(ch) || ch == ',') {
-                this.end--;
-                break;
-            }
-            if (ch == '.') {
-                if (buff.length > 0) {
-                    this.varPath.push(buff);
-                    buff = '';
-                    continue;
-                }
-                return false;
-            }
-            if (ch == ')') {
-                this.end--;
-                break;
-            }
-            if (ch == '(') {
-                this.end--;
-                return false;
-            }
-            buff += ch;
-        }
-        if (buff.length > 0) {
-            this.varPath.push(buff);
-        }
-        return this.varPath.length > 0;
-    }
-
-
-}
-
-
-class ParameterListToken {
-
-    constructor(parameterTokens, length) {
-        this.parameterTokens = parameterTokens;
-        this.length = length;
-    }
-
-    toScript() {
-        return this.parameterTokens.map(token => token.toScript()).join(',');
-    }
-
-}
-
-
-class ParameterListTokenParser {
-
-    constructor(src) {
-        this.src = src;
-        this.start = 0;
-        this.end = this.src.length - 1;
-        this.type = undefined;
-        this.parameterTokens = [];
-    }
-
-    tryParse() {
-        if (this.parse()) {
-            var length = this.src.length;
-            return new ParameterListToken(this.parameterTokens, length);
-        }
-        return false;
-    }
-
-    length() {
-        return this.length;
-    }
-
-    parse() {
-        var ch = this.src.charAt(this.start);
-        if (ch != '(') {
-            return false;
-        }
-        this.start++;
-        while (this.start < this.end) {
-            var ch = this.src.charAt(this.start);
-            switch (ch) {
-                case ')': return true;
-                case ',': {
-                    this.start++;
-                    continue;
-                }
-                default: {
-                    this.skipWiteSpaces();
-                    var token = this.parseParameter();
-                    if (!token) {
-                        return false;
-                    }
-                    this.parameterTokens.push(token);
-                    this.start += token.length
-                    this.skipWiteSpaces();
-                }
-            }
-            if (this.src.charAt(this.start) == ',') {
-                continue;
-            }
-        }
-        return true;
-    }
-
-
-    skipWiteSpaces() {
-        while (this.start < this.end) {
-            var ch = this.src.charAt(this.start);
-            if (isWhitespace(ch)) {
-                this.start++;
-                continue;
-            }
-            break;
-
-        }
-    }
-
-
-    parseParameter() {
-        var src = this.src.substring(this.start);
-        var parser = new StringParameterTokenParser(src);
-        var token = parser.tryParse();
-        if (token) {
-            return token;
-        }
-        parser = new NumberParameterTokenParser(src);
-        token = parser.tryParse();
-        if (token) {
-            return token;
-        }
-        parser = new VarParameterTokenParser(src);
-        token = parser.tryParse();
-        if (token) {
-            return token;
-        }
-        return new FunctionTokenParser(src).tryParse();
-    }
-}
-
-class FunctionToken {
-
-    constructor(functionName, parameterListToken) {
-        this.functionName = functionName;
-        this.parameterListToken = parameterListToken;
-        this.length = functionName.length + this.parameterListToken.length;
-    }
-
-    toScript() {
-        var script = this.functionName;
-        script += '(';
-        script += this.parameterListToken.toScript();
-        script += ')';
-        return script;
-    }
-}
-
-class FunctionTokenParser {
-
-    constructor(src) {
-        this.src = src;
-        this.start = 0;
-        this.end = this.src.length - 1;
-        this.functionName = '';
-    }
-
-    tryParse() {
-        if (this.parse()) {
-            var substr = this.src.substring(this.start, this.end + 1);
-            var parameterListTokenParser = new ParameterListTokenParser(substr);
-            var parameterListToken = parameterListTokenParser.tryParse();
-            if (!parameterListToken || this.functionName.length == 0) {
-                return false;
-            }
-            return new FunctionToken(this.functionName, parameterListToken);
-        }
-        return false;
-    }
-
-    length() {
-        return this.length;
-    }
-
-    parse() {
-        var endChar = this.src.charAt(this.end);
-        console.log(endChar);
-        if (endChar !== ')') {
-            return false;
-        }
-        while (this.start < this.end) {
-            var ch = this.src.charAt(this.start++);
-            console.log(ch);
-            if (ch == '$' || ch == '{' || ch == '}') {
-                return false;
-            } else if (ch == '(') {
-                this.start--;
-                break;
-            } else {
-                this.functionName += ch;
-            }
-        }
-        return true;
-    }
-
-
-}
-
-
-function isWhitespace(ch) {
-    return ch == ' ' || ch == "\t" || ch == "\n" || ch == "\r";
-}
-
-
-class ScriptExpression {
-
-    constructor(script) {
-        this.script = script;
-    }
-
-    /**
-    * Evaluates the script for the given data.
-    *
-    * @param {Data} data
-    * @returns
-    */
-    evaluate(data) {
-        return eval(this.script);
-    }
-
-}
-
-class ScriptExpressionParser {
-
-    constructor(src) {
-        this.src = src;
-        this.start = 0;
-        this.end = this.src.length - 1;
-    }
-
-
-    /**
-     * Creates a script object by parsing a textnode.
-     * @private
-     */
-    tryParse() {
-        var rootToken = this.rootToken();
-        if (rootToken) {
-            var script = rootToken.toScript();
-            return new ScriptExpression(script);
-        }
-        return false;
-    }
-
-
-    rootToken() {
-        var parser = new VarParameterTokenParser(this.src);
-        var token = parser.tryParse();
-        if (token) {
-            return token;
-        }
-        return new FunctionTokenParser(this.src).tryParse();
-    }
-
-
 }
 
 
@@ -721,7 +254,7 @@ class CharIterator {
 
 
 
-class TextWithVars {
+class TextContent {
 
     constructor(parts) {
         this.parts = parts;
@@ -734,7 +267,7 @@ class TextWithVars {
 
 }
 
-class TextWithVarsParser {
+class TextContentParser {
 
     constructor(src) {
         this.chars = new CharIterator(src);
@@ -743,7 +276,7 @@ class TextWithVarsParser {
 
     parse() {
         this.readText();
-        return new TextWithVars(this.parts);
+        return new TextContent(this.parts);
     }
 
 
@@ -794,7 +327,7 @@ class TextWithVarsParser {
     }
 
     tryCreateVarPart(src) {
-        var expression = new ScriptExpressionParser(src).tryParse();
+        var expression = new ExpressionParser().parse(src);
         if (expression) {
             return {
                 expression: expression,
@@ -807,9 +340,6 @@ class TextWithVarsParser {
     }
 }
 
-function arrayAsString(arr) {
-    return "['" + arr.join("','") + "']";
-}
 
 /**
  * Hierarchical page-data
@@ -1018,7 +548,7 @@ function cloneAndInitTree(node) {
 
 function initElement(element) {
     element.repeats = [];
-    forAttributeDo(element, 'show', addRefreshOut);
+    forAttributeDo(element, 'show', addRefreshShow);
     forAttributeDo(element, 'out', addRefreshOut);
     forAttributeDo(element, 'repeat', addRepeat);
     addRefesh(element);
@@ -1045,9 +575,8 @@ function cloneTextNode(node) {
 
 function initTextNode(node) {
     if (node.nodeValue.indexOf('${') != -1) {
-        var textWithVars = new TextWithVarsParser(node.nodeValue).parse();
-        node.textWithVars = textWithVars;
-        node.refresh = data => node.nodeValue = node.textWithVars.evaluate(data);
+        node.content = new TextContentParser(node.nodeValue).parse();
+        node.refresh = data => node.nodeValue = node.content.evaluate(data);
     }
     return node;
 }
@@ -1057,7 +586,7 @@ function initTextNode(node) {
  * @param {Element} e 
  */
 function addRefreshShow(e) {
-    e.show = new Show(element);
+    e.show = new ShowAttribute(element);
     e.refreshShow = data => e.show.refresh(data);
 }
 
@@ -1065,8 +594,14 @@ function addRefreshShow(e) {
  * @param {Element} e 
  */
 function addRefreshOut(e) {
-    e.content = new Out(e);
-    e.refreshContent = data => e.content.refresh(data);
+    e.out = new OutAttribute(e);
+    e.out.init();
+    e.refreshContent = data => e.out.refresh(data);
+}
+
+
+function cloneRefreshOut(src, target) {
+    target.con
 }
 
 /**
