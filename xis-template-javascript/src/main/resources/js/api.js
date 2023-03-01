@@ -16,206 +16,209 @@
  * @param {Element}
  */
 
-/**
- * Representation of the repeat-attribute.
- *
- * @public
- *
- */
-class Repeat {
 
-    /**
-     * @param {Element} element
-     */
-    constructor(element) {
-        this.element = element;
-        this.element.explicitRefresh = true;
-        this.parent = element.parentNode;
-        this.nodeBehind = this.element.nextSibling;
-        this.boundElements = [];
-        this.parent.removeChild(element);
-        this.arrayPath = [];
-        this.varName = undefined;
-        this.attributeName = attributeName(element, 'repeat')
-        this.init();
+
+
+class ChildElementController {
+
+    constructor(parent) {
+        this.parent = parent;
+        this.childNodes = toArray(parent.childNodes);
+        this.repeats = {};
+        this.showHide = {};
+        this.repeatCaches = {};
     }
 
-    /**
-     * Creates a deep clone of an element.
-     * The repeat attribute is removed, so the clones do not create
-     * repeats.
-     *
-     * @private
-     * @returns {Element}
-     */
-    clonedElement() {
-        var clone = shallowCloneElement(this.element);
-        clone.removeAttribute(this.attributeName);
-        for (var i = 0; i < this.element.childNodes.length; i++) {
-            var child = this.element.childNodes.item(i);
-            clone.appendChild(cloneAndInitTree(child));
+
+    unlinkElement(e) {
+        e.parentNode.removeChild(e);
+    }
+
+    addRepeat(e) {
+        var arr = doSplit(e.getAttribute('data-repeat'), ':');
+        var arrayPath = doSplit(arr[0], '.');
+        var varName = arr[1];
+        this.unlinkElement(e);
+        this.repeats[e] = { arrayPath: arrayPath, varName: varName };
+        e.removeAttribute('data-repeat');
+    }
+
+    addShowHide(e) {
+        this.unlinkElement(e);
+        this.showHide[e] = new ExpressionParser().parse(e.getAttribute('data-show'));
+    }
+
+    refresh(data) {
+        this.clear();
+        this.childNodes.forEach(child => this.refreshElement(child, data));
+    }
+
+    refreshElement(e, data) {
+        var visible = this.evaluateShowHide(e, data);
+        if (this.repeats[e]) {
+            if (visible) {
+                this.repeats[e].refresh(e, data);
+            }
+        } else {
+            if (e.visible) {
+                this.showElement(e);
+            }
         }
-        initElement(clone);
-        clone.explicitRefresh = true;
-        return clone;
     }
 
-    /**
-     * Refreshes the childnodes of this loop. To keep context, it
-     * declares an own data-object for this repeat, where the given
-     * data-object will be an ancestor.
-     *
-     * @public
-     * @param {Data} parentData
-     * @returns
-     */
-    refresh(parentData) {
-        var data = new Data({});
-        data.parentData = parentData;
-        var dataArray = parentData.getValue(this.arrayPath);
-        var indexName = this.varName + '_index';
-        var index = 0;
-        var e;
-        var behind = this.nodeBehind;
-        while (index < dataArray.length) {
-            var dataValue = dataArray[index];
-            data.setValue(this.varName, dataValue);
-            data.setValue(indexName, 'index:' + index);
-            if (this.boundElements.length <= index) {
-                e = this.clonedElement();
-                if (!behind) {
-                    this.parent.appendChild(e);
-                } else {
-                    this.parent.insertBefore(e, behind);
+    clear() {
+        this.childNodes.forEach(child => this.parent.removeChild(child));
+    }
+
+    showVisibleElements() {
+        this.childNodes.forEach(child => this.showIfVisible(child))
+    }
+
+    showIfVisible(child, data) {
+        if (child.showHide) {
+            if (!child.showHide.evaluate(data)) {
+                return;
+            }
+        }
+        if (child.repeat) {
+            this.evaluateRepeat(child);
+        } else {
+            this.parent.appendChild(child);
+        }
+    }
+
+    evaluateRepeat(child, data) {
+        var cache = this.getRepeatCache();
+        var arr = data.getValue(child.repeat.arrayPath);
+        var valueKey = child.repeat.varName;
+        var newData = new Data({});
+        newData.parentData = data;
+        for (var i = 0; i < arr.length; i++) {
+            newData.setValue(valueKey, arr[i]);
+            newData.setValue(valueKey + '_index', i);
+            var element;
+            if (cache.length <= i) {
+                element = this.cloneNode(child);
+                cache.push(element);
+            } else {
+                element = cache[i];
+            }
+            this.parent.appendChild(element);
+            if (element.childController) {
+                element.childController.refresh(newData);
+            } else if (element.refresh) {
+                element.refresh(newData);
+            }
+        }
+
+    }
+
+    evaluateShowHide(e, data) {
+        var showHide = this.showHide[e];
+        if (!showHide) return true;
+        return showHide.evaluate(data);
+    }
+
+    hideElement(e) {
+        if (e.visible) {
+            this.parent.removeChild(e);
+        }
+        e.visible = false;
+    }
+
+    showElement(e) {
+        this.parent.appendChild(e);
+    }
+
+    cloneNode(node) {
+        if (isElement(node)) {
+            var newElement = document.createElement(node.localName);
+            for (var attrName of node.getAttributeNames()) {
+                newElement.setAttribute(attrName, node.getAttribute(attrName));
+            }
+            newElement.attrExpr = node.attrExpr;
+            if (node.childController) {
+                newElement.childController = node.childController.clone();
+            }
+            for (var i = 0; i < e.childNodes.length; i++) {
+                newNode.appendChild(this.cloneNode(e.childNodes.item(i)));
+            }
+            return newElement;
+        } else {
+            var newNode = document.createTextNode();
+            if (node.expression) {
+                newNode.expression = node.expression;
+            }
+            return newNode;
+        }
+    }
+
+    getRepeatCache(e) {
+        var cache = this.repeatCaches[e];
+        if (!cache) {
+            cache = [];
+            this.repeatCaches[e] = cache;
+        }
+        return cache;
+    }
+
+}
+
+class DocumentInitializer {
+
+    constructor() {
+        this.exprParser = new ExpressionParser();
+    }
+
+    initialize(node) {
+        if (isElement(node)) {
+            if (node.getAttribute('data-repeat')) {
+                this.childController(node.parentNode).addRepeat(node);
+            }
+            if (node.getAttribute('data-show')) {
+                this.childController(node.parentNode).addShowHide(node);
+            }
+            if (node.getAttribute('data-out')) {
+                this.outExpr = this.exprParser.parse(node.getAttribute('data-out'));
+            }
+            node.attrExpr = {};
+            for (var attrName of node.getAttributeNames()) {
+                var attrValue = node.getAttribute(attrName);
+                if (attrValue.indexOf('${') != -1) {
+                    node.attrExpr[attrName] = new TextContentParser(attrValue).parse();
                 }
-                this.boundElements.push(e);
-            } else {
-                e = this.boundElements[index];
             }
-            index++
-            e.refreshChildren(data);
-            if (e.refreshShow && !e.refreshShow(data)) {
-                continue;
+            node.refreshables = [];
+            for (var i = 0; i < node.childNodes.length; i++) {
+                this.initialize(node.childNodes.item(i));
             }
-            if (e.refreshContent && !e.refreshContent(data)) {
-                continue;
-            }
+            node.refresh = (e, data) => {
+                for (var attrName of Object.keys(e.attrExpr)) {
+                    e.setAttribute(e.attrExpr[attrName].evaluate(data));
+                }
+                if (e.childController) {
+                    e.childController.refresh(data);
+                } else {
+                    for (var i = 0; i < e.childNodes.length; i++) {
+                        var childNode = e.childNodes.item(i);
+                        if (childNode.refresh) {
+                            childNode.refresh(childNode, data);
+                        }
+                    }
+                }
+            };
+        } else if (node.nodeValue && node.nodeValue.indexOf('${') != -1) {
+            node.contentExpr = new TextContentParser(node.nodeValue).parse();
+            node.refresh = (n, data) => n.nodeValue = n.contentExpr.evaluate(data);
         }
-        return true;
     }
 
-    /**
-     * @private
-     */
-    init() {
-        var repeatAttribute = this.element.getAttribute(this.attributeName);
-        var arr = doSplit(repeatAttribute, ':');
-        this.arrayPath = doSplit(arr[0], '.');
-        this.varName = arr[1];
-    }
-}
 
-/**
- * Representation of an attribute containing an expression deciding 
- * show or hide the tag and its content.
- * 
- */
-class ShowAttribute {
-
-    /**
-     *
-     * @param {Element} element
-     */
-    constructor(element) {
-        this.element = element;
-        this.parent = element.parentNode;
-        this.nodeAfter = this.element.nextSibling;
-        this.visible = true;
-        this.attributeName = attributeName(element, 'show');
-        this.init();
-    }
-
-    /**
-     * @private
-     */
-    init() {
-        var ifAttribute = this.element.getAttribute(this.attributeName);
-        this.expression = new ExpressionParser().parse(ifAttribute);
-    }
-
-    /**
-     * Invokes new decision, the children and deeper children will
-     * be displayed.
-     *
-     * @param {*} data
-     * @returns
-     */
-    refresh(data) {
-        var state = this.expression.evaluate(data);
-        if (state) this.doShow();
-        else this.doHide();
-        return state;
-    }
-
-    /**
-     * @private
-     * Causes this element to be visible, in case it's currently hidden.
-     */
-    doShow() {
-        if (!this.visible) {
-            if (this.nodeAfter) {
-                this.parent.insertBefore(this.element, this.nodeAfter);
-            } else {
-                this.parent.appendChild(this.element);
-            }
-            this.visible = true;
+    childController(element) {
+        if (!element.childController) {
+            element.childController = new ChildElementController(element);
         }
-        forChildElements(this.parent, child => child.refresh());
-
-    }
-
-    /**
-     * @private
-     * Hides this element, in case it is curently visible.
-     */
-    doHide() {
-        this.parent.removeChild(this.element);
-        this.visible = false;
-    }
-}
-
-/**
- * Representation of an attribute for displaying data.
- */
-class OutAttribute {
-
-    constructor(element) {
-        this.element = element;
-        this.attributeName = attributeName(element, 'out');
-    }
-
-    /**
-     * @public
-     */
-    init() {
-        this.expression = new ExpressionParser().parse(this.element.getAttribute(this.attributeName));
-    }
-
-    /**
-     * Re-builds the content of this tag.
-     * @public
-     * @param {Data} data 
-     * @returns 
-     */
-    refresh(data) {
-        var content = this.expression.evaluate(data);
-        this.element.innerText = content;
-        return true;
-    }
-
-
-    cloneAttribute(e) {
-
+        return element.childController;
     }
 }
 
@@ -387,58 +390,6 @@ class Data {
 }
 
 /**
- * The attribute for the given short-name in use.
- * 
- * @param {Element} element 
- * @param {string} name 
- * @returns the short name or the name prefixed with 'data-'
- */
-function attributeName(element, name) {
-    var attr = element.getAttribute(name);
-    if (attr) {
-        return name;
-    }
-    name = 'data-' + name;
-    return element.getAttribute(name) ? name : undefined;
-}
-
-
-/**
- * 
- * @param {Element} element 
- * @param {String} attributeName 
- * @param {attributeCallback} 
- */
-function forAttributeDo(element, attributeName, attributeCallback) {
-    var attributeValue = element.getAttribute(attributeName) || element.getAttribute('data-' + attributeName);
-    if (attributeValue) {
-        attributeCallback(element);
-    }
-}
-
-
-/**
- * @public
- * @param {Element} parent 
- * @param {elementConsumer} will be executed for each element
- */
-function forChildElements(parent, consumer) {
-    toArray(parent.childNodes).filter(n => isElement(n)).forEach(e => consumer(e));
-}
-
-/**
- * 
- * @public
- * @param {Element} parent
- * @param {nodeConsumer} will be executed for each node
- */
-function forChildNodes(parent, consumer) {
-    toArray(parent.childNodes).forEach(e => consumer(e));
-}
-
-
-
-/**
  * Maps a NodeList to an array.
  *
  * @public
@@ -461,6 +412,7 @@ function isElement(node) {
     return node instanceof HTMLElement;
 }
 
+
 /**
  * 
  * @param {String} string 
@@ -482,160 +434,10 @@ function doSplit(string, separatorChar) {
     rv.push(buffer);
     return rv;
 }
-/**
- * 
- * Initialzes the given tree or subtree, which means
- * adding some methods to the dom element.
- *
- * @public
- * @param {Element} node
- */
-function initTree(node) {
-    if (isElement(node)) {
-        initElement(node);
-    } else {
-        initTextNode(node);
-    }
-    forChildNodes(node, child => initTree(child));
+
+function initTree(element) {
+    new DocumentInitializer().initialize(element);
 }
-
-/**
- * Creates a deep clone of the given node.
- *
- * @param {Node} node
- * @returns
- */
-function cloneTree(node) {
-    if (isElement(node)) {
-        var clone = shallowCloneElement(node);
-        for (var i = 0; i < node.childNodes.length; i++) {
-            var child = node.childNodes.item(i);
-            clone.appendChild(cloneTree(child));
-        }
-        return clone;
-    } else {
-        return cloneTextNode(node);
-    }
-}
-
-/**
- * Creates a deep clone of the given node and runs initialization,
- * which means adding some methods to the dom element.
- *
- * @param {Node} node
- * @returns
- */
-function cloneAndInitTree(node) {
-    if (isElement(node)) {
-        var clone = initElement(shallowCloneElement(node));
-        for (var i = 0; i < node.childNodes.length; i++) {
-            var child = node.childNodes.item(i);
-            clone.appendChild(cloneAndInitTree(child));
-        }
-        return clone;
-    } else {
-        return initTextNode(cloneTextNode(node));
-    }
-}
-
-/**
- * Runs initialization for an element, which means adding some methods
- * to the dom element.
- *
- * @param {Element} element
- * @returns
- */
-
-function initElement(element) {
-    element.repeats = [];
-    forAttributeDo(element, 'show', addRefreshShow);
-    forAttributeDo(element, 'out', addRefreshOut);
-    forAttributeDo(element, 'repeat', addRepeat);
-    addRefesh(element);
-    return element;
-}
-
-function shallowCloneElement(element) {
-    var newElement = document.createElement(element.localName);
-    for (var attrName of element.getAttributeNames()) {
-        newElement.setAttribute(attrName, element.getAttribute(attrName));
-    }
-    return newElement;
-}
-
-function cloneTextNode(node) {
-    var clonedNode = document.createTextNode(node.textContent);
-    if (node.expression) {
-        clonedNode.expression = node.expression;
-        clonedNode.refresh = data => clonedNode.nodeValue = clonedNode.expression.evaluate(data);
-    }
-    return clonedNode;
-}
-
-
-function initTextNode(node) {
-    if (node.nodeValue.indexOf('${') != -1) {
-        node.content = new TextContentParser(node.nodeValue).parse();
-        node.refresh = data => node.nodeValue = node.content.evaluate(data);
-    }
-    return node;
-}
-
-
-/**
- * @param {Element} e 
- */
-function addRefreshShow(e) {
-    e.show = new ShowAttribute(element);
-    e.refreshShow = data => e.show.refresh(data);
-}
-
-/**
- * @param {Element} e 
- */
-function addRefreshOut(e) {
-    e.out = new OutAttribute(e);
-    e.out.init();
-    e.refreshContent = data => e.out.refresh(data);
-}
-
-
-function cloneRefreshOut(src, target) {
-    target.con
-}
-
-/**
- * @param {Element} e 
- */
-function addRepeat(e) {
-    e.parentNode.repeats.push(new Repeat(e));
-}
-
-/**
- * @param {Element} e 
- */
-function addRefesh(element) {
-    element.refresh = data => {
-        if (element.refreshShow && !element.refreshShow(data)) {
-            return;
-        }
-        for (var repeat of element.repeats) {
-            repeat.refresh(data);
-        }
-        if (element.refreshContent) {
-            element.refreshContent(data);
-        }
-        element.refreshChildren(data);
-    }
-    element.refreshChildren = data => forChildNodes(element, child => {
-        if (!child.explicitRefresh && child.refresh) {
-            child.refresh(data);
-        }
-    });
-
-}
-
-
 
 /**
  * 
@@ -643,7 +445,7 @@ function addRefesh(element) {
 function initPage() {
     var html = document.getElementsByTagName('html').item(0);
     initTree(html);
-    html.refresh(new Data({
+    html.refresh(html, new Data({
         title: 'bla', items: [{ name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' },
         { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' },
         { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' },
