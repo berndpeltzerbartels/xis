@@ -57,7 +57,7 @@ class ChildElementController {
         var visible = this.evaluateShowHide(e, data);
         if (this.repeats[e]) {
             if (visible) {
-                this.repeats[e].refresh(e, data);
+                this.evaluateRepeat(e, data);
             }
         } else {
             if (e.visible) {
@@ -67,7 +67,7 @@ class ChildElementController {
     }
 
     clear() {
-        this.childNodes.forEach(child => this.parent.removeChild(child));
+        this.childNodes.filter(e => e.visible).forEach(child => this.hideNode(child));
     }
 
     showVisibleElements() {
@@ -89,8 +89,8 @@ class ChildElementController {
 
     evaluateRepeat(child, data) {
         var cache = this.getRepeatCache();
-        var arr = data.getValue(child.repeat.arrayPath);
-        var valueKey = child.repeat.varName;
+        var arr = data.getValue(this.repeats[child].arrayPath);
+        var valueKey = this.repeats[child].varName;
         var newData = new Data({});
         newData.parentData = data;
         for (var i = 0; i < arr.length; i++) {
@@ -107,7 +107,7 @@ class ChildElementController {
             if (element.childController) {
                 element.childController.refresh(newData);
             } else if (element.refresh) {
-                element.refresh(newData);
+                element.refresh(element, newData);
             }
         }
 
@@ -119,7 +119,7 @@ class ChildElementController {
         return showHide.evaluate(data);
     }
 
-    hideElement(e) {
+    hideNode(e) {
         if (e.visible) {
             this.parent.removeChild(e);
         }
@@ -128,6 +128,7 @@ class ChildElementController {
 
     showElement(e) {
         this.parent.appendChild(e);
+        e.visible = true;
     }
 
     cloneNode(node) {
@@ -140,14 +141,17 @@ class ChildElementController {
             if (node.childController) {
                 newElement.childController = node.childController.clone();
             }
-            for (var i = 0; i < e.childNodes.length; i++) {
-                newNode.appendChild(this.cloneNode(e.childNodes.item(i)));
+            for (var i = 0; i < node.childNodes.length; i++) {
+                newElement.appendChild(this.cloneNode(node.childNodes.item(i)));
             }
+            newElement.refresh = node.refresh;
+            newElement.attrExpr = node.attrExpr;
             return newElement;
         } else {
-            var newNode = document.createTextNode();
-            if (node.expression) {
-                newNode.expression = node.expression;
+            var newNode = document.createTextNode(node.nodeValue);
+            if (node.contentExpr) {
+                newNode.contentExpr = node.contentExpr;
+                newNode.refresh = node.refresh;
             }
             return newNode;
         }
@@ -188,10 +192,6 @@ class DocumentInitializer {
                     node.attrExpr[attrName] = new TextContentParser(attrValue).parse();
                 }
             }
-            node.refreshables = [];
-            for (var i = 0; i < node.childNodes.length; i++) {
-                this.initialize(node.childNodes.item(i));
-            }
             node.refresh = (e, data) => {
                 for (var attrName of Object.keys(e.attrExpr)) {
                     e.setAttribute(e.attrExpr[attrName].evaluate(data));
@@ -207,6 +207,9 @@ class DocumentInitializer {
                     }
                 }
             };
+            for (var i = 0; i < node.childNodes.length; i++) {
+                this.initialize(node.childNodes.item(i));
+            }
         } else if (node.nodeValue && node.nodeValue.indexOf('${') != -1) {
             node.contentExpr = new TextContentParser(node.nodeValue).parse();
             node.refresh = (n, data) => n.nodeValue = n.contentExpr.evaluate(data);
