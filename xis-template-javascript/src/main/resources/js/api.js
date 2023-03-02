@@ -16,17 +16,35 @@
  * @param {Element}
  */
 
+class ContainerController {
+    constructor(containerId) {
+        this.containerId = containerId;
+    }
+
+    refresh(data, httpParameters) {
+
+    }
+
+    submitForm(form) {
+
+    }
+
+    linkInvocated() {
+
+    }
+}
 
 
 
-class ChildElementController {
+class ChildController {
 
     constructor(parent) {
         this.parent = parent;
         this.childNodes = toArray(parent.childNodes);
-        this.repeats = {};
-        this.showHide = {};
+        this.repeats = new Array(parent.childNodes.length);
+        this.showHide = new Array(parent.childNodes.length);
         this.repeatCaches = {};
+        this.expressionParser = new ExpressionParser();
     }
 
 
@@ -34,64 +52,51 @@ class ChildElementController {
         e.parentNode.removeChild(e);
     }
 
-    addRepeat(e) {
+    addRepeat(e, index) {
         var arr = doSplit(e.getAttribute('data-repeat'), ':');
-        var arrayPath = doSplit(arr[0], '.');
-        var varName = arr[1];
+        var expression = this.expressionParser.parse(arr[1]);
+        var varName = arr[0];
         this.unlinkElement(e);
-        this.repeats[e] = { arrayPath: arrayPath, varName: varName };
+        this.repeats[index] = { expression: expression, varName: varName };
         e.removeAttribute('data-repeat');
     }
 
-    addShowHide(e) {
+    addShowHide(e, index) {
         this.unlinkElement(e);
-        this.showHide[e] = new ExpressionParser().parse(e.getAttribute('data-show'));
+        this.showHide[index] = new ExpressionParser().parse(e.getAttribute('data-show'));
     }
 
     refresh(data) {
         this.clear();
-        this.childNodes.forEach(child => this.refreshElement(child, data));
+        for (var i = 0; i < this.childNodes.length; i++) {
+            var child = this.childNodes[i];
+            this.refreshNode(child, data, i);
+        }
     }
 
-    refreshElement(e, data) {
-        var visible = this.evaluateShowHide(e, data);
-        if (this.repeats[e]) {
-            if (visible) {
-                this.evaluateRepeat(e, data);
-            }
-        } else {
-            if (e.visible) {
-                this.showElement(e);
+    refreshNode(node, data, index) {
+        if (this.evaluateShowHide(node, data, index)) {
+            if (this.repeats[index]) {
+                this.evaluateRepeat(node, data, this.repeats[index]);
+            } else {
+                this.parent.doAppendChild(this.parent, node);
+                if (node.refresh) {
+                    node.refresh(node, data);
+                }
             }
         }
     }
 
     clear() {
-        this.childNodes.filter(e => e.visible).forEach(child => this.hideNode(child));
+        this.childNodes.forEach(child => this.parent.doRemoveChild(this.parent, child));
     }
 
-    showVisibleElements() {
-        this.childNodes.forEach(child => this.showIfVisible(child))
-    }
-
-    showIfVisible(child, data) {
-        if (child.showHide) {
-            if (!child.showHide.evaluate(data)) {
-                return;
-            }
-        }
-        if (child.repeat) {
-            this.evaluateRepeat(child);
-        } else {
-            this.parent.appendChild(child);
-        }
-    }
-
-    evaluateRepeat(child, data) {
+    evaluateRepeat(child, data, repeat) {
         var cache = this.getRepeatCache();
-        var arr = data.getValue(this.repeats[child].arrayPath);
-        var valueKey = this.repeats[child].varName;
-        var newData = new Data({});
+        var arr = repeat.expression.evaluate(data);
+        if (!arr) return;
+        var valueKey = repeat.varName;
+        var newData = new Data({}, data);
         newData.parentData = data;
         for (var i = 0; i < arr.length; i++) {
             newData.setValue(valueKey, arr[i]);
@@ -113,22 +118,10 @@ class ChildElementController {
 
     }
 
-    evaluateShowHide(e, data) {
-        var showHide = this.showHide[e];
+    evaluateShowHide(e, data, index) {
+        var showHide = this.showHide[index];
         if (!showHide) return true;
         return showHide.evaluate(data);
-    }
-
-    hideNode(e) {
-        if (e.visible) {
-            this.parent.removeChild(e);
-        }
-        e.visible = false;
-    }
-
-    showElement(e) {
-        this.parent.appendChild(e);
-        e.visible = true;
     }
 
     cloneNode(node) {
@@ -146,6 +139,8 @@ class ChildElementController {
             }
             newElement.refresh = node.refresh;
             newElement.attrExpr = node.attrExpr;
+            newElement.doAppendChild = node.doAppendChild;
+            newElement.doRemoveChild = node.doRemoveChild;
             return newElement;
         } else {
             var newNode = document.createTextNode(node.nodeValue);
@@ -169,69 +164,86 @@ class ChildElementController {
 }
 
 
-class ContainerController {
-    constructor(containerId) {
-        this.containerId = containerId;
-    }
-
-    refresh(data, httpParameters) {
-
-    }
-
-    submitForm(form) {
-
-    }
-}
-
 class DocumentInitializer {
 
     constructor() {
         this.exprParser = new ExpressionParser();
     }
 
-    initialize(node) {
-        if (isElement(node)) {
-            if (node.getAttribute('data-repeat')) {
-                this.childController(node.parentNode).addRepeat(node);
+    initializeDocument(root) {
+        this.decorateElement(root);
+        this.initialize(root);
+    }
+
+    initialize(parent) {
+        for (var i = 0; i < parent.childNodes.length; i++) {
+            var child = parent.childNodes.item(i);
+            if (isElement(child)) {
+                this.decorateElement(child);
+                this.decorateChildElement(child, i);
+                this.initialize(child);
+            } else if (child.nodeValue && child.nodeValue.indexOf('${') != -1) {
+                child.contentExpr = new TextContentParser(child.nodeValue).parse();
+                child.refresh = (n, data) => n.nodeValue = n.contentExpr.evaluate(data);
             }
-            if (node.getAttribute('data-show')) {
-                this.childController(node.parentNode).addShowHide(node);
-            }
-            node.attrExpr = {};
-            for (var attrName of node.getAttributeNames()) {
-                var attrValue = node.getAttribute(attrName);
-                if (attrValue.indexOf('${') != -1) {
-                    node.attrExpr[attrName] = new TextContentParser(attrValue).parse();
-                }
-            }
-            node.refresh = (e, data) => {
-                for (var attrName of Object.keys(e.attrExpr)) {
-                    e.setAttribute(attrName, e.attrExpr[attrName].evaluate(data));
-                }
-                if (e.childController) {
-                    e.childController.refresh(data);
-                } else {
-                    for (var i = 0; i < e.childNodes.length; i++) {
-                        var childNode = e.childNodes.item(i);
-                        if (childNode.refresh) {
-                            childNode.refresh(childNode, data);
-                        }
-                    }
-                }
-            };
-            for (var i = 0; i < node.childNodes.length; i++) {
-                this.initialize(node.childNodes.item(i));
-            }
-        } else if (node.nodeValue && node.nodeValue.indexOf('${') != -1) {
-            node.contentExpr = new TextContentParser(node.nodeValue).parse();
-            node.refresh = (n, data) => n.nodeValue = n.contentExpr.evaluate(data);
         }
     }
 
+    decorateElement(element) {
+        element.refresh = (e, data) => {
+            for (var attrName of Object.keys(e.attrExpr)) {
+                e.setAttribute(attrName, e.attrExpr[attrName].evaluate(data));
+            }
+            if (e.childController) {
+                e.childController.refresh(data);
+            } else {
+                for (var i = 0; i < e.childNodes.length; i++) {
+                    var childNode = e.childNodes.item(i);
+                    if (childNode.refresh) {
+                        childNode.refresh(childNode, data);
+                    }
+                }
+            }
+        };
+        element.doAppendChild = (e, child) => {
+            if (!e.childArray) {
+                e.childArray = [];
+            }
+            e.childArray.push(e);
+            e.appendChild(child);
+        };
+
+        element.doRemoveChild = (e, child) => {
+            if (e.childArray) {
+                var index = e.childArray.indexOf(child);
+                if (index != -1) {
+                    e.childArray.splice(index, 1);
+                    e.removeChild(child);
+                }
+            }
+        };
+
+        element.attrExpr = {};
+        for (var attrName of element.getAttributeNames()) {
+            var attrValue = element.getAttribute(attrName);
+            if (attrValue.indexOf('${') != -1) {
+                element.attrExpr[attrName] = new TextContentParser(attrValue).parse();
+            }
+        }
+    }
+
+    decorateChildElement(element, childIndex) {
+        if (element.getAttribute('data-repeat')) {
+            this.childController(element.parentNode).addRepeat(element, childIndex);
+        }
+        if (element.getAttribute('data-show')) {
+            this.childController(element.parentNode).addShowHide(element, childIndex);
+        }
+    }
 
     childController(element) {
         if (!element.childController) {
-            element.childController = new ChildElementController(element);
+            element.childController = new ChildController(element);
         }
         return element.childController;
     }
@@ -368,9 +380,9 @@ class Data {
      * 
      * @param {any} values 
      */
-    constructor(values) {
+    constructor(values, parentData = undefined) {
         this.values = values;
-        this.parentData = undefined;
+        this.parentData = parentData;
     }
     /**
      * 
@@ -451,7 +463,7 @@ function doSplit(string, separatorChar) {
 }
 
 function initTree(element) {
-    new DocumentInitializer().initialize(element);
+    new DocumentInitializer().initializeDocument(element);
 }
 
 /**
@@ -483,6 +495,11 @@ function initPage() {
         { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' },
         { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' },
         { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' },
+        ],
+        countries: [
+            { id: 1, name: 'Deutschland' },
+            { id: 2, name: 'Spanien' },
+            { id: 3, name: 'USA' },
         ]
     }));
 

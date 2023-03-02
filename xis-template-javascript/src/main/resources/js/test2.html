@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title data-content="title"></title>
+    <title>${title}</title>
     <script src="exprparser.js"></script>
     <script src="api.js"></script>
 
@@ -30,32 +30,23 @@
         }
     </script>
 
-    <style>
-        .red {
-            color: red;
-        }
-    </style>
+
 </head>
 
 <body onload="initPage();">
 
-    <div id="test">
-        </dv>
+    <div data-container="weatherWidget">
 
-        <div data-key="title"></div>
-        <ul>
-            <li data-repeat="items:item"><strong class="${styleClass(item_index)}">Der Name ist: ${item.name}</strong>
-            </li>
+        <form>
+            <select>
+                <option>Bitte wählen</option>
+                <option data-repeat="country:countries" value="${country.id}">${country.name}</option>
+            </select>
 
-        </ul>
+        </form>
+    </div>
 
-        <table>
-            <tbody>
-                <tr data-repeat="items:item">
-                    <td>${item.name}</td>
-                </tr>
-            </tbody>
-        </table>
+
 
 </body>
 

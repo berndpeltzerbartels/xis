@@ -2,7 +2,8 @@
 <html>
 
 <head>
-    <title data-content="title"></title>
+    <title>${title}</title>
+    <script src="exprparser.js"></script>
     <script src="api.js"></script>
 
     <script type="text/javascript">
@@ -10,21 +11,45 @@
         function identity(o) {
             return o;
         }
+
+        function styleClass(index) {
+            if (index % 2 == 1) {
+                return 'red';
+            }
+            return '';
+        }
     </script>
+
+    <style>
+        .red {
+            color: red;
+        }
+    </style>
 </head>
 
 <body onload="initPage();">
 
-    <div data-key="title"></div>
-    <ul>
-        <li data-repeat="items:item">Der Name ist: ${item.name}</li>
+    <h4>${title}</h4>
 
-    </ul>
+    <div id="test">
+        </dv>
+
+        <div data-key="title"></div>
+        <ul>
+            <li data-repeat="item:items"><strong class="${styleClass(item_index)}">Der Name ist:
+                    ${item.name}</strong>
+            </li>
+
+        </ul>
+
+    </div>
+
+
 
     <table>
         <tbody>
-            <tr repeat="items:item">
-                <td>NAME:${item.name}</td>
+            <tr data-repeat="item:items">
+                <td>${item.name}</td>
             </tr>
         </tbody>
     </table>
