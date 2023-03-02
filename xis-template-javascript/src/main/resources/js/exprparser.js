@@ -264,7 +264,7 @@ class TreeParser {
     }
 
     parseParentheses(node) {
-        return new Paranethesis(node.subTree);
+        return new Paranetheses(node.subTree);
     }
 
     parseParameters(openPar) {
@@ -353,7 +353,7 @@ class Variable {
     }
 }
 
-class Paranethesis {
+class Paranetheses {
 
     constructor(firstChild) {
         this.firstChild = firstChild;

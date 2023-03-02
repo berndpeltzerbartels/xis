@@ -21,7 +21,20 @@
                 var expr = new ExpressionParser().parse('sum(square(x), y)');
                 console.log(expr.evaluate(new Data({ x: 2, y: 10 })));
         */
+
+        function styleClass(index) {
+            if (index % 2 == 1) {
+                return 'red';
+            }
+            return '';
+        }
     </script>
+
+    <style>
+        .red {
+            color: red;
+        }
+    </style>
 </head>
 
 <body onload="initPage();">
@@ -31,14 +44,15 @@
 
         <div data-key="title"></div>
         <ul>
-            <li data-repeat="items:item"><strong>Der Name ist: ${item.name}</strong></li>
+            <li data-repeat="items:item"><strong class="${styleClass(item_index)}">Der Name ist: ${item.name}</strong>
+            </li>
 
         </ul>
 
         <table>
             <tbody>
-                <tr repeat="items:item">
-                    <td data-out="item.name"></td>
+                <tr data-repeat="items:item">
+                    <td>${item.name}</td>
                 </tr>
             </tbody>
         </table>

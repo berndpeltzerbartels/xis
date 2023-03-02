@@ -168,6 +168,21 @@ class ChildElementController {
 
 }
 
+
+class ContainerController {
+    constructor(containerId) {
+        this.containerId = containerId;
+    }
+
+    refresh(data, httpParameters) {
+
+    }
+
+    submitForm(form) {
+
+    }
+}
+
 class DocumentInitializer {
 
     constructor() {
@@ -182,9 +197,6 @@ class DocumentInitializer {
             if (node.getAttribute('data-show')) {
                 this.childController(node.parentNode).addShowHide(node);
             }
-            if (node.getAttribute('data-out')) {
-                this.outExpr = this.exprParser.parse(node.getAttribute('data-out'));
-            }
             node.attrExpr = {};
             for (var attrName of node.getAttributeNames()) {
                 var attrValue = node.getAttribute(attrName);
@@ -194,7 +206,7 @@ class DocumentInitializer {
             }
             node.refresh = (e, data) => {
                 for (var attrName of Object.keys(e.attrExpr)) {
-                    e.setAttribute(e.attrExpr[attrName].evaluate(data));
+                    e.setAttribute(attrName, e.attrExpr[attrName].evaluate(data));
                 }
                 if (e.childController) {
                     e.childController.refresh(data);
