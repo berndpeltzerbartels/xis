@@ -18,6 +18,10 @@
             }
             return '';
         }
+
+        function visible(i) {
+            return i % 10 == 0
+        }
     </script>
 
     <style>
@@ -36,7 +40,8 @@
 
         <div data-key="title"></div>
         <ul>
-            <li data-repeat="item:items"><strong class="${styleClass(item_index)}">Der Name ist:
+            <li data-repeat="item:items"><strong class="${styleClass(item_index)}">Der
+                    Name ist:
                     ${item.name}</strong>
             </li>
 

@@ -388,7 +388,9 @@ class Func {
 
     evaluate(data) {
         var paramValues = this.parameters.map(p => p.evaluate(data));
-        var value = window[this.name].apply(null, paramValues);
+        var fu = window[this.name];
+        if (!fu) throw new Error('no such function: ' + this.name);
+        var value = fu.apply(null, paramValues);
         if (this.next) {
             var operator = this.next;
             var next = operator.next;

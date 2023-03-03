@@ -97,17 +97,14 @@ class ChildController {
         if (!arr) return;
         var valueKey = repeat.varName;
         var newData = new Data({}, data);
-        newData.parentData = data;
         for (var i = 0; i < arr.length; i++) {
             newData.setValue(valueKey, arr[i]);
             newData.setValue(valueKey + '_index', i);
             var element;
             if (cache.length <= i) {
-                element = this.cloneNode(child);
-                cache.push(element);
-            } else {
-                element = cache[i];
+                cache.push(this.cloneNode(child));
             }
+            element = cache[i];
             element.childIndex = i;// we need this for selectedIndex
             this.parent.appendChild(element);
             if (element.childController) {
@@ -133,10 +130,11 @@ class ChildController {
             }
             newElement.attrExpr = node.attrExpr;
             if (node.childController) {
-                newElement.childController = node.childController.clone();
-            }
-            for (var i = 0; i < node.childNodes.length; i++) {
-                newElement.appendChild(this.cloneNode(node.childNodes.item(i)));
+                newElement.childController = node.childController.cloneForElement(newElement);
+            } else {
+                for (var i = 0; i < node.childNodes.length; i++) {
+                    newElement.appendChild(this.cloneNode(node.childNodes.item(i)));
+                }
             }
             newElement.refresh = node.refresh;
             newElement.attrExpr = node.attrExpr;
@@ -154,6 +152,16 @@ class ChildController {
         }
     }
 
+    cloneForElement(element) {
+        var controller = new ChildController(element);
+        controller.repeats = this.repeats;
+        controller.showHide = this.showHide;
+        for (var child of this.childNodes) {
+            controller.childNodes.push(this.cloneNode(child));
+        }
+        return controller;
+    }
+
     getRepeatCache(e) {
         var cache = this.repeatCaches[e];
         if (!cache) {
@@ -165,18 +173,30 @@ class ChildController {
 
 }
 
-
+/**
+ * Decorates elements of the document 
+ * with faremwork classes and methods.
+ */
 class DocumentInitializer {
 
     constructor() {
         this.exprParser = new ExpressionParser();
     }
 
+    /**
+     * Decorates the document of the given root
+     * @public
+     * @param {Element} root 
+     */
     initializeDocument(root) {
         this.decorateElement(root);
         this.initialize(root);
     }
 
+    /**
+     * @private
+     * @param {Element} parent 
+     */
     initialize(parent) {
         for (var i = 0; i < parent.childNodes.length; i++) {
             var child = parent.childNodes.item(i);
@@ -191,6 +211,10 @@ class DocumentInitializer {
         }
     }
 
+    /**
+    * @private
+    * @param {Element} parent 
+    */
     decorateElement(element) {
         element.refresh = (e, data) => {
             for (var attrName of Object.keys(e.attrExpr)) {
@@ -198,7 +222,9 @@ class DocumentInitializer {
             }
             if (e.selectedExpr) {
                 if (e.getAttribute('value') == e.selectedExpr.evaluate(data)) {
-                    e.parent.setAttribute("selectedIndex", e.childIndex); // TODO test
+                    e.setAttribute("selected", true); // TODO test
+                } else {
+                    e.removeAttribute('selected');
                 }
             }
             if (e.childController) {
@@ -247,7 +273,7 @@ class DocumentInitializer {
             this.childController(element.parentNode).addShowHide(element, childIndex);
         }
         if (element.getAttribute('data-selected')) {
-            element.selectedExpr = this.exprParser.parse(e.getAttribute('data-selected'));
+            element.selectedExpr = this.exprParser.parse(element.getAttribute('data-selected'));
         }
     }
 
@@ -259,33 +285,58 @@ class DocumentInitializer {
     }
 }
 
-
+/**
+ * Util-class to navigate among
+ * a string's characters.
+ */
 class CharIterator {
 
+    /**
+     * 
+     * @param {string} src 
+     */
     constructor(src) {
         this.src = src;
         this.index = -1;
     }
 
+    /**
+     * @public
+     * @returns {boolean}
+     */
     hasNext() {
         return this.index + 1 < this.src.length;
     }
 
+    /**
+     * @public
+     * @returns {any}
+     */
     current() {
         return this.src[this.index];
     }
 
-
+    /**
+     * @public
+     * @returns {any}
+     */
     next() {
         this.index++;
         return this.src[this.index];
     }
 
-
+    /**
+     * @public
+     * @returns {any}
+     */
     beforeCurrent() {
         return this.index - 1 > -1 ? this.src[this.index - 1] : undefined;
     }
 
+    /**
+     * @public
+     * @returns {any}
+     */
     afterCurrent() {
         return this.index + 1 < this.src.length ? this.src[this.index + 1] : undefined;
     }
@@ -293,14 +344,22 @@ class CharIterator {
 }
 
 
-
+/**
+ * Represents text containg static string parts
+ * and variables like "My name is ${name}"
+ */
 class TextContent {
 
     constructor(parts) {
         this.parts = parts;
     }
 
-
+    /**
+     * @public
+     * @param {Data} data 
+     * @returns the string we get after replacing the 
+     * vriables with the actual data.
+     */
     evaluate(data) {
         return this.parts.map(part => part.asString(data)).reduce((s1, s2) => s1 + s2);
     }
