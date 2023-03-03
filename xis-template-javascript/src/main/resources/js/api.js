@@ -16,272 +16,193 @@
  * @param {Element}
  */
 
-class ContainerController {
-    constructor(containerId) {
-        this.containerId = containerId;
+
+function showChild(parent, index) {
+    var child = parent._xis.childArray[index];
+    if (!parent._xis.childVisible[index])
+        parent._xis.element.appendChild(child);
+    parent._xis.childVisible[index] = true;
+    return child;
+}
+
+function hideChild(parent, index) {
+    var child = parent._xis.childArray[index];
+    if (parent._xis.childVisible[index])
+        parent._xis.element.removeChild(child);
+    parent._xis.childVisible[index] = false;
+    return child;
+}
+
+function clearChildren(e) {
+    var xis = e._xis;
+    for (var i = 0; i < xis.childArray.length; i++) {
+        hideChild(e, i);
     }
+};
 
-    refresh(data, httpParameters) {
-
+function cloneNode(node) {
+    if (isElement(node)) {
+        return cloneElement(node);
     }
+    return cloneTextNode(node);
+}
 
-    submitForm(form) {
-
+function cloneElement(element) {
+    var newElement = document.createElement(element.localName);
+    for (var attrName of element.getAttributeNames()) {
+        newElement.setAttribute(attrName, element.getAttribute(attrName));
     }
+    for (var i = 0; i < element._xis.childArray.length; i++) {
+        var child = element._xis.childArray[i];
+        var clonedChild = cloneNode(child);
+        newElement.appendChild(clonedChild);
+    }
+    newElement._xis = element._xis.clone(newElement);
+    return newElement;
+}
 
-    linkInvocated() {
+function cloneTextNode(textNode) {
+    var newNode = document.createTextNode(textNode.nodeValue);
+    newNode._xis = textNode._xis;
+    return newNode;
+}
 
+function evaluateRepeat(e, data) {
+    var xis = e._xis;
+    var repeat = xis.repeat;
+    var parent = xis.parent;
+    var arr = repeat.expression.evaluate(data);
+    if (!arr) return;
+    var valueKey = repeat.varName;
+    var newData = new Data({}, data);
+    for (var i = 0; i < arr.length; i++) {
+        newData.setValue(valueKey, arr[i]);
+        newData.setValue(valueKey + '_index', i);
+        var element;
+        if (repeat.cache.length <= i) {
+            repeat.cache.push(cloneNode(e));
+        }
+        element = repeat.cache[i];
+        element.childIndex = i;
+        parent.appendChild(element);
+        refresh(element, newData);
     }
 }
 
 
-
-class ChildController {
-
-    constructor(parent) {
-        this.parent = parent;
-        this.childNodes = toArray(parent.childNodes);
-        this.repeats = new Array(parent.childNodes.length);
-        this.showHide = new Array(parent.childNodes.length);
-        this.repeatCaches = {};
-        this.expressionParser = new ExpressionParser();
+function refreshAttributes(e, data) {
+    var xis = e._xis;
+    for (var attrName of Object.keys(xis.attributes)) {
+        e.setAttribute(attrName, xis.attributes[attrName].evaluate(data));
     }
-
-
-    unlinkElement(e) {
-        e.parentNode.removeChild(e);
-    }
-
-    addRepeat(e, index) {
-        var arr = doSplit(e.getAttribute('data-repeat'), ':');
-        var expression = this.expressionParser.parse(arr[1]);
-        var varName = arr[0];
-        this.unlinkElement(e);
-        this.repeats[index] = { expression: expression, varName: varName };
-        e.removeAttribute('data-repeat');
-    }
-
-    addShowHide(e, index) {
-        this.unlinkElement(e);
-        this.showHide[index] = new ExpressionParser().parse(e.getAttribute('data-show'));
-    }
-
-    refresh(data) {
-        this.clear();
-        for (var i = 0; i < this.childNodes.length; i++) {
-            var child = this.childNodes[i];
-            this.refreshNode(child, data, i);
-        }
-    }
-
-    refreshNode(node, data, index) {
-        if (this.evaluateShowHide(node, data, index)) {
-            if (this.repeats[index]) {
-                this.evaluateRepeat(node, data, this.repeats[index]);
-            } else {
-                this.parent.doAppendChild(this.parent, node);
-                if (node.refresh) {
-                    node.refresh(node, data);
-                }
-            }
-        }
-    }
-
-    clear() {
-        this.childNodes.forEach(child => this.parent.doRemoveChild(this.parent, child));
-    }
-
-    evaluateRepeat(child, data, repeat) {
-        var cache = this.getRepeatCache();
-        var arr = repeat.expression.evaluate(data);
-        if (!arr) return;
-        var valueKey = repeat.varName;
-        var newData = new Data({}, data);
-        for (var i = 0; i < arr.length; i++) {
-            newData.setValue(valueKey, arr[i]);
-            newData.setValue(valueKey + '_index', i);
-            var element;
-            if (cache.length <= i) {
-                cache.push(this.cloneNode(child));
-            }
-            element = cache[i];
-            element.childIndex = i;// we need this for selectedIndex
-            this.parent.appendChild(element);
-            if (element.childController) {
-                element.childController.refresh(newData);
-            } else if (element.refresh) {
-                element.refresh(element, newData);
-            }
-        }
-
-    }
-
-    evaluateShowHide(e, data, index) {
-        var showHide = this.showHide[index];
-        if (!showHide) return true;
-        return showHide.evaluate(data);
-    }
-
-    cloneNode(node) {
-        if (isElement(node)) {
-            var newElement = document.createElement(node.localName);
-            for (var attrName of node.getAttributeNames()) {
-                newElement.setAttribute(attrName, node.getAttribute(attrName));
-            }
-            newElement.attrExpr = node.attrExpr;
-            if (node.childController) {
-                newElement.childController = node.childController.cloneForElement(newElement);
-            } else {
-                for (var i = 0; i < node.childNodes.length; i++) {
-                    newElement.appendChild(this.cloneNode(node.childNodes.item(i)));
-                }
-            }
-            newElement.refresh = node.refresh;
-            newElement.attrExpr = node.attrExpr;
-            newElement.selectedExpr = node.selectedExpr;
-            newElement.doAppendChild = node.doAppendChild;
-            newElement.doRemoveChild = node.doRemoveChild;
-            return newElement;
-        } else {
-            var newNode = document.createTextNode(node.nodeValue);
-            if (node.contentExpr) {
-                newNode.contentExpr = node.contentExpr;
-                newNode.refresh = node.refresh;
-            }
-            return newNode;
-        }
-    }
-
-    cloneForElement(element) {
-        var controller = new ChildController(element);
-        controller.repeats = this.repeats;
-        controller.showHide = this.showHide;
-        for (var child of this.childNodes) {
-            controller.childNodes.push(this.cloneNode(child));
-        }
-        return controller;
-    }
-
-    getRepeatCache(e) {
-        var cache = this.repeatCaches[e];
-        if (!cache) {
-            cache = [];
-            this.repeatCaches[e] = cache;
-        }
-        return cache;
-    }
-
 }
 
-/**
- * Decorates elements of the document 
- * with faremwork classes and methods.
- */
-class DocumentInitializer {
-
-    constructor() {
-        this.exprParser = new ExpressionParser();
+function refreshDocument(root, data) {
+    var xis = root._xis;
+    for (var i = 0; i < xis.childArray.length; i++) {
+        refresh(xis.childArray[i], data);
     }
+}
 
-    /**
-     * Decorates the document of the given root
-     * @public
-     * @param {Element} root 
-     */
-    initializeDocument(root) {
-        this.decorateElement(root);
-        this.initialize(root);
+function refresh(node, data) {
+    if (isElement(node)) {
+        refreshElement(node, data);
+    } else {
+        refreshTextNode(node, data);
     }
+}
 
-    /**
-     * @private
-     * @param {Element} parent 
-     */
-    initialize(parent) {
-        for (var i = 0; i < parent.childNodes.length; i++) {
-            var child = parent.childNodes.item(i);
-            if (isElement(child)) {
-                this.decorateElement(child);
-                this.decorateChildElement(child, i);
-                this.initialize(child);
-            } else if (child.nodeValue && child.nodeValue.indexOf('${') != -1) {
-                child.contentExpr = new TextContentParser(child.nodeValue).parse();
-                child.refresh = (n, data) => n.nodeValue = n.contentExpr.evaluate(data);
-            }
-        }
-    }
-
-    /**
-    * @private
-    * @param {Element} parent 
-    */
-    decorateElement(element) {
-        element.refresh = (e, data) => {
-            for (var attrName of Object.keys(e.attrExpr)) {
-                e.setAttribute(attrName, e.attrExpr[attrName].evaluate(data));
-            }
-            if (e.selectedExpr) {
-                if (e.getAttribute('value') == e.selectedExpr.evaluate(data)) {
-                    e.setAttribute("selected", true); // TODO test
+function refreshElement(e, data) {
+    var xis = e._xis;
+    refreshAttributes(e, data);
+    clearChildren(e);
+    for (var i = 0; i < xis.childArray.length; i++) {
+        var child = xis.childArray[i];
+        if (isElement(child)) {
+            if (!child._xis.showHide || child._xis.showHide.evaluate(data)) {
+                if (child._xis.repeat) {
+                    evaluateRepeat(child, data);
                 } else {
-                    e.removeAttribute('selected');
+                    refreshElement(child, data);
                 }
             }
-            if (e.childController) {
-                e.childController.refresh(data);
-            } else {
-                for (var i = 0; i < e.childNodes.length; i++) {
-                    var childNode = e.childNodes.item(i);
-                    if (childNode.refresh) {
-                        childNode.refresh(childNode, data);
-                    }
-                }
-            }
-        };
-        element.doAppendChild = (e, child) => {
-            if (!e.childArray) {
-                e.childArray = [];
-            }
-            e.childArray.push(e);
-            e.appendChild(child);
-        };
-
-        element.doRemoveChild = (e, child) => {
-            if (e.childArray) {
-                var index = e.childArray.indexOf(child);
-                if (index != -1) {
-                    e.childArray.splice(index, 1);
-                    e.removeChild(child);
-                }
-            }
-        };
-
-        element.attrExpr = {};
-        for (var attrName of element.getAttributeNames()) {
-            var attrValue = element.getAttribute(attrName);
-            if (attrValue.indexOf('${') != -1) {
-                element.attrExpr[attrName] = new TextContentParser(attrValue).parse();
-            }
+        } else {
+            refreshTextNode(child, data);
+            showChild(e, i);
         }
     }
+}
 
-    decorateChildElement(element, childIndex) {
-        if (element.getAttribute('data-repeat')) {
-            this.childController(element.parentNode).addRepeat(element, childIndex);
-        }
-        if (element.getAttribute('data-show')) {
-            this.childController(element.parentNode).addShowHide(element, childIndex);
-        }
-        if (element.getAttribute('data-selected')) {
-            element.selectedExpr = this.exprParser.parse(element.getAttribute('data-selected'));
-        }
+
+function refreshTextNode(node, data) {
+    node.nodeValue = node._xis.expression.evaluate(data);
+}
+
+class Xis {
+
+    constructor(element) {
+        this.element = element;
+        this.parent = element.parentNode;
+        this.attributes = {};
+        this.repeat = undefined;
+        this.showHide = undefined;
+        return this;
     }
 
-    childController(element) {
-        if (!element.childController) {
-            element.childController = new ChildController(element);
+    updateChildNodes() {
+        this.childArray = toArray(this.element.childNodes);
+        this.childVisible = new Array(this.childArray.length);
+        return this;
+    }
+
+    clone(e) {
+        var xis = new Xis(e);
+        xis.element = e;
+        xis.parent = e.parent;
+        xis.childArray = toArray(e.childNodes);
+        xis.childVisible = new Array(xis.childArray.length);
+        xis.attributes = this.attributes;
+        xis.repeat = this.repeat;
+        xis.showHide = this.showHide;
+        return xis;
+    }
+}
+
+
+function initialize(node) {
+    if (isElement(node)) {
+        initializeElement(node);
+    } else {
+        initializeTextNode(node);
+    }
+}
+
+function initializeElement(element) {
+    var xis = new Xis(element);
+    element._xis = xis;
+    if (element.getAttribute('data-show')) {
+        xis.showHide = this.exprParser.parse(element.getAttribute('data-show'));
+    }
+    if (element.getAttribute('data-repeat')) {
+        var arr = doSplit(element.getAttribute('data-repeat'), ':');
+        xis.repeat = { expression: new ExpressionParser().parse(arr[1]), varName: arr[0], cache: [] };
+    }
+    for (var attrName of element.getAttributeNames()) {
+        var attrValue = element.getAttribute(attrName);
+        if (attrValue.indexOf('${') != -1) {
+            xis.attributes[attrName] = new TextContentParser(attrValue).parse();
         }
-        return element.childController;
+    }
+    for (var i = 0; i < element.childNodes.length; i++) {
+        initialize(element.childNodes.item(i));
+    }
+    xis.updateChildNodes();
+}
+
+function initializeTextNode(node) {
+    node._xis = { expression: { evaluate: (data) => node.nodeValue } };
+    if (node.nodeValue && node.nodeValue.indexOf('${') != -1) {
+        node._xis.expression = new TextContentParser(node.nodeValue).parse();
     }
 }
 
@@ -531,17 +452,10 @@ function doSplit(string, separatorChar) {
     return rv;
 }
 
-function initTree(element) {
-    new DocumentInitializer().initializeDocument(element);
-}
-
-/**
- * 
- */
 function initPage() {
     var html = document.getElementsByTagName('html').item(0);
-    initTree(html);
-    html.refresh(html, new Data({
+    initialize(html);
+    refresh(html, new Data({
         title: 'bla', items: [{ name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' },
         { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' },
         { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' },
