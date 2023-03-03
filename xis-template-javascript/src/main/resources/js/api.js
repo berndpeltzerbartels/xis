@@ -75,17 +75,32 @@ function evaluateRepeat(e, data) {
     if (!arr) return;
     var valueKey = repeat.varName;
     var newData = new Data({}, data);
-    for (var i = 0; i < arr.length; i++) {
+    var i = 0;
+    var element;
+    while (i < arr.length) {
         newData.setValue(valueKey, arr[i]);
         newData.setValue(valueKey + '_index', i);
-        var element;
-        if (repeat.cache.length <= i) {
-            repeat.cache.push(cloneNode(e));
+        if (repeat.cache.elements.length <= i) {
+            repeat.cache.elements.push(cloneNode(e));
         }
-        element = repeat.cache[i];
+        element = repeat.cache.elements[i];
+        if (!repeat.cache.visible[i]) {
+            parent.appendChild(element);
+            repeat.cache.visible[i] = true;
+        }
         element.childIndex = i;
-        parent.appendChild(element);
         refresh(element, newData);
+        i++;
+    }
+    while (i < repeat.cache.elements.length) {
+        element = repeat.cache.elements[i];
+        if (repeat.cache.visible[i]) {
+            parent.removeChild(element);
+            repeat.cache.visible[i] = false;
+            i++;
+        } else {
+            break;
+        }
     }
 }
 
@@ -185,7 +200,9 @@ function initializeElement(element) {
     }
     if (element.getAttribute('data-repeat')) {
         var arr = doSplit(element.getAttribute('data-repeat'), ':');
-        xis.repeat = { expression: new ExpressionParser().parse(arr[1]), varName: arr[0], cache: [] };
+        xis.repeat = { expression: new ExpressionParser().parse(arr[1]), varName: arr[0], cache: { elements: [], visible: [] } };
+        xis.repeat.cache.elements.push(element);
+        xis.repeat.cache.visible.push(true);
     }
     for (var attrName of element.getAttributeNames()) {
         var attrValue = element.getAttribute(attrName);
@@ -479,6 +496,15 @@ function initPage() {
         { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' },
         { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' }, { name: 'name2' }, { name: 'name1' },
         ],
+        countries: [
+            { id: 1, name: 'Deutschland' },
+            { id: 2, name: 'Spanien' },
+            { id: 3, name: 'USA' },
+        ],
+        selectedCountry: { id: 2, name: 'Spanien' }
+    }));
+    refresh(html, new Data({
+        title: 'bla', items: [{ name: 'name1' }, { name: 'name2' }],
         countries: [
             { id: 1, name: 'Deutschland' },
             { id: 2, name: 'Spanien' },
