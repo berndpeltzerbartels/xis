@@ -40,7 +40,8 @@
         <form>
             <select>
                 <option>Bitte wählen</option>
-                <option data-repeat="country:countries" value="${country.id}">${country.name}</option>
+                <option data-repeat="country:countries" value="${country.id}" data-selected="${selectedCountry.id}">
+                    ${country.name}</option>
             </select>
 
         </form>

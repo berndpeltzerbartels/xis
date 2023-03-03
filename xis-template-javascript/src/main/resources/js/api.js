@@ -108,6 +108,7 @@ class ChildController {
             } else {
                 element = cache[i];
             }
+            element.childIndex = i;// we need this for selectedIndex
             this.parent.appendChild(element);
             if (element.childController) {
                 element.childController.refresh(newData);
@@ -139,6 +140,7 @@ class ChildController {
             }
             newElement.refresh = node.refresh;
             newElement.attrExpr = node.attrExpr;
+            newElement.selectedExpr = node.selectedExpr;
             newElement.doAppendChild = node.doAppendChild;
             newElement.doRemoveChild = node.doRemoveChild;
             return newElement;
@@ -194,6 +196,11 @@ class DocumentInitializer {
             for (var attrName of Object.keys(e.attrExpr)) {
                 e.setAttribute(attrName, e.attrExpr[attrName].evaluate(data));
             }
+            if (e.selectedExpr) {
+                if (e.getAttribute('value') == e.selectedExpr.evaluate(data)) {
+                    e.parent.setAttribute("selectedIndex", e.childIndex); // TODO test
+                }
+            }
             if (e.childController) {
                 e.childController.refresh(data);
             } else {
@@ -238,6 +245,9 @@ class DocumentInitializer {
         }
         if (element.getAttribute('data-show')) {
             this.childController(element.parentNode).addShowHide(element, childIndex);
+        }
+        if (element.getAttribute('data-selected')) {
+            element.selectedExpr = this.exprParser.parse(e.getAttribute('data-selected'));
         }
     }
 
@@ -500,7 +510,8 @@ function initPage() {
             { id: 1, name: 'Deutschland' },
             { id: 2, name: 'Spanien' },
             { id: 3, name: 'USA' },
-        ]
+        ],
+        selectedCountry: { id: 2, name: 'Spanien' }
     }));
 
 
