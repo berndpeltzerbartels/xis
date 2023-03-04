@@ -421,6 +421,162 @@ class Noop {
     evaluate(data) { }
 }
 
+
+/**
+ * Represents text containg static string parts
+ * and variables like "My name is ${name}"
+ */
+class TextContent {
+
+    constructor(parts) {
+        this.parts = parts;
+    }
+
+    /**
+     * @public
+     * @param {Data} data 
+     * @returns the string we get after replacing the 
+     * vriables with the actual data.
+     */
+    evaluate(data) {
+        return this.parts.map(part => part.asString(data)).reduce((s1, s2) => s1 + s2);
+    }
+
+}
+
+class TextContentParser {
+
+    constructor(src) {
+        this.chars = new CharIterator(src);
+        this.parts = [];
+    }
+
+    parse() {
+        this.readText();
+        return new TextContent(this.parts);
+    }
+
+
+    readText() {
+        var buff = '';
+        while (this.chars.hasNext()) {
+            var currentChar = this.chars.next();
+            if (currentChar == '$' && this.chars.afterCurrent() == '{') {
+                if (buff.length > 0) {
+                    this.parts.push(this.createTextPart(buff));
+                }
+                this.chars.next();
+                this.readVar();
+                buff = '';
+                continue;
+            }
+            buff += currentChar;
+        }
+
+    }
+
+    readVar() {
+        var buff = '';
+        while (this.chars.hasNext()) {
+            var currentChar = this.chars.next();
+            if (currentChar == '}' && this.chars.beforeCurrent() != '\\') {
+                if (buff.length > 0) {
+                    var varPart = this.tryCreateVarPart(buff);
+                    if (varPart) {
+                        this.parts.push(varPart);
+                    } else {
+                        this.parts.push(this.createTextPart(buff));
+                    }
+                }
+                return;
+            }
+            buff += currentChar;
+        }
+    }
+
+    createTextPart(text) {
+        return {
+            text: text,
+            asString: function (data) {
+                return this.text;
+            }
+        };
+    }
+
+    tryCreateVarPart(src) {
+        var expression = new ExpressionParser().parse(src);
+        if (expression) {
+            return {
+                expression: expression,
+                asString: function (data) {
+                    return this.expression.evaluate(data);
+                }
+            };
+        }
+        return false;
+    }
+}
+
+
+/**
+ * Util-class to navigate among
+ * a string's characters.
+ */
+class CharIterator {
+
+    /**
+     * 
+     * @param {string} src 
+     */
+    constructor(src) {
+        this.src = src;
+        this.index = -1;
+    }
+
+    /**
+     * @public
+     * @returns {boolean}
+     */
+    hasNext() {
+        return this.index + 1 < this.src.length;
+    }
+
+    /**
+     * @public
+     * @returns {any}
+     */
+    current() {
+        return this.src[this.index];
+    }
+
+    /**
+     * @public
+     * @returns {any}
+     */
+    next() {
+        this.index++;
+        return this.src[this.index];
+    }
+
+    /**
+     * @public
+     * @returns {any}
+     */
+    beforeCurrent() {
+        return this.index - 1 > -1 ? this.src[this.index - 1] : undefined;
+    }
+
+    /**
+     * @public
+     * @returns {any}
+     */
+    afterCurrent() {
+        return this.index + 1 < this.src.length ? this.src[this.index + 1] : undefined;
+    }
+
+}
+
+
 /**
  * 
  * @param {string} str 
