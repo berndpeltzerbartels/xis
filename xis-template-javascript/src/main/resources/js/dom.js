@@ -334,6 +334,75 @@ function removeLastChar(string) {
     return string.substring(0, string.length - 1); // surprising, but tested
 }
 
+
+function bindPage(pageId) {
+    var xis = html._xis;
+    var page = xis.getPage(pageId);
+    if (!page) return false;
+    var html = getTemplateRoot();
+    var head = getTemplateHead();
+    var body = getTemplateBody();
+    var title = getTitle();
+    for (var i = 0; i < page.getHeadElement().childNodes.length; i++) {
+        var child = page.getHeadElement().childNodes.item(i);
+        if (child.localName && child.localName == title) {
+            title.innerHTML = child.innerHTML;
+        } else {
+            head.appendChild(child);
+            xis.head.childNodes.push(child);
+        }
+    }
+    for (var i = 0; i < page.getBodyElement().childNodes.length; i++) {
+        body.appendChild(page.getBodyElement().childNodes.item(i));
+    }
+    for (var name of page.getBodyElement().getAttributeNames()) {
+        body.setAttribute(name, page.body.getAttribute(name));
+    }
+    return true;
+}
+
+function unbindPage() {
+    var html = getTemplateRoot();
+    var xis = html._xis;
+    var head = getTemplateHead();
+    var body = getTemplateBody();
+    var title = getTitle();
+    title.innerHTML = '';
+    // We do not want to remove our script-tags etc.
+    for (var i = 0; i < xis.head.childNodes.length; i++) {
+        var child = xis.head.childNodes[i];
+        head.removeChild(child);
+    }
+    for (var i = 0; i < body.childNodes.length; i++) {
+        var child = body.childNodes.item(i);
+        body.removeChild(child);
+    }
+    for (var name of body.getAttributeNames()) {
+        body.removeAttribute(name);
+    }
+}
+
+function
+
+
+function getTemplateHead() {
+    return getElementByTagName('head');
+}
+
+function getTemplateBody() {
+    return getElementByTagName('body');
+}
+
+function getTemplateRoot() {
+    return document.getRootNode();
+}
+
+function getElementByTagName(name) {
+    return document.getElementsByTagName(name).item(0);
+}
+
+
+
 function initPage() {
     var html = document.getElementsByTagName('html').item(0);
     initialize(html);

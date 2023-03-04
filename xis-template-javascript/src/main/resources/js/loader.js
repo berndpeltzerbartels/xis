@@ -23,53 +23,29 @@ function refreshWidget(container, xis) {
 }
 
 function loadPage(pageId) {
-    var shadowHead = document.createElement('head');
-    var shadowBody = document.createElement('body');
-    shadowHead.innerHTML = client.loadHead(pageId);
-    shadowBody.innerHTML = client.loadBody(pageId);
-    var html = getTemplateRoot();
-    var head = getTemplateHead();
-    var body = getTemplateBody();
-    var title = getTitle();
-    var xis = html._xis;
-    for (var i = 0; i < shadowHead.childNodes.length; i++) {
-        var child = shadowHead.childNodes.item(i);
-        if (child.localName && child.localName == title) {
-            title.innerHTML = child.innerHTML;
-        } else {
-            head.appendChild(child);
-            xis.head.childNodes.push(child);
-        }
-    }
-    for (var i = 0; i < shadowBody.childNodes.length; i++) {
-        body.appendChild(shadowHead.childNodes.item(i));
-    }
-    for (var name of shadowBody.getAttributeNames()) {
-        body.setAttribute(name, shadowBody.getAttribute(name));
+    var headHolder = document.createElement('div');
+    var bodyHolder = document.createElement('div');
+    headHolder.innerHTML = client.loadHead(pageId);
+    bodyHolder.innerHTML = client.loadBody(pageId);
+    return {
+        id: pageId,
+        headHolder: headHolder,
+        bodyHolder, bodyHolder,
+        getHeadElement: () => this.headHolder.childNodes.item(0),
+        getBodyElement: () => this.bodyHolder.childNodes.item(0)
+    };
+}
+
+function loadWidget(widgetId) {
+    var holder = document.createElement('div');
+    return {
+        id: widgetId,
+        holder: holder,
+        getRootElement: () => holder.childNodes.item(0)
     }
 }
 
 
-function unloadPage() {
-    var html = getTemplateRoot();
-    var xis = html._xis;
-    var head = getTemplateHead();
-    var body = getTemplateBody();
-    var title = getTitle();
-    title.innerHTML = '';
-    // We do not want to remove our script-tags etc.
-    for (var i = 0; i < xis.head.childNodes.length; i++) {
-        var child = xis.head.childNodes[i];
-        head.removeChild(child);
-    }
-    for (var i = 0; i < body.childNodes.length; i++) {
-        var child = body.childNodes.item(i);
-        body.removeChild(child);
-    }
-    for (var name of body.getAttributeNames()) {
-        body.removeAttribute(name);
-    }
-}
 
 function loadWidget(container, widgetId, client) {
     container.innerHTML = client.loadWidget(widgetId);
