@@ -127,26 +127,51 @@ function refresh(node, data) {
     }
 }
 
+function refreshContainer(containerElement) {
+    var xis = containerElement._xis;
+    var containerAttributes = xis.container;
+    if (containerAttributes.currentWidgetId != containerAttributes.widgetId) {
+        if (containerAttributes.widget) {
+            client.onDestroyWidget(containerAttributes.widget, containerAttributes.data);
+            unbindWidget(containerAttributes);
+            containerAttributes.currentWidgetId = undefined;
+        }
+        var widget = getRootXis().getWidget(containerAttributes.widgetId);
+        bindWidget(widget);
+        containerAttributes.currentWidgetId = widget.id;
+        containerAttributes.widget = widget;
+        var data;
+        if (widget.initialized) {
+            data = new Data(client.onInitWidget(widget), containerAttributes.data);
+        } else {
+            data = new Data(client.onShowWidget(widget), containerAttributes.data);
+        }
+        containerElement.appendChild(widget.getRootElement());
+        refresh(widget.getRootElement(), data);
+    }
+}
+
 function refreshElement(e, data) {
     var xis = e._xis;
     refreshAttributes(e, data);
     clearChildren(e);
-    if (xis.widget) {
-        refreshWidget(e, xis);
-    }
-    for (var i = 0; i < xis.childArray.length; i++) {
-        var child = xis.childArray[i];
-        if (isElement(child)) {
-            if (!child._xis.showHide || child._xis.showHide.evaluate(data)) {
-                if (child._xis.repeat) {
-                    evaluateRepeat(child, data);
-                } else {
-                    refreshElement(child, data);
+    if (xis.container) {
+        refreshContainer(e);
+    } else {
+        for (var i = 0; i < xis.childArray.length; i++) {
+            var child = xis.childArray[i];
+            if (isElement(child)) {
+                if (!child._xis.showHide || child._xis.showHide.evaluate(data)) {
+                    if (child._xis.repeat) {
+                        evaluateRepeat(child, data);
+                    } else {
+                        refreshElement(child, data);
+                    }
                 }
+            } else {
+                refreshTextNode(child, data);
+                showChild(e, i);
             }
-        } else {
-            refreshTextNode(child, data);
-            showChild(e, i);
         }
     }
 }
@@ -217,7 +242,7 @@ function initializeElement(element) {
         var arr = doSplit(element.getAttribute('data-widget'), '(');
         var widgetId = arr[0];
         var parameters = doSplit(arr[1]).map(s => trim(s));
-        xis.widget = { widgetId: widgetId, parameters: parameters };
+        xis.container = { widgetId: widgetId, parameters: parameters };
     }
     for (var attrName of element.getAttributeNames()) {
         var attrValue = element.getAttribute(attrName);
@@ -232,7 +257,7 @@ function initializeElement(element) {
 }
 
 function initializeTextNode(node) {
-    node._xis = { expression: { evaluate: (data) => node.nodeValue } };
+    node._xis = { expression: { evaluate: (_) => node.nodeValue } };
     if (node.nodeValue && node.nodeValue.indexOf('${') != -1) {
         node._xis.expression = new TextContentParser(node.nodeValue).parse();
     }
@@ -335,9 +360,8 @@ function removeLastChar(string) {
 }
 
 
-function bindPage(pageId) {
+function bindPage(page) {
     var xis = html._xis;
-    var page = xis.getPage(pageId);
     if (!page) return false;
     var html = getTemplateRoot();
     var head = getTemplateHead();
@@ -358,7 +382,6 @@ function bindPage(pageId) {
     for (var name of page.getBodyElement().getAttributeNames()) {
         body.setAttribute(name, page.body.getAttribute(name));
     }
-    return true;
 }
 
 function unbindPage() {
@@ -382,8 +405,55 @@ function unbindPage() {
     }
 }
 
-function
+function bindWidget(container, widgetId) {
+    var widget = getRootXis().getWidget(widgetId);
+    container.appendChild(widget.getRootElement());
+    container._xis.container.widget = widget;
+}
 
+function unbindWidget(container) {
+    for (var i = 0; i < container.childNodes.length; i++) {
+        var child = container.childNodes.item(i);
+        container.removeChild(child);
+    }
+}
+
+function showPage(pageId) {
+    var pageStatus = getRootNode()._xis.page;
+    if (pageId != pageStatus.pageId) {
+        if (pageStatus.pageId) {
+            unloadPage();
+            pageStatus.pageId = undefined;
+        }
+        loadPage(pageId);
+        pageStatus.pageId = pageId;
+    }
+}
+
+function loadPage(pageId) {
+    var headHolder = document.createElement('div');
+    var bodyHolder = document.createElement('div');
+    headHolder.innerHTML = client.loadHead(pageId);
+    bodyHolder.innerHTML = client.loadBody(pageId);
+    return {
+        id: pageId,
+        headHolder: headHolder,
+        bodyHolder, bodyHolder,
+        getHeadElement: () => this.headHolder.childNodes.item(0),
+        getBodyElement: () => this.bodyHolder.childNodes.item(0)
+    };
+}
+
+
+function loadWidget(widgetId) {
+    var holder = document.createElement('div');
+    holder.innerHTML = client.loadWidget(pageId);
+    return {
+        id: widgetId,
+        holder: holder,
+        getRootElement: () => this.headHolder.childNodes.item(0)
+    };
+}
 
 function getTemplateHead() {
     return getElementByTagName('head');
@@ -396,11 +466,13 @@ function getTemplateBody() {
 function getTemplateRoot() {
     return document.getRootNode();
 }
+function getRootXis() {
+    getTemplateRoot()._xis;
+}
 
 function getElementByTagName(name) {
     return document.getElementsByTagName(name).item(0);
 }
-
 
 
 function initPage() {
