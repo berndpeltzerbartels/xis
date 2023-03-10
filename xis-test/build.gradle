@@ -21,7 +21,8 @@ dependencies {
     implementation project(':xis-ajax-entities')
     compileOnly project(':xis-pages')
     compileOnly project(':xis-widgets')
-    compileOnly project(':xis-resources')
+    implementation project(':xis-resources')
+
     compileOnly project(':xis-javascript')
     implementation group: 'org.reflections', name: 'reflections', version: '0.9.10'
     implementation group: 'org.mockito', name: 'mockito-core', version: '2.1.0'

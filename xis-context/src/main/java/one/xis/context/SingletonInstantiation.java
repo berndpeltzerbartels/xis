@@ -89,7 +89,7 @@ public class SingletonInstantiation {
         singletons.add(o);
         fieldInjection.onComponentCreated(o);
         initMethodInvocation.onComponentCreated(o);
-        singletonInstantiators.forEach(instantitor -> instantitor.onComponentCreated(o));
+        unusedSingletonInstantiators.forEach(instantitor -> instantitor.onComponentCreated(o));
         createInstances();
     }
 

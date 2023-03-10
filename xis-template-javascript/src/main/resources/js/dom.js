@@ -112,13 +112,6 @@ function refreshAttributes(e, data) {
     }
 }
 
-
-function setPage(pageId, data) {
-    showPage(pageId);
-    var root = document.getRootNode();
-    refresh(root, data);
-}
-
 function refresh(node, data) {
     if (isElement(node)) {
         refreshElement(node, data);
@@ -127,28 +120,18 @@ function refresh(node, data) {
     }
 }
 
-function refreshContainer(containerElement) {
+function refreshContainer(containerElement, data) {
     var xis = containerElement._xis;
     var containerAttributes = xis.container;
-    if (containerAttributes.currentWidgetId != containerAttributes.widgetId) {
-        if (containerAttributes.widget) {
-            client.onDestroyWidget(containerAttributes.widget, containerAttributes.data);
-            unbindWidget(containerAttributes);
-            containerAttributes.currentWidgetId = undefined;
-        }
-        var widget = getRootXis().getWidget(containerAttributes.widgetId);
-        bindWidget(widget);
-        containerAttributes.currentWidgetId = widget.id;
-        containerAttributes.widget = widget;
-        var data;
-        if (widget.initialized) {
-            data = new Data(client.onInitWidget(widget), containerAttributes.data);
-        } else {
-            data = new Data(client.onShowWidget(widget), containerAttributes.data);
-        }
-        containerElement.appendChild(widget.getRootElement());
-        refresh(widget.getRootElement(), data);
+    var widgetId = containerAttributes.widgetIdExpr.evaluate(data);
+    if (widgetId != containerAttributes.currentWidgetId) {
+        var widgetRoot = getRootXis().getWidgetRoot();
+        containerElement.appendChild(widgetRoot);
     }
+    client.loadData(widgetId, data, newData => {
+        newData.parentData = data
+        refresh(widgetRoot, newData);
+    });
 }
 
 function refreshElement(e, data) {
@@ -156,7 +139,7 @@ function refreshElement(e, data) {
     refreshAttributes(e, data);
     clearChildren(e);
     if (xis.container) {
-        refreshContainer(e);
+        refreshContainer(e, data);
     } else {
         for (var i = 0; i < xis.childArray.length; i++) {
             var child = xis.childArray[i];
@@ -238,11 +221,7 @@ function initializeElement(element) {
     }
     if (element.getAttribute('data-widget')) {
         var attribute = element.getAttribute('data-widget');
-        attribute = removeLastChar(attribute);
-        var arr = doSplit(element.getAttribute('data-widget'), '(');
-        var widgetId = arr[0];
-        var parameters = doSplit(arr[1]).map(s => trim(s));
-        xis.container = { widgetId: widgetId, parameters: parameters };
+        xis.container = { widgetIdExpr: new TextContentParser(attribute).parse(), currentWidgetId: undefined, initializedWidgetIds: [] };
     }
     for (var attrName of element.getAttributeNames()) {
         var attrValue = element.getAttribute(attrName);
@@ -277,7 +256,7 @@ class Data {
         this.parentData = parentData;
     }
     /**
-     * 
+     * @public 
      * @param {Array} path the path of the data value
      * @returns {any}
      */
@@ -299,13 +278,15 @@ class Data {
     }
 
     /**
-     * 
+     * @public 
      * @param {String} key 
      * @param {any} value 
      */
     setValue(key, value) {
         this.values[key] = value;
     }
+
+
 }
 
 /**
@@ -418,23 +399,11 @@ function unbindWidget(container) {
     }
 }
 
-function showPage(pageId) {
-    var pageStatus = getRootNode()._xis.page;
-    if (pageId != pageStatus.pageId) {
-        if (pageStatus.pageId) {
-            unloadPage();
-            pageStatus.pageId = undefined;
-        }
-        loadPage(pageId);
-        pageStatus.pageId = pageId;
-    }
-}
-
 function loadPage(pageId) {
     var headHolder = document.createElement('div');
     var bodyHolder = document.createElement('div');
-    headHolder.innerHTML = client.loadHead(pageId);
-    bodyHolder.innerHTML = client.loadBody(pageId);
+    headHolder.innerHTML = client.loadPageHead(pageId);
+    bodyHolder.innerHTML = client.loadPageBody(pageId);
     return {
         id: pageId,
         headHolder: headHolder,

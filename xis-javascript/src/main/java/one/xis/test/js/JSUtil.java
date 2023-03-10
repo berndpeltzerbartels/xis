@@ -3,6 +3,7 @@ package one.xis.test.js;
 import lombok.experimental.UtilityClass;
 
 import javax.script.*;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -11,7 +12,7 @@ import java.util.Set;
 public class JSUtil {
 
     public CompiledScript compile(String javascript) throws ScriptException {
-        return compile(javascript, null);
+        return compile(javascript, Collections.emptyMap());
     }
 
     public CompiledScript compile(String javascript, Map<String, Object> bindingMap) throws ScriptException {

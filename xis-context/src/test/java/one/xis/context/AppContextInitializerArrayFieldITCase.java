@@ -11,7 +11,9 @@ class AppContextInitializerArrayFieldITCase {
 
     @Test
     void arrayField() {
-        var appContext = new TestContextBuilder().withSingletonClasses(Comp1.class, Comp2.class, Comp3.class).build();
+        var appContext = new TestContextBuilder().withSingletonClasses(Comp1.class, Comp2.class, Comp3.class)
+                .withComponentAnnotation(XISComponent.class)
+                .build();
 
         Comp1 comp1 = appContext.getSingleton(Comp1.class);
         Comp2 comp2 = appContext.getSingleton(Comp2.class);

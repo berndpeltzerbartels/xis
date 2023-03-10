@@ -26,4 +26,5 @@ include 'xis-entities'
 include 'xis-security'
 include 'xis-frontend-test'
 include 'xis-template-javascript'
+include 'xis-server'
 

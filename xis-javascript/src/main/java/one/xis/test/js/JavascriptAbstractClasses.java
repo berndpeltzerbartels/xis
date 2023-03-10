@@ -11,8 +11,7 @@ public class JavascriptAbstractClasses {
             .addDeclaredMethod("refresh")
             .addDeclaredMethod("getValueHolder")
             .addDeclaredMethod("getValue", 1)
-            .addDeclaredMethod("getChildren")
-            .addDeclaredMethod("getElement");
+            .addDeclaredMethod("getChildren");
 
 
     public static final JSSuperClass XIS_STATIC_TEXT_NODE = new JSSuperClass("XISStaticTextNode", "parent")
@@ -109,10 +108,6 @@ public class JavascriptAbstractClasses {
             .addDeclaredMethod("hide")
             .addDeclaredMethod("unbind")
             .addDeclaredMethod("refresh")
-            .addDeclaredMethod("bindHeadContent")
-            .addDeclaredMethod("bindBodyContent")
-            .addDeclaredMethod("unbindHeadContent")
-            .addDeclaredMethod("unbindBodyContent", 0)
             .addDeclaredMethod("setBodyAttributes", 0)
             .addDeclaredMethod("removeBodyAttributes")
             .superClass(XIS_COMPONENT);

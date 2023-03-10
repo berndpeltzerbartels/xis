@@ -14,11 +14,10 @@ import one.xis.test.mocks.LocalStorage;
 import one.xis.widget.WidgetComponent;
 import one.xis.widget.WidgetService;
 
-import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.Map;
 
-public class IntegrationTestInvokerBuilder implements ContextBuilder<IntegrationTestInvoker> {
+public class IntegrationTestInvokerBuilder {
 
     private final Class<?> controllerClass;
     private final Document document;
@@ -38,7 +37,6 @@ public class IntegrationTestInvokerBuilder implements ContextBuilder<Integration
         this.testContextBuiler.withSingletonClasses(controllerClass);
     }
 
-    @Override
     public IntegrationTestInvoker build() {
         var appContext = testContextBuiler.build();
         var http = new HttpMock(appContext.getSingleton(AjaxService.class));
@@ -46,41 +44,6 @@ public class IntegrationTestInvokerBuilder implements ContextBuilder<Integration
         return new IntegrationTestInvoker(script.toString(), bindings, appContext, document, http, localStorage);
     }
 
-    @Override
-    public ContextBuilder<IntegrationTestInvoker> withSingletonClass(Class<?> clazz) {
-        testContextBuiler.withSingletonClass(clazz);
-        return this;
-    }
-
-    @Override
-    public ContextBuilder<IntegrationTestInvoker> withMock(Object singleton) {
-        testContextBuiler.withMock(singleton);
-        return this;
-    }
-
-    @Override
-    public ContextBuilder<IntegrationTestInvoker> withPackage(String pack) {
-        testContextBuiler.withPackage(pack);
-        return this;
-    }
-
-    @Override
-    public ContextBuilder<IntegrationTestInvoker> withComponentAnnotation(Class<? extends Annotation> componentAnnotation) {
-        testContextBuiler.withComponentAnnotation(componentAnnotation);
-        return this;
-    }
-
-    @Override
-    public ContextBuilder<IntegrationTestInvoker> withDependencyFieldAnnotation(Class<? extends Annotation> dependencyFieldAnnotation) {
-        testContextBuiler.withDependencyFieldAnnotation(dependencyFieldAnnotation);
-        return this;
-    }
-
-    @Override
-    public ContextBuilder<IntegrationTestInvoker> withBeanInitAnnotation(Class<? extends Annotation> beanInitAnnotation) {
-        testContextBuiler.withBeanInitAnnotation(beanInitAnnotation);
-        return this;
-    }
 
     private void evaluateScript(AppContext context, HttpMock httpMock) {
         addApi();
@@ -146,4 +109,5 @@ public class IntegrationTestInvokerBuilder implements ContextBuilder<Integration
         script.append("var clientAttributes = new XISClientAttributes();\n");
         script.append("var actions = new XISActions();\n");
     }
+
 }

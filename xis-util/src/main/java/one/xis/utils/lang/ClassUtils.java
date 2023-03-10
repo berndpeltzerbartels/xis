@@ -63,4 +63,12 @@ public class ClassUtils {
         }
         return level;
     }
+
+    public static Class<?> classForName(String name) {
+        try {
+            return Class.forName(name);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

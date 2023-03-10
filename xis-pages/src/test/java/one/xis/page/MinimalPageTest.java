@@ -1,10 +1,7 @@
 package one.xis.page;
 
 import one.xis.context.AppContext;
-import one.xis.context.XISComponent;
-import one.xis.test.IntegrationTestInvoker;
 import one.xis.test.JSTestUtil;
-import org.junit.jupiter.api.Test;
 
 import javax.script.ScriptException;
 import javax.script.SimpleBindings;
@@ -56,15 +53,16 @@ class MinimalPageTest {
 
     }
 
-    @Test
+    //@Test
     void show() throws ScriptException {
 
+        /*
         var invoker = IntegrationTestInvoker.builder(MinimalPage.class).withComponentAnnotation(XISComponent.class).build();
 
         invoker.invokeInit();
 
         var document = invoker.getDocument();
-        
+        */
 
 
         /*

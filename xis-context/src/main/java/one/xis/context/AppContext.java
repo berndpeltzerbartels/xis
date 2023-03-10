@@ -11,6 +11,10 @@ public interface AppContext {
 
     Map<AppContextKey, AppContext> CONTEXT_MAP = new ConcurrentHashMap<>();
 
+    static AppContextBuilder builder() {
+        return new AppContextBuilderImpl();
+    }
+
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
     static AppContext getInstance(String rootPackageName) {
         AppContextKey appContextKey = AppContextKey.getKey(rootPackageName);

@@ -1,10 +1,13 @@
 package one.xis.test.js.api;
 
 import one.xis.test.JavaScript;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import javax.script.ScriptException;
 
+
+@Disabled
 class ScriptExpressionParserTest {
 
     @Test

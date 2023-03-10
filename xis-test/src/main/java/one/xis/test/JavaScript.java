@@ -93,7 +93,7 @@ public class JavaScript {
         public JavaScript build() throws ScriptException {
             StringBuilder script = new StringBuilder();
             if (withApi) {
-                script.append(new ClassPathResource("js/api.js").getContent());
+                script.append(new ClassPathResource("js/xis.js").getContent());
             }
             script.append(userScript);
             return new JavaScript(JSUtil.compile(script.toString(), bindings), document, console, localStorage, bindings);

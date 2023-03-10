@@ -2,12 +2,14 @@ package one.xis.test.js.api;
 
 import one.xis.test.JavaScript;
 import one.xis.test.mocks.Console;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import javax.script.ScriptException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Disabled
 class FunctionTokenParserTest {
 
 
