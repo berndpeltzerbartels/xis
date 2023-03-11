@@ -32,7 +32,7 @@ public class ControllerUtils {
 
 
     public static Set<Method> getActionMethods(Class<?> controllerClass) {
-        return getAnnotatedMethods(controllerClass, OnAction.class).collect(Collectors.toSet());
+        return getAnnotatedMethods(controllerClass, Action.class).collect(Collectors.toSet());
     }
 
     public static Stream<Parameter> getModelParamters(Method method) {

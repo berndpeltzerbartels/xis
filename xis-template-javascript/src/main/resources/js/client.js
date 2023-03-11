@@ -49,8 +49,6 @@ class Client {
         this.httpClient.get('/xis/page/' + pageId + '/body', callback)
     }
 
-
-
     /**
      * @public
      * @param {string} pageId

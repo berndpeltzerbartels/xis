@@ -1,6 +1,6 @@
 package one.xis.test.js;
 
-import one.xis.OnAction;
+import one.xis.Action;
 import one.xis.context.XISComponent;
 import one.xis.controller.ControllerUtils;
 
@@ -58,8 +58,8 @@ public class JavascriptControllerModelParser {
 
     private JSArray activeActionsArray(Class<?> controllerClass) {
         return new JSArray(ControllerUtils.getActionMethods(controllerClass).stream()
-                .map(m -> m.getAnnotation(OnAction.class))
-                .map(OnAction::value)
+                .map(m -> m.getAnnotation(Action.class))
+                .map(Action::value)
                 .map(JSString::new)
                 .toArray(JSString[]::new));
     }
@@ -107,7 +107,7 @@ public class JavascriptControllerModelParser {
         var object = new JSObject();
         ControllerUtils.getActionMethods(controllerClass)
                 .forEach(method -> {
-                    var action = method.getAnnotation(OnAction.class).value();
+                    var action = method.getAnnotation(Action.class).value();
                     object.addField(action, componentStateArray(Stream.of(method)));
                 });
 

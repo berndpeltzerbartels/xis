@@ -19,6 +19,7 @@ dependencies {
     compileOnly project(':xis-resources')
     annotationProcessor 'org.projectlombok:lombok:1.18.12'
     implementation 'org.projectlombok:lombok:1.18.12'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.14.1'
 }
 
 test {
