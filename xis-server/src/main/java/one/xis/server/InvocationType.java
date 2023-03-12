@@ -1,5 +1,5 @@
 package one.xis.server;
 
 enum InvocationType {
-    ACTION, MODEL
+    ACTION, MODEL, TIMESTAMP
 }

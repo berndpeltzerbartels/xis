@@ -2,56 +2,37 @@ package one.xis.server;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.*;
-import one.xis.*;
+import lombok.Data;
+import lombok.SneakyThrows;
+import lombok.experimental.SuperBuilder;
+import one.xis.ClientId;
+import one.xis.Model;
+import one.xis.UserId;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.List;
 
 @Data
-@With
-@AllArgsConstructor
-@NoArgsConstructor
-class ControllerMethod {
+@SuperBuilder
+abstract class ControllerMethod {
 
     @JsonIgnore
-    private Object controller;
+    protected Object controller;
 
     @JsonIgnore
-    private Method method;
-
-    private int id;
+    protected Method method;
 
     @JsonProperty("parameters")
-    private List<MethodParameter> methodParameters;
-
-    private String key;
-
-    @JsonProperty("type")
-    private InvocationType invocationType;
+    protected List<MethodParameter> methodParameters;
 
     @SneakyThrows
     Object invoke(InvocationContext context) {
         return method.invoke(controller, prepareArgs(context));
     }
 
-    boolean isWidget() {
-        return controller.getClass().isAnnotationPresent(Widget.class);
-    }
-
-    boolean isPage() {
-        return controller.getClass().isAnnotationPresent(Page.class);
-    }
-
-    boolean isModel() {
-        return method.isAnnotationPresent(Model.class);
-    }
-
-    boolean isAction() {
-        return method.isAnnotationPresent(Action.class);
-    }
-
+    @JsonProperty("type")
+    abstract InvocationType getInvocationType();
 
     @Override
     public String toString() {
@@ -59,7 +40,7 @@ class ControllerMethod {
     }
 
 
-    private Object[] prepareArgs(InvocationContext context) {
+    protected Object[] prepareArgs(InvocationContext context) {
         Object[] args = new Object[method.getParameterCount()];
         var params = method.getParameters();
         for (int i = 0; i < args.length; i++) {
@@ -78,7 +59,7 @@ class ControllerMethod {
     }
 
     private Object modelParameter(Parameter parameter, InvocationContext context) {
-        var key = method.getAnnotation(Model.class).value();
+        var key = parameter.getAnnotation(Model.class).value();
         return context.getData().get(key);
     }
 }

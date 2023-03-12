@@ -10,14 +10,11 @@ repositories {
 dependencies {
 
     implementation project(':xis-context')
-    implementation project(':xis-pages')
+    implementation project(':xis-server')
     implementation project(':xis-widgets')
-    implementation project(':xis-root-page')
     implementation project(':xis-resources')
     implementation project(':xis-remote-core')
     implementation project(':xis-util')
-    implementation project(':xis-ajax')
-    implementation project(':xis-ajax-entities')
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'

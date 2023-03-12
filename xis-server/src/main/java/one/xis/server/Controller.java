@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Collection;
 import java.util.Map;
 
 @Data
@@ -19,8 +18,11 @@ public class Controller {
     private Class<?> controllerClass;
 
     @JsonProperty("model-methods")
-    private Collection<ControllerMethod> modelMethods;
+    private Map<String, ModelMethod> modelMethods;
+
+    @JsonProperty("model-timestamp-methods")
+    private Map<String, ModelTimestampMethod> modelTimestampMethods;
 
     @JsonProperty("action-methods")
-    private Map<String, ControllerMethod> actionMethods;
+    private Map<String, ActionMethod> actionMethods;
 }
