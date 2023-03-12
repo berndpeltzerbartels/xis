@@ -8,7 +8,7 @@ class ModelMethod extends ControllerMethod {
 
     @Override
     @SneakyThrows
-    Object invoke(InvocationContext context) {
+    Object invoke(Request context) {
         return method.invoke(controller, prepareArgs(context));
     }
 

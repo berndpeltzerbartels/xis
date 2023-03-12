@@ -9,7 +9,7 @@ import java.util.Map;
 
 @Data
 @NoArgsConstructor
-public class Controller {
+public class ControllerWrapper {
 
     @JsonIgnore
     private String id;

@@ -23,11 +23,13 @@ abstract class ControllerMethod {
     @JsonIgnore
     protected Method method;
 
+    protected String key;
+
     @JsonProperty("parameters")
     protected List<MethodParameter> methodParameters;
 
     @SneakyThrows
-    Object invoke(InvocationContext context) {
+    Object invoke(Request context) {
         return method.invoke(controller, prepareArgs(context));
     }
 
@@ -40,7 +42,7 @@ abstract class ControllerMethod {
     }
 
 
-    protected Object[] prepareArgs(InvocationContext context) {
+    protected Object[] prepareArgs(Request context) {
         Object[] args = new Object[method.getParameterCount()];
         var params = method.getParameters();
         for (int i = 0; i < args.length; i++) {
@@ -58,7 +60,7 @@ abstract class ControllerMethod {
         return args;
     }
 
-    private Object modelParameter(Parameter parameter, InvocationContext context) {
+    private Object modelParameter(Parameter parameter, Request context) {
         var key = parameter.getAnnotation(Model.class).value();
         return context.getData().get(key);
     }

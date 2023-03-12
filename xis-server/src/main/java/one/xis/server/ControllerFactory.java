@@ -8,7 +8,6 @@ import one.xis.utils.lang.MethodUtils;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -18,10 +17,8 @@ import java.util.stream.Stream;
 @XISComponent
 class ControllerFactory {
 
-    private static int currentId;
-
-    Controller createController(@NonNull String id, @NonNull Object controller) {
-        var controllerModel = new Controller();
+    ControllerWrapper createController(@NonNull String id, @NonNull Object controller) {
+        var controllerModel = new ControllerWrapper();
         controllerModel.setId(id);
         controllerModel.setModelMethods(modelMethods(controller));
         controllerModel.setModelTimestampMethods(modelTimestampMethods(controller));
@@ -30,18 +27,18 @@ class ControllerFactory {
         return controllerModel;
     }
 
-    private Collection<ModelMethod> modelMethods(Object controller) {
+    private Map<String, ModelMethod> modelMethods(Object controller) {
         return MethodUtils.methods(controller).stream()
                 .filter(m -> m.isAnnotationPresent(Model.class))
                 .map(method -> createModelMethod(controller, method))
-                .collect(Collectors.toSet());
+                .collect(Collectors.toMap(ControllerMethod::getKey, Function.identity()));
     }
 
-    private Collection<ModelTimestampMethod> modelTimestampMethods(Object controller) {
+    private Map<String, ModelTimestampMethod> modelTimestampMethods(Object controller) {
         return MethodUtils.methods(controller).stream()
                 .filter(m -> m.isAnnotationPresent(ModelTimestamp.class))
                 .map(method -> createModelTimestampMethod(controller, method))
-                .collect(Collectors.toSet());
+                .collect(Collectors.toMap(ControllerMethod::getKey, Function.identity()));
     }
 
     private Map<String, ActionMethod> actionMethodMap(Object controller) {
@@ -56,7 +53,6 @@ class ControllerFactory {
 
     private ModelMethod createModelMethod(Object controller, Method method) {
         return ModelMethod.builder()
-                .id(++currentId)
                 .method(method)
                 .controller(controller)
                 .key(method.getAnnotation(Model.class).value())
@@ -66,7 +62,6 @@ class ControllerFactory {
 
     private ModelTimestampMethod createModelTimestampMethod(Object controller, Method method) {
         return ModelTimestampMethod.builder()
-                .id(++currentId)
                 .method(method)
                 .controller(controller)
                 .key(method.getAnnotation(ModelTimestamp.class).value())
@@ -76,7 +71,6 @@ class ControllerFactory {
 
     private ActionMethod createActionMethod(Object controller, Method method) {
         return ActionMethod.builder()
-                .id(++currentId)
                 .method(method)
                 .controller(controller)
                 .key(method.getAnnotation(Action.class).value())

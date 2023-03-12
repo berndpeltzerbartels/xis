@@ -66,6 +66,9 @@ class AppContextBuilderImpl implements AppContextBuilder {
 
     @Override
     public AppContext build() {
+        componentAnnotations.add(XISComponent.class);
+        beanInitAnnotation.add(XISInit.class);
+        dependencyFieldAnnotations.add(XISInject.class);
         validate();
         var noScanReflection = new NoScanReflection(singletons, singletonClasses, componentAnnotations, dependencyFieldAnnotations);
         var defaultReflection = new DefaultReflection(packagesToScan, componentAnnotations, dependencyFieldAnnotations);

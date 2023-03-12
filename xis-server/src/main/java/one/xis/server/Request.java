@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.Map;
 
 @Data
-class InvocationContext {
+public class Request {
     private Map<String, DataItem> data;
     private String clientId;
     private String userId;
@@ -14,5 +14,5 @@ class InvocationContext {
     private String controllerId;
 
     @JsonProperty("type")
-    private InvocationType invocationType;
+    private ControllerType controllerType;
 }

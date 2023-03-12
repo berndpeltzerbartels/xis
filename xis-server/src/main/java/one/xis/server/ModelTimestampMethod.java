@@ -16,7 +16,7 @@ class ModelTimestampMethod extends ControllerMethod {
 
     @Override
     @SneakyThrows
-    Optional<Long> invoke(InvocationContext context) {
+    Optional<Long> invoke(Request context) {
         Object rv = method.invoke(controller, prepareArgs(context));
         if (rv == null) {
             return Optional.empty();

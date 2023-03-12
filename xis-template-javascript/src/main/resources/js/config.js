@@ -1,19 +1,19 @@
 
 /**
- * @property {array<ComponentConfig>} pageConfigs
- * @property {array<ComponentConfig>} widgetConfigs
+ * @property {array<ComponentConfig>} pages
+ * @property {array<ComponentConfig>} widgets
  * @property {string} welcomePageId
  */
 class Config {
 
     constructor() {
-        this.pageConfigs = [];
-        this.widgetConfigs = [];
+        this.pages = [];
+        this.widgets = [];
         this.welcomePageId = undefined;
     }
 
     getPageConfig(id) {
-        return this.pageConfigs.find(config => config.id == id);
+        return this.pages.find(config => config.id == id);
     }
 
     getWidgetConfig(id) {

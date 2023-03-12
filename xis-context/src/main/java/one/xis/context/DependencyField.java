@@ -47,7 +47,7 @@ public abstract class DependencyField implements ComponentCreationListener {
         if (!anno.isAnnotationPresent(XISComponent.class)) {
             String annoName = anno.getSimpleName();
             String componentAnnoName = XISComponent.class.getSimpleName();
-            throw new AppContextException(String.format("%s used in @XISInject is not annotated as component. Consider to annotate @%s with @%s", annoName, annoName, componentAnnoName));
+            throw new AppContextException(String.format("@%s used in @XISInject is not annotated to be a component. Consider to annotate @%s with @%s", annoName, annoName, componentAnnoName));
         }
     }
 

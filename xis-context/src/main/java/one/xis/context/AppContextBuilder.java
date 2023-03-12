@@ -2,10 +2,15 @@ package one.xis.context;
 
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
+import java.util.Collection;
 
 public interface AppContextBuilder {
 
     AppContext build();
+
+    static AppContextBuilder createInstance() {
+        return new AppContextBuilderImpl();
+    }
 
     AppContextBuilder withSingletonClass(Class<?> clazz);
 
@@ -41,7 +46,7 @@ public interface AppContextBuilder {
 
     AppContextBuilder withBeanInitAnnotation(Class<? extends Annotation> beanInitAnnotation);
 
-    default AppContextBuilder withbeanInitAnnotations(Class<? extends Annotation>... beanInitAnnotations) {
+    default AppContextBuilder withBeanInitAnnotations(Class<? extends Annotation>... beanInitAnnotations) {
         Arrays.stream(beanInitAnnotations).forEach(this::withBeanInitAnnotation);
         return this;
     }
@@ -50,6 +55,11 @@ public interface AppContextBuilder {
 
     default AppContextBuilder withSingeltons(Object... objects) {
         Arrays.stream(objects).forEach(this::withSingelton);
+        return this;
+    }
+
+    default AppContextBuilder withSingeltons(Collection<Object> objects) {
+        objects.forEach(this::withSingelton);
         return this;
     }
 }
