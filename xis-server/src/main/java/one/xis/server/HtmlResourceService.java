@@ -67,8 +67,7 @@ class HtmlResourceService {
     private String childNodesAsString(Element e) {
         return XmlUtil.getChildNodes(e).map(XmlUtil::asString).collect(Collectors.joining()).trim();
     }
-
-
+    
     private Resource htmlResource(Object controller) {
         return resources.getByPath(getHtmlTemplatePath(controller));
     }
