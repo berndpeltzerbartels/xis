@@ -26,6 +26,7 @@ class ControllerWrapperFactory {
     ControllerWrapper createController(@NonNull String id, @NonNull Object controller) {
         var controllerWrapper = new ControllerWrapper();
         controllerWrapper.setId(id);
+        controllerWrapper.setController(controller);
         controllerWrapper.setModelMethods(modelMethods(controller));
         controllerWrapper.setModelTimestampMethods(modelTimestampMethods(controller));
         controllerWrapper.setActionMethods(actionMethodMap(controller));
@@ -45,14 +46,14 @@ class ControllerWrapperFactory {
     private Map<String, ModelMethod> modelMethods(Object controller) {
         return MethodUtils.methods(controller).stream()
                 .filter(m -> m.isAnnotationPresent(Model.class))
-                .map(method -> createModelMethod(controller, method))
+                .map(this::createModelMethod)
                 .collect(Collectors.toMap(ControllerMethod::getKey, Function.identity()));
     }
 
     private Map<String, ModelTimestampMethod> modelTimestampMethods(Object controller) {
         return MethodUtils.methods(controller).stream()
                 .filter(m -> m.isAnnotationPresent(ModelTimestamp.class))
-                .map(method -> createModelTimestampMethod(controller, method))
+                .map(this::createModelTimestampMethod)
                 .collect(Collectors.toMap(ControllerMethod::getKey, Function.identity()));
     }
 
@@ -63,31 +64,28 @@ class ControllerWrapperFactory {
     private Stream<ActionMethod> actionMethods(Object controller) {
         return MethodUtils.methods(controller).stream()
                 .filter(m -> m.isAnnotationPresent(Action.class))
-                .map(method -> createActionMethod(controller, method));
+                .map(this::createActionMethod);
     }
 
-    private ModelMethod createModelMethod(Object controller, Method method) {
+    private ModelMethod createModelMethod(Method method) {
         return ModelMethod.builder()
                 .method(method)
-                .controller(controller)
                 .key(method.getAnnotation(Model.class).value())
                 .methodParameters(createParameters(method))
                 .build();
     }
 
-    private ModelTimestampMethod createModelTimestampMethod(Object controller, Method method) {
+    private ModelTimestampMethod createModelTimestampMethod(Method method) {
         return ModelTimestampMethod.builder()
                 .method(method)
-                .controller(controller)
                 .key(method.getAnnotation(ModelTimestamp.class).value())
                 .methodParameters(createParameters(method))
                 .build();
     }
 
-    private ActionMethod createActionMethod(Object controller, Method method) {
+    private ActionMethod createActionMethod(Method method) {
         return ActionMethod.builder()
                 .method(method)
-                .controller(controller)
                 .key(method.getAnnotation(Action.class).value())
                 .methodParameters(createParameters(method))
                 .build();

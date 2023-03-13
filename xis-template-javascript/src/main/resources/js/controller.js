@@ -105,14 +105,22 @@ class Controller {
     * @returns {Promise<string>}
     */
     refreshPage(pageId) {
+        var controller = this;
         return new Promise((resolve, _) => {
-            var head = this.pageHeadDoms[pageId];
-            var body = this.pageBodyDoms[pageId];
-            var data = this.pageData[pageId];
+            var head = controller.pageHeadDoms[pageId];
+            var body = controller.pageBodyDoms[pageId];
+            var data = controller.pageData[pageId];
             refresh(head, data);
             refresh(body, data);
+            controller.updateHistory(head);
             resolve(pageId);
         });
+    }
+
+    updateHistory(head) {
+        var titleList = head.getElementsByTagName('title');
+        var title = titleList.length > 0 ? titleList.item(0).innerHTML : '';
+        window.history.pushState({}, title, pageId);
     }
 
     /**
