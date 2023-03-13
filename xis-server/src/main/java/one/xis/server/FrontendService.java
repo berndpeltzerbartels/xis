@@ -10,7 +10,7 @@ import one.xis.context.XISInit;
 @RequiredArgsConstructor
 public class FrontendService {
 
-    private final ControllerInvocationService invocationService;
+    private final ControllerService controllerService;
     private final ConfigService configService;
 
     @Getter
@@ -21,11 +21,29 @@ public class FrontendService {
         config = configService.getConfig();
     }
 
-    public Response invokeModelMethods(Request request) {
-        return invocationService.invokeModelMethods(request);
+    public Response invokePageActionMethod(Request request) {
+        return controllerService.invokePageActionMethod(request);
     }
 
-    public Response invokeActionMethod(Request request) {
-        return invocationService.invokeActionMethod(request);
+    public Response invokeWidgetActionMethod(Request request) {
+        return controllerService.invokeWidgetActionMethod(request);
     }
+
+    public Response invokePageModelMethods(Request request) {
+        return controllerService.invokePageModelMethods(request);
+    }
+
+    public Response invokeWidgetModelMethods(Request request) {
+        return controllerService.invokeWidgetModelMethods(request);
+    }
+
+    public String getPageHtmlResource(String id) {
+        return controllerService.getPageHtmlResource(id).getContent();
+    }
+
+    public String getWidgetHtmlResource(String id) {
+        return controllerService.getWidgetHtmlResource(id).getContent();
+    }
+
+
 }

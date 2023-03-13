@@ -1,6 +1,5 @@
 package one.xis.server;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.SneakyThrows;
@@ -17,20 +16,13 @@ import java.util.List;
 @SuperBuilder
 abstract class ControllerMethod {
 
-    @JsonIgnore
-    protected Object controller;
-
-    @JsonIgnore
     protected Method method;
-
     protected String key;
-
-    @JsonProperty("parameters")
     protected List<MethodParameter> methodParameters;
 
     @SneakyThrows
-    Object invoke(Request context) {
-        return method.invoke(controller, prepareArgs(context));
+    Object invoke(Request request, Object controller) {
+        return method.invoke(controller, prepareArgs(request));
     }
 
     @JsonProperty("type")

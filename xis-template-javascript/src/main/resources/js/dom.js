@@ -71,15 +71,17 @@ function evaluateRepeat(e, data) {
     var xis = e._xis;
     var repeat = xis.repeat;
     var parent = xis.parent;
-    var arr = repeat.expression.evaluate(data);
+    var dataItem = repeat.expression.evaluate(data);
+    var arr = dataItem.value;
+    var timestamp = dataItem.timestamp;
     if (!arr) return;
     var valueKey = repeat.varName;
     var newData = new Data({}, data);
     var i = 0;
     var element;
     while (i < arr.length) {
-        newData.setValue(valueKey, arr[i]);
-        newData.setValue(valueKey + '_index', i);
+        newData.setValue(valueKey, arr[i], timestamp);
+        newData.setValue(valueKey + '_index', i, timestamp);
         if (repeat.cache.elements.length <= i) {
             repeat.cache.elements.push(cloneNode(e));
         }
@@ -243,53 +245,6 @@ function initializeTextNode(node) {
 }
 
 /**
- * Hierarchical page-data
- */
-class Data {
-
-    /**
-     * 
-     * @param {any} values 
-     */
-    constructor(values, parentData = undefined) {
-        this.values = values;
-        this.parentData = parentData;
-    }
-    /**
-     * @public 
-     * @param {Array} path the path of the data value
-     * @returns {any}
-     */
-    getValue(path) {
-        var dataNode = this.values;
-        for (var i = 0; i < path.length; i++) {
-            var key = path[i];
-            if (dataNode[key]) {
-                dataNode = dataNode[key];
-            } else {
-                dataNode = undefined;
-                break;
-            }
-        }
-        if (dataNode === undefined && this.parentData) {
-            return this.parentData.getValue(path)
-        }
-        return dataNode;
-    }
-
-    /**
-     * @public 
-     * @param {String} key 
-     * @param {any} value 
-     */
-    setValue(key, value) {
-        this.values[key] = value;
-    }
-
-
-}
-
-/**
  * Maps a NodeList to an array.
  *
  * @public
@@ -340,16 +295,12 @@ function removeLastChar(string) {
     return string.substring(0, string.length - 1); // surprising, but tested
 }
 
-
-function bindPage(page) {
+function bindHead(newHead) {
     var xis = html._xis;
-    if (!page) return false;
-    var html = getTemplateRoot();
     var head = getTemplateHead();
-    var body = getTemplateBody();
     var title = getTitle();
-    for (var i = 0; i < page.getHeadElement().childNodes.length; i++) {
-        var child = page.getHeadElement().childNodes.item(i);
+    for (var i = 0; i < newHead.childNodes.length; i++) {
+        var child = newHead.childNodes.item(i);
         if (child.localName && child.localName == title) {
             title.innerHTML = child.innerHTML;
         } else {
@@ -357,13 +308,17 @@ function bindPage(page) {
             xis.head.childNodes.push(child);
         }
     }
-    for (var i = 0; i < page.getBodyElement().childNodes.length; i++) {
-        body.appendChild(page.getBodyElement().childNodes.item(i));
+}
+
+function bindBody(newBody) {
+    for (var i = 0; i < newBody.childNodes.length; i++) {
+        body.appendChild(newBody.childNodes.item(i));
     }
-    for (var name of page.getBodyElement().getAttributeNames()) {
-        body.setAttribute(name, page.body.getAttribute(name));
+    for (var name of newBody.getAttributeNames()) {
+        body.setAttribute(name, newBody.getAttribute(name));
     }
 }
+
 
 function unbindPage() {
     var html = getTemplateRoot();

@@ -8,6 +8,7 @@ import one.xis.Widget;
 import one.xis.context.XISComponent;
 import one.xis.context.XISInit;
 import one.xis.context.XISInject;
+import one.xis.resource.Resource;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -18,7 +19,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 class ControllerService {
 
-    private final ControllerFactory controllerFactory;
+    private final ControllerWrapperFactory controllerWrapperFactory;
 
     @XISInject(annotatedWith = Widget.class)
     private Collection<Object> widgetControllers;
@@ -38,25 +39,50 @@ class ControllerService {
         pageControllerWrappers = pageControllerWrappers();
     }
 
+
+    Resource getPageHtmlResource(String id) {
+        return controllerWrapperById(id, pageControllerWrappers).getHtmlResource();
+    }
+
+    Resource getWidgetHtmlResource(String id) {
+        return controllerWrapperById(id, widgetControllerWrappers).getHtmlResource();
+    }
+
+
+    Response invokePageModelMethods(Request request) {
+        var data = findPageControllerWrapper(request).orElseThrow().invokeGetModelMethods(request);
+        return new Response(data, request.getControllerId());
+    }
+
+    Response invokeWidgetModelMethods(Request request) {
+        var data = findWidgetControllerWrapper(request).orElseThrow().invokeGetModelMethods(request);
+        return new Response(data, request.getControllerId());
+    }
+
+    Response invokePageActionMethod(Request request) {
+        var result = findPageControllerWrapper(request).orElseThrow().invokeActionMethod(request);
+        var next = controllerWrapperByResult(result, pageControllerWrappers).orElseThrow();
+        return new Response(next.invokeGetModelMethods(request), next.getId());
+    }
+
+    Response invokeWidgetActionMethod(Request request) {
+        var result = findPageControllerWrapper(request).orElseThrow().invokeActionMethod(request);
+        var next = controllerWrapperByResult(result, widgetControllerWrappers).orElseThrow();
+        return new Response(next.invokeGetModelMethods(request), next.getId());
+    }
+
     private Collection<ControllerWrapper> widgetControllerWrappers() {
         return widgetControllers.stream()
-                .map(controller -> createController(controller, this::getWidgetId))
+                .map(controller -> createControllerWrapper(controller, this::getWidgetId))
                 .collect(Collectors.toSet());
     }
 
     private Collection<ControllerWrapper> pageControllerWrappers() {
         return pageControllers.stream()
-                .map(controller -> createController(controller, this::getPagePath))
+                .map(controller -> createControllerWrapper(controller, this::getPagePath))
                 .collect(Collectors.toSet());
     }
 
-    Optional<ControllerWrapper> widgetControllerWrapperByResult(Object result) {
-        return controllerWrapperByResult(result, widgetControllerWrappers);
-    }
-
-    Optional<ControllerWrapper> pageControllerWrapperByResult(Object result) {
-        return controllerWrapperByResult(result, pageControllerWrappers);
-    }
 
     private Optional<ControllerWrapper> controllerWrapperByResult(Object result, Collection<ControllerWrapper> controllerWrappers) {
         if (result instanceof Class) {
@@ -75,8 +101,8 @@ class ControllerService {
         return controllerWrappers.stream().filter(c -> c.getId().equals(id)).findFirst().orElseThrow();
     }
 
-    private ControllerWrapper createController(Object controller, Function<Object, String> idMapper) {
-        return controllerFactory.createController(idMapper.apply(controller), controller);
+    private ControllerWrapper createControllerWrapper(Object controller, Function<Object, String> idMapper) {
+        return controllerWrapperFactory.createController(idMapper.apply(controller), controller);
     }
 
     private String getWidgetId(Object widgetController) {
@@ -87,4 +113,15 @@ class ControllerService {
         return widgetController.getClass().getAnnotation(Page.class).path();
     }
 
+    private Optional<ControllerWrapper> findPageControllerWrapper(Request request) {
+        return pageControllerWrappers.stream()
+                .filter(controller -> controller.getId().equals(request.getControllerId()))
+                .findFirst();
+    }
+
+    private Optional<ControllerWrapper> findWidgetControllerWrapper(Request request) {
+        return widgetControllerWrappers.stream()
+                .filter(controller -> controller.getId().equals(request.getControllerId()))
+                .findFirst();
+    }
 }

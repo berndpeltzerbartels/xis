@@ -6,10 +6,7 @@ import one.xis.server.Config;
 import one.xis.server.FrontendService;
 import one.xis.server.Request;
 import one.xis.server.Response;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/xis")
@@ -23,14 +20,34 @@ class SpringController {
         return frontendService.getConfig();
     }
 
-    @GetMapping("/model")
-    Response getModel(Request request) {
-        return frontendService.invokeModelMethods(request);
+    @GetMapping("/page/model")
+    Response getPageModel(@RequestBody Request request) {
+        return frontendService.invokePageModelMethods(request);
     }
 
-    @PostMapping("/action")
-    Response onAction(Request request) {
-        return frontendService.invokeActionMethod(request);
+    @GetMapping("/widget/model")
+    Response getWidgetModel(@RequestBody Request request) {
+        return frontendService.invokeWidgetModelMethods(request);
+    }
+
+    @PostMapping("/page/action")
+    Response onPageAction(@RequestBody Request request) {
+        return frontendService.invokePageActionMethod(request);
+    }
+
+    @PostMapping("/widget/action")
+    Response onWidgetAction(@RequestBody Request request) {
+        return frontendService.invokeWidgetActionMethod(request);
+    }
+
+    @GetMapping("/page/html")
+    String getPageHtml(@RequestParam("id") String id) {
+        return frontendService.getPageHtmlResource(id);
+    }
+
+    @GetMapping("/widget/html")
+    String getWidgetHtml(@RequestParam("id") String id) {
+        return frontendService.getWidgetHtmlResource(id);
     }
 
 

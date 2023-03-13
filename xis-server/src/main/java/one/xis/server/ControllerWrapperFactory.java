@@ -1,8 +1,11 @@
 package one.xis.server;
 
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import one.xis.*;
 import one.xis.context.XISComponent;
+import one.xis.resource.Resource;
+import one.xis.resource.Resources;
 import one.xis.utils.lang.MethodUtils;
 
 import java.lang.reflect.Method;
@@ -15,16 +18,28 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @XISComponent
-class ControllerFactory {
+@RequiredArgsConstructor
+class ControllerWrapperFactory {
+
+    private final Resources resources;
 
     ControllerWrapper createController(@NonNull String id, @NonNull Object controller) {
-        var controllerModel = new ControllerWrapper();
-        controllerModel.setId(id);
-        controllerModel.setModelMethods(modelMethods(controller));
-        controllerModel.setModelTimestampMethods(modelTimestampMethods(controller));
-        controllerModel.setActionMethods(actionMethodMap(controller));
-        controllerModel.setControllerClass(controller.getClass());
-        return controllerModel;
+        var controllerWrapper = new ControllerWrapper();
+        controllerWrapper.setId(id);
+        controllerWrapper.setModelMethods(modelMethods(controller));
+        controllerWrapper.setModelTimestampMethods(modelTimestampMethods(controller));
+        controllerWrapper.setActionMethods(actionMethodMap(controller));
+        controllerWrapper.setControllerClass(controller.getClass());
+        controllerWrapper.setHtmlResource(htmlResource(controller));
+        return controllerWrapper;
+    }
+
+    private Resource htmlResource(Object controller) {
+        return resources.getByPath(getHtmlTemplatePath(controller));
+    }
+
+    private String getHtmlTemplatePath(Object controller) {
+        return controller.getClass().getName().replace('.', '/') + ".html";
     }
 
     private Map<String, ModelMethod> modelMethods(Object controller) {
