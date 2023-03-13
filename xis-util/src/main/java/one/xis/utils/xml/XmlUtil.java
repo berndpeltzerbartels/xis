@@ -23,8 +23,12 @@ public class XmlUtil {
         return new XmlLoader().loadDocument(file);
     }
 
-    public Document loadDocument(String xml) throws IOException, SAXException {
-        return new XmlLoader().loadDocument(xml);
+    public Document loadDocument(String xml) {
+        try {
+            return new XmlLoader().loadDocument(xml);
+        } catch (IOException | SAXException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public Document loadDocument(InputStream in) throws IOException, SAXException {
@@ -72,7 +76,25 @@ public class XmlUtil {
         return map;
     }
 
-    public static String asString(Document document) throws TransformerException {
-        return new XmlSerializer().serialize(document.getDocumentElement());
+    public static String asString(Document document) {
+        return asString(document.getDocumentElement());
+    }
+
+    public static String asString(Element element) {
+        try {
+            return new XmlSerializer().serialize(element);
+        } catch (TransformerException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static String asString(Node node) {
+        if (node instanceof Document) {
+            return asString((Document) node);
+        }
+        if (node instanceof Element) {
+            return asString((Element) node);
+        }
+        return node.getNodeValue();
     }
 }

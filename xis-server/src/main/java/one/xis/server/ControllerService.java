@@ -8,7 +8,6 @@ import one.xis.Widget;
 import one.xis.context.XISComponent;
 import one.xis.context.XISInit;
 import one.xis.context.XISInject;
-import one.xis.resource.Resource;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -38,16 +37,7 @@ class ControllerService {
         widgetControllerWrappers = widgetControllerWrappers();
         pageControllerWrappers = pageControllerWrappers();
     }
-
-
-    Resource getPageHtmlResource(String id) {
-        return controllerWrapperById(id, pageControllerWrappers).getHtmlResource();
-    }
-
-    Resource getWidgetHtmlResource(String id) {
-        return controllerWrapperById(id, widgetControllerWrappers).getHtmlResource();
-    }
-
+    
 
     Response invokePageModelMethods(Request request) {
         var data = findPageControllerWrapper(request).orElseThrow().invokeGetModelMethods(request);
@@ -73,7 +63,7 @@ class ControllerService {
 
     private Collection<ControllerWrapper> widgetControllerWrappers() {
         return widgetControllers.stream()
-                .map(controller -> createControllerWrapper(controller, this::getWidgetId))
+                .map(controller -> createControllerWrapper(controller, WidgetUtil::getId))
                 .collect(Collectors.toSet());
     }
 
@@ -105,12 +95,14 @@ class ControllerService {
         return controllerWrapperFactory.createController(idMapper.apply(controller), controller);
     }
 
-    private String getWidgetId(Object widgetController) {
-        return widgetController.getClass().getAnnotation(Widget.class).value();
-    }
 
-    private String getPagePath(Object widgetController) {
-        return widgetController.getClass().getAnnotation(Page.class).path();
+    private String getPagePath(Object pageController) {
+        var path = pageController.getClass().getAnnotation(Page.class).path();
+        if (!path.endsWith(".html")) {
+            throw new IllegalStateException(pageController.getClass() + ": Identifier in @Page-annotation must have suffix '.html'");
+        }
+        return path;
+
     }
 
     private Optional<ControllerWrapper> findPageControllerWrapper(Request request) {

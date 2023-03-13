@@ -15,6 +15,7 @@ dependencies {
     implementation project(':xis-resources')
     implementation project(':xis-remote-core')
     implementation project(':xis-util')
+    implementation project(':xis-template-javascript')
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'

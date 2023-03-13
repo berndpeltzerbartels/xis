@@ -1,10 +1,10 @@
 package one.xis.server;
 
 
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
-import one.xis.context.XISInit;
+
+import java.util.Map;
 
 @XISComponent
 @RequiredArgsConstructor
@@ -12,13 +12,10 @@ public class FrontendService {
 
     private final ControllerService controllerService;
     private final ConfigService configService;
+    private final HtmlResourceService htmlResourceService;
 
-    @Getter
-    private Config config;
-
-    @XISInit
-    void init() {
-        config = configService.getConfig();
+    public Config getConfig() {
+        return configService.getConfig();
     }
 
     public Response invokePageActionMethod(Request request) {
@@ -37,12 +34,20 @@ public class FrontendService {
         return controllerService.invokeWidgetModelMethods(request);
     }
 
-    public String getPageHtmlResource(String id) {
-        return controllerService.getPageHtmlResource(id).getContent();
+    public String getPageHead(String id) {
+        return htmlResourceService.getPageHead(id);
     }
 
-    public String getWidgetHtmlResource(String id) {
-        return controllerService.getWidgetHtmlResource(id).getContent();
+    public String getPageBody(String id) {
+        return htmlResourceService.getPageBody(id);
+    }
+
+    public Map<String, String> getBodyAttributes(String id) {
+        return htmlResourceService.getBodyAttributes(id);
+    }
+
+    public String getWidgetHtml(String id) {
+        return htmlResourceService.getWidgetHtml(id);
     }
 
 

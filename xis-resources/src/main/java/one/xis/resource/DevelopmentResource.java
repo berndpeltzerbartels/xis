@@ -25,12 +25,15 @@ class DevelopmentResource implements ReloadableResource {
 
     @Override
     public int getLength() {
-        return (int) file.length();
+        return getContent().length();
     }
 
 
     @Override
     public String getContent() {
+        if (isObsolete()) {
+            reload();
+        }
         return content;
     }
 

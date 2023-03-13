@@ -8,6 +8,8 @@ import one.xis.server.Request;
 import one.xis.server.Response;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/xis")
 @RequiredArgsConstructor
@@ -40,14 +42,24 @@ class SpringController {
         return frontendService.invokeWidgetActionMethod(request);
     }
 
-    @GetMapping("/page/html")
-    String getPageHtml(@RequestParam("id") String id) {
-        return frontendService.getPageHtmlResource(id);
+    @GetMapping("/page/head")
+    String getPageHead(@RequestHeader("uri") String id) {
+        return frontendService.getPageHead(id);
     }
 
-    @GetMapping("/widget/html")
-    String getWidgetHtml(@RequestParam("id") String id) {
-        return frontendService.getWidgetHtmlResource(id);
+    @GetMapping("/page/body")
+    String getPageBody(@RequestHeader("uri") String id) {
+        return frontendService.getPageBody(id);
+    }
+
+    @GetMapping("/page/body-attributes")
+    Map<String, String> getBodyAttributes(@RequestHeader("uri") String id) {
+        return frontendService.getBodyAttributes(id);
+    }
+
+    @GetMapping("/widget/html/{id}")
+    String getWidgetHtml(@PathVariable("id") String id) {
+        return frontendService.getWidgetHtml(id);
     }
 
 

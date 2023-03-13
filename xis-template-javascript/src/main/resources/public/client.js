@@ -22,7 +22,8 @@ class Client {
      * @return {Promise<any>} 
      */
     loadConfig() {
-        return this.httpClient.get('/xis/config');
+        return this.httpClient.get('/xis/config', {})
+            .then(content => JSON.parse(content));
     }
 
     /**
@@ -30,9 +31,31 @@ class Client {
      * @param {string} pageId
      * @return {Promise<string>} 
      */
-    loadPage(pageId) {
-        return this.httpClient.get('/xis/page/html?id=' + pageId);
+    loadPageHead(pageId) {
+        return this.httpClient.get('/xis/page/head', { uri: pageId });
     }
+
+
+    /**
+     * @public
+     * @param {string} pageId
+     * @return {Promise<string>} 
+     */
+    loadPageBody(pageId) {
+        return this.httpClient.get('/xis/page/body', { uri: pageId });
+    }
+
+
+    /**
+     * @public
+     * @param {string} pageId
+     * @return {Promise<any>} 
+     */
+    loadPageBodyAttributes(pageId) {
+        return this.httpClient.get('/xis/page/body-attributes', { uri: pageId }).then(content => JSON.parse(content));
+    }
+
+
 
     /**
     * @public
@@ -40,7 +63,7 @@ class Client {
     * @return {Promise<string>} 
     */
     loadWidget(widgetId) {
-        return this.httpClient.get('/xis/widget/html?id=' + widgetId);
+        return this.httpClient.get('/xis/widget/html/' + widgetId, {});
     }
 
 
@@ -52,7 +75,8 @@ class Client {
      */
     loadPageData(pageId, data) {
         var request = this.createRequest(pageId, data, undefined);
-        return this.httpClient.post('/xis/page/model', request);
+        return this.httpClient.post('/xis/page/model', request, {})
+            .then(content => JSON.parse(content));
     }
 
     /**
@@ -63,7 +87,8 @@ class Client {
      */
     loadWidgetData(widgetId, data) {
         var request = this.createRequest(widgetId, data, undefined);
-        return this.httpClient.post('/xis/page/model', request);
+        return this.httpClient.post('/xis/page/model', request)
+            .then(content => JSON.parse(content));
     }
 
     /**
@@ -75,7 +100,8 @@ class Client {
      */
     widgetAction(widgetId, action, data) {
         var request = this.createRequest(widgetId, data, action);
-        return this.httpClient.post('/xis/widget/action', request);
+        return this.httpClient.post('/xis/widget/action', request, {})
+            .then(content => JSON.parse(content));
     }
 
     /**
@@ -87,7 +113,7 @@ class Client {
      */
     pageAction(pageId, action, data) {
         var request = this.createRequest(pageId, data, action);
-        return this.httpClient.post('/xis/page/action', request);
+        return this.httpClient.post('/xis/page/action', request, {});
     }
 
 
@@ -105,29 +131,6 @@ class Client {
         request.data = data;
         return request;
     }
-
-
-    /**
-     * @private
-     * @param {array<MethodConfig>} methodConfigs
-     * @param {Data} data
-     */
-    createMethodInvocations(methodConfigs, data) {
-        return methodConfigs.map(config => this.createMethodInvocation(config, data));
-    }
-
-    /**
-     * @private
-     * @param {MethodConfig} methodConfig 
-     * @param {Data} data
-     */
-    createMethodInvocation(methodConfig, data) {
-        var parameters = {};
-        methodConfig.parameters.forEach(param => parameters[param.name] = data.getValue(param.path));
-        return new MethodInvocation(methodConfig.name, parameters);
-    }
-
-
 }
 
 
@@ -148,7 +151,8 @@ class HttpClient {
      * @return {Promise<any>}
      * 
      */
-    post(uri, payload) {
+    post(uri, payload, headers) {
+        if (!headers) headers = {};
         var payloadJson = JSON.stringify(payload);
         headers['Content-length'] = payloadJson.length;
         headers['Content-type'] = 'application/json';
@@ -161,8 +165,8 @@ class HttpClient {
      * @param {any} headers
      * @return {Promise<any>}
      */
-    get(uri) {
-        return this.doRequest(uri, {}, 'GET', undefined);
+    get(uri, headers) {
+        return this.doRequest(uri, headers, 'GET', undefined);
     }
 
     /**
@@ -184,10 +188,12 @@ class HttpClient {
                 // TODO Handle errors and "304 NOT MODIFIED"
                 // TODO Add headers to allow 304
                 // Readystaet == 4 for 304 ?
-                if (xmlHttp.readyState == 4 && xmlHttp.status == 200) { // TODO In Java 204 if there is no server-method
-                    resolve(JSON.parse(xmlHttp.responseText));
-                } else {
-                    reject('status: ' + xmlHttp.status);
+                if (xmlHttp.readyState == 4) { // TODO In Java 204 if there is no server-method
+                    if (xmlHttp.status == 200) {
+                        resolve(xmlHttp.responseText);
+                    } else {
+                        reject('status: ' + xmlHttp.status);
+                    }
                 }
                 // TODO use errorhandler
             }

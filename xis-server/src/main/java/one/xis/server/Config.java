@@ -1,25 +1,19 @@
 package one.xis.server;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
 import lombok.Data;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
 
 @Data
+@Builder
 public class Config {
-
-    @JsonProperty("widgets")
-    private final List<String> widgetIds;
-
-    @JsonProperty("pages")
-    private final List<String> pageIds;
-
+    private final Collection<String> widgetIds;
+    private final Collection<String> pageIds;
     private final Map<String, String> widgetHosts;
-
     private final Map<String, String> pageHosts;
-
     private final String welcomePageId;
 
 }

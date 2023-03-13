@@ -13,24 +13,18 @@ import java.io.InputStream;
 import java.io.StringReader;
 
 class XmlLoader {
-
-    private static DocumentBuilder documentBuilder;
-
-    static {
-        documentBuilder = documentBuilder();
-    }
-
+    
     Document loadDocument(File file) throws IOException, SAXException {
-        return documentBuilder.parse(file);
+        return documentBuilder().parse(file);
     }
 
     Document loadDocument(InputStream in) throws IOException, SAXException {
-        return documentBuilder.parse(in);
+        return documentBuilder().parse(in);
     }
 
     Document loadDocument(String xml) throws IOException, SAXException {
         try (StringReader in = new StringReader(xml)) {
-            return documentBuilder.parse(new InputSource(in));
+            return documentBuilder().parse(new InputSource(in));
         }
     }
 

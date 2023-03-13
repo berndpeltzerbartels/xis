@@ -4,7 +4,6 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import one.xis.*;
 import one.xis.context.XISComponent;
-import one.xis.resource.Resource;
 import one.xis.resource.Resources;
 import one.xis.utils.lang.MethodUtils;
 
@@ -31,16 +30,7 @@ class ControllerWrapperFactory {
         controllerWrapper.setModelTimestampMethods(modelTimestampMethods(controller));
         controllerWrapper.setActionMethods(actionMethodMap(controller));
         controllerWrapper.setControllerClass(controller.getClass());
-        controllerWrapper.setHtmlResource(htmlResource(controller));
         return controllerWrapper;
-    }
-
-    private Resource htmlResource(Object controller) {
-        return resources.getByPath(getHtmlTemplatePath(controller));
-    }
-
-    private String getHtmlTemplatePath(Object controller) {
-        return controller.getClass().getName().replace('.', '/') + ".html";
     }
 
     private Map<String, ModelMethod> modelMethods(Object controller) {

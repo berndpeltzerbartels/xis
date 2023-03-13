@@ -2,7 +2,6 @@ package one.xis.server;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import one.xis.resource.Resource;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,7 +13,6 @@ public class ControllerWrapper {
 
     private String id;
     private Object controller;
-    private Resource htmlResource;
     private Class<?> controllerClass;
     private Map<String, ModelMethod> modelMethods;
     private Map<String, ActionMethod> actionMethods;

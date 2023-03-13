@@ -8,8 +8,9 @@ class Controller {
     constructor(client) {
         this.client = client;
         this.widgetDoms = {};
-        this.pageHeadDoms = {};
-        this.pageBodyDoms = {};
+        this.pageHeadContent = {};
+        this.pageBodyContent = {};
+        this.pageBodyAttributes = {};
         this.pageData = {};
         this.headChildNodes = [];
         this.welcomePageId;
@@ -17,11 +18,13 @@ class Controller {
 
     init() {
         var controller = this;
-        var client = this.client;
-        client.loadConfig().then(config => {
+        this.loadConfig().then(config => {
+            controller.welcomePageId = config.welcomePageId;
             var promises = [];
             config.widgetIds.forEach(id => promises.push(controller.loadWidget(id)));
-            config.pageIds.forEach(id => promises.push(controller.loadPage(id)));
+            config.pageIds.forEach(id => promises.push(controller.loadPageHead(id)));
+            config.pageIds.forEach(id => promises.push(controller.loadPageBody(id)));
+            config.pageIds.forEach(id => promises.push(controller.loadPageBodyAttributes(id)));
             return Promise.all(promises);
 
         }).then(() => controller.findPageId())
@@ -35,10 +38,11 @@ class Controller {
     displayPage(pageId) {
         var controller = this;
         return new Promise((resolve, _) => {
-            var head = controller.pageHeadDoms[pageId];
-            var body = controller.pageBodyDoms[pageId];
+            var head = controller.pageHeadContent[pageId];
+            var body = controller.pageBodyContent[pageId];
+            var attributes = controller.pageBodyAttributes[pageId];
             bindHead(head);
-            bindBody(body);
+            bindBody(body, attributes);
             resolve(pageId);
         });
     }
@@ -62,27 +66,10 @@ class Controller {
         var controller = this;
         return new Promise((resolve, _) => {
             var uri = document.location.pathname;
-            if (!controller.pageHeadDoms[uri]) {
+            if (!controller.pageHeadContent[uri]) {
                 uri = controller.welcomePageId;
             }
             resolve(uri);
-        });
-    }
-
-
-
-
-    /**
-     * @returns {Promise<string>}
-     */
-    loadData(pageId) {
-        var controller = this;
-        return new Promise((resolve, _) => {
-            var head = controller.pageHeadDoms[id];
-            var body = controller.pageBodyDoms[id];
-            bindHead(head);
-            bindBody(body);
-            resolve(pageId);
         });
     }
 
@@ -107,8 +94,8 @@ class Controller {
     refreshPage(pageId) {
         var controller = this;
         return new Promise((resolve, _) => {
-            var head = controller.pageHeadDoms[pageId];
-            var body = controller.pageBodyDoms[pageId];
+            var head = controller.pageHeadContent[pageId];
+            var body = controller.pageBodyContent[pageId];
             var data = controller.pageData[pageId];
             refresh(head, data);
             refresh(body, data);
@@ -132,38 +119,63 @@ class Controller {
     }
 
     /**
+     * @param {string} pageId
     * @returns {Promise<string>}
     */
-    loadPage(pageId) {
+    loadPageHead(pageId) {
         var controller = this;
-        this.client.loadHead(pageId).then(html => {
-            var root = controller.asRootElement(html);
-            controller.pageHeadDoms[pageId] = root.getElementsByTagName('head');
-            controller.pageBodyDoms[pageId] = root.getElementsByTagName('body');
+        return this.client.loadPageHead(pageId).then(content => {
+            controller.pageHeadContent[pageId] = content;
             return pageId;
         });
     }
 
+    /**
+   * @param {string} pageId
+  * @returns {Promise<string>}
+  */
+    loadPageBody(pageId) {
+        var controller = this;
+        return this.client.loadPageBody(pageId).then(content => {
+            controller.pageBodyContent[pageId] = content;
+            return pageId;
+        });
+    }
 
+    loadPageBodyAttributes(pageId) {
+        var controller = this;
+        return this.client.loadPageBodyAttributes(pageId).then(attributes => {
+            controller.pageBodyAttributes[pageId] = attributes;
+            return pageId;
+        });
+    }
     /**
     * @returns {Promise<string>}
     */
     loadWidget(widgetId) {
         var controller = this;
-        this.client.loadBody(pageId).then(html => {
-            controller.widgetDoms[pageId] = controller.asRootElement(html);
+        return this.client.loadWidget(widgetId).then(html => {
+            controller.widgetDoms[widgetId] = controller.asRootElement(html);
             return widgetId;
         });
     }
 
+
     /**
-     * 
-     * @param {string} tree 
+    * @returns {Promise<ComponentConfig>}
+    */
+    loadConfig() {
+        return this.client.loadConfig();
+    }
+
+    /**
+     *
+     * @param {string} tree
      * @returns {Element}
      */
     asRootElement(tree) {
         var div = document.createElement('div');
-        div.innerHTML = tree;
+        div.innerHTML = trim(tree);
         return div.childNodes.item(0);
     }
 

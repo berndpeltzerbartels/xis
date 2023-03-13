@@ -11,8 +11,6 @@ import one.xis.utils.xml.XmlUtil;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-import java.io.IOException;
-
 @Slf4j
 @RequiredArgsConstructor
 public abstract class JavascriptComponentCompiler<C extends JavascriptComponent, M extends TemplateModel> {
@@ -94,10 +92,6 @@ public abstract class JavascriptComponentCompiler<C extends JavascriptComponent,
     }
 
     private Document htmlToDocument(String htmlSource) throws SAXException {
-        try {
-            return XmlUtil.loadDocument(htmlSource);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return XmlUtil.loadDocument(htmlSource);
     }
 }

@@ -295,28 +295,17 @@ function removeLastChar(string) {
     return string.substring(0, string.length - 1); // surprising, but tested
 }
 
-function bindHead(newHead) {
-    var xis = html._xis;
+function bindHead(newHeadContent) {
     var head = getTemplateHead();
-    var title = getTitle();
-    for (var i = 0; i < newHead.childNodes.length; i++) {
-        var child = newHead.childNodes.item(i);
-        if (child.localName && child.localName == title) {
-            title.innerHTML = child.innerHTML;
-        } else {
-            head.appendChild(child);
-            xis.head.childNodes.push(child);
-        }
-    }
+    head.innerHTML = newHeadContent;
 }
 
-function bindBody(newBody) {
-    for (var i = 0; i < newBody.childNodes.length; i++) {
-        body.appendChild(newBody.childNodes.item(i));
+function bindBody(newBodyContent, attributes) {
+    var body = getTemplateBody();
+    for (var name of Object.keys(attributes)) {
+        body.setAttribute(name, attributes[name]);
     }
-    for (var name of newBody.getAttributeNames()) {
-        body.setAttribute(name, newBody.getAttribute(name));
-    }
+    body.innerHTML = newBodyContent;
 }
 
 
@@ -382,6 +371,11 @@ function loadWidget(widgetId) {
 function getTemplateHead() {
     return getElementByTagName('head');
 }
+
+function getTemplateTitle() {
+    return getElementByTagName('title');
+}
+
 
 function getTemplateBody() {
     return getElementByTagName('body');
