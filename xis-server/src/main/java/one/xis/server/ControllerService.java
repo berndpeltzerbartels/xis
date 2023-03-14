@@ -37,28 +37,36 @@ class ControllerService {
         widgetControllerWrappers = widgetControllerWrappers();
         pageControllerWrappers = pageControllerWrappers();
     }
-    
+
 
     Response invokePageModelMethods(Request request) {
         var data = findPageControllerWrapper(request).orElseThrow().invokeGetModelMethods(request);
-        return new Response(data, request.getControllerId());
+        return new Response(data, request.getControllerId(), null);
     }
 
     Response invokeWidgetModelMethods(Request request) {
         var data = findWidgetControllerWrapper(request).orElseThrow().invokeGetModelMethods(request);
-        return new Response(data, request.getControllerId());
+        return new Response(data, null, request.getControllerId());
     }
 
     Response invokePageActionMethod(Request request) {
         var result = findPageControllerWrapper(request).orElseThrow().invokeActionMethod(request);
-        var next = controllerWrapperByResult(result, pageControllerWrappers).orElseThrow();
-        return new Response(next.invokeGetModelMethods(request), next.getId());
+        var nextPageController = widgetControllerWrapperByResult(result).orElseThrow();
+        return pageModelDataResponse(nextPageController, request);
     }
 
     Response invokeWidgetActionMethod(Request request) {
         var result = findPageControllerWrapper(request).orElseThrow().invokeActionMethod(request);
-        var next = controllerWrapperByResult(result, widgetControllerWrappers).orElseThrow();
-        return new Response(next.invokeGetModelMethods(request), next.getId());
+        return pageControllerWrapperByResult(result).map(wrapper -> pageModelDataResponse(wrapper, request))
+                .orElseGet(() -> widgetControllerWrapperByResult(result).map(wrapper -> widgetModelDataResponse(wrapper, request)).orElseThrow());
+    }
+
+    private Response widgetModelDataResponse(ControllerWrapper wrapper, Request request) {
+        return new Response(wrapper.invokeGetModelMethods(request), null, wrapper.getId());
+    }
+
+    private Response pageModelDataResponse(ControllerWrapper wrapper, Request request) {
+        return new Response(wrapper.invokeGetModelMethods(request), wrapper.getId(), null);
     }
 
     private Collection<ControllerWrapper> widgetControllerWrappers() {
@@ -74,11 +82,20 @@ class ControllerService {
     }
 
 
-    private Optional<ControllerWrapper> controllerWrapperByResult(Object result, Collection<ControllerWrapper> controllerWrappers) {
+    private Optional<ControllerWrapper> widgetControllerWrapperByResult(Object result) {
         if (result instanceof Class) {
-            return Optional.of(controllerWrapperByClass((Class<?>) result, controllerWrappers));
+            return Optional.of(controllerWrapperByClass((Class<?>) result, widgetControllerWrappers));
         } else if (result instanceof String) {
-            return Optional.of(controllerWrapperById((String) result, controllerWrappers));
+            return Optional.of(controllerWrapperById((String) result, widgetControllerWrappers));
+        }
+        return Optional.empty();
+    }
+
+    private Optional<ControllerWrapper> pageControllerWrapperByResult(Object result) {
+        if (result instanceof Class) {
+            return Optional.of(controllerWrapperByClass((Class<?>) result, pageControllerWrappers));
+        } else if (result instanceof String) {
+            return Optional.of(controllerWrapperById((String) result, pageControllerWrappers));
         }
         return Optional.empty();
     }

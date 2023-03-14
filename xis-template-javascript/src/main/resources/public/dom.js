@@ -107,6 +107,11 @@ function evaluateRepeat(e, data) {
 }
 
 
+function refreshHead(head, data) {
+
+}
+
+
 function refreshAttributes(e, data) {
     var xis = e._xis;
     for (var attrName of Object.keys(xis.attributes)) {
@@ -163,7 +168,9 @@ function refreshElement(e, data) {
 
 
 function refreshTextNode(node, data) {
-    node.nodeValue = node._xis.expression.evaluate(data);
+    if (node._xis && node._xis.expression) {
+        node.nodeValue = node._xis.expression.evaluate(data);
+    }
 }
 
 class Xis {
@@ -181,6 +188,9 @@ class Xis {
     updateChildNodes() {
         this.childArray = toArray(this.element.childNodes);
         this.childVisible = new Array(this.childArray.length);
+        for (var i = 0; i < this.childVisible; i++) {
+            this.childVisible[i] = true;
+        }
         return this;
     }
 
@@ -232,7 +242,8 @@ function initializeElement(element) {
         }
     }
     for (var i = 0; i < element.childNodes.length; i++) {
-        initialize(element.childNodes.item(i));
+        var child = element.childNodes.item(i);
+        initialize(child);
     }
     xis.updateChildNodes();
 }
@@ -293,79 +304,6 @@ function doSplit(string, separatorChar) {
 
 function removeLastChar(string) {
     return string.substring(0, string.length - 1); // surprising, but tested
-}
-
-function bindHead(newHeadContent) {
-    var head = getTemplateHead();
-    head.innerHTML = newHeadContent;
-}
-
-function bindBody(newBodyContent, attributes) {
-    var body = getTemplateBody();
-    for (var name of Object.keys(attributes)) {
-        body.setAttribute(name, attributes[name]);
-    }
-    body.innerHTML = newBodyContent;
-}
-
-
-function unbindPage() {
-    var html = getTemplateRoot();
-    var xis = html._xis;
-    var head = getTemplateHead();
-    var body = getTemplateBody();
-    var title = getTitle();
-    title.innerHTML = '';
-    // We do not want to remove our script-tags etc.
-    for (var i = 0; i < xis.head.childNodes.length; i++) {
-        var child = xis.head.childNodes[i];
-        head.removeChild(child);
-    }
-    for (var i = 0; i < body.childNodes.length; i++) {
-        var child = body.childNodes.item(i);
-        body.removeChild(child);
-    }
-    for (var name of body.getAttributeNames()) {
-        body.removeAttribute(name);
-    }
-}
-
-function bindWidget(container, widgetId) {
-    var widget = getRootXis().getWidget(widgetId);
-    container.appendChild(widget.getRootElement());
-    container._xis.container.widget = widget;
-}
-
-function unbindWidget(container) {
-    for (var i = 0; i < container.childNodes.length; i++) {
-        var child = container.childNodes.item(i);
-        container.removeChild(child);
-    }
-}
-
-function loadPage(pageId) {
-    var headHolder = document.createElement('div');
-    var bodyHolder = document.createElement('div');
-    headHolder.innerHTML = client.loadPageHead(pageId);
-    bodyHolder.innerHTML = client.loadPageBody(pageId);
-    return {
-        id: pageId,
-        headHolder: headHolder,
-        bodyHolder, bodyHolder,
-        getHeadElement: () => this.headHolder.childNodes.item(0),
-        getBodyElement: () => this.bodyHolder.childNodes.item(0)
-    };
-}
-
-
-function loadWidget(widgetId) {
-    var holder = document.createElement('div');
-    holder.innerHTML = client.loadWidget(pageId);
-    return {
-        id: widgetId,
-        holder: holder,
-        getRootElement: () => this.headHolder.childNodes.item(0)
-    };
 }
 
 function getTemplateHead() {

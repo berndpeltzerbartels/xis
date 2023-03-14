@@ -154,9 +154,8 @@ class HttpClient {
     post(uri, payload, headers) {
         if (!headers) headers = {};
         var payloadJson = JSON.stringify(payload);
-        headers['Content-length'] = payloadJson.length;
         headers['Content-type'] = 'application/json';
-        return this.doRequest(uri, headers, 'POST', payloadJson, handler);
+        return this.doRequest(uri, headers, 'POST', payloadJson);
     }
 
     /**

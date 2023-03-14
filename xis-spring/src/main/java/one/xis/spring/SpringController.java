@@ -22,7 +22,7 @@ class SpringController {
         return frontendService.getConfig();
     }
 
-    @GetMapping("/page/model")
+    @PostMapping("/page/model")
     Response getPageModel(@RequestBody Request request) {
         return frontendService.invokePageModelMethods(request);
     }

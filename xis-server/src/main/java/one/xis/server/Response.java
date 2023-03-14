@@ -8,5 +8,6 @@ import java.util.Map;
 @Data
 public class Response {
     private final Map<String, DataItem> data;
-    private final String nextControllerId;
+    private final String nextPageId;
+    private final String nextWidgetId;
 }

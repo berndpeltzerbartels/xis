@@ -17,7 +17,7 @@ class ProductListWidget {
     @Autowired
     private BasketService basketService;
 
-    @Model
+    @Model("list")
     ProductListData createProductList() {
         var productListData = new ProductListData();
         productListData.setProductCategories(productCategoryService.allCategories());
