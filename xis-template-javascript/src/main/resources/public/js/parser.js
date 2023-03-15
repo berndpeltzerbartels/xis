@@ -439,6 +439,7 @@ class TextContent {
      * vriables with the actual data.
      */
     evaluate(data) {
+        if (this.parts.length == 0) return '';
         return this.parts.map(part => part.asString(data)).reduce((s1, s2) => s1 + s2);
     }
 

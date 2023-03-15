@@ -50,5 +50,9 @@ public class FrontendService {
         return htmlResourceService.getWidgetHtml(id);
     }
 
+    public String getRootPageHtml() {
+        return htmlResourceService.getRootPageHtml();
+    }
+
 
 }

@@ -1,5 +1,6 @@
 package one.xis.spring;
 
+import lombok.RequiredArgsConstructor;
 import one.xis.Page;
 import one.xis.Widget;
 import one.xis.context.AppContextBuilder;
@@ -7,9 +8,10 @@ import one.xis.server.FrontendService;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.web.servlet.ServletComponentScan;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -17,8 +19,11 @@ import java.util.HashSet;
 @Configuration
 @ComponentScan(basePackages = {"one.xis.spring"})
 @ServletComponentScan(basePackages = {"one.xis.spring"})
+@RequiredArgsConstructor
 class SpringContextAdapter implements BeanPostProcessor {
-    
+
+    private final SpringHtmlFilter filter;
+    private final SpringController controller;
 
     private final Collection<Object> controllers = new HashSet<>();
 
@@ -30,13 +35,14 @@ class SpringContextAdapter implements BeanPostProcessor {
         return bean;
     }
 
-    @Bean
-    FrontendService frontendService() {
+    @EventListener(ContextRefreshedEvent.class)
+    public void init() {
         var context = AppContextBuilder.createInstance()
                 .withSingeltons(controllers)
                 .withPackage("one.xis")
                 .build();
-        return context.getSingleton(FrontendService.class);
+        var frontEndService = context.getSingleton(FrontendService.class);
+        filter.setFrontendService(frontEndService);
+        controller.setFrontendService(frontEndService);
     }
-
 }

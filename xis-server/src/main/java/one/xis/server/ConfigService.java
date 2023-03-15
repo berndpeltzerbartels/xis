@@ -32,18 +32,24 @@ class ConfigService {
         var pageIds = new HashSet<String>();
         String welcomePageId = null;
         var widgeIds = widgetControllers.stream()
-                .map(WidgetUtil::getId).collect(Collectors.toSet());
+                .map(WidgetUtil::getId)
+                .collect(Collectors.toSet());
 
         for (Object pageController : pageControllers) {
             var pageAnno = pageController.getClass().getAnnotation(Page.class);
             pageIds.add(pageAnno.path());
             hosts.put(pageAnno.path(), "");
             if (pageAnno.welcomePage()) {
+                if (welcomePageId != null) {
+                    throw new IllegalStateException("There must be exactly one welcome-page (@Page(welcomePage = true)). More than one found " + welcomePageId + ", " + pageAnno.path());
+                }
                 welcomePageId = pageAnno.path();
             }
         }
 
-
+        if (welcomePageId == null) {
+            throw new IllegalStateException("There must be exactly one welcome-page (@Page(welcomePage = true)). No one found");
+        }
         config = Config.builder()
                 .pageHosts(Collections.unmodifiableMap(hosts))
                 .pageIds(Collections.unmodifiableSet(pageIds))

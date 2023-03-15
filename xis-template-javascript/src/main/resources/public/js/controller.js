@@ -1,5 +1,5 @@
 
-class Controller {
+class PageController {
 
     /**
      * 

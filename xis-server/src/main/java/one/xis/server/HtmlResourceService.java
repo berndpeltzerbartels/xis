@@ -31,6 +31,8 @@ class HtmlResourceService {
     private Map<String, Resource> widgetHtmlResources;
     private Map<String, Resource> pageHtmlResources;
 
+    private Resource rootPage;
+
     @XISInit
     void initWidgetResources() {
         widgetHtmlResources = widgetControllers.stream().collect(Collectors.toMap(WidgetUtil::getId, this::htmlResource));
@@ -39,6 +41,16 @@ class HtmlResourceService {
     @XISInit
     void initPageResources() {
         pageHtmlResources = pageControllers.stream().collect(Collectors.toMap(contr -> contr.getClass().getAnnotation(Page.class).path(), this::htmlResource));
+    }
+
+    @XISInit
+    void initRootPage() {
+        rootPage = resources.getByPath("/public/index.html");
+    }
+
+
+    String getRootPageHtml() {
+        return rootPage.getContent();
     }
 
     String getWidgetHtml(String id) {
@@ -67,7 +79,7 @@ class HtmlResourceService {
     private String childNodesAsString(Element e) {
         return XmlUtil.getChildNodes(e).map(XmlUtil::asString).collect(Collectors.joining()).trim();
     }
-    
+
     private Resource htmlResource(Object controller) {
         return resources.getByPath(getHtmlTemplatePath(controller));
     }
@@ -75,5 +87,4 @@ class HtmlResourceService {
     private String getHtmlTemplatePath(Object controller) {
         return controller.getClass().getName().replace('.', '/') + ".html";
     }
-
 }
