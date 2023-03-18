@@ -13,7 +13,7 @@ import java.io.InputStream;
 import java.io.StringReader;
 
 class XmlLoader {
-    
+
     Document loadDocument(File file) throws IOException, SAXException {
         return documentBuilder().parse(file);
     }
@@ -29,7 +29,7 @@ class XmlLoader {
     }
 
     @SneakyThrows
-    static DocumentBuilder documentBuilder() {
+    private DocumentBuilder documentBuilder() {
         return DocumentBuilderFactory.newInstance().newDocumentBuilder();
     }
 

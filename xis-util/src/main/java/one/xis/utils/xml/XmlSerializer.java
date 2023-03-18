@@ -1,6 +1,7 @@
 package one.xis.utils.xml;
 
 import lombok.SneakyThrows;
+import org.tinylog.Logger;
 import org.w3c.dom.Element;
 
 import javax.xml.transform.OutputKeys;
@@ -9,19 +10,21 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import java.io.IOException;
 import java.io.StringWriter;
 
 public class XmlSerializer {
-    private static Transformer transformer;
 
-    static {
-        transformer = transformer();
-    }
-
-    String serialize(Element e) throws TransformerException {
-        StringWriter writer = new StringWriter();
-        transformer.transform(new DOMSource(e), new StreamResult(writer));
-        return writer.toString();
+    String serialize(Element element) throws TransformerException {
+        var transformer = transformer();
+        try (StringWriter writer = new StringWriter()) {
+            transformer.transform(new DOMSource(element), new StreamResult(writer));
+            var result = writer.toString();
+            Logger.info("serializer-result:" + result);
+            return result;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @SneakyThrows

@@ -17,6 +17,10 @@ dependencies {
     testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.16.1'
 
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+
+
+    implementation 'org.tinylog:tinylog-api:2.6.1'
+    implementation 'org.tinylog:tinylog-impl:2.6.1'
 }
 
 test {

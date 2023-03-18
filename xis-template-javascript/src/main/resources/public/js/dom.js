@@ -27,8 +27,10 @@ function showChild(parent, index) {
 
 function hideChild(parent, index) {
     var child = parent._xis.childArray[index];
-    if (parent._xis.childVisible[index])
+    if (parent._xis.childVisible[index]) {
+        console.log('remove child');
         parent._xis.element.removeChild(child);
+    }
     parent._xis.childVisible[index] = false;
     return child;
 }
@@ -67,11 +69,12 @@ function cloneTextNode(textNode) {
     return newNode;
 }
 
-function evaluateRepeat(e, data) {
+function refreshRepeat(e, data) {
     var xis = e._xis;
     var repeat = xis.repeat;
     var parent = xis.parent;
     var dataItem = repeat.expression.evaluate(data);
+    if (!dataItem) return;
     var arr = dataItem.value;
     var timestamp = dataItem.timestamp;
     if (!arr) return;
@@ -98,6 +101,7 @@ function evaluateRepeat(e, data) {
         element = repeat.cache.elements[i];
         if (repeat.cache.visible[i]) {
             parent.removeChild(element);
+            console.log('remove child');
             repeat.cache.visible[i] = false;
             i++;
         } else {
@@ -107,17 +111,6 @@ function evaluateRepeat(e, data) {
 }
 
 
-function refreshHead(head, data) {
-
-}
-
-
-function refreshAttributes(e, data) {
-    var xis = e._xis;
-    for (var attrName of Object.keys(xis.attributes)) {
-        e.setAttribute(attrName, xis.attributes[attrName].evaluate(data));
-    }
-}
 
 function refresh(node, data) {
     if (isElement(node)) {
@@ -127,43 +120,9 @@ function refresh(node, data) {
     }
 }
 
-function refreshContainer(containerElement, data) {
-    var xis = containerElement._xis;
-    var containerAttributes = xis.container;
-    var widgetId = containerAttributes.widgetIdExpr.evaluate(data);
-    if (widgetId != containerAttributes.currentWidgetId) {
-        var widgetRoot = getRootXis().getWidgetRoot();
-        containerElement.appendChild(widgetRoot);
-    }
-    client.loadData(widgetId, data, newData => {
-        newData.parentData = data
-        refresh(widgetRoot, newData);
-    });
-}
-
 function refreshElement(e, data) {
     var xis = e._xis;
-    refreshAttributes(e, data);
-    clearChildren(e);
-    if (xis.container) {
-        refreshContainer(e, data);
-    } else {
-        for (var i = 0; i < xis.childArray.length; i++) {
-            var child = xis.childArray[i];
-            if (isElement(child)) {
-                if (!child._xis.showHide || child._xis.showHide.evaluate(data)) {
-                    if (child._xis.repeat) {
-                        evaluateRepeat(child, data);
-                    } else {
-                        refreshElement(child, data);
-                    }
-                }
-            } else {
-                refreshTextNode(child, data);
-                showChild(e, i);
-            }
-        }
-    }
+    xis.refresh(data);
 }
 
 
@@ -173,86 +132,157 @@ function refreshTextNode(node, data) {
     }
 }
 
-class Xis {
+class XisTextNode {
+    constructor(node) {
+        this.node = node;
+        this.expression = new TextContentParser(node.nodeValue).parse();
+    }
+
+    refresh(data) {
+        this.node.nodeValue = this.expression.evaluate(data);
+    }
+}
+
+class XisElement {
 
     constructor(element) {
         this.element = element;
         this.parent = element.parentNode;
-        this.attributes = {};
+        this.attributeExpressions = {};
         this.repeat = undefined;
         this.showHide = undefined;
-        this.widget = this.widget;
-        return this;
-    }
-
-    updateChildNodes() {
+        this.widget = undefined;
         this.childArray = toArray(this.element.childNodes);
         this.childVisible = new Array(this.childArray.length);
-        for (var i = 0; i < this.childVisible; i++) {
-            this.childVisible[i] = true;
-        }
         return this;
     }
 
+    update() {
+        this.childArray = toArray(this.element.childNodes);
+        this.childVisible = new Array(this.childArray.length);
+    }
+
+    initialize() {
+        for (var i = 0; i < this.childArray.length; i++) {
+            var node = this.childArray[i];
+            if (isElement(node) && !node.getAttribute('data-ignore')) {
+                this.initializeElement(node);
+            } else {
+                this.initializeTextNode(node);
+            }
+            this.childVisible[i] = true;
+        }
+    }
+
+    initializeElement(element) {
+        var xis = new XisElement(element);
+        element._xis = xis;
+        if (element.getAttribute('data-widget')) {
+            xis.container = { expression: new TextContentParser(element.getAttribute('data-widget')).parse() };
+        }
+        if (element.getAttribute('data-show')) {
+            xis.showHide = this.exprParser.parse(element.getAttribute('data-show'));
+        } if (element.getAttribute('data-repeat')) {
+            var arr = doSplit(element.getAttribute('data-repeat'), ':');
+            xis.repeat = { expression: new ExpressionParser().parse(arr[1]), varName: arr[0], cache: { elements: [], visible: [] } };
+            xis.repeat.cache.elements.push(element);
+            xis.repeat.cache.visible.push(true);
+        }
+        for (var attrName of element.getAttributeNames()) {
+            var attrValue = element.getAttribute(attrName);
+            if (attrValue.indexOf('${') != -1) {
+                xis.attributes[attrName] = new TextContentParser(attrValue).parse();
+            }
+        }
+        if (!xis.container) {
+            xis.initialize(); // otherwise already initialized
+        }
+
+    }
+
+
+    initializeTextNode(node) {
+        if (node.nodeValue && node.nodeValue.indexOf('${') != -1) {
+            node._xis = new XisTextNode(node);
+        }
+    }
+
+
+    refresh(data) {
+        for (var i = 0; i < this.childArray.length; i++) {
+            var child = this.childArray[i];
+            var xis = child._xis;
+            if (!xis) {
+                continue;
+            }
+            var showChild = !this.showHide || this.showHide.evaluate(data);
+            if (showChild && !this.isVisibleChild(i)) {
+                this.show(i);
+            } else if (!showChild && this.isVisibleChild(i)) {
+                this.hide(i);
+            }
+            if (xis.container) {
+                containerController.refresh(child, data);
+            }
+            if (xis.repeat) {
+                refreshRepeat(child, data);
+            }
+            xis.refresh(data);
+        }
+    }
+
+    refreshAttributes(data) {
+        for (var attrName of Object.keys(this.attributes)) {
+            e.setAttribute(attrName, this.attributes[attrName].evaluate(data));
+        }
+    }
+
+    hide(index) {
+        console.log('remove child');
+        this.element.removeChild(this.childArray[index]);
+        this.childVisible[index] = false;
+    }
+
+    show(index) {
+        var child = this.childArray[index];
+        var next = undefined;
+        for (var i = index + 1; i < this.childVisible.length; i++) {
+            if (this.childVisible[i]) {
+                next = this.childArray[i];
+                break;
+            }
+        }
+        if (next) {
+            this.element.insertBefore(child, next);
+        } else {
+            this.element.appendChild(child);
+        }
+        this.childVisible[i] = true;
+    }
+
+    isVisibleChild(index) {
+        return this.childVisible[index];
+    }
+
+
+
     clone(e) {
-        var xis = new Xis(e);
+        var xis = new XisElement(e);
         xis.element = e;
         xis.parent = e.parent;
         xis.childArray = toArray(e.childNodes);
         xis.childVisible = new Array(xis.childArray.length);
-        xis.attributes = this.attributes;
+        xis.attributeExpressions = this.attributeExpressions;
         xis.repeat = this.repeat;
         xis.showHide = this.showHide;
-        xis.widget = this.widget;
-        if (xis.widget)
-            xis.widget.currentWidgetId = undefined; // otherwise never laoded
+        xis.container = this.container;
         return xis;
     }
 }
 
-
-function initialize(node) {
-    if (isElement(node)) {
-        initializeElement(node);
-    } else {
-        initializeTextNode(node);
-    }
-}
-
-function initializeElement(element) {
-    var xis = new Xis(element);
-    element._xis = xis;
-    if (element.getAttribute('data-show')) {
-        xis.showHide = this.exprParser.parse(element.getAttribute('data-show'));
-    }
-    if (element.getAttribute('data-repeat')) {
-        var arr = doSplit(element.getAttribute('data-repeat'), ':');
-        xis.repeat = { expression: new ExpressionParser().parse(arr[1]), varName: arr[0], cache: { elements: [], visible: [] } };
-        xis.repeat.cache.elements.push(element);
-        xis.repeat.cache.visible.push(true);
-    }
-    if (element.getAttribute('data-widget')) {
-        var attribute = element.getAttribute('data-widget');
-        xis.container = { widgetIdExpr: new TextContentParser(attribute).parse(), currentWidgetId: undefined, initializedWidgetIds: [] };
-    }
-    for (var attrName of element.getAttributeNames()) {
-        var attrValue = element.getAttribute(attrName);
-        if (attrValue.indexOf('${') != -1) {
-            xis.attributes[attrName] = new TextContentParser(attrValue).parse();
-        }
-    }
-    for (var i = 0; i < element.childNodes.length; i++) {
-        var child = element.childNodes.item(i);
-        initialize(child);
-    }
-    xis.updateChildNodes();
-}
-
-function initializeTextNode(node) {
-    node._xis = { expression: { evaluate: (_) => node.nodeValue } };
-    if (node.nodeValue && node.nodeValue.indexOf('${') != -1) {
-        node._xis.expression = new TextContentParser(node.nodeValue).parse();
-    }
+function initialize(element) {
+    element._xis = new XisElement(element);
+    element._xis.initialize();
 }
 
 /**

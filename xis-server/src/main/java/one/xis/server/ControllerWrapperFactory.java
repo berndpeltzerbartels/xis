@@ -4,12 +4,12 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import one.xis.*;
 import one.xis.context.XISComponent;
-import one.xis.resource.Resources;
 import one.xis.utils.lang.MethodUtils;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -20,24 +20,34 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 class ControllerWrapperFactory {
 
-    private final Resources resources;
-
     ControllerWrapper createController(@NonNull String id, @NonNull Object controller) {
-        var controllerWrapper = new ControllerWrapper();
-        controllerWrapper.setId(id);
-        controllerWrapper.setController(controller);
-        controllerWrapper.setModelMethods(modelMethods(controller));
-        controllerWrapper.setModelTimestampMethods(modelTimestampMethods(controller));
-        controllerWrapper.setActionMethods(actionMethodMap(controller));
-        controllerWrapper.setControllerClass(controller.getClass());
-        return controllerWrapper;
+        try {
+            var controllerWrapper = new ControllerWrapper();
+            controllerWrapper.setId(id);
+            controllerWrapper.setController(controller);
+            controllerWrapper.setModelMethods(modelMethods(controller));
+            controllerWrapper.setModelTimestampMethods(modelTimestampMethods(controller));
+            controllerWrapper.setActionMethods(actionMethodMap(controller));
+            controllerWrapper.setControllerClass(controller.getClass());
+            return controllerWrapper;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to initialize " + controller.getClass(), e);
+        }
     }
 
     private Map<String, ModelMethod> modelMethods(Object controller) {
-        return MethodUtils.methods(controller).stream()
+        var map = new HashMap<String, ModelMethod>();
+        MethodUtils.methods(controller).stream()
                 .filter(m -> m.isAnnotationPresent(Model.class))
                 .map(this::createModelMethod)
-                .collect(Collectors.toMap(ControllerMethod::getKey, Function.identity()));
+                .forEach(controllerMethod -> {
+                    if (map.containsKey(controllerMethod.getKey())) {
+                        throw new IllegalStateException(controller.getClass() + ": there is more than one @Model(...) annotation containing the key " + controllerMethod.key);
+                    }
+                    map.put(controllerMethod.getKey(), controllerMethod);
+                });
+        return map;
+
     }
 
     private Map<String, ModelTimestampMethod> modelTimestampMethods(Object controller) {
@@ -58,27 +68,39 @@ class ControllerWrapperFactory {
     }
 
     private ModelMethod createModelMethod(Method method) {
-        return ModelMethod.builder()
-                .method(method)
-                .key(method.getAnnotation(Model.class).value())
-                .methodParameters(createParameters(method))
-                .build();
+        try {
+            return ModelMethod.builder()
+                    .method(method)
+                    .key(method.getAnnotation(Model.class).value())
+                    .methodParameters(createParameters(method))
+                    .build();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to initialize " + method, e);
+        }
     }
 
     private ModelTimestampMethod createModelTimestampMethod(Method method) {
-        return ModelTimestampMethod.builder()
-                .method(method)
-                .key(method.getAnnotation(ModelTimestamp.class).value())
-                .methodParameters(createParameters(method))
-                .build();
+        try {
+            return ModelTimestampMethod.builder()
+                    .method(method)
+                    .key(method.getAnnotation(ModelTimestamp.class).value())
+                    .methodParameters(createParameters(method))
+                    .build();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to initialize " + method, e);
+        }
     }
 
     private ActionMethod createActionMethod(Method method) {
-        return ActionMethod.builder()
-                .method(method)
-                .key(method.getAnnotation(Action.class).value())
-                .methodParameters(createParameters(method))
-                .build();
+        try {
+            return ActionMethod.builder()
+                    .method(method)
+                    .key(method.getAnnotation(Action.class).value())
+                    .methodParameters(createParameters(method))
+                    .build();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to initialize " + method, e);
+        }
     }
 
     private List<MethodParameter> createParameters(Method method) {
@@ -93,8 +115,10 @@ class ControllerWrapperFactory {
             methodParameter.setParameterType(ParameterType.CLIENT_ID);
         } else if (parameter.isAnnotationPresent(UserId.class)) {
             methodParameter.setParameterType(ParameterType.USER_ID);
+        } else if (parameter.isAnnotationPresent(PathElement.class)) {
+            methodParameter.setParameterType(ParameterType.USER_ID);
         } else {
-            throw new IllegalStateException("No annotation: " + parameter);
+            throw new IllegalStateException("No known annotation for method-parameter: " + parameter);
         }
         return methodParameter;
     }

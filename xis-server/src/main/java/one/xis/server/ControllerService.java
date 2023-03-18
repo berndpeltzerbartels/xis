@@ -14,6 +14,8 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.emptyMap;
+
 @XISComponent
 @RequiredArgsConstructor
 class ControllerService {
@@ -40,18 +42,19 @@ class ControllerService {
 
 
     Response invokePageModelMethods(Request request) {
-        var data = findPageControllerWrapper(request).orElseThrow().invokeGetModelMethods(request);
+        var data = findPageControllerWrapper(request).map(wrapper -> wrapper.invokeGetModelMethods(request)).orElse(emptyMap());
         return new Response(data, request.getControllerId(), null);
     }
 
     Response invokeWidgetModelMethods(Request request) {
-        var data = findWidgetControllerWrapper(request).orElseThrow().invokeGetModelMethods(request);
+        var data = findWidgetControllerWrapper(request).map(wrapper -> wrapper.invokeGetModelMethods(request)).orElse(emptyMap());
         return new Response(data, null, request.getControllerId());
     }
 
     Response invokePageActionMethod(Request request) {
-        var result = findPageControllerWrapper(request).orElseThrow().invokeActionMethod(request);
-        var nextPageController = widgetControllerWrapperByResult(result).orElseThrow();
+        var invokerController = findPageControllerWrapper(request).orElseThrow();
+        var result = invokerController.invokeActionMethod(request);
+        var nextPageController = widgetControllerWrapperByResult(result).orElse(invokerController);
         return pageModelDataResponse(nextPageController, request);
     }
 

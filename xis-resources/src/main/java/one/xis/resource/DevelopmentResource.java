@@ -44,13 +44,17 @@ class DevelopmentResource implements ReloadableResource {
 
     @Override
     public boolean isObsolete() {
-        return file.lastModified() > lastModified;
+        synchronized (this) {
+            return file.lastModified() > lastModified;
+        }
     }
 
     @Override
     public void reload() {
-        log.info("loading {}", file.getAbsolutePath());
-        content = IOUtils.getContent(file, "utf-8");
-        lastModified = file.lastModified();
+        synchronized (this) {
+            log.info("loading {}", file.getAbsolutePath());
+            content = IOUtils.getContent(file, "utf-8");
+            lastModified = file.lastModified();
+        }
     }
 }

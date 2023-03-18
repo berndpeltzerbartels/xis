@@ -2,6 +2,7 @@ package one.xis.utils.xml;
 
 
 import lombok.experimental.UtilityClass;
+import org.tinylog.Logger;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
@@ -9,9 +10,7 @@ import javax.xml.transform.TransformerException;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 
@@ -43,8 +42,10 @@ public class XmlUtil {
         NodeList nodeList = parent.getElementsByTagName(tagName);
         switch (nodeList.getLength()) {
             case 0:
+                Logger.info("nodelist empty");
                 return Optional.empty();
             case 1:
+                Logger.info(tagName + " - nodelist one: " + nodeList.item(0));
                 return Optional.of(nodeList.item(0)).filter(Element.class::isInstance).map(Element.class::cast);
             default:
                 throw new IllegalStateException("too many results");
@@ -52,15 +53,15 @@ public class XmlUtil {
     }
 
     public Stream<Node> getChildNodes(Element parent) {
-        return new NodeIterator(parent.getChildNodes()).asStream();
+        return asList(parent.getChildNodes()).stream();
     }
 
     public Stream<Element> getChildElements(Element parent) {
-        return new NodeIterator(parent.getChildNodes()).asStream().filter(Element.class::isInstance).map(Element.class::cast);
+        return getChildNodes(parent).filter(Element.class::isInstance).map(Element.class::cast);
     }
 
     public Stream<Element> getElementsByTagName(Element parent, String tagName) {
-        return new NodeIterator(parent.getElementsByTagName(tagName)).asStream().filter(Element.class::isInstance).map(Element.class::cast);
+        return asList(parent.getElementsByTagName(tagName)).stream().filter(Element.class::isInstance).map(Element.class::cast);
     }
 
     public Map<String, String> getAttributes(Element e) {
@@ -82,7 +83,9 @@ public class XmlUtil {
 
     public static String asString(Element element) {
         try {
-            return new XmlSerializer().serialize(element);
+            var result = new XmlSerializer().serialize(element);
+            Logger.info("serializer-result:" + result);
+            return result;
         } catch (TransformerException e) {
             throw new RuntimeException(e);
         }
@@ -96,5 +99,14 @@ public class XmlUtil {
             return asString((Element) node);
         }
         return node.getNodeValue();
+    }
+
+
+    public static List<Node> asList(NodeList nodeList) {
+        var list = new ArrayList<Node>();
+        for (var i = 0; i < nodeList.getLength(); i++) {
+            list.add(nodeList.item(i));
+        }
+        return list;
     }
 }

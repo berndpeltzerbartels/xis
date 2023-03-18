@@ -1,4 +1,5 @@
 
+
 class PageController {
 
     /**
@@ -11,27 +12,25 @@ class PageController {
         this.head = this.getElementByTagName('head');
         this.body = this.getElementByTagName('body');
         this.title = this.getElementByTagName('title');
-        this.widgets = {};
+        this.head._xis = new XisElement(this.head);
+        this.body._xis = new XisElement(this.body);
         this.pages = {};
         this.pageData = {};
-        this.headChildNodes = [];
+        this.pageId = undefined;
         this.welcomePageId;
+        this.titleExpression;
     }
 
-    init() {
+    init(config) {
+        this.welcomePageId = config.welcomePageId;
+        var promises = [];
         var _this = this;
-        this.loadConfig().then(config => {
-            _this.welcomePageId = config.welcomePageId;
-            var promises = [];
-            config.pageIds.forEach(id => { _this.pages[id] = {}; _this.pageData[id] = {}; });
-            config.widgetIds.forEach(id => _this.widgets[id] = {});
-            config.widgetIds.forEach(id => promises.push(_this.loadWidget(id)));
-            config.pageIds.forEach(id => promises.push(_this.loadPageHead(id)));
-            config.pageIds.forEach(id => promises.push(_this.loadPageBody(id)));
-            config.pageIds.forEach(id => promises.push(_this.loadPageBodyAttributes(id)));
-            return Promise.all(promises);
-
-        }).then(() => _this.findPageId())
+        config.pageIds.forEach(id => { _this.pages[id] = {}; _this.pageData[id] = {}; });
+        config.pageIds.forEach(id => promises.push(_this.loadPageHead(id)));
+        config.pageIds.forEach(id => promises.push(_this.loadPageBody(id)));
+        config.pageIds.forEach(id => promises.push(_this.loadPageBodyAttributes(id)));
+        console.log('PageCOntroller:Promises.all');
+        return Promise.all(promises).then(() => _this.findPageId())
             .then(pageId => _this.bindPage(pageId))
             .then(pageId => _this.refreshData(pageId))
             .then(pageId => _this.refreshPage(pageId));
@@ -42,6 +41,8 @@ class PageController {
     * @returns {Promise<string>}
     */
     bindPage(pageId) {
+        console.log('bindPage: ' + pageId);
+        this.pageId = pageId;
         var _this = this;
         return new Promise((resolve, _) => {
             var headChildArray = _this.pages[pageId].headChildArray;
@@ -49,6 +50,7 @@ class PageController {
             var attributes = _this.pages[pageId].bodyAttributes;
             this.bindHead(headChildArray);
             this.bindBody(bodyChildArray, attributes);
+            console.log('resolve bindPage: ' + pageId);
             resolve(pageId);
         });
     }
@@ -63,6 +65,7 @@ class PageController {
         for (var name of this.body.getAttributeNames()) {
             body.removeAttribute(name);
         }
+        this.titleExpression = undefined;
     }
 
     pageAction(pageId, action) {
@@ -81,27 +84,33 @@ class PageController {
      * @returns {Promise<string>}
      */
     findPageId() {
+        console.log('findPageId');
         var _this = this;
         return new Promise((resolve, _) => {
             var uri = document.location.pathname;
             if (!_this.pages[uri]) {
                 uri = _this.welcomePageId;
             }
+            console.log('resolve findPageId: ' + uri);
             resolve(uri);
         });
     }
 
+    refresh() {
+        var _this = this;
+        return this.refreshData().then(() => _this.refreshPage());
+    }
 
     /**
      * @returns {Promise<string>}
      */
     refreshData(pageId) {
-        var controller = this;
-        return client.loadPageData(pageId, controller.pageData[pageId] || {}).then(response => {
-            var data = response.data;
-            for (var key of Object.keys(data)) {
-                controller.pageData[pageId][key] = data[key];
-            }
+        console.log('refreshData');
+        var _this = this;
+        return client.loadPageData(this.pageId, _this.pageData[pageId] || {}).then(response => {
+            var responseData = response.data;
+            _this.pageData[pageId] = new Data(responseData);
+            console.log('return in refreshData');
             return pageId;
         });
     }
@@ -110,24 +119,27 @@ class PageController {
     * @returns {Promise<string>}
     */
     refreshPage(pageId) {
+        console.log('refreshPage: ' + pageId);
         var _this = this;
         return new Promise((resolve, _) => {
             var data = _this.pageData[pageId];
-            this.refreshChildNodes(_this.head, data);
-            this.refreshChildNodes(_this.body, data);
+            this.refreshTitle(data);
+            _this.head._xis.refresh(data);
+            _this.body._xis.refresh(data);
             _this.updateHistory(_this.head, pageId);
+            console.log('resolve - refreshPage: ' + pageId);
             resolve(pageId);
         });
     }
 
-
-    refreshChildNodes(element, data) {
-        for (var i = 0; i < element.childNodes.length; i++) {
-            var child = element.childNodes.item(i);
-            if (!child.getAttribute || !child.getAttribute('data-ignore')) {
-                refresh(child, data);
-            }
+    refreshTitle(data) {
+        if (this.titleExpression) {
+            this.title.innerHTML = this.titleExpression.evaluate(data);
         }
+    }
+
+    ignoreElement(element) {
+        return element.getAttribute('data-ignore');
     }
 
     updateHistory(head, pageId) {
@@ -174,37 +186,7 @@ class PageController {
             return pageId;
         });
     }
-    /**
-    * @returns {Promise<string>}
-    */
-    loadWidget(widgetId) {
-        var _this = this;
-        return this.client.loadWidget(widgetId).then(widgetHtml => {
-            var root = _this.asRootElement(widgetHtml);
-            _this.widgets[widgetId].root = root;
-            initialize(root);
-            return widgetId;
-        });
-    }
 
-
-    /**
-    * @returns {Promise<ComponentConfig>}
-    */
-    loadConfig() {
-        return this.client.loadConfig();
-    }
-
-    /**
-     *
-     * @param {string} tree
-     * @returns {Element}
-     */
-    asRootElement(tree) {
-        var div = document.createElement('div');
-        div.innerHTML = trim(tree);
-        return div.childNodes.item(0);
-    }
     getElementByTagName(name) {
         return document.getElementsByTagName(name).item(0);
     }
@@ -216,12 +198,12 @@ class PageController {
         for (var i = 0; i < headChildArray.length; i++) {
             var child = headChildArray[i];
             if (isElement(child) && child.localName == 'title') {
-                getTemplateTitle().innerHTML = child.innerHTML;
+                this.titleExpression = new TextContentParser(child.innerHTML).parse();
             } else {
                 this.head.appendChild(child);
             }
-
         }
+        this.head._xis.update();
     }
 
     /**
@@ -232,11 +214,108 @@ class PageController {
         for (var name of Object.keys(attributes)) {
             this.body.setAttribute(name, attributes[name]);
         }
+        console.log('body-children:' + bodyChildArray.length);
         for (var i = 0; i < bodyChildArray.length; i++) {
+            console.log('body-children - append:' + bodyChildArray[i]);
             this.body.appendChild(bodyChildArray[i]);
         }
+        this.body._xis.update();
     }
 
 }
 
+class Widgets {
 
+    constructor(client) {
+        this.widgets = {};
+        this.client = client;
+    }
+
+    init(config) {
+        var _this = this;
+        var promises = [];
+        config.widgetIds.forEach(id => _this.widgets[id] = {});
+        config.widgetIds.forEach(id => promises.push(_this.loadWidget(id)));
+        console.log('Widgets - Promise.all');
+        return Promise.all(promises).then(() => config);
+    }
+    /**
+    * @returns {Promise<string>}
+    */
+    loadWidget(widgetId) {
+        console.log('loadWidget: ' + widgetId);
+        var _this = this;
+        return this.client.loadWidget(widgetId).then(widgetHtml => {
+            var root = _this.asRootElement(widgetHtml);
+            _this.widgets[widgetId].root = root;
+            console.log('initialize: ' + root);
+            initialize(root);
+            return widgetId;
+        });
+    }
+
+    getWidgetRoot(widgetId) {
+        return this.widgets[widgetId].root;
+    }
+
+
+    /**
+     *
+     * @param {string} tree
+     * @returns {Element}
+     */
+    asRootElement(tree) {
+        var div = document.createElement('div');
+        div.innerHTML = trim(tree);
+        return div.childNodes.item(0);
+    }
+}
+
+class ContainerController {
+
+    constructor(client, widgets) {
+        this.client = client;
+        this.widgets = widgets;
+    }
+
+    refresh(containerElement, data) {
+        var xis = containerElement._xis;
+        var container = xis.container;
+        var widgetId = this.getWidgetIdToShow(container, data);
+        if (widgetId) {
+            if (container.widgetId != widgetId) {
+                if (container.widgetId) {
+                    this.removeWidget(containerElement, container);
+                }
+                this.showWidget(containerElement, container, widgetId);
+            }
+            this.client.loadWidgetData(widgetId, container.data)
+                .then(result => new Data(result))
+                .then(data => container.widgetRoot._xis.refresh(data));
+
+
+        } else {
+            this.removeWidget(containerElement, container);
+        }
+        if (container.widgetRoot) {
+            container.widgetRoot._xis.refresh(data);
+        }
+    }
+
+    getWidgetIdToShow(container, data) {
+        return container.expression.evaluate(data);
+    }
+
+    removeWidget(containerElement, container) {
+        containerElement.removeChild(this.widgetRoot);
+        container.widgetId = undefined;
+        container.widgetRoot = undefined;
+    }
+
+    showWidget(containerElement, container, widgetId) {
+        container.widgetId = widgetId;
+        container.widgetRoot = this.widgets.getWidgetRoot(widgetId);
+        containerElement.appendChild(container.widgetRoot);
+    }
+
+}

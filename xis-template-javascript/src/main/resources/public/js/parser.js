@@ -473,6 +473,9 @@ class TextContentParser {
             }
             buff += currentChar;
         }
+        if (buff.length > 0) {
+            this.parts.push(this.createTextPart(buff));
+        }
 
     }
 

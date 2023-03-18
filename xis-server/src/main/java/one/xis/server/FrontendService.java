@@ -3,6 +3,7 @@ package one.xis.server;
 
 import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
+import org.tinylog.Logger;
 
 import java.util.Map;
 
@@ -35,11 +36,15 @@ public class FrontendService {
     }
 
     public String getPageHead(String id) {
-        return htmlResourceService.getPageHead(id);
+        var head = htmlResourceService.getPageHead(id);
+        Logger.info(head);
+        return head;
     }
 
     public String getPageBody(String id) {
-        return htmlResourceService.getPageBody(id);
+        var body = htmlResourceService.getPageBody(id);
+        Logger.info(body);
+        return body;
     }
 
     public Map<String, String> getBodyAttributes(String id) {

@@ -9,6 +9,7 @@ import one.xis.context.XISInject;
 import one.xis.resource.Resource;
 import one.xis.resource.Resources;
 import one.xis.utils.xml.XmlUtil;
+import org.tinylog.Logger;
 import org.w3c.dom.Element;
 
 import java.util.Collection;
@@ -59,12 +60,15 @@ class HtmlResourceService {
 
     String getPageHead(String id) {
         var content = pageHtmlResources.get(id).getContent();
+        Logger.info("content for head :" + content);
         var doc = XmlUtil.loadDocument(content);
+
         return XmlUtil.getElementByTagName(doc.getDocumentElement(), "head").map(this::childNodesAsString).orElse("");
     }
 
     String getPageBody(String id) {
         var content = pageHtmlResources.get(id).getContent();
+        Logger.info("content for body:" + content);
         var doc = XmlUtil.loadDocument(content);
         return XmlUtil.getElementByTagName(doc.getDocumentElement(), "body").map(this::childNodesAsString).orElse("");
     }

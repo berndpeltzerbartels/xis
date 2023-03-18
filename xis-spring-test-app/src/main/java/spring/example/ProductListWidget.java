@@ -30,13 +30,13 @@ class ProductListWidget {
     }
 
     @Action("categorySelected")
-    void categorySelected(@Param long categoryId, @ComponentState ProductListData productListData) {
+    void categorySelected(@PathElement("categoryId") long categoryId, @Model("list") ProductListData productListData) {
         productListData.setCategoryId(categoryId);
         productListData.setProducts(productService.getByCategory(categoryId));
     }
 
     @Action("productToBasket")
-    void productToBasket(@Param long productId, @ClientId String clientId) {
+    void productToBasket(@PathElement("productId") long productId, @ClientId String clientId) {
         basketService.addProduct(productId, clientId);
     }
 

@@ -27,7 +27,7 @@ class SpringController {
         return frontendService.invokePageModelMethods(request);
     }
 
-    @GetMapping("/xis/widget/model")
+    @PostMapping("/xis/widget/model")
     Response getWidgetModel(@RequestBody Request request) {
         return frontendService.invokeWidgetModelMethods(request);
     }

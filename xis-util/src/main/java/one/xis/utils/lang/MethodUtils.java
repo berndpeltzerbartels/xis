@@ -33,7 +33,7 @@ public class MethodUtils {
     public static String methodSignature(Method method) {
         return String.format("%s(%s)", method.getName(), parameterString(method));
     }
-    
+
     public static Object invoke(Object controller, Method method, Object[] args) {
         try {
             return method.invoke(controller, args);
@@ -42,9 +42,18 @@ public class MethodUtils {
         }
     }
 
-    private static List<Class<?>> hierarchy(Class<?> c) {
+    /**
+     * Creates a list containing the given class and it's superclasses
+     * so the most parent class is first and the given subclass is the last.
+     * <p>
+     * This is the order we need to replace super-method by overriden method.
+     *
+     * @param c
+     * @return
+     */
+    public static List<Class<?>> hierarchy(Class<?> c) {
         List<Class<?>> classes = new ArrayList<>();
-        while (c != null && c.equals(Object.class)) {
+        while (c != null && !c.equals(Object.class)) {
             classes.add(c);
             c = c.getSuperclass();
         }

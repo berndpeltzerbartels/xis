@@ -87,7 +87,7 @@ class Client {
      */
     loadWidgetData(widgetId, data) {
         var request = this.createRequest(widgetId, data, undefined);
-        return this.httpClient.post('/xis/page/model', request)
+        return this.httpClient.post('/xis/widget/model', request)
             .then(content => JSON.parse(content));
     }
 

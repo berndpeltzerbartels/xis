@@ -2,14 +2,13 @@ package one.xis.resource;
 
 import one.xis.context.XISComponent;
 
-import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
 @XISComponent
 public class Resources {
-    public Resource getByPath(String path) {
+    public synchronized Resource getByPath(String path) {
         String resourcePath = removeTrailingSlah(path);
         URL url = ClassLoader.getSystemClassLoader().getResource(resourcePath);
         if (url == null) {
@@ -24,7 +23,7 @@ public class Resources {
         if (uri.getScheme().equals("jar")) {
             return new StaticResource(resourcePath);
         } else {
-            return new DevelopmentResource(new File(uri));
+            return new StaticResource(resourcePath);
         }
     }
 
