@@ -68,6 +68,7 @@ class ControllerWrapperFactory {
     }
 
     private ModelMethod createModelMethod(Method method) {
+        method.setAccessible(true);
         try {
             return ModelMethod.builder()
                     .method(method)
@@ -80,6 +81,7 @@ class ControllerWrapperFactory {
     }
 
     private ModelTimestampMethod createModelTimestampMethod(Method method) {
+        method.setAccessible(true);
         try {
             return ModelTimestampMethod.builder()
                     .method(method)
@@ -92,6 +94,7 @@ class ControllerWrapperFactory {
     }
 
     private ActionMethod createActionMethod(Method method) {
+        method.setAccessible(true);
         try {
             return ActionMethod.builder()
                     .method(method)

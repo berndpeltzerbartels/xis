@@ -30,11 +30,17 @@ public class ControllerWrapper {
     }
 
     private void invokeForDataItem(String key, ModelMethod modelMethod, Request request, Map<String, DataItem> result) {
-        var timestamp = invokeModelTimestampMethod(key, request);
-        var requestTimestamp = request.getData().get(key).getTimestamp();
-        if (timestamp.isEmpty() || timestamp.get() > requestTimestamp) {
-            result.put(key, new DataItem(modelMethod.invoke(request, controller), timestamp.orElse(System.currentTimeMillis())));
+        var requestTimestamp = requestTimestamp(request, key);
+        var modelTimestamp = invokeModelTimestampMethod(key, request).orElse(null);
+        if (modelTimestamp == null || requestTimestamp == null || modelTimestamp > requestTimestamp) {
+            var timestamp = modelTimestamp == null ? System.currentTimeMillis() : modelTimestamp;
+            result.put(key, new DataItem(modelMethod.invoke(request, controller), timestamp));
         }
+    }
+
+
+    private Long requestTimestamp(Request request, String key) {
+        return Optional.ofNullable(request.getData().get(key)).map(DataItem::getTimestamp).orElse(null);
     }
 
     private Optional<Long> invokeModelTimestampMethod(String key, Request request) {

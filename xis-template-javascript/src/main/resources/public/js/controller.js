@@ -109,7 +109,8 @@ class PageController {
         var _this = this;
         return client.loadPageData(this.pageId, _this.pageData[pageId] || {}).then(response => {
             var responseData = response.data;
-            _this.pageData[pageId] = new Data(responseData);
+            for (var item of responseData)
+                _this.pageData[pageId] = new Data(responseData);
             console.log('return in refreshData');
             return pageId;
         });

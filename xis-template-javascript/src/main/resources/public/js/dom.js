@@ -178,7 +178,7 @@ class XisElement {
         var xis = new XisElement(element);
         element._xis = xis;
         if (element.getAttribute('data-widget')) {
-            xis.container = { expression: new TextContentParser(element.getAttribute('data-widget')).parse() };
+            xis.container = { expression: new TextContentParser(element.getAttribute('data-widget')).parse(), data: {} };
         }
         if (element.getAttribute('data-show')) {
             xis.showHide = this.exprParser.parse(element.getAttribute('data-show'));
@@ -202,7 +202,9 @@ class XisElement {
 
 
     initializeTextNode(node) {
-        if (node.nodeValue && node.nodeValue.indexOf('${') != -1) {
+        if (empty(node.nodeValue)) {
+            node.parentNode.removeChild(node);
+        } else if (node.nodeValue && node.nodeValue.indexOf('${') != -1) {
             node._xis = new XisTextNode(node);
         }
     }
@@ -329,6 +331,12 @@ function doSplit(string, separatorChar) {
     }
     rv.push(buffer);
     return rv;
+}
+
+function empty(str) {
+    if (!str) return true;
+    if (!trim(str).length == 0) return true;
+    return false;
 }
 
 
