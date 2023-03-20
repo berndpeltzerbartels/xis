@@ -2,12 +2,13 @@ package one.xis.server;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import one.xis.*;
+import one.xis.Action;
+import one.xis.Model;
+import one.xis.ModelTimestamp;
 import one.xis.context.XISComponent;
 import one.xis.utils.lang.MethodUtils;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -107,22 +108,8 @@ class ControllerWrapperFactory {
     }
 
     private List<MethodParameter> createParameters(Method method) {
-        return Arrays.stream(method.getParameters()).map(this::createParameter).collect(Collectors.toList());
+        return Arrays.stream(method.getParameters()).map(MethodParameter::createParameter).collect(Collectors.toList());
     }
 
-    private MethodParameter createParameter(Parameter parameter) {
-        var methodParameter = new MethodParameter();
-        if (parameter.isAnnotationPresent(Model.class)) {
-            methodParameter.setParameterType(ParameterType.MODEL);
-        } else if (parameter.isAnnotationPresent(ClientId.class)) {
-            methodParameter.setParameterType(ParameterType.CLIENT_ID);
-        } else if (parameter.isAnnotationPresent(UserId.class)) {
-            methodParameter.setParameterType(ParameterType.USER_ID);
-        } else if (parameter.isAnnotationPresent(PathElement.class)) {
-            methodParameter.setParameterType(ParameterType.USER_ID);
-        } else {
-            throw new IllegalStateException("No known annotation for method-parameter: " + parameter);
-        }
-        return methodParameter;
-    }
+
 }

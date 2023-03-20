@@ -16,6 +16,7 @@ class PageController {
         this.body._xis = new XisElement(this.body);
         this.pages = {};
         this.pageData = {};
+        this.timestamps = {};
         this.pageId = undefined;
         this.welcomePageId;
         this.titleExpression;
@@ -25,7 +26,8 @@ class PageController {
         this.welcomePageId = config.welcomePageId;
         var promises = [];
         var _this = this;
-        config.pageIds.forEach(id => { _this.pages[id] = {}; _this.pageData[id] = {}; });
+        config.pageIds.forEach(id => { _this.pages[id] = {}; _this.pageData[id] = new Data({}); });
+        config.pageIds.forEach(id => { _this.pages[id] = {}; _this.timestamps[id] = {}; });
         config.pageIds.forEach(id => promises.push(_this.loadPageHead(id)));
         config.pageIds.forEach(id => promises.push(_this.loadPageBody(id)));
         config.pageIds.forEach(id => promises.push(_this.loadPageBodyAttributes(id)));
@@ -71,11 +73,14 @@ class PageController {
     pageAction(pageId, action) {
         var _this = this;
         return this.client.pageAction(pageId, action, this.pageData[pageId]).then(response => {
-            var data = response.data;
+            var data = _this.pageData[key];
+            _this.timestamps
             for (var key of Object.keys(data)) {
-                _this.pageData[pageId][key] = data[key];
+                var dataItem = response.data[key];
+                data.setValue(key, dataItem.value);
+                this.timestamps[key] = dataItem.timestamp;
             }
-            return response.nextControllerId;
+            return data;
         }).then(controllerId => _this.bindPage(controllerId));
     }
 
@@ -105,12 +110,25 @@ class PageController {
      * @returns {Promise<string>}
      */
     refreshData(pageId) {
-        console.log('refreshData');
         var _this = this;
-        return client.loadPageData(this.pageId, _this.pageData[pageId] || {}).then(response => {
+        console.log('refreshData');
+        var data = this.pageData[pageId];
+        var timestamps = this.timestamps[pageId];
+        var dto = {};
+        for (var key of data.getKeys()) {
+            var value = data.getValue(key);
+            var timestamp = timestamps[key];
+            var dataItem = { value: value, timestamp: timestamp };
+            dto[key] = dataItem;
+        }
+        return client.loadPageData(this.pageId, dto).then(response => {
             var responseData = response.data;
-            for (var item of responseData)
-                _this.pageData[pageId] = new Data(responseData);
+            var data = _this.pageData[pageId];
+            for (var key of Object.keys(responseData)) {
+                var dataItem = responseData[key];
+                data.setValue(key, dataItem.value);
+                _this.timestamps[key] = dataItem.timestamp;
+            }
             console.log('return in refreshData');
             return pageId;
         });
@@ -290,9 +308,22 @@ class ContainerController {
                 }
                 this.showWidget(containerElement, container, widgetId);
             }
-            this.client.loadWidgetData(widgetId, container.data)
-                .then(result => new Data(result))
-                .then(data => container.widgetRoot._xis.refresh(data));
+            var dto = {};
+            for (var key of container.data.getKeys()) {
+                var value = container.data.getValue(key);
+                var timestamp = container.timestamps[key];
+                var dataItem = { value: value, timestamp: timestamp };
+                dto[key] = dataItem;
+            }
+            this.client.loadWidgetData(widgetId, dto || {})
+                .then(response => {
+                    for (var key of Object.keys(response.data)) {
+                        var dataItem = responseData[key];
+                        container.data.setValue(key, dataItem.value);
+                        container.timestamps[key] = dataItem.timestamp;
+                    }
+                    return container.data;
+                }).then(data => xis.refresh(data));
 
 
         } else {

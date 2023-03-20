@@ -34,6 +34,10 @@ class Data {
         return dataNode;
     }
 
+    getKeys() {
+        return Object.keys(this.values);
+    }
+
     /**
      * @public 
      * @param {String} key 
@@ -42,6 +46,30 @@ class Data {
     setValue(key, value, timestamp) {
         this.values[key] = { value: value, timestamp: timestamp };
     }
+}
+
+class DataItem {
+
+    constructor() {
+        this.key = '';
+        this.value = undefined;
+        this.timestamp = -1;
+    }
+
+    getValue(path) {
+        var dataNode = this.values;
+        for (var i = 1; i < path.length; i++) {
+            var key = path[i];
+            if (dataNode[key]) {
+                dataNode = dataNode[key].value;
+            } else {
+                dataNode = undefined;
+                break;
+            }
+        }
+        return dataNode;
+    }
+
 }
 
 

@@ -38,7 +38,6 @@ public class ControllerWrapper {
         }
     }
 
-
     private Long requestTimestamp(Request request, String key) {
         return Optional.ofNullable(request.getData().get(key)).map(DataItem::getTimestamp).orElse(null);
     }
