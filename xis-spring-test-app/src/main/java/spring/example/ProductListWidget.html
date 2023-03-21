@@ -1,14 +1,13 @@
 <div>
     <h4>Unsere Angebote zu Toppreisen</h4>
     <table>
-        <tbody data-for="category:categories" data-number="categoryNumber">
+        <tbody data-repeat="category:categories">
         <tr>
             <td colspan="3">
-                ${categoryNumber}. ${category.title}
+                ${category.title}
             </td>
         </tr>
-        <tr data-repeat="product:category.products" data-number="productNumber">
-            <td>${productNumber}</td>
+        <tr data-repeat="product:category.products">
             <td><a>${product.title}</a></td>
             <td>${product.price} EUR</td>
         </tr>

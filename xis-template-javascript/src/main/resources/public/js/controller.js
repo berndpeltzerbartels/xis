@@ -222,7 +222,7 @@ class PageController {
                 this.head.appendChild(child);
             }
         }
-        this.head._xis.update();
+        this.head._xis.updateChildArray();
     }
 
     /**
@@ -238,7 +238,7 @@ class PageController {
             console.log('body-children - append:' + bodyChildArray[i]);
             this.body.appendChild(bodyChildArray[i]);
         }
-        this.body._xis.update();
+        this.body._xis.updateChildArray();
     }
 
 }
@@ -306,7 +306,7 @@ class ContainerController {
                 if (container.widgetId) {
                     this.removeWidget(containerElement, container);
                 }
-                this.showWidget(containerElement, container, widgetId);
+                this.bindWidget(containerElement, container, widgetId);
             }
             var dto = {};
             for (var key of container.data.getKeys()) {
@@ -318,7 +318,7 @@ class ContainerController {
             this.client.loadWidgetData(widgetId, dto || {})
                 .then(response => {
                     for (var key of Object.keys(response.data)) {
-                        var dataItem = responseData[key];
+                        var dataItem = response.data[key];
                         container.data.setValue(key, dataItem.value);
                         container.timestamps[key] = dataItem.timestamp;
                     }
@@ -328,9 +328,6 @@ class ContainerController {
 
         } else {
             this.removeWidget(containerElement, container);
-        }
-        if (container.widgetRoot) {
-            container.widgetRoot._xis.refresh(data);
         }
     }
 
@@ -344,10 +341,11 @@ class ContainerController {
         container.widgetRoot = undefined;
     }
 
-    showWidget(containerElement, container, widgetId) {
+    bindWidget(containerElement, container, widgetId) {
         container.widgetId = widgetId;
         container.widgetRoot = this.widgets.getWidgetRoot(widgetId);
         containerElement.appendChild(container.widgetRoot);
+        containerElement._xis.updateChildArray();
     }
 
 }

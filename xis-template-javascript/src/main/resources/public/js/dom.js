@@ -73,18 +73,15 @@ function refreshRepeat(e, data) {
     var xis = e._xis;
     var repeat = xis.repeat;
     var parent = xis.parent;
-    var dataItem = repeat.expression.evaluate(data);
-    if (!dataItem) return;
-    var arr = dataItem.value;
-    var timestamp = dataItem.timestamp;
+    var arr = repeat.expression.evaluate(data);
     if (!arr) return;
     var valueKey = repeat.varName;
     var newData = new Data({}, data);
     var i = 0;
     var element;
     while (i < arr.length) {
-        newData.setValue(valueKey, arr[i], timestamp);
-        newData.setValue(valueKey + '_index', i, timestamp);
+        newData.setValue(valueKey, arr[i]);
+        newData.setValue(valueKey + '_index', i);
         if (repeat.cache.elements.length <= i) {
             repeat.cache.elements.push(cloneNode(e));
         }
@@ -136,6 +133,7 @@ class XisTextNode {
     constructor(node) {
         this.node = node;
         this.expression = new TextContentParser(node.nodeValue).parse();
+        this.node.nodeValue = '';
     }
 
     refresh(data) {
@@ -157,9 +155,12 @@ class XisElement {
         return this;
     }
 
-    update() {
+    updateChildArray() {
         this.childArray = toArray(this.element.childNodes);
-        this.childVisible = new Array(this.childArray.length);
+        this.childVisible = [];
+        for (var i = 0; i < this.childArray.length; i++) {
+            this.childVisible.push(true);
+        }
     }
 
     initialize() {
@@ -178,7 +179,7 @@ class XisElement {
         var xis = new XisElement(element);
         element._xis = xis;
         if (element.getAttribute('data-widget')) {
-            xis.container = { expression: new TextContentParser(element.getAttribute('data-widget')).parse(), data: new Data({}) };
+            xis.container = { expression: new TextContentParser(element.getAttribute('data-widget')).parse(), data: new Data({}), timestamps: {} };
         }
         if (element.getAttribute('data-show')) {
             xis.showHide = this.exprParser.parse(element.getAttribute('data-show'));
@@ -225,11 +226,12 @@ class XisElement {
             }
             if (xis.container) {
                 containerController.refresh(child, data);
-            }
-            if (xis.repeat) {
+            } else if (xis.repeat) {
                 refreshRepeat(child, data);
+            } else {
+                xis.refresh(data);
             }
-            xis.refresh(data);
+
         }
     }
 
@@ -335,7 +337,7 @@ function doSplit(string, separatorChar) {
 
 function empty(str) {
     if (!str) return true;
-    if (!trim(str).length == 0) return true;
+    if (trim(str).length == 0) return true;
     return false;
 }
 

@@ -9,5 +9,5 @@ class Product {
     private int id;
     private String title;
     private BigDecimal price;
-    private long categoryOd;
+    private long categoryId;
 }

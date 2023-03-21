@@ -4,6 +4,8 @@ import one.xis.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Widget
 @Component
 class ProductListWidget {
@@ -17,20 +19,18 @@ class ProductListWidget {
     @Autowired
     private BasketService basketService;
 
-    @Model("list")
-    ProductListData createProductList() {
-        var productListData = new ProductListData();
-        productListData.setProductCategories(productCategoryService.allCategories());
-        if (!productListData.getProductCategories().isEmpty()) {
-            var category = productListData.getProductCategories().get(0);
-            productListData.setCategoryId(category.getId());
-            productListData.setProducts(productService.getByCategory(category.getId()));
+    @Model("categories")
+    List<ProductCategory> createProductList() {
+        var categories = productCategoryService.allCategories();
+        for (var category : categories) {
+            category.setProducts(productService.getByCategory(category.getId()));
         }
-        return productListData;
+        return categories;
     }
 
+
     @Action("categorySelected")
-    void categorySelected(@PathElement("categoryId") long categoryId, @Model("list") ProductListData productListData) {
+    void categorySelected(@PathElement("categoryId") int categoryId, @Model("productListData") ProductListData productListData) {
         productListData.setCategoryId(categoryId);
         productListData.setProducts(productService.getByCategory(categoryId));
     }

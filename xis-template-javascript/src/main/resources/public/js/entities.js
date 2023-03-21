@@ -22,7 +22,7 @@ class Data {
         for (var i = 0; i < path.length; i++) {
             var key = path[i];
             if (dataNode[key]) {
-                dataNode = dataNode[key].value;
+                dataNode = dataNode[key];
             } else {
                 dataNode = undefined;
                 break;
@@ -43,8 +43,8 @@ class Data {
      * @param {String} key 
      * @param {any} value 
      */
-    setValue(key, value, timestamp) {
-        this.values[key] = { value: value, timestamp: timestamp };
+    setValue(key, value) {
+        this.values[key] = value;
     }
 }
 

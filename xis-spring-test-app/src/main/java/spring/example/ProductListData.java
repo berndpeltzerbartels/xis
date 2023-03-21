@@ -9,5 +9,5 @@ class ProductListData {
 
     private List<Product> products;
     private List<ProductCategory> productCategories;
-    private Long categoryId;
+    private int categoryId;
 }
