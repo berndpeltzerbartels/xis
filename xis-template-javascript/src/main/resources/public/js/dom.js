@@ -129,7 +129,8 @@ function refreshTextNode(node, data) {
     }
 }
 
-class XisTextNode {
+class TextNodeController {
+
     constructor(node) {
         this.node = node;
         this.expression = new TextContentParser(node.nodeValue).parse();
@@ -141,7 +142,7 @@ class XisTextNode {
     }
 }
 
-class XisElement {
+class ElementController {
 
     constructor(element) {
         this.element = element;
@@ -150,9 +151,7 @@ class XisElement {
         this.repeat = undefined;
         this.showHide = undefined;
         this.widget = undefined;
-        this.childArray = toArray(this.element.childNodes);
-        this.childVisible = new Array(this.childArray.length);
-        return this;
+        this.updateChildArray();
     }
 
     updateChildArray() {
@@ -162,54 +161,6 @@ class XisElement {
             this.childVisible.push(true);
         }
     }
-
-    initialize() {
-        for (var i = 0; i < this.childArray.length; i++) {
-            var node = this.childArray[i];
-            if (isElement(node) && !node.getAttribute('data-ignore')) {
-                this.initializeElement(node);
-            } else {
-                this.initializeTextNode(node);
-            }
-            this.childVisible[i] = true;
-        }
-    }
-
-    initializeElement(element) {
-        var xis = new XisElement(element);
-        element._xis = xis;
-        if (element.getAttribute('data-widget')) {
-            xis.container = { expression: new TextContentParser(element.getAttribute('data-widget')).parse(), data: new Data({}), timestamps: {} };
-        }
-        if (element.getAttribute('data-show')) {
-            xis.showHide = this.exprParser.parse(element.getAttribute('data-show'));
-        } if (element.getAttribute('data-repeat')) {
-            var arr = doSplit(element.getAttribute('data-repeat'), ':');
-            xis.repeat = { expression: new ExpressionParser().parse(arr[1]), varName: arr[0], cache: { elements: [], visible: [] } };
-            xis.repeat.cache.elements.push(element);
-            xis.repeat.cache.visible.push(true);
-        }
-        for (var attrName of element.getAttributeNames()) {
-            var attrValue = element.getAttribute(attrName);
-            if (attrValue.indexOf('${') != -1) {
-                xis.attributes[attrName] = new TextContentParser(attrValue).parse();
-            }
-        }
-        if (!xis.container) {
-            xis.initialize(); // otherwise already initialized
-        }
-
-    }
-
-
-    initializeTextNode(node) {
-        if (empty(node.nodeValue)) {
-            node.parentNode.removeChild(node);
-        } else if (node.nodeValue && node.nodeValue.indexOf('${') != -1) {
-            node._xis = new XisTextNode(node);
-        }
-    }
-
 
     refresh(data) {
         for (var i = 0; i < this.childArray.length; i++) {
@@ -271,7 +222,7 @@ class XisElement {
 
 
     clone(e) {
-        var xis = new XisElement(e);
+        var xis = new ElementController(e);
         xis.element = e;
         xis.parent = e.parent;
         xis.childArray = toArray(e.childNodes);
@@ -284,9 +235,70 @@ class XisElement {
     }
 }
 
+class Initializer {
+
+    constructor() {
+        this.exprParser = new ExpressionParser();
+    }
+
+    initialize(element) {
+        this.initializeElement(element);
+    }
+
+    initializeChildren(element) {
+        for (var i = 0; i < element.childNodes.length; i++) {
+            var node = element.childNodes.item(i);
+            if (isElement(node) && !node.getAttribute('data-ignore')) {
+                this.initializeElement(node);
+            } else {
+                this.initializeTextNode(node);
+            }
+        }
+    }
+
+    initializeElement(element) {
+        var xis = new ElementController(element);
+        var exprParser = this.exprParser;
+        element._xis = xis;
+        if (element.getAttribute('data-widget')) {
+            xis.container = { expression: new TextContentParser(element.getAttribute('data-widget')).parse(), data: new Data({}), timestamps: {} };
+        }
+        if (element.getAttribute('data-show')) {
+            xis.showHide = exprParser.parse(element.getAttribute('data-show'));
+        } if (element.getAttribute('data-repeat')) {
+            var arr = doSplit(element.getAttribute('data-repeat'), ':');
+            xis.repeat = { expression: exprParser.parse(arr[1]), varName: arr[0], cache: { elements: [], visible: [] } };
+            xis.repeat.cache.elements.push(element);
+            xis.repeat.cache.visible.push(true);
+        }
+        for (var attrName of element.getAttributeNames()) {
+            var attrValue = element.getAttribute(attrName);
+            if (attrValue.indexOf('${') != -1) {
+                xis.attributes[attrName] = new TextContentParser(attrValue).parse();
+            }
+        }
+        if (!xis.container) {
+            this.initializeChildren(element); // otherwise already initialized
+        }
+
+    }
+
+
+    initializeTextNode(node) {
+        /*
+        if (empty(node.nodeValue)) {
+            node.parentNode.removeChild(node);
+        } else
+        */
+        if (node.nodeValue && node.nodeValue.indexOf('${') != -1) {
+            node._xis = new TextNodeController(node);
+        }
+    }
+}
+
 function initialize(element) {
-    element._xis = new XisElement(element);
-    element._xis.initialize();
+    var initializer = new Initializer();
+    initializer.initialize(element);
 }
 
 /**

@@ -12,8 +12,8 @@ class PageController {
         this.head = this.getElementByTagName('head');
         this.body = this.getElementByTagName('body');
         this.title = this.getElementByTagName('title');
-        this.head._xis = new XisElement(this.head);
-        this.body._xis = new XisElement(this.body);
+        this.head._xis = new ElementController(this.head);
+        this.body._xis = new ElementController(this.body);
         this.pages = {};
         this.pageData = {};
         this.timestamps = {};
