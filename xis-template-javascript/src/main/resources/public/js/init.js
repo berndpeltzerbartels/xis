@@ -1,6 +1,3 @@
-var root = getTemplateRoot();
-if (!root._xis) root._xis = {};
-
 class Starter {
 
     /**
@@ -29,8 +26,9 @@ class Starter {
 
 
 var client = new Client(new HttpClient());
-var pageController = new PageController(client);
 var widgets = new Widgets(client);
-var containerController = new ContainerController(client, widgets);
+var treeRefresher = new TreeRefresher(client, widgets);
+var pageController = new PageController(treeRefresher, client);
+var nodeCloner = new NodeCloner();
 var starter = new Starter(pageController, widgets, client);
 starter.doStart();

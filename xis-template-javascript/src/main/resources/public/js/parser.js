@@ -590,13 +590,13 @@ function trim(str) {
     var start = 0;
     for (; start < str.length; start++) {
         if (!isWhitespace(str.charAt(start))) {
-            break
+            break;
         }
     }
     var end = str.length - 1;
     for (; end >= start; end--) {
         if (!isWhitespace(str.charAt(end))) {
-            break
+            break;
         }
     }
     return str.substring(start, end + 1);

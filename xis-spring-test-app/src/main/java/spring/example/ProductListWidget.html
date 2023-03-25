@@ -1,17 +1,8 @@
 <div>
     <h4>Unsere Angebote zu Toppreisen</h4>
-    <table>
-        <tbody data-repeat="category:categories">
-        <tr>
-            <td colspan="3">
-                ${category.title}
-            </td>
-        </tr>
-        <tr data-repeat="product:category.products">
-            <td><a>${product.title}</a></td>
-            <td>${product.price} EUR</td>
-        </tr>
 
-        </tbody>
-    </table>
+    <div data-repeat="category:categories">
+        <h4>${category.title}</h4>
+        <span data-repeat="product:category.products">${product.title}</span>
+    </div>
 </div>
