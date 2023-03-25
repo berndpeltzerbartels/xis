@@ -257,7 +257,7 @@ class ChildNodes {
     }
 
     init() {
-        this._childArray = nodeListToArray(element.childNodes);
+        this._childArray = nodeListToArray(this.element.childNodes);
     }
 
     hideAll() {
@@ -313,6 +313,11 @@ class ChildNodes {
 
     cloneNode(node) {
         return this.nodeCloner.clone(node);
+    }
+
+    removeChild(child) {
+        removeFromArray(this.childArray, child);
+        this.element.removeChild(child);
     }
 }
 
@@ -481,11 +486,11 @@ class TreeRefresher {
     constructor(client, widgets) {
         this.repeatRefresher = new RepeatLoopRefresher(this);
         this.forRefresher = new ForLoopRefresher(this);
-        this.widgetContainerRefresher = new WidgetContainerRefresher(client, widgets);
+        this.widgetContainerRefresher = new WidgetContainerRefresher(this, client, widgets);
     }
 
-    refreshRoot(head, data) {
-        for (var child of nodeListToArray(head.childNodes)) {
+    refreshRoot(element, data) {
+        for (var child of nodeListToArray(element.childNodes)) {
             if (!child.getAttribute || !child.getAttribute('data-ignore')) {
                 this.refresh(child, data);
             }
@@ -556,6 +561,10 @@ class TreeRefresher {
         }
     }
 
+    refreshContainer(containerElement, containerAttributes) {
+        this.widgetContainerRefresher.refresh(containerElement, containerAttributes);
+    }
+
     updateVisibility(element, visible) {
         var parentChildNodes = element._parent._childNodes;
         if (visible) {
@@ -583,14 +592,16 @@ class Initializer {
     }
 
     initializeChildren(element) {
-        var childNodes = nodeListToArray(element.childNodes); // We need a copy here to allow remove nodes
-        for (var i = 0; i < childNodes.length; i++) {
-            var node = childNodes[i];
+        var childNodes = element._childNodes; // We need a copy here to allow remove nodes
+        for (var i = 0; i < childNodes.childArray.length; i++) {
+            var node = childNodes.childArray[i];
             node._parent = element;
             if (isElement(node) && !node.getAttribute('data-ignore')) {
                 this.initializeElement(node);
             } else {
-                this.initializeTextNode(node);
+                if (!this.initializeTextNode(node)) {
+                    childNodes.removeChild(node); // whitespaces only so remove it
+                }
             }
         }
     }
@@ -598,6 +609,7 @@ class Initializer {
     initializeElement(element) {
         element._elementAttributes = new ElementAttributes();
         element._childNodes = new ChildNodes(element, this.nodeCloner);
+        element._childNodes.init();
         if (element.getAttribute('data-ignore')) {
             return;
         }
@@ -628,7 +640,9 @@ class Initializer {
     }
 
     initializeWidgetContainer(element) {
-        element._elementAttributes.widgetIdExpression = new TextContentParser(element.getAttribute('data-widget')).parse();
+        var widgetIdExpression = new TextContentParser(element.getAttribute('data-widget')).parse();
+        element._elementAttributes.containerAttributes = new ContainerAttributes(widgetIdExpression);
+        element._data = new Data({});
     }
 
     initializeAttributes(element) {
@@ -645,10 +659,12 @@ class Initializer {
 
     initializeTextNode(node) {
         if (empty(node.nodeValue)) {
-            node.parentNode.removeChild(node);
+            return false;
         } else if (node.nodeValue && node.nodeValue.indexOf('${') != -1) {
             node._expression = new TextContentParser(node.nodeValue).parse();
+            return true;
         }
+        return true;
     }
 }
 
@@ -701,24 +717,28 @@ class Widgets {
 
 class WidgetContainerRefresher {
 
-    constructor(client, widgets) {
+    constructor(treeRefresher, client, widgets) {
+        this.treeRefresher = treeRefresher;
         this.client = client;
         this.widgets = widgets;
     }
 
-    refresh(containerElement, containerAttributes, data) {
-        var widgetId = containerAttributes.evaluateWidgetid(data);
+    refresh(containerElement, containerAttributes) {
+        var _this = this;
+        var widgetId = containerAttributes.widgetIdExpression.evaluate(data);
         if (widgetId) {
             if (containerElement._widgetId != widgetId) {
                 if (containerElement._widgetId) {
-                    this.removeWidget(containerElement, container);
+                    this.removeWidget(containerElement);
                 }
-                this.bindWidget(containerElement, container, widgetId);
+                this.bindWidget(containerElement, widgetId);
             }
             var dto = {};
-            for (var key of container.data.getKeys()) {
-                var value = container.data.getValue(key);
-                var timestamp = container.timestamps[key];
+            var data = containerElement._data;
+            var timestamps = containerElement, _timestamps;
+            for (var key of data.getKeys()) {
+                var value = data.getValue([key]);
+                var timestamp = timestamps[key];
                 var dataItem = { value: value, timestamp: timestamp };
                 dto[key] = dataItem;
             }
@@ -726,11 +746,11 @@ class WidgetContainerRefresher {
                 .then(response => {
                     for (var key of Object.keys(response.data)) {
                         var dataItem = response.data[key];
-                        container.data.setValue(key, dataItem.value);
-                        container.timestamps[key] = dataItem.timestamp;
+                        data.setValue(key, dataItem.value);
+                        timestamps[key] = dataItem.timestamp;
                     }
-                    return container.data;
-                }).then(data => elementController.refresh(data));
+                    return containerElement;
+                }).then(containerElement => _this.treeRefresher.refresh(containerElement, data));
 
 
         } else {
@@ -747,7 +767,7 @@ class WidgetContainerRefresher {
     bindWidget(containerElement, widgetId) {
         containerElement._widgetId = widgetId;
         containerElement._widgetRoot = this.widgets.getWidgetRoot(widgetId);
-        containerElement.appendChild(container.widgetRoot);
+        containerElement.appendChild(containerElement._widgetRoot);
     }
 
 }
@@ -1277,6 +1297,20 @@ function appendArray(arr1, arr2) {
 
 function getElementByTagName(name) {
     return document.getElementsByTagName(name).item(0);
+}
+
+function removeFromArray(array, value) {
+    var removeIndex = -1;
+    for (let index = 0; index < array.length; index++) {
+        const element = array[index];
+        if (element == array) {
+            removeIndex = index;
+        }
+    }
+    if (removeIndex !== -1) {
+        array.splice(removeIndex, removeIndex);
+    }
+
 }
 
 
