@@ -1,9 +1,13 @@
 package one.xis.server;
 
-import lombok.Value;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Value
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 class DataItem {
-    Object value;
-    long timestamp;
+    private Object value;
+    private long timestamp;
 }

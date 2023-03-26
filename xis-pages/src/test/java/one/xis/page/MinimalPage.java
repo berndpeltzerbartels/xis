@@ -3,7 +3,7 @@ package one.xis.page;
 import one.xis.Page;
 import one.xis.context.XISInject;
 
-@Page(path = "/MinimalPage")
+@Page(value = "/MinimalPage")
 class MinimalPage {
 
     @XISInject

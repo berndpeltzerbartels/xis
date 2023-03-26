@@ -41,7 +41,7 @@ class HtmlResourceService {
 
     @XISInit
     void initPageResources() {
-        pageHtmlResources = pageControllers.stream().collect(Collectors.toMap(contr -> contr.getClass().getAnnotation(Page.class).path(), this::htmlResource));
+        pageHtmlResources = pageControllers.stream().collect(Collectors.toMap(contr -> contr.getClass().getAnnotation(Page.class).value(), this::htmlResource));
     }
 
     @XISInit
@@ -59,11 +59,15 @@ class HtmlResourceService {
     }
 
     String getPageHead(String id) {
-        var content = pageHtmlResources.get(id).getContent();
-        Logger.info("content for head :" + content);
-        var doc = XmlUtil.loadDocument(content);
+        try {
+            var content = pageHtmlResources.get(id).getContent();
+            Logger.info("content for head :" + content);
+            var doc = XmlUtil.loadDocument(content);
 
-        return XmlUtil.getElementByTagName(doc.getDocumentElement(), "head").map(this::childNodesAsString).orElse("");
+            return XmlUtil.getElementByTagName(doc.getDocumentElement(), "head").map(this::childNodesAsString).orElse("");
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to load head for " + id, e);
+        }
     }
 
     String getPageBody(String id) {

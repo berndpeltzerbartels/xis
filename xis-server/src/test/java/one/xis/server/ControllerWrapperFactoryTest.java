@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 class ControllerWrapperFactoryTest {
 
 
-    @Page(path = "/page.html")
+    @Page(value = "/page.html")
     class TestPageController {
 
         @Model("x")

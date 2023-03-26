@@ -64,11 +64,11 @@ class ElementAttributes {
 
     clone() {
         var attributes = new ElementAttributes();
-        attributes.repeatLoopAttributes = this.repeatLoopAttributes;
         attributes.forLoopAttributes = this.forLoopAttributes;
         attributes.variableAttributes = this.variableAttributes;
         attributes.showExpression = this.showExpression;
         attributes.containerAttributes = this.containerAttributes;
+        return attributes;
     }
 }
 
@@ -218,14 +218,31 @@ class NodeCloner {
 
     cloneElement(element) {
         var newElement = document.createElement(element.localName);
-        for (var attrName of element.getAttributeNames()) {
-            newElement.setAttribute(attrName, element.getAttribute(attrName));
+        this.cloneAttributes(element, newElement);
+        this.cloneElementAttributes(element, newElement);
+        this.cloneChildNodes(newElement, element);
+        newElement._parent = element._parent;
+        return newElement;
+    }
+
+    cloneAttributes(src, dest) {
+        for (var attrName of src.getAttributeNames()) {
+            dest.setAttribute(attrName, src.getAttribute(attrName));
         }
-        newElement._elementAttributes = element._elementAttributes;
+    }
+
+    cloneElementAttributes(src, dest) {
+        dest._elementAttributes = src._elementAttributes.clone();
     }
 
     cloneChildNodes(newElement, srcElement) {
-        newElement._childNodes = srcElement._childNodes.clone();
+        for (let index = 0; index < srcElement.childNodes.length; index++) {
+            var child = srcElement.childNodes.item(index);
+            var clonedChild = this.clone(child);
+            newElement.appendChild(clonedChild);
+            clonedChild._parent = newElement;
+        }
+        newElement._childNodes = new ChildNodes(newElement);
     }
 
     cloneTextNode(node) {
@@ -244,20 +261,14 @@ class ChildNodes {
     /**
      * 
      * @param {ElementController} element 
-     * @param {NodeCloner} nodeCloner 
      */
-    constructor(element, nodeCloner) {
+    constructor(element) {
         this.element = element;
-        this.nodeCloner = nodeCloner;
-        this._childArray = []; // never changes
+        this._childArray = nodeListToArray(this.element.childNodes); // never changes
     }
 
     get childArray() {
-        return this._childArray;
-    }
-
-    init() {
-        this._childArray = nodeListToArray(this.element.childNodes);
+        return this._childArray; // TODO return a clone, here
     }
 
     hideAll() {
@@ -299,22 +310,6 @@ class ChildNodes {
         return -1;
     }
 
-    clone() {
-        var cloned = new ChildNodes();
-        for (var child of this._childArray) {
-            var clone = this.cloneNode(child);
-            if (child.parent) {
-                child.parent.appendChild(clone);
-            }
-            clone.childArray.push(clone);
-        }
-        return cloned;
-    }
-
-    cloneNode(node) {
-        return this.nodeCloner.clone(node);
-    }
-
     removeChild(child) {
         removeFromArray(this.childArray, child);
         this.element.removeChild(child);
@@ -343,7 +338,7 @@ class ForLoopCache {
      */
     increaseAndGet(index) {
         this.maxVisibleIndex = index;
-        while (this.rows < index) {
+        while (this.rows.length <= index) {
             var childNodes = this.childNodes.clone();
             this.rows.push(childNodes);
         }
@@ -363,9 +358,11 @@ class RepeatLoopCache {
 
     constructor(rowElement) {
         this.rowElement = rowElement;
+        this.parent = this.rowElement.parentNode;
         this.maxVisibleIndex = -1;
         this.cachedRowElements = [];
         this.nodeCloner = new NodeCloner();
+        this.cachedRowElements.push(rowElement);
     }
 
     reset() {
@@ -373,11 +370,13 @@ class RepeatLoopCache {
     }
 
     increaseAndGet(index) {
-        while (this.cachedRowElements.length < index) {
-            this.cachedRowElements.push(this.nodeCloner.cloneElement(this.rowElement));
+        while (this.cachedRowElements.length <= index) {
+            var cloned = this.nodeCloner.cloneElement(this.rowElement);
+            this.cachedRowElements.push(cloned);
             this.maxVisibleIndex = index;
         }
-        return this.cachedRowElements[index];
+        var element = this.cachedRowElements[index];
+        return element;
     }
 
     hideNonVisible() {
@@ -405,32 +404,21 @@ class RepeatLoopRefresher {
      * @param {LoopAttributes} loopAttributes 
      * @param {Data} data 
      */
-    refreshLoop(parent, loopAttributes, data) {
-        var valueKey = this.getKey(loopAttributes);
+    refreshLoop(element, loopAttributes, data) {
+        var valueKey = loopAttributes.valueKey;
         var arr = loopAttributes.arrayExpression.evaluate(data);
+        if (!arr) return;
         var newData = new Data({}, data);
         var index = 0;
-        var cache = this.getCache(parent);
+        var cache = element._repeatCache;
         while (index < arr.length) {
-            newData.setValue(valueKey, arr[i]);
-            newData.setValue(valueKey + '_index', i);
-            var rowElement = cache.increaseAndGet(i++);
-            if (!rowElement.parent) {
-                parent.appendChild(rowElement);
-            }
-            this.treeRefresher.refresh(rowElement, data);
+            newData.setValue(valueKey, arr[index]);
+            newData.setValue(valueKey + '_index', index);
+            var rowElement = cache.increaseAndGet(index++);
+            rowElement._parent.appendChild(rowElement);
+            this.treeRefresher.refreshChildNodes(rowElement, newData);
         }
         cache.hideNonVisible();
-    }
-
-    getCache(element) {
-        var cache = element._repeatCache;
-        if (!cache) {
-            cache = new RepeatLoopCache(element);
-            element._repeatCache = cache;
-        }
-        cache.reset();
-        return cache;
     }
 }
 
@@ -449,16 +437,17 @@ class ForLoopRefresher {
      * @param {Data} data 
      */
     refreshLoop(element, loopAttributes, data) {
-        var valueKey = this.getKey(loopAttributes);
+        var valueKey = loopAttributes.valueKey;
         var arr = loopAttributes.arrayExpression.evaluate(data);
         var newData = new Data({}, data);
         var index = 0;
-        var cache = this.getCache(element);
+        var cache = element._forCache;
         while (index < arr.length) {
             newData.setValue(valueKey, arr[i]);
             newData.setValue(valueKey + '_index', i);
             var childNodes = cache.increaseAndGet(i++);
-            childNodes.showAll();
+            // TODO
+            //childNodes.showAll();
         }
         cache.hideNonVisible();
     }
@@ -490,7 +479,7 @@ class TreeRefresher {
     }
 
     refreshRoot(element, data) {
-        for (var child of nodeListToArray(element.childNodes)) {
+        for (var child of element._childNodes.childArray) {
             if (!child.getAttribute || !child.getAttribute('data-ignore')) {
                 this.refresh(child, data);
             }
@@ -517,7 +506,7 @@ class TreeRefresher {
         if (elementAttributes.forLoopAttributes) {
             this.forRefresher.refresh(element, elementAttributes.forLoopAttributes, data);
         } else if (elementAttributes.repeatLoopAttributes) {
-            this.repeatRefresher.refresh(element, elementAttributes.repeatLoopAttributes, data);
+            this.repeatRefresher.refreshLoop(element, elementAttributes.repeatLoopAttributes, data);
         } else if (elementAttributes.containerAttributes) {
             this.refreshContainer(element, elementAttributes.containerAttributes);
         } else {
@@ -608,8 +597,8 @@ class Initializer {
 
     initializeElement(element) {
         element._elementAttributes = new ElementAttributes();
-        element._childNodes = new ChildNodes(element, this.nodeCloner);
-        element._childNodes.init();
+        element._childNodes = new ChildNodes(element, this.nodeCloner);;
+        element._parent = element.parentNode;
         if (element.getAttribute('data-ignore')) {
             return;
         }
@@ -617,32 +606,46 @@ class Initializer {
             this.initializeWidgetContainer(element);
         }
         if (element.getAttribute('data-show')) {
-            this.initializeShowAttribute(element, xis, this.exprParser);
+            this.initializeShowAttribute(element);
         }
         if (element.getAttribute('data-repeat')) {
-            this.initializeRepeat(element, this.exprParser);
+            this.initializeRepeat(element);
+        }
+        if (element.getAttribute('data-for')) {
+            this.initializeFor(element);
         }
         this.initializeAttributes(element);
         this.initializeChildren(element); // otherwise already initialized
     }
 
-    initializeRepeat(element, exprParser) {
+    initializeRepeat(element) {
         var arr = doSplit(element.getAttribute('data-repeat'), ':');
         var loopAttributes = new LoopAttributes();
         loopAttributes.valueKey = arr[0];
-        loopAttributes.arrayExpression = exprParser.parse(arr[1]);
+        loopAttributes.arrayExpression = this.exprParser.parse(arr[1]);
         element._elementAttributes.repeatLoopAttributes = loopAttributes;
         element._repeatCache = new RepeatLoopCache(element);
     }
 
-    initializeShowAttribute(element, exprParser) {
-        element._elementAttributes.showExpression = exprParser.parse(element.getAttribute('data-show'));
+    initializeFor(element) {
+        var arr = doSplit(element.getAttribute('data-for'), ':');
+        var loopAttributes = new LoopAttributes();
+        loopAttributes.valueKey = arr[0];
+        loopAttributes.arrayExpression = this.exprParser.parse(arr[1]);
+        element._elementAttributes.forLoopAttributes = loopAttributes;
+        element._forCache = new ForLoopCache(element);
+    }
+
+
+    initializeShowAttribute(element) {
+        element._elementAttributes.showExpression = this.exprParser.parse(element.getAttribute('data-show'));
     }
 
     initializeWidgetContainer(element) {
         var widgetIdExpression = new TextContentParser(element.getAttribute('data-widget')).parse();
         element._elementAttributes.containerAttributes = new ContainerAttributes(widgetIdExpression);
         element._data = new Data({});
+        element._timestamps = {};
     }
 
     initializeAttributes(element) {
@@ -735,7 +738,7 @@ class WidgetContainerRefresher {
             }
             var dto = {};
             var data = containerElement._data;
-            var timestamps = containerElement, _timestamps;
+            var timestamps = containerElement._timestamps;
             for (var key of data.getKeys()) {
                 var value = data.getValue([key]);
                 var timestamp = timestamps[key];
@@ -749,8 +752,8 @@ class WidgetContainerRefresher {
                         data.setValue(key, dataItem.value);
                         timestamps[key] = dataItem.timestamp;
                     }
-                    return containerElement;
-                }).then(containerElement => _this.treeRefresher.refresh(containerElement, data));
+                    return containerElement._widgetRoot;
+                }).then(containerElement => _this.treeRefresher.refreshRoot(containerElement, data));
 
 
         } else {
@@ -946,8 +949,8 @@ class PageController {
         return this.client.loadPageHead(pageId).then(content => {
             var holder = document.createElement('div');
             holder.innerHTML = content;
-            initialize(holder);
             _this.pages[pageId].headChildArray = nodeListToArray(holder.childNodes);
+            initialize(holder);
             return pageId;
         });
     }
@@ -961,8 +964,8 @@ class PageController {
         return this.client.loadPageBody(pageId).then(content => {
             var holder = document.createElement('div');
             holder.innerHTML = content;
-            initialize(holder);
             _this.pages[pageId].bodyChildArray = nodeListToArray(holder.childNodes);
+            initialize(holder);
             return pageId;
         });
     }
@@ -991,6 +994,7 @@ class PageController {
                 this.head.appendChild(child);
             }
         }
+        this.head._childNodes = new ChildNodes(this.head);
     }
 
     /**
@@ -1004,8 +1008,11 @@ class PageController {
         console.log('body-children:' + bodyChildArray.length);
         for (var i = 0; i < bodyChildArray.length; i++) {
             console.log('body-children - append:' + bodyChildArray[i]);
+            var child = bodyChildArray[i];
             this.body.appendChild(bodyChildArray[i]);
+            child._parent = this.body;
         }
+        this.body._childNodes = new ChildNodes(this.body);
     }
 
 }
@@ -1227,7 +1234,6 @@ function refresh(node, data) {
 
 
 function initialize(element) {
-    var initializer = new Initializer();
     initializer.initialize(element);
 }
 

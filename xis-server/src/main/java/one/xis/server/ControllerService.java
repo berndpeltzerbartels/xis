@@ -117,7 +117,7 @@ class ControllerService {
 
 
     private String getPagePath(Object pageController) {
-        var path = pageController.getClass().getAnnotation(Page.class).path();
+        var path = pageController.getClass().getAnnotation(Page.class).value();
         if (!path.endsWith(".html")) {
             throw new IllegalStateException(pageController.getClass() + ": Identifier in @Page-annotation must have suffix '.html'");
         }

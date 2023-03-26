@@ -3,7 +3,7 @@ package spring.example;
 import one.xis.Page;
 import org.springframework.stereotype.Component;
 
-@Page(path = "/product/details.html", welcomePage = true)
+@Page(value = "/product/details.html")
 @Component
 public class ProductPage {
 

@@ -96,6 +96,6 @@ public class ControllerUtils {
     }
 
     public static String getPageControllerPath(Class<?> controllerClass) {
-        return controllerClass.getAnnotation(Page.class).path();
+        return controllerClass.getAnnotation(Page.class).value();
     }
 }

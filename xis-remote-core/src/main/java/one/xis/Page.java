@@ -17,7 +17,5 @@ import java.lang.annotation.Target;
 @Component // for spring
 @XISComponent
 public @interface Page {
-    String path();
-
-    boolean welcomePage() default false;
+    String value();
 }
