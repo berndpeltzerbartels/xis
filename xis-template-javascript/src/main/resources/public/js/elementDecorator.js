@@ -7,29 +7,14 @@ class RootPageInitializer {
      */
     constructor(nodeInitialier) {
         this.nodeInitialier = nodeInitialier;
-        this.html = document.getRootNode();
         this.head = getElementByTagName('head');
         this.body = getElementByTagName('body');
     }
 
     initialize() {
-        var _head = this.head;
-        var _body = this.body;
-
-        this.html._refresh = function (data) {
-            _head._refresh(data);
-            _body._refresh(data);
-        }
-
-        this.html._clear = function () {
-            _head._removeChildNodes();
-            _body._removeChildNodes();
-            _head._childNodes = [];
-            _body.childNodes = [];
-        }
-
-        this.html._bindHead = function (headChildArray) {
-            _head._childNodes = headChildArray;
+        this.head._bindChildNodes = function (headChildArray) {
+            this._removeChildNodes();
+            this._childNodes = headChildArray;
             for (var child of headChildArray) {
                 if (child.localName !== title && child._refresh) {
                     child._refresh(data);
@@ -37,8 +22,9 @@ class RootPageInitializer {
             }
         }
 
-        this.html._bindBody = function (bodyChildArray) {
-            _body._childNodes = bodyChildArray;
+        this.body._bindChildNodes = function (bodyChildArray) {
+            this._removeChildNodes();
+            this._childNodes = bodyChildArray;
             for (var child of bodyChildArray) {
                 if (child.localName !== title && child._refresh) {
                     child._refresh(data);
@@ -46,21 +32,10 @@ class RootPageInitializer {
             }
         }
 
-        this.html._bindBodyAttributes = function (attributes) {
+        this.body._bindBodyAttributes = function (attributes) {
             for (var name of Object.keys(attributes)) {
-                this.body.setAttribute(name, attributes[name]);
+                this.setAttribute(name, attributes[name]);
             }
-        }
-
-        var _nodeInitialier = this.nodeInitialier;
-        this.html._initialize = function () {
-            _nodeInitialier.initializeElement(this.head);
-            _nodeInitialier.initializeElement(this.body);
-        }
-
-        this.html._refresh = function (data) {
-            _head.refresh(data);
-            _body.refresh(data);
         }
     }
 }
@@ -74,7 +49,7 @@ class NodeInitializer {
      * @param {Node} node 
      */
     initializeNode(node) {
-        if (isElement(node)) {
+        if (isElement(node) && !node.getAttribute('data-ignore')) {
             this.initializeElement(node);
         } else {
             this.initializeTextNode(node);
