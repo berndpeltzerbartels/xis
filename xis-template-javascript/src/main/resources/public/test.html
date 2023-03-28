@@ -3,27 +3,21 @@
 
 <head>
     <title>${title}</title>
-    <script src="parser.js"></script>
-    <script src="dom.js"></script>
-    <script src="forms.js"></script>
+
 
 
     <script type="text/javascript">
 
-        function identity(o) {
-            return o;
+        var testFunction = () => { console.log(this.localName); };
+
+
+        function runTest() {
+            var e = document.getElementById('test');
+            e.echo = testFunction;
+
+            e.echo();
         }
 
-        function styleClass(index) {
-            if (index % 2 == 1) {
-                return 'red';
-            }
-            return '';
-        }
-
-        function visible(i) {
-            return i % 10 == 0
-        }
     </script>
 
     <style>
@@ -33,7 +27,7 @@
     </style>
 </head>
 
-<body onload="initPage();">
+<body onload="runTest();">
 
     <h4>${title}</h4>
 
