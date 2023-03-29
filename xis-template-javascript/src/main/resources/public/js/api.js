@@ -1,0 +1,985 @@
+
+/**
+ * @property {HttpClient} httpClient
+ * @property {Config} config
+ * @property {string} clientId
+ * @property {string} userId
+ */
+class Client {
+
+    /**
+     * 
+     * @param {HttpClient} httpClient 
+     */
+    constructor(httpClient) {
+        this.httpClient = httpClient;
+        this.config = undefined;
+        this.clientId = '';
+        this.userId = '';
+    }
+
+    /**
+     * @public
+     * @return {Promise<any>} 
+     */
+    loadConfig() {
+        return this.httpClient.get('/xis/config', {})
+            .then(content => JSON.parse(content));
+    }
+
+    /**
+     * @public
+     * @param {string} pageId
+     * @return {Promise<string>} 
+     */
+    loadPageHead(pageId) {
+        return this.httpClient.get('/xis/page/head', { uri: pageId });
+    }
+
+
+    /**
+     * @public
+     * @param {string} pageId
+     * @return {Promise<string>} 
+     */
+    loadPageBody(pageId) {
+        return this.httpClient.get('/xis/page/body', { uri: pageId });
+    }
+
+    /**
+     * @public
+     * @param {string} pageId
+     * @return {Promise<any>} 
+     */
+    loadPageBodyAttributes(pageId) {
+        return this.httpClient.get('/xis/page/body-attributes', { uri: pageId }).then(content => JSON.parse(content));
+    }
+
+    /**
+    * @public
+    * @param {string} pageId
+    * @return {Promise<string>} 
+    */
+    loadWidget(widgetId) {
+        return this.httpClient.get('/xis/widget/html/' + widgetId, {});
+    }
+
+    /**
+     * @public
+     * @param {string} pageId
+     * @param {Data} data
+     * @returns {Promise<any>}
+     */
+    loadPageData(pageId, data) {
+        var request = this.createRequest(pageId, data, undefined);
+        return this.httpClient.post('/xis/page/model', request, {})
+            .then(content => JSON.parse(content));
+    }
+
+    /**
+     * @public
+     * @param {string} widgetId
+     * @param {Data} data
+     * @returns {Promise<any>}
+     */
+    loadWidgetData(widgetId, data) {
+        var request = this.createRequest(widgetId, data, undefined);
+        return this.httpClient.post('/xis/widget/model', request)
+            .then(content => JSON.parse(content));
+    }
+
+    /**
+     * @public
+     * @param {string} widgetId
+     * @param {string} action 
+     * @param {Data} data
+     * @returns {Promise<any>}
+     */
+    widgetAction(widgetId, action, data) {
+        var request = this.createRequest(widgetId, data, action);
+        return this.httpClient.post('/xis/widget/action', request, {})
+            .then(content => JSON.parse(content));
+    }
+
+    /**
+     * @public
+     * @param {string} pageId
+     * @param {string} action 
+     * @param {Data} data
+     * @returns {Promise<any>}
+     */
+    pageAction(pageId, action, data) {
+        var request = this.createRequest(pageId, data, action);
+        return this.httpClient.post('/xis/page/action', request, {});
+    }
+
+
+    /**
+    * @private
+    * @param {string} controllerId 
+    * @param {any} data 
+    */
+    createRequest(controllerId, data, action) {
+        var request = new ComponentRequest();
+        request.clientId = this.clientId;
+        request.userId = this.userId;
+        request.controllerId = controllerId;
+        request.action = action;
+        request.data = data;
+        return request;
+    }
+}
+
+
+class HttpClient {
+
+    /**
+     * @param {Function} errorHandler 
+     */
+    constructor(errorHandler) {
+        this.className = 'HttpClient';
+        this.errorHandler = errorHandler;
+    }
+
+    /**
+     * @public
+     * @param {string} uri
+     * @param {any} payload 
+     * @return {Promise<any>}
+     * 
+     */
+    post(uri, payload, headers) {
+        if (!headers) headers = {};
+        var payloadJson = JSON.stringify(payload);
+        headers['Content-type'] = 'application/json';
+        return this.doRequest(uri, headers, 'POST', payloadJson);
+    }
+
+    /**
+     * @public
+     * @param {string} uri 
+     * @param {any} headers
+     * @return {Promise<any>}
+     */
+    get(uri, headers) {
+        return this.doRequest(uri, headers, 'GET', undefined);
+    }
+
+    /**
+     * @private
+     * @param {string} uri 
+     * @param {any} headers
+     * @param {string} method 
+     * @param {any} payload 
+     * @return {Promise<any>}
+     */
+    doRequest(uri, headers, method, payload) {
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.open(method, uri, true); // true for asynchronous
+        for (var name of Object.keys(headers)) {
+            xmlHttp.setRequestHeader(name, headers[name]);
+        }
+        var promise = new Promise((resolve, reject) => {
+            xmlHttp.onreadystatechange = function () {
+                // TODO Handle errors and "304 NOT MODIFIED"
+                // TODO Add headers to allow 304
+                // Readystaet == 4 for 304 ?
+                if (xmlHttp.readyState == 4) { // TODO In Java 204 if there is no server-method
+                    if (xmlHttp.status == 200) {
+                        resolve(xmlHttp.responseText);
+                    } else {
+                        reject('status: ' + xmlHttp.status);
+                    }
+                }
+                // TODO use errorhandler
+            }
+
+        });
+
+        if (payload) {
+            xmlHttp.send(payload);
+        }
+        else {
+            xmlHttp.send();
+        }
+        return promise;
+    }
+
+}
+
+
+class PageController {
+
+    /**
+     * @param {Client} client 
+     */
+    constructor(client) {
+        this.client = client;
+        this.html = getElementByTagName('html');
+        this.head = getElementByTagName('head');
+        this.body = getElementByTagName('body');
+        this.title = getElementByTagName('title');
+        this.pages = {};
+        this.pageData = {};
+        this.timestamps = {};
+        this.pageId = undefined;
+        this.welcomePageId;
+        this.titleExpression;
+    }
+
+    init(config) {
+        this.welcomePageId = config.welcomePageId;
+        var promises = [];
+        var _this = this;
+        config.pageIds.forEach(id => { _this.pages[id] = {}; _this.pageData[id] = new Data({}); });
+        config.pageIds.forEach(id => { _this.pages[id] = {}; _this.timestamps[id] = {}; });
+        config.pageIds.forEach(id => promises.push(_this.loadPageHead(id)));
+        config.pageIds.forEach(id => promises.push(_this.loadPageBody(id)));
+        config.pageIds.forEach(id => promises.push(_this.loadPageBodyAttributes(id)));
+        console.log('PageCOntroller:Promises.all');
+        return Promise.all(promises).then(() => _this.findPageId())
+            .then(pageId => _this.bindPage(pageId))
+            .then(pageId => _this.refreshData(pageId))
+            .then(pageId => _this.refreshPage(pageId));
+    }
+
+
+    /**
+    * @returns {Promise<string>}
+    */
+    bindPage(pageId) {
+        console.log('bindPage: ' + pageId);
+        this.pageId = pageId;
+        var _this = this;
+        return new Promise((resolve, _) => {
+            var headChildArray = _this.pages[pageId].headChildArray;
+            var bodyChildArray = _this.pages[pageId].bodyChildArray;
+            var attributes = _this.pages[pageId].bodyAttributes;
+            this.head._bindChildNodes(headChildArray);
+            this.body._bindBodyAttributes(attributes);
+            this.body._bindChildNodes(bodyChildArray)
+            console.log('resolve bindPage: ' + pageId);
+            resolve(pageId);
+        });
+    }
+
+    pageAction(pageId, action) {
+        var _this = this;
+        return this.client.pageAction(pageId, action, this.pageData[pageId]).then(response => {
+            var data = _this.pageData[key];
+            _this.timestamps
+            for (var key of Object.keys(data)) {
+                var dataItem = response.data[key];
+                data.setValue(key, dataItem.value);
+                this.timestamps[key] = dataItem.timestamp;
+            }
+            return data;
+        }).then(controllerId => _this.bindPage(controllerId));
+    }
+
+
+    /**
+     * @returns {Promise<string>}
+     */
+    findPageId() {
+        console.log('findPageId');
+        var _this = this;
+        return new Promise((resolve, _) => {
+            var uri = document.location.pathname;
+            if (!_this.pages[uri]) {
+                uri = _this.welcomePageId;
+            }
+            console.log('resolve findPageId: ' + uri);
+            resolve(uri);
+        });
+    }
+
+    /**
+     * @returns {Promise<string>}
+     */
+    refreshData(pageId) {
+        var _this = this;
+        console.log('refreshData');
+        var dto = dtoFromElementData(_this.html);
+        return client.loadPageData(this.pageId, dto).then(response => {
+            storeElementData(_this.html, response.data);
+            console.log('return in refreshData');
+            return pageId;
+        });
+    }
+
+    /**
+    * @private 
+    * @returns {Promise<string>}
+    */
+    refreshPage(pageId) {
+        console.log('refreshPage: ' + pageId);
+        var _this = this;
+        return new Promise((resolve, _) => {
+            var data = _this.pageData[pageId];
+            this.refreshTitle(data);
+            this._head.refresh(data);
+            this._body.refresh(data);
+            _this.updateHistory(_this.head, pageId);
+            console.log('resolve - refreshPage: ' + pageId);
+            resolve(pageId);
+        });
+    }
+
+
+    refreshTitle(data) {
+        if (this.titleExpression) {
+            this.title.innerHTML = this.titleExpression.evaluate(data);
+        }
+    }
+
+
+    updateHistory(head, pageId) {
+        var titleList = head.getElementsByTagName('title');
+        var title = titleList.length > 0 ? titleList.item(0).innerHTML : '';
+        window.history.pushState({}, title, pageId);
+    }
+
+
+    /**
+     * @param {string} pageId
+    * @returns {Promise<string>}
+    */
+    loadPageHead(pageId) {
+        var _this = this;
+        return this.client.loadPageHead(pageId).then(content => {
+            var holder = document.createElement('div');
+            holder.innerHTML = content;
+            _this.pages[pageId].headChildArray = nodeListToArray(holder.childNodes);
+            initialize(holder);
+            return pageId;
+        });
+    }
+
+    /**
+    * @private
+    * @param {string} pageId
+    * @returns {Promise<string>}
+    */
+    loadPageBody(pageId) {
+        var _this = this;
+        return this.client.loadPageBody(pageId).then(content => {
+            var holder = document.createElement('div');
+            holder.innerHTML = content;
+            _this.pages[pageId].bodyChildArray = nodeListToArray(holder.childNodes);
+            initialize(holder);
+            return pageId;
+        });
+    }
+
+    /**
+     * @private
+     * @param {String} pageId 
+     * @returns 
+     */
+    loadPageBodyAttributes(pageId) {
+        var _this = this;
+        return this.client.loadPageBodyAttributes(pageId).then(attributes => {
+            _this.pages[pageId].bodyAttributes = attributes;
+            return pageId;
+        });
+    }
+}
+
+
+class Widgets {
+
+    constructor(client) {
+        this.widgets = {};
+        this.client = client;
+    }
+
+    init(config) {
+        var _this = this;
+        var promises = [];
+        config.widgetIds.forEach(id => _this.widgets[id] = {});
+        config.widgetIds.forEach(id => promises.push(_this.loadWidget(id)));
+        console.log('Widgets - Promise.all');
+        return Promise.all(promises).then(() => config);
+    }
+    /**
+    * @returns {Promise<string>}
+    */
+    loadWidget(widgetId) {
+        console.log('loadWidget: ' + widgetId);
+        var _this = this;
+        return this.client.loadWidget(widgetId).then(widgetHtml => {
+            var root = _this.asRootElement(widgetHtml);
+            _this.widgets[widgetId].root = root;
+            console.log('initialize: ' + root);
+            initialize(root);
+            return widgetId;
+        });
+    }
+
+    getWidgetRoot(widgetId) {
+        return this.widgets[widgetId].root;
+    }
+
+
+    /**
+     *
+     * @param {string} tree
+     * @returns {Element}
+     */
+    asRootElement(tree) {
+        var div = document.createElement('div');
+        div.innerHTML = trim(tree);
+        return div.childNodes.item(0);
+    }
+}
+
+class RootPageInitializer {
+
+    /**
+     * 
+     * @param {NodeInitializer} nodeInitialier 
+     */
+    constructor(nodeInitialier) {
+        this.nodeInitialier = nodeInitialier;
+        this.head = getElementByTagName('head');
+        this.body = getElementByTagName('body');
+    }
+
+    initialize() {
+        this.head._bindChildNodes = function (headChildArray) {
+            this._clearChildNodes();
+            this._childNodes = headChildArray;
+            for (var child of headChildArray) {
+                if (child.localName !== title && child._refresh) {
+                    child._refresh(data);
+                }
+            }
+        }
+
+        this.head._clearChildNodes = function () {
+            this._childNodes = headChildArray;
+            for (var child of this._childNodes) {
+                this.head.removeChild(child);
+            }
+        }
+
+        this.body._bindChildNodes = function (bodyChildArray) {
+            this._clearChildNodes();
+            this._childNodes = bodyChildArray;
+            for (var child of bodyChildArray) {
+                if (child.localName !== title && child._refresh) {
+                    child._refresh(data);
+                }
+            }
+        }
+
+        this.body._bindBodyAttributes = function (attributes) {
+            for (var name of Object.keys(attributes)) {
+                this.setAttribute(name, attributes[name]);
+            }
+        }
+
+        this.head._clearChildNodes = function () {
+            for (var child of this._childNodes) {
+                this.head.removeChild(child);
+            }
+            this._childNodes = [];
+        }
+
+        this.head._refresh = function (data) {
+            for (var child of this._childNodes) {
+                child._refresh(data);
+            }
+        }
+
+        this.body._refresh = function (data) {
+            for (var child of this._childNodes) {
+                child._refresh(data);
+            }
+        }
+    }
+}
+
+
+
+class NodeInitializer {
+
+    /**
+     * @public
+     * @param {Node} node 
+     */
+    initializeNode(node) {
+        if (isElement(node) && !node.getAttribute('data-ignore')) {
+            this.initializeElement(node);
+        } else {
+            this.initializeTextNode(node);
+        }
+    }
+
+    /**
+     * @private
+     * @param {Element} element 
+     */
+    initializeElement(element) {
+        this.addElementStandardFields(element);
+        this.addElementStandardMethods(element);
+
+        if (element.getAttribute('data-repeat')) {
+            this.initializeRepeat(element);
+        }
+
+
+        if (element.getAttribute('data-widget')) {
+            this.initializeWidgetContainer(element);
+        }
+
+        this.initializeChildNodes(element);
+    }
+
+    /**
+     * @private
+     * @param {Element} element 
+     */
+    addElementStandardFields(element) {
+        element._parent = element.parentNode;
+        parent._childNodes.push(element);
+    }
+
+    /**
+     * @private
+     * @param {Element} element 
+     */
+    addElementStandardMethods(element) {
+
+        element._refresh = function (data) {
+            if (this._widgetIdExpression) {
+                refreshWidgetContainer(element, data);
+            }
+            if (this._repeat) {
+                refreshRepeat(this, data);
+            }
+        }
+
+        element._refreshAttributes = function (data) {
+            for (attribute of this._variableAttributes) {
+                var value = attribute.expression.evaluate(data);
+                element.setAttribute(attribute.name, value);
+            }
+        }
+
+        element._refreshChildNodes = function (data) {
+            var childArray = nodeListToArray(this.childNodes);
+            for (let index = 0; index < childArray.length; index++) {
+                var child = childArray[i];
+                if (!child.getAttribute('data-ignore')) {
+                    if (child.refresh) {
+                        child._refresh(data);
+                    }
+                }
+            }
+        }
+
+        element._removeChildNodes = function () {
+            var childArray = nodeListToArray(this.childNodes);
+            for (let index = 0; index < childArray.length; index++) {
+                removeChildNode(childArray[i]);
+            }
+        }
+
+    }
+    /**
+     * @private
+     * @param {Element} element 
+     */
+    initializeRepeat(element) {
+        var arr = doSplit(element.getAttribute('data-repeat'), ':');
+        var valueKey = arr[0];
+        var arrayExpression = this.exprParser.parse(arr[1]);
+        element._repeat = {
+            valueKey: valueKey,
+            arrayExpression: arrayExpression,
+            elements: []
+        };
+    }
+
+    /**
+     * @private
+     * @param {Element} element 
+     */
+    initializeTextNode(node) {
+        if (empty(node.nodeValue)) {
+            node.paarentNode.removeChild(child);
+        } else if (node.nodeValue && node.nodeValue.indexOf('${') != -1) {
+            node._expression = new TextContentParser(node.nodeValue).parse();
+            node._refresh = function (data) {
+                this.nodeValue = this._expression.evaluate(data);
+            }
+        }
+    }
+
+    /**
+     * @private
+     * @param {Element} element 
+     */
+    initializeWidgetContainer(element) {
+        element._widgetIdExpression = widgetIdExpression = new TextContentParser(element.getAttribute('data-widget')).parse();
+    }
+
+    initializeAttributes(element) {
+        element._attributes = [];
+        for (var attrName of element.getAttributeNames()) {
+            var attrValue = element.getAttribute(attrName);
+            if (attrValue.indexOf('${') != -1) {
+                element._attributes.push({
+                    name: attrName,
+                    expression: new TextContentParser(attrValue).parse()
+                });
+            }
+        }
+    }
+
+
+    /**
+     * @private
+     * @param {Element} element 
+     */
+    initializeChildNodes(element) {
+        for (var i = 0; i < element.childNodes.length; i++) {
+            this.initializeNode(element.childNodes[i]);
+        }
+    }
+}
+
+function storeElementData(element, data) {
+    var data = new Data({});
+    var timestamps = [];
+    element._data = data;
+    element._timestamps = timestamps;
+    for (var key of Object.keys(responseData)) {
+        var dataItem = responseData[key];
+        data.setValue(key, dataItem.value);
+        timestamps[key] = dataItem.timestamp;
+    }
+    return data;
+}
+
+function dtoFromElementData(element) {
+    var data = element._data;
+    var timestamps = element._timestamps;
+    if (!data) {
+        data = new Data({});
+        element._data = data;
+    }
+    if (!timestamps) {
+        timestamps = [];
+        element._timestamps = timestamps;
+    }
+    var dto = {};
+    for (var key of data.getKeys()) {
+        var value = data.getValue(key);
+        var timestamp = timestamps[key];
+        var dataItem = { value: value, timestamp: timestamp };
+        dto[key] = dataItem;
+    }
+    return dto;
+}
+
+
+function refreshRepeat(origElement, loopAttributes, data) {
+    var varName = loopAttributes.varName;
+    var arrPath = loopAttributes.arrayExpression.evaluate(data);
+    var dataArr = data.getValue(arrPath);
+    if (!dataArr) {
+        dataArr = [];
+    }
+    var elements = origElement._repeat.elements;
+    var i = 0;
+    var element = origElement;
+    while (i < dataArr) {
+        if (i >= elements.length) {
+            var clone = cloner.cloneNode(element);
+            appendSibling(element, clone);
+            element = clone;
+        } else {
+            element = elements[i];
+        }
+        var value = dataArr[i];
+        var data = new Data({}, parentData);
+        data.setValue(varName, value);
+        element.refresh(data);
+        i++;
+    }
+    while (i < elements.length) {
+        var element = elements[i];
+        if (element.paarentNode) {
+            element.paarentNode.removeChild(element);
+        }
+        i++;
+    }
+}
+
+function refreshFor(element, loopAttributes, data) {
+    var varName = loopAttributes.varName;
+    var arrPath = loopAttributes.arrPath;
+    var dataArr = data.getValue(arrPath);
+    if (!dataArr) {
+        dataArr = [];
+    }
+    var nodeArrays = element._forLoop.nodeArrays;
+    var origNodeArray = nodeListToArray(element.childNodes);
+    var i = 0;
+    var e = element;
+    while (i < dataArr) {
+        var nodeArray;
+        if (i >= nodeArrays.length) {
+            var clones = cloner.cloneNodeArray(origNodeArray);
+            for (var clone of clones) {
+                appendSibling(e, clone);
+            }
+            nodeArray = clone;
+        } else {
+            nodeArray = nodeArrays[i];
+        }
+        e = lastArrayElement(nodeArray);
+        var value = dataArr[i];
+        var data = new Data({}, parentData);
+        data.setValue(varName, value);
+        for (var node of nodeArray) {
+            if (node.refresh) {
+                node.refresh(data);
+            }
+        }
+        i++;
+    }
+    while (i < nodeArrays.length) {
+        var nodeArray = nodeArrays[i];
+        for (var node of nodeArray) {
+            if (node.paarentNode) {
+                node.paarentNode.removeChild(node);
+            }
+        }
+        i++;
+    }
+}
+
+function refresh(node, data) {
+    if (node.refresh) {
+        node.refresh(data);
+    }
+}
+
+function refreshChildNodes(element, data) {
+    for (let index = 0; index < element.childNodes.length; index++) {
+        refresh(element.childNodes[index], data);
+    }
+}
+
+function refreshChildNodeAsync(node) {
+    var promises = [];
+    for (let index = 0; index < element.childNodes.length; index++) {
+        promises.add(new Promise((resolve, _) => {
+            refresh(node, data);
+            resolve();
+        }));
+    }
+    Promise.all(promises);
+}
+
+
+function refreshWidgetContainer(element, parentData, client) {
+    var widgetId = element._widgetIdExpression.evaluate(parentData);
+    var dto = dtoFromElementData(element);
+    client.loadWidgetData(widgetId, dto)
+        .then(response => storeElementData(_this.html, response.data))
+        .then(data => { refreshAttributes(element, data); return data; })
+        .then(data => refreshChildNodes(element, data));
+}
+
+class DataStore {
+
+    constructor() {
+        this.widgetDataMap = {};
+        this.pageDataMap = {};
+        this.currentPageId;
+    }
+
+    storeWidgetData(widgetId, dataMap) {
+        var data = new Data({});
+        this.widgetDataMap[widgetId] = data;
+        for (key of Object.keys(dataMap)) {
+            data.setValue(key, dataMap[key]);
+        }
+        return data;
+    }
+
+    storePageData(pageId, dataMap) {
+        if (pageId !== this.currentPageId) {
+            this.pageDataMap[pageId] == undefined;
+        }
+        var data = new Data({});
+        this.pageDataMap[pageId] = data;
+        for (key of Object.keys(dataMap)) {
+            data.setValue(key, dataMap[key]);
+        }
+        return data;
+
+    }
+
+
+    createWidgetDataKey(widgetId, modelKey) {
+        return 'xis.' + widgetId + '.' + modelKey + '.' + data;
+    }
+}
+
+/**
+ * 
+ * @param {Node} element 
+ * @param {Node} sibling 
+ */
+function appendSibling(element, sibling) {
+    var parent = element._parent;
+    if (element.nextSibling) {
+        parent.insertBefore(sibling, element.nextSibling);
+    } else {
+        parent.appendChild(sibling);
+    }
+}
+
+
+
+function lastArrayElement(arr) {
+    if (arr.length == 0) {
+        return undefined;
+    }
+    return arr[arr.length - 1];
+}
+
+
+function isEmpyArray(arr) {
+    return arr.length == 0;
+}
+
+
+class Cloner {
+
+    /**
+     * @public
+     * @param {Node} node 
+     * @returns {Node}
+     */
+    cloneNode(node) {
+        if (isElement(node)) {
+            return this.cloneElement(node);
+        }
+        return this.cloneTextNode(node);
+    }
+
+    /**
+   * @private
+   * @param {Node} element 
+   * @returns 
+   */
+    cloneTextNode(node) {
+        if (node._expression) {
+            var cloned = document.createTextNode('');
+            cloned._expression = node._expression;
+            clone._refresh = function (data) {
+                this.nodeValue = this._expression.evaluate(data);
+            }
+            return cloned;
+        }
+        return document.createTextNode(node.nodeValue);
+    }
+
+
+    /**
+     * @private
+     * @param {Element} element 
+     * @returns 
+     */
+    cloneElement(element) {
+        var newElement = document.createElement(element.localName);
+        this.cloneAttributes(element, newElement);
+        this.cloneFrameworkAttributes(element, newElement);
+        this.cloneChildNodes(element, newElement);
+        return newElement;
+    }
+
+
+    /**
+     * @private
+     * @param {Element} src 
+     * @param {Element} dest 
+     */
+    cloneFrameworkAttributes(src, dest) {
+        dest._variableAttributes = src._variableAttributes;
+        dest._widgetIdExpression = src._widgetIdExpression;
+        if (src._repeat) {
+            dest._repeat = {
+                varName: src._repeat.varName,
+                arrayExpression: src._arrayExpression,
+                elements: [] // do not clone
+            };
+        }
+    }
+
+    /**
+     * @private
+     * @param {Element} src 
+     * @param {Element} dest 
+     */
+    cloneChildNodes(newElement, srcElement) {
+        newElement._childNodes = [];
+        for (let index = 0; index < srcElement.childNodes.length; index++) {
+            var child = srcElement.childNodes.item(index);
+            var clonedChild = this.clone(child);
+            newElement.appendChild(clonedChild);
+            newElement._childNodes.push(clonedChild);
+            clonedChild._parent = newElement;
+        }
+    }
+
+    /**
+     * 
+     * @param {Array<Node>} nodeArray 
+     */
+    cloneNodeArray(nodeArray) {
+        return nodeArray.map(node => cloneNode(node));
+    }
+}
+
+/** 
+ * @param {Node} node 
+ * @returns {boolean}
+ */
+function isElement(node) {
+    return node instanceof HTMLElement;
+}
+
+/**
+ * Maps a NodeList to an array.
+ *
+ * @public
+ * @param {NodeList} nodeList
+ * @returns {Array}
+ */
+function nodeListToArray(nodeList) {
+    var arr = [];
+    for (var i = 0; i < nodeList.length; i++) {
+        arr.push(nodeList.item(i));
+    }
+    return arr;
+}
+
+function getElementByTagName(name) {
+    return document.getElementsByTagName(name).item(0);
+}
+
+var client = new Client(new HttpClient());
+var widgets = new Widgets(client);
+var pageController = new PageController(client);
+var cloner = new Cloner();
+var initializer = new NodeInitializer();
+var starter = new Starter(pageController, widgets, client);
+starter.doStart();
