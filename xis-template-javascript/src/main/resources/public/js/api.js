@@ -131,6 +131,65 @@ class Client {
 }
 
 
+/**
+ * @property {any} data
+ * @property {string} clientId
+ * @property {string} userId
+ * @property {string} key // action-key or model-key
+ * @property {string} controllerId
+ * @property {string} type
+ */
+class ComponentRequest {
+
+    constructor() {
+        this.data = {};
+        this.clientId = '';
+        this.userId = '';
+        this.key = '';
+        this.controllerId = '';
+        this.type = '';
+    }
+}
+
+
+
+/**
+ * @property {array<string>} pageIds
+ * @property {array<string>} widgetIds
+ * @property {any} pageHosts
+ * @property {any} widgetHosts
+ * @property {string} welcomePageId
+ */
+class Config {
+
+    constructor() {
+        this.pageIds = [];
+        this.widgetIds = [];
+        this.pageHosts = {};
+        this.widgetHosts = {};
+        this.welcomePageId = undefined;
+    }
+
+    /**
+     * @public
+     * @param {string} id 
+     * @returns {string}
+     */
+    getPageHost(id) {
+        return this.pageHosts[id];
+    }
+
+    /**
+     * @public
+     * @param {string} id 
+     * @returns {string} 
+     */
+    getWidgetHost(id) {
+        return this.widgetHosts[id];
+    }
+}
+
+
 class HttpClient {
 
     /**
@@ -255,9 +314,9 @@ class PageController {
             var headChildArray = _this.pages[pageId].headChildArray;
             var bodyChildArray = _this.pages[pageId].bodyChildArray;
             var attributes = _this.pages[pageId].bodyAttributes;
-            this.head._bindChildNodes(headChildArray);
-            this.body._bindBodyAttributes(attributes);
-            this.body._bindChildNodes(bodyChildArray)
+            _this.head._bindChildNodes(headChildArray);
+            _this.body._bindBodyAttributes(attributes);
+            _this.body._bindChildNodes(bodyChildArray)
             console.log('resolve bindPage: ' + pageId);
             resolve(pageId);
         });
@@ -317,9 +376,9 @@ class PageController {
         var _this = this;
         return new Promise((resolve, _) => {
             var data = _this.pageData[pageId];
-            this.refreshTitle(data);
-            this._head.refresh(data);
-            this._body.refresh(data);
+            _this.refreshTitle(data);
+            _this.head._refresh(data);
+            _this.body._refresh(data);
             _this.updateHistory(_this.head, pageId);
             console.log('resolve - refreshPage: ' + pageId);
             resolve(pageId);
@@ -351,7 +410,7 @@ class PageController {
             var holder = document.createElement('div');
             holder.innerHTML = content;
             _this.pages[pageId].headChildArray = nodeListToArray(holder.childNodes);
-            initialize(holder);
+            initializer.initializeRootElement(holder);
             return pageId;
         });
     }
@@ -367,7 +426,7 @@ class PageController {
             var holder = document.createElement('div');
             holder.innerHTML = content;
             _this.pages[pageId].bodyChildArray = nodeListToArray(holder.childNodes);
-            initialize(holder);
+            initializer.initializeRootElement(holder);
             return pageId;
         });
     }
@@ -412,7 +471,7 @@ class Widgets {
             var root = _this.asRootElement(widgetHtml);
             _this.widgets[widgetId].root = root;
             console.log('initialize: ' + root);
-            initialize(root);
+            initializer.initializeRootElement(root);
             return widgetId;
         });
     }
@@ -447,30 +506,46 @@ class RootPageInitializer {
     }
 
     initialize() {
-        this.head._bindChildNodes = function (headChildArray) {
-            this._clearChildNodes();
-            this._childNodes = headChildArray;
-            for (var child of headChildArray) {
-                if (child.localName !== title && child._refresh) {
-                    child._refresh(data);
+        this.head._clearChildNodes = function () {
+            this._childNodes = [];
+            for (var child of nodeListToArray(this.childNodes)) {
+                if (child.localName !== 'title' && (!child.getAttribute || child.getAttribute('data-ignore'))) {
+                    this.removeChild(child);
                 }
             }
         }
 
-        this.head._clearChildNodes = function () {
-            this._childNodes = headChildArray;
-            for (var child of this._childNodes) {
-                this.head.removeChild(child);
+        this.body._clearChildNodes = function () {
+            this._childNodes = [];
+            for (var child of nodeListToArray(this.childNodes)) {
+                if (!child.getAttribute || child.getAttribute('data-ignore')) {
+                    this.removeChild(child);
+                }
+            }
+        }
+
+        this.head._bindChildNodes = function (headChildArray) {
+            this._childNodes = [];
+            for (var child of headChildArray) {
+                if (child.localName == 'title') {
+                    var title = getElementByTagName('title');
+                    title.innerHTML = '';
+                    title._expression = new TextContentParser(child.innerHTML).parse();
+                    title._refresh = function (data) {
+                        title.innerHTML = title._expression.evaluate(data);
+                    }
+                } else {
+                    this._childNodes.push(child);
+                    this.appendChild(child);
+                }
             }
         }
 
         this.body._bindChildNodes = function (bodyChildArray) {
-            this._clearChildNodes();
-            this._childNodes = bodyChildArray;
+            this._childNodes = [];
             for (var child of bodyChildArray) {
-                if (child.localName !== title && child._refresh) {
-                    child._refresh(data);
-                }
+                this.appendChild(child);
+                this._childNodes.push(child);
             }
         }
 
@@ -480,22 +555,22 @@ class RootPageInitializer {
             }
         }
 
-        this.head._clearChildNodes = function () {
-            for (var child of this._childNodes) {
-                this.head.removeChild(child);
-            }
-            this._childNodes = [];
-        }
+
 
         this.head._refresh = function (data) {
             for (var child of this._childNodes) {
-                child._refresh(data);
+                if (child._refresh) {
+                    child._refresh(data);
+                }
             }
+            getElementByTagName('title')._refresh(data);
         }
 
         this.body._refresh = function (data) {
             for (var child of this._childNodes) {
-                child._refresh(data);
+                if (child._refresh) {
+                    child._refresh(data);
+                }
             }
         }
     }
@@ -504,6 +579,11 @@ class RootPageInitializer {
 
 
 class NodeInitializer {
+
+
+    constructor() {
+        this.exprParser = new ExpressionParser();
+    }
 
     /**
      * @public
@@ -517,6 +597,10 @@ class NodeInitializer {
         }
     }
 
+    initializeRootElement(node) {
+        this.initializeElement(node);
+    }
+
     /**
      * @private
      * @param {Element} element 
@@ -524,7 +608,7 @@ class NodeInitializer {
     initializeElement(element) {
         this.addElementStandardFields(element);
         this.addElementStandardMethods(element);
-
+        this.initializeAttributes(element);
         if (element.getAttribute('data-repeat')) {
             this.initializeRepeat(element);
         }
@@ -542,8 +626,8 @@ class NodeInitializer {
      * @param {Element} element 
      */
     addElementStandardFields(element) {
+        element._childNodes = nodeListToArray(element.childNodes);
         element._parent = element.parentNode;
-        parent._childNodes.push(element);
     }
 
     /**
@@ -554,7 +638,8 @@ class NodeInitializer {
 
         element._refresh = function (data) {
             if (this._widgetIdExpression) {
-                refreshWidgetContainer(element, data);
+                var widgetId = bindWidget(this);
+                refreshWidgetContainer(widgetId, element, data);
             }
             if (this._repeat) {
                 refreshRepeat(this, data);
@@ -562,7 +647,7 @@ class NodeInitializer {
         }
 
         element._refreshAttributes = function (data) {
-            for (attribute of this._variableAttributes) {
+            for (attribute of this._attributes) {
                 var value = attribute.expression.evaluate(data);
                 element.setAttribute(attribute.name, value);
             }
@@ -573,7 +658,7 @@ class NodeInitializer {
             for (let index = 0; index < childArray.length; index++) {
                 var child = childArray[i];
                 if (!child.getAttribute('data-ignore')) {
-                    if (child.refresh) {
+                    if (child._refresh) {
                         child._refresh(data);
                     }
                 }
@@ -608,9 +693,7 @@ class NodeInitializer {
      * @param {Element} element 
      */
     initializeTextNode(node) {
-        if (empty(node.nodeValue)) {
-            node.paarentNode.removeChild(child);
-        } else if (node.nodeValue && node.nodeValue.indexOf('${') != -1) {
+        if (node.nodeValue && node.nodeValue.indexOf('${') != -1) {
             node._expression = new TextContentParser(node.nodeValue).parse();
             node._refresh = function (data) {
                 this.nodeValue = this._expression.evaluate(data);
@@ -623,7 +706,7 @@ class NodeInitializer {
      * @param {Element} element 
      */
     initializeWidgetContainer(element) {
-        element._widgetIdExpression = widgetIdExpression = new TextContentParser(element.getAttribute('data-widget')).parse();
+        element._widgetIdExpression = new TextContentParser(element.getAttribute('data-widget')).parse();
     }
 
     initializeAttributes(element) {
@@ -651,7 +734,7 @@ class NodeInitializer {
     }
 }
 
-function storeElementData(element, data) {
+function storeElementData(element, responseData) {
     var data = new Data({});
     var timestamps = [];
     element._data = data;
@@ -787,13 +870,25 @@ function refreshChildNodeAsync(node) {
 }
 
 
-function refreshWidgetContainer(element, parentData, client) {
+function bindWidget(element) {
     var widgetId = element._widgetIdExpression.evaluate(parentData);
+    if (element._widgetId && element._widgetId !== widgetId) {
+        element._clearChildNodes();
+        var widgetRoot = widgets.getWidgetRoot(widgetId);
+        element.appendChild(widgetRoot);
+        element._childNodes = [widgetRoot];
+    }
+    return widgetId;
+}
+
+
+function refreshWidgetContainer(widgetId, element, parentData) {
     var dto = dtoFromElementData(element);
     client.loadWidgetData(widgetId, dto)
-        .then(response => storeElementData(_this.html, response.data))
-        .then(data => { refreshAttributes(element, data); return data; })
-        .then(data => refreshChildNodes(element, data));
+        .then(response => storeElementData(element, response.data))
+        .then(data => { data.parentData = parentData; return data; })
+        .then(data => { element._refreshAttributes(element, data); return data; })
+        .then(data => element._refreshChildNodes(element, data));
 }
 
 class DataStore {
@@ -949,6 +1044,28 @@ class Cloner {
     }
 }
 
+/**
+ * 
+ * @param {String} string 
+ * @param {String} separatorChar 
+ * @returns 
+ */
+function doSplit(string, separatorChar) {
+    var rv = [];
+    var buffer = '';
+    for (var i = 0; i < string.length; i++) {
+        var c = string.charAt(i);
+        if (c === separatorChar) {
+            rv.push(buffer);
+            buffer = '';
+        } else {
+            buffer += c;
+        }
+    }
+    rv.push(buffer);
+    return rv;
+}
+
 /** 
  * @param {Node} node 
  * @returns {boolean}
@@ -974,6 +1091,91 @@ function nodeListToArray(nodeList) {
 
 function getElementByTagName(name) {
     return document.getElementsByTagName(name).item(0);
+}
+
+function empty(str) {
+    if (!str) return true;
+    if (trim(str).length == 0) return true;
+    return false;
+}
+
+
+
+/**
+ * Hierarchical page-data
+ */
+class Data {
+
+    /**
+     * 
+     * @param {any} values 
+     */
+    constructor(values, parentData = undefined) {
+        this.values = values;
+        this.parentData = parentData;
+    }
+    /**
+     * @public 
+     * @param {Array} path the path of the data value
+     * @returns {any}
+     */
+    getValue(path) {
+        var dataNode = this.values;
+        for (var i = 0; i < path.length; i++) {
+            var key = path[i];
+            if (dataNode[key]) {
+                dataNode = dataNode[key];
+            } else {
+                dataNode = undefined;
+                break;
+            }
+        }
+        if (dataNode === undefined && this.parentData) {
+            return this.parentData.getValue(path)
+        }
+        return dataNode;
+    }
+
+    getKeys() {
+        return Object.keys(this.values);
+    }
+
+    /**
+     * @public 
+     * @param {String} key 
+     * @param {any} value 
+     */
+    setValue(key, value) {
+        this.values[key] = value;
+    }
+}
+
+
+class Starter {
+
+    /**
+     * 
+     * @param {PageController} pageController 
+     * @param {Widgets} widgets 
+     */
+    constructor(pageController, widgets, client) {
+        this.pageController = pageController;
+        this.widgets = widgets;
+        this.client = client;
+    }
+
+    doStart() {
+        var _this = this;
+        new RootPageInitializer().initialize();
+        this.loadConfig().then(config => _this.widgets.init(config))
+            .then(config => _this.pageController.init(config));
+    }
+    /**
+    * @returns {Promise<ComponentConfig>}
+    */
+    loadConfig() {
+        return this.client.loadConfig();
+    }
 }
 
 var client = new Client(new HttpClient());
