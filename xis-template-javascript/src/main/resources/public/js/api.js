@@ -308,6 +308,7 @@ class PageController {
     */
     bindPage(pageId) {
         console.log('bindPage: ' + pageId);
+        document.pageId = pageId;
         this.pageId = pageId;
         var _this = this;
         return new Promise((resolve, _) => {
@@ -643,12 +644,13 @@ class NodeInitializer {
 
         element._refresh = function (data) {
             if (this._widgetIdExpression) {
-                var widgetId = bindWidget(this);
+                var widgetId = bindWidget(this, data);
                 refreshWidgetContainer(widgetId, element, data);
-            }
-            element._refreshChildNodes(data);
-            if (this._repeat) {
+            } if (this._repeat) {
                 refreshRepeat(this, data);
+            } else {
+                element._refreshChildNodes(data);
+
             }
         }
 
@@ -660,7 +662,7 @@ class NodeInitializer {
         }
 
         element._refreshChildNodes = function (data) {
-            var childArray = nodeListToArray(this.childNodes);
+            var childArray = this._childNodes;
             for (let index = 0; index < childArray.length; index++) {
                 var child = childArray[index];
                 if (!isElement(child) || !child.getAttribute('data-ignore')) {
@@ -671,7 +673,7 @@ class NodeInitializer {
             }
         }
 
-        element._removeChildNodes = function () {
+        element._clearChildNodes = function () {
             var childArray = nodeListToArray(this.childNodes);
             for (let index = 0; index < childArray.length; index++) {
                 removeChildNode(childArray[i]);
@@ -789,6 +791,9 @@ function refreshRepeat(origElement, parentData) {
     if (!dataArr) {
         dataArr = [];
     }
+    if (origElement.parentNode) {
+        origElement.parentNode.removeChild(origElement);
+    }
     var elements = origElement._repeat.elements;
     var i = 0;
     var element = origElement;
@@ -865,27 +870,9 @@ function refresh(node, data) {
     }
 }
 
-function refreshChildNodes(element, data) {
-    for (let index = 0; index < element.childNodes.length; index++) {
-        refresh(element.childNodes[index], data);
-    }
-}
-
-function refreshChildNodeAsync(node) {
-    var promises = [];
-    for (let index = 0; index < element.childNodes.length; index++) {
-        promises.add(new Promise((resolve, _) => {
-            refresh(node, data);
-            resolve();
-        }));
-    }
-    Promise.all(promises);
-}
-
-
-function bindWidget(element) {
+function bindWidget(element, parentData) {
     var widgetId = element._widgetIdExpression.evaluate(parentData);
-    if (element._widgetId && element._widgetId !== widgetId) {
+    if (!element._widgetId || element._widgetId !== widgetId) {
         element._clearChildNodes();
         var widgetRoot = widgets.getWidgetRoot(widgetId);
         element.appendChild(widgetRoot);
@@ -901,7 +888,7 @@ function refreshWidgetContainer(widgetId, element, parentData) {
         .then(response => storeElementData(element, response.data))
         .then(data => { data.parentData = parentData; return data; })
         .then(data => { element._refreshAttributes(element, data); return data; })
-        .then(data => element._refreshChildNodes(element, data));
+        .then(data => element._refreshChildNodes(data));
 }
 
 class DataStore {
@@ -1068,14 +1055,14 @@ class Cloner {
         if (src._repeat) {
             dest._repeat = {
                 varName: src._repeat.varName,
-                arrayExpression: src._arrayExpression,
+                arrayExpression: src._repeat.arrayExpression,
                 elements: [] // do not clone
             };
         }
         if (src._for) {
             dest._for = {
-                varName: src._repeat.varName,
-                arrayExpression: src._arrayExpression,
+                varName: src._for.varName,
+                arrayExpression: src._for.arrayExpression,
                 elements: [] // do not clone
             };
         }
