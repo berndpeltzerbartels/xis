@@ -375,7 +375,7 @@ class PageController {
         console.log('refreshPage: ' + pageId);
         var _this = this;
         return new Promise((resolve, _) => {
-            var data = _this.pageData[pageId];
+            var data = getElementData(_this.html);
             _this.refreshTitle(data);
             _this.head._refresh(data);
             _this.body._refresh(data);
@@ -511,6 +511,7 @@ class RootPageInitializer {
             for (var child of nodeListToArray(this.childNodes)) {
                 if (child.localName !== 'title' && (!child.getAttribute || child.getAttribute('data-ignore'))) {
                     this.removeChild(child);
+                    child._parent = undefined;
                 }
             }
         }
@@ -520,6 +521,7 @@ class RootPageInitializer {
             for (var child of nodeListToArray(this.childNodes)) {
                 if (!child.getAttribute || child.getAttribute('data-ignore')) {
                     this.removeChild(child);
+                    child._parent = undefined;
                 }
             }
         }
@@ -527,6 +529,7 @@ class RootPageInitializer {
         this.head._bindChildNodes = function (headChildArray) {
             this._childNodes = [];
             for (var child of headChildArray) {
+                child._parent = this;
                 if (child.localName == 'title') {
                     var title = getElementByTagName('title');
                     title.innerHTML = '';
@@ -544,6 +547,7 @@ class RootPageInitializer {
         this.body._bindChildNodes = function (bodyChildArray) {
             this._childNodes = [];
             for (var child of bodyChildArray) {
+                child._parent = this;
                 this.appendChild(child);
                 this._childNodes.push(child);
             }
@@ -601,23 +605,24 @@ class NodeInitializer {
         this.initializeElement(node);
     }
 
-    /**
-     * @private
-     * @param {Element} element 
-     */
-    initializeElement(element) {
+    initializeElementFlat(element) {
         this.addElementStandardFields(element);
         this.addElementStandardMethods(element);
         this.initializeAttributes(element);
         if (element.getAttribute('data-repeat')) {
             this.initializeRepeat(element);
         }
-
-
         if (element.getAttribute('data-widget')) {
             this.initializeWidgetContainer(element);
         }
+    }
 
+    /**
+     * @private
+     * @param {Element} element 
+     */
+    initializeElement(element) {
+        this.initializeElementFlat(element);
         this.initializeChildNodes(element);
     }
 
@@ -641,6 +646,7 @@ class NodeInitializer {
                 var widgetId = bindWidget(this);
                 refreshWidgetContainer(widgetId, element, data);
             }
+            element._refreshChildNodes(data);
             if (this._repeat) {
                 refreshRepeat(this, data);
             }
@@ -656,8 +662,8 @@ class NodeInitializer {
         element._refreshChildNodes = function (data) {
             var childArray = nodeListToArray(this.childNodes);
             for (let index = 0; index < childArray.length; index++) {
-                var child = childArray[i];
-                if (!child.getAttribute('data-ignore')) {
+                var child = childArray[index];
+                if (!isElement(child) || !child.getAttribute('data-ignore')) {
                     if (child._refresh) {
                         child._refresh(data);
                     }
@@ -679,10 +685,10 @@ class NodeInitializer {
      */
     initializeRepeat(element) {
         var arr = doSplit(element.getAttribute('data-repeat'), ':');
-        var valueKey = arr[0];
+        var varName = arr[0];
         var arrayExpression = this.exprParser.parse(arr[1]);
         element._repeat = {
-            valueKey: valueKey,
+            varName: varName,
             arrayExpression: arrayExpression,
             elements: []
         };
@@ -747,6 +753,13 @@ function storeElementData(element, responseData) {
     return data;
 }
 
+function getElementData(element) {
+    if (!element._data) {
+        element._data = new Data({});
+    }
+    return element._data;
+}
+
 function dtoFromElementData(element) {
     var data = element._data;
     var timestamps = element._timestamps;
@@ -769,17 +782,17 @@ function dtoFromElementData(element) {
 }
 
 
-function refreshRepeat(origElement, loopAttributes, data) {
+function refreshRepeat(origElement, parentData) {
+    var loopAttributes = origElement._repeat;
     var varName = loopAttributes.varName;
-    var arrPath = loopAttributes.arrayExpression.evaluate(data);
-    var dataArr = data.getValue(arrPath);
+    var dataArr = loopAttributes.arrayExpression.evaluate(parentData);
     if (!dataArr) {
         dataArr = [];
     }
     var elements = origElement._repeat.elements;
     var i = 0;
     var element = origElement;
-    while (i < dataArr) {
+    while (i < dataArr.length) {
         if (i >= elements.length) {
             var clone = cloner.cloneNode(element);
             appendSibling(element, clone);
@@ -790,7 +803,7 @@ function refreshRepeat(origElement, loopAttributes, data) {
         var value = dataArr[i];
         var data = new Data({}, parentData);
         data.setValue(varName, value);
-        element.refresh(data);
+        element._refresh(data);
         i++;
     }
     while (i < elements.length) {
@@ -802,7 +815,7 @@ function refreshRepeat(origElement, loopAttributes, data) {
     }
 }
 
-function refreshFor(element, loopAttributes, data) {
+function refreshFor(element, loopAttributes, parentData) {
     var varName = loopAttributes.varName;
     var arrPath = loopAttributes.arrPath;
     var dataArr = data.getValue(arrPath);
@@ -918,7 +931,10 @@ class DataStore {
             data.setValue(key, dataMap[key]);
         }
         return data;
+    }
 
+    getPageData(pageId) {
+        return this.pageDataMap[pageId];
     }
 
 
@@ -939,8 +955,13 @@ function appendSibling(element, sibling) {
     } else {
         parent.appendChild(sibling);
     }
+    sibling._parent = parent;
 }
 
+
+function lastChild(element) {
+
+}
 
 
 function lastArrayElement(arr) {
@@ -978,8 +999,8 @@ class Cloner {
     cloneTextNode(node) {
         if (node._expression) {
             var cloned = document.createTextNode('');
-            cloned._expression = node._expression;
-            clone._refresh = function (data) {
+            cloned._expression = node._expression.clone();
+            cloned._refresh = function (data) {
                 this.nodeValue = this._expression.evaluate(data);
             }
             return cloned;
@@ -998,9 +1019,33 @@ class Cloner {
         this.cloneAttributes(element, newElement);
         this.cloneFrameworkAttributes(element, newElement);
         this.cloneChildNodes(element, newElement);
+        this.cloneMethods(element, newElement);
+        initializer.initializeElementFlat(newElement);
         return newElement;
     }
 
+    /**
+    * @private
+    * @param {Element} src 
+    * @param {Element} dest 
+    */
+    cloneMethods(src, dest) {
+        dest._refresh = src._refresh;
+    }
+    /**
+    * @private
+    * @param {Element} src 
+    * @param {Element} dest 
+    */
+    cloneAttributes(src, dest) {
+        for (var name of src.getAttributeNames()) {
+            if (name === 'data-repeat' || name == 'data-for') {
+                continue;
+            }
+            var attrValue = src.getAttribute(name);
+            dest.setAttribute(name, attrValue);
+        }
+    }
 
     /**
      * @private
@@ -1010,8 +1055,25 @@ class Cloner {
     cloneFrameworkAttributes(src, dest) {
         dest._variableAttributes = src._variableAttributes;
         dest._widgetIdExpression = src._widgetIdExpression;
+    }
+
+    /**
+     * Only for childnodes !!!
+     * 
+     * @private
+     * @param {Element} src 
+     * @param {Element} dest 
+     */
+    cloneLoops(src, dest) {
         if (src._repeat) {
             dest._repeat = {
+                varName: src._repeat.varName,
+                arrayExpression: src._arrayExpression,
+                elements: [] // do not clone
+            };
+        }
+        if (src._for) {
+            dest._for = {
                 varName: src._repeat.varName,
                 arrayExpression: src._arrayExpression,
                 elements: [] // do not clone
@@ -1024,14 +1086,14 @@ class Cloner {
      * @param {Element} src 
      * @param {Element} dest 
      */
-    cloneChildNodes(newElement, srcElement) {
-        newElement._childNodes = [];
-        for (let index = 0; index < srcElement.childNodes.length; index++) {
-            var child = srcElement.childNodes.item(index);
-            var clonedChild = this.clone(child);
-            newElement.appendChild(clonedChild);
-            newElement._childNodes.push(clonedChild);
-            clonedChild._parent = newElement;
+    cloneChildNodes(src, dest) {
+        dest._childNodes = [];
+        for (var child of src._childNodes) {
+            var clonedChild = this.cloneNode(child);
+            this.cloneLoops(child, clonedChild); // only for childnodes !
+            dest.appendChild(clonedChild);
+            dest._childNodes.push(clonedChild);
+            clonedChild._parent = dest;
         }
     }
 

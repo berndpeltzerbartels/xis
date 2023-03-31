@@ -443,6 +443,28 @@ class TextContent {
         return this.parts.map(part => part.asString(data)).reduce((s1, s2) => s1 + s2);
     }
 
+    clone() {
+        var parts = [];
+        for (var part of this.parts) {
+            if (part.expression) {
+                parts.push({
+                    expression: part.expression,
+                    asString: function (data) {
+                        return this.expression.evaluate(data);
+                    }
+                });
+            } else {
+                parts.push({
+                    text: part.text,
+                    asString: function (data) {
+                        return this.text;
+                    }
+                });
+            }
+        }
+        return new TextContent(parts);
+    }
+
 }
 
 class TextContentParser {
