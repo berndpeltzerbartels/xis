@@ -2,7 +2,7 @@ package one.xis.page;
 
 import lombok.RequiredArgsConstructor;
 import one.xis.Page;
-import one.xis.Welcome;
+import one.xis.WelcomePage;
 import one.xis.context.XISComponent;
 import one.xis.path.PathUtils;
 import one.xis.resource.Resources;
@@ -38,7 +38,7 @@ class PageMetaDataFactory {
     }
 
     private boolean isWelcomePage(Class<?> controllerClass) {
-        return controllerClass.isAnnotationPresent(Welcome.class);
+        return controllerClass.isAnnotationPresent(WelcomePage.class);
     }
 
     public String getHtmlTemplatePath(Class<?> controllerClass) {

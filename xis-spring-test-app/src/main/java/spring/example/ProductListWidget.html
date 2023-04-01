@@ -3,6 +3,11 @@
 
     <div data-repeat="category:categories">
         <h4>${category.title}</h4>
-        <span data-repeat="product:category.products">${product.title}</span>
+        <div data-repeat="product:category.products">
+            ${product.title} ${product.price} EUR
+        </div>
+    </div>
+    <div>
+        <a data-widget-link="ProductListWidget2">Andere Ansicht</a>
     </div>
 </div>
