@@ -112,7 +112,7 @@ class ControllerService {
     }
 
     private ControllerWrapper createControllerWrapper(Object controller, Function<Object, String> idMapper) {
-        return controllerWrapperFactory.createController(idMapper.apply(controller), controller);
+        return controllerWrapperFactory.createControllerWrapper(idMapper.apply(controller), controller);
     }
 
 

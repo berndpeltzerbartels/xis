@@ -4,6 +4,7 @@ import lombok.experimental.UtilityClass;
 
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @UtilityClass
 public class FieldUtil {
@@ -42,6 +43,13 @@ public class FieldUtil {
         return Arrays.asList(clazz.getDeclaredFields());
     }
 
+    public Collection<Field> getDeclaredAccessibleFields(Class<?> clazz) {
+        return Arrays.asList(clazz.getDeclaredFields())
+                .stream().peek(f -> f.setAccessible(true))
+                .collect(Collectors.toSet());
+    }
+
+
     public void setFieldValue(Object owner, Field field, Object value) {
         field.setAccessible(true);
         try {
@@ -65,5 +73,14 @@ public class FieldUtil {
 
     public boolean isArrayField(Field field) {
         return field.getType().isArray();
+    }
+
+    public static Object getFieldValue(Object owner, Field field) {
+        field.setAccessible(true);
+        try {
+            return field.get(owner);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

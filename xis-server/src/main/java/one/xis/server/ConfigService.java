@@ -2,7 +2,7 @@ package one.xis.server;
 
 import lombok.Getter;
 import one.xis.Page;
-import one.xis.Welcome;
+import one.xis.WelcomePage;
 import one.xis.Widget;
 import one.xis.context.XISComponent;
 import one.xis.context.XISInit;
@@ -40,7 +40,7 @@ class ConfigService {
             var pageAnno = pageController.getClass().getAnnotation(Page.class);
             pageIds.add(pageAnno.value());
             hosts.put(pageAnno.value(), "");
-            if (pageController.getClass().isAnnotationPresent(Welcome.class)) {
+            if (pageController.getClass().isAnnotationPresent(WelcomePage.class)) {
                 if (welcomePageId != null) {
                     throw new IllegalStateException("There must be exactly one welcome-page (@Page(welcomePage = true)). More than one found " + welcomePageId + ", " + pageAnno.value());
                 }

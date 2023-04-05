@@ -61,13 +61,13 @@ class ControllerWrapperFactoryTest {
     @Test
     void noExceptionPage() {
         var controller = new TestPageController();
-        new ControllerWrapperFactory().createController("/page.html", controller);
+        new ControllerWrapperFactory().createControllerWrapper("/page.html", controller);
     }
 
     @Test
     void noExceptionWidget() {
         var controller = new TestWidgetController();
-        new ControllerWrapperFactory().createController("TestWidgetController", controller);
+        new ControllerWrapperFactory().createControllerWrapper("TestWidgetController", controller);
     }
 
 

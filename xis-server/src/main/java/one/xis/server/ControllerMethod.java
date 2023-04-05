@@ -1,6 +1,6 @@
 package one.xis.server;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.experimental.SuperBuilder;
@@ -10,7 +10,6 @@ import one.xis.UserId;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.List;
 
 @Data
 @SuperBuilder
@@ -18,15 +17,12 @@ abstract class ControllerMethod {
 
     protected Method method;
     protected String key;
-    protected List<MethodParameter> methodParameters;
+    protected ObjectMapper objectMapper;
 
     @SneakyThrows
     Object invoke(Request request, Object controller) {
         return method.invoke(controller, prepareArgs(request));
     }
-
-    @JsonProperty("type")
-    abstract InvocationType getInvocationType();
 
     @Override
     public String toString() {
@@ -52,8 +48,16 @@ abstract class ControllerMethod {
         return args;
     }
 
+    @SneakyThrows
     private Object modelParameter(Parameter parameter, Request context) {
         var key = parameter.getAnnotation(Model.class).value();
-        return context.getData().get(key);
+        var o = context.getData().get(key);
+        if (o instanceof String) {
+            if (parameter.getType() == String.class) {
+                return o;
+            }
+            return objectMapper.readValue((String) o, parameter.getType());
+        }
+        return o;
     }
 }

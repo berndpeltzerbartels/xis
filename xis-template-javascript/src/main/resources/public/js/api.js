@@ -279,8 +279,6 @@ class PageController {
         this.body = getElementByTagName('body');
         this.title = getElementByTagName('title');
         this.pages = {};
-        this.pageData = {};
-        this.timestamps = {};
         this.pageId = undefined;
         this.welcomePageId;
         this.titleExpression;
@@ -290,8 +288,6 @@ class PageController {
         this.welcomePageId = config.welcomePageId;
         var promises = [];
         var _this = this;
-        config.pageIds.forEach(id => { _this.pages[id] = {}; _this.pageData[id] = new Data({}); });
-        config.pageIds.forEach(id => { _this.pages[id] = {}; _this.timestamps[id] = {}; });
         config.pageIds.forEach(id => promises.push(_this.loadPageHead(id)));
         config.pageIds.forEach(id => promises.push(_this.loadPageBody(id)));
         config.pageIds.forEach(id => promises.push(_this.loadPageBodyAttributes(id)));
@@ -343,21 +339,6 @@ class PageController {
         this.titleExpression = '';
     }
 
-    pageAction(pageId, action) {
-        var _this = this;
-        return this.client.pageAction(pageId, action, this.pageData[pageId]).then(response => {
-            var data = _this.pageData[key];
-            _this.timestamps
-            for (var key of Object.keys(data)) {
-                var dataItem = response.data[key];
-                data.setValue(key, dataItem.value);
-                this.timestamps[key] = dataItem.timestamp;
-            }
-            return data;
-        }).then(controllerId => _this.bindPage(controllerId));
-    }
-
-
     /**
      * @returns {Promise<string>}
      */
@@ -380,9 +361,8 @@ class PageController {
     refreshData(pageId) {
         var _this = this;
         console.log('refreshData');
-        var dto = dtoFromElementData(_this.html);
-        return client.loadPageData(this.pageId, dto).then(response => {
-            bindConvertedData(_this.html, response, undefined);
+        return client.loadPageData(this.pageId, this.html._data.values).then(response => {
+            _this.html._data = new Data(response.data);
             console.log('return in refreshData');
             return pageId;
         });
@@ -396,7 +376,7 @@ class PageController {
         console.log('refreshPage: ' + pageId);
         var _this = this;
         return new Promise((resolve, _) => {
-            var data = getElementData(_this.html);
+            var data = _this.html._data;
             _this.refreshTitle(data);
             _this.head._refresh(data);
             _this.body._refresh(data);
@@ -670,7 +650,6 @@ class NodeInitializer {
     * @param {Element} element 
     */
     initializeWidgetContainer(element) {
-        element._widgetIdExpression = new TextContentParser(element.getAttribute('data-widget')).parse();
         element._showWidget = function (widgetId) {
             var widgetRoot = widgets.getWidgetRoot(widgetId);
             if (!this._widgetId || this._widgetId !== widgetId) {
@@ -680,13 +659,13 @@ class NodeInitializer {
                 this._widgetId = widgetId;
                 widgetRoot._parent = this;
             }
-            var parentData = element._data;
-            var dto = dtoFromElementData(widgetRoot);
-            client.loadWidgetData(widgetId, dto)
-                .then(response => bindConvertedData(widgetRoot, response, parentData))
-                .then(data => this._refreshChildNodes(data));
+            client.loadWidgetData(this._widgetId, widgetRoot._data)
+                .then(response => new Data(response.data))
+                .then(data => { widgetRoot._data = data; return data; })
+                .then(data => widgetRoot._refresh(data));
         }
     }
+
 
 
     /**
@@ -712,7 +691,6 @@ class NodeInitializer {
      * @param {Element} element 
      */
     addElementStandardMethods(element) {
-
         element._refresh = function (data) {
             this._refreshAttributes(data);
             if (this._widgetLinkExpression) {
@@ -721,9 +699,8 @@ class NodeInitializer {
             if (this._pageLinkExpression) {
                 this._linkTargetPageId = this._pageLinkExpression.evaluate(data);
             }
-            if (this._widgetIdExpression) {
-                var widgetId = element._widgetIdExpression.evaluate(data);
-                this._showWidget(widgetId);
+            if (this.getAttribute('data-widget')) {
+                this._showWidget(this._widgetId);
             } else if (this._repeat) {
                 refreshRepeat(this, data);
             } else {
@@ -792,7 +769,7 @@ class NodeInitializer {
         element._attributes = [];
         for (var attrName of element.getAttributeNames()) {
             if (attrName.startsWith('data-')) {
-                continue; // otherwise evaluated and replacing logic
+                continue; // otherwise evaluated and will replace logic
                 // with static content !
             }
             var attrValue = element.getAttribute(attrName);
@@ -815,54 +792,6 @@ class NodeInitializer {
             this.initializeNode(element.childNodes[i]);
         }
     }
-}
-
-/**
- * Converts backend-data into frontend-format and binds the result
- * to the element.
- * 
- * @param {Element} element 
- * @param {any} response 
- * @param {Data} parentData 
- * @returns {Data}
- */
-function bindConvertedData(element, response, parentData) {
-    var timestamps = [];
-    element._data = convertResponseData(response.data, timestamps);
-    element._data.parentData = parentData;
-    element._timestamps = timestamps;
-    return element._data;
-}
-
-/**
- *  Converts backend-data into frontend-format
- * 
- * @param {any} responseData from backend
- * @param {Array<Number>} timestamps an array the timstamsd will 
- * get stored into
- * @returns {Data} 
- */
-function convertResponseData(responseData, timestamps) {
-    var data = new Data({});
-    for (var key of Object.keys(responseData)) {
-        var dataItem = responseData[key];
-        data.setValue(key, dataItem.value);
-        timestamps[key] = dataItem.timestamp;
-    }
-    return data;
-}
-
-function getResponseTimestamps(element, responseData) {
-    var data = new Data({});
-    var timestamps = [];
-    element._data = data;
-    element._timestamps = timestamps;
-    for (var key of Object.keys(responseData)) {
-        var dataItem = responseData[key];
-        data.setValue(key, dataItem.value);
-        timestamps[key] = dataItem.timestamp;
-    }
-    return data;
 }
 
 
@@ -919,28 +848,6 @@ function getElementData(element) {
     }
     return element._data;
 }
-
-function dtoFromElementData(element) {
-    var data = element._data;
-    var timestamps = element._timestamps;
-    if (!data) {
-        data = new Data({});
-        element._data = data;
-    }
-    if (!timestamps) {
-        timestamps = [];
-        element._timestamps = timestamps;
-    }
-    var dto = {};
-    for (var key of data.getKeys()) {
-        var value = data.getValue(key);
-        var timestamp = timestamps[key];
-        var dataItem = { value: value, timestamp: timestamp };
-        dto[key] = dataItem;
-    }
-    return dto;
-}
-
 
 function refreshRepeat(origElement, parentData) {
     var loopAttributes = origElement._repeat;
@@ -1049,11 +956,6 @@ function appendSibling(element, sibling) {
 }
 
 
-function lastChild(element) {
-
-}
-
-
 function lastArrayElement(arr) {
     if (arr.length == 0) {
         return undefined;
@@ -1144,7 +1046,7 @@ class Cloner {
      */
     cloneFrameworkAttributes(src, dest) {
         dest._variableAttributes = src._variableAttributes;
-        dest._widgetIdExpression = src._widgetIdExpression;
+        dest._widgetId = src._widgetId;
     }
 
     /**
