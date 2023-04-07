@@ -15,7 +15,7 @@ import java.util.Random;
 class Index {
 
     @Model("pages")
-    List<PageLink> pages() {
+    List<PageLink> pages(@Model("pages") List<PageLink> pages) {
         var list = new ArrayList<PageLink>();
         list.add(new PageLink("ProductPage", "/product/details.html"));
         list.add(new PageLink("PageWithRepeat", "/pageWithRepeat.html"));

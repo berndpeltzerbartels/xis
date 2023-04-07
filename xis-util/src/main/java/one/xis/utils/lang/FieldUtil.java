@@ -3,6 +3,7 @@ package one.xis.utils.lang;
 import lombok.experimental.UtilityClass;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -38,6 +39,18 @@ public class FieldUtil {
         return Collections.unmodifiableSet(fields);
     }
 
+    public Field getField(Class<?> clazz, String name) {
+        Class<?> c = clazz;
+        while (c != null && !c.equals(Object.class)) {
+            var field = getDeclaredField(clazz, name);
+            if (field != null) {
+                return field;
+            }
+            c = c.getSuperclass();
+        }
+        return null;
+    }
+
 
     public Collection<Field> getDeclaredFields(Class<?> clazz) {
         return Arrays.asList(clazz.getDeclaredFields());
@@ -59,9 +72,10 @@ public class FieldUtil {
         }
     }
 
-    public Class<?> getGenericTypeParameter(Field field) {
+    public Type getGenericTypeParameter(Field field) {
         return null;
     }
+
 
     public Class<?> getArrayComponentType(Field field) {
         return field.getType().getComponentType();

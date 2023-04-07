@@ -9,6 +9,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class MethodUtilsTest {
 
+    class GenericTestBean {
+        void method(List<String> list) {
+
+        }
+    }
+
+    @Test
+    void getGenericTypeParameter() throws NoSuchMethodException {
+        var param = GenericTestBean.class.getDeclaredMethod("method", List.class).getParameters()[0];
+        var result = MethodUtils.getGenericTypeParameter(param);
+
+        assertThat(result).isEqualTo(String.class);
+
+    }
 
     class TestClass1 {
         void test1() {

@@ -3,10 +3,11 @@ package one.xis.server;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 class DataDeserializer extends JsonDeserializer<Map<String, String>> {
@@ -14,8 +15,14 @@ class DataDeserializer extends JsonDeserializer<Map<String, String>> {
     @Override
     public Map<String, String> deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
         ObjectMapper mapper = (ObjectMapper) jp.getCodec();
-        JsonNode node = mapper.readTree(jp);
-        var map = mapper.treeToValue(node, Map.class);
+        ObjectNode node = mapper.readTree(jp);
+        // var map = mapper.treeToValue(node, Map.class);
+        var names = node.fieldNames();
+        var map = new HashMap<String, String>();
+        while (names.hasNext()) {
+            var name = names.next();
+            map.put(name, mapper.writeValueAsString(node.get(name)));
+        }
         return map;
     }
 }

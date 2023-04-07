@@ -48,5 +48,8 @@ public class CollectionUtils {
         return coll.stream().filter(clazz::isInstance).map(clazz::cast).collect(CollectorUtils.toOnlyElement());
     }
 
+    public <T> T getTypeParameter(Class<?> clazz) {
+        return (T) clazz.getTypeParameters()[0].getBounds()[0]; // TODO
+    }
 
 }

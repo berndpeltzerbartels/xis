@@ -278,6 +278,7 @@ class PageController {
         this.head = getElementByTagName('head');
         this.body = getElementByTagName('body');
         this.title = getElementByTagName('title');
+        this.html._pageDataMap = {};
         this.pages = {};
         this.pageId = undefined;
         this.welcomePageId;
@@ -288,6 +289,7 @@ class PageController {
         this.welcomePageId = config.welcomePageId;
         var promises = [];
         var _this = this;
+        config.pageIds.forEach(id => this.pages[id] = {});
         config.pageIds.forEach(id => promises.push(_this.loadPageHead(id)));
         config.pageIds.forEach(id => promises.push(_this.loadPageBody(id)));
         config.pageIds.forEach(id => promises.push(_this.loadPageBodyAttributes(id)));
@@ -361,8 +363,10 @@ class PageController {
     refreshData(pageId) {
         var _this = this;
         console.log('refreshData');
-        return client.loadPageData(this.pageId, this.html._data.values).then(response => {
-            _this.html._data = new Data(response.data);
+        var data = this.html._pageDataMap[pageId];
+        var values = data ? data.values : {};
+        return client.loadPageData(this.pageId, values).then(response => {
+            _this.html._pageDataMap[pageId] = new Data(response.data);
             console.log('return in refreshData');
             return pageId;
         });
@@ -376,7 +380,7 @@ class PageController {
         console.log('refreshPage: ' + pageId);
         var _this = this;
         return new Promise((resolve, _) => {
-            var data = _this.html._data;
+            var data = _this.html._pageDataMap[pageId];
             _this.refreshTitle(data);
             _this.head._refresh(data);
             _this.body._refresh(data);
@@ -659,7 +663,8 @@ class NodeInitializer {
                 this._widgetId = widgetId;
                 widgetRoot._parent = this;
             }
-            client.loadWidgetData(this._widgetId, widgetRoot._data)
+            var values = widgetRoot._data ? widgetRoot._data : {};
+            client.loadWidgetData(this._widgetId, values)
                 .then(response => new Data(response.data))
                 .then(data => { widgetRoot._data = data; return data; })
                 .then(data => widgetRoot._refresh(data));

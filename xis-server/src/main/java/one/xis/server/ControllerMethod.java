@@ -1,6 +1,7 @@
 package one.xis.server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.experimental.SuperBuilder;
@@ -51,13 +52,15 @@ abstract class ControllerMethod {
     @SneakyThrows
     private Object modelParameter(Parameter parameter, Request context) {
         var key = parameter.getAnnotation(Model.class).value();
-        var o = context.getData().get(key);
-        if (o instanceof String) {
+        var paramValue = context.getData().get(key);
+        if (paramValue instanceof String) {
             if (parameter.getType() == String.class) {
-                return o;
+                return paramValue;
             }
-            return objectMapper.readValue((String) o, parameter.getType());
+            return new Gson().fromJson((String) paramValue, parameter.getType());
         }
-        return o;
+        return paramValue;
     }
+
+
 }

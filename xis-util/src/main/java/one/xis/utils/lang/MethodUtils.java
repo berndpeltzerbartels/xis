@@ -3,10 +3,7 @@ package one.xis.utils.lang;
 import lombok.NonNull;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Parameter;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -41,6 +38,12 @@ public class MethodUtils {
             throw new RuntimeException(e);
         }
     }
+
+    public static Class<?> getGenericTypeParameter(Parameter parameter) {
+        var parameterizedType = (ParameterizedType) parameter.getParameterizedType();
+        return (Class<?>) parameterizedType.getActualTypeArguments()[0];
+    }
+
 
     /**
      * Creates a list containing the given class and it's superclasses

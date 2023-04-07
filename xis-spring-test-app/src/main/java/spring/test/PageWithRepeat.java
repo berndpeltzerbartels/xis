@@ -10,7 +10,7 @@ import java.util.List;
 class PageWithRepeat {
 
     @Model("items")
-    List<PageWithRepeatItem> items() {
+    List<PageWithRepeatItem> items(@Model("items") List<PageWithRepeatItem> items) {
         var list = new ArrayList<PageWithRepeatItem>();
         list.add(new PageWithRepeatItem(1, "title1"));
         list.add(new PageWithRepeatItem(2, "title2"));

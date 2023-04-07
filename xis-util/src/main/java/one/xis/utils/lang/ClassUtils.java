@@ -27,13 +27,23 @@ public class ClassUtils {
 
     public <T> T newInstance(Class<T> aClass) {
         try {
-            Constructor<T> constructor = aClass.getConstructor();
+            Constructor<T> constructor = aClass.getDeclaredConstructor();
             constructor.setAccessible(true);
             return constructor.newInstance();
         } catch (NoSuchMethodException e) {
             throw new RuntimeException(aClass + " must habe a default contructor");
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public <T> Constructor<T> getConstructor(Class<T> aClass, Class<?> parameterTypes) {
+        try {
+            var constructor = aClass.getConstructor(parameterTypes);
+            constructor.setAccessible(true);
+            return constructor;
+        } catch (NoSuchMethodException e) {
+            return null;
         }
     }
 
