@@ -1,7 +1,8 @@
-package one.xis.json;
+package one.xis.server;
 
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
+import one.xis.context.XISComponent;
 import one.xis.utils.lang.ClassUtils;
 import one.xis.utils.lang.FieldUtil;
 
@@ -17,9 +18,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 
+@XISComponent
 class ParameterDeserializer {
 
-    Object deserialze(String json, Parameter parameter) throws IOException {
+    public Object deserialze(String json, Parameter parameter) throws IOException {
         return evaluate(new JsonReader(new StringReader(json)), parameter);
     }
 

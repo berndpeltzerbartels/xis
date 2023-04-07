@@ -1,9 +1,13 @@
 package spring.test;
 
-import lombok.Value;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Value
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 class PageLink {
-    String title;
-    String url;
+    private String title;
+    private String url;
 }

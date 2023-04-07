@@ -31,7 +31,7 @@ public class ClassUtils {
             constructor.setAccessible(true);
             return constructor.newInstance();
         } catch (NoSuchMethodException e) {
-            throw new RuntimeException(aClass + " must habe a default contructor");
+            throw new RuntimeException(aClass + " must have a default contructor");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

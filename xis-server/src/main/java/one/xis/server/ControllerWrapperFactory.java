@@ -1,7 +1,7 @@
 package one.xis.server;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import one.xis.Action;
 import one.xis.Model;
 import one.xis.context.XISComponent;
@@ -15,13 +15,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @XISComponent
+@RequiredArgsConstructor
 class ControllerWrapperFactory {
 
-    private final ObjectMapper objectMapper;
-
-    ControllerWrapperFactory() {
-        this.objectMapper = new ObjectMapper();
-    }
+    private final ParameterDeserializer parameterDeserializer;
 
     ControllerWrapper createControllerWrapper(@NonNull String id, @NonNull Object controller) {
         try {
@@ -67,7 +64,7 @@ class ControllerWrapperFactory {
             return ModelMethod.builder()
                     .method(method)
                     .key(method.getAnnotation(Model.class).value())
-                    .objectMapper(objectMapper)
+                    .parameterDeserializer(parameterDeserializer)
                     .build();
         } catch (Exception e) {
             throw new RuntimeException("Failed to initialize " + method, e);
@@ -80,7 +77,7 @@ class ControllerWrapperFactory {
             return ActionMethod.builder()
                     .method(method)
                     .key(method.getAnnotation(Action.class).value())
-                    .objectMapper(objectMapper)
+                    .parameterDeserializer(parameterDeserializer)
                     .build();
         } catch (Exception e) {
             throw new RuntimeException("Failed to initialize " + method, e);

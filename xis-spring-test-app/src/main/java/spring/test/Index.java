@@ -19,6 +19,7 @@ class Index {
         var list = new ArrayList<PageLink>();
         list.add(new PageLink("ProductPage", "/product/details.html"));
         list.add(new PageLink("PageWithRepeat", "/pageWithRepeat.html"));
+        list.addAll(pages);
         return list;
     }
 

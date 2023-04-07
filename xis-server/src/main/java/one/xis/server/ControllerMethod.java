@@ -1,7 +1,5 @@
 package one.xis.server;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
 import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.experimental.SuperBuilder;
@@ -18,7 +16,7 @@ abstract class ControllerMethod {
 
     protected Method method;
     protected String key;
-    protected ObjectMapper objectMapper;
+    protected ParameterDeserializer parameterDeserializer;
 
     @SneakyThrows
     Object invoke(Request request, Object controller) {
@@ -57,7 +55,7 @@ abstract class ControllerMethod {
             if (parameter.getType() == String.class) {
                 return paramValue;
             }
-            return new Gson().fromJson((String) paramValue, parameter.getType());
+            return parameterDeserializer.deserialze((String) paramValue, parameter);
         }
         return paramValue;
     }

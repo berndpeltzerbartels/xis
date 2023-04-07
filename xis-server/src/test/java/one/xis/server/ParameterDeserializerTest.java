@@ -1,4 +1,4 @@
-package one.xis.json;
+package one.xis.server;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
