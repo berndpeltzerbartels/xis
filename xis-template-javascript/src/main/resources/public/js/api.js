@@ -875,6 +875,9 @@ function refreshRepeat(origElement, parentData) {
             elements.push(element);
         } else {
             element = elements[i];
+            if (!element.parentNode) {
+                element._parent.appendChild(element);
+            }
         }
         var value = dataArr[i];
         var data = new Data({}, parentData);
