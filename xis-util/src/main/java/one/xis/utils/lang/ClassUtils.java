@@ -37,7 +37,7 @@ public class ClassUtils {
         }
     }
 
-    public <T> Constructor<T> getConstructor(Class<T> aClass, Class<?> parameterTypes) {
+    public <T> Constructor<T> getConstructor(Class<T> aClass, Class<?>... parameterTypes) {
         try {
             var constructor = aClass.getConstructor(parameterTypes);
             constructor.setAccessible(true);

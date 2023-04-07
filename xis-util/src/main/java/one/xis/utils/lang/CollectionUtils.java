@@ -2,10 +2,8 @@ package one.xis.utils.lang;
 
 import lombok.experimental.UtilityClass;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.lang.reflect.Modifier;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -48,8 +46,26 @@ public class CollectionUtils {
         return coll.stream().filter(clazz::isInstance).map(clazz::cast).collect(CollectorUtils.toOnlyElement());
     }
 
-    public <T> T getTypeParameter(Class<?> clazz) {
-        return (T) clazz.getTypeParameters()[0].getBounds()[0]; // TODO
+    @SuppressWarnings("unchecked")
+    public <C extends Collection<?>> C emptyInstance(Class<C> clazz) {
+        if (clazz.isAssignableFrom(List.class)) {
+            return (C) new ArrayList<>();
+        }
+        if (clazz.isAssignableFrom(Set.class)) {
+            return (C) new HashSet<>();
+        }
+        if (clazz.isAssignableFrom(HashSet.class)) {
+            return (C) new HashSet<>();
+        }
+        var constructor = ClassUtils.getConstructor(clazz);
+        if (constructor != null && !Modifier.isAbstract(clazz.getModifiers()) && !Modifier.isInterface(clazz.getModifiers())) {
+            try {
+                return constructor.newInstance();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        throw new UnsupportedOperationException("unable to instantiate " + clazz);
     }
 
 }

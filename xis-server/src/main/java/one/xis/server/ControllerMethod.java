@@ -6,9 +6,12 @@ import lombok.experimental.SuperBuilder;
 import one.xis.ClientId;
 import one.xis.Model;
 import one.xis.UserId;
+import one.xis.utils.lang.CollectionUtils;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.Collection;
+import java.util.List;
 
 @Data
 @SuperBuilder
@@ -48,9 +51,17 @@ abstract class ControllerMethod {
     }
 
     @SneakyThrows
+    @SuppressWarnings("unchecked")
     private Object modelParameter(Parameter parameter, Request context) {
         var key = parameter.getAnnotation(Model.class).value();
         var paramValue = context.getData().get(key);
+        if (paramValue == null) {
+            if (parameter.getType().equals(Iterable.class)) {
+                return CollectionUtils.emptyInstance(List.class);
+            } else if (Collection.class.isAssignableFrom(parameter.getType())) {
+                return CollectionUtils.emptyInstance((Class<Collection<?>>) parameter.getType());
+            }
+        }
         if (paramValue instanceof String) {
             if (parameter.getType() == String.class) {
                 return paramValue;

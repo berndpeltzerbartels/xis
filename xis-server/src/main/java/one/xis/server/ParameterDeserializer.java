@@ -12,10 +12,9 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.*;
 
 
 @XISComponent
@@ -129,8 +128,28 @@ class ParameterDeserializer {
         if (type.equals(Integer.TYPE) || type.equals(Integer.class)) {
             return reader.nextInt();
         }
-        reader.skipValue();
-        return null;
+        if (type.equals(Long.TYPE) || type.equals(Long.class)) {
+            return reader.nextLong();
+        }
+        if (type.equals(Boolean.TYPE) || type.equals(Boolean.class)) {
+            return reader.nextBoolean();
+        }
+        if (type.equals(Float.TYPE) || type.equals(Float.class)) {
+            return reader.nextDouble();
+        }
+        if (type.equals(Double.TYPE) || type.equals(Double.class)) {
+            return reader.nextDouble();
+        }
+        if (type.equals(BigInteger.class)) {
+            return BigInteger.valueOf(reader.nextLong());
+        }
+        if (type.equals(BigDecimal.class)) {
+            return BigDecimal.valueOf(reader.nextLong());
+        }
+        if (type.equals(Date.class)) {
+            return Date.parse(reader.nextString());
+        }
+        throw new UnsupportedOperationException("parameter-type " + type);
     }
 
     private Object readArray(JsonReader reader, Class<?> type, ParameterizedType elementType) throws IOException {
