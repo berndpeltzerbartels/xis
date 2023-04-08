@@ -14,8 +14,6 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static java.util.Collections.emptyMap;
-
 @XISComponent
 @RequiredArgsConstructor
 class ControllerService {
@@ -42,13 +40,15 @@ class ControllerService {
 
 
     Response invokePageModelMethods(Request request) {
-        var data = findPageControllerWrapper(request).map(wrapper -> wrapper.invokeGetModelMethods(request)).orElse(emptyMap());
-        return new Response(data, request.getControllerId(), null);
+        var wrapper = findPageControllerWrapper(request).orElseThrow();
+        var data = wrapper.invokeGetModelMethods(request);
+        return new Response(data, request.getControllerId(), null, wrapper.getComponentAttributes());
     }
 
     Response invokeWidgetModelMethods(Request request) {
-        var data = findWidgetControllerWrapper(request).map(wrapper -> wrapper.invokeGetModelMethods(request)).orElse(emptyMap());
-        return new Response(data, null, request.getControllerId());
+        var wrapper = findPageControllerWrapper(request).orElseThrow();
+        var data = wrapper.invokeGetModelMethods(request);
+        return new Response(data, request.getControllerId(), null, wrapper.getComponentAttributes());
     }
 
     Response invokePageActionMethod(Request request) {
@@ -65,11 +65,11 @@ class ControllerService {
     }
 
     private Response widgetModelDataResponse(ControllerWrapper wrapper, Request request) {
-        return new Response(wrapper.invokeGetModelMethods(request), null, wrapper.getId());
+        return new Response(wrapper.invokeGetModelMethods(request), null, wrapper.getId(), wrapper.getComponentAttributes());
     }
 
     private Response pageModelDataResponse(ControllerWrapper wrapper, Request request) {
-        return new Response(wrapper.invokeGetModelMethods(request), wrapper.getId(), null);
+        return new Response(wrapper.invokeGetModelMethods(request), wrapper.getId(), null, wrapper.getComponentAttributes());
     }
 
     private Collection<ControllerWrapper> widgetControllerWrappers() {
