@@ -23,7 +23,6 @@ public class ControllerWrapper {
 
     private Map<String, ModelMethod> modelMethods;
     private Map<String, ActionMethod> actionMethods;
-    private ComponentAttributes componentAttributes;
 
     Map<String, Object> invokeGetModelMethods(Request request) {
         var data = new HashMap<String, Object>();

@@ -279,6 +279,7 @@ class PageController {
         this.body = getElementByTagName('body');
         this.title = getElementByTagName('title');
         this.html._pageDataMap = {};
+        this.html._pageAttributes = {};
         this.pages = {};
         this.pageId = undefined;
         this.welcomePageId;
@@ -287,13 +288,14 @@ class PageController {
 
     loadPages(config) {
         this.welcomePageId = config.welcomePageId;
+        this.html._pageAttributes = config.pageAttributes;
         var promises = [];
         var _this = this;
         config.pageIds.forEach(id => this.pages[id] = {});
+        config.pageIds.forEach(id => this.html._pageDataMap[id] = new Data({}));
         config.pageIds.forEach(id => promises.push(_this.loadPageHead(id)));
         config.pageIds.forEach(id => promises.push(_this.loadPageBody(id)));
         config.pageIds.forEach(id => promises.push(_this.loadPageBodyAttributes(id)));
-        console.log('PageCOntroller:Promises.all');
         return Promise.all(promises).then(() => _this.findPageId())
             .then(pageId => _this.bindPage(pageId))
             .then(pageId => _this.refreshData(pageId))
@@ -363,11 +365,16 @@ class PageController {
     refreshData(pageId) {
         var _this = this;
         console.log('refreshData');
-        var data = this.html._pageDataMap[pageId];
-        var values = data ? data.values : {};
+        var values = {};
+        var pageData = this.html._pageDataMap[pageId];
+        var pageAttributes = this.html._pageAttributes[pageId];
+        if (pageData) {
+            for (var dataKey of pageAttributes.modelsToSubmitForModel) {
+                values[dataKey] = pageData.getValue([dataKey]);
+            }
+        }
         return client.loadPageData(this.pageId, values).then(response => {
             _this.html._pageDataMap[pageId] = new Data(response.data);
-            console.log('return in refreshData');
             return pageId;
         });
     }
@@ -377,7 +384,6 @@ class PageController {
     * @returns {Promise<string>}
     */
     refreshPage(pageId) {
-        console.log('refreshPage: ' + pageId);
         var _this = this;
         return new Promise((resolve, _) => {
             var data = _this.html._pageDataMap[pageId];
@@ -455,11 +461,13 @@ class Widgets {
     constructor(client) {
         this.widgets = {};
         this.client = client;
+        this.widgetAttributes = {};
     }
 
     loadWidgets(config) {
         var _this = this;
         var promises = [];
+        this.widgetAttributes = config.widgetAttributes;
         config.widgetIds.forEach(id => _this.widgets[id] = {});
         config.widgetIds.forEach(id => promises.push(_this.loadWidget(id)));
         console.log('Widgets - Promise.all');
@@ -473,6 +481,8 @@ class Widgets {
         var _this = this;
         return this.client.loadWidget(widgetId).then(widgetHtml => {
             var root = _this.asRootElement(widgetHtml);
+            root._widgetAttributes = _this.widgetAttributes[widgetId];
+            root._data = {};
             _this.widgets[widgetId].root = root;
             console.log('initialize: ' + root);
             initializer.initializeRootElement(root);
@@ -627,6 +637,16 @@ class NodeInitializer {
         }
     }
 
+    isActionForm(element) {
+        return element.localName == 'form' && element.getAttribute('data-action');
+    }
+
+    initializeForm(element) {
+        var action = element.getAttribute('data-action');
+        element.onsubmit = () => false;
+
+    }
+
     initializeWidgetLink(a) {
         a._widgetLinkExpression = new TextContentParser(a.getAttribute('data-widget-link')).parse();
         a._linkTargetWidgetId = undefined;
@@ -663,11 +683,21 @@ class NodeInitializer {
                 this._widgetId = widgetId;
                 widgetRoot._parent = this;
             }
-            var values = widgetRoot._data ? widgetRoot._data : {};
+            var widgetAttributes = widgetRoot._widgetAttributes;
+            var values = {};
+            var data = widgetRoot._data;
+            var widgetAttributes = widgetRoot._widgetAttributes;
+            for (var dataKey of widgetAttributes.modelsToSubmitForModel) {
+                values[dataKey] = data.getValue([dataKey]);
+            }
             client.loadWidgetData(this._widgetId, values)
                 .then(response => new Data(response.data))
                 .then(data => { widgetRoot._data = data; return data; })
                 .then(data => widgetRoot._refresh(data));
+        }
+        element._refreshWidget = function () {
+            var widgetId = this._widgetId ? this._widgetId : this.getAttribute('data-widget');
+            this._showWidget(widgetId);
         }
     }
 
@@ -704,8 +734,8 @@ class NodeInitializer {
             if (this._pageLinkExpression) {
                 this._linkTargetPageId = this._pageLinkExpression.evaluate(data);
             }
-            if (this.getAttribute('data-widget')) {
-                this._showWidget(this._widgetId);
+            if (this._refreshWidget) {
+                this._refreshWidget();
             } else if (this._repeat) {
                 refreshRepeat(this, data);
             } else {

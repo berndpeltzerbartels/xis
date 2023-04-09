@@ -15,5 +15,8 @@ public class Config {
     private final Map<String, String> widgetHosts;
     private final Map<String, String> pageHosts;
     private final String welcomePageId;
+    private final Map<String, ComponentAttributes> pageAttributes;
+    private final Map<String, ComponentAttributes> widgetAttributes;
+
 
 }

@@ -8,9 +8,7 @@ import one.xis.context.XISComponent;
 import one.xis.utils.lang.MethodUtils;
 
 import java.lang.reflect.Method;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -29,22 +27,10 @@ class ControllerWrapperFactory {
             controllerWrapper.setController(controller);
             controllerWrapper.setModelMethods(modelMethods(controller));
             controllerWrapper.setActionMethods(actionMethodMap(controller));
-            controllerWrapper.setComponentAttributes(componentAttributes(controllerWrapper));
             return controllerWrapper;
         } catch (Exception e) {
             throw new RuntimeException("Failed to initialize " + controller.getClass(), e);
         }
-    }
-
-    private ComponentAttributes componentAttributes(ControllerWrapper wrapper) {
-        var submitDataForModels = new HashSet<String>();
-        wrapper.getModelMethods().values().forEach(method -> submitDataForModels.addAll(method.getRequiredModels()));
-        var submitDataForActions = new HashMap<String, Collection<String>>();
-        wrapper.getActionMethods().forEach((action, method) -> submitDataForActions.computeIfAbsent(action, a -> new HashSet<>()).addAll(method.getRequiredModels()));
-        var attributes = new ComponentAttributes();
-        attributes.setSubmitDataForModels(submitDataForModels);
-        attributes.setSubmitDataForActions(submitDataForActions);
-        return componentAttributes(wrapper);
     }
 
     private Map<String, ModelMethod> modelMethods(Object controller) {
