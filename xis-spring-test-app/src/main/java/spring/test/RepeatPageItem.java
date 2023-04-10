@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-class PageWithRepeatItem {
+class RepeatPageItem {
     private long id;
     private String title;
 }

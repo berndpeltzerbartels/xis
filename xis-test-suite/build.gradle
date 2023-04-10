@@ -1,0 +1,44 @@
+plugins {
+  id 'java'
+  id 'io.qameta.allure' version '2.9.3'
+}
+
+group 'com.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+  mavenCentral()
+}
+
+ext {
+  allureVersion = '2.20.1'
+  junitVersion = '5.9.1'
+}
+
+sourceCompatibility = '11'
+targetCompatibility = '11'
+
+tasks.withType(JavaCompile) {
+  options.encoding = 'UTF-8'
+}
+
+dependencies {
+    testImplementation('com.codeborne:selenide:6.11.0')
+    testImplementation("io.qameta.allure:allure-selenide:${allureVersion}")
+  testImplementation('org.slf4j:slf4j-simple:2.0.6')
+
+  testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
+  testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
+
+  testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.16.1'
+}
+
+test {
+  useJUnitPlatform()  }
+allure {
+  autoconfigure = true
+  version = "${allureVersion}"
+
+    useJUnit5 {
+    version = "${allureVersion}"
+  }}

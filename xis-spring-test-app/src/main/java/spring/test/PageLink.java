@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 class PageLink {
+    private String id;
     private String title;
     private String url;
 }

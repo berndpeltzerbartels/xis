@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>RepeatInsideRepeat</title>
+</head>
+<body>
+<div data-repeat="item:items" class="item">
+    <h5 class="item">${item.title}</h5>
+    <div data-repeat="subItem:item.subItems" class="subItem">${subItem.title}</div>
+    <hr/>
+</div>
+<div>
+    <a data-page-link="/index.html" id="indexLink">Index</a>
+</div>
+</body>
+</html>

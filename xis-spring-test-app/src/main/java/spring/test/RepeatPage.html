@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8"/>
-    <title>PageWithRepeat</title>
+    <title>Repeat</title>
 </head>
 <body>
 <div data-repeat="item:items" class="item">
-    <span>${item.title}</span>
+    <span class="item">${item.title}</span>
 </div>
 <div>
-    <a data-page-link="/index.html">Index</a>
+    <a data-page-link="/index.html" id="indexLink">Index</a>
 </div>
 </body>
 </html>

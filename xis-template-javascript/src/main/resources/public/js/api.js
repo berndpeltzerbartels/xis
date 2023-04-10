@@ -266,147 +266,43 @@ class HttpClient {
 
 }
 
-
-class PageController {
-
+class Pages {
     /**
-     * @param {Client} client 
-     */
+    * @param {Client} client 
+    */
     constructor(client) {
         this.client = client;
-        this.html = getElementByTagName('html');
-        this.head = getElementByTagName('head');
-        this.body = getElementByTagName('body');
-        this.title = getElementByTagName('title');
-        this.html._pageDataMap = {};
-        this.html._pageAttributes = {};
         this.pages = {};
-        this.pageId = undefined;
-        this.welcomePageId;
-        this.titleExpression;
     }
 
+    /**
+     * 
+     * @param {Config} config 
+     * @returns {Promise<any>}
+     */
     loadPages(config) {
         this.welcomePageId = config.welcomePageId;
-        this.html._pageAttributes = config.pageAttributes;
+        this.pageAttributes = config.pageAttributes;
         var promises = [];
         var _this = this;
-        config.pageIds.forEach(id => this.pages[id] = {});
-        config.pageIds.forEach(id => this.html._pageDataMap[id] = new Data({}));
+        config.pageIds.forEach(id => _this.pages[id] = new Page(id));
         config.pageIds.forEach(id => promises.push(_this.loadPageHead(id)));
         config.pageIds.forEach(id => promises.push(_this.loadPageBody(id)));
         config.pageIds.forEach(id => promises.push(_this.loadPageBodyAttributes(id)));
-        return Promise.all(promises).then(() => _this.findPageId())
-            .then(pageId => _this.bindPage(pageId))
-            .then(pageId => _this.refreshData(pageId))
-            .then(pageId => _this.refreshPage(pageId));
-    }
-
-
-    /**
-    * @returns {Promise<string>}
-    */
-    bindPage(pageId) {
-        console.log('bindPage: ' + pageId);
-        document.pageId = pageId;
-        this.pageId = pageId;
-        var _this = this;
-        return new Promise((resolve, _) => {
-            var headChildArray = _this.pages[pageId].headChildArray;
-            var bodyChildArray = _this.pages[pageId].bodyChildArray;
-            var attributes = _this.pages[pageId].bodyAttributes;
-            _this.head._bindChildNodes(headChildArray);
-            _this.body._bindBodyAttributes(attributes);
-            _this.body._bindChildNodes(bodyChildArray)
-            console.log('resolve bindPage: ' + pageId);
-            resolve(pageId);
-        });
-    }
-
-
-    unbindPage() {
-        for (var name of this.body.getAttributeNames()) {
-            this.body.removeAttribute(name);
-        }
-        for (var child of nodeListToArray(this.body.childNodes)) {
-            if (!child.getAttribute || !child.getAttribute('data-ignore')) {
-                this.body.removeChild(child);
-            }
-        }
-        for (var child of nodeListToArray(this.head.childNodes)) {
-            if (!child.getAttribute || !child.getAttribute('data-ignore')) {
-                this.head.removeChild(child);
-            }
-        }
-        this.head._childNodes = [];
-        this.body._childNodes = [];
-        this.titleExpression = '';
+        return Promise.all(promises).then(() => config);
     }
 
     /**
-     * @returns {Promise<string>}
+     * @public
+     * @param {String} uri 
+     * @returns {Page}
      */
-    findPageId() {
-        console.log('findPageId');
-        var _this = this;
-        return new Promise((resolve, _) => {
-            var uri = document.location.pathname;
-            if (!_this.pages[uri]) {
-                uri = _this.welcomePageId;
-            }
-            console.log('resolve findPageId: ' + uri);
-            resolve(uri);
-        });
+    getPageById(uri) {
+        return this.pages[uri];
     }
 
-    /**
-     * @returns {Promise<string>}
-     */
-    refreshData(pageId) {
-        var _this = this;
-        console.log('refreshData');
-        var values = {};
-        var pageData = this.html._pageDataMap[pageId];
-        var pageAttributes = this.html._pageAttributes[pageId];
-        if (pageData) {
-            for (var dataKey of pageAttributes.modelsToSubmitForModel) {
-                values[dataKey] = pageData.getValue([dataKey]);
-            }
-        }
-        return client.loadPageData(this.pageId, values).then(response => {
-            _this.html._pageDataMap[pageId] = new Data(response.data);
-            return pageId;
-        });
-    }
-
-    /**
-    * @private 
-    * @returns {Promise<string>}
-    */
-    refreshPage(pageId) {
-        var _this = this;
-        return new Promise((resolve, _) => {
-            var data = _this.html._pageDataMap[pageId];
-            _this.refreshTitle(data);
-            _this.head._refresh(data);
-            _this.body._refresh(data);
-            _this.updateHistory(pageId);
-            console.log('resolve - refreshPage: ' + pageId);
-            resolve(pageId);
-        });
-    }
-
-
-    refreshTitle(data) {
-        if (this.titleExpression) {
-            this.title.innerHTML = this.titleExpression.evaluate(data);
-        }
-    }
-
-
-    updateHistory(pageId) {
-        var title = getElementByTagName('title').innerHTML;
-        window.history.replaceState({}, title, pageId);
+    getWelcomePage() {
+        return this.pages[this.welcomePageId];
     }
 
 
@@ -452,6 +348,155 @@ class PageController {
             _this.pages[pageId].bodyAttributes = attributes;
             return pageId;
         });
+    }
+}
+
+class Page {
+
+    constructor(id) {
+        this.id = id;
+        this.headChildArray = [];
+        this.bodyChildArray = [];
+        this.bodyAttributes = {};
+    }
+
+
+}
+
+
+class PageController {
+
+    /**
+     * @param {Client} client
+     * @param {Pages} pages 
+     */
+    constructor(client, pages) {
+        this.client = client;
+        this.pages = pages;
+        this.html = getElementByTagName('html');
+        this.head = getElementByTagName('head');
+        this.body = getElementByTagName('body');
+        this.title = getElementByTagName('title');
+        this.pageDataMap = {};
+        this.pageAttributes = {};
+        this.pageId = undefined;
+        this.titleExpression;
+    }
+
+    /**
+     * @public
+     * @param {Config} config 
+     */
+    displayInitialPage(config) {
+        this.pageAttributes = config.pageAttributes;
+        var _this = this;
+        this.findPageForCurrentUrl()
+            .then(page => _this.bindPage(page))
+            .then(pageId => _this.refreshData(pageId))
+            .then(pageId => _this.refreshPage(pageId));
+    }
+
+    bindPageForId(id) {
+        return this.bindPage(this.pages.getPageById(id));
+    }
+
+    /**
+    * @returns {Promise<string>}
+    */
+    bindPage(page) {
+        var _this = this;
+        return new Promise((resolve, _) => {
+            _this.head._bindChildNodes(page.headChildArray);
+            _this.body._bindBodyAttributes(page.bodyAttributes);
+            _this.body._bindChildNodes(page.bodyChildArray)
+            resolve(page.id);
+        });
+    }
+
+
+    unbindPage() {
+        for (var name of this.body.getAttributeNames()) {
+            this.body.removeAttribute(name);
+        }
+        for (var child of nodeListToArray(this.body.childNodes)) {
+            if (!child.getAttribute || !child.getAttribute('data-ignore')) {
+                this.body.removeChild(child);
+            }
+        }
+        for (var child of nodeListToArray(this.head.childNodes)) {
+            if (!child.getAttribute || !child.getAttribute('data-ignore')) {
+                this.head.removeChild(child);
+            }
+        }
+        this.head._childNodes = [];
+        this.body._childNodes = [];
+        this.titleExpression = '';
+    }
+
+    /**
+     * @returns {Promise<string>}
+     */
+    findPageForCurrentUrl() {
+        console.log('findPageId');
+        return new Promise((resolve, _) => {
+            var uri = document.location.pathname;
+            var page = this.pages.getPageById(uri);
+            if (!page) {
+                page = this.pages.getWelcomePage();
+            }
+            console.log('resolve findPageId: ' + uri);
+            resolve(page);
+        });
+    }
+
+    /**
+     * @returns {Promise<string>}
+     */
+    refreshData(pageId) {
+        var _this = this;
+        console.log('refreshData');
+        var values = {};
+        var pageData = this.pageDataMap[pageId];
+        var pageAttributes = this.pageAttributes[pageId];
+        if (pageData) {
+            for (var dataKey of pageAttributes.modelsToSubmitForModel) {
+                values[dataKey] = pageData.getValue([dataKey]);
+            }
+        }
+        return client.loadPageData(pageId, values).then(response => {
+            _this.pageDataMap[pageId] = new Data(response.data);
+            return pageId;
+        });
+    }
+
+    /**
+    * @private 
+    * @returns {Promise<string>}
+    */
+    refreshPage(pageId) {
+        var _this = this;
+        return new Promise((resolve, _) => {
+            var data = _this.pageDataMap[pageId];
+            _this.refreshTitle(data);
+            _this.head._refresh(data);
+            _this.body._refresh(data);
+            _this.updateHistory(pageId);
+            console.log('resolve - refreshPage: ' + pageId);
+            resolve(pageId);
+        });
+    }
+
+
+    refreshTitle(data) {
+        if (this.titleExpression) {
+            this.title.innerHTML = this.titleExpression.evaluate(data);
+        }
+    }
+
+
+    updateHistory(pageId) {
+        var title = getElementByTagName('title').innerHTML;
+        window.history.replaceState({}, title, pageId);
     }
 }
 
@@ -663,7 +708,7 @@ class NodeInitializer {
         a.href = "#";
         a.onclick = function () {
             pageController.unbindPage();
-            pageController.bindPage(this._linkTargetPageId)
+            pageController.bindPageForId(this._linkTargetPageId)
                 .then(pageId => pageController.refreshData(pageId))
                 .then(pageId => pageController.refreshPage(pageId))
         }
@@ -1248,10 +1293,13 @@ class Starter {
     /**
      * 
      * @param {PageController} pageController 
+     * @param {Pages} pages
      * @param {Widgets} widgets 
+     * @param {Client} client
      */
-    constructor(pageController, widgets, client) {
+    constructor(pageController, pages, widgets, client) {
         this.pageController = pageController;
+        this.pages = pages;
         this.widgets = widgets;
         this.client = client;
     }
@@ -1259,8 +1307,10 @@ class Starter {
     doStart() {
         var _this = this;
         new RootPageInitializer().initialize();
-        this.loadConfig().then(config => _this.widgets.loadWidgets(config))
-            .then(config => _this.pageController.loadPages(config));
+        this.loadConfig()
+            .then(config => _this.widgets.loadWidgets(config))
+            .then(config => _this.pages.loadPages(config))
+            .then(config => _this.pageController.displayInitialPage(config));
     }
     /**
     * @returns {Promise<ComponentConfig>}
@@ -1272,14 +1322,15 @@ class Starter {
 
 var client = new Client(new HttpClient());
 var widgets = new Widgets(client);
-var pageController = new PageController(client);
+var pages = new Pages(client);
+var pageController = new PageController(client, pages);
 var cloner = new Cloner();
 var initializer = new NodeInitializer();
 var domAccessor = new DomAccessor();
 var userFunctions = new UserFunctions(domAccessor);
 var widgetController = new WidgetController(domAccessor);
 var expressionParser = new ExpressionParser();
-var starter = new Starter(pageController, widgets, client);
+var starter = new Starter(pageController, pages, widgets, client);
 starter.doStart();
 
 console.log('pathname: ' + document.location.pathname);
