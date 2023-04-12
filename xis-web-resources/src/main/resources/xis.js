@@ -173,7 +173,8 @@ class Client {
      *
      * @param {HttpClient} httpClient
      */
-    constructor() {
+    constructor(httpClient) {
+        this.httpClient = httpClient;
         this.config = undefined;
         this.clientId = '';
         this.userId = '';
@@ -184,7 +185,7 @@ class Client {
      * @return {Promise<any>}
      */
     loadConfig() {
-        return httpClient.get('/xis/config', {})
+        return this.httpClient.get('/xis/config', {})
             .then(content => JSON.parse(content));
     }
 
@@ -194,7 +195,7 @@ class Client {
      * @return {Promise<string>}
      */
     loadPageHead(pageId) {
-        return httpClient.get('/xis/page/head', { uri: pageId });
+        return this.httpClient.get('/xis/page/head', { uri: pageId });
     }
 
 
@@ -204,7 +205,7 @@ class Client {
      * @return {Promise<string>}
      */
     loadPageBody(pageId) {
-        return httpClient.get('/xis/page/body', { uri: pageId });
+        return this.httpClient.get('/xis/page/body', { uri: pageId });
     }
 
     /**
@@ -213,7 +214,7 @@ class Client {
      * @return {Promise<any>}
      */
     loadPageBodyAttributes(pageId) {
-        return httpClient.get('/xis/page/body-attributes', { uri: pageId }).then(content => JSON.parse(content));
+        return this.httpClient.get('/xis/page/body-attributes', { uri: pageId }).then(content => JSON.parse(content));
     }
 
     /**
@@ -222,7 +223,7 @@ class Client {
     * @return {Promise<string>}
     */
     loadWidget(widgetId) {
-        return httpClient.get('/xis/widget/html/' + widgetId, {});
+        return this.httpClient.get('/xis/widget/html/' + widgetId, {});
     }
 
     /**
@@ -233,7 +234,7 @@ class Client {
      */
     loadPageData(pageId, data) {
         var request = this.createRequest(pageId, data, undefined);
-        return httpClient.post('/xis/page/model', request, {})
+        return this.httpClient.post('/xis/page/model', request, {})
             .then(content => JSON.parse(content));
     }
 
@@ -245,7 +246,7 @@ class Client {
      */
     loadWidgetData(widgetId, data) {
         var request = this.createRequest(widgetId, data, undefined);
-        return httpClient.post('/xis/widget/model', request)
+        return this.httpClient.post('/xis/widget/model', request)
             .then(content => JSON.parse(content));
     }
 
@@ -258,7 +259,7 @@ class Client {
      */
     widgetAction(widgetId, action, data) {
         var request = this.createRequest(widgetId, data, action);
-        return httpClient.post('/xis/widget/action', request, {})
+        return this.httpClient.post('/xis/widget/action', request, {})
             .then(content => JSON.parse(content));
     }
 
@@ -271,7 +272,7 @@ class Client {
      */
     pageAction(pageId, action, data) {
         var request = this.createRequest(pageId, data, action);
-        return httpClient.post('/xis/page/action', request, {});
+        return this.httpClient.post('/xis/page/action', request, {});
     }
 
 
@@ -344,7 +345,7 @@ class NodeCache {
     cloneChildNodes(node) {
         var clones = [];
         for (node of this.nodeArray) {
-            clones.push(node.cloneNode);
+            clones.push(node.cloneNode());
         }
         return clones;
     }

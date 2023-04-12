@@ -28,7 +28,7 @@ class ClientTest {
         promise = Mockito.mock(Promise.class);
         when(httpClient.get(anyString(), any())).thenReturn(promise);
         var clientJs = IOUtils.getResourceAsString("js/Client.js");
-        var instantiation = "var client = new Client();";
+        var instantiation = "var client = new Client(httpClient);";
         script = clientJs + instantiation;
     }
 
@@ -43,11 +43,13 @@ class ClientTest {
 
     @Test
     void loadPageHead() throws ScriptException {
-        var compiledScript = JSUtil.compile(script + "client.loadConfig();", Map.of("httpClient", httpClient));
+        var compiledScript = JSUtil.compile(script + "client.loadPageHead('x.html');", Map.of("httpClient", httpClient));
         compiledScript.eval();
 
-        verify(httpClient).get(eq("/xis/config"), any());
-        verify(promise).then(any());
+        var captor = ArgumentCaptor.forClass(Map.class);
+        verify(httpClient, times(1)).get(eq("/xis/page/head"), (Map<String, String>) captor.capture());
+
+        assertThat(captor.getValue().get("uri")).isEqualTo("x.html");
     }
 
     @Test

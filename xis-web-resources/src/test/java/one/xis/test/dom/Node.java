@@ -1,6 +1,6 @@
 package one.xis.test.dom;
 
-public class Node {
+public abstract class Node {
     public Node nextSibling;
     public Element parentNode;
     Node previousSibling;
@@ -28,5 +28,7 @@ public class Node {
         parentNode.updateChildNodes();
         parentNode = null;
     }
+
+    abstract Node cloneNode();
 
 }

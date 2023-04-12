@@ -50,7 +50,7 @@ class NodeCache {
     cloneChildNodes(node) {
         var clones = [];
         for (node of this.nodeArray) {
-            clones.push(node.cloneNode);
+            clones.push(node.cloneNode());
         }
         return clones;
     }

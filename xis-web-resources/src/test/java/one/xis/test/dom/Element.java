@@ -3,12 +3,18 @@ package one.xis.test.dom;
 
 import lombok.Getter;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 @Getter
 public class Element extends Node {
 
     public final String localName;
     public Node firstChild;
     public final NodeList childNodes = new NodeList();
+    private Map<String, String> attributes = new HashMap<>();
 
     public Element(String tagName) {
         this.localName = tagName;
@@ -35,6 +41,26 @@ public class Element extends Node {
             throw new IllegalStateException("not a child");
         }
         node.remove();
+    }
+
+    public List<String> getAttributeNames() {
+        return new ArrayList<>(attributes.keySet());
+    }
+
+    public String getAttribute(String name) {
+        return attributes.get(name);
+    }
+
+    public void setAttribute(String name, String value) {
+        attributes.put(name, value);
+    }
+
+    @Override
+    public Node cloneNode() {
+        var clone = new Element(localName);
+        this.attributes.forEach(clone::setAttribute);
+        childNodes.stream().forEach(child -> clone.appendChild(child.cloneNode()));
+        return clone;
     }
 
     void findByTagName(String name, NodeList result) {
