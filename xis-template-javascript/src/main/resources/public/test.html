@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html xmlns="xis:https://xis.one">
 
 <head>
     <title>${title}</title>
@@ -8,14 +8,17 @@
 
     <script type="text/javascript">
 
-        var testFunction = () => { console.log(this.localName); };
+        function onload() {
+            var tag = document.getElementsByTagName('xis:forEach').item(0);
+            for (var i = 0; i < tag.childNodes.length; i++) {
+                console.log(tag.childNodes.item(i).localName);
+            }
+            for (var i = 0; i < tag.getAttributeNames().length)
 
-
-        function runTest() {
-            var e = document.getElementById('test');
-            e.echo = testFunction;
-
-            e.echo();
+                tag = document.getElementsByTagName('ul').item(0);
+            for (var i = 0; i < tag.childNodes.length; i++) {
+                console.log(tag.childNodes.item(i).localName);
+            }
         }
 
     </script>
@@ -27,33 +30,26 @@
     </style>
 </head>
 
-<body onload="runTest();">
+<body onload="onload()">
 
-    <h4>${title}</h4>
+    <h4>Test</h4>
 
     <div id="test">
-        </dv>
 
-        <div data-key="title"></div>
+
+        <div></div>
         <ul>
-            <li data-repeat="item:items"><strong class="${styleClass(item_index)}">Der
-                    Name ist:
-                    ${item.name}</strong>
-            </li>
-
+            <xis:foreach array="" var="">
+                <li><strong>Item1</strong></li>
+                <li><strong>Item2</strong></li>
+                <li><strong>Item3</strong></li>
+            </xis:foreach>
         </ul>
+        <xis:a href="">Test</xis:a>
 
     </div>
 
 
-
-    <table>
-        <tbody>
-            <tr data-repeat="item:items">
-                <td>${item.name}</td>
-            </tr>
-        </tbody>
-    </table>
 
 </body>
 

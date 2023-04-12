@@ -16,20 +16,19 @@ dependencies {
     implementation project(':xis-context')
     implementation project(':xis-util')
     implementation project(':xis-remote-core')
-    implementation project(':xis-javascript-model')
-    implementation project(':xis-ajax')
-    implementation project(':xis-ajax-entities')
-    compileOnly project(':xis-pages')
-    compileOnly project(':xis-widgets')
     implementation project(':xis-resources')
-
-    compileOnly project(':xis-javascript')
+    implementation project(':xis-server')
+    //compileOnly project(':xis-web-resources')
     implementation group: 'org.reflections', name: 'reflections', version: '0.9.10'
     implementation group: 'org.mockito', name: 'mockito-core', version: '2.1.0'
 
     runtimeOnly('org.graalvm.js:js:22.1.0')
     //testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     //testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+
+    implementation 'org.graalvm.js:js-scriptengine:22.3.1'
+    implementation 'org.graalvm.truffle:truffle-api:22.3.1'
+    implementation 'org.graalvm.js:js:22.1.0'
 }
 
 test {

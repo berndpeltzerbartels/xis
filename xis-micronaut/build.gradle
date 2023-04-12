@@ -26,7 +26,7 @@ dependencies {
     implementation project(':xis-ajax-entities')
 
     implementation project(':xis-resources')
-    implementation project(':xis-javascript')
+    //implementation project(':xis-javascript')
 
     implementation 'org.slf4j:slf4j-log4j12:2.0.3'
 

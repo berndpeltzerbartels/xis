@@ -46,7 +46,7 @@ class HtmlResourceService {
 
     @XISInit
     void initRootPage() {
-        rootPage = resources.getByPath("/public/index.html");
+        rootPage = resources.getByPath("/public/index2.html");
     }
 
 

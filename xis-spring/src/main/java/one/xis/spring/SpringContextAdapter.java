@@ -41,8 +41,8 @@ class SpringContextAdapter implements BeanPostProcessor {
                 .withSingeltons(controllers)
                 .withPackage("one.xis")
                 .build();
-        var frontEndService = context.getSingleton(FrontendService.class);
-        filter.setFrontendService(frontEndService);
-        controller.setFrontendService(frontEndService);
+        var frontendService = context.getSingleton(FrontendService.class);
+        filter.setFrontendService(frontendService);
+        controller.setFrontendService(frontendService);
     }
 }

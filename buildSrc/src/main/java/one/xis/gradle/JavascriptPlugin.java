@@ -24,11 +24,13 @@ public class JavascriptPlugin implements Plugin<Project> {
 
     @Override
     public void apply(Project project) {
+        printfln("apply plugin for project %s", project.getDisplayName());
+        var outFile = getOutFile(project);
         var jsFiles = FileUtils.files(getJsApiSrcRoot(project), "js").stream()
                 .map(this::toJSFile)
+                .filter(jsFile -> !jsFile.getFile().equals(outFile))
                 .collect(Collectors.toSet());
         var sortedJsFiles = JSFileSorter.sort(jsFiles);
-        var outFile = getOutFile(project);
         printfln("js-outfile: '%s'", outFile);
         writeJsToFile(sortedJsFiles, outFile);
         compileAndEval(outFile);
@@ -36,7 +38,7 @@ public class JavascriptPlugin implements Plugin<Project> {
 
 
     private File getOutFile(Project project) {
-        var outDir = new File(project.getProjectDir(), "src/main/resources/js");
+        var outDir = new File(project.getProjectDir(), "src/main/resources");
         if (!outDir.exists()) {
             printfln("creating %s", outDir);
             if (!outDir.mkdirs()) {
@@ -86,7 +88,7 @@ public class JavascriptPlugin implements Plugin<Project> {
     }
 
     private File getJsApiSrcRoot(Project project) {
-        return new File(project.getProjectDir(), "src/main/resources/api");
+        return new File(project.getProjectDir(), "src/main/resources/js");
     }
 
     private void printfln(String pattern, Object... args) {

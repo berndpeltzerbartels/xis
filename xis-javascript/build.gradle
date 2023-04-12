@@ -1,5 +1,3 @@
-import one.xis.gradle.JavascriptPlugin
-
 plugins {
     id 'java'
     id 'javascript-plugin'
@@ -12,7 +10,6 @@ repositories {
     mavenCentral()
 }
 
-apply plugin: JavascriptPlugin
 
 dependencies {
 

@@ -11,11 +11,9 @@ dependencies {
 
     implementation project(':xis-context')
     implementation project(':xis-server')
-    implementation project(':xis-widgets')
     implementation project(':xis-resources')
     implementation project(':xis-remote-core')
     implementation project(':xis-util')
-    implementation project(':xis-template-javascript')
 
     // implementation 'org.springframework.boot:spring-boot-devtools:2.7.6'
 
