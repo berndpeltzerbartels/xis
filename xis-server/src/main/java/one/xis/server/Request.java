@@ -9,7 +9,7 @@ import java.util.Map;
 public class Request {
 
     @JsonDeserialize(using = DataDeserializer.class)
-    private Map<String, Object> data;
+    private Map<String, String> data;
     private String clientId;
     private String userId;
     private String action;

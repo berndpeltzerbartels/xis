@@ -21,6 +21,11 @@ public class TestContextBuilder extends AppContextBuilderImpl implements AppCont
         return this;
     }
 
+    public TestContextBuilder withXisApi() {
+        withPackage("one.xis");
+        return this;
+    }
+
 
 
     /*
