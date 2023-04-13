@@ -8,5 +8,7 @@ public interface Resource {
 
     long getLastModified();
 
+    String getResourcePath();
+
     Resource EMPTY = new EmptyResource();
 }

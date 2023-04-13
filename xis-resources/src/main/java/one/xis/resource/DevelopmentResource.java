@@ -14,11 +14,13 @@ import java.io.File;
 @Slf4j
 class DevelopmentResource implements ReloadableResource {
 
+    private final String path;
     private final File file;
     private String content;
     private long lastModified;
 
-    DevelopmentResource(File file) {
+    DevelopmentResource(String path, File file) {
+        this.path = path;
         this.file = file;
         reload();
     }
@@ -37,6 +39,11 @@ class DevelopmentResource implements ReloadableResource {
         return content;
     }
 
+    @Override
+    public String getResourcePath() {
+        return path;
+    }
+    
     @Override
     public long getLastModified() {
         return lastModified;

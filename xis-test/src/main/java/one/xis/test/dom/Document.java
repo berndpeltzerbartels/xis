@@ -1,20 +1,24 @@
 package one.xis.test.dom;
 
-import lombok.AllArgsConstructor;
 import one.xis.utils.io.IOUtils;
 import one.xis.utils.xml.XmlUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@AllArgsConstructor
 @SuppressWarnings("unused")
 public class Document {
 
     public final Element rootNode;
 
+    public Location location = new Location();
+
     public Document(String rootTagName) {
         this(new Element(rootTagName));
+    }
+
+    public Document(Element rootNode) {
+        this.rootNode = rootNode;
     }
 
     public Element createElement(String name) {
@@ -69,8 +73,8 @@ public class Document {
         var nodeList = src.getChildNodes();
         for (var i = 0; i < nodeList.getLength(); i++) {
             org.w3c.dom.Node node = nodeList.item(i);
-            if (node instanceof Element) {
-                var e = new Element(node.getLocalName());
+            if (node instanceof org.w3c.dom.Element) {
+                var e = new Element(((org.w3c.dom.Element) node).getTagName());
                 dest.appendChild(e);
                 evaluate((org.w3c.dom.Element) node, e);
             } else {

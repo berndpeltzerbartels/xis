@@ -11,14 +11,22 @@ import one.xis.utils.io.IOUtils;
 @Getter
 class StaticResource implements Resource {
 
+    private final String resource;
     private final String content;
     private final long lastModified;
 
     StaticResource(String resource) {
         log.info("loading {}", resource);
+        this.resource = resource;
         content = IOUtils.getResourceAsString(resource);
         lastModified = System.currentTimeMillis();
     }
+
+    @Override
+    public String getResourcePath() {
+        return resource;
+    }
+
 
     @Override
     public int getLength() {

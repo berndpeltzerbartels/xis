@@ -1,15 +1,20 @@
 package one.xis.resource;
 
+import lombok.NonNull;
 import one.xis.context.XISComponent;
+import org.reflections.Reflections;
+import org.reflections.scanners.ResourcesScanner;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 @XISComponent
 public class Resources {
     public synchronized Resource getByPath(String path) {
-        String resourcePath = removeTrailingSlah(path);
+        String resourcePath = removeTrailingSlash(path);
         URL url = ClassLoader.getSystemClassLoader().getResource(resourcePath);
         if (url == null) {
             throw new NoSuchResourceException(path);
@@ -27,11 +32,16 @@ public class Resources {
         }
     }
 
+    public Collection<Resource> getClassPathResources(String prefix, @NonNull String suffix) {
+        return new Reflections(prefix, new ResourcesScanner()).getResources(name -> name.endsWith(suffix)).stream()
+                .map(StaticResource::new).collect(Collectors.toSet());
+    }
+
     public boolean exists(String path) {
         return ClassLoader.getSystemClassLoader().getResource(path) != null;
     }
 
-    private String removeTrailingSlah(String path) {
+    private String removeTrailingSlash(String path) {
         if (path.startsWith("/")) {
             return path.substring(1);
         }

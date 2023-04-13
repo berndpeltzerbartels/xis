@@ -58,6 +58,23 @@ public class Element extends Node {
         }
     }
 
+    public List<Node> getChildList() {
+        return childNodes.list();
+    }
+
+    @Override
+    public String name() {
+        return localName;
+    }
+
+    public List<Element> getChildElementsByName(String name) {
+        return childNodes.getElementsByName(name);
+    }
+
+    public Element getChildElementByName(String name) {
+        return childNodes.getElementByName(name);
+    }
+
     private void addClasses(String classes) {
         cssClasses.addAll(Arrays.stream(classes.split(" "))
                 .filter(StringUtils::isNotEmpty)

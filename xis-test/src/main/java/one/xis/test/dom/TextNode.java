@@ -10,4 +10,9 @@ class TextNode extends Node {
     public Node cloneNode() {
         return new TextNode(nodeValue);
     }
+
+    @Override
+    public String name() {
+        return "TextNode";
+    }
 }

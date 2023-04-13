@@ -1,8 +1,8 @@
 class HttpClient {
 
 
-    constructor(frontendService, testRequestFactory) {
-        this.frontendService = frontendService;
+    constructor(frontendServiceWrapper, testRequestFactory) {
+        this.frontendServiceWrapper = frontendServiceWrapper;
         this.testRequestFactory = testRequestFactory;
     }
 
@@ -35,14 +35,14 @@ class HttpClient {
 
     responseForGet(uri, headers) {
         switch (uri) {
-            case '/xis/config': return this.frontendService.getComponentConfig();
-            case '/xis/page/head': return this.frontendService.getPageHead(headers['uri']);
-            case '/xis/page/body': return this.frontendService.getPageBody(headers['uri']);
-            case '/xis/page/body-attributes': this.frontendService.getBodyAttributes(headers['uri']);
+            case '/xis/config': return this.frontendServiceWrapper.getComponentConfig();
+            case '/xis/page/head': return this.frontendServiceWrapper.getPageHead(headers['uri']);
+            case '/xis/page/body': return this.frontendServiceWrapper.getPageBody(headers['uri']);
+            case '/xis/page/body-attributes': this.frontendServiceWrapper.getBodyAttributes(headers['uri']);
             default:
                 if (uri.startsWith('/xis/widget/html/')) {
                     var id = uri.subtring('/xis/widget/html/'.length);
-                    return this.frontendService.getWidgetHtml(id);
+                    return this.frontendServiceWrapper.getWidgetHtml(id);
                 }
                 throw new Error('unknown uri for http-get: ' + uri);
         }
@@ -51,10 +51,10 @@ class HttpClient {
     responseForPost(uri, payload, headers) {
         var request = this.createRequest(payload, headers);
         switch (uri) {
-            case '/xis/page/model': return this.frontendService.getPageModel(request);
-            case '/xis/widget/model': return this.frontendService.getWidgetModel(request);
-            case '/xis/page/action': return this.frontendService.invokePageActionMethod(request);
-            case '/xis/widget/action': return this.frontendService.invokeWidgetActionMethod(request);
+            case '/xis/page/model': return this.frontendServiceWrapper.getPageModel(request);
+            case '/xis/widget/model': return this.frontendServiceWrapper.getWidgetModel(request);
+            case '/xis/page/action': return this.frontendServiceWrapper.invokePageActionMethod(request);
+            case '/xis/widget/action': return this.frontendServiceWrapper.invokeWidgetActionMethod(request);
             default: throw new Error('unknown uri for http-post: ' + uri);
         }
     }

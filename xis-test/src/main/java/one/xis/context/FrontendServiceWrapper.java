@@ -14,7 +14,7 @@ import java.util.Map;
 @XISComponent
 @RequiredArgsConstructor
 @SuppressWarnings({"unused", "unchecked"})
-public class FrontEndServiceJSAdapter {
+public class FrontendServiceWrapper {
     private final FrontendService frontendService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 

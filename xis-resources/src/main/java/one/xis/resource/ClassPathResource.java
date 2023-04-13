@@ -7,8 +7,10 @@ public class ClassPathResource implements Resource {
 
     @Getter
     private final String content;
+    private final String path;
 
     public ClassPathResource(String path) {
+        this.path = path;
         content = IOUtils.getResourceAsString(path);
     }
 
@@ -20,5 +22,10 @@ public class ClassPathResource implements Resource {
     @Override
     public long getLastModified() {
         return 0;
+    }
+
+    @Override
+    public String getResourcePath() {
+        return path;
     }
 }

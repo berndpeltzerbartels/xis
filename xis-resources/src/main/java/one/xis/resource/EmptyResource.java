@@ -21,4 +21,9 @@ class EmptyResource implements Resource {
         return "";
     }
 
+    @Override
+    public String getResourcePath() {
+        return null;
+    }
+
 }
