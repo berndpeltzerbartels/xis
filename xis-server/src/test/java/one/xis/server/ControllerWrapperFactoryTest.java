@@ -6,6 +6,8 @@ import one.xis.Page;
 import one.xis.Widget;
 import org.junit.jupiter.api.Test;
 
+import static org.mockito.Mockito.mock;
+
 class ControllerWrapperFactoryTest {
 
 
@@ -61,13 +63,13 @@ class ControllerWrapperFactoryTest {
     @Test
     void noExceptionPage() {
         var controller = new TestPageController();
-        new ControllerWrapperFactory().createControllerWrapper("/page.html", controller);
+        new ControllerWrapperFactory(mock(ParameterDeserializer.class)).createControllerWrapper("/page.html", controller);
     }
 
     @Test
     void noExceptionWidget() {
         var controller = new TestWidgetController();
-        new ControllerWrapperFactory().createControllerWrapper("TestWidgetController", controller);
+        new ControllerWrapperFactory(mock(ParameterDeserializer.class)).createControllerWrapper("TestWidgetController", controller);
     }
 
 

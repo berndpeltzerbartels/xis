@@ -2,19 +2,20 @@ package one.xis.test.dom;
 
 
 import lombok.Getter;
+import one.xis.utils.lang.StringUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Getter
+@SuppressWarnings("unused")
 public class Element extends Node {
 
     public final String localName;
     public Node firstChild;
     public final NodeList childNodes = new NodeList();
     private Map<String, String> attributes = new HashMap<>();
+    private Collection<String> cssClasses = new HashSet<>();
 
     public Element(String tagName) {
         this.localName = tagName;
@@ -25,7 +26,6 @@ public class Element extends Node {
             firstChild = node;
         } else {
             firstChild.nextSibling = node;
-            node.previousSibling = firstChild;
         }
         node.parentNode = this;
         updateChildNodes();
@@ -53,6 +53,16 @@ public class Element extends Node {
 
     public void setAttribute(String name, String value) {
         attributes.put(name, value);
+        if (name.equals("class")) {
+            addClasses(value);
+        }
+    }
+
+    private void addClasses(String classes) {
+        cssClasses.addAll(Arrays.stream(classes.split(" "))
+                .filter(StringUtils::isNotEmpty)
+                .collect(Collectors.toSet()));
+
     }
 
     @Override
@@ -73,6 +83,31 @@ public class Element extends Node {
         if (firstChild != null && firstChild instanceof Element) {
             ((Element) firstChild).findByTagName(name, result);
         }
+    }
+
+    void findByClass(String cssClass, List<Element> result) {
+        if (cssClasses.contains(cssClass)) {
+            result.add(this);
+        }
+        if (nextSibling != null && nextSibling instanceof Element) {
+            ((Element) nextSibling).findByClass(cssClass, result);
+        }
+        if (firstChild != null && firstChild instanceof Element) {
+            ((Element) firstChild).findByClass(cssClass, result);
+        }
+    }
+
+    Element getElementById(String id) {
+        if (id.equals(attributes.get(id))) {
+            return this;
+        }
+        if (nextSibling != null && nextSibling instanceof Element) {
+            ((Element) nextSibling).getElementById(id);
+        }
+        if (firstChild != null && firstChild instanceof Element) {
+            ((Element) firstChild).getElementById(id);
+        }
+        return null;
     }
 
     @Override

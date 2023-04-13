@@ -25,9 +25,12 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
 
     testImplementation project(':xis-test')
-    
+
 }
 
 test {
     useJUnitPlatform()
+    afterTest { desc, result ->
+        logger.quiet "${desc.className} - ${desc.name}: ${result.resultType}"
+    }
 }

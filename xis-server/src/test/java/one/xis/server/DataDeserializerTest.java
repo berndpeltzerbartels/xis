@@ -15,7 +15,7 @@ class DataDeserializerTest {
         var json = "{ \"data\": {\"a\":1, \"b\":\"xyz\"}, \"clientId\":\"\",  \"userId\":\"\", \"action\":\"\", \"controllerId\":\"\"}";
         var request = objectMapper.readValue(json, Request.class);
 
-        assertThat(request.getData().get("a")).isEqualTo(1);
+        assertThat(request.getData().get("a")).isEqualTo("1");
         assertThat(request.getData().get("b")).isEqualTo("xyz");
 
     }

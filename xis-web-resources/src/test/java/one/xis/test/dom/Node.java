@@ -3,32 +3,44 @@ package one.xis.test.dom;
 public abstract class Node {
     public Node nextSibling;
     public Element parentNode;
-    Node previousSibling;
 
     void insertPreviousSibling(Node node) {
         node.parentNode = this.parentNode;
+        var previousSibling = getPreviousSibling();
         if (previousSibling != null) {
             previousSibling.nextSibling = node;
         }
-        node.previousSibling = previousSibling;
         node.nextSibling = this;
-        previousSibling = node;
     }
 
     void remove() {
-        if (parentNode.firstChild == this) {
-            parentNode.firstChild = null;
-        }
+        var previousSibling = getPreviousSibling();
         if (previousSibling != null) {
             previousSibling.nextSibling = nextSibling;
         }
-        if (nextSibling != null) {
-            nextSibling.previousSibling = previousSibling;
+        if (parentNode.firstChild == this) {
+            parentNode.firstChild = null;
         }
         parentNode.updateChildNodes();
         parentNode = null;
     }
 
     abstract Node cloneNode();
+
+    Node getPreviousSibling() {
+        var prev = parentNode.firstChild;
+        if (prev == null) {
+            return null;
+        }
+        var node = prev.nextSibling;
+        while (node != null && prev != null) {
+            if (node.equals(this)) {
+                return prev;
+            }
+            node = node.nextSibling;
+            prev = prev.nextSibling;
+        }
+        return null;
+    }
 
 }

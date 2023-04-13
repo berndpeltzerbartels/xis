@@ -49,8 +49,6 @@ class ParameterDeserializerTest {
     }
 
     @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
     static
     class TestPojo {
 

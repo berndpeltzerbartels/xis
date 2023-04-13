@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -21,7 +22,12 @@ class DataDeserializer extends JsonDeserializer<Map<String, String>> {
         var map = new HashMap<String, String>();
         while (names.hasNext()) {
             var name = names.next();
-            map.put(name, mapper.writeValueAsString(node.get(name)));
+            var valueNode = node.get(name);
+            if (valueNode instanceof TextNode) {
+                map.put(name, valueNode.textValue()); // otherwise, redundant quotation marks
+            } else {
+                map.put(name, mapper.writeValueAsString(valueNode));
+            }
         }
         return map;
     }

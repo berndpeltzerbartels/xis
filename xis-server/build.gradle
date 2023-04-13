@@ -27,8 +27,12 @@ dependencies {
 
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '2.1.0'
     testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.16.1'
+
 }
 
 test {
     useJUnitPlatform()
+    afterTest { desc, result ->
+        logger.quiet "${desc.className} - ${desc.name}: ${result.resultType}"
+    }
 }

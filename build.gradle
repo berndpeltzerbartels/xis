@@ -15,6 +15,7 @@ dependencies {
     implementation 'org.projectlombok:lombok:1.18.12'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.3'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.3'
+
 }
 
 
@@ -23,4 +24,8 @@ test {
     testLogging {
         events "passed", "skipped", "failed"
     }
+    afterTest { desc, result ->
+        logger.quiet "${desc.className} - ${desc.name}: ${result.resultType}"
+    }
 }
+

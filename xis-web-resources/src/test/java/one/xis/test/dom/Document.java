@@ -1,11 +1,21 @@
 package one.xis.test.dom;
 
 import lombok.AllArgsConstructor;
+import one.xis.utils.io.IOUtils;
+import one.xis.utils.xml.XmlUtil;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @AllArgsConstructor
+@SuppressWarnings("unused")
 public class Document {
 
-    public Element rootNode;
+    public final Element rootNode;
+
+    public Document(String rootTagName) {
+        this(new Element(rootTagName));
+    }
 
     public Element createElement(String name) {
         return new Element(name);
@@ -21,6 +31,16 @@ public class Document {
         return nodeList;
     }
 
+    public Element getElementById(String id) {
+        return getElementById(id);
+    }
+
+    public List<Element> getElementsByClass(String cssClass) {
+        var list = new ArrayList<Element>();
+        rootNode.findByClass(cssClass, list);
+        return list;
+    }
+
     public Element getElementByTagName(String name) {
         var list = getElementsByTagName(name);
         switch (list.length) {
@@ -33,5 +53,29 @@ public class Document {
         }
     }
 
+    public static Document fromResource(String classPathResource) {
+        return of(IOUtils.getResourceAsString(classPathResource));
+    }
 
+    public static Document of(String html) {
+        var w3cDoc = XmlUtil.loadDocument(html);
+        var rootName = w3cDoc.getDocumentElement().getTagName();
+        var document = new Document(rootName);
+        evaluate(w3cDoc.getDocumentElement(), document.rootNode);
+        return document;
+    }
+
+    public static void evaluate(org.w3c.dom.Element src, Element dest) {
+        var nodeList = src.getChildNodes();
+        for (var i = 0; i < nodeList.getLength(); i++) {
+            org.w3c.dom.Node node = nodeList.item(i);
+            if (node instanceof Element) {
+                var e = new Element(node.getLocalName());
+                dest.appendChild(e);
+                evaluate((org.w3c.dom.Element) node, e);
+            } else {
+                dest.appendChild(new TextNode(node.getNodeValue()));
+            }
+        }
+    }
 }

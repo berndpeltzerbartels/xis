@@ -42,12 +42,13 @@ class ClientTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     void loadPageHead() throws ScriptException {
         var compiledScript = JSUtil.compile(script + "client.loadPageHead('x.html');", Map.of("httpClient", httpClient));
         compiledScript.eval();
 
         var captor = ArgumentCaptor.forClass(Map.class);
-        verify(httpClient, times(1)).get(eq("/xis/page/head"), (Map<String, String>) captor.capture());
+        verify(httpClient, times(1)).get(eq("/xis/page/head"), captor.capture());
 
         assertThat(captor.getValue().get("uri")).isEqualTo("x.html");
     }
