@@ -18,6 +18,10 @@ class IndexTest {
     @Test
     void showIndex() {
         testContext.openPage("/index.html");
+
+        var document = testContext.getDocument();
+
+
     }
 
 }

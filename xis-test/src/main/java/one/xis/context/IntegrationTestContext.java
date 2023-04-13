@@ -1,6 +1,7 @@
 package one.xis.context;
 
 
+import lombok.Getter;
 import one.xis.resource.Resource;
 import one.xis.resource.Resources;
 import one.xis.server.FrontendService;
@@ -15,9 +16,12 @@ import java.util.stream.Collectors;
 
 public class IntegrationTestContext {
 
-    private final AppContext internalContext;
+    @Getter
     private final Document document;
+
+    @Getter
     private final LocalStorage localStorage;
+    private final AppContext internalContext;
     private final Resources resources;
     private final CompiledScript compiledScript;
     private final FrontendService frontendService;
@@ -65,12 +69,10 @@ public class IntegrationTestContext {
 
 
     private String getApiJavascript() {
-        var apiJS = resources.getClassPathResources("js", ".js").stream()
-                .filter(resource -> !resource.getResourcePath().endsWith("HttpClient.js"))
+        return resources.getClassPathResources("js", ".js").stream()
+                .filter(resource -> !resource.getResourcePath().endsWith("HttpClient.js")) // we have a mock instead
                 .map(Resource::getContent)
                 .collect(Collectors.joining("\n"));
-        apiJS += resources.getByPath("/js/HttpClientMock.js");
-        return apiJS;
     }
 
     public static class Builder {
