@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 class IndexTest {
 
-    IntegrationTestContext testContext;
+    private IntegrationTestContext testContext;
 
     @BeforeEach
     void createContext() {

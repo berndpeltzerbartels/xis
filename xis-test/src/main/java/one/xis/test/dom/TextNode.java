@@ -1,9 +1,12 @@
 package one.xis.test.dom;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 @AllArgsConstructor
 class TextNode extends Node {
+
+    @Getter
     public String nodeValue;
 
     @Override

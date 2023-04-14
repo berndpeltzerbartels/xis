@@ -26,6 +26,7 @@ public class IntegrationTestContext {
     private final CompiledScript compiledScript;
     private final FrontendService frontendService;
 
+
     public static Builder builder() {
         return new Builder();
     }
@@ -39,7 +40,7 @@ public class IntegrationTestContext {
                 .build();
         frontendService = internalContext.getSingleton(FrontendService.class);
         document = Document.of(frontendService.getRootPageHtml());
-        compiledScript = compiledScript(getApiJavascript());
+        compiledScript = compiledScript(getApiJavascript() + "\n" + START_SCRIPT);
     }
 
     public void openPage(String uri, Map<String, Object> parameters) {
@@ -57,7 +58,7 @@ public class IntegrationTestContext {
 
     private CompiledScript compiledScript(String javascript) {
         var bindings = new HashMap<String, Object>();
-        bindings.put("frontendServiceWrapper", new FrontendServiceWrapper(frontendService));
+        bindings.put("controllerBridge", new ControllerBridge(frontendService));
         bindings.put("localStorage", localStorage);
         bindings.put("document", document);
         try {
@@ -69,7 +70,7 @@ public class IntegrationTestContext {
 
 
     private String getApiJavascript() {
-        return resources.getClassPathResources("js", ".js").stream()
+        return resources.getClassPathResources("js/", ".js").stream()
                 .filter(resource -> !resource.getResourcePath().endsWith("HttpClient.js")) // we have a mock instead
                 .map(Resource::getContent)
                 .collect(Collectors.joining("\n"));
@@ -92,6 +93,10 @@ public class IntegrationTestContext {
             return new IntegrationTestContext(singeltons.stream().toArray(Object[]::new));
         }
     }
+
+    private static final String START_SCRIPT = "var httpClient = new HttpClientMock(controllerBridge);\n" +
+            "var starter = new Starter(httpClient);\n" +
+            "starter.doStart();";
 
 
 }

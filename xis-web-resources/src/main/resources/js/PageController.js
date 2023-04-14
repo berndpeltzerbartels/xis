@@ -65,13 +65,13 @@ class PageController {
         }
     }
 
-    bindBodyAttributes = function (attributes) {
+    bindBodyAttributes(attributes) {
         for (var name of Object.keys(attributes)) {
             this.setAttribute(name, attributes[name]);
         }
     }
 
-    clearBodyAttributes = function () {
+    clearBodyAttributes() {
         for (var name of this.body.getAttributeNames()) {
             this.body.removeAttribute(name);
         }

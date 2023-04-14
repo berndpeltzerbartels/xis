@@ -90,6 +90,22 @@ public class Element extends Node {
         return clone;
     }
 
+    public Element childElement(int index) {
+        var elementList = childNodes.stream().filter(Element.class::isInstance).map(Element.class::cast).collect(Collectors.toList());
+        if (index >= elementList.size()) {
+            return null;
+        }
+        return elementList.get(index);
+    }
+
+    public String getTextContent() {
+        return childNodes.stream()
+                .filter(TextNode.class::isInstance)
+                .map(TextNode.class::cast)
+                .map(TextNode::getNodeValue)
+                .collect(Collectors.joining()).trim();
+    }
+
     void findByTagName(String name, NodeList result) {
         if (localName.equals(name)) {
             result.addNode(this);

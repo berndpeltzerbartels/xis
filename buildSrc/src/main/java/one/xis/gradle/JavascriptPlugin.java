@@ -8,6 +8,8 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import java.io.*;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 
@@ -15,29 +17,53 @@ import java.util.stream.Collectors;
  * Writes all javascript-sources into a single file and compiles the result
  */
 public class JavascriptPlugin implements Plugin<Project> {
-
-    private final Compilable compiler;
-
-    public JavascriptPlugin() {
-        this.compiler = getCompiler();
-    }
+    private static final String API_OUT_FILE_NAME = "xis.js";
+    private static final String API_TEST_OUT_FILE_NAME = "xis-test.js";
 
     @Override
     public void apply(Project project) {
         printfln("apply plugin for project %s", project.getDisplayName());
-        var outFile = getOutFile(project);
         var jsFiles = FileUtils.files(getJsApiSrcRoot(project), "js").stream()
-                .map(this::toJSFile)
-                .filter(jsFile -> !jsFile.getFile().equals(outFile))
-                .collect(Collectors.toSet());
+                .filter(file -> !file.getName().equals(API_OUT_FILE_NAME))
+                .filter(file -> !file.getName().equals(API_TEST_OUT_FILE_NAME))
+                .map(this::toJSFile).collect(Collectors.toUnmodifiableSet());
+        writeApiFile(jsFiles, project);
+        writeApiTestFile(jsFiles, project);
+    }
+
+    private void writeApiFile(Set<JSFile> jsFiles, Project project) {
+        var files = new HashSet<>(jsFiles);
+        files.add(toJSFile(getHttpClientFile(project)));
+        var outFile = getOutFile(project);
+        outFile.delete();
+        writeToOutFile(files, outFile);
+    }
+
+    private void writeApiTestFile(Set<JSFile> jsFiles, Project project) {
+        var files = new HashSet<>(jsFiles);
+        files.add(toJSFile(getHttpClientMockFile(project)));
+        var outFile = getTestOutFile(project);
+        outFile.delete();
+        writeToOutFile(files, outFile);
+    }
+
+    private void writeToOutFile(Set<JSFile> jsFiles, File outFile) {
         var sortedJsFiles = JSFileSorter.sort(jsFiles);
         printfln("js-outfile: '%s'", outFile);
         writeJsToFile(sortedJsFiles, outFile);
         compileAndEval(outFile);
+
     }
 
-
     private File getOutFile(Project project) {
+        return new File(getOutDir(project), "xis.js");
+    }
+
+    private File getTestOutFile(Project project) {
+        return new File(getOutDir(project), "xis-test.js");
+    }
+
+    private File getOutDir(Project project) {
         var outDir = new File(project.getProjectDir(), "src/main/resources");
         if (!outDir.exists()) {
             printfln("creating %s", outDir);
@@ -50,7 +76,7 @@ public class JavascriptPlugin implements Plugin<Project> {
         if (!outDir.isDirectory()) {
             throw new RuntimeException("not a directory: " + outDir);
         }
-        return new File(outDir, "xis.js");
+        return outDir;
     }
 
     private JSFile toJSFile(File file) {
@@ -65,9 +91,7 @@ public class JavascriptPlugin implements Plugin<Project> {
             jsSrcFiles.forEach(file -> {
                 printfln("add script content: %s", file.getFile().getName());
                 writer.println(file.getContent());
-
             });
-
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -75,10 +99,10 @@ public class JavascriptPlugin implements Plugin<Project> {
 
     private void compileAndEval(File jsFile) {
         try {
-            var script = compiler.compile(FileUtils.getContent(jsFile, "utf-8"));
+            var script = getCompiler().compile(FileUtils.getContent(jsFile, "utf-8"));
             script.eval();
         } catch (ScriptException e) {
-            throw new RuntimeException("Compilation failed for " + jsFile.getAbsolutePath() + ": " + e.getMessage());
+            throw new RuntimeException("Compilation failed for " + jsFile.getAbsolutePath() + ": " + e.getMessage() + " at line " + e.getLineNumber() + ", column " + e.getColumnNumber());
         }
 
     }
@@ -89,6 +113,14 @@ public class JavascriptPlugin implements Plugin<Project> {
 
     private File getJsApiSrcRoot(Project project) {
         return new File(project.getProjectDir(), "src/main/resources/js");
+    }
+
+    private File getHttpClientFile(Project project) {
+        return new File(project.getProjectDir(), "src/main/resources/HttpClient.js");
+    }
+
+    private File getHttpClientMockFile(Project project) {
+        return new File(project.getProjectDir(), "src/main/resources/HttpClientMock.js");
     }
 
     private void printfln(String pattern, Object... args) {

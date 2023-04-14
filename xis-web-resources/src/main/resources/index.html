@@ -1,10 +1,17 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <title data-ignore="true"></title>
-</head>
+    <script src="xis.js" data-ignore="true"></script>
+    <script data-ignore="true">
 
-<body></body>
-<script src="/xis.js" data-ignore="true"></script>
+        function initialize() {
+            var httpClient = new HttpClient();
+            var starter = new Starter(httpClient);
+            starter.doStart();
+        }
+
+    </script>
+</head>
+<body onload="initialize()"></body>
 </html>

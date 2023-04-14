@@ -2,9 +2,11 @@
 class Pages {
     /**
     * @param {Client} client
+    * @param {Initializer} initializer
     */
-    constructor(client) {
+    constructor(client, initializer) {
         this.client = client;
+        this.initializer = initializer;
         this.pages = {};
     }
 
@@ -49,7 +51,7 @@ class Pages {
             var holder = document.createElement('div');
             holder.innerHTML = content;
             _this.pages[pageId].headChildArray = nodeListToArray(holder.childNodes);
-            initializer.initializeRootElement(holder);
+            _this.initializer.initializeRootElement(holder);
             return pageId;
         });
     }
@@ -65,7 +67,7 @@ class Pages {
             var holder = document.createElement('div');
             holder.innerHTML = content;
             _this.pages[pageId].bodyChildArray = nodeListToArray(holder.childNodes);
-            initializer.initializeRootElement(holder);
+            _this.initializer.initializeRootElement(holder);
             return pageId;
         });
     }
