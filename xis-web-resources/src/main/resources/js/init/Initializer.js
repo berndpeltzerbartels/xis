@@ -10,6 +10,7 @@ class Initializer {
 
 
     initialize(node) {
+        console.log('initialize:' + node);
         if (isElement(node) && !node.getAttribute('ignore')) {
             this.initializeElement(node);
         } else {
@@ -18,14 +19,17 @@ class Initializer {
     }
 
     initializeElement(element) {
+        console.log('initializeElement:' + element);
         if (this.isFrameworkElement(element)) {
             this.initializeFrameworkElement(element);
         } else {
             this.initializeHtmlElement(element);
         }
+        this.initializeChildNodes(element);
     }
 
     initializeHtmlElement(element) {
+        console.log('initializeHtmlElement:' + element);
         if (element.getAttribute('repeat')) {
             this.initializeRepeat(element);
         }
@@ -72,6 +76,7 @@ class Initializer {
     }
 
     initializeFrameworkElement(element) {
+        console.log('initializeFrameworkElement:' + element);
         switch (element.localName) {
             case 'xis:foreach':
             case 'xis:forEach':
@@ -85,11 +90,19 @@ class Initializer {
         }
     }
 
+    initializeChildNodes(element) {
+        console.log('initializeChildNodes:' + element);
+        for (let index = 0; index < element.childNodes.length; index++) {
+            var child = element.childNodes.item(index);
+            this.initialize(child);
+        }
+    }
     /**
     * @private
     * @param {Element} element 
     */
     initializeRepeat(element) {
+        console.log('initializeRepeat:' + element);
         var arr = doSplit(element.getAttribute('repeat'), ':');
         var foreach = document.createElement('xis:foreach');
         foreach.setAttribute('var', arr[0]);
@@ -112,12 +125,10 @@ class Initializer {
         this.initializeFrameworkElement(foreach);
     }
 
-    isFrameworElement(element) {
+
+
+    isFrameworkElement(element) {
         return element.localName.startsWith('xis:');
-    }
-
-    insertForeachAbove(element) {
-
     }
 
 }

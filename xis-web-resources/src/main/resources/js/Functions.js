@@ -3,7 +3,9 @@
  * @returns {boolean}
  */
 function isElement(node) {
-    return node instanceof HTMLElement;
+    var rv =  node.childNodes !== null && node.childNodes !== undefined;
+    console.log('isElement' + node + ' => '+ rv);
+    return rv;
 }
 
 /**
@@ -66,4 +68,21 @@ function isWhitespace(c) {
 
 function cloneArr(arr) {
     return arr.map(v => v);
+}
+
+
+function doSplit(string, separatorChar) {
+    var rv = [];
+    var buffer = '';
+    for (var i = 0; i < string.length; i++) {
+        var c = string.charAt(i);
+        if (c === separatorChar) {
+            rv.push(buffer);
+            buffer = '';
+        } else {
+            buffer += c;
+        }
+    }
+    rv.push(buffer);
+    return rv;
 }

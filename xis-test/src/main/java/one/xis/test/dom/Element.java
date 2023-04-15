@@ -5,6 +5,7 @@ import lombok.Getter;
 import one.xis.utils.lang.StringUtils;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @Getter
@@ -13,6 +14,8 @@ public class Element extends Node {
 
     public final String localName;
     public Node firstChild;
+    public Consumer<Object> _refresh; // We add this method to every element during initialization
+    public Object _handler;
     public final NodeList childNodes = new NodeList();
     private Map<String, String> attributes = new HashMap<>();
     private Collection<String> cssClasses = new HashSet<>();

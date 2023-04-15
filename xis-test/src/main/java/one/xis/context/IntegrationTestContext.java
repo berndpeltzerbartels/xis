@@ -12,6 +12,7 @@ import javax.script.CompiledScript;
 import javax.script.ScriptException;
 import java.util.*;
 
+@SuppressWarnings("unused")
 public class IntegrationTestContext {
 
     @Getter
@@ -19,8 +20,6 @@ public class IntegrationTestContext {
 
     @Getter
     private final LocalStorage localStorage;
-    private final AppContext internalContext;
-    private final Resources resources;
     private final CompiledScript compiledScript;
     private final FrontendService frontendService;
 
@@ -31,12 +30,8 @@ public class IntegrationTestContext {
 
     public IntegrationTestContext(Object... controllers) {
         this.localStorage = new LocalStorage();
-        this.resources = new Resources();
-        internalContext = AppContextBuilder.createInstance()
-                .withPackage("one.xis")
-                .withSingeltons(controllers)
-                .build();
-        frontendService = internalContext.getSingleton(FrontendService.class);
+        var resources = new Resources();
+        frontendService = internalContext(controllers).getSingleton(FrontendService.class);
         document = Document.of(frontendService.getRootPageHtml());
         compiledScript = compiledScript(resources.getByPath("xis-test.js").getContent() + "\n" + START_SCRIPT);
     }
@@ -66,6 +61,12 @@ public class IntegrationTestContext {
         }
     }
 
+    private AppContext internalContext(Object... controllers) {
+        return AppContextBuilder.createInstance()
+                .withPackage("one.xis")
+                .withSingeltons(controllers)
+                .build();
+    }
 
     public static class Builder {
 

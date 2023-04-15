@@ -20,7 +20,7 @@ class TagHandler {
     findParentHtmlElement() {
         var element = this;
         while (element) {
-            if (isFrameworkTag(element)) {
+            if (this.isFrameworkElement(element)) {
                 element = element.parentNode;
             } else {
                 break;
