@@ -92,7 +92,7 @@ class Initializer {
 
     initializeChildNodes(element) {
         console.log('initializeChildNodes:' + element);
-        for (let index = 0; index < element.childNodes.length; index++) {
+        for (var index = 0; index < element.childNodes.length; index++) {
             var child = element.childNodes.item(index);
             this.initialize(child);
         }
@@ -117,11 +117,11 @@ class Initializer {
     * @param {Element} element 
     */
     initializeFor(element) {
-        var arr = doSplit(element.getAttribute('repeat'), ':');
+        var arr = doSplit(element.getAttribute('for'), ':');
         var foreach = document.createElement('xis:foreach');
         foreach.setAttribute('var', arr[0]);
         foreach.setAttribute('array', arr[1]);
-        this.domAccessor.insertParent(element, foreach);
+        this.domAccessor.insertChild(element, foreach);
         this.initializeFrameworkElement(foreach);
     }
 

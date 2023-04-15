@@ -17,8 +17,8 @@ public class Element extends Node {
     public Consumer<Object> _refresh; // We add this method to every element during initialization
     public Object _handler;
     public final NodeList childNodes = new NodeList();
-    private Map<String, String> attributes = new HashMap<>();
-    private Collection<String> cssClasses = new HashSet<>();
+    private final Map<String, String> attributes = new HashMap<>();
+    private final Collection<String> cssClasses = new HashSet<>();
 
     public Element(String tagName) {
         this.localName = tagName;

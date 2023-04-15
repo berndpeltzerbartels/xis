@@ -80,9 +80,11 @@ public class Document {
         for (var i = 0; i < nodeList.getLength(); i++) {
             org.w3c.dom.Node node = nodeList.item(i);
             if (node instanceof org.w3c.dom.Element) {
-                var e = new Element(((org.w3c.dom.Element) node).getTagName());
+                var w3cElement = (org.w3c.dom.Element) node;
+                var e = new Element(w3cElement.getTagName());
                 dest.appendChild(e);
-                copyAttributes((org.w3c.dom.Element) node, e);
+                copyAttributes(w3cElement, e);
+                evaluate(w3cElement, e);
             } else if (StringUtils.isNotEmpty(node.getNodeValue())) {
                 dest.appendChild(new TextNode(node.getNodeValue()));
             }

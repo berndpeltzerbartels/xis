@@ -39,7 +39,7 @@ class DocumentTest {
     }
 
     @Test
-    @DisplayName("Create document from source")
+    @DisplayName("Create document from index.html")
     void of2() {
         var html = new Resources().getByPath("/index.html").getContent();
         var document = Document.of(html);
@@ -51,8 +51,19 @@ class DocumentTest {
         assertThat(head.getChildElementNames()).containsExactly("title", "script", "script");
 
         var body = document.getElementByTagName("body");
-        assertThat(body.getChildList().size()).isEqualTo(2);
+        assertThat(body.getChildList()).isEmpty();
         assertThat(body.getAttribute("onload")).isEqualTo("initialize()");
+    }
+
+    @Test
+    @DisplayName("Create document from simple source")
+    void of3() {
+        var document = Document.of("<a><b/><c><d/></c></a>");
+
+        assertThat(document.getElementByTagName("a")).isNotNull();
+        assertThat(document.getElementByTagName("b")).isNotNull();
+        assertThat(document.getElementByTagName("c")).isNotNull();
+        assertThat(document.getElementByTagName("d")).isNotNull();
     }
 
     @Test

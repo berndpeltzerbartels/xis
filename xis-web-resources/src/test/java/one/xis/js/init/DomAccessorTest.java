@@ -111,7 +111,7 @@ class DomAccessorTest {
         JSUtil.compile(js, Map.of("document", document)).eval();
 
         assertThat(document.rootNode.getChildElementNames()).containsExactly("x");
-        assertThat(document.getElementByTagName("x").getChildElementNames()).containsExactly("c", "c");
+        assertThat(document.getElementByTagName("x").getChildElementNames()).containsExactly("b", "c");
 
     }
 

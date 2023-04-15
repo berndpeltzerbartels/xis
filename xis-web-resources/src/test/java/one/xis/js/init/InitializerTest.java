@@ -31,8 +31,44 @@ class InitializerTest {
     }
 
     @Test
+    void refreshMethodAdded() throws ScriptException {
+        var document = Document.of("<a><b/><c><d/></c></a>");
+
+        var script = javascriptDefinitions;
+        script += "var initializer = new Initializer(new DomAccessor());";
+        script += "initializer.initialize(document.rootNode);";
+
+        var compiledScript = JSUtil.compile(script, Map.of("document", document, "console", new Console()));
+        compiledScript.eval();
+
+        assertThat(document.getElementByTagName("a")._refresh).isNotNull();
+        assertThat(document.getElementByTagName("b")._refresh).isNotNull();
+        assertThat(document.getElementByTagName("c")._refresh).isNotNull();
+        assertThat(document.getElementByTagName("d")._refresh).isNotNull();
+    }
+
+    @Test
     void repeatAttribute() throws ScriptException {
         var document = Document.of("<div><span repeat=\"item:items\"></span></div>");
+
+        var script = javascriptDefinitions;
+        script += "var initializer = new Initializer(new DomAccessor());";
+        script += "initializer.initialize(document.rootNode);";
+
+        var compiledScript = JSUtil.compile(script, Map.of("document", document, "console", new Console()));
+        compiledScript.eval();
+
+        assertThat(document.rootNode.getChildElementNames()).containsExactly("xis:foreach");
+
+        var foreach = document.getElementByTagName("xis:foreach");
+        assertThat(foreach.getChildElementNames()).containsExactly("span");
+        assertThat(foreach.getAttribute("array")).isEqualTo("items");
+        assertThat(foreach.getAttribute("var")).isEqualTo("item");
+    }
+
+    @Test
+    void forAttribute() throws ScriptException {
+        var document = Document.of("<div for=\"item:items\"><span></span></div>");
 
         var script = javascriptDefinitions;
         script += "var initializer = new Initializer(new DomAccessor());";
@@ -43,9 +79,11 @@ class InitializerTest {
         compiledScript.eval();
 
         assertThat(document.rootNode.getChildElementNames()).containsExactly("xis:foreach");
-        assertThat(document.getElementByTagName("xis:foreach").getChildElementNames()).containsExactly("span");
-        assertThat(document.getElementByTagName("xis:foreach").getAttribute("array")).isEqualTo("items");
-        assertThat(document.getElementByTagName("xis:foreach").getAttribute("var")).isEqualTo("item");
+
+        var foreach = document.getElementByTagName("xis:foreach");
+        assertThat(foreach.getChildElementNames()).containsExactly("span");
+        assertThat(foreach.getAttribute("array")).isEqualTo("items");
+        assertThat(foreach.getAttribute("var")).isEqualTo("item");
     }
 
 }
