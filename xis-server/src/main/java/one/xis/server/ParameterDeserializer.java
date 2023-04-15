@@ -124,6 +124,7 @@ class ParameterDeserializer {
 
     }
 
+    @SuppressWarnings("deprecation")
     private Object readNumber(JsonReader reader, Class<?> type) throws IOException {
         if (type.equals(Integer.TYPE) || type.equals(Integer.class)) {
             return reader.nextInt();

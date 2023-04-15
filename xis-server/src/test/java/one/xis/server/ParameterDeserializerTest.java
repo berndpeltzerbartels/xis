@@ -25,6 +25,7 @@ class ParameterDeserializerTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     void deserialzeArray() throws IOException, NoSuchMethodException {
         var deserializer = new ParameterDeserializer();
 
@@ -36,6 +37,7 @@ class ParameterDeserializerTest {
 
 
     @Test
+    @SuppressWarnings("unchecked")
     void typeParametersInTypeParameters() throws NoSuchMethodException, IOException {
         var deserializer = new ParameterDeserializer();
 
