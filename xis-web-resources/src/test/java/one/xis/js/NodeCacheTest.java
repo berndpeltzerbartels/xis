@@ -30,9 +30,9 @@ class NodeCacheTest {
         var list1 = (List<Element>) result.get(1);
         var list2 = (List<Element>) result.get(2);
 
-        assertThat(Arrays.stream(list0).map(Node::name)).containsExactly("a", "b");
-        assertThat(list1.stream().map(Node::name)).containsExactly("a", "b");
-        assertThat(list2.stream().map(Node::name)).containsExactly("a", "b");
+        assertThat(Arrays.stream(list0).map(Node::getName)).containsExactly("a", "b");
+        assertThat(list1.stream().map(Node::getName)).containsExactly("a", "b");
+        assertThat(list2.stream().map(Node::getName)).containsExactly("a", "b");
 
 
     }

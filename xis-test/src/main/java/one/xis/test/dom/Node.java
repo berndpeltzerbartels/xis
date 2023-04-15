@@ -27,7 +27,14 @@ public abstract class Node {
 
     public abstract Node cloneNode();
 
-    public abstract String name();
+    public abstract String getName();
+
+    public Node getLastSibling() {
+        if (nextSibling == null) {
+            return this;
+        }
+        return nextSibling.getLastSibling();
+    }
 
     Node getPreviousSibling() {
         var prev = parentNode.firstChild;

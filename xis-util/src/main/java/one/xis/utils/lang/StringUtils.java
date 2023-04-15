@@ -16,7 +16,7 @@ public class StringUtils {
     private static final String ESCAPE = Character.toString('\\');
 
     public boolean isEmpty(CharSequence s) {
-        return s == null || s.length() == 0;
+        return s == null || s.toString().trim().length() == 0;
     }
 
     public boolean isNotEmpty(CharSequence s) {

@@ -25,7 +25,7 @@ public class Element extends Node {
         if (firstChild == null) {
             firstChild = node;
         } else {
-            firstChild.nextSibling = node;
+            firstChild.getLastSibling().nextSibling = node;
         }
         node.parentNode = this;
         updateChildNodes();
@@ -62,8 +62,9 @@ public class Element extends Node {
         return childNodes.list();
     }
 
+
     @Override
-    public String name() {
+    public String getName() {
         return localName;
     }
 
@@ -98,11 +99,20 @@ public class Element extends Node {
         return elementList.get(index);
     }
 
+    public List<String> getChildElementNames() {
+        return childNodes.stream()
+                .filter(Element.class::isInstance)
+                .map(Element.class::cast)
+                .map(Element::getLocalName)
+                .collect(Collectors.toList());
+    }
+
     public String getTextContent() {
         return childNodes.stream()
                 .filter(TextNode.class::isInstance)
                 .map(TextNode.class::cast)
                 .map(TextNode::getNodeValue)
+                .filter(Objects::nonNull)
                 .collect(Collectors.joining()).trim();
     }
 

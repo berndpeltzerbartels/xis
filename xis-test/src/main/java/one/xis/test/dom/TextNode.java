@@ -15,7 +15,7 @@ class TextNode extends Node {
     }
 
     @Override
-    public String name() {
+    public String getName() {
         return "TextNode";
     }
 }

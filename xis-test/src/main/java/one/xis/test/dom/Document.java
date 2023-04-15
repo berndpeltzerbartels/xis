@@ -1,11 +1,16 @@
 package one.xis.test.dom;
 
 import one.xis.utils.io.IOUtils;
+import one.xis.utils.lang.StringUtils;
 import one.xis.utils.xml.XmlUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Document used as mock for html-documents. Sorrily {@link org.w3c.dom.Element} is using
+ * getters instead of fields. So it can not be used for html-testing.
+ */
 @SuppressWarnings("unused")
 public class Document {
 
@@ -65,6 +70,7 @@ public class Document {
         var w3cDoc = XmlUtil.loadDocument(html);
         var rootName = w3cDoc.getDocumentElement().getTagName();
         var document = new Document(rootName);
+        copyAttributes(w3cDoc.getDocumentElement(), document.rootNode);
         evaluate(w3cDoc.getDocumentElement(), document.rootNode);
         return document;
     }
@@ -76,10 +82,17 @@ public class Document {
             if (node instanceof org.w3c.dom.Element) {
                 var e = new Element(((org.w3c.dom.Element) node).getTagName());
                 dest.appendChild(e);
-                evaluate((org.w3c.dom.Element) node, e);
-            } else {
+                copyAttributes((org.w3c.dom.Element) node, e);
+            } else if (StringUtils.isNotEmpty(node.getNodeValue())) {
                 dest.appendChild(new TextNode(node.getNodeValue()));
             }
+        }
+    }
+
+    private static void copyAttributes(org.w3c.dom.Element src, Element dest) {
+        for (int i = 0; i < src.getAttributes().getLength(); i++) {
+            var attribute = src.getAttributes().item(i);
+            dest.setAttribute(attribute.getNodeName(), attribute.getNodeValue());
         }
     }
 }
