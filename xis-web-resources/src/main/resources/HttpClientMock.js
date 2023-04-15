@@ -1,4 +1,4 @@
-class HttpClient {
+class HttpClientMock {
 
 
     constructor(controllerBridge) {

@@ -17,7 +17,6 @@ class Starter {
 
     doStart() {
         var _this = this;
-        new RootPageInitializer().initialize();
         this.loadConfig()
             .then(config => _this.widgetService.loadWidgets(config))
             .then(config => _this.pages.loadPages(config))

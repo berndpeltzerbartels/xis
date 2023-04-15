@@ -7,7 +7,22 @@ function isElement(node) {
 }
 
 /**
- * Maps a NodeList to an array.
+ * Finds a unique element
+ * 
+ * @param {string} name 
+ * @returns 
+ */
+function getElementByTagName(name) {
+    var list = document.getElementsByTagName(name);
+    switch (list.length) {
+        case 0: return null;
+        case 1: return list.item(0);
+        default: throw new Error('too many results for ' + name);
+    }
+}
+
+/**
+ * Maps a NodeList into an array.
  *
  * @public
  * @param {NodeList} nodeList

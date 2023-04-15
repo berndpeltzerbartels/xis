@@ -27,7 +27,7 @@ class ClientTest {
         httpClient = Mockito.mock(HttpClient.class);
         promise = Mockito.mock(Promise.class);
         when(httpClient.get(anyString(), any())).thenReturn(promise);
-        var clientJs = IOUtils.getResourceAsString("js/Client.js");
+        var clientJs = IOUtils.getResourceAsString("js/connect/Client.js");
         var instantiation = "var client = new Client(httpClient);";
         script = clientJs + instantiation;
     }
@@ -98,4 +98,10 @@ class ClientTest {
     }
 
 
+    interface HttpClient {
+
+        Promise post(String uri, Object payload, Map<String, String> headers);
+
+        Promise get(String path, Map<String, String> headers);
+    }
 }

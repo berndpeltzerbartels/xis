@@ -25,9 +25,9 @@ public abstract class Node {
         parentNode = null;
     }
 
-    abstract Node cloneNode();
+    public abstract Node cloneNode();
 
-    abstract String name();
+    public abstract String name();
 
     Node getPreviousSibling() {
         var prev = parentNode.firstChild;

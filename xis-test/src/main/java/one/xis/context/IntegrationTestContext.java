@@ -2,7 +2,6 @@ package one.xis.context;
 
 
 import lombok.Getter;
-import one.xis.resource.Resource;
 import one.xis.resource.Resources;
 import one.xis.server.FrontendService;
 import one.xis.test.dom.Document;
@@ -12,7 +11,6 @@ import one.xis.test.js.LocalStorage;
 import javax.script.CompiledScript;
 import javax.script.ScriptException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class IntegrationTestContext {
 
@@ -40,7 +38,7 @@ public class IntegrationTestContext {
                 .build();
         frontendService = internalContext.getSingleton(FrontendService.class);
         document = Document.of(frontendService.getRootPageHtml());
-        compiledScript = compiledScript(getApiJavascript() + "\n" + START_SCRIPT);
+        compiledScript = compiledScript(resources.getByPath("xis-test.js").getContent() + "\n" + START_SCRIPT);
     }
 
     public void openPage(String uri, Map<String, Object> parameters) {
@@ -48,7 +46,7 @@ public class IntegrationTestContext {
         try {
             compiledScript.eval();
         } catch (ScriptException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Compilation failed :" + e.getMessage() + " at line " + e.getLineNumber() + ", column " + e.getColumnNumber());
         }
     }
 
@@ -64,17 +62,10 @@ public class IntegrationTestContext {
         try {
             return JSUtil.compile(javascript, bindings);
         } catch (ScriptException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Compilation failed :" + e.getMessage() + " at line " + e.getLineNumber() + ", column " + e.getColumnNumber());
         }
     }
 
-
-    private String getApiJavascript() {
-        return resources.getClassPathResources("js/", ".js").stream()
-                .filter(resource -> !resource.getResourcePath().endsWith("HttpClient.js")) // we have a mock instead
-                .map(Resource::getContent)
-                .collect(Collectors.joining("\n"));
-    }
 
     public static class Builder {
 

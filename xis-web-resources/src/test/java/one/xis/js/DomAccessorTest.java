@@ -19,7 +19,7 @@ class DomAccessorTest {
         document.rootNode.appendChild(document.createElement("e1"));
         document.rootNode.appendChild(document.createElement("e2"));
 
-        var js = IOUtils.getResourceAsString("js/DomAccessor.js");
+        var js = IOUtils.getResourceAsString("js/init/DomAccessor.js");
         js += "var accessor = new DomAccessor();";
         js += "var e2 = document.getElementsByTagName('e2').item(0);";
         js += "var x = document.createElement('x');";
@@ -53,7 +53,7 @@ class DomAccessorTest {
         var document = new Document(new Element("root"));
         document.rootNode.appendChild(document.createElement("e1"));
 
-        var js = IOUtils.getResourceAsString("js/DomAccessor.js");
+        var js = IOUtils.getResourceAsString("js/init/DomAccessor.js");
         js += "var accessor = new DomAccessor();";
         js += "var e1 = document.getElementsByTagName('e1').item(0);";
         js += "var x = document.createElement('x');";
@@ -79,7 +79,7 @@ class DomAccessorTest {
         var document = new Document(new Element("root"));
         document.rootNode.appendChild(document.createElement("e2"));
 
-        var js = IOUtils.getResourceAsString("js/DomAccessor.js");
+        var js = IOUtils.getResourceAsString("js/init/DomAccessor.js");
         js += "var accessor = new DomAccessor();";
         js += "var e2 = document.getElementsByTagName('e2').item(0);";
         js += "var e1 = document.createElement('e1');";

@@ -29,9 +29,9 @@ class ForeachHandlerTest {
         foreach.appendChild(div2);
 
         var js = IOUtils.getResourceAsString("js/Data.js");
-        js += IOUtils.getResourceAsString("js/ForeachHandler.js");
-        js += IOUtils.getResourceAsString("js/NodeCache.js");
-        js += IOUtils.getResourceAsString("js/Initializer.js");
+        js += IOUtils.getResourceAsString("js/tags/ForeachHandler.js");
+        js += IOUtils.getResourceAsString("js/tags/NodeCache.js");
+        js += IOUtils.getResourceAsString("js/init/Initializer.js");
 
         js += "var data = new Data({\"a\": {\"b\": {\"c\": [{\"id\": 1, \"title\": \"title1\"}, {\"id\": 2, \"title\": \"title2\"}, {\"id\": 3, \"title\": \"title3\"}]}}});";
         js += "var handler = new ForeachHandler(tag);";
