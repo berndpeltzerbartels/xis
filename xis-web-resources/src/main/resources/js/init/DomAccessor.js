@@ -2,8 +2,22 @@
 class DomAccessor {
 
     insertParent(element, elementToInsert) {
-       this.replaceElement(element, elementToInsert);
-       elementToInsert.appendChild(element);
+        this.replaceElement(element, elementToInsert);
+        elementToInsert.appendChild(element);
+    }
+
+    /**
+     * 
+     * @param {Element} element 
+     * @param {Element} elementToInsert 
+     */
+    insertChild(element, elementToInsert) {
+        var childArray = nodeListToArray(element.childNodes);
+        for (var child of childArray) {
+            element.removeChild(child);
+            elementToInsert.appendChild(child);
+        }
+        element.appendChild(elementToInsert);
     }
 
     replaceElement(old, replacement) {

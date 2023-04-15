@@ -78,4 +78,82 @@ class DocumentTest {
         assertThat(document.rootNode.getAttribute("y")).isEqualTo("2");
     }
 
+    @Test
+    void getPreviousSibling() {
+        var xml = "<x><a/><b/><c/></x>";
+
+        var document = Document.of(xml);
+        var a = document.getElementByTagName("a");
+        var b = document.getElementByTagName("b");
+        var c = document.getElementByTagName("c");
+
+        assertThat(a.getPreviousSibling()).isNull();
+        assertThat(b.getPreviousSibling()).isEqualTo(a);
+        assertThat(c.getPreviousSibling()).isEqualTo(b);
+    }
+
+    @Test
+    void insertBefore1() {
+        var xml = "<x><a/><b/></x>";
+
+        var document = Document.of(xml);
+        var x = document.getElementByTagName("x");
+        var a = document.getElementByTagName("a");
+        var b = document.getElementByTagName("b");
+
+        x.removeChild(b);
+
+        x.insertBefore(b, a);
+
+        assertThat(x.firstChild).isEqualTo(b);
+
+        assertThat(b.getPreviousSibling()).isNull();
+        assertThat(a.getPreviousSibling()).isEqualTo(b);
+
+        assertThat(b.nextSibling).isEqualTo(a);
+        assertThat(a.nextSibling).isNull();
+    }
+
+    @Test
+    void insertBefore2() {
+        var xml = "<x><a/><b/></x>";
+
+        var document = Document.of(xml);
+        var x = document.getElementByTagName("x");
+        var a = document.getElementByTagName("a");
+        var b = document.getElementByTagName("b");
+        var c = document.createElement("c");
+
+        x.insertBefore(c, b);
+
+        assertThat(x.firstChild).isEqualTo(a);
+
+        assertThat(c.getPreviousSibling()).isEqualTo(a);
+        assertThat(b.getPreviousSibling()).isEqualTo(c);
+
+        assertThat(a.nextSibling).isEqualTo(c);
+        assertThat(c.nextSibling).isEqualTo(b);
+        assertThat(b.nextSibling).isNull();
+    }
+
+    @Test
+    void remove1() {
+        var xml = "<x><a/><b/></x>";
+
+        var document = Document.of(xml);
+        var x = document.getElementByTagName("x");
+        var a = document.getElementByTagName("a");
+        var b = document.getElementByTagName("b");
+
+        a.remove();
+
+        assertThat(x.firstChild).isEqualTo(b);
+        assertThat(a.nextSibling).isNull();
+        assertThat(a.parentNode).isNull();
+
+        assertThat(x.childNodes.length).isEqualTo(1);
+
+    }
+
+
 }

@@ -1,4 +1,4 @@
-package one.xis.js;
+package one.xis.js.init;
 
 import one.xis.test.dom.Document;
 import one.xis.test.dom.Element;
@@ -94,6 +94,24 @@ class DomAccessorTest {
 
         assertThat(root.firstChild).isEqualTo(e1);
         assertThat(e1.firstChild).isEqualTo(e2);
+
+    }
+
+    @Test
+    void insertChild() throws ScriptException {
+        var document = Document.of("<a><b/><c/></a>");
+
+        var js = IOUtils.getResourceAsString("js/init/DomAccessor.js");
+        js += IOUtils.getResourceAsString("js/Functions.js"); // nodeListToArray(nodeList) is used in DomParser
+        js += "var accessor = new DomAccessor();";
+        js += "var a = document.getElementsByTagName('a').item(0);";
+        js += "var x = document.createElement('x');";
+        js += "accessor.insertChild(a, x);";
+
+        JSUtil.compile(js, Map.of("document", document)).eval();
+
+        assertThat(document.rootNode.getChildElementNames()).containsExactly("x");
+        assertThat(document.getElementByTagName("x").getChildElementNames()).containsExactly("c", "c");
 
     }
 

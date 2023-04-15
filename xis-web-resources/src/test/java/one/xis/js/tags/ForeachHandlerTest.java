@@ -1,4 +1,4 @@
-package one.xis.js;
+package one.xis.js.tags;
 
 import one.xis.test.dom.Document;
 import one.xis.test.dom.Element;

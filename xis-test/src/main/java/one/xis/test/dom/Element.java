@@ -31,8 +31,11 @@ public class Element extends Node {
         updateChildNodes();
     }
 
-    public void insertBefore(Node node, Node next) {
-        next.insertPreviousSibling(node);
+    public void insertBefore(Node newNoode, Node referenceNode) {
+        if (referenceNode.parentNode != this) {
+            throw new IllegalStateException();
+        }
+        referenceNode.insertPreviousSibling(newNoode);
         updateChildNodes();
     }
 

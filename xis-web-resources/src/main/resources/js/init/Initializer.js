@@ -26,6 +26,12 @@ class Initializer {
     }
 
     initializeHtmlElement(element) {
+        if (element.getAttribute('repeat')) {
+            this.initializeRepeat(element);
+        }
+        if (element.getAttribute('for')) {
+            this.initializeFor(element);
+        }
         element._refresh = function (data) {
             for (var attribute of this._attributes) {
                 this.setAttribute(atttribute.name, attribute.expression.evaluate(data));
@@ -77,6 +83,33 @@ class Initializer {
         element._refresh = function (data) {
             this._handler.refresh(data);
         }
+    }
+
+    /**
+    * @private
+    * @param {Element} element 
+    */
+    initializeRepeat(element) {
+        var arr = doSplit(element.getAttribute('repeat'), ':');
+        var foreach = document.createElement('xis:foreach');
+        foreach.setAttribute('var', arr[0]);
+        foreach.setAttribute('array', arr[1]);
+        this.domAccessor.insertParent(element, foreach);
+        this.initializeFrameworkElement(foreach);
+    }
+
+
+    /**
+    * @private
+    * @param {Element} element 
+    */
+    initializeFor(element) {
+        var arr = doSplit(element.getAttribute('repeat'), ':');
+        var foreach = document.createElement('xis:foreach');
+        foreach.setAttribute('var', arr[0]);
+        foreach.setAttribute('array', arr[1]);
+        this.domAccessor.insertParent(element, foreach);
+        this.initializeFrameworkElement(foreach);
     }
 
     isFrameworElement(element) {

@@ -1,5 +1,6 @@
-package one.xis.js;
+package one.xis.js.connect;
 
+import one.xis.js.Promise;
 import one.xis.test.js.JSUtil;
 import one.xis.utils.io.IOUtils;
 import org.junit.jupiter.api.BeforeAll;

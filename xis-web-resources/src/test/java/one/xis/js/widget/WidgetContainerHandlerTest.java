@@ -1,4 +1,4 @@
-package one.xis.js;
+package one.xis.js.widget;
 
 class WidgetContainerHandlerTest {
 }

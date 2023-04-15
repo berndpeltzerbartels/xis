@@ -11,6 +11,9 @@ public abstract class Node {
             previousSibling.nextSibling = node;
         }
         node.nextSibling = this;
+        if (node.parentNode.firstChild == this) {
+            node.parentNode.firstChild = node;
+        }
     }
 
     void remove() {
@@ -19,8 +22,9 @@ public abstract class Node {
             previousSibling.nextSibling = nextSibling;
         }
         if (parentNode.firstChild == this) {
-            parentNode.firstChild = null;
+            parentNode.firstChild = nextSibling;
         }
+        nextSibling = null;
         parentNode.updateChildNodes();
         parentNode = null;
     }
@@ -37,6 +41,9 @@ public abstract class Node {
     }
 
     Node getPreviousSibling() {
+        if (parentNode == null) {
+            return null;
+        }
         var prev = parentNode.firstChild;
         if (prev == null) {
             return null;
