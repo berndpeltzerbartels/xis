@@ -1,0 +1,133 @@
+package one.xis.test.dom;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+class DomAssertTest {
+
+
+    @Nested
+    class ExceptionTest {
+
+        @Test
+        void assertRootElement() {
+            var document = Document.of("<a/>");
+            assertThrows(DomAssertionException.class, () -> DomAssert.assertRootElement(document, "b"));
+        }
+
+        @Test
+        @DisplayName("There is no such child")
+        void assertChildElements1() {
+            var document = Document.of("<a><b/></a>");
+            assertThrows(DomAssertionException.class, () -> DomAssert.assertChildElements(document.rootNode, "c"));
+        }
+
+        @Test
+        @DisplayName("Number of children is too small and one element is present")
+        void assertChildElements2() {
+            var document = Document.of("<a><b/></a>");
+            assertThrows(DomAssertionException.class, () -> DomAssert.assertChildElements(document.rootNode, "b", "c"));
+        }
+
+        @Test
+        @DisplayName("Number of children is too small and no element is present")
+        void assertChildElements3() {
+            var document = Document.of("<a></a>");
+            assertThrows(DomAssertionException.class, () -> DomAssert.assertChildElements(document.rootNode, "b", "c"));
+        }
+
+        @Test
+        @DisplayName("Number of children is too small and many elements are present")
+        void assertChildElements4() {
+            var document = Document.of("<a><b/><c/></a>");
+            assertThrows(DomAssertionException.class, () -> DomAssert.assertChildElements(document.rootNode, "b", "c", "d"));
+        }
+
+
+        @Test
+        void assertChildElement() {
+            var document = Document.of("<a><b/></a>");
+            assertThrows(DomAssertionException.class, () -> DomAssert.assertChildElement(document.rootNode, "c"));
+        }
+
+        @Test
+        void assertTrue() {
+            assertThrows(DomAssertionException.class, () -> DomAssert.assertTrue(System.currentTimeMillis() < 0, "bla %s", "bla"));
+        }
+
+        @Test
+        void assertNoChildElement() {
+            var document = Document.of("<a><b/></a>");
+            assertThrows(DomAssertionException.class, () -> DomAssert.assertNoChildElement(document.rootNode, "b"));
+        }
+
+        @Test
+        void assertTagName() {
+            var document = Document.of("<a></a>");
+            assertThrows(DomAssertionException.class, () -> DomAssert.assertTagName(document.rootNode, "b"));
+        }
+
+        @Test
+        void assertParentElement() {
+            var document = Document.of("<a><b/></a>");
+            var b = document.getElementByTagName("b");
+            assertThrows(DomAssertionException.class, () -> DomAssert.assertParentElement(b, "b"));
+        }
+    }
+
+    @Nested
+    class SuccessTest {
+        @Test
+        void assertRootElement() {
+            var document = Document.of("<a/>");
+            DomAssert.assertRootElement(document, "a");
+        }
+
+        @Test
+        void assertChildElements1() {
+            var document = Document.of("<a><b/></a>");
+            DomAssert.assertChildElements(document.rootNode, "b");
+        }
+
+        @Test
+        void assertChildElements() {
+            var document = Document.of("<a><b/><c/></a>");
+            DomAssert.assertChildElements(document.rootNode, "b", "c");
+        }
+
+
+        @Test
+        void assertChildElement() {
+            var document = Document.of("<a><b/></a>");
+            DomAssert.assertChildElement(document.rootNode, "b");
+        }
+
+        @Test
+        void assertTrue() {
+            DomAssert.assertTrue(System.currentTimeMillis() > 0, "bla %s", "bla");
+        }
+
+        @Test
+        void assertNoChildElement() {
+            var document = Document.of("<a><b/></a>");
+            DomAssert.assertNoChildElement(document.rootNode, "c");
+        }
+
+        @Test
+        void assertTagName() {
+            var document = Document.of("<a></a>");
+            DomAssert.assertTagName(document.rootNode, "a");
+        }
+
+        @Test
+        void assertParentElement() {
+            var document = Document.of("<a><b/></a>");
+            var b = document.getElementByTagName("b");
+            DomAssert.assertParentElement(b, "a");
+        }
+
+    }
+}

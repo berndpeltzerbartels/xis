@@ -98,11 +98,15 @@ public class Element extends Node {
     }
 
     public Element childElement(int index) {
-        var elementList = childNodes.stream().filter(Element.class::isInstance).map(Element.class::cast).collect(Collectors.toList());
+        var elementList = getChildElements();
         if (index >= elementList.size()) {
             return null;
         }
         return elementList.get(index);
+    }
+
+    public List<Element> getChildElements() {
+        return childNodes.stream().filter(Element.class::isInstance).map(Element.class::cast).collect(Collectors.toList());
     }
 
     public List<String> getChildElementNames() {

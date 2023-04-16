@@ -4,6 +4,7 @@ import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Collection;
 
+@SuppressWarnings({"unchecked", "unused"})
 public interface AppContextBuilder {
 
     AppContext build();

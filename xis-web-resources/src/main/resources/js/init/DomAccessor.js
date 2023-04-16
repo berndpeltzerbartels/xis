@@ -2,8 +2,16 @@
 class DomAccessor {
 
     insertParent(element, elementToInsert) {
-        this.replaceElement(element, elementToInsert);
-        elementToInsert.appendChild(element);
+        console.log('insertParent: ' + element + ", " + elementToInsert);
+        if (element.parent) {
+            console.log('with parent');
+            this.replaceElement(element, elementToInsert);
+            elementToInsert.appendChild(element);
+        } else {
+            console.log('no parent');
+            element.parentNode = elementToInsert;
+            elementToInsert.appendChild(element);
+        }
     }
 
     /**
@@ -29,6 +37,6 @@ class DomAccessor {
         } else {
             parent.appendChild(replacement);
         }
-    }
 
+    }
 }

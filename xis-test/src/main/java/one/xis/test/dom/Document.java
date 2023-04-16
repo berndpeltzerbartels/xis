@@ -14,7 +14,7 @@ import java.util.List;
 @SuppressWarnings("unused")
 public class Document {
 
-    public final Element rootNode;
+    public Element rootNode;
 
     public Location location = new Location();
 
@@ -64,6 +64,10 @@ public class Document {
 
     public static Document fromResource(String classPathResource) {
         return of(IOUtils.getResourceAsString(classPathResource));
+    }
+
+    public void replaceRoot(Element element) {
+        this.rootNode = element;
     }
 
     public static Document of(String html) {

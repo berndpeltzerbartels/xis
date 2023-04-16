@@ -1,6 +1,7 @@
 package one.xis.js.init;
 
 import one.xis.test.dom.Document;
+import one.xis.test.dom.DomAssert;
 import one.xis.test.dom.Element;
 import one.xis.test.js.JSUtil;
 import one.xis.utils.io.IOUtils;
@@ -69,9 +70,8 @@ class DomAccessorTest {
         assertThat(x.nextSibling).isNull();
         assertThat(x.parentNode).isEqualTo(root);
 
-        assertThat(root.childNodes.length).isEqualTo(1);
-        assertThat(root.childNodes.item(0)).isEqualTo(x);
-        assertThat(root.firstChild).isEqualTo(x);
+        DomAssert.assertRootElement(document, "root")
+                .assertChildElements("x").assertNoChildElement("e1");
     }
 
     @Test

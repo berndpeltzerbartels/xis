@@ -1,6 +1,8 @@
 package one.xis.js.init;
 
 import one.xis.test.dom.Document;
+import one.xis.test.dom.DomAssert;
+import one.xis.test.dom.TextNode;
 import one.xis.test.js.Console;
 import one.xis.test.js.JSUtil;
 import one.xis.utils.io.IOUtils;
@@ -86,4 +88,38 @@ class InitializerTest {
         assertThat(foreach.getAttribute("var")).isEqualTo("item");
     }
 
+
+    @Test
+    void repeatAndForeach() throws ScriptException {
+        var document = new Document("html");
+        var div = document.createElement("div");
+        div.setAttribute("repeat", "array1:items");
+
+        var foreach = document.createElement("xis:foreach");
+        foreach.setAttribute("array", "array1");
+        foreach.setAttribute("var", "value");
+
+        var span = document.createElement("span");
+
+        div.appendChild(foreach);
+        foreach.appendChild(span);
+        span.appendChild(new TextNode("123"));
+
+        var script = javascriptDefinitions;
+        script += "var initializer = new Initializer(new DomAccessor());";
+        script += "initializer.initialize(div);";
+
+        var compiledScript = JSUtil.compile(script, Map.of("div", div, "console", new Console(), "document", document));
+        compiledScript.eval();
+
+
+        DomAssert.assertParentElement(span, "xis:foreach")
+                .assertParentElement("div")
+                .assertParentElement("xis:foreach")
+                .assertAttribute("array", "items")
+                .assertAttribute("var", "array1");
+
+    }
+
 }
+

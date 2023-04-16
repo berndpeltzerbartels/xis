@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @AllArgsConstructor
-class TextNode extends Node {
+public class TextNode extends Node {
 
     @Getter
     public String nodeValue;
