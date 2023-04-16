@@ -37,13 +37,18 @@ class Initializer {
             this.initializeFor(element);
         }
         element._refresh = function (data) {
-            for (var attribute of this._attributes) {
-                this.setAttribute(atttribute.name, attribute.expression.evaluate(data));
+            if (this._handler) {
+                this._handler.refresh(data);
             }
-            for (var i = 0; i < this.childNodes; i++) {
-                var child = nodeList.item(i);
-                if (child._refresh) {
-                    child._refresh(data);
+            else {
+                for (var attribute of this._attributes) {
+                    this.setAttribute(atttribute.name, attribute.expression.evaluate(data));
+                }
+                for (var i = 0; i < this.childNodes; i++) {
+                    var child = nodeList.item(i);
+                    if (child._refresh) {
+                        child._refresh(data);
+                    }
                 }
             }
         }
@@ -84,9 +89,6 @@ class Initializer {
                 break;
             case 'xis:widget-container':
                 element._handler = new WidgetContainerHandler(element);
-        }
-        element._refresh = function (data) {
-            this._handler.refresh(data);
         }
     }
 

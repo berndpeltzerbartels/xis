@@ -3,10 +3,8 @@ package one.xis.context;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import one.xis.server.Config;
 import one.xis.server.FrontendService;
 import one.xis.server.Request;
-import one.xis.server.Response;
 
 import java.util.Map;
 
@@ -19,28 +17,28 @@ public class ControllerBridge {
     private final ObjectMapper objectMapper = new ObjectMapper(); // TODO always use the same mapper and inject it here
 
 
-    public Config getComponentConfig(String uri, Map<String, String> headers) {
-        return frontendService.getConfig();
+    public String getComponentConfig(String uri, Map<String, String> headers) {
+        return serialialize(frontendService.getConfig());
     }
 
 
-    public Response getPageModel(String uri, String requestJson, Map<String, String> headers) {
-        return frontendService.invokePageModelMethods(request(requestJson));
+    public String getPageModel(String uri, String requestJson, Map<String, String> headers) {
+        return serialialize(frontendService.invokePageModelMethods(request(requestJson)));
     }
 
 
-    public Response getWidgetModel(String uri, String requestJson, Map<String, String> headers) {
-        return frontendService.invokeWidgetModelMethods(request(requestJson));
+    public String getWidgetModel(String uri, String requestJson, Map<String, String> headers) {
+        return serialialize(frontendService.invokeWidgetModelMethods(request(requestJson)));
     }
 
 
-    public Response onPageAction(String uri, String requestJson, Map<String, String> headers) {
-        return frontendService.invokePageActionMethod(request(requestJson));
+    public String onPageAction(String uri, String requestJson, Map<String, String> headers) {
+        return serialialize(frontendService.invokePageActionMethod(request(requestJson)));
     }
 
 
-    public Response onWidgetAction(String uri, String requestJson, Map<String, String> headers) {
-        return frontendService.invokeWidgetActionMethod(request(requestJson));
+    public String onWidgetAction(String uri, String requestJson, Map<String, String> headers) {
+        return serialialize(frontendService.invokeWidgetActionMethod(request(requestJson)));
     }
 
 
@@ -54,8 +52,8 @@ public class ControllerBridge {
     }
 
 
-    public Map<String, String> getBodyAttributes(String uri, Map<String, String> headers) {
-        return frontendService.getBodyAttributes(headers.get("uri"));
+    public String getBodyAttributes(String uri, Map<String, String> headers) {
+        return serialialize(frontendService.getBodyAttributes(headers.get("uri")));
     }
 
 
@@ -69,6 +67,14 @@ public class ControllerBridge {
             return objectMapper.readValue(requestJson, Request.class);
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Failed to deserialize request", e);
+        }
+    }
+
+    private String serialialize(Object o) {
+        try {
+            return objectMapper.writeValueAsString(o);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to serialize", e);
         }
     }
 }

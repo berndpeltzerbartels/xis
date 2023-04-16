@@ -3,8 +3,8 @@
  * @returns {boolean}
  */
 function isElement(node) {
-    var rv =  node.childNodes !== null && node.childNodes !== undefined;
-    console.log('isElement' + node + ' => '+ rv);
+    var rv = node.childNodes !== null && node.childNodes !== undefined;
+    console.log('isElement' + node + ' => ' + rv);
     return rv;
 }
 
@@ -85,4 +85,23 @@ function doSplit(string, separatorChar) {
     }
     rv.push(buffer);
     return rv;
+}
+
+function traceMethodCalls(obj) {
+    const handler = {
+        get(target, propKey, receiver) {
+            console.log('get(..)');
+            const targetValue = Reflect.get(target, propKey, receiver);
+            console.log('type: ' + (typeof targetValue));
+            if (typeof targetValue === 'function') {
+                return function (...args) {
+                    console.log('CALL', propKey, args);
+                    return targetValue.apply(this, args); // (A)
+                }
+            } else {
+                return targetValue;
+            }
+        }
+    };
+    return new Proxy(obj, handler);
 }

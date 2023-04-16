@@ -23,12 +23,14 @@ class PageController {
      * @param {Config} config
      */
     displayInitialPage(config) {
+        console.log('PageController - displayInitialPage');
         this.pageAttributes = config.pageAttributes;
         var _this = this;
         this.findPageForCurrentUrl()
             .then(page => _this.bindPage(page))
             .then(pageId => _this.refreshData(pageId))
-            .then(pageId => _this.refreshPage(pageId));
+            .then(pageId => _this.refreshPage(pageId))
+            .catch(e => console.error(e));
     }
 
     bindPageForId(id) {
@@ -87,7 +89,7 @@ class PageController {
     }
 
     clearChildren(element) {
-        for (node of nodeListToArray(element, childNodes)) {
+        for (var node of nodeListToArray(element.childNodes)) {
             if (node.getAttribute && node.getAttribute('ignore')) {
                 continue;
             }

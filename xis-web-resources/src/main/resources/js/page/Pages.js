@@ -16,6 +16,7 @@ class Pages {
      * @returns {Promise<any>}
      */
     loadPages(config) {
+        console.log('Loading pages');
         this.welcomePageId = config.welcomePageId;
         this.pageAttributes = config.pageAttributes;
         var promises = [];
@@ -24,7 +25,7 @@ class Pages {
         config.pageIds.forEach(id => promises.push(_this.loadPageHead(id)));
         config.pageIds.forEach(id => promises.push(_this.loadPageBody(id)));
         config.pageIds.forEach(id => promises.push(_this.loadPageBodyAttributes(id)));
-        return Promise.all(promises).then(() => config);
+        return Promise.all(promises).then(() => config).catch(e => console.error(e));;
     }
 
     /**
@@ -51,7 +52,7 @@ class Pages {
             var holder = document.createElement('div');
             holder.innerHTML = content;
             _this.pages[pageId].headChildArray = nodeListToArray(holder.childNodes);
-            _this.initializer.initializeRootElement(holder);
+            _this.initializer.initialize(holder);
             return pageId;
         });
     }
@@ -67,7 +68,7 @@ class Pages {
             var holder = document.createElement('div');
             holder.innerHTML = content;
             _this.pages[pageId].bodyChildArray = nodeListToArray(holder.childNodes);
-            _this.initializer.initializeRootElement(holder);
+            _this.initializer.initialize(holder);
             return pageId;
         });
     }

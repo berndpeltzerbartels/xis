@@ -5,12 +5,10 @@ import one.xis.test.dom.Element;
 import one.xis.utils.io.IOUtils;
 import org.junit.jupiter.api.Test;
 
-import javax.script.ScriptException;
-
 class ForeachHandlerTest {
 
     @Test
-    void foreach() throws ScriptException {
+    void foreach() {
         System.out.println("*************************************å");
         var document = new Document(new Element("html"));
         var body = document.createElement("body");

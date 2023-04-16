@@ -13,6 +13,8 @@ public class Element extends Node {
 
     public final String localName;
     public Node firstChild;
+    public String innerHTML;
+    public String innerText;
     public Object _handler;
     public final NodeList childNodes = new NodeList();
     private final Map<String, String> attributes = new HashMap<>();

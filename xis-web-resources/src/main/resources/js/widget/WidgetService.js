@@ -11,6 +11,7 @@ class WidgetService {
     }
 
     loadWidgets(config) {
+        console.log('Loading widgets');
         var _this = this;
         var promises = [];
         this.widgetAttributes = config.widgetAttributes;
