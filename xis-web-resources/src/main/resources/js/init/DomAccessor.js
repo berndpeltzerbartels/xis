@@ -3,12 +3,12 @@ class DomAccessor {
 
     insertParent(element, elementToInsert) {
         console.log('insertParent: ' + element + ", " + elementToInsert);
-        if (element.parent) {
-            console.log('with parent');
+        if (element.parentNode) {
+            console.log(element + ' has parent');
             this.replaceElement(element, elementToInsert);
             elementToInsert.appendChild(element);
         } else {
-            console.log('no parent');
+            console.log(element + ' has no parent');
             element.parentNode = elementToInsert;
             elementToInsert.appendChild(element);
         }

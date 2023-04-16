@@ -7,6 +7,7 @@ import one.xis.test.js.Console;
 import one.xis.test.js.JSUtil;
 import one.xis.utils.io.IOUtils;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
@@ -90,6 +91,7 @@ class InitializerTest {
 
 
     @Test
+    @DisplayName("Repeat-attribute and foreach with foreach as root in result")
     void repeatAndForeach() throws ScriptException {
         var document = new Document("html");
         var div = document.createElement("div");
@@ -110,6 +112,40 @@ class InitializerTest {
         script += "initializer.initialize(div);";
 
         var compiledScript = JSUtil.compile(script, Map.of("div", div, "console", new Console(), "document", document));
+        compiledScript.eval();
+
+
+        DomAssert.assertParentElement(span, "xis:foreach")
+                .assertParentElement("div")
+                .assertParentElement("xis:foreach")
+                .assertAttribute("array", "items")
+                .assertAttribute("var", "array1");
+
+    }
+
+    @Test
+    @DisplayName("Repeat-attribute and foreach with newly created foreach nestend in root")
+    void repeatAndForeach2() throws ScriptException {
+        var document = new Document("html");
+        var div1 = document.createElement("div");
+        var div2 = document.createElement("div");
+        div2.setAttribute("repeat", "array1:items");
+
+        var foreach = document.createElement("xis:foreach");
+        foreach.setAttribute("array", "array1");
+        foreach.setAttribute("var", "value");
+
+        var span = document.createElement("span");
+        div1.appendChild(div2);
+        div2.appendChild(foreach);
+        foreach.appendChild(span);
+        span.appendChild(new TextNode("123"));
+
+        var script = javascriptDefinitions;
+        script += "var initializer = new Initializer(new DomAccessor());";
+        script += "initializer.initialize(div1);";
+
+        var compiledScript = JSUtil.compile(script, Map.of("div1", div1, "console", new Console(), "document", document));
         compiledScript.eval();
 
 
