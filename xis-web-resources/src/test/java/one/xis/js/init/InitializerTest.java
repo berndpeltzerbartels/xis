@@ -31,6 +31,13 @@ class InitializerTest {
         javascriptDefinitions += IOUtils.getResourceAsString("js/tags/NodeCache.js");
         javascriptDefinitions += IOUtils.getResourceAsString("js/tags/ForeachHandler.js");
         javascriptDefinitions += IOUtils.getResourceAsString("js/Functions.js");
+        javascriptDefinitions += IOUtils.getResourceAsString("js/parse/TextContentParser.js");
+        javascriptDefinitions += IOUtils.getResourceAsString("js/parse/CharIterator.js");
+        javascriptDefinitions += IOUtils.getResourceAsString("js/parse/TextContent.js");
+        javascriptDefinitions += IOUtils.getResourceAsString("js/parse/ExpressionParser.js");
+        javascriptDefinitions += IOUtils.getResourceAsString("js/parse/Tokenizer.js");
+        javascriptDefinitions += IOUtils.getResourceAsString("js/parse/TreeParser.js");
+        javascriptDefinitions += IOUtils.getResourceAsString("js/parse/TokenLinker.js");
     }
 
     @Test
@@ -115,9 +122,9 @@ class InitializerTest {
         compiledScript.eval();
 
 
-        DomAssert.assertParentElement(span, "xis:foreach")
-                .assertParentElement("div")
-                .assertParentElement("xis:foreach")
+        DomAssert.assertAndGetParentElement(span, "xis:foreach")
+                .assertAndGetParentElement("div")
+                .assertAndGetParentElement("xis:foreach")
                 .assertAttribute("array", "items")
                 .assertAttribute("var", "array1");
 
@@ -149,11 +156,59 @@ class InitializerTest {
         compiledScript.eval();
 
 
-        DomAssert.assertParentElement(span, "xis:foreach")
-                .assertParentElement("div")
-                .assertParentElement("xis:foreach")
+        DomAssert.assertAndGetParentElement(span, "xis:foreach")
+                .assertAndGetParentElement("div")
+                .assertAndGetParentElement("xis:foreach")
                 .assertAttribute("array", "items")
                 .assertAttribute("var", "array1");
+
+    }
+
+    @Test
+    @DisplayName("Element has repeat-attribute and for-attribute at the same time")
+    void repeatAndFor() throws ScriptException {
+        var document = new Document("html");
+        var div = document.createElement("div");
+        div.setAttribute("repeat", "item1:items1");
+        div.setAttribute("for", "item2:items2");
+
+        var script = javascriptDefinitions;
+        script += "var initializer = new Initializer(new DomAccessor());";
+        script += "initializer.initialize(div);";
+
+        var compiledScript = JSUtil.compile(script, Map.of("div", div, "console", new Console(), "document", document));
+        compiledScript.eval();
+
+
+        DomAssert.assertAndGetParentElement(div, "xis:foreach")
+                .assertAttribute("var", "item1")
+                .assertAttribute("array", "items1")
+                .assertAndGetChildElement("div")
+                .assertAndGetChildElement("xis:foreach")
+                .assertAttribute("var", "item2")
+                .assertAttribute("array", "items2");
+
+
+    }
+
+    @Test
+    void textNode() throws ScriptException {
+        var document = Document.of("<html><head><title>The title is ${title}</title></head></html>");
+
+        var script = javascriptDefinitions;
+        script += "var initializer = new Initializer(new DomAccessor());";
+        script += "initializer.initialize(head);";
+
+        var head = document.getElementByTagName("head");
+
+        var compiledScript = JSUtil.compile(script, Map.of("head", head, "console", new Console(), "document", document));
+        compiledScript.eval();
+
+        var title = document.getElementByTagName("title");
+        assertThat(title.getChildNodes().length).isEqualTo(1);
+        var textNode = (TextNode) title.childNodes.item(0);
+        assertThat(textNode._expression).isNotNull();
+        assertThat(textNode._refresh).isNotNull();
 
     }
 

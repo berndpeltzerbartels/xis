@@ -1,13 +1,18 @@
 package one.xis.test.dom;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-@AllArgsConstructor
 public class TextNode extends Node {
 
     @Getter
     public String nodeValue;
+
+    @SuppressWarnings("unused")
+    public Object _expression;
+
+    public TextNode(String nodeValue) {
+        this.nodeValue = nodeValue;
+    }
 
     @Override
     public Node cloneNode() {
@@ -17,5 +22,10 @@ public class TextNode extends Node {
     @Override
     public String getName() {
         return "TextNode";
+    }
+
+    @Override
+    public String toString() {
+        return "TextNode(" + nodeValue + ")";
     }
 }

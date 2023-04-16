@@ -1,6 +1,7 @@
 package one.xis.test.dom;
 
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import one.xis.utils.lang.StringUtils;
 
@@ -9,11 +10,20 @@ import static one.xis.test.dom.DomAssert.assertTrue;
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public class ElementResult {
 
+    @Getter
     private final Element element;
 
     public ElementResult assertChildElements(String... names) {
         DomAssert.assertChildElements(element, names);
         return this;
+    }
+
+    public ElementResults assertAndGetChildElements(String... names) {
+        return DomAssert.assertChildElements(element, names);
+    }
+
+    public ElementResult assertAndGetChildElement(String name) {
+        return DomAssert.assertAndGetChildElement(element, name);
     }
 
     public ElementResult assertNoChildElement(String name) {
@@ -52,7 +62,7 @@ public class ElementResult {
         return this;
     }
 
-    public ElementResult assertParentElement(String name) {
-        return DomAssert.assertParentElement(element, name);
+    public ElementResult assertAndGetParentElement(String name) {
+        return DomAssert.assertAndGetParentElement(element, name);
     }
 }

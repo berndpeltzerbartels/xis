@@ -35,7 +35,7 @@ public class DomAssert {
 
     }
 
-    public static ElementResult assertChildElement(Element element, String name) {
+    public static ElementResult assertAndGetChildElement(Element element, String name) {
         return assertChildElements(element, name).toUniqueResult();
     }
 
@@ -48,7 +48,7 @@ public class DomAssert {
         assertTrue(element, element.localName.equals(name), "Expected element to have tag name '%s'", name);
     }
 
-    public static ElementResult assertParentElement(Element element, String name) {
+    public static ElementResult assertAndGetParentElement(Element element, String name) {
         assertTrue(element, element.parentNode.localName.equals(name), "Expected element to have parent tag '%s'", name);
         return new ElementResult(element.parentNode);
     }

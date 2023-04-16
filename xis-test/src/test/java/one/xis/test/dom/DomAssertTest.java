@@ -50,7 +50,7 @@ class DomAssertTest {
         @Test
         void assertChildElement() {
             var document = Document.of("<a><b/></a>");
-            assertThrows(DomAssertionException.class, () -> DomAssert.assertChildElement(document.rootNode, "c"));
+            assertThrows(DomAssertionException.class, () -> DomAssert.assertAndGetChildElement(document.rootNode, "c"));
         }
 
         @Test
@@ -74,7 +74,7 @@ class DomAssertTest {
         void assertParentElement() {
             var document = Document.of("<a><b/></a>");
             var b = document.getElementByTagName("b");
-            assertThrows(DomAssertionException.class, () -> DomAssert.assertParentElement(b, "b"));
+            assertThrows(DomAssertionException.class, () -> DomAssert.assertAndGetParentElement(b, "b"));
         }
     }
 
@@ -102,7 +102,7 @@ class DomAssertTest {
         @Test
         void assertChildElement() {
             var document = Document.of("<a><b/></a>");
-            DomAssert.assertChildElement(document.rootNode, "b");
+            DomAssert.assertAndGetChildElement(document.rootNode, "b");
         }
 
         @Test
@@ -126,7 +126,7 @@ class DomAssertTest {
         void assertParentElement() {
             var document = Document.of("<a><b/></a>");
             var b = document.getElementByTagName("b");
-            DomAssert.assertParentElement(b, "a");
+            DomAssert.assertAndGetParentElement(b, "a");
         }
 
     }

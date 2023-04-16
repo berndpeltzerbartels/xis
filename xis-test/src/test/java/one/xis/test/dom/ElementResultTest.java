@@ -54,7 +54,7 @@ class ElementResultTest {
         void assertParentElement() {
             var document = Document.of("<a><b/></a>");
             var b = document.getElementByTagName("b");
-            assertThrows(DomAssertionException.class, () -> new ElementResult(b).assertParentElement("b"));
+            assertThrows(DomAssertionException.class, () -> new ElementResult(b).assertAndGetParentElement("b"));
         }
     }
 
@@ -105,7 +105,7 @@ class ElementResultTest {
         void assertParentElement() {
             var document = Document.of("<a><b/></a>");
             var b = document.getElementByTagName("b");
-            new ElementResult(b).assertParentElement("a");
+            new ElementResult(b).assertAndGetParentElement("a");
         }
     }
 }

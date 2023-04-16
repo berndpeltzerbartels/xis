@@ -1,8 +1,11 @@
 package one.xis.test.dom;
 
+import java.util.function.Consumer;
+
 public abstract class Node {
     public Node nextSibling;
     public Element parentNode;
+    public Consumer<Object> _refresh; // We add this method during initialization
 
     void insertPreviousSibling(Node node) {
         node.parentNode = this.parentNode;
