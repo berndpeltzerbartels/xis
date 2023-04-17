@@ -70,7 +70,7 @@ class DomAccessorTest {
         assertThat(x.nextSibling).isNull();
         assertThat(x.parentNode).isEqualTo(root);
 
-        DomAssert.assertRootElement(document, "root")
+        DomAssert.assertAndGetRootElement(document, "root")
                 .assertChildElements("x").assertNoChildElement("e1");
     }
 

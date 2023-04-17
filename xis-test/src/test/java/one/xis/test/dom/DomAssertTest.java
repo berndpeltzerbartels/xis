@@ -15,7 +15,7 @@ class DomAssertTest {
         @Test
         void assertRootElement() {
             var document = Document.of("<a/>");
-            assertThrows(DomAssertionException.class, () -> DomAssert.assertRootElement(document, "b"));
+            assertThrows(DomAssertionException.class, () -> DomAssert.assertAndGetRootElement(document, "b"));
         }
 
         @Test
@@ -83,7 +83,7 @@ class DomAssertTest {
         @Test
         void assertRootElement() {
             var document = Document.of("<a/>");
-            DomAssert.assertRootElement(document, "a");
+            DomAssert.assertAndGetRootElement(document, "a");
         }
 
         @Test

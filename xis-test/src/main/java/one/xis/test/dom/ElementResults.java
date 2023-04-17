@@ -4,7 +4,9 @@ package one.xis.test.dom;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static one.xis.test.dom.DomAssert.assertTrue;
@@ -27,7 +29,7 @@ public class ElementResults {
     public int size() {
         return elements.size();
     }
-    
+
     public ElementResult toUniqueResult() {
         switch (elements.size()) {
             case 0:
@@ -57,7 +59,11 @@ public class ElementResults {
         return new ElementResult(elements.get(index));
     }
 
-    ElementResults pickAll(String name) {
+    public ElementResults pickAll(String name) {
         return new ElementResults(elements.stream().filter(e -> e.localName.equals(name)).collect(Collectors.toList()));
+    }
+
+    public void andThen(Consumer<List<Element>> elementConsumer) {
+        elementConsumer.accept(Collections.unmodifiableList(elements));
     }
 }

@@ -64,6 +64,13 @@ public class Element extends Node {
         }
     }
 
+    public void removeAttribute(String name) {
+        attributes.remove(name);
+        if (name.equals("class")) {
+            cssClasses.clear();
+        }
+    }
+
     public List<Node> getChildList() {
         return childNodes.list();
     }

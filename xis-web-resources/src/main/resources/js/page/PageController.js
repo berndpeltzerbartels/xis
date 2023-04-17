@@ -8,7 +8,6 @@ class PageController {
     constructor(client, pages) {
         this.client = client;
         this.pages = pages;
-        this.html = getElementByTagName('html');
         this.head = getElementByTagName('head');
         this.body = getElementByTagName('body');
         this.title = getElementByTagName('title');
@@ -50,7 +49,7 @@ class PageController {
             _this.bindBodyAttributes(page.bodyAttributes);
             _this.bindBodyChildNodes(page.bodyChildArray)
             resolve(page.id);
-        });
+        }).catch(e => console.error(e));
     }
 
     bindHeadChildNodes(nodeArray) {
@@ -69,7 +68,7 @@ class PageController {
 
     bindBodyAttributes(attributes) {
         for (var name of Object.keys(attributes)) {
-            this.setAttribute(name, attributes[name]);
+            this.body.setAttribute(name, attributes[name]);
         }
     }
 
@@ -85,7 +84,7 @@ class PageController {
     }
 
     clearBodyChildNodes() {
-        this.clearChildren(this.head);
+        this.clearChildren(this.body);
     }
 
     clearChildren(element) {
@@ -93,9 +92,7 @@ class PageController {
             if (node.getAttribute && node.getAttribute('ignore')) {
                 continue;
             }
-            if (node.parentNode) {
-                node.parentNode.removeChild(node);
-            }
+            element.removeChild(node);
         }
     }
 
