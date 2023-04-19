@@ -3,6 +3,7 @@ package one.xis.js.page;
 import one.xis.test.dom.Document;
 import one.xis.test.dom.DomAssert;
 import one.xis.test.dom.Element;
+import one.xis.test.dom.Window;
 import one.xis.test.js.JSUtil;
 import one.xis.utils.io.IOUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import javax.script.ScriptException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -24,14 +26,16 @@ class PageControllerTest {
     void init() {
         javascript = IOUtils.getResourceAsString("js/page/PageController.js");
         javascript += IOUtils.getResourceAsString("js/Functions.js");
+        javascript += IOUtils.getResourceAsString("js/Data.js");
         javascript += IOUtils.getResourceAsString("one/xis/page/PageControllerTestMocks.js");
         javascript += "var pageController = new PageController(client, pages);";
+        document = Document.fromResource("index.html");
     }
 
 
     @Test
-    void bindPage() throws ScriptException {
-        var testScript = javascript + "pageController.bindPageForId('bla');";
+    void bindPageForId() throws ScriptException {
+        var testScript = javascript + "pageController.bindPageById('bla');";
         var compiledScript = JSUtil.compile(testScript, createBindings());
 
         compiledScript.eval();
@@ -50,9 +54,34 @@ class PageControllerTest {
 
     }
 
+    @Test
+    void displayInitialPage() throws ScriptException {
+
+        var head = document.getElementByTagName("head");
+        var title = document.getElementByTagName("title");
+        var body = document.getElementByTagName("body");
+
+
+        final var refreshCalls = new HashSet<>();
+
+        head._refresh = o -> refreshCalls.add("head");
+        title._refresh = o -> refreshCalls.add("title");
+        body._refresh = o -> refreshCalls.add("body");
+
+        var testScript = javascript + "config;pageController.displayInitialPage(config);";
+
+        var compiledScript = JSUtil.compile(testScript, createBindings());
+
+        compiledScript.eval();
+
+        assertThat(refreshCalls).contains("head");
+        assertThat(refreshCalls).contains("body");
+        assertThat(title.innerText).isEqualTo("Test");
+
+    }
+
 
     private Map<String, Object> createBindings() {
-        document = Document.fromResource("index.html");
         var head = document.getElementByTagName("head");
         var title = document.getElementByTagName("title");
         var body = document.getElementByTagName("body");
@@ -73,6 +102,7 @@ class PageControllerTest {
         var bindings = new HashMap<String, Object>();
         bindings.put("document", document);
         bindings.put("getElementByTagName", getElementByTagName);
+        bindings.put("window", new Window());
         return bindings;
     }
 

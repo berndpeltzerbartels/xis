@@ -32,7 +32,7 @@ class PageController {
             .catch(e => console.error(e));
     }
 
-    bindPageForId(id) {
+    bindPageById(id) {
         return this.bindPage(this.pages.getPageById(id));
     }
 
@@ -45,15 +45,40 @@ class PageController {
             _this.clearHeadChildNodes();
             _this.clearBodyChildNodes();
             _this.clearBodyAttributes();
+            _this.bindTitle(page);
             _this.bindHeadChildNodes(page.headChildArray);
             _this.bindBodyAttributes(page.bodyAttributes);
             _this.bindBodyChildNodes(page.bodyChildArray)
             resolve(page.id);
-        }).catch(e => console.error(e));
+        }).catch(e => console.error('failed to bind page:' + e));
     }
 
     bindHeadChildNodes(nodeArray) {
         this.bindChildNodes(this.head, nodeArray);
+    }
+
+    /**
+     * 
+     * @param {string} title 
+     */
+    bindTitle(page) {
+        if (page.headChildArray) {
+            for (var child of page.headChildArray) {
+                console.log('bindTitle - child:' + child.localName);
+                if (isElement(child) && child.localName == 'title') {
+                    var title = child.innerText;
+                    console.log('bindTitle - title:' + title);
+                    if (!title) {
+                        return;
+                    }
+                    if (title.indexOf('${') != -1) {
+                        this.title.expression = new TextContentParser(attrValue).parse()
+                    } else {
+                        this.title.innerText = title;
+                    }
+                }
+            }
+        }
     }
 
     bindBodyChildNodes(nodeArray) {
@@ -78,7 +103,6 @@ class PageController {
         }
     }
 
-
     clearHeadChildNodes() {
         this.clearChildren(this.head);
     }
@@ -96,7 +120,6 @@ class PageController {
         }
     }
 
-
     unbindPage() {
         for (var name of this.body.getAttributeNames()) {
             this.body.removeAttribute(name);
@@ -111,7 +134,7 @@ class PageController {
                 this.head.removeChild(child);
             }
         }
-        this.titleExpression = '';
+        this.titleExpression = undefined;
     }
 
     /**
@@ -126,6 +149,7 @@ class PageController {
                 page = this.pages.getWelcomePage();
             }
             console.log('resolve findPageId: ' + uri);
+            console.log('resolve findPageId: ' + page);
             resolve(page);
         });
     }
@@ -137,10 +161,12 @@ class PageController {
     */
     refreshData(pageId) {
         var _this = this;
-        console.log('refreshData');
+        console.log('refreshData:' + pageId);
         var values = {};
+        console.log('pageDataMap:' + this.pageDataMap);
         var pageData = this.pageDataMap[pageId];
         var pageAttributes = this.pageAttributes[pageId];
+        console.log('attributes:' + JSON.stringify(this.pageAttributes));
         if (pageData) {
             for (var dataKey of pageAttributes.modelsToSubmitForModel) {
                 values[dataKey] = pageData.getValue([dataKey]);

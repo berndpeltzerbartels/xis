@@ -52,7 +52,8 @@ class Pages {
             var holder = document.createElement('div');
             holder.innerHTML = content;
             _this.pages[pageId].headChildArray = nodeListToArray(holder.childNodes);
-            _this.initializer.initialize(holder);
+            _this.pages[pageId].title =
+                _this.initializer.initialize(holder);
             return pageId;
         });
     }
