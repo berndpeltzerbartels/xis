@@ -11,8 +11,8 @@ repositories {
 
 dependencies {
 
-    annotationProcessor 'org.projectlombok:lombok:1.18.12'
-    implementation 'org.projectlombok:lombok:1.18.12'
+    annotationProcessor 'org.projectlombok:lombok:1.18.26'
+    implementation 'org.projectlombok:lombok:1.18.26'
     implementation project(':xis-context')
     implementation project(':xis-util')
     implementation project(':xis-remote-core')
@@ -28,7 +28,7 @@ dependencies {
 
     implementation 'org.graalvm.js:js-scriptengine:22.3.1'
     implementation 'org.graalvm.truffle:truffle-api:22.3.1'
-    implementation 'org.graalvm.js:js:22.1.0'
+    implementation 'org.graalvm.js:js:22.3.1'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.14.1'
 
     testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.16.1'

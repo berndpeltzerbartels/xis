@@ -24,6 +24,20 @@ function getElementByTagName(name) {
 }
 
 /**
+ * 
+ * @param {Element} parent 
+ * @param {string} childName 
+ * @returns {Element}
+ */
+function getChildElementByName(parent, childName) {
+    for (var i = 0; i < parent.childNodes.length; i++) {
+        var child = parent.childNodes.item(i);
+        if (isElement(child) && child.localName == childName) {
+            return child;
+        }
+    }
+}
+/**
  * Maps a NodeList into an array.
  *
  * @public
