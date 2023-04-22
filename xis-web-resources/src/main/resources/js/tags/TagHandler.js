@@ -18,14 +18,16 @@ class TagHandler {
     }
 
     findParentHtmlElement() {
-        var element = this;
+        var element = this.tag;
         while (element) {
+            debug.debug('findParentHtmlElement', element);
             if (this.isFrameworkElement(element)) {
                 element = element.parentNode;
             } else {
                 break;
             }
         }
+        console.log('return findParentHtmlElement:' + element.localName);
         return element;
     }
 

@@ -2,6 +2,7 @@ package one.xis.test.dom;
 
 
 import lombok.Getter;
+import lombok.NonNull;
 import one.xis.utils.lang.StringUtils;
 
 import java.util.*;
@@ -20,16 +21,21 @@ public class Element extends Node {
     private final Map<String, String> attributes = new HashMap<>();
     private final Collection<String> cssClasses = new HashSet<>();
 
-    public Element(String tagName) {
+    public Element(@NonNull String tagName) {
         this.localName = tagName;
     }
 
-    public void appendChild(Node node) {
+    public void appendChild(@NonNull Node node) {
         if (firstChild == null) {
             firstChild = node;
         } else {
-            firstChild.getLastSibling().nextSibling = node;
+            var last = firstChild.getLastSibling();
+            last.nextSibling = node;
+            if (last == last.nextSibling) {
+                throw new IllegalStateException();
+            }
         }
+
         node.parentNode = this;
         updateChildNodes();
     }
@@ -172,7 +178,15 @@ public class Element extends Node {
 
     @Override
     public String toString() {
-        return "<" + localName + ">";
+        StringBuilder s = new StringBuilder();
+        s.append("<");
+        s.append(localName);
+        if (!attributes.isEmpty()) {
+            s.append(" ");
+            s.append(attributes.entrySet().stream().map(e -> String.format("\"%s\"=\"%s\"", e.getKey(), e.getValue())).collect(Collectors.joining(" ")));
+        }
+        s.append(">");
+        return s.toString();
     }
 
     void updateChildNodes() {

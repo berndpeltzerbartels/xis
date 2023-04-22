@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script>
+
+        function test() {
+             var xyz = document.getElementsByTagName('xyz').item(0);   
+             
+             var div1 = document.createElement('div');
+             var div2 = document.createElement('div');
+             var div3 = document.createElement('div');
+
+             div1.innerText = 'div1';
+             div2.innerText = 'div2';
+             div3.innerText = 'div3';
+
+             xyz.appendChild(div1);
+             xyz.appendChild(div2);
+             xyz.appendChild(div3);
+        }
+
+    </script>
+
+</head>
+<body onload="test()">
+    <xyz/>
+</body>
+</html>

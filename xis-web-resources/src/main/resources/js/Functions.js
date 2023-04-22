@@ -4,6 +4,9 @@
  */
 function isElement(node) {
     var rv = node.childNodes !== null && node.childNodes !== undefined;
+    console.log('node.nodeValue:' + node.nodeValue);
+    console.log('node.localName:' + node.localName);
+    console.log('node.childNodes:' + node.childNodes);
     console.log('isElement' + node + ' => ' + rv);
     return rv;
 }

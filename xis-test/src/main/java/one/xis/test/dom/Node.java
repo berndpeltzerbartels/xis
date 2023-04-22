@@ -12,8 +12,14 @@ public abstract class Node {
         var previousSibling = getPreviousSibling();
         if (previousSibling != null) {
             previousSibling.nextSibling = node;
+            if (previousSibling == previousSibling.nextSibling) {
+                throw new IllegalStateException();
+            }
         }
         node.nextSibling = this;
+        if (node == node.nextSibling) {
+            throw new IllegalStateException();
+        }
         if (node.parentNode.firstChild == this) {
             node.parentNode.firstChild = node;
         }
@@ -23,7 +29,11 @@ public abstract class Node {
         var previousSibling = getPreviousSibling();
         if (previousSibling != null) {
             previousSibling.nextSibling = nextSibling;
+            if (previousSibling == previousSibling.nextSibling) {
+                throw new IllegalStateException();
+            }
         }
+
         if (parentNode.firstChild == this) {
             parentNode.firstChild = nextSibling;
         }
