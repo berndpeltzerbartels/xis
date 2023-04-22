@@ -84,7 +84,7 @@ class ForeachHandlerTest {
         script += "handler.refresh(data2);";// length = 1
         JSUtil.execute(script, Map.of("foreach", foreach, "debug", new Debug()));
 
-        //assertThat(foreach.getChildNodes().length).isEqualTo(1);
+        assertThat(foreach.getChildNodes().length).isEqualTo(2); // 2 subtags for every array-element
     }
 
 }

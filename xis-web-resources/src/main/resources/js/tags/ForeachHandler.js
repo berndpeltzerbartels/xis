@@ -34,7 +34,7 @@ class ForeachHandler extends TagHandler {
             } else {
                 // Cache is too long. We remove unused elements 
                 for (var child of children) {
-                    if (child.parentNode != this.tag) {
+                    if (child.parentNode == this.tag) {
                         this.tag.removeChild(child);
                     } else {
                         break;

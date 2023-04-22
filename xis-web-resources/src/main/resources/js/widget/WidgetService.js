@@ -44,7 +44,7 @@ class WidgetService {
      * @returns {Element}
      */
     asRootElement(tree) {
-        var div = document.createElement('div');
+        var div = createElement('div');
         div.innerHTML = trim(tree);
         return div.childNodes.item(0);
     }
