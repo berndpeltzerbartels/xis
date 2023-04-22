@@ -41,7 +41,7 @@ class ExpressionParserTest {
         var parameter = (Map<String, Object>) parameters.get(0);
         assertThat(parameter.get("type")).isEqualTo("VAR");
         assertThat((Collection<String>) parameter.get("path")).containsExactly("a", "b");
-        assertThat(parameter.get("next")).isNull();
+        assertThat(parameter.get("next")).isNull(); // TODO check with function in b
     }
 
     // TODO
