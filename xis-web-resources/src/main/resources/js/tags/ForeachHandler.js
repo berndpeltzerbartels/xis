@@ -25,16 +25,21 @@ class ForeachHandler extends TagHandler {
             if (i < arr.length) {
                 for (var child of children) {
                     if (child.parentNode != this.tag) {
-                        debug.debug('append child in refresh of foreach-handler:', [this, child]);
-                        console.log('foreach - appendChild');
                         this.tag.appendChild(child);
                     }
                     if (child.refresh) {
                         child.refresh(subData);
                     }
                 }
-            } else if (!child.parentNode) {
-                break;
+            } else {
+                // Cache is too long. We remove unused elements 
+                for (var child of children) {
+                    if (child.parentNode != this.tag) {
+                        this.tag.removeChild(child);
+                    } else {
+                        break;
+                    }
+                }
             }
         }
     }
