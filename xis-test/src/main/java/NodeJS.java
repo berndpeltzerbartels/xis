@@ -7,7 +7,7 @@ public class NodeJS {
 
 
     public void execute(String jsFilePath) {
-        execute(getResourceDir(), "node", jsFilePath);
+        execute(getResourceDir(), "/opt/homebrew/bin/node", "--inspect", jsFilePath);
     }
 
 
