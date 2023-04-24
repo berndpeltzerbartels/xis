@@ -164,14 +164,14 @@ public class Element extends Node {
     }
 
     Element getElementById(String id) {
-        if (id.equals(attributes.get(id))) {
+        if (id.equals(attributes.get("id"))) {
             return this;
         }
         if (nextSibling != null && nextSibling instanceof Element) {
-            ((Element) nextSibling).getElementById(id);
+            return ((Element) nextSibling).getElementById(id);
         }
         if (firstChild != null && firstChild instanceof Element) {
-            ((Element) firstChild).getElementById(id);
+            return ((Element) firstChild).getElementById(id);
         }
         return null;
     }

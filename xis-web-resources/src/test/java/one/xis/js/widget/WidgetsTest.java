@@ -15,7 +15,7 @@ import java.util.function.Function;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings("unchecked")
-class WidgetServiceTest {
+class WidgetsTest {
 
 
     private String javascript;
@@ -25,17 +25,16 @@ class WidgetServiceTest {
         javascript = IOUtils.getResourceAsString("js/Data.js");
         javascript += IOUtils.getResourceAsString("js/tags/TagHandler.js");
         javascript += IOUtils.getResourceAsString("js/widget/Widget.js");
-        javascript += IOUtils.getResourceAsString("js/widget/WidgetService.js");
+        javascript += IOUtils.getResourceAsString("js/widget/Widgets.js");
         javascript += IOUtils.getResourceAsString("js/widget/WidgetContainerHandler.js");
-        javascript += IOUtils.getResourceAsString("js/LoggingProxy.js");
-        javascript += IOUtils.getResourceAsString("one/xis/widget/WidgetTestMocks.js");
+        javascript += IOUtils.getResourceAsString("one/xis/widget/WidgetsTestMocks.js");
     }
 
     @Test
     void loadWidgets() throws ScriptException {
         var script = javascript;
-        script += "var widgetService = new WidgetService(client);";
-        script += "widgetService.loadWidgets(config); widgetService.widgets";
+        script += "var widgets = new Widgets(client);";
+        script += "widgets.loadWidgets(config); widgets.widgets";
 
         Function<String, Element> createElement = name -> {
             var element = new Element(name);

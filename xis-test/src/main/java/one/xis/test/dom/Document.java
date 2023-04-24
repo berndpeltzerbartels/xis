@@ -41,7 +41,7 @@ public class Document {
     }
 
     public Element getElementById(String id) {
-        return getElementById(id);
+        return rootNode.getElementById(id);
     }
 
     public List<Element> getElementsByClass(String cssClass) {

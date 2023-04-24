@@ -3,11 +3,15 @@ class LoggingProxy {
     constructor(obj) {
         this.obj = obj;
         for (var method of this.methods()) {
+        console.log('proxy method: ' +method.name);
             this[method.name] = function () {
                 console.log(method.name + '(' + this.formatParameters(arguments) + ")");
                 return this.obj[method.name].apply(this, arguments);
             }
         }
+          for (var method of this.methods()) {
+                  console.log('method: ' +method.name);
+          }
     }
 
     methods() {

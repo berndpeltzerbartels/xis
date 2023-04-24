@@ -166,5 +166,16 @@ class DocumentTest {
 
     }
 
+    @Test
+    void getElementById() {
+        var xml = "<x><a/><b id=\"123\" /></x>";
+        var document = Document.of(xml);
+        
+        var element = document.getElementById("123");
+
+        assertThat(element).isNotNull();
+        assertThat(element.localName).isEqualTo("b");
+    }
+
 
 }

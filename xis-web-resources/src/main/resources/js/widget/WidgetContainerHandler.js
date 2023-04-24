@@ -3,11 +3,11 @@ class WidgetContainerHandler extends TagHandler {
     /**
      *
      * @param {Element} tag
-     * @param {WidgetService} widgetService
+     * @param {Widgets} widgets
      */
-    constructor(tag, widgetService) {
+    constructor(tag, widgets) {
         super(tag);
-        this.widgetService = widgetService;
+        this.widgets = widgets;
         this.parent = this.findParentHtmlElement();
         this.initialWidgetId = this.getAttribute('widget');
         this.widgetRoot;
@@ -15,13 +15,15 @@ class WidgetContainerHandler extends TagHandler {
     }
 
     refresh(data) {
+        console.log('refresh');
         this.ensureWidgetPresent();
-        if (this.widgetRoot.refresh) {
-            this.widgetRoot.refresh(data);
+        if (this.widgetRoot._refresh) {
+            this.widgetRoot._refresh(data);
         }
     }
 
     ensureWidgetPresent() {
+        console.log('ensureWidgetPresent');
         if (!this.widgetRoot) {
             this.widgetRoot = this.getWidgetRoot(this.widgetId);
             this.showWidget(this.widgetRoot);
@@ -29,16 +31,13 @@ class WidgetContainerHandler extends TagHandler {
     }
 
     showWidget(widgetRoot) {
-        if (this.parent.nextSibling) {
-            this.parent.insertBefore(widgetRoot, this.parent.nextSibling);
-        } else {
-            this.parent.appendChild(widgetRoot);
-        }
+        console.log('showWidget');
+        this.tag.appendChild(widgetRoot);
     }
 
 
     getWidgetRoot(widgetId) {
-        return this.widgetService.getWidget(widgetId).root;
+        return this.widgets.getWidget(widgetId).root;
     }
 
 }

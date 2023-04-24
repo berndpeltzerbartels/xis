@@ -1,4 +1,4 @@
-class WidgetService {
+class Widgets {
 
     /**
      *
