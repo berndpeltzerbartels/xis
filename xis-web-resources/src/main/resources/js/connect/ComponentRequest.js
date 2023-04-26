@@ -12,8 +12,7 @@ class ComponentRequest {
         this.data = {};
         this.clientId = '';
         this.userId = '';
-        this.key = '';
         this.controllerId = '';
-        this.type = '';
+        this.action = '';
     }
 }

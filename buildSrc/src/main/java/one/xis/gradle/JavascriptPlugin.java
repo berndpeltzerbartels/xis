@@ -28,17 +28,18 @@ public class JavascriptPlugin implements Plugin<Project> {
                 .filter(file -> !file.getName().equals(API_TEST_OUT_FILE_NAME))
                 .map(this::toJSFile).collect(Collectors.toUnmodifiableSet());
         writeApiFile(jsFiles, project);
-        writeApiTestFile(jsFiles, project);
+        //writeApiTestFile(jsFiles, project);
     }
 
     private void writeApiFile(Set<JSFile> jsFiles, Project project) {
         var files = new HashSet<>(jsFiles);
-        files.add(toJSFile(getHttpClientFile(project)));
+        //files.add(toJSFile(getHttpClientFile(project)));
         var outFile = getOutFile(project);
         outFile.delete();
         writeToOutFile(files, outFile);
     }
 
+    /*
     private void writeApiTestFile(Set<JSFile> jsFiles, Project project) {
         var files = new HashSet<>(jsFiles);
         files.add(toJSFile(getHttpClientMockFile(project)));
@@ -46,6 +47,8 @@ public class JavascriptPlugin implements Plugin<Project> {
         outFile.delete();
         writeToOutFile(files, outFile);
     }
+
+     */
 
     private void writeToOutFile(Set<JSFile> jsFiles, File outFile) {
         var sortedJsFiles = JSFileSorter.sort(jsFiles);
@@ -115,6 +118,7 @@ public class JavascriptPlugin implements Plugin<Project> {
         return new File(project.getProjectDir(), "src/main/resources/js");
     }
 
+    /*
     private File getHttpClientFile(Project project) {
         return new File(project.getProjectDir(), "src/main/resources/HttpClient.js");
     }
@@ -122,6 +126,7 @@ public class JavascriptPlugin implements Plugin<Project> {
     private File getHttpClientMockFile(Project project) {
         return new File(project.getProjectDir(), "src/main/resources/HttpClientMock.js");
     }
+    */
 
     private void printfln(String pattern, Object... args) {
         System.out.printf(pattern, args);

@@ -3,12 +3,16 @@
  * @returns {boolean}
  */
 function isElement(node) {
-    var rv = node.childNodes !== null && node.childNodes !== undefined;
-    console.log('node.nodeValue:' + node.nodeValue);
-    console.log('node.localName:' + node.localName);
-    console.log('node.childNodes:' + node.childNodes);
-    console.log('isElement' + node + ' => ' + rv);
-    return rv;
+    return node.nodeType == 1;
+}
+
+function refreshElement(element, data) {
+    for (let index = 0; index < element.childNodes.length; index++) {
+        const child = this.childNodes[index];
+        if (child._refresh) {
+            child._refresh(data);
+        }
+    }
 }
 
 /**

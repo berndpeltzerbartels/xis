@@ -4,10 +4,12 @@ class PageController {
     /**
      * @param {Client} client
      * @param {Pages} pages
+     * @param {Initializer} initializer
      */
-    constructor(client, pages) {
+    constructor(client, pages, initializer) {
         this.client = client;
         this.pages = pages;
+        this.initializer = initializer;
         this.head = getElementByTagName('head');
         this.body = getElementByTagName('body');
         this.title = getElementByTagName('title');
@@ -54,7 +56,12 @@ class PageController {
     }
 
     bindHeadChildNodes(nodeArray) {
-        this.bindChildNodes(this.head, nodeArray);
+        for (var node of nodeArray) {
+            if (node.nodeType == 1 && node.localName == 'title') {
+                continue;
+            }
+            this.head.appendChild(node);
+        }
     }
 
     /**
@@ -95,12 +102,14 @@ class PageController {
         for (var name of Object.keys(attributes)) {
             this.body.setAttribute(name, attributes[name]);
         }
+        this.initializer.initializeAttributes(this.body);
     }
 
     clearBodyAttributes() {
         for (var name of this.body.getAttributeNames()) {
             this.body.removeAttribute(name);
         }
+        this.body._attributes = undefined;
     }
 
     clearHeadChildNodes() {
@@ -172,7 +181,7 @@ class PageController {
                 values[dataKey] = pageData.getValue([dataKey]);
             }
         }
-        return client.loadPageData(pageId, values).then(response => {
+        return this.client.loadPageData(pageId, values).then(response => {
             _this.pageDataMap[pageId] = new Data(response.data);
             return pageId;
         });

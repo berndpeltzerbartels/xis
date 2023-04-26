@@ -10,6 +10,8 @@ import one.xis.test.js.LocalStorage;
 
 import javax.script.CompiledScript;
 import javax.script.ScriptException;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.*;
 
 @SuppressWarnings("unused")
@@ -33,7 +35,8 @@ public class IntegrationTestContext {
         var resources = new Resources();
         frontendService = internalContext(controllers).getSingleton(FrontendService.class);
         document = Document.of(frontendService.getRootPageHtml());
-        compiledScript = compiledScript(resources.getByPath("xis-test.js").getContent() + "\n" + START_SCRIPT);
+        var script = resources.getByPath("xis.js").getContent() + "\n" + START_SCRIPT;
+        compiledScript = compileScript(script);
     }
 
     public void openPage(String uri, Map<String, Object> parameters) {
@@ -49,7 +52,25 @@ public class IntegrationTestContext {
         openPage(uri, Collections.emptyMap());
     }
 
-    private CompiledScript compiledScript(String javascript) {
+    class ErrorWriter extends Writer {
+
+        @Override
+        public void write(char[] cbuf, int off, int len) throws IOException {
+            System.err.print(new String(cbuf, off, len));
+        }
+
+        @Override
+        public void flush() throws IOException {
+            System.err.println();
+        }
+
+        @Override
+        public void close() throws IOException {
+            System.err.println();
+        }
+    }
+
+    private CompiledScript compileScript(String javascript) {
         var bindings = new HashMap<String, Object>();
         bindings.put("controllerBridge", new ControllerBridge(frontendService));
         bindings.put("localStorage", localStorage);

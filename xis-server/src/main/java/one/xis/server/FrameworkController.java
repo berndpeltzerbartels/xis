@@ -22,4 +22,6 @@ public interface FrameworkController {
 
     String getWidgetHtml(String id);
 
+    String getApiJs();
+
 }

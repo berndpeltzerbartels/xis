@@ -3,6 +3,9 @@ package one.xis.server;
 
 import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
+import one.xis.context.XISInit;
+import one.xis.resource.Resource;
+import one.xis.resource.Resources;
 import org.tinylog.Logger;
 
 import java.util.Map;
@@ -14,6 +17,13 @@ public class FrontendService {
     private final ControllerService controllerService;
     private final ConfigService configService;
     private final HtmlResourceService htmlResourceService;
+    private final Resources resources;
+    private Resource apiJsResource;
+
+    @XISInit
+    void init() {
+        apiJsResource = resources.getByPath("xis.js");
+    }
 
     public Config getConfig() {
         return configService.getConfig();
@@ -60,4 +70,7 @@ public class FrontendService {
     }
 
 
+    public String getApiJs() {
+        return apiJsResource.getContent();
+    }
 }

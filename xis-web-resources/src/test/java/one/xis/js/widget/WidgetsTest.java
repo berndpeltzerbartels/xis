@@ -34,7 +34,7 @@ class WidgetsTest {
     void loadWidgets() throws ScriptException {
         var script = javascript;
         script += "var widgets = new Widgets(client);";
-        script += "widgets.loadWidgets(config); widgets.widgets";
+        script += "widgets.loadWidgets(config); widgets.getWidget('widgetId');";
 
         Function<String, Element> createElement = name -> {
             var element = new Element(name);

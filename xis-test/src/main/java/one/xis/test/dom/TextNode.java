@@ -7,6 +7,7 @@ public class TextNode extends Node {
     @Getter
     public String nodeValue;
 
+    public static final int nodeType = 3;
     @SuppressWarnings("unused")
     public Object _expression;
 

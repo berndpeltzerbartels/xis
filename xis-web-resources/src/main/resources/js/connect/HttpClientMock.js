@@ -55,7 +55,7 @@ class HttpClientMock {
     }
 
     responseForPost(uri, payload, headers) {
-        var requestJson = JSON.tringify(payload);
+        var requestJson = JSON.stringify(payload);
         switch (uri) {
             case '/xis/page/model': return this.controllerBridge.getPageModel(uri, requestJson, headers);
             case '/xis/widget/model': return this.controllerBridge.getWidgetModel(uri, requestJson, headers);

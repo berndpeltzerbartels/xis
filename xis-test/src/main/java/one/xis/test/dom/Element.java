@@ -6,6 +6,7 @@ import lombok.NonNull;
 import one.xis.utils.lang.StringUtils;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @Getter
@@ -17,6 +18,11 @@ public class Element extends Node {
     public String innerHTML;
     public String innerText;
     public Object _handler;
+    public Collection<Object> _attributes;
+    public Consumer<Object> _refresh = obj -> {
+    };
+
+    public final int nodeType = 1;
     public final NodeList childNodes = new NodeList();
     private final Map<String, String> attributes = new HashMap<>();
     private final Collection<String> cssClasses = new HashSet<>();
@@ -26,6 +32,9 @@ public class Element extends Node {
     }
 
     public void appendChild(@NonNull Node node) {
+        if (childNodes.stream().filter(Element.class::isInstance).map(Element.class::cast).anyMatch(e -> e.getLocalName().equals("title"))) {
+            if (node.getName().equals("title")) throw new IllegalStateException();
+        }
         if (firstChild == null) {
             firstChild = node;
         } else {

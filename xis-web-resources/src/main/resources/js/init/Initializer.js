@@ -28,6 +28,11 @@ class Initializer {
         this.initializeChildNodes(element);
     }
 
+    /**
+    * Initializes a html-element, which means 
+    * this is not a xis-element like <xis:foreach/>
+    * @param {Element} element 
+    */
     initializeHtmlElement(element) {
         console.log('initializeHtmlElement:' + element);
         if (element.getAttribute('repeat')) {
@@ -37,15 +42,16 @@ class Initializer {
             this.initializeFor(element);
         }
         element._refresh = function (data) {
-            if (this._handler) {
-                this._handler.refresh(data);
-            }
-            else {
+            if (this._attributes) {
                 for (var attribute of this._attributes) {
                     this.setAttribute(atttribute.name, attribute.expression.evaluate(data));
                 }
-                for (var i = 0; i < this.childNodes; i++) {
-                    var child = nodeList.item(i);
+            }
+            if (this._handler) {
+                this._handler.refresh(data);
+            } else {
+                for (var i = 0; i < this.childNodes.length; i++) {
+                    var child = this.childNodes.item(i);
                     if (child._refresh) {
                         child._refresh(data);
                     }
@@ -85,10 +91,10 @@ class Initializer {
         switch (element.localName) {
             case 'xis:foreach':
             case 'xis:forEach':
-                element._handler = new ForeachHandler(element);
+                this.decorateForeach(element);
                 break;
             case 'xis:widget-container':
-                element._handler = new WidgetContainerHandler(element);
+                this.decorateContainer(element);
         }
     }
 
@@ -106,11 +112,8 @@ class Initializer {
     initializeRepeat(element) {
         console.log('initializeRepeat:' + element);
         var arr = doSplit(element.getAttribute('repeat'), ':');
-        var foreach = document.createElement('xis:foreach');
-        foreach.setAttribute('var', arr[0]);
-        foreach.setAttribute('array', arr[1]);
+        var foreach = this.createForEach(arr[0], arr[1]);
         this.domAccessor.insertParent(element, foreach);
-        this.initializeFrameworkElement(foreach);
     }
 
 
@@ -120,13 +123,32 @@ class Initializer {
     */
     initializeFor(element) {
         var arr = doSplit(element.getAttribute('for'), ':');
-        var foreach = document.createElement('xis:foreach');
-        foreach.setAttribute('var', arr[0]);
-        foreach.setAttribute('array', arr[1]);
+        var foreach = this.createForEach(arr[0], arr[1]);
         this.domAccessor.insertChild(element, foreach);
-        this.initializeFrameworkElement(foreach);
     }
 
+    createForEach(varName, array) {
+        var foreach = document.createElement('xis:foreach');
+        foreach.setAttribute('var', varName);
+        foreach.setAttribute('array', array);
+        return this.decorateForeach(foreach);
+    }
+
+    decorateForeach(foreach) {
+        foreach._handler = new ForeachHandler(foreach);
+        foreach._refresh = function (data) {
+            this._handler.refresh(data);
+        }
+        return foreach;
+    }
+
+    decorateContainer(container) {
+        container._handler = new WidgetContainerHandler(container);
+        container._refresh = function (data) {
+            this._handler.refresh(data);
+        }
+        return container;
+    }
 
 
     isFrameworkElement(element) {

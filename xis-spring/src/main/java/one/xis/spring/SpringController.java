@@ -67,4 +67,10 @@ class SpringController implements FrameworkController {
     public String getWidgetHtml(@PathVariable("id") String id) {
         return frontendService.getWidgetHtml(id);
     }
+
+    @Override
+    @GetMapping("/xis.js")
+    public String getApiJs() {
+        return frontendService.getApiJs();
+    }
 }

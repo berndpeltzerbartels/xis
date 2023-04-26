@@ -27,8 +27,9 @@ class PageControllerTest {
         javascript = IOUtils.getResourceAsString("js/page/PageController.js");
         javascript += IOUtils.getResourceAsString("js/Functions.js");
         javascript += IOUtils.getResourceAsString("js/Data.js");
+        javascript += IOUtils.getResourceAsString("js/init/Initializer.js");
         javascript += IOUtils.getResourceAsString("one/xis/page/PageControllerTestMocks.js");
-        javascript += "var pageController = new PageController(client, pages);";
+        javascript += "var pageController = new PageController(client, pages, new Initializer());";
         document = Document.fromResource("index.html");
     }
 

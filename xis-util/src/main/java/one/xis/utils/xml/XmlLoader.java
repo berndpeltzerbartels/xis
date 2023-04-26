@@ -30,7 +30,9 @@ class XmlLoader {
 
     @SneakyThrows
     private DocumentBuilder documentBuilder() {
-        return DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        var factory = DocumentBuilderFactory.newInstance();
+        factory.setValidating(false);
+        return factory.newDocumentBuilder();
     }
 
 
