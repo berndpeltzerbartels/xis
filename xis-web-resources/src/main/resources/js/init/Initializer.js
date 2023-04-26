@@ -135,7 +135,7 @@ class Initializer {
     }
 
     decorateForeach(foreach) {
-        foreach._handler = new ForeachHandler(foreach);
+        foreach._handler = new ForeachHandler(foreach, this);
         foreach._refresh = function (data) {
             this._handler.refresh(data);
         }

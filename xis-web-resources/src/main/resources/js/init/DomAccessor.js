@@ -9,7 +9,6 @@ class DomAccessor {
             elementToInsert.appendChild(element);
         } else {
             console.log(element + ' has no parent');
-            element.parentNode = elementToInsert;
             elementToInsert.appendChild(element);
         }
     }

@@ -10,9 +10,11 @@ class NodeCache {
 
     /**
      * @param {array<Node>} nodeArray
+     * @param {Initializer} initializer
      */
-    constructor(nodeArray) {
+    constructor(nodeArray, initializer) {
         this.nodeArray = nodeArray;
+        this.initializer = initializer;
         this.cache = [nodeArray];
     }
 
@@ -47,12 +49,42 @@ class NodeCache {
      * @param {Node} node
      * @returns {array<Node>}
      */
-    cloneChildNodes(node) {
+    cloneChildNodes() {
         var clones = [];
-        for (node of this.nodeArray) {
-            clones.push(node.cloneNode());
+        for (var node of this.nodeArray) {
+            var clone = this.cloneNode(node);
+            this.initializer.initialize(clone);
+            clones.push(clone);
         }
         return clones;
+    }
+
+    cloneNode(node) {
+        if (isElement(node)) {
+            return this.cloneElement(node);
+        } else {
+            return this.cloneTextNode(node);
+        }
+    }
+
+    /**
+     * 
+     * @param {Element} element 
+     */
+    cloneElement(element) {
+        var clone = document.createElement(element.localName);
+        for (var name of element.getAttributeNames()) {
+            clone.setAttribute(name, element.getAttribute(name));
+        }
+        for (let index = 0; index < element.childNodes.length; index++) {
+            const child = element.childNodes.item(index);
+            clone.appendChild(this.cloneNode(child));
+        }
+        return clone;
+    }
+
+    cloneTextNode(node) {
+        return document.createTextNode(node.nodeValue);
     }
 }
 
