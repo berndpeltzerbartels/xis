@@ -41,10 +41,11 @@ class Initializer {
         if (element.getAttribute('for')) {
             this.initializeFor(element);
         }
+        this.initializeAttributes(element);
         element._refresh = function (data) {
             if (this._attributes) {
                 for (var attribute of this._attributes) {
-                    this.setAttribute(atttribute.name, attribute.expression.evaluate(data));
+                    this.setAttribute(attribute.name, attribute.expression.evaluate(data));
                 }
             }
             if (this._handler) {
@@ -112,6 +113,7 @@ class Initializer {
     initializeRepeat(element) {
         console.log('initializeRepeat:' + element);
         var arr = doSplit(element.getAttribute('repeat'), ':');
+        element.removeAttribute('repeat');
         var foreach = this.createForEach(arr[0], arr[1]);
         this.domAccessor.insertParent(element, foreach);
     }
@@ -123,6 +125,7 @@ class Initializer {
     */
     initializeFor(element) {
         var arr = doSplit(element.getAttribute('for'), ':');
+        element.removeAttribute('for');
         var foreach = this.createForEach(arr[0], arr[1]);
         this.domAccessor.insertChild(element, foreach);
     }
