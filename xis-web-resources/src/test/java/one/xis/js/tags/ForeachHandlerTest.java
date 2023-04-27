@@ -2,7 +2,6 @@ package one.xis.js.tags;
 
 import one.xis.test.dom.Document;
 import one.xis.test.dom.Element;
-import one.xis.test.js.Debug;
 import one.xis.test.js.JSUtil;
 import one.xis.utils.io.IOUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,8 +25,10 @@ class ForeachHandlerTest {
         javascript += IOUtils.getResourceAsString("js/tags/TagHandler.js");
         javascript += IOUtils.getResourceAsString("js/tags/ForeachHandler.js");
         javascript += IOUtils.getResourceAsString("js/tags/NodeCache.js");
+        javascript += IOUtils.getResourceAsString("js/init/DomAccessor.js");
         javascript += IOUtils.getResourceAsString("js/init/Initializer.js");
         javascript += IOUtils.getResourceAsString("js/Functions.js");
+        javascript += IOUtils.getResourceAsString("js/Refresher.js");
     }
 
     @BeforeEach
@@ -54,10 +55,11 @@ class ForeachHandlerTest {
     void iterate() throws ScriptException {
         var script = javascript;
         script += "var data = new Data({\"a\": {\"b\": {\"c\": [{\"id\": 1, \"title\": \"title1\"}, {\"id\": 2, \"title\": \"title2\"}, {\"id\": 3, \"title\": \"title3\"}]}}});";
-        script += "var handler = new ForeachHandler(foreach);";
+        script += "var initializer = new Initializer(new DomAccessor());";
+        script += "var handler = new ForeachHandler(foreach, initializer);";
         script += "handler.refresh(data);";
 
-        JSUtil.execute(script, Map.of("foreach", foreach, "debug", new Debug()));
+        JSUtil.execute(script, Map.of("foreach", foreach, "document", document));
 
         var childElementClasses = foreach.getChildElements().stream()
                 .map(Element::getCssClasses)
@@ -79,10 +81,11 @@ class ForeachHandlerTest {
         var script = javascript;
         script += "var data1 = new Data({\"a\": {\"b\": {\"c\": [{\"id\": 1, \"title\": \"title1\"}, {\"id\": 2, \"title\": \"title2\"}, {\"id\": 3, \"title\": \"title3\"}]}}});";
         script += "var data2 = new Data({\"a\": {\"b\": {\"c\": [{\"id\": 1, \"title\": \"title1\"}]}}});";
-        script += "var handler = new ForeachHandler(foreach);";
+        script += "var initializer = new Initializer(new DomAccessor());";
+        script += "var handler = new ForeachHandler(foreach, initializer);";
         script += "handler.refresh(data1);"; // length = 3
         script += "handler.refresh(data2);";// length = 1
-        JSUtil.execute(script, Map.of("foreach", foreach, "debug", new Debug()));
+        JSUtil.execute(script, Map.of("foreach", foreach, "document", document));
 
         assertThat(foreach.getChildNodes().length).isEqualTo(2); // 2 subtags for every array-element
     }

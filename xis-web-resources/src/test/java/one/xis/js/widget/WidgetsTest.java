@@ -33,15 +33,14 @@ class WidgetsTest {
     @Test
     void loadWidgets() throws ScriptException {
         var script = javascript;
-        script += "var widgets = new Widgets(client);";
-        script += "widgets.loadWidgets(config); widgets.getWidget('widgetId');";
+        script += "var widgets = new Widgets(client);\n";
+        script += "widgets.loadWidgets(config).then(config => console.log('ok'));widgets.widgets";
 
         Function<String, Element> createElement = name -> {
             var element = new Element(name);
             element.appendChild(new Element("div"));
             return element;
         };
-
         Function<String, String> trim = String::trim;
 
         var bindings = new HashMap<String, Object>();

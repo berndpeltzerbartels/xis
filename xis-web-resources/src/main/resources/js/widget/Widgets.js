@@ -23,17 +23,24 @@ class Widgets {
     * @returns {Promise<string>}
     */
     loadWidget(widgetId) {
+        console.log('Loading widget ' + widgetId);
         var _this = this;
         return this.client.loadWidget(widgetId).then(widgetHtml => {
+            console.log('Widget-Html: ' + widgetHtml);
             var widget = new Widget();
             widget.id = widgetId;
             widget.root = _this.asRootElement(widgetHtml);
             widget.attributes = _this.widgetAttributes[widgetId];
-            _this.widgets[widgetId] = widget;
+            _this.addWidget(widgetId, widget);
         });
     }
 
+    addWidget(widgetId, widget) {
+        this.widgets[widgetId] = widget;
+    }
+
     getWidgetRoot(widgetId) {
+        console.log('widget-json: ' + JSON.stringify(this.widgets));
         return this.widgets[widgetId].root;
     }
 

@@ -4,12 +4,11 @@ var widgets = {
     getWidget: function(id) {
         var widgetRoot =  document.createElement('div');
         widgetRoot.setAttribute('id', 'widgetRoot');
-        widgetRoot._refresh = data => {refreshData = data};
-        return {id: id, root: widgetRoot, attributes: {}, _refresh: function(data){refreshData=dfata; }};
+        return {id: id, root: widgetRoot, attributes: {}};
     }
 }
 
-var data = new Data({});
+var data = new Data({x:123});
 
 var client = {
 

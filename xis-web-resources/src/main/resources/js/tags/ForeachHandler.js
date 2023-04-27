@@ -27,9 +27,7 @@ class ForeachHandler extends TagHandler {
                     if (child.parentNode != this.tag) {
                         this.tag.appendChild(child);
                     }
-                    if (child._refresh) {
-                        child._refresh(subData);
-                    }
+                    refreshNode(child, subData);
                 }
             } else {
                 // Cache is too long. We remove unused elements 

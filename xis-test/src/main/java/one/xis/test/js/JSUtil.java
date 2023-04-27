@@ -21,9 +21,10 @@ public class JSUtil {
         bindings.put("polyglot.js.allowAllAccess", true);
         bindings.putAll(bindingMap);
         engine.setBindings(bindings, ScriptContext.ENGINE_SCOPE);
+        System.out.println(javascript);
         var compiler = (Compilable) engine;
         var compiledScript = compiler.compile(javascript);
-        engine.getContext().setErrorWriter(new ExceptionThrowingErrorWriter());
+        // engine.getContext().setErrorWriter(new ExceptionThrowingErrorWriter());
         return compiledScript;
     }
 

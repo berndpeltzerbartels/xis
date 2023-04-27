@@ -42,26 +42,10 @@ class Initializer {
             this.initializeFor(element);
         }
         this.initializeAttributes(element);
-        element._refresh = function (data) {
-            if (this._attributes) {
-                for (var attribute of this._attributes) {
-                    this.setAttribute(attribute.name, attribute.expression.evaluate(data));
-                }
-            }
-            if (this._handler) {
-                this._handler.refresh(data);
-            } else {
-                for (var i = 0; i < this.childNodes.length; i++) {
-                    var child = this.childNodes.item(i);
-                    if (child._refresh) {
-                        child._refresh(data);
-                    }
-                }
-            }
-        }
     }
 
     initializeAttributes(element) {
+        console.log('initializeAttributes:' + element);
         element._attributes = [];
         for (var attrName of element.getAttributeNames()) {
             var attrValue = element.getAttribute(attrName);
@@ -81,9 +65,6 @@ class Initializer {
     initializeTextNode(node) {
         if (node.nodeValue && node.nodeValue.indexOf('${') != -1) {
             node._expression = new TextContentParser(node.nodeValue).parse();
-            node._refresh = function (data) {
-                this.nodeValue = this._expression.evaluate(data);
-            }
         }
     }
 
@@ -139,17 +120,11 @@ class Initializer {
 
     decorateForeach(foreach) {
         foreach._handler = new ForeachHandler(foreach, this);
-        foreach._refresh = function (data) {
-            this._handler.refresh(data);
-        }
         return foreach;
     }
 
     decorateContainer(container) {
         container._handler = new WidgetContainerHandler(container);
-        container._refresh = function (data) {
-            this._handler.refresh(data);
-        }
         return container;
     }
 

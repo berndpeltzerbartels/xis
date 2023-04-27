@@ -6,15 +6,6 @@ function isElement(node) {
     return node.nodeType == 1;
 }
 
-function refreshElement(element, data) {
-    for (let index = 0; index < element.childNodes.length; index++) {
-        const child = this.childNodes[index];
-        if (child._refresh) {
-            child._refresh(data);
-        }
-    }
-}
-
 /**
  * Finds a unique element
  * 
@@ -114,3 +105,4 @@ function doSplit(string, separatorChar) {
 function createElement(name) {
     return document.createElement(name);
 }
+

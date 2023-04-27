@@ -41,8 +41,8 @@ class InitializerTest {
     }
 
     @Test
-    void refreshMethodAdded() throws ScriptException {
-        var document = Document.of("<a><b/><c><d/></c></a>");
+    void elementsAndTextNodeEvaluated() throws ScriptException {
+        var document = Document.of("<a><b/><c><d>${bla}</d></c></a>");
 
         var script = javascriptDefinitions;
         script += "var initializer = new Initializer(new DomAccessor());";
@@ -51,10 +51,9 @@ class InitializerTest {
         var compiledScript = JSUtil.compile(script, Map.of("document", document, "console", new Console()));
         compiledScript.eval();
 
-        assertThat(document.getElementByTagName("a")._refresh).isNotNull();
-        assertThat(document.getElementByTagName("b")._refresh).isNotNull();
-        assertThat(document.getElementByTagName("c")._refresh).isNotNull();
-        assertThat(document.getElementByTagName("d")._refresh).isNotNull();
+        assertThat(document.getElementByTagName("d").firstChild).isNotNull();
+        assertThat(document.getElementByTagName("d").firstChild).isInstanceOf(TextNode.class);
+        assertThat(((TextNode) document.getElementByTagName("d").firstChild)._expression).isNotNull();
     }
 
     @Test
@@ -208,7 +207,6 @@ class InitializerTest {
         assertThat(title.getChildNodes().length).isEqualTo(1);
         var textNode = (TextNode) title.childNodes.item(0);
         assertThat(textNode._expression).isNotNull();
-        assertThat(textNode._refresh).isNotNull();
 
     }
 

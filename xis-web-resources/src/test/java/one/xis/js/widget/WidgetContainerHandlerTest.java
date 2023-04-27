@@ -21,6 +21,7 @@ class WidgetContainerHandlerTest {
     void initScript() {
         javascript = IOUtils.getResourceAsString("js/Data.js");
         javascript += IOUtils.getResourceAsString("js/Functions.js");
+        javascript += IOUtils.getResourceAsString("js/Refresher.js");
         javascript += IOUtils.getResourceAsString("js/tags/TagHandler.js");
         javascript += IOUtils.getResourceAsString("js/widget/Widget.js");
         javascript += IOUtils.getResourceAsString("js/widget/WidgetContainerHandler.js");
@@ -29,21 +30,20 @@ class WidgetContainerHandlerTest {
 
     @Test
     void refresh() throws ScriptException {
-        var document = Document.of("<html><body><div id=\"container\"/></body></html>");
+        var document = Document.of("<html><body><div id=\"container\"></div></body></html>");
         var containerDiv = document.getElementById("container");
 
         var script = javascript;
         script += "var handler = new WidgetContainerHandler(tag, widgets);";
-        script += "handler.refresh(data);refreshData";
+        script += "handler.refresh(data)";
 
         var bindings = new HashMap<String, Object>();
         bindings.put("document", document);
         bindings.put("tag", containerDiv);
         bindings.put("debug", new Debug());
 
-        var refreshData = JSUtil.execute(script, bindings);
+        JSUtil.execute(script, bindings);
 
-        assertThat(refreshData).isNotNull();
         assertThat(containerDiv.firstChild).isNotNull();
         assertThat(containerDiv.firstChild).isInstanceOf(Element.class);
         assertThat((((Element) containerDiv.firstChild).getAttribute("id"))).isEqualTo("widgetRoot");

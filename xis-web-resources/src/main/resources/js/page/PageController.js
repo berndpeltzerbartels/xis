@@ -109,6 +109,7 @@ class PageController {
         for (var name of this.body.getAttributeNames()) {
             this.body.removeAttribute(name);
         }
+        console.log('clearBodyAttributes:' + this.body);
         this.body._attributes = undefined;
     }
 
@@ -197,8 +198,8 @@ class PageController {
         return new Promise((resolve, _) => {
             var data = _this.pageDataMap[pageId];
             _this.refreshTitle(data);
-            _this.head._refresh(data);
-            _this.body._refresh(data);
+            refreshNode(_this.head, data);
+            refreshNode(_this.body, data);
             _this.updateHistory(pageId);
             console.log('resolve - refreshPage: ' + pageId);
             resolve(pageId);

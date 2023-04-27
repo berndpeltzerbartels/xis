@@ -5,6 +5,7 @@ import lombok.Getter;
 import one.xis.resource.Resources;
 import one.xis.server.FrontendService;
 import one.xis.test.dom.Document;
+import one.xis.test.dom.Window;
 import one.xis.test.js.JSUtil;
 import one.xis.test.js.LocalStorage;
 
@@ -22,6 +23,9 @@ public class IntegrationTestContext {
 
     @Getter
     private final LocalStorage localStorage;
+
+    @Getter
+    private final Window window;
     private final CompiledScript compiledScript;
     private final FrontendService frontendService;
 
@@ -35,6 +39,7 @@ public class IntegrationTestContext {
         var resources = new Resources();
         frontendService = internalContext(controllers).getSingleton(FrontendService.class);
         document = Document.of(frontendService.getRootPageHtml());
+        window = new Window();
         var script = resources.getByPath("xis.js").getContent() + "\n" + START_SCRIPT;
         compiledScript = compileScript(script);
     }
@@ -75,6 +80,7 @@ public class IntegrationTestContext {
         bindings.put("controllerBridge", new ControllerBridge(frontendService));
         bindings.put("localStorage", localStorage);
         bindings.put("document", document);
+        bindings.put("window", window);
         try {
             return JSUtil.compile(javascript, bindings);
         } catch (ScriptException e) {

@@ -34,3 +34,4 @@ class Starter {
         return this.client.loadConfig();
     }
 }
+

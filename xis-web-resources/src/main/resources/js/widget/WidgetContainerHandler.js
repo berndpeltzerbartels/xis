@@ -17,9 +17,7 @@ class WidgetContainerHandler extends TagHandler {
     refresh(data) {
         console.log('refresh');
         this.ensureWidgetPresent();
-        if (this.widgetRoot._refresh) {
-            this.widgetRoot._refresh(data);
-        }
+        refreshNode(this.widgetRoot, data);
     }
 
     ensureWidgetPresent() {
