@@ -40,7 +40,6 @@ class Widgets {
     }
 
     getWidgetRoot(widgetId) {
-        console.log('widget-json: ' + JSON.stringify(this.widgets));
         return this.widgets[widgetId].root;
     }
 

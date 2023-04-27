@@ -4,24 +4,28 @@ import lombok.experimental.UtilityClass;
 
 import javax.script.*;
 import java.io.Writer;
-import java.util.Collections;
 import java.util.Map;
+
+import static java.util.Collections.emptyMap;
 
 @UtilityClass
 public class JSUtil {
 
     public CompiledScript compile(String javascript) throws ScriptException {
-        return compile(javascript, Collections.emptyMap());
+        return compile(javascript, emptyMap());
     }
-
+    
     public CompiledScript compile(String javascript, Map<String, Object> bindingMap) throws ScriptException {
         ScriptEngine engine = new ScriptEngineManager().getEngineByName("graal.js");
+        //engine.put("bindToElement", (BiFunction<String, String, Element>) (s, s2) -> new Element(s2));
+        //engine.getContext().setAttribute("bindToElement", (BiFunction<String, String, Element>) (s, s2) -> new Element(s2), ScriptContext.ENGINE_SCOPE);
         Bindings bindings = engine.createBindings();
         bindings.put("polyglot.js.allowHostClassLookup", true);
         bindings.put("polyglot.js.allowAllAccess", true);
+        bindings.put("engine.WarnInterpreterOnly", false);
         bindings.putAll(bindingMap);
         engine.setBindings(bindings, ScriptContext.ENGINE_SCOPE);
-        System.out.println(javascript);
+        //System.out.println(javascript);
         var compiler = (Compilable) engine;
         var compiledScript = compiler.compile(javascript);
         // engine.getContext().setErrorWriter(new ExceptionThrowingErrorWriter());

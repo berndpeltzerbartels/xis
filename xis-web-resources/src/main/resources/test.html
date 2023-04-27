@@ -4,127 +4,39 @@
 <head>
     <script>
 
-      class LoggingProxy {
 
-    constructor(obj) {
-        this.obj = obj;
-        this.methodNames = {};
-        var methods = Object.getOwnPropertyNames(obj);
-        for (var method of this.methods(obj)) {
-            console.log('proxy method: ' +method.name);
-            if (!obj[method.name]) continue;
-            var count = obj[method.name].length;
-            this[method.name] = (p0,p1,p2,p3,p4,p5,p6,p7,p8,p9)=> {
-                var args = [];
-                if (count > 0) args.push(p0);
-                if (count > 1) args.push(p1);
-                if (count > 2) args.push(p2);
-                if (count > 3) args.push(p3);
-                if (count > 4) args.push(p4);
-                if (count > 5) args.push(p5);
-                if (count > 6) args.push(p6);
-                if (count > 7) args.push(p7);
-                if (count > 8) args.push(p8);
-                if (count > 9) args.push(p9);
-    
-                console.log(method.name + '(' + this.formatParameters(args) + ")");
-                return this.obj[method.name].apply(args);
-            }
-        }
-    }
-
-    methods(obj) {
-        var methods = [];
-        for (var name of Object.getOwnPropertyNames(Object.getPrototypeOf(obj))) {
-            var prop = this.obj[name];
-            if (typeof prop == 'function') {
-                methods.push(prop);
-            }
-        }
-        return methods;
-    }
-
-    formatParameters(args) {
-        var result = [];
-        for (var i = 0; i < args.length; i++ ) {
-            result.push(this.formatValue(args[i]));
-        }
-        return result.join(',');
-    }
-
-    formatArray(arr) {
-        return "[" + this.formatParameters(arr) + "]";
-    }
-
-    formatValue(o) {
-        if (!isNaN(o)) {
-            return o;
-        }
-        if (o == undefined) {
-            return undefined;
-        }
-        if (typeof o == 'string') {
-            return o;
-        }
-        if (typeof o == 'array') {
-            return this.formatArray(o);
-        }
-        if (typeof o == 'object') {
-            return JSON.stringify(o);
-        }
-        return o;
-    }
-
-}
-function interceptMethodCalls(obj, fn) {
-  return new Proxy(obj, {
-    get(target, prop) { // (A)
-      if (typeof target[prop] === 'function') {
-        return new Proxy(target[prop], {
-          apply: (target, thisArg, argumentsList) => { // (B)
-            fn(prop, argumentsList);
-            return Reflect.apply(target, thisArg, argumentsList);
-          }
-        });
-      } else {
-        return Reflect.get(target, prop);
-      }
-    }
-  });
-}
-
-class Test {
-
-    square(i) {
-        return i*i;
-    }
-
-    multiply(i,j) {
-        return i*j;
-    }
-}
-
-
-const handleMethodCall = (fnName, fnArgs) =>
-  console.log(`${fnName} called with `, fnArgs);
-
-
-class MethodWrapper {
-    constructor(method, name) {
-        this.method = method;
-        this.name = name;
-    }
-}
 
 function doIt() {
-    var test = new  Test();
-    interceptMethodCalls(test, handleMethodCall);
-    var result = test.square(test.multiply(3,4));
+   var div = document.createElement('div');
+      var s1 = document.createElement('span');
+        var s2 = document.createElement('span');
+        div.appendChild(s1);
+        div.appendChild(s2);
+
+        var a = document.createElement('a');
+        a.appendChild(s1);
+
+        console.log(a.childNodes.length);
+        console.log(s1.nextSibling);
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
     </script>
 
 </head>
 <body onload="doIt()">
-    <xyz/>
+<xyz/>
 </body>
 </html>

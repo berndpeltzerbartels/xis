@@ -5,6 +5,7 @@ import lombok.Getter;
 import one.xis.resource.Resources;
 import one.xis.server.FrontendService;
 import one.xis.test.dom.Document;
+import one.xis.test.dom.Element;
 import one.xis.test.dom.Window;
 import one.xis.test.js.JSUtil;
 import one.xis.test.js.LocalStorage;
@@ -14,6 +15,7 @@ import javax.script.ScriptException;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.*;
+import java.util.function.BiFunction;
 
 @SuppressWarnings("unused")
 public class IntegrationTestContext {
@@ -75,12 +77,21 @@ public class IntegrationTestContext {
         }
     }
 
+    public Element htmlToElement(String name, String content) {
+        var doc = Document.of(new StringBuilder().append("<").append(name).append(">")
+                .append(content)
+                .append("</").append(name).append(">").toString());
+        return doc.rootNode;
+    }
+
     private CompiledScript compileScript(String javascript) {
         var bindings = new HashMap<String, Object>();
         bindings.put("controllerBridge", new ControllerBridge(frontendService));
         bindings.put("localStorage", localStorage);
         bindings.put("document", document);
         bindings.put("window", window);
+        BiFunction<String, String, Element> bind = this::htmlToElement;
+        bindings.put("htmlToElement", bind);
         try {
             return JSUtil.compile(javascript, bindings);
         } catch (ScriptException e) {

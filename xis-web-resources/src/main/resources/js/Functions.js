@@ -50,6 +50,7 @@ function nodeListToArray(nodeList) {
     return arr;
 }
 
+
 /**
  *
  * @param {string} str

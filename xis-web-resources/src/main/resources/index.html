@@ -5,11 +5,20 @@
     <script ignore="true" src="xis.js"></script>
     <script ignore="true">
 
+
+        function htmlToElement(elementName, html) {
+            var element = document.createElement(elementName);
+            element.innerHTML = html;
+            return element;
+        }
+
         function initialize() {
             var httpClient = new HttpClient();
             var starter = new Starter(httpClient);
             starter.doStart();
         }
+
+
 
     </script>
 </head>

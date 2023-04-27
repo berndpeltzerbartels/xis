@@ -17,7 +17,7 @@ class Refresher {
     refreshElement(element, data) {
         if (element._attributes) {
             for (var attribute of element._attributes) {
-                this.setAttribute(attribute.name, attribute.expression.evaluate(data));
+                element.setAttribute(attribute.name, attribute.expression.evaluate(data));
             }
         }
         if (element._handler) {
@@ -25,7 +25,7 @@ class Refresher {
         } else {
             for (var i = 0; i < element.childNodes.length; i++) {
                 var child = element.childNodes.item(i);
-                this.refreshNode(child);
+                this.refreshNode(child, data);
             }
         }
     }

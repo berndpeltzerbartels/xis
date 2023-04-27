@@ -28,10 +28,15 @@ public class Element extends Node {
         this.localName = tagName;
     }
 
+    public void setInnerHTML(String html) {
+        System.out.println(html);
+    }
+
     public void appendChild(@NonNull Node node) {
         if (childNodes.stream().filter(Element.class::isInstance).map(Element.class::cast).anyMatch(e -> e.getLocalName().equals("title"))) {
             if (node.getName().equals("title")) throw new IllegalStateException();
         }
+        node.nextSibling = null;
         if (firstChild == null) {
             firstChild = node;
         } else {

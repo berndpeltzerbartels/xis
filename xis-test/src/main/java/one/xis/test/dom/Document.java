@@ -91,6 +91,8 @@ public class Document {
                 evaluate(w3cElement, e);
             } else if (StringUtils.isNotEmpty(node.getNodeValue())) {
                 dest.appendChild(new TextNode(node.getNodeValue()));
+                dest.innerText = node.getNodeValue();
+                dest.innerHTML = node.getNodeValue();
             }
         }
     }

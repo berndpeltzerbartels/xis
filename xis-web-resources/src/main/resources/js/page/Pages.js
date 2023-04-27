@@ -49,8 +49,7 @@ class Pages {
     loadPageHead(pageId) {
         var _this = this;
         return this.client.loadPageHead(pageId).then(content => {
-            var holder = document.createElement('holder');
-            holder.innerHTML = content;
+            var holder = htmlToElement('holder', content);
             console.log('initialize head');
             _this.initializer.initialize(holder);
             var headChildArray = nodeListToArray(holder.childNodes);
@@ -70,9 +69,7 @@ class Pages {
     loadPageBody(pageId) {
         var _this = this;
         return this.client.loadPageBody(pageId).then(content => {
-            var holder = document.createElement('holder');
-            holder.innerHTML = content;
-            console.log('initialize body');
+            var holder = htmlToElement('holder', content);
             _this.initializer.initialize(holder);
             _this.pages[pageId].bodyChildArray = nodeListToArray(holder.childNodes);
             return pageId;

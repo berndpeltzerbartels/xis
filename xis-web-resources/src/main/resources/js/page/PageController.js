@@ -61,6 +61,7 @@ class PageController {
                 continue;
             }
             this.head.appendChild(node);
+
         }
     }
 
@@ -70,19 +71,13 @@ class PageController {
      */
     bindTitle(page) {
         if (page.headChildArray) {
-            for (var child of page.headChildArray) {
-                console.log('bindTitle - child:' + child.localName);
-                if (isElement(child) && child.localName == 'title') {
-                    var title = child.innerText;
-                    console.log('bindTitle - title:' + title);
-                    if (!title) {
-                        return;
-                    }
-                    if (title.indexOf('${') != -1) {
-                        this.title.expression = new TextContentParser(attrValue).parse()
-                    } else {
-                        this.title.innerText = title;
-                    }
+            var titleTag = page.headChildArray.find(child => child.localName == 'title');
+            if (titleTag) {
+                var title = titleTag.innerText;
+                if (title.indexOf('${') != -1) {
+                    this.title.expression = new TextContentParser(attrValue).parse()
+                } else {
+                    this.title.innerText = title;
                 }
             }
         }
@@ -176,7 +171,6 @@ class PageController {
         console.log('pageDataMap:' + this.pageDataMap);
         var pageData = this.pageDataMap[pageId];
         var pageAttributes = this.pageAttributes[pageId];
-        console.log('attributes:' + JSON.stringify(this.pageAttributes));
         if (pageData) {
             for (var dataKey of pageAttributes.modelsToSubmitForModel) {
                 values[dataKey] = pageData.getValue([dataKey]);
@@ -200,7 +194,7 @@ class PageController {
             _this.refreshTitle(data);
             refreshNode(_this.head, data);
             refreshNode(_this.body, data);
-            _this.updateHistory(pageId);
+            //_this.updateHistory(pageId);
             console.log('resolve - refreshPage: ' + pageId);
             resolve(pageId);
         });
@@ -222,6 +216,7 @@ class PageController {
      * @param {string} pageId
      */
     updateHistory(pageId) {
+        console.log('update history');
         var title = getElementByTagName('title').innerHTML;
         window.history.replaceState({}, title, pageId);
     }
