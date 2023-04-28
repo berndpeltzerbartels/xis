@@ -43,33 +43,33 @@ class ControllerService {
 
     Response invokePageModelMethods(Request request) {
         var data = findPageControllerWrapper(request).map(wrapper -> wrapper.invokeGetModelMethods(request)).orElse(emptyMap());
-        return new Response(data, request.getControllerId(), null);
+        return new Response(200, data, request.getControllerId(), null);
     }
 
     Response invokeWidgetModelMethods(Request request) {
         var data = findWidgetControllerWrapper(request).map(wrapper -> wrapper.invokeGetModelMethods(request)).orElse(emptyMap());
-        return new Response(data, null, request.getControllerId());
+        return new Response(200, data, null, request.getControllerId());
     }
 
     Response invokePageActionMethod(Request request) {
         var invokerController = findPageControllerWrapper(request).orElseThrow();
         var result = invokerController.invokeActionMethod(request);
         var nextPageController = widgetControllerWrapperByResult(result).orElse(invokerController);
-        return pageModelDataResponse(nextPageController, request);
+        return pageModelDataResponse(200, nextPageController, request);
     }
 
     Response invokeWidgetActionMethod(Request request) {
         var result = findPageControllerWrapper(request).orElseThrow().invokeActionMethod(request);
-        return pageControllerWrapperByResult(result).map(wrapper -> pageModelDataResponse(wrapper, request))
-                .orElseGet(() -> widgetControllerWrapperByResult(result).map(wrapper -> widgetModelDataResponse(wrapper, request)).orElseThrow());
+        return pageControllerWrapperByResult(result).map(wrapper -> pageModelDataResponse(200, wrapper, request))
+                .orElseGet(() -> widgetControllerWrapperByResult(result).map(wrapper -> widgetModelDataResponse(200, wrapper, request)).orElseThrow());
     }
 
-    private Response widgetModelDataResponse(ControllerWrapper wrapper, Request request) {
-        return new Response(wrapper.invokeGetModelMethods(request), null, wrapper.getId());
+    private Response widgetModelDataResponse(int status, ControllerWrapper wrapper, Request request) {
+        return new Response(status, wrapper.invokeGetModelMethods(request), null, wrapper.getId());
     }
 
-    private Response pageModelDataResponse(ControllerWrapper wrapper, Request request) {
-        return new Response(wrapper.invokeGetModelMethods(request), wrapper.getId(), null);
+    private Response pageModelDataResponse(int status, ControllerWrapper wrapper, Request request) {
+        return new Response(status, wrapper.invokeGetModelMethods(request), wrapper.getId(), null);
     }
 
     private Collection<ControllerWrapper> widgetControllerWrappers() {

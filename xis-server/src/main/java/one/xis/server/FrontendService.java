@@ -9,6 +9,7 @@ import one.xis.resource.Resources;
 import org.tinylog.Logger;
 
 import java.util.Map;
+import java.util.function.Function;
 
 @XISComponent
 @RequiredArgsConstructor
@@ -18,6 +19,7 @@ public class FrontendService {
     private final ConfigService configService;
     private final HtmlResourceService htmlResourceService;
     private final Resources resources;
+    private final RequestFilters requestFilterChain;
     private Resource apiJsResource;
 
     @XISInit
@@ -30,19 +32,19 @@ public class FrontendService {
     }
 
     public Response invokePageActionMethod(Request request) {
-        return controllerService.invokePageActionMethod(request);
+        return applyFilterChain(request, controllerService::invokePageActionMethod);
     }
 
     public Response invokeWidgetActionMethod(Request request) {
-        return controllerService.invokeWidgetActionMethod(request);
+        return applyFilterChain(request, controllerService::invokeWidgetActionMethod);
     }
 
     public Response invokePageModelMethods(Request request) {
-        return controllerService.invokePageModelMethods(request);
+        return applyFilterChain(request, controllerService::invokePageModelMethods);
     }
 
     public Response invokeWidgetModelMethods(Request request) {
-        return controllerService.invokeWidgetModelMethods(request);
+        return applyFilterChain(request, controllerService::invokeWidgetModelMethods);
     }
 
     public String getPageHead(String id) {
@@ -72,5 +74,13 @@ public class FrontendService {
 
     public String getApiJs() {
         return apiJsResource.getContent();
+    }
+    
+    private Response applyFilterChain(Request request, Function<Request, Response> responder) {
+        var chain = requestFilterChain.apply(request);
+        if (chain.isInterrupt()) {
+            return new Response(chain.getHttpStatus(), chain.getData(), null, null);
+        }
+        return responder.apply(request);
     }
 }

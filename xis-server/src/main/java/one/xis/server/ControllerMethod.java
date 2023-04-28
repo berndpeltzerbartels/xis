@@ -10,10 +10,8 @@ import one.xis.utils.lang.CollectionUtils;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Data
 @SuperBuilder
@@ -52,14 +50,6 @@ abstract class ControllerMethod {
         return args;
     }
 
-    Collection<String> getRequiredModels() {
-        return Arrays.stream(method.getParameters())
-                .filter(param -> param.isAnnotationPresent(Model.class))
-                .map(param -> param.getAnnotation(Model.class))
-                .map(Model::value)
-                .collect(Collectors.toSet());
-    }
-
     @SneakyThrows
     @SuppressWarnings("unchecked")
     private Object modelParameter(Parameter parameter, Request context) {
@@ -71,15 +61,9 @@ abstract class ControllerMethod {
             } else if (Collection.class.isAssignableFrom(parameter.getType())) {
                 return CollectionUtils.emptyInstance((Class<Collection<?>>) parameter.getType());
             }
+        } else if (parameter.getType() == String.class) {
+            return paramValue;
         }
-        if (paramValue instanceof String) {
-            if (parameter.getType() == String.class) {
-                return paramValue;
-            }
-            return parameterDeserializer.deserialze((String) paramValue, parameter);
-        }
-        return paramValue;
+        return parameterDeserializer.deserialze(paramValue, parameter);
     }
-
-
 }
