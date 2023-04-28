@@ -17,12 +17,9 @@ class IndexTest {
 
     @Test
     void showIndex() {
-        var document = testContext.getDocument();
         testContext.openPage("/index.html");
-
-        document = testContext.getDocument();
-// TODO
-
+        var document = testContext.getDocument();
+        
     }
 
 }

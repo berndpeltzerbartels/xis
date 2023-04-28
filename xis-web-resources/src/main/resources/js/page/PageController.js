@@ -166,9 +166,9 @@ class PageController {
     */
     refreshData(pageId) {
         var _this = this;
-        console.log('refreshData:' + pageId);
+        console.log('PageController - refreshData:' + pageId);
         var values = {};
-        console.log('pageDataMap:' + this.pageDataMap);
+        console.log('PageController - pageDataMap:' + this.pageDataMap);
         var pageData = this.pageDataMap[pageId];
         var pageAttributes = this.pageAttributes[pageId];
         if (pageData) {

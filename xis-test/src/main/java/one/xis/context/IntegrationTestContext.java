@@ -2,10 +2,12 @@ package one.xis.context;
 
 
 import lombok.Getter;
+import lombok.NonNull;
 import one.xis.resource.Resources;
 import one.xis.server.FrontendService;
 import one.xis.test.dom.Document;
 import one.xis.test.dom.Element;
+import one.xis.test.dom.TextNode;
 import one.xis.test.dom.Window;
 import one.xis.test.js.JSUtil;
 import one.xis.test.js.LocalStorage;
@@ -31,7 +33,6 @@ public class IntegrationTestContext {
     private final CompiledScript compiledScript;
     private final FrontendService frontendService;
 
-
     public static Builder builder() {
         return new Builder();
     }
@@ -50,6 +51,7 @@ public class IntegrationTestContext {
         document.location.pathname = uri;
         try {
             compiledScript.eval();
+            finalizeDocument(document);
         } catch (ScriptException e) {
             throw new RuntimeException("Compilation failed :" + e.getMessage() + " at line " + e.getLineNumber() + ", column " + e.getColumnNumber());
         }
@@ -122,6 +124,29 @@ public class IntegrationTestContext {
         public IntegrationTestContext build() {
             return new IntegrationTestContext(singeltons.stream().toArray(Object[]::new));
         }
+    }
+
+    private void finalizeDocument(@NonNull Document document) {
+        if (document.rootNode != null)
+            finalizeElement(document.rootNode);
+    }
+
+    private void finalizeElement(@NonNull Element element) {
+        String value = null;
+        if (element.getTextNode() != null) {
+            value = element.getTextNode().nodeValue;
+        } else if (element.innerHTML != null) {
+            value = element.innerHTML;
+        } else if (element.innerText != null) {
+            value = element.innerText;
+        }
+        element.innerHTML = value;
+        element.innerText = value;
+        if (element.getTextNode() == null) {
+            var textNode = new TextNode(value);
+            element.appendChild(textNode);
+        }
+        element.getChildElements().forEach(this::finalizeElement);
     }
 
     private static final String START_SCRIPT = "var httpClient = new HttpClientMock(controllerBridge);\n" +

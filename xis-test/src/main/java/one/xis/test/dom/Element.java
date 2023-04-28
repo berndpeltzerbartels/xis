@@ -187,6 +187,17 @@ public class Element extends Node {
         return null;
     }
 
+    public TextNode getTextNode() {
+        var child = firstChild;
+        while (child != null) {
+            if (child instanceof TextNode) {
+                return (TextNode) child;
+            }
+            child = child.nextSibling;
+        }
+        return null;
+    }
+
     @Override
     public String toString() {
         StringBuilder s = new StringBuilder();

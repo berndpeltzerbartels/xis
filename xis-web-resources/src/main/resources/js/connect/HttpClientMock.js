@@ -13,13 +13,11 @@ class HttpClientMock {
      *
      */
     post(uri, payload, headers) {
-        // console.log('post: ' + uri + ' : ' + JSON.stringify(payload));
+       console.log('HTTP - POST: ' + uri + ' : ' + JSON.stringify(payload));
         var _this = this;
         return new Promise((resolve, reject) => {
-            // console.log('resolve post: ' + uri + ' : ' + JSON.stringify(payload));
-            var response = this.responseForPost(uri, payload, headers);
-            //console.log('response for post: ' + uri + ': ' + JSON.stringify(response));
-            resolve(_this.responseForPost(uri, payload, headers));
+            var response = _this.responseForPost(uri, payload, headers);
+            resolve(response);
         });
     }
 
@@ -30,12 +28,10 @@ class HttpClientMock {
      * @return {Promise<any>}
      */
     get(uri, headers) {
-        //console.log('get: ' + uri);
+        console.log('HTTP - GET: ' + uri);
         var _this = this;
         return new Promise((resolve, reject) => {
-            //console.log('resolve get: ' + uri);
             var response = _this.responseForGet(uri, headers);
-            //console.log('response for get: ' + uri + ': ' + JSON.stringify(response));
             resolve(response);
         });
     }
