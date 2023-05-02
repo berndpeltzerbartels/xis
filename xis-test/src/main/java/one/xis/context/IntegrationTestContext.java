@@ -110,19 +110,19 @@ public class IntegrationTestContext {
 
     public static class Builder {
 
-        private final Collection<Object> singeltons = new HashSet<>();
+        private final Collection<Object> singletons = new HashSet<>();
 
-        public Builder withSingelton(Object o) {
-            singeltons.add(o);
+        public Builder withSingleton(Object o) {
+            singletons.add(o);
             return this;
         }
 
         public Builder withMock(Object o) {
-            return withSingelton(o);
+            return withSingleton(o);
         }
 
         public IntegrationTestContext build() {
-            return new IntegrationTestContext(singeltons.stream().toArray(Object[]::new));
+            return new IntegrationTestContext(singletons.stream().toArray(Object[]::new));
         }
     }
 

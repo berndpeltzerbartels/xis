@@ -1,6 +1,8 @@
 package one.xis.test.js;
 
 import lombok.experimental.UtilityClass;
+import org.graalvm.polyglot.Context;
+import org.graalvm.polyglot.PolyglotAccess;
 
 import javax.script.*;
 import java.io.Writer;
@@ -14,7 +16,7 @@ public class JSUtil {
     public CompiledScript compile(String javascript) throws ScriptException {
         return compile(javascript, emptyMap());
     }
-    
+
     public CompiledScript compile(String javascript, Map<String, Object> bindingMap) throws ScriptException {
         ScriptEngine engine = new ScriptEngineManager().getEngineByName("graal.js");
         //engine.put("bindToElement", (BiFunction<String, String, Element>) (s, s2) -> new Element(s2));
@@ -22,6 +24,7 @@ public class JSUtil {
         Bindings bindings = engine.createBindings();
         bindings.put("polyglot.js.allowHostClassLookup", true);
         bindings.put("polyglot.js.allowAllAccess", true);
+        bindings.put("polyglot.inspect", 9229);
         bindings.put("engine.WarnInterpreterOnly", false);
         bindings.putAll(bindingMap);
         engine.setBindings(bindings, ScriptContext.ENGINE_SCOPE);
@@ -39,6 +42,33 @@ public class JSUtil {
 
     public Object execute(String js) throws ScriptException {
         return compile(js).eval();
+    }
+
+    public Object debug(String js, Map<String, Object> bindingMap) {
+
+        String port = "4242";
+        String path = java.util.UUID.randomUUID().toString();
+        Context context = Context.newBuilder("js")
+                .allowAllAccess(true)
+                .allowExperimentalOptions(true)
+                .allowHostClassLoading(true)
+                .allowHostClassLookup(c -> true)
+                .allowPolyglotAccess(PolyglotAccess.ALL)
+                .allowNativeAccess(true)
+                .option("inspect", port)
+                .option("inspect.Secure", "false")
+                .option("inspect.Path", path)
+                .build();
+        String hostAdress = "localhost";
+        String url = String.format(
+                "devtools://devtools/bundled/js_app.html?ws=%s:%s/%s",
+                hostAdress, port, path);
+        System.out.println(url);
+
+        //     bindingMap.forEach(context.getBindings("js")::putMember);
+
+
+        return context.eval("js", js);
     }
 
     class ExceptionThrowingErrorWriter extends Writer {

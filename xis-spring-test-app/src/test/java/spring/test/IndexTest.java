@@ -11,7 +11,7 @@ class IndexTest {
     @BeforeEach
     void createContext() {
         testContext = IntegrationTestContext.builder()
-                .withSingelton(new Index())
+                .withSingleton(new Index())
                 .build();
     }
 
@@ -19,7 +19,7 @@ class IndexTest {
     void showIndex() {
         testContext.openPage("/index.html");
         var document = testContext.getDocument();
-        
+
     }
 
 }

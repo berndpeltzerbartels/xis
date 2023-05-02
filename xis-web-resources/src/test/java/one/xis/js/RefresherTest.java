@@ -51,7 +51,7 @@ class RefresherTest {
         var expression = new Expression();
         textNode._expression = expression;
         div.appendChild(textNode);
-        JSUtil.compile(script, Map.of("element", document.rootNode)).eval();
+        JSUtil.execute(script, Map.of("element", document.rootNode));
 
         var values = (Map<String, Object>) expression.getData().get("values");
         assertThat(values.get("x")).isEqualTo("y");

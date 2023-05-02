@@ -43,6 +43,9 @@ class CollectionDependencyField extends DependencyField {
 
         } else if (actualType instanceof Class) {
             return (Class<?>) collType.getActualTypeArguments()[0];
+        } else if (actualType instanceof ParameterizedType) {
+            ParameterizedType parameterizedType = (ParameterizedType) actualType;
+            return (Class<?>) parameterizedType.getRawType();
         }
         throw new IllegalStateException(); // should never happen
     }
