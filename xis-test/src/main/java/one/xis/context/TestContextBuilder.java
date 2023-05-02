@@ -9,9 +9,9 @@ public class TestContextBuilder extends AppContextBuilderImpl implements AppCont
 
     public TestContextBuilder withMock(Object singleton) {
         if (singleton instanceof Class) {
-            withSingelton(Mockito.mock((Class<?>) singleton));
+            withSingleton(Mockito.mock((Class<?>) singleton));
         } else {
-            withSingelton(singleton);
+            withSingleton(singleton);
         }
         return this;
     }

@@ -17,7 +17,7 @@ public class AppContextInitializer {
     private final FieldInjection fieldInjection;
     private final InitMethodInvocation initInvokers;
     private final Collection<Class<?>> additionalClasses;
-    private final Collection<Object> additionalSingeltons;
+    private final Collection<Object> additionalSingletons;
 
     @Getter
     private Set<Object> singletons;
@@ -43,12 +43,12 @@ public class AppContextInitializer {
 
     public AppContextInitializer(Set<String> packagesToScan,
                                  Set<Class<?>> additionalClasses,
-                                 Set<Object> additionalSingeltons) {
+                                 Set<Object> additionalSingletons) {
         this(new DefaultReflection(packagesToScan,
                         Set.of(XISComponent.class),
                         Set.of(XISInject.class)),
                 additionalClasses,
-                additionalSingeltons,
+                additionalSingletons,
                 Set.of(XISInit.class));
 
     }
@@ -56,12 +56,12 @@ public class AppContextInitializer {
 
     AppContextInitializer(Reflection reflection,
                           Collection<Class<?>> additionalClasses,
-                          Collection<Object> additionalSingeltons,
+                          Collection<Object> additionalSingletons,
                           Set<Class<? extends Annotation>> beanInitAnnotation) {
         this.reflection = reflection;
         this.additionalClasses = additionalClasses;
-        this.additionalSingeltons = additionalSingeltons;
-        this.fieldInjection = new FieldInjection(reflection, additionalClasses, additionalSingeltons);
+        this.additionalSingletons = additionalSingletons;
+        this.fieldInjection = new FieldInjection(reflection, additionalClasses, additionalSingletons);
         this.initInvokers = new InitMethodInvocation(beanInitAnnotation);
     }
 
@@ -86,7 +86,7 @@ public class AppContextInitializer {
     }
 
     private SingletonInstantiation singletonInstantiation() {
-        return new SingletonInstantiation(fieldInjection, initInvokers, reflection, additionalSingeltons, additionalClasses);
+        return new SingletonInstantiation(fieldInjection, initInvokers, reflection, additionalSingletons, additionalClasses);
     }
 
     private void postCheck(SingletonInstantiation singletonInstantiation) {

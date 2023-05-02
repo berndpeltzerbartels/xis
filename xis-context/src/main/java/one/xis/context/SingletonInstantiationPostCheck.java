@@ -21,7 +21,7 @@ class SingletonInstantiationPostCheck {
                 Set<Class<?>> unsatisfiedConstructorParameterClasses = getUnsatisfiedConstructorParameterClasses(unusedInstantiator).collect(Collectors.toSet());
                 unsatisfiedConstructorParameterClasses.removeAll(allClassesToInstantiate);
                 if (!unsatisfiedConstructorParameterClasses.isEmpty()) {
-                    throw new AppContextException(String.format("unsatisfied dependency in constructor of %s: no singelton(s) of type %s", unusedInstantiator.getType(), kommaSeparatedClassList(unsatisfiedConstructorParameterClasses)));
+                    throw new AppContextException(String.format("unsatisfied dependency in constructor of %s: no singleton(s) of type %s", unusedInstantiator.getType(), kommaSeparatedClassList(unsatisfiedConstructorParameterClasses)));
                 }
             }
         }

@@ -38,7 +38,7 @@ class SpringContextAdapter implements BeanPostProcessor {
     @EventListener(ContextRefreshedEvent.class)
     public void init() {
         var context = AppContextBuilder.createInstance()
-                .withSingeltons(controllers)
+                .withSingletons(controllers)
                 .withPackage("one.xis")
                 .build();
         var frontendService = context.getSingleton(FrontendService.class);

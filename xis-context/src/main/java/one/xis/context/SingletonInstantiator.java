@@ -13,7 +13,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Instantiates a singleton. Each singelton-type has an instance of {@link SingletonInstantiator}.
+ * Instantiates a singleton. Each singleton-type has an instance of {@link SingletonInstantiator}.
  */
 @RequiredArgsConstructor
 class SingletonInstantiator {

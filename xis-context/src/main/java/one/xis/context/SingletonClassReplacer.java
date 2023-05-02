@@ -9,11 +9,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
-class SingeltonClassReplacer {
+class SingletonClassReplacer {
 
-    Set<Class<?>> doReplacement(Set<Class<?>> allSingeltonClasses) {
-        var rv = new HashSet<Class<?>>(allSingeltonClasses);
-        var replacements = allSingeltonClasses.stream().filter(this::isReplacement).collect(Collectors.toSet());
+    Set<Class<?>> doReplacement(Set<Class<?>> allSingletonClasses) {
+        var rv = new HashSet<Class<?>>(allSingletonClasses);
+        var replacements = allSingletonClasses.stream().filter(this::isReplacement).collect(Collectors.toSet());
         while (!replacements.isEmpty()) {
             var replacementClass = CollectionUtils.removeOne(replacements);
             var classToReplace = classToReplace(replacementClass);

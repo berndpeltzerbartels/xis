@@ -16,18 +16,18 @@ public class SingletonInstantiation {
     private final Set<SingletonInstantiator> unusedSingletonInstantiators;
     private final FieldInjection fieldInjection;
     private final InitMethodInvocation initMethodInvocation;
-    private final SingeltonClassReplacer classReplacer;
-    protected final Collection<Object> additionalSingeltons;
+    private final SingletonClassReplacer classReplacer;
+    protected final Collection<Object> additionalSingletons;
     protected final Collection<Class<?>> additionalClasses;
 
     @Getter
     private final Set<Object> singletons = new HashSet<>();
 
-    SingletonInstantiation(FieldInjection fieldInjection, InitMethodInvocation initMethodInvocation, Reflection reflections, Collection<Object> additionalSingeltons, Collection<Class<?>> additionalClasses) {
+    SingletonInstantiation(FieldInjection fieldInjection, InitMethodInvocation initMethodInvocation, Reflection reflections, Collection<Object> additionalSingletons, Collection<Class<?>> additionalClasses) {
         this.fieldInjection = fieldInjection;
         this.initMethodInvocation = initMethodInvocation;
-        this.classReplacer = new SingeltonClassReplacer();
-        this.additionalSingeltons = additionalSingeltons;
+        this.classReplacer = new SingletonClassReplacer();
+        this.additionalSingletons = additionalSingletons;
         this.additionalClasses = additionalClasses;
         this.singletonInstantiators = createInstantiators(reflections);
         this.unusedSingletonInstantiators = new HashSet<>(singletonInstantiators);
@@ -67,7 +67,7 @@ public class SingletonInstantiation {
     }
 
     protected Set<Class<?>> getAdditionalSingletonClasses() {
-        return additionalSingeltons.stream().map(Object::getClass).collect(Collectors.toSet());
+        return additionalSingletons.stream().map(Object::getClass).collect(Collectors.toSet());
     }
 
     private SingletonInstantiator createInstantiator(Class<?> aClass) {
@@ -98,6 +98,6 @@ public class SingletonInstantiation {
     }
 
     void populateAddionalSingletons() {
-        additionalSingeltons.forEach(this::populateComponent);
+        additionalSingletons.forEach(this::populateComponent);
     }
 }

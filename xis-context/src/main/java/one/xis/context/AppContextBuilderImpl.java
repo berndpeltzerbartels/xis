@@ -35,7 +35,7 @@ class AppContextBuilderImpl implements AppContextBuilder {
     }
 
     @Override
-    public AppContextBuilder withSingelton(Object bean) {
+    public AppContextBuilder withSingleton(Object bean) {
         singletons.add(bean);
         return this;
     }

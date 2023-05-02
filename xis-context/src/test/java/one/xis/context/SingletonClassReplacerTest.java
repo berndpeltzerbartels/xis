@@ -6,11 +6,11 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
-class SingeltonClassReplacerTest {
+class SingletonClassReplacerTest {
 
     @Test
     void doReplace() {
-        var replacer = new SingeltonClassReplacer();
+        var replacer = new SingletonClassReplacer();
         var classes = Set.of(C1.class, C2.class, C3.class, C4.class);
         var result = replacer.doReplacement(classes);
 

@@ -21,7 +21,7 @@ public interface AppContextBuilder {
     }
 
 
-    AppContextBuilder withSingelton(Object bean);
+    AppContextBuilder withSingleton(Object bean);
 
     AppContextBuilder withPackage(String pack);
 
@@ -54,13 +54,13 @@ public interface AppContextBuilder {
 
     AppContextBuilder withSingletonClass(String s);
 
-    default AppContextBuilder withSingeltons(Object... objects) {
-        Arrays.stream(objects).forEach(this::withSingelton);
+    default AppContextBuilder withSingletons(Object... objects) {
+        Arrays.stream(objects).forEach(this::withSingleton);
         return this;
     }
 
-    default AppContextBuilder withSingeltons(Collection<Object> objects) {
-        objects.forEach(this::withSingelton);
+    default AppContextBuilder withSingletons(Collection<Object> objects) {
+        objects.forEach(this::withSingleton);
         return this;
     }
 }
