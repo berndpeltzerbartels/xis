@@ -59,6 +59,7 @@ public class JSUtil {
                 .option("inspect.Secure", "false")
                 .option("inspect.Path", path)
                 .build();
+        bindingMap.forEach(context.getBindings("js")::putMember);
         String hostAdress = "localhost";
         String url = String.format(
                 "devtools://devtools/bundled/js_app.html?ws=%s:%s/%s",

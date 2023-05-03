@@ -30,7 +30,7 @@ public class IntegrationTestContext {
 
     @Getter
     private final Window window;
-    private final CompiledScript compiledScript;
+    private final String script;
     private final FrontendService frontendService;
 
     public static Builder builder() {
@@ -43,12 +43,27 @@ public class IntegrationTestContext {
         frontendService = internalContext(controllers).getSingleton(FrontendService.class);
         document = Document.of(frontendService.getRootPageHtml());
         window = new Window();
-        var script = resources.getByPath("xis.js").getContent() + "\n" + START_SCRIPT;
-        compiledScript = compileScript(script);
+        script = resources.getByPath("xis.js").getContent() + "\n" + START_SCRIPT;
+
     }
 
     public void openPage(String uri, Map<String, Object> parameters) {
         document.location.pathname = uri;
+        if ("true".equals(System.getenv().get("debug"))) {
+            debugOpenPage(uri, parameters);
+        } else {
+            openPageDefault(uri, parameters);
+        }
+    }
+
+    public void openPage(String uri) {
+        openPage(uri, Collections.emptyMap());
+    }
+
+
+    private void openPageDefault(String uri, Map<String, Object> parameters) {
+        document.location.pathname = uri;
+        var compiledScript = compileScript(script);
         try {
             compiledScript.eval();
             finalizeDocument(document);
@@ -57,8 +72,8 @@ public class IntegrationTestContext {
         }
     }
 
-    public void openPage(String uri) {
-        openPage(uri, Collections.emptyMap());
+    private void debugOpenPage(String uri, Map<String, Object> parameters) {
+        JSUtil.debug(script, createBindings());
     }
 
     class ErrorWriter extends Writer {
@@ -80,13 +95,21 @@ public class IntegrationTestContext {
     }
 
     public Element htmlToElement(String name, String content) {
-        var doc = Document.of(new StringBuilder().append("<").append(name).append(">")
-                .append(content)
-                .append("</").append(name).append(">").toString());
+        var doc = Document.of("<" + name + ">" +
+                content +
+                "</" + name + ">");
         return doc.rootNode;
     }
 
     private CompiledScript compileScript(String javascript) {
+        try {
+            return JSUtil.compile(javascript, createBindings());
+        } catch (ScriptException e) {
+            throw new RuntimeException("Compilation failed :" + e.getMessage() + " at line " + e.getLineNumber() + ", column " + e.getColumnNumber());
+        }
+    }
+
+    private Map<String, Object> createBindings() {
         var bindings = new HashMap<String, Object>();
         bindings.put("controllerBridge", new ControllerBridge(frontendService));
         bindings.put("localStorage", localStorage);
@@ -94,11 +117,7 @@ public class IntegrationTestContext {
         bindings.put("window", window);
         BiFunction<String, String, Element> bind = this::htmlToElement;
         bindings.put("htmlToElement", bind);
-        try {
-            return JSUtil.compile(javascript, bindings);
-        } catch (ScriptException e) {
-            throw new RuntimeException("Compilation failed :" + e.getMessage() + " at line " + e.getLineNumber() + ", column " + e.getColumnNumber());
-        }
+        return bindings;
     }
 
     private AppContext internalContext(Object... controllers) {
