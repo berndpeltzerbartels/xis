@@ -5,8 +5,8 @@ import one.xis.Page;
 
 import java.util.List;
 
-@Page("/simpleForeachTag.html")
-class SimpleForeachTag {
+@Page("/foreachTag.html")
+class ForeachTagPage {
 
     @Model("items")
     List<String> items() {

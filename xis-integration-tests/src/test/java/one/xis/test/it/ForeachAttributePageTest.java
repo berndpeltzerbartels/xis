@@ -10,20 +10,20 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class SimpleForeachTagTest {
+class ForeachAttributePageTest {
 
     private IntegrationTestContext testContext;
 
     @BeforeEach
     void init() {
         testContext = IntegrationTestContext.builder()
-                .withSingleton(SimpleForeachTag.class)
+                .withSingleton(ForeachAttributePage.class)
                 .build();
     }
 
     @Test
     void test() {
-        testContext.openPage("/simpleForeachTag.html");
+        testContext.openPage("/foreachAttribute.html");
         var items = testContext.getDocument().getElementsByClass("item")
                 .stream().map(Element::getTextNode).map(TextNode::getNodeValue).collect(Collectors.toList());
 

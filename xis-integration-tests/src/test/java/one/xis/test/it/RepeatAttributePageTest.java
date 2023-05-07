@@ -10,19 +10,19 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class SimpleLoopRepeatAttrTest {
+class RepeatAttributePageTest {
     private IntegrationTestContext testContext;
 
     @BeforeEach
     void init() {
         testContext = IntegrationTestContext.builder()
-                .withSingleton(SimpleLoopRepeatAttr.class)
+                .withSingleton(RepeatAttributePage.class)
                 .build();
     }
 
     @Test
     void test() {
-        testContext.openPage("/simpleLoopRepeatAttr.html");
+        testContext.openPage("/repeatAttr.html");
         var items = testContext.getDocument().getElementsByClass("item")
                 .stream().map(Element::getTextNode).map(TextNode::getNodeValue).collect(Collectors.toList());
 

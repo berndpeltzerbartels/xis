@@ -6,20 +6,21 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class SimpleTitleTest {
+class TitleAndHeadlinePageTest {
 
     private IntegrationTestContext testContext;
 
     @BeforeEach
     void init() {
         testContext = IntegrationTestContext.builder()
-                .withSingleton(SimpleTitle.class)
+                .withSingleton(TitleAndHeadlinePage.class)
                 .build();
     }
 
     @Test
     void test() {
-        testContext.openPage("/simpleTitle.html");
-        assertThat(testContext.getDocument().getElementByTagName("title").innerText).isEqualTo("Hello !");
+        testContext.openPage("/titleAndHeadline.html");
+        assertThat(testContext.getDocument().getElementByTagName("title").innerText).isEqualTo("title");
+        assertThat(testContext.getDocument().getElementByTagName("h1").innerText).isEqualTo("headline");
     }
 }

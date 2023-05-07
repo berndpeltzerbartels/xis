@@ -3,8 +3,8 @@ package one.xis.test.it;
 import one.xis.Model;
 import one.xis.Page;
 
-@Page("/simpleTitle.html")
-class SimpleTitle {
+@Page("/title.html")
+class TitlePage {
 
     @Model("titleText")
     String title() {

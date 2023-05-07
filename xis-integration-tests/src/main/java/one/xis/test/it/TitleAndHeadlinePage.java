@@ -4,7 +4,7 @@ import one.xis.Model;
 import one.xis.Page;
 
 @Page("/titleAndHeadline.html")
-class TitleAndHeadline {
+class TitleAndHeadlinePage {
 
     @Model("data")
     TitleAndHeadlineData titleAndHeadlineData() {

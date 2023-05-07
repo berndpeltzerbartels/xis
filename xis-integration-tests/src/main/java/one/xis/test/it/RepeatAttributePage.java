@@ -5,8 +5,8 @@ import one.xis.Page;
 
 import java.util.List;
 
-@Page("/simpleLoopRepeatAttr.html")
-class SimpleLoopRepeatAttr {
+@Page("/repeatAttr.html")
+class RepeatAttributePage {
 
     @Model("items")
     List<String> items() {

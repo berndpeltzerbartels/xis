@@ -38,7 +38,7 @@ class Initializer {
         if (element.getAttribute('repeat')) {
             this.initializeRepeat(element);
         }
-        if (element.getAttribute('for')) {
+        if (element.getAttribute('foreach')) {
             this.initializeFor(element);
         }
         this.initializeAttributes(element);
@@ -105,8 +105,8 @@ class Initializer {
     * @param {Element} element 
     */
     initializeFor(element) {
-        var arr = doSplit(element.getAttribute('for'), ':');
-        element.removeAttribute('for');
+        var arr = doSplit(element.getAttribute('foreach'), ':');
+        element.removeAttribute('foreach');
         var foreach = this.createForEach(arr[0], arr[1]);
         this.domAccessor.insertChild(element, foreach);
     }
