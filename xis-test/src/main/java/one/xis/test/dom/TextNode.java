@@ -5,13 +5,12 @@ import lombok.Getter;
 public class TextNode extends Node {
 
     @Getter
-    public String nodeValue;
+    public Object nodeValue;
 
     public static final int nodeType = 3;
-    @SuppressWarnings("unused")
     public Object _expression;
 
-    public TextNode(String nodeValue) {
+    public TextNode(Object nodeValue) {
         this.nodeValue = nodeValue;
     }
 

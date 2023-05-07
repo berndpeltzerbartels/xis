@@ -1,12 +1,12 @@
-package one.xis.test.it;
+package test;
 
 import one.xis.Model;
 import one.xis.Page;
 
 import java.util.List;
 
-@Page("/foreachAttribute.html")
-class ForeachAttributePage {
+@Page("/repeatAttr.html")
+class RepeatAttributePage {
 
     @Model("items")
     List<String> items() {

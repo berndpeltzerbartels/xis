@@ -1,4 +1,4 @@
-package one.xis.test.it;
+package test;
 
 import lombok.Data;
 

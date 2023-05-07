@@ -11,6 +11,7 @@ import one.xis.test.dom.TextNode;
 import one.xis.test.dom.Window;
 import one.xis.test.js.JSUtil;
 import one.xis.test.js.LocalStorage;
+import one.xis.utils.lang.StringUtils;
 
 import javax.script.CompiledScript;
 import javax.script.ScriptException;
@@ -19,7 +20,6 @@ import java.io.Writer;
 import java.util.*;
 import java.util.function.BiFunction;
 
-@SuppressWarnings("unused")
 public class IntegrationTestContext {
 
     @Getter
@@ -49,10 +49,11 @@ public class IntegrationTestContext {
     public void openPage(String uri, Map<String, Object> parameters) {
         document.location.pathname = uri;
         if ("true".equals(System.getenv().get("debug")) || "true".equals(System.getProperty("debug"))) {
-            debugOpenPage(uri, parameters);
+            debugOpenPage();
         } else {
-            openPageDefault(uri, parameters);
+            openPageDefault();
         }
+        finalizeDocument(document);
     }
 
     public void openPage(String uri) {
@@ -60,17 +61,16 @@ public class IntegrationTestContext {
     }
 
 
-    private void openPageDefault(String uri, Map<String, Object> parameters) {
+    private void openPageDefault() {
         var compiledScript = compileScript(script);
         try {
             compiledScript.eval();
-            finalizeDocument(document);
         } catch (ScriptException e) {
             throw new RuntimeException("Compilation failed :" + e.getMessage() + " at line " + e.getLineNumber() + ", column " + e.getColumnNumber());
         }
     }
 
-    private void debugOpenPage(String uri, Map<String, Object> parameters) {
+    private void debugOpenPage() {
         JSUtil.debug(script, createBindings());
     }
 
@@ -144,14 +144,15 @@ public class IntegrationTestContext {
     }
 
     private void finalizeDocument(@NonNull Document document) {
-        if (document.rootNode != null)
+        if (document.rootNode != null) {
             finalizeElement(document.rootNode);
+        }
     }
 
     private void finalizeElement(@NonNull Element element) {
         String value = null;
         if (element.getTextNode() != null) {
-            value = element.getTextNode().nodeValue;
+            value = StringUtils.toString(element.getTextNode().nodeValue);
         } else if (element.innerHTML != null) {
             value = element.innerHTML;
         } else if (element.innerText != null) {

@@ -6,6 +6,7 @@ import lombok.experimental.SuperBuilder;
 import one.xis.ClientId;
 import one.xis.Model;
 import one.xis.UserId;
+import one.xis.utils.lang.ClassUtils;
 import one.xis.utils.lang.CollectionUtils;
 
 import java.lang.reflect.Method;
@@ -63,6 +64,12 @@ abstract class ControllerMethod {
             }
         } else if (parameter.getType() == String.class) {
             return paramValue;
+        }
+        if (paramValue == null) {
+            if (ClassUtils.hasNoArgsConstructor(parameter.getType())) {
+                return ClassUtils.newInstance(parameter.getType());
+            }
+            throw new IllegalStateException(parameter.getType() + " must have no args constructor");
         }
         return parameterDeserializer.deserialze(paramValue, parameter);
     }

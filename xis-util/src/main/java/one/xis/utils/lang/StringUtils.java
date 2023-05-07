@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @UtilityClass
-@SuppressWarnings("unused")
 public class StringUtils {
 
     private static final String ESCAPE = Character.toString('\\');
@@ -71,6 +70,17 @@ public class StringUtils {
             throw new IllegalArgumentException("can no remove last char of empty string");
         }
         return s.substring(1);
+    }
+
+    public String toString(Object o) {
+        if (o == null) {
+            return "";
+        }
+        if (o instanceof String) {
+            return (String) o;
+        }
+        // TODO Date etc
+        return o.toString();
     }
 
 }

@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 @UtilityClass
 public class ClassUtils {
 
-    @SuppressWarnings("unchecked")
     public <T, R extends T> R cast(T obj, Class<R> target, Supplier<RuntimeException> exceptionSupplier) {
         if (!target.isInstance(obj)) {
             throw exceptionSupplier.get();
@@ -79,6 +78,15 @@ public class ClassUtils {
             return Class.forName(name);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public boolean hasNoArgsConstructor(Class<?> c) {
+        try {
+            c.getDeclaredConstructor();
+            return true;
+        } catch (NoSuchMethodException e) {
+            return false;
         }
     }
 }

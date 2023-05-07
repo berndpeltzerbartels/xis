@@ -1,4 +1,4 @@
-package one.xis.test.it;
+package test;
 
 import lombok.RequiredArgsConstructor;
 import one.xis.Page;
@@ -9,8 +9,9 @@ class ModelPage {
     private final ModelService modelService;
 
     @one.xis.Model("model")
-    Model model() {
-        return modelService.getModel();
+    Model model(@one.xis.Model("model") Model model) {
+        modelService.updateModel(model); // This is not reality-like but good for testing
+        return model;
     }
 
 }

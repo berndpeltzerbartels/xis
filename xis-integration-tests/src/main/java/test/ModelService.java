@@ -1,8 +1,7 @@
-package one.xis.test.it;
+package test;
 
 public interface ModelService {
 
     void updateModel(Model model);
 
-    Model getModel();
 }

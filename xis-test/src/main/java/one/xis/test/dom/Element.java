@@ -9,7 +9,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Getter
-@SuppressWarnings("unused")
 public class Element extends Node {
 
     public final String localName;
@@ -139,6 +138,7 @@ public class Element extends Node {
                 .filter(TextNode.class::isInstance)
                 .map(TextNode.class::cast)
                 .map(TextNode::getNodeValue)
+                .map(StringUtils::toString)
                 .filter(Objects::nonNull)
                 .collect(Collectors.joining()).trim();
     }
