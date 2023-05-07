@@ -31,16 +31,22 @@ public class JSUtil {
         //System.out.println(javascript);
         var compiler = (Compilable) engine;
         var compiledScript = compiler.compile(javascript);
-        // engine.getContext().setErrorWriter(new ExceptionThrowingErrorWriter());
+        engine.getContext().setErrorWriter(new ExceptionThrowingErrorWriter());
         return compiledScript;
     }
 
     public Object execute(String javascript, Map<String, Object> bindingMap) throws ScriptException {
+        if ("true".equals(System.getenv().get("debug")) || "true".equals(System.getProperty("debug"))) {
+            return debug(javascript, bindingMap);
+        }
         return compile(javascript, bindingMap).eval();
     }
 
 
     public Object execute(String js) throws ScriptException {
+        if ("true".equals(System.getenv().get("debug")) || "true".equals(System.getProperty("debug"))) {
+            return debug(js, emptyMap());
+        }
         return compile(js).eval();
     }
 

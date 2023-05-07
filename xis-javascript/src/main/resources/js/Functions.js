@@ -107,3 +107,6 @@ function createElement(name) {
     return document.createElement(name);
 }
 
+function bindPage(uri) {
+    pageController.bindPageById(uri);
+}

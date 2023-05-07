@@ -8,11 +8,12 @@ class Starter {
      */
     constructor(httpClient) {
         this.domAccessor = new DomAccessor();
-        this.initializer = new Initializer(this.domAccessor);
         this.client = new Client(httpClient);
         this.widgets = new Widgets(this.client);
+        this.initializer = new Initializer(this.domAccessor);
         this.pages = new Pages(this.client, this.initializer);
         this.pageController = new PageController(this.client, this.pages, this.initializer);
+
     }
 
     doStart() {
@@ -34,4 +35,5 @@ class Starter {
         return this.client.loadConfig();
     }
 }
+
 

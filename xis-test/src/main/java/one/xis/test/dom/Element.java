@@ -6,6 +6,7 @@ import lombok.NonNull;
 import one.xis.utils.lang.StringUtils;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @Getter
@@ -17,6 +18,7 @@ public class Element extends Node {
     public String innerText;
     public Object _handler;
     public Collection<Object> _attributes;
+    public Consumer<Object> onclick;
 
     public final int nodeType = 1;
     public final NodeList childNodes = new NodeList();

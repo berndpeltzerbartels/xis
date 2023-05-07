@@ -12,7 +12,6 @@ include 'xis-test'
 // include 'xis-micronaut' TODO
 // include 'xis-micronaut-test-app' TODO
 include 'xis-security'
-include 'xis-frontend-test'
 include 'xis-server'
 include 'xis-javascript'
 include 'xis-integration-tests'

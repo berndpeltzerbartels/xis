@@ -48,30 +48,16 @@ public class IntegrationTestContext {
 
     public void openPage(String uri, Map<String, Object> parameters) {
         document.location.pathname = uri;
-        if ("true".equals(System.getenv().get("debug")) || "true".equals(System.getProperty("debug"))) {
-            debugOpenPage();
-        } else {
-            openPageDefault();
+        try {
+            JSUtil.execute(script, createBindings());
+        } catch (ScriptException e) {
+            throw new RuntimeException("Compilation failed :" + e.getMessage() + " at line " + e.getLineNumber() + ", column " + e.getColumnNumber());
         }
         finalizeDocument(document);
     }
 
     public void openPage(String uri) {
         openPage(uri, Collections.emptyMap());
-    }
-
-
-    private void openPageDefault() {
-        var compiledScript = compileScript(script);
-        try {
-            compiledScript.eval();
-        } catch (ScriptException e) {
-            throw new RuntimeException("Compilation failed :" + e.getMessage() + " at line " + e.getLineNumber() + ", column " + e.getColumnNumber());
-        }
-    }
-
-    private void debugOpenPage() {
-        JSUtil.debug(script, createBindings());
     }
 
     class ErrorWriter extends Writer {
@@ -169,7 +155,9 @@ public class IntegrationTestContext {
 
     private static final String START_SCRIPT = "var httpClient = new HttpClientMock(controllerBridge);\n" +
             "var starter = new Starter(httpClient);\n" +
-            "starter.doStart();";
+            "starter.doStart();;\n" +
+            "var pageController = starter.pageController;\n" +
+            "var widgetController = starter.widgetController;\n";
 
 
 }

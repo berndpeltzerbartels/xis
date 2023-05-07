@@ -27,7 +27,7 @@ class PageController {
         console.log('PageController - displayInitialPage');
         this.pageAttributes = config.pageAttributes;
         var _this = this;
-        this.findPageForCurrentUrl()
+        this.findPageForCurrentUrl(document.location.pathname)
             .then(page => _this.bindPage(page))
             .then(pageId => _this.refreshData(pageId))
             .then(pageId => _this.refreshPage(pageId))
@@ -35,7 +35,13 @@ class PageController {
     }
 
     bindPageById(id) {
-        return this.bindPage(this.pages.getPageById(id));
+        var page = this.pages.getPageById(id);
+        if (!page) throw new Error('no such page: ' + id);
+        var _this = this;
+        this.bindPage(page)
+            .then(pageId => _this.refreshData(pageId))
+            .then(pageId => _this.refreshPage(pageId))
+            .catch(e => console.error(e));
     }
 
     /**
@@ -50,9 +56,9 @@ class PageController {
             _this.bindTitle(page);
             _this.bindHeadChildNodes(page.headChildArray);
             _this.bindBodyAttributes(page.bodyAttributes);
-            _this.bindBodyChildNodes(page.bodyChildArray)
+            _this.bindBodyChildNodes(page.bodyChildArray);
             resolve(page.id);
-        }).catch(e => console.error('failed to bind page:' + e));
+        });
     }
 
     bindHeadChildNodes(nodeArray) {
@@ -145,19 +151,16 @@ class PageController {
     /**
      * @returns {Promise<string>}
      */
-    findPageForCurrentUrl() {
+    findPageForCurrentUrl(uri) {
         console.log('findPageId');
         return new Promise((resolve, _) => {
-            var uri = document.location.pathname;
             var page = this.pages.getPageById(uri);
             if (!page) {
                 page = this.pages.getWelcomePage();
             }
             if (page == null) {
-                throw new Error('no page for uri:"' +uri+'" and no welcome page defined');
+                throw new Error('no page for uri:"' + uri + '" and no welcome page defined');
             }
-            console.log('resolve findPageId: ' + uri);
-            console.log('resolve findPageId: ' + page);
             resolve(page);
         });
     }
@@ -197,7 +200,7 @@ class PageController {
             _this.refreshTitle(data);
             refreshNode(_this.head, data);
             refreshNode(_this.body, data);
-            //_this.updateHistory(pageId);
+            _this.updateHistory(pageId);
             console.log('resolve - refreshPage: ' + pageId);
             resolve(pageId);
         });

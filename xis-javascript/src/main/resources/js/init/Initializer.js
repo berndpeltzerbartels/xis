@@ -39,7 +39,10 @@ class Initializer {
             this.initializeRepeat(element);
         }
         if (element.getAttribute('foreach')) {
-            this.initializeFor(element);
+            this.initializeForeachAttribute(element);
+        }
+        if (element.getAttribute('page-link')) {
+            this.initializePagelink(element);
         }
         this.initializeAttributes(element);
     }
@@ -104,11 +107,24 @@ class Initializer {
     * @private
     * @param {Element} element 
     */
-    initializeFor(element) {
+    initializeForeachAttribute(element) {
         var arr = doSplit(element.getAttribute('foreach'), ':');
         element.removeAttribute('foreach');
         var foreach = this.createForEach(arr[0], arr[1]);
         this.domAccessor.insertChild(element, foreach);
+    }
+
+
+    /**
+     * @private
+     * @param {Element} element 
+     */
+    initializePagelink(element) {
+        var pageId = element.getAttribute('page-link');
+        if (element.localName == 'a') {
+            element.setAttribute('href', '#');
+        }
+        element.onclick = e => bindPage(pageId);
     }
 
     createForEach(varName, array) {

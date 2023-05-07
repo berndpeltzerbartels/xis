@@ -5,6 +5,8 @@
     <script ignore="true" src="xis.js"></script>
     <script ignore="true">
 
+         var pageController;
+         var widgetController;
 
         function htmlToElement(elementName, html) {
             var element = document.createElement(elementName);
@@ -15,8 +17,14 @@
         function initialize() {
             var httpClient = new HttpClient();
             var starter = new Starter(httpClient);
+            pageController = starter.pageController;
+            widgetController = starter.widgetController;
             starter.doStart();
         }
+
+
+
+
 
 
 

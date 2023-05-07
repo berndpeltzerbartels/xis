@@ -76,16 +76,14 @@ class InitializerTest {
     }
 
     @Test
-    void forAttribute() throws ScriptException {
-        var document = Document.of("<div for=\"item:items\"><span></span></div>");
+    void foreachAttribute() throws ScriptException {
+        var document = Document.of("<div foreach=\"item:items\"><span></span></div>");
 
         var script = javascriptDefinitions;
         script += "var initializer = new Initializer(new DomAccessor());";
         script += "initializer.initialize(document.rootNode);";
 
-        var compiledScript = JSUtil.compile(script, Map.of("document", document, "console", new Console()));
-
-        compiledScript.eval();
+        JSUtil.execute(script, Map.of("document", document, "console", new Console()));
 
         assertThat(document.rootNode.getChildElementNames()).containsExactly("xis:foreach");
 
@@ -100,8 +98,8 @@ class InitializerTest {
     @DisplayName("Repeat-attribute and foreach with foreach as root in result")
     void repeatAndForeach() throws ScriptException {
         var document = new Document("html");
-        var div = document.createElement("div");
-        div.setAttribute("repeat", "array1:items");
+        var divForeach = document.createElement("div");
+        divForeach.setAttribute("repeat", "array1:items");
 
         var foreach = document.createElement("xis:foreach");
         foreach.setAttribute("array", "array1");
@@ -109,7 +107,7 @@ class InitializerTest {
 
         var span = document.createElement("span");
 
-        div.appendChild(foreach);
+        divForeach.appendChild(foreach);
         foreach.appendChild(span);
         span.appendChild(new TextNode("123"));
 
@@ -117,9 +115,7 @@ class InitializerTest {
         script += "var initializer = new Initializer(new DomAccessor());";
         script += "initializer.initialize(div);";
 
-        var compiledScript = JSUtil.compile(script, Map.of("div", div, "console", new Console(), "document", document));
-        compiledScript.eval();
-
+        JSUtil.execute(script, Map.of("div", divForeach, "console", new Console(), "document", document));
 
         DomAssert.assertAndGetParentElement(span, "xis:foreach")
                 .assertAndGetParentElement("div")
