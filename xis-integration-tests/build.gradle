@@ -1,0 +1,48 @@
+import one.xis.gradle.XISPlugin
+
+plugins {
+    id 'java'
+    id 'xis'
+}
+
+group 'one.xis'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(':xis-context')
+    implementation project(':xis-server')
+    implementation project(':xis-resources')
+    implementation project(':xis-remote-core')
+    implementation project(':xis-util')
+
+    annotationProcessor 'org.projectlombok:lombok:1.18.12'
+    implementation 'org.projectlombok:lombok:1.18.12'
+
+    testImplementation project(':xis-test')
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '2.1.0'
+    testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.16.1'
+    testImplementation 'org.mockito:mockito-junit-jupiter:4.5.1'
+
+}
+
+test {
+    useJUnitPlatform()
+}
+
+apply plugin: XISPlugin
+
+
+sourceSets {
+    main {
+        resources {
+            srcDir 'src/main/java'
+        }
+    }
+}

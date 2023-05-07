@@ -45,7 +45,6 @@ public class JSUtil {
     }
 
     public Object debug(String js, Map<String, Object> bindingMap) {
-
         String port = "4242";
         String path = java.util.UUID.randomUUID().toString();
         Context context = Context.newBuilder("js")
@@ -64,6 +63,7 @@ public class JSUtil {
         String url = String.format(
                 "devtools://devtools/bundled/js_app.html?ws=%s:%s/%s",
                 hostAdress, port, path);
+
         System.out.println(url);
 
         //     bindingMap.forEach(context.getBindings("js")::putMember);

@@ -6,7 +6,6 @@ include 'xis-processor'
 include 'xis-spring-test-app'
 include 'xis-util'
 include 'xis-resources'
-include 'xis-gradle-plugin'
 include 'xis-spring'
 include 'xis-context'
 include 'xis-test'
@@ -15,5 +14,11 @@ include 'xis-test'
 include 'xis-security'
 include 'xis-frontend-test'
 include 'xis-server'
-include 'xis-web-resources'
+include 'xis-javascript'
+include 'xis-integration-tests'
+
+
+
+
+
 

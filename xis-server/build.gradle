@@ -16,7 +16,7 @@ dependencies {
     implementation project(':xis-context')
     implementation project(':xis-util')
     implementation project(':xis-remote-core')
-    implementation project(':xis-web-resources')
+    implementation project(':xis-javascript')
     compileOnly project(':xis-resources')
     annotationProcessor 'org.projectlombok:lombok:1.18.12'
     implementation 'org.projectlombok:lombok:1.18.12'

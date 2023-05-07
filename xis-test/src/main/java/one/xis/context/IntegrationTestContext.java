@@ -44,12 +44,11 @@ public class IntegrationTestContext {
         document = Document.of(frontendService.getRootPageHtml());
         window = new Window();
         script = resources.getByPath("xis.js").getContent() + "\n" + START_SCRIPT;
-
     }
 
     public void openPage(String uri, Map<String, Object> parameters) {
         document.location.pathname = uri;
-        if ("true".equals(System.getenv().get("debug"))) {
+        if ("true".equals(System.getenv().get("debug")) || "true".equals(System.getProperty("debug"))) {
             debugOpenPage(uri, parameters);
         } else {
             openPageDefault(uri, parameters);
@@ -62,7 +61,6 @@ public class IntegrationTestContext {
 
 
     private void openPageDefault(String uri, Map<String, Object> parameters) {
-        document.location.pathname = uri;
         var compiledScript = compileScript(script);
         try {
             compiledScript.eval();
@@ -115,8 +113,8 @@ public class IntegrationTestContext {
         bindings.put("localStorage", localStorage);
         bindings.put("document", document);
         bindings.put("window", window);
-        BiFunction<String, String, Element> bind = this::htmlToElement;
-        bindings.put("htmlToElement", bind);
+        BiFunction<String, String, Element> htmlToElement = this::htmlToElement;
+        bindings.put("htmlToElement", htmlToElement);
         return bindings;
     }
 
@@ -141,7 +139,7 @@ public class IntegrationTestContext {
         }
 
         public IntegrationTestContext build() {
-            return new IntegrationTestContext(singletons.stream().toArray(Object[]::new));
+            return new IntegrationTestContext(singletons.toArray());
         }
     }
 

@@ -18,7 +18,7 @@ dependencies {
     implementation project(':xis-remote-core')
     implementation project(':xis-resources')
     implementation project(':xis-server')
-    //compileOnly project(':xis-web-resources')
+    //compileOnly project(':xis-javascript')
     implementation group: 'org.reflections', name: 'reflections', version: '0.9.10'
     implementation group: 'org.mockito', name: 'mockito-core', version: '2.1.0'
 
