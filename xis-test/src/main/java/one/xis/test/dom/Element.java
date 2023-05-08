@@ -174,10 +174,16 @@ public class Element extends Node {
             return this;
         }
         if (nextSibling != null && nextSibling instanceof Element) {
-            return ((Element) nextSibling).getElementById(id);
+            var element = ((Element) nextSibling).getElementById(id);
+            if (element != null) {
+                return element;
+            }
         }
         if (firstChild != null && firstChild instanceof Element) {
-            return ((Element) firstChild).getElementById(id);
+            var element = ((Element) firstChild).getElementById(id);
+            if (element != null) {
+                return element;
+            }
         }
         return null;
     }

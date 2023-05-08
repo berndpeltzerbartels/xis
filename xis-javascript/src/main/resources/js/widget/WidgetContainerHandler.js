@@ -11,6 +11,7 @@ class WidgetContainerHandler extends TagHandler {
         this.parent = this.findParentHtmlElement();
         this.initialWidgetId = this.getAttribute('widget');
         this.widgetRoot;
+        this.type = 'widget-container-handler';
         this.clearChildren();
     }
 

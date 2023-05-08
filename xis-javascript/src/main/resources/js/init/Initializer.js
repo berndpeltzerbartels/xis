@@ -120,11 +120,7 @@ class Initializer {
      * @param {Element} element 
      */
     initializePagelink(element) {
-        var pageId = element.getAttribute('page-link');
-        if (element.localName == 'a') {
-            element.setAttribute('href', '#');
-        }
-        element.onclick = e => bindPage(pageId);
+        this.addHandler(element, new PageLinkHandler(element));
     }
 
     createForEach(varName, array) {
@@ -135,18 +131,29 @@ class Initializer {
     }
 
     decorateForeach(foreach) {
-        foreach._handler = new ForeachHandler(foreach, this);
+        foreach._handler = new ForeachHandler(foreach, this); // never CompositeTagHandler, here
         return foreach;
     }
 
     decorateContainer(container) {
-        container._handler = new WidgetContainerHandler(container);
+        this.addHandler(container, new WidgetContainerHandler(container));
         return container;
     }
 
 
     isFrameworkElement(element) {
         return element.localName.startsWith('xis:');
+    }
+
+    addHandler(element, handler) {
+        if (!element._handler) {
+            element._handler = handler;
+        } else {
+            var anotherHandler = element._handler;
+            element._handler = new CompositeTagHandler();
+            element._handler.addHandler(anotherHandler);
+            element._handler.addHandler(handler);
+        }
     }
 
 }

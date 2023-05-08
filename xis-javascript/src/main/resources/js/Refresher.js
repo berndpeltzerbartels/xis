@@ -20,9 +20,14 @@ class Refresher {
                 element.setAttribute(attribute.name, attribute.expression.evaluate(data));
             }
         }
+        var evaluateChildNodes = true;
         if (element._handler) {
-            element._handler.refresh(data); // invokes child modes, too
-        } else {
+            if (element._handler.type == 'foreach-handler') {
+                evaluateChildNodes = false;// invokes child modes, too
+            }
+            element._handler.refresh(data);
+        }
+        if (evaluateChildNodes) {
             for (var i = 0; i < element.childNodes.length; i++) {
                 var child = element.childNodes.item(i);
                 this.refreshNode(child, data);

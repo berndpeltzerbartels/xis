@@ -9,6 +9,8 @@ class ForeachHandler extends TagHandler {
         this.initializer = initializer;
         this.arrayPath = this.doSplit(this.getAttribute('array'), '.');
         this.varName = this.getAttribute('var');
+        this.type = 'foreach-handler';
+        this.priority = 'high';
     }
 
     /**

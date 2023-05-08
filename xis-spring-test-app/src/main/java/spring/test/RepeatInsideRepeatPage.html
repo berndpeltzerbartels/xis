@@ -5,13 +5,13 @@
     <title>RepeatInsideRepeat</title>
 </head>
 <body>
-<div data-repeat="item:items" class="item">
+<div repeat="item:items" class="item">
     <h5 class="item">${item.title}</h5>
-    <div data-repeat="subItem:item.subItems" class="subItem">${subItem.title}</div>
+    <div repeat="subItem:item.subItems" class="subItem">${subItem.title}</div>
     <hr/>
 </div>
 <div>
-    <a data-page-link="/index.html" id="indexLink">Index</a>
+    <a page-link="/index.html" id="indexLink">Index</a>
 </div>
 </body>
 </html>

@@ -206,5 +206,20 @@ class InitializerTest {
 
     }
 
+    @Test
+    void pageLink() throws ScriptException {
+        var document = Document.of("<html><body><a page-link=\"/test.html\">test</a></body></html>");
+
+        var script = javascriptDefinitions;
+        script += "var initializer = new Initializer(new DomAccessor());";
+        script += "initializer.initialize(a);";
+
+        var a = document.getElementByTagName("a");
+
+        JSUtil.execute(script, Map.of("a", a, "console", new Console(), "document", document));
+
+
+    }
+
 }
 

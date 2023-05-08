@@ -3,6 +3,7 @@ class TagHandler {
     constructor(tag) {
         this.tag = tag;
         this.childArray = this.nodeListToArray(tag.childNodes);
+        this.priority = 'normal';
     }
 
     refresh(data) {
