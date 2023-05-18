@@ -66,7 +66,7 @@ class Client {
     /**
      * @public
      * @param {string} pageId
-     * @param {Data} data
+     * @param {any} data
      * @returns {Promise<any>}
      */
     loadPageData(pageId, data) {
@@ -78,7 +78,7 @@ class Client {
     /**
      * @public
      * @param {string} widgetId
-     * @param {Data} data
+     * @param {any} data
      * @returns {Promise<any>}
      */
     loadWidgetData(widgetId, data) {
@@ -87,12 +87,29 @@ class Client {
             .then(content => JSON.parse(content));
     }
 
+
+    /**
+     * @public
+     * @param {string} pageId
+     * @param {string} widgetId
+     * @param {string} action
+     * @param {Data} data
+     * @returns {Promise<Response>}
+     */
+    action(pageId, widgetId, action, data) {
+        var request = this.createRequest(pageId, data, action);
+        return this.httpClient.post('/xis/page/action', request, {});
+    }
+
+
+
     /**
      * @public
      * @param {string} widgetId
      * @param {string} action
      * @param {Data} data
-     * @returns {Promise<any>}
+     * @returns {Promise<Response>}
+     * @deprecated
      */
     widgetAction(widgetId, action, data) {
         var request = this.createRequest(widgetId, data, action);
@@ -105,7 +122,8 @@ class Client {
      * @param {string} pageId
      * @param {string} action
      * @param {Data} data
-     * @returns {Promise<any>}
+     * @returns {Promise<Response>}
+     * @deprecated
      */
     pageAction(pageId, action, data) {
         var request = this.createRequest(pageId, data, action);

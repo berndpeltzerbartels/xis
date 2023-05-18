@@ -45,5 +45,19 @@ class Data {
     setValue(key, value) {
         this.values[key] = value;
     }
+
+
+    /**
+     @ @public
+     * @param {String[]} keys 
+     * @return {any}
+     */
+    getValues(keys) {
+        var result = {};
+        for (var key of keys) {
+            result[key] = this.values[key];
+        }
+        return result;
+    }
 }
 

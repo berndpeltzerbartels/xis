@@ -12,6 +12,7 @@ class Widgets {
 
     loadWidgets(config) {
         console.log('Loading widgets');
+        this.widgetAttributes = config.widgetAttributes;
         var _this = this;
         var promises = [];
         this.widgetAttributes = config.widgetAttributes;
@@ -43,6 +44,13 @@ class Widgets {
         return this.widgets[widgetId].root;
     }
 
+    getModelKeysToSubmitForModel(widgetId) {
+        return this.widgetAttributes[widgetId].modelsToSubmitForModel;
+    }
+
+    getModelKeysToSubmitForAction(widgetId, action) {
+        return this.widgetAttributes[widgetId].modelsToSubmitForAction[action];
+    }
 
     /**
      *

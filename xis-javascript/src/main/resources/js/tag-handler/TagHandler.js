@@ -10,6 +10,11 @@ class TagHandler {
         throw new Error('abstract method');
     }
 
+
+    refreshChildNodes(data) {
+        // TODO
+    }
+
     clearChildren() {
         for (node of this.childArray) {
             if (node.parentNode) {
@@ -32,6 +37,36 @@ class TagHandler {
         return element;
     }
 
+    createExpression(src) {
+        return new TextContentParser(src).parse();
+    }
+
+    expressionFromAttribute(element, attrName) {
+        var attr = element.getAttribute(attrName);
+        if (attr) {
+            return new TextContentParser(attr).parse();
+        }
+    }
+
+    getTargetContainer(targetContainer) {
+        if (targetContainer) {
+            var container = this.widgetContainers.findContainer(targetContainer);
+            if (!container) throw new Error('no such target-container: ' + targetContainer);
+            return container;
+        }
+        var container = this.findParentWidgetContainer();
+        if (!container) throw new Error('no parent container found');
+        return container;
+    }
+
+    currentPageId() {
+        return pageController.pageId;
+    }
+
+    currentWidgetId() {
+        var container = this.findParentWidgetContainer();
+        return container ? container.widgetId : undefined;
+    }
 
     isFrameworkElement(node) {
         return isElement(node) && node.localName.startsWith('xis:');

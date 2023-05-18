@@ -19,36 +19,63 @@ class PageController {
         this.titleExpression;
     }
 
+    submitAction(action) {
+        var _this = this;
+        var data = this.pageDataMap[this.pageId];
+        var keys = this.pageAttributes[this.pageId].modelsToSubmitForAction[action];
+        this.client.action(this.pageId, undefined, action, data.getValues(keys))
+            .then(response => _this.handleActionResponse(response));
+    }
+
+
+    handleActionResponse(response) {
+        if (response.nextWidgetId) throw new Error('widget can not be set if there is no container: ' + response.nextWidgetId);
+        if (response.nextPageId && response.nextPageId !== this.pageId) {
+            this.displayPage(response.nextPageId);
+        }
+    }
+
     /**
      * @public
      * @param {Config} config
      */
     displayInitialPage(config) {
         console.log('PageController - displayInitialPage');
+        this.config = config;
         this.pageAttributes = config.pageAttributes;
+        return this.displayPage(document.location.pathname);
+    }
+
+
+    /**
+     * @public
+     * @param {string} pageId
+     */
+    displayPage(pageId) {
         var _this = this;
-        this.findPageForCurrentUrl(document.location.pathname)
+        this.findPageForUrl(pageId)
             .then(page => _this.bindPage(page))
-            .then(pageId => _this.refreshData(pageId))
-            .then(pageId => _this.refreshPage(pageId))
+            .then(() => _this.refreshData())
+            .then(() => _this.refreshPage())
             .catch(e => console.error(e));
     }
 
-    bindPageById(id) {
+    bindPage(id) {
+        this.pageId = id;
         var page = this.pages.getPageById(id);
         if (!page) throw new Error('no such page: ' + id);
         var _this = this;
-        this.bindPage(page)
+        this.doBindPage(page)
             .then(pageId => _this.refreshData(pageId))
-            .then(pageId => _this.refreshPage(pageId))
             .catch(e => console.error(e));
     }
 
     /**
     * @returns {Promise<string>}
     */
-    bindPage(page) {
+    doBindPage(page) {
         var _this = this;
+        this.pageId = page.id;
         return new Promise((resolve, _) => {
             _this.clearHeadChildNodes();
             _this.clearBodyChildNodes();
@@ -57,7 +84,7 @@ class PageController {
             _this.bindHeadChildNodes(page.headChildArray);
             _this.bindBodyAttributes(page.bodyAttributes);
             _this.bindBodyChildNodes(page.bodyChildArray);
-            resolve(page.id);
+            resolve();
         });
     }
 
@@ -151,7 +178,7 @@ class PageController {
     /**
      * @returns {Promise<string>}
      */
-    findPageForCurrentUrl(uri) {
+    findPageForUrl(uri) {
         console.log('findPageId');
         return new Promise((resolve, _) => {
             var page = this.pages.getPageById(uri);
@@ -165,13 +192,19 @@ class PageController {
         });
     }
 
+    reloadDataAndRefreshCurrentPage() {
+        if (!this.pageId) throw new Error('no page to reload');
+        var _this = this;
+        this.refreshData().then(() => _this.refreshPage())
+    }
+
     /**
     * @private
-    * @param {string} pageId
-    * @returns {Promise<string>}
+    * @returns {Promise}
     */
-    refreshData(pageId) {
+    refreshData() {
         var _this = this;
+        var pageId = this.pageId;
         console.log('PageController - refreshData:' + pageId);
         var values = {};
         console.log('PageController - pageDataMap:' + this.pageDataMap);
@@ -188,13 +221,19 @@ class PageController {
         });
     }
 
+
+    getCurrentPageData() {
+        return this.pageDataMap[this.pageId];
+    }
+
     /**
     * @private
     * @param {string} pageId
     * @returns {Promise<string>}
     */
-    refreshPage(pageId) {
+    refreshPage() {
         var _this = this;
+        var pageId = this.pageId;
         return new Promise((resolve, _) => {
             var data = _this.pageDataMap[pageId];
             _this.refreshTitle(data);
@@ -202,7 +241,7 @@ class PageController {
             refreshNode(_this.body, data);
             _this.updateHistory(pageId);
             console.log('resolve - refreshPage: ' + pageId);
-            resolve(pageId);
+            resolve();
         });
     }
 

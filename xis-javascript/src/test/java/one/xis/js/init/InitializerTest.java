@@ -30,6 +30,7 @@ class InitializerTest {
         javascriptDefinitions += IOUtils.getResourceAsString("js/tags/TagHandler.js");
         javascriptDefinitions += IOUtils.getResourceAsString("js/tags/NodeCache.js");
         javascriptDefinitions += IOUtils.getResourceAsString("js/tags/ForeachHandler.js");
+        javascriptDefinitions += IOUtils.getResourceAsString("js/tags/PageLinkHandler.js");
         javascriptDefinitions += IOUtils.getResourceAsString("js/Functions.js");
         javascriptDefinitions += IOUtils.getResourceAsString("js/parse/TextContentParser.js");
         javascriptDefinitions += IOUtils.getResourceAsString("js/parse/CharIterator.js");
@@ -218,8 +219,47 @@ class InitializerTest {
 
         JSUtil.execute(script, Map.of("a", a, "console", new Console(), "document", document));
 
-
+        var handler = (Map<String, Object>) a._handler;
+        assertThat(handler).isNotNull();
+        assertThat(handler.get("type")).isEqualTo("page-link-handler");
     }
+
+    @Test
+    void actionLink() throws ScriptException {
+        var document = Document.of("<html><body><a action-link=\"test-action\">test</a></body></html>");
+
+        var script = javascriptDefinitions;
+        script += "var initializer = new Initializer(new DomAccessor());";
+        script += "initializer.initialize(a);";
+
+        var a = document.getElementByTagName("a");
+
+        JSUtil.execute(script, Map.of("a", a, "console", new Console(), "document", document));
+
+        var handler = (Map<String, Object>) a._handler;
+        assertThat(handler).isNotNull();
+        assertThat(handler.get("type")).isEqualTo("action-link-handler");
+    }
+
+    /*
+    @Test
+    void compositeTagHandler() throws ScriptException {
+        var document = Document.of("<html><body><a repeat=\"x:y\" page-link=\"/test.html\">test</a></body></html>"); // repeat ans page-link in sin tag
+
+        var script = javascriptDefinitions;
+        script += "var initializer = new Initializer(new DomAccessor());";
+        script += "initializer.initialize(a);";
+
+        var a = document.getElementByTagName("a");
+
+        JSUtil.execute(script, Map.of("a", a, "console", new Console(), "document", document));
+
+        var handler = (Map<String, Object>) a._handler;
+        assertThat(handler).isNotNull();
+        assertThat(handler.get("type")).isEqualTo("page-link-handler");
+    }
+
+     */
 
 }
 

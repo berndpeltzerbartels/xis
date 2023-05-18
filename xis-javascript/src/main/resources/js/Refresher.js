@@ -23,7 +23,7 @@ class Refresher {
         var evaluateChildNodes = true;
         if (element._handler) {
             if (element._handler.type == 'foreach-handler') {
-                evaluateChildNodes = false;// invokes child modes, too
+                evaluateChildNodes = false;// invokes child nodes, too
             }
             element._handler.refresh(data);
         }
@@ -42,8 +42,4 @@ class Refresher {
     }
 }
 
-var refresher = new Refresher();
-
-function refreshNode(node, data) {
-    refresher.refreshNode(node, data);
-}
+var refresher = new Refresher(); // TODO better solution for an available instance ? Starter and Function ?

@@ -7,7 +7,7 @@ class ForeachHandler extends TagHandler {
     constructor(tag, initializer) {
         super(tag);
         this.initializer = initializer;
-        this.arrayPath = this.doSplit(this.getAttribute('array'), '.');
+        this.arrayPathExpression = this.createExpression(this.getAttribute('array'), '.');
         this.varName = this.getAttribute('var');
         this.type = 'foreach-handler';
         this.priority = 'high';
@@ -18,10 +18,12 @@ class ForeachHandler extends TagHandler {
      * @param {Data} data
      */
     refresh(data) {
-        var arr = data.getValue(this.arrayPath);
+        var arrayPath = this.doSplit(this.arrayPathExpression.evaluate(data), '.');
+        var arr = data.getValue(arrayPath);
         this.nodeCache().sizeUp(arr.length);
         for (var i = 0; i < this.cache.length; i++) {
             var subData = new Data({}, data);
+            subData.setValue(this.varName + '-index', i);
             subData.setValue(this.varName, arr[i]);
             var children = this.nodeCache().getChildren(i);
             if (i < arr.length) {

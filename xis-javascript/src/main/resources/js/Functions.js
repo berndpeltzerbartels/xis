@@ -108,5 +108,26 @@ function createElement(name) {
 }
 
 function bindPage(uri) {
-    pageController.bindPageById(uri);
+    return new Promise((resolve, _) => {
+        pageController.bindPageById(uri);
+        resolve(uri);
+    });
 }
+
+function reloadDataAndRefreshCurrentPage() {
+    return new Promise((resolve, _) => {
+        pageController.reloadDataAndRefreshCurrentPage();
+        resolve(uri);
+    });
+}
+
+function assertNotNull(o, errorText) {
+    if (o) return;
+    else throw new Error(errorText);
+}
+
+
+function refreshNode(node, data) {
+    refresher.refreshNode(node, data);
+}
+
