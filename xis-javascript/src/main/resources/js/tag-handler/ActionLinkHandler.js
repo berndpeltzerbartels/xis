@@ -10,7 +10,7 @@ class ActionLinkHandler extends TagHandler {
         super(element);
         this.client = client;
         this.widgetContainers = widgetContainers;
-        this.type = 'link-handler';
+        this.type = 'action-link-handler';
         this.targetExpression = this.expressionFromAttribute('target-container'); // not mandatory
         this.actionExpression = this.expressionFromAttribute('action');
         if (element.localName == 'a') {

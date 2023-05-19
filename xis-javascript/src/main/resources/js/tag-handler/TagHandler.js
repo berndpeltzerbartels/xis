@@ -41,8 +41,8 @@ class TagHandler {
         return new TextContentParser(src).parse();
     }
 
-    expressionFromAttribute(element, attrName) {
-        var attr = element.getAttribute(attrName);
+    expressionFromAttribute(attrName) {
+        var attr = this.tag.getAttribute(attrName);
         if (attr) {
             return new TextContentParser(attr).parse();
         }

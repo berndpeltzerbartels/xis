@@ -10,7 +10,7 @@ public class XISPlugin implements Plugin<Project> {
     @Override
     public void apply(Project project) {
         System.out.println(project.getExtensions().getByType(JavaPluginExtension.class)
-                .getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME));
+                .getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME).getJava());
 
     }
 

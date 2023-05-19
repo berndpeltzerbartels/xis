@@ -16,7 +16,6 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SuppressWarnings("unchecked")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class InitializerTest {
 
@@ -27,10 +26,11 @@ class InitializerTest {
     void load() {
         javascriptDefinitions = IOUtils.getResourceAsString("js/init/Initializer.js");
         javascriptDefinitions += IOUtils.getResourceAsString("js/init/DomAccessor.js");
-        javascriptDefinitions += IOUtils.getResourceAsString("js/tags/TagHandler.js");
-        javascriptDefinitions += IOUtils.getResourceAsString("js/tags/NodeCache.js");
-        javascriptDefinitions += IOUtils.getResourceAsString("js/tags/ForeachHandler.js");
-        javascriptDefinitions += IOUtils.getResourceAsString("js/tags/PageLinkHandler.js");
+        javascriptDefinitions += IOUtils.getResourceAsString("js/tag-handler/TagHandler.js");
+        javascriptDefinitions += IOUtils.getResourceAsString("js/tag-handler/NodeCache.js");
+        javascriptDefinitions += IOUtils.getResourceAsString("js/tag-handler/ForeachHandler.js");
+        javascriptDefinitions += IOUtils.getResourceAsString("js/tag-handler/LinkHandler.js");
+        javascriptDefinitions += IOUtils.getResourceAsString("js/tag-handler/ActionLinkHandler.js");
         javascriptDefinitions += IOUtils.getResourceAsString("js/Functions.js");
         javascriptDefinitions += IOUtils.getResourceAsString("js/parse/TextContentParser.js");
         javascriptDefinitions += IOUtils.getResourceAsString("js/parse/CharIterator.js");
@@ -59,7 +59,7 @@ class InitializerTest {
 
     @Test
     void repeatAttribute() throws ScriptException {
-        var document = Document.of("<div><span repeat=\"item:items\"></span></div>");
+        var document = Document.of("<div><span xis:repeat=\"item:items\"></span></div>");
 
         var script = javascriptDefinitions;
         script += "var initializer = new Initializer(new DomAccessor());";
@@ -78,7 +78,7 @@ class InitializerTest {
 
     @Test
     void foreachAttribute() throws ScriptException {
-        var document = Document.of("<div foreach=\"item:items\"><span></span></div>");
+        var document = Document.of("<div xis:foreach=\"item:items\"><span></span></div>");
 
         var script = javascriptDefinitions;
         script += "var initializer = new Initializer(new DomAccessor());";
@@ -92,6 +92,7 @@ class InitializerTest {
         assertThat(foreach.getChildElementNames()).containsExactly("span");
         assertThat(foreach.getAttribute("array")).isEqualTo("items");
         assertThat(foreach.getAttribute("var")).isEqualTo("item");
+        assertThat(((Map<String, Object>) foreach._handler).get("type")).isEqualTo("foreach-handler");
     }
 
 
@@ -100,7 +101,7 @@ class InitializerTest {
     void repeatAndForeach() throws ScriptException {
         var document = new Document("html");
         var divForeach = document.createElement("div");
-        divForeach.setAttribute("repeat", "array1:items");
+        divForeach.setAttribute("xis:repeat", "array1:items");
 
         var foreach = document.createElement("xis:foreach");
         foreach.setAttribute("array", "array1");
@@ -162,11 +163,11 @@ class InitializerTest {
 
     @Test
     @DisplayName("Element has repeat-attribute and for-attribute at the same time")
-    void repeatAndFor() throws ScriptException {
+    void repeatAndForAttributes() throws ScriptException {
         var document = new Document("html");
         var div = document.createElement("div");
-        div.setAttribute("repeat", "item1:items1");
-        div.setAttribute("for", "item2:items2");
+        div.setAttribute("xis:repeat", "item1:items1");
+        div.setAttribute("xis:foreach", "item2:items2");
 
         var script = javascriptDefinitions;
         script += "var initializer = new Initializer(new DomAccessor());";
@@ -209,7 +210,7 @@ class InitializerTest {
 
     @Test
     void pageLink() throws ScriptException {
-        var document = Document.of("<html><body><a page-link=\"/test.html\">test</a></body></html>");
+        var document = Document.of("<html><body><a xis:page=\"/test.html\">test</a></body></html>");
 
         var script = javascriptDefinitions;
         script += "var initializer = new Initializer(new DomAccessor());";
@@ -221,12 +222,12 @@ class InitializerTest {
 
         var handler = (Map<String, Object>) a._handler;
         assertThat(handler).isNotNull();
-        assertThat(handler.get("type")).isEqualTo("page-link-handler");
+        assertThat(handler.get("type")).isEqualTo("link-handler");
     }
 
     @Test
     void actionLink() throws ScriptException {
-        var document = Document.of("<html><body><a action-link=\"test-action\">test</a></body></html>");
+        var document = Document.of("<html><body><a xis:action=\"test-action\">test</a></body></html>");
 
         var script = javascriptDefinitions;
         script += "var initializer = new Initializer(new DomAccessor());";
