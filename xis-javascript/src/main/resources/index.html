@@ -8,10 +8,11 @@
          var pageController;
          var widgetController;
 
-        function htmlToElement(elementName, html) {
-            var element = document.createElement(elementName);
-            element.innerHTML = html;
-            return element;
+        function htmlToElement(html) {
+            var rootName = html.localName;
+            var element = document.createElement('holder');
+            holder.innerHTML = html;
+            return getChildElementByName(holder, rootName);
         }
 
         function initialize() {
@@ -21,6 +22,24 @@
             widgetController = starter.widgetController;
             starter.doStart();
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -26,4 +26,9 @@ class EmptyResource implements Resource {
         return null;
     }
 
+    @Override
+    public boolean isObsolete() {
+        return false;
+    }
+
 }

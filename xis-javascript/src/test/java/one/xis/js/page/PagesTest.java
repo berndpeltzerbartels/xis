@@ -31,7 +31,6 @@ class PagesTest {
 
 
     @Test
-    @SuppressWarnings("unchecked")
     void loadPages() throws ScriptException {
         var testScript = javascript + "pages.loadPages(config); var result = {pagesLoaded: pages.pages, initializedNodes: initializer.initializedNodes}; result";
         var compiledScript = JSUtil.compile(testScript, createBindings());
@@ -77,9 +76,7 @@ class PagesTest {
     }
 
     public Element htmlToElement(String name, String content) {
-        var doc = Document.of("<" + name + ">" +
-                content +
-                "</" + name + ">");
+        var doc = Document.of(content);
         return doc.rootNode;
     }
 

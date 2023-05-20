@@ -54,7 +54,7 @@ class PageController {
     displayPage(pageId) {
         var _this = this;
         this.findPageForUrl(pageId)
-            .then(page => _this.bindPage(page))
+            .then(page => _this.doBindPage(page))
             .then(() => _this.refreshData())
             .then(() => _this.refreshPage())
             .catch(e => console.error(e));

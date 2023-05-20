@@ -10,5 +10,7 @@ public interface Resource {
 
     String getResourcePath();
 
+    boolean isObsolete();
+
     Resource EMPTY = new EmptyResource();
 }

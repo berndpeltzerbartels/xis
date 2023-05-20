@@ -49,10 +49,10 @@ class Pages {
     loadPageHead(pageId) {
         var _this = this;
         return this.client.loadPageHead(pageId).then(content => {
-            var holder = htmlToElement('holder', content);
+            var shadowHead = htmlToElement(content);
             console.log('initialize head');
-            _this.initializer.initialize(holder);
-            var headChildArray = nodeListToArray(holder.childNodes);
+            _this.initializer.initialize(shadowHead);
+            var headChildArray = nodeListToArray(shadowHead.childNodes);
             var title = headChildArray.find(child => isElement(child) && child.localName == 'title');
             _this.pages[pageId].headChildArray = headChildArray;
             _this.pages[pageId].title = title ? title.innerText : '';
@@ -69,9 +69,9 @@ class Pages {
     loadPageBody(pageId) {
         var _this = this;
         return this.client.loadPageBody(pageId).then(content => {
-            var holder = htmlToElement('holder', content);
-            _this.initializer.initialize(holder);
-            _this.pages[pageId].bodyChildArray = nodeListToArray(holder.childNodes);
+            var shadowBody = htmlToElement(content);
+            _this.initializer.initialize(shadowBody);
+            _this.pages[pageId].bodyChildArray = nodeListToArray(shadowBody.childNodes);
             return pageId;
         });
     }

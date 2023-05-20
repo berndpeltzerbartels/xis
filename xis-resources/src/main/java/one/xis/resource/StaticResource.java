@@ -27,9 +27,16 @@ class StaticResource implements Resource {
         return resource;
     }
 
+    @Override
+    public boolean isObsolete() {
+        return false;
+    }
+
 
     @Override
     public int getLength() {
         return content.length();
     }
+
+
 }

@@ -18,7 +18,7 @@ import javax.script.ScriptException;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.*;
-import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class IntegrationTestContext {
 
@@ -78,10 +78,8 @@ public class IntegrationTestContext {
         }
     }
 
-    public Element htmlToElement(String name, String content) {
-        var doc = Document.of("<" + name + ">" +
-                content +
-                "</" + name + ">");
+    public Element htmlToElement(String content) {
+        var doc = Document.of(content);
         return doc.rootNode;
     }
 
@@ -99,7 +97,7 @@ public class IntegrationTestContext {
         bindings.put("localStorage", localStorage);
         bindings.put("document", document);
         bindings.put("window", window);
-        BiFunction<String, String, Element> htmlToElement = this::htmlToElement;
+        Function<String, Element> htmlToElement = this::htmlToElement;
         bindings.put("htmlToElement", htmlToElement);
         return bindings;
     }
@@ -155,7 +153,7 @@ public class IntegrationTestContext {
 
     private static final String START_SCRIPT = "var httpClient = new HttpClientMock(controllerBridge);\n" +
             "var starter = new Starter(httpClient);\n" +
-            "starter.doStart();;\n" +
+            "starter.doStart();\n" +
             "var pageController = starter.pageController;\n" +
             "var widgetController = starter.widgetController;\n";
 

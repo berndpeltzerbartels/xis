@@ -13,6 +13,9 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
 
+    implementation 'dom4j:dom4j:1.6.1'
+
+
     implementation project(':xis-context')
     implementation project(':xis-util')
     implementation project(':xis-remote-core')

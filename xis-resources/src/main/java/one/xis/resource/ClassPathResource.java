@@ -28,4 +28,11 @@ public class ClassPathResource implements Resource {
     public String getResourcePath() {
         return path;
     }
+
+    @Override
+    public boolean isObsolete() {
+        return false;
+    }
+
+
 }
