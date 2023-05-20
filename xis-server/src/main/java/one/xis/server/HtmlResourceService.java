@@ -18,9 +18,8 @@ import org.tinylog.Logger;
 
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @XISComponent
@@ -37,6 +36,9 @@ class HtmlResourceService {
 
     private Map<String, Resource> widgetHtmlResources;
     private Map<String, Resource> pageHtmlResources;
+    private ResourceCache<String> pageBodyResourceCache;
+    private ResourceCache<String> pageHeadResourceCache;
+    private ResourceCache<Map<String, String>> pageAttributesResourceCache;
 
     private Resource rootPage;
 
@@ -48,6 +50,10 @@ class HtmlResourceService {
     @XISInit
     void initPageResources() {
         pageHtmlResources = pageControllers.stream().collect(Collectors.toMap(contr -> contr.getClass().getAnnotation(Page.class).value(), this::htmlResource));
+        pageHeadResourceCache = new ResourceCache<String>(this::extractPageHead, pageHtmlResources);
+        pageBodyResourceCache = new ResourceCache<String>(this::extractPageBody, pageHtmlResources);
+        pageAttributesResourceCache = new ResourceCache<Map<String, String>>(this::extractBodyAttributes, pageHtmlResources);
+
     }
 
     @XISInit
@@ -65,36 +71,48 @@ class HtmlResourceService {
     }
 
     String getPageHead(String id) {
+        return pageHeadResourceCache.getResourceContent(id).orElseThrow();
+    }
+
+    String getPageBody(String id) {
+        return pageBodyResourceCache.getResourceContent(id).orElseThrow();
+    }
+
+    Map<String, String> getBodyAttributes(String id) {
+        return pageAttributesResourceCache.getResourceContent(id).orElseThrow();
+    }
+
+    private String extractPageHead(Resource pageResource) {
         try {
-            var content = pageHtmlResources.get(id).getContent();
+            var content = pageResource.getContent();
             Logger.info("content for head :" + content);
             var doc = createDocument(content);
             var head = doc.getRootElement().element("head");
             return serialize(head);
         } catch (Exception e) {
-            throw new RuntimeException("Unable to load head for " + id, e);
+            throw new RuntimeException("Unable to extract head", e);
         }
     }
 
-    String getPageBody(String id) {
+    private String extractPageBody(Resource pageResource) {
         try {
-            var content = pageHtmlResources.get(id).getContent();
+            var content = pageResource.getContent();
             Logger.info("content for body :" + content);
             var doc = createDocument(content);
             var body = doc.getRootElement().element("body");
             return serialize(body);
         } catch (Exception e) {
-            throw new RuntimeException("Unable to load body for " + id, e);
+            throw new RuntimeException("Unable to extract body", e);
         }
     }
 
-    Map<String, String> getBodyAttributes(String id) {
-        var content = pageHtmlResources.get(id).getContent();
+    private Map<String, String> extractBodyAttributes(Resource pageResource) {
+        var content = pageResource.getContent();
         var doc = XmlUtil.loadDocument(content);
         return XmlUtil.getElementByTagName(doc.getDocumentElement(), "body").map(XmlUtil::getAttributes).orElse(Collections.emptyMap());
     }
 
-    
+
     private Resource htmlResource(Object controller) {
         return resources.getByPath(getHtmlTemplatePath(controller));
     }
@@ -124,5 +142,25 @@ class HtmlResourceService {
             xmlWriter.close();
         }
         return stringWriter.toString();
+    }
+
+    @RequiredArgsConstructor
+    static class ResourceCache<T> {
+        private final Function<Resource, T> updateFunction;
+        private final Map<String, Resource> resources;
+        private final Map<String, T> cache = new HashMap<>();
+
+
+        Optional<T> getResourceContent(String id) {
+            if (!resources.containsKey(id)) {
+                return Optional.empty();
+            }
+            var resource = resources.get(id);
+            if (!cache.containsKey(id) || resource.isObsolete()) {
+                return Optional.of(cache.computeIfAbsent(id, key -> updateFunction.apply(resources.get(key))));
+            }
+            return Optional.of(cache.get(id));
+        }
+
     }
 }
