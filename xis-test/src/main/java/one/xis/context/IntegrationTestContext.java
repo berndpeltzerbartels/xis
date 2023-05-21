@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import one.xis.resource.Resources;
 import one.xis.server.FrontendService;
+import one.xis.server.PageUtil;
 import one.xis.test.dom.Document;
 import one.xis.test.dom.Element;
 import one.xis.test.dom.TextNode;
@@ -61,6 +62,12 @@ public class IntegrationTestContext {
     public void openPage(String uri) {
         openPage(uri, Collections.emptyMap());
     }
+
+
+    public void openPage(Class<?> pageController) {
+        openPage(PageUtil.getUrl(pageController), Collections.emptyMap());
+    }
+
 
     public <T> T getSingleton(Class<T> type) {
         return appContext.getSingleton(type);

@@ -1,6 +1,11 @@
 
 class DomAccessor {
 
+    /**
+     * @public
+     * @param {Element} element 
+     * @param {Element} elementToInsert 
+     */
     insertParent(element, elementToInsert) {
         console.log('insertParent: ' + element + ", " + elementToInsert);
         if (element.parentNode) {
@@ -14,7 +19,7 @@ class DomAccessor {
     }
 
     /**
-     * 
+     * @public
      * @param {Element} element 
      * @param {Element} elementToInsert 
      */
@@ -27,6 +32,11 @@ class DomAccessor {
         element.appendChild(elementToInsert);
     }
 
+    /**
+     * @public
+     * @param {Element} old 
+     * @param {Element} replacement 
+     */
     replaceElement(old, replacement) {
         var parent = old.parentNode;
         var nextSibling = old.nextSibling;

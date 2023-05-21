@@ -116,14 +116,34 @@ class Initializer {
         console.log('initializeFrameworkElement:' + element);
         switch (element.localName) {
             case 'xis:foreach':
-            case 'xis:forEach':
                 this.decorateForeach(element);
                 break;
             case 'xis:widget-container':
                 this.initializeWidgetContainer(element);
+                break;
+            case 'xis:a':
+                this.replaceByHtmlElement(element, 'a');
+                break;
         }
     }
 
+    replaceByHtmlElement(element, name) {
+        var replacement = document.createElement(name);
+        for (var attrName of element.getAttributeNames()) {
+            var attrValue = element.getAttribute(attrName);
+            switch (attrName) {
+                case 'page':
+                case 'widget':
+                case 'foreach':
+                case 'repeat':
+                case 'target-container':
+                case 'action': replacement.setAttribute('xis:' + attrName, attrValue);
+                default: replacement.setAttribute(attrName, attrValue);
+            }
+        }
+        this.domAccessor.replaceElement(element, replacement);
+        this.initializeHtmlElement(replacement);
+    }
     /**
     * @private
     * @param {Element} element
@@ -157,22 +177,6 @@ class Initializer {
         element.removeAttribute('xis:foreach');
         var foreach = this.createForEach(arr[0], arr[1]);
         this.domAccessor.insertChild(element, foreach);
-    }
-
-    /**
-    * @private
-    * @param {Element} element 
-    */
-    initializeContainerAttribute(element) {
-        var containerId = element.getAttribute('xis:widget-container');
-        var defaultWidget = element.getAttribute('xis:default-widget');
-        var containerTag = document.createElement('xis:widget-container');
-        if (defaultWidget) {
-            containerTag.setAttribute('default-widget', defaultWidget);
-        }
-        containerTag.setAttribute('id', containerId);
-        this.domAccessor.insertChild(element, containerTag);
-        this.initializeWidgetContainer(containerTag);
     }
 
     /**
