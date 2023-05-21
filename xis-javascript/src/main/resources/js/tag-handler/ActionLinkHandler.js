@@ -11,8 +11,8 @@ class ActionLinkHandler extends TagHandler {
         this.client = client;
         this.widgetContainers = widgetContainers;
         this.type = 'action-link-handler';
-        this.targetExpression = this.expressionFromAttribute('target-container'); // not mandatory
-        this.actionExpression = this.expressionFromAttribute('action');
+        this.targetExpression = this.expressionFromAttribute('xis:target-container'); // not mandatory
+        this.actionExpression = this.expressionFromAttribute('xis:action');
         if (element.localName == 'a') {
             element.setAttribute('href', '#');
         }
@@ -26,7 +26,7 @@ class ActionLinkHandler extends TagHandler {
         if (this.actionExpression) {
             this.action = this.actionExpression.evaluate(data);
         }
-        this.element.onclick = e => _this.onClick(e);
+        this.tag.onclick = e => _this.onClick(e);
     }
 
 

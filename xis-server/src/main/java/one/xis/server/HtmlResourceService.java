@@ -8,6 +8,7 @@ import one.xis.context.XISComponent;
 import one.xis.context.XISInit;
 import one.xis.context.XISInject;
 import one.xis.resource.Resource;
+import one.xis.resource.ResourceCache;
 import one.xis.resource.Resources;
 import one.xis.utils.xml.XmlUtil;
 import org.dom4j.Document;
@@ -18,8 +19,9 @@ import org.tinylog.Logger;
 
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.util.*;
-import java.util.function.Function;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @XISComponent
@@ -35,7 +37,6 @@ class HtmlResourceService {
     private final Resources resources;
 
     private Map<String, Resource> widgetHtmlResources;
-    private Map<String, Resource> pageHtmlResources;
     private ResourceCache<String> pageBodyResourceCache;
     private ResourceCache<String> pageHeadResourceCache;
     private ResourceCache<Map<String, String>> pageAttributesResourceCache;
@@ -49,11 +50,10 @@ class HtmlResourceService {
 
     @XISInit
     void initPageResources() {
-        pageHtmlResources = pageControllers.stream().collect(Collectors.toMap(contr -> contr.getClass().getAnnotation(Page.class).value(), this::htmlResource));
-        pageHeadResourceCache = new ResourceCache<String>(this::extractPageHead, pageHtmlResources);
-        pageBodyResourceCache = new ResourceCache<String>(this::extractPageBody, pageHtmlResources);
-        pageAttributesResourceCache = new ResourceCache<Map<String, String>>(this::extractBodyAttributes, pageHtmlResources);
-
+        Map<String, Resource> pageHtmlResources = pageControllers.stream().collect(Collectors.toMap(contr -> contr.getClass().getAnnotation(Page.class).value(), this::htmlResource));
+        pageHeadResourceCache = new ResourceCache<>(this::extractPageHead, pageHtmlResources);
+        pageBodyResourceCache = new ResourceCache<>(this::extractPageBody, pageHtmlResources);
+        pageAttributesResourceCache = new ResourceCache<>(this::extractBodyAttributes, pageHtmlResources);
     }
 
     @XISInit
@@ -88,6 +88,9 @@ class HtmlResourceService {
             Logger.info("content for head :" + content);
             var doc = createDocument(content);
             var head = doc.getRootElement().element("head");
+            if (head == null) {
+                throw new IllegalStateException("page must contain head element");
+            }
             return serialize(head);
         } catch (Exception e) {
             throw new RuntimeException("Unable to extract head", e);
@@ -100,6 +103,9 @@ class HtmlResourceService {
             Logger.info("content for body :" + content);
             var doc = createDocument(content);
             var body = doc.getRootElement().element("body");
+            if (body == null) {
+                throw new IllegalStateException("page must contain body element");
+            }
             return serialize(body);
         } catch (Exception e) {
             throw new RuntimeException("Unable to extract body", e);
@@ -144,23 +150,4 @@ class HtmlResourceService {
         return stringWriter.toString();
     }
 
-    @RequiredArgsConstructor
-    static class ResourceCache<T> {
-        private final Function<Resource, T> updateFunction;
-        private final Map<String, Resource> resources;
-        private final Map<String, T> cache = new HashMap<>();
-
-
-        Optional<T> getResourceContent(String id) {
-            if (!resources.containsKey(id)) {
-                return Optional.empty();
-            }
-            var resource = resources.get(id);
-            if (!cache.containsKey(id) || resource.isObsolete()) {
-                return Optional.of(cache.computeIfAbsent(id, key -> updateFunction.apply(resources.get(key))));
-            }
-            return Optional.of(cache.get(id));
-        }
-
-    }
 }

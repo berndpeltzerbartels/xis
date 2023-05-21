@@ -3,10 +3,9 @@ class LinkHandler extends TagHandler {
     constructor(element) {
         super(element);
         this.type = 'link-handler';
-        this.pageExpression = this.expressionFromAttribute('page');
-        this.widgetExpression = this.expressionFromAttribute('widget');
-        this.targetExpression = this.expressionFromAttribute('target-container');
-        this.refreshExpression = this.expressionFromAttribute('refresh');
+        this.pageExpression = this.expressionFromAttribute('xis:page');
+        this.widgetExpression = this.expressionFromAttribute('xis:widget');
+        this.targetExpression = this.expressionFromAttribute('xis:target-container');
         if (element.localName == 'a') {
             element.setAttribute('href', '#');
         }
@@ -29,32 +28,31 @@ class LinkHandler extends TagHandler {
         } else {
             this.refreshFlag = true;
         }
-        this.element.onclick = e => _this.onClick(e);
+        this.tag.onclick = e => { _this.onClick(e).catch(e => console.error(e)); };
     }
 
 
     onClick(e) {
         if (this.widgetExpression) {
-            this.onClickWidgetLink(this.widgetId);
+            return this.onClickWidgetLink(this.widgetId);
         } else if (this.pageExpression) {
-            this.onClickPageLink(this.pageId);
+            return this.onClickPageLink(this.pageId);
         }
     }
 
     onClickWidgetLink() {
-        var container = this.getTargetContainer();
-        var handler = container._handler;
-        handler.showWidget(this.widgetId);
-        if (this.refreshFlag) {
+        return new Promise((resolve, _) => {
+            var container = this.getTargetContainer();
+            var handler = container._handler;
+            var _this = this;
+            handler.showWidget(this.widgetId);
             handler.reloadDataAndRefresh(this.data);
-        }
+            resolve();
+        });
     }
 
     onClickPageLink(pageId) {
-        bindPageId(pageId);
-        if (this.refreshFlag) {
-            reloadDataAndRefreshCurrentPage();
-        }
+        return bindPage(pageId).then(() => reloadDataAndRefreshCurrentPage()).catch(e => console.error(e));
     }
 
 

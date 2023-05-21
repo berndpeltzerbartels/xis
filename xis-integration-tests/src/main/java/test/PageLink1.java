@@ -5,14 +5,14 @@ import one.xis.Model;
 import one.xis.Page;
 
 @Getter
-@Page("/index.html")
-class IndexPage {
+@Page("/pageLink1.html")
+class PageLink1 {
 
     private int invocations;
 
     @Model("title")
     String title() {
         invocations++;
-        return "Index";
+        return "PageLink1";
     }
 }

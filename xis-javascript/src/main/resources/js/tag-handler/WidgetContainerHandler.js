@@ -45,6 +45,7 @@ class WidgetContainerHandler extends TagHandler {
     /**
      * @public
      * @param {string} widgetId 
+     * @returns {Promise<void>}
      */
     showWidget(widgetId) {
         if (widgetId !== this.widgetId) {

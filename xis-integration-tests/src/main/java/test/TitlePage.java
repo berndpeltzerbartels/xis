@@ -8,7 +8,7 @@ class TitlePage {
 
     @Model("titleText")
     String title() {
-        return "Hello !";
+        return "Hello ! I am the title";
     }
 
 }

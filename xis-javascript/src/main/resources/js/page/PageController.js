@@ -60,18 +60,21 @@ class PageController {
             .catch(e => console.error(e));
     }
 
+    /**
+    * @public
+    * @returns {Promise<void>}
+    */
     bindPage(id) {
         this.pageId = id;
         var page = this.pages.getPageById(id);
         if (!page) throw new Error('no such page: ' + id);
         var _this = this;
-        this.doBindPage(page)
-            .then(pageId => _this.refreshData(pageId))
-            .catch(e => console.error(e));
+        return this.doBindPage(page);
     }
 
     /**
-    * @returns {Promise<string>}
+     * @private
+    * @returns {Promise<void>}
     */
     doBindPage(page) {
         var _this = this;

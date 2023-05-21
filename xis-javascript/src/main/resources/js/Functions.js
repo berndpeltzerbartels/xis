@@ -107,17 +107,19 @@ function createElement(name) {
     return document.createElement(name);
 }
 
+/**
+ * 
+ * @param {string} uri 
+ * @returns {Promise<void>}
+ */
 function bindPage(uri) {
-    return new Promise((resolve, _) => {
-        pageController.bindPageById(uri);
-        resolve(uri);
-    });
+    return pageController.bindPage(uri);
 }
 
 function reloadDataAndRefreshCurrentPage() {
     return new Promise((resolve, _) => {
         pageController.reloadDataAndRefreshCurrentPage();
-        resolve(uri);
+        resolve();
     });
 }
 

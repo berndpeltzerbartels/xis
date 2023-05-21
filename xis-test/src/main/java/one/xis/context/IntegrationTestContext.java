@@ -32,6 +32,7 @@ public class IntegrationTestContext {
     private final Window window;
     private final String script;
     private final FrontendService frontendService;
+    private final AppContext appContext;
 
     public static Builder builder() {
         return new Builder();
@@ -40,7 +41,8 @@ public class IntegrationTestContext {
     public IntegrationTestContext(Object... controllers) {
         this.localStorage = new LocalStorage();
         var resources = new Resources();
-        frontendService = internalContext(controllers).getSingleton(FrontendService.class);
+        appContext = internalContext(controllers);
+        frontendService = appContext.getSingleton(FrontendService.class);
         document = Document.of(frontendService.getRootPageHtml());
         window = new Window();
         script = resources.getByPath("xis.js").getContent() + "\n" + START_SCRIPT;
@@ -58,6 +60,10 @@ public class IntegrationTestContext {
 
     public void openPage(String uri) {
         openPage(uri, Collections.emptyMap());
+    }
+
+    public <T> T getSingleton(Class<T> type) {
+        return appContext.getSingleton(type);
     }
 
     class ErrorWriter extends Writer {

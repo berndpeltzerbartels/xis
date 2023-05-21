@@ -77,7 +77,7 @@ class ActionController {
     }
 
     showPage(pageId) {
-        this.pageController.bindPage(pageId);
+        bindPage(pageId).catch(e => console.error(e));
     }
 
     showWidget(widgetId) {
