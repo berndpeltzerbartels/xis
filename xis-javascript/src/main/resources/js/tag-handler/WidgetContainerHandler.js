@@ -11,7 +11,7 @@ class WidgetContainerHandler extends TagHandler {
         this.client = client;
         this.widgets = widgets;
         this.defaultWidgetIdExpression = this.expressionFromAttribute('default-widget');
-        this.containerId = tag.getAttribute('id'); // the id must not be an expression
+        this.containerId = tag.getAttribute('container-id'); // the id must not be an expression
         this.widgetRoot = undefined;
         this.widgeteData = {};
         this.type = 'widget-container-handler';
@@ -35,7 +35,7 @@ class WidgetContainerHandler extends TagHandler {
      */
     refresh(data) {
         console.log('refresh');
-        if (!this.widgetId) {
+        if (!this.widgetId && this.defaultWidgetIdExpression) {
             var widgetId = this.defaultWidgetIdExpression.evaluate(data);
             this.showWidget(widgetId);
         }

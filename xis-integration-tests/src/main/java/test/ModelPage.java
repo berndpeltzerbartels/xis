@@ -10,7 +10,7 @@ class ModelPage {
 
     @one.xis.Model("model")
     Model model(@one.xis.Model("model") Model model) {
-        modelService.updateModel(model); // This is not reality-like but good for testing
+        modelService.updateModel(model); // This is not reality-like, but good enough for testing
         return model;
     }
 

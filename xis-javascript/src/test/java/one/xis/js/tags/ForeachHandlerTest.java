@@ -22,13 +22,20 @@ class ForeachHandlerTest {
     @BeforeEach
     void initScript() {
         javascript = IOUtils.getResourceAsString("js/Data.js");
-        javascript += IOUtils.getResourceAsString("js/tags/TagHandler.js");
-        javascript += IOUtils.getResourceAsString("js/tags/ForeachHandler.js");
-        javascript += IOUtils.getResourceAsString("js/tags/NodeCache.js");
+        javascript += IOUtils.getResourceAsString("js/tag-handler/TagHandler.js");
+        javascript += IOUtils.getResourceAsString("js/tag-handler/ForeachHandler.js");
+        javascript += IOUtils.getResourceAsString("js/tag-handler/NodeCache.js");
         javascript += IOUtils.getResourceAsString("js/init/DomAccessor.js");
         javascript += IOUtils.getResourceAsString("js/init/Initializer.js");
         javascript += IOUtils.getResourceAsString("js/Functions.js");
         javascript += IOUtils.getResourceAsString("js/Refresher.js");
+        javascript += IOUtils.getResourceAsString("js/parse/TextContentParser.js");
+        javascript += IOUtils.getResourceAsString("js/parse/CharIterator.js");
+        javascript += IOUtils.getResourceAsString("js/parse/TextContent.js");
+        javascript += IOUtils.getResourceAsString("js/parse/ExpressionParser.js");
+        javascript += IOUtils.getResourceAsString("js/parse/Tokenizer.js");
+        javascript += IOUtils.getResourceAsString("js/parse/TreeParser.js");
+        javascript += IOUtils.getResourceAsString("js/parse/TokenLinker.js");
     }
 
     @BeforeEach

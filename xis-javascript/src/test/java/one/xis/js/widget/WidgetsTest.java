@@ -14,7 +14,6 @@ import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SuppressWarnings("unchecked")
 class WidgetsTest {
 
 
@@ -23,10 +22,10 @@ class WidgetsTest {
     @BeforeEach
     void initScript() {
         javascript = IOUtils.getResourceAsString("js/Data.js");
-        javascript += IOUtils.getResourceAsString("js/tags/TagHandler.js");
+        javascript += IOUtils.getResourceAsString("js/tag-handler/TagHandler.js");
         javascript += IOUtils.getResourceAsString("js/widget/Widget.js");
         javascript += IOUtils.getResourceAsString("js/widget/Widgets.js");
-        javascript += IOUtils.getResourceAsString("js/widget/WidgetContainerHandler.js");
+        javascript += IOUtils.getResourceAsString("js/tag-handler/WidgetContainerHandler.js");
         javascript += IOUtils.getResourceAsString("one/xis/widget/WidgetsTestMocks.js");
     }
 

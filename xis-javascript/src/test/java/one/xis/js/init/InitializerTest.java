@@ -128,12 +128,12 @@ class InitializerTest {
     }
 
     @Test
-    @DisplayName("Repeat-attribute and foreach with newly created foreach nestend in root")
+    @DisplayName("Repeat-attribute and foreach with newly created foreach nested in root")
     void repeatAndForeach2() throws ScriptException {
         var document = new Document("html");
         var div1 = document.createElement("div");
         var div2 = document.createElement("div");
-        div2.setAttribute("repeat", "array1:items");
+        div2.setAttribute("xis:repeat", "array1:items");
 
         var foreach = document.createElement("xis:foreach");
         foreach.setAttribute("array", "array1");

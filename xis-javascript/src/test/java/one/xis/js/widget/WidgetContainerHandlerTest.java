@@ -22,31 +22,55 @@ class WidgetContainerHandlerTest {
         javascript = IOUtils.getResourceAsString("js/Data.js");
         javascript += IOUtils.getResourceAsString("js/Functions.js");
         javascript += IOUtils.getResourceAsString("js/Refresher.js");
-        javascript += IOUtils.getResourceAsString("js/tags/TagHandler.js");
+        javascript += IOUtils.getResourceAsString("js/tag-handler/TagHandler.js");
         javascript += IOUtils.getResourceAsString("js/widget/Widget.js");
-        javascript += IOUtils.getResourceAsString("js/widget/WidgetContainerHandler.js");
+        javascript += IOUtils.getResourceAsString("js/tag-handler/WidgetContainerHandler.js");
+        javascript += IOUtils.getResourceAsString("js/parse/TextContentParser.js");
+        javascript += IOUtils.getResourceAsString("js/parse/CharIterator.js");
+        javascript += IOUtils.getResourceAsString("js/parse/TextContent.js");
+        javascript += IOUtils.getResourceAsString("js/parse/ExpressionParser.js");
+        javascript += IOUtils.getResourceAsString("js/parse/Tokenizer.js");
+        javascript += IOUtils.getResourceAsString("js/parse/TreeParser.js");
+        javascript += IOUtils.getResourceAsString("js/parse/TokenLinker.js");
+        javascript += IOUtils.getResourceAsString("js/connect/HttpClientMock.js");
         javascript += IOUtils.getResourceAsString("one/xis/widget/WidgetContainerHandlerTestMocks.js");
     }
 
     @Test
     void refresh() throws ScriptException {
-        var document = Document.of("<html><body><div id=\"container\"></div></body></html>");
-        var containerDiv = document.getElementById("container");
+        var document = Document.of("<html><body><xis:widget-container id=\"container\" default-widget=\"${x}\"/></body></html>");
+        var container = document.getElementById("container");
 
         var script = javascript;
-        script += "var handler = new WidgetContainerHandler(tag, widgets);";
+        script += "var handler = new WidgetContainerHandler(tag, new HttpClientMock(), widgets);";
         script += "handler.refresh(data)";
 
         var bindings = new HashMap<String, Object>();
         bindings.put("document", document);
-        bindings.put("tag", containerDiv);
+        bindings.put("tag", container);
+        bindings.put("widgets", new WidgetsMock());
         bindings.put("debug", new Debug());
 
         JSUtil.execute(script, bindings);
 
-        assertThat(containerDiv.firstChild).isNotNull();
-        assertThat(containerDiv.firstChild).isInstanceOf(Element.class);
-        assertThat((((Element) containerDiv.firstChild).getAttribute("id"))).isEqualTo("widgetRoot");
+        assertThat(container.firstChild).isNotNull();
+        assertThat(container.firstChild).isInstanceOf(Element.class);
+        assertThat((((Element) container.firstChild).getAttribute("id"))).isEqualTo("widgetRoot");
+
+    }
+
+    public static class WidgetsMock {
+        private final Element root;
+
+        WidgetsMock() {
+            this.root = new Element("div");
+            this.root.setAttribute("id", "widgetRoot");
+        }
+
+        @SuppressWarnings("unused")
+        public Element getWidgetRoot(String id) {
+            return root;
+        }
 
     }
 }

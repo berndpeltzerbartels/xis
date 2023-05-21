@@ -20,6 +20,6 @@ class TitlePageTest {
     @Test
     void test() {
         testContext.openPage("/title.html");
-        assertThat(testContext.getDocument().getElementByTagName("title").innerText).isEqualTo("Hello !");
+        assertThat(testContext.getDocument().getElementByTagName("title").innerText).isEqualTo("Hello ! I am the title");
     }
 }

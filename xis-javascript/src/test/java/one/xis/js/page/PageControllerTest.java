@@ -35,8 +35,8 @@ class PageControllerTest {
 
 
     @Test
-    void bindPageForId() throws ScriptException {
-        var testScript = javascript + "pageController.bindPageById('bla');";
+    void bindPage() throws ScriptException {
+        var testScript = javascript + "pageController.bindPage('bla');";
         var compiledScript = JSUtil.compile(testScript, createBindings());
 
         compiledScript.eval();

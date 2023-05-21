@@ -5,10 +5,12 @@ var client = {
     loadPageHead: function (pageId) {
         this.calledMethods.push('loadPageHead');
         return new Promise((resolve, reject) => {
-            resolve(`<title>Title</title>
-                    <style>
+            resolve(`<head>
+                        <title>Title</title>
+                        <style>
 
-                    </style>
+                        </style>
+                      </head>
             `)
         });
     },
@@ -16,10 +18,12 @@ var client = {
     loadPageBody: function (pageId) {
         this.calledMethods.push('loadPageBody');
         return new Promise((resolve, reject) => {
-            resolve(`<h5>Title</h5>
-                    <div>
+            resolve(`<body>
+                        <h5>Title</h5>
+                        <div>
 
-                    </div>
+                        </div>
+                    </body>
             `)
         });
     },

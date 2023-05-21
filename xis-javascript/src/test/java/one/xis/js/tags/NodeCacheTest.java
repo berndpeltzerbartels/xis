@@ -14,12 +14,11 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SuppressWarnings("unchecked")
 class NodeCacheTest {
 
     @Test
     void sizeUp() throws ScriptException {
-        var js = IOUtils.getResourceAsString("js/tags/NodeCache.js");
+        var js = IOUtils.getResourceAsString("js/tag-handler/NodeCache.js");
         js += IOUtils.getResourceAsString("js/init/Initializer.js");
         js += IOUtils.getResourceAsString("js/init/DomAccessor.js");
         js += IOUtils.getResourceAsString("js/Functions.js");
