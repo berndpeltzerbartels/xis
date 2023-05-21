@@ -2,6 +2,7 @@ package test;
 
 import one.xis.context.IntegrationTestContext;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -19,6 +20,7 @@ class PageLinkTest {
     }
 
     @Test
+    @DisplayName("Click link to another page, then click the link back to first page")
     void test() {
         var controller1 = testContext.getSingleton(PageLink1.class);
         var controller2 = testContext.getSingleton(PageLink2.class);
