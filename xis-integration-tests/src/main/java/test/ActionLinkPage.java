@@ -18,18 +18,17 @@ class ActionLinkPage {
     }
 
     @Model("action3")
-    Class<?> action(ActionLinkPageData data) {
-        service.update(data);
-        return IndexPage.class;
+    String getAction3() {
+        return "test-action3";
     }
 
     @Action("test-action1")
-    void action1(ActionLinkPageData data) {
+    void action1(@Model("data") ActionLinkPageData data) {
         service.update(data);
     }
 
     @Action("test-action2")
-    Class<?> action2(ActionLinkPageData data) {
+    Class<?> action2(@Model("data") ActionLinkPageData data) {
         service.update(data);
         return ActionLinkPage.class;
     }

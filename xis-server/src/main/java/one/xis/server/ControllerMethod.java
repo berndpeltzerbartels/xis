@@ -45,7 +45,7 @@ abstract class ControllerMethod {
             } else if (param.isAnnotationPresent(ClientId.class)) {
                 args[i] = context.getClientId();
             } else {
-                throw new IllegalStateException("no annotation: " + param);
+                throw new IllegalStateException(method + ": parameter without annotation=" + param);
             }
         }
         return args;
