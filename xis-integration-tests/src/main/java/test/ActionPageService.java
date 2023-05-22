@@ -1,10 +1,8 @@
 package test;
 
-import java.util.List;
-
 interface ActionPageService {
 
-    List<ActionPageData> getDataList();
+    ActionLinkPageData getData();
 
-    void update(ActionPageData data);
+    void update(ActionLinkPageData data);
 }

@@ -5,6 +5,7 @@ import one.xis.test.dom.DomAssert;
 import one.xis.test.dom.Element;
 import one.xis.test.js.JSUtil;
 import one.xis.utils.io.IOUtils;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import javax.script.ScriptException;
@@ -15,12 +16,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 class DomAccessorTest {
 
     @Test
+    @DisplayName("Element e2 is a child of element e1 and e2 is getting replaced by element x")
     void replaceElement1() throws ScriptException {
         var document = new Document(new Element("root"));
         document.rootNode.appendChild(document.createElement("e1"));
         document.rootNode.appendChild(document.createElement("e2"));
 
         var js = IOUtils.getResourceAsString("js/init/DomAccessor.js");
+        js += IOUtils.getResourceAsString("js/Functions.js");
         js += "var accessor = new DomAccessor();";
         js += "var e2 = document.getElementsByTagName('e2').item(0);";
         js += "var x = document.createElement('x');";
@@ -50,11 +53,13 @@ class DomAccessorTest {
     }
 
     @Test
+    @DisplayName("Element e1 is getting replaced by element x")
     void replaceElement2() throws ScriptException {
         var document = new Document(new Element("root"));
         document.rootNode.appendChild(document.createElement("e1"));
 
         var js = IOUtils.getResourceAsString("js/init/DomAccessor.js");
+        js += IOUtils.getResourceAsString("js/Functions.js");
         js += "var accessor = new DomAccessor();";
         js += "var e1 = document.getElementsByTagName('e1').item(0);";
         js += "var x = document.createElement('x');";
@@ -75,11 +80,56 @@ class DomAccessorTest {
     }
 
     @Test
+    @DisplayName("e1 has next sibling e2 and e2 is replaced by x")
+    void replaceElement3() throws ScriptException {
+        var document = new Document(new Element("root"));
+        var e1 = document.createElement("e1");
+        var e2 = document.createElement("e2");
+        var e3 = document.createElement("e3");
+        e1.appendChild(e3);
+        document.rootNode.appendChild(e1);
+        document.rootNode.appendChild(e2);
+
+
+        var js = IOUtils.getResourceAsString("js/init/DomAccessor.js");
+        js += IOUtils.getResourceAsString("js/Functions.js");
+        js += "var accessor = new DomAccessor();";
+        js += "var e1 = document.getElementsByTagName('e1').item(0);";
+        js += "var e2 = document.getElementsByTagName('e2').item(0);";
+        js += "var x = document.createElement('x');";
+        js += "accessor.replaceElement(e1, x);";
+        var script = JSUtil.compile(js, Map.of("document", document));
+        script.eval();
+
+        var root = document.getElementByTagName("root");
+        e1 = document.getElementByTagName("e1");
+        e2 = document.getElementByTagName("e2");
+        var x = document.getElementByTagName("x");
+
+        assertThat(root).isNotNull();
+        assertThat(e1).isNull();
+        assertThat(e2).isNotNull();
+        assertThat(x).isNotNull();
+
+        assertThat(x.firstChild).isEqualTo(e3); // e3 was a child of e1 and must get moved
+
+
+        assertThat(x.nextSibling).isEqualTo(e2);
+        assertThat(e2.parentNode).isEqualTo(root);
+        assertThat(x.parentNode).isEqualTo(root);
+
+        assertThat(root.childNodes.length).isEqualTo(2);
+        assertThat(root.childNodes.item(0)).isEqualTo(x);
+        assertThat(root.childNodes.item(1)).isEqualTo(e2);
+    }
+
+    @Test
     void insertParent() throws ScriptException {
         var document = new Document(new Element("root"));
         document.rootNode.appendChild(document.createElement("e2"));
 
         var js = IOUtils.getResourceAsString("js/init/DomAccessor.js");
+        js += IOUtils.getResourceAsString("js/Functions.js");
         js += "var accessor = new DomAccessor();";
         js += "var e2 = document.getElementsByTagName('e2').item(0);";
         js += "var e1 = document.createElement('e1');";

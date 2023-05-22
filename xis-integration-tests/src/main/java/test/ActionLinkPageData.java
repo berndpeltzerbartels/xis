@@ -3,7 +3,7 @@ package test;
 import lombok.Data;
 
 @Data
-class ActionPageData {
+class ActionLinkPageData {
     private final int id;
     private final String value;
 }

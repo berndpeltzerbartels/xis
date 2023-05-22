@@ -226,7 +226,7 @@ class InitializerTest {
     }
 
     @Test
-    void actionLink() throws ScriptException {
+    void actionLink1() throws ScriptException {
         var document = Document.of("<html><body><a xis:action=\"test-action\">test</a></body></html>");
 
         var script = javascriptDefinitions;
@@ -241,6 +241,29 @@ class InitializerTest {
         assertThat(handler).isNotNull();
         assertThat(handler.get("type")).isEqualTo("action-link-handler");
     }
+
+    /*
+     * Similar to previous test, but element type is "xis:a" intead of "a" and attribute is "xis:action" instead of "action"
+     */
+    @Test
+    void actionLink2() throws ScriptException {
+        var document = Document.of("<html><body><xis:a action=\"test-action\">test</xis:a></body></html>");
+
+
+        var script = javascriptDefinitions;
+        script += "var initializer = new Initializer(new DomAccessor());";
+        script += "initializer.initialize(a);";
+
+        var a1 = document.getElementByTagName("xis:a");
+
+        JSUtil.execute(script, Map.of("a", a1, "console", new Console(), "document", document));
+
+        var a2 = document.getElementByTagName("a");
+        var handler = (Map<String, Object>) a2._handler;
+        assertThat(handler).isNotNull();
+        assertThat(handler.get("type")).isEqualTo("action-link-handler");
+    }
+
 
     /*
     @Test
