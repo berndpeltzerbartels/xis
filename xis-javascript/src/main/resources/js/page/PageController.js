@@ -23,7 +23,7 @@ class PageController {
         var _this = this;
         var data = this.pageDataMap[this.pageId];
         var keys = this.pageAttributes[this.pageId].modelsToSubmitForAction[action];
-        this.client.action(this.pageId, undefined, action, data.getValues(keys))
+        return this.client.action(this.pageId, undefined, action, data.getValues(keys))
             .then(response => _this.handleActionResponse(response));
     }
 

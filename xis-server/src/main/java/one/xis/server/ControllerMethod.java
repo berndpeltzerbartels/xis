@@ -1,7 +1,6 @@
 package one.xis.server;
 
 import lombok.Data;
-import lombok.SneakyThrows;
 import lombok.experimental.SuperBuilder;
 import one.xis.ClientId;
 import one.xis.Model;
@@ -9,6 +8,7 @@ import one.xis.UserId;
 import one.xis.utils.lang.ClassUtils;
 import one.xis.utils.lang.CollectionUtils;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Collection;
@@ -22,8 +22,7 @@ abstract class ControllerMethod {
     protected String key;
     protected ParameterDeserializer parameterDeserializer;
 
-    @SneakyThrows
-    Object invoke(Request request, Object controller) {
+    Object invoke(Request request, Object controller) throws Exception {
         return method.invoke(controller, prepareArgs(request));
     }
 
@@ -33,7 +32,7 @@ abstract class ControllerMethod {
     }
 
 
-    protected Object[] prepareArgs(Request context) {
+    protected Object[] prepareArgs(Request context) throws Exception {
         Object[] args = new Object[method.getParameterCount()];
         var params = method.getParameters();
         for (int i = 0; i < args.length; i++) {
@@ -51,9 +50,8 @@ abstract class ControllerMethod {
         return args;
     }
 
-    @SneakyThrows
     @SuppressWarnings("unchecked")
-    private Object modelParameter(Parameter parameter, Request context) {
+    private Object modelParameter(Parameter parameter, Request context) throws IOException {
         var key = parameter.getAnnotation(Model.class).value();
         var paramValue = context.getData().get(key);
         if (paramValue == null) {

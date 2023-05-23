@@ -13,7 +13,7 @@ class HttpClientMock {
      *
      */
     post(uri, payload, headers) {
-       console.log('HTTP - POST: ' + uri + ' : ' + JSON.stringify(payload));
+        console.log('HTTP - POST: ' + uri + ' : ' + JSON.stringify(payload));
         var _this = this;
         return new Promise((resolve, reject) => {
             var response = _this.responseForPost(uri, payload, headers);
@@ -55,8 +55,8 @@ class HttpClientMock {
         switch (uri) {
             case '/xis/page/model': return this.controllerBridge.getPageModel(uri, requestJson, headers);
             case '/xis/widget/model': return this.controllerBridge.getWidgetModel(uri, requestJson, headers);
-            case '/xis/page/action': return this.controllerBridge.invokePageActionMethod(uri, requestJson, headers);
-            case '/xis/widget/action': return this.controllerBridge.invokeWidgetActionMethod(uri, requestJson, headers);
+            case '/xis/page/action': return this.controllerBridge.onPageAction(uri, requestJson, headers);
+            case '/xis/widget/action': return this.controllerBridge.onWidgetAction(uri, requestJson, headers);
             default: throw new Error('unknown uri for http-post: ' + uri);
         }
     }

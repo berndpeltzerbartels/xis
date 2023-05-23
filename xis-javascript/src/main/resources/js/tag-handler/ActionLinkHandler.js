@@ -35,7 +35,7 @@ class ActionLinkHandler extends TagHandler {
             var targetContainer = this.getTargetContainer(this.targetContainerId);
             targetContainer._handler.submitAction(this.action);
         } else {
-            pageController.submitAction(this.action);
+            pageController.submitAction(this.action).catch(e => console.log(e));
         }
     }
 

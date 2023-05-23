@@ -34,7 +34,7 @@ class ActionLinkPageTest {
         var captor = ArgumentCaptor.forClass(ActionLinkPageData.class);
         verify(service, times(1)).update(captor.capture());
 
-        assertThat(captor.getValue().getId()).isEqualTo(100);
+        assertThat(captor.getValue().getId()).isEqualTo(101);
         assertThat(captor.getValue().getValue()).isEqualTo("bla");
 
     }

@@ -98,7 +98,8 @@ class Client {
      */
     action(pageId, widgetId, action, data) {
         var request = this.createRequest(pageId, data, action);
-        return this.httpClient.post('/xis/page/action', request, {});
+        return this.httpClient.post('/xis/page/action', request, {})
+            .then(content => JSON.parse(content));
     }
 
 
