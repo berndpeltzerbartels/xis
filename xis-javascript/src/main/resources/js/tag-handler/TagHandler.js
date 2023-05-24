@@ -49,15 +49,14 @@ class TagHandler {
         }
     }
 
-    getTargetContainer(targetContainer) {
-        if (targetContainer) {
-            var container = this.widgetContainers.findContainer(targetContainer);
-            if (!container) throw new Error('no such target-container: ' + targetContainer);
-            return container;
+    findParentWidgetContainer() {
+        var e = this.tag;
+        while (e) {
+            if (e.localName == 'xis:widget-container') {
+                return e;
+            }
+            e = e.parentNode;
         }
-        var container = this.findParentWidgetContainer();
-        if (!container) throw new Error('no parent container found');
-        return container;
     }
 
     currentPageId() {

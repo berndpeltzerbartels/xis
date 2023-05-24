@@ -9,6 +9,6 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 class ComponentAttributes {
-    private Collection<String> modelsToSubmitForModel;
-    private Map<String, Collection<String>> modelsToSubmitForAction;
+    private Collection<String> modelsToSubmitOnRefresh;
+    private Map<String, Collection<String>> modelsToSubmitOnAction;
 }

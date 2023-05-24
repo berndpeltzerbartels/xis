@@ -2,7 +2,7 @@
  * @property {Number} httpStatus
  * @property {any} data
  * @property {string} nextPageId
- * @property {string} nextPageId
+ * @property {string} nextWidgetId
  */
 
 class Response {
@@ -11,6 +11,6 @@ class Response {
         this.httpStatus = -1;
         this.data = {};
         this.nextPageId = '';
-        this.nextPageId = '';
+        this.nextWidgetId = '';
     }
 }

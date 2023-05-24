@@ -45,11 +45,11 @@ class Widgets {
     }
 
     getModelKeysToSubmitForModel(widgetId) {
-        return this.widgetAttributes[widgetId].modelsToSubmitForModel;
+        return this.widgetAttributes[widgetId].modelsToSubmitOnRefresh;
     }
 
     getModelKeysToSubmitForAction(widgetId, action) {
-        return this.widgetAttributes[widgetId].modelsToSubmitForAction[action];
+        return this.widgetAttributes[widgetId].modelsToSubmitOnAction[action];
     }
 
     /**

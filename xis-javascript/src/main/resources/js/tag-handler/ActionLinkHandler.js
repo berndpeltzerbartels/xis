@@ -16,6 +16,7 @@ class ActionLinkHandler extends TagHandler {
         if (element.localName == 'a') {
             element.setAttribute('href', '#');
         }
+        this.targetContainerId = this.findParentWidgetContainer();
     }
 
     refresh(data) {
@@ -32,12 +33,14 @@ class ActionLinkHandler extends TagHandler {
 
     onClick(e) {
         if (this.targetContainerId) {
-            var targetContainer = this.getTargetContainer(this.targetContainerId);
+            var targetContainer = this.widgetContainers.findContainer(this.targetContainerId);
             targetContainer._handler.submitAction(this.action);
         } else {
             pageController.submitAction(this.action).catch(e => console.log(e));
         }
     }
+
+    getParentContainer() { }
 
     asString() {
         return 'Link';

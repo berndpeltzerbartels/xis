@@ -14,8 +14,6 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static java.util.Collections.emptyMap;
-
 @XISComponent
 @RequiredArgsConstructor
 class ControllerService {
@@ -42,13 +40,13 @@ class ControllerService {
 
 
     Response invokePageModelMethods(Request request) {
-        var data = findPageControllerWrapper(request).map(wrapper -> wrapper.invokeGetModelMethods(request)).orElse(emptyMap());
-        return new Response(200, data, request.getControllerId(), null);
+        var wrapper = findPageControllerWrapper(request).orElseThrow();
+        return pageModelDataResponse(200, wrapper, request);
     }
 
     Response invokeWidgetModelMethods(Request request) {
-        var data = findWidgetControllerWrapper(request).map(wrapper -> wrapper.invokeGetModelMethods(request)).orElse(emptyMap());
-        return new Response(200, data, null, request.getControllerId());
+        var wrapper = findWidgetControllerWrapper(request).orElseThrow();
+        return widgetModelDataResponse(200, wrapper, request);
     }
 
     Response invokePageActionMethod(Request request) {
@@ -83,7 +81,6 @@ class ControllerService {
                 .map(controller -> createControllerWrapper(controller, this::getPagePath))
                 .collect(Collectors.toSet());
     }
-
 
     private Optional<ControllerWrapper> widgetControllerWrapperByResult(Object result) {
         if (result instanceof Class) {
@@ -127,13 +124,13 @@ class ControllerService {
 
     private Optional<ControllerWrapper> findPageControllerWrapper(Request request) {
         return pageControllerWrappers.stream()
-                .filter(controller -> controller.getId().equals(request.getControllerId()))
+                .filter(controller -> controller.getId().equals(request.getPageId()))
                 .findFirst();
     }
 
     private Optional<ControllerWrapper> findWidgetControllerWrapper(Request request) {
         return widgetControllerWrappers.stream()
-                .filter(controller -> controller.getId().equals(request.getControllerId()))
+                .filter(controller -> controller.getId().equals(request.getWidgetId()))
                 .findFirst();
     }
 }

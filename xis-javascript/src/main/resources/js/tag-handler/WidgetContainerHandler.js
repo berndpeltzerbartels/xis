@@ -85,7 +85,7 @@ class WidgetContainerHandler extends TagHandler {
     handleActionResponse(response) {
         if (response.nextPageId) {
             bindPage(response.nextPageId)
-                .then(_ => reloadDataAndRefreshCurrentPage());
+                .then(() => reloadDataAndRefreshCurrentPage());
         } else if (response.nextWidgetId) {
             this.showWidget(response.nextWidgetId)
             this.reloadDataAndRefresh();

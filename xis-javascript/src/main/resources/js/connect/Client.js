@@ -70,7 +70,7 @@ class Client {
      * @returns {Promise<any>}
      */
     loadPageData(pageId, data) {
-        var request = this.createRequest(pageId, data, undefined);
+        var request = this.createRequest(pageId, null, data, undefined);
         return this.httpClient.post('/xis/page/model', request, {})
             .then(content => JSON.parse(content));
     }
@@ -82,7 +82,7 @@ class Client {
      * @returns {Promise<any>}
      */
     loadWidgetData(widgetId, data) {
-        var request = this.createRequest(widgetId, data, undefined);
+        var request = this.createRequest(null, widgetId, data, undefined);
         return this.httpClient.post('/xis/widget/model', request)
             .then(content => JSON.parse(content));
     }
@@ -90,30 +90,13 @@ class Client {
 
     /**
      * @public
-     * @param {string} pageId
      * @param {string} widgetId
      * @param {string} action
      * @param {Data} data
      * @returns {Promise<Response>}
-     */
-    action(pageId, widgetId, action, data) {
-        var request = this.createRequest(pageId, data, action);
-        return this.httpClient.post('/xis/page/action', request, {})
-            .then(content => JSON.parse(content));
-    }
-
-
-
-    /**
-     * @public
-     * @param {string} widgetId
-     * @param {string} action
-     * @param {Data} data
-     * @returns {Promise<Response>}
-     * @deprecated
      */
     widgetAction(widgetId, action, data) {
-        var request = this.createRequest(widgetId, data, action);
+        var request = this.createRequest(null, widgetId, data, action);
         return this.httpClient.post('/xis/widget/action', request, {})
             .then(content => JSON.parse(content));
     }
@@ -124,24 +107,25 @@ class Client {
      * @param {string} action
      * @param {Data} data
      * @returns {Promise<Response>}
-     * @deprecated
      */
     pageAction(pageId, action, data) {
-        var request = this.createRequest(pageId, data, action);
+        var request = this.createRequest(pageId, null, data, action);
         return this.httpClient.post('/xis/page/action', request, {});
     }
 
 
     /**
     * @private
-    * @param {string} controllerId
+    * @param {string} pageId
+    * @param {string} widgetId
     * @param {any} data
     */
-    createRequest(controllerId, data, action) {
+    createRequest(pageId, widgetId, data, action) {
         var request = new ComponentRequest();
         request.clientId = this.clientId;
         request.userId = this.userId;
-        request.controllerId = controllerId;
+        request.pageId = pageId;
+        request.widgetId = widgetId;
         request.action = action;
         request.data = data;
         return request;

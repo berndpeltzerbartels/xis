@@ -14,8 +14,8 @@ class ComponentAttributesFactory {
 
     ComponentAttributes componentAttributes(Object controller) {
         var attributes = new ComponentAttributes();
-        attributes.setModelsToSubmitForModel(modelsToSubmitForModel(controller));
-        attributes.setModelsToSubmitForAction(modelsToSubmitForAction(controller));
+        attributes.setModelsToSubmitOnRefresh(modelsToSubmitForModel(controller));
+        attributes.setModelsToSubmitOnAction(modelsToSubmitForAction(controller));
         return attributes;
     }
 

@@ -21,18 +21,29 @@ class PageController {
 
     submitAction(action) {
         var _this = this;
-        var data = this.pageDataMap[this.pageId];
-        var keys = this.pageAttributes[this.pageId].modelsToSubmitForAction[action];
-        return this.client.action(this.pageId, undefined, action, data.getValues(keys))
+        var values = {};
+        console.log('PageController - pageDataMap:' + this.pageDataMap);
+        var pageData = this.pageDataMap[pageId];
+        var pageAttributes = this.pageAttributes[pageId];
+        if (pageData) {
+            for (var dataKey of pageAttributes.modelsToSubmitOnRefresh) {
+                values[dataKey] = pageData.getValue([dataKey]);
+            }
+        }
+        return this.client.pageAction(this.pageId, undefined, action, values)
             .then(response => _this.handleActionResponse(response));
     }
 
 
     handleActionResponse(response) {
         if (response.nextWidgetId) throw new Error('widget can not be set if there is no container: ' + response.nextWidgetId);
-        if (response.nextPageId && response.nextPageId !== this.pageId) {
+        if (response.nextPageId !== this.pageId) {
             this.displayPage(response.nextPageId);
+            this.refreshData().then(() => _this.refreshPage());
+            this.pageId = response.nextPageId;
         }
+        this.pageDataMap[this.pageId] = new Data(response.data);
+        this.refreshPage();
     }
 
     /**
@@ -214,7 +225,7 @@ class PageController {
         var pageData = this.pageDataMap[pageId];
         var pageAttributes = this.pageAttributes[pageId];
         if (pageData) {
-            for (var dataKey of pageAttributes.modelsToSubmitForModel) {
+            for (var dataKey of pageAttributes.modelsToSubmitOnRefresh) {
                 values[dataKey] = pageData.getValue([dataKey]);
             }
         }
@@ -231,7 +242,6 @@ class PageController {
 
     /**
     * @private
-    * @param {string} pageId
     * @returns {Promise<string>}
     */
     refreshPage() {

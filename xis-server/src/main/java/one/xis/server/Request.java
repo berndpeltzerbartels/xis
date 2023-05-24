@@ -13,5 +13,6 @@ public class Request {
     private String clientId;
     private String userId;
     private String action;
-    private String controllerId;
+    private String pageId;
+    private String widgetId;
 }
