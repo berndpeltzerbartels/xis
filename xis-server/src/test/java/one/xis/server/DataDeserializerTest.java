@@ -12,7 +12,7 @@ class DataDeserializerTest {
 
     @Test
     void deserialize() throws JsonProcessingException {
-        var json = "{ \"data\": {\"a\":1, \"b\":\"xyz\"}, \"clientId\":\"\",  \"userId\":\"\", \"action\":\"\", \"controllerId\":\"\"}";
+        var json = "{ \"data\": {\"a\":1, \"b\":\"xyz\"}, \"clientId\":\"\",  \"userId\":\"\", \"action\":\"\", \"pageId\":\"\", \"widgetId\":\"\"}";
         var request = objectMapper.readValue(json, Request.class);
 
         assertThat(request.getData().get("a")).isEqualTo("1");

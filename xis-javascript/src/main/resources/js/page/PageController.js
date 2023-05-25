@@ -14,7 +14,7 @@ class PageController {
         this.body = getElementByTagName('body');
         this.title = getElementByTagName('title');
         this.pageDataMap = {};
-        this.pageAttributes = {};
+        this.config = {};
         this.pageId = undefined;
         this.titleExpression;
     }
@@ -23,24 +23,23 @@ class PageController {
         var _this = this;
         var values = {};
         console.log('PageController - pageDataMap:' + this.pageDataMap);
-        var pageData = this.pageDataMap[pageId];
-        var pageAttributes = this.pageAttributes[pageId];
+        var pageData = this.pageDataMap[this.pageId];
+        var pageAttributes = this.config.pageAttributes[this.pageId];
         if (pageData) {
-            for (var dataKey of pageAttributes.modelsToSubmitOnRefresh) {
+            for (var dataKey of pageAttributes.modelsToSubmitOnAction[action]) {
                 values[dataKey] = pageData.getValue([dataKey]);
             }
         }
-        return this.client.pageAction(this.pageId, undefined, action, values)
+        return this.client.pageAction(this.pageId, action, values)
             .then(response => _this.handleActionResponse(response));
     }
 
 
     handleActionResponse(response) {
         if (response.nextWidgetId) throw new Error('widget can not be set if there is no container: ' + response.nextWidgetId);
-        if (response.nextPageId !== this.pageId) {
+        if (response.nextPageId && response.nextPageId !== this.pageId) {
+            this.pageId[response.nextPageId];
             this.displayPage(response.nextPageId);
-            this.refreshData().then(() => _this.refreshPage());
-            this.pageId = response.nextPageId;
         }
         this.pageDataMap[this.pageId] = new Data(response.data);
         this.refreshPage();
@@ -53,7 +52,6 @@ class PageController {
     displayInitialPage(config) {
         console.log('PageController - displayInitialPage');
         this.config = config;
-        this.pageAttributes = config.pageAttributes;
         return this.displayPage(document.location.pathname);
     }
 
@@ -223,7 +221,7 @@ class PageController {
         var values = {};
         console.log('PageController - pageDataMap:' + this.pageDataMap);
         var pageData = this.pageDataMap[pageId];
-        var pageAttributes = this.pageAttributes[pageId];
+        var pageAttributes = this.config.pageAttributes[pageId];
         if (pageData) {
             for (var dataKey of pageAttributes.modelsToSubmitOnRefresh) {
                 values[dataKey] = pageData.getValue([dataKey]);

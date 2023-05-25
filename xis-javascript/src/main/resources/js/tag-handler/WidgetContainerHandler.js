@@ -25,7 +25,7 @@ class WidgetContainerHandler extends TagHandler {
     submitAction(action) {
         var _this = this;
         var keys = this.widgets.getModelKeysToSubmitForAction(this.widgetId, action);
-        this.client.action(this.currentPageId(), this.widgetId, action, this.widgeteData.getValues(keys))
+        this.client.widgetAction(this.widgetId, action, this.widgeteData.getValues(keys))
             .then(response => _this.handleActionResponse(response));
     }
 

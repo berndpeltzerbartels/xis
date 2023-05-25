@@ -57,9 +57,10 @@ class ControllerService {
     }
 
     Response invokeWidgetActionMethod(Request request) {
-        var result = findPageControllerWrapper(request).orElseThrow().invokeActionMethod(request);
-        return pageControllerWrapperByResult(result).map(wrapper -> pageModelDataResponse(200, wrapper, request))
-                .orElseGet(() -> widgetControllerWrapperByResult(result).map(wrapper -> widgetModelDataResponse(200, wrapper, request)).orElseThrow());
+        var invokerController = findPageControllerWrapper(request).orElseThrow();
+        var result = invokerController.invokeActionMethod(request);
+        var nextWidgetControlller = widgetControllerWrapperByResult(result).orElse(invokerController);
+        return widgetModelDataResponse(200, nextWidgetControlller, request);
     }
 
     private Response widgetModelDataResponse(int status, ControllerWrapper wrapper, Request request) {
