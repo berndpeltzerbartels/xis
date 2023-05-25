@@ -52,7 +52,7 @@ class ControllerService {
     Response invokePageActionMethod(Request request) {
         var invokerController = findPageControllerWrapper(request).orElseThrow();
         var result = invokerController.invokeActionMethod(request);
-        var nextPageController = widgetControllerWrapperByResult(result).orElse(invokerController);
+        var nextPageController = pageControllerWrapperByResult(result).orElse(invokerController);
         return pageModelDataResponse(200, nextPageController, request);
     }
 

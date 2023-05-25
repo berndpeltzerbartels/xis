@@ -37,12 +37,19 @@ class PageController {
 
     handleActionResponse(response) {
         if (response.nextWidgetId) throw new Error('widget can not be set if there is no container: ' + response.nextWidgetId);
+        this.pageDataMap[response.nextPageId || this.pageId] = new Data(response.data);
         if (response.nextPageId && response.nextPageId !== this.pageId) {
-            this.pageId[response.nextPageId];
-            this.displayPage(response.nextPageId);
+            var _this = this;
+            this.pageId = response.nextPageId;
+            this.findPageForUrl(this.pageId)
+                .then(page => _this.doBindPage(page))
+                .then(() => _this.refreshPage())
+                .catch(e => console.error(e));
+
+        } else {
+            this.refreshPage();
         }
-        this.pageDataMap[this.pageId] = new Data(response.data);
-        this.refreshPage();
+
     }
 
     /**
@@ -77,7 +84,6 @@ class PageController {
         this.pageId = id;
         var page = this.pages.getPageById(id);
         if (!page) throw new Error('no such page: ' + id);
-        var _this = this;
         return this.doBindPage(page);
     }
 
@@ -244,14 +250,13 @@ class PageController {
     */
     refreshPage() {
         var _this = this;
-        var pageId = this.pageId;
         return new Promise((resolve, _) => {
-            var data = _this.pageDataMap[pageId];
+            var data = _this.pageDataMap[this.pageId];
             _this.refreshTitle(data);
             refreshNode(_this.head, data);
             refreshNode(_this.body, data);
-            _this.updateHistory(pageId);
-            console.log('resolve - refreshPage: ' + pageId);
+            _this.updateHistory(this.pageId);
+            console.log('resolve - refreshPage: ' + this.pageId);
             resolve();
         });
     }

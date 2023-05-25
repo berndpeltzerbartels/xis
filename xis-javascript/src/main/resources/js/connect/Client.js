@@ -110,7 +110,8 @@ class Client {
      */
     pageAction(pageId, action, data) {
         var request = this.createRequest(pageId, null, data, action);
-        return this.httpClient.post('/xis/page/action', request, {});
+        return this.httpClient.post('/xis/page/action', request, {})
+            .then(content => JSON.parse(content));
     }
 
 

@@ -21,6 +21,7 @@ class ActionLinkPageTest {
         testContext = IntegrationTestContext.builder()
                 .withSingleton(ActionLinkPage.class)
                 .withSingleton(service)
+                .withSingleton(IndexPage.class) // new page in action3
                 .build();
     }
 
@@ -28,8 +29,39 @@ class ActionLinkPageTest {
     void action1() {
         testContext.openPage("/actionPage.html");
         testContext.getDocument().getElementById("action-link1").onclick.accept(null);
-        // redirct to index
+
         assertThat(testContext.getDocument().getElementByTagName("title").innerText).isEqualTo("ActionPage");
+
+        var captor = ArgumentCaptor.forClass(ActionLinkPageData.class);
+        verify(service, times(1)).update(captor.capture());
+
+        assertThat(captor.getValue().getId()).isEqualTo(101);
+        assertThat(captor.getValue().getValue()).isEqualTo("bla");
+
+    }
+
+
+    @Test
+    void action2() {
+        testContext.openPage("/actionPage.html");
+        testContext.getDocument().getElementById("action-link2").onclick.accept(null);
+
+        assertThat(testContext.getDocument().getElementByTagName("title").innerText).isEqualTo("ActionPage");
+
+        var captor = ArgumentCaptor.forClass(ActionLinkPageData.class);
+        verify(service, times(1)).update(captor.capture());
+
+        assertThat(captor.getValue().getId()).isEqualTo(101);
+        assertThat(captor.getValue().getValue()).isEqualTo("bla");
+
+    }
+
+    @Test
+    void action3() {
+        testContext.openPage("/actionPage.html");
+        testContext.getDocument().getElementById("action-link3").onclick.accept(null);
+        // redirct to index
+        assertThat(testContext.getDocument().getElementByTagName("title").innerText).isEqualTo("Index");
 
         var captor = ArgumentCaptor.forClass(ActionLinkPageData.class);
         verify(service, times(1)).update(captor.capture());
