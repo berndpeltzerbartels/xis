@@ -110,10 +110,7 @@ class DomAccessorTest {
         assertThat(e1).isNull();
         assertThat(e2).isNotNull();
         assertThat(x).isNotNull();
-
-        assertThat(x.firstChild).isEqualTo(e3); // e3 was a child of e1 and must get moved
-
-
+        
         assertThat(x.nextSibling).isEqualTo(e2);
         assertThat(e2.parentNode).isEqualTo(root);
         assertThat(x.parentNode).isEqualTo(root);

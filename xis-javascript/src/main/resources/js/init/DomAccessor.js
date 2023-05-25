@@ -46,9 +46,5 @@ class DomAccessor {
         } else {
             parent.appendChild(replacement);
         }
-        for (var child of nodeListToArray(old.childNodes)) {
-            old.removeChild(child);
-            replacement.appendChild(child);
-        }
     }
 }

@@ -133,11 +133,11 @@ class InitializerTest {
         var document = new Document("html");
         var div1 = document.createElement("div");
         var div2 = document.createElement("div");
-        div2.setAttribute("xis:repeat", "array1:items");
+        div2.setAttribute("xis:repeat", "item1:items1");
 
         var foreach = document.createElement("xis:foreach");
-        foreach.setAttribute("array", "array1");
-        foreach.setAttribute("var", "value");
+        foreach.setAttribute("array", "items2");
+        foreach.setAttribute("var", "item2");
 
         var span = document.createElement("span");
         div1.appendChild(div2);
@@ -149,15 +149,16 @@ class InitializerTest {
         script += "var initializer = new Initializer(new DomAccessor());";
         script += "initializer.initialize(div1);";
 
-        var compiledScript = JSUtil.compile(script, Map.of("div1", div1, "console", new Console(), "document", document));
-        compiledScript.eval();
-
+        JSUtil.execute(script, Map.of("div1", div1, "console", new Console(), "document", document));
 
         DomAssert.assertAndGetParentElement(span, "xis:foreach")
+                .assertAttribute("array", "items2")
+                .assertAttribute("var", "item2")
                 .assertAndGetParentElement("div")
                 .assertAndGetParentElement("xis:foreach")
-                .assertAttribute("array", "items")
-                .assertAttribute("var", "array1");
+                .assertAttribute("array", "items1")
+                .assertAttribute("var", "item1");
+
 
     }
 

@@ -44,10 +44,10 @@ class TagHandler {
     expressionFromAttribute(attrName) {
         var attr = this.tag.getAttribute(attrName);
         if (attr) {
-            this.tag.removeAttribute(attrName);
             return new TextContentParser(attr).parse();
         }
     }
+
 
     findParentWidgetContainer() {
         var e = this.tag;

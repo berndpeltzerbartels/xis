@@ -206,7 +206,7 @@ public class Element extends Node {
         s.append(localName);
         if (!attributes.isEmpty()) {
             s.append(" ");
-            s.append(attributes.entrySet().stream().map(e -> String.format("\"%s\"=\"%s\"", e.getKey(), e.getValue())).collect(Collectors.joining(" ")));
+            s.append(attributes.entrySet().stream().map(e -> String.format("%s=\"%s\"", e.getKey(), e.getValue())).collect(Collectors.joining(" ")));
         }
         s.append(">");
         return s.toString();
