@@ -212,6 +212,22 @@ public class Element extends Node {
         return s.toString();
     }
 
+    public List<Element> getChildElementsByClassName(String cssClass) {
+        return getChildElements().stream().filter(e -> e.getCssClasses().contains(cssClass)).collect(Collectors.toList());
+    }
+
+    public List<Element> getDescendantElementsByClassName(String cssClass) {
+        var result = new ArrayList<Element>();
+        for (var child : getChildElements()) {
+            if (child.getCssClasses().contains(cssClass)) {
+                result.add(child);
+            }
+            result.addAll(child.getDescendantElementsByClassName(cssClass));
+        }
+        return result;
+    }
+
+
     void updateChildNodes() {
         childNodes.clear();
         var child = firstChild;
@@ -220,5 +236,4 @@ public class Element extends Node {
             child = child.nextSibling;
         }
     }
-
 }
