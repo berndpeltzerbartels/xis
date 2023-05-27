@@ -168,7 +168,8 @@ public class IntegrationTestContext {
             "var starter = new Starter(httpClient);\n" +
             "starter.doStart();\n" +
             "var pageController = starter.pageController;\n" +
-            "var widgetController = starter.widgetController;\n";
+            "var widgetController = starter.widgetController;\n" +
+            "var initializer = starter.initializer";
 
 
 }

@@ -7,6 +7,7 @@
 
          var pageController;
          var widgetController;
+         var initializer;
 
         function htmlToElement(html) {
             var rootName = html.localName;
@@ -20,8 +21,17 @@
             var starter = new Starter(httpClient);
             pageController = starter.pageController;
             widgetController = starter.widgetController;
+            initializer = starter.initializer;
             starter.doStart();
         }
+
+
+
+
+
+
+
+
 
 
 

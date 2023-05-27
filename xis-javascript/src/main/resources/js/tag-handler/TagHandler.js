@@ -12,7 +12,7 @@ class TagHandler {
 
 
     refreshChildNodes(data) {
-        // TODO
+        refresher.refreshChildNodes(this.tag, data);
     }
 
     clearChildren() {

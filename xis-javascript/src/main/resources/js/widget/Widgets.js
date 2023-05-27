@@ -26,12 +26,13 @@ class Widgets {
     loadWidget(widgetId) {
         console.log('Loading widget ' + widgetId);
         var _this = this;
+        var widget = new Widget();
         return this.client.loadWidget(widgetId).then(widgetHtml => {
             console.log('Widget-Html: ' + widgetHtml);
-            var widget = new Widget();
             widget.id = widgetId;
             widget.root = _this.asRootElement(widgetHtml);
             widget.attributes = _this.widgetAttributes[widgetId];
+            initialize(widget.root);
             _this.addWidget(widgetId, widget);
         });
     }
@@ -58,9 +59,7 @@ class Widgets {
      * @returns {Element}
      */
     asRootElement(tree) {
-        var div = createElement('div');
-        div.innerHTML = trim(tree);
-        return div.childNodes.item(0);
+        return htmlToElement(tree);
     }
 
 }

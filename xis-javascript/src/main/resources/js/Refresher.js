@@ -22,19 +22,32 @@ class Refresher {
         }
         var evaluateChildNodes = true;
         if (element._handler) {
-            if (element._handler.type == 'foreach-handler') {
+            if (element._handler.type == 'foreach-handler' || element._handler.type == 'widget-container-handler') {
                 evaluateChildNodes = false;// invokes child nodes, too
             }
             element._handler.refresh(data);
         }
         if (evaluateChildNodes) {
-            for (var i = 0; i < element.childNodes.length; i++) {
-                var child = element.childNodes.item(i);
-                this.refreshNode(child, data);
-            }
+            this.refreshChildNodes(element, data);
         }
     }
 
+    /**
+     * @public 
+     * @param {Element} element 
+     * @param {Data} data
+     */
+    refreshChildNodes(element, data) {
+        for (var child of nodeListToArray(element.childNodes)) {
+            this.refreshNode(child, data);
+        }
+    }
+
+    /**
+     * 
+     * @param {Node} node 
+     * @param {Data} data 
+     */
     refreshTextNode(node, data) {
         if (node._expression) {
             node.nodeValue = node._expression.evaluate(data);

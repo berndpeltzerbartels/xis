@@ -123,6 +123,10 @@ function reloadDataAndRefreshCurrentPage() {
     });
 }
 
+function initialize(element) {
+    initializer.initialize(element);
+}
+
 function assertNotNull(o, errorText) {
     if (o) return;
     else throw new Error(errorText);

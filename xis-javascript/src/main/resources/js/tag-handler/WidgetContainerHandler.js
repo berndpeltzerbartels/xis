@@ -13,7 +13,7 @@ class WidgetContainerHandler extends TagHandler {
         this.defaultWidgetIdExpression = this.expressionFromAttribute('default-widget');
         this.containerId = tag.getAttribute('container-id'); // TODO validate: the id must not be an expression
         this.widgetRoot = undefined;
-        this.widgeteData = {};
+        this.widgetData = {};
         this.type = 'widget-container-handler';
         this.clearChildren();
     }
@@ -35,11 +35,13 @@ class WidgetContainerHandler extends TagHandler {
      */
     refresh(data) {
         console.log('refresh');
-        if (!this.widgetId && this.tag.getAttribute('default-widget')) {
-            var widgetId = this.defaultWidgetIdExpression.evaluate(data);
-            this.showWidget(widgetId);
+        if (!this.widgetId && this.defaultWidgetIdExpression) {
+            this.widgetId = this.defaultWidgetIdExpression.evaluate(data);
+            this.doShowWidget();
         }
-        this.widgeteData[this.widgetId] = data;
+        if (this.widgetId) {
+            this.reloadDataAndRefresh();
+        }
     }
 
     /**
@@ -53,9 +55,15 @@ class WidgetContainerHandler extends TagHandler {
                 this.clearChildren();
             }
             this.widgetId = widgetId;
-            this.widgetRoot = this.widgets.getWidgetRoot(this.widgetId);
-            this.tag.appendChild(this.widgetRoot);
         }
+        this.doShowWidget();
+        this.reloadDataAndRefresh();
+    }
+
+
+    doShowWidget() {
+        this.widgetRoot = this.widgets.getWidgetRoot(this.widgetId);
+        this.tag.appendChild(this.widgetRoot);
     }
 
 
@@ -65,7 +73,7 @@ class WidgetContainerHandler extends TagHandler {
     reloadDataAndRefresh() {
         var _this = this;
         var clientData = {};
-        var widgetData = this.widgeteData[this.widgetId];
+        var widgetData = this.widgetData[this.widgetId];
         if (widgetData) {
             for (var dataKey of this.widgets.getModelKeysToSubmitForModel(this.widgetId)) {
                 clientData[dataKey] = widgetData.getValue([dataKey]);
@@ -73,8 +81,9 @@ class WidgetContainerHandler extends TagHandler {
         }
         this.client.loadWidgetData(this.widgetId, clientData)
             .then(response => new Data(response.data))
-            .then(data => { _this.data[_this.widgetId] = data; return data; })
-            .then(data => _this.refreshChildNodes(data));
+            .then(data => { _this.widgetData[_this.widgetId] = data; return data; })
+            .then(data => _this.refreshChildNodes(data))
+            .catch(e => console.log(e));
 
     }
 
@@ -88,7 +97,6 @@ class WidgetContainerHandler extends TagHandler {
                 .then(() => reloadDataAndRefreshCurrentPage());
         } else if (response.nextWidgetId) {
             this.showWidget(response.nextWidgetId)
-            this.reloadDataAndRefresh();
         }
     }
 }

@@ -2,11 +2,9 @@
 class Pages {
     /**
     * @param {Client} client
-    * @param {Initializer} initializer
     */
-    constructor(client, initializer) {
+    constructor(client) {
         this.client = client;
-        this.initializer = initializer;
         this.pages = {};
     }
 
@@ -51,7 +49,7 @@ class Pages {
         return this.client.loadPageHead(pageId).then(content => {
             var shadowHead = htmlToElement(content);
             console.log('initialize head');
-            _this.initializer.initialize(shadowHead);
+            initialize(shadowHead);
             var headChildArray = nodeListToArray(shadowHead.childNodes);
             var title = headChildArray.find(child => isElement(child) && child.localName == 'title');
             _this.pages[pageId].headChildArray = headChildArray;
@@ -70,7 +68,7 @@ class Pages {
         var _this = this;
         return this.client.loadPageBody(pageId).then(content => {
             var shadowBody = htmlToElement(content);
-            _this.initializer.initialize(shadowBody);
+            initialize(shadowBody);
             _this.pages[pageId].bodyChildArray = nodeListToArray(shadowBody.childNodes);
             return pageId;
         });
