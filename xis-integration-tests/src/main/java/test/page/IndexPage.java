@@ -1,18 +1,18 @@
-package test;
+package test.page;
 
 import lombok.Getter;
 import one.xis.Model;
 import one.xis.Page;
 
 @Getter
-@Page("/pageLink1.html")
-class PageLink1 {
+@Page("/index.html")
+class IndexPage {
 
     private int invocations;
 
     @Model("title")
     String title() {
         invocations++;
-        return "PageLink1";
+        return "Index";
     }
 }

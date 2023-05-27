@@ -1,4 +1,4 @@
-package test;
+package test.page;
 
 import one.xis.context.IntegrationTestContext;
 import org.junit.jupiter.api.BeforeEach;

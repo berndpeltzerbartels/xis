@@ -1,4 +1,4 @@
-package test;
+package test.page;
 
 import one.xis.Page;
 

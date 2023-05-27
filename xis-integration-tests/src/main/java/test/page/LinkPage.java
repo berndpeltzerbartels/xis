@@ -1,4 +1,4 @@
-package test;
+package test.page;
 
 import lombok.RequiredArgsConstructor;
 import one.xis.Model;

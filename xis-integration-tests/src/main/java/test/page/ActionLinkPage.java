@@ -1,4 +1,4 @@
-package test;
+package test.page;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;

@@ -1,4 +1,4 @@
-package test;
+package test.page;
 
 public interface ModelService {
 

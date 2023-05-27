@@ -1,4 +1,4 @@
-package test;
+package test.page;
 
 import one.xis.context.IntegrationTestContext;
 import org.junit.jupiter.api.BeforeEach;
@@ -59,7 +59,7 @@ class ActionLinkPageTest {
     @Test
     void action3() {
         testContext.openPage("/actionPage.html");
-        testContext.getDocument().getElementById("action-link3").onclick.accept(null);
+        testContext.getDocument().getElementById("action-link3").onclick.accept(null); // "action-link3"is set by model variable "action3"
         // redirct to index
         assertThat(testContext.getDocument().getElementByTagName("title").innerText).isEqualTo("Index");
 
