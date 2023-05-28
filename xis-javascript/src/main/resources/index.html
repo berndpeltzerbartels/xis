@@ -1,19 +1,22 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title ignore="true" class="test"></title>
     <script ignore="true" src="xis.js"></script>
     <script ignore="true">
 
-         var pageController;
-         var widgetController;
-         var initializer;
+        var pageController;
+        var widgetController;
+        var initializer;
 
         function htmlToElement(html) {
-            var rootName = html.localName;
-            var element = document.createElement('holder');
-            holder.innerHTML = html;
-            return getChildElementByName(holder, rootName);
+            var holder = document.createElement('holder');
+            for (var child of nodeListToArray(holder.childNodes)) {
+                if (isElement(child)) {
+                    return child;
+                }
+            }
         }
 
         function initialize() {
@@ -30,34 +33,9 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     </script>
 </head>
+
 <body onload="initialize()"></body>
+
 </html>

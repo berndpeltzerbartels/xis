@@ -32,6 +32,8 @@ class XmlLoader {
     private DocumentBuilder documentBuilder() {
         var factory = DocumentBuilderFactory.newInstance();
         factory.setValidating(false);
+        // factory.setFeature("http://xml.org/sax/features/namespaces", false);
+        factory.setFeature("http://xml.org/sax/features/validation", false);
         return factory.newDocumentBuilder();
     }
 

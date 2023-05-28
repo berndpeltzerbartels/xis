@@ -49,7 +49,7 @@ class Pages {
         return this.client.loadPageHead(pageId).then(content => {
             var shadowHead = htmlToElement(content);
             console.log('initialize head');
-            initialize(shadowHead);
+            initializeElement(shadowHead);
             var headChildArray = nodeListToArray(shadowHead.childNodes);
             var title = headChildArray.find(child => isElement(child) && child.localName == 'title');
             _this.pages[pageId].headChildArray = headChildArray;
@@ -68,7 +68,7 @@ class Pages {
         var _this = this;
         return this.client.loadPageBody(pageId).then(content => {
             var shadowBody = htmlToElement(content);
-            initialize(shadowBody);
+            initializeElement(shadowBody);
             _this.pages[pageId].bodyChildArray = nodeListToArray(shadowBody.childNodes);
             return pageId;
         });

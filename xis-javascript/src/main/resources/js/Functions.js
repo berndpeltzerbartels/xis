@@ -123,7 +123,7 @@ function reloadDataAndRefreshCurrentPage() {
     });
 }
 
-function initialize(element) {
+function initializeElement(element) {
     initializer.initialize(element);
 }
 

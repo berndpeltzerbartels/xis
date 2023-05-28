@@ -33,6 +33,8 @@ class WidgetContainerHandlerTest {
         javascript += IOUtils.getResourceAsString("js/parse/TreeParser.js");
         javascript += IOUtils.getResourceAsString("js/parse/TokenLinker.js");
         javascript += IOUtils.getResourceAsString("js/connect/HttpClientMock.js");
+        javascript += IOUtils.getResourceAsString("js/connect/Client.js");
+        javascript += IOUtils.getResourceAsString("js/connect/ComponentRequest.js");
         javascript += IOUtils.getResourceAsString("one/xis/widget/WidgetContainerHandlerTestMocks.js");
     }
 
@@ -42,7 +44,7 @@ class WidgetContainerHandlerTest {
         var container = document.getElementById("container");
 
         var script = javascript;
-        script += "var handler = new WidgetContainerHandler(tag, new HttpClientMock(), widgets);";
+        script += "var handler = new WidgetContainerHandler(tag, new Client(new HttpClientMock()), widgets);";
         script += "handler.refresh(data)";
 
         var bindings = new HashMap<String, Object>();

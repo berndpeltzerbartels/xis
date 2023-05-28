@@ -1,10 +1,12 @@
 var client = {
     loadWidget: function(id) {
          return new Promise((resolve, reject) => {
-            resolve(`<h5>Widget</h5>
-                    <div>
+            resolve(`<xis:template>
+                        <h5>Widget</h5>
+                        <div>
 
-                    </div>
+                        </div>
+                    </xis:template>
             `)
          });
     }
@@ -16,3 +18,22 @@ var config = {
         'widgetId': {}
     }
 }
+
+
+ function getChildElementByName(parent, childName) {
+     for (var i = 0; i < parent.childNodes.length; i++) {
+         var child = parent.childNodes.item(i);
+         if (isElement(child) && child.localName == childName) {
+             return child;
+         }
+     }
+ }
+
+ function isElement(node) {
+     return node.nodeType == 1;
+ }
+
+
+
+ function initializeElement(element) {
+ }

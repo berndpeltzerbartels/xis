@@ -32,7 +32,7 @@ class Widgets {
             widget.id = widgetId;
             widget.root = _this.asRootElement(widgetHtml);
             widget.attributes = _this.widgetAttributes[widgetId];
-            initialize(widget.root);
+            initializeElement(widget.root);
             _this.addWidget(widgetId, widget);
         });
     }

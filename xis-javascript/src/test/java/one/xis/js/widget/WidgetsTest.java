@@ -30,10 +30,11 @@ class WidgetsTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     void loadWidgets() throws ScriptException {
         var script = javascript;
         script += "var widgets = new Widgets(client);\n";
-        script += "widgets.loadWidgets(config).then(config => console.log('ok'));widgets.widgets";
+        script += "widgets.loadWidgets(config);widgets.widgets";
 
         Function<String, Element> createElement = name -> {
             var element = new Element(name);
@@ -46,16 +47,25 @@ class WidgetsTest {
         bindings.put("document", new Document("html"));
         bindings.put("createElement", createElement);
         bindings.put("trim", trim);
+        Function<String, Element> htmlToElement = this::htmlToElement;
+        bindings.put("htmlToElement", htmlToElement);
 
         var result = (Map<String, Object>) JSUtil.execute(script, bindings);
+
         assertThat(result).hasSize(1);
         assertThat(result.get("widgetId")).isNotNull();
 
         var widgetData = (Map<String, Object>) result.get("widgetId");
 
         assertThat(widgetData.get("id")).isEqualTo("widgetId");
-        assertThat(widgetData.get("root").toString()).isEqualTo("<div>");
+        assertThat(((Element) widgetData.get("root")).localName).isEqualTo("xis:template");
         assertThat(widgetData.get("attributes")).isNotNull();
-
     }
+
+    public Element htmlToElement(String content) {
+        var doc = Document.of(content);
+        return doc.rootNode;
+    }
+
+
 }

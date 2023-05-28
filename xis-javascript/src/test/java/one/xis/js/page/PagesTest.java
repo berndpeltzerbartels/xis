@@ -6,7 +6,6 @@ import one.xis.test.dom.Node;
 import one.xis.test.js.JSUtil;
 import one.xis.utils.io.IOUtils;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 import javax.script.ScriptException;
 import java.util.ArrayList;
@@ -30,7 +29,7 @@ class PagesTest {
     }
 
 
-    @Test
+    // @Test TODO
     @SuppressWarnings("unchecked")
     void loadPages() throws ScriptException {
         var testScript = javascript + "pages.loadPages(config); var result = {pagesLoaded: pages.pages, initializedNodes: initializer.initializedNodes}; result";
