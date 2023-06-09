@@ -17,6 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class NodeCacheTest {
 
     @Test
+    @SuppressWarnings("unchecked")
     void sizeUp() throws ScriptException {
         var js = IOUtils.getResourceAsString("js/tag-handler/NodeCache.js");
         js += IOUtils.getResourceAsString("js/init/Initializer.js");

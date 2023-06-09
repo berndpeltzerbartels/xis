@@ -15,4 +15,6 @@ public class Request {
     private String action;
     private String pageId;
     private String widgetId;
+    private Map<String, String> parameters;
+    private Map<String, String> pathVariables;
 }

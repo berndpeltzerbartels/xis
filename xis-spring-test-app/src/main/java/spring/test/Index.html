@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:xis="http://xis.one/html">
 <head>
     <meta charset="UTF-8"/>
     <title>Index</title>
 </head>
 <body>
-<div repeat="page:pages">
-    <a page-link="${page.url}" id="${page.id}">${page.title}</a>
+<div xis:repeat="page:pages">
+    <a xis:page="${page.url}" id="${page.id}">${page.title}</a>
 </div>
 
 </body>

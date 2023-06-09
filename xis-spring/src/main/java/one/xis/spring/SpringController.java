@@ -45,6 +45,13 @@ class SpringController implements FrameworkController {
     }
 
     @Override
+    @GetMapping("/xis/page")
+    public String getPage(@RequestHeader("uri") String id) {
+        return frontendService.getPage(id);
+    }
+
+
+    @Override
     @GetMapping("/xis/page/head")
     public String getPageHead(@RequestHeader("uri") String id) {
         return frontendService.getPageHead(id);

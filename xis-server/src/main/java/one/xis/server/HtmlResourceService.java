@@ -11,8 +11,7 @@ import one.xis.resource.Resource;
 import one.xis.resource.ResourceCache;
 import one.xis.resource.Resources;
 import one.xis.utils.xml.XmlUtil;
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
+import org.dom4j.*;
 import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
 import org.tinylog.Logger;
@@ -21,6 +20,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -37,6 +37,7 @@ class HtmlResourceService {
     private final Resources resources;
 
     private Map<String, Resource> widgetHtmlResources;
+    private Map<String, Resource> pageHtmlResources;
     private ResourceCache<String> pageBodyResourceCache;
     private ResourceCache<String> pageHeadResourceCache;
     private ResourceCache<Map<String, String>> pageAttributesResourceCache;
@@ -50,7 +51,7 @@ class HtmlResourceService {
 
     @XISInit
     void initPageResources() {
-        Map<String, Resource> pageHtmlResources = pageControllers.stream().collect(Collectors.toMap(contr -> contr.getClass().getAnnotation(Page.class).value(), this::htmlResource));
+        pageHtmlResources = pageControllers.stream().collect(Collectors.toMap(contr -> contr.getClass().getAnnotation(Page.class).value(), this::htmlResource));
         pageHeadResourceCache = new ResourceCache<>(this::extractPageHead, pageHtmlResources);
         pageBodyResourceCache = new ResourceCache<>(this::extractPageBody, pageHtmlResources);
         pageAttributesResourceCache = new ResourceCache<>(this::extractBodyAttributes, pageHtmlResources);
@@ -70,6 +71,10 @@ class HtmlResourceService {
         return widgetHtmlResources.get(id).getContent();
     }
 
+    String getPage(String id) {
+        return pageHtmlResources.get(id).getContent();
+    }
+
     String getPageHead(String id) {
         return pageHeadResourceCache.getResourceContent(id).orElseThrow();
     }
@@ -87,11 +92,13 @@ class HtmlResourceService {
             var content = pageResource.getContent();
             Logger.info("content for head :" + content);
             var doc = createDocument(content);
+            var html = doc.getRootElement();
             var head = doc.getRootElement().element("head");
+            html.remove(head);
             if (head == null) {
                 throw new IllegalStateException("page must contain head element");
             }
-            return serialize(head);
+            return toTemplateString(head);
         } catch (Exception e) {
             throw new RuntimeException("Unable to extract head", e);
         }
@@ -102,14 +109,29 @@ class HtmlResourceService {
             var content = pageResource.getContent();
             Logger.info("content for body :" + content);
             var doc = createDocument(content);
+            var html = doc.getRootElement();
             var body = doc.getRootElement().element("body");
             if (body == null) {
                 throw new IllegalStateException("page must contain body element");
             }
-            return serialize(body);
+            html.remove(body);
+            return toTemplateString(body);
         } catch (Exception e) {
             throw new RuntimeException("Unable to extract body", e);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private String toTemplateString(Element element) {
+        var templateDoc = DocumentHelper.createDocument();
+        var templateElement = DocumentHelper.createElement("xis:template");
+        templateDoc.add(templateElement);
+        ((List<Node>) element.elements())
+                .forEach(e -> {
+                    element.remove(e);
+                    templateElement.add(e);
+                });
+        return serialize(templateElement);
     }
 
     private Map<String, String> extractBodyAttributes(Resource pageResource) {

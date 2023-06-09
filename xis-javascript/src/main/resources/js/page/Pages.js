@@ -20,6 +20,7 @@ class Pages {
         var promises = [];
         var _this = this;
         config.pageIds.forEach(id => _this.pages[id] = new Page(id));
+        //config.pageIds.forEach(id => promises.push(_this.loadPage(id)));
         config.pageIds.forEach(id => promises.push(_this.loadPageHead(id)));
         config.pageIds.forEach(id => promises.push(_this.loadPageBody(id)));
         config.pageIds.forEach(id => promises.push(_this.loadPageBodyAttributes(id)));
@@ -39,6 +40,22 @@ class Pages {
         return this.pages[this.welcomePageId];
     }
 
+    /*
+    loadPage(pageId) {
+        var _this = this;
+        return this.client.loadPage(pageId).then(content => {
+            var shadowHead = htmlToElement(content);
+            console.log('initialize head');
+            initializeElement(shadowHead);
+            var headChildArray = nodeListToArray(shadowHead.childNodes);
+            var title = headChildArray.find(child => isElement(child) && child.localName == 'title');
+            _this.pages[pageId].headChildArray = headChildArray;
+            _this.pages[pageId].title = title ? title.innerText : '';
+
+            return pageId;
+        });
+    }
+    */
 
     /**
      * @param {string} pageId
@@ -47,10 +64,10 @@ class Pages {
     loadPageHead(pageId) {
         var _this = this;
         return this.client.loadPageHead(pageId).then(content => {
-            var shadowHead = htmlToElement(content);
+            var templateElement = htmlToElement(content);
             console.log('initialize head');
-            initializeElement(shadowHead);
-            var headChildArray = nodeListToArray(shadowHead.childNodes);
+            initializeElement(templateElement);
+            var headChildArray = nodeListToArray(templateElement.childNodes);
             var title = headChildArray.find(child => isElement(child) && child.localName == 'title');
             _this.pages[pageId].headChildArray = headChildArray;
             _this.pages[pageId].title = title ? title.innerText : '';
@@ -67,9 +84,9 @@ class Pages {
     loadPageBody(pageId) {
         var _this = this;
         return this.client.loadPageBody(pageId).then(content => {
-            var shadowBody = htmlToElement(content);
-            initializeElement(shadowBody);
-            _this.pages[pageId].bodyChildArray = nodeListToArray(shadowBody.childNodes);
+            var templateElement = htmlToElement(content);
+            initializeElement(templateElement);
+            _this.pages[pageId].bodyChildArray = nodeListToArray(templateElement.childNodes);
             return pageId;
         });
     }

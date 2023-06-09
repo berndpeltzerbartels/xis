@@ -10,26 +10,42 @@ class Refresher {
     }
 
     /**
-     * 
+     * @public
      * @param {Element} element 
      * @param {Data} data 
      */
     refreshElement(element, data) {
+        this.refreshAttributes(element, data);
+        if (!this.invokeHandler(element, data)) {
+            this.refreshChildNodes(element, data);
+        }
+    }
+
+    /**
+     * @private
+     * @param {Element} element 
+     * @param {Data} data 
+     */
+    refreshAttributes(element, data) {
         if (element._attributes) {
             for (var attribute of element._attributes) {
                 element.setAttribute(attribute.name, attribute.expression.evaluate(data));
             }
         }
-        var evaluateChildNodes = true;
+    }
+
+    /**
+     * 
+     * @param {Element} element 
+     * @param {Data} data 
+     * @returns {boolean} true if the handler refreshes child-nodes
+     */
+    invokeHandler(element, data) {
         if (element._handler) {
-            if (element._handler.type == 'foreach-handler' || element._handler.type == 'widget-container-handler') {
-                evaluateChildNodes = false;// invokes child nodes, too
-            }
             element._handler.refresh(data);
+            return element._handler.type == 'foreach-handler' || element._handler.type == 'widget-container-handler';// these handlers are refreshing child nodes
         }
-        if (evaluateChildNodes) {
-            this.refreshChildNodes(element, data);
-        }
+        return false;
     }
 
     /**

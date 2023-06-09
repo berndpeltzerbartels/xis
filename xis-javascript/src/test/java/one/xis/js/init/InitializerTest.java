@@ -16,6 +16,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@SuppressWarnings("unchecked")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class InitializerTest {
 
@@ -31,6 +32,7 @@ class InitializerTest {
         javascriptDefinitions += IOUtils.getResourceAsString("js/tag-handler/ForeachHandler.js");
         javascriptDefinitions += IOUtils.getResourceAsString("js/tag-handler/LinkHandler.js");
         javascriptDefinitions += IOUtils.getResourceAsString("js/tag-handler/ActionLinkHandler.js");
+        javascriptDefinitions += IOUtils.getResourceAsString("js/tag-handler/CompositeTagHandler.js");
         javascriptDefinitions += IOUtils.getResourceAsString("js/Functions.js");
         javascriptDefinitions += IOUtils.getResourceAsString("js/parse/TextContentParser.js");
         javascriptDefinitions += IOUtils.getResourceAsString("js/parse/CharIterator.js");
@@ -210,7 +212,7 @@ class InitializerTest {
     }
 
     @Test
-    void pageLink() throws ScriptException {
+    void pageLink1() throws ScriptException {
         var document = Document.of("<html><body><a xis:page=\"/test.html\">test</a></body></html>");
 
         var script = javascriptDefinitions;
@@ -225,6 +227,80 @@ class InitializerTest {
         assertThat(handler).isNotNull();
         assertThat(handler.get("type")).isEqualTo("link-handler");
     }
+
+    @Test
+    void pageLink2() throws ScriptException {
+        var document = Document.of("<html><body><xis:a page=\"/test.html\">test</xis:a></body></html>");
+
+        var script = javascriptDefinitions;
+        script += "var initializer = new Initializer(new DomAccessor());";
+        script += "initializer.initialize(a);";
+
+        var xisA = document.getElementByTagName("xis:a");
+
+        JSUtil.execute(script, Map.of("a", xisA, "console", new Console(), "document", document));
+
+        var a = document.getElementByTagName("a");
+        var handler = (Map<String, Object>) a._handler;
+        assertThat(handler).isNotNull();
+        assertThat(handler.get("type")).isEqualTo("link-handler");
+    }
+
+    @Test
+    void widgetLink1() throws ScriptException {
+        var document = Document.of("<html><body><a xis:widget=\"/test-widget\">test</a></body></html>");
+
+        var script = javascriptDefinitions;
+        script += "var initializer = new Initializer(new DomAccessor());";
+        script += "initializer.initialize(a);";
+
+        var a = document.getElementByTagName("a");
+
+        JSUtil.execute(script, Map.of("a", a, "console", new Console(), "document", document));
+
+        var handler = (Map<String, Object>) a._handler;
+        assertThat(handler).isNotNull();
+        assertThat(handler.get("type")).isEqualTo("link-handler");
+    }
+
+    @Test
+    void wigetLink2() throws ScriptException {
+        var document = Document.of("<html><body><xis:a widget=\"/test-widget\">test</xis:a></body></html>");
+
+        var script = javascriptDefinitions;
+        script += "var initializer = new Initializer(new DomAccessor());";
+        script += "initializer.initialize(a);";
+
+        var xisA = document.getElementByTagName("xis:a");
+
+        JSUtil.execute(script, Map.of("a", xisA, "console", new Console(), "document", document));
+
+        var a = document.getElementByTagName("a");
+        var handler = (Map<String, Object>) a._handler;
+        assertThat(handler).isNotNull();
+        assertThat(handler.get("type")).isEqualTo("link-handler");
+    }
+
+    @Test
+    void replaceLinkWithChildNodes() throws ScriptException {
+        var document = Document.of("<html><body><xis:a widget=\"/test-widget\"><div/><span/></xis:a></body></html>");
+
+        var script = javascriptDefinitions;
+        script += "var initializer = new Initializer(new DomAccessor());";
+        script += "initializer.initialize(a);";
+
+        var xisA = document.getElementByTagName("xis:a");
+
+        JSUtil.execute(script, Map.of("a", xisA, "console", new Console(), "document", document));
+
+        var a = document.getElementByTagName("a");
+
+        assertThat(a.getChildElements().get(0).localName).isEqualTo("div");
+        assertThat(a.getChildElements().get(1).localName).isEqualTo("span");
+
+
+    }
+
 
     @Test
     void actionLink1() throws ScriptException {

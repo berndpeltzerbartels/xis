@@ -67,10 +67,11 @@ class Client {
      * @public
      * @param {string} pageId
      * @param {any} data
+     * @param {any} parameters 
      * @returns {Promise<any>}
      */
-    loadPageData(pageId, data) {
-        var request = this.createRequest(pageId, null, data, undefined);
+    loadPageData(pageId, data, parameters) {
+        var request = this.createRequest(pageId, null, data, undefined, parameters);
         return this.httpClient.post('/xis/page/model', request, {})
             .then(content => JSON.parse(content));
     }
@@ -79,10 +80,11 @@ class Client {
      * @public
      * @param {string} widgetId
      * @param {any} data
+     * @param {any} parameters
      * @returns {Promise<any>}
      */
-    loadWidgetData(widgetId, data) {
-        var request = this.createRequest(null, widgetId, data, undefined);
+    loadWidgetData(widgetId, data, parameters) {
+        var request = this.createRequest(null, widgetId, data, undefined, parameters);
         return this.httpClient.post('/xis/widget/model', request)
             .then(content => JSON.parse(content));
     }
@@ -120,8 +122,9 @@ class Client {
     * @param {string} pageId
     * @param {string} widgetId
     * @param {any} data
+    * @param {any} parameters
     */
-    createRequest(pageId, widgetId, data, action) {
+    createRequest(pageId, widgetId, data, action, parameters) {
         var request = new ComponentRequest();
         request.clientId = this.clientId;
         request.userId = this.userId;
@@ -129,6 +132,7 @@ class Client {
         request.widgetId = widgetId;
         request.action = action;
         request.data = data;
+        request.parameters = parameters;
         return request;
     }
 }

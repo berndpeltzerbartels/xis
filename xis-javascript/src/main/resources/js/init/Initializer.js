@@ -27,7 +27,7 @@ class Initializer {
     initializeElement(element) {
         console.log('initializeElement:' + element);
         if (this.isFrameworkElement(element)) {
-            this.initializeFrameworkElement(element);
+            element = this.initializeFrameworkElement(element); // may be replaced
         } else {
             this.initializeHtmlElement(element);
         }
@@ -48,10 +48,14 @@ class Initializer {
             this.initializeForeachAttribute(element);
         }
         if (element.getAttribute('xis:page') || element.getAttribute('xis:widget')) {
-            this.initializeLink(element);
+            this.initializeLinkByAttribute(element);
         }
         if (element.getAttribute('xis:action')) {
-            this.initializeActionElement(element);
+            if (element.localName == 'form') {
+                this.initializeForm(element);
+            } else {
+                this.initializeLinkByAttribute(element);
+            }
         }
         this.initializeAttributes(element);
     }
@@ -74,28 +78,12 @@ class Initializer {
         }
     }
 
-    initializeActionElement(element) {
-        if (element.localName == 'form') {
-            this.initializeForm(element);
-        } else {
-            this.initializeActionLink(element);
-        }
-    }
-
     /**
     * @private
     * @param {Element} formElement 
     */
     initializeForm(formElement) {
         // TODO
-    }
-
-    /**
-    * @private
-    * @param {Element} element 
-    */
-    initializeActionLink(element) {
-        this.addHandler(element, new ActionLinkHandler(element, this.client, this.widgetContainers));
     }
 
     /**
@@ -116,19 +104,19 @@ class Initializer {
         console.log('initializeFrameworkElement:' + element);
         switch (element.localName) {
             case 'xis:foreach':
-                this.decorateForeach(element);
-                break;
+                return this.decorateForeach(element);
             case 'xis:widget-container':
-                this.initializeWidgetContainer(element);
-                break;
+                return this.initializeWidgetContainer(element);
             case 'xis:a':
-                this.replaceByHtmlElement(element, 'a');
-                break;
+                return this.initializeFrameworkLink(element);
+            case 'xis:param':
+                return this.initializeParameter(element);
+            default: return element;
         }
     }
 
-    replaceByHtmlElement(element, name) {
-        var replacement = document.createElement(name);
+    replaceFrameworkLinkByHtml(element) {
+        var replacement = document.createElement('a');
         for (var attrName of element.getAttributeNames()) {
             var attrValue = element.getAttribute(attrName);
             switch (attrName) {
@@ -143,6 +131,11 @@ class Initializer {
         }
         this.domAccessor.replaceElement(element, replacement);
         this.initializeHtmlElement(replacement);
+        for (var child of nodeListToArray(element.childNodes)) {
+            element.removeChild(child);
+            replacement.appendChild(child);
+        }
+        return replacement;
     }
     /**
     * @private
@@ -155,6 +148,7 @@ class Initializer {
             this.initialize(child);
         }
     }
+
     /**
     * @private
     * @param {Element} element 
@@ -166,6 +160,53 @@ class Initializer {
         this.domAccessor.insertParent(element, foreach);
     }
 
+    /**
+     * <a xis:page..> or 
+     * <a xis:widget..>
+     * @private
+     * @param {Element} element 
+     */
+    initializeLinkByAttribute(a) {
+        a.setAttribute('href', '#');
+        var handler;
+        if (a.getAttribute('xis:page') || a.getAttribute('xis:widget')) {
+            handler = new LinkHandler(a);
+        } else if (a.getAttribute('xis:action')) {
+            handler = new ActionLinkHandler(a);
+        }
+        this.addHandler(a, handler);
+        a.onclick = event => handler.onClick(event);
+    }
+
+    /**
+     * <xis:a....>
+     * @private
+     * @param {Element} element 
+     * @returns {Element} "a"
+     */
+    initializeFrameworkLink(element) {
+        return this.replaceFrameworkLinkByHtml(element);
+    }
+
+    /**
+     * @private
+     * @param {Element} element 
+     * @returns {void} 
+     */
+    initializeParameter(element) {
+        var parameter = new Parameter(element.getAttribute('name'), element.innerText);
+        element._handler = new ParameterHandler(element, parameter);
+        var parent = element.parentNode;
+        while (parent) {
+            if (parent._handler.addParameter) {
+                parent._handler.addParameter(parameter);
+                return element;
+            }
+            parent = parent.parentNode;
+        }
+        var stringRepresentation = '<xis:param name="' + element.getAttribute('name') || '' + '">';
+        throw new Error(stringRepresentation + ': no parent tag supporting parameters found');
+    }
 
     /**
     * @private
@@ -175,14 +216,6 @@ class Initializer {
         var arr = doSplit(element.getAttribute('xis:foreach'), ':');
         var foreach = this.createForEach(arr[0], arr[1]);
         this.domAccessor.insertChild(element, foreach);
-    }
-
-    /**
-     * @private
-     * @param {Element} element 
-     */
-    initializeLink(element) {
-        this.addHandler(element, new LinkHandler(element));
     }
 
     /**

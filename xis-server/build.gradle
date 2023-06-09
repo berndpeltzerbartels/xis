@@ -14,7 +14,7 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
 
     implementation 'dom4j:dom4j:1.6.1'
-
+    implementation 'org.slf4j:slf4j-api:2.0.3'
 
     implementation project(':xis-context')
     implementation project(':xis-util')

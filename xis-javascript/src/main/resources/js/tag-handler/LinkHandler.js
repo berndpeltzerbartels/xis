@@ -9,6 +9,15 @@ class LinkHandler extends TagHandler {
         if (element.localName == 'a') {
             element.setAttribute('href', '#');
         }
+        this.parameters = [];
+    }
+
+    /**
+     * @public
+     * @param {Parameter} parameter 
+     */
+    addParameter(parameter) {
+        this.parameters.push(parameter);
     }
 
     refresh(data) {
@@ -34,26 +43,29 @@ class LinkHandler extends TagHandler {
 
     onClick(e) {
         if (this.widgetExpression) {
-            return this.onClickWidgetLink(this.widgetId);
+            return this.onClickWidgetLink();
         } else if (this.pageExpression) {
-            return this.onClickPageLink(this.pageId);
+            return this.onClickPageLink();
         }
     }
 
+    /**
+     * @private
+     * @returns {Promise<void>} 
+     */
     onClickWidgetLink() {
         return new Promise((resolve, _) => {
             var container = this.getTargetContainer();
             var handler = container._handler;
-            var _this = this;
-            handler.showWidget(this.widgetId);
-            handler.reloadDataAndRefresh(this.data);
+            handler.showWidget(this.widgetId, this.parameters);
             resolve();
         });
     }
 
-    onClickPageLink(pageId) {
-        return bindPage(pageId).then(() => reloadDataAndRefreshCurrentPage()).catch(e => console.error(e));
+    onClickPageLink() {
+        return bindPage(this.pageId).then(() => reloadDataAndRefreshCurrentPage(this.parameters)).catch(e => console.error(e));
     }
+
 
 
 

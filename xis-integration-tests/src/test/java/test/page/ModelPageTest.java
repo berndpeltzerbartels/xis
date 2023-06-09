@@ -61,7 +61,6 @@ class ModelPageTest {
 
         var model2 = capturer.getAllValues().get(1);
 
-        //  assertThat(model1).isNull();
         assertThat(model2).isNotNull();
         assertThat(model2.getId()).isEqualTo(1L);
         assertThat(model2.getValue()).isEqualTo("Hello");

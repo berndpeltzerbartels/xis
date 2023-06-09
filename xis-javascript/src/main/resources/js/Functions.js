@@ -116,9 +116,13 @@ function bindPage(uri) {
     return pageController.bindPage(uri);
 }
 
-function reloadDataAndRefreshCurrentPage() {
+/**
+ * @param {Array<Parameter>} parameters, may be undefined
+ * @returns {Prmoise<void>}
+ */
+function reloadDataAndRefreshCurrentPage(parameters = []) {
     return new Promise((resolve, _) => {
-        pageController.reloadDataAndRefreshCurrentPage();
+        pageController.reloadDataAndRefreshCurrentPage(parameters);
         resolve();
     });
 }

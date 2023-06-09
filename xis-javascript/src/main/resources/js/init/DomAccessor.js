@@ -46,5 +46,6 @@ class DomAccessor {
         } else {
             parent.appendChild(replacement);
         }
+        // TODO move child nodes ?
     }
 }

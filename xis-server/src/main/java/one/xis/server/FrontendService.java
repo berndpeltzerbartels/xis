@@ -47,6 +47,10 @@ public class FrontendService {
         return applyFilterChain(request, controllerService::invokeWidgetModelMethods);
     }
 
+    public String getPage(String id) {
+        return htmlResourceService.getPage(id);
+    }
+
     public String getPageHead(String id) {
         var head = htmlResourceService.getPageHead(id);
         Logger.info(head);
@@ -75,7 +79,7 @@ public class FrontendService {
     public String getApiJs() {
         return apiJsResource.getContent();
     }
-    
+
     private Response applyFilterChain(Request request, Function<Request, Response> responder) {
         var chain = requestFilterChain.apply(request);
         if (chain.isInterrupt()) {

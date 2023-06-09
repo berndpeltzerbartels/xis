@@ -210,17 +210,22 @@ class PageController {
         });
     }
 
-    reloadDataAndRefreshCurrentPage() {
+    /**
+     * @public
+     * @param {Array<Parameter>} parameters, may be undefined
+     */
+    reloadDataAndRefreshCurrentPage(parameters) {
         if (!this.pageId) throw new Error('no page to reload');
         var _this = this;
-        this.refreshData().then(() => _this.refreshPage())
+        this.refreshData(parameters).then(() => _this.refreshPage())
     }
 
     /**
     * @private
+    * @param {Array<Parameter>} parameters, may be undefined
     * @returns {Promise}
     */
-    refreshData() {
+    refreshData(parameters = []) {
         var _this = this;
         var pageId = this.pageId;
         console.log('PageController - refreshData:' + pageId);
@@ -233,7 +238,13 @@ class PageController {
                 values[dataKey] = pageData.getValue([dataKey]);
             }
         }
-        return this.client.loadPageData(pageId, values).then(response => {
+        var params = {};
+        if (parameters) {
+            for (var par of parameters) {
+                params[pageAttributes.name] = par.value;
+            }
+        }
+        return this.client.loadPageData(pageId, values, params).then(response => {
             _this.pageDataMap[pageId] = new Data(response.data);
             return pageId;
         });

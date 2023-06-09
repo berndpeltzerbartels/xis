@@ -14,6 +14,8 @@ public interface FrameworkController {
 
     Response onWidgetAction(Request request);
 
+    String getPage(String id);
+
     String getPageHead(String id);
 
     String getPageBody(String id);

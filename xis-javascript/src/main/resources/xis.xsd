@@ -1,8 +1,8 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xis="http://www.w3.org/2001/XMLSchema"
            targetNamespace="https://xis.one/xsd"
            elementFormDefault="qualified">
-    
+
     <xs:element name="foreach">
         <xs:complexType>
             <xs:attribute name="var" type="xs:string" use="required"/>
@@ -39,4 +39,5 @@
         </xs:complexType>
     </xs:element>
 
+    <xis:attribute name="action" type="xs:string"/>
 </xs:schema>

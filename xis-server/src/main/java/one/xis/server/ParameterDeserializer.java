@@ -34,6 +34,10 @@ class ParameterDeserializer {
             return evaluateArray(reader, type, parameterizedType);
         } else if (reader.peek() == JsonToken.BEGIN_OBJECT) {
             return readValue(reader, parameter.getType());
+        } else if (reader.peek() == JsonToken.NUMBER) {
+            return readValue(reader, parameter.getType());
+        } else if (reader.peek() == JsonToken.STRING) {
+            return readValue(reader, parameter.getType());
         } else {
             throw new IllegalStateException();
         }
@@ -150,6 +154,9 @@ class ParameterDeserializer {
         if (type.equals(Date.class)) {
             return Date.parse(reader.nextString());
         }
+        if (type.equals(String.class)) {
+            return reader.nextString();
+        }
         throw new UnsupportedOperationException("parameter-type " + type);
     }
 
@@ -199,7 +206,6 @@ class ParameterDeserializer {
             }
         }
         throw new UnsupportedOperationException("create instance of " + collType);
-
     }
 
 }

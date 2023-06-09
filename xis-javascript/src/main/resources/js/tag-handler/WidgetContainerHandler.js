@@ -47,9 +47,10 @@ class WidgetContainerHandler extends TagHandler {
     /**
      * @public
      * @param {string} widgetId 
+     * @param {Array<Parameter>} parameters
      * @returns {Promise<void>}
      */
-    showWidget(widgetId) {
+    showWidget(widgetId, parameters = []) {
         if (widgetId !== this.widgetId) {
             if (this.widgetRoot) {
                 this.clearChildren();
@@ -57,7 +58,7 @@ class WidgetContainerHandler extends TagHandler {
             this.widgetId = widgetId;
         }
         this.doShowWidget();
-        this.reloadDataAndRefresh();
+        this.reloadDataAndRefresh(parameters);
     }
 
 
@@ -69,8 +70,10 @@ class WidgetContainerHandler extends TagHandler {
 
     /**
      * @public
+     * @param {Array<Parameter>} parameters, may be undefined
+     * @param 
      */
-    reloadDataAndRefresh() {
+    reloadDataAndRefresh(parameters = []) {
         var _this = this;
         var clientData = {};
         var widgetData = this.widgetData[this.widgetId];
@@ -79,7 +82,13 @@ class WidgetContainerHandler extends TagHandler {
                 clientData[dataKey] = widgetData.getValue([dataKey]);
             }
         }
-        this.client.loadWidgetData(this.widgetId, clientData)
+        var params = {};
+        if (parameters) {
+            for (var par of parameters) {
+                params[pageAttributes.name] = par.value;
+            }
+        }
+        this.client.loadWidgetData(this.widgetId, clientData, params)
             .then(response => new Data(response.data))
             .then(data => { _this.widgetData[_this.widgetId] = data; return data; })
             .then(data => _this.refreshChildNodes(data))
