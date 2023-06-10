@@ -18,7 +18,7 @@ class GraalVMFunction {
     @SuppressWarnings("unchecked")
     Object execute(String... args) {
         if (functionObj instanceof Value) {
-            return ((Value) functionObj).execute(args); // with chrome debugger
+            return ((Value) functionObj).execute((Object[]) args); // with chrome debugger
         } else if (functionObj instanceof Function) {
             return ((Function<String[], Object>) functionObj).apply(args);
         }
