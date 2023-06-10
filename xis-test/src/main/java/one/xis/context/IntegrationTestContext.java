@@ -12,10 +12,9 @@ import java.util.Map;
 
 public class IntegrationTestContext {
 
-    private static IntegrationTestEnvironment environment;
     private final AppContext appContext;
+    private final IntegrationTestEnvironment environment;
     private final Resources resources;
-    private static final Object SYNC_LOCK = new Object();
 
     public static Builder builder() {
         return new Builder();
@@ -24,19 +23,11 @@ public class IntegrationTestContext {
     IntegrationTestContext(Object... controllers) {
         this.resources = new Resources();
         this.appContext = internalContext(controllers);
+        this.environment = new IntegrationTestEnvironment(resources.getByPath("xis.js"), resources.getByPath("index.html"));
     }
 
     public void openPage(String uri, Map<String, Object> parameters) {
-        synchronized (SYNC_LOCK) {
-            if (environment == null) {
-                // loads page as initial page
-                environment = new IntegrationTestEnvironment(resources.getByPath("xis.js"), resources.getByPath("index.html"), uri);
-            }
-            environment.reset();
-            environment.openPage(uri, appContext);
-            environment.afterPageLoaded();
-        }
-
+        environment.openPage(uri, appContext);
     }
 
     public Document getDocument() {

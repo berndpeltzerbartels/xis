@@ -17,12 +17,11 @@ public class HtmlObjects {
     private final Window window;
     private final Function<String, Element> htmlToElement;
 
-    public HtmlObjects(Resource rootPageResource, String initialUri) {
+    public HtmlObjects(Resource rootPageResource) {
         this.rootPage = Document.of(rootPageResource.getContent());
         this.localStorage = new LocalStorage();
         this.window = new Window();
         this.htmlToElement = HtmlObjects::htmlToElement;
-        this.rootPage.location.pathname = initialUri;
     }
 
     public static Element htmlToElement(String content) {

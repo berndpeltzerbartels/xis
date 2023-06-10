@@ -10,21 +10,19 @@ class IntegrationTestEnvironment {
     private final HtmlObjects htmlObjects;
     private final IntegrationTestScript integrationTestScript;
     private final BackendBridgeProvider backendBridgeProvider;
-    private GraalVMFunction starter;
+    //private GraalVMFunction starter;
 
-    IntegrationTestEnvironment(Resource scriptResource, Resource rootPage, String initialUri) {
-        this.htmlObjects = new HtmlObjects(rootPage, initialUri);
+    IntegrationTestEnvironment(Resource scriptResource, Resource rootPage) {
+        this.htmlObjects = new HtmlObjects(rootPage);
         this.backendBridgeProvider = new BackendBridgeProvider();
         this.integrationTestScript = new IntegrationTestScript(scriptResource, this);
     }
 
     void openPage(String uri, AppContext appContext) {
+        htmlObjects.getRootPage().location.pathname = uri;
         backendBridgeProvider.setBackendBridge(appContext.getSingleton(BackendBridge.class));
-        if (starter == null) {
-            starter = integrationTestScript.runScript();
-        } else {
-            this.starter.execute(uri);
-        }
+        integrationTestScript.runScript();
+        htmlObjects.finalizeDocument();
     }
 
     void reset() {
