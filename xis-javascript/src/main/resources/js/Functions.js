@@ -141,3 +141,8 @@ function refreshNode(node, data) {
     refresher.refreshNode(node, data);
 }
 
+function openForTesting(uri) {
+    document.location.pathname = uri;
+    starter.reInit();
+}
+

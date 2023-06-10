@@ -3,6 +3,7 @@ package one.xis.test.js;
 import java.util.HashMap;
 import java.util.Map;
 
+@SuppressWarnings("unused")
 public class LocalStorage {
 
     private final Map<String, String> items = new HashMap<>();
@@ -14,5 +15,10 @@ public class LocalStorage {
     public String getItem(String name) {
         return items.get(name);
     }
-    
+
+
+    public void reset() {
+        items.clear();
+    }
+
 }

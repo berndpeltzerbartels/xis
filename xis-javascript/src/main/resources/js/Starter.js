@@ -21,19 +21,28 @@ class Starter {
         var body = getElementByTagName('body');
         this.initializer.initializeHtmlElement(head);
         this.initializer.initializeHtmlElement(body);
-        console.log('Loading configuration');
-        var _this = this;
-        this.loadConfig()
-            .then(config => _this.widgets.loadWidgets(config))
-            .then(config => _this.pages.loadPages(config))
-            .then(config => _this.pageController.displayInitialPage(config))
-            .catch(e => console.log(error));
+        this.loadConfig();
+
     }
+
+    /**
+    * @returns {Promise<ComponentConfig>}
+    */
+    reInit() {
+        return this.loadConfig();
+    }
+
     /**
     * @returns {Promise<ComponentConfig>}
     */
     loadConfig() {
-        return this.client.loadConfig();
+        console.log('Loading configuration');
+        var _this = this;
+        this.client.loadConfig()
+            .then(config => _this.widgets.loadWidgets(config))
+            .then(config => _this.pages.loadPages(config))
+            .then(config => _this.pageController.displayInitialPage(config))
+            .catch(e => console.log(error));
     }
 }
 

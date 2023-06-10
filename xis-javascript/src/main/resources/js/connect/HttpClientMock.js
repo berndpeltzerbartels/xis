@@ -1,8 +1,8 @@
 class HttpClientMock {
 
 
-    constructor(controllerBridge) {
-        this.controllerBridge = controllerBridge;
+    constructor(backendBridgeProvider) {
+        this.backendBridgeProvider = backendBridgeProvider;
     }
 
     /**
@@ -37,26 +37,28 @@ class HttpClientMock {
     }
 
     responseForGet(uri, headers) {
+        var backendBridge = this.backendBridgeProvider.getBackendBridge();
         switch (uri) {
-            case '/xis/config': return this.controllerBridge.getComponentConfig(uri, headers);
-            case '/xis/page/head': return this.controllerBridge.getPageHead(uri, headers);
-            case '/xis/page/body': return this.controllerBridge.getPageBody(uri, headers);
-            case '/xis/page/body-attributes': return this.controllerBridge.getBodyAttributes(uri, headers);
+            case '/xis/config': return backendBridge.getComponentConfig(uri, headers);
+            case '/xis/page/head': return backendBridge.getPageHead(uri, headers);
+            case '/xis/page/body': return backendBridge.getPageBody(uri, headers);
+            case '/xis/page/body-attributes': return backendBridge.getBodyAttributes(uri, headers);
             default:
                 if (uri.startsWith('/xis/widget/html/')) {
-                    return this.controllerBridge.getWidgetHtml(uri, headers);
+                    return backendBridge.getWidgetHtml(uri, headers);
                 }
                 throw new Error('unknown uri for http-get: ' + uri);
         }
     }
 
     responseForPost(uri, payload, headers) {
+        var backendBridge = this.backendBridgeProvider.getBackendBridge();
         var requestJson = JSON.stringify(payload);
         switch (uri) {
-            case '/xis/page/model': return this.controllerBridge.getPageModel(uri, requestJson, headers);
-            case '/xis/widget/model': return this.controllerBridge.getWidgetModel(uri, requestJson, headers);
-            case '/xis/page/action': return this.controllerBridge.onPageAction(uri, requestJson, headers);
-            case '/xis/widget/action': return this.controllerBridge.onWidgetAction(uri, requestJson, headers);
+            case '/xis/page/model': return backendBridge.getPageModel(uri, requestJson, headers);
+            case '/xis/widget/model': return backendBridge.getWidgetModel(uri, requestJson, headers);
+            case '/xis/page/action': return backendBridge.onPageAction(uri, requestJson, headers);
+            case '/xis/widget/action': return backendBridge.onWidgetAction(uri, requestJson, headers);
             default: throw new Error('unknown uri for http-post: ' + uri);
         }
     }

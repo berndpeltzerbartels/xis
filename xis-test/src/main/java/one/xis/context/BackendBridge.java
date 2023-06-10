@@ -8,10 +8,13 @@ import one.xis.server.Request;
 
 import java.util.Map;
 
+/**
+ * Mediator between the compiled javascript and backendclasses.
+ */
 @XISComponent
 @SuppressWarnings("unused")
 @RequiredArgsConstructor
-public class ControllerBridge {
+public class BackendBridge {
 
     private final FrontendService frontendService;
     private final ObjectMapper objectMapper = new ObjectMapper(); // TODO always use the same mapper and inject it here
