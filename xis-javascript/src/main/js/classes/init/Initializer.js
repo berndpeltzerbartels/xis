@@ -157,6 +157,7 @@ class Initializer {
         var arr = doSplit(element.getAttribute('xis:repeat'), ':');
         var foreach = this.createForEach(arr[0], arr[1]);
         this.domAccessor.insertParent(element, foreach);
+        element.removeAttribute('xis:repeat'); // Otherwise endless recursion
     }
 
     /**
@@ -215,6 +216,7 @@ class Initializer {
         var arr = doSplit(element.getAttribute('xis:foreach'), ':');
         var foreach = this.createForEach(arr[0], arr[1]);
         this.domAccessor.insertChild(element, foreach);
+        element.removeAttribute('xis:foreach');// Otherwise endless recursion
     }
 
     /**
