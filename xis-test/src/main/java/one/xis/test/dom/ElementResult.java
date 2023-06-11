@@ -41,6 +41,11 @@ public class ElementResult {
         return this;
     }
 
+    public ElementResult assertId(String value) {
+        assertTrue(element, value.equals(element.getAttribute("id")), "It should have id ='%s'", value);
+        return this;
+    }
+
     public ElementResult assertTextContent(String content) {
         assertTrue(element, content.equals(element.getTextContent()), "Expected text-content to be '%s', bit it was '%s'", content, element.getTextContent());
         return this;

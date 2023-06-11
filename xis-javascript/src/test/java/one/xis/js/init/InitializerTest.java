@@ -57,6 +57,43 @@ class InitializerTest {
     }
 
     @Test
+    void repeatAttributeHasNestedTagWithRepeatAttribute() throws ScriptException {
+        var document = new Document("html");
+
+        var divForeach1 = document.createElement("div");
+        divForeach1.setAttribute("id", "divForeach1");
+        divForeach1.setAttribute("xis:repeat", "item:items");
+
+        var divForeach2 = document.createElement("div");
+        divForeach2.setAttribute("id", "divForeach2");
+        divForeach2.setAttribute("xis:repeat", "subItem:item.subItems");
+
+        var span = document.createElement("span");
+
+        divForeach1.appendChild(divForeach2);
+        divForeach2.appendChild(span);
+        span.appendChild(new TextNode("123"));
+
+        var script = Javascript.getScript(CLASSES, FUNCTIONS);
+        script += "var initializer = new Initializer(new DomAccessor());";
+        script += "initializer.initialize(div);";
+
+        JSUtil.execute(script, Map.of("div", divForeach1, "console", new Console(), "document", document));
+
+        DomAssert.assertAndGetParentElement(span, "div")
+                .assertId("divForeach2")
+                .assertAndGetParentElement("xis:foreach")
+                .assertAttribute("array", "item.subItems")
+                .assertAttribute("var", "subItem")
+                .assertAndGetParentElement("div")
+                .assertId("divForeach1")
+                .assertAndGetParentElement("xis:foreach")
+                .assertAttribute("array", "items")
+                .assertAttribute("var", "item");
+
+    }
+
+    @Test
     void foreachAttribute() throws ScriptException {
         var document = Document.of("<div xis:foreach=\"item:items\"><span></span></div>");
 
