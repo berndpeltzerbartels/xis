@@ -7,9 +7,10 @@ import javax.script.Compilable;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import java.io.*;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 
@@ -17,20 +18,50 @@ import java.util.stream.Collectors;
  * Writes all javascript-sources into a single file and compiles the result
  */
 public class JavascriptPlugin implements Plugin<Project> {
-    private static final String API_OUT_FILE_NAME = "xis.js";
-    private static final String API_TEST_OUT_FILE_NAME = "xis-test.js";
 
     @Override
     public void apply(Project project) {
         printfln("apply plugin for project %s", project.getDisplayName());
-        var jsFiles = FileUtils.files(getJsApiSrcRoot(project), "js").stream()
-                .filter(file -> !file.getName().equals(API_OUT_FILE_NAME))
-                .filter(file -> !file.getName().equals(API_TEST_OUT_FILE_NAME))
-                .map(this::toJSFile).collect(Collectors.toUnmodifiableSet());
-        writeApiFile(jsFiles, project);
-        //writeApiTestFile(jsFiles, project);
+        process(project);
     }
 
+    private void process(Project project) {
+        processSourceDirs(sourceDirs(project), project);
+    }
+
+    private void processSourceDirs(Collection<File> sourceDirs, Project project) {
+        sourceDirs.forEach(dir -> processSourceDir(dir, project));
+    }
+
+    private void processSourceDir(File sourceDir, Project project) {
+        var jsFiles = FileUtils.files(sourceDir, "js").stream()
+                .map(this::toJSFile)
+                .collect(Collectors.toSet());
+        if (!jsFiles.isEmpty()) {
+            var sortedJsFiles = JSFileSorter.sort(jsFiles);
+            var outFile = outFileForSourceDir(sourceDir, project);
+            writeToOutFile(sortedJsFiles, outFile);
+        }
+    }
+
+
+    private Collection<File> sourceDirs(Project project) {
+        var root = getJsApiSrcRoot(project);
+        var files = root.listFiles();
+        if (files == null) {
+            return Collections.emptyList();
+        }
+        return Arrays.stream(files)
+                .filter(File::isDirectory)
+                .collect(Collectors.toSet());
+    }
+
+
+    private File outFileForSourceDir(File dir, Project project) {
+        return new File(getOutDir(project), dir.getName() + ".js");
+    }
+
+    /*
     private void writeApiFile(Set<JSFile> jsFiles, Project project) {
         var files = new HashSet<>(jsFiles);
         //files.add(toJSFile(getHttpClientFile(project)));
@@ -39,7 +70,7 @@ public class JavascriptPlugin implements Plugin<Project> {
         writeToOutFile(files, outFile);
     }
 
-    /*
+
     private void writeApiTestFile(Set<JSFile> jsFiles, Project project) {
         var files = new HashSet<>(jsFiles);
         files.add(toJSFile(getHttpClientMockFile(project)));
@@ -50,10 +81,9 @@ public class JavascriptPlugin implements Plugin<Project> {
 
      */
 
-    private void writeToOutFile(Set<JSFile> jsFiles, File outFile) {
-        var sortedJsFiles = JSFileSorter.sort(jsFiles);
+    private void writeToOutFile(List<JSFile> jsFiles, File outFile) {
         printfln("js-outfile: '%s'", outFile);
-        writeJsToFile(sortedJsFiles, outFile);
+        writeJsToFile(jsFiles, outFile);
         compileAndEval(outFile);
 
     }
@@ -115,7 +145,7 @@ public class JavascriptPlugin implements Plugin<Project> {
     }
 
     private File getJsApiSrcRoot(Project project) {
-        return new File(project.getProjectDir(), "src/main/resources/js");
+        return new File(project.getProjectDir(), "src/main/js");
     }
 
     /*

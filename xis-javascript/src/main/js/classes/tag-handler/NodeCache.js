@@ -10,11 +10,9 @@ class NodeCache {
 
     /**
      * @param {array<Node>} nodeArray
-     * @param {Initializer} initializer
      */
-    constructor(nodeArray, initializer) {
+    constructor(nodeArray) {
         this.nodeArray = nodeArray;
-        this.initializer = initializer;
         this.cache = [nodeArray];
     }
 
@@ -53,7 +51,7 @@ class NodeCache {
         var clones = [];
         for (var node of this.nodeArray) {
             var clone = this.cloneNode(node);
-            this.initializer.initialize(clone);
+            app.initializer.initialize(clone);
             clones.push(clone);
         }
         return clones;

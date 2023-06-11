@@ -1,10 +1,10 @@
 package one.xis.js.tags;
 
+import one.xis.js.Javascript;
 import one.xis.test.dom.Document;
 import one.xis.test.dom.Element;
 import one.xis.test.dom.Node;
 import one.xis.test.js.JSUtil;
-import one.xis.utils.io.IOUtils;
 import org.junit.jupiter.api.Test;
 
 import javax.script.ScriptException;
@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import static one.xis.js.JavascriptSource.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class NodeCacheTest {
@@ -19,10 +20,7 @@ class NodeCacheTest {
     @Test
     @SuppressWarnings("unchecked")
     void sizeUp() throws ScriptException {
-        var js = IOUtils.getResourceAsString("js/tag-handler/NodeCache.js");
-        js += IOUtils.getResourceAsString("js/init/Initializer.js");
-        js += IOUtils.getResourceAsString("js/init/DomAccessor.js");
-        js += IOUtils.getResourceAsString("js/Functions.js");
+        var js = Javascript.getScript(CLASSES, FUNCTIONS, TEST, TEST_APP_INSTANCE);
         js += "var cache = new NodeCache(nodeArray, new Initializer(new DomAccessor())); cache.sizeUp(3); [cache.getChildren(0), cache.getChildren(1), cache.getChildren(2)]";
         Map<String, Object> bindings = Map.of("nodeArray", new Node[]{new Element("a"), new Element("b")}, "document", Document.of("<html/>"));
 

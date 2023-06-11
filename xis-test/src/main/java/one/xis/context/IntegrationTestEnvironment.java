@@ -1,7 +1,6 @@
 package one.xis.context;
 
 import lombok.Getter;
-import one.xis.resource.Resource;
 import one.xis.test.dom.HtmlObjects;
 
 @Getter
@@ -10,18 +9,18 @@ class IntegrationTestEnvironment {
     private final HtmlObjects htmlObjects;
     private final IntegrationTestScript integrationTestScript;
     private final BackendBridgeProvider backendBridgeProvider;
-    //private GraalVMFunction starter;
+    private GraalVMFunction openPage;
 
-    IntegrationTestEnvironment(Resource scriptResource, Resource rootPage) {
-        this.htmlObjects = new HtmlObjects(rootPage);
+    IntegrationTestEnvironment() {
+        this.htmlObjects = new HtmlObjects();
         this.backendBridgeProvider = new BackendBridgeProvider();
-        this.integrationTestScript = new IntegrationTestScript(scriptResource, this);
+        this.integrationTestScript = new IntegrationTestScript(this);
+        this.openPage = integrationTestScript.runScript();
     }
 
     void openPage(String uri, AppContext appContext) {
-        htmlObjects.getRootPage().location.pathname = uri;
         backendBridgeProvider.setBackendBridge(appContext.getSingleton(BackendBridge.class));
-        integrationTestScript.runScript();
+        openPage.execute(uri);
         htmlObjects.finalizeDocument();
     }
 

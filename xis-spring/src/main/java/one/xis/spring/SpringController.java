@@ -76,8 +76,26 @@ class SpringController implements FrameworkController {
     }
 
     @Override
-    @GetMapping("/xis.js")
-    public String getApiJs() {
-        return frontendService.getApiJs();
+    @GetMapping("/app.js")
+    public String getAppJs() {
+        return frontendService.getAppJs();
+    }
+
+    @Override
+    @GetMapping("/classes.js")
+    public String getClassesJs() {
+        return frontendService.getClassesJs();
+    }
+
+    @Override
+    @GetMapping("/main.js")
+    public String getMainJs() {
+        return frontendService.getMainJs();
+    }
+
+    @Override
+    @GetMapping("/functions.js")
+    public String getFunctionsJs() {
+        return frontendService.getFunctionsJs();
     }
 }

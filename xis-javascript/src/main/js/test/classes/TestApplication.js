@@ -1,14 +1,10 @@
+class TestApplication {
 
-
-class Starter {
-
-    /**
-     *
-     * @param {HttpClient} httpClient
-     */
-    constructor(httpClient) {
+    constructor(backendBridgeProvider) {
+        this.httpClient = new HttpClientMock(backendBridgeProvider);
+        this.refresher = new Refresher();
         this.domAccessor = new DomAccessor();
-        this.client = new Client(httpClient);
+        this.client = new Client(this.httpClient);
         this.pages = new Pages(this.client);
         this.widgetContainers = new WidgetContainers();
         this.widgets = new Widgets(this.client);
@@ -16,34 +12,22 @@ class Starter {
         this.pageController = new PageController(this.client, this.pages, this.initializer);
     }
 
-    doStart() {
+
+    start() {
         var head = getElementByTagName('head');
         var body = getElementByTagName('body');
         this.initializer.initializeHtmlElement(head);
         this.initializer.initializeHtmlElement(body);
-        this.loadConfig();
-
     }
 
-    /**
-    * @returns {Promise<ComponentConfig>}
-    */
-    reInit() {
-        return this.loadConfig();
-    }
-
-    /**
-    * @returns {Promise<ComponentConfig>}
-    */
-    loadConfig() {
-        console.log('Loading configuration');
+    openPage(uri) {
+        document.location.pathname = uri;
         var _this = this;
-        this.client.loadConfig()
+        return this.client.loadConfig()
             .then(config => _this.widgets.loadWidgets(config))
             .then(config => _this.pages.loadPages(config))
             .then(config => _this.pageController.displayInitialPage(config))
-            .catch(e => console.log(error));
+            .catch(e => console.error(error));
     }
+
 }
-
-

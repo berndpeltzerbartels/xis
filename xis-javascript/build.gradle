@@ -17,7 +17,8 @@ apply plugin: JavascriptPlugin
 dependencies {
     annotationProcessor 'org.projectlombok:lombok:1.18.12'
     implementation 'org.projectlombok:lombok:1.18.12'
-
+    implementation project(':xis-resources')
+    
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
 

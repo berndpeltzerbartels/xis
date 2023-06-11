@@ -20,11 +20,17 @@ public class FrontendService {
     private final HtmlResourceService htmlResourceService;
     private final Resources resources;
     private final RequestFilters requestFilterChain;
-    private Resource apiJsResource;
+    private Resource appJsResource;
+    private Resource classesJsResource;
+    private Resource mainJsResource;
+    private Resource functionsJsResource;
 
     @XISInit
     void init() {
-        apiJsResource = resources.getByPath("xis.js");
+        appJsResource = resources.getByPath("app.js");
+        classesJsResource = resources.getByPath("classes.js");
+        mainJsResource = resources.getByPath("main.js");
+        functionsJsResource = resources.getByPath("functions.js");
     }
 
     public Config getConfig() {
@@ -76,8 +82,20 @@ public class FrontendService {
     }
 
 
-    public String getApiJs() {
-        return apiJsResource.getContent();
+    public String getAppJs() {
+        return appJsResource.getContent();
+    }
+
+    public String getClassesJs() {
+        return classesJsResource.getContent();
+    }
+
+    public String getMainJs() {
+        return mainJsResource.getContent();
+    }
+
+    public String getFunctionsJs() {
+        return functionsJsResource.getContent();
     }
 
     private Response applyFilterChain(Request request, Function<Request, Response> responder) {

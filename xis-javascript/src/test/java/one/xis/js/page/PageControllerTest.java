@@ -1,5 +1,6 @@
 package one.xis.js.page;
 
+import one.xis.js.Javascript;
 import one.xis.test.dom.Document;
 import one.xis.test.dom.DomAssert;
 import one.xis.test.dom.Element;
@@ -14,6 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import static one.xis.js.JavascriptSource.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class PageControllerTest {
@@ -23,13 +25,9 @@ class PageControllerTest {
 
     @BeforeEach
     void init() {
-        javascript = IOUtils.getResourceAsString("js/page/PageController.js");
-        javascript += IOUtils.getResourceAsString("js/Functions.js");
-        javascript += IOUtils.getResourceAsString("js/Data.js");
-        javascript += IOUtils.getResourceAsString("js/init/Initializer.js");
-        javascript += IOUtils.getResourceAsString("js/Refresher.js");
+        javascript = Javascript.getScript(CLASSES, FUNCTIONS, TEST, TEST_APP_INSTANCE);
         javascript += IOUtils.getResourceAsString("one/xis/page/PageControllerTestMocks.js");
-        javascript += "var pageController = new PageController(client, pages, new Initializer());";
+        javascript += "var pageController = new PageController(client, pages, new Initializer());"; // client and pages are getting instantiated inside mock-code
         document = Document.fromResource("index.html");
     }
 
@@ -37,9 +35,8 @@ class PageControllerTest {
     @Test
     void bindPage() throws ScriptException {
         var testScript = javascript + "pageController.bindPage('bla');";
-        var compiledScript = JSUtil.compile(testScript, createBindings());
 
-        compiledScript.eval();
+        JSUtil.execute(testScript, createBindings());
 
         DomAssert.assertAndGetRootElement(document, "html")
                 .assertAndGetChildElements("head", "body")
@@ -47,7 +44,7 @@ class PageControllerTest {
                     var head = elements.get(0);
                     var body = elements.get(1);
 
-                    DomAssert.assertChildElements(head, "title", "script", "script", "style", "script"); // the last 2 ones are read from mock
+                    DomAssert.assertChildElements(head, "title", "script", "script", "script", "script", "style", "script"); // the last 2 ones are read from mock
                     DomAssert.assertAndGetChildElement(body, "div").assertChildElements("div");
 
                     assertThat(body.getAttribute("class")).isEqualTo("test"); // see mock
@@ -58,9 +55,8 @@ class PageControllerTest {
     @Test
     void displayInitialPage() throws ScriptException {
         var testScript = javascript + "pageController.displayInitialPage(config);";
-        var compiledScript = JSUtil.compile(testScript, createBindings());
 
-        compiledScript.eval();
+        JSUtil.execute(testScript, createBindings());
 
         assertThat(document.getElementByTagName("title").innerText).isEqualTo("Test");
         DomAssert.assertAndGetChildElement(document.getElementByTagName("body"), "div")
@@ -91,6 +87,7 @@ class PageControllerTest {
         bindings.put("document", document);
         bindings.put("getElementByTagName", getElementByTagName);
         bindings.put("window", new Window());
+
         return bindings;
     }
 

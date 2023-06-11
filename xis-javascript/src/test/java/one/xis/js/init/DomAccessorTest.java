@@ -1,16 +1,18 @@
 package one.xis.js.init;
 
+import one.xis.js.Javascript;
 import one.xis.test.dom.Document;
 import one.xis.test.dom.DomAssert;
 import one.xis.test.dom.Element;
 import one.xis.test.js.JSUtil;
-import one.xis.utils.io.IOUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import javax.script.ScriptException;
 import java.util.Map;
 
+import static one.xis.js.JavascriptSource.CLASSES;
+import static one.xis.js.JavascriptSource.FUNCTIONS;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class DomAccessorTest {
@@ -22,8 +24,7 @@ class DomAccessorTest {
         document.rootNode.appendChild(document.createElement("e1"));
         document.rootNode.appendChild(document.createElement("e2"));
 
-        var js = IOUtils.getResourceAsString("js/init/DomAccessor.js");
-        js += IOUtils.getResourceAsString("js/Functions.js");
+        var js = Javascript.getScript(CLASSES, FUNCTIONS);
         js += "var accessor = new DomAccessor();";
         js += "var e2 = document.getElementsByTagName('e2').item(0);";
         js += "var x = document.createElement('x');";
@@ -58,8 +59,7 @@ class DomAccessorTest {
         var document = new Document(new Element("root"));
         document.rootNode.appendChild(document.createElement("e1"));
 
-        var js = IOUtils.getResourceAsString("js/init/DomAccessor.js");
-        js += IOUtils.getResourceAsString("js/Functions.js");
+        var js = Javascript.getScript(CLASSES, FUNCTIONS);
         js += "var accessor = new DomAccessor();";
         js += "var e1 = document.getElementsByTagName('e1').item(0);";
         js += "var x = document.createElement('x');";
@@ -91,8 +91,7 @@ class DomAccessorTest {
         document.rootNode.appendChild(e2);
 
 
-        var js = IOUtils.getResourceAsString("js/init/DomAccessor.js");
-        js += IOUtils.getResourceAsString("js/Functions.js");
+        var js = Javascript.getScript(CLASSES, FUNCTIONS);
         js += "var accessor = new DomAccessor();";
         js += "var e1 = document.getElementsByTagName('e1').item(0);";
         js += "var e2 = document.getElementsByTagName('e2').item(0);";
@@ -110,7 +109,7 @@ class DomAccessorTest {
         assertThat(e1).isNull();
         assertThat(e2).isNotNull();
         assertThat(x).isNotNull();
-        
+
         assertThat(x.nextSibling).isEqualTo(e2);
         assertThat(e2.parentNode).isEqualTo(root);
         assertThat(x.parentNode).isEqualTo(root);
@@ -125,8 +124,7 @@ class DomAccessorTest {
         var document = new Document(new Element("root"));
         document.rootNode.appendChild(document.createElement("e2"));
 
-        var js = IOUtils.getResourceAsString("js/init/DomAccessor.js");
-        js += IOUtils.getResourceAsString("js/Functions.js");
+        var js = Javascript.getScript(CLASSES, FUNCTIONS);
         js += "var accessor = new DomAccessor();";
         js += "var e2 = document.getElementsByTagName('e2').item(0);";
         js += "var e1 = document.createElement('e1');";
@@ -148,8 +146,7 @@ class DomAccessorTest {
     void insertChild() throws ScriptException {
         var document = Document.of("<a><b/><c/></a>");
 
-        var js = IOUtils.getResourceAsString("js/init/DomAccessor.js");
-        js += IOUtils.getResourceAsString("js/Functions.js"); // nodeListToArray(nodeList) is used in DomParser
+        var js = Javascript.getScript(CLASSES, FUNCTIONS);
         js += "var accessor = new DomAccessor();";
         js += "var a = document.getElementsByTagName('a').item(0);";
         js += "var x = document.createElement('x');";

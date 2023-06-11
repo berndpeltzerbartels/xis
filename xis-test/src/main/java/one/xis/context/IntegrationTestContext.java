@@ -14,16 +14,14 @@ public class IntegrationTestContext {
 
     private final AppContext appContext;
     private final IntegrationTestEnvironment environment;
-    private final Resources resources;
 
     public static Builder builder() {
         return new Builder();
     }
 
     IntegrationTestContext(Object... controllers) {
-        this.resources = new Resources();
         this.appContext = internalContext(controllers);
-        this.environment = new IntegrationTestEnvironment(resources.getByPath("xis.js"), resources.getByPath("index.html"));
+        this.environment = new IntegrationTestEnvironment();
     }
 
     public void openPage(String uri, Map<String, Object> parameters) {

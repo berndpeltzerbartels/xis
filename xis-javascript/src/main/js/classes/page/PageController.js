@@ -148,7 +148,7 @@ class PageController {
         for (var name of Object.keys(attributes)) {
             this.body.setAttribute(name, attributes[name]);
         }
-        this.initializer.initializeAttributes(this.body);
+        app.initializer.initializeAttributes(this.body);
     }
 
     clearBodyAttributes() {

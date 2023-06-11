@@ -15,10 +15,10 @@ class StaticResource implements Resource {
     private final String content;
     private final long lastModified;
 
-    StaticResource(String resource) {
-        log.info("loading {}", resource);
-        this.resource = resource;
-        content = IOUtils.getResourceAsString(resource);
+    StaticResource(String resourcePath) {
+        log.info("loading {}", resourcePath);
+        this.resource = resourcePath;
+        content = IOUtils.getResourceAsString(resourcePath);
         lastModified = System.currentTimeMillis();
     }
 

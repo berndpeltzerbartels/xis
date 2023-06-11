@@ -71,4 +71,3 @@ class Refresher {
     }
 }
 
-var refresher = new Refresher(); // TODO better solution for an available instance ? Starter and Function ?

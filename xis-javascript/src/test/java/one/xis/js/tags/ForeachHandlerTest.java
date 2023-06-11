@@ -1,9 +1,9 @@
 package one.xis.js.tags;
 
+import one.xis.js.Javascript;
 import one.xis.test.dom.Document;
 import one.xis.test.dom.Element;
 import one.xis.test.js.JSUtil;
-import one.xis.utils.io.IOUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -11,32 +11,14 @@ import javax.script.ScriptException;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static one.xis.js.JavascriptSource.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ForeachHandlerTest {
 
-    private String javascript;
     private Document document;
     private Element foreach;
 
-    @BeforeEach
-    void initScript() {
-        javascript = IOUtils.getResourceAsString("js/Data.js");
-        javascript += IOUtils.getResourceAsString("js/tag-handler/TagHandler.js");
-        javascript += IOUtils.getResourceAsString("js/tag-handler/ForeachHandler.js");
-        javascript += IOUtils.getResourceAsString("js/tag-handler/NodeCache.js");
-        javascript += IOUtils.getResourceAsString("js/init/DomAccessor.js");
-        javascript += IOUtils.getResourceAsString("js/init/Initializer.js");
-        javascript += IOUtils.getResourceAsString("js/Functions.js");
-        javascript += IOUtils.getResourceAsString("js/Refresher.js");
-        javascript += IOUtils.getResourceAsString("js/parse/TextContentParser.js");
-        javascript += IOUtils.getResourceAsString("js/parse/CharIterator.js");
-        javascript += IOUtils.getResourceAsString("js/parse/TextContent.js");
-        javascript += IOUtils.getResourceAsString("js/parse/ExpressionParser.js");
-        javascript += IOUtils.getResourceAsString("js/parse/Tokenizer.js");
-        javascript += IOUtils.getResourceAsString("js/parse/TreeParser.js");
-        javascript += IOUtils.getResourceAsString("js/parse/TokenLinker.js");
-    }
 
     @BeforeEach
     void initDocument() {
@@ -60,7 +42,7 @@ class ForeachHandlerTest {
 
     @Test
     void iterate() throws ScriptException {
-        var script = javascript;
+        var script = Javascript.getScript(CLASSES, FUNCTIONS, TEST, TEST_APP_INSTANCE);
         script += "var data = new Data({\"a\": {\"b\": {\"c\": [{\"id\": 1, \"title\": \"title1\"}, {\"id\": 2, \"title\": \"title2\"}, {\"id\": 3, \"title\": \"title3\"}]}}});";
         script += "var initializer = new Initializer(new DomAccessor());";
         script += "var handler = new ForeachHandler(foreach, initializer);";
@@ -85,7 +67,7 @@ class ForeachHandlerTest {
 
     @Test
     void decreaseElementCount() throws ScriptException {
-        var script = javascript;
+        var script = Javascript.getScript(CLASSES, FUNCTIONS, TEST, TEST_APP_INSTANCE);
         script += "var data1 = new Data({\"a\": {\"b\": {\"c\": [{\"id\": 1, \"title\": \"title1\"}, {\"id\": 2, \"title\": \"title2\"}, {\"id\": 3, \"title\": \"title3\"}]}}});";
         script += "var data2 = new Data({\"a\": {\"b\": {\"c\": [{\"id\": 1, \"title\": \"title1\"}]}}});";
         script += "var initializer = new Initializer(new DomAccessor());";

@@ -92,7 +92,7 @@ class WidgetContainerHandler extends TagHandler {
             .then(response => new Data(response.data))
             .then(data => { _this.widgetData[_this.widgetId] = data; return data; })
             .then(data => _this.refreshChildNodes(data))
-            .catch(e => console.log(e));
+            .catch(e => console.error(e));
 
     }
 

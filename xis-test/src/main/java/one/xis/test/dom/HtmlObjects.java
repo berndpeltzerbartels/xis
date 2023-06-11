@@ -2,7 +2,7 @@ package one.xis.test.dom;
 
 import lombok.Data;
 import lombok.NonNull;
-import one.xis.resource.Resource;
+import one.xis.resource.Resources;
 import one.xis.test.js.LocalStorage;
 import one.xis.utils.lang.StringUtils;
 
@@ -17,8 +17,8 @@ public class HtmlObjects {
     private final Window window;
     private final Function<String, Element> htmlToElement;
 
-    public HtmlObjects(Resource rootPageResource) {
-        this.rootPage = Document.of(rootPageResource.getContent());
+    public HtmlObjects() {
+        this.rootPage = Document.of(new Resources().getByPath("index.html").getContent());
         this.localStorage = new LocalStorage();
         this.window = new Window();
         this.htmlToElement = HtmlObjects::htmlToElement;

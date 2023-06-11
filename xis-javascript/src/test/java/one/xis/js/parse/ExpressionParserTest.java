@@ -1,5 +1,6 @@
 package one.xis.js.parse;
 
+import one.xis.js.Javascript;
 import one.xis.test.dom.Document;
 import one.xis.test.js.JSUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,6 +11,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import static one.xis.js.JavascriptSource.CLASSES;
+import static one.xis.js.JavascriptSource.FUNCTIONS;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings("unchecked")
@@ -20,7 +23,7 @@ class ExpressionParserTest {
 
     @BeforeEach
     void init() {
-        javascript = ParserScriptsFiles.getContent();
+        javascript = Javascript.getScript(CLASSES, FUNCTIONS);
         javascript += "var expressionParser = new ExpressionParser();";
     }
 

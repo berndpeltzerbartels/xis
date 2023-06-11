@@ -4,13 +4,14 @@ import lombok.Getter;
 import one.xis.test.dom.Document;
 import one.xis.test.dom.TextNode;
 import one.xis.test.js.JSUtil;
-import one.xis.utils.io.IOUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import javax.script.ScriptException;
 import java.util.Map;
 
+import static one.xis.js.JavascriptSource.CLASSES;
+import static one.xis.js.JavascriptSource.FUNCTIONS;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class RefresherTest {
@@ -21,9 +22,7 @@ class RefresherTest {
 
     @BeforeEach
     void init() {
-        javascript = IOUtils.getResourceAsString("js/Data.js");
-        javascript += IOUtils.getResourceAsString("js/Refresher.js");
-        javascript += IOUtils.getResourceAsString("js/Functions.js");
+        javascript = Javascript.getScript(CLASSES, FUNCTIONS);
         document = Document.of("<html><body><div/></body></html>");
     }
 

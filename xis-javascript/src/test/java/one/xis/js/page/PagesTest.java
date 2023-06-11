@@ -21,8 +21,8 @@ class PagesTest {
 
     @BeforeEach
     void init() {
-        javascript = IOUtils.getResourceAsString("js/page/Pages.js");
-        javascript += IOUtils.getResourceAsString("js/page/Page.js");
+        javascript = IOUtils.getResourceAsString("js/classes/page/Pages.js");
+        javascript += IOUtils.getResourceAsString("js/classes/page/Page.js");
         javascript += IOUtils.getResourceAsString("one/xis/page/PagesTestMocks.js");
         javascript += "var pages = new Pages(client, initializer);";
         document = new Document("html");

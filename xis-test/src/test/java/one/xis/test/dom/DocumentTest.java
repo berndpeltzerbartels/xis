@@ -48,11 +48,11 @@ class DocumentTest {
         assertThat(document.rootNode.getChildElementNames()).containsExactly("head", "body");
 
         var head = document.getElementByTagName("head");
-        assertThat(head.getChildElementNames()).containsExactly("title", "script", "script");
+        assertThat(head.getChildElementNames()).containsExactly("title", "script", "script", "script", "script");
 
         var body = document.getElementByTagName("body");
         assertThat(body.getChildList()).isEmpty();
-        assertThat(body.getAttribute("onload")).isEqualTo("initialize()");
+        assertThat(body.getAttribute("onload")).isEqualTo("main()");
     }
 
     @Test
@@ -170,7 +170,7 @@ class DocumentTest {
     void getElementById() {
         var xml = "<x><a/><b id=\"123\" /></x>";
         var document = Document.of(xml);
-        
+
         var element = document.getElementById("123");
 
         assertThat(element).isNotNull();

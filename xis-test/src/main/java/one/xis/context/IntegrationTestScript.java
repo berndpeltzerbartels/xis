@@ -1,12 +1,14 @@
 package one.xis.context;
 
 import lombok.Getter;
-import one.xis.resource.Resource;
+import one.xis.js.Javascript;
 import one.xis.test.js.JSUtil;
 
 import javax.script.ScriptException;
 import java.util.HashMap;
 import java.util.Map;
+
+import static one.xis.js.JavascriptSource.*;
 
 
 @Getter
@@ -15,9 +17,13 @@ class IntegrationTestScript {
     private final IntegrationTestEnvironment testSingletons;
     private final String script;
 
-    IntegrationTestScript(Resource scriptResource, IntegrationTestEnvironment testSingletons) {
+    IntegrationTestScript(IntegrationTestEnvironment testSingletons) {
         this.testSingletons = testSingletons;
-        this.script = scriptResource.getContent() + "\n" + START_SCRIPT;
+        this.script = testScript();
+    }
+
+    private String testScript() {
+        return Javascript.getScript(CLASSES, FUNCTIONS, TEST, TEST_MAIN);
     }
 
     GraalVMFunction runScript() {
@@ -37,13 +43,4 @@ class IntegrationTestScript {
         bindings.put("htmlToElement", testSingletons.getHtmlObjects().getHtmlToElement());
         return bindings;
     }
-
-    private static final String START_SCRIPT = "var httpClient = new HttpClientMock(backendBridgeProvider);\n" +
-            "var starter = new Starter(httpClient);\n" +
-            "starter.doStart();\n" +
-            "var pageController = starter.pageController;\n" +
-            "var widgetController = starter.widgetController;\n" +
-            "var initializer = starter.initializer;\n" +
-            "openForTesting";
-
 }

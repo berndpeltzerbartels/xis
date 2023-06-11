@@ -12,7 +12,7 @@ class TagHandler {
 
 
     refreshChildNodes(data) {
-        refresher.refreshChildNodes(this.tag, data);
+        app.refresher.refreshChildNodes(this.tag, data);
     }
 
     clearChildren() {
@@ -60,7 +60,7 @@ class TagHandler {
     }
 
     currentPageId() {
-        return pageController.pageId;
+        return app.pageController.pageId;
     }
 
     currentWidgetId() {

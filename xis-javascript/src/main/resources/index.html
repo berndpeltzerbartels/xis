@@ -1,43 +1,11 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <title ignore="true" class="test"></title>
-    <script ignore="true" src="xis.js"></script>
-    <script ignore="true">
-
-        var pageController;
-        var widgetController;
-        var initializer;
-
-        function htmlToElement(html) {
-            var holder = document.createElement('holder');
-            holder.innerHTML = html;
-            for (var child of nodeListToArray(holder.childNodes)) {
-                if (isElement(child)) {
-                    return child;
-                }
-            }
-        }
-
-        function initialize() {
-            var httpClient = new HttpClient();
-            var starter = new Starter(httpClient);
-            pageController = starter.pageController;
-            widgetController = starter.widgetController;
-            initializer = starter.initializer;
-            starter.doStart();
-        }
-
-
-
-
-
-
-
-    </script>
+    <script ignore="true" src="classes.js"></script>
+    <script ignore="true" src="functions.js"></script>
+    <script ignore="true" src="app.js"></script>
+    <script ignore="true" src="main.js"></script>
 </head>
-
-<body onload="initialize()"></body>
-
+<body onload="main()"></body>
 </html>

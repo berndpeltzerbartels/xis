@@ -1,8 +1,8 @@
 package one.xis.js.connect;
 
+import one.xis.js.Javascript;
 import one.xis.js.Promise;
 import one.xis.test.js.JSUtil;
-import one.xis.utils.io.IOUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -12,6 +12,7 @@ import org.mockito.Mockito;
 import javax.script.ScriptException;
 import java.util.Map;
 
+import static one.xis.js.JavascriptSource.CLASSES;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -29,7 +30,7 @@ class ClientTest {
         httpClient = Mockito.mock(HttpClient.class);
         promise = Mockito.mock(Promise.class);
         when(httpClient.get(anyString(), any())).thenReturn(promise);
-        var clientJs = IOUtils.getResourceAsString("js/connect/Client.js");
+        var clientJs = Javascript.getScript(CLASSES);
         var instantiation = "var client = new Client(httpClient);";
         script = clientJs + instantiation;
     }
@@ -70,7 +71,6 @@ class ClientTest {
 
     @Test
     void loadPageBodyAttributes() throws ScriptException {
-        ;
     }
 
 

@@ -113,7 +113,7 @@ function createElement(name) {
  * @returns {Promise<void>}
  */
 function bindPage(uri) {
-    return pageController.bindPage(uri);
+    return app.pageController.bindPage(uri);
 }
 
 /**
@@ -122,13 +122,13 @@ function bindPage(uri) {
  */
 function reloadDataAndRefreshCurrentPage(parameters = []) {
     return new Promise((resolve, _) => {
-        pageController.reloadDataAndRefreshCurrentPage(parameters);
+        app.pageController.reloadDataAndRefreshCurrentPage(parameters);
         resolve();
     });
 }
 
 function initializeElement(element) {
-    initializer.initialize(element);
+    app.initializer.initialize(element);
 }
 
 function assertNotNull(o, errorText) {
@@ -138,11 +138,6 @@ function assertNotNull(o, errorText) {
 
 
 function refreshNode(node, data) {
-    refresher.refreshNode(node, data);
-}
-
-function openForTesting(uri) {
-    document.location.pathname = uri;
-    starter.reInit();
+    app.refresher.refreshNode(node, data);
 }
 

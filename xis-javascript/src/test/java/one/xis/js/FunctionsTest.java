@@ -1,7 +1,6 @@
 package one.xis.js;
 
 import one.xis.test.js.JSUtil;
-import one.xis.utils.io.IOUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -19,7 +18,7 @@ class FunctionsTest {
 
     @BeforeAll
     void loadFunctions() {
-        functions = IOUtils.getResourceAsString("js/Functions.js");
+        functions = Javascript.getScript(JavascriptSource.FUNCTIONS);
     }
 
     @Test

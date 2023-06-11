@@ -2,11 +2,9 @@ class ForeachHandler extends TagHandler {
 
     /**
      * @param {Element} tag the custom tag '<xis:foreach/>'
-     * @param {Initializer} initializer
      */
-    constructor(tag, initializer) {
+    constructor(tag) {
         super(tag);
-        this.initializer = initializer;
         this.arrayPathExpression = this.createExpression(this.getAttribute('array'), '.');
         this.varName = this.getAttribute('var');
         this.type = 'foreach-handler';
@@ -48,7 +46,7 @@ class ForeachHandler extends TagHandler {
 
     nodeCache() {
         if (!this.cache) {
-            this.cache = new NodeCache(nodeListToArray(this.tag.childNodes), this.initializer);
+            this.cache = new NodeCache(nodeListToArray(this.tag.childNodes));
         }
         return this.cache;
     }

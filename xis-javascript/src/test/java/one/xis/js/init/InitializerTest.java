@@ -1,12 +1,11 @@
 package one.xis.js.init;
 
+import one.xis.js.Javascript;
 import one.xis.test.dom.Document;
 import one.xis.test.dom.DomAssert;
 import one.xis.test.dom.TextNode;
 import one.xis.test.js.Console;
 import one.xis.test.js.JSUtil;
-import one.xis.utils.io.IOUtils;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -14,40 +13,19 @@ import org.junit.jupiter.api.TestInstance;
 import javax.script.ScriptException;
 import java.util.Map;
 
+import static one.xis.js.JavascriptSource.CLASSES;
+import static one.xis.js.JavascriptSource.FUNCTIONS;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings("unchecked")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class InitializerTest {
 
-    private String javascriptDefinitions;
-
-
-    @BeforeAll
-    void load() {
-        javascriptDefinitions = IOUtils.getResourceAsString("js/init/Initializer.js");
-        javascriptDefinitions += IOUtils.getResourceAsString("js/init/DomAccessor.js");
-        javascriptDefinitions += IOUtils.getResourceAsString("js/tag-handler/TagHandler.js");
-        javascriptDefinitions += IOUtils.getResourceAsString("js/tag-handler/NodeCache.js");
-        javascriptDefinitions += IOUtils.getResourceAsString("js/tag-handler/ForeachHandler.js");
-        javascriptDefinitions += IOUtils.getResourceAsString("js/tag-handler/LinkHandler.js");
-        javascriptDefinitions += IOUtils.getResourceAsString("js/tag-handler/ActionLinkHandler.js");
-        javascriptDefinitions += IOUtils.getResourceAsString("js/tag-handler/CompositeTagHandler.js");
-        javascriptDefinitions += IOUtils.getResourceAsString("js/Functions.js");
-        javascriptDefinitions += IOUtils.getResourceAsString("js/parse/TextContentParser.js");
-        javascriptDefinitions += IOUtils.getResourceAsString("js/parse/CharIterator.js");
-        javascriptDefinitions += IOUtils.getResourceAsString("js/parse/TextContent.js");
-        javascriptDefinitions += IOUtils.getResourceAsString("js/parse/ExpressionParser.js");
-        javascriptDefinitions += IOUtils.getResourceAsString("js/parse/Tokenizer.js");
-        javascriptDefinitions += IOUtils.getResourceAsString("js/parse/TreeParser.js");
-        javascriptDefinitions += IOUtils.getResourceAsString("js/parse/TokenLinker.js");
-    }
-
     @Test
     void elementsAndTextNodeEvaluated() throws ScriptException {
         var document = Document.of("<a><b/><c><d>${bla}</d></c></a>");
 
-        var script = javascriptDefinitions;
+        var script = Javascript.getScript(CLASSES, FUNCTIONS);
         script += "var initializer = new Initializer(new DomAccessor());";
         script += "initializer.initialize(document.rootNode);";
 
@@ -63,7 +41,7 @@ class InitializerTest {
     void repeatAttribute() throws ScriptException {
         var document = Document.of("<div><span xis:repeat=\"item:items\"></span></div>");
 
-        var script = javascriptDefinitions;
+        var script = Javascript.getScript(CLASSES, FUNCTIONS);
         script += "var initializer = new Initializer(new DomAccessor());";
         script += "initializer.initialize(document.rootNode);";
 
@@ -82,7 +60,7 @@ class InitializerTest {
     void foreachAttribute() throws ScriptException {
         var document = Document.of("<div xis:foreach=\"item:items\"><span></span></div>");
 
-        var script = javascriptDefinitions;
+        var script = Javascript.getScript(CLASSES, FUNCTIONS);
         script += "var initializer = new Initializer(new DomAccessor());";
         script += "initializer.initialize(document.rootNode);";
 
@@ -115,7 +93,7 @@ class InitializerTest {
         foreach.appendChild(span);
         span.appendChild(new TextNode("123"));
 
-        var script = javascriptDefinitions;
+        var script = Javascript.getScript(CLASSES, FUNCTIONS);
         script += "var initializer = new Initializer(new DomAccessor());";
         script += "initializer.initialize(div);";
 
@@ -147,7 +125,7 @@ class InitializerTest {
         foreach.appendChild(span);
         span.appendChild(new TextNode("123"));
 
-        var script = javascriptDefinitions;
+        var script = Javascript.getScript(CLASSES, FUNCTIONS);
         script += "var initializer = new Initializer(new DomAccessor());";
         script += "initializer.initialize(div1);";
 
@@ -172,7 +150,7 @@ class InitializerTest {
         div.setAttribute("xis:repeat", "item1:items1");
         div.setAttribute("xis:foreach", "item2:items2");
 
-        var script = javascriptDefinitions;
+        var script = Javascript.getScript(CLASSES, FUNCTIONS);
         script += "var initializer = new Initializer(new DomAccessor());";
         script += "initializer.initialize(div);";
 
@@ -195,7 +173,7 @@ class InitializerTest {
     void textNode() throws ScriptException {
         var document = Document.of("<html><head><title>The title is ${title}</title></head></html>");
 
-        var script = javascriptDefinitions;
+        var script = Javascript.getScript(CLASSES, FUNCTIONS);
         script += "var initializer = new Initializer(new DomAccessor());";
         script += "initializer.initialize(head);";
 
@@ -215,7 +193,7 @@ class InitializerTest {
     void pageLink1() throws ScriptException {
         var document = Document.of("<html><body><a xis:page=\"/test.html\">test</a></body></html>");
 
-        var script = javascriptDefinitions;
+        var script = Javascript.getScript(CLASSES, FUNCTIONS);
         script += "var initializer = new Initializer(new DomAccessor());";
         script += "initializer.initialize(a);";
 
@@ -232,7 +210,7 @@ class InitializerTest {
     void pageLink2() throws ScriptException {
         var document = Document.of("<html><body><xis:a page=\"/test.html\">test</xis:a></body></html>");
 
-        var script = javascriptDefinitions;
+        var script = Javascript.getScript(CLASSES, FUNCTIONS);
         script += "var initializer = new Initializer(new DomAccessor());";
         script += "initializer.initialize(a);";
 
@@ -250,7 +228,7 @@ class InitializerTest {
     void widgetLink1() throws ScriptException {
         var document = Document.of("<html><body><a xis:widget=\"/test-widget\">test</a></body></html>");
 
-        var script = javascriptDefinitions;
+        var script = Javascript.getScript(CLASSES, FUNCTIONS);
         script += "var initializer = new Initializer(new DomAccessor());";
         script += "initializer.initialize(a);";
 
@@ -267,7 +245,7 @@ class InitializerTest {
     void wigetLink2() throws ScriptException {
         var document = Document.of("<html><body><xis:a widget=\"/test-widget\">test</xis:a></body></html>");
 
-        var script = javascriptDefinitions;
+        var script = Javascript.getScript(CLASSES, FUNCTIONS);
         script += "var initializer = new Initializer(new DomAccessor());";
         script += "initializer.initialize(a);";
 
@@ -285,7 +263,7 @@ class InitializerTest {
     void replaceLinkWithChildNodes() throws ScriptException {
         var document = Document.of("<html><body><xis:a widget=\"/test-widget\"><div/><span/></xis:a></body></html>");
 
-        var script = javascriptDefinitions;
+        var script = Javascript.getScript(CLASSES, FUNCTIONS);
         script += "var initializer = new Initializer(new DomAccessor());";
         script += "initializer.initialize(a);";
 
@@ -306,7 +284,7 @@ class InitializerTest {
     void actionLink1() throws ScriptException {
         var document = Document.of("<html><body><a xis:action=\"test-action\">test</a></body></html>");
 
-        var script = javascriptDefinitions;
+        var script = Javascript.getScript(CLASSES, FUNCTIONS);
         script += "var initializer = new Initializer(new DomAccessor());";
         script += "initializer.initialize(a);";
 
@@ -327,7 +305,7 @@ class InitializerTest {
         var document = Document.of("<html><body><xis:a action=\"test-action\">test</xis:a></body></html>");
 
 
-        var script = javascriptDefinitions;
+        var script = Javascript.getScript(CLASSES, FUNCTIONS);
         script += "var initializer = new Initializer(new DomAccessor());";
         script += "initializer.initialize(a);";
 
@@ -347,7 +325,7 @@ class InitializerTest {
     void compositeTagHandler() throws ScriptException {
         var document = Document.of("<html><body><a repeat=\"x:y\" page-link=\"/test.html\">test</a></body></html>"); // repeat ans page-link in sin tag
 
-        var script = javascriptDefinitions;
+        var script = Javascript.getScript(CLASSES, FUNCTIONS);
         script += "var initializer = new Initializer(new DomAccessor());";
         script += "initializer.initialize(a);";
 

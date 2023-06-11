@@ -1,10 +1,11 @@
 package one.xis.js.widget;
 
+import one.xis.js.Javascript;
+import one.xis.js.JavascriptSource;
 import one.xis.test.dom.Document;
 import one.xis.test.dom.Element;
 import one.xis.test.js.JSUtil;
 import one.xis.utils.io.IOUtils;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import javax.script.ScriptException;
@@ -16,23 +17,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class WidgetsTest {
 
-
-    private String javascript;
-
-    @BeforeEach
-    void initScript() {
-        javascript = IOUtils.getResourceAsString("js/Data.js");
-        javascript += IOUtils.getResourceAsString("js/tag-handler/TagHandler.js");
-        javascript += IOUtils.getResourceAsString("js/widget/Widget.js");
-        javascript += IOUtils.getResourceAsString("js/widget/Widgets.js");
-        javascript += IOUtils.getResourceAsString("js/tag-handler/WidgetContainerHandler.js");
-        javascript += IOUtils.getResourceAsString("one/xis/widget/WidgetsTestMocks.js");
-    }
-
     @Test
     @SuppressWarnings("unchecked")
     void loadWidgets() throws ScriptException {
-        var script = javascript;
+        var script = Javascript.getScript(JavascriptSource.CLASSES);
+        script += IOUtils.getResourceAsString("one/xis/widget/WidgetsTestMocks.js");
         script += "var widgets = new Widgets(client);\n";
         script += "widgets.loadWidgets(config);widgets.widgets";
 

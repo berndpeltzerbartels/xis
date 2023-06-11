@@ -3,7 +3,6 @@ class Initializer {
     /**
      *
      * @param {DomAccessor} domAccessor
-     * @param {Client} client
      * @param {Widgets} widgets
      * @param {WidgetContainers} widgetContainers
      */
