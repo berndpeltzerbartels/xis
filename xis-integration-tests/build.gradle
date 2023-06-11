@@ -19,6 +19,15 @@ dependencies {
     implementation project(':xis-remote-core')
     implementation project(':xis-util')
 
+    /*
+    implementation 'org.graalvm.sdk:graal-sdk:22.3.2'
+    implementation 'org.graalvm.truffle:truffle-api:22.3.2'
+    implementation 'org.graalvm.js:js-scriptengine:21.0.0'
+    implementation 'org.graalvm.regex:regex:22.3.2'
+    implementation 'com.ibm.icu:icu4j:67.1'
+    */
+    //  com.oracle.truffle.js.shell.JSLauncher
+
     annotationProcessor 'org.projectlombok:lombok:1.18.12'
     implementation 'org.projectlombok:lombok:1.18.12'
 

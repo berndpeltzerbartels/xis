@@ -1,17 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:xis="http://xis.one/html">
 <head>
     <meta charset="UTF-8"/>
     <title>RepeatInsideRepeat</title>
 </head>
 <body>
-<div repeat="item:items" class="item">
+<div xis:repeat="item:items" class="item">
     <h5 class="item">${item.title}</h5>
-    <div repeat="subItem:item.subItems" class="subItem">${subItem.title}</div>
+    <div xis:repeat="subItem:item.subItems" class="subItem">${subItem.title}</div>
     <hr/>
 </div>
 <div>
-    <a page-link="/index.html" id="indexLink">Index</a>
+    <a xis:page="/index.html" id="indexLink">Index</a>
 </div>
 </body>
 </html>
