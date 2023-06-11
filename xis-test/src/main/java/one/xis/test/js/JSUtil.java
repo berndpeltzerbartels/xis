@@ -43,6 +43,14 @@ public class JSUtil {
     }
 
 
+    public <T> T execute(String javascript, Map<String, Object> bindingMap, Class<T> clazz) throws ScriptException {
+        if ("true".equals(System.getenv().get("debug")) || "true".equals(System.getProperty("debug"))) {
+            return clazz.cast(debug(javascript, bindingMap));
+        }
+        return clazz.cast(compile(javascript, bindingMap).eval());
+    }
+
+
     public Object execute(String js) throws ScriptException {
         if ("true".equals(System.getenv().get("debug")) || "true".equals(System.getProperty("debug"))) {
             return debug(js, emptyMap());

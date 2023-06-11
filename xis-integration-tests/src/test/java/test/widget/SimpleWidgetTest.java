@@ -21,8 +21,8 @@ class SimpleWidgetTest {
     @Test
     void test() {
         testContext.getSingleton(WidgetPage.class).setWidgetId("SimpleWidget");
-        testContext.openPage(WidgetPage.class);
+        var result = testContext.openPage(WidgetPage.class);
 
-        assertThat(testContext.getDocument().getElementById("greeting").innerText).isEqualTo("Huhu !");
+        assertThat(result.getDocument().getElementById("greeting").innerText).isEqualTo("Huhu !");
     }
 }

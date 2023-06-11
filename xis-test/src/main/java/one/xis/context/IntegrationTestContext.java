@@ -3,7 +3,6 @@ package one.xis.context;
 
 import one.xis.resource.Resources;
 import one.xis.server.PageUtil;
-import one.xis.test.dom.Document;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -15,6 +14,8 @@ public class IntegrationTestContext {
     private final AppContext appContext;
     private final IntegrationTestEnvironment environment;
 
+    private static final Object SYNC_LOCK = new Object();
+
     public static Builder builder() {
         return new Builder();
     }
@@ -24,21 +25,20 @@ public class IntegrationTestContext {
         this.environment = new IntegrationTestEnvironment();
     }
 
-    public void openPage(String uri, Map<String, Object> parameters) {
+    public IntegrationTestResult openPage(String uri, Map<String, Object> parameters) {
+        //synchronized (SYNC_LOCK) {
         environment.openPage(uri, appContext);
+        return new IntegrationTestResult(appContext, environment);
+        //}
     }
 
-    public Document getDocument() {
-        return environment.getHtmlObjects().getRootPage();
-    }
-
-    public void openPage(String uri) {
-        openPage(uri, Collections.emptyMap());
+    public IntegrationTestResult openPage(String uri) {
+        return openPage(uri, Collections.emptyMap());
     }
 
 
-    public void openPage(Class<?> pageController) {
-        openPage(PageUtil.getUrl(pageController), Collections.emptyMap());
+    public IntegrationTestResult openPage(Class<?> pageController) {
+        return openPage(PageUtil.getUrl(pageController), Collections.emptyMap());
     }
 
 

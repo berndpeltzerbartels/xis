@@ -42,8 +42,8 @@ class ModelPageTest {
     @Test
     @DisplayName("Update data on model page, click link to index-page, click link back to model page and old data from previos visit is submitted ")
     void test() {
-        testContext.openPage("/model.html");
-        var doc = testContext.getDocument();
+        var result = testContext.openPage("/model.html");
+        var doc = result.getDocument();
         assertThat(doc.getElementById("id").innerText).isEqualTo("1");
         assertThat(doc.getElementById("value").innerText).isEqualTo("Hello");
 

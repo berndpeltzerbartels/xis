@@ -29,10 +29,10 @@ class ActionLinkPageTest {
 
     @Test
     void action1() {
-        testContext.openPage("/actionPage.html");
-        testContext.getDocument().getElementById("action-link1").onclick.accept(null);
+        var result = testContext.openPage("/actionPage.html");
+        result.getDocument().getElementById("action-link1").onclick.accept(null);
 
-        assertThat(testContext.getDocument().getElementByTagName("title").innerText).isEqualTo("ActionPage");
+        assertThat(result.getDocument().getElementByTagName("title").innerText).isEqualTo("ActionPage");
 
         var captor = ArgumentCaptor.forClass(ActionLinkPageData.class);
         verify(service, times(1)).update(captor.capture());
@@ -45,10 +45,10 @@ class ActionLinkPageTest {
 
     @Test
     void action2() {
-        testContext.openPage("/actionPage.html");
-        testContext.getDocument().getElementById("action-link2").onclick.accept(null);
+        var result = testContext.openPage("/actionPage.html");
+        result.getDocument().getElementById("action-link2").onclick.accept(null);
 
-        assertThat(testContext.getDocument().getElementByTagName("title").innerText).isEqualTo("ActionPage");
+        assertThat(result.getDocument().getElementByTagName("title").innerText).isEqualTo("ActionPage");
 
         var captor = ArgumentCaptor.forClass(ActionLinkPageData.class);
         verify(service, times(1)).update(captor.capture());
@@ -60,10 +60,10 @@ class ActionLinkPageTest {
 
     @Test
     void action3() {
-        testContext.openPage("/actionPage.html");
-        testContext.getDocument().getElementById("action-link3").onclick.accept(null); // "action-link3"is set by model variable "action3"
+        var result = testContext.openPage("/actionPage.html");
+        result.getDocument().getElementById("action-link3").onclick.accept(null); // "action-link3"is set by model variable "action3"
         // redirct to index
-        assertThat(testContext.getDocument().getElementByTagName("title").innerText).isEqualTo("Index");
+        assertThat(result.getDocument().getElementByTagName("title").innerText).isEqualTo("Index");
 
         var captor = ArgumentCaptor.forClass(ActionLinkPageData.class);
         verify(service, times(1)).update(captor.capture());

@@ -25,8 +25,8 @@ class ForeachTagPageTest {
     @Test
     @DisplayName("foreach-tag with simple data")
     void test() {
-        testContext.openPage("/foreachTag.html");
-        var items = testContext.getDocument().getElementsByClass("item")
+        var result = testContext.openPage("/foreachTag.html");
+        var items = result.getDocument().getElementsByClass("item")
                 .stream().map(Element::getTextNode).map(TextNode::getNodeValue).collect(Collectors.toList());
 
         assertThat(items).containsExactly("Item1", "Item2", "Item3");

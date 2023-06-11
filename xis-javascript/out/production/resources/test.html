@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script>
+
+
+
+function doIt() {
+   var div = document.createElement('div');
+      var s1 = document.createElement('span');
+        var s2 = document.createElement('span');
+        div.appendChild(s1);
+        div.appendChild(s2);
+
+        var a = document.createElement('a');
+        a.appendChild(s1);
+
+        console.log(a.childNodes.length);
+        console.log(s1.nextSibling);
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </script>
+
+</head>
+<body onload="doIt()">
+<xyz/>
+</body>
+</html>

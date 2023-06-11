@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:xis="http://xis.one/html">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Index</title>
+</head>
+<body>
+<div xis:repeat="page:pages">
+    <a xis:page="${page.url}" id="${page.id}">${page.title}</a>
+</div>
+
+</body>
+</html>

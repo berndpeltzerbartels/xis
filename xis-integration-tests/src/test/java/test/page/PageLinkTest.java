@@ -25,15 +25,15 @@ class PageLinkTest {
         var controller1 = testContext.getSingleton(PageLink1.class);
         var controller2 = testContext.getSingleton(PageLink2.class);
 
-        testContext.openPage("/pageLink1.html"); // open link 1 first time
-        assertThat(testContext.getDocument().getElementByTagName("title").innerText).isEqualTo("PageLink1");
+        var result = testContext.openPage("/pageLink1.html"); // open link 1 first time
+        assertThat(result.getDocument().getElementByTagName("title").innerText).isEqualTo("PageLink1");
         assertThat(controller1.getInvocations()).isEqualTo(1);
 
-        testContext.getDocument().getElementById("link1").onclick.accept(null); // go to PageLink2.html
-        assertThat(testContext.getDocument().getElementByTagName("title").innerText).isEqualTo("PageLink2");
+        result.getDocument().getElementById("link1").onclick.accept(null); // go to PageLink2.html
+        assertThat(result.getDocument().getElementByTagName("title").innerText).isEqualTo("PageLink2");
         assertThat(controller2.getInvocations()).isEqualTo(1);
 
-        testContext.getDocument().getElementById("link2").onclick.accept(null); // go back to PageLink1.html
+        result.getDocument().getElementById("link2").onclick.accept(null); // go back to PageLink1.html
         assertThat(controller1.getInvocations()).isEqualTo(2);
     }
 }

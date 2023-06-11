@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xis="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="https://xis.one/xsd"
+           elementFormDefault="qualified">
+
+    <xs:element name="foreach">
+        <xs:complexType>
+            <xs:attribute name="var" type="xs:string" use="required"/>
+            <xs:attribute name="array" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="widget"/>
+    <xs:element name="include" fixed="">
+        <xs:complexType>
+            <xs:attribute name="file" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="widget-container" fixed="">
+        <xs:complexType>
+            <xs:attribute name="default-widget" type="xs:string" use="required"/>
+            <xs:attribute name="container-id" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="if">
+        <xs:complexType>
+            <xs:attribute name="condition" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="a">
+        <xs:complexType>
+            <xs:attribute name="page" type="xs:string"/>
+            <xs:attribute name="widget" type="xs:string"/>
+            <xs:attribute name="action" type="xs:string"/>
+            <xs:attribute name="target-container" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xis:attribute name="action" type="xs:string"/>
+</xs:schema>

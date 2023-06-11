@@ -39,6 +39,7 @@ dependencies {
 }
 
 test {
+    maxParallelForks = 4
     useJUnitPlatform()
     afterTest { desc, result ->
         logger.quiet "${desc.className} - ${desc.name}: ${result.resultType}"
