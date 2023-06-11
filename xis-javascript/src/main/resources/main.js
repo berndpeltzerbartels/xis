@@ -1,5 +1,6 @@
-var app = new Application();
+var app;
 
 function main() {
+    app = new Application();
     app.start();
 }
