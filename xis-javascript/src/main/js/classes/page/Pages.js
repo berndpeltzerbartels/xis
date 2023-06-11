@@ -40,23 +40,6 @@ class Pages {
         return this.pages[this.welcomePageId];
     }
 
-    /*
-    loadPage(pageId) {
-        var _this = this;
-        return this.client.loadPage(pageId).then(content => {
-            var shadowHead = htmlToElement(content);
-            console.log('initialize head');
-            initializeElement(shadowHead);
-            var headChildArray = nodeListToArray(shadowHead.childNodes);
-            var title = headChildArray.find(child => isElement(child) && child.localName == 'title');
-            _this.pages[pageId].headChildArray = headChildArray;
-            _this.pages[pageId].title = title ? title.innerText : '';
-
-            return pageId;
-        });
-    }
-    */
-
     /**
      * @param {string} pageId
     * @returns {Promise<string>}

@@ -15,7 +15,6 @@ public class NodeList {
 
     public NodeList() {
         this.nodes = new ArrayList<>();
-        this.length = nodes.size();
     }
 
     public Node item(int index) {
@@ -55,4 +54,12 @@ public class NodeList {
         length = 0;
     }
 
+    void removeTextNodes() {
+        var textNodes = nodes.stream().filter(TextNode.class::isInstance).collect(Collectors.toSet());
+        textNodes.forEach(nodes::remove);
+    }
+
+    Stream<Element> elements() {
+        return stream().filter(Element.class::isInstance).map(Element.class::cast);
+    }
 }

@@ -1,6 +1,7 @@
 package one.xis.context;
 
 
+import lombok.Getter;
 import one.xis.resource.Resources;
 import one.xis.server.PageUtil;
 
@@ -11,6 +12,7 @@ import java.util.Map;
 
 public class IntegrationTestContext {
 
+    @Getter
     private final AppContext appContext;
     private final IntegrationTestEnvironment environment;
 
@@ -22,14 +24,14 @@ public class IntegrationTestContext {
 
     IntegrationTestContext(Object... controllers) {
         this.appContext = internalContext(controllers);
-        this.environment = new IntegrationTestEnvironment();
+        this.environment = new IntegrationTestEnvironment(appContext.getSingleton(BackendBridge.class));
     }
 
     public IntegrationTestResult openPage(String uri, Map<String, Object> parameters) {
-        //synchronized (SYNC_LOCK) {
-        environment.openPage(uri, appContext);
-        return new IntegrationTestResult(appContext, environment);
-        //}
+        synchronized (SYNC_LOCK) {
+            environment.openPage(uri);
+            return new IntegrationTestResult(appContext, environment);
+        }
     }
 
     public IntegrationTestResult openPage(String uri) {

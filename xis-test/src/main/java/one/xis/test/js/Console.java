@@ -7,4 +7,8 @@ public class Console {
         System.out.println(message);
     }
 
+    public void log(Object message) {
+        System.out.println(message);
+    }
+
 }

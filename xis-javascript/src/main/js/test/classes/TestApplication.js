@@ -1,7 +1,7 @@
 class TestApplication {
 
-    constructor(backendBridgeProvider) {
-        this.httpClient = new HttpClientMock(backendBridgeProvider);
+    constructor() {
+        this.httpClient = new HttpClientMock();
         this.refresher = new Refresher();
         this.domAccessor = new DomAccessor();
         this.client = new Client(this.httpClient);

@@ -72,4 +72,5 @@ public abstract class Node {
         return null;
     }
 
+    protected abstract void evaluateContent(StringBuilder builder);
 }

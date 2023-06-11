@@ -4,7 +4,6 @@ import lombok.Getter;
 import one.xis.js.Javascript;
 import one.xis.test.js.JSUtil;
 
-import javax.script.ScriptException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,11 +13,12 @@ import static one.xis.js.JavascriptSource.*;
 @Getter
 class IntegrationTestScript {
 
-    private final IntegrationTestEnvironment testSingletons;
+    private final IntegrationTestEnvironment testEnvironment;
     private final String script;
+    private static JavascriptFunction invoker;
 
-    IntegrationTestScript(IntegrationTestEnvironment testSingletons) {
-        this.testSingletons = testSingletons;
+    IntegrationTestScript(IntegrationTestEnvironment testEnvironment) {
+        this.testEnvironment = testEnvironment;
         this.script = testScript();
     }
 
@@ -26,21 +26,35 @@ class IntegrationTestScript {
         return Javascript.getScript(CLASSES, FUNCTIONS, TEST, TEST_MAIN);
     }
 
-    GraalVMFunction runScript() {
-        try {
-            return new GraalVMFunction(JSUtil.execute(script, createBindings()));
-        } catch (ScriptException e) {
-            throw new RuntimeException("Script failed :" + e.getMessage() + " at line " + e.getLineNumber() + ", column " + e.getColumnNumber(), e);
+    JavascriptFunction getInvoker() {
+        if (invoker == null) {
+            invoker = createInvoker();
+        } else {
+            updateBindings();
         }
+        return invoker;
+    }
+
+    private JavascriptFunction createInvoker() {
+        return JSUtil.function(script, createBindings());
     }
 
     private Map<String, Object> createBindings() {
         var bindings = new HashMap<String, Object>();
-        bindings.put("backendBridgeProvider", testSingletons.getBackendBridgeProvider());
-        bindings.put("localStorage", testSingletons.getHtmlObjects().getLocalStorage());
-        bindings.put("document", testSingletons.getHtmlObjects().getRootPage());
-        bindings.put("window", testSingletons.getHtmlObjects().getWindow());
-        bindings.put("htmlToElement", testSingletons.getHtmlObjects().getHtmlToElement());
+        bindings.put("backendBridge", testEnvironment.getBackendBridge());
+        bindings.put("localStorage", testEnvironment.getHtmlObjects().getLocalStorage());
+        bindings.put("document", testEnvironment.getHtmlObjects().getRootPage());
+        bindings.put("window", testEnvironment.getHtmlObjects().getWindow());
+        bindings.put("htmlToElement", testEnvironment.getHtmlObjects().getHtmlToElement());
         return bindings;
+    }
+
+    private void updateBindings() {
+        invoker.setBinding("backendBridge", testEnvironment.getBackendBridge());
+        invoker.setBinding("localStorage", testEnvironment.getHtmlObjects().getLocalStorage());
+        invoker.setBinding("document", testEnvironment.getHtmlObjects().getRootPage());
+        invoker.setBinding("window", testEnvironment.getHtmlObjects().getWindow());
+        invoker.setBinding("htmlToElement", testEnvironment.getHtmlObjects().getHtmlToElement());
+
     }
 }

@@ -7,6 +7,7 @@ public class TextNode extends Node {
     @Getter
     public Object nodeValue;
 
+    @SuppressWarnings("unused") // used in js
     public static final int nodeType = 3;
     public Object _expression;
 
@@ -25,7 +26,21 @@ public class TextNode extends Node {
     }
 
     @Override
+    protected void evaluateContent(StringBuilder builder) {
+        if (nodeValue != null) {
+            builder.append(nodeValue);
+        }
+    }
+
+    @Override
     public String toString() {
         return "TextNode(" + nodeValue + ")";
+    }
+
+
+    @SuppressWarnings("unused")
+    public void setNodeValue(Object nodeValue) {
+        this.nodeValue = nodeValue;
+        parentNode.textContentChanged();
     }
 }

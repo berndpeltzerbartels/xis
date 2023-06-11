@@ -13,7 +13,8 @@ var page = {
     id : 'index.html',
     headChildArray: headChildArray,
     bodyChildArray: bodyChildArray,
-    bodyAttributes: { class: 'test' }
+    bodyAttributes: { class: 'test' },
+    title: 'Test'
 };
 
 

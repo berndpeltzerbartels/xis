@@ -1,3 +1,3 @@
 function openPage(uri) {
-    app.openPage(uri);
+    return app.openPage(uri);
 }

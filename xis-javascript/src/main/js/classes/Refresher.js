@@ -65,8 +65,15 @@ class Refresher {
      * @param {Data} data 
      */
     refreshTextNode(node, data) {
+        debugger;
         if (node._expression) {
-            node.nodeValue = node._expression.evaluate(data);
+            var value = node._expression.evaluate(data);
+            if (node.setNodeValue) {
+                node.setNodeValue(value);
+            } else {
+                node.nodeValue = value;
+            }
+
         }
     }
 }

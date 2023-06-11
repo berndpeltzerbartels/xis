@@ -18,7 +18,7 @@ public class BackendBridge {
 
     private final FrontendService frontendService;
     private final ObjectMapper objectMapper = new ObjectMapper(); // TODO always use the same mapper and inject it here
-
+    private final AppContext appContext;
 
     public String getComponentConfig(String uri, Map<String, String> headers) {
         return serialialize(frontendService.getConfig());

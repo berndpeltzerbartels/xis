@@ -8,28 +8,15 @@ class IntegrationTestEnvironment {
 
     private final HtmlObjects htmlObjects;
     private final IntegrationTestScript integrationTestScript;
-    private final BackendBridgeProvider backendBridgeProvider;
-    private GraalVMFunction openPage;
+    private final BackendBridge backendBridge;
 
-    IntegrationTestEnvironment() {
+    IntegrationTestEnvironment(BackendBridge backendBridge) {
         this.htmlObjects = new HtmlObjects();
-        this.backendBridgeProvider = new BackendBridgeProvider();
         this.integrationTestScript = new IntegrationTestScript(this);
-        this.openPage = integrationTestScript.runScript();
+        this.backendBridge = backendBridge;
     }
 
-    void openPage(String uri, AppContext appContext) {
-        backendBridgeProvider.setBackendBridge(appContext.getSingleton(BackendBridge.class));
-        openPage.execute(uri);
-        htmlObjects.finalizeDocument();
+    void openPage(String uri) {
+        integrationTestScript.getInvoker().execute(uri);
     }
-
-    void reset() {
-        this.htmlObjects.reset();
-    }
-
-    void afterPageLoaded() {
-        htmlObjects.finalizeDocument();
-    }
-
 }

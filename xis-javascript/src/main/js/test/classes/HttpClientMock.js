@@ -1,10 +1,5 @@
 class HttpClientMock {
 
-
-    constructor(backendBridgeProvider) {
-        this.backendBridgeProvider = backendBridgeProvider;
-    }
-
     /**
      * @public
      * @param {string} uri
@@ -37,7 +32,6 @@ class HttpClientMock {
     }
 
     responseForGet(uri, headers) {
-        var backendBridge = this.backendBridgeProvider.getBackendBridge();
         switch (uri) {
             case '/xis/config': return backendBridge.getComponentConfig(uri, headers);
             case '/xis/page/head': return backendBridge.getPageHead(uri, headers);
@@ -52,7 +46,6 @@ class HttpClientMock {
     }
 
     responseForPost(uri, payload, headers) {
-        var backendBridge = this.backendBridgeProvider.getBackendBridge();
         var requestJson = JSON.stringify(payload);
         switch (uri) {
             case '/xis/page/model': return backendBridge.getPageModel(uri, requestJson, headers);

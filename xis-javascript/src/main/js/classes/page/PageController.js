@@ -10,9 +10,6 @@ class PageController {
         this.client = client;
         this.pages = pages;
         this.initializer = initializer;
-        this.head = getElementByTagName('head');
-        this.body = getElementByTagName('body');
-        this.title = getElementByTagName('title');
         this.pageDataMap = {};
         this.config = {};
         this.pageId = undefined;
@@ -95,23 +92,25 @@ class PageController {
         var _this = this;
         this.pageId = page.id;
         return new Promise((resolve, _) => {
-            _this.clearHeadChildNodes();
-            _this.clearBodyChildNodes();
-            _this.clearBodyAttributes();
+            var head = getElementByTagName('head');
+            var body = getElementByTagName('body');
+            _this.clearHeadChildNodes(head);
+            _this.clearBodyChildNodes(body);
+            _this.clearBodyAttributes(body);
             _this.bindTitle(page);
-            _this.bindHeadChildNodes(page.headChildArray);
-            _this.bindBodyAttributes(page.bodyAttributes);
-            _this.bindBodyChildNodes(page.bodyChildArray);
+            _this.bindHeadChildNodes(head, page.headChildArray);
+            _this.bindBodyAttributes(body, page.bodyAttributes);
+            _this.bindBodyChildNodes(body, page.bodyChildArray);
             resolve();
         });
     }
 
-    bindHeadChildNodes(nodeArray) {
+    bindHeadChildNodes(head, nodeArray) {
         for (var node of nodeArray) {
             if (node.nodeType == 1 && node.localName == 'title') {
                 continue;
             }
-            this.head.appendChild(node);
+            head.appendChild(node);
 
         }
     }
@@ -121,21 +120,27 @@ class PageController {
      * @param {string} title 
      */
     bindTitle(page) {
-        if (page.headChildArray) {
-            var titleTag = page.headChildArray.find(child => child.localName == 'title');
-            if (titleTag) {
-                var title = titleTag.innerText;
-                if (title.indexOf('${') != -1) {
-                    this.titleExpression = new TextContentParser(title).parse();
-                } else {
-                    this.title.innerText = title;
-                }
+        var title = page.title;
+        if (title) {
+            if (title.indexOf('${') != -1) {
+                this.titleExpression = new TextContentParser(title).parse();
+                return;
             }
+        }
+        this.setTitle(title);
+    }
+
+    setTitle(title) {
+        var titleElement = getElementByTagName('title');
+        if (titleElement.setInnerText) {
+            titleElement.setInnerText(title);
+        } else {
+            titleElement.innerText = title;
         }
     }
 
-    bindBodyChildNodes(nodeArray) {
-        this.bindChildNodes(this.body, nodeArray);
+    bindBodyChildNodes(body, nodeArray) {
+        this.bindChildNodes(body, nodeArray);
     }
 
     bindChildNodes(element, nodeArray) {
@@ -144,27 +149,27 @@ class PageController {
         }
     }
 
-    bindBodyAttributes(attributes) {
+    bindBodyAttributes(body, attributes) {
         for (var name of Object.keys(attributes)) {
-            this.body.setAttribute(name, attributes[name]);
+            body.setAttribute(name, attributes[name]);
         }
-        app.initializer.initializeAttributes(this.body);
+        app.initializer.initializeAttributes(body);
     }
 
-    clearBodyAttributes() {
-        for (var name of this.body.getAttributeNames()) {
-            this.body.removeAttribute(name);
+    clearBodyAttributes(body) {
+        for (var name of body.getAttributeNames()) {
+            body.removeAttribute(name);
         }
-        console.log('clearBodyAttributes:' + this.body);
-        this.body._attributes = undefined;
+        console.log('clearBodyAttributes:' + body);
+        body._attributes = undefined;
     }
 
-    clearHeadChildNodes() {
-        this.clearChildren(this.head);
+    clearHeadChildNodes(head) {
+        this.clearChildren(head);
     }
 
-    clearBodyChildNodes() {
-        this.clearChildren(this.body);
+    clearBodyChildNodes(body) {
+        this.clearChildren(body);
     }
 
     clearChildren(element) {
@@ -174,23 +179,6 @@ class PageController {
             }
             element.removeChild(node);
         }
-    }
-
-    unbindPage() {
-        for (var name of this.body.getAttributeNames()) {
-            this.body.removeAttribute(name);
-        }
-        for (var child of nodeListToArray(this.body.childNodes)) {
-            if (!child.getAttribute || !child.getAttribute('ignore')) {
-                this.body.removeChild(child);
-            }
-        }
-        for (var child of nodeListToArray(this.head.childNodes)) {
-            if (!child.getAttribute || !child.getAttribute('ignore')) {
-                this.head.removeChild(child);
-            }
-        }
-        this.titleExpression = undefined;
     }
 
     /**
@@ -264,8 +252,8 @@ class PageController {
         return new Promise((resolve, _) => {
             var data = _this.pageDataMap[this.pageId];
             _this.refreshTitle(data);
-            refreshNode(_this.head, data);
-            refreshNode(_this.body, data);
+            refreshNode(getElementByTagName('head'), data);
+            refreshNode(getElementByTagName('body'), data);
             _this.updateHistory(this.pageId);
             console.log('resolve - refreshPage: ' + this.pageId);
             resolve();
@@ -278,7 +266,8 @@ class PageController {
      */
     refreshTitle(data) {
         if (this.titleExpression) {
-            this.title.innerText = this.titleExpression.evaluate(data);
+            var content = this.titleExpression.evaluate(data);
+            this.setTitle(content);
         }
     }
 

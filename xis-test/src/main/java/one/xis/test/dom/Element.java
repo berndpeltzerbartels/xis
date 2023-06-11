@@ -14,7 +14,6 @@ public class Element extends Node {
 
     public final String localName;
     public Node firstChild;
-    public String innerHTML;
     public String innerText;
     public Object _handler;
     public Collection<Object> _attributes;
@@ -43,6 +42,9 @@ public class Element extends Node {
 
         node.parentNode = this;
         updateChildNodes();
+        if (node instanceof TextNode) {
+            textContentChanged();
+        }
     }
 
     public void insertBefore(Node newNoode, Node referenceNode) {
@@ -73,6 +75,13 @@ public class Element extends Node {
         if (name.equals("class")) {
             addClasses(value);
         }
+    }
+
+    public void setInnerText(String text) {
+        innerText = text;
+        this.childNodes.clear();
+        this.firstChild = null;
+        this.appendChild(new TextNode(text));
     }
 
     public void removeAttribute(String name) {
@@ -227,6 +236,9 @@ public class Element extends Node {
         return result;
     }
 
+    void textContentChanged() {
+        innerText = innerText();
+    }
 
     void updateChildNodes() {
         childNodes.clear();
@@ -236,4 +248,39 @@ public class Element extends Node {
             child = child.nextSibling;
         }
     }
+
+    public String asString() {
+        var builder = new StringBuilder();
+        evaluateContent(builder);
+        return builder.toString();
+    }
+
+    private String innerText() {
+        return childNodes.stream()
+                .filter(TextNode.class::isInstance)
+                .map(TextNode.class::cast)
+                .map(TextNode::getNodeValue)
+                .filter(Objects::nonNull)
+                .map(Object::toString)
+                .collect(Collectors.joining());
+    }
+
+    @Override
+    protected void evaluateContent(StringBuilder builder) {
+        builder.append("<");
+        builder.append(localName);
+        attributes.forEach((key, value) -> {
+            builder.append(" ");
+            builder.append(key);
+            builder.append("=\"");
+            builder.append(value);
+            builder.append("\"");
+        });
+        builder.append(">");
+        childNodes.stream().forEach(node -> node.evaluateContent(builder));
+        builder.append("</");
+        builder.append(localName);
+        builder.append(">");
+    }
+
 }
