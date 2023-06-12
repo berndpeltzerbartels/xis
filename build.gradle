@@ -27,5 +27,5 @@ test {
     afterTest { desc, result ->
         logger.quiet "${desc.className} - ${desc.name}: ${result.resultType}"
     }
-    maxParallelForks = Runtime.getRuntime().availableProcessors()
+    maxParallelForks = 4
 }

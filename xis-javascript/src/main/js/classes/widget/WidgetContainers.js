@@ -21,4 +21,8 @@ class WidgetContainers {
     addContainer(element, id) {
         this.containers[id] = element;
     }
+
+    reset() {
+        this.containers = {};
+    }
 }

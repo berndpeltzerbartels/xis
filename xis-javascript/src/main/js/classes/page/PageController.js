@@ -281,4 +281,32 @@ class PageController {
         var title = getElementByTagName('title').innerText;
         window.history.replaceState({}, title, pageId);
     }
+
+
+    reset() {
+        var body = getElementByTagName('body');
+        var head = getElementByTagName('head');
+        var titleTag = getElementByTagName('title');
+        for (var name of body.getAttributeNames()) {
+            body.removeAttribute(name);
+        }
+        for (var child of nodeListToArray(body.childNodes)) {
+            if (!child.getAttribute || !child.getAttribute('ignore')) {
+                body.removeChild(child);
+            }
+        }
+        for (var child of nodeListToArray(head.childNodes)) {
+            if (!child.getAttribute || !child.getAttribute('ignore')) {
+                head.removeChild(child);
+            }
+        }
+
+        this.titleExpression = undefined;
+        titleTag.innerText = ''
+
+        this.pageDataMap = {};
+        this.config = {};
+        this.pageId = undefined;
+    }
+
 }

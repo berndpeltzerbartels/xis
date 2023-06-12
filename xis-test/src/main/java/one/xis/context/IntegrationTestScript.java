@@ -15,7 +15,7 @@ class IntegrationTestScript {
 
     private final IntegrationTestEnvironment testEnvironment;
     private final String script;
-    private static JavascriptFunction invoker;
+    private static IntegrationTestFunctions integrationTestFunctions;
 
     IntegrationTestScript(IntegrationTestEnvironment testEnvironment) {
         this.testEnvironment = testEnvironment;
@@ -27,16 +27,27 @@ class IntegrationTestScript {
     }
 
     JavascriptFunction getInvoker() {
-        if (invoker == null) {
-            invoker = createInvoker();
-        } else {
-            updateBindings();
-        }
-        return invoker;
+        return getIntegrationTestFunctions().getInvoker();
     }
 
-    private JavascriptFunction createInvoker() {
-        return JSUtil.function(script, createBindings());
+    private IntegrationTestFunctions getIntegrationTestFunctions() {
+        if (integrationTestFunctions == null) {
+            integrationTestFunctions = createIntegrationTestFunctions();
+        } else {
+            integrationTestFunctions.getReset().execute();
+            updateBindings(integrationTestFunctions.getInvoker());
+        }
+        return integrationTestFunctions;
+    }
+
+    @SuppressWarnings("unchecekd")
+    private IntegrationTestFunctions createIntegrationTestFunctions() {
+        var context = JSUtil.context(createBindings());
+        var value = JSUtil.execute(script, context);
+        var invoker = new JavascriptFunctionContext(value.getArrayElement(0), context);
+        var reset = new JavascriptFunctionContext(value.getArrayElement(1), context);
+        return new IntegrationTestFunctions(invoker, reset);
+
     }
 
     private Map<String, Object> createBindings() {
@@ -49,7 +60,7 @@ class IntegrationTestScript {
         return bindings;
     }
 
-    private void updateBindings() {
+    private void updateBindings(JavascriptFunction invoker) {
         invoker.setBinding("backendBridge", testEnvironment.getBackendBridge());
         invoker.setBinding("localStorage", testEnvironment.getHtmlObjects().getLocalStorage());
         invoker.setBinding("document", testEnvironment.getHtmlObjects().getRootPage());

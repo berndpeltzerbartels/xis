@@ -30,4 +30,11 @@ class TestApplication {
             .catch(e => console.error(error));
     }
 
+    reset() {
+        this.pageController.reset();
+        this.pages.reset();
+        this.widgets.reset();
+        this.widgetContainers.reset();
+    }
+
 }

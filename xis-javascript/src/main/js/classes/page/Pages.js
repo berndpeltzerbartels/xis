@@ -51,9 +51,9 @@ class Pages {
             console.log('initialize head');
             initializeElement(templateElement);
             var headChildArray = nodeListToArray(templateElement.childNodes);
-            var title = headChildArray.find(child => isElement(child) && child.localName == 'title');
+            var titleElement = headChildArray.find(child => isElement(child) && child.localName == 'title');
             _this.pages[pageId].headChildArray = headChildArray;
-            _this.pages[pageId].title = title ? title.innerText : '';
+            _this.pages[pageId].title = titleElement ? titleElement.innerText : '';
 
             return pageId;
         });
@@ -85,5 +85,9 @@ class Pages {
             _this.pages[pageId].bodyAttributes = attributes;
             return pageId;
         });
+    }
+
+    reset() {
+        this.pages = {};
     }
 }

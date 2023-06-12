@@ -62,4 +62,9 @@ class Widgets {
         return htmlToElement(tree);
     }
 
+    reset() {
+        this.widgets = {};
+        this.widgetAttributes = {};
+    }
+
 }

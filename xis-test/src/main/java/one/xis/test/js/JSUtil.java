@@ -5,6 +5,7 @@ import one.xis.context.JavascriptFunction;
 import one.xis.context.JavascriptFunctionContext;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.PolyglotAccess;
+import org.graalvm.polyglot.Value;
 
 import javax.script.*;
 import java.io.Writer;
@@ -14,7 +15,7 @@ import static java.util.Collections.emptyMap;
 
 @UtilityClass
 public class JSUtil {
-    
+
     public JavascriptFunction function(String script, Map<String, Object> bindings) {
         Context context;
         if ("true".equals(System.getenv().get("debug")) || "true".equals(System.getProperty("debug"))) {
@@ -49,6 +50,10 @@ public class JSUtil {
         return compiledScript;
     }
 
+    public Value execute(String js, Context context) {
+        return context.eval("js", js);
+    }
+
     public Object execute(String javascript, Map<String, Object> bindingMap) throws ScriptException {
         if ("true".equals(System.getenv().get("debug")) || "true".equals(System.getProperty("debug"))) {
             return debug(javascript, bindingMap);
@@ -78,6 +83,14 @@ public class JSUtil {
         return context.eval("js", js);
     }
 
+    public Context context(Map<String, Object> bindings) {
+        if ("true".equals(System.getenv().get("debug")) || "true".equals(System.getProperty("debug"))) {
+            return debugContext(bindings);
+        } else {
+            return runContext(bindings);
+        }
+    }
+
     public Context debugContext(Map<String, Object> bindingMap) {
         String port = "4242";
         String path = "xis";
@@ -96,7 +109,7 @@ public class JSUtil {
         return context;
     }
 
-    private Context runContext(Map<String, Object> bindingMap) {
+    public Context runContext(Map<String, Object> bindingMap) {
         Context context = Context.newBuilder("js")
                 .allowAllAccess(true)
                 .allowExperimentalOptions(true)
