@@ -71,7 +71,7 @@ class Client {
      * @returns {Promise<any>}
      */
     loadPageData(pageId, data, parameters) {
-        var request = this.createDataRequest(pageId, null, data, parameters);
+        var request = this.createRequest(pageId, null, data, parameters);
         return this.httpClient.post('/xis/page/model', request, {})
             .then(content => JSON.parse(content));
     }
@@ -84,7 +84,7 @@ class Client {
      * @returns {Promise<any>}
      */
     loadWidgetData(widgetId, data, parameters) {
-        var request = this.createDataRequest(null, widgetId, data, parameters);
+        var request = this.createRequest(null, widgetId, data, parameters);
         return this.httpClient.post('/xis/widget/model', request)
             .then(content => JSON.parse(content));
     }
@@ -98,7 +98,7 @@ class Client {
      * @returns {Promise<Response>}
      */
     widgetAction(widgetId, action, data) {
-        var request = this.createDataRequest(null, widgetId, data, action);
+        var request = this.createRequest(null, widgetId, data, action);
         return this.httpClient.post('/xis/widget/action', request, {})
             .then(content => JSON.parse(content));
     }
@@ -111,7 +111,7 @@ class Client {
      * @returns {Promise<Response>}
      */
     pageAction(pageId, action, data) {
-        var request = this.createDataRequest(pageId, null, data, action);
+        var request = this.createRequest(pageId, null, data, action);
         return this.httpClient.post('/xis/page/action', request, {})
             .then(content => JSON.parse(content));
     }
@@ -123,8 +123,7 @@ class Client {
     * @param {any} data
     * @param {any} parameters
     */
-    createDataRequest(pageId, widgetId, data, parameters) {
-        debugger;
+    createRequest(pageId, widgetId, data, parameters) {
         var request = new Request();
         request.clientId = this.clientId;
         request.userId = this.userId;
@@ -132,29 +131,6 @@ class Client {
         request.widgetId = widgetId;
         request.data = data;
         request.parameters = parameters;
-        return request;
-    }
-
-    /**
-    * @private
-    * @param {string} pageId
-    * @param {string} widgetId
-    * @param {any} data
-    * @param {any} parameters
-    * @param {string} nextPageId
-    * @param {string} nextWidgetId
-    */
-    createActionRequest(pageId, widgetId, data, action, parameters, nextPageId, nextWidgetId) {
-        var request = new Request();
-        request.clientId = this.clientId;
-        request.userId = this.userId;
-        request.pageId = pageId;
-        request.widgetId = widgetId;
-        request.action = action;
-        request.data = data;
-        request.parameters = parameters;
-        request.nextPageId = nextPageId;
-        request.nextWidgetId = nextWidgetId;
         return request;
     }
 }

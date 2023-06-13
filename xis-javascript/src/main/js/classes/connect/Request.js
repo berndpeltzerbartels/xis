@@ -5,8 +5,6 @@
  * @property {string} pageId
  * @property {string} widgetId 
  * @property {string} action
- * @property {string} nextPageId
- * @property {string} nextWidgetId 
 */
 class Request {
 
@@ -17,7 +15,5 @@ class Request {
         this.pageId = '';
         this.widgetId = '';
         this.action = '';
-        this.nextPageId = '';
-        this.nextWidgetId = '';
     }
 }
