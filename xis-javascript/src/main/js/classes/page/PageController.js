@@ -72,12 +72,14 @@ class PageController {
     /**
      * @public
      * @param {string} pageId
+     * @param {any} parameters
+     * @returns {Promise<void>}
      */
-    displayPage(pageId) {
+    displayPage(pageId, parameters) {
         var _this = this;
-        this.findPageForUrl(pageId)
+        return this.findPageForUrl(pageId)
             .then(page => _this.doBindPage(page))
-            .then(() => _this.refreshData())
+            .then(() => _this.refreshData(parameters))
             .then(() => _this.refreshPage())
             .catch(e => console.error(e));
     }

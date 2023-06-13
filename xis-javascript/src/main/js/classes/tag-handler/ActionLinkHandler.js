@@ -12,8 +12,9 @@ class ActionLinkHandler extends TagHandler {
         this.widgetContainers = widgetContainers;
         this.type = 'action-link-handler';
         this.targetExpression = this.expressionFromAttribute('xis:target-container'); // not mandatory
-        this.actionExpression = this.expressionFromAttribute('xis:action');
-        this.targetContainerId = this.findParentWidgetContainer();
+        this.actionExpression = this.expressionFromAttribute('xis:action'); // mandatory
+        this.parentWidgetContainer = this.findParentWidgetContainer();
+        this.targetContainer = undefined;
         element.onclick = e => this.onClick(e);
         if (element.localName == 'a') {
             element.setAttribute('href', '#');
@@ -21,21 +22,18 @@ class ActionLinkHandler extends TagHandler {
     }
 
     refresh(data) {
-        var _this = this;
         if (this.targetExpression) {
-            this.targetContainerId = this.targetExpression.evaluate(data);
+            this.targetContainer = this.widgetContainers.findContainer(this.targetExpression.evaluate(data));
+        } else {
+            this.targetContainer = this.parentWidgetContainer;
         }
-        if (this.actionExpression) {
-            this.action = this.actionExpression.evaluate(data);
-        }
-
+        this.action = this.actionExpression.evaluate(data);
     }
 
 
     onClick(e) {
-        if (this.targetContainerId) {
-            var targetContainer = this.widgetContainers.findContainer(this.targetContainerId);
-            targetContainer._handler.submitAction(this.action);
+        if (this.targetContainer) {
+            this.targetContainer._handler.submitAction(this.action);
         } else {
             app.pageController.submitAction(this.action).catch(e => console.error(e));
         }

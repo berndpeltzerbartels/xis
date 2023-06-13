@@ -63,7 +63,7 @@ class LinkHandler extends TagHandler {
     }
 
     onClickPageLink() {
-        return bindPage(this.pageId).then(() => reloadDataAndRefreshCurrentPage(this.parameters)).catch(e => console.error(e));
+        return displayPage(this.pageId, this.parameters);
     }
 
 

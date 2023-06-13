@@ -108,12 +108,13 @@ function createElement(name) {
 }
 
 /**
- * 
  * @param {string} uri 
+ * @param {Array<Parameter>}
  * @returns {Promise<void>}
  */
-function bindPage(uri) {
-    return app.pageController.bindPage(uri);
+
+function displayPage(id, parameters) {
+    return app.pageController.displayPage(id, parameters);
 }
 
 /**
