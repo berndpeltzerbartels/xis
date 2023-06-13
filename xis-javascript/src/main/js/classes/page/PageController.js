@@ -240,16 +240,6 @@ class PageController {
     }
 
     /**
-     * @public
-     * @param {Array<Parameter>} parameters, may be undefined
-     */
-    reloadDataAndRefreshCurrentPage(parameters) {
-        if (!this.pageId) throw new Error('no page to reload');
-        var _this = this;
-        this.refreshData(parameters).then(() => _this.refreshPage())
-    }
-
-    /**
     * @private
     * @param {Array<Parameter>} parameters, may be undefined
     * @returns {Promise}
@@ -351,6 +341,7 @@ class PageController {
 
     /**
      * Changes value diplayed in browsers address-input.
+     * 
      * @private
      * @param {string} pageId
      */

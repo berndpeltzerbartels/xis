@@ -59,13 +59,15 @@ class TagHandler {
         }
     }
 
-    currentPageId() {
-        return app.pageController.pageId;
-    }
-
-    currentWidgetId() {
-        var container = this.findParentWidgetContainer();
-        return container ? container.widgetId : undefined;
+    getWidgetId() {
+        var e = this.tag;
+        while (e) {
+            var widgetId = e.getAttribute('widgetId');
+            if (widgetId) {
+                return widgetId;
+            }
+            e = e.parentNode;
+        }
     }
 
     isFrameworkElement(node) {

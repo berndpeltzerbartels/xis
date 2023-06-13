@@ -11,27 +11,38 @@ class ActionLinkHandler extends TagHandler {
         this.client = client;
         this.widgetContainers = widgetContainers;
         this.type = 'action-link-handler';
-        this.targetExpression = this.expressionFromAttribute('xis:target-container'); // not mandatory
+        this.targetContainerId = undefined;
+        this.targetContainerExpression = this.expressionFromAttribute('xis:target-container'); // not mandatory
         this.actionExpression = this.expressionFromAttribute('xis:action'); // mandatory
-        this.parentWidgetContainer = this.findParentWidgetContainer();
-        this.targetContainer = undefined;
         element.onclick = e => this.onClick(e);
         if (element.localName == 'a') {
             element.setAttribute('href', '#');
         }
     }
 
+    /**
+     * @public
+     * @param {Data} data 
+     */
     refresh(data) {
-        if (this.targetExpression) {
-            this.targetContainer = this.widgetContainers.findContainer(this.targetExpression.evaluate(data));
-        } else {
-            this.targetContainer = this.parentWidgetContainer;
+        if (this.targetContainerExpression) {
+            this.targetContainerId = this.widgetContainers.findContainer(this.targetContainerExpression.evaluate(data));
         }
         this.action = this.actionExpression.evaluate(data);
     }
 
-
+    /**
+     * @public
+     * @param {Event} e 
+     */
     onClick(e) {
+        var parentWidget = this.findParentWidgetContainer();
+        if (parentWidget) {
+            this.client.widgetAction()
+        } else {
+
+        }
+
         if (this.targetContainer) {
             this.targetContainer._handler.submitAction(this.action);
         } else {
@@ -39,7 +50,6 @@ class ActionLinkHandler extends TagHandler {
         }
     }
 
-    getParentContainer() { }
 
     asString() {
         return 'Link';

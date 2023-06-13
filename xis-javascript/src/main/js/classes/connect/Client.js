@@ -124,6 +124,7 @@ class Client {
     * @param {any} parameters
     */
     createDataRequest(pageId, widgetId, data, parameters) {
+        debugger;
         var request = new Request();
         request.clientId = this.clientId;
         request.userId = this.userId;

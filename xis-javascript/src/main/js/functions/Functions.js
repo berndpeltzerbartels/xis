@@ -117,16 +117,10 @@ function displayPage(id, parameters) {
     return app.pageController.displayPage(id, parameters);
 }
 
-/**
- * @param {Array<Parameter>} parameters, may be undefined
- * @returns {Prmoise<void>}
- */
-function reloadDataAndRefreshCurrentPage(parameters = []) {
-    return new Promise((resolve, _) => {
-        app.pageController.reloadDataAndRefreshCurrentPage(parameters);
-        resolve();
-    });
+function getCurrentPageId() {
+    return app.pageController.pageId;
 }
+
 
 function initializeElement(element) {
     app.initializer.initialize(element);

@@ -1,4 +1,6 @@
-
+/**
+ * Utility-class to manipulate the document-tree.
+ */
 class DomAccessor {
 
     /**

@@ -1,3 +1,6 @@
+/**
+ * Refreshes the document-tree after receiving data.
+ */
 class Refresher {
 
 
@@ -65,7 +68,6 @@ class Refresher {
      * @param {Data} data 
      */
     refreshTextNode(node, data) {
-        debugger;
         if (node._expression) {
             var value = node._expression.evaluate(data);
             if (node.setNodeValue) {

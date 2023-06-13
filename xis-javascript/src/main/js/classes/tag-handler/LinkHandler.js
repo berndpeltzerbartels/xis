@@ -1,15 +1,25 @@
 class LinkHandler extends TagHandler {
 
-    constructor(element) {
+    /**
+     * 
+     * @param {Element} element 
+     * @param {WidgetContainers} widgetContainers
+     */
+    constructor(element, widgetContainers) {
         super(element);
         this.type = 'link-handler';
-        this.pageExpression = this.expressionFromAttribute('xis:page');
-        this.widgetExpression = this.expressionFromAttribute('xis:widget');
-        this.targetExpression = this.expressionFromAttribute('xis:target-container');
+        this.widgetContainers = widgetContainers;
+        this.pageIdExpression = this.expressionFromAttribute('xis:page');
+        this.widgetIdExpression = this.expressionFromAttribute('xis:widget');
+        this.targetContainerExpression = this.expressionFromAttribute('xis:target-container');
+        this.parameters = [];
+        if (!this.targetContainerExpression) {
+            this.parentWidgetContainer = this.findParentWidgetContainer();
+        }
         if (element.localName == 'a') {
             element.setAttribute('href', '#');
         }
-        this.parameters = [];
+        element.onclick = e => { this.onClick(e).catch(e => console.error(e)); };
     }
 
     /**
@@ -20,31 +30,35 @@ class LinkHandler extends TagHandler {
         this.parameters.push(parameter);
     }
 
+    /**
+     * @public
+     * @param {Data} data 
+     */
     refresh(data) {
         var _this = this; // TODO validate attributes in backend
         this.data = data;
-        if (this.pageExpression) {
-            this.pageId = this.pageExpression.evaluate(data);
+        if (this.pageIdExpression) {
+            this.pageId = this.pageIdExpression.evaluate(data);
         }
-        if (this.widgetExpression) {
-            this.widgetId = this.widgetExpression.evaluate(data);
+        if (this.widgetIdExpression) {
+            this.widgetId = this.widgetIdExpression.evaluate(data);
         }
-        if (this.targetExpression) {
-            this.targetContainerId = this.targetExpression.evaluate(data);
+        if (this.targetContainerExpression) {
+            this.targetContainerId = this.targetContainerExpression.evaluate(data);
         }
-        if (this.refreshExpression) {
-            this.refreshFlag = this.refreshExpression.evaluate(data);
-        } else {
-            this.refreshFlag = true;
-        }
-        this.tag.onclick = e => { _this.onClick(e).catch(e => console.error(e)); };
+
     }
 
 
+    /**
+     * @public
+     * @param {Event} e 
+     * @returns {Promise<void>} 
+     */
     onClick(e) {
-        if (this.widgetExpression) {
+        if (this.widgetIdExpression) {
             return this.onClickWidgetLink();
-        } else if (this.pageExpression) {
+        } else if (this.pageIdExpression) {
             return this.onClickPageLink();
         }
     }
@@ -62,10 +76,24 @@ class LinkHandler extends TagHandler {
         });
     }
 
+    /**
+     * @private
+     * @returns {Promise<void>}
+     */
     onClickPageLink() {
         return displayPage(this.pageId, this.parameters);
     }
 
+    /**
+     * @private
+     * @returns {Element}
+     */
+    getTargetContainer() {
+        if (this.targetContainerId) {
+            return this.widgetContainers.findContainer(this.targetContainerId);
+        }
+        return this.findParentWidgetContainer();
+    }
 
 
 
