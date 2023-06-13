@@ -31,7 +31,7 @@ class Widgets {
             console.log('Widget-Html: ' + widgetHtml);
             widget.id = widgetId;
             widget.root = _this.asRootElement(widgetHtml);
-            widget.root.setAttribute('widgetId', widgetId);
+            widget.root._widgetId = widgetId;
             widget.attributes = _this.widgetAttributes[widgetId];
             initializeElement(widget.root);
             _this.addWidget(widgetId, widget);

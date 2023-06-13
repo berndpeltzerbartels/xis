@@ -62,9 +62,8 @@ class TagHandler {
     getWidgetId() {
         var e = this.tag;
         while (e) {
-            var widgetId = e.getAttribute('widgetId');
-            if (widgetId) {
-                return widgetId;
+            if (e._widgetId) {
+                return e._widgetId;
             }
             e = e.parentNode;
         }

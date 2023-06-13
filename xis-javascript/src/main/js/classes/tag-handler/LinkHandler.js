@@ -38,10 +38,10 @@ class LinkHandler extends TagHandler {
         var _this = this; // TODO validate attributes in backend
         this.data = data;
         if (this.pageIdExpression) {
-            this.pageId = this.pageIdExpression.evaluate(data);
+            this.targetPageId = this.pageIdExpression.evaluate(data);
         }
         if (this.widgetIdExpression) {
-            this.widgetId = this.widgetIdExpression.evaluate(data);
+            this.targetWidgetId = this.widgetIdExpression.evaluate(data);
         }
         if (this.targetContainerExpression) {
             this.targetContainerId = this.targetContainerExpression.evaluate(data);
@@ -71,7 +71,7 @@ class LinkHandler extends TagHandler {
         return new Promise((resolve, _) => {
             var container = this.getTargetContainer();
             var handler = container._handler;
-            handler.showWidget(this.widgetId, this.parameters);
+            handler.showWidget(this.targetWidgetId, this.parameters);
             resolve();
         });
     }
@@ -81,7 +81,7 @@ class LinkHandler extends TagHandler {
      * @returns {Promise<void>}
      */
     onClickPageLink() {
-        return displayPage(this.pageId, this.parameters);
+        return displayPage(this.targetPageId, this.parameters);
     }
 
     /**
