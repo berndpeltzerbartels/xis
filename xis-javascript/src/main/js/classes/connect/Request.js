@@ -2,11 +2,13 @@
  * @property {any} data
  * @property {string} clientId
  * @property {string} userId
- * @property {string} key // action-key or model-key
- * @property {string} controllerId
- * @property {string} type
- */
-class ComponentRequest {
+ * @property {string} pageId
+ * @property {string} widgetId 
+ * @property {string} action
+ * @property {string} nextPageId
+ * @property {string} nextWidgetId 
+*/
+class Request {
 
     constructor() {
         this.data = {};
@@ -15,5 +17,7 @@ class ComponentRequest {
         this.pageId = '';
         this.widgetId = '';
         this.action = '';
+        this.nextPageId = '';
+        this.nextWidgetId = '';
     }
 }

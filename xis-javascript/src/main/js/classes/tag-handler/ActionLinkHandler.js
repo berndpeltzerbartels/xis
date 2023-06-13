@@ -13,10 +13,11 @@ class ActionLinkHandler extends TagHandler {
         this.type = 'action-link-handler';
         this.targetExpression = this.expressionFromAttribute('xis:target-container'); // not mandatory
         this.actionExpression = this.expressionFromAttribute('xis:action');
+        this.targetContainerId = this.findParentWidgetContainer();
+        element.onclick = e => this.onClick(e);
         if (element.localName == 'a') {
             element.setAttribute('href', '#');
         }
-        this.targetContainerId = this.findParentWidgetContainer();
     }
 
     refresh(data) {
@@ -27,7 +28,7 @@ class ActionLinkHandler extends TagHandler {
         if (this.actionExpression) {
             this.action = this.actionExpression.evaluate(data);
         }
-        this.tag.onclick = e => _this.onClick(e);
+
     }
 
 

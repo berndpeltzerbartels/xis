@@ -11,20 +11,20 @@ repositories {
 
 dependencies {
     annotationProcessor group: 'com.google.auto.service', name: 'auto-service', version: '1.0-rc7'
-    annotationProcessor 'org.projectlombok:lombok:1.18.12'
+    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
 
     implementation project(':xis-util')
     implementation group: 'com.google.auto.service', name: 'auto-service', version: '1.0-rc7'
-    implementation 'org.projectlombok:lombok:1.18.12'
+    implementation "org.projectlombok:lombok:$lombokVersion"
 
     implementation group: 'com.squareup', name: 'javapoet', version: '1.12.1'
 
-    testImplementation group: 'org.mockito', name: 'mockito-core', version: '2.1.0'
+    testImplementation "org.mockito:mockito-core:$mockitoVersion"
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.6.2'
     //compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.8'
 
 
-    testAnnotationProcessor 'org.projectlombok:lombok:1.18.12'
+    testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.9.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.0'
     testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.16.1'

@@ -16,6 +16,11 @@ class PageController {
         this.titleExpression;
     }
 
+    /**
+     * @public
+     * @param {String} action 
+     * @returns {Promise<void>}
+     */
     submitAction(action) {
         var _this = this;
         var values = {};
@@ -32,6 +37,10 @@ class PageController {
     }
 
 
+    /**
+     * @private
+     * @param {Response} response 
+     */
     handleActionResponse(response) {
         if (response.nextWidgetId) throw new Error('widget can not be set if there is no container: ' + response.nextWidgetId);
         this.pageDataMap[response.nextPageId || this.pageId] = new Data(response.data);
@@ -85,7 +94,7 @@ class PageController {
     }
 
     /**
-     * @private
+    * @private
     * @returns {Promise<void>}
     */
     doBindPage(page) {
@@ -94,8 +103,8 @@ class PageController {
         return new Promise((resolve, _) => {
             var head = getElementByTagName('head');
             var body = getElementByTagName('body');
-            _this.clearHeadChildNodes(head);
-            _this.clearBodyChildNodes(body);
+            _this.clearChildren(head);
+            _this.clearChildren(body);
             _this.clearBodyAttributes(body);
             _this.bindTitle(page);
             _this.bindHeadChildNodes(head, page.headChildArray);
@@ -105,6 +114,11 @@ class PageController {
         });
     }
 
+    /**
+     * @private
+     * @param {Element} element 
+     * @param {Array<Node>} attributes 
+     */
     bindHeadChildNodes(head, nodeArray) {
         for (var node of nodeArray) {
             if (node.nodeType == 1 && node.localName == 'title') {
@@ -116,8 +130,8 @@ class PageController {
     }
 
     /**
-     * 
-     * @param {string} title 
+     * @private
+     * @param {Page} title 
      */
     bindTitle(page) {
         var title = page.title;
@@ -130,6 +144,10 @@ class PageController {
         this.setTitle(title);
     }
 
+    /**
+     * @private
+     * @param {string} title 
+     */
     setTitle(title) {
         var titleElement = getElementByTagName('title');
         if (titleElement.setInnerText) {
@@ -139,16 +157,31 @@ class PageController {
         }
     }
 
+    /**
+     * @private
+     * @param {Element} element 
+     * @param {Array<Node>} attributes 
+     */
     bindBodyChildNodes(body, nodeArray) {
         this.bindChildNodes(body, nodeArray);
     }
 
+    /**
+     * @private
+     * @param {Element} element 
+     * @param {Array<Node>} attributes 
+     */
     bindChildNodes(element, nodeArray) {
         for (var node of nodeArray) {
             element.appendChild(node);
         }
     }
 
+    /**
+     * @private
+     * @param {Element} body 
+     * @param {any} attributes 
+     */
     bindBodyAttributes(body, attributes) {
         for (var name of Object.keys(attributes)) {
             body.setAttribute(name, attributes[name]);
@@ -156,22 +189,28 @@ class PageController {
         app.initializer.initializeAttributes(body);
     }
 
+    /**
+     * Removes all attributes from body-tag except onload.
+     *
+     * @private
+     * @param {Element} body 
+     */
     clearBodyAttributes(body) {
         for (var name of body.getAttributeNames()) {
+            if (name == 'unload') {
+                continue;
+            }
             body.removeAttribute(name);
         }
         console.log('clearBodyAttributes:' + body);
         body._attributes = undefined;
     }
 
-    clearHeadChildNodes(head) {
-        this.clearChildren(head);
-    }
-
-    clearBodyChildNodes(body) {
-        this.clearChildren(body);
-    }
-
+    /**
+     * Removes all child nodes.
+     * 
+     * @param {Element} element 
+     */
     clearChildren(element) {
         for (var node of nodeListToArray(element.childNodes)) {
             if (node.getAttribute && node.getAttribute('ignore')) {
@@ -239,8 +278,45 @@ class PageController {
     }
 
 
+    /**
+     * @public
+     * @returns {Data}
+     */
     getCurrentPageData() {
         return this.pageDataMap[this.pageId];
+    }
+
+    /**
+     *
+     * Resetting of controller and root-page intended to use
+     * within tests.
+     * 
+     *  @public
+     */
+    reset() {
+        var body = getElementByTagName('body');
+        var head = getElementByTagName('head');
+
+        for (var name of body.getAttributeNames()) {
+            body.removeAttribute(name);
+        }
+        for (var child of nodeListToArray(body.childNodes)) {
+            if (!child.getAttribute || !child.getAttribute('ignore')) {
+                body.removeChild(child);
+            }
+        }
+        for (var child of nodeListToArray(head.childNodes)) {
+            if (!child.getAttribute || !child.getAttribute('ignore')) {
+                head.removeChild(child);
+            }
+        }
+        var titleTag = getElementByTagName('title');
+
+        this.titleExpression = undefined;
+        titleTag.innerText = ''
+        this.pageDataMap = {};
+        this.config = {};
+        this.pageId = undefined;
     }
 
     /**
@@ -272,41 +348,14 @@ class PageController {
     }
 
     /**
-     * @private
      * Changes value diplayed in browsers address-input.
+     * @private
      * @param {string} pageId
      */
     updateHistory(pageId) {
         console.log('update history');
         var title = getElementByTagName('title').innerText;
         window.history.replaceState({}, title, pageId);
-    }
-
-
-    reset() {
-        var body = getElementByTagName('body');
-        var head = getElementByTagName('head');
-        var titleTag = getElementByTagName('title');
-        for (var name of body.getAttributeNames()) {
-            body.removeAttribute(name);
-        }
-        for (var child of nodeListToArray(body.childNodes)) {
-            if (!child.getAttribute || !child.getAttribute('ignore')) {
-                body.removeChild(child);
-            }
-        }
-        for (var child of nodeListToArray(head.childNodes)) {
-            if (!child.getAttribute || !child.getAttribute('ignore')) {
-                head.removeChild(child);
-            }
-        }
-
-        this.titleExpression = undefined;
-        titleTag.innerText = ''
-
-        this.pageDataMap = {};
-        this.config = {};
-        this.pageId = undefined;
     }
 
 }

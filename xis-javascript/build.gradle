@@ -15,18 +15,18 @@ repositories {
 apply plugin: JavascriptPlugin
 
 dependencies {
-    annotationProcessor 'org.projectlombok:lombok:1.18.12'
-    implementation 'org.projectlombok:lombok:1.18.12'
+    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+    implementation "org.projectlombok:lombok:$lombokVersion"
     implementation project(':xis-resources')
-    
+
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
 
     testImplementation project(':xis-test')
     testImplementation project(':xis-util')
-    implementation group: 'org.mockito', name: 'mockito-core', version: '2.1.0'
+    implementation "org.mockito:mockito-core:$mockitoVersion"
     testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.16.1'
-    testAnnotationProcessor 'org.projectlombok:lombok:1.18.12'
+    testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"
 
     implementation 'org.graalvm.js:js-scriptengine:22.3.1'
     implementation 'org.graalvm.truffle:truffle-api:22.3.1'

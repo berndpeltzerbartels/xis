@@ -28,14 +28,14 @@ dependencies {
     */
     //  com.oracle.truffle.js.shell.JSLauncher
 
-    annotationProcessor 'org.projectlombok:lombok:1.18.12'
-    implementation 'org.projectlombok:lombok:1.18.12'
+    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+    implementation "org.projectlombok:lombok:$lombokVersion"
 
     testImplementation project(':xis-test')
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
 
-    testImplementation group: 'org.mockito', name: 'mockito-core', version: '2.1.0'
+    testImplementation "org.mockito:mockito-core:$mockitoVersion"
     testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.16.1'
     testImplementation 'org.mockito:mockito-junit-jupiter:4.5.1'
 
@@ -44,6 +44,9 @@ dependencies {
 test {
     maxParallelForks = 4
     useJUnitPlatform()
+    afterTest { desc, result ->
+        logger.quiet "${desc.className} - ${desc.name}: ${result.resultType}"
+    }
 }
 
 apply plugin: XISPlugin

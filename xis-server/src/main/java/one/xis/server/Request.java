@@ -15,6 +15,8 @@ public class Request {
     private String action;
     private String pageId;
     private String widgetId;
+    private String nextPageId;
+    private String nextWidgetId;
     private Map<String, String> parameters;
     private Map<String, String> pathVariables;
 }
