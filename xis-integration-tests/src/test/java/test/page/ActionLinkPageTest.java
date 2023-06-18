@@ -11,12 +11,12 @@ import static org.mockito.Mockito.*;
 //@Disabled // TODO
 class ActionLinkPageTest {
 
-    private ActionPageService service;
+    private ActionLinkPageService service;
     private IntegrationTestContext testContext;
 
     @BeforeEach
     void init() {
-        service = mock(ActionPageService.class);
+        service = mock(ActionLinkPageService.class);
         when(service.getData()).thenReturn(new ActionLinkPageData(101, "bla"));
 
         testContext = IntegrationTestContext.builder()

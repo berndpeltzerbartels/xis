@@ -6,7 +6,7 @@ import one.xis.Page;
 
 @Getter
 @Page("/index.html")
-class IndexPage {
+public class IndexPage {
 
     private int invocations;
 

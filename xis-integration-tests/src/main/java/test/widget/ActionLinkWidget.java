@@ -5,12 +5,13 @@ import lombok.RequiredArgsConstructor;
 import one.xis.Action;
 import one.xis.Model;
 import one.xis.Widget;
+import test.page.IndexPage;
 
-@Widget("/actionWidget.html")
+@Widget
 @RequiredArgsConstructor
 class ActionLinkWidget {
 
-    private final ActionWidgetService service;
+    private final ActionLinkWidgetService service;
 
     @Model("data")
     ActionLinkWidgetData data() {
@@ -36,7 +37,13 @@ class ActionLinkWidget {
     @Action("test-action3")
     Class<?> action3(@Model("data") ActionLinkWidgetData data, @NonNull @Model("action3") String action3) {
         service.update(data);
-        return LinkTestWidget.class;
+        return IndexPage.class;
+    }
+
+
+    @Action("test-action4")
+    Class<?> action4() {
+        return SimpleWidget.class;
     }
 
 

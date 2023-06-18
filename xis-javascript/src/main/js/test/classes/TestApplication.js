@@ -26,7 +26,8 @@ class TestApplication {
         return this.client.loadConfig()
             .then(config => _this.widgets.loadWidgets(config))
             .then(config => _this.pages.loadPages(config))
-            .then(config => _this.pageController.displayInitialPage(config))
+            .then(config => { config.welcomePageId = uri; return config; })
+            .then(config => _this.pageController.displayInitialPage(config, {}))
             .catch(e => console.error(error));
     }
 

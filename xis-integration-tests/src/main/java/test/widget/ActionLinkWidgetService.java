@@ -1,6 +1,6 @@
 package test.widget;
 
-interface ActionWidgetService {
+interface ActionLinkWidgetService {
 
     ActionLinkWidgetData getData();
 

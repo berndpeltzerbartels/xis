@@ -1,6 +1,6 @@
 package test.page;
 
-interface ActionPageService {
+interface ActionLinkPageService {
 
     ActionLinkPageData getData();
 

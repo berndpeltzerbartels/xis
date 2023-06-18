@@ -117,6 +117,7 @@ function displayPage(id, parameters) {
     return app.pageController.displayPage(id, parameters);
 }
 
+
 function getCurrentPageId() {
     return app.pageController.pageId;
 }

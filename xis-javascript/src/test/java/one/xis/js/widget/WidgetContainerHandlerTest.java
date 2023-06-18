@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import javax.script.ScriptException;
 import java.util.HashMap;
+import java.util.Map;
 
 import static one.xis.js.JavascriptSource.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -40,18 +41,25 @@ class WidgetContainerHandlerTest {
 
     }
 
-    public static class WidgetsMock {
-        private final Element root;
+    public static class Widget {
+        public String id;
+        public Element root;
+        public Map<String, String> attributes = new HashMap<>();
+        public Object data;
 
-        WidgetsMock() {
-            this.root = new Element("div");
-            this.root.setAttribute("id", "widgetRoot");
-        }
+    }
+
+    public static class WidgetsMock {
 
         @SuppressWarnings("unused")
-        public Element getWidgetRoot(String id) {
-            return root;
+        public Widget getWidget(String id) {
+            var widget = new Widget();
+            widget.id = id;
+            widget.root = new Element("div");
+            widget.root.setAttribute("id", "widgetRoot");
+            return widget;
         }
+
 
     }
 }

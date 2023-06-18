@@ -10,7 +10,7 @@ import one.xis.Page;
 @RequiredArgsConstructor
 class ActionLinkPage {
 
-    private final ActionPageService service;
+    private final ActionLinkPageService service;
 
     @Model("data")
     ActionLinkPageData data() {

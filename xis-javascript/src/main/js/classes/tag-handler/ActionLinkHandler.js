@@ -56,7 +56,7 @@ class ActionLinkHandler extends TagHandler {
             } else {
                 targetContainer = this.findParentWidgetContainer();
             }
-            this.targetContainer._handler.submitAction(this.action);
+            targetContainer._handler.submitAction(this.action);
         } else {
             app.pageController.submitAction(this.action);
         }

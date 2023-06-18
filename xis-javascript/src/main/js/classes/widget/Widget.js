@@ -4,5 +4,7 @@ class Widget {
         this.id = undefined;
         this.root = undefined;
         this.attributes = {};
+        this.data = new Data({});
     }
+
 }

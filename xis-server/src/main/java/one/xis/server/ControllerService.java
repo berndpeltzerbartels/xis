@@ -57,10 +57,21 @@ class ControllerService {
     }
 
     Response invokeWidgetActionMethod(Request request) {
-        var invokerController = findPageControllerWrapper(request).orElseThrow();
+        var invokerController = findWidgetControllerWrapper(request).orElseThrow();
         var result = invokerController.invokeActionMethod(request);
-        var nextWidgetControlller = widgetControllerWrapperByResult(result).orElse(invokerController);
-        return widgetModelDataResponse(200, nextWidgetControlller, request);
+        if (result == null || result == Void.class) {
+            return widgetModelDataResponse(200, invokerController, request);
+        }
+        var controllerWrapper = widgetControllerWrapperByResult(result)
+                .orElseGet(() -> pageControllerWrapperByResult(result).orElseThrow());
+        if (controllerWrapper.getController().getClass().isAnnotationPresent(Widget.class)) {
+            return widgetModelDataResponse(200, controllerWrapper, request);
+        } else if (controllerWrapper.getController().getClass().isAnnotationPresent(Page.class)) {
+            return pageModelDataResponse(200, controllerWrapper, request);
+        } else {
+            throw new IllegalStateException("not a controller: " + controllerWrapper.getClass());
+        }
+
     }
 
     private Response widgetModelDataResponse(int status, ControllerWrapper wrapper, Request request) {
@@ -85,28 +96,28 @@ class ControllerService {
 
     private Optional<ControllerWrapper> widgetControllerWrapperByResult(Object result) {
         if (result instanceof Class) {
-            return Optional.of(controllerWrapperByClass((Class<?>) result, widgetControllerWrappers));
+            return controllerWrapperByClass((Class<?>) result, widgetControllerWrappers);
         } else if (result instanceof String) {
-            return Optional.of(controllerWrapperById((String) result, widgetControllerWrappers));
+            return controllerWrapperById((String) result, widgetControllerWrappers);
         }
         return Optional.empty();
     }
 
     private Optional<ControllerWrapper> pageControllerWrapperByResult(Object result) {
         if (result instanceof Class) {
-            return Optional.of(controllerWrapperByClass((Class<?>) result, pageControllerWrappers));
+            return controllerWrapperByClass((Class<?>) result, pageControllerWrappers);
         } else if (result instanceof String) {
-            return Optional.of(controllerWrapperById((String) result, pageControllerWrappers));
+            return controllerWrapperById((String) result, pageControllerWrappers);
         }
         return Optional.empty();
     }
 
-    private ControllerWrapper controllerWrapperByClass(@NonNull Class<?> cl, Collection<ControllerWrapper> controllerWrappers) {
-        return controllerWrappers.stream().filter(c -> c.getControllerClass().equals(cl)).findFirst().orElseThrow();
+    private Optional<ControllerWrapper> controllerWrapperByClass(@NonNull Class<?> cl, Collection<ControllerWrapper> controllerWrappers) {
+        return controllerWrappers.stream().filter(c -> c.getControllerClass().equals(cl)).findFirst();
     }
 
-    private ControllerWrapper controllerWrapperById(@NonNull String id, Collection<ControllerWrapper> controllerWrappers) {
-        return controllerWrappers.stream().filter(c -> c.getId().equals(id)).findFirst().orElseThrow();
+    private Optional<ControllerWrapper> controllerWrapperById(@NonNull String id, Collection<ControllerWrapper> controllerWrappers) {
+        return controllerWrappers.stream().filter(c -> c.getId().equals(id)).findFirst();
     }
 
     private ControllerWrapper createControllerWrapper(Object controller, Function<Object, String> idMapper) {

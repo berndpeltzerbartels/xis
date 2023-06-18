@@ -38,13 +38,25 @@ class Widgets {
         });
     }
 
+    /**
+     * @public
+     * @param {string} widgetId 
+     * @param {Widget} widget 
+     */
     addWidget(widgetId, widget) {
         this.widgets[widgetId] = widget;
     }
 
-    getWidgetRoot(widgetId) {
-        return this.widgets[widgetId].root;
+
+    /**
+    * @public
+    * @param {string} widgetId 
+    * @returns {Widget}
+    */
+    getWidget(widgetId) {
+        return this.widgets[widgetId];
     }
+
 
     getModelKeysToSubmitForModel(widgetId) {
         return this.widgetAttributes[widgetId].modelsToSubmitOnRefresh;

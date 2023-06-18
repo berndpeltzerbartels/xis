@@ -10,10 +10,10 @@ class WidgetContainerHandler extends TagHandler {
         super(tag);
         this.client = client;
         this.widgets = widgets;
+        this.widgetId = undefined;
+        this.widget = undefined;
         this.defaultWidgetIdExpression = this.expressionFromAttribute('default-widget');
         this.containerId = tag.getAttribute('container-id'); // TODO validate: the id must not be an expression
-        this.widgetRoot = undefined;
-        this.widgetData = {};
         this.type = 'widget-container-handler';
         this.clearChildren();
     }
@@ -25,19 +25,19 @@ class WidgetContainerHandler extends TagHandler {
     submitAction(action) {
         var _this = this;
         var keys = this.widgets.getModelKeysToSubmitForAction(this.widgetId, action);
-        this.client.widgetAction(this.widgetId, action, this.widgeteData.getValues(keys))
+        this.client.widgetAction(this.widgetId, action, this.widget.data.getValues(keys))
             .then(response => _this.handleActionResponse(response));
     }
 
     /**
      * @public
-     * @param {Data} data 
+     * @param {Data} parentData 
      */
-    refresh(data) {
+    refresh(parentData) {
         console.log('refresh');
-        if (!this.widgetId && this.defaultWidgetIdExpression) {
-            this.widgetId = this.defaultWidgetIdExpression.evaluate(data);
-            this.doShowWidget();
+        if (this.defaultWidgetIdExpression) {
+            var widgetId = this.defaultWidgetIdExpression.evaluate(parentData);
+            this.bindWidget(widgetId);
         }
         if (this.widgetId) {
             this.reloadDataAndRefresh();
@@ -51,20 +51,25 @@ class WidgetContainerHandler extends TagHandler {
      * @returns {Promise<void>}
      */
     showWidget(widgetId, parameters = []) {
-        if (widgetId !== this.widgetId) {
-            if (this.widgetRoot) {
-                this.clearChildren();
-            }
-            this.widgetId = widgetId;
-        }
-        this.doShowWidget();
+        this.bindWidget(widgetId);
         this.reloadDataAndRefresh(parameters);
     }
 
 
-    doShowWidget() {
-        this.widgetRoot = this.widgets.getWidgetRoot(this.widgetId);
-        this.tag.appendChild(this.widgetRoot);
+    /**
+     * @param {string} widgetId 
+     * @private
+     */
+    bindWidget(widgetId) {
+        if (widgetId !== this.widgetId) {
+            if (this.widget) {
+                this.clearChildren();
+            }
+            this.widgetId = widgetId;
+            this.widget = this.widgets.getWidget(this.widgetId);
+            this.tag.appendChild(this.widget.root);
+        }
+
     }
 
 
@@ -76,21 +81,20 @@ class WidgetContainerHandler extends TagHandler {
     reloadDataAndRefresh(parameters = []) {
         var _this = this;
         var clientData = {};
-        var widgetData = this.widgetData[this.widgetId];
-        if (widgetData) {
+        if (this.widget.data) {
             for (var dataKey of this.widgets.getModelKeysToSubmitForModel(this.widgetId)) {
-                clientData[dataKey] = widgetData.getValue([dataKey]);
+                clientData[dataKey] = this.widget.data.getValue([dataKey]);
             }
         }
         var params = {};
         if (parameters) {
             for (var par of parameters) {
-                params[pageAttributes.name] = par.value;
+                params[par.name] = par.value;
             }
         }
         this.client.loadWidgetData(this.widgetId, clientData, params)
             .then(response => new Data(response.data))
-            .then(data => { _this.widgetData[_this.widgetId] = data; return data; })
+            .then(data => { _this.widget.data = data; return data; })
             .then(data => _this.refreshChildNodes(data))
             .catch(e => console.error(e));
 
@@ -102,9 +106,12 @@ class WidgetContainerHandler extends TagHandler {
      */
     handleActionResponse(response) {
         if (response.nextPageId) {
-            displayPage(response.nextPageId);
+            debugger
+            app.pageController.handleActionResponse(response);
         } else if (response.nextWidgetId) {
-            this.showWidget(response.nextWidgetId)
+            this.bindWidget(response.nextWidgetId);
+            this.widget.data = new Data(response.data);
+            this.refreshChildNodes(this.widget.data);
         }
     }
 }

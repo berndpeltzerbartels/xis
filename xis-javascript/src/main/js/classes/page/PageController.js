@@ -46,6 +46,30 @@ class PageController {
     }
 
 
+
+    /**
+     * Handels server-response after subitting an action.
+     * 
+     * @public
+     * @param {Response} response 
+     */
+    handleActionResponse(response) {
+        if (response.nextWidgetId) throw new Error('widget can not be set if there is no container: ' + response.nextWidgetId);
+        this.pageDataMap[response.nextPageId || this.pageId] = new Data(response.data);
+        if (response.nextPageId && response.nextPageId !== this.pageId) {
+            var _this = this;
+            this.pageId = response.nextPageId;
+            this.findPageForUrl(this.pageId)
+                .then(page => _this.doBindPage(page))
+                .then(() => _this.refreshPage())
+                .catch(e => console.error(e));
+
+        } else {
+            this.refreshPage();
+        }
+    }
+
+
     /**
      * Reads the welcome-page from config and initiates
      * diplaying it.
@@ -56,7 +80,7 @@ class PageController {
     displayInitialPage(config) {
         console.log('PageController - displayInitialPage');
         this.config = config;
-        return this.displayPage(document.location.pathname);
+        return this.displayPage(config.welcomePageId);
     }
 
 
@@ -67,6 +91,13 @@ class PageController {
      * @returns {Promise<void>}
      */
     displayPage(pageId, parameters) {
+        var _this = this;
+        if (this.pageId == pageId) {
+            this.pageId = pageId;
+            return this.refreshData(parameters)
+                .then(() => _this.refreshPage())
+                .catch(e => console.error(e));
+        }
         var _this = this;
         return this.findPageForUrl(pageId)
             .then(page => _this.doBindPage(page))
@@ -107,29 +138,6 @@ class PageController {
         });
     }
 
-
-    /**
-     * Handles server-response after subitting an action.
-     * 
-     * @private
-     * @param {Response} response 
-     */
-    handleActionResponse(response) {
-        if (response.nextWidgetId) throw new Error('widget can not be set if there is no container: ' + response.nextWidgetId);
-        this.pageDataMap[response.nextPageId || this.pageId] = new Data(response.data);
-        if (response.nextPageId && response.nextPageId !== this.pageId) {
-            var _this = this;
-            this.pageId = response.nextPageId;
-            this.findPageForUrl(this.pageId)
-                .then(page => _this.doBindPage(page))
-                .then(() => _this.refreshPage())
-                .catch(e => console.error(e));
-
-        } else {
-            this.refreshPage();
-        }
-
-    }
 
     /**
      * @private
@@ -233,6 +241,7 @@ class PageController {
     /**
      * Removes all child nodes.
      * 
+     * @private
      * @param {Element} element 
      */
     clearChildren(element) {
@@ -245,6 +254,7 @@ class PageController {
     }
 
     /**
+     * @private
      * @returns {Promise<string>}
      */
     findPageForUrl(uri) {
