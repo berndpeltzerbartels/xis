@@ -16,6 +16,7 @@ class ActionLinkHandler extends TagHandler {
         this.actionExpression = this.expressionFromAttribute('xis:action'); // mandatory
         this.action = undefined;
         this.data = {};
+        this.parameters = [];
         this.widgetId = this.getWidgetId();
         element.onclick = e => this.onClick(e);
         if (element.localName == 'a') {
@@ -23,6 +24,13 @@ class ActionLinkHandler extends TagHandler {
         }
     }
 
+    /**
+   * @public
+   * @param {Parameter} parameter 
+   */
+    addParameter(parameter) {
+        this.parameters.push(parameter);
+    }
     /**
      * @public
      * @param {Data} data 
@@ -44,24 +52,13 @@ class ActionLinkHandler extends TagHandler {
             var targetContainer;
             if (this.targetContainerId) {
                 targetContainer = this.widgetContainers.findContainer(this.targetContainerId);
+                assertNotNull(targetContainer, 'action-link ' + this.asString() + ': target-widget-container ' + this.targetContainerId + ' not found');
             } else {
                 targetContainer = this.findParentWidgetContainer();
             }
-            this.client.widgetAction(this.widgetId, this.action, this.data);
-        } else {
-
-        }
-        var parentWidget = this.findParentWidgetContainer();
-        if (parentWidget) {
-            this.client.widgetAction()
-        } else {
-
-        }
-
-        if (this.targetContainer) {
             this.targetContainer._handler.submitAction(this.action);
         } else {
-            app.pageController.submitAction(this.action).catch(e => console.error(e));
+            app.pageController.submitAction(this.action);
         }
     }
 

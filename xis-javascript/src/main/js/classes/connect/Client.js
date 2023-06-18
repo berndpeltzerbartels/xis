@@ -98,7 +98,7 @@ class Client {
      * @returns {Promise<Response>}
      */
     widgetAction(widgetId, action, data) {
-        var request = this.createRequest(null, widgetId, data, action);
+        var request = this.createRequest(null, widgetId, data, {}, action);// TODO Parameters
         return this.httpClient.post('/xis/widget/action', request, {})
             .then(content => JSON.parse(content));
     }
@@ -111,7 +111,7 @@ class Client {
      * @returns {Promise<Response>}
      */
     pageAction(pageId, action, data) {
-        var request = this.createRequest(pageId, null, data, action);
+        var request = this.createRequest(pageId, null, data, {}, action); // TODO Parameters
         return this.httpClient.post('/xis/page/action', request, {})
             .then(content => JSON.parse(content));
     }
@@ -122,8 +122,9 @@ class Client {
     * @param {string} widgetId
     * @param {any} data
     * @param {any} parameters
+    * @param {string} action
     */
-    createRequest(pageId, widgetId, data, parameters) {
+    createRequest(pageId, widgetId, data, parameters, action) {
         var request = new Request();
         request.clientId = this.clientId;
         request.userId = this.userId;
@@ -131,6 +132,7 @@ class Client {
         request.widgetId = widgetId;
         request.data = data;
         request.parameters = parameters;
+        request.action = action;
         return request;
     }
 }

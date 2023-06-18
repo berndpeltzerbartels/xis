@@ -7,14 +7,18 @@ import java.util.Map;
 
 @Data
 public class Request {
-
-    @JsonDeserialize(using = DataDeserializer.class)
-    private Map<String, String> data;
     private String clientId;
     private String userId;
     private String action;
     private String pageId;
     private String widgetId;
+
+    @JsonDeserialize(using = MapDeserializer.class)
+    private Map<String, String> data;
+
+    @JsonDeserialize(using = MapDeserializer.class)
     private Map<String, String> parameters;
+
+    @JsonDeserialize(using = MapDeserializer.class)
     private Map<String, String> pathVariables;
 }

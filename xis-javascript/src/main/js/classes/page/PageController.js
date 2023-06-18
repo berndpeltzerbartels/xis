@@ -1,4 +1,8 @@
-
+/**
+ * A singleton responsibe for placing or replacing
+ * subelements of the root-page that will never 
+ * get replaced.
+ */
 class PageController {
 
     /**
@@ -17,6 +21,11 @@ class PageController {
     }
 
     /**
+     * Should be used, for any action 
+     * having a page-controller for target.
+     * This is in case of the source 
+     * of the action has no parent widget-container.
+     * 
      * @public
      * @param {String} action 
      * @returns {Promise<void>}
@@ -38,27 +47,9 @@ class PageController {
 
 
     /**
-     * @private
-     * @param {Response} response 
-     */
-    handleActionResponse(response) {
-        if (response.nextWidgetId) throw new Error('widget can not be set if there is no container: ' + response.nextWidgetId);
-        this.pageDataMap[response.nextPageId || this.pageId] = new Data(response.data);
-        if (response.nextPageId && response.nextPageId !== this.pageId) {
-            var _this = this;
-            this.pageId = response.nextPageId;
-            this.findPageForUrl(this.pageId)
-                .then(page => _this.doBindPage(page))
-                .then(() => _this.refreshPage())
-                .catch(e => console.error(e));
-
-        } else {
-            this.refreshPage();
-        }
-
-    }
-
-    /**
+     * Reads the welcome-page from config and initiates
+     * diplaying it.
+     * 
      * @public
      * @param {Config} config
      */
@@ -116,6 +107,30 @@ class PageController {
         });
     }
 
+
+    /**
+     * Handles server-response after subitting an action.
+     * 
+     * @private
+     * @param {Response} response 
+     */
+    handleActionResponse(response) {
+        if (response.nextWidgetId) throw new Error('widget can not be set if there is no container: ' + response.nextWidgetId);
+        this.pageDataMap[response.nextPageId || this.pageId] = new Data(response.data);
+        if (response.nextPageId && response.nextPageId !== this.pageId) {
+            var _this = this;
+            this.pageId = response.nextPageId;
+            this.findPageForUrl(this.pageId)
+                .then(page => _this.doBindPage(page))
+                .then(() => _this.refreshPage())
+                .catch(e => console.error(e));
+
+        } else {
+            this.refreshPage();
+        }
+
+    }
+
     /**
      * @private
      * @param {Element} element 
@@ -132,6 +147,9 @@ class PageController {
     }
 
     /**
+     * Loads the title of the page from server into 
+     * the root-page and converts it to an expresion.
+     * 
      * @private
      * @param {Page} title 
      */
@@ -147,6 +165,10 @@ class PageController {
     }
 
     /**
+     * Setting the title after refreshing the page and 
+     * evaluating the expression, so it's the "real text"
+     * diplayed for title.
+     * 
      * @private
      * @param {string} title 
      */

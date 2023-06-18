@@ -11,7 +11,14 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-class DataDeserializer extends JsonDeserializer<Map<String, String>> {
+
+/**
+ * Solves the problem, the request contains data with unknown type.
+ * This type is given by the method parameters. We do not know
+ * them when we deserialze the json from client, so we put all
+ * the values into maps having raw json as values.
+ */
+class MapDeserializer extends JsonDeserializer<Map<String, String>> {
 
     @Override
     public Map<String, String> deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
