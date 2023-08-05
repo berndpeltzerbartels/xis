@@ -1,21 +1,38 @@
-var div1 = document.createElement('div');
-var div2 = document.createElement('div');
-div1.appendChild(div2);
+var titleWelcomePage = document.createElement('title');
+titleWelcomePage.innerText = 'WelcomePage';
 
-var titleElement = document.createElement('title');
-titleElement.innerText = 'Test'
+var h1WelcomePage = document.createElement('h1')
+h1WelcomePage.innerText = 'WelcomePage';
 
-var headChildArray = [document.createElement('style'), document.createElement('script'), titleElement];
-var bodyChildArray = [div1];
+var welcomePage = {
+    normalizedPath: '/index.html',
+    headChildArray: [titleWelcomePage],
+    bodyChildArray: [h1WelcomePage],
+    bodyAttributes: { class: 'WelcomePage' },
+    titleExpression: new TextContentParser('WelcomePage').parse()
+};
 
+var welcomePagePath = new Path(new PathElement({ type: 'static', content: '/index.html' }));
+
+
+
+var title = document.createElement('title');
+title.innerText = 'Page'
+
+var h1 = document.createElement('h1')
+h1.innerText = 'Page'
+
+var div = document.createElement('div');
 
 var page = {
-    id : 'index.html',
-    headChildArray: headChildArray,
-    bodyChildArray: bodyChildArray,
-    bodyAttributes: { class: 'test' },
-    title: 'Test'
+    normalizedPath: '/page.html',
+    headChildArray: [title],
+    bodyChildArray: [h1, div],
+    bodyAttributes: { class: 'Page' },
+    titleExpression: new TextContentParser('Page').parse()
 };
+
+var pagePath = new Path(new PathElement({ type: 'static', content: '/page.html' }));
 
 
 var dataResponse = {
@@ -24,18 +41,25 @@ var dataResponse = {
     }
 };
 
-var config = {
-    welcomePageId: 'index.html',
-    pageAttributes : {
-        'index.html' : {
-            modelsToSubmitForModel: []
-        }
-    }
-}
-
 
 var pages = {
-    getPageById: function (id) { return page; }
+    getPage: function (normalizedPath) {
+        return page;
+    },
+    getAllPaths: function () {
+        return [welcomePagePath, pagePath];
+    },
+    getWelcomePage: function () {
+        return welcomePage;
+    }
+};
+
+
+var config = {
+    pageAttributes: {
+        '/index.html': { modelsToSubmitOnRefresh: [] },
+        '/page.html': { modelsToSubmitOnRefresh: [] }
+    }
 };
 
 var client = {

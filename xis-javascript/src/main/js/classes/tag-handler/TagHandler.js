@@ -2,7 +2,6 @@ class TagHandler {
 
     constructor(tag) {
         this.tag = tag;
-        this.childArray = this.nodeListToArray(tag.childNodes);
         this.priority = 'normal';
     }
 
@@ -16,7 +15,7 @@ class TagHandler {
     }
 
     clearChildren() {
-        for (node of this.childArray) {
+        for (var node of this.nodeListToArray(this.tag.childNodes)) {
             if (node.parentNode) {
                 node.parentNode.removeChild(node);
             }

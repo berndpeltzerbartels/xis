@@ -35,7 +35,6 @@ class LinkHandler extends TagHandler {
      * @param {Data} data 
      */
     refresh(data) {
-        var _this = this; // TODO validate attributes in backend
         this.data = data;
         if (this.pageIdExpression) {
             this.targetPageId = this.pageIdExpression.evaluate(data);
@@ -81,7 +80,8 @@ class LinkHandler extends TagHandler {
      * @returns {Promise<void>}
      */
     onClickPageLink() {
-        return displayPage(this.targetPageId, this.parameters);
+        if (this.parameters.length > 0) throw new Error('page link does not accept parameters');
+        return displayPageForUrl(this.targetPageId, this.parameters);
     }
 
     /**

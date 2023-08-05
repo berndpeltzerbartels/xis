@@ -45,6 +45,7 @@ class ActionLinkPageTest {
     @Test
     void action2() {
         var result = testContext.openPage("/actionPage.html");
+        assertThat(result.getDocument().getElementByTagName("title").innerText).isEqualTo("ActionPage");
         result.getDocument().getElementById("action-link2").onclick.accept(null);
 
         assertThat(result.getDocument().getElementByTagName("title").innerText).isEqualTo("ActionPage");

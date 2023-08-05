@@ -12,10 +12,24 @@ import java.util.Map;
 public class Config {
     private final Collection<String> widgetIds;
     private final Collection<String> pageIds;
-    private final Map<String, String> widgetHosts;
-    private final Map<String, String> pageHosts;
+
+    /**
+     * Normalized path of the welcome-page.
+     */
     private final String welcomePageId;
-    private final Map<String, ComponentAttributes> pageAttributes;
+
+    /**
+     * Key is the normalized path
+     *
+     * @{@link Path}
+     */
+    private final Map<String, PageAttributes> pageAttributes;
+
+    /**
+     * Key is the normalized path
+     *
+     * @{@link Path}
+     */
     private final Map<String, ComponentAttributes> widgetAttributes;
 
 

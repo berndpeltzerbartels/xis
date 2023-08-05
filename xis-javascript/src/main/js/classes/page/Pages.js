@@ -14,32 +14,41 @@ class Pages {
      * @returns {Promise<any>}
      */
     loadPages(config) {
-        console.log('Loading pages');
-        this.welcomePageId = config.welcomePageId;
-        this.pageAttributes = config.pageAttributes;
+        this.config = config;
         var promises = [];
         var _this = this;
-        config.pageIds.forEach(id => _this.pages[id] = new Page(id));
-        //config.pageIds.forEach(id => promises.push(_this.loadPage(id)));
+        config.pageIds.forEach(id => _this.pages[id] = new Page(id, new PageAttributes(config.pageAttributes[id])));
         config.pageIds.forEach(id => promises.push(_this.loadPageHead(id)));
         config.pageIds.forEach(id => promises.push(_this.loadPageBody(id)));
         config.pageIds.forEach(id => promises.push(_this.loadPageBodyAttributes(id)));
-        return Promise.all(promises).then(() => config).catch(e => console.error(e));;
+        return Promise.all(promises)
+            .then(() => _this.paths = Object.values(this.pages).map(page => page.pageAttributes.path))
+            .then(() => config).catch(e => console.error(e));
     }
 
     /**
      * @public
-     * @param {String} uri
      * @returns {Page}
      */
-    getPageById(uri) {
-        return this.pages[uri];
-    }
-
     getWelcomePage() {
-        return this.pages[this.welcomePageId];
+        return this.pages[this.config.welcomePageId];
     }
 
+    /**
+     * @public
+     * @returns {Array<Path>}
+     */
+    getAllPaths() {
+        return this.paths;
+    }
+
+    /**
+     * @public
+     * @param {string} normalizedPath a path with path-variables represented by an asterisk
+     */
+    getPage(normalizedPath) {
+        return this.pages[normalizedPath];
+    }
     /**
      * @param {string} pageId
     * @returns {Promise<string>}
@@ -48,13 +57,13 @@ class Pages {
         var _this = this;
         return this.client.loadPageHead(pageId).then(content => {
             var templateElement = htmlToElement(content);
-            console.log('initialize head');
             initializeElement(templateElement);
             var headChildArray = nodeListToArray(templateElement.childNodes);
             var titleElement = headChildArray.find(child => isElement(child) && child.localName == 'title');
+            if (titleElement) {
+                _this.pages[pageId].titleExpression = new TextContentParser(titleElement.innerText).parse();
+            }
             _this.pages[pageId].headChildArray = headChildArray;
-            _this.pages[pageId].title = titleElement ? titleElement.innerText : '';
-
             return pageId;
         });
     }
@@ -87,6 +96,9 @@ class Pages {
         });
     }
 
+    /**
+     * for testing
+     */
     reset() {
         this.pages = {};
     }

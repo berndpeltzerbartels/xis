@@ -2,18 +2,15 @@
 /**
  * @property {array<string>} pageIds
  * @property {array<string>} widgetIds
- * @property {any} pageHosts
- * @property {any} widgetHosts
- * @property {any} pageAttributes
- * @property {any} widgetAttributes
+ * @property {string: PageAttributes} pageAttributes
+ * @property {string: WidgetAttributes} widgetAttributes
  */
+
 class Config {
 
     constructor() {
         this.pageIds = [];
         this.widgetIds = [];
-        this.pageHosts = {};
-        this.widgetHosts = {};
         this.welcomePageId = undefined;
         this.pageAttributes = {}
         this.widgetAttributes = {};

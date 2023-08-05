@@ -10,7 +10,6 @@ class WidgetContainerHandler extends TagHandler {
         super(tag);
         this.client = client;
         this.widgets = widgets;
-        this.widgetId = undefined;
         this.widget = undefined;
         this.defaultWidgetIdExpression = this.expressionFromAttribute('default-widget');
         this.containerId = tag.getAttribute('container-id'); // TODO validate: the id must not be an expression
@@ -21,12 +20,15 @@ class WidgetContainerHandler extends TagHandler {
     /**
      * @public
      * @param {String} action 
+     * @param {Array<Parameter>} parameters
      */
-    submitAction(action) {
-        var _this = this;
-        var keys = this.widgets.getModelKeysToSubmitForAction(this.widgetId, action);
-        this.client.widgetAction(this.widgetId, action, this.widget.data.getValues(keys))
-            .then(response => _this.handleActionResponse(response));
+    submitAction(action, parameters) {
+        if (this.widget) {
+            var _this = this;
+            var clientData = this.widget.clientDataForActionRequest(action, parameters);
+            this.client.widgetAction(this.widget.id, clientData, action)
+                .then(response => _this.handleActionResponse(response));
+        }
     }
 
     /**
@@ -39,7 +41,7 @@ class WidgetContainerHandler extends TagHandler {
             var widgetId = this.defaultWidgetIdExpression.evaluate(parentData);
             this.bindWidget(widgetId);
         }
-        if (this.widgetId) {
+        if (this.widget) {
             this.reloadDataAndRefresh();
         }
     }
@@ -51,27 +53,25 @@ class WidgetContainerHandler extends TagHandler {
      * @returns {Promise<void>}
      */
     showWidget(widgetId, parameters = []) {
-        this.bindWidget(widgetId);
+        if (!this.widget || this.widget.id != widgetId) {
+            this.bindWidget(widgetId);
+        }
         this.reloadDataAndRefresh(parameters);
     }
 
 
     /**
+     * @private
      * @param {string} widgetId 
      * @private
      */
     bindWidget(widgetId) {
-        if (widgetId !== this.widgetId) {
-            if (this.widget) {
-                this.clearChildren();
-            }
-            this.widgetId = widgetId;
-            this.widget = this.widgets.getWidget(this.widgetId);
+        if (!this.widget || this.widget.id != widgetId) {
+            this.clearChildren();
+            this.widget = this.widgets.getWidget(widgetId);
             this.tag.appendChild(this.widget.root);
         }
-
     }
-
 
     /**
      * @public
@@ -79,25 +79,15 @@ class WidgetContainerHandler extends TagHandler {
      * @param 
      */
     reloadDataAndRefresh(parameters = []) {
-        var _this = this;
-        var clientData = {};
-        if (this.widget.data) {
-            for (var dataKey of this.widgets.getModelKeysToSubmitForModel(this.widgetId)) {
-                clientData[dataKey] = this.widget.data.getValue([dataKey]);
-            }
+        if (this.widget) {
+            var _this = this;
+            var clientData = this.widget.clientDataForModelRequest(parameters);
+            this.client.loadWidgetData(this.widget.id, clientData, parameters)
+                .then(response => new Data(response.data))
+                .then(data => { _this.widget.data = data; return data; })
+                .then(data => _this.refreshChildNodes(data))
+                .catch(e => console.error(e));
         }
-        var params = {};
-        if (parameters) {
-            for (var par of parameters) {
-                params[par.name] = par.value;
-            }
-        }
-        this.client.loadWidgetData(this.widgetId, clientData, params)
-            .then(response => new Data(response.data))
-            .then(data => { _this.widget.data = data; return data; })
-            .then(data => _this.refreshChildNodes(data))
-            .catch(e => console.error(e));
-
     }
 
     /**
@@ -105,7 +95,7 @@ class WidgetContainerHandler extends TagHandler {
      * @param {Response} response 
      */
     handleActionResponse(response) {
-        if (response.nextPageId) {
+        if (response.nextPageURL) {
             debugger
             app.pageController.handleActionResponse(response);
         } else if (response.nextWidgetId) {

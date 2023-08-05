@@ -9,7 +9,7 @@ public class IntegrationTestResult {
     private final IntegrationTestEnvironment testEnvironment;
 
     public Document getDocument() {
-        return testEnvironment.getHtmlObjects().getRootPage();
+        return testEnvironment.getHTML_OBJECTS().getRootPage();
     }
 }
 

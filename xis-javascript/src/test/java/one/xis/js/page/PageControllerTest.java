@@ -27,41 +27,19 @@ class PageControllerTest {
     void init() {
         javascript = Javascript.getScript(CLASSES, FUNCTIONS, TEST, TEST_APP_INSTANCE);
         javascript += IOUtils.getResourceAsString("one/xis/page/PageControllerTestMocks.js");
-        javascript += "var pageController = new PageController(client, pages, new Initializer());"; // client and pages are getting instantiated inside mock-code
+        javascript += "var pageController = new PageController(client, pages, new Initializer(), new URLResolver(pages), new PageHtml());\n"; // client and pages are getting instantiated inside mock-code
+        javascript += "pageController.setConfig(config);\n"; // config from mock-code
         document = Document.fromResource("index.html");
     }
 
-
     @Test
-    void bindPage() throws ScriptException {
-        var testScript = javascript + "pageController.bindPage('bla');";
+    void displayPageForUrl() throws ScriptException {
+        var testScript = javascript + "pageController.displayPageForUrl('/page.html');";
 
         JSUtil.execute(testScript, createBindings());
 
-        DomAssert.assertAndGetRootElement(document, "html")
-                .assertAndGetChildElements("head", "body")
-                .andThen(elements -> {
-                    var head = elements.get(0);
-                    var body = elements.get(1);
-
-                    DomAssert.assertChildElements(head, "title", "script", "script", "script", "script", "style", "script"); // the last 2 ones are read from mock
-                    DomAssert.assertAndGetChildElement(body, "div").assertChildElements("div");
-
-                    assertThat(body.getAttribute("class")).isEqualTo("test"); // see mock
-                });
-
-    }
-
-    @Test
-    void displayInitialPage() throws ScriptException {
-        var testScript = javascript + "pageController.displayInitialPage(config);";
-
-        JSUtil.execute(testScript, createBindings());
-
-        assertThat(document.getElementByTagName("title").innerText).isEqualTo("Test");
-        DomAssert.assertAndGetChildElement(document.getElementByTagName("body"), "div")
-                .assertChildElements("div");
-
+        assertThat(document.getElementByTagName("title").innerText).isEqualTo("Page");
+        DomAssert.assertAndGetChildElement(document.getElementByTagName("body"), "h1").assertTextContent("Page");
     }
 
 

@@ -1,7 +1,19 @@
 /**
- * A singleton responsibe for placing or replacing
- * subelements of the root-page that will never 
- * get replaced.
+ * 
+ * @typedef PageController
+ * @property {Client} client
+ * @property {Pages} pages
+ * @property {Initializer} initializer
+ * @property {URLResolver} urlResolver
+ * @property {Page} page
+ * @property {PageHtml} html
+ * @property {Data} data
+ * @property {Config} config
+ * @property {ResolvedURL} resolvedURL
+ * 
+ * A singleton responsible for placing or replacing
+ * subelements of the root-page, our basic html document 
+ * never get replaced.
  */
 class PageController {
 
@@ -9,378 +21,187 @@ class PageController {
      * @param {Client} client
      * @param {Pages} pages
      * @param {Initializer} initializer
+     * @param {URLResolver} urlResolver
+     * @param {PageHtml} html
      */
-    constructor(client, pages, initializer) {
+    constructor(client, pages, initializer, urlResolver, html) {
         this.client = client;
         this.pages = pages;
         this.initializer = initializer;
-        this.pageDataMap = {};
-        this.config = {};
-        this.pageId = undefined;
-        this.titleExpression;
+        this.urlResolver = urlResolver;
+        this.html = html;
+        this.page = undefined;
+        this.resolvedURL = undefined;
+        this.data = new Data({});
+        this.config = undefined;
     }
 
     /**
-     * Should be used, for any action 
-     * having a page-controller for target.
-     * This is in case of the source 
+     * Should be used for any action 
+     * having a page-controller for target (instead of a widget).
+     * This occurs in case of the source 
      * of the action has no parent widget-container.
      * 
      * @public
-     * @param {String} action 
+     * @param {String} action
+     * @param {array<Parameter>} data
      * @returns {Promise<void>}
      */
-    submitAction(action) {
+    submitAction(action, parameters) {
         var _this = this;
-        var values = {};
-        console.log('PageController - pageDataMap:' + this.pageDataMap);
-        var pageData = this.pageDataMap[this.pageId];
-        var pageAttributes = this.config.pageAttributes[this.pageId];
-        if (pageData) {
-            for (var dataKey of pageAttributes.modelsToSubmitOnAction[action]) {
-                values[dataKey] = pageData.getValue([dataKey]);
-            }
-        }
-        return this.client.pageAction(this.pageId, action, values)
+        var clientData = new PageClientData();
+        clientData.pathVariables = this.resolvedURL.pathVariables;
+        clientData.urlParameters = this.resolvedURL.urlParameters
+        clientData.parameters = parameters;
+        clientData.modelData = this.modelDataForAction(action);
+        return this.client.pageAction(this.page.normalizedPath, clientData, action)
             .then(response => _this.handleActionResponse(response));
     }
-
-
 
     /**
      * Handels server-response after subitting an action.
      * 
      * @public
-     * @param {Response} response 
+     * @param {Response} response
      */
     handleActionResponse(response) {
-        if (response.nextWidgetId) throw new Error('widget can not be set if there is no container: ' + response.nextWidgetId);
-        this.pageDataMap[response.nextPageId || this.pageId] = new Data(response.data);
-        if (response.nextPageId && response.nextPageId !== this.pageId) {
-            var _this = this;
-            this.pageId = response.nextPageId;
-            this.findPageForUrl(this.pageId)
-                .then(page => _this.doBindPage(page))
-                .then(() => _this.refreshPage())
-                .catch(e => console.error(e));
+        var data = new Data(response.data);
+        if (response.nextPageURL) {
+            debugger;
+            var resolvedURL = this.urlResolver.resolve(response.nextPageURL);
+            if (!resolvedURL) {
+                throw new Error('no page for ' + response.nextPageURL);
+            }
+            this.resolvedURL = resolvedURL;
+            if (resolvedURL.page != this.page) {
+                this.html.bindPage(resolvedURL.page);
+            }
 
-        } else {
-            this.refreshPage();
         }
+        data.setValue('pathVariables', this.resolvedURL.pathVariables);
+        data.setValue('urlParameters', this.resolvedURL.urlParameters);
+        this.html.refresh(data, this.resolvedURL);
     }
 
-
     /**
-     * Reads the welcome-page from config and initiates
-     * diplaying it.
+     * Displays page by it's location from
+     * browser's address-field.
      * 
      * @public
-     * @param {Config} config
+     * @param {string} realUrl url from address-line
      */
-    displayInitialPage(config) {
-        console.log('PageController - displayInitialPage');
+    displayPageForUrl(realUrl) {
+        this.resolvedURL = this.urlResolver.resolve(realUrl);
+        if (!this.resolvedURL) {
+            this.resolvedURL = this.welcomePageUrl();
+        }
+        if (this.resolvedURL.page != this.page) {
+            this.html.bindPage(this.resolvedURL.page);
+        }
+        this.page = this.resolvedURL.page;
+        this.refreshCurrentPage().catch(e => console.error(e));
+    }
+
+    /**
+     * @public
+     * @param {Config} config 
+     */
+    setConfig(config) {
         this.config = config;
-        return this.displayPage(config.welcomePageId);
     }
-
 
     /**
      * @public
-     * @param {string} pageId
-     * @param {any} parameters
-     * @returns {Promise<void>}
-     */
-    displayPage(pageId, parameters) {
-        var _this = this;
-        if (this.pageId == pageId) {
-            this.pageId = pageId;
-            return this.refreshData(parameters)
-                .then(() => _this.refreshPage())
-                .catch(e => console.error(e));
-        }
-        var _this = this;
-        return this.findPageForUrl(pageId)
-            .then(page => _this.doBindPage(page))
-            .then(() => _this.refreshData(parameters))
-            .then(() => _this.refreshPage())
-            .catch(e => console.error(e));
-    }
-
-    /**
-    * @public
-    * @returns {Promise<void>}
-    */
-    bindPage(id) {
-        this.pageId = id;
-        var page = this.pages.getPageById(id);
-        if (!page) throw new Error('no such page: ' + id);
-        return this.doBindPage(page);
-    }
-
-    /**
-    * @private
-    * @returns {Promise<void>}
-    */
-    doBindPage(page) {
-        var _this = this;
-        this.pageId = page.id;
-        return new Promise((resolve, _) => {
-            var head = getElementByTagName('head');
-            var body = getElementByTagName('body');
-            _this.clearChildren(head);
-            _this.clearChildren(body);
-            _this.clearBodyAttributes(body);
-            _this.bindTitle(page);
-            _this.bindHeadChildNodes(head, page.headChildArray);
-            _this.bindBodyAttributes(body, page.bodyAttributes);
-            _this.bindBodyChildNodes(body, page.bodyChildArray);
-            resolve();
-        });
-    }
-
-
-    /**
-     * @private
-     * @param {Element} element 
-     * @param {Array<Node>} attributes 
-     */
-    bindHeadChildNodes(head, nodeArray) {
-        for (var node of nodeArray) {
-            if (node.nodeType == 1 && node.localName == 'title') {
-                continue;
-            }
-            head.appendChild(node);
-
-        }
-    }
-
-    /**
-     * Loads the title of the page from server into 
-     * the root-page and converts it to an expresion.
-     * 
-     * @private
-     * @param {Page} title 
-     */
-    bindTitle(page) {
-        var title = page.title;
-        if (title) {
-            if (title.indexOf('${') != -1) {
-                this.titleExpression = new TextContentParser(title).parse();
-                return;
-            }
-        }
-        this.setTitle(title);
-    }
-
-    /**
-     * Setting the title after refreshing the page and 
-     * evaluating the expression, so it's the "real text"
-     * diplayed for title.
-     * 
-     * @private
-     * @param {string} title 
-     */
-    setTitle(title) {
-        var titleElement = getElementByTagName('title');
-        if (titleElement.setInnerText) {
-            titleElement.setInnerText(title);
-        } else {
-            titleElement.innerText = title;
-        }
-    }
-
-    /**
-     * @private
-     * @param {Element} element 
-     * @param {Array<Node>} attributes 
-     */
-    bindBodyChildNodes(body, nodeArray) {
-        this.bindChildNodes(body, nodeArray);
-    }
-
-    /**
-     * @private
-     * @param {Element} element 
-     * @param {Array<Node>} attributes 
-     */
-    bindChildNodes(element, nodeArray) {
-        for (var node of nodeArray) {
-            element.appendChild(node);
-        }
-    }
-
-    /**
-     * @private
-     * @param {Element} body 
-     * @param {any} attributes 
-     */
-    bindBodyAttributes(body, attributes) {
-        for (var name of Object.keys(attributes)) {
-            body.setAttribute(name, attributes[name]);
-        }
-        app.initializer.initializeAttributes(body);
-    }
-
-    /**
-     * Removes all attributes from body-tag except onload.
-     *
-     * @private
-     * @param {Element} body 
-     */
-    clearBodyAttributes(body) {
-        for (var name of body.getAttributeNames()) {
-            if (name == 'unload') {
-                continue;
-            }
-            body.removeAttribute(name);
-        }
-        console.log('clearBodyAttributes:' + body);
-        body._attributes = undefined;
-    }
-
-    /**
-     * Removes all child nodes.
-     * 
-     * @private
-     * @param {Element} element 
-     */
-    clearChildren(element) {
-        for (var node of nodeListToArray(element.childNodes)) {
-            if (node.getAttribute && node.getAttribute('ignore')) {
-                continue;
-            }
-            element.removeChild(node);
-        }
-    }
-
-    /**
-     * @private
-     * @returns {Promise<string>}
-     */
-    findPageForUrl(uri) {
-        console.log('findPageId');
-        return new Promise((resolve, _) => {
-            var page = this.pages.getPageById(uri);
-            if (!page) {
-                page = this.pages.getWelcomePage();
-            }
-            if (page == null) {
-                throw new Error('no page for uri:"' + uri + '" and no welcome page defined');
-            }
-            resolve(page);
-        });
-    }
-
-    /**
-    * @private
-    * @param {Array<Parameter>} parameters, may be undefined
-    * @returns {Promise}
-    */
-    refreshData(parameters = []) {
-        var _this = this;
-        var pageId = this.pageId;
-        console.log('PageController - refreshData:' + pageId);
-        var values = {};
-        console.log('PageController - pageDataMap:' + this.pageDataMap);
-        var pageData = this.pageDataMap[pageId];
-        var pageAttributes = this.config.pageAttributes[pageId];
-        if (pageData) {
-            for (var dataKey of pageAttributes.modelsToSubmitOnRefresh) {
-                values[dataKey] = pageData.getValue([dataKey]);
-            }
-        }
-        var params = {};
-        if (parameters) {
-            for (var par of parameters) {
-                params[pageAttributes.name] = par.value;
-            }
-        }
-        return this.client.loadPageData(pageId, values, params).then(response => {
-            _this.pageDataMap[pageId] = new Data(response.data);
-            return pageId;
-        });
-    }
-
-
-    /**
-     * @public
-     * @returns {Data}
-     */
-    getCurrentPageData() {
-        return this.pageDataMap[this.pageId];
-    }
-
-    /**
-     *
-     * Resetting of controller and root-page intended to use
-     * within tests.
-     * 
-     *  @public
      */
     reset() {
-        var body = getElementByTagName('body');
-        var head = getElementByTagName('head');
-
-        for (var name of body.getAttributeNames()) {
-            body.removeAttribute(name);
-        }
-        for (var child of nodeListToArray(body.childNodes)) {
-            if (!child.getAttribute || !child.getAttribute('ignore')) {
-                body.removeChild(child);
-            }
-        }
-        for (var child of nodeListToArray(head.childNodes)) {
-            if (!child.getAttribute || !child.getAttribute('ignore')) {
-                head.removeChild(child);
-            }
-        }
-        var titleTag = getElementByTagName('title');
-
-        this.titleExpression = undefined;
-        titleTag.innerText = ''
-        this.pageDataMap = {};
-        this.config = {};
-        this.pageId = undefined;
+        this.page = undefined;
+        this.resolvedURL = undefined;
+        this.data = new Data({});
+        this.config = undefined;
     }
 
     /**
     * @private
+    * @param {ResolvedURL} resolvedURL
     * @returns {Promise<string>}
     */
-    refreshPage() {
+    refreshCurrentPage() {
         var _this = this;
-        return new Promise((resolve, _) => {
-            var data = _this.pageDataMap[this.pageId];
-            _this.refreshTitle(data);
-            refreshNode(getElementByTagName('head'), data);
-            refreshNode(getElementByTagName('body'), data);
-            _this.updateHistory(this.pageId);
-            console.log('resolve - refreshPage: ' + this.pageId);
-            resolve();
+        var pathVariables = this.resolvedURL.pathVariables;
+        var urlParameters = this.resolvedURL.urlParameters;
+        var clientData = new PageClientData();
+        clientData.pathVariables = this.resolvedURL.pathVariables;
+        clientData.urlParameters = this.resolvedURL.urlParameters
+        clientData.parameters = [];
+        clientData.modelData = this.modelDataForRefresh();
+        return this.client.loadPageData(this.page.normalizedPath, clientData).then(response => {
+            var data = _this.responseAsData(response, pathVariables, urlParameters);
+            _this.data = data;
+            _this.html.refresh(data, this.resolvedURL);
         });
     }
 
     /**
      * @private
-     * @param {Data} data
+     * @returns {string: string}
      */
-    refreshTitle(data) {
-        if (this.titleExpression) {
-            var content = this.titleExpression.evaluate(data);
-            this.setTitle(content);
+    modelDataForRefresh() {
+        var result = {};
+        var attributes = this.config.pageAttributes[this.page.normalizedPath];
+        var keys = attributes.modelsToSubmitOnRefresh;
+        for (var key of keys) {
+            result[key] = this.data.getValue([key]);
         }
+        return result;
     }
 
     /**
-     * Changes value diplayed in browsers address-input.
-     * 
-     * @private
-     * @param {string} pageId
+    * @private
+    * @param {string} action
+    * @returns {string: string}
+    */
+    modelDataForAction(action) {
+        debugger;
+        var result = {};
+        var attributes = this.config.pageAttributes[this.page.normalizedPath];
+        var keys = attributes.modelsToSubmitOnAction[action];
+        for (var key of keys) {
+            result[key] = this.data.getValue([key]);
+        }
+        return result;
+    }
+
+    /**
+     * @private 
+     * @param {Response} response 
+     * @param {Arrays<string: string} pathVariableArray
+     * @param {string:string} urlParameters 
+     * @returns {Data}
      */
-    updateHistory(pageId) {
-        console.log('update history');
-        var title = getElementByTagName('title').innerText;
-        window.history.replaceState({}, title, pageId);
+    responseAsData(response, pathVariableArray, urlParameters) {
+        var pathVariables = {};
+        for (var keyValue of pathVariableArray) {
+            var key = Object.keys(keyValue)[0]
+            var value = Object.values(keyValue)[0];
+            pathVariables[key] = value;
+        }
+        var data = new Data(response.data);
+        data.setValue('pathVariables', pathVariables);
+        data.setValue('parameters', response.parameters);
+        data.setValue('urlParameters', urlParameters);
+        return data;
+    }
+
+    /**
+     * @private
+     * @returns {ResolvedURL}
+     */
+    welcomePageUrl() {
+        // TODO Validate: Welcome Page must have no path-variables
+        var welcomePage = this.pages.getWelcomePage();
+        // normalizedPath works here, because welcome-page never has path-variables
+        var path = new Path(new PathElement({ type: 'static', content: welcomePage.normalizedPath }));
+        return new ResolvedURL(path, [], [], welcomePage);
     }
 
 }

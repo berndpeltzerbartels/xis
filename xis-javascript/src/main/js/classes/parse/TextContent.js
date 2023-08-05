@@ -1,5 +1,7 @@
 
 /**
+ * @typedef TextContent
+ * @property {array} parts
  * Represents text containg static string parts
  * and variables like "My name is ${name}"
  */

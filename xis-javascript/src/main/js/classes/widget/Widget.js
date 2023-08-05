@@ -1,10 +1,81 @@
+/**
+ * @typedef Widget
+ * @property {string} id
+ * @property {Element}
+ * @property {WidgetAttributes} widgetAttributes
+ * @property {Data} data
+ */
 class Widget {
 
     constructor() {
         this.id = undefined;
         this.root = undefined;
-        this.attributes = {};
+        this.widgetAttributes = {};
         this.data = new Data({});
     }
 
+    /**
+     * @public
+     * @param {array<Parameter>} parameters passed by parameter-tag
+     * @returns {WidgetClientData}
+     */
+    clientDataForModelRequest(parameters) {
+        var clientData = this.clientData(parameters);
+        this.addModelDataForModelRequest(clientData);
+        return clientData;
+    }
+
+    /**
+   * @public
+   * @param {string} action
+   * @param {array<Parameter>} parameters passed by parameter-tag
+   * @returns {WidgetClientData}
+   */
+    clientDataForActionRequest(action, parameters) {
+        var clientData = this.clientData(parameters);
+        this.addModelDataForActionRequest(action, clientData);
+        return clientData;
+    }
+
+    /** 
+  * @private
+  * @param {WidgetClientData} clientData
+  */
+    addModelDataForModelRequest(clientData) {
+        for (var dataKey of Object.keys(this.widgetAttributes.modelsToSubmitOnRefresh)) {
+            clientData.modelData[dataKey] = this.data.getValue([dataKey]);
+        }
+    }
+
+    /** 
+    * @private
+    * @param {WidgetClientData} clientData
+    */
+    addModelDataForActionRequest(action, clientData) {
+        for (var dataKey of this.widgetAttributes.modelsToSubmitOnAction[action]) {
+            clientData.modelData[dataKey] = this.data.getValue([dataKey]);
+        }
+    }
+
+    /**
+    * @private
+    * @param  {WidgetClientData} clientData
+    * @param {array<Parameter>} parameters created by parameter-tag
+    */
+    addParameters(clientData, parameters) {
+        for (param of parameters) {
+            clientData.parameters[param.name] = param.value;
+        }
+    }
+
+    /**
+    * @private
+    * @param {array<Parameter>} parameters created by parameter-tag
+    * @returns {WidgetClientData}
+    */
+    clientData(parameters) {
+        var clientData = new WidgetClientData();
+        this.addParameters(clientData, parameters);
+        return clientData;
+    }
 }

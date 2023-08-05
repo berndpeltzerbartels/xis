@@ -5,7 +5,8 @@ public class Window {
     public History history = new History();
 
 
-    void reset() {
-
+    public void reset() {
+        location.reset();
+        history.reset();
     }
 }

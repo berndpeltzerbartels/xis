@@ -26,13 +26,12 @@ class Widgets {
     loadWidget(widgetId) {
         console.log('Loading widget ' + widgetId);
         var _this = this;
-        var widget = new Widget();
         return this.client.loadWidget(widgetId).then(widgetHtml => {
-            console.log('Widget-Html: ' + widgetHtml);
+            var widget = new Widget();
             widget.id = widgetId;
             widget.root = _this.asRootElement(widgetHtml);
             widget.root._widgetId = widgetId;
-            widget.attributes = _this.widgetAttributes[widgetId];
+            widget.widgetAttributes = new WidgetAttributes(_this.widgetAttributes[widgetId]);
             initializeElement(widget.root);
             _this.addWidget(widgetId, widget);
         });
@@ -76,6 +75,7 @@ class Widgets {
     }
 
     reset() {
+        console.log('widgets-reset');
         this.widgets = {};
         this.widgetAttributes = {};
     }

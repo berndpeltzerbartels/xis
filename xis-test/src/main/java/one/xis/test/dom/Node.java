@@ -11,12 +11,12 @@ public abstract class Node {
         node.parentNode = this.parentNode;
         var previousSibling = getPreviousSibling();
         if (previousSibling != null) {
-            previousSibling.nextSibling = node;
+            previousSibling.setNextSibling(node);
             if (previousSibling == previousSibling.nextSibling) {
                 throw new IllegalStateException();
             }
         }
-        node.nextSibling = this;
+        node.setNextSibling(this);
         if (node == node.nextSibling) {
             throw new IllegalStateException();
         }
@@ -28,7 +28,7 @@ public abstract class Node {
     void remove() {
         var previousSibling = getPreviousSibling();
         if (previousSibling != null) {
-            previousSibling.nextSibling = nextSibling;
+            previousSibling.setNextSibling(nextSibling);
             if (previousSibling == previousSibling.nextSibling) {
                 throw new IllegalStateException();
             }
@@ -37,9 +37,17 @@ public abstract class Node {
         if (parentNode.firstChild == this) {
             parentNode.firstChild = nextSibling;
         }
-        nextSibling = null;
+        setNextSibling(null);
         parentNode.updateChildNodes();
         parentNode = null;
+    }
+
+
+    void setNextSibling(Node node) {
+        if (this.equals(node)) {
+            throw new IllegalStateException();
+        }
+        nextSibling = node;
     }
 
     public abstract Node cloneNode();

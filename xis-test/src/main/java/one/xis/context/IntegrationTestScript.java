@@ -40,7 +40,6 @@ class IntegrationTestScript {
         return integrationTestFunctions;
     }
 
-    @SuppressWarnings("unchecekd")
     private IntegrationTestFunctions createIntegrationTestFunctions() {
         var context = JSUtil.context(createBindings());
         var value = JSUtil.execute(script, context);
@@ -53,19 +52,19 @@ class IntegrationTestScript {
     private Map<String, Object> createBindings() {
         var bindings = new HashMap<String, Object>();
         bindings.put("backendBridge", testEnvironment.getBackendBridge());
-        bindings.put("localStorage", testEnvironment.getHtmlObjects().getLocalStorage());
-        bindings.put("document", testEnvironment.getHtmlObjects().getRootPage());
-        bindings.put("window", testEnvironment.getHtmlObjects().getWindow());
-        bindings.put("htmlToElement", testEnvironment.getHtmlObjects().getHtmlToElement());
+        bindings.put("localStorage", testEnvironment.getHTML_OBJECTS().getLocalStorage());
+        bindings.put("document", testEnvironment.getHTML_OBJECTS().getRootPage());
+        bindings.put("window", testEnvironment.getHTML_OBJECTS().getWindow());
+        bindings.put("htmlToElement", testEnvironment.getHTML_OBJECTS().getHtmlToElement());
         return bindings;
     }
 
     private void updateBindings(JavascriptFunction invoker) {
         invoker.setBinding("backendBridge", testEnvironment.getBackendBridge());
-        invoker.setBinding("localStorage", testEnvironment.getHtmlObjects().getLocalStorage());
-        invoker.setBinding("document", testEnvironment.getHtmlObjects().getRootPage());
-        invoker.setBinding("window", testEnvironment.getHtmlObjects().getWindow());
-        invoker.setBinding("htmlToElement", testEnvironment.getHtmlObjects().getHtmlToElement());
+        invoker.setBinding("localStorage", testEnvironment.getHTML_OBJECTS().getLocalStorage());
+        invoker.setBinding("document", testEnvironment.getHTML_OBJECTS().getRootPage());
+        invoker.setBinding("window", testEnvironment.getHTML_OBJECTS().getWindow());
+        invoker.setBinding("htmlToElement", testEnvironment.getHTML_OBJECTS().getHtmlToElement());
 
     }
 }

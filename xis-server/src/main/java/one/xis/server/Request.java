@@ -21,4 +21,7 @@ public class Request {
 
     @JsonDeserialize(using = MapDeserializer.class)
     private Map<String, String> pathVariables;
+
+    @JsonDeserialize(using = MapDeserializer.class)
+    private Map<String, String> urlParameters;
 }

@@ -2,24 +2,19 @@ package one.xis.server;
 
 import one.xis.Action;
 import one.xis.Model;
-import one.xis.context.XISComponent;
 import one.xis.utils.lang.MethodUtils;
 
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@XISComponent
-class ComponentAttributesFactory {
 
-    ComponentAttributes componentAttributes(Object controller) {
-        var attributes = new ComponentAttributes();
-        attributes.setModelsToSubmitOnRefresh(modelsToSubmitForModel(controller));
-        attributes.setModelsToSubmitOnAction(modelsToSubmitForAction(controller));
-        return attributes;
-    }
+abstract class ComponentAttributesFactory<C extends ComponentAttributes> {
 
-    private Map<String, Collection<String>> modelsToSubmitForAction(Object controller) {
+    abstract C attributes(Object controller);
+
+
+    protected Map<String, Collection<String>> modelsToSubmitForAction(Object controller) {
         var map = new HashMap<String, Collection<String>>();
         MethodUtils.methods(controller).stream()
                 .filter(m -> m.isAnnotationPresent(Action.class))
@@ -30,6 +25,13 @@ class ComponentAttributesFactory {
         return map;
     }
 
+    protected Collection<String> modelsToSubmitForModel(Object controller) {
+        return MethodUtils.methods(controller).stream()
+                .filter(method -> method.isAnnotationPresent(Model.class))
+                .map(this::getModelParameters)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet());
+    }
 
     private String getAction(Method method) {
         return method.getAnnotation(Action.class).value();
@@ -43,11 +45,5 @@ class ComponentAttributesFactory {
                 .collect(Collectors.toSet());
     }
 
-    private Collection<String> modelsToSubmitForModel(Object controller) {
-        return MethodUtils.methods(controller).stream()
-                .filter(method -> method.isAnnotationPresent(Model.class))
-                .map(this::getModelParameters)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toSet());
-    }
+
 }

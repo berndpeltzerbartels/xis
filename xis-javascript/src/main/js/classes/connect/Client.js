@@ -1,4 +1,5 @@
 /**
+ * @typedef Client
  * @property {HttpClient} httpClient
  * @property {Config} config
  * @property {string} clientId
@@ -7,7 +8,6 @@
 class Client {
 
     /**
-     *
      * @param {HttpClient} httpClient
      */
     constructor(httpClient) {
@@ -19,7 +19,7 @@ class Client {
 
     /**
      * @public
-     * @return {Promise<any>}
+     * @return {Promise<Config>}
      */
     loadConfig() {
         return this.httpClient.get('/xis/config', {})
@@ -66,25 +66,23 @@ class Client {
     /**
      * @public
      * @param {string} pageId
-     * @param {any} data
-     * @param {any} parameters 
+     * @param {PageClientData} clientData
      * @returns {Promise<any>}
      */
-    loadPageData(pageId, data, parameters) {
-        var request = this.createRequest(pageId, null, data, parameters);
+    loadPageData(pageId, clientData) {
+        var request = this.createPageRequest(pageId, clientData, null);
         return this.httpClient.post('/xis/page/model', request, {})
             .then(content => JSON.parse(content));
     }
 
     /**
-     * @public
-     * @param {string} widgetId
-     * @param {any} data
-     * @param {any} parameters
-     * @returns {Promise<any>}
-     */
-    loadWidgetData(widgetId, data, parameters) {
-        var request = this.createRequest(null, widgetId, data, parameters);
+    * @public
+    * @param {string} widgetId
+    * @param {WidgetClientData} widgetClientData
+    * @returns {Promise<Response>}
+    */
+    loadWidgetData(widgetId, widgetClientData) {
+        var request = this.createWidgetRequest(widgetId, widgetClientData, null);
         return this.httpClient.post('/xis/widget/model', request)
             .then(content => JSON.parse(content));
     }
@@ -93,12 +91,12 @@ class Client {
     /**
      * @public
      * @param {string} widgetId
+     * @param {WidgetClientData} widgetClientData
      * @param {string} action
-     * @param {Data} data
      * @returns {Promise<Response>}
      */
-    widgetAction(widgetId, action, data) {
-        var request = this.createRequest(null, widgetId, data, {}, action);// TODO Parameters
+    widgetAction(widgetId, widgetClientData, action) {
+        var request = this.createWidgetRequest(widgetId, widgetClientData, action);
         return this.httpClient.post('/xis/widget/action', request, {})
             .then(content => JSON.parse(content));
     }
@@ -106,33 +104,62 @@ class Client {
     /**
      * @public
      * @param {string} pageId
+     * @param {PageClientData} clientData
      * @param {string} action
-     * @param {Data} data
      * @returns {Promise<Response>}
      */
-    pageAction(pageId, action, data) {
-        var request = this.createRequest(pageId, null, data, {}, action); // TODO Parameters
+    pageAction(pageId, pageClientData, action) {
+        var request = this.createPageRequest(pageId, pageClientData, action);
         return this.httpClient.post('/xis/page/action', request, {})
             .then(content => JSON.parse(content));
     }
 
     /**
-    * @private
-    * @param {string} pageId
-    * @param {string} widgetId
-    * @param {any} data
-    * @param {any} parameters
-    * @param {string} action
-    */
-    createRequest(pageId, widgetId, data, parameters, action) {
+     * @private
+     * @param {string} pageId 
+     * @param {PageClientData} pageClientData
+     * @param {string} action
+     * @returns {Request}
+     */
+    createPageRequest(pageId, pageClientData, action) {
+        debugger;
         var request = new Request();
         request.clientId = this.clientId;
         request.userId = this.userId;
         request.pageId = pageId;
-        request.widgetId = widgetId;
-        request.data = data;
-        request.parameters = parameters;
+        request.data = pageClientData.modelData;
         request.action = action;
+        request.urlParameters = pageClientData.urlParameters;
+        request.pathVariables = {};
+        for (var pathVariable of pageClientData.pathVariables) {
+            var name = Object.keys(pathVariable)[0];
+            var value = Object.values(pathVariable)[0];
+            request.pathVariables[name] = value;
+        }
+        request.parameters = {};
+        for (var parameter of pageClientData.parameters) {
+            request.parameters[parameter.name] = parameter.value;
+        }
         return request;
     }
+
+    /**
+    * @private
+    * @param {string} widgetId 
+    * @param {WidgetClientData} widgetClientData
+    * @param {string} action
+    * @returns {Request}
+    */
+    createWidgetRequest(widgetId, widgetClientData, action) {
+        var request = new Request();
+        request.clientId = this.clientId;
+        request.userId = this.userId;
+        request.widgetId = widgetId;
+        request.action = action;
+        request.data = widgetClientData.modelData;
+        request.data = widgetClientData.modelData;
+        request.parameters = widgetClientData.parameters;
+        return request;
+    }
+
 }

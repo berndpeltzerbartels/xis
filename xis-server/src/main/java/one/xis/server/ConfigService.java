@@ -3,7 +3,6 @@ package one.xis.server;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import one.xis.Page;
-import one.xis.WelcomePage;
 import one.xis.Widget;
 import one.xis.context.XISComponent;
 import one.xis.context.XISInit;
@@ -19,14 +18,14 @@ import java.util.HashSet;
 @RequiredArgsConstructor
 class ConfigService {
 
-    private final ComponentAttributesFactory componentAttributesFactory;
+    private final PageAttributesFactory pageAttributesFactory;
+    private final WidgetAttributesFactory widgetAttributesFactory;
 
     @XISInject(annotatedWith = Page.class)
     private Collection<Object> pageControllers;
 
     @XISInject(annotatedWith = Widget.class)
     private Collection<Object> widgetControllers;
-
 
     @Getter
     private Config config;
@@ -40,42 +39,35 @@ class ConfigService {
     }
 
     private void addPageAttributes(ConfigBuilder configBuilder) {
-        var pageHosts = new HashMap<String, String>();
         var pageIds = new HashSet<String>();
-        var pageAttributes = new HashMap<String, ComponentAttributes>();
         String welcomePageId = null;
+        var pageAttributes = new HashMap<String, PageAttributes>();
         for (Object pageController : pageControllers) {
-            var pageAnno = pageController.getClass().getAnnotation(Page.class);
-            pageIds.add(pageAnno.value());
-            pageHosts.put(pageAnno.value(), "");
-            pageAttributes.put(pageAnno.value(), componentAttributesFactory.componentAttributes(pageController));
-            if (pageController.getClass().isAnnotationPresent(WelcomePage.class)) {
+            var attributes = pageAttributesFactory.attributes(pageController);
+            pageAttributes.put(attributes.getNormalizedPath(), attributes);
+            pageIds.add(attributes.getNormalizedPath());
+            if (attributes.isWelcomePage()) {
                 if (welcomePageId != null) {
-                    throw new IllegalStateException("There must be exactly one welcome-page (annotated with @WelcomePage). More than one found: " + welcomePageId + ", " + pageAnno.value());
+                    throw new IllegalStateException("There must be exactly one welcome-page (annotated with @WelcomePage). More than one found: " + welcomePageId + ", " + attributes.getNormalizedPath());
                 }
-                welcomePageId = pageAnno.value();
+                welcomePageId = attributes.getNormalizedPath();
             }
-
         }
-        configBuilder.pageHosts(Collections.unmodifiableMap(pageHosts))
-                .pageIds(Collections.unmodifiableSet(pageIds))
+        configBuilder.pageIds(Collections.unmodifiableSet(pageIds))
                 .pageAttributes(pageAttributes)
                 .welcomePageId(welcomePageId);
     }
 
     private void addWidgetAttributes(ConfigBuilder configBuilder) {
-        var widgetHosts = new HashMap<String, String>();
         var widgetIds = new HashSet<String>();
         var widgetAttributes = new HashMap<String, ComponentAttributes>();
         for (Object widgetController : widgetControllers) {
+            var attributes = widgetAttributesFactory.attributes(widgetController);
             var id = WidgetUtil.getId(widgetController);
             widgetIds.add(id);
-            widgetHosts.put(id, "");
-            widgetAttributes.put(id, componentAttributesFactory.componentAttributes(widgetController));
-
+            widgetAttributes.put(id, attributes);
         }
-        configBuilder.widgetHosts(Collections.unmodifiableMap(widgetHosts))
-                .widgetIds(Collections.unmodifiableSet(widgetIds))
+        configBuilder.widgetIds(Collections.unmodifiableSet(widgetIds))
                 .widgetAttributes(widgetAttributes);
     }
 

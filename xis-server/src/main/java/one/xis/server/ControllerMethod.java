@@ -5,6 +5,7 @@ import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
 import one.xis.ClientId;
 import one.xis.Model;
+import one.xis.PathVariable;
 import one.xis.UserId;
 import one.xis.utils.lang.ClassUtils;
 import one.xis.utils.lang.CollectionUtils;
@@ -51,13 +52,16 @@ abstract class ControllerMethod {
                 args[i] = context.getClientId();
             } else if (param.isAnnotationPresent(one.xis.Parameter.class)) {
                 args[i] = deserializeParameter(param, context);
+            } else if (param.isAnnotationPresent(PathVariable.class)) {
+                var key = param.getAnnotation(PathVariable.class).value();
+                args[i] = deserializeParameter(context.getPathVariables().get(key), param);
             } else {
                 throw new IllegalStateException(method + ": parameter without annotation=" + param);
             }
         }
         return args;
     }
-
+    
     private Object deserializeModelParameter(Parameter parameter, Request context) throws IOException {
         var key = parameter.getAnnotation(Model.class).value();
         var paramValue = context.getData().get(key);

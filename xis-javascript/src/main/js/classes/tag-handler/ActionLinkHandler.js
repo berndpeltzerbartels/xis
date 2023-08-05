@@ -49,16 +49,18 @@ class ActionLinkHandler extends TagHandler {
      */
     onClick(e) {
         if (this.widgetId) {
-            var targetContainer;
-            if (this.targetContainerId) {
-                targetContainer = this.widgetContainers.findContainer(this.targetContainerId);
-                assertNotNull(targetContainer, 'action-link ' + this.asString() + ': target-widget-container ' + this.targetContainerId + ' not found');
-            } else {
-                targetContainer = this.findParentWidgetContainer();
-            }
-            targetContainer._handler.submitAction(this.action);
+            this.getTargetContainer()._handler.submitAction(this.action, this.parameters);
         } else {
-            app.pageController.submitAction(this.action);
+            app.pageController.submitAction(this.action, this.parameters);
+        }
+    }
+
+
+    getTargetContainer() {
+        if (this.targetContainerId) {
+            return this.widgetContainers.findContainer(this.targetContainerId);
+        } else {
+            return this.findParentWidgetContainer();
         }
     }
 

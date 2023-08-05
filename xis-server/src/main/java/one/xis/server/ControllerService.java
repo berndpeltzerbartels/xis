@@ -19,6 +19,8 @@ import java.util.stream.Collectors;
 class ControllerService {
 
     private final ControllerWrapperFactory controllerWrapperFactory;
+    private final PathResolver pathResolver;
+
 
     @XISInject(annotatedWith = Widget.class)
     private Collection<Object> widgetControllers;
@@ -130,7 +132,7 @@ class ControllerService {
         if (!path.endsWith(".html")) {
             throw new IllegalStateException(pageController.getClass() + ": Identifier in @Page-annotation must have suffix '.html'");
         }
-        return path;
+        return pathResolver.normalizedPath(pageController);
 
     }
 

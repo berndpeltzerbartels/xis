@@ -107,20 +107,6 @@ function createElement(name) {
     return document.createElement(name);
 }
 
-/**
- * @param {string} uri 
- * @param {Array<Parameter>}
- * @returns {Promise<void>}
- */
-
-function displayPage(id, parameters) {
-    return app.pageController.displayPage(id, parameters);
-}
-
-
-function getCurrentPageId() {
-    return app.pageController.pageId;
-}
 
 
 function initializeElement(element) {
@@ -136,4 +122,3 @@ function assertNotNull(o, errorText) {
 function refreshNode(node, data) {
     app.refresher.refreshNode(node, data);
 }
-

@@ -48,7 +48,7 @@ class WidgetsTest {
 
         assertThat(widgetData.get("id")).isEqualTo("widgetId");
         assertThat(((Element) widgetData.get("root")).localName).isEqualTo("xis:template");
-        assertThat(widgetData.get("attributes")).isNotNull();
+        assertThat(widgetData.get("widgetAttributes")).isNotNull();
     }
 
     public Element htmlToElement(String content) {

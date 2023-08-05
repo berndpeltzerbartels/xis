@@ -30,13 +30,17 @@ public class Element extends Node {
         this.localName = tagName;
     }
 
+    public String getId() {
+        return attributes.get("id");
+    }
+
     public void appendChild(@NonNull Node node) {
-        node.nextSibling = null;
+        node.setNextSibling(null);
         if (firstChild == null) {
-            firstChild = node;
+            setFirstChild(node);
         } else {
             var last = firstChild.getLastSibling();
-            last.nextSibling = node;
+            last.setNextSibling(node);
             if (last == last.nextSibling) {
                 throw new IllegalStateException();
             }
@@ -49,11 +53,11 @@ public class Element extends Node {
         }
     }
 
-    public void insertBefore(Node newNoode, Node referenceNode) {
+    public void insertBefore(Node node, Node referenceNode) {
         if (referenceNode.parentNode != this) {
             throw new IllegalStateException();
         }
-        referenceNode.insertPreviousSibling(newNoode);
+        referenceNode.insertPreviousSibling(node);
         updateChildNodes();
     }
 
@@ -82,7 +86,7 @@ public class Element extends Node {
     public void setInnerText(String text) {
         innerText = text;
         this.childNodes.clear();
-        this.firstChild = null;
+        this.setFirstChild(null);
         this.appendChild(new TextNode(text));
     }
 
@@ -147,13 +151,17 @@ public class Element extends Node {
     }
 
     public String getTextContent() {
-        return childNodes.stream()
+        var text = childNodes.stream()
                 .filter(TextNode.class::isInstance)
                 .map(TextNode.class::cast)
                 .map(TextNode::getNodeValue)
                 .map(StringUtils::toString)
                 .filter(Objects::nonNull)
                 .collect(Collectors.joining()).trim();
+        if (text.isEmpty() && innerText != null) { // TODO create interface for Element and remove this hack
+            text = text.concat(innerText);
+        }
+        return text;
     }
 
     void findByTagName(String name, NodeList result) {
@@ -213,6 +221,8 @@ public class Element extends Node {
     @Override
     public String toString() {
         StringBuilder s = new StringBuilder();
+        s.append(super.toString());
+        s.append(" ");
         s.append("<");
         s.append(localName);
         if (!attributes.isEmpty()) {
@@ -249,6 +259,13 @@ public class Element extends Node {
             childNodes.addNode(child);
             child = child.nextSibling;
         }
+    }
+
+    public void setFirstChild(Node node) {
+        if (this.equals(node)) {
+            throw new IllegalStateException();
+        }
+        firstChild = node;
     }
 
     public String asString() {

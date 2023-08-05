@@ -35,6 +35,7 @@ class HtmlResourceService {
     private Collection<Object> pageControllers;
 
     private final Resources resources;
+    private final PathResolver pathResolver;
 
     private Map<String, Resource> widgetHtmlResources;
     private Map<String, Resource> pageHtmlResources;
@@ -51,7 +52,8 @@ class HtmlResourceService {
 
     @XISInit
     void initPageResources() {
-        pageHtmlResources = pageControllers.stream().collect(Collectors.toMap(contr -> contr.getClass().getAnnotation(Page.class).value(), this::htmlResource));
+        pageHtmlResources = pageControllers.stream()
+                .collect(Collectors.toMap(pathResolver::normalizedPath, this::htmlResource));
         pageHeadResourceCache = new ResourceCache<>(this::extractPageHead, pageHtmlResources);
         pageBodyResourceCache = new ResourceCache<>(this::extractPageBody, pageHtmlResources);
         pageAttributesResourceCache = new ResourceCache<>(this::extractBodyAttributes, pageHtmlResources);
@@ -171,5 +173,6 @@ class HtmlResourceService {
         }
         return stringWriter.toString();
     }
+
 
 }
