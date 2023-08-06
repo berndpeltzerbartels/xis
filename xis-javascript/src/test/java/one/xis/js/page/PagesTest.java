@@ -1,11 +1,13 @@
 package one.xis.js.page;
 
+import one.xis.js.Javascript;
 import one.xis.test.dom.Document;
 import one.xis.test.dom.Element;
 import one.xis.test.dom.Node;
 import one.xis.test.js.JSUtil;
 import one.xis.utils.io.IOUtils;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.script.ScriptException;
 import java.util.ArrayList;
@@ -14,6 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+import static one.xis.js.JavascriptSource.CLASSES;
+
 class PagesTest {
 
     private String javascript;
@@ -21,11 +25,19 @@ class PagesTest {
 
     @BeforeEach
     void init() {
-        javascript = IOUtils.getResourceAsString("js/classes/page/Pages.js");
-        javascript += IOUtils.getResourceAsString("js/classes/page/Page.js");
+        javascript = Javascript.getScript(CLASSES);
         javascript += IOUtils.getResourceAsString("one/xis/page/PagesTestMocks.js");
-        javascript += "var pages = new Pages(client, initializer);";
+        javascript += "var pages = new Pages(client);";
         document = new Document("html");
+    }
+
+
+    @Test
+        // TODO
+    void getAllPaths() throws ScriptException {
+        var testScript = javascript + "pages.getAllPaths();";
+
+        var result = JSUtil.execute(testScript, createBindings());
     }
 
 

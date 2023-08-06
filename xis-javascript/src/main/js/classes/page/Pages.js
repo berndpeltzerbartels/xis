@@ -21,9 +21,7 @@ class Pages {
         config.pageIds.forEach(id => promises.push(_this.loadPageHead(id)));
         config.pageIds.forEach(id => promises.push(_this.loadPageBody(id)));
         config.pageIds.forEach(id => promises.push(_this.loadPageBodyAttributes(id)));
-        return Promise.all(promises)
-            .then(() => _this.paths = Object.values(this.pages).map(page => page.pageAttributes.path))
-            .then(() => config).catch(e => console.error(e));
+        return Promise.all(promises).then(() => config).catch(e => console.error(e));
     }
 
     /**
@@ -39,7 +37,7 @@ class Pages {
      * @returns {Array<Path>}
      */
     getAllPaths() {
-        return this.paths;
+        return Object.values(this.pages).map(page => page.pageAttributes.path);
     }
 
     /**
@@ -49,7 +47,9 @@ class Pages {
     getPage(normalizedPath) {
         return this.pages[normalizedPath];
     }
+
     /**
+     * @private
      * @param {string} pageId
     * @returns {Promise<string>}
     */

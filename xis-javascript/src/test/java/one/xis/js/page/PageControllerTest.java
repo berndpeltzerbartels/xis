@@ -42,7 +42,6 @@ class PageControllerTest {
         DomAssert.assertAndGetChildElement(document.getElementByTagName("body"), "h1").assertTextContent("Page");
     }
 
-
     private Map<String, Object> createBindings() {
         var head = document.getElementByTagName("head");
         var title = document.getElementByTagName("title");

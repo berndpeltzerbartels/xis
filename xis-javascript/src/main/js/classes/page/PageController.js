@@ -103,11 +103,29 @@ class PageController {
     }
 
     /**
+     * 
+     * @param {string} realUrl 
+     * @returns {Promise<void>}
+     */
+    displayPageForUrlLater(realUrl) {
+        var _this = this;
+        return new Promise((resolve, _) => {
+            _this.displayPageForUrl(realUrl);
+            resolve();
+        });
+    }
+
+    /**
      * @public
-     * @param {Config} config 
+     * @param {Config} config
+     * @returns {Promise<Config>}
      */
     setConfig(config) {
-        this.config = config;
+        var _this = this;
+        return new Promise((resolve, _) => {
+            _this.config = config;
+            resolve(config);
+        });
     }
 
     /**

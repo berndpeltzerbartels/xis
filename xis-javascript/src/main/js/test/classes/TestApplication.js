@@ -26,12 +26,19 @@ class TestApplication {
         document.location.pathname = uri;
         var _this = this;
         return this.client.loadConfig()
+            .then(config => _this.pageController.setConfig(config))
             .then(config => _this.widgets.loadWidgets(config))
             .then(config => _this.pages.loadPages(config))
-            .then(config => { config.welcomePageId = uri; return config; })
-            .then(config => this.pageController.setConfig(config))
-            .then(() => _this.pageController.displayPageForUrl(document.location.pathname))
+            .then(config => _this.updateWelcomePage(config))
+            .then(() => _this.pageController.displayPageForUrlLater(document.location.pathname))
             .catch(e => console.error(e));
+    }
+
+    updateWelcomePage(uri, config) {
+        return new Promise((resolve, _) => {
+            config.welcomePageId = uri;
+            resolve(config);
+        });
     }
 
     reset() {
