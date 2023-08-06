@@ -30,6 +30,19 @@ class ResolvedURL {
             }
             pathElement = pathElement.next;
         }
+        var urlParamNames = Object.keys(this.urlParameters);
+        if (urlParamNames.length > 0) {
+            url += '?';
+            for (var i = 0; i < urlParamNames.length; i++) {
+                var name = url[i];
+                url += name;
+                url += '=';
+                url += this.urlParameters[name]; // already encoded !
+                if (i < urlParamNames.length - 1) {
+                    url += '&';
+                }
+            }
+        }
         return url;
     }
 
