@@ -11,7 +11,6 @@ class Widgets {
     }
 
     loadWidgets(config) {
-        console.log('Loading widgets');
         this.widgetAttributes = config.widgetAttributes;
         var _this = this;
         var promises = [];
@@ -24,7 +23,6 @@ class Widgets {
     * @returns {Promise<string>}
     */
     loadWidget(widgetId) {
-        console.log('Loading widget ' + widgetId);
         var _this = this;
         return this.client.loadWidget(widgetId).then(widgetHtml => {
             var widget = new Widget();
@@ -75,7 +73,6 @@ class Widgets {
     }
 
     reset() {
-        console.log('widgets-reset');
         this.widgets = {};
         this.widgetAttributes = {};
     }

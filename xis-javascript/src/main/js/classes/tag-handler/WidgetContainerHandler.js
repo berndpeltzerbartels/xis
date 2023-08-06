@@ -36,7 +36,6 @@ class WidgetContainerHandler extends TagHandler {
      * @param {Data} parentData 
      */
     refresh(parentData) {
-        console.log('refresh');
         if (this.defaultWidgetIdExpression) {
             var widgetId = this.defaultWidgetIdExpression.evaluate(parentData);
             this.bindWidget(widgetId);

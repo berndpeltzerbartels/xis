@@ -10,7 +10,7 @@ class Response {
     constructor() {
         this.httpStatus = -1;
         this.data = {};
-        this.nextPageId = '';
+        this.nextPageURL = '';
         this.nextWidgetId = '';
     }
 }

@@ -33,6 +33,11 @@ class PageControllerTest {
     }
 
     @Test
+    void showWelcomePageInCaseOfNoMatch() {
+        // TODO
+    }
+
+    @Test
     void displayPageForUrl() throws ScriptException {
         var testScript = javascript + "pageController.displayPageForUrl('/page.html');";
 

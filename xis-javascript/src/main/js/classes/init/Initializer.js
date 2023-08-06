@@ -15,7 +15,6 @@ class Initializer {
 
 
     initialize(node) {
-        console.log('initialize:' + node);
         if (isElement(node) && !node.getAttribute('ignore')) {
             this.initializeElement(node);
         } else {
@@ -24,7 +23,6 @@ class Initializer {
     }
 
     initializeElement(element) {
-        console.log('initializeElement:' + element);
         if (this.isFrameworkElement(element)) {
             element = this.initializeFrameworkElement(element); // may be replaced
         } else {
@@ -39,7 +37,6 @@ class Initializer {
     * @param {Element} element 
     */
     initializeHtmlElement(element) {
-        console.log('initializeHtmlElement:' + element);
         if (element.getAttribute('xis:repeat')) {
             this.initializeRepeat(element);
         }
@@ -64,7 +61,6 @@ class Initializer {
      * @param {Element} element 
      */
     initializeAttributes(element) {
-        console.log('initializeAttributes:' + element);
         element._attributes = [];
         for (var attrName of element.getAttributeNames()) {
             var attrValue = element.getAttribute(attrName);
@@ -100,7 +96,6 @@ class Initializer {
     * @param {Element} element
     */
     initializeFrameworkElement(element) {
-        console.log('initializeFrameworkElement:' + element);
         switch (element.localName) {
             case 'xis:foreach':
                 return this.decorateForeach(element);
@@ -141,7 +136,6 @@ class Initializer {
     * @param {Element} element
     */
     initializeChildNodes(element) {
-        console.log('initializeChildNodes:' + element);
         for (var index = 0; index < element.childNodes.length; index++) {
             var child = element.childNodes.item(index);
             this.initialize(child);
@@ -153,7 +147,6 @@ class Initializer {
     * @param {Element} element 
     */
     initializeRepeat(element) {
-        console.log('initializeRepeat:' + element);
         var arr = doSplit(element.getAttribute('xis:repeat'), ':');
         var foreach = this.createForEach(arr[0], arr[1]);
         this.domAccessor.insertParent(element, foreach);

@@ -9,13 +9,10 @@ class DomAccessor {
      * @param {Element} elementToInsert 
      */
     insertParent(element, elementToInsert) {
-        console.log('insertParent: ' + element + ", " + elementToInsert);
         if (element.parentNode) {
-            console.log(element + ' has parent');
             this.replaceElement(element, elementToInsert);
             elementToInsert.appendChild(element);
         } else {
-            console.log(element + ' has no parent');
             elementToInsert.appendChild(element);
         }
     }

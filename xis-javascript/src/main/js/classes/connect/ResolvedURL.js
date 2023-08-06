@@ -5,7 +5,7 @@ class ResolvedURL {
      * 
      * @param {Path} path
      * @param {Array{string: string}} pathVariables 
-     * @param {string: string} urlParameters
+     * @param {{string: string}} urlParameters
      * @param {Page} page
      */
     constructor(path, pathVariables, urlParameters, page) {
