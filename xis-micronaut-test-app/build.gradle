@@ -1,63 +1,138 @@
 plugins {
-    id("com.github.johnrengelman.shadow") version "7.1.2"
-    id("io.micronaut.application") version "3.4.1"
-    id 'java'
-    id 'groovy'
+    id("groovy")
+    id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("io.micronaut.application") version "4.0.0"
+    id("io.micronaut.test-resources") version '3.5.1'
 }
+
+version = "0.0.1"
+group = "one.xis"
 
 repositories {
     mavenCentral()
-}
-
-dependencies {
-
-    annotationProcessor("io.micronaut:micronaut-http-validation")
-    implementation("io.micronaut:micronaut-http-client")
-    implementation("io.micronaut:micronaut-jackson-databind")
-    implementation("jakarta.annotation:jakarta.annotation-api")
-    runtimeOnly("ch.qos.logback:logback-classic")
-    implementation("io.micronaut:micronaut-validation")
-
-    implementation 'org.codehaus.groovy:groovy-all:3.0.11'
-
-    implementation project(':xis-micronaut')
-    implementation project(':xis-remote-core')
-
-    implementation 'org.codehaus.groovy:groovy-all:3.0.5'
-
-}
-
-tasks.getByName("distZip").enabled = false
-tasks.getByName("distTar").enabled = false
-tasks.getByName("startShadowScripts").enabled = false
-tasks.getByName("shadowJar").enabled = false
-tasks.getByName("shadowDistTar").enabled = false
-tasks.getByName("shadowDistZip").enabled = false
-tasks.getByName("assemble").enabled = false
-
-application {
-    mainClass.set("one.xis.micronaut.Application")
-}
-java {
-    sourceCompatibility = JavaVersion.toVersion("11")
-    targetCompatibility = JavaVersion.toVersion("11")
-}
-
-graalvmNative.toolchainDetection = false
-micronaut {
-    runtime("netty")
-    testRuntime("junit5")
-    processing {
-        incremental(true)
-        annotations("hello.world.*")
+    jcenter()
+    maven {
+        url = "https://www.dcm4che.org/maven2/"
+    }
+    maven {
+        url = "https://raw.github.com/nroduit/mvn-repo/master/"
     }
 }
 
+micronaut {
+    version = "4.0.0"
+    runtime("netty")
+    testRuntime("spock2")
+    processing {
+        incremental(true)
+        annotations("de.jungdiagnostics.*")
+    }
+    testResources {
+        enabled = true
+    }
+}
 
 sourceSets {
     main {
         resources {
             srcDir 'src/main/groovy'
         }
+    }
+}
+
+
+dependencies {
+
+    annotationProcessor "io.micronaut:micronaut-inject-java"
+
+    implementation project(':xis-remote-core')
+    implementation project(':xis-micronaut')
+    implementation project(':xis-test')
+
+
+    implementation("io.micronaut:micronaut-http-server-netty")
+    implementation("io.micronaut:micronaut-http-client")
+    implementation("io.micronaut.groovy:micronaut-runtime-groovy")
+
+    annotationProcessor("io.micronaut.data:micronaut-data-processor")
+    implementation("io.micronaut.data:micronaut-data-hibernate-jpa")
+    implementation("io.micronaut.sql:micronaut-hibernate-jpa")
+    implementation("io.micronaut.sql:micronaut-jdbc-hikari")
+
+    implementation("io.micronaut.mongodb:micronaut-mongo-sync")
+
+    // module to handle serialization
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-hibernate6")
+    implementation("io.micronaut:micronaut-jackson-databind")
+
+    //  runtimeOnly("io.micronaut.sql:micronaut-jdbc-tomcat")
+
+    annotationProcessor("io.micronaut.validation:micronaut-validation-processor")
+    implementation("io.micronaut.validation:micronaut-validation")
+    // implementation("io.micronaut.beanvalidation:micronaut-hibernate-validator")
+    annotationProcessor("io.micronaut:micronaut-http-validation")
+
+    runtimeOnly("org.mariadb.jdbc:mariadb-java-client")
+    runtimeOnly("ch.qos.logback:logback-classic")
+    runtimeOnly("org.yaml:snakeyaml")
+
+    implementation("io.micronaut.groovy:micronaut-runtime-groovy")
+
+    /*
+    compileOnly("io.micronaut.security:micronaut-security-annotations")
+    implementation("io.micronaut.security:micronaut-security")
+    implementation("io.micronaut.security:micronaut-security-jwt")
+
+    implementation "org.springframework.security:spring-security-crypto:${springSecurityCryptoVersion}"
+*/
+//    implementation("io.micronaut.rxjava3:micronaut-rxjava3:2.0.0")
+//    implementation("io.micronaut.rxjava3:micronaut-rxjava3-http-client:2.0.0")
+
+    implementation("io.micronaut.rxjava2:micronaut-rxjava2")
+    implementation("io.micronaut.rxjava2:micronaut-rxjava2-http-client")
+
+/*
+    implementation group: 'jakarta.mail', name: 'jakarta.mail-api', version: "2.1.2"
+    implementation group: 'org.dcm4che', name: 'dcm4che-core', version: '5.23.0'
+    implementation group: 'org.dcm4che', name: 'dcm4che-net', version: '5.23.0'
+    implementation group: 'org.dcm4che', name: 'dcm4che-imageio', version: '5.23.0'
+    implementation group: 'org.dcm4che', name: 'dcm4che-imageio-opencv', version: '5.23.0'
+    implementation group: 'org.dcm4che', name: 'dcm4che-imageio-rle', version: '5.23.0'
+    implementation group: 'org.dcm4che.tool', name: 'dcm4che-tool-findscu', version: '5.23.0'
+    implementation group: 'org.dcm4che.tool', name: 'dcm4che-tool-dcm2json', version: '5.23.0'
+    implementation group: 'org.dcm4che.tool', name: 'dcm4che-tool-storescp', version: '5.23.0'
+    implementation group: 'org.dcm4che.tool', name: 'dcm4che-tool-pdf2dcm', version: '5.23.0'
+    implementation group: 'com.sun.media', name: 'jai_imageio', version: '1.2-pre-dr-b04'
+    implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: '2.0.25'
+    implementation group: 'org.imgscalr', name: 'imgscalr-lib', version: '4.2'
+*/
+    implementation 'org.apache.groovy:groovy:4.0.13'
+    implementation group: 'org.apache.groovy', name: 'groovy-xml', version: '4.0.13'
+    implementation group: 'org.apache.groovy', name: 'groovy-json', version: '4.0.13'
+    implementation group: 'org.apache.groovy', name: 'groovy-templates', version: '4.0.13'
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0'
+    implementation group: 'org.apache.xmlgraphics', name: 'fop', version: '2.6'
+    implementation group: 'org.passay', name: 'passay', version: '1.6.1'
+
+
+    compileOnly("io.micronaut.openapi:micronaut-openapi:4.4.3")
+
+
+    implementation("io.swagger.core.v3:swagger-annotations")
+
+    testRuntimeOnly group: 'com.h2database', name: 'h2'
+}
+
+
+application {
+    mainClass.set("micronaut.example.MicronautTestApplication")
+
+}
+
+
+test {
+    useJUnitPlatform()
+    afterTest { desc, result ->
+        logger.quiet "${desc.className} - ${desc.name}: ${result.resultType}"
     }
 }

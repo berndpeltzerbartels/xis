@@ -5,6 +5,7 @@ import one.xis.test.js.JSUtil;
 import org.junit.jupiter.api.Test;
 
 import javax.script.ScriptException;
+import java.util.List;
 import java.util.Map;
 
 import static one.xis.js.JavascriptSource.CLASSES;
@@ -30,6 +31,7 @@ class URLResolverTest {
     void resolve() throws ScriptException {
         var script = Javascript.getScript(FUNCTIONS, CLASSES);
         script += """
+                       // "/a/{x}.html"
                        var pathElement1 = new PathElement({
                            type: 'static',
                            content: '/a/',
@@ -43,6 +45,7 @@ class URLResolverTest {
                            })
                        });
                        
+                       // "/b/{x}.html"
                        var pathElement2 = new PathElement({
                            type: 'static',
                            content: '/b/',
@@ -67,9 +70,9 @@ class URLResolverTest {
                         var resolver = new URLResolver(pages);
                         resolver.resolve('/b/xyz.html');
                 """;
-        var result = (Map<String, String>) JSUtil.execute(script);
-
-        // TODO
-
+        var result = (Map<String, List<Map<String, String>>>) JSUtil.execute(script);
+        assertThat(result.get("pathVariables")).hasSize(1);
+        var variable = result.get("pathVariables").get(0);
+        assertThat(variable.get("x")).isEqualTo("xyz");
     }
 }

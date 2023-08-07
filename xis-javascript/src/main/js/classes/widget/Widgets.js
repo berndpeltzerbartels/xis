@@ -15,8 +15,10 @@ class Widgets {
         var _this = this;
         var promises = [];
         this.widgetAttributes = config.widgetAttributes;
-        config.widgetIds.forEach(id => _this.widgets[id] = {});
-        config.widgetIds.forEach(id => promises.push(_this.loadWidget(id)));
+        if (config.widgetIds) {
+            config.widgetIds.forEach(id => _this.widgets[id] = {});
+            config.widgetIds.forEach(id => promises.push(_this.loadWidget(id)));
+        }
         return Promise.all(promises).then(() => config);
     }
     /**

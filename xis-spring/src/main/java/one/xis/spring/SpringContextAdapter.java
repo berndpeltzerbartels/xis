@@ -22,7 +22,7 @@ import java.util.HashSet;
 @RequiredArgsConstructor
 class SpringContextAdapter implements BeanPostProcessor {
 
-    private final SpringHtmlFilter filter;
+    private final SpringFilter filter;
     private final SpringController controller;
 
     private final Collection<Object> controllers = new HashSet<>();

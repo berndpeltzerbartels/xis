@@ -1,67 +1,35 @@
 plugins {
-    id("com.github.johnrengelman.shadow") version "7.1.2"
-    id("io.micronaut.application") version "3.4.1"
     id 'java'
-    id 'groovy'
 }
+
 
 repositories {
     mavenCentral()
 }
 
+
 dependencies {
-    annotationProcessor("io.micronaut:micronaut-http-validation")
-    implementation("io.micronaut:micronaut-http-client")
-    implementation("io.micronaut:micronaut-jackson-databind")
-    implementation("jakarta.annotation:jakarta.annotation-api")
-    runtimeOnly("ch.qos.logback:logback-classic")
-    implementation("io.micronaut:micronaut-validation")
 
-    implementation project(':xis-remote-core')
-    implementation project(':xis-context')
-    implementation project(':xis-pages')
-    implementation project(':xis-widgets')
-    implementation project(':xis-root-page')
-    implementation project(':xis-ajax')
-    implementation project(':xis-ajax-entities')
+    annotationProcessor "io.micronaut:micronaut-inject-java:4.0.1"
 
-    implementation project(':xis-resources')
-    //implementation project(':xis-javascript')
-
-    implementation 'org.slf4j:slf4j-log4j12:2.0.3'
-
-    implementation 'org.codehaus.groovy:groovy-all:3.0.11'
-
-    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
-
+    annotationProcessor("org.projectlombok:lombok:$lombokVersion")
     implementation "org.projectlombok:lombok:$lombokVersion"
-    implementation 'org.slf4j:slf4j-api:2.0.3'
+
+    compileOnly("io.micronaut:micronaut-context:2.4.1")
+    compileOnly("jakarta.annotation:jakarta.annotation-api:2.1.1")
+    compileOnly("jakarta.inject:jakarta.inject-api:2.0.1")
+    compileOnly("io.micronaut:micronaut-http-client:4.1.0")
+
+    implementation project(':xis-context')
+    implementation project(':xis-server')
+    compileOnly project(':xis-resources')
+    compileOnly project(':xis-remote-core')
+    compileOnly project(':xis-util')
 
 }
 
-tasks.getByName("distZip").enabled = false
-tasks.getByName("distTar").enabled = false
-tasks.getByName("startShadowScripts").enabled = false
-tasks.getByName("shadowJar").enabled = false
-tasks.getByName("shadowDistTar").enabled = false
-tasks.getByName("shadowDistZip").enabled = false
-tasks.getByName("assemble").enabled = false
-
-
-application {
-    mainClass.set("one.xis.micronaut.Application")
-}
 java {
-    sourceCompatibility = JavaVersion.toVersion("11")
-    targetCompatibility = JavaVersion.toVersion("11")
+    sourceCompatibility = JavaVersion.toVersion("17")
+    targetCompatibility = JavaVersion.toVersion("17")
 }
 
-graalvmNative.toolchainDetection = false
-micronaut {
-    runtime("netty")
-    testRuntime("junit5")
-    processing {
-        incremental(true)
-        annotations("hello.world.*")
-    }
-}
