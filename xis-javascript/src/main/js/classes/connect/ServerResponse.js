@@ -5,7 +5,7 @@
  * @property {string} nextWidgetId
  */
 
-class Response {
+class ServerResponse {
 
     constructor() {
         this.httpStatus = -1;

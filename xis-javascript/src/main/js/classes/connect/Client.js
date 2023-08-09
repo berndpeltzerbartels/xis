@@ -22,8 +22,9 @@ class Client {
      * @return {Promise<Config>}
      */
     loadConfig() {
+        var _this = this;
         return this.httpClient.get('/xis/config', {})
-            .then(content => JSON.parse(content));
+            .then(content => _this.deserializeConfig(content));
     }
 
     /**
@@ -70,9 +71,10 @@ class Client {
      * @returns {Promise<any>}
      */
     loadPageData(pageId, clientData) {
+        var _this = this;
         var request = this.createPageRequest(pageId, clientData, null);
         return this.httpClient.post('/xis/page/model', request, {})
-            .then(content => JSON.parse(content));
+            .then(content => _this.deserializeResponse(content));
     }
 
     /**
@@ -82,9 +84,10 @@ class Client {
     * @returns {Promise<Response>}
     */
     loadWidgetData(widgetId, widgetClientData) {
+        var _this = this;
         var request = this.createWidgetRequest(widgetId, widgetClientData, null);
         return this.httpClient.post('/xis/widget/model', request)
-            .then(content => JSON.parse(content));
+            .then(content => _this.deserializeResponse(content));
     }
 
 
@@ -96,9 +99,10 @@ class Client {
      * @returns {Promise<Response>}
      */
     widgetAction(widgetId, widgetClientData, action) {
+        var _this = this;
         var request = this.createWidgetRequest(widgetId, widgetClientData, action);
         return this.httpClient.post('/xis/widget/action', request, {})
-            .then(content => JSON.parse(content));
+            .then(content => _this.deserializeResponse(content));
     }
 
     /**
@@ -109,9 +113,10 @@ class Client {
      * @returns {Promise<Response>}
      */
     pageAction(pageId, pageClientData, action) {
+        var _this = this;
         var request = this.createPageRequest(pageId, pageClientData, action);
         return this.httpClient.post('/xis/page/action', request, {})
-            .then(content => JSON.parse(content));
+            .then(content => _this.deserializeResponse(content));
     }
 
     /**
@@ -119,11 +124,10 @@ class Client {
      * @param {string} pageId 
      * @param {PageClientData} pageClientData
      * @param {string} action
-     * @returns {Request}
+     * @returns {ClientRequest}
      */
     createPageRequest(pageId, pageClientData, action) {
-        debugger;
-        var request = new Request();
+        var request = new ClientRequest();
         request.clientId = this.clientId;
         request.userId = this.userId;
         request.pageId = pageId;
@@ -148,10 +152,10 @@ class Client {
     * @param {string} widgetId 
     * @param {WidgetClientData} widgetClientData
     * @param {string} action
-    * @returns {Request}
+    * @returns {ClientRequest}
     */
     createWidgetRequest(widgetId, widgetClientData, action) {
-        var request = new Request();
+        var request = new ClientRequest();
         request.clientId = this.clientId;
         request.userId = this.userId;
         request.widgetId = widgetId;
@@ -162,4 +166,46 @@ class Client {
         return request;
     }
 
+
+    /**
+     * @private
+     * @param {string} content 
+     * @returns {Config}
+     */
+    deserializeConfig(content) {
+        var obj = JSON.parse(content);
+        var config = new Config();
+        config.welcomePageId = obj.welcomePageId;
+        config.pageIds = obj.pageIds ? obj.pageIds : [];
+        config.widgetIds = obj.widgetIds ? obj.widgetIds : [];
+        config.pageAttributes = {};
+        if (obj.pageAttributes) {
+            for (var key of Object.keys(obj.pageAttributes)) {
+                config.pageAttributes[key] = new PageAttributes(obj.pageAttributes[key]);
+            }
+        }
+        config.widgetAttributes = {};
+        if (obj.widgetAttributes) {
+            for (var key of Object.keys(obj.widgetAttributes)) {
+                config.widgetAttributes[key] = new WidgetAttributes(obj.widgetAttributes[key]);
+            }
+        }
+        return config;
+    }
+
+    /**
+     * @private
+     * @param {string} content 
+     * @returns {Response}
+     */
+    deserializeResponse(content) {
+        var obj = JSON.parse(content);
+        var data = obj.data ? new Data(obj.data) : new Data({});
+        var response = new ServerResponse();
+        response.data = data;
+        response.nextPageURL = obj.nextPageURL;
+        response.nextWidgetId = obj.nextWidgetId;
+        return response;
+
+    }
 }

@@ -14,7 +14,7 @@ class Page {
     /**
      * 
      * @param {string} normalizedPath 
-     * @param {PageAttributes} path 
+     * @param {PageAttributes} pageAttributes 
      */
     constructor(normalizedPath, pageAttributes) {
         this.normalizedPath = normalizedPath;

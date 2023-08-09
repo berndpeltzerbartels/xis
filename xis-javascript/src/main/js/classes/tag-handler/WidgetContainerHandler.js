@@ -82,7 +82,7 @@ class WidgetContainerHandler extends TagHandler {
             var _this = this;
             var clientData = this.widget.clientDataForModelRequest(parameters);
             this.client.loadWidgetData(this.widget.id, clientData, parameters)
-                .then(response => new Data(response.data))
+                .then(response => response.data)
                 .then(data => { _this.widget.data = data; return data; })
                 .then(data => _this.refreshChildNodes(data))
                 .catch(e => console.error(e));
@@ -99,7 +99,7 @@ class WidgetContainerHandler extends TagHandler {
             app.pageController.handleActionResponse(response);
         } else if (response.nextWidgetId) {
             this.bindWidget(response.nextWidgetId);
-            this.widget.data = new Data(response.data);
+            this.widget.data = response.data;
             this.refreshChildNodes(this.widget.data);
         }
     }

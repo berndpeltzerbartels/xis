@@ -17,7 +17,7 @@ class Pages {
         this.config = config;
         var promises = [];
         var _this = this;
-        config.pageIds.forEach(id => _this.pages[id] = new Page(id, new PageAttributes(config.pageAttributes[id])));
+        config.pageIds.forEach(id => _this.pages[id] = new Page(id, config.pageAttributes[id]));
         config.pageIds.forEach(id => promises.push(_this.loadPageHead(id)));
         config.pageIds.forEach(id => promises.push(_this.loadPageBody(id)));
         config.pageIds.forEach(id => promises.push(_this.loadPageBodyAttributes(id)));

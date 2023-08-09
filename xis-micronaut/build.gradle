@@ -13,18 +13,22 @@ dependencies {
     annotationProcessor "io.micronaut:micronaut-inject-java:4.0.1"
 
     annotationProcessor("org.projectlombok:lombok:$lombokVersion")
-    implementation "org.projectlombok:lombok:$lombokVersion"
+    compileOnly "org.projectlombok:lombok:$lombokVersion"
 
     compileOnly("io.micronaut:micronaut-context:2.4.1")
     compileOnly("jakarta.annotation:jakarta.annotation-api:2.1.1")
     compileOnly("jakarta.inject:jakarta.inject-api:2.0.1")
     compileOnly("io.micronaut:micronaut-http-client:4.1.0")
+    compileOnly("io.micronaut.rxjava2:micronaut-rxjava2:2.0.1")
+
+    implementation("io.micronaut.rxjava2:micronaut-rxjava2-http-server-netty:2.0.1")
+    implementation("io.micronaut.rxjava2:micronaut-rxjava2-http-client:2.0.1")
+
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.21'
 
     implementation project(':xis-context')
     implementation project(':xis-server')
-    compileOnly project(':xis-resources')
-    compileOnly project(':xis-remote-core')
-    compileOnly project(':xis-util')
+    implementation project(':xis-remote-core')
 
 }
 

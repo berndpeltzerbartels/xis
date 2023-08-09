@@ -15,10 +15,8 @@ class Widgets {
         var _this = this;
         var promises = [];
         this.widgetAttributes = config.widgetAttributes;
-        if (config.widgetIds) {
-            config.widgetIds.forEach(id => _this.widgets[id] = {});
-            config.widgetIds.forEach(id => promises.push(_this.loadWidget(id)));
-        }
+        config.widgetIds.forEach(id => _this.widgets[id] = {});
+        config.widgetIds.forEach(id => promises.push(_this.loadWidget(id)));
         return Promise.all(promises).then(() => config);
     }
     /**
@@ -31,7 +29,7 @@ class Widgets {
             widget.id = widgetId;
             widget.root = _this.asRootElement(widgetHtml);
             widget.root._widgetId = widgetId;
-            widget.widgetAttributes = new WidgetAttributes(_this.widgetAttributes[widgetId]);
+            widget.widgetAttributes = _this.widgetAttributes[widgetId];
             initializeElement(widget.root);
             _this.addWidget(widgetId, widget);
         });
@@ -45,7 +43,6 @@ class Widgets {
     addWidget(widgetId, widget) {
         this.widgets[widgetId] = widget;
     }
-
 
     /**
     * @public

@@ -9,7 +9,7 @@
  * @property {string: string} parameters
  * @property {string: string} urlParameters
 */
-class Request {
+class ClientRequest {
 
     constructor() {
         this.data = {};

@@ -65,7 +65,7 @@ class PageController {
      * @param {Response} response
      */
     handleActionResponse(response) {
-        var data = new Data(response.data);
+        var data = response.data;
         if (response.nextPageURL) {
             debugger;
             var resolvedURL = this.urlResolver.resolve(response.nextPageURL);
@@ -153,7 +153,7 @@ class PageController {
         clientData.parameters = [];
         clientData.modelData = this.modelDataForRefresh();
         return this.client.loadPageData(this.page.normalizedPath, clientData).then(response => {
-            var data = _this.responseAsData(response, pathVariables, urlParameters);
+            var data = _this.responseToData(response, pathVariables, urlParameters);
             _this.data = data;
             _this.html.refresh(data, this.resolvedURL);
         });
@@ -196,14 +196,14 @@ class PageController {
      * @param {string:string} urlParameters 
      * @returns {Data}
      */
-    responseAsData(response, pathVariableArray, urlParameters) {
+    responseToData(response, pathVariableArray, urlParameters) {
         var pathVariables = {};
         for (var keyValue of pathVariableArray) {
             var key = Object.keys(keyValue)[0]
             var value = Object.values(keyValue)[0];
             pathVariables[key] = value;
         }
-        var data = new Data(response.data);
+        var data = response.data;
         data.setValue('pathVariables', pathVariables);
         data.setValue('parameters', response.parameters);
         data.setValue('urlParameters', urlParameters);

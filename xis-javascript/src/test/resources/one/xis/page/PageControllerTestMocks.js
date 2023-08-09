@@ -36,9 +36,7 @@ var pagePath = new Path(new PathElement({ type: 'static', content: '/page.html' 
 
 
 var dataResponse = {
-    data: {
-        test: 123
-    }
+    data: new Data({test: 123})
 };
 
 
