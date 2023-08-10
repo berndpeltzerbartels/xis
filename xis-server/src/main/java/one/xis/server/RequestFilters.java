@@ -23,7 +23,7 @@ public class RequestFilters {
                 .collect(Collectors.toList());
     }
 
-    RequestFilterChain apply(Request request) {
+    RequestFilterChain apply(ClientRequest request) {
         var filterChain = new RequestFilterChain();
         for (var filter : sortedFilters) {
             filter.doFilter(request, this);

@@ -3,6 +3,7 @@ package one.xis.spring;
 
 import lombok.Setter;
 import one.xis.server.*;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -22,25 +23,25 @@ class SpringController implements FrameworkController {
 
     @Override
     @PostMapping("/xis/page/model")
-    public Response getPageModel(@RequestBody Request request) {
+    public ServerResponse getPageModel(@RequestBody ClientRequest request) {
         return frontendService.invokePageModelMethods(request);
     }
 
     @Override
     @PostMapping("/xis/widget/model")
-    public Response getWidgetModel(@RequestBody Request request) {
+    public ServerResponse getWidgetModel(@RequestBody ClientRequest request) {
         return frontendService.invokeWidgetModelMethods(request);
     }
 
     @Override
     @PostMapping("/xis/page/action")
-    public Response onPageAction(@RequestBody Request request) {
+    public ServerResponse onPageAction(@RequestBody ClientRequest request) {
         return frontendService.invokePageActionMethod(request);
     }
 
     @Override
     @PostMapping("/xis/widget/action")
-    public Response onWidgetAction(@RequestBody Request request) {
+    public ServerResponse onWidgetAction(@RequestBody ClientRequest request) {
         return frontendService.invokeWidgetActionMethod(request);
     }
 

@@ -25,13 +25,13 @@ public class ControllerWrapper {
     private Map<String, ModelMethod> modelMethods;
     private Map<String, ActionMethod> actionMethods;
 
-    Map<String, Object> invokeGetModelMethods(Request request) {
+    Map<String, Object> invokeGetModelMethods(ClientRequest request) {
         var data = new HashMap<String, Object>();
         modelMethods.forEach((key, method) -> invokeForModel(key, method, request, data));
         return data;
     }
 
-    Object invokeActionMethod(Request request) {
+    Object invokeActionMethod(ClientRequest request) {
         var method = actionMethods.get(request.getAction());
         try {
             return method.invoke(request, controller);
@@ -45,7 +45,7 @@ public class ControllerWrapper {
         return controller.getClass();
     }
 
-    private void invokeForModel(String key, ModelMethod modelMethod, Request request, Map<String, Object> result) {
+    private void invokeForModel(String key, ModelMethod modelMethod, ClientRequest request, Map<String, Object> result) {
         try {
             result.put(key, modelMethod.invoke(request, controller));
         } catch (Exception e) {

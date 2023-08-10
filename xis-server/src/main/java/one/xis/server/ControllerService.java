@@ -3,6 +3,7 @@ package one.xis.server;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import one.xis.Page;
 import one.xis.Widget;
 import one.xis.context.XISComponent;
@@ -14,6 +15,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+@Slf4j
 @XISComponent
 @RequiredArgsConstructor
 class ControllerService {
@@ -41,24 +43,24 @@ class ControllerService {
     }
 
 
-    Response invokePageModelMethods(Request request) {
+    ServerResponse invokePageModelMethods(ClientRequest request) {
         var wrapper = findPageControllerWrapper(request).orElseThrow();
         return pageModelDataResponse(200, wrapper, request);
     }
 
-    Response invokeWidgetModelMethods(Request request) {
+    ServerResponse invokeWidgetModelMethods(ClientRequest request) {
         var wrapper = findWidgetControllerWrapper(request).orElseThrow();
         return widgetModelDataResponse(200, wrapper, request);
     }
 
-    Response invokePageActionMethod(Request request) {
+    ServerResponse invokePageActionMethod(ClientRequest request) {
         var invokerController = findPageControllerWrapper(request).orElseThrow();
         var result = invokerController.invokeActionMethod(request);
         var nextPageController = pageControllerWrapperByResult(result).orElse(invokerController);
         return pageModelDataResponse(200, nextPageController, request);
     }
 
-    Response invokeWidgetActionMethod(Request request) {
+    ServerResponse invokeWidgetActionMethod(ClientRequest request) {
         var invokerController = findWidgetControllerWrapper(request).orElseThrow();
         var result = invokerController.invokeActionMethod(request);
         if (result == null || result == Void.class) {
@@ -76,23 +78,25 @@ class ControllerService {
 
     }
 
-    private Response widgetModelDataResponse(int status, ControllerWrapper wrapper, Request request) {
-        return new Response(status, wrapper.invokeGetModelMethods(request), null, wrapper.getId());
+    private ServerResponse widgetModelDataResponse(int status, ControllerWrapper wrapper, ClientRequest request) {
+        return new ServerResponse(status, wrapper.invokeGetModelMethods(request), null, wrapper.getId());
     }
 
-    private Response pageModelDataResponse(int status, ControllerWrapper wrapper, Request request) {
-        return new Response(status, wrapper.invokeGetModelMethods(request), wrapper.getId(), null);
+    private ServerResponse pageModelDataResponse(int status, ControllerWrapper wrapper, ClientRequest request) {
+        return new ServerResponse(status, wrapper.invokeGetModelMethods(request), wrapper.getId(), null);
     }
 
     private Collection<ControllerWrapper> widgetControllerWrappers() {
         return widgetControllers.stream()
                 .map(controller -> createControllerWrapper(controller, WidgetUtil::getId))
+                .peek(wrapper -> log.info("widget-id: {} -> controller: {}", wrapper.getId(), wrapper.getController().getClass().getSimpleName()))
                 .collect(Collectors.toSet());
     }
 
     private Collection<ControllerWrapper> pageControllerWrappers() {
         return pageControllers.stream()
                 .map(controller -> createControllerWrapper(controller, this::getPagePath))
+                .peek(wrapper -> log.info("url: {} -> controller: {}", wrapper.getId(), wrapper.getController().getClass().getSimpleName()))
                 .collect(Collectors.toSet());
     }
 
@@ -136,13 +140,13 @@ class ControllerService {
 
     }
 
-    private Optional<ControllerWrapper> findPageControllerWrapper(Request request) {
+    private Optional<ControllerWrapper> findPageControllerWrapper(ClientRequest request) {
         return pageControllerWrappers.stream()
                 .filter(controller -> controller.getId().equals(request.getPageId()))
                 .findFirst();
     }
 
-    private Optional<ControllerWrapper> findWidgetControllerWrapper(Request request) {
+    private Optional<ControllerWrapper> findWidgetControllerWrapper(ClientRequest request) {
         return widgetControllerWrappers.stream()
                 .filter(controller -> controller.getId().equals(request.getWidgetId()))
                 .findFirst();

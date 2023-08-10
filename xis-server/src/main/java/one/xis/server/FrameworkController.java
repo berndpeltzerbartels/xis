@@ -6,13 +6,13 @@ public interface FrameworkController {
 
     Config getComponentConfig();
 
-    Response getPageModel(Request request);
+    ServerResponse getPageModel(ClientRequest request);
 
-    Response getWidgetModel(Request request);
+    ServerResponse getWidgetModel(ClientRequest request);
 
-    Response onPageAction(Request request);
+    ServerResponse onPageAction(ClientRequest request);
 
-    Response onWidgetAction(Request request);
+    ServerResponse onWidgetAction(ClientRequest request);
 
     String getPage(String id);
 
@@ -29,6 +29,6 @@ public interface FrameworkController {
     String getClassesJs();
 
     String getMainJs();
-    
+
     String getFunctionsJs();
 }

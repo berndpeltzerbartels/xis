@@ -25,7 +25,7 @@ abstract class ControllerMethod {
     protected String key;
     protected ParameterDeserializer parameterDeserializer;
 
-    Object invoke(Request request, Object controller) throws Exception {
+    Object invoke(ClientRequest request, Object controller) throws Exception {
         return method.invoke(controller, prepareArgs(request));
     }
 
@@ -35,7 +35,7 @@ abstract class ControllerMethod {
     }
 
 
-    protected Object[] prepareArgs(Request context) throws Exception {
+    protected Object[] prepareArgs(ClientRequest context) throws Exception {
         Object[] args = new Object[method.getParameterCount()];
         var params = method.getParameters();
         for (int i = 0; i < args.length; i++) {
@@ -61,14 +61,14 @@ abstract class ControllerMethod {
         }
         return args;
     }
-    
-    private Object deserializeModelParameter(Parameter parameter, Request context) throws IOException {
+
+    private Object deserializeModelParameter(Parameter parameter, ClientRequest context) throws IOException {
         var key = parameter.getAnnotation(Model.class).value();
         var paramValue = context.getData().get(key);
         return deserializeParameter(paramValue, parameter);
     }
 
-    private Object deserializeParameter(Parameter parameter, Request context) throws IOException {
+    private Object deserializeParameter(Parameter parameter, ClientRequest context) throws IOException {
         var key = parameter.getAnnotation(one.xis.Parameter.class).value();
         var paramValue = context.getData().get(key);
         return deserializeParameter(paramValue, parameter);

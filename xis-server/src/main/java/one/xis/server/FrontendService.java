@@ -37,19 +37,19 @@ public class FrontendService {
         return configService.getConfig();
     }
 
-    public Response invokePageActionMethod(Request request) {
+    public ServerResponse invokePageActionMethod(ClientRequest request) {
         return applyFilterChain(request, controllerService::invokePageActionMethod);
     }
 
-    public Response invokeWidgetActionMethod(Request request) {
+    public ServerResponse invokeWidgetActionMethod(ClientRequest request) {
         return applyFilterChain(request, controllerService::invokeWidgetActionMethod);
     }
 
-    public Response invokePageModelMethods(Request request) {
+    public ServerResponse invokePageModelMethods(ClientRequest request) {
         return applyFilterChain(request, controllerService::invokePageModelMethods);
     }
 
-    public Response invokeWidgetModelMethods(Request request) {
+    public ServerResponse invokeWidgetModelMethods(ClientRequest request) {
         return applyFilterChain(request, controllerService::invokeWidgetModelMethods);
     }
 
@@ -98,10 +98,10 @@ public class FrontendService {
         return functionsJsResource.getContent();
     }
 
-    private Response applyFilterChain(Request request, Function<Request, Response> responder) {
+    private ServerResponse applyFilterChain(ClientRequest request, Function<ClientRequest, ServerResponse> responder) {
         var chain = requestFilterChain.apply(request);
         if (chain.isInterrupt()) {
-            return new Response(chain.getHttpStatus(), chain.getData(), null, null);
+            return new ServerResponse(chain.getHttpStatus(), chain.getData(), null, null);
         }
         return responder.apply(request);
     }

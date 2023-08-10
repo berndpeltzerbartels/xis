@@ -3,8 +3,8 @@ package one.xis.context;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import one.xis.server.ClientRequest;
 import one.xis.server.FrontendService;
-import one.xis.server.Request;
 
 import java.util.Map;
 
@@ -65,9 +65,9 @@ public class BackendBridge {
         return frontendService.getWidgetHtml(id);
     }
 
-    private Request request(String requestJson) {
+    private ClientRequest request(String requestJson) {
         try {
-            return objectMapper.readValue(requestJson, Request.class);
+            return objectMapper.readValue(requestJson, ClientRequest.class);
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Failed to deserialize request", e);
         }

@@ -88,7 +88,7 @@ class ParameterDeserializer {
     private Object readValue(JsonReader reader, Class<?> type) throws IOException {
         switch (reader.peek()) {
             case BEGIN_ARRAY:
-                throw new IllegalStateException("Collections mus have type-parameters");
+                throw new IllegalStateException("Collections must have type-parameters");
             case BEGIN_OBJECT:
                 return readObject(reader, type);
             case NULL:

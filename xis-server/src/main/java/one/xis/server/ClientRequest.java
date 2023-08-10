@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.Map;
 
 @Data
-public class Request {
+public class ClientRequest {
     private String clientId;
     private String userId;
     private String action;

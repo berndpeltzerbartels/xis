@@ -13,7 +13,7 @@ class MapDeserializerTest {
     @Test
     void deserialize() throws JsonProcessingException {
         var json = "{ \"data\": {\"a\":1, \"b\":\"xyz\"}, \"clientId\":\"\",  \"userId\":\"\", \"action\":\"\", \"pageId\":\"\", \"widgetId\":\"\"}";
-        var request = objectMapper.readValue(json, Request.class);
+        var request = objectMapper.readValue(json, ClientRequest.class);
 
         assertThat(request.getData().get("a")).isEqualTo("1");
         assertThat(request.getData().get("b")).isEqualTo("xyz");

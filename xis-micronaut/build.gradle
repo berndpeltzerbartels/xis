@@ -20,6 +20,7 @@ dependencies {
     compileOnly("jakarta.inject:jakarta.inject-api:2.0.1")
     compileOnly("io.micronaut:micronaut-http-client:4.1.0")
     compileOnly("io.micronaut.rxjava2:micronaut-rxjava2:2.0.1")
+    compileOnly("com.fasterxml.jackson.core:jackson-databind:2.15.2")
 
     implementation("io.micronaut.rxjava2:micronaut-rxjava2-http-server-netty:2.0.1")
     implementation("io.micronaut.rxjava2:micronaut-rxjava2-http-client:2.0.1")

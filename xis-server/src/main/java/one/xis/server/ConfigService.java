@@ -2,6 +2,7 @@ package one.xis.server;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import one.xis.Page;
 import one.xis.Widget;
 import one.xis.context.XISComponent;
@@ -14,6 +15,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 
+@Slf4j
 @XISComponent
 @RequiredArgsConstructor
 class ConfigService {
@@ -36,6 +38,7 @@ class ConfigService {
         addPageAttributes(configBuilder);
         addWidgetAttributes(configBuilder);
         config = configBuilder.build();
+        log.info("configuration : {}", config);
     }
 
     private void addPageAttributes(ConfigBuilder configBuilder) {
