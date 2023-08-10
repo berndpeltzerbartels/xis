@@ -21,7 +21,9 @@ import java.util.*;
 class ParameterDeserializer {
 
     public Object deserialze(String json, Parameter parameter) throws IOException {
-        return evaluate(new JsonReader(new StringReader(json)), parameter);
+        var reader = new JsonReader(new StringReader(json));
+        reader.setLenient(true);
+        return evaluate(reader, parameter);
     }
 
     public Object evaluate(JsonReader reader, Parameter parameter) throws IOException {
@@ -156,6 +158,9 @@ class ParameterDeserializer {
         }
         if (type.equals(String.class)) {
             return reader.nextString();
+        }
+        if (type.equals(Object.class)) { // Groovy
+            return BigDecimal.valueOf(reader.nextDouble());
         }
         throw new UnsupportedOperationException("parameter-type " + type);
     }

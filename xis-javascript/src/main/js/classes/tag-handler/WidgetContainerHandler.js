@@ -95,7 +95,6 @@ class WidgetContainerHandler extends TagHandler {
      */
     handleActionResponse(response) {
         if (response.nextPageURL) {
-            debugger
             app.pageController.handleActionResponse(response);
         } else if (response.nextWidgetId) {
             this.bindWidget(response.nextWidgetId);

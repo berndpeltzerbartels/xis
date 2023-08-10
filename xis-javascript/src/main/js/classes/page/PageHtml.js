@@ -70,7 +70,6 @@ class PageHtml {
      * @param {Array<Node>} attributes 
      */
     bindBodyChildNodes(nodeArray) {
-        debugger;
         for (var node of nodeArray) {
             this.body.appendChild(node);
         }

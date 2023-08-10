@@ -20,12 +20,17 @@ class ResolvedURL {
      * @returns {string}
      */
     toURL() {
+        debugger;
         var url = '';
         var pathElement = this.path.pathElement;
+        var pathVarIndex = 0;
         while (pathElement) {
             switch (pathElement.type) {
                 case 'static': url += pathElement.content; break;
-                case 'variable': url += this.pathVariables[pathElement.key]; break;
+                case 'variable': {
+                    var pathVar = this.pathVariables[pathVarIndex++];
+                    url += Object.values(pathVar)[0];
+                } break;
                 default: throw new Error('unknown element-type: ' + pathElement.type);
             }
             pathElement = pathElement.next;

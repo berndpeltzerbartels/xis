@@ -67,7 +67,6 @@ class PageController {
     handleActionResponse(response) {
         var data = response.data;
         if (response.nextPageURL) {
-            debugger;
             var resolvedURL = this.urlResolver.resolve(response.nextPageURL);
             if (!resolvedURL) {
                 throw new Error('no page for ' + response.nextPageURL);
@@ -179,7 +178,6 @@ class PageController {
     * @returns {string: string}
     */
     modelDataForAction(action) {
-        debugger;
         var result = {};
         var attributes = this.config.pageAttributes[this.page.normalizedPath];
         var keys = attributes.modelsToSubmitOnAction[action];
