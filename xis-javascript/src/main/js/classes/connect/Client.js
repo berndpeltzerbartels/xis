@@ -200,7 +200,7 @@ class Client {
      */
     deserializeResponse(content) {
         var obj = JSON.parse(content);
-        var data = obj.data ? new Data(obj.data) : new Data({});
+        var data = obj.data ? new Data(JSON.parse(obj.data)) : new Data({});
         var response = new ServerResponse();
         response.data = data;
         response.nextPageURL = obj.nextPageURL;

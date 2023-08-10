@@ -22,6 +22,7 @@ class ControllerService {
 
     private final ControllerWrapperFactory controllerWrapperFactory;
     private final PathResolver pathResolver;
+    private final DataSerializer dataSerializer;
 
 
     @XISInject(annotatedWith = Widget.class)
@@ -79,11 +80,11 @@ class ControllerService {
     }
 
     private ServerResponse widgetModelDataResponse(int status, ControllerWrapper wrapper, ClientRequest request) {
-        return new ServerResponse(status, wrapper.invokeGetModelMethods(request), null, wrapper.getId());
+        return new ServerResponse(status, dataSerializer.serialize(wrapper.invokeGetModelMethods(request)), null, wrapper.getId());
     }
 
     private ServerResponse pageModelDataResponse(int status, ControllerWrapper wrapper, ClientRequest request) {
-        return new ServerResponse(status, wrapper.invokeGetModelMethods(request), wrapper.getId(), null);
+        return new ServerResponse(status, dataSerializer.serialize(wrapper.invokeGetModelMethods(request)), wrapper.getId(), null);
     }
 
     private Collection<ControllerWrapper> widgetControllerWrappers() {

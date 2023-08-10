@@ -20,6 +20,7 @@ public class FrontendService {
     private final HtmlResourceService htmlResourceService;
     private final Resources resources;
     private final RequestFilters requestFilterChain;
+    private final DataSerializer dataSerializer;
     private Resource appJsResource;
     private Resource classesJsResource;
     private Resource mainJsResource;
@@ -101,7 +102,7 @@ public class FrontendService {
     private ServerResponse applyFilterChain(ClientRequest request, Function<ClientRequest, ServerResponse> responder) {
         var chain = requestFilterChain.apply(request);
         if (chain.isInterrupt()) {
-            return new ServerResponse(chain.getHttpStatus(), chain.getData(), null, null);
+            return new ServerResponse(chain.getHttpStatus(), dataSerializer.serialize(chain.getData()), null, null);
         }
         return responder.apply(request);
     }
