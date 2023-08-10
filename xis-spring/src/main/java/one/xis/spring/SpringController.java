@@ -17,7 +17,7 @@ class SpringController implements FrameworkController {
 
     @Override
     @GetMapping("/xis/config")
-    public Config getComponentConfig() {
+    public ClientConfig getComponentConfig() {
         return frontendService.getConfig();
     }
 

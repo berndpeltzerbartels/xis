@@ -8,7 +8,7 @@ import one.xis.Widget;
 import one.xis.context.XISComponent;
 import one.xis.context.XISInit;
 import one.xis.context.XISInject;
-import one.xis.server.Config.ConfigBuilder;
+import one.xis.server.ClientConfig.ClientConfigBuilder;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -18,7 +18,7 @@ import java.util.HashSet;
 @Slf4j
 @XISComponent
 @RequiredArgsConstructor
-class ConfigService {
+class ClientConfigService {
 
     private final PageAttributesFactory pageAttributesFactory;
     private final WidgetAttributesFactory widgetAttributesFactory;
@@ -30,18 +30,18 @@ class ConfigService {
     private Collection<Object> widgetControllers;
 
     @Getter
-    private Config config;
+    private ClientConfig config;
 
     @XISInit
     void init() {
-        ConfigBuilder configBuilder = Config.builder();
+        var configBuilder = ClientConfig.builder();
         addPageAttributes(configBuilder);
         addWidgetAttributes(configBuilder);
         config = configBuilder.build();
         log.info("configuration : {}", config);
     }
 
-    private void addPageAttributes(ConfigBuilder configBuilder) {
+    private void addPageAttributes(ClientConfigBuilder configBuilder) {
         var pageIds = new HashSet<String>();
         String welcomePageId = null;
         var pageAttributes = new HashMap<String, PageAttributes>();
@@ -61,7 +61,7 @@ class ConfigService {
                 .welcomePageId(welcomePageId);
     }
 
-    private void addWidgetAttributes(ConfigBuilder configBuilder) {
+    private void addWidgetAttributes(ClientConfigBuilder configBuilder) {
         var widgetIds = new HashSet<String>();
         var widgetAttributes = new HashMap<String, ComponentAttributes>();
         for (Object widgetController : widgetControllers) {

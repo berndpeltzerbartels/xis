@@ -1,7 +1,6 @@
 package one.xis.server;
 
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
 
@@ -14,18 +13,14 @@ import java.util.Map;
  */
 @Data
 @Builder
-public class Config {
+public class ClientConfig {
 
-    @JsonInclude
     private final Collection<String> widgetIds;
-
-    @JsonInclude
     private final Collection<String> pageIds;
 
     /**
      * Normalized path of the welcome-page.
      */
-    @JsonInclude
     private final String welcomePageId;
 
     /**
@@ -33,7 +28,6 @@ public class Config {
      *
      * @{@link Path}
      */
-    @JsonInclude
     private final Map<String, PageAttributes> pageAttributes;
 
     /**
@@ -41,7 +35,6 @@ public class Config {
      *
      * @{@link Path}
      */
-    @JsonInclude
     private final Map<String, ComponentAttributes> widgetAttributes;
 
 

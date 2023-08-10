@@ -10,7 +10,7 @@ class Pages {
 
     /**
      *
-     * @param {Config} config
+     * @param {ClientConfig} config
      * @returns {Promise<any>}
      */
     loadPages(config) {

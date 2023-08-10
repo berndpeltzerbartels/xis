@@ -6,7 +6,7 @@
  * @property {string: WidgetAttributes} widgetAttributes
  */
 
-class Config {
+class ClientConfig {
 
     constructor() {
         this.pageIds = [];

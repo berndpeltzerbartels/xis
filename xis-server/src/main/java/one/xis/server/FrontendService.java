@@ -16,7 +16,7 @@ import java.util.function.Function;
 public class FrontendService {
 
     private final ControllerService controllerService;
-    private final ConfigService configService;
+    private final ClientConfigService configService;
     private final HtmlResourceService htmlResourceService;
     private final Resources resources;
     private final RequestFilters requestFilterChain;
@@ -33,7 +33,7 @@ public class FrontendService {
         functionsJsResource = resources.getByPath("functions.js");
     }
 
-    public Config getConfig() {
+    public ClientConfig getConfig() {
         return configService.getConfig();
     }
 

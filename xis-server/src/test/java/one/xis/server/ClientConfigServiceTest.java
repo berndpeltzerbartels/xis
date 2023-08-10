@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class ConfigServiceTest {
+class ClientConfigServiceTest {
 
 
     @Nested
@@ -24,7 +24,7 @@ class ConfigServiceTest {
         void init() {
             appContext = AppContext.builder()
                     .withSingletonClass(ConfigServiceTestPage1.class)
-                    .withSingletonClass(ConfigService.class)
+                    .withSingletonClass(ClientConfigService.class)
                     .withSingletonClass(PathResolver.class)
                     .withSingletonClass(PageAttributesFactory.class)
                     .withSingletonClass(WidgetAttributesFactory.class)
@@ -33,7 +33,7 @@ class ConfigServiceTest {
 
         @Test
         void getConfig() {
-            var config = appContext.getSingleton(ConfigService.class).getConfig();
+            var config = appContext.getSingleton(ClientConfigService.class).getConfig();
 
             var expectedId = "/Test1.html";
             assertThat(config.getPageAttributes()).containsKey(expectedId);
@@ -76,7 +76,7 @@ class ConfigServiceTest {
         void init() {
             appContext = AppContext.builder()
                     .withSingletonClass(ConfigServiceTestPage2.class)
-                    .withSingletonClass(ConfigService.class)
+                    .withSingletonClass(ClientConfigService.class)
                     .withSingletonClass(PathResolver.class)
                     .withSingletonClass(PageAttributesFactory.class)
                     .withSingletonClass(WidgetAttributesFactory.class)
@@ -85,7 +85,7 @@ class ConfigServiceTest {
 
         @Test
         void getConfig() {
-            var config = appContext.getSingleton(ConfigService.class).getConfig();
+            var config = appContext.getSingleton(ClientConfigService.class).getConfig();
 
             var expectedId = "/*/test_*/*.html";
             assertThat(config.getPageAttributes()).containsKey(expectedId);
@@ -124,7 +124,7 @@ class ConfigServiceTest {
         void init() {
             appContext = AppContext.builder()
                     .withSingletonClass(ConfigServiceTestWidget1.class)
-                    .withSingletonClass(ConfigService.class)
+                    .withSingletonClass(ClientConfigService.class)
                     .withSingletonClass(PathResolver.class)
                     .withSingletonClass(PageAttributesFactory.class)
                     .withSingletonClass(WidgetAttributesFactory.class)
@@ -133,7 +133,7 @@ class ConfigServiceTest {
 
         @Test
         void getConfig() {
-            var config = appContext.getSingleton(ConfigService.class).getConfig();
+            var config = appContext.getSingleton(ClientConfigService.class).getConfig();
 
             var widgetId = "ConfigServiceTestWidget1";
             assertThat(config.getWidgetAttributes()).containsKey(widgetId);

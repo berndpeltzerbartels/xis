@@ -23,7 +23,7 @@ class MicronautController implements FrameworkController {
 
     @Override
     @Get("/xis/config")
-    public Config getComponentConfig() {
+    public ClientConfig getComponentConfig() {
         return frontendService.getConfig();
     }
 

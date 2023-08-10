@@ -4,7 +4,7 @@ import java.util.Map;
 
 public interface FrameworkController {
 
-    Config getComponentConfig();
+    ClientConfig getComponentConfig();
 
     ServerResponse getPageModel(ClientRequest request);
 

@@ -8,7 +8,7 @@
  * @property {Page} page
  * @property {PageHtml} html
  * @property {Data} data
- * @property {Config} config
+ * @property {ClientConfig} config
  * @property {ResolvedURL} resolvedURL
  * 
  * A singleton responsible for placing or replacing
@@ -117,8 +117,8 @@ class PageController {
 
     /**
      * @public
-     * @param {Config} config
-     * @returns {Promise<Config>}
+     * @param {ClientConfig} config
+     * @returns {Promise<ClientConfig>}
      */
     setConfig(config) {
         var _this = this;

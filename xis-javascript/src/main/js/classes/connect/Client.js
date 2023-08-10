@@ -1,7 +1,7 @@
 /**
  * @typedef Client
  * @property {HttpClient} httpClient
- * @property {Config} config
+ * @property {ClientConfig} config
  * @property {string} clientId
  * @property {string} userId
  */
@@ -19,7 +19,7 @@ class Client {
 
     /**
      * @public
-     * @return {Promise<Config>}
+     * @return {Promise<ClientConfig>}
      */
     loadConfig() {
         var _this = this;
@@ -170,11 +170,11 @@ class Client {
     /**
      * @private
      * @param {string} content 
-     * @returns {Config}
+     * @returns {ClientConfig}
      */
     deserializeConfig(content) {
         var obj = JSON.parse(content);
-        var config = new Config();
+        var config = new ClientConfig();
         config.welcomePageId = obj.welcomePageId;
         config.pageIds = obj.pageIds ? obj.pageIds : [];
         config.widgetIds = obj.widgetIds ? obj.widgetIds : [];
