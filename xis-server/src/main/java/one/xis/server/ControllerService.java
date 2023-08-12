@@ -43,47 +43,45 @@ class ControllerService {
         pageControllerWrappers = pageControllerWrappers();
     }
 
-
-    ServerResponse invokePageModelMethods(ClientRequest request) {
+    ServerResponse processPageModelDataRequest(ClientRequest request) {
         var wrapper = findPageControllerWrapper(request).orElseThrow();
-        return pageModelDataResponse(200, wrapper, request);
+        return invokeGetPageModelMethods(200, wrapper, request);
     }
 
-    ServerResponse invokeWidgetModelMethods(ClientRequest request) {
+    ServerResponse processWidgetModelDataRequest(ClientRequest request) {
         var wrapper = findWidgetControllerWrapper(request).orElseThrow();
-        return widgetModelDataResponse(200, wrapper, request);
+        return invokeGetWidgetModelMethods(200, wrapper, request);
     }
 
-    ServerResponse invokePageActionMethod(ClientRequest request) {
+    ServerResponse processPageActionRequest(ClientRequest request) {
         var invokerController = findPageControllerWrapper(request).orElseThrow();
         var result = invokerController.invokeActionMethod(request);
         var nextPageController = pageControllerWrapperByResult(result).orElse(invokerController);
-        return pageModelDataResponse(200, nextPageController, request);
+        return invokeGetPageModelMethods(200, nextPageController, request);
     }
 
-    ServerResponse invokeWidgetActionMethod(ClientRequest request) {
+    ServerResponse processWidgetActionRequest(ClientRequest request) {
         var invokerController = findWidgetControllerWrapper(request).orElseThrow();
         var result = invokerController.invokeActionMethod(request);
         if (result == null || result == Void.class) {
-            return widgetModelDataResponse(200, invokerController, request);
+            return invokeGetWidgetModelMethods(200, invokerController, request);
         }
         var controllerWrapper = widgetControllerWrapperByResult(result)
                 .orElseGet(() -> pageControllerWrapperByResult(result).orElseThrow());
         if (controllerWrapper.getController().getClass().isAnnotationPresent(Widget.class)) {
-            return widgetModelDataResponse(200, controllerWrapper, request);
+            return invokeGetWidgetModelMethods(200, controllerWrapper, request);
         } else if (controllerWrapper.getController().getClass().isAnnotationPresent(Page.class)) {
-            return pageModelDataResponse(200, controllerWrapper, request);
+            return invokeGetPageModelMethods(200, controllerWrapper, request);
         } else {
             throw new IllegalStateException("not a controller: " + controllerWrapper.getClass());
         }
-
     }
 
-    private ServerResponse widgetModelDataResponse(int status, ControllerWrapper wrapper, ClientRequest request) {
+    private ServerResponse invokeGetWidgetModelMethods(int status, ControllerWrapper wrapper, ClientRequest request) {
         return new ServerResponse(status, dataSerializer.serialize(wrapper.invokeGetModelMethods(request)), null, wrapper.getId());
     }
 
-    private ServerResponse pageModelDataResponse(int status, ControllerWrapper wrapper, ClientRequest request) {
+    private ServerResponse invokeGetPageModelMethods(int status, ControllerWrapper wrapper, ClientRequest request) {
         return new ServerResponse(status, dataSerializer.serialize(wrapper.invokeGetModelMethods(request)), wrapper.getId(), null);
     }
 
@@ -130,15 +128,13 @@ class ControllerService {
     private ControllerWrapper createControllerWrapper(Object controller, Function<Object, String> idMapper) {
         return controllerWrapperFactory.createControllerWrapper(idMapper.apply(controller), controller);
     }
-
-
+    
     private String getPagePath(Object pageController) {
         var path = pageController.getClass().getAnnotation(Page.class).value();
         if (!path.endsWith(".html")) {
             throw new IllegalStateException(pageController.getClass() + ": Identifier in @Page-annotation must have suffix '.html'");
         }
         return pathResolver.normalizedPath(pageController);
-
     }
 
     private Optional<ControllerWrapper> findPageControllerWrapper(ClientRequest request) {

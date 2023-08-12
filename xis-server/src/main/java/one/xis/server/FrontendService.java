@@ -39,19 +39,19 @@ public class FrontendService {
     }
 
     public ServerResponse invokePageActionMethod(ClientRequest request) {
-        return applyFilterChain(request, controllerService::invokePageActionMethod);
+        return applyFilterChain(request, controllerService::processPageActionRequest);
     }
 
     public ServerResponse invokeWidgetActionMethod(ClientRequest request) {
-        return applyFilterChain(request, controllerService::invokeWidgetActionMethod);
+        return applyFilterChain(request, controllerService::processWidgetActionRequest);
     }
 
     public ServerResponse invokePageModelMethods(ClientRequest request) {
-        return applyFilterChain(request, controllerService::invokePageModelMethods);
+        return applyFilterChain(request, controllerService::processPageModelDataRequest);
     }
 
     public ServerResponse invokeWidgetModelMethods(ClientRequest request) {
-        return applyFilterChain(request, controllerService::invokeWidgetModelMethods);
+        return applyFilterChain(request, controllerService::processWidgetModelDataRequest);
     }
 
     public String getPage(String id) {

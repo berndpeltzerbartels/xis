@@ -177,5 +177,27 @@ class DocumentTest {
         assertThat(element.localName).isEqualTo("b");
     }
 
+    @Test
+    void findElement() {
+        var xml = "<x><a/><b id=\"123\" /></x>";
+        var document = Document.of(xml);
+
+        var element = document.findElement(e -> "123".equals(e.getId()));
+
+        assertThat(element).isNotNull();
+        assertThat(element.localName).isEqualTo("b");
+
+    }
+
+    @Test
+    void findElements() {
+        var xml = "<x id=\"123\"><a/><b id=\"123\" /></x>";
+        var document = Document.of(xml);
+
+        var element = document.findElements(e -> "123".equals(e.getId()));
+
+        assertThat(element).hasSize(2);
+    }
+
 
 }

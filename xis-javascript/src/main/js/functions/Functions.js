@@ -114,11 +114,13 @@ function initializeElement(element) {
 }
 
 function assertNotNull(o, errorText) {
-    if (o) return;
-    else throw new Error(errorText);
+    if (!errorText) errorText = 'Assertion failed. Value is null.'
+    if (!o) throw new Error(errorText);
+    return o;
 }
 
 
 function refreshNode(node, data) {
     app.refresher.refreshNode(node, data);
 }
+

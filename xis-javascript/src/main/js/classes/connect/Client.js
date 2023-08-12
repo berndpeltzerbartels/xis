@@ -81,7 +81,7 @@ class Client {
     * @public
     * @param {string} widgetId
     * @param {WidgetClientData} widgetClientData
-    * @returns {Promise<Response>}
+    * @returns {Promise<ServerReponse>}
     */
     loadWidgetData(widgetId, widgetClientData) {
         var _this = this;
@@ -96,7 +96,7 @@ class Client {
      * @param {string} widgetId
      * @param {WidgetClientData} widgetClientData
      * @param {string} action
-     * @returns {Promise<Response>}
+     * @returns {Promise<ServerReponse>}
      */
     widgetAction(widgetId, widgetClientData, action) {
         var _this = this;
@@ -110,7 +110,7 @@ class Client {
      * @param {string} pageId
      * @param {PageClientData} clientData
      * @param {string} action
-     * @returns {Promise<Response>}
+     * @returns {Promise<ServerReponse>}
      */
     pageAction(pageId, pageClientData, action) {
         var _this = this;
@@ -152,14 +152,16 @@ class Client {
     * @param {string} widgetId 
     * @param {WidgetClientData} widgetClientData
     * @param {string} action
+    * @param {string} targetContainerId
     * @returns {ClientRequest}
     */
-    createWidgetRequest(widgetId, widgetClientData, action) {
+    createWidgetRequest(widgetId, widgetClientData, action, targetContainerId) {
         var request = new ClientRequest();
         request.clientId = this.clientId;
         request.userId = this.userId;
         request.widgetId = widgetId;
         request.action = action;
+        request.targetContainerId = targetContainerId;
         request.data = widgetClientData.modelData;
         request.data = widgetClientData.modelData;
         request.parameters = widgetClientData.parameters;
@@ -196,7 +198,7 @@ class Client {
     /**
      * @private
      * @param {string} content 
-     * @returns {Response}
+     * @returns {ServerReponse}
      */
     deserializeResponse(content) {
         var obj = JSON.parse(content);

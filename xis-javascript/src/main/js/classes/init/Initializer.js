@@ -3,10 +3,12 @@ class Initializer {
     /**
      *
      * @param {DomAccessor} domAccessor
+     * @param {Client} client
      * @param {Widgets} widgets
      * @param {WidgetContainers} widgetContainers
      */
     constructor(domAccessor, client, widgets, widgetContainers) {
+        debugger;
         this.domAccessor = domAccessor;
         this.client = client;
         this.widgets = widgets;
@@ -52,6 +54,9 @@ class Initializer {
             } else {
                 this.initializeLinkByAttribute(element);
             }
+        }
+        if (element.getAttribute('xis:widget-container')) {
+            this.initializeWidgetContainerByAttribute(element);
         }
         this.initializeAttributes(element);
     }
@@ -165,7 +170,7 @@ class Initializer {
         if (a.getAttribute('xis:page') || a.getAttribute('xis:widget')) {
             handler = new LinkHandler(a);
         } else if (a.getAttribute('xis:action')) {
-            handler = new ActionLinkHandler(a);
+            handler = new ActionLinkHandler(a, this.widgetContainers);
         }
         this.addHandler(a, handler);
         a.onclick = event => handler.onClick(event);
@@ -236,13 +241,28 @@ class Initializer {
     }
 
     /**
+      * @private
+      * @param {Element} foreach 
+      */
+    initializeWidgetContainerByAttribute(element) {
+        var id = element.getAttribute('xis:widget-container');
+        var container = createElement('xis:widget-container');
+        container.setAttribute('container-id', id);
+        var defaultWidget = element.getAttribute('xis:default-widget');
+        if (defaultWidget) {
+            container.setAttribute('default-widget', defaultWidget);
+        }
+        element.appendChild(container);
+        return container;
+    }
+
+    /**
      * @private
      * @param {Element} container 
      * @returns {Element}
      */
     initializeWidgetContainer(container) {
-        this.addHandler(container, new WidgetContainerHandler(container, this.client, this.widgets));
-        this.widgetContainers.addContainer(container, container.getAttribute('id')); // TODO validate, the id must not be an expression
+        this.addHandler(container, new WidgetContainerHandler(container, this.client, this.widgets, this.widgetContainers));
         return container;
     }
 

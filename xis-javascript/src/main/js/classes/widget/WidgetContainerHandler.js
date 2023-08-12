@@ -5,29 +5,40 @@ class WidgetContainerHandler extends TagHandler {
      * @param {Element} tag
      * @param {Client} client
      * @param {Widgets} widgets
+     * @param {WidgetContainers} widgetContainers
      */
-    constructor(tag, client, widgets) {
+    constructor(tag, client, widgets, widgetContainers) {
+        debugger;
         super(tag);
         this.client = client;
         this.widgets = widgets;
+        this.widgetContainers = widgetContainers;
         this.widget = undefined;
+        this.containerId = undefined;
+        this.containerIdExpression = this.expressionFromAttribute('container-id');
         this.defaultWidgetIdExpression = this.expressionFromAttribute('default-widget');
-        this.containerId = tag.getAttribute('container-id'); // TODO validate: the id must not be an expression
         this.type = 'widget-container-handler';
-        this.clearChildren();
     }
 
     /**
      * @public
      * @param {String} action 
      * @param {Array<Parameter>} parameters
+     * @param {String} targetContainerId
      */
-    submitAction(action, parameters) {
+    submitAction(action, parameters, targetContainerId) {
         if (this.widget) {
             var _this = this;
-            var clientData = this.widget.clientDataForActionRequest(action, parameters);
+            var clientData = this.widget.clientDataForActionRequest(action, parameters, targetContainerId);
             this.client.widgetAction(this.widget.id, clientData, action)
-                .then(response => _this.handleActionResponse(response));
+                .then(response => {
+                    if (!targetContainerId || targetContainerId == _this.containerId) {
+                        _this.handleActionResponse(response, targetContainerId);
+                    } else {
+                        var targetContainer = _this.widgetContainers.findContainer(targetContainerId);
+                        targetContainer._handler.handleActionResponse(response, targetContainerId);
+                    }
+                });
         }
     }
 
@@ -36,10 +47,8 @@ class WidgetContainerHandler extends TagHandler {
      * @param {Data} parentData 
      */
     refresh(parentData) {
-        if (this.defaultWidgetIdExpression) {
-            var widgetId = this.defaultWidgetIdExpression.evaluate(parentData);
-            this.bindWidget(widgetId);
-        }
+        this.refreshContainerId(parentData);
+        this.refreshDefaultWidget(parentData);
         if (this.widget) {
             this.reloadDataAndRefresh();
         }
@@ -58,6 +67,32 @@ class WidgetContainerHandler extends TagHandler {
         this.reloadDataAndRefresh(parameters);
     }
 
+    /**
+     * @private
+     * @param {Data} parentData 
+     */
+    refreshContainerId(parentData) {
+        if (this.containerIdExpression) {
+            var containerId = this.containerIdExpression.evaluate(parentData);
+            if (this.containerId) {
+                this.widgetContainers.updateContainerId(this.containerId, containerId);
+            } else {
+                this.widgetContainers.addContainer(this.tag, containerId);
+            }
+            this.containerId = containerId;
+        }
+    }
+
+    /**
+     * @private
+     * @param {Data} parentData 
+     */
+    refreshDefaultWidget(parentData) {
+        if (this.defaultWidgetIdExpression && !this.widget) { // only once
+            var widgetId = this.defaultWidgetIdExpression.evaluate(parentData);
+            this.bindWidget(widgetId);
+        }
+    }
 
     /**
      * @private
@@ -67,7 +102,7 @@ class WidgetContainerHandler extends TagHandler {
     bindWidget(widgetId) {
         if (!this.widget || this.widget.id != widgetId) {
             this.clearChildren();
-            this.widget = this.widgets.getWidget(widgetId);
+            this.widget = assertNotNull(this.widgets.getWidget(widgetId), 'no such widget: ' + widgetId);
             this.tag.appendChild(this.widget.root);
         }
     }
@@ -90,7 +125,7 @@ class WidgetContainerHandler extends TagHandler {
     }
 
     /**
-     * @private
+     * @public
      * @param {Response} response 
      */
     handleActionResponse(response) {

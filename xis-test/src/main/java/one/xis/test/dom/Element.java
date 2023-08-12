@@ -7,6 +7,7 @@ import one.xis.utils.lang.StringUtils;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Getter
@@ -101,7 +102,6 @@ public class Element extends Node {
         return childNodes.list();
     }
 
-
     @Override
     public String getName() {
         return localName;
@@ -164,6 +164,26 @@ public class Element extends Node {
         return text;
     }
 
+    public Element getDescendantById(String id) {
+        if (id.equals(attributes.get("id"))) {
+            return this;
+        }
+        if (nextSibling != null && nextSibling instanceof Element) {
+            var element = ((Element) nextSibling).getDescendantById(id);
+            if (element != null) {
+                return element;
+            }
+        }
+        if (firstChild != null && firstChild instanceof Element) {
+            var element = ((Element) firstChild).getDescendantById(id);
+            if (element != null) {
+                return element;
+            }
+        }
+        return null;
+    }
+
+
     void findByTagName(String name, NodeList result) {
         if (localName.equals(name)) {
             result.addNode(this);
@@ -188,24 +208,18 @@ public class Element extends Node {
         }
     }
 
-    Element getElementById(String id) {
-        if (id.equals(attributes.get("id"))) {
-            return this;
+    void findElements(Predicate<Element> predicate, Collection<Element> result) {
+        if (predicate.test(this)) {
+            result.add(this);
         }
         if (nextSibling != null && nextSibling instanceof Element) {
-            var element = ((Element) nextSibling).getElementById(id);
-            if (element != null) {
-                return element;
-            }
+            ((Element) nextSibling).findElements(predicate, result);
         }
         if (firstChild != null && firstChild instanceof Element) {
-            var element = ((Element) firstChild).getElementById(id);
-            if (element != null) {
-                return element;
-            }
+            ((Element) firstChild).findElements(predicate, result);
         }
-        return null;
     }
+
 
     public TextNode getTextNode() {
         var child = firstChild;

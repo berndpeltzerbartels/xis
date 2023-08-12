@@ -24,7 +24,7 @@ class WidgetContainerHandlerTest {
 
         var script = Javascript.getScript(CLASSES, FUNCTIONS, TEST, TEST_APP_INSTANCE);
         script += IOUtils.getResourceAsString("one/xis/widget/WidgetContainerHandlerTestMocks.js");
-        script += "var handler = new WidgetContainerHandler(tag, client, widgets);";
+        script += "var handler = new WidgetContainerHandler(tag, client, widgets, new WidgetContainers());";
         script += "handler.refresh(data)";
 
         var bindings = new HashMap<String, Object>();

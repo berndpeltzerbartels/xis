@@ -80,7 +80,7 @@ class LinkHandler extends TagHandler {
      * @returns {Promise<void>}
      */
     onClickPageLink() {
-        if (this.parameters.length > 0) throw new Error('page link does not accept parameters');
+        if (this.parameters.length > 0) throw new Error('Page link does not accept parameters. Use path variables or url-parameters instead.');
         return displayPageForUrl(this.targetPageId, this.parameters);
     }
 

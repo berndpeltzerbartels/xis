@@ -29,10 +29,12 @@ class Widget {
    * @public
    * @param {string} action
    * @param {array<Parameter>} parameters passed by parameter-tag
+   * @param {string} targetContainerId
    * @returns {WidgetClientData}
    */
-    clientDataForActionRequest(action, parameters) {
+    clientDataForActionRequest(action, parameters, targetContainerId) {
         var clientData = this.clientData(parameters);
+        clientData.targetContainerId = targetContainerId;
         this.addModelDataForActionRequest(action, clientData);
         return clientData;
     }

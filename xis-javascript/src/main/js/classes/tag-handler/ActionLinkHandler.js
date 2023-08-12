@@ -1,14 +1,11 @@
 class ActionLinkHandler extends TagHandler {
 
     /**
-     * 
      * @param {Element} element 
-     * @param {Client} client 
      * @param {WidgetContainers} widgetContainers
      */
-    constructor(element, client, widgetContainers) {
+    constructor(element, widgetContainers) {
         super(element);
-        this.client = client;
         this.widgetContainers = widgetContainers;
         this.type = 'action-link-handler';
         this.targetContainerId = undefined;
@@ -38,7 +35,7 @@ class ActionLinkHandler extends TagHandler {
     refresh(data) {
         this.data = data;
         if (this.targetContainerExpression) {
-            this.targetContainerId = this.widgetContainers.findContainer(this.targetContainerExpression.evaluate(data));
+            this.targetContainerId = this.targetContainerExpression.evaluate(data);
         }
         this.action = this.actionExpression.evaluate(data);
     }
@@ -49,7 +46,13 @@ class ActionLinkHandler extends TagHandler {
      */
     onClick(e) {
         if (this.widgetId) {
-            this.getTargetContainer()._handler.submitAction(this.action, this.parameters);
+            var widgetContainer = this.findParentWidgetContainer();
+            if (this.targetContainerId) {
+                widgetContainer._handler.submitAction(this.action, this.parameters, this.targetContainerId);
+            } else {
+                var targetContainerId = widgetContainer._handler.containerId;
+                widgetContainer._handler.submitAction(this.action, this.parameters, targetContainerId);
+            }
         } else {
             app.pageController.submitAction(this.action, this.parameters);
         }

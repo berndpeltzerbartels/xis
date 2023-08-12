@@ -5,6 +5,11 @@ class WidgetContainers {
         this.containers = {};
     }
 
+    updateContainerId(oldId, newId) {
+        var container = this.containers[oldId];
+        this.containers[oldId] = undefined;
+        this.containers[newId] = container;
+    }
     /**
      * 
      * @param {String} id

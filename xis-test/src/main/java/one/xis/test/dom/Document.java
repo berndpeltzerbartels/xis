@@ -4,8 +4,8 @@ import one.xis.utils.io.IOUtils;
 import one.xis.utils.lang.StringUtils;
 import one.xis.utils.xml.XmlUtil;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.function.Predicate;
 
 /**
  * Document used as mock for html-documents. Sorrily {@link org.w3c.dom.Element} is using
@@ -41,7 +41,7 @@ public class Document {
     }
 
     public Element getElementById(String id) {
-        return rootNode.getElementById(id);
+        return rootNode.getDescendantById(id);
     }
 
     public List<Element> getElementsByClass(String cssClass) {
@@ -64,6 +64,28 @@ public class Document {
 
     public static Document fromResource(String classPathResource) {
         return of(IOUtils.getResourceAsString(classPathResource));
+    }
+
+    public Element findElement(Predicate<Element> predicate) {
+        var result = new ArrayList<>(findElements(predicate));
+        return switch (result.size()) {
+            case 0 -> throw new NoSuchElementException();
+            case 1 -> result.get(0);
+            default -> throw new IllegalStateException("too many results");
+        };
+    }
+
+    public String asString() {
+        return rootNode != null ? rootNode.asString() : null;
+    }
+
+    // TODO test
+    public Collection<Element> findElements(Predicate<Element> predicate) {
+        var results = new HashSet<Element>();
+        if (this.rootNode != null) {
+            rootNode.findElements(predicate, results);
+        }
+        return results;
     }
 
     public void replaceRoot(Element element) {
