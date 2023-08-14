@@ -323,6 +323,9 @@ public class Element extends Node {
 
     @Override
     protected void evaluateContent(StringBuilder builder, int indent) {
+        for (int i = 0; i < indent; i++) {
+            builder.append("\t");
+        }
         builder.append("<");
         builder.append(localName);
         attributes.forEach((key, value) -> {
@@ -333,14 +336,17 @@ public class Element extends Node {
             builder.append("\"");
         });
         if (childNodes.list().isEmpty()) {
-            builder.append("/>");
+            builder.append("/>\n");
             return;
         }
-        builder.append(">");
+        builder.append(">\n");
         childNodes.stream().forEach(node -> node.evaluateContent(builder, indent + 1));
+        for (int i = 0; i < indent; i++) {
+            builder.append("\t");
+        }
         builder.append("</");
         builder.append(localName);
-        builder.append(">");
+        builder.append(">\n");
     }
 
 }

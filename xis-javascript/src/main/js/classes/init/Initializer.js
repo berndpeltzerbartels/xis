@@ -189,22 +189,25 @@ class Initializer {
     /**
      * @private
      * @param {Element} element 
-     * @returns {void} 
+     * @returns {Element} 
      */
     initializeParameter(element) {
         var parameter = new Parameter(element.getAttribute('name'), element.innerText);
         element._handler = new ParameterHandler(element, parameter);
+        return element;
     }
 
     /**
     * @private
-    * @param {Element} element 
+    * @param {Element} element
+    * @returns {Element}
     */
     initializeForeachAttribute(element) {
         var arr = doSplit(element.getAttribute('xis:foreach'), ':');
         var foreach = this.createForEach(arr[0], arr[1]);
         this.domAccessor.insertChild(element, foreach);
         element.removeAttribute('xis:foreach');// Otherwise endless recursion
+        return element;
     }
 
     /**
@@ -242,7 +245,7 @@ class Initializer {
         if (defaultWidget) {
             container.setAttribute('default-widget', defaultWidget);
         }
-        element.appendChild(container);
+        this.domAccessor.insertChild(element, container);
         return container;
     }
 

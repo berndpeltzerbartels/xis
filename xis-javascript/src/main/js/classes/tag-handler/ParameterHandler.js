@@ -19,7 +19,7 @@ class ParameterHandler extends TagHandler {
     }
 
     findParentParameterAcceptor() {
-        var e = element;
+        var e = this.tag;
         while (e) {
             if (e._handler && e._handler.addParameter) {
                 return e;

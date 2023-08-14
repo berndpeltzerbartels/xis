@@ -8,7 +8,7 @@ import java.util.List;
 @Page("/widgetInLoopPage.html")
 class WidgetInLoopPage {
 
-    @Model("Numbers")
+    @Model("numbers")
     List<Integer> numbers() {
         return List.of(1, 2, 3, 4, 5, 6, 7, 8);
     }

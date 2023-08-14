@@ -5,7 +5,7 @@
 </head>
 <body>
 <xis:foreach var="num" array="numbers">
-    <div xis:container-id="cont{num}" class="container">
+    <div xis:widget-container="cont{num}" class="container">
         <xis:param name="number">${num}</xis:param>
     </div>
 </xis:foreach>
