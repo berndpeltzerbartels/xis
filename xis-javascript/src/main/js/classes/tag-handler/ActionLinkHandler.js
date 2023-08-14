@@ -1,11 +1,13 @@
 class ActionLinkHandler extends TagHandler {
 
     /**
-     * @param {Element} element 
+     * @param {Element} element
+     * @param {Client} client
      * @param {WidgetContainers} widgetContainers
      */
-    constructor(element, widgetContainers) {
+    constructor(element, client, widgetContainers) {
         super(element);
+        this.client = client;
         this.widgetContainers = widgetContainers;
         this.type = 'action-link-handler';
         this.targetContainerId = undefined;
@@ -13,7 +15,7 @@ class ActionLinkHandler extends TagHandler {
         this.actionExpression = this.expressionFromAttribute('xis:action'); // mandatory
         this.action = undefined;
         this.data = {};
-        this.parameters = [];
+        this.parameters = {};
         this.widgetId = this.getWidgetId();
         element.onclick = e => this.onClick(e);
         if (element.localName == 'a') {
@@ -23,16 +25,18 @@ class ActionLinkHandler extends TagHandler {
 
     /**
    * @public
-   * @param {Parameter} parameter 
+   * @param {string} name
+   * @param {any} value 
    */
-    addParameter(parameter) {
-        this.parameters.push(parameter);
+    addParameter(name, value) {
+        this.parameters[name] = value;
     }
     /**
      * @public
      * @param {Data} data 
      */
     refresh(data) {
+        this.parameters = {};
         this.data = data;
         if (this.targetContainerExpression) {
             this.targetContainerId = this.targetContainerExpression.evaluate(data);
@@ -46,25 +50,38 @@ class ActionLinkHandler extends TagHandler {
      */
     onClick(e) {
         if (this.widgetId) {
-            var widgetContainer = this.findParentWidgetContainer();
-            if (this.targetContainerId) {
-                widgetContainer._handler.submitAction(this.action, this.parameters, this.targetContainerId);
-            } else {
-                var targetContainerId = widgetContainer._handler.containerId;
-                widgetContainer._handler.submitAction(this.action, this.parameters, targetContainerId);
-            }
+            this.widgetAction();
         } else {
-            app.pageController.submitAction(this.action, this.parameters);
+            this.pageAction();
         }
     }
 
+    widgetAction() {
+        var invokerContainer = this.findParentWidgetContainer();
+        var targetContainer = this.targetContainerId ? this.widgetContainers.findContainer(this.targetContainerId) : invokerContainer;
+        var targetContainerHandler = targetContainer._handler;
+        var targetContainerId = targetContainerHandler.containerId;
+        var invokerWidget = invokerContainer._handler.widget;
+        var clientData = invokerWidget.clientDataForActionRequest(this.action, this.parameters, targetContainerId);
+        var _this = this;
+        this.client.widgetAction(invokerWidget.id, clientData, this.action)
+            .then(response => _this.handleActionResponse(response, targetContainerHandler));
+    }
 
-    getTargetContainer() {
-        if (this.targetContainerId) {
-            return this.widgetContainers.findContainer(this.targetContainerId);
+    handleActionResponse(response, targetContainerHandler) {
+        if (response.nextPageURL) {
+            app.pageController.handleActionResponse(response);
         } else {
-            return this.findParentWidgetContainer();
+            targetContainerHandler.handleActionResponse(response);
         }
+    }
+
+    /**
+     * @private
+     * @param {string} action 
+     */
+    pageAction() {
+        app.pageController.submitAction(this.action, this.parameters);
     }
 
 

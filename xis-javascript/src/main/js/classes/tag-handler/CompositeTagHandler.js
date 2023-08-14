@@ -21,7 +21,6 @@ class CompositeTagHandler {
         }
     }
 
-
     widgetContainerHandler() {
         for (var handler of this.handlers) {
             if (handler.type == 'widget-container-handler') {
@@ -29,5 +28,4 @@ class CompositeTagHandler {
             }
         }
     }
-
 }

@@ -80,5 +80,5 @@ public abstract class Node {
         return null;
     }
 
-    protected abstract void evaluateContent(StringBuilder builder);
+    protected abstract void evaluateContent(StringBuilder builder, int indent);
 }

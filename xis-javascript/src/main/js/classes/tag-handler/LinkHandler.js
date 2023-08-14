@@ -12,7 +12,7 @@ class LinkHandler extends TagHandler {
         this.pageIdExpression = this.expressionFromAttribute('xis:page');
         this.widgetIdExpression = this.expressionFromAttribute('xis:widget');
         this.targetContainerExpression = this.expressionFromAttribute('xis:target-container');
-        this.parameters = [];
+        this.parameters = {};
         if (!this.targetContainerExpression) {
             this.parentWidgetContainer = this.findParentWidgetContainer();
         }
@@ -23,11 +23,12 @@ class LinkHandler extends TagHandler {
     }
 
     /**
-     * @public
-     * @param {Parameter} parameter 
-     */
-    addParameter(parameter) {
-        this.parameters.push(parameter);
+   * @public
+   * @param {string} name
+   * @param {any} value 
+   */
+    addParameter(name, value) {
+        this.parameters[name] = value;
     }
 
     /**
@@ -35,6 +36,7 @@ class LinkHandler extends TagHandler {
      * @param {Data} data 
      */
     refresh(data) {
+        this.parameters = {};
         this.data = data;
         if (this.pageIdExpression) {
             this.targetPageId = this.pageIdExpression.evaluate(data);
@@ -45,7 +47,6 @@ class LinkHandler extends TagHandler {
         if (this.targetContainerExpression) {
             this.targetContainerId = this.targetContainerExpression.evaluate(data);
         }
-
     }
 
 

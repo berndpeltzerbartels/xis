@@ -16,7 +16,7 @@ class Widget {
 
     /**
      * @public
-     * @param {array<Parameter>} parameters passed by parameter-tag
+     * @param {{string: any}} parameters passed by parameter-tag
      * @returns {WidgetClientData}
      */
     clientDataForModelRequest(parameters) {
@@ -28,7 +28,7 @@ class Widget {
     /**
    * @public
    * @param {string} action
-   * @param {array<Parameter>} parameters passed by parameter-tag
+   * @param {{string: any}} parameters passed by parameter-tag
    * @param {string} targetContainerId
    * @returns {WidgetClientData}
    */
@@ -61,23 +61,12 @@ class Widget {
 
     /**
     * @private
-    * @param  {WidgetClientData} clientData
-    * @param {array<Parameter>} parameters created by parameter-tag
-    */
-    addParameters(clientData, parameters) {
-        for (param of parameters) {
-            clientData.parameters[param.name] = param.value;
-        }
-    }
-
-    /**
-    * @private
-    * @param {array<Parameter>} parameters created by parameter-tag
+    * @param {{string: any}} parameters created by parameter-tag
     * @returns {WidgetClientData}
     */
     clientData(parameters) {
         var clientData = new WidgetClientData();
-        this.addParameters(clientData, parameters);
+        clientData.parameters = parameters;
         return clientData;
     }
 }

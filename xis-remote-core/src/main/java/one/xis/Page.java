@@ -5,10 +5,7 @@ import jakarta.inject.Singleton;
 import one.xis.context.XISComponent;
 import org.springframework.stereotype.Component;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 @Target({ElementType.TYPE, ElementType.PARAMETER, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
@@ -16,6 +13,7 @@ import java.lang.annotation.Target;
 @Singleton // for micronaut
 @Component // for spring
 @XISComponent
+@Documented
 public @interface Page {
     String value();
 }

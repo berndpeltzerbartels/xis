@@ -170,7 +170,7 @@ class Initializer {
         if (a.getAttribute('xis:page') || a.getAttribute('xis:widget')) {
             handler = new LinkHandler(a);
         } else if (a.getAttribute('xis:action')) {
-            handler = new ActionLinkHandler(a, this.widgetContainers);
+            handler = new ActionLinkHandler(a, this.client, this.widgetContainers);
         }
         this.addHandler(a, handler);
         a.onclick = event => handler.onClick(event);
@@ -194,16 +194,6 @@ class Initializer {
     initializeParameter(element) {
         var parameter = new Parameter(element.getAttribute('name'), element.innerText);
         element._handler = new ParameterHandler(element, parameter);
-        var parent = element.parentNode;
-        while (parent) {
-            if (parent._handler.addParameter) {
-                parent._handler.addParameter(parameter);
-                return element;
-            }
-            parent = parent.parentNode;
-        }
-        var stringRepresentation = '<xis:param name="' + element.getAttribute('name') || '' + '">';
-        throw new Error(stringRepresentation + ': no parent tag supporting parameters found');
     }
 
     /**

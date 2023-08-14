@@ -44,15 +44,13 @@ class PageController {
      * 
      * @public
      * @param {String} action
-     * @param {array<Parameter>} data
      * @returns {Promise<void>}
      */
-    submitAction(action, parameters) {
+    submitAction(action) {
         var _this = this;
         var clientData = new PageClientData();
         clientData.pathVariables = this.resolvedURL.pathVariables;
         clientData.urlParameters = this.resolvedURL.urlParameters
-        clientData.parameters = parameters;
         clientData.modelData = this.modelDataForAction(action);
         return this.client.pageAction(this.page.normalizedPath, clientData, action)
             .then(response => _this.handleActionResponse(response));
@@ -149,7 +147,6 @@ class PageController {
         var clientData = new PageClientData();
         clientData.pathVariables = this.resolvedURL.pathVariables;
         clientData.urlParameters = this.resolvedURL.urlParameters
-        clientData.parameters = [];
         clientData.modelData = this.modelDataForRefresh();
         return this.client.loadPageData(this.page.normalizedPath, clientData).then(response => {
             var data = _this.responseToData(response, pathVariables, urlParameters);
@@ -203,7 +200,6 @@ class PageController {
         }
         var data = response.data;
         data.setValue('pathVariables', pathVariables);
-        data.setValue('parameters', response.parameters);
         data.setValue('urlParameters', urlParameters);
         return data;
     }

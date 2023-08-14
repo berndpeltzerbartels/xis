@@ -26,7 +26,7 @@ public class TextNode extends Node {
     }
 
     @Override
-    protected void evaluateContent(StringBuilder builder) {
+    protected void evaluateContent(StringBuilder builder, int indent) {
         if (nodeValue != null) {
             builder.append(nodeValue);
         }

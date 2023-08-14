@@ -133,16 +133,13 @@ class Client {
         request.pageId = pageId;
         request.data = pageClientData.modelData;
         request.action = action;
+        request.parameters = pageClientData.parameters;
         request.urlParameters = pageClientData.urlParameters;
         request.pathVariables = {};
         for (var pathVariable of pageClientData.pathVariables) {
             var name = Object.keys(pathVariable)[0];
             var value = Object.values(pathVariable)[0];
             request.pathVariables[name] = value;
-        }
-        request.parameters = {};
-        for (var parameter of pageClientData.parameters) {
-            request.parameters[parameter.name] = parameter.value;
         }
         return request;
     }

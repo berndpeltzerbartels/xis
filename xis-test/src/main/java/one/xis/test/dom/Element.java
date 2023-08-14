@@ -138,6 +138,23 @@ public class Element extends Node {
         return elementList.get(index);
     }
 
+    public List<Element> findDescants(Predicate<Element> predicate) {
+        var result = new ArrayList<Element>();
+        for (var child : this.getChildElements()) {
+            child.findElements(predicate, result);
+        }
+        return result;
+    }
+
+    public Element findDescant(Predicate<Element> predicate) {
+        var result = new ArrayList<>(findDescants(predicate));
+        return switch (result.size()) {
+            case 0 -> throw new NoSuchElementException();
+            case 1 -> result.get(0);
+            default -> throw new IllegalStateException("too many results");
+        };
+    }
+
     public List<Element> getChildElements() {
         return childNodes.stream().filter(Element.class::isInstance).map(Element.class::cast).collect(Collectors.toList());
     }
@@ -284,7 +301,13 @@ public class Element extends Node {
 
     public String asString() {
         var builder = new StringBuilder();
-        evaluateContent(builder);
+        evaluateContent(builder, 0);
+        return builder.toString();
+    }
+
+    String asString(int indent) {
+        var builder = new StringBuilder();
+        evaluateContent(builder, indent);
         return builder.toString();
     }
 
@@ -299,7 +322,7 @@ public class Element extends Node {
     }
 
     @Override
-    protected void evaluateContent(StringBuilder builder) {
+    protected void evaluateContent(StringBuilder builder, int indent) {
         builder.append("<");
         builder.append(localName);
         attributes.forEach((key, value) -> {
@@ -309,8 +332,12 @@ public class Element extends Node {
             builder.append(value);
             builder.append("\"");
         });
+        if (childNodes.list().isEmpty()) {
+            builder.append("/>");
+            return;
+        }
         builder.append(">");
-        childNodes.stream().forEach(node -> node.evaluateContent(builder));
+        childNodes.stream().forEach(node -> node.evaluateContent(builder, indent + 1));
         builder.append("</");
         builder.append(localName);
         builder.append(">");
