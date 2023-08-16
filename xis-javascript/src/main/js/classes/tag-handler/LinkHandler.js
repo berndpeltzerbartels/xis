@@ -9,10 +9,9 @@ class LinkHandler extends TagHandler {
         super(element);
         this.type = 'link-handler';
         this.widgetContainers = widgetContainers;
-        this.pageIdExpression = this.expressionFromAttribute('xis:page');
-        this.widgetIdExpression = this.expressionFromAttribute('xis:widget');
+        this.pageUrlExpression = this.expressionFromAttribute('xis:page');
+        this.widgetUrlExpression = this.expressionFromAttribute('xis:widget');
         this.targetContainerExpression = this.expressionFromAttribute('xis:target-container');
-        this.parameters = {};
         if (!this.targetContainerExpression) {
             this.parentWidgetContainer = this.findParentWidgetContainer();
         }
@@ -23,26 +22,16 @@ class LinkHandler extends TagHandler {
     }
 
     /**
-   * @public
-   * @param {string} name
-   * @param {any} value 
-   */
-    addParameter(name, value) {
-        this.parameters[name] = value;
-    }
-
-    /**
      * @public
      * @param {Data} data 
      */
     refresh(data) {
-        this.parameters = {};
         this.data = data;
-        if (this.pageIdExpression) {
-            this.targetPageId = this.pageIdExpression.evaluate(data);
+        if (this.pageUrlExpression) {
+            this.targetPageUrl = this.pageUrlExpression.evaluate(data);
         }
-        if (this.widgetIdExpression) {
-            this.targetWidgetId = this.widgetIdExpression.evaluate(data);
+        if (this.widgetUrlExpression) {
+            this.targetWidgetUrl = this.widgetUrlExpression.evaluate(data);
         }
         if (this.targetContainerExpression) {
             this.targetContainerId = this.targetContainerExpression.evaluate(data);
@@ -56,9 +45,9 @@ class LinkHandler extends TagHandler {
      * @returns {Promise<void>} 
      */
     onClick(e) {
-        if (this.widgetIdExpression) {
+        if (this.widgetUrlExpression) {
             return this.onClickWidgetLink();
-        } else if (this.pageIdExpression) {
+        } else if (this.pageUrlExpression) {
             return this.onClickPageLink();
         }
     }
@@ -71,9 +60,22 @@ class LinkHandler extends TagHandler {
         return new Promise((resolve, _) => {
             var container = this.getTargetContainer();
             var handler = container._handler;
-            handler.showWidget(this.targetWidgetId, this.parameters);
+            var widgetUrlParameters = urlParameters(this.targetWidgetUrl);
+            var widgetId = this.targetWidgetId();
+            handler.showWidget(widgetId, widgetUrlParameters);
             resolve();
         });
+    }
+
+    /**
+     * @private
+     * @returns {string} the widget-id by leaving query from the widget-url
+     */
+    targetWidgetId() {
+        if (this.targetWidgetUrl.indexOf('?') != -1) {
+            return doSplit(this.targetWidgetUrl, '?')[1];
+        }
+        return this.targetWidgetUrl;
     }
 
     /**
@@ -81,8 +83,7 @@ class LinkHandler extends TagHandler {
      * @returns {Promise<void>}
      */
     onClickPageLink() {
-        if (this.parameters.length > 0) throw new Error('Page link does not accept parameters. Use path variables or url-parameters instead.');
-        return displayPageForUrl(this.targetPageId, this.parameters);
+        return displayPageForUrl(this.targetPageUrl);
     }
 
     /**

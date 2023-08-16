@@ -17,17 +17,6 @@ class WidgetContainerHandler extends TagHandler {
         this.containerIdExpression = this.expressionFromAttribute('container-id');
         this.defaultWidgetIdExpression = this.expressionFromAttribute('default-widget');
         this.type = 'widget-container-handler';
-        this.parameters = {};
-    }
-
-
-    /**
-    * @public
-    * @param {string} name
-    * @param {any} value 
-    */
-    addParameter(name, value) {
-        this.parameters[name] = value;
     }
 
     /**
@@ -47,25 +36,38 @@ class WidgetContainerHandler extends TagHandler {
      * @param {Data} parentData 
      */
     refresh(parentData) {
-        this.parameters = {};
         this.refreshContainerId(parentData);
         this.refreshDefaultWidget(parentData);
         if (this.widget) {
-            this.reloadDataAndRefresh(this.parameters);
+            this.widget.data = parentData;
+            this.reloadDataAndRefresh({});
         }
     }
 
     /**
      * @public
      * @param {string} widgetId 
-     * @param {{string: any}} parameters 
+     * @param {{string: any}} widgetUrlParameters
      * @returns {Promise<void>}
      */
-    showWidget(widgetId, parameters = {}) {
+    showWidget(widgetId, widgetUrlParameters = {}) {
         if (!this.widget || this.widget.id != widgetId) {
             this.bindWidget(widgetId);
         }
-        this.reloadDataAndRefresh(parameters);
+        this.reloadDataAndRefresh(widgetUrlParameters);
+    }
+
+    /**
+     * @public
+     * @returns {string}
+     */
+    getCurrentWidgetId() {
+        return this.widget ? this.widget.id : undefined;
+    }
+
+
+    getPageData() {
+        return app.pageController.data;
     }
 
     /**
@@ -89,7 +91,7 @@ class WidgetContainerHandler extends TagHandler {
      * @param {Data} parentData 
      */
     refreshDefaultWidget(parentData) {
-        if (this.defaultWidgetIdExpression && !this.widget) { // only once
+        if (this.defaultWidgetIdExpression && !this.widget) { // once, only
             var widgetId = this.defaultWidgetIdExpression.evaluate(parentData);
             this.bindWidget(widgetId);
         }
@@ -109,13 +111,14 @@ class WidgetContainerHandler extends TagHandler {
 
     /**
      * @private
-     * @param {{string: any}} parameters 
+     * @param {{string: any}} widgetUrlParameters 
      */
-    reloadDataAndRefresh(parameters) {
+    reloadDataAndRefresh(widgetUrlParameters) {
         if (this.widget) {
             var _this = this;
-            var clientData = this.widget.clientDataForModelRequest(parameters);
-            this.client.loadWidgetData(this.widget.id, clientData, parameters)
+            var clientData = this.widget.clientDataForModelRequest();
+            clientData.addUrlParameters(widgetUrlParameters);
+            this.client.loadWidgetData(this.widget.id, clientData)
                 .then(response => response.data)
                 .then(data => { _this.widget.data = data; return data; })
                 .then(data => _this.refreshChildNodes(data))

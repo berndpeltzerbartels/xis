@@ -67,7 +67,7 @@ class Client {
     /**
      * @public
      * @param {string} pageId
-     * @param {PageClientData} clientData
+     * @param {ClientData} clientData
      * @returns {Promise<any>}
      */
     loadPageData(pageId, clientData) {
@@ -80,12 +80,12 @@ class Client {
     /**
     * @public
     * @param {string} widgetId
-    * @param {WidgetClientData} widgetClientData
+    * @param {ClientData} ClientData
     * @returns {Promise<ServerReponse>}
     */
-    loadWidgetData(widgetId, widgetClientData) {
+    loadWidgetData(widgetId, clientData) {
         var _this = this;
-        var request = this.createWidgetRequest(widgetId, widgetClientData, null);
+        var request = this.createWidgetRequest(widgetId, clientData, null);
         return this.httpClient.post('/xis/widget/model', request)
             .then(content => _this.deserializeResponse(content));
     }
@@ -94,13 +94,13 @@ class Client {
     /**
      * @public
      * @param {string} widgetId
-     * @param {WidgetClientData} widgetClientData
+     * @param {ClientData} ClientData
      * @param {string} action
      * @returns {Promise<ServerReponse>}
      */
-    widgetAction(widgetId, widgetClientData, action) {
+    widgetAction(widgetId, clientData, action) {
         var _this = this;
-        var request = this.createWidgetRequest(widgetId, widgetClientData, action);
+        var request = this.createWidgetRequest(widgetId, clientData, action);
         return this.httpClient.post('/xis/widget/action', request, {})
             .then(content => _this.deserializeResponse(content));
     }
@@ -108,7 +108,7 @@ class Client {
     /**
      * @public
      * @param {string} pageId
-     * @param {PageClientData} clientData
+     * @param {ClientData} clientData
      * @param {string} action
      * @returns {Promise<ServerReponse>}
      */
@@ -122,7 +122,7 @@ class Client {
     /**
      * @private
      * @param {string} pageId 
-     * @param {PageClientData} pageClientData
+     * @param {ClientData} pageClientData
      * @param {string} action
      * @returns {ClientRequest}
      */
@@ -133,7 +133,6 @@ class Client {
         request.pageId = pageId;
         request.data = pageClientData.modelData;
         request.action = action;
-        request.parameters = pageClientData.parameters;
         request.urlParameters = pageClientData.urlParameters;
         request.pathVariables = {};
         for (var pathVariable of pageClientData.pathVariables) {
@@ -147,21 +146,21 @@ class Client {
     /**
     * @private
     * @param {string} widgetId 
-    * @param {WidgetClientData} widgetClientData
+    * @param {ClientData} ClientData
     * @param {string} action
     * @param {string} targetContainerId
     * @returns {ClientRequest}
     */
-    createWidgetRequest(widgetId, widgetClientData, action, targetContainerId) {
+    createWidgetRequest(widgetId, clientData, action, targetContainerId) {
         var request = new ClientRequest();
         request.clientId = this.clientId;
         request.userId = this.userId;
         request.widgetId = widgetId;
         request.action = action;
         request.targetContainerId = targetContainerId;
-        request.data = widgetClientData.modelData;
-        request.data = widgetClientData.modelData;
-        request.parameters = widgetClientData.parameters;
+        request.data = clientData.modelData;
+        request.data = clientData.modelData;
+        request.urlParameters = clientData.urlParameters;
         return request;
     }
 

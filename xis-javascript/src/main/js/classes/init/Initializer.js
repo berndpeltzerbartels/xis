@@ -108,8 +108,6 @@ class Initializer {
                 return this.initializeWidgetContainer(element);
             case 'xis:a':
                 return this.initializeFrameworkLink(element);
-            case 'xis:param':
-                return this.initializeParameter(element);
             default: return element;
         }
     }
@@ -184,17 +182,6 @@ class Initializer {
      */
     initializeFrameworkLink(element) {
         return this.replaceFrameworkLinkByHtml(element);
-    }
-
-    /**
-     * @private
-     * @param {Element} element 
-     * @returns {Element} 
-     */
-    initializeParameter(element) {
-        var parameter = new Parameter(element.getAttribute('name'), element.innerText);
-        element._handler = new ParameterHandler(element, parameter);
-        return element;
     }
 
     /**

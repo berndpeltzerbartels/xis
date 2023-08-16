@@ -15,8 +15,6 @@ class ActionLinkHandler extends TagHandler {
         this.actionExpression = this.expressionFromAttribute('xis:action'); // mandatory
         this.action = undefined;
         this.data = {};
-        this.parameters = {};
-        this.widgetId = this.getWidgetId();
         element.onclick = e => this.onClick(e);
         if (element.localName == 'a') {
             element.setAttribute('href', '#');
@@ -24,19 +22,10 @@ class ActionLinkHandler extends TagHandler {
     }
 
     /**
-   * @public
-   * @param {string} name
-   * @param {any} value 
-   */
-    addParameter(name, value) {
-        this.parameters[name] = value;
-    }
-    /**
      * @public
      * @param {Data} data 
      */
     refresh(data) {
-        this.parameters = {};
         this.data = data;
         if (this.targetContainerExpression) {
             this.targetContainerId = this.targetContainerExpression.evaluate(data);
@@ -49,20 +38,20 @@ class ActionLinkHandler extends TagHandler {
      * @param {Event} e 
      */
     onClick(e) {
-        if (this.widgetId) {
-            this.widgetAction();
+        var widgetcontainer = this.findParentWidgetContainer();
+        if (widgetcontainer) {
+            this.widgetAction(widgetcontainer);
         } else {
             this.pageAction();
         }
     }
 
-    widgetAction() {
-        var invokerContainer = this.findParentWidgetContainer();
+    widgetAction(invokerContainer) {
         var targetContainer = this.targetContainerId ? this.widgetContainers.findContainer(this.targetContainerId) : invokerContainer;
         var targetContainerHandler = targetContainer._handler;
         var targetContainerId = targetContainerHandler.containerId;
         var invokerWidget = invokerContainer._handler.widget;
-        var clientData = invokerWidget.clientDataForActionRequest(this.action, this.parameters, targetContainerId);
+        var clientData = invokerWidget.clientDataForActionRequest(this.action, targetContainerId);
         var _this = this;
         this.client.widgetAction(invokerWidget.id, clientData, this.action)
             .then(response => _this.handleActionResponse(response, targetContainerHandler));
@@ -81,9 +70,8 @@ class ActionLinkHandler extends TagHandler {
      * @param {string} action 
      */
     pageAction() {
-        app.pageController.submitAction(this.action, this.parameters);
+        app.pageController.submitAction(this.action);
     }
-
 
     asString() {
         return 'Link';

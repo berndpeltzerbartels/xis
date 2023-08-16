@@ -47,10 +47,15 @@ class WidgetContainerHandlerTest {
         public Map<String, String> attributes = new HashMap<>();
         public Object data;
 
-        public Object clientDataForModelRequest(Object o) {
-            return new HashMap<>();
+        public Object clientDataForModelRequest() {
+            return new ClientData();
         }
 
+    }
+
+    public static class ClientData {
+        public void addUrlParameters(Object o) {
+        }
     }
 
     public static class WidgetsMock {

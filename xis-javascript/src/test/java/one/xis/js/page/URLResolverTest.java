@@ -18,16 +18,6 @@ class URLResolverTest {
 
 
     @Test
-    void urlParameters() throws ScriptException {
-        var result = (Map<String, String>) JSUtil.execute(Javascript.getScript(FUNCTIONS, CLASSES) + "\nnew URLResolver().urlParameters('xyz.html?a=v1&b=v2&c=v3')");
-
-        assertThat(result.get("a")).isEqualTo("v1");
-        assertThat(result.get("b")).isEqualTo("v2");
-        assertThat(result.get("c")).isEqualTo("v3");
-    }
-
-
-    @Test
     void resolve() throws ScriptException {
         var script = Javascript.getScript(FUNCTIONS, CLASSES);
         script += """

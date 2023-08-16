@@ -58,15 +58,6 @@ class TagHandler {
         }
     }
 
-    getWidgetId() {
-        var e = this.tag;
-        while (e) {
-            if (e._widgetId) {
-                return e._widgetId;
-            }
-            e = e.parentNode;
-        }
-    }
 
     isFrameworkElement(node) {
         return isElement(node) && node.localName.startsWith('xis:');

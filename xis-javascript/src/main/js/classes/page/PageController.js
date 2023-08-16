@@ -48,7 +48,7 @@ class PageController {
      */
     submitAction(action) {
         var _this = this;
-        var clientData = new PageClientData();
+        var clientData = new ClientData();
         clientData.pathVariables = this.resolvedURL.pathVariables;
         clientData.urlParameters = this.resolvedURL.urlParameters
         clientData.modelData = this.modelDataForAction(action);
@@ -135,6 +135,19 @@ class PageController {
         this.config = undefined;
     }
 
+
+    /**
+     * @private
+     * @returns {ClientData}
+     */
+    clientData() {
+        var clientData = new ClientData();
+        clientData.pathVariables = this.resolvedURL.pathVariables;
+        clientData.urlParameters = this.resolvedURL.urlParameters
+        clientData.modelData = this.modelDataForRefresh();
+        return clientData;
+    }
+
     /**
     * @private
     * @param {ResolvedURL} resolvedURL
@@ -144,10 +157,7 @@ class PageController {
         var _this = this;
         var pathVariables = this.resolvedURL.pathVariables;
         var urlParameters = this.resolvedURL.urlParameters;
-        var clientData = new PageClientData();
-        clientData.pathVariables = this.resolvedURL.pathVariables;
-        clientData.urlParameters = this.resolvedURL.urlParameters
-        clientData.modelData = this.modelDataForRefresh();
+        var clientData = this.clientData();
         return this.client.loadPageData(this.page.normalizedPath, clientData).then(response => {
             var data = _this.responseToData(response, pathVariables, urlParameters);
             _this.data = data;
@@ -178,8 +188,10 @@ class PageController {
         var result = {};
         var attributes = this.config.pageAttributes[this.page.normalizedPath];
         var keys = attributes.modelsToSubmitOnAction[action];
-        for (var key of keys) {
-            result[key] = this.data.getValue([key]);
+        if (keys) {
+            for (var key of keys) {
+                result[key] = this.data.getValue([key]);
+            }
         }
         return result;
     }

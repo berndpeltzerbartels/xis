@@ -14,10 +14,10 @@ class CompositeTagHandler {
         this.handlers.forEach(handler => handler.refresh(data));
     }
 
-    showWidget(widgetId, parameters = []) {
+    showWidget(widgetId) {
         var handler = this.widgetContainerHandler();
         if (handler) {
-            handler.showWidget(widgetId, parameters);
+            handler.showWidget(widgetId, {});
         }
     }
 

@@ -124,3 +124,20 @@ function refreshNode(node, data) {
     app.refresher.refreshNode(node, data);
 }
 
+/**
+ * @param {string} url 
+ * @returns {string:string} 
+ */
+function urlParameters(url) {
+    var urlParameters = {};
+    var start = url.indexOf('?');
+    if (start != -1) {
+        var query = url.substring(start + 1);
+        for (var keyValue of doSplit(query, '&')) {
+            var param = doSplit(keyValue, '=');
+            urlParameters[param[0]] = param[1];
+        }
+    }
+    return urlParameters;
+}
+

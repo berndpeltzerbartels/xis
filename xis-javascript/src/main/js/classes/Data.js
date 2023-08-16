@@ -6,6 +6,7 @@ class Data {
     /**
      *
      * @param {any} values
+     * @param {Data} parentData
      */
     constructor(values, parentData = undefined) {
         this.values = values;

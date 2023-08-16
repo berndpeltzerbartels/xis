@@ -12,61 +12,44 @@ class Widget {
         this.root = undefined;
         this.widgetAttributes = {};
         this.data = new Data({});
+        this.urlParameters = {};
     }
 
     /**
-     * @public
-     * @param {{string: any}} parameters passed by parameter-tag
-     * @returns {WidgetClientData}
-     */
-    clientDataForModelRequest(parameters) {
-        var clientData = this.clientData(parameters);
-        this.addModelDataForModelRequest(clientData);
-        return clientData;
-    }
-
-    /**
-   * @public
-   * @param {string} action
-   * @param {{string: any}} parameters passed by parameter-tag
-   * @param {string} targetContainerId
-   * @returns {WidgetClientData}
-   */
-    clientDataForActionRequest(action, parameters, targetContainerId) {
-        var clientData = this.clientData(parameters);
-        clientData.targetContainerId = targetContainerId;
-        this.addModelDataForActionRequest(action, clientData);
-        return clientData;
-    }
-
-    /** 
-  * @private
-  * @param {WidgetClientData} clientData
-  */
-    addModelDataForModelRequest(clientData) {
-        for (var dataKey of Object.keys(this.widgetAttributes.modelsToSubmitOnRefresh)) {
-            clientData.modelData[dataKey] = this.data.getValue([dataKey]);
-        }
-    }
-
-    /** 
-    * @private
-    * @param {WidgetClientData} clientData
+    * @public
+    * @returns {ClientData}
     */
-    addModelDataForActionRequest(action, clientData) {
-        for (var dataKey of this.widgetAttributes.modelsToSubmitOnAction[action]) {
+    clientDataForModelRequest() {
+        debugger;
+        var resolvedURL = app.pageController.resolvedURL;
+        var clientData = new ClientData();
+        clientData.addPathVariables(resolvedURL.pathVariables);
+        clientData.addUrlParameters(resolvedURL.urlParameters);
+        clientData.addUrlParameters(this.urlParameters); // overriding is allowed
+        for (dataKey of this.widgetAttributes.modelsToSubmitOnRefresh) {
             clientData.modelData[dataKey] = this.data.getValue([dataKey]);
         }
+        return clientData;
     }
 
+
     /**
-    * @private
-    * @param {{string: any}} parameters created by parameter-tag
+    * @public
+    * @param {string} action
+    * @param {{string: any}} parameters passed by parameter-tag
     * @returns {WidgetClientData}
     */
-    clientData(parameters) {
-        var clientData = new WidgetClientData();
-        clientData.parameters = parameters;
+    clientDataForActionRequest(action, targetContainerId) {
+        var resolvedURL = app.pageController.resolvedURL;
+        var clientData = new ClientData();
+        clientData.addPathVariables(resolvedURL.pathVariables);
+        clientData.addUrlParameters(resolvedURL.urlParameters);
+        clientData.addUrlParameters(this.urlParameters); // overriding is allowed
+        clientData.targetContainerId = targetContainerId;
+        var keys = this.widgetAttributes.modelsToSubmitOnAction[action];
+        for (var dataKey of keys) {
+            clientData.modelData[dataKey] = this.data.getValue([dataKey]);
+        }
         return clientData;
     }
 }
