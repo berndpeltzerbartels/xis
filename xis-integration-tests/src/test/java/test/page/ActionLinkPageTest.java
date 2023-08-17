@@ -8,7 +8,6 @@ import org.mockito.ArgumentCaptor;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-//@Disabled // TODO
 class ActionLinkPageTest {
 
     private ActionLinkPageService service;

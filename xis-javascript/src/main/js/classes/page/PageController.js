@@ -49,7 +49,7 @@ class PageController {
     submitAction(action) {
         var _this = this;
         var clientData = new ClientData();
-        clientData.pathVariables = this.resolvedURL.pathVariables;
+        clientData.pathVariables = this.pathVariablesAsMap();
         clientData.urlParameters = this.resolvedURL.urlParameters
         clientData.modelData = this.modelDataForAction(action);
         return this.client.pageAction(this.page.normalizedPath, clientData, action)
@@ -75,7 +75,7 @@ class PageController {
             }
 
         }
-        data.setValue('pathVariables', this.resolvedURL.pathVariables);
+        data.setValue('pathVariables', this.pathVariablesAsMap());
         data.setValue('urlParameters', this.resolvedURL.urlParameters);
         this.html.refresh(data, this.resolvedURL);
     }
