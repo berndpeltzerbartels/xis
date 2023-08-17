@@ -134,12 +134,7 @@ class Client {
         request.data = pageClientData.modelData;
         request.action = action;
         request.urlParameters = pageClientData.urlParameters;
-        request.pathVariables = {};
-        for (var pathVariable of pageClientData.pathVariables) {
-            var name = Object.keys(pathVariable)[0];
-            var value = Object.values(pathVariable)[0];
-            request.pathVariables[name] = value;
-        }
+        request.pathVariables = pageClientData.pathVariables;
         return request;
     }
 
@@ -161,6 +156,7 @@ class Client {
         request.data = clientData.modelData;
         request.data = clientData.modelData;
         request.urlParameters = clientData.urlParameters;
+        request.pathVariables = clientData.pathVariables;
         return request;
     }
 

@@ -18,7 +18,7 @@ class URLResolverTest {
 
 
     @Test
-    void resolve() throws ScriptException {
+    void resolveWithPathVariable() throws ScriptException {
         var script = Javascript.getScript(FUNCTIONS, CLASSES);
         script += """
                        // "/a/{x}.html"
@@ -64,5 +64,55 @@ class URLResolverTest {
         assertThat(result.get("pathVariables")).hasSize(1);
         var variable = result.get("pathVariables").get(0);
         assertThat(variable.get("x")).isEqualTo("xyz");
+    }
+
+    @Test
+    void resolveWithUrlParameter() throws ScriptException {
+        var script = Javascript.getScript(FUNCTIONS, CLASSES);
+        script += """
+                       // "/a/{x}.html"
+                       var pathElement1 = new PathElement({
+                           type: 'static',
+                           content: '/a/',
+                           next: new PathElement({
+                               type: 'variable',
+                               key: 'x',
+                               next: new PathElement({
+                                   type: 'static',
+                                   content: '.html'
+                               })
+                           })
+                       });
+                       
+                       // "/b/{x}.html"
+                       var pathElement2 = new PathElement({
+                           type: 'static',
+                           content: '/b/',
+                           next: new PathElement({
+                               type: 'variable',
+                               key: 'x',
+                               next: new PathElement({
+                                   type: 'static',
+                                   content: '.html'
+                               })
+                           })
+                       });
+                       
+                       var path1 = new Path(pathElement1);
+                       var path2 = new Path(pathElement2);
+                       
+                       var pages = {
+                           getAllPaths: () => [path1, path2],
+                           getPage: (normalizedUrl) => {}
+                       };
+                        
+                        var resolver = new URLResolver(pages);
+                        resolver.resolve('/b/xyz.html?x=y');
+                """;
+
+        var result = (Map<String, Map<String, String>>) JSUtil.execute(script);
+        assertThat(result.get("urlParameters")).hasSize(1);
+        var variable = result.get("urlParameters").get("x");
+        assertThat(variable).isEqualTo("y");
     }
 }

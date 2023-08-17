@@ -20,10 +20,9 @@ class Widget {
     * @returns {ClientData}
     */
     clientDataForModelRequest() {
-        debugger;
         var resolvedURL = app.pageController.resolvedURL;
         var clientData = new ClientData();
-        clientData.addPathVariables(resolvedURL.pathVariables);
+        clientData.addPathVariables(app.pageController.pathVariablesAsMap());
         clientData.addUrlParameters(resolvedURL.urlParameters);
         clientData.addUrlParameters(this.urlParameters); // overriding is allowed
         for (dataKey of this.widgetAttributes.modelsToSubmitOnRefresh) {

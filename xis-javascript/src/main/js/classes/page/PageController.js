@@ -135,6 +135,21 @@ class PageController {
         this.config = undefined;
     }
 
+    /**
+     * Merges the array of path-variables into a map.
+     * 
+     * @public
+     * @returns {{string: string}}
+     */
+    pathVariablesAsMap() {
+        var map = {};
+        for (var pathVariable of this.resolvedURL.pathVariables) {
+            var name = Object.keys(pathVariable)[0];
+            var value = Object.values(pathVariable)[0];
+            map[name] = value;
+        }
+        return map;
+    }
 
     /**
      * @private
@@ -142,8 +157,8 @@ class PageController {
      */
     clientData() {
         var clientData = new ClientData();
-        clientData.pathVariables = this.resolvedURL.pathVariables;
         clientData.urlParameters = this.resolvedURL.urlParameters
+        clientData.pathVariables = this.pathVariablesAsMap();
         clientData.modelData = this.modelDataForRefresh();
         return clientData;
     }

@@ -15,12 +15,11 @@ class URLResolver {
      * @returns {ResolvedURL} or false if the url does not match
      */
     resolve(url) {
+        debugger;
         var index = url.indexOf('?');
-        if (index != -1) {
-            url = url.substring(index);
-        }
+        var pageUrl = index == -1 ? url : url.substring(0, index);
         for (var path of this.pages.getAllPaths()) {
-            var pathVariables = path.evaluate(url);
+            var pathVariables = path.evaluate(pageUrl);
             if (pathVariables) {
                 var normalizedPath = path.normalized();
                 var page = this.pages.getPage(normalizedPath);

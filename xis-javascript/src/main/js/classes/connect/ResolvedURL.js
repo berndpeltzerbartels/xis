@@ -39,7 +39,7 @@ class ResolvedURL {
         if (urlParamNames.length > 0) {
             url += '?';
             for (var i = 0; i < urlParamNames.length; i++) {
-                var name = url[i];
+                var name = urlParamNames[i];
                 url += name;
                 url += '=';
                 url += this.urlParameters[name]; // already encoded !
