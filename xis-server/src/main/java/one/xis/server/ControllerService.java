@@ -11,6 +11,7 @@ import one.xis.context.XISInit;
 import one.xis.context.XISInject;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -78,11 +79,11 @@ class ControllerService {
     }
 
     private ServerResponse invokeGetWidgetModelMethods(int status, ControllerWrapper wrapper, ClientRequest request) {
-        return new ServerResponse(status, dataSerializer.serialize(wrapper.invokeGetModelMethods(request)), null, wrapper.getId());
+        return new ServerResponse(status, dataSerializer.serialize(wrapper.invokeGetModelMethods(request)), null, wrapper.getId(), new HashMap<>());
     }
 
     private ServerResponse invokeGetPageModelMethods(int status, ControllerWrapper wrapper, ClientRequest request) {
-        return new ServerResponse(status, dataSerializer.serialize(wrapper.invokeGetModelMethods(request)), wrapper.getId(), null);
+        return new ServerResponse(status, dataSerializer.serialize(wrapper.invokeGetModelMethods(request)), wrapper.getId(), null, new HashMap<>());
     }
 
     private Collection<ControllerWrapper> widgetControllerWrappers() {
@@ -128,7 +129,7 @@ class ControllerService {
     private ControllerWrapper createControllerWrapper(Object controller, Function<Object, String> idMapper) {
         return controllerWrapperFactory.createControllerWrapper(idMapper.apply(controller), controller);
     }
-    
+
     private String getPagePath(Object pageController) {
         var path = pageController.getClass().getAnnotation(Page.class).value();
         if (!path.endsWith(".html")) {

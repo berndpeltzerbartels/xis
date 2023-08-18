@@ -15,7 +15,6 @@ class URLResolver {
      * @returns {ResolvedURL} or false if the url does not match
      */
     resolve(url) {
-        debugger;
         var index = url.indexOf('?');
         var pageUrl = index == -1 ? url : url.substring(0, index);
         for (var path of this.pages.getAllPaths()) {

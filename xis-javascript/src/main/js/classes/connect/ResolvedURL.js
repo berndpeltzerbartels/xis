@@ -13,6 +13,7 @@ class ResolvedURL {
         this.pathVariables = pathVariables;
         this.urlParameters = urlParameters;
         this.page = page;
+        this.url = this.toURL();
     }
 
     /**
@@ -20,7 +21,6 @@ class ResolvedURL {
      * @returns {string}
      */
     toURL() {
-        debugger;
         var url = '';
         var pathElement = this.path.pathElement;
         var pathVarIndex = 0;
@@ -37,6 +37,7 @@ class ResolvedURL {
         }
         var urlParamNames = Object.keys(this.urlParameters);
         if (urlParamNames.length > 0) {
+            urlParamNames.sort(); // for comparison
             url += '?';
             for (var i = 0; i < urlParamNames.length; i++) {
                 var name = urlParamNames[i];
@@ -50,6 +51,5 @@ class ResolvedURL {
         }
         return url;
     }
-
 
 }

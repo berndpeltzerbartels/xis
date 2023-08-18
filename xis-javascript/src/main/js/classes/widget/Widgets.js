@@ -6,6 +6,7 @@ class Widgets {
      */
     constructor(client) {
         this.widgets = {};
+        this.widgetInstances = {};
         this.client = client;
         this.widgetAttributes = {};
     }
@@ -27,10 +28,8 @@ class Widgets {
         return this.client.loadWidget(widgetId).then(widgetHtml => {
             var widget = new Widget();
             widget.id = widgetId;
-            widget.root = _this.asRootElement(widgetHtml);
-            widget.root._widgetId = widgetId;
+            widget.html = widgetHtml;
             widget.widgetAttributes = _this.widgetAttributes[widgetId];
-            initializeElement(widget.root);
             _this.addWidget(widgetId, widget);
         });
     }
@@ -46,11 +45,29 @@ class Widgets {
 
     /**
     * @public
-    * @param {string} widgetId 
-    * @returns {Widget}
+    * @param {string} widgetId
+    * @returns {WidgetInstance}
     */
-    getWidget(widgetId) {
-        return this.widgets[widgetId];
+    getWidgetInstance(widgetId) {
+        if (!this.widgetInstances[widgetId]) {
+            this.widgetInstances[widgetId] = [];
+        }
+        var instances = this.widgetInstances[widgetId];
+        var widgetInstance = instances.shift();
+        if (!widgetInstance) {
+            var widget = this.widgets[widgetId];
+            widgetInstance = new WidgetInstance(widget, this);
+        }
+        return widgetInstance;
+    }
+
+    /**
+     * @public
+     * @param {WidgetInstance} widgetInstance 
+     */
+    disposeInstance(widgetInstance) {
+        var instances = this.widgetInstances[widgetInstance.widget.id];
+        instances.push(widgetInstance);
     }
 
 
@@ -62,17 +79,10 @@ class Widgets {
         return this.widgetAttributes[widgetId].modelsToSubmitOnAction[action];
     }
 
-    /**
-     *
-     * @param {string} tree
-     * @returns {Element}
-     */
-    asRootElement(tree) {
-        return htmlToElement(tree);
-    }
 
     reset() {
         this.widgets = {};
+        this.widgetInstances = {};
         this.widgetAttributes = {};
     }
 

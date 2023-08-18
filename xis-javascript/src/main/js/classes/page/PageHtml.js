@@ -110,7 +110,7 @@ class PageHtml {
      */
     updateHistory(resolvedURL) {
         var title = getElementByTagName('title').innerText;
-        window.history.replaceState({}, title, resolvedURL.toURL());
+        window.history.replaceState({}, title, resolvedURL.url);
     }
 
 

@@ -12,7 +12,7 @@ class WidgetContainerHandler extends TagHandler {
         this.client = client;
         this.widgets = widgets;
         this.widgetContainers = widgetContainers;
-        this.widget = undefined;
+        this.widgetInstance = undefined;
         this.containerId = undefined;
         this.containerIdExpression = this.expressionFromAttribute('container-id');
         this.defaultWidgetIdExpression = this.expressionFromAttribute('default-widget');
@@ -25,50 +25,39 @@ class WidgetContainerHandler extends TagHandler {
     */
     handleActionResponse(response) {
         if (response.nextWidgetId) {
-            this.bindWidget(response.nextWidgetId);
+            this.ensureWidgetBound(response.nextWidgetId);
         }
-        this.widget.data = response.data;
-        this.refreshChildNodes(this.widget.data);
+        var widgetParameters = response.widgetParameters ? response.widgetParameters : {};
+        this.widgetInstance.widgetState = new WidgetState(app.pageController.resolvedURL, widgetParameters);
+        this.widgetInstance.widgetState.data = response.data;
+        this.refreshChildNodes(this.widgetInstance.widgetState.data);
     }
 
     /**
      * @public
-     * @param {Data} parentData 
+     * @param {Data} data 
      */
-    refresh(parentData) {
-        this.refreshContainerId(parentData);
-        this.refreshDefaultWidget(parentData);
-        if (this.widget) {
-            this.widget.data = parentData;
-            this.reloadDataAndRefresh({});
+    refresh(data) {
+        this.refreshContainerId(data);
+        this.refreshDefaultWidget(data);
+        if (this.widgetInstance) {
+            this.widgetInstance.widgetState.data = data;
+            this.reloadDataAndRefresh();
         }
     }
 
     /**
      * @public
      * @param {string} widgetId 
-     * @param {{string: any}} widgetUrlParameters
+     * @param {WidgetState} widgetState
      * @returns {Promise<void>}
      */
-    showWidget(widgetId, widgetUrlParameters = {}) {
-        if (!this.widget || this.widget.id != widgetId) {
-            this.bindWidget(widgetId);
-        }
-        this.reloadDataAndRefresh(widgetUrlParameters);
+    showWidget(widgetId, widgetState) {
+        this.ensureWidgetBound(widgetId);
+        this.widgetInstance.widgetState = widgetState;
+        this.reloadDataAndRefresh();
     }
 
-    /**
-     * @public
-     * @returns {string}
-     */
-    getCurrentWidgetId() {
-        return this.widget ? this.widget.id : undefined;
-    }
-
-
-    getPageData() {
-        return app.pageController.data;
-    }
 
     /**
      * @private
@@ -91,36 +80,39 @@ class WidgetContainerHandler extends TagHandler {
      * @param {Data} parentData 
      */
     refreshDefaultWidget(parentData) {
-        if (this.defaultWidgetIdExpression && !this.widget) { // once, only
+        if (this.defaultWidgetIdExpression && !this.widgetInstance) { // once, only
             var widgetId = this.defaultWidgetIdExpression.evaluate(parentData);
-            this.bindWidget(widgetId);
+            this.ensureWidgetBound(widgetId);
+            this.widgetInstance.widgetState = new WidgetState(app.pageController.resolvedURL, {});
         }
     }
 
     /**
      * @private
-     * @param {string} widgetId 
+     * @param {string} widgetId
      */
-    bindWidget(widgetId) {
-        if (!this.widget || this.widget.id != widgetId) {
-            this.clearChildren();
-            this.widget = assertNotNull(this.widgets.getWidget(widgetId), 'no such widget: ' + widgetId);
-            this.tag.appendChild(this.widget.root);
+    ensureWidgetBound(widgetId) {
+        if (this.widgetInstance) {
+            if (this.widgetInstance.widget.id == widgetId) {
+                return;
+            } else {
+                this.clearChildren();
+                this.widgetInstance.dispose();
+            }
         }
+        this.widgetInstance = assertNotNull(this.widgets.getWidgetInstance(widgetId), 'no such widget: ' + widgetId);
+        this.tag.appendChild(this.widgetInstance.root);
     }
 
     /**
      * @private
-     * @param {{string: any}} widgetUrlParameters 
      */
-    reloadDataAndRefresh(widgetUrlParameters) {
-        if (this.widget) {
+    reloadDataAndRefresh() {
+        if (this.widgetInstance) {
             var _this = this;
-            var clientData = this.widget.clientDataForModelRequest();
-            clientData.addUrlParameters(widgetUrlParameters);
-            this.client.loadWidgetData(this.widget.id, clientData)
+            this.client.loadWidgetData(this.widgetInstance)
                 .then(response => response.data)
-                .then(data => { _this.widget.data = data; return data; })
+                .then(data => { _this.widgetInstance.widgetState.data = data; return data; })
                 .then(data => _this.refreshChildNodes(data))
                 .catch(e => console.error(e));
         }

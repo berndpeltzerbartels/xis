@@ -60,9 +60,10 @@ class LinkHandler extends TagHandler {
         return new Promise((resolve, _) => {
             var container = this.getTargetContainer();
             var handler = container._handler;
-            var widgetUrlParameters = urlParameters(this.targetWidgetUrl);
+            var widgetParameters = urlParameters(this.targetWidgetUrl);
+            var widgetState = new WidgetState(app.pageController.resolvedURL, widgetParameters);
             var widgetId = this.targetWidgetId();
-            handler.showWidget(widgetId, widgetUrlParameters);
+            handler.showWidget(widgetId, widgetState);
             resolve();
         });
     }

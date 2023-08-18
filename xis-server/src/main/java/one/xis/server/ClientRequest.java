@@ -24,4 +24,7 @@ public class ClientRequest {
 
     @JsonDeserialize(using = MapDeserializer.class)
     private Map<String, String> urlParameters;
+
+    @JsonDeserialize(using = MapDeserializer.class)
+    private Map<String, String> widgetParameters;
 }

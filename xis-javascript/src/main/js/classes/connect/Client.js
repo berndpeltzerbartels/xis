@@ -80,12 +80,12 @@ class Client {
     /**
     * @public
     * @param {string} widgetId
-    * @param {ClientData} ClientData
+    * @param {WidgewtInstance} widgetInstance
     * @returns {Promise<ServerReponse>}
     */
-    loadWidgetData(widgetId, clientData) {
+    loadWidgetData(widgetInstance) {
         var _this = this;
-        var request = this.createWidgetRequest(widgetId, clientData, null);
+        var request = this.createWidgetRequest(widgetInstance, null);
         return this.httpClient.post('/xis/widget/model', request)
             .then(content => _this.deserializeResponse(content));
     }
@@ -93,14 +93,13 @@ class Client {
 
     /**
      * @public
-     * @param {string} widgetId
-     * @param {ClientData} ClientData
+     * @param {WidgewtInstance} widgetInstance
      * @param {string} action
      * @returns {Promise<ServerReponse>}
      */
-    widgetAction(widgetId, clientData, action) {
+    widgetAction(widgetInstance, action) {
         var _this = this;
-        var request = this.createWidgetRequest(widgetId, clientData, action);
+        var request = this.createWidgetRequest(widgetInstance, action);
         return this.httpClient.post('/xis/widget/action', request, {})
             .then(content => _this.deserializeResponse(content));
     }
@@ -141,22 +140,26 @@ class Client {
     /**
     * @private
     * @param {string} widgetId 
-    * @param {ClientData} ClientData
+    * @param {WidgetInstance} widgetInstance
     * @param {string} action
     * @param {string} targetContainerId
     * @returns {ClientRequest}
     */
-    createWidgetRequest(widgetId, clientData, action, targetContainerId) {
+    createWidgetRequest(widgetInstance, action) {
         var request = new ClientRequest();
         request.clientId = this.clientId;
         request.userId = this.userId;
-        request.widgetId = widgetId;
+        request.widgetId = widgetInstance.widget.id;
         request.action = action;
-        request.targetContainerId = targetContainerId;
-        request.data = clientData.modelData;
-        request.data = clientData.modelData;
-        request.urlParameters = clientData.urlParameters;
-        request.pathVariables = clientData.pathVariables;
+        request.data = widgetInstance.widgetState.data.values;
+        request.urlParameters = widgetInstance.widgetState.resolvedURL.urlParameters;
+        request.widgetParameters = widgetInstance.widgetState.widgetParameters;
+        request.pathVariables = {};
+        for (var pathVariable of widgetInstance.widgetState.resolvedURL.pathVariables) {
+            var name = Object.keys(pathVariable)[0];
+            var value = Object.values(pathVariable)[0];
+            request.pathVariables[name] = value;
+        }
         return request;
     }
 

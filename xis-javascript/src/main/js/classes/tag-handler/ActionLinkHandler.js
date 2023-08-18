@@ -14,7 +14,7 @@ class ActionLinkHandler extends TagHandler {
         this.targetContainerExpression = this.expressionFromAttribute('xis:target-container'); // not mandatory
         this.actionExpression = this.expressionFromAttribute('xis:action'); // mandatory
         this.action = undefined;
-        this.data = {};
+        this.data = new Data({});
         element.onclick = e => this.onClick(e);
         if (element.localName == 'a') {
             element.setAttribute('href', '#');
@@ -49,11 +49,9 @@ class ActionLinkHandler extends TagHandler {
     widgetAction(invokerContainer) {
         var targetContainer = this.targetContainerId ? this.widgetContainers.findContainer(this.targetContainerId) : invokerContainer;
         var targetContainerHandler = targetContainer._handler;
-        var targetContainerId = targetContainerHandler.containerId;
-        var invokerWidget = invokerContainer._handler.widget;
-        var clientData = invokerWidget.clientDataForActionRequest(this.action, targetContainerId);
+        var invokerWidgetInstance = invokerContainer._handler.widgetInstance;
         var _this = this;
-        this.client.widgetAction(invokerWidget.id, clientData, this.action)
+        this.client.widgetAction(invokerWidgetInstance, this.action)
             .then(response => _this.handleActionResponse(response, targetContainerHandler));
     }
 

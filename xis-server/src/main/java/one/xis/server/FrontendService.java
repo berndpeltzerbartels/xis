@@ -8,6 +8,7 @@ import one.xis.resource.Resource;
 import one.xis.resource.Resources;
 import org.tinylog.Logger;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -102,7 +103,7 @@ public class FrontendService {
     private ServerResponse applyFilterChain(ClientRequest request, Function<ClientRequest, ServerResponse> responder) {
         var chain = requestFilterChain.apply(request);
         if (chain.isInterrupt()) {
-            return new ServerResponse(chain.getHttpStatus(), dataSerializer.serialize(chain.getData()), null, null);
+            return new ServerResponse(chain.getHttpStatus(), dataSerializer.serialize(chain.getData()), null, null, new HashMap<>());
         }
         return responder.apply(request);
     }

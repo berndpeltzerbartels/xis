@@ -7,6 +7,7 @@
  * @property {string} action
  * @property {string: string} pathVariables
  * @property {string: string} urlParameters
+ * @property {string: string} widgetParameters
 */
 class ClientRequest {
 
@@ -19,6 +20,7 @@ class ClientRequest {
         this.action = '';
         this.pathVariables = {};
         this.urlParameters = {};
+        this.widgetParameters = {};
 
     }
 }

@@ -8,7 +8,6 @@ class Initializer {
      * @param {WidgetContainers} widgetContainers
      */
     constructor(domAccessor, client, widgets, widgetContainers) {
-        debugger;
         this.domAccessor = domAccessor;
         this.client = client;
         this.widgets = widgets;
