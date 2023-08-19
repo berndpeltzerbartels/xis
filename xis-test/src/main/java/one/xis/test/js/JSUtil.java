@@ -7,7 +7,7 @@ import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.PolyglotAccess;
 import org.graalvm.polyglot.Value;
 
-import javax.script.*;
+import javax.script.ScriptException;
 import java.io.Writer;
 import java.util.Map;
 
@@ -27,28 +27,6 @@ public class JSUtil {
         return new JavascriptFunctionContext(value, context);
     }
 
-
-    public CompiledScript compile(String javascript) throws ScriptException {
-        return compile(javascript, emptyMap());
-    }
-
-    public CompiledScript compile(String javascript, Map<String, Object> bindingMap) throws ScriptException {
-        ScriptEngine engine = new ScriptEngineManager().getEngineByName("graal.js");
-        //engine.put("bindToElement", (BiFunction<String, String, Element>) (s, s2) -> new Element(s2));
-        //engine.getContext().setAttribute("bindToElement", (BiFunction<String, String, Element>) (s, s2) -> new Element(s2), ScriptContext.ENGINE_SCOPE);
-        Bindings bindings = engine.createBindings();
-        bindings.put("polyglot.js.allowHostClassLookup", true);
-        bindings.put("polyglot.js.allowAllAccess", true);
-        bindings.put("polyglot.inspect", 9229);
-        bindings.put("engine.WarnInterpreterOnly", false);
-        bindings.putAll(bindingMap);
-        engine.setBindings(bindings, ScriptContext.ENGINE_SCOPE);
-        //System.out.println(javascript);
-        var compiler = (Compilable) engine;
-        var compiledScript = compiler.compile(javascript);
-        engine.getContext().setErrorWriter(new ExceptionThrowingErrorWriter());
-        return compiledScript;
-    }
 
     public Value execute(String js, Context context) {
         return context.eval("js", js);
@@ -85,7 +63,7 @@ public class JSUtil {
         bindingMap.forEach(context.getBindings("js")::putMember);
         return context.eval("js", js);
     }
-    
+
     public Value doRun(String js, Map<String, Object> bindingMap) {
         Context context = runContext(bindingMap);
         bindingMap.forEach(context.getBindings("js")::putMember);

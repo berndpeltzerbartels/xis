@@ -18,7 +18,6 @@ class DataTest {
         var js = Javascript.getScript(CLASSES);
         js += "var data = new Data(dataContent);";
         js += "data.getValue(['A','B','C'])";
-        var script = JSUtil.compile(js, Map.of("dataContent", dataContent));
 
         var result = JSUtil.execute(js, Map.of("dataContent", dataContent));
 
@@ -50,10 +49,10 @@ class DataTest {
         js += "var parentData = new Data(parentContent);";
         js += "var data = new Data(content, parentData);";
         js += "data.getValue(['A','B','C'])";
-        var script = JSUtil.compile(js, Map.of("parentContent", parentContent, "content", content));
 
-        Object result = script.eval();
 
-        assertThat(result).isEqualTo(123);
+        var result = JSUtil.execute(js, Map.of("parentContent", parentContent, "content", content));
+
+        assertThat(result.asInt()).isEqualTo(123);
     }
 }

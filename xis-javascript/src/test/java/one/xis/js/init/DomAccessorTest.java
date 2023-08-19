@@ -29,8 +29,7 @@ class DomAccessorTest {
         js += "var e2 = document.getElementsByTagName('e2').item(0);";
         js += "var x = document.createElement('x');";
         js += "accessor.replaceElement(e2, x);";
-        var script = JSUtil.compile(js, Map.of("document", document));
-        script.eval();
+        JSUtil.execute(js, Map.of("document", document));
 
         var root = document.getElementByTagName("root");
         var e1 = document.getElementByTagName("e1");
@@ -64,8 +63,7 @@ class DomAccessorTest {
         js += "var e1 = document.getElementsByTagName('e1').item(0);";
         js += "var x = document.createElement('x');";
         js += "accessor.replaceElement(e1, x);";
-        var script = JSUtil.compile(js, Map.of("document", document));
-        script.eval();
+        JSUtil.execute(js, Map.of("document", document));
 
         var root = document.getElementByTagName("root");
         var e1 = document.getElementByTagName("e1");
@@ -97,8 +95,7 @@ class DomAccessorTest {
         js += "var e2 = document.getElementsByTagName('e2').item(0);";
         js += "var x = document.createElement('x');";
         js += "accessor.replaceElement(e1, x);";
-        var script = JSUtil.compile(js, Map.of("document", document));
-        script.eval();
+        JSUtil.execute(js, Map.of("document", document));
 
         var root = document.getElementByTagName("root");
         e1 = document.getElementByTagName("e1");
@@ -130,8 +127,7 @@ class DomAccessorTest {
         js += "var e1 = document.createElement('e1');";
         js += "accessor.insertParent(e2, e1);";
 
-        var script = JSUtil.compile(js, Map.of("document", document));
-        script.eval();
+        JSUtil.execute(js, Map.of("document", document));
 
         var root = document.getElementByTagName("root");
         var e1 = document.getElementByTagName("e1");
@@ -152,7 +148,7 @@ class DomAccessorTest {
         js += "var x = document.createElement('x');";
         js += "accessor.insertChild(a, x);";
 
-        JSUtil.compile(js, Map.of("document", document)).eval();
+        JSUtil.execute(js, Map.of("document", document));
 
         assertThat(document.rootNode.getChildElementNames()).containsExactly("x");
         assertThat(document.getElementByTagName("x").getChildElementNames()).containsExactly("b", "c");

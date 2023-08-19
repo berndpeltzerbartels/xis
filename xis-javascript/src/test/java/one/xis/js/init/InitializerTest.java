@@ -29,8 +29,7 @@ class InitializerTest {
         script += "var initializer = new Initializer(new DomAccessor());";
         script += "initializer.initialize(document.rootNode);";
 
-        var compiledScript = JSUtil.compile(script, Map.of("document", document, "console", new Console()));
-        compiledScript.eval();
+        JSUtil.execute(script, Map.of("document", document, "console", new Console()));
 
         assertThat(document.getElementByTagName("d").firstChild).isNotNull();
         assertThat(document.getElementByTagName("d").firstChild).isInstanceOf(TextNode.class);
@@ -45,8 +44,7 @@ class InitializerTest {
         script += "var initializer = new Initializer(new DomAccessor());";
         script += "initializer.initialize(document.rootNode);";
 
-        var compiledScript = JSUtil.compile(script, Map.of("document", document, "console", new Console()));
-        compiledScript.eval();
+        JSUtil.execute(script, Map.of("document", document, "console", new Console()));
 
         assertThat(document.rootNode.getChildElementNames()).containsExactly("xis:foreach");
 
@@ -191,9 +189,7 @@ class InitializerTest {
         script += "var initializer = new Initializer(new DomAccessor());";
         script += "initializer.initialize(div);";
 
-        var compiledScript = JSUtil.compile(script, Map.of("div", div, "console", new Console(), "document", document));
-        compiledScript.eval();
-
+        JSUtil.execute(script, Map.of("div", div, "console", new Console(), "document", document));
 
         DomAssert.assertAndGetParentElement(div, "xis:foreach")
                 .assertAttribute("var", "item1")
@@ -216,8 +212,7 @@ class InitializerTest {
 
         var head = document.getElementByTagName("head");
 
-        var compiledScript = JSUtil.compile(script, Map.of("head", head, "console", new Console(), "document", document));
-        compiledScript.eval();
+        JSUtil.execute(script, Map.of("head", head, "console", new Console(), "document", document));
 
         var title = document.getElementByTagName("title");
         assertThat(title.getChildNodes().length).isEqualTo(1);
