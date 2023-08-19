@@ -60,9 +60,10 @@ class URLResolverTest {
                         var resolver = new URLResolver(pages);
                         resolver.resolve('/b/xyz.html');
                 """;
-        var result = (Map<String, List<Map<String, String>>>) JSUtil.execute(script);
-        assertThat(result.get("pathVariables")).hasSize(1);
-        var variable = result.get("pathVariables").get(0);
+        var result = JSUtil.execute(script);
+        assertThat(result.getMember("pathVariables").as(List.class)).hasSize(1);
+
+        var variable = (Map<String, String>) result.getMember("pathVariables").as(List.class).get(0);
         assertThat(variable.get("x")).isEqualTo("xyz");
     }
 
@@ -110,9 +111,9 @@ class URLResolverTest {
                         resolver.resolve('/b/xyz.html?x=y');
                 """;
 
-        var result = (Map<String, Map<String, String>>) JSUtil.execute(script);
-        assertThat(result.get("urlParameters")).hasSize(1);
-        var variable = result.get("urlParameters").get("x");
-        assertThat(variable).isEqualTo("y");
+        var result = JSUtil.execute(script);
+        assertThat(result.getMember("urlParameters").as(Map.class)).hasSize(1);
+        var variable = result.getMember("urlParameters").as(Map.class);
+        assertThat(variable.get("x")).isEqualTo("y");
     }
 }

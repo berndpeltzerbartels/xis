@@ -20,9 +20,9 @@ class DataTest {
         js += "data.getValue(['A','B','C'])";
         var script = JSUtil.compile(js, Map.of("dataContent", dataContent));
 
-        Object result = script.eval();
+        var result = JSUtil.execute(js, Map.of("dataContent", dataContent));
 
-        assertThat(result).isEqualTo(123);
+        assertThat(result.asInt()).isEqualTo(123);
     }
 
     @Test
@@ -34,11 +34,10 @@ class DataTest {
         js += "var parentData = new Data(parentContent);";
         js += "var data = new Data(content, parentData);";
         js += "data.getValue(['A','B','C'])";
-        var script = JSUtil.compile(js, Map.of("parentContent", parentContent, "content", content));
 
-        Object result = script.eval();
+        var result = JSUtil.execute(js, Map.of("parentContent", parentContent, "content", content));
 
-        assertThat(result).isEqualTo(456);
+        assertThat(result.asInt()).isEqualTo(456);
     }
 
 

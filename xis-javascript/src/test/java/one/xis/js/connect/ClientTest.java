@@ -37,8 +37,7 @@ class ClientTest {
 
     @Test
     void loadConfig() throws ScriptException {
-        var compiledScript = JSUtil.compile(script + "client.loadConfig();", Map.of("httpClient", httpClient));
-        System.out.println(compiledScript.eval());
+        JSUtil.execute(script + "client.loadConfig();", Map.of("httpClient", httpClient));
 
         verify(httpClient).get(eq("/xis/config"), any());
         verify(promise).then(any());
@@ -47,8 +46,7 @@ class ClientTest {
     @Test
     @SuppressWarnings("unchecked")
     void loadPageHead() throws ScriptException {
-        var compiledScript = JSUtil.compile(script + "client.loadPageHead('x.html');", Map.of("httpClient", httpClient));
-        compiledScript.eval();
+        JSUtil.execute(script + "client.loadPageHead('x.html');", Map.of("httpClient", httpClient));
 
         var captor = ArgumentCaptor.forClass(Map.class);
         verify(httpClient, times(1)).get(eq("/xis/page/head"), captor.capture());
@@ -58,8 +56,7 @@ class ClientTest {
 
     @Test
     void loadPageBody() throws ScriptException {
-        var compiledScript = JSUtil.compile(script + "client.loadPageBody('x.html');", Map.of("httpClient", httpClient));
-        compiledScript.eval();
+        JSUtil.execute(script + "client.loadPageBody('x.html');", Map.of("httpClient", httpClient));
 
         var captor = ArgumentCaptor.forClass(Map.class);
         verify(httpClient, times(1)).get(eq("/xis/page/body"), (Map<String, String>) captor.capture());
@@ -98,5 +95,5 @@ class ClientTest {
     void pageAction() {
 
     }
-    
+
 }

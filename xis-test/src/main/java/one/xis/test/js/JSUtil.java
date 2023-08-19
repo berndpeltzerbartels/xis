@@ -54,31 +54,40 @@ public class JSUtil {
         return context.eval("js", js);
     }
 
-    public Object execute(String javascript, Map<String, Object> bindingMap) throws ScriptException {
+    public Value execute(String javascript, Map<String, Object> bindingMap) throws ScriptException {
         if ("true".equals(System.getenv().get("debug")) || "true".equals(System.getProperty("debug"))) {
             return debug(javascript, bindingMap);
         }
-        return compile(javascript, bindingMap).eval();
+        return doRun(javascript, bindingMap);
     }
 
+    public <T> T execute(String javascript, Class<T> clazz) throws ScriptException {
+        return execute(javascript, emptyMap(), clazz);
+    }
 
     public <T> T execute(String javascript, Map<String, Object> bindingMap, Class<T> clazz) throws ScriptException {
         if ("true".equals(System.getenv().get("debug")) || "true".equals(System.getProperty("debug"))) {
             return clazz.cast(debug(javascript, bindingMap));
         }
-        return clazz.cast(compile(javascript, bindingMap).eval());
+        return clazz.cast(doRun(javascript, bindingMap));
     }
 
 
-    public Object execute(String js) throws ScriptException {
+    public Value execute(String js) throws ScriptException {
         if ("true".equals(System.getenv().get("debug")) || "true".equals(System.getProperty("debug"))) {
             return debug(js, emptyMap());
         }
-        return compile(js).eval();
+        return doRun(js, emptyMap());
     }
 
-    public Object debug(String js, Map<String, Object> bindingMap) {
+    public Value debug(String js, Map<String, Object> bindingMap) {
         Context context = debugContext(bindingMap);
+        bindingMap.forEach(context.getBindings("js")::putMember);
+        return context.eval("js", js);
+    }
+    
+    public Value doRun(String js, Map<String, Object> bindingMap) {
+        Context context = runContext(bindingMap);
         bindingMap.forEach(context.getBindings("js")::putMember);
         return context.eval("js", js);
     }
@@ -108,6 +117,7 @@ public class JSUtil {
         bindingMap.forEach(context.getBindings("js")::putMember);
         return context;
     }
+
 
     public Context runContext(Map<String, Object> bindingMap) {
         Context context = Context.newBuilder("js")

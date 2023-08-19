@@ -32,13 +32,13 @@ class ExpressionParserTest {
     void methodWithVarParameter() throws ScriptException {
         var testScript = javascript + "expressionParser.parse('xyz(a.b)');";
 
-        var result = (Map<String, Object>) JSUtil.execute(testScript);
+        var result = JSUtil.execute(testScript);
 
-        assertThat(result.get("type")).isEqualTo("FUNCTION");
-        assertThat(result.get("next")).isNull();
-        assertThat(result.get("name")).isEqualTo("xyz");
+        assertThat(result.getMember("type").asString()).isEqualTo("FUNCTION");
+        assertThat(result.getMember("next").asString()).isNull();
+        assertThat(result.getMember("name").asString()).isEqualTo("xyz");
 
-        var parameters = (List<Object>) result.get("parameters");
+        var parameters = (List<Object>) result.getMember("parameters").as(List.class);
         assertThat(parameters).hasSize(1);
 
         var parameter = (Map<String, Object>) parameters.get(0);

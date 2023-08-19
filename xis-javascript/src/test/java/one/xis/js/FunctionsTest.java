@@ -26,14 +26,14 @@ class FunctionsTest {
         var strings = "['xyz',' x',' x',' x y ']";
         var script = functions + "var a = " + strings + "; a.map(v => trim(v));";
 
-        var result = (List<String>) JSUtil.compile(script).eval();
+        var result = (List<String>) JSUtil.execute(script).as(List.class);
 
         assertThat(result).containsExactly("xyz", "x", "x", "x y");
     }
 
     @Test
     void cloneArr() throws ScriptException {
-        var result = (List<Integer>) JSUtil.compile(functions + "cloneArr([1,2,3])").eval();
+        var result = (List<Integer>) JSUtil.execute(functions + "cloneArr([1,2,3])").as(List.class);
         assertThat(result).containsExactly(1, 2, 3);
     }
 

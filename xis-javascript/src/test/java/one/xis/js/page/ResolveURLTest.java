@@ -58,7 +58,7 @@ class ResolveURLTest {
                         var resolvedURL = resolver.resolve('/b/xyz.html?x=y');
                         resolvedURL.toURL();
                 """;
-        var result = (String) JSUtil.execute(script);
+        var result = JSUtil.execute(script).asString();
 
         assertThat(result).isEqualTo("/b/xyz.html?x=y");
     }

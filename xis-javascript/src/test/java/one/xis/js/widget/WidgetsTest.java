@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 
 import javax.script.ScriptException;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -18,7 +17,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 class WidgetsTest {
 
     @Test
-    @SuppressWarnings("unchecked")
     void loadWidgets() throws ScriptException {
         var script = Javascript.getScript(JavascriptSource.CLASSES);
         script += IOUtils.getResourceAsString("one/xis/widget/WidgetsTestMocks.js");
@@ -39,16 +37,15 @@ class WidgetsTest {
         Function<String, Element> htmlToElement = this::htmlToElement;
         bindings.put("htmlToElement", htmlToElement);
 
-        var result = (Map<String, Object>) JSUtil.execute(script, bindings);
+        var result = JSUtil.execute(script, bindings);
 
-        assertThat(result).hasSize(1);
-        assertThat(result.get("widgetId")).isNotNull();
+        assertThat(result.getMember("widgetId")).isNotNull();
 
-        var widgetData = (Map<String, Object>) result.get("widgetId");
+        var widgetData = result.getMember("widgetId");
 
-        assertThat(widgetData.get("id")).isEqualTo("widgetId");
-        assertThat(((Element) widgetData.get("root")).localName).isEqualTo("xis:template");
-        assertThat(widgetData.get("widgetAttributes")).isNotNull();
+        assertThat(widgetData.getMember("id").asString()).isEqualTo("widgetId");
+        assertThat(widgetData.getMember("html").asString()).startsWith("<xis:template");
+        assertThat(widgetData.getMember("widgetAttributes")).isNotNull();
     }
 
     public Element htmlToElement(String content) {

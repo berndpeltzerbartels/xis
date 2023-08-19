@@ -25,7 +25,7 @@ class NodeCacheTest {
         js += "var cache = new NodeCache(nodeArray, new Initializer(new DomAccessor())); cache.sizeUp(3); [cache.getChildren(0), cache.getChildren(1), cache.getChildren(2)]";
         Map<String, Object> bindings = Map.of("nodeArray", new Node[]{new Element("a"), new Element("b")}, "document", Document.of("<html/>"));
 
-        var result = (List<?>) JSUtil.compile(js, bindings).eval();
+        var result = JSUtil.execute(js, bindings).as(List.class);
 
         assertThat(result.size()).isEqualTo(3);
 
@@ -85,13 +85,15 @@ class NodeCacheTest {
             script2 += "cache.sizeUp(3); ";
             script2 += "cache.cache;";
 
-            var result = (List<List<Element>>) JSUtil.execute(script2, Map.of("foreach1", foreach1, "console", new Console(), "document", document));
+            var result = JSUtil.execute(script2, Map.of("foreach1", foreach1, "console", new Console(), "document", document));
 
-            assertThat(result.size()).isEqualTo(3);
 
-            assertThat(result.get(0).size()).isEqualTo(1);
-            assertThat(result.get(1).size()).isEqualTo(1);
-            assertThat(result.get(2).size()).isEqualTo(1);
+            assertThat(result.as(List.class).size()).isEqualTo(3);
+
+            var list = result.as(List.class);
+            assertThat(((List<Object>) list.get(0)).size()).isEqualTo(1);
+            assertThat(((List<Object>) list.get(1)).size()).isEqualTo(1);
+            assertThat(((List<Object>) list.get(2)).size()).isEqualTo(1);
 
             DomAssert.assertAndGetChildElement(foreach1, "div")
                     .assertId("divForeach1")
@@ -102,8 +104,6 @@ class NodeCacheTest {
                     .assertId("divForeach2")
                     .assertChildElements("span");
 
-
         }
     }
-
 }
