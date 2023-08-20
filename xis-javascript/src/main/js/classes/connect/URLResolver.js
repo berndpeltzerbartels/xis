@@ -22,7 +22,7 @@ class URLResolver {
             if (pathVariables) {
                 var normalizedPath = path.normalized();
                 var page = this.pages.getPage(normalizedPath);
-                return new ResolvedURL(path, pathVariables, urlParameters(url), page);
+                return new ResolvedURL(path, pathVariables, urlParameters(url), page, normalizedPath);
             }
 
         }

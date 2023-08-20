@@ -32,6 +32,7 @@ class HttpClientMock {
     }
 
     responseForGet(uri, headers) {
+        debugger;
         switch (uri) {
             case '/xis/config': return backendBridge.getComponentConfig(uri, headers);
             case '/xis/page/head': return backendBridge.getPageHead(uri, headers);
@@ -46,6 +47,7 @@ class HttpClientMock {
     }
 
     responseForPost(uri, payload, headers) {
+        debugger;
         var requestJson = JSON.stringify(payload);
         switch (uri) {
             case '/xis/page/model': return backendBridge.getPageModel(uri, requestJson, headers);

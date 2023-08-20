@@ -7,13 +7,31 @@ class ResolvedURL {
      * @param {Array{string: string}} pathVariables 
      * @param {{string: string}} urlParameters
      * @param {Page} page
+     * @param {string} normalizedPath e.g. /x/*.html (* for path-variable)
      */
-    constructor(path, pathVariables, urlParameters, page) {
+    constructor(path, pathVariables, urlParameters, page, normalizedPath) {
         this.path = path;
         this.pathVariables = pathVariables;
         this.urlParameters = urlParameters;
         this.page = page;
+        this.normalizedPath = normalizedPath;
         this.url = this.toURL();
+    }
+
+    /**
+    * Merges the array of path-variables an non-array object.
+    * 
+    * @public
+    * @returns {{string: string}}
+    */
+    pathVariablesAsMap() {
+        var map = {};
+        for (var pathVariable of this.pathVariables) {
+            var name = Object.keys(pathVariable)[0];
+            var value = Object.values(pathVariable)[0];
+            map[name] = value;
+        }
+        return map;
     }
 
     /**

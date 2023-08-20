@@ -70,16 +70,6 @@ class Widgets {
         instances.push(widgetInstance);
     }
 
-
-    getModelKeysToSubmitForModel(widgetId) {
-        return this.widgetAttributes[widgetId].modelsToSubmitOnRefresh;
-    }
-
-    getModelKeysToSubmitForAction(widgetId, action) {
-        return this.widgetAttributes[widgetId].modelsToSubmitOnAction[action];
-    }
-
-
     reset() {
         this.widgets = {};
         this.widgetInstances = {};

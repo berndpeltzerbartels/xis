@@ -16,8 +16,8 @@ class PageAttributesFactory extends ComponentAttributesFactory<PageAttributes> {
     PageAttributes attributes(Object controller) {
         var attributes = new PageAttributes();
         var path = pathResolver.create(controller.getClass().getAnnotation(Page.class).value());
-        attributes.setModelsToSubmitOnRefresh(modelsToSubmitForModel(controller));
-        attributes.setModelsToSubmitOnAction(modelsToSubmitForAction(controller));
+        attributes.setModelParameterNames(modelsToSubmitForModel(controller));
+        attributes.setActionParameterNames(modelsToSubmitForAction(controller));
         attributes.setWelcomePage(controller.getClass().isAnnotationPresent(WelcomePage.class));
         attributes.setPath(path);
         attributes.setNormalizedPath(path.normalized());

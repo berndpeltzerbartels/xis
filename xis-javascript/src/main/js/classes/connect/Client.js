@@ -24,7 +24,8 @@ class Client {
     loadConfig() {
         var _this = this;
         return this.httpClient.get('/xis/config', {})
-            .then(content => _this.deserializeConfig(content));
+            .then(content => _this.deserializeConfig(content))
+            .then(config => { _this.config = config; return config; });
     }
 
     /**
@@ -66,13 +67,13 @@ class Client {
 
     /**
      * @public
-     * @param {string} pageId
-     * @param {ClientData} clientData
+     * @param {ResolvedURL} resolvedURL 
+     * @param {Data} data
      * @returns {Promise<any>}
      */
-    loadPageData(pageId, clientData) {
+    loadPageData(resolvedURL, data) {
         var _this = this;
-        var request = this.createPageRequest(pageId, clientData, null);
+        var request = this.createPageRequest(resolvedURL, data, null);
         return this.httpClient.post('/xis/page/model', request, {})
             .then(content => _this.deserializeResponse(content));
     }
@@ -80,7 +81,7 @@ class Client {
     /**
     * @public
     * @param {string} widgetId
-    * @param {WidgewtInstance} widgetInstance
+    * @param {WidgetInstance} widgetInstance
     * @returns {Promise<ServerReponse>}
     */
     loadWidgetData(widgetInstance) {
@@ -93,7 +94,7 @@ class Client {
 
     /**
      * @public
-     * @param {WidgewtInstance} widgetInstance
+     * @param {WidgetInstance} widgetInstance
      * @param {string} action
      * @returns {Promise<ServerReponse>}
      */
@@ -106,34 +107,35 @@ class Client {
 
     /**
      * @public
-     * @param {string} pageId
-     * @param {ClientData} clientData
+     * @param {ResolvedURL} resolvedURL 
+     * @param {Data} data
      * @param {string} action
      * @returns {Promise<ServerReponse>}
      */
-    pageAction(pageId, pageClientData, action) {
+    pageAction(resolvedURL, data, action) {
         var _this = this;
-        var request = this.createPageRequest(pageId, pageClientData, action);
+        var request = this.createPageRequest(resolvedURL, data, action);
         return this.httpClient.post('/xis/page/action', request, {})
             .then(content => _this.deserializeResponse(content));
     }
 
     /**
      * @private
-     * @param {string} pageId 
-     * @param {ClientData} pageClientData
+     * @param {ResolvedURL} resolvedURL 
+     * @param {Data} data
      * @param {string} action
      * @returns {ClientRequest}
      */
-    createPageRequest(pageId, pageClientData, action) {
+    createPageRequest(resolvedURL, data, action) {
+        var normalizedPath = resolvedURL.normalizedPath;
         var request = new ClientRequest();
         request.clientId = this.clientId;
         request.userId = this.userId;
-        request.pageId = pageId;
-        request.data = pageClientData.modelData;
+        request.pageId = normalizedPath;
         request.action = action;
-        request.urlParameters = pageClientData.urlParameters;
-        request.pathVariables = pageClientData.pathVariables;
+        request.data = action ? this.pageActionParameters(action, data, normalizedPath) : this.pageModelParameters(data, normalizedPath);
+        request.urlParameters = resolvedURL.urlParameters;
+        request.pathVariables = resolvedURL.pathVariablesAsMap();
         return request;
     }
 
@@ -151,15 +153,10 @@ class Client {
         request.userId = this.userId;
         request.widgetId = widgetInstance.widget.id;
         request.action = action;
-        request.data = widgetInstance.widgetState.data.values;
+        request.data = action ? this.widgetActionParameters(action, widgetInstance) : this.widgetModelParameters(widgetInstance);
         request.urlParameters = widgetInstance.widgetState.resolvedURL.urlParameters;
+        request.pathVariables = widgetInstance.widgetState.resolvedURL.pathVariablesAsMap();
         request.widgetParameters = widgetInstance.widgetState.widgetParameters;
-        request.pathVariables = {};
-        for (var pathVariable of widgetInstance.widgetState.resolvedURL.pathVariables) {
-            var name = Object.keys(pathVariable)[0];
-            var value = Object.values(pathVariable)[0];
-            request.pathVariables[name] = value;
-        }
         return request;
     }
 
@@ -205,4 +202,85 @@ class Client {
         return response;
 
     }
+
+    /**
+    * @private
+    * @param {Data} data
+    * @param {string} normalizedPath
+    * @returns {string: string}
+    */
+    pageModelParameters(data, normalizedPath) {
+        var result = {};
+        var attributes = this.config.pageAttributes[normalizedPath];
+        var keys = attributes.modelParameterNames;
+        if (keys) {
+            for (var key of keys) {
+                result[key] = data.getValue([key]);
+            }
+        }
+        return result;
+    }
+
+
+    /**
+    * @private
+    * @param {WidgetInstance} widgetInstance
+    * @returns {string: string}
+    */
+    widgetModelParameters(widgetInstance) {
+        var result = {};
+        var widgetState = widgetInstance.widgetState;
+        var widgetId = widgetInstance.widget.id;
+        var data = widgetState.data;
+        var attributes = this.config.widgetAttributes[widgetId];
+        var keys = attributes.modelParameterNames;
+        if (keys) {
+            for (var key of keys) {
+                result[key] = data.getValue([key]);
+            }
+        }
+        return result;
+    }
+
+    /**
+    * @private
+    * @param {string} action
+    * @param {Data} data
+    * @param {string} normalizedPath 
+    * @returns {string: string}
+    */
+    pageActionParameters(action, data, normalizedPath) {
+        var result = {};
+        var attributes = this.config.pageAttributes[normalizedPath];
+        var keys = attributes.actionParameterNames[action];
+        if (keys) {
+            for (var key of keys) {
+                result[key] = data.getValue([key]);
+            }
+        }
+        return result;
+    }
+
+    /**
+   * @private
+   * @param {string} action
+   * @param {Data} data
+   * @param {string} widgetId 
+   * @returns {string: string}
+   */
+    widgetActionParameters(action, widgetInstance) {
+        var result = {};
+        var widgetState = widgetInstance.widgetState;
+        var widgetId = widgetInstance.widget.id;
+        var data = widgetState.data;
+        var attributes = this.config.widgetAttributes[widgetId];
+        var keys = attributes.actionParameterNames[action];
+        if (keys) {
+            for (var key of keys) {
+                result[key] = data.getValue([key]);
+            }
+        }
+        return result;
+    }
+
 }

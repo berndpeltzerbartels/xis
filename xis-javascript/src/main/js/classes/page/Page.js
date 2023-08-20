@@ -7,6 +7,7 @@
  * @property {{string: string}} bodyAttributes
  * @property {PageAttributes} pageAttributes
  * @property {TextContent} titleExpression
+ * @property {Data} data
  */
 
 class Page {
@@ -23,6 +24,7 @@ class Page {
         this.headChildArray = [];
         this.bodyChildArray = [];
         this.bodyAttributes = {};
+        this.data = new Data({});
     }
 
 }

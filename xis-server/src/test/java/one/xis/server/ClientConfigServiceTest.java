@@ -40,8 +40,8 @@ class ClientConfigServiceTest {
             assertThat(config.getPageIds()).contains(expectedId);
 
             var attributes = config.getPageAttributes().get(expectedId);
-            assertThat(attributes.getModelsToSubmitOnAction().get("action")).contains("string", "model");
-            assertThat(attributes.getModelsToSubmitOnRefresh()).contains("string", "model");
+            assertThat(attributes.getActionParameterNames().get("action")).contains("string", "model");
+            assertThat(attributes.getModelParameterNames()).contains("string", "model");
 
         }
 
@@ -140,8 +140,8 @@ class ClientConfigServiceTest {
             assertThat(config.getWidgetIds()).contains(widgetId);
 
             var attributes = config.getWidgetAttributes().get(widgetId);
-            assertThat(attributes.getModelsToSubmitOnAction().get("action")).contains("string", "model");
-            assertThat(attributes.getModelsToSubmitOnRefresh()).contains("string", "model");
+            assertThat(attributes.getActionParameterNames().get("action")).contains("string", "model");
+            assertThat(attributes.getModelParameterNames()).contains("string", "model");
 
         }
 

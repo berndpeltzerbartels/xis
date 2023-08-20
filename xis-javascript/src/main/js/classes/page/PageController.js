@@ -7,7 +7,6 @@
  * @property {URLResolver} urlResolver
  * @property {Page} page
  * @property {PageHtml} html
- * @property {Data} data
  * @property {ClientConfig} config
  * @property {ResolvedURL} resolvedURL
  * 
@@ -32,7 +31,6 @@ class PageController {
         this.html = html;
         this.page = undefined;
         this.resolvedURL = undefined;
-        this.data = new Data({});
         this.config = undefined;
     }
 
@@ -48,22 +46,17 @@ class PageController {
      */
     submitAction(action) {
         var _this = this;
-        var clientData = new ClientData();
-        clientData.pathVariables = this.pathVariablesAsMap();
-        clientData.urlParameters = this.resolvedURL.urlParameters
-        clientData.modelData = this.modelDataForAction(action);
-        return this.client.pageAction(this.page.normalizedPath, clientData, action)
+        return this.client.pageAction(this.resolvedURL, this.page.data, action)
             .then(response => _this.handleActionResponse(response));
     }
 
     /**
-     * Handels server-response after subitting an action.
+     * Handels server-response after submitting an action.
      * 
      * @public
      * @param {Response} response
      */
     handleActionResponse(response) {
-        var data = response.data;
         if (response.nextPageURL) {
             var resolvedURL = this.urlResolver.resolve(response.nextPageURL);
             if (!resolvedURL) {
@@ -71,13 +64,15 @@ class PageController {
             }
             this.resolvedURL = resolvedURL;
             if (resolvedURL.page != this.page) {
+                this.page = resolvedURL.page;
                 this.html.bindPage(resolvedURL.page);
             }
-
         }
-        data.setValue('pathVariables', this.pathVariablesAsMap());
-        data.setValue('urlParameters', this.resolvedURL.urlParameters);
-        this.html.refresh(data, this.resolvedURL);
+        var data = response.data;
+        data.setValue('pathVariables', resolvedURL.pathVariablesAsMap());
+        data.setValue('urlParameters', resolvedURL.urlParameters);
+        this.page.data = data;
+        this.html.refresh(this.page.data, this.resolvedURL);
     }
 
     /**
@@ -131,37 +126,10 @@ class PageController {
     reset() {
         this.page = undefined;
         this.resolvedURL = undefined;
-        this.data = new Data({});
         this.config = undefined;
     }
 
-    /**
-     * Merges the array of path-variables into a map.
-     * 
-     * @public
-     * @returns {{string: string}}
-     */
-    pathVariablesAsMap() {
-        var map = {};
-        for (var pathVariable of this.resolvedURL.pathVariables) {
-            var name = Object.keys(pathVariable)[0];
-            var value = Object.values(pathVariable)[0];
-            map[name] = value;
-        }
-        return map;
-    }
 
-    /**
-     * @private
-     * @returns {ClientData}
-     */
-    clientData() {
-        var clientData = new ClientData();
-        clientData.urlParameters = this.resolvedURL.urlParameters
-        clientData.pathVariables = this.pathVariablesAsMap();
-        clientData.modelData = this.modelDataForRefresh();
-        return clientData;
-    }
 
     /**
     * @private
@@ -170,65 +138,13 @@ class PageController {
     */
     refreshCurrentPage() {
         var _this = this;
-        var pathVariables = this.resolvedURL.pathVariables;
-        var urlParameters = this.resolvedURL.urlParameters;
-        var clientData = this.clientData();
-        return this.client.loadPageData(this.page.normalizedPath, clientData).then(response => {
-            var data = _this.responseToData(response, pathVariables, urlParameters);
-            _this.data = data;
+        return this.client.loadPageData(this.resolvedURL, this.page.data).then(response => {
+            var data = response.data;
+            data.setValue('pathVariables', this.resolvedURL.pathVariablesAsMap());
+            data.setValue('urlParameters', this.resolvedURL.urlParameters);
+            this.page.data = data;
             _this.html.refresh(data, this.resolvedURL);
         });
-    }
-
-    /**
-     * @private
-     * @returns {string: string}
-     */
-    modelDataForRefresh() {
-        var result = {};
-        var attributes = this.config.pageAttributes[this.page.normalizedPath];
-        var keys = attributes.modelsToSubmitOnRefresh;
-        for (var key of keys) {
-            result[key] = this.data.getValue([key]);
-        }
-        return result;
-    }
-
-    /**
-    * @private
-    * @param {string} action
-    * @returns {string: string}
-    */
-    modelDataForAction(action) {
-        var result = {};
-        var attributes = this.config.pageAttributes[this.page.normalizedPath];
-        var keys = attributes.modelsToSubmitOnAction[action];
-        if (keys) {
-            for (var key of keys) {
-                result[key] = this.data.getValue([key]);
-            }
-        }
-        return result;
-    }
-
-    /**
-     * @private 
-     * @param {Response} response 
-     * @param {Arrays<string: string} pathVariableArray
-     * @param {string:string} urlParameters 
-     * @returns {Data}
-     */
-    responseToData(response, pathVariableArray, urlParameters) {
-        var pathVariables = {};
-        for (var keyValue of pathVariableArray) {
-            var key = Object.keys(keyValue)[0]
-            var value = Object.values(keyValue)[0];
-            pathVariables[key] = value;
-        }
-        var data = response.data;
-        data.setValue('pathVariables', pathVariables);
-        data.setValue('urlParameters', urlParameters);
-        return data;
     }
 
     /**

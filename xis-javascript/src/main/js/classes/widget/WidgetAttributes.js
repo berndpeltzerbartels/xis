@@ -1,8 +1,8 @@
 /**
  * @typedef WidgetAttributes
  * @property {string} host
- * @property {array<string>} modelsToSubmitOnRefresh
- * @property {{string: array<string>}} modelsToSubmitOnAction
+ * @property {array<string>} modelParameterNames
+ * @property {{string: array<string>}} actionParameterNames
  */
 
 
@@ -10,7 +10,7 @@ class WidgetAttributes {
 
     constructor(obj) {
         this.host = obj.host;
-        this.modelsToSubmitOnRefresh = obj.modelsToSubmitOnRefresh || [];
-        this.modelsToSubmitOnAction = obj.modelsToSubmitOnAction || {};
+        this.modelParameterNames = obj.modelParameterNames || [];
+        this.actionParameterNames = obj.actionParameterNames || {};
     }
 }
