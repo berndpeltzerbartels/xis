@@ -14,7 +14,8 @@ import java.util.Map;
 
 import static one.xis.js.JavascriptSource.CLASSES;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @SuppressWarnings("unchecked")
@@ -29,18 +30,10 @@ class ClientTest {
     void init() {
         httpClient = Mockito.mock(HttpClient.class);
         promise = Mockito.mock(Promise.class);
-        when(httpClient.get(anyString(), any())).thenReturn(promise);
+        when(httpClient.get(any(), any())).thenReturn(promise);
         var clientJs = Javascript.getScript(CLASSES);
         var instantiation = "var client = new Client(httpClient);";
         script = clientJs + instantiation;
-    }
-
-    @Test
-    void loadConfig() throws ScriptException {
-        JSUtil.execute(script + "client.loadConfig();", Map.of("httpClient", httpClient));
-
-        verify(httpClient).get(eq("/xis/config"), any());
-        verify(promise).then(any());
     }
 
     @Test

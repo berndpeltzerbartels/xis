@@ -21,7 +21,7 @@ class ParameterWidget {
 
 
     @Action("action")
-    void action(@Model("pathVariable") Integer a, @Model("urlParameter") Integer b) {
-        service.action(a, b);
+    void action(@Model("pathVariable") Integer a, @Model("urlParameter") Integer b, @WidgetParameter("c") int c) {
+        service.action(a, b, c);
     }
 }

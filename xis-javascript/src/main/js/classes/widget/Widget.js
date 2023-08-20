@@ -3,7 +3,6 @@
  * @property {string} id
  * @property {Element}
  * @property {WidgetAttributes} widgetAttributes
- * @property {Data} data
  */
 class Widget {
 
@@ -11,7 +10,6 @@ class Widget {
         this.id = undefined;
         this.html = '';
         this.widgetAttributes = {};
-        this.data = new Data({});
         this.urlParameters = {};
     }
 }

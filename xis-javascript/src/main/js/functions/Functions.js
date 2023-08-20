@@ -141,3 +141,14 @@ function urlParameters(url) {
     return urlParameters;
 }
 
+
+/**
+* @private
+* @returns {string} the widget-id by leaving query from the widget-url
+*/
+function stripQuery(url) {
+    if (url.indexOf('?') != -1) {
+        return doSplit(url, '?')[0];
+    }
+    return url;
+}

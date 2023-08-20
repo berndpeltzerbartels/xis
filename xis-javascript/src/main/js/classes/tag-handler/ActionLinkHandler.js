@@ -49,9 +49,9 @@ class ActionLinkHandler extends TagHandler {
     widgetAction(invokerContainer) {
         var targetContainer = this.targetContainerId ? this.widgetContainers.findContainer(this.targetContainerId) : invokerContainer;
         var targetContainerHandler = targetContainer._handler;
-        var invokerWidgetInstance = invokerContainer._handler.widgetInstance;
+        var invokerHandler = invokerContainer._handler;
         var _this = this;
-        this.client.widgetAction(invokerWidgetInstance, this.action)
+        this.client.widgetAction(invokerHandler.widgetInstance, invokerHandler.widgetState, this.action)
             .then(response => _this.handleActionResponse(response, targetContainerHandler));
     }
 

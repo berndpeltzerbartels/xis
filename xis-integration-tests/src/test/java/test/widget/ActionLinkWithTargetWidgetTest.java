@@ -22,7 +22,7 @@ class ActionLinkWithTargetWidgetTest {
     }
 
     @Test
-    void action1() {
+    void action() {
         var result = testContext.openPage(ActionLinkWithTargetPage.class);
 
         var container1 = result.getDocument().findElement(e -> "container1".equals(e.getAttribute("container-id")));

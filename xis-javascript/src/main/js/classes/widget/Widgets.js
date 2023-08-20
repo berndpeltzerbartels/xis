@@ -56,6 +56,9 @@ class Widgets {
         var widgetInstance = instances.shift();
         if (!widgetInstance) {
             var widget = this.widgets[widgetId];
+            if (!widget) {
+                throw new Error('no such widget: ' + widgetId);
+            }
             widgetInstance = new WidgetInstance(widget, this);
         }
         return widgetInstance;

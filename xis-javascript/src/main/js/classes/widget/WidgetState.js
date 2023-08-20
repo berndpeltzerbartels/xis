@@ -10,5 +10,6 @@ class WidgetState {
     constructor(resolvedURL, widgetParameters) {
         this.resolvedURL = resolvedURL;
         this.widgetParameters = widgetParameters;
+        this.data = new Data({});
     }
 }

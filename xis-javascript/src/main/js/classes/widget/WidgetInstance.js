@@ -6,7 +6,6 @@ class WidgetInstance {
      */
     constructor(widget, widgets) {
         this.widget = widget;
-        this.widgetState = undefined;
         this.widgets = widgets;
         this.root = htmlToElement(widget.html);
         initializeElement(this.root);

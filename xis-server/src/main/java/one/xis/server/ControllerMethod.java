@@ -54,6 +54,9 @@ abstract class ControllerMethod {
             } else if (param.isAnnotationPresent(PathVariable.class)) {
                 var key = param.getAnnotation(PathVariable.class).value();
                 args[i] = deserializeParameter(context.getPathVariables().get(key), param);
+            } else if (param.isAnnotationPresent(WidgetParameter.class)) {
+                var key = param.getAnnotation(WidgetParameter.class).value();
+                args[i] = deserializeParameter(context.getWidgetParameters().get(key), param);
             } else {
                 throw new IllegalStateException(method + ": parameter without annotation=" + param);
             }

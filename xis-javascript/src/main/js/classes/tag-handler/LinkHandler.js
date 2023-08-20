@@ -62,21 +62,10 @@ class LinkHandler extends TagHandler {
             var handler = container._handler;
             var widgetParameters = urlParameters(this.targetWidgetUrl);
             var widgetState = new WidgetState(app.pageController.resolvedURL, widgetParameters);
-            var widgetId = this.targetWidgetId();
+            var widgetId = stripQuery(this.targetWidgetUrl);
             handler.showWidget(widgetId, widgetState);
             resolve();
         });
-    }
-
-    /**
-     * @private
-     * @returns {string} the widget-id by leaving query from the widget-url
-     */
-    targetWidgetId() {
-        if (this.targetWidgetUrl.indexOf('?') != -1) {
-            return doSplit(this.targetWidgetUrl, '?')[1];
-        }
-        return this.targetWidgetUrl;
     }
 
     /**

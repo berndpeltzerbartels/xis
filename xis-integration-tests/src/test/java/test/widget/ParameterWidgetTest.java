@@ -7,8 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 class ParameterWidgetTest {
 
@@ -49,8 +48,10 @@ class ParameterWidgetTest {
     void action() {
         var result = testContext.openPage("/3/parameterWidgetPage.html?b=8");
         result.getDocument().getElementByTagName("a").onclick.accept(null);
+        result.getDocument().getElementByTagName("a").onclick.accept(null);
+        result.getDocument().getElementByTagName("a").onclick.accept(null);
 
-        verify(service).action(eq(3), eq(8));
+        verify(service, times(3)).action(eq(3), eq(8), eq(42));
 
     }
 }
