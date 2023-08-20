@@ -9,19 +9,8 @@ class ParameterWidget {
 
     private final ParameterWidgetService service;
 
-    @Model("pathVariable")
-    Integer a(@PathVariable("a") Integer a) {
-        return a;
-    }
-
-    @Model("urlParameter")
-    Integer b(@URLParameter("b") Integer b) {
-        return b;
-    }
-
-
     @Action("action")
-    void action(@Model("pathVariable") Integer a, @Model("urlParameter") Integer b, @WidgetParameter("c") int c) {
+    void action(@PathVariable("a") Integer a, @URLParameter("b") Integer b, @WidgetParameter("c") int c) {
         service.action(a, b, c);
     }
 }
