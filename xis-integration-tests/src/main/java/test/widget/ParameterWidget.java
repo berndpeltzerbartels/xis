@@ -9,7 +9,7 @@ class ParameterWidget {
 
     private final ParameterWidgetService service;
 
-    @Action("action")
+    @LinkAction("action")
     void action(@PathVariable("a") Integer a, @URLParameter("b") Integer b, @WidgetParameter("c") int c) {
         service.action(a, b, c);
     }

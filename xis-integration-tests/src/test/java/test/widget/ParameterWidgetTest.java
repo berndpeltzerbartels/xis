@@ -44,7 +44,7 @@ class ParameterWidgetTest {
     }
 
     @Test
-    @DisplayName("Action-method in widget is always called with the same parameters")
+    @DisplayName("LinkAction-method in widget is always called with the same parameters")
     void action() {
         var result = testContext.openPage("/3/parameterWidgetPage.html?b=8");
         result.getDocument().getElementByTagName("a").onclick.accept(null);

@@ -1,6 +1,6 @@
 package one.xis.server;
 
-import one.xis.Action;
+import one.xis.LinkAction;
 import one.xis.Model;
 import one.xis.Page;
 import one.xis.Widget;
@@ -25,12 +25,12 @@ class ControllerWrapperFactoryTest {
             return "y";
         }
 
-        @Action("button1")
+        @LinkAction("button1")
         Class<?> action1() {
             return null;
         }
 
-        @Action("button2")
+        @LinkAction("button2")
         Class<?> action2() {
             return null;
         }
@@ -49,12 +49,12 @@ class ControllerWrapperFactoryTest {
             return "y";
         }
 
-        @Action("button1")
+        @LinkAction("button1")
         Class<?> action1() {
             return null;
         }
 
-        @Action("button2")
+        @LinkAction("button2")
         Class<?> action2() {
             return null;
         }

@@ -1,6 +1,6 @@
 package test.widget;
 
-import one.xis.Action;
+import one.xis.LinkAction;
 import one.xis.Model;
 import one.xis.Widget;
 
@@ -12,7 +12,7 @@ class ActionLinkWithTargetWidget1 {
         return "container2";
     }
 
-    @Action("test-action1")
+    @LinkAction("test-action1")
     Class<?> action1() {
         return ActionLinkWithTargetWidget2.class;
     }

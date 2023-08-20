@@ -1,6 +1,6 @@
 package one.xis.server;
 
-import one.xis.Action;
+import one.xis.LinkAction;
 import one.xis.Model;
 import one.xis.utils.lang.MethodUtils;
 
@@ -17,7 +17,7 @@ abstract class ComponentAttributesFactory<C extends ComponentAttributes> {
     protected Map<String, Collection<String>> modelsToSubmitForAction(Object controller) {
         var map = new HashMap<String, Collection<String>>();
         MethodUtils.methods(controller).stream()
-                .filter(m -> m.isAnnotationPresent(Action.class))
+                .filter(m -> m.isAnnotationPresent(LinkAction.class))
                 .forEach(method -> {
                     var action = getAction(method);
                     map.computeIfAbsent(action, a -> new HashSet<>()).addAll(getModelParameters(method));
@@ -34,7 +34,7 @@ abstract class ComponentAttributesFactory<C extends ComponentAttributes> {
     }
 
     private String getAction(Method method) {
-        return method.getAnnotation(Action.class).value();
+        return method.getAnnotation(LinkAction.class).value();
     }
 
     private Collection<String> getModelParameters(Method method) {
