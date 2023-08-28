@@ -26,22 +26,22 @@ public class BackendBridge {
 
 
     public String getPageModel(String uri, String requestJson, Map<String, String> headers) {
-        return serialialize(frontendService.invokePageModelMethods(request(requestJson)));
+        return serialialize(frontendService.processPageModelDataRequest(request(requestJson)));
     }
 
 
     public String getWidgetModel(String uri, String requestJson, Map<String, String> headers) {
-        return serialialize(frontendService.invokeWidgetModelMethods(request(requestJson)));
+        return serialialize(frontendService.processWidgetModelDataRequest(request(requestJson)));
     }
 
 
     public String onPageAction(String uri, String requestJson, Map<String, String> headers) {
-        return serialialize(frontendService.invokePageActionMethod(request(requestJson)));
+        return serialialize(frontendService.processPageActionRequest(request(requestJson)));
     }
 
 
     public String onWidgetAction(String uri, String requestJson, Map<String, String> headers) {
-        return serialialize(frontendService.invokeWidgetActionMethod(request(requestJson)));
+        return serialialize(frontendService.processWidgetActionRequest(request(requestJson)));
     }
 
 

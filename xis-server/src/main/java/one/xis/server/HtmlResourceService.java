@@ -2,6 +2,7 @@ package one.xis.server;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import one.xis.HtmlFile;
 import one.xis.Page;
 import one.xis.Widget;
 import one.xis.context.XISComponent;
@@ -148,6 +149,10 @@ class HtmlResourceService {
     }
 
     private String getHtmlTemplatePath(Object controller) {
+        if (controller.getClass().isAnnotationPresent(HtmlFile.class)) {
+            var path = controller.getClass().getPackageName() + "/" + controller.getClass().getAnnotation(HtmlFile.class).value();
+            return path.endsWith(".html") ? path : path + ".html";
+        }
         return controller.getClass().getName().replace('.', '/') + ".html";
     }
 

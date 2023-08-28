@@ -12,11 +12,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+/**
+ * Encapsulates all methods, required by the framework's controller.
+ */
 @XISComponent
 @RequiredArgsConstructor
 public class FrontendService {
 
-    private final ControllerService controllerService;
+    private final PageControllerService pageControllerService;
+    private final WidgetControllerService widgetControllerService;
     private final ClientConfigService configService;
     private final HtmlResourceService htmlResourceService;
     private final Resources resources;
@@ -39,20 +43,20 @@ public class FrontendService {
         return configService.getConfig();
     }
 
-    public ServerResponse invokePageActionMethod(ClientRequest request) {
-        return applyFilterChain(request, controllerService::processPageActionRequest);
+    public ServerResponse processPageActionRequest(ClientRequest request) {
+        return applyFilterChain(request, pageControllerService::processPageActionRequest);
     }
 
-    public ServerResponse invokeWidgetActionMethod(ClientRequest request) {
-        return applyFilterChain(request, controllerService::processWidgetActionRequest);
+    public ServerResponse processWidgetActionRequest(ClientRequest request) {
+        return applyFilterChain(request, widgetControllerService::processWidgetActionRequest);
     }
 
-    public ServerResponse invokePageModelMethods(ClientRequest request) {
-        return applyFilterChain(request, controllerService::processPageModelDataRequest);
+    public ServerResponse processPageModelDataRequest(ClientRequest request) {
+        return applyFilterChain(request, pageControllerService::processPageModelDataRequest);
     }
 
-    public ServerResponse invokeWidgetModelMethods(ClientRequest request) {
-        return applyFilterChain(request, controllerService::processWidgetModelDataRequest);
+    public ServerResponse processWidgetModelDataRequest(ClientRequest request) {
+        return applyFilterChain(request, widgetControllerService::processWidgetModelDataRequest);
     }
 
     public String getPage(String id) {

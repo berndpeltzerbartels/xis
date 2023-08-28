@@ -1,6 +1,5 @@
 package one.xis.server;
 
-import one.xis.Page;
 import one.xis.context.XISComponent;
 
 import java.text.CharacterIterator;
@@ -9,12 +8,12 @@ import java.text.StringCharacterIterator;
 @XISComponent
 class PathResolver {
 
-    Path create(String path) {
+    Path createPath(String path) {
         return new Path(evaluate(new StringCharacterIterator(path)));
     }
 
     String normalizedPath(Object controller) {
-        var path = create(controller.getClass().getAnnotation(Page.class).value());
+        var path = createPath(PageUtil.getUrl(controller.getClass()));
         return path.normalized();
     }
 

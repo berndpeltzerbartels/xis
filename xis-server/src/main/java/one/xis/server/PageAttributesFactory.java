@@ -2,7 +2,6 @@ package one.xis.server;
 
 
 import lombok.RequiredArgsConstructor;
-import one.xis.Page;
 import one.xis.WelcomePage;
 import one.xis.context.XISComponent;
 
@@ -15,7 +14,7 @@ class PageAttributesFactory extends ComponentAttributesFactory<PageAttributes> {
     @Override
     PageAttributes attributes(Object controller) {
         var attributes = new PageAttributes();
-        var path = pathResolver.create(controller.getClass().getAnnotation(Page.class).value());
+        var path = pathResolver.createPath(PageUtil.getUrl(controller));
         attributes.setModelParameterNames(modelsToSubmitForModel(controller));
         attributes.setActionParameterNames(modelsToSubmitForAction(controller));
         attributes.setWelcomePage(controller.getClass().isAnnotationPresent(WelcomePage.class));

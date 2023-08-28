@@ -24,25 +24,25 @@ class SpringController implements FrameworkController {
     @Override
     @PostMapping("/xis/page/model")
     public ServerResponse getPageModel(@RequestBody ClientRequest request) {
-        return frontendService.invokePageModelMethods(request);
+        return frontendService.processPageModelDataRequest(request);
     }
 
     @Override
     @PostMapping("/xis/widget/model")
     public ServerResponse getWidgetModel(@RequestBody ClientRequest request) {
-        return frontendService.invokeWidgetModelMethods(request);
+        return frontendService.processWidgetModelDataRequest(request);
     }
 
     @Override
     @PostMapping("/xis/page/action")
     public ServerResponse onPageAction(@RequestBody ClientRequest request) {
-        return frontendService.invokePageActionMethod(request);
+        return frontendService.processPageActionRequest(request);
     }
 
     @Override
     @PostMapping("/xis/widget/action")
     public ServerResponse onWidgetAction(@RequestBody ClientRequest request) {
-        return frontendService.invokeWidgetActionMethod(request);
+        return frontendService.processWidgetActionRequest(request);
     }
 
     @Override

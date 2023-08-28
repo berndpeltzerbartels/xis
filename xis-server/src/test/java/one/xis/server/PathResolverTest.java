@@ -10,7 +10,7 @@ class PathResolverTest {
 
     @Test
     void noVariables() {
-        var path = pathResolver.create("/abc/xyz.html");
+        var path = pathResolver.createPath("/abc/xyz.html");
 
         assertThat(path.normalized()).isEqualTo("/abc/xyz.html");
         assertThat(path.getPathElements().size()).isEqualTo(1);
@@ -19,7 +19,7 @@ class PathResolverTest {
 
     @Test
     void onePathVariable() {
-        var path = pathResolver.create("/a/{b}/c.html");
+        var path = pathResolver.createPath("/a/{b}/c.html");
 
         assertThat(path.normalized()).isEqualTo("/a/*/c.html");
         assertThat(path.getPathElements().size()).isEqualTo(3);
@@ -30,7 +30,7 @@ class PathResolverTest {
 
     @Test
     void twoPathVariable() {
-        var path = pathResolver.create("/{a}/{b}/c.html");
+        var path = pathResolver.createPath("/{a}/{b}/c.html");
 
         assertThat(path.normalized()).isEqualTo("/*/*/c.html");
         assertThat(path.getPathElements().size()).isEqualTo(5);
@@ -44,7 +44,7 @@ class PathResolverTest {
 
     @Test
     void startingWithVariable() {
-        var path = pathResolver.create("{a}/b.html");
+        var path = pathResolver.createPath("{a}/b.html");
 
         assertThat(path.normalized()).isEqualTo("*/b.html");
         assertThat(path.getPathElements().size()).isEqualTo(2);
@@ -55,7 +55,7 @@ class PathResolverTest {
 
     @Test
     void mixedContent() {
-        var path = pathResolver.create("/{a}/product_{b}/c.html");
+        var path = pathResolver.createPath("/{a}/product_{b}/c.html");
 
         assertThat(path.normalized()).isEqualTo("/*/product_*/c.html");
         assertThat(path.getPathElements().size()).isEqualTo(5);

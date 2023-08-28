@@ -30,25 +30,25 @@ class MicronautController implements FrameworkController {
     @Override
     @Post("/xis/page/model")
     public ServerResponse getPageModel(@Body ClientRequest request) {
-        return frontendService.invokePageModelMethods(request);
+        return frontendService.processPageModelDataRequest(request);
     }
 
     @Override
     @Post("/xis/widget/model")
     public ServerResponse getWidgetModel(@Body ClientRequest request) {
-        return frontendService.invokeWidgetModelMethods(request);
+        return frontendService.processWidgetModelDataRequest(request);
     }
 
     @Override
     @Post("/xis/page/action")
     public ServerResponse onPageAction(@Body ClientRequest request) {
-        return frontendService.invokePageActionMethod(request);
+        return frontendService.processPageActionRequest(request);
     }
 
     @Override
     @Post("/xis/widget/action")
     public ServerResponse onWidgetAction(@Body ClientRequest request) {
-        return frontendService.invokeWidgetActionMethod(request);
+        return frontendService.processWidgetActionRequest(request);
     }
 
     @Override

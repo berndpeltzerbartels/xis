@@ -1,13 +1,12 @@
 package test.page;
 
 import lombok.Data;
-import one.xis.Identifier;
 
 @Data
-class SimpleFormObject {
+class SimpleObject {
 
-    @Identifier
     private int id;
+    private String title;
     private String property1;
     private String property2;
 }

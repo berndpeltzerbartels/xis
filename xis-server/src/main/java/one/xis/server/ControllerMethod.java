@@ -77,7 +77,7 @@ abstract class ControllerMethod {
     }
 
     @SuppressWarnings("unchecked")
-    private Object deserializeParameter(String paramValue, Parameter parameter) throws IOException {
+    private Object deserializeParameter(Object paramValue, Parameter parameter) throws IOException {
         if (paramValue == null) {
             if (parameter.getType().equals(Iterable.class)) {
                 return CollectionUtils.emptyInstance(List.class);
@@ -87,8 +87,13 @@ abstract class ControllerMethod {
             return null;
         } else if (String.class.isAssignableFrom(parameter.getType())) {
             return paramValue;
+        } else if (paramValue instanceof String json) {
+            return parameterDeserializer.deserialze(json, parameter);
+        } else {
+            throw new IllegalArgumentException("paramValue: " + paramValue + " for " + parameter);
         }
-        return parameterDeserializer.deserialze(paramValue, parameter);
+
+
     }
 
 

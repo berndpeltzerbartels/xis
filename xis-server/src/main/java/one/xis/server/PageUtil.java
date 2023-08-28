@@ -14,7 +14,8 @@ public class PageUtil {
     }
 
     public static String getUrl(@NonNull Class<?> controllerClass) {
-        return controllerClass.getAnnotation(Page.class).value();
+        var url = controllerClass.getAnnotation(Page.class).value();
+        return url.endsWith(".html") ? url : url + ".html";
     }
 
 

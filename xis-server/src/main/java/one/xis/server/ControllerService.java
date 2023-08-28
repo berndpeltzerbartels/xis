@@ -1,152 +1,87 @@
 package one.xis.server;
 
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import one.xis.Page;
+import one.xis.PageResult;
 import one.xis.Widget;
-import one.xis.context.XISComponent;
-import one.xis.context.XISInit;
+import one.xis.WidgetResult;
 import one.xis.context.XISInject;
 
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Slf4j
-@XISComponent
-@RequiredArgsConstructor
-class ControllerService {
+abstract class ControllerService {
 
-    private final ControllerWrapperFactory controllerWrapperFactory;
-    private final PathResolver pathResolver;
-    private final DataSerializer dataSerializer;
+    @XISInject
+    private DataSerializer dataSerializer;
 
+    @XISInject
+    private PageControllerWrappers pageControllerWrappers;
 
-    @XISInject(annotatedWith = Widget.class)
-    private Collection<Object> widgetControllers;
+    @XISInject
+    private WidgetControllerWrappers widgetControllerWrappers;
 
-    @XISInject(annotatedWith = Page.class)
-    private Collection<Object> pageControllers;
-
-    @Getter
-    private Collection<ControllerWrapper> widgetControllerWrappers;
-
-    @Getter
-    private Collection<ControllerWrapper> pageControllerWrappers;
-
-    @XISInit
-    void init() {
-        widgetControllerWrappers = widgetControllerWrappers();
-        pageControllerWrappers = pageControllerWrappers();
-    }
-
-    ServerResponse processPageModelDataRequest(ClientRequest request) {
-        var wrapper = findPageControllerWrapper(request).orElseThrow();
-        return invokeGetPageModelMethods(200, wrapper, request);
-    }
-
-    ServerResponse processWidgetModelDataRequest(ClientRequest request) {
-        var wrapper = findWidgetControllerWrapper(request).orElseThrow();
-        return invokeGetWidgetModelMethods(200, wrapper, request);
-    }
-
-    ServerResponse processPageActionRequest(ClientRequest request) {
-        var invokerController = findPageControllerWrapper(request).orElseThrow();
-        var result = invokerController.invokeActionMethod(request);
-        var nextPageController = pageControllerWrapperByResult(result).orElse(invokerController);
-        return invokeGetPageModelMethods(200, nextPageController, request);
-    }
-
-    ServerResponse processWidgetActionRequest(ClientRequest request) {
-        var invokerController = findWidgetControllerWrapper(request).orElseThrow();
-        var result = invokerController.invokeActionMethod(request);
-        if (result == null || result == Void.class) {
-            return invokeGetWidgetModelMethods(200, invokerController, request);
-        }
-        var controllerWrapper = widgetControllerWrapperByResult(result)
-                .orElseGet(() -> pageControllerWrapperByResult(result).orElseThrow());
-        if (controllerWrapper.getController().getClass().isAnnotationPresent(Widget.class)) {
-            return invokeGetWidgetModelMethods(200, controllerWrapper, request);
-        } else if (controllerWrapper.getController().getClass().isAnnotationPresent(Page.class)) {
-            return invokeGetPageModelMethods(200, controllerWrapper, request);
-        } else {
-            throw new IllegalStateException("not a controller: " + controllerWrapper.getClass());
-        }
-    }
-
-    private ServerResponse invokeGetWidgetModelMethods(int status, ControllerWrapper wrapper, ClientRequest request) {
+    protected ServerResponse invokeGetWidgetModelMethods(int status, ControllerWrapper wrapper, ClientRequest request) {
         return new ServerResponse(status, dataSerializer.serialize(wrapper.invokeGetModelMethods(request)), null, wrapper.getId(), new HashMap<>());
     }
 
-    private ServerResponse invokeGetPageModelMethods(int status, ControllerWrapper wrapper, ClientRequest request) {
-        return new ServerResponse(status, dataSerializer.serialize(wrapper.invokeGetModelMethods(request)), wrapper.getId(), null, new HashMap<>());
+    protected ServerResponse invokeGetPageModelMethods(int status, ControllerWrapper wrapper, ClientRequest request) {
+        return new ServerResponse(status, dataSerializer.serialize(wrapper.invokeGetModelMethods(request)), null, wrapper.getId(), new HashMap<>());
     }
 
-    private Collection<ControllerWrapper> widgetControllerWrappers() {
-        return widgetControllers.stream()
-                .map(controller -> createControllerWrapper(controller, WidgetUtil::getId))
-                .peek(wrapper -> log.info("widget-id: {} -> controller: {}", wrapper.getId(), wrapper.getController().getClass().getSimpleName()))
-                .collect(Collectors.toSet());
+    protected ControllerWrapper widgetControllerWrapperByClass(Class<?> controllerClass) {
+        return widgetControllerWrappers.findByClass(controllerClass)
+                .orElseThrow(() -> new IllegalStateException("not a widget-controller:" + controllerClass));
     }
 
-    private Collection<ControllerWrapper> pageControllerWrappers() {
-        return pageControllers.stream()
-                .map(controller -> createControllerWrapper(controller, this::getPagePath))
-                .peek(wrapper -> log.info("url: {} -> controller: {}", wrapper.getId(), wrapper.getController().getClass().getSimpleName()))
-                .collect(Collectors.toSet());
+    protected ControllerWrapper widgetControllerWrapperById(String id) {
+        return widgetControllerWrappers.findWidgetById(id)
+                .orElseThrow(() -> new IllegalStateException("not a widget-controller:" + id));
     }
 
-    private Optional<ControllerWrapper> widgetControllerWrapperByResult(Object result) {
-        if (result instanceof Class) {
-            return controllerWrapperByClass((Class<?>) result, widgetControllerWrappers);
-        } else if (result instanceof String) {
-            return controllerWrapperById((String) result, widgetControllerWrappers);
+    protected ServerResponse processActionResult(ClientRequest request, PageResult pageResult) {
+        var controllerClass = pageResult.getControllerClass();
+        var controllerWrapper = widgetControllerWrapperByClass(controllerClass);
+        request.getUrlParameters().putAll(pageResult.getUrlParameters()); // TODO May be better to create a context class to avoid mutating the request
+        request.getPathVariables().putAll(pageResult.getPathVariables());
+        return invokeGetWidgetModelMethods(200, controllerWrapper, request);
+    }
+
+    protected ServerResponse processActionResult(ClientRequest request, WidgetResult widgetResult) {
+        var controllerClass = widgetResult.getControllerClass();
+        var controllerWrapper = widgetControllerWrapperByClass(controllerClass);
+        request.getWidgetParameters().putAll(widgetResult.getWidgetParameters()); // TODO May be better to create a context class to avoid mutating the request
+        return invokeGetWidgetModelMethods(200, controllerWrapper, request);
+    }
+
+    protected ServerResponse processActionResult(ClientRequest request, Class<?> controllerClass) {
+        if (controllerClass.isAnnotationPresent(Page.class)) {
+            var controllerWrapper = widgetControllerWrapperByClass(controllerClass);
+            return invokeGetPageModelMethods(200, controllerWrapper, request);
+        } else if (controllerClass.isAnnotationPresent(Widget.class)) {
+            var controllerWrapper = widgetControllerWrapperByClass(controllerClass);
+            return invokeGetWidgetModelMethods(200, controllerWrapper, request);
+        } else {
+            throw new IllegalStateException("returned type is not a controller class: " + controllerClass);
         }
-        return Optional.empty();
     }
 
-    private Optional<ControllerWrapper> pageControllerWrapperByResult(Object result) {
-        if (result instanceof Class) {
-            return controllerWrapperByClass((Class<?>) result, pageControllerWrappers);
-        } else if (result instanceof String) {
-            return controllerWrapperById((String) result, pageControllerWrappers);
-        }
-        return Optional.empty();
+    protected ServerResponse processPageResult(ClientRequest request, PageResult pageResult) {
+        var controllerClass = pageResult.getControllerClass();
+        var controllerWrapper = widgetControllerWrapperByClass(controllerClass);
+        request.getPathVariables().putAll(pageResult.getPathVariables());
+        request.getUrlParameters().putAll(pageResult.getUrlParameters());
+        return invokeGetPageModelMethods(200, controllerWrapper, request);
     }
 
-    private Optional<ControllerWrapper> controllerWrapperByClass(@NonNull Class<?> cl, Collection<ControllerWrapper> controllerWrappers) {
-        return controllerWrappers.stream().filter(c -> c.getControllerClass().equals(cl)).findFirst();
+    protected ControllerWrapper pageControllerWrapperByClass(Class<?> controllerClass) {
+        return pageControllerWrappers.findByClass(controllerClass)
+                .orElseThrow(() -> new IllegalStateException("not a page-controller:" + controllerClass));
     }
 
-    private Optional<ControllerWrapper> controllerWrapperById(@NonNull String id, Collection<ControllerWrapper> controllerWrappers) {
-        return controllerWrappers.stream().filter(c -> c.getId().equals(id)).findFirst();
+    protected ControllerWrapper pageControllerWrapperById(String id) {
+        return pageControllerWrappers.findByPath(id)
+                .orElseThrow(() -> new IllegalStateException("not a page-controller:" + id));
     }
 
-    private ControllerWrapper createControllerWrapper(Object controller, Function<Object, String> idMapper) {
-        return controllerWrapperFactory.createControllerWrapper(idMapper.apply(controller), controller);
-    }
-
-    private String getPagePath(Object pageController) {
-        var path = pageController.getClass().getAnnotation(Page.class).value();
-        if (!path.endsWith(".html")) {
-            throw new IllegalStateException(pageController.getClass() + ": Identifier in @Page-annotation must have suffix '.html'");
-        }
-        return pathResolver.normalizedPath(pageController);
-    }
-
-    private Optional<ControllerWrapper> findPageControllerWrapper(ClientRequest request) {
-        return pageControllerWrappers.stream()
-                .filter(controller -> controller.getId().equals(request.getPageId()))
-                .findFirst();
-    }
-
-    private Optional<ControllerWrapper> findWidgetControllerWrapper(ClientRequest request) {
-        return widgetControllerWrappers.stream()
-                .filter(controller -> controller.getId().equals(request.getWidgetId()))
-                .findFirst();
-    }
 }
