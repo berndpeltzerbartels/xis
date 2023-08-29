@@ -17,7 +17,7 @@ class PageControllerService extends ControllerService {
     }
 
     ServerResponse processPageActionRequest(ClientRequest request) {
-        var invokerControllerWrapper = widgetControllerWrapperById(request.getWidgetId());
+        var invokerControllerWrapper = pageControllerWrapperById(request.getPageId());
         var result = invokerControllerWrapper.invokeActionMethod(request);
         if (result == null || result == Void.class) {
             return invokeGetPageModelMethods(200, invokerControllerWrapper, request);// Still the same controller

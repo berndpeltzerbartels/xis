@@ -26,7 +26,7 @@ abstract class ControllerService {
     }
 
     protected ServerResponse invokeGetPageModelMethods(int status, ControllerWrapper wrapper, ClientRequest request) {
-        return new ServerResponse(status, dataSerializer.serialize(wrapper.invokeGetModelMethods(request)), null, wrapper.getId(), new HashMap<>());
+        return new ServerResponse(status, dataSerializer.serialize(wrapper.invokeGetModelMethods(request)), wrapper.getId(), null, new HashMap<>());
     }
 
     protected ControllerWrapper widgetControllerWrapperByClass(Class<?> controllerClass) {
@@ -56,7 +56,7 @@ abstract class ControllerService {
 
     protected ServerResponse processActionResult(ClientRequest request, Class<?> controllerClass) {
         if (controllerClass.isAnnotationPresent(Page.class)) {
-            var controllerWrapper = widgetControllerWrapperByClass(controllerClass);
+            var controllerWrapper = pageControllerWrapperByClass(controllerClass);
             return invokeGetPageModelMethods(200, controllerWrapper, request);
         } else if (controllerClass.isAnnotationPresent(Widget.class)) {
             var controllerWrapper = widgetControllerWrapperByClass(controllerClass);
