@@ -9,6 +9,8 @@ import one.xis.context.XISInject;
 
 import java.util.HashMap;
 
+import static java.util.Collections.emptyMap;
+
 @Slf4j
 abstract class ControllerService {
 
@@ -37,6 +39,10 @@ abstract class ControllerService {
     protected ControllerWrapper widgetControllerWrapperById(String id) {
         return widgetControllerWrappers.findWidgetById(id)
                 .orElseThrow(() -> new IllegalStateException("not a widget-controller:" + id));
+    }
+
+    protected ServerResponse createPageResponse(ControllerMethodResult result, ControllerWrapper pageControllerWrapper) {
+        return new ServerResponse(200, dataSerializer.serialize(result.modelData()), pageControllerWrapper.getId(), null, emptyMap());
     }
 
     protected ServerResponse processActionResult(ClientRequest request, PageResult pageResult) {

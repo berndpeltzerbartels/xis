@@ -19,16 +19,16 @@ class PageControllerService extends ControllerService {
     ServerResponse processPageActionRequest(ClientRequest request) {
         var invokerControllerWrapper = pageControllerWrapperById(request.getPageId());
         var result = invokerControllerWrapper.invokeActionMethod(request);
-        if (result == null || result == Void.class) {
-            return invokeGetPageModelMethods(200, invokerControllerWrapper, request);// Still the same controller
-        } else if (result instanceof WidgetResult widgetResult) {
+        if (result.returnValue() == null || result.returnValue() == Void.class || result.returnValue().equals(invokerControllerWrapper.getControllerClass())) {
+            return createPageResponse(result, invokerControllerWrapper);// Still the same controller
+        } else if (result.returnValue() instanceof WidgetResult widgetResult) {
             if (widgetResult.getTargetContainer() == null) { // TODO Client side code and test for this case
                 throw new IllegalStateException(invokerControllerWrapper.getControllerClass().getSimpleName() + ": widget-result of a page-controller must define a target-container");
             }
             return processActionResult(request, widgetResult);
-        } else if (result instanceof PageResult pageResult) {
+        } else if (result.returnValue() instanceof PageResult pageResult) {
             return processPageResult(request, pageResult);
-        } else if (result instanceof Class<?> controllerClass) {
+        } else if (result.returnValue() instanceof Class<?> controllerClass) {
             return processActionResult(request, controllerClass);
         } else {
             throw new IllegalStateException(result.getClass() + " is not a valid return type for a widget-action");

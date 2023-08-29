@@ -17,13 +17,13 @@ class WidgetControllerService extends ControllerService {
     ServerResponse processWidgetActionRequest(ClientRequest request) {
         var invokerControllerWrapper = widgetControllerWrapperById(request.getWidgetId());
         var result = invokerControllerWrapper.invokeActionMethod(request);
-        if (result == null || result == Void.class) {
+        if (result.returnValue() == null || result.returnValue() == Void.class) {
             return invokeGetWidgetModelMethods(200, invokerControllerWrapper, request);// Still the same controller
-        } else if (result instanceof WidgetResult widgetResult) {
+        } else if (result.returnValue() instanceof WidgetResult widgetResult) {
             return processActionResult(request, widgetResult);
-        } else if (result instanceof PageResult pageResult) {
+        } else if (result.returnValue() instanceof PageResult pageResult) {
             return processActionResult(request, pageResult);
-        } else if (result instanceof Class<?> controllerClass) {
+        } else if (result.returnValue() instanceof Class<?> controllerClass) {
             return processActionResult(request, controllerClass);
         } else {
             throw new IllegalStateException(result.getClass() + " is not a valid return type for a widget-action");

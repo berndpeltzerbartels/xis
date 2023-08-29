@@ -12,7 +12,9 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Data
 @Slf4j
@@ -23,8 +25,10 @@ abstract class ControllerMethod {
     protected String key;
     protected ParameterDeserializer parameterDeserializer;
 
-    Object invoke(ClientRequest request, Object controller) throws Exception {
-        return method.invoke(controller, prepareArgs(request));
+    ControllerMethodResult invoke(ClientRequest request, Object controller) throws Exception {
+        var args = prepareArgs(request);
+        var returnValue = method.invoke(controller, prepareArgs(request));
+        return new ControllerMethodResult(returnValue, modelParameterData(args));
     }
 
     @Override
@@ -62,6 +66,17 @@ abstract class ControllerMethod {
             }
         }
         return args;
+    }
+
+    private Map<String, Object> modelParameterData(Object[] args) {
+        var rv = new HashMap<String, Object>();
+        for (var i = 0; i < method.getParameterCount(); i++) {
+            var parameter = method.getParameters()[i];
+            if (parameter.isAnnotationPresent(Model.class)) {
+                rv.put(parameter.getAnnotation(Model.class).value(), args[i]);
+            }
+        }
+        return rv;
     }
 
     private Object deserializeModelParameter(Parameter parameter, ClientRequest context) throws IOException {

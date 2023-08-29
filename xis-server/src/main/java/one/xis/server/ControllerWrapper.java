@@ -31,7 +31,7 @@ public class ControllerWrapper {
         return data;
     }
 
-    Object invokeActionMethod(ClientRequest request) {
+    ControllerMethodResult invokeActionMethod(ClientRequest request) {
         var method = actionMethods.get(request.getAction());
         try {
             return method.invoke(request, controller);
@@ -47,7 +47,7 @@ public class ControllerWrapper {
 
     private void invokeForModel(String key, ModelMethod modelMethod, ClientRequest request, Map<String, Object> result) {
         try {
-            result.put(key, modelMethod.invoke(request, controller));
+            result.put(key, modelMethod.invoke(request, controller).returnValue());
         } catch (Exception e) {
             Logger.error(e, "Failed to invoke model-method");
             throw new RuntimeException("Failed to invoke model-method " + modelMethod, e);
