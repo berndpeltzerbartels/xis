@@ -2,7 +2,7 @@ package one.xis.server;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import one.xis.LinkAction;
+import one.xis.Action;
 import one.xis.Model;
 import one.xis.context.XISComponent;
 import one.xis.utils.lang.MethodUtils;
@@ -54,7 +54,7 @@ class ControllerWrapperFactory {
 
     private Stream<ActionMethod> actionMethods(Object controller) {
         return MethodUtils.methods(controller).stream()
-                .filter(m -> m.isAnnotationPresent(LinkAction.class))
+                .filter(m -> m.isAnnotationPresent(Action.class))
                 .map(this::createActionMethod);
     }
 
@@ -76,7 +76,7 @@ class ControllerWrapperFactory {
         try {
             return ActionMethod.builder()
                     .method(method)
-                    .key(method.getAnnotation(LinkAction.class).value())
+                    .key(method.getAnnotation(Action.class).value())
                     .parameterDeserializer(parameterDeserializer)
                     .build();
         } catch (Exception e) {

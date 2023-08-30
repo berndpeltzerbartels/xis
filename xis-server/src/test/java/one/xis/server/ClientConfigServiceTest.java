@@ -1,7 +1,7 @@
 package one.xis.server;
 
 import lombok.Data;
-import one.xis.LinkAction;
+import one.xis.Action;
 import one.xis.Model;
 import one.xis.Page;
 import one.xis.Widget;
@@ -54,7 +54,7 @@ class ClientConfigServiceTest {
         @Page("/Test1.html")
         static class ConfigServiceTestPage1 {
 
-            @LinkAction("action")
+            @Action("action")
             void action(@Model("string") String string, @Model("model") TestModel testModel) {
 
             }
@@ -102,7 +102,7 @@ class ClientConfigServiceTest {
         @Page("/{group}/test_{id}/{xyz}.html")
         static class ConfigServiceTestPage2 {
 
-            @LinkAction("action")
+            @Action("action")
             void action(@Model("string") String string, @Model("model") TestModel testModel) {
 
             }
@@ -154,7 +154,7 @@ class ClientConfigServiceTest {
         @Widget
         static class ConfigServiceTestWidget1 {
 
-            @LinkAction("action")
+            @Action("action")
             void action(@Model("string") String string, @Model("model") TestModel testModel) {
 
             }

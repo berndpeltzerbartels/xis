@@ -2,6 +2,7 @@ package test.page;
 
 
 import lombok.RequiredArgsConstructor;
+import one.xis.Model;
 import one.xis.*;
 
 @Page("/simpleObject/new")
@@ -11,13 +12,13 @@ class SimpleObjectNewController {
 
     private final SimpleObjectService simpleObjectService;
 
-    @FormData("formObject")
+    @Model("formObject")
     SimpleObject simpleObject() {
         return new SimpleObject();
     }
 
-    @FormAction("save")
-    PageResult save(@FormData("formObject") SimpleObject simpleObject) {
+    @Action("save")
+    PageResult save(@Model("formObject") SimpleObject simpleObject) {
         simpleObjectService.save(simpleObject);
         return PageResult.of(SimpleObjectDetails.class, "id", simpleObject.getId());
     }

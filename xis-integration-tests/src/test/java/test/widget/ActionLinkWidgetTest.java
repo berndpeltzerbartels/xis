@@ -59,7 +59,7 @@ class ActionLinkWidgetTest {
     }
 
     @Test
-    @DisplayName("LinkAction is a variable and link of a widget is clicked, but the result demands displaying a new page")
+    @DisplayName("Action is a variable and link of a widget is clicked, but the result demands displaying a new page")
     void action3() {
         var result = testContext.openPage(WidgetPage.class);
         result.getDocument().getElementById("action-link3").onclick.accept(null); // "action-link3"is set by model variable "action3"
@@ -77,7 +77,7 @@ class ActionLinkWidgetTest {
     }
 
     @Test
-    @DisplayName("LinkAction is a variable and link of a widget is clicked and demands displaying another widget")
+    @DisplayName("Action is a variable and link of a widget is clicked and demands displaying another widget")
     void action4() {
         var result = testContext.openPage(WidgetPage.class);
         result.getDocument().getElementById("action-link4").onclick.accept(null); // "action-link3"is set by model variable "action3"

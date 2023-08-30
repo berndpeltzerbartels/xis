@@ -2,7 +2,7 @@ package test.page;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import one.xis.LinkAction;
+import one.xis.Action;
 import one.xis.Model;
 import one.xis.Page;
 
@@ -22,18 +22,18 @@ class ActionLinkPage {
         return "test-action3";
     }
 
-    @LinkAction("test-action1")
+    @Action("test-action1")
     void action1(@Model("data") ActionLinkPageData data) {
         service.update(data);
     }
 
-    @LinkAction("test-action2")
+    @Action("test-action2")
     Class<?> action2(@Model("data") ActionLinkPageData data) {
         service.update(data);
         return ActionLinkPage.class;
     }
 
-    @LinkAction("test-action3")
+    @Action("test-action3")
     Class<?> action3(@Model("data") ActionLinkPageData data, @NonNull @Model("action3") String action3) {
         service.update(data);
         return IndexPage.class;
