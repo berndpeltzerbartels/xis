@@ -36,7 +36,7 @@ class ActionLinkWidgetTest {
         var result = testContext.openPage(WidgetPage.class);
         result.getDocument().getElementById("action-link1").onclick.accept(null);
 
-        verify(service, times(2)).getData(); // 2 times, because action updates the data
+        verify(service).getData();
 
         var captor = ArgumentCaptor.forClass(ActionLinkWidgetData.class);
         verify(service, times(1)).update(captor.capture());
@@ -51,7 +51,7 @@ class ActionLinkWidgetTest {
         var result = testContext.openPage(WidgetPage.class);
         result.getDocument().getElementById("action-link2").onclick.accept(null);
 
-        verify(service, times(2)).getData(); // 2 times, because after action, data has to be reloaded
+        verify(service).getData();
         var captor = ArgumentCaptor.forClass(ActionLinkWidgetData.class);
         verify(service, times(1)).update(captor.capture());
         assertThat(captor.getValue().getId()).isEqualTo(101);

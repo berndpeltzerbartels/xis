@@ -45,6 +45,10 @@ abstract class ControllerService {
         return new ServerResponse(200, dataSerializer.serialize(result.modelData()), pageControllerWrapper.getId(), null, emptyMap());
     }
 
+    protected ServerResponse createWidgetResponse(ControllerMethodResult result, ControllerWrapper widgetControllerWrapper) {
+        return new ServerResponse(200, dataSerializer.serialize(result.modelData()), null, widgetControllerWrapper.getId(), emptyMap());
+    }
+
     protected ServerResponse processActionResult(ClientRequest request, PageResult pageResult) {
         var controllerClass = pageResult.getControllerClass();
         var controllerWrapper = widgetControllerWrapperByClass(controllerClass);
