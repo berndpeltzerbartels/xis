@@ -55,4 +55,30 @@ class DataTest {
 
         assertThat(result.asInt()).isEqualTo(123);
     }
+
+    @Test
+    @DisplayName("Set a data value with path containig multiple elements in existing tree")
+    void setValue() throws ScriptException {
+        var js = Javascript.getScript(CLASSES);
+        js += "var data = new Data({a:{b:{}}});";
+        js += "data.setValue(['a','b'],'c');";
+        js += "data.values['a']['b'];";
+
+        var result = JSUtil.execute(js);
+
+        assertThat(result.asString()).isEqualTo("c");
+    }
+
+    @Test
+    @DisplayName("Set a data value with path containig multiple elements and tree has to be created")
+    void setValue2() throws ScriptException {
+        var js = Javascript.getScript(CLASSES);
+        js += "var data = new Data({});";
+        js += "data.setValue(['a','b'],'c');";
+        js += "data.values['a']['b'];";
+
+        var result = JSUtil.execute(js);
+
+        assertThat(result.asString()).isEqualTo("c");
+    }
 }

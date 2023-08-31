@@ -121,9 +121,9 @@ class WidgetContainerHandler extends TagHandler {
             var _this = this;
             this.client.loadWidgetData(this.widgetInstance, this.widgetState)
                 .then(response => response.data)
-                .then(data => { data.setValue('urlParameters', resolvedURL.urlParameters); return data; })
-                .then(data => { data.setValue('pathVariables', resolvedURL.pathVariablesAsMap()); return data; })
-                .then(data => { data.setValue('widgetParameters', _this.widgetState.widgetParameters); return data; })
+                .then(data => { data.setValue(['urlParameters'], resolvedURL.urlParameters); return data; })
+                .then(data => { data.setValue(['pathVariables'], resolvedURL.pathVariablesAsMap()); return data; })
+                .then(data => { data.setValue(['widgetParameters'], _this.widgetState.widgetParameters); return data; })
                 .then(data => { _this.widgetState.data = data; return data; })
                 .then(data => _this.refreshChildNodes(data))
                 .catch(e => console.error(e));

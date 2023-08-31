@@ -43,8 +43,19 @@ class Data {
      * @param {String} key
      * @param {any} value
      */
-    setValue(key, value) {
-        this.values[key] = value;
+    setValue(path, value) {
+        var parentDataNode = this.values;
+        for (var i = 0; i < path.length - 1; i++) {
+            var key = path[i];
+            var dataNode = parentDataNode[key];
+            if (!dataNode) {
+                dataNode = {};
+                parentDataNode[key] = dataNode;
+            }
+            parentDataNode = dataNode;
+        }
+        var key = path[path.length - 1];
+        parentDataNode[key] = value;
     }
 
 

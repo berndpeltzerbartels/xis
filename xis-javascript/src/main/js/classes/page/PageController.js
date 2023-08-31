@@ -69,8 +69,8 @@ class PageController {
             }
         }
         var data = response.data;
-        data.setValue('pathVariables', resolvedURL.pathVariablesAsMap());
-        data.setValue('urlParameters', resolvedURL.urlParameters);
+        data.setValue(['pathVariables'], resolvedURL.pathVariablesAsMap());
+        data.setValue(['urlParameters'], resolvedURL.urlParameters);
         this.page.data = data;
         this.html.refresh(this.page.data, this.resolvedURL);
     }
@@ -140,8 +140,8 @@ class PageController {
         var _this = this;
         return this.client.loadPageData(this.resolvedURL, this.page.data).then(response => {
             var data = response.data;
-            data.setValue('pathVariables', this.resolvedURL.pathVariablesAsMap());
-            data.setValue('urlParameters', this.resolvedURL.urlParameters);
+            data.setValue(['pathVariables'], this.resolvedURL.pathVariablesAsMap());
+            data.setValue(['urlParameters'], this.resolvedURL.urlParameters);
             this.page.data = data;
             _this.html.refresh(data, this.resolvedURL);
         });

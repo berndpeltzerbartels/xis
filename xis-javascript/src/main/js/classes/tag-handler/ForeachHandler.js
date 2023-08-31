@@ -21,8 +21,8 @@ class ForeachHandler extends TagHandler {
         this.nodeCache().sizeUp(arr.length);
         for (var i = 0; i < this.cache.length; i++) {
             var subData = new Data({}, data);
-            subData.setValue(this.varName + '-index', i);
-            subData.setValue(this.varName, arr[i]);
+            subData.setValue([this.varName + '-index'], i);
+            subData.setValue([this.varName], arr[i]);
             var children = this.nodeCache().getChildren(i);
             if (i < arr.length) {
                 for (var child of children) {

@@ -42,7 +42,7 @@ class RefresherTest {
         var script = javascript;
         script += "var refresher = new Refresher();";
         script += "var data = new Data({});";
-        script += "data.setValue('x', 'y');";
+        script += "data.setValue(['x'], 'y');";
         script += "refresher.refreshNode(element, data);";
 
         var div = document.getElementByTagName("div");
