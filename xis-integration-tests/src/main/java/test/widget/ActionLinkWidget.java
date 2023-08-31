@@ -3,7 +3,7 @@ package test.widget;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import one.xis.Action;
-import one.xis.Model;
+import one.xis.ModelData;
 import one.xis.Widget;
 import test.page.IndexPage;
 
@@ -13,29 +13,29 @@ class ActionLinkWidget {
 
     private final ActionLinkWidgetService service;
 
-    @Model("data")
+    @ModelData("data")
     ActionLinkWidgetData data() {
         return service.getData();
     }
 
-    @Model("action3")
+    @ModelData("action3")
     String getAction3() {
         return "test-action3";
     }
 
     @Action("test-action1")
-    void action1(@Model("data") ActionLinkWidgetData data) {
+    void action1(@ModelData("data") ActionLinkWidgetData data) {
         service.update(data);
     }
 
     @Action("test-action2")
-    Class<?> action2(@Model("data") ActionLinkWidgetData data) {
+    Class<?> action2(@ModelData("data") ActionLinkWidgetData data) {
         service.update(data);
         return ActionLinkWidget.class;
     }
 
     @Action("test-action3")
-    Class<?> action3(@Model("data") ActionLinkWidgetData data, @NonNull @Model("action3") String action3) {
+    Class<?> action3(@ModelData("data") ActionLinkWidgetData data, @NonNull @ModelData("action3") String action3) {
         service.update(data);
         return IndexPage.class;
     }

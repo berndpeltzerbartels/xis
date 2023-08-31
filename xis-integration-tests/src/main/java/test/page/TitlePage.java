@@ -1,12 +1,12 @@
 package test.page;
 
-import one.xis.Model;
+import one.xis.ModelData;
 import one.xis.Page;
 
 @Page("/title.html")
 class TitlePage {
 
-    @Model("titleText")
+    @ModelData("titleText")
     String title() {
         return "Hello ! I am the title";
     }

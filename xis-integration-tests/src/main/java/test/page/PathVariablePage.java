@@ -1,7 +1,7 @@
 package test.page;
 
 import lombok.RequiredArgsConstructor;
-import one.xis.Model;
+import one.xis.ModelData;
 import one.xis.Page;
 import one.xis.PathVariable;
 
@@ -9,7 +9,7 @@ import one.xis.PathVariable;
 @Page("/url-parameter/{x}/{y}.html")
 class PathVariablePage {
 
-    @Model("result")
+    @ModelData("result")
     String model(@PathVariable("x") String x, @PathVariable("y") int y) {
         return x + y;
     }

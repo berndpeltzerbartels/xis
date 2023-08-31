@@ -1,6 +1,6 @@
 package test.page;
 
-import one.xis.Model;
+import one.xis.ModelData;
 import one.xis.Page;
 
 import java.util.List;
@@ -8,7 +8,7 @@ import java.util.List;
 @Page("/foreachTag.html")
 class ForeachTagPage {
 
-    @Model("items")
+    @ModelData("items")
     List<String> items() {
         return List.of("Item1", "Item2", "Item3");
     }

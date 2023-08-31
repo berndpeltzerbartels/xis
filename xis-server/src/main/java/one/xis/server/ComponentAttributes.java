@@ -1,12 +1,11 @@
 package one.xis.server;
 
-import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Collection;
 import java.util.Map;
 
-@Data
+@lombok.Data
 @NoArgsConstructor
 class ComponentAttributes {
 
@@ -17,7 +16,7 @@ class ComponentAttributes {
     private String host;
 
     /**
-     * Keys of the data used as a parameter in methods annotated with @Model.
+     * Keys of the data used as a parameter in methods annotated with @ModelData.
      * This filering is mainly to avoid transmission of transmissions
      * of data not required on server side.
      */

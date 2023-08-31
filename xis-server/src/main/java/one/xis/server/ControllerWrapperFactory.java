@@ -3,7 +3,7 @@ package one.xis.server;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import one.xis.Action;
-import one.xis.Model;
+import one.xis.ModelData;
 import one.xis.context.XISComponent;
 import one.xis.utils.lang.MethodUtils;
 
@@ -36,11 +36,11 @@ class ControllerWrapperFactory {
     private Map<String, ModelMethod> modelMethods(Object controller) {
         var map = new HashMap<String, ModelMethod>();
         MethodUtils.methods(controller).stream()
-                .filter(m -> m.isAnnotationPresent(Model.class))
+                .filter(m -> m.isAnnotationPresent(ModelData.class))
                 .map(this::createModelMethod)
                 .forEach(controllerMethod -> {
                     if (map.containsKey(controllerMethod.getKey())) {
-                        throw new IllegalStateException(controller.getClass() + ": there is more than one @Model(...) annotation containing the key " + controllerMethod.key);
+                        throw new IllegalStateException(controller.getClass() + ": there is more than one @ModelData(...) annotation containing the key " + controllerMethod.key);
                     }
                     map.put(controllerMethod.getKey(), controllerMethod);
                 });
@@ -63,7 +63,7 @@ class ControllerWrapperFactory {
         try {
             return ModelMethod.builder()
                     .method(method)
-                    .key(method.getAnnotation(Model.class).value())
+                    .key(method.getAnnotation(ModelData.class).value())
                     .parameterDeserializer(parameterDeserializer)
                     .build();
         } catch (Exception e) {

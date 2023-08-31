@@ -2,7 +2,7 @@ package test.widget;
 
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import one.xis.Model;
+import one.xis.ModelData;
 import one.xis.Page;
 
 @Page("/widgetPage.html")
@@ -11,7 +11,7 @@ import one.xis.Page;
 class WidgetPage {
     private String widgetId;
 
-    @Model("widgetId")
+    @ModelData("widgetId")
     String widgetId() {
         return widgetId;
     }

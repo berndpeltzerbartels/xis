@@ -1,7 +1,7 @@
 package test.page;
 
 import lombok.Getter;
-import one.xis.Model;
+import one.xis.ModelData;
 import one.xis.Page;
 
 @Getter
@@ -10,7 +10,7 @@ class PageLink1 {
 
     private int invocations;
 
-    @Model("title")
+    @ModelData("title")
     String title() {
         invocations++;
         return "PageLink1";

@@ -1,12 +1,12 @@
 package test.widget;
 
-import one.xis.Model;
+import one.xis.ModelData;
 import one.xis.Widget;
 
 @Widget
 class SimpleWidget {
 
-    @Model("greeting")
+    @ModelData("greeting")
     String getGreeting() {
         return "Huhu !";
     }

@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 
 @Target({ElementType.METHOD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Model {
+public @interface ModelData {
 
     String value();
 }

@@ -1,8 +1,7 @@
 package one.xis.server;
 
-import lombok.Data;
 import one.xis.Action;
-import one.xis.Model;
+import one.xis.ModelData;
 import one.xis.Page;
 import one.xis.Widget;
 import one.xis.context.AppContext;
@@ -45,7 +44,7 @@ class ClientConfigServiceTest {
 
         }
 
-        @Data
+        @lombok.Data
         static class ConfigServieTestModel {
             private int someInt;
             private String someString;
@@ -55,12 +54,12 @@ class ClientConfigServiceTest {
         static class ConfigServiceTestPage1 {
 
             @Action("action")
-            void action(@Model("string") String string, @Model("model") TestModel testModel) {
+            void action(@ModelData("string") String string, @ModelData("model") TestModel testModel) {
 
             }
 
-            @Model("model")
-            ConfigServieTestModel pageModel(@Model("string") String string, @Model("model") TestModel testModel) {
+            @ModelData("model")
+            ConfigServieTestModel pageModel(@ModelData("string") String string, @ModelData("model") TestModel testModel) {
                 return new ConfigServieTestModel();
             }
         }
@@ -93,7 +92,7 @@ class ClientConfigServiceTest {
             assertThat(config.getPageAttributes().get(expectedId).getPath().normalized()).isEqualTo(expectedId);
         }
 
-        @Data
+        @lombok.Data
         static class ConfigServieTestModel {
             private int someInt;
             private String someString;
@@ -103,12 +102,12 @@ class ClientConfigServiceTest {
         static class ConfigServiceTestPage2 {
 
             @Action("action")
-            void action(@Model("string") String string, @Model("model") TestModel testModel) {
+            void action(@ModelData("string") String string, @ModelData("model") TestModel testModel) {
 
             }
 
-            @Model("model")
-            ConfigServieTestModel pageModel(@Model("string") String string, @Model("model") TestModel testModel) {
+            @ModelData("model")
+            ConfigServieTestModel pageModel(@ModelData("string") String string, @ModelData("model") TestModel testModel) {
                 return new ConfigServieTestModel();
             }
         }
@@ -145,7 +144,7 @@ class ClientConfigServiceTest {
 
         }
 
-        @Data
+        @lombok.Data
         static class ConfigServieTestModel {
             private int someInt;
             private String someString;
@@ -155,12 +154,12 @@ class ClientConfigServiceTest {
         static class ConfigServiceTestWidget1 {
 
             @Action("action")
-            void action(@Model("string") String string, @Model("model") TestModel testModel) {
+            void action(@ModelData("string") String string, @ModelData("model") TestModel testModel) {
 
             }
 
-            @Model("model")
-            ConfigServieTestModel pageModel(@Model("string") String string, @Model("model") TestModel testModel) {
+            @ModelData("model")
+            ConfigServieTestModel pageModel(@ModelData("string") String string, @ModelData("model") TestModel testModel) {
                 return new ConfigServieTestModel();
             }
         }

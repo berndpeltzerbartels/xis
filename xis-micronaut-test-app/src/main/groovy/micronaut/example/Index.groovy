@@ -1,6 +1,6 @@
 package micronaut.example
 
-import one.xis.Model
+import one.xis.ModelData
 import one.xis.Page
 import one.xis.WelcomePage
 
@@ -8,7 +8,7 @@ import one.xis.WelcomePage
 @Page('/index.html')
 class Index {
 
-    @Model('pages')
+    @ModelData('pages')
     def pages() {
         [new PageLink('repeat', 'Repeat', '/repeat.html'), new PageLink('repeatInsideRepeat', 'RepeatInsideRepeat', '/repeatInsideRepeat.html')]
     }

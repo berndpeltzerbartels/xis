@@ -2,7 +2,7 @@ package test.page;
 
 
 import lombok.RequiredArgsConstructor;
-import one.xis.Model;
+import one.xis.ModelData;
 import one.xis.*;
 
 @Page("/simpleObject/edit/${id}.html")
@@ -12,13 +12,13 @@ class SimpleObjectUpdateController {
 
     private final SimpleObjectService simpleObjectService;
 
-    @Model("formObject")
+    @ModelData("formObject")
     SimpleObject formObject(@URLParameter("id") Integer id) {
         return simpleObjectService.getById(id);
     }
 
     @Action("save")
-    PageResult save(@Model("formObject") SimpleObject simpleObject) {
+    PageResult save(@ModelData("formObject") SimpleObject simpleObject) {
         simpleObjectService.save(simpleObject);
         return PageResult.of(SimpleObjectDetails.class, "id", simpleObject.getId());
     }

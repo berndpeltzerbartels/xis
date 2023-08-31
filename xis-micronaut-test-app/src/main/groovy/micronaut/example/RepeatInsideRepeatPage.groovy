@@ -1,12 +1,12 @@
 package micronaut.example
 
-import one.xis.Model
+import one.xis.ModelData
 import one.xis.Page
 
 @Page("/repeatInsideRepeat.html")
 class RepeatInsideRepeatPage {
 
-    @Model("items")
+    @ModelData("items")
     List<RepeatInsideRepeatPageItem> items() {
         var subItem1 = new RepeatInsideRepeatPageSubItem("subItem1");
         var subItem2 = new RepeatInsideRepeatPageSubItem("subItem2");

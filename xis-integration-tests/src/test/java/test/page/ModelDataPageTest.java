@@ -10,7 +10,7 @@ import org.mockito.Mockito;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-class ModelPageTest {
+class ModelDataPageTest {
 
     private IntegrationTestContext testContext;
     private ModelService modelService;

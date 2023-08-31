@@ -1,7 +1,7 @@
 package one.xis.server;
 
 import one.xis.Action;
-import one.xis.Model;
+import one.xis.ModelData;
 import one.xis.Page;
 import one.xis.Widget;
 import org.junit.jupiter.api.Test;
@@ -14,13 +14,13 @@ class ControllerWrapperFactoryTest {
     @Page(value = "/page.html")
     class TestPageController {
 
-        @Model("x")
+        @ModelData("x")
         String getX() {
             return "x";
         }
 
 
-        @Model("y")
+        @ModelData("y")
         String getY() {
             return "y";
         }
@@ -38,13 +38,13 @@ class ControllerWrapperFactoryTest {
 
     @Widget
     class TestWidgetController {
-        @Model("x")
+        @ModelData("x")
         String getX() {
             return "x";
         }
 
 
-        @Model("y")
+        @ModelData("y")
         String getY() {
             return "y";
         }

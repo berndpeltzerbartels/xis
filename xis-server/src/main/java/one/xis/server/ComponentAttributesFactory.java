@@ -1,7 +1,7 @@
 package one.xis.server;
 
 import one.xis.Action;
-import one.xis.Model;
+import one.xis.ModelData;
 import one.xis.utils.lang.MethodUtils;
 
 import java.lang.reflect.Method;
@@ -27,7 +27,7 @@ abstract class ComponentAttributesFactory<C extends ComponentAttributes> {
 
     protected Collection<String> modelsToSubmitForModel(Object controller) {
         return MethodUtils.methods(controller).stream()
-                .filter(method -> method.isAnnotationPresent(Model.class))
+                .filter(method -> method.isAnnotationPresent(ModelData.class))
                 .map(this::getModelParameters)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toSet());
@@ -39,9 +39,9 @@ abstract class ComponentAttributesFactory<C extends ComponentAttributes> {
 
     private Collection<String> getModelParameters(Method method) {
         return Arrays.stream(method.getParameters())
-                .filter(parameter -> parameter.isAnnotationPresent(Model.class))
-                .map(parameter -> parameter.getAnnotation(Model.class))
-                .map(Model::value)
+                .filter(parameter -> parameter.isAnnotationPresent(ModelData.class))
+                .map(parameter -> parameter.getAnnotation(ModelData.class))
+                .map(ModelData::value)
                 .collect(Collectors.toSet());
     }
 

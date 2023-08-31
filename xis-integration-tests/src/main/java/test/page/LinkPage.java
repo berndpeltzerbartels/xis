@@ -1,7 +1,7 @@
 package test.page;
 
 import lombok.RequiredArgsConstructor;
-import one.xis.Model;
+import one.xis.ModelData;
 import one.xis.Page;
 
 @Page("/link.html")
@@ -9,12 +9,12 @@ import one.xis.Page;
 class LinkPage {
     private final LinkPageService linkPageService;
 
-    @Model("page")
+    @ModelData("page")
     String getPageUri() {
         return linkPageService.getPageUri();
     }
 
-    @Model("widget")
+    @ModelData("widget")
     String getWidgetId() {
         return linkPageService.getWidgetId();
     }

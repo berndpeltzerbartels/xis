@@ -1,6 +1,5 @@
 package one.xis.server;
 
-import lombok.Data;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
 import one.xis.PathVariable;
@@ -16,7 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Data
+@lombok.Data
 @Slf4j
 @SuperBuilder
 abstract class ControllerMethod {
@@ -42,7 +41,7 @@ abstract class ControllerMethod {
         var params = method.getParameters();
         for (int i = 0; i < args.length; i++) {
             var param = params[i];
-            if (param.isAnnotationPresent(Model.class)) {
+            if (param.isAnnotationPresent(ModelData.class)) {
                 var paramValue = deserializeModelParameter(param, context);
                 if (paramValue == null) {
                     paramValue = createModelInstance(param.getType());
@@ -72,15 +71,15 @@ abstract class ControllerMethod {
         var rv = new HashMap<String, Object>();
         for (var i = 0; i < method.getParameterCount(); i++) {
             var parameter = method.getParameters()[i];
-            if (parameter.isAnnotationPresent(Model.class)) {
-                rv.put(parameter.getAnnotation(Model.class).value(), args[i]);
+            if (parameter.isAnnotationPresent(ModelData.class)) {
+                rv.put(parameter.getAnnotation(ModelData.class).value(), args[i]);
             }
         }
         return rv;
     }
 
     private Object deserializeModelParameter(Parameter parameter, ClientRequest context) throws IOException {
-        var key = parameter.getAnnotation(Model.class).value();
+        var key = parameter.getAnnotation(ModelData.class).value();
         var paramValue = context.getData().get(key);
         return deserializeParameter(paramValue, parameter);
     }
