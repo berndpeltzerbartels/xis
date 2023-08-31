@@ -168,7 +168,6 @@ class Client {
      * @returns {ClientConfig}
      */
     deserializeConfig(content) {
-        debugger;
         var obj = JSON.parse(content);
         var config = new ClientConfig();
         config.welcomePageId = obj.welcomePageId;

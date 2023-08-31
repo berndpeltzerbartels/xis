@@ -75,6 +75,10 @@ class PageController {
         this.html.refresh(this.page.data, this.resolvedURL);
     }
 
+    getData() {
+        return this.page ? this.page.data : undefined;
+    }
+
     /**
      * Displays page by it's location from
      * browser's address-field.

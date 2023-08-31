@@ -19,6 +19,11 @@ class WidgetContainerHandler extends TagHandler {
         this.type = 'widget-container-handler';
     }
 
+    getData() {
+        var data = this.widgetState ? this.widgetState.data : new Data({});
+        data.parentData = this.parentData();
+        return data;
+    }
     /**
     * @public
     * @param {Response} response 
@@ -47,7 +52,7 @@ class WidgetContainerHandler extends TagHandler {
         this.widgetState = new WidgetState(app.pageController.resolvedURL, widgetParameters);
         if (this.widgetInstance) {
             this.widgetState.data = data;
-            this.reloadDataAndRefresh();
+            this.reloadDataAndRefresh(data);
         }
     }
 
@@ -61,7 +66,7 @@ class WidgetContainerHandler extends TagHandler {
         this.widgetState = widgetState;
         this.ensureWidgetBound(widgetId);
         this.widgetState = widgetState;
-        this.reloadDataAndRefresh();
+        this.reloadDataAndRefresh(this.parentData());
     }
 
 
@@ -115,12 +120,13 @@ class WidgetContainerHandler extends TagHandler {
     /**
      * @private
      */
-    reloadDataAndRefresh() {
+    reloadDataAndRefresh(parentData) {
         if (this.widgetInstance) {
             var resolvedURL = this.widgetState.resolvedURL;
             var _this = this;
             this.client.loadWidgetData(this.widgetInstance, this.widgetState)
                 .then(response => response.data)
+                .then(data => { data.parentData = parentData; return data; })
                 .then(data => { data.setValue(['urlParameters'], resolvedURL.urlParameters); return data; })
                 .then(data => { data.setValue(['pathVariables'], resolvedURL.pathVariablesAsMap()); return data; })
                 .then(data => { data.setValue(['widgetParameters'], _this.widgetState.widgetParameters); return data; })
@@ -128,5 +134,22 @@ class WidgetContainerHandler extends TagHandler {
                 .then(data => _this.refreshChildNodes(data))
                 .catch(e => console.error(e));
         }
+    }
+
+    /**
+     * @private
+     * @returns {Data}
+     */
+    parentData() {
+        var e = this.tag.parentNode;
+        var parentDataHandler;
+        while (e) {
+            if (e._handler && e._handler.getData) {
+                parentDataHandler = e._handler;
+                break;
+            }
+            e = e.parentNode;
+        }
+        return parentDataHandler ? parentDataHandler.getData() : app.pageController.getData();
     }
 }
