@@ -76,9 +76,9 @@ class AppContextBuilderImpl implements AppContextBuilder {
         var appContextWrapper = new AppContextWrapper();
         singletons.add(appContextWrapper);
         validate();
-        var noScanReflection = new NoScanReflection(singletons, singletonClasses, componentAnnotations, dependencyFieldAnnotations);
+        var externalSingeltons = new ExternalSingeltons(singletons, singletonClasses, componentAnnotations, dependencyFieldAnnotations);
         var defaultReflection = new DefaultReflection(packagesToScan, componentAnnotations, dependencyFieldAnnotations);
-        var reflection = new CompositeReflection(noScanReflection, defaultReflection);
+        var reflection = new CompositeReflection(externalSingeltons, defaultReflection);
         var initializer = new AppContextInitializer(reflection, singletonClasses, singletons, beanInitAnnotation);
         var appContext = initializer.initializeContext();
         appContextWrapper.setAppContext(appContext);

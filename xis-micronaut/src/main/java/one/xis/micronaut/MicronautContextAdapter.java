@@ -31,7 +31,7 @@ class MicronautContextAdapter {
     public void init() {
         var context = AppContextBuilder.createInstance()
                 .withSingletons(findControllers())
-                .withPackage("one.xis")
+                .withXIS()
                 .build();
         frontendService = context.getSingleton(FrontendService.class);
     }

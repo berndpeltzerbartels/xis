@@ -2,7 +2,6 @@ package test.page;
 
 
 import lombok.RequiredArgsConstructor;
-import one.xis.ModelData;
 import one.xis.*;
 
 @Page("/simpleObject/new")

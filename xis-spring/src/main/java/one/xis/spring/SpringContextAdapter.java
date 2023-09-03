@@ -2,6 +2,7 @@ package one.xis.spring;
 
 import lombok.RequiredArgsConstructor;
 import one.xis.Page;
+import one.xis.Push;
 import one.xis.Widget;
 import one.xis.context.AppContextBuilder;
 import one.xis.server.FrontendService;
@@ -22,14 +23,14 @@ import java.util.HashSet;
 @RequiredArgsConstructor
 class SpringContextAdapter implements BeanPostProcessor {
 
-    private final SpringFilter filter;
-    private final SpringController controller;
+    private final SpringFilter springFilter;
+    private final SpringController springController;
 
     private final Collection<Object> controllers = new HashSet<>();
 
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-        if (bean.getClass().isAnnotationPresent(Page.class) || bean.getClass().isAnnotationPresent(Widget.class)) {
+        if (isBeanClass(bean.getClass())) {
             controllers.add(bean);
         }
         return bean;
@@ -39,10 +40,16 @@ class SpringContextAdapter implements BeanPostProcessor {
     public void init() {
         var context = AppContextBuilder.createInstance()
                 .withSingletons(controllers)
-                .withPackage("one.xis")
+                .withXIS()
                 .build();
         var frontendService = context.getSingleton(FrontendService.class);
-        filter.setFrontendService(frontendService);
-        controller.setFrontendService(frontendService);
+        springFilter.setFrontendService(frontendService);
+        springController.setFrontendService(frontendService);
+    }
+
+    private boolean isBeanClass(Class<?> clazz) {
+        return clazz.isAnnotationPresent(Page.class)
+                || clazz.isAnnotationPresent(Widget.class)
+                || clazz.isAnnotationPresent(Push.class);
     }
 }

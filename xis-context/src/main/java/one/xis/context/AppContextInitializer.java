@@ -31,7 +31,7 @@ public class AppContextInitializer {
     }
 
     public AppContextInitializer(Collection<Class<?>> classes) {
-        this(new NoScanReflection(emptySet(), classes));
+        this(new ExternalSingeltons(emptySet(), classes));
     }
 
     public AppContextInitializer(Reflection reflection) {
@@ -66,11 +66,11 @@ public class AppContextInitializer {
     }
 
     public AppContextInitializer(Class<?>... classes) {
-        this(new NoScanReflection(Collections.emptySet(), Arrays.asList(classes)));
+        this(new ExternalSingeltons(Collections.emptySet(), Arrays.asList(classes)));
     }
 
     public AppContextInitializer(Set<String> packagesToScan, Set<Class<?>> singletonClasses, Set<Object> mocks, Set<Class<? extends Annotation>> beanInitAnnotation) {
-        this(new CompositeReflection(new DefaultReflection(packagesToScan), new NoScanReflection(mocks, singletonClasses)), singletonClasses, mocks, beanInitAnnotation);
+        this(new CompositeReflection(new DefaultReflection(packagesToScan), new ExternalSingeltons(mocks, singletonClasses)), singletonClasses, mocks, beanInitAnnotation);
     }
 
     public AppContext initializeContext() {

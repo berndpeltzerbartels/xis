@@ -25,6 +25,10 @@ public interface AppContextBuilder {
 
     AppContextBuilder withPackage(String pack);
 
+    default AppContextBuilder withXIS() {
+        return withPackage("one.xis");
+    }
+
     default AppContextBuilder withPackages(String... packages) {
         Arrays.stream(packages).forEach(this::withPackage);
         return this;

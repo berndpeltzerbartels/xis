@@ -16,8 +16,8 @@ class SingletonInstantiationPostCheck {
     void check() {
         if (!unusedInstantiators().isEmpty()) {
             Set<Class<?>> allClassesToInstantiate = new HashSet<>(getClassesToInstatiate());
-            Set<SingletonInstantiator> unusedInstantiators = new HashSet<>(unusedInstantiators());
-            for (SingletonInstantiator unusedInstantiator : unusedInstantiators) {
+            Set<ConstructorInstantiator> unusedInstantiators = new HashSet<>(unusedInstantiators());
+            for (ConstructorInstantiator unusedInstantiator : unusedInstantiators) {
                 Set<Class<?>> unsatisfiedConstructorParameterClasses = getUnsatisfiedConstructorParameterClasses(unusedInstantiator).collect(Collectors.toSet());
                 unsatisfiedConstructorParameterClasses.removeAll(allClassesToInstantiate);
                 if (!unsatisfiedConstructorParameterClasses.isEmpty()) {
@@ -31,19 +31,19 @@ class SingletonInstantiationPostCheck {
         return classes.stream().map(Class::getName).collect(Collectors.joining(", "));
     }
 
-    private Collection<SingletonInstantiator> unusedInstantiators() {
+    private Collection<ConstructorInstantiator> unusedInstantiators() {
         return singletonInstantiation.getUnusedSingletonInstantiators();// Used ones have been removed
     }
 
-    private Stream<Class<?>> getUnsatisfiedConstructorParameterClasses(SingletonInstantiator instantiator) {
+    private Stream<Class<?>> getUnsatisfiedConstructorParameterClasses(ConstructorInstantiator instantiator) {
         return getUnsatisfiedConstructorParameters(instantiator).map(ConstructorParameter::getElementType);
     }
 
-    private Stream<ConstructorParameter> getUnsatisfiedConstructorParameters(SingletonInstantiator instantiator) {
+    private Stream<ConstructorParameter> getUnsatisfiedConstructorParameters(ConstructorInstantiator instantiator) {
         return instantiator.getConstructorParameters().stream().filter(constructorParameter -> !constructorParameter.isComplete());
     }
 
     private Set<Class<?>> getClassesToInstatiate() {
-        return singletonInstantiation.getSingletonInstantiators().stream().map(SingletonInstantiator::getType).collect(Collectors.toSet());
+        return singletonInstantiation.getSingletonInstantiators().stream().map(ConstructorInstantiator::getType).collect(Collectors.toSet());
     }
 }

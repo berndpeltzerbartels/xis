@@ -10,10 +10,10 @@ import java.util.stream.Collectors;
 public class SingletonInstantiation {
 
     @Getter
-    private final Set<SingletonInstantiator> singletonInstantiators;
+    private final Set<ConstructorInstantiator> singletonInstantiators;
 
     @Getter
-    private final Set<SingletonInstantiator> unusedSingletonInstantiators;
+    private final Set<ConstructorInstantiator> unusedSingletonInstantiators;
     private final FieldInjection fieldInjection;
     private final InitMethodInvocation initMethodInvocation;
     private final SingletonClassReplacer classReplacer;
@@ -37,7 +37,7 @@ public class SingletonInstantiation {
         populateSingletonClasses();
     }
 
-    private Set<SingletonInstantiator> createInstantiators(Reflection reflections) {
+    private Set<ConstructorInstantiator> createInstantiators(Reflection reflections) {
         return classesToInstantiate(reflections).stream()
                 .map(this::createInstantiator)//
                 .collect(Collectors.toUnmodifiableSet());
@@ -63,24 +63,24 @@ public class SingletonInstantiation {
     }
 
     protected Set<Class<?>> getSingletonClasses() {
-        return singletonInstantiators.stream().map(SingletonInstantiator::getType).collect(Collectors.toSet());
+        return singletonInstantiators.stream().map(ConstructorInstantiator::getType).collect(Collectors.toSet());
     }
 
     protected Set<Class<?>> getAdditionalSingletonClasses() {
         return additionalSingletons.stream().map(Object::getClass).collect(Collectors.toSet());
     }
 
-    private SingletonInstantiator createInstantiator(Class<?> aClass) {
-        SingletonInstantiator instantitor = new SingletonInstantiator(aClass);
+    private ConstructorInstantiator createInstantiator(Class<?> aClass) {
+        ConstructorInstantiator instantitor = new ConstructorInstantiator(aClass);
         instantitor.init();
         return instantitor;
     }
 
     void createInstances() {
-        unusedSingletonInstantiators.stream().filter(SingletonInstantiator::isParameterCompleted).findFirst().ifPresent(this::createInstance);
+        unusedSingletonInstantiators.stream().filter(ConstructorInstantiator::isParameterCompleted).findFirst().ifPresent(this::createInstance);
     }
 
-    private void createInstance(SingletonInstantiator instantitor) {
+    private void createInstance(ConstructorInstantiator instantitor) {
         unusedSingletonInstantiators.remove(instantitor);
         populateComponent(instantitor.createInstance());
     }

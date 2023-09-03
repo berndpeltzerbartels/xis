@@ -50,7 +50,7 @@ public class IntegrationTestContext {
 
     private AppContext internalContext(Object... controllers) {
         return AppContextBuilder.createInstance()
-                .withPackage("one.xis")
+                .withXIS()
                 .withSingletons(controllers)
                 .build();
     }

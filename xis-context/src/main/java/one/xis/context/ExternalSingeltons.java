@@ -12,25 +12,28 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-
-public class NoScanReflection implements Reflection {
+/**
+ * Singeltons and singleton classes requiring no reflection. Allows
+ * adding componentes without pckagescan e.g. for testing.
+ */
+public class ExternalSingeltons implements Reflection {
 
     private final Collection<Class<?>> classes = new HashSet<>();
     private final Set<Class<? extends Annotation>> componentTypeAnnotations;
     private final Set<Class<? extends Annotation>> dependencyFieldAnnotations;
 
-    public NoScanReflection(Collection<Object> beans,
-                            Collection<Class<?>> classes,
-                            Set<Class<? extends Annotation>> componentTypeAnnotations,
-                            Set<Class<? extends Annotation>> dependencyFieldAnnotations) {
+    public ExternalSingeltons(Collection<Object> beans,
+                              Collection<Class<?>> classes,
+                              Set<Class<? extends Annotation>> componentTypeAnnotations,
+                              Set<Class<? extends Annotation>> dependencyFieldAnnotations) {
         this.classes.addAll(classes);
         this.classes.addAll(beans.stream().map(Object::getClass).collect(Collectors.toSet()));
         this.componentTypeAnnotations = componentTypeAnnotations;
         this.dependencyFieldAnnotations = dependencyFieldAnnotations;
     }
 
-    public NoScanReflection(Collection<Object> beans,
-                            Collection<Class<?>> classes) {
+    public ExternalSingeltons(Collection<Object> beans,
+                              Collection<Class<?>> classes) {
         this(beans, classes, Set.of(XISComponent.class), Set.of(XISInject.class));
     }
 
