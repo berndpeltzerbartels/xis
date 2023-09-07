@@ -27,5 +27,4 @@ public class AnnotationUtils {
         return annotations.stream().anyMatch(element::isAnnotationPresent);
     }
 
-
 }

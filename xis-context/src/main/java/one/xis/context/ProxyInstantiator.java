@@ -1,61 +1,43 @@
 package one.xis.context;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+import lombok.RequiredArgsConstructor;
 
-class ProxyInstantiator implements SingletonInstantiator {
-    private final Class<?> interf;
-    private final List<Class<InvocationHandler>> invocationHandlerClasses;
-    private final InvocationHandler[] invocationHandlers;
-    private final AtomicInteger missingHandlers;
+import java.util.Set;
 
-    ProxyInstantiator(Class<?> interf, List<Class<InvocationHandler>> invocationHandlerClasses) {
-        this.interf = interf;
-        this.invocationHandlerClasses = invocationHandlerClasses;
-        this.invocationHandlers = new InvocationHandler[invocationHandlerClasses.size()];
-        this.missingHandlers = new AtomicInteger(invocationHandlerClasses.size());
+@RequiredArgsConstructor
+class ProxyInstantiator<I> implements SingletonInstantiator<I> {
+
+    private final Class<I> interf;
+    private final Class<I> proxyFactoryClass;
+    private ProxyFactory<I> proxyFactory;
+
+
+    @Override
+    public void onSingletonClassesFound(Set<Class<?>> singletonClasses) {
+        // Not needed, here
     }
 
     @Override
+    public Class<?> getType() {
+        return interf;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
     public void onComponentCreated(Object o) {
-        var index = invocationHandlerClasses.indexOf(o.getClass()); // TODO this fails for proxies e.g. from spring
-        if (index != -1) {
-            invocationHandlers[index] = (InvocationHandler) o;
-            missingHandlers.decrementAndGet();
+        if (proxyFactoryClass.isInstance(o)) {
+            proxyFactory = (ProxyFactory<I>) o;
         }
     }
 
     @Override
     public boolean isParameterCompleted() {
-        return missingHandlers.get() < 1;
+        return proxyFactory != null;
     }
 
     @Override
-    public Object createInstance() {
-        return Proxy.newProxyInstance(interf.getClassLoader(), new Class[]{interf}, new CompoundInvocationHandler(Arrays.asList(invocationHandlers)));
+    public I createInstance() {
+        return proxyFactory.createProxy(interf);
     }
-    
-    private static class CompoundInvocationHandler implements InvocationHandler {
-        private final List<InvocationHandler> invocationHandlers;
 
-        private CompoundInvocationHandler(List<InvocationHandler> invocationHandlers) {
-            this.invocationHandlers = invocationHandlers;
-            if (invocationHandlers.isEmpty()) {
-                throw new IllegalStateException("no handlers");
-            }
-        }
-
-        @Override
-        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            Object rv = null;
-            for (var hanlder : invocationHandlers) {
-                rv = hanlder.invoke(proxy, method, args);
-            }
-            return rv;
-        }
-    }
 }

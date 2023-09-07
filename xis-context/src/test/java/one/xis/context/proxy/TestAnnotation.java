@@ -9,6 +9,6 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-@XISProxy(handlerClass = TestInvocationHandler.class)
+@XISProxy(factory = TestProxyFactory.class)
 public @interface TestAnnotation {
 }

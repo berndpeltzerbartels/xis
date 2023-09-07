@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
  * Instantiates a singleton. Each singleton-type has an instance of {@link ConstructorInstantiator}.
  */
 @RequiredArgsConstructor
-class ConstructorInstantiator implements SingletonInstantiator {
+class ConstructorInstantiator implements SingletonInstantiator<Object> {
     @Getter
     private final Class<?> type;
 
@@ -84,7 +84,8 @@ class ConstructorInstantiator implements SingletonInstantiator {
         return constructorParameters.stream().map(ConstructorParameter::getValue).toArray();
     }
 
-    void registerSingletonClasses(Set<Class<?>> singletonClasses) {
+    @Override
+    public void onSingletonClassesFound(Set<Class<?>> singletonClasses) {
         constructorParameters.stream().filter(MultiValueParameter.class::isInstance)
                 .map(MultiValueParameter.class::cast)
                 .forEach(parameter -> parameter.registerSingletonClasses(singletonClasses));

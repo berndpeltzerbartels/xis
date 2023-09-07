@@ -16,10 +16,14 @@ public interface AppContextBuilder {
     AppContextBuilder withSingletonClass(Class<?> clazz);
 
     default AppContextBuilder withSingletonClasses(Class<?>... classes) {
-        Arrays.stream(classes).forEach(this::withSingletonClass);
+        withSingletonClasses(Arrays.asList(classes));
         return this;
     }
 
+    default AppContextBuilder withSingletonClasses(Collection<Class<?>> classes) {
+        classes.forEach(this::withSingletonClass);
+        return this;
+    }
 
     AppContextBuilder withSingleton(Object bean);
 

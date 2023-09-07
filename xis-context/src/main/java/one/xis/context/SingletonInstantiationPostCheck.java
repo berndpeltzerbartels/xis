@@ -15,15 +15,19 @@ class SingletonInstantiationPostCheck {
 
     void check() {
         if (!unusedInstantiators().isEmpty()) {
-            Set<Class<?>> allClassesToInstantiate = new HashSet<>(getClassesToInstatiate());
-            Set<ConstructorInstantiator> unusedInstantiators = new HashSet<>(unusedInstantiators());
-            for (ConstructorInstantiator unusedInstantiator : unusedInstantiators) {
-                Set<Class<?>> unsatisfiedConstructorParameterClasses = getUnsatisfiedConstructorParameterClasses(unusedInstantiator).collect(Collectors.toSet());
-                unsatisfiedConstructorParameterClasses.removeAll(allClassesToInstantiate);
-                if (!unsatisfiedConstructorParameterClasses.isEmpty()) {
-                    throw new AppContextException(String.format("unsatisfied dependency in constructor of %s: no singleton(s) of type %s", unusedInstantiator.getType(), kommaSeparatedClassList(unsatisfiedConstructorParameterClasses)));
-                }
-            }
+            var allClassesToInstantiate = new HashSet<>(getClassesToInstatiate());
+            unusedInstantiators().stream()
+                    .filter(ConstructorInstantiator.class::isInstance)
+                    .map(ConstructorInstantiator.class::cast)
+                    .forEach(constructorInstantiator -> checkUnusedConstructorInstantiator(constructorInstantiator, allClassesToInstantiate));
+        }
+    }
+
+    private void checkUnusedConstructorInstantiator(ConstructorInstantiator unusedInstantiator, Collection<Class<?>> allClassesToInstantiate) {
+        var unsatisfiedConstructorParameterClasses = getUnsatisfiedConstructorParameterClasses(unusedInstantiator).collect(Collectors.toSet());
+        unsatisfiedConstructorParameterClasses.removeAll(allClassesToInstantiate);
+        if (!unsatisfiedConstructorParameterClasses.isEmpty()) {
+            throw new AppContextException(String.format("unsatisfied dependency in constructor of %s: no singleton(s) of type %s", unusedInstantiator.getType(), kommaSeparatedClassList(unsatisfiedConstructorParameterClasses)));
         }
     }
 
@@ -31,7 +35,7 @@ class SingletonInstantiationPostCheck {
         return classes.stream().map(Class::getName).collect(Collectors.joining(", "));
     }
 
-    private Collection<ConstructorInstantiator> unusedInstantiators() {
+    private Collection<SingletonInstantiator<?>> unusedInstantiators() {
         return singletonInstantiation.getUnusedSingletonInstantiators();// Used ones have been removed
     }
 
@@ -44,6 +48,6 @@ class SingletonInstantiationPostCheck {
     }
 
     private Set<Class<?>> getClassesToInstatiate() {
-        return singletonInstantiation.getSingletonInstantiators().stream().map(ConstructorInstantiator::getType).collect(Collectors.toSet());
+        return singletonInstantiation.getSingletonInstantiators().stream().map(SingletonInstantiator::getType).collect(Collectors.toSet());
     }
 }
