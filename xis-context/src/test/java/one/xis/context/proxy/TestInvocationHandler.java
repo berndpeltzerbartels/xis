@@ -1,14 +1,15 @@
 package one.xis.context.proxy;
 
-import java.lang.reflect.InvocationHandler;
+import one.xis.context.MethodHandler;
+
 import java.lang.reflect.Method;
 
-public class TestInvocationHandler implements InvocationHandler {
+public class TestInvocationHandler extends MethodHandler {
 
     @Override
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+    public Object doInvoke(Object proxy, Method method, Object[] args) {
         var i1 = (int) args[0];
-        var i2 = (int) args[2];
+        var i2 = (int) args[1];
         return i1 + i2;
     }
 }

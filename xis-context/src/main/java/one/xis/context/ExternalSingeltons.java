@@ -13,8 +13,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Singeltons and singleton classes requiring no reflection. Allows
- * adding componentes without pckagescan e.g. for testing.
+ * Encapsulates singeltons and singleton classes requiring no reflection. Allows
+ * adding componentes without packagescan e.g. for testing.
  */
 public class ExternalSingeltons implements Reflection {
 

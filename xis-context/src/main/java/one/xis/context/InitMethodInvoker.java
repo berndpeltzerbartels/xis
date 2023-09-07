@@ -1,5 +1,6 @@
 package one.xis.context;
 
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 import java.lang.reflect.InvocationTargetException;
@@ -9,10 +10,10 @@ import java.util.Set;
 
 @RequiredArgsConstructor
 class InitMethodInvoker {
-    Set<Object> owners = new HashSet<>();
+    final Set<Object> owners = new HashSet<>();
     private final Method method;
 
-    void onComponentCreated(Object o) {
+    void onComponentCreated(@NonNull Object o) {
         if (method.getDeclaringClass().isInstance(o)) {
             owners.add(o);
         }

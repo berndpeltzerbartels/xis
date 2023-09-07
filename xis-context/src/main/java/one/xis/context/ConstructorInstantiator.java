@@ -55,14 +55,11 @@ class ConstructorInstantiator implements SingletonInstantiator<Object> {
 
     private Constructor<?> getConstructor() {
         List<Constructor<?>> constructors = Arrays.stream(type.getDeclaredConstructors()).filter(this::nonPrivate).collect(Collectors.toList());
-        switch (constructors.size()) {
-            case 0:
-                throw new AppContextException("no accessible constructor for " + type);
-            case 1:
-                return constructors.get(0);
-            default:
-                throw new AppContextException("too many constructors for " + type);
-        }
+        return switch (constructors.size()) {
+            case 0 -> throw new AppContextException("no accessible constructor for " + type);
+            case 1 -> constructors.get(0);
+            default -> throw new AppContextException("too many constructors for " + type);
+        };
     }
 
     private boolean nonPrivate(Executable accessibleObject) {
