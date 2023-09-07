@@ -23,6 +23,22 @@ class AppContextInitializerCollectionTest {
         assertThat(comp1.linkedList).hasSize(2);
         assertThat(comp1.linkedList).contains(comp2, comp3);
 
+    }
+
+    @Test
+    void linkedListFieldObjects() {
+        var context = AppContext.builder()
+                .withSingletons(new Comp1(), new Comp2(), new Comp3())
+                .build();
+
+        Collection<Object> singletons = context.getSingletons();
+
+        Comp1 comp1 = singletons.stream().filter(Comp1.class::isInstance).map(Comp1.class::cast).findFirst().orElseThrow();
+        Comp2 comp2 = singletons.stream().filter(Comp2.class::isInstance).map(Comp2.class::cast).findFirst().orElseThrow();
+        Comp3 comp3 = singletons.stream().filter(Comp3.class::isInstance).map(Comp3.class::cast).findFirst().orElseThrow();
+
+        assertThat(comp1.linkedList).hasSize(2);
+        assertThat(comp1.linkedList).contains(comp2, comp3);
 
     }
 
