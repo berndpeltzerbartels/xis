@@ -13,7 +13,7 @@ import static java.util.Collections.emptySet;
 
 public class AppContextInitializer {
 
-    private final Reflection reflection;
+    private final ClassSource classSource;
     private final FieldInjection fieldInjection;
     private final InitMethodInvocation initInvokers;
     private final Collection<Class<?>> additionalClasses;
@@ -23,19 +23,19 @@ public class AppContextInitializer {
     private Set<Object> singletons;
 
     public AppContextInitializer(Class<?> basePackageClass) {
-        this(new DefaultReflection(basePackageClass));
+        this(new DefaultClassSource(basePackageClass));
     }
 
     public AppContextInitializer(String basePackage) {
-        this(new DefaultReflection(basePackage));
+        this(new DefaultClassSource(basePackage));
     }
 
     public AppContextInitializer(Collection<Class<?>> classes) {
         this(new ExternalSingeltons(emptySet(), classes));
     }
 
-    public AppContextInitializer(Reflection reflection) {
-        this(reflection,
+    public AppContextInitializer(ClassSource classSource) {
+        this(classSource,
                 emptySet(),
                 emptySet(),
                 Set.of(XISInit.class));
@@ -44,7 +44,7 @@ public class AppContextInitializer {
     public AppContextInitializer(Set<String> packagesToScan,
                                  Set<Class<?>> additionalClasses,
                                  Set<Object> additionalSingletons) {
-        this(new DefaultReflection(packagesToScan,
+        this(new DefaultClassSource(packagesToScan,
                         Set.of(XISComponent.class),
                         Set.of(XISInject.class)),
                 additionalClasses,
@@ -54,14 +54,14 @@ public class AppContextInitializer {
     }
 
 
-    AppContextInitializer(Reflection reflection,
+    AppContextInitializer(ClassSource classSource,
                           Collection<Class<?>> additionalClasses,
                           Collection<Object> additionalSingletons,
                           Set<Class<? extends Annotation>> beanInitAnnotation) {
-        this.reflection = reflection;
+        this.classSource = classSource;
         this.additionalClasses = additionalClasses;
         this.additionalSingletons = additionalSingletons;
-        this.fieldInjection = new FieldInjection(reflection, additionalClasses, additionalSingletons);
+        this.fieldInjection = new FieldInjection(classSource, additionalClasses, additionalSingletons);
         this.initInvokers = new InitMethodInvocation(beanInitAnnotation);
     }
 
@@ -70,7 +70,7 @@ public class AppContextInitializer {
     }
 
     public AppContextInitializer(Set<String> packagesToScan, Set<Class<?>> singletonClasses, Set<Object> mocks, Set<Class<? extends Annotation>> beanInitAnnotation) {
-        this(new CompositeReflection(new DefaultReflection(packagesToScan), new ExternalSingeltons(mocks, singletonClasses)), singletonClasses, mocks, beanInitAnnotation);
+        this(new CompositeClassSource(new DefaultClassSource(packagesToScan), new ExternalSingeltons(mocks, singletonClasses)), singletonClasses, mocks, beanInitAnnotation);
     }
 
     public AppContext initializeContext() {
@@ -86,7 +86,7 @@ public class AppContextInitializer {
     }
 
     private SingletonInstantiation singletonInstantiation() {
-        return new SingletonInstantiation(fieldInjection, initInvokers, reflection, additionalSingletons, additionalClasses);
+        return new SingletonInstantiation(fieldInjection, initInvokers, classSource, additionalSingletons, additionalClasses);
     }
 
     private void postCheck(SingletonInstantiation singletonInstantiation) {

@@ -14,7 +14,7 @@ class InitMethodInvokerTest {
         invoker.onComponentCreated(new B());
         invoker.onComponentCreated(new C());
 
-        assertThat(invoker.owners).hasSize(3);
+        assertThat(invoker.getOwners()).hasSize(3);
     }
 
     class A {

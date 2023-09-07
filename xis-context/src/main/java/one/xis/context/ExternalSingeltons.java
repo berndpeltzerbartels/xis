@@ -16,7 +16,7 @@ import java.util.stream.Stream;
  * Encapsulates singeltons and singleton classes requiring no reflection. Allows
  * adding componentes without packagescan e.g. for testing.
  */
-public class ExternalSingeltons implements Reflection {
+public class ExternalSingeltons implements ClassSource {
 
     private final Collection<Class<?>> classes = new HashSet<>();
     private final Set<Class<? extends Annotation>> componentTypeAnnotations;

@@ -7,7 +7,7 @@ import java.util.LinkedList;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class AppContextInitializerCollectionITCase {
+class AppContextInitializerCollectionTest {
 
 
     @Test

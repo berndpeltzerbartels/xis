@@ -6,7 +6,7 @@ import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class AppContextInitializerArrayFieldITCase {
+class AppContextInitializerArrayFieldTest {
 
 
     @Test
@@ -24,6 +24,23 @@ class AppContextInitializerArrayFieldITCase {
 
 
     }
+
+    @Test
+    void arrayFieldObjects() {
+        var appContext = new TestContextBuilder().withSingletons(new Comp1(), new Comp2(), new Comp3())
+                .withComponentAnnotation(XISComponent.class)
+                .build();
+
+        Comp1 comp1 = appContext.getSingleton(Comp1.class);
+        Comp2 comp2 = appContext.getSingleton(Comp2.class);
+        Comp3 comp3 = appContext.getSingleton(Comp3.class);
+
+        assertThat(comp1.arr.length).isEqualTo(2);
+        assertThat(Arrays.asList(comp1.arr)).contains(comp2, comp3);
+
+
+    }
+
 
     interface Interf1 {
 

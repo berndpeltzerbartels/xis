@@ -1,5 +1,6 @@
 package one.xis.context;
 
+import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
@@ -10,7 +11,9 @@ import java.util.Set;
 
 @RequiredArgsConstructor
 class InitMethodInvoker {
-    final Set<Object> owners = new HashSet<>();
+
+    @Getter
+    private final Set<Object> owners = new HashSet<>();
     private final Method method;
 
     void onComponentCreated(@NonNull Object o) {
