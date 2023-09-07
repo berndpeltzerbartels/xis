@@ -30,13 +30,10 @@ public class AppContextImpl implements AppContext {
     }
 
     private String createExceptionText(List<Object> candidates, Class<?> type) {
-        switch (candidates.size()) {
-            case 0:
-                return "no candidate for dependency " + type;
-            case 1:
-                throw new IllegalStateException("should never happen");
-            default:
-                return "too many candidates for dependency " + type;
-        }
+        return switch (candidates.size()) {
+            case 0 -> "no candidate for dependency " + type;
+            case 1 -> throw new IllegalStateException("should never happen");
+            default -> "too many candidates for dependency " + type;
+        };
     }
 }

@@ -32,7 +32,7 @@ class ArrayDependencyField extends DependencyField {
 
     @Override
     public void doInjection() {
-        Object[] arr = (Object[]) Array.newInstance(elementType, fieldValues.size());
+        var arr = (Object[]) Array.newInstance(elementType, fieldValues.size());
         owners.forEach(owner -> inject(owner, field, fieldValues.toArray(arr)));
     }
 }

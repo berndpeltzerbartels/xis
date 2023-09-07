@@ -2,7 +2,10 @@ package one.xis.context;
 
 import lombok.SneakyThrows;
 
-import java.lang.reflect.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.WildcardType;
 import java.util.*;
 
 class CollectionDependencyField extends DependencyField {
@@ -34,17 +37,15 @@ class CollectionDependencyField extends DependencyField {
         if (!(field.getGenericType() instanceof ParameterizedType)) {
             throw new AppContextException(field + ": collection-dependency-fields must have generic type parameter");
         }
-        ParameterizedType collType = (ParameterizedType) field.getGenericType();
-        Type actualType = collType.getActualTypeArguments()[0];
-        if (actualType instanceof WildcardType) {
+        var collType = (ParameterizedType) field.getGenericType();
+        var actualType = collType.getActualTypeArguments()[0];
+        if (actualType instanceof WildcardType wildcardType) {
             // TODO this will not always work
-            WildcardType wildcardType = (WildcardType) actualType;
             return (Class<?>) wildcardType.getUpperBounds()[0];
 
         } else if (actualType instanceof Class) {
             return (Class<?>) collType.getActualTypeArguments()[0];
-        } else if (actualType instanceof ParameterizedType) {
-            ParameterizedType parameterizedType = (ParameterizedType) actualType;
+        } else if (actualType instanceof ParameterizedType parameterizedType) {
             return (Class<?>) parameterizedType.getRawType();
         }
         throw new IllegalStateException(); // should never happen
