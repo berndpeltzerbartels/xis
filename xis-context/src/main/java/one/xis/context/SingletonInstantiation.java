@@ -26,13 +26,13 @@ public class SingletonInstantiation {
     @Getter
     private final Set<Object> singletons = new HashSet<>();
 
-    SingletonInstantiation(FieldInjection fieldInjection, InitMethodInvocation initMethodInvocation, ClassSource classSource, Collection<Object> additionalSingletons, Collection<Class<?>> additionalClasses) {
+    SingletonInstantiation(FieldInjection fieldInjection, InitMethodInvocation initMethodInvocation, ClassesSource classesSource, Collection<Object> additionalSingletons, Collection<Class<?>> additionalClasses) {
         this.fieldInjection = fieldInjection;
         this.initMethodInvocation = initMethodInvocation;
         this.classReplacer = new SingletonClassReplacer();
         this.additionalSingletons = additionalSingletons;
         this.additionalClasses = additionalClasses;
-        this.singletonInstantiators = createInstantiators(classSource);
+        this.singletonInstantiators = createInstantiators(classesSource);
         this.unusedSingletonInstantiators = new HashSet<>(singletonInstantiators);
     }
 
@@ -44,22 +44,22 @@ public class SingletonInstantiation {
         populateSingletonClasses();
     }
 
-    private Set<SingletonInstantiator<?>> createInstantiators(ClassSource classSource) {
-        return classesToInstantiate(classSource).stream()
+    private Set<SingletonInstantiator<?>> createInstantiators(ClassesSource classesSource) {
+        return classesToInstantiate(classesSource).stream()
                 .map(this::createInstantiator)//
                 .collect(Collectors.toUnmodifiableSet());
     }
 
-    private Set<Class<?>> classesToInstantiate(ClassSource classSource) {
-        var candidates = getComponentClasses(classSource);
+    private Set<Class<?>> classesToInstantiate(ClassesSource classesSource) {
+        var candidates = getComponentClasses(classesSource);
         candidates.addAll(additionalClasses);
         additionalSingletons.stream().map(Object::getClass).toList().forEach(candidates::remove);
         return classReplacer.doReplacement(candidates);
     }
 
 
-    private Set<Class<?>> getComponentClasses(ClassSource classSource) {
-        return classSource.getComponentTypes().stream()// includes types having custom component-annotations, too
+    private Set<Class<?>> getComponentClasses(ClassesSource classesSource) {
+        return classesSource.getComponentTypes().stream()// includes types having custom component-annotations, too
                 .filter(c -> !c.isAnnotation())
                 .collect(Collectors.toSet());
     }

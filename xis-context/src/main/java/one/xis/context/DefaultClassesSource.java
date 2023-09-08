@@ -11,27 +11,27 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-class DefaultClassSource implements ClassSource {
+class DefaultClassesSource implements ClassesSource {
 
     private final Reflections reflections;
     private final Set<Class<? extends Annotation>> componentTypeAnnotations;
     private final Set<Class<? extends Annotation>> dependencyFieldAnnotations;
 
-    DefaultClassSource(Class<?> basePackageClass) {
+    DefaultClassesSource(Class<?> basePackageClass) {
         this(basePackageClass.getPackageName());
     }
 
-    DefaultClassSource(String... basePackages) {
+    DefaultClassesSource(String... basePackages) {
         this(Set.of(basePackages), Set.of(XISComponent.class), Set.of(XISInject.class));
     }
 
-    DefaultClassSource(Set<String> basePackages) {
+    DefaultClassesSource(Set<String> basePackages) {
         this(basePackages, Set.of(XISComponent.class), Set.of(XISInject.class));
     }
 
 
-    DefaultClassSource(Set<String> basePackages, Set<Class<? extends Annotation>> componentTypeAnnotations,
-                       Set<Class<? extends Annotation>> dependencyFieldAnnotations) {
+    DefaultClassesSource(Set<String> basePackages, Set<Class<? extends Annotation>> componentTypeAnnotations,
+                         Set<Class<? extends Annotation>> dependencyFieldAnnotations) {
         this.componentTypeAnnotations = componentTypeAnnotations;
         this.dependencyFieldAnnotations = dependencyFieldAnnotations;
         reflections = new Reflections(basePackages, new SubTypesScanner(),

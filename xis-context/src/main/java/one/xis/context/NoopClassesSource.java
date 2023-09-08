@@ -4,7 +4,7 @@ import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.Set;
 
-class NoopClassSource implements ClassSource {
+class NoopClassesSource implements ClassesSource {
 
     @Override
     public Set<Field> getDependencyFields() {

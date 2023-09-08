@@ -15,15 +15,15 @@ import java.util.stream.Stream;
 class FieldInjection {
     private final Set<DependencyField> dependencyFields;
 
-    FieldInjection(ClassSource classSource, Collection<Class<?>> additionalClasses, Collection<Object> additionalBeans) {
+    FieldInjection(ClassesSource classesSource, Collection<Class<?>> additionalClasses, Collection<Object> additionalBeans) {
         dependencyFields = new HashSet<>();
-        dependencyFields.addAll(dependencyFieldsByReflection(classSource));
+        dependencyFields.addAll(dependencyFieldsByReflection(classesSource));
         dependencyFields.addAll(dependencyFieldsOfClasses(additionalClasses));
         dependencyFields.addAll(dependencyFieldsOfObjects(additionalBeans));
     }
 
-    private Collection<DependencyField> dependencyFieldsByReflection(ClassSource classSource) {
-        return classSource.getDependencyFields().stream()
+    private Collection<DependencyField> dependencyFieldsByReflection(ClassesSource classesSource) {
+        return classesSource.getDependencyFields().stream()
                 .map(DependencyField::getInstanceForField)
                 .collect(Collectors.toSet());
     }

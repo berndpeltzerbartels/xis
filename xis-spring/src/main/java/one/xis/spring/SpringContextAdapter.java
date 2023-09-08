@@ -43,12 +43,8 @@ class SpringContextAdapter implements BeanPostProcessor, ApplicationContextAware
 
     @Setter
     private ApplicationContext applicationContext;
-
-    private final Set<String> scannedPackages = new HashSet<>();
-
     private final Collection<Object> controllers = new HashSet<>();
-
-
+    
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
         if (isBeanClass(bean.getClass())) {
