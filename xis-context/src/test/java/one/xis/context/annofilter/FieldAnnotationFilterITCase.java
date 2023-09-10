@@ -1,6 +1,6 @@
 package one.xis.context.annofilter;
 
-import one.xis.context.AppContextInitializer;
+import one.xis.context.AppContext;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;
@@ -14,10 +14,9 @@ class FieldAnnotationFilterITCase {
     @Test
     void fieldWithAnnotationFilter() {
 
-        AppContextInitializer initializer = new AppContextInitializer(getClass());
-        initializer.initializeContext();
+        AppContext appContext = AppContext.getInstance(getClass());
 
-        Set<Object> singletons = initializer.getSingletons();
+        Set<Object> singletons = appContext.getSingletons();
 
         ComponentWithField componentWithField = findElementOfType(singletons, ComponentWithField.class);
         ComponentWithoutTestAnnotation componentWithoutTestAnnotation = findElementOfType(singletons, ComponentWithoutTestAnnotation.class);

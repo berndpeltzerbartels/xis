@@ -17,11 +17,11 @@ public class MethodUtils {
         return method -> method.isAnnotationPresent(annotationClass);
     }
 
-    public static Collection<Method> methods(@NonNull Object obj) {
-        return methods(obj.getClass());
+    public static Collection<Method> allMethods(@NonNull Object obj) {
+        return allMethods(obj.getClass());
     }
 
-    public static Collection<Method> methods(@NonNull Class<?> clazz) {
+    public static Collection<Method> allMethods(@NonNull Class<?> clazz) {
         Map<String, Method> methods = new HashMap<>();
         hierarchy(clazz).forEach(c -> declaredMethods(c).forEach(m -> methods.put(methodSignature(m), m)));
         return methods.values();
@@ -31,9 +31,9 @@ public class MethodUtils {
         return String.format("%s(%s)", method.getName(), parameterString(method));
     }
 
-    public static Object invoke(Object controller, Method method, Object[] args) {
+    public static Object invoke(Object o, Method method, Object[] args) {
         try {
-            return method.invoke(controller, args);
+            return method.invoke(o, args);
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }

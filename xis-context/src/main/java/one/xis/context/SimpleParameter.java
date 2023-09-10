@@ -2,16 +2,17 @@ package one.xis.context;
 
 import lombok.Getter;
 
-class SimpleParameter extends ConstructorParameter {
+@Getter
+class SimpleParameter implements ComponentParameter {
 
     private final Class<?> type;
-
-    @Getter
+    private final int index;
     private Object value;
 
-    SimpleParameter(Class<?> type, String name) {
-        super(name);
+
+    SimpleParameter(Class<?> type, int index) {
         this.type = type;
+        this.index = index;
     }
 
     @Override
@@ -23,12 +24,9 @@ class SimpleParameter extends ConstructorParameter {
     }
 
     @Override
-    boolean isComplete() {
+    public boolean isComplete() {
         return value != null;
     }
 
-    @Override
-    Class<?> getElementType() {
-        return type;
-    }
+
 }

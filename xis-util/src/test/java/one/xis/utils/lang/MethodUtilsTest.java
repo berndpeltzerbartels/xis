@@ -63,7 +63,7 @@ class MethodUtilsTest {
         var t2Test1 = TestClass2.class.getDeclaredMethod("test1");// part of the given class, so should be present
         var t2Test2 = TestClass2.class.getDeclaredMethod("test2"); // overrides method of base-class so should be found
 
-        var result = MethodUtils.methods(new TestClass2());
+        var result = MethodUtils.allMethods(new TestClass2());
         assertThat(result).containsAll(Set.of(t1Test1, t2Test1, t2Test2));
         assertThat(result).doesNotContain(t1Test2);
 

@@ -11,7 +11,7 @@ import java.lang.reflect.Proxy;
 class PushClientProxyFactory implements ProxyFactory<Object> {
 
     private final PushClientInvocationHandler pushClientInvocationHandler;
-    
+
     @Override
     public Object createProxy(Class<Object> interf) {
         return Proxy.newProxyInstance(interf.getClassLoader(), new Class[]{interf}, pushClientInvocationHandler);

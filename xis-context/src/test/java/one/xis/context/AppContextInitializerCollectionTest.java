@@ -12,7 +12,7 @@ class AppContextInitializerCollectionTest {
 
     @Test
     void linkedListField() {
-        var context = new AppContextInitializer(Comp1.class, Comp2.class, Comp3.class).initializeContext();
+        var context = AppContext.builder().withSingletonClasses(Comp1.class, Comp2.class, Comp3.class).build();
 
         Collection<Object> singletons = context.getSingletons();
 

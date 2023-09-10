@@ -1,7 +1,7 @@
 package one.xis.context;
 
-class AppContextException extends RuntimeException {
-    AppContextException(String message) {
+public class AppContextException extends RuntimeException {
+    public AppContextException(String message) {
         super(message);
     }
 

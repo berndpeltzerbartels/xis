@@ -6,6 +6,7 @@ import lombok.ToString;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -17,6 +18,10 @@ public interface AppContext {
         return new AppContextBuilderImpl();
     }
 
+    static AppContext getInstance(Class<?> rootClass) {
+        return getInstance(rootClass.getPackageName());
+    }
+
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
     static AppContext getInstance(String rootPackageName) {
         AppContextKey appContextKey = AppContextKey.getKey(rootPackageName);
@@ -26,12 +31,15 @@ public interface AppContext {
     }
 
     private static AppContext createContext(String rootPackageName) {
-        return new AppContextInitializer(rootPackageName).initializeContext();
+        return new AppContextBuilderImpl()
+                .withPackage(rootPackageName)
+                .build();
+
     }
 
     <T> T getSingleton(Class<T> type);
 
-    Collection<Object> getSingletons();
+    Set<Object> getSingletons();
 
     default Collection<Object> getSingletons(Class<?> type) {
         return getSingletons().stream().filter(type::isInstance).collect(Collectors.toSet());

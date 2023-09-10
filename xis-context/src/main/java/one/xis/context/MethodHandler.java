@@ -23,7 +23,7 @@ public abstract class MethodHandler implements InvocationHandler {
             return str;
         }
         if (method.getName().equals("equals") && method.getParameterCount() == 1) {
-            return isEqual(args[0]);
+            return this.equals(args[0]);
         }
         return doInvoke(proxy, method, args);
     }

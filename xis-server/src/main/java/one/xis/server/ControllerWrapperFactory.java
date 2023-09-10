@@ -35,7 +35,7 @@ class ControllerWrapperFactory {
 
     private Map<String, ModelMethod> modelMethods(Object controller) {
         var map = new HashMap<String, ModelMethod>();
-        MethodUtils.methods(controller).stream()
+        MethodUtils.allMethods(controller).stream()
                 .filter(m -> m.isAnnotationPresent(ModelData.class))
                 .map(this::createModelMethod)
                 .forEach(controllerMethod -> {
@@ -53,7 +53,7 @@ class ControllerWrapperFactory {
     }
 
     private Stream<ActionMethod> actionMethods(Object controller) {
-        return MethodUtils.methods(controller).stream()
+        return MethodUtils.allMethods(controller).stream()
                 .filter(m -> m.isAnnotationPresent(Action.class))
                 .map(this::createActionMethod);
     }

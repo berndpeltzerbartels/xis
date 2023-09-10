@@ -13,7 +13,8 @@ class AppContextBuilderImpl implements AppContextBuilder {
     private final Set<Object> singletons = new HashSet<>();
     private final Set<Class<? extends Annotation>> componentAnnotations = new HashSet<>();
     private final Set<Class<? extends Annotation>> dependencyFieldAnnotations = new HashSet<>();
-    private final Set<Class<? extends Annotation>> beanInitAnnotation = new HashSet<>();
+    private final Set<Class<? extends Annotation>> initAnnotation = new HashSet<>();
+    private final Set<Class<? extends Annotation>> beanMethodAnnotations = new HashSet<>();
     private final Set<String> packagesToScan = new HashSet<>();
 
     @Override
@@ -64,25 +65,31 @@ class AppContextBuilderImpl implements AppContextBuilder {
 
     @Override
     public AppContextBuilder withBeanInitAnnotation(Class<? extends Annotation> beanInitAnnotation) {
-        this.beanInitAnnotation.add(beanInitAnnotation);
+        this.initAnnotation.add(beanInitAnnotation);
         return this;
     }
 
     @Override
+    public AppContextBuilder withBeanMethodAnnotation(Class<? extends Annotation> beanMethodAnnotation) {
+        this.beanMethodAnnotations.add(beanMethodAnnotation);
+        return this;
+    }
+
+
+    @Override
     public AppContext build() {
         componentAnnotations.add(XISComponent.class);
-        beanInitAnnotation.add(XISInit.class);
+        initAnnotation.add(XISInit.class);
         dependencyFieldAnnotations.add(XISInject.class);
-        var appContextWrapper = new AppContextWrapper();
-        singletons.add(appContextWrapper);
-        validate();
-        var externalSingeltons = new ExternalSingeltons(singletons, singletonClasses, componentAnnotations, dependencyFieldAnnotations);
-        var defaultReflection = new DefaultClassesSource(packagesToScan, componentAnnotations, dependencyFieldAnnotations);
-        var reflection = new CompositeClassesSource(externalSingeltons, defaultReflection);
-        var initializer = new AppContextInitializer(reflection, singletonClasses, singletons, beanInitAnnotation);
-        var appContext = initializer.initializeContext();
-        appContextWrapper.setAppContext(appContext);
-        return appContext;
+        beanMethodAnnotations.add(XISBean.class);
+        var contextFactory = new AppContextFactory(singletonClasses,
+                singletons,
+                componentAnnotations,
+                dependencyFieldAnnotations,
+                initAnnotation,
+                beanMethodAnnotations,
+                packagesToScan);
+        return contextFactory.createContext();
     }
 
 

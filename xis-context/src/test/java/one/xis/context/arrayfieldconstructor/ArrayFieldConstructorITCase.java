@@ -1,6 +1,6 @@
 package one.xis.context.arrayfieldconstructor;
 
-import one.xis.context.AppContextInitializer;
+import one.xis.context.AppContext;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;
@@ -13,11 +13,8 @@ class ArrayFieldConstructorITCase {
 
     @Test
     void arrayField() {
-
-        AppContextInitializer initializer = new AppContextInitializer(getClass());
-        initializer.initializeContext();
-
-        Set<Object> singletons = initializer.getSingletons();
+        
+        Set<Object> singletons = AppContext.getInstance(getClass()).getSingletons();
 
         ComponentWithArrayField componentWithArrayField = findElementOfType(singletons, ComponentWithArrayField.class);
         Comp2 comp2 = findElementOfType(singletons, Comp2.class);

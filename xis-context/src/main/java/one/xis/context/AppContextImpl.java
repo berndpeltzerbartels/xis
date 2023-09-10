@@ -6,13 +6,14 @@ import one.xis.utils.lang.CollectorUtils;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class AppContextImpl implements AppContext {
 
     @Getter
-    private final Collection<Object> singletons;
+    private final Set<Object> singletons;
 
     @Override
     @SuppressWarnings("unchecked")

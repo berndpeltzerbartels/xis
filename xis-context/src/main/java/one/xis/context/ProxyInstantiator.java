@@ -2,42 +2,34 @@ package one.xis.context;
 
 import lombok.RequiredArgsConstructor;
 
-import java.util.Set;
+import java.util.function.Consumer;
 
 @RequiredArgsConstructor
-class ProxyInstantiator<I> implements SingletonInstantiator<I> {
+class ProxyInstantiator implements Instantiator {
 
-    private final Class<I> interf;
-    private final Class<I> proxyFactoryClass;
-    private ProxyFactory<I> proxyFactory;
-
-
-    @Override
-    public void onSingletonClassesFound(Set<Class<?>> singletonClasses) {
-        // Not needed, here
-    }
-
-    @Override
-    public Class<?> getType() {
-        return interf;
-    }
+    private final Class<?> interf;
+    private final Class<?> proxyFactoryClass;
+    private ProxyFactory<Object> proxyFactory;
+    private final Consumer<Object> componentConsumer;
 
     @Override
     @SuppressWarnings("unchecked")
     public void onComponentCreated(Object o) {
         if (proxyFactoryClass.isInstance(o)) {
-            proxyFactory = (ProxyFactory<I>) o;
+            proxyFactory = (ProxyFactory<Object>) o;
         }
     }
 
     @Override
-    public boolean isParameterCompleted() {
+    public boolean isExecutable() {
         return proxyFactory != null;
     }
 
     @Override
-    public I createInstance() {
-        return proxyFactory.createProxy(interf);
+    @SuppressWarnings("unchecked")
+    public void createInstance() {
+        var proxy = proxyFactory.createProxy((Class<Object>) interf);
+        componentConsumer.accept(proxy);
     }
 
 }

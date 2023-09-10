@@ -1,5 +1,8 @@
 package one.xis.context;
 
-interface ComponentCreationListener {
+public interface FieldWrapper {
+
+    boolean isInjected();
+
     void onComponentCreated(Object o);
 }

@@ -6,23 +6,22 @@ import lombok.Getter;
 import java.lang.reflect.Parameter;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Getter
-abstract class MultiValueParameter extends ConstructorParameter {
+abstract class MultiValueParameter implements ComponentParameter {
 
     private final Class<?> elementType;
-    private final Collection<Object> values = new HashSet<>();
-    private Set<?> candidateClasses;
+    private final int index;
+    private final List<?> candidateClasses;
 
-    MultiValueParameter(Parameter parameter) {
-        super(parameter.getName());
+    protected final Collection<Object> values = new HashSet<>();
+
+    MultiValueParameter(Parameter parameter, int index, List<Class<?>> allComponentClasses) {
         this.elementType = findElementType(parameter);
-    }
-
-    void registerSingletonClasses(Collection<Class<?>> allSingletonClasses) {
-        candidateClasses = allSingletonClasses.stream().filter(elementType::isAssignableFrom).collect(Collectors.toSet());
+        this.index = index;
+        this.candidateClasses = allComponentClasses.stream().filter(this.elementType::isAssignableFrom).collect(Collectors.toList());
     }
 
     @Override
@@ -33,7 +32,7 @@ abstract class MultiValueParameter extends ConstructorParameter {
     }
 
     @Override
-    boolean isComplete() {
+    public boolean isComplete() {
         return candidateClasses.isEmpty();
     }
 

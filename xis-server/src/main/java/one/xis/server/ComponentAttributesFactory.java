@@ -16,7 +16,7 @@ abstract class ComponentAttributesFactory<C extends ComponentAttributes> {
 
     protected Map<String, Collection<String>> modelsToSubmitForAction(Object controller) {
         var map = new HashMap<String, Collection<String>>();
-        MethodUtils.methods(controller).stream()
+        MethodUtils.allMethods(controller).stream()
                 .filter(m -> m.isAnnotationPresent(Action.class))
                 .forEach(method -> {
                     var action = getAction(method);
@@ -26,7 +26,7 @@ abstract class ComponentAttributesFactory<C extends ComponentAttributes> {
     }
 
     protected Collection<String> modelsToSubmitForModel(Object controller) {
-        return MethodUtils.methods(controller).stream()
+        return MethodUtils.allMethods(controller).stream()
                 .filter(method -> method.isAnnotationPresent(ModelData.class))
                 .map(this::getModelParameters)
                 .flatMap(Collection::stream)

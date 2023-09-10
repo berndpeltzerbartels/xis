@@ -2,11 +2,12 @@ package one.xis.context;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Parameter;
+import java.util.List;
 
 class ArrayParameter extends MultiValueParameter {
 
-    ArrayParameter(Parameter parameter) {
-        super(parameter);
+    ArrayParameter(Parameter parameter, int index, List<Class<?>> allComponentClasses) {
+        super(parameter, index, allComponentClasses);
     }
 
     @Override
@@ -16,7 +17,12 @@ class ArrayParameter extends MultiValueParameter {
 
 
     @Override
-    Object getValue() {
+    public int getIndex() {
+        return 0;
+    }
+
+    @Override
+    public Object getValue() {
         var arr = (Object[]) Array.newInstance(getElementType(), getValues().size());
         var index = 0;
         for (Object o : getValues()) {

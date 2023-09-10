@@ -1,6 +1,6 @@
 package one.xis.context.arrayfieldinject;
 
-import one.xis.context.AppContextInitializer;
+import one.xis.context.AppContext;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;
@@ -14,10 +14,7 @@ class ArrayFieldInjectITCase {
     @Test
     void arrayField() {
 
-        AppContextInitializer initializer = new AppContextInitializer(getClass());
-        initializer.initializeContext();
-
-        Set<Object> singletons = initializer.getSingletons();
+        Set<Object> singletons = AppContext.getInstance(getClass()).getSingletons();
 
         Comp1 comp1 = findElementOfType(singletons, Comp1.class);
         Comp2 comp2 = findElementOfType(singletons, Comp2.class);

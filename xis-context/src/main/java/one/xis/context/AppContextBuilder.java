@@ -7,6 +7,8 @@ import java.util.Collection;
 @SuppressWarnings({"unchecked", "unused"})
 public interface AppContextBuilder {
 
+    AppContextBuilder withBeanMethodAnnotation(Class<? extends Annotation> beanMethodAnnotation);
+
     AppContext build();
 
     static AppContextBuilder createInstance() {

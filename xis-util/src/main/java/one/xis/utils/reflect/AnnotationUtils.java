@@ -5,8 +5,8 @@ import lombok.experimental.UtilityClass;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.util.Collection;
 import java.util.Optional;
-import java.util.Set;
 
 @UtilityClass
 public class AnnotationUtils {
@@ -23,7 +23,7 @@ public class AnnotationUtils {
         return Optional.of(annotatedType.getAnnotation(annotationClass));
     }
 
-    public boolean hasAtLeasOneAnnotation(AnnotatedElement element, Set<Class<? extends Annotation>> annotations) {
+    public boolean hasAtLeasOneAnnotation(AnnotatedElement element, Collection<Class<? extends Annotation>> annotations) {
         return annotations.stream().anyMatch(element::isAnnotationPresent);
     }
 
