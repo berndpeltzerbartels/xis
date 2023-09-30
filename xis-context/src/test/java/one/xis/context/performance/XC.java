@@ -8,6 +8,6 @@ import java.util.Collection;
 
 @XISComponent
 @RequiredArgsConstructor
-class XC {
+public class XC {
     private final Collection<XI> xis;
 }

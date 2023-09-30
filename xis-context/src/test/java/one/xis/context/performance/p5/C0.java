@@ -11,7 +11,7 @@ import java.util.Collection;
 @XISComponent
 @RequiredArgsConstructor
 class C0 implements XI {
-    private final C2 c2;
+    private final one.xis.context.performance.p4.C2 c2;
 
 
     @XISInit

@@ -8,7 +8,7 @@ import one.xis.context.performance.XI;
 
 @XISComponent
 @RequiredArgsConstructor
-class C2 implements XI {
+public class C2 implements XI {
 
     private final C9 c9;
 
