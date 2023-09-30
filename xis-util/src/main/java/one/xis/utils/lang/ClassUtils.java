@@ -3,10 +3,9 @@ package one.xis.utils.lang;
 import lombok.experimental.UtilityClass;
 
 import java.lang.reflect.Constructor;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Set;
+import java.lang.reflect.Executable;
+import java.lang.reflect.Modifier;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -47,6 +46,15 @@ public class ClassUtils {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    public static <T> Optional<Constructor<T>> getAccessibleContructor(Class<T> aClass) {
+        return Arrays.stream(aClass.getDeclaredConstructors())
+                .map(c -> (Constructor<T>) c)
+                .filter(ClassUtils::nonPrivate)
+                .findFirst();
+
+    }
+
     public Class<?> lastDescendant(Set<Class<?>> relatedClasses) {
         LinkedList<Class<?>> sorted = relatedClasses.stream()
                 .sorted(Comparator.comparing(ClassUtils::inheritanceLevel).reversed())
@@ -74,6 +82,10 @@ public class ClassUtils {
         return level;
     }
 
+    public static boolean related(Class<?> c1, Class<?> c2) {
+        return c1.isAssignableFrom(c2) || c2.isAssignableFrom(c1);
+    }
+
     public static Class<?> classForName(String name) {
         try {
             return Class.forName(name);
@@ -82,13 +94,7 @@ public class ClassUtils {
         }
     }
 
-    public boolean hasNoArgsConstructor(Class<?> c) {
-        try {
-            c.getDeclaredConstructor();
-            return true;
-        } catch (NoSuchMethodException e) {
-            return false;
-        }
+    private boolean nonPrivate(Executable executable) {
+        return !Modifier.isPrivate(executable.getModifiers());
     }
-
 }

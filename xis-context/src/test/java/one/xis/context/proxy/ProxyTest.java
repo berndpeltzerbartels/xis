@@ -15,6 +15,7 @@ class ProxyTest {
                 .withSingletonClass(TestInterface.class)
                 .withSingletonClass(TestProxyFactory.class)
                 .withSingletonClass(TestInvocationHandler.class)
+                .withProxyAnnotation(TestAnnotation.class)
                 .build();
 
         var proxy = context.getSingleton(TestInterface.class);

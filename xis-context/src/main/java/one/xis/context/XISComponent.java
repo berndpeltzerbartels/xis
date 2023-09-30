@@ -8,5 +8,4 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.ANNOTATION_TYPE})
 public @interface XISComponent {
-    Class<?> replacementFor() default None.class;
 }

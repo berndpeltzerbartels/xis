@@ -5,7 +5,6 @@ import lombok.experimental.UtilityClass;
 import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 @UtilityClass
 public class CollectionUtils {
@@ -38,8 +37,26 @@ public class CollectionUtils {
         return first(coll);
     }
 
-    public <T> List<T> elementsOfClass(Collection<Object> coll, Class<T> clazz) {
-        return coll.stream().filter(clazz::isInstance).map(clazz::cast).collect(Collectors.toList());
+    @SuppressWarnings("unchecked")
+    public <C extends Collection<?>> C elementsOfClass(Collection<Object> coll, Class<C> clazz) {
+        if (clazz.isAssignableFrom(List.class)) {
+            return (C) new ArrayList<>(coll);
+        }
+        if (clazz.isAssignableFrom(Set.class)) {
+            return (C) new HashSet<>(coll);
+        }
+        if (clazz.isAssignableFrom(HashSet.class)) {
+            return (C) new HashSet<>(coll);
+        }
+        var constructor = ClassUtils.getConstructor(clazz, Collection.class);
+        if (constructor != null && !Modifier.isAbstract(clazz.getModifiers()) && !Modifier.isInterface(clazz.getModifiers())) {
+            try {
+                return constructor.newInstance(coll);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        throw new UnsupportedOperationException("unable to instantiate " + clazz);
     }
 
     public <T> T findElementOfType(Collection<Object> coll, Class<T> clazz) {
@@ -67,5 +84,28 @@ public class CollectionUtils {
         }
         throw new UnsupportedOperationException("unable to instantiate " + clazz);
     }
+
+    @SuppressWarnings("unchecked")
+    public <T, C extends Collection<T>> C createInstance(Class<C> clazz, Collection<?> values) {
+        if (clazz.isAssignableFrom(List.class)) {
+            return (C) new ArrayList<>(values);
+        }
+        if (clazz.isAssignableFrom(Set.class)) {
+            return (C) new HashSet<>(values);
+        }
+        if (clazz.isAssignableFrom(HashSet.class)) {
+            return (C) new HashSet<>(values);
+        }
+        var constructor = ClassUtils.getConstructor(clazz, Collection.class);
+        if (constructor != null && !Modifier.isAbstract(clazz.getModifiers()) && !Modifier.isInterface(clazz.getModifiers())) {
+            try {
+                return constructor.newInstance(values);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        throw new UnsupportedOperationException("unable to instantiate " + clazz);
+    }
+
 
 }

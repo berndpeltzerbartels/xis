@@ -9,6 +9,8 @@ public interface AppContextBuilder {
 
     AppContextBuilder withBeanMethodAnnotation(Class<? extends Annotation> beanMethodAnnotation);
 
+    AppContextBuilder withProxyAnnotation(Class<? extends Annotation> clazz);
+
     AppContext build();
 
     static AppContextBuilder createInstance() {

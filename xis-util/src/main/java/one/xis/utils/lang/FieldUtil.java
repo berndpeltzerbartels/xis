@@ -3,7 +3,8 @@ package one.xis.utils.lang;
 import lombok.experimental.UtilityClass;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Type;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.WildcardType;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -72,8 +73,20 @@ public class FieldUtil {
         }
     }
 
-    public Type getGenericTypeParameter(Field field) {
-        return null;
+    public Class<?> getGenericTypeParameter(Field field) {
+        var genericType = field.getGenericType();
+        if (genericType instanceof ParameterizedType parameterizedType) {
+            var type = parameterizedType.getActualTypeArguments()[0];
+            if (type instanceof WildcardType wildcardType) {
+                return (Class<?>) wildcardType.getUpperBounds()[0];
+            }
+            var actualTypeparameter = parameterizedType.getActualTypeArguments()[0];
+            if (actualTypeparameter instanceof ParameterizedType parameterizedType2) {
+                return (Class<?>) parameterizedType2.getRawType(); // We do not want to dive deeper
+            }
+            return (Class<?>) actualTypeparameter;
+        }
+        throw new IllegalArgumentException(field + " has no generic type");
     }
 
 

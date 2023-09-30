@@ -6,7 +6,7 @@ import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class AppContextInitializerArrayFieldTest {
+class AppContextArrayOfObjectsFieldTest {
 
 
     @Test

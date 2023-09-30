@@ -6,7 +6,6 @@ import lombok.ToString;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -39,7 +38,7 @@ public interface AppContext {
 
     <T> T getSingleton(Class<T> type);
 
-    Set<Object> getSingletons();
+    Collection<Object> getSingletons();
 
     default Collection<Object> getSingletons(Class<?> type) {
         return getSingletons().stream().filter(type::isInstance).collect(Collectors.toSet());

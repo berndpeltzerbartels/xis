@@ -2,16 +2,15 @@ package one.xis.context;
 
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
+import java.util.Optional;
 
 class ProxyUtils {
 
     @SuppressWarnings("unchecked")
-    static Class<? extends ProxyFactory<?>> factoryClass(Class<?> c) {
-        var annotation = proxyAnnotation(c);
-        if (annotation.factory() != null) {
-            return (Class<? extends ProxyFactory<?>>) annotation.factory();
-        }
-        return null;
+    static Optional<Class<? extends ProxyFactory<?>>> factoryClass(Class<?> c) {
+        return proxyAnnotation(c)
+                .map(XISProxy::factory)
+                .map(factory -> (Class<? extends ProxyFactory<?>>) factory);
     }
 
 
@@ -24,13 +23,13 @@ class ProxyUtils {
     }
 
 
-    static XISProxy proxyAnnotation(Class<?> interf) {
+    static Optional<XISProxy> proxyAnnotation(Class<?> interf) {
         return Arrays.stream(interf.getAnnotations())
                 .filter(annotation -> annotation.annotationType().isAnnotationPresent(XISProxy.class))
                 .map(Annotation::annotationType)
                 .map(interf::getAnnotation)
                 .map(Annotation::annotationType)
                 .map(type -> type.getAnnotation(XISProxy.class))
-                .findFirst().orElseThrow();
+                .findFirst();
     }
 }

@@ -27,12 +27,19 @@ public class MethodUtils {
         return methods.values();
     }
 
+    public static Collection<Method> methods(@NonNull Class<?> clazz, Predicate<Method> methodPredicate) {
+        Map<String, Method> methods = new HashMap<>();
+        hierarchy(clazz).forEach(c -> declaredMethods(c).filter(methodPredicate).forEach(m -> methods.put(methodSignature(m), m)));
+        return methods.values();
+    }
+
     public static String methodSignature(Method method) {
         return String.format("%s(%s)", method.getName(), parameterString(method));
     }
 
     public static Object invoke(Object o, Method method, Object[] args) {
         try {
+            method.setAccessible(true);
             return method.invoke(o, args);
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
@@ -40,8 +47,19 @@ public class MethodUtils {
     }
 
     public static Class<?> getGenericTypeParameter(Parameter parameter) {
-        var parameterizedType = (ParameterizedType) parameter.getParameterizedType();
-        return (Class<?>) parameterizedType.getActualTypeArguments()[0];
+        var genericType = parameter.getParameterizedType();
+        if (genericType instanceof ParameterizedType parameterizedType) {
+            var type = parameterizedType.getActualTypeArguments()[0];
+            if (type instanceof WildcardType wildcardType) {
+                return (Class<?>) wildcardType.getUpperBounds()[0];
+            }
+            var actualTypeparameter = parameterizedType.getActualTypeArguments()[0];
+            if (actualTypeparameter instanceof ParameterizedType parameterizedType2) {
+                return (Class<?>) parameterizedType2.getRawType(); // We do not want to dive deeper
+            }
+            return (Class<?>) actualTypeparameter;
+        }
+        throw new IllegalArgumentException(parameter + " has no generic type");
     }
 
 

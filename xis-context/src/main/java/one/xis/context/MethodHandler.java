@@ -10,8 +10,6 @@ public abstract class MethodHandler implements InvocationHandler {
     public MethodHandler() {
         obj = new Object();
         str = this.toString();
-
-
     }
 
     @Override
@@ -23,7 +21,7 @@ public abstract class MethodHandler implements InvocationHandler {
             return str;
         }
         if (method.getName().equals("equals") && method.getParameterCount() == 1) {
-            return this.equals(args[0]);
+            return isEqual(args[0]);
         }
         return doInvoke(proxy, method, args);
     }

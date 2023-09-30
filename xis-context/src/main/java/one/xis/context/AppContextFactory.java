@@ -1,132 +1,304 @@
 package one.xis.context;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import one.xis.utils.lang.ClassUtils;
+import one.xis.utils.lang.FieldUtil;
+import one.xis.utils.lang.MethodUtils;
+import one.xis.utils.reflect.AnnotationUtils;
+import org.reflections.Reflections;
+import org.reflections.scanners.FieldAnnotationsScanner;
+import org.reflections.scanners.SubTypesScanner;
+import org.reflections.scanners.TypeAnnotationsScanner;
 
 import java.lang.annotation.Annotation;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Queue;
-import java.util.Set;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.*;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-class AppContextFactory {
+@SuppressWarnings("unchecked")
+class AppContextFactory implements ComponentCreationListener {
 
-    private final Queue<Instantiator> instantiators = new ConcurrentLinkedQueue<>();
-    private final Queue<Instantiator> executableInstantiators = new ConcurrentLinkedQueue<>();
-    private final Queue<MethodWrapper> executableMethods = new ConcurrentLinkedQueue<>();
-    private final ComponentWrapperFactory componentWrapperFactory;
-    private final InstantiatorFactory instantiatorFactory;
-    private final Queue<ComponentWrapper> componentWrappers;
-    private final HashSet<Object> components = new HashSet<>();
+    @Getter
+    private final Collection<Class<?>> replacedClasses = new HashSet<>();
+    private final Set<Class<? extends Annotation>> componentAnnotations;
+    private final Reflections reflections;
+    private final Collection<ConstructorWrapper> initialConstructorWrappers = new ConcurrentLinkedDeque<>();
+    private final Collection<ComponentWrapper> componentWrappers;
+    private final Vector<Object> components = new Vector<>();
+    private final AppContextImpl appContext = new AppContextImpl();
 
-    AppContextFactory(Set<Class<?>> singletonClasses,
-                      Set<Object> singletons,
+
+    AppContextFactory(Set<Class<?>> customComponentClasses,
+                      Set<Object> customComponents,
+                      Set<Class<? extends Annotation>> customProxyAnnotations,
                       Set<Class<? extends Annotation>> componentAnnotations,
                       Set<Class<? extends Annotation>> dependencyFieldAnnotations,
                       Set<Class<? extends Annotation>> initMethodAnnotations,
                       Set<Class<? extends Annotation>> beanMethodAnnotations,
                       Set<String> packagesToScan) {
-        var reflector = new ComponentClassReflector(singletonClasses, singletons, initMethodAnnotations, packagesToScan, beanMethodAnnotations, componentAnnotations, dependencyFieldAnnotations);// TODO builder
-        var reflectionResult = reflector.findComponentClasses();
-        var parameterFactory = new ParameterFactory(reflectionResult.getAllComponentClasses());
-        var fieldWrapperFactory = new FieldWrapperFactory(reflectionResult.getAllComponentClasses());
-        this.componentWrapperFactory = new ComponentWrapperFactory(parameterFactory, reflector, fieldWrapperFactory, this::onComponentCreated);
-        this.instantiatorFactory = new InstantiatorFactory(parameterFactory, reflector, this::onComponentCreated);
-        this.componentWrappers = createWrappers(singletons);
-        createConstructorInstantiators(reflectionResult.getClassesToInstantiate());
-    }
 
+        this.componentAnnotations = componentAnnotations;
 
-    public AppContext createContext() {
-        while (!executableInstantiators.isEmpty() && !executableMethods.isEmpty()) {
-            var active = runExecutableConstructorIntantiators();
-            active = active && runExecutableMethods();
-            if (!active) {
-                break;
-            }
-        }
-        runPostCheck();
-        return new AppContextImpl(components);
-    }
+        this.reflections = new Reflections(packagesToScan, new SubTypesScanner(),
+                new TypeAnnotationsScanner(),
+                new FieldAnnotationsScanner());
 
-    void onComponentCreated(Object o) {
-        components.add(o);
-        componentWrappers.add(createWrapper(o));
-        runComponentWrapperLoop(o);
-        runConstructorInstantiatorLoop(o);
-    }
+        var componentProducers = new HashSet<ComponentProducer>();
+        var componentConsumers = new HashSet<ComponentConsumer>();
+        var constructorWrapperCreator = new ConstructorWrapperCreator(dependencyFieldAnnotations,
+                initMethodAnnotations,
+                beanMethodAnnotations,
+                initialConstructorWrappers,
+                componentProducers,
+                componentConsumers,
+                this);
 
-    private boolean runExecutableConstructorIntantiators() {
-        var active = false;
-        var instantiator = executableInstantiators.poll();
-        while (instantiator != null) {
-            instantiator.createInstance();
-            instantiator = executableInstantiators.poll();
-            active = true;
-        }
-        return active;
-    }
+        var componentWrapperCreator = new ComponentWrapperCreator(dependencyFieldAnnotations,
+                initMethodAnnotations, beanMethodAnnotations,
+                componentConsumers,
+                this);
 
+        var proxyIntantiators = new ProxyIntantiatorCreator(reflections,
+                customProxyAnnotations,
+                componentProducers,
+                componentConsumers,
+                this);
 
-    private boolean runExecutableMethods() {
-        var active = false;
-        var methodWrapper = executableMethods.poll();
-        while (methodWrapper != null) {
-            var componentWrapper = methodWrapper.getComponentWrapper();
-            componentWrapper.removeExecutableMethod(methodWrapper);
-            methodWrapper.execute();
-            if (componentWrapper.isDone()) {
-                componentWrappers.remove(componentWrapper);
-            }
-            methodWrapper = executableMethods.poll();
-            active = true;
-        }
-        return active;
-    }
-
-    private void runComponentWrapperLoop(Object o) {
-        componentWrappers.forEach(componentWrapper -> {
-            componentWrapper.onComponentCreated(o);
-            if (componentWrapper.isDependencyFieldsInjected()) {
-                executableMethods.addAll(componentWrapper.removeExecutableMethods());
-            }
-            if (componentWrapper.isDone()) {
-                componentWrappers.remove(componentWrapper);
-            }
+        scanComponentClasses(constructorWrapperCreator, proxyIntantiators);
+        customComponentClasses.forEach(clazz -> {
+            constructorWrapperCreator.accept(clazz);
+            proxyIntantiators.accept(clazz);
         });
-    }
-
-    private void runConstructorInstantiatorLoop(Object o) {
-        for (var instantiator : instantiators) {
-            instantiator.onComponentCreated(o);
-            if (instantiator.isExecutable()) {
-                instantiators.remove(instantiator);
-                instantiator.createInstance();
+        customComponents.forEach(componentWrapperCreator);
+        customComponents.add(appContext);
+        this.componentWrappers = componentWrapperCreator.getComponentWrappers();
+        components.addAll(customComponents);
+        for (var consumer : componentConsumers) {
+            consumer.mapProducers(componentProducers);
+            consumer.mapInitialComponents(customComponents);
+            if (consumer instanceof ConstructorWrapper constructorWrapper) {
+                if (constructorWrapper.isPrepared() && !initialConstructorWrappers.contains(constructorWrapper)) {
+                    initialConstructorWrappers.add(constructorWrapper);
+                }
             }
         }
     }
 
-    private void createConstructorInstantiators(Collection<Class<?>> classes) {
-        for (var c : classes) {
-            var instantiator = instantiatorFactory.createComponentInstantiator(c);
-            instantiators.add(instantiator);
-            if (instantiator.isExecutable()) {
-                executableInstantiators.add(instantiator);
+
+    AppContext createContext() {
+        runInstiationLoop();
+        appContext.setSingletons(components);
+        return appContext;
+    }
+
+    void removeConstructorWrapper(ConstructorWrapper constructorWrapper) {
+        initialConstructorWrappers.remove(constructorWrapper);
+    }
+
+    private void runInstiationLoop() {
+        for (var constructorWrapper : initialConstructorWrappers) {
+            if (constructorWrapper.isPrepared()) {
+                removeConstructorWrapper(constructorWrapper);
+                constructorWrapper.execute();
             }
         }
     }
 
-    private Queue<ComponentWrapper> createWrappers(Collection<Object> components) {
-        return components.stream().map(this::createWrapper).collect(Collectors.toCollection(ConcurrentLinkedQueue::new));
+    private Collection<Class<?>> scanComponentClasses(Consumer<Class<?>>... consumers) {
+        return componentAnnotations.stream()
+                .map(reflections::getTypesAnnotatedWith)
+                .flatMap(Set::stream)
+                .peek(c -> Arrays.stream(consumers).forEach(consumer -> consumer.accept(c)))
+                .collect(Collectors.toSet());
     }
 
-    private ComponentWrapper createWrapper(Object component) {
-        return componentWrapperFactory.createComponentWrapper(component);
+    @Override
+    public void componentCreated(Object o, ComponentProducer producer) {
+        System.out.println("created " + o.getClass().getSimpleName());
+        if (!(o instanceof Empty)) {
+            components.add(o);
+            if (producer instanceof ConstructorWrapper constructorWrapper) {
+                componentWrappers.add(new ComponentWrapper(o, constructorWrapper, this));
+            }
+        }
     }
 
-    private void runPostCheck() {
-        // TODO
+    private static class ComponentWrapperCreator extends ComponentReflector implements Consumer<Object> {
+
+        @Getter
+        private final Queue<ComponentWrapper> componentWrappers = new ConcurrentLinkedDeque<>();
+        private final Collection<ComponentConsumer> componentConsumers;
+        private final AppContextFactory contextFactory;
+
+        public ComponentWrapperCreator(Set<Class<? extends Annotation>> dependencyFieldAnnotations,
+                                       Set<Class<? extends Annotation>> initMethodAnnotations,
+                                       Set<Class<? extends Annotation>> beanMethodAnnotations,
+                                       Collection<ComponentConsumer> componentConsumers,
+                                       AppContextFactory contextFactory) {
+            super(dependencyFieldAnnotations, initMethodAnnotations, beanMethodAnnotations, contextFactory);
+            this.componentConsumers = componentConsumers;
+            this.contextFactory = contextFactory;
+        }
+
+        @Override
+        public void accept(Object component) {
+            componentWrappers.add(componentWrapper(component));
+        }
+
+        private ComponentWrapper componentWrapper(Object component) {
+            var componentWrapper = new ComponentWrapper(component, contextFactory);
+            var placeholder = new ComponentWrapperPlaceholder(componentWrapper);
+            componentWrapper.setFieldWrappers(fieldWrappers(component.getClass(), placeholder));
+            componentWrapper.setInitMethods(initMethods(component.getClass(), placeholder));
+            componentWrapper.setBeanMethods(beanMethods(component.getClass(), placeholder));
+            componentConsumers.add(componentWrapper);
+            return componentWrapper;
+        }
+    }
+
+    private static class ConstructorWrapperCreator extends ComponentReflector implements Consumer<Class<?>> {
+
+        @Getter
+        private final Collection<ConstructorWrapper> initialContructors;
+
+        private final Collection<ComponentProducer> componentProducers;
+        private final Collection<ComponentConsumer> componentConsumers;
+
+        public ConstructorWrapperCreator(Set<Class<? extends Annotation>> dependencyFieldAnnotations,
+                                         Set<Class<? extends Annotation>> initMethodAnnotations,
+                                         Set<Class<? extends Annotation>> beanMethodAnnotations,
+                                         Collection<ConstructorWrapper> initialContructors,
+                                         Collection<ComponentProducer> componentProducers,
+                                         Collection<ComponentConsumer> componentConsumers,
+                                         AppContextFactory contextFactory) {
+            super(dependencyFieldAnnotations,
+                    initMethodAnnotations,
+                    beanMethodAnnotations,
+                    contextFactory);
+            this.componentProducers = componentProducers;
+            this.componentConsumers = componentConsumers;
+            this.initialContructors = initialContructors;
+        }
+
+        @Override
+        public void accept(Class<?> c) {
+            if (!c.isInterface() && !c.isAnnotation()) {
+                var placeholder = new ComponentWrapperPlaceholder();
+                var constructorWrapper = new ConstructorWrapper(ClassUtils.getAccessibleContructor(c).orElseThrow(), placeholder, contextFactory);
+                constructorWrapper.setFieldWrappers(fieldWrappers(c, placeholder));
+                constructorWrapper.setInitMethods(initMethods(c, placeholder));
+                constructorWrapper.setBeanMethods(beanMethods(c, placeholder));
+                componentProducers.add(constructorWrapper);
+                componentConsumers.add(constructorWrapper);
+                if (constructorWrapper.isPrepared()) {
+                    initialContructors.add(constructorWrapper);
+                }
+            }
+        }
     }
 
 
+    @RequiredArgsConstructor
+    private static class ComponentReflector {
+        private final Set<Class<? extends Annotation>> dependencyFieldAnnotations;
+        private final Set<Class<? extends Annotation>> initMethodAnnotations;
+        private final Set<Class<? extends Annotation>> beanMethodAnnotations;
+        protected final AppContextFactory contextFactory;
+
+        protected Collection<FieldWrapper> fieldWrappers(Class<?> c, ComponentWrapperPlaceholder placeholder) {
+            return FieldUtil.getAllFields(c).stream()
+                    .filter(this::isDependencyField)
+                    .map(field -> fieldWrapper(field, placeholder))
+                    .collect(Collectors.toCollection(ConcurrentLinkedDeque::new));
+        }
+
+        protected Collection<InitMethodWrapper> initMethods(Class<?> c, ComponentWrapperPlaceholder placeholder) {
+            return MethodUtils.allMethods(c).stream()
+                    .filter(this::isInitMethod)
+                    .map(method -> initMethodWrapper(method, placeholder))
+                    .collect(Collectors.toCollection(ConcurrentLinkedDeque::new));
+        }
+
+        protected Collection<BeanMethodWrapper> beanMethods(Class<?> c, ComponentWrapperPlaceholder placeholder) {
+            return MethodUtils.allMethods(c).stream()
+                    .filter(this::isBeanMethod)
+                    .map(method -> beanMethodWrapper(method, placeholder))
+                    .collect(Collectors.toCollection(ConcurrentLinkedDeque::new));
+        }
+
+        private BeanMethodWrapper beanMethodWrapper(Method method, ComponentWrapperPlaceholder placeholder) {
+            return new BeanMethodWrapper(method, placeholder, contextFactory);
+        }
+
+        private InitMethodWrapper initMethodWrapper(Method method, ComponentWrapperPlaceholder placeholder) {
+            return new InitMethodWrapper(method, placeholder);
+        }
+
+        private FieldWrapper fieldWrapper(Field field, ComponentWrapperPlaceholder placeholder) {
+            return new FieldWrapper(field, placeholder);
+        }
+
+        private boolean isDependencyField(Field field) {
+            return AnnotationUtils.hasAtLeasOneAnnotation(field, dependencyFieldAnnotations);
+        }
+
+        private boolean isInitMethod(Method method) {
+            return AnnotationUtils.hasAtLeasOneAnnotation(method, initMethodAnnotations);
+        }
+
+        private boolean isBeanMethod(Method method) {
+            return AnnotationUtils.hasAtLeasOneAnnotation(method, beanMethodAnnotations);
+        }
+    }
+
+
+    private static class ProxyIntantiatorCreator implements Consumer<Class<?>> {
+        private final Reflections reflections;
+        private final Collection<Class<? extends Annotation>> proxyAnnotations = new HashSet<>();
+        private final Collection<ComponentProducer> componentProducers;
+        private final Collection<ComponentConsumer> componentConsumers;
+        private final AppContextFactory contextFactory;
+        @Getter
+        private final Collection<ProxyInstantiator> proxyInstantiators = new HashSet<>();
+
+        ProxyIntantiatorCreator(Reflections reflections,
+                                Collection<Class<? extends Annotation>> customProxyAnnotations,
+                                Collection<ComponentProducer> componentProducers,
+                                Collection<ComponentConsumer> componentConsumers,
+                                AppContextFactory contextFactory) {
+            this.reflections = reflections;
+            this.componentProducers = componentProducers;
+            this.componentConsumers = componentConsumers;
+            this.proxyAnnotations.addAll(customProxyAnnotations);
+            this.proxyAnnotations.addAll(scanProxyAnnotations());
+            this.contextFactory = contextFactory;
+        }
+
+        @SuppressWarnings("unchecked")
+        private Set<Class<? extends Annotation>> scanProxyAnnotations() {
+            return reflections.getTypesAnnotatedWith(XISProxy.class)
+                    .stream().map(a -> (Class<? extends Annotation>) a).collect(Collectors.toSet());
+        }
+
+        private ProxyInstantiator proxyInstantiator(Class<?> interf) {
+            return new ProxyInstantiator((Class<Object>) interf, ProxyUtils.factoryClass(interf).orElseThrow(), contextFactory);
+        }
+
+        @Override
+        public void accept(Class<?> clazz) {
+            if (clazz.isInterface() && AnnotationUtils.hasAtLeasOneAnnotation(clazz, proxyAnnotations)) {
+                var instantiator = proxyInstantiator(clazz);
+                instantiator.addComponentCreationListener(contextFactory);
+                proxyInstantiators.add(instantiator);
+                componentProducers.add(instantiator);
+                componentConsumers.add(instantiator);
+            }
+        }
+    }
 }
+
+

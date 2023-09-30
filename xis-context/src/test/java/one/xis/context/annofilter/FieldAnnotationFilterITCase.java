@@ -3,8 +3,6 @@ package one.xis.context.annofilter;
 import one.xis.context.AppContext;
 import org.junit.jupiter.api.Test;
 
-import java.util.Set;
-
 import static one.xis.utils.lang.CollectionUtils.findElementOfType;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -16,7 +14,7 @@ class FieldAnnotationFilterITCase {
 
         AppContext appContext = AppContext.getInstance(getClass());
 
-        Set<Object> singletons = appContext.getSingletons();
+        var singletons = appContext.getSingletons();
 
         ComponentWithField componentWithField = findElementOfType(singletons, ComponentWithField.class);
         ComponentWithoutTestAnnotation componentWithoutTestAnnotation = findElementOfType(singletons, ComponentWithoutTestAnnotation.class);
