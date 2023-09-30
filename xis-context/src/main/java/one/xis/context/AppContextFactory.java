@@ -58,7 +58,9 @@ class AppContextFactory implements ComponentCreationListener {
                 this);
 
         var componentWrapperCreator = new ComponentWrapperCreator(dependencyFieldAnnotations,
-                initMethodAnnotations, beanMethodAnnotations,
+                initMethodAnnotations,
+                beanMethodAnnotations,
+                componentProducers,
                 componentConsumers,
                 this);
 
@@ -118,7 +120,6 @@ class AppContextFactory implements ComponentCreationListener {
 
     @Override
     public void componentCreated(Object o, ComponentProducer producer) {
-        System.out.println("created " + o.getClass().getSimpleName());
         if (!(o instanceof Empty)) {
             components.add(o);
             if (producer instanceof ConstructorWrapper constructorWrapper) {
@@ -137,9 +138,14 @@ class AppContextFactory implements ComponentCreationListener {
         public ComponentWrapperCreator(Set<Class<? extends Annotation>> dependencyFieldAnnotations,
                                        Set<Class<? extends Annotation>> initMethodAnnotations,
                                        Set<Class<? extends Annotation>> beanMethodAnnotations,
+                                       Collection<ComponentProducer> componentProducers,
                                        Collection<ComponentConsumer> componentConsumers,
                                        AppContextFactory contextFactory) {
-            super(dependencyFieldAnnotations, initMethodAnnotations, beanMethodAnnotations, contextFactory);
+            super(dependencyFieldAnnotations,
+                    initMethodAnnotations,
+                    beanMethodAnnotations,
+                    componentProducers,
+                    contextFactory);
             this.componentConsumers = componentConsumers;
             this.contextFactory = contextFactory;
         }
@@ -178,6 +184,7 @@ class AppContextFactory implements ComponentCreationListener {
             super(dependencyFieldAnnotations,
                     initMethodAnnotations,
                     beanMethodAnnotations,
+                    componentProducers,
                     contextFactory);
             this.componentProducers = componentProducers;
             this.componentConsumers = componentConsumers;
@@ -201,12 +208,12 @@ class AppContextFactory implements ComponentCreationListener {
         }
     }
 
-
     @RequiredArgsConstructor
     private static class ComponentReflector {
         private final Set<Class<? extends Annotation>> dependencyFieldAnnotations;
         private final Set<Class<? extends Annotation>> initMethodAnnotations;
         private final Set<Class<? extends Annotation>> beanMethodAnnotations;
+        private final Collection<ComponentProducer> componentProducers;
         protected final AppContextFactory contextFactory;
 
         protected Collection<FieldWrapper> fieldWrappers(Class<?> c, ComponentWrapperPlaceholder placeholder) {
@@ -231,7 +238,9 @@ class AppContextFactory implements ComponentCreationListener {
         }
 
         private BeanMethodWrapper beanMethodWrapper(Method method, ComponentWrapperPlaceholder placeholder) {
-            return new BeanMethodWrapper(method, placeholder, contextFactory);
+            var beanMethodWrapper = new BeanMethodWrapper(method, placeholder, contextFactory);
+            componentProducers.add(beanMethodWrapper);
+            return beanMethodWrapper;
         }
 
         private InitMethodWrapper initMethodWrapper(Method method, ComponentWrapperPlaceholder placeholder) {

@@ -1,4 +1,4 @@
-package one.xis.context.collectionfieldinject;
+package one.xis.context.simplefield;
 
 import one.xis.context.AppContext;
 import org.junit.jupiter.api.Test;
@@ -6,11 +6,10 @@ import org.junit.jupiter.api.Test;
 import static one.xis.utils.lang.CollectionUtils.findElementOfType;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class CollectionFieldInjectITCase {
-
+class SimpleFieldTest {
 
     @Test
-    void collectionField() {
+    void simpleFieldTest() {
 
         var singletons = AppContext.getInstance(getClass()).getSingletons();
 
@@ -22,11 +21,9 @@ class CollectionFieldInjectITCase {
         assertThat(comp2).isNotNull();
         assertThat(comp3).isNotNull();
 
-        assertThat(comp1.getField1()).containsExactlyInAnyOrder(comp2, comp3);
-
-        assertThat(comp1.getField2()).hasSize(2);
-        assertThat(comp1.getField2().contains(comp2)).isTrue();
-        assertThat(comp1.getField2().contains(comp3)).isTrue();
+        assertThat(comp1.getComp2()).isNotNull();
+        assertThat(comp2.getComp3()).isNotNull();
 
     }
+
 }

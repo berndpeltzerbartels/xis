@@ -1,25 +1,24 @@
-package one.xis.context.initmethod;
-
+package one.xis.context.all;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import one.xis.context.XISBean;
 import one.xis.context.XISComponent;
-import one.xis.context.XISInit;
 import one.xis.context.XISInject;
 
-@XISComponent
 @Getter
+@XISComponent
 @RequiredArgsConstructor
 class Comp1 {
+
     private final Comp3 comp3;
 
     @XISInject
     private Comp2 comp2;
 
-    private int result;
-
-    @XISInit
-    void init() {
-        result = comp2.getInt() + comp3.getInt();
+    @XISBean
+    Comp5 comp5(Comp4 comp4) {
+        return new Comp5(comp4);
     }
+
 }

@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class InitMethodITCase {
+class InitMethodTest {
 
     @Test
     @DisplayName("Init-method is executed when all fields are present")

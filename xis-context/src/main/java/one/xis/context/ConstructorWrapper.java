@@ -23,7 +23,6 @@ class ConstructorWrapper extends ExecutableWrapper<Constructor<?>> implements Co
 
     ConstructorWrapper(Constructor<?> constructor, ComponentWrapperPlaceholder componentWrapperPlaceholder, AppContextFactory factory) {
         super(constructor);
-        System.out.println("constructor: " + constructor.getDeclaringClass());
         this.constructor = constructor;
         this.componentWrapperPlaceholder = componentWrapperPlaceholder;
         contextFactory = factory;
