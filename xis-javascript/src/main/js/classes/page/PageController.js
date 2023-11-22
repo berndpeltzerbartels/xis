@@ -35,10 +35,11 @@ class PageController {
     }
 
     /**
-     * Should be used for any action 
-     * having a page-controller for target (instead of a widget).
-     * This occurs in case of the source 
-     * of the action has no parent widget-container.
+     * Should be used in case of the source 
+     * of the action has no parent widget-container
+     * and invoker has no data.
+     * 
+     * @see ActionLinkHandler
      * 
      * @public
      * @param {String} action
@@ -47,6 +48,24 @@ class PageController {
     submitAction(action) {
         var _this = this;
         return this.client.pageAction(this.resolvedURL, this.page.data, action)
+            .then(response => _this.handleActionResponse(response));
+    }
+
+    /**
+   * Should be used in case of the source 
+   * of the action has no parent widget-container
+   * and invoker has no data.
+   * 
+   * @see FormHandler
+   * 
+   * @public
+   * @param {String} action
+   * @param {Data} formData
+   * @returns {Promise<void>}
+   */
+    submitFormData(action, formData) {
+        var _this = this;
+        return this.client.pageFormAction(this.resolvedURL, formData, action)
             .then(response => _this.handleActionResponse(response));
     }
 

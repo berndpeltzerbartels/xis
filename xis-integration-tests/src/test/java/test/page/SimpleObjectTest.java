@@ -17,7 +17,7 @@ class SimpleObjectTest {
     @Nested
     @Disabled
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-    class CreateNeeTest {
+    class CreateNewObjectTest {
 
         private SimpleObjectService service;
         private Document document;

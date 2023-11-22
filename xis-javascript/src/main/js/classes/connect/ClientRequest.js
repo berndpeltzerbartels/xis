@@ -13,6 +13,7 @@ class ClientRequest {
 
     constructor() {
         this.data = {};
+        this.formData = {};
         this.clientId = '';
         this.userId = '';
         this.pageId = '';
