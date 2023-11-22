@@ -149,11 +149,16 @@ class HtmlResourceService {
     }
 
     private String getHtmlTemplatePath(Object controller) {
+        var path = new StringBuilder(controller.getClass().getPackageName().replace('.', '/')).append("/");
         if (controller.getClass().isAnnotationPresent(HtmlFile.class)) {
-            var path = controller.getClass().getPackageName() + "/" + controller.getClass().getAnnotation(HtmlFile.class).value();
-            return path.endsWith(".html") ? path : path + ".html";
+            path.append(controller.getClass().getAnnotation(HtmlFile.class).value());
+        } else {
+            path.append(controller.getClass().getSimpleName());
         }
-        return controller.getClass().getName().replace('.', '/') + ".html";
+        if (!path.toString().endsWith(".html")) {
+            path.append(".html");
+        }
+        return path.toString();
     }
 
     private Document createDocument(String xml) {

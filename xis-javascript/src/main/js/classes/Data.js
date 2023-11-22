@@ -34,6 +34,10 @@ class Data {
         return dataNode;
     }
 
+    /**
+     * @public
+     * @returns {Array<string>}
+     */
     getKeys() {
         return Object.keys(this.values);
     }

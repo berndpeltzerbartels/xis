@@ -22,7 +22,7 @@ class NodeCacheTest {
     @SuppressWarnings("unchecked")
     void sizeUp() throws ScriptException {
         var js = Javascript.getScript(CLASSES, FUNCTIONS, TEST, TEST_APP_INSTANCE);
-        js += "var cache = new NodeCache(nodeArray, new Initializer(new DomAccessor())); cache.sizeUp(3); [cache.getChildren(0), cache.getChildren(1), cache.getChildren(2)]";
+        js += "var cache = new ForEachNodeCache(nodeArray, new Initializer(new DomAccessor())); cache.sizeUp(3); [cache.getChildren(0), cache.getChildren(1), cache.getChildren(2)]";
         Map<String, Object> bindings = Map.of("nodeArray", new Node[]{new Element("a"), new Element("b")}, "document", Document.of("<html/>"));
 
         var result = JSUtil.execute(js, bindings).as(List.class);
@@ -81,7 +81,7 @@ class NodeCacheTest {
 
             var foreach1 = parentDivWithRepeat.parentNode;
             var script2 = Javascript.getScript(CLASSES, FUNCTIONS, TEST, TEST_APP_INSTANCE);
-            script2 += "var cache = new NodeCache(nodeListToArray(foreach1.childNodes), new Initializer(new DomAccessor())); ";
+            script2 += "var cache = new ForEachNodeCache(nodeListToArray(foreach1.childNodes), new Initializer(new DomAccessor())); ";
             script2 += "cache.sizeUp(3); ";
             script2 += "cache.cache;";
 

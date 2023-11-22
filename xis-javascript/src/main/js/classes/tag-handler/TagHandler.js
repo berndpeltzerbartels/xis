@@ -36,6 +36,20 @@ class TagHandler {
         return element;
     }
 
+    appendAttribute(attrName, appendValue) {
+        if (this.tag.getAttribute('xis:submit-onkeyup')) {
+            var attr = '';
+            if (element.getAttribute(attrName)) {
+                attr += element.getAttribute(attrName);
+                if (!trim(attr).endsWith(";")) {
+                    attr += ';'
+                }
+            }
+            attr += appendValue;
+            this.tag.setAttribute('onkeyup', attr);
+        }
+    }
+
     createExpression(src) {
         return new TextContentParser(src).parse();
     }
@@ -46,7 +60,6 @@ class TagHandler {
             return new TextContentParser(attr).parse();
         }
     }
-
 
     findParentWidgetContainer() {
         var e = this.tag;

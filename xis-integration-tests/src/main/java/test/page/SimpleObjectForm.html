@@ -1,29 +1,30 @@
 <!DOCTYPE html>
 <html xmlns:xis="http://xis.one/html">
 <head>
-    <title>FormPage</title>
+    <title>${title}</title>
 </head>
 <body>
-<form xis:data="formObject">
+<form xis:form-data="formObject">
     <div>
-        <input type="text" xis:binding="property1" id="value1"/>
-        <label for="value1">Property 1</label>
-
+        <input type="text" xis:binding="property1" id="field1"/>
+        <label for="field1">Property 1</label>
+        <div>${validation.messages['property1']}</div>
     </div>
 
     <div>
-        <input type="text" xis:binding="property2" id="value2"/>
-        <label for="value2">Property 2</label>
+        <input type="text" xis:binding="property2" id="field2"/>
+        <label for="field2">Property 2</label>
+        <div>${validation.messages['property1']}</div>
     </div>
 
     <div>
-        <button xis:action="save">Speichern</button>
+        <button xis:action="save" id="save">Speichern</button>
     </div>
 
 
     <div>
         <ul><a></a>
-            <li xis:repeat="message:errorMessages">${message}</li>
+            <li xis:repeat="message:validation.globalMessages">${message}</li>
         </ul>
     </div>
 </form>

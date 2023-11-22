@@ -21,6 +21,7 @@ public class Element extends Node {
     public Collection<Object> _attributes;
     public Consumer<Object> onclick;
     public String _widgetId;
+    public String value;
 
     public final int nodeType = 1;
     public final NodeList childNodes = new NodeList();

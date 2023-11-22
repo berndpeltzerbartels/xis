@@ -4,7 +4,7 @@ package test.page;
 import lombok.RequiredArgsConstructor;
 import one.xis.*;
 
-@Page("/simpleObject/new")
+@Page("/simpleObject/new.html")
 @HtmlFile("SimpleObjectForm.html")
 @RequiredArgsConstructor
 class SimpleObjectNewController {
@@ -13,7 +13,12 @@ class SimpleObjectNewController {
 
     @ModelData("formObject")
     SimpleObject simpleObject() {
-        return new SimpleObject();
+        return new SimpleObject(1, "Simple Object", "p1", "p2");
+    }
+
+    @ModelData("title")
+    String title() {
+        return "New Object";
     }
 
     @Action("save")

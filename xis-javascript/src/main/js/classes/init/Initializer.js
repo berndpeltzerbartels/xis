@@ -57,7 +57,15 @@ class Initializer {
         if (element.getAttribute('xis:widget-container')) {
             this.initializeWidgetContainerByAttribute(element);
         }
+        if (element.getAttribute('xis:binding')) {
+            this.initializeBinding(element);
+        }
         this.initializeAttributes(element);
+    }
+
+
+    initializeBinding(element) {
+
     }
 
     /**

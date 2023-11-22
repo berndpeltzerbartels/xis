@@ -26,7 +26,7 @@ class ParameterWidgetTest {
     }
 
     @Test
-    @DisplayName("Widget returns url-parameter for model and is diplayed in widget")
+    @DisplayName("Widget returns url-parameter for model and is displayed in widget")
     void urlParameter() {
         var result = testContext.openPage("/3/parameterWidgetPage.html?b=8");
 
@@ -36,7 +36,7 @@ class ParameterWidgetTest {
 
 
     @Test
-    @DisplayName("Widget returns path-variable for model and is diplayed in widget")
+    @DisplayName("Widget returns path-variable for model and is displayed in widget")
     void pathVariable() {
         var result = testContext.openPage("/3/parameterWidgetPage.html");
 

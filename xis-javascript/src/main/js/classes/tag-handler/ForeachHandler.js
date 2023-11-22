@@ -46,7 +46,7 @@ class ForeachHandler extends TagHandler {
 
     nodeCache() {
         if (!this.cache) {
-            this.cache = new NodeCache(nodeListToArray(this.tag.childNodes));
+            this.cache = new ForEachNodeCache(nodeListToArray(this.tag.childNodes));
         }
         return this.cache;
     }

@@ -6,7 +6,7 @@
  * @property {array<Node>} nodeArray
  * @property {array<array<Node>>} cache
  */
-class NodeCache {
+class ForEachNodeCache {
 
     /**
      * @param {array<Node>} nodeArray
