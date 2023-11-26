@@ -105,11 +105,12 @@ public class FrontendService {
     }
 
     private ServerResponse applyFilterChain(ClientRequest request, Function<ClientRequest, ServerResponse> responder) {
-        var chain = requestFilterChain.apply(request);
+        var validationResult = new ValidationResult();
+        var chain = requestFilterChain.apply(request, validationResult);
         if (chain.isInterrupt()) {
-            return new ServerResponse(chain.getHttpStatus(), dataSerializer.serialize(chain.getData()), null, null, new HashMap<>());
+            return new ServerResponse(chain.getHttpStatus(), dataSerializer.serialize(chain.getData()), null, null, new HashMap<>(), validationResult);
         }
         return responder.apply(request);
     }
-    
+
 }

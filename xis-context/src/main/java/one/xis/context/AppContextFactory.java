@@ -26,11 +26,10 @@ class AppContextFactory implements ComponentCreationListener {
     private final Collection<Class<?>> replacedClasses = new HashSet<>();
     private final Set<Class<? extends Annotation>> componentAnnotations;
     private final Reflections reflections;
-    private final Collection<ConstructorWrapper> initialConstructorWrappers = new ConcurrentLinkedDeque<>();
+    private final Collection<ConstructorWrapper> executableConstructorWrappers = new ConcurrentLinkedDeque<>();
     private final Collection<ComponentWrapper> componentWrappers;
     private final Vector<Object> components = new Vector<>();
     private final AppContextImpl appContext = new AppContextImpl();
-
 
     AppContextFactory(Set<Class<?>> customComponentClasses,
                       Set<Object> customComponents,
@@ -52,7 +51,7 @@ class AppContextFactory implements ComponentCreationListener {
         var constructorWrapperCreator = new ConstructorWrapperCreator(dependencyFieldAnnotations,
                 initMethodAnnotations,
                 beanMethodAnnotations,
-                initialConstructorWrappers,
+                executableConstructorWrappers,
                 componentProducers,
                 componentConsumers,
                 this);
@@ -83,8 +82,8 @@ class AppContextFactory implements ComponentCreationListener {
             consumer.mapProducers(componentProducers);
             consumer.mapInitialComponents(customComponents);
             if (consumer instanceof ConstructorWrapper constructorWrapper) {
-                if (constructorWrapper.isPrepared() && !initialConstructorWrappers.contains(constructorWrapper)) {
-                    initialConstructorWrappers.add(constructorWrapper);
+                if (constructorWrapper.isPrepared() && !executableConstructorWrappers.contains(constructorWrapper)) {
+                    executableConstructorWrappers.add(constructorWrapper);
                 }
             }
         }
@@ -94,15 +93,16 @@ class AppContextFactory implements ComponentCreationListener {
     AppContext createContext() {
         runInstiationLoop();
         appContext.setSingletons(components);
+        runPostCheck();
         return appContext;
     }
 
     void removeConstructorWrapper(ConstructorWrapper constructorWrapper) {
-        initialConstructorWrappers.remove(constructorWrapper);
+        executableConstructorWrappers.remove(constructorWrapper);
     }
 
     private void runInstiationLoop() {
-        for (var constructorWrapper : initialConstructorWrappers) {
+        for (var constructorWrapper : executableConstructorWrappers) {
             if (constructorWrapper.isPrepared()) {
                 removeConstructorWrapper(constructorWrapper);
                 constructorWrapper.execute();
@@ -126,6 +126,15 @@ class AppContextFactory implements ComponentCreationListener {
                 componentWrappers.add(new ComponentWrapper(o, constructorWrapper, this));
             }
         }
+    }
+
+    private void runPostCheck() {
+        componentWrapperPostCheck();
+        // TODO Creators below
+    }
+
+    private void componentWrapperPostCheck() {
+        componentWrappers.stream().map(ComponentWrapperPostCheck::new).forEach(ComponentWrapperPostCheck::postCheck);
     }
 
     private static class ComponentWrapperCreator extends ComponentReflector implements Consumer<Object> {
@@ -169,7 +178,7 @@ class AppContextFactory implements ComponentCreationListener {
     private static class ConstructorWrapperCreator extends ComponentReflector implements Consumer<Class<?>> {
 
         @Getter
-        private final Collection<ConstructorWrapper> initialContructors;
+        private final Collection<ConstructorWrapper> executableContructors;
 
         private final Collection<ComponentProducer> componentProducers;
         private final Collection<ComponentConsumer> componentConsumers;
@@ -177,7 +186,7 @@ class AppContextFactory implements ComponentCreationListener {
         public ConstructorWrapperCreator(Set<Class<? extends Annotation>> dependencyFieldAnnotations,
                                          Set<Class<? extends Annotation>> initMethodAnnotations,
                                          Set<Class<? extends Annotation>> beanMethodAnnotations,
-                                         Collection<ConstructorWrapper> initialContructors,
+                                         Collection<ConstructorWrapper> executableContructors,
                                          Collection<ComponentProducer> componentProducers,
                                          Collection<ComponentConsumer> componentConsumers,
                                          AppContextFactory contextFactory) {
@@ -188,7 +197,7 @@ class AppContextFactory implements ComponentCreationListener {
                     contextFactory);
             this.componentProducers = componentProducers;
             this.componentConsumers = componentConsumers;
-            this.initialContructors = initialContructors;
+            this.executableContructors = executableContructors;
         }
 
         @Override
@@ -202,7 +211,7 @@ class AppContextFactory implements ComponentCreationListener {
                 componentProducers.add(constructorWrapper);
                 componentConsumers.add(constructorWrapper);
                 if (constructorWrapper.isPrepared()) {
-                    initialContructors.add(constructorWrapper);
+                    executableContructors.add(constructorWrapper);
                 }
             }
         }

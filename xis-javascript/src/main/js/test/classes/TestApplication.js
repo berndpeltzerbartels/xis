@@ -16,6 +16,7 @@ class TestApplication {
 
 
     start() {
+        debugger;
         var head = getElementByTagName('head');
         var body = getElementByTagName('body');
         this.initializer.initializeHtmlElement(head);

@@ -23,10 +23,10 @@ public class RequestFilters {
                 .collect(Collectors.toList());
     }
 
-    RequestFilterChain apply(ClientRequest request) {
+    RequestFilterChain apply(ClientRequest request, ValidationResult validationResult) {
         var filterChain = new RequestFilterChain();
         for (var filter : sortedFilters) {
-            filter.doFilter(request, this);
+            filter.doFilter(request, validationResult, this);
             if (filterChain.isInterrupt()) {
                 return filterChain;
             }

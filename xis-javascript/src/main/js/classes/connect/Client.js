@@ -234,6 +234,7 @@ class Client {
         response.data = data;
         response.nextPageURL = obj.nextPageURL;
         response.nextWidgetId = obj.nextWidgetId;
+        data.setValue(['validation'], obj.validation);
         return response;
 
     }

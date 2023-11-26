@@ -1,0 +1,10 @@
+{
+    "configurations": [
+        {
+            "name": "Attach",
+            "type": "node",
+            "request": "attach",
+            "debugServer": 4242
+        }
+    ]
+}

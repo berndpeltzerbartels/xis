@@ -10,10 +10,10 @@ repositories {
 dependencies {
 
     // https://mvnrepository.com/artifact/org.graalvm.js/js-scriptengine
-    implementation 'org.graalvm.js:js-scriptengine:22.1.0'
-    implementation 'org.graalvm.sdk:graal-sdk:22.1.0'
-    implementation 'org.graalvm.truffle:truffle-api:22.1.0'
-    implementation 'org.graalvm.js:js:22.1.0'
+    implementation 'org.graalvm.js:js-scriptengine:23.0.1'
+    implementation 'org.graalvm.sdk:graal-sdk:23.0.1'
+    implementation 'org.graalvm.truffle:truffle-api:23.0.1'
+    implementation 'org.graalvm.js:js:23.0.1'
 
     annotationProcessor "org.projectlombok:lombok:1.18.26"
     implementation "org.projectlombok:lombok:1.18.26"

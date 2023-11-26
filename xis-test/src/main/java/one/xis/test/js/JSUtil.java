@@ -91,6 +91,7 @@ public class JSUtil {
                 .option("inspect", port)
                 .option("inspect.Secure", "false")
                 .option("inspect.Path", path)
+                .option("inspect.WaitAttached", "true")
                 .build();
         bindingMap.forEach(context.getBindings("js")::putMember);
         return context;

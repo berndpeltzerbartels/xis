@@ -9,7 +9,7 @@ class FormHandler extends TagHandler {
     constructor(formTag, client) {
         super(formTag)
         this.client = client;
-        this.actionElements = {};
+        this.action = formTag.getAttribute('xis:action');
         this.formData = new Data({});
         this.pathExpr = new TextContentParser().parse(this.getAttribute('form-data'));
         var _this = this;

@@ -24,11 +24,11 @@ abstract class ControllerService {
     private WidgetControllerWrappers widgetControllerWrappers;
 
     protected ServerResponse invokeGetWidgetModelMethods(int status, ControllerWrapper wrapper, ClientRequest request) {
-        return new ServerResponse(status, dataSerializer.serialize(wrapper.invokeGetModelMethods(request)), null, wrapper.getId(), new HashMap<>());
+        return new ServerResponse(status, dataSerializer.serialize(wrapper.invokeGetModelMethods(request)), null, wrapper.getId(), new HashMap<>(), new ValidationResult());
     }
 
     protected ServerResponse invokeGetPageModelMethods(int status, ControllerWrapper wrapper, ClientRequest request) {
-        return new ServerResponse(status, dataSerializer.serialize(wrapper.invokeGetModelMethods(request)), wrapper.getId(), null, new HashMap<>());
+        return new ServerResponse(status, dataSerializer.serialize(wrapper.invokeGetModelMethods(request)), wrapper.getId(), null, new HashMap<>(), new ValidationResult());
     }
 
     protected ControllerWrapper widgetControllerWrapperByClass(Class<?> controllerClass) {
@@ -42,11 +42,11 @@ abstract class ControllerService {
     }
 
     protected ServerResponse createPageResponse(ControllerMethodResult result, ControllerWrapper pageControllerWrapper) {
-        return new ServerResponse(200, dataSerializer.serialize(result.modelData()), pageControllerWrapper.getId(), null, emptyMap());
+        return new ServerResponse(200, dataSerializer.serialize(result.modelData()), pageControllerWrapper.getId(), null, emptyMap(), new ValidationResult());
     }
 
     protected ServerResponse createWidgetResponse(ControllerMethodResult result, ControllerWrapper widgetControllerWrapper) {
-        return new ServerResponse(200, dataSerializer.serialize(result.modelData()), null, widgetControllerWrapper.getId(), emptyMap());
+        return new ServerResponse(200, dataSerializer.serialize(result.modelData()), null, widgetControllerWrapper.getId(), emptyMap(), new ValidationResult());
     }
 
     protected ServerResponse processActionResult(ClientRequest request, PageResult pageResult) {
@@ -78,7 +78,7 @@ abstract class ControllerService {
 
     protected ServerResponse processPageResult(ClientRequest request, PageResult pageResult) {
         var controllerClass = pageResult.getControllerClass();
-        var controllerWrapper = widgetControllerWrapperByClass(controllerClass);
+        var controllerWrapper = pageControllerWrapperByClass(controllerClass);
         request.getPathVariables().putAll(pageResult.getPathVariables());
         request.getUrlParameters().putAll(pageResult.getUrlParameters());
         return invokeGetPageModelMethods(200, controllerWrapper, request);

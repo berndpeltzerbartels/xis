@@ -85,12 +85,7 @@ class ComponentWrapper implements ComponentConsumer, FieldHolder {
             beanMethodWrapper.execute(component);
         }
     }
-
-
-    boolean isDone() {
-        return fieldWrappers.isEmpty() && initMethods.isEmpty() && beanMethods.isEmpty();
-    }
-
+    
     @Override
     public String toString() {
         return "ComponentWrapper{" + component.getClass().getSimpleName() + "}";

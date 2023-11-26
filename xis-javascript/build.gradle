@@ -28,10 +28,10 @@ dependencies {
     testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.16.1'
     testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"
 
-    implementation 'org.graalvm.js:js-scriptengine:22.3.1'
-    implementation 'org.graalvm.truffle:truffle-api:22.3.1'
-    implementation 'org.graalvm.js:js:22.3.1'
-    implementation 'org.graalvm.tools:chromeinspector:22.3.1'
+    implementation 'org.graalvm.js:js-scriptengine:23.0.1'
+    implementation 'org.graalvm.truffle:truffle-api:23.0.1'
+    implementation 'org.graalvm.js:js:23.0.1'
+    implementation 'org.graalvm.tools:chromeinspector:23.0.1'
 }
 
 test {

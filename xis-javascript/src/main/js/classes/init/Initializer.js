@@ -90,7 +90,7 @@ class Initializer {
     * @param {Element} formElement 
     */
     initializeForm(formElement) {
-        // TODO
+        formElement._handler = new FormHandler(formElement);
     }
 
     /**

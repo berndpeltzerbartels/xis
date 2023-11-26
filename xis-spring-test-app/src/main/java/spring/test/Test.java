@@ -1,8 +1,6 @@
 package spring.test;
 
-import one.xis.Push;
-
-@Push(Index.class)
+//@Push(Index.class) TODO
 public interface Test {
 
     void add(int a, int b);
