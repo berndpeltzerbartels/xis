@@ -7,11 +7,13 @@ import one.xis.*;
 import one.xis.utils.lang.ClassUtils;
 import one.xis.utils.lang.CollectionUtils;
 
-import java.beans.PropertyEditorManager;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @lombok.Data
 @Slf4j
@@ -54,10 +56,10 @@ abstract class ControllerMethod {
                 args[i] = deserializeParameter(context.getUrlParameters().get(key), param);
             } else if (param.isAnnotationPresent(PathVariable.class)) {
                 var key = param.getAnnotation(PathVariable.class).value();
-                args[i] = deserializeJSON(context.getPathVariables().get(key), param);
+                args[i] = deserializeParameter(context.getPathVariables().get(key), param);
             } else if (param.isAnnotationPresent(WidgetParameter.class)) {
                 var key = param.getAnnotation(WidgetParameter.class).value();
-                args[i] = deserializeJSON(context.getWidgetParameters().get(key), param);
+                args[i] = deserializeParameter(context.getWidgetParameters().get(key), param);
             } else {
                 throw new IllegalStateException(method + ": parameter without annotation=" + param);
             }
@@ -79,20 +81,12 @@ abstract class ControllerMethod {
     private Object deserializeModelParameter(Parameter parameter, ClientRequest context) throws IOException {
         var key = parameter.getAnnotation(ModelData.class).value();
         var paramValue = context.getData().get(key);
-        return deserializeJSON(paramValue, parameter);
+        return deserializeParameter(paramValue, parameter);
     }
 
-    private Object deserializeParameter(Object paramValue, Parameter parameter) throws IOException {
-        if (parameter.getType().isInstance(paramValue)) {
-            return paramValue;
-        }
-        var editor = Objects.requireNonNull(PropertyEditorManager.findEditor(parameter.getType()), "unable to convert  " + paramValue + " to " + parameter.getType());
-        editor.setValue(paramValue);
-        return editor.getValue();
-    }
 
     @SuppressWarnings("unchecked")
-    private Object deserializeJSON(Object paramValue, Parameter parameter) throws IOException {
+    private Object deserializeParameter(String paramValue, Parameter parameter) throws IOException {
         if (paramValue == null) {
             if (parameter.getType().equals(Iterable.class)) {
                 return CollectionUtils.emptyInstance(List.class);
@@ -100,17 +94,10 @@ abstract class ControllerMethod {
                 return CollectionUtils.emptyInstance((Class<Collection<?>>) parameter.getType());
             }
             return null;
-        } else if (parameter.getType().isInstance(paramValue)) {
-            return paramValue;
         } else if (String.class.isAssignableFrom(parameter.getType())) {
             return paramValue;
-        } else if (paramValue instanceof String json) {
-            return parameterDeserializer.deserialze(json, parameter);
-        } else {
-            throw new IllegalArgumentException("paramValue: " + paramValue + " for " + parameter);
         }
-
-
+        return parameterDeserializer.deserialze(paramValue, parameter);
     }
 
 

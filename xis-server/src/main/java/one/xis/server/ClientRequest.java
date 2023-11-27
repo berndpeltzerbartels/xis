@@ -20,11 +20,11 @@ public class ClientRequest {
     private Map<String, String> parameters;
 
     @JsonDeserialize(using = MapDeserializer.class)
-    private Map<String, Object> pathVariables;
+    private Map<String, String> pathVariables;
 
     @JsonDeserialize(using = MapDeserializer.class)
-    private Map<String, Object> urlParameters;
+    private Map<String, String> urlParameters;
 
     @JsonDeserialize(using = MapDeserializer.class)
-    private Map<String, Object> widgetParameters;
+    private Map<String, String> widgetParameters;
 }
