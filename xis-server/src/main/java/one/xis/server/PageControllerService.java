@@ -20,7 +20,7 @@ class PageControllerService extends ControllerService {
         var invokerControllerWrapper = pageControllerWrapperById(request.getPageId());
         var result = invokerControllerWrapper.invokeActionMethod(request);
         if (result.returnValue() == null || result.returnValue() == Void.class || result.returnValue().equals(invokerControllerWrapper.getControllerClass())) {
-            return createPageResponse(result, invokerControllerWrapper);// Still the same controller
+            return createPageResponse(invokerControllerWrapper.invokeGetModelMethods(request), invokerControllerWrapper);// Still the same controller
         } else if (result.returnValue() instanceof WidgetResult widgetResult) {
             if (widgetResult.getTargetContainer() == null) { // TODO Client side code and test for this case
                 throw new IllegalStateException(invokerControllerWrapper.getControllerClass().getSimpleName() + ": widget-result of a page-controller must define a target-container");

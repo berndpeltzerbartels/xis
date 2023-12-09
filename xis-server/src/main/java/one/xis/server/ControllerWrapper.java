@@ -2,6 +2,7 @@ package one.xis.server;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import org.tinylog.Logger;
 
 import java.util.HashMap;
@@ -32,12 +33,12 @@ public class ControllerWrapper {
     }
 
     ControllerMethodResult invokeActionMethod(ClientRequest request) {
-        var method = actionMethods.get(request.getAction());
+        @NonNull var method = actionMethods.get(request.getAction());
         try {
             return method.invoke(request, controller);
         } catch (Exception e) {
             Logger.error(e, "Failed to invoke action-method");
-            throw new RuntimeException("Failed to invoke action-method" + method, e);
+            throw new RuntimeException("Failed to invoke action-method: " + method, e);
         }
     }
 

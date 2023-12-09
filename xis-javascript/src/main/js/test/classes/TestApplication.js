@@ -1,9 +1,7 @@
 class TestApplication {
 
     constructor() {
-        this.html = new PageHtml();
         this.httpClient = new HttpClientMock();
-        this.refresher = new Refresher();
         this.domAccessor = new DomAccessor();
         this.client = new Client(this.httpClient);
         this.pages = new Pages(this.client);
@@ -11,16 +9,12 @@ class TestApplication {
         this.widgetContainers = new WidgetContainers();
         this.widgets = new Widgets(this.client);
         this.initializer = new Initializer(this.domAccessor, this.client, this.widgets, this.widgetContainers);
-        this.pageController = new PageController(this.client, this.pages, this.initializer, this.urlResolver, this.html);
+        this.pageController = new PageController(this.client, this.pages, this.initializer, this.urlResolver);
     }
 
 
     start() {
-        debugger;
-        var head = getElementByTagName('head');
-        var body = getElementByTagName('body');
-        this.initializer.initializeHtmlElement(head);
-        this.initializer.initializeHtmlElement(body);
+        // Noop
     }
 
     openPage(uri) {
@@ -42,7 +36,6 @@ class TestApplication {
     }
 
     reset() {
-        this.html.reset();
         this.pageController.reset();
         this.pages.reset();
         this.widgets.reset();

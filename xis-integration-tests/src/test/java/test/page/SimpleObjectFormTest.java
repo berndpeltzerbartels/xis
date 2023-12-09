@@ -2,6 +2,7 @@ package test.page;
 
 import one.xis.context.IntegrationTestContext;
 import one.xis.test.dom.Document;
+import one.xis.test.js.Event;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -45,7 +46,7 @@ class SimpleObjectFormTest {
 
             document.getElementById("field1").value = "v1";
             document.getElementById("field2").value = "v2";
-            document.getElementById("save").onclick.accept(null);
+            document.getElementById("save").onclick.accept(new Event());
 
             var captor = ArgumentCaptor.forClass(SimpleObject.class);
             verify(service).save(captor.capture());

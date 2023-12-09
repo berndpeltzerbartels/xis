@@ -108,7 +108,6 @@ function createElement(name) {
 }
 
 
-
 function initializeElement(element) {
     app.initializer.initialize(element);
 }
@@ -121,7 +120,11 @@ function assertNotNull(o, errorText) {
 
 
 function refreshNode(node, data) {
-    app.refresher.refreshNode(node, data);
+    if (node._rootHandler) {
+        node._rootHandler.refresh(data);
+    } else if (node._handler) {
+        node._handler.refresh(data);
+    }
 }
 
 /**

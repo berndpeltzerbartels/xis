@@ -18,7 +18,7 @@ class WidgetControllerService extends ControllerService {
         var invokerControllerWrapper = widgetControllerWrapperById(request.getWidgetId());
         var result = invokerControllerWrapper.invokeActionMethod(request);
         if (result.returnValue() == null || result.returnValue() == Void.class || result.returnValue().equals(invokerControllerWrapper.getControllerClass())) {
-            return createWidgetResponse(result, invokerControllerWrapper);// Still the same controller
+            return createWidgetResponse(invokerControllerWrapper.invokeGetModelMethods(request), invokerControllerWrapper);// Still the same controller
         } else if (result.returnValue() instanceof WidgetResult widgetResult) {
             return processActionResult(request, widgetResult);
         } else if (result.returnValue() instanceof PageResult pageResult) {

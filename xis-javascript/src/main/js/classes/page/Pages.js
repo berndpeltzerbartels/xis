@@ -60,10 +60,11 @@ class Pages {
             initializeElement(templateElement);
             var headChildArray = nodeListToArray(templateElement.childNodes);
             var titleElement = headChildArray.find(child => isElement(child) && child.localName == 'title');
+            var page = _this.pages[pageId];
             if (titleElement) {
-                _this.pages[pageId].titleExpression = new TextContentParser(titleElement.innerText).parse();
+                page.titleExpression = new TextContentParser(titleElement.innerText).parse();
             }
-            _this.pages[pageId].headChildArray = headChildArray;
+            page.headTemplate = templateElement;
             return pageId;
         });
     }
@@ -78,7 +79,8 @@ class Pages {
         return this.client.loadPageBody(pageId).then(content => {
             var templateElement = htmlToElement(content);
             initializeElement(templateElement);
-            _this.pages[pageId].bodyChildArray = nodeListToArray(templateElement.childNodes);
+            var page = _this.pages[pageId];
+            page.bodyTemplate = templateElement;
             return pageId;
         });
     }

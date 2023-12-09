@@ -34,7 +34,7 @@ class FormHandler extends TagHandler {
         var path = doSplit(formDataPath, '.');
         this.actionElements = {};
         this.formData = new Data(data.getValue(path));
-        this.refreshChildNodes(data);
+        this.refreshDescendantHandlers(data);
     }
 
 

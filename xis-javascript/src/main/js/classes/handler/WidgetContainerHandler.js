@@ -38,7 +38,7 @@ class WidgetContainerHandler extends TagHandler {
         var data = response.data;
         this.widgetState.data = data;
         this.refreshContainerId(data);
-        this.refreshChildNodes(data);
+        this.refreshDescendantHandlers(data);
     }
 
     /**
@@ -47,7 +47,7 @@ class WidgetContainerHandler extends TagHandler {
      */
     refresh(data) {
         this.refreshContainerId(data);
-        this.refreshDefaultWidget(data);
+        this.bindDefaultWidgetInitial(data);
         var widgetParameters = this.widgetState ? this.widgetState.widgetParameters : {};
         this.widgetState = new WidgetState(app.pageController.resolvedURL, widgetParameters);
         if (this.widgetInstance) {
@@ -90,7 +90,7 @@ class WidgetContainerHandler extends TagHandler {
      * @private
      * @param {Data} parentData 
      */
-    refreshDefaultWidget(parentData) {
+    bindDefaultWidgetInitial(parentData) {
         if (this.defaultWidgetExpression && !this.widgetInstance) { // once, only
             var widgetUrl = this.defaultWidgetExpression.evaluate(parentData);
             var widgetParameters = urlParameters(widgetUrl);
@@ -111,10 +111,12 @@ class WidgetContainerHandler extends TagHandler {
             } else {
                 this.clearChildren();
                 this.widgetInstance.dispose();
+                this.descendantHandlers = [];
             }
         }
         this.widgetInstance = assertNotNull(this.widgets.getWidgetInstance(widgetId), 'no such widget: ' + widgetId);
         this.tag.appendChild(this.widgetInstance.root);
+        this.addDescendantHandler(this.widgetInstance.root._rootHandler);
     }
 
     /**
@@ -131,7 +133,7 @@ class WidgetContainerHandler extends TagHandler {
                 .then(data => { data.setValue(['pathVariables'], resolvedURL.pathVariablesAsMap()); return data; })
                 .then(data => { data.setValue(['widgetParameters'], _this.widgetState.widgetParameters); return data; })
                 .then(data => { _this.widgetState.data = data; return data; })
-                .then(data => _this.refreshChildNodes(data))
+                .then(data => _this.refreshDescendantHandlers(data))
                 .catch(e => console.error(e));
         }
     }

@@ -1,6 +1,7 @@
 package test.page;
 
 import one.xis.context.IntegrationTestContext;
+import one.xis.test.js.Event;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -28,13 +29,13 @@ class ActionLinkPageTest {
     @Test
     void action1() {
         var result = testContext.openPage("/actionPage.html");
-        result.getDocument().getElementById("action-link1").onclick.accept(null);
-
+        System.out.println(result.getDocument().asString());
+        result.getDocument().getElementById("action-link1").onclick.accept(new Event());
         assertThat(result.getDocument().getElementByTagName("title").innerText).isEqualTo("ActionPage");
-        verify(service).getData();
+        verify(service, times(2)).getData();
 
         var captor = ArgumentCaptor.forClass(ActionLinkPageData.class);
-        verify(service, times(1)).update(captor.capture());
+        verify(service).update(captor.capture());
         assertThat(captor.getValue().getId()).isEqualTo(101);
         assertThat(captor.getValue().getValue()).isEqualTo("bla");
         assertThat(result.getDocument().getElementByTagName("title").innerText).isEqualTo("ActionPage");
@@ -46,10 +47,10 @@ class ActionLinkPageTest {
     void action2() {
         var result = testContext.openPage("/actionPage.html");
         assertThat(result.getDocument().getElementByTagName("title").innerText).isEqualTo("ActionPage");
-        result.getDocument().getElementById("action-link2").onclick.accept(null);
+        result.getDocument().getElementById("action-link2").onclick.accept(new Event());
 
         assertThat(result.getDocument().getElementByTagName("title").innerText).isEqualTo("ActionPage");
-        verify(service).getData();
+        verify(service, times(2)).getData();
         var captor = ArgumentCaptor.forClass(ActionLinkPageData.class);
         verify(service, times(1)).update(captor.capture());
         assertThat(captor.getValue().getId()).isEqualTo(101);
@@ -60,7 +61,7 @@ class ActionLinkPageTest {
     @Test
     void action3() {
         var result = testContext.openPage("/actionPage.html");
-        result.getDocument().getElementById("action-link3").onclick.accept(null); // "action-link3" is set by model variable "action3"
+        result.getDocument().getElementById("action-link3").onclick.accept(new Event()); // "action-link3" is set by model variable "action3"
 
 
         verify(service).getData(); // once, because a new page was loaded after action

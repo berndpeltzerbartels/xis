@@ -1,0 +1,11 @@
+class RootTagHandler extends TagHandler {
+    constructor(tag) {
+        super(tag);
+        this.type = 'root-handler';
+    }
+
+    refresh(data) {
+        this.refreshDescendantHandlers(data);
+    }
+
+}

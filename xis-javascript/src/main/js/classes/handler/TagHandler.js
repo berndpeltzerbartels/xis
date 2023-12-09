@@ -2,24 +2,43 @@ class TagHandler {
 
     constructor(tag) {
         this.tag = tag;
+        this.descendantHandlers = [];
         this.priority = 'normal';
+    }
+
+    addDescendantHandler(handler) {
+        this.descendantHandlers.push(handler);
+    }
+
+    removeDescendantHandler(handler) {
+        this.descendantHandlers = this.descendantHandlers.filter(h => h != handler);
     }
 
     refresh(data) {
         throw new Error('abstract method');
     }
 
-
-    refreshChildNodes(data) {
-        app.refresher.refreshChildNodes(this.tag, data);
+    /**
+     * Refreshes descendant handlers.
+     * 
+     * @param {Data} data 
+     */
+    refreshDescendantHandlers(data) {
+        for (var handler of this.descendantHandlers) {
+            handler.refresh(data);
+        }
     }
 
     clearChildren() {
         for (var node of this.nodeListToArray(this.tag.childNodes)) {
+            if (node.getAttribute && node.getAttribute('ignore')) {
+                continue;
+            }
             if (node.parentNode) {
                 node.parentNode.removeChild(node);
             }
         }
+        this.descendantHandlers = [];
     }
 
     findParentHtmlElement() {

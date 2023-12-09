@@ -41,6 +41,10 @@ public class TextNode extends Node {
     @SuppressWarnings("unused")
     public void setNodeValue(Object nodeValue) {
         this.nodeValue = nodeValue;
-        parentNode.textContentChanged();
+        parentNode.textNodeChanged();
+    }
+
+    public void nodeValueChanged() {
+        parentNode.textNodeChanged();
     }
 }

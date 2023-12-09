@@ -15,10 +15,6 @@ class ActionLinkHandler extends TagHandler {
         this.actionExpression = this.expressionFromAttribute('xis:action'); // mandatory
         this.action = undefined;
         this.data = new Data({});
-        element.onclick = e => this.onClick(e);
-        if (element.localName == 'a') {
-            element.setAttribute('href', '#');
-        }
     }
 
     /**

@@ -5,6 +5,7 @@
  *
  * @property {array<Node>} nodeArray
  * @property {array<array<Node>>} cache
+ * @property {ForeachHandler} cache
  */
 class ForEachNodeCache {
 
@@ -13,7 +14,10 @@ class ForEachNodeCache {
      */
     constructor(nodeArray) {
         this.nodeArray = nodeArray;
-        this.cache = [nodeArray];
+        this.nodeCache = [nodeArray];
+        for (var node of nodeArray) {
+            this.initialize(node);
+        }
     }
 
     /**
@@ -21,8 +25,8 @@ class ForEachNodeCache {
      * @param {Number} size
      */
     sizeUp(size) {
-        while (this.cache.length < size) {
-            this.cache.push(this.cloneChildNodes());
+        while (this.nodeCache.length < size) {
+            this.nodeCache.push(this.cloneChildNodes());
         }
     }
 
@@ -31,19 +35,20 @@ class ForEachNodeCache {
     * @param {Number} length
     */
     get length() {
-        return this.cache.length;
+        return this.nodeCache.length;
     }
 
     /**
-     *
+     * @public
      * @param {Number} index
      * @returns {array<Node>}
      */
     getChildren(index) {
-        return this.cache[index];
+        return this.nodeCache[index];
     }
 
     /**
+     * @private
      * @param {Node} node
      * @returns {array<Node>}
      */
@@ -51,12 +56,17 @@ class ForEachNodeCache {
         var clones = [];
         for (var node of this.nodeArray) {
             var clone = this.cloneNode(node);
-            app.initializer.initialize(clone);
+            this.initialize(clone);
             clones.push(clone);
         }
         return clones;
     }
 
+    /**
+     * @private
+     * @param {Node} node 
+     * @returns {Node} 
+     */
     cloneNode(node) {
         if (isElement(node)) {
             return this.cloneElement(node);
@@ -66,7 +76,7 @@ class ForEachNodeCache {
     }
 
     /**
-     * 
+     * @private
      * @param {Element} element 
      */
     cloneElement(element) {
@@ -81,8 +91,21 @@ class ForEachNodeCache {
         return clone;
     }
 
+    /**
+     * @private
+     * @param {Node} node 
+     * @returns 
+     */
     cloneTextNode(node) {
         return document.createTextNode(node.nodeValue);
+    }
+
+    /**
+     * @private
+     * @param {Node} node 
+     */
+    initialize(node) {
+        app.initializer.initialize(node, null)
     }
 }
 

@@ -88,6 +88,7 @@ public class JSUtil {
                 .allowHostClassLookup(c -> true)
                 .allowPolyglotAccess(PolyglotAccess.ALL)
                 .allowNativeAccess(true)
+                .allowAllAccess(true)
                 .option("inspect", port)
                 .option("inspect.Secure", "false")
                 .option("inspect.Path", path)
@@ -106,6 +107,7 @@ public class JSUtil {
                 .allowHostClassLookup(c -> true)
                 .allowPolyglotAccess(PolyglotAccess.ALL)
                 .allowNativeAccess(true)
+                .allowAllAccess(true)
                 .build();
         bindingMap.forEach(context.getBindings("js")::putMember);
         return context;

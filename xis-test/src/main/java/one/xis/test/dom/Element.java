@@ -11,6 +11,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Getter
+@SuppressWarnings("unused")
 public class Element extends Node {
 
     // TODO interface, not everyrhing here should be accesssible
@@ -18,8 +19,10 @@ public class Element extends Node {
     public Node firstChild;
     public String innerText;
     public Object _handler;
+    public Object _rootHandler;
     public Collection<Object> _attributes;
-    public Consumer<Object> onclick;
+    public Consumer<Object> onclick = o -> {
+    };
     public String _widgetId;
     public String value;
 
@@ -36,6 +39,7 @@ public class Element extends Node {
         return attributes.get("id");
     }
 
+
     public void appendChild(@NonNull Node node) {
         node.setNextSibling(null);
         if (firstChild == null) {
@@ -51,7 +55,7 @@ public class Element extends Node {
         node.parentNode = this;
         updateChildNodes();
         if (node instanceof TextNode) {
-            textContentChanged();
+            textNodeChanged();
         }
     }
 
@@ -61,6 +65,7 @@ public class Element extends Node {
         }
         referenceNode.insertPreviousSibling(node);
         updateChildNodes();
+        textNodeChanged();
     }
 
     public void removeChild(Node node) {
@@ -68,6 +73,9 @@ public class Element extends Node {
             throw new IllegalStateException("not a child");
         }
         node.remove();
+        if (node instanceof TextNode) {
+            textNodeChanged();
+        }
     }
 
     public List<String> getAttributeNames() {
@@ -85,11 +93,16 @@ public class Element extends Node {
         }
     }
 
+    public boolean hasChildNodes() {
+        return childNodes.length > 0;
+    }
+
     public void setInnerText(String text) {
         innerText = text;
         this.childNodes.clear();
         this.setFirstChild(null);
         this.appendChild(new TextNode(text));
+        textNodeChanged();
     }
 
     public void removeAttribute(String name) {
@@ -139,7 +152,7 @@ public class Element extends Node {
         return elementList.get(index);
     }
 
-    public List<Element> findDescants(Predicate<Element> predicate) {
+    public List<Element> findDescendants(Predicate<Element> predicate) {
         var result = new ArrayList<Element>();
         for (var child : this.getChildElements()) {
             child.findElements(predicate, result);
@@ -147,8 +160,8 @@ public class Element extends Node {
         return result;
     }
 
-    public Element findDescant(Predicate<Element> predicate) {
-        var result = new ArrayList<>(findDescants(predicate));
+    public Element findDescendant(Predicate<Element> predicate) {
+        var result = new ArrayList<>(findDescendants(predicate));
         return switch (result.size()) {
             case 0 -> throw new NoSuchElementException();
             case 1 -> result.get(0);
@@ -280,7 +293,13 @@ public class Element extends Node {
         return result;
     }
 
-    void textContentChanged() {
+    public void innerTextChanged() {
+        this.childNodes.clear();
+        this.firstChild = null;
+        this.appendChild(new TextNode(innerText));
+    }
+
+    void textNodeChanged() {
         innerText = innerText();
     }
 

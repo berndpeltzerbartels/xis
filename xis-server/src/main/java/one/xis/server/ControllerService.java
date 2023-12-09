@@ -8,6 +8,7 @@ import one.xis.WidgetResult;
 import one.xis.context.XISInject;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import static java.util.Collections.emptyMap;
 
@@ -41,12 +42,12 @@ abstract class ControllerService {
                 .orElseThrow(() -> new IllegalStateException("not a widget-controller:" + id));
     }
 
-    protected ServerResponse createPageResponse(ControllerMethodResult result, ControllerWrapper pageControllerWrapper) {
-        return new ServerResponse(200, dataSerializer.serialize(result.modelData()), pageControllerWrapper.getId(), null, emptyMap(), new ValidationResult());
+    protected ServerResponse createPageResponse(Map<String, Object> modelData, ControllerWrapper pageControllerWrapper) {
+        return new ServerResponse(200, dataSerializer.serialize(modelData), pageControllerWrapper.getId(), null, emptyMap(), new ValidationResult());
     }
 
-    protected ServerResponse createWidgetResponse(ControllerMethodResult result, ControllerWrapper widgetControllerWrapper) {
-        return new ServerResponse(200, dataSerializer.serialize(result.modelData()), null, widgetControllerWrapper.getId(), emptyMap(), new ValidationResult());
+    protected ServerResponse createWidgetResponse(Map<String, Object> modelData, ControllerWrapper widgetControllerWrapper) {
+        return new ServerResponse(200, dataSerializer.serialize(modelData), null, widgetControllerWrapper.getId(), emptyMap(), new ValidationResult());
     }
 
     protected ServerResponse processActionResult(ClientRequest request, PageResult pageResult) {

@@ -15,10 +15,6 @@ class LinkHandler extends TagHandler {
         if (!this.targetContainerExpression) {
             this.parentWidgetContainer = this.findParentWidgetContainer();
         }
-        if (element.localName == 'a') {
-            element.setAttribute('href', '#');
-        }
-        element.onclick = e => { this.onClick(e).catch(e => console.error(e)); };
     }
 
     /**

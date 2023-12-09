@@ -1,6 +1,7 @@
 package test.widget;
 
 import one.xis.context.IntegrationTestContext;
+import one.xis.test.js.Event;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,9 +35,9 @@ class ActionLinkWidgetTest {
     @Test
     void action1() {
         var result = testContext.openPage(WidgetPage.class);
-        result.getDocument().getElementById("action-link1").onclick.accept(null);
+        result.getDocument().getElementById("action-link1").onclick.accept(new Event());
 
-        verify(service).getData();
+        verify(service, times(2)).getData();
 
         var captor = ArgumentCaptor.forClass(ActionLinkWidgetData.class);
         verify(service, times(1)).update(captor.capture());
@@ -49,9 +50,9 @@ class ActionLinkWidgetTest {
     @Test
     void action2() {
         var result = testContext.openPage(WidgetPage.class);
-        result.getDocument().getElementById("action-link2").onclick.accept(null);
+        result.getDocument().getElementById("action-link2").onclick.accept(new Event());
 
-        verify(service).getData();
+        verify(service, times(2)).getData();
         var captor = ArgumentCaptor.forClass(ActionLinkWidgetData.class);
         verify(service, times(1)).update(captor.capture());
         assertThat(captor.getValue().getId()).isEqualTo(101);
@@ -62,7 +63,7 @@ class ActionLinkWidgetTest {
     @DisplayName("Action is a variable and link of a widget is clicked, but the result demands displaying a new page")
     void action3() {
         var result = testContext.openPage(WidgetPage.class);
-        result.getDocument().getElementById("action-link3").onclick.accept(null); // "action-link3"is set by model variable "action3"
+        result.getDocument().getElementById("action-link3").onclick.accept(new Event()); // "action-link3"is set by model variable "action3"
 
 
         verify(service, times(1)).getData(); // once, because a new page was loaded after action
@@ -80,7 +81,7 @@ class ActionLinkWidgetTest {
     @DisplayName("Action is a variable and link of a widget is clicked and demands displaying another widget")
     void action4() {
         var result = testContext.openPage(WidgetPage.class);
-        result.getDocument().getElementById("action-link4").onclick.accept(null); // "action-link3"is set by model variable "action3"
+        result.getDocument().getElementById("action-link4").onclick.accept(new Event()); // "action-link3"is set by model variable "action3"
 
         assertThat(result.getDocument().getElementById("greeting").innerText).isEqualTo("Huhu !");
 

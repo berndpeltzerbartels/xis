@@ -6,7 +6,7 @@
  * @property {Initializer} initializer
  * @property {URLResolver} urlResolver
  * @property {Page} page
- * @property {PageHtml} html
+ * @property {HtmlTagHandler} html
  * @property {ClientConfig} config
  * @property {ResolvedURL} resolvedURL
  * 
@@ -21,14 +21,13 @@ class PageController {
      * @param {Pages} pages
      * @param {Initializer} initializer
      * @param {URLResolver} urlResolver
-     * @param {PageHtml} html
      */
-    constructor(client, pages, initializer, urlResolver, html) {
+    constructor(client, pages, initializer, urlResolver) {
         this.client = client;
         this.pages = pages;
         this.initializer = initializer;
         this.urlResolver = urlResolver;
-        this.html = html;
+        this.htmlTagHandler = new HtmlTagHandler();
         this.page = undefined;
         this.resolvedURL = undefined;
         this.config = undefined;
@@ -84,15 +83,17 @@ class PageController {
             this.resolvedURL = resolvedURL;
             if (resolvedURL.page != this.page) {
                 this.page = resolvedURL.page;
-                this.html.bindPage(resolvedURL.page);
+                this.htmlTagHandler.bindPage(resolvedURL.page);
             }
         }
         var data = response.data;
         data.setValue(['pathVariables'], resolvedURL.pathVariablesAsMap());
         data.setValue(['urlParameters'], resolvedURL.urlParameters);
         this.page.data = data;
-        this.html.refresh(this.page.data, this.resolvedURL);
+        this.htmlTagHandler.refresh(this.page.data);
+        this.updateHistory(this.resolvedURL);
     }
+
 
     getData() {
         return this.page ? this.page.data : undefined;
@@ -111,7 +112,7 @@ class PageController {
             this.resolvedURL = this.welcomePageUrl();
         }
         if (this.resolvedURL.page != this.page) {
-            this.html.bindPage(this.resolvedURL.page);
+            this.htmlTagHandler.bindPage(this.resolvedURL.page);
         }
         this.page = this.resolvedURL.page;
         this.refreshCurrentPage().catch(e => console.error(e));
@@ -147,6 +148,7 @@ class PageController {
      * @public
      */
     reset() {
+        this.htmlTagHandler.reset();
         this.page = undefined;
         this.resolvedURL = undefined;
         this.config = undefined;
@@ -166,7 +168,7 @@ class PageController {
             data.setValue(['pathVariables'], this.resolvedURL.pathVariablesAsMap());
             data.setValue(['urlParameters'], this.resolvedURL.urlParameters);
             this.page.data = data;
-            _this.html.refresh(data, this.resolvedURL);
+            _this.htmlTagHandler.refresh(data);
         });
     }
 
@@ -181,5 +183,16 @@ class PageController {
         var path = new Path(new PathElement({ type: 'static', content: welcomePage.normalizedPath }));
         return new ResolvedURL(path, [], {}, welcomePage);
     }
+
+    /**
+     * Updates value displayed in browser's address-input.
+     * @param {ResolvedURL} resolvedURL
+     * @private
+     */
+    updateHistory(resolvedURL) {
+        var title = this.htmlTagHandler.getTitle();
+        window.history.replaceState({}, title, resolvedURL.url);
+    }
+
 
 }

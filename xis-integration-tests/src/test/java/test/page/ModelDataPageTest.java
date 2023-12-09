@@ -1,6 +1,7 @@
 package test.page;
 
 import one.xis.context.IntegrationTestContext;
+import one.xis.test.js.Event;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -47,11 +48,11 @@ class ModelDataPageTest {
         assertThat(doc.getElementById("id").innerText).isEqualTo("1");
         assertThat(doc.getElementById("value").innerText).isEqualTo("Hello");
 
-        doc.getElementById("link").onclick.accept(null); // Go to LinkPage
+        doc.getElementById("link").onclick.accept(new Event()); // Go to LinkPage
         // Check link-page is displayed
         assertThat(doc.getElementByTagName("title").innerText).isEqualTo("LinkPage");
 
-        doc.getElementById("page-link").onclick.accept(null); // Back to ModelPage
+        doc.getElementById("page-link").onclick.accept(new Event()); // Back to ModelPage
         // Check we are back
         assertThat(doc.getElementByTagName("title").innerText).isEqualTo("Model");
 

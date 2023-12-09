@@ -2,12 +2,13 @@
  * @typedef Page
  * @property {string} normalizedPath
  * @property {string} title
- * @property {array<Element>} headChildArray
- * @property {array<Element>} bodyChildArray
+ * @property {Element} headTemplate
+ * @property {Element} bodyTemplate
  * @property {{string: string}} bodyAttributes
  * @property {PageAttributes} pageAttributes
  * @property {TextContent} titleExpression
  * @property {Data} data
+ * @property {RootTagHandler} rootTagHandler;
  */
 
 class Page {
@@ -21,8 +22,8 @@ class Page {
         this.normalizedPath = normalizedPath;
         this.pageAttributes = pageAttributes;
         this.titleExpression = undefined;
-        this.headChildArray = [];
-        this.bodyChildArray = [];
+        this.headTemplate = undefined;
+        this.bodyTemplate = undefined;
         this.bodyAttributes = {};
         this.data = new Data({});
     }
