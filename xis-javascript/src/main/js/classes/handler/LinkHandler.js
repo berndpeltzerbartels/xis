@@ -15,6 +15,10 @@ class LinkHandler extends TagHandler {
         if (!this.targetContainerExpression) {
             this.parentWidgetContainer = this.findParentWidgetContainer();
         }
+        element.addEventListener('click', event => {
+            event.preventDefault();
+            this.onClick(event);
+        });
     }
 
     /**

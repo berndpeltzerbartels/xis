@@ -8,61 +8,44 @@ class FormHandler extends TagHandler {
      */
     constructor(formTag, client) {
         super(formTag)
+        this.type = 'form-handler';
         this.client = client;
-        this.action = formTag.getAttribute('xis:action');
         this.formData = new Data({});
-        this.pathExpr = new TextContentParser().parse(this.getAttribute('form-data'));
+        this.pathExpr = new TextContentParser(formTag.getAttribute('xis:binding')).parse();
         var _this = this;
-        formTag.addEventListener('submit', event => {
-            event.preventDefault();
-            _this.submit(event);
-        });
+        formTag.addEventListener('submit', event => event.preventDefault());
 
     }
 
-    submit(event) {
+    submit(action) {
         var widgetcontainer = this.findParentWidgetContainer();
         if (widgetcontainer) {
-            this.widgetAction(widgetcontainer);
+            this.widgetAction(action, widgetcontainer);
         } else {
-            this.pageAction();
+            this.pageAction(action);
         }
     }
 
+    validate() { }
+
+    /**
+     * @public
+     * @override
+     * @param {Data} data 
+     */
     refresh(data) {
-        var formDataPath = doSplit(this.pathExpr.evaluate(data));
-        var path = doSplit(formDataPath, '.');
+        var formDataPath = this.pathExpr.evaluate(data);
         this.actionElements = {};
-        this.formData = new Data(data.getValue(path));
+        this.formData = new Data(data.getValueByPath(formDataPath));
         this.refreshDescendantHandlers(data);
     }
 
-
-    registerFormElement(formElement) {
-        this.formElements.push(formElement);
-    }
-
-    registerActionElement(name, element) {
-        this.actionElements[name] = element;
-    }
-
-    validateSendAttribute(value) {
-        switch (value) {
-            case 'never':
-            case 'onsubmit':
-            case 'onkey':
-            case 'onkeyup':
-
-        }
-    }
-
-
-    widgetAction(invokerContainer) {
+    widgetAction(action, invokerContainer) {
         var targetContainer = this.targetContainerId ? this.widgetContainers.findContainer(this.targetContainerId) : invokerContainer;
         var targetContainerHandler = targetContainer._handler;
         var invokerHandler = invokerContainer._handler;
         var _this = this;
-        this.client.widgetFormAction(invokerHandler.widgetInstance, invokerHandler.widgetState, this.action, this.formData)
+        this.client.widgetFormAction(invokerHandler.widgetInstance, invokerHandler.widgetState, action, this.formData)
             .then(response => _this.handleActionResponse(response, targetContainerHandler));
     }
 
@@ -78,8 +61,8 @@ class FormHandler extends TagHandler {
      * @private
      * @param {string} action 
      */
-    pageAction() {
-        app.pageController.submitFormAction(this.action, this.formData);
+    pageAction(action) {
+        app.pageController.submitFormAction(action, this.formData);
     }
 
 

@@ -18,6 +18,7 @@ public class Element extends Node {
     public final String localName;
     public Node firstChild;
     public String innerText;
+    public Object classList;
     public Object _handler;
     public Object _rootHandler;
     public Collection<Object> _attributes;
@@ -167,6 +168,9 @@ public class Element extends Node {
             case 1 -> result.get(0);
             default -> throw new IllegalStateException("too many results");
         };
+    }
+
+    public void addEventListener(String name, Object o) {
     }
 
     public List<Element> getChildElements() {

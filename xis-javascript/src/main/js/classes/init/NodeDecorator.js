@@ -49,12 +49,23 @@ class NodeDecorator {
                 parentHandler.addDescendantHandler(this.decorateForeach(element));
                 return; // Do not evaluate child nodes, here !
             case 'xis:widget-container':
-                handler = this.initializeWidgetContainer(element);
+                handler = this.decorateWidgetContainer(element);
                 parentHandler.addDescendantHandler(handler);
                 this.decorateChildNodes(element, handler);
                 return;
-            case 'form': if (element.getAttribute('xis:action')) {
-                handler = this.decorateFormElement(element);
+            case 'form': if (element.getAttribute('xis:binding')) {
+                handler = this.decorateForm(element);
+            }
+                break;
+            case 'input': if (element.getAttribute('xis:binding')) {
+                handler = this.decorateInputElement(element);
+            }
+            case 'submit': if (element.getAttribute('xis:binding')) {
+                handler = this.decorateSubmitElement(element);
+            }
+                break;
+            case 'button': if (element.getAttribute('xis:binding')) {
+                handler = this.decorateSubmitElement(element);
             }
                 break;
             case 'a': if (element.getAttribute('xis:page') || element.getAttribute('xis:widget') || element.getAttribute('xis:action')) {
@@ -73,8 +84,8 @@ class NodeDecorator {
         }
     }
 
-    decorateFormElement(element) {
-        var handler = new FormElementHandler(element);
+    decorateInputElement(element) {
+        var handler = new InputTagHandler(element);
         this.addHandler(element, handler);
         return handler;
     }
@@ -100,7 +111,9 @@ class NodeDecorator {
     * @param {Element} formElement 
     */
     decorateForm(formElement) {
-        formElement._handler = new FormHandler(formElement, this.client);
+        var handler = new FormHandler(formElement, this.client);
+        formElement._handler = handler;
+        return handler;
     }
 
     /**
@@ -142,10 +155,6 @@ class NodeDecorator {
             handler = new ActionLinkHandler(element, this.client, this.widgetContainers);
         }
         this.addHandler(element, handler);
-        element.onclick = event => {
-            event.preventDefault();
-            handler.onClick(event);
-        }
         return handler;
     }
 
@@ -159,12 +168,18 @@ class NodeDecorator {
         return foreach._handler;
     }
 
+    decorateSubmitElement(element) {
+        var handler = new FormSubmitterHandler(element);
+        element._handler = handler;
+        return handler;
+    }
+
     /**
      * @private
      * @param {Element} container 
      * @returns {TagHandler}
      */
-    initializeWidgetContainer(container) {
+    decorateWidgetContainer(container) {
         var handler = new WidgetContainerHandler(container, this.client, this.widgets, this.widgetContainers);
         this.addHandler(container, handler);
         return handler;

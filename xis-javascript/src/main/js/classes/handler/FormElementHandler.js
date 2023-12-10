@@ -1,45 +1,64 @@
 class FormElementHandler extends TagHandler {
 
+    /**
+     * 
+     * @param {Element} element 
+     */
     constructor(element) {
         super(element);
-        this.bindingExpr = new TextContentParser(element.getAttribute('xis:binding')).parse();
-        if (this.getAttribute('xis:submit-onkeyup')) {
-            this.appendAttribute('onkeyup', 'this._handler.submit();');
-        }
-        if (this.getAttribute('xis:submit-onchange')) {
-            this.appendAttribute('onchange', 'this._handler.submit();');
-        }
+        this.value = element.value;
+        this.binding = element.getAttribute('xis:binding');
+        if (this.binding.indexOf('${')) throw new Error('binding must have no variables: ' + this.binding);
+        this.init();
     }
+
+    /**
+     * @private
+     */
+    init() {
+        var _this = this;
+        this.updateState('pristine');
+        element.addEventListener('change', event => {
+            _this.updateState('edited');
+            this.initiateValidation();
+        });
+        var form = this.findParentFormElement();
+        if (!form) throw new Error('no parent form-tag or form-tag is not bound for ' + this.tag);
+        this.formHandler = form._handler;
+        this.formHandler.registerElementHandler(this);
+    }
+
 
     refresh(data) {
-        var binding = this.bindingExpr.evaluate(data);
-        var formElement = this.parentFormElement();
-        var formHandler = formElement._handler;
-        var value = formHandler.formData.getValue(binding);
-        this.tag.value = value;
+        this.value = data.getValueByPath(this.binding);
+        this.refreshDescendantHandlers(data);
     }
 
+    /**
+     * @protected
+     * @override
+     */
+    onBind() {
+        this.updateState('pristine');
+    }
 
-    parentFormElement() {
-        var e = this.tag.parentNode;
-        while (e) {
-            if (e.localName == 'form') {
-                return e;
-            }
-            e = e.parentNode;
+    /**
+     * @protected
+     */
+    initiateValidation() {
+        this.formHandler.validate();
+    }
+
+    /**
+     * @protected
+     * @param {string} state 
+     */
+    updateState(state) {
+        this.state = state;
+        if (!this.tag.classList.contains(state)) {
+            this.tag.classList.add(state);
         }
-        throw new Error('no parent form-tag for ' + this.tag);
 
     }
-
-
-
-
-    submit() {
-
-    }
-
-
-
 }
 

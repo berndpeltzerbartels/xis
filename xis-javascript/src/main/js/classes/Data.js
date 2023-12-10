@@ -34,6 +34,10 @@ class Data {
         return dataNode;
     }
 
+    getValueByPath(pathStr) {
+        return this.getValue(doSplit(pathStr, '.'));
+    }
+
     /**
      * @public
      * @returns {Array<string>}
@@ -59,9 +63,16 @@ class Data {
             parentDataNode = dataNode;
         }
         var key = path[path.length - 1];
-        parentDataNode[key] = value;
-    }
+        if (parentDataNode[key]) {
+            if (!Array.isArray(parentDataNode[key])) {
+                parentDataNode[key] = [parentDataNode[key]];
+            }
+            parentDataNode[key].push(value);
+        } else {
+            parentDataNode[key] = value;
+        }
 
+    }
 
     /**
      @ @public

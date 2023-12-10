@@ -8,6 +8,8 @@ class TagHandler {
 
     addDescendantHandler(handler) {
         this.descendantHandlers.push(handler);
+        handler.publishBindEvent();
+
     }
 
     removeDescendantHandler(handler) {
@@ -16,6 +18,23 @@ class TagHandler {
 
     refresh(data) {
         throw new Error('abstract method');
+    }
+
+    /**
+     * @protected
+     */
+    publishBindEvent() {
+        this.onBind();
+        for (var handler of this.descendantHandlers) {
+            handler.publishBindEvent();
+        }
+    }
+
+    /**
+     * @protected
+     */
+    onBind() {
+
     }
 
     /**
@@ -90,6 +109,28 @@ class TagHandler {
         }
     }
 
+    /**
+  * @protected
+  * @returns {Element}
+  */
+    findParentFormElement() {
+        var e = this.tag.parentNode;
+        while (e) {
+            if (this.isFrameworkFormElement(e)) {
+                return e;
+            }
+            e = e.parentNode;
+        }
+    }
+
+    /**
+     * @private
+     * @param {Element} element 
+     * @returns 
+     */
+    isFrameworkFormElement(element) {
+        return isElement(element) && element._handler && element._handler.type == 'form-handler';
+    }
 
     isFrameworkElement(node) {
         return isElement(node) && node.localName.startsWith('xis:');

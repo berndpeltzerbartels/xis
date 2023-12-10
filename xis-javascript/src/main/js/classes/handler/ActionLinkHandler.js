@@ -15,6 +15,11 @@ class ActionLinkHandler extends TagHandler {
         this.actionExpression = this.expressionFromAttribute('xis:action'); // mandatory
         this.action = undefined;
         this.data = new Data({});
+        this.parentForm = this.findParentFormElement();
+        element.addEventListener('click', event => {
+            event.preventDefault();
+            this.onClick(event);
+        });
     }
 
     /**
@@ -34,11 +39,15 @@ class ActionLinkHandler extends TagHandler {
      * @param {Event} e 
      */
     onClick(e) {
-        var widgetcontainer = this.findParentWidgetContainer();
-        if (widgetcontainer) {
-            this.widgetAction(widgetcontainer);
+        if (this.parentForm) {
+            this.parentForm._handler.submit(this.action);
         } else {
-            this.pageAction();
+            var widgetcontainer = this.findParentWidgetContainer();
+            if (widgetcontainer) {
+                this.widgetAction(widgetcontainer);
+            } else {
+                this.pageAction();
+            }
         }
     }
 
@@ -51,20 +60,27 @@ class ActionLinkHandler extends TagHandler {
             .then(response => _this.handleActionResponse(response, targetContainerHandler));
     }
 
-    handleActionResponse(response, targetContainerHandler) {
-        if (response.nextPageURL) {
-            app.pageController.handleActionResponse(response);
-        } else {
-            targetContainerHandler.handleActionResponse(response);
-        }
-    }
-
     /**
      * @private
      * @param {string} action 
      */
     pageAction() {
         app.pageController.submitAction(this.action);
+    }
+
+
+    formAction(form) {
+        var handler = form._handler;
+        handler.sumbit(this.action)
+    }
+
+
+    handleActionResponse(response, targetContainerHandler) {
+        if (response.nextPageURL) {
+            app.pageController.handleActionResponse(response);
+        } else {
+            targetContainerHandler.handleActionResponse(response);
+        }
     }
 
     asString() {

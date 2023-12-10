@@ -34,6 +34,12 @@ class DomNormalizer {
             this.replaceFrameworkLinkByHtml(element);
         } else if (this.isFrameworkForm(element)) {
             this.replaceFrameworkFormTagByHtml(element);
+        } else if (this.isFrameworkInput(element)) {
+            this.replaceFrameworkInputByHtml(element);
+        } else if (this.isFrameworkSubmit(element)) {
+            this.replaceFrameworkSubmitByHtml(element);
+        } else if (this.isFrameworkButton(element)) {
+            this.replaceFrameworkButtonByHtml(element);
         } else {
             this.normalizeHtmlElement(element);
         }
@@ -80,7 +86,6 @@ class DomNormalizer {
     }
 
 
-
     /**
    * @private
    * @param {Element} element 
@@ -88,6 +93,17 @@ class DomNormalizer {
    */
     isFrameworkForm(element) {
         return element.localName == 'xis:form';
+    }
+
+    isFrameworkInput(element) {
+        return element.localName == 'xis:input';
+    }
+
+    isFrameworkSubmit(element) {
+        return element.localName == 'xis:submit';
+    }
+    isFrameworkButton(element) {
+        return element.localName == 'xis:button';
     }
 
 
@@ -103,17 +119,43 @@ class DomNormalizer {
         return foreach;
     }
 
+
+
+    replaceFrameworkLinkByHtml(frameworkLink) {
+        return this.replaceFrameworkElementByHtml(frameworkLink, 'a');
+    }
+    /**
+    * 
+    * @param {Element} frameworkForm
+    * @returns {Element} 
+    */
+    replaceFrameworkFormTagByHtml(frameworkForm) {
+        return this.replaceFrameworkElementByHtml(frameworkForm, 'form');
+    }
+
+    replaceFrameworkInputByHtml(frameworkInput) {
+        return this.replaceFrameworkElementByHtml(frameworkInput, 'input');
+    }
+
+    replaceFrameworkSubmitByHtml(frameworkSubmit) {
+        return this.replaceFrameworkElementByHtml(frameworkSubmit, 'submit');
+    }
+    replaceFrameworkButtonByHtml(frameworkButton) {
+        return this.replaceFrameworkElementByHtml(frameworkButton, 'button');
+    }
+
     /**
      * 
-     * @param {Element} frameworkLink 
+     * @param {Element} frameworkElement 
      * @returns {Element} (Anchor)
      */
-    replaceFrameworkLinkByHtml(frameworkLink) {
-        var anchor = document.createElement('a');
-        for (var attrName of frameworkLink.getAttributeNames()) {
-            var attrValue = frameworkLink.getAttribute(attrName);
+    replaceFrameworkElementByHtml(frameworkElement, elementName) {
+        var anchor = document.createElement(elementName);
+        for (var attrName of frameworkElement.getAttributeNames()) {
+            var attrValue = frameworkElement.getAttribute(attrName);
             switch (attrName) {
                 case 'page':
+                case 'binding':
                 case 'widget':
                 case 'foreach':
                 case 'repeat':
@@ -122,31 +164,14 @@ class DomNormalizer {
                 default: anchor.setAttribute(attrName, attrValue);
             }
         }
-        this.domAccessor.replaceElement(frameworkLink, anchor);
-        for (var child of nodeListToArray(frameworkLink.childNodes)) {
-            frameworkLink.removeChild(child);
+        this.domAccessor.replaceElement(frameworkElement, anchor);
+        for (var child of nodeListToArray(frameworkElement.childNodes)) {
+            frameworkElement.removeChild(child);
             anchor.appendChild(child);
         }
         return anchor;
     }
 
-
-    /**
-    * 
-    * @param {Element} frameworkForm
-    * @returns {Element} 
-    */
-    replaceFrameworkFormTagByHtml(frameworkForm) {
-        var form = document.createElement('form');
-        form.setAttribute('xis:action', frameworkForm.getAttribute('action'))
-        this.domAccessor.replaceElement(frameworkForm, form);
-        this.normalizeHtmlElement(form);
-        for (var child of nodeListToArray(frameworkForm.childNodes)) {
-            frameworkLink.removeChild(child);
-            form.appendChild(child);
-        }
-        return form;
-    }
 
     /**
     * Creates a xis-foreach-tag and appends as a child of the 
