@@ -1,7 +1,6 @@
 package test.widget;
 
 import one.xis.context.IntegrationTestContext;
-import one.xis.test.js.Event;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -35,12 +34,12 @@ class ActionLinkWithTargetWidgetTest {
         // first widget
         var actionLink1 = container1.getDescendantById("action1");
         assertThat(actionLink1).isNotNull();
-        actionLink1.onclick.accept(new Event());
+        actionLink1.click();
 
         // second widget is displayed in second container
         var actionLink2 = container2.getDescendantById("action2");
         assertThat(actionLink2).isNotNull();
-        actionLink2.onclick.accept(new Event());
+        actionLink2.click();
 
         // third widget is displayed in first container
         assertThat(container1.getDescendantById("widget3")).isNotNull();

@@ -1,7 +1,6 @@
 package test.page;
 
 import one.xis.context.IntegrationTestContext;
-import one.xis.test.js.Event;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -30,7 +29,7 @@ class ActionLinkPageTest {
     void action1() {
         var result = testContext.openPage("/actionPage.html");
         System.out.println(result.getDocument().asString());
-        result.getDocument().getElementById("action-link1").onclick.accept(new Event());
+        result.getDocument().getElementById("action-link1").click();
         assertThat(result.getDocument().getElementByTagName("title").innerText).isEqualTo("ActionPage");
         verify(service, times(2)).getData();
 
@@ -47,7 +46,7 @@ class ActionLinkPageTest {
     void action2() {
         var result = testContext.openPage("/actionPage.html");
         assertThat(result.getDocument().getElementByTagName("title").innerText).isEqualTo("ActionPage");
-        result.getDocument().getElementById("action-link2").onclick.accept(new Event());
+        result.getDocument().getElementById("action-link2").click();
 
         assertThat(result.getDocument().getElementByTagName("title").innerText).isEqualTo("ActionPage");
         verify(service, times(2)).getData();
@@ -61,7 +60,7 @@ class ActionLinkPageTest {
     @Test
     void action3() {
         var result = testContext.openPage("/actionPage.html");
-        result.getDocument().getElementById("action-link3").onclick.accept(new Event()); // "action-link3" is set by model variable "action3"
+        result.getDocument().getElementById("action-link3").click(); // "action-link3" is set by model variable "action3"
 
 
         verify(service).getData(); // once, because a new page was loaded after action

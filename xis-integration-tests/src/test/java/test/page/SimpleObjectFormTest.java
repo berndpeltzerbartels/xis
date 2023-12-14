@@ -1,8 +1,6 @@
 package test.page;
 
 import one.xis.context.IntegrationTestContext;
-import one.xis.test.dom.Document;
-import one.xis.test.js.Event;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -22,7 +20,6 @@ class SimpleObjectFormTest {
     class CreateNewObjectTest {
 
         private SimpleObjectService service;
-        private Document document;
 
         @BeforeAll
         void init() {
@@ -39,14 +36,14 @@ class SimpleObjectFormTest {
         void test() {
             var result = testContext.openPage("/simpleObject/new.html");
 
-            document = result.getDocument();
+            var document = result.getDocument();
             var titleElement = document.getElementByTagName("title");
 
             assertThat(titleElement.innerText).isEqualTo("New Object");
 
             document.getElementById("field1").value = "v1";
             document.getElementById("field2").value = "v2";
-            document.getElementById("save").onclick.accept(new Event());
+            document.getElementById("save").click();
 
             var captor = ArgumentCaptor.forClass(SimpleObject.class);
             verify(service).save(captor.capture());

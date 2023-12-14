@@ -1,8 +1,6 @@
 package one.xis.test.dom;
 
 import one.xis.utils.io.IOUtils;
-import one.xis.utils.lang.StringUtils;
-import one.xis.utils.xml.XmlUtil;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -93,35 +91,6 @@ public class Document {
     }
 
     public static Document of(String html) {
-        var w3cDoc = XmlUtil.loadDocument(html);
-        var rootName = w3cDoc.getDocumentElement().getTagName();
-        var document = new Document(rootName);
-        copyAttributes(w3cDoc.getDocumentElement(), document.rootNode);
-        evaluate(w3cDoc.getDocumentElement(), document.rootNode);
-        return document;
-    }
-
-    public static void evaluate(org.w3c.dom.Element src, Element dest) {
-        var nodeList = src.getChildNodes();
-        for (var i = 0; i < nodeList.getLength(); i++) {
-            org.w3c.dom.Node node = nodeList.item(i);
-            if (node instanceof org.w3c.dom.Element) {
-                var w3cElement = (org.w3c.dom.Element) node;
-                var e = new Element(w3cElement.getTagName());
-                dest.appendChild(e);
-                copyAttributes(w3cElement, e);
-                evaluate(w3cElement, e);
-            } else if (StringUtils.isNotEmpty(node.getNodeValue())) {
-                dest.appendChild(new TextNode(node.getNodeValue()));
-                dest.innerText = node.getNodeValue();
-            }
-        }
-    }
-
-    private static void copyAttributes(org.w3c.dom.Element src, Element dest) {
-        for (int i = 0; i < src.getAttributes().getLength(); i++) {
-            var attribute = src.getAttributes().item(i);
-            dest.setAttribute(attribute.getNodeName(), attribute.getNodeValue());
-        }
+        return DocumentBuilder.build(html);
     }
 }

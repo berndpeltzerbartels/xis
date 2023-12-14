@@ -11,10 +11,10 @@ class FormHandler extends TagHandler {
         this.type = 'form-handler';
         this.client = client;
         this.formData = new Data({});
-        this.pathExpr = new TextContentParser(formTag.getAttribute('xis:binding')).parse();
-        var _this = this;
+        if (formTag.getAttribute('xis:binding')) {
+            this.bindingExpression = new TextContentParser(formTag.getAttribute('xis:binding')).parse();
+        }
         formTag.addEventListener('submit', event => event.preventDefault());
-
     }
 
     submit(action) {
@@ -34,10 +34,17 @@ class FormHandler extends TagHandler {
      * @param {Data} data 
      */
     refresh(data) {
-        var formDataPath = this.pathExpr.evaluate(data);
-        this.actionElements = {};
-        this.formData = new Data(data.getValueByPath(formDataPath));
-        this.refreshDescendantHandlers(data);
+        this.formData = new Data({});
+        if (this.bindingExpression) {
+            var binding = this.bindingExpression.evaluate(data);
+            this.refreshDescendantHandlers(new Data(data.getValueByPath(binding), data));
+        } else {
+            this.refreshDescendantHandlers(data);
+        }
+    }
+
+    registerElementHandler(handler) {
+        this.formData.setValue(handler.binding, new Value(handler.tag));
     }
 
     widgetAction(action, invokerContainer) {

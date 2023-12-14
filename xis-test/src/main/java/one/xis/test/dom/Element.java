@@ -3,6 +3,7 @@ package one.xis.test.dom;
 
 import lombok.Getter;
 import lombok.NonNull;
+import one.xis.test.js.Event;
 import one.xis.utils.lang.StringUtils;
 
 import java.util.*;
@@ -18,19 +19,19 @@ public class Element extends Node {
     public final String localName;
     public Node firstChild;
     public String innerText;
-    public Object classList;
+    public DOMStringList classList = new DOMStringList();
     public Object _handler;
     public Object _rootHandler;
     public Collection<Object> _attributes;
-    public Consumer<Object> onclick = o -> {
-    };
     public String _widgetId;
     public String value;
 
     public final int nodeType = 1;
     public final NodeList childNodes = new NodeList();
     private final Map<String, String> attributes = new HashMap<>();
-    private final Collection<String> cssClasses = new HashSet<>();
+    private final Map<String, Collection<Consumer<Object>>> eventListeners = new HashMap<>();
+
+    public static Element elementInFocus;
 
     public Element(@NonNull String tagName) {
         this.localName = tagName;
@@ -66,7 +67,9 @@ public class Element extends Node {
         }
         referenceNode.insertPreviousSibling(node);
         updateChildNodes();
-        textNodeChanged();
+        if (node instanceof TextNode) {
+            textNodeChanged();
+        }
     }
 
     public void removeChild(Node node) {
@@ -94,6 +97,10 @@ public class Element extends Node {
         }
     }
 
+    public Collection<String> getCssClasses() {
+        return classList.getValues();
+    }
+
     public boolean hasChildNodes() {
         return childNodes.length > 0;
     }
@@ -109,7 +116,7 @@ public class Element extends Node {
     public void removeAttribute(String name) {
         attributes.remove(name);
         if (name.equals("class")) {
-            cssClasses.clear();
+            classList.clear();
         }
     }
 
@@ -131,9 +138,9 @@ public class Element extends Node {
     }
 
     private void addClasses(String classes) {
-        cssClasses.addAll(Arrays.stream(classes.split(" "))
+        Arrays.stream(classes.split(" "))
                 .filter(StringUtils::isNotEmpty)
-                .collect(Collectors.toSet()));
+                .forEach(classList::add);
 
     }
 
@@ -170,7 +177,8 @@ public class Element extends Node {
         };
     }
 
-    public void addEventListener(String name, Object o) {
+    public void addEventListener(String name, Consumer<Object> listener) {
+        eventListeners.computeIfAbsent(name, n -> new HashSet<>()).add(listener);
     }
 
     public List<Element> getChildElements() {
@@ -218,6 +226,29 @@ public class Element extends Node {
         return null;
     }
 
+    public void click() {
+        focus(this);
+        fireEvent("click");
+    }
+
+    protected void focus(Element element) {
+        if (elementInFocus != this) {
+            if (elementInFocus != null) {
+                elementInFocus.fireEvent("blur");
+                element.fireEvent("focus");
+            }
+            elementInFocus = this;
+        }
+    }
+
+    protected void fireEvent(String eventType) {
+        var listeners = eventListeners.get(eventType);
+        if (listeners != null) {
+            var event = new Event(eventType);
+            listeners.forEach(listener -> listener.accept(event));
+        }
+    }
+
 
     void findByTagName(String name, NodeList result) {
         if (localName.equals(name)) {
@@ -232,7 +263,7 @@ public class Element extends Node {
     }
 
     void findByClass(String cssClass, List<Element> result) {
-        if (cssClasses.contains(cssClass)) {
+        if (classList.contains(cssClass)) {
             result.add(this);
         }
         if (nextSibling != null && nextSibling instanceof Element) {
@@ -283,13 +314,13 @@ public class Element extends Node {
     }
 
     public List<Element> getChildElementsByClassName(String cssClass) {
-        return getChildElements().stream().filter(e -> e.getCssClasses().contains(cssClass)).collect(Collectors.toList());
+        return getChildElements().stream().filter(e -> e.getClassList().contains(cssClass)).collect(Collectors.toList());
     }
 
     public List<Element> getDescendantElementsByClassName(String cssClass) {
         var result = new ArrayList<Element>();
         for (var child : getChildElements()) {
-            if (child.getCssClasses().contains(cssClass)) {
+            if (child.getClassList().contains(cssClass)) {
                 result.add(child);
             }
             result.addAll(child.getDescendantElementsByClassName(cssClass));

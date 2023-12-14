@@ -1,7 +1,6 @@
 package test.page;
 
 import one.xis.context.IntegrationTestContext;
-import one.xis.test.js.Event;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,11 +29,11 @@ class PageLinkTest {
         assertThat(result.getDocument().getElementByTagName("title").innerText).isEqualTo("PageLink1");
         assertThat(controller1.getInvocations()).isEqualTo(1);
 
-        result.getDocument().getElementById("link1").onclick.accept(new Event()); // go to PageLink2.html
+        result.getDocument().getElementById("link1").click(); // go to PageLink2.html
         assertThat(result.getDocument().getElementByTagName("title").innerText).isEqualTo("PageLink2");
         assertThat(controller2.getInvocations()).isEqualTo(1);
 
-        result.getDocument().getElementById("link2").onclick.accept(new Event()); // go back to PageLink1.html
+        result.getDocument().getElementById("link2").click(); // go back to PageLink1.html
         assertThat(controller1.getInvocations()).isEqualTo(2);
     }
 }

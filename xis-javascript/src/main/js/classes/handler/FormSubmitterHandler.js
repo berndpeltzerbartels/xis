@@ -6,9 +6,10 @@ class FormSubmitterHandler extends TagHandler {
         var form = this.findParentFormElement();
         this.formHandler = form._handler;
         if (!form) throw new Error('no parent form-tag or form-tag is not bound for ' + this.tag);
+        var _this = this;
         element.addEventListener('click', event => {
             event.preventDefault();
-            this.onClick(event);
+            _this.onClick(event);
         });
     }
 

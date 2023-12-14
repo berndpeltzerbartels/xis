@@ -60,11 +60,12 @@ class NodeDecorator {
             case 'input': if (element.getAttribute('xis:binding')) {
                 handler = this.decorateInputElement(element);
             }
-            case 'submit': if (element.getAttribute('xis:binding')) {
+                break;
+            case 'submit': if (element.getAttribute('xis:action')) {
                 handler = this.decorateSubmitElement(element);
             }
                 break;
-            case 'button': if (element.getAttribute('xis:binding')) {
+            case 'button': if (element.getAttribute('xis:action')) {
                 handler = this.decorateSubmitElement(element);
             }
                 break;

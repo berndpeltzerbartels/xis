@@ -6,9 +6,8 @@ class FormElementHandler extends TagHandler {
      */
     constructor(element) {
         super(element);
-        this.value = element.value;
-        this.binding = element.getAttribute('xis:binding');
-        if (this.binding.indexOf('${')) throw new Error('binding must have no variables: ' + this.binding);
+        this.bindingExpression = new TextContentParser(element.getAttribute('xis:binding')).parse();
+        this.binding = undefined;
         this.init();
     }
 
@@ -18,20 +17,27 @@ class FormElementHandler extends TagHandler {
     init() {
         var _this = this;
         this.updateState('pristine');
-        element.addEventListener('change', event => {
+        this.tag.addEventListener('change', event => {
             _this.updateState('edited');
             this.initiateValidation();
         });
         var form = this.findParentFormElement();
         if (!form) throw new Error('no parent form-tag or form-tag is not bound for ' + this.tag);
         this.formHandler = form._handler;
-        this.formHandler.registerElementHandler(this);
     }
 
 
     refresh(data) {
-        this.value = data.getValueByPath(this.binding);
+        this.binding = this.bindingExpression.evaluate(data);
+        this.tag.value = data.getValueByPath(this.binding);
+        this.formHandler.registerElementHandler(this);
         this.refreshDescendantHandlers(data);
+
+    }
+
+
+    getValue() {
+        return this.tag.value;
     }
 
     /**

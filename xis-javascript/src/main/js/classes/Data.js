@@ -46,9 +46,12 @@ class Data {
         return Object.keys(this.values);
     }
 
+    setValueByPath(pathStr, value) {
+        this.setValue(doSplit(pathStr, '.'), value);
+    }
     /**
      * @public
-     * @param {String} key
+     * @param {array<string>} path
      * @param {any} value
      */
     setValue(path, value) {

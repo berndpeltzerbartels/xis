@@ -62,7 +62,7 @@ class PageController {
    * @param {Data} formData
    * @returns {Promise<void>}
    */
-    submitFormData(action, formData) {
+    submitFormAction(action, formData) {
         var _this = this;
         return this.client.pageFormAction(this.resolvedURL, formData, action)
             .then(response => _this.handleActionResponse(response));

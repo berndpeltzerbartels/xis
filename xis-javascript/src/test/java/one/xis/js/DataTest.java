@@ -84,7 +84,7 @@ class DataTest {
 
 
     @Test
-    void reference() throws ScriptException {
+    void reference1() throws ScriptException {
         var js = Javascript.getScript(CLASSES);
         js += "var o = {'v': 1};";
         js += "var data = new Data({});";
@@ -95,6 +95,22 @@ class DataTest {
         var result = JSUtil.execute(js);
 
         assertThat(result.asInt()).isEqualTo(2);
+    }
+
+    @Test
+    void jsonStringifyValue() throws ScriptException {
+        var js = Javascript.getScript(CLASSES);
+        js += "var o = {'value': 1};\n";
+        js += "var value = new Value(o);\n";
+        js += "var data = new Data({});\n";
+        js += "data.setValue(['x', 'y'], value);\n";
+        js += "var json = JSON.stringify(data);\n";
+        js += "var obj = JSON.parse(json);\n";
+        js += "obj.values.x.y";
+
+        var result = JSUtil.execute(js);
+
+        assertThat(result.asInt()).isEqualTo(1);
     }
 
     @Test
