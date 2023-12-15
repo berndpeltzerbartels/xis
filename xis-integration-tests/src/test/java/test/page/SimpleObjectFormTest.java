@@ -5,7 +5,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
-import org.mockito.ArgumentCaptor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -29,7 +28,14 @@ class SimpleObjectFormTest {
                     .withSingleton(SimpleObjectNewController.class)
                     .withSingleton(SimpleObjectDetails.class)
                     .build();
-            when(service.getById(eq(1))).thenReturn(new SimpleObject(1, "SimpleObject", "p1", "p2"));
+
+            doAnswer(inv -> {
+                var simpleObject = (SimpleObject) inv.getArgument(0);
+                simpleObject.setId(1000);
+                return simpleObject;
+            }).when(service).save(any());
+
+            when(service.getById(eq(1000))).thenReturn(new SimpleObject(1000, "SimpleObject", "p1", "p2"));
         }
 
         @Test
@@ -45,8 +51,7 @@ class SimpleObjectFormTest {
             document.getElementById("field2").value = "v2";
             document.getElementById("save").click();
 
-            var captor = ArgumentCaptor.forClass(SimpleObject.class);
-            verify(service).save(captor.capture());
+            verify(service).save(any());
 
             assertThat(titleElement.innerText).isEqualTo("Object Details");
 

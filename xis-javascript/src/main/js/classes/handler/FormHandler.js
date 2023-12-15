@@ -34,17 +34,24 @@ class FormHandler extends TagHandler {
      * @param {Data} data 
      */
     refresh(data) {
-        this.formData = new Data({});
+        this.formData = new Data({}, data);
         if (this.bindingExpression) {
-            var binding = this.bindingExpression.evaluate(data);
-            this.refreshDescendantHandlers(new Data(data.getValueByPath(binding), data));
+            this.binding = this.bindingExpression.evaluate(data);
+            this.refreshDescendantHandlers(new Data(data.getValueByPath(this.binding), data));
         } else {
             this.refreshDescendantHandlers(data);
         }
     }
 
     registerElementHandler(handler) {
-        this.formData.setValue(handler.binding, new Value(handler.tag));
+        var path = [];
+        if (this.bindingExpression) {
+            path.push(this.binding);
+        }
+        for (var part of doSplit(handler.binding, '.')) {
+            path.push(part); // array.push(array) fails in GraalVM
+        }
+        this.formData.setValue(path, new Value(handler.tag));
     }
 
     widgetAction(action, invokerContainer) {
