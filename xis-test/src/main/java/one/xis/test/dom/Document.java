@@ -42,6 +42,10 @@ public class Document {
         return rootNode.getDescendantById(id);
     }
 
+    public InputElement getInputElementById(String id) {
+        return (InputElement) rootNode.getDescendantById(id);
+    }
+
     public List<Element> getElementsByClass(String cssClass) {
         var list = new ArrayList<Element>();
         rootNode.findByClass(cssClass, list);

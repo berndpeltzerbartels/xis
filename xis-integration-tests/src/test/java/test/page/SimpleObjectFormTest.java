@@ -19,6 +19,7 @@ class SimpleObjectFormTest {
     class CreateNewObjectTest {
 
         private SimpleObjectService service;
+        private SimpleObject simpleObject;
 
         @BeforeAll
         void init() {
@@ -30,28 +31,41 @@ class SimpleObjectFormTest {
                     .build();
 
             doAnswer(inv -> {
-                var simpleObject = (SimpleObject) inv.getArgument(0);
+                simpleObject = inv.getArgument(0);
                 simpleObject.setId(1000);
-                return simpleObject;
+                return null;
             }).when(service).save(any());
 
-            when(service.getById(eq(1000))).thenReturn(new SimpleObject(1000, "SimpleObject", "p1", "p2"));
+            doAnswer(inv -> {
+                Integer id = inv.getArgument(0);
+                return id != null && id.equals(1000) ? simpleObject : null;
+            }).when(service).getById(eq(1000));
         }
 
         @Test
         void test() {
+            // Display form
             var result = testContext.openPage("/simpleObject/new.html");
 
             var document = result.getDocument();
             var titleElement = document.getElementByTagName("title");
+            var inputField1 = document.getInputElementById("field1");
+            var inputField2 = document.getInputElementById("field2");
 
+            // Check controller values
             assertThat(titleElement.innerText).isEqualTo("New Object");
+            assertThat(inputField1.value).isEqualTo("p1");
+            assertThat(inputField2.value).isEqualTo("p2");
 
-            document.getElementById("field1").value = "v1";
-            document.getElementById("field2").value = "v2";
+            // Edit field values
+            inputField1.value = "v1";
+            inputField2.value = "v2";
             document.getElementById("save").click();
+            assertThat(simpleObject.getProperty1()).isEqualTo("v1");
+            assertThat(simpleObject.getProperty2()).isEqualTo("v2");
 
             verify(service).save(any());
+
 
             assertThat(titleElement.innerText).isEqualTo("Object Details");
 
@@ -59,8 +73,8 @@ class SimpleObjectFormTest {
             var p2 = document.getElementById("v2");
 
 
-            assertThat(p1.innerText).isEqualTo("p1");
-            assertThat(p2.innerText).isEqualTo("p2");
+            assertThat(p1.innerText).isEqualTo("v1");
+            assertThat(p2.innerText).isEqualTo("v2");
         }
 
     }

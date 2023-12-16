@@ -24,7 +24,6 @@ public class Element extends Node {
     public Object _rootHandler;
     public Collection<Object> _attributes;
     public String _widgetId;
-    public String value;
 
     public final int nodeType = 1;
     public final NodeList childNodes = new NodeList();
