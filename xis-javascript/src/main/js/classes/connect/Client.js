@@ -100,7 +100,7 @@ class Client {
      */
     widgetAction(widgetInstance, widgetState, action) {
         var _this = this;
-        var request = this.createWidgetRequest(widgetInstance, widgetState, action);
+        var request = this.createWidgetRequest(widgetInstance, widgetState, action, null);
         return this.httpClient.post('/xis/widget/action', request, {})
             .then(content => _this.deserializeResponse(content));
     }
@@ -108,13 +108,14 @@ class Client {
     /**
      * @public
      * @param {WidgetInstance} widgetInstance
+     * @param {WidgetState} widgetState
      * @param {string} action
      * @param {Data} formData    
      * @returns {Promise<ServerReponse>}
      */
-    widgetFormAction(widgetInstance, widgetState, action) {
+    widgetFormAction(widgetInstance, widgetState, action, formData) {
         var _this = this;
-        var request = this.createWidgetRequest(widgetInstance, widgetState, action);
+        var request = this.createWidgetRequest(widgetInstance, widgetState, action, formData);
         return this.httpClient.post('/xis/widget/action', request, {})
             .then(content => _this.deserializeResponse(content));
     }
@@ -128,7 +129,7 @@ class Client {
      */
     pageAction(resolvedURL, data, action) {
         var _this = this;
-        var request = this.createPageRequest(resolvedURL, data, action);
+        var request = this.createPageRequest(resolvedURL, data, action, null);
         return this.httpClient.post('/xis/page/action', request, {})
             .then(content => _this.deserializeResponse(content));
     }
@@ -138,11 +139,12 @@ class Client {
    * @param {ResolvedURL} resolvedURL 
    * @param {Data} pageData
    * @param {string} action
+   * @param {Data} formData 
    * @returns {Promise<ServerReponse>}
    */
-    pageFormAction(resolvedURL, pageData, action) {
+    pageFormAction(resolvedURL, pageData, action, formData) {
         var _this = this;
-        var request = this.createPageRequest(resolvedURL, pageData, action);
+        var request = this.createPageRequest(resolvedURL, pageData, action, formData);
         return this.httpClient.post('/xis/page/action', request, {})
             .then(content => _this.deserializeResponse(content));
     }
@@ -155,7 +157,7 @@ class Client {
      * @param {Data} formData (nullable)
      * @returns {ClientRequest}
      */
-    createPageRequest(resolvedURL, data, action) {
+    createPageRequest(resolvedURL, data, action, formData) {
         var normalizedPath = resolvedURL.normalizedPath;
         var request = new ClientRequest();
         request.clientId = this.clientId;
@@ -163,6 +165,7 @@ class Client {
         request.pageId = normalizedPath;
         request.action = action;
         request.data = action ? this.pageActionParameters(action, data, normalizedPath) : this.pageModelParameters(data, normalizedPath);
+        request.formData = formData ? formData.values : {};
         request.urlParameters = resolvedURL.urlParameters;
         request.pathVariables = resolvedURL.pathVariablesAsMap();
         return request;
@@ -177,13 +180,14 @@ class Client {
     * @param {Data} formData (nullable)
     * @returns {ClientRequest}
     */
-    createWidgetRequest(widgetInstance, widgetState, action) {
+    createWidgetRequest(widgetInstance, widgetState, action, formData) {
         var request = new ClientRequest();
         request.clientId = this.clientId;
         request.userId = this.userId;
         request.widgetId = widgetInstance.widget.id;
         request.action = action;
         request.data = action ? this.widgetActionParameters(widgetInstance, widgetState, action) : this.widgetModelParameters(widgetInstance, widgetState);
+        request.formData = formData ? formData.values : {};
         request.urlParameters = widgetState.resolvedURL.urlParameters;
         request.pathVariables = widgetState.resolvedURL.pathVariablesAsMap();
         request.widgetParameters = widgetState.widgetParameters;

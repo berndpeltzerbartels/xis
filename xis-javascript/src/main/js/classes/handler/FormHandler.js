@@ -11,13 +11,15 @@ class FormHandler extends TagHandler {
         this.type = 'form-handler';
         this.client = client;
         this.formData = new Data({});
-        if (formTag.getAttribute('xis:binding')) {
-            this.bindingExpression = new TextContentParser(formTag.getAttribute('xis:binding')).parse();
+        if (!formTag.getAttribute('xis:binding')) {
+            throw new Error('form has no binding: ' + this.tag);
         }
+        this.bindingExpression = new TextContentParser(formTag.getAttribute('xis:binding')).parse();
         formTag.addEventListener('submit', event => event.preventDefault());
     }
 
     submit(action) {
+        debugger;
         var widgetcontainer = this.findParentWidgetContainer();
         if (widgetcontainer) {
             this.widgetAction(action, widgetcontainer);
@@ -34,24 +36,18 @@ class FormHandler extends TagHandler {
      * @param {Data} data 
      */
     refresh(data) {
-        this.formData = new Data({}, data);
-        if (this.bindingExpression) {
-            this.binding = this.bindingExpression.evaluate(data);
-            this.refreshDescendantHandlers(new Data(data.getValueByPath(this.binding), data));
-        } else {
-            this.refreshDescendantHandlers(data);
-        }
+        this.formData = new Data({});
+        this.binding = this.bindingExpression.evaluate(data);
+        this.refreshDescendantHandlers(data);
     }
 
-    registerElementHandler(handler) {
-        var path = [];
-        if (this.bindingExpression) {
-            path.push(this.binding);
-        }
-        for (var part of doSplit(handler.binding, '.')) {
-            path.push(part); // array.push(array) fails in GraalVM
-        }
-        this.formData.setValue(path, new Value(handler.tag));
+    /**
+     * 
+     * @param {TagHandler} handler 
+     * @param {array<String>} bindingPath 
+     */
+    onElementHandlerRefreshed(handler, bindingPath) {
+        this.formData.setValue(bindingPath, new Value(handler.tag));
     }
 
     widgetAction(action, invokerContainer) {

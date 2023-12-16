@@ -64,7 +64,7 @@ class PageController {
    */
     submitFormAction(action, formData) {
         var _this = this;
-        return this.client.pageFormAction(this.resolvedURL, formData, action)
+        return this.client.pageFormAction(this.resolvedURL, this.page.data, action, formData)
             .then(response => _this.handleActionResponse(response));
     }
 

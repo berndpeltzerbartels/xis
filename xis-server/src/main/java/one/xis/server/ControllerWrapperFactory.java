@@ -3,6 +3,7 @@ package one.xis.server;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import one.xis.Action;
+import one.xis.FormData;
 import one.xis.ModelData;
 import one.xis.context.XISComponent;
 import one.xis.utils.lang.MethodUtils;
@@ -18,7 +19,7 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 class ControllerWrapperFactory {
 
-    private final ParameterDeserializer parameterDeserializer;
+    private final ControllerMethodParameterFactory parameterFactory;
 
     ControllerWrapper createControllerWrapper(@NonNull String id, @NonNull Object controller) {
         try {
@@ -36,11 +37,11 @@ class ControllerWrapperFactory {
     private Map<String, ModelMethod> modelMethods(Object controller) {
         var map = new HashMap<String, ModelMethod>();
         MethodUtils.allMethods(controller).stream()
-                .filter(m -> m.isAnnotationPresent(ModelData.class))
+                .filter(m -> m.isAnnotationPresent(ModelData.class) || m.isAnnotationPresent(FormData.class))
                 .map(this::createModelMethod)
                 .forEach(controllerMethod -> {
                     if (map.containsKey(controllerMethod.getKey())) {
-                        throw new IllegalStateException(controller.getClass() + ": there is more than one @ModelData(...) annotation containing the key " + controllerMethod.key);
+                        throw new IllegalStateException(controller.getClass() + ": there is more than one @ModelData or @FormData annotation containing the key " + controllerMethod.key);
                     }
                     map.put(controllerMethod.getKey(), controllerMethod);
                 });
@@ -60,11 +61,13 @@ class ControllerWrapperFactory {
 
     private ModelMethod createModelMethod(Method method) {
         method.setAccessible(true);
+        var key = method.isAnnotationPresent(FormData.class) ?
+                method.getAnnotation(FormData.class).value() : method.getAnnotation(ModelData.class).value();
         try {
             return ModelMethod.builder()
                     .method(method)
-                    .key(method.getAnnotation(ModelData.class).value())
-                    .parameterDeserializer(parameterDeserializer)
+                    .key(key)
+                    .parameterFactory(parameterFactory)
                     .build();
         } catch (Exception e) {
             throw new RuntimeException("Failed to initialize " + method, e);
@@ -77,7 +80,7 @@ class ControllerWrapperFactory {
             return ActionMethod.builder()
                     .method(method)
                     .key(method.getAnnotation(Action.class).value())
-                    .parameterDeserializer(parameterDeserializer)
+                    .parameterFactory(parameterFactory)
                     .build();
         } catch (Exception e) {
             throw new RuntimeException("Failed to initialize " + method, e);

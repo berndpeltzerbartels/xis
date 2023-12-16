@@ -11,7 +11,7 @@ class SimpleObjectNewController {
 
     private final SimpleObjectService simpleObjectService;
 
-    @ModelData("formObject")
+    @FormData("formObject")
     SimpleObject simpleObject() {
         return new SimpleObject(1, "Simple Object", "p1", "p2");
     }
@@ -22,7 +22,7 @@ class SimpleObjectNewController {
     }
 
     @Action("save")
-    PageResult save(@ModelData("formObject") SimpleObject simpleObject) {
+    PageResult save(@FormData("formObject") SimpleObject simpleObject) {
         simpleObjectService.save(simpleObject);
         return PageResult.of(SimpleObjectDetails.class, "id", simpleObject.getId());
     }
