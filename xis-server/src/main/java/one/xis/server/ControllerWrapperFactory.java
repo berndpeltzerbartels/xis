@@ -19,7 +19,7 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 class ControllerWrapperFactory {
 
-    private final ControllerMethodParameterFactory parameterFactory;
+    private final ParameterPreparer parameterFactory;
 
     ControllerWrapper createControllerWrapper(@NonNull String id, @NonNull Object controller) {
         try {

@@ -45,6 +45,11 @@ class WidgetContainerHandlerTest {
         public Object widgetState;
     }
 
+    public static class RootHandler {
+        public void publishBindEvent() {
+        }
+    }
+
     public static class WidgetsMock {
 
         @SuppressWarnings("unused")
@@ -52,6 +57,7 @@ class WidgetContainerHandlerTest {
             var widget = new WidgetInstance();
             widget.root = new Element("div");
             widget.root.setAttribute("id", "widgetRoot");
+            widget.root._rootHandler = new RootHandler();
             return widget;
         }
     }

@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import one.xis.PathVariable;
 import one.xis.*;
 import one.xis.context.XISComponent;
-import one.xis.utils.lang.ClassUtils;
 import one.xis.utils.lang.CollectionUtils;
 
 import java.io.IOException;
@@ -17,10 +16,10 @@ import java.util.List;
 @Slf4j
 @XISComponent
 @RequiredArgsConstructor
-class ControllerMethodParameterFactory {
+class ParameterPreparer {
     protected final ParameterDeserializer parameterDeserializer;
 
-    Object[] prepareArgs(Method method, ClientRequest context) throws Exception {
+    Object[] prepareParameters(Method method, ClientRequest context) throws Exception {
         Object[] args = new Object[method.getParameterCount()];
         var params = method.getParameters();
         for (int i = 0; i < args.length; i++) {
@@ -75,15 +74,5 @@ class ControllerMethodParameterFactory {
             return paramValue;
         }
         return parameterDeserializer.deserialze(paramValue, parameter);
-    }
-
-
-    private Object createModelInstance(Class<?> t) {
-        try {
-            return ClassUtils.newInstance(t);
-        } catch (Exception e) {
-            log.warn("unable to create instance of " + t, e);
-            return null; // we allow this
-        }
     }
 }

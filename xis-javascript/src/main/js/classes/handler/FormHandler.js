@@ -19,7 +19,6 @@ class FormHandler extends TagHandler {
     }
 
     submit(action) {
-        debugger;
         var widgetcontainer = this.findParentWidgetContainer();
         if (widgetcontainer) {
             this.widgetAction(action, widgetcontainer);

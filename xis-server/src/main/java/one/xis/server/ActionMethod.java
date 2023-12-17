@@ -10,7 +10,7 @@ class ActionMethod extends ControllerMethod {
 
     @Override
     protected Object[] prepareArgs(Method method, ClientRequest context) throws Exception {
-        var args = parameterFactory.prepareArgs(method, context);
+        var args = parameterFactory.prepareParameters(method, context);
 
         return args;
     }

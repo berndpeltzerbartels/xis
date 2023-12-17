@@ -60,9 +60,9 @@ class DataTest {
     @DisplayName("Set a data value with path containig multiple elements in existing tree")
     void setValue() throws ScriptException {
         var js = Javascript.getScript(CLASSES);
-        js += "var data = new Data({a:{b:{}}});";
-        js += "data.setValue(['a','b'],'c');";
-        js += "data.values['a']['b'];";
+        js += "var data = new Data({});\n";
+        js += "data.setValue(['a','b'],'c');\n";
+        js += "data.getValue(['a', 'b']);\n";
 
         var result = JSUtil.execute(js);
 
