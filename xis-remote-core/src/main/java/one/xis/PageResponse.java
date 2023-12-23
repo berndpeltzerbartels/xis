@@ -9,23 +9,23 @@ import java.util.Map;
 
 @Getter
 @RequiredArgsConstructor
-public class PageResult {
+public class PageResponse {
     private final Class<?> controllerClass;
     private final Map<String, String> pathVariables = new HashMap<>();
     private final Map<String, String> urlParameters = new HashMap<>();
 
-    public PageResult withPathVariable(@NonNull String name, @NonNull Object value) {
+    public PageResponse pathVariable(@NonNull String name, @NonNull Object value) {
         pathVariables.put(name, asString(value));
         return this;
     }
 
-    public PageResult withUrlParameter(@NonNull String name, @NonNull Object value) {
+    public PageResponse urlParameter(@NonNull String name, @NonNull Object value) {
         pathVariables.put(name, asString(value));
         return this;
     }
 
-    public static PageResult of(@NonNull Class<?> controllerClass, @NonNull String pathVariable, @NonNull Object pathVariabelValue) {
-        return new PageResult(controllerClass).withPathVariable(pathVariable, asString(pathVariabelValue));
+    public static PageResponse of(@NonNull Class<?> controllerClass, @NonNull String pathVariable, @NonNull Object pathVariabelValue) {
+        return new PageResponse(controllerClass).pathVariable(pathVariable, asString(pathVariabelValue));
     }
 
     private static String asString(@NonNull Object o) {

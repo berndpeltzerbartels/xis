@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 @Data
-class ValidationResult {
+class ValidatorMessages {
     private final List<String> globalMessages = new ArrayList<>();
     private final Map<String, String> messages = new HashMap<>();
 

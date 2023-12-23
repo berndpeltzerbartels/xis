@@ -13,7 +13,7 @@ public class FieldUtil {
 
     public void setFieldValue(Object obj, String fieldName, Object value) {
         Class<?> clazz = obj.getClass();
-        while (clazz != null && clazz.equals(Object.class)) {
+        while (clazz != null && !clazz.equals(Object.class)) {
             Field field = getDeclaredField(clazz, fieldName);
             if (field != null) {
                 setFieldValue(obj, field, value);

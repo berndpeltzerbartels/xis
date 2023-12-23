@@ -13,6 +13,6 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface NotEmpty {
+public @interface Mandatory {
     String value() default "";
 }

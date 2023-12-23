@@ -24,14 +24,14 @@ public class ClientConfig {
     private final String welcomePageId;
 
     /**
-     * Key is the normalized path
+     * ValidationResultKey is the normalized path
      *
      * @{@link Path}
      */
     private final Map<String, PageAttributes> pageAttributes;
 
     /**
-     * Key is the normalized path
+     * ValidationResultKey is the normalized path
      *
      * @{@link Path}
      */

@@ -22,9 +22,9 @@ class SimpleObjectNewController {
     }
 
     @Action("save")
-    PageResult save(@FormData("formObject") SimpleObject simpleObject) {
+    PageResponse save(@FormData("formObject") SimpleObject simpleObject) {
         simpleObjectService.save(simpleObject);
-        return PageResult.of(SimpleObjectDetails.class, "id", simpleObject.getId());
+        return PageResponse.of(SimpleObjectDetails.class, "id", simpleObject.getId());
     }
 
 }

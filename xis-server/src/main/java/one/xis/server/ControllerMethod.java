@@ -16,7 +16,7 @@ abstract class ControllerMethod {
 
     protected Method method;
     protected String key;
-    protected ParameterPreparer parameterFactory;
+    protected ParameterPreparation parameterFactory;
 
     ControllerMethodResult invoke(ClientRequest request, Object controller) throws Exception {
         var args = prepareArgs(method, request);

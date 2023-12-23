@@ -11,15 +11,16 @@ import java.math.BigInteger;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 class ParameterDeserializerTest {
 
-    private final ParameterDeserializer deserializer = new ParameterDeserializer();
+    private final JsonDeserializer deserializer = new JsonDeserializer(mock(Validation.class));
 
     @Test
     void deserialzeObject() throws IOException, NoSuchMethodException {
         var json = "{ \"text\":\"Hello !\", \"b\": { \"c\": {\"value\":\"Huhu !\"}} }";
-        var result = (A) deserializer.deserialze(json, TestPojo.class.getDeclaredMethod("test", A.class).getParameters()[0]);
+        var result = (A) deserializer.deserialze(json, TestPojo.class.getDeclaredMethod("test", A.class).getParameters()[0], new ValidatorResultElement(pathElement, index, parent));
 
         assertThat(result.text).isEqualTo("Hello !");
         assertThat(result.b.c.value).isEqualTo("Huhu !");
@@ -30,7 +31,7 @@ class ParameterDeserializerTest {
     @SuppressWarnings("unchecked")
     void deserialzeArray() throws IOException, NoSuchMethodException {
         var json = "[1,2,3,4]";
-        var result = (List<Integer>) deserializer.deserialze(json, TestPojo.class.getDeclaredMethod("test1", List.class).getParameters()[0]);
+        var result = (List<Integer>) deserializer.deserialze(json, TestPojo.class.getDeclaredMethod("test1", List.class).getParameters()[0], new ValidatorResultElement(pathElement, index, parent));
 
         assertThat(result).containsExactly(1, 2, 3, 4);
     }
@@ -40,7 +41,7 @@ class ParameterDeserializerTest {
     @SuppressWarnings("unchecked")
     void typeParametersInTypeParameters() throws NoSuchMethodException, IOException {
         var json = "[[1],[2],[3],[4]]";
-        var result = (List<List<Integer>>) deserializer.deserialze(json, TestPojo.class.getDeclaredMethod("test2", List.class).getParameters()[0]);
+        var result = (List<List<Integer>>) deserializer.deserialze(json, TestPojo.class.getDeclaredMethod("test2", List.class).getParameters()[0], new ValidatorResultElement(pathElement, index, parent));
 
         assertThat(result.get(0)).isEqualTo(List.of(1));
         assertThat(result.get(1)).isEqualTo(List.of(2));
@@ -53,11 +54,13 @@ class ParameterDeserializerTest {
     void integer() throws NoSuchMethodException, IOException {
         var method = TestPojo.class.getDeclaredMethod("integer", String.class, Integer.TYPE, Integer.class, BigInteger.class, BigDecimal.class);
 
-        assertThat(deserializer.deserialze("123", method.getParameters()[0])).isEqualTo("123");
-        assertThat(deserializer.deserialze("123", method.getParameters()[1])).isEqualTo(123);
-        assertThat(deserializer.deserialze("123", method.getParameters()[2])).isEqualTo(Integer.parseInt("123"));
-        assertThat(deserializer.deserialze("123", method.getParameters()[3])).isEqualTo(BigInteger.valueOf(123));
-        assertThat(deserializer.deserialze("123", method.getParameters()[4])).isEqualTo(BigDecimal.valueOf(123));
+        var typeValidationResult = new ValidatorResultElement(pathElement, index, parent);
+
+        assertThat(deserializer.deserialze("123", method.getParameters()[0], typeValidationResult)).isEqualTo("123");
+        assertThat(deserializer.deserialze("123", method.getParameters()[1], typeValidationResult)).isEqualTo(123);
+        assertThat(deserializer.deserialze("123", method.getParameters()[2], typeValidationResult)).isEqualTo(Integer.parseInt("123"));
+        assertThat(deserializer.deserialze("123", method.getParameters()[3], typeValidationResult)).isEqualTo(BigInteger.valueOf(123));
+        assertThat(deserializer.deserialze("123", method.getParameters()[4], typeValidationResult)).isEqualTo(BigDecimal.valueOf(123));
     }
 
     @Data

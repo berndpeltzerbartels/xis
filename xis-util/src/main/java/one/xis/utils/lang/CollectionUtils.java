@@ -9,6 +9,13 @@ import java.util.function.Supplier;
 @UtilityClass
 public class CollectionUtils {
 
+
+    public <T> void resize(Collection<T> collection, int size) {
+        while (collection.size() < size) {
+            collection.add(null);
+        }
+    }
+
     public <T> T first(Collection<T> coll) {
         Iterator<T> iterator = coll.iterator();
         if (!iterator.hasNext()) {

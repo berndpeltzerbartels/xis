@@ -1,8 +1,8 @@
 package one.xis.server;
 
 import lombok.RequiredArgsConstructor;
-import one.xis.PageResult;
-import one.xis.WidgetResult;
+import one.xis.PageResponse;
+import one.xis.WidgetResponse;
 import one.xis.context.XISComponent;
 
 @XISComponent
@@ -19,10 +19,10 @@ class WidgetControllerService extends ControllerService {
         var result = invokerControllerWrapper.invokeActionMethod(request);
         if (result.returnValue() == null || result.returnValue() == Void.class || result.returnValue().equals(invokerControllerWrapper.getControllerClass())) {
             return createWidgetResponse(invokerControllerWrapper.invokeGetModelMethods(request), invokerControllerWrapper);// Still the same controller
-        } else if (result.returnValue() instanceof WidgetResult widgetResult) {
-            return processActionResult(request, widgetResult);
-        } else if (result.returnValue() instanceof PageResult pageResult) {
-            return processActionResult(request, pageResult);
+        } else if (result.returnValue() instanceof WidgetResponse widgetResponse) {
+            return processActionResult(request, widgetResponse);
+        } else if (result.returnValue() instanceof PageResponse pageResponse) {
+            return processActionResult(request, pageResponse);
         } else if (result.returnValue() instanceof Class<?> controllerClass) {
             return processActionResult(request, controllerClass);
         } else {

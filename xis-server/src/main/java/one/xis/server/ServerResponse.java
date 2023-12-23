@@ -12,5 +12,5 @@ public class ServerResponse {
     private final String nextPageURL;
     private final String nextWidgetId;
     private final Map<String, Object> widgetParameters;
-    private final ValidationResult validationResult;
+    private final ValidatorMessages validatorMessages;
 }
