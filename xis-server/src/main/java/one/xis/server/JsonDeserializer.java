@@ -4,20 +4,15 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
-import lombok.experimental.Delegate;
 import one.xis.FormData;
 import one.xis.ModelData;
 import one.xis.context.XISComponent;
 import one.xis.utils.lang.ClassUtils;
-import one.xis.utils.lang.CollectionUtils;
 import one.xis.utils.lang.FieldUtil;
-import one.xis.utils.lang.ParameterUtil;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Parameter;
+import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
@@ -28,6 +23,7 @@ import java.util.*;
 class JsonDeserializer {
 
     private final Validation validation;
+
 
     public Object deserialze(String json, Parameter parameter, ValidatorResultElement parameterResult) throws IOException {
         return deserialze(json, new TargetParameter(parameter), parameterResult);
@@ -69,28 +65,35 @@ class JsonDeserializer {
         return value;
     }
 
-    private Object[] jsonArrayToArray(JsonReader reader, Target target, ValidatorResultElement result) throws IOException {
-        return jsonArrayToCollection(reader, target.getName(), List.class, target.getType().getComponentType(), result).toArray();
+    private Object[] jsonArrayToArray(JsonReader reader, Target target, ValidatorResultElement parentResult) throws IOException {
+        return jsonArrayToList(reader, target, parentResult).toArray();
     }
 
 
     @SuppressWarnings("unchecked")
-    <C extends Collection<?>> C jsonArrayToCollection(JsonReader reader, Target target, ValidatorResultElement result) throws IOException {
-        return jsonArrayToCollection(reader, target.getName(), (Class<C>) target.getType(), target.getElementType(), result);
+    <C extends Collection<?>> C jsonArrayToCollection(JsonReader reader, Target target, ValidatorResultElement parentResult) throws IOException {
+        var list = (List<C>) jsonArrayToList(reader, target, parentResult);
+        return toCollectionOfType(list, (Class<C>) target.getType());
     }
 
-    <C extends Collection<?>> C jsonArrayToCollection(JsonReader reader, String name, Class<C> collectionType, Class<?> elementType, ValidatorResultElement parentResult) throws IOException {
+    List<?> jsonArrayToList(JsonReader reader, Target target, ValidatorResultElement parentResult) throws IOException {
         var list = new ArrayList<>();
         reader.beginArray();
         int index = 0;
         while (reader.hasNext()) {
-            var result = parentResult.childElement(name, index);
-            CollectionUtils.resize(list, index + 1);
-            list.set(index, readObject(reader, elementType, result));
-            index++;
+            var result = parentResult.childElement(target.getName(), index++);
+            Target elementTarget;
+            if (target.getElementType() instanceof ParameterizedType parameterizedType) {
+                elementTarget = new ParameterizedTargetElement(target.getName(), parameterizedType);
+            } else if (target.getElementType() instanceof Class<?> clazz) {
+                elementTarget = new ClassTargetElement(target.getName(), clazz);
+            } else {
+                throw new IllegalStateException();
+            }
+            list.add(read(reader, elementTarget, result));
         }
         reader.endArray();
-        return toCollectionOfType(list, collectionType);
+        return list;
     }
 
     private String readString(JsonReader reader, Target target, ValidatorResultElement validatorResultElement) throws IOException {
@@ -134,8 +137,8 @@ class JsonDeserializer {
         throw new UnsupportedOperationException("parameter-type " + type);
     }
 
-    private Object readObject(JsonReader reader, Target field, ValidatorResultElement result) throws IOException {
-        return readObject(reader, field.getType(), result);
+    private Object readObject(JsonReader reader, Target target, ValidatorResultElement result) throws IOException {
+        return readObject(reader, target.getType(), result);
     }
 
     private Object readObject(JsonReader reader, Class<?> type, ValidatorResultElement result) throws IOException {
@@ -170,8 +173,8 @@ class JsonDeserializer {
     }
 
     @SuppressWarnings("unchecked")
-    <C extends Collection<?>> C toCollectionOfType(ArrayList<?> list, Class<C> collType) {
-        if (collType.isAssignableFrom(list.getClass())) {
+    <C extends Collection<?>> C toCollectionOfType(List<?> list, Class<C> collType) {
+        if (collType.isAssignableFrom(List.class)) {
             return (C) list;
         }
         if (collType.isAssignableFrom(Set.class)) {
@@ -191,17 +194,49 @@ class JsonDeserializer {
         throw new UnsupportedOperationException("create instance of " + collType);
     }
 
+
     interface Target {
         String getName();
 
         Class<?> getType();
 
-        Class<?> getElementType();
+        Type getElementType();
+
+
+    }
+
+    @Value
+    static class ClassTargetElement implements Target {
+        String name;
+        Class<?> type;
+
+        @Override
+        public Class<?> getElementType() {
+            return type;
+        }
+
+    }
+
+
+    @Value
+    static class ParameterizedTargetElement implements Target {
+        String name;
+        ParameterizedType type;
+
+        @Override
+        public Class<?> getType() {
+            return (Class<?>) type.getRawType();
+        }
+
+        @Override
+        public Type getElementType() {
+            return type.getActualTypeArguments()[0];
+        }
+
     }
 
     @Value
     static class TargetField implements Target {
-        @Delegate(excludes = Exclusions.class)
         Field field;
 
         @Override
@@ -210,21 +245,27 @@ class JsonDeserializer {
         }
 
         @Override
-        public Class<?> getElementType() {
-            if (Collection.class.isAssignableFrom(field.getType())) {
-                return FieldUtil.getGenericTypeParameter(field);
-            }
-            if (field.getType().isArray()) {
-                return field.getType().getComponentType();
-            }
+        public Class<?> getType() {
             return field.getType();
         }
+
+        @Override
+        public Type getElementType() {
+            var type = field.getGenericType();
+            if (type instanceof ParameterizedType elementType) {
+                return elementType.getActualTypeArguments()[0];
+            }
+            if (type instanceof WildcardType wildcardType) {
+                return wildcardType.getUpperBounds()[0];
+            }
+            return null;
+        }
+
     }
 
     @Value
     static class TargetParameter implements Target {
 
-        @Delegate(excludes = Exclusions.class)
         Parameter parameter;
 
         @Override
@@ -239,19 +280,23 @@ class JsonDeserializer {
         }
 
         @Override
-        public Class<?> getElementType() {
-            if (Collection.class.isAssignableFrom(parameter.getType())) {
-                return ParameterUtil.getGenericTypeParameter(parameter);
-            }
-            if (parameter.getType().isArray()) {
-                return parameter.getType().getComponentType();
-            }
+        public Class<?> getType() {
             return parameter.getType();
         }
-    }
 
-    interface Exclusions {
-        String getName();
+        @Override
+        public Type getElementType() {
+            var type = parameter.getParameterizedType();
+            if (type instanceof ParameterizedType elementType) {
+                return elementType.getActualTypeArguments()[0];
+            }
+            if (type instanceof WildcardType wildcardType) {
+                return wildcardType.getUpperBounds()[0];
+            }
+            return null;
+        }
+
+
     }
 }
 
