@@ -26,8 +26,13 @@ class ValidatorResultElement {
         this.errors = new HashMap<>();
     }
 
+    @Override
+    public String toString() {
+        return "ValidatorResultElement{" + path + '}';
+    }
+
     static ValidatorResultElement rootResult() {
-        return new ValidatorResultElement("/", 0);
+        return new ValidatorResultElement("", 0);
     }
 
     ValidatorResultElement childElement(String pathElement, int index) {

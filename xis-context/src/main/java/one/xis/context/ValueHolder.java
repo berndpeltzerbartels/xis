@@ -77,7 +77,7 @@ abstract class ValueHolder implements ComponentCreationListener, ComponentConsum
     @SuppressWarnings("unchecked")
     private Object value() {
         if (Collection.class.isAssignableFrom(getType())) {
-            return CollectionUtils.elementsOfClass(values, (Class<? extends Collection<?>>) getType());
+            return CollectionUtils.convertCollectionClass(values, (Class<? extends Collection<?>>) getType());
         }
         if (getType().isArray()) {
             return values.toArray((Object[]) Array.newInstance(getElementType(), values.size()));

@@ -9,4 +9,9 @@ class ValidatorMessageResolver {
     String resolveMessage(ValidationErrorType errorType, JsonDeserializer.Target target, Object value) {
         return "";
     }
+
+
+    String resolveMessage(ValidationErrorType errorType, JsonDeserializer.Target target) {
+        return "";
+    }
 }

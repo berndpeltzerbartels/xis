@@ -67,7 +67,7 @@ class ControllerWrapperFactory {
             return ModelMethod.builder()
                     .method(method)
                     .key(key)
-                    .parameterFactory(parameterFactory)
+                    .parameterPreparation(parameterFactory)
                     .build();
         } catch (Exception e) {
             throw new RuntimeException("Failed to initialize " + method, e);
@@ -80,7 +80,7 @@ class ControllerWrapperFactory {
             return ActionMethod.builder()
                     .method(method)
                     .key(method.getAnnotation(Action.class).value())
-                    .parameterFactory(parameterFactory)
+                    .parameterPreparation(parameterFactory)
                     .build();
         } catch (Exception e) {
             throw new RuntimeException("Failed to initialize " + method, e);

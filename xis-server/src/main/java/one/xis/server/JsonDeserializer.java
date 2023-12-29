@@ -8,6 +8,7 @@ import one.xis.FormData;
 import one.xis.ModelData;
 import one.xis.context.XISComponent;
 import one.xis.utils.lang.ClassUtils;
+import one.xis.utils.lang.CollectionUtils;
 import one.xis.utils.lang.FieldUtil;
 
 import java.io.IOException;
@@ -15,7 +16,15 @@ import java.io.StringReader;
 import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.text.ParseException;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.format.FormatStyle;
 import java.util.*;
+import java.util.function.Function;
 
 
 @XISComponent
@@ -25,39 +34,39 @@ class JsonDeserializer {
     private final Validation validation;
 
 
-    public Object deserialze(String json, Parameter parameter, ValidatorResultElement parameterResult) throws IOException {
-        return deserialze(json, new TargetParameter(parameter), parameterResult);
+    public Object deserialze(String json, Parameter parameter, ValidatorResultElement parameterResult, Locale locale) throws IOException {
+        return deserialze(json, new TargetParameter(parameter), parameterResult, locale);
     }
 
-    public Object deserialze(String json, Field field, ValidatorResultElement parameterResult) throws IOException {
-        return deserialze(json, new TargetField(field), parameterResult);
+    public Object deserialze(String json, Field field, ValidatorResultElement parameterResult, Locale locale) throws IOException {
+        return deserialze(json, new TargetField(field), parameterResult, locale);
     }
 
 
-    private Object deserialze(String json, Target target, ValidatorResultElement parameterResult) throws IOException {
+    private Object deserialze(String json, Target target, ValidatorResultElement parameterResult, Locale locale) throws IOException {
         var reader = new JsonReader(new StringReader(json));
         reader.setLenient(true);
-        return read(reader, target, parameterResult);
+        return read(reader, target, parameterResult, locale);
     }
 
 
-    private Object read(JsonReader reader, Target target, ValidatorResultElement result) throws IOException {
+    private Object read(JsonReader reader, Target target, ValidatorResultElement result, Locale locale) throws IOException {
         Object value;
         if (reader.peek() == JsonToken.BEGIN_ARRAY) {
             var type = target.getType();
             if (type.isArray()) {
-                value = jsonArrayToArray(reader, target, result);
+                value = jsonArrayToArray(reader, target, result, locale);
             } else if (Collection.class.isAssignableFrom(type)) {
-                value = jsonArrayToCollection(reader, target, result);
+                value = jsonArrayToCollection(reader, target, result, locale);
             } else {
                 throw new IllegalArgumentException("unsupported type: " + target);
             }
         } else if (reader.peek() == JsonToken.BEGIN_OBJECT) {
-            value = readObject(reader, target, result);
+            value = readObject(reader, target, result, locale);
         } else if (reader.peek() == JsonToken.NUMBER) {
-            value = readNumber(reader, target.getType());
+            value = readLeafValue(reader, target, result, locale);
         } else if (reader.peek() == JsonToken.STRING) {
-            value = readString(reader, target, result);
+            value = readLeafValue(reader, target, result, locale);
         } else {
             throw new IllegalStateException();
         }
@@ -65,18 +74,32 @@ class JsonDeserializer {
         return value;
     }
 
-    private Object[] jsonArrayToArray(JsonReader reader, Target target, ValidatorResultElement parentResult) throws IOException {
-        return jsonArrayToList(reader, target, parentResult).toArray();
+    private Object readLeafValue(JsonReader reader, Target target, ValidatorResultElement result, Locale locale) {
+        try {
+            return readLeafValue(reader, target.getType(), locale);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ConversionException e) {
+            validation.assignmentError(target, e.getValue(), result);
+            return null;
+        }
+    }
+
+    private Object[] jsonArrayToArray(JsonReader reader, Target target, ValidatorResultElement parentResult, Locale locale) throws IOException {
+        return jsonArrayToList(reader, target, parentResult, locale).toArray();
     }
 
 
     @SuppressWarnings("unchecked")
-    <C extends Collection<?>> C jsonArrayToCollection(JsonReader reader, Target target, ValidatorResultElement parentResult) throws IOException {
-        var list = (List<C>) jsonArrayToList(reader, target, parentResult);
-        return toCollectionOfType(list, (Class<C>) target.getType());
+    <C extends Collection<?>> C jsonArrayToCollection(JsonReader reader, Target target, ValidatorResultElement parentResult, Locale locale) throws IOException {
+        var list = (List<Object>) jsonArrayToList(reader, target, parentResult, locale);
+        if (target.getType().isInstance(list)) {
+            return (C) list;
+        }
+        return CollectionUtils.convertCollectionClass(list, (Class<C>) target.getType());
     }
 
-    List<?> jsonArrayToList(JsonReader reader, Target target, ValidatorResultElement parentResult) throws IOException {
+    List<?> jsonArrayToList(JsonReader reader, Target target, ValidatorResultElement parentResult, Locale locale) throws IOException {
         var list = new ArrayList<>();
         reader.beginArray();
         int index = 0;
@@ -90,64 +113,24 @@ class JsonDeserializer {
             } else {
                 throw new IllegalStateException();
             }
-            list.add(read(reader, elementTarget, result));
+            list.add(read(reader, elementTarget, result, locale));
         }
         reader.endArray();
         return list;
     }
 
-    private String readString(JsonReader reader, Target target, ValidatorResultElement validatorResultElement) throws IOException {
-        var str = reader.nextString();
-        validation.validateBeforeAssignment(target, str, validatorResultElement);
-        return str;
+
+    private Object readObject(JsonReader reader, Target target, ValidatorResultElement result, Locale locale) throws IOException {
+        return readObject(reader, target.getType(), result, locale);
     }
 
-    @SuppressWarnings("depecation")
-    private Object readNumber(JsonReader reader, Class<?> type) throws IOException {
-        if (type.equals(Integer.TYPE) || type.equals(Integer.class)) {
-            return reader.nextInt();
-        }
-        if (type.equals(Long.TYPE) || type.equals(Long.class)) {
-            return reader.nextLong();
-        }
-        if (type.equals(Boolean.TYPE) || type.equals(Boolean.class)) {
-            return reader.nextBoolean() ? 1 : 0;
-        }
-        if (type.equals(Float.TYPE) || type.equals(Float.class)) {
-            return reader.nextDouble();
-        }
-        if (type.equals(Double.TYPE) || type.equals(Double.class)) {
-            return reader.nextDouble();
-        }
-        if (type.equals(BigInteger.class)) {
-            return BigInteger.valueOf(reader.nextLong());
-        }
-        if (type.equals(BigDecimal.class)) {
-            return BigDecimal.valueOf(reader.nextLong());
-        }
-        if (type.equals(Date.class)) {
-            return Date.parse(reader.nextString());
-        }
-        if (type.equals(String.class)) {
-            return reader.nextString();
-        }
-        if (type.equals(Object.class)) { // Groovy
-            return BigDecimal.valueOf(reader.nextDouble());
-        }
-        throw new UnsupportedOperationException("parameter-type " + type);
-    }
-
-    private Object readObject(JsonReader reader, Target target, ValidatorResultElement result) throws IOException {
-        return readObject(reader, target.getType(), result);
-    }
-
-    private Object readObject(JsonReader reader, Class<?> type, ValidatorResultElement result) throws IOException {
+    private Object readObject(JsonReader reader, Class<?> type, ValidatorResultElement result, Locale locale) throws IOException {
         var o = ClassUtils.newInstance(type);
-        readObjectFields(reader, o, result);
+        readObjectFields(reader, o, result, locale);
         return o;
     }
 
-    private void readObjectFields(JsonReader reader, Object o, ValidatorResultElement parentResult) throws IOException {
+    private void readObjectFields(JsonReader reader, Object o, ValidatorResultElement parentResult, Locale locale) throws IOException {
         reader.beginObject();
         while (reader.hasNext()) {
             var name = reader.nextName();
@@ -157,7 +140,7 @@ class JsonDeserializer {
                 Object value = null;
                 try {
                     var targetField = new TargetField(field);
-                    value = read(reader, targetField, result);
+                    value = read(reader, targetField, result, locale);
                     validation.validateBeforeAssignment(targetField, value, result);
                     if (!result.hasError()) {
                         FieldUtil.setFieldValue(o, field, value);
@@ -172,28 +155,251 @@ class JsonDeserializer {
         reader.endObject();
     }
 
-    @SuppressWarnings("unchecked")
-    <C extends Collection<?>> C toCollectionOfType(List<?> list, Class<C> collType) {
-        if (collType.isAssignableFrom(List.class)) {
-            return (C) list;
+
+    Object readLeafValue(JsonReader reader, Class<?> type, Locale locale) throws IOException, ConversionException {
+        if (reader.peek() == JsonToken.NULL) {
+            reader.nextNull();
+            return null;
         }
-        if (collType.isAssignableFrom(Set.class)) {
-            return (C) new HashSet<>(list);
+        if (type.equals(Object.class) && reader.peek() == JsonToken.NUMBER) {
+            type = BigDecimal.class; // GRoovy
         }
-        if (collType.isAssignableFrom(HashSet.class)) {
-            return (C) new HashSet<>(list);
+        if (type.equals(Short.TYPE) || type.equals(Short.class)) {
+            return readShort(reader, locale);
         }
-        var constructor = ClassUtils.getConstructor(collType, Collection.class);
-        if (constructor != null && !Modifier.isAbstract(collType.getModifiers()) && !Modifier.isInterface(collType.getModifiers())) {
-            try {
-                return constructor.newInstance(list);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+        if (type.equals(Integer.TYPE) || type.equals(Integer.class)) {
+            return readInt(reader, locale);
         }
-        throw new UnsupportedOperationException("create instance of " + collType);
+        if (type.equals(Long.TYPE) || type.equals(Long.class)) {
+            return readLong(reader, locale);
+        }
+        if (type.equals(Boolean.TYPE) || type.equals(Boolean.class)) {
+            return reader.nextBoolean();
+        }
+        if (type.equals(Float.TYPE) || type.equals(Float.class)) {
+            return readFloat(reader, locale);
+        }
+        if (type.equals(Double.TYPE) || type.equals(Double.class)) {
+            return readDouble(reader, locale);
+        }
+        if (type.equals(BigInteger.class)) {
+            return readBigInteger(reader, locale);
+        }
+        if (type.equals(BigDecimal.class)) {
+            return readBigDecimal(reader, locale);
+        }
+        if (type.equals(Date.class)) {
+            return readDate(reader, locale);
+        }
+        if (type.equals(ZonedDateTime.class)) {
+            return readZonedDateTime(reader, locale);
+        }
+        if (type.equals(OffsetDateTime.class)) {
+            return readOffsetDateTime(reader, locale);
+        }
+        if (type.equals(LocalDate.class)) {
+            return readLocalDate(reader, locale);
+        }
+        if (type.equals(LocalDateTime.class)) {
+            return readLocalDateTime(reader, locale);
+        }
+        if (type.equals(Year.class)) {
+            return readYear(reader);
+        }
+        if (type.equals(YearMonth.class)) {
+            return readYearMonth(reader, locale);
+        }
+
+        if (type.equals(Month.class)) {
+            return readMonth(reader, locale);
+        }
+
+        if (type.equals(String.class)) {
+            return reader.nextString();
+        }
+        if (type.isEnum()) {
+            return readEnumValue(reader, (Class<? extends Enum>) type);
+        }
+
+        throw new UnsupportedOperationException("parameter-type " + type);
     }
 
+    private short readShort(JsonReader reader, Locale locale) throws ConversionException {
+        return readNumber(reader, locale, Number::shortValue);
+    }
+
+    private int readInt(JsonReader reader, Locale locale) throws ConversionException {
+        return readNumber(reader, locale, Number::intValue);
+    }
+
+    private long readLong(JsonReader reader, Locale locale) throws ConversionException {
+        return readNumber(reader, locale, Number::longValue);
+    }
+
+    private float readFloat(JsonReader reader, Locale locale) throws ConversionException {
+        return readNumber(reader, locale, Number::floatValue);
+    }
+
+    private double readDouble(JsonReader reader, Locale locale) throws ConversionException {
+        return readNumber(reader, locale, Number::doubleValue);
+    }
+
+    private Object readEnumValue(JsonReader reader, Class<? extends Enum> type) throws ConversionException {
+        try {
+            if (reader.peek() == JsonToken.NUMBER) {
+                var index = -1;
+                try {
+                    index = reader.nextInt();
+                    var allValues = allEnumValues(type);
+                    return allValues[index];
+                } catch (Exception e) {
+                    throw new ConversionException(e, index);
+                }
+            } else if (reader.peek() == JsonToken.STRING) {
+                return Enum.valueOf(type, reader.nextString());
+            } else {
+                throw new IllegalStateException();
+            }
+        } catch (IOException e) {
+            throw new ConversionException(e);
+        }
+    }
+
+    private Enum<?>[] allEnumValues(Class<?> e) throws Exception {
+        var values = e.getMethod("values");
+        return (Enum<?>[]) values.invoke(null);
+    }
+
+    private BigDecimal readBigDecimal(JsonReader reader, Locale locale) throws ConversionException {
+        DecimalFormat numberFormat = (DecimalFormat) NumberFormat.getInstance(locale);
+        numberFormat.setParseIntegerOnly(false);
+        String str = null;
+        try {
+            str = reader.nextString();
+            return BigDecimal.valueOf(numberFormat.parse(str).doubleValue());
+        } catch (ParseException | IOException e) {
+            throw new ConversionException(e, str);
+        }
+    }
+
+    private BigInteger readBigInteger(JsonReader reader, Locale locale) throws ConversionException {
+        String str = null;
+        try {
+            str = reader.nextString();
+            return new BigInteger(str);
+        } catch (NumberFormatException | IOException e) {
+            throw new ConversionException(e, str);
+        }
+    }
+
+    private <N extends Number> N readNumber(JsonReader reader, Locale locale, Function<Number, N> numberFunction) throws ConversionException {
+        NumberFormat numberFormat = NumberFormat.getNumberInstance(locale);
+        String str = null;
+        try {
+            str = reader.nextString();
+            Number number = numberFormat.parse(str);
+            return numberFunction.apply(number);
+        } catch (ParseException | IOException e) {
+            throw new ConversionException(e, str);
+        }
+    }
+
+    private Date readDate(JsonReader reader, Locale locale) throws ConversionException {
+        return toDate(readZonedDateTime(reader, locale));
+    }
+
+    private OffsetDateTime readOffsetDateTime(JsonReader reader, Locale locale) throws ConversionException {
+        return readZonedDateTime(reader, locale).toOffsetDateTime();
+    }
+
+    private LocalDate readLocalDate(JsonReader reader, Locale locale) throws ConversionException {
+        return readZonedDateTime(reader, locale).toOffsetDateTime().toLocalDate();
+    }
+
+    private LocalDateTime readLocalDateTime(JsonReader reader, Locale locale) throws ConversionException {
+        return readZonedDateTime(reader, locale).toOffsetDateTime().toLocalDateTime();
+    }
+
+    private Year readYear(JsonReader reader) throws ConversionException {
+        String str = null;
+        try {
+            str = reader.nextString();
+            return Year.parse(str);
+        } catch (IOException e) {
+            throw new ConversionException(e, str);
+        }
+    }
+
+    private Month readMonth(JsonReader reader, Locale locale) throws ConversionException {
+        String value = null;
+        try {
+            value = reader.nextString();
+        } catch (IOException e) {
+            throw new ConversionException(e, value);
+        }
+        try {
+            return Month.valueOf(Month.class, value);
+        } catch (IllegalArgumentException e) {
+            try {
+                return Month.from(DateTimeFormatter.ofPattern("MMMM").localizedBy(locale).parse(value));
+            } catch (DateTimeParseException ex) {
+                throw new RuntimeException("", ex);
+            }
+        }
+    }
+
+    private YearMonth readYearMonth(JsonReader reader, Locale locale) throws ConversionException {
+        String value = null;
+        try {
+            value = reader.nextString();
+        } catch (IOException e) {
+            throw new ConversionException(e, value);
+        }
+        try {
+            return YearMonth.parse(value);
+        } catch (IllegalArgumentException e) {
+            try {
+                return YearMonth.from(DateTimeFormatter.ofPattern("MMMM").localizedBy(locale).parse(value));
+            } catch (DateTimeParseException ex) {
+                throw new RuntimeException("", ex);
+            }
+        }
+    }
+
+    private ZonedDateTime readZonedDateTime(JsonReader reader, Locale locale) throws ConversionException {
+        String value = null;
+        try {
+            value = reader.nextString();
+        } catch (IOException e) {
+            throw new ConversionException(e, value);
+        }
+        try {
+            return readIsoZonedDateTime(value);
+        } catch (ConversionException e) {
+            return readLocalizedZonedDateTime(value, locale);
+        }
+    }
+
+    private ZonedDateTime readIsoZonedDateTime(String value) throws ConversionException {
+        try {
+            return ZonedDateTime.parse(value);
+        } catch (DateTimeParseException e) {
+            throw new ConversionException(e, value);
+        }
+    }
+
+    private ZonedDateTime readLocalizedZonedDateTime(String value, Locale locale) throws ConversionException {
+        var formatter = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).localizedBy(locale);
+        try {
+            return ZonedDateTime.from(formatter.parse(value));
+        } catch (DateTimeException e) {
+            throw new ConversionException(e, value);
+        }
+    }
+
+    private Date toDate(ZonedDateTime zonedDateTime) {
+        return Date.from(zonedDateTime.toInstant());
+    }
 
     interface Target {
         String getName();

@@ -16,7 +16,7 @@ abstract class ControllerMethod {
 
     protected Method method;
     protected String key;
-    protected ParameterPreparation parameterFactory;
+    protected ParameterPreparation parameterPreparation;
 
     ControllerMethodResult invoke(ClientRequest request, Object controller) throws Exception {
         var args = prepareArgs(method, request);
@@ -30,7 +30,7 @@ abstract class ControllerMethod {
     }
 
     protected Object[] prepareArgs(Method method, ClientRequest request) throws Exception {
-        return parameterFactory.prepareParameters(method, request);
+        return parameterPreparation.prepareParameters(method, request);
     }
 
     private Map<String, Object> modelParameterData(Object[] args) {

@@ -45,7 +45,7 @@ public class CollectionUtils {
     }
 
     @SuppressWarnings("unchecked")
-    public <C extends Collection<?>> C elementsOfClass(Collection<Object> coll, Class<C> clazz) {
+    public <C extends Collection<?>> C convertCollectionClass(Collection<Object> coll, Class<C> clazz) {
         if (clazz.isAssignableFrom(List.class)) {
             return (C) new ArrayList<>(coll);
         }
@@ -91,28 +91,5 @@ public class CollectionUtils {
         }
         throw new UnsupportedOperationException("unable to instantiate " + clazz);
     }
-
-    @SuppressWarnings("unchecked")
-    public <T, C extends Collection<T>> C createInstance(Class<C> clazz, Collection<?> values) {
-        if (clazz.isAssignableFrom(List.class)) {
-            return (C) new ArrayList<>(values);
-        }
-        if (clazz.isAssignableFrom(Set.class)) {
-            return (C) new HashSet<>(values);
-        }
-        if (clazz.isAssignableFrom(HashSet.class)) {
-            return (C) new HashSet<>(values);
-        }
-        var constructor = ClassUtils.getConstructor(clazz, Collection.class);
-        if (constructor != null && !Modifier.isAbstract(clazz.getModifiers()) && !Modifier.isInterface(clazz.getModifiers())) {
-            try {
-                return constructor.newInstance(values);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-        throw new UnsupportedOperationException("unable to instantiate " + clazz);
-    }
-
 
 }

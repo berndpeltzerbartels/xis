@@ -6,6 +6,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 import one.xis.server.*;
 
+import java.util.Locale;
 import java.util.Map;
 
 @Controller
@@ -29,25 +30,29 @@ class MicronautController implements FrameworkController {
 
     @Override
     @Post("/xis/page/model")
-    public ServerResponse getPageModel(@Body ClientRequest request) {
+    public ServerResponse getPageModel(@Body ClientRequest request, Locale locale) {
+        request.setLocale(locale); // TODO is Locale a valid parameter for Micronaut ?
         return frontendService.processPageModelDataRequest(request);
     }
 
     @Override
     @Post("/xis/widget/model")
-    public ServerResponse getWidgetModel(@Body ClientRequest request) {
+    public ServerResponse getWidgetModel(@Body ClientRequest request, Locale locale) {
+        request.setLocale(locale);
         return frontendService.processWidgetModelDataRequest(request);
     }
 
     @Override
     @Post("/xis/page/action")
-    public ServerResponse onPageAction(@Body ClientRequest request) {
+    public ServerResponse onPageAction(@Body ClientRequest request, Locale locale) {
+        request.setLocale(locale);
         return frontendService.processPageActionRequest(request);
     }
 
     @Override
     @Post("/xis/widget/action")
-    public ServerResponse onWidgetAction(@Body ClientRequest request) {
+    public ServerResponse onWidgetAction(@Body ClientRequest request, Locale locale) {
+        request.setLocale(locale);
         return frontendService.processWidgetActionRequest(request);
     }
 

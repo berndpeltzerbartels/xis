@@ -1,5 +1,6 @@
 package one.xis.server;
 
+import lombok.AllArgsConstructor;
 import one.xis.context.XISComponent;
 import one.xis.context.XISInject;
 
@@ -8,6 +9,7 @@ import java.util.Collection;
 import java.util.Set;
 
 @XISComponent
+@AllArgsConstructor
 class Validation {
 
     @XISInject
@@ -23,6 +25,10 @@ class Validation {
                 .findFirst().orElseThrow(() -> new IllegalStateException("unmatched validation error for " + target));
         var message = messageResolver.resolveMessage(type, target, value);
         validatorResultElement.setErrorIfEmpty(type, message, value);
+    }
+
+    void assignmentError(JsonDeserializer.Target target, ValidatorResultElement validatorResultElement) {
+        assignmentError(target, null, validatorResultElement);
     }
 
     boolean validateBeforeAssignment(JsonDeserializer.Target target, Object value, ValidatorResultElement validatorResultElement) {

@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import one.xis.server.ClientRequest;
 import one.xis.server.FrontendService;
 
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -67,7 +68,9 @@ public class BackendBridge {
 
     private ClientRequest request(String requestJson) {
         try {
-            return objectMapper.readValue(requestJson, ClientRequest.class);
+            var request = objectMapper.readValue(requestJson, ClientRequest.class);
+            request.setLocale(Locale.GERMANY); // TODO
+            return request;
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Failed to deserialize request", e);
         }

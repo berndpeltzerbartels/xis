@@ -3,6 +3,7 @@ package one.xis.server;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.Data;
 
+import java.util.Locale;
 import java.util.Map;
 
 @Data
@@ -12,6 +13,7 @@ public class ClientRequest {
     private String action;
     private String pageId;
     private String widgetId;
+    private Locale locale;
 
     @JsonDeserialize(using = MapDeserializer.class)
     private Map<String, String> data;

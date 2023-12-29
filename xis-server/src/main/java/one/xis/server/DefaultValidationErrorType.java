@@ -7,14 +7,11 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.YearMonth;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 
 enum DefaultValidationErrorType implements ValidationErrorType {
-    NOT_A_NUMBER(Number.class),
+    NOT_A_NUMBER(Number.class, Short.TYPE, Integer.TYPE, Long.TYPE, Float.TYPE, Double.TYPE),
     NOT_A_TIME(LocalTime.class, Time.class),
     NOT_A_YEAR(LocalTime.class),
     NOT_A_MONTH(YearMonth.class),
@@ -31,5 +28,9 @@ enum DefaultValidationErrorType implements ValidationErrorType {
 
     DefaultValidationErrorType() {
         this.fieldTypes = new HashSet<>();
+    }
+
+    static Optional<DefaultValidationErrorType> errorForType(Class<?> c) {
+        return Arrays.stream(values()).filter(errorType -> errorType.getFieldTypes().contains(c)).findFirst();
     }
 }
