@@ -162,5 +162,5 @@ function randomString() {
 }
 
 function timeZone() {
-    return ntl.DateTimeFormat().resolvedOptions().timeZone;
+    return Intl.DateTimeFormat().resolvedOptions().timeZone;
 }

@@ -1,4 +1,4 @@
-package one.xis.server;
+package one.xis.validation;
 
 public interface ValidationErrorType {
 }

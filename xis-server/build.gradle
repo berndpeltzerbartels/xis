@@ -20,13 +20,17 @@ dependencies {
     implementation project(':xis-util')
     implementation project(':xis-remote-core')
     implementation project(':xis-javascript')
+    implementation project(':xis-parameter-deserializer')
+    implementation project(':xis-validation')
+
+
     compileOnly project(':xis-resources')
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
     implementation "org.projectlombok:lombok:$lombokVersion"
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.14.1'
     implementation 'org.tinylog:tinylog-api:2.6.1'
     implementation 'org.tinylog:tinylog-impl:2.6.1'
-    implementation 'com.google.code.gson:gson:2.10.1'
+
 
     testImplementation "org.mockito:mockito-core:$mockitoVersion"
     testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.16.1'

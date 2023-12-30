@@ -1,9 +1,12 @@
-package one.xis.server;
+package one.xis.parameter;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import one.xis.utils.lang.CollectionUtils;
+import one.xis.validation.Validation;
+import one.xis.validation.ValidatorResultElement;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -14,15 +17,17 @@ import java.time.*;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
-class JsonDeserializerTest {
+class ParameterDeserializerTest {
 
-    private final Validation validation = new Validation(Collections.emptyList(), new ValidatorMessageResolver());
-    private final JsonDeserializer deserializer = new JsonDeserializer(validation);
+    private final Validation validation = mock(Validation.class);
+    private final ParameterDeserializer deserializer = new ParameterDeserializerImpl(validation);
 
     @Nested
     class ParameterDeserializationOnlyTest {
         @Test
+        @DisplayName("Parameter with complex object with string field is getting deserialized")
         void deserialzeObject() throws IOException, NoSuchMethodException {
             var json = "{ \"text\":\"Hello !\", \"b\": { \"c\": {\"value\":\"Huhu !\"}} }";
             var result = (A) deserializer.deserialze(json, TestPojo.class.getDeclaredMethod("test", A.class).getParameters()[0], ValidatorResultElement.rootResult(), Locale.GERMANY, ZoneId.of("Europe/Berlin"));
@@ -34,6 +39,7 @@ class JsonDeserializerTest {
 
         @Test
         @SuppressWarnings("unchecked")
+        @DisplayName("An array of integers as parameter is getting deserialized")
         void deserialzeArray() throws IOException, NoSuchMethodException {
             var json = "[1,2,3,4]";
             var result = (List<Integer>) deserializer.deserialze(json, TestPojo.class.getDeclaredMethod("test1", List.class).getParameters()[0], ValidatorResultElement.rootResult(), Locale.GERMANY, ZoneId.of("Europe/Berlin"));
@@ -44,6 +50,7 @@ class JsonDeserializerTest {
 
         @Test
         @SuppressWarnings("unchecked")
+        @DisplayName("Deserialization of json-array nested in json-arrays is getting deserialized to list of list")
         void typeParametersInTypeParameters() throws NoSuchMethodException, IOException {
             var json = "[[1],[2],[3],[4]]";
             var result = (List<List<Integer>>) deserializer.deserialze(json, TestPojo.class.getDeclaredMethod("test2", List.class).getParameters()[0], ValidatorResultElement.rootResult(), Locale.GERMANY, ZoneId.of("Europe/Berlin"));
@@ -55,7 +62,7 @@ class JsonDeserializerTest {
         }
 
         @Test
-        @SuppressWarnings("unchecked")
+        @DisplayName("A parameter of hierarchy of multiple different collections types is deserialized from nested json arrays")
         void typeParametersInTypeParameters3() throws NoSuchMethodException, IOException {
             var json = "[[[1]]]";
             var result = deserializer.deserialze(json, TestPojo.class.getDeclaredMethod("test3", ArrayList.class).getParameters()[0], ValidatorResultElement.rootResult(), Locale.GERMANY, ZoneId.of("Europe/Berlin"));
@@ -71,6 +78,7 @@ class JsonDeserializerTest {
 
 
         @Test
+        @DisplayName("An integer as  string is deserialized to differen parameter types")
         void integer() throws NoSuchMethodException, IOException {
             var method = TestPojo.class.getDeclaredMethod("integer", String.class, Integer.TYPE, Integer.class, BigInteger.class, BigDecimal.class);
 
@@ -84,6 +92,7 @@ class JsonDeserializerTest {
         }
 
         @Test
+        @DisplayName("A date in iso and localized format is deserialized to LocalDate")
         void localDate() throws NoSuchMethodException, IOException {
             var method = TestPojo.class.getDeclaredMethod("localDate", LocalDate.class);
             var parameter = method.getParameters()[0];
@@ -94,8 +103,10 @@ class JsonDeserializerTest {
             assertThat(deserializer.deserialze("2016-05-01", parameter, typeValidationResult, Locale.GERMANY, ZoneId.of("Europe/Berlin"))).isEqualTo(expected);
         }
 
+
         @Test
-        void dateTimeTypes() throws NoSuchMethodException, IOException {
+        @DisplayName("A datetime in localized format is deserialized for different parameter types")
+        void dateTimeTypesLocalized() throws NoSuchMethodException, IOException {
             var method = TestPojo.class.getDeclaredMethod("dateTimeTypes", DateTimeValue.class);
             var typeValidationResult = ValidatorResultElement.rootResult();
             var json = "{\"localDateTime\":\"12.07.2000, 23:00:00\",\"zonedDateTime\":\"12.07.2000, 23:00:00\",\"offsetDateTime\":\"12.07.2000, 23:00:00\",\"date\":\"12.07.2000, 23:00:00\"}";
@@ -109,6 +120,36 @@ class JsonDeserializerTest {
             assertThat(result.zonedDateTime.toInstant()).isEqualTo(expected);
             assertThat(result.offsetDateTime.toInstant()).isEqualTo(expected);
             assertThat(result.localDateTime.toInstant(ZoneOffset.ofHours(2))).isEqualTo(expected);
+        }
+
+        @Test
+        @DisplayName("A datetime in iso format is deserialized for different parameter types")
+        void dateTimeTypesIso() throws NoSuchMethodException, IOException {
+            var method = TestPojo.class.getDeclaredMethod("dateTimeTypes", DateTimeValue.class);
+            var typeValidationResult = ValidatorResultElement.rootResult();
+            var json = "{\"localDateTime\":\"2000-07-12T23:00:00\",\"zonedDateTime\":\"2000-07-12T23:00:00\",\"offsetDateTime\":\"2000-07-12T23:00:00\",\"date\":\"2000-07-12T23:00:00\"}";
+            var expected = Instant.from(ZonedDateTime.of(2000, 7, 12, 21, 0, 0, 0, ZoneId.of("UTC")));
+
+            var params = method.getParameters();
+            var result = (DateTimeValue) deserializer.deserialze(json, params[0], typeValidationResult, Locale.GERMANY, ZoneId.of("Europe/Berlin"));
+
+
+            assertThat(result.date.toInstant()).isEqualTo(expected);
+            assertThat(result.zonedDateTime.toInstant()).isEqualTo(expected);
+            assertThat(result.offsetDateTime.toInstant()).isEqualTo(expected);
+            assertThat(result.localDateTime.toInstant(ZoneOffset.ofHours(2))).isEqualTo(expected);
+        }
+
+        @Test
+        void zonedDateTimeAsIso() throws NoSuchMethodException, IOException {
+            var method = TestPojo.class.getDeclaredMethod("dateTimeTypes", DateTimeValue.class);
+            var typeValidationResult = ValidatorResultElement.rootResult();
+            var json = "{\"zonedDateTime\":\"2000-07-12T23:00:00+10:00\"}";
+            var expected = Instant.from(ZonedDateTime.of(2000, 7, 12, 13, 0, 0, 0, ZoneId.of("UTC")));
+            var params = method.getParameters();
+            var result = (DateTimeValue) deserializer.deserialze(json, params[0], typeValidationResult, Locale.GERMANY, ZoneId.of("Europe/Berlin"));
+
+            assertThat(result.zonedDateTime.toInstant()).isEqualTo(expected);
         }
 
 

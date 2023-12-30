@@ -1,0 +1,32 @@
+plugins {
+    id 'java'
+}
+
+group 'one.xis'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(':xis-util')
+    implementation project(':xis-remote-core')
+    implementation project(':xis-context')
+    implementation project(':xis-validation')
+
+    implementation 'com.google.code.gson:gson:2.10.1'
+
+    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+    implementation "org.projectlombok:lombok:$lombokVersion"
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+
+    testImplementation "org.mockito:mockito-core:$mockitoVersion"
+    testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.16.1'
+}
+
+test {
+    useJUnitPlatform()
+}

@@ -1,4 +1,4 @@
-package one.xis.server;
+package one.xis.validation;
 
 import lombok.Getter;
 
@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Getter
+public
 class ValidatorResultElement {
     private final String path;
     private final int index;
@@ -31,11 +32,11 @@ class ValidatorResultElement {
         return "ValidatorResultElement{" + path + '}';
     }
 
-    static ValidatorResultElement rootResult() {
+    public static ValidatorResultElement rootResult() {
         return new ValidatorResultElement("", 0);
     }
 
-    ValidatorResultElement childElement(String pathElement, int index) {
+    public ValidatorResultElement childElement(String pathElement, int index) {
         return new ValidatorResultElement(pathElement, index, this);
     }
 
@@ -45,7 +46,7 @@ class ValidatorResultElement {
         }
     }
 
-    boolean hasError() {
+    public boolean hasError() {
         return errors.containsKey(this.path);
     }
 

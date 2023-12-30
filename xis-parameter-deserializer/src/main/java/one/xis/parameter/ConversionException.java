@@ -1,8 +1,8 @@
-package one.xis.server;
+package one.xis.parameter;
 
 import lombok.Getter;
 
-class ConversionException extends Exception {
+class ConversionException extends RuntimeException {
 
     @Getter
     private final Object value;

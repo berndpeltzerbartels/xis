@@ -1,4 +1,4 @@
-package one.xis.server;
+package one.xis.validation;
 
 import lombok.Data;
 
@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 @Data
-class ValidatorMessages {
+public class ValidatorMessages {
     private final List<String> globalMessages = new ArrayList<>();
     private final Map<String, String> messages = new HashMap<>();
 

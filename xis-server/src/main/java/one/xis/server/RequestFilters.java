@@ -3,6 +3,7 @@ package one.xis.server;
 import one.xis.context.XISComponent;
 import one.xis.context.XISInit;
 import one.xis.context.XISInject;
+import one.xis.validation.ValidatorMessages;
 
 import java.util.Collection;
 import java.util.Comparator;

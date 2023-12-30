@@ -5,13 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import one.xis.PathVariable;
 import one.xis.*;
 import one.xis.context.XISComponent;
-import one.xis.utils.lang.CollectionUtils;
+import one.xis.parameter.ParameterDeserializer;
+import one.xis.validation.ValidatorResultElement;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.time.ZoneId;
-import java.util.Collection;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -19,8 +18,7 @@ import java.util.Objects;
 @XISComponent
 @RequiredArgsConstructor
 class ParameterPreparation {
-    private final JsonDeserializer jsonDeserializer;
-    private final Validation validation;
+    private final ParameterDeserializer parameterDeserializer;
 
     Object[] prepareParameters(Method method, ClientRequest context) throws Exception {
         var rootValidationResult = ValidatorResultElement.rootResult();
@@ -52,48 +50,32 @@ class ParameterPreparation {
     private Object deserializeModelParameter(Parameter parameter, ClientRequest context, ValidatorResultElement resultElement, Locale locale, String zoneId) throws IOException {
         var key = parameter.getAnnotation(ModelData.class).value();
         var paramValue = context.getData().get(key);
-        return deserializeParameter(paramValue, parameter, resultElement, locale, zoneId);
+        return parameterDeserializer.deserializeParameter(paramValue, parameter, resultElement, locale, zoneId);
     }
 
     private Object deserializeFormDataParameter(Parameter parameter, ClientRequest context, ValidatorResultElement validatorResultElement, Locale locale, String zoneId) throws IOException {
         var key = parameter.getAnnotation(FormData.class).value();
         var paramValue = context.getFormData().get(key);
-        return deserializeParameter(paramValue, parameter, validatorResultElement, locale, zoneId);
+        return parameterDeserializer.deserializeParameter(paramValue, parameter, validatorResultElement, locale, zoneId);
     }
 
     private Object deserializeUrlParameter(Parameter parameter, ClientRequest context, ValidatorResultElement resultElement, Locale locale, String zoneId) throws IOException {
         var key = parameter.getAnnotation(URLParameter.class).value();
         var paramValue = context.getUrlParameters().get(key);
-        return deserializeParameter(paramValue, parameter, resultElement, locale, zoneId);
+        return parameterDeserializer.deserializeParameter(paramValue, parameter, resultElement, locale, zoneId);
     }
 
     private Object deserializePathVariable(Parameter parameter, ClientRequest context, ValidatorResultElement resultElement, Locale locale, String zoneId) throws IOException {
         var key = parameter.getAnnotation(PathVariable.class).value();
         var paramValue = context.getPathVariables().get(key);
-        return deserializeParameter(paramValue, parameter, resultElement, locale, zoneId);
+        return parameterDeserializer.deserializeParameter(paramValue, parameter, resultElement, locale, zoneId);
     }
 
     private Object deserializeWidgetParameter(Parameter parameter, ClientRequest context, ValidatorResultElement resultElement, Locale locale, String zoneId) throws IOException {
         var key = parameter.getAnnotation(WidgetParameter.class).value();
         var paramValue = context.getWidgetParameters().get(key);
-        return deserializeParameter(paramValue, parameter, resultElement, locale, zoneId);
+        return parameterDeserializer.deserializeParameter(paramValue, parameter, resultElement, locale, zoneId);
     }
 
 
-    @SuppressWarnings("unchecked")
-    private Object deserializeParameter(String paramValue, Parameter parameter, ValidatorResultElement validatorResultElement, Locale locale, String zoneId) throws IOException {
-        var target = new JsonDeserializer.TargetParameter(parameter);
-        if (paramValue == null) {
-            if (Collection.class.isAssignableFrom(parameter.getType())) {
-                var collection = CollectionUtils.emptyInstance((Class<Collection<?>>) parameter.getType());
-                validation.validateBeforeAssignment(target, collection, validatorResultElement);
-                return collection;
-            }
-            return null;
-        } else if (String.class.isAssignableFrom(parameter.getType())) {
-            validation.validateBeforeAssignment(target, "", validatorResultElement);
-            return paramValue;
-        }
-        return jsonDeserializer.deserialze(paramValue, parameter, validatorResultElement, locale, ZoneId.of(zoneId));
-    }
 }

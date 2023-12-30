@@ -2,6 +2,7 @@ package one.xis.server;
 
 
 import lombok.Data;
+import one.xis.validation.ValidatorMessages;
 
 import java.util.Map;
 

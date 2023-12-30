@@ -6,6 +6,7 @@ import one.xis.context.XISComponent;
 import one.xis.context.XISInit;
 import one.xis.resource.Resource;
 import one.xis.resource.Resources;
+import one.xis.validation.ValidatorMessages;
 import org.tinylog.Logger;
 
 import java.util.HashMap;

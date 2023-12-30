@@ -1,42 +1,62 @@
-package one.xis.server;
+package one.xis.parameter;
 
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
-import one.xis.FormData;
-import one.xis.ModelData;
 import one.xis.context.XISComponent;
 import one.xis.utils.lang.ClassUtils;
 import one.xis.utils.lang.CollectionUtils;
 import one.xis.utils.lang.FieldUtil;
+import one.xis.validation.Validation;
+import one.xis.validation.ValidatorResultElement;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.lang.reflect.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.Parameter;
+import java.lang.reflect.ParameterizedType;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.sql.Timestamp;
 import java.text.*;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.Temporal;
 import java.util.*;
 import java.util.function.Function;
 
-
 @XISComponent
 @RequiredArgsConstructor
-class JsonDeserializer {
+class ParameterDeserializerImpl implements ParameterDeserializer {
 
     private final Validation validation;
 
-
+    @Override
     public Object deserialze(String json, Parameter parameter, ValidatorResultElement parameterResult, Locale locale, ZoneId zoneId) throws IOException {
         return deserialze(json, new TargetParameter(parameter), parameterResult, locale, zoneId);
     }
 
+    @Override
     public Object deserialze(String json, Field field, ValidatorResultElement parameterResult, Locale locale, ZoneId zoneId) throws IOException {
         return deserialze(json, new TargetField(field), parameterResult, locale, zoneId);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public Object deserializeParameter(String paramValue, Parameter parameter, ValidatorResultElement validatorResultElement, Locale locale, String zoneId) throws IOException {
+        if (paramValue == null) {
+            if (Collection.class.isAssignableFrom(parameter.getType())) {
+                var collection = CollectionUtils.emptyInstance((Class<Collection<?>>) parameter.getType());
+                validation.validateBeforeAssignment(parameter.getType(), collection, validatorResultElement);
+                return collection;
+            }
+            return null;
+        } else if (String.class.isAssignableFrom(parameter.getType())) {
+            validation.validateBeforeAssignment(String.class, "", validatorResultElement);
+            return paramValue;
+        }
+        return deserialze(paramValue, parameter, validatorResultElement, locale, ZoneId.of(zoneId));
     }
 
 
@@ -67,7 +87,7 @@ class JsonDeserializer {
         } else {
             throw new IllegalStateException();
         }
-        validation.validateAssignedValue(target, value, result);
+        validation.validateAssignedValue(target.getType(), value, result);
         return value;
     }
 
@@ -77,7 +97,7 @@ class JsonDeserializer {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } catch (ConversionException e) {
-            validation.assignmentError(target, e.getValue(), result);
+            validation.assignmentError(target.getType(), e.getValue(), result);
             return null;
         }
     }
@@ -138,12 +158,12 @@ class JsonDeserializer {
                 try {
                     var targetField = new TargetField(field);
                     value = read(reader, targetField, result, locale, zoneId);
-                    validation.validateBeforeAssignment(targetField, value, result);
+                    validation.validateBeforeAssignment(targetField.getType(), value, result);
                     if (!result.hasError()) {
                         FieldUtil.setFieldValue(o, field, value);
                     }
                 } catch (IllegalArgumentException e) {
-                    validation.assignmentError(new TargetField(field), value, result);
+                    validation.assignmentError(field.getType(), value, result);
                 }
             } else {
                 reader.skipValue();
@@ -186,29 +206,31 @@ class JsonDeserializer {
             return readBigDecimal(reader, locale);
         }
         if (type.equals(Date.class)) {
-            return readDate(reader, locale, zoneId);
+            return TemporalReader.readDate(reader, locale, zoneId);
         }
         if (type.equals(ZonedDateTime.class)) {
-            return readZonedDateTime(reader, locale, zoneId);
+            return TemporalReader.readZonedDateTime(reader, locale, zoneId);
         }
         if (type.equals(OffsetDateTime.class)) {
-            return readOffsetDateTime(reader, locale, zoneId);
+            return TemporalReader.readOffsetDateTime(reader, locale, zoneId);
         }
         if (type.equals(LocalDate.class)) {
-            return readLocalDate(reader, locale);
+            return TemporalReader.readLocalDate(reader, locale);
         }
         if (type.equals(LocalDateTime.class)) {
-            return readLocalDateTime(reader, locale);
+            return TemporalReader.readLocalDateTime(reader, locale);
         }
         if (type.equals(Year.class)) {
-            return readYear(reader);
+            return TemporalReader.readYear(reader);
         }
         if (type.equals(YearMonth.class)) {
-            return readYearMonth(reader, locale);
+            return TemporalReader.readYearMonth(reader, locale);
         }
-
         if (type.equals(Month.class)) {
-            return readMonth(reader, locale);
+            return TemporalReader.readMonth(reader, locale);
+        }
+        if (type.equals(Timestamp.class)) {
+            return TemporalReader.readTimestamp(reader, locale, zoneId);
         }
         if (type.equals(String.class)) {
             return reader.nextString();
@@ -302,275 +324,196 @@ class JsonDeserializer {
         }
     }
 
-    private Date readDate(JsonReader reader, Locale locale, ZoneId zoneId) throws ConversionException {
-        return toDate(readZonedDateTime(reader, locale, zoneId));
-    }
+    static class TemporalReader {
 
-    private OffsetDateTime readOffsetDateTime(JsonReader reader, Locale locale, ZoneId zoneId) throws ConversionException {
-        var localDateTime = readLocalDateTime(reader, locale);
-        var offset = zoneId.getRules().getOffset(localDateTime);
-        return OffsetDateTime.of(localDateTime, offset);
-    }
-
-    private LocalDate readLocalDate(JsonReader reader, Locale locale) throws ConversionException {
-        String str;
-        try {
-            str = reader.nextString();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        try {
-            return readIsoLocalDate(str);
-        } catch (ConversionException e) {
-            return readLocalizedLocalDate(str, locale);
-        }
-    }
-
-
-    private LocalDate readIsoLocalDate(String value) throws ConversionException {
-        try {
-            return LocalDate.parse(value);
-        } catch (DateTimeParseException e) {
-            throw new ConversionException(value);
-        }
-    }
-
-
-    private LocalDate readLocalizedLocalDate(String value, Locale locale) throws ConversionException {
-        for (var style : List.of(DateFormat.SHORT, DateFormat.MEDIUM, DateFormat.LONG, DateFormat.FULL)) {
+        static ZonedDateTime readZonedDateTime(JsonReader reader, Locale locale, ZoneId zoneId) throws
+                ConversionException {
+            String value = null;
             try {
-                return readLocalizedLocalDate(value, locale, style);
+                value = reader.nextString();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            Collection<Function<String, Temporal>> methods = Set.of(TemporalReader::readIsoLocalDate);
+
+            try {
+                return readZonedDateTimeIso(value);
             } catch (ConversionException e) {
-                // NOOP
+                return readLocalDateTime(reader, locale).atZone(zoneId);
             }
         }
-        throw new ConversionException(value);
-    }
 
-    private LocalDate readLocalizedLocalDate(String value, Locale locale, int dateFormatStyle) throws
-            ConversionException {
-        var dateFormat = DateFormat.getDateInstance(dateFormatStyle, locale);
-        var pattern = ((SimpleDateFormat) dateFormat).toLocalizedPattern().replace(".yy,", ".yyyy,");
-        var formatter = DateTimeFormatter.ofPattern(pattern).localizedBy(locale);
-        try {
-            return LocalDate.parse(value, formatter);
-        } catch (DateTimeParseException e) {
-            throw new ConversionException(value);
+        static Timestamp readTimestamp(JsonReader reader, Locale locale, ZoneId zoneId) throws ConversionException {
+            return Timestamp.from(readDate(reader, locale, zoneId).toInstant());
         }
-    }
 
-    private ZonedDateTime readZonedDateTime(JsonReader reader, Locale locale, ZoneId zoneId) throws ConversionException {
-        return readLocalDateTime(reader, locale).atZone(zoneId);
-    }
-
-    private Year readYear(JsonReader reader) throws ConversionException {
-        String str = null;
-        try {
-            str = reader.nextString();
-            return Year.parse(str);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (DateTimeParseException e) {
-            throw new ConversionException(str);
+        static Date readDate(JsonReader reader, Locale locale, ZoneId zoneId) throws ConversionException {
+            return toDate(readZonedDateTime(reader, locale, zoneId));
         }
-    }
 
-    private Month readMonth(JsonReader reader, Locale locale) throws ConversionException {
-        String value = null;
-        try {
-            value = reader.nextString();
-        } catch (IOException e) {
-            throw new ConversionException(e, value);
+        static OffsetDateTime readOffsetDateTime(JsonReader reader, Locale locale, ZoneId zoneId) throws
+                ConversionException {
+            var localDateTime = readLocalDateTime(reader, locale);
+            var offset = zoneId.getRules().getOffset(localDateTime);
+            return OffsetDateTime.of(localDateTime, offset);
         }
-        try {
-            return Month.valueOf(Month.class, value);
-        } catch (IllegalArgumentException e) {
+
+        static LocalDate readLocalDate(JsonReader reader, Locale locale) throws ConversionException {
+            String str;
             try {
-                return Month.from(DateTimeFormatter.ofPattern("MMMM").localizedBy(locale).parse(value));
-            } catch (DateTimeParseException ex) {
-                throw new RuntimeException("", ex);
+                str = reader.nextString();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
-        }
-    }
-
-    private YearMonth readYearMonth(JsonReader reader, Locale locale) throws ConversionException {
-        String value;
-        try {
-            value = reader.nextString();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        try {
-            return YearMonth.parse(value);
-        } catch (IllegalArgumentException e) {
             try {
-                return YearMonth.from(DateTimeFormatter.ofPattern("MMMM").localizedBy(locale).parse(value));
-            } catch (DateTimeParseException ex) {
-                throw new RuntimeException("", ex);
+                return readIsoLocalDate(str);
+            } catch (ConversionException e) {
+                return readLocalizedLocalDate(str, locale);
             }
         }
-    }
 
-    private LocalDateTime readLocalDateTime(JsonReader reader, Locale locale) throws ConversionException {
-        String value;
-        try {
-            value = reader.nextString();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        try {
-            return readIsoLocalDateTime(value);
-        } catch (ConversionException e) {
-            return readLocalizedLocalDateTime(value, locale);
-        }
-    }
 
-    private LocalDateTime readIsoLocalDateTime(String value) throws ConversionException {
-        try {
-            return LocalDateTime.parse(value);
-        } catch (DateTimeParseException e) {
-            throw new ConversionException(e, value);
+        private static LocalDate readIsoLocalDate(String value) {
+            try {
+                return LocalDate.parse(value);
+            } catch (DateTimeParseException e) {
+                throw new ConversionException(value);
+            }
         }
-    }
 
-    private LocalDateTime readLocalizedLocalDateTime(String value, Locale locale) throws ConversionException {
-        var styles = List.of(DateFormat.SHORT, DateFormat.MEDIUM, DateFormat.LONG, DateFormat.FULL);
-        for (var dateStyle : styles) {
-            for (var timeStyle : styles) {
+
+        private static LocalDate readLocalizedLocalDate(String value, Locale locale) throws ConversionException {
+            for (var style : List.of(DateFormat.SHORT, DateFormat.MEDIUM, DateFormat.LONG, DateFormat.FULL)) {
                 try {
-                    return readLocalizedLocalDateTime(value, locale, dateStyle, timeStyle);
+                    return readLocalizedLocalDate(value, locale, style);
                 } catch (ConversionException e) {
                     // NOOP
                 }
             }
-        }
-        throw new ConversionException(value);
-    }
-
-    private LocalDateTime readLocalizedLocalDateTime(String value, Locale locale, int dateStyle, int timeStyle) throws ConversionException {
-        var dateFormat = DateFormat.getDateTimeInstance(dateStyle, timeStyle, locale);
-        var pattern = ((SimpleDateFormat) dateFormat).toLocalizedPattern().replace(".yy,", ".yyyy,");
-        var formatter = DateTimeFormatter.ofPattern(pattern).localizedBy(locale);
-        try {
-            return LocalDateTime.parse(value, formatter);
-        } catch (DateTimeParseException e) {
             throw new ConversionException(value);
         }
-    }
 
-    private Date toDate(ZonedDateTime zonedDateTime) {
-        return Date.from(zonedDateTime.toInstant());
-    }
-
-    interface Target {
-        String getName();
-
-        Class<?> getType();
-
-        Type getElementType();
-
-
-    }
-
-    @Value
-    static class ClassTargetElement implements Target {
-        String name;
-        Class<?> type;
-
-        @Override
-        public Class<?> getElementType() {
-            return type;
-        }
-
-    }
-
-
-    @Value
-    static class ParameterizedTargetElement implements Target {
-        String name;
-        ParameterizedType type;
-
-        @Override
-        public Class<?> getType() {
-            return (Class<?>) type.getRawType();
-        }
-
-        @Override
-        public Type getElementType() {
-            return type.getActualTypeArguments()[0];
-        }
-
-    }
-
-    @Value
-    static class TargetField implements Target {
-        Field field;
-
-        @Override
-        public String getName() {
-            return field.getName();
-        }
-
-        @Override
-        public Class<?> getType() {
-            return field.getType();
-        }
-
-        @Override
-        public Type getElementType() {
-            var type = field.getGenericType();
-            if (type instanceof ParameterizedType elementType) {
-                return elementType.getActualTypeArguments()[0];
+        private static LocalDate readLocalizedLocalDate(String value, Locale locale, int dateFormatStyle) throws
+                ConversionException {
+            var dateFormat = DateFormat.getDateInstance(dateFormatStyle, locale);
+            var pattern = ((SimpleDateFormat) dateFormat).toLocalizedPattern().replace(".yy,", ".yyyy,");
+            var formatter = DateTimeFormatter.ofPattern(pattern).localizedBy(locale);
+            try {
+                return LocalDate.parse(value, formatter);
+            } catch (DateTimeParseException e) {
+                throw new ConversionException(value);
             }
-            if (type instanceof WildcardType wildcardType) {
-                return wildcardType.getUpperBounds()[0];
-            }
-            return null;
         }
 
+
+        private static ZonedDateTime readZonedDateTimeIso(String value) throws ConversionException {
+            try {
+                return ZonedDateTime.parse(value);
+            } catch (DateTimeParseException e) {
+                throw new ConversionException(value);
+            }
+        }
+
+        static Year readYear(JsonReader reader) throws ConversionException {
+            String str = null;
+            try {
+                str = reader.nextString();
+                return Year.parse(str);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            } catch (DateTimeParseException e) {
+                throw new ConversionException(str);
+            }
+        }
+
+        static Month readMonth(JsonReader reader, Locale locale) throws ConversionException {
+            String value = null;
+            try {
+                value = reader.nextString();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            try {
+                return Month.valueOf(Month.class, value);
+            } catch (IllegalArgumentException e) {
+                try {
+                    return Month.from(DateTimeFormatter.ofPattern("MMMM").localizedBy(locale).parse(value));
+                } catch (DateTimeParseException ex) {
+                    throw new RuntimeException("", ex);
+                }
+            }
+        }
+
+        static YearMonth readYearMonth(JsonReader reader, Locale locale) throws ConversionException {
+            String value;
+            try {
+                value = reader.nextString();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            try {
+                return YearMonth.parse(value);
+            } catch (IllegalArgumentException e) {
+                try {
+                    return YearMonth.from(DateTimeFormatter.ofPattern("MMMM").localizedBy(locale).parse(value));
+                } catch (DateTimeParseException ex) {
+                    throw new RuntimeException("", ex);
+                }
+            }
+        }
+
+        static LocalDateTime readLocalDateTime(JsonReader reader, Locale locale) throws ConversionException {
+            String value;
+            try {
+                value = reader.nextString();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            try {
+                return readIsoLocalDateTime(value);
+            } catch (ConversionException e) {
+                return readLocalizedLocalDateTime(value, locale);
+            }
+        }
+
+        private static LocalDateTime readIsoLocalDateTime(String value) throws ConversionException {
+            try {
+                return LocalDateTime.parse(value);
+            } catch (DateTimeParseException e) {
+                throw new ConversionException(e, value);
+            }
+        }
+
+        private static LocalDateTime readLocalizedLocalDateTime(String value, Locale locale) throws ConversionException {
+            var styles = List.of(DateFormat.SHORT, DateFormat.MEDIUM, DateFormat.LONG, DateFormat.FULL);
+            for (var dateStyle : styles) {
+                for (var timeStyle : styles) {
+                    try {
+                        return readLocalizedLocalDateTime(value, locale, dateStyle, timeStyle);
+                    } catch (ConversionException e) {
+                        // NOOP
+                    }
+                }
+            }
+            throw new ConversionException(value);
+        }
+
+        private static LocalDateTime readLocalizedLocalDateTime(String value, Locale locale, int dateStyle, int timeStyle) throws
+                ConversionException {
+            var dateFormat = DateFormat.getDateTimeInstance(dateStyle, timeStyle, locale);
+            var pattern = ((SimpleDateFormat) dateFormat).toLocalizedPattern().replace(".yy,", ".yyyy,");
+            var formatter = DateTimeFormatter.ofPattern(pattern).localizedBy(locale);
+            try {
+                return LocalDateTime.parse(value, formatter);
+            } catch (DateTimeParseException e) {
+                throw new ConversionException(value);
+            }
+        }
+
+        private static Date toDate(ZonedDateTime zonedDateTime) {
+            return Date.from(zonedDateTime.toInstant());
+        }
     }
 
-    @Value
-    static class TargetParameter implements Target {
 
-        Parameter parameter;
-
-        @Override
-        public String getName() {
-            if (parameter.isAnnotationPresent(FormData.class)) {
-                return parameter.getAnnotation(FormData.class).value();
-            }
-            if (parameter.isAnnotationPresent(ModelData.class)) {
-                return parameter.getAnnotation(ModelData.class).value();
-            }
-            return parameter.getName();
-        }
-
-        @Override
-        public Class<?> getType() {
-            return parameter.getType();
-        }
-
-        @Override
-        public Type getElementType() {
-            var type = parameter.getParameterizedType();
-            if (type instanceof ParameterizedType elementType) {
-                return elementType.getActualTypeArguments()[0];
-            }
-            if (type instanceof WildcardType wildcardType) {
-                return wildcardType.getUpperBounds()[0];
-            }
-            return null;
-        }
-
-
-    }
 }
-
-
-
-
-
-
-
-

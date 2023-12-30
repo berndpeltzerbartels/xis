@@ -13,6 +13,7 @@ import javax.script.ScriptException;
 import java.util.Map;
 
 import static one.xis.js.JavascriptSource.CLASSES;
+import static one.xis.js.JavascriptSource.FUNCTIONS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -31,7 +32,7 @@ class ClientTest {
         httpClient = Mockito.mock(HttpClient.class);
         promise = Mockito.mock(Promise.class);
         when(httpClient.get(any(), any())).thenReturn(promise);
-        var clientJs = Javascript.getScript(CLASSES);
+        var clientJs = Javascript.getScript(CLASSES, FUNCTIONS);
         var instantiation = "var client = new Client(httpClient);";
         script = clientJs + instantiation;
     }
