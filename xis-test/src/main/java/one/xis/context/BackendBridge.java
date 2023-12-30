@@ -70,6 +70,7 @@ public class BackendBridge {
         try {
             var request = objectMapper.readValue(requestJson, ClientRequest.class);
             request.setLocale(Locale.GERMANY); // TODO
+            request.setZoneId("Europe/Berlin");
             return request;
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Failed to deserialize request", e);

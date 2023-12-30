@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.*;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,7 +25,7 @@ class JsonDeserializerTest {
         @Test
         void deserialzeObject() throws IOException, NoSuchMethodException {
             var json = "{ \"text\":\"Hello !\", \"b\": { \"c\": {\"value\":\"Huhu !\"}} }";
-            var result = (A) deserializer.deserialze(json, TestPojo.class.getDeclaredMethod("test", A.class).getParameters()[0], ValidatorResultElement.rootResult(), Locale.GERMANY);
+            var result = (A) deserializer.deserialze(json, TestPojo.class.getDeclaredMethod("test", A.class).getParameters()[0], ValidatorResultElement.rootResult(), Locale.GERMANY, ZoneId.of("Europe/Berlin"));
 
             assertThat(result.text).isEqualTo("Hello !");
             assertThat(result.b.c.value).isEqualTo("Huhu !");
@@ -35,7 +36,7 @@ class JsonDeserializerTest {
         @SuppressWarnings("unchecked")
         void deserialzeArray() throws IOException, NoSuchMethodException {
             var json = "[1,2,3,4]";
-            var result = (List<Integer>) deserializer.deserialze(json, TestPojo.class.getDeclaredMethod("test1", List.class).getParameters()[0], ValidatorResultElement.rootResult(), Locale.GERMANY);
+            var result = (List<Integer>) deserializer.deserialze(json, TestPojo.class.getDeclaredMethod("test1", List.class).getParameters()[0], ValidatorResultElement.rootResult(), Locale.GERMANY, ZoneId.of("Europe/Berlin"));
 
             assertThat(result).containsExactly(1, 2, 3, 4);
         }
@@ -45,7 +46,7 @@ class JsonDeserializerTest {
         @SuppressWarnings("unchecked")
         void typeParametersInTypeParameters() throws NoSuchMethodException, IOException {
             var json = "[[1],[2],[3],[4]]";
-            var result = (List<List<Integer>>) deserializer.deserialze(json, TestPojo.class.getDeclaredMethod("test2", List.class).getParameters()[0], ValidatorResultElement.rootResult(), Locale.GERMANY);
+            var result = (List<List<Integer>>) deserializer.deserialze(json, TestPojo.class.getDeclaredMethod("test2", List.class).getParameters()[0], ValidatorResultElement.rootResult(), Locale.GERMANY, ZoneId.of("Europe/Berlin"));
 
             assertThat(result.get(0)).isEqualTo(List.of(1));
             assertThat(result.get(1)).isEqualTo(List.of(2));
@@ -57,7 +58,7 @@ class JsonDeserializerTest {
         @SuppressWarnings("unchecked")
         void typeParametersInTypeParameters3() throws NoSuchMethodException, IOException {
             var json = "[[[1]]]";
-            var result = deserializer.deserialze(json, TestPojo.class.getDeclaredMethod("test3", ArrayList.class).getParameters()[0], ValidatorResultElement.rootResult(), Locale.GERMANY);
+            var result = deserializer.deserialze(json, TestPojo.class.getDeclaredMethod("test3", ArrayList.class).getParameters()[0], ValidatorResultElement.rootResult(), Locale.GERMANY, ZoneId.of("Europe/Berlin"));
             assertThat(result).isInstanceOf(ArrayList.class);
             result = CollectionUtils.onlyElement((Collection<?>) result);
             assertThat(result).isInstanceOf(LinkedList.class);
@@ -75,11 +76,39 @@ class JsonDeserializerTest {
 
             var typeValidationResult = ValidatorResultElement.rootResult();
 
-            assertThat(deserializer.deserialze("123", method.getParameters()[0], typeValidationResult, Locale.GERMANY)).isEqualTo("123");
-            assertThat(deserializer.deserialze("123", method.getParameters()[1], typeValidationResult, Locale.GERMANY)).isEqualTo(123);
-            assertThat(deserializer.deserialze("123", method.getParameters()[2], typeValidationResult, Locale.GERMANY)).isEqualTo(Integer.parseInt("123"));
-            assertThat(deserializer.deserialze("123", method.getParameters()[3], typeValidationResult, Locale.GERMANY)).isEqualTo(BigInteger.valueOf(123));
-            assertThat(deserializer.deserialze("123", method.getParameters()[4], typeValidationResult, Locale.GERMANY)).isEqualTo(BigDecimal.valueOf(123.0));
+            assertThat(deserializer.deserialze("123", method.getParameters()[0], typeValidationResult, Locale.GERMANY, ZoneId.of("Europe/Berlin"))).isEqualTo("123");
+            assertThat(deserializer.deserialze("123", method.getParameters()[1], typeValidationResult, Locale.GERMANY, ZoneId.of("Europe/Berlin"))).isEqualTo(123);
+            assertThat(deserializer.deserialze("123", method.getParameters()[2], typeValidationResult, Locale.GERMANY, ZoneId.of("Europe/Berlin"))).isEqualTo(Integer.parseInt("123"));
+            assertThat(deserializer.deserialze("123", method.getParameters()[3], typeValidationResult, Locale.GERMANY, ZoneId.of("Europe/Berlin"))).isEqualTo(BigInteger.valueOf(123));
+            assertThat(deserializer.deserialze("123", method.getParameters()[4], typeValidationResult, Locale.GERMANY, ZoneId.of("Europe/Berlin"))).isEqualTo(BigDecimal.valueOf(123.0));
+        }
+
+        @Test
+        void localDate() throws NoSuchMethodException, IOException {
+            var method = TestPojo.class.getDeclaredMethod("localDate", LocalDate.class);
+            var parameter = method.getParameters()[0];
+            var typeValidationResult = ValidatorResultElement.rootResult();
+            var expected = LocalDate.of(2016, Month.MAY, 1);
+
+            assertThat(deserializer.deserialze("01.05.2016", parameter, typeValidationResult, Locale.GERMANY, ZoneId.of("Europe/Berlin"))).isEqualTo(expected);
+            assertThat(deserializer.deserialze("2016-05-01", parameter, typeValidationResult, Locale.GERMANY, ZoneId.of("Europe/Berlin"))).isEqualTo(expected);
+        }
+
+        @Test
+        void dateTimeTypes() throws NoSuchMethodException, IOException {
+            var method = TestPojo.class.getDeclaredMethod("dateTimeTypes", DateTimeValue.class);
+            var typeValidationResult = ValidatorResultElement.rootResult();
+            var json = "{\"localDateTime\":\"12.07.2000, 23:00:00\",\"zonedDateTime\":\"12.07.2000, 23:00:00\",\"offsetDateTime\":\"12.07.2000, 23:00:00\",\"date\":\"12.07.2000, 23:00:00\"}";
+            var expected = Instant.from(ZonedDateTime.of(2000, 7, 12, 21, 0, 0, 0, ZoneId.of("UTC")));
+
+            var params = method.getParameters();
+            var result = (DateTimeValue) deserializer.deserialze(json, params[0], typeValidationResult, Locale.GERMANY, ZoneId.of("Europe/Berlin"));
+
+
+            assertThat(result.date.toInstant()).isEqualTo(expected);
+            assertThat(result.zonedDateTime.toInstant()).isEqualTo(expected);
+            assertThat(result.offsetDateTime.toInstant()).isEqualTo(expected);
+            assertThat(result.localDateTime.toInstant(ZoneOffset.ofHours(2))).isEqualTo(expected);
         }
 
 
@@ -104,6 +133,22 @@ class JsonDeserializerTest {
 
             void integer(String s, int i1, Integer i2, BigInteger bigInteger, BigDecimal bigDecimal) {
             }
+
+            void localDate(LocalDate localDate) {
+
+            }
+
+            void dateTimeTypes(DateTimeValue value) {
+
+            }
+        }
+
+        @Data
+        static class DateTimeValue {
+            private LocalDateTime localDateTime;
+            private ZonedDateTime zonedDateTime;
+            private OffsetDateTime offsetDateTime;
+            private Date date;
         }
 
         @Data
@@ -152,14 +197,14 @@ class JsonDeserializerTest {
         void invalidInteger() throws NoSuchFieldException, IOException {
             var json = "{\"integer\": \"bla\"}";
             var validationElement = ValidatorResultElement.rootResult();
-            var object = deserializer.deserialze(json, A.class.getDeclaredField("b"), validationElement, Locale.GERMANY);
+            var object = deserializer.deserialze(json, A.class.getDeclaredField("b"), validationElement, Locale.GERMANY, ZoneId.of("Europe/Berlin"));
         }
 
         @Test
         void validInteger() throws NoSuchFieldException, IOException {
             var json = "{\"integer\": \"123\"}";
             var validationElement = ValidatorResultElement.rootResult();
-            var object = deserializer.deserialze(json, A.class.getDeclaredField("b"), validationElement, Locale.GERMANY);
+            var object = deserializer.deserialze(json, A.class.getDeclaredField("b"), validationElement, Locale.GERMANY, ZoneId.of("Europe/Berlin"));
         }
 
 

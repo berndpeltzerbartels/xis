@@ -14,6 +14,7 @@ public class ClientRequest {
     private String pageId;
     private String widgetId;
     private Locale locale;
+    private String zoneId;
 
     @JsonDeserialize(using = MapDeserializer.class)
     private Map<String, String> data;

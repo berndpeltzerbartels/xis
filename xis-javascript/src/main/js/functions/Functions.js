@@ -155,3 +155,12 @@ function stripQuery(url) {
     }
     return url;
 }
+
+
+function randomString() {
+    return Math.random().toString(36).slice(2);
+}
+
+function timeZone() {
+    return ntl.DateTimeFormat().resolvedOptions().timeZone;
+}

@@ -4,6 +4,7 @@
  * @property {ClientConfig} config
  * @property {string} clientId
  * @property {string} userId
+ * @property {zoneId}
  */
 class Client {
 
@@ -13,8 +14,9 @@ class Client {
     constructor(httpClient) {
         this.httpClient = httpClient;
         this.config = undefined;
-        this.clientId = '';
+        this.clientId = randomString();
         this.userId = '';
+        this.zoneId = timeZone();
     }
 
     /**
@@ -168,6 +170,7 @@ class Client {
         request.formData = formData ? formData.values : {};
         request.urlParameters = resolvedURL.urlParameters;
         request.pathVariables = resolvedURL.pathVariablesAsMap();
+        request.zoneId = this.zoneId;
         return request;
     }
 
@@ -191,6 +194,7 @@ class Client {
         request.urlParameters = widgetState.resolvedURL.urlParameters;
         request.pathVariables = widgetState.resolvedURL.pathVariablesAsMap();
         request.widgetParameters = widgetState.widgetParameters;
+        request.zoneId = this.zoneId;
         return request;
     }
 
