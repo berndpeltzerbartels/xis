@@ -20,13 +20,18 @@ import java.util.Optional;
 import java.util.Set;
 
 @XISComponent
-class ZoneDateTimeDeserializer implements JsonDeserializer<Object> {
+class DateTimeDeserializer implements JsonDeserializer<Object> {
 
     private static final Set<Class<?>> TYPES = Set.of(LocalDateTime.class, ZonedDateTime.class, OffsetDateTime.class, Date.class);
 
     @Override
     public boolean matchesTarget(Target target, JsonToken token) {
-        return target.getType().equals(ZonedDateTime.class) && token.equals(JsonToken.STRING);
+        return TYPES.contains(target.getType()) && token.equals(JsonToken.STRING);
+    }
+
+    @Override
+    public int getPriority() {
+        return 50;
     }
 
     @Override
@@ -47,9 +52,13 @@ class ZoneDateTimeDeserializer implements JsonDeserializer<Object> {
     }
 
     private Optional<LocalDateTime> localDateTime(@NonNull String value, @NonNull ParameterDeserializationContext context) throws IOException {
-        return zonedDateTime(value, context)
-                .map(z -> z.withZoneSameInstant(ZoneId.systemDefault()))
-                .map(ZonedDateTime::toLocalDateTime);
+        try {
+            return zonedDateTime(value, context)
+                    .map(z -> z.withZoneSameInstant(ZoneId.systemDefault()))
+                    .map(ZonedDateTime::toLocalDateTime);
+        } catch (ConversionException e) {
+            return localDateTime(value, context.getLocale());
+        }
     }
 
     private Optional<OffsetDateTime> offsetDateTime(@NonNull String value, @NonNull ParameterDeserializationContext context) throws IOException {

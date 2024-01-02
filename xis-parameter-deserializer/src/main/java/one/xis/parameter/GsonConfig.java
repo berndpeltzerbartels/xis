@@ -16,4 +16,5 @@ class GsonConfig {
                 .setLenient()
                 .create();
     }
+
 }

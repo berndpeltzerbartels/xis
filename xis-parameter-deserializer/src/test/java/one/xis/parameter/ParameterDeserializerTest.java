@@ -31,6 +31,7 @@ class ParameterDeserializerTest {
                 .withSingletonClass(GsonConfig.class)
                 .withSingletonClass(ParameterDeserializerImpl.class)
                 .withSingletonClass(DefaultJsonDeserializer.class)
+                .withSingletonClass(DateTimeDeserializer.class)
                 .withSingleton(mock(Validation.class))
                 .build().getSingleton(ParameterDeserializer.class);
     }
@@ -133,7 +134,7 @@ class ParameterDeserializerTest {
         void dateTimeTypesLocalized() throws NoSuchMethodException, IOException {
             var method = TestPojo.class.getDeclaredMethod("dateTimeTypes", DateTimeValue.class);
             var typeValidationResult = ValidatorResultElement.rootResult();
-            var json = "{\"localDateTime\":\"12.07.2000, 23:00:00\",\"zonedDateTime\":\"12.07.2000, 23:00:00\",\"offsetDateTime\":\"12.07.2000, 23:00:00\",\"date\":\"12.07.2000, 23:00:00\"}";
+            var json = "{\"localDateTime\":\"12.07.2000, 23:00\",\"zonedDateTime\":\"12.07.2000, 23:00\",\"offsetDateTime\":\"12.07.2000, 23:00\",\"date\":\"12.07.2000, 23:00\"}";
             var expected = Instant.from(ZonedDateTime.of(2000, 7, 12, 21, 0, 0, 0, ZoneId.of("UTC")));
             var params = method.getParameters();
 

@@ -25,7 +25,6 @@ class ParameterDeserializerImpl implements ParameterDeserializer {
 
     private final Validation validation;
     private final Collection<JsonDeserializer<Object>> deserializers;
-    private final DefaultJsonDeserializer defaultJsonDeserializer;
     private final Map<Target, JsonDeserializer<Object>> deserializerCache = new HashMap<>();
 
     @Override
@@ -66,7 +65,7 @@ class ParameterDeserializerImpl implements ParameterDeserializer {
     private Optional<Object> read(JsonReader reader, Target target, ParameterDeserializationContext context) throws IOException {
         Optional<Object> value;
         if (reader.peek() == JsonToken.STRING || reader.peek() == JsonToken.NUMBER) {
-            var deserializer = getDeserializer(target, reader.peek()).orElse(defaultJsonDeserializer);
+            var deserializer = getDeserializer(target, reader.peek());
             value = deserializer.deserialize(reader, target, context);
         } else if (reader.peek() == JsonToken.BEGIN_ARRAY) {
             if (Collection.class.isAssignableFrom(target.getType())) {
@@ -86,18 +85,18 @@ class ParameterDeserializerImpl implements ParameterDeserializer {
     }
 
     @NonNull
-    private Optional<JsonDeserializer<Object>> getDeserializer(Target target, JsonToken token) {
+    private JsonDeserializer<Object> getDeserializer(Target target, JsonToken token) {
         if (deserializerCache.containsKey(target)) {
-            return Optional.of(deserializerCache.get(target));
+            return deserializerCache.get(target);
         }
-        var deserializer = findDeserializer(target, token);
-        deserializer.ifPresent(d -> deserializerCache.put(target, d));
-        return deserializer;
+        return deserializerCache.computeIfAbsent(target, t -> findDeserializer(t, token));
     }
 
 
-    private Optional<JsonDeserializer<Object>> findDeserializer(Target target, JsonToken token) {
-        return deserializers.stream().filter(deserializer -> deserializer.matchesTarget(target, token)).findFirst();
+    private JsonDeserializer<Object> findDeserializer(Target target, JsonToken token) {
+        return deserializers.stream()
+                .filter(deserializer -> deserializer.matchesTarget(target, token))
+                .min(Comparator.comparing(JsonDeserializer::getPriority)).orElseThrow();
     }
 
     private Collection<Object> deserializeArrayToArray(JsonReader reader, Target target, ParameterDeserializationContext context) throws IOException {

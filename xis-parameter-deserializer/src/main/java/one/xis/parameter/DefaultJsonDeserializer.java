@@ -23,8 +23,16 @@ class DefaultJsonDeserializer implements JsonDeserializer<Object> {
     }
 
     @Override
+    public int getPriority() {
+        return 100;
+    }
+
+    @Override
     public Optional<Object> deserialize(@NonNull String value, Target target, ParameterDeserializationContext context) throws IOException, ConversionException {
         try {
+            if (target.getType().equals(String.class)) {
+                return Optional.of(value);
+            }
             var reader = new JsonReader(new StringReader(value));
             reader.setLenient(true);
             var adapter = gson.getAdapter(target.getType());

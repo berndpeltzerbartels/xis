@@ -13,9 +13,9 @@ import java.util.Locale;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.mock;
 
-class ZoneDateTimeDeserializerTest {
+class DateTimeDeserializerTest {
 
-    private final ZoneDateTimeDeserializer zoneDateTimeDeserializer = new ZoneDateTimeDeserializer();
+    private final DateTimeDeserializer zoneDateTimeDeserializer = new DateTimeDeserializer();
 
     @Test
     void deserializeZoneDateTimeIso() throws IOException {

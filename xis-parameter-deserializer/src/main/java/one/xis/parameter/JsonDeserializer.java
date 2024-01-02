@@ -12,6 +12,10 @@ public interface JsonDeserializer<T> {
 
     boolean matchesTarget(Target target, JsonToken token);
 
+    default int getPriority() {
+        return 10;
+    }
+
 
     default Optional<T> deserialize(JsonReader reader, Target target, ParameterDeserializationContext context) throws IOException, ConversionException {
         var value = reader.nextString();
