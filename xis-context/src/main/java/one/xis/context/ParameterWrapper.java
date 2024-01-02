@@ -47,7 +47,7 @@ class ParameterWrapper extends ValueHolder {
 
     @Override
     public String toString() {
-        return "ParameterWrapper{" + parameter.getType().getSimpleName() + " " + parameter.getName() + "}";
+        return "ParameterWrapper{" + parameter.getDeclaringExecutable() + ": " + parameter + "}";
     }
 
 

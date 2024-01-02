@@ -82,7 +82,7 @@ class AppContextFactory implements ComponentCreationListener {
             consumer.mapProducers(componentProducers);
             consumer.mapInitialComponents(customComponents);
             if (consumer instanceof ConstructorWrapper constructorWrapper) {
-                if (constructorWrapper.isPrepared() && !executableConstructorWrappers.contains(constructorWrapper)) {
+                if (!constructorWrapper.isExecuted() && constructorWrapper.isPrepared() && !executableConstructorWrappers.contains(constructorWrapper)) {
                     executableConstructorWrappers.add(constructorWrapper);
                 }
             }
@@ -104,7 +104,7 @@ class AppContextFactory implements ComponentCreationListener {
     private void runInstiationLoop() {
         for (var constructorWrapper : executableConstructorWrappers) {
             if (constructorWrapper.isPrepared()) {
-                removeConstructorWrapper(constructorWrapper);
+                //removeConstructorWrapper(constructorWrapper);
                 constructorWrapper.execute();
             }
         }

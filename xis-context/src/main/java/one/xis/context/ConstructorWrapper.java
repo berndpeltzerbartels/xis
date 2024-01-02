@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Parameter;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.stream.Collectors;
@@ -20,8 +22,11 @@ class ConstructorWrapper extends ExecutableWrapper<Constructor<?>> implements Co
     private Collection<FieldWrapper> fieldWrappers;
     private Collection<InitMethodWrapper> initMethods;
     private Collection<BeanMethodWrapper> beanMethods;
+    private boolean executed;
 
-    ConstructorWrapper(Constructor<?> constructor, ComponentWrapperPlaceholder componentWrapperPlaceholder, AppContextFactory factory) {
+    ConstructorWrapper(Constructor<?> constructor,
+                       ComponentWrapperPlaceholder componentWrapperPlaceholder,
+                       AppContextFactory factory) {
         super(constructor);
         this.constructor = constructor;
         this.componentWrapperPlaceholder = componentWrapperPlaceholder;
@@ -73,6 +78,7 @@ class ConstructorWrapper extends ExecutableWrapper<Constructor<?>> implements Co
         } else {
             constructor.setAccessible(true);
             try {
+                executed = true;
                 var component = constructor.newInstance(getArgs());
                 componentCreationListeners.forEach(listener -> listener.componentCreated(component, this));
                 contextFactory.componentCreated(component, this);
@@ -88,7 +94,7 @@ class ConstructorWrapper extends ExecutableWrapper<Constructor<?>> implements Co
         s.append("{");
         s.append(constructor.getDeclaringClass().getSimpleName());
         s.append("(");
-        s.append(getParameters().stream().map(ParameterWrapper::getType).map(Class::getSimpleName).collect(Collectors.joining(",")));
+        s.append(Arrays.stream(constructor.getParameters()).map(Parameter::getType).map(Class::getSimpleName).collect(Collectors.joining(",")));
         s.append(")}");
         return s.toString();
     }

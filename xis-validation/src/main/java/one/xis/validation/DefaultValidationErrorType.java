@@ -10,7 +10,8 @@ import java.time.YearMonth;
 import java.util.*;
 
 
-enum DefaultValidationErrorType implements ValidationErrorType {
+public enum DefaultValidationErrorType implements ValidationErrorType {
+    ILLEGAL_UNKNOWN_REASON,
     NOT_A_NUMBER(Number.class, Short.TYPE, Integer.TYPE, Long.TYPE, Float.TYPE, Double.TYPE),
     NOT_A_TIME(LocalTime.class, Time.class),
     NOT_A_YEAR(LocalTime.class),

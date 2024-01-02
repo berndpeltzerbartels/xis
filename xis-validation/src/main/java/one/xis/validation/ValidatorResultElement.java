@@ -40,10 +40,14 @@ class ValidatorResultElement {
         return new ValidatorResultElement(pathElement, index, this);
     }
 
-    void setErrorIfEmpty(DefaultValidationErrorType errorType, String message, Object value) {
+    public void setErrorIfEmpty(DefaultValidationErrorType errorType, String message, Object value) {
         if (!errors.containsKey(this.path)) {
             errors.put(this.path, new ValidationError(errorType, message, value));
         }
+    }
+
+    public void setErrorIfEmpty(Object value) {
+        setErrorIfEmpty(DefaultValidationErrorType.ILLEGAL_UNKNOWN_REASON, null, value);
     }
 
     public boolean hasError() {

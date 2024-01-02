@@ -3,9 +3,11 @@ package one.xis.parameter;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import one.xis.context.AppContext;
 import one.xis.utils.lang.CollectionUtils;
 import one.xis.validation.Validation;
 import one.xis.validation.ValidatorResultElement;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -21,8 +23,17 @@ import static org.mockito.Mockito.mock;
 
 class ParameterDeserializerTest {
 
-    private final Validation validation = mock(Validation.class);
-    private final ParameterDeserializer deserializer = new ParameterDeserializerImpl(validation);
+    private ParameterDeserializer deserializer;
+
+    @BeforeEach
+    void init() {
+        deserializer = AppContext.builder()
+                .withSingletonClass(GsonConfig.class)
+                .withSingletonClass(ParameterDeserializerImpl.class)
+                .withSingletonClass(DefaultJsonDeserializer.class)
+                .withSingleton(mock(Validation.class))
+                .build().getSingleton(ParameterDeserializer.class);
+    }
 
     @Nested
     class ParameterDeserializationOnlyTest {
@@ -30,10 +41,15 @@ class ParameterDeserializerTest {
         @DisplayName("Parameter with complex object with string field is getting deserialized")
         void deserialzeObject() throws IOException, NoSuchMethodException {
             var json = "{ \"text\":\"Hello !\", \"b\": { \"c\": {\"value\":\"Huhu !\"}} }";
-            var result = (A) deserializer.deserialze(json, TestPojo.class.getDeclaredMethod("test", A.class).getParameters()[0], ValidatorResultElement.rootResult(), Locale.GERMANY, ZoneId.of("Europe/Berlin"));
 
-            assertThat(result.text).isEqualTo("Hello !");
-            assertThat(result.b.c.value).isEqualTo("Huhu !");
+
+            var result = deserializer.deserialize(json, TestPojo.class.getDeclaredMethod("test", A.class).getParameters()[0], ValidatorResultElement.rootResult(), Locale.GERMANY, ZoneId.of("Europe/Berlin"));
+            assertThat(result).isPresent();
+
+            var a = (A) result.get();
+
+            assertThat(a.text).isEqualTo("Hello !");
+            assertThat(a.b.c.value).isEqualTo("Huhu !");
 
         }
 
@@ -42,9 +58,11 @@ class ParameterDeserializerTest {
         @DisplayName("An array of integers as parameter is getting deserialized")
         void deserialzeArray() throws IOException, NoSuchMethodException {
             var json = "[1,2,3,4]";
-            var result = (List<Integer>) deserializer.deserialze(json, TestPojo.class.getDeclaredMethod("test1", List.class).getParameters()[0], ValidatorResultElement.rootResult(), Locale.GERMANY, ZoneId.of("Europe/Berlin"));
+            var result = deserializer.deserialize(json, TestPojo.class.getDeclaredMethod("test1", List.class).getParameters()[0], ValidatorResultElement.rootResult(), Locale.GERMANY, ZoneId.of("Europe/Berlin"));
 
-            assertThat(result).containsExactly(1, 2, 3, 4);
+            assertThat(result).isPresent();
+            var list = (List<Integer>) result.get();
+            assertThat(list).containsExactly(1, 2, 3, 4);
         }
 
 
@@ -53,42 +71,48 @@ class ParameterDeserializerTest {
         @DisplayName("Deserialization of json-array nested in json-arrays is getting deserialized to list of list")
         void typeParametersInTypeParameters() throws NoSuchMethodException, IOException {
             var json = "[[1],[2],[3],[4]]";
-            var result = (List<List<Integer>>) deserializer.deserialze(json, TestPojo.class.getDeclaredMethod("test2", List.class).getParameters()[0], ValidatorResultElement.rootResult(), Locale.GERMANY, ZoneId.of("Europe/Berlin"));
+            var result = deserializer.deserialize(json, TestPojo.class.getDeclaredMethod("test2", List.class).getParameters()[0], ValidatorResultElement.rootResult(), Locale.GERMANY, ZoneId.of("Europe/Berlin"));
 
-            assertThat(result.get(0)).isEqualTo(List.of(1));
-            assertThat(result.get(1)).isEqualTo(List.of(2));
-            assertThat(result.get(2)).isEqualTo(List.of(3));
-            assertThat(result.get(3)).isEqualTo(List.of(4));
+            assertThat(result).isPresent();
+            var list = (List<List<Integer>>) result.get();
+
+            assertThat(list.get(0)).isEqualTo(List.of(1));
+            assertThat(list.get(1)).isEqualTo(List.of(2));
+            assertThat(list.get(2)).isEqualTo(List.of(3));
+            assertThat(list.get(3)).isEqualTo(List.of(4));
         }
 
         @Test
         @DisplayName("A parameter of hierarchy of multiple different collections types is deserialized from nested json arrays")
         void typeParametersInTypeParameters3() throws NoSuchMethodException, IOException {
             var json = "[[[1]]]";
-            var result = deserializer.deserialze(json, TestPojo.class.getDeclaredMethod("test3", ArrayList.class).getParameters()[0], ValidatorResultElement.rootResult(), Locale.GERMANY, ZoneId.of("Europe/Berlin"));
-            assertThat(result).isInstanceOf(ArrayList.class);
-            result = CollectionUtils.onlyElement((Collection<?>) result);
-            assertThat(result).isInstanceOf(LinkedList.class);
-            result = CollectionUtils.onlyElement((Collection<?>) result);
-            assertThat(result).isInstanceOf(HashSet.class);
-            result = CollectionUtils.onlyElement((Collection<?>) result);
-            assertThat(result).isEqualTo(1);
+            var result = deserializer.deserialize(json, TestPojo.class.getDeclaredMethod("test3", ArrayList.class).getParameters()[0], ValidatorResultElement.rootResult(), Locale.GERMANY, ZoneId.of("Europe/Berlin"));
+
+            assertThat(result).isPresent();
+            assertThat(result.get()).isInstanceOf(ArrayList.class);
+            Collection<?> collection = (ArrayList<?>) result.get();
+            collection = (Collection<?>) CollectionUtils.onlyElement(collection);
+            assertThat(collection).isInstanceOf(LinkedList.class);
+            collection = (Collection<?>) CollectionUtils.onlyElement(collection);
+            assertThat(collection).isInstanceOf(HashSet.class);
+            var integer = CollectionUtils.onlyElement(collection);
+            assertThat(integer).isEqualTo(1);
 
         }
 
 
         @Test
-        @DisplayName("An integer as  string is deserialized to differen parameter types")
+        @DisplayName("An integer as  string is deserialized to different parameter types")
         void integer() throws NoSuchMethodException, IOException {
             var method = TestPojo.class.getDeclaredMethod("integer", String.class, Integer.TYPE, Integer.class, BigInteger.class, BigDecimal.class);
 
             var typeValidationResult = ValidatorResultElement.rootResult();
 
-            assertThat(deserializer.deserialze("123", method.getParameters()[0], typeValidationResult, Locale.GERMANY, ZoneId.of("Europe/Berlin"))).isEqualTo("123");
-            assertThat(deserializer.deserialze("123", method.getParameters()[1], typeValidationResult, Locale.GERMANY, ZoneId.of("Europe/Berlin"))).isEqualTo(123);
-            assertThat(deserializer.deserialze("123", method.getParameters()[2], typeValidationResult, Locale.GERMANY, ZoneId.of("Europe/Berlin"))).isEqualTo(Integer.parseInt("123"));
-            assertThat(deserializer.deserialze("123", method.getParameters()[3], typeValidationResult, Locale.GERMANY, ZoneId.of("Europe/Berlin"))).isEqualTo(BigInteger.valueOf(123));
-            assertThat(deserializer.deserialze("123", method.getParameters()[4], typeValidationResult, Locale.GERMANY, ZoneId.of("Europe/Berlin"))).isEqualTo(BigDecimal.valueOf(123.0));
+            assertThat(deserializer.deserialize("123", method.getParameters()[0], typeValidationResult, Locale.GERMANY, ZoneId.of("Europe/Berlin"))).contains("123");
+            assertThat(deserializer.deserialize("123", method.getParameters()[1], typeValidationResult, Locale.GERMANY, ZoneId.of("Europe/Berlin"))).contains(123);
+            assertThat(deserializer.deserialize("123", method.getParameters()[2], typeValidationResult, Locale.GERMANY, ZoneId.of("Europe/Berlin"))).contains(Integer.parseInt("123"));
+            assertThat(deserializer.deserialize("123", method.getParameters()[3], typeValidationResult, Locale.GERMANY, ZoneId.of("Europe/Berlin"))).contains(BigInteger.valueOf(123));
+            assertThat(deserializer.deserialize("123", method.getParameters()[4], typeValidationResult, Locale.GERMANY, ZoneId.of("Europe/Berlin"))).contains(BigDecimal.valueOf(123));
         }
 
         @Test
@@ -99,8 +123,8 @@ class ParameterDeserializerTest {
             var typeValidationResult = ValidatorResultElement.rootResult();
             var expected = LocalDate.of(2016, Month.MAY, 1);
 
-            assertThat(deserializer.deserialze("01.05.2016", parameter, typeValidationResult, Locale.GERMANY, ZoneId.of("Europe/Berlin"))).isEqualTo(expected);
-            assertThat(deserializer.deserialze("2016-05-01", parameter, typeValidationResult, Locale.GERMANY, ZoneId.of("Europe/Berlin"))).isEqualTo(expected);
+            assertThat(deserializer.deserialize("01.05.2016", parameter, typeValidationResult, Locale.GERMANY, ZoneId.of("Europe/Berlin"))).contains(expected);
+            assertThat(deserializer.deserialize("2016-05-01", parameter, typeValidationResult, Locale.GERMANY, ZoneId.of("Europe/Berlin"))).contains(expected);
         }
 
 
@@ -111,11 +135,12 @@ class ParameterDeserializerTest {
             var typeValidationResult = ValidatorResultElement.rootResult();
             var json = "{\"localDateTime\":\"12.07.2000, 23:00:00\",\"zonedDateTime\":\"12.07.2000, 23:00:00\",\"offsetDateTime\":\"12.07.2000, 23:00:00\",\"date\":\"12.07.2000, 23:00:00\"}";
             var expected = Instant.from(ZonedDateTime.of(2000, 7, 12, 21, 0, 0, 0, ZoneId.of("UTC")));
-
             var params = method.getParameters();
-            var result = (DateTimeValue) deserializer.deserialze(json, params[0], typeValidationResult, Locale.GERMANY, ZoneId.of("Europe/Berlin"));
 
-
+            var opt = deserializer.deserialize(json, params[0], typeValidationResult, Locale.GERMANY, ZoneId.of("Europe/Berlin"));
+            assertThat(opt).isPresent();
+            assertThat(opt.get()).isInstanceOf(DateTimeValue.class);
+            var result = (DateTimeValue) opt.get();
             assertThat(result.date.toInstant()).isEqualTo(expected);
             assertThat(result.zonedDateTime.toInstant()).isEqualTo(expected);
             assertThat(result.offsetDateTime.toInstant()).isEqualTo(expected);
@@ -129,11 +154,12 @@ class ParameterDeserializerTest {
             var typeValidationResult = ValidatorResultElement.rootResult();
             var json = "{\"localDateTime\":\"2000-07-12T23:00:00\",\"zonedDateTime\":\"2000-07-12T23:00:00\",\"offsetDateTime\":\"2000-07-12T23:00:00\",\"date\":\"2000-07-12T23:00:00\"}";
             var expected = Instant.from(ZonedDateTime.of(2000, 7, 12, 21, 0, 0, 0, ZoneId.of("UTC")));
-
             var params = method.getParameters();
-            var result = (DateTimeValue) deserializer.deserialze(json, params[0], typeValidationResult, Locale.GERMANY, ZoneId.of("Europe/Berlin"));
 
-
+            var opt = deserializer.deserialize(json, params[0], typeValidationResult, Locale.GERMANY, ZoneId.of("Europe/Berlin"));
+            assertThat(opt).isPresent();
+            assertThat(opt.get()).isInstanceOf(DateTimeValue.class);
+            var result = (DateTimeValue) opt.get();
             assertThat(result.date.toInstant()).isEqualTo(expected);
             assertThat(result.zonedDateTime.toInstant()).isEqualTo(expected);
             assertThat(result.offsetDateTime.toInstant()).isEqualTo(expected);
@@ -147,9 +173,18 @@ class ParameterDeserializerTest {
             var json = "{\"zonedDateTime\":\"2000-07-12T23:00:00+10:00\"}";
             var expected = Instant.from(ZonedDateTime.of(2000, 7, 12, 13, 0, 0, 0, ZoneId.of("UTC")));
             var params = method.getParameters();
-            var result = (DateTimeValue) deserializer.deserialze(json, params[0], typeValidationResult, Locale.GERMANY, ZoneId.of("Europe/Berlin"));
+            var opt = deserializer.deserialize(json, params[0], typeValidationResult, Locale.GERMANY, ZoneId.of("Europe/Berlin"));
 
+            assertThat(opt).isPresent();
+            assertThat(opt.get()).isInstanceOf(DateTimeValue.class);
+            var result = (DateTimeValue) opt.get();
             assertThat(result.zonedDateTime.toInstant()).isEqualTo(expected);
+        }
+
+        @Test
+        void gsonTest() {
+            var json = "{\"zonedDateTime\":\"bla\"}";
+
         }
 
 
@@ -238,14 +273,14 @@ class ParameterDeserializerTest {
         void invalidInteger() throws NoSuchFieldException, IOException {
             var json = "{\"integer\": \"bla\"}";
             var validationElement = ValidatorResultElement.rootResult();
-            var object = deserializer.deserialze(json, A.class.getDeclaredField("b"), validationElement, Locale.GERMANY, ZoneId.of("Europe/Berlin"));
+            var object = deserializer.deserialize(json, A.class.getDeclaredField("b"), validationElement, Locale.GERMANY, ZoneId.of("Europe/Berlin"));
         }
 
         @Test
         void validInteger() throws NoSuchFieldException, IOException {
             var json = "{\"integer\": \"123\"}";
             var validationElement = ValidatorResultElement.rootResult();
-            var object = deserializer.deserialze(json, A.class.getDeclaredField("b"), validationElement, Locale.GERMANY, ZoneId.of("Europe/Berlin"));
+            var object = deserializer.deserialize(json, A.class.getDeclaredField("b"), validationElement, Locale.GERMANY, ZoneId.of("Europe/Berlin"));
         }
 
 
