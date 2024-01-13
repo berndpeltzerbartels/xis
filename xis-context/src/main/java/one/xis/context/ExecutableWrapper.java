@@ -33,9 +33,8 @@ abstract class ExecutableWrapper<E extends Executable> implements ComponentConsu
         return parameters.isEmpty();
     }
 
-    boolean parameterAssigned(Object o, ParameterWrapper parameter) {
+    void parameterAssigned(Object o, ParameterWrapper parameter) {
         parameters.remove(parameter);
         args[parameter.getIndex()] = o;
-        return parameters.isEmpty();
     }
 }

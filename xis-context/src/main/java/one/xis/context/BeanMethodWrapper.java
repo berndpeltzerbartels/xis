@@ -32,13 +32,11 @@ class BeanMethodWrapper extends ExecutableWrapper<Method> implements ComponentPr
     }
 
     @Override
-    boolean parameterAssigned(Object o, ParameterWrapper parameter) {
+    void parameterAssigned(Object o, ParameterWrapper parameter) {
         super.parameterAssigned(o, parameter);
         if (isPrepared()) {
             placeholder.beanMethodParameterSet(this);
-            return true;
         }
-        return false;
     }
 
     void execute(Object component) {

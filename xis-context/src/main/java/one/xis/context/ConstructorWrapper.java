@@ -60,13 +60,11 @@ class ConstructorWrapper extends ExecutableWrapper<Constructor<?>> implements Co
     }
 
     @Override
-    boolean parameterAssigned(Object o, ParameterWrapper parameter) {
+    void parameterAssigned(Object o, ParameterWrapper parameter) {
         super.parameterAssigned(o, parameter);
         if (isPrepared()) {
             contextFactory.addExecutableConstructorWrapper(this);
-            return true;
         }
-        return false;
     }
 
     void execute() {
