@@ -153,7 +153,7 @@ class ParameterDeserializerTest {
         void dateTimeTypesIso() throws NoSuchMethodException, IOException {
             var method = TestPojo.class.getDeclaredMethod("dateTimeTypes", DateTimeValue.class);
             var typeValidationResult = ValidatorResultElement.rootResult();
-            var json = "{\"localDateTime\":\"2000-07-12T23:00:00\",\"zonedDateTime\":\"2000-07-12T23:00:00\",\"offsetDateTime\":\"2000-07-12T23:00:00\",\"date\":\"2000-07-12T23:00:00\"}";
+            var json = "{\"localDateTime\":\"2000-07-12T23:00\",\"zonedDateTime\":\"2000-07-12T23:00:00\",\"offsetDateTime\":\"2000-07-12T23:00:00\",\"date\":\"2000-07-12T23:00:00\"}";
             var expected = Instant.from(ZonedDateTime.of(2000, 7, 12, 21, 0, 0, 0, ZoneId.of("UTC")));
             var params = method.getParameters();
 

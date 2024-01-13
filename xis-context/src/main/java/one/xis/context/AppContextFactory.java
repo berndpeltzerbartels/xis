@@ -97,14 +97,19 @@ class AppContextFactory implements ComponentCreationListener {
         return appContext;
     }
 
-    void removeConstructorWrapper(ConstructorWrapper constructorWrapper) {
+    void removeExecutableConstructorWrapper(ConstructorWrapper constructorWrapper) {
         executableConstructorWrappers.remove(constructorWrapper);
     }
 
+    void addExecutableConstructorWrapper(ConstructorWrapper constructorWrapper) {
+        executableConstructorWrappers.add(constructorWrapper);
+    }
+
+
     private void runInstiationLoop() {
-        for (var constructorWrapper : executableConstructorWrappers) {
+        while (!executableConstructorWrappers.isEmpty()) {
+            var constructorWrapper = executableConstructorWrappers.iterator().next();
             if (constructorWrapper.isPrepared()) {
-                //removeConstructorWrapper(constructorWrapper);
                 constructorWrapper.execute();
             }
         }

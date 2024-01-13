@@ -53,11 +53,15 @@ class DateTimeDeserializer implements JsonDeserializer<Object> {
 
     private Optional<LocalDateTime> localDateTime(@NonNull String value, @NonNull ParameterDeserializationContext context) throws IOException {
         try {
-            return zonedDateTime(value, context)
-                    .map(z -> z.withZoneSameInstant(ZoneId.systemDefault()))
-                    .map(ZonedDateTime::toLocalDateTime);
+            return localDateTimeIso(value);
         } catch (ConversionException e) {
-            return localDateTime(value, context.getLocale());
+            try {
+                return zonedDateTime(value, context)
+                        .map(z -> z.withZoneSameInstant(ZoneId.systemDefault()))
+                        .map(ZonedDateTime::toLocalDateTime);
+            } catch (ConversionException e2) {
+                return localDateTime(value, context.getLocale());
+            }
         }
     }
 
@@ -84,8 +88,16 @@ class DateTimeDeserializer implements JsonDeserializer<Object> {
         }
     }
 
+    private Optional<LocalDateTime> localDateTimeIso(String value) {
+        try {
+            return Optional.of(LocalDateTime.parse(value));
+        } catch (DateTimeParseException e) {
+            throw new ConversionException(value);
+        }
+    }
+
     private Optional<LocalDateTime> localDateTime(String value, Locale locale) throws ConversionException {
-        var dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, locale);
+        var dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM, locale);
         var pattern = ((SimpleDateFormat) dateFormat).toLocalizedPattern();
         if (pattern.contains("yy") && !pattern.contains("yyyy")) {
             pattern = pattern.replace("yy", "yyyy"); // We do not want year expresses with just 2 digits

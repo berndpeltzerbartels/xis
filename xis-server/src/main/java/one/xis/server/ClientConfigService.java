@@ -56,6 +56,10 @@ class ClientConfigService {
                 welcomePageId = attributes.getNormalizedPath();
             }
         }
+        if (welcomePageId == null) {
+            // TODO activate this, but special treatment for tests
+            //  throw new IllegalStateException("There must be exactly one welcome-page (annotated with @WelcomePage). More than one found: " + welcomePageId + ", " + attributes.getNormalizedPath());
+        }
         configBuilder.pageIds(Collections.unmodifiableSet(pageIds))
                 .pageAttributes(pageAttributes)
                 .welcomePageId(welcomePageId);

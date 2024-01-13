@@ -60,9 +60,10 @@ class FieldWrapper extends ValueHolder {
 
     @Override
     public String toString() {
-        return "FieldWrapper{" + field.getType().getSimpleName() + " " + field.getName() + "}";
+        return "FieldWrapper{" + field.getDeclaringClass().getSimpleName() + "." + field.getName() + "}";
     }
 
+    @SuppressWarnings("unchecked")
     private Optional<Object> defaultValue() {
         if (Collection.class.isAssignableFrom(getType())) {
             return Optional.of(CollectionUtils.emptyInstance((Class<Collection<?>>) getType()));

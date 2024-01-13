@@ -9,8 +9,8 @@ class UnsatisfiedDependencyException extends RuntimeException {
         super("unsatisfied dependency for " + field);
     }
 
-    UnsatisfiedDependencyException(Parameter field) {
-        super("unsatisfied dependency for " + field);
+    UnsatisfiedDependencyException(Parameter parameter) {
+        super("unsatisfied dependency for " + parameter);
     }
 
 }

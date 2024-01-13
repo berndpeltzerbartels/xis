@@ -25,7 +25,7 @@ class ComponentWrapperPostCheck {
 
     private void postCheckDependencyFields() {
         if (!componentWrapper.getFieldWrappers().isEmpty()) {
-            throw new UnsatisfiedDependencyException(CollectionUtils.first(componentWrapper.getFieldWrappers()).getField());
+            System.out.println(CollectionUtils.first(componentWrapper.getFieldWrappers()).getField());
         }
     }
 

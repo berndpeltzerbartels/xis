@@ -74,6 +74,10 @@ abstract class ValueHolder implements ComponentCreationListener, ComponentConsum
         }
     }
 
+    boolean isArrayOrCollectionHolder() {
+        return Collection.class.isAssignableFrom(getType()) || getType().isArray();
+    }
+
     @SuppressWarnings("unchecked")
     private Object value() {
         if (Collection.class.isAssignableFrom(getType())) {

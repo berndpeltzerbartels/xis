@@ -63,14 +63,14 @@ class ConstructorWrapper extends ExecutableWrapper<Constructor<?>> implements Co
     boolean parameterAssigned(Object o, ParameterWrapper parameter) {
         super.parameterAssigned(o, parameter);
         if (isPrepared()) {
-            execute();
+            contextFactory.addExecutableConstructorWrapper(this);
             return true;
         }
         return false;
     }
 
     void execute() {
-        contextFactory.removeConstructorWrapper(this);
+        contextFactory.removeExecutableConstructorWrapper(this);
         if (contextFactory.getReplacedClasses().contains(constructor.getDeclaringClass())) {
             var empty = new Empty();
             componentCreationListeners.forEach(listener -> listener.componentCreated(empty, this));
