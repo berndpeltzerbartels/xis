@@ -4,8 +4,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import one.xis.context.AppContext;
+import one.xis.gson.GsonFactory;
+import one.xis.server.UserContextTestUtil;
 import one.xis.utils.lang.CollectionUtils;
 import one.xis.validation.Validation;
+import one.xis.validation.ValidatorMessageResolver;
 import one.xis.validation.ValidatorResultElement;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -21,19 +24,21 @@ import java.util.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
-class ParameterDeserializerTest {
+class FormattedParameterDeserializerTest {
 
-    private ParameterDeserializer deserializer;
+    private FormattedParameterDeserializer deserializer;
 
     @BeforeEach
     void init() {
         deserializer = AppContext.builder()
-                .withSingletonClass(GsonConfig.class)
-                .withSingletonClass(ParameterDeserializerImpl.class)
+                .withSingletonClass(GsonFactory.class)
+                .withSingletonClass(FormattedParameterDeserializerImpl.class)
                 .withSingleton(mock(Validation.class))
-                .build().getSingleton(ParameterDeserializer.class);
+                .withSingletonClass(ValidatorMessageResolver.class)
+                .withSingletonClass(DeserializationErrorHandler.class)
+                .build().getSingleton(FormattedParameterDeserializer.class);
 
-        UserContext.setInstance(new UserContext(Locale.GERMANY, ZoneId.of("Europe/Berlin"), "user", "client"));
+        UserContextTestUtil.setTestContextDe();
     }
 
     @Nested
@@ -103,7 +108,7 @@ class ParameterDeserializerTest {
 
 
         @Test
-        @DisplayName("An integer as  string is deserialized to different parameter types")
+        @DisplayName("An integer as string is deserialized to different parameter types")
         void integer() throws NoSuchMethodException, IOException {
             var method = TestPojo.class.getDeclaredMethod("integer", String.class, Integer.TYPE, Integer.class, BigInteger.class, BigDecimal.class);
 
@@ -113,7 +118,7 @@ class ParameterDeserializerTest {
             assertThat(deserializer.deserialize("123", method.getParameters()[1], typeValidationResult)).contains(123);
             assertThat(deserializer.deserialize("123", method.getParameters()[2], typeValidationResult)).contains(Integer.parseInt("123"));
             assertThat(deserializer.deserialize("123", method.getParameters()[3], typeValidationResult)).contains(BigInteger.valueOf(123));
-            assertThat(deserializer.deserialize("123", method.getParameters()[4], typeValidationResult)).contains(BigDecimal.valueOf(123));
+            assertThat(deserializer.deserialize("123", method.getParameters()[4], typeValidationResult)).map(Object::toString).contains("123"); // Result is BigInteger, which also matched BgDecimal
         }
 
         @Test

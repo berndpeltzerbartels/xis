@@ -16,4 +16,5 @@ include 'xis-server'
 include 'xis-javascript'
 include 'xis-integration-tests'
 include 'xis-parameter-deserializer'
+include 'xis-gson'
 

@@ -1,23 +1,33 @@
 package one.xis.server;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.function.BiConsumer;
 
-@Data
-public class RequestFilterChain {
-    private boolean interrupt;
-    private int httpStatus = 200;
-    private Map<String, Object> data = new HashMap<>();
 
-    public void addData(String name, Object value) {
-        data.put(name, value);
+class RequestFilterChain {
+    private final List<RequestFilter> filters;
+
+    @Setter
+    @Getter
+    private ServerResponse serverResponse;
+
+    RequestFilterChain(BiConsumer<ClientRequest, ServerResponse> responder, Collection<RequestFilter> requestFilters) {
+        this.filters = new ArrayList<>(requestFilters);
+        filters.sort(Comparator.comparing(RequestFilter::getPriority));
     }
 
-    public void interrupt(int httpStatus) {
-        this.interrupt = true;
-        this.httpStatus = httpStatus;
+    void doFilter(ClientRequest request, ServerResponse response, RequestFilterChain filterChain) {
+        serverResponse = response;
+        if (!filters.isEmpty()) {
+            var filter = filters.remove(0);
+            filter.doFilter(request, serverResponse, filterChain);
+        }
     }
 
 }

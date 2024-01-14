@@ -11,25 +11,26 @@ class PageControllerService extends ControllerService {
 
     private final PageControllerWrappers controllerWrappers;
 
-    ServerResponse processPageModelDataRequest(ClientRequest request) {
+    void processPageModelDataRequest(ClientRequest request, ServerResponse response) {
         var wrapper = findPageControllerWrapper(request);
-        return invokeGetPageModelMethods(200, wrapper, request);
+        invokeGetPageModelMethods(200, wrapper, request, response);
     }
 
-    ServerResponse processPageActionRequest(ClientRequest request) {
+    void processPageActionRequest(ClientRequest request, ServerResponse response) {
         var invokerControllerWrapper = pageControllerWrapperById(request.getPageId());
         var result = invokerControllerWrapper.invokeActionMethod(request);
         if (result.returnValue() == null || result.returnValue() == Void.class || result.returnValue().equals(invokerControllerWrapper.getControllerClass())) {
-            return createPageResponse(invokerControllerWrapper.invokeGetModelMethods(request), invokerControllerWrapper);// Still the same controller
+            var dataMap = invokerControllerWrapper.invokeGetModelMethods(request);// Still the same controller
+            updatePageResponse(response, dataMap, invokerControllerWrapper);// Still the same controller
         } else if (result.returnValue() instanceof WidgetResponse widgetResponse) {
             if (widgetResponse.getTargetContainer() == null) { // TODO Client side code and test for this case
                 throw new IllegalStateException(invokerControllerWrapper.getControllerClass().getSimpleName() + ": widget-result of a page-controller must define a target-container");
             }
-            return processActionResult(request, widgetResponse);
+            processActionResult(request, response, widgetResponse);
         } else if (result.returnValue() instanceof PageResponse pageResponse) {
-            return processPageResult(request, pageResponse);
+            processPageResult(request, response, pageResponse);
         } else if (result.returnValue() instanceof Class<?> controllerClass) {
-            return processActionResult(request, controllerClass);
+            processActionResult(request, response, controllerClass);
         } else {
             throw new IllegalStateException(result.getClass() + " is not a valid return type for a widget-action");
         }

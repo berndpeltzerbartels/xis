@@ -27,6 +27,10 @@ class ValidatorResultElement {
         this.errors = new HashMap<>();
     }
 
+    public boolean hasErrors() {
+        return !errors.isEmpty();
+    }
+
     @Override
     public String toString() {
         return "ValidatorResultElement{" + path + '}';
@@ -40,14 +44,26 @@ class ValidatorResultElement {
         return new ValidatorResultElement(pathElement, index, this);
     }
 
-    public void setErrorIfEmpty(DefaultValidationErrorType errorType, String message, Object value) {
+    public void setErrorIfEmpty(DefaultValidationErrorType errorType, String message, Class<?> targetType, Object value) {
         if (!errors.containsKey(this.path)) {
             errors.put(this.path, new ValidationError(errorType, message, value));
         }
     }
 
-    public void setErrorIfEmpty(Object value) {
-        setErrorIfEmpty(DefaultValidationErrorType.ILLEGAL_UNKNOWN_REASON, null, value);
+    public void setErrorIfEmpty(Class<?> targetType) {
+        if (!errors.containsKey(this.path)) {
+            errors.put(this.path, new ValidationError(errorType(targetType), null, null));
+        }
+    }
+
+    public void setErrorIfEmpty(Object value, Class<?> type) {
+        if (!errors.containsKey(this.path)) {
+            errors.put(this.path, new ValidationError(errorType(type), value));
+        }
+    }
+
+    private DefaultValidationErrorType errorType(Class<?> targetType) {
+        return DefaultValidationErrorType.errorForType(targetType).orElse(DefaultValidationErrorType.ILLEGAL_UNKNOWN_REASON);
     }
 
     public boolean hasError() {

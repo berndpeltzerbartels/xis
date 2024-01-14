@@ -4,16 +4,14 @@ package one.xis.server;
 import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
 import one.xis.context.XISInit;
-import one.xis.parameter.UserContext;
 import one.xis.resource.Resource;
 import one.xis.resource.Resources;
-import one.xis.validation.ValidatorMessages;
 import org.tinylog.Logger;
 
 import java.time.ZoneId;
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.function.BiConsumer;
 
 /**
  * Encapsulates all methods, required by the framework's controller.
@@ -27,8 +25,7 @@ public class FrontendService {
     private final ClientConfigService configService;
     private final HtmlResourceService htmlResourceService;
     private final Resources resources;
-    private final RequestFilters requestFilterChain;
-    private final DataSerializer dataSerializer;
+    private final Collection<RequestFilter> requestFilters;
     private Resource appJsResource;
     private Resource classesJsResource;
     private Resource mainJsResource;
@@ -136,17 +133,17 @@ public class FrontendService {
         UserContext.setInstance(userContext);
     }
 
-    void removeUserContext() {
+    private void removeUserContext() {
         UserContext.removeInstance();
     }
 
-    private ServerResponse applyFilterChain(ClientRequest request, Function<ClientRequest, ServerResponse> responder) {
-        var validationResult = new ValidatorMessages();
-        var chain = requestFilterChain.apply(request, validationResult);
-        if (chain.isInterrupt()) {
-            return new ServerResponse(chain.getHttpStatus(), dataSerializer.serialize(chain.getData()), null, null, new HashMap<>(), validationResult);
-        }
-        return responder.apply(request);
+    private ServerResponse applyFilterChain(ClientRequest request, BiConsumer<ClientRequest, ServerResponse> requestHandler) {
+        var response = new ServerResponse();
+        var filterChain = new RequestFilterChain(requestHandler, requestFilters);
+        filterChain.doFilter(request, response, filterChain);
+        response = filterChain.getServerResponse();
+        requestHandler.accept(request, response);
+        return response;
     }
 
 }

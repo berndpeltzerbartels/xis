@@ -5,7 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import one.xis.PathVariable;
 import one.xis.*;
 import one.xis.context.XISComponent;
-import one.xis.parameter.ParameterDeserializer;
+import one.xis.parameter.FormattedParameterDeserializer;
+import one.xis.validation.ValidationFailedException;
 import one.xis.validation.ValidatorResultElement;
 
 import java.io.IOException;
@@ -18,7 +19,7 @@ import java.util.Objects;
 @XISComponent
 @RequiredArgsConstructor
 class ParameterPreparation {
-    private final ParameterDeserializer parameterDeserializer;
+    private final FormattedParameterDeserializer parameterDeserializer;
 
     Object[] prepareParameters(Method method, ClientRequest context) throws Exception {
         var rootValidationResult = ValidatorResultElement.rootResult();
@@ -43,6 +44,9 @@ class ParameterPreparation {
             } else {
                 throw new IllegalStateException(method + ": parameter without annotation=" + param);
             }
+        }
+        if (rootValidationResult.hasErrors()) {
+            throw new ValidationFailedException(rootValidationResult.getErrors());
         }
         return args;
     }

@@ -1,4 +1,4 @@
-package one.xis.parameter;
+package one.xis.server;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,11 +23,11 @@ public class UserContext {
         return instance.get();
     }
 
-    public static void setInstance(UserContext context) {
+    static void setInstance(UserContext context) {
         instance.set(context);
     }
 
-    public static void removeInstance() {
+    static void removeInstance() {
         instance.remove();
     }
 }

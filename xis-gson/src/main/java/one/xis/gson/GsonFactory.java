@@ -1,4 +1,4 @@
-package one.xis.parameter;
+package one.xis.gson;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -6,20 +6,16 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import lombok.RequiredArgsConstructor;
-import one.xis.context.XISBean;
 import one.xis.context.XISComponent;
+import one.xis.server.UserContext;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.net.ConnectException;
 import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.Temporal;
@@ -28,10 +24,9 @@ import java.util.Locale;
 
 @XISComponent
 @RequiredArgsConstructor
-class GsonConfig {
+public class GsonFactory {
 
-    @XISBean
-    Gson gson() {
+    public Gson gson() {
         return new GsonBuilder()
                 .setLenient()
                 .registerTypeAdapter(Date.class, new UtilDateDateTimeAdapter())
@@ -72,7 +67,7 @@ class GsonConfig {
             try {
                 return NumberFormat.getInstance(getLocale()).parse(in.nextString());
             } catch (ParseException e) {
-                throw new ConnectException();
+                throw new ConversionException(e);
             }
         }
 
@@ -94,7 +89,7 @@ class GsonConfig {
             var value = in.nextString();
             try {
                 return parseLocalized(value, getLocalFormatter(getLocale()));
-            } catch (DateTimeParseException e) {
+            } catch (ConversionException e) {
                 try {
                     return parseIso(value);
                 } catch (DateTimeParseException e2) {
@@ -137,7 +132,7 @@ class GsonConfig {
         }
 
         @Override
-        public LocalDate parseIso(String value) throws IOException {
+        public LocalDate parseIso(String value) {
             try {
                 return LocalDate.parse(value);
             } catch (DateTimeParseException e) {
@@ -155,7 +150,7 @@ class GsonConfig {
 
 
         @Override
-        public LocalDateTime parseLocalized(String value, DateTimeFormatter dateTimeFormatter) throws IOException {
+        public LocalDateTime parseLocalized(String value, DateTimeFormatter dateTimeFormatter) {
             try {
                 return LocalDateTime.parse(value, dateTimeFormatter);
             } catch (DateTimeParseException e) {
@@ -164,7 +159,7 @@ class GsonConfig {
         }
 
         @Override
-        public LocalDateTime parseIso(String value) throws IOException {
+        public LocalDateTime parseIso(String value) {
             try {
                 return LocalDateTime.parse(value);
             } catch (DateTimeParseException e) {
@@ -192,7 +187,7 @@ class GsonConfig {
         }
 
         @Override
-        public ZonedDateTime parseIso(String value) throws IOException {
+        public ZonedDateTime parseIso(String value) {
             try {
                 return ZonedDateTime.parse(value, DateTimeFormatter.ISO_ZONED_DATE_TIME);
             } catch (DateTimeParseException e) {
@@ -219,7 +214,7 @@ class GsonConfig {
         }
 
         @Override
-        public OffsetDateTime parseIso(String value) throws IOException {
+        public OffsetDateTime parseIso(String value) {
             try {
                 return OffsetDateTime.parse(value);
             } catch (DateTimeParseException e) {
@@ -243,18 +238,23 @@ class GsonConfig {
 
         @Override
         public void write(JsonWriter out, Date value) throws IOException {
-            throw new AbstractMethodError();
+            var zonedDateTime = value.toInstant().atZone(getZoneId());
+            zonedDateTimeAdapter.write(out, zonedDateTime);
         }
 
         @Override
         public Date read(JsonReader in) throws IOException {
-            ZonedDateTime zonedDateTime = zonedDateTimeAdapter.read(in);
+            var zonedDateTime = zonedDateTimeAdapter.read(in);
             try {
                 return Date.from(zonedDateTime.toInstant());
             } catch (DateTimeParseException e) {
                 throw new ConversionException(e);
 
             }
+        }
+
+        private ZoneId getZoneId() {
+            return UserContext.getInstance().getZoneId();
         }
     }
 }

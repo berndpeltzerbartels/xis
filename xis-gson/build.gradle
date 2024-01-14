@@ -10,11 +10,8 @@ repositories {
 }
 
 dependencies {
-    implementation project(':xis-util')
-    implementation project(':xis-gson')
-    implementation project(':xis-remote-core')
     implementation project(':xis-context')
-    implementation project(':xis-validation')
+    implementation project(':xis-remote-core')
 
     implementation 'com.google.code.gson:gson:2.10.1'
 
@@ -23,9 +20,6 @@ dependencies {
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
-
-    testImplementation "org.mockito:mockito-core:$mockitoVersion"
-    testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.16.1'
 }
 
 test {

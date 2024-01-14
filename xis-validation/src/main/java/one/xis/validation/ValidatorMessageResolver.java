@@ -6,7 +6,7 @@ import one.xis.context.XISComponent;
 @XISComponent
 public class ValidatorMessageResolver {
 
-    String resolveMessage(ValidationErrorType errorType, Object value) {
+    public String resolveMessage(ValidationErrorType errorType, Class<?> targetType, String value) {
         return "";
     }
 
