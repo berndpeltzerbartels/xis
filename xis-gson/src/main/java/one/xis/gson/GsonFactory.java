@@ -6,8 +6,8 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import lombok.RequiredArgsConstructor;
+import one.xis.UserContext;
 import one.xis.context.XISComponent;
-import one.xis.server.UserContext;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -97,6 +97,7 @@ public class GsonFactory {
                 }
             }
         }
+
 
         private Locale getLocale() {
             return UserContext.getInstance().getLocale();

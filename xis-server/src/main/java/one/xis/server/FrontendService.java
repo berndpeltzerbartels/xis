@@ -8,7 +8,6 @@ import one.xis.resource.Resource;
 import one.xis.resource.Resources;
 import org.tinylog.Logger;
 
-import java.time.ZoneId;
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -44,39 +43,19 @@ public class FrontendService {
     }
 
     public ServerResponse processPageActionRequest(ClientRequest request) {
-        try {
-            addUserContext(request);
-            return applyFilterChain(request, pageControllerService::processPageActionRequest);
-        } finally {
-            removeUserContext();
-        }
+        return applyFilterChain(request, pageControllerService::processPageActionRequest);
     }
 
     public ServerResponse processWidgetActionRequest(ClientRequest request) {
-        try {
-            addUserContext(request);
-            return applyFilterChain(request, widgetControllerService::processWidgetActionRequest);
-        } finally {
-            removeUserContext();
-        }
+        return applyFilterChain(request, widgetControllerService::processWidgetActionRequest);
     }
 
     public ServerResponse processPageModelDataRequest(ClientRequest request) {
-        try {
-            addUserContext(request);
-            return applyFilterChain(request, pageControllerService::processPageModelDataRequest);
-        } finally {
-            removeUserContext();
-        }
+        return applyFilterChain(request, pageControllerService::processPageModelDataRequest);
     }
 
     public ServerResponse processWidgetModelDataRequest(ClientRequest request) {
-        try {
-            addUserContext(request);
-            return applyFilterChain(request, widgetControllerService::processWidgetModelDataRequest);
-        } finally {
-            removeUserContext();
-        }
+        return applyFilterChain(request, widgetControllerService::processWidgetModelDataRequest);
     }
 
     public String getPage(String id) {
@@ -106,8 +85,7 @@ public class FrontendService {
     public String getRootPageHtml() {
         return htmlResourceService.getRootPageHtml();
     }
-
-
+    
     public String getAppJs() {
         return appJsResource.getContent();
     }
@@ -122,19 +100,6 @@ public class FrontendService {
 
     public String getFunctionsJs() {
         return functionsJsResource.getContent();
-    }
-
-    private void addUserContext(ClientRequest request) {
-        var userContext = new UserContext();
-        userContext.setClientId(request.getClientId());
-        userContext.setUserId(request.getUserId());
-        userContext.setLocale(request.getLocale());
-        userContext.setZoneId(ZoneId.of(request.getZoneId()));
-        UserContext.setInstance(userContext);
-    }
-
-    private void removeUserContext() {
-        UserContext.removeInstance();
     }
 
     private ServerResponse applyFilterChain(ClientRequest request, BiConsumer<ClientRequest, ServerResponse> requestHandler) {

@@ -15,16 +15,11 @@ class FormElementHandler extends TagHandler {
      * @private
      */
     init() {
-        var _this = this;
-        this.updateState('pristine');
-        this.tag.addEventListener('change', event => {
-            _this.updateState('edited');
-            this.initiateValidation();
-        });
         var form = this.findParentFormElement();
         if (!form) throw new Error('no parent form-tag or form-tag is not bound for ' + this.tag);
         this.formHandler = form._handler;
     }
+
 
 
     refresh(data) {
@@ -50,15 +45,9 @@ class FormElementHandler extends TagHandler {
      * @override
      */
     onBind() {
-        this.updateState('pristine');
+        this.valid = true;
     }
 
-    /**
-     * @protected
-     */
-    initiateValidation() {
-        this.formHandler.validate();
-    }
 
     /**
      * @protected

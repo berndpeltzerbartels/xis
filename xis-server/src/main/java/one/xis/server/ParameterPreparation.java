@@ -5,42 +5,45 @@ import lombok.extern.slf4j.Slf4j;
 import one.xis.PathVariable;
 import one.xis.*;
 import one.xis.context.XISComponent;
-import one.xis.parameter.FormattedParameterDeserializer;
+import one.xis.parameter.ParameterDeserializer;
 import one.xis.validation.ValidationFailedException;
 import one.xis.validation.ValidatorResultElement;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.Locale;
+import java.time.ZoneId;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 @Slf4j
 @XISComponent
 @RequiredArgsConstructor
 class ParameterPreparation {
-    private final FormattedParameterDeserializer parameterDeserializer;
+    private final ParameterDeserializer parameterDeserializer;
 
     Object[] prepareParameters(Method method, ClientRequest context) throws Exception {
         var rootValidationResult = ValidatorResultElement.rootResult();
+        var errors = new HashMap<String, Throwable>();
         Object[] args = new Object[method.getParameterCount()];
         var params = method.getParameters();
         for (int i = 0; i < args.length; i++) {
             var param = params[i];
             if (param.isAnnotationPresent(ModelData.class)) {
-                args[i] = deserializeModelParameter(param, context, rootValidationResult, context.getLocale(), context.getZoneId());
+                args[i] = deserializeModelParameter(param, context, errors);
             } else if (param.isAnnotationPresent(FormData.class)) {
-                args[i] = deserializeFormDataParameter(param, context, rootValidationResult, context.getLocale(), context.getZoneId());
+                args[i] = deserializeFormDataParameter(param, context, errors);
             } else if (param.isAnnotationPresent(UserId.class)) {
                 args[i] = Objects.requireNonNull(context.getUserId(), "UserId expected, but it was null"); // TODO Specialized exception and login
             } else if (param.isAnnotationPresent(ClientId.class)) {
                 args[i] = Objects.requireNonNull(context.getClientId(), "ClientId expected, but it was null");
             } else if (param.isAnnotationPresent(URLParameter.class)) {
-                args[i] = deserializeUrlParameter(param, context, rootValidationResult, context.getLocale(), context.getZoneId());
+                args[i] = deserializeUrlParameter(param, context, errors);
             } else if (param.isAnnotationPresent(one.xis.PathVariable.class)) {
-                args[i] = deserializePathVariable(param, context, rootValidationResult, context.getLocale(), context.getZoneId());
+                args[i] = deserializePathVariable(param, context, errors);
             } else if (param.isAnnotationPresent(WidgetParameter.class)) {
-                args[i] = deserializeWidgetParameter(param, context, rootValidationResult, context.getLocale(), context.getZoneId());
+                args[i] = deserializeWidgetParameter(param, context, errors);
             } else {
                 throw new IllegalStateException(method + ": parameter without annotation=" + param);
             }
@@ -51,34 +54,39 @@ class ParameterPreparation {
         return args;
     }
 
-    private Object deserializeModelParameter(Parameter parameter, ClientRequest context, ValidatorResultElement resultElement, Locale locale, String zoneId) throws IOException {
+    private Object deserializeModelParameter(Parameter parameter, ClientRequest request, Map<String, Throwable> errors) throws IOException {
         var key = parameter.getAnnotation(ModelData.class).value();
-        var paramValue = context.getData().get(key);
-        return parameterDeserializer.deserialize(paramValue, parameter, resultElement).orElse(null);
+        var paramValue = request.getData().get(key);
+        return deserializeParameter(paramValue, request, parameter, errors);
     }
 
-    private Object deserializeFormDataParameter(Parameter parameter, ClientRequest context, ValidatorResultElement validatorResultElement, Locale locale, String zoneId) throws IOException {
+    private Object deserializeFormDataParameter(Parameter parameter, ClientRequest request, Map<String, Throwable> errors) throws IOException {
         var key = parameter.getAnnotation(FormData.class).value();
-        var paramValue = context.getFormData().get(key);
-        return parameterDeserializer.deserialize(paramValue, parameter, validatorResultElement).orElse(null);
+        var paramValue = request.getFormData().get(key);
+        return deserializeParameter(paramValue, request, parameter, errors);
     }
 
-    private Object deserializeUrlParameter(Parameter parameter, ClientRequest context, ValidatorResultElement resultElement, Locale locale, String zoneId) throws IOException {
+    private Object deserializeUrlParameter(Parameter parameter, ClientRequest request, Map<String, Throwable> errors) throws IOException {
         var key = parameter.getAnnotation(URLParameter.class).value();
-        var paramValue = context.getUrlParameters().get(key);
-        return parameterDeserializer.deserialize(paramValue, parameter, resultElement).orElse(null);
+        var paramValue = request.getUrlParameters().get(key);
+        return deserializeParameter(paramValue, request, parameter, errors);
     }
 
-    private Object deserializePathVariable(Parameter parameter, ClientRequest context, ValidatorResultElement resultElement, Locale locale, String zoneId) throws IOException {
+    private Object deserializePathVariable(Parameter parameter, ClientRequest request, Map<String, Throwable> errors) throws IOException {
         var key = parameter.getAnnotation(PathVariable.class).value();
-        var paramValue = context.getPathVariables().get(key);
-        return parameterDeserializer.deserialize(paramValue, parameter, resultElement).orElse(null);
+        var paramValue = request.getPathVariables().get(key);
+        return deserializeParameter(paramValue, request, parameter, errors);
     }
 
-    private Object deserializeWidgetParameter(Parameter parameter, ClientRequest context, ValidatorResultElement resultElement, Locale locale, String zoneId) throws IOException {
+    private Object deserializeWidgetParameter(Parameter parameter, ClientRequest request, Map<String, Throwable> errors) throws IOException {
         var key = parameter.getAnnotation(WidgetParameter.class).value();
-        var paramValue = context.getWidgetParameters().get(key);
-        return parameterDeserializer.deserialize(paramValue, parameter, resultElement).orElse(null);
+        var paramValue = request.getWidgetParameters().get(key);
+        return deserializeParameter(paramValue, request, parameter, errors);
+    }
+
+    private Object deserializeParameter(String jsonValue, ClientRequest request, Parameter parameter, Map<String, Throwable> errors) throws IOException {
+        var userContext = new UserContext(request.getLocale(), ZoneId.of(request.getZoneId()), request.getUserId(), request.getClientId());
+        return parameterDeserializer.deserialize(jsonValue, parameter, errors, userContext);
     }
 
 
