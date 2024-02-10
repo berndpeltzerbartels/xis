@@ -13,15 +13,21 @@ class PageControllerService extends ControllerService {
 
     void processPageModelDataRequest(ClientRequest request, ServerResponse response) {
         var wrapper = findPageControllerWrapper(request);
-        invokeGetPageModelMethods(200, wrapper, request, response);
+        invokeGetPageModelMethods(wrapper, request, response);
+        response.setHttpStatus(200);
     }
 
     void processPageActionRequest(ClientRequest request, ServerResponse response) {
         var invokerControllerWrapper = pageControllerWrapperById(request.getPageId());
         var result = invokerControllerWrapper.invokeActionMethod(request);
+        if (!result.errors().isEmpty()) {
+            response.setHttpStatus(422);
+            //response.setValidatorMessages(result.errors());
+            return;
+        }
         if (result.returnValue() == null || result.returnValue() == Void.class || result.returnValue().equals(invokerControllerWrapper.getControllerClass())) {
             var dataMap = invokerControllerWrapper.invokeGetModelMethods(request);// Still the same controller
-            updatePageResponse(response, dataMap, invokerControllerWrapper);// Still the same controller
+            processPageResult(response, dataMap, invokerControllerWrapper);// Still the same controller
         } else if (result.returnValue() instanceof WidgetResponse widgetResponse) {
             if (widgetResponse.getTargetContainer() == null) { // TODO Client side code and test for this case
                 throw new IllegalStateException(invokerControllerWrapper.getControllerClass().getSimpleName() + ": widget-result of a page-controller must define a target-container");

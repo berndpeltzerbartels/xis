@@ -7,10 +7,10 @@ import java.lang.annotation.Target;
 
 /**
  * Annotation allows to control output formatting in input parsing by specifying
- * a custom {@link TypeAdapter} for a field.
+ * a custom {@link FieldFormat} for a field.
  */
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Format {
-    Class<? extends TypeAdapter<?>> value();
+    Class<? extends FieldFormat<?>> value();
 }

@@ -24,16 +24,14 @@ abstract class ControllerService {
     @XISInject
     private WidgetControllerWrappers widgetControllerWrappers;
 
-    protected void invokeGetWidgetModelMethods(int status, ControllerWrapper wrapper, ClientRequest request, ServerResponse response) {
-        response.setHttpStatus(status);
+    protected void invokeGetWidgetModelMethods(ControllerWrapper wrapper, ClientRequest request, ServerResponse response) {
         response.setData(dataSerializer.serialize(wrapper.invokeGetModelMethods(request)));
         response.setNextWidgetId(wrapper.getId());
         response.setWidgetParameters(emptyMap());
         response.setValidatorMessages(new ValidatorMessages());
     }
 
-    protected void invokeGetPageModelMethods(int status, ControllerWrapper wrapper, ClientRequest request, ServerResponse response) {
-        response.setHttpStatus(status);
+    protected void invokeGetPageModelMethods(ControllerWrapper wrapper, ClientRequest request, ServerResponse response) {
         response.setData(dataSerializer.serialize(wrapper.invokeGetModelMethods(request)));
         response.setNextPageURL(wrapper.getId());
         response.setWidgetParameters(emptyMap());
@@ -50,7 +48,7 @@ abstract class ControllerService {
                 .orElseThrow(() -> new IllegalStateException("not a widget-controller:" + id));
     }
 
-    protected void updatePageResponse(ServerResponse response, Map<String, Object> modelData, ControllerWrapper pageControllerWrapper) {
+    protected void processPageResult(ServerResponse response, Map<String, Object> modelData, ControllerWrapper pageControllerWrapper) {
         response.setHttpStatus(200);
         response.setData(dataSerializer.serialize(modelData));
         response.setNextPageURL(pageControllerWrapper.getId());
@@ -71,23 +69,27 @@ abstract class ControllerService {
         var controllerWrapper = widgetControllerWrapperByClass(controllerClass);
         request.getUrlParameters().putAll(pageResponse.getUrlParameters()); // TODO May be better to create a context class to avoid mutating the request
         request.getPathVariables().putAll(pageResponse.getPathVariables());
-        invokeGetWidgetModelMethods(200, controllerWrapper, request, response);
+        invokeGetWidgetModelMethods(controllerWrapper, request, response);
+        response.setHttpStatus(200);
     }
 
     protected void processActionResult(ClientRequest request, ServerResponse response, WidgetResponse widgetResponse) {
         var controllerClass = widgetResponse.getControllerClass();
         var controllerWrapper = widgetControllerWrapperByClass(controllerClass);
         request.getWidgetParameters().putAll(widgetResponse.getWidgetParameters()); // TODO May be better to create a context class to avoid mutating the request
-        invokeGetWidgetModelMethods(200, controllerWrapper, request, response);
+        invokeGetWidgetModelMethods(controllerWrapper, request, response);
+        response.setHttpStatus(200);
     }
 
     protected void processActionResult(ClientRequest request, ServerResponse response, Class<?> controllerClass) {
         if (controllerClass.isAnnotationPresent(Page.class)) {
             var controllerWrapper = pageControllerWrapperByClass(controllerClass);
-            invokeGetPageModelMethods(200, controllerWrapper, request, response);
+            invokeGetPageModelMethods(controllerWrapper, request, response);
+            response.setHttpStatus(200);
         } else if (controllerClass.isAnnotationPresent(Widget.class)) {
             var controllerWrapper = widgetControllerWrapperByClass(controllerClass);
-            invokeGetWidgetModelMethods(200, controllerWrapper, request, response);
+            invokeGetWidgetModelMethods(controllerWrapper, request, response);
+            response.setHttpStatus(200);
         } else {
             throw new IllegalStateException("returned type is not a controller class: " + controllerClass);
         }
@@ -98,7 +100,8 @@ abstract class ControllerService {
         var controllerWrapper = pageControllerWrapperByClass(controllerClass);
         request.getPathVariables().putAll(pageResponse.getPathVariables());
         request.getUrlParameters().putAll(pageResponse.getUrlParameters());
-        invokeGetPageModelMethods(200, controllerWrapper, request, response);
+        invokeGetPageModelMethods(controllerWrapper, request, response);
+        response.setHttpStatus(200);
     }
 
     protected ControllerWrapper pageControllerWrapperByClass(Class<?> controllerClass) {

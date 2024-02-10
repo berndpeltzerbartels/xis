@@ -11,7 +11,8 @@ class WidgetControllerService extends ControllerService {
 
     void processWidgetModelDataRequest(ClientRequest request, ServerResponse response) {
         var wrapper = widgetControllerWrapperById(request.getWidgetId());
-        invokeGetWidgetModelMethods(200, wrapper, request, response);
+        invokeGetWidgetModelMethods(wrapper, request, response);
+        response.setHttpStatus(200);
     }
 
     void processWidgetActionRequest(ClientRequest request, ServerResponse response) {

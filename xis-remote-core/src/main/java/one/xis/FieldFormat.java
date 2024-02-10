@@ -3,7 +3,7 @@ package one.xis;
 import java.time.ZoneId;
 import java.util.Locale;
 
-public interface TypeAdapter<T> {
+public interface FieldFormat<T> {
 
     String format(T t, Locale locale, ZoneId zoneId);
 

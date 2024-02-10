@@ -1,13 +1,12 @@
-package one.xis.parameter;
+package one.xis.server;
 
 import lombok.Data;
 
 import java.lang.reflect.Field;
 
 @Data
-class Error {
+class ValidationError {
     private String path;
-    private String message;
     private Field field;
-    private Throwable throwable;
+    private Object value;
 }

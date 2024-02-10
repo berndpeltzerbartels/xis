@@ -181,7 +181,7 @@ class PageController {
         var welcomePage = this.pages.getWelcomePage();
         // normalizedPath works here, because welcome-page never has path-variables
         var path = new Path(new PathElement({ type: 'static', content: welcomePage.normalizedPath }));
-        return new ResolvedURL(path, [], {}, welcomePage);
+        return new ResolvedURL(path, [], {}, welcomePage, path.normalized());
     }
 
     /**

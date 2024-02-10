@@ -19,9 +19,10 @@ abstract class ControllerMethod {
     protected ParameterPreparation parameterPreparation;
 
     ControllerMethodResult invoke(ClientRequest request, Object controller) throws Exception {
-        var args = prepareArgs(method, request);
+        var errors = new HashMap<String, Throwable>();
+        var args = prepareArgs(method, request, errors);
         var returnValue = method.invoke(controller, args);
-        return new ControllerMethodResult(returnValue, modelParameterData(args));
+        return new ControllerMethodResult(returnValue, modelParameterData(args), errors);
     }
 
     @Override
@@ -29,8 +30,8 @@ abstract class ControllerMethod {
         return "ControllerMethod(" + method.getName() + ")";
     }
 
-    protected Object[] prepareArgs(Method method, ClientRequest request) throws Exception {
-        return parameterPreparation.prepareParameters(method, request);
+    protected Object[] prepareArgs(Method method, ClientRequest request, Map<String, Throwable> errors) throws Exception {
+        return parameterPreparation.prepareParameters(method, request, errors);
     }
 
     private Map<String, Object> modelParameterData(Object[] args) {

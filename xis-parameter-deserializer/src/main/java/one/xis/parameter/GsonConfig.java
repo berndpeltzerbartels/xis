@@ -11,4 +11,5 @@ class GsonConfig {
     Gson gson() {
         return new Gson();
     }
+    
 }

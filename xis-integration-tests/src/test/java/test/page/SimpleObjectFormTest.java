@@ -66,13 +66,12 @@ class SimpleObjectFormTest {
 
             verify(service).save(any());
 
-
+            // After saving object, the details page should be displayed
             assertThat(titleElement.innerText).isEqualTo("Object Details");
 
+            // The details page should display the saved values
             var p1 = document.getElementById("v1");
             var p2 = document.getElementById("v2");
-
-
             assertThat(p1.innerText).isEqualTo("v1");
             assertThat(p2.innerText).isEqualTo("v2");
         }

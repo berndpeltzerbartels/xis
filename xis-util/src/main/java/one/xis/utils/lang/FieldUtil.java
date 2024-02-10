@@ -23,11 +23,7 @@ public class FieldUtil {
     }
 
     public Field getDeclaredField(Class<?> clazz, String fieldName) {
-        try {
-            return clazz.getDeclaredField(fieldName);
-        } catch (NoSuchFieldException e) {
-            return null;
-        }
+        return getDeclaredField(clazz, fieldName, true);
     }
 
     public Collection<Field> getAllFields(Class<?> clazz) {
@@ -55,6 +51,18 @@ public class FieldUtil {
 
     public Collection<Field> getDeclaredFields(Class<?> clazz) {
         return Arrays.asList(clazz.getDeclaredFields());
+    }
+
+    public static Field getDeclaredField(Class<?> clazz, String name, boolean forceAccess) {
+        try {
+            Field field = clazz.getDeclaredField(name);
+            if (forceAccess && !field.isAccessible()) {
+                field.setAccessible(true);
+            }
+            return field;
+        } catch (NoSuchFieldException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public Collection<Field> getDeclaredAccessibleFields(Class<?> clazz) {

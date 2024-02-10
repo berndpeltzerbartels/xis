@@ -1,15 +1,23 @@
+/**
+ * Handler for tags without a parent handler.
+ */
+
 class RootTagHandler extends TagHandler {
     constructor(tag) {
         super(tag);
         this.type = 'root-handler';
     }
 
+    /**
+     * @public
+     * @param {Data} data 
+     */
     refresh(data) {
         this.refreshDescendantHandlers(data);
     }
 
     /**
-     * 
+     * TODO : seems to be never used. Check for bug.
      * @param {TagHandler} parentHandler 
      */
     bindParentHandler(parentHandler) {
@@ -19,7 +27,10 @@ class RootTagHandler extends TagHandler {
     }
 
 
-
+    /**
+     * TODO : seems to be never used. Check for bug.
+     * @param {TagHandler} parentHandler 
+     */
     unbindParentHandler(parentHandler) {
         parentHandler.descendantHandlers = parentHandler.descendantHandlers.filter(h => h != this);
     }

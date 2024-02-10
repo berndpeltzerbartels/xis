@@ -1,8 +1,8 @@
 package one.xis.parameter;
 
 import lombok.Data;
+import one.xis.FieldFormat;
 import one.xis.Format;
-import one.xis.TypeAdapter;
 import one.xis.UserContext;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -221,10 +221,10 @@ class DeserializerTest {
     }
 
     @Nested
-    class CustomTypeAdapterTest {
+    class CustomFieldFormatTest {
 
 
-        static class TestTypeAdapter implements TypeAdapter<LocalDate> {
+        static class TestFieldFormat implements FieldFormat<LocalDate> {
 
             @Override
             public String format(LocalDate localDate, Locale locale, ZoneId zoneId) {
@@ -237,12 +237,12 @@ class DeserializerTest {
             }
         }
 
-        private final Deserializer deserializer = new Deserializer(new GsonConfig().gson(), Set.of(new TestTypeAdapter()));
+        private final Deserializer deserializer = new Deserializer(new GsonConfig().gson(), Set.of(new TestFieldFormat()));
 
         @Data
         static class CustomType {
 
-            @Format(TestTypeAdapter.class)
+            @Format(TestFieldFormat.class)
             private LocalDate value;
         }
 

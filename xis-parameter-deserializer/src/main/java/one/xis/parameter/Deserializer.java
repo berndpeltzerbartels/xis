@@ -7,8 +7,8 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import one.xis.FieldFormat;
 import one.xis.Format;
-import one.xis.TypeAdapter;
 import one.xis.UserContext;
 import one.xis.context.XISComponent;
 import one.xis.utils.lang.ClassUtils;
@@ -27,7 +27,7 @@ import java.util.Map;
 class Deserializer implements ParameterDeserializer {
 
     private final Gson gson;
-    private final Collection<TypeAdapter<?>> typeAdapters;
+    private final Collection<FieldFormat<?>> fieldFormats;
 
     @Override
     public Object deserialize(String json, Parameter parameter, Map<String, Throwable> errors, UserContext userContext) throws IOException {
@@ -211,20 +211,14 @@ class Deserializer implements ParameterDeserializer {
     }
 
     private String readString(JsonReader reader) throws IOException {
-        // no restriction token, here. May read numbers and custom types, too
         return reader.nextString();
     }
 
-    private void assertToken(JsonReader reader, JsonToken token) throws IOException {
-        if (reader.peek() != token) {
-            throw new IllegalStateException();
-        }
-    }
 
-    private TypeAdapter<?> typeAdapter(Class<? extends TypeAdapter<?>> typeAdapterClass) {
-        return typeAdapters.stream()
+    private FieldFormat<?> typeAdapter(Class<? extends FieldFormat<?>> typeAdapterClass) {
+        return fieldFormats.stream()
                 .filter(typeAdapterClass::isInstance)
-                .map(typeAdapter -> (TypeAdapter<?>) typeAdapter)
+                .map(fieldFormat -> (FieldFormat<?>) fieldFormat)
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("Type adapter not found in context: " + typeAdapterClass + ". Must be a component"));
     }

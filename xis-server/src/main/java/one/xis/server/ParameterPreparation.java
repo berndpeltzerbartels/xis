@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.time.ZoneId;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -23,9 +22,8 @@ import java.util.Objects;
 class ParameterPreparation {
     private final ParameterDeserializer parameterDeserializer;
 
-    Object[] prepareParameters(Method method, ClientRequest context) throws Exception {
+    Object[] prepareParameters(Method method, ClientRequest context, Map<String, Throwable> errors) throws Exception {
         var rootValidationResult = ValidatorResultElement.rootResult();
-        var errors = new HashMap<String, Throwable>();
         Object[] args = new Object[method.getParameterCount()];
         var params = method.getParameters();
         for (int i = 0; i < args.length; i++) {

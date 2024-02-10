@@ -36,6 +36,7 @@ class LinkHandler extends TagHandler {
         if (this.targetContainerExpression) {
             this.targetContainerId = this.targetContainerExpression.evaluate(data);
         }
+        this.refreshDescendantHandlers(data);
     }
 
 

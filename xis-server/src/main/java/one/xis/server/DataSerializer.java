@@ -1,11 +1,9 @@
 package one.xis.server;
 
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
-import one.xis.context.XISInit;
 
 import java.util.Map;
 
@@ -18,23 +16,12 @@ import java.util.Map;
  * empty arrays etc.
  */
 @XISComponent
+@RequiredArgsConstructor
 class DataSerializer {
 
-    private ObjectMapper objectMapper;
-
-    @XISInit
-    void init() {
-        objectMapper = new ObjectMapper();
-        objectMapper.setSerializationInclusion(JsonInclude.Include.ALWAYS);
-        // TODO dates/timestamps
-        // TODO may spring / micronaut deserialzer has to be configured, too
-    }
+    private final Gson gson;
 
     String serialize(Map<String, Object> data) {
-        try {
-            return objectMapper.writeValueAsString(data);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        return gson.toJson(data);
     }
 }

@@ -15,4 +15,9 @@ class PageLink1 {
         invocations++;
         return "PageLink1";
     }
+
+    @ModelData("link1-content")
+    String link1Content() {
+        return "Link to PageLink2";
+    }
 }
