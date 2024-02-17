@@ -19,10 +19,10 @@ import java.util.Objects;
 @Slf4j
 @XISComponent
 @RequiredArgsConstructor
-class ParameterPreparation {
+class ParameterPreparer {
     private final ParameterDeserializer parameterDeserializer;
 
-    Object[] prepareParameters(Method method, ClientRequest context, Map<String, Throwable> errors) throws Exception {
+    Object[] prepareParameters(Method method, ClientRequest context, Map<String, ValidationError> errors) throws Exception {
         var rootValidationResult = ValidatorResultElement.rootResult();
         Object[] args = new Object[method.getParameterCount()];
         var params = method.getParameters();
@@ -52,37 +52,37 @@ class ParameterPreparation {
         return args;
     }
 
-    private Object deserializeModelParameter(Parameter parameter, ClientRequest request, Map<String, Throwable> errors) throws IOException {
+    private Object deserializeModelParameter(Parameter parameter, ClientRequest request, Map<String, ValidationError> errors) throws IOException {
         var key = parameter.getAnnotation(ModelData.class).value();
         var paramValue = request.getData().get(key);
         return deserializeParameter(paramValue, request, parameter, errors);
     }
 
-    private Object deserializeFormDataParameter(Parameter parameter, ClientRequest request, Map<String, Throwable> errors) throws IOException {
+    private Object deserializeFormDataParameter(Parameter parameter, ClientRequest request, Map<String, ValidationError> errors) throws IOException {
         var key = parameter.getAnnotation(FormData.class).value();
         var paramValue = request.getFormData().get(key);
         return deserializeParameter(paramValue, request, parameter, errors);
     }
 
-    private Object deserializeUrlParameter(Parameter parameter, ClientRequest request, Map<String, Throwable> errors) throws IOException {
+    private Object deserializeUrlParameter(Parameter parameter, ClientRequest request, Map<String, ValidationError> errors) throws IOException {
         var key = parameter.getAnnotation(URLParameter.class).value();
         var paramValue = request.getUrlParameters().get(key);
         return deserializeParameter(paramValue, request, parameter, errors);
     }
 
-    private Object deserializePathVariable(Parameter parameter, ClientRequest request, Map<String, Throwable> errors) throws IOException {
+    private Object deserializePathVariable(Parameter parameter, ClientRequest request, Map<String, ValidationError> errors) throws IOException {
         var key = parameter.getAnnotation(PathVariable.class).value();
         var paramValue = request.getPathVariables().get(key);
         return deserializeParameter(paramValue, request, parameter, errors);
     }
 
-    private Object deserializeWidgetParameter(Parameter parameter, ClientRequest request, Map<String, Throwable> errors) throws IOException {
+    private Object deserializeWidgetParameter(Parameter parameter, ClientRequest request, Map<String, ValidationError> errors) throws IOException {
         var key = parameter.getAnnotation(WidgetParameter.class).value();
         var paramValue = request.getWidgetParameters().get(key);
         return deserializeParameter(paramValue, request, parameter, errors);
     }
 
-    private Object deserializeParameter(String jsonValue, ClientRequest request, Parameter parameter, Map<String, Throwable> errors) throws IOException {
+    private Object deserializeParameter(String jsonValue, ClientRequest request, Parameter parameter, Map<String, ValidationError> errors) throws IOException {
         var userContext = new UserContext(request.getLocale(), ZoneId.of(request.getZoneId()), request.getUserId(), request.getClientId());
         return parameterDeserializer.deserialize(jsonValue, parameter, errors, userContext);
     }

@@ -53,7 +53,7 @@ class PageController {
     /**
    * Should be used in case of the source 
    * of the action has no parent widget-container
-   * and invoker has no data.
+   * and invoker has data.
    * 
    * @see FormHandler
    * 
@@ -111,10 +111,12 @@ class PageController {
         if (!this.resolvedURL) {
             this.resolvedURL = this.welcomePageUrl();
         }
+        if (!this.resolvedURL) throw new Error('no page for url: ' + realUrl);
         if (this.resolvedURL.page != this.page) {
             this.htmlTagHandler.bindPage(this.resolvedURL.page);
         }
         this.page = this.resolvedURL.page;
+        this.updateHistory(this.resolvedURL);
         this.refreshCurrentPage().catch(e => console.error(e));
     }
 
@@ -179,6 +181,7 @@ class PageController {
     welcomePageUrl() {
         // TODO Validate: Welcome Page must have no path-variables
         var welcomePage = this.pages.getWelcomePage();
+        if (!welcomePage) return undefined;
         // normalizedPath works here, because welcome-page never has path-variables
         var path = new Path(new PathElement({ type: 'static', content: welcomePage.normalizedPath }));
         return new ResolvedURL(path, [], {}, welcomePage, path.normalized());

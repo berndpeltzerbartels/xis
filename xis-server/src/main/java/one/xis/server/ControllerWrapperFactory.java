@@ -19,7 +19,7 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 class ControllerWrapperFactory {
 
-    private final ParameterPreparation parameterFactory;
+    private final ParameterPreparer parameterFactory;
 
     ControllerWrapper createControllerWrapper(@NonNull String id, @NonNull Object controller) {
         try {
@@ -67,7 +67,7 @@ class ControllerWrapperFactory {
             return ModelMethod.builder()
                     .method(method)
                     .key(key)
-                    .parameterPreparation(parameterFactory)
+                    .parameterPreparer(parameterFactory)
                     .build();
         } catch (Exception e) {
             throw new RuntimeException("Failed to initialize " + method, e);
@@ -80,7 +80,7 @@ class ControllerWrapperFactory {
             return ActionMethod.builder()
                     .method(method)
                     .key(method.getAnnotation(Action.class).value())
-                    .parameterPreparation(parameterFactory)
+                    .parameterPreparer(parameterFactory)
                     .build();
         } catch (Exception e) {
             throw new RuntimeException("Failed to initialize " + method, e);

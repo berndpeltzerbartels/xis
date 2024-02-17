@@ -9,12 +9,7 @@ class LinkHandler extends TagHandler {
         super(element);
         this.type = 'link-handler';
         this.widgetContainers = widgetContainers;
-        this.pageUrlExpression = this.expressionFromAttribute('xis:page');
-        this.widgetUrlExpression = this.expressionFromAttribute('xis:widget');
-        this.targetContainerExpression = this.expressionFromAttribute('xis:target-container');
-        if (!this.targetContainerExpression) {
-            this.parentWidgetContainer = this.findParentWidgetContainer();
-        }
+        element.setAttribute("href", "#");
         element.addEventListener('click', event => {
             event.preventDefault();
             this.onClick(event);
@@ -27,16 +22,10 @@ class LinkHandler extends TagHandler {
      */
     refresh(data) {
         this.data = data;
-        if (this.pageUrlExpression) {
-            this.targetPageUrl = this.pageUrlExpression.evaluate(data);
-        }
-        if (this.widgetUrlExpression) {
-            this.targetWidgetUrl = this.widgetUrlExpression.evaluate(data);
-        }
-        if (this.targetContainerExpression) {
-            this.targetContainerId = this.targetContainerExpression.evaluate(data);
-        }
-        this.refreshDescendantHandlers(data);
+        this.refreshDescendantHandlers(data); // attributes might have variables !
+        this.targetPageUrl = this.tag.getAttribute('xis:page');
+        this.targetWidgetUrl = this.tag.getAttribute('xis:widget');
+        this.targetContainerId = this.tag.getAttribute('xis:target-container');
     }
 
 
@@ -46,9 +35,9 @@ class LinkHandler extends TagHandler {
      * @returns {Promise<void>} 
      */
     onClick(e) {
-        if (this.widgetUrlExpression) {
+        if (this.targetWidgetUrl) {
             return this.onClickWidgetLink();
-        } else if (this.pageUrlExpression) {
+        } else if (this.targetPageUrl) {
             return this.onClickPageLink();
         }
     }

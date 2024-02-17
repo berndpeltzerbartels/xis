@@ -16,10 +16,10 @@ abstract class ControllerMethod {
 
     protected Method method;
     protected String key;
-    protected ParameterPreparation parameterPreparation;
+    protected ParameterPreparer parameterPreparer;
 
     ControllerMethodResult invoke(ClientRequest request, Object controller) throws Exception {
-        var errors = new HashMap<String, Throwable>();
+        var errors = new HashMap<String, ValidationError>();
         var args = prepareArgs(method, request, errors);
         var returnValue = method.invoke(controller, args);
         return new ControllerMethodResult(returnValue, modelParameterData(args), errors);
@@ -30,8 +30,8 @@ abstract class ControllerMethod {
         return "ControllerMethod(" + method.getName() + ")";
     }
 
-    protected Object[] prepareArgs(Method method, ClientRequest request, Map<String, Throwable> errors) throws Exception {
-        return parameterPreparation.prepareParameters(method, request, errors);
+    protected Object[] prepareArgs(Method method, ClientRequest request, Map<String, ValidationError> errors) throws Exception {
+        return parameterPreparer.prepareParameters(method, request, errors);
     }
 
     private Map<String, Object> modelParameterData(Object[] args) {

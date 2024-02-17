@@ -9,6 +9,9 @@ class ForeachHandler extends TagHandler {
         this.varName = this.getAttribute('var');
         this.type = 'foreach-handler';
         this.priority = 'high';
+        this.cache = new ForEachNodeCache(nodeListToArray(this.tag.childNodes));
+        this.clearChildren();
+
     }
 
     /**
@@ -18,12 +21,12 @@ class ForeachHandler extends TagHandler {
     refresh(data) {
         var arrayPath = this.doSplit(this.arrayPathExpression.evaluate(data), '.');
         var arr = data.getValue(arrayPath);
-        this.nodeCache().sizeUp(arr.length);
+        this.cache.sizeUp(arr.length);
         for (var i = 0; i < this.cache.length; i++) {
             var subData = new Data({}, data);
             subData.setValue([this.varName + '-index'], i);
             subData.setValue([this.varName], arr[i]);
-            var children = this.nodeCache().getChildren(i);
+            var children = this.cache.getChildren(i);
             if (i < arr.length) {
                 for (var child of children) {
                     if (child.parentNode != this.tag) {
@@ -42,12 +45,5 @@ class ForeachHandler extends TagHandler {
                 }
             }
         }
-    }
-
-    nodeCache() {
-        if (!this.cache) {
-            this.cache = new ForEachNodeCache(nodeListToArray(this.tag.childNodes));
-        }
-        return this.cache;
     }
 }

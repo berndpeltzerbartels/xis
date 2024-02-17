@@ -6,6 +6,6 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-class ValidationFieldInjectionError extends ValidationError {
-    private Exception exception;
+public class ValidationFieldInjectionError extends ValidationError {
+    private Throwable throwable;
 }

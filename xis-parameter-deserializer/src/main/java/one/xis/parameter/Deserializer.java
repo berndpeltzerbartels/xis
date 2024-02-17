@@ -11,6 +11,8 @@ import one.xis.FieldFormat;
 import one.xis.Format;
 import one.xis.UserContext;
 import one.xis.context.XISComponent;
+import one.xis.server.ValidationError;
+import one.xis.server.ValidationFieldInjectionError;
 import one.xis.utils.lang.ClassUtils;
 import one.xis.utils.lang.CollectionUtils;
 import one.xis.utils.lang.FieldUtil;
@@ -30,13 +32,13 @@ class Deserializer implements ParameterDeserializer {
     private final Collection<FieldFormat<?>> fieldFormats;
 
     @Override
-    public Object deserialize(String json, Parameter parameter, Map<String, Throwable> errors, UserContext userContext) throws IOException {
+    public Object deserialize(String json, Parameter parameter, Map<String, ValidationError> errors, UserContext userContext) throws IOException {
         var reader = new JsonReader(new StringReader(json));
         reader.setLenient(true);
         return deserialize(reader, parameter.getParameterizedType(), parameter.getName(), new RootPathElement(), errors, userContext);
     }
 
-    Object deserialize(String json, Type type, Map<String, Throwable> errors, UserContext userContext) throws IOException {
+    Object deserialize(String json, Type type, Map<String, ValidationError> errors, UserContext userContext) throws IOException {
         var reader = new JsonReader(new StringReader(json));
         var path = new RootPathElement();
         reader.setLenient(true);
@@ -52,7 +54,7 @@ class Deserializer implements ParameterDeserializer {
     private Object deserialize(@NonNull JsonReader reader,
                                @NonNull Field field,
                                @NonNull PathElement pathElement,
-                               @NonNull Map<String, Throwable> errors,
+                               @NonNull Map<String, ValidationError> errors,
                                @NonNull UserContext userContext) throws IOException {
 
         return deserialize(reader, field.getGenericType(), field.getName(), pathElement, errors, userContext);
@@ -63,7 +65,7 @@ class Deserializer implements ParameterDeserializer {
                                @NonNull Type type,
                                @NonNull String fieldName,
                                @NonNull PathElement pathElement,
-                               @NonNull Map<String, Throwable> errors,
+                               @NonNull Map<String, ValidationError> errors,
                                @NonNull UserContext userContext) throws IOException {
 
         if (type.equals(String.class)) {
@@ -119,7 +121,7 @@ class Deserializer implements ParameterDeserializer {
     private Object deserializeObject(@NonNull JsonReader reader,
                                      @NonNull Object o,
                                      @NonNull PathElement parent,
-                                     @NonNull Map<String, Throwable> errors,
+                                     @NonNull Map<String, ValidationError> errors,
                                      @NonNull UserContext userContext) throws IOException {
         reader.beginObject();
         while (reader.hasNext()) {
@@ -129,8 +131,9 @@ class Deserializer implements ParameterDeserializer {
             if (field == null) {
                 reader.skipValue();
             } else {
+                Object value = null;
                 try {
-                    Object value;
+
                     if (field.isAnnotationPresent(Format.class)) {
                         var format = field.getAnnotation(Format.class);
                         var adapterClass = format.value();
@@ -146,10 +149,10 @@ class Deserializer implements ParameterDeserializer {
                     }
                     FieldUtil.setFieldValue(o, field, value);
                 } catch (JsonProcessingException | JsonSyntaxException e) {
-                    errors.put(pathElement.toPathString(), e.getCause());
+                    errors.put(pathElement.toPathString(), createValidationError(pathElement, e, value));
                 } catch (Exception e) {
                     reader.skipValue();
-                    errors.put(pathElement.toPathString(), e);
+                    errors.put(pathElement.toPathString(), createValidationError(pathElement, e, value));
                 }
             }
         }
@@ -157,12 +160,24 @@ class Deserializer implements ParameterDeserializer {
         return o;
     }
 
+    private ValidationFieldInjectionError createValidationError(PathElement pathElement, Throwable e, Object value) {
+        var validationError = new ValidationFieldInjectionError();
+        validationError.setPath(pathElement.toPathString());
+        validationError.setValue(value);
+        if (e instanceof JsonSyntaxException jsonSyntaxException) {
+            validationError.setThrowable(jsonSyntaxException.getCause());
+        } else {
+            validationError.setThrowable(e);
+        }
+        return validationError;
+    }
+
     @SuppressWarnings("unchecked")
     private Object deserializeArray(@NonNull JsonReader reader,
                                     @NonNull Type genericType,
                                     @NonNull String fieldName,
                                     @NonNull PathElement parent,
-                                    @NonNull Map<String, Throwable> errors,
+                                    @NonNull Map<String, ValidationError> errors,
                                     @NonNull UserContext userContext) throws IOException {
         if (genericType instanceof ParameterizedType parameterizedType && Collection.class.isAssignableFrom((Class<?>) parameterizedType.getRawType())) {
             var elementType = assertNoArrayOrCollectionType(parameterizedType.getActualTypeArguments()[0]);
@@ -183,20 +198,22 @@ class Deserializer implements ParameterDeserializer {
                                   @NonNull Type elementType,
                                   @NonNull String fieldName,
                                   @NonNull PathElement element,
-                                  @NonNull Map<String, Throwable> errors,
+                                  @NonNull Map<String, ValidationError> errors,
                                   @NonNull UserContext userContext) throws IOException {
         var parent = element.getParent();
         parent.clearChildren();
         reader.beginArray();
         while (reader.hasNext()) {
+            Object value = null;
             var pathElement = parent.addChild(fieldName);
             try {
-                collection.add(deserialize(reader, elementType, fieldName, pathElement, errors, userContext));
+                value = deserialize(reader, elementType, fieldName, pathElement, errors, userContext);
+                collection.add(value);
             } catch (JsonProcessingException | JsonSyntaxException e) {
-                errors.put(pathElement.toPathString(), e.getCause());
+                errors.put(pathElement.toPathString(), createValidationError(pathElement, e, value));
             } catch (Exception e) {
                 reader.skipValue();
-                errors.put(pathElement.toPathString(), e);
+                errors.put(pathElement.toPathString(), createValidationError(pathElement, e, value));
             }
         }
         reader.endArray();

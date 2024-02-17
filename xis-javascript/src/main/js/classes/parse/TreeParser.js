@@ -158,7 +158,7 @@ class Variable {
             }
             throw new Error('operator expected');
         }
-        return value;
+        return (value === undefined) ? "" : value;
     }
 }
 

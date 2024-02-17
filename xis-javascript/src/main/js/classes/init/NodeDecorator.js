@@ -76,7 +76,7 @@ class NodeDecorator {
 
         }
 
-        this.initializeAttributes(element, parentHandler);
+        this.initializeAttributes(element, handler ? handler : parentHandler);
         if (handler) {
             parentHandler.addDescendantHandler(handler);
             this.decorateChildNodes(element, handler);
@@ -97,11 +97,13 @@ class NodeDecorator {
      * @param {TagHandler} parentHandler
      */
     initializeAttributes(element, parentHandler) {
+        element._removedAttributes = {}; // we need removed attributes to clone an element
         for (var attrName of element.getAttributeNames()) {
             var attrValue = element.getAttribute(attrName);
             if (attrValue.indexOf('${') != -1) {
                 parentHandler.addDescendantHandler(new AttributeHandler(element, attrName));
                 element.removeAttribute(attrName);
+                element._removedAttributes[attrName] = attrValue;
             }
 
         }

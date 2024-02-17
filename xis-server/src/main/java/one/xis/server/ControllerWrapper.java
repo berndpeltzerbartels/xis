@@ -29,7 +29,7 @@ public class ControllerWrapper {
 
     Map<String, Object> invokeGetModelMethods(ClientRequest request) {
         var data = new HashMap<String, Object>();
-        var errors = new HashMap<String, Throwable>();
+        var errors = new HashMap<String, ValidationError>();
         modelMethods.forEach((key, method) -> invokeForModel(key, method, request, data, errors));
         if (!errors.isEmpty()) {
             throw exceptionForErrors(errors);
@@ -51,7 +51,7 @@ public class ControllerWrapper {
         return controller.getClass();
     }
 
-    private void invokeForModel(String key, ModelMethod modelMethod, ClientRequest request, Map<String, Object> result, Map<String, Throwable> errors) {
+    private void invokeForModel(String key, ModelMethod modelMethod, ClientRequest request, Map<String, Object> result, Map<String, ValidationError> errors) {
         try {
             var methodResult = modelMethod.invoke(request, controller);
             result.put(key, methodResult.returnValue());
@@ -62,7 +62,7 @@ public class ControllerWrapper {
         }
     }
 
-    private RuntimeException exceptionForErrors(Map<String, Throwable> errors) {
+    private RuntimeException exceptionForErrors(Map<String, ValidationError> errors) {
         var message = errors.entrySet().stream()
                 .map(e -> e.getKey() + ": " + e.getValue())
                 .collect(Collectors.joining(", "));

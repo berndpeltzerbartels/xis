@@ -1,5 +1,10 @@
+
 class TagHandler {
 
+    /**
+     * 
+     * @param {Element} tag 
+     */
     constructor(tag) {
         this.tag = tag;
         this.descendantHandlers = [];

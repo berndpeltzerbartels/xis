@@ -27,6 +27,7 @@ public class WidgetResponse {
         return this;
     }
 
+
     public WidgetResponse reloadWidget(Class<?> widgetController) {
         if (!widgetController.isAnnotationPresent(Widget.class)) {
             throw new IllegalArgumentException("not a widget: " + widgetController);

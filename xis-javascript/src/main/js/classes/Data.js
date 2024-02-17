@@ -21,7 +21,7 @@ class Data {
         var dataNode = this.values;
         for (var i = 0; i < path.length; i++) {
             var key = path[i];
-            if (dataNode[key]) {
+            if (dataNode[key] != undefined) {  // false failes for 0
                 dataNode = dataNode[key];
             } else {
                 dataNode = undefined;

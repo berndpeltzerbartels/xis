@@ -4,6 +4,8 @@ import lombok.Data;
 import one.xis.FieldFormat;
 import one.xis.Format;
 import one.xis.UserContext;
+import one.xis.server.ValidationError;
+import one.xis.server.ValidationFieldInjectionError;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -144,13 +146,14 @@ class DeserializerTest {
         @Test
         void test() throws IOException {
             var json = "{\"number\":\"test\"}";
-            var errors = new HashMap<String, Throwable>();
+            var errors = new HashMap<String, ValidationError>();
             var object = deserializer.deserialize(json, ObjectWithIntField.class, errors, new UserContext());
 
             assertThat(errors).hasSize(1);
             assertThat(object).isNotNull();
             assertThat(errors).containsKey("/number[0]");
-            assertThat(errors.get("/number[0]")).isInstanceOf(IllegalArgumentException.class);
+            assertThat(errors.get("/number[0]")).isInstanceOf(ValidationFieldInjectionError.class);
+            assertThat(((ValidationFieldInjectionError) errors.get("/number[0]")).getThrowable()).isInstanceOf(NumberFormatException.class);
         }
     }
 
@@ -167,13 +170,14 @@ class DeserializerTest {
         @Test
         void test() throws IOException {
             var json = "{\"numbers\":[1,2, \"test\"]}";
-            var errors = new HashMap<String, Throwable>();
+            var errors = new HashMap<String, ValidationError>();
             var object = deserializer.deserialize(json, ObjectWithCollectionOfInts.class, errors, new UserContext());
 
             assertThat(errors).hasSize(1);
             assertThat(object).isNotNull();
             assertThat(errors).containsKey("/numbers[2]");
-            assertThat(errors.get("/numbers[2]")).isInstanceOf(NumberFormatException.class);
+            assertThat(errors.get("/numbers[2]")).isInstanceOf(ValidationFieldInjectionError.class);
+            assertThat(((ValidationFieldInjectionError) errors.get("/numbers[2]")).getThrowable()).isInstanceOf(NumberFormatException.class);
         }
     }
 
@@ -209,13 +213,14 @@ class DeserializerTest {
                         }
                     }
                     """;
-            var errors = new HashMap<String, Throwable>();
+            var errors = new HashMap<String, ValidationError>();
             var object = deserializer.deserialize(json, A.class, errors, new UserContext());
 
             assertThat(errors).hasSize(1);
             assertThat(object).isNotNull();
             assertThat(errors).containsKey("/b[0]/c[1]/i[0]");
-            assertThat(errors.get("/b[0]/c[1]/i[0]")).isInstanceOf(NumberFormatException.class);
+            assertThat(errors.get("/b[0]/c[1]/i[0]")).isInstanceOf(ValidationFieldInjectionError.class);
+            assertThat(((ValidationFieldInjectionError) errors.get("/b[0]/c[1]/i[0]")).getThrowable()).isInstanceOf(NumberFormatException.class);
         }
 
     }
@@ -250,7 +255,7 @@ class DeserializerTest {
         @Test
         void test() throws IOException {
             var json = "{\"value\":\"Day: 01, Month: 08, Year: 2017\"}";
-            var errors = new HashMap<String, Throwable>();
+            var errors = new HashMap<String, ValidationError>();
             var object = (CustomType) deserializer.deserialize(json, CustomType.class, errors, new UserContext());
 
             assertThat(errors).isEmpty();

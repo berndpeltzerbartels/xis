@@ -73,6 +73,12 @@ abstract class ControllerService {
         response.setHttpStatus(200);
     }
 
+
+    protected void processFailedValidation(Map<String, ValidationError> validationErrors, ServerResponse response) {
+        //response.setValidatorMessages();
+        response.setHttpStatus(422);
+    }
+
     protected void processActionResult(ClientRequest request, ServerResponse response, WidgetResponse widgetResponse) {
         var controllerClass = widgetResponse.getControllerClass();
         var controllerWrapper = widgetControllerWrapperByClass(controllerClass);

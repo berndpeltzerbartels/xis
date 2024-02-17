@@ -1,3 +1,7 @@
+/**
+ * A handler for all tags with consitioned visiblility
+ * e.g. child nodes of a foreach, or tag representing a widget.
+ */
 class RootTagHandler extends TagHandler {
     constructor(tag) {
         super(tag);

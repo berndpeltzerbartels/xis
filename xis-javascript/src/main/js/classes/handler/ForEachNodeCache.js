@@ -13,11 +13,8 @@ class ForEachNodeCache {
      * @param {array<Node>} nodeArray
      */
     constructor(nodeArray) {
-        this.nodeArray = nodeArray;
-        this.nodeCache = [nodeArray];
-        for (var node of nodeArray) {
-            this.initialize(node);
-        }
+        this.templateNodeArray = nodeArray;
+        this.nodeCache = [];
     }
 
     /**
@@ -54,7 +51,7 @@ class ForEachNodeCache {
      */
     cloneChildNodes() {
         var clones = [];
-        for (var node of this.nodeArray) {
+        for (var node of this.templateNodeArray) {
             var clone = this.cloneNode(node);
             this.initialize(clone);
             clones.push(clone);
@@ -83,6 +80,13 @@ class ForEachNodeCache {
         var clone = document.createElement(element.localName);
         for (var name of element.getAttributeNames()) {
             clone.setAttribute(name, element.getAttribute(name));
+        }
+        // Attributes with variables are getting removed and treated
+        // with a handler, instead
+        if (element._removedAttributes) {
+            for (var name of Object.keys(element._removedAttributes)) {
+                clone.setAttribute(name, element._removedAttributes[name]);
+            }
         }
         for (let index = 0; index < element.childNodes.length; index++) {
             const child = element.childNodes.item(index);

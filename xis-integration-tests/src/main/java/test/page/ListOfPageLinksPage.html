@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html xmlns:xis="http://xis.one/html">
+<head>
+    <title>List of links</title>
+</head>
+<body>
+<div xis:repeat="link:links">
+    <a xis:page="/${link.href}" id="link_${link-index}">${link.title}</a>
+</div>
+</body>
+</html>

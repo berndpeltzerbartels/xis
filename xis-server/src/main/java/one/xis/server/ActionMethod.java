@@ -10,8 +10,8 @@ class ActionMethod extends ControllerMethod {
 
 
     @Override
-    protected Object[] prepareArgs(Method method, ClientRequest context, Map<String, Throwable> errors) throws Exception {
-        var args = parameterPreparation.prepareParameters(method, context, errors);
+    protected Object[] prepareArgs(Method method, ClientRequest context, Map<String, ValidationError> errors) throws Exception {
+        var args = parameterPreparer.prepareParameters(method, context, errors);
 
         return args;
     }
