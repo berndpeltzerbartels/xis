@@ -1,4 +1,4 @@
-class TextNodeHandler extends TagHandler { // TODO Basisklasse mit Refresh-Methode für Taghandler erstellen, hier verwenden
+class TextNodeHandler extends TagHandler {
 
     constructor(node) {
         super(node);

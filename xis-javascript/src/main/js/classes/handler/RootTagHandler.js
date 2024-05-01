@@ -1,8 +1,10 @@
 /**
- * Handler for tags without a parent handler.
+ * A handler for all elements with conditioned visiblility.
+ * This handler has no parent handler.
  */
-
 class RootTagHandler extends TagHandler {
+
+    /**
     constructor(tag) {
         super(tag);
         this.type = 'root-handler';

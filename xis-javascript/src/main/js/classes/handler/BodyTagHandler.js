@@ -13,13 +13,28 @@ class BodyTagHandler extends TagHandler {
 
     /**
     * @public
-    * @param {Element} bodyTemplate 
+    * @param {Element} bodyTemplate
     */
     bind(bodyTemplate) {
         for (var node of this.nodeListToArray(bodyTemplate.childNodes)) {
+            bodyTemplate.removeChild(node);
             this.tag.appendChild(node);
         }
         this.addDescendantHandler(bodyTemplate._rootHandler);
+    }
+
+    /**
+    * Removes all children from body-tag and put them bag to bodyTemplate.
+    *
+    * @public
+    * @param {Element} bodyTemplate
+    */
+    release(bodyTemplate) {
+        for (var node of this.nodeListToArray(this.tag.childNodes)) {
+            this.tag.removeChild(node);
+            bodyTemplate.appendChild(node);
+        }
+        this.descendantHandlers = [];
     }
     /**
     * @public
@@ -38,7 +53,7 @@ class BodyTagHandler extends TagHandler {
     }
 
     /**
-    * Removes all attributes from body-tag except onload.
+    * Removes all attributes from body-tag, except onload.
     *
     * @public
     */

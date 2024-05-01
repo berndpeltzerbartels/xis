@@ -24,6 +24,22 @@ class HeadTagHandler extends TagHandler {
     }
 
     /**
+    * Removes all children from head-tag and put them bag to headTemplate, except title.
+    *
+    * @public
+    * @param {Element} headTemplate
+    */
+    release(headTemplate) {
+        for (var node of this.nodeListToArray(this.tag.childNodes)) {
+            if (isElement(node) && node.localName == 'title') {
+                continue;
+            }
+            this.tag.removeChild(node);
+            headTemplate.appendChild(node);
+        }
+    }
+
+    /**
      * @public
      * @override
      * @param {Data} data 

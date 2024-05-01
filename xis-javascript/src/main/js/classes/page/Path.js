@@ -15,8 +15,8 @@ class Path {
 
     /**
      * Evaluates the path-variables as an array
-     * of key-values pairs in original order the 
-     * are placed  in url.
+     * of key-values pairs in original order they 
+     * are placed in url.
      * 
      * @public
      * @param {string} realPath 

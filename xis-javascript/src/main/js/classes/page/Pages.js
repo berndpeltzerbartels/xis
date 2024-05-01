@@ -29,7 +29,7 @@ class Pages {
      * @returns {Page}
      */
     getWelcomePage() {
-        return this.pages[this.config.welcomePageId];
+        return this.getPage(this.config.welcomePageId);
     }
 
     /**
@@ -49,8 +49,8 @@ class Pages {
     }
 
     /**
-     * @private
-     * @param {string} pageId
+    * @private
+    * @param {string} pageId
     * @returns {Promise<string>}
     */
     loadPageHead(pageId) {

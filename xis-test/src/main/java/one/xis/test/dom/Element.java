@@ -74,7 +74,7 @@ public class Element extends Node {
 
     public void removeChild(Node node) {
         if (node.parentNode != this) {
-            throw new IllegalStateException("not a child");
+            return; //throw new IllegalStateException("not a child");
         }
         node.remove();
         if (node instanceof TextNode) {
