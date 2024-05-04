@@ -24,8 +24,8 @@ public class ControllerWrapper {
      */
     private Object controller;
 
-    private Map<String, ModelMethod> modelMethods;
-    private Map<String, ActionMethod> actionMethods;
+    private Map<String, ControllerMethod> modelMethods;
+    private Map<String, ControllerMethod> actionMethods;
 
     Map<String, Object> invokeGetModelMethods(ClientRequest request) {
         var data = new HashMap<String, Object>();
@@ -51,7 +51,7 @@ public class ControllerWrapper {
         return controller.getClass();
     }
 
-    private void invokeForModel(String key, ModelMethod modelMethod, ClientRequest request, Map<String, Object> result, Map<String, ValidationError> errors) {
+    private void invokeForModel(String key, ControllerMethod modelMethod, ClientRequest request, Map<String, Object> result, Map<String, ValidationError> errors) {
         try {
             var methodResult = modelMethod.invoke(request, controller);
             result.put(key, methodResult.returnValue());

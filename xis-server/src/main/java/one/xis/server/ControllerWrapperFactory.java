@@ -7,6 +7,7 @@ import one.xis.FormData;
 import one.xis.ModelData;
 import one.xis.context.XISComponent;
 import one.xis.utils.lang.MethodUtils;
+import one.xis.validation.Validation;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -20,6 +21,7 @@ import java.util.stream.Stream;
 class ControllerWrapperFactory {
 
     private final ParameterPreparer parameterFactory;
+    private final Validation validation;
 
     ControllerWrapper createControllerWrapper(@NonNull String id, @NonNull Object controller) {
         try {
@@ -34,8 +36,8 @@ class ControllerWrapperFactory {
         }
     }
 
-    private Map<String, ModelMethod> modelMethods(Object controller) {
-        var map = new HashMap<String, ModelMethod>();
+    private Map<String, ControllerMethod> modelMethods(Object controller) {
+        var map = new HashMap<String, ControllerMethod>();
         MethodUtils.allMethods(controller).stream()
                 .filter(m -> m.isAnnotationPresent(ModelData.class) || m.isAnnotationPresent(FormData.class))
                 .map(this::createModelMethod)
@@ -49,38 +51,40 @@ class ControllerWrapperFactory {
 
     }
 
-    private Map<String, ActionMethod> actionMethodMap(Object controller) {
+    private Map<String, ControllerMethod> actionMethodMap(Object controller) {
         return actionMethods(controller).collect(Collectors.toMap(ControllerMethod::getKey, Function.identity()));
     }
 
-    private Stream<ActionMethod> actionMethods(Object controller) {
+    private Stream<ControllerMethod> actionMethods(Object controller) {
         return MethodUtils.allMethods(controller).stream()
                 .filter(m -> m.isAnnotationPresent(Action.class))
                 .map(this::createActionMethod);
     }
 
-    private ModelMethod createModelMethod(Method method) {
+    private ControllerMethod createModelMethod(Method method) {
         method.setAccessible(true);
         var key = method.isAnnotationPresent(FormData.class) ?
                 method.getAnnotation(FormData.class).value() : method.getAnnotation(ModelData.class).value();
         try {
-            return ModelMethod.builder()
+            return ControllerMethod.builder()
                     .method(method)
                     .key(key)
                     .parameterPreparer(parameterFactory)
+                    .validation(validation)
                     .build();
         } catch (Exception e) {
             throw new RuntimeException("Failed to initialize " + method, e);
         }
     }
 
-    private ActionMethod createActionMethod(Method method) {
+    private ControllerMethod createActionMethod(Method method) {
         method.setAccessible(true);
         try {
-            return ActionMethod.builder()
+            return ControllerMethod.builder()
                     .method(method)
                     .key(method.getAnnotation(Action.class).value())
                     .parameterPreparer(parameterFactory)
+                    .validation(validation)
                     .build();
         } catch (Exception e) {
             throw new RuntimeException("Failed to initialize " + method, e);
