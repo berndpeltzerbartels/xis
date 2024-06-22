@@ -3,46 +3,23 @@ package one.xis.validation;
 import one.xis.context.XISComponent;
 import one.xis.context.XISInject;
 
-import java.util.Arrays;
+import java.lang.reflect.Parameter;
 import java.util.Collection;
-import java.util.Set;
 
 @XISComponent
 public class ValidationImpl implements Validation {
 
     @XISInject
     @SuppressWarnings("rawtypes")
-    private Collection<Validator> validators;
+    private Collection<TypeValidator<?>> validators;
 
     @XISInject
-    private ValidatorMessageResolver messageResolver;
+    private AnnotationValidation annotationValidation;
 
 
     @Override
-    public void assignmentError(Class<?> valueType, Object value, ValidatorResultElement validatorResultElement) {
-        var type = Arrays.stream(DefaultValidationErrorType.values())
-                .filter(errorType -> matchingFieldErrorType(errorType, valueType))
-                .findFirst().orElseThrow(() -> new IllegalStateException("unmatched validation error for " + valueType));
-        //  var message = messageResolver.resolveMessage(type, value);
-        //  validatorResultElement.setErrorIfEmpty(type, message, value);
+    public void validate(Parameter parameter, Object parameterValue, ValidationErrors errors) {
+        annotationValidation.validate(parameter, parameterValue, errors);
+        new TypeValidation(validators, errors).validate(parameter, parameterValue);
     }
-
-    @Override
-    public void assignmentError(Class<?> valueType, ValidatorResultElement validatorResultElement) {
-
-    }
-    
-    @Override
-    public void validateAssignedValue(Class<?> valueType, Object value, ValidatorResultElement validatorResultElement) {
-
-    }
-
-
-    private static boolean matchingFieldErrorType(DefaultValidationErrorType errorType, Class<?> valueType) {
-        return Arrays.stream(DefaultValidationErrorType.values()).map(DefaultValidationErrorType::getFieldTypes)
-                .flatMap(Set::stream)
-                .anyMatch(type -> type.isAssignableFrom(valueType));
-    }
-
-
 }

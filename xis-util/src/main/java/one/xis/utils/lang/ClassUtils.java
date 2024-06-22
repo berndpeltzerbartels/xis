@@ -1,10 +1,13 @@
 package one.xis.utils.lang;
 
+import lombok.NonNull;
 import lombok.experimental.UtilityClass;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.time.temporal.Temporal;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -97,4 +100,48 @@ public class ClassUtils {
     private boolean nonPrivate(Executable executable) {
         return !Modifier.isPrivate(executable.getModifiers());
     }
+
+    @NonNull
+    public static Class<?> getGenericInterfacesTypeParameter(@NonNull Class<?> c, @NonNull Class<?> interf, int index) {
+        if (!interf.isInterface()) {
+            throw new IllegalArgumentException(interf + " is not an interface");
+        }
+        for (var inter : c.getGenericInterfaces()) {
+            if (inter instanceof ParameterizedType parameterizedType) {
+                if (parameterizedType.getRawType().equals(interf)) {
+                    var typeParameter = parameterizedType.getActualTypeArguments()[index];
+                    if (typeParameter instanceof Class<?> clazz) {
+                        return clazz;
+                    }
+                    if (typeParameter instanceof ParameterizedType parameterizedType1) {
+                        return (Class<?>) parameterizedType1.getRawType();
+                    }
+                    throw new IllegalArgumentException("unsupported type parameter in " + c + " for " + interf + " at index " + index);
+                }
+            }
+        }
+        throw new IllegalArgumentException(interf + " is not implemented by " + c);
+    }
+
+    public static boolean isNumber(Class<?> type) {
+        return Number.class.isAssignableFrom(type) || type.isPrimitive() && type != boolean.class && type != char.class;
+    }
+
+    public static boolean isDate(@NonNull Class<?> type) {
+        return Date.class.isAssignableFrom(type) || java.sql.Date.class.isAssignableFrom(type) || java.sql.Timestamp.class.isAssignableFrom(type) || Temporal.class.isAssignableFrom(type);
+    }
+
+    public static boolean isBoolean(Class<?> type) {
+        return type == boolean.class || type == Boolean.class;
+    }
+
+    public static boolean isString(Class<?> type) {
+        return type == String.class;
+    }
+
+    public static boolean isEnum(Class<?> type) {
+        return type.isEnum();
+    }
+
+    
 }

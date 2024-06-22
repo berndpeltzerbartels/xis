@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import one.xis.ModelData;
 import one.xis.validation.Validated;
 import one.xis.validation.Validation;
+import one.xis.validation.ValidationErrors;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -23,9 +24,13 @@ class ControllerMethod {
     protected Validation validation;
 
     ControllerMethodResult invoke(ClientRequest request, Object controller) throws Exception {
-        var errors = new HashMap<String, ValidationError>();
+        var errors = new ValidationErrors();
         var args = prepareArgs(method, request, errors);
         validateArgs(args, method, request, errors);
+        if (errors.hasErrors()) {
+            // TODO
+            return new ControllerMethodResult(null, modelParameterData(args), errors);
+        }
         var returnValue = method.invoke(controller, args);
         return new ControllerMethodResult(returnValue, modelParameterData(args), errors);
     }
@@ -35,21 +40,20 @@ class ControllerMethod {
         return "ControllerMethod(" + method.getName() + ")";
     }
 
-    protected Object[] prepareArgs(Method method, ClientRequest request, Map<String, ValidationError> errors) throws Exception {
+    private Object[] prepareArgs(Method method, ClientRequest request, ValidationErrors errors) throws Exception {
         return parameterPreparer.prepareParameters(method, request, errors);
     }
 
 
-    protected void validateArgs(@NonNull Object[] args, @NonNull Method method, @NonNull ClientRequest request, Map<String, ValidationError> errors) {
+    private void validateArgs(@NonNull Object[] args, @NonNull Method method, @NonNull ClientRequest request, ValidationErrors errors) {
         for (var i = 0; i < args.length; i++) {
             var parameter = method.getParameters()[i];
             if (!parameter.isAnnotationPresent(Validated.class)) {
                 continue;
             }
-            var arg = args[i];
-            //var validationResult = validation.v(arg);
+            var parameterValue = args[i];
+            validation.validate(parameter, parameterValue, errors);
         }
-        // TODO
     }
 
     private Map<String, Object> modelParameterData(Object[] args) {

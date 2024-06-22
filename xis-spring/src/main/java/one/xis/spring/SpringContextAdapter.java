@@ -11,6 +11,8 @@ import one.xis.server.FrontendService;
 import one.xis.server.PushClientProxy;
 import one.xis.server.PushClientUtil;
 import one.xis.utils.lang.ClassUtils;
+import one.xis.validation.AnnotationValidator;
+import one.xis.validation.TypeValidator;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -44,10 +46,10 @@ class SpringContextAdapter implements BeanPostProcessor, ApplicationContextAware
     @Setter
     private ApplicationContext applicationContext;
     private final Collection<Object> controllers = new HashSet<>();
-    
+
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-        if (isBeanClass(bean.getClass())) {
+        if (isFrameworkBeanClass(bean.getClass())) {
             controllers.add(bean);
         }
         return bean;
@@ -76,9 +78,11 @@ class SpringContextAdapter implements BeanPostProcessor, ApplicationContextAware
         springContext.getBeanFactory().registerSingleton(o.getClass().getName(), o);
     }
 
-    private boolean isBeanClass(Class<?> clazz) {
+    private boolean isFrameworkBeanClass(Class<?> clazz) {
         return clazz.isAnnotationPresent(Page.class)
-                || clazz.isAnnotationPresent(Widget.class);
+                || clazz.isAnnotationPresent(Widget.class)
+                || TypeValidator.class.isAssignableFrom(clazz)
+                || AnnotationValidator.class.isAssignableFrom(clazz);
     }
 
     private Stream<String> pushClientPackages() {

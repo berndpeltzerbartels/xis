@@ -3,6 +3,7 @@ package one.xis.server;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import one.xis.validation.ValidationErrors;
 import org.tinylog.Logger;
 
 import java.util.HashMap;
@@ -29,9 +30,9 @@ public class ControllerWrapper {
 
     Map<String, Object> invokeGetModelMethods(ClientRequest request) {
         var data = new HashMap<String, Object>();
-        var errors = new HashMap<String, ValidationError>();
+        var errors = new ValidationErrors();
         modelMethods.forEach((key, method) -> invokeForModel(key, method, request, data, errors));
-        if (!errors.isEmpty()) {
+        if (errors.hasErrors()) {
             throw exceptionForErrors(errors);
         }
         return data;
@@ -51,21 +52,20 @@ public class ControllerWrapper {
         return controller.getClass();
     }
 
-    private void invokeForModel(String key, ControllerMethod modelMethod, ClientRequest request, Map<String, Object> result, Map<String, ValidationError> errors) {
+    private void invokeForModel(String key, ControllerMethod modelMethod, ClientRequest request, Map<String, Object> result, ValidationErrors errors) {
         try {
             var methodResult = modelMethod.invoke(request, controller);
             result.put(key, methodResult.returnValue());
-            errors.putAll(methodResult.errors());
+            // TODO
+            // errors.putAll(methodResult.errors());
         } catch (Exception e) {
             Logger.error(e, "Failed to invoke model-method");
             throw new RuntimeException("Failed to invoke model-method " + modelMethod, e);
         }
     }
 
-    private RuntimeException exceptionForErrors(Map<String, ValidationError> errors) {
-        var message = errors.entrySet().stream()
-                .map(e -> e.getKey() + ": " + e.getValue())
-                .collect(Collectors.joining(", "));
+    private RuntimeException exceptionForErrors(ValidationErrors errors) {
+        var message = errors.getErrors().keySet().stream().map(key -> key + ": " + errors.getErrors().get(key)).collect(Collectors.joining(", "));
         return new RuntimeException("Errors occurred: " + message);
 
     }

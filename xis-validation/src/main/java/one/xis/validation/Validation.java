@@ -1,9 +1,7 @@
 package one.xis.validation;
 
-public interface Validation {
-    void assignmentError(Class<?> valueType, Object value, ValidatorResultElement validatorResultElement);
+import java.lang.reflect.Parameter;
 
-    void assignmentError(Class<?> valueType, ValidatorResultElement validatorResultElement);
-    
-    void validateAssignedValue(Class<?> valueType, Object value, ValidatorResultElement validatorResultElement);
+public interface Validation {
+    void validate(Parameter parameter, Object parameterValue, ValidationErrors errors);
 }

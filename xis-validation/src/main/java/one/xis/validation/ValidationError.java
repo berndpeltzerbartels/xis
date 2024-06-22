@@ -1,19 +1,14 @@
 package one.xis.validation;
 
-
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 
 @Data
-@RequiredArgsConstructor
-class ValidationError {
-    private final DefaultValidationErrorType errorType;
-    private final String message;
-    private final Object value;
-
-    public ValidationError(DefaultValidationErrorType errorType, Object value) {
-        this.errorType = errorType;
-        this.value = value;
-        this.message = null;
-    }
+@NoArgsConstructor
+@AllArgsConstructor
+public class ValidationError {
+    private String path;
+    private String message;
+    private String globalMessage;
 }

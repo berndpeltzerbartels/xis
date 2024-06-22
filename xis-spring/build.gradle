@@ -14,6 +14,7 @@ dependencies {
     implementation project(':xis-resources')
     implementation project(':xis-remote-core')
     implementation project(':xis-util')
+    implementation project(':xis-validation')
 
     // implementation 'org.springframework.boot:spring-boot-devtools:2.7.6'
 

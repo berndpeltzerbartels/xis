@@ -3,10 +3,7 @@ package one.xis.context;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @RequiredArgsConstructor
@@ -24,6 +21,15 @@ public class AppContextImpl implements AppContext {
     @SuppressWarnings("unchecked")
     public <T> T getSingleton(Class<T> type) {
         return (T) singletonCache.computeIfAbsent(type, t -> findSingleton(type));
+    }
+
+    @Override
+    public <T> Optional<T> getOptionalSingleton(Class<T> type) {
+        try {
+            return Optional.of(getSingleton(type));
+        } catch (Exception e) {
+            return Optional.empty();
+        }
     }
 
     private <T> T findSingleton(Class<T> type) {
