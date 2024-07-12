@@ -4,7 +4,7 @@ package test.page;
 import lombok.RequiredArgsConstructor;
 import one.xis.*;
 
-@Page("/simpleObject/edit/${id}.html")
+@Page("/simpleObject/edit/{id}.html")
 @HtmlFile("SimpleObjectForm.html")
 @RequiredArgsConstructor
 class SimpleObjectUpdateController {

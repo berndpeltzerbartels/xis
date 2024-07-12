@@ -13,6 +13,7 @@ public class ClientRequest {
     private String action;
     private String pageId;
     private String widgetId;
+    private String widgetContainerId;
     private Locale locale;
     private String zoneId;
 

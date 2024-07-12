@@ -31,6 +31,9 @@ class PathString extends PathElement {
         StringBuilder content = new StringBuilder();
         char ch = path.current();
         while (ch != CharacterIterator.DONE) {
+            if (!isLegalPathCharacter(ch)) {
+                throw new IllegalStateException("illegal character '" + ch + "' in path: " + path);
+            }
             if (ch == '{') {
                 break;
             }
@@ -41,6 +44,20 @@ class PathString extends PathElement {
             return new PathString(content.toString());
         }
         return null;
+    }
+
+    private static boolean isLegalPathCharacter(char c) {
+        if (c == '{' || c == '}' || c == '_' || c == '-' || c == '/' || c == '.' || c == '?' || c == '*') {
+            return true;
+        }
+        if (Character.isAlphabetic(c)) {
+            return true;
+        }
+        if (Character.isDigit(c)) {
+            return true;
+        }
+        return false;
+
     }
 
     @Override

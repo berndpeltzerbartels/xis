@@ -32,28 +32,28 @@ class MicronautController implements FrameworkController {
     @Post("/xis/page/model")
     public ServerResponse getPageModel(@Body ClientRequest request, Locale locale) {
         request.setLocale(locale); // TODO is Locale a valid parameter for Micronaut ?
-        return frontendService.processPageModelDataRequest(request);
+        return frontendService.processModelDataRequest(request);
     }
 
     @Override
     @Post("/xis/widget/model")
     public ServerResponse getWidgetModel(@Body ClientRequest request, Locale locale) {
         request.setLocale(locale);
-        return frontendService.processWidgetModelDataRequest(request);
+        return frontendService.processModelDataRequest(request);
     }
 
     @Override
     @Post("/xis/page/action")
     public ServerResponse onPageAction(@Body ClientRequest request, Locale locale) {
         request.setLocale(locale);
-        return frontendService.processPageActionRequest(request);
+        return frontendService.processActionRequest(request);
     }
 
     @Override
     @Post("/xis/widget/action")
     public ServerResponse onWidgetAction(@Body ClientRequest request, Locale locale) {
         request.setLocale(locale);
-        return frontendService.processWidgetActionRequest(request);
+        return frontendService.processActionRequest(request);
     }
 
     @Override

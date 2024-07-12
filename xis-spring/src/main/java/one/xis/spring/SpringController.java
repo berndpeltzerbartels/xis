@@ -26,28 +26,28 @@ class SpringController implements FrameworkController {
     @PostMapping("/xis/page/model")
     public ServerResponse getPageModel(@RequestBody ClientRequest request, Locale locale) {
         request.setLocale(locale);
-        return frontendService.processPageModelDataRequest(request);
+        return frontendService.processModelDataRequest(request);
     }
 
     @Override
     @PostMapping("/xis/widget/model")
     public ServerResponse getWidgetModel(@RequestBody ClientRequest request, Locale locale) {
         request.setLocale(locale);
-        return frontendService.processWidgetModelDataRequest(request);
+        return frontendService.processModelDataRequest(request);
     }
 
     @Override
     @PostMapping("/xis/page/action")
     public ServerResponse onPageAction(@RequestBody ClientRequest request, Locale locale) {
         request.setLocale(locale);
-        return frontendService.processPageActionRequest(request);
+        return frontendService.processActionRequest(request);
     }
 
     @Override
     @PostMapping("/xis/widget/action")
     public ServerResponse onWidgetAction(@RequestBody ClientRequest request, Locale locale) {
         request.setLocale(locale);
-        return frontendService.processWidgetActionRequest(request);
+        return frontendService.processActionRequest(request);
     }
 
     @Override

@@ -2,11 +2,9 @@ package one.xis.server;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import one.xis.validation.ValidationErrors;
+import one.xis.validation.ValidatorMessages;
 import org.tinylog.Logger;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -28,20 +26,28 @@ public class ControllerWrapper {
     private Map<String, ControllerMethod> modelMethods;
     private Map<String, ControllerMethod> actionMethods;
 
-    Map<String, Object> invokeGetModelMethods(ClientRequest request) {
-        var data = new HashMap<String, Object>();
-        var errors = new ValidationErrors();
-        modelMethods.forEach((key, method) -> invokeForModel(key, method, request, data, errors));
-        if (errors.hasErrors()) {
-            throw exceptionForErrors(errors);
-        }
-        return data;
+    void invokeGetModelMethods(ClientRequest request, ControllerResult controllerResult) {
+        modelMethods.forEach((key, method) -> invokeForModel(key, request, controllerResult, method));
     }
 
-    ControllerMethodResult invokeActionMethod(ClientRequest request) {
-        @NonNull var method = actionMethods.get(request.getAction());
+    void invokeActionMethod(ClientRequest request, ControllerResult controllerResult) {
+        var method = actionMethods.get(request.getAction());
+        if (method == null) {
+            throw new RuntimeException("No action-method found for action " + request.getAction());
+        }
         try {
-            return method.invoke(request, controller);
+            var controllerMethodResult = method.invoke(request, controller);
+            controllerResult.setNextPageURL(controllerMethodResult.getNextPageURL());
+            controllerResult.setNextWidgetId(controllerMethodResult.getNextWidgetId());
+            controllerResult.setWidgetContainerId(controllerMethodResult.getWidgetContainerId());
+            controllerResult.setWidgetParameters(controllerMethodResult.getWidgetParameters());
+            controllerResult.setPathVariables(controllerMethodResult.getPathVariables());
+            controllerResult.setUrlParameters(controllerMethodResult.getUrlParameters());
+            controllerResult.getValidatorMessages().getGlobalMessages().addAll(controllerMethodResult.getValidatorMessages().getGlobalMessages());
+            controllerResult.getValidatorMessages().getMessages().putAll(controllerMethodResult.getValidatorMessages().getMessages());
+            if (controllerMethodResult.isValidationFailed()) {
+                controllerMethodResult.setValidationFailed(true);
+            }
         } catch (Exception e) {
             Logger.error(e, "Failed to invoke action-method");
             throw new RuntimeException("Failed to invoke action-method: " + method, e);
@@ -52,20 +58,26 @@ public class ControllerWrapper {
         return controller.getClass();
     }
 
-    private void invokeForModel(String key, ControllerMethod modelMethod, ClientRequest request, Map<String, Object> result, ValidationErrors errors) {
+    private void invokeForModel(String dataKey, ClientRequest request, ControllerResult controllerResult, ControllerMethod modelMethod) {
         try {
-            var methodResult = modelMethod.invoke(request, controller);
-            result.put(key, methodResult.returnValue());
-            // TODO
-            // errors.putAll(methodResult.errors());
+            var controllerMethodResult = modelMethod.invoke(request, controller);
+            if (controllerMethodResult.isValidationFailed()) {
+                // these validation errors are unexpected, so we throw an exception
+                throw exceptionForValiationErrors(controllerMethodResult.getValidatorMessages());
+            }
+            controllerResult.getModelData().putAll(controllerMethodResult.getModelData());
         } catch (Exception e) {
             Logger.error(e, "Failed to invoke model-method");
             throw new RuntimeException("Failed to invoke model-method " + modelMethod, e);
         }
     }
 
-    private RuntimeException exceptionForErrors(ValidationErrors errors) {
-        var message = errors.getErrors().keySet().stream().map(key -> key + ": " + errors.getErrors().get(key)).collect(Collectors.joining(", "));
+    /**
+     * @param validatorMessages
+     * @return a RuntimeException with a message containing all validation errors
+     */
+    private RuntimeException exceptionForValiationErrors(ValidatorMessages validatorMessages) {
+        var message = validatorMessages.getMessages().keySet().stream().map(key -> key + ": " + validatorMessages.getMessages().get(key)).collect(Collectors.joining(", "));
         return new RuntimeException("Errors occurred: " + message);
 
     }

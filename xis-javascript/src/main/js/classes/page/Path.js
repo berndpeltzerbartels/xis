@@ -23,6 +23,7 @@ class Path {
      * @returns {Array<string: string>} pathVariables in case path is matching, otherwise false
      */
     evaluate(realPath) {
+        debugger;
         if (this.pathElement) {
             var pathVariables = [];
             if (this.pathElement.evaluate(realPath, pathVariables)) {

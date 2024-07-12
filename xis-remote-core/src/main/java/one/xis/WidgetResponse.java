@@ -1,8 +1,8 @@
 package one.xis;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -10,12 +10,26 @@ import java.util.HashSet;
 import java.util.Map;
 
 @Getter
-@RequiredArgsConstructor
-public class WidgetResponse {
-    private final Class<?> controllerClass;
+@EqualsAndHashCode
+public class WidgetResponse implements Response {
+    private Class<?> controllerClass;
     private String targetContainer; // TODO
-    private final Map<String, String> widgetParameters = new HashMap<>();
+    private final Map<String, Object> widgetParameters = new HashMap<>();
     private final Collection<String> widgetsToReload = new HashSet<>(); // TODO
+
+    public WidgetResponse(@NonNull Class<?> controllerClass) {
+        this.controllerClass = controllerClass;
+    }
+
+    public WidgetResponse() {
+
+    }
+
+
+    public WidgetResponse controllerClass(@NonNull Class<?> controllerClass) {
+        this.controllerClass = controllerClass;
+        return this;
+    }
 
     public WidgetResponse widgetParameter(@NonNull String name, @NonNull Object value) {
         widgetParameters.put(name, asString(value));
@@ -26,7 +40,6 @@ public class WidgetResponse {
         this.targetContainer = targeteContainer;
         return this;
     }
-
 
     public WidgetResponse reloadWidget(Class<?> widgetController) {
         if (!widgetController.isAnnotationPresent(Widget.class)) {

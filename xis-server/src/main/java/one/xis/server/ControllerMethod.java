@@ -4,14 +4,13 @@ import lombok.Data;
 import lombok.NonNull;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
-import one.xis.ModelData;
+import one.xis.Action;
+import one.xis.Page;
 import one.xis.validation.Validated;
 import one.xis.validation.Validation;
 import one.xis.validation.ValidationErrors;
 
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
 
 @Data
 @Slf4j
@@ -22,17 +21,38 @@ class ControllerMethod {
     protected String key;
     protected ParameterPreparer parameterPreparer;
     protected Validation validation;
+    protected ControllerMethodResultMapper controllerMethodResultMapper;
 
-    ControllerMethodResult invoke(ClientRequest request, Object controller) throws Exception {
+    ControllerMethodResult invoke(@NonNull ClientRequest request, @NonNull Object controller) throws Exception {
         var errors = new ValidationErrors();
         var args = prepareArgs(method, request, errors);
         validateArgs(args, method, request, errors);
         if (errors.hasErrors()) {
-            // TODO
-            return new ControllerMethodResult(null, modelParameterData(args), errors);
+            return controllerMethodResultMapper.mapValidationErrorState(request, errors);
         }
         var returnValue = method.invoke(controller, args);
-        return new ControllerMethodResult(returnValue, modelParameterData(args), errors);
+        if (returnValue == null) { // e.g. a void method
+            if (method.isAnnotationPresent(Action.class)) {
+                return controllerMethodResultMapper.keepStateOnAction(request, method);
+            }
+            return controllerMethodResultMapper.keepStateOnAction(request, method);
+        }
+        if (returnValue instanceof Class clazz && clazz.isAssignableFrom(controller.getClass())) {
+            return controllerMethodResultMapper.keepStateOnAction(request, method);
+        }
+        var controllerMethodResult = controllerMethodResultMapper.mapControllerResult(method, returnValue);
+        validateWidgetContainerIdIsPresentIfRequired(controllerMethodResult, method);
+        return controllerMethodResult;
+    }
+
+    private void validateWidgetContainerIdIsPresentIfRequired(ControllerMethodResult controllerMethodResult, Method method) {
+        if (!method.getDeclaringClass().isAnnotationPresent(Page.class)) {
+            return;
+        }
+        if (controllerMethodResult.getNextWidgetId() != null && controllerMethodResult.getWidgetContainerId() == null) {
+            // otherwise, we do not know where to show the widget
+            throw new IllegalStateException("If a method of page controller returns a widget id, the widget container id must be set.");
+        }
     }
 
     @Override
@@ -55,17 +75,4 @@ class ControllerMethod {
             validation.validate(parameter, parameterValue, errors);
         }
     }
-
-    private Map<String, Object> modelParameterData(Object[] args) {
-        var rv = new HashMap<String, Object>();
-        for (var i = 0; i < method.getParameterCount(); i++) {
-            var parameter = method.getParameters()[i];
-            if (parameter.isAnnotationPresent(ModelData.class)) {
-                rv.put(parameter.getAnnotation(ModelData.class).value(), args[i]);
-            }
-        }
-        return rv;
-    }
-
-
 }

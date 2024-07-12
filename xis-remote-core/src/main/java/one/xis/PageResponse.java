@@ -9,10 +9,10 @@ import java.util.Map;
 
 @Getter
 @RequiredArgsConstructor
-public class PageResponse {
+public class PageResponse implements Response {
     private final Class<?> controllerClass;
-    private final Map<String, String> pathVariables = new HashMap<>();
-    private final Map<String, String> urlParameters = new HashMap<>();
+    private final Map<String, Object> pathVariables = new HashMap<>();
+    private final Map<String, Object> urlParameters = new HashMap<>();
 
     public PageResponse pathVariable(@NonNull String name, @NonNull Object value) {
         pathVariables.put(name, asString(value));

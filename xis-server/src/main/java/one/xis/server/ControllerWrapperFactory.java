@@ -21,6 +21,7 @@ import java.util.stream.Stream;
 class ControllerWrapperFactory {
 
     private final ParameterPreparer parameterFactory;
+    private final ControllerMethodResultMapper controllerMethodResultMapper;
     private final Validation validation;
 
     ControllerWrapper createControllerWrapper(@NonNull String id, @NonNull Object controller) {
@@ -70,6 +71,7 @@ class ControllerWrapperFactory {
                     .method(method)
                     .key(key)
                     .parameterPreparer(parameterFactory)
+                    .controllerMethodResultMapper(controllerMethodResultMapper)
                     .validation(validation)
                     .build();
         } catch (Exception e) {
@@ -84,6 +86,7 @@ class ControllerWrapperFactory {
                     .method(method)
                     .key(method.getAnnotation(Action.class).value())
                     .parameterPreparer(parameterFactory)
+                    .controllerMethodResultMapper(controllerMethodResultMapper)
                     .validation(validation)
                     .build();
         } catch (Exception e) {

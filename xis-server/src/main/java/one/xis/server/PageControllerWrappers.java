@@ -1,7 +1,6 @@
 package one.xis.server;
 
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import one.xis.Page;
@@ -24,7 +23,8 @@ class PageControllerWrappers {
 
     @XISInject(annotatedWith = Page.class)
     private Collection<Object> pageControllers;
-    
+
+
     @Getter
     private Collection<ControllerWrapper> pageControllerWrappers;
 
@@ -33,14 +33,10 @@ class PageControllerWrappers {
         pageControllerWrappers = pageControllerWrappers();
     }
 
-    Optional<ControllerWrapper> findByPath(String normalizedPath) {
+    Optional<ControllerWrapper> findByPath(Path path) {
         return pageControllerWrappers.stream()
-                .filter(controller -> controller.getId().equals(normalizedPath))
+                .filter(controller -> controller.getId().equals(path.normalized()))
                 .findFirst();
-    }
-
-    Optional<ControllerWrapper> findByClass(@NonNull Class<?> cl) {
-        return pageControllerWrappers.stream().filter(c -> c.getControllerClass().equals(cl)).findFirst();
     }
 
     private Collection<ControllerWrapper> pageControllerWrappers() {

@@ -21,25 +21,25 @@ import java.util.Objects;
 class ParameterPreparer {
     private final ParameterDeserializer parameterDeserializer;
 
-    Object[] prepareParameters(Method method, ClientRequest context, ValidationErrors errors) throws Exception {
+    Object[] prepareParameters(Method method, ClientRequest request, ValidationErrors errors) throws Exception {
         Object[] args = new Object[method.getParameterCount()];
         var params = method.getParameters();
         for (int i = 0; i < args.length; i++) {
             var param = params[i];
             if (param.isAnnotationPresent(ModelData.class)) {
-                args[i] = deserializeModelParameter(param, context, errors);
+                args[i] = deserializeModelParameter(param, request, errors);
             } else if (param.isAnnotationPresent(FormData.class)) {
-                args[i] = deserializeFormDataParameter(param, context, errors);
+                args[i] = deserializeFormDataParameter(param, request, errors);
             } else if (param.isAnnotationPresent(UserId.class)) {
-                args[i] = Objects.requireNonNull(context.getUserId(), "UserId expected, but it was null"); // TODO Specialized exception and login
+                args[i] = Objects.requireNonNull(request.getUserId(), "UserId expected, but it was null"); // TODO Specialized exception and login
             } else if (param.isAnnotationPresent(ClientId.class)) {
-                args[i] = Objects.requireNonNull(context.getClientId(), "ClientId expected, but it was null");
+                args[i] = Objects.requireNonNull(request.getClientId(), "ClientId expected, but it was null");
             } else if (param.isAnnotationPresent(URLParameter.class)) {
-                args[i] = deserializeUrlParameter(param, context, errors);
+                args[i] = deserializeUrlParameter(param, request, errors);
             } else if (param.isAnnotationPresent(one.xis.PathVariable.class)) {
-                args[i] = deserializePathVariable(param, context, errors);
+                args[i] = deserializePathVariable(param, request, errors);
             } else if (param.isAnnotationPresent(WidgetParameter.class)) {
-                args[i] = deserializeWidgetParameter(param, context, errors);
+                args[i] = deserializeWidgetParameter(param, request, errors);
             } else {
                 throw new IllegalStateException(method + ": parameter without annotation=" + param);
             }
@@ -70,12 +70,18 @@ class ParameterPreparer {
 
     private Object deserializePathVariable(Parameter parameter, ClientRequest request, ValidationErrors errors) throws IOException {
         var key = parameter.getAnnotation(PathVariable.class).value();
+        if (!request.getPathVariables().containsKey(key)) {
+            throw new IllegalStateException("No path variable found for key " + key);
+        }
         var paramValue = request.getPathVariables().get(key);
         return deserializeParameter(paramValue, request, parameter, errors);
     }
 
     private Object deserializeWidgetParameter(Parameter parameter, ClientRequest request, ValidationErrors errors) throws IOException {
         var key = parameter.getAnnotation(WidgetParameter.class).value();
+        if (!request.getWidgetParameters().containsKey(key)) {
+            throw new IllegalStateException("No widget parameter found for key " + key);
+        }
         var paramValue = request.getWidgetParameters().get(key);
         return deserializeParameter(paramValue, request, parameter, errors);
     }

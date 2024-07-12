@@ -1,19 +1,19 @@
-package test.page;
+package test.widget;
 
 import lombok.RequiredArgsConstructor;
 import one.xis.ModelData;
-import one.xis.Page;
-import one.xis.PathVariable;
+import one.xis.Widget;
+import one.xis.WidgetParameter;
 
-@Page("/simpleObject/{id}.html")
+@Widget("/simpleObject/{id}.html")
 @RequiredArgsConstructor
-class SimpleObjectDetails {
+class SimpleObjectDetailsWidget {
 
     private final SimpleObjectService simpleObjectService;
 
     @ModelData("simpleObject")
-    SimpleObject simpleObject(@PathVariable("id") Integer id) {
+    SimpleObject simpleObject(@WidgetParameter("id") Integer id) {
         return simpleObjectService.getById(id);
     }
-
+    
 }

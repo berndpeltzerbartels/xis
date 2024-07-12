@@ -1,20 +1,18 @@
 package one.xis.server;
 
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import one.xis.Page;
-import one.xis.PageResponse;
-import one.xis.Widget;
-import one.xis.WidgetResponse;
+import one.xis.context.XISComponent;
 import one.xis.context.XISInject;
-import one.xis.validation.ValidationError;
-import one.xis.validation.ValidatorMessages;
+import one.xis.utils.lang.StringUtils;
 
+import java.util.HashMap;
 import java.util.Map;
-
-import static java.util.Collections.emptyMap;
+import java.util.stream.Collectors;
 
 @Slf4j
-abstract class ControllerService {
+@XISComponent
+class ControllerService {
 
     @XISInject
     private DataSerializer dataSerializer;
@@ -25,100 +23,86 @@ abstract class ControllerService {
     @XISInject
     private WidgetControllerWrappers widgetControllerWrappers;
 
-    protected void invokeGetWidgetModelMethods(ControllerWrapper wrapper, ClientRequest request, ServerResponse response) {
-        response.setData(dataSerializer.serialize(wrapper.invokeGetModelMethods(request)));
-        response.setNextWidgetId(wrapper.getId());
-        response.setWidgetParameters(emptyMap());
-        response.setValidatorMessages(new ValidatorMessages());
+    @XISInject
+    private PathResolver pathResolver;
+
+    void processModelDataRequest(@NonNull ClientRequest request, @NonNull ServerResponse response) {
+        var controllerResult = new ControllerResult();
+        var wrapper = controllerWrapper(request);
+        wrapper.invokeGetModelMethods(request, controllerResult);
+        mapResultToResponse(response, controllerResult);
     }
 
-    protected void invokeGetPageModelMethods(ControllerWrapper wrapper, ClientRequest request, ServerResponse response) {
-        response.setData(dataSerializer.serialize(wrapper.invokeGetModelMethods(request)));
-        response.setNextPageURL(wrapper.getId());
-        response.setWidgetParameters(emptyMap());
-        response.setValidatorMessages(new ValidatorMessages());
+    void processActionRequest(@NonNull ClientRequest request, @NonNull ServerResponse response) {
+        var controllerResult = new ControllerResult();
+        var invokerControllerWrapper = controllerWrapper(request);
+        invokerControllerWrapper.invokeActionMethod(request, controllerResult);
+        mapResultToResponse(response, controllerResult);
+        var nextControllerWrapper = nextControllerWrapper(controllerResult);
+        // This should only occur when action method is called
+        mapResultToRequestOnAction(request, controllerResult);
+        nextControllerWrapper.invokeGetModelMethods(request, controllerResult);
+        mapResultToResponse(response, controllerResult);
     }
 
-    protected ControllerWrapper widgetControllerWrapperByClass(Class<?> controllerClass) {
-        return widgetControllerWrappers.findByClass(controllerClass)
-                .orElseThrow(() -> new IllegalStateException("not a widget-controller:" + controllerClass));
+    private ControllerWrapper controllerWrapper(ClientRequest request) {
+        if (request.getWidgetId() != null && !request.getWidgetId().isEmpty()) {
+            return widgetControllerWrapperById(request.getWidgetId());
+        }
+        return pageControllerWrapperById(request.getPageId());
     }
 
-    protected ControllerWrapper widgetControllerWrapperById(String id) {
+    private ControllerWrapper nextControllerWrapper(ControllerResult controllerResult) {
+        if (StringUtils.isNotEmpty(controllerResult.getNextWidgetId())) {
+            return widgetControllerWrapperById(controllerResult.getNextWidgetId());
+        }
+        return pageControllerWrapperById(controllerResult.getNextPageURL());
+    }
+
+    private void mapResultToResponse(ServerResponse response, ControllerResult result) {
+        response.setData(dataSerializer.serialize(result.getModelData()));
+        response.setNextPageURL(result.getNextPageURL());
+        response.setNextWidgetId(result.getNextWidgetId());
+        response.setWidgetParameters(result.getWidgetParameters());
+        response.setValidatorMessages(result.getValidatorMessages());
+        response.setHttpStatus(result.isValidationFailed() ? 422 : 200);
+    }
+
+    private void mapResultToRequestOnAction(ClientRequest request, ControllerResult result) {
+        if (request.getUrlParameters() == null) {
+            request.setUrlParameters(new HashMap<>());
+        }
+        if (request.getPathVariables() == null) {
+            request.setPathVariables(new HashMap<>());
+        }
+        if (request.getWidgetParameters() == null) {
+            request.setWidgetParameters(new HashMap<>());
+        }
+        if (result.getUrlParameters() != null) {
+            request.getUrlParameters().putAll(toStringMap(result.getUrlParameters()));
+        }
+        if (result.getPathVariables() != null) {
+            request.getPathVariables().putAll(toStringMap(result.getPathVariables()));
+        }
+        if (result.getWidgetParameters() != null) {
+            request.getWidgetParameters().putAll(toStringMap(result.getWidgetParameters()));
+        }
+    }
+
+    private static Map<String, String> toStringMap(Map<String, Object> map) {
+        return map.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString()));
+    }
+
+
+    protected ControllerWrapper widgetControllerWrapperById(@NonNull String id) {
         return widgetControllerWrappers.findWidgetById(id)
                 .orElseThrow(() -> new IllegalStateException("not a widget-controller:" + id));
     }
 
-    protected void processPageResult(ServerResponse response, Map<String, Object> modelData, ControllerWrapper pageControllerWrapper) {
-        response.setHttpStatus(200);
-        response.setData(dataSerializer.serialize(modelData));
-        response.setNextPageURL(pageControllerWrapper.getId());
-        response.setWidgetParameters(emptyMap());
-        response.setValidatorMessages(new ValidatorMessages());
-    }
-
-    protected void updateWidgetResponse(ServerResponse response, Map<String, Object> modelData, ControllerWrapper widgetControllerWrapper) {
-        response.setHttpStatus(200);
-        response.setData(dataSerializer.serialize(modelData));
-        response.setNextWidgetId(widgetControllerWrapper.getId());
-        response.setWidgetParameters(emptyMap());
-        response.setValidatorMessages(new ValidatorMessages());
-    }
-
-    protected void processActionResult(ClientRequest request, ServerResponse response, PageResponse pageResponse) {
-        var controllerClass = pageResponse.getControllerClass();
-        var controllerWrapper = widgetControllerWrapperByClass(controllerClass);
-        request.getUrlParameters().putAll(pageResponse.getUrlParameters()); // TODO May be better to create a context class to avoid mutating the request
-        request.getPathVariables().putAll(pageResponse.getPathVariables());
-        invokeGetWidgetModelMethods(controllerWrapper, request, response);
-        response.setHttpStatus(200);
-    }
-
-
-    protected void processFailedValidation(Map<String, ValidationError> validationErrors, ServerResponse response) {
-        //response.setValidatorMessages();
-        response.setHttpStatus(422);
-    }
-
-    protected void processActionResult(ClientRequest request, ServerResponse response, WidgetResponse widgetResponse) {
-        var controllerClass = widgetResponse.getControllerClass();
-        var controllerWrapper = widgetControllerWrapperByClass(controllerClass);
-        request.getWidgetParameters().putAll(widgetResponse.getWidgetParameters()); // TODO May be better to create a context class to avoid mutating the request
-        invokeGetWidgetModelMethods(controllerWrapper, request, response);
-        response.setHttpStatus(200);
-    }
-
-    protected void processActionResult(ClientRequest request, ServerResponse response, Class<?> controllerClass) {
-        if (controllerClass.isAnnotationPresent(Page.class)) {
-            var controllerWrapper = pageControllerWrapperByClass(controllerClass);
-            invokeGetPageModelMethods(controllerWrapper, request, response);
-            response.setHttpStatus(200);
-        } else if (controllerClass.isAnnotationPresent(Widget.class)) {
-            var controllerWrapper = widgetControllerWrapperByClass(controllerClass);
-            invokeGetWidgetModelMethods(controllerWrapper, request, response);
-            response.setHttpStatus(200);
-        } else {
-            throw new IllegalStateException("returned type is not a controller class: " + controllerClass);
-        }
-    }
-
-    protected void processPageResult(ClientRequest request, ServerResponse response, PageResponse pageResponse) {
-        var controllerClass = pageResponse.getControllerClass();
-        var controllerWrapper = pageControllerWrapperByClass(controllerClass);
-        request.getPathVariables().putAll(pageResponse.getPathVariables());
-        request.getUrlParameters().putAll(pageResponse.getUrlParameters());
-        invokeGetPageModelMethods(controllerWrapper, request, response);
-        response.setHttpStatus(200);
-    }
-
-    protected ControllerWrapper pageControllerWrapperByClass(Class<?> controllerClass) {
-        return pageControllerWrappers.findByClass(controllerClass)
-                .orElseThrow(() -> new IllegalStateException("not a page-controller:" + controllerClass));
-    }
-
-    protected ControllerWrapper pageControllerWrapperById(String id) {
-        return pageControllerWrappers.findByPath(id)
-                .orElseThrow(() -> new IllegalStateException("not a page-controller:" + id));
+    protected ControllerWrapper pageControllerWrapperById(@NonNull String id) {
+        return pageControllerWrappers.findByPath(pathResolver.createPath(id))
+                .orElseThrow(() -> new IllegalStateException("page-controller not found for path:" + id));
     }
 
 }

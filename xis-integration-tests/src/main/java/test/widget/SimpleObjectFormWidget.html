@@ -1,0 +1,26 @@
+<div xmlns:xis="http://xis.one/html">
+    <form xis:binding="formObject">
+        <div>
+            <input type="text" xis:binding="property1" id="field1"/>
+            <label for="field1">Property 1</label>
+            <div>${validation.messages['property1']}</div>
+        </div>
+
+        <div>
+            <input type="text" xis:binding="property2" id="field2"/>
+            <label for="field2">Property 2</label>
+            <div>${validation.messages['property1']}</div>
+        </div>
+
+        <div>
+            <button xis:action="save" id="save">Speichern</button>
+        </div>
+
+
+        <div>
+            <ul><a></a>
+                <li xis:repeat="message:validation.globalMessages">${message}</li>
+            </ul>
+        </div>
+    </form>
+</div>

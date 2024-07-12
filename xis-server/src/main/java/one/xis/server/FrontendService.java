@@ -22,8 +22,7 @@ import java.util.function.BiConsumer;
 @RequiredArgsConstructor
 public class FrontendService {
 
-    private final PageControllerService pageControllerService;
-    private final WidgetControllerService widgetControllerService;
+    private final ControllerService controllerService;
     private final ClientConfigService configService;
     private final HtmlResourceService htmlResourceService;
     private final Resources resources;
@@ -45,41 +44,25 @@ public class FrontendService {
         return configService.getConfig();
     }
 
-    public ServerResponse processPageActionRequest(ClientRequest request) {
+    public ServerResponse processActionRequest(ClientRequest request) {
         try {
             addUserContext(request);
-            return applyFilterChain(request, pageControllerService::processPageActionRequest);
+            return applyFilterChain(request, controllerService::processActionRequest);
         } finally {
             removeUserContext();
         }
     }
 
-    public ServerResponse processWidgetActionRequest(ClientRequest request) {
-        try {
-            addUserContext(request);
-            return applyFilterChain(request, widgetControllerService::processWidgetActionRequest);
-        } finally {
-            removeUserContext();
-        }
-    }
 
-    public ServerResponse processPageModelDataRequest(ClientRequest request) {
+    public ServerResponse processModelDataRequest(ClientRequest request) {
         try {
             addUserContext(request);
-            return applyFilterChain(request, pageControllerService::processPageModelDataRequest);
+            return applyFilterChain(request, controllerService::processModelDataRequest);
         } finally {
             removeUserContext();
         }
     }
-
-    public ServerResponse processWidgetModelDataRequest(ClientRequest request) {
-        try {
-            addUserContext(request);
-            return applyFilterChain(request, widgetControllerService::processWidgetModelDataRequest);
-        } finally {
-            removeUserContext();
-        }
-    }
+    
 
     public String getPage(String id) {
         return htmlResourceService.getPage(id);
