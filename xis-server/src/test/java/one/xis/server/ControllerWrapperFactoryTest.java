@@ -64,13 +64,13 @@ class ControllerWrapperFactoryTest {
     @Test
     void noExceptionPage() {
         var controller = new TestPageController();
-        new ControllerWrapperFactory(mock(ParameterPreparer.class), mock(Validation.class)).createControllerWrapper("/page.html", controller);
+        new ControllerWrapperFactory(mock(ParameterPreparer.class), mock(ControllerMethodResultMapper.class), mock(Validation.class)).createControllerWrapper("/page.html", controller);
     }
 
     @Test
     void noExceptionWidget() {
         var controller = new TestWidgetController();
-        new ControllerWrapperFactory(mock(ParameterPreparer.class), mock(Validation.class)).createControllerWrapper("TestWidgetController", controller);
+        new ControllerWrapperFactory(mock(ParameterPreparer.class), mock(ControllerMethodResultMapper.class), mock(Validation.class)).createControllerWrapper("TestWidgetController", controller);
     }
 
 
