@@ -2,8 +2,12 @@ package one.xis.server;
 
 import one.xis.context.XISComponent;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @XISComponent
 class PathResolver {
@@ -15,6 +19,28 @@ class PathResolver {
     String normalizedPath(Object controller) {
         var path = createPath(PageUtil.getUrl(controller.getClass()));
         return path.normalized();
+    }
+
+    String evaluateRealPath(Path path, Map<String, Object> pathVariables, Map<String, Object> queryParameters) {
+        StringBuilder realPath = new StringBuilder();
+        var element = path.getPathElement();
+        while (element != null) {
+            realPath.append(element.evaluate(pathVariables));
+            element = element.getNext();
+        }
+        if (!queryParameters.isEmpty()) {
+            realPath.append("?").append(queryParameters.entrySet().stream().map(e -> {
+                if (e.getValue() == null) {
+                    return null;
+                }
+                try {
+                    return e.getKey() + "=" + URLEncoder.encode(e.getValue().toString(), "UTF-8");
+                } catch (UnsupportedEncodingException ex) {
+                    throw new RuntimeException("unsupported encoding ", ex);
+                }
+            }).collect(Collectors.joining("&")));
+        }
+        return realPath.toString();
     }
 
     private PathElement evaluate(CharacterIterator path) {

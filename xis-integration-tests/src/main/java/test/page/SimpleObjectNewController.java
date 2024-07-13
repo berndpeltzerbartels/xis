@@ -15,12 +15,7 @@ class SimpleObjectNewController {
     SimpleObject simpleObject() {
         return new SimpleObject(1, "Simple Object", "p1", "p2");
     }
-
-    @ModelData("title")
-    String title() {
-        return "New Object";
-    }
-
+    
     @Action("save")
     PageResponse save(@FormData("formObject") SimpleObject simpleObject) {
         simpleObjectService.save(simpleObject);

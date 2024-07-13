@@ -52,8 +52,11 @@ class SimpleObjectFormPageTest {
             var inputField1 = document.getInputElementById("field1");
             var inputField2 = document.getInputElementById("field2");
 
+            System.out.println("----------------------------------------------------------------------------------------");
+            System.out.println(result.getDocument().asString());
             // Check controller values
-            assertThat(titleElement.innerText).isEqualTo("New Object");
+            assertThat(titleElement.innerText).isEqualTo("Form");
+
             assertThat(inputField1.value).isEqualTo("p1");
             assertThat(inputField2.value).isEqualTo("p2");
 
@@ -67,7 +70,7 @@ class SimpleObjectFormPageTest {
             verify(service).save(any());
 
             // After saving object, the details page should be displayed
-            assertThat(titleElement.innerText).isEqualTo("Object Details");
+            assertThat(titleElement.innerText).isEqualTo("Details");
 
             // The details page should display the saved values
             var p1 = document.getElementById("v1");

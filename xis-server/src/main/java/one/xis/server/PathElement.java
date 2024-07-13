@@ -3,6 +3,8 @@ package one.xis.server;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Map;
+
 
 abstract class PathElement {
     abstract String normalized();
@@ -10,4 +12,6 @@ abstract class PathElement {
     @Getter
     @Setter
     private PathElement next;
+
+    abstract String evaluate(Map<String, Object> pathVariables);
 }

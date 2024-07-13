@@ -3,6 +3,7 @@ package one.xis.server;
 import lombok.Data;
 
 import java.text.CharacterIterator;
+import java.util.Map;
 import java.util.Objects;
 
 @Data
@@ -62,6 +63,11 @@ class PathString extends PathElement {
 
     @Override
     public String normalized() {
+        return content;
+    }
+
+    @Override
+    String evaluate(Map<String, Object> pathVariables) {
         return content;
     }
 }

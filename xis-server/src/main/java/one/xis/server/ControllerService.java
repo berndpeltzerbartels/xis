@@ -60,8 +60,13 @@ class ControllerService {
     }
 
     private void mapResultToResponse(ServerResponse response, ControllerResult result) {
+        if (result.getNextPageURL() != null) {
+            var path = pathResolver.createPath(result.getNextPageURL());
+            var pathString = pathResolver.evaluateRealPath(path, result.getPathVariables(), result.getUrlParameters());
+            response.setNextPageURL(pathString);
+        }
         response.setData(dataSerializer.serialize(result.getModelData()));
-        response.setNextPageURL(result.getNextPageURL());
+
         response.setNextWidgetId(result.getNextWidgetId());
         response.setWidgetParameters(result.getWidgetParameters());
         response.setValidatorMessages(result.getValidatorMessages());

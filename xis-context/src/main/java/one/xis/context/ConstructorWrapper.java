@@ -81,7 +81,7 @@ class ConstructorWrapper extends ExecutableWrapper<Constructor<?>> implements Co
                 componentCreationListeners.forEach(listener -> listener.componentCreated(component, this));
                 contextFactory.componentCreated(component, this);
             } catch (Exception e) {
-                throw new RuntimeException("", e);
+                throw new RuntimeException("executing constructor failed", e);
             }
         }
     }

@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 public class ControllerWrapper {
 
     /**
-     * ID of the component. In case of page, it's an url. For widgets it's
+     * ID of the component. In case of page, it's an url. For widgets, it's
      * the classes simple name or custom key.
      */
     private String id;
@@ -40,9 +40,9 @@ public class ControllerWrapper {
             controllerResult.setNextPageURL(controllerMethodResult.getNextPageURL());
             controllerResult.setNextWidgetId(controllerMethodResult.getNextWidgetId());
             controllerResult.setWidgetContainerId(controllerMethodResult.getWidgetContainerId());
-            controllerResult.setWidgetParameters(controllerMethodResult.getWidgetParameters());
-            controllerResult.setPathVariables(controllerMethodResult.getPathVariables());
-            controllerResult.setUrlParameters(controllerMethodResult.getUrlParameters());
+            controllerResult.getWidgetParameters().putAll(controllerMethodResult.getWidgetParameters());
+            controllerResult.getPathVariables().putAll(controllerMethodResult.getPathVariables());
+            controllerResult.getUrlParameters().putAll(controllerMethodResult.getUrlParameters());
             controllerResult.getValidatorMessages().getGlobalMessages().addAll(controllerMethodResult.getValidatorMessages().getGlobalMessages());
             controllerResult.getValidatorMessages().getMessages().putAll(controllerMethodResult.getValidatorMessages().getMessages());
             if (controllerMethodResult.isValidationFailed()) {

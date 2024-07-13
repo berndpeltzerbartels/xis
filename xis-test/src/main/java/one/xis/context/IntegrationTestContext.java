@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class IntegrationTestContext {
 
@@ -29,6 +30,10 @@ public class IntegrationTestContext {
 
     public IntegrationTestResult openPage(String uri, Map<String, Object> parameters) {
         synchronized (SYNC_LOCK) {
+            if (!parameters.isEmpty()) {
+                uri += "?";
+                uri += parameters.entrySet().stream().map(e -> e.getKey() + "=" + e.getValue()).collect(Collectors.joining("&"));
+            }
             environment.openPage(uri);
             return new IntegrationTestResult(appContext, environment);
         }

@@ -62,7 +62,7 @@ public class FrontendService {
             removeUserContext();
         }
     }
-    
+
 
     public String getPage(String id) {
         return htmlResourceService.getPage(id);
@@ -70,13 +70,13 @@ public class FrontendService {
 
     public String getPageHead(String id) {
         var head = htmlResourceService.getPageHead(id);
-        Logger.info(head);
+        Logger.debug(head);
         return head;
     }
 
     public String getPageBody(String id) {
         var body = htmlResourceService.getPageBody(id);
-        Logger.info(body);
+        Logger.debug(body);
         return body;
     }
 

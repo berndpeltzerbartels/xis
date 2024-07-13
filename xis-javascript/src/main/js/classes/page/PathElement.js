@@ -74,9 +74,8 @@ class PathElement {
         if (!path.startsWith(this.content)) {
             return false;
         }
-        this.currentValue = this.content;
         if (this.next) {
-            this.next.evaluateVar(path.substring(this.content.length), pathVariables);
+            return this.next.evaluateVar(path.substring(this.content.length), pathVariables);
         }
         return true;
     }

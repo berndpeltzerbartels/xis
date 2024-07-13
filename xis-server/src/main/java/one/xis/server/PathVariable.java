@@ -1,8 +1,11 @@
 package one.xis.server;
 
 import lombok.Data;
+import lombok.SneakyThrows;
 
+import java.net.URLEncoder;
 import java.text.CharacterIterator;
+import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -57,5 +60,15 @@ class PathVariable extends PathElement {
     @Override
     public String normalized() {
         return "*";
+    }
+
+    @SneakyThrows
+    @Override
+    String evaluate(Map<String, Object> pathVariables) {
+        var o = pathVariables.get(key);
+        if (o != null) {
+            return URLEncoder.encode(o.toString(), "UTF-8");
+        }
+        return null;
     }
 }

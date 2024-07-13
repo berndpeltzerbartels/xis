@@ -51,7 +51,6 @@ class SimpleObjectFormWidgetTest {
             var result = testContext.openPage(WidgetPage.class);
 
             var document = result.getDocument();
-            var titleElement = document.getElementByTagName("title");
             var inputField1 = document.getInputElementById("field1");
             var inputField2 = document.getInputElementById("field2");
 
@@ -67,7 +66,7 @@ class SimpleObjectFormWidgetTest {
             assertThat(simpleObject.getProperty2()).isEqualTo("v2");
 
             verify(service).save(any());
-            
+
 
             // The details page should display the saved values
             var p1 = document.getElementById("v1");

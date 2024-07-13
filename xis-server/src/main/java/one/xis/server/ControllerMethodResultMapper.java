@@ -35,19 +35,20 @@ class ControllerMethodResultMapper {
         controllerMethodResult.setNextPageURL(request.getPageId());
         controllerMethodResult.setNextWidgetId(request.getWidgetId());
         controllerMethodResult.setWidgetContainerId(request.getWidgetContainerId());
-        controllerMethodResult.setWidgetParameters(castStringMap(request.getWidgetParameters()));
-        controllerMethodResult.setPathVariables(castStringMap(request.getPathVariables()));
-        controllerMethodResult.setUrlParameters(castStringMap(request.getUrlParameters()));
+        controllerMethodResult.getWidgetParameters().putAll(castStringMap(request.getWidgetParameters()));
+        controllerMethodResult.getPathVariables().putAll(castStringMap(request.getPathVariables()));
+        controllerMethodResult.getUrlParameters().putAll(castStringMap(request.getUrlParameters()));
         return controllerMethodResult;
     }
 
     ControllerMethodResult mapValidationErrorState(ClientRequest request, ValidationErrors errors) {
         var controllerMethodResult = new ControllerMethodResult();
         controllerMethodResult.setNextPageURL(request.getPageId());
+        controllerMethodResult.setNextWidgetId(request.getWidgetId());
         controllerMethodResult.setWidgetContainerId(request.getWidgetContainerId());
-        controllerMethodResult.setWidgetParameters(castStringMap(request.getWidgetParameters()));
-        controllerMethodResult.setPathVariables(castStringMap(request.getPathVariables()));
-        controllerMethodResult.setUrlParameters(castStringMap(request.getUrlParameters()));
+        controllerMethodResult.getWidgetParameters().putAll(castStringMap(request.getWidgetParameters()));
+        controllerMethodResult.getPathVariables().putAll(castStringMap(request.getPathVariables()));
+        controllerMethodResult.getUrlParameters().putAll(castStringMap(request.getUrlParameters()));
         controllerMethodResult.getValidatorMessages().getGlobalMessages().addAll(errors.getGlobalErrors());
         controllerMethodResult.getValidatorMessages().getMessages().putAll(errors.getErrors());
         controllerMethodResult.setValidationFailed(true);
@@ -75,16 +76,16 @@ class ControllerMethodResultMapper {
             updateControllerClass(result, widgetResponse.getControllerClass());
         }
         result.setWidgetContainerId(widgetResponse.getTargetContainer());
-        result.setWidgetsToReload(widgetResponse.getWidgetsToReload());
-        result.setWidgetParameters(widgetResponse.getWidgetParameters());
+        result.getWidgetsToReload().addAll(widgetResponse.getWidgetsToReload());
+        result.getWidgetParameters().putAll(widgetResponse.getWidgetParameters());
     }
 
     private void mapPageResponse(PageResponse pageResponse, ControllerMethodResult controllerMethodResult) {
         if (pageResponse.getControllerClass() != null) {
             updateControllerClass(controllerMethodResult, pageResponse.getControllerClass());
         }
-        controllerMethodResult.setPathVariables(pageResponse.getPathVariables());
-        controllerMethodResult.setUrlParameters(pageResponse.getUrlParameters());
+        controllerMethodResult.getPathVariables().putAll(pageResponse.getPathVariables());
+        controllerMethodResult.getUrlParameters().putAll(pageResponse.getUrlParameters());
     }
 
 
