@@ -15,7 +15,6 @@ import one.xis.utils.xml.XmlUtil;
 import org.dom4j.*;
 import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
-import org.tinylog.Logger;
 
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -93,7 +92,6 @@ class HtmlResourceService {
     private String extractPageHead(Resource pageResource) {
         try {
             var content = pageResource.getContent();
-            Logger.info("content for head :" + content);
             var doc = createDocument(content);
             var html = doc.getRootElement();
             var head = doc.getRootElement().element("head");
@@ -110,7 +108,6 @@ class HtmlResourceService {
     private String extractPageBody(Resource pageResource) {
         try {
             var content = pageResource.getContent();
-            Logger.info("content for body :" + content);
             var doc = createDocument(content);
             var html = doc.getRootElement();
             var body = doc.getRootElement().element("body");

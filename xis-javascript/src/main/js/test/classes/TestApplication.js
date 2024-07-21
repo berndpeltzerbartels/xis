@@ -24,6 +24,7 @@ class TestApplication {
             .then(config => _this.pageController.setConfig(config))
             .then(config => _this.widgets.loadWidgets(config))
             .then(config => _this.pages.loadPages(config))
+            .then(() => _this.urlResolver.init())
             .then(() => _this.pageController.displayPageForUrlLater(document.location.pathname))
             .catch(e => console.error(e));
     }

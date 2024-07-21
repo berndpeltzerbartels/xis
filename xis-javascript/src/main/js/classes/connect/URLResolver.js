@@ -25,6 +25,11 @@ class URLResolver {
         });
     }
 
+    reset() {
+        debugger;
+        this.init();
+    }
+
     /**
      * 
      * @param {string} url 

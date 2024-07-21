@@ -23,6 +23,7 @@ class SimpleWidgetTest {
         testContext.getSingleton(WidgetPage.class).setWidgetId("SimpleWidget");
         var result = testContext.openPage(WidgetPage.class);
 
+        System.out.println(result.getDocument().asString());
         assertThat(result.getDocument().getElementById("greeting").innerText).isEqualTo("Huhu !");
     }
 }
