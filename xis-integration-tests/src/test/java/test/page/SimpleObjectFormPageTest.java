@@ -52,8 +52,6 @@ class SimpleObjectFormPageTest {
             var inputField1 = document.getInputElementById("field1");
             var inputField2 = document.getInputElementById("field2");
 
-            System.out.println("----------------------------------------------------------------------------------------");
-            System.out.println(result.getDocument().asString());
             // Check controller values
             assertThat(titleElement.innerText).isEqualTo("Form");
 

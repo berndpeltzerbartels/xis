@@ -28,7 +28,6 @@ class ActionLinkPageTest {
     @Test
     void action1() {
         var result = testContext.openPage("/actionPage.html");
-        System.out.println(result.getDocument().asString());
         result.getDocument().getElementById("action-link1").click();
         assertThat(result.getDocument().getElementByTagName("title").innerText).isEqualTo("ActionPage");
         verify(service, times(2)).getData();

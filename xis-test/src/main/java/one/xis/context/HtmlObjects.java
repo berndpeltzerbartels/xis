@@ -5,6 +5,7 @@ import one.xis.resource.Resources;
 import one.xis.test.dom.Document;
 import one.xis.test.dom.Element;
 import one.xis.test.dom.Window;
+import one.xis.test.js.Console;
 import one.xis.test.js.LocalStorage;
 
 import java.util.function.Function;
@@ -15,6 +16,7 @@ class HtmlObjects {
     private Document rootPage;
     private LocalStorage localStorage;
     private Window window;
+    private Console console;
     private final Function<String, Element> htmlToElement;
 
     HtmlObjects() {
@@ -36,5 +38,6 @@ class HtmlObjects {
         this.rootPage = Document.of(new Resources().getByPath("index.html").getContent());
         this.localStorage = new LocalStorage();
         this.window = new Window();
+        this.console = new Console();
     }
 }

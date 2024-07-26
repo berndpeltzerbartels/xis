@@ -65,6 +65,5 @@ class IntegrationTestScript {
         invoker.setBinding("document", testEnvironment.getHTML_OBJECTS().getRootPage());
         invoker.setBinding("window", testEnvironment.getHTML_OBJECTS().getWindow());
         invoker.setBinding("htmlToElement", testEnvironment.getHTML_OBJECTS().getHtmlToElement());
-
     }
 }

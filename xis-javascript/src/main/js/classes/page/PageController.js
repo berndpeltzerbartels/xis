@@ -83,6 +83,7 @@ class PageController {
             this.resolvedURL = resolvedURL;
             if (resolvedURL.page != this.page) {
                 this.page = resolvedURL.page;
+                this.htmlTagHandler.unbindPage();
                 this.htmlTagHandler.bindPage(resolvedURL.page);
             }
         }

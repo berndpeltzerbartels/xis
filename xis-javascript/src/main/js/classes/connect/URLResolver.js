@@ -25,10 +25,6 @@ class URLResolver {
         });
     }
 
-    reset() {
-        debugger;
-        this.init();
-    }
 
     /**
      * 

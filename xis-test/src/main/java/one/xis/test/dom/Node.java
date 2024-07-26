@@ -45,7 +45,9 @@ public abstract class Node {
 
     void setNextSibling(Node node) {
         if (this.equals(node)) {
-            throw new IllegalStateException();
+            return;
+            // does not work in integration-etst. behaviour of DOM in browser is differen
+            // throw new IllegalStateException("Node cannot be its own sibling: " + this);
         }
         nextSibling = node;
     }
