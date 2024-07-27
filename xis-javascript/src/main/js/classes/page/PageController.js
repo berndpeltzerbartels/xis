@@ -108,7 +108,6 @@ class PageController {
      * @param {string} realUrl url from address-line
      */
     displayPageForUrl(realUrl) {
-        debugger;
         this.resolvedURL = this.urlResolver.resolve(realUrl);
         if (!this.resolvedURL) {
             this.resolvedURL = this.welcomePageUrl();
