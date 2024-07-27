@@ -46,7 +46,6 @@ class HttpClientMock {
     }
 
     responseForPost(uri, payload, headers) {
-        debugger;
         var requestJson = JSON.stringify(payload);
         switch (uri) {
             case '/xis/page/model': return backendBridge.getPageModel(uri, requestJson, headers);

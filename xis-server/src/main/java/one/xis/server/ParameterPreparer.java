@@ -7,7 +7,6 @@ import one.xis.*;
 import one.xis.context.XISComponent;
 import one.xis.parameter.ParameterDeserializer;
 import one.xis.validation.ValidationErrors;
-import one.xis.validation.ValidationFailedException;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -43,9 +42,6 @@ class ParameterPreparer {
             } else {
                 throw new IllegalStateException(method + ": parameter without annotation=" + param);
             }
-        }
-        if (errors.hasErrors()) {
-            throw new ValidationFailedException(errors); // TODO catch it
         }
         return args;
     }
@@ -87,6 +83,9 @@ class ParameterPreparer {
     }
 
     private Object deserializeParameter(String jsonValue, ClientRequest request, Parameter parameter, ValidationErrors errors) throws IOException {
+        if (jsonValue == null) {
+            return null;
+        }
         var userContext = new UserContext(request.getLocale(), ZoneId.of(request.getZoneId()), request.getUserId(), request.getClientId());
         return parameterDeserializer.deserialize(jsonValue, parameter, errors, userContext);
     }

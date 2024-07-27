@@ -41,7 +41,9 @@ class ControllerService {
         var nextControllerWrapper = nextControllerWrapper(controllerResult);
         // This should only occur when action method is called
         mapResultToRequestOnAction(request, controllerResult);
-        nextControllerWrapper.invokeGetModelMethods(request, controllerResult);
+        if (!controllerResult.isValidationFailed()) {
+            nextControllerWrapper.invokeGetModelMethods(request, controllerResult);
+        }
         mapResultToResponse(response, controllerResult);
     }
 

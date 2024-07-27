@@ -46,7 +46,7 @@ public class ControllerWrapper {
             controllerResult.getValidatorMessages().getGlobalMessages().addAll(controllerMethodResult.getValidatorMessages().getGlobalMessages());
             controllerResult.getValidatorMessages().getMessages().putAll(controllerMethodResult.getValidatorMessages().getMessages());
             if (controllerMethodResult.isValidationFailed()) {
-                controllerMethodResult.setValidationFailed(true);
+                controllerResult.setValidationFailed(true);
             }
         } catch (Exception e) {
             Logger.error(e, "Failed to invoke action-method");

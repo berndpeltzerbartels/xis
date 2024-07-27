@@ -6,7 +6,6 @@ import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
 import one.xis.Action;
 import one.xis.Page;
-import one.xis.validation.Validated;
 import one.xis.validation.Validation;
 import one.xis.validation.ValidationErrors;
 
@@ -68,9 +67,6 @@ class ControllerMethod {
     private void validateArgs(@NonNull Object[] args, @NonNull Method method, @NonNull ClientRequest request, ValidationErrors errors) {
         for (var i = 0; i < args.length; i++) {
             var parameter = method.getParameters()[i];
-            if (!parameter.isAnnotationPresent(Validated.class)) {
-                continue;
-            }
             var parameterValue = args[i];
             validation.validate(parameter, parameterValue, errors);
         }
