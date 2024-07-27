@@ -76,6 +76,18 @@ class ParameterDeserializerImpl implements ParameterDeserializer {
         }
     }
 
+    private Object deserializeJsonArray(@NonNull JsonReader reader,
+                                        @NonNull Field field,
+                                        @NonNull Type genericType,
+                                        @NonNull ArrayPathElement arrayPathElement,
+                                        @NonNull ValidationErrors errors,
+                                        @NonNull UserContext userContext) throws IOException {
+
+        var deserialized = deserializeJsonArray(reader, genericType, arrayPathElement, errors, userContext);
+        checkEmpty(deserialized, field, arrayPathElement, errors);
+        return deserialized;
+    }
+
     @SuppressWarnings("unchecked")
     private Object deserializeJsonArray(@NonNull JsonReader reader,
                                         @NonNull Type genericType,
@@ -175,29 +187,40 @@ class ParameterDeserializerImpl implements ParameterDeserializer {
         errors.addGlobalError(errorKey + ".global");
     }
 
+    @SuppressWarnings("unchecked")
     private Object deserializeAnyField(@NonNull JsonReader reader,
                                        @NonNull Field field,
                                        @NonNull PathElement pathElement,
                                        @NonNull ValidationErrors errors,
                                        @NonNull UserContext userContext) throws IOException {
         var type = field.getGenericType();
-        if (type.equals(String.class)) {
-            return readString(reader);
-        } else if (isNumber(type)) {
-            return readNumber(reader, (Class<? extends Number>) type);
-        } else if (isBoolean(type)) {
-            return readBoolean(reader);
-        } else if (reader.peek() == JsonToken.NULL) {
-            readNull(reader);
-            return null;
-        } else if (reader.peek() == JsonToken.BEGIN_ARRAY) {
-            return deserializeJsonArray(reader, type, (ArrayPathElement) pathElement, errors, userContext);
+        if (reader.peek() == JsonToken.BEGIN_ARRAY) {
+            return deserializeJsonArray(reader, field, type, (ArrayPathElement) pathElement, errors, userContext);
         } else if (reader.peek() == JsonToken.BEGIN_OBJECT) {
             if (type instanceof Class<?> clazz) {
                 return deserializeObject(reader, ClassUtils.newInstance(clazz), (DefaultPathElement) pathElement, errors, userContext);
             } else {
                 throw new IllegalStateException();
             }
+        }
+        String value;
+        if (reader.peek() == JsonToken.NULL) {
+            reader.nextNull();
+            value = null;
+        } else {
+            value = reader.nextString();
+        }
+        if (checkEmpty(value, field, pathElement, errors)) {
+            return null;
+        }
+        if (type.equals(String.class)) {
+            return value;
+        } else if (isNumber(type)) {
+            return readNumber(value, (Class<? extends Number>) type);
+        } else if (isBoolean(type)) {
+            return readBoolean(value);
+        } else if (reader.peek() == JsonToken.NULL) {
+            return null;
         } else {
             throw new IllegalStateException();
         }
@@ -223,11 +246,50 @@ class ParameterDeserializerImpl implements ParameterDeserializer {
     }
 
     private Object readBoolean(JsonReader reader) throws IOException {
-        return gson.fromJson(reader.nextString(), Boolean.class);
+        return readBoolean(reader.nextString());
+    }
+
+    private Object readBoolean(String value) {
+        return gson.fromJson(value, Boolean.class);
     }
 
     private <N extends Number> N readNumber(JsonReader reader, Class<N> type) throws IOException {
-        return gson.fromJson(reader.nextString(), type);
+        return readNumber(reader.nextString(), type);
+    }
+
+    private <N extends Number> N readNumber(String value, Class<N> type) throws IOException {
+        return gson.fromJson(value, type);
+    }
+
+    private boolean checkEmpty(Object value,
+                               @NonNull Field field,
+                               @NonNull PathElement pathElement,
+                               @NonNull ValidationErrors errors) {
+        if (isEmpty(value)) {
+            if (field.isAnnotationPresent(NotEmpty.class)) {
+                errors.addError(pathElement.getPath(), "mandatory");
+                errors.addGlobalError("mandatory.global");
+            }
+            return true;
+        }
+        return false;
+    }
+
+
+    private boolean isEmpty(Object o) {
+        if (o == null) {
+            return true;
+        }
+        if (o instanceof String s) {
+            return s.isEmpty();
+        }
+        if (o instanceof Collection<?> c) {
+            return c.isEmpty();
+        }
+        if (o.getClass().isArray()) {
+            return Array.getLength(o) == 0;
+        }
+        return false;
     }
 
 

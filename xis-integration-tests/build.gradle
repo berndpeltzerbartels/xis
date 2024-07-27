@@ -18,7 +18,8 @@ dependencies {
     implementation project(':xis-resources')
     implementation project(':xis-remote-core')
     implementation project(':xis-util')
-    
+    implementation project(':xis-validation')
+
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
     implementation "org.projectlombok:lombok:$lombokVersion"
 
