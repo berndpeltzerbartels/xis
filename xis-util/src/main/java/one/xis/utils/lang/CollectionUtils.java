@@ -46,6 +46,16 @@ public class CollectionUtils {
 
     @SuppressWarnings("unchecked")
     public <C extends Collection<?>> C convertCollectionClass(Collection<Object> coll, Class<C> clazz) {
+        if (!clazz.isInterface() && !Modifier.isAbstract(clazz.getModifiers())) {
+            var constructor = ClassUtils.getConstructor(clazz, Collection.class);
+            if (constructor != null && !Modifier.isAbstract(clazz.getModifiers()) && !Modifier.isInterface(clazz.getModifiers())) {
+                try {
+                    return constructor.newInstance(coll);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
         if (clazz.isAssignableFrom(List.class)) {
             return (C) new ArrayList<>(coll);
         }
@@ -55,13 +65,8 @@ public class CollectionUtils {
         if (clazz.isAssignableFrom(HashSet.class)) {
             return (C) new HashSet<>(coll);
         }
-        var constructor = ClassUtils.getConstructor(clazz, Collection.class);
-        if (constructor != null && !Modifier.isAbstract(clazz.getModifiers()) && !Modifier.isInterface(clazz.getModifiers())) {
-            try {
-                return constructor.newInstance(coll);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+        if (clazz.isAssignableFrom(SortedSet.class)) {
+            return (C) new TreeSet<>(coll);
         }
         throw new UnsupportedOperationException("unable to instantiate " + clazz);
     }

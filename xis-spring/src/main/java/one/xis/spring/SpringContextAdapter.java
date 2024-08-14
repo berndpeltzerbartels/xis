@@ -2,17 +2,14 @@ package one.xis.spring;
 
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import one.xis.EnablePushClients;
-import one.xis.Page;
-import one.xis.Push;
-import one.xis.Widget;
+import one.xis.*;
 import one.xis.context.AppContextBuilder;
+import one.xis.deserialize.DeserializationPostProcessor;
 import one.xis.server.FrontendService;
 import one.xis.server.PushClientProxy;
 import one.xis.server.PushClientUtil;
 import one.xis.utils.lang.ClassUtils;
-import one.xis.validation.AnnotationValidator;
-import one.xis.validation.TypeValidator;
+import one.xis.validation.Validator;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -81,8 +78,9 @@ class SpringContextAdapter implements BeanPostProcessor, ApplicationContextAware
     private boolean isFrameworkBeanClass(Class<?> clazz) {
         return clazz.isAnnotationPresent(Page.class)
                 || clazz.isAnnotationPresent(Widget.class)
-                || TypeValidator.class.isAssignableFrom(clazz)
-                || AnnotationValidator.class.isAssignableFrom(clazz);
+                || Formatter.class.isAssignableFrom(clazz)
+                || DeserializationPostProcessor.class.isAssignableFrom(clazz)
+                || Validator.class.isAssignableFrom(clazz);
     }
 
     private Stream<String> pushClientPackages() {

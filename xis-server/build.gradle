@@ -20,7 +20,8 @@ dependencies {
     implementation project(':xis-util')
     implementation project(':xis-remote-core')
     implementation project(':xis-javascript')
-    implementation project(':xis-parameter-deserializer')
+    implementation project(':xis-deserializer')
+    implementation project(':xis-parameter-deserializer')  // TODO: remove
     implementation project(':xis-validation')
 
 

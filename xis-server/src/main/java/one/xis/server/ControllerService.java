@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 class ControllerService {
 
     @XISInject
-    private DataSerializer dataSerializer;
+    private ControllerResponseMapper responseMapper;
 
     @XISInject
     private PageControllerWrappers pageControllerWrappers;
@@ -62,17 +62,7 @@ class ControllerService {
     }
 
     private void mapResultToResponse(ServerResponse response, ControllerResult result) {
-        if (result.getNextPageURL() != null) {
-            var path = pathResolver.createPath(result.getNextPageURL());
-            var pathString = pathResolver.evaluateRealPath(path, result.getPathVariables(), result.getUrlParameters());
-            response.setNextPageURL(pathString);
-        }
-        response.setData(dataSerializer.serialize(result.getModelData()));
-
-        response.setNextWidgetId(result.getNextWidgetId());
-        response.setWidgetParameters(result.getWidgetParameters());
-        response.setValidatorMessages(result.getValidatorMessages());
-        response.setHttpStatus(result.isValidationFailed() ? 422 : 200);
+        responseMapper.mapResultToResponse(response, result);
     }
 
     private void mapResultToRequestOnAction(ClientRequest request, ControllerResult result) {

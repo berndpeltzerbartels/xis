@@ -2,31 +2,42 @@ package one.xis.server;
 
 import lombok.Data;
 import lombok.NonNull;
-import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
 import one.xis.Action;
 import one.xis.Page;
-import one.xis.validation.Validation;
-import one.xis.validation.ValidationErrors;
+import one.xis.deserialize.MainDeserializer;
+import one.xis.deserialize.ReportedError;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
 
 @Data
 @Slf4j
-@SuperBuilder
 class ControllerMethod {
 
-    protected Method method;
-    protected String key;
-    protected ParameterPreparer parameterPreparer;
-    protected Validation validation;
-    protected ControllerMethodResultMapper controllerMethodResultMapper;
+    private final Method method;
+    private final String key;
+    private final MainDeserializer deserializer;
+    private final ControllerMethodResultMapper controllerMethodResultMapper;
+    private final ControllerMethodParameter[] controllerMethodParameters;
 
+    ControllerMethod(@NonNull Method method, @NonNull String key, @NonNull MainDeserializer deserializer, @NonNull ControllerMethodResultMapper controllerMethodResultMapper) {
+        this.method = method;
+        this.key = key;
+        this.deserializer = deserializer;
+        this.controllerMethodResultMapper = controllerMethodResultMapper;
+        this.controllerMethodParameters = new ControllerMethodParameter[method.getParameterCount()];
+        for (var i = 0; i < method.getParameterCount(); i++) {
+            controllerMethodParameters[i] = new ControllerMethodParameter(method, method.getParameters()[i], deserializer);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
     ControllerMethodResult invoke(@NonNull ClientRequest request, @NonNull Object controller) throws Exception {
-        var errors = new ValidationErrors();
+        var errors = new ArrayList<ReportedError>();
         var args = prepareArgs(method, request, errors);
-        validateArgs(args, method, request, errors);
-        if (errors.hasErrors()) {
+        if (!errors.isEmpty()) {
             return controllerMethodResultMapper.mapValidationErrorState(request, errors);
         }
         var returnValue = method.invoke(controller, args);
@@ -59,16 +70,12 @@ class ControllerMethod {
         return "ControllerMethod(" + method.getName() + ")";
     }
 
-    private Object[] prepareArgs(Method method, ClientRequest request, ValidationErrors errors) throws Exception {
-        return parameterPreparer.prepareParameters(method, request, errors);
-    }
-
-
-    private void validateArgs(@NonNull Object[] args, @NonNull Method method, @NonNull ClientRequest request, ValidationErrors errors) {
-        for (var i = 0; i < args.length; i++) {
-            var parameter = method.getParameters()[i];
-            var parameterValue = args[i];
-            validation.validate(parameter, parameterValue, errors);
+    private Object[] prepareArgs(Method method, ClientRequest request, Collection<ReportedError> errors) throws Exception {
+        var args = new Object[method.getParameterCount()];
+        for (var i = 0; i < method.getParameterCount(); i++) {
+            args[i] = controllerMethodParameters[i].prepareParameter(request, errors);
         }
+        return args;
     }
+
 }

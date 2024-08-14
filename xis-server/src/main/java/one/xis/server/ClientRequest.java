@@ -22,7 +22,7 @@ public class ClientRequest {
 
     @JsonDeserialize(using = MapDeserializer.class)
     private Map<String, String> formData;
-    
+
     @JsonDeserialize(using = MapDeserializer.class)
     private Map<String, String> pathVariables;
 

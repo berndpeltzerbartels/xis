@@ -1,18 +1,25 @@
 package one.xis.server;
 
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import one.xis.*;
 import one.xis.context.XISComponent;
-import one.xis.validation.ValidationErrors;
+import one.xis.deserialize.ReportedError;
+import one.xis.validation.ValidatorMessageResolver;
 
 import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @XISComponent
+@RequiredArgsConstructor
 class ControllerMethodResultMapper {
 
-    // TODO validate widgetresponse must have target container when return from PageController
+    private final ValidatorMessageResolver validatorMessageResolver;
+
     ControllerMethodResult mapControllerResult(Method method, Object returnValue) {
         var controllerMethodResult = new ControllerMethodResult();
         if (method.isAnnotationPresent(Action.class)) {
@@ -41,7 +48,7 @@ class ControllerMethodResultMapper {
         return controllerMethodResult;
     }
 
-    ControllerMethodResult mapValidationErrorState(ClientRequest request, ValidationErrors errors) {
+    ControllerMethodResult mapValidationErrorState(ClientRequest request, Collection<ReportedError> errors) {
         var controllerMethodResult = new ControllerMethodResult();
         controllerMethodResult.setNextPageURL(request.getPageId());
         controllerMethodResult.setNextWidgetId(request.getWidgetId());
@@ -49,8 +56,8 @@ class ControllerMethodResultMapper {
         controllerMethodResult.getWidgetParameters().putAll(castStringMap(request.getWidgetParameters()));
         controllerMethodResult.getPathVariables().putAll(castStringMap(request.getPathVariables()));
         controllerMethodResult.getUrlParameters().putAll(castStringMap(request.getUrlParameters()));
-        controllerMethodResult.getValidatorMessages().getGlobalMessages().addAll(errors.getGlobalErrors());
-        controllerMethodResult.getValidatorMessages().getMessages().putAll(errors.getErrors());
+        controllerMethodResult.getValidatorMessages().getGlobalMessages().addAll(mapGlobalErrors(errors));
+        controllerMethodResult.getValidatorMessages().getMessages().putAll(mapErrors(errors));
         controllerMethodResult.setValidationFailed(true);
         return controllerMethodResult;
     }
@@ -101,5 +108,31 @@ class ControllerMethodResultMapper {
 
     private Map<String, Object> castStringMap(Map<String, String> map) {
         return map.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    private Map<String, String> mapErrors(Collection<ReportedError> errors) {
+        var errorMessageMap = new HashMap<String, String>();
+        errors.forEach(error -> mapError(error, errorMessageMap));
+        return errorMessageMap;
+    }
+
+    private List<String> mapGlobalErrors(Collection<ReportedError> errors) {
+        return errors.stream().map(this::globalErrorMessages).toList();
+    }
+
+    private void mapError(ReportedError error, Map<String, String> errorMessageMap) {
+        var message = validatorMessageResolver.createMessage(error.getMessageKey(),
+                error.getMessageParameters(),
+                error.getReportedErrorContext().getTarget(),
+                error.getReportedErrorContext().getUserContext());
+        var key = error.getReportedErrorContext().getPath();
+        errorMessageMap.put(key, message);
+    }
+
+    private String globalErrorMessages(ReportedError error) {
+        return validatorMessageResolver.createMessage(error.getMessageKey(),
+                error.getMessageParameters(),
+                error.getReportedErrorContext().getTarget(),
+                error.getReportedErrorContext().getUserContext());
     }
 }

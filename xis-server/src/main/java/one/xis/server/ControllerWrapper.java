@@ -6,7 +6,6 @@ import one.xis.validation.ValidatorMessages;
 import org.tinylog.Logger;
 
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Data
 @NoArgsConstructor
@@ -77,8 +76,8 @@ public class ControllerWrapper {
      * @return a RuntimeException with a message containing all validation errors
      */
     private RuntimeException exceptionForValiationErrors(ValidatorMessages validatorMessages) {
-        var message = validatorMessages.getMessages().keySet().stream().map(key -> key + ": " + validatorMessages.getMessages().get(key)).collect(Collectors.joining(", "));
-        return new RuntimeException("Errors occurred: " + message);
+
+        return new RuntimeException("Errors occurred: ");
 
     }
 

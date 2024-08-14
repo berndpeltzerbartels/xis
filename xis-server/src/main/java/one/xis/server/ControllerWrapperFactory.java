@@ -6,8 +6,8 @@ import one.xis.Action;
 import one.xis.FormData;
 import one.xis.ModelData;
 import one.xis.context.XISComponent;
+import one.xis.deserialize.MainDeserializer;
 import one.xis.utils.lang.MethodUtils;
-import one.xis.validation.Validation;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -20,9 +20,8 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 class ControllerWrapperFactory {
 
-    private final ParameterPreparer parameterFactory;
+    private final MainDeserializer deserializer;
     private final ControllerMethodResultMapper controllerMethodResultMapper;
-    private final Validation validation;
 
     ControllerWrapper createControllerWrapper(@NonNull String id, @NonNull Object controller) {
         try {
@@ -44,7 +43,7 @@ class ControllerWrapperFactory {
                 .map(this::createModelMethod)
                 .forEach(controllerMethod -> {
                     if (map.containsKey(controllerMethod.getKey())) {
-                        throw new IllegalStateException(controller.getClass() + ": there is more than one @ModelData or @FormData annotation containing the key " + controllerMethod.key);
+                        throw new IllegalStateException(controller.getClass() + ": there is more than one @ModelData or @FormData annotation assigning a value for the key " + controllerMethod.getKey());
                     }
                     map.put(controllerMethod.getKey(), controllerMethod);
                 });
@@ -67,13 +66,7 @@ class ControllerWrapperFactory {
         var key = method.isAnnotationPresent(FormData.class) ?
                 method.getAnnotation(FormData.class).value() : method.getAnnotation(ModelData.class).value();
         try {
-            return ControllerMethod.builder()
-                    .method(method)
-                    .key(key)
-                    .parameterPreparer(parameterFactory)
-                    .controllerMethodResultMapper(controllerMethodResultMapper)
-                    .validation(validation)
-                    .build();
+            return new ControllerMethod(method, key, deserializer, controllerMethodResultMapper);
         } catch (Exception e) {
             throw new RuntimeException("Failed to initialize " + method, e);
         }
@@ -82,13 +75,8 @@ class ControllerWrapperFactory {
     private ControllerMethod createActionMethod(Method method) {
         method.setAccessible(true);
         try {
-            return ControllerMethod.builder()
-                    .method(method)
-                    .key(method.getAnnotation(Action.class).value())
-                    .parameterPreparer(parameterFactory)
-                    .controllerMethodResultMapper(controllerMethodResultMapper)
-                    .validation(validation)
-                    .build();
+            var key = method.getAnnotation(Action.class).value();
+            return new ControllerMethod(method, key, deserializer, controllerMethodResultMapper);
         } catch (Exception e) {
             throw new RuntimeException("Failed to initialize " + method, e);
         }

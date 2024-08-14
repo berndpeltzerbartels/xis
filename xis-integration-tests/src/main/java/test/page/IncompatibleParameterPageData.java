@@ -1,12 +1,12 @@
 package test.page;
 
 import lombok.Data;
-import one.xis.validation.NotEmpty;
+import one.xis.validation.Mandatory;
 
 @Data
 class IncompatibleParameterPageData {
 
-    @NotEmpty
+    @Mandatory
     private Integer integerFieldMandatory;
 
     private Integer integerField;
