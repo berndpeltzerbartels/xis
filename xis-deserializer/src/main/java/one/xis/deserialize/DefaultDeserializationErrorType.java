@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 enum DefaultDeserializationErrorType {
     CONVERSION_ERROR("validation.invalid", "validation.invalidGlobal"),
-    MISSING_MANDATORY_PROPERTY("validation.notEmpty", "validation.notEmptyGlobal");
+    MISSING_MANDATORY_PROPERTY("validation.mandatory", "validation.mandatory.global");
     private final String messageKey;
     private final String globalMessageKey;
 }

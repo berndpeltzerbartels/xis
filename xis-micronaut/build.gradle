@@ -32,10 +32,16 @@ dependencies {
     implementation project(':xis-server')
     implementation project(':xis-remote-core')
 
+
+    testImplementation project(':xis-context')
+    testImplementation project(':xis-server')
+    testImplementation project(':xis-remote-core')
+
+
 }
 
 java {
-    sourceCompatibility = JavaVersion.toVersion("17")
-    targetCompatibility = JavaVersion.toVersion("17")
+    sourceCompatibility = JavaVersion.toVersion("20")
+    targetCompatibility = JavaVersion.toVersion("20")
 }
 

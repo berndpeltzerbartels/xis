@@ -7,22 +7,22 @@ import one.xis.context.XISComponent;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Parameter;
-import java.util.Map;
-import java.util.MissingResourceException;
-import java.util.Optional;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.stream.Stream;
 
 @XISComponent
 public class ValidatorMessageResolver {
 
     public String createMessage(@NonNull String messageKey, @NonNull Map<String, Object> messageParameters, @NonNull AnnotatedElement annotatedElement, @NonNull UserContext userContext) {
-        var message = createMessage(messageKey, messageParameters, userContext);
+        var labelKey = getLabelKey(annotatedElement);
+        var label = getMessage(labelKey, userContext);
+        var parameters = new HashMap<>(messageParameters);
+        parameters.put("label", label == null ? labelKey : label);
+        var message = createMessage(messageKey, parameters, userContext);
         if (message == null) {
-            return null;
+            return "[" + messageKey + "]";
         }
-        var label = getLabel(annotatedElement, userContext);
-        return label == null ? message : message.replace("${label}", label);
+        return message;
     }
 
 
@@ -84,32 +84,29 @@ public class ValidatorMessageResolver {
         return parameter.getName();
     }
 
-    private String getLabel(@NonNull AnnotatedElement annotatedElement, @NonNull UserContext userContext) {
+    private String getLabelKey(@NonNull AnnotatedElement annotatedElement) {
         if (annotatedElement instanceof Field field) {
-            return getLabel(field, userContext);
+            return getLabelKey(field);
         }
         if (annotatedElement instanceof Parameter parameter) {
-            return getLabel(parameter, userContext);
+            return getLabelKey(parameter);
         }
         if (annotatedElement instanceof Class<?> clazz) {
-            return getLabel(clazz, userContext);
+            return getLabelKey(clazz);
         }
         throw new IllegalArgumentException("Unsupported AnnotatedElement: " + annotatedElement);
     }
 
-    private String getLabel(@NonNull Field field, @NonNull UserContext userContext) {
-        var key = field.isAnnotationPresent(LabelKey.class) ? field.getAnnotation(LabelKey.class).messageKey() : field.getName();
-        return getMessage(key, userContext);
+    private String getLabelKey(@NonNull Field field) {
+        return field.isAnnotationPresent(LabelKey.class) ? field.getAnnotation(LabelKey.class).value() : field.getName();
     }
 
-    private String getLabel(@NonNull Parameter parameter, @NonNull UserContext userContext) {
-        var key = parameter.isAnnotationPresent(LabelKey.class) ? parameter.getAnnotation(LabelKey.class).messageKey() : getParameterName(parameter);
-        return getMessage(key, userContext);
+    private String getLabelKey(@NonNull Parameter parameter) {
+        return parameter.isAnnotationPresent(LabelKey.class) ? parameter.getAnnotation(LabelKey.class).value() : getParameterName(parameter);
     }
 
-    private String getLabel(@NonNull Class<?> field, @NonNull UserContext userContext) {
-        var key = field.isAnnotationPresent(LabelKey.class) ? field.getAnnotation(LabelKey.class).messageKey() : field.getName();
-        return getMessage(key, userContext);
+    private String getLabelKey(@NonNull Class<?> field) {
+        return field.isAnnotationPresent(LabelKey.class) ? field.getAnnotation(LabelKey.class).value() : field.getName();
     }
 
 

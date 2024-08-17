@@ -14,9 +14,9 @@ import one.xis.context.XISInit;
 import one.xis.server.ClientRequest;
 import one.xis.server.FrontendService;
 import one.xis.validation.EMail;
+import one.xis.validation.LabelKey;
 import one.xis.validation.Mandatory;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -60,48 +60,62 @@ class ValidationPostProcessorIntegrationTest {
         assertThat(personData.getDateOfBirth()).isEqualTo(LocalDate.of(2000, 1, 5));
     }
 
-    @Nested
-    class EmaiValidatortest {
-        @Test
-        void validateEmailOK() throws JsonProcessingException {
-            // given
-            var personData = new PersonData();
-            personData.setName("Max Mustermann");
-            personData.setEmail("bla@bla.de");
-            personData.setDateOfBirth(LocalDate.of(2000, 1, 1));
-            var request = createRequest(personData);
 
-            // when
-            var response = frontendService.processActionRequest(request);
+    @Test
+    void validateEmailOK() throws JsonProcessingException {
+        // given
+        var personData = new PersonData();
+        personData.setName("Max Mustermann");
+        personData.setEmail("bla@bla.de");
+        personData.setDateOfBirth(LocalDate.of(2000, 1, 1));
+        var request = createRequest(personData);
 
-            // then
-            var dataTree = objectMapper.readTree(response.getData());
-            personData = objectMapper.treeToValue(dataTree.at("/person"), PersonData.class);
+        // when
+        var response = frontendService.processActionRequest(request);
 
-            // Data was changed by the action method:
-            assertThat(personData.getName()).isEqualTo("Maxl Mustermann");
-            assertThat(personData.getEmail()).isEqualTo("blabla@blabla.de");
-            assertThat(personData.getDateOfBirth()).isEqualTo(LocalDate.of(2000, 1, 5));
+        // then
+        var dataTree = objectMapper.readTree(response.getData());
+        personData = objectMapper.treeToValue(dataTree.at("/person"), PersonData.class);
 
-        }
+        // Data was changed by the action method:
+        assertThat(personData.getName()).isEqualTo("Maxl Mustermann");
+        assertThat(personData.getEmail()).isEqualTo("blabla@blabla.de");
+        assertThat(personData.getDateOfBirth()).isEqualTo(LocalDate.of(2000, 1, 5));
 
-        @Test
-        void validateEmailFailed() throws JsonProcessingException {
-            // given
-            var personData = new PersonData();
-            personData.setName("Max Mustermann");
-            personData.setEmail("blabla.de");
-            personData.setDateOfBirth(LocalDate.of(2000, 1, 1));
-            var request = createRequest(personData);
+    }
 
-            // when
-            var response = frontendService.processActionRequest(request);
+    @Test
+    void validateEmailFailed() throws JsonProcessingException {
+        // given
+        var personData = new PersonData();
+        personData.setName("Max Mustermann");
+        personData.setEmail("blabla.de");
+        personData.setDateOfBirth(LocalDate.of(2000, 1, 1));
+        var request = createRequest(personData);
 
-            // then
-            assertThat(response.getHttpStatus()).isEqualTo(422);
-            assertThat(response.getValidatorMessages().getMessages()).containsEntry("/person/email", "Ungültig");
-            assertThat(response.getValidatorMessages().getGlobalMessages()).containsExactly("Ungültige E-Mail-Adresse");
-        }
+        // when
+        var response = frontendService.processActionRequest(request);
+
+        // then
+        assertThat(response.getHttpStatus()).isEqualTo(422);
+        assertThat(response.getValidatorMessages().getMessages()).containsEntry("/person/email", "Ungültig");
+        assertThat(response.getValidatorMessages().getGlobalMessages()).containsExactly("Ungültige E-Mail-Adresse");
+    }
+
+    @Test
+    void mandatoryFieldFailed() throws JsonProcessingException {
+        // given
+        var personData = new PersonData();
+        personData.setName("Max Mustermann");
+        var request = createRequest(personData);
+        // when
+        var response = frontendService.processActionRequest(request);
+
+        // then
+        assertThat(response.getHttpStatus()).isEqualTo(422);
+        assertThat(response.getValidatorMessages().getMessages()).containsExactlyInAnyOrderEntriesOf(Map.of("/person/email", "erforderlich", "/person/dateOfBirth", "erforderlich"));
+        assertThat(response.getValidatorMessages().getGlobalMessages()).containsExactlyInAnyOrder("EMail ist erforderlich", "Geburtsdatum ist erforderlich");
+
     }
 
     private ClientRequest createRequest(PersonData data) throws JsonProcessingException {
@@ -115,6 +129,7 @@ class ValidationPostProcessorIntegrationTest {
         return request;
     }
 
+
     private ObjectMapper createObjectMapper() {
         var mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
@@ -122,17 +137,21 @@ class ValidationPostProcessorIntegrationTest {
         return mapper;
     }
 
+
     @Data
     static class PersonData {
 
         @Mandatory
+        @LabelKey("name")
         private String name;
 
         @EMail
         @Mandatory
+        @LabelKey("email")
         private String email;
 
         @Mandatory
+        @LabelKey("dateOfBirth")
         private LocalDate dateOfBirth;
     }
 
