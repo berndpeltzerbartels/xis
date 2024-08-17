@@ -26,17 +26,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class ValidationIntegrationTest {
     private FrontendService frontendService;
-    private PersonController personController;
     private final ObjectMapper objectMapper = createObjectMapper();
 
 
     @BeforeEach
     void initFrontendService() {
-        personController = new PersonController();
-        IntegrationTestContext appContext = IntegrationTestContext.builder()
+        var context = IntegrationTestContext.builder()
                 .withSingleton(PersonController.class)
                 .build();
-        frontendService = appContext.getSingleton(FrontendService.class);
+        frontendService = context.getSingleton(FrontendService.class);
     }
 
     @Test
