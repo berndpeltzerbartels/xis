@@ -66,8 +66,7 @@ public class FieldUtil {
     }
 
     public Collection<Field> getDeclaredAccessibleFields(Class<?> clazz) {
-        return Arrays.asList(clazz.getDeclaredFields())
-                .stream().peek(f -> f.setAccessible(true))
+        return Arrays.stream(clazz.getDeclaredFields()).peek(f -> f.setAccessible(true))
                 .collect(Collectors.toSet());
     }
 

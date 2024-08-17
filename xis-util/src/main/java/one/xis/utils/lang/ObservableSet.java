@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.function.Predicate;
 
+@SuppressWarnings("unchecked")
 @RequiredArgsConstructor
 public class ObservableSet<T> extends HashSet<T> {
 

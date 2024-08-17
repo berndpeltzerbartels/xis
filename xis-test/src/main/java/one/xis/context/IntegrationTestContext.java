@@ -23,8 +23,8 @@ public class IntegrationTestContext {
         return new Builder();
     }
 
-    IntegrationTestContext(Object... controllers) {
-        this.appContext = internalContext(controllers);
+    IntegrationTestContext(Collection<String> packages, Object... controllers) {
+        this.appContext = internalContext(packages, controllers);
         this.environment = new IntegrationTestEnvironment(appContext.getSingleton(BackendBridge.class));
     }
 
@@ -53,17 +53,21 @@ public class IntegrationTestContext {
         return appContext.getSingleton(type);
     }
 
-    private AppContext internalContext(Object... controllers) {
-        return AppContextBuilder.createInstance()
+    private AppContext internalContext(Collection<String> packages, Object... controllers) {
+        var builder = AppContextBuilder.createInstance()
                 .withXIS()
-                .withSingletons(controllers)
-                .build();
+                .withSingletons(controllers);
+        packages.forEach(builder::withPackage);
+        return builder.build();
     }
 
     @SuppressWarnings("unused")
     public static class Builder {
 
         private final Collection<Object> singletons = new HashSet<>();
+        private final Collection<String> packages = new HashSet<>();
+        private final Collection<String> ignorePackages = new HashSet<>();
+
         private static IntegrationTestEnvironment testSingletons;
         private static final Resources RESOURCES = new Resources();
 
@@ -77,9 +81,28 @@ public class IntegrationTestContext {
         }
 
         public IntegrationTestContext build() {
-            return new IntegrationTestContext(singletons.toArray());
+            return new IntegrationTestContext(packages, singletons.toArray());
         }
 
+        public Builder withPackage(String packageName) {
+            packages.add(packageName);
+            return this;
+        }
+
+        public Builder withBasePackageClass(Class<?> type) {
+            packages.add(type.getPackageName());
+            return this;
+        }
+
+        public Builder withoutPackage(String packageName) {
+            ignorePackages.add(packageName);
+            return this;
+        }
+
+        public Builder withoutBasePackageClass(Class<?> type) {
+            ignorePackages.add(type.getPackageName());
+            return this;
+        }
     }
 
 

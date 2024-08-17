@@ -26,8 +26,16 @@ dependencies {
     testImplementation "org.mockito:mockito-core:5.2.0"
     testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.16.1'
     testImplementation 'org.mockito:mockito-junit-jupiter:4.5.1'
+    testImplementation project(":xis-server")
+    testImplementation 'com.google.code.gson:gson:2.10.1'
 
     testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"
+
+    testImplementation project(":xis-test")
+
+
+    testImplementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.2'
+
 }
 
 test {

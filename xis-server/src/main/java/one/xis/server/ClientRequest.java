@@ -3,6 +3,7 @@ package one.xis.server;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.Data;
 
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
@@ -18,17 +19,17 @@ public class ClientRequest {
     private String zoneId;
 
     @JsonDeserialize(using = MapDeserializer.class)
-    private Map<String, String> data;
+    private Map<String, String> data = new HashMap<>();
 
     @JsonDeserialize(using = MapDeserializer.class)
-    private Map<String, String> formData;
+    private Map<String, String> formData = new HashMap<>();
 
     @JsonDeserialize(using = MapDeserializer.class)
-    private Map<String, String> pathVariables;
+    private Map<String, String> pathVariables = new HashMap<>();
 
     @JsonDeserialize(using = MapDeserializer.class)
-    private Map<String, String> urlParameters;
+    private Map<String, String> urlParameters = new HashMap<>();
 
     @JsonDeserialize(using = MapDeserializer.class)
-    private Map<String, String> widgetParameters;
+    private Map<String, String> widgetParameters = new HashMap<>();
 }

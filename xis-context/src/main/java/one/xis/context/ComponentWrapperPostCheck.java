@@ -30,10 +30,10 @@ class ComponentWrapperPostCheck {
     }
 
     private void postCheckExecutables(Collection<? extends ExecutableWrapper<?>> executableWrappers) {
-        if (!executableWrappers.isEmpty()) {
-            var executable = CollectionUtils.first(executableWrappers);
-            if (executable.getParameters().isEmpty()) {
-                throw new IllegalStateException();
+        if (!executableWrappers.isEmpty()) { // wrappers get removed when intantionation is completed and all methods are called
+            var executable = CollectionUtils.first(executableWrappers); // if there is at leas one of them, context creation failed
+            if (!executable.getParameters().isEmpty()) { // if there is at least one parameter, this is the reason why the method was not called
+                throw new UnsatisfiedDependencyException(CollectionUtils.first(executable.getParameters()).getParameter());
             }
             throw new UnsatisfiedDependencyException(CollectionUtils.first(executable.getParameters()).getParameter());
         }
