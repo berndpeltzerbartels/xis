@@ -255,7 +255,7 @@ class DeserializationTest {
         }
 
         @Test
-        void deserialize() throws NoSuchFieldException {
+        void deserialize() {
             var json = """
                     {
                         "beanField": {

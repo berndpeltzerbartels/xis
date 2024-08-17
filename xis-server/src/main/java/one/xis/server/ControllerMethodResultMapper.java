@@ -130,7 +130,7 @@ class ControllerMethodResultMapper {
     }
 
     private String globalErrorMessages(ReportedError error) {
-        return validatorMessageResolver.createMessage(error.getMessageKey(),
+        return validatorMessageResolver.createMessage(error.getGlobalMessageKey(),
                 error.getMessageParameters(),
                 error.getReportedErrorContext().getTarget(),
                 error.getReportedErrorContext().getUserContext());

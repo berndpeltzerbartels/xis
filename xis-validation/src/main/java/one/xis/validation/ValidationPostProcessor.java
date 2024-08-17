@@ -7,12 +7,15 @@ import one.xis.deserialize.ReportedError;
 import one.xis.deserialize.ReportedErrorContext;
 import one.xis.utils.lang.ClassUtils;
 
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Field;
+import java.lang.reflect.Parameter;
 import java.util.Collection;
 import java.util.List;
 
 @XISComponent
 @RequiredArgsConstructor
-class Validation implements DeserializationPostProcessor {
+class ValidationPostProcessor implements DeserializationPostProcessor {
 
     private final List<Validator<?>> validators;
 
@@ -22,7 +25,7 @@ class Validation implements DeserializationPostProcessor {
         var validatorClass = validateAnnotation.validatorClass();
         var validator = getValidator(validatorClass);
         var typeParameter = ClassUtils.getGenericInterfacesTypeParameter(validatorClass, Validator.class, 0);
-        if (!typeParameter.isAssignableFrom(reportedErrorContext.getTarget().getClass())) {
+        if (!typeParameter.isAssignableFrom(getTargetType(reportedErrorContext.getTarget()))) {
             throw new IllegalArgumentException("Validator " + validatorClass + " in annotataion " + reportedErrorContext.getAnnotationClass()
                     + " is not applicable to " + reportedErrorContext.getTarget());
         }
@@ -31,8 +34,19 @@ class Validation implements DeserializationPostProcessor {
         } catch (ValidatorException e) {
             failed.add(new ReportedError(reportedErrorContext, validateAnnotation.messageKey(), validateAnnotation.globalMessageKey()));
         }
+    }
 
-
+    private Class<?> getTargetType(AnnotatedElement annotatedElement) {
+        if (annotatedElement instanceof Class) {
+            return (Class<?>) annotatedElement;
+        }
+        if (annotatedElement instanceof Field field) {
+            return field.getType();
+        }
+        if (annotatedElement instanceof Parameter parameter) {
+            return parameter.getType();
+        }
+        throw new IllegalArgumentException("Unsupported annotated element: " + annotatedElement);
     }
 
     @SuppressWarnings("unchecked")

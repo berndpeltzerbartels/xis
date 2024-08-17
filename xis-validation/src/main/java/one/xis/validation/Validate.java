@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.ANNOTATION_TYPE})
-@PostProcessor(Validation.class)
+@PostProcessor(ValidationPostProcessor.class)
 public @interface Validate {
     Class<? extends Validator<?>> validatorClass();
 
