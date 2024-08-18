@@ -13,6 +13,8 @@ dependencies {
     implementation project(':xis-util')
     implementation project(':xis-remote-core')
     implementation project(':xis-context')
+    implementation project(":xis-frontend")
+    testImplementation project(":xis-frontend")
     testImplementation project(':xis-test')
 
 

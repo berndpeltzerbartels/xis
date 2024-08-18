@@ -35,7 +35,7 @@ class ObjectDeserializer implements JsonDeserializer<Object> {
                                         AnnotatedElement target,
                                         UserContext userContext,
                                         MainDeserializer mainDeserializer,
-                                        PostProcessingObjects results) throws IOException {
+                                        PostProcessingResults results) throws IOException {
         var objectType = getType(target);
         var o = ClassUtils.newInstance(objectType);
         var mandatorFields = getMandatoryFields(objectType);

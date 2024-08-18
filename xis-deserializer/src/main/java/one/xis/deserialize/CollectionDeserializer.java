@@ -32,7 +32,7 @@ class CollectionDeserializer implements JsonDeserializer<Collection> {
                                             AnnotatedElement target,
                                             UserContext userContext,
                                             MainDeserializer mainDeserializer,
-                                            PostProcessingObjects postProcessingObjects) throws IOException {
+                                            PostProcessingResults postProcessingResults) throws IOException {
         var collectionType = getType(target);
         var collection = createCollection(collectionType);
         var elementTarget = getTypeParameter(target);
@@ -40,7 +40,7 @@ class CollectionDeserializer implements JsonDeserializer<Collection> {
         reader.beginArray();
         int index = 0;
         while (reader.hasNext()) {
-            var result = mainDeserializer.deserialize(reader, path(path, index++), elementTarget, userContext, postProcessingObjects);
+            var result = mainDeserializer.deserialize(reader, path(path, index++), elementTarget, userContext, postProcessingResults);
             if (result.isPresent()) {
                 collection.add(result.get());
             } else {
@@ -49,10 +49,10 @@ class CollectionDeserializer implements JsonDeserializer<Collection> {
             }
         }
         if (deserialiaztionFailed) {
-            handleDeserializationError(collection, path, target, postProcessingObjects);
+            handleDeserializationError(collection, path, target, postProcessingResults);
         }
         reader.endArray();
-        checkMandatory(collection, target, postProcessingObjects, path);
+        checkMandatory(collection, target, postProcessingResults, path);
         return Optional.of(collection);
     }
 
@@ -61,16 +61,16 @@ class CollectionDeserializer implements JsonDeserializer<Collection> {
         return DeserializerPriority.FRAMEWORK_LOW;
     }
 
-    private void checkMandatory(Collection<?> collection, AnnotatedElement target, PostProcessingObjects postProcessingObjects, String path) {
+    private void checkMandatory(Collection<?> collection, AnnotatedElement target, PostProcessingResults postProcessingResults, String path) {
         if (target.isAnnotationPresent(Mandatory.class) && collection.isEmpty()) {
             var context = new DeserializationContext(path, target, Mandatory.class, UserContext.getInstance());
-            postProcessingObjects.add(new InvalidValueError(context, MISSING_MANDATORY_PROPERTY.getMessageKey(), MISSING_MANDATORY_PROPERTY.getGlobalMessageKey()));
+            postProcessingResults.add(new InvalidValueError(context, MISSING_MANDATORY_PROPERTY.getMessageKey(), MISSING_MANDATORY_PROPERTY.getGlobalMessageKey()));
         }
     }
 
-    private void handleDeserializationError(Collection<?> values, String path, AnnotatedElement target, PostProcessingObjects postProcessingObjects) {
+    private void handleDeserializationError(Collection<?> values, String path, AnnotatedElement target, PostProcessingResults postProcessingResults) {
         var context = new DeserializationContext(path, target, NoAnnotation.class, UserContext.getInstance());
-        postProcessingObjects.add(new InvalidValueError(context, CONVERSION_ERROR.getMessageKey(), CONVERSION_ERROR.getGlobalMessageKey()));
+        postProcessingResults.add(new InvalidValueError(context, CONVERSION_ERROR.getMessageKey(), CONVERSION_ERROR.getGlobalMessageKey()));
     }
 
     private String path(String parent, int index) {

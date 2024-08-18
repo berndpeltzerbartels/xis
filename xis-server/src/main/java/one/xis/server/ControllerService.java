@@ -31,6 +31,12 @@ class ControllerService {
         var wrapper = controllerWrapper(request);
         wrapper.invokeGetModelMethods(request, controllerResult);
         mapResultToResponse(response, controllerResult);
+        if (response.getNextPageURL() == null && wrapper instanceof PageControllerWrapper pageControllerWrapper) {
+            response.setNextPageURL(pageControllerWrapper.getId());
+        }
+        if (response.getNextWidgetId() == null && wrapper instanceof WidgetControllerWrapper widgetControllerWrapper) {
+            response.setNextWidgetId(widgetControllerWrapper.getId());
+        }
     }
 
     void processActionRequest(@NonNull ClientRequest request, @NonNull ServerResponse response) {

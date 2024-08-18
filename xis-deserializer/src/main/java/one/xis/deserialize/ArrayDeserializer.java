@@ -30,14 +30,14 @@ class ArrayDeserializer implements JsonDeserializer<Object> {
                                         AnnotatedElement target,
                                         UserContext userContext,
                                         MainDeserializer mainDeserializer,
-                                        PostProcessingObjects postProcessingObjects) throws DeserializationException, IOException {
+                                        PostProcessingResults postProcessingResults) throws DeserializationException, IOException {
         var list = new ArrayList<>();
         reader.beginArray();
         int index = 0;
         var componentType = getType(target).getComponentType();
         var deserializationFailed = false;
         while (reader.hasNext()) {
-            var result = mainDeserializer.deserialize(reader, path(path, index), componentType, userContext, postProcessingObjects);
+            var result = mainDeserializer.deserialize(reader, path(path, index), componentType, userContext, postProcessingResults);
             if (result.isPresent()) {
                 list.add(result.get());
             } else {
@@ -52,9 +52,9 @@ class ArrayDeserializer implements JsonDeserializer<Object> {
             index++;
         }
         if (deserializationFailed) {
-            handleDeserializationError(list, path, target, postProcessingObjects);
+            handleDeserializationError(list, path, target, postProcessingResults);
         }
-        checkMandatory(list, target, postProcessingObjects, path);
+        checkMandatory(list, target, postProcessingResults, path);
         return Optional.of(toArray(list, componentType));
     }
 
@@ -70,15 +70,15 @@ class ArrayDeserializer implements JsonDeserializer<Object> {
         return arr;
     }
 
-    private void handleDeserializationError(List<?> values, String path, AnnotatedElement target, PostProcessingObjects postProcessingObjects) {
+    private void handleDeserializationError(List<?> values, String path, AnnotatedElement target, PostProcessingResults postProcessingResults) {
         var context = new DeserializationContext(path, target, NoAnnotation.class, UserContext.getInstance());
-        postProcessingObjects.add(new InvalidValueError(context, CONVERSION_ERROR.getMessageKey(), CONVERSION_ERROR.getGlobalMessageKey()));
+        postProcessingResults.add(new InvalidValueError(context, CONVERSION_ERROR.getMessageKey(), CONVERSION_ERROR.getGlobalMessageKey()));
     }
 
-    private void checkMandatory(List<?> values, AnnotatedElement target, PostProcessingObjects postProcessingObjects, String path) {
+    private void checkMandatory(List<?> values, AnnotatedElement target, PostProcessingResults postProcessingResults, String path) {
         if (target.isAnnotationPresent(Mandatory.class) && values.isEmpty()) {
             var context = new DeserializationContext(path, target, Mandatory.class, UserContext.getInstance());
-            postProcessingObjects.add(new InvalidValueError(context, MISSING_MANDATORY_PROPERTY.getMessageKey(), MISSING_MANDATORY_PROPERTY.getGlobalMessageKey()));
+            postProcessingResults.add(new InvalidValueError(context, MISSING_MANDATORY_PROPERTY.getMessageKey(), MISSING_MANDATORY_PROPERTY.getGlobalMessageKey()));
         }
     }
 

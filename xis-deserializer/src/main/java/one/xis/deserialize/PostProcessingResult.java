@@ -8,7 +8,7 @@ import java.util.Map;
 
 @Data
 @RequiredArgsConstructor
-public abstract class PostProcessingObject {
+public abstract class PostProcessingResult {
 
     private final DeserializationContext deserializationContext;
     private final String messageKey;
@@ -33,4 +33,8 @@ public abstract class PostProcessingObject {
      * @return true if processing the current request should be stopped
      */
     public abstract boolean reject();
+
+    public boolean authenticate() {
+        return false;
+    }
 }

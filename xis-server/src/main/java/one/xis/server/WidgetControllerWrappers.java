@@ -50,7 +50,7 @@ class WidgetControllerWrappers {
     }
 
     private ControllerWrapper createControllerWrapper(Object controller, Function<Object, String> idMapper) {
-        return controllerWrapperFactory.createControllerWrapper(idMapper.apply(controller), controller);
+        return controllerWrapperFactory.createControllerWrapper(idMapper.apply(controller), controller, WidgetControllerWrapper.class);
     }
 
 }

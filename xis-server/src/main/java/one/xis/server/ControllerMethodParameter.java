@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import one.xis.PathVariable;
 import one.xis.*;
 import one.xis.deserialize.MainDeserializer;
-import one.xis.deserialize.PostProcessingObjects;
+import one.xis.deserialize.PostProcessingResults;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -18,68 +18,68 @@ class ControllerMethodParameter {
     private final Parameter parameter;
     private final MainDeserializer deserializer;
 
-    Object prepareParameter(ClientRequest request, PostProcessingObjects postProcessingObjects) throws Exception {
+    Object prepareParameter(ClientRequest request, PostProcessingResults postProcessingResults) throws Exception {
         if (parameter.isAnnotationPresent(ModelData.class)) {
-            return deserializeModelParameter(parameter, request, postProcessingObjects);
+            return deserializeModelParameter(parameter, request, postProcessingResults);
         } else if (parameter.isAnnotationPresent(FormData.class)) {
-            return deserializeFormDataParameter(parameter, request, postProcessingObjects);
+            return deserializeFormDataParameter(parameter, request, postProcessingResults);
         } else if (parameter.isAnnotationPresent(UserId.class)) {
             return Objects.requireNonNull(request.getUserId(), "UserId expected, but it was null"); // TODO Specialized exception and login
         } else if (parameter.isAnnotationPresent(ClientId.class)) {
             return Objects.requireNonNull(request.getClientId(), "ClientId expected, but it was null");
         } else if (parameter.isAnnotationPresent(URLParameter.class)) {
-            return deserializeUrlParameter(parameter, request, postProcessingObjects);
+            return deserializeUrlParameter(parameter, request, postProcessingResults);
         } else if (parameter.isAnnotationPresent(one.xis.PathVariable.class)) {
-            return deserializePathVariable(parameter, request, postProcessingObjects);
+            return deserializePathVariable(parameter, request, postProcessingResults);
         } else if (parameter.isAnnotationPresent(WidgetParameter.class)) {
-            return deserializeWidgetParameter(parameter, request, postProcessingObjects);
+            return deserializeWidgetParameter(parameter, request, postProcessingResults);
         } else {
             throw new IllegalStateException(method + ": parameter without annotation=" + parameter);
         }
     }
 
-    private Object deserializeModelParameter(Parameter parameter, ClientRequest request, PostProcessingObjects postProcessingObjects) throws IOException {
+    private Object deserializeModelParameter(Parameter parameter, ClientRequest request, PostProcessingResults postProcessingResults) throws IOException {
         var key = parameter.getAnnotation(ModelData.class).value();
         var paramValue = request.getData().get(key);
-        return deserializeParameter(paramValue, request, parameter, postProcessingObjects);
+        return deserializeParameter(paramValue, request, parameter, postProcessingResults);
     }
 
-    private Object deserializeFormDataParameter(Parameter parameter, ClientRequest request, PostProcessingObjects postProcessingObjects) throws IOException {
+    private Object deserializeFormDataParameter(Parameter parameter, ClientRequest request, PostProcessingResults postProcessingResults) throws IOException {
         var key = parameter.getAnnotation(FormData.class).value();
         var paramValue = request.getFormData().get(key);
-        return deserializeParameter(paramValue, request, parameter, postProcessingObjects);
+        return deserializeParameter(paramValue, request, parameter, postProcessingResults);
     }
 
-    private Object deserializeUrlParameter(Parameter parameter, ClientRequest request, PostProcessingObjects postProcessingObjects) throws IOException {
+    private Object deserializeUrlParameter(Parameter parameter, ClientRequest request, PostProcessingResults postProcessingResults) throws IOException {
         var key = parameter.getAnnotation(URLParameter.class).value();
         var paramValue = request.getUrlParameters().get(key);
-        return deserializeParameter(paramValue, request, parameter, postProcessingObjects);
+        return deserializeParameter(paramValue, request, parameter, postProcessingResults);
     }
 
-    private Object deserializePathVariable(Parameter parameter, ClientRequest request, PostProcessingObjects postProcessingObjects) throws IOException {
+    private Object deserializePathVariable(Parameter parameter, ClientRequest request, PostProcessingResults postProcessingResults) throws IOException {
         var key = parameter.getAnnotation(PathVariable.class).value();
         if (!request.getPathVariables().containsKey(key)) {
             throw new IllegalStateException("No path variable found for key " + key);
         }
         var paramValue = request.getPathVariables().get(key);
-        return deserializeParameter(paramValue, request, parameter, postProcessingObjects);
+        return deserializeParameter(paramValue, request, parameter, postProcessingResults);
     }
 
-    private Object deserializeWidgetParameter(Parameter parameter, ClientRequest request, PostProcessingObjects postProcessingObjects) throws IOException {
+    private Object deserializeWidgetParameter(Parameter parameter, ClientRequest request, PostProcessingResults postProcessingResults) throws IOException {
         var key = parameter.getAnnotation(WidgetParameter.class).value();
         if (!request.getWidgetParameters().containsKey(key)) {
             throw new IllegalStateException("No widget parameter found for key " + key);
         }
         var paramValue = request.getWidgetParameters().get(key);
-        return deserializeParameter(paramValue, request, parameter, postProcessingObjects);
+        return deserializeParameter(paramValue, request, parameter, postProcessingResults);
     }
 
-    private Object deserializeParameter(String jsonValue, ClientRequest request, Parameter parameter, PostProcessingObjects postProcessingObjects) throws IOException {
+    private Object deserializeParameter(String jsonValue, ClientRequest request, Parameter parameter, PostProcessingResults postProcessingResults) throws IOException {
         if (jsonValue == null) {
             return null;
         }
         var userContext = new UserContext(request.getLocale(), ZoneId.of(request.getZoneId()), request.getUserId(), request.getClientId());
-        return deserializer.deserialize(jsonValue, parameter, userContext, postProcessingObjects);
+        return deserializer.deserialize(jsonValue, parameter, userContext, postProcessingResults);
     }
 
 

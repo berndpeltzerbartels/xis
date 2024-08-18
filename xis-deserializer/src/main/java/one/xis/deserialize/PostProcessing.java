@@ -15,7 +15,7 @@ class PostProcessing {
 
     private final List<DeserializationPostProcessor> postProcessors;
 
-    void postProcess(String path, Object value, AnnotatedElement target, UserContext userContext, PostProcessingObjects results) {
+    void postProcess(String path, Object value, AnnotatedElement target, UserContext userContext, PostProcessingResults results) {
         doRecursiveProcess(path, target, value, userContext, results);
         if (value == null) {
             return;
@@ -24,7 +24,7 @@ class PostProcessing {
 
     }
 
-    private void doRecursiveProcess(String path, AnnotatedElement target, Object value, UserContext userContext, PostProcessingObjects results) {
+    private void doRecursiveProcess(String path, AnnotatedElement target, Object value, UserContext userContext, PostProcessingResults results) {
         for (var annotation : target.getAnnotations()) {
             if (isJavaAnnotation(annotation)) {
                 continue;
@@ -34,7 +34,7 @@ class PostProcessing {
         }
     }
 
-    private void doRecursiveProcessClass(String path, AnnotatedElement target, Object value, UserContext userContext, PostProcessingObjects results) {
+    private void doRecursiveProcessClass(String path, AnnotatedElement target, Object value, UserContext userContext, PostProcessingResults results) {
         for (var annotation : value.getClass().getAnnotations()) {
             if (isJavaAnnotation(annotation)) {
                 continue;
@@ -44,7 +44,7 @@ class PostProcessing {
         }
     }
 
-    private void recursiveProcess(DeserializationContext context, AnnotatedElement currentElement, Object value, PostProcessingObjects results) {
+    private void recursiveProcess(DeserializationContext context, AnnotatedElement currentElement, Object value, PostProcessingResults results) {
         for (var annotation : currentElement.getAnnotations()) {
             if (isJavaAnnotation(annotation)) {
                 continue;

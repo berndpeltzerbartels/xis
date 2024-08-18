@@ -4,7 +4,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import one.xis.*;
 import one.xis.context.XISComponent;
-import one.xis.deserialize.InvalidValueError;
+import one.xis.deserialize.PostProcessingResult;
 import one.xis.validation.ValidatorMessageResolver;
 
 import java.lang.reflect.Method;
@@ -48,7 +48,7 @@ class ControllerMethodResultMapper {
         return controllerMethodResult;
     }
 
-    ControllerMethodResult mapValidationErrorState(ClientRequest request, Collection<InvalidValueError> errors) {
+    ControllerMethodResult mapValidationErrorState(ClientRequest request, Collection<PostProcessingResult> errors) {
         var controllerMethodResult = new ControllerMethodResult();
         controllerMethodResult.setNextPageURL(request.getPageId());
         controllerMethodResult.setNextWidgetId(request.getWidgetId());
@@ -110,17 +110,17 @@ class ControllerMethodResultMapper {
         return map.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    private Map<String, String> mapErrors(Collection<InvalidValueError> errors) {
+    private Map<String, String> mapErrors(Collection<PostProcessingResult> errors) {
         var errorMessageMap = new HashMap<String, String>();
         errors.forEach(error -> mapError(error, errorMessageMap));
         return errorMessageMap;
     }
 
-    private List<String> mapGlobalErrors(Collection<InvalidValueError> errors) {
+    private List<String> mapGlobalErrors(Collection<PostProcessingResult> errors) {
         return errors.stream().map(this::globalErrorMessages).toList();
     }
 
-    private void mapError(InvalidValueError error, Map<String, String> errorMessageMap) {
+    private void mapError(PostProcessingResult error, Map<String, String> errorMessageMap) {
         var message = validatorMessageResolver.createMessage(error.getMessageKey(),
                 error.getMessageParameters(),
                 error.getDeserializationContext().getTarget(),
@@ -129,7 +129,7 @@ class ControllerMethodResultMapper {
         errorMessageMap.put(key, message);
     }
 
-    private String globalErrorMessages(InvalidValueError error) {
+    private String globalErrorMessages(PostProcessingResult error) {
         return validatorMessageResolver.createMessage(error.getGlobalMessageKey(),
                 error.getMessageParameters(),
                 error.getDeserializationContext().getTarget(),

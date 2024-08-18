@@ -34,7 +34,7 @@ class NumberDeserializer implements JsonDeserializer<Number> {
                                         AnnotatedElement target,
                                         UserContext userContext,
                                         MainDeserializer mainDeserializer,
-                                        PostProcessingObjects results) throws IOException {
+                                        PostProcessingResults results) throws IOException {
         try {
             if (reader.peek().equals(JsonToken.NUMBER)) {
                 return Optional.of(parseNumber(reader.nextDouble(), target));

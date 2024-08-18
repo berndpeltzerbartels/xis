@@ -34,30 +34,30 @@ public class MainDeserializer {
     }
 
 
-    public Object deserialize(@NonNull String value, @NonNull AnnotatedElement target, @NonNull UserContext userContext, @NonNull PostProcessingObjects postProcessingObjects) {
+    public Object deserialize(@NonNull String value, @NonNull AnnotatedElement target, @NonNull UserContext userContext, @NonNull PostProcessingResults postProcessingResults) {
         var reader = new JsonReader(new StringReader(value));
         reader.setLenient(true);
         var path = "/" + getName(target);
-        return deserialize(reader, path, target, userContext, postProcessingObjects).orElse(null);
+        return deserialize(reader, path, target, userContext, postProcessingResults).orElse(null);
     }
 
     @SneakyThrows
-    Optional<?> deserialize(JsonReader reader, String path, AnnotatedElement target, UserContext userContext, PostProcessingObjects postProcessingObjects) {
+    Optional<?> deserialize(JsonReader reader, String path, AnnotatedElement target, UserContext userContext, PostProcessingResults postProcessingResults) {
         if (reader.peek().equals(JsonToken.NULL)) {
             reader.nextNull();
             if (target.isAnnotationPresent(Mandatory.class)) {
                 var context = new DeserializationContext(path, target, Mandatory.class, UserContext.getInstance());
-                postProcessingObjects.add(new InvalidValueError(context, MISSING_MANDATORY_PROPERTY.getMessageKey(), MISSING_MANDATORY_PROPERTY.getGlobalMessageKey()));
+                postProcessingResults.add(new InvalidValueError(context, MISSING_MANDATORY_PROPERTY.getMessageKey(), MISSING_MANDATORY_PROPERTY.getGlobalMessageKey()));
             }
             return Optional.empty();
         }
         try {
-            var value = getDeserializer(reader, target).deserialize(reader, path, target, userContext, this, postProcessingObjects);
-            value.ifPresent(o -> deserializationPostProcessing.postProcess(path, o, target, userContext, postProcessingObjects));
+            var value = getDeserializer(reader, target).deserialize(reader, path, target, userContext, this, postProcessingResults);
+            value.ifPresent(o -> deserializationPostProcessing.postProcess(path, o, target, userContext, postProcessingResults));
             return value;
         } catch (DeserializationException e) {
             var context = new DeserializationContext(path, target, NoAnnotation.class, UserContext.getInstance());
-            postProcessingObjects.add(new InvalidValueError(context, CONVERSION_ERROR.getMessageKey(), CONVERSION_ERROR.getGlobalMessageKey()));
+            postProcessingResults.add(new InvalidValueError(context, CONVERSION_ERROR.getMessageKey(), CONVERSION_ERROR.getGlobalMessageKey()));
             return Optional.empty();
         }
 

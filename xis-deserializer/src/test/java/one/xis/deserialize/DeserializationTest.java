@@ -40,7 +40,7 @@ class DeserializationTest {
     void deserializeIntField() throws NoSuchMethodException {
         var parameter = getClass().getDeclaredMethod("testMethodBeanParameter", TestBean.class).getParameters()[0];
         var json = "{\"intField\":123}";
-        var testBean = (TestBean) mainDeserializer.deserialize(json, parameter, new UserContext(), new PostProcessingObjects());
+        var testBean = (TestBean) mainDeserializer.deserialize(json, parameter, new UserContext(), new PostProcessingResults());
         assertThat(testBean.getIntField()).isEqualTo(123);
     }
 
@@ -48,7 +48,7 @@ class DeserializationTest {
     void deserializeStringField() throws NoSuchMethodException {
         var parameter = getClass().getDeclaredMethod("testMethodBeanParameter", TestBean.class).getParameters()[0];
         var json = "{\"stringField\":\"test\"}";
-        var testBean = (TestBean) mainDeserializer.deserialize(json, parameter, new UserContext(), new PostProcessingObjects());
+        var testBean = (TestBean) mainDeserializer.deserialize(json, parameter, new UserContext(), new PostProcessingResults());
         assertThat(testBean.getStringField()).isEqualTo("test");
     }
 
@@ -56,7 +56,7 @@ class DeserializationTest {
     void deserializeLocalDateField() throws NoSuchMethodException {
         var parameter = getClass().getDeclaredMethod("testMethodBeanParameter", TestBean.class).getParameters()[0];
         var json = "{\"localDateField\":\"2021-01-01\"}";
-        var testBean = (TestBean) mainDeserializer.deserialize(json, parameter, new UserContext(), new PostProcessingObjects());
+        var testBean = (TestBean) mainDeserializer.deserialize(json, parameter, new UserContext(), new PostProcessingResults());
         assertThat(testBean.getLocalDateField()).isEqualTo(LocalDate.of(2021, 1, 1));
     }
 
@@ -64,7 +64,7 @@ class DeserializationTest {
     void deserializeArrayField() throws NoSuchMethodException {
         var parameter = getClass().getDeclaredMethod("testMethodBeanParameter", TestBean.class).getParameters()[0];
         var json = "{\"stringArrayField\":[\"a\",\"b\"]}";
-        var testBean = (TestBean) mainDeserializer.deserialize(json, parameter, new UserContext(), new PostProcessingObjects());
+        var testBean = (TestBean) mainDeserializer.deserialize(json, parameter, new UserContext(), new PostProcessingResults());
         assertThat(testBean.getStringArrayField()).containsExactly("a", "b");
     }
 
@@ -72,7 +72,7 @@ class DeserializationTest {
     void deserializeCollectionField() throws NoSuchMethodException {
         var parameter = getClass().getDeclaredMethod("testMethodBeanParameter", TestBean.class).getParameters()[0];
         var json = "{\"stringCollectionField\":[\"a\",\"b\"]}";
-        var testBean = (TestBean) mainDeserializer.deserialize(json, parameter, new UserContext(), new PostProcessingObjects());
+        var testBean = (TestBean) mainDeserializer.deserialize(json, parameter, new UserContext(), new PostProcessingResults());
         assertThat(testBean.getStringCollectionField()).containsExactly("a", "b");
     }
 
@@ -80,7 +80,7 @@ class DeserializationTest {
     void deserializeIntParameter() throws NoSuchMethodException {
         var parameter = getClass().getDeclaredMethod("testMethodInt", int.class).getParameters()[0];
         var json = "123";
-        var result = mainDeserializer.deserialize(json, parameter, new UserContext(), new PostProcessingObjects());
+        var result = mainDeserializer.deserialize(json, parameter, new UserContext(), new PostProcessingResults());
         assertThat(result).isEqualTo(123);
     }
 
@@ -89,7 +89,7 @@ class DeserializationTest {
     void deserializeCollectionParameter() throws NoSuchMethodException {
         var parameter = getClass().getDeclaredMethod("testMethodCollection", Collection.class).getParameters()[0];
         var json = "[\"2021-01-01\",\"2021-01-02\"]";
-        var result = (Collection<LocalDate>) mainDeserializer.deserialize(json, parameter, new UserContext(), new PostProcessingObjects());
+        var result = (Collection<LocalDate>) mainDeserializer.deserialize(json, parameter, new UserContext(), new PostProcessingResults());
         assertThat(result).containsExactly(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 2));
     }
 
@@ -97,38 +97,38 @@ class DeserializationTest {
     void deserializeFormattedField() throws NoSuchMethodException {
         var json = "{\"localDate\":\"01.01.2021\"}";
         var parameter = getClass().getDeclaredMethod("testMethodLocalDateBean", BeanWithLocalDate.class).getParameters()[0];
-        var beanWithLocalDate = (BeanWithLocalDate) mainDeserializer.deserialize(json, parameter, new UserContext(), new PostProcessingObjects());
+        var beanWithLocalDate = (BeanWithLocalDate) mainDeserializer.deserialize(json, parameter, new UserContext(), new PostProcessingResults());
         assertThat(beanWithLocalDate.getLocalDate()).isEqualTo(LocalDate.of(2021, 1, 1));
     }
 
     @Test
     void integerParameterFailed() throws NoSuchMethodException {
         var parameter = getClass().getDeclaredMethod("testMethodInt", int.class).getParameters()[0];
-        var ppObjects = new PostProcessingObjects();
+        var ppObjects = new PostProcessingResults();
         mainDeserializer.deserialize("abc", parameter, new UserContext(), ppObjects);
-        assertThat(ppObjects.postProcessingObjects(InvalidValueError.class)).hasSize(1);
-        var error = CollectionUtils.first(ppObjects.postProcessingObjects(InvalidValueError.class));
+        assertThat(ppObjects.postProcessingResults(InvalidValueError.class)).hasSize(1);
+        var error = CollectionUtils.first(ppObjects.postProcessingResults(InvalidValueError.class));
         assertThat(error.getDeserializationContext().getPath()).isEqualTo("/integer");
     }
 
     @Test
     void collectionParameterFailed() throws NoSuchMethodException {
         var parameter = getClass().getDeclaredMethod("testMethodCollection", Collection.class).getParameters()[0];
-        var ppObjects = new PostProcessingObjects();
+        var ppObjects = new PostProcessingResults();
         mainDeserializer.deserialize("[123]", parameter, new UserContext(), ppObjects);
-        assertThat(ppObjects.postProcessingObjects(InvalidValueError.class)).hasSize(2);
-        assertThat(ppObjects.postProcessingObjects(InvalidValueError.class)).anyMatch(e -> e.getDeserializationContext().getPath().equals("/collection[0]"));
-        assertThat(ppObjects.postProcessingObjects(InvalidValueError.class)).anyMatch(e -> e.getDeserializationContext().getPath().equals("/collection"));
+        assertThat(ppObjects.postProcessingResults(InvalidValueError.class)).hasSize(2);
+        assertThat(ppObjects.postProcessingResults(InvalidValueError.class)).anyMatch(e -> e.getDeserializationContext().getPath().equals("/collection[0]"));
+        assertThat(ppObjects.postProcessingResults(InvalidValueError.class)).anyMatch(e -> e.getDeserializationContext().getPath().equals("/collection"));
     }
 
     @Test
     void nestedFieldFailed() throws NoSuchMethodException {
         var parameter = getClass().getDeclaredMethod("testMethodBeanParameter2", TestBean2.class).getParameters()[0];
         var json = "{\"intField\":123,\"testBeanField\":{\"intField\":\"abc\"}}";
-        var ppObjects = new PostProcessingObjects();
+        var ppObjects = new PostProcessingResults();
         mainDeserializer.deserialize(json, parameter, new UserContext(), ppObjects);
-        assertThat(ppObjects.postProcessingObjects(InvalidValueError.class)).hasSize(1);
-        var error = CollectionUtils.first(ppObjects.postProcessingObjects(InvalidValueError.class));
+        assertThat(ppObjects.postProcessingResults(InvalidValueError.class)).hasSize(1);
+        var error = CollectionUtils.first(ppObjects.postProcessingResults(InvalidValueError.class));
         assertThat(error.getDeserializationContext().getPath()).isEqualTo("/test/testBeanField/intField");
     }
 
@@ -136,11 +136,11 @@ class DeserializationTest {
     void arrayElementFailed() throws NoSuchMethodException {
         var parameter = getClass().getDeclaredMethod("testMethodBeanParameter", TestBean.class).getParameters()[0];
         var json = "{\"intArrayField\":[0,1,\"a\",3]}";
-        var ppObjects = new PostProcessingObjects();
+        var ppObjects = new PostProcessingResults();
         var testBean = (TestBean) mainDeserializer.deserialize(json, parameter, new UserContext(), ppObjects);
-        assertThat(ppObjects.postProcessingObjects(InvalidValueError.class)).hasSize(2);
-        assertThat(ppObjects.postProcessingObjects(InvalidValueError.class).stream().map(InvalidValueError::getDeserializationContext).map(DeserializationContext::getPath)).anyMatch("/testObject/intArrayField[2]"::equals);
-        assertThat(ppObjects.postProcessingObjects(InvalidValueError.class).stream().map(InvalidValueError::getDeserializationContext).map(DeserializationContext::getPath)).anyMatch("/testObject/intArrayField"::equals);
+        assertThat(ppObjects.postProcessingResults(InvalidValueError.class)).hasSize(2);
+        assertThat(ppObjects.postProcessingResults(InvalidValueError.class).stream().map(InvalidValueError::getDeserializationContext).map(DeserializationContext::getPath)).anyMatch("/testObject/intArrayField[2]"::equals);
+        assertThat(ppObjects.postProcessingResults(InvalidValueError.class).stream().map(InvalidValueError::getDeserializationContext).map(DeserializationContext::getPath)).anyMatch("/testObject/intArrayField"::equals);
         assertThat(testBean.getIntArrayField()).containsExactly(0, 1, 0, 3);
     }
 
@@ -148,23 +148,23 @@ class DeserializationTest {
     void collectionElementFailed() throws NoSuchMethodException {
         var parameter = getClass().getDeclaredMethod("testMethodBeanParameter", TestBean.class).getParameters()[0];
         var json = "{\"intCollectionField\":[\"a\",\"b\",3]}";
-        var ppObjects = new PostProcessingObjects();
+        var ppObjects = new PostProcessingResults();
         var testBean = (TestBean) mainDeserializer.deserialize(json, parameter, new UserContext(), ppObjects);
-        assertThat(ppObjects.postProcessingObjects(InvalidValueError.class)).hasSize(3);
-        assertThat(ppObjects.postProcessingObjects(InvalidValueError.class).stream().map(InvalidValueError::getDeserializationContext).map(DeserializationContext::getPath)).anyMatch("/testObject/intCollectionField[0]"::equals);
-        assertThat(ppObjects.postProcessingObjects(InvalidValueError.class).stream().map(InvalidValueError::getDeserializationContext).map(DeserializationContext::getPath)).anyMatch("/testObject/intCollectionField[1]"::equals);
-        assertThat(ppObjects.postProcessingObjects(InvalidValueError.class).stream().map(InvalidValueError::getDeserializationContext).map(DeserializationContext::getPath)).anyMatch("/testObject/intCollectionField"::equals);
+        assertThat(ppObjects.postProcessingResults(InvalidValueError.class)).hasSize(3);
+        assertThat(ppObjects.postProcessingResults(InvalidValueError.class).stream().map(InvalidValueError::getDeserializationContext).map(DeserializationContext::getPath)).anyMatch("/testObject/intCollectionField[0]"::equals);
+        assertThat(ppObjects.postProcessingResults(InvalidValueError.class).stream().map(InvalidValueError::getDeserializationContext).map(DeserializationContext::getPath)).anyMatch("/testObject/intCollectionField[1]"::equals);
+        assertThat(ppObjects.postProcessingResults(InvalidValueError.class).stream().map(InvalidValueError::getDeserializationContext).map(DeserializationContext::getPath)).anyMatch("/testObject/intCollectionField"::equals);
         assertThat(testBean.getIntCollectionField()).containsExactly(null, null, 3);
     }
 
     @Test
     void formattedFieldFailed() throws NoSuchMethodException {
         var json = "{\"localDate\":\"01. Januar 2021\"}";
-        var ppObjects = new PostProcessingObjects();
+        var ppObjects = new PostProcessingResults();
         var parameter = getClass().getDeclaredMethod("testMethodLocalDateBean", BeanWithLocalDate.class).getParameters()[0];
         mainDeserializer.deserialize(json, parameter, new UserContext(), ppObjects);
-        assertThat(ppObjects.postProcessingObjects(InvalidValueError.class)).hasSize(1);
-        var error = CollectionUtils.first(ppObjects.postProcessingObjects(InvalidValueError.class));
+        assertThat(ppObjects.postProcessingResults(InvalidValueError.class)).hasSize(1);
+        var error = CollectionUtils.first(ppObjects.postProcessingResults(InvalidValueError.class));
         assertThat(error.getDeserializationContext().getPath()).isEqualTo("/localDateBean/localDate");
     }
 
@@ -179,12 +179,12 @@ class DeserializationTest {
                         
                     }
                 }""";
-        var ppObjects = new PostProcessingObjects();
+        var ppObjects = new PostProcessingResults();
         var parameter = getClass().getDeclaredMethod("testMethodMandatory", BeanWithMandatoryFields.class).getParameters()[0];
         var bean = (BeanWithMandatoryFields) mainDeserializer.deserialize(json, parameter, new UserContext(), ppObjects);
         assertThat(bean.getObjectField()).isNotNull();
-        assertThat(ppObjects.postProcessingObjects(InvalidValueError.class)).hasSize(1);
-        var error = CollectionUtils.first(ppObjects.postProcessingObjects(InvalidValueError.class));
+        assertThat(ppObjects.postProcessingResults(InvalidValueError.class)).hasSize(1);
+        var error = CollectionUtils.first(ppObjects.postProcessingResults(InvalidValueError.class));
         assertThat(error.getDeserializationContext().getPath()).isEqualTo("/model/objectField/localDateField");
     }
 
@@ -199,12 +199,12 @@ class DeserializationTest {
                         
                     }
                 }""";
-        var ppObjects = new PostProcessingObjects();
+        var ppObjects = new PostProcessingResults();
         var parameter = getClass().getDeclaredMethod("testMethodMandatory", BeanWithMandatoryFields.class).getParameters()[0];
         var bean = (BeanWithMandatoryFields) mainDeserializer.deserialize(json, parameter, new UserContext(), ppObjects);
         assertThat(bean.getObjectField()).isNotNull();
-        assertThat(ppObjects.postProcessingObjects(InvalidValueError.class)).hasSize(1);
-        var error = CollectionUtils.first(ppObjects.postProcessingObjects(InvalidValueError.class));
+        assertThat(ppObjects.postProcessingResults(InvalidValueError.class)).hasSize(1);
+        var error = CollectionUtils.first(ppObjects.postProcessingResults(InvalidValueError.class));
         assertThat(error.getDeserializationContext().getPath()).isEqualTo("/model/objectField/localDateField");
     }
 
@@ -213,10 +213,10 @@ class DeserializationTest {
         private MainDeserializer mainDeserializer;
         private ArgumentCaptor<DeserializationContext> deserializationContextArgumentCaptor;
         private ArgumentCaptor<Object> valueCaptor;
-        private ArgumentCaptor<PostProcessingObjects> postPricessingObjectCaptor;
+        private ArgumentCaptor<PostProcessingResults> postPricessingObjectCaptor;
         private TestPostProcessor postProcessorMock;
         private final UserContext userContext = new UserContext();
-        private final PostProcessingObjects postProcessingObjects = new PostProcessingObjects();
+        private final PostProcessingResults postProcessingResults = new PostProcessingResults();
         private Parameter parameter;
 
         @BeforeEach
@@ -224,7 +224,7 @@ class DeserializationTest {
         void initArgumentCaptors() {
             deserializationContextArgumentCaptor = ArgumentCaptor.forClass(DeserializationContext.class);
             valueCaptor = ArgumentCaptor.forClass(Object.class);
-            postPricessingObjectCaptor = ArgumentCaptor.forClass(PostProcessingObjects.class);
+            postPricessingObjectCaptor = ArgumentCaptor.forClass(PostProcessingResults.class);
         }
 
 
@@ -261,10 +261,10 @@ class DeserializationTest {
                         }
                     }""";
 
-            var result = ((PostProcessorTestBean1) mainDeserializer.deserialize(json, parameter, userContext, postProcessingObjects));
+            var result = ((PostProcessorTestBean1) mainDeserializer.deserialize(json, parameter, userContext, postProcessingResults));
 
             assertThat(result).isNotNull();
-            assertThat(postProcessingObjects.postProcessingObjects(InvalidValueError.class)).isEmpty();
+            assertThat(postProcessingResults.postProcessingResults(InvalidValueError.class)).isEmpty();
             assertThat(result.getBeanField()).isNotNull();
             assertThat(result.getBeanField().getLocalDate()).isEqualTo(LocalDate.of(2021, 1, 1));
         }

@@ -114,6 +114,7 @@ class PageController {
         }
         if (!this.resolvedURL) throw new Error('no page for url: ' + realUrl);
         if (this.resolvedURL.page != this.page) {
+            this.htmlTagHandler.unbindPage();
             this.htmlTagHandler.bindPage(this.resolvedURL.page);
         }
         this.page = this.resolvedURL.page;

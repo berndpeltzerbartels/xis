@@ -22,7 +22,7 @@ class StringDeserializer implements JsonDeserializer<String> {
                                         AnnotatedElement target,
                                         UserContext userContext,
                                         MainDeserializer mainDeserializer,
-                                        PostProcessingObjects results) throws IOException {
+                                        PostProcessingResults results) throws IOException {
         try {
             return Optional.of(reader.nextString());
         } catch (IOException e) {

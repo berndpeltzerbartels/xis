@@ -18,7 +18,7 @@ public interface JsonDeserializer<T> extends Comparable<JsonDeserializer<?>> {
                             AnnotatedElement target,
                             UserContext userContext,
                             MainDeserializer mainDeserializer,
-                            PostProcessingObjects results) throws DeserializationException, IOException;
+                            PostProcessingResults results) throws DeserializationException, IOException;
 
     default String getName(AnnotatedElement target) {
         if (target instanceof Field field) {

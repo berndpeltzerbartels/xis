@@ -23,7 +23,7 @@ class LocalDateDeserializer implements JsonDeserializer<LocalDate> { // TODO: Im
                                            AnnotatedElement target,
                                            UserContext userContext,
                                            MainDeserializer mainDeserializer,
-                                           PostProcessingObjects results) throws IOException {
+                                           PostProcessingResults results) throws IOException {
         try {
             return Optional.of(LocalDate.parse(reader.nextString()));
         } catch (Exception e) {

@@ -5,7 +5,7 @@ import one.xis.context.XISComponent;
 import one.xis.deserialize.DeserializationContext;
 import one.xis.deserialize.DeserializationPostProcessor;
 import one.xis.deserialize.InvalidValueError;
-import one.xis.deserialize.PostProcessingObjects;
+import one.xis.deserialize.PostProcessingResults;
 import one.xis.utils.lang.ClassUtils;
 
 import java.lang.reflect.AnnotatedElement;
@@ -20,7 +20,7 @@ class ValidationPostProcessor implements DeserializationPostProcessor {
     private final List<Validator<?>> validators;
 
     @Override
-    public void postProcess(DeserializationContext deserializationContext, Object value, PostProcessingObjects postProcessingObjects) {
+    public void postProcess(DeserializationContext deserializationContext, Object value, PostProcessingResults postProcessingResults) {
         var validateAnnotation = deserializationContext.getAnnotationClass().getAnnotation(Validate.class);
         var validatorClass = validateAnnotation.validatorClass();
         var validator = getValidator(validatorClass);
@@ -32,7 +32,7 @@ class ValidationPostProcessor implements DeserializationPostProcessor {
         try {
             validator.validate(value, deserializationContext.getTarget());
         } catch (ValidatorException e) {
-            postProcessingObjects.add(new InvalidValueError(deserializationContext, validateAnnotation.messageKey(), validateAnnotation.globalMessageKey()));
+            postProcessingResults.add(new InvalidValueError(deserializationContext, validateAnnotation.messageKey(), validateAnnotation.globalMessageKey()));
         }
     }
 

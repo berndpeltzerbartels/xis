@@ -32,7 +32,7 @@ class FormattedDeserializer implements JsonDeserializer<Object> {
                                         AnnotatedElement target,
                                         UserContext userContext,
                                         MainDeserializer mainDeserializer,
-                                        PostProcessingObjects results) throws IOException {
+                                        PostProcessingResults results) throws IOException {
         if (reader.peek().equals(JsonToken.NULL)) {
             reader.nextNull();
             return Optional.empty();

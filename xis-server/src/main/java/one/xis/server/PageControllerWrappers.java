@@ -47,7 +47,7 @@ class PageControllerWrappers {
     }
 
     private ControllerWrapper createControllerWrapper(Object controller, Function<Object, String> idMapper) {
-        return controllerWrapperFactory.createControllerWrapper(idMapper.apply(controller), controller);
+        return controllerWrapperFactory.createControllerWrapper(idMapper.apply(controller), controller, PageControllerWrapper.class);
     }
 
     private String getPagePath(Object pageController) {

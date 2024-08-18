@@ -7,6 +7,7 @@ import one.xis.FormData;
 import one.xis.ModelData;
 import one.xis.context.XISComponent;
 import one.xis.deserialize.MainDeserializer;
+import one.xis.utils.lang.ClassUtils;
 import one.xis.utils.lang.MethodUtils;
 
 import java.lang.reflect.Method;
@@ -23,9 +24,9 @@ class ControllerWrapperFactory {
     private final MainDeserializer deserializer;
     private final ControllerMethodResultMapper controllerMethodResultMapper;
 
-    ControllerWrapper createControllerWrapper(@NonNull String id, @NonNull Object controller) {
+    <W extends ControllerWrapper> W createControllerWrapper(@NonNull String id, @NonNull Object controller, Class<W> wrapperClass) {
         try {
-            var controllerWrapper = new ControllerWrapper();
+            var controllerWrapper = ClassUtils.newInstance(wrapperClass);
             controllerWrapper.setId(id);
             controllerWrapper.setController(controller);
             controllerWrapper.setModelMethods(modelMethods(controller));
