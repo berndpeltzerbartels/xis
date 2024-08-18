@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.Data;
+import lombok.Getter;
 import one.xis.Action;
 import one.xis.FormData;
 import one.xis.ModelData;
@@ -20,6 +21,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -27,13 +30,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class ValidationPostProcessorIntegrationTest {
     private FrontendService frontendService;
+    private IntegrationTestContext context;
     private final ObjectMapper objectMapper = createObjectMapper();
 
 
     @BeforeEach
     void initFrontendService() {
-        var context = IntegrationTestContext.builder()
+        context = IntegrationTestContext.builder()
                 .withSingleton(PersonController.class)
+                .withSingleton(PersonDataListController.class)
                 .build();
         frontendService = context.getSingleton(FrontendService.class);
     }
@@ -45,7 +50,7 @@ class ValidationPostProcessorIntegrationTest {
         personData.setName("Max Mustermann");
         personData.setEmail("bla@bla.de");
         personData.setDateOfBirth(LocalDate.of(2000, 1, 1));
-        var request = createRequest(personData);
+        var request = createPersonRequest(personData);
 
         // when
         var response = frontendService.processActionRequest(request);
@@ -68,7 +73,7 @@ class ValidationPostProcessorIntegrationTest {
         personData.setName("Max Mustermann");
         personData.setEmail("bla@bla.de");
         personData.setDateOfBirth(LocalDate.of(2000, 1, 1));
-        var request = createRequest(personData);
+        var request = createPersonRequest(personData);
 
         // when
         var response = frontendService.processActionRequest(request);
@@ -91,7 +96,7 @@ class ValidationPostProcessorIntegrationTest {
         personData.setName("Max Mustermann");
         personData.setEmail("blabla.de");
         personData.setDateOfBirth(LocalDate.of(2000, 1, 1));
-        var request = createRequest(personData);
+        var request = createPersonRequest(personData);
 
         // when
         var response = frontendService.processActionRequest(request);
@@ -107,7 +112,7 @@ class ValidationPostProcessorIntegrationTest {
         // given
         var personData = new PersonData();
         personData.setName("Max Mustermann");
-        var request = createRequest(personData);
+        var request = createPersonRequest(personData);
         // when
         var response = frontendService.processActionRequest(request);
 
@@ -115,10 +120,69 @@ class ValidationPostProcessorIntegrationTest {
         assertThat(response.getHttpStatus()).isEqualTo(422);
         assertThat(response.getValidatorMessages().getMessages()).containsExactlyInAnyOrderEntriesOf(Map.of("/person/email", "erforderlich", "/person/dateOfBirth", "erforderlich"));
         assertThat(response.getValidatorMessages().getGlobalMessages()).containsExactlyInAnyOrder("EMail ist erforderlich", "Geburtsdatum ist erforderlich");
-
     }
 
-    private ClientRequest createRequest(PersonData data) throws JsonProcessingException {
+    @Test
+    void saveListOk() throws JsonProcessingException {
+        // given
+        var personDataList = new ArrayList<PersonData>();
+        var personData = new PersonData();
+        personData.setName("Max Mustermann");
+        personData.setEmail("bla@bla.de");
+        personData.setDateOfBirth(LocalDate.of(2000, 1, 1));
+        personDataList.add(personData);
+        var request = createPersonListRequest(personDataList);
+
+        // when
+        var response = frontendService.processActionRequest(request);
+
+        // then
+        assertThat(response.getHttpStatus()).isEqualTo(200);
+        assertThat(context.getSingleton(PersonDataListController.class).getPersons()).containsExactly(personData);
+    }
+
+    @Test
+    void saveListFailed() {
+        // given
+        var personDataList = """
+                [
+                    {
+                        "name": "Max Mustermann",
+                        "dateOfBirth": "2000-01-01"
+                    },
+                    {
+                        "name": "Hansl Fransl",
+                        "email": "bla.de",
+                        "dateOfBirth": "erster Januar 2000"
+                    }
+                ]
+                """;
+
+        var request = new ClientRequest();
+        request.setPageId("/person-list.html");
+        request.setAction("save");
+        request.setLocale(Locale.GERMANY);
+        request.setZoneId("Europe/Berlin");
+        request.setFormData(Map.of("persons", personDataList));
+
+        // when
+        var response = frontendService.processActionRequest(request);
+
+        // then
+        assertThat(response.getHttpStatus()).isEqualTo(422);
+        assertThat(response.getValidatorMessages().getMessages()).containsExactlyInAnyOrderEntriesOf(Map.of(
+                "/persons[0]/email", "erforderlich",
+                "/persons[1]/email", "Ungültig",
+                "/persons[1]/dateOfBirth", "Ungültige Eingabe"
+        ));
+
+        assertThat(response.getValidatorMessages().getGlobalMessages())
+                .containsExactlyInAnyOrder("EMail ist erforderlich",
+                        "Ungültige E-Mail-Adresse",
+                        "Bitte überprüfen Sie Ihre Eingabe für das Feld \"Geburtsdatum\"");
+    }
+
+    private ClientRequest createPersonRequest(PersonData data) throws JsonProcessingException {
         var personData = objectMapper.writeValueAsString(data);
         var request = new ClientRequest();
         request.setPageId("/person.html");
@@ -126,6 +190,17 @@ class ValidationPostProcessorIntegrationTest {
         request.setFormData(Map.of("person", personData));
         request.setLocale(Locale.GERMANY);
         request.setZoneId("Europe/Berlin");
+        return request;
+    }
+
+    private ClientRequest createPersonListRequest(List<PersonData> data) throws JsonProcessingException {
+        var personDataList = objectMapper.writeValueAsString(data);
+        var request = new ClientRequest();
+        request.setPageId("/person-list.html");
+        request.setAction("save");
+        request.setLocale(Locale.GERMANY);
+        request.setZoneId("Europe/Berlin");
+        request.setFormData(Map.of("persons", personDataList));
         return request;
     }
 
@@ -150,8 +225,7 @@ class ValidationPostProcessorIntegrationTest {
         @LabelKey("email")
         private String email;
 
-        @Mandatory
-        @LabelKey("dateOfBirth")
+        @Mandatory // No @LabelKey annotation to check if the default message-key is used
         private LocalDate dateOfBirth;
     }
 
@@ -179,6 +253,28 @@ class ValidationPostProcessorIntegrationTest {
             this.personData.setName("Maxl Mustermann");
             this.personData.setEmail("blabla@blabla.de");
             this.personData.setDateOfBirth(LocalDate.of(2000, 1, 5));
+        }
+    }
+
+    @Page("/person-list.html")
+    static class PersonDataListController {
+
+        @Getter
+        private List<PersonData> persons = new ArrayList<>();
+
+        @ModelData("persons")
+        List<PersonData> persons() {
+            return persons;
+        }
+
+        @Action("add")
+        void add(@FormData("person") PersonData person) {
+            persons.add(person);
+        }
+
+        @Action("save")
+        void save(@FormData("persons") List<PersonData> persons) {
+            this.persons = persons;
         }
     }
 
