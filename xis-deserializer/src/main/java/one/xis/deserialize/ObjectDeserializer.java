@@ -12,7 +12,6 @@ import one.xis.validation.Mandatory;
 import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
-import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -36,7 +35,7 @@ class ObjectDeserializer implements JsonDeserializer<Object> {
                                         AnnotatedElement target,
                                         UserContext userContext,
                                         MainDeserializer mainDeserializer,
-                                        Collection<ReportedError> failed) throws IOException {
+                                        PostProcessingObjects results) throws IOException {
         var objectType = getType(target);
         var o = ClassUtils.newInstance(objectType);
         var mandatorFields = getMandatoryFields(objectType);
@@ -49,7 +48,7 @@ class ObjectDeserializer implements JsonDeserializer<Object> {
             }
             var field = fieldMap.get(name);
             mandatorFields.remove(field);
-            mainDeserializer.deserialize(reader, path(path, field), field, userContext, failed)
+            mainDeserializer.deserialize(reader, path(path, field), field, userContext, results)
                     .ifPresent(fieldValue -> FieldUtil.setFieldValue(o, field, fieldValue));
             if (reader.peek().equals(JsonToken.END_OBJECT)) {
                 reader.endObject();
@@ -59,7 +58,7 @@ class ObjectDeserializer implements JsonDeserializer<Object> {
         // We need this in case the field is not present in the JSON:
         mandatorFields.forEach(field -> {
             var context = new ReportedErrorContext(path(path, field), field, Mandatory.class, UserContext.getInstance());
-            failed.add(new ReportedError(context, MISSING_MANDATORY_PROPERTY.getMessageKey(), MISSING_MANDATORY_PROPERTY.getGlobalMessageKey()));
+            results.add(new InvalidValueError(context, MISSING_MANDATORY_PROPERTY.getMessageKey(), MISSING_MANDATORY_PROPERTY.getGlobalMessageKey()));
         });
         return Optional.of(o);
     }

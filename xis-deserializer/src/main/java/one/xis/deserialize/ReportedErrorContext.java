@@ -14,8 +14,5 @@ public final class ReportedErrorContext {
     private final AnnotatedElement target;
     private final Class<? extends Annotation> annotationClass;
     private final UserContext userContext;
-
-    ReportedErrorContext withAnnotationClass(Class<? extends Annotation> annotationClass) {
-        return new ReportedErrorContext(path, target, annotationClass, userContext);
-    }
+    
 }

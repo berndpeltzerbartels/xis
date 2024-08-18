@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,21 +25,36 @@ class ArrayDeserializer implements JsonDeserializer<Object> {
     }
 
     @Override
-    public Optional<Object> deserialize(JsonReader reader, String path, AnnotatedElement target, UserContext userContext, MainDeserializer mainDeserializer, Collection<ReportedError> failed) throws DeserializationException, IOException {
+    public Optional<Object> deserialize(JsonReader reader,
+                                        String path,
+                                        AnnotatedElement target,
+                                        UserContext userContext,
+                                        MainDeserializer mainDeserializer,
+                                        PostProcessingObjects postProcessingObjects) throws DeserializationException, IOException {
         var list = new ArrayList<>();
         reader.beginArray();
         int index = 0;
         var componentType = getType(target).getComponentType();
+        var deserializationFailed = false;
         while (reader.hasNext()) {
-            mainDeserializer.deserialize(reader, path(path, index), componentType, userContext, failed).ifPresentOrElse(list::add,
-                    () -> handleDeserializationError(list, path, target, failed));
+            var result = mainDeserializer.deserialize(reader, path(path, index), componentType, userContext, postProcessingObjects);
+            if (result.isPresent()) {
+                list.add(result.get());
+            } else {
+                list.add(null);
+                deserializationFailed = true;
+            }
             if (reader.peek() == JsonToken.END_ARRAY) {
                 reader.endArray();
                 break;
             }
+
             index++;
         }
-        checkMandatory(list, target, failed, path);
+        if (deserializationFailed) {
+            handleDeserializationError(list, path, target, postProcessingObjects);
+        }
+        checkMandatory(list, target, postProcessingObjects, path);
         return Optional.of(toArray(list, componentType));
     }
 
@@ -56,16 +70,15 @@ class ArrayDeserializer implements JsonDeserializer<Object> {
         return arr;
     }
 
-    private void handleDeserializationError(List<?> values, String path, AnnotatedElement target, Collection<ReportedError> failed) {
-        values.add(null);
+    private void handleDeserializationError(List<?> values, String path, AnnotatedElement target, PostProcessingObjects postProcessingObjects) {
         var context = new ReportedErrorContext(path, target, NoAnnotation.class, UserContext.getInstance());
-        failed.add(new ReportedError(context, CONVERSION_ERROR.getMessageKey(), CONVERSION_ERROR.getGlobalMessageKey()));
+        postProcessingObjects.add(new InvalidValueError(context, CONVERSION_ERROR.getMessageKey(), CONVERSION_ERROR.getGlobalMessageKey()));
     }
 
-    private void checkMandatory(List<?> values, AnnotatedElement target, Collection<ReportedError> failed, String path) {
+    private void checkMandatory(List<?> values, AnnotatedElement target, PostProcessingObjects postProcessingObjects, String path) {
         if (target.isAnnotationPresent(Mandatory.class) && values.isEmpty()) {
             var context = new ReportedErrorContext(path, target, Mandatory.class, UserContext.getInstance());
-            failed.add(new ReportedError(context, MISSING_MANDATORY_PROPERTY.getMessageKey(), MISSING_MANDATORY_PROPERTY.getGlobalMessageKey()));
+            postProcessingObjects.add(new InvalidValueError(context, MISSING_MANDATORY_PROPERTY.getMessageKey(), MISSING_MANDATORY_PROPERTY.getGlobalMessageKey()));
         }
     }
 

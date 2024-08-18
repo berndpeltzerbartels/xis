@@ -5,12 +5,11 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import one.xis.Action;
 import one.xis.Page;
+import one.xis.deserialize.InvalidValueError;
 import one.xis.deserialize.MainDeserializer;
-import one.xis.deserialize.ReportedError;
+import one.xis.deserialize.PostProcessingObjects;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
 
 @Data
 @Slf4j
@@ -35,10 +34,10 @@ class ControllerMethod {
 
     @SuppressWarnings("unchecked")
     ControllerMethodResult invoke(@NonNull ClientRequest request, @NonNull Object controller) throws Exception {
-        var errors = new ArrayList<ReportedError>();
-        var args = prepareArgs(method, request, errors);
-        if (!errors.isEmpty()) {
-            return controllerMethodResultMapper.mapValidationErrorState(request, errors);
+        var postProcessingObjects = new PostProcessingObjects();
+        var args = prepareArgs(method, request, postProcessingObjects);
+        if (!postProcessingObjects.postProcessingObjects(InvalidValueError.class).isEmpty()) {
+            return controllerMethodResultMapper.mapValidationErrorState(request, postProcessingObjects.postProcessingObjects(InvalidValueError.class));
         }
         var returnValue = method.invoke(controller, args);
         if (returnValue == null) { // e.g. a void method
@@ -70,10 +69,10 @@ class ControllerMethod {
         return "ControllerMethod(" + method.getName() + ")";
     }
 
-    private Object[] prepareArgs(Method method, ClientRequest request, Collection<ReportedError> errors) throws Exception {
+    private Object[] prepareArgs(Method method, ClientRequest request, PostProcessingObjects postProcessingObjects) throws Exception {
         var args = new Object[method.getParameterCount()];
         for (var i = 0; i < method.getParameterCount(); i++) {
-            args[i] = controllerMethodParameters[i].prepareParameter(request, errors);
+            args[i] = controllerMethodParameters[i].prepareParameter(request, postProcessingObjects);
         }
         return args;
     }

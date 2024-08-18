@@ -7,45 +7,44 @@ import one.xis.utils.lang.ClassUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
-import java.util.Collection;
 import java.util.List;
 
 @XISComponent
 @RequiredArgsConstructor
-class DeserializationPostProcessing {
+class PostProcessing {
 
     private final List<DeserializationPostProcessor> postProcessors;
 
-    void postProcess(String path, Object value, AnnotatedElement target, UserContext userContext, Collection<ReportedError> reportedErrors) {
-        doRecursiveProcess(path, target, value, userContext, reportedErrors);
+    void postProcess(String path, Object value, AnnotatedElement target, UserContext userContext, PostProcessingObjects results) {
+        doRecursiveProcess(path, target, value, userContext, results);
         if (value == null) {
             return;
         }
-        doRecursiveProcessClass(path, target, value, userContext, reportedErrors);
+        doRecursiveProcessClass(path, target, value, userContext, results);
 
     }
 
-    private void doRecursiveProcess(String path, AnnotatedElement target, Object value, UserContext userContext, Collection<ReportedError> reportedErrors) {
+    private void doRecursiveProcess(String path, AnnotatedElement target, Object value, UserContext userContext, PostProcessingObjects results) {
         for (var annotation : target.getAnnotations()) {
             if (isJavaAnnotation(annotation)) {
                 continue;
             }
             var context = new ReportedErrorContext(path, target, annotation.annotationType(), userContext);
-            recursiveProcess(context, annotation.annotationType(), value, reportedErrors);
+            recursiveProcess(context, annotation.annotationType(), value, results);
         }
     }
 
-    private void doRecursiveProcessClass(String path, AnnotatedElement target, Object value, UserContext userContext, Collection<ReportedError> reportedErrors) {
+    private void doRecursiveProcessClass(String path, AnnotatedElement target, Object value, UserContext userContext, PostProcessingObjects results) {
         for (var annotation : value.getClass().getAnnotations()) {
             if (isJavaAnnotation(annotation)) {
                 continue;
             }
             var context = new ReportedErrorContext(path, target, annotation.annotationType(), userContext);
-            recursiveProcess(context, annotation.annotationType(), value, reportedErrors);
+            recursiveProcess(context, annotation.annotationType(), value, results);
         }
     }
 
-    private void recursiveProcess(ReportedErrorContext context, AnnotatedElement currentElement, Object value, Collection<ReportedError> reportedErrors) {
+    private void recursiveProcess(ReportedErrorContext context, AnnotatedElement currentElement, Object value, PostProcessingObjects results) {
         for (var annotation : currentElement.getAnnotations()) {
             if (isJavaAnnotation(annotation)) {
                 continue;
@@ -56,9 +55,9 @@ class DeserializationPostProcessing {
                 }
                 var postProcessorClass = ((PostProcessor) annotation).value();
                 var postProcessor = getPostProcessor(postProcessorClass);
-                postProcessor.postProcess(context, value, reportedErrors);
+                postProcessor.postProcess(context, value, results);
             }
-            recursiveProcess(context, annotation.annotationType(), value, reportedErrors);
+            recursiveProcess(context, annotation.annotationType(), value, results);
         }
     }
 

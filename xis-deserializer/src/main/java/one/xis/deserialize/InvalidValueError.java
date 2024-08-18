@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Data
-public class ReportedError {
+public class InvalidValueError implements PostProcessingObject {
     private final ReportedErrorContext reportedErrorContext;
     private final String messageKey;
     private final String globalMessageKey;
@@ -14,5 +14,10 @@ public class ReportedError {
 
     public void addMessageParameter(String key, Object value) {
         messageParameters.put(key, value);
+    }
+
+    @Override
+    public boolean reject() {
+        return true;
     }
 }

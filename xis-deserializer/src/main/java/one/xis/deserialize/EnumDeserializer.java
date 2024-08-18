@@ -7,7 +7,6 @@ import one.xis.context.XISComponent;
 
 import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
-import java.util.Collection;
 import java.util.Optional;
 
 @XISComponent
@@ -19,7 +18,7 @@ class EnumDeserializer implements JsonDeserializer<Enum> {
     }
 
     @Override
-    public Optional<Enum> deserialize(JsonReader reader, String path, AnnotatedElement target, UserContext userContext, MainDeserializer mainDeserializer, Collection<ReportedError> failed) throws IOException {
+    public Optional<Enum> deserialize(JsonReader reader, String path, AnnotatedElement target, UserContext userContext, MainDeserializer mainDeserializer, PostProcessingObjects results) throws IOException {
         try {
             return Optional.of(Enum.valueOf((Class<Enum>) getType(target), reader.nextString()));
         } catch (Exception e) {

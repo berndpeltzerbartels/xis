@@ -27,18 +27,32 @@ class CollectionDeserializer implements JsonDeserializer<Collection> {
     }
 
     @Override
-    public Optional<Collection> deserialize(JsonReader reader, String path, AnnotatedElement target, UserContext userContext, MainDeserializer mainDeserializer, Collection<ReportedError> failed) throws IOException {
+    public Optional<Collection> deserialize(JsonReader reader,
+                                            String path,
+                                            AnnotatedElement target,
+                                            UserContext userContext,
+                                            MainDeserializer mainDeserializer,
+                                            PostProcessingObjects postProcessingObjects) throws IOException {
         var collectionType = getType(target);
         var collection = createCollection(collectionType);
         var elementTarget = getTypeParameter(target);
+        var deserialiaztionFailed = false;
         reader.beginArray();
         int index = 0;
         while (reader.hasNext()) {
-            mainDeserializer.deserialize(reader, path(path, index++), elementTarget, userContext, failed)
-                    .ifPresentOrElse(collection::add, () -> handleDeserializationError(collection, path, target, failed));
+            var result = mainDeserializer.deserialize(reader, path(path, index++), elementTarget, userContext, postProcessingObjects);
+            if (result.isPresent()) {
+                collection.add(result.get());
+            } else {
+                collection.add(null);
+                deserialiaztionFailed = true;
+            }
+        }
+        if (deserialiaztionFailed) {
+            handleDeserializationError(collection, path, target, postProcessingObjects);
         }
         reader.endArray();
-        checkMandatory(collection, target, failed, path);
+        checkMandatory(collection, target, postProcessingObjects, path);
         return Optional.of(collection);
     }
 
@@ -47,17 +61,16 @@ class CollectionDeserializer implements JsonDeserializer<Collection> {
         return DeserializerPriority.FRAMEWORK_LOW;
     }
 
-    private void checkMandatory(Collection<?> collection, AnnotatedElement target, Collection<ReportedError> failed, String path) {
+    private void checkMandatory(Collection<?> collection, AnnotatedElement target, PostProcessingObjects postProcessingObjects, String path) {
         if (target.isAnnotationPresent(Mandatory.class) && collection.isEmpty()) {
             var context = new ReportedErrorContext(path, target, Mandatory.class, UserContext.getInstance());
-            failed.add(new ReportedError(context, MISSING_MANDATORY_PROPERTY.getMessageKey(), MISSING_MANDATORY_PROPERTY.getGlobalMessageKey()));
+            postProcessingObjects.add(new InvalidValueError(context, MISSING_MANDATORY_PROPERTY.getMessageKey(), MISSING_MANDATORY_PROPERTY.getGlobalMessageKey()));
         }
     }
 
-    private void handleDeserializationError(Collection<?> values, String path, AnnotatedElement target, Collection<ReportedError> failed) {
-        values.add(null);
+    private void handleDeserializationError(Collection<?> values, String path, AnnotatedElement target, PostProcessingObjects postProcessingObjects) {
         var context = new ReportedErrorContext(path, target, NoAnnotation.class, UserContext.getInstance());
-        failed.add(new ReportedError(context, CONVERSION_ERROR.getMessageKey(), CONVERSION_ERROR.getGlobalMessageKey()));
+        postProcessingObjects.add(new InvalidValueError(context, CONVERSION_ERROR.getMessageKey(), CONVERSION_ERROR.getGlobalMessageKey()));
     }
 
     private String path(String parent, int index) {

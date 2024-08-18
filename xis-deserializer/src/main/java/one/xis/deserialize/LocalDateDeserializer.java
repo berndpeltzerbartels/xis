@@ -8,7 +8,6 @@ import one.xis.context.XISComponent;
 import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
 import java.time.LocalDate;
-import java.util.Collection;
 import java.util.Optional;
 
 @XISComponent
@@ -24,7 +23,7 @@ class LocalDateDeserializer implements JsonDeserializer<LocalDate> { // TODO: Im
                                            AnnotatedElement target,
                                            UserContext userContext,
                                            MainDeserializer mainDeserializer,
-                                           Collection<ReportedError> failed) throws IOException {
+                                           PostProcessingObjects results) throws IOException {
         try {
             return Optional.of(LocalDate.parse(reader.nextString()));
         } catch (Exception e) {

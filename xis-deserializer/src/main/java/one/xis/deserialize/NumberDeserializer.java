@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Collection;
 import java.util.Optional;
 
 
@@ -35,7 +34,7 @@ class NumberDeserializer implements JsonDeserializer<Number> {
                                         AnnotatedElement target,
                                         UserContext userContext,
                                         MainDeserializer mainDeserializer,
-                                        Collection<ReportedError> failed) throws IOException {
+                                        PostProcessingObjects results) throws IOException {
         try {
             if (reader.peek().equals(JsonToken.NUMBER)) {
                 return Optional.of(parseNumber(reader.nextDouble(), target));

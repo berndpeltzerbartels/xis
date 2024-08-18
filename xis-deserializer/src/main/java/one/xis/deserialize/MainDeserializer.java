@@ -13,7 +13,6 @@ import one.xis.validation.Mandatory;
 import java.io.StringReader;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -26,39 +25,39 @@ import static one.xis.deserialize.DefaultDeserializationErrorType.MISSING_MANDAT
 public class MainDeserializer {
 
     private final List<JsonDeserializer<?>> deserializers;
-    private DeserializationPostProcessing deserializationPostProcessing;
+    private PostProcessing deserializationPostProcessing;
 
-    public MainDeserializer(@NonNull List<JsonDeserializer<?>> deserializers, @NonNull DeserializationPostProcessing deserializationPostProcessing) {
+    public MainDeserializer(@NonNull List<JsonDeserializer<?>> deserializers, @NonNull PostProcessing postProcessing) {
         this.deserializers = deserializers;
-        this.deserializationPostProcessing = deserializationPostProcessing;
+        this.deserializationPostProcessing = postProcessing;
         deserializers.sort(Comparator.reverseOrder());
     }
 
 
-    public Object deserialize(@NonNull String value, @NonNull AnnotatedElement target, @NonNull UserContext userContext, @NonNull Collection<ReportedError> failed) {
+    public Object deserialize(@NonNull String value, @NonNull AnnotatedElement target, @NonNull UserContext userContext, @NonNull PostProcessingObjects postProcessingObjects) {
         var reader = new JsonReader(new StringReader(value));
         reader.setLenient(true);
         var path = "/" + getName(target);
-        return deserialize(reader, path, target, userContext, failed).orElse(null);
+        return deserialize(reader, path, target, userContext, postProcessingObjects).orElse(null);
     }
 
     @SneakyThrows
-    Optional<?> deserialize(JsonReader reader, String path, AnnotatedElement target, UserContext userContext, Collection<ReportedError> failed) {
+    Optional<?> deserialize(JsonReader reader, String path, AnnotatedElement target, UserContext userContext, PostProcessingObjects postProcessingObjects) {
         if (reader.peek().equals(JsonToken.NULL)) {
             reader.nextNull();
             if (target.isAnnotationPresent(Mandatory.class)) {
                 var context = new ReportedErrorContext(path, target, Mandatory.class, UserContext.getInstance());
-                failed.add(new ReportedError(context, MISSING_MANDATORY_PROPERTY.getMessageKey(), MISSING_MANDATORY_PROPERTY.getGlobalMessageKey()));
+                postProcessingObjects.add(new InvalidValueError(context, MISSING_MANDATORY_PROPERTY.getMessageKey(), MISSING_MANDATORY_PROPERTY.getGlobalMessageKey()));
             }
             return Optional.empty();
         }
         try {
-            var value = getDeserializer(reader, target).deserialize(reader, path, target, userContext, this, failed);
-            value.ifPresent(o -> deserializationPostProcessing.postProcess(path, o, target, userContext, failed));
+            var value = getDeserializer(reader, target).deserialize(reader, path, target, userContext, this, postProcessingObjects);
+            value.ifPresent(o -> deserializationPostProcessing.postProcess(path, o, target, userContext, postProcessingObjects));
             return value;
         } catch (DeserializationException e) {
             var context = new ReportedErrorContext(path, target, NoAnnotation.class, UserContext.getInstance());
-            failed.add(new ReportedError(context, CONVERSION_ERROR.getMessageKey(), CONVERSION_ERROR.getGlobalMessageKey()));
+            postProcessingObjects.add(new InvalidValueError(context, CONVERSION_ERROR.getMessageKey(), CONVERSION_ERROR.getGlobalMessageKey()));
             return Optional.empty();
         }
 

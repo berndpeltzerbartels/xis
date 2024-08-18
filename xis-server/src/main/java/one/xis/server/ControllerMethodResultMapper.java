@@ -4,7 +4,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import one.xis.*;
 import one.xis.context.XISComponent;
-import one.xis.deserialize.ReportedError;
+import one.xis.deserialize.InvalidValueError;
 import one.xis.validation.ValidatorMessageResolver;
 
 import java.lang.reflect.Method;
@@ -48,7 +48,7 @@ class ControllerMethodResultMapper {
         return controllerMethodResult;
     }
 
-    ControllerMethodResult mapValidationErrorState(ClientRequest request, Collection<ReportedError> errors) {
+    ControllerMethodResult mapValidationErrorState(ClientRequest request, Collection<InvalidValueError> errors) {
         var controllerMethodResult = new ControllerMethodResult();
         controllerMethodResult.setNextPageURL(request.getPageId());
         controllerMethodResult.setNextWidgetId(request.getWidgetId());
@@ -110,17 +110,17 @@ class ControllerMethodResultMapper {
         return map.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    private Map<String, String> mapErrors(Collection<ReportedError> errors) {
+    private Map<String, String> mapErrors(Collection<InvalidValueError> errors) {
         var errorMessageMap = new HashMap<String, String>();
         errors.forEach(error -> mapError(error, errorMessageMap));
         return errorMessageMap;
     }
 
-    private List<String> mapGlobalErrors(Collection<ReportedError> errors) {
+    private List<String> mapGlobalErrors(Collection<InvalidValueError> errors) {
         return errors.stream().map(this::globalErrorMessages).toList();
     }
 
-    private void mapError(ReportedError error, Map<String, String> errorMessageMap) {
+    private void mapError(InvalidValueError error, Map<String, String> errorMessageMap) {
         var message = validatorMessageResolver.createMessage(error.getMessageKey(),
                 error.getMessageParameters(),
                 error.getReportedErrorContext().getTarget(),
@@ -129,7 +129,7 @@ class ControllerMethodResultMapper {
         errorMessageMap.put(key, message);
     }
 
-    private String globalErrorMessages(ReportedError error) {
+    private String globalErrorMessages(InvalidValueError error) {
         return validatorMessageResolver.createMessage(error.getGlobalMessageKey(),
                 error.getMessageParameters(),
                 error.getReportedErrorContext().getTarget(),

@@ -27,7 +27,12 @@ class FormattedDeserializer implements JsonDeserializer<Object> {
     }
 
     @Override
-    public Optional<Object> deserialize(JsonReader reader, String path, AnnotatedElement target, UserContext userContext, MainDeserializer mainDeserializer, Collection<ReportedError> failed) throws IOException {
+    public Optional<Object> deserialize(JsonReader reader,
+                                        String path,
+                                        AnnotatedElement target,
+                                        UserContext userContext,
+                                        MainDeserializer mainDeserializer,
+                                        PostProcessingObjects results) throws IOException {
         if (reader.peek().equals(JsonToken.NULL)) {
             reader.nextNull();
             return Optional.empty();

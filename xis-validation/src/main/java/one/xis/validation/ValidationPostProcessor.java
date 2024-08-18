@@ -3,14 +3,14 @@ package one.xis.validation;
 import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
 import one.xis.deserialize.DeserializationPostProcessor;
-import one.xis.deserialize.ReportedError;
+import one.xis.deserialize.InvalidValueError;
+import one.xis.deserialize.PostProcessingObjects;
 import one.xis.deserialize.ReportedErrorContext;
 import one.xis.utils.lang.ClassUtils;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Parameter;
-import java.util.Collection;
 import java.util.List;
 
 @XISComponent
@@ -20,7 +20,7 @@ class ValidationPostProcessor implements DeserializationPostProcessor {
     private final List<Validator<?>> validators;
 
     @Override
-    public void postProcess(ReportedErrorContext reportedErrorContext, Object value, Collection<ReportedError> failed) {
+    public void postProcess(ReportedErrorContext reportedErrorContext, Object value, PostProcessingObjects postProcessingObjects) {
         var validateAnnotation = reportedErrorContext.getAnnotationClass().getAnnotation(Validate.class);
         var validatorClass = validateAnnotation.validatorClass();
         var validator = getValidator(validatorClass);
@@ -32,7 +32,7 @@ class ValidationPostProcessor implements DeserializationPostProcessor {
         try {
             validator.validate(value, reportedErrorContext.getTarget());
         } catch (ValidatorException e) {
-            failed.add(new ReportedError(reportedErrorContext, validateAnnotation.messageKey(), validateAnnotation.globalMessageKey()));
+            postProcessingObjects.add(new InvalidValueError(reportedErrorContext, validateAnnotation.messageKey(), validateAnnotation.globalMessageKey()));
         }
     }
 

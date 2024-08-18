@@ -7,7 +7,6 @@ import one.xis.UserContext;
 import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
-import java.util.Collection;
 import java.util.Optional;
 
 public interface JsonDeserializer<T> extends Comparable<JsonDeserializer<?>> {
@@ -18,7 +17,8 @@ public interface JsonDeserializer<T> extends Comparable<JsonDeserializer<?>> {
                             String path,
                             AnnotatedElement target,
                             UserContext userContext,
-                            MainDeserializer mainDeserializer, Collection<ReportedError> failed) throws DeserializationException, IOException;
+                            MainDeserializer mainDeserializer,
+                            PostProcessingObjects results) throws DeserializationException, IOException;
 
     default String getName(AnnotatedElement target) {
         if (target instanceof Field field) {
