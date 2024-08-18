@@ -23,6 +23,7 @@ dependencies {
     implementation project(':xis-deserializer')
     implementation project(':xis-gson')
     implementation project(':xis-validation')
+    implementation project(':xis-frontend')
 
 
     compileOnly project(':xis-resources')

@@ -32,6 +32,7 @@ dependencies {
     testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"
 
     testImplementation project(":xis-test")
+    testImplementation project(":xis-frontend")
 
 
     testImplementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.2'

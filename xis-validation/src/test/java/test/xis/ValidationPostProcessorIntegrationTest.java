@@ -13,7 +13,7 @@ import one.xis.Page;
 import one.xis.context.IntegrationTestContext;
 import one.xis.context.XISInit;
 import one.xis.server.ClientRequest;
-import one.xis.server.FrontendService;
+import one.xis.server.FrontendServiceImpl;
 import one.xis.validation.EMail;
 import one.xis.validation.LabelKey;
 import one.xis.validation.Mandatory;
@@ -29,7 +29,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ValidationPostProcessorIntegrationTest {
-    private FrontendService frontendService;
+    private FrontendServiceImpl frontendService;
     private IntegrationTestContext context;
     private final ObjectMapper objectMapper = createObjectMapper();
 
@@ -40,7 +40,7 @@ class ValidationPostProcessorIntegrationTest {
                 .withSingleton(PersonController.class)
                 .withSingleton(PersonDataListController.class)
                 .build();
-        frontendService = context.getSingleton(FrontendService.class);
+        frontendService = context.getSingleton(FrontendServiceImpl.class);
     }
 
     @Test

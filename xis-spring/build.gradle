@@ -12,6 +12,7 @@ dependencies {
     compileOnly project(':xis-deserializer')
     implementation project(':xis-context')
     implementation project(':xis-server')
+    implementation(project(':xis-frontend'))
     implementation project(':xis-resources')
     implementation project(':xis-remote-core')
     implementation project(':xis-util')

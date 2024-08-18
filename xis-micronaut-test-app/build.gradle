@@ -47,6 +47,7 @@ dependencies {
     implementation project(':xis-remote-core')
     implementation project(':xis-micronaut')
     implementation project(':xis-test')
+    implementation(project(':xis-frontend'))
 
 
     implementation("io.micronaut:micronaut-http-server-netty")

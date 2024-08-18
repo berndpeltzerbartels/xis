@@ -2,10 +2,10 @@ package one.xis.validation;
 
 import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
+import one.xis.deserialize.DeserializationContext;
 import one.xis.deserialize.DeserializationPostProcessor;
 import one.xis.deserialize.InvalidValueError;
 import one.xis.deserialize.PostProcessingObjects;
-import one.xis.deserialize.ReportedErrorContext;
 import one.xis.utils.lang.ClassUtils;
 
 import java.lang.reflect.AnnotatedElement;
@@ -20,19 +20,19 @@ class ValidationPostProcessor implements DeserializationPostProcessor {
     private final List<Validator<?>> validators;
 
     @Override
-    public void postProcess(ReportedErrorContext reportedErrorContext, Object value, PostProcessingObjects postProcessingObjects) {
-        var validateAnnotation = reportedErrorContext.getAnnotationClass().getAnnotation(Validate.class);
+    public void postProcess(DeserializationContext deserializationContext, Object value, PostProcessingObjects postProcessingObjects) {
+        var validateAnnotation = deserializationContext.getAnnotationClass().getAnnotation(Validate.class);
         var validatorClass = validateAnnotation.validatorClass();
         var validator = getValidator(validatorClass);
         var typeParameter = ClassUtils.getGenericInterfacesTypeParameter(validatorClass, Validator.class, 0);
-        if (!typeParameter.isAssignableFrom(getTargetType(reportedErrorContext.getTarget()))) {
-            throw new IllegalArgumentException("Validator " + validatorClass + " in annotataion " + reportedErrorContext.getAnnotationClass()
-                    + " is not applicable to " + reportedErrorContext.getTarget());
+        if (!typeParameter.isAssignableFrom(getTargetType(deserializationContext.getTarget()))) {
+            throw new IllegalArgumentException("Validator " + validatorClass + " in annotataion " + deserializationContext.getAnnotationClass()
+                    + " is not applicable to " + deserializationContext.getTarget());
         }
         try {
-            validator.validate(value, reportedErrorContext.getTarget());
+            validator.validate(value, deserializationContext.getTarget());
         } catch (ValidatorException e) {
-            postProcessingObjects.add(new InvalidValueError(reportedErrorContext, validateAnnotation.messageKey(), validateAnnotation.globalMessageKey()));
+            postProcessingObjects.add(new InvalidValueError(deserializationContext, validateAnnotation.messageKey(), validateAnnotation.globalMessageKey()));
         }
     }
 

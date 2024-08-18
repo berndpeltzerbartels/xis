@@ -5,7 +5,7 @@ import lombok.Setter;
 import one.xis.*;
 import one.xis.context.AppContextBuilder;
 import one.xis.deserialize.DeserializationPostProcessor;
-import one.xis.server.FrontendService;
+import one.xis.server.FrontendServiceImpl;
 import one.xis.server.PushClientProxy;
 import one.xis.server.PushClientUtil;
 import one.xis.utils.lang.ClassUtils;
@@ -59,7 +59,7 @@ class SpringContextAdapter implements BeanPostProcessor, ApplicationContextAware
                 .withSingletonClasses(pushClientClasses())
                 .withXIS()
                 .build();
-        var frontendService = context.getSingleton(FrontendService.class);
+        var frontendService = context.getSingleton(FrontendServiceImpl.class);
         springFilter.setFrontendService(frontendService);
         springController.setFrontendService(frontendService);
         context.getSingletons(PushClientProxy.class).forEach(this::addToSpringContext);

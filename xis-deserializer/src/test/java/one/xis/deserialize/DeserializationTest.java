@@ -108,7 +108,7 @@ class DeserializationTest {
         mainDeserializer.deserialize("abc", parameter, new UserContext(), ppObjects);
         assertThat(ppObjects.postProcessingObjects(InvalidValueError.class)).hasSize(1);
         var error = CollectionUtils.first(ppObjects.postProcessingObjects(InvalidValueError.class));
-        assertThat(error.getReportedErrorContext().getPath()).isEqualTo("/integer");
+        assertThat(error.getDeserializationContext().getPath()).isEqualTo("/integer");
     }
 
     @Test
@@ -117,8 +117,8 @@ class DeserializationTest {
         var ppObjects = new PostProcessingObjects();
         mainDeserializer.deserialize("[123]", parameter, new UserContext(), ppObjects);
         assertThat(ppObjects.postProcessingObjects(InvalidValueError.class)).hasSize(2);
-        assertThat(ppObjects.postProcessingObjects(InvalidValueError.class)).anyMatch(e -> e.getReportedErrorContext().getPath().equals("/collection[0]"));
-        assertThat(ppObjects.postProcessingObjects(InvalidValueError.class)).anyMatch(e -> e.getReportedErrorContext().getPath().equals("/collection"));
+        assertThat(ppObjects.postProcessingObjects(InvalidValueError.class)).anyMatch(e -> e.getDeserializationContext().getPath().equals("/collection[0]"));
+        assertThat(ppObjects.postProcessingObjects(InvalidValueError.class)).anyMatch(e -> e.getDeserializationContext().getPath().equals("/collection"));
     }
 
     @Test
@@ -129,7 +129,7 @@ class DeserializationTest {
         mainDeserializer.deserialize(json, parameter, new UserContext(), ppObjects);
         assertThat(ppObjects.postProcessingObjects(InvalidValueError.class)).hasSize(1);
         var error = CollectionUtils.first(ppObjects.postProcessingObjects(InvalidValueError.class));
-        assertThat(error.getReportedErrorContext().getPath()).isEqualTo("/test/testBeanField/intField");
+        assertThat(error.getDeserializationContext().getPath()).isEqualTo("/test/testBeanField/intField");
     }
 
     @Test
@@ -139,8 +139,8 @@ class DeserializationTest {
         var ppObjects = new PostProcessingObjects();
         var testBean = (TestBean) mainDeserializer.deserialize(json, parameter, new UserContext(), ppObjects);
         assertThat(ppObjects.postProcessingObjects(InvalidValueError.class)).hasSize(2);
-        assertThat(ppObjects.postProcessingObjects(InvalidValueError.class).stream().map(InvalidValueError::getReportedErrorContext).map(ReportedErrorContext::getPath)).anyMatch("/testObject/intArrayField[2]"::equals);
-        assertThat(ppObjects.postProcessingObjects(InvalidValueError.class).stream().map(InvalidValueError::getReportedErrorContext).map(ReportedErrorContext::getPath)).anyMatch("/testObject/intArrayField"::equals);
+        assertThat(ppObjects.postProcessingObjects(InvalidValueError.class).stream().map(InvalidValueError::getDeserializationContext).map(DeserializationContext::getPath)).anyMatch("/testObject/intArrayField[2]"::equals);
+        assertThat(ppObjects.postProcessingObjects(InvalidValueError.class).stream().map(InvalidValueError::getDeserializationContext).map(DeserializationContext::getPath)).anyMatch("/testObject/intArrayField"::equals);
         assertThat(testBean.getIntArrayField()).containsExactly(0, 1, 0, 3);
     }
 
@@ -151,9 +151,9 @@ class DeserializationTest {
         var ppObjects = new PostProcessingObjects();
         var testBean = (TestBean) mainDeserializer.deserialize(json, parameter, new UserContext(), ppObjects);
         assertThat(ppObjects.postProcessingObjects(InvalidValueError.class)).hasSize(3);
-        assertThat(ppObjects.postProcessingObjects(InvalidValueError.class).stream().map(InvalidValueError::getReportedErrorContext).map(ReportedErrorContext::getPath)).anyMatch("/testObject/intCollectionField[0]"::equals);
-        assertThat(ppObjects.postProcessingObjects(InvalidValueError.class).stream().map(InvalidValueError::getReportedErrorContext).map(ReportedErrorContext::getPath)).anyMatch("/testObject/intCollectionField[1]"::equals);
-        assertThat(ppObjects.postProcessingObjects(InvalidValueError.class).stream().map(InvalidValueError::getReportedErrorContext).map(ReportedErrorContext::getPath)).anyMatch("/testObject/intCollectionField"::equals);
+        assertThat(ppObjects.postProcessingObjects(InvalidValueError.class).stream().map(InvalidValueError::getDeserializationContext).map(DeserializationContext::getPath)).anyMatch("/testObject/intCollectionField[0]"::equals);
+        assertThat(ppObjects.postProcessingObjects(InvalidValueError.class).stream().map(InvalidValueError::getDeserializationContext).map(DeserializationContext::getPath)).anyMatch("/testObject/intCollectionField[1]"::equals);
+        assertThat(ppObjects.postProcessingObjects(InvalidValueError.class).stream().map(InvalidValueError::getDeserializationContext).map(DeserializationContext::getPath)).anyMatch("/testObject/intCollectionField"::equals);
         assertThat(testBean.getIntCollectionField()).containsExactly(null, null, 3);
     }
 
@@ -165,7 +165,7 @@ class DeserializationTest {
         mainDeserializer.deserialize(json, parameter, new UserContext(), ppObjects);
         assertThat(ppObjects.postProcessingObjects(InvalidValueError.class)).hasSize(1);
         var error = CollectionUtils.first(ppObjects.postProcessingObjects(InvalidValueError.class));
-        assertThat(error.getReportedErrorContext().getPath()).isEqualTo("/localDateBean/localDate");
+        assertThat(error.getDeserializationContext().getPath()).isEqualTo("/localDateBean/localDate");
     }
 
     @Test
@@ -185,7 +185,7 @@ class DeserializationTest {
         assertThat(bean.getObjectField()).isNotNull();
         assertThat(ppObjects.postProcessingObjects(InvalidValueError.class)).hasSize(1);
         var error = CollectionUtils.first(ppObjects.postProcessingObjects(InvalidValueError.class));
-        assertThat(error.getReportedErrorContext().getPath()).isEqualTo("/model/objectField/localDateField");
+        assertThat(error.getDeserializationContext().getPath()).isEqualTo("/model/objectField/localDateField");
     }
 
     @Test
@@ -205,13 +205,13 @@ class DeserializationTest {
         assertThat(bean.getObjectField()).isNotNull();
         assertThat(ppObjects.postProcessingObjects(InvalidValueError.class)).hasSize(1);
         var error = CollectionUtils.first(ppObjects.postProcessingObjects(InvalidValueError.class));
-        assertThat(error.getReportedErrorContext().getPath()).isEqualTo("/model/objectField/localDateField");
+        assertThat(error.getDeserializationContext().getPath()).isEqualTo("/model/objectField/localDateField");
     }
 
     @Nested
     class PostProcessorTest {
         private MainDeserializer mainDeserializer;
-        private ArgumentCaptor<ReportedErrorContext> deserializationContextArgumentCaptor;
+        private ArgumentCaptor<DeserializationContext> deserializationContextArgumentCaptor;
         private ArgumentCaptor<Object> valueCaptor;
         private ArgumentCaptor<PostProcessingObjects> postPricessingObjectCaptor;
         private TestPostProcessor postProcessorMock;
@@ -222,7 +222,7 @@ class DeserializationTest {
         @BeforeEach
         @SuppressWarnings("unchecked")
         void initArgumentCaptors() {
-            deserializationContextArgumentCaptor = ArgumentCaptor.forClass(ReportedErrorContext.class);
+            deserializationContextArgumentCaptor = ArgumentCaptor.forClass(DeserializationContext.class);
             valueCaptor = ArgumentCaptor.forClass(Object.class);
             postPricessingObjectCaptor = ArgumentCaptor.forClass(PostProcessingObjects.class);
         }
@@ -274,7 +274,7 @@ class DeserializationTest {
         void doVerification() throws NoSuchFieldException {
             verify(postProcessorMock, times(3)).postProcess(deserializationContextArgumentCaptor.capture(), valueCaptor.capture(), postPricessingObjectCaptor.capture());
 
-            var paths = deserializationContextArgumentCaptor.getAllValues().stream().map(ReportedErrorContext::getPath).toList();
+            var paths = deserializationContextArgumentCaptor.getAllValues().stream().map(DeserializationContext::getPath).toList();
             assertThat(paths).containsExactlyInAnyOrder(
                     "/model/beanField/localDate",
                     "/model/beanField",
@@ -287,7 +287,7 @@ class DeserializationTest {
                     new PostProcessorTestBean1(new PostProcessorTestBean2(LocalDate.of(2021, 1, 1)))
             );
 
-            var targets = deserializationContextArgumentCaptor.getAllValues().stream().map(ReportedErrorContext::getTarget).toList();
+            var targets = deserializationContextArgumentCaptor.getAllValues().stream().map(DeserializationContext::getTarget).toList();
             assertThat(targets).containsExactlyInAnyOrder(
                     PostProcessorTestBean2.class.getDeclaredField("localDate"),
                     PostProcessorTestBean1.class.getDeclaredField("beanField"),
@@ -295,7 +295,7 @@ class DeserializationTest {
             );
 
             var annotationClasses = deserializationContextArgumentCaptor.getAllValues().stream()
-                    .map(ReportedErrorContext::getAnnotationClass)
+                    .map(DeserializationContext::getAnnotationClass)
                     .map(Class.class::cast)
                     .toList();
             assertThat(annotationClasses).containsExactlyInAnyOrder(
@@ -303,7 +303,7 @@ class DeserializationTest {
                     PostProcessorTestAnnotation.class,
                     PostProcessorTestAnnotation.class);
 
-            var userContexts = deserializationContextArgumentCaptor.getAllValues().stream().map(ReportedErrorContext::getUserContext).toList();
+            var userContexts = deserializationContextArgumentCaptor.getAllValues().stream().map(DeserializationContext::getUserContext).toList();
             assertThat(userContexts).containsExactlyInAnyOrder(
                     userContext,
                     userContext,

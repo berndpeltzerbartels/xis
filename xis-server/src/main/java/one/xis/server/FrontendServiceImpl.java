@@ -20,7 +20,7 @@ import java.util.function.BiConsumer;
  */
 @XISComponent
 @RequiredArgsConstructor
-public class FrontendService {
+public class FrontendServiceImpl implements FrontendService {
 
     private final ControllerService controllerService;
     private final ClientConfigService configService;
@@ -40,10 +40,12 @@ public class FrontendService {
         functionsJsResource = resources.getByPath("functions.js");
     }
 
+    @Override
     public ClientConfig getConfig() {
         return configService.getConfig();
     }
 
+    @Override
     public ServerResponse processActionRequest(ClientRequest request) {
         try {
             addUserContext(request);
@@ -54,6 +56,7 @@ public class FrontendService {
     }
 
 
+    @Override
     public ServerResponse processModelDataRequest(ClientRequest request) {
         try {
             addUserContext(request);
@@ -64,47 +67,57 @@ public class FrontendService {
     }
 
 
+    @Override
     public String getPage(String id) {
         return htmlResourceService.getPage(id);
     }
 
+    @Override
     public String getPageHead(String id) {
         var head = htmlResourceService.getPageHead(id);
         Logger.debug(head);
         return head;
     }
 
+    @Override
     public String getPageBody(String id) {
         var body = htmlResourceService.getPageBody(id);
         Logger.debug(body);
         return body;
     }
 
+    @Override
     public Map<String, String> getBodyAttributes(String id) {
         return htmlResourceService.getBodyAttributes(id);
     }
 
+    @Override
     public String getWidgetHtml(String id) {
         return htmlResourceService.getWidgetHtml(id);
     }
 
+    @Override
     public String getRootPageHtml() {
         return htmlResourceService.getRootPageHtml();
     }
 
 
+    @Override
     public String getAppJs() {
         return appJsResource.getContent();
     }
 
+    @Override
     public String getClassesJs() {
         return classesJsResource.getContent();
     }
 
+    @Override
     public String getMainJs() {
         return mainJsResource.getContent();
     }
 
+    @Override
     public String getFunctionsJs() {
         return functionsJsResource.getContent();
     }

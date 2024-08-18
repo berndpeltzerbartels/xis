@@ -1,19 +1,14 @@
 package one.xis.deserialize;
 
-import lombok.Data;
+import lombok.EqualsAndHashCode;
 
-import java.util.HashMap;
-import java.util.Map;
 
-@Data
-public class InvalidValueError implements PostProcessingObject {
-    private final ReportedErrorContext reportedErrorContext;
-    private final String messageKey;
-    private final String globalMessageKey;
-    private final Map<String, Object> messageParameters = new HashMap<>();
+@EqualsAndHashCode(callSuper = false)
+public class InvalidValueError extends PostProcessingObject {
 
-    public void addMessageParameter(String key, Object value) {
-        messageParameters.put(key, value);
+
+    public InvalidValueError(DeserializationContext deserializationContext, String messageKey, String globalMessageKey) {
+        super(deserializationContext, messageKey, globalMessageKey);
     }
 
     @Override

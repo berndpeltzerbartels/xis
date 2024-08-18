@@ -29,7 +29,7 @@ class PostProcessing {
             if (isJavaAnnotation(annotation)) {
                 continue;
             }
-            var context = new ReportedErrorContext(path, target, annotation.annotationType(), userContext);
+            var context = new DeserializationContext(path, target, annotation.annotationType(), userContext);
             recursiveProcess(context, annotation.annotationType(), value, results);
         }
     }
@@ -39,12 +39,12 @@ class PostProcessing {
             if (isJavaAnnotation(annotation)) {
                 continue;
             }
-            var context = new ReportedErrorContext(path, target, annotation.annotationType(), userContext);
+            var context = new DeserializationContext(path, target, annotation.annotationType(), userContext);
             recursiveProcess(context, annotation.annotationType(), value, results);
         }
     }
 
-    private void recursiveProcess(ReportedErrorContext context, AnnotatedElement currentElement, Object value, PostProcessingObjects results) {
+    private void recursiveProcess(DeserializationContext context, AnnotatedElement currentElement, Object value, PostProcessingObjects results) {
         for (var annotation : currentElement.getAnnotations()) {
             if (isJavaAnnotation(annotation)) {
                 continue;

@@ -123,16 +123,16 @@ class ControllerMethodResultMapper {
     private void mapError(InvalidValueError error, Map<String, String> errorMessageMap) {
         var message = validatorMessageResolver.createMessage(error.getMessageKey(),
                 error.getMessageParameters(),
-                error.getReportedErrorContext().getTarget(),
-                error.getReportedErrorContext().getUserContext());
-        var key = error.getReportedErrorContext().getPath();
+                error.getDeserializationContext().getTarget(),
+                error.getDeserializationContext().getUserContext());
+        var key = error.getDeserializationContext().getPath();
         errorMessageMap.put(key, message);
     }
 
     private String globalErrorMessages(InvalidValueError error) {
         return validatorMessageResolver.createMessage(error.getGlobalMessageKey(),
                 error.getMessageParameters(),
-                error.getReportedErrorContext().getTarget(),
-                error.getReportedErrorContext().getUserContext());
+                error.getDeserializationContext().getTarget(),
+                error.getDeserializationContext().getUserContext());
     }
 }
