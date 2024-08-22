@@ -13,7 +13,7 @@ dependencies {
 
     implementation project(':xis-util')
 
-    implementation group: 'org.reflections', name: 'reflections', version: '0.9.10'
+    implementation "org.reflections:reflections:$reflectionsVersion"
 
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
     testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"

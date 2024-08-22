@@ -20,7 +20,7 @@ dependencies {
     implementation('org.springframework:spring-context:5.3.20')
 
     // https://mvnrepository.com/artifact/org.reflections/reflections
-    implementation group: 'org.reflections', name: 'reflections', version: '0.9.10'
+    implementation "org.reflections:reflections:$reflectionsVersion"
 
     // https://mvnrepository.com/artifact/jakarta.inject/jakarta.inject-api
     implementation 'jakarta.inject:jakarta.inject-api:2.0.1'

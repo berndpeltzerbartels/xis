@@ -22,7 +22,7 @@ dependencies {
     implementation project(':xis-gson')
     implementation project(':xis-javascript')
     //compileOnly project(':xis-javascript')
-    implementation group: 'org.reflections', name: 'reflections', version: '0.9.10'
+    implementation "org.reflections:reflections:$reflectionsVersion"
     implementation "org.mockito:mockito-core:$mockitoVersion"
 
     implementation('org.graalvm.js:js:23.0.1')

@@ -15,8 +15,7 @@ dependencies {
     implementation project(":xis-context")
     implementation project(":xis-util")
     implementation project(":xis-remote-core")
-
-
+    implementation("org.reflections:reflections:$reflectionsVersion")
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
     implementation "org.projectlombok:lombok:$lombokVersion"
 

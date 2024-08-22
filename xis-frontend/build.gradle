@@ -10,8 +10,9 @@ repositories {
 }
 
 dependencies {
-    //  implementation(project(':xis-validation'))
+    implementation(project(':xis-remote-core'))
 
+    implementation "org.reflections:reflections:$reflectionsVersion"
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
     implementation "org.projectlombok:lombok:$lombokVersion"
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.14.1'

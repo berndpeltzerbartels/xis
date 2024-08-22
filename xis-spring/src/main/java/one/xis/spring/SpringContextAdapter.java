@@ -2,14 +2,16 @@ package one.xis.spring;
 
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import one.xis.*;
+import one.xis.EnablePushClients;
+import one.xis.Page;
+import one.xis.Push;
+import one.xis.Widget;
 import one.xis.context.AppContextBuilder;
-import one.xis.deserialize.DeserializationPostProcessor;
 import one.xis.server.FrontendServiceImpl;
+import one.xis.server.ImportedTypes;
 import one.xis.server.PushClientProxy;
 import one.xis.server.PushClientUtil;
 import one.xis.utils.lang.ClassUtils;
-import one.xis.validation.Validator;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -42,12 +44,15 @@ class SpringContextAdapter implements BeanPostProcessor, ApplicationContextAware
 
     @Setter
     private ApplicationContext applicationContext;
-    private final Collection<Object> controllers = new HashSet<>();
+    private final Collection<Object> singletons = new HashSet<>();
+
+    private static final Set<Class<?>> FRAMEWORK_BEAN_CLASSES = ImportedTypes.getImportedTypes();
+
 
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
         if (isFrameworkBeanClass(bean.getClass())) {
-            controllers.add(bean);
+            singletons.add(bean);
         }
         return bean;
     }
@@ -55,7 +60,7 @@ class SpringContextAdapter implements BeanPostProcessor, ApplicationContextAware
     @EventListener(ContextRefreshedEvent.class)
     public void init() {
         var context = AppContextBuilder.createInstance()
-                .withSingletons(controllers)
+                .withSingletons(singletons)
                 .withSingletonClasses(pushClientClasses())
                 .withXIS()
                 .build();
@@ -78,10 +83,13 @@ class SpringContextAdapter implements BeanPostProcessor, ApplicationContextAware
     private boolean isFrameworkBeanClass(Class<?> clazz) {
         return clazz.isAnnotationPresent(Page.class)
                 || clazz.isAnnotationPresent(Widget.class)
-                || Formatter.class.isAssignableFrom(clazz)
-                || DeserializationPostProcessor.class.isAssignableFrom(clazz)
-                || Validator.class.isAssignableFrom(clazz);
+                || isTypeForImport(clazz);
     }
+
+    private static boolean isTypeForImport(Class<?> clazz) {
+        return FRAMEWORK_BEAN_CLASSES.stream().anyMatch(c -> c.isAssignableFrom(clazz));
+    }
+
 
     private Stream<String> pushClientPackages() {
         return applicationContext.getBeansWithAnnotation(EnablePushClients.class).values().stream()

@@ -1,5 +1,7 @@
 package one.xis.gradle;
 
+import org.graalvm.polyglot.Context;
+import org.graalvm.polyglot.PolyglotAccess;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 
@@ -131,17 +133,21 @@ public class JavascriptPlugin implements Plugin<Project> {
     }
 
     private void compileAndEval(File jsFile) {
-        try {
-            var script = getCompiler().compile(FileUtils.getContent(jsFile, "utf-8"));
-            script.eval();
-        } catch (ScriptException e) {
-            throw new RuntimeException("Compilation failed for " + jsFile.getAbsolutePath() + ": " + e.getMessage() + " at line " + e.getLineNumber() + ", column " + e.getColumnNumber());
-        }
-
+        var content = FileUtils.getContent(jsFile, "utf-8");
+        Context context = Context.newBuilder("js")
+                .allowAllAccess(true)
+                .allowExperimentalOptions(true)
+                .allowHostClassLoading(true)
+                .allowHostClassLookup(c -> true)
+                .allowPolyglotAccess(PolyglotAccess.ALL)
+                .allowNativeAccess(true)
+                .allowAllAccess(true)
+                .build();
+        context.eval("js",content);
     }
 
     private Compilable getCompiler() {
-        return (Compilable) new ScriptEngineManager().getEngineByName("graal.js");
+        return (Compilable) new ScriptEngineManager().getEngineByName("js");
     }
 
     private File getJsApiSrcRoot(Project project) {

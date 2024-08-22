@@ -9,6 +9,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Retention(RUNTIME)
 @Target(ElementType.TYPE)
-public @interface Mapped {
+public @interface Mapped { // TODO remove hole module
     Class<? extends Mapper<?>> value();
 }

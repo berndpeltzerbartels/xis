@@ -220,7 +220,6 @@ class DeserializationTest {
         private Parameter parameter;
 
         @BeforeEach
-        @SuppressWarnings("unchecked")
         void initArgumentCaptors() {
             deserializationContextArgumentCaptor = ArgumentCaptor.forClass(DeserializationContext.class);
             valueCaptor = ArgumentCaptor.forClass(Object.class);
@@ -253,7 +252,7 @@ class DeserializationTest {
         }
 
         @Test
-        void deserialize() {
+        void deserialize() throws NoSuchFieldException {
             var json = """
                     {
                         "beanField": {
@@ -267,11 +266,7 @@ class DeserializationTest {
             assertThat(postProcessingResults.postProcessingResults(InvalidValueError.class)).isEmpty();
             assertThat(result.getBeanField()).isNotNull();
             assertThat(result.getBeanField().getLocalDate()).isEqualTo(LocalDate.of(2021, 1, 1));
-        }
 
-
-        @AfterEach
-        void doVerification() throws NoSuchFieldException {
             verify(postProcessorMock, times(3)).postProcess(deserializationContextArgumentCaptor.capture(), valueCaptor.capture(), postPricessingObjectCaptor.capture());
 
             var paths = deserializationContextArgumentCaptor.getAllValues().stream().map(DeserializationContext::getPath).toList();

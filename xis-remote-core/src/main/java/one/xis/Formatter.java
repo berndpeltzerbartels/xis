@@ -3,6 +3,7 @@ package one.xis;
 import java.time.ZoneId;
 import java.util.Locale;
 
+@ImportInstances
 public interface Formatter<T> {
 
     String format(T t, Locale locale, ZoneId zoneId);

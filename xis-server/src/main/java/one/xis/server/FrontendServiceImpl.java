@@ -31,7 +31,7 @@ public class FrontendServiceImpl implements FrontendService {
     private Resource classesJsResource;
     private Resource mainJsResource;
     private Resource functionsJsResource;
-
+    
     @XISInit
     void init() {
         appJsResource = resources.getByPath("app.js");
@@ -121,6 +121,7 @@ public class FrontendServiceImpl implements FrontendService {
     public String getFunctionsJs() {
         return functionsJsResource.getContent();
     }
+
 
     private void addUserContext(ClientRequest request) {
         var userContext = new UserContext();

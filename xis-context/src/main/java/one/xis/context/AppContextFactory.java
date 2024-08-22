@@ -41,8 +41,8 @@ class AppContextFactory implements ComponentCreationListener {
                       Set<String> packagesToScan) {
 
         this.componentAnnotations = componentAnnotations;
-
-        this.reflections = new Reflections(packagesToScan, new SubTypesScanner(),
+        this.reflections = new Reflections(packagesToScan,
+                new SubTypesScanner(),
                 new TypeAnnotationsScanner(),
                 new FieldAnnotationsScanner());
 

@@ -4,6 +4,7 @@ import lombok.NonNull;
 import one.xis.context.XISComponent;
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
+import org.reflections.scanners.Scanners;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -33,7 +34,7 @@ public class Resources {
     }
 
     public Collection<Resource> getClassPathResources(String prefix, @NonNull String suffix) {
-        return new Reflections(prefix, new ResourcesScanner()).getResources(name -> name.endsWith(suffix)).stream()
+        return new Reflections(prefix, Scanners.Resources).getResources("*"+suffix).stream()
                 .map(StaticResource::new).collect(Collectors.toSet());
     }
 
