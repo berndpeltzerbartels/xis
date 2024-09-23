@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import one.xis.server.ClientRequest;
 import one.xis.server.FrontendService;
+import one.xis.server.ServerResponse;
 
 import java.util.Locale;
 import java.util.Map;
@@ -21,49 +22,59 @@ public class BackendBridge {
     private final ObjectMapper objectMapper = new ObjectMapper(); // TODO always use the same mapper and inject it here
     private final AppContext appContext;
 
-    public String getComponentConfig(String uri, Map<String, String> headers) {
-        return serialialize(frontendService.getConfig());
+    public BackendBridgeResponse getComponentConfig(String uri, Map<String, String> headers) {
+        return toBridgeResponse(frontendService.getConfig());
+    }
+
+    public BackendBridgeResponse getPageModel(String uri, String requestJson, Map<String, String> headers) {
+        return toBridgeResponse(frontendService.processModelDataRequest(request(requestJson)));
+    }
+
+    public BackendBridgeResponse getWidgetModel(String uri, String requestJson, Map<String, String> headers) {
+        return toBridgeResponse(frontendService.processModelDataRequest(request(requestJson)));
+    }
+
+    public BackendBridgeResponse onPageAction(String uri, String requestJson, Map<String, String> headers) {
+        return toBridgeResponse(frontendService.processActionRequest(request(requestJson)));
+    }
+
+    public BackendBridgeResponse onWidgetAction(String uri, String requestJson, Map<String, String> headers) {
+        return toBridgeResponse(frontendService.processActionRequest(request(requestJson)));
+    }
+
+    public BackendBridgeResponse getPageHead(String uri, Map<String, String> headers) {
+        return stringToBridgeResponse(frontendService.getPageHead(headers.get("uri")));
+    }
+
+    public BackendBridgeResponse getPageBody(String uri, Map<String, String> headers) {
+        return stringToBridgeResponse(frontendService.getPageBody(headers.get("uri")));
+    }
+
+    public BackendBridgeResponse getBodyAttributes(String uri, Map<String, String> headers) {
+        return toBridgeResponse(frontendService.getBodyAttributes(headers.get("uri")));
+    }
+
+    public BackendBridgeResponse getWidgetHtml(String uri, Map<String, String> headers) {
+        return stringToBridgeResponse(frontendService.getWidgetHtml(headers.get("uri")));
+    }
+
+    private BackendBridgeResponse stringToBridgeResponse(String str) {
+        return new BackendBridgeResponse(str, 200);
     }
 
 
-    public String getPageModel(String uri, String requestJson, Map<String, String> headers) {
-        return serialialize(frontendService.processModelDataRequest(request(requestJson)));
+    private <T> BackendBridgeResponse toBridgeResponse(T o) {
+        return new BackendBridgeResponse(serialialize(o), 200);
     }
 
 
-    public String getWidgetModel(String uri, String requestJson, Map<String, String> headers) {
-        return serialialize(frontendService.processModelDataRequest(request(requestJson)));
+    private <T> BackendBridgeResponse toBridgeResponse(ServerResponse o) {
+        return new BackendBridgeResponse(serialialize(o), o.getStatus());
     }
 
 
-    public String onPageAction(String uri, String requestJson, Map<String, String> headers) {
-        return serialialize(frontendService.processActionRequest(request(requestJson)));
-    }
-
-
-    public String onWidgetAction(String uri, String requestJson, Map<String, String> headers) {
-        return serialialize(frontendService.processActionRequest(request(requestJson)));
-    }
-
-
-    public String getPageHead(String uri, Map<String, String> headers) {
-        return frontendService.getPageHead(headers.get("uri"));
-    }
-
-
-    public String getPageBody(String uri, Map<String, String> headers) {
-        return frontendService.getPageBody(headers.get("uri"));
-    }
-
-
-    public String getBodyAttributes(String uri, Map<String, String> headers) {
-        return serialialize(frontendService.getBodyAttributes(headers.get("uri")));
-    }
-
-
-    public String getWidgetHtml(String uri, Map<String, String> headers) {
-        var id = uri.substring("/xis/widget/html/".length());
-        return frontendService.getWidgetHtml(id);
+    private String resourceId(String uri) {
+        return uri.substring(uri.lastIndexOf("/") + 1);
     }
 
     private ClientRequest request(String requestJson) {

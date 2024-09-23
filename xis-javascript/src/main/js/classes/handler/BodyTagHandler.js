@@ -6,9 +6,9 @@ class BodyTagHandler extends TagHandler {
         this.attributeHandlers = [];
     }
 
-    refresh(data) {
+    refresh(data, formData) {
         this.attributeHandlers.forEach(h => h.refresh(data));
-        this.refreshDescendantHandlers(data);
+        this.refreshDescendantHandlers(data, formData);
     }
 
     /**

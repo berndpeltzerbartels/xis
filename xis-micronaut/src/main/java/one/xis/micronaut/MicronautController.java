@@ -1,5 +1,7 @@
 package one.xis.micronaut;
 
+import io.micronaut.http.HttpResponse;
+import io.micronaut.http.HttpStatus;
 import io.micronaut.http.annotation.PathVariable;
 import io.micronaut.http.annotation.*;
 import jakarta.annotation.PostConstruct;
@@ -10,7 +12,7 @@ import java.util.Locale;
 import java.util.Map;
 
 @Controller
-class MicronautController implements FrameworkController {
+class MicronautController implements FrameworkController<HttpResponse<ServerResponse<Object>>> {
 
     @Inject
     private MicronautContextAdapter contextAdapter;
@@ -30,30 +32,34 @@ class MicronautController implements FrameworkController {
 
     @Override
     @Post("/xis/page/model")
-    public ServerResponse getPageModel(@Body ClientRequest request, Locale locale) {
+    public HttpResponse<ServerResponse<Object>> getPageModel(@Body ClientRequest request, Locale locale) {
         request.setLocale(locale); // TODO is Locale a valid parameter for Micronaut ?
-        return frontendService.processModelDataRequest(request);
+        var serverResponse = frontendService.processModelDataRequest(request);
+        return HttpResponse.status(HttpStatus.valueOf(serverResponse.getHttpStatus())).body(serverResponse);
     }
 
     @Override
     @Post("/xis/widget/model")
-    public ServerResponse getWidgetModel(@Body ClientRequest request, Locale locale) {
+    public HttpResponse<ServerResponse<Object>> getWidgetModel(@Body ClientRequest request, Locale locale) {
         request.setLocale(locale);
-        return frontendService.processModelDataRequest(request);
+        var serverResponse = frontendService.processModelDataRequest(request);
+        return HttpResponse.status(HttpStatus.valueOf(serverResponse.getHttpStatus())).body(serverResponse);
     }
 
     @Override
     @Post("/xis/page/action")
-    public ServerResponse onPageAction(@Body ClientRequest request, Locale locale) {
+    public HttpResponse<ServerResponse<Object>> onPageAction(@Body ClientRequest request, Locale locale) {
         request.setLocale(locale);
-        return frontendService.processActionRequest(request);
+        var serverResponse = frontendService.processActionRequest(request);
+        return HttpResponse.status(HttpStatus.valueOf(serverResponse.getHttpStatus())).body(serverResponse);
     }
 
     @Override
     @Post("/xis/widget/action")
-    public ServerResponse onWidgetAction(@Body ClientRequest request, Locale locale) {
+    public HttpResponse<ServerResponse<Object>> onWidgetAction(@Body ClientRequest request, Locale locale) {
         request.setLocale(locale);
-        return frontendService.processActionRequest(request);
+        var serverResponse = frontendService.processActionRequest(request);
+        return HttpResponse.status(HttpStatus.valueOf(serverResponse.getHttpStatus())).body(serverResponse);
     }
 
     @Override
@@ -81,8 +87,8 @@ class MicronautController implements FrameworkController {
     }
 
     @Override
-    @Get("/xis/widget/html/{id}")
-    public String getWidgetHtml(@PathVariable("id") String id) {
+    @Get("/xis/widget/html")
+    public String getWidgetHtml(@Header("uri") String id) {
         return frontendService.getWidgetHtml(id);
     }
 

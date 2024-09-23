@@ -1,16 +1,14 @@
 /**
  * @typedef WidgetAttributes
+ * @property {string} id
  * @property {string} host
- * @property {array<string>} modelParameterNames
- * @property {{string: array<string>}} actionParameterNames
  */
 
 
 class WidgetAttributes {
 
     constructor(obj) {
+        this.id = obj.id;
         this.host = obj.host;
-        this.modelParameterNames = obj.modelParameterNames || [];
-        this.actionParameterNames = obj.actionParameterNames || {};
     }
 }

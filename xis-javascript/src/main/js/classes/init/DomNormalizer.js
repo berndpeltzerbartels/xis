@@ -160,6 +160,7 @@ class DomNormalizer {
                 case 'foreach':
                 case 'repeat':
                 case 'target-container':
+                case 'parameters':
                 case 'action': anchor.setAttribute('xis:' + attrName, attrValue);
                 default: anchor.setAttribute(attrName, attrValue);
             }

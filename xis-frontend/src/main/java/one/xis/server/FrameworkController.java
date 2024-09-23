@@ -3,17 +3,17 @@ package one.xis.server;
 import java.util.Locale;
 import java.util.Map;
 
-public interface FrameworkController {
+public interface FrameworkController<R> {
 
     ClientConfig getComponentConfig();
 
-    ServerResponse getPageModel(ClientRequest request, Locale locale);
+    R getPageModel(ClientRequest request, Locale locale);
 
-    ServerResponse getWidgetModel(ClientRequest request, Locale locale);
+    R getWidgetModel(ClientRequest request, Locale locale);
 
-    ServerResponse onPageAction(ClientRequest request, Locale locale);
+    R onPageAction(ClientRequest request, Locale locale);
 
-    ServerResponse onWidgetAction(ClientRequest request, Locale locale);
+    R onWidgetAction(ClientRequest request, Locale locale);
 
     String getPage(String id);
 

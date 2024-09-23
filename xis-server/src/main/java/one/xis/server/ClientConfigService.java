@@ -67,15 +67,14 @@ class ClientConfigService {
 
     private void addWidgetAttributes(ClientConfigBuilder configBuilder) {
         var widgetIds = new HashSet<String>();
-        var widgetAttributes = new HashMap<String, ComponentAttributes>();
+        var widgetAttributesHashMap = new HashMap<String, WidgetAttributes>();
         for (Object widgetController : widgetControllers) {
             var attributes = widgetAttributesFactory.attributes(widgetController);
-            var id = WidgetUtil.getId(widgetController);
-            widgetIds.add(id);
-            widgetAttributes.put(id, attributes);
+            widgetIds.add(attributes.getId());
+            widgetAttributesHashMap.put(attributes.getId(), attributes); // TODO host
         }
         configBuilder.widgetIds(Collections.unmodifiableSet(widgetIds))
-                .widgetAttributes(widgetAttributes);
+                .widgetAttributes(widgetAttributesHashMap);
     }
 
 

@@ -145,6 +145,31 @@ function urlParameters(url) {
 
 
 /**
+ * Appends query parameters to the url. Also works in case the url 
+ * already has query parameters.
+ * 
+ * @param {string} url 
+ * @param {any} parameters key/value pairs as object 
+ * @returns 
+ */
+function appendQueryParameters(url, parameters) {
+    var result = url;
+    var parameterNames = Object.keys(parameters);
+    var parameterCount = parameterNames.length;
+    if (parameterCount == 0) {
+        return result;
+    }
+    if (result.indexOf('?') == -1) {
+        result += '?';
+    } else if (!result.endsWith('&')) {
+        result += '&';
+    }
+    result += parameterNames.map(name => name + '=' + encodeURI(parameters[name])).join('&');
+    return result;
+}
+
+
+/**
 * @private
 * @returns {string} the widget-id by leaving query from the widget-url
 */

@@ -23,6 +23,7 @@ class ControllerWrapperFactory {
 
     private final MainDeserializer deserializer;
     private final ControllerMethodResultMapper controllerMethodResultMapper;
+    private final ControllerResultMapper controllerResultMapper;
 
     <W extends ControllerWrapper> W createControllerWrapper(@NonNull String id, @NonNull Object controller, Class<W> wrapperClass) {
         try {
@@ -31,6 +32,7 @@ class ControllerWrapperFactory {
             controllerWrapper.setController(controller);
             controllerWrapper.setModelMethods(modelMethods(controller));
             controllerWrapper.setActionMethods(actionMethodMap(controller));
+            controllerWrapper.setControllerResultMapper(controllerResultMapper);
             return controllerWrapper;
         } catch (Exception e) {
             throw new RuntimeException("Failed to initialize " + controller.getClass(), e);

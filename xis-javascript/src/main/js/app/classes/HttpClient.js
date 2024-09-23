@@ -11,7 +11,7 @@ class HttpClient {
      * @public
      * @param {string} uri
      * @param {any} payload
-     * @return {Promise<any>}
+     * @return {Promise<any, int>}
      *
      */
     post(uri, payload, headers) {
@@ -25,7 +25,7 @@ class HttpClient {
      * @public
      * @param {string} uri
      * @param {any} headers
-     * @return {Promise<any>}
+     * @return {Promise<any, int>}
      */
     get(uri, headers) {
         return this.doRequest(uri, headers, 'GET', undefined);
@@ -51,10 +51,10 @@ class HttpClient {
                 // TODO Add headers to allow 304
                 // Readystaet == 4 for 304 ?
                 if (xmlHttp.readyState == 4) { // TODO In Java 204 if there is no server-method
-                    if (xmlHttp.status == 200) {
-                        resolve(xmlHttp.responseText);
+                    if (xmlHttp.status < 400 || xmlHttp.status == 422) {
+                        resolve(xmlHttp);
                     } else {
-                        reject('status: ' + xmlHttp.status);
+                        reject();
                     }
                 }
                 // TODO use errorhandler

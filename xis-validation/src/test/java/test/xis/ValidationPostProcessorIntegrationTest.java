@@ -56,7 +56,7 @@ class ValidationPostProcessorIntegrationTest {
         var response = frontendService.processActionRequest(request);
 
         // then
-        var dataTree = objectMapper.readTree(response.getData());
+        var dataTree = objectMapper.valueToTree(response.getFormData());
         personData = objectMapper.treeToValue(dataTree.at("/person"), PersonData.class);
 
         // Data was changed by the action method:
@@ -79,7 +79,7 @@ class ValidationPostProcessorIntegrationTest {
         var response = frontendService.processActionRequest(request);
 
         // then
-        var dataTree = objectMapper.readTree(response.getData());
+        var dataTree = objectMapper.valueToTree(response.getFormData());
         personData = objectMapper.treeToValue(dataTree.at("/person"), PersonData.class);
 
         // Data was changed by the action method:
@@ -102,7 +102,7 @@ class ValidationPostProcessorIntegrationTest {
         var response = frontendService.processActionRequest(request);
 
         // then
-        assertThat(response.getHttpStatus()).isEqualTo(422);
+        assertThat(response.getStatus()).isEqualTo(422);
         assertThat(response.getValidatorMessages().getMessages()).containsEntry("/person/email", "Ungültig");
         assertThat(response.getValidatorMessages().getGlobalMessages()).containsExactly("Ungültige E-Mail-Adresse");
     }
@@ -117,7 +117,7 @@ class ValidationPostProcessorIntegrationTest {
         var response = frontendService.processActionRequest(request);
 
         // then
-        assertThat(response.getHttpStatus()).isEqualTo(422);
+        assertThat(response.getStatus()).isEqualTo(422);
         assertThat(response.getValidatorMessages().getMessages()).containsExactlyInAnyOrderEntriesOf(Map.of("/person/email", "erforderlich", "/person/dateOfBirth", "erforderlich"));
         assertThat(response.getValidatorMessages().getGlobalMessages()).containsExactlyInAnyOrder("EMail ist erforderlich", "Geburtsdatum ist erforderlich");
     }
@@ -137,7 +137,7 @@ class ValidationPostProcessorIntegrationTest {
         var response = frontendService.processActionRequest(request);
 
         // then
-        assertThat(response.getHttpStatus()).isEqualTo(200);
+        assertThat(response.getStatus()).isEqualTo(200);
         assertThat(context.getSingleton(PersonDataListController.class).getPersons()).containsExactly(personData);
     }
 
@@ -169,7 +169,7 @@ class ValidationPostProcessorIntegrationTest {
         var response = frontendService.processActionRequest(request);
 
         // then
-        assertThat(response.getHttpStatus()).isEqualTo(422);
+        assertThat(response.getStatus()).isEqualTo(422);
         assertThat(response.getValidatorMessages().getMessages()).containsExactlyInAnyOrderEntriesOf(Map.of(
                 "/persons[0]/email", "erforderlich",
                 "/persons[1]/email", "Ungültig",
@@ -250,9 +250,10 @@ class ValidationPostProcessorIntegrationTest {
 
         @Action("save")
         void save(@FormData("person") PersonData person) {
-            this.personData.setName("Maxl Mustermann");
-            this.personData.setEmail("blabla@blabla.de");
-            this.personData.setDateOfBirth(LocalDate.of(2000, 1, 5));
+            person.setName("Maxl Mustermann");
+            person.setEmail("blabla@blabla.de");
+            person.setDateOfBirth(LocalDate.of(2000, 1, 5));
+            personData = person;
         }
     }
 

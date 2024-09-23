@@ -1,5 +1,4 @@
 /**
- * @property {any} data
  * @property {string} clientId
  * @property {string} userId
  * @property {string} pageId
@@ -12,7 +11,6 @@
 class ClientRequest {
 
     constructor() {
-        this.data = {};
         this.clientId = '';
         this.userId = '';
         this.pageId = '';

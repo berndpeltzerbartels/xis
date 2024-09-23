@@ -11,7 +11,7 @@ import java.util.List;
 
 @XISComponent
 @RequiredArgsConstructor
-class PostProcessing {
+public class PostProcessing {
 
     private final List<DeserializationPostProcessor> postProcessors;
 

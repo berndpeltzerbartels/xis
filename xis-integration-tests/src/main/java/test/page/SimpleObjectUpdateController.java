@@ -11,13 +11,13 @@ class SimpleObjectUpdateController {
 
     private final SimpleObjectService simpleObjectService;
 
-    @ModelData("formObject")
+    @FormData("formObject")
     SimpleObject formObject(@URLParameter("id") Integer id) {
         return simpleObjectService.getById(id);
     }
 
     @Action("save")
-    PageResponse save(@ModelData("formObject") SimpleObject simpleObject) {
+    PageResponse save(@FormData("formObject") SimpleObject simpleObject) {
         simpleObjectService.save(simpleObject);
         return PageResponse.of(SimpleObjectDetails.class, "id", simpleObject.getId());
     }

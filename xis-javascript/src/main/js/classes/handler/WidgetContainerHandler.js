@@ -17,12 +17,35 @@ class WidgetContainerHandler extends TagHandler {
         this.containerIdExpression = this.expressionFromAttribute('container-id');
         this.defaultWidgetExpression = this.expressionFromAttribute('default-widget');
         this.type = 'widget-container-handler';
+        this.forms = {};
     }
 
-    getData() {
-        var data = this.widgetState ? this.widgetState.data : new Data({});
-        data.parentData = this.parentData();
+
+    registerForm(formHandler) {
+        this.forms[formHandler.binding] = formHandler;
+    }
+
+
+    resetForms() {
+        for (var binding of Object.keys(this.forms)) {
+            this.forms[binding].reset();
+        }
+        this.forms = {}; // may be they do not appear again
+    }
+
+    formData() {
+        var data = new Data({});
+        for (var binding of Object.keys(this.forms)) {
+            data.setValue(binding, this.forms[binding].formData);
+        }
         return data;
+    }
+
+    submitAction(action) {
+        debugger;
+        var _this = this;
+        this.client.widgetAction(this.widgetInstance, this.widgetState, action, this.formData(), {})
+            .then(response => _this.handleActionResponse(response));
     }
     /**
     * @public
@@ -36,7 +59,6 @@ class WidgetContainerHandler extends TagHandler {
             this.widgetState = new WidgetState(app.pageController.resolvedURL, {});
         }
         var data = response.data;
-        this.widgetState.data = data;
         this.refreshContainerId(data);
         this.refreshDescendantHandlers(data);
     }
@@ -46,12 +68,12 @@ class WidgetContainerHandler extends TagHandler {
      * @param {Data} data 
      */
     refresh(data) {
+        this.resetForms();
         this.refreshContainerId(data);
         this.bindDefaultWidgetInitial(data);
         var widgetParameters = this.widgetState ? this.widgetState.widgetParameters : {};
         this.widgetState = new WidgetState(app.pageController.resolvedURL, widgetParameters);
         if (this.widgetInstance) {
-            this.widgetState.data = data;
             this.reloadDataAndRefresh(data);
         }
     }

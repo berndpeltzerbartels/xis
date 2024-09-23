@@ -7,7 +7,6 @@ import one.xis.context.XISComponent;
 @RequiredArgsConstructor
 class ControllerResponseMapper {
 
-    private final DataSerializer dataSerializer;
     private final PathResolver pathResolver;
 
     void mapResultToResponse(ServerResponse response, ControllerResult result) {
@@ -16,17 +15,11 @@ class ControllerResponseMapper {
             var pathString = pathResolver.evaluateRealPath(path, result.getPathVariables(), result.getUrlParameters());
             response.setNextPageURL(pathString);
         }
-        response.setData(dataSerializer.serialize(result.getModelData()));
-
+        response.setData(result.getModelData());
+        response.setFormData(result.getFormData());
         response.setNextWidgetId(result.getNextWidgetId());
         response.setWidgetParameters(result.getWidgetParameters());
         response.setValidatorMessages(result.getValidatorMessages());
-        response.setHttpStatus(result.isValidationFailed() ? 422 : 200);
-    }
-
-    private void mapValidatorMessages(ControllerResult result) {
-        result.getValidatorMessages();
-
-
+        response.setStatus(result.isValidationFailed() ? 422 : 200);
     }
 }

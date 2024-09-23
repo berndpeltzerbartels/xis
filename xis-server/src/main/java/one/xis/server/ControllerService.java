@@ -6,10 +6,6 @@ import one.xis.context.XISComponent;
 import one.xis.context.XISInject;
 import one.xis.utils.lang.StringUtils;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 @Slf4j
 @XISComponent
 class ControllerService {
@@ -28,75 +24,60 @@ class ControllerService {
 
     void processModelDataRequest(@NonNull ClientRequest request, @NonNull ServerResponse response) {
         var controllerResult = new ControllerResult();
+        controllerResult.setCurrentPageURL(request.getPageId());
+        controllerResult.setCurrentWidgetId(request.getWidgetId());
         var wrapper = controllerWrapper(request);
         wrapper.invokeGetModelMethods(request, controllerResult);
+        if (controllerResult.getNextPageURL() == null) {
+            controllerResult.setNextPageURL(request.getPageId());
+        }
+        if (controllerResult.getNextWidgetId() == null) {
+            controllerResult.setNextWidgetId(request.getWidgetId());
+        }
         mapResultToResponse(response, controllerResult);
-        if (response.getNextPageURL() == null && wrapper instanceof PageControllerWrapper pageControllerWrapper) {
-            response.setNextPageURL(pageControllerWrapper.getId());
-        }
-        if (response.getNextWidgetId() == null && wrapper instanceof WidgetControllerWrapper widgetControllerWrapper) {
-            response.setNextWidgetId(widgetControllerWrapper.getId());
-        }
     }
 
     void processActionRequest(@NonNull ClientRequest request, @NonNull ServerResponse response) {
         var controllerResult = new ControllerResult();
+        controllerResult.setCurrentPageURL(request.getPageId());
+        controllerResult.setCurrentWidgetId(request.getWidgetId());
         var invokerControllerWrapper = controllerWrapper(request);
         invokerControllerWrapper.invokeActionMethod(request, controllerResult);
+        if (controllerResult.getNextPageURL() == null) {
+            controllerResult.setNextPageURL(request.getPageId());
+        }
+        if (controllerResult.getNextWidgetId() == null) {
+            controllerResult.setNextWidgetId(request.getWidgetId());
+        }
         mapResultToResponse(response, controllerResult);
-        var nextControllerWrapper = nextControllerWrapper(controllerResult);
-        // This should only occur when action method is called
-        mapResultToRequestOnAction(request, controllerResult);
-        if (!controllerResult.isValidationFailed()) {
+        var nextControllerWrapper = nextControllerWrapperAfterAction(controllerResult);
+        if (!nextControllerWrapper.equals(invokerControllerWrapper)) {
+            controllerResult.getModelData().clear();
             nextControllerWrapper.invokeGetModelMethods(request, controllerResult);
         }
         mapResultToResponse(response, controllerResult);
     }
 
     private ControllerWrapper controllerWrapper(ClientRequest request) {
-        if (request.getWidgetId() != null && !request.getWidgetId().isEmpty()) {
+        if (StringUtils.isNotEmpty(request.getWidgetId())) {
             return widgetControllerWrapperById(request.getWidgetId());
         }
         return pageControllerWrapperById(request.getPageId());
     }
 
-    private ControllerWrapper nextControllerWrapper(ControllerResult controllerResult) {
+    private ControllerWrapper nextControllerWrapperAfterAction(@NonNull ControllerResult controllerResult) {
+        if (StringUtils.isNotEmpty(controllerResult.getNextPageURL())) {
+            return pageControllerWrapperById(controllerResult.getNextPageURL());
+        }
         if (StringUtils.isNotEmpty(controllerResult.getNextWidgetId())) {
             return widgetControllerWrapperById(controllerResult.getNextWidgetId());
         }
-        return pageControllerWrapperById(controllerResult.getNextPageURL());
+        throw new IllegalStateException("no controller found for request: " + controllerResult);
     }
 
     private void mapResultToResponse(ServerResponse response, ControllerResult result) {
         responseMapper.mapResultToResponse(response, result);
     }
-
-    private void mapResultToRequestOnAction(ClientRequest request, ControllerResult result) {
-        if (request.getUrlParameters() == null) {
-            request.setUrlParameters(new HashMap<>());
-        }
-        if (request.getPathVariables() == null) {
-            request.setPathVariables(new HashMap<>());
-        }
-        if (request.getWidgetParameters() == null) {
-            request.setWidgetParameters(new HashMap<>());
-        }
-        if (result.getUrlParameters() != null) {
-            request.getUrlParameters().putAll(toStringMap(result.getUrlParameters()));
-        }
-        if (result.getPathVariables() != null) {
-            request.getPathVariables().putAll(toStringMap(result.getPathVariables()));
-        }
-        if (result.getWidgetParameters() != null) {
-            request.getWidgetParameters().putAll(toStringMap(result.getWidgetParameters()));
-        }
-    }
-
-    private static Map<String, String> toStringMap(Map<String, Object> map) {
-        return map.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString()));
-    }
-
 
     protected ControllerWrapper widgetControllerWrapperById(@NonNull String id) {
         return widgetControllerWrappers.findWidgetById(id)

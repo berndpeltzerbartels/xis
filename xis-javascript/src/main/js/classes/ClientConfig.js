@@ -22,7 +22,7 @@ class ClientConfig {
      * @returns {string}
      */
     getPageHost(id) {
-        return this.pageHosts[id];
+        return this.pageAttributes[id];
     }
 
     /**
@@ -31,6 +31,6 @@ class ClientConfig {
      * @returns {string}
      */
     getWidgetHost(id) {
-        return this.widgetHosts[id];
+        return this.hostsByWidgetId[id].getHost();
     }
 }

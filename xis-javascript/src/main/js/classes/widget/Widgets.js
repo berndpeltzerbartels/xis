@@ -12,7 +12,6 @@ class Widgets {
     }
 
     loadWidgets(config) {
-        this.widgetAttributes = config.widgetAttributes;
         var _this = this;
         var promises = [];
         this.widgetAttributes = config.widgetAttributes;

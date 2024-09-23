@@ -42,11 +42,12 @@ class PageController {
      * 
      * @public
      * @param {String} action
+     * @param {Object} actionParameters
      * @returns {Promise<void>}
      */
-    submitAction(action) {
+    submitAction(action, actionParameters) {
         var _this = this;
-        return this.client.pageAction(this.resolvedURL, this.page.data, action)
+        return this.client.pageAction(this.resolvedURL, {}, action, actionParameters)
             .then(response => _this.handleActionResponse(response));
     }
 
@@ -64,17 +65,32 @@ class PageController {
    */
     submitFormAction(action, formData) {
         var _this = this;
-        return this.client.pageFormAction(this.resolvedURL, this.page.data, action, formData)
+        return this.client.pageAction(this.resolvedURL, formData, action, {})
             .then(response => _this.handleActionResponse(response));
+    }
+
+    handleActionResponse(response) {
+        switch (response.status) {
+            case 200:
+                this.handleActionResponseOK(response);
+                break;
+            case 204:
+                this.handleActionResponseNoContent(response);
+                break;
+            case 422:
+                this.handleActionResponseUnprocessableEntity(response);
+            default:
+                throw new Error('status: ' + response.status);
+        }
     }
 
     /**
      * Handels server-response after submitting an action.
      * 
      * @public
-     * @param {Response} response
+     * @param {ServerResponse} response
      */
-    handleActionResponse(response) {
+    handleActionResponseOK(response) {
         if (response.nextPageURL) {
             var resolvedURL = this.urlResolver.resolve(response.nextPageURL);
             if (!resolvedURL) {
@@ -95,6 +111,40 @@ class PageController {
         this.updateHistory(this.resolvedURL);
     }
 
+
+    /** 
+     * Handels server-response after submitting an action.
+     * 
+     * @public
+     * @param {ServerResponse} response
+     */
+    handleActionResponseNoContent(response) {
+        if (response.nextPageURL) {
+            var resolvedURL = this.urlResolver.resolve(response.nextPageURL);
+            if (!resolvedURL) {
+                throw new Error('no page for ' + response.nextPageURL);
+            }
+            this.resolvedURL = resolvedURL;
+            if (resolvedURL.page != this.page) {
+                this.page = resolvedURL.page;
+                this.htmlTagHandler.unbindPage();
+                this.htmlTagHandler.bindPage(resolvedURL.page);
+            }
+        }
+        this.updateHistory(this.resolvedURL);
+    }
+
+
+    /**
+     * Handels server-response after submitting an action.
+     *  @public
+     * @param {ServerResponse} response
+     * @returns {Promise<void>}
+     *  
+     * */
+    handleActionResponseUnprocessableEntity(response) {
+
+    }
 
     getData() {
         return this.page ? this.page.data : undefined;
@@ -167,7 +217,7 @@ class PageController {
     */
     refreshCurrentPage() {
         var _this = this;
-        return this.client.loadPageData(this.resolvedURL, this.page.data).then(response => {
+        return this.client.loadPageData(this.resolvedURL).then(response => {
             var data = response.data;
             data.setValue(['pathVariables'], this.resolvedURL.pathVariablesAsMap());
             data.setValue(['urlParameters'], this.resolvedURL.urlParameters);

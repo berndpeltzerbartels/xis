@@ -10,8 +10,8 @@ class CompositeTagHandler {
         this.handlers.push(handler);
     }
 
-    refresh(data) {
-        this.handlers.forEach(handler => handler.refresh(data));
+    refresh(data, formData) {
+        this.handlers.forEach(handler => handler.refresh(data, formData));
     }
 
     showWidget(widgetId, widgewtState) {

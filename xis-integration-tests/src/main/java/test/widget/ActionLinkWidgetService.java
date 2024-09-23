@@ -4,5 +4,5 @@ interface ActionLinkWidgetService {
 
     ActionLinkWidgetData getData();
 
-    void update(ActionLinkWidgetData data);
+    void action(Object value);
 }

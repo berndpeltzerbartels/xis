@@ -18,7 +18,7 @@ public class Element extends Node {
     // TODO interface, not everyrhing here should be accesssible
     public final String localName;
     public Node firstChild;
-    public String innerText;
+    public String innerText = "";
     public DOMStringList classList = new DOMStringList();
     public Object _handler;
     public Object _rootHandler;

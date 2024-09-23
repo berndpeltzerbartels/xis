@@ -3,17 +3,17 @@ package one.xis.spring;
 
 import lombok.Setter;
 import one.xis.server.*;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Locale;
 import java.util.Map;
 
+@Setter
 @RestController
 @RequestMapping
-class SpringController implements FrameworkController {
+class SpringController implements FrameworkController<ResponseEntity<ServerResponse>> {
 
-    @Setter
     private FrontendService frontendService;
 
     @Override
@@ -24,30 +24,34 @@ class SpringController implements FrameworkController {
 
     @Override
     @PostMapping("/xis/page/model")
-    public ServerResponse getPageModel(@RequestBody ClientRequest request, Locale locale) {
+    public ResponseEntity<ServerResponse> getPageModel(@RequestBody ClientRequest request, Locale locale) {
         request.setLocale(locale);
-        return frontendService.processModelDataRequest(request);
+        var serverResponse = frontendService.processModelDataRequest(request);
+        return ResponseEntity.status(serverResponse.getStatus()).body(serverResponse);
     }
 
     @Override
     @PostMapping("/xis/widget/model")
-    public ServerResponse getWidgetModel(@RequestBody ClientRequest request, Locale locale) {
+    public ResponseEntity<ServerResponse> getWidgetModel(@RequestBody ClientRequest request, Locale locale) {
         request.setLocale(locale);
-        return frontendService.processModelDataRequest(request);
+        var serverResponse = frontendService.processModelDataRequest(request);
+        return ResponseEntity.status(serverResponse.getStatus()).body(serverResponse);
     }
 
     @Override
     @PostMapping("/xis/page/action")
-    public ServerResponse onPageAction(@RequestBody ClientRequest request, Locale locale) {
+    public ResponseEntity<ServerResponse> onPageAction(@RequestBody ClientRequest request, Locale locale) {
         request.setLocale(locale);
-        return frontendService.processActionRequest(request);
+        var serverResponse = frontendService.processActionRequest(request);
+        return ResponseEntity.status(serverResponse.getStatus()).body(serverResponse);
     }
 
     @Override
     @PostMapping("/xis/widget/action")
-    public ServerResponse onWidgetAction(@RequestBody ClientRequest request, Locale locale) {
+    public ResponseEntity<ServerResponse> onWidgetAction(@RequestBody ClientRequest request, Locale locale) {
         request.setLocale(locale);
-        return frontendService.processActionRequest(request);
+        var serverResponse = frontendService.processActionRequest(request);
+        return ResponseEntity.status(serverResponse.getStatus()).body(serverResponse);
     }
 
     @Override
@@ -76,8 +80,8 @@ class SpringController implements FrameworkController {
     }
 
     @Override
-    @GetMapping("/xis/widget/html/{id}")
-    public String getWidgetHtml(@PathVariable("id") String id) {
+    @GetMapping("/xis/widget/html")
+    public String getWidgetHtml(@RequestHeader("uri") String id) {
         return frontendService.getWidgetHtml(id);
     }
 

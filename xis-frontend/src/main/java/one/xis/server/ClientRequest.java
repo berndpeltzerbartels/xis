@@ -19,9 +19,6 @@ public class ClientRequest {
     private String zoneId;
 
     @JsonDeserialize(using = MapDeserializer.class)
-    private Map<String, String> data = new HashMap<>();
-
-    @JsonDeserialize(using = MapDeserializer.class)
     private Map<String, String> formData = new HashMap<>();
 
     @JsonDeserialize(using = MapDeserializer.class)
@@ -32,4 +29,9 @@ public class ClientRequest {
 
     @JsonDeserialize(using = MapDeserializer.class)
     private Map<String, String> widgetParameters = new HashMap<>();
+
+    @JsonDeserialize(using = MapDeserializer.class)
+    private Map<String, String> actionParameters = new HashMap<>();
+
+
 }

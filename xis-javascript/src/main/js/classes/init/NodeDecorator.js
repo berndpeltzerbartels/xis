@@ -53,6 +53,10 @@ class NodeDecorator {
                 parentHandler.addDescendantHandler(handler);
                 this.decorateChildNodes(element, handler);
                 return;
+            case 'xis:parameter':
+                handler = new ParameterTagHandler(element, parentHandler);
+                parentHandler.addDescendantHandler(handler);
+                break;
             case 'form': if (element.getAttribute('xis:binding')) {
                 handler = this.decorateForm(element);
             }
@@ -152,8 +156,11 @@ class NodeDecorator {
      */
     decorateLinkByAttribute(element) {
         var handler;
-        if (element.getAttribute('xis:page') || element.getAttribute('xis:widget')) {
-            handler = new LinkHandler(element);
+        if (element.getAttribute('xis:page')) {
+            handler = new PageLinkHandler(element);
+        }
+        if (element.getAttribute('xis:widget')) {
+            handler = new WidgetLinkHandler(element);
         } else if (element.getAttribute('xis:action')) {
             handler = new ActionLinkHandler(element, this.client, this.widgetContainers);
         }

@@ -30,12 +30,12 @@ class ActionLinkPageTest {
         var result = testContext.openPage("/actionPage.html");
         result.getDocument().getElementById("action-link1").click();
         assertThat(result.getDocument().getElementByTagName("title").innerText).isEqualTo("ActionPage");
-        verify(service, times(2)).getData();
+        verify(service, times(1)).getData();
 
         var captor = ArgumentCaptor.forClass(ActionLinkPageData.class);
         verify(service).update(captor.capture());
-        assertThat(captor.getValue().getId()).isEqualTo(101);
-        assertThat(captor.getValue().getValue()).isEqualTo("bla");
+        assertThat(captor.getValue().getId()).isEqualTo(123);
+        assertThat(captor.getValue().getValue()).isEqualTo("value1");
         assertThat(result.getDocument().getElementByTagName("title").innerText).isEqualTo("ActionPage");
 
     }
@@ -48,7 +48,7 @@ class ActionLinkPageTest {
         result.getDocument().getElementById("action-link2").click();
 
         assertThat(result.getDocument().getElementByTagName("title").innerText).isEqualTo("ActionPage");
-        verify(service, times(2)).getData();
+        verify(service, times(1)).getData();
         var captor = ArgumentCaptor.forClass(ActionLinkPageData.class);
         verify(service, times(1)).update(captor.capture());
         assertThat(captor.getValue().getId()).isEqualTo(101);
@@ -63,13 +63,13 @@ class ActionLinkPageTest {
 
 
         verify(service).getData(); // once, because a new page was loaded after action
-        // redirct to index
+        // redirect to index
         assertThat(result.getDocument().getElementByTagName("title").innerText).isEqualTo("Index");
         assertThat(testContext.getSingleton(IndexPage.class).getInvocations()).isEqualTo(1); // model from next page has to be loaded
         var captor = ArgumentCaptor.forClass(ActionLinkPageData.class);
         verify(service).update(captor.capture());
         assertThat(captor.getValue().getId()).isEqualTo(101);
-        assertThat(captor.getValue().getValue()).isEqualTo("bla");
+        assertThat(captor.getValue().getValue()).isEqualTo("value-test-action3");
 
     }
 }

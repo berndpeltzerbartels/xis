@@ -7,16 +7,13 @@ import one.xis.context.XISComponent;
 
 @XISComponent
 @RequiredArgsConstructor
-class PageAttributesFactory extends ComponentAttributesFactory<PageAttributes> {
+class PageAttributesFactory {
 
     private final PathResolver pathResolver;
-
-    @Override
+    
     PageAttributes attributes(Object controller) {
         var attributes = new PageAttributes();
         var path = pathResolver.createPath(PageUtil.getUrl(controller));
-        attributes.setModelParameterNames(modelsToSubmitForModel(controller));
-        attributes.setActionParameterNames(modelsToSubmitForAction(controller));
         attributes.setWelcomePage(controller.getClass().isAnnotationPresent(WelcomePage.class));
         attributes.setPath(path);
         attributes.setNormalizedPath(path.normalized());

@@ -176,7 +176,7 @@ class DeserializationTest {
                     "stringField": "123",
                     "objectField": {
                         "localDateField": null
-                        
+                
                     }
                 }""";
         var ppObjects = new PostProcessingResults();
@@ -196,7 +196,7 @@ class DeserializationTest {
                     "stringField": "123",
                     "objectField": {
                         "localDateField": null
-                        
+                
                     }
                 }""";
         var ppObjects = new PostProcessingResults();
@@ -322,27 +322,27 @@ class DeserializationTest {
 
 
     @SuppressWarnings("unused")
-    void testMethodInt(@ModelData("integer") int i) {
+    void testMethodInt(@URLParameter("integer") int i) {
 
     }
 
     @SuppressWarnings("unused")
-    void testMethodCollection(@ModelData("collection") Collection<LocalDate> collection) {
+    void testMethodCollection(@FormData("collection") Collection<LocalDate> collection) {
 
     }
 
     @SuppressWarnings("unused")
-    void testMethodLocalDateBean(@ModelData("localDateBean") BeanWithLocalDate bean) {
+    void testMethodLocalDateBean(@FormData("localDateBean") BeanWithLocalDate bean) {
 
     }
 
     @SuppressWarnings("unused")
-    void testMethodMandatory(@ModelData("model") BeanWithMandatoryFields bean) {
+    void testMethodMandatory(@FormData("model") BeanWithMandatoryFields bean) {
 
     }
 
     @SuppressWarnings("unused")
-    void testMethodPostProcessing(@ModelData("model") @PostProcessorTestAnnotation PostProcessorTestBean1 bean) {
+    void testMethodPostProcessing(@FormData("model") @PostProcessorTestAnnotation PostProcessorTestBean1 bean) {
 
     }
 

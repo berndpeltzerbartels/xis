@@ -4,9 +4,7 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import lombok.NonNull;
 import lombok.SneakyThrows;
-import one.xis.FormData;
-import one.xis.ModelData;
-import one.xis.UserContext;
+import one.xis.*;
 import one.xis.context.XISComponent;
 import one.xis.validation.Mandatory;
 
@@ -25,7 +23,7 @@ import static one.xis.deserialize.DefaultDeserializationErrorType.MISSING_MANDAT
 public class MainDeserializer {
 
     private final List<JsonDeserializer<?>> deserializers;
-    private PostProcessing deserializationPostProcessing;
+    private final PostProcessing deserializationPostProcessing;
 
     public MainDeserializer(@NonNull List<JsonDeserializer<?>> deserializers, @NonNull PostProcessing postProcessing) {
         this.deserializers = deserializers;
@@ -34,7 +32,10 @@ public class MainDeserializer {
     }
 
 
-    public Object deserialize(@NonNull String value, @NonNull AnnotatedElement target, @NonNull UserContext userContext, @NonNull PostProcessingResults postProcessingResults) {
+    public Object deserialize(@NonNull String value,
+                              @NonNull AnnotatedElement target,
+                              @NonNull UserContext userContext,
+                              @NonNull PostProcessingResults postProcessingResults) {
         var reader = new JsonReader(new StringReader(value));
         reader.setLenient(true);
         var path = "/" + getName(target);
@@ -81,6 +82,12 @@ public class MainDeserializer {
         }
         if (target.isAnnotationPresent(FormData.class)) {
             return target.getAnnotation(FormData.class).value();
+        }
+        if (target.isAnnotationPresent(URLParameter.class)) {
+            return target.getAnnotation(URLParameter.class).value();
+        }
+        if (target.isAnnotationPresent(ActionParameter.class)) {
+            return target.getAnnotation(ActionParameter.class).value();
         }
         if (target instanceof Field field) {
             return field.getName();

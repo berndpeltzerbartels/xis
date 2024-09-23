@@ -10,6 +10,8 @@ import java.util.Map;
 @Data
 class ControllerResult {
 
+    private String currentPageURL;
+    private String currentWidgetId;
     private String nextPageURL;
     private String nextWidgetId;
     private String widgetContainerId;
@@ -18,6 +20,7 @@ class ControllerResult {
     private final Map<String, Object> urlParameters = new HashMap<>();
     private final Map<String, Object> pathVariables = new HashMap<>();
     private final Map<String, Object> modelData = new HashMap<>();
+    private final Map<String, Object> formData = new HashMap<>();
     private boolean validationFailed;
     private final ValidatorMessages validatorMessages = new ValidatorMessages();
 

@@ -17,11 +17,12 @@ import java.util.Map;
  */
 @XISComponent
 @RequiredArgsConstructor
-class DataSerializer {
+class DataSerializerImpl implements DataSerializer {
 
     private final Gson gson;
 
-    String serialize(Map<String, Object> data) {
+    @Override
+    public String serialize(Map<String, Object> data) {
         return gson.toJson(data);
     }
 }

@@ -28,23 +28,23 @@ public class IntegrationTestContext {
         this.environment = new IntegrationTestEnvironment(appContext.getSingleton(BackendBridge.class));
     }
 
-    public IntegrationTestResult openPage(String uri, Map<String, Object> parameters) {
+    public OpenPageResult openPage(String uri, Map<String, Object> parameters) {
         synchronized (SYNC_LOCK) {
             if (!parameters.isEmpty()) {
                 uri += "?";
                 uri += parameters.entrySet().stream().map(e -> e.getKey() + "=" + e.getValue()).collect(Collectors.joining("&"));
             }
             environment.openPage(uri);
-            return new IntegrationTestResult(appContext, environment);
+            return new OpenPageResult(appContext, environment);
         }
     }
 
-    public IntegrationTestResult openPage(String uri) {
+    public OpenPageResult openPage(String uri) {
         return openPage(uri, Collections.emptyMap());
     }
 
 
-    public IntegrationTestResult openPage(Class<?> pageController) {
+    public OpenPageResult openPage(Class<?> pageController) {
         return openPage(PageUtil.getUrl(pageController), Collections.emptyMap());
     }
 

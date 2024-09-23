@@ -2,6 +2,6 @@ package test.page;
 
 import one.xis.Page;
 
-@Page("/anchortestPage.html")
+@Page("/anchorTestPage.html")
 class AnchorReplaceTestPage {
 }

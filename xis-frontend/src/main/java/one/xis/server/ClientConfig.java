@@ -24,18 +24,14 @@ public class ClientConfig {
     private final String welcomePageId;
 
     /**
-     * ValidationResultKey is the normalized path
-     *
-     * @{@link Path}
+     * Page attributes by normalized path. Must contain all pages.
      */
     private final Map<String, PageAttributes> pageAttributes;
 
     /**
-     * ValidationResultKey is the normalized path
-     *
-     * @{@link Path}
+     * Hosts by widget-id. Must contain all widgets.
      */
-    private final Map<String, ComponentAttributes> widgetAttributes;
+    private final Map<String, WidgetAttributes> widgetAttributes;
 
 
 }

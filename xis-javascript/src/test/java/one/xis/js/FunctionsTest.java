@@ -37,4 +37,22 @@ class FunctionsTest {
         assertThat(result).containsExactly(1, 2, 3);
     }
 
+    @Test
+    void appendQueryParameters1() throws ScriptException {
+        var result = JSUtil.execute(functions + "appendQueryParameters('http://example.com', {a: 'b', c: 'd'})").asString();
+        assertThat(result).isEqualTo("http://example.com?a=b&c=d");
+    }
+
+    @Test
+    void appendQueryParameters2() throws ScriptException {
+        var result = JSUtil.execute(functions + "appendQueryParameters('http://example.com', {})").asString();
+        assertThat(result).isEqualTo("http://example.com");
+    }
+
+    @Test
+    void appendQueryParameters3() throws ScriptException {
+        var result = JSUtil.execute(functions + "appendQueryParameters('http://example.com?a=b', {c: 'd'})").asString();
+        assertThat(result).isEqualTo("http://example.com?a=b&c=d");
+    }
+
 }

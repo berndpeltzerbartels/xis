@@ -1,6 +1,17 @@
 <div xmlns:xis="https://xis.one/xsd" id="widgetRoot">
-    <a xis:action="test-action1" id="action-link1">Test-Action1</a>
-    <xis:a action="test-action2" id="action-link2">Test-Action2</xis:a>
-    <a xis:action="${action3}" id="action-link3">Test-Action3</a>
-    <xis:a action="test-action4" id="action-link4">Test-Action4</xis:a>
+    <a xis:action="test-action1" id="action-link1">Test-Action1
+        <xis:parameter name="param" value="value1"/>
+    </a>
+    <xis:a action="test-action2" id="action-link2">Test-Action2
+        <xis:parameter name="id" value="101"/>
+        <xis:parameter name="value" value="bla"/>
+    </xis:a>
+    <a xis:action="${action3}" id="action-link3">Test-Action3
+        <xis:parameter name="id" value="value1"/>
+        <xis:parameter name="value" value="value1"/>
+    </a>
+    <xis:a action="test-action4" id="action-link4">Test-Action4
+        <xis:parameter name="greeting" value="Hallo!"/>
+    </xis:a>
+
 </div>

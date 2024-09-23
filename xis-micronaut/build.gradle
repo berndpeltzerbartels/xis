@@ -29,7 +29,7 @@ dependencies {
     implementation "org.reflections:reflections:$reflectionsVersion"
 
     implementation project(':xis-context')
-    implementation project(':xis-server')
+    implementation project(':xis-frontend')
     implementation project(':xis-remote-core')
 
 

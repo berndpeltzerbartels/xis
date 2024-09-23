@@ -20,79 +20,76 @@ class ControllerMethodResultMapper {
 
     private final ValidatorMessageResolver validatorMessageResolver;
 
-    ControllerMethodResult mapControllerResult(Method method, Object returnValue) {
-        var controllerMethodResult = new ControllerMethodResult();
-        if (method.isAnnotationPresent(Action.class)) {
-            mapActionResult(returnValue, controllerMethodResult);
-        }
-        if (method.isAnnotationPresent(ModelData.class)) {
-            mapModelResult(method.getAnnotation(ModelData.class).value(), returnValue, controllerMethodResult);
-        }
-        if (method.isAnnotationPresent(FormData.class)) {
-            mapModelResult(method.getAnnotation(FormData.class).value(), returnValue, controllerMethodResult);
-        }
-        return controllerMethodResult;
-    }
-
-    ControllerMethodResult keepStateOnAction(ClientRequest request, Method method) {
-        if (!method.isAnnotationPresent(Action.class)) {
-            throw new IllegalArgumentException("Method must be an action method");
-        }
-        var controllerMethodResult = new ControllerMethodResult();
-        controllerMethodResult.setNextPageURL(request.getPageId());
-        controllerMethodResult.setNextWidgetId(request.getWidgetId());
-        controllerMethodResult.setWidgetContainerId(request.getWidgetContainerId());
-        controllerMethodResult.getWidgetParameters().putAll(castStringMap(request.getWidgetParameters()));
-        controllerMethodResult.getPathVariables().putAll(castStringMap(request.getPathVariables()));
-        controllerMethodResult.getUrlParameters().putAll(castStringMap(request.getUrlParameters()));
-        return controllerMethodResult;
-    }
-
-    ControllerMethodResult mapValidationErrorState(ClientRequest request, Collection<PostProcessingResult> errors) {
-        var controllerMethodResult = new ControllerMethodResult();
-        controllerMethodResult.setNextPageURL(request.getPageId());
-        controllerMethodResult.setNextWidgetId(request.getWidgetId());
-        controllerMethodResult.setWidgetContainerId(request.getWidgetContainerId());
-        controllerMethodResult.getWidgetParameters().putAll(castStringMap(request.getWidgetParameters()));
-        controllerMethodResult.getPathVariables().putAll(castStringMap(request.getPathVariables()));
-        controllerMethodResult.getUrlParameters().putAll(castStringMap(request.getUrlParameters()));
-        controllerMethodResult.getValidatorMessages().getGlobalMessages().addAll(mapGlobalErrors(errors));
-        controllerMethodResult.getValidatorMessages().getMessages().putAll(mapErrors(errors));
-        controllerMethodResult.setValidationFailed(true);
-        return controllerMethodResult;
-    }
-
-    private void mapModelResult(String key, Object value, ControllerMethodResult controllerMethodResult) {
-        controllerMethodResult.getModelData().put(key, value);
-    }
-
-    private void mapActionResult(Object returnValue, ControllerMethodResult controllerMethodResult) {
+    void mapReturnValueToResult(ControllerMethodResult controllerMethodResult, Method method, Object returnValue) {
         if (returnValue instanceof PageResponse pageResponse) {
             mapPageResponse(pageResponse, controllerMethodResult);
         } else if (returnValue instanceof WidgetResponse widgetResponse) {
             mapWidgetResponse(widgetResponse, controllerMethodResult);
         } else if (returnValue instanceof Class<?> controllerClass) {
             updateControllerClass(controllerMethodResult, controllerClass);
-        } else {
-            throw new IllegalStateException(returnValue.getClass() + " must be a widget class or an instance of WidgetResponse");
         }
+        if (method.isAnnotationPresent(ModelData.class)) {
+            mapModelResult(method.getAnnotation(ModelData.class).value(), returnValue, controllerMethodResult);
+        }
+        if (method.isAnnotationPresent(FormData.class)) {
+            mapFormData(method.getAnnotation(FormData.class).value(), returnValue, controllerMethodResult);
+        }
+    }
+
+    void mapMethodParameterToResultAfterInvocation(ControllerMethodResult controllerMethodResult, ControllerMethodParameter[] parameters, Object[] args) {
+        for (var i = 0; i < parameters.length; i++) {
+            parameters[i].addParameterValueToResult(controllerMethodResult, args[i]);
+        }
+    }
+
+    void mapRequestToResult(ClientRequest request, ControllerMethodResult controllerMethodResult) {
+        // Do not map widgetId or pageURL here !
+        controllerMethodResult.setWidgetContainerId(request.getWidgetContainerId());
+        controllerMethodResult.getWidgetParameters().putAll(castStringMap(request.getWidgetParameters()));
+        controllerMethodResult.getPathVariables().putAll(castStringMap(request.getPathVariables()));
+        controllerMethodResult.getUrlParameters().putAll(castStringMap(request.getUrlParameters()));
+    }
+
+    void mapValidationErrors(ControllerMethodResult controllerMethodResult, Collection<PostProcessingResult> errors) {
+        controllerMethodResult.getValidatorMessages().getGlobalMessages().addAll(mapGlobalErrors(errors));
+        controllerMethodResult.getValidatorMessages().getMessages().putAll(mapErrors(errors));
+        controllerMethodResult.setValidationFailed(true);
+    }
+
+    private void mapModelResult(String key, Object value, ControllerMethodResult controllerMethodResult) {
+        controllerMethodResult.getModelData().put(key, value);
+    }
+
+    private void mapFormData(String key, Object value, ControllerMethodResult controllerMethodResult) {
+        controllerMethodResult.getFormData().put(key, value);
     }
 
     private void mapWidgetResponse(WidgetResponse widgetResponse, ControllerMethodResult result) {
         if (widgetResponse.getControllerClass() != null) {
             updateControllerClass(result, widgetResponse.getControllerClass());
         }
-        result.setWidgetContainerId(widgetResponse.getTargetContainer());
-        result.getWidgetsToReload().addAll(widgetResponse.getWidgetsToReload());
-        result.getWidgetParameters().putAll(widgetResponse.getWidgetParameters());
+        if (widgetResponse.getTargetContainer() != null) {
+            result.setWidgetContainerId(widgetResponse.getTargetContainer());
+        }
+        if (widgetResponse.getWidgetsToReload() != null) {
+            result.getWidgetsToReload().addAll(widgetResponse.getWidgetsToReload());
+        }
+        if (widgetResponse.getWidgetParameters() != null) {
+            result.getWidgetParameters().putAll(widgetResponse.getWidgetParameters());
+        }
     }
 
     private void mapPageResponse(PageResponse pageResponse, ControllerMethodResult controllerMethodResult) {
         if (pageResponse.getControllerClass() != null) {
             updateControllerClass(controllerMethodResult, pageResponse.getControllerClass());
         }
-        controllerMethodResult.getPathVariables().putAll(pageResponse.getPathVariables());
-        controllerMethodResult.getUrlParameters().putAll(pageResponse.getUrlParameters());
+        if (pageResponse.getPathVariables() != null) {
+            controllerMethodResult.getPathVariables().putAll(pageResponse.getPathVariables());
+        }
+        if (pageResponse.getUrlParameters() != null) {
+            controllerMethodResult.getUrlParameters().putAll(pageResponse.getUrlParameters());
+        }
+
     }
 
 

@@ -36,8 +36,8 @@ public class WidgetResponse implements Response {
         return this;
     }
 
-    public WidgetResponse targeContainer(String targeteContainer) {
-        this.targetContainer = targeteContainer;
+    public WidgetResponse targetContainer(String targetContainer) {
+        this.targetContainer = targetContainer;
         return this;
     }
 

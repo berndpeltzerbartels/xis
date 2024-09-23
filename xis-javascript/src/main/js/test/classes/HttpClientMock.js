@@ -4,7 +4,7 @@ class HttpClientMock {
      * @public
      * @param {string} uri
      * @param {any} payload
-     * @return {Promise<any>}
+     * @return {Promise<any,int>}
      *
      */
     post(uri, payload, headers) {
@@ -20,14 +20,14 @@ class HttpClientMock {
      * @public
      * @param {string} uri
      * @param {any} headers
-     * @return {Promise<any>}
+     * @return {Promise<any, int>}
      */
     get(uri, headers) {
         console.log('HTTP - GET: ' + uri);
         var _this = this;
         return new Promise((resolve, reject) => {
             var response = _this.responseForGet(uri, headers);
-            resolve(response);
+            resolve(response);;
         });
     }
 
@@ -37,11 +37,8 @@ class HttpClientMock {
             case '/xis/page/head': return backendBridge.getPageHead(uri, headers);
             case '/xis/page/body': return backendBridge.getPageBody(uri, headers);
             case '/xis/page/body-attributes': return backendBridge.getBodyAttributes(uri, headers);
-            default:
-                if (uri.startsWith('/xis/widget/html/')) {
-                    return backendBridge.getWidgetHtml(uri, headers);
-                }
-                throw new Error('unknown uri for http-get: ' + uri);
+            case '/xis/widget/html': return backendBridge.getWidgetHtml(uri, headers);
+            default: throw new Error('unknown uri for http-get: ' + uri);
         }
     }
 

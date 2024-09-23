@@ -1,4 +1,4 @@
-class LinkHandler extends TagHandler {
+class WidgetLinkHandler extends TagHandler {
 
     /**
      * 
@@ -21,11 +21,16 @@ class LinkHandler extends TagHandler {
      * @param {Data} data 
      */
     refresh(data) {
+        this.widgetParameters = {};
         this.data = data;
         this.refreshDescendantHandlers(data); // attributes might have variables !
         this.targetPageUrl = this.tag.getAttribute('xis:page');
         this.targetWidgetUrl = this.tag.getAttribute('xis:widget');
         this.targetContainerId = this.tag.getAttribute('xis:target-container');
+    }
+
+    addParameter(name, value) {
+        this.widgetParameters[name] = value;
     }
 
 
@@ -35,35 +40,18 @@ class LinkHandler extends TagHandler {
      * @returns {Promise<void>} 
      */
     onClick(e) {
-        if (this.targetWidgetUrl) {
-            return this.onClickWidgetLink();
-        } else if (this.targetPageUrl) {
-            return this.onClickPageLink();
-        }
-    }
-
-    /**
-     * @private
-     * @returns {Promise<void>} 
-     */
-    onClickWidgetLink() {
         return new Promise((resolve, _) => {
             var container = this.getTargetContainer();
             var handler = container._handler;
-            var widgetParameters = urlParameters(this.targetWidgetUrl);
-            var widgetState = new WidgetState(app.pageController.resolvedURL, widgetParameters);
+            var widgetParametersInUrl = urlParameters(this.targetWidgetUrl);
+            for (var key of widgetParametersInUrl) {
+                this.widgetParameters[key] = widgetParametersInUrl[key];
+            }
+            var widgetState = new WidgetState(app.pageController.resolvedURL, this.widgetParameters);
             var widgetId = stripQuery(this.targetWidgetUrl);
             handler.showWidget(widgetId, widgetState);
             resolve();
         });
-    }
-
-    /**
-     * @private
-     * @returns {Promise<void>}
-     */
-    onClickPageLink() {
-        return displayPageForUrl(this.targetPageUrl);
     }
 
     /**

@@ -1,11 +1,9 @@
 package one.xis.server;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 @Data
-@EqualsAndHashCode(callSuper = true)
-class PageAttributes extends ComponentAttributes {
+class PageAttributes {
 
     private Path path;
 
@@ -17,5 +15,6 @@ class PageAttributes extends ComponentAttributes {
      */
     private String normalizedPath;
     private boolean welcomePage;
+    private String host;
 
 }

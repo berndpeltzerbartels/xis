@@ -64,13 +64,13 @@ class ControllerWrapperFactoryTest {
     @Test
     void noExceptionPage() {
         var controller = new TestPageController();
-        new ControllerWrapperFactory(mock(MainDeserializer.class), mock(ControllerMethodResultMapper.class)).createControllerWrapper("/page.html", controller, PageControllerWrapper.class);
+        new ControllerWrapperFactory(mock(MainDeserializer.class), mock(ControllerMethodResultMapper.class), mock(ControllerResultMapper.class)).createControllerWrapper("/page.html", controller, PageControllerWrapper.class);
     }
 
     @Test
     void noExceptionWidget() {
         var controller = new TestWidgetController();
-        new ControllerWrapperFactory(mock(MainDeserializer.class), mock(ControllerMethodResultMapper.class)).createControllerWrapper("TestWidgetController", controller, PageControllerWrapper.class);
+        new ControllerWrapperFactory(mock(MainDeserializer.class), mock(ControllerMethodResultMapper.class), mock(ControllerResultMapper.class)).createControllerWrapper("TestWidgetController", controller, PageControllerWrapper.class);
     }
 
 

@@ -22,11 +22,12 @@ public class ControllerWrapper {
      */
     private Object controller;
 
-    private Map<String, ControllerMethod> modelMethods;
-    private Map<String, ControllerMethod> actionMethods;
+    private Map<String, ControllerMethod> modelMethods;// TODO a collection is sufficient
+    private Map<String, ControllerMethod> actionMethods;// TODO a collection is sufficient
+    private ControllerResultMapper controllerResultMapper;
 
     void invokeGetModelMethods(ClientRequest request, ControllerResult controllerResult) {
-        modelMethods.forEach((key, method) -> invokeForModel(key, request, controllerResult, method));
+        modelMethods.values().forEach(method -> invokeForModel(request, controllerResult, method));
     }
 
     void invokeActionMethod(ClientRequest request, ControllerResult controllerResult) {
@@ -36,17 +37,7 @@ public class ControllerWrapper {
         }
         try {
             var controllerMethodResult = method.invoke(request, controller);
-            controllerResult.setNextPageURL(controllerMethodResult.getNextPageURL());
-            controllerResult.setNextWidgetId(controllerMethodResult.getNextWidgetId());
-            controllerResult.setWidgetContainerId(controllerMethodResult.getWidgetContainerId());
-            controllerResult.getWidgetParameters().putAll(controllerMethodResult.getWidgetParameters());
-            controllerResult.getPathVariables().putAll(controllerMethodResult.getPathVariables());
-            controllerResult.getUrlParameters().putAll(controllerMethodResult.getUrlParameters());
-            controllerResult.getValidatorMessages().getGlobalMessages().addAll(controllerMethodResult.getValidatorMessages().getGlobalMessages());
-            controllerResult.getValidatorMessages().getMessages().putAll(controllerMethodResult.getValidatorMessages().getMessages());
-            if (controllerMethodResult.isValidationFailed()) {
-                controllerResult.setValidationFailed(true);
-            }
+            controllerResultMapper.mapMethodResultToControllerResult(controllerMethodResult, controllerResult);
         } catch (Exception e) {
             Logger.error(e, "Failed to invoke action-method");
             throw new RuntimeException("Failed to invoke action-method: " + method, e);
@@ -57,14 +48,14 @@ public class ControllerWrapper {
         return controller.getClass();
     }
 
-    private void invokeForModel(String dataKey, ClientRequest request, ControllerResult controllerResult, ControllerMethod modelMethod) {
+    private void invokeForModel(ClientRequest request, ControllerResult controllerResult, ControllerMethod modelMethod) {
         try {
             var controllerMethodResult = modelMethod.invoke(request, controller);
             if (controllerMethodResult.isValidationFailed()) {
                 // these validation errors are unexpected, so we throw an exception
-                throw exceptionForValiationErrors(controllerMethodResult.getValidatorMessages());
+                throw exceptionForValidationErrors(controllerMethodResult.getValidatorMessages());
             }
-            controllerResult.getModelData().putAll(controllerMethodResult.getModelData());
+            controllerResultMapper.mapMethodResultToControllerResult(controllerMethodResult, controllerResult);
         } catch (Exception e) {
             Logger.error(e, "Failed to invoke model-method");
             throw new RuntimeException("Failed to invoke model-method " + modelMethod, e);
@@ -75,11 +66,10 @@ public class ControllerWrapper {
      * @param validatorMessages
      * @return a RuntimeException with a message containing all validation errors
      */
-    private RuntimeException exceptionForValiationErrors(ValidatorMessages validatorMessages) {
-
+    private RuntimeException exceptionForValidationErrors(ValidatorMessages validatorMessages) {
+        // TODO
         return new RuntimeException("Errors occurred: ");
 
     }
-
 
 }

@@ -1,8 +1,8 @@
 package test.page;
 
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import one.xis.Action;
+import one.xis.ActionParameter;
 import one.xis.ModelData;
 import one.xis.Page;
 
@@ -12,7 +12,7 @@ class ActionLinkPage {
 
     private final ActionLinkPageService service;
 
-    @ModelData("data")
+    @ModelData("actionLinkData")
     ActionLinkPageData data() {
         return service.getData();
     }
@@ -23,19 +23,19 @@ class ActionLinkPage {
     }
 
     @Action("test-action1")
-    void action1(@ModelData("data") ActionLinkPageData data) {
-        service.update(data);
+    void action1(@ActionParameter("value") String value) {
+        service.update(new ActionLinkPageData(123, value));
     }
 
     @Action("test-action2")
-    Class<?> action2(@ModelData("data") ActionLinkPageData data) {
-        service.update(data);
+    Class<?> action2(@ActionParameter("id") int id, @ActionParameter("value") String value) {
+        service.update(new ActionLinkPageData(id, value));
         return ActionLinkPage.class;
     }
 
     @Action("test-action3")
-    Class<?> action3(@ModelData("data") ActionLinkPageData data, @NonNull @ModelData("action3") String action3) {
-        service.update(data);
+    Class<?> action3(@ActionParameter("id") int id, @ActionParameter("value3") String value) {
+        service.update(new ActionLinkPageData(id, value));
         return IndexPage.class;
     }
 

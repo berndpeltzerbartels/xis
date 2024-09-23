@@ -20,7 +20,7 @@ class AnchorReplaceTest {
     }
 
     @Test
-    @DisplayName("xis:a is replaced by html-a-element")
+    @DisplayName("xis:a is getting replaced by html-a-element")
     void test() {
         var result = testContext.openPage(AnchorReplaceTestPage.class);
 

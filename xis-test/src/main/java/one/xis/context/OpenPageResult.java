@@ -4,7 +4,7 @@ import lombok.Data;
 import one.xis.test.dom.Document;
 
 @Data
-public class IntegrationTestResult {
+public class OpenPageResult {
     private final AppContext appContext;
     private final IntegrationTestEnvironment testEnvironment;
 

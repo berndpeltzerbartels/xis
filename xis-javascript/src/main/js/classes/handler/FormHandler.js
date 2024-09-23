@@ -35,9 +35,15 @@ class FormHandler extends TagHandler {
      * @param {Data} data 
      */
     refresh(data) {
-        this.formData = new Data({});
         this.binding = this.bindingExpression.evaluate(data);
         this.refreshDescendantHandlers(data);
+    }
+
+    /**
+     * @public
+     */
+    reset() {
+        // TODO: implement
     }
 
     /**
@@ -54,7 +60,7 @@ class FormHandler extends TagHandler {
         var targetContainerHandler = targetContainer._handler;
         var invokerHandler = invokerContainer._handler;
         var _this = this;
-        this.client.widgetFormAction(invokerHandler.widgetInstance, invokerHandler.widgetState, action, this.formData)
+        this.client.widgetAction(invokerHandler.widgetInstance, invokerHandler.widgetState, action, this.formData, {})
             .then(response => _this.handleActionResponse(response, targetContainerHandler));
     }
 

@@ -4,7 +4,6 @@ import one.xis.context.IntegrationTestContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import test.page.IndexPage;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,15 +33,11 @@ class ActionLinkWidgetTest {
     @Test
     void action1() {
         var result = testContext.openPage(WidgetPage.class);
+
         result.getDocument().getElementById("action-link1").click();
 
-        verify(service, times(2)).getData();
-
-        var captor = ArgumentCaptor.forClass(ActionLinkWidgetData.class);
-        verify(service, times(1)).update(captor.capture());
-        assertThat(captor.getValue().getId()).isEqualTo(101);
-        assertThat(captor.getValue().getValue()).isEqualTo("bla");
-
+        verify(service, times(1)).getData();
+        verify(service, times(1)).action("value1");
     }
 
 
@@ -51,11 +46,8 @@ class ActionLinkWidgetTest {
         var result = testContext.openPage(WidgetPage.class);
         result.getDocument().getElementById("action-link2").click();
 
-        verify(service, times(2)).getData();
-        var captor = ArgumentCaptor.forClass(ActionLinkWidgetData.class);
-        verify(service, times(1)).update(captor.capture());
-        assertThat(captor.getValue().getId()).isEqualTo(101);
-        assertThat(captor.getValue().getValue()).isEqualTo("bla");
+        verify(service, times(1)).getData();
+        verify(service, times(1)).action(new Object[]{101, "bla"});
     }
 
     @Test
@@ -66,18 +58,13 @@ class ActionLinkWidgetTest {
 
 
         verify(service, times(1)).getData(); // once, because a new page was loaded after action
-        // redirct to index
+        // redirect to index
         assertThat(result.getDocument().getElementByTagName("title").innerText).isEqualTo("Index");
-        assertThat(testContext.getSingleton(IndexPage.class).getInvocations()).isEqualTo(1); // model from next page has to be loaded
-        var captor = ArgumentCaptor.forClass(ActionLinkWidgetData.class);
-        verify(service, times(1)).update(captor.capture());
-        assertThat(captor.getValue().getId()).isEqualTo(101);
-        assertThat(captor.getValue().getValue()).isEqualTo("bla");
-
+        assertThat(testContext.getSingleton(IndexPage.class).getInvocations()).isEqualTo(1); // model from next page has to be loaded;
     }
 
     @Test
-    @DisplayName("Action is a variable and link of a widget is clicked and demands displaying another widget")
+    @DisplayName("Action demands displaying another widget")
     void action4() {
         var result = testContext.openPage(WidgetPage.class);
         result.getDocument().getElementById("action-link4").click(); // "action-link3"is set by model variable "action3"

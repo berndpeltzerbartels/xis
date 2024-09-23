@@ -3,8 +3,6 @@ package one.xis.server;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import one.xis.Action;
-import one.xis.Page;
 import one.xis.deserialize.MainDeserializer;
 import one.xis.deserialize.PostProcessingResults;
 
@@ -14,11 +12,11 @@ import java.lang.reflect.Method;
 @Slf4j
 class ControllerMethod {
 
-    private final Method method;
-    private final String key;
-    private final MainDeserializer deserializer;
-    private final ControllerMethodResultMapper controllerMethodResultMapper;
-    private final ControllerMethodParameter[] controllerMethodParameters;
+    protected final Method method;
+    protected final String key;
+    protected final MainDeserializer deserializer;
+    protected final ControllerMethodResultMapper controllerMethodResultMapper;
+    protected final ControllerMethodParameter[] controllerMethodParameters;
 
     ControllerMethod(@NonNull Method method, @NonNull String key, @NonNull MainDeserializer deserializer, @NonNull ControllerMethodResultMapper controllerMethodResultMapper) {
         this.method = method;
@@ -31,40 +29,24 @@ class ControllerMethod {
         }
     }
 
-    @SuppressWarnings("unchecked")
     ControllerMethodResult invoke(@NonNull ClientRequest request, @NonNull Object controller) throws Exception {
         var postProcessingResults = new PostProcessingResults();
         var args = prepareArgs(method, request, postProcessingResults);
         if (postProcessingResults.authenticate()) {
             // TODO
         }
+        var controllerMethodResult = new ControllerMethodResult();
+        controllerMethodResultMapper.mapRequestToResult(request, controllerMethodResult);
         if (postProcessingResults.reject()) {
-            return controllerMethodResultMapper.mapValidationErrorState(request, postProcessingResults.getResults());
+            controllerMethodResultMapper.mapValidationErrors(controllerMethodResult, postProcessingResults.getResults());
+            return controllerMethodResult;
         }
         var returnValue = method.invoke(controller, args);
-        if (returnValue == null) { // e.g. a void method
-            if (method.isAnnotationPresent(Action.class)) {
-                return controllerMethodResultMapper.keepStateOnAction(request, method);
-            }
-            return controllerMethodResultMapper.keepStateOnAction(request, method);
-        }
-        if (returnValue instanceof Class clazz && clazz.isAssignableFrom(controller.getClass())) {
-            return controllerMethodResultMapper.keepStateOnAction(request, method);
-        }
-        var controllerMethodResult = controllerMethodResultMapper.mapControllerResult(method, returnValue);
-        validateWidgetContainerIdIsPresentIfRequired(controllerMethodResult, method);
+        // let parameters override request values
+        controllerMethodResultMapper.mapMethodParameterToResultAfterInvocation(controllerMethodResult, controllerMethodParameters, args);
+        // let return values override parameters
+        controllerMethodResultMapper.mapReturnValueToResult(controllerMethodResult, method, returnValue);
         return controllerMethodResult;
-    }
-
-
-    private void validateWidgetContainerIdIsPresentIfRequired(ControllerMethodResult controllerMethodResult, Method method) {
-        if (!method.getDeclaringClass().isAnnotationPresent(Page.class)) {
-            return;
-        }
-        if (controllerMethodResult.getNextWidgetId() != null && controllerMethodResult.getWidgetContainerId() == null) {
-            // otherwise, we do not know where to show the widget
-            throw new IllegalStateException("If a method of page controller returns a widget id, the widget container id must be set.");
-        }
     }
 
     @Override
@@ -72,7 +54,7 @@ class ControllerMethod {
         return "ControllerMethod(" + method.getName() + ")";
     }
 
-    private Object[] prepareArgs(Method method, ClientRequest request, PostProcessingResults postProcessingResults) throws Exception {
+    protected Object[] prepareArgs(Method method, ClientRequest request, PostProcessingResults postProcessingResults) throws Exception {
         var args = new Object[method.getParameterCount()];
         for (var i = 0; i < method.getParameterCount(); i++) {
             args[i] = controllerMethodParameters[i].prepareParameter(request, postProcessingResults);
