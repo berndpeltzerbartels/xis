@@ -84,6 +84,8 @@ class ControllerService {
             nextRequest.setPathVariables(controllerResult.getPathVariables().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString())));
             nextRequest.setWidgetContainerId(controllerResult.getWidgetContainerId());
             var nextControllerResult = new ControllerResult();
+            nextControllerResult.setNextPageURL(controllerResult.getNextPageURL());
+            nextControllerResult.setNextWidgetId(controllerResult.getNextWidgetId());
             nextControllerWrapper.invokeGetModelMethods(nextRequest, nextControllerResult);
             mapResultToResponse(response, nextControllerResult);
         }
