@@ -31,7 +31,7 @@ public class ControllerWrapper {
     void invokeGetModelMethods(ClientRequest request, ControllerResult controllerResult) {
         modelMethods.forEach(method -> invokeForModel(request, controllerResult, method));
     }
-
+    
     void invokeFormDataMethods(ClientRequest request, ControllerResult controllerResult) {
         formDataMethods.forEach(method -> invokeForFormData(request, controllerResult, method));
     }

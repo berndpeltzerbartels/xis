@@ -6,6 +6,9 @@ import one.xis.context.XISComponent;
 import one.xis.context.XISInject;
 import one.xis.utils.lang.StringUtils;
 
+import java.util.Map;
+import java.util.stream.Collectors;
+
 @Slf4j
 @XISComponent
 class ControllerService {
@@ -66,11 +69,25 @@ class ControllerService {
         }
         mapResultToResponse(response, controllerResult);
         var nextControllerWrapper = nextControllerWrapperAfterAction(controllerResult);
-        if (!nextControllerWrapper.equals(invokerControllerWrapper)) {
-            controllerResult.getModelData().clear();
-            nextControllerWrapper.invokeGetModelMethods(request, controllerResult);
+        if (nextControllerWrapper.equals(invokerControllerWrapper)) {
+            mapResultToResponse(response, controllerResult);
+        } else {
+            var nextRequest = new ClientRequest(); // TODO Mapper dafür
+            nextRequest.setPageId(controllerResult.getNextPageURL());
+            nextRequest.setWidgetId(controllerResult.getNextWidgetId());
+            nextRequest.setLocale(request.getLocale());
+            nextRequest.setZoneId(request.getZoneId());
+            nextRequest.setClientId(request.getClientId());
+            nextRequest.setUserId(request.getUserId());
+            nextRequest.setFormData(controllerResult.getFormData().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString())));
+            nextRequest.setUrlParameters(controllerResult.getUrlParameters().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString())));
+            nextRequest.setPathVariables(controllerResult.getPathVariables().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString())));
+            nextRequest.setWidgetContainerId(controllerResult.getWidgetContainerId());
+            var nextControllerResult = new ControllerResult();
+            nextControllerWrapper.invokeGetModelMethods(nextRequest, nextControllerResult);
+            mapResultToResponse(response, nextControllerResult);
         }
-        mapResultToResponse(response, controllerResult);
+
     }
 
     private ControllerWrapper controllerWrapper(ClientRequest request) {

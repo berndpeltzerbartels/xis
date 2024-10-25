@@ -10,7 +10,7 @@ class FormHandler extends TagHandler {
         super(formTag)
         this.type = 'form-handler';
         this.client = client;
-        this.formData = new Data({});
+        this.formElementHandlers = {};
         if (!formTag.getAttribute('xis:binding')) {
             throw new Error('form has no binding: ' + this.tag);
         }
@@ -18,16 +18,22 @@ class FormHandler extends TagHandler {
         formTag.addEventListener('submit', event => event.preventDefault());
     }
 
-    submit(action, actionParameters) {
+    submit(action) {
         var resolevdUrl = app.pageController.resolvedURL;
         var formHandler = this;
         var formBindingParameters = urlParameters(this.binding);
-        var formBindigKey = stripQuery(this.binding);
-        this.client.loadFormData(app.pageController.resolvedURL, this.widgetId(), formBindigKey, formBindingParameters);
-        //resolvedURL, widgetInstance, formData, action, actionParameters, binding
-        this.client.formAction(resolevdUrl, this.widgetId(), this.formData, action, formBindigKey, formBindingParameters).then(response => {
+        var formBindingKey = stripQuery(this.binding);
+        this.client.formAction(resolevdUrl, this.widgetId(), this.formData(), action, formBindingKey, formBindingParameters).then(response => {
             formHandler.handleActionResponse(response, formHandler.targetContainerHandler());
         });
+    }
+
+    formData() {
+        var data = {}
+        for (var key of Object.keys(this.formElementHandlers)) {
+            data[key] = this.formElementHandlers[key].getValue();
+        }
+        return data;
     }
 
     widgetId() {
@@ -43,8 +49,6 @@ class FormHandler extends TagHandler {
         return container ? container._handler : null;
     }
 
-    validate() { }
-
     /**
      * @public
      * @override
@@ -53,10 +57,12 @@ class FormHandler extends TagHandler {
     refresh(data) {
         this.binding = this.bindingExpression.evaluate(data);
         var formBindingParameters = urlParameters(this.binding);
-        var formBindigKey = stripQuery(this.binding);
-        this.client.loadFormData(app.pageController.resolvedURL, this.widgetId(), formBindigKey, formBindingParameters); // TODO
+        var formBindingKey = stripQuery(this.binding);
+        var formHandler = this;
+        this.formElementHandlers = {};
         this.refreshDescendantHandlers(data);
-
+        this.client.loadFormData(app.pageController.resolvedURL, this.widgetId(), formBindingKey, formBindingParameters)
+            .then(response => formHandler.refreshFormData(response.formData));
     }
 
     widgetId() {
@@ -65,19 +71,12 @@ class FormHandler extends TagHandler {
     }
 
     /**
-     * @public
-     */
-    reset() {
-        // TODO: implement
-    }
-
-    /**
      * 
      * @param {TagHandler} handler 
-     * @param {array<String>} bindingPath 
+     * @param {String} binding
      */
-    onElementHandlerRefreshed(handler, bindingPath) {
-        this.formData.setValue(bindingPath, new Value(handler.tag));
+    onElementHandlerRefreshed(handler, binding) {
+        this.formElementHandlers[binding] = handler;
     }
 
     /**
@@ -86,6 +85,10 @@ class FormHandler extends TagHandler {
      * @param {WidgetContainerHandler} targetContainerHandler 
      */
     handleActionResponse(response, targetContainerHandler) {
+        this.refreshValidatorMessages(response.validatorMessages);
+        if (!response.validatorMessages.isEmpty()) {
+            return;
+        }
         if (response.nextPageURL) {
             app.pageController.handleActionResponse(response);
         } else {

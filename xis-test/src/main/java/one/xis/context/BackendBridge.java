@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import one.xis.server.ClientRequest;
 import one.xis.server.FrontendService;
 import one.xis.server.ServerResponse;
+import one.xis.validation.ValidatorMessages;
 
 import java.util.Locale;
 import java.util.Map;
@@ -67,17 +68,17 @@ public class BackendBridge {
     }
 
     private BackendBridgeResponse stringToBridgeResponse(String str) {
-        return new BackendBridgeResponse(str, 200);
+        return new BackendBridgeResponse(str, 200, new ValidatorMessages());
     }
 
 
     private <T> BackendBridgeResponse toBridgeResponse(T o) {
-        return new BackendBridgeResponse(serialialize(o), 200);
+        return new BackendBridgeResponse(serialialize(o), 200, new ValidatorMessages());
     }
 
 
     private <T> BackendBridgeResponse toBridgeResponse(ServerResponse o) {
-        return new BackendBridgeResponse(serialialize(o), o.getStatus());
+        return new BackendBridgeResponse(serialialize(o), o.getStatus(), o.getValidatorMessages());
     }
 
 

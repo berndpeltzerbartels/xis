@@ -94,8 +94,18 @@ class Client {
             .then(response => _this.deserializeResponse(response));
     }
 
+    /**
+     * @public
+     * @param {ResolvedURL} resolvedURL 
+     * @param {String} widgetId 
+     * @param {String} formBindingKey 
+     * @param {any} formBindingParameters 
+     */
     loadFormData(resolvedURL, widgetId, formBindingKey, formBindingParameters) {
-
+        var _this = this;
+        var request = this.createFormRequest(resolvedURL, widgetId, {}, null, formBindingKey, formBindingParameters);
+        return this.httpClient.post('/xis/form/model', request)
+            .then(response => _this.deserializeResponse(response));
     }
 
     /**
@@ -130,7 +140,7 @@ class Client {
      * @public
      * @param {ResolvedURL} resolvedURL 
      * @param {String} widgetId
-     * @param {Data} formData
+     * @param {sring:string} formData
      * @param {string} action
      * @param {any} actionParameters
      * @param {string} binding
@@ -171,11 +181,15 @@ class Client {
      * @private
      * @param {ResolvedURL} resolvedURL 
      * @param {String} widgetId 
-     * @param {Data} formData 
+     * @param {string:string} formData 
      * @param {String} action 
      * @param {any} actionParameters 
      */
     createFormRequest(resolvedURL, widgetId, formData, action, formBindingKey, formBindingParameters) {
+        var mappedFormData = {};
+        if (formBindingKey) {
+            mappedFormData[formBindingKey] = formData;
+        }
         var normalizedPath = resolvedURL.normalizedPath;
         var request = new ClientRequest();
         request.clientId = this.clientId;
@@ -184,7 +198,7 @@ class Client {
         request.pageId = normalizedPath;
         request.formBinding = formBindingKey;
         request.action = action;
-        request.formData = formData ? formData.values : {};
+        request.formData = mappedFormData;
         request.urlParameters = resolvedURL.urlParameters;
         request.pathVariables = resolvedURL.pathVariablesAsMap();
         request.bindingParameters = formBindingParameters;
@@ -255,12 +269,14 @@ class Client {
     deserializeResponse(response) {
         var obj = JSON.parse(response.responseText);
         var data = obj.data ? new Data(obj.data) : new Data({});
+        var formData = obj.formData ? new Data(obj.formData) : new Data({});
         var serverResponse = new ServerResponse();
         serverResponse.data = data;
+        serverResponse.formData = formData;
         serverResponse.nextPageURL = obj.nextPageURL;
         serverResponse.nextWidgetId = obj.nextWidgetId;
         serverResponse.status = response.status;
-        data.setValue(['validation'], obj.validatorMessages);
+        serverResponse.validatorMessages = new ValidatorMessages(obj.validatorMessages);
         return serverResponse;
 
     }

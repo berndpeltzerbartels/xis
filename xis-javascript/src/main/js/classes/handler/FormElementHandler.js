@@ -24,15 +24,19 @@ class FormElementHandler extends TagHandler {
 
     refresh(data) {
         this.binding = this.bindingExpression.evaluate(data);
+        this.refreshDescendantHandlers(data);
+    }
+
+    refreshFormData(data) {
         if (this.binding) {
             var path = doSplit(this.formHandler.binding);
             for (var part of doSplit(this.binding, '.')) {
                 path.push(part);
             }
             this.tag.value = data.getValue(path);
-            this.formHandler.onElementHandlerRefreshed(this, path);
+            this.formHandler.onElementHandlerRefreshed(this, this.binding);
         }
-        this.refreshDescendantHandlers(data);
+        super.refreshFormData(data);
     }
 
 
