@@ -84,7 +84,6 @@ class Client {
 
     /**
     * @public
-    * @param {string} widgetId
     * @param {WidgetInstance} widgetInstance
     * @returns {Promise<ServerReponse>}
     */
@@ -95,6 +94,9 @@ class Client {
             .then(response => _this.deserializeResponse(response));
     }
 
+    loadFormData(resolvedURL, widgetId, formBindingKey, formBindingParameters) {
+
+    }
 
     /**
      * @public
@@ -103,9 +105,9 @@ class Client {
      * @param {string} actionParameters
      * @returns {Promise<ServerReponse>}
      */
-    widgetAction(widgetInstance, widgetState, action, formData, actionParameters) {
+    widgetLinkAction(widgetInstance, widgetState, action, actionParameters) {
         var _this = this;
-        var request = this.createWidgetRequest(widgetInstance, widgetState, action, formData, actionParameters);
+        var request = this.createWidgetRequest(widgetInstance, widgetState, action, {}, actionParameters);
         return this.httpClient.post('/xis/widget/action', request, {})
             .then(response => _this.deserializeResponse(response));
     }
@@ -113,15 +115,31 @@ class Client {
     /**
      * @public
      * @param {ResolvedURL} resolvedURL 
-     * @param {Data} formData
      * @param {string} action
      * @param {any} actionParameters
      * @returns {Promise<ServerReponse>}
      */
-    pageAction(resolvedURL, formData, action, actionParameters) {
+    pageLinkAction(resolvedURL, action, actionParameters) {
         var _this = this;
-        var request = this.createPageRequest(resolvedURL, formData, action, actionParameters);
+        var request = this.createPageRequest(resolvedURL, {}, action, actionParameters);
         return this.httpClient.post('/xis/page/action', request, {})
+            .then(response => _this.deserializeResponse(response));
+    }
+
+    /**
+     * @public
+     * @param {ResolvedURL} resolvedURL 
+     * @param {String} widgetId
+     * @param {Data} formData
+     * @param {string} action
+     * @param {any} actionParameters
+     * @param {string} binding
+     * @returns {Promise<ServerReponse>}
+     */
+    formAction(resolvedURL, widgetId, formData, action, formBindigKey, formBindingParameters) {
+        var _this = this;
+        var request = this.createFormRequest(resolvedURL, widgetId, formData, action, formBindigKey, formBindingParameters);
+        return this.httpClient.post('/xis/form/action', request, {})
             .then(response => _this.deserializeResponse(response));
     }
 
@@ -150,6 +168,31 @@ class Client {
     }
 
     /**
+     * @private
+     * @param {ResolvedURL} resolvedURL 
+     * @param {String} widgetId 
+     * @param {Data} formData 
+     * @param {String} action 
+     * @param {any} actionParameters 
+     */
+    createFormRequest(resolvedURL, widgetId, formData, action, formBindingKey, formBindingParameters) {
+        var normalizedPath = resolvedURL.normalizedPath;
+        var request = new ClientRequest();
+        request.clientId = this.clientId;
+        request.userId = this.userId;
+        request.widgetId = widgetId;
+        request.pageId = normalizedPath;
+        request.formBinding = formBindingKey;
+        request.action = action;
+        request.formData = formData ? formData.values : {};
+        request.urlParameters = resolvedURL.urlParameters;
+        request.pathVariables = resolvedURL.pathVariablesAsMap();
+        request.bindingParameters = formBindingParameters;
+        request.zoneId = this.zoneId;
+        return request;
+    }
+
+    /**
     * @private
     * @param {string} widgetId 
     * @param {WidgetInstance} widgetInstance
@@ -168,7 +211,7 @@ class Client {
         request.formData = formData ? formData.values : {};
         request.urlParameters = widgetState.resolvedURL.urlParameters;
         request.pathVariables = widgetState.resolvedURL.pathVariablesAsMap();
-        request.widgetParameters = widgetState.widgetParameters;
+        request.bindingParameters = widgetState.widgetParameters;
         request.actionParameters = actionParameters
         request.zoneId = this.zoneId;         // TODO locale ?
         return request;

@@ -47,8 +47,10 @@ class HttpClientMock {
         switch (uri) {
             case '/xis/page/model': return backendBridge.getPageModel(uri, requestJson, headers);
             case '/xis/widget/model': return backendBridge.getWidgetModel(uri, requestJson, headers);
-            case '/xis/page/action': return backendBridge.onPageAction(uri, requestJson, headers);
-            case '/xis/widget/action': return backendBridge.onWidgetAction(uri, requestJson, headers);
+            case '/xis/form/model': return backendBridge.getFormModel(uri, requestJson, headers);
+            case '/xis/page/action': return backendBridge.onPageLinkAction(uri, requestJson, headers);
+            case '/xis/widget/action': return backendBridge.onWidgetLinkAction(uri, requestJson, headers);
+            case '/xis/form/action': return backendBridge.onFormAction(uri, requestJson, headers);
             default: throw new Error('unknown uri for http-post: ' + uri);
         }
     }

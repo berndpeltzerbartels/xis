@@ -30,15 +30,23 @@ public class BackendBridge {
         return toBridgeResponse(frontendService.processModelDataRequest(request(requestJson)));
     }
 
+    public BackendBridgeResponse getFormModel(String uri, String requestJson, Map<String, String> headers) {
+        return toBridgeResponse(frontendService.processFormDataRequest(request(requestJson)));
+    }
+
     public BackendBridgeResponse getWidgetModel(String uri, String requestJson, Map<String, String> headers) {
         return toBridgeResponse(frontendService.processModelDataRequest(request(requestJson)));
     }
 
-    public BackendBridgeResponse onPageAction(String uri, String requestJson, Map<String, String> headers) {
+    public BackendBridgeResponse onPageLinkAction(String uri, String requestJson, Map<String, String> headers) {
         return toBridgeResponse(frontendService.processActionRequest(request(requestJson)));
     }
 
-    public BackendBridgeResponse onWidgetAction(String uri, String requestJson, Map<String, String> headers) {
+    public BackendBridgeResponse onWidgetLinkAction(String uri, String requestJson, Map<String, String> headers) {
+        return toBridgeResponse(frontendService.processActionRequest(request(requestJson)));
+    }
+
+    public BackendBridgeResponse onFormAction(String uri, String requestJson, Map<String, String> headers) {
         return toBridgeResponse(frontendService.processActionRequest(request(requestJson)));
     }
 

@@ -33,25 +33,20 @@ class WidgetContainerHandler extends TagHandler {
         this.forms = {}; // may be they do not appear again
     }
 
-    formData() {
-        var data = new Data({});
-        for (var binding of Object.keys(this.forms)) {
-            data.setValue(binding, this.forms[binding].formData);
-        }
-        return data;
-    }
-
     submitAction(action) {
         debugger;
         var _this = this;
-        this.client.widgetAction(this.widgetInstance, this.widgetState, action, this.formData(), {})
+        this.client.widgetLinkAction(this.widgetInstance, this.widgetState, action, {})
             .then(response => _this.handleActionResponse(response));
     }
     /**
     * @public
-    * @param {Response} response 
+    * @param {ServerResponse} response 
     */
     handleActionResponse(response) {
+        if (response.nextPageId) {
+            app.pageController.handleActionResponse(response.nextPageId, response.nextPageParameters);
+        }
         if (response.nextWidgetId) {
             this.ensureWidgetBound(response.nextWidgetId);
         }
@@ -65,7 +60,7 @@ class WidgetContainerHandler extends TagHandler {
 
     /**
      * @public
-     * @param {Data} data 
+     * @param {Data} data
      */
     refresh(data) {
         this.resetForms();
@@ -91,10 +86,17 @@ class WidgetContainerHandler extends TagHandler {
         this.reloadDataAndRefresh(this.parentData());
     }
 
+    /**
+     * @private
+     */
+    currentWidgetId() {
+        return this.widgetInstance ? this.widgetInstance.widget.id : undefined;
+    }
+
 
     /**
      * @private
-     * @param {Data} parentData 
+     * @param {Data} parentData
      */
     refreshContainerId(parentData) {
         if (this.containerIdExpression) {
@@ -110,7 +112,7 @@ class WidgetContainerHandler extends TagHandler {
 
     /**
      * @private
-     * @param {Data} parentData 
+     * @param {Data} parentData
      */
     bindDefaultWidgetInitial(parentData) {
         if (this.defaultWidgetExpression && !this.widgetInstance) { // once, only

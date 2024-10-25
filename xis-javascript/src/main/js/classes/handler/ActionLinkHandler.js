@@ -13,7 +13,7 @@ class ActionLinkHandler extends TagHandler {
         this.targetContainerId = undefined;
         this.action = undefined;
         this.data = new Data({});
-        this.actionParamters = {};
+        this.actionParameters = {};
         this.parentForm = this.findParentFormElement();
         element.setAttribute("href", "#");
         element.addEventListener('click', event => {
@@ -27,7 +27,7 @@ class ActionLinkHandler extends TagHandler {
      * @param {Data} data 
      */
     refresh(data) {
-        this.actionParamters = {};
+        this.actionParameters = {};
         this.data = data;
         this.refreshDescendantHandlers(data);
         this.targetContainerId = this.tag.getAttribute('xis:target-container');
@@ -36,7 +36,7 @@ class ActionLinkHandler extends TagHandler {
 
 
     addParameter(name, value) {
-        this.actionParamters[name] = value;
+        this.actionParameters[name] = value;
     }
 
     /**
@@ -61,7 +61,7 @@ class ActionLinkHandler extends TagHandler {
         var targetContainerHandler = targetContainer._handler;
         var invokerHandler = invokerContainer._handler;
         var _this = this;
-        this.client.widgetAction(invokerHandler.widgetInstance, invokerHandler.widgetState, this.action, {}, this.actionParamters)
+        this.client.widgetLinkAction(invokerHandler.widgetInstance, invokerHandler.widgetState, this.action, this.actionParameters)
             .then(response => _this.handleActionResponse(response, targetContainerHandler));
     }
 
@@ -70,7 +70,7 @@ class ActionLinkHandler extends TagHandler {
      * @param {string} action 
      */
     pageAction() {
-        app.pageController.submitAction(this.action, this.actionParamters);
+        app.pageController.submitPageLinkAction(this.action, this.actionParameters);
     }
 
 

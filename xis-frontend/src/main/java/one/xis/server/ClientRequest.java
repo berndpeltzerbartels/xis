@@ -12,6 +12,7 @@ public class ClientRequest {
     private String clientId;
     private String userId;
     private String action;
+    private String formBinding;
     private String pageId;
     private String widgetId;
     private String widgetContainerId;
@@ -28,7 +29,7 @@ public class ClientRequest {
     private Map<String, String> urlParameters = new HashMap<>();
 
     @JsonDeserialize(using = MapDeserializer.class)
-    private Map<String, String> widgetParameters = new HashMap<>();
+    private Map<String, String> bindingParameters = new HashMap<>();
 
     @JsonDeserialize(using = MapDeserializer.class)
     private Map<String, String> actionParameters = new HashMap<>();

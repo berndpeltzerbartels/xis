@@ -1,12 +1,14 @@
 package test.page;
 
 import one.xis.context.IntegrationTestContext;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-@Disabled
 class SimpleObjectFormPageTest {
 
 

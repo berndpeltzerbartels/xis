@@ -28,7 +28,7 @@ class ControllerMethodParameter {
             return deserializeUrlParameter(parameter, request, postProcessingResults);
         } else if (parameter.isAnnotationPresent(one.xis.PathVariable.class)) {
             return deserializePathVariable(parameter, request, postProcessingResults);
-        } else if (parameter.isAnnotationPresent(WidgetParameter.class)) {
+        } else if (parameter.isAnnotationPresent(Parameter.class)) {
             return deserializeWidgetParameter(parameter, request, postProcessingResults);
         } else if (parameter.isAnnotationPresent(ActionParameter.class)) {
             var key = parameter.getAnnotation(ActionParameter.class).value();
@@ -48,8 +48,8 @@ class ControllerMethodParameter {
             controllerMethodResult.getUrlParameters().put(parameter.getAnnotation(URLParameter.class).value(), parameterValue);
         } else if (parameter.isAnnotationPresent(PathVariable.class)) {
             controllerMethodResult.getPathVariables().put(parameter.getAnnotation(PathVariable.class).value(), parameterValue);
-        } else if (parameter.isAnnotationPresent(WidgetParameter.class)) {
-            controllerMethodResult.getWidgetParameters().put(parameter.getAnnotation(WidgetParameter.class).value(), parameterValue);
+        } else if (parameter.isAnnotationPresent(Parameter.class)) {
+            controllerMethodResult.getWidgetParameters().put(parameter.getAnnotation(Parameter.class).value(), parameterValue);
         } else {
             throw new IllegalStateException(method + ": parameter without annotation=" + parameter);
         }
@@ -77,11 +77,11 @@ class ControllerMethodParameter {
     }
 
     private Object deserializeWidgetParameter(java.lang.reflect.Parameter parameter, ClientRequest request, PostProcessingResults postProcessingResults) throws IOException {
-        var key = parameter.getAnnotation(WidgetParameter.class).value();
-        if (!request.getWidgetParameters().containsKey(key)) {
+        var key = parameter.getAnnotation(Parameter.class).value();
+        if (!request.getBindingParameters().containsKey(key)) {
             throw new IllegalStateException("No widget parameter found for key " + key);
         }
-        var paramValue = request.getWidgetParameters().get(key);
+        var paramValue = request.getBindingParameters().get(key);
         return deserializeParameter(paramValue, request, parameter, postProcessingResults);
     }
 

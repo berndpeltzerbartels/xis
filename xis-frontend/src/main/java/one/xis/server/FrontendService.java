@@ -9,6 +9,8 @@ public interface FrontendService {
 
     ServerResponse processModelDataRequest(ClientRequest request);
 
+    ServerResponse processFormDataRequest(ClientRequest request);
+
     String getPage(String id);
 
     String getPageHead(String id);

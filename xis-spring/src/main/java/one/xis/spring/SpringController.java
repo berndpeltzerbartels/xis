@@ -31,6 +31,14 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
     }
 
     @Override
+    @PostMapping("/xis/form/model")
+    public ResponseEntity<ServerResponse> getFormModel(@RequestBody ClientRequest request, Locale locale) {
+        request.setLocale(locale);
+        var serverResponse = frontendService.processFormDataRequest(request);
+        return ResponseEntity.status(serverResponse.getStatus()).body(serverResponse);
+    }
+
+    @Override
     @PostMapping("/xis/widget/model")
     public ResponseEntity<ServerResponse> getWidgetModel(@RequestBody ClientRequest request, Locale locale) {
         request.setLocale(locale);
@@ -40,7 +48,7 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
 
     @Override
     @PostMapping("/xis/page/action")
-    public ResponseEntity<ServerResponse> onPageAction(@RequestBody ClientRequest request, Locale locale) {
+    public ResponseEntity<ServerResponse> onPageLinkAction(@RequestBody ClientRequest request, Locale locale) {
         request.setLocale(locale);
         var serverResponse = frontendService.processActionRequest(request);
         return ResponseEntity.status(serverResponse.getStatus()).body(serverResponse);
@@ -48,7 +56,15 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
 
     @Override
     @PostMapping("/xis/widget/action")
-    public ResponseEntity<ServerResponse> onWidgetAction(@RequestBody ClientRequest request, Locale locale) {
+    public ResponseEntity<ServerResponse> onWidgetLinkAction(@RequestBody ClientRequest request, Locale locale) {
+        request.setLocale(locale);
+        var serverResponse = frontendService.processActionRequest(request);
+        return ResponseEntity.status(serverResponse.getStatus()).body(serverResponse);
+    }
+
+    @Override
+    @PostMapping("/xis/form/action")
+    public ResponseEntity<ServerResponse> onFormAction(@RequestBody ClientRequest request, Locale locale) {
         request.setLocale(locale);
         var serverResponse = frontendService.processActionRequest(request);
         return ResponseEntity.status(serverResponse.getStatus()).body(serverResponse);

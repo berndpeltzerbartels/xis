@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 
 /**
- * Encapsulates all methods, required by the framework's controller.
+ * BacEncapsulates all methods, required by the framework's controller.
  */
 @XISComponent
 @RequiredArgsConstructor
@@ -68,6 +68,17 @@ public class FrontendServiceImpl implements FrontendService {
 
 
     @Override
+    public ServerResponse processFormDataRequest(ClientRequest request) {
+        try {
+            addUserContext(request);
+            return applyFilterChain(request, controllerService::processFormDataRequest);
+        } finally {
+            removeUserContext();
+        }
+    }
+
+
+    @Override
     public String getPage(String id) {
         return htmlResourceService.getPage(id);
     }
@@ -81,9 +92,7 @@ public class FrontendServiceImpl implements FrontendService {
 
     @Override
     public String getPageBody(String id) {
-        var body = htmlResourceService.getPageBody(id);
-        Logger.debug(body);
-        return body;
+        return htmlResourceService.getPageBody(id);
     }
 
     @Override

@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import one.xis.validation.ValidatorMessages;
 import org.tinylog.Logger;
 
+import java.util.Collection;
 import java.util.Map;
 
 @Data
@@ -22,12 +23,17 @@ public class ControllerWrapper {
      */
     private Object controller;
 
-    private Map<String, ControllerMethod> modelMethods;// TODO a collection is sufficient
-    private Map<String, ControllerMethod> actionMethods;// TODO a collection is sufficient
+    private Collection<ControllerMethod> modelMethods;
+    private Map<String, ControllerMethod> actionMethods;
+    private Collection<ControllerMethod> formDataMethods;
     private ControllerResultMapper controllerResultMapper;
 
     void invokeGetModelMethods(ClientRequest request, ControllerResult controllerResult) {
-        modelMethods.values().forEach(method -> invokeForModel(request, controllerResult, method));
+        modelMethods.forEach(method -> invokeForModel(request, controllerResult, method));
+    }
+
+    void invokeFormDataMethods(ClientRequest request, ControllerResult controllerResult) {
+        formDataMethods.forEach(method -> invokeForFormData(request, controllerResult, method));
     }
 
     void invokeActionMethod(ClientRequest request, ControllerResult controllerResult) {
@@ -60,6 +66,10 @@ public class ControllerWrapper {
             Logger.error(e, "Failed to invoke model-method");
             throw new RuntimeException("Failed to invoke model-method " + modelMethod, e);
         }
+    }
+
+    private void invokeForFormData(ClientRequest request, ControllerResult controllerResult, ControllerMethod formDataMethod) {
+        invokeForModel(request, controllerResult, formDataMethod);
     }
 
     /**

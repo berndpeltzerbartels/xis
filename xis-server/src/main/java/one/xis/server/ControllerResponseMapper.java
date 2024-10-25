@@ -18,7 +18,6 @@ class ControllerResponseMapper {
         response.setData(result.getModelData());
         response.setFormData(result.getFormData());
         response.setNextWidgetId(result.getNextWidgetId());
-        response.setWidgetParameters(result.getWidgetParameters());
         response.setValidatorMessages(result.getValidatorMessages());
         response.setStatus(result.isValidationFailed() ? 422 : 200);
     }

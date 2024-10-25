@@ -9,11 +9,15 @@ public interface FrameworkController<R> {
 
     R getPageModel(ClientRequest request, Locale locale);
 
+    R getFormModel(ClientRequest request, Locale locale);
+
     R getWidgetModel(ClientRequest request, Locale locale);
 
-    R onPageAction(ClientRequest request, Locale locale);
+    R onPageLinkAction(ClientRequest request, Locale locale);
 
-    R onWidgetAction(ClientRequest request, Locale locale);
+    R onWidgetLinkAction(ClientRequest request, Locale locale);
+
+    R onFormAction(ClientRequest request, Locale locale);
 
     String getPage(String id);
 

@@ -45,9 +45,9 @@ class PageController {
      * @param {Object} actionParameters
      * @returns {Promise<void>}
      */
-    submitAction(action, actionParameters) {
+    submitPageLinkAction(action, actionParameters) {
         var _this = this;
-        return this.client.pageAction(this.resolvedURL, {}, action, actionParameters)
+        return this.client.pageLinkAction(this.resolvedURL, action, actionParameters)
             .then(response => _this.handleActionResponse(response));
     }
 

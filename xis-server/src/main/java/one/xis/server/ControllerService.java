@@ -37,6 +37,21 @@ class ControllerService {
         mapResultToResponse(response, controllerResult);
     }
 
+    void processFormDataRequest(@NonNull ClientRequest request, @NonNull ServerResponse response) {
+        var controllerResult = new ControllerResult();
+        controllerResult.setCurrentPageURL(request.getPageId());
+        controllerResult.setCurrentWidgetId(request.getWidgetId());
+        var wrapper = controllerWrapper(request);
+        wrapper.invokeFormDataMethods(request, controllerResult);
+        if (controllerResult.getNextPageURL() == null) {
+            controllerResult.setNextPageURL(request.getPageId());
+        }
+        if (controllerResult.getNextWidgetId() == null) {
+            controllerResult.setNextWidgetId(request.getWidgetId());
+        }
+        mapResultToResponse(response, controllerResult);
+    }
+
     void processActionRequest(@NonNull ClientRequest request, @NonNull ServerResponse response) {
         var controllerResult = new ControllerResult();
         controllerResult.setCurrentPageURL(request.getPageId());

@@ -18,13 +18,29 @@ class FormHandler extends TagHandler {
         formTag.addEventListener('submit', event => event.preventDefault());
     }
 
-    submit(action) {
-        var widgetcontainer = this.findParentWidgetContainer();
-        if (widgetcontainer) {
-            this.widgetAction(action, widgetcontainer);
-        } else {
-            this.pageAction(action);
+    submit(action, actionParameters) {
+        var resolevdUrl = app.pageController.resolvedURL;
+        var formHandler = this;
+        var formBindingParameters = urlParameters(this.binding);
+        var formBindigKey = stripQuery(this.binding);
+        this.client.loadFormData(app.pageController.resolvedURL, this.widgetId(), formBindigKey, formBindingParameters);
+        //resolvedURL, widgetInstance, formData, action, actionParameters, binding
+        this.client.formAction(resolevdUrl, this.widgetId(), this.formData, action, formBindigKey, formBindingParameters).then(response => {
+            formHandler.handleActionResponse(response, formHandler.targetContainerHandler());
+        });
+    }
+
+    widgetId() {
+        var container = this.findParentWidgetContainer();
+        if (!container) {
+            return null;
         }
+        return container._handler.currendWidgetId();
+    }
+
+    targetContainerHandler() {
+        var container = this.findParentWidgetContainer();
+        return container ? container._handler : null;
     }
 
     validate() { }
@@ -36,7 +52,16 @@ class FormHandler extends TagHandler {
      */
     refresh(data) {
         this.binding = this.bindingExpression.evaluate(data);
+        var formBindingParameters = urlParameters(this.binding);
+        var formBindigKey = stripQuery(this.binding);
+        this.client.loadFormData(app.pageController.resolvedURL, this.widgetId(), formBindigKey, formBindingParameters); // TODO
         this.refreshDescendantHandlers(data);
+
+    }
+
+    widgetId() {
+        var container = this.findParentWidgetContainer();
+        return container ? container._handler.widgetInstance.id : null;
     }
 
     /**
@@ -55,15 +80,11 @@ class FormHandler extends TagHandler {
         this.formData.setValue(bindingPath, new Value(handler.tag));
     }
 
-    widgetAction(action, invokerContainer) {
-        var targetContainer = this.targetContainerId ? this.widgetContainers.findContainer(this.targetContainerId) : invokerContainer;
-        var targetContainerHandler = targetContainer._handler;
-        var invokerHandler = invokerContainer._handler;
-        var _this = this;
-        this.client.widgetAction(invokerHandler.widgetInstance, invokerHandler.widgetState, action, this.formData, {})
-            .then(response => _this.handleActionResponse(response, targetContainerHandler));
-    }
-
+    /**
+     * @private
+     * @param {ServerResponse} response 
+     * @param {WidgetContainerHandler} targetContainerHandler 
+     */
     handleActionResponse(response, targetContainerHandler) {
         if (response.nextPageURL) {
             app.pageController.handleActionResponse(response);
@@ -71,14 +92,4 @@ class FormHandler extends TagHandler {
             targetContainerHandler.handleActionResponse(response);
         }
     }
-
-    /**
-     * @private
-     * @param {string} action 
-     */
-    pageAction(action) {
-        app.pageController.submitFormAction(action, this.formData);
-    }
-
-
 }

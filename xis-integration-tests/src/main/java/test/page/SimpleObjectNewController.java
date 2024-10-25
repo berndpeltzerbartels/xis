@@ -15,9 +15,9 @@ class SimpleObjectNewController {
     SimpleObject simpleObject() {
         return new SimpleObject(1, "Simple Object", "p1", "p2");
     }
-    
+
     @Action("save")
-    PageResponse save(@FormData("formObject") SimpleObject simpleObject) {
+    PageResponse saServerve(@FormData("formObject") SimpleObject simpleObject) {
         simpleObjectService.save(simpleObject);
         return PageResponse.of(SimpleObjectDetails.class, "id", simpleObject.getId());
     }

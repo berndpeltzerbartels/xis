@@ -21,6 +21,5 @@ public class ServerResponse {
     private Map<String, Object> formData = new HashMap<>();
     private String nextPageURL;
     private String nextWidgetId;
-    private Map<String, Object> widgetParameters = new HashMap<>();
     private ValidatorMessages validatorMessages = new ValidatorMessages();
 }
