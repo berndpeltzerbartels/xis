@@ -6,9 +6,6 @@ import one.xis.context.XISComponent;
 import one.xis.context.XISInject;
 import one.xis.utils.lang.StringUtils;
 
-import java.util.Map;
-import java.util.stream.Collectors;
-
 @Slf4j
 @XISComponent
 class ControllerService {
@@ -21,6 +18,9 @@ class ControllerService {
 
     @XISInject
     private WidgetControllerWrappers widgetControllerWrappers;
+
+    @XISInject
+    private ControllerResultMapper controllerResultMapper;
 
     @XISInject
     private PathResolver pathResolver;
@@ -72,24 +72,18 @@ class ControllerService {
         if (nextControllerWrapper.equals(invokerControllerWrapper)) {
             mapResultToResponse(response, controllerResult);
         } else {
-            var nextRequest = new ClientRequest(); // TODO Mapper dafür
-            nextRequest.setPageId(controllerResult.getNextPageURL());
-            nextRequest.setWidgetId(controllerResult.getNextWidgetId());
+            var nextRequest = new ClientRequest();
             nextRequest.setLocale(request.getLocale());
             nextRequest.setZoneId(request.getZoneId());
             nextRequest.setClientId(request.getClientId());
             nextRequest.setUserId(request.getUserId());
-            nextRequest.setFormData(controllerResult.getFormData().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString())));
-            nextRequest.setUrlParameters(controllerResult.getUrlParameters().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString())));
-            nextRequest.setPathVariables(controllerResult.getPathVariables().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString())));
-            nextRequest.setWidgetContainerId(controllerResult.getWidgetContainerId());
+            controllerResultMapper.mapControllerResultToRequest(controllerResult, nextRequest);
             var nextControllerResult = new ControllerResult();
             nextControllerResult.setNextPageURL(controllerResult.getNextPageURL());
             nextControllerResult.setNextWidgetId(controllerResult.getNextWidgetId());
             nextControllerWrapper.invokeGetModelMethods(nextRequest, nextControllerResult);
             mapResultToResponse(response, nextControllerResult);
         }
-
     }
 
     private ControllerWrapper controllerWrapper(ClientRequest request) {

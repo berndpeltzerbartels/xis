@@ -16,7 +16,7 @@ class ControllerResult {
     private String nextWidgetId;
     private String widgetContainerId;
     private Collection<String> widgetsToReload;
-    private final Map<String, Object> widgetParameters = new HashMap<>();
+    private final Map<String, Object> bindingParameters = new HashMap<>();
     private final Map<String, Object> urlParameters = new HashMap<>();
     private final Map<String, Object> pathVariables = new HashMap<>();
     private final Map<String, Object> modelData = new HashMap<>();
