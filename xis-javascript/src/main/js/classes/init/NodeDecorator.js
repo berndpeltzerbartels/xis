@@ -77,7 +77,12 @@ class NodeDecorator {
                 handler = this.decorateLinkByAttribute(element);
             }
                 break;
-
+            case 'xis:message':
+                handler = new MessageTagHandler(element);
+                break;
+            case 'xis:global-messages':
+                handler = new GlobalMessagesTagHandler(element);
+                break;
         }
 
         this.initializeAttributes(element, handler ? handler : parentHandler);

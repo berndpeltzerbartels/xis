@@ -1,10 +1,24 @@
 /**
- * Because some tags can get expressed by attributes, we want to normalize the document.
+ * @class DomNormalizer
+ * @package classes/init
+ * @access public
+ * @description
+ * Because some tags can get expressed by attributes and by a special element, 
+ * we want to normalize the document. One of the reasons to do so is to avoid 
+ * a tag handler has to deal with to types of attributes (with and without xis-namespace).
+ * 
+ * Addidionally, on some cases, we are looking for parent tags. Normalization helps to
+ * avoid double search.
+ * 
  * The document tree is updated to fulfill the following rules:
  * <ul>
  *  <li>Framework elements get replaced by valid html elements, if necessary for correct rendering</li>
- *  <li>Loop attributes are getting replaces by use of the framework's foreach-tag.</li>
+ *  <li>Loop attributes are getting replaced by use of the framework's foreach-tag.</li>
+ *  <li>Handlers demanded by a framework attribute arre replaced by framework's child tag.</li>
  * </ul>
+ * 
+ * @property {Element} root
+ * @property {DomAccessor} domAccessor
  */
 class DomNormalizer {
 
@@ -53,6 +67,7 @@ class DomNormalizer {
     /**
     * Initializes a html-element, which means 
     * this is not a xis-element like e.g. <xis:foreach/>
+    * @private
     * @param {Element} element
     */
     normalizeHtmlElement(element) {
@@ -64,6 +79,12 @@ class DomNormalizer {
         }
         if (element.getAttribute('xis:widget-container')) {
             this.initializeWidgetContainerByAttribute(element);
+        }
+        if (element.getAttribute('xis:message-for')) {
+            this.replaceMessageAttributeByChildMessageElement(element);
+        }
+        if (element.getAttribute('xis:global-messages')) {
+            this.replaceGlobalMessagesAttributeByChildGlobalMessagesElement(element);
         }
     }
 
@@ -95,17 +116,32 @@ class DomNormalizer {
         return element.localName == 'xis:form';
     }
 
+    /**
+     * 
+     * @param {Element} element 
+     * @returns 
+     */
     isFrameworkInput(element) {
         return element.localName == 'xis:input';
     }
 
+    /**
+     * @private 
+     * @param {Element} element
+     * @returns {boolean}
+     */
     isFrameworkSubmit(element) {
         return element.localName == 'xis:submit';
     }
+
+    /**
+    * @private 
+    * @param {Element} element
+    * @returns {boolean}
+    */
     isFrameworkButton(element) {
         return element.localName == 'xis:button';
     }
-
 
     /**
     * @private
@@ -119,7 +155,18 @@ class DomNormalizer {
         return foreach;
     }
 
+    replaceMessageAttributeByChildMessageElement(element) {
+        var message = createElement('xis:message');
+        message.setAttribute('message-for', element.getAttribute('xis:message-for'));
+        element.removeAttribute('xis:message');
+        this.domAccessor.insertChild(element, message);
+    }
 
+    replaceGlobalMessagesAttributeByChildGlobalMessagesElement(element) {
+        var globalMessages = createElement('xis:global-messages');
+        element.removeAttribute('xis:global-messages');
+        this.domAccessor.insertChild(element, globalMessages);
+    }
 
     replaceFrameworkLinkByHtml(frameworkLink) {
         return this.replaceFrameworkElementByHtml(frameworkLink, 'a');

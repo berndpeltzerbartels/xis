@@ -1,3 +1,17 @@
+/**
+ * @class WidgetLinkHandler
+ * @extends {TagHandler}
+ * @package classes/handler
+ * @access public
+ * @description This handler is responsible for handling a link to a widget. Backend is not involved.
+ * 
+ * @property {String} type
+ * @property {WidgetContainers} widgetContainers
+ * @property {Object} widgetParameters
+ * @property {String} targetPageUrl
+ * @property {String} targetWidgetUrl
+ * @property {String} targetContainerId
+ */
 class WidgetLinkHandler extends TagHandler {
 
     /**
@@ -7,8 +21,12 @@ class WidgetLinkHandler extends TagHandler {
      */
     constructor(element, widgetContainers) {
         super(element);
-        this.type = 'link-handler';
+        this.type = 'widget-link-handler';
         this.widgetContainers = widgetContainers;
+        this.widgetParameters = {};
+        this.targetPageUrl = undefined;
+        this.targetWidgetUrl = undefined;
+        this.targetContainerId = undefined;
         element.setAttribute("href", "#");
         element.addEventListener('click', event => {
             event.preventDefault();
@@ -29,6 +47,11 @@ class WidgetLinkHandler extends TagHandler {
         this.targetContainerId = this.tag.getAttribute('xis:target-container');
     }
 
+    /**
+     * 
+     * @param {String} name 
+     * @param {String} value 
+     */
     addParameter(name, value) {
         this.widgetParameters[name] = value;
     }

@@ -1,3 +1,19 @@
+/**
+ * @class WidgetContainerHandler
+ * @extends {TagHandler}
+ * @package classes/handler
+ * @access public
+ * @description This handler is responsible for handling a tag for presenting widgets.
+ * 
+ * @property {Client} client
+ * @property {Widgets} widgets
+ * @property {WidgetContainers} widgetContainers
+ * @property {WidgetInstance} widgetInstance
+ * @property {String} containerId
+ * @property {Expression} containerIdExpression
+ * @property {Expression} defaultWidgetExpression
+ * @property {String} type
+ */
 class WidgetContainerHandler extends TagHandler {
 
     /**
@@ -17,28 +33,8 @@ class WidgetContainerHandler extends TagHandler {
         this.containerIdExpression = this.expressionFromAttribute('container-id');
         this.defaultWidgetExpression = this.expressionFromAttribute('default-widget');
         this.type = 'widget-container-handler';
-        this.forms = {};
     }
 
-
-    registerForm(formHandler) {
-        this.forms[formHandler.binding] = formHandler;
-    }
-
-
-    resetForms() {
-        for (var binding of Object.keys(this.forms)) {
-            this.forms[binding].reset();
-        }
-        this.forms = {}; // may be they do not appear again
-    }
-
-    submitAction(action) {
-        debugger;
-        var _this = this;
-        this.client.widgetLinkAction(this.widgetInstance, this.widgetState, action, {})
-            .then(response => _this.handleActionResponse(response));
-    }
     /**
     * @public
     * @param {ServerResponse} response 
@@ -63,7 +59,6 @@ class WidgetContainerHandler extends TagHandler {
      * @param {Data} data
      */
     refresh(data) {
-        this.resetForms();
         this.refreshContainerId(data);
         this.bindDefaultWidgetInitial(data);
         var widgetParameters = this.widgetState ? this.widgetState.widgetParameters : {};

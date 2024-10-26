@@ -1,7 +1,7 @@
 package one.xis.js.connect;
 
 import one.xis.js.Promise;
-import one.xis.utils.lang.ThreeFunction;
+import one.xis.utils.lang.TriFunction;
 
 import java.util.Map;
 import java.util.function.BiFunction;
@@ -9,9 +9,9 @@ import java.util.function.BiFunction;
 public class HttpClient {
 
     private final BiFunction<String, Map<String, String>, Promise> getHandler;
-    private final ThreeFunction<String, Object, Map<String, String>, Promise> postHandler;
+    private final TriFunction<String, Object, Map<String, String>, Promise> postHandler;
 
-    public HttpClient(BiFunction<String, Map<String, String>, Promise> getHandler, ThreeFunction<String, Object, Map<String, String>, Promise> postHandler) {
+    public HttpClient(BiFunction<String, Map<String, String>, Promise> getHandler, TriFunction<String, Object, Map<String, String>, Promise> postHandler) {
         this.getHandler = getHandler;
         this.postHandler = postHandler;
     }

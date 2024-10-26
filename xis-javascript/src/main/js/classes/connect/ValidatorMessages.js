@@ -15,7 +15,11 @@ class ValidatorMessages {
     }
 
     isEmpty() {
-        debugger;
         return Object.keys(this.messages).length === 0 && this.globalMessages.length === 0;
     }
+
+    getMessageFor(binding) {
+        return this.messages[binding] ? this.messages[binding] : '';
+    }
+
 }

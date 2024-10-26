@@ -1,3 +1,9 @@
+/**
+ * @class Initializer
+ * @package classes/init
+ * @access public
+ * @description Prepares the dom for using the framework's tag handlers.
+ */
 class Initializer {
 
     /**
@@ -13,6 +19,11 @@ class Initializer {
     }
 
 
+    /**
+     * 
+     * @param {Node} node 
+     * @param {TagHandler} parentHandler 
+     */
     initialize(node, parentHandler) {
         if (isElement(node)) {
             new DomNormalizer(node, this.domAccessor).normalize();

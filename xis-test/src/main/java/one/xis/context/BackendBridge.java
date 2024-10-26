@@ -11,8 +11,10 @@ import one.xis.validation.ValidatorMessages;
 import java.util.Locale;
 import java.util.Map;
 
+import static one.xis.context.BackendBridgeVerboseRunner.run;
+
 /**
- * Mediator between the compiled javascript and backendclasses.
+ * Mediator between the compiled javascript and backend classes during testing.
  */
 @XISComponent
 @SuppressWarnings("unused")
@@ -24,47 +26,47 @@ public class BackendBridge {
     private final AppContext appContext;
 
     public BackendBridgeResponse getComponentConfig(String uri, Map<String, String> headers) {
-        return toBridgeResponse(frontendService.getConfig());
+        return toBridgeResponse(run(frontendService::getConfig));
     }
 
     public BackendBridgeResponse getPageModel(String uri, String requestJson, Map<String, String> headers) {
-        return toBridgeResponse(frontendService.processModelDataRequest(request(requestJson)));
+        return toBridgeResponse(run(frontendService::processModelDataRequest, request(requestJson)));
     }
 
     public BackendBridgeResponse getFormModel(String uri, String requestJson, Map<String, String> headers) {
-        return toBridgeResponse(frontendService.processFormDataRequest(request(requestJson)));
+        return toBridgeResponse(run(frontendService::processFormDataRequest, request(requestJson)));
     }
 
     public BackendBridgeResponse getWidgetModel(String uri, String requestJson, Map<String, String> headers) {
-        return toBridgeResponse(frontendService.processModelDataRequest(request(requestJson)));
+        return toBridgeResponse(run(frontendService::processModelDataRequest, request(requestJson)));
     }
 
     public BackendBridgeResponse onPageLinkAction(String uri, String requestJson, Map<String, String> headers) {
-        return toBridgeResponse(frontendService.processActionRequest(request(requestJson)));
+        return toBridgeResponse(run(frontendService::processActionRequest, request(requestJson)));
     }
 
     public BackendBridgeResponse onWidgetLinkAction(String uri, String requestJson, Map<String, String> headers) {
-        return toBridgeResponse(frontendService.processActionRequest(request(requestJson)));
+        return toBridgeResponse(run(frontendService::processActionRequest, request(requestJson)));
     }
 
     public BackendBridgeResponse onFormAction(String uri, String requestJson, Map<String, String> headers) {
-        return toBridgeResponse(frontendService.processActionRequest(request(requestJson)));
+        return toBridgeResponse(run(frontendService::processActionRequest, request(requestJson)));
     }
 
     public BackendBridgeResponse getPageHead(String uri, Map<String, String> headers) {
-        return stringToBridgeResponse(frontendService.getPageHead(headers.get("uri")));
+        return stringToBridgeResponse(run(frontendService::getPageHead, headers.get("uri")));
     }
 
     public BackendBridgeResponse getPageBody(String uri, Map<String, String> headers) {
-        return stringToBridgeResponse(frontendService.getPageBody(headers.get("uri")));
+        return stringToBridgeResponse(run(frontendService::getPageBody, headers.get("uri")));
     }
 
     public BackendBridgeResponse getBodyAttributes(String uri, Map<String, String> headers) {
-        return toBridgeResponse(frontendService.getBodyAttributes(headers.get("uri")));
+        return toBridgeResponse(run(frontendService::getBodyAttributes, headers.get("uri")));
     }
 
     public BackendBridgeResponse getWidgetHtml(String uri, Map<String, String> headers) {
-        return stringToBridgeResponse(frontendService.getWidgetHtml(headers.get("uri")));
+        return stringToBridgeResponse(run(frontendService::getWidgetHtml, headers.get("uri")));
     }
 
     private BackendBridgeResponse stringToBridgeResponse(String str) {

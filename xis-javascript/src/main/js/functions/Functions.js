@@ -34,6 +34,20 @@ function getChildElementByName(parent, childName) {
         }
     }
 }
+
+/**
+ * 
+ * @param {Element} parent 
+ * @returns {Element}
+ */
+function getFirstChildElement(parent) {
+    for (var i = 0; i < parent.childNodes.length; i++) {
+        var child = parent.childNodes.item(i);
+        if (isElement(child)) {
+            return child;
+        }
+    }
+}
 /**
  * Maps a NodeList into an array.
  *

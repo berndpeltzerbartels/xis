@@ -32,6 +32,7 @@ dependencies {
     implementation 'org.graalvm.js:js-scriptengine:23.0.1'
     implementation 'org.graalvm.truffle:truffle-api:23.0.1'
     implementation 'org.graalvm.js:js:23.0.1'
+    implementation 'org.tinylog:tinylog-impl:2.6.1'
 
     implementation 'org.openjdk.nashorn:nashorn-core:15.4'
 
