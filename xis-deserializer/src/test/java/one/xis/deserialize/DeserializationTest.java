@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import one.xis.*;
 import one.xis.context.TestContextBuilder;
 import one.xis.utils.lang.CollectionUtils;
+import one.xis.validation.AllElementsMandatory;
 import one.xis.validation.Mandatory;
 import org.junit.jupiter.api.*;
 import org.mockito.ArgumentCaptor;
@@ -102,6 +103,22 @@ class DeserializationTest {
     }
 
     @Test
+    void dateToLocalDateCollection() throws NoSuchMethodException {
+        var date = getClass().getDeclaredMethod("testMethodLocalDateBean", BeanWithLocalDate.class).getParameters()[0];
+        var json = "{\"localDate\": [\"01.01.2021\"]}";
+        var result = (BeanWithLocalDate) mainDeserializer.deserialize(json, date, new UserContext(), new PostProcessingResults());
+        assertThat(result.getLocalDate()).isEqualTo(LocalDate.of(2021, 1, 1));
+    }
+
+    @Test
+    void dateCollectionToLocalDate() throws NoSuchMethodException {
+        var date = getClass().getDeclaredMethod("testMethodLocalDateCollectionBean", BeanWithLocalDateCollection.class).getParameters()[0];
+        var json = "{\"localDates\": [\"01.01.2021\", \"02.01.2021\"]}";
+        var result = (BeanWithLocalDateCollection) mainDeserializer.deserialize(json, date, new UserContext(), new PostProcessingResults());
+        assertThat(result.getLocalDates()).containsExactly(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 2));
+    }
+
+    @Test
     void integerParameterFailed() throws NoSuchMethodException {
         var parameter = getClass().getDeclaredMethod("testMethodInt", int.class).getParameters()[0];
         var ppObjects = new PostProcessingResults();
@@ -120,6 +137,7 @@ class DeserializationTest {
         assertThat(ppObjects.postProcessingResults(InvalidValueError.class)).anyMatch(e -> e.getDeserializationContext().getPath().equals("/collection[0]"));
         assertThat(ppObjects.postProcessingResults(InvalidValueError.class)).anyMatch(e -> e.getDeserializationContext().getPath().equals("/collection"));
     }
+
 
     @Test
     void nestedFieldFailed() throws NoSuchMethodException {
@@ -327,12 +345,18 @@ class DeserializationTest {
     }
 
     @SuppressWarnings("unused")
-    void testMethodCollection(@FormData("collection") Collection<LocalDate> collection) {
+    void testMethodCollection(@FormData("collection") @AllElementsMandatory Collection<LocalDate> collection) {
+
+    }
+
+
+    @SuppressWarnings("unused")
+    void testMethodLocalDateBean(@FormData("localDateBean") BeanWithLocalDate bean) {
 
     }
 
     @SuppressWarnings("unused")
-    void testMethodLocalDateBean(@FormData("localDateBean") BeanWithLocalDate bean) {
+    void testMethodLocalDateCollectionBean(@FormData("localDateBean") BeanWithLocalDateCollection bean) {
 
     }
 
@@ -352,9 +376,17 @@ class DeserializationTest {
         private int intField;
         private String stringField;
         private LocalDate localDateField;
+
+        @AllElementsMandatory
         private String[] stringArrayField;
+
+        @AllElementsMandatory
         private int[] intArrayField;
+
+        @AllElementsMandatory
         private Collection<String> stringCollectionField;
+
+        @AllElementsMandatory
         private Collection<Integer> intCollectionField;
     }
 
@@ -372,6 +404,17 @@ class DeserializationTest {
         @Format(LocalDateFormatter.class)
         private LocalDate localDate;
     }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    static class BeanWithLocalDateCollection {
+
+        @AllElementsMandatory
+        @Format(LocalDateFormatter.class)
+        private Collection<LocalDate> localDates;
+    }
+
 
     @Data
     static class BeanWithMandatoryFields {

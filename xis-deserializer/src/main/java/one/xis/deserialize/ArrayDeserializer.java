@@ -2,9 +2,10 @@ package one.xis.deserialize;
 
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
+import one.xis.Format;
 import one.xis.UserContext;
 import one.xis.context.XISComponent;
-import one.xis.validation.Mandatory;
+import one.xis.validation.AllElementsMandatory;
 
 import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
@@ -12,9 +13,6 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-import static one.xis.deserialize.DefaultDeserializationErrorType.CONVERSION_ERROR;
-import static one.xis.deserialize.DefaultDeserializationErrorType.MISSING_MANDATORY_PROPERTY;
 
 @XISComponent
 class ArrayDeserializer implements JsonDeserializer<Object> {
@@ -37,12 +35,19 @@ class ArrayDeserializer implements JsonDeserializer<Object> {
         var componentType = getType(target).getComponentType();
         var deserializationFailed = false;
         while (reader.hasNext()) {
-            var result = mainDeserializer.deserialize(reader, path(path, index), componentType, userContext, postProcessingResults);
+            Optional<Object> result = Optional.empty();
+            if (target.isAnnotationPresent(Format.class)) {
+                result = mainDeserializer.getDeserializer(FormattedDeserializer.class).deserialize(reader, path(path, index), target, userContext, mainDeserializer, postProcessingResults);
+            } else {
+                result = mainDeserializer.deserialize(reader, path(path, index), componentType, userContext, postProcessingResults).map(Object.class::cast);
+            }
             if (result.isPresent()) {
                 list.add(result.get());
             } else {
                 list.add(null);
-                deserializationFailed = true;
+                if (componentType.isPrimitive() || target.isAnnotationPresent(AllElementsMandatory.class)) {
+                    deserializationFailed = true;
+                }
             }
             if (reader.peek() == JsonToken.END_ARRAY) {
                 reader.endArray();
@@ -68,18 +73,6 @@ class ArrayDeserializer implements JsonDeserializer<Object> {
             Array.set(arr, i, value);
         }
         return arr;
-    }
-
-    private void handleDeserializationError(List<?> values, String path, AnnotatedElement target, PostProcessingResults postProcessingResults) {
-        var context = new DeserializationContext(path, target, NoAnnotation.class, UserContext.getInstance());
-        postProcessingResults.add(new InvalidValueError(context, CONVERSION_ERROR.getMessageKey(), CONVERSION_ERROR.getGlobalMessageKey()));
-    }
-
-    private void checkMandatory(List<?> values, AnnotatedElement target, PostProcessingResults postProcessingResults, String path) {
-        if (target.isAnnotationPresent(Mandatory.class) && values.isEmpty()) {
-            var context = new DeserializationContext(path, target, Mandatory.class, UserContext.getInstance());
-            postProcessingResults.add(new InvalidValueError(context, MISSING_MANDATORY_PROPERTY.getMessageKey(), MISSING_MANDATORY_PROPERTY.getGlobalMessageKey()));
-        }
     }
 
     @Override

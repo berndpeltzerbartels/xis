@@ -6,13 +6,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * In case the annotated field is of type collection, it will get validated
- * to contain elements.
+ * Annotation for collection fields and array fields or parameters, only.
+ * For fields with this annotation, all elements are validated to non-null.
  * <p>
- * Otherwise the corresponding field is validated to be filled.
+ * In case the element type is a primitive type, the validation will fail without this annotation, too.
  */
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Mandatory {
-    String value() default "";
+public @interface AllElementsMandatory {
 }

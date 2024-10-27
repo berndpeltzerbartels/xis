@@ -2,12 +2,18 @@ package one.xis.deserialize;
 
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
+import lombok.NonNull;
 import one.xis.UserContext;
+import one.xis.validation.Mandatory;
 
 import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
+import java.util.List;
 import java.util.Optional;
+
+import static one.xis.deserialize.DefaultDeserializationErrorType.CONVERSION_ERROR;
+import static one.xis.deserialize.DefaultDeserializationErrorType.MISSING_MANDATORY_PROPERTY;
 
 public interface JsonDeserializer<T> extends Comparable<JsonDeserializer<?>> {
 
@@ -30,7 +36,7 @@ public interface JsonDeserializer<T> extends Comparable<JsonDeserializer<?>> {
         throw new IllegalArgumentException("Unsupported target type: " + target.getClass());
     }
 
-    default Class<?> getType(AnnotatedElement target) {
+    default Class<?> getType(@NonNull AnnotatedElement target) {
         if (target instanceof Field field) {
             return field.getType();
         }
@@ -50,6 +56,19 @@ public interface JsonDeserializer<T> extends Comparable<JsonDeserializer<?>> {
     @Override
     default int compareTo(JsonDeserializer<?> o) {
         return getPriority().compareTo(o.getPriority());
+    }
+
+
+    default void checkMandatory(List<?> values, AnnotatedElement target, PostProcessingResults postProcessingResults, String path) {
+        if (target.isAnnotationPresent(Mandatory.class) && values.isEmpty()) {
+            var context = new DeserializationContext(path, target, Mandatory.class, UserContext.getInstance());
+            postProcessingResults.add(new InvalidValueError(context, MISSING_MANDATORY_PROPERTY.getMessageKey(), MISSING_MANDATORY_PROPERTY.getGlobalMessageKey()));
+        }
+    }
+
+    default void handleDeserializationError(List<?> values, String path, AnnotatedElement target, PostProcessingResults postProcessingResults) {
+        var context = new DeserializationContext(path, target, NoAnnotation.class, UserContext.getInstance());
+        postProcessingResults.add(new InvalidValueError(context, CONVERSION_ERROR.getMessageKey(), CONVERSION_ERROR.getGlobalMessageKey()));
     }
 
 }

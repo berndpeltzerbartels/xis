@@ -72,22 +72,26 @@ class ControllerService {
         if (nextControllerWrapper.equals(invokerControllerWrapper)) {
             mapResultToResponse(response, controllerResult);
         } else {
-            var nextRequest = new ClientRequest();
-            // userdata is the same
-            nextRequest.setLocale(request.getLocale());
-            nextRequest.setZoneId(request.getZoneId());
-            nextRequest.setClientId(request.getClientId());
-            nextRequest.setUserId(request.getUserId());
-            controllerResultMapper.mapControllerResultToRequest(controllerResult, nextRequest);
-            var nextControllerResult = new ControllerResult();
-            // one of these 2 values changed
-            nextControllerResult.setNextPageURL(controllerResult.getNextPageURL());
-            nextControllerResult.setNextWidgetId(controllerResult.getNextWidgetId());
-            // get model data for next controller
-            nextControllerWrapper.invokeGetModelMethods(nextRequest, nextControllerResult);
-            // map result to response
-            mapResultToResponse(response, nextControllerResult);
+            processNextController(request, controllerResult, response, nextControllerWrapper);
         }
+    }
+
+    private void processNextController(ClientRequest request, ControllerResult controllerResult, ServerResponse response, ControllerWrapper nextControllerWrapper) {
+        var nextRequest = new ClientRequest();
+        // userdata is the same
+        nextRequest.setLocale(request.getLocale());
+        nextRequest.setZoneId(request.getZoneId());
+        nextRequest.setClientId(request.getClientId());
+        nextRequest.setUserId(request.getUserId());
+        controllerResultMapper.mapControllerResultToRequest(controllerResult, nextRequest);
+        var nextControllerResult = new ControllerResult();
+        // one of these 2 values changed
+        nextControllerResult.setNextPageURL(controllerResult.getNextPageURL());
+        nextControllerResult.setNextWidgetId(controllerResult.getNextWidgetId());
+        // get model data for next controller
+        nextControllerWrapper.invokeGetModelMethods(nextRequest, nextControllerResult);
+        // map result to response
+        mapResultToResponse(response, nextControllerResult);
     }
 
     private ControllerWrapper controllerWrapper(ClientRequest request) {

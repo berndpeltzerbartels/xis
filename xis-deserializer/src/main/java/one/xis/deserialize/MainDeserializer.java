@@ -43,7 +43,7 @@ public class MainDeserializer {
     }
 
     @SneakyThrows
-    Optional<?> deserialize(JsonReader reader, String path, AnnotatedElement target, UserContext userContext, PostProcessingResults postProcessingResults) {
+    Optional<?> deserialize(@NonNull JsonReader reader, @NonNull String path, @NonNull AnnotatedElement target, @NonNull UserContext userContext, @NonNull PostProcessingResults postProcessingResults) {
         if (reader.peek().equals(JsonToken.NULL)) {
             reader.nextNull();
             if (target.isAnnotationPresent(Mandatory.class)) {
@@ -64,7 +64,15 @@ public class MainDeserializer {
 
     }
 
-    private JsonDeserializer<?> getDeserializer(JsonReader reader, AnnotatedElement target) {
+    <D extends JsonDeserializer<?>> D getDeserializer(Class<D> deserializerClass) {
+        return deserializers.stream()
+                .filter(d -> d.getClass().equals(deserializerClass))
+                .map(deserializerClass::cast)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("No deserializer found for " + deserializerClass));
+    }
+
+    private JsonDeserializer<?> getDeserializer(@NonNull JsonReader reader, @NonNull AnnotatedElement target) {
         return deserializers.stream()
                 .filter(d -> matches(d, reader, target))
                 .findFirst()

@@ -3,12 +3,27 @@ package one.xis;
 import java.lang.annotation.*;
 
 /**
- * Method parameters annotated with {@link URLParameter} identify values from parent component
- * passed to a widget. The parent-component mirght be a parent widget or a page.
+ * Annotation  for url-parameters {@link URLParameter}. url parameters
+ * are defined in value of {@link Page} annotation.
  * <p>
- * In the template these values must be decared with xis:parameter-attribute or a xis:parameter-tag.
+ * Example:
+ * <pre>
+ *     <code>
+ *         @Page("/{a}/xyz.html")
+ *         class ExamplePage {
+ *         ...
+ *     </code>
+ * </pre>
  * <p>
- * These tags must be child-nodes of a widget-container.
+ * The name of the parameter in the example is "a".
+ * To use this url-parameter as a method parameter, it has to be annotated with {@link URLParameter} like this:
+ * <pre>
+ *     <code>
+ *         public void method(@URLParameter("a") String a) {
+ *         ...
+ *         }
+ *         </code>
+ *  </pre>
  */
 @Documented
 @Target(ElementType.PARAMETER)

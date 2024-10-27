@@ -2,10 +2,13 @@ package one.xis.deserialize;
 
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
+import lombok.NonNull;
+import one.xis.Format;
 import one.xis.UserContext;
 import one.xis.context.XISComponent;
 import one.xis.utils.lang.FieldUtil;
 import one.xis.utils.lang.ParameterUtil;
+import one.xis.validation.AllElementsMandatory;
 import one.xis.validation.Mandatory;
 
 import java.io.IOException;
@@ -22,8 +25,8 @@ import static one.xis.deserialize.DefaultDeserializationErrorType.MISSING_MANDAT
 class CollectionDeserializer implements JsonDeserializer<Collection> {
 
     @Override
-    public boolean matches(JsonToken token, AnnotatedElement target) {
-        return Collection.class.isAssignableFrom(getType(target));
+    public boolean matches(@NonNull JsonToken token, @NonNull AnnotatedElement target) {
+        return Collection.class.isAssignableFrom(getType(target)) && JsonToken.BEGIN_ARRAY.equals(token);
     }
 
     @Override
@@ -40,13 +43,21 @@ class CollectionDeserializer implements JsonDeserializer<Collection> {
         reader.beginArray();
         int index = 0;
         while (reader.hasNext()) {
-            var result = mainDeserializer.deserialize(reader, path(path, index++), elementTarget, userContext, postProcessingResults);
+            Optional<Object> result = Optional.empty();
+            if (target.isAnnotationPresent(Format.class)) {
+                result = mainDeserializer.getDeserializer(FormattedDeserializer.class).deserialize(reader, path(path, index), target, userContext, mainDeserializer, postProcessingResults);
+            } else {
+                result = mainDeserializer.deserialize(reader, path(path, index), elementTarget, userContext, postProcessingResults).map(Object.class::cast);
+            }
             if (result.isPresent()) {
                 collection.add(result.get());
             } else {
                 collection.add(null);
-                deserialiaztionFailed = true;
+                if (elementTarget.isPrimitive() || target.isAnnotationPresent(AllElementsMandatory.class)) {
+                    deserialiaztionFailed = true;
+                }
             }
+            index++;
         }
         if (deserialiaztionFailed) {
             handleDeserializationError(collection, path, target, postProcessingResults);
@@ -58,7 +69,7 @@ class CollectionDeserializer implements JsonDeserializer<Collection> {
 
     @Override
     public DeserializerPriority getPriority() {
-        return DeserializerPriority.FRAMEWORK_LOW;
+        return DeserializerPriority.FRAMEWORK_HIGHEST;
     }
 
     private void checkMandatory(Collection<?> collection, AnnotatedElement target, PostProcessingResults postProcessingResults, String path) {
