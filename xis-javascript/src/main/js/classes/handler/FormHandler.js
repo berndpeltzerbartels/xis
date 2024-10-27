@@ -64,9 +64,19 @@ class FormHandler extends TagHandler {
         var formBindingKey = stripQuery(this.binding);
         var formHandler = this;
         this.formElementHandlers = {};
+        data.validationPath = '/' + formBindingKey;
         this.refreshDescendantHandlers(data);
         this.client.loadFormData(app.pageController.resolvedURL, this.widgetId(), formBindingKey, formBindingParameters)
-            .then(response => formHandler.refreshFormData(response.formData));
+            .then(response => formHandler.refreshFormData(formHandler.subData(response, formBindingKey)));
+    }
+
+    /**
+     * Creates a new Data object for embedded for elements from the response
+     * @param {ServerResponse} response 
+     * @returns 
+     */
+    subData(response, formBindingKey) {
+        return new Data(response.formData.getValue([formBindingKey]));
     }
 
     widgetId() {

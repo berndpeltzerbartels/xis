@@ -24,6 +24,7 @@ class ForeachHandler extends TagHandler {
         this.cache.sizeUp(arr.length);
         for (var i = 0; i < this.cache.length; i++) {
             var subData = new Data({}, data);
+            this.setValidationPath(subData, this.varName, i);
             subData.setValue([this.varName + '-index'], i);
             subData.setValue([this.varName], arr[i]);
             var children = this.cache.getChildren(i);
@@ -45,5 +46,12 @@ class ForeachHandler extends TagHandler {
                 }
             }
         }
+    }
+
+    setValidationPath(subData, varName, index) {
+        if (!subData.validationPath) {
+            return; // we are not inside a form
+        }
+        subData.validationPath += '/' + varName + '[' + index + ']';
     }
 }

@@ -11,6 +11,7 @@ class Data {
     constructor(values, parentData = undefined) {
         this.values = values;
         this.parentData = parentData;
+        this.validationPath = '';
     }
     /**
      * @public
@@ -18,6 +19,9 @@ class Data {
      * @returns {any}
      */
     getValue(path) {
+        if (typeof path === 'string') {
+            path = doSplit(path, '.');
+        }
         var dataNode = this.values;
         for (var i = 0; i < path.length; i++) {
             var key = path[i];

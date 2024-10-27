@@ -36,7 +36,7 @@ class MessageTagHandler extends TagHandler {
      * @param {Data} data
      */
     refresh(data) {
-        this.binding = this.bindingExpression.evaluate(data);
+        this.binding = data.validationPath + '/' + this.bindingExpression.evaluate(data);
         this.refreshDescendantHandlers(data);
     }
 
@@ -46,17 +46,9 @@ class MessageTagHandler extends TagHandler {
      * @param {ValidatorMessages} messages 
      */
     refreshValidatorMessages(messages) {
-        this.tag.innerText = messages.getMessageFor(this.messagePath());
+        this.tag.innerText = messages.getMessageFor(this.binding);
         super.refreshValidatorMessages(messages);
     }
 
-    /**
-     * Message path for validator message.
-     * 
-     * @private
-     * @returns {string}
-     */
-    messagePath() {
-        return '/' + this.formHandler.binding + '/' + this.binding;
-    }
+
 }
