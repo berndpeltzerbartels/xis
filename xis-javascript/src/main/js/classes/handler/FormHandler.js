@@ -76,7 +76,8 @@ class FormHandler extends TagHandler {
      * @returns 
      */
     subData(response, formBindingKey) {
-        return new Data(response.formData.getValue([formBindingKey]));
+        var values = response.formData.getValue([formBindingKey]) || {};
+        return new Data(values);
     }
 
     widgetId() {
