@@ -31,7 +31,11 @@ class FormHandler extends TagHandler {
     formData() {
         var data = {}
         for (var key of Object.keys(this.formElementHandlers)) {
-            data[key] = this.formElementHandlers[key].getValue();
+            if (!data[key]) {
+                data[key] = [];
+            }
+            var arr = data[key];
+            arr.push(this.formElementHandlers[key].getValue());
         }
         return data;
     }

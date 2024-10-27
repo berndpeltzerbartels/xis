@@ -120,11 +120,14 @@ class ControllerMethodResultMapper {
     }
 
     private void mapError(PostProcessingResult error, Map<String, String> errorMessageMap) {
+        var key = error.getDeserializationContext().getPath();
+        if (errorMessageMap.containsKey(key)) {
+            return;
+        }
         var message = validatorMessageResolver.createMessage(error.getMessageKey(),
                 error.getMessageParameters(),
                 error.getDeserializationContext().getTarget(),
                 error.getDeserializationContext().getUserContext());
-        var key = error.getDeserializationContext().getPath();
         errorMessageMap.put(key, message);
     }
 

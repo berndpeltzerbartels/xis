@@ -5,10 +5,13 @@ import com.google.gson.stream.JsonToken;
 import one.xis.Format;
 import one.xis.UserContext;
 import one.xis.context.XISComponent;
+import one.xis.validation.Mandatory;
 
 import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
 import java.util.Optional;
+
+import static one.xis.deserialize.DefaultDeserializationErrorType.MISSING_MANDATORY_PROPERTY;
 
 @XISComponent
 class CollectionToSingleElementDeserializer implements JsonDeserializer<Object> {
@@ -26,7 +29,6 @@ class CollectionToSingleElementDeserializer implements JsonDeserializer<Object> 
     @Override
     public Optional<Object> deserialize(JsonReader reader, String path, AnnotatedElement target, UserContext userContext, MainDeserializer mainDeserializer, PostProcessingResults results) throws DeserializationException, IOException {
         reader.beginArray();
-        int index = 0;
         var componentType = getType(target);
         Object value = null;
         if (reader.hasNext()) {
@@ -34,10 +36,13 @@ class CollectionToSingleElementDeserializer implements JsonDeserializer<Object> 
             if (target.isAnnotationPresent(Format.class)) {
                 result = mainDeserializer.getDeserializer(FormattedDeserializer.class).deserialize(reader, path, target, userContext, mainDeserializer, results);
             } else {
-                result = mainDeserializer.deserialize(reader, path(path, index), componentType, userContext, results).map(Object.class::cast);
+                result = mainDeserializer.deserialize(reader, path, componentType, userContext, results).map(Object.class::cast);
             }
             if (result.isPresent()) {
                 value = result.get();
+            } else if (target.isAnnotationPresent(Mandatory.class)) {
+                var context = new DeserializationContext(path, target, Mandatory.class, userContext);
+                results.add(new InvalidValueError(context, MISSING_MANDATORY_PROPERTY.getMessageKey(), MISSING_MANDATORY_PROPERTY.getGlobalMessageKey()));
             }
             if (reader.peek() == JsonToken.END_ARRAY) {
                 reader.endArray();
