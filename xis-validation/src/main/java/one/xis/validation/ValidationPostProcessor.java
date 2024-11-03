@@ -32,7 +32,7 @@ class ValidationPostProcessor implements DeserializationPostProcessor {
         try {
             validator.validate(value, deserializationContext.getTarget());
         } catch (ValidatorException e) {
-            postProcessingResults.add(new InvalidValueError(deserializationContext, validateAnnotation.messageKey(), validateAnnotation.globalMessageKey()));
+            postProcessingResults.add(new InvalidValueError(deserializationContext, validateAnnotation.messageKey(), validateAnnotation.globalMessageKey(), value, e.getMessageParameters()));
         }
     }
 

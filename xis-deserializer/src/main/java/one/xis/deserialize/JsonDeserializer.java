@@ -62,13 +62,13 @@ public interface JsonDeserializer<T> extends Comparable<JsonDeserializer<?>> {
     default void checkMandatory(List<?> values, AnnotatedElement target, PostProcessingResults postProcessingResults, String path) {
         if (target.isAnnotationPresent(Mandatory.class) && values.isEmpty()) {
             var context = new DeserializationContext(path, target, Mandatory.class, UserContext.getInstance());
-            postProcessingResults.add(new InvalidValueError(context, MISSING_MANDATORY_PROPERTY.getMessageKey(), MISSING_MANDATORY_PROPERTY.getGlobalMessageKey()));
+            postProcessingResults.add(new InvalidValueError(context, MISSING_MANDATORY_PROPERTY.getMessageKey(), MISSING_MANDATORY_PROPERTY.getGlobalMessageKey(), values));
         }
     }
 
     default void handleDeserializationError(List<?> values, String path, AnnotatedElement target, PostProcessingResults postProcessingResults) {
         var context = new DeserializationContext(path, target, NoAnnotation.class, UserContext.getInstance());
-        postProcessingResults.add(new InvalidValueError(context, CONVERSION_ERROR.getMessageKey(), CONVERSION_ERROR.getGlobalMessageKey()));
+        postProcessingResults.add(new InvalidValueError(context, CONVERSION_ERROR.getMessageKey(), CONVERSION_ERROR.getGlobalMessageKey(), values));
     }
 
 }

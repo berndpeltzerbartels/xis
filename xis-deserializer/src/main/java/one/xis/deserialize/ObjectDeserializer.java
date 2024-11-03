@@ -38,7 +38,7 @@ class ObjectDeserializer implements JsonDeserializer<Object> {
                                         PostProcessingResults results) throws IOException {
         var objectType = getType(target);
         var o = ClassUtils.newInstance(objectType);
-        var mandatorFields = getMandatoryFields(objectType);
+        var mandatoryFields = getMandatoryFields(objectType);
         var fieldMap = fieldMap(objectType);
         reader.beginObject();
         while (reader.hasNext()) {
@@ -47,7 +47,7 @@ class ObjectDeserializer implements JsonDeserializer<Object> {
                 throw new IllegalArgumentException("no field named '" + name + "' present in " + o.getClass());
             }
             var field = fieldMap.get(name);
-            mandatorFields.remove(field);
+            mandatoryFields.remove(field);
             mainDeserializer.deserialize(reader, path(path, field), field, userContext, results)
                     .ifPresent(fieldValue -> FieldUtil.setFieldValue(o, field, fieldValue));
             if (reader.peek().equals(JsonToken.END_OBJECT)) {
@@ -56,9 +56,9 @@ class ObjectDeserializer implements JsonDeserializer<Object> {
             }
         }
         // We need this in case the field is not present in the JSON:
-        mandatorFields.forEach(field -> {
+        mandatoryFields.forEach(field -> {
             var context = new DeserializationContext(path(path, field), field, Mandatory.class, UserContext.getInstance());
-            results.add(new InvalidValueError(context, MISSING_MANDATORY_PROPERTY.getMessageKey(), MISSING_MANDATORY_PROPERTY.getGlobalMessageKey()));
+            results.add(new InvalidValueError(context, MISSING_MANDATORY_PROPERTY.getMessageKey(), MISSING_MANDATORY_PROPERTY.getGlobalMessageKey(), o));
         });
         return Optional.of(o);
     }

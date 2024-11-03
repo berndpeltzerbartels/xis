@@ -35,15 +35,18 @@ class NumberDeserializer implements JsonDeserializer<Number> {
                                         UserContext userContext,
                                         MainDeserializer mainDeserializer,
                                         PostProcessingResults results) throws IOException {
+        Object value = null;
         try {
             if (reader.peek().equals(JsonToken.NUMBER)) {
-                return Optional.of(parseNumber(reader.nextDouble(), target));
+                value = reader.nextDouble();
+                return Optional.of(parseNumber((Number) value, target));
             }
             if (reader.peek().equals(JsonToken.STRING)) {
-                return Optional.of(parseNumber(reader.nextString(), target));
+                value = reader.nextString();
+                return Optional.of(parseNumber((String) value, target));
             }
         } catch (Exception e) {
-            throw new DeserializationException(e);
+            throw new DeserializationException(e, value != null ? value.toString() : "");
         }
         return Optional.empty();
     }

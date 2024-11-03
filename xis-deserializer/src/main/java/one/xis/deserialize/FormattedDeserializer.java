@@ -41,10 +41,11 @@ class FormattedDeserializer implements JsonDeserializer<Object> {
         if (!reader.peek().equals(JsonToken.STRING)) {
             throw new IllegalArgumentException("Expected a string");
         }
+        var value = reader.nextString();
         try {
-            return Optional.of(formatter.parse(reader.nextString(), userContext.getLocale(), userContext.getZoneId()));
+            return Optional.of(formatter.parse(value, userContext.getLocale(), userContext.getZoneId()));
         } catch (Exception e) {
-            throw new DeserializationException(e);
+            throw new DeserializationException(e, value);
         }
     }
 

@@ -19,10 +19,11 @@ class EnumDeserializer implements JsonDeserializer<Enum> {
 
     @Override
     public Optional<Enum> deserialize(JsonReader reader, String path, AnnotatedElement target, UserContext userContext, MainDeserializer mainDeserializer, PostProcessingResults results) throws IOException {
+        var input = reader.nextString();
         try {
-            return Optional.of(Enum.valueOf((Class<Enum>) getType(target), reader.nextString()));
+            return Optional.of(Enum.valueOf((Class<Enum>) getType(target), input));
         } catch (Exception e) {
-            throw new DeserializationException(e);
+            throw new DeserializationException(e, input);
         }
     }
 

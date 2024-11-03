@@ -24,10 +24,11 @@ class LocalDateDeserializer implements JsonDeserializer<LocalDate> { // TODO: Im
                                            UserContext userContext,
                                            MainDeserializer mainDeserializer,
                                            PostProcessingResults results) throws IOException {
+        var value = reader.nextString();
         try {
-            return Optional.of(LocalDate.parse(reader.nextString()));
+            return Optional.of(LocalDate.parse(value));
         } catch (Exception e) {
-            throw new DeserializationException(e);
+            throw new DeserializationException(e, value);
         }
 
     }

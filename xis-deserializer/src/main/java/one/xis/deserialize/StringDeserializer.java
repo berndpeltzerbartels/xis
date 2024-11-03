@@ -26,7 +26,7 @@ class StringDeserializer implements JsonDeserializer<String> {
         try {
             return Optional.of(reader.nextString());
         } catch (IOException e) {
-            throw new DeserializationException(e);
+            throw new DeserializationException(e, null);
         }
     }
 

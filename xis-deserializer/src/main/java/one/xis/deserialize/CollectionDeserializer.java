@@ -75,13 +75,13 @@ class CollectionDeserializer implements JsonDeserializer<Collection> {
     private void checkMandatory(Collection<?> collection, AnnotatedElement target, PostProcessingResults postProcessingResults, String path) {
         if (target.isAnnotationPresent(Mandatory.class) && collection.isEmpty()) {
             var context = new DeserializationContext(path, target, Mandatory.class, UserContext.getInstance());
-            postProcessingResults.add(new InvalidValueError(context, MISSING_MANDATORY_PROPERTY.getMessageKey(), MISSING_MANDATORY_PROPERTY.getGlobalMessageKey()));
+            postProcessingResults.add(new InvalidValueError(context, MISSING_MANDATORY_PROPERTY.getMessageKey(), MISSING_MANDATORY_PROPERTY.getGlobalMessageKey(), collection));
         }
     }
 
     private void handleDeserializationError(Collection<?> values, String path, AnnotatedElement target, PostProcessingResults postProcessingResults) {
         var context = new DeserializationContext(path, target, NoAnnotation.class, UserContext.getInstance());
-        postProcessingResults.add(new InvalidValueError(context, CONVERSION_ERROR.getMessageKey(), CONVERSION_ERROR.getGlobalMessageKey()));
+        postProcessingResults.add(new InvalidValueError(context, CONVERSION_ERROR.getMessageKey(), CONVERSION_ERROR.getGlobalMessageKey(), values));
     }
 
     private String path(String parent, int index) {

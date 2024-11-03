@@ -48,17 +48,18 @@ public class MainDeserializer {
             reader.nextNull();
             if (target.isAnnotationPresent(Mandatory.class)) {
                 var context = new DeserializationContext(path, target, Mandatory.class, UserContext.getInstance());
-                postProcessingResults.add(new InvalidValueError(context, MISSING_MANDATORY_PROPERTY.getMessageKey(), MISSING_MANDATORY_PROPERTY.getGlobalMessageKey()));
+                postProcessingResults.add(new InvalidValueError(context, MISSING_MANDATORY_PROPERTY.getMessageKey(), MISSING_MANDATORY_PROPERTY.getGlobalMessageKey(), null));
             }
             return Optional.empty();
         }
+        Optional<?> value;
         try {
-            var value = getDeserializer(reader, target).deserialize(reader, path, target, userContext, this, postProcessingResults);
+            value = getDeserializer(reader, target).deserialize(reader, path, target, userContext, this, postProcessingResults);
             value.ifPresent(o -> deserializationPostProcessing.postProcess(path, o, target, userContext, postProcessingResults));
             return value;
         } catch (DeserializationException e) {
             var context = new DeserializationContext(path, target, NoAnnotation.class, UserContext.getInstance());
-            postProcessingResults.add(new InvalidValueError(context, CONVERSION_ERROR.getMessageKey(), CONVERSION_ERROR.getGlobalMessageKey()));
+            postProcessingResults.add(new InvalidValueError(context, CONVERSION_ERROR.getMessageKey(), CONVERSION_ERROR.getGlobalMessageKey(), e.getUserInput()));
             return Optional.empty();
         }
 

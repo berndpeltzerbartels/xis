@@ -13,6 +13,7 @@ public abstract class PostProcessingResult {
     private final DeserializationContext deserializationContext;
     private final String messageKey;
     private final String globalMessageKey;
+    private final Object value;
 
     private final Map<String, Object> messageParameters = new HashMap<>();
 

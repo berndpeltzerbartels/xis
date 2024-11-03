@@ -5,8 +5,8 @@ import one.xis.deserialize.PostProcessingResult;
 
 class SecurityError extends PostProcessingResult {
 
-    public SecurityError(DeserializationContext deserializationContext, String messageKey, String globalMessageKey) {
-        super(deserializationContext, messageKey, globalMessageKey);
+    public SecurityError(DeserializationContext deserializationContext, String messageKey, String globalMessageKey, Object value) {
+        super(deserializationContext, messageKey, globalMessageKey, value);
     }
 
     @Override

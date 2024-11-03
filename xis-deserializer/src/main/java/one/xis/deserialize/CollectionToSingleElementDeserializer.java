@@ -42,12 +42,12 @@ class CollectionToSingleElementDeserializer implements JsonDeserializer<Object> 
                 value = result.get();
             } else if (target.isAnnotationPresent(Mandatory.class)) {
                 var context = new DeserializationContext(path, target, Mandatory.class, userContext);
-                results.add(new InvalidValueError(context, MISSING_MANDATORY_PROPERTY.getMessageKey(), MISSING_MANDATORY_PROPERTY.getGlobalMessageKey()));
+                results.add(new InvalidValueError(context, MISSING_MANDATORY_PROPERTY.getMessageKey(), MISSING_MANDATORY_PROPERTY.getGlobalMessageKey(), value));
             }
             if (reader.peek() == JsonToken.END_ARRAY) {
                 reader.endArray();
             } else {
-                throw new DeserializationException("Expected single element collection, but got multiple elements");
+                throw new DeserializationException("Expected single element collection, but got multiple elements", value);
             }
         }
         return Optional.ofNullable(value);
