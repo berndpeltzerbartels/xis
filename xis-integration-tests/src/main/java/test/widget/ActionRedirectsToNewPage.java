@@ -3,7 +3,7 @@ package test.widget;
 
 import one.xis.Action;
 import one.xis.Widget;
-import test.page.IndexPage;
+import test.page.core.IndexPage;
 
 @Widget
 class ActionRedirectsToNewPage {

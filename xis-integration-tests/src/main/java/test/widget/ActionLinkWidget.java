@@ -5,7 +5,7 @@ import one.xis.Action;
 import one.xis.ActionParameter;
 import one.xis.ModelData;
 import one.xis.Widget;
-import test.page.IndexPage;
+import test.page.core.IndexPage;
 
 /*
 

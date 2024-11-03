@@ -4,7 +4,7 @@ import one.xis.context.IntegrationTestContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import test.page.IndexPage;
+import test.page.core.IndexPage;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
