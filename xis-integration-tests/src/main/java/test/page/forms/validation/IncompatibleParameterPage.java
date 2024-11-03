@@ -1,4 +1,4 @@
-package test.page.forms;
+package test.page.forms.validation;
 
 import one.xis.Action;
 import one.xis.FormData;

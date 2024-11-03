@@ -1,4 +1,4 @@
-package test.page.forms;
+package test.page.forms.validation;
 
 import one.xis.context.IntegrationTestContext;
 import one.xis.test.dom.Document;

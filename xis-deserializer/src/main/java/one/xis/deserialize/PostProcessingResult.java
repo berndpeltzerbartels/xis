@@ -22,7 +22,6 @@ public abstract class PostProcessingResult {
      *
      * @param variableName the name of the variable in the message, like "variableName" in the example above
      * @param messageKey   the key for the message in resource bundle
-     * @param messageKey   the key for the message in resource bundle
      */
     public void addMessageParameter(String variableName, Object messageKey) {
         messageParameters.put(variableName, messageKey);

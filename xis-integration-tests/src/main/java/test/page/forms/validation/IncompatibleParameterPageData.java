@@ -1,4 +1,4 @@
-package test.page.forms;
+package test.page.forms.validation;
 
 import lombok.Data;
 import one.xis.validation.Mandatory;
