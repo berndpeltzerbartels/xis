@@ -124,8 +124,10 @@ class ControllerMethodResultMapper {
         if (errorMessageMap.containsKey(key)) {
             return;
         }
+        var parameterMap = new HashMap<String, Object>(errorMessageMap);
+        parameterMap.put("value", error.getValue());
         var message = validatorMessageResolver.createMessage(error.getMessageKey(),
-                error.getMessageParameters(),
+                parameterMap,
                 error.getDeserializationContext().getTarget(),
                 error.getDeserializationContext().getUserContext());
         errorMessageMap.put(key, message);
