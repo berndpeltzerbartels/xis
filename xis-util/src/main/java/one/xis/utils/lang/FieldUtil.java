@@ -6,6 +6,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.WildcardType;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @UtilityClass
@@ -24,6 +25,16 @@ public class FieldUtil {
 
     public Field getDeclaredField(Class<?> clazz, String fieldName) {
         return getDeclaredField(clazz, fieldName, true);
+    }
+
+    public List<Field> getFields(Class<?> clazz, Predicate<Field> filter) {
+        var fields = new ArrayList<Field>();
+        Class<?> c = clazz;
+        while (c != null && !c.equals(Object.class)) {
+            fields.addAll(getDeclaredFields(c));
+            c = c.getSuperclass();
+        }
+        return fields;
     }
 
     public Collection<Field> getAllFields(Class<?> clazz) {
