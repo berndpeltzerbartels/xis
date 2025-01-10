@@ -209,7 +209,7 @@ class AppContextFactory implements ComponentCreationListener {
         public void accept(Class<?> c) {
             if (!c.isInterface() && !c.isAnnotation()) {
                 var placeholder = new ComponentWrapperPlaceholder();
-                var constructorWrapper = new ConstructorWrapper(ClassUtils.getAccessibleContructor(c).orElseThrow(), placeholder, contextFactory);
+                var constructorWrapper = new ConstructorWrapper(ClassUtils.getAccessibleConstructor(c).orElseThrow(), placeholder, contextFactory);
                 constructorWrapper.setFieldWrappers(fieldWrappers(c, placeholder));
                 constructorWrapper.setInitMethods(initMethods(c, placeholder));
                 constructorWrapper.setBeanMethods(beanMethods(c, placeholder));

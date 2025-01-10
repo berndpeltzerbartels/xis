@@ -1,12 +1,14 @@
 package one.xis.context2;
 
-public interface SingletonProducer {
+interface SingletonProducer {
 
     Class<?> getSingletonClass();
 
-    void onParameterAssigned();
+    boolean isReadyForProduction();
 
-    boolean isSatisfied();
+    void addConsumer(SingletonConsumer consumer);
 
-    void addListener(SingletonConsumer consumer);
+    void addListener(SingletonCreationListener listener);
+
+    void invoke();
 }

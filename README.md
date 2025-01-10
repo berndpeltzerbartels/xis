@@ -159,7 +159,8 @@ the pageComponent-component is not associated with a URL, because it's loaded dy
 pageComponent or widgetComponent or an upper pageComponent-component in the way you know from MainPage-example above.
 
 In this example, the main-pageComponent displays the weather-widgetComponent and the news-component, initially. As you
-see, a component instance can be uses as a parameter in annotated methods. Bounded fields of the parameters (@Binding)
+see, a component instance can be uses as a parameter in annotated methods. Bounded fields of the parameterFactory (
+@Binding)
 will contain the actual values from client.
 
 **Instantiating pageComponent-components on your own is not recommended (no injection).**

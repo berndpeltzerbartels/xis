@@ -39,6 +39,35 @@ public class ClassUtils {
         }
     }
 
+    public boolean areRelated(Class<?> c1, Class<?> c2) {
+        return c1.isAssignableFrom(c2) || c2.isAssignableFrom(c1);
+    }
+
+    public boolean isComplex(Class<?> c) {
+        return !c.isPrimitive() && !c.isEnum() && !c.isArray();
+    }
+
+    public boolean isCustomType(Class<?> c) {
+        if (c.isPrimitive() || c.isEnum() || c.isArray()) {
+            return false;
+        }
+        return !c.getName().startsWith("java.lang");
+    }
+
+    public Constructor<?> getUniqueConstructor(Class<?> c) {
+        if (c.getDeclaredConstructors().length > 1) {
+            throw new RuntimeException("Multiple constructors found for class " + c.getName());
+        }
+        if (c.getConstructors().length == 0) {
+            throw new RuntimeException("No constructor found for class " + c.getName());
+        }
+        try {
+            return c.getConstructor();
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public <T> Constructor<T> getConstructor(Class<T> aClass, Class<?>... parameterTypes) {
         try {
             var constructor = aClass.getConstructor(parameterTypes);
@@ -49,8 +78,9 @@ public class ClassUtils {
         }
     }
 
+
     @SuppressWarnings("unchecked")
-    public static <T> Optional<Constructor<T>> getAccessibleContructor(Class<T> aClass) {
+    public static <T> Optional<Constructor<T>> getAccessibleConstructor(Class<T> aClass) {
         return Arrays.stream(aClass.getDeclaredConstructors())
                 .map(c -> (Constructor<T>) c)
                 .filter(ClassUtils::nonPrivate)
@@ -123,25 +153,29 @@ public class ClassUtils {
         throw new IllegalArgumentException(interf + " is not implemented by " + c);
     }
 
-    public static boolean isNumber(Class<?> type) {
+    public boolean isPrimitiveWrapper(Class<?> type) {
+        return type == Integer.class || type == Long.class || type == Short.class || type == Byte.class || type == Float.class || type == Double.class || type == Character.class;
+    }
+
+    public boolean isNumber(Class<?> type) {
         return Number.class.isAssignableFrom(type) || type.isPrimitive() && type != boolean.class && type != char.class;
     }
 
-    public static boolean isDate(@NonNull Class<?> type) {
+    public boolean isDate(@NonNull Class<?> type) {
         return Date.class.isAssignableFrom(type) || java.sql.Date.class.isAssignableFrom(type) || java.sql.Timestamp.class.isAssignableFrom(type) || Temporal.class.isAssignableFrom(type);
     }
 
-    public static boolean isBoolean(Class<?> type) {
+    public boolean isBoolean(Class<?> type) {
         return type == boolean.class || type == Boolean.class;
     }
 
-    public static boolean isString(Class<?> type) {
+    public boolean isString(Class<?> type) {
         return type == String.class;
     }
 
-    public static boolean isEnum(Class<?> type) {
+    public boolean isEnum(Class<?> type) {
         return type.isEnum();
     }
 
-    
+
 }

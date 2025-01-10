@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.Delegate;
 
 import java.lang.reflect.Parameter;
+import java.util.Collection;
+import java.util.List;
 
 @Getter
 @RequiredArgsConstructor
@@ -23,15 +25,27 @@ class SimpleParam implements Param {
     }
 
     @Override
-    public void onProducerCreated(SingletonProducer producer) {
-        if (parameter.getType().isAssignableFrom(producer.getSingletonClass())) {
-            if (this.producer != null) throw new IllegalStateException("too many candidates for " + parameter);
-            this.producer = producer;
-        }
+    public boolean isConsumerFor(Class<?> c) {
+        return false;
     }
 
     @Override
-    public boolean isSatisfied() {
+    public boolean isProducersComplete() {
+        return producer != null;
+    }
+
+    @Override
+    public boolean isValuesAssigned() {
         return value != null;
+    }
+
+    @Override
+    public Collection<Class<?>> getUnsatisfiedDependencies() {
+        return value == null ? List.of(parameter.getType()) : List.of();
+    }
+
+    @Override
+    public void setProducer(SingletonProducer producer) {
+        this.producer = producer;
     }
 }

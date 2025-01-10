@@ -1,15 +1,21 @@
 package one.xis.context2;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 import java.lang.reflect.Field;
+import java.util.Collection;
+import java.util.List;
 
 @RequiredArgsConstructor
 class SingletonField implements SingletonConsumer {
 
     private final Field field;
-    private final Singleton parent;
+    private final SingletonWrapper parent;
 
+    @Getter
+    @Setter
     private SingletonProducer producer;
     private Object value;
 
@@ -19,12 +25,23 @@ class SingletonField implements SingletonConsumer {
     }
 
     @Override
-    public void onProducerCreated(SingletonProducer producer) {
-        if (field.getType().isAssignableFrom(producer.getSingletonClass())) {
-            if (this.producer != null) throw new IllegalStateException(field + ": too many candidates");
-            this.producer = producer;
-            producer.addListener(this);
-        }
+    public boolean isConsumerFor(Class<?> c) {
+        return field.getType().isAssignableFrom(c);
+    }
+
+    @Override
+    public boolean isProducersComplete() {
+        return producer != null;
+    }
+
+    @Override
+    public boolean isValuesAssigned() {
+        return value != null;
+    }
+
+    @Override
+    public Collection<Class<?>> getUnsatisfiedDependencies() {
+        return List.of();
     }
 
     public boolean isAssigned() {

@@ -4,7 +4,7 @@ import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
 
-class Parameters {
+class ParameterFactory {
 
     private final List<Param> params = new ArrayList<>();
 

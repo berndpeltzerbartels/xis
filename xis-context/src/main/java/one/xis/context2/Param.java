@@ -4,9 +4,7 @@ public interface Param extends SingletonConsumer {
 
     void assignValue(Object o);
 
-    void onProducerCreated(SingletonProducer producer);
-
-    boolean isSatisfied();
+    boolean isValuesAssigned();
 
     Object getValue();
 }
