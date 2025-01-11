@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
+// test
 class Fields {
     private final List<SingletonField> fields = new ArrayList<>();
 
