@@ -18,7 +18,6 @@ class ApplicationContextFactory implements SingletonCreationListener {
     private final Set<SingletonProducer> initialProducers = new HashSet<>();
     private final Set<Object> singletons = new HashSet<>();
     private final ParameterFactory parameterFactory = new ParameterFactory();
-    private final Fields fields = new Fields();
     private final Annotations annotations;
 
     private final Class<?>[] annotatedComponentClasses;
