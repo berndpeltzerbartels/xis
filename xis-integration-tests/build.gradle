@@ -39,6 +39,9 @@ dependencies {
     implementation project(':xis-util')
     implementation project(':xis-validation')
 
+    // Local test dependencies
+    testImplementation project(":xis-test")
+
     // Lombok dependencies
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
     implementation "org.projectlombok:lombok:$lombokVersion"
@@ -50,6 +53,7 @@ dependencies {
     // Mockito dependencies
     testImplementation "org.mockito:mockito-core:$mockitoVersion"
     testImplementation "org.mockito:mockito-junit-jupiter:4.5.1"
+
 
     // AssertJ dependencies
     testImplementation group: 'org.assertj', name: 'assertj-core', version: assertjVersion

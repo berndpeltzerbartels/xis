@@ -11,6 +11,12 @@ tasks.withType(JavaCompile) {
     targetCompatibility = JavaVersion.VERSION_17
 }
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
 // Local variables for versions
 var graalVersion = "23.0.1"
 var lombokVersion = "1.18.34"
@@ -40,7 +46,7 @@ dependencies {
     testImplementation "org.mockito:mockito-junit-jupiter:$mockitoVersion"
 
     // AssertJ dependencies
-    testImplementation group: "org.assertj", name: "assertj-core", version: assertjVersion
+    testImplementation"org.assertj:assertj-core:$assertjVersion"
 
 }
 

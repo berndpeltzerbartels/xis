@@ -1,0 +1,61 @@
+plugins {
+    id 'java'
+    id 'maven-publish'
+    id 'groovy' // Optional, falls du Groovy verwenden möchtest
+    id 'com.gradle.plugin-publish' version '0.15.0' // Für Plugin-Veröffentlichung
+}
+
+group = 'com.example'
+version = '1.0.0'
+
+repositories {
+    mavenCentral()
+}
+
+tasks.withType(JavaCompile) {
+    sourceCompatibility = rootProject.ext.javaVersion.toString()
+    targetCompatibility = rootProject.ext.javaVersion.toString()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(rootProject.ext.javaVersionInt)
+    }
+}
+
+
+dependencies {
+    implementation gradleApi()
+    implementation localGroovy()
+}
+
+pluginBundle {
+    website = 'https://example.com'
+    vcsUrl = 'https://github.com/example/repo'
+    tags = ['java', 'dependency', 'java-version']
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+// Aufgabe zum Schreiben der Version in eine Datei
+task writeVersionToFile {
+    doLast {
+        def versionFile = new File(buildDir, "plugin-version.txt")
+        versionFile.text = project.version.toString() // Schreibe die Version in die Datei
+        println "Plugin version written to: " + versionFile
+    }
+}
+
+task writeJavaVersionIntToFile {
+    doLast {
+        def versionFile = new File(buildDir, "java-version.txt")
+        versionFile.text = rootProject.ext.javaVersionInt
+        println "Java version written to: " + versionFile
+    }
+}
+
+// Führe die Aufgabe automatisch beim Build aus
+classes.dependsOn writeVersionToFile
+classes.dependsOn writeJavaVersionIntToFile

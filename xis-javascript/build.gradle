@@ -22,7 +22,7 @@ java {
     }
 }
 
-//apply plugin: JavascriptPlugin
+apply plugin: JavascriptPlugin
 
 // Local variables for versions
 var lombokVersion = rootProject.ext.libraryVersions.lombok
