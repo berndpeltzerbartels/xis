@@ -1,41 +1,66 @@
 plugins {
-    id 'java'
+    id "java"
 }
 
-group 'one.xis'
-version '1.0-SNAPSHOT'
+group = rootProject.ext.projectGroup
+version = rootProject.ext.projectVersion
 
 repositories {
     mavenCentral()
 }
 
+tasks.withType(JavaCompile) {
+    sourceCompatibility = rootProject.ext.javaVersion.toString()
+    targetCompatibility = rootProject.ext.javaVersion.toString()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(rootProject.ext.javaVersionInt)
+    }
+}
+
+
+// Local variables for versions
+var lombokVersion = rootProject.ext.libraryVersions.lombok
+var junitVersion = rootProject.ext.libraryVersions.junit
+var assertjVersion = rootProject.ext.libraryVersions.assertj
+var jacksonVersion = "2.14.1"
+var gsonVersion = "2.10.1"
+var mockitoVersion = "5.2.0"
+
+
 dependencies {
-    implementation project(':xis-util')
-    implementation project(':xis-remote-core')
-    implementation project(':xis-context')
+
+    // Local project dependencies
+    implementation project(":xis-util")
+    implementation project(":xis-remote-core")
+    implementation project(":xis-context")
     implementation project(":xis-frontend")
     testImplementation project(":xis-frontend")
-    testImplementation project(':xis-test')
+    testImplementation project(":xis-test")
 
-
+    // Lombok dependencies
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
     implementation "org.projectlombok:lombok:$lombokVersion"
-
     testAnnotationProcessor("org.projectlombok:lombok:$lombokVersion")
 
-    implementation 'com.google.code.gson:gson:2.10.1'
+    // Gson dependency
+    implementation "com.google.code.gson:gson:$gsonVersion"
 
-    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
-    implementation "org.projectlombok:lombok:$lombokVersion"
+    // Jackson dependencies
+    implementation "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
 
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.14.1'
+    // JUnit dependencies
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
 
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
-
+    // Mockito dependencies
     testImplementation "org.mockito:mockito-core:$mockitoVersion"
-    testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.16.1'
+    testImplementation "org.mockito:mockito-junit-jupiter:$mockitoVersion"
 
+    // AssertJ dependencies
+    testImplementation "org.assertj:assertj-core:$assertjVersion"
 
 }
 

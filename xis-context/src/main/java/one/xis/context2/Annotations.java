@@ -23,6 +23,10 @@ class Annotations {
         return true;
     }
 
+    boolean isInitializerMethod(Method method) {
+        return true;
+    }
+
     /**
      * Determines if a class is a component.
      *

@@ -9,6 +9,25 @@ repositories {
     mavenCentral()
 }
 
+tasks.withType(JavaCompile) {
+    sourceCompatibility = rootProject.ext.javaVersion.toString()
+    targetCompatibility = rootProject.ext.javaVersion.toString()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(rootProject.ext.javaVersionInt)
+    }
+}
+
+
+// Local variables for versions
+var lombokVersion = rootProject.ext.libraryVersions.lombok
+var junitVersion = rootProject.ext.libraryVersions.junit
+var assertjVersion = rootProject.ext.libraryVersions.assertj
+var reflectionsVersion = rootProject.ext.libraryVersions.reflections
+
+
 dependencies {
 
     implementation project(':xis-util')
@@ -33,4 +52,36 @@ test {
     afterTest { desc, result ->
         logger.quiet "${desc.className} - ${desc.name}: ${result.resultType}"
     }
+}
+
+
+
+dependencies {
+
+    // Lombok dependencies
+    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+    implementation "org.projectlombok:lombok:$lombokVersion"
+
+    // JUnit dependencies
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+
+    // AssertJ dependencies
+    testImplementation "org.assertj:assertj-core:$assertjVersion"
+
+    // Local project dependencies
+    implementation project(":xis-util")
+    testImplementation project(":xis-test")
+
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+    afterTest { desc, result ->
+        logger.quiet "${desc.className} - ${desc.name}: ${result.resultType}"
+    }
+    maxParallelForks = 4
 }

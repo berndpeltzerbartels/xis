@@ -23,22 +23,25 @@ tasks.withType(JavaCompile) {
 }
 
 dependencies {
-    testImplementation('com.codeborne:selenide:6.11.0')
-    testImplementation("io.qameta.allure:allure-selenide:${allureVersion}")
+  testImplementation('com.codeborne:selenide:6.11.0')
+  testImplementation("io.qameta.allure:allure-selenide:${allureVersion}")
   testImplementation('org.slf4j:slf4j-simple:2.0.6')
 
   testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
   testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
 
-  testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.16.1'
+  testImplementation("org.assertj:assertj-core:3.16.1")
 }
 
 test {
-  useJUnitPlatform()  }
+  useJUnitPlatform()
+}
+
 allure {
   autoconfigure = true
   version = "${allureVersion}"
 
-    useJUnit5 {
+  useJUnit5 {
     version = "${allureVersion}"
-  }}
+  }
+}

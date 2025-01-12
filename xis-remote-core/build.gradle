@@ -3,32 +3,53 @@ plugins {
 }
 
 group 'one.xis'
-version '1.0-SNAPSHOT'
+version rootProject.ext.projectVersion
 
 repositories {
     mavenCentral()
 }
 
+tasks.withType(JavaCompile) {
+    sourceCompatibility = rootProject.ext.javaVersion.toString()
+    targetCompatibility = rootProject.ext.javaVersion.toString()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(rootProject.ext.javaVersionInt)
+    }
+}
+
+
+// Local variables for versions
+var lombokVersion = rootProject.ext.libraryVersions.lombok
+var reflectionsVersion = rootProject.ext.libraryVersions.reflections
+var springContextVersion = "5.3.20"
+var jakartaInjectVersion = "2.0.1"
+var junitVersion = "5.9.0"
+
+
 dependencies {
 
-    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+    // Local project dependencies
+    implementation(project(":xis-context"))
 
-    implementation project(':xis-context')
-    // implementation project(':xis-ajax')
-    //implementation group: 'net.bytebuddy', name: 'byte-buddy', version: '1.10.22'
-    //implementation group: 'net.bytebuddy', name: 'byte-buddy-agent', version: '1.11.19'
-    implementation('org.springframework:spring-context:5.3.20')
+    // Lombok dependencies
+    annotationProcessor("org.projectlombok:lombok:$lombokVersion")
+    implementation("org.projectlombok:lombok:$lombokVersion")
 
-    // https://mvnrepository.com/artifact/org.reflections/reflections
-    implementation "org.reflections:reflections:$reflectionsVersion"
+    // Spring Context dependency
+    implementation("org.springframework:spring-context:$springContextVersion")
 
-    // https://mvnrepository.com/artifact/jakarta.inject/jakarta.inject-api
-    implementation 'jakarta.inject:jakarta.inject-api:2.0.1'
+    // Reflections dependency
+    implementation("org.reflections:reflections:$reflectionsVersion")
 
-    implementation "org.projectlombok:lombok:$lombokVersion"
+    // Jakarta Inject dependency
+    implementation("jakarta.inject:jakarta.inject-api:$jakartaInjectVersion")
 
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.0'
+    // JUnit dependencies
+    testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
 }
 
 test {

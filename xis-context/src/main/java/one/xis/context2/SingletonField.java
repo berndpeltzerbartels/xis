@@ -1,12 +1,9 @@
 package one.xis.context2;
 
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import one.xis.utils.lang.FieldUtil;
 
 import java.lang.reflect.Field;
-import java.util.Collection;
-import java.util.List;
 
 @RequiredArgsConstructor
 class SingletonField implements SingletonConsumer {
@@ -14,14 +11,10 @@ class SingletonField implements SingletonConsumer {
     private final Field field;
     private final SingletonWrapper parent;
 
-    @Getter
-    @Setter
-    private SingletonProducer producer;
-    private Object value;
-
     @Override
     public void assignValue(Object o) {
-        this.value = o;
+        FieldUtil.setFieldValue(parent.getBean(), field, o);
+        parent.doNotify();
     }
 
     @Override
@@ -30,21 +23,15 @@ class SingletonField implements SingletonConsumer {
     }
 
     @Override
-    public boolean isProducersComplete() {
-        return producer != null;
+    public void mapProducer(SingletonProducer producer) {
+        if (field.getType().isAssignableFrom(producer.getSingletonClass())) {
+            producer.addConsumer(this);
+        }
     }
 
     @Override
-    public boolean isValuesAssigned() {
-        return value != null;
+    public Class<?> getConsumedClass() {
+        return field.getType();
     }
 
-    @Override
-    public Collection<Class<?>> getUnsatisfiedDependencies() {
-        return List.of();
-    }
-
-    public boolean isAssigned() {
-        return value != null;
-    }
 }

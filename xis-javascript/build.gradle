@@ -4,34 +4,60 @@ plugins {
     id 'java'
 }
 
-group 'one.xis'
-version '1.0-SNAPSHOT'
+group = rootProject.ext.projectGroup
+version = rootProject.ext.projectVersion
 
 repositories {
     mavenCentral()
 }
 
+ tasks.withType(JavaCompile) {
+    sourceCompatibility = rootProject.ext.javaVersion.toString()
+    targetCompatibility = rootProject.ext.javaVersion.toString()
+}
 
-apply plugin: JavascriptPlugin
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(rootProject.ext.javaVersionInt)
+    }
+}
+
+//apply plugin: JavascriptPlugin
+
+// Local variables for versions
+var lombokVersion = rootProject.ext.libraryVersions.lombok
+var mockitoVersion = "5.2.0"
+var junitVersion = "5.7.0"
+var assertjVersion = "3.16.1"
+var graalVersion = "23.0.1"
+
 
 dependencies {
+
+    // Lombok dependencies
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
     implementation "org.projectlombok:lombok:$lombokVersion"
+
+    // Local project dependencies
     implementation project(':xis-resources')
-
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
-
     testImplementation project(':xis-test')
     testImplementation project(':xis-util')
-    implementation "org.mockito:mockito-core:$mockitoVersion"
-    testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.16.1'
-    testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"
 
-    implementation 'org.graalvm.js:js-scriptengine:23.0.1'
-    implementation 'org.graalvm.truffle:truffle-api:23.0.1'
-    implementation 'org.graalvm.js:js:23.0.1'
-    implementation 'org.graalvm.tools:chromeinspector:23.0.1'
+    // JUnit dependencies
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+
+    // Mockito dependencies
+    implementation "org.mockito:mockito-core:$mockitoVersion"
+
+    // AssertJ dependencies
+    testImplementation "org.assertj:assertj-core:$assertjVersion"
+
+    // GraalVM dependencies
+    implementation "org.graalvm.js:js-scriptengine:$graalVersion"
+    implementation "org.graalvm.truffle:truffle-api:$graalVersion"
+    implementation "org.graalvm.js:js:$graalVersion"
+    implementation "org.graalvm.tools:chromeinspector:$graalVersion"
 }
 
 test {

@@ -2,23 +2,46 @@ plugins {
     id 'java'
 }
 
-group 'one.xis'
-version '1.0-SNAPSHOT'
+group = rootProject.ext.projectGroup
+version = rootProject.ext.projectVersion
 
 repositories {
     mavenCentral()
 }
 
+tasks.withType(JavaCompile) {
+    sourceCompatibility = rootProject.ext.javaVersion.toString()
+    targetCompatibility = rootProject.ext.javaVersion.toString()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(rootProject.ext.javaVersionInt)
+    }
+}
+
+// Local variables for versions
+var lombokVersion = rootProject.ext.libraryVersions.lombok
+var gsonVersion = "2.10.1"
+var junitVersion = "5.7.0"
+
+
 dependencies {
-    implementation 'com.google.code.gson:gson:2.10.1'
+
+    // Local project dependencies
     implementation project(':xis-context')
 
+    // Gson dependencies
+    implementation "com.google.code.gson:gson:$gsonVersion"
 
+    // Lombok dependencies
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
     implementation "org.projectlombok:lombok:$lombokVersion"
 
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+    // JUnit dependencies
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+
 }
 
 test {

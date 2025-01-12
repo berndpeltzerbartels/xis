@@ -6,8 +6,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.Delegate;
 
 import java.lang.reflect.Parameter;
-import java.util.Collection;
-import java.util.List;
 
 @Getter
 @RequiredArgsConstructor
@@ -15,13 +13,14 @@ class SimpleParam implements Param {
 
     @Delegate
     private final Parameter parameter;
-    private final SingletonProducer parent;
+    private final SingletonProducer parentProducer;
     private Object value;
-    private SingletonProducer producer;
+    private SingletonProducer paramValueProducer;
 
     @Override
     public void assignValue(@NonNull Object o) {
         this.value = o;
+        parentProducer.doNotify();
     }
 
     @Override
@@ -30,22 +29,17 @@ class SimpleParam implements Param {
     }
 
     @Override
-    public boolean isProducersComplete() {
-        return producer != null;
-    }
-
-    @Override
     public boolean isValuesAssigned() {
         return value != null;
     }
 
     @Override
-    public Collection<Class<?>> getUnsatisfiedDependencies() {
-        return value == null ? List.of(parameter.getType()) : List.of();
+    public void mapProducer(SingletonProducer producer) {
+        this.paramValueProducer = producer;
     }
 
     @Override
-    public void setProducer(SingletonProducer producer) {
-        this.producer = producer;
+    public Class<?> getConsumedClass() {
+        return parameter.getType();
     }
 }

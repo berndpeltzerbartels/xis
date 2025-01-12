@@ -1,6 +1,7 @@
 package one.xis.context2;
 
 import lombok.Getter;
+import lombok.Setter;
 
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
@@ -8,12 +9,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-abstract class SingletonProducerImpl implements SingletonProducer, SingletonConsumer {
+abstract class SingletonProducerImpl implements SingletonProducer {
     private final List<SingletonConsumer> consumers = new ArrayList<>();
     private final Set<SingletonCreationListener> creationListeners = new HashSet<>();
     @Getter
     private final List<Param> parameters;
-    private boolean satisfied;
+    @Getter
+    @Setter
+    private SingletonProducer producer;
 
     SingletonProducerImpl(Parameter[] params, ParameterFactory parameterFactory) {
         this.parameters = new ArrayList<>(params.length);
@@ -23,34 +26,14 @@ abstract class SingletonProducerImpl implements SingletonProducer, SingletonCons
     }
 
     @Override
-    public boolean isReadyForProduction() {
-        return isValuesAssigned();
-    }
-
-    @Override
-    public boolean isValuesAssigned() {
-        if (satisfied) {
-            return true;
-        }
-        for (var i = 0; i < parameters.size(); i++) {
-            if (!parameters.get(i).isValuesAssigned()) {
-                return false;
-            }
-        }
-        satisfied = true;
-        return true;
-    }
-
-    @Override
-    public boolean isProducersComplete() {
-        for (var i = 0; i < parameters.size(); i++) {
-            if (!parameters.get(i).isProducersComplete()) {
+    public boolean isInvocable() {
+        for (var i = 0; i < getParameters().size(); i++) {
+            if (!getParameters().get(i).isValuesAssigned()) {
                 return false;
             }
         }
         return true;
     }
-
 
     @Override
     public void addConsumer(SingletonConsumer consumer) {
@@ -67,9 +50,8 @@ abstract class SingletonProducerImpl implements SingletonProducer, SingletonCons
         var args = getArgs();
         var o = invoke(args);
         notifySingletonCreationListeners(o);
-        notifyConsumers(o);
+        assignValueInConsumers(o);
     }
-
 
     protected void notifySingletonCreationListeners(Object o) {
         for (var listener : creationListeners) {
@@ -77,12 +59,11 @@ abstract class SingletonProducerImpl implements SingletonProducer, SingletonCons
         }
     }
 
-    protected void notifyConsumers(Object o) {
+    protected void assignValueInConsumers(Object o) {
         for (var i = 0; i < consumers.size(); i++) {
             consumers.get(i).assignValue(o);
         }
     }
-
 
     protected Object[] getArgs() {
         var args = new Object[parameters.size()];

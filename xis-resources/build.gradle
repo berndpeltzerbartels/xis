@@ -3,29 +3,54 @@ plugins {
 }
 
 group 'one.xis'
-version '1.0-SNAPSHOT'
+version rootProject.ext.projectVersion
+
+tasks.withType(JavaCompile) {
+    sourceCompatibility = rootProject.ext.javaVersion.toString()
+    targetCompatibility = rootProject.ext.javaVersion.toString()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(rootProject.ext.javaVersionInt)
+    }
+}
 
 repositories {
     mavenCentral()
 }
 
+// Local variables for versions
+var lombokVersion = rootProject.ext.libraryVersions.lombok
+var reflectionsVersion = rootProject.ext.libraryVersions.reflections
+var slf4jVersion = "2.0.3"
+var tinylogVersion = "2.6.1"
+var junitVersion = "5.7.0"
+
+
 dependencies {
 
-    implementation project(':xis-context')
-    implementation project(':xis-util')
-    implementation 'org.slf4j:slf4j-api:2.0.3'
+    // Local project dependencies
+    implementation(project(":xis-context"))
+    implementation(project(":xis-util"))
 
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+    // Lombok dependencies
+    annotationProcessor("org.projectlombok:lombok:$lombokVersion")
+    implementation("org.projectlombok:lombok:$lombokVersion")
 
-    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
-    implementation "org.reflections:reflections:$reflectionsVersion"
-    implementation "org.projectlombok:lombok:$lombokVersion"
+    // SLF4J dependency
+    implementation("org.slf4j:slf4j-api:$slf4jVersion")
 
-    implementation 'org.tinylog:tinylog-api:2.6.1'
-    implementation 'org.tinylog:tinylog-impl:2.6.1'
+    // Reflections dependency
+    implementation("org.reflections:reflections:$reflectionsVersion")
 
+    // Tinylog dependencies
+    implementation("org.tinylog:tinylog-api:$tinylogVersion")
+    implementation("org.tinylog:tinylog-impl:$tinylogVersion")
 
+    // JUnit dependencies
+    testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
 }
 
 test {

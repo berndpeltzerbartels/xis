@@ -1,9 +1,11 @@
 package one.xis.context2;
 
+import lombok.Getter;
 import one.xis.utils.lang.MethodUtils;
 
 import java.lang.reflect.Method;
 
+@Getter
 class SingletonMethod extends SingletonProducerImpl {
     private final Method method;
     private final SingletonWrapper parent;
@@ -21,25 +23,14 @@ class SingletonMethod extends SingletonProducerImpl {
     }
 
     @Override
-    public void assignValue(Object o) {
-
-    }
-
-    @Override
-    public boolean isConsumerFor(Class<?> c) {
-        return false;
-    }
-
-
-    @Override
     protected Object invoke(Object[] args) {
         return MethodUtils.invoke(parent.getBean(), method, args);
     }
 
     @Override
-    public boolean isReadyForProduction() {
+    public boolean isInvocable() {
         if (parent.getBean() == null) return false;
-        return super.isReadyForProduction();
+        return super.isInvocable();
     }
 
     Class<?> getReturnType() {

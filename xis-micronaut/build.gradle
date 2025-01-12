@@ -2,46 +2,62 @@ plugins {
     id 'java'
 }
 
+group = rootProject.ext.projectGroup
+version = rootProject.ext.projectVersion
 
 repositories {
     mavenCentral()
 }
 
+// Local variables for versions
+var lombokVersion = rootProject.ext.libraryVersions.lombok
+var reflectionsVersion = rootProject.ext.libraryVersions.reflections
+var micronautInjectVersion = "4.0.1"
+var micronautContextVersion = "2.4.1"
+var jakartaAnnotationVersion = "2.1.1"
+var jakartaInjectVersion = "2.0.1"
+var micronautHttpClientVersion = "4.1.0"
+var micronautRxjava2Version = "2.0.1"
+var jacksonDatabindVersion = "2.15.2"
+var rxjavaVersion = "2.2.21"
+
 
 dependencies {
 
-    annotationProcessor "io.micronaut:micronaut-inject-java:4.0.1"
+    // Annotation processors
+    annotationProcessor "io.micronaut:micronaut-inject-java:$micronautInjectVersion"
+    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
 
-    annotationProcessor("org.projectlombok:lombok:$lombokVersion")
+    // Compile-only dependencies
     compileOnly "org.projectlombok:lombok:$lombokVersion"
+    compileOnly "io.micronaut:micronaut-context:$micronautContextVersion"
+    compileOnly "jakarta.annotation:jakarta.annotation-api:$jakartaAnnotationVersion"
+    compileOnly "jakarta.inject:jakarta.inject-api:$jakartaInjectVersion"
+    compileOnly "io.micronaut:micronaut-http-client:$micronautHttpClientVersion"
+    compileOnly "io.micronaut.rxjava2:micronaut-rxjava2:$micronautRxjava2Version"
+    compileOnly "com.fasterxml.jackson.core:jackson-databind:$jacksonDatabindVersion"
 
-    compileOnly("io.micronaut:micronaut-context:2.4.1")
-    compileOnly("jakarta.annotation:jakarta.annotation-api:2.1.1")
-    compileOnly("jakarta.inject:jakarta.inject-api:2.0.1")
-    compileOnly("io.micronaut:micronaut-http-client:4.1.0")
-    compileOnly("io.micronaut.rxjava2:micronaut-rxjava2:2.0.1")
-    compileOnly("com.fasterxml.jackson.core:jackson-databind:2.15.2")
-
-    implementation("io.micronaut.rxjava2:micronaut-rxjava2-http-server-netty:2.0.1")
-    implementation("io.micronaut.rxjava2:micronaut-rxjava2-http-client:2.0.1")
-
-    implementation 'io.reactivex.rxjava2:rxjava:2.2.21'
+    // Implementation dependencies
+    implementation "io.micronaut.rxjava2:micronaut-rxjava2-http-server-netty:$micronautRxjava2Version"
+    implementation "io.micronaut.rxjava2:micronaut-rxjava2-http-client:$micronautRxjava2Version"
+    implementation "io.reactivex.rxjava2:rxjava:$rxjavaVersion"
     implementation "org.reflections:reflections:$reflectionsVersion"
 
+    // Local project dependencies
     implementation project(':xis-context')
     implementation project(':xis-frontend')
     implementation project(':xis-remote-core')
 
-
+    // Test dependencies
     testImplementation project(':xis-context')
     testImplementation project(':xis-server')
     testImplementation project(':xis-remote-core')
-
-
 }
 
+
+/*
 java {
     sourceCompatibility = JavaVersion.toVersion("20")
     targetCompatibility = JavaVersion.toVersion("20")
 }
-
+*/

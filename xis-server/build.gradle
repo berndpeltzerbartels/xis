@@ -3,19 +3,37 @@ plugins {
 }
 
 group 'one.xis'
-version '1.0-SNAPSHOT'
+version rootProject.ext.projectVersion
 
 repositories {
     mavenCentral()
 }
 
+tasks.withType(JavaCompile) {
+    sourceCompatibility = rootProject.ext.javaVersion.toString()
+    targetCompatibility = rootProject.ext.javaVersion.toString()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(rootProject.ext.javaVersionInt)
+    }
+}
+
+// Local variables for versions
+var lombokVersion = rootProject.ext.libraryVersions.lombok
+var dom4jVersion = rootProject.ext.libraryVersions.dom4j
+var slf4jVersion = rootProject.ext.libraryVersions.slf4j
+var jacksonDatabindVersion = rootProject.ext.libraryVersions.jackson
+var tinylogVersion = rootProject.ext.libraryVersions.tinylog
+var gsonVersion = rootProject.ext.libraryVersions.gson
+var junitVersion = rootProject.ext.libraryVersions.junit
+var mockitoVersion = rootProject.ext.libraryVersions.mockito
+var assertjVersion = rootProject.ext.libraryVersions.assertj
+
 dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
 
-    implementation 'dom4j:dom4j:1.6.1'
-    implementation 'org.slf4j:slf4j-api:2.0.3'
-
+    // Local project dependencies
     implementation project(':xis-context')
     implementation project(':xis-util')
     implementation project(':xis-remote-core')
@@ -25,18 +43,25 @@ dependencies {
     implementation project(':xis-validation')
     implementation project(':xis-frontend')
 
-
+    // Compile-only dependencies
     compileOnly project(':xis-resources')
+
+    // Annotation processors
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+
+    // Implementation dependencies
     implementation "org.projectlombok:lombok:$lombokVersion"
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.14.1'
-    implementation 'org.tinylog:tinylog-api:2.6.1'
-    implementation 'com.google.code.gson:gson:2.10.1'
+    implementation "dom4j:dom4j:$dom4jVersion"
+    implementation "org.slf4j:slf4j-api:$slf4jVersion"
+    implementation "com.fasterxml.jackson.core:jackson-databind:$jacksonDatabindVersion"
+    implementation "org.tinylog:tinylog-api:$tinylogVersion"
+    implementation "com.google.code.gson:gson:$gsonVersion"
 
-
+    // Test dependencies
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
     testImplementation "org.mockito:mockito-core:$mockitoVersion"
-    testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.16.1'
-
+    testImplementation "org.assertj:assertj-core:$assertjVersion"
 }
 
 test {

@@ -3,24 +3,46 @@ plugins {
 }
 
 group 'one.xis'
-version '1.0-SNAPSHOT'
+version rootProject.ext.projectVersion
 
 repositories {
     mavenCentral()
 }
 
+
+tasks.withType(JavaCompile) {
+    sourceCompatibility = rootProject.ext.javaVersion.toString()
+    targetCompatibility = rootProject.ext.javaVersion.toString()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(rootProject.ext.javaVersionInt)
+    }
+}
+
+
+// Local variables for versions
+var lombokVersion = rootProject.ext.libraryVersions.lombok
+var tinylogVersion = rootProject.ext.libraryVersions.tinylog
+var junitVersion = rootProject.ext.libraryVersions.junit
+var assertjVersion = rootProject.ext.libraryVersions.assertj
+
+
 dependencies {
+
+    // Annotation processors
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
 
+    // Implementation dependencies
     implementation "org.projectlombok:lombok:$lombokVersion"
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
-    testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.16.1'
+    implementation "org.tinylog:tinylog-api:$tinylogVersion"
+    implementation "org.tinylog:tinylog-impl:$tinylogVersion"
 
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
-
-
-    implementation 'org.tinylog:tinylog-api:2.6.1'
-    implementation 'org.tinylog:tinylog-impl:2.6.1'
+    // Test dependencies
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+    testImplementation "org.assertj:assertj-core:$assertjVersion"
 }
 
 test {

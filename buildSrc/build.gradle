@@ -6,24 +6,51 @@ repositories {
     mavenCentral()
 }
 
+tasks.withType(JavaCompile) {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+// Local variables for versions
 var graalVersion = "23.0.1"
+var lombokVersion = "1.18.34"
+var junitVersion = "5.7.0"
+var assertjVersion = "3.16.1"
+var mockitoVersion = "5.2.0"
+
 
 dependencies {
 
-    // https://mvnrepository.com/artifact/org.graalvm.js/js-scriptengine
+    // GraalVM dependencies
     implementation "org.graalvm.js:js-scriptengine:$graalVersion"
     implementation "org.graalvm.sdk:graal-sdk:$graalVersion"
     implementation "org.graalvm.truffle:truffle-api:$graalVersion"
     implementation "org.graalvm.js:js:$graalVersion"
 
-    annotationProcessor "org.projectlombok:lombok:1.18.34"
-    implementation "org.projectlombok:lombok:1.18.34"
+    // Lombok dependencies
+    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+    implementation "org.projectlombok:lombok:$lombokVersion"
 
-    testImplementation "org.junit.jupiter:junit-jupiter-api:5.7.0"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.7.0"
-    testImplementation group: "org.junit.jupiter", name: "junit-jupiter-api", version: "5.7.0"
-    testImplementation "org.mockito:mockito-core:5.2.0"
-    testImplementation group: "org.assertj", name: "assertj-core", version: "3.16.1"
-    testImplementation "org.mockito:mockito-junit-jupiter:4.5.1"
+    // JUnit dependencies
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
 
+    // Mockito dependencies
+    testImplementation "org.mockito:mockito-core:$mockitoVersion"
+    testImplementation "org.mockito:mockito-junit-jupiter:$mockitoVersion"
+
+    // AssertJ dependencies
+    testImplementation group: "org.assertj", name: "assertj-core", version: assertjVersion
+
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+    afterTest { desc, result ->
+        logger.quiet "${desc.className} - ${desc.name}: ${result.resultType}"
+    }
+    maxParallelForks = 4
 }

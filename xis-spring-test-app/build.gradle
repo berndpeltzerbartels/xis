@@ -3,28 +3,52 @@ plugins {
 }
 
 group 'one.xis'
-version '1.0-SNAPSHOT'
+version rootProject.ext.projectVersion
 
 repositories {
     mavenCentral()
 }
+tasks.withType(JavaCompile) {
+    sourceCompatibility = rootProject.ext.javaVersion.toString()
+    targetCompatibility = rootProject.ext.javaVersion.toString()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(rootProject.ext.javaVersionInt)
+    }
+}
+
+// Local variables for versions
+var lombokVersion = rootProject.ext.libraryVersions.lombok
+var springBootStarterWebVersion = "2.6.4"
+var junitVersion = rootProject.ext.libraryVersions.junit
+
 
 dependencies {
+
+    // Local project dependencies
     implementation project(':xis-remote-core')
     implementation project(':xis-spring')
     implementation project(':xis-test')
 
+    // Annotation processors
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+
+    // Implementation dependencies
     implementation "org.projectlombok:lombok:$lombokVersion"
+    implementation "org.springframework.boot:spring-boot-starter-web:$springBootStarterWebVersion"
 
-    implementation 'org.springframework.boot:spring-boot-starter-web:2.6.4'
-
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+    // Test dependencies
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
 }
 
 test {
     useJUnitPlatform()
+    afterTest { desc, result ->
+        logger.quiet "${desc.className} - ${desc.name}: ${result.resultType}"
+    }
 }
 
 sourceSets {

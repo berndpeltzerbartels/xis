@@ -4,78 +4,90 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import one.xis.utils.lang.FieldUtil;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @RequiredArgsConstructor
 class SingletonWrapper implements SingletonConsumer {
     private Object bean;
     private final Class<?> beanClass;
-    private SingletonProducer beanProducer;
-    private final Collection<SingletonField> singletonFields;
-
+    private final List<SingletonField> singletonFields;
+    private final Collection<InitMethod> initMethods = new HashSet<>();
+    private final Collection<BeanMethod> beanMethods = new HashSet<>();
 
     SingletonWrapper(Class<?> c, Annotations annotations) {
         beanClass = c;
         this.singletonFields = FieldUtil.getFields(beanClass, annotations::isDependencyField).stream()
-                .map(field -> new SingletonField(field, this)).toList();
+                .map(field -> Fields.createField(field, this)).collect(Collectors.toList());
     }
+
 
     @Override
     public void assignValue(Object o) {
         this.bean = o;
+        doNotify();
+    }
+
+    void doNotify() {
+        notifyInitMethods();
+        if (initMethods.isEmpty()) {
+            notifyBeanMethods();
+        }
+    }
+
+    protected void notifyInitMethods() {
+        var initMethods = new ArrayList<>(this.initMethods);
+        for (var i = 0; i < initMethods.size(); i++) {
+            var initMethod = initMethods.get(i);
+            initMethod.doNotify();
+        }
+    }
+
+    protected void notifyBeanMethods() {
+        var beanMethods = new ArrayList<>(this.beanMethods);
+        for (var i = 0; i < beanMethods.size(); i++) {
+            var beanMethod = beanMethods.get(i);
+            beanMethod.doNotify();
+        }
+    }
+
+    void addInitMethod(InitMethod method) {
+        initMethods.add(method);
+    }
+
+    void addBeanMethod(BeanMethod method) {
+        beanMethods.add(method);
+    }
+
+    void removeInitMethod(InitMethod method) {
+        initMethods.remove(method);
+        if (initMethods.isEmpty()) {
+            beanMethods.forEach(SingletonProducer::doNotify);
+        }
+    }
+
+    void removeBeanMethod(BeanMethod method) {
+        beanMethods.remove(method);
     }
 
     @Override
     public boolean isConsumerFor(Class<?> c) {
-        if (beanClass.isAssignableFrom(c)) {
-            return true;
-        }
-        for (SingletonField singletonField : singletonFields) {
-            if (singletonField.isConsumerFor(c)) {
-                return true;
-            }
-        }
-        return false;
+        return beanClass.isAssignableFrom(c);
     }
 
     @Override
-    public boolean isProducersComplete() {
-        for (SingletonField singletonField : singletonFields) {
-            if (!singletonField.isProducersComplete()) {
-                return false;
-            }
+    public void mapProducer(SingletonProducer producer) {
+        if (beanClass.isAssignableFrom(producer.getSingletonClass())) {
+            producer.addConsumer(this);
         }
-        return false;
     }
 
     @Override
-    public boolean isValuesAssigned() {
-        if (bean == null) {
-            return false;
-        }
-        for (SingletonField singletonField : singletonFields) {
-            if (!singletonField.isValuesAssigned()) {
-                return false;
-            }
-        }
-        return true;
+    public Class<?> getConsumedClass() {
+        return beanClass;
     }
-
-    @Override
-    public Collection<Class<?>> getUnsatisfiedDependencies() {
-        return List.of();
-    }
-
-    @Override
-    public SingletonProducer getProducer() {
-        return null;
-    }
-
-    @Override
-    public void setProducer(SingletonProducer producer) {
-
-    }
-
 }

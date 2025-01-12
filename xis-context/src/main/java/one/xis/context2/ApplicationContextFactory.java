@@ -48,11 +48,11 @@ class ApplicationContextFactory implements SingletonCreationListener {
                 var producer = producers.get(i);
                 if (consumer.isConsumerFor(producer.getSingletonClass())) {
                     producer.addConsumer(consumer);
-                    consumer.setProducer(producer);
+                    consumer.mapProducer(producer);
+                    break;
+                } else {
+                    throw new UnsatisfiedDependencyException(consumer.getConsumedClass());
                 }
-            }
-            if (!consumer.isProducersComplete()) {
-                throw new UnsatisfiedDependencyException(consumer.getUnsatisfiedDependencies());
             }
         }
     }
@@ -68,33 +68,42 @@ class ApplicationContextFactory implements SingletonCreationListener {
     }
 
     private void evaluateContext(SingletonWrapper singleton) {
+        singletonConsumers.add(singleton);
         if (annotations.isAnnotatedComponent(singleton.getBeanClass())) {
             var singletonConstructor = new SingletonConstructor(ClassUtils.getUniqueConstructor(singleton.getBeanClass()), parameterFactory);
             singletonConstructor.addListener(this);
             singletonProducers.add(singletonConstructor);
-            singletonConsumers.add(singletonConstructor);
-            if (!singletonConstructor.isReadyForProduction()) {
+            singletonConsumers.addAll(singletonConstructor.getParameters());
+            if (!singletonConstructor.isInvocable()) {
                 initialProducers.add(singletonConstructor);
             }
         }
-        MethodUtils.methods(singleton.getBeanClass(), this::isBeanMethod).forEach(method -> {
-            var singletonMethod = new SingletonMethod(method, singleton, parameterFactory);
-            singletonProducers.add(singletonMethod);
-            singletonConsumers.add(singletonMethod);
-            if (!singletonMethod.isReadyForProduction()) {
-                initialProducers.add(singletonMethod);
+        MethodUtils.methods(singleton.getBeanClass(), this::isSingletonMethod).forEach(method -> {
+            SingletonMethod singletonMethod;
+            if (isInitMethod(method)) {
+                var initMethod = new InitMethod(method, singleton, parameterFactory);
+                singleton.addInitMethod(initMethod);
+                singletonMethod = initMethod;
+            } else {
+                var beanMethod = new BeanMethod(method, singleton, parameterFactory);
+                singleton.addBeanMethod(beanMethod);
+                singletonMethod = beanMethod;
             }
+            singletonConsumers.addAll(singletonMethod.getParameters());
             if (singletonMethod.getReturnType() != Void.TYPE) {
                 singletonMethod.addListener(this);
+                singletonProducers.add(singletonMethod);
             }
-            var singletonWrapper = new SingletonWrapper(method.getReturnType(), annotations);
-            singletonConsumers.addAll(singletonWrapper.getSingletonFields());
-            evaluateContext(new SingletonWrapper(method.getReturnType(), annotations));
+            evaluateContext(new SingletonWrapper(singletonMethod.getReturnType(), annotations));
         });
     }
 
-    private boolean isBeanMethod(Method method) {
+    private boolean isSingletonMethod(Method method) {
         return annotations.isAnnotatedMethod(method);
+    }
+
+    private boolean isInitMethod(Method method) {
+        return annotations.isInitializerMethod(method);
     }
 
 
