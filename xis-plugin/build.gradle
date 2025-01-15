@@ -1,15 +1,17 @@
 plugins {
     id 'java'
+    id 'java-gradle-plugin'
     id 'maven-publish'
-    id 'groovy' // Optional, falls du Groovy verwenden möchtest
-    id 'com.gradle.plugin-publish' version '0.15.0' // Für Plugin-Veröffentlichung
+    id 'groovy' // Optional, falls Groovy verwendet wird
+    id 'com.gradle.plugin-publish' version '0.15.0' // Nur für Gradle Plugin Portal notwendig
 }
 
-group = 'com.example'
+group = 'one.xis'
 version = '1.0.0'
 
 repositories {
     mavenCentral()
+    mavenLocal()
 }
 
 tasks.withType(JavaCompile) {
@@ -23,27 +25,45 @@ java {
     }
 }
 
-
 dependencies {
     implementation gradleApi()
-    implementation localGroovy()
+    implementation localGroovy() // Für Groovy-basierte Gradle Scripte
 }
 
 pluginBundle {
-    website = 'https://example.com'
-    vcsUrl = 'https://github.com/example/repo'
+    website = 'https://example.com' // Ersetzen durch echte URL, falls nötig
+    vcsUrl = 'https://github.com/example/repo' // Ersetzen durch echte URL
     tags = ['java', 'dependency', 'java-version']
+}
+
+gradlePlugin {
+    plugins {
+        springPlugin {
+            id = 'one.xis.spring-plugin' // Plugin-ID
+            implementationClass = 'one.xis.plugin.XISSpringPlugin' // Implementierungsklasse
+        }
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            groupId = 'one.xis' // Gruppierung
+            artifactId = 'spring-plugin' // Artefaktname
+            version = '1.0.0'
+        }
+    }
 }
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
 
-// Aufgabe zum Schreiben der Version in eine Datei
 task writeVersionToFile {
     doLast {
         def versionFile = new File(buildDir, "plugin-version.txt")
-        versionFile.text = project.version.toString() // Schreibe die Version in die Datei
+        versionFile.text = project.version.toString()
         println "Plugin version written to: " + versionFile
     }
 }
@@ -56,6 +76,6 @@ task writeJavaVersionIntToFile {
     }
 }
 
-// Führe die Aufgabe automatisch beim Build aus
+// Aufgaben automatisch ausführen
 classes.dependsOn writeVersionToFile
 classes.dependsOn writeJavaVersionIntToFile

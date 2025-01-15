@@ -1,3 +1,13 @@
+pluginManagement {
+    repositories {
+        mavenLocal()
+        gradlePluginPortal()
+    }
+}
+
+
+
+
 rootProject.name = 'xis-remote'
 include 'xis-remote-spring'
 include 'xis-remote-core'
@@ -20,3 +30,5 @@ include 'xis-i18n'
 include 'xis-deserializer'
 include 'xis-frontend'
 include 'xis-plugin'
+
+

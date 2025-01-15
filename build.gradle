@@ -1,5 +1,6 @@
 plugins {
     id "java"
+    id "maven-publish"
 }
 
 ext {
@@ -43,8 +44,8 @@ subprojects {
         sourceCompatibility = rootProject.ext.javaVersion.toString()
         targetCompatibility = rootProject.ext.javaVersion.toString()
     }
-}
 
+}
 
 test {
     useJUnitPlatform()

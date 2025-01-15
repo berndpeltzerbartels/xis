@@ -15,7 +15,6 @@ class SimpleParam implements Param {
     private final Parameter parameter;
     private final SingletonProducer parentProducer;
     private Object value;
-    private SingletonProducer paramValueProducer;
 
     @Override
     public void assignValue(@NonNull Object o) {
@@ -25,7 +24,7 @@ class SimpleParam implements Param {
 
     @Override
     public boolean isConsumerFor(Class<?> c) {
-        return false;
+        return parameter.getType().isAssignableFrom(c);
     }
 
     @Override
@@ -35,7 +34,7 @@ class SimpleParam implements Param {
 
     @Override
     public void mapProducer(SingletonProducer producer) {
-        this.paramValueProducer = producer;
+        // NOOP
     }
 
     @Override

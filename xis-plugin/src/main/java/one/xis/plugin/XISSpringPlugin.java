@@ -15,6 +15,7 @@ public class XISSpringPlugin implements Plugin<Project> {
     public void apply(Project project) {
         addDependencies(project);
         configureResources(project);
+       // checkJavaHome();
         checkGradleJavaVersion(project);
         checkCompilerJavaVersion(project);
     }
@@ -26,9 +27,12 @@ public class XISSpringPlugin implements Plugin<Project> {
      */
     private void addDependencies(Project project) {
         var version = xisVersion();
+        /*
         project.getDependencies().add("implementation", "one.xis:xis-spring:"+version);
         project.getDependencies().add("implementation", "one.xis:xis-remote-core:"+version);
         project.getDependencies().add("testImplementation", "one.xis:xis-test:"+version);
+
+         */
     }
 
     /**
@@ -58,6 +62,21 @@ public class XISSpringPlugin implements Plugin<Project> {
     }
 
     /**
+     * Checks if the JAVA_HOME environment variable is set and points to a valid Java installation
+     * of version 17
+     */
+    private void checkJavaHome() {
+        String javaHome = System.getProperty("java.home");
+        if (javaHome == null) {
+            throw new IllegalStateException("JAVA_HOME environment variable is not set");
+        }
+        var targetVersion = javaTargetVersion();
+        if (!javaHome.contains(javaTargetVersion())) {
+            throw new IllegalStateException("JAVA_HOME: '"+ javaHome+"' environment variable does not point to a Java "+targetVersion+" installation");
+        }
+    }
+
+    /**
      *  Checks if the compiler Java version is 17
      *
      * @param project
@@ -77,11 +96,11 @@ public class XISSpringPlugin implements Plugin<Project> {
     }
 
     private String xisVersion() {
-        return readContent("/xis-version.txt").trim();
+        return "1.0.0";
     }
 
     private String javaTargetVersion() {
-            return readContent("/java-target-version.txt").trim();
+            return "17";
     }
 
     private String readContent(String resource) {
