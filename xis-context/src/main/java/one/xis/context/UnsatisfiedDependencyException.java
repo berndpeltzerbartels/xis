@@ -1,16 +1,19 @@
 package one.xis.context;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Parameter;
+import java.util.Collection;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 class UnsatisfiedDependencyException extends RuntimeException {
-
-    UnsatisfiedDependencyException(Field field) {
-        super("unsatisfied dependency for " + field);
+    public UnsatisfiedDependencyException(Collection<Class<?>> unsatisfiedDependencies) {
+        super("Unsatisfied dependencies: " + unsatisfiedDependencies);
     }
 
-    UnsatisfiedDependencyException(Parameter parameter) {
-        super("unsatisfied dependency for " + parameter);
+    public UnsatisfiedDependencyException(Class<?> unsatisfiedDependencies) {
+        this(Set.of(unsatisfiedDependencies));
     }
 
+    private static String unsatisfiedDependenciesToString(Collection<Class<?>> unsatisfiedDependencies) {
+        return unsatisfiedDependencies.stream().map(Class::getSimpleName).collect(Collectors.joining(", "));
+    }
 }

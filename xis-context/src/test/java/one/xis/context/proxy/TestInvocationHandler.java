@@ -1,7 +1,5 @@
 package one.xis.context.proxy;
 
-import one.xis.context.MethodHandler;
-
 import java.lang.reflect.Method;
 
 public class TestInvocationHandler extends MethodHandler {

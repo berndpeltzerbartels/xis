@@ -1,6 +1,5 @@
 package one.xis.context.performance;
 
-import one.xis.context.AppContextBuilder;
 import org.junit.jupiter.api.Test;
 
 class PerfTest {

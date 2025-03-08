@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-class AppContextBuilderImpl implements AppContextBuilder {
+public class AppContextBuilderImpl implements AppContextBuilder {
 
     private final Set<Class<?>> singletonClasses = new HashSet<>();
     private final Set<Object> singletons = new HashSet<>();
@@ -88,21 +88,25 @@ class AppContextBuilderImpl implements AppContextBuilder {
 
     @Override
     public AppContext build() {
-        componentAnnotations.add(XISComponent.class);
-        initAnnotation.add(XISInit.class);
-        dependencyFieldAnnotations.add(XISInject.class);
-        beanMethodAnnotations.add(XISBean.class);
-        var contextFactory = new AppContextFactory(singletonClasses,
-                singletons,
-                proxyAnnotations,
-                componentAnnotations,
-                dependencyFieldAnnotations,
-                initAnnotation,
-                beanMethodAnnotations,
-                packagesToScan);
+        var packageScan = new PackageScan(packagesToScan);
+        var scanResult = packageScan.doScan();
+        var contextFactory = new AppContextFactory(singletons.toArray(Object[]::new), singletonClasses.toArray(Class[]::new), scanResult);
         return contextFactory.createContext();
     }
 
+
+    private Annotations annotations() {
+        var annotations = new Annotations()
+                .addComponentClassAnnotation(XISComponent.class)
+                .addDependencyFieldAnnotation(XISInject.class)
+                .addInitAnnotation(XISInit.class)
+                .addBeanMethodAnnotation(XISBean.class);
+        annotations.addComponentClassAnnotations(componentAnnotations);
+        annotations.addDependencyFieldAnnotations(dependencyFieldAnnotations);
+        annotations.addInitAnnotations(initAnnotation);
+        annotations.addBeanMethodAnnotations(beanMethodAnnotations);
+        return annotations;
+    }
 
     private void validate() {
         if (componentAnnotations.isEmpty()) {
