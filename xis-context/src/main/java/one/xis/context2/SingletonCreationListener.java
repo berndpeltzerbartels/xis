@@ -1,5 +1,5 @@
 package one.xis.context2;
 
-interface SingletonCreationListener {
+public interface SingletonCreationListener {
     void onSingletonCreated(Object o);
 }

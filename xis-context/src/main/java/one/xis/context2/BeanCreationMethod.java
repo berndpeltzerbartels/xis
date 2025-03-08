@@ -2,8 +2,8 @@ package one.xis.context2;
 
 import java.lang.reflect.Method;
 
-class BeanMethod extends SingletonMethod {
-    BeanMethod(Method method, SingletonWrapper parent, ParameterFactory parameterFactory) {
+class BeanCreationMethod extends SingletonMethod {
+    BeanCreationMethod(Method method, SingletonWrapper parent, ParameterFactory parameterFactory) {
         super(method, parent, parameterFactory);
     }
 
@@ -15,6 +15,8 @@ class BeanMethod extends SingletonMethod {
 
     @Override
     public boolean isInvocable() {
+        if (getParent().getBean() == null) return false;
+        if (!getParent().getSingletonFields().isEmpty()) return false;
         if (!getParent().getInitMethods().isEmpty()) return false;
         return super.isInvocable();
     }

@@ -1,6 +1,6 @@
 package one.xis.context2;
 
-interface SingletonProducer {
+public interface SingletonProducer {
 
     Class<?> getSingletonClass();
 

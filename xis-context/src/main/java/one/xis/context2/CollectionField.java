@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-class CollectionField implements SingletonConsumer {
+class CollectionField implements SingletonField {
 
     private final SingletonWrapper parent;
     private final Field field;

@@ -1,7 +1,7 @@
 package one.xis.context2;
 
-import lombok.RequiredArgsConstructor;
 import one.xis.context.AppContext;
+import one.xis.context.ProxyFactory;
 import one.xis.utils.lang.ClassUtils;
 import one.xis.utils.lang.MethodUtils;
 
@@ -11,24 +11,39 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
 
-@RequiredArgsConstructor
-class ApplicationContextFactory implements SingletonCreationListener {
+
+class AppContextFactory implements SingletonCreationListener {
     private final Set<SingletonProducer> singletonProducers = new HashSet<>();
     private final Set<SingletonConsumer> singletonConsumers = new HashSet<>();
     private final Set<SingletonProducer> initialProducers = new HashSet<>();
     private final Set<Object> singletons = new HashSet<>();
+    private final Object[] additionalSingletons;
+    private final Class<?>[] additionalSingletonClasses;
     private final ParameterFactory parameterFactory = new ParameterFactory();
     private final Annotations annotations;
-
     private final Class<?>[] annotatedComponentClasses;
+    private final ProxyConfiguration proxyConfiguration;
+
+    AppContextFactory(Object[] additionalSingletons,
+                      Class<?>[] additionalSingletonClasses,
+                      PackageScanResult scanResult) {
+        this.additionalSingletons = additionalSingletons;
+        this.additionalSingletonClasses = additionalSingletonClasses;
+        this.annotations = scanResult.getAnnotations();
+        this.proxyConfiguration = scanResult.getProxyConfiguration();
+        this.annotatedComponentClasses = scanResult.getAnnotatedComponentClasses().toArray(Class[]::new);
+    }
 
 
     public AppContext createContext() {
         evaluateAnnotatedComponents();
+        evaluateAdditionalSingletonClasses();
+        evaluateAdditionalSingletons();
         mapProducers();
         createSingletons();
         return new AppContextImpl(singletons);
     }
+
 
     private void createSingletons() {
         var producers = new ArrayList<>(initialProducers);
@@ -63,12 +78,35 @@ class ApplicationContextFactory implements SingletonCreationListener {
         }
     }
 
+    private void evaluateAdditionalSingletonClasses() {
+        for (var i = 0; i < additionalSingletonClasses.length; i++) {
+            evaluateContext(additionalSingletonClasses[i]);
+        }
+    }
+
+    private void evaluateAdditionalSingletons() {
+        for (var i = 0; i < additionalSingletons.length; i++) {
+            var singletonWrapper = new SingletonWrapper(additionalSingletons[i].getClass(), annotations);
+            evaluateContext(additionalSingletons[i].getClass());
+        }
+    }
+
     private void evaluateContext(Class<?> singleton) {
         evaluateContext(new SingletonWrapper(singleton, annotations));
     }
 
+    @SuppressWarnings("unchecked")
     private void evaluateContext(SingletonWrapper singleton) {
         singletonConsumers.add(singleton);
+        if (isProxyFactory(singleton.getBeanClass())) {
+            var factory = (ProxyFactory<Object>) singleton.getBean();
+            proxyConfiguration.proxyInterfacesForFactory(factory).forEach(interfaceClass -> {
+                var proxyCreator = new ProxyCreationMethodCall(singleton, interfaceClass);
+                proxyCreator.addListener(this);
+                singleton.addProxyCreationMethodCall(proxyCreator);
+                singletonProducers.add(proxyCreator);
+            });
+        }
         if (annotations.isAnnotatedComponent(singleton.getBeanClass())) {
             var singletonConstructor = new SingletonConstructor(ClassUtils.getUniqueConstructor(singleton.getBeanClass()), parameterFactory);
             singletonConstructor.addListener(this);
@@ -77,6 +115,7 @@ class ApplicationContextFactory implements SingletonCreationListener {
             if (!singletonConstructor.isInvocable()) {
                 initialProducers.add(singletonConstructor);
             }
+            evaluateContext(new SingletonWrapper(singletonConstructor.getSingletonClass(), annotations));
         }
         MethodUtils.methods(singleton.getBeanClass(), this::isSingletonMethod).forEach(method -> {
             SingletonMethod singletonMethod;
@@ -85,7 +124,7 @@ class ApplicationContextFactory implements SingletonCreationListener {
                 singleton.addInitMethod(initMethod);
                 singletonMethod = initMethod;
             } else {
-                var beanMethod = new BeanMethod(method, singleton, parameterFactory);
+                var beanMethod = new BeanCreationMethod(method, singleton, parameterFactory);
                 singleton.addBeanMethod(beanMethod);
                 singletonMethod = beanMethod;
             }
@@ -96,6 +135,14 @@ class ApplicationContextFactory implements SingletonCreationListener {
             }
             evaluateContext(new SingletonWrapper(singletonMethod.getReturnType(), annotations));
         });
+    }
+
+    private boolean isProxyFactory(Class<?> c) {
+        return ProxyFactory.class.isAssignableFrom(c);
+    }
+
+    private boolean isBeanMethod(Method method) {
+        return annotations.isBeanMethod(method);
     }
 
     private boolean isSingletonMethod(Method method) {

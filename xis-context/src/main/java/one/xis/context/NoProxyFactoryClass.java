@@ -1,4 +1,4 @@
 package one.xis.context;
 
-interface NoProxyFactoryClass<T> extends ProxyFactory<T> {
+public interface NoProxyFactoryClass<T> extends ProxyFactory<T> {
 }

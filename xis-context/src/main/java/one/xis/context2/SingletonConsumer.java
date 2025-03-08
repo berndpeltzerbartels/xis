@@ -1,6 +1,6 @@
 package one.xis.context2;
 
-interface SingletonConsumer {
+public interface SingletonConsumer {
 
     void assignValue(Object o);
 
