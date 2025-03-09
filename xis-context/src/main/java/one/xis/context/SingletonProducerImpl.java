@@ -1,6 +1,7 @@
 package one.xis.context;
 
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 
 import java.lang.reflect.Parameter;
@@ -49,8 +50,11 @@ abstract class SingletonProducerImpl implements SingletonProducer {
     public void invoke() {
         var args = getArgs();
         var o = invoke(args);
-        notifySingletonCreationListeners(o);
-        assignValueInConsumers(o);
+        if (o != null) {
+            notifySingletonCreationListeners(o);
+            assignValueInConsumers(o);
+        }
+
     }
 
     protected void notifySingletonCreationListeners(Object o) {
@@ -59,7 +63,7 @@ abstract class SingletonProducerImpl implements SingletonProducer {
         }
     }
 
-    protected void assignValueInConsumers(Object o) {
+    protected void assignValueInConsumers(@NonNull Object o) {
         for (var i = 0; i < consumers.size(); i++) {
             consumers.get(i).assignValue(o);
         }

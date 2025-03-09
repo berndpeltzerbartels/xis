@@ -2,6 +2,7 @@ package one.xis.context;
 
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 class ParameterFactory {
@@ -9,7 +10,13 @@ class ParameterFactory {
     private final List<Param> params = new ArrayList<>();
 
     Param createParam(Parameter parameter, SingletonProducer producer) {
-        var param = new SimpleParam(parameter, producer);// TODO
+        Param param;
+        if (parameter.getType().isArray()) {
+            param = new ArrayParam(parameter, producer);
+        } else if (Collection.class.isAssignableFrom(parameter.getType())) {
+            param = new CollectionParam(parameter, producer);
+        }
+        param = new SimpleParam(parameter, producer);
         params.add(param);
         return param;
     }

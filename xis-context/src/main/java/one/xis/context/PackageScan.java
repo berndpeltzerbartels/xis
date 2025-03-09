@@ -35,6 +35,7 @@ class PackageScan {
         return annotations.getComponentClassAnnotations().stream()
                 .map(reflections::getTypesAnnotatedWith)
                 .flatMap(Set::stream)
+                .filter(c -> !c.isAnnotation())
                 .collect(Collectors.toSet());
     }
 

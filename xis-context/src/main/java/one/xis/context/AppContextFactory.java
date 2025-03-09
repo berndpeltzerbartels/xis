@@ -82,7 +82,13 @@ class AppContextFactory implements SingletonCreationListener {
     private void evaluateAdditionalSingletons() {
         for (var i = 0; i < additionalSingletons.length; i++) {
             // var singletonWrapper = new SingletonWrapper(additionalSingletons[i].getClass(), annotations);
-            evaluateContext(additionalSingletons[i].getClass());
+            var singleton = additionalSingletons[i];
+            var additionalSingleton = new AdditionalSingleton(singleton);
+            additionalSingleton.addListener(this);
+            singletonProducers.add(additionalSingleton);
+            initialProducers.add(additionalSingleton);
+            var singletonWrapper = new SingletonWrapper(singleton, annotations);
+            evaluateContext(singletonWrapper);
         }
     }
 
@@ -95,15 +101,14 @@ class AppContextFactory implements SingletonCreationListener {
         singletonConsumers.add(singleton);
         singletonConsumers.addAll(singleton.getSingletonFields());
         if (isProxyFactory(singleton.getBeanClass())) {
-            var factory = (ProxyFactory<Object>) singleton.getBean();
-            scanResult.getProxyInterfacesByFactory().get(factory.getClass()).forEach(interfaceClass -> {
+            scanResult.getProxyInterfacesByFactory().get(singleton.getBeanClass()).forEach(interfaceClass -> {
                 var proxyCreator = new ProxyCreationMethodCall(singleton, interfaceClass);
                 proxyCreator.addListener(this);
                 singleton.addProxyCreationMethodCall(proxyCreator);
                 singletonProducers.add(proxyCreator);
             });
         }
-        if (annotations.isAnnotatedComponent(singleton.getBeanClass())) {
+        if (annotations.isAnnotatedComponent(singleton.getBeanClass()) && singleton.getBean() == null) {
             var singletonConstructor = new SingletonConstructor(ClassUtils.getUniqueConstructor(singleton.getBeanClass()), parameterFactory);
             singletonConstructor.addListener(this);
             singletonProducers.add(singletonConstructor);

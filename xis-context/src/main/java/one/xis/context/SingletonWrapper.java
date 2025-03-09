@@ -1,6 +1,7 @@
 package one.xis.context;
 
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import one.xis.utils.lang.FieldUtil;
 
@@ -15,7 +16,7 @@ import java.util.stream.Collectors;
 class SingletonWrapper implements SingletonConsumer {
     private Object bean;
     private final Class<?> beanClass;
-    private final List<SimpleDependencyField> singletonFields;
+    private final List<DependencyField> singletonFields;
     private final Collection<InitMethod> initMethods = new HashSet<>();
     private final Collection<BeanCreationMethod> beanCreationMethods = new HashSet<>();
     private final Collection<ProxyCreationMethodCall> proxyCreationMethodCalls = new HashSet<>();
@@ -37,6 +38,11 @@ class SingletonWrapper implements SingletonConsumer {
     @Override
     public void assignValue(Object o) {
         this.bean = o;
+        for (var singletonField : new ArrayList<>(singletonFields)) {
+            if (singletonField.isValueAssigned()) {
+                doSetFieldValue(singletonField);
+            }
+        }
         doNotify();
     }
 
@@ -45,6 +51,9 @@ class SingletonWrapper implements SingletonConsumer {
     }
 
     void doNotify() {
+        if (bean == null) {
+            return;
+        }
         if (singletonFields.isEmpty()) {
             notifyInitMethods();
             if (initMethods.isEmpty()) {
@@ -52,7 +61,17 @@ class SingletonWrapper implements SingletonConsumer {
                 notifyProxyCreationMethodCalls();
             }
         }
+    }
 
+    void fieldValueAssigned(@NonNull DependencyField field) {
+        doSetFieldValue(field);
+    }
+
+    private void doSetFieldValue(@NonNull DependencyField field) {
+        if (bean != null) {
+            singletonFields.remove(field);
+            field.doInject();
+        }
     }
 
     private void notifyInitMethods() {

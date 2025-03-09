@@ -12,10 +12,7 @@ class ProxyTest {
     @DisplayName("Create a proxy and invoke a proxy-method")
     void test() {
         var context = new TestContextBuilder()
-                .withSingletonClass(TestInterface.class)
-                .withSingletonClass(TestProxyFactory.class)
-                .withSingletonClass(TestInvocationHandler.class)
-                .withProxyAnnotation(TestAnnotation.class)
+                .withPackage("one.xis.context.proxy")
                 .build();
 
         var proxy = context.getSingleton(TestInterface.class);

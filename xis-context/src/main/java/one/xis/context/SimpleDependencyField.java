@@ -1,5 +1,6 @@
 package one.xis.context;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import one.xis.utils.lang.FieldUtil;
 
@@ -10,12 +11,16 @@ class SimpleDependencyField implements DependencyField {
 
     private final Field field;
     private final SingletonWrapper parent;
+    private Object fieldValue;
+
+    @Getter
+    private boolean valueAssigned;
 
     @Override
     public void assignValue(Object o) {
-        parent.removeField(this);
-        FieldUtil.setFieldValue(parent.getBean(), field, o);
-        parent.doNotify();
+        fieldValue = o;
+        valueAssigned = true;
+        parent.fieldValueAssigned(this);
     }
 
     @Override
@@ -35,4 +40,9 @@ class SimpleDependencyField implements DependencyField {
         return field.getType();
     }
 
+
+    @Override
+    public void doInject() {
+        FieldUtil.setFieldValue(parent.getBean(), field, fieldValue);
+    }
 }

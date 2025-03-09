@@ -15,7 +15,6 @@ public class AppContextBuilderImpl implements AppContextBuilder {
     private final Set<Class<? extends Annotation>> dependencyFieldAnnotations = new HashSet<>();
     private final Set<Class<? extends Annotation>> initAnnotation = new HashSet<>();
     private final Set<Class<? extends Annotation>> beanMethodAnnotations = new HashSet<>();
-    private final Set<Class<? extends Annotation>> proxyAnnotations = new HashSet<>();
     private final Set<String> packagesToScan = new HashSet<>();
 
     @Override
@@ -28,6 +27,11 @@ public class AppContextBuilderImpl implements AppContextBuilder {
     public AppContextBuilder withSingletonClass(String clazz) {
         singletonClasses.add(ClassUtils.classForName(clazz));
         return this;
+    }
+
+    @Override
+    public AppContextBuilder withBasePackageClass(Class<?> basePackageCLass) {
+        return withPackage(basePackageCLass.getPackageName());
     }
 
     @Override
@@ -75,16 +79,6 @@ public class AppContextBuilderImpl implements AppContextBuilder {
         this.beanMethodAnnotations.add(beanMethodAnnotation);
         return this;
     }
-
-    @Override
-    public AppContextBuilder withProxyAnnotation(Class<? extends Annotation> clazz) {
-        if (!clazz.isAnnotationPresent(XISProxy.class)) {
-            throw new IllegalStateException("annotation " + clazz.getSimpleName() + " must be annotated for proxy (@XISProxy)");
-        }
-        proxyAnnotations.add(clazz);
-        return this;
-    }
-
 
     @Override
     public AppContext build() {

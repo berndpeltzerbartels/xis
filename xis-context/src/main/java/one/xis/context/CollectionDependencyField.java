@@ -24,9 +24,8 @@ class CollectionDependencyField implements DependencyField {
     @Override
     public void assignValue(Object o) {
         values.add(o);
-        if (values.size() == producerCount.get()) {
-            FieldUtil.setFieldValue(parent.getBean(), field, values);
-            parent.doNotify();
+        if (isValueAssigned()) {
+            parent.fieldValueAssigned(this);
         }
     }
 
@@ -44,5 +43,15 @@ class CollectionDependencyField implements DependencyField {
     @Override
     public Class<?> getConsumedClass() {
         return elementType;
+    }
+
+    @Override
+    public boolean isValueAssigned() {
+        return values.size() == producerCount.get();
+    }
+
+    @Override
+    public void doInject() {
+        FieldUtil.setFieldValue(parent.getBean(), field, values);
     }
 }

@@ -1,5 +1,6 @@
 package one.xis.utils.lang;
 
+import lombok.NonNull;
 import lombok.experimental.UtilityClass;
 
 import java.lang.reflect.Field;
@@ -82,7 +83,7 @@ public class FieldUtil {
     }
 
 
-    public void setFieldValue(Object owner, Field field, Object value) {
+    public void setFieldValue(@NonNull Object owner, @NonNull Field field, Object value) {
         field.setAccessible(true);
         try {
             field.set(owner, value);
