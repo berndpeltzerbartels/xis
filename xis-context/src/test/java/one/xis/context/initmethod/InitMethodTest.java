@@ -1,6 +1,7 @@
 package one.xis.context.initmethod;
 
 import one.xis.context.AppContext;
+import one.xis.context.AppContextBuilder;
 import one.xis.context.IntegrationTestContext;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
