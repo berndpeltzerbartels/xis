@@ -61,6 +61,7 @@ class PackageScan {
 
     private <A extends Annotation> Stream<Class<A>> proxyAnnotations() {
         return reflections.getTypesAnnotatedWith(XISProxy.class).stream()
+                .filter(Class::isAnnotation)
                 .map(clazz -> (Class<A>) clazz);
     }
 }

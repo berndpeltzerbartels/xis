@@ -8,8 +8,8 @@ import java.lang.reflect.Field;
 class Fields {
 
 
-    SimpleField createField(Field f, SingletonWrapper parent) {
-        var field = new SimpleField(f, parent);
+    SimpleDependencyField createField(Field f, SingletonWrapper parent) {
+        var field = new SimpleDependencyField(f, parent);
         return field;
     }
 }

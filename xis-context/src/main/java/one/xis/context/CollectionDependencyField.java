@@ -7,37 +7,38 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-class ArrayField implements SingletonField {
+class CollectionDependencyField implements DependencyField {
 
-    private final Field field;
     private final SingletonWrapper parent;
-    private final Class<?> elementType;
+    private final Field field;
     private final List<Object> values = new ArrayList<>();
     private final AtomicInteger producerCount = new AtomicInteger(0);
+    private final Class<?> elementType;
 
-    ArrayField(Field field, SingletonWrapper parent) {
+    CollectionDependencyField(Field field, SingletonWrapper parent) {
         this.field = field;
         this.parent = parent;
-        this.elementType = field.getType().getComponentType();
+        this.elementType = FieldUtil.getGenericTypeParameter(field);
     }
 
     @Override
     public void assignValue(Object o) {
         values.add(o);
         if (values.size() == producerCount.get()) {
-            FieldUtil.setFieldValue(parent.getBean(), field, values.toArray());
+            FieldUtil.setFieldValue(parent.getBean(), field, values);
             parent.doNotify();
         }
     }
 
     @Override
     public boolean isConsumerFor(Class<?> c) {
-        return false;
+        return elementType.isAssignableFrom(c);
     }
 
     @Override
     public void mapProducer(SingletonProducer producer) {
-        producerCount.incrementAndGet();
+        this.producerCount.incrementAndGet();
+        producer.addConsumer(this);
     }
 
     @Override

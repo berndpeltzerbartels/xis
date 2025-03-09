@@ -20,4 +20,14 @@ class BeanCreationMethod extends SingletonMethod {
         if (!getParent().getInitMethods().isEmpty()) return false;
         return super.isInvocable();
     }
+
+    @Override
+    public Class<?> getSingletonClass() {
+        return getMethod().getReturnType();
+    }
+
+    @Override
+    public String toString() {
+        return "BeanCreationMethod{" + getMethod().getDeclaringClass().getSimpleName() + "." + getMethod().getName() + "}";
+    }
 }

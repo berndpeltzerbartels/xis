@@ -11,7 +11,9 @@ class AppContextImpl implements AppContext {
     private final List<Object> singletons;
 
     AppContextImpl(Collection<Object> singletons) {
-        this.singletons = Collections.unmodifiableList(new ArrayList<>(singletons));
+        var singletonList = new ArrayList<>(singletons);
+        singletonList.add(this);
+        this.singletons = Collections.unmodifiableList(singletonList);
     }
 
     @Override

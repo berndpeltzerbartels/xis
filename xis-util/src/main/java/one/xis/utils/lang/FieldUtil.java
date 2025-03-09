@@ -31,7 +31,7 @@ public class FieldUtil {
         var fields = new ArrayList<Field>();
         Class<?> c = clazz;
         while (c != null && !c.equals(Object.class)) {
-            fields.addAll(getDeclaredFields(c));
+            fields.addAll(getDeclaredFields(c).stream().filter(filter).toList());
             c = c.getSuperclass();
         }
         return fields;

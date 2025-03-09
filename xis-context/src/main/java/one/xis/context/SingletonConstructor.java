@@ -14,7 +14,12 @@ public class SingletonConstructor extends SingletonProducerImpl {
 
     @Override
     protected Object invoke(Object[] args) {
-        return null;
+        try {
+            constructor.setAccessible(true);
+            return constructor.newInstance(args);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -29,4 +34,10 @@ public class SingletonConstructor extends SingletonProducerImpl {
         notifySingletonCreationListeners(o);
     }
 
+    @Override
+    public String toString() {
+        return "SingletonConstructor{" +
+                constructor.getDeclaringClass().getSimpleName() +
+                '}';
+    }
 }

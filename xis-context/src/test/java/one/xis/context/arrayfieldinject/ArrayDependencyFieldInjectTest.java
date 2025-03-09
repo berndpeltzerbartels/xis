@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import static one.xis.utils.lang.CollectionUtils.findElementOfType;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class ArrayFieldInjectTest {
+class ArrayDependencyFieldInjectTest {
 
 
     @Test

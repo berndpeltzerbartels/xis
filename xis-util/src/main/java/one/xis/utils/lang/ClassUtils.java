@@ -58,14 +58,10 @@ public class ClassUtils {
         if (c.getDeclaredConstructors().length > 1) {
             throw new RuntimeException("Multiple constructors found for class " + c.getName());
         }
-        if (c.getConstructors().length == 0) {
+        if (c.getDeclaredConstructors().length == 0) {
             throw new RuntimeException("No constructor found for class " + c.getName());
         }
-        try {
-            return c.getConstructor();
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
+        return c.getDeclaredConstructors()[0];
     }
 
     public <T> Constructor<T> getConstructor(Class<T> aClass, Class<?>... parameterTypes) {

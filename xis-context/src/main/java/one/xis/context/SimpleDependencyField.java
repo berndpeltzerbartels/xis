@@ -6,7 +6,7 @@ import one.xis.utils.lang.FieldUtil;
 import java.lang.reflect.Field;
 
 @RequiredArgsConstructor
-class SimpleField implements SingletonField {
+class SimpleDependencyField implements DependencyField {
 
     private final Field field;
     private final SingletonWrapper parent;

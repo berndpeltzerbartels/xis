@@ -14,6 +14,7 @@ class BeanCreationMethodTest {
                 .build();
 
         assertThat(context.getSingleton(Comp3.class)).isNotNull();
+        assertThat(context.getSingleton(AppContext.class)).isNotNull();
         assertThat(context.getSingletons()).hasSize(4);
     }
 }

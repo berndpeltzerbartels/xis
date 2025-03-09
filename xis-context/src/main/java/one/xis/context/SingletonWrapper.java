@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 class SingletonWrapper implements SingletonConsumer {
     private Object bean;
     private final Class<?> beanClass;
-    private final List<SimpleField> singletonFields;
+    private final List<SimpleDependencyField> singletonFields;
     private final Collection<InitMethod> initMethods = new HashSet<>();
     private final Collection<BeanCreationMethod> beanCreationMethods = new HashSet<>();
     private final Collection<ProxyCreationMethodCall> proxyCreationMethodCalls = new HashSet<>();
@@ -100,7 +100,7 @@ class SingletonWrapper implements SingletonConsumer {
         beanCreationMethods.remove(method);
     }
 
-    void removeField(SimpleField field) {
+    void removeField(SimpleDependencyField field) {
         singletonFields.remove(field);
     }
 
@@ -119,5 +119,10 @@ class SingletonWrapper implements SingletonConsumer {
     @Override
     public Class<?> getConsumedClass() {
         return beanClass;
+    }
+
+    @Override
+    public String toString() {
+        return "SingletonWrapper{" + beanClass.getSimpleName() + "}";
     }
 }

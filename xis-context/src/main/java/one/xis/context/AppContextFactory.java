@@ -11,8 +11,8 @@ import java.util.Set;
 
 
 class AppContextFactory implements SingletonCreationListener {
-    private final Set<SingletonProducer> singletonProducers = new HashSet<>();
-    private final Set<SingletonConsumer> singletonConsumers = new HashSet<>();
+    private final LinkedList<SingletonProducer> singletonProducers = new LinkedList<>();
+    private final LinkedList<SingletonConsumer> singletonConsumers = new LinkedList<>();
     private final Set<SingletonProducer> initialProducers = new HashSet<>();
     private final Set<Object> singletons = new HashSet<>();
     private final Object[] additionalSingletons;
@@ -53,20 +53,17 @@ class AppContextFactory implements SingletonCreationListener {
 
 
     private void mapProducers() {
-        var consumers = new LinkedList<>(singletonConsumers);
-        var producers = new LinkedList<>(singletonProducers);
-        while (!consumers.isEmpty()) {
-            var consumer = consumers.poll();
+        consumerLoop:
+        while (!singletonConsumers.isEmpty()) {
+            var consumer = singletonConsumers.poll();
             for (var i = 0; i < singletonProducers.size(); i++) {
-                var producer = producers.get(i);
+                var producer = singletonProducers.get(i);
                 if (consumer.isConsumerFor(producer.getSingletonClass())) {
                     producer.addConsumer(consumer);
-                    consumer.mapProducer(producer);
-                    break;
-                } else {
-                    throw new UnsatisfiedDependencyException(consumer.getConsumedClass());
+                    continue consumerLoop;
                 }
             }
+            throw new UnsatisfiedDependencyException(consumer.getConsumedClass());
         }
     }
 
@@ -96,6 +93,7 @@ class AppContextFactory implements SingletonCreationListener {
     @SuppressWarnings("unchecked")
     private void evaluateContext(SingletonWrapper singleton) {
         singletonConsumers.add(singleton);
+        singletonConsumers.addAll(singleton.getSingletonFields());
         if (isProxyFactory(singleton.getBeanClass())) {
             var factory = (ProxyFactory<Object>) singleton.getBean();
             scanResult.getProxyInterfacesByFactory().get(factory.getClass()).forEach(interfaceClass -> {
@@ -110,10 +108,10 @@ class AppContextFactory implements SingletonCreationListener {
             singletonConstructor.addListener(this);
             singletonProducers.add(singletonConstructor);
             singletonConsumers.addAll(singletonConstructor.getParameters());
-            if (!singletonConstructor.isInvocable()) {
+            if (singletonConstructor.isInvocable()) {
                 initialProducers.add(singletonConstructor);
             }
-            evaluateContext(new SingletonWrapper(singletonConstructor.getSingletonClass(), annotations));
+            // evaluateContext(new SingletonWrapper(singletonConstructor.getSingletonClass(), annotations));
         }
         MethodUtils.methods(singleton.getBeanClass(), this::isSingletonMethod).forEach(method -> {
             SingletonMethod singletonMethod;
@@ -131,7 +129,9 @@ class AppContextFactory implements SingletonCreationListener {
                 singletonMethod.addListener(this);
                 singletonProducers.add(singletonMethod);
             }
-            evaluateContext(new SingletonWrapper(singletonMethod.getReturnType(), annotations));
+            if (!singletonMethod.getReturnType().equals(Void.TYPE) && !singletonMethod.getReturnType().equals(Void.class)) {
+                evaluateContext(new SingletonWrapper(singletonMethod.getReturnType(), annotations));
+            }
         });
     }
 

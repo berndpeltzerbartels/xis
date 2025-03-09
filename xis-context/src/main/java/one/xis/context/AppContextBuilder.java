@@ -37,7 +37,6 @@ public interface AppContextBuilder {
         return withBeanInitAnnotation(XISInit.class)
                 .withComponentAnnotation(XISComponent.class)
                 .withDependencyFieldAnnotation(XISInject.class)
-                .withProxyAnnotation(XISProxy.class)
                 .withPackage("one.xis");
     }
 
