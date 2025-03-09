@@ -49,6 +49,7 @@ class SingletonWrapper implements SingletonConsumer {
             notifyInitMethods();
             if (initMethods.isEmpty()) {
                 notifyBeanMethods();
+                notifyProxyCreationMethodCalls();
             }
         }
 
@@ -67,6 +68,14 @@ class SingletonWrapper implements SingletonConsumer {
         for (var i = 0; i < beanMethods.size(); i++) {
             var beanMethod = beanMethods.get(i);
             beanMethod.doNotify();
+        }
+    }
+
+    private void notifyProxyCreationMethodCalls() {
+        var proxyCreationMethodCalls = new ArrayList<>(this.proxyCreationMethodCalls);
+        for (var i = 0; i < proxyCreationMethodCalls.size(); i++) {
+            var proxyCreationMethodCall = proxyCreationMethodCalls.get(i);
+            proxyCreationMethodCall.doNotify();
         }
     }
 

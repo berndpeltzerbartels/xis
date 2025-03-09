@@ -10,27 +10,26 @@ import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @SuppressWarnings({"unchecked", "deprecation"})
 class PackageScan {
     private final Reflections reflections;
+    private final Annotations annotations;
 
-    PackageScan(Collection<String> packagesToScan) {
+    PackageScan(Collection<String> packagesToScan, Annotations annotations) {
         this.reflections = new Reflections(packagesToScan,
                 new SubTypesScanner(),
                 new TypeAnnotationsScanner(),
                 new FieldAnnotationsScanner());
+        this.annotations = annotations;
     }
 
     PackageScanResult doScan() {
-        var annotations = new Annotations();
         annotations.addProxyAnnotations(proxyAnnotations().collect(Collectors.toSet()));
-        return new PackageScanResult(annotations, scanAnnotatedComponentClasses(annotations), proxyConfiguration(annotations));
+        return new PackageScanResult(annotations, scanAnnotatedComponentClasses(annotations), proxyInterfacesByFactory());
     }
-
 
     private Collection<Class<?>> scanAnnotatedComponentClasses(Annotations annotations) {
         return annotations.getComponentClassAnnotations().stream()
@@ -39,15 +38,17 @@ class PackageScan {
                 .collect(Collectors.toSet());
     }
 
-    <A extends Annotation, P extends ProxyFactory<?>> Map<Class<A>, Class<P>> proxyFactoriesByAnnotation() {
+
+    private <A extends Annotation, F extends ProxyFactory<?>> Map<Class<F>, Collection<Class<?>>> proxyInterfacesByFactory() {
         return proxyAnnotations()
                 .map(annotation -> (Class<A>) annotation)
-                .collect(Collectors.toMap(Function.identity(), this::getFactoryClass));
+                .collect(Collectors.toMap(this::getFactoryClass, this::interfaceClassesForProxyAnnotation));
     }
 
-    private ProxyConfiguration proxyConfiguration(Annotations annotations) {
-        return new ProxyConfiguration(annotations.getProxyAnnotations(), reflections);
+    private <A extends Annotation> Collection<Class<?>> interfaceClassesForProxyAnnotation(Class<A> annotation) {
+        return reflections.getTypesAnnotatedWith(annotation);
     }
+
 
     private <F extends ProxyFactory<?>> Class<F> getFactoryClass(Class<? extends Annotation> annotation) {
         XISProxy proxyAnnotation = annotation.getAnnotation(XISProxy.class);
@@ -62,5 +63,4 @@ class PackageScan {
         return reflections.getTypesAnnotatedWith(XISProxy.class).stream()
                 .map(clazz -> (Class<A>) clazz);
     }
-
 }

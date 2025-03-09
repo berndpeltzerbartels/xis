@@ -88,7 +88,7 @@ public class AppContextBuilderImpl implements AppContextBuilder {
 
     @Override
     public AppContext build() {
-        var packageScan = new PackageScan(packagesToScan);
+        var packageScan = new PackageScan(packagesToScan, annotations());
         var scanResult = packageScan.doScan();
         var contextFactory = new AppContextFactory(singletons.toArray(Object[]::new), singletonClasses.toArray(Class[]::new), scanResult);
         return contextFactory.createContext();

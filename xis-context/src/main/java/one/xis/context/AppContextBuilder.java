@@ -34,7 +34,11 @@ public interface AppContextBuilder {
     AppContextBuilder withPackage(String pack);
 
     default AppContextBuilder withXIS() {
-        return withPackage("one.xis");
+        return withBeanInitAnnotation(XISInit.class)
+                .withComponentAnnotation(XISComponent.class)
+                .withDependencyFieldAnnotation(XISInject.class)
+                .withProxyAnnotation(XISProxy.class)
+                .withPackage("one.xis");
     }
 
     default AppContextBuilder withPackages(String... packages) {

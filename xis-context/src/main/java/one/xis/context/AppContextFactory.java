@@ -20,7 +20,7 @@ class AppContextFactory implements SingletonCreationListener {
     private final ParameterFactory parameterFactory = new ParameterFactory();
     private final Annotations annotations;
     private final Class<?>[] annotatedComponentClasses;
-    private final ProxyConfiguration proxyConfiguration;
+    private final PackageScanResult scanResult;
 
     AppContextFactory(Object[] additionalSingletons,
                       Class<?>[] additionalSingletonClasses,
@@ -28,7 +28,7 @@ class AppContextFactory implements SingletonCreationListener {
         this.additionalSingletons = additionalSingletons;
         this.additionalSingletonClasses = additionalSingletonClasses;
         this.annotations = scanResult.getAnnotations();
-        this.proxyConfiguration = scanResult.getProxyConfiguration();
+        this.scanResult = scanResult;
         this.annotatedComponentClasses = scanResult.getAnnotatedComponentClasses().toArray(Class[]::new);
     }
 
@@ -84,7 +84,7 @@ class AppContextFactory implements SingletonCreationListener {
 
     private void evaluateAdditionalSingletons() {
         for (var i = 0; i < additionalSingletons.length; i++) {
-            var singletonWrapper = new SingletonWrapper(additionalSingletons[i].getClass(), annotations);
+            // var singletonWrapper = new SingletonWrapper(additionalSingletons[i].getClass(), annotations);
             evaluateContext(additionalSingletons[i].getClass());
         }
     }
@@ -98,7 +98,7 @@ class AppContextFactory implements SingletonCreationListener {
         singletonConsumers.add(singleton);
         if (isProxyFactory(singleton.getBeanClass())) {
             var factory = (ProxyFactory<Object>) singleton.getBean();
-            proxyConfiguration.proxyInterfacesForFactory(factory.getClass()).forEach(interfaceClass -> {
+            scanResult.getProxyInterfacesByFactory().get(factory.getClass()).forEach(interfaceClass -> {
                 var proxyCreator = new ProxyCreationMethodCall(singleton, interfaceClass);
                 proxyCreator.addListener(this);
                 singleton.addProxyCreationMethodCall(proxyCreator);
