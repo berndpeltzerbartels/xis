@@ -1,5 +1,6 @@
 package one.xis.context;
 
+import one.xis.utils.lang.ClassUtils;
 import one.xis.utils.lang.FieldUtil;
 
 import java.lang.reflect.Array;
@@ -32,6 +33,13 @@ class ArrayDependencyField implements DependencyField {
 
     @Override
     public boolean isConsumerFor(Class<?> c) {
+        if (field.isAnnotationPresent(XISInject.class)) {
+            var componentAnnotation = field.getAnnotation(XISInject.class).annotatedWith();
+            if (!componentAnnotation.equals(None.class) && !ClassUtils.isAnnotationPresentInHierarchy(c, componentAnnotation)) {
+                return false;
+
+            }
+        }
         return elementType.isAssignableFrom(c);
     }
 

@@ -30,9 +30,7 @@ class SimpleDependencyField implements DependencyField {
 
     @Override
     public void mapProducer(SingletonProducer producer) {
-        if (field.getType().isAssignableFrom(producer.getSingletonClass())) {
-            producer.addConsumer(this);
-        }
+        // do nothing
     }
 
     @Override

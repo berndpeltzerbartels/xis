@@ -3,6 +3,7 @@ package one.xis.utils.lang;
 import lombok.NonNull;
 import lombok.experimental.UtilityClass;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Modifier;
@@ -171,6 +172,20 @@ public class ClassUtils {
 
     public boolean isEnum(Class<?> type) {
         return type.isEnum();
+    }
+
+    public boolean isAnnotationPresentInHierarchy(Class<?> clazz, Class<? extends Annotation> annotation) {
+        if (clazz.isAnnotationPresent(annotation)) {
+            return true;
+        }
+        Class<?> c = clazz;
+        while (c != null && !c.equals(Object.class)) {
+            if (c.isAnnotationPresent(annotation)) {
+                return true;
+            }
+            c = c.getSuperclass();
+        }
+        return false;
     }
 
 
