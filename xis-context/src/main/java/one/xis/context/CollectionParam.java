@@ -56,4 +56,10 @@ class CollectionParam implements Param {
     public Object getValue() {
         return values;
     }
+
+
+    @Override
+    public boolean isSingleValueConsumer() {
+        return false;
+    }
 }

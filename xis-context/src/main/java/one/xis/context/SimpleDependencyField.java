@@ -45,4 +45,16 @@ class SimpleDependencyField implements DependencyField {
     public void doInject() {
         FieldUtil.setFieldValue(parent.getBean(), field, fieldValue);
     }
+
+    @Override
+    public boolean isSingleValueConsumer() {
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "SimpleDependencyField{" +
+                "field=" + field +
+                '}';
+    }
 }

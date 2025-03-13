@@ -54,4 +54,17 @@ class CollectionDependencyField implements DependencyField {
     public void doInject() {
         FieldUtil.setFieldValue(parent.getBean(), field, values);
     }
+
+
+    @Override
+    public boolean isSingleValueConsumer() {
+        return false;
+    }
+
+    @Override
+    public String toString() {
+        return "CollectionDependencyField{" +
+                "field=" + field +
+                '}';
+    }
 }

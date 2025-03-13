@@ -9,4 +9,6 @@ public interface SingletonConsumer {
     void mapProducer(SingletonProducer producer);
 
     Class<?> getConsumedClass();
+
+    boolean isSingleValueConsumer();
 }

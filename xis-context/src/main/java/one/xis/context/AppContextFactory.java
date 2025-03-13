@@ -60,10 +60,15 @@ class AppContextFactory implements SingletonCreationListener {
                 var producer = singletonProducers.get(i);
                 if (consumer.isConsumerFor(producer.getSingletonClass())) {
                     producer.addConsumer(consumer);
-                    continue consumerLoop;
+                    consumer.mapProducer(producer);
+                    if (consumer.isSingleValueConsumer()) {
+                        continue consumerLoop;
+                    }
                 }
             }
-            throw new UnsatisfiedDependencyException(consumer.getConsumedClass());
+            if (consumer.isSingleValueConsumer()) {
+                throw new UnsatisfiedDependencyException(consumer.getConsumedClass());
+            }
         }
     }
 
@@ -113,7 +118,7 @@ class AppContextFactory implements SingletonCreationListener {
             singletonConstructor.addListener(this);
             singletonProducers.add(singletonConstructor);
             singletonConsumers.addAll(singletonConstructor.getParameters());
-            if (singletonConstructor.isInvocable()) {
+            if (isInitial(singletonConstructor)) {
                 initialProducers.add(singletonConstructor);
             }
             // evaluateContext(new SingletonWrapper(singletonConstructor.getSingletonClass(), annotations));
@@ -138,6 +143,10 @@ class AppContextFactory implements SingletonCreationListener {
                 evaluateContext(new SingletonWrapper(singletonMethod.getReturnType(), annotations));
             }
         });
+    }
+
+    private boolean isInitial(SingletonConstructor singletonConstructor) {
+        return singletonConstructor.getParameters().isEmpty();
     }
 
     private boolean isProxyFactory(Class<?> c) {

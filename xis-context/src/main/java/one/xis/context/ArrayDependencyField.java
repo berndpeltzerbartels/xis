@@ -2,6 +2,7 @@ package one.xis.context;
 
 import one.xis.utils.lang.FieldUtil;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +32,7 @@ class ArrayDependencyField implements DependencyField {
 
     @Override
     public boolean isConsumerFor(Class<?> c) {
-        return false;
+        return elementType.isAssignableFrom(c);
     }
 
     @Override
@@ -46,11 +47,28 @@ class ArrayDependencyField implements DependencyField {
 
     @Override
     public boolean isValueAssigned() {
-        return values.size() == producerCount.get();
+        return values.size() >= producerCount.get();
     }
 
     @Override
     public void doInject() {
-        FieldUtil.setFieldValue(parent.getBean(), field, values.toArray());
+        var array = Array.newInstance(elementType, values.size());
+        for (var i = 0; i < values.size(); i++) {
+            Array.set(array, i, values.get(i));
+        }
+        FieldUtil.setFieldValue(parent.getBean(), field, array);
+    }
+
+
+    @Override
+    public boolean isSingleValueConsumer() {
+        return false;
+    }
+
+    @Override
+    public String toString() {
+        return "ArrayDependencyField{" +
+                "field=" + field +
+                '}';
     }
 }

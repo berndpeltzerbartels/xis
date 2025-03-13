@@ -15,8 +15,9 @@ class ParameterFactory {
             param = new ArrayParam(parameter, producer);
         } else if (Collection.class.isAssignableFrom(parameter.getType())) {
             param = new CollectionParam(parameter, producer);
+        } else {
+            param = new SimpleParam(parameter, producer);
         }
-        param = new SimpleParam(parameter, producer);
         params.add(param);
         return param;
     }

@@ -1,5 +1,6 @@
 package one.xis.context;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +46,16 @@ class ArrayParam implements Param {
 
     @Override
     public Object getValue() {
-        return values.toArray();
+        var array = (Object[]) Array.newInstance(componentType, values.size());
+        for (var i = 0; i < values.size(); i++) {
+            array[i] = values.get(i);
+        }
+        return array;
     }
+
+    @Override
+    public boolean isSingleValueConsumer() {
+        return false;
+    }
+
 }

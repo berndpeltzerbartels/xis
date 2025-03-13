@@ -14,7 +14,7 @@ class InitMethodTest {
     class AppContextInitMethodTest {
         @Test
         @DisplayName("Init-method is executed when all fields are present and bean class is instantiated")
-        void testInitWithClassIntantiation() {
+        void testInitWithClassInstantiation() {
             Comp1 comp1 = AppContext.getInstance(getClass()).getSingleton(Comp1.class);
             assertThat(comp1.getResult()).isEqualTo(8);
         }

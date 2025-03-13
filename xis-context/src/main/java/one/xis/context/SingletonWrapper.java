@@ -130,14 +130,17 @@ class SingletonWrapper implements SingletonConsumer {
 
     @Override
     public void mapProducer(SingletonProducer producer) {
-        if (beanClass.isAssignableFrom(producer.getSingletonClass())) {
-            producer.addConsumer(this);
-        }
+        // do nothing
     }
 
     @Override
     public Class<?> getConsumedClass() {
         return beanClass;
+    }
+
+    @Override
+    public boolean isSingleValueConsumer() {
+        return true;
     }
 
     @Override

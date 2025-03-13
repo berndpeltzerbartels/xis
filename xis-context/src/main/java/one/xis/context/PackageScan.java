@@ -8,6 +8,7 @@ import org.reflections.scanners.TypeAnnotationsScanner;
 
 import java.lang.annotation.Annotation;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -28,15 +29,46 @@ class PackageScan {
 
     PackageScanResult doScan() {
         annotations.addProxyAnnotations(proxyAnnotations().collect(Collectors.toSet()));
-        return new PackageScanResult(annotations, scanAnnotatedComponentClasses(annotations), proxyInterfacesByFactory());
+        var customComponentAnnotations = new HashSet<Class<? extends Annotation>>();
+        var componentClasses = new HashSet<Class<?>>();
+        scanAnnotatedComponentClasses(annotations).forEach(componentClass -> {
+            if (componentClass.isAnnotation()) {
+                customComponentAnnotations.add((Class<Annotation>) componentClass);
+            } else {
+                componentClasses.add(componentClass);
+            }
+        });
+        customComponentAnnotations.forEach(annotation -> {
+            componentClasses.addAll(scanAnnotatedComponentClasses(annotation).collect(Collectors.toSet()));
+            annotations.addComponentClassAnnotation(annotation);
+        });
+        return new PackageScanResult(annotations, componentClasses, proxyInterfacesByFactory());
     }
 
-    private Collection<Class<?>> scanAnnotatedComponentClasses(Annotations annotations) {
+
+    private Stream<Class<?>> scanAnnotatedComponentClasses(Annotations annotations) {
         return annotations.getComponentClassAnnotations().stream()
                 .map(reflections::getTypesAnnotatedWith)
-                .flatMap(Set::stream)
-                .filter(c -> !c.isAnnotation())
+                .flatMap(Set::stream);
+    }
+
+    private Stream<Class<?>> scanAnnotatedComponentClasses(Class<? extends Annotation> componentAnnotation) {
+        return reflections.getTypesAnnotatedWith(componentAnnotation).stream();
+
+    }
+
+    private Collection<Class<Annotation>> scanCustomComponentAnnotations(Annotations annotations) {
+        return annotations.getComponentClassAnnotations().stream()
+                .flatMap(this::scanCustomComponentAnnotations)
+                .map(clazz -> (Class<Annotation>) clazz)
                 .collect(Collectors.toSet());
+    }
+
+    private Stream<Class<Annotation>> scanCustomComponentAnnotations(Class<? extends Annotation> componentAnnotation) {
+        return reflections.getTypesAnnotatedWith(componentAnnotation)
+                .stream()
+                .filter(Class::isAnnotation)
+                .map(clazz -> (Class<Annotation>) clazz);
     }
 
 
