@@ -1,7 +1,6 @@
 package one.xis.context;
 
 import java.util.Collection;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 class UnsatisfiedDependencyException extends RuntimeException {
@@ -9,8 +8,8 @@ class UnsatisfiedDependencyException extends RuntimeException {
         super("Unsatisfied dependencies: " + unsatisfiedDependencies);
     }
 
-    public UnsatisfiedDependencyException(Class<?> unsatisfiedDependencies) {
-        this(Set.of(unsatisfiedDependencies));
+    public UnsatisfiedDependencyException(Class<?> unsatisfiedDependencies, SingletonConsumer consumer) {
+        super("Unsatisfied dependencies: " + unsatisfiedDependencies + " in " + consumer);
     }
 
     private static String unsatisfiedDependenciesToString(Collection<Class<?>> unsatisfiedDependencies) {

@@ -31,6 +31,8 @@ var reflectionsVersion = rootProject.ext.libraryVersions.reflections
 dependencies {
 
     implementation project(':xis-util')
+    // implementation 'org.slf4j:slf4j-simple:2.0.9'
+    implementation 'ch.qos.logback:logback-classic:1.4.11'
 
     implementation "org.reflections:reflections:$reflectionsVersion"
 
@@ -53,7 +55,6 @@ test {
         logger.quiet "${desc.className} - ${desc.name}: ${result.resultType}"
     }
 }
-
 
 
 dependencies {

@@ -3,6 +3,7 @@ package one.xis.context;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
@@ -10,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+@Slf4j
 abstract class SingletonProducerImpl implements SingletonProducer {
     private final List<SingletonConsumer> consumers = new ArrayList<>();
     private final Set<SingletonCreationListener> creationListeners = new HashSet<>();
@@ -51,6 +53,7 @@ abstract class SingletonProducerImpl implements SingletonProducer {
         var args = getArgs();
         var o = invoke(args);
         if (o != null) {
+            log.debug("Singleton created by method: {}", o);
             notifySingletonCreationListeners(o);
             assignValueInConsumers(o);
         }
@@ -65,7 +68,7 @@ abstract class SingletonProducerImpl implements SingletonProducer {
 
     protected void assignValueInConsumers(@NonNull Object o) {
         for (var i = 0; i < consumers.size(); i++) {
-            consumers.get(i).assignValue(o);
+            consumers.get(i).assignValueIfMatching(o);
         }
     }
 

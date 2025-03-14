@@ -1,15 +1,19 @@
 package one.xis.context;
 
+import lombok.Getter;
+
 import java.lang.reflect.Array;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-class ArrayParam implements Param {
+class ArrayParam implements Param, MultiValueConsumer {
     private final Class<?> componentType;
     private final SingletonProducer parentProducer;
     private final List<Object> values = new ArrayList<>();
+
+    @Getter
     private final AtomicInteger producerCount = new AtomicInteger(0);
 
 
@@ -19,9 +23,13 @@ class ArrayParam implements Param {
     }
 
     @Override
-    public void assignValue(Object o) {
-        values.add(o);
-        parentProducer.doNotify();
+    public void assignValueIfMatching(Object o) {
+        if (componentType.isAssignableFrom(o.getClass())) {
+            values.add(o);
+        }
+        if (producerCount.decrementAndGet() == 0) {
+            parentProducer.doNotify();
+        }
     }
 
     @Override
@@ -58,4 +66,8 @@ class ArrayParam implements Param {
         return false;
     }
 
+    @Override
+    public void notifyParent() {
+        parentProducer.doNotify();
+    }
 }

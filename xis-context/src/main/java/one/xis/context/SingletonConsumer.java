@@ -1,8 +1,10 @@
 package one.xis.context;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public interface SingletonConsumer {
 
-    void assignValue(Object o);
+    void assignValueIfMatching(Object o);
 
     boolean isConsumerFor(Class<?> c);
 
@@ -11,4 +13,10 @@ public interface SingletonConsumer {
     Class<?> getConsumedClass();
 
     boolean isSingleValueConsumer();
+
+    AtomicInteger getProducerCount();
+
+    default boolean hasProducer() {
+        return getProducerCount().get() > 0;
+    }
 }

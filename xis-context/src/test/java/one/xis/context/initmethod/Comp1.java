@@ -20,7 +20,6 @@ class Comp1 {
 
     @XISInit
     void init() {
-        System.out.println("*** INIT ***");
         result = comp2.getInt() + comp3.getInt();
     }
 }

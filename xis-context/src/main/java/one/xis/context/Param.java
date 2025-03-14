@@ -2,7 +2,7 @@ package one.xis.context;
 
 public interface Param extends SingletonConsumer {
 
-    void assignValue(Object o);
+    void assignValueIfMatching(Object o);
 
     boolean isValuesAssigned();
 

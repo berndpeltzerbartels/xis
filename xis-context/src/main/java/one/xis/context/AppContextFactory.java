@@ -1,18 +1,19 @@
 package one.xis.context;
 
+import lombok.extern.slf4j.Slf4j;
 import one.xis.utils.lang.ClassUtils;
+import one.xis.utils.lang.FieldUtil;
 import one.xis.utils.lang.MethodUtils;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
-
+@Slf4j
 class AppContextFactory implements SingletonCreationListener {
     private final LinkedList<SingletonProducer> singletonProducers = new LinkedList<>();
     private final LinkedList<SingletonConsumer> singletonConsumers = new LinkedList<>();
+    private final LinkedList<MultiValueConsumer> multiValueConsumers = new LinkedList<>();
     private final Set<SingletonProducer> initialProducers = new HashSet<>();
     private final Set<Object> singletons = new HashSet<>();
     private final Object[] additionalSingletons;
@@ -32,7 +33,6 @@ class AppContextFactory implements SingletonCreationListener {
         this.annotatedComponentClasses = scanResult.getAnnotatedComponentClasses().toArray(Class[]::new);
     }
 
-
     public AppContext createContext() {
         evaluateAnnotatedComponents();
         evaluateAdditionalSingletonClasses();
@@ -42,8 +42,13 @@ class AppContextFactory implements SingletonCreationListener {
         return new AppContextImpl(singletons);
     }
 
-
     private void createSingletons() {
+        for (var i = 0; i < multiValueConsumers.size(); i++) {
+            var consumer = multiValueConsumers.get(i);
+            if (consumer.getProducerCount().get() == 0) {
+                consumer.notifyParent();
+            }
+        }
         var producers = new ArrayList<>(initialProducers);
         for (var i = 0; i < producers.size(); i++) {
             var producer = producers.get(i);
@@ -53,76 +58,89 @@ class AppContextFactory implements SingletonCreationListener {
 
 
     private void mapProducers() {
-        consumerLoop:
         while (!singletonConsumers.isEmpty()) {
             var consumer = singletonConsumers.poll();
+            if (consumer instanceof MultiValueConsumer) {
+                multiValueConsumers.add((MultiValueConsumer) consumer);
+            }
             for (var i = 0; i < singletonProducers.size(); i++) {
                 var producer = singletonProducers.get(i);
                 if (consumer.isConsumerFor(producer.getSingletonClass())) {
                     producer.addConsumer(consumer);
                     consumer.mapProducer(producer);
-                    if (consumer.isSingleValueConsumer()) {
-                        continue consumerLoop;
-                    }
                 }
             }
-            if (consumer.isSingleValueConsumer()) {
-                throw new UnsatisfiedDependencyException(consumer.getConsumedClass());
+            if (consumer.isSingleValueConsumer() && !consumer.hasProducer()) {
+                throw new UnsatisfiedDependencyException(consumer.getConsumedClass(), consumer);
             }
         }
     }
 
     private void evaluateAnnotatedComponents() {
         for (var i = 0; i < annotatedComponentClasses.length; i++) {
-            evaluateContext(annotatedComponentClasses[i]);
+            evaluate(new SingletonWrapper(annotatedComponentClasses[i], true));
         }
     }
 
     private void evaluateAdditionalSingletonClasses() {
         for (var i = 0; i < additionalSingletonClasses.length; i++) {
-            evaluateContext(additionalSingletonClasses[i]);
+            evaluate(new SingletonWrapper(additionalSingletonClasses[i], true));
         }
     }
 
     private void evaluateAdditionalSingletons() {
         for (var i = 0; i < additionalSingletons.length; i++) {
-            // var singletonWrapper = new SingletonWrapper(additionalSingletons[i].getClass(), annotations);
-            var singleton = additionalSingletons[i];
-            var additionalSingleton = new AdditionalSingleton(singleton);
-            additionalSingleton.addListener(this);
-            singletonProducers.add(additionalSingleton);
-            initialProducers.add(additionalSingleton);
-            var singletonWrapper = new SingletonWrapper(singleton, annotations);
-            evaluateContext(singletonWrapper);
+            evaluateAdditionalSingleton(additionalSingletons[i]);
+
         }
     }
 
-    private void evaluateContext(Class<?> singleton) {
-        evaluateContext(new SingletonWrapper(singleton, annotations));
+    private void evaluateAdditionalSingleton(Object singleton) {
+        var additionalSingleton = new AdditionalSingleton(singleton);
+        additionalSingleton.addListener(this);
+        singletonProducers.add(additionalSingleton);
+        initialProducers.add(additionalSingleton);
+        var singletonWrapper = new SingletonWrapper(singleton.getClass(), true);
+        singletonConsumers.add(singletonWrapper);
+        var dependencyFields = unassignedDependencyFields(singleton, singletonWrapper);
+        singletonWrapper.setSingletonFields(dependencyFields);
+        singletonConsumers.addAll(dependencyFields);
+        if (isProxyFactory(singleton.getClass())) {
+            evaluateProxyFactory(singletonWrapper);
+        }
+        evaluateMethods(singletonWrapper);
     }
 
-    @SuppressWarnings("unchecked")
-    private void evaluateContext(SingletonWrapper singleton) {
+    private void evaluate(SingletonWrapper singleton) {
+        if (singleton.getBean() != null) {
+            throw new IllegalStateException("SingletonWrapper with bean already set");
+        }
         singletonConsumers.add(singleton);
-        singletonConsumers.addAll(singleton.getSingletonFields());
+        var dependencyFields = dependencyFields(singleton);
+        singleton.setSingletonFields(dependencyFields);
+        singletonConsumers.addAll(dependencyFields);
         if (isProxyFactory(singleton.getBeanClass())) {
-            scanResult.getProxyInterfacesByFactory().get(singleton.getBeanClass()).forEach(interfaceClass -> {
-                var proxyCreator = new ProxyCreationMethodCall(singleton, interfaceClass);
-                proxyCreator.addListener(this);
-                singleton.addProxyCreationMethodCall(proxyCreator);
-                singletonProducers.add(proxyCreator);
-            });
+            evaluateProxyFactory(singleton);
         }
-        if (annotations.isAnnotatedComponent(singleton.getBeanClass()) && singleton.getBean() == null) {
-            var singletonConstructor = new SingletonConstructor(ClassUtils.getUniqueConstructor(singleton.getBeanClass()), parameterFactory);
-            singletonConstructor.addListener(this);
-            singletonProducers.add(singletonConstructor);
-            singletonConsumers.addAll(singletonConstructor.getParameters());
-            if (isInitial(singletonConstructor)) {
-                initialProducers.add(singletonConstructor);
-            }
-            // evaluateContext(new SingletonWrapper(singletonConstructor.getSingletonClass(), annotations));
+        if (requiresConstructor(singleton)) {
+            evaluateConstructor(singleton);
         }
+        evaluateMethods(singleton);
+    }
+
+    private Collection<DependencyField> dependencyFields(SingletonWrapper singleton) {
+        return FieldUtil.getFields(singleton.getBeanClass(), annotations::isDependencyField).stream()
+                .map(field -> Fields.createField(field, singleton)).collect(Collectors.toList());
+    }
+
+    private Collection<DependencyField> unassignedDependencyFields(Object bean, SingletonWrapper wrapper) {
+        return FieldUtil.getFields(bean.getClass(), annotations::isDependencyField).stream()
+                .filter(field -> FieldUtil.getFieldValue(bean, field) == null)
+                .map(field -> Fields.createField(field, wrapper)).collect(Collectors.toList());
+    }
+
+
+    private void evaluateMethods(SingletonWrapper singleton) {
         MethodUtils.methods(singleton.getBeanClass(), this::isSingletonMethod).forEach(method -> {
             SingletonMethod singletonMethod;
             if (isInitMethod(method)) {
@@ -140,9 +158,40 @@ class AppContextFactory implements SingletonCreationListener {
                 singletonProducers.add(singletonMethod);
             }
             if (!singletonMethod.getReturnType().equals(Void.TYPE) && !singletonMethod.getReturnType().equals(Void.class)) {
-                evaluateContext(new SingletonWrapper(singletonMethod.getReturnType(), annotations));
+                evaluate(new SingletonWrapper(singletonMethod.getReturnType()));
             }
         });
+    }
+
+    private void evaluateConstructor(SingletonWrapper singleton) {
+        var singletonConstructor = new SingletonConstructor(ClassUtils.getUniqueConstructor(singleton.getBeanClass()), parameterFactory);
+        singletonConstructor.addListener(this);
+        singletonProducers.add(singletonConstructor);
+        singletonConsumers.addAll(singletonConstructor.getParameters());
+        if (isInitial(singletonConstructor)) {
+            initialProducers.add(singletonConstructor);
+        }
+    }
+
+
+    private void evaluateProxyFactory(SingletonWrapper singleton) {
+        scanResult.getProxyInterfacesByFactory().get(singleton.getBeanClass()).forEach(interfaceClass -> {
+            var proxyCreator = new ProxyCreationMethodCall(singleton, interfaceClass);
+            proxyCreator.addListener(this);
+            singleton.addProxyCreationMethodCall(proxyCreator);
+            singletonProducers.add(proxyCreator);
+        });
+    }
+
+    private boolean requiresConstructor(SingletonWrapper singletonWrapper) {
+        if (singletonWrapper.getBean() != null) {
+            return false;
+        }
+        if (annotations.isAnnotatedComponent(singletonWrapper.getBeanClass())) {
+            return true;
+        }
+        return singletonWrapper.isAdditionalClass();
+
     }
 
     private boolean isInitial(SingletonConstructor singletonConstructor) {
@@ -168,6 +217,9 @@ class AppContextFactory implements SingletonCreationListener {
 
     @Override
     public void onSingletonCreated(Object o) {
+        if (log.isDebugEnabled()) {
+            log.debug("Singleton created: {}", o);
+        }
         singletons.add(o);
     }
 

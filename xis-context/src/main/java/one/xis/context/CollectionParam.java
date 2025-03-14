@@ -1,5 +1,6 @@
 package one.xis.context;
 
+import lombok.Getter;
 import lombok.experimental.Delegate;
 import one.xis.utils.lang.CollectionUtils;
 import one.xis.utils.lang.ParameterUtil;
@@ -9,14 +10,17 @@ import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
-class CollectionParam implements Param {
+class CollectionParam implements Param, MultiValueConsumer {
 
     @Delegate
     private final Parameter parameter;
     private final Class<?> actualTypeParameter;
     private final SingletonProducer parentProducer;
     private Collection<Object> values;
+
+    @Getter
     private final AtomicInteger producerCount = new AtomicInteger(0);
+    private final Class<?> elementType;
 
     @SuppressWarnings("unchecked")
     CollectionParam(Parameter parameter, SingletonProducer parentProducer) {
@@ -24,12 +28,17 @@ class CollectionParam implements Param {
         this.parentProducer = parentProducer;
         this.actualTypeParameter = ParameterUtil.getGenericTypeParameter(parameter);
         this.values = CollectionUtils.emptyInstance((Class<? extends Collection<Object>>) parameter.getType());
+        this.elementType = ParameterUtil.getGenericTypeParameter(parameter);
     }
 
     @Override
-    public void assignValue(Object o) {
-        this.values.add(o);
-        parentProducer.doNotify();
+    public void assignValueIfMatching(Object o) {
+        if (elementType.isAssignableFrom(o.getClass())) {
+            this.values.add(o);
+        }
+        if (producerCount.decrementAndGet() == 0) {
+            parentProducer.doNotify();
+        }
     }
 
     @Override
@@ -61,5 +70,10 @@ class CollectionParam implements Param {
     @Override
     public boolean isSingleValueConsumer() {
         return false;
+    }
+
+    @Override
+    public void notifyParent() {
+        parentProducer.doNotify();
     }
 }

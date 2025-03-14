@@ -1,5 +1,6 @@
 package one.xis.context;
 
+import lombok.Getter;
 import one.xis.utils.lang.ClassUtils;
 import one.xis.utils.lang.FieldUtil;
 
@@ -9,12 +10,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-class ArrayDependencyField implements DependencyField {
+class ArrayDependencyField implements DependencyField, MultiValueConsumer {
 
     private final Field field;
     private final SingletonWrapper parent;
     private final Class<?> elementType;
     private final List<Object> values = new ArrayList<>();
+
+    @Getter
     private final AtomicInteger producerCount = new AtomicInteger(0);
 
     ArrayDependencyField(Field field, SingletonWrapper parent) {
@@ -24,9 +27,11 @@ class ArrayDependencyField implements DependencyField {
     }
 
     @Override
-    public void assignValue(Object o) {
-        values.add(o);
-        if (isValueAssigned()) {
+    public void assignValueIfMatching(Object o) {
+        if (elementType.isAssignableFrom(o.getClass())) {
+            values.add(o);
+        }
+        if (producerCount.decrementAndGet() == 0) {
             parent.fieldValueAssigned(this);
         }
     }
@@ -55,7 +60,7 @@ class ArrayDependencyField implements DependencyField {
 
     @Override
     public boolean isValueAssigned() {
-        return values.size() >= producerCount.get();
+        return producerCount.get() == 0;
     }
 
     @Override
@@ -78,5 +83,10 @@ class ArrayDependencyField implements DependencyField {
         return "ArrayDependencyField{" +
                 "field=" + field +
                 '}';
+    }
+
+    @Override
+    public void notifyParent() {
+        parent.fieldValueAssigned(this);
     }
 }

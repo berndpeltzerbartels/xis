@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.Delegate;
 
 import java.lang.reflect.Parameter;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Getter
 @RequiredArgsConstructor
@@ -16,10 +17,15 @@ class SimpleParam implements Param {
     private final SingletonProducer parentProducer;
     private Object value;
 
+    @Getter
+    private final AtomicInteger producerCount = new AtomicInteger(0);
+
     @Override
-    public void assignValue(@NonNull Object o) {
-        this.value = o;
-        parentProducer.doNotify();
+    public void assignValueIfMatching(@NonNull Object o) {
+        if (parameter.getType().isAssignableFrom(o.getClass())) {
+            this.value = o;
+            parentProducer.doNotify();
+        }
     }
 
     @Override
@@ -34,7 +40,7 @@ class SimpleParam implements Param {
 
     @Override
     public void mapProducer(SingletonProducer producer) {
-        // NOOP
+        producerCount.incrementAndGet();
     }
 
     @Override
@@ -45,5 +51,12 @@ class SimpleParam implements Param {
     @Override
     public boolean isSingleValueConsumer() {
         return true;
+    }
+
+    @Override
+    public String toString() {
+        return "SimpleParam{" +
+                "parameter=" + parameter +
+                '}';
     }
 }

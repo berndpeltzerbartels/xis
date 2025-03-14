@@ -2,48 +2,58 @@ package one.xis.context;
 
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import one.xis.utils.lang.FieldUtil;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.LinkedList;
+import java.util.concurrent.atomic.AtomicInteger;
 
+@Slf4j
 @Getter
-@RequiredArgsConstructor
 class SingletonWrapper implements SingletonConsumer {
     private Object bean;
     private final Class<?> beanClass;
-    private final List<DependencyField> singletonFields;
-    private final Collection<InitMethod> initMethods = new HashSet<>();
-    private final Collection<BeanCreationMethod> beanCreationMethods = new HashSet<>();
-    private final Collection<ProxyCreationMethodCall> proxyCreationMethodCalls = new HashSet<>();
+    @Setter
+    private Collection<DependencyField> singletonFields;
+    private final LinkedList<InitMethod> initMethods = new LinkedList<>();
+    private final LinkedList<BeanCreationMethod> beanCreationMethods = new LinkedList<>();
+    private final LinkedList<ProxyCreationMethodCall> proxyCreationMethodCalls = new LinkedList<>();
+    private final boolean additionalClass;
 
-    SingletonWrapper(Class<?> c, Annotations annotations) {
+    @Getter
+    private final AtomicInteger producerCount = new AtomicInteger(0);
+
+    SingletonWrapper(Class<?> c, boolean additionalClass) {
         beanClass = c;
-        this.singletonFields = FieldUtil.getFields(beanClass, annotations::isDependencyField).stream()
-                .map(field -> Fields.createField(field, this)).collect(Collectors.toList());
+        this.additionalClass = additionalClass;
     }
 
-    SingletonWrapper(Object bean, Annotations annotations) {
+    SingletonWrapper(Class<?> c) {
+        this(c, false);
+    }
+
+    SingletonWrapper(Object bean, boolean additionalClass) {
         this.bean = bean;
+        this.additionalClass = additionalClass;
         beanClass = bean.getClass();
-        this.singletonFields = FieldUtil.getFields(beanClass, annotations::isDependencyField).stream()
-                .map(field -> Fields.createField(field, this)).collect(Collectors.toList());
     }
 
 
     @Override
-    public void assignValue(Object o) {
-        this.bean = o;
-        for (var singletonField : new ArrayList<>(singletonFields)) {
-            if (singletonField.isValueAssigned()) {
-                doSetFieldValue(singletonField);
+    public void assignValueIfMatching(Object o) {
+        log.debug("{}: trying to assign value {}", this, o);
+        if (beanClass.isAssignableFrom(o.getClass())) {
+            this.bean = o;
+            log.debug("{}: bean assigned", this);
+            for (var singletonField : new ArrayList<>(singletonFields)) {
+                if (singletonField.isValueAssigned()) {
+                    doSetFieldValue(singletonField);
+                }
             }
+            doNotify();
         }
-        doNotify();
     }
 
     void addProxyCreationMethodCall(ProxyCreationMethodCall proxyCreationMethodCall) {
@@ -51,20 +61,30 @@ class SingletonWrapper implements SingletonConsumer {
     }
 
     void doNotify() {
+        log.debug("{}: notify", this);
         if (bean == null) {
+            log.debug("{}: bean is null", this);
             return;
         }
+        log.debug("{}: notify fields", this);
         if (singletonFields.isEmpty()) {
+            log.debug("{}: notify init methods", this);
             notifyInitMethods();
             if (initMethods.isEmpty()) {
+                log.debug("{}: notify bean methods", this);
                 notifyBeanMethods();
                 notifyProxyCreationMethodCalls();
+            } else {
+                log.debug("{}: init methods not executed: {}", this, initMethods.size());
             }
+        } else {
+            log.debug("{}: fields not assigned: {}", this, singletonFields.size());
         }
     }
 
     void fieldValueAssigned(@NonNull DependencyField field) {
         doSetFieldValue(field);
+        doNotify();
     }
 
     private void doSetFieldValue(@NonNull DependencyField field) {
@@ -75,18 +95,30 @@ class SingletonWrapper implements SingletonConsumer {
     }
 
     private void notifyInitMethods() {
+        if (log.isDebugEnabled()) {
+            log.debug("{}: notify {} init methods ", this, this.initMethods.size());
+        }
         var initMethods = new ArrayList<>(this.initMethods);
         for (var i = 0; i < initMethods.size(); i++) {
             var initMethod = initMethods.get(i);
-            initMethod.doNotify();
+            if (initMethod.isInvocable()) {
+                this.initMethods.remove(initMethod);
+                initMethod.invoke();
+            }
         }
     }
 
     private void notifyBeanMethods() {
+        if (log.isDebugEnabled()) {
+            log.debug("{}: notify {} bean methods ", this, this.beanCreationMethods.size());
+        }
         var beanMethods = new ArrayList<>(this.beanCreationMethods);
         for (var i = 0; i < beanMethods.size(); i++) {
             var beanMethod = beanMethods.get(i);
-            beanMethod.doNotify();
+            if (beanMethod.isInvocable()) {
+                this.beanCreationMethods.remove(beanMethod);
+                beanMethod.invoke();
+            }
         }
     }
 
@@ -100,28 +132,20 @@ class SingletonWrapper implements SingletonConsumer {
 
 
     void addInitMethod(InitMethod method) {
+        log.debug("add init method {} to {}", method, this);
         initMethods.add(method);
     }
 
     void addBeanMethod(BeanCreationMethod method) {
+        log.debug("add bean method {} to {}", method, this);
         beanCreationMethods.add(method);
     }
 
     void removeInitMethod(InitMethod method) {
+        log.debug("remove init method {} from {}", method, this);
         initMethods.remove(method);
-        if (initMethods.isEmpty()) {
-            beanCreationMethods.forEach(SingletonProducer::doNotify);
-        }
     }
 
-
-    void removeBeanMethod(BeanCreationMethod method) {
-        beanCreationMethods.remove(method);
-    }
-
-    void removeField(SimpleDependencyField field) {
-        singletonFields.remove(field);
-    }
 
     @Override
     public boolean isConsumerFor(Class<?> c) {
@@ -130,7 +154,7 @@ class SingletonWrapper implements SingletonConsumer {
 
     @Override
     public void mapProducer(SingletonProducer producer) {
-        // do nothing
+        producerCount.incrementAndGet();
     }
 
     @Override

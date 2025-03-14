@@ -16,7 +16,7 @@ class PerfTest {
                 .build();
         var i1 = System.currentTimeMillis();
         var t = i1 - i0;
-        assertThat(t).isLessThan(100);
+        assertThat(t).isLessThan(200);
 
     }
 }

@@ -48,7 +48,7 @@ class AdditionalSingleton implements SingletonProducer {
 
     private void assignValueInConsumers(Object o) {
         for (var i = 0; i < consumers.size(); i++) {
-            consumers.get(i).assignValue(o);
+            consumers.get(i).assignValueIfMatching(o);
         }
     }
 }

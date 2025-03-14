@@ -1,18 +1,23 @@
 package one.xis.context;
 
+import lombok.Getter;
 import one.xis.utils.lang.ClassUtils;
+import one.xis.utils.lang.CollectionUtils;
 import one.xis.utils.lang.FieldUtil;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-class CollectionDependencyField implements DependencyField {
+class CollectionDependencyField implements DependencyField, MultiValueConsumer {
 
     private final SingletonWrapper parent;
     private final Field field;
     private final List<Object> values = new ArrayList<>();
+
+    @Getter
     private final AtomicInteger producerCount = new AtomicInteger(0);
     private final Class<?> elementType;
 
@@ -23,9 +28,11 @@ class CollectionDependencyField implements DependencyField {
     }
 
     @Override
-    public void assignValue(Object o) {
-        values.add(o);
-        if (isValueAssigned()) {
+    public void assignValueIfMatching(Object o) {
+        if (elementType.isAssignableFrom(o.getClass())) {
+            values.add(o);
+        }
+        if (producerCount.decrementAndGet() == 0) {
             parent.fieldValueAssigned(this);
         }
     }
@@ -58,8 +65,10 @@ class CollectionDependencyField implements DependencyField {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void doInject() {
-        FieldUtil.setFieldValue(parent.getBean(), field, values);
+        var fieldValue = CollectionUtils.convertCollectionClass(values, (Class<? extends Collection<?>>) field.getType());
+        FieldUtil.setFieldValue(parent.getBean(), field, fieldValue);
     }
 
 
@@ -73,5 +82,10 @@ class CollectionDependencyField implements DependencyField {
         return "CollectionDependencyField{" +
                 "field=" + field +
                 '}';
+    }
+
+    @Override
+    public void notifyParent() {
+        parent.fieldValueAssigned(this);
     }
 }

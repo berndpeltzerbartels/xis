@@ -27,6 +27,8 @@ class InitMethodTest {
                     .withSingleton(new Comp1(new Comp3()))
                     .build();
             var comp1 = context.getSingleton(Comp1.class);
+            assertThat(comp1.getComp2()).isNotNull();
+            assertThat(comp1.getComp3()).isNotNull();
             assertThat(comp1.getResult()).isEqualTo(8);
         }
     }
