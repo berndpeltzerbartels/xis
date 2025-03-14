@@ -65,13 +65,7 @@ class CollectionParam implements Param, MultiValueConsumer {
     public Object getValue() {
         return values;
     }
-
-
-    @Override
-    public boolean isSingleValueConsumer() {
-        return false;
-    }
-
+    
     @Override
     public void notifyParent() {
         parentProducer.doNotify();

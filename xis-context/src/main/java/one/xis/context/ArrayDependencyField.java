@@ -72,12 +72,6 @@ class ArrayDependencyField implements DependencyField, MultiValueConsumer {
         FieldUtil.setFieldValue(parent.getBean(), field, array);
     }
 
-
-    @Override
-    public boolean isSingleValueConsumer() {
-        return false;
-    }
-
     @Override
     public String toString() {
         return "ArrayDependencyField{" +

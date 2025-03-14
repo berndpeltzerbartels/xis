@@ -47,12 +47,7 @@ class SimpleParam implements Param {
     public Class<?> getConsumedClass() {
         return parameter.getType();
     }
-
-    @Override
-    public boolean isSingleValueConsumer() {
-        return true;
-    }
-
+    
     @Override
     public String toString() {
         return "SimpleParam{" +

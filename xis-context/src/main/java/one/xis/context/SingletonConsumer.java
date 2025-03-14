@@ -12,8 +12,6 @@ public interface SingletonConsumer {
 
     Class<?> getConsumedClass();
 
-    boolean isSingleValueConsumer();
-
     AtomicInteger getProducerCount();
 
     default boolean hasProducer() {

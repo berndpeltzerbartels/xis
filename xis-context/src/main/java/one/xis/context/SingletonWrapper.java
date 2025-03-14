@@ -163,11 +163,6 @@ class SingletonWrapper implements SingletonConsumer {
     }
 
     @Override
-    public boolean isSingleValueConsumer() {
-        return true;
-    }
-
-    @Override
     public String toString() {
         return "SingletonWrapper{" + beanClass.getSimpleName() + "}";
     }

@@ -70,7 +70,7 @@ class AppContextFactory implements SingletonCreationListener {
                     consumer.mapProducer(producer);
                 }
             }
-            if (consumer.isSingleValueConsumer() && !consumer.hasProducer()) {
+            if (!(consumer instanceof MultiValueConsumer) && !consumer.hasProducer()) {
                 throw new UnsatisfiedDependencyException(consumer.getConsumedClass(), consumer);
             }
         }

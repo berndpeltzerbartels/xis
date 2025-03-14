@@ -70,13 +70,7 @@ class CollectionDependencyField implements DependencyField, MultiValueConsumer {
         var fieldValue = CollectionUtils.convertCollectionClass(values, (Class<? extends Collection<?>>) field.getType());
         FieldUtil.setFieldValue(parent.getBean(), field, fieldValue);
     }
-
-
-    @Override
-    public boolean isSingleValueConsumer() {
-        return false;
-    }
-
+    
     @Override
     public String toString() {
         return "CollectionDependencyField{" +

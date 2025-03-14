@@ -60,12 +60,7 @@ class ArrayParam implements Param, MultiValueConsumer {
         }
         return array;
     }
-
-    @Override
-    public boolean isSingleValueConsumer() {
-        return false;
-    }
-
+    
     @Override
     public void notifyParent() {
         parentProducer.doNotify();
