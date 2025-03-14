@@ -253,7 +253,6 @@ class DeserializationTest {
                     .withSingletonClass(CollectionDeserializer.class)
                     .withSingletonClass(EnumDeserializer.class)
                     .withSingletonClass(FormattedDeserializer.class)
-                    .withSingletonClass(JsonDeserializer.class)
                     .withSingletonClass(LocalDateDeserializer.class)
                     .withSingletonClass(MainDeserializer.class)
                     .withSingletonClass(NumberDeserializer.class)
