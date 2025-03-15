@@ -1,10 +1,10 @@
 package one.xis.context;
 
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 import one.xis.utils.lang.ClassUtils;
 import one.xis.utils.lang.CollectionUtils;
 import one.xis.utils.lang.FieldUtil;
+import org.tinylog.Logger;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -12,7 +12,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@Slf4j
 class CollectionDependencyField implements DependencyField, MultiValueConsumer {
 
     private final SingletonWrapper parent;
@@ -32,11 +31,11 @@ class CollectionDependencyField implements DependencyField, MultiValueConsumer {
     @Override
     public void assignValueIfMatching(Object o) {
         if (elementType.isAssignableFrom(o.getClass())) {
-            log.debug("assigning value {} to field {}", o, field);
+            Logger.debug("assigning value {} to field {}", o, field);
             values.add(o);
         }
         if (producerCount.decrementAndGet() == 0) {
-            log.debug("all producers for field {} assigned", field);
+            Logger.debug("all producers for field {} assigned", field);
             parent.fieldValueAssigned(this);
         }
     }

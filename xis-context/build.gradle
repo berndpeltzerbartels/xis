@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'java-library'
 }
 
 group 'one.xis'
@@ -26,13 +27,13 @@ var lombokVersion = rootProject.ext.libraryVersions.lombok
 var junitVersion = rootProject.ext.libraryVersions.junit
 var assertjVersion = rootProject.ext.libraryVersions.assertj
 var reflectionsVersion = rootProject.ext.libraryVersions.reflections
+var tinylogVersion = rootProject.ext.libraryVersions.tinylog
 
 
 dependencies {
 
     implementation project(':xis-util')
-    // implementation 'org.slf4j:slf4j-simple:2.0.9'
-    implementation 'ch.qos.logback:logback-classic:1.4.11'
+    implementation "org.tinylog:tinylog-api:$tinylogVersion"
 
     implementation "org.reflections:reflections:$reflectionsVersion"
 

@@ -1,16 +1,15 @@
 package one.xis.context;
 
-import lombok.extern.slf4j.Slf4j;
 import one.xis.utils.lang.ClassUtils;
 import one.xis.utils.lang.FieldUtil;
 import one.xis.utils.lang.MethodUtils;
 import org.reflections.Reflections;
+import org.tinylog.Logger;
 
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Slf4j
 class AppContextFactory implements SingletonCreationListener {
     private final LinkedList<SingletonProducer> singletonProducers = new LinkedList<>();
     private final LinkedList<SingletonConsumer> singletonConsumers = new LinkedList<>();
@@ -45,16 +44,16 @@ class AppContextFactory implements SingletonCreationListener {
         evaluateAdditionalSingletonClasses();
         evaluateAdditionalSingletons();
         long t1 = System.currentTimeMillis();
-        log.info("Evaluating singletons took {} ms", t1 - t0);
+        Logger.info("Evaluating singletons took {} ms", t1 - t0);
         mapProducers();
         long t2 = System.currentTimeMillis();
-        log.info("Mapping producers took {} ms", t2 - t1);
+        Logger.info("Mapping producers took {} ms", t2 - t1);
         createSingletons();
         long t3 = System.currentTimeMillis();
-        log.info("Creating singletons took {} ms", t3 - t2);
+        Logger.info("Creating singletons took {} ms", t3 - t2);
         context.lockModification();
         long t4 = System.currentTimeMillis();
-        log.info("Context lock took {} ms", t4 - t3);
+        Logger.info("Context lock took {} ms", t4 - t3);
         return context;
     }
 
@@ -232,8 +231,8 @@ class AppContextFactory implements SingletonCreationListener {
 
     @Override
     public void onSingletonCreated(Object o) {
-        if (log.isDebugEnabled()) {
-            log.debug("Singleton created: {}", o);
+        if (Logger.isDebugEnabled()) {
+            Logger.debug("Singleton created: {}", o);
         }
         singletons.add(o);
     }

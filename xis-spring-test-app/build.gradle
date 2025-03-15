@@ -1,6 +1,7 @@
 plugins {
     id 'java'
-   // id 'one.xis.spring-plugin' version '1.0.0'
+    id 'java-library'
+    // id 'one.xis.spring-plugin' version '1.0.0'
 }
 
 group 'one.xis'
@@ -33,6 +34,13 @@ dependencies {
     implementation project(':xis-remote-core')
     implementation project(':xis-spring')
     implementation project(':xis-test')
+
+    // implementation "org.slf4j:slf4j-api:1.7.32"
+
+    //  implementation "ch.qos.logback:logback-classic:1.4.11"
+
+    // add slf simple
+    //  implementation "org.slf4j:slf4j-simple:1.7.32"
 
     // Annotation processors
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"

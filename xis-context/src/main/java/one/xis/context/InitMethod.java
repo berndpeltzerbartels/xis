@@ -1,10 +1,9 @@
 package one.xis.context;
 
-import lombok.extern.slf4j.Slf4j;
+import org.tinylog.Logger;
 
 import java.lang.reflect.Method;
 
-@Slf4j
 class InitMethod extends SingletonMethod {
     InitMethod(Method method, SingletonWrapper parent, ParameterFactory parameterFactory) {
         super(method, parent, parameterFactory);
@@ -12,8 +11,8 @@ class InitMethod extends SingletonMethod {
 
     @Override
     public void invoke() {
-        if (log.isDebugEnabled()) {
-            log.debug("invoking init method {} of {}", getMethod().getName(), getParent().getBeanClass().getName());
+        if (Logger.isDebugEnabled()) {
+            Logger.debug("invoking init method {} of {}", getMethod().getName(), getParent().getBeanClass().getName());
         }
         super.invoke();
     }
