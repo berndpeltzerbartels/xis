@@ -3,7 +3,6 @@ package one.xis.context;
 import one.xis.utils.lang.ClassUtils;
 import one.xis.utils.lang.FieldUtil;
 import one.xis.utils.lang.MethodUtils;
-import org.reflections.Reflections;
 import org.tinylog.Logger;
 
 import java.lang.reflect.Method;
@@ -22,17 +21,14 @@ class AppContextFactory implements SingletonCreationListener {
     private final Annotations annotations;
     private final Class<?>[] annotatedComponentClasses;
     private final PackageScanResult scanResult;
-    private final Reflections reflections;
 
     AppContextFactory(List<Object> additionalSingletons,
                       Class<?>[] additionalSingletonClasses,
-                      PackageScanResult scanResult,
-                      Reflections reflections) {
+                      PackageScanResult scanResult) {
         this.additionalSingletons = additionalSingletons;
         this.additionalSingletonClasses = additionalSingletonClasses;
         this.annotations = scanResult.getAnnotations();
         this.scanResult = scanResult;
-        this.reflections = reflections;
         this.annotatedComponentClasses = scanResult.getAnnotatedComponentClasses().toArray(Class[]::new);
     }
 

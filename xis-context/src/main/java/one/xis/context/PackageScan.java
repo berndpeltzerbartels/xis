@@ -1,6 +1,5 @@
 package one.xis.context;
 
-import lombok.Getter;
 import one.xis.utils.lang.ClassUtils;
 import org.reflections.Reflections;
 import org.reflections.scanners.FieldAnnotationsScanner;
@@ -18,7 +17,6 @@ import java.util.stream.Stream;
 @SuppressWarnings({"unchecked", "deprecation"})
 class PackageScan {
 
-    @Getter
     private final Reflections reflections;
     private final Annotations annotations;
 
