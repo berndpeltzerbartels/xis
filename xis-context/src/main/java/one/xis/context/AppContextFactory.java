@@ -11,9 +11,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 class AppContextFactory implements SingletonCreationListener {
-    private final LinkedList<SingletonProducer> singletonProducers = new LinkedList<>();
-    private final LinkedList<SingletonConsumer> singletonConsumers = new LinkedList<>();
-    private final LinkedList<MultiValueConsumer> multiValueConsumers = new LinkedList<>();
+    private final List<SingletonProducer> singletonProducers = new ArrayList<>();
+    private final List<SingletonConsumer> singletonConsumers = new ArrayList<>();
+    private final List<MultiValueConsumer> multiValueConsumers = new ArrayList<>();
     private final Set<SingletonProducer> initialProducers = new HashSet<>();
     private final List<Object> singletons = new ArrayList<>();
     private final List<Object> additionalSingletons;
@@ -72,8 +72,8 @@ class AppContextFactory implements SingletonCreationListener {
     }
 
     private void mapProducers() {
-        while (!singletonConsumers.isEmpty()) {
-            var consumer = singletonConsumers.poll();
+        for (var i = 0; i < singletonConsumers.size(); i++) {
+            var consumer = singletonConsumers.get(i);
             if (consumer instanceof MultiValueConsumer) {
                 multiValueConsumers.add((MultiValueConsumer) consumer);
             }
