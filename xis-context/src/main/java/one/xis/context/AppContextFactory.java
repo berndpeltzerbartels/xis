@@ -38,14 +38,23 @@ class AppContextFactory implements SingletonCreationListener {
     }
 
     public AppContext createContext() {
+        long t0 = System.currentTimeMillis();
         var context = new AppContextImpl(singletons);
         additionalSingletons.add(context);
         evaluateAnnotatedComponents();
         evaluateAdditionalSingletonClasses();
         evaluateAdditionalSingletons();
+        long t1 = System.currentTimeMillis();
+        log.info("Evaluating singletons took {} ms", t1 - t0);
         mapProducers();
+        long t2 = System.currentTimeMillis();
+        log.info("Mapping producers took {} ms", t2 - t1);
         createSingletons();
+        long t3 = System.currentTimeMillis();
+        log.info("Creating singletons took {} ms", t3 - t2);
         context.lockModification();
+        long t4 = System.currentTimeMillis();
+        log.info("Context lock took {} ms", t4 - t3);
         return context;
     }
 
@@ -64,25 +73,6 @@ class AppContextFactory implements SingletonCreationListener {
     }
 
     private void mapProducers() {
-        while (!singletonConsumers.isEmpty()) {
-            var consumer = singletonConsumers.poll();
-            if (consumer instanceof MultiValueConsumer) {
-                multiValueConsumers.add((MultiValueConsumer) consumer);
-            }
-            for (var j = 0; j < singletonProducers.size(); j++) {
-                var producer = singletonProducers.get(j);
-                if (consumer.isConsumerFor(producer.getSingletonClass())) {
-                    producer.addConsumer(consumer);
-                    consumer.mapProducer(producer);
-                }
-            }
-            if (!(consumer instanceof MultiValueConsumer) && !consumer.hasProducer()) {
-                throw new UnsatisfiedDependencyException(consumer.getConsumedClass(), consumer);
-            }
-        }
-    }
-
-    private void mapProducers2() {
         while (!singletonConsumers.isEmpty()) {
             var consumer = singletonConsumers.poll();
             if (consumer instanceof MultiValueConsumer) {
