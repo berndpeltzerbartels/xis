@@ -3,6 +3,7 @@ package one.xis.context;
 import one.xis.utils.lang.ClassUtils;
 
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -84,7 +85,7 @@ public class AppContextBuilderImpl implements AppContextBuilder {
     public AppContext build() {
         var packageScan = new PackageScan(packagesToScan, annotations());
         var scanResult = packageScan.doScan();
-        var contextFactory = new AppContextFactory(singletons.toArray(Object[]::new), singletonClasses.toArray(Class[]::new), scanResult);
+        var contextFactory = new AppContextFactory(new ArrayList<>(singletons), singletonClasses.toArray(Class[]::new), scanResult, packageScan.getReflections());
         return contextFactory.createContext();
     }
 

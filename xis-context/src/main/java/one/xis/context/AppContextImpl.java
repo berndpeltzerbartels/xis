@@ -1,19 +1,20 @@
 package one.xis.context;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
-
+@AllArgsConstructor
 class AppContextImpl implements AppContext {
 
     @Getter
-    private final List<Object> singletons;
+    private List<Object> singletons;
 
-    AppContextImpl(Collection<Object> singletons) {
-        var singletonList = new ArrayList<>(singletons);
-        singletonList.add(this);
-        this.singletons = Collections.unmodifiableList(singletonList);
+    void lockModification() {
+        singletons = Collections.unmodifiableList(singletons);
     }
 
     @Override

@@ -58,14 +58,14 @@ class CollectionParam implements Param, MultiValueConsumer {
 
     @Override
     public boolean isValuesAssigned() {
-        return values.size() >= producerCount.get();
+        return producerCount.get() <= 0;
     }
 
     @Override
     public Object getValue() {
         return values;
     }
-    
+
     @Override
     public void notifyParent() {
         parentProducer.doNotify();

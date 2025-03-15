@@ -39,7 +39,7 @@ class ArrayParam implements Param, MultiValueConsumer {
 
     @Override
     public boolean isValuesAssigned() {
-        return values.size() >= producerCount.get();
+        return producerCount.get() <= 0;
     }
 
     @Override
@@ -60,7 +60,7 @@ class ArrayParam implements Param, MultiValueConsumer {
         }
         return array;
     }
-    
+
     @Override
     public void notifyParent() {
         parentProducer.doNotify();

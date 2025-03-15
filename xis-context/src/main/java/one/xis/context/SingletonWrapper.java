@@ -43,16 +43,20 @@ class SingletonWrapper implements SingletonConsumer {
 
     @Override
     public void assignValueIfMatching(Object o) {
-        log.debug("{}: trying to assign value {}", this, o);
+        log.debug("{}: trying to assign bean {}", this, o);
         if (beanClass.isAssignableFrom(o.getClass())) {
             this.bean = o;
             log.debug("{}: bean assigned", this);
+            log.debug("{}: unassigned field count: {}", this, this.singletonFields.size());
             for (var singletonField : new ArrayList<>(singletonFields)) {
+                log.debug("{}: field {}, assigned={}", this, singletonField, singletonField.isValueAssigned());
                 if (singletonField.isValueAssigned()) {
                     doSetFieldValue(singletonField);
                 }
             }
             doNotify();
+        } else {
+            log.debug("{}: {} bean not assignable", o, this);
         }
     }
 
@@ -78,19 +82,22 @@ class SingletonWrapper implements SingletonConsumer {
                 log.debug("{}: init methods not executed: {}", this, initMethods.size());
             }
         } else {
-            log.debug("{}: fields not assigned: {}", this, singletonFields.size());
+            log.debug("{}: fields not assigned: {}", this, singletonFields);
         }
     }
 
     void fieldValueAssigned(@NonNull DependencyField field) {
         doSetFieldValue(field);
-        doNotify();
     }
 
     private void doSetFieldValue(@NonNull DependencyField field) {
         if (bean != null) {
+            log.debug("{}: set field value to {}", this, field);
             singletonFields.remove(field);
             field.doInject();
+            doNotify();
+        } else {
+            log.debug("{}: can not set field value. bean is null", this);
         }
     }
 
@@ -164,6 +171,6 @@ class SingletonWrapper implements SingletonConsumer {
 
     @Override
     public String toString() {
-        return "SingletonWrapper{" + beanClass.getSimpleName() + "}";
+        return "SingletonWrapper" + hashCode() + "{" + beanClass.getSimpleName() + "}";
     }
 }

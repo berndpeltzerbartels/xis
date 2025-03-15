@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import one.xis.utils.lang.ClassUtils;
 import one.xis.utils.lang.FieldUtil;
 import one.xis.utils.lang.MethodUtils;
+import org.reflections.Reflections;
 
 import java.lang.reflect.Method;
 import java.util.*;
@@ -15,31 +16,37 @@ class AppContextFactory implements SingletonCreationListener {
     private final LinkedList<SingletonConsumer> singletonConsumers = new LinkedList<>();
     private final LinkedList<MultiValueConsumer> multiValueConsumers = new LinkedList<>();
     private final Set<SingletonProducer> initialProducers = new HashSet<>();
-    private final Set<Object> singletons = new HashSet<>();
-    private final Object[] additionalSingletons;
+    private final List<Object> singletons = new ArrayList<>();
+    private final List<Object> additionalSingletons;
     private final Class<?>[] additionalSingletonClasses;
     private final ParameterFactory parameterFactory = new ParameterFactory();
     private final Annotations annotations;
     private final Class<?>[] annotatedComponentClasses;
     private final PackageScanResult scanResult;
+    private final Reflections reflections;
 
-    AppContextFactory(Object[] additionalSingletons,
+    AppContextFactory(List<Object> additionalSingletons,
                       Class<?>[] additionalSingletonClasses,
-                      PackageScanResult scanResult) {
+                      PackageScanResult scanResult,
+                      Reflections reflections) {
         this.additionalSingletons = additionalSingletons;
         this.additionalSingletonClasses = additionalSingletonClasses;
         this.annotations = scanResult.getAnnotations();
         this.scanResult = scanResult;
+        this.reflections = reflections;
         this.annotatedComponentClasses = scanResult.getAnnotatedComponentClasses().toArray(Class[]::new);
     }
 
     public AppContext createContext() {
+        var context = new AppContextImpl(singletons);
+        additionalSingletons.add(context);
         evaluateAnnotatedComponents();
         evaluateAdditionalSingletonClasses();
         evaluateAdditionalSingletons();
         mapProducers();
         createSingletons();
-        return new AppContextImpl(singletons);
+        context.lockModification();
+        return context;
     }
 
     private void createSingletons() {
@@ -56,15 +63,33 @@ class AppContextFactory implements SingletonCreationListener {
         }
     }
 
-
     private void mapProducers() {
         while (!singletonConsumers.isEmpty()) {
             var consumer = singletonConsumers.poll();
             if (consumer instanceof MultiValueConsumer) {
                 multiValueConsumers.add((MultiValueConsumer) consumer);
             }
-            for (var i = 0; i < singletonProducers.size(); i++) {
-                var producer = singletonProducers.get(i);
+            for (var j = 0; j < singletonProducers.size(); j++) {
+                var producer = singletonProducers.get(j);
+                if (consumer.isConsumerFor(producer.getSingletonClass())) {
+                    producer.addConsumer(consumer);
+                    consumer.mapProducer(producer);
+                }
+            }
+            if (!(consumer instanceof MultiValueConsumer) && !consumer.hasProducer()) {
+                throw new UnsatisfiedDependencyException(consumer.getConsumedClass(), consumer);
+            }
+        }
+    }
+
+    private void mapProducers2() {
+        while (!singletonConsumers.isEmpty()) {
+            var consumer = singletonConsumers.poll();
+            if (consumer instanceof MultiValueConsumer) {
+                multiValueConsumers.add((MultiValueConsumer) consumer);
+            }
+            for (var j = 0; j < singletonProducers.size(); j++) {
+                var producer = singletonProducers.get(j);
                 if (consumer.isConsumerFor(producer.getSingletonClass())) {
                     producer.addConsumer(consumer);
                     consumer.mapProducer(producer);
@@ -89,8 +114,8 @@ class AppContextFactory implements SingletonCreationListener {
     }
 
     private void evaluateAdditionalSingletons() {
-        for (var i = 0; i < additionalSingletons.length; i++) {
-            evaluateAdditionalSingleton(additionalSingletons[i]);
+        for (var i = 0; i < additionalSingletons.size(); i++) {
+            evaluateAdditionalSingleton(additionalSingletons.get(i));
 
         }
     }

@@ -60,7 +60,7 @@ class ArrayDependencyField implements DependencyField, MultiValueConsumer {
 
     @Override
     public boolean isValueAssigned() {
-        return producerCount.get() == 0;
+        return producerCount.get() <= 0;
     }
 
     @Override
