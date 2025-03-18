@@ -1,8 +1,239 @@
-/**
-* Parse a script into tokens. Non-variable tokens are returned as objects with a value of strings, integer or float and the type (see constants hereunder).
-* Variable tokens are returned as objects with a name. Operators (e.g. '&&') are returned as objects with type (see constants) of the operator.
-*/
+class ScriptTokenizer {
+    constructor(script) {
+        this.script = script.toString();
+        this.tokens = [];
+        this.index = 0;
+    }
 
+    tokenize() {
+        while (this.index < this.script.length) {
+            this.skipWhitespace();
+            if (this.index >= this.script.length) break;
+
+            const c = this.peekChar();
+
+            if (this.isArrayStart(c)) {
+                this.processArray();
+            } else if (this.isStringStart(c)) {
+                this.processString();
+            } else if (this.isDigit(c)) {
+                this.processNumber();
+            } else if (this.isIdentifierStart(c)) {
+                this.processIdentifier();
+            } else if (this.isTwoCharOperator(c)) {
+                this.processTwoCharOperator();
+            } else if (this.isSingleCharOperator(c)) {
+                this.processSingleCharOperator();
+            } else if (c === ',') {
+                this.addToken({ type: COMMA });
+                this.index++;
+            } else {
+                throw new Error("Unrecognized character: '" + c + "'");
+            }
+        }
+        return this.tokens;
+    }
+
+    // Hilfsmethoden
+
+    skipWhitespace() {
+        while (this.index < this.script.length && /\s/.test(this.script.charAt(this.index))) {
+            this.index++;
+        }
+    }
+
+    peekChar(offset = 0) {
+        return this.script.charAt(this.index + offset);
+    }
+    
+    addToken(token) {
+        token.index = this.tokens.length;
+        this.tokens.push(token);
+        return token;
+    }
+    
+
+    // Array-Verarbeitung
+    isArrayStart(c) {
+        return c === '[';
+    }
+
+    processArray() {
+        // '[' konsumieren und Inhalt einlesen bis ']'
+        this.index++; // Skip '['
+        let arrayContent = '';
+        while (this.index < this.script.length && this.peekChar() !== ']') {
+            arrayContent += this.peekChar();
+            this.index++;
+        }
+        if (this.peekChar() !== ']') {
+            throw new Error("Unclosed array literal.");
+        }
+        this.index++; // Skip ']'
+        this.addToken({ type: ARRAY, value: arrayContent });
+    }
+
+    // String-Verarbeitung
+    isStringStart(c) {
+        return c === '"' || c === "'";
+    }
+
+    processString() {
+        const token = this.readString();
+        token.type = STRING;
+        this.addToken(token);
+    }
+
+    readString() {
+        const quoteChar = this.peekChar();
+        this.index++; // Skip starting quote
+        let str = '';
+        while (this.index < this.script.length) {
+            let c = this.peekChar();
+            if (c === '\\') { // Escapesequenz
+                str += c;
+                this.index++;
+                if (this.index < this.script.length) {
+                    str += this.peekChar();
+                    this.index++;
+                }
+            } else if (c === quoteChar) {
+                this.index++; // Schließendes Anführungszeichen überspringen
+                break;
+            } else {
+                str += c;
+                this.index++;
+            }
+        }
+        return { value: str, newIndex: this.index };
+    }
+
+    // Zahlen-Verarbeitung
+    isDigit(c) {
+        return /\d/.test(c);
+    }
+
+    processNumber() {
+        const token = this.readNumber();
+        token.type = token.isFloat ? FLOAT : INTEGER;
+        this.addToken(token);
+    }
+
+    readNumber() {
+        let numStr = '';
+        let isFloat = false;
+        while (this.index < this.script.length && /[0-9.]/.test(this.peekChar())) {
+            let c = this.peekChar();
+            if (c === '.') {
+                isFloat = true;
+            }
+            numStr += c;
+            this.index++;
+        }
+        const value = isFloat ? parseFloat(numStr) : parseInt(numStr, 10);
+        return { value, isFloat, newIndex: this.index };
+    }
+
+    // Identifier und Literale (z. B. true, false)
+    isIdentifierStart(c) {
+        return /[a-zA-Z_]/.test(c);
+    }
+
+    processIdentifier() {
+        const token = this.readIdentifier();
+        if (token.value === "true" || token.value === "false") {
+            token.type = BOOL;
+            token.value = token.value === "true";
+        } else if (token.value === "null" || token.value === "undefined") {
+            token.type = NULL_OR_UNDEFINED;
+            token.value = null;
+        } else {
+            token.type = IDENTIFIER;
+            token.name = token.value;
+        }
+        this.addToken(token);
+    }
+
+    readIdentifier() {
+        let idStr = '';
+        while (this.index < this.script.length && /[a-zA-Z0-9_\.]/.test(this.peekChar())) {
+            idStr += this.peekChar();
+            this.index++;
+        }
+        return { value: idStr, newIndex: this.index };
+    }
+
+    // Operatoren
+
+    isTwoCharOperator(c) {
+        const nxt = this.peekChar(1);
+        return (c === '&' && nxt === '&') ||
+               (c === '|' && nxt === '|') ||
+               (c === '!' && nxt === '=') ||
+               (c === '=' && nxt === '=') ||
+               (c === '>' && nxt === '=') ||
+               (c === '<' && nxt === '=') ||
+               (c === '+' && (nxt === '+' || nxt === '=')) ||
+               (c === '-' && (nxt === '-' || nxt === '=')) ||
+               (c === '*' && nxt === '=') ||
+               (c === '/' && nxt === '=') ||
+               (c === '%' && nxt === '=');
+    }
+    
+    processTwoCharOperator() {
+        const c = this.peekChar();
+        const nxt = this.peekChar(1);
+        const op = c + nxt;
+        let type;
+        switch (op) {
+            case "&&": type = AND; break;
+            case "||": type = OR; break;
+            case "!=": type = NOT_EQUAL; break;
+            case "==": type = EQUAL; break;
+            case ">=": type = GREATER_EQUAL; break;
+            case "<=": type = LESS_EQUAL; break;
+            case "++": type = INCREMENT; break;
+            case "--": type = DECREMENT; break;
+            case "+=": type = ADD_ASSIGN; break;
+            case "-=": type = SUB_ASSIGN; break;
+            case "*=": type = MUL_ASSIGN; break;
+            case "/=": type = DIV_ASSIGN; break;
+            case "%=": type = MOD_ASSIGN; break;
+            default:
+                throw new Error("Unknown two-character operator: " + op);
+        }
+        this.addToken({ type, op });
+        this.index += 2;
+    }
+    
+    isSingleCharOperator(c) {
+        return ['!', '>', '<', '+', '-', '*', '/', '%', '=', '(', ')'].includes(c);
+    }
+
+    processSingleCharOperator() {
+        const c = this.peekChar();
+        let type;
+        switch(c) {
+            case '!': type = NOT; break;
+            case '>': type = GREATER; break;
+            case '<': type = LESS; break;
+            case '+': type = ADD; break;
+            case '-': type = SUB; break;
+            case '*': type = MUL; break;
+            case '/': type = DIV; break;
+            case '%': type = MOD; break;
+            case '=': type = ASSIGN; break;
+            case '(': type = OPEN_BRACKET; break;
+            case ')': type = CLOSE_BRACKET; break;
+            default:
+                throw new Error("Unknown operator: " + c);
+        }
+        this.addToken({ type, op: c });
+        this.index++;
+    }
+}
+
+// Konstanten für die Token-Typen
 const STRING = 1;
 const INTEGER = 2;
 const FLOAT = 3;
@@ -34,232 +265,4 @@ const DECREMENT = 30;
 const OPEN_BRACKET = 31;
 const CLOSE_BRACKET = 32;
 const IDENTIFIER = 34;
-
-class ScriptTokenizer {
-
-    constructor(script) {
-        this.script = script.toString(); // Ensure the script is treated as a string
-        this.tokens = [];
-    }
-
-    tokenize() {
-        let i = 0;
-        while (i < this.script.length) {
-            let c = this.script.charAt(i);
-
-            // Skip whitespace
-            if (/\s/.test(c)) {
-                i++;
-                continue;
-            }
-
-            if (c === '[') {
-                let arrayToken = this.readArray(i);
-                this.tokens.push({ type: ARRAY, value: arrayToken.value });
-                i = arrayToken.newIndex;
-                continue;
-            }
-
-            // If starting a string literal, use readString
-            if (c === '"' || c === "'") {
-                const stringToken = this.readString(i);
-                this.tokens.push({ type: STRING, value: stringToken.value });
-                i = stringToken.newIndex;
-                continue;
-            }
-
-            // If a digit, read a number (int or float)
-            if (/\d/.test(c)) {
-                const numberToken = this.readNumber(i);
-                this.tokens.push({ type: numberToken.isFloat ? FLOAT : INTEGER, value: numberToken.value });
-                i = numberToken.newIndex;
-                continue;
-            }
-
-            // If a letter or underscore, read identifier/variable or keyword (e.g. true, false, null)
-            if (/[a-zA-Z_]/.test(c)) {
-                const identToken = this.readIdentifier(i);
-                if (identToken.value === "true" || identToken.value === "false") {
-                    this.tokens.push({ type: BOOL, value: identToken.value === "true" });
-                    i = identToken.newIndex;
-                } else if (identToken.value === "null" || identToken.value === "undefined") {
-                    this.tokens.push({ type: NULL_OR_UNDEFINED, value: null });
-                    i = identToken.newIndex;
-                } else {
-                    // Otherwise, treat as a generic identifier variable
-                    this.tokens.push({ type: IDENTIFIER, name: identToken.value });
-                    i = identToken.newIndex;
-                }
-                continue;
-            }
-
-            // Check for two-character operators first
-            if (c === '&' && this.script.charAt(i + 1) === '&') {
-                this.tokens.push({ type: AND, op: "&&" });
-                i += 2;
-                continue;
-            }
-            if (c === '|' && this.script.charAt(i + 1) === '|') {
-                this.tokens.push({ type: OR, op: "||" });
-                i += 2;
-                continue;
-            }
-            if (c === '!' && this.script.charAt(i + 1) === '=') {
-                this.tokens.push({ type: NOT_EQUAL, op: "!=" });
-                i += 2;
-                continue;
-            }
-            if (c === '=' && this.script.charAt(i + 1) === '=') {
-                this.tokens.push({ type: EQUAL, op: "==" });
-                i += 2;
-                continue;
-            }
-            if (c === '>' && this.script.charAt(i + 1) === '=') {
-                this.tokens.push({ type: GREATER_EQUAL, op: ">=" });
-                i += 2;
-                continue;
-            }
-            if (c === '<' && this.script.charAt(i + 1) === '=') {
-                this.tokens.push({ type: LESS_EQUAL, op: "<=" });
-                i += 2;
-                continue;
-            }
-            if (c === '+' && this.script.charAt(i + 1) === '+') {
-                this.tokens.push({ type: INCREMENT, op: "++" });
-                i += 2;
-                continue;
-            }
-            if (c === '-' && this.script.charAt(i + 1) === '-') {
-                this.tokens.push({ type: DECREMENT, op: "--" });
-                i += 2;
-                continue;
-            }
-            if (c === '+' && this.script.charAt(i + 1) === '=') {
-                this.tokens.push({ type: ADD_ASSIGN, op: "+=" });
-                i += 2;
-                continue;
-            }
-            if (c === '-' && this.script.charAt(i + 1) === '=') {
-                this.tokens.push({ type: SUB_ASSIGN, op: "-=" });
-                i += 2;
-                continue;
-            }
-            if (c === '*' && this.script.charAt(i + 1) === '=') {
-                this.tokens.push({ type: MUL_ASSIGN, op: "*=" });
-                i += 2;
-                continue;
-            }
-            if (c === '/' && this.script.charAt(i + 1) === '=') {
-                this.tokens.push({ type: DIV_ASSIGN, op: "/=" });
-                i += 2;
-                continue;
-            }
-            if (c === '%' && this.script.charAt(i + 1) === '=') {
-                this.tokens.push({ type: MOD_ASSIGN, op: "%=" });
-                i += 2;
-                continue;
-            }
-
-            // If not a two-character operator, handle single-character tokens.
-            switch (c) {
-                case '!':
-                    this.tokens.push({ type: NOT, op: "!" });
-                    break;
-                case '>':
-                    this.tokens.push({ type: GREATER, op: ">" });
-                    break;
-                case '<':
-                    this.tokens.push({ type: LESS, op: "<" });
-                    break;
-                case '+':
-                    this.tokens.push({ type: ADD, op: "+" });
-                    break;
-                case '-':
-                    this.tokens.push({ type: SUB, op: "-" });
-                    break;
-                case '*':
-                    this.tokens.push({ type: MUL, op: "*" });
-                    break;
-                case '/':
-                    this.tokens.push({ type: DIV, op: "/" });
-                    break;
-                case '%':
-                    this.tokens.push({ type: MOD, op: "%" });
-                    break;
-                case '=':
-                    this.tokens.push({ type: ASSIGN, op: "=" });
-                    break;
-                case '(':
-                    this.tokens.push({ type: OPEN_BRACKET, op: "(" });
-                    break;
-                case ')':
-                    this.tokens.push({ type: CLOSE_BRACKET, op: ")" });
-                    break;
-                default:
-                    // For any unrecognized single character, add it as a literal token.
-                   throw new Error("Unrecognized character: '"+c+"'");
-            }
-            i++;
-        }
-
-        return this.tokens;
-    }
-
-    readString(startIndex) {
-        const quoteChar = this.script.charAt(startIndex);
-        let i = startIndex + 1;
-        let str = '';
-        while (i < this.script.length) {
-            let c = this.script.charAt(i);
-            if (c === '\\') { // handle escape sequences
-                str += c;
-                i++;
-                if (i < this.script.length) {
-                    str += this.script.charAt(i);
-                }
-            } else if (c === quoteChar) {
-                i++; // move past the closing quote
-                break;
-            } else {
-                str += c;
-            }
-            i++;
-        }
-        return { value: str, newIndex: i };
-    }
-
-    readNumber(startIndex) {
-        let i = startIndex;
-        let numStr = '';
-        let isFloat = false;
-        while (i < this.script.length && /[0-9.]/.test(this.script.charAt(i))) {
-            let c = this.script.charAt(i);
-            if (c === '.') {
-                isFloat = true;
-            }
-            numStr += c;
-            i++;
-        }
-        return { value: isFloat ? parseFloat(numStr) : parseInt(numStr, 10), newIndex: i, isFloat };
-    }
-
-    readIdentifier(startIndex) {
-        let i = startIndex;
-        let idStr = '';
-        while (i < this.script.length && /[a-zA-Z0-9_\.]/.test(this.script.charAt(i))) {
-            idStr += this.script.charAt(i);
-            i++;
-        }
-        return { value: idStr, newIndex: i };
-    }
-
-    readArray(startIndex) {
-        let i = startIndex + 1;
-        let arrayStr = '';
-        while (i < this.script.length && this.script.charAt(i) !== ']') {
-            arrayStr += this.script.charAt(i);
-            i++;
-        }
-        return { value: arrayStr, newIndex: i + 1 };
-    }
-}
+const COMMA = 35;
