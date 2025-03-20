@@ -66,7 +66,7 @@ class AstFactory {
                     row.push(this.createOperator(this.consumeToken()));
                     break;
                 default:
-                    throw new Error("Unexpected token in '"+this.originalExpression+"' : " + this.currentToken().type);
+                    throw new Error("Unexpected token in '" + this.originalExpression + "' : " + this.currentToken().type);
             }
         }
         return this.toExpression(row);
@@ -79,7 +79,7 @@ class AstFactory {
             default:
                 var result;
                 for (var precedence = 3; precedence >= 0; precedence--) {
-                    const operator  = this.expressionForPrecedence(row, precedence);
+                    const operator = this.expressionForPrecedence(row, precedence);
                     if (operator) {
                         result = operator;
                     }
@@ -113,13 +113,13 @@ class AstFactory {
     }
 
     nextToken() {
-        return  this.index + 1 < this.tokens.length ? this.tokens[this.index + 1] : {};
+        return this.index + 1 < this.tokens.length ? this.tokens[this.index + 1] : {};
     }
 
     consumeToken(type) {
         const token = this.currentToken();
         if (type && token.type !== type) {
-            throw new Error("Expected token of type " + type + " in '"+this.originalExpression+"', but got " + token.type);
+            throw new Error("Expected token of type " + type + " in '" + this.originalExpression + "', but got " + token.type);
         }
         this.index++;
         return token;
@@ -150,7 +150,7 @@ class AstFactory {
         while (this.currentToken().type !== CLOSE_BRACKET) {
             if (this.currentToken().type === COMMA) {
                 if (!expectCommata) {
-                    throw new Error("Unexpected comma in '"+this.originalExpression+"'");
+                    throw new Error("Unexpected comma in '" + this.originalExpression + "'");
                 }
                 this.consumeToken(COMMA);
                 expectCommata = false;
@@ -176,7 +176,7 @@ class AstFactory {
         while (this.currentToken().type !== CLOSE_BRACKET) {
             if (this.currentToken().type === COMMA) {
                 if (!expectCommata) {
-                    throw new Error("Unexpected comma in '"+this.originalExpression+"'");
+                    throw new Error("Unexpected comma in '" + this.originalExpression + "'");
                 }
                 this.consumeToken(COMMA);
                 expectCommata = false;
@@ -269,30 +269,28 @@ class Operator {
             case GREATER_EQUAL: return (a, b) => a >= b;
             case LESS_EQUAL: return (a, b) => a <= b;
             default:
-                throw new Error("Unknown operator in '"+this.originalExpression+"': " + token.type);
+                throw new Error("Unknown operator in '" + this.originalExpression + "': " + token.type);
         }
     }
 
-    // Liefert einen numerischen Wert für die jeweilige Präzedenz.
     getPrecedence(tokenType) {
-        // Höherer Rückgabewert = höhere Präzedenz
         switch (tokenType) {
             case MUL:
             case DIV:
             case MOD:
-                return 2;
+                return 3;
             case ADD:
             case SUB:
-                return 1;
-            // Weitere Operatoren wie AND, OR, Vergleichsoperatoren erhalten hier ggf. niedrigere Werte.
-            case AND:
-            case OR:
+                return 2;
             case EQUAL:
             case NOT_EQUAL:
             case GREATER:
             case LESS:
             case GREATER_EQUAL:
             case LESS_EQUAL:
+                return 1;
+            case AND:
+            case OR:
                 return 0;
             default:
                 return -1;

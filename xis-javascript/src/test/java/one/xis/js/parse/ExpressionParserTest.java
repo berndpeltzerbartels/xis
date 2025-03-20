@@ -119,6 +119,46 @@ class ExpressionParserTest {
         assertThat(result.asInt()).isEqualTo(4);
     }
 
+    @Test
+    void brackets() throws ScriptException {
+        var result = evaluate("a*(b+c)", "{a: 2, b: 3, c: 4}");
+        assertThat(result.asInt()).isEqualTo(14);
+    }
+
+    @Nested
+    @DisplayName("a > 2 || b > 3")
+    class GreaterAndOrTest {
+        private static final String EXPRESSION = "a > 2 || b > 3";
+
+        @Test
+        @DisplayName("{a: 3, b: 2}")
+        void test1() throws ScriptException {
+            var result = evaluate(EXPRESSION, "{a: 3, b: 2}");
+            assertThat(result.asBoolean()).isTrue();
+        }
+
+        @Test
+        @DisplayName("{a: 1, b: 4}")
+        void test2() throws ScriptException {
+            var result = evaluate(EXPRESSION, "{a: 1, b: 4}");
+            assertThat(result.asBoolean()).isTrue();
+        }
+
+        @Test
+        @DisplayName("{a: 1, b: 2}")
+        void test3() throws ScriptException {
+            var result = evaluate(EXPRESSION, "{a: 1, b: 2}");
+            assertThat(result.asBoolean()).isFalse();
+        }
+
+        @Test
+        @DisplayName("{a: 3, b: 4}")
+        void test4() throws ScriptException {
+            var result = evaluate(EXPRESSION, "{a: 3, b: 4}");
+            assertThat(result.asBoolean()).isTrue();
+        }
+    }
+
 
     private Value evaluate(String expression, String data) throws ScriptException {
         var testScript = (javascript + """
