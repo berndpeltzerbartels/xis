@@ -3,12 +3,12 @@ package one.xis.js.parse;
 import one.xis.js.Javascript;
 import one.xis.test.js.JSUtil;
 import org.graalvm.polyglot.Value;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 
 import javax.script.ScriptException;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 
 import static one.xis.js.JavascriptSource.CLASSES;
 import static one.xis.js.JavascriptSource.FUNCTIONS;
@@ -106,32 +106,31 @@ class ExpressionParserTest {
 
 
     @Test
-    @Disabled
-    void methodWithVarParameter() throws ScriptException {
-        var testScript = javascript + "expressionParser.parse('xyz(a.b)');";
+    void methodWith2Parameters() throws ScriptException {
+        var result = evaluate("xyz(a,b)", "{a: 1, b: 2}");
 
-        var result = JSUtil.execute(testScript);
+        assertThat(result.asInt()).isEqualTo(3);
+    }
 
-        assertThat(result.getMember("type").asString()).isEqualTo("FUNCTION");
-        assertThat(result.getMember("next").asString()).isNull();
-        assertThat(result.getMember("name").asString()).isEqualTo("xyz");
+    @Test
+    void methodAsMethodParameter() throws ScriptException {
+        var result = evaluate("xyz(a,xyz(a,b))", "{a: 1, b: 2}");
 
-        var parameters = (List<Object>) result.getMember("parameters").as(List.class);
-        assertThat(parameters).hasSize(1);
-
-        var parameter = (Map<String, Object>) parameters.get(0);
-        assertThat(parameter.get("type")).isEqualTo("VAR");
-        assertThat((Collection<String>) parameter.get("path")).containsExactly("a", "b");
-        assertThat(parameter.get("next")).isNull(); // TODO check with function in b
+        assertThat(result.asInt()).isEqualTo(4);
     }
 
 
     private Value evaluate(String expression, String data) throws ScriptException {
         var testScript = (javascript + """
-                var data = new Data(${data});
-                var expressionParser = new ExpressionParser();
-                var expression = expressionParser.parse("${expression}");
-                expression.evaluate(data);
+                
+                    function testFunction(p1, p2){
+                          return p1 + p2;
+                     }
+                
+                    var data = new Data(${data});
+                    var expressionParser = new ExpressionParser({xyz: testFunction});
+                    var expression = expressionParser.parse("${expression}");
+                    expression.evaluate(data);
                 """).replace("${expression}", expression).replace("${data}", data);
         return JSUtil.execute(testScript);
     }

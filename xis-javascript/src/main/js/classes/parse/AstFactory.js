@@ -1,7 +1,8 @@
 class AstFactory {
-    constructor(tokens, functions) {
+    constructor(tokens, functions, originalExpression) {
         this.tokens = tokens;
         this.functions = functions;
+        this.originalExpression = originalExpression;
         this.index = 0;
     }
 
@@ -24,7 +25,11 @@ class AstFactory {
                 case CLOSE_BRACKET:
                     return this.toExpression(row);
                 case IDENTIFIER:
-                    row.push(this.createVariable(this.consumeToken(IDENTIFIER)));
+                    if (this.nextToken().type === OPEN_BRACKET) {
+                        row.push(this.parseFunctionCall());
+                    } else {
+                        row.push(this.createVariable(this.consumeToken(IDENTIFIER)));
+                    }
                     break;
                 case FLOAT:
                 case INTEGER:
@@ -36,7 +41,7 @@ class AstFactory {
                 case ARRAY_START:
                     return this.parseArray();
                 case COMMA:
-                    break;
+                    return this.toExpression(row);
                 case AND:
                 case OR:
                 case NOT: // TODO
@@ -61,7 +66,7 @@ class AstFactory {
                     row.push(this.createOperator(this.consumeToken()));
                     break;
                 default:
-                    throw new Error("Unexpected token: " + this.currentToken().type);
+                    throw new Error("Unexpected token in '"+this.originalExpression+"' : " + this.currentToken().type);
             }
         }
         return this.toExpression(row);
@@ -108,13 +113,13 @@ class AstFactory {
     }
 
     nextToken() {
-        return this.tokens[this.index + 1];
+        return  this.index + 1 < this.tokens.length ? this.tokens[this.index + 1] : {};
     }
 
     consumeToken(type) {
         const token = this.currentToken();
         if (type && token.type !== type) {
-            throw new Error("Expected token of type " + type + " but got " + token.type);
+            throw new Error("Expected token of type " + type + " in '"+this.originalExpression+"', but got " + token.type);
         }
         this.index++;
         return token;
@@ -140,12 +145,18 @@ class AstFactory {
 
     parseParameters() {
         const array = [];
+        var expectCommata = false;
         this.consumeToken(OPEN_BRACKET);
         while (this.currentToken().type !== CLOSE_BRACKET) {
             if (this.currentToken().type === COMMA) {
+                if (!expectCommata) {
+                    throw new Error("Unexpected comma in '"+this.originalExpression+"'");
+                }
                 this.consumeToken(COMMA);
+                expectCommata = false;
             } else {
                 array.push(this.parse());
+                expectCommata = true;
             }
         }
         this.consumeToken(CLOSE_BRACKET);
@@ -156,15 +167,22 @@ class AstFactory {
     parseFunctionCall() {
         const functionName = this.consumeToken(IDENTIFIER);
         const fct = this.functions[functionName.value];
+        const parameters = [];
         if (fct === undefined) {
             throw new Error(`Function ${functionName.value} not found`);
         }
         this.consumeToken(OPEN_BRACKET);
-        const parameters = [];
+        var expectCommata = false;
         while (this.currentToken().type !== CLOSE_BRACKET) {
-            parameters.push(this.parse());
             if (this.currentToken().type === COMMA) {
+                if (!expectCommata) {
+                    throw new Error("Unexpected comma in '"+this.originalExpression+"'");
+                }
                 this.consumeToken(COMMA);
+                expectCommata = false;
+            } else {
+                parameters.push(this.parse());
+                expectCommata = true;
             }
         }
         this.consumeToken(CLOSE_BRACKET);
@@ -251,13 +269,12 @@ class Operator {
             case GREATER_EQUAL: return (a, b) => a >= b;
             case LESS_EQUAL: return (a, b) => a <= b;
             default:
-                throw new Error("Unknown operator: " + token.type);
+                throw new Error("Unknown operator in '"+this.originalExpression+"': " + token.type);
         }
     }
 
     // Liefert einen numerischen Wert für die jeweilige Präzedenz.
     getPrecedence(tokenType) {
-        debugger;
         // Höherer Rückgabewert = höhere Präzedenz
         switch (tokenType) {
             case MUL:
@@ -284,14 +301,15 @@ class Operator {
 }
 
 class FunctionCall {
-    constructor(name, parameters) {
+    constructor(fct, parameters) {
         this.type = 'FUNCTION_CALL';
-        this.name = name;
+        this.fct = fct;
         this.parameters = parameters;
     }
 
     evaluate(data) {
-        return this.name(this.parameters.map(p => p.evaluate(data)));
+        const parameterArray = this.parameters.map(p => p.evaluate(data));
+        return this.fct.apply(null, parameterArray);
     }
 }
 
