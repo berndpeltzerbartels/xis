@@ -105,7 +105,7 @@ class ScriptTokenizer {
                 this.index++;
             }
         }
-        return { value: str, newIndex: this.index };
+        return { value: str };
     }
 
     // Zahlen-Verarbeitung
@@ -131,7 +131,7 @@ class ScriptTokenizer {
             this.index++;
         }
         const value = isFloat ? parseFloat(numStr) : parseInt(numStr, 10);
-        return { value, isFloat, newIndex: this.index };
+        return { value, isFloat };
     }
 
     // Identifier und Literale (z. B. true, false)
@@ -160,7 +160,7 @@ class ScriptTokenizer {
             idStr += this.peekChar();
             this.index++;
         }
-        return { value: idStr, newIndex: this.index };
+        return { value: idStr};
     }
 
     // Operatoren
@@ -239,7 +239,6 @@ const INTEGER = 2;
 const FLOAT = 3;
 const BOOL = 4;
 const NULL_OR_UNDEFINED = 5;
-const ARRAY = 6;
 const AND = 9;
 const OR = 10;
 const NOT = 11;
@@ -266,3 +265,6 @@ const OPEN_BRACKET = 31;
 const CLOSE_BRACKET = 32;
 const IDENTIFIER = 34;
 const COMMA = 35;
+const OPERATOR = 36;
+const ARRAY_START = 37;
+const ARRAY_END = 38;

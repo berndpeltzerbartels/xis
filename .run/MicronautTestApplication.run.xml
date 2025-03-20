@@ -1,7 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="MicronautTestApplication" type="Application" factoryName="Application" nameIsGenerated="true">
     <option name="MAIN_CLASS_NAME" value="micronaut.example.MicronautTestApplication" />
-    <module name="xis-remote.xis-micronaut-test-app.main" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="micronaut.example.*" />

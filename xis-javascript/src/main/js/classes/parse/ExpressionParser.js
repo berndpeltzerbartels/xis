@@ -1,13 +1,10 @@
+
 class ExpressionParser {
 
-    constructor() {
-        this.tokenizer = new Tokenizer();
-        this.treeParser = new TreeParser();
+    parse(expression) {
+        this.tokens = new ScriptTokenizer(expression).tokenize();
+        return new AstFactory(this.tokens).createAst();
     }
-    parse(str) {
-        var tokenArray = this.tokenizer.tokens(str);
-        var root = new TokenLinker(tokenArray).linkTokens();
-        return this.treeParser.parseTree(root);
-    }
-
 }
+
+
