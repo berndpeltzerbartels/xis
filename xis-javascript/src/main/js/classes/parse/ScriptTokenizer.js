@@ -65,12 +65,12 @@ class ScriptTokenizer {
     }
 
     processArrayStart() {
-        this.addToken({ type: ARRAY_START, index: this.index });
+        this.addToken({ type: OPENING_SQUARE_BRACKET, index: this.index });
         this.index++; // Skip '['
     }
 
     processArrayEnd() {
-        this.addToken({ type: ARRAY_END, index: this.index });
+        this.addToken({ type: CLOSING_SQUARE_BRACKET, index: this.index });
         this.index++; // Skip '['
     }
 
@@ -267,5 +267,5 @@ const CLOSE_BRACKET = 32;
 const IDENTIFIER = 34;
 const COMMA = 35;
 const OPERATOR = 36;
-const ARRAY_START = 37;
-const ARRAY_END = 38;
+const OPENING_SQUARE_BRACKET = 37;
+const CLOSING_SQUARE_BRACKET = 38;

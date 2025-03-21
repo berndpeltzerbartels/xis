@@ -40,7 +40,7 @@ class AstFactory {
                 case NULL_OR_UNDEFINED:
                     row.push(this.createConstant(this.consumeToken()));
                     break;
-                case ARRAY_START:
+                case OPENING_SQUARE_BRACKET:
                     return this.parseArray();
                 case COMMA:
                     return this.toExpression(row);
@@ -137,15 +137,15 @@ class AstFactory {
 
     parseArray() {
         const array = [];
-        this.consumeToken(ARRAY_START);
-        while (this.currentToken().type !== ARRAY_END) {
+        this.consumeToken(OPENING_SQUARE_BRACKET);
+        while (this.currentToken().type !== CLOSING_SQUARE_BRACKET) {
             if (this.currentToken().type === COMMA) {
                 this.consumeToken(COMMA);
             } else {
                 array.push(this.parse());
             }
         }
-        this.consumeToken(ARRAY_END);
+        this.consumeToken(CLOSING_SQUARE_BRACKET);
         return array;
     }
 

@@ -43,8 +43,8 @@ class ScriptTokenizerTest {
     private static final int OPEN_BRACKET = 31;
     private static final int CLOSE_BRACKET = 32;
     private static final int IDENTIFIER = 34;
-    private static final int ARRAY_START = 37;
-    private static final int ARRAY_END = 38;
+    private static final int OPENING_SQUARE_BRACKET = 37;
+    private static final int CLOSING_SQUARE_BRACKET = 38;
 
     private String javascript;
 
@@ -116,8 +116,8 @@ class ScriptTokenizerTest {
             var result = JSUtil.execute(testScript);
             var open = result.getArrayElement(0);
             var close = result.getArrayElement(1);
-            assertThat(open.getMember("type").asInt()).isEqualTo(ARRAY_START);
-            assertThat(close.getMember("type").asInt()).isEqualTo(ARRAY_END);
+            assertThat(open.getMember("type").asInt()).isEqualTo(OPENING_SQUARE_BRACKET);
+            assertThat(close.getMember("type").asInt()).isEqualTo(CLOSING_SQUARE_BRACKET);
         }
 
         @Test
