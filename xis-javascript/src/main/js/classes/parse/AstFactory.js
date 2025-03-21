@@ -16,7 +16,7 @@ class AstFactory {
     parse() {
         var row = [];
         while (this.index < this.tokens.length) {
-            console.log(row);
+           //console.log(row);
             const token = this.tokens[this.index];
             switch (this.currentToken().type) {
                 case OPEN_BRACKET:
@@ -49,7 +49,6 @@ class AstFactory {
                 case COMMA:
                     return this.toExpression(row);
                 case SUB:
-                    debugger;
                     if ((row.length === 0 || this.isOperator(row[row.length - 1]))
                         && ([FLOAT, INTEGER].indexOf(this.nextToken().type) !== -1)) {
                         this.consumeToken(SUB);
@@ -58,9 +57,12 @@ class AstFactory {
                         row.push(this.createOperator(this.consumeToken()));
                     }
                     break;
+                case NOT:
+                    this.consumeToken(NOT);
+                    row.push(new Negation());      
+                    break;
                 case AND:
                 case OR:
-                case NOT: // TODO
                 case EQUAL:
                 case NOT_EQUAL:
                 case GREATER:
@@ -68,7 +70,6 @@ class AstFactory {
                 case LESS:
                 case LESS_EQUAL:
                 case ADD:
-
                 case MUL:
                 case DIV:
                 case MOD:
@@ -89,6 +90,7 @@ class AstFactory {
     }
 
     toExpression(row) {
+        this.applyNegation(row);
         switch (row.length) {
             case 0: return [];
             case 1: return row[0];
@@ -109,6 +111,11 @@ class AstFactory {
         var operator;
         while (i < row.length) {
             var element = row[i];
+            if (element.type ===  'Negation') {
+                negation = element ;
+                row.splice(i, 1);
+                continue;
+            }
             if (i % 2 != 0 && element.precedence == precedence) {
                 if (!this.isOperator(element)) {
                     throw new Error("Expected operator in '" + this.originalExpression + "', but got " + element.type);
@@ -126,6 +133,38 @@ class AstFactory {
         return operator;
     }
 
+    applyNegation(row) {
+        var i = 0;
+        debugger;
+        while (i < row.length) {
+            var element = row[i];
+            if (element.type === NOT) {
+                if (i + 1 >= row.length) {
+                    throw new Error("Unexpected end of expression in '" + this.originalExpression + "'. It should not end with negation");
+                }
+                const nextElement = row[i + 1];
+                nextElement.negated = true;
+                row.splice(i, 2, nextElement);  
+            }
+            i++;    
+        }
+    }
+
+
+    processNegation(row) {
+        var i = 0;
+        while (i < row.length) {
+            var element = row[i];
+            if (element.type === NOT) {
+                const negation = new Negation();
+                negation.expression = row[i + 1];
+                this.replace(row, i, 2, negation);
+            } else {
+                i++;
+            }
+        }
+    }
+
     replace(arr, startIndex, count, replacement) {
         arr.splice(startIndex + 1, count - 1);
         arr[startIndex] = replacement;
@@ -140,7 +179,6 @@ class AstFactory {
     }
 
     consumeToken(type) {
-        //  doDebug(() => type === CLOSE_BRACKET);
         const token = this.currentToken();
         if (type && token.type !== type) {
             throw new Error("Expected token of type " + type + " in '" + this.originalExpression + "', but got " + token.type);
@@ -231,6 +269,7 @@ class AstFactory {
             case LESS:
             case GREATER_EQUAL:
             case LESS_EQUAL:
+            case NOT:
                 return true;
             default:
                 return false;
@@ -282,6 +321,7 @@ class Operator {
         this.type = token.type;
         this.left = undefined;
         this.right = undefined;
+        this.negated = false;
         this.binaryFunction = this.operatorFunction(token);
         this.precedence = this.getPrecedence(token.type);
     }
@@ -289,7 +329,8 @@ class Operator {
     evaluate(data) {
         const leftValue = this.left.evaluate(data);
         const rightValue = this.right.evaluate(data);
-        return this.binaryFunction(leftValue, rightValue);
+        const rv = this.binaryFunction(leftValue, rightValue);
+        return this.negated ? !rv : rv;
     }
 
     toString() {
@@ -352,6 +393,8 @@ class Operator {
 
     getPrecedence(tokenType) {
         switch (tokenType) {
+            case NOT:
+                return 4;
             case MUL:
             case DIV:
             case MOD:
@@ -380,11 +423,13 @@ class FunctionCall {
         this.type = 'FUNCTION_CALL';
         this.fct = fct;
         this.parameters = parameters;
+        this.negated = false;
     }
 
     evaluate(data) {
         const parameterArray = this.parameters.map(p => p.evaluate(data));
-        return this.fct.apply(null, parameterArray);
+        const rv = this.fct.apply(null, parameterArray);
+        return this.negated ? !rv : rv;
     }
 
     toString() {
@@ -396,10 +441,11 @@ class Constant {
     constructor(value) {
         this.type = 'CONSTANT';
         this.value = value;
+        this.negated = false;
     }
 
     evaluate(data) {
-        return this.value;
+        return this.negated ? !this.value : this.value;
     }
 
     toString() {
@@ -411,10 +457,12 @@ class Variable {
     constructor(path) {
         this.type = 'VARIABLE';
         this.path = path;
+        this.negated = false;
     }
 
     evaluate(data) {
-        return data.getValueByPath(this.path);
+        const value = data.getValueByPath(this.path);
+        return this.negated ? !value : value;
     }
 
     toString() {
@@ -441,15 +489,32 @@ class ObjectProperty {
         this.type = 'OBJECT_PROPERTY';
         this.path = path;
         this.key = key;
+        this.negated = false;
     }
 
     evaluate(data) {
         const variable = data.getValueByPath(this.path);
-        return variable[this.key.evaluate(data)];
+        const rv =  variable[this.key.evaluate(data)];
+        return this.negated ? !rv : rv;
     }
 
     toString() {
         return '.' + this.key;
+    }
+}
+
+class Negation {
+    constructor() {
+        this.type = NOT;
+        this.expression = undefined;
+    }
+
+    evaluate(data) {
+        return !this.expression.evaluate(data);
+    }
+
+    toString() {
+        return '!' + this.expression.toString();
     }
 }
 

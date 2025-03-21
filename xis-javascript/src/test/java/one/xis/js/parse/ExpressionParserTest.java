@@ -356,6 +356,40 @@ class ExpressionParserTest {
         }
     }
 
+    @Nested
+    class NegationTest {
+
+        @Test
+        void notTrue() throws ScriptException {
+            var result = evaluate("!true", "{}");
+            assertThat(result.asBoolean()).isFalse();
+        }
+
+        @Test
+        void notFalse() throws ScriptException {
+            var result = evaluate("!false", "{}");
+            assertThat(result.asBoolean()).isTrue();
+        }
+
+        @Test
+        void notExpression() throws ScriptException {
+            var result = evaluate("!(a > b)", "{a: 2, b: 3}");
+            assertThat(result.asBoolean()).isTrue();
+        }
+
+        @Test
+        void notExpression2() throws ScriptException {
+            var result = evaluate("!(a > b)", "{a: 3, b: 2}");
+            assertThat(result.asBoolean()).isFalse();
+        }
+
+        @Test
+        void notExpression3() throws ScriptException {
+            var result = evaluate("!bool(a,b)||true", "{a: 2, b: 1}");
+            assertThat(result.asBoolean()).isTrue();
+        }
+    }
+
 
     private Value evaluate(String expression, String data) throws ScriptException {
         var testScript = (javascript + """
