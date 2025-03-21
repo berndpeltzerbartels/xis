@@ -27,5 +27,5 @@ include 'xis-i18n'
 include 'xis-deserializer'
 include 'xis-frontend'
 include 'xis-plugin'
-
+include 'xis-boot'
 

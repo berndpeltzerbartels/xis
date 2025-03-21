@@ -1,4 +1,14 @@
+/**
+ * Create the abstract source tree of the expression in tag attributes or text content.
+ */
 class AstFactory {
+
+    /**
+     * 
+     * @param {array<any>} tokens 
+     * @param {any} functions 
+     * @param {string} originalExpression 
+     */
     constructor(tokens, functions, originalExpression) {
         this.tokens = tokens;
         this.functions = functions;
@@ -6,6 +16,12 @@ class AstFactory {
         this.index = 0;
     }
 
+    /**
+     * Create the abstract syntax tree from the tokens.
+     * 
+     * @returns the root element of the abstract syntax tree. The root element is an operator or fanction call in common cases.
+     * If the expression is empty, a NoopAst is returned. If there is only a single element, this element is returned.
+     */
     createAst() {
         if (this.tokens.length === 0) {
             return new NoopAst();

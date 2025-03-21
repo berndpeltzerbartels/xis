@@ -1,4 +1,12 @@
+/**
+ * A tokenizer for JavaScript-like scripts.
+ */
 class ScriptTokenizer {
+
+    /**
+     * Creates a new tokenizer for the given script.
+     * @param {string} script The script to tokenize.
+     */
     constructor(script) {
         this.script = script.toString();
         this.tokens = [];

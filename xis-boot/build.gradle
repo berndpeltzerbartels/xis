@@ -1,0 +1,84 @@
+plugins {
+    id 'java'
+    id 'java-library'
+}
+
+group 'one.xis'
+version rootProject.ext.projectVersion
+
+repositories {
+    mavenCentral()
+}
+
+tasks.withType(JavaCompile) {
+    sourceCompatibility = rootProject.ext.javaVersion.toString()
+    targetCompatibility = rootProject.ext.javaVersion.toString()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(rootProject.ext.javaVersionInt)
+    }
+}
+
+// Local variables for versions
+var lombokVersion = rootProject.ext.libraryVersions.lombok
+var reflectionsVersion = rootProject.ext.libraryVersions.reflections
+var junitVersion = rootProject.ext.libraryVersions.junit
+var assertjVersion = rootProject.ext.libraryVersions.assertj
+var gsonVersion = rootProject.ext.libraryVersions.gson
+var jacksonVersion = rootProject.ext.libraryVersions.jackson
+var mockitoVersion = rootProject.ext.libraryVersions.mockito
+var slf4jLog4j12Version = "2.0.3"
+
+
+dependencies {
+
+    // Local project dependencies
+    implementation project(":xis-deserializer")
+    implementation project(":xis-context")
+    implementation project(":xis-util")
+    implementation project(":xis-remote-core")
+    implementation project(":xis-resources")
+    implementation project(":xis-server")
+    implementation project(":xis-frontend")
+    implementation project(":xis-validation")
+
+    // Compile-only dependencies
+    compileOnly project(":xis-deserializer")
+
+    // Alle Dependencies für Netty
+    implementation "io.netty:netty-all:4.1.94.Final"
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.14.0'
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.14.0'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.14.0'
+
+
+    // Annotation processors
+    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+
+    // Implementation dependencies
+    implementation "org.projectlombok:lombok:$lombokVersion"
+    implementation "org.reflections:reflections:$reflectionsVersion"
+    implementation "org.slf4j:slf4j-log4j12:$slf4jLog4j12Version"
+
+    // Test dependencies
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+    testImplementation "org.mockito:mockito-core:$mockitoVersion"
+    testImplementation "org.mockito:mockito-junit-jupiter:$mockitoVersion"
+    testImplementation "org.assertj:assertj-core:$assertjVersion"
+    testImplementation project(":xis-server")
+    testImplementation project(":xis-test")
+    testImplementation project(":xis-frontend")
+    testImplementation "com.google.code.gson:gson:$gsonVersion"
+    testImplementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion"
+    testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"
+}
+
+test {
+    useJUnitPlatform()
+    afterTest { desc, result ->
+        logger.quiet "${desc.className} - ${desc.name}: ${result.resultType}"
+    }
+}
