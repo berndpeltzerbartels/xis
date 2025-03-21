@@ -13,7 +13,9 @@ class ScriptTokenizer {
             const c = this.peekChar();
 
             if (this.isArrayStart(c)) {
-                this.processArray();
+                this.processArrayStart();
+            } else if (this.isArrayEnd(c)) {
+                this.processArrayEnd();
             } else if (this.isStringStart(c)) {
                 this.processString();
             } else if (this.isDigit(c)) {
@@ -58,19 +60,18 @@ class ScriptTokenizer {
         return c === '[';
     }
 
-    processArray() {
-        // '[' konsumieren und Inhalt einlesen bis ']'
+    isArrayEnd(c) {
+        return c === ']';
+    }
+
+    processArrayStart() {
+        this.addToken({ type: ARRAY_START, index: this.index });
         this.index++; // Skip '['
-        let arrayContent = '';
-        while (this.index < this.script.length && this.peekChar() !== ']') {
-            arrayContent += this.peekChar();
-            this.index++;
-        }
-        if (this.peekChar() !== ']') {
-            throw new Error("Unclosed array literal.");
-        }
-        this.index++; // Skip ']'
-        this.addToken({ type: ARRAY, value: arrayContent });
+    }
+
+    processArrayEnd() {
+        this.addToken({ type: ARRAY_END, index: this.index });
+        this.index++; // Skip '['
     }
 
     // String-Verarbeitung

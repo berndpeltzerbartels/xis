@@ -18,7 +18,6 @@ class ScriptTokenizerTest {
     private static final int FLOAT = 3;
     private static final int BOOL = 4;
     private static final int NULL_OR_UNDEFINED = 5;
-    private static final int ARRAY = 6;
     private static final int AND = 9;
     private static final int OR = 10;
     private static final int NOT = 11;
@@ -44,6 +43,8 @@ class ScriptTokenizerTest {
     private static final int OPEN_BRACKET = 31;
     private static final int CLOSE_BRACKET = 32;
     private static final int IDENTIFIER = 34;
+    private static final int ARRAY_START = 37;
+    private static final int ARRAY_END = 38;
 
     private String javascript;
 
@@ -113,8 +114,10 @@ class ScriptTokenizerTest {
         void testArray() throws ScriptException {
             var testScript = javascript + "new ScriptTokenizer('[]').tokenize();";
             var result = JSUtil.execute(testScript);
-            var value = result.getArrayElement(0);
-            assertThat(value.getMember("type").asInt()).isEqualTo(ARRAY);
+            var open = result.getArrayElement(0);
+            var close = result.getArrayElement(1);
+            assertThat(open.getMember("type").asInt()).isEqualTo(ARRAY_START);
+            assertThat(close.getMember("type").asInt()).isEqualTo(ARRAY_END);
         }
 
         @Test
