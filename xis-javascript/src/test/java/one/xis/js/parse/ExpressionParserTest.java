@@ -190,6 +190,69 @@ class ExpressionParserTest {
         }
     }
 
+    @Nested
+    class ObjectPropertyTest {
+
+        @Test
+        @DisplayName("Object property access")
+        void testSimpleObjectPropertyAccess() throws ScriptException {
+            var result = evaluate("a.b", "{a: {b: 8}}");
+            assertThat(result.asInt()).isEqualTo(8);
+        }
+
+        @Test
+        @DisplayName("Object property access by key")
+        void testSimpleObjectPropertyAccessByKey() throws ScriptException {
+            var result = evaluate("a['b']", "{a: {b: 8}}");
+            assertThat(result.asInt()).isEqualTo(8);
+        }
+
+        @Test
+        @DisplayName("Object property access by key and addition")
+        void testObjectPropertyAccessByKeyWithAddition() throws ScriptException {
+            var result = evaluate("2 + a['b']", "{a: {b: 8}}");
+            assertThat(result.asInt()).isEqualTo(10);
+        }
+
+        @Test
+        @DisplayName("Object property access by variable string key")
+        void testObjectPropertyAccessByVariableStringKey() throws ScriptException {
+            var result = evaluate("a[c]", "{a: {b: 8}, c: 'b'}");
+            assertThat(result.asInt()).isEqualTo(8);
+        }
+
+        @Test
+        void arrayElementAccess() throws ScriptException {
+            var result = evaluate("a[1]", "{a: [1, 2, 3]}");
+            assertThat(result.asInt()).isEqualTo(2);
+        }
+
+        @Test
+        void arrayElementAccessWithAddition() throws ScriptException {
+            var result = evaluate("a[1] + a[2]", "{a: [1, 2, 3]}");
+            assertThat(result.asInt()).isEqualTo(5);
+        }
+
+        @Test
+        void arrayElementAccessWithVariableIndex() throws ScriptException {
+            var result = evaluate("a[b]", "{a: [1, 2, 3], b: 1}");
+            assertThat(result.asInt()).isEqualTo(2);
+        }
+
+        @Test
+        void arrayElementAccessWithVariableIndexFromFunction() throws ScriptException {
+            var result = evaluate("a[xyz(1, 2) - 1]", "{a: [1, 2, 3]}");
+            assertThat(result.asInt()).isEqualTo(3);
+        }
+
+        @Test
+        void arrayElementAccessWithVariableIndexFromFunction2() throws ScriptException {
+            var result = evaluate("a[-2 + xyz(1, 2)]", "{a: [10, 20, 30]}");
+            assertThat(result.asInt()).isEqualTo(20);
+        }
+
+    }
+
     @Test
     @DisplayName("{a: false, b: false, c: false}")
     void plusAndMultiplication() throws ScriptException {
@@ -224,28 +287,28 @@ class ExpressionParserTest {
         private static final String EXPRESSION = "a > 2 || b > 3";
 
         @Test
-        @DisplayName("{a: 3, b: 2}")
+        @DisplayName("1. {a: 3, b: 2}")
         void test1() throws ScriptException {
             var result = evaluate(EXPRESSION, "{a: 3, b: 2}");
             assertThat(result.asBoolean()).isTrue();
         }
 
         @Test
-        @DisplayName("{a: 1, b: 4}")
+        @DisplayName("2. {a: 1, b: 4}")
         void test2() throws ScriptException {
             var result = evaluate(EXPRESSION, "{a: 1, b: 4}");
             assertThat(result.asBoolean()).isTrue();
         }
 
         @Test
-        @DisplayName("{a: 1, b: 2}")
+        @DisplayName("3. {a: 1, b: 2}")
         void test3() throws ScriptException {
             var result = evaluate(EXPRESSION, "{a: 1, b: 2}");
             assertThat(result.asBoolean()).isFalse();
         }
 
         @Test
-        @DisplayName("{a: 3, b: 4}")
+        @DisplayName("4. {a: 3, b: 4}")
         void test4() throws ScriptException {
             var result = evaluate(EXPRESSION, "{a: 3, b: 4}");
             assertThat(result.asBoolean()).isTrue();

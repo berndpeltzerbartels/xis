@@ -25,27 +25,16 @@ class AstFactory {
                     this.consumeToken(CLOSE_BRACKET);
                     break;
                 case CLOSE_BRACKET:
+                case CLOSING_SQUARE_BRACKET:
                     return this.toExpression(row);
                 case IDENTIFIER:
                     if (this.nextToken().type === OPEN_BRACKET) {
                         row.push(this.parseFunctionCall());
                     } else if (this.nextToken().type === OPENING_SQUARE_BRACKET) {
-                        const token2 = this.furtherToken(2);
-                        if (token2.type == INTEGER) {
-                            this.consumeToken(IDENTIFIER);
-                            this.consumeToken(OPENING_SQUARE_BRACKET);
-                            row.push(this.createArrayElement(this.consumeToken(INTEGER)));
-                            this.consumeToken(CLOSING_SQUARE_BRACKET);
-                        } else if (token2.type == STRING) {
-                            this.consumeToken(IDENTIFIER);
-                            this.consumeToken(OPENING_SQUARE_BRACKET);
-                            row.push(this.createObjectProperty(this.consumeToken(STRING)));
-                            this.consumeToken(CLOSING_SQUARE_BRACKET);
-                        } else {
-                            row.push(this.createVariable(this.consumeToken(IDENTIFIER)));
-                        }
+                        row.push(this.createPropertyVariable());
                     } else {
                         row.push(this.createVariable(this.consumeToken(IDENTIFIER)));
+
                     }
                     break;
                 case FLOAT:
@@ -59,6 +48,16 @@ class AstFactory {
                     return this.parseArray();
                 case COMMA:
                     return this.toExpression(row);
+                case SUB:
+                    debugger;
+                    if ((row.length === 0 || this.isOperator(row[row.length - 1]))
+                        && ([FLOAT, INTEGER].indexOf(this.nextToken().type) !== -1)) {
+                        this.consumeToken(SUB);
+                        row.push(this.createNegativeConstant(this.consumeToken()));
+                    } else {
+                        row.push(this.createOperator(this.consumeToken()));
+                    }
+                    break;
                 case AND:
                 case OR:
                 case NOT: // TODO
@@ -69,7 +68,7 @@ class AstFactory {
                 case LESS:
                 case LESS_EQUAL:
                 case ADD:
-                case SUB:
+
                 case MUL:
                 case DIV:
                 case MOD:
@@ -257,9 +256,22 @@ class AstFactory {
         return new Constant(token.value);
     }
 
+    createNegativeConstant(token) {
+        return new Constant(-token.value);
+    }
+
 
     createOperator(token) {
         return new Operator(token);
+    }
+
+    createPropertyVariable() {
+        debugger;
+        var variable = this.consumeToken(IDENTIFIER);
+        this.consumeToken(OPENING_SQUARE_BRACKET);
+        const keyExpression = this.parse();
+        this.consumeToken(CLOSING_SQUARE_BRACKET);
+        return new ObjectProperty(variable.value, keyExpression);
     }
 
 }
@@ -424,29 +436,16 @@ class NoopAst {
     }
 }
 
-class ArrayElement {
-    constructor(index) {
-        this.type = 'ARRAY_ELEMENT';
-        this.index = index;
-    }
-
-    evaluate(data) {
-        return data[this.index];
-    }
-
-    toString() {
-        return '[' + this.index + ']';
-    }
-}
-
 class ObjectProperty {
-    constructor(key) {
+    constructor(path, key) {
         this.type = 'OBJECT_PROPERTY';
+        this.path = path;
         this.key = key;
     }
 
     evaluate(data) {
-        return data[this.key];
+        const variable = data.getValueByPath(this.path);
+        return variable[this.key.evaluate(data)];
     }
 
     toString() {
