@@ -19,3 +19,4 @@ function innerTextChanged(element) {
 function nodeValueChanged(node) {
     // Not needed here, but in testcode
 }
+

@@ -16,11 +16,13 @@ class AstFactory {
     parse() {
         var row = [];
         while (this.index < this.tokens.length) {
+            console.log(row);
             const token = this.tokens[this.index];
             switch (this.currentToken().type) {
                 case OPEN_BRACKET:
                     this.consumeToken(OPEN_BRACKET);
                     row.push(this.parse());
+                    this.consumeToken(CLOSE_BRACKET);
                     break;
                 case CLOSE_BRACKET:
                     return this.toExpression(row);
@@ -89,11 +91,14 @@ class AstFactory {
     }
 
     expressionForPrecedence(row, precedence) {
-        var i = 0;
+        var i = 1;
         var operator;
         while (i < row.length) {
             var element = row[i];
-            if (this.isOperator(element) && element.precedence == precedence) {
+            if (i%2 != 0 && element.precedence == precedence) {
+                if (!this.isOperator(element))  {
+                    throw new Error("Expected operator in '" + this.originalExpression + "', but got " + element.type);
+                }
                 const left = row[i - 1];
                 const right = row[i + 1];
                 operator = row[i];
@@ -117,6 +122,7 @@ class AstFactory {
     }
 
     consumeToken(type) {
+      //  doDebug(() => type === CLOSE_BRACKET);
         const token = this.currentToken();
         if (type && token.type !== type) {
             throw new Error("Expected token of type " + type + " in '" + this.originalExpression + "', but got " + token.type);
@@ -173,13 +179,15 @@ class AstFactory {
         }
         this.consumeToken(OPEN_BRACKET);
         var expectCommata = false;
-        while (this.currentToken().type !== CLOSE_BRACKET) {
+        while (this.index < this.tokens.length) {
             if (this.currentToken().type === COMMA) {
                 if (!expectCommata) {
                     throw new Error("Unexpected comma in '" + this.originalExpression + "'");
                 }
                 this.consumeToken(COMMA);
                 expectCommata = false;
+            } else if (this.currentToken().type === CLOSE_BRACKET) {
+                break;
             } else {
                 parameters.push(this.parse());
                 expectCommata = true;
@@ -223,7 +231,7 @@ class AstFactory {
     }
 
     createVariable(token) {
-        return new Variable2(token.value);
+        return new Variable(token.value);
     }
 
     createConstant(token) {
@@ -252,6 +260,44 @@ class Operator {
         const rightValue = this.right.evaluate(data);
         return this.binaryFunction(leftValue, rightValue);
     }
+
+    toString() {
+        var str = '(';
+        if (this.left) {
+            str += this.left.toString();
+        } else {
+            str += 'unknown';
+        }
+        str += this.operatorAsString();
+        if (this.right) {
+            str += this.right.toString();
+        } else {
+            str += 'undefined';
+        }
+        str += ')';
+        return str;
+    }
+
+    operatorAsString() {
+        switch (this.type) {
+            case ADD: return '+';
+            case SUB: return '-';
+            case MUL: return '*';
+            case DIV: return '/';
+            case MOD: return '%';
+            case AND: return '&&';
+            case OR: return '||';
+            case EQUAL: return '===';
+            case NOT_EQUAL: return '!==';
+            case GREATER: return '>';
+            case LESS: return '<';
+            case GREATER_EQUAL: return '>=';
+            case LESS_EQUAL: return '<=';
+            default:
+                throw new Error("Unknown operator in '" + this.originalExpression + "': " + this.type);
+        }
+    }
+
 
     operatorFunction(token) {
         switch (token.type) {
@@ -309,6 +355,10 @@ class FunctionCall {
         const parameterArray = this.parameters.map(p => p.evaluate(data));
         return this.fct.apply(null, parameterArray);
     }
+
+    toString() {
+        return this.fct.name + '(' + this.parameters.map(p => p.toString()).join(', ') + ')';
+    }
 }
 
 class Constant {
@@ -320,9 +370,13 @@ class Constant {
     evaluate(data) {
         return this.value;
     }
+
+    toString() {
+        return this.value;
+    }
 }
 
-class Variable2 {
+class Variable {
     constructor(path) {
         this.type = 'VARIABLE';
         this.path = path;
@@ -330,6 +384,10 @@ class Variable2 {
 
     evaluate(data) {
         return data.getValueByPath(this.path);
+    }
+
+    toString() {
+        return this.path;
     }
 }
 
@@ -340,5 +398,16 @@ class NoopAst {
 
     evaluate(data) {
         return '';
+    }
+
+    toString() {
+        return 'noop';
+    }
+}
+
+
+function doDebug(conditionFkt) {
+    if (conditionFkt()) {
+        debugger;
     }
 }

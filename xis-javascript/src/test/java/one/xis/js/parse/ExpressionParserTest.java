@@ -34,6 +34,19 @@ class ExpressionParserTest {
         assertThat(result.asBoolean()).isTrue();
     }
 
+    @Test
+    void arithmetic() throws ScriptException {
+        var result = evaluate("a + b * c", "{a: 2, b: 3, c: 4}");
+        assertThat(result.asInt()).isEqualTo(14);
+    }
+
+    @Test
+    void arithmeticWithBrackets() throws ScriptException {
+        var result = evaluate("d * (a + b * c)", "{a: 2, b: 3, c: 4, d: 4}");
+        assertThat(result.asInt()).isEqualTo(56);
+    }
+
+
     @Nested
     @DisplayName("a && b || c")
     class AAndBOrCTest {
@@ -95,6 +108,86 @@ class ExpressionParserTest {
             assertThat(result.asBoolean()).isFalse();
         }
 
+    }
+
+    @Nested
+    @DisplayName("Comparison Test")
+    class ComparisonTest {
+
+        @Test
+        @DisplayName("Greater than comparison with addition")
+        void testGreaterThanWithAddition() throws ScriptException {
+            var result = evaluate("a + b > c", "{a: 2, b: 3, c: 4}");
+            assertThat(result.asBoolean()).isTrue();
+        }
+
+        @Test
+        @DisplayName("Less than comparison with subtraction")
+        void testLessThanWithSubtraction() throws ScriptException {
+            var result = evaluate("a - b < c", "{a: 5, b: 2, c: 4}");
+            assertThat(result.asBoolean()).isTrue();
+        }
+
+        @Test
+        @DisplayName("Equal comparison with multiplication")
+        void testEqualWithMultiplication() throws ScriptException {
+            var result = evaluate("a * b == c", "{a: 2, b: 3, c: 6}");
+            assertThat(result.asBoolean()).isTrue();
+        }
+
+        @Test
+        @DisplayName("Not equal comparison with division")
+        void testNotEqualWithDivision() throws ScriptException {
+            var result = evaluate("a / b != c", "{a: 6, b: 2, c: 4}");
+            assertThat(result.asBoolean()).isTrue();
+        }
+
+        @Test
+        @DisplayName("Greater or equal comparison with constant")
+        void testGreaterOrEqualWithConstant() throws ScriptException {
+            var result = evaluate("a >= 5", "{a: 5}");
+            assertThat(result.asBoolean()).isTrue();
+        }
+
+        @Test
+        @DisplayName("Less or equal comparison with constant")
+        void testLessOrEqualWithConstant() throws ScriptException {
+            var result = evaluate("a <= 3", "{a: 2}");
+            assertThat(result.asBoolean()).isTrue();
+        }
+    }
+
+    @Nested
+    @DisplayName("Brackets Test")
+    class BracketsTest {
+
+        @Test
+        @DisplayName("Simple nested brackets")
+        void testSimpleNestedBrackets() throws ScriptException {
+            var result = evaluate("(a + b) * (c - d)", "{a: 2, b: 3, c: 5, d: 1}");
+            assertThat(result.asInt()).isEqualTo(20);
+        }
+
+        @Test
+        @DisplayName("Multiple nested brackets")
+        void testMultipleNestedBrackets() throws ScriptException {
+            var result = evaluate("((a + b) * (c - d)) + ((e + f) * (g - h))", "{a: 2, b: 3, c: 5, d: 1, e: 1, f: 2, g: 4, h: 2}");
+            assertThat(result.asInt()).isEqualTo(26);
+        }
+
+        @Test
+        @DisplayName("Nested brackets with functions")
+        void testNestedBracketsWithFunctions() throws ScriptException {
+            var result = evaluate("xyz((a + b), (c - d))", "{a: 2, b: 3, c: 5, d: 1}");
+            assertThat(result.asInt()).isEqualTo(9);
+        }
+
+        @Test
+        @DisplayName("Complex nested brackets")
+        void testComplexNestedBrackets() throws ScriptException {
+            var result = evaluate("((a + b) * (c - d)) + xyz((e + f), (g - h))", "{a: 2, b: 3, c: 5, d: 1, e: 1, f: 2, g: 4, h: 2}");
+            assertThat(result.asInt()).isEqualTo(25);
+        }
     }
 
     @Test
@@ -159,6 +252,47 @@ class ExpressionParserTest {
         }
     }
 
+    @Nested
+    @DisplayName("Complex Expression Test")
+    class ComplexExpressionTest {
+        private static final String EXPRESSION = "((v1 + v2) > v3 && xyz(v1, v2) < v3) || bool(v1, v2)";
+
+        @Test
+        @DisplayName("1. {v1: 1, v2: 2, v3: 4}")
+        void test1() throws ScriptException {
+            var result = evaluate(EXPRESSION, "{v1: 1, v2: 2, v3: 4}");
+            assertThat(result.asBoolean()).isFalse();
+        }
+
+        @Test
+        @DisplayName("2. {v1: 3, v2: 2, v3: 4}")
+        void test2() throws ScriptException {
+            var result = evaluate(EXPRESSION, "{v1: 3, v2: 2, v3: 4}");
+            assertThat(result.asBoolean()).isTrue();
+        }
+
+        @Test
+        @DisplayName("3. {v1: 5, v2: 3, v3: 7}")
+        void test3() throws ScriptException {
+            var result = evaluate(EXPRESSION, "{v1: 5, v2: 3, v3: 7}");
+            assertThat(result.asBoolean()).isTrue();
+        }
+
+        @Test
+        @DisplayName("4. {v1: 2, v2: 2, v3: 5}")
+        void test4() throws ScriptException {
+            var result = evaluate(EXPRESSION, "{v1: 2, v2: 2, v3: 5}");
+            assertThat(result.asBoolean()).isFalse();
+        }
+
+        @Test
+        @DisplayName("5. {v1: 4, v2: 4, v3: 8}")
+        void test5() throws ScriptException {
+            var result = evaluate(EXPRESSION, "{v1: 4, v2: 4, v3: 8}");
+            assertThat(result.asBoolean()).isFalse();
+        }
+    }
+
 
     private Value evaluate(String expression, String data) throws ScriptException {
         var testScript = (javascript + """
@@ -167,8 +301,12 @@ class ExpressionParserTest {
                           return p1 + p2;
                      }
                 
+                     function boolFunction(p1, p2){
+                          return p1 > p2;
+                     }
+                
                     var data = new Data(${data});
-                    var expressionParser = new ExpressionParser({xyz: testFunction});
+                    var expressionParser = new ExpressionParser({xyz: testFunction, bool: boolFunction});
                     var expression = expressionParser.parse("${expression}");
                     expression.evaluate(data);
                 """).replace("${expression}", expression).replace("${data}", data);
