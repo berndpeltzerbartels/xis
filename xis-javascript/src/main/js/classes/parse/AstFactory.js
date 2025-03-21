@@ -29,6 +29,21 @@ class AstFactory {
                 case IDENTIFIER:
                     if (this.nextToken().type === OPEN_BRACKET) {
                         row.push(this.parseFunctionCall());
+                    } else if (this.nextToken().type === OPENING_SQUARE_BRACKET) {
+                        const token2 = this.furtherToken(2);
+                        if (token2.type == INTEGER) {
+                            this.consumeToken(IDENTIFIER);
+                            this.consumeToken(OPENING_SQUARE_BRACKET);
+                            row.push(this.createArrayElement(this.consumeToken(INTEGER)));
+                            this.consumeToken(CLOSING_SQUARE_BRACKET);
+                        } else if (token2.type == STRING) {
+                            this.consumeToken(IDENTIFIER);
+                            this.consumeToken(OPENING_SQUARE_BRACKET);
+                            row.push(this.createObjectProperty(this.consumeToken(STRING)));
+                            this.consumeToken(CLOSING_SQUARE_BRACKET);
+                        } else {
+                            row.push(this.createVariable(this.consumeToken(IDENTIFIER)));
+                        }
                     } else {
                         row.push(this.createVariable(this.consumeToken(IDENTIFIER)));
                     }
@@ -95,8 +110,8 @@ class AstFactory {
         var operator;
         while (i < row.length) {
             var element = row[i];
-            if (i%2 != 0 && element.precedence == precedence) {
-                if (!this.isOperator(element))  {
+            if (i % 2 != 0 && element.precedence == precedence) {
+                if (!this.isOperator(element)) {
                     throw new Error("Expected operator in '" + this.originalExpression + "', but got " + element.type);
                 }
                 const left = row[i - 1];
@@ -118,11 +133,15 @@ class AstFactory {
     }
 
     nextToken() {
-        return this.index + 1 < this.tokens.length ? this.tokens[this.index + 1] : {};
+        return this.furtherToken(1);
+    }
+
+    furtherToken(increment) {
+        return this.index + increment < this.tokens.length ? this.tokens[this.index + increment] : {};
     }
 
     consumeToken(type) {
-      //  doDebug(() => type === CLOSE_BRACKET);
+        //  doDebug(() => type === CLOSE_BRACKET);
         const token = this.currentToken();
         if (type && token.type !== type) {
             throw new Error("Expected token of type " + type + " in '" + this.originalExpression + "', but got " + token.type);
@@ -402,6 +421,36 @@ class NoopAst {
 
     toString() {
         return 'noop';
+    }
+}
+
+class ArrayElement {
+    constructor(index) {
+        this.type = 'ARRAY_ELEMENT';
+        this.index = index;
+    }
+
+    evaluate(data) {
+        return data[this.index];
+    }
+
+    toString() {
+        return '[' + this.index + ']';
+    }
+}
+
+class ObjectProperty {
+    constructor(key) {
+        this.type = 'OBJECT_PROPERTY';
+        this.key = key;
+    }
+
+    evaluate(data) {
+        return data[this.key];
+    }
+
+    toString() {
+        return '.' + this.key;
     }
 }
 

@@ -12,9 +12,9 @@ class ScriptTokenizer {
 
             const c = this.peekChar();
 
-            if (this.isArrayStart(c)) {
+            if (this.isOpeningSquareBracket(c)) {
                 this.processArrayStart();
-            } else if (this.isArrayEnd(c)) {
+            } else if (this.isClosingSquareBracket(c)) {
                 this.processArrayEnd();
             } else if (this.isStringStart(c)) {
                 this.processString();
@@ -56,11 +56,11 @@ class ScriptTokenizer {
     
 
     // Array-Verarbeitung
-    isArrayStart(c) {
+    isOpeningSquareBracket(c) {
         return c === '[';
     }
 
-    isArrayEnd(c) {
+    isClosingSquareBracket(c) {
         return c === ']';
     }
 
