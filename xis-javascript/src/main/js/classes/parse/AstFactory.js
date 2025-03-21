@@ -269,7 +269,6 @@ class AstFactory {
             case LESS:
             case GREATER_EQUAL:
             case LESS_EQUAL:
-            case NOT:
                 return true;
             default:
                 return false;
@@ -393,8 +392,6 @@ class Operator {
 
     getPrecedence(tokenType) {
         switch (tokenType) {
-            case NOT:
-                return 4;
             case MUL:
             case DIV:
             case MOD:
