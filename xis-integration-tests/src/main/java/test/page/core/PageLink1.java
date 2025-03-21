@@ -16,7 +16,7 @@ class PageLink1 {
         return "PageLink1";
     }
 
-    @ModelData("link1-content")
+    @ModelData("link1Content")
     String link1Content() {
         return "Link to PageLink2";
     }
