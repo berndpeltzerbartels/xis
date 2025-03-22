@@ -21,7 +21,7 @@ class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
     private final FrontendService frontendService;
     private final NettyMapper mapper;
-    
+
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) {
         Logger.info("Handler added: " + ctx.channel().remoteAddress());
@@ -74,7 +74,15 @@ class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
         Logger.info("Flushing response");
         ctx.flush();
         Logger.info("Response flushed");
-        ctx.close();  // Close the connection after sending the response
+
+        if (HttpUtil.isKeepAlive(request)) {
+            response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
+        } else {
+            response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.CLOSE);
+            ctx.close();  // Close the connection after sending the response
+        }
+
+
     }
 
     private FullHttpResponse handleGetRequest(String uri, FullHttpRequest request) {
