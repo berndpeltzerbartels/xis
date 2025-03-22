@@ -29,6 +29,7 @@ var assertjVersion = rootProject.ext.libraryVersions.assertj
 var gsonVersion = rootProject.ext.libraryVersions.gson
 var jacksonVersion = rootProject.ext.libraryVersions.jackson
 var mockitoVersion = rootProject.ext.libraryVersions.mockito
+var tinylogVersion = "2.6.1"
 var slf4jLog4j12Version = "2.0.3"
 
 
@@ -36,9 +37,9 @@ dependencies {
 
     // Local project dependencies
     implementation project(":xis-deserializer")
-    implementation project(":xis-context")
+    api project(":xis-context")
     implementation project(":xis-util")
-    implementation project(":xis-remote-core")
+    api project(":xis-remote-core")
     implementation project(":xis-resources")
     implementation project(":xis-server")
     implementation project(":xis-frontend")
@@ -48,10 +49,14 @@ dependencies {
     compileOnly project(":xis-deserializer")
 
     // Alle Dependencies für Netty
-    implementation "io.netty:netty-all:4.1.94.Final"
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.14.0'
-    implementation 'com.fasterxml.jackson.core:jackson-core:2.14.0'
-    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.14.0'
+    implementation("io.netty:netty-all:4.2.0.RC4")
+    implementation "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
+    implementation "com.fasterxml.jackson.core:jackson-core:$jacksonVersion"
+    implementation "com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion"
+
+    // Tinylog dependencies
+    implementation("org.tinylog:tinylog-api:$tinylogVersion")
+    implementation("org.tinylog:tinylog-impl:$tinylogVersion")
 
 
     // Annotation processors

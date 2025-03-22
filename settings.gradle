@@ -28,4 +28,5 @@ include 'xis-deserializer'
 include 'xis-frontend'
 include 'xis-plugin'
 include 'xis-boot'
+include 'xis-boot-test-app'
 

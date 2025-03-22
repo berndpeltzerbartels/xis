@@ -1,4 +1,4 @@
-package one.xis.boot;
+package one.xis.boot.netty;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
@@ -11,16 +11,18 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.HttpServerExpectContinueHandler;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import one.xis.context.XISComponent;
 
 @XISComponent
 @RequiredArgsConstructor
-class NettyServer {
+public class NettyServer {
 
-    private final int port;
+    @Setter
+    private int port = 8080;
     private final NettyServerHandler nettyServerHandler;
 
-    void start() throws InterruptedException {
+    public void start() throws InterruptedException {
         NioEventLoopGroup bossGroup = new NioEventLoopGroup(1);
         NioEventLoopGroup workerGroup = new NioEventLoopGroup();
 
