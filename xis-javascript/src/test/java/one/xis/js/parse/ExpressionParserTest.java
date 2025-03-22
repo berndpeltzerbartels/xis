@@ -315,6 +315,65 @@ class ExpressionParserTest {
         }
     }
 
+    /**
+     * Is testing the ternary operator in different scenarios.
+     * Simple ternary operator, nested ternary operator, ternary operator with method calls etc.
+     */
+    @Nested
+    class TernaryOperatorTest {
+
+        @Test
+        @DisplayName("Simple ternary operator")
+        void testSimpleTernaryOperator() throws ScriptException {
+            var result = evaluate("a > b ? a : b", "{a: 3, b: 2}");
+            assertThat(result.asInt()).isEqualTo(3);
+        }
+
+        @Test
+        @DisplayName("Simple ternary operator with false condition")
+        void testSimpleTernaryOperatorWithFalseCondition() throws ScriptException {
+            var result = evaluate("a > b ? a : b", "{a: 1, b: 2}");
+            assertThat(result.asInt()).isEqualTo(2);
+        }
+
+        @Test
+        @DisplayName("Nested ternary operator")
+        void testNestedTernaryOperator() throws ScriptException {
+            var result = evaluate("a > b ? (a > c ? a : c) : (b > c ? b : c)", "{a: 3, b: 2, c: 1}");
+            assertThat(result.asInt()).isEqualTo(3);
+        }
+
+        @Test
+        @DisplayName("Nested ternary operator with false condition")
+        void testNestedTernaryOperatorWithFalseCondition() throws ScriptException {
+            var result = evaluate("a > b ? (a > c ? a : c) : (b > c ? b : c)", "{a: 2, b: 3, c: 1}");
+            assertThat(result.asInt()).isEqualTo(3);
+        }
+
+        @Test
+        @DisplayName("Ternary operator as method parameter")
+        void testTernaryOperatorAsMethodParameter() throws ScriptException {
+            var result = evaluate("xyz(bool(a,b) ? a : b , b) : a", "{a: 3, b: 2}");
+            assertThat(result.asInt()).isEqualTo(5);
+        }
+
+
+        @Test
+        @DisplayName("Ternary operator with method calls")
+        void testTernaryOperatorWithMethodCalls() throws ScriptException {
+            var result = evaluate("bool(a, b) ? xyz(a, b) : a", "{a: 2, b: 3}");
+            assertThat(result.asInt()).isEqualTo(2);
+        }
+
+        @Test
+        @DisplayName("Ternary operator with method calls and nested ternary operator")
+        void testTernaryOperatorWithMethodCallsAndNestedTernaryOperator() throws ScriptException {
+            var result = evaluate("bool(a, b) ? (xyz(a, b) > 2 ? xyz(a, b) : 2) : a", "{a: 3, b: 2}");
+            assertThat(result.asInt()).isEqualTo(5);
+        }
+
+    }
+
     @Nested
     @DisplayName("Complex Expression Test")
     class ComplexExpressionTest {

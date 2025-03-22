@@ -32,14 +32,18 @@ class AstFactory {
     parse() {
         var row = [];
         while (this.index < this.tokens.length) {
-           //console.log(row);
+            //console.log(row);
             const token = this.tokens[this.index];
             switch (this.currentToken().type) {
+                case QUESTION_MARK:
+                    return this.createTernaryOperator(row);
                 case OPEN_BRACKET:
                     this.consumeToken(OPEN_BRACKET);
                     row.push(this.parse());
                     this.consumeToken(CLOSE_BRACKET);
                     break;
+                case COLON:
+                case QUESTION_MARK:
                 case CLOSE_BRACKET:
                 case CLOSING_SQUARE_BRACKET:
                     return this.toExpression(row);
@@ -75,7 +79,7 @@ class AstFactory {
                     break;
                 case NOT:
                     this.consumeToken(NOT);
-                    row.push(new Negation());      
+                    row.push(new Negation());
                     break;
                 case AND:
                 case OR:
@@ -112,7 +116,7 @@ class AstFactory {
             case 1: return row[0];
             default:
                 var result;
-                for (var precedence = 3; precedence >= 0; precedence--) {
+                for (var precedence = 4; precedence >= 0; precedence--) {
                     const operator = this.expressionForPrecedence(row, precedence);
                     if (operator) {
                         result = operator;
@@ -127,8 +131,8 @@ class AstFactory {
         var operator;
         while (i < row.length) {
             var element = row[i];
-            if (element.type ===  'Negation') {
-                negation = element ;
+            if (element.type === 'Negation') {
+                negation = element;
                 row.splice(i, 1);
                 continue;
             }
@@ -151,7 +155,6 @@ class AstFactory {
 
     applyNegation(row) {
         var i = 0;
-        debugger;
         while (i < row.length) {
             var element = row[i];
             if (element.type === NOT) {
@@ -160,9 +163,9 @@ class AstFactory {
                 }
                 const nextElement = row[i + 1];
                 nextElement.negated = true;
-                row.splice(i, 2, nextElement);  
+                row.splice(i, 2, nextElement);
             }
-            i++;    
+            i++;
         }
     }
 
@@ -285,6 +288,7 @@ class AstFactory {
             case LESS:
             case GREATER_EQUAL:
             case LESS_EQUAL:
+            case 'TERNARY':
                 return true;
             default:
                 return false;
@@ -326,6 +330,16 @@ class AstFactory {
         const keyExpression = this.parse();
         this.consumeToken(CLOSING_SQUARE_BRACKET);
         return new ObjectProperty(variable.value, keyExpression);
+    }
+
+    createTernaryOperator(row) {
+        debugger;
+        const condition = this.toExpression(row);
+        this.consumeToken(QUESTION_MARK);
+        var trueExpression = this.parse();
+        this.consumeToken(COLON);
+        var falseExpression = this.parse();
+        return new TernaryOperator(condition, trueExpression, falseExpression);
     }
 
 }
@@ -411,19 +425,21 @@ class Operator {
             case MUL:
             case DIV:
             case MOD:
-                return 3;
+                return 4;
             case ADD:
             case SUB:
-                return 2;
+                return 3;
             case EQUAL:
             case NOT_EQUAL:
             case GREATER:
             case LESS:
             case GREATER_EQUAL:
             case LESS_EQUAL:
-                return 1;
+                return 2;
             case AND:
             case OR:
+                return 1;
+            case 'TERNARY':
                 return 0;
             default:
                 return -1;
@@ -507,7 +523,7 @@ class ObjectProperty {
 
     evaluate(data) {
         const variable = data.getValueByPath(this.path);
-        const rv =  variable[this.key.evaluate(data)];
+        const rv = variable[this.key.evaluate(data)];
         return this.negated ? !rv : rv;
     }
 
@@ -528,6 +544,26 @@ class Negation {
 
     toString() {
         return '!' + this.expression.toString();
+    }
+}
+
+class TernaryOperator {
+    constructor(condition, trueExpression, falseExpression) {
+        this.type = 'TERNARY';
+        this.condition = condition;
+        this.trueExpression = trueExpression;
+        this.falseExpression = falseExpression;
+        this.negated = false;
+    }
+
+    evaluate(data) {
+        const conditionValue = this.condition.evaluate(data);
+        const rv = conditionValue ? this.trueExpression.evaluate(data) : this.falseExpression.evaluate(data);
+        return this.negated ? !rv : rv;
+    }
+
+    toString() {
+        return this.condition.toString() + ' ? ' + this.trueExpression.toString() + ' : ' + this.falseExpression.toString();
     }
 }
 

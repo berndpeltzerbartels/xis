@@ -19,8 +19,13 @@ class ScriptTokenizer {
             if (this.index >= this.script.length) break;
 
             const c = this.peekChar();
-
-            if (this.isOpeningSquareBracket(c)) {
+            if (this.isColon(c)) {
+                this.addToken({ type: COLON });
+                this.index++;
+            } else if (this.isQuestionMark(c)) {
+                this.addToken({ type: QUESTION_MARK });
+                this.index++;
+            } else if (this.isOpeningSquareBracket(c)) {
                 this.processArrayStart();
             } else if (this.isClosingSquareBracket(c)) {
                 this.processArrayEnd();
@@ -72,6 +77,10 @@ class ScriptTokenizer {
         return c === ']';
     }
 
+    isQuestionMark(c) {
+        return c === '?';
+    }
+
     processArrayStart() {
         this.addToken({ type: OPENING_SQUARE_BRACKET, index: this.index });
         this.index++; // Skip '['
@@ -120,6 +129,10 @@ class ScriptTokenizer {
     // Zahlen-Verarbeitung
     isDigit(c) {
         return /\d/.test(c);
+    }
+
+    isColon(c) {
+        return c === ':';
     }
 
     processNumber() {
@@ -277,3 +290,5 @@ const COMMA = 35;
 const OPERATOR = 36;
 const OPENING_SQUARE_BRACKET = 37;
 const CLOSING_SQUARE_BRACKET = 38;
+const QUESTION_MARK = 39;
+const COLON = 40;

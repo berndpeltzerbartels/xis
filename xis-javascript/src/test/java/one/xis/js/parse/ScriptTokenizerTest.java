@@ -45,6 +45,8 @@ class ScriptTokenizerTest {
     private static final int IDENTIFIER = 34;
     private static final int OPENING_SQUARE_BRACKET = 37;
     private static final int CLOSING_SQUARE_BRACKET = 38;
+    private static final int QUESTION_MARK = 39;
+    private static final int COLON = 40;
 
     private String javascript;
 
@@ -327,6 +329,22 @@ class ScriptTokenizerTest {
             var result = JSUtil.execute(testScript);
             var value = result.getArrayElement(0);
             assertThat(value.getMember("type").asInt()).isEqualTo(CLOSE_BRACKET);
+        }
+
+        @Test
+        void testQuestionMark() throws ScriptException {
+            var testScript = javascript + "new ScriptTokenizer('?').tokenize();";
+            var result = JSUtil.execute(testScript);
+            var value = result.getArrayElement(0);
+            assertThat(value.getMember("type").asInt()).isEqualTo(QUESTION_MARK);
+        }
+
+        @Test
+        void testColon() throws ScriptException {
+            var testScript = javascript + "new ScriptTokenizer(':').tokenize();";
+            var result = JSUtil.execute(testScript);
+            var value = result.getArrayElement(0);
+            assertThat(value.getMember("type").asInt()).isEqualTo(COLON);
         }
     }
 
