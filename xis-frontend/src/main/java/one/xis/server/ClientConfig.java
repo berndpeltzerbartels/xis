@@ -17,6 +17,7 @@ public class ClientConfig {
 
     private final Collection<String> widgetIds;
     private final Collection<String> pageIds;
+    private boolean useWebsockets;
 
     /**
      * Normalized path of the welcome-page.

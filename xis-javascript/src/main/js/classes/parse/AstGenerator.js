@@ -1,7 +1,7 @@
 /**
  * Create the abstract source tree of the expression in tag attributes or text content.
  */
-class AstFactory {
+class AstGenerator {
 
     /**
      * 
@@ -32,7 +32,6 @@ class AstFactory {
     parse() {
         var row = [];
         while (this.index < this.tokens.length) {
-            //console.log(row);
             const token = this.tokens[this.index];
             switch (this.currentToken().type) {
                 case QUESTION_MARK:

@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * In case the anntatated field is of type collection, it will get validated
+ * In case the annotated field is of type collection, it will get validated
  * to contain at least the give number of elements.
  * <p>
  * Otherwise the corresponding field is validated to be filled.

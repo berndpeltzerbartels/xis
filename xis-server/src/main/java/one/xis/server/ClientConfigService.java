@@ -2,6 +2,7 @@ package one.xis.server;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import one.xis.Page;
 import one.xis.Widget;
@@ -29,12 +30,15 @@ class ClientConfigService {
     @XISInject(annotatedWith = Widget.class)
     private Collection<Object> widgetControllers;
 
+    @Setter
+    private boolean useWebsockets;
+
     @Getter
     private ClientConfig config;
 
     @XISInit
     void init() {
-        var configBuilder = ClientConfig.builder();
+        var configBuilder = ClientConfig.builder().useWebsockets(useWebsockets);
         addPageAttributes(configBuilder);
         addWidgetAttributes(configBuilder);
         config = configBuilder.build();

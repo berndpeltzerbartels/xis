@@ -8,7 +8,7 @@ class ExpressionParser {
     parse(expression) {
         debugger;
         const tokens = new ScriptTokenizer(expression).tokenize();
-        return new AstFactory(tokens, this.functions, expression).createAst();
+        return new AstGenerator(tokens, this.functions, expression).createAst();
     }
 }
 
