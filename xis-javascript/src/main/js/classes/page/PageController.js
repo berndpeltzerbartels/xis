@@ -104,12 +104,25 @@ class PageController {
             }
         }
         var data = response.data;
-        data.setValue(['pathVariables'], resolvedURL.pathVariablesAsMap());
-        data.setValue(['urlParameters'], resolvedURL.urlParameters);
+        data.scope = 'TREE';
+        this.doRefresh(data);
+    }
+
+    triggerPageReload(response) {
+        var data = response.data;
+        data.scope = 'CONTROLER';
+        this.doRefresh(response);
+    }
+
+    doRefresh(data) {
+        data.setValue(['pathVariables'], this.resolvedURL.pathVariablesAsMap());
+        data.setValue(['urlParameters'], this.resolvedURL.urlParameters);
         this.page.data = data;
         this.htmlTagHandler.refresh(this.page.data);
         this.updateHistory(this.resolvedURL);
     }
+
+
 
 
     /** 

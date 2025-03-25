@@ -145,7 +145,7 @@ class WidgetContainerHandler extends TagHandler {
         if (this.widgetInstance) {
             var resolvedURL = this.widgetState.resolvedURL;
             var _this = this;
-            this.client.loadWidgetData(this.widgetInstance, this.widgetState)
+            this.client.loadWidgetData(this.widgetInstance, this.widgetState) 
                 .then(response => response.data)
                 .then(data => { data.parentData = parentData; return data; })
                 .then(data => { data.setValue(['urlParameters'], resolvedURL.urlParameters); return data; })

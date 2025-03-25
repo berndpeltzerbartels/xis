@@ -28,4 +28,5 @@ public class ServerResponse {
     private String nextPageURL;
     private String nextWidgetId;
     private ValidatorMessages validatorMessages = new ValidatorMessages();
+    private boolean reloadPage;
 }

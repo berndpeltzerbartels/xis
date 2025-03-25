@@ -247,6 +247,8 @@ class Client {
         serverResponse.nextWidgetId = obj.nextWidgetId;
         serverResponse.status = response.status;
         serverResponse.validatorMessages = new ValidatorMessages(obj.validatorMessages);
+        serverResponse.reloadPage = obj.reloadPage;
+        serverResponse.reloadWidgets = obj.reloadWidgets;
         return serverResponse;
     }
 
