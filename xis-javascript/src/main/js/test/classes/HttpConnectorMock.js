@@ -1,4 +1,4 @@
-class ConnectorMock {
+class HttpConnectorMock {
 
     /**
      * @public
