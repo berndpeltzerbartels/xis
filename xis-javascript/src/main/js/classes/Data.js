@@ -12,6 +12,7 @@ class Data {
         this.values = values;
         this.parentData = parentData;
         this.validationPath = '';
+        this.scope = 'default';
     }
     /**
      * @public

@@ -25,7 +25,7 @@ class ForeachHandler extends TagHandler {
         for (var i = 0; i < this.cache.length; i++) {
             var subData = new Data({}, data);
             this.setValidationPath(subData, this.varName, i);
-            subData.setValue([this.varName + '_index'], i);
+            subData.setValue([this.varName + 'Index'], i);
             subData.setValue([this.varName], arr[i]);
             var children = this.cache.getChildren(i);
             if (i < arr.length) {

@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 
 /**
- * BacEncapsulates all methods, required by the framework's controller.
+ * Encapsulates all methods, required by the framework's controller.
  */
 @XISComponent
 @RequiredArgsConstructor
