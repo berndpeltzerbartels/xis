@@ -142,12 +142,20 @@ class WidgetContainerHandler extends TagHandler {
      * @private
      */
     reloadDataAndRefresh(parentData) {
+        this.doLoad(parentData, SCOPE_TREE);
+    }
+
+    trggerRefresh() {
+        this.doLoad(new Data({}), SCOPE_CONTROLLER);
+    }
+
+    doLoad(parentData, scope) {
         if (this.widgetInstance) {
             var resolvedURL = this.widgetState.resolvedURL;
             var _this = this;
             this.client.loadWidgetData(this.widgetInstance, this.widgetState) 
                 .then(response => response.data)
-                .then(data => { data.parentData = parentData; return data; })
+                .then(data => { data.parentData = parentData; data.scope = scope; return data; })
                 .then(data => { data.setValue(['urlParameters'], resolvedURL.urlParameters); return data; })
                 .then(data => { data.setValue(['pathVariables'], resolvedURL.pathVariablesAsMap()); return data; })
                 .then(data => { data.setValue(['widgetParameters'], _this.widgetState.widgetParameters); return data; })

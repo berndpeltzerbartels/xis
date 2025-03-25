@@ -3,12 +3,15 @@ class ReloadTrigger {
         this.client = client;
     }
     
-    triggerReloads(serverRepsonse) {
-        if (serverRepsonse.reloadPage) {
+    triggerReloads(serverResponse) {
+        if (serverResponse.reloadPage) {
            app.pageController.triggerPageReload();
         }
-        for (var widgetId in serverRepsonse.reloadWidgets) {
-           
+        for (var widgetId in serverResponse.reloadWidgets) {
+           var containerHandler = app.widgetContainers.findContainerHandlerByWidgetId(widgetId);
+           if (containerHandler) {
+               containerHandler.triggerWidgetReload();
+           }
         }
     }
 }
