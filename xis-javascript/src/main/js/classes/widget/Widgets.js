@@ -2,7 +2,7 @@ class Widgets {
 
     /**
      *
-     * @param {Client} client
+     * @param {HttpClient} client
      */
     constructor(client) {
         this.widgets = {};

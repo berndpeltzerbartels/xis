@@ -1,12 +1,12 @@
 /**
- * @typedef Client
+ * @typedef HttpClient
  * @property {HttpConnector} httpConnector
  * @property {ClientConfig} config
  * @property {string} clientId
  * @property {string} userId
  * @property {zoneId}
  */
-class Client {
+class HttpClient {
 
     /**
      * @param {HttpConnector} httpConnector

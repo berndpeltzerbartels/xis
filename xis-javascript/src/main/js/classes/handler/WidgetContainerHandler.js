@@ -5,7 +5,7 @@
  * @access public
  * @description This handler is responsible for handling a tag for presenting widgets.
  * 
- * @property {Client} client
+ * @property {HttpClient} client
  * @property {Widgets} widgets
  * @property {WidgetContainers} widgetContainers
  * @property {WidgetInstance} widgetInstance
@@ -19,7 +19,7 @@ class WidgetContainerHandler extends TagHandler {
     /**
      *
      * @param {Element} tag
-     * @param {Client} client
+     * @param {HttpClient} client
      * @param {Widgets} widgets
      * @param {WidgetContainers} widgetContainers
      */

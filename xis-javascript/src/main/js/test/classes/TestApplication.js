@@ -3,7 +3,7 @@ class TestApplication {
     constructor() {
         this.httpConnector = new HttpConnectorMock();
         this.domAccessor = new DomAccessor();
-        this.client = new Client(this.httpConnector);
+        this.client = new HttpClient(this.httpConnector);
         this.pages = new Pages(this.client);
         this.urlResolver = new URLResolver(this.pages);
         this.widgetContainers = new WidgetContainers();

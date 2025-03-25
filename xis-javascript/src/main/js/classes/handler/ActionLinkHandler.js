@@ -2,7 +2,7 @@ class ActionLinkHandler extends TagHandler {
 
     /**
      * @param {Element} element
-     * @param {Client} client
+     * @param {HttpClient} client
      * @param {WidgetContainers} widgetContainers
      */
     constructor(element, client, widgetContainers) {

@@ -1,7 +1,7 @@
 /**
  * 
  * @typedef PageController
- * @property {Client} client
+ * @property {HttpClient} client
  * @property {Pages} pages
  * @property {Initializer} initializer
  * @property {URLResolver} urlResolver
@@ -17,7 +17,7 @@
 class PageController {
 
     /**
-     * @param {Client} client
+     * @param {HttpClient} client
      * @param {Pages} pages
      * @param {Initializer} initializer
      * @param {URLResolver} urlResolver

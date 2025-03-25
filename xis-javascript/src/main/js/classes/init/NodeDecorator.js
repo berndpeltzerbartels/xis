@@ -7,7 +7,7 @@ class NodeDecorator {
     /**
      *
      * @param {DomAccessor} domAccessor
-     * @param {Client} client
+     * @param {HttpClient} client
      * @param {Widgets} widgets
      * @param {WidgetContainers} widgetContainers
      */

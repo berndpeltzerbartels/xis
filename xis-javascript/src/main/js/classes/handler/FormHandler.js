@@ -4,7 +4,7 @@ class FormHandler extends TagHandler {
     /**
      * 
      * @param {Element} formTag 
-     * @param {Client} client 
+     * @param {HttpClient} client 
      */
     constructor(formTag, client) {
         super(formTag)

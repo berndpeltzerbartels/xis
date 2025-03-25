@@ -1,7 +1,7 @@
 
 class Pages {
     /**
-    * @param {Client} client
+    * @param {HttpClient} client
     */
     constructor(client) {
         this.client = client;

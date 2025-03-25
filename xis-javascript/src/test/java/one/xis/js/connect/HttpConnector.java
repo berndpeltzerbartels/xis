@@ -6,17 +6,17 @@ import one.xis.utils.lang.TriFunction;
 import java.util.Map;
 import java.util.function.BiFunction;
 
-public class HttpClient {
+public class HttpConnector {
 
     private final BiFunction<String, Map<String, String>, Promise> getHandler;
     private final TriFunction<String, Object, Map<String, String>, Promise> postHandler;
 
-    public HttpClient(BiFunction<String, Map<String, String>, Promise> getHandler, TriFunction<String, Object, Map<String, String>, Promise> postHandler) {
+    public HttpConnector(BiFunction<String, Map<String, String>, Promise> getHandler, TriFunction<String, Object, Map<String, String>, Promise> postHandler) {
         this.getHandler = getHandler;
         this.postHandler = postHandler;
     }
 
-    public HttpClient() {
+    public HttpConnector() {
         this.getHandler = (a, b) -> null;
         this.postHandler = (a, b, c) -> null;
     }

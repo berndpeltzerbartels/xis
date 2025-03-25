@@ -24,36 +24,36 @@ import static org.mockito.Mockito.*;
 class ClientTest {
 
     private String script;
-    private HttpClient httpClient;
+    private HttpConnector httpConnector;
     private Promise promise;
 
     @BeforeAll
     void init() {
-        httpClient = Mockito.mock(HttpClient.class);
+        httpConnector = Mockito.mock(HttpConnector.class);
         promise = Mockito.mock(Promise.class);
-        when(httpClient.get(any(), any())).thenReturn(promise);
+        when(httpConnector.get(any(), any())).thenReturn(promise);
         var clientJs = Javascript.getScript(CLASSES, FUNCTIONS);
-        var instantiation = "var client = new Client(httpClient);";
+        var instantiation = "var client = new HttpClient(httpConnector);";
         script = clientJs + instantiation;
     }
 
     @Test
     @SuppressWarnings("unchecked")
     void loadPageHead() throws ScriptException {
-        JSUtil.execute(script + "client.loadPageHead('x.html');", Map.of("httpClient", httpClient));
+        JSUtil.execute(script + "client.loadPageHead('x.html');", Map.of("httpConnector", httpConnector));
 
         var captor = ArgumentCaptor.forClass(Map.class);
-        verify(httpClient, times(1)).get(eq("/xis/page/head"), captor.capture());
+        verify(httpConnector, times(1)).get(eq("/xis/page/head"), captor.capture());
 
         assertThat(captor.getValue().get("uri")).isEqualTo("x.html");
     }
 
     @Test
     void loadPageBody() throws ScriptException {
-        JSUtil.execute(script + "client.loadPageBody('x.html');", Map.of("httpClient", httpClient));
+        JSUtil.execute(script + "client.loadPageBody('x.html');", Map.of("httpConnector", httpConnector));
 
         var captor = ArgumentCaptor.forClass(Map.class);
-        verify(httpClient, times(1)).get(eq("/xis/page/body"), (Map<String, String>) captor.capture());
+        verify(httpConnector, times(1)).get(eq("/xis/page/body"), (Map<String, String>) captor.capture());
 
         assertThat(captor.getValue().get("uri")).isEqualTo("x.html");
 
