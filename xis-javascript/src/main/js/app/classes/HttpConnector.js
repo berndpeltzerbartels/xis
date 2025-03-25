@@ -1,4 +1,4 @@
-class HttpClient {
+class HttpConnector {
 
     /**
      * @param {Function} errorHandler

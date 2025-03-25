@@ -1,6 +1,6 @@
 /**
  * @typedef Client
- * @property {HttpClient} httpClient
+ * @property {HttpConnector} httpConnector
  * @property {ClientConfig} config
  * @property {string} clientId
  * @property {string} userId
@@ -9,10 +9,10 @@
 class Client {
 
     /**
-     * @param {HttpClient} httpClient
+     * @param {HttpConnector} httpConnector
      */
-    constructor(httpClient) {
-        this.httpClient = httpClient;
+    constructor(httpConnector) {
+        this.httpConnector = httpConnector;
         this.config = undefined;
         this.clientId = randomString();
         this.userId = '';
@@ -26,7 +26,7 @@ class Client {
      */
     loadConfig() {
         var _this = this;
-        return this.httpClient.get('/xis/config', {})
+        return this.httpConnector.get('/xis/config', {})
             .then(response => _this.deserializeConfig(response.responseText))
             .then(config => { _this.config = config; return config; });
     }
@@ -37,7 +37,7 @@ class Client {
      * @return {Promise<string>}
      */
     loadPageHead(pageId) {
-        return this.httpClient.get('/xis/page/head', { uri: pageId }).then(response => response.responseText);
+        return this.httpConnector.get('/xis/page/head', { uri: pageId }).then(response => response.responseText);
     }
 
 
@@ -47,7 +47,7 @@ class Client {
      * @return {Promise<string>}
      */
     loadPageBody(pageId) {
-        return this.httpClient.get('/xis/page/body', { uri: pageId }).then(response => response.responseText);
+        return this.httpConnector.get('/xis/page/body', { uri: pageId }).then(response => response.responseText);
     }
 
     /**
@@ -56,7 +56,7 @@ class Client {
      * @return {Promise<any>}
      */
     loadPageBodyAttributes(pageId) {
-        return this.httpClient.get('/xis/page/body-attributes', { uri: pageId })
+        return this.httpConnector.get('/xis/page/body-attributes', { uri: pageId })
             .then(response => response.responseText)
             .then(content => JSON.parse(content));
     }
@@ -67,7 +67,7 @@ class Client {
     * @return {Promise<string>}
     */
     loadWidget(widgetId) {
-        return this.httpClient.get('/xis/widget/html', { uri: widgetId }).then(response => response.responseText);
+        return this.httpConnector.get('/xis/widget/html', { uri: widgetId }).then(response => response.responseText);
     }
 
     /**
@@ -78,7 +78,7 @@ class Client {
     loadPageData(resolvedURL) {
         var _this = this;
         var request = this.createPageRequest(resolvedURL, null, null);
-        return this.httpClient.post('/xis/page/model', request, {})
+        return this.httpConnector.post('/xis/page/model', request, {})
             .then(response => _this.deserializeResponse(response));
     }
 
@@ -90,7 +90,7 @@ class Client {
     loadWidgetData(widgetInstance, widgetState) {
         var _this = this;
         var request = this.createWidgetRequest(widgetInstance, widgetState, null, null, null);
-        return this.httpClient.post('/xis/widget/model', request)
+        return this.httpConnector.post('/xis/widget/model', request)
             .then(response => _this.deserializeResponse(response));
     }
 
@@ -104,7 +104,7 @@ class Client {
     loadFormData(resolvedURL, widgetId, formBindingKey, formBindingParameters) {
         var _this = this;
         var request = this.createFormRequest(resolvedURL, widgetId, {}, null, formBindingKey, formBindingParameters);
-        return this.httpClient.post('/xis/form/model', request)
+        return this.httpConnector.post('/xis/form/model', request)
             .then(response => _this.deserializeResponse(response));
     }
 
@@ -118,7 +118,7 @@ class Client {
     widgetLinkAction(widgetInstance, widgetState, action, actionParameters) {
         var _this = this;
         var request = this.createWidgetRequest(widgetInstance, widgetState, action, {}, actionParameters);
-        return this.httpClient.post('/xis/widget/action', request, {})
+        return this.httpConnector.post('/xis/widget/action', request, {})
             .then(response => _this.deserializeResponse(response));
     }
 
@@ -132,7 +132,7 @@ class Client {
     pageLinkAction(resolvedURL, action, actionParameters) {
         var _this = this;
         var request = this.createPageRequest(resolvedURL, {}, action, actionParameters);
-        return this.httpClient.post('/xis/page/action', request, {})
+        return this.httpConnector.post('/xis/page/action', request, {})
             .then(response => _this.deserializeResponse(response));
     }
 
@@ -149,7 +149,7 @@ class Client {
     formAction(resolvedURL, widgetId, formData, action, formBindigKey, formBindingParameters) {
         var _this = this;
         var request = this.createFormRequest(resolvedURL, widgetId, formData, action, formBindigKey, formBindingParameters);
-        return this.httpClient.post('/xis/form/action', request, {})
+        return this.httpConnector.post('/xis/form/action', request, {})
             .then(response => _this.deserializeResponse(response));
     }
 
