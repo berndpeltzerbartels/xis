@@ -122,7 +122,10 @@ class PageController {
         this.updateHistory(this.resolvedURL);
     }
 
-
+    triggerAdditionalReloads(response) {
+        app.reloadTrigger.triggerWidgetReloadsonDemand(response);
+        return response;
+    }
 
 
     /** 

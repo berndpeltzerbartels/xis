@@ -40,6 +40,7 @@ class WidgetContainerHandler extends TagHandler {
     * @param {ServerResponse} response 
     */
     handleActionResponse(response) {
+        this.triggerAdditionalReloads(response);
         if (response.nextPageId) {
             app.pageController.handleActionResponse(response.nextPageId, response.nextPageParameters);
         }
@@ -145,7 +146,7 @@ class WidgetContainerHandler extends TagHandler {
         this.doLoad(parentData, SCOPE_TREE);
     }
 
-    trggerRefresh() {
+    triggerWidgetReload() {
         this.doLoad(new Data({}), SCOPE_CONTROLLER);
     }
 
@@ -153,7 +154,8 @@ class WidgetContainerHandler extends TagHandler {
         if (this.widgetInstance) {
             var resolvedURL = this.widgetState.resolvedURL;
             var _this = this;
-            this.client.loadWidgetData(this.widgetInstance, this.widgetState) 
+            this.client.loadWidgetData(this.widgetInstance, this.widgetState)
+                .then(response => _this.triggerAdditionalReloads(response)) 
                 .then(response => response.data)
                 .then(data => { data.parentData = parentData; data.scope = scope; return data; })
                 .then(data => { data.setValue(['urlParameters'], resolvedURL.urlParameters); return data; })
@@ -163,6 +165,12 @@ class WidgetContainerHandler extends TagHandler {
                 .then(data => _this.refreshDescendantHandlers(data))
                 .catch(e => console.error(e));
         }
+    }
+
+    triggerAdditionalReloads(response) {
+       app.reloadTrigger.triggerPageReloadOnDemand(response);
+       app.reloadTrigger.triggerWidgetReloadsOnDemand(response);
+       return response;
     }
 
     /**

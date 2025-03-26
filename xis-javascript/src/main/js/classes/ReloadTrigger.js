@@ -1,17 +1,19 @@
 class ReloadTrigger {
-    constructor(client) {
-        this.client = client;
-    }
-    
-    triggerReloads(serverResponse) {
+
+    triggerPageReloadOnDemand(serverResponse) {
         if (serverResponse.reloadPage) {
-           app.pageController.triggerPageReload();
-        }
+            app.pageController.triggerPageReload();
+         }
+         return serverResponse;
+    }
+
+    triggerWidgetReloadsOnDemand(serverResponse) {
         for (var widgetId in serverResponse.reloadWidgets) {
-           var containerHandler = app.widgetContainers.findContainerHandlerByWidgetId(widgetId);
-           if (containerHandler) {
-               containerHandler.triggerWidgetReload();
-           }
-        }
+            var containerHandler = app.widgetContainers.findContainerHandlerByWidgetId(widgetId);
+            if (containerHandler) {
+                containerHandler.triggerWidgetReload();
+            }
+         }
+         return serverResponse;
     }
 }
