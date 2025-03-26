@@ -14,6 +14,7 @@ class NodeDecorator {
     constructor(domAccessor, client, widgets, widgetContainers) {
         this.domAccessor = domAccessor;
         this.client = client;
+        this.bakcenService = new BackendService(this.client);
         this.widgets = widgets;
         this.widgetContainers = widgetContainers;
     }
@@ -195,7 +196,7 @@ class NodeDecorator {
      * @returns {TagHandler}
      */
     decorateWidgetContainer(container) {
-        var handler = new WidgetContainerHandler(container, this.client, this.widgets, this.widgetContainers);
+        var handler = new WidgetContainerHandler(container, this.bakcenService, this.widgets, this.widgetContainers);
         this.addHandler(container, handler);
         return handler;
     }

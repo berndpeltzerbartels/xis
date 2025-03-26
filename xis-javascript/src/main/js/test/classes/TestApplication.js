@@ -10,7 +10,7 @@ class TestApplication {
         this.widgets = new Widgets(this.client);
         this.initializer = new Initializer(this.domAccessor, this.client, this.widgets, this.widgetContainers);
         this.pageController = new PageController(this.client, this.pages, this.initializer, this.urlResolver);
-        this.backenService = new BackenService();
+        this.backendService = new BackendService();
     }
 
 

@@ -5,7 +5,7 @@
  * @access public
  * @description This handler is responsible for handling a tag for presenting widgets.
  * 
- * @property {HttpClient} client
+ * @property {BackendService} backendService
  * @property {Widgets} widgets
  * @property {WidgetContainers} widgetContainers
  * @property {WidgetInstance} widgetInstance
@@ -19,13 +19,13 @@ class WidgetContainerHandler extends TagHandler {
     /**
      *
      * @param {Element} tag
-     * @param {HttpClient} client
+     * @param {BackendService} backendService
      * @param {Widgets} widgets
      * @param {WidgetContainers} widgetContainers
      */
-    constructor(tag, client, widgets, widgetContainers) {
+    constructor(tag, backendService, widgets, widgetContainers) {
         super(tag);
-        this.client = client;
+        this.backendService = backendService;
         this.widgets = widgets;
         this.widgetContainers = widgetContainers;
         this.widgetInstance = undefined;
@@ -40,7 +40,7 @@ class WidgetContainerHandler extends TagHandler {
     * @param {ServerResponse} response 
     */
     handleActionResponse(response) {
-        this.triggerAdditionalReloads(response);
+        this.backendService.triggerAdditionalReloadsOnDemand(response); // TODO move it
         if (response.nextPageId) {
             app.pageController.handleActionResponse(response.nextPageId, response.nextPageParameters);
         }
@@ -152,15 +152,10 @@ class WidgetContainerHandler extends TagHandler {
 
     doLoad(parentData, scope) {
         if (this.widgetInstance) {
-            var resolvedURL = this.widgetState.resolvedURL;
             var _this = this;
-            this.client.loadWidgetData(this.widgetInstance, this.widgetState)
-                .then(response => _this.triggerAdditionalReloads(response)) 
-                .then(response => response.data)
+            this.backendService.loadWidgetData(this.widgetInstance, this.widgetState)
                 .then(data => { data.parentData = parentData; data.scope = scope; return data; })
-                .then(data => { data.setValue(['urlParameters'], resolvedURL.urlParameters); return data; })
-                .then(data => { data.setValue(['pathVariables'], resolvedURL.pathVariablesAsMap()); return data; })
-                .then(data => { data.setValue(['widgetParameters'], _this.widgetState.widgetParameters); return data; })
+                .then(data => { console.log("data"+(typeof data)); data.parentData = parentData; data.scope = scope; return data; })
                 .then(data => { _this.widgetState.data = data; return data; })
                 .then(data => _this.refreshDescendantHandlers(data))
                 .catch(e => console.error(e));
@@ -168,8 +163,8 @@ class WidgetContainerHandler extends TagHandler {
     }
 
     triggerAdditionalReloads(response) {
-       app.backenService.triggerPageReloadOnDemand(response);
-       app.backenService.triggerWidgetReloadsOnDemand(response);
+       app.backendService.triggerPageReloadOnDemand(response);
+       app.backendService.triggerWidgetReloadsOnDemand(response);
        return response;
     }
 

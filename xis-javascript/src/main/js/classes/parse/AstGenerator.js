@@ -323,7 +323,6 @@ class AstGenerator {
     }
 
     createPropertyVariable() {
-        debugger;
         var variable = this.consumeToken(IDENTIFIER);
         this.consumeToken(OPENING_SQUARE_BRACKET);
         const keyExpression = this.parse();
@@ -332,7 +331,6 @@ class AstGenerator {
     }
 
     createTernaryOperator(row) {
-        debugger;
         const condition = this.toExpression(row);
         this.consumeToken(QUESTION_MARK);
         var trueExpression = this.parse();
