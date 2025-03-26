@@ -168,8 +168,8 @@ class WidgetContainerHandler extends TagHandler {
     }
 
     triggerAdditionalReloads(response) {
-       app.reloadTrigger.triggerPageReloadOnDemand(response);
-       app.reloadTrigger.triggerWidgetReloadsOnDemand(response);
+       app.backenService.triggerPageReloadOnDemand(response);
+       app.backenService.triggerWidgetReloadsOnDemand(response);
        return response;
     }
 

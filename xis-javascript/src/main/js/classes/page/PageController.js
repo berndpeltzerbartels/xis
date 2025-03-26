@@ -123,7 +123,7 @@ class PageController {
     }
 
     triggerAdditionalReloads(response) {
-        app.reloadTrigger.triggerWidgetReloadsonDemand(response);
+        app.backenService.triggerWidgetReloadsonDemand(response);
         return response;
     }
 
