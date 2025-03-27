@@ -45,6 +45,7 @@ class ControllerWrapperFactory {
     private Collection<ControllerMethod> modelMethods(Object controller) {
         var map = new MethodMap();
         annotatedMethods(controller, ModelData.class)
+                .filter(m -> !m.isAnnotationPresent(Action.class))
                 .map(this::createModelMethod)
                 .forEach(controllerMethod -> map.put(controllerMethod.getKey(), controllerMethod));
         return map.values();
@@ -53,6 +54,7 @@ class ControllerWrapperFactory {
     private Collection<ControllerMethod> formDataMethods(Object controller) {
         var map = new MethodMap();
         annotatedMethods(controller, FormData.class)
+                .filter(m -> !m.isAnnotationPresent(Action.class))
                 .map(this::createFormDataMethod)
                 .forEach(controllerMethod -> map.put(controllerMethod.getKey(), controllerMethod));
         return map.values();

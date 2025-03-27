@@ -145,6 +145,7 @@ function refreshNode(node, data) {
  * @returns {string:string} 
  */
 function urlParameters(url) {
+    assertNotNull(url, 'url is null');
     var urlParameters = {};
     var start = url.indexOf('?');
     if (start != -1) {
