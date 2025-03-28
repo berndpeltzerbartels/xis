@@ -2,6 +2,20 @@ class BackendService {
 
     constructor(client) {
         this.client = client;
+        this.config = undefined;
+    }
+    
+     /**
+     * @public
+     * @param {ClientConfig} config
+     * @returns {Promise<ClientConfig>}
+     */
+     setConfig(config) {
+        var _this = this;
+        return new Promise((resolve, _) => {
+            _this.config = config;
+            resolve(config);
+        });
     }
 
     /**

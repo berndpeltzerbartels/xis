@@ -23,6 +23,7 @@ class TestApplication {
         var _this = this;
         return this.client.loadConfig()
             .then(config => _this.pageController.setConfig(config))
+            .then(config => _this.backendService.setConfig(config))
             .then(config => _this.widgets.loadWidgets(config))
             .then(config => _this.pages.loadPages(config))
             .then(() => _this.urlResolver.init())
