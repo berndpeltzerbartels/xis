@@ -36,7 +36,7 @@ dependencies {
     implementation project(":xis-deserializer")
     implementation project(":xis-context")
     implementation project(":xis-util")
-    implementation project(":xis-remote-core")
+    implementation project(":xis-controller-api")
 
     // Annotation processors
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"

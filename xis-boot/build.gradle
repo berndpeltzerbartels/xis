@@ -39,7 +39,7 @@ dependencies {
     implementation project(":xis-deserializer")
     api project(":xis-context")
     implementation project(":xis-util")
-    api project(":xis-remote-core")
+    api project(":xis-controller-api")
     implementation project(":xis-resources")
     implementation project(":xis-server")
     implementation project(":xis-adapter-spi")

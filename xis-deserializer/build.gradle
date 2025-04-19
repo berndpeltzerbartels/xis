@@ -34,7 +34,7 @@ dependencies {
 
     // Local project dependencies
     implementation project(":xis-util")
-    implementation project(":xis-remote-core")
+    implementation project(":xis-controller-api")
     implementation project(":xis-context")
     implementation project(":xis-adapter-spi")
     testImplementation project(":xis-adapter-spi")

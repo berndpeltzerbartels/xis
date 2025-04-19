@@ -31,7 +31,7 @@ var junitVersion = rootProject.ext.libraryVersions.junit
 dependencies {
 
     // Local project dependencies
-    implementation project(':xis-remote-core')
+    implementation project(':xis-controller-api')
     implementation project(':xis-spring')
     implementation project(':xis-test')
 

@@ -7,7 +7,7 @@ pluginManagement {
 
 
 rootProject.name = 'xis-remote'
-include 'xis-remote-core'
+include 'xis-controller-api'
 include 'xis-validation'
 include 'xis-processor'
 include 'xis-spring-test-app'

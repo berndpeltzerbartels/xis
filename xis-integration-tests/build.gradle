@@ -35,7 +35,7 @@ dependencies {
     implementation project(':xis-context')
     implementation project(':xis-server')
     implementation project(':xis-resources')
-    implementation project(':xis-remote-core')
+    implementation project(':xis-controller-api')
     implementation project(':xis-util')
     implementation project(':xis-validation')
 

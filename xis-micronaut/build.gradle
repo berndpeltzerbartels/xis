@@ -46,12 +46,12 @@ dependencies {
     // Local project dependencies
     implementation project(':xis-context')
     implementation project(':xis-adapter-spi')
-    implementation project(':xis-remote-core')
+    implementation project(':xis-controller-api')
 
     // Test dependencies
     testImplementation project(':xis-context')
     testImplementation project(':xis-server')
-    testImplementation project(':xis-remote-core')
+    testImplementation project(':xis-controller-api')
 }
 
 

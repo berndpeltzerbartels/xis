@@ -36,7 +36,7 @@ dependencies {
     // Local project dependencies
     implementation(project(":xis-context"))
     implementation(project(":xis-util"))
-    implementation(project(":xis-remote-core"))
+    implementation(project(":xis-controller-api"))
     implementation(project(":xis-javascript"))
     implementation(project(":xis-deserializer"))
     implementation(project(":xis-gson"))

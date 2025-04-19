@@ -31,7 +31,7 @@ var junitVersion = "5.7.0"
 dependencies {
 
     // Local project dependencies
-    implementation project(':xis-remote-core')
+    implementation project(':xis-controller-api')
 
     // Reflections dependencies
     implementation "org.reflections:reflections:$reflectionsVersion"

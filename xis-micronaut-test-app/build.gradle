@@ -59,7 +59,7 @@ dependencies {
     annotationProcessor("io.micronaut:micronaut-inject-java:$micronautInjectVersion")
 
     // Local project dependencies
-    implementation(project(":xis-remote-core"))
+    implementation(project(":xis-controller-api"))
     implementation(project(":xis-micronaut"))
     implementation(project(":xis-test"))
     implementation(project(":xis-adapter-spi"))
