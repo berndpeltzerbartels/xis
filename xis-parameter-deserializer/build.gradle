@@ -41,7 +41,7 @@ dependencies {
     implementation(project(":xis-deserializer"))
     implementation(project(":xis-gson"))
     implementation(project(":xis-validation"))
-    implementation(project(":xis-frontend"))
+    implementation(project(":xis-adapter-spi"))
 
     compileOnly(project(":xis-resources"))
 

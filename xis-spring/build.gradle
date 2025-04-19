@@ -42,7 +42,7 @@ dependencies {
     implementation project(":xis-remote-core")
     implementation project(":xis-resources")
     implementation project(":xis-server")
-    implementation project(":xis-frontend")
+    implementation project(":xis-adapter-spi")
     implementation project(":xis-validation")
 
     // Compile-only dependencies
@@ -65,7 +65,7 @@ dependencies {
     testImplementation "org.assertj:assertj-core:$assertjVersion"
     testImplementation project(":xis-server")
     testImplementation project(":xis-test")
-    testImplementation project(":xis-frontend")
+    testImplementation project(":xis-adapter-spi")
     testImplementation "com.google.code.gson:gson:$gsonVersion"
     testImplementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion"
     testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"

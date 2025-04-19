@@ -40,7 +40,7 @@ dependencies {
     implementation project(':xis-remote-core')
     implementation project(':xis-resources')
     implementation project(':xis-server')
-    implementation project(':xis-frontend')
+    implementation project(':xis-adapter-spi')
     implementation project(':xis-gson')
     implementation project(':xis-javascript')
 
