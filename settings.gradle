@@ -6,7 +6,7 @@ pluginManagement {
 }
 
 
-rootProject.name = 'xis-remote'
+rootProject.name = 'xis'
 include 'xis-controller-api'
 include 'xis-validation'
 include 'xis-processor'
