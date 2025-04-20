@@ -4,6 +4,7 @@ plugins {
     id 'maven-publish'
     id 'groovy' // Optional, falls Groovy verwendet wird
     id 'com.gradle.plugin-publish' version '0.15.0' // Nur für Gradle Plugin Portal notwendig
+    id 'signing'
 }
 
 group = 'one.xis'

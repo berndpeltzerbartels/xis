@@ -1,5 +1,7 @@
 plugins {
     id 'java'
+    id 'maven-publish'
+    id 'signing'
 }
 
 group 'one.xis'
@@ -14,6 +16,8 @@ java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(rootProject.ext.javaVersionInt)
     }
+    withSourcesJar()
+    withJavadocJar()
 }
 
 repositories {

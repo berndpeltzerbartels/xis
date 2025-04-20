@@ -19,7 +19,7 @@ class SpringFilter extends HttpFilter {
 
     @Override
     protected void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
-        if (request.getRequestURI().equals("/") || request.getRequestURI().equals("") || request.getRequestURI().endsWith(".html")) {
+        if (request.getRequestURI().equals("/") || request.getRequestURI().isEmpty() || request.getRequestURI().endsWith(".html")) {
             response.setContentType("text/html");
             try (var writer = response.getWriter()) {
                 writer.println(frontendService.getRootPageHtml());
