@@ -5,8 +5,8 @@ plugins {
     id 'signing'
 }
 
-group 'one.xis'
-version '1.0-SNAPSHOT'
+group = rootProject.ext.projectGroup
+version = rootProject.ext.projectVersion
 
 repositories {
     mavenCentral()

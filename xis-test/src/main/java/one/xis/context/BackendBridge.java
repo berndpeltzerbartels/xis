@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import one.xis.server.ClientRequest;
 import one.xis.server.FrontendService;
 import one.xis.server.ServerResponse;
+import one.xis.server.StaticResourcePathProvider;
 import one.xis.validation.ValidatorMessages;
 
 import java.util.Locale;
@@ -19,7 +20,7 @@ import static one.xis.context.BackendBridgeVerboseRunner.run;
 @XISComponent
 @SuppressWarnings("unused")
 @RequiredArgsConstructor
-public class BackendBridge {
+public class BackendBridge implements StaticResourcePathProvider {
 
     private final FrontendService frontendService;
     private final ObjectMapper objectMapper = new ObjectMapper(); // TODO always use the same mapper and inject it here
@@ -105,5 +106,10 @@ public class BackendBridge {
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Failed to serialize", e);
         }
+    }
+
+    @Override
+    public String getCustomStaticResourcePath() {
+        return "public";
     }
 }

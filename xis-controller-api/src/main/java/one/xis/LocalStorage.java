@@ -6,16 +6,32 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation allows reading and writing to a local storage.
- * <p>
- * The annotation placed at a method will write the value of the parameter to the local storage.
- * This will typically be an action method, but it can also be used by model specific methods.
- * <p>
- * The value is the key to the local storage. The annotation placed at a method parameter
- * will read the value from the local storage and place it into the parameter.
- * <p>
- * The behaviour is similar to the {@link PageScope} annotation, but the local storage
- * is persistent and will be available even when the page is reloaded or in a new session.
+ * Binds a value from the browser's LocalStorage to a method parameter,
+ * or stores a method's return value in LocalStorage.
+ *
+ * <p><strong>Usage on method parameters:</strong><br>
+ * The value associated with the given key will be read from LocalStorage
+ * and passed into the method as an argument.
+ *
+ * <pre>{@code
+ * public String render(@LocalStorage("username") String name) {
+ *     return "Hello " + name;
+ * }
+ * }</pre>
+ *
+ * <p><strong>Usage on methods:</strong><br>
+ * The return value of the method will be stored in LocalStorage under the given key
+ * after the request has been processed.
+ *
+ * <pre>{@code
+ * @LocalStorage("username")
+ * public String getNameToStore() {
+ *     return currentUser.getName();
+ * }
+ * }</pre>
+ *
+ * <p>Note: Storage is handled client-side in the user's browser. Values are automatically
+ * restored during later page requests. All values are serialized as JSON.</p>
  */
 @Target({ElementType.PARAMETER, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)

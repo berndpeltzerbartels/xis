@@ -54,8 +54,7 @@ public class FrontendServiceImpl implements FrontendService {
             removeUserContext();
         }
     }
-
-
+    
     @Override
     public ServerResponse processModelDataRequest(ClientRequest request) {
         try {
@@ -65,7 +64,6 @@ public class FrontendServiceImpl implements FrontendService {
             removeUserContext();
         }
     }
-
 
     @Override
     public ServerResponse processFormDataRequest(ClientRequest request) {
@@ -130,7 +128,6 @@ public class FrontendServiceImpl implements FrontendService {
     public String getFunctionsJs() {
         return functionsJsResource.getContent();
     }
-
 
     private void addUserContext(ClientRequest request) {
         var userContext = new UserContext();

@@ -18,10 +18,7 @@ import org.dom4j.io.XMLWriter;
 
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @XISComponent
@@ -34,6 +31,9 @@ class HtmlResourceService {
     @XISInject(annotatedWith = Page.class)
     private Collection<Object> pageControllers;
 
+    @XISInject
+    private RootPageService rootPageService;
+
     private final Resources resources;
     private final PathResolver pathResolver;
 
@@ -42,8 +42,6 @@ class HtmlResourceService {
     private ResourceCache<String> pageBodyResourceCache;
     private ResourceCache<String> pageHeadResourceCache;
     private ResourceCache<Map<String, String>> pageAttributesResourceCache;
-
-    private Resource rootPage;
 
     @XISInit
     void initWidgetResources() {
@@ -59,14 +57,8 @@ class HtmlResourceService {
         pageAttributesResourceCache = new ResourceCache<>(this::extractBodyAttributes, pageHtmlResources);
     }
 
-    @XISInit
-    void initRootPage() {
-        rootPage = resources.getByPath("/index.html");
-    }
-
-
     String getRootPageHtml() {
-        return rootPage.getContent();
+        return rootPageService.getRootPageHtml();
     }
 
     String getWidgetHtml(String id) {
@@ -123,6 +115,7 @@ class HtmlResourceService {
 
     @SuppressWarnings("unchecked")
     private String toTemplateString(Element element) {
+        fixScriptElements(element);
         var templateDoc = DocumentHelper.createDocument();
         var templateElement = DocumentHelper.createElement("xis:template");
         templateDoc.add(templateElement);
@@ -132,6 +125,15 @@ class HtmlResourceService {
                     templateElement.add(e);
                 });
         return serialize(templateElement);
+    }
+
+    private void fixScriptElements(Element element) {
+        if ("script".equalsIgnoreCase(element.getName()) && element.content().isEmpty()) {
+            element.addText("");
+        }
+        for (Iterator<?> it = element.elementIterator(); it.hasNext(); ) {
+            fixScriptElements((Element) it.next());
+        }
     }
 
     private Map<String, String> extractBodyAttributes(Resource pageResource) {

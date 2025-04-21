@@ -4,8 +4,8 @@ plugins {
     id 'signing'
 }
 
-group 'one.xis'
-version rootProject.ext.projectVersion
+group = rootProject.ext.projectGroup
+version = rootProject.ext.projectVersion
 
 tasks.withType(JavaCompile) {
     sourceCompatibility = rootProject.ext.javaVersion.toString()

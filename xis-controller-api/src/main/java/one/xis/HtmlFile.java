@@ -7,7 +7,7 @@ import java.lang.annotation.*;
  * allow sharing html-files with different controllers. In case the names are equal and the html-file
  * is located in the controller's package (e.g. Xyz.java / Xyz.html), there is no need to use this annotation.
  */
-@Target({ElementType.TYPE, ElementType.PARAMETER, ElementType.FIELD})
+@Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface HtmlFile {

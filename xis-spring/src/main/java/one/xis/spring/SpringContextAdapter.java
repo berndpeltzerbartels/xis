@@ -7,10 +7,7 @@ import one.xis.Page;
 import one.xis.Push;
 import one.xis.Widget;
 import one.xis.context.AppContextBuilder;
-import one.xis.server.FrontendServiceImpl;
-import one.xis.server.ImportedTypes;
-import one.xis.server.PushClientProxy;
-import one.xis.server.PushClientUtil;
+import one.xis.server.*;
 import one.xis.utils.lang.ClassUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
@@ -37,7 +34,7 @@ import java.util.stream.Stream;
 @ComponentScan(basePackages = {"one.xis.spring"})
 @ServletComponentScan(basePackages = {"one.xis.spring"})
 @RequiredArgsConstructor
-class SpringContextAdapter implements BeanPostProcessor, ApplicationContextAware {
+class SpringContextAdapter implements BeanPostProcessor, ApplicationContextAware, StaticResourcePathProvider {
 
     private final SpringFilter springFilter;
     private final SpringController springController;
@@ -47,7 +44,6 @@ class SpringContextAdapter implements BeanPostProcessor, ApplicationContextAware
     private final Collection<Object> singletons = new HashSet<>();
 
     private static final Set<Class<?>> FRAMEWORK_BEAN_CLASSES = ImportedTypes.getImportedTypes();
-
 
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
@@ -59,6 +55,7 @@ class SpringContextAdapter implements BeanPostProcessor, ApplicationContextAware
 
     @EventListener(ContextRefreshedEvent.class)
     public void init() {
+        singletons.add(this);
         var context = AppContextBuilder.createInstance()
                 .withSingletons(singletons)
                 .withSingletonClasses(pushClientClasses())
@@ -114,4 +111,8 @@ class SpringContextAdapter implements BeanPostProcessor, ApplicationContextAware
     }
 
 
+    @Override
+    public String getCustomStaticResourcePath() {
+        return "public";
+    }
 }
