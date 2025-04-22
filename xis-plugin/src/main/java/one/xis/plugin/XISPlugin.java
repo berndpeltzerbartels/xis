@@ -2,26 +2,26 @@ package one.xis.plugin;
 
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
-import org.gradle.api.tasks.compile.JavaCompile;
 import org.gradle.api.tasks.Sync;
+import org.gradle.api.tasks.compile.JavaCompile;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-public class XISSpringPlugin implements Plugin<Project> {
+public class XISPlugin implements Plugin<Project> {
     @Override
     public void apply(Project project) {
         addDependencies(project);
         configureResources(project);
-       // checkJavaHome();
+        // checkJavaHome();
         checkGradleJavaVersion(project);
         checkCompilerJavaVersion(project);
     }
 
     /**
-     *  Adds the required dependencies to the project
+     * Adds the required dependencies to the project
      *
      * @param project
      */
@@ -36,7 +36,7 @@ public class XISSpringPlugin implements Plugin<Project> {
     }
 
     /**
-     *  Configures to look for resources in the src/main/java directory
+     * Configures to look for resources in the src/main/java directory
      *
      * @param project
      */
@@ -50,7 +50,7 @@ public class XISSpringPlugin implements Plugin<Project> {
     }
 
     /**
-     *  Checks if the Gradle Java version is 17
+     * Checks if the Gradle Java version is 17
      *
      * @param project
      */
@@ -72,12 +72,12 @@ public class XISSpringPlugin implements Plugin<Project> {
         }
         var targetVersion = javaTargetVersion();
         if (!javaHome.contains(javaTargetVersion())) {
-            throw new IllegalStateException("JAVA_HOME: '"+ javaHome+"' environment variable does not point to a Java "+targetVersion+" installation");
+            throw new IllegalStateException("JAVA_HOME: '" + javaHome + "' environment variable does not point to a Java " + targetVersion + " installation");
         }
     }
 
     /**
-     *  Checks if the compiler Java version is 17
+     * Checks if the compiler Java version is 17
      *
      * @param project
      */
@@ -100,7 +100,7 @@ public class XISSpringPlugin implements Plugin<Project> {
     }
 
     private String javaTargetVersion() {
-            return "17";
+        return "17";
     }
 
     private String readContent(String resource) {

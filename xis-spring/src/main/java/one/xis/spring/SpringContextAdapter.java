@@ -34,7 +34,7 @@ import java.util.stream.Stream;
 @ComponentScan(basePackages = {"one.xis.spring"})
 @ServletComponentScan(basePackages = {"one.xis.spring"})
 @RequiredArgsConstructor
-class SpringContextAdapter implements BeanPostProcessor, ApplicationContextAware, ResourcePathProvider {
+public class SpringContextAdapter implements BeanPostProcessor, ApplicationContextAware, ResourcePathProvider {
 
     private final SpringFilter springFilter;
     private final SpringController springController;

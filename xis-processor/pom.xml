@@ -7,7 +7,6 @@
 
     <groupId>one.xis</groupId>
     <artifactId>xis-processor</artifactId>
-    <version>0.1.0</version>
     <packaging>jar</packaging>
 
     <name>XIS Controller API</name>

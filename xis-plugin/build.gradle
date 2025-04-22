@@ -1,10 +1,10 @@
 plugins {
     id 'java'
     id 'java-gradle-plugin'
+    id 'groovy'
     id 'maven-publish'
-    id 'groovy' // Optional, falls Groovy verwendet wird
-    id 'com.gradle.plugin-publish' version '0.15.0' // Nur für Gradle Plugin Portal notwendig
     id 'signing'
+    id 'com.gradle.plugin-publish' version '0.15.0' // optional für Plugin-Portal
 }
 
 group = rootProject.ext.projectGroup
@@ -18,49 +18,91 @@ repositories {
 tasks.withType(JavaCompile) {
     sourceCompatibility = rootProject.ext.javaVersion.toString()
     targetCompatibility = rootProject.ext.javaVersion.toString()
+    options.encoding = 'UTF-8'
 }
 
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(rootProject.ext.javaVersionInt)
     }
+    withSourcesJar()
+    withJavadocJar()
 }
 
 dependencies {
     implementation gradleApi()
-    implementation localGroovy() // Für Groovy-basierte Gradle Scripte
+    implementation localGroovy()
 }
 
 pluginBundle {
-    website = 'https://example.com' // Ersetzen durch echte URL, falls nötig
-    vcsUrl = 'https://github.com/example/repo' // Ersetzen durch echte URL
+    website = 'https://example.com' // optional, für Plugin-Portal
+    vcsUrl = 'https://github.com/example/repo'
     tags = ['java', 'dependency', 'java-version']
 }
 
 gradlePlugin {
     plugins {
         springPlugin {
-            id = 'one.xis.spring-plugin' // Plugin-ID
-            implementationClass = 'one.xis.plugin.XISSpringPlugin' // Implementierungsklasse
+            id = 'one.xis.xis-plugin'
+            implementationClass = 'one.xis.plugin.XISPlugin'
         }
     }
 }
 
+// ✔ Eigene Publication für Maven Central
 publishing {
     publications {
-        mavenJava(MavenPublication) {
+        pluginPublication(MavenPublication) {
             from components.java
-            groupId = 'one.xis' // Gruppierung
-            artifactId = 'spring-plugin' // Artefaktname
-            version = '1.0.0'
+            artifactId = project.name
+
+            pom {
+                name = 'XIS Plugin'
+                description = 'Gradle plugin module for the XIS declarative web framework.'
+                url = 'https://github.com/berndpeltzerbartels/xis'
+
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = 'bernd'
+                        name = 'Bernd Peltzer-Bartels'
+                        email = 'bernd@xis.one'
+                    }
+                }
+
+                scm {
+                    connection = 'scm:git:https://github.com/berndpeltzerbartels/xis.git'
+                    developerConnection = 'scm:git:git@github.com:berndpeltzerbartels/xis.git'
+                    url = 'https://github.com/berndpeltzerbartels/xis'
+                }
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            name = "OSSRH"
+            url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2")
+            credentials {
+                username = project.findProperty("ossrhUsername") ?: ""
+                password = project.findProperty("ossrhPassword") ?: ""
+            }
         }
     }
 }
 
-tasks.withType(JavaCompile) {
-    options.encoding = 'UTF-8'
+signing {
+    sign publishing.publications.pluginPublication
+    useGpgCmd()
 }
 
+// ✍️ Kleine Zusatzaufgaben für Version-Dateien
 task writeVersionToFile {
     doLast {
         def versionFile = new File(buildDir, "plugin-version.txt")
@@ -77,6 +119,5 @@ task writeJavaVersionIntToFile {
     }
 }
 
-// Aufgaben automatisch ausführen
 classes.dependsOn writeVersionToFile
 classes.dependsOn writeJavaVersionIntToFile
