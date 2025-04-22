@@ -19,6 +19,7 @@ abstract class SingletonProducerImpl implements SingletonProducer {
     @Getter
     @Setter
     private SingletonProducer producer;
+    private boolean isInvoked = false;
 
     SingletonProducerImpl(Parameter[] params, ParameterFactory parameterFactory) {
         this.parameters = new ArrayList<>(params.length);
@@ -29,6 +30,7 @@ abstract class SingletonProducerImpl implements SingletonProducer {
 
     @Override
     public boolean isInvocable() {
+        if (isInvoked) return false;
         for (var i = 0; i < getParameters().size(); i++) {
             if (!getParameters().get(i).isValuesAssigned()) {
                 return false;
@@ -49,6 +51,7 @@ abstract class SingletonProducerImpl implements SingletonProducer {
 
     @Override
     public void invoke() {
+        isInvoked = true;
         var args = getArgs();
         var o = invoke(args);
         if (o != null) {

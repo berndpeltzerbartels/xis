@@ -11,9 +11,11 @@ class HeadTagHandler extends TagHandler {
      * @public
      * @param {Element} headTemplate
      * @param {any} titleExpression
+     * @param {Array} scriptSourceExpressions
      */
-    bind(headTemplate, titleExpression) {
+    bind(headTemplate, titleExpression, scriptSourceExpressions) {
         this.setTitleExpression(titleExpression);
+        this.addScriptTags(scriptSourceExpressions);
         for (var node of this.nodeListToArray(headTemplate.childNodes)) {
             if (isElement(node) && node.localName == 'title') {
                 continue;
@@ -24,6 +26,20 @@ class HeadTagHandler extends TagHandler {
     }
 
     /**
+    * @private
+    * @param {Array} scriptSourceExpressions
+    */
+    addScriptTags(scriptSourceExpressions) {
+        this.scriptSourceExpressions = scriptSourceExpressions;
+        for (var scriptSourceExpression of this.scriptSourceExpressions) {
+            var scriptElement = document.createElement('script');
+            scriptElement.setAttribute('type', 'text/javascript');
+            scriptElement.srcexpr = scriptSourceExpression;
+            this.tag.appendChild(scriptElement);
+        }
+    }
+
+    /**
     * Removes all children from head-tag and put them bag to headTemplate, except title.
     *
     * @public
@@ -31,7 +47,7 @@ class HeadTagHandler extends TagHandler {
     */
     release(headTemplate) {
         for (var node of this.nodeListToArray(this.tag.childNodes)) {
-            if (isElement(node) && node.localName == 'title') {
+            if (isElement(node) && node.getAttribute('ignore')) {
                 continue;
             }
             this.tag.removeChild(node);
@@ -47,6 +63,7 @@ class HeadTagHandler extends TagHandler {
     refresh(data) {
         this.refreshTitle(data);
         this.refreshDescendantHandlers(data);
+        this.refreshScriptTags(data);
     }
 
     /**
@@ -55,6 +72,22 @@ class HeadTagHandler extends TagHandler {
     refreshTitle(data) {
         this.title.innerText = this.titleExpression.evaluate(data);
         innerTextChanged(this.title);
+    }
+
+    /**
+    * @private
+    * @param {Data} data
+    */
+    refreshScriptTags(data) {
+        for (var scriptElement of this.nodeListToArray(this.tag.childNodes)) {
+            if (isElement(scriptElement) && scriptElement.localName == 'script') {
+                var expression = scriptElement.srcexpr;
+                if (expression) {
+                    scriptElement.setAttribute('src', expression.evaluate(data));
+                    nodeValueChanged(scriptElement);
+                }
+            }
+        }
     }
 
     setTitleExpression(expression) {

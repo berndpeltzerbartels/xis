@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import one.xis.server.ClientRequest;
 import one.xis.server.FrontendService;
+import one.xis.server.GlobalResourcePathProvider;
 import one.xis.server.ServerResponse;
-import one.xis.server.StaticResourcePathProvider;
 import one.xis.validation.ValidatorMessages;
 
 import java.util.Locale;
@@ -20,7 +20,7 @@ import static one.xis.context.BackendBridgeVerboseRunner.run;
 @XISComponent
 @SuppressWarnings("unused")
 @RequiredArgsConstructor
-public class BackendBridge implements StaticResourcePathProvider {
+public class BackendBridge implements GlobalResourcePathProvider {
 
     private final FrontendService frontendService;
     private final ObjectMapper objectMapper = new ObjectMapper(); // TODO always use the same mapper and inject it here

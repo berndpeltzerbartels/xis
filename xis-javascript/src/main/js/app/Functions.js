@@ -12,6 +12,8 @@ function htmlToElement(html) {
     }
 }
 
+
+
 function innerTextChanged(element) {
     // Not needed here, but in testcode
 }

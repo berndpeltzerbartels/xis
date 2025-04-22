@@ -27,12 +27,6 @@ public class SingletonConstructor extends SingletonProducerImpl {
         return constructor.getDeclaringClass();
     }
 
-    @Override
-    public void invoke() {
-        var o = invoke(getArgs());
-        assignValueInConsumers(o);
-        notifySingletonCreationListeners(o);
-    }
 
     @Override
     public String toString() {
