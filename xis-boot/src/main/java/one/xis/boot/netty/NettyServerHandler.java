@@ -96,6 +96,8 @@ class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
             case "/xis/page/body" -> createHtmlResponse(frontendService.getPageBody(request.headers().get("uri")));
             case "/xis/page/body-attributes" ->
                     createResponse(frontendService.getBodyAttributes(request.headers().get("uri")));
+            case "/xis/page/javascript" ->
+                    createHtmlResponse(frontendService.getPageJavascript(request.headers().get("uri")));
             case "/xis/widget/html" -> createHtmlResponse(frontendService.getWidgetHtml(request.headers().get("uri")));
             case "/app.js" -> createHtmlResponse(frontendService.getAppJs());
             case "/classes.js" -> createHtmlResponse(frontendService.getClassesJs());

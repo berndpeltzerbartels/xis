@@ -6,6 +6,7 @@
  * @property {Path} path
  * @property {string} normalizedPath
  * @property {boolean} welcomePage
+ * @property {string} pageJavascriptSource
  */
 
 class PageAttributes {
@@ -18,5 +19,6 @@ class PageAttributes {
         this.path = new Path(new PathElement(obj.path.pathElement));
         this.normalizedPath = obj.normalizedPath;
         this.welcomePage = obj.welcomePage;
+        this.pageJavascriptSource = obj.pageJavascriptSource;
     }
 }

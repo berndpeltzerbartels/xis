@@ -6,13 +6,14 @@ import one.xis.server.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Locale;
 import java.util.Map;
 
 @Setter
 @RestController
 @RequestMapping
-class SpringController implements FrameworkController<ResponseEntity<ServerResponse>> {
+class SpringController implements FrameworkController<ResponseEntity<ServerResponse>, HttpServletRequest> {
 
     private FrontendService frontendService;
 
@@ -68,6 +69,12 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
         request.setLocale(locale);
         var serverResponse = frontendService.processActionRequest(request);
         return ResponseEntity.status(serverResponse.getStatus()).body(serverResponse);
+    }
+
+    @Override
+    @GetMapping("/xis/page/javascript/**")
+    public String getPageJavascript(HttpServletRequest request) {
+        return frontendService.getPageJavascript(request.getRequestURI());
     }
 
     @Override

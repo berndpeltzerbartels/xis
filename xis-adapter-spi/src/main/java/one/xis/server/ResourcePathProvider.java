@@ -7,7 +7,7 @@ import one.xis.ImportInstances;
  * has its own way of serving static resources.
  */
 @ImportInstances
-public interface GlobalResourcePathProvider {
+public interface ResourcePathProvider {
     /**
      * Returns the path to the static resources.
      *

@@ -34,7 +34,7 @@ class HtmlTagHandler extends TagHandler {
     bindPage(page) {
         this.headTagHandler.clearTitle();
         this.bodyTagHandler.clearAttributes();
-        this.headTagHandler.bind(page.headTemplate, page.titleExpression, page.scriptSourceExpressions);
+        this.headTagHandler.bind(page);
         this.bodyTagHandler.bindAttributes(page.bodyAttributes);
         this.bodyTagHandler.bind(page.bodyTemplate);
         this.page = page;

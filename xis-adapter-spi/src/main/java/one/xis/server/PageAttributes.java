@@ -18,5 +18,6 @@ class PageAttributes extends ComponentAttributes {
     private String normalizedPath;
     private boolean welcomePage;
     private String host;
+    private String pageJavascriptSource;
 
 }

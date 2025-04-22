@@ -1,0 +1,1 @@
+console.log("Huhu ! Global geht auch !");

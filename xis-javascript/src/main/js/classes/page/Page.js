@@ -24,6 +24,7 @@ class Page {
         this.titleExpression = undefined;
         this.headTemplate = undefined;
         this.bodyTemplate = undefined;
+        this.scriptSourceExpressions = [];
         this.bodyAttributes = {};
         this.data = new Data({});
     }

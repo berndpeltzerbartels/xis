@@ -11,23 +11,23 @@ import org.w3c.dom.Document;
 @XISComponent
 class RootPageService {
     private final Resources resources;
-    private final GlobalResourcePathProvider globalResourcePathProvider;
+    private final ResourcePathProvider resourcePathProvider;
 
     @Getter
     private String rootPageHtml;
 
-    RootPageService(Resources resources, GlobalResourcePathProvider globalResourcePathProvider) {
+    RootPageService(Resources resources, ResourcePathProvider resourcePathProvider) {
         this.resources = resources;
-        this.globalResourcePathProvider = globalResourcePathProvider;
+        this.resourcePathProvider = resourcePathProvider;
     }
 
     @XISInit
     void init() {
         var rootPageHtml = resources.getByPath("index.html").getContent();
         var rootPageDocument = XmlUtil.loadDocument(rootPageHtml);
-        var customStaticResourcePath = globalResourcePathProvider.getCustomStaticResourcePath();
-        addCssLinks(customStaticResourcePath, rootPageDocument);
-        addJsReferences(customStaticResourcePath, rootPageDocument);
+        var customGlobalResourcePath = resourcePathProvider.getCustomStaticResourcePath() + "/global";
+        addCssLinks(customGlobalResourcePath, rootPageDocument);
+        addJsReferences(customGlobalResourcePath, rootPageDocument);
         this.rootPageHtml = XmlUtil.asString(rootPageDocument);
     }
 
@@ -36,9 +36,9 @@ class RootPageService {
                 .forEach(resource -> addCssLink(resource.getResourcePath().substring(customStaticResourcePath.length()), rootPageDocument));
     }
 
-    private void addJsReferences(String customStaticResourcePath, Document rootPageDocument) {
-        resources.getClassPathResources(customStaticResourcePath, ".js")
-                .forEach(resource -> addJsReference(resource.getResourcePath().substring(customStaticResourcePath.length()), rootPageDocument));
+    private void addJsReferences(String customGlobalResourcePath, Document rootPageDocument) {
+        resources.getClassPathResources(customGlobalResourcePath, ".js")
+                .forEach(resource -> addJsReference(resource.getResourcePath().substring(resourcePathProvider.getCustomStaticResourcePath().length()), rootPageDocument));
     }
 
     private void addCssLink(String cssPath, Document rootPageDocument) {

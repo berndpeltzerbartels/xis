@@ -1,6 +1,7 @@
 package one.xis.server;
 
 import lombok.NonNull;
+import one.xis.JavascriptFile;
 import one.xis.Page;
 import one.xis.context.AppContext;
 
@@ -16,6 +17,23 @@ public class PageUtil {
     public static String getUrl(@NonNull Class<?> controllerClass) {
         var url = controllerClass.getAnnotation(Page.class).value();
         return url.endsWith(".html") ? url : url + ".html";
+    }
+
+    public static String getJavascriptResourcePath(Class<?> pageControllerClass) {
+        var path = new StringBuilder(pageControllerClass.getPackageName().replace('.', '/')).append("/");
+        if (pageControllerClass.isAnnotationPresent(JavascriptFile.class)) {
+            path.append(pageControllerClass.getAnnotation(JavascriptFile.class).value());
+        } else {
+            path.append(pageControllerClass.getSimpleName());
+        }
+        if (!path.toString().endsWith(".js")) {
+            path.append(".js");
+        }
+        return path.toString();
+    }
+
+    public static String getJavascriptResourcePath(Object pageController) {
+        return getJavascriptResourcePath(pageController.getClass());
     }
 
 

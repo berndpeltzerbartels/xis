@@ -9,25 +9,27 @@ class HeadTagHandler extends TagHandler {
 
     /**
      * @public
-     * @param {Element} headTemplate
-     * @param {any} titleExpression
-     * @param {Array} scriptSourceExpressions
+     * @param {page} page
      */
-    bind(headTemplate, titleExpression, scriptSourceExpressions) {
-        this.setTitleExpression(titleExpression);
-        this.addScriptTags(scriptSourceExpressions);
-        for (var node of this.nodeListToArray(headTemplate.childNodes)) {
+    bind(page) {
+        this.setTitleExpression(page.titleExpression);
+        this.addScriptTags(page.scriptSourceExpressions);
+        if (page.pageAttributes.pageJavascriptSource) {
+            this.addPageJavascript(page.pageAttributes.pageJavascriptSource);
+        }
+        for (var node of this.nodeListToArray(page.headTemplate.childNodes)) {
             if (isElement(node) && node.localName == 'title') {
                 continue;
             }
             this.tag.appendChild(node);
         }
-        this.addDescendantHandler(headTemplate._rootHandler);
+        this.addDescendantHandler(page.headTemplate._rootHandler);
     }
 
     /**
     * @private
     * @param {Array} scriptSourceExpressions
+    * @param {string} pageSpecificJsSource
     */
     addScriptTags(scriptSourceExpressions) {
         this.scriptSourceExpressions = scriptSourceExpressions;
@@ -37,6 +39,17 @@ class HeadTagHandler extends TagHandler {
             scriptElement.srcexpr = scriptSourceExpression;
             this.tag.appendChild(scriptElement);
         }
+    }
+
+    /**
+    * @private
+    * @param {string} pageJavascriptSource
+    */
+    addPageJavascript(pageJavascriptSource) {
+        var scriptElement = document.createElement('script');
+        scriptElement.setAttribute('type', 'text/javascript');
+        scriptElement.setAttribute('src', pageJavascriptSource);
+        this.tag.appendChild(scriptElement);
     }
 
     /**

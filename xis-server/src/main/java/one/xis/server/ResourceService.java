@@ -21,9 +21,11 @@ import java.io.StringWriter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static one.xis.server.PageUtil.getJavascriptResourcePath;
+
 @XISComponent
 @RequiredArgsConstructor
-class HtmlResourceService {
+class ResourceService {
 
     @XISInject(annotatedWith = Widget.class)
     private Collection<Object> widgetControllers;
@@ -39,6 +41,7 @@ class HtmlResourceService {
 
     private Map<String, Resource> widgetHtmlResources;
     private Map<String, Resource> pageHtmlResources;
+    private final Map<String, Resource> pageJavascriptResources = new HashMap<>();
     private ResourceCache<String> pageBodyResourceCache;
     private ResourceCache<String> pageHeadResourceCache;
     private ResourceCache<Map<String, String>> pageAttributesResourceCache;
@@ -52,10 +55,17 @@ class HtmlResourceService {
     void initPageResources() {
         pageHtmlResources = pageControllers.stream()
                 .collect(Collectors.toMap(pathResolver::normalizedPath, this::htmlResource));
+        pageControllers.forEach(pageController -> {
+            var path = getJavascriptResourcePath(pageController);
+            if (resources.exists(path)) {
+                pageJavascriptResources.put(PageUtil.getJavascriptResourcePath(pageController), resources.getByPath(path));
+            }
+        });
         pageHeadResourceCache = new ResourceCache<>(this::extractPageHead, pageHtmlResources);
         pageBodyResourceCache = new ResourceCache<>(this::extractPageBody, pageHtmlResources);
         pageAttributesResourceCache = new ResourceCache<>(this::extractBodyAttributes, pageHtmlResources);
     }
+
 
     String getRootPageHtml() {
         return rootPageService.getRootPageHtml();
@@ -67,6 +77,11 @@ class HtmlResourceService {
 
     String getPage(String id) {
         return pageHtmlResources.get(id).getContent();
+    }
+
+    String getJavascript(String path) {
+        var id = path.substring("/xis/page/javascript/".length());
+        return pageJavascriptResources.get(id).getContent();
     }
 
     String getPageHead(String id) {
@@ -147,6 +162,14 @@ class HtmlResourceService {
         return resources.getByPath(getHtmlTemplatePath(controller));
     }
 
+    private Optional<Resource> getJavascriptResource(Object pageController) {
+        try {
+            return Optional.of(resources.getByPath(getJavascriptResourcePath(pageController)));
+        } catch (Exception e) {
+            return Optional.empty();
+        }
+    }
+
     private String getHtmlTemplatePath(Object controller) {
         var path = new StringBuilder(controller.getClass().getPackageName().replace('.', '/')).append("/");
         if (controller.getClass().isAnnotationPresent(HtmlFile.class)) {
@@ -159,6 +182,7 @@ class HtmlResourceService {
         }
         return path.toString();
     }
+
 
     private Document createDocument(String xml) {
         try {

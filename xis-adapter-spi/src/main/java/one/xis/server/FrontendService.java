@@ -31,4 +31,5 @@ public interface FrontendService {
 
     String getFunctionsJs();
 
+    String getPageJavascript(String javascriptPath);
 }

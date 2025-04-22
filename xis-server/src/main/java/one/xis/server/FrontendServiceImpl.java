@@ -24,7 +24,7 @@ public class FrontendServiceImpl implements FrontendService {
 
     private final ControllerService controllerService;
     private final ClientConfigService configService;
-    private final HtmlResourceService htmlResourceService;
+    private final ResourceService resourceService;
     private final Resources resources;
     private final Collection<RequestFilter> requestFilters;
     private Resource appJsResource;
@@ -54,7 +54,7 @@ public class FrontendServiceImpl implements FrontendService {
             removeUserContext();
         }
     }
-    
+
     @Override
     public ServerResponse processModelDataRequest(ClientRequest request) {
         try {
@@ -78,34 +78,34 @@ public class FrontendServiceImpl implements FrontendService {
 
     @Override
     public String getPage(String id) {
-        return htmlResourceService.getPage(id);
+        return resourceService.getPage(id);
     }
 
     @Override
     public String getPageHead(String id) {
-        var head = htmlResourceService.getPageHead(id);
+        var head = resourceService.getPageHead(id);
         Logger.debug(head);
         return head;
     }
 
     @Override
     public String getPageBody(String id) {
-        return htmlResourceService.getPageBody(id);
+        return resourceService.getPageBody(id);
     }
 
     @Override
     public Map<String, String> getBodyAttributes(String id) {
-        return htmlResourceService.getBodyAttributes(id);
+        return resourceService.getBodyAttributes(id);
     }
 
     @Override
     public String getWidgetHtml(String id) {
-        return htmlResourceService.getWidgetHtml(id);
+        return resourceService.getWidgetHtml(id);
     }
 
     @Override
     public String getRootPageHtml() {
-        return htmlResourceService.getRootPageHtml();
+        return resourceService.getRootPageHtml();
     }
 
 
@@ -127,6 +127,11 @@ public class FrontendServiceImpl implements FrontendService {
     @Override
     public String getFunctionsJs() {
         return functionsJsResource.getContent();
+    }
+
+    @Override
+    public String getPageJavascript(String javascriptPath) {
+        return resourceService.getJavascript(javascriptPath);
     }
 
     private void addUserContext(ClientRequest request) {
