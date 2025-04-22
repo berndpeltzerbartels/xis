@@ -17,7 +17,7 @@ class FormElementHandler extends TagHandler {
     init() {
         var form = this.findParentFormElement();
         if (!form) throw new Error('no parent form-tag or form-tag is not bound for ' + this.tag);
-        this.formHandler = form._handler;
+        this.formHandler = form.handler;
     }
 
 

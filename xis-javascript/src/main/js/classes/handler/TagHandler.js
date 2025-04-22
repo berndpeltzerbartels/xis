@@ -146,7 +146,7 @@ class TagHandler {
      * @returns 
      */
     isFrameworkFormElement(element) {
-        return isElement(element) && element._handler && element._handler.type == 'form-handler';
+        return isElement(element) && element.handler && element.handler.type == 'form-handler';
     }
 
     isFrameworkElement(node) {

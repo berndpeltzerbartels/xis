@@ -20,7 +20,7 @@ public class Element extends Node {
     public Node firstChild;
     public String innerText = "";
     public DOMStringList classList = new DOMStringList();
-    public Object _handler;
+    public Object handler;
     public Object _rootHandler;
     public Collection<Object> _attributes;
     public String _widgetId;

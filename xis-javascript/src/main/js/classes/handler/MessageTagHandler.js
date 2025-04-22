@@ -27,7 +27,7 @@ class MessageTagHandler extends TagHandler {
     findParentFormHandler() {
         var form = this.findParentFormElement();
         if (!form) throw new Error('no parent form-tag or form-tag is not bound for ' + this.tag);
-        return form._handler;
+        return form.handler;
     }
 
     /**

@@ -176,8 +176,8 @@ class WidgetContainerHandler extends TagHandler {
         var e = this.tag.parentNode;
         var parentDataHandler;
         while (e) {
-            if (e._handler && e._handler.getData) {
-                parentDataHandler = e._handler;
+            if (e.handler && e.handler.getData) {
+                parentDataHandler = e.handler;
                 break;
             }
             e = e.parentNode;

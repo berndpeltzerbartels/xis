@@ -27,8 +27,8 @@ class AnchorReplaceTest {
         var pageLink = result.getDocument().getElementById("page-link");
         var widgetLink = result.getDocument().getElementById("widget-link");
 
-        assertThat(pageLink._handler).isNotNull();
-        assertThat(widgetLink._handler).isNotNull();
+        assertThat(pageLink.handler).isNotNull();
+        assertThat(widgetLink.handler).isNotNull();
 
         assertThat(pageLink.getChildElements()).isEmpty();
         assertThat(widgetLink.getChildElements()).isEmpty();

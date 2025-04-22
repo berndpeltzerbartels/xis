@@ -125,7 +125,7 @@ class NodeDecorator {
     */
     decorateForm(formElement) {
         var handler = new FormHandler(formElement, this.client);
-        formElement._handler = handler;
+        formElement.handler = handler;
         return handler;
     }
 
@@ -180,13 +180,13 @@ class NodeDecorator {
      * @returns {TagHandler}
      */
     decorateForeach(foreach) {
-        foreach._handler = new ForeachHandler(foreach, this); // never CompositeTagHandler, here
-        return foreach._handler;
+        foreach.handler = new ForeachHandler(foreach, this); // never CompositeTagHandler, here
+        return foreach.handler;
     }
 
     decorateSubmitElement(element) {
         var handler = new FormSubmitterHandler(element);
-        element._handler = handler;
+        element.handler = handler;
         return handler;
     }
 
@@ -207,13 +207,13 @@ class NodeDecorator {
      * @param {TagHandler} handler 
      */
     addHandler(element, handler) {
-        if (!element._handler) {
-            element._handler = handler;
+        if (!element.handler) {
+            element.handler = handler;
         } else {
-            var anotherHandler = element._handler;
-            element._handler = new CompositeTagHandler();
-            element._handler.addHandler(anotherHandler);
-            element._handler.addHandler(handler);
+            var anotherHandler = element.handler;
+            element.handler = new CompositeTagHandler();
+            element.handler.addHandler(anotherHandler);
+            element.handler.addHandler(handler);
         }
     }
 

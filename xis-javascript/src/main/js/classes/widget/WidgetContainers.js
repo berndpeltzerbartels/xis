@@ -28,7 +28,7 @@ class WidgetContainers {
     findContainerHandlerByWidgetId(widgetId) {
         for (var key in this.containers) {
             var container = this.containers[key];
-            if (container._handler.widgetInstance.id === widgetId) {
+            if (container.handler.widgetInstance.id === widgetId) {
                 return container_handler;
             }
         }

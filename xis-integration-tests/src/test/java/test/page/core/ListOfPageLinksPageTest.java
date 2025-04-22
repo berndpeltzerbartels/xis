@@ -33,7 +33,7 @@ class ListOfPageLinksPageTest {
 
         var link0 = document.getElementById("link_0");
         assertThat(link0.innerText).isEqualTo("Index");
-        assertThat(link0._handler).isNotNull();
+        assertThat(link0.handler).isNotNull();
 
         var link1 = document.getElementById("link_1");
         assertThat(link1.innerText).isEqualTo("Title test page");

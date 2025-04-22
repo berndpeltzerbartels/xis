@@ -45,7 +45,7 @@ class ActionLinkHandler extends TagHandler {
      */
     onClick(e) {
         if (this.parentForm) {
-            this.parentForm._handler.submit(this.action);
+            this.parentForm.handler.submit(this.action);
         } else {
             var widgetcontainer = this.findParentWidgetContainer();
             if (widgetcontainer) {
@@ -58,8 +58,8 @@ class ActionLinkHandler extends TagHandler {
 
     widgetAction(invokerContainer) {
         var targetContainer = this.targetContainerId ? this.widgetContainers.findContainer(this.targetContainerId) : invokerContainer;
-        var targetContainerHandler = targetContainer._handler;
-        var invokerHandler = invokerContainer._handler;
+        var targetContainerHandler = targetContainer.handler;
+        var invokerHandler = invokerContainer.handler;
         var _this = this;
         this.client.widgetLinkAction(invokerHandler.widgetInstance, invokerHandler.widgetState, this.action, this.actionParameters)
             .then(response => _this.handleActionResponse(response, targetContainerHandler));
@@ -75,7 +75,7 @@ class ActionLinkHandler extends TagHandler {
 
 
     formAction(form) {
-        var handler = form._handler;
+        var handler = form.handler;
         handler.sumbit(this.action)
     }
 
