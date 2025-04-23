@@ -6,16 +6,6 @@ from a form.
 
 ---
 
-## Built-in Formatting Support
-
-XIS supports automatic formatting for many basic types, including:
-
-- `String`
-- `int`, `Integer`, and other numbers
-- `LocalDate`, `LocalDateTime` (with default or localized formats)
-
-You can customize how values are formatted or parsed using the `@Format` annotation on a field.
-
 ### Example
 
 ```java
@@ -38,23 +28,31 @@ To create a custom formatter, implement the `Formatter<T>` interface:
 
 ```java
 public class LocalDateFormatter implements Formatter<LocalDate> {
-    @Override
-    public String format(LocalDate localDate, Locale locale, ZoneId zoneId) {
-        return String.format("%02d.%02d.%d", localDate.getDayOfMonth(), localDate.getMonthValue(), localDate.getYear());
-    }
+    class LocalDateFormatter implements Formatter<LocalDate> {
 
-    @Override
-    public LocalDate parse(String s, Locale locale, ZoneId zoneId) {
-        var split = s.split("\\.");
-        if (split.length == 3) {
-            return LocalDate.of(
-                    Integer.parseInt(split[2]),
-                    Integer.parseInt(split[1]),
-                    Integer.parseInt(split[0]));
+        @Override
+        public String format(LocalDate localDate, Locale locale, ZoneId zoneId) {
+            DateTimeFormatter formatter = DateTimeFormatter
+                    .ofLocalizedDate(FormatStyle.MEDIUM) // oder SHORT, LONG
+                    .withLocale(locale)
+                    .withZone(zoneId);
+            return formatter.format(localDate);
         }
-        throw new IllegalArgumentException("Invalid date format");
+
+        @Override
+        public LocalDate parse(String s, Locale locale, ZoneId zoneId) {
+            DateTimeFormatter formatter = DateTimeFormatter
+                    .ofLocalizedDate(FormatStyle.MEDIUM) // oder SHORT, LONG
+                    .withLocale(locale)
+                    .withZone(zoneId);
+            try {
+                return LocalDate.parse(s, formatter);
+            } catch (DateTimeParseException e) {
+                throw new IllegalArgumentException("Invalid date format", e);
+            }
+
+        }
     }
-}
 ```
 
 Apply this formatter via `@Format` on fields in form-bound objects.

@@ -84,7 +84,8 @@ public class HelloPage {
 
 > 💡 Make sure your controller class is located within a package that Spring scans automatically.
 > This typically means: the same or a subpackage of your `@SpringBootApplication` class.
-> XIS controllers are **not** Spring `@Component`s — they are discovered and instantiated via the XIS runtime.
+> XIS controllers are Spring components, but no @Component annotation is needed. @Page and @Widget are sufficient
+> component annotations.
 > (XIS `@Widget`s, however, **are** annotated with `@Component`.)
 
 ---
