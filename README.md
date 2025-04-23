@@ -1,171 +1,81 @@
-# XIS #
+# XIS – A Declarative Java Web Framework
 
-XIS-Remote allows you to create your single-pageComponent web-application with Spring-backend easily by hiding the
-commununication-layer, based on HTTP and socket.io, behind some simple abstractions. By using XIS-Remote, you will save
-all the code you normally have to write for restful-services or sending websocket-messages, handling client state,
-reducers, effects and so on. All these things are running behind the scenes as generated Java-code and generated
-javascript on client-side. It's controlled by some powerful and intuitive annotations in conjunction with a very simple
-template-design. Go on with this documentation or check out the example code to see how straight-forward it is.
+**XIS** is a lightweight, fast, and structured web framework for building **single-page Java applications** with fully *
+*declarative HTML templates**. It empowers developers to structure their UIs into manageable fragments, each with its
+own **Java controller**, supporting **microfrontend architectures** and modular development workflows.
 
-## Components
+XIS covers the entire **client-server communication layer**, providing seamless data binding and routing — and includes
+built-in support for **push communication via Socket.IO**, enabling real-time updates out of the box.
 
-In XIS-Remote, one of the main concepts is the component. It's a Java-class in conjunction with a piece of HTML. If you
-are familar with Angular, you may already know it.
+XIS combines a minimal footprint with strong typing, full IDE support, and a clear separation of concerns. It avoids
+boilerplate through powerful conventions while remaining highly explicit and testable. The result is a streamlined
+developer experience — without giving up control.
 
-The HTML-file can be located inside the components java-package or in the resouce-folder. For a single component this
-may look like this:
+---
 
-```
-src
-    main
-        java
-            com
-                mydomain
-                    myapp
-                        xyz
-                            Xyz.java
-                            Xyz.html
+## 🔗 Quick Links
 
-```
+- [🚀 Quickstart Guide](#quickstart-guide)
+- [📐 Architecture & Design](#architecture--design)
+- [🤔 Why XIS?](#why-xis)
+- [📚 Documentation](https://xis.one/docs/)
+- [📘 Javadoc](https://javadoc.io/doc/one.xis/xis-core)
 
-Intention was, inside your Java-code you feel like to be on client-side, but of course you are not. Getting values from
-the pageComponent or placing data on it is done by socket.io automatically.
+---
 
-As a consequence, a component is not a singleton (because we have several clients). It is just in request scope (to keep
-your server-application stateless), but it contains the actual client-state (by using @Binding- annotated fields).
+## 🚀 Quickstart Guide
 
-In XIS-Remote, we have two kinds of components. Pages and widgets on one hand side and pageComponent-components on the
-other.
+_Read the full guide in [docs/Quickstart.md](docs/Quickstart.md)_
 
-### Pages and Widgets
+XIS applications are built from simple HTML templates, each backed by a Java controller class. You define your UI in
+HTML and bind it directly to Java methods, keeping logic and markup close but cleanly separated.
 
-When you create a component to be loaded by an HTTP-URL, you have to annotate the java-classes with @Page or @Widget,
-where in fact @Widget is just an alias for @Page, just to show, the corresponding HTML is just a fragment and intended
-to be diplayed on an HTML-pageComponent. With the annotation, you define an URL to access such kind of components.
+The project structure encourages clear responsibilities:
 
-#### Widget
+- Each **HTML fragment** corresponds to one controller.
+- Controllers are written in plain Java, with zero framework-specific annotations.
+- All routing, data binding and lifecycle control is **declarative and explicit**.
 
-A widgetComponent has to be annotated wiht @Widget. There are several ways to load a some HTML at runtime and we will
-discuss it later.
+Build your first page in minutes with the Quickstart guide.
 
-Example: WeatherWidget.java
+---
 
-```
-@Widget("/weather/weather.widgetComponent")
-class WeatherWidget {
-    
-    @Autowired
-    private WeatherService weatherService;
-    
-    @Autowired
-    private LocationService locationService;
-    
-    @Binding
-    private String locationTitle;
-    
-    @Binding
-    private String clouds;
-    
-    @Binding
-    private String icon;
-    
-    @Binding
-    @NumberFormat(maxFractionDigits=1, minFractionDigits=1)
-    private float degreesCentigrade;
-    
-    @OnInit
-    void init() {
-        Location location = locationService.getLocation();
-        locationTitle = location.getTitle();
-        Weather weather = weatherService.getWeather(location.getId());
-        clouds = weaher.getClouds();
-        icon = weather.getIcon();
-    }
-    
- }
- 
-```
+## 📐 Architecture & Design
 
-The associated HTML.
+_Read the full architecture overview in [docs/Architecture.md](docs/Architecture.md)_
 
-WeatherWidget.html:
+XIS promotes a component-based, modular architecture that makes it easy to:
 
-```
-<div>
-    <h4>${weather.location}</h4>
-    <span>${degreesCentigrade} °</span>
-    <span>${clouds}</span>
-    <img src="${icon}"/>
-</div>
+- Split applications into self-contained fragments or pages
+- Assign responsibility to teams per domain or feature
+- Compose applications from reusable UI modules
 
-```
+This structure naturally supports **microfrontend patterns**, while maintaining a consistent development model based
+entirely on Java and HTML.
 
-#### Pages
+---
 
-Because a pageComponent is something like a root element, it is responsible to load the generated javascript. URL is
-`/resources/public/xis-remote-generated.js`.
+## 🤔 Why XIS?
 
-MainPage.html
+Other Java frameworks often force you into:
 
-```
-<html>
-    <head>
-        <script type="text/javascript" src="/resources/public/xis-remote-generated.js"></script>
-         <link rel="stylesheet" href="/resources/public/styles.css"> 
-    </head>
-    <body>
-        <div data-id="widgetComponent"/>
-        <div data-id="mainContent"/>
-    </body>
-</html>
-```
+- heavyweight abstractions
+- reflection-based dependency injection
+- magic annotations and XML config
+- template engines with little IDE support
 
-MainPage.java
+**XIS takes a different approach.**
 
-```
-@Page("/index.html")
-public class MainPage {
+### What makes it different:
 
-    @Binding
-    private Object widgetComponent;
-    
-    @Binding
-    private Object mainContent;
-      
-    @OnInit
-    void init(WeatherWidget weatherWidget, News news) {
-        if (widgetComponent == null) widgetComponent = weatherWidget;
-        if (mainContent == null) mainContent = news;
-    }
+- ✅ **Declarative HTML-first approach** with Java-backed controllers
+- 🧩 **Composable UI fragments**, each with its own logic
+- 🚀 **Fast and lightweight**, no runtime overhead or proxies
+- 📦 **Boilerplate-free**, sensible defaults and strong typing
+- 🛠️ **Microfrontend-ready**: Natural support for distributed UIs and independent ownership
+- 👥 **Team-friendly**: Developers can work independently on isolated features and provide their HTML and logic in one
+  place
 
-    public void setWidget(Object widgetComponent) {
-        this.widgetComponent = widgetComponent;
-    }
-    
-    public void setMainContent(Object mainContent) {
-        this.mainContent = mainContent;
-    }
-    
-}
-```
+If you’re tired of bloated, abstracted frameworks and want something clean, fast, and transparent — **XIS is built for
+you.**
 
-The setters allow set change the content of the two div-containers. The parameter has to be a pageComponent-component.
-You might also use pageComponent-components inside pageComponent-components.
-
-### Page-Components
-
-Sorrily "@Component" is used by Spring. To avoid confusion, I named it @PageComponent. In contrary to pages or widgets,
-the pageComponent-component is not associated with a URL, because it's loaded dynamically by the java-code of a
-pageComponent or widgetComponent or an upper pageComponent-component in the way you know from MainPage-example above.
-
-In this example, the main-pageComponent displays the weather-widgetComponent and the news-component, initially. As you
-see, a component instance can be uses as a parameter in annotated methods. Bounded fields of the parameterFactory (
-@Binding)
-will contain the actual values from client.
-
-**Instantiating pageComponent-components on your own is not recommended (no injection).**
-
-If the value of a field annotated with @Binding is a Page-Component (annotated with @PageComponent), it will be
-displayed in the bounded container. Before rendering, all methods of these components annotated with @OnInit are called.
-
-A component (@PageComponent) might contain other components in the same way.
