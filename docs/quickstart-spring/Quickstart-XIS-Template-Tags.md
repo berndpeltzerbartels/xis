@@ -28,17 +28,17 @@ Both tags render items from a collection, but they behave differently:
 ```html
 <!-- repeat duplicates the entire <li> tag -->
 <ul>
-    <li xis:repeat="item:items">${item}</li>
+    <li xis:repeat="fruit:fruits">${fruit.name}</li>
 </ul>
 
 <!-- foreach only duplicates the content -->
-<xis:foreach var="item" items="${items}">
-    <li>${item}</li>
+<xis:foreach var="fruit" items="fruits">
+    <li>${fruit.name}</li>
 </xis:foreach>
 
 <!-- another foreach example with outer tag -->
-<ul xis:foreach="item:items">
-    <li>${item}</li>
+<ul xis:foreach="fruit:fruits">
+    <li>${fruit.name}</li>
 </ul>
 ```
 
@@ -49,9 +49,9 @@ Both tags render items from a collection, but they behave differently:
 @Widget
 public class ListControllerExample {
 
-    @ModelData("items")
-    public Collection<String> listItems() {
-        return List.of("Apple", "Banana");
+    @ModelData("fruits")
+    public Collection<Fruit> listItems() {
+        return List.of(new Fruit("Apple"), new Fruit("Banana"));
     }
 }
 ```

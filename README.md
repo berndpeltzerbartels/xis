@@ -25,7 +25,7 @@ developer experience — without giving up control.
 
 ## 🚀 Quickstart Guide
 
-_Read the full guide in [docs/Quickstart.md](docs/Quickstart.md)_
+_Read the full guide in [docs/Quickstart.md](docs/quickstart-spring/Quickstart-Setup.md)_
 
 XIS applications are built from simple HTML templates, each backed by a Java controller class. You define your UI in
 HTML and bind it directly to Java methods, keeping logic and markup close but cleanly separated.

@@ -40,9 +40,7 @@ Most XIS tags support variable expressions. For example:
 
 ```html
 
-<ul>
-    <li xis:repeat="item:items">${item.name}</li>
-</ul>
+<a xis:widget="$(widgetId}" xis:target-container="${targetId}">Details</a>
 ```
 
 ### Tip
@@ -50,7 +48,7 @@ Most XIS tags support variable expressions. For example:
 When using expressions inside attributes, they can be the full value or part of it:
 
 ```html
-<a xis:widget="$(widgetId}" xis:target-container="${targetId}">Details</a>
+<a xis:widget="MyWidget" xis:target-container="${targetId}-container">Details</a>
 ```
 
 These expression capabilities make it easy to write clean, data-driven HTML without verbose scripting.
