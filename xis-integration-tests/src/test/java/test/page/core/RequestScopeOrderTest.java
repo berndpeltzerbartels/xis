@@ -4,6 +4,8 @@ import one.xis.context.IntegrationTestContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 class RequestScopeOrderTest {
 
     private RequestScopeOrderPageService service;
@@ -24,19 +26,9 @@ class RequestScopeOrderTest {
         result.getDocument().getElementById("go").click();
 
         var calls = service.getRecorder().getCalls();
-        /*
-        TODO: Fix this test
-        assertThat(calls).containsExactly(
-                                     // ohne @RequestScope → zuerst
-                "provideId",
-                "normalModel", // request scoped → gebraucht für mehrere
-                "provideToken",                     // dito
-                "requestScopedModel: id=42",
-                "form: token=abc",
-                "scopedForm: id=42, token=abc",
-                "go: id=42, token=abc"              // Action zuletzt
-        );
+        var expected = new String[]{"a", "b", "c", "d", "a", "b", "go", "c", "d"};
 
-         */
+
+        assertThat(calls).containsExactly(expected);
     }
 }

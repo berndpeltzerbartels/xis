@@ -10,51 +10,44 @@ class RequestScopeOrderPage {
     private final RequestScopeOrderPageService service;
 
     //
-    @RequestScope("id")
-    int provideId() {
-        service.record("provideId");
+    @RequestScope("a")
+    int a() {
+        service.record("a");
         return 42;
     }
 
     //
-    @RequestScope("token")
-    String provideToken() {
-        service.record("provideToken");
+    @RequestScope("b")
+    String b(@RequestScope("a") int id) {
+        service.record("b");
         return "abc";
     }
 
     //
-    @ModelData("normalModel")
-    String normalModel() {
-        service.record("normalModel");
-        return "foo";
-    }
-
-    //
-    @ModelData("model")
-    @RequestScope("model")
-    String requestScopedModel(@RequestScope("id") int id) {
-        service.record("requestScopedModel: id=" + id);
-        return "model-" + id;
+    @ModelData("c")
+    @RequestScope("c")
+    String c(@RequestScope("b") String token) {
+        service.record("c");
+        return "model-" + token;
     }
 
     //
     @FormData("token")
-    String form(@RequestScope("token") String token) {
-        service.record("form: token=" + token);
+    String form(@RequestScope("c") String token) {
+        service.record("c");
         return "form-" + token;
     }
 
     //
     @FormData("form")
     @RequestScope("scopedForm")
-    String scopedForm(@RequestScope("id") int id, @RequestScope("token") String token) {
-        service.record("scopedForm: id=" + id + ", token=" + token);
+    String d(@RequestScope("a") int id, @RequestScope("c") String token) {
+        service.record("d");
         return "scopedForm-" + id + "-" + token;
     }
 
     @Action("go")
-    void go(@RequestScope("id") int id, @RequestScope("token") String token) {
-        service.record("go: id=" + id + ", token=" + token);
+    void go(@RequestScope("a") int id, @RequestScope("b") String token) {
+        service.record("go");
     }
 }
