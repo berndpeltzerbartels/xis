@@ -1,15 +1,16 @@
 package one.xis.server;
 
 import lombok.RequiredArgsConstructor;
-import one.xis.PathVariable;
 import one.xis.*;
+import one.xis.PathVariable;
 import one.xis.deserialize.MainDeserializer;
 import one.xis.deserialize.PostProcessingResults;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.time.ZoneId;
-import java.util.Objects;
+import java.util.Map;
+import java.util.function.Supplier;
 
 @RequiredArgsConstructor
 class ControllerMethodParameter {
@@ -17,13 +18,13 @@ class ControllerMethodParameter {
     private final java.lang.reflect.Parameter parameter;
     private final MainDeserializer deserializer;
 
-    Object prepareParameter(ClientRequest request, PostProcessingResults postProcessingResults) throws Exception {
+    Object prepareParameter(ClientRequest request, PostProcessingResults postProcessingResults, Map<String, Object> requestScope) throws Exception {
         if (parameter.isAnnotationPresent(FormData.class)) {
             return deserializeFormDataParameter(parameter, request, postProcessingResults);
         } else if (parameter.isAnnotationPresent(UserId.class)) {
-            return Objects.requireNonNull(request.getUserId(), "UserId expected, but it was null"); // TODO Specialized exception and login
+            return validateAndRetrieve(request::getUserId, "UserId expected, but it was null");
         } else if (parameter.isAnnotationPresent(ClientId.class)) {
-            return Objects.requireNonNull(request.getClientId(), "ClientId expected, but it was null");
+            return validateAndRetrieve(request::getClientId, "ClientId expected, but it was null");
         } else if (parameter.isAnnotationPresent(URLParameter.class)) {
             return deserializeUrlParameter(parameter, request, postProcessingResults);
         } else if (parameter.isAnnotationPresent(one.xis.PathVariable.class)) {
@@ -33,6 +34,21 @@ class ControllerMethodParameter {
         } else if (parameter.isAnnotationPresent(ActionParameter.class)) {
             var key = parameter.getAnnotation(ActionParameter.class).value();
             var paramValue = request.getActionParameters().get(key);
+            return deserializeParameter(paramValue, request, parameter, postProcessingResults);
+        } else if (parameter.isAnnotationPresent(RequestScope.class)) {
+            var key = parameter.getAnnotation(RequestScope.class).value();
+            var paramValue = requestScope.get(key);
+            if (paramValue == null) {
+                throw new IllegalStateException(method + ": No request scope value found for key " + key);
+            }
+            return paramValue;
+        } else if (parameter.isAnnotationPresent(PageScope.class)) {
+            var key = parameter.getAnnotation(PageScope.class).value();
+            var paramValue = request.getPageScope().get(key);
+            return deserializeParameter(paramValue, request, parameter, postProcessingResults);
+        } else if (parameter.isAnnotationPresent(LocalStorage.class)) {
+            var key = parameter.getAnnotation(LocalStorage.class).value();
+            var paramValue = request.getLocalStorage().get(key);
             return deserializeParameter(paramValue, request, parameter, postProcessingResults);
         } else {
             throw new IllegalStateException(method + ": parameter without annotation=" + parameter);
@@ -50,9 +66,23 @@ class ControllerMethodParameter {
             controllerMethodResult.getPathVariables().put(parameter.getAnnotation(PathVariable.class).value(), parameterValue);
         } else if (parameter.isAnnotationPresent(Parameter.class)) {
             controllerMethodResult.getWidgetParameters().put(parameter.getAnnotation(Parameter.class).value(), parameterValue);
+        } else if (parameter.isAnnotationPresent(RequestScope.class)) {
+            controllerMethodResult.getRequestScope().put(parameter.getAnnotation(RequestScope.class).value(), parameterValue);
+        } else if (parameter.isAnnotationPresent(PageScope.class)) {
+            controllerMethodResult.getPageScope().put(parameter.getAnnotation(PageScope.class).value(), parameterValue);
+        } else if (parameter.isAnnotationPresent(LocalStorage.class)) {
+            controllerMethodResult.getLocalStorage().put(parameter.getAnnotation(LocalStorage.class).value(), parameterValue);
         } else {
             throw new IllegalStateException(method + ": parameter without annotation=" + parameter);
         }
+    }
+
+    private Object validateAndRetrieve(Supplier<Object> valueSupplier, String exceptionMessage) {
+        var value = valueSupplier.get();
+        if (value == null) {
+            throw new IllegalStateException(exceptionMessage);
+        }
+        return value;
     }
 
     private Object deserializeFormDataParameter(java.lang.reflect.Parameter parameter, ClientRequest request, PostProcessingResults postProcessingResults) throws IOException {

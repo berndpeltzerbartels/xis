@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import one.xis.Action;
 import one.xis.FormData;
 import one.xis.ModelData;
+import one.xis.RequestScope;
 import one.xis.context.XISComponent;
 import one.xis.deserialize.MainDeserializer;
 import one.xis.utils.lang.ClassUtils;
@@ -13,7 +14,6 @@ import one.xis.utils.lang.MethodUtils;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -35,6 +35,7 @@ class ControllerWrapperFactory {
             controllerWrapper.setModelMethods(modelMethods(controller));
             controllerWrapper.setFormDataMethods(formDataMethods(controller));
             controllerWrapper.setActionMethods(actionMethodMap(controller));
+            controllerWrapper.setRequestScopeMethods(requestScopeMethods(controller));
             controllerWrapper.setControllerResultMapper(controllerResultMapper);
             return controllerWrapper;
         } catch (Exception e) {
@@ -42,31 +43,23 @@ class ControllerWrapperFactory {
         }
     }
 
+    private Map<String, ControllerMethod> requestScopeMethods(Object controller) {
+        return annotatedMethods(controller, RequestScope.class)
+                .collect(Collectors.toMap(m -> m.getAnnotation(RequestScope.class).value(), this::createControllerMethod));
+    }
+
     private Collection<ControllerMethod> modelMethods(Object controller) {
-        var map = new MethodMap();
-        annotatedMethods(controller, ModelData.class)
+        return annotatedMethods(controller, ModelData.class)
                 .filter(m -> !m.isAnnotationPresent(Action.class))
-                .map(this::createModelMethod)
-                .forEach(controllerMethod -> map.put(controllerMethod.getKey(), controllerMethod));
-        return map.values();
+                .map(this::createControllerMethod)
+                .collect(Collectors.toSet());
     }
 
     private Collection<ControllerMethod> formDataMethods(Object controller) {
-        var map = new MethodMap();
-        annotatedMethods(controller, FormData.class)
+        return annotatedMethods(controller, FormData.class)
                 .filter(m -> !m.isAnnotationPresent(Action.class))
-                .map(this::createFormDataMethod)
-                .forEach(controllerMethod -> map.put(controllerMethod.getKey(), controllerMethod));
-        return map.values();
-    }
-
-    private static class MethodMap extends HashMap<String, ControllerMethod> {
-        void put(ControllerMethod controllerMethod) {
-            if (containsKey(controllerMethod.getKey())) {
-                throw new IllegalStateException("Duplicate method key: " + controllerMethod.getKey());
-            }
-            super.put(controllerMethod.getKey(), controllerMethod);
-        }
+                .map(this::createControllerMethod)
+                .collect(Collectors.toSet());
     }
 
     private <A extends Annotation> Stream<Method> annotatedMethods(Object controller, Class<A> annotation) {
@@ -75,44 +68,30 @@ class ControllerWrapperFactory {
     }
 
     private Map<String, ControllerMethod> actionMethodMap(Object controller) {
-        return actionMethods(controller).collect(Collectors.toMap(ControllerMethod::getKey, Function.identity()));
+        return actionMethods(controller).collect(Collectors.toMap(this::getActionKey, Function.identity()));
+    }
+
+    private String getActionKey(ControllerMethod controllerMethod) {
+        if (controllerMethod.getMethod().isAnnotationPresent(Action.class)) {
+            return controllerMethod.getMethod().getAnnotation(Action.class).value();
+        }
+        throw new IllegalStateException("Method is not annotated with Action: " + controllerMethod.getMethod());
     }
 
     private Stream<ControllerMethod> actionMethods(Object controller) {
         return MethodUtils.allMethods(controller).stream()
                 .filter(m -> m.isAnnotationPresent(Action.class))
-                .map(this::createActionMethod);
+                .map(this::createControllerMethod);
     }
 
-    private ControllerMethod createModelMethod(Method method) {
+    private ControllerMethod createControllerMethod(Method method) {
         method.setAccessible(true);
-        var key = method.getAnnotation(ModelData.class).value();
         try {
-            return new ControllerMethod(method, key, deserializer, controllerMethodResultMapper);
+            return new ControllerMethod(method, deserializer, controllerMethodResultMapper);
         } catch (Exception e) {
             throw new RuntimeException("Failed to initialize " + method, e);
         }
     }
 
-    private ControllerMethod createFormDataMethod(Method method) {
-        method.setAccessible(true);
-        var key = method.getAnnotation(FormData.class).value();
-        try {
-            return new ControllerMethod(method, key, deserializer, controllerMethodResultMapper);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to initialize " + method, e);
-        }
-    }
-
-
-    private ControllerMethod createActionMethod(Method method) {
-        method.setAccessible(true);
-        try {
-            var key = method.getAnnotation(Action.class).value();
-            return new ControllerMethod(method, key, deserializer, controllerMethodResultMapper);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to initialize " + method, e);
-        }
-    }
 
 }

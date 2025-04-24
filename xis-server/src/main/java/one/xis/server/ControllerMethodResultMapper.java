@@ -20,7 +20,7 @@ class ControllerMethodResultMapper {
 
     private final ValidatorMessageResolver validatorMessageResolver;
 
-    void mapReturnValueToResult(ControllerMethodResult controllerMethodResult, Method method, Object returnValue) {
+    void mapReturnValueToResult(ControllerMethodResult controllerMethodResult, Method method, Object returnValue, Map<String, Object> requestScope) {
         if (returnValue instanceof PageResponse pageResponse) {
             mapPageResponse(pageResponse, controllerMethodResult);
         } else if (returnValue instanceof WidgetResponse widgetResponse) {
@@ -33,6 +33,18 @@ class ControllerMethodResultMapper {
         }
         if (method.isAnnotationPresent(FormData.class)) {
             mapFormData(method.getAnnotation(FormData.class).value(), returnValue, controllerMethodResult);
+        }
+        if (method.isAnnotationPresent(RequestScope.class)) {
+            var key = method.getAnnotation(RequestScope.class).value();
+            requestScope.put(key, returnValue);
+        }
+        if (method.isAnnotationPresent(PageScope.class)) {
+            var key = method.getAnnotation(PageScope.class).value();
+            controllerMethodResult.getPageScope().put(key, returnValue);
+        }
+        if (method.isAnnotationPresent(LocalStorage.class)) {
+            var key = method.getAnnotation(LocalStorage.class).value();
+            controllerMethodResult.getLocalStorage().put(key, returnValue);
         }
     }
 

@@ -34,5 +34,11 @@ public class ClientRequest {
     @JsonDeserialize(using = MapDeserializer.class)
     private Map<String, String> actionParameters = new HashMap<>();
 
+    @JsonDeserialize(using = MapDeserializer.class)
+    private final Map<String, String> pageScope = new HashMap<>();
+
+    @JsonDeserialize(using = MapDeserializer.class)
+    private final Map<String, String> localStorage = new HashMap<>();
+
 
 }

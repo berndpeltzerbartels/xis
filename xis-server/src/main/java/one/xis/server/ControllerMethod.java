@@ -7,20 +7,19 @@ import one.xis.deserialize.MainDeserializer;
 import one.xis.deserialize.PostProcessingResults;
 
 import java.lang.reflect.Method;
+import java.util.Map;
 
 @Data
 @Slf4j
 class ControllerMethod {
 
     protected final Method method;
-    protected final String key;
     protected final MainDeserializer deserializer;
     protected final ControllerMethodResultMapper controllerMethodResultMapper;
     protected final ControllerMethodParameter[] controllerMethodParameters;
 
-    ControllerMethod(@NonNull Method method, @NonNull String key, @NonNull MainDeserializer deserializer, @NonNull ControllerMethodResultMapper controllerMethodResultMapper) {
+    ControllerMethod(Method method, MainDeserializer deserializer, ControllerMethodResultMapper controllerMethodResultMapper) {
         this.method = method;
-        this.key = key;
         this.deserializer = deserializer;
         this.controllerMethodResultMapper = controllerMethodResultMapper;
         this.controllerMethodParameters = new ControllerMethodParameter[method.getParameterCount()];
@@ -29,9 +28,9 @@ class ControllerMethod {
         }
     }
 
-    ControllerMethodResult invoke(@NonNull ClientRequest request, @NonNull Object controller) throws Exception {
+    ControllerMethodResult invoke(@NonNull ClientRequest request, @NonNull Object controller, Map<String, Object> requestScope) throws Exception {
         var postProcessingResults = new PostProcessingResults();
-        var args = prepareArgs(method, request, postProcessingResults);
+        var args = prepareArgs(method, request, postProcessingResults, requestScope);
         if (postProcessingResults.authenticate()) {
             // TODO
         }
@@ -45,7 +44,7 @@ class ControllerMethod {
         // let parameters override request values
         controllerMethodResultMapper.mapMethodParameterToResultAfterInvocation(controllerMethodResult, controllerMethodParameters, args);
         // let return values override parameters
-        controllerMethodResultMapper.mapReturnValueToResult(controllerMethodResult, method, returnValue);
+        controllerMethodResultMapper.mapReturnValueToResult(controllerMethodResult, method, returnValue, requestScope);
         return controllerMethodResult;
     }
 
@@ -54,10 +53,23 @@ class ControllerMethod {
         return "ControllerMethod(" + method.getName() + ")";
     }
 
-    protected Object[] prepareArgs(Method method, ClientRequest request, PostProcessingResults postProcessingResults) throws Exception {
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        ControllerMethod that = (ControllerMethod) obj;
+        return method.equals(that.method);
+    }
+
+    @Override
+    public int hashCode() {
+        return method.hashCode();
+    }
+
+    protected Object[] prepareArgs(Method method, ClientRequest request, PostProcessingResults postProcessingResults, Map<String, Object> requestScope) throws Exception {
         var args = new Object[method.getParameterCount()];
         for (var i = 0; i < method.getParameterCount(); i++) {
-            args[i] = controllerMethodParameters[i].prepareParameter(request, postProcessingResults);
+            args[i] = controllerMethodParameters[i].prepareParameter(request, postProcessingResults, requestScope);
         }
         return args;
     }
