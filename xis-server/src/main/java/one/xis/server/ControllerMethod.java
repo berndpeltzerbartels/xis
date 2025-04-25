@@ -7,7 +7,10 @@ import one.xis.deserialize.MainDeserializer;
 import one.xis.deserialize.PostProcessingResults;
 
 import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Data
 @Slf4j
@@ -64,6 +67,20 @@ class ControllerMethod {
     @Override
     public int hashCode() {
         return method.hashCode();
+    }
+
+    String getReturnValueRequestScopeKey() {
+        if (method.isAnnotationPresent(one.xis.RequestScope.class)) {
+            return method.getAnnotation(one.xis.RequestScope.class).value();
+        }
+        return null;
+    }
+
+    Collection<String> getParameterRequestScopeKeys() {
+        return Stream.of(method.getParameters())
+                .filter(p -> p.isAnnotationPresent(one.xis.RequestScope.class))
+                .map(p -> p.getAnnotation(one.xis.RequestScope.class).value())
+                .collect(Collectors.toSet());
     }
 
     protected Object[] prepareArgs(Method method, ClientRequest request, PostProcessingResults postProcessingResults, Map<String, Object> requestScope) throws Exception {

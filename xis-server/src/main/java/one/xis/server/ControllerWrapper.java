@@ -2,12 +2,11 @@ package one.xis.server;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
-import one.xis.RequestScope;
 import one.xis.validation.ValidatorMessages;
 import org.tinylog.Logger;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Data
 @NoArgsConstructor
@@ -31,37 +30,58 @@ public class ControllerWrapper {
     private ControllerResultMapper controllerResultMapper;
 
     void invokeGetModelMethods(ClientRequest request, ControllerResult controllerResult) {
-        var methods = new HashSet<>(modelMethods);
-        methods.addAll(requestScopeMethods.values());
-        new ModelDataMethodChainExecutor(request, controllerResult, methods).execute();
+        var methods = RequestScopeSorter.sortMethods(modelMethods, requestScopeMethods.values());
+        methods.forEach(m -> invokeModelDataMethod(request, controllerResult, m));
     }
 
     void invokeFormDataMethods(ClientRequest request, ControllerResult controllerResult) {
-        var formDataMethods = new HashSet<>(this.formDataMethods);
-        formDataMethods.addAll(requestScopeMethods.values());
-        new FormDataMethodChainExecutor(request, controllerResult, formDataMethods).execute();
+        var methods = RequestScopeSorter.sortMethods(formDataMethods, requestScopeMethods.values());
+        methods.forEach(m -> invokeModelDataMethod(request, controllerResult, m));
     }
 
     void invokeActionMethod(ClientRequest request, ControllerResult controllerResult) {
         var method = actionMethods.get(request.getAction());
-        var methods = new HashSet<>(requestScopeMethods.values());
-        methods.add(method);
-        if (method == null) {
-            throw new RuntimeException("No action-method found for action " + request.getAction());
-        }
-        new ActionMethodChainExecutor(request, controllerResult, methods).execute();
+        var methods = RequestScopeSorter.sortMethods(Set.of(method), requestScopeMethods.values());
+        methods.forEach(m -> {
+            if (m.equals(method)) {
+                invokeActionMethod(request, controllerResult, m);
+            } else {
+                invokeModelDataMethod(request, controllerResult, m);
+            }
+        });
     }
 
     Class<?> getControllerClass() {
         return controller.getClass();
     }
 
-    private List<String> getRequestScopeParameterKeys(ControllerMethod controllerMethod) {
-        return Arrays.stream(controllerMethod.getMethod().getParameters())
-                .filter(parameter -> parameter.isAnnotationPresent(RequestScope.class))
-                .map(parameter -> parameter.getAnnotation(RequestScope.class).value())
-                .toList();
+    private void invokeModelDataMethod(ClientRequest request, ControllerResult controllerResult, ControllerMethod method) {
+        try {
+            var controllerMethodResult = method.invoke(request, controller, controllerResult.getRequestScope());
+            if (controllerMethodResult.isValidationFailed()) {
+                // these validation errors are unexpected, so we throw an exception
+                throw exceptionForValidationErrors(controllerMethodResult.getValidatorMessages());
+            }
+            controllerResultMapper.mapMethodResultToControllerResult(controllerMethodResult, controllerResult);
+        } catch (Exception e) {
+            Logger.error(e, "Failed to invoke model-method");
+            throw new RuntimeException("Failed to invoke model-method " + method, e);
+        }
     }
+
+    private void invokeActionMethod(ClientRequest request, ControllerResult controllerResult, ControllerMethod method) {
+        if (method == null) {
+            throw new RuntimeException("No action-method found for action " + request.getAction());
+        }
+        try {
+            var controllerMethodResult = method.invoke(request, controller, controllerResult.getRequestScope());
+            controllerResultMapper.mapMethodResultToControllerResult(controllerMethodResult, controllerResult);
+        } catch (Exception e) {
+            Logger.error(e, "Failed to invoke action-method");
+            throw new RuntimeException("Failed to invoke action-method: " + method, e);
+        }
+    }
+
 
     /**
      * @param validatorMessages
@@ -73,105 +93,77 @@ public class ControllerWrapper {
 
     }
 
-    @RequiredArgsConstructor
-    abstract class MethodChainExecutor {
 
-        private final ClientRequest request;
-        private final ControllerResult controllerResult;
-        private final Set<ControllerMethod> invoked = new HashSet<>();
-        private final Collection<ControllerMethod> methods;
-
-        public void execute() {
-            // Continue to invoke until no more missing keys can be filled
-            boolean progress;
-            do {
-                progress = false;
-                for (ControllerMethod method : methods) {
-                    if (invoked.contains(method)) {
-                        continue;
-                    }
-                    // Retrieve required request scope keys for the method.
-                    List<String> requiredKeys = getRequestScopeParameterKeys(method);
-                    // Check if all required keys are already present.
-                    if (controllerResult.getRequestScope().keySet().containsAll(requiredKeys)) {
-                        try {
-                            doInvoke(request, controllerResult, method);
-                            invoked.add(method);
-                            progress = true;
-                        } catch (Exception e) {
-                            throw new RuntimeException("Failed to invoke model-method: " + method, e);
-                        }
-                    }
+    static class RequestScopeSorter {
+        public static List<ControllerMethod> sortMethods(Collection<ControllerMethod> mandatoryMethods, Collection<ControllerMethod> conditionalMethods) {
+            Map<String, ControllerMethod> providedBy = new HashMap<>();
+            for (ControllerMethod method : conditionalMethods) {
+                String retScope = method.getReturnValueRequestScopeKey();
+                if (retScope != null) {
+                    providedBy.put(retScope, method);
                 }
-            } while (progress); // Stop when no new method could be invoked
+            }
+            Set<ControllerMethod> allRequired = new HashSet<>();
+            for (ControllerMethod method : mandatoryMethods) {
+                allRequired.add(method);
+                allRequired.addAll(resolveDependencies(method, providedBy));
+            }
+            Set<ControllerMethod> needed = allRequired.stream()
+                    .flatMap(m -> m.getParameterRequestScopeKeys().stream())
+                    .map(providedBy::get)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
+            for (ControllerMethod method : needed) {
+                allRequired.add(method);
+                allRequired.addAll(resolveDependencies(method, providedBy));
+            }
+            return topologicalSort(allRequired, providedBy);
         }
 
-        abstract void doInvoke(ClientRequest request, ControllerResult controllerResult, ControllerMethod method);
-    }
-
-    class ModelDataMethodChainExecutor extends MethodChainExecutor {
-
-        public ModelDataMethodChainExecutor(ClientRequest request, ControllerResult controllerResult, Collection<ControllerMethod> modelMethods) {
-            super(request, controllerResult, modelMethods);
-        }
-
-        @Override
-        void doInvoke(ClientRequest request, ControllerResult controllerResult, ControllerMethod method) {
-            try {
-                var controllerMethodResult = method.invoke(request, controller, controllerResult.getRequestScope());
-                if (controllerMethodResult.isValidationFailed()) {
-                    // these validation errors are unexpected, so we throw an exception
-                    throw exceptionForValidationErrors(controllerMethodResult.getValidatorMessages());
+        private static Set<ControllerMethod> resolveDependencies(ControllerMethod method, Map<String, ControllerMethod> providedBy) {
+            Set<ControllerMethod> deps = new HashSet<>();
+            for (String paramScope : method.getParameterRequestScopeKeys()) {
+                ControllerMethod provider = providedBy.get(paramScope);
+                if (provider != null) {
+                    deps.add(provider);
+                    deps.addAll(resolveDependencies(provider, providedBy));
                 }
-                controllerResultMapper.mapMethodResultToControllerResult(controllerMethodResult, controllerResult);
-            } catch (Exception e) {
-                Logger.error(e, "Failed to invoke model-method");
-                throw new RuntimeException("Failed to invoke model-method " + method, e);
             }
-        }
-    }
-
-    class FormDataMethodChainExecutor extends MethodChainExecutor {
-
-        public FormDataMethodChainExecutor(ClientRequest request, ControllerResult controllerResult, Collection<ControllerMethod> modelMethods) {
-            super(request, controllerResult, modelMethods);
+            return deps;
         }
 
-        @Override
-        void doInvoke(ClientRequest request, ControllerResult controllerResult, ControllerMethod method) {
-            try {
-                var controllerMethodResult = method.invoke(request, controller, controllerResult.getRequestScope());
-                if (controllerMethodResult.isValidationFailed()) {
-                    // these validation errors are unexpected, so we throw an exception
-                    throw exceptionForValidationErrors(controllerMethodResult.getValidatorMessages());
+        private static List<ControllerMethod> topologicalSort(Set<ControllerMethod> methods, Map<String, ControllerMethod> providedBy) {
+            Map<ControllerMethod, Set<ControllerMethod>> graph = new HashMap<>();
+            for (ControllerMethod m : methods) {
+                graph.put(m, resolveDependencies(m, providedBy));
+            }
+            List<ControllerMethod> result = new ArrayList<>();
+            Set<ControllerMethod> visited = new HashSet<>();
+            Set<ControllerMethod> visiting = new HashSet<>();
+            for (ControllerMethod m : methods) {
+                if (!visited.contains(m)) {
+                    dfs(m, graph, visited, visiting, result);
                 }
-                controllerResultMapper.mapMethodResultToControllerResult(controllerMethodResult, controllerResult);
-            } catch (Exception e) {
-                Logger.error(e, "Failed to invoke model-method");
-                throw new RuntimeException("Failed to invoke model-method " + method, e);
             }
+            return result;
+        }
+
+        private static void dfs(ControllerMethod current, Map<ControllerMethod, Set<ControllerMethod>> graph,
+                                Set<ControllerMethod> visited, Set<ControllerMethod> visiting,
+                                List<ControllerMethod> result) {
+            if (visiting.contains(current)) {
+                throw new IllegalStateException("Cycle detected");
+            }
+            if (visited.contains(current)) return;
+            visiting.add(current);
+            for (ControllerMethod dep : graph.getOrDefault(current, Collections.emptySet())) {
+                dfs(dep, graph, visited, visiting, result);
+            }
+            visiting.remove(current);
+            visited.add(current);
+            result.add(current);
         }
     }
 
-    class ActionMethodChainExecutor extends MethodChainExecutor {
-
-        public ActionMethodChainExecutor(ClientRequest request, ControllerResult controllerResult, Collection<ControllerMethod> methods) {
-            super(request, controllerResult, methods);
-        }
-
-        @Override
-        void doInvoke(ClientRequest request, ControllerResult controllerResult, ControllerMethod method) {
-            if (method == null) {
-                throw new RuntimeException("No action-method found for action " + request.getAction());
-            }
-            try {
-                var controllerMethodResult = method.invoke(request, controller, controllerResult.getRequestScope());
-                controllerResultMapper.mapMethodResultToControllerResult(controllerMethodResult, controllerResult);
-            } catch (Exception e) {
-                Logger.error(e, "Failed to invoke action-method");
-                throw new RuntimeException("Failed to invoke action-method: " + method, e);
-            }
-        }
-    }
 
 }
