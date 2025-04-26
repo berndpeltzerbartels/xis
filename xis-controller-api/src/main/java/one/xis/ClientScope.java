@@ -14,7 +14,7 @@ import java.lang.annotation.Target;
  * as a variable with the specified key during rendering or interaction.
  *
  * <pre>{@code
- * public String render(@PageScope("status") String status) {
+ * public String render(@ClientScope("status") String status) {
  *     return "Status: " + status;
  * }
  * }</pre>
@@ -36,6 +36,6 @@ import java.lang.annotation.Target;
  */
 @Target({ElementType.PARAMETER, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface PageScope {
+public @interface ClientScope {
     String value();
 }

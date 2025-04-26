@@ -20,5 +20,10 @@ class ControllerResponseMapper {
         response.setNextWidgetId(result.getNextWidgetId());
         response.setValidatorMessages(result.getValidatorMessages());
         response.setStatus(result.isValidationFailed() ? 422 : 200);
+        response.setWidgetContainerId(result.getWidgetContainerId());
+        response.setLocalStorageData(result.getLocalStorage());
+        response.setClientScopeData(result.getClientScope());
+        response.setReloadWidgets(result.getWidgetsToReload());
+        // TODO navigation test. reload widgets ? set widget in another container ?
     }
 }

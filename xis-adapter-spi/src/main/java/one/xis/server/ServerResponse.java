@@ -12,6 +12,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+
+//TODO do not serialize null fields. requires edits in client, too
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -23,10 +25,11 @@ public class ServerResponse {
     private Map<String, Object> formData = new HashMap<>();
     private Map<String, Object> localStorageData = new HashMap<>();
     private Map<String, Object> localDatabaseData = new HashMap<>();
-    private Map<String, Object> localMemoryData = new HashMap<>();
+    private Map<String, Object> clientScopeData = new HashMap<>();
     private Collection<String> reloadWidgets = new ArrayList<>();
     private String nextPageURL;
     private String nextWidgetId;
     private ValidatorMessages validatorMessages = new ValidatorMessages();
-    private boolean reloadPage;
+    private boolean reloadPage; // TODO do we need this?
+    private String widgetContainerId;
 }

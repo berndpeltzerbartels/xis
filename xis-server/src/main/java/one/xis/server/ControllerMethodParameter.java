@@ -43,9 +43,9 @@ class ControllerMethodParameter {
                 throw new IllegalStateException(method + ": No request scope value found for key " + key);
             }
             return paramValue;
-        } else if (parameter.isAnnotationPresent(PageScope.class)) {
-            var key = parameter.getAnnotation(PageScope.class).value();
-            var paramValue = request.getPageScope().get(key);
+        } else if (parameter.isAnnotationPresent(ClientScope.class)) {
+            var key = parameter.getAnnotation(ClientScope.class).value();
+            var paramValue = request.getClientScope().get(key);
             return deserializeParameter(paramValue, request, parameter, postProcessingResults);
         } else if (parameter.isAnnotationPresent(LocalStorage.class)) {
             var key = parameter.getAnnotation(LocalStorage.class).value();
@@ -69,8 +69,8 @@ class ControllerMethodParameter {
             controllerMethodResult.getWidgetParameters().put(parameter.getAnnotation(Parameter.class).value(), parameterValue);
         } else if (parameter.isAnnotationPresent(RequestScope.class)) {
             controllerMethodResult.getRequestScope().put(parameter.getAnnotation(RequestScope.class).value(), parameterValue);
-        } else if (parameter.isAnnotationPresent(PageScope.class)) {
-            controllerMethodResult.getPageScope().put(parameter.getAnnotation(PageScope.class).value(), parameterValue);
+        } else if (parameter.isAnnotationPresent(ClientScope.class)) {
+            controllerMethodResult.getClientScope().put(parameter.getAnnotation(ClientScope.class).value(), parameterValue);
         } else if (parameter.isAnnotationPresent(LocalStorage.class)) {
             controllerMethodResult.getLocalStorage().put(parameter.getAnnotation(LocalStorage.class).value(), parameterValue);
         } else {

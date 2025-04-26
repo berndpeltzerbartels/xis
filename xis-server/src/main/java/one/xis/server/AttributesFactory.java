@@ -1,8 +1,8 @@
 package one.xis.server;
 
+import one.xis.ClientScope;
 import one.xis.LocalDatabase;
 import one.xis.LocalStorage;
-import one.xis.PageScope;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -19,8 +19,8 @@ class AttributesFactory {
 
     private void addParameterAttributes(Method method, ComponentAttributes attributes) {
         for (var parameter : method.getParameters()) {
-            if (parameter.isAnnotationPresent(PageScope.class)) {
-                attributes.getPageScope().add(parameter.getAnnotation(PageScope.class).value());
+            if (parameter.isAnnotationPresent(ClientScope.class)) {
+                attributes.getClientScope().add(parameter.getAnnotation(ClientScope.class).value());
             }
             if (parameter.isAnnotationPresent(LocalStorage.class)) {
                 attributes.getLocalStorage().add(parameter.getAnnotation(one.xis.LocalStorage.class).value());

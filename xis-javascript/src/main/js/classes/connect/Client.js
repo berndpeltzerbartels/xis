@@ -6,6 +6,7 @@ class Client {
         this.clientId = randomString();
         this.userId = '';
         this.zoneId = timeZone();
+        this.clientState = {}
     }
 
        /**
@@ -249,7 +250,38 @@ class Client {
         serverResponse.validatorMessages = new ValidatorMessages(obj.validatorMessages);
         serverResponse.reloadPage = obj.reloadPage;
         serverResponse.reloadWidgets = obj.reloadWidgets;
+        serverResponse.localDatabaseData = obj.localDatabaseData;
+        serverResponse.localStorageData = obj.localStorageData;
+        serverResponse.clientScopeData = obj.clientScopeData;
+        serverResponse.widgetContainerId = obj.widgetContainerId;
+        data.setValue(['clientScope'], serverResponse.clientScopeData); // TODO correct ? docs ?
         return serverResponse;
     }
+
+    storeData(ressponse) {
+      this.storeLocalStorageData(ressponse.localStorageData);
+      this.storeClientScopeData(ressponse.clientScopeData);
+      this.storeLocalDatabaseData(ressponse.localDatabaseData);
+    }
+
+    storeLocalStorageData(localStorageData) {
+        for (var key of Object.keys(localStorageData)) {
+            localStorage.setItem(key, localStorageData[key]);
+        }
+    }
+
+    storeClientScopeData(clientScopeData) {
+        for (var key of Object.keys(clientScopeData)) {
+            this.clientState[key] = clientScopeData[key];
+        }
+    }
+    storeLocalDatabaseData(localDatabaseData) {
+        // TODO create and configure db
+        for (var key of Object.keys(localDatabaseData)) {
+            this.localDatabase.setItem(key, localDatabaseData[key]);
+        }
+    }
+
+
 
 }

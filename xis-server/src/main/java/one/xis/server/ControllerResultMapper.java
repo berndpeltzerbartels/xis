@@ -27,7 +27,7 @@ class ControllerResultMapper {
         controllerResult.getValidatorMessages().getMessages().putAll(controllerMethodResult.getValidatorMessages().getMessages());
         controllerResult.getWidgetsToReload().addAll(controllerMethodResult.getWidgetsToReload());
         controllerResult.getRequestScope().putAll(controllerMethodResult.getRequestScope());
-        controllerResult.getPageScope().putAll(controllerMethodResult.getPageScope());
+        controllerResult.getClientScope().putAll(controllerMethodResult.getClientScope());
         controllerResult.getLocalStorage().putAll(controllerMethodResult.getLocalStorage());
         if (controllerMethodResult.isValidationFailed()) {
             controllerResult.setValidationFailed(true);
