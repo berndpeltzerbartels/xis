@@ -23,25 +23,30 @@ public class ControllerWrapper {
      */
     private Object controller;
 
-    private Map<String, ControllerMethod> requestScopeMethods;
+    private Collection<ControllerMethod> requestScopeMethods;
     private Collection<ControllerMethod> modelMethods;
     private Map<String, ControllerMethod> actionMethods;
     private Collection<ControllerMethod> formDataMethods;
+    private Collection<ControllerMethod> pageScopeOnlyMethods;
+    private Collection<ControllerMethod> localStorageOnlyMethods;
     private ControllerResultMapper controllerResultMapper;
 
     void invokeGetModelMethods(ClientRequest request, ControllerResult controllerResult) {
-        var methods = RequestScopeSorter.sortMethods(modelMethods, requestScopeMethods.values());
+        var methodsToExecute = new ArrayList<>(modelMethods);
+        methodsToExecute.addAll(pageScopeOnlyMethods);
+        methodsToExecute.addAll(localStorageOnlyMethods);
+        var methods = RequestScopeSorter.sortMethods(methodsToExecute, requestScopeMethods);
         methods.forEach(m -> invokeModelDataMethod(request, controllerResult, m));
     }
 
     void invokeFormDataMethods(ClientRequest request, ControllerResult controllerResult) {
-        var methods = RequestScopeSorter.sortMethods(formDataMethods, requestScopeMethods.values());
+        var methods = RequestScopeSorter.sortMethods(formDataMethods, requestScopeMethods);
         methods.forEach(m -> invokeModelDataMethod(request, controllerResult, m));
     }
 
     void invokeActionMethod(ClientRequest request, ControllerResult controllerResult) {
         var method = actionMethods.get(request.getAction());
-        var methods = RequestScopeSorter.sortMethods(Set.of(method), requestScopeMethods.values());
+        var methods = RequestScopeSorter.sortMethods(Set.of(method), requestScopeMethods);
         methods.forEach(m -> {
             if (m.equals(method)) {
                 invokeActionMethod(request, controllerResult, m);
@@ -164,6 +169,4 @@ public class ControllerWrapper {
             result.add(current);
         }
     }
-
-
 }

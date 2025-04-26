@@ -1,7 +1,10 @@
 package test.page.core;
 
 import lombok.RequiredArgsConstructor;
-import one.xis.*;
+import one.xis.Action;
+import one.xis.ModelData;
+import one.xis.Page;
+import one.xis.RequestScope;
 
 @Page("/requestScopeOrder.html")
 @RequiredArgsConstructor
@@ -31,18 +34,16 @@ class RequestScopeOrderPage {
         return "model-" + token;
     }
 
-    //
-    @FormData("token")
-    String form(@RequestScope("c") String token) {
-        service.record("c");
+    @ModelData("d")
+    String d(@RequestScope("c") String token) {
+        service.record("d");
         return "form-" + token;
     }
 
-    //
-    @FormData("form")
+    @ModelData("xyz")
     @RequestScope("scopedForm")
-    String d(@RequestScope("a") int id, @RequestScope("c") String token) {
-        service.record("d");
+    String e(@RequestScope("a") int id, @RequestScope("c") String token) {
+        service.record("e");
         return "scopedForm-" + id + "-" + token;
     }
 

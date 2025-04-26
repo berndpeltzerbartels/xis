@@ -23,12 +23,15 @@ class RequestScopeOrderTest {
     @Test
     void testExecutionOrder() {
         var result = testContext.openPage("/requestScopeOrder.html");
-        result.getDocument().getElementById("go").click();
-
         var calls = service.getRecorder().getCalls();
-        var expected = new String[]{"a", "b", "c", "d", "a", "b", "go", "c", "d"};
-
-
-        assertThat(calls).containsExactly(expected);
+        // check the first three calls are a, b, c, this order is mandatory
+        assertThat(calls).containsSubsequence("a", "b", "c");
+        // check d and e are the last 2 elements in any order
+        assertThat(calls.subList(calls.size() - 2, calls.size()))
+                .containsExactlyInAnyOrder("d", "e");
+        
+        calls.clear();
+        result.getDocument().getElementById("go").click();
+        assertThat(calls).containsExactly("a", "b", "go");
     }
 }

@@ -2,10 +2,7 @@ package one.xis.server;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import one.xis.Action;
-import one.xis.FormData;
-import one.xis.ModelData;
-import one.xis.RequestScope;
+import one.xis.*;
 import one.xis.context.XISComponent;
 import one.xis.deserialize.MainDeserializer;
 import one.xis.utils.lang.ClassUtils;
@@ -36,6 +33,8 @@ class ControllerWrapperFactory {
             controllerWrapper.setFormDataMethods(formDataMethods(controller));
             controllerWrapper.setActionMethods(actionMethodMap(controller));
             controllerWrapper.setRequestScopeMethods(requestScopeMethods(controller));
+            controllerWrapper.setPageScopeOnlyMethods(pageScopeOnlyMethods(controller));
+            controllerWrapper.setLocalStorageOnlyMethods(localStorageOnlyMethods(controller));
             controllerWrapper.setControllerResultMapper(controllerResultMapper);
             return controllerWrapper;
         } catch (Exception e) {
@@ -43,9 +42,30 @@ class ControllerWrapperFactory {
         }
     }
 
-    private Map<String, ControllerMethod> requestScopeMethods(Object controller) {
+    private Collection<ControllerMethod> localStorageOnlyMethods(@NonNull Object controller) {
+        return annotatedMethods(controller, LocalStorage.class)
+                .filter(m -> !m.isAnnotationPresent(Action.class))
+                .filter(method -> !method.isAnnotationPresent(PageScope.class))
+                .filter(method -> !method.isAnnotationPresent(ModelData.class))
+                .filter(method -> !method.isAnnotationPresent(FormData.class))
+                .map(this::createControllerMethod)
+                .collect(Collectors.toSet());
+    }
+
+    private Collection<ControllerMethod> pageScopeOnlyMethods(@NonNull Object controller) {
+        return annotatedMethods(controller, PageScope.class)
+                .filter(m -> !m.isAnnotationPresent(Action.class))
+                .filter(method -> !method.isAnnotationPresent(LocalStorage.class))
+                .filter(method -> !method.isAnnotationPresent(ModelData.class))
+                .filter(method -> !method.isAnnotationPresent(FormData.class))
+                .map(this::createControllerMethod)
+                .collect(Collectors.toSet());
+    }
+
+    private Collection<ControllerMethod> requestScopeMethods(Object controller) {
         return annotatedMethods(controller, RequestScope.class)
-                .collect(Collectors.toMap(m -> m.getAnnotation(RequestScope.class).value(), this::createControllerMethod));
+                .map(this::createControllerMethod)
+                .collect(Collectors.toSet());
     }
 
     private Collection<ControllerMethod> modelMethods(Object controller) {

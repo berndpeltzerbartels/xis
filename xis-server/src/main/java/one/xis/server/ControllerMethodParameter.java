@@ -18,6 +18,7 @@ class ControllerMethodParameter {
     private final java.lang.reflect.Parameter parameter;
     private final MainDeserializer deserializer;
 
+    // TODO Validation: only one of these annotation in parameter
     Object prepareParameter(ClientRequest request, PostProcessingResults postProcessingResults, Map<String, Object> requestScope) throws Exception {
         if (parameter.isAnnotationPresent(FormData.class)) {
             return deserializeFormDataParameter(parameter, request, postProcessingResults);
