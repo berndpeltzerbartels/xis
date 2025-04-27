@@ -38,6 +38,10 @@ class ControllerMethodResultMapper {
             var key = method.getAnnotation(RequestScope.class).value();
             requestScope.put(key, returnValue);
         }
+        if (method.isAnnotationPresent(ClientState.class)) {
+            var key = method.getAnnotation(ClientState.class).value();
+            controllerMethodResult.getClientState().put(key, returnValue);
+        }
         if (method.isAnnotationPresent(ClientScope.class)) {
             var key = method.getAnnotation(ClientScope.class).value();
             controllerMethodResult.getClientScope().put(key, returnValue);

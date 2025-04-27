@@ -21,7 +21,7 @@ class JSFileSorter {
                 }
             }
             if (matches.isEmpty()) {
-                throw new IllegalStateException("circular or illegal dependecies, envolved files: " + asList(filesLeft));
+                throw new IllegalStateException("circular or illegal dependencies, envolved files: " + asList(filesLeft));
             }
             filesLeft.removeAll(matches);
             var classNames = matches.stream()

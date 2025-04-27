@@ -9,6 +9,10 @@ class TextContent {
 
     constructor(parts) {
         this.parts = parts;
+        this.clientStateVariables().forEach(variable => {
+           app.clientState.registerListener(variable, () => this.refreshOnClientStateChange());
+        }
+        );
     }
 
     /**
@@ -18,9 +22,26 @@ class TextContent {
      * variables with the actual data.
      */
     evaluate(data) {
+        this.data = data;
         if (this.parts.length == 0) return '';
         return this.parts.map(part => part.asString(data)).reduce((s1, s2) => s1 + s2);
     }
+
+    refreshOnClientStateChange() {
+        this.evaluate(this.data);
+    }
+
+    clientStateVariables() {
+        var variables = [];
+        for (var part of this.parts) {
+            if (part.type  == 'CLIENT_STATE_VARIABLE') {
+                variables.push(part.expression);
+            }
+        }
+        return variables;
+    }
+                
+
 
     clone() {
         var parts = [];

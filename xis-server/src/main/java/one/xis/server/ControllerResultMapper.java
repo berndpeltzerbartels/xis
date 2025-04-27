@@ -26,6 +26,7 @@ class ControllerResultMapper {
         controllerResult.getValidatorMessages().getGlobalMessages().addAll(controllerMethodResult.getValidatorMessages().getGlobalMessages());
         controllerResult.getValidatorMessages().getMessages().putAll(controllerMethodResult.getValidatorMessages().getMessages());
         controllerResult.getWidgetsToReload().addAll(controllerMethodResult.getWidgetsToReload());
+        controllerResult.getClientState().putAll(controllerMethodResult.getClientState());
         controllerResult.getRequestScope().putAll(controllerMethodResult.getRequestScope());
         controllerResult.getClientScope().putAll(controllerMethodResult.getClientScope());
         controllerResult.getLocalStorage().putAll(controllerMethodResult.getLocalStorage());

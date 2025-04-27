@@ -1,6 +1,7 @@
 class TestApplication {
 
     constructor() {
+        this.clientState = new ClientState();
         this.httpConnector = new HttpConnectorMock();
         this.domAccessor = new DomAccessor();
         this.client = new HttpClient(this.httpConnector);

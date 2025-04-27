@@ -24,6 +24,7 @@ class ControllerResponseMapper {
         response.setLocalStorageData(result.getLocalStorage());
         response.setClientScopeData(result.getClientScope());
         response.setReloadWidgets(result.getWidgetsToReload());
+        response.setClientStateData(result.getClientState());
         // TODO navigation test. reload widgets ? set widget in another container ?
     }
 }

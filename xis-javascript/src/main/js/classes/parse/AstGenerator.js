@@ -14,6 +14,7 @@ class AstGenerator {
         this.functions = functions;
         this.originalExpression = originalExpression;
         this.index = 0;
+        this.clientStateVariableDetected;
     }
 
     /**
@@ -29,6 +30,12 @@ class AstGenerator {
         return this.parse();
     }
 
+    /**
+     * Parse the expression and create the abstract syntax tree.
+     *
+     * @returns the root element of the abstract syntax tree. The root element is an operator or fanction call in common cases.
+     * If the expression is empty, a NoopAst is returned. If there is only a single element, this element is returned.
+     */
     parse() {
         var row = [];
         while (this.index < this.tokens.length) {
@@ -52,8 +59,13 @@ class AstGenerator {
                     } else if (this.nextToken().type === OPENING_SQUARE_BRACKET) {
                         row.push(this.createPropertyVariable());
                     } else {
-                        row.push(this.createVariable(this.consumeToken(IDENTIFIER)));
-
+                        const identifierToken = this.consumeToken(IDENTIFIER);
+                        if (identifierToken.value.startsWith("state.")) {
+                            this.clientStateVariableDetected = true;
+                            row.push(this.createClientStateVariable(identifierToken.value));
+                        } else {
+                            row.push(this.createVariable(identifierToken));
+                        }
                     }
                     break;
                 case FLOAT:
@@ -108,6 +120,12 @@ class AstGenerator {
         return this.toExpression(row);
     }
 
+    /**
+     * Convert the row of tokens into an expression.
+     *
+     * @param {array<any>} row
+     * @returns the expression created from the row of tokens.
+     */
     toExpression(row) {
         this.applyNegation(row);
         switch (row.length) {
@@ -125,6 +143,12 @@ class AstGenerator {
         }
     }
 
+    /**
+     * 
+     * @param {array<any>} row 
+     * @param {Number} precedence 
+     * @returns 
+     */
     expressionForPrecedence(row, precedence) {
         var i = 1;
         var operator;
@@ -152,6 +176,15 @@ class AstGenerator {
         return operator;
     }
 
+    /**
+     * Apply negation to the row of tokens.
+     *
+     * @param {array<any>} row
+     * @throws Error if the row ends with a negation.
+     * @returns void
+     *  
+     * @description This method processes the negation operator in the row of tokens.
+     */ 
     applyNegation(row) {
         var i = 0;
         while (i < row.length) {
@@ -168,7 +201,10 @@ class AstGenerator {
         }
     }
 
-
+    /**
+     * 
+     * @param {array<any>} row 
+     */
     processNegation(row) {
         var i = 0;
         while (i < row.length) {
@@ -183,19 +219,45 @@ class AstGenerator {
         }
     }
 
+    /**
+     * 
+     * @param {*} arr 
+     * @param {*} startIndex 
+     * @param {*} count 
+     * @param {*} replacement 
+     */
     replace(arr, startIndex, count, replacement) {
         arr.splice(startIndex + 1, count - 1);
         arr[startIndex] = replacement;
     }
 
+    /**
+     * Get the next token in the expression.
+     *
+     * @returns the next token in the expression.
+     * @description This method returns the next token in the expression.
+     * 
+     * */
     nextToken() {
         return this.furtherToken(1);
     }
 
+    /**
+     * 
+     * @param {*} increment 
+     * @returns 
+     */
     furtherToken(increment) {
         return this.index + increment < this.tokens.length ? this.tokens[this.index + increment] : {};
     }
 
+    /**
+     * Consume the current token and return it.
+     *
+     * @param {string} type
+     * @returns the current token.
+     * @throws Error if the current token is not of the expected type.
+     */
     consumeToken(type) {
         const token = this.currentToken();
         if (type && token.type !== type) {
@@ -204,6 +266,11 @@ class AstGenerator {
         this.index++;
         return token;
     }
+
+    /**
+     * 
+     * @return
+     */
 
     currentToken() {
         return this.tokens[this.index];
@@ -271,7 +338,16 @@ class AstGenerator {
         return new FunctionCall(fct, parameters);
     }
 
+    /** 
+     * Check if the token is an operator.
+     *
+     * @param {object} token
+     * @returns true if the token is an operator, false otherwise.
+     * @description This method checks if the token is an operator.
+     * 
+     * @throws Error if the token is not of the expected type.
 
+    */
     isOperator(token) {
         switch (token.type) {
             case ADD:
@@ -294,6 +370,15 @@ class AstGenerator {
         }
     }
 
+    /**
+     * Check if the token is a constant.
+     *
+     * @param {object} token
+     * @returns true if the token is a constant, false otherwise.
+     * @description This method checks if the token is a constant.
+     *
+     * @throws Error if the token is not of the expected type.
+     */
     isConstant(token) {
         switch (token.type) {
             case NUMBER:
@@ -305,23 +390,55 @@ class AstGenerator {
         }
     }
 
+    /**
+     * 
+     * @param {*} token 
+     * @returns 
+     */
     createVariable(token) {
         return new Variable(token.value);
     }
 
+    /**
+     *
+     * @param {*} token
+     * @returns
+     */
+    createClientStateVariable(token) {
+        return new ClientStateVariable(token.value);
+    }
+
+    /**
+     * 
+     * @param {*} token 
+     * @returns 
+     */
     createConstant(token) {
         return new Constant(token.value);
     }
 
+    /**
+     * 
+     * @param {*} token 
+     * @returns 
+     */
     createNegativeConstant(token) {
         return new Constant(-token.value);
     }
 
-
+    /**
+     * 
+     * @param {*} token 
+     * @returns 
+     */
     createOperator(token) {
         return new Operator(token);
     }
 
+    /**
+     * 
+     * @returns 
+     */
     createPropertyVariable() {
         var variable = this.consumeToken(IDENTIFIER);
         this.consumeToken(OPENING_SQUARE_BRACKET);
@@ -330,6 +447,11 @@ class AstGenerator {
         return new ObjectProperty(variable.value, keyExpression);
     }
 
+    /**
+     * 
+     * @param {*} row 
+     * @returns 
+     */
     createTernaryOperator(row) {
         const condition = this.toExpression(row);
         this.consumeToken(QUESTION_MARK);
@@ -341,8 +463,17 @@ class AstGenerator {
 
 }
 
+/**
+ * @class Operator
+ * @description This class represents an operator in the AST.
+ * It is used to evaluate the operator with the given left and right operands.
+ */
 class Operator {
 
+    /**
+     * 
+     * @param {*} token 
+     */
     constructor(token) {
         this.type = token.type;
         this.left = undefined;
@@ -352,6 +483,11 @@ class Operator {
         this.precedence = this.getPrecedence(token.type);
     }
 
+    /**
+     * 
+     * @param {Data} data 
+     * @returns 
+     */
     evaluate(data) {
         const leftValue = this.left.evaluate(data);
         const rightValue = this.right.evaluate(data);
@@ -359,6 +495,10 @@ class Operator {
         return this.negated ? !rv : rv;
     }
 
+    /**
+     * 
+     * @returns 
+     */
     toString() {
         var str = '(';
         if (this.left) {
@@ -376,6 +516,10 @@ class Operator {
         return str;
     }
 
+    /**
+     * 
+     * @returns 
+     */
     operatorAsString() {
         switch (this.type) {
             case ADD: return '+';
@@ -397,6 +541,11 @@ class Operator {
     }
 
 
+    /**
+     * 
+     * @param {*} token 
+     * @returns 
+     */
     operatorFunction(token) {
         switch (token.type) {
             case ADD: return (a, b) => a + b;
@@ -417,6 +566,13 @@ class Operator {
         }
     }
 
+    /**
+     * Get the precedence of the operator.
+     *  
+     * @param {string} tokenType
+     * @returns the precedence of the operator.
+     * @description This method returns the precedence of the operator.
+     */
     getPrecedence(tokenType) {
         switch (tokenType) {
             case MUL:
@@ -444,7 +600,17 @@ class Operator {
     }
 }
 
+/**
+ * @class FunctionCall
+ * @description This class represents a function call in the AST.
+ * It is used to evaluate the function with the given parameters.
+ */
 class FunctionCall {
+    /**
+     * @param {function} fct
+     * @param {array<any>} parameters
+     * @description The function to be called and the parameters to be passed to it.
+     */
     constructor(fct, parameters) {
         this.type = 'FUNCTION_CALL';
         this.fct = fct;
@@ -452,12 +618,21 @@ class FunctionCall {
         this.negated = false;
     }
 
+    /**
+     * @public
+     * @param {Data} data
+     * @returns {string}
+     */
     evaluate(data) {
         const parameterArray = this.parameters.map(p => p.evaluate(data));
         const rv = this.fct.apply(null, parameterArray);
         return this.negated ? !rv : rv;
     }
 
+    /**
+     * @public
+     * @returns {string}
+     */
     toString() {
         return this.fct.name + '(' + this.parameters.map(p => p.toString()).join(', ') + ')';
     }
@@ -480,37 +655,106 @@ class Constant {
 }
 
 class Variable {
+    /**
+     * 
+     * @param {string} path 
+     */
     constructor(path) {
         this.type = 'VARIABLE';
         this.path = path;
         this.negated = false;
     }
 
+    /**
+     * 
+     * @param {Data} data 
+     * @returns 
+     */
     evaluate(data) {
         const value = data.getValueByPath(this.path);
         return this.negated ? !value : value;
     }
 
+    /**
+     * @public
+     * @returns {string}
+     */
     toString() {
         return this.path;
     }
 }
 
+class ClientStateVariable {
+    /**
+     * @param {string} path
+     * @throws Error if the path does not start with "state."
+     */
+    constructor(path) {
+        this.negated = false;
+        if (!path.startsWith("state.")) {
+            throw new Error(`Invalid path for ClientStateVariable: ${path}. Path must start with "state."`);
+        }
+        this.path = path.substring(6); // Entfernt den "state."-Präfix
+        this.type = 'CLIENT_STATE_VARIABLE';
+    }
+
+    /**
+    * 
+    * @param {Data} data 
+    * @returns 
+    */
+    evaluate(data) {
+        const value = data.getValueByPath(this.path);
+        return this.negated ? !value : value;
+    }
+
+    /**
+     * @public
+     * @returns {string}
+     */
+    toString() {
+        return 'state.' + this.path;
+    }
+}
+
+
+/**
+ * @class NoopAst
+ * @description This class represents a no-operation AST node.
+ * It is used when the expression is empty or when there is no valid AST node.
+ */
 class NoopAst {
     constructor() {
         this.type = 'NOOP';
     }
 
+    /**
+     * @public
+     * @param {Data} data
+     * @returns {string}
+     */
     evaluate(data) {
         return '';
     }
 
+    /**
+     * @public
+     * @returns {string}
+     */
     toString() {
         return 'noop';
     }
 }
 
+/**
+ * @class ObjectProperty
+ * @description This class represents an object property in the AST.
+ */
 class ObjectProperty {
+    /**
+     * @param {string} path
+     * @param {string} key
+     */
     constructor(path, key) {
         this.type = 'OBJECT_PROPERTY';
         this.path = path;
@@ -518,32 +762,58 @@ class ObjectProperty {
         this.negated = false;
     }
 
+    /**
+     * @public
+     * @param {Data} data
+     * @returns {string}
+     */
     evaluate(data) {
         const variable = data.getValueByPath(this.path);
         const rv = variable[this.key.evaluate(data)];
         return this.negated ? !rv : rv;
     }
 
+    /**
+     * @public
+     * @returns {string}
+     */
     toString() {
         return '.' + this.key;
     }
 }
 
+/**
+ * @class Negation
+ * @description This class represents a negation in the AST.
+ */
 class Negation {
     constructor() {
         this.type = NOT;
         this.expression = undefined;
     }
 
+    /**
+     * @public
+     * @param {Data} data
+     * @returns {string}
+     */
     evaluate(data) {
         return !this.expression.evaluate(data);
     }
 
+    /**
+     * 
+     * @return
+     */
     toString() {
         return '!' + this.expression.toString();
     }
 }
 
+/**
+ * @class TernaryOperator
+ * @description This class represents a ternary operator in the AST.
+ */
 class TernaryOperator {
     constructor(condition, trueExpression, falseExpression) {
         this.type = 'TERNARY';
@@ -553,12 +823,21 @@ class TernaryOperator {
         this.negated = false;
     }
 
+    /**
+     * @public
+     * @param {Data} data
+     * @returns {string}
+     */
     evaluate(data) {
         const conditionValue = this.condition.evaluate(data);
         const rv = conditionValue ? this.trueExpression.evaluate(data) : this.falseExpression.evaluate(data);
         return this.negated ? !rv : rv;
     }
 
+    /**
+     * @public
+     * @returns {string}
+     */
     toString() {
         return this.condition.toString() + ' ? ' + this.trueExpression.toString() + ' : ' + this.falseExpression.toString();
     }
