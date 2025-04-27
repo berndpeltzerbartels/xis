@@ -33,7 +33,7 @@ public class ClientRequest {
 
     @JsonDeserialize(using = MapDeserializer.class)
     private Map<String, String> actionParameters = new HashMap<>();
-    
+
     @JsonDeserialize(using = MapDeserializer.class)
     private final Map<String, String> clientState = new HashMap<>();
 
@@ -42,6 +42,9 @@ public class ClientRequest {
 
     @JsonDeserialize(using = MapDeserializer.class)
     private final Map<String, String> localStorage = new HashMap<>();
+
+    @JsonDeserialize(using = MapDeserializer.class)
+    private final Map<String, String> localDatabase = new HashMap<>();
 
 
 }

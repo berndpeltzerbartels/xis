@@ -13,7 +13,7 @@ class Client {
      * @public
      * @return {Promise<ClientConfig>}
      */
-       loadConfig() {
+    loadConfig() {
         throw new Error('Not implemented');
     }
 
@@ -145,6 +145,8 @@ class Client {
         request.pathVariables = resolvedURL.pathVariablesAsMap();
         request.actionParameters = actionParameters;
         request.zoneId = this.zoneId;
+        request.clientState = this.clientStateDataPage(normalizedPath);
+        request.localStorage = this.localStorageDataPage(normalizedPath);
         return request;
     }
 
@@ -174,6 +176,14 @@ class Client {
         request.pathVariables = resolvedURL.pathVariablesAsMap();
         request.bindingParameters = formBindingParameters;
         request.zoneId = this.zoneId;
+        if (widgetId) { // TODO write a test
+            request.clientState = this.clientStateDataWidget(widgetId);
+            request.localStorage = this.localStorageDataWidget(widgetId);
+        }
+        if (normalizedPath) {// TODO write a test
+            request.clientState = this.clientStateDataPage(normalizedPath);
+            request.localStorage = this.localStorageDataPage(normalizedPath);
+        }
         return request;
     }
 
@@ -199,8 +209,46 @@ class Client {
         request.bindingParameters = widgetState.widgetParameters;
         request.actionParameters = actionParameters
         request.zoneId = this.zoneId;         // TODO locale ?
+        request.clientState = this.clientStateDataWidget(widgetInstance.widget.id);
+        request.localStorage = this.localStorageDataWidget(widgetInstance.widget.id);
         return request;
     }
+
+    localStorageDataPage(pageId) {
+       return this.localStorageData(this.config.pageAttributes[pageId]);
+    }
+
+    clientStateDataPage(pageId) {
+        return this.clientStateData(this.config.pageAttributes[pageId]);
+    }
+
+
+    clientStateDataWidget(widgetId) {
+       return this.clientStateData(this.config.widgetAttributes[widgetId]);
+    }
+
+    localStorageDataWidget(widgetId) {
+        return this.localStorageData(this.config.widgetAttributes[widgetId]);
+    }
+
+
+    clientStateData(attributes) {
+        var data = {};
+        for (var key of attributes.clientStateKeys) {
+            data[key] = this.clientState[key];
+        }
+        return data;
+    }
+
+ 
+    localStorageData(attributes) {
+        var data = {};
+        for (var key of attributes.localStorageKeys) {
+            data[key] = localStorage.getItem(key);
+        }
+        return data;
+    }
+
 
 
     /**
@@ -258,10 +306,10 @@ class Client {
         return serverResponse;
     }
 
-    storeData(ressponse) {
-      this.storeLocalStorageData(ressponse.localStorageData);
-      this.storeClientScopeData(ressponse.clientScopeData);
-      this.storeLocalDatabaseData(ressponse.localDatabaseData);
+    storeData(response) {
+      this.storeLocalStorageData(response.localStorageData);
+      this.storeClientScopeData(response.clientScopeData);
+      this.storeLocalDatabaseData(response.localDatabaseData);
     }
 
     storeLocalStorageData(localStorageData) {

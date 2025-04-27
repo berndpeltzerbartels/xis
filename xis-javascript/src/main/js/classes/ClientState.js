@@ -1,30 +1,37 @@
 class ClientState {
     constructor() {
-        this.variables = {};
         this.listeners = {};
+        this.data = new Data({});
     }
 
+    /**
+     * 
+     * @param {string} path 
+     * @param {function<any>} listener {
+        
+     }} listener 
+     */
     registerListener(path, listener) {
-        if (this.variables[path] === undefined) {
-            this.variables[path] = [];
+        if (this.listeners[path] === undefined) {
+            this.listeners[path] = [];
         }
-        this.variables[path].push(listener);
+        this.listeners[path].push(listener);
     }
 
-
-    publish(path, value) {
-        var pathElements = path.split('.');
-        var path = '';
-        for (var i = 0; i < pathElements.length; i++) {
-            if (i > 0) {
-                path += '.';
-            }
-            path += pathElements[i];
+    /**
+     * 
+     * @param {{string: any}} values 
+     */
+    publish(values) {
+        for (var path in Object.keys(values)) {
+            var value = this.data.getValueByPath(path);
+            this.data.setValueByPath(path, values[path]);
             if (this.listeners[path] !== undefined) {
                 this.listeners[path].forEach(listener => {
                     listener(value);
                 });
             }
+
         }
     }
 }

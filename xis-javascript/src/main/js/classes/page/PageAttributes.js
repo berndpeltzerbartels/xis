@@ -20,5 +20,8 @@ class PageAttributes {
         this.normalizedPath = obj.normalizedPath;
         this.welcomePage = obj.welcomePage;
         this.pageJavascriptSource = obj.pageJavascriptSource;
+        this.globalScopeKeys = obj.globalScopeKeys || [];
+        this.localStorageKeys = obj.localStorageKeys || [];
+        this.clientStateKeys = obj.clientStateKeys || [];
     }
 }

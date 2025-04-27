@@ -21,16 +21,16 @@ class AttributesFactory {
     private void addParameterAttributes(Method method, ComponentAttributes attributes) {
         for (var parameter : method.getParameters()) {
             if (parameter.isAnnotationPresent(ClientState.class)) {
-                attributes.getClientScope().add(parameter.getAnnotation(ClientState.class).value());
+                attributes.getClientScopeKeys().add(parameter.getAnnotation(ClientState.class).value());
             }
             if (parameter.isAnnotationPresent(ClientScope.class)) {
-                attributes.getClientScope().add(parameter.getAnnotation(ClientScope.class).value());
+                attributes.getClientScopeKeys().add(parameter.getAnnotation(ClientScope.class).value());
             }
             if (parameter.isAnnotationPresent(LocalStorage.class)) {
-                attributes.getLocalStorage().add(parameter.getAnnotation(LocalStorage.class).value());
+                attributes.getLocalStorageKeys().add(parameter.getAnnotation(LocalStorage.class).value());
             }
             if (parameter.isAnnotationPresent(LocalDatabase.class)) {
-                attributes.getLocalDatabase().add(parameter.getAnnotation(LocalDatabase.class).value());
+                attributes.getLocalDatabaseKeys().add(parameter.getAnnotation(LocalDatabase.class).value());
             }
         }
     }

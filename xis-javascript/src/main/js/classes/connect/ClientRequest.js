@@ -7,6 +7,9 @@
  * @property {string: string} pathVariables
  * @property {string: string} urlParameters
  * @property {string: string} bindingParameters
+ * @property {string: string} clientState
+ * @property {string: string} localStorage
+ * @property {string: string} localDatabase
 */
 class ClientRequest {
 
@@ -19,6 +22,8 @@ class ClientRequest {
         this.pathVariables = {};
         this.urlParameters = {};
         this.bindingParameters = {};
-
+        this.clientState = {};
+        this.localStorage = {};
+        this.localDatabase = {}; // TODO
     }
 }
