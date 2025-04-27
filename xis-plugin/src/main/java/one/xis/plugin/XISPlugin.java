@@ -4,6 +4,7 @@ import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.Sync;
 import org.gradle.api.tasks.compile.JavaCompile;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -12,7 +13,7 @@ import java.nio.file.Paths;
 
 public class XISPlugin implements Plugin<Project> {
     @Override
-    public void apply(Project project) {
+    public void apply(@NotNull Project project) {
         addDependencies(project);
         configureResources(project);
         // checkJavaHome();

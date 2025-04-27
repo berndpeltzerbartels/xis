@@ -15,7 +15,7 @@ class TextContent {
      * @public
      * @param {Data} data
      * @returns the string we get after replacing the
-     * vriables with the actual data.
+     * variables with the actual data.
      */
     evaluate(data) {
         if (this.parts.length == 0) return '';
