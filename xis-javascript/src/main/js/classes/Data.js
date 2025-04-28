@@ -55,7 +55,7 @@ class Data {
     }
 
     setValueByPath(pathStr, value) {
-        if (path == undefined || path.length == 0) {
+        if (pathStr == undefined || pathStr.length == 0) {
             throw new Error('Path is undefined or empty (2)');
         } 
         this.setValue(this.doSplit(pathStr, '.'), value);

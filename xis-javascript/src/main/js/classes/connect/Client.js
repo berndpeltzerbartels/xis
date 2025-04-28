@@ -9,10 +9,10 @@ class Client {
         this.clientState = {}
     }
 
-       /**
-     * @public
-     * @return {Promise<ClientConfig>}
-     */
+    /**
+  * @public
+  * @return {Promise<ClientConfig>}
+  */
     loadConfig() {
         throw new Error('Not implemented');
     }
@@ -145,8 +145,9 @@ class Client {
         request.pathVariables = resolvedURL.pathVariablesAsMap();
         request.actionParameters = actionParameters;
         request.zoneId = this.zoneId;
-        request.clientState = this.clientStateDataPage(normalizedPath);
-        request.localStorage = this.localStorageDataPage(normalizedPath);
+        request.clientStateData = this.clientStateDataPage(normalizedPath);
+        request.localStorageData = this.localStorageDataPage(normalizedPath);
+        request.localDatabaseData = {};
         return request;
     }
 
@@ -177,12 +178,12 @@ class Client {
         request.bindingParameters = formBindingParameters;
         request.zoneId = this.zoneId;
         if (widgetId) { // TODO write a test
-            request.clientState = this.clientStateDataWidget(widgetId);
-            request.localStorage = this.localStorageDataWidget(widgetId);
+            request.clientStateData = this.clientStateDataWidget(widgetId);
+            request.localStorageData = this.localStorageDataWidget(widgetId);
         }
         if (normalizedPath) {// TODO write a test
-            request.clientState = this.clientStateDataPage(normalizedPath);
-            request.localStorage = this.localStorageDataPage(normalizedPath);
+            request.clientStateData = this.clientStateDataPage(normalizedPath);
+            request.localStorageData = this.localStorageDataPage(normalizedPath);
         }
         return request;
     }
@@ -209,13 +210,14 @@ class Client {
         request.bindingParameters = widgetState.widgetParameters;
         request.actionParameters = actionParameters
         request.zoneId = this.zoneId;         // TODO locale ?
-        request.clientState = this.clientStateDataWidget(widgetInstance.widget.id);
-        request.localStorage = this.localStorageDataWidget(widgetInstance.widget.id);
+        request.clientStateData = this.clientStateDataWidget(widgetInstance.widget.id);
+        request.localStorageData = this.localStorageDataWidget(widgetInstance.widget.id);
+        request.localDatabaseData = {};
         return request;
     }
 
     localStorageDataPage(pageId) {
-       return this.localStorageData(this.config.pageAttributes[pageId]);
+        return this.localStorageData(this.config.pageAttributes[pageId]);
     }
 
     clientStateDataPage(pageId) {
@@ -224,7 +226,7 @@ class Client {
 
 
     clientStateDataWidget(widgetId) {
-       return this.clientStateData(this.config.widgetAttributes[widgetId]);
+        return this.clientStateData(this.config.widgetAttributes[widgetId]);
     }
 
     localStorageDataWidget(widgetId) {
@@ -235,12 +237,12 @@ class Client {
     clientStateData(attributes) {
         var data = {};
         for (var key of attributes.clientStateKeys) {
-            data[key] = this.clientState[key];
+            data[key] = app.clientState.getValue(key);
         }
         return data;
     }
 
- 
+
     localStorageData(attributes) {
         var data = {};
         for (var key of attributes.localStorageKeys) {
@@ -300,16 +302,17 @@ class Client {
         serverResponse.reloadWidgets = obj.reloadWidgets;
         serverResponse.localDatabaseData = obj.localDatabaseData;
         serverResponse.localStorageData = obj.localStorageData;
-        serverResponse.clientScopeData = obj.clientScopeData;
+        serverResponse.clientStateData = obj.clientStateData;
         serverResponse.widgetContainerId = obj.widgetContainerId;
-        data.setValue(['clientScope'], serverResponse.clientScopeData); // TODO correct ? docs ?
+        data.setValue(['state'], serverResponse.clientStateData);
+        this.storeData(serverResponse);
         return serverResponse;
     }
 
     storeData(response) {
-      this.storeLocalStorageData(response.localStorageData);
-      this.storeClientScopeData(response.clientScopeData);
-      this.storeLocalDatabaseData(response.localDatabaseData);
+        this.storeLocalStorageData(response.localStorageData);
+        this.storeClientStateData(response.clientStateData);
+        this.storeLocalDatabaseData(response.localDatabaseData);
     }
 
     storeLocalStorageData(localStorageData) {
@@ -318,10 +321,8 @@ class Client {
         }
     }
 
-    storeClientScopeData(clientScopeData) {
-        for (var key of Object.keys(clientScopeData)) {
-            this.clientState[key] = clientScopeData[key];
-        }
+    storeClientStateData(clientStateData) {
+        app.clientState.publish(clientStateData);
     }
     storeLocalDatabaseData(localDatabaseData) {
         // TODO create and configure db

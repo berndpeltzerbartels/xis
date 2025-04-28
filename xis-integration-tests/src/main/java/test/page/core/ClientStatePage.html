@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:xis="http://xis.one/html">
+<head>
+    <title>ClientStatePage</title>
+</head>
+<body>
+<a xis:action="link-action" id="action-link">Test-Action1</a>
+<div>
+    <form xis:binding="formdata">
+        <button xis:action="form-action" id="save">Speichern</button>
+    </form>
+
+    <span id="clientStateValue">${state.clientState.id}</span>
+</div>
+</body>
+</html>

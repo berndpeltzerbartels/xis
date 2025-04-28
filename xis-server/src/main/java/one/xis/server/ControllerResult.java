@@ -26,7 +26,6 @@ class ControllerResult {
     private final ValidatorMessages validatorMessages = new ValidatorMessages();
     private final Map<String, Object> requestScope = new HashMap<>();
     private final Map<String, Object> clientState = new HashMap<>();
-    private final Map<String, Object> clientScope = new HashMap<>();
     private final Map<String, Object> localStorage = new HashMap<>();
 
 }

@@ -28,7 +28,6 @@ class ControllerResultMapper {
         controllerResult.getWidgetsToReload().addAll(controllerMethodResult.getWidgetsToReload());
         controllerResult.getClientState().putAll(controllerMethodResult.getClientState());
         controllerResult.getRequestScope().putAll(controllerMethodResult.getRequestScope());
-        controllerResult.getClientScope().putAll(controllerMethodResult.getClientScope());
         controllerResult.getLocalStorage().putAll(controllerMethodResult.getLocalStorage());
         if (controllerMethodResult.isValidationFailed()) {
             controllerResult.setValidationFailed(true);

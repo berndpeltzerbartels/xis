@@ -33,7 +33,6 @@ class ControllerWrapperFactory {
             controllerWrapper.setFormDataMethods(formDataMethods(controller));
             controllerWrapper.setActionMethods(actionMethodMap(controller));
             controllerWrapper.setRequestScopeMethods(requestScopeMethods(controller));
-            controllerWrapper.setClientScopeOnlyMethods(clientScopeOnlyMethods(controller));
             controllerWrapper.setLocalStorageOnlyMethods(localStorageOnlyMethods(controller));
             controllerWrapper.setControllerResultMapper(controllerResultMapper);
             return controllerWrapper;
@@ -45,17 +44,6 @@ class ControllerWrapperFactory {
     private Collection<ControllerMethod> localStorageOnlyMethods(@NonNull Object controller) {
         return annotatedMethods(controller, LocalStorage.class)
                 .filter(m -> !m.isAnnotationPresent(Action.class))
-                .filter(method -> !method.isAnnotationPresent(ClientScope.class))
-                .filter(method -> !method.isAnnotationPresent(ModelData.class))
-                .filter(method -> !method.isAnnotationPresent(FormData.class))
-                .map(this::createControllerMethod)
-                .collect(Collectors.toSet());
-    }
-
-    private Collection<ControllerMethod> clientScopeOnlyMethods(@NonNull Object controller) {
-        return annotatedMethods(controller, ClientScope.class)
-                .filter(m -> !m.isAnnotationPresent(Action.class))
-                .filter(method -> !method.isAnnotationPresent(LocalStorage.class))
                 .filter(method -> !method.isAnnotationPresent(ModelData.class))
                 .filter(method -> !method.isAnnotationPresent(FormData.class))
                 .map(this::createControllerMethod)

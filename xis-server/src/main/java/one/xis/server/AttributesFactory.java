@@ -1,6 +1,5 @@
 package one.xis.server;
 
-import one.xis.ClientScope;
 import one.xis.ClientState;
 import one.xis.LocalDatabase;
 import one.xis.LocalStorage;
@@ -21,10 +20,7 @@ class AttributesFactory {
     private void addParameterAttributes(Method method, ComponentAttributes attributes) {
         for (var parameter : method.getParameters()) {
             if (parameter.isAnnotationPresent(ClientState.class)) {
-                attributes.getClientScopeKeys().add(parameter.getAnnotation(ClientState.class).value());
-            }
-            if (parameter.isAnnotationPresent(ClientScope.class)) {
-                attributes.getClientScopeKeys().add(parameter.getAnnotation(ClientScope.class).value());
+                attributes.getClientStateKeys().add(parameter.getAnnotation(ClientState.class).value());
             }
             if (parameter.isAnnotationPresent(LocalStorage.class)) {
                 attributes.getLocalStorageKeys().add(parameter.getAnnotation(LocalStorage.class).value());

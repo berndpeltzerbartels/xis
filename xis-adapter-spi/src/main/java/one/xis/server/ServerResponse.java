@@ -26,7 +26,6 @@ public class ServerResponse {
     private Map<String, Object> localStorageData = new HashMap<>();
     private Map<String, Object> localDatabaseData = new HashMap<>();
     private Map<String, Object> clientStateData = new HashMap<>();
-    private Map<String, Object> clientScopeData = new HashMap<>();
     private Collection<String> reloadWidgets = new ArrayList<>();
     private String nextPageURL;
     private String nextWidgetId;

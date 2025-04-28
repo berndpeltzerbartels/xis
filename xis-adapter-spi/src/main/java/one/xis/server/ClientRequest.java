@@ -35,16 +35,13 @@ public class ClientRequest {
     private Map<String, String> actionParameters = new HashMap<>();
 
     @JsonDeserialize(using = MapDeserializer.class)
-    private final Map<String, String> clientState = new HashMap<>();
+    private final Map<String, String> clientStateData = new HashMap<>();
 
     @JsonDeserialize(using = MapDeserializer.class)
-    private final Map<String, String> clientScope = new HashMap<>();
+    private final Map<String, String> localStorageData = new HashMap<>();
 
     @JsonDeserialize(using = MapDeserializer.class)
-    private final Map<String, String> localStorage = new HashMap<>();
-
-    @JsonDeserialize(using = MapDeserializer.class)
-    private final Map<String, String> localDatabase = new HashMap<>();
+    private final Map<String, String> localDatabaseData = new HashMap<>();
 
 
 }

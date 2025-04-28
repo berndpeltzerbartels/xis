@@ -18,20 +18,24 @@ class ClientState {
         this.listeners[path].push(listener);
     }
 
+    getValue(path) {
+        return this.data.getValueByPath(path);
+    }
+
+
     /**
      * 
      * @param {{string: any}} values 
      */
     publish(values) {
-        for (var path in Object.keys(values)) {
-            var value = this.data.getValueByPath(path);
+        for (var path of Object.keys(values)) {
             this.data.setValueByPath(path, values[path]);
+            var value = values[path];
             if (this.listeners[path] !== undefined) {
                 this.listeners[path].forEach(listener => {
                     listener(value);
                 });
             }
-
         }
     }
 }

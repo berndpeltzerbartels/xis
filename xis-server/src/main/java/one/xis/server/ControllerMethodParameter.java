@@ -45,15 +45,11 @@ class ControllerMethodParameter {
             return paramValue;
         } else if (parameter.isAnnotationPresent(ClientState.class)) {
             var key = parameter.getAnnotation(ClientState.class).value();
-            var paramValue = request.getClientScope().get(key);
-            return deserializeParameter(paramValue, request, parameter, postProcessingResults);
-        } else if (parameter.isAnnotationPresent(ClientScope.class)) {
-            var key = parameter.getAnnotation(ClientScope.class).value();
-            var paramValue = request.getClientScope().get(key);
+            var paramValue = request.getClientStateData().get(key);
             return deserializeParameter(paramValue, request, parameter, postProcessingResults);
         } else if (parameter.isAnnotationPresent(LocalStorage.class)) {
             var key = parameter.getAnnotation(LocalStorage.class).value();
-            var paramValue = request.getLocalStorage().get(key);
+            var paramValue = request.getLocalStorageData().get(key);
             return deserializeParameter(paramValue, request, parameter, postProcessingResults);
         } else {
             throw new IllegalStateException(method + ": parameter without annotation=" + parameter);
@@ -74,9 +70,7 @@ class ControllerMethodParameter {
         } else if (parameter.isAnnotationPresent(RequestScope.class)) {
             controllerMethodResult.getRequestScope().put(parameter.getAnnotation(RequestScope.class).value(), parameterValue);
         } else if (parameter.isAnnotationPresent(ClientState.class)) {
-            controllerMethodResult.getClientScope().put(parameter.getAnnotation(ClientState.class).value(), parameterValue);
-        } else if (parameter.isAnnotationPresent(ClientScope.class)) {
-            controllerMethodResult.getClientScope().put(parameter.getAnnotation(ClientScope.class).value(), parameterValue);
+            controllerMethodResult.getClientState().put(parameter.getAnnotation(ClientState.class).value(), parameterValue);
         } else if (parameter.isAnnotationPresent(LocalStorage.class)) {
             controllerMethodResult.getLocalStorage().put(parameter.getAnnotation(LocalStorage.class).value(), parameterValue);
         } else {

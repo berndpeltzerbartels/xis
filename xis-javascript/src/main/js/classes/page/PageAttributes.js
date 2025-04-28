@@ -7,6 +7,9 @@
  * @property {string} normalizedPath
  * @property {boolean} welcomePage
  * @property {string} pageJavascriptSource
+ * @property {array<string>} localDatabaseKeys
+ * @property {array<string>} localStorageKeys
+ * @property {array<string>} clientStateKeys
  */
 
 class PageAttributes {
@@ -20,7 +23,7 @@ class PageAttributes {
         this.normalizedPath = obj.normalizedPath;
         this.welcomePage = obj.welcomePage;
         this.pageJavascriptSource = obj.pageJavascriptSource;
-        this.globalScopeKeys = obj.globalScopeKeys || [];
+        this.localDatabaseKeys = obj.localDatabaseKeys || [];
         this.localStorageKeys = obj.localStorageKeys || [];
         this.clientStateKeys = obj.clientStateKeys || [];
     }

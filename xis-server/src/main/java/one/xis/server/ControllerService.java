@@ -83,9 +83,8 @@ class ControllerService {
         nextRequest.setZoneId(request.getZoneId());
         nextRequest.setClientId(request.getClientId());
         nextRequest.setUserId(request.getUserId());
-        nextRequest.getClientScope().putAll(request.getClientScope());
-        nextRequest.getLocalStorage().putAll(request.getLocalStorage());
-        nextRequest.getClientState().putAll(request.getClientState());
+        nextRequest.getLocalStorageData().putAll(request.getLocalStorageData());
+        nextRequest.getClientStateData().putAll(request.getClientStateData());
         controllerResultMapper.mapControllerResultToRequest(controllerResult, nextRequest);
         var nextControllerResult = new ControllerResult();
         // one of these 2 values changed

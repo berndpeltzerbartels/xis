@@ -22,8 +22,8 @@ class ClientRequest {
         this.pathVariables = {};
         this.urlParameters = {};
         this.bindingParameters = {};
-        this.clientState = {};
-        this.localStorage = {};
-        this.localDatabase = {}; // TODO
+        this.clientStateData = {};
+        this.localStorageData = {};
+        this.localDatabaseData = {}; // TODO
     }
 }

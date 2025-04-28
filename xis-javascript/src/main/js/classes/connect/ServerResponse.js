@@ -8,7 +8,7 @@
  * @property {any} localDatabaseData
  * @property {string} widgetContainerId
  * @property {Array} reloadWidgets
- * @property {any} clientScopeData
+ * @property {any} clientStateData
  * 
  */
 
@@ -24,7 +24,7 @@ class ServerResponse {
         this.localDatabaseData = {};
         this.widgetContainerId = '';
         this.reloadWidgets = [];
-        this.clientScopeData = {};
+        this.clientStateData = {};
     }
 }
 
