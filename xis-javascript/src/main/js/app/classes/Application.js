@@ -2,6 +2,7 @@ class Application {
 
     constructor() {
         this.clientState = new ClientState();
+        this.localStore = new LocalStore();
         this.httpConnector = new HttpConnector();
         this.domAccessor = new DomAccessor();
         this.client = new HttpClient(this.httpConnector);

@@ -1,7 +1,6 @@
-class ClientState {
+class Store {
     constructor() {
         this.listeners = {};
-        this.data = new Data({});
     }
 
     /**
@@ -24,7 +23,11 @@ class ClientState {
     }
 
     getValue(path) {
-        return this.data.getValueByPath(path);
+       throw new Error('getValue must be implemented in the subclass');
+    }
+
+    saveValue(path, value) {
+        throw new Error('saveValue must be implemented in the subclass');
     }
 
 
@@ -32,9 +35,9 @@ class ClientState {
      * 
      * @param {{string: any}} values 
      */
-    publish(values) {
+    saveData(values) {
         for (var path of Object.keys(values)) {
-            this.data.setValueByPath(path, values[path]);
+            this.saveValue(path, values[path]);
             var value = values[path];
             // check if value is a function or method
             if (typeof value === 'function') {

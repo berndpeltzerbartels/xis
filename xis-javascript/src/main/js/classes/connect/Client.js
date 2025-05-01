@@ -323,7 +323,7 @@ class Client {
     }
 
     storeClientStateData(clientStateData) {
-        app.clientState.publish(clientStateData);
+        app.clientState.saveData(clientStateData);
     }
     storeLocalDatabaseData(localDatabaseData) {
         // TODO create and configure db

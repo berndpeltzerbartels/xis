@@ -32,7 +32,7 @@ class ClientStateTest {
         var result = JSUtil.execute(js);
         registerListener = result.getMember("registerListener").as(BiConsumer.class);
         getValue = result.getMember("getValue").as(Function.class);
-        publish = result.getMember("publish").as(Consumer.class);
+        publish = result.getMember("saveData").as(Consumer.class);
     }
 
     @Nested

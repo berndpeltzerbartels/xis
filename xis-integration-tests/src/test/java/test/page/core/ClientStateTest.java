@@ -18,6 +18,7 @@ class ClientStateTest {
                 .build();
     }
 
+    // TODO est für liste mit foreach
     @Test
     void clientStateTest() {
         var result = testContext.openPage(ClientStatePage.class);
