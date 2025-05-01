@@ -14,7 +14,6 @@ class AstGenerator {
         this.functions = functions;
         this.originalExpression = originalExpression;
         this.index = 0;
-        this.clientStateVariableDetected;
     }
 
     /**
@@ -61,7 +60,6 @@ class AstGenerator {
                     } else {
                         const identifierToken = this.consumeToken(IDENTIFIER);
                         if (identifierToken.value.startsWith("state.")) {
-                            this.clientStateVariableDetected = true;
                             row.push(this.createClientStateVariable(identifierToken.value));
                         } else {
                             row.push(this.createVariable(identifierToken));
@@ -405,7 +403,7 @@ class AstGenerator {
      * @returns
      */
     createClientStateVariable(token) {
-        return new ClientStateVariable(token.value);
+        return new ClientStateVariable(token);
     }
 
     /**
@@ -704,7 +702,7 @@ class ClientStateVariable {
     * @returns 
     */
     evaluate(data) {
-        const value = data.getValueByPath(this.path);
+        const value = app.clientState.getValue(this.path);
         return this.negated ? !value : value;
     }
 

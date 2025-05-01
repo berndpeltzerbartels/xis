@@ -93,7 +93,7 @@ class DataTest {
 
         var result = JSUtil.execute(js);
 
-        assertThat(result.asInt()).isEqualTo(123);
+        assertThat(result.asString()).isEqualTo("y");
     }
 
 
@@ -153,34 +153,4 @@ class DataTest {
 
         assertThat(result.asInt()).isEqualTo(1);
     }
-
-    @Test
-    void array1() throws ScriptException {
-        var js = Javascript.getScript(CLASSES);
-        js += "var data = new Data({});";
-        js += "data.setValue(['x'], 1);";
-        js += "data.setValue(['x'], 2);";
-        js += "data.setValue(['x'], 3);";
-        js += "data.getValue(['x'])";
-
-        var result = JSUtil.execute(js);
-
-        assertThat(result.as(int[].class)).isEqualTo(new int[]{1, 2, 3});
-    }
-
-    @Test
-    void array2() throws ScriptException {
-        var js = Javascript.getScript(CLASSES);
-        js += "var data = new Data({});";
-        js += "data.setValue(['x', 'y'], 1);";
-        js += "data.setValue(['x', 'y'], 2);";
-        js += "data.setValue(['x', 'y'], 3);";
-        js += "data.getValue(['x', 'y'])";
-
-        var result = JSUtil.execute(js);
-
-        assertThat(result.as(int[].class)).isEqualTo(new int[]{1, 2, 3});
-    }
-
-
 }

@@ -9,10 +9,7 @@ class TextContent {
 
     constructor(parts) {
         this.parts = parts;
-        this.clientStateVariables().forEach(variable => {
-           app.clientState.registerListener(variable, () => this.refreshOnClientStateChange());
-        }
-        );
+        this.registerClientStateVariables();
     }
 
     /**
@@ -31,11 +28,12 @@ class TextContent {
         this.evaluate(this.data);
     }
 
-    clientStateVariables() {
+    registerClientStateVariables() {
         var variables = [];
         for (var part of this.parts) {
-            if (part.type  == 'CLIENT_STATE_VARIABLE') {
-                variables.push(part.expression);
+            if (part.expression && part.expression.type  == 'CLIENT_STATE_VARIABLE') {
+                var key = part.expression.path.split('.')[0];
+                app.clientState.registerListener(key,  () => this.refreshOnClientStateChange());
             }
         }
         return variables;

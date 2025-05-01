@@ -12,10 +12,15 @@ class ClientState {
      }} listener 
      */
     registerListener(path, listener) {
-        if (this.listeners[path] === undefined) {
-            this.listeners[path] = [];
+        var key = '';
+        for (var pathElement of path.split('.')) {
+            if (key !== '') key += '.';
+            key += pathElement;
+            if (this.listeners[key] === undefined) {
+                this.listeners[key] = [];
+            }
+            this.listeners[key].push(listener);
         }
-        this.listeners[path].push(listener);
     }
 
     getValue(path) {
@@ -31,10 +36,14 @@ class ClientState {
         for (var path of Object.keys(values)) {
             this.data.setValueByPath(path, values[path]);
             var value = values[path];
+            // check if value is a function or method
+            if (typeof value === 'function') {
+                continue; // For debugging with Java-objects, to skip toString etc
+            }
             if (this.listeners[path] !== undefined) {
-                this.listeners[path].forEach(listener => {
-                    listener(value);
-                });
+               for (var listener of  this.listeners[path]) {
+                    listener();
+                };
             }
         }
     }

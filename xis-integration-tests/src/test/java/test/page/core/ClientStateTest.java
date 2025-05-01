@@ -24,11 +24,14 @@ class ClientStateTest {
         var page = testContext.getAppContext().getSingleton(ClientStatePage.class);
 
         assertThat(page.getInvokateddMethods()).containsExactly("data");
+        assertThat(result.getDocument().getElementById("clientStateValue").innerText).isEqualTo("100");
 
         result.getDocument().getElementById("action-link").click();
         assertThat(page.getInvokateddMethods()).containsExactly("data", "linkAction");
         assertThat(page.getPageData().getId()).isEqualTo(200);
         assertThat(page.getPageData().getValue()).isEqualTo("test2");
+
+        assertThat(result.getDocument().getElementById("clientStateValue").innerText).isEqualTo("200");
     }
 
 }

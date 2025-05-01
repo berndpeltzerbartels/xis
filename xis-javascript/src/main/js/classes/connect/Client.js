@@ -177,6 +177,7 @@ class Client {
         request.pathVariables = resolvedURL.pathVariablesAsMap();
         request.bindingParameters = formBindingParameters;
         request.zoneId = this.zoneId;
+        debugger;
         if (widgetId) { // TODO write a test
             request.clientStateData = this.clientStateDataWidget(widgetId);
             request.localStorageData = this.localStorageDataWidget(widgetId);

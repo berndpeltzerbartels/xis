@@ -56,6 +56,7 @@ dependencies {
 
     // AssertJ dependencies
     testImplementation "org.assertj:assertj-core:$assertjVersion"
+    testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"
 
     // GraalVM dependencies
     implementation "org.graalvm.js:js-scriptengine:$graalVersion"

@@ -80,15 +80,7 @@ class Data {
             parentDataNode = dataNode;
         }
         var key = path[path.length - 1];
-        if (parentDataNode[key]) {
-            if (!Array.isArray(parentDataNode[key])) {
-                parentDataNode[key] = [parentDataNode[key]];
-            }
-            parentDataNode[key].push(value);
-        } else {
-            parentDataNode[key] = value;
-        }
-
+        parentDataNode[key] = value;
     }
 
     /**
