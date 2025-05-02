@@ -10,6 +10,7 @@ class ClientStateTest {
 
 
     private IntegrationTestContext testContext;
+    private ClientStatePage page;
 
     @BeforeEach
     void init() {
@@ -18,21 +19,30 @@ class ClientStateTest {
                 .build();
     }
 
-    // TODO est für liste mit foreach
+    // TODO test für liste mit foreach
     @Test
-    void clientStateTest() {
+    void clientStateLinkTest() {
         var result = testContext.openPage(ClientStatePage.class);
         var page = testContext.getAppContext().getSingleton(ClientStatePage.class);
 
-        assertThat(page.getInvokateddMethods()).containsExactly("data");
-        assertThat(result.getDocument().getElementById("clientStateValue").innerText).isEqualTo("100");
-
         result.getDocument().getElementById("action-link").click();
-        assertThat(page.getInvokateddMethods()).containsExactly("data", "linkAction");
-        assertThat(page.getPageData().getId()).isEqualTo(200);
-        assertThat(page.getPageData().getValue()).isEqualTo("test2");
+        assertThat(page.getInvokateddMethods()).containsExactly("linkAction");
+        assertThat(page.getClientStatePageData().getId()).isEqualTo(200);
+        assertThat(page.getClientStatePageData().getValue()).isEqualTo("test2");
+        assertThat(result.getSessionStorage().getItem("data")).contains("\"id\":200");
+        assertThat(result.getSessionStorage().getItem("data")).contains("\"value\":\"test2\"");
 
         assertThat(result.getDocument().getElementById("clientStateValue").innerText).isEqualTo("200");
+
+        result.getDocument().getElementById("save-button").click();
+        assertThat(page.getInvokateddMethods()).containsExactly("linkAction", "formAction");
+        assertThat(page.getClientStatePageData().getId()).isEqualTo(300);
+        assertThat(page.getClientStatePageData().getValue()).isEqualTo("test3");
+        assertThat(result.getSessionStorage().getItem("data")).contains("\"id\":300");
+        assertThat(result.getSessionStorage().getItem("data")).contains("\"value\":\"test3\"");
+
+
+        assertThat(result.getDocument().getElementById("clientStateValue").innerText).isEqualTo("300");
     }
 
 }

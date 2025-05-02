@@ -23,7 +23,7 @@ import static one.xis.context.BackendBridgeVerboseRunner.run;
 public class BackendBridge implements ResourcePathProvider {
 
     private final FrontendService frontendService;
-    private final ObjectMapper objectMapper = new ObjectMapper(); // TODO always use the same mapper and inject it here
+    private final ObjectMapper objectMapper;
     private final AppContext appContext;
 
     public BackendBridgeResponse getComponentConfig(String uri, Map<String, String> headers) {

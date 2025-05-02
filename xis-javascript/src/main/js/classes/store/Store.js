@@ -134,8 +134,9 @@ class Store {
             } else {
                 this.saveValue(path, this.toStoreString(val));
             }
-
+            this.startUpdate(path);
         }
+       
     }
 
     /**

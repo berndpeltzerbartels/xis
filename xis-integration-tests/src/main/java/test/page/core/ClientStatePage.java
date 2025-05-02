@@ -1,7 +1,11 @@
 package test.page.core;
 
 import lombok.Getter;
-import one.xis.*;
+import lombok.NonNull;
+import one.xis.Action;
+import one.xis.ClientState;
+import one.xis.FormData;
+import one.xis.Page;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,30 +15,26 @@ import java.util.List;
 class ClientStatePage {
 
     private final List<String> invokateddMethods = new ArrayList<>();
-    private ClientStatePageData pageData;
-
-    @ModelData("clientState")
-    @ClientState("clientState")
-    ClientStatePageData data() {
-        invokateddMethods.add("data");
-        this.pageData = new ClientStatePageData(100, "test");
-        return pageData;
-    }
+    private ClientStatePageData clientStatePageData;
 
     @Action("link-action")
-    @ClientState("clientState")
-    ClientStatePageData linkAction(@ClientState("clientState") ClientStatePageData clientState) {
+    @ClientState("data")
+    ClientStatePageData linkAction() {
         invokateddMethods.add("linkAction");
-        this.pageData = clientState;
-        this.pageData.setId(200);
-        this.pageData.setValue("test2");
-        return this.pageData;
+        this.clientStatePageData = new ClientStatePageData();
+        this.clientStatePageData.setId(200);
+        this.clientStatePageData.setValue("test2");
+        return this.clientStatePageData;
     }
 
     @Action("form-action")
-    void formAction(@ClientState("clientState") ClientStatePageData clientState, @FormData("formData") Object formData) {
-        this.pageData = clientState;
+    @ClientState("data")
+    ClientStatePageData formAction(@NonNull @ClientState("data") ClientStatePageData clientState, @NonNull @FormData("formData") ClientStatePageData formData) {
+        this.clientStatePageData = clientState;
         invokateddMethods.add("formAction");
+        this.clientStatePageData.setId(300);
+        this.clientStatePageData.setValue("test3");
+        return this.clientStatePageData;
     }
 
 }

@@ -132,14 +132,6 @@ function assertNotNull(o, errorText) {
 }
 
 
-function refreshNode(node, data) {
-    if (node._rootHandler) {
-        node._rootHandler.refresh(data);
-    } else if (node.handler) {
-        node.handler.refresh(data);
-    }
-}
-
 /**
  * @param {string} url 
  * @returns {string:string} 
