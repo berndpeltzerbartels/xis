@@ -306,6 +306,7 @@ class Client {
         serverResponse.clientStateData = obj.clientStateData;
         serverResponse.widgetContainerId = obj.widgetContainerId;
         data.setValue(['state'], serverResponse.clientStateData);
+        data.setValue(['localStorage'], serverResponse.localStorageData);
         this.storeData(serverResponse);
         return serverResponse;
     }

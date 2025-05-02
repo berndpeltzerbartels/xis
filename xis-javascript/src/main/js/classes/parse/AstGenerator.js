@@ -61,6 +61,8 @@ class AstGenerator {
                         const identifierToken = this.consumeToken(IDENTIFIER);
                         if (identifierToken.value.startsWith("state.")) {
                             row.push(this.createClientStateVariable(identifierToken.value));
+                        } else if (identifierToken.value.startsWith("localStorage.")) {
+                            row.push(this.createLocalStoreVariable(identifierToken.value));
                         } else {
                             row.push(this.createVariable(identifierToken));
                         }
@@ -182,7 +184,7 @@ class AstGenerator {
      * @returns void
      *  
      * @description This method processes the negation operator in the row of tokens.
-     */ 
+     */
     applyNegation(row) {
         var i = 0;
         while (i < row.length) {
@@ -390,7 +392,7 @@ class AstGenerator {
 
     /**
      * 
-     * @param {*} token 
+     * @param {string} token 
      * @returns 
      */
     createVariable(token) {
@@ -399,7 +401,7 @@ class AstGenerator {
 
     /**
      *
-     * @param {*} token
+     * @param {string} token
      * @returns
      */
     createClientStateVariable(token) {
@@ -408,7 +410,15 @@ class AstGenerator {
 
     /**
      * 
-     * @param {*} token 
+     * @param {string} token 
+     * @returns 
+     */
+    createLocalStoreVariable(token) {
+        return new LocalStoreVariable(token);
+    }
+    /**
+     * 
+     * @param {string} token 
      * @returns 
      */
     createConstant(token) {
@@ -417,7 +427,7 @@ class AstGenerator {
 
     /**
      * 
-     * @param {*} token 
+     * @param {string} token 
      * @returns 
      */
     createNegativeConstant(token) {
@@ -426,7 +436,7 @@ class AstGenerator {
 
     /**
      * 
-     * @param {*} token 
+     * @param {string} token 
      * @returns 
      */
     createOperator(token) {
@@ -682,6 +692,36 @@ class Variable {
     }
 }
 
+class LocalStoreVariable {
+    /**
+     * @param {string} path
+     * @throws Error if the path does not start with "local."
+     * */
+    constructor(path) {
+        this.negated = false;
+        if (!path.startsWith("localStorage.")) {
+            throw new Error(`Invalid path for LocalStoreVariable: ${path}. Path must start with "localStorage."`);
+        }
+        this.path = path.substring(14); // Entfernt den "localStorage."-Präfix
+        this.type = 'LOCAL_STORE_VARIABLE';
+        app.localStorage.activatePath(this.path);
+    }
+    /**
+     * @param {Data} data
+     * @returns {string}
+     */
+    evaluate(data) {
+        const value = app.localStorage.getValue(this.path);
+        return this.negated ? !value : value;
+    }
+    /**
+     * @public
+     * @returns {string}
+     */
+    toString() {
+        return 'localStorage.' + this.path;
+    }
+}
 class ClientStateVariable {
     /**
      * @param {string} path
@@ -694,6 +734,7 @@ class ClientStateVariable {
         }
         this.path = path.substring(6); // Entfernt den "state."-Präfix
         this.type = 'CLIENT_STATE_VARIABLE';
+        app.clientState.activatePath(this.path);
     }
 
     /**

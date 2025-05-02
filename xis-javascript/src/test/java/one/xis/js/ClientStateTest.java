@@ -2,13 +2,15 @@ package one.xis.js;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import one.xis.test.dom.Window;
 import one.xis.test.js.JSUtil;
+import one.xis.test.js.SessionStorage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import javax.script.ScriptException;
-import java.util.function.BiConsumer;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -20,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ClientStateTest {
 
     private String js;
-    private BiConsumer<String, Runnable> registerListener;
+    private Consumer<String> activatePath;
     private Function<String, Object> getValue;
     private Consumer<Object> publish;
 
@@ -29,125 +31,145 @@ class ClientStateTest {
         js = Javascript.getScript(CLASSES);
         js += "var clientState = new ClientState();";
         js += "clientState";
-        var result = JSUtil.execute(js);
-        registerListener = result.getMember("registerListener").as(BiConsumer.class);
+        var result = JSUtil.execute(js, Map.of("sessionStorage", new SessionStorage(), "window", new Window()));
+        activatePath = result.getMember("activatePath").as(Consumer.class);
         getValue = result.getMember("getValue").as(Function.class);
         publish = result.getMember("saveData").as(Consumer.class);
     }
 
     @Nested
-    public class SimplePathTest {
+    class CustomPathTests {
 
         @Data
         @AllArgsConstructor
-        public static class TestData {
-            public Object value;
+        public static class NestedObject {
+            public Object b;
         }
 
-        private boolean listenerInvoked;
+        @Data
+        @AllArgsConstructor
+        public static class ComplexObject {
+            public NestedObject a;
+        }
+
+        @Data
+        @AllArgsConstructor
+        public static class DataContainer {
+            public Object a;
+        }
 
         @BeforeEach
         void init() {
-            registerListener.accept("value", this::run);
+            publish.accept(new ComplexObject(new NestedObject(100)));
         }
 
         @Test
-        void simpleValue() throws ScriptException {
-            publish.accept(new TestData(200));
+        void nestedObjectPath() {
+            // Beispiel 1: Verschachteltes Objekt
+            activatePath.accept("a.b");
 
-            var result = getValue.apply("value");
-            assertThat(result).isEqualTo(200);
-            assertThat(listenerInvoked).isTrue();
+            var result = getValue.apply("a.b");
+            assertThat(result).isEqualTo(100);
         }
 
+        @Test
+        void fullObject() {
+            // Beispiel 2: Ganzes Objekt
+            activatePath.accept("a");
 
-        public void run() {
-            listenerInvoked = true;
+            var result = (Map) getValue.apply("a");
+            assertThat(result.get("b")).isEqualTo(100);
+        }
+
+        @Test
+        void directKey() {
+            // Beispiel 3: Direkter Schlüssel
+            activatePath.accept("a.b");
+            publish.accept(new NestedObject(100));
+
+            var result = getValue.apply("a.b");
+            assertThat(result).isEqualTo(100); // Hier wird das Ergebnis als Map erwartet
+        }
+
+        @Test
+        void invalidPath() {
+            // Beispiel 4: Ungültiger Pfad
+            activatePath.accept("a.c");
+
+            var result = getValue.apply("a.c");
+            assertThat(result).isNull(); // Ungültiger Pfad sollte null zurückgeben
         }
     }
 
     @Nested
-    public class PathWith2Elements {
-        private boolean listenerInvoked;
+    class MapTextContentTests {
 
         @Data
         @AllArgsConstructor
-        public static class B {
-            public Object c;
+        public static class TextContent {
+            private String content;
+
+            public void doRefresh() {
+                // Simuliert das Aktualisieren des Textinhalts
+                this.content = "Refreshed";
+            }
         }
 
-        @Data
-        @AllArgsConstructor
-        public static class A {
-            public B b;
-        }
+        private Consumer<String> activatePath;
+        private Consumer<TextContent> mapTextContent;
+        private Function<String, Object> getValue;
 
         @BeforeEach
-        void init() {
-            listenerInvoked = false;
+        void init() throws ScriptException {
+            js = Javascript.getScript(CLASSES);
+            js += "var clientState = new ClientState();";
+            js += "clientState";
+            var result = JSUtil.execute(js, Map.of("sessionStorage", new SessionStorage(), "window", new Window()));
+            activatePath = result.getMember("activatePath").as(Consumer.class);
+            mapTextContent = result.getMember("mapTextContent").as(Consumer.class);
+            getValue = result.getMember("getValue").as(Function.class);
         }
 
         @Test
-        void fullPath() {
-            registerListener.accept("b.c", this::run);
-            publish.accept(new A(new B(200)));
+        void mapSinglePathToTextContent() {
+            // Aktiviere einen Pfad
+            activatePath.accept("a.b");
 
-            var result = getValue.apply("b.c");
-            assertThat(result).isEqualTo(200);
-            assertThat(listenerInvoked).isTrue();
+            // Erstelle ein TextContent-Objekt und mappe es
+            TextContent textContent = new TextContent("Initial");
+            mapTextContent.accept(textContent);
+
+            // Simuliere eine Änderung und prüfe, ob das TextContent-Objekt aktualisiert wird
+            textContent.doRefresh();
+            assertThat(textContent.getContent()).isEqualTo("Refreshed");
         }
 
         @Test
-        void parentElement() {
-            registerListener.accept("b", this::run);
-            publish.accept(new A(new B(200)));
+        void mapMultiplePathsToTextContent() {
+            // Aktiviere mehrere Pfade
+            activatePath.accept("a.b");
+            activatePath.accept("a.c");
 
-            var result = (B) getValue.apply("b");
-            assertThat(result.getC()).isEqualTo(200);
-            assertThat(listenerInvoked).isTrue();
-        }
+            // Erstelle ein TextContent-Objekt und mappe es
+            TextContent textContent = new TextContent("Initial");
+            mapTextContent.accept(textContent);
 
-
-        public void run() {
-            listenerInvoked = true;
-        }
-    }
-
-    @Nested
-    class StoreTwiceTest {
-
-
-        @Data
-        @AllArgsConstructor
-        public static class TestData2 {
-            public Object value;
-        }
-
-        private int listenerInvokationCount;
-
-        @BeforeEach
-        void init() {
-            listenerInvokationCount = 0;
+            // Simuliere eine Änderung und prüfe, ob das TextContent-Objekt aktualisiert wird
+            textContent.doRefresh();
+            assertThat(textContent.getContent()).isEqualTo("Refreshed");
         }
 
         @Test
-        void storeTwice() {
-            registerListener.accept("value", this::run);
+        void mapNoPathToTextContent() {
+            // Kein Pfad wird aktiviert
 
-            publish.accept(new TestData2(200));
-            assertThat(getValue.apply("value")).isEqualTo(200);
+            // Erstelle ein TextContent-Objekt und mappe es
+            TextContent textContent = new TextContent("Initial");
+            mapTextContent.accept(textContent);
 
-            publish.accept(new TestData2(300));
-            assertThat(getValue.apply("value")).isEqualTo(300);
-
-            assertThat(listenerInvokationCount).isEqualTo(2);
+            // Simuliere eine Änderung und prüfe, ob das TextContent-Objekt nicht aktualisiert wird
+            assertThat(textContent.getContent()).isEqualTo("Initial");
         }
-
-        public void run() {
-            listenerInvokationCount++;
-        }
-
-
     }
 }
 

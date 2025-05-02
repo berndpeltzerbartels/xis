@@ -3,10 +3,20 @@ class LocalStore extends Store{
         super();
     }
 
-    getValue(path) {
-        return localStorage.getItem(path);
+    /**
+     * @override
+     * @param {string} path 
+     * @returns {any}
+     */
+    readValue(path) {
+        return this.localStorage.getItem(path);
     }
 
+    /**
+     * @override
+     * @param {*} path 
+     * @param {*} value 
+     */
     saveValue(path, value) {
         localStorage.setItem(path, value);
     }

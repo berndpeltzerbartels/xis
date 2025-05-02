@@ -3,6 +3,7 @@ package one.xis.js.widget;
 import one.xis.js.Javascript;
 import one.xis.test.dom.Document;
 import one.xis.test.dom.Element;
+import one.xis.test.dom.Window;
 import one.xis.test.js.Debug;
 import one.xis.test.js.JSUtil;
 import one.xis.utils.io.IOUtils;
@@ -31,6 +32,7 @@ class WidgetContainerHandlerTest {
         bindings.put("tag", container);
         bindings.put("widgets", new WidgetsMock());
         bindings.put("debug", new Debug());
+        bindings.put("window", new Window());
 
         JSUtil.execute(script, bindings);
 

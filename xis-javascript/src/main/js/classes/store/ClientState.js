@@ -1,14 +1,25 @@
-class ClientState extends Store{
+class ClientState extends Store {
     constructor() {
         super();
-        this.data = new Data({});
     }
 
-    getValue(path) {
-        return this.data.getValueByPath(path);
+    /**
+     * @override
+     * @param {string} path 
+     * @returns {any}
+     */
+    readValue(path) {
+        return sessionStorage.getItem(path);
     }
 
+
+    /**
+     * @override
+     * @param {string} path 
+     * @param {any} value 
+     */
     saveValue(path, value) {
-        this.data.setValueByPath(path, value);
+        sessionStorage.setItem(path, value);
     }
+
 }

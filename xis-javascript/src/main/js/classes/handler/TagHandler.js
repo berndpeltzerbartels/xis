@@ -106,13 +106,13 @@ class TagHandler {
     }
 
     createExpression(src) {
-        return new TextContentParser(src).parse();
+        return new TextContentParser(src, this).parse();
     }
 
     expressionFromAttribute(attrName) {
         var attr = this.tag.getAttribute(attrName);
         if (attr) {
-            return new TextContentParser(attr).parse();
+            return new TextContentParser(attr, this).parse();
         }
     }
 

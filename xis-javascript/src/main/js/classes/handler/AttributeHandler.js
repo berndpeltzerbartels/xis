@@ -13,7 +13,7 @@ class AttributeHandler extends TagHandler {
         super(element);
         this.type = 'attribute-handler';
         this.attrName = attrName;
-        this.attrExpression = new TextContentParser(element.getAttribute(this.attrName)).parse();
+        this.attrExpression = new TextContentParser(element.getAttribute(this.attrName), this).parse();
     }
 
     /**

@@ -8,8 +8,10 @@ import org.graalvm.polyglot.PolyglotAccess;
 import org.graalvm.polyglot.Value;
 
 import javax.script.ScriptException;
+import java.io.OutputStream;
 import java.io.Writer;
 import java.util.Map;
+import java.util.logging.ConsoleHandler;
 
 import static java.util.Collections.emptyMap;
 
@@ -93,6 +95,12 @@ public class JSUtil {
                 .option("inspect.Secure", "false")
                 .option("inspect.Path", path)
                 .option("inspect.WaitAttached", "true")
+
+                .option("js.stack-trace-limit", "100") // Erhöht die Stacktrace-Limitierung
+                //        .option("js.print-interop-exceptions", "true")
+                // .option("js.trace", "true")
+                .option("js.debug-builtin", "true")
+                .logHandler(new ConsoleHandler())
                 .build();
         bindingMap.forEach(context.getBindings("js")::putMember);
         return context;
@@ -108,12 +116,42 @@ public class JSUtil {
                 .allowPolyglotAccess(PolyglotAccess.ALL)
                 .allowNativeAccess(true)
                 .allowAllAccess(true)
+                .option("js.stack-trace-limit", "100") // Erhöht die Stacktrace-Limitierung
+                //  .option("js.print-interop-exceptions", "true")
+                // .option("js.trace", "true")
+                .option("js.debug-builtin", "true")
+                .logHandler(new ConsoleHandler())
                 .build();
         bindingMap.forEach(context.getBindings("js")::putMember);
         return context;
     }
 
-    class ExceptionThrowingErrorWriter extends Writer {
+
+    static class OutputstreamWrapper extends OutputStream {
+
+        @Override
+        public void write(int b) {
+            System.err.write(b);
+        }
+
+        @Override
+        public void write(byte[] b, int off, int len) {
+            System.err.write(b, off, len);
+        }
+
+        @Override
+        public void flush() {
+            System.err.flush();
+        }
+
+        @Override
+        public void close() {
+            System.err.close();
+        }
+
+    }
+
+    static class ExceptionThrowingErrorWriter extends Writer {
 
         private final StringBuilder stringBuilder = new StringBuilder();
 

@@ -12,8 +12,8 @@ class HeadTagHandler extends TagHandler {
      * @param {page} page
      */
     bind(page) {
-        this.setTitleExpression(page.titleExpression);
-        this.addScriptTags(page.scriptSourceExpressions);
+        this.setTitleExpression(page);
+        this.addScriptTags(page);
         if (page.pageAttributes.pageJavascriptSource) {
             this.addPageJavascript(page.pageAttributes.pageJavascriptSource);
         }
@@ -28,11 +28,13 @@ class HeadTagHandler extends TagHandler {
 
     /**
     * @private
-    * @param {Array} scriptSourceExpressions
+    * @param {Page} page
     * @param {string} pageSpecificJsSource
     */
-    addScriptTags(scriptSourceExpressions) {
-        this.scriptSourceExpressions = scriptSourceExpressions;
+    addScriptTags(page) {
+        this.scriptSourceExpressions = this.extractFromArrayInPlace(page.headChildArray, node => node.localName == 'script')
+            .map(node => node.getAttribute('src'))
+            .map(src => new TextContentParser(src, this).parse());
         for (var scriptSourceExpression of this.scriptSourceExpressions) {
             var scriptElement = document.createElement('script');
             scriptElement.setAttribute('type', 'text/javascript');
@@ -103,9 +105,11 @@ class HeadTagHandler extends TagHandler {
         }
     }
 
-    setTitleExpression(expression) {
-        if (expression) {
-            this.titleExpression = expression;
+    setTitleExpression(page) {
+        var arr = this.extractFromArrayInPlace(page.headChildArray, node => node.localName == 'title');
+        if (arr.length > 0) {
+            var expressionSrc = arr[0].innerText;
+            this.titleExpression = new TextContentParser(expressionSrc, this).parse();
         } else {
             this.titleExpression = {
                 evaluate(_) { }
@@ -117,5 +121,23 @@ class HeadTagHandler extends TagHandler {
         this.innerText = '';
         this.titleExpression = undefined;
         innerTextChanged(this.title);
+    }
+
+
+    /**
+     * @param {Array} array
+     * @param {Function} filterFunction
+     * @returns {Array} An array of all elements matching the filterFunction
+     * @description Removes all matching elements from the original array and returns them.
+     */
+    extractFromArrayInPlace(array, filterFunction) {
+        const result = [];
+        for (let i = array.length - 1; i >= 0; i--) {
+            if (filterFunction(array[i])) {
+                result.push(array[i]);
+                array.splice(i, 1);
+            }
+        }
+        return result.reverse(); // to preserve original order
     }
 }

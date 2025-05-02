@@ -5,6 +5,7 @@ import one.xis.test.dom.Document;
 import one.xis.test.dom.Window;
 import one.xis.test.js.Console;
 import one.xis.test.js.LocalStorage;
+import one.xis.test.js.SessionStorage;
 
 @Data
 public class OpenPageResult {
@@ -17,6 +18,10 @@ public class OpenPageResult {
 
     public LocalStorage getLocalStorage() {
         return testEnvironment.getHTML_OBJECTS().getLocalStorage();
+    }
+
+    public SessionStorage getSessionStorage() {
+        return testEnvironment.getHTML_OBJECTS().getSessionStorage();
     }
 
     public Window getWindow() {

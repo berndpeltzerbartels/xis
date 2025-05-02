@@ -14,7 +14,7 @@ class FormHandler extends TagHandler {
         if (!formTag.getAttribute('xis:binding')) {
             throw new Error('form has no binding: ' + this.tag);
         }
-        this.bindingExpression = new TextContentParser(formTag.getAttribute('xis:binding')).parse();
+        this.bindingExpression = new TextContentParser(formTag.getAttribute('xis:binding'), this).parse();
         formTag.addEventListener('submit', event => event.preventDefault());
     }
 

@@ -1,13 +1,17 @@
 class TextContentParser {
 
-    constructor(src) {
+    constructor(src, handler) {
+        this.handler = handler;
         this.chars = new CharIterator(src);
         this.parts = [];
     }
 
     parse() {
         this.readText();
-        return new TextContent(this.parts);
+        const textContent = new TextContent(this.parts, this.handler);
+        app.clientState.mapTextContent(textContent);
+        app.localStore.mapTextContent(textContent);
+        return textContent;
     }
 
 

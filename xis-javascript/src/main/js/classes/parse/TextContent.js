@@ -7,9 +7,13 @@
  */
 class TextContent {
 
-    constructor(parts) {
+    /**
+     * @param {array} parts
+     * @param {TagHandler} handler
+     */
+    constructor(parts, handler) {
+        this.handler = handler;
         this.parts = parts;
-        this.registerClientStateVariables();
     }
 
     /**
@@ -24,23 +28,20 @@ class TextContent {
         return this.parts.map(part => part.asString(data)).reduce((s1, s2) => s1 + s2);
     }
 
-    refreshOnClientStateChange() {
-        this.evaluate(this.data);
-    }
-
-    registerClientStateVariables() {
-        var variables = [];
-        for (var part of this.parts) {
-            if (part.expression && part.expression.type  == 'CLIENT_STATE_VARIABLE') {
-                var key = part.expression.path.split('.')[0];
-                app.clientState.registerListener(key,  () => this.refreshOnClientStateChange());
-            }
+    /**
+     * Refresh the text content. This is used when store data (sessionStorage or localStorage)
+     * is changed and we need to refresh the text content. The date from controller of the 
+     * embedding component is re-used to refresh the text content, while the new stored 
+     * data is loaded during evaluation.
+     * 
+     * @public
+     */
+    doRefresh() {
+        if (this.data) { // text content inside invoker is not evaluated yet and so data is not set
+            this.evaluate(this.data);
         }
-        return variables;
     }
-                
-
-
+ 
     clone() {
         var parts = [];
         for (var part of this.parts) {
@@ -60,7 +61,7 @@ class TextContent {
                 });
             }
         }
-        return new TextContent(parts);
+        return new TextContent(parts, this.handler);
     }
 
 }

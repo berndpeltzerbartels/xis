@@ -53,6 +53,7 @@ class IntegrationTestScript {
         var bindings = new HashMap<String, Object>();
         bindings.put("backendBridge", testEnvironment.getBackendBridge());
         bindings.put("localStorage", testEnvironment.getHTML_OBJECTS().getLocalStorage());
+        bindings.put("sessionStorage", testEnvironment.getHTML_OBJECTS().getSessionStorage());
         bindings.put("document", testEnvironment.getHTML_OBJECTS().getRootPage());
         bindings.put("window", testEnvironment.getHTML_OBJECTS().getWindow());
         bindings.put("htmlToElement", testEnvironment.getHTML_OBJECTS().getHtmlToElement());
@@ -62,6 +63,7 @@ class IntegrationTestScript {
     private void updateBindings(JavascriptFunction invoker) {
         invoker.setBinding("backendBridge", testEnvironment.getBackendBridge());
         invoker.setBinding("localStorage", testEnvironment.getHTML_OBJECTS().getLocalStorage());
+        invoker.setBinding("sessionStorage", testEnvironment.getHTML_OBJECTS().getSessionStorage());
         invoker.setBinding("document", testEnvironment.getHTML_OBJECTS().getRootPage());
         invoker.setBinding("window", testEnvironment.getHTML_OBJECTS().getWindow());
         invoker.setBinding("htmlToElement", testEnvironment.getHTML_OBJECTS().getHtmlToElement());

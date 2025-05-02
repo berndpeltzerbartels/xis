@@ -7,6 +7,7 @@ import one.xis.test.dom.Element;
 import one.xis.test.dom.Window;
 import one.xis.test.js.Console;
 import one.xis.test.js.LocalStorage;
+import one.xis.test.js.SessionStorage;
 
 import java.util.function.Function;
 
@@ -15,6 +16,7 @@ class HtmlObjects {
 
     private Document rootPage;
     private LocalStorage localStorage;
+    private SessionStorage sessionStorage;
     private Window window;
     private Console console;
     private final Function<String, Element> htmlToElement;
@@ -31,12 +33,14 @@ class HtmlObjects {
 
     void reset() {
         localStorage.reset();
+        sessionStorage.reset();
         window.reset();
     }
 
     private void init() {
         this.rootPage = Document.of(new Resources().getByPath("index.html").getContent());
         this.localStorage = new LocalStorage();
+        this.sessionStorage = new SessionStorage();
         this.window = new Window();
         this.console = new Console();
     }

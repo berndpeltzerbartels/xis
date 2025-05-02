@@ -6,7 +6,7 @@ class FormElementHandler extends TagHandler {
      */
     constructor(element) {
         super(element);
-        this.bindingExpression = new TextContentParser(element.getAttribute('xis:binding')).parse();
+        this.bindingExpression = new TextContentParser(element.getAttribute('xis:binding'), this).parse();
         this.binding = undefined;
         this.init();
     }

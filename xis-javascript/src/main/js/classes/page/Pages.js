@@ -59,13 +59,8 @@ class Pages {
             var templateElement = htmlToElement(content);
             initializeElement(templateElement);
             var headChildArray = nodeListToArray(templateElement.childNodes);
-            var titleElement = this.extractFromArrayInPlace(headChildArray, node => node.localName == 'title')[0];
-            var scriptSourceExpressions = this.extractFromArrayInPlace(headChildArray, node => node.localName == 'script').map(node => node.getAttribute('src')).map(src => new TextContentParser(src).parse());
             var page = _this.pages[pageId];
-            page.scriptSourceExpressions = scriptSourceExpressions;
-            if (titleElement) {
-                page.titleExpression = new TextContentParser(titleElement.innerText).parse();
-            }
+            page.headChildArray = headChildArray;
             page.headTemplate = templateElement;
             return pageId;
         });
@@ -79,23 +74,6 @@ class Pages {
         });
     }
 
-
-/**
- * @param {Array} array
- * @param {Function} filterFunction
- * @returns {Array} An array of all elements matching the filterFunction
- * @description Removes all matching elements from the original array and returns them.
- */
- extractFromArrayInPlace(array, filterFunction) {
-    const result = [];
-    for (let i = array.length - 1; i >= 0; i--) {
-        if (filterFunction(array[i])) {
-            result.push(array[i]);
-            array.splice(i, 1);
-        }
-    }
-    return result.reverse(); // to preserve original order
-}
 
     /**
     * @private

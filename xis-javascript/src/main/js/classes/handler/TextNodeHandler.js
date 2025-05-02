@@ -3,7 +3,7 @@ class TextNodeHandler extends TagHandler {
     constructor(node) {
         super(node);
         this.node = node;
-        this.expression = new TextContentParser(node.nodeValue).parse();
+        this.expression = new TextContentParser(node.nodeValue, this).parse();
     }
 
     /**
