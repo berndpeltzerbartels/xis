@@ -1,9 +1,9 @@
 class HtmlTagHandler extends TagHandler {
 
-    constructor() {
+    constructor(tagHandlers) {
         super(getElementByTagName('html'));
-        this.headTagHandler = new HeadTagHandler();
-        this.bodyTagHandler = new BodyTagHandler();
+        this.headTagHandler = new HeadTagHandler(tagHandlers);
+        this.bodyTagHandler = new BodyTagHandler(tagHandlers);
     }
 
     /**

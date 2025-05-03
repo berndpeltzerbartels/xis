@@ -1,7 +1,11 @@
 class BodyTagHandler extends TagHandler {
 
-    constructor() {
+    /**
+     * @param {TagHandlers} tagHandlers 
+     */
+    constructor(tagHandlers) {
         super(getElementByTagName('body'));
+        this.tagHandlers = tagHandlers;
         this.type = 'body-handler';
         this.attributeHandlers = [];
     }
@@ -20,6 +24,7 @@ class BodyTagHandler extends TagHandler {
             bodyTemplate.removeChild(node);
             this.tag.appendChild(node);
         }
+        var bodyTemplateHandler = this.tagHandlers.getRootHandler(bodyTemplate);
         this.addDescendantHandler(bodyTemplate._rootHandler);
     }
 

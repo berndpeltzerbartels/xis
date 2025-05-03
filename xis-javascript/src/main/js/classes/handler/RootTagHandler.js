@@ -4,10 +4,8 @@
  */
 class RootTagHandler extends TagHandler {
 
-    /**
     constructor(tag) {
         super(tag);
-        this.type = 'root-handler';
     }
 
     /**
@@ -23,6 +21,7 @@ class RootTagHandler extends TagHandler {
      * @param {TagHandler} parentHandler 
      */
     bindParentHandler(parentHandler) {
+        handler.parentHandler = this;
         for (var handler of this.descendantHandlers) {
             parentHandler.addDescendantHandler(handler);
         }
@@ -34,7 +33,9 @@ class RootTagHandler extends TagHandler {
      * @param {TagHandler} parentHandler 
      */
     unbindParentHandler(parentHandler) {
-        parentHandler.descendantHandlers = parentHandler.descendantHandlers.filter(h => h != this);
+        parentHandler.descendantHandlers = parentHandler.descendantHandlers
+        .map(h => h.parentHandler = undefined)
+        .filter(h => h != this);
     }
 
 }

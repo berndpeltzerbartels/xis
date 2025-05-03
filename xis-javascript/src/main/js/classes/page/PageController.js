@@ -21,13 +21,14 @@ class PageController {
      * @param {Pages} pages
      * @param {Initializer} initializer
      * @param {URLResolver} urlResolver
+     * @param {TagHandlers} tagHandlers
      */
-    constructor(client, pages, initializer, urlResolver) {
+    constructor(client, pages, initializer, urlResolver, tagHandlers) {
         this.client = client;
         this.pages = pages;
         this.initializer = initializer;
         this.urlResolver = urlResolver;
-        this.htmlTagHandler = new HtmlTagHandler();
+        this.htmlTagHandler = new HtmlTagHandler(tagHandlers);
         this.page = undefined;
         this.resolvedURL = undefined;
         this.config = undefined;

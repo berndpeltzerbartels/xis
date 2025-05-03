@@ -12,9 +12,10 @@ class Initializer {
      * @param {HttpClient} client
      * @param {Widgets} widgets
      * @param {WidgetContainers} widgetContainers
+     * @param {TagHandlers} tagHandlers
      */
-    constructor(domAccessor, client, widgets, widgetContainers) {
-        this.tagHandlerDecorator = new NodeDecorator(domAccessor, client, widgets, widgetContainers);
+    constructor(domAccessor, client, widgets, widgetContainers, tagHandlers) {
+        this.tagHandlerDecorator = new NodeDecorator(domAccessor, client, widgets, widgetContainers, tagHandlers);
         this.domAccessor = domAccessor;
     }
 

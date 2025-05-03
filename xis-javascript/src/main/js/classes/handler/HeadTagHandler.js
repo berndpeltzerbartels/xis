@@ -1,7 +1,12 @@
 class HeadTagHandler extends TagHandler {
 
-    constructor() {
+    /**
+     * 
+     * @param {TagHandlers} tagHandlers 
+     */
+    constructor(tagHandlers) {
         super(getElementByTagName('head'));
+        this.tagHandlers = tagHandlers;
         this.title = getElementByTagName('title');
         this.type = 'head-handler';
 

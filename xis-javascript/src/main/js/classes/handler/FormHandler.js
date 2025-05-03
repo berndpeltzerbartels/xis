@@ -19,11 +19,11 @@ class FormHandler extends TagHandler {
     }
 
     submit(action) {
-        var resolevdUrl = app.pageController.resolvedURL;
+        var resolvedUrl = app.pageController.resolvedURL;
         var formHandler = this;
         var formBindingParameters = urlParameters(this.binding);
         var formBindingKey = stripQuery(this.binding);
-        this.client.formAction(resolevdUrl, this.widgetId(), this.formData(), action, formBindingKey, formBindingParameters).then(response => {
+        this.client.formAction(resolvedUrl, this.widgetId(), this.formData(), action, formBindingKey, formBindingParameters).then(response => {
             formHandler.handleActionResponse(response, formHandler.targetContainerHandler());
         });
     }

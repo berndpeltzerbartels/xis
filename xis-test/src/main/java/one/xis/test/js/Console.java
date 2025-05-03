@@ -13,7 +13,19 @@ public class Console {
         System.out.println(message);
     }
 
+    public void log(Object message, Object arg) {
+        System.out.println(message);
+    }
+
     public void error(Object message) {
+        try {
+            printError(message);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            System.err.println(message);
+        }
+    }
+
+    public void error(Object message, Object arg) {
         try {
             printError(message);
         } catch (NoSuchFieldException | IllegalAccessException e) {

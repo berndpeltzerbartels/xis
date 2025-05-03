@@ -10,13 +10,15 @@ class NodeDecorator {
      * @param {HttpClient} client
      * @param {Widgets} widgets
      * @param {WidgetContainers} widgetContainers
+     * @param {TagHandlers} tagHandlers
      */
-    constructor(domAccessor, client, widgets, widgetContainers) {
+    constructor(domAccessor, client, widgets, widgetContainers, tagHandlers) {
         this.domAccessor = domAccessor;
         this.client = client;
         this.bakcenService = new BackendService(this.client);
         this.widgets = widgets;
         this.widgetContainers = widgetContainers;
+        this.tagHandlers = tagHandlers;
     }
 
     /**
@@ -27,6 +29,7 @@ class NodeDecorator {
     decorate(node, parentHandler) {
         if (!parentHandler) {
             parentHandler = new RootTagHandler(node);
+            this.tagHandlers.mapRootHandler(node, parentHandler);
             node._rootHandler = parentHandler;
         }
         if (isElement(node)) {
@@ -85,7 +88,7 @@ class NodeDecorator {
                 handler = new GlobalMessagesTagHandler(element);
                 break;
         }
-
+        this.tagHandlers.mapHandler(element, handler);
         this.initializeAttributes(element, handler ? handler : parentHandler);
         if (handler) {
             parentHandler.addDescendantHandler(handler);
@@ -180,8 +183,9 @@ class NodeDecorator {
      * @returns {TagHandler}
      */
     decorateForeach(foreach) {
-        foreach.handler = new ForeachHandler(foreach, this); // never CompositeTagHandler, here
-        return foreach.handler;
+        var handler = new ForeachHandler(foreach, this); // never CompositeTagHandler, here
+        foreach.handler = handler;
+        return handler;
     }
 
     decorateSubmitElement(element) {

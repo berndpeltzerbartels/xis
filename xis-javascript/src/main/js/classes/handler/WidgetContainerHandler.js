@@ -134,6 +134,7 @@ class WidgetContainerHandler extends TagHandler {
                 this.descendantHandlers = [];
             }
         }
+        debugger;
         this.widgetInstance = assertNotNull(this.widgets.getWidgetInstance(widgetId), 'no such widget: ' + widgetId);
         this.tag.appendChild(this.widgetInstance.root);
         this.addDescendantHandler(this.widgetInstance.root._rootHandler);

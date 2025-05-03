@@ -26,7 +26,7 @@ class TextContentParserTest {
                 
                             }
                         },
-                        localStore: {
+                        localStorage: {
                              mapTextContent: function (textContent) {
                 
                             }

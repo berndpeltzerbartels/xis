@@ -8,17 +8,17 @@ class TagHandler {
     constructor(tag) {
         this.tag = tag;
         this.descendantHandlers = [];
+        this.parentHandler = null;
+        this.type = 'tag-handler';
         this.priority = 'normal';
     }
 
     addDescendantHandler(handler) {
+        console.log('type: ' + this.type + 'handler: ' + handler.type);
+        handler.parentHandler = this;
         this.descendantHandlers.push(handler);
         handler.publishBindEvent();
 
-    }
-
-    removeDescendantHandler(handler) {
-        this.descendantHandlers = this.descendantHandlers.filter(h => h != handler);
     }
 
     refresh(data) {
