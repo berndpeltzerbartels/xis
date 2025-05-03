@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 
 import javax.script.ScriptException;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static one.xis.js.JavascriptSource.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -45,8 +44,9 @@ class ForeachHandlerTest {
     void iterate() throws ScriptException {
         var script = Javascript.getScript(CLASSES, FUNCTIONS, TEST, TEST_APP_INSTANCE);
         script += "var data = new Data({\"a\": {\"b\": {\"c\": [{\"id\": 1, \"title\": \"title1\"}, {\"id\": 2, \"title\": \"title2\"}, {\"id\": 3, \"title\": \"title3\"}]}}});";
-        script += "var initializer = new Initializer(new DomAccessor());";
-        script += "var handler = new ForeachHandler(foreach, initializer);";
+        script += "var tagHandlers = {getRootHandler(e) { return { refresh(data){} };}};";
+        script += "var initializer = new Initializer(new DomAccessor(), null, null, null, tagHandlers);";
+        script += "var handler = new ForeachHandler(foreach, tagHandlers);";
         script += "handler.refresh(data);";
 
         JSUtil.execute(script, Map.of("foreach", foreach, "document", document, "window", new Window()));
@@ -54,7 +54,7 @@ class ForeachHandlerTest {
         var childElementClasses = foreach.getChildElements().stream()
                 .map(Element::getCssClasses)
                 .map(cl -> String.join(" ", cl))
-                .collect(Collectors.toList());
+                .toList();
 
         assertThat(foreach.getChildNodes().length).isEqualTo(6);
 
@@ -71,8 +71,9 @@ class ForeachHandlerTest {
         var script = Javascript.getScript(CLASSES, FUNCTIONS, TEST, TEST_APP_INSTANCE);
         script += "var data1 = new Data({\"a\": {\"b\": {\"c\": [{\"id\": 1, \"title\": \"title1\"}, {\"id\": 2, \"title\": \"title2\"}, {\"id\": 3, \"title\": \"title3\"}]}}});";
         script += "var data2 = new Data({\"a\": {\"b\": {\"c\": [{\"id\": 1, \"title\": \"title1\"}]}}});";
-        script += "var initializer = new Initializer(new DomAccessor());";
-        script += "var handler = new ForeachHandler(foreach, initializer);";
+        script += "var tagHandlers = {getRootHandler(e) { return { refresh(data){} };}};";
+        script += "var initializer = new Initializer(new DomAccessor(), null, null, null, tagHandlers);";
+        script += "var handler = new ForeachHandler(foreach, tagHandlers);";
         script += "handler.refresh(data1);"; // length = 3
         script += "handler.refresh(data2);";// length = 1
         JSUtil.execute(script, Map.of("foreach", foreach, "document", document, "window", new Window()));

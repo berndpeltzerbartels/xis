@@ -8,6 +8,7 @@
  * @property {BackendService} backendService
  * @property {Widgets} widgets
  * @property {WidgetContainers} widgetContainers
+ * @property {TagHandlers} tagHandlers
  * @property {WidgetInstance} widgetInstance
  * @property {String} containerId
  * @property {Expression} containerIdExpression
@@ -23,11 +24,12 @@ class WidgetContainerHandler extends TagHandler {
      * @param {Widgets} widgets
      * @param {WidgetContainers} widgetContainers
      */
-    constructor(tag, backendService, widgets, widgetContainers) {
+    constructor(tag, backendService, widgets, widgetContainers, tagHandlers) {
         super(tag);
         this.backendService = backendService;
         this.widgets = widgets;
         this.widgetContainers = widgetContainers;
+        this.tagHandlers = tagHandlers;
         this.widgetInstance = undefined;
         this.containerId = undefined;
         this.containerIdExpression = this.expressionFromAttribute('container-id');
@@ -134,10 +136,10 @@ class WidgetContainerHandler extends TagHandler {
                 this.descendantHandlers = [];
             }
         }
-        debugger;
         this.widgetInstance = assertNotNull(this.widgets.getWidgetInstance(widgetId), 'no such widget: ' + widgetId);
         this.tag.appendChild(this.widgetInstance.root);
-        this.addDescendantHandler(this.widgetInstance.root._rootHandler);
+        const widgetRootHandler = this.tagHandlers.getRootHandler(this.widgetInstance.root);
+        this.addDescendantHandler(widgetRootHandler);
     }
 
     /**

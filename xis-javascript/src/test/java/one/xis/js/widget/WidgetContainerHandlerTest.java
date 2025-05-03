@@ -24,7 +24,8 @@ class WidgetContainerHandlerTest {
 
         var script = Javascript.getScript(CLASSES, FUNCTIONS, TEST, TEST_APP_INSTANCE);
         script += IOUtils.getResourceAsString("one/xis/widget/WidgetContainerHandlerTestMocks.js");
-        script += "var handler = new WidgetContainerHandler(tag, client, widgets, new WidgetContainers());";
+        script += "var tagHandlers = {refresh(data){}, getRootHandler(e){ return { publishBindEvent(){}};}};";
+        script += "var handler = new WidgetContainerHandler(tag, client, widgets, new WidgetContainers(), tagHandlers);";
         script += "handler.refresh(data)";
 
         var bindings = new HashMap<String, Object>();
@@ -48,6 +49,8 @@ class WidgetContainerHandlerTest {
     }
 
     public static class RootHandler {
+        public Object parentHandler;
+
         public void publishBindEvent() {
         }
     }

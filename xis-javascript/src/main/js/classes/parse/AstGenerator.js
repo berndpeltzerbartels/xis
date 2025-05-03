@@ -711,7 +711,6 @@ class LocalStoreVariable {
      * @returns {string}
      */
     evaluate(data) {
-    debugger;
         const value = app.localStorage.getValue(this.path);
         return this.negated ? !value : value;
     }

@@ -15,7 +15,7 @@ class NodeDecorator {
     constructor(domAccessor, client, widgets, widgetContainers, tagHandlers) {
         this.domAccessor = domAccessor;
         this.client = client;
-        this.bakcenService = new BackendService(this.client);
+        this.backendService = new BackendService(this.client);
         this.widgets = widgets;
         this.widgetContainers = widgetContainers;
         this.tagHandlers = tagHandlers;
@@ -51,9 +51,11 @@ class NodeDecorator {
         switch (element.localName) {
             case 'xis:foreach':
                 parentHandler.addDescendantHandler(this.decorateForeach(element));
+                this.tagHandlers.mapHandler(element, handler);
                 return; // Do not evaluate child nodes, here !
             case 'xis:widget-container':
                 handler = this.decorateWidgetContainer(element);
+                this.tagHandlers.mapHandler(element, handler);
                 parentHandler.addDescendantHandler(handler);
                 this.decorateChildNodes(element, handler);
                 return;
@@ -88,10 +90,11 @@ class NodeDecorator {
                 handler = new GlobalMessagesTagHandler(element);
                 break;
         }
-        this.tagHandlers.mapHandler(element, handler);
+
         this.initializeAttributes(element, handler ? handler : parentHandler);
         if (handler) {
             parentHandler.addDescendantHandler(handler);
+            this.tagHandlers.mapHandler(element, handler);
             this.decorateChildNodes(element, handler);
         } else {
             this.decorateChildNodes(element, parentHandler);
@@ -183,7 +186,7 @@ class NodeDecorator {
      * @returns {TagHandler}
      */
     decorateForeach(foreach) {
-        var handler = new ForeachHandler(foreach, this); // never CompositeTagHandler, here
+        var handler = new ForeachHandler(foreach, this.tagHandlers); // never CompositeTagHandler, here
         foreach.handler = handler;
         return handler;
     }
@@ -200,7 +203,11 @@ class NodeDecorator {
      * @returns {TagHandler}
      */
     decorateWidgetContainer(container) {
-        var handler = new WidgetContainerHandler(container, this.bakcenService, this.widgets, this.widgetContainers);
+        var handler = new WidgetContainerHandler(container, 
+            this.backendService, 
+            this.widgets, 
+            this.widgetContainers, 
+            this.tagHandlers);
         this.addHandler(container, handler);
         return handler;
     }

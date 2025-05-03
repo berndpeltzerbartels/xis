@@ -2,9 +2,11 @@ class ForeachHandler extends TagHandler {
 
     /**
      * @param {Element} tag the custom tag '<xis:foreach/>'
+     * @param {TagHandler} tagHandlers
      */
-    constructor(tag) {
+    constructor(tag, tagHandlers) {
         super(tag);
+        this.tagHandlers = tagHandlers;
         this.arrayPathExpression = this.createExpression(this.getAttribute('array'), '.');
         this.varName = this.getAttribute('var');
         this.type = 'foreach-handler';
@@ -22,7 +24,6 @@ class ForeachHandler extends TagHandler {
         var arrayPath = this.doSplit(this.arrayPathExpression.evaluate(data), '.');
         var arr = data.getValue(arrayPath);
         if (!arr) {
-            debugger;
             throw new Error('Array not found: [' + arrayPath+']');
         }
         this.cache.sizeUp(arr.length);
@@ -37,7 +38,8 @@ class ForeachHandler extends TagHandler {
                     if (child.parentNode != this.tag) {
                         this.tag.appendChild(child);
                     }
-                    child._rootHandler.refresh(subData);
+                    const childHandler = this.tagHandlers.getRootHandler(child);
+                    childHandler.refresh(subData);
                 }
             } else {
                 // Cache is too long. We remove unused elements 

@@ -25,7 +25,7 @@ class BodyTagHandler extends TagHandler {
             this.tag.appendChild(node);
         }
         var bodyTemplateHandler = this.tagHandlers.getRootHandler(bodyTemplate);
-        this.addDescendantHandler(bodyTemplate._rootHandler);
+        this.addDescendantHandler(bodyTemplateHandler);
     }
 
     /**

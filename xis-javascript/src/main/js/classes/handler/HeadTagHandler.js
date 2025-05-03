@@ -28,7 +28,8 @@ class HeadTagHandler extends TagHandler {
             }
             this.tag.appendChild(node);
         }
-        this.addDescendantHandler(page.headTemplate._rootHandler);
+        var headTemplateRootHandler = this.tagHandlers.getRootHandler(page.headTemplate);
+        this.addDescendantHandler(headTemplateRootHandler);
     }
 
     /**

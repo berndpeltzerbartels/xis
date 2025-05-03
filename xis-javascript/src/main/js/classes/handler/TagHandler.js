@@ -117,7 +117,6 @@ class TagHandler {
     }
 
     findParentWidgetContainer() {
-        debugger;
         var e = this.tag;
         while (e) {
             if (e.localName == 'xis:widget-container') {
