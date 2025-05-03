@@ -34,10 +34,7 @@ class ControllerResultMapper {
         }
     }
 
-    void mapControllerResultToRequest(ControllerResult controllerResult, ClientRequest nextRequest) {
-        nextRequest.setPageId(controllerResult.getNextPageURL());
-        nextRequest.setWidgetId(controllerResult.getNextWidgetId());
-        nextRequest.setFormData(controllerResult.getFormData().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString())));
+    void mapControllerResultToNextRequest(ControllerResult controllerResult, ClientRequest nextRequest) {
         nextRequest.setUrlParameters(controllerResult.getUrlParameters().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString())));
         nextRequest.setPathVariables(controllerResult.getPathVariables().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString())));
         nextRequest.setWidgetContainerId(controllerResult.getWidgetContainerId());

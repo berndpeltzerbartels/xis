@@ -65,11 +65,12 @@ class ControllerService {
         controllerResult.setCurrentWidgetId(request.getWidgetId());
         var invokerControllerWrapper = controllerWrapper(request);
         invokerControllerWrapper.invokeActionMethod(request, controllerResult);
-        if (controllerResult.getNextPageURL() == null) {
-            controllerResult.setNextPageURL(request.getPageId());
-        }
-        if (controllerResult.getNextWidgetId() == null) {
-            controllerResult.setNextWidgetId(request.getWidgetId());
+        if (controllerResult.getNextPageURL() == null && controllerResult.getNextWidgetId() == null) {
+            if (invokerControllerWrapper.isWidgetController()) {
+                controllerResult.setNextWidgetId(request.getWidgetId());
+            } else {
+                controllerResult.setNextPageURL(request.getPageId());
+            }
         }
         mapResultToResponse(response, controllerResult);
         var nextControllerWrapper = nextControllerWrapperAfterAction(controllerResult);
@@ -90,14 +91,18 @@ class ControllerService {
         nextRequest.setUserId(request.getUserId());
         nextRequest.getLocalStorageData().putAll(request.getLocalStorageData());
         nextRequest.getClientStateData().putAll(request.getClientStateData());
-        controllerResultMapper.mapControllerResultToRequest(controllerResult, nextRequest);
+        controllerResultMapper.mapControllerResultToNextRequest(controllerResult, nextRequest);
         var nextControllerResult = new ControllerResult();
         // one of these 2 values changed
-        nextControllerResult.setNextPageURL(controllerResult.getNextPageURL());
-        nextControllerResult.setNextWidgetId(controllerResult.getNextWidgetId());
+        if (nextControllerWrapper.isWidgetController()) {
+            nextControllerResult.setNextWidgetId(nextControllerWrapper.getId());
+        } else {
+            nextControllerResult.setNextPageURL(nextControllerWrapper.getId());
+        }
         // get model data for next controller
         nextControllerWrapper.invokeGetModelMethods(nextRequest, nextControllerResult);
         // map result to response
+        response.clear();
         mapResultToResponse(response, nextControllerResult);
     }
 

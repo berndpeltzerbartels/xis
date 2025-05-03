@@ -2,6 +2,7 @@ package one.xis.server;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import one.xis.Widget;
 import one.xis.validation.ValidatorMessages;
 import org.tinylog.Logger;
 
@@ -52,6 +53,14 @@ public class ControllerWrapper {
                 invokeModelDataMethod(request, controllerResult, m); // TODO Schrott ?
             }
         });
+    }
+
+    boolean isWidgetController() {
+        return controller.getClass().isAnnotationPresent(Widget.class);
+    }
+
+    boolean isPageController() {
+        return !isWidgetController();
     }
 
     Class<?> getControllerClass() {
