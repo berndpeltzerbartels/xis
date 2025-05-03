@@ -44,5 +44,5 @@ class ClientStateTest {
 
         assertThat(result.getDocument().getElementById("clientStateValue").innerText).isEqualTo("300");
     }
-
+    
 }
