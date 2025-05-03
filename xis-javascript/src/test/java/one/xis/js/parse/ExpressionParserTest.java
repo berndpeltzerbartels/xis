@@ -3,7 +3,10 @@ package one.xis.js.parse;
 import one.xis.js.Javascript;
 import one.xis.test.js.JSUtil;
 import org.graalvm.polyglot.Value;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 
 import javax.script.ScriptException;
 
@@ -248,23 +251,6 @@ class ExpressionParserTest {
             assertThat(result.asInt()).isEqualTo(20);
         }
 
-    }
-
-    @Nested
-    @Disabled
-    class ClientStateTest {
-
-        @Test
-        void testClientState() throws ScriptException {
-            var result = evaluate("a + b", "{a: 2, state.b: 3}");
-            assertThat(result.asInt()).isEqualTo(5);
-        }
-
-        @Test
-        void testClientStateWithFunction() throws ScriptException {
-            var result = evaluate("xyz(a, b)", "{a: 2, b: 3}");
-            assertThat(result.asInt()).isEqualTo(5);
-        }
     }
 
     @Test

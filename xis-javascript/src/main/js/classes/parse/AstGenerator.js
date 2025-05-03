@@ -702,7 +702,7 @@ class LocalStoreVariable {
         if (!path.startsWith("localStorage.")) {
             throw new Error(`Invalid path for LocalStoreVariable: ${path}. Path must start with "localStorage."`);
         }
-        this.path = path.substring(14); // Entfernt den "localStorage."-Präfix
+        this.path = path.substring(13); // Entfernt den "localStorage."-Präfix
         this.type = 'LOCAL_STORE_VARIABLE';
         app.localStorage.activatePath(this.path);
     }
@@ -711,6 +711,7 @@ class LocalStoreVariable {
      * @returns {string}
      */
     evaluate(data) {
+    debugger;
         const value = app.localStorage.getValue(this.path);
         return this.negated ? !value : value;
     }

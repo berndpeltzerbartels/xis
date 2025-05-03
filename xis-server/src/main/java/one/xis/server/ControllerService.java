@@ -65,12 +65,8 @@ class ControllerService {
         controllerResult.setCurrentWidgetId(request.getWidgetId());
         var invokerControllerWrapper = controllerWrapper(request);
         invokerControllerWrapper.invokeActionMethod(request, controllerResult);
-        if (controllerResult.getNextPageURL() == null && controllerResult.getNextWidgetId() == null) {
-            if (invokerControllerWrapper.isWidgetController()) {
-                controllerResult.setNextWidgetId(request.getWidgetId());
-            } else {
-                controllerResult.setNextPageURL(request.getPageId());
-            }
+        if (!resultContainsNextController(controllerResult)) {
+            usePreviousController(controllerResult, invokerControllerWrapper);
         }
         mapResultToResponse(response, controllerResult);
         var nextControllerWrapper = nextControllerWrapperAfterAction(controllerResult);
@@ -113,6 +109,19 @@ class ControllerService {
             return pageControllerWrapperById(request.getPageId());
         }
         return pageControllerWrapperById(request.getPageId());
+    }
+
+    private boolean resultContainsNextController(ControllerResult controllerResult) {
+        return StringUtils.isNotEmpty(controllerResult.getNextWidgetId()) || StringUtils.isNotEmpty(controllerResult.getNextPageURL());
+    }
+
+
+    private void usePreviousController(ControllerResult controllerResult, ControllerWrapper controllerWrapper) {
+        if (controllerWrapper.isWidgetController()) {
+            controllerResult.setNextWidgetId(controllerWrapper.getId());
+        } else {
+            controllerResult.setNextPageURL(controllerWrapper.getId());
+        }
     }
 
     private ControllerWrapper nextControllerWrapperAfterAction(@NonNull ControllerResult controllerResult) {

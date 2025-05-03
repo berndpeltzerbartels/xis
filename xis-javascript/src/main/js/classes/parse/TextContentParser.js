@@ -10,7 +10,7 @@ class TextContentParser {
         this.readText();
         const textContent = new TextContent(this.parts, this.handler);
         app.clientState.mapTextContent(textContent);
-        app.localStore.mapTextContent(textContent);
+        app.localStorage.mapTextContent(textContent);
         return textContent;
     }
 

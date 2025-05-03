@@ -2,7 +2,7 @@ class TestApplication {
 
     constructor() {
         this.clientState = new ClientState();
-        this.localStore = new LocalStore();
+        this.localStorage = new LocalStore();
         this.httpConnector = new HttpConnectorMock();
         this.domAccessor = new DomAccessor();
         this.client = new HttpClient(this.httpConnector);

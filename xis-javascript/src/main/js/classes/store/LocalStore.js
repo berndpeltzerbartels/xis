@@ -9,7 +9,7 @@ class LocalStore extends Store{
      * @returns {any}
      */
     readValue(path) {
-        return this.localStorage.getItem(path);
+        return localStorage.getItem(path);
     }
 
     /**

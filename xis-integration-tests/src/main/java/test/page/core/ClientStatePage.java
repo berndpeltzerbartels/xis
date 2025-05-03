@@ -17,12 +17,21 @@ class ClientStatePage {
     private final List<String> invokateddMethods = new ArrayList<>();
     private ClientStatePageData clientStatePageData;
 
+    @ClientState("data")
+    ClientStatePageData data() {
+        invokateddMethods.add("data");
+        this.clientStatePageData = new ClientStatePageData();
+        this.clientStatePageData.setId(100);
+        this.clientStatePageData.setValue("test");
+        return this.clientStatePageData;
+    }
+
     @Action("link-action")
     @ClientState("data")
-    ClientStatePageData linkAction() {
+    ClientStatePageData linkAction(@ClientState("data") ClientStatePageData data) {
         invokateddMethods.add("linkAction");
         this.clientStatePageData = new ClientStatePageData();
-        this.clientStatePageData.setId(200);
+        this.clientStatePageData.setId(data.getId() + 100);
         this.clientStatePageData.setValue("test2");
         return this.clientStatePageData;
     }

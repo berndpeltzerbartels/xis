@@ -249,7 +249,7 @@ class Client {
     localStorageData(attributes) {
         var data = {};
         for (var key of attributes.localStorageKeys) {
-            data[key] = localStorage.getItem(key);
+            data[key] = app.localStorage.getValue(key);
         }
         return data;
     }
@@ -321,9 +321,7 @@ class Client {
     }
 
     storeLocalStorageData(localStorageData) {
-        for (var key of Object.keys(localStorageData)) {
-            localStorage.setItem(key, localStorageData[key]);
-        }
+        app.localStorage.saveData(localStorageData);
     }
 
     storeClientStateData(clientStateData) {

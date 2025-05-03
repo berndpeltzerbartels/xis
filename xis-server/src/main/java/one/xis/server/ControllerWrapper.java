@@ -29,11 +29,13 @@ public class ControllerWrapper {
     private Map<String, ControllerMethod> actionMethods;
     private Collection<ControllerMethod> formDataMethods;
     private Collection<ControllerMethod> localStorageOnlyMethods;
+    private Collection<ControllerMethod> clientStateOnlyMethods;
     private ControllerResultMapper controllerResultMapper;
 
     void invokeGetModelMethods(ClientRequest request, ControllerResult controllerResult) {
         var methodsToExecute = new ArrayList<>(modelMethods);
         methodsToExecute.addAll(localStorageOnlyMethods);
+        methodsToExecute.addAll(clientStateOnlyMethods);
         var methods = RequestScopeSorter.sortMethods(methodsToExecute, requestScopeMethods);
         methods.forEach(m -> invokeModelDataMethod(request, controllerResult, m));
     }
