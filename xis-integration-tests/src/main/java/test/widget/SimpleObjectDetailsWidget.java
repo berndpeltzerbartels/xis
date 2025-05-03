@@ -5,7 +5,7 @@ import one.xis.ModelData;
 import one.xis.Parameter;
 import one.xis.Widget;
 
-@Widget("/simpleObject/{id}.html")
+@Widget
 @RequiredArgsConstructor
 class SimpleObjectDetailsWidget {
 

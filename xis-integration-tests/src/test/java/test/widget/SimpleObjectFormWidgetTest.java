@@ -68,7 +68,7 @@ class SimpleObjectFormWidgetTest {
             verify(service).save(any());
 
 
-            // The details page should display the saved values
+            // The details widget should display the saved values
             var p1 = document.getElementById("v1");
             var p2 = document.getElementById("v2");
             assertThat(p1.innerText).isEqualTo("v1");

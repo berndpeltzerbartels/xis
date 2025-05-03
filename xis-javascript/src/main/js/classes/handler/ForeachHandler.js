@@ -21,6 +21,10 @@ class ForeachHandler extends TagHandler {
     refresh(data) {
         var arrayPath = this.doSplit(this.arrayPathExpression.evaluate(data), '.');
         var arr = data.getValue(arrayPath);
+        if (!arr) {
+            debugger;
+            throw new Error('Array not found: [' + arrayPath+']');
+        }
         this.cache.sizeUp(arr.length);
         for (var i = 0; i < this.cache.length; i++) {
             var subData = new Data({}, data);

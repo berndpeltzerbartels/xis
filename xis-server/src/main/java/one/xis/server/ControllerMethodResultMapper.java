@@ -86,11 +86,11 @@ class ControllerMethodResultMapper {
         if (widgetResponse.getWidgetsToReload() != null) {
             result.getWidgetsToReload().addAll(widgetResponse.getWidgetsToReload());
         }
-        /*
+
         if (widgetResponse.getWidgetParameters() != null) {
             result.getWidgetParameters().putAll(widgetResponse.getWidgetParameters());
         }
-         */
+        
     }
 
     private void mapPageResponse(PageResponse pageResponse, ControllerMethodResult controllerMethodResult) {

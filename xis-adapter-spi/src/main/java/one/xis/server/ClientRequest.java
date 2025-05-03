@@ -18,6 +18,7 @@ public class ClientRequest {
     private String widgetContainerId;
     private Locale locale;
     private String zoneId;
+    private RequestType type;
 
     @JsonDeserialize(using = MapDeserializer.class)
     private Map<String, String> formData = new HashMap<>();

@@ -148,6 +148,7 @@ class Client {
         request.clientStateData = this.clientStateDataPage(normalizedPath);
         request.localStorageData = this.localStorageDataPage(normalizedPath);
         request.localDatabaseData = {};
+        request.type = 'page';
         return request;
     }
 
@@ -177,7 +178,7 @@ class Client {
         request.pathVariables = resolvedURL.pathVariablesAsMap();
         request.bindingParameters = formBindingParameters;
         request.zoneId = this.zoneId;
-        debugger;
+        request.type = request.widgetId ? 'widget' : 'page';
         if (widgetId) { // TODO write a test
             request.clientStateData = this.clientStateDataWidget(widgetId);
             request.localStorageData = this.localStorageDataWidget(widgetId);
@@ -214,6 +215,7 @@ class Client {
         request.clientStateData = this.clientStateDataWidget(widgetInstance.widget.id);
         request.localStorageData = this.localStorageDataWidget(widgetInstance.widget.id);
         request.localDatabaseData = {};
+        request.type = 'widget';
         return request;
     }
 
@@ -307,6 +309,7 @@ class Client {
         serverResponse.widgetContainerId = obj.widgetContainerId;
         data.setValue(['state'], serverResponse.clientStateData);
         data.setValue(['localStorage'], serverResponse.localStorageData);
+        data.setValue(['validation'], obj.validatorMessages);
         this.storeData(serverResponse);
         return serverResponse;
     }

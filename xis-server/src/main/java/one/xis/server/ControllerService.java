@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import one.xis.context.XISComponent;
 import one.xis.context.XISInject;
 import one.xis.utils.lang.StringUtils;
+import org.tinylog.Logger;
 
 @Slf4j
 @XISComponent
@@ -26,6 +27,7 @@ class ControllerService {
     private PathResolver pathResolver;
 
     void processModelDataRequest(@NonNull ClientRequest request, @NonNull ServerResponse response) {
+        Logger.info("Process model data request: {}", request);
         var controllerResult = new ControllerResult();
         controllerResult.setCurrentPageURL(request.getPageId());
         controllerResult.setCurrentWidgetId(request.getWidgetId());
@@ -41,6 +43,7 @@ class ControllerService {
     }
 
     void processFormDataRequest(@NonNull ClientRequest request, @NonNull ServerResponse response) {
+        Logger.info("Process form data request: {}", request);
         var controllerResult = new ControllerResult();
         controllerResult.setCurrentPageURL(request.getPageId());
         controllerResult.setCurrentWidgetId(request.getWidgetId());
@@ -56,6 +59,7 @@ class ControllerService {
     }
 
     void processActionRequest(@NonNull ClientRequest request, @NonNull ServerResponse response) {
+        Logger.info("Process action request: {}", request);
         var controllerResult = new ControllerResult();
         controllerResult.setCurrentPageURL(request.getPageId());
         controllerResult.setCurrentWidgetId(request.getWidgetId());
@@ -77,6 +81,7 @@ class ControllerService {
     }
 
     private void processNextController(ClientRequest request, ControllerResult controllerResult, ServerResponse response, ControllerWrapper nextControllerWrapper) {
+        Logger.info("Process next controller: {}, request: {}", nextControllerWrapper, request);
         var nextRequest = new ClientRequest();
         // userdata is the same
         nextRequest.setLocale(request.getLocale());
@@ -97,18 +102,20 @@ class ControllerService {
     }
 
     private ControllerWrapper controllerWrapper(ClientRequest request) {
-        if (StringUtils.isNotEmpty(request.getWidgetId())) {
+        if (request.getType() == RequestType.widget) {
             return widgetControllerWrapperById(request.getWidgetId());
+        } else if (request.getType() == RequestType.page) {
+            return pageControllerWrapperById(request.getPageId());
         }
         return pageControllerWrapperById(request.getPageId());
     }
 
     private ControllerWrapper nextControllerWrapperAfterAction(@NonNull ControllerResult controllerResult) {
-        if (StringUtils.isNotEmpty(controllerResult.getNextPageURL())) {
-            return pageControllerWrapperById(controllerResult.getNextPageURL());
-        }
         if (StringUtils.isNotEmpty(controllerResult.getNextWidgetId())) {
             return widgetControllerWrapperById(controllerResult.getNextWidgetId());
+        }
+        if (StringUtils.isNotEmpty(controllerResult.getNextPageURL())) {
+            return pageControllerWrapperById(controllerResult.getNextPageURL());
         }
         throw new IllegalStateException("no controller found for request: " + controllerResult);
     }

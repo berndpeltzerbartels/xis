@@ -45,7 +45,7 @@ class FormHandler extends TagHandler {
         if (!container) {
             return null;
         }
-        return container.handler.currendWidgetId();
+        return container.handler.currentWidgetId();
     }
 
     targetContainerHandler() {
@@ -78,11 +78,6 @@ class FormHandler extends TagHandler {
     subData(response, formBindingKey) {
         var values = response.formData.getValue([formBindingKey]) || {};
         return new Data(values);
-    }
-
-    widgetId() {
-        var container = this.findParentWidgetContainer();
-        return container ? container.handler.widgetInstance.id : null;
     }
 
     /**
