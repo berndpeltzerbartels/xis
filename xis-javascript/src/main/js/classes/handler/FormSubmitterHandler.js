@@ -4,6 +4,7 @@ class FormSubmitterHandler extends TagHandler {
         super(element);
         this.actionExpression = this.expressionFromAttribute('xis:action'); // mandatory
         var form = this.findParentFormElement();
+       app.tagHandlers.getHandler(form);
         this.formHandler = form.handler;
         if (!form) throw new Error('no parent form-tag or form-tag is not bound for ' + this.tag);
         var _this = this;
