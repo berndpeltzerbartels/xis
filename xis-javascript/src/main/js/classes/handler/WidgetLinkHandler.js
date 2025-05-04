@@ -65,7 +65,10 @@ class WidgetLinkHandler extends TagHandler {
     onClick(e) {
         return new Promise((resolve, _) => {
             var container = this.getTargetContainer();
-            var handler = container.handler;
+            var handler = app.tagHandlers.getHandler(container);
+            if (!handler) {
+                throw new Error('no handler for target container: ' + this.targetContainerId);
+            }
             var widgetParametersInUrl = urlParameters(this.targetWidgetUrl);
             for (var key of widgetParametersInUrl) {
                 this.widgetParameters[key] = widgetParametersInUrl[key];

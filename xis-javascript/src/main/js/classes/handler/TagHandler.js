@@ -77,20 +77,6 @@ class TagHandler {
         this.descendantHandlers = [];
     }
 
-    findParentHtmlElement() {
-        var element = this.tag;
-        while (element) {
-            debug.debug('findParentHtmlElement', element);
-            if (this.isFrameworkElement(element)) {
-                element = element.parentNode;
-            } else {
-                break;
-            }
-        }
-        console.log('return findParentHtmlElement:' + element.localName);
-        return element;
-    }
-
     appendAttribute(attrName, appendValue) {
         if (this.tag.getAttribute('xis:submit-onkeyup')) {
             var attr = '';
@@ -133,20 +119,30 @@ class TagHandler {
     findParentFormElement() {
         var e = this.tag.parentNode;
         while (e) {
-            if (this.isFrameworkFormElement(e)) {
+            if (e.localName == 'form') {
                 return e;
             }
             e = e.parentNode;
         }
     }
 
-    /**
-     * @private
-     * @param {Element} element 
-     * @returns 
-     */
-    isFrameworkFormElement(element) {
-        return isElement(element) && element.handler && element.handler.type == 'form-handler';
+    getParentFormHandler()  {
+        var handler = this.findParentFormHandler();
+        if (handler) {
+            return handler;
+        }
+        throw new Error('no parent form-handler for ' + this.tag);
+    }
+
+    findParentFormHandler() {
+        var handler = this;
+        while (handler) {
+            if (handler.type == 'form-handler') {
+                return handler;
+            }
+            handler = handler.parentHandler;
+        }
+    
     }
 
     isFrameworkElement(node) {

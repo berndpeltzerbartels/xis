@@ -14,7 +14,6 @@ class ActionLinkHandler extends TagHandler {
         this.action = undefined;
         this.data = new Data({});
         this.actionParameters = {};
-        this.parentForm = this.findParentFormElement();
         element.setAttribute("href", "#");
         element.addEventListener('click', event => {
             event.preventDefault();
@@ -44,8 +43,8 @@ class ActionLinkHandler extends TagHandler {
      * @param {Event} e 
      */
     onClick(e) {
-        if (this.parentForm) {
-            const formHandler = app.tagHandlers.getHandler(this.parentForm);
+        const formHandler = this.findParentFormHandler();
+        if (formHandler) {
             formHandler.submit(this.action);
         } else {
             var widgetcontainer = this.findParentWidgetContainer();
@@ -76,7 +75,10 @@ class ActionLinkHandler extends TagHandler {
 
 
     formAction(form) {
-        var handler = form.handler;
+        var handler = app.tagHandlers.getHandler(form);
+        if (!handler) {
+            throw new Error('no form handler for ' + form);
+        }
         handler.sumbit(this.action)
     }
 

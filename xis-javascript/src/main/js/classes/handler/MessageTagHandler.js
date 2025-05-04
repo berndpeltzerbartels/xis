@@ -3,7 +3,6 @@
  * @extends TagHandler
  * @property {String} binding
  * @property {Expression} bindingExpression
- * @property {FormElementHandler} formHandler
  */
 class MessageTagHandler extends TagHandler {
 
@@ -15,20 +14,8 @@ class MessageTagHandler extends TagHandler {
         super(tag);
         this.bindingExpression = this.expressionFromAttribute('message-for');
         this.binding = '';
-        this.formHandler = this.findParentFormHandler();
     }
 
-    /**
-     * Searches the parent form-tag and returns the handler.
-     * 
-     * @private
-     * @returns {FormElementHandler}
-     */
-    findParentFormHandler() {
-        var form = this.findParentFormElement();
-        if (!form) throw new Error('no parent form-tag or form-tag is not bound for ' + this.tag);
-        return form.handler;
-    }
 
     /**
      * @public

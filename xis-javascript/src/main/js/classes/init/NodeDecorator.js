@@ -63,12 +63,12 @@ class NodeDecorator {
                 handler = new ParameterTagHandler(element, parentHandler);
                 parentHandler.addDescendantHandler(handler);
                 break;
-            case 'form': if (element.getAttribute('xis:binding')) {
-                handler = this.decorateForm(element);
-            }
-                break;
             case 'input': if (element.getAttribute('xis:binding')) {
                 handler = this.decorateInputElement(element);
+            }
+                break;
+            case 'form': if (element.getAttribute('xis:binding')) {
+                handler = this.decorateForm(element);
             }
                 break;
             case 'submit': if (element.getAttribute('xis:action')) {
@@ -203,10 +203,10 @@ class NodeDecorator {
      * @returns {TagHandler}
      */
     decorateWidgetContainer(container) {
-        var handler = new WidgetContainerHandler(container, 
-            this.backendService, 
-            this.widgets, 
-            this.widgetContainers, 
+        var handler = new WidgetContainerHandler(container,
+            this.backendService,
+            this.widgets,
+            this.widgetContainers,
             this.tagHandlers);
         this.addHandler(container, handler);
         return handler;

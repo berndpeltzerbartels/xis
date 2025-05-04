@@ -8,18 +8,7 @@ class FormElementHandler extends TagHandler {
         super(element);
         this.bindingExpression = new TextContentParser(element.getAttribute('xis:binding'), this).parse();
         this.binding = undefined;
-        this.init();
     }
-
-    /**
-     * @private
-     */
-    init() {
-        var form = this.findParentFormElement();
-        if (!form) throw new Error('no parent form-tag or form-tag is not bound for ' + this.tag);
-        this.formHandler = app.tagHandlers.getHandler(form);
-    }
-
 
 
     refresh(data) {
@@ -31,7 +20,9 @@ class FormElementHandler extends TagHandler {
         if (this.binding) {
             var path = doSplit(this.binding, '.');
             this.tag.value = data.getValue(path);
-            this.formHandler.onElementHandlerRefreshed(this, this.binding);
+            const formHandler = this.getParentFormHandler();
+           
+            formHandler.onElementHandlerRefreshed(this, this.binding);
         }
         super.refreshFormData(data);
     }
