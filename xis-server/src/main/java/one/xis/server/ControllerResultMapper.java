@@ -39,5 +39,6 @@ class ControllerResultMapper {
         nextRequest.setPathVariables(controllerResult.getPathVariables().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString())));
         nextRequest.setWidgetContainerId(controllerResult.getWidgetContainerId());
         nextRequest.setBindingParameters(controllerResult.getBindingParameters().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString())));
+        nextRequest.setWidgetId(controllerResult.getNextWidgetId());
     }
 }

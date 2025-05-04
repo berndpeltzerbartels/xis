@@ -112,20 +112,6 @@ class TagHandler {
         }
     }
 
-    /**
-  * @protected
-  * @returns {Element}
-  */
-    findParentFormElement() {
-        var e = this.tag.parentNode;
-        while (e) {
-            if (e.localName == 'form') {
-                return e;
-            }
-            e = e.parentNode;
-        }
-    }
-
     getParentFormHandler()  {
         var handler = this.findParentFormHandler();
         if (handler) {
@@ -142,7 +128,17 @@ class TagHandler {
             }
             handler = handler.parentHandler;
         }
-    
+    }
+
+    findParentWidgetContainerHandler() {
+        var handler = this;
+        while (handler) {
+            if (handler.type == 'widget-container-handler') {
+                return handler;
+            }
+            handler = handler.parentHandler;
+        }
+        return null;
     }
 
     isFrameworkElement(node) {

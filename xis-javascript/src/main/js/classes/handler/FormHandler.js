@@ -41,12 +41,11 @@ class FormHandler extends TagHandler {
     }
 
     widgetId() {
-        var container = this.findParentWidgetContainer();
-        if (!container) {
+        const handler  = this.findParentWidgetContainerHandler();
+        if (!handler) {
             return null;
         }
-        const handler  = app.tagHandlers.getHandler(container);
-        return handler.currentWidgetId();
+        return handler.currentWidgetId();   
     }
 
     targetContainerHandler() {

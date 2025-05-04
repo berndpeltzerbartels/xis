@@ -133,7 +133,6 @@ class WidgetContainerHandler extends TagHandler {
             } else {
                 this.clearChildren();
                 this.widgetInstance.dispose();
-                this.descendantHandlers = [];
             }
         }
         this.widgetInstance = assertNotNull(this.widgets.getWidgetInstance(widgetId), 'no such widget: ' + widgetId);

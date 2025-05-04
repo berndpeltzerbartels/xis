@@ -47,22 +47,24 @@ class ActionLinkHandler extends TagHandler {
         if (formHandler) {
             formHandler.submit(this.action);
         } else {
-            var widgetcontainer = this.findParentWidgetContainer();
-            if (widgetcontainer) {
-                this.widgetAction(widgetcontainer);
+            const widgetcontainerHandler = this.findParentWidgetContainerHandler();
+            const targetContainerHandler = this.targetContainerId ? app.tagHandlers.getHandler(this.widgetContainers.findContainer(this.targetContainerId)) : null;
+            if (widgetcontainerHandler || targetContainerHandler) {
+                this.widgetAction(widgetcontainerHandler, targetContainerHandler);
             } else {
                 this.pageAction();
             }
         }
     }
 
-    widgetAction(invokerContainer) {
-        var targetContainer = this.targetContainerId ? this.widgetContainers.findContainer(this.targetContainerId) : invokerContainer;
-        var targetContainerHandler = app.tagHandlers.getHandler(targetContainer);
-        var invokerHandler = app.tagHandlers.getHandler(invokerContainer);
-        var _this = this;
-        this.client.widgetLinkAction(invokerHandler.widgetInstance, invokerHandler.widgetState, this.action, this.actionParameters)
-            .then(response => _this.handleActionResponse(response, targetContainerHandler));
+
+    widgetAction(widgetcontainerHandler, targetContainerHandler) {
+        if (!targetContainerHandler) {
+            targetContainerHandler = widgetcontainerHandler;
+        }
+        debugger;
+        this.client.widgetLinkAction(widgetcontainerHandler.widgetInstance, widgetcontainerHandler.widgetState, this.action, this.actionParameters)
+            .then(response => this.handleActionResponse(response, targetContainerHandler));
     }
 
     /**

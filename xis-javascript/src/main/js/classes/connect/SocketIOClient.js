@@ -102,6 +102,7 @@ class SocketIOClient extends Client {
      * @param {WidgetInstance} widgetInstance
      * @param {string} action
      * @param {string} actionParameters
+     * @param {string} targetContainerId
      * @returns {Promise<ServerReponse>}
      */
     widgetLinkAction(widgetInstance, widgetState, action, actionParameters) {

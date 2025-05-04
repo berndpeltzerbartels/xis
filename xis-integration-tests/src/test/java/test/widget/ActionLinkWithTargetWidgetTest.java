@@ -33,11 +33,13 @@ class ActionLinkWithTargetWidgetTest {
 
         // first widget
         var actionLink1 = container1.getDescendantById("action1");
+        assertThat(actionLink1.getAttribute("xis:target-container")).isEqualTo("container2");
         assertThat(actionLink1).isNotNull();
         actionLink1.click();
 
         // second widget is displayed in second container
         var actionLink2 = container2.getDescendantById("action2");
+
         assertThat(actionLink2).isNotNull();
         actionLink2.click();
 
