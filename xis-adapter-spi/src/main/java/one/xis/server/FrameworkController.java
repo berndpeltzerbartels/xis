@@ -38,4 +38,6 @@ public interface FrameworkController<RES, REQ> {
     String getMainJs();
 
     String getFunctionsJs();
+    
+    String getBundleJs();
 }

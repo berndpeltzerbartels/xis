@@ -199,9 +199,9 @@ function timeZone() {
 
 function cloneNode(node) {
     if (isElement(node)) {
-        return this.cloneElement(node);
+        return cloneElement(node);
     } else {
-        return this.cloneTextNode(node);
+        return cloneTextNode(node);
     }
 }
 
@@ -220,7 +220,7 @@ function cloneElement(element) {
     }
     for (let index = 0; index < element.childNodes.length; index++) {
         const child = element.childNodes.item(index);
-        clone.appendChild(this.cloneNode(child));
+        clone.appendChild(cloneNode(child));
     }
     return clone;
 }

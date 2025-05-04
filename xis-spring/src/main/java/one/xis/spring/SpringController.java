@@ -131,4 +131,10 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
     public String getFunctionsJs() {
         return frontendService.getFunctionsJs();
     }
+
+    @Override
+    @GetMapping("/bundle.min.js")
+    public String getBundleJs() {
+        return frontendService.getBundleJs();
+    }
 }

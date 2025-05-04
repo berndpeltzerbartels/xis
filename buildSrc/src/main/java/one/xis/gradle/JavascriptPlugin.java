@@ -55,6 +55,7 @@ public class JavascriptPlugin implements Plugin<Project> {
 
         // ✅ Finale Release-Datei mit globaler Sortierung
         var globallySorted = JSFileSorter.sort(allJsFiles);
+        globallySorted.add(toJSFile(getMainFile(project)));
         writeJsToFile(globallySorted, releaseJsFile, false);
     }
 
@@ -66,6 +67,7 @@ public class JavascriptPlugin implements Plugin<Project> {
         }
         return Arrays.stream(files)
                 .filter(File::isDirectory)
+                .filter(f -> !f.getName().equals("test"))
                 .collect(Collectors.toSet());
     }
 
@@ -134,6 +136,10 @@ public class JavascriptPlugin implements Plugin<Project> {
 
     private File getJsApiSrcRoot(Project project) {
         return new File(project.getProjectDir(), "src/main/js");
+    }
+
+    private File getMainFile(Project project) {
+        return new File(project.getProjectDir(), "src/main/resources/main.js");
     }
 
     private void printfln(String pattern, Object... args) {

@@ -103,6 +103,7 @@ class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
             case "/classes.js" -> createHtmlResponse(frontendService.getClassesJs());
             case "/main.js" -> createHtmlResponse(frontendService.getMainJs());
             case "/functions.js" -> createHtmlResponse(frontendService.getFunctionsJs());
+            case "/bundle.min.js" -> createHtmlResponse(frontendService.getBundleJs());
             default -> notFound(HttpMethod.GET, uri);
         };
     }

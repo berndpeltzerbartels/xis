@@ -2,6 +2,7 @@ package one.xis.server;
 
 
 import lombok.RequiredArgsConstructor;
+import one.xis.Page;
 import one.xis.UserContext;
 import one.xis.UserContextAccess;
 import one.xis.context.XISComponent;
@@ -31,6 +32,7 @@ public class FrontendServiceImpl implements FrontendService {
     private Resource classesJsResource;
     private Resource mainJsResource;
     private Resource functionsJsResource;
+    private Resource bundleJsResource;
 
     @XISInit
     void init() {
@@ -38,6 +40,7 @@ public class FrontendServiceImpl implements FrontendService {
         classesJsResource = resources.getByPath("classes.js");
         mainJsResource = resources.getByPath("main.js");
         functionsJsResource = resources.getByPath("functions.js");
+        bundleJsResource = resources.getByPath("bundle.min.js");
     }
 
     @Override
@@ -129,6 +132,12 @@ public class FrontendServiceImpl implements FrontendService {
         return functionsJsResource.getContent();
     }
 
+
+    @Override
+    public String getBundleJs() {
+        return bundleJsResource.getContent();
+    }
+
     @Override
     public String getPageJavascript(String javascriptPath) {
         return resourceService.getJavascript(javascriptPath);
@@ -155,5 +164,11 @@ public class FrontendServiceImpl implements FrontendService {
         requestHandler.accept(request, response);
         return response;
     }
+
+    boolean isRunningFromJar() {
+        String path = Page.class.getResource(Page.class.getSimpleName() + ".class").toString();
+        return path.startsWith("jar:");
+    }
+
 
 }

@@ -4,7 +4,6 @@ plugins {
     id 'java'
     id 'maven-publish'
     id 'signing'
-    //id 'base' // falls noch kein Plugin definiert
 }
 
 group = rootProject.ext.projectGroup
@@ -29,35 +28,33 @@ java {
 
 apply plugin: JavascriptPlugin
 
-
 def jsSrcDir = file("src/main/resources")
-def buildDir = file("$buildDir/esbuild")
-
-// Wähle das Haupt-JS je nach Modus
-def entryJs = file("${jsSrcDir}/app.js")
-def bundledJs = file("${buildDir}/bundle.min.js")
+def buildDirEs = file("$buildDir/esbuild")
 def indexTemplate = file("${jsSrcDir}/index.html")
-def indexMaven = file("${buildDir}/index.html")
+def indexMaven = file("${buildDirEs}/index.prod.html")
+def bundledJs = file("${buildDirEs}/bundle.min.js")
+def xisProdJs = file("${jsSrcDir}/xis-prod.js") // vom Plugin erzeugt
 
-// Task: Bündeln mit esbuild
+// JS-Minification: Erzeuge bundle.min.js aus xis-prod.js
 task bundleJs(type: Exec) {
-    inputs.files fileTree(dir: jsSrcDir, include: ["*.js"])
+    inputs.file xisProdJs
     outputs.file bundledJs
 
     doFirst {
-        buildDir.mkdirs()
+        buildDirEs.mkdirs()
     }
 
     commandLine "npx", "esbuild",
-            entryJs.absolutePath,
+            xisProdJs.absolutePath,
             "--bundle",
             "--minify",
             "--keep-names",
+            "--format=iife",
             "--target=es2017",
             "--outfile=${bundledJs.absolutePath}"
 }
 
-// Task: Generiere neue index.html für Maven Central
+// Erzeuge eine index.prod.html mit Verweis auf bundle.min.js
 task generateMavenIndex {
     dependsOn bundleJs
     inputs.file indexTemplate
@@ -65,62 +62,59 @@ task generateMavenIndex {
 
     doLast {
         def content = indexTemplate.text
-        content = content
                 .replaceAll(/<script.*?src=".*?\.js".*?><\/script>/, "")
-                .replace("</head>", '    <script src="/bundle.min.js" ignore="true"></script>\n</head>')
+                .replace("</head>", '    <script src="bundle.min.js" ignore="true"></script>\n</head>')
         indexMaven.text = content
     }
 }
 
-// Task: Nur für das Packaging
+// JAR-Konfiguration
 jar {
     dependsOn generateMavenIndex
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
-    from(buildDir) {
-        include "bundle.min.js"
+    // Originale index.html und alle *.js-Dateien (außer xis-prod.js) ins Root
+    from(jsSrcDir) {
         include "index.html"
-        into "static" // oder "public", je nach Erwartung
+        include "*.js"
+        exclude "xis-prod.js" // nur temporär zur Bundle-Erzeugung
+        into ""
     }
 
-    // Optional: Ressourcenverzeichnis weiterhin einbinden
-    from(jsSrcDir) {
-        include "*.js"
-        include "index.html"
-        into "raw" // optionaler Zielordner im JAR
+    // index.prod.html ins Root
+    from(buildDirEs) {
+        include "index.prod.html"
+        into ""
+    }
+
+    // bundle.min.js ins JAR (z. B. für Doku, externe Tools)
+    from(buildDirEs) {
+        include "bundle.min.js"
+        into ""
     }
 }
 
-// Local variables for versions
-var lombokVersion = rootProject.ext.libraryVersions.lombok
-var mockitoVersion = "5.2.0"
-var junitVersion = "5.7.0"
-var assertjVersion = "3.16.1"
-var graalVersion = "23.0.1"
-
+// Bibliotheks- und Tooling-Setup
+def lombokVersion = rootProject.ext.libraryVersions.lombok
+def mockitoVersion = "5.2.0"
+def junitVersion = "5.7.0"
+def assertjVersion = "3.16.1"
+def graalVersion = "23.0.1"
 
 dependencies {
-
-    // Lombok dependencies
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
     implementation "org.projectlombok:lombok:$lombokVersion"
 
-    // Local project dependencies
     implementation project(':xis-resources')
     testImplementation project(':xis-test')
     testImplementation project(':xis-util')
 
-    // JUnit dependencies
     testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
-
-    // Mockito dependencies
     implementation "org.mockito:mockito-core:$mockitoVersion"
-
-    // AssertJ dependencies
     testImplementation "org.assertj:assertj-core:$assertjVersion"
     testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"
 
-    // GraalVM dependencies
     implementation "org.graalvm.js:js-scriptengine:$graalVersion"
     implementation "org.graalvm.truffle:truffle-api:$graalVersion"
     implementation "org.graalvm.js:js:$graalVersion"
@@ -168,6 +162,7 @@ publishing {
             }
         }
     }
+
     repositories {
         maven {
             name = "OSSRH"
@@ -184,7 +179,6 @@ signing {
     sign publishing.publications.mavenJava
     useGpgCmd()
 }
-
 
 tasks.withType(Javadoc) {
     options.addBooleanOption('Xdoclint:none', true)

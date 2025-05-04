@@ -1,6 +1,7 @@
 package one.xis.server;
 
 import lombok.Getter;
+import one.xis.context.MainClassUtil;
 import one.xis.context.XISComponent;
 import one.xis.context.XISInit;
 import one.xis.resource.Resources;
@@ -16,6 +17,8 @@ class RootPageService {
     @Getter
     private String rootPageHtml;
 
+    private String prodRootPageHtml;
+
     RootPageService(Resources resources, ResourcePathProvider resourcePathProvider) {
         this.resources = resources;
         this.resourcePathProvider = resourcePathProvider;
@@ -23,7 +26,8 @@ class RootPageService {
 
     @XISInit
     void init() {
-        var rootPageHtml = resources.getByPath("index.html").getContent();
+        var resourcePath = MainClassUtil.isRunningFromJar() ? "index.prod.html" : "index.html";
+        var rootPageHtml = resources.getByPath(resourcePath).getContent();
         var rootPageDocument = XmlUtil.loadDocument(rootPageHtml);
         var customGlobalResourcePath = resourcePathProvider.getCustomStaticResourcePath() + "/global";
         addCssLinks(customGlobalResourcePath, rootPageDocument);
