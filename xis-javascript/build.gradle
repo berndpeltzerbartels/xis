@@ -4,6 +4,7 @@ plugins {
     id 'java'
     id 'maven-publish'
     id 'signing'
+    //id 'base' // falls noch kein Plugin definiert
 }
 
 group = rootProject.ext.projectGroup
@@ -27,6 +28,67 @@ java {
 }
 
 apply plugin: JavascriptPlugin
+
+
+def jsSrcDir = file("src/main/resources")
+def buildDir = file("$buildDir/esbuild")
+
+// Wähle das Haupt-JS je nach Modus
+def entryJs = file("${jsSrcDir}/app.js")
+def bundledJs = file("${buildDir}/bundle.min.js")
+def indexTemplate = file("${jsSrcDir}/index.html")
+def indexMaven = file("${buildDir}/index.html")
+
+// Task: Bündeln mit esbuild
+task bundleJs(type: Exec) {
+    inputs.files fileTree(dir: jsSrcDir, include: ["*.js"])
+    outputs.file bundledJs
+
+    doFirst {
+        buildDir.mkdirs()
+    }
+
+    commandLine "npx", "esbuild",
+            entryJs.absolutePath,
+            "--bundle",
+            "--minify",
+            "--keep-names",
+            "--target=es2017",
+            "--outfile=${bundledJs.absolutePath}"
+}
+
+// Task: Generiere neue index.html für Maven Central
+task generateMavenIndex {
+    dependsOn bundleJs
+    inputs.file indexTemplate
+    outputs.file indexMaven
+
+    doLast {
+        def content = indexTemplate.text
+        content = content
+                .replaceAll(/<script.*?src=".*?\.js".*?><\/script>/, "")
+                .replace("</head>", '    <script src="/bundle.min.js" ignore="true"></script>\n</head>')
+        indexMaven.text = content
+    }
+}
+
+// Task: Nur für das Packaging
+jar {
+    dependsOn generateMavenIndex
+
+    from(buildDir) {
+        include "bundle.min.js"
+        include "index.html"
+        into "static" // oder "public", je nach Erwartung
+    }
+
+    // Optional: Ressourcenverzeichnis weiterhin einbinden
+    from(jsSrcDir) {
+        include "*.js"
+        include "index.html"
+        into "raw" // optionaler Zielordner im JAR
+    }
+}
 
 // Local variables for versions
 var lombokVersion = rootProject.ext.libraryVersions.lombok

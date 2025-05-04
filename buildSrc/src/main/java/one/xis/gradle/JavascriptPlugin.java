@@ -7,7 +7,6 @@ import org.gradle.api.Project;
 
 import javax.script.Compilable;
 import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
 import java.io.*;
 import java.util.Arrays;
 import java.util.Collection;
@@ -21,6 +20,8 @@ import java.util.stream.Collectors;
  */
 public class JavascriptPlugin implements Plugin<Project> {
 
+    private static final String RELEASE_JS_OUTFILE = "xis-prod.js";
+
     @Override
     public void apply(Project project) {
         printfln("apply plugin for project %s", project.getDisplayName());
@@ -28,24 +29,34 @@ public class JavascriptPlugin implements Plugin<Project> {
     }
 
     private void process(Project project) {
-        processSourceDirs(sourceDirs(project), project);
-    }
+        var releaseJsFile = getReleaseOutFile(project);
+        if (releaseJsFile.exists() && !releaseJsFile.delete()) {
+            throw new RuntimeException("can not delete " + releaseJsFile);
+        }
 
-    private void processSourceDirs(Collection<File> sourceDirs, Project project) {
-        sourceDirs.forEach(dir -> processSourceDir(dir, project));
-    }
-
-    private void processSourceDir(File sourceDir, Project project) {
-        var jsFiles = FileUtils.files(sourceDir, "js").stream()
+        var allJsFiles = sourceDirs(project).stream()
+                .flatMap(dir -> FileUtils.files(dir, "js").stream())
                 .map(this::toJSFile)
                 .collect(Collectors.toSet());
-        if (!jsFiles.isEmpty()) {
-            var sortedJsFiles = JSFileSorter.sort(jsFiles);
-            var outFile = outFileForSourceDir(sourceDir, project);
-            writeToOutFile(sortedJsFiles, outFile);
-        }
-    }
 
+        // 🔁 Einzelne .js-Dateien wie bisher (für Debugging oder Tests)
+        var groupedByTopFolder = allJsFiles.stream()
+                .collect(Collectors.groupingBy(file -> {
+                    var fullPath = file.getFile().toPath();
+                    var rootPath = getJsApiSrcRoot(project).toPath();
+                    return rootPath.relativize(fullPath).getName(0).toString(); // top-level dir
+                }));
+
+        groupedByTopFolder.forEach((dirName, files) -> {
+            var outFile = new File(getOutDir(project), dirName + ".js");
+            var sorted = JSFileSorter.sort(files);
+            writeToOutFile(sorted, outFile, false);
+        });
+
+        // ✅ Finale Release-Datei mit globaler Sortierung
+        var globallySorted = JSFileSorter.sort(allJsFiles);
+        writeJsToFile(globallySorted, releaseJsFile, false);
+    }
 
     private Collection<File> sourceDirs(Project project) {
         var root = getJsApiSrcRoot(project);
@@ -59,43 +70,14 @@ public class JavascriptPlugin implements Plugin<Project> {
     }
 
 
-    private File outFileForSourceDir(File dir, Project project) {
-        return new File(getOutDir(project), dir.getName() + ".js");
-    }
-
-    /*
-    private void writeApiFile(Set<JSFile> jsFiles, Project project) {
-        var files = new HashSet<>(jsFiles);
-        //files.add(toJSFile(getHttpClientFile(project)));
-        var outFile = getOutFile(project);
-        outFile.delete();
-        writeToOutFile(files, outFile);
-    }
-
-
-    private void writeApiTestFile(Set<JSFile> jsFiles, Project project) {
-        var files = new HashSet<>(jsFiles);
-        files.add(toJSFile(getHttpClientMockFile(project)));
-        var outFile = getTestOutFile(project);
-        outFile.delete();
-        writeToOutFile(files, outFile);
-    }
-
-     */
-
-    private void writeToOutFile(List<JSFile> jsFiles, File outFile) {
+    private void writeToOutFile(List<JSFile> jsFiles, File outFile, boolean append) {
         printfln("js-outfile: '%s'", outFile);
-        writeJsToFile(jsFiles, outFile);
+        writeJsToFile(jsFiles, outFile, append);
         compileAndEval(outFile);
-
     }
 
-    private File getOutFile(Project project) {
-        return new File(getOutDir(project), "xis.js");
-    }
-
-    private File getTestOutFile(Project project) {
-        return new File(getOutDir(project), "xis-test.js");
+    private File getReleaseOutFile(Project project) {
+        return new File(getOutDir(project), RELEASE_JS_OUTFILE);
     }
 
     private File getOutDir(Project project) {
@@ -121,8 +103,8 @@ public class JavascriptPlugin implements Plugin<Project> {
         return new JSFile(file, content, analyzer.getDeclaredClasses(), analyzer.getSuperClasses());
     }
 
-    private void writeJsToFile(Collection<JSFile> jsSrcFiles, File jsOutFile) {
-        try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(jsOutFile)))) {
+    private void writeJsToFile(Collection<JSFile> jsSrcFiles, File jsOutFile, boolean append) {
+        try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(jsOutFile, append)))) {
             jsSrcFiles.forEach(file -> {
                 printfln("add script content: %s", file.getFile().getName());
                 writer.println(file.getContent());
@@ -143,7 +125,7 @@ public class JavascriptPlugin implements Plugin<Project> {
                 .allowNativeAccess(true)
                 .allowAllAccess(true)
                 .build();
-        context.eval("js",content);
+        context.eval("js", content);
     }
 
     private Compilable getCompiler() {
@@ -153,16 +135,6 @@ public class JavascriptPlugin implements Plugin<Project> {
     private File getJsApiSrcRoot(Project project) {
         return new File(project.getProjectDir(), "src/main/js");
     }
-
-    /*
-    private File getHttpClientFile(Project project) {
-        return new File(project.getProjectDir(), "src/main/resources/HttpClient.js");
-    }
-
-    private File getHttpClientMockFile(Project project) {
-        return new File(project.getProjectDir(), "src/main/resources/HttpClientMock.js");
-    }
-    */
 
     private void printfln(String pattern, Object... args) {
         System.out.printf(pattern, args);
