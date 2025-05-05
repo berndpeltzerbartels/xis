@@ -1,7 +1,7 @@
 /**
  * Decorates the dom tag with handlers. 
  */
-
+// TODO rename to factory
 class NodeDecorator {
 
     /**
@@ -30,7 +30,6 @@ class NodeDecorator {
         if (!parentHandler) {
             parentHandler = new RootTagHandler(node);
             this.tagHandlers.mapRootHandler(node, parentHandler);
-            node._rootHandler = parentHandler;
         }
         if (isElement(node)) {
             if (!node.getAttribute('ignore')) {
@@ -130,7 +129,7 @@ class NodeDecorator {
     * @param {Element} formElement 
     */
     decorateForm(formElement) {
-        return  new FormHandler(formElement, this.client);
+        return new FormHandler(formElement, this.client);
     }
 
     /**
@@ -184,11 +183,11 @@ class NodeDecorator {
      * @returns {TagHandler}
      */
     decorateForeach(foreach) {
-        return  new ForeachHandler(foreach, this.tagHandlers); // never CompositeTagHandler, here
+        return new ForeachHandler(foreach, this.tagHandlers); // never CompositeTagHandler, here
     }
 
     decorateSubmitElement(element) {
-        return  new FormSubmitterHandler(element);
+        return new FormSubmitterHandler(element);
     }
 
     /**
