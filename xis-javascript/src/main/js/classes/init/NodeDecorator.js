@@ -101,9 +101,7 @@ class NodeDecorator {
     }
 
     decorateInputElement(element) {
-        var handler = new InputTagHandler(element);
-        this.addHandler(element, handler);
-        return handler;
+        return new InputTagHandler(element);
     }
 
     /**
@@ -201,7 +199,6 @@ class NodeDecorator {
             this.widgets,
             this.widgetContainers,
             this.tagHandlers);
-        this.addHandler(container, handler);
         return handler;
     }
 
