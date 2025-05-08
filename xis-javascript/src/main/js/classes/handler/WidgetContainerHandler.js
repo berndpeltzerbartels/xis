@@ -55,6 +55,7 @@ class WidgetContainerHandler extends TagHandler {
         var data = response.data;
         this.refreshContainerId(data);
         this.refreshDescendantHandlers(data);
+        this.refreshWidget(data);
     }
 
     /**
@@ -131,14 +132,13 @@ class WidgetContainerHandler extends TagHandler {
             if (this.widgetInstance.widget.id == widgetId) {
                 return;
             } else {
-                this.clearChildren();
                 this.widgetInstance.dispose();
             }
         }
         this.widgetInstance = assertNotNull(this.widgets.getWidgetInstance(widgetId), 'no such widget: ' + widgetId);
         this.tag.appendChild(this.widgetInstance.root);
-        const widgetRootHandler = this.tagHandlers.getRootHandler(this.widgetInstance.root);
-        this.addDescendantHandler(widgetRootHandler);
+        const widgetRootHandler = assertNotNull(this.widgetInstance.rootHandler, 'no widget root handler: ' + widgetId);
+        this.addDescendantHandler(widgetRootHandler); // TODO remove this
     }
 
     /**
@@ -154,13 +154,20 @@ class WidgetContainerHandler extends TagHandler {
 
     doLoad(parentData, scope) {
         if (this.widgetInstance) {
-            var _this = this;
             this.backendService.loadWidgetData(this.widgetInstance, this.widgetState)
                 .then(data => { data.parentData = parentData; data.scope = scope; return data; })
                 .then(data => { console.log("data"+(typeof data)); data.parentData = parentData; data.scope = scope; return data; })
-                .then(data => { _this.widgetState.data = data; return data; })
-                .then(data => _this.refreshDescendantHandlers(data))
+                .then(data => { this.widgetState.data = data; return data; })
+                .then(data => this.refreshDescendantHandlers(data))
+                .then(data => this.refreshWidget(data))
                 .catch(e => console.error(e));
+        }
+    }
+
+    refreshWidget(data) {
+        if (this.widgetInstance) {
+            // TODO avtivate this when widget is not a descendent handler anymore
+         //   this.widgetInstance.rootHandler.refresh(data);
         }
     }
 

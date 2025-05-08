@@ -46,6 +46,7 @@ class WidgetContainerHandlerTest {
     public static class WidgetInstance {
         public Element root;
         public Object widgetState;
+        public Object rootHandler;
     }
 
     public static class RootHandler {
@@ -62,7 +63,7 @@ class WidgetContainerHandlerTest {
             var widget = new WidgetInstance();
             widget.root = new Element("div");
             widget.root.setAttribute("id", "widgetRoot");
-            widget.root._rootHandler = new RootHandler();
+            widget.rootHandler = new RootHandler();
             return widget;
         }
     }

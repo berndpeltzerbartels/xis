@@ -122,7 +122,7 @@ function createElement(name) {
 
 
 function initializeElement(element) {
-    app.initializer.initialize(element);
+   return app.initializer.initialize(element);
 }
 
 function assertNotNull(o, errorText) {

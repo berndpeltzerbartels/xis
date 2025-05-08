@@ -18,7 +18,7 @@ class TagHandler {
         handler.parentHandler = this;
         this.descendantHandlers.push(handler);
         handler.publishBindEvent();
-
+        return handler;
     }
 
     refresh(data) {
@@ -51,6 +51,7 @@ class TagHandler {
         for (var handler of this.descendantHandlers) {
             handler.refresh(data);
         }
+        return data;
     }
 
     refreshFormData(data) {

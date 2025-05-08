@@ -8,7 +8,7 @@ class WidgetInstance {
         this.widget = widget;
         this.widgets = widgets;
         this.root = htmlToElement(widget.html);
-        initializeElement(this.root);
+        this.rootHandler = assertNotNull(initializeElement(this.root));
     }
 
     dispose() {

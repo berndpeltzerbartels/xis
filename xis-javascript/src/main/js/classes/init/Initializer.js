@@ -29,6 +29,6 @@ class Initializer {
         if (isElement(node)) {
             new DomNormalizer(node, this.domAccessor).normalize();
         }
-        this.tagHandlerDecorator.decorate(node, parentHandler);
+        return this.tagHandlerDecorator.decorate(node, parentHandler);
     }
 }

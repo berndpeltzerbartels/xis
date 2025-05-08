@@ -36,8 +36,9 @@ class NodeDecorator {
                 this.decorateElement(node, parentHandler);
             }
         } else {
-            this.decorateTextNode(node, parentHandler);
+           this.decorateTextNode(node, parentHandler);
         }
+        return parentHandler;
     }
 
     /**
@@ -49,7 +50,7 @@ class NodeDecorator {
         var handler;
         switch (element.localName) {
             case 'xis:foreach':
-                parentHandler.addDescendantHandler(this.decorateForeach(element));
+                handler = parentHandler.addDescendantHandler(this.decorateForeach(element));
                 this.tagHandlers.mapHandler(element, handler);
                 return; // Do not evaluate child nodes, here !
             case 'xis:widget-container':
@@ -98,6 +99,7 @@ class NodeDecorator {
         } else {
             this.decorateChildNodes(element, parentHandler);
         }
+        return handler;
     }
 
     decorateInputElement(element) {
@@ -139,6 +141,7 @@ class NodeDecorator {
         if (node.nodeValue && node.nodeValue.indexOf('${') != -1) {
             var handler = new TextNodeHandler(node);
             parentHandler.addDescendantHandler(handler);
+            return handler;
         }
     }
 
@@ -171,7 +174,7 @@ class NodeDecorator {
         } else if (element.getAttribute('xis:action')) {
             handler = new ActionLinkHandler(element, this.client, this.widgetContainers);
         }
-        this.addHandler(element, handler);
+        element.handler = handler; // TODO remove ! important !
         return handler;
     }
 
@@ -201,21 +204,4 @@ class NodeDecorator {
             this.tagHandlers);
         return handler;
     }
-
-    /**
-     * @private
-     * @param {Element} element 
-     * @param {TagHandler} handler 
-     */
-    addHandler(element, handler) {
-        if (!element.handler) {
-            element.handler = handler;
-        } else {
-            var anotherHandler = element.handler;
-            element.handler = new CompositeTagHandler();
-            element.handler.addHandler(anotherHandler);
-            element.handler.addHandler(handler);
-        }
-    }
-
 }
