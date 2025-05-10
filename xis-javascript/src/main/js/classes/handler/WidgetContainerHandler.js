@@ -57,7 +57,6 @@ class WidgetContainerHandler extends TagHandler {
         var data = response.data;
         this.refreshContainerId(data);
         this.refreshDescendantHandlers(data);
-        this.refreshWidget(data);
     }
 
     /**
@@ -134,13 +133,16 @@ class WidgetContainerHandler extends TagHandler {
             if (this.widgetInstance.widget.id == widgetId) {
                 return;
             } else {
+                this.tag.removeChild(this.widgetInstance.root);
+                this.removeDescendantHandler(this.widgetInstance.rootHandler);
                 this.widgetInstance.dispose();
             }
         }
         this.widgetInstance = assertNotNull(this.widgets.getWidgetInstance(widgetId), 'no such widget: ' + widgetId);
-        this.tag.appendChild(this.widgetInstance.root);
-        const widgetRootHandler = assertNotNull(this.widgetInstance.rootHandler, 'no widget root handler: ' + widgetId);
-        this.addDescendantHandler(widgetRootHandler); // TODO remove this
+        var widgetRoot = assertNotNull(this.widgetInstance.root, 'no widget root: ' + widgetId);
+        this.tag.appendChild(widgetRoot);
+        var widgetHandler = assertNotNull(this.widgetInstance.rootHandler, 'no widget handler: ' + widgetId);   
+        this.addDescendantHandler(widgetHandler);
     }
 
     /**
@@ -161,17 +163,10 @@ class WidgetContainerHandler extends TagHandler {
                 .then(data => { console.log("data"+(typeof data)); data.parentData = parentData; data.scope = scope; return data; })
                 .then(data => { this.widgetState.data = data; return data; })
                 .then(data => this.refreshDescendantHandlers(data))
-                .then(data => this.refreshWidget(data))
                 .catch(e => console.error(e));
         }
     }
 
-    refreshWidget(data) {
-        if (this.widgetInstance) {
-            // TODO avtivate this when widget is not a descendent handler anymore
-         //   this.widgetInstance.rootHandler.refresh(data);
-        }
-    }
 
     triggerAdditionalReloads(response) {
        app.backendService.triggerPageReloadOnDemand(response);

@@ -21,6 +21,17 @@ class TagHandler {
         return handler;
     }
 
+    removeDescendantHandler(handler) {
+        const handlers =[];
+        for (var h of this.descendantHandlers) {
+            if (h != handler) {
+                handlers.push(h);
+            }
+        }
+        this.descendantHandlers = handlers;
+        handler.parentHandler = null;   
+    }
+
     refresh(data) {
         throw new Error('abstract method');
     }

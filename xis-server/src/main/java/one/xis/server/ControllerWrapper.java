@@ -47,6 +47,9 @@ public class ControllerWrapper {
 
     void invokeActionMethod(ClientRequest request, ControllerResult controllerResult) {
         var method = actionMethods.get(request.getAction());
+        if (method == null) {
+            throw new RuntimeException("No action-method found for action " + request.getAction() + " in controller " + controller.getClass().getName());
+        }
         var methods = RequestScopeSorter.sortMethods(Set.of(method), requestScopeMethods);
         methods.forEach(m -> {
             if (m.equals(method)) {
