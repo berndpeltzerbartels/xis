@@ -30,7 +30,7 @@ class ActionLinkPageTest {
         var result = testContext.openPage("/actionPage.html");
         result.getDocument().getElementById("action-link1").click();
         assertThat(result.getDocument().getElementByTagName("title").innerText).isEqualTo("ActionPage");
-        verify(service, times(1)).getData();
+        verify(service, times(2)).getData();
 
         var captor = ArgumentCaptor.forClass(ActionLinkPageData.class);
         verify(service).update(captor.capture());
@@ -48,7 +48,7 @@ class ActionLinkPageTest {
         result.getDocument().getElementById("action-link2").click();
 
         assertThat(result.getDocument().getElementByTagName("title").innerText).isEqualTo("ActionPage");
-        verify(service, times(1)).getData();
+        verify(service, times(2)).getData();
         var captor = ArgumentCaptor.forClass(ActionLinkPageData.class);
         verify(service, times(1)).update(captor.capture());
         assertThat(captor.getValue().getId()).isEqualTo(101);

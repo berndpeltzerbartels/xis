@@ -6,6 +6,7 @@ import one.xis.Action;
 import one.xis.ClientState;
 import one.xis.FormData;
 import one.xis.Page;
+import one.xis.context.XISInit;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,12 +18,17 @@ class ClientStatePage {
     private final List<String> invokateddMethods = new ArrayList<>();
     private ClientStatePageData clientStatePageData;
 
-    @ClientState("data")
-    ClientStatePageData data() {
-        invokateddMethods.add("data");
+    @XISInit
+    void init() {
         this.clientStatePageData = new ClientStatePageData();
         this.clientStatePageData.setId(100);
         this.clientStatePageData.setValue("test");
+    }
+
+
+    @ClientState("data")
+    ClientStatePageData data() {
+        invokateddMethods.add("data");
         return this.clientStatePageData;
     }
 

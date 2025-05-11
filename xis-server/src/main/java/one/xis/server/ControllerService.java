@@ -71,6 +71,7 @@ class ControllerService {
         mapResultToResponse(response, controllerResult);
         var nextControllerWrapper = nextControllerWrapperAfterAction(controllerResult);
         if (nextControllerWrapper.equals(invokerControllerWrapper)) {
+            invokerControllerWrapper.invokeGetModelMethods(request, controllerResult);
             mapResultToResponse(response, controllerResult);
         } else {
             processNextController(request, controllerResult, response, nextControllerWrapper);

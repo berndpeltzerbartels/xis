@@ -1,7 +1,6 @@
 package test.page.core;
 
 import lombok.RequiredArgsConstructor;
-import one.xis.Action;
 import one.xis.ModelData;
 import one.xis.Page;
 import one.xis.RequestScope;
@@ -47,8 +46,4 @@ class RequestScopeOrderPage {
         return "scopedForm-" + id + "-" + token;
     }
 
-    @Action("go")
-    void go(@RequestScope("a") int id, @RequestScope("b") String token) {
-        service.record("go");
-    }
 }

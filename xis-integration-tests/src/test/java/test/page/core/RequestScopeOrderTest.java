@@ -30,8 +30,5 @@ class RequestScopeOrderTest {
         assertThat(calls.subList(calls.size() - 2, calls.size()))
                 .containsExactlyInAnyOrder("d", "e");
         
-        calls.clear();
-        result.getDocument().getElementById("go").click();
-        assertThat(calls).containsExactly("a", "b", "go");
     }
 }

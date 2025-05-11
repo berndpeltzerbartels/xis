@@ -86,6 +86,11 @@ class DomNormalizer {
         if (element.getAttribute('xis:global-messages')) {
             this.replaceGlobalMessagesAttributeByChildGlobalMessagesElement(element);
         }
+
+        if (element.getAttribute('xis:if')) {
+            this.surroundWithIfTag(element);
+        }
+
     }
 
     /**
@@ -218,6 +223,22 @@ class DomNormalizer {
             anchor.appendChild(child);
         }
         return anchor;
+    }
+
+    /**
+     * Creates a xis-if-tag and appends as a child of the
+     * given element.
+     * 
+     * @private
+     * @param {Element} element 
+     * @returns 
+     */
+    surroundWithIfTag(element) {
+        var ifTag = createElement('xis:if');
+        ifTag.setAttribute('condition', element.getAttribute('xis:if'));
+        this.domAccessor.insertParent(element, ifTag);
+        element.removeAttribute('xis:if'); // Otherwise endless recursion
+        return element;
     }
 
 

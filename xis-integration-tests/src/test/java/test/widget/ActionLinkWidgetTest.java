@@ -36,7 +36,7 @@ class ActionLinkWidgetTest {
 
         result.getDocument().getElementById("action-link1").click();
 
-        verify(service, times(1)).getData();
+        verify(service, times(2)).getData();
         verify(service, times(1)).action("value1");
     }
 
@@ -46,7 +46,7 @@ class ActionLinkWidgetTest {
         var result = testContext.openPage(WidgetPage.class);
         result.getDocument().getElementById("action-link2").click();
 
-        verify(service, times(1)).getData();
+        verify(service, times(2)).getData();
         verify(service, times(1)).action(new Object[]{101, "bla"});
     }
 

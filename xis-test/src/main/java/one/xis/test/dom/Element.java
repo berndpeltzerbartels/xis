@@ -101,6 +101,11 @@ public class Element extends Node {
         }
     }
 
+
+    public void setAttribute(String name, Object value) {
+        setAttribute(name, value == null ? null : value.toString());
+    }
+
     public Collection<String> getCssClasses() {
         return classList.getValues();
     }
@@ -233,6 +238,18 @@ public class Element extends Node {
     public void click() {
         focus(this);
         fireEvent("click");
+    }
+
+    public String getInnerText() {
+        var sb = new StringBuilder();
+        for (var child : childNodes.list()) {
+            if (child instanceof TextNode) {
+                sb.append(((TextNode) child).getNodeValue());
+            } else if (child instanceof Element) {
+                sb.append(((Element) child).getInnerText());
+            }
+        }
+        return sb.toString();
     }
 
     protected void focus(Element element) {

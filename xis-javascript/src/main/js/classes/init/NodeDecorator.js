@@ -89,6 +89,9 @@ class NodeDecorator {
             case 'xis:global-messages':
                 handler = new GlobalMessagesTagHandler(element);
                 break;
+            case 'xis:if':
+                handler = new IfHandler(element);
+                break; 
         }
 
         this.initializeAttributes(element, handler ? handler : parentHandler);
@@ -174,7 +177,6 @@ class NodeDecorator {
         } else if (element.getAttribute('xis:action')) {
             handler = new ActionLinkHandler(element, this.client, this.widgetContainers);
         }
-        element.handler = handler; // TODO remove ! important !
         return handler;
     }
 
