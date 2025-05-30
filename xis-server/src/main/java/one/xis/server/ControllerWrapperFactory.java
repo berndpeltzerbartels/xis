@@ -91,7 +91,11 @@ class ControllerWrapperFactory {
 
     private String getActionKey(ControllerMethod controllerMethod) {
         if (controllerMethod.getMethod().isAnnotationPresent(Action.class)) {
-            return controllerMethod.getMethod().getAnnotation(Action.class).value();
+            var actionKey = controllerMethod.getMethod().getAnnotation(Action.class).value();
+            if (actionKey.isEmpty()) {
+                return controllerMethod.getMethod().getName();
+            }
+            return actionKey;
         }
         throw new IllegalStateException("Method is not annotated with Action: " + controllerMethod.getMethod());
     }

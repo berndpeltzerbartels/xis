@@ -2,7 +2,6 @@ package one.xis.deserialize;
 
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
-import one.xis.Format;
 import one.xis.UserContext;
 import one.xis.context.XISComponent;
 import one.xis.validation.AllElementsMandatory;
@@ -36,7 +35,7 @@ class ArrayDeserializer implements JsonDeserializer<Object> {
         var deserializationFailed = false;
         while (reader.hasNext()) {
             Optional<Object> result = Optional.empty();
-            if (target.isAnnotationPresent(Format.class)) {
+            if (this.requiresFormatter(target)) {
                 result = mainDeserializer.getDeserializer(FormattedDeserializer.class).deserialize(reader, path(path, index), target, userContext, mainDeserializer, postProcessingResults);
             } else {
                 result = mainDeserializer.deserialize(reader, path(path, index), componentType, userContext, postProcessingResults).map(Object.class::cast);

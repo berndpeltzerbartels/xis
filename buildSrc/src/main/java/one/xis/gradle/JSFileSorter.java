@@ -9,12 +9,11 @@ import java.util.stream.Collectors;
 
 class JSFileSorter {
     static List<JSFile> sort(Collection<JSFile> files) {
-        var rv = new ArrayList<JSFile>();
 
         // 1. Sonderfall: Functions-Dateien zuerst
         var functionFiles = files.stream()
                 .filter(file -> file.getFile().getAbsolutePath().contains("functions/"))
-                .collect(Collectors.toList());
+                .toList();
 
         // Safety: functions.js darf keine Klassen enthalten
         for (var f : functionFiles) {
@@ -23,7 +22,7 @@ class JSFileSorter {
             }
         }
 
-        rv.addAll(functionFiles);
+        var rv = new ArrayList<>(functionFiles);
 
         // 2. Übrige Dateien behandeln wie bisher (Klassenabhängigkeiten)
         var classFiles = files.stream()

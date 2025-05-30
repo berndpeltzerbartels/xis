@@ -48,6 +48,10 @@ class NodeDecorator {
     */
     decorateElement(element, parentHandler) {
         var handler;
+        if (element.getAttribute('xis:binding') && element.getAttribute('xis:error-class')) {
+            // TODO write a test
+            parentHandler.addDescendantHandler(new ErrorStyleHandler(element));
+        }
         switch (element.localName) {
             case 'xis:foreach':
                 handler = parentHandler.addDescendantHandler(this.decorateForeach(element));
@@ -90,7 +94,7 @@ class NodeDecorator {
                 handler = new GlobalMessagesTagHandler(element);
                 break;
             case 'xis:if':
-                handler = new IfHandler(element);
+                handler = new IfTagHandler(element);
                 break; 
         }
 

@@ -20,7 +20,7 @@ public class PageResponse implements Response {
     }
 
     public PageResponse urlParameter(@NonNull String name, @NonNull Object value) {
-        pathVariables.put(name, asString(value));
+        urlParameters.put(name, asString(value));
         return this;
     }
 

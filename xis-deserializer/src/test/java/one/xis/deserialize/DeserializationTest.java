@@ -406,7 +406,7 @@ class DeserializationTest {
     @NoArgsConstructor
     static class BeanWithLocalDate {
 
-        @Format(LocalDateFormatter.class)
+        @UseFormatter(LocalDateFormatter.class)
         private LocalDate localDate;
     }
 
@@ -416,7 +416,7 @@ class DeserializationTest {
     static class BeanWithLocalDateCollection {
 
         @AllElementsMandatory
-        @Format(LocalDateFormatter.class)
+        @UseFormatter(LocalDateFormatter.class)
         private Collection<LocalDate> localDates;
     }
 

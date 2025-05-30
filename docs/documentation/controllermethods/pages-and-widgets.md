@@ -45,7 +45,7 @@ This example defines a simple page that provides data to the template via `@Mode
 
 ## Widgets
 
-Widgets are reusable UI components that are rendered inside a page or other widgets. Each widget class is also linked to
+Widgets are components that are rendered inside a page or other widgets. Each widget class is also linked to
 an HTML file of the same name.
 
 Widgets:

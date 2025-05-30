@@ -6,7 +6,7 @@ import one.xis.RefreshClient;
 
 import java.util.List;
 
-@Push(PushWidget2.class)
+@Push(PushWidget2.class) // TODO noch in gebrauch ?
 interface PushPageClient extends RefreshClient {
 
     void setTitle(@PushData("title") String title);

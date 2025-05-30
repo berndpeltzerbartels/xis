@@ -2,7 +2,6 @@ package one.xis.deserialize;
 
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
-import one.xis.Format;
 import one.xis.UserContext;
 import one.xis.context.XISComponent;
 import one.xis.validation.Mandatory;
@@ -33,7 +32,7 @@ class CollectionToSingleElementDeserializer implements JsonDeserializer<Object> 
         Object value = null;
         if (reader.hasNext()) {
             Optional<Object> result = Optional.empty();
-            if (target.isAnnotationPresent(Format.class)) {
+            if (this.requiresFormatter(target)) {
                 result = mainDeserializer.getDeserializer(FormattedDeserializer.class).deserialize(reader, path, target, userContext, mainDeserializer, results);
             } else {
                 result = mainDeserializer.deserialize(reader, path, componentType, userContext, results).map(Object.class::cast);

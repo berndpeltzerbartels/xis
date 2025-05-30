@@ -3,8 +3,8 @@ package one.xis.deserialize;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import lombok.RequiredArgsConstructor;
-import one.xis.Format;
 import one.xis.Formatter;
+import one.xis.UseFormatter;
 import one.xis.UserContext;
 import one.xis.context.XISComponent;
 import one.xis.utils.lang.ClassUtils;
@@ -23,7 +23,7 @@ class FormattedDeserializer implements JsonDeserializer<Object> {
 
     @Override
     public boolean matches(JsonToken token, AnnotatedElement target) {
-        return target.isAnnotationPresent(Format.class);
+        return requiresFormatter(target);
     }
 
     @Override
@@ -55,10 +55,24 @@ class FormattedDeserializer implements JsonDeserializer<Object> {
     }
 
     private Formatter getFormatter(AnnotatedElement target) {
-        var formatterClass = target.getAnnotation(Format.class).value();
+        Class<? extends Formatter> formatterClass = null;
+        if (target.isAnnotationPresent(UseFormatter.class)) {
+            formatterClass = target.getAnnotation(UseFormatter.class).value();
+        } else {
+            for (var annotation : target.getAnnotations()) {
+                if (annotation.annotationType().isAnnotationPresent(UseFormatter.class)) {
+                    formatterClass = annotation.annotationType().getAnnotation(UseFormatter.class).value();
+                    break;
+                }
+            }
+        }
+        if (formatterClass == null) {
+            throw new IllegalArgumentException("No formatter specified for " + target);
+        }
+        final var fm = formatterClass;
         return formatters.stream()
-                .filter(f -> f.getClass().equals(formatterClass))
+                .filter(f -> f.getClass().equals(fm))
                 .findFirst()
-                .orElseGet(() -> ClassUtils.newInstance(formatterClass));
+                .orElseGet(() -> ClassUtils.newInstance(fm));
     }
 }

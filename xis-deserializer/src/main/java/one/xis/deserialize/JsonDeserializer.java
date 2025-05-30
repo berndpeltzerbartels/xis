@@ -3,6 +3,7 @@ package one.xis.deserialize;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import lombok.NonNull;
+import one.xis.UseFormatter;
 import one.xis.UserContext;
 import one.xis.validation.Mandatory;
 
@@ -71,4 +72,15 @@ public interface JsonDeserializer<T> extends Comparable<JsonDeserializer<?>> {
         postProcessingResults.add(new InvalidValueError(context, CONVERSION_ERROR.getMessageKey(), CONVERSION_ERROR.getGlobalMessageKey(), values));
     }
 
+    default boolean requiresFormatter(AnnotatedElement target) {
+        if (target.isAnnotationPresent(UseFormatter.class)) {
+            return true;
+        }
+        for (var annotation : target.getAnnotations()) {
+            if (annotation.annotationType().isAnnotationPresent(UseFormatter.class)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
