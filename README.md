@@ -33,18 +33,18 @@ cases.
 This documentation is divided into clearly structured chapters. You can start with an overview or jump directly to a
 specific topic:
 
-- [1. Introduction & Philosophy](docs/documentation/01-introduction.md)
-- [2. Module Overview](docs/documentation/02-overview)
-- [2b. HTML Integration Overview](docs/documentation/02b-html-integration-overview.md)
-- [3. Pages (`@Page`)](docs/documentation/03-pages.md)
-- [4. Pagelets (`@Pagelet`)](docs/documentation/04-pagelets.md)
-- [5. Data Lifecycle & Model Binding](docs/documentation/05-data.md)
-- [6. Actions & Navigation](docs/documentation/06-actions.md)
-- [7. Template Language (Full Reference)](docs/documentation/07-template-reference.md)
-- [8. Forms & Validation](docs/documentation/08-forms.md)
-- [9. Extension Points](docs/documentation/09-extension.md)
-- [10. Deployment & Build](docs/documentation/10-deployment.md)
-- [11. Appendix & Reference](docs/documentation/11-appendix.md)
+- [1. Introduction & Philosophy](docs/documentation.old/01-introduction.md)
+- [2. Module Overview](docs/documentation.old/02-overview)
+- [2b. HTML Integration Overview](docs/documentation.old/02b-html-integration-overview.md)
+- [3. Pages (`@Page`)](docs/documentation.old/03-pages.md)
+- [4. Pagelets (`@Pagelet`)](docs/documentation.old/04-pagelets.md)
+- [5. Data Lifecycle & Model Binding](docs/documentation.old/05-data.md)
+- [6. Actions & Navigation](docs/documentation.old/06-actions.md)
+- [7. Template Language (Full Reference)](docs/documentation.old/07-template-reference.md)
+- [8. Forms & Validation](docs/documentation.old/08-forms.md)
+- [9. Extension Points](docs/documentation.old/09-extension.md)
+- [10. Deployment & Build](docs/documentation.old/10-deployment.md)
+- [11. Appendix & Reference](docs/documentation.old/11-appendix.md)
 
 If you're new to XIS, we recommend starting with the [Quickstart Guide](quickstart/index.md).
 

@@ -4,3 +4,5 @@ This chapter will be filled in soon. It will cover the push model in XIS, especi
 updates from the server to the client — for example, for live data, notifications, or collaborative applications.
 
 The concept is not yet finalized.
+
+[Kapitel 16: Security ←](16-security.md)

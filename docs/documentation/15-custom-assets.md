@@ -98,3 +98,5 @@ The JS file associated with a page provides:
 * ✅ Gradle plugin ensures `src/main/java` is also scanned for resources.
 * 🛠️ A Maven plugin is planned but not yet implemented.
 * 🔍 Make sure Expression Language engine only scans the local JS file for EL-visible functions.
+
+[Kapitel 14: Client State and Reactive Values ←](14-client-state.md) | [Kapitel 16: Security →](16-security.md)

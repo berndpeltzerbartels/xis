@@ -1,4 +1,4 @@
-# 1. The Origins & Philosophy of XIS
+# The Origins & Philosophy of XIS
 
 ## The Origins of XIS
 
@@ -96,4 +96,4 @@ You don’t need to worry about AJAX, fetch calls, or serialization: it all just
 
 ---
 
-→ [Continue to Chapter 2: Module Overview](02-overview)
+→ [Chapter 1: Module Overview](01-overview.md)

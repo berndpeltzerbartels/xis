@@ -1,4 +1,4 @@
-# 2. How XIS Applications Work – An Overview
+# 1. How XIS Applications Work – An Overview
 
 XIS applications are built around a small set of clear concepts. Each one will be explained in detail in later chapters,
 but this section gives you a high-level map of how everything fits together.
@@ -55,21 +55,6 @@ Here’s what happens when a user navigates to a new page in a XIS app:
 
 ---
 
-## What You’ll Learn Next
-
-In the upcoming chapters, we’ll look at each of these pieces in detail:
-
-- [Chapter 3](03-pages.md): How pages and their controllers work
-- [Chapter 4](04-pagelets.md): How to build and nest reusable components
-- [Chapter 5](05-data.md): How model binding and lifecycle work
-- [Chapter 6](06-actions.md): How to define buttons, links, and logic triggers
-- [Chapter 7](07-template-reference.md): How templates and includes work
-- [Chapter 8](08-forms.md): How to build forms and validate user input
-
-Each chapter builds on the last, but you can also jump directly to the topic you need.
-
----
-
 > “XIS is built to make web development understandable again. This chapter is your map. The next ones are your journey.”
 
-→ [Continue to Chapter 3: Pages (`@Page`)](03-pages.md)
+[Previous Chapter: Introduction ←](00-introduction.md) | [Next Chapter: Installation →](02-installation.md)
