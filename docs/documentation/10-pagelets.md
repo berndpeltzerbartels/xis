@@ -88,4 +88,4 @@ They behave exactly as in pages and can be used for data preparation, request ha
 
 ---
 
-[Kapitel 09: Pages (`@Page`) ←](09-pages.md) | [Kapitel 11: Form Handling →](11-form-handling.md)
+[← Pages (`@Page`)](09-pages.md) | [Form Handling →](11-form-handling.md)

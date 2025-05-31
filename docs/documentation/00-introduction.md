@@ -96,4 +96,4 @@ You don’t need to worry about AJAX, fetch calls, or serialization: it all just
 
 ---
 
-→ [Chapter 1: Module Overview](01-overview.md)
+→ [How XIS Applications Work](01-overview.md)

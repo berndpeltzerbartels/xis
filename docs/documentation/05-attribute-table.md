@@ -63,4 +63,4 @@ repeat the tag it is attached to.
 
 A separate table will describe **tags** like `<xis:message>`, `<xis:template>`, and others.
 
-[Kapitel 04: Expression Language ←](04-expression-language.md) | [Kapitel 06: XIS Tags in HTML Templates →](06-xis-tags-table.md)
+[← Expression Language](04-expression-language.md) | [ XIS Tags →](06-xis-tags-table.md)

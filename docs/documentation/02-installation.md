@@ -70,4 +70,4 @@ A Maven plugin is not yet available. All testing and configuration has been done
 This setup ensures that XIS remains modular and tightly integrated, following the philosophy of colocating controller,
 template, and resource files.
 
-[Kapitel 01: Module Overview ←](01-overview.md) | [Kapitel 03: Push with Socket.IO →](03-push-socketio.md)
+[← How XIS Applications Work](01-overview.md) | [HTML Integration Overview →](03-html-integration-overview.md)

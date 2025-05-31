@@ -81,4 +81,4 @@ These files will be **automatically included** if they match the name of the HTM
 
 ---
 
-[Kapitel 02: Installation ←](02-installation.md) | [Kapitel 04: HTML Integration Overview →](04-html-integration-overview.md)
+[← Installation](02-installation.md) | [Expression Language →](04-expression-language.md)

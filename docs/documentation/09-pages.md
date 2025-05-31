@@ -75,5 +75,4 @@ application transition. The default behavior is to replace the current view with
 
 ---
 
-[Kapitel 08: Response Types Of Action-Methods ←](08-response-types.md) | [Kapitel 10: Pagelets (
-`@Pagelet`) →](10-pagelets.md)
+[← Response Types Of Action-Methods](08-response-types.md) | [Pagelets (`@Pagelet`) →](10-pagelets.md)

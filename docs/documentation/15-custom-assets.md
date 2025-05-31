@@ -1,4 +1,4 @@
-## 17. Custom JavaScript Functions and CSS
+## 15. Custom JavaScript Functions and CSS
 
 XIS allows each component or page to include its own JavaScript and CSS resources. This modular design ensures that
 logic and styling stay **close to their context**, simplifying maintenance and improving separation of concerns.
@@ -99,4 +99,4 @@ The JS file associated with a page provides:
 * 🛠️ A Maven plugin is planned but not yet implemented.
 * 🔍 Make sure Expression Language engine only scans the local JS file for EL-visible functions.
 
-[Kapitel 14: Client State and Reactive Values ←](14-client-state.md) | [Kapitel 16: Security →](16-security.md)
+[← Client State and Reactive Values](14-client-state.md) | [Security →](16-security.md)

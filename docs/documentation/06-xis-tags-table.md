@@ -70,4 +70,4 @@ Language (EL) within attribute values.
 We recommend that integration tests be written for cases involving `xis:message`, `xis:global-messages`, and `<xis:a>`
 with `target-container`. These serve as critical runtime features.
 
-[Kapitel 05: Microfrontend Support ←](05-microfrontend-support.md) | [Kapitel 07: Controller Methods →](07-controller-methods.md)
+[← XIS Attributes](05-attribute-table.md) | [Controller Methods →](07-controller-methods.md)

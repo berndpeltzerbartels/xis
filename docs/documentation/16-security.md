@@ -1,4 +1,4 @@
-## 13. Security
+## 16. Security
 
 This chapter introduces the security model of XIS, which is based on JSON Web Tokens (JWT). All authentication
 mechanisms, including Keycloak and future community logins, are unified under a common token format used internally by
@@ -61,4 +61,4 @@ _(To be implemented)_
 - Add configuration guides for Keycloak
 - Implement community login strategies (Google, Facebook, etc.)
 
-[Kapitel 15: Custom Assets ←](15-custom-assets.md) | [Kapitel 17: Push with Socket.IO →](17-push-socketio.md)
+[← Custom JavaScript Functions and CSS](15-custom-assets.md) | [Push with Socket.IO →](17-push-socketio.md)

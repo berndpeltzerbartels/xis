@@ -1,4 +1,4 @@
-## 15. Client State and Reactive Values
+## 14. Client State and Reactive Values
 
 XIS supports reactive template updates based on values stored in the **client-side state**, especially through
 `localStorage` and `clientState`. This allows elements of the UI to automatically reflect changes without manual
@@ -151,4 +151,4 @@ controller.
 > Centralized state management (e.g. Redux-like models) works against the XIS design philosophy of self-contained,
 > composable frontend modules.
 
-[Kapitel 13: Formatting ←](13-formatting.md) | [Kapitel 15: Custom Assets →](15-custom-assets.md)
+[← Formatting](13-formatting.md) | [Custom JavaScript and CSS →](15-custom-assets.md)

@@ -114,4 +114,4 @@ Global messages can be used to display a general error for the entire form.
 
 This approach allows concise, reusable, and testable validation logic integrated seamlessly into XIS forms.
 
-[Kapitel 11: Form Handling ←](11-form-handling.md) | [Kapitel 13: Formatting →](13-formatting.md)
+[← Form Handling](11-form-handling.md) | [Formatting →](13-formatting.md)

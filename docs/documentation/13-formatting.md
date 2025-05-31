@@ -151,3 +151,5 @@ public class BirthdayPage {
   test.
 - Support meta-annotations with `@UseFormatter`, like in the example.
 - Implement meta-annotation capability if not yet available.
+
+[← Custom Validation](12-custom-validation.md) | [Client State →](14-client-state.md)

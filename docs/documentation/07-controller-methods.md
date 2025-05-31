@@ -117,4 +117,4 @@ and locale.
 
 These examples demonstrate the most common interaction patterns between templates and controller logic.
 
-[Kapitel 06: XIS Tags in HTML Templates ←](06-xis-tags-table.md) | [Kapitel 08: Response Types Of Action-Methods →](08-response-types.md)
+[← XIS Tags](06-xis-tags-table.md) | [ Response Types Of Action-Methods →](08-response-types.md)

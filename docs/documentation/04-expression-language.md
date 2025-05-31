@@ -255,4 +255,4 @@ We recommend starting simple with `@ModelData` and progressing to advanced patte
 * Clarify expression usage in styling and `xis:if`, `xis:action`, etc.
 * Add examples for using validation messages with specialized tags and attributes
 
-[Kapitel 03: HTML Integration Overview ←](03-html-integration-overview.md) | [Kapitel 05: Microfrontend Support →](05-microfrontend-support.md)
+[← HTML Integration Overview](03-html-integration-overview.md) | [XIS Attributes →](05-attribute-table.md)

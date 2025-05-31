@@ -105,4 +105,4 @@ validation.int.global=Invalid numeric value.
 For English and German, these messages are already included in the XIS core, so you don't need to provide them — but you
 can override them to customize the wording.
 
-[Kapitel 10: Pagelets (`@Pagelet`) ←](10-pagelets.md) | [Kapitel 12: Custom Validation →](12-custom-validation.md)
+[← Pagelets (`@Pagelet`)](10-pagelets.md) | [Custom Validation →](12-custom-validation.md)

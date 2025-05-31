@@ -57,4 +57,4 @@ Here’s what happens when a user navigates to a new page in a XIS app:
 
 > “XIS is built to make web development understandable again. This chapter is your map. The next ones are your journey.”
 
-[Previous Chapter: Introduction ←](00-introduction.md) | [Next Chapter: Installation →](02-installation.md)
+[← The Origins & Philosophy of XIS](00-introduction.md) | [Next Chapter: Installation →](02-installation.md)

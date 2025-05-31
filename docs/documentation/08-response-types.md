@@ -125,4 +125,4 @@ return"com.example.pages.MyPage";
 
 ---
 
-[Kapitel 07: Controller Methods ←](07-controller-methods.md) | [Kapitel 09: Pages (`@Page`) →](09-pages.md)
+[Controller Methods ←](07-controller-methods.md) | [Pages (`@Page`) →](09-pages.md)
