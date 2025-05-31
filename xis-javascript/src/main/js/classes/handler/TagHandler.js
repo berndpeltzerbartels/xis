@@ -174,6 +174,10 @@ class TagHandler {
         return this.tag.getAttribute(name);
     }
 
+    hasAttribute(name) {
+        return this.tag.hasAttribute(name);
+    }
+
     doSplit(string, separatorChar) {
         var rv = [];
         var buffer = '';

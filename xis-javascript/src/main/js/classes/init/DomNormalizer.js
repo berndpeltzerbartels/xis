@@ -161,7 +161,7 @@ class DomNormalizer {
     }
 
     replaceMessageAttributeByChildMessageElement(element) {
-        var message = createElement('xis:message');
+        var message = createElement('xis:message'); // TODO Nur "for" im message Tag
         message.setAttribute('message-for', element.getAttribute('xis:message-for'));
         element.removeAttribute('xis:message');
         this.domAccessor.insertChild(element, message);

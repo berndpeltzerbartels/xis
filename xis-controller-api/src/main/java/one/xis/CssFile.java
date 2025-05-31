@@ -6,6 +6,6 @@ import java.lang.annotation.*;
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface CSSFile { // TODO
+public @interface CssFile { // TODO
     String value();
 }

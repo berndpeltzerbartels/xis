@@ -18,10 +18,16 @@ Each controller corresponds to exactly one HTML file:
 ```bash
 src/
 └── main/
-    ├── java/com/example/pages/HelloPage.java
-    └── resources/com/example/pages/HelloPage.html
+    └── java/
+          └──com/
+              └──example/
+                  ├── HelloPage.java
+                  └── HelloPage.html
 ```
 
+Alternatively, you can use the `resources` folder, but it must mirror the Java package structure.
+
+```bash
 ---
 
 ## Folder Structure & Page Resolution

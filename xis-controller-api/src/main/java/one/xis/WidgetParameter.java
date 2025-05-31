@@ -9,6 +9,6 @@ import java.lang.annotation.*;
 @Documented
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Parameter {
+public @interface WidgetParameter {
     String value();
 }
