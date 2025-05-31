@@ -27,12 +27,16 @@ repositories {
 // Local variables for versions
 var lombokVersion = rootProject.ext.libraryVersions.lombok
 var junitVersion = "5.7.0"
+var gsonVersion = "2.10.1"
 
 dependencies {
 
     // Local project dependencies
     implementation(project(":xis-deserializer"))
     implementation(project(":xis-context"))
+
+    // Gson dependency
+    implementation "com.google.code.gson:gson:$gsonVersion"
 
     // Lombok dependencies
     annotationProcessor("org.projectlombok:lombok:$lombokVersion")
@@ -41,6 +45,7 @@ dependencies {
     // JUnit dependencies
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
+    testImplementation("org.assertj:assertj-core:3.16.1")
 }
 
 test {

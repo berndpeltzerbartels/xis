@@ -1,12 +1,9 @@
 package one.xis.security;
 
-import lombok.Value;
-
+import java.time.Instant;
 import java.util.Collection;
+import java.util.Map;
 
+public record TokenAttributes(String userId, Collection<String> roles, Map<String, String> claims, Instant expiresAt) {
 
-@Value
-public class TokenAttributes {
-    String userId;
-    Collection<String> roles;
 }

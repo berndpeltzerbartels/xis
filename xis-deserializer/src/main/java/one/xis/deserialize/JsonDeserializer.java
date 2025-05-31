@@ -10,6 +10,7 @@ import one.xis.validation.Mandatory;
 import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
+import java.lang.reflect.RecordComponent;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,6 +47,9 @@ public interface JsonDeserializer<T> extends Comparable<JsonDeserializer<?>> {
         }
         if (target instanceof Class<?> classTarget) {
             return classTarget;
+        }
+        if (target instanceof RecordComponent) {
+            return ((RecordComponent) target).getType();
         }
         throw new IllegalArgumentException("Unsupported target type: " + target.getClass());
     }

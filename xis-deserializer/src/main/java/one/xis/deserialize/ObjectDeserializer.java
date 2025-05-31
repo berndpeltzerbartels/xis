@@ -10,11 +10,8 @@ import one.xis.utils.lang.FieldUtil;
 import one.xis.validation.Mandatory;
 
 import java.io.IOException;
-import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Field;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.lang.reflect.*;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -37,6 +34,26 @@ class ObjectDeserializer implements JsonDeserializer<Object> {
                                         MainDeserializer mainDeserializer,
                                         PostProcessingResults results) throws IOException {
         var objectType = getType(target);
+        if (objectType.isRecord()) {
+            try {
+                return deserializeRecord(objectType, reader, path, target, userContext, mainDeserializer, results);
+            } catch (IOException | IllegalAccessException | InstantiationException | NoSuchMethodException |
+                     InvocationTargetException e) {
+                throw new RuntimeException("Error deserializing record: " + objectType.getName(), e);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            return deserializeObject(objectType, reader, path, userContext, mainDeserializer, results);
+        }
+    }
+
+    private Optional<Object> deserializeObject(Class<?> objectType,
+                                               JsonReader reader,
+                                               String path,
+                                               UserContext userContext,
+                                               MainDeserializer mainDeserializer,
+                                               PostProcessingResults results) throws IOException {
         var o = ClassUtils.newInstance(objectType);
         var mandatoryFields = getMandatoryFields(objectType);
         var fieldMap = fieldMap(objectType);
@@ -62,6 +79,50 @@ class ObjectDeserializer implements JsonDeserializer<Object> {
         });
         return Optional.of(o);
     }
+
+
+    private Optional<Object> deserializeRecord(Class<?> clazz,
+                                               JsonReader reader,
+                                               String path,
+                                               AnnotatedElement target,
+                                               UserContext userContext,
+                                               MainDeserializer mainDeserializer,
+                                               PostProcessingResults results) throws IOException, IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
+        Map<String, RecordComponent> components = Arrays.stream(clazz.getRecordComponents())
+                .collect(Collectors.toMap(RecordComponent::getName, Function.identity()));
+
+        Map<String, Object> values = new HashMap<>();
+
+        reader.beginObject();
+        while (reader.peek() != JsonToken.END_OBJECT) {
+            String name = reader.nextName();
+            RecordComponent component = components.get(name);
+            if (component == null) {
+                reader.skipValue();
+                continue;
+            }
+            Object value = mainDeserializer.deserialize(reader, path, component, userContext, results).orElse(null);
+            values.put(name, value);
+        }
+        reader.endObject();
+
+        Object[] args = new Object[components.size()];
+        Class<?>[] types = new Class<?>[components.size()];
+        int i = 0;
+        for (RecordComponent component : clazz.getRecordComponents()) {
+            if (!values.containsKey(component.getName())) {
+                throw new IllegalStateException("Missing required record component: " + component.getName());
+            }
+            args[i] = values.get(component.getName());
+            types[i] = component.getType();
+            i++;
+        }
+
+        Constructor<?> constructor = clazz.getDeclaredConstructor(types);
+        constructor.setAccessible(true);
+        return Optional.of(constructor.newInstance(args));
+    }
+
 
     private Set<Field> getMandatoryFields(Class<?> objectType) {
         return FieldUtil.getAllFields(objectType).stream()

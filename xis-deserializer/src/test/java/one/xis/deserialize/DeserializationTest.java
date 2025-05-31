@@ -232,6 +232,18 @@ class DeserializationTest {
         assertThat(error.getDeserializationContext().getPath()).isEqualTo("/model/objectField/localDateField");
     }
 
+
+    @Test
+    void deserializeRecord() throws NoSuchMethodException {
+        var parameter = getClass().getDeclaredMethod("testMethodBeanParameter", TestRecord.class).getParameters()[0];
+        var json = "{\"intField\":123,\"stringField\":\"test\",\"localDateField\":\"2021-01-01\"}";
+        var testRecord = (TestRecord) mainDeserializer.deserialize(json, parameter, UserContext.getInstance(), new PostProcessingResults());
+        assertThat(testRecord.intField()).isEqualTo(123);
+        assertThat(testRecord.stringField()).isEqualTo("test");
+        assertThat(testRecord.localDateField()).isEqualTo(LocalDate.of(2021, 1, 1));
+    }
+
+
     @Nested
     class PostProcessorTest {
         private MainDeserializer mainDeserializer;
@@ -338,6 +350,10 @@ class DeserializationTest {
 
     }
 
+    void testMethodBeanParameter(@FormData("testObject") TestRecord testRecord) {
+
+    }
+
     @SuppressWarnings("unused")
     void testMethodBeanParameter2(@FormData("test") TestBean2 testBean) {
 
@@ -399,6 +415,10 @@ class DeserializationTest {
     static class TestBean2 {
         private int intField;
         private TestBean testBeanField;
+    }
+
+    record TestRecord(int intField, String stringField, LocalDate localDateField) {
+        // This is just a record to test deserialization of records
     }
 
     @Data
