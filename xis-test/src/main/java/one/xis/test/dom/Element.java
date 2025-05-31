@@ -129,6 +129,10 @@ public class Element extends Node {
         }
     }
 
+    public boolean hasAttribute(String name) {
+        return attributes.containsKey(name);
+    }
+
     public List<Node> getChildList() {
         return childNodes.list();
     }
