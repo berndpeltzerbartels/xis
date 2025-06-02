@@ -12,7 +12,7 @@ import lombok.Data;
 public class AuthenticationConfiguration {
 
 
-    public static final String CALLBACK_URL = "/xis/auth/callback";
+    public static final String CALLBACK_URL = "/xis/auth";
 
 
     /**
