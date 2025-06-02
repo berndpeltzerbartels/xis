@@ -34,6 +34,7 @@ dependencies {
     // Local project dependencies
     implementation(project(":xis-deserializer"))
     implementation(project(":xis-context"))
+    implementation(project(":xis-util"))
 
     // Gson dependency
     implementation "com.google.code.gson:gson:$gsonVersion"
@@ -45,6 +46,7 @@ dependencies {
     // JUnit dependencies
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
+    testImplementation "org.mockito:mockito-core:$mockitoVersion"
     testImplementation("org.assertj:assertj-core:3.16.1")
 }
 

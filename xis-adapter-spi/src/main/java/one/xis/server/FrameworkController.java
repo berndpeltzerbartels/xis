@@ -3,23 +3,27 @@ package one.xis.server;
 import java.util.Locale;
 import java.util.Map;
 
-public interface FrameworkController<RES, REQ> {
+public interface FrameworkController<FRESP, REQ, RESP> {
 
     ClientConfig getComponentConfig();
 
-    RES getPageModel(ClientRequest request, Locale locale);
+    FRESP getPageModel(ClientRequest request, Locale locale);
 
-    RES getFormModel(ClientRequest request, Locale locale);
+    FRESP getFormModel(ClientRequest request, Locale locale);
 
-    RES getWidgetModel(ClientRequest request, Locale locale);
+    FRESP getWidgetModel(ClientRequest request, Locale locale);
 
-    RES onPageLinkAction(ClientRequest request, Locale locale);
+    FRESP onPageLinkAction(ClientRequest request, Locale locale);
 
-    RES onWidgetLinkAction(ClientRequest request, Locale locale);
+    FRESP onWidgetLinkAction(ClientRequest request, Locale locale);
 
-    RES onFormAction(ClientRequest request, Locale locale);
+    FRESP onFormAction(ClientRequest request, Locale locale);
 
-    String getPageJavascript(REQ request);
+    RESP auth(REQ request, String provider);
+
+    RenewTokenResponse renewToken(RenewTokenRequest request);
+
+    String getPageJavascript(String path);
 
     String getPage(String id);
 
@@ -38,6 +42,6 @@ public interface FrameworkController<RES, REQ> {
     String getMainJs();
 
     String getFunctionsJs();
-    
+
     String getBundleJs();
 }

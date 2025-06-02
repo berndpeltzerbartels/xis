@@ -126,6 +126,15 @@ class Client {
     }
 
     /**
+     * @public
+     * @param {string} renewToken
+     * @returns {Promise<TokenResponse>}
+     */
+    renew(renewToken) {
+        throw new Error('Not implemented');
+    }
+
+    /**
      * @protected
      * @param {ResolvedURL} resolvedURL 
      * @param {string} action (nullable)

@@ -16,8 +16,7 @@ class TokenManagerImplTest {
 
     @BeforeEach
     void setUp() {
-        // Tokens gelten je 1 Stunde / 24 Stunden
-        tokenManager = new TokenManagerImpl(3600, 86400);
+        tokenManager = new TokenManagerImpl();
     }
 
     @Test
@@ -32,10 +31,10 @@ class TokenManagerImplTest {
 
         TokenResult result = tokenManager.createTokens(request);
 
-        assertThat(result.token()).isNotBlank();
-        assertThat(result.expiresAt()).isAfter(Instant.now());
+        assertThat(result.accessToken()).isNotBlank();
+        assertThat(result.accessTokenExpiresAt()).isAfter(Instant.now());
 
-        TokenAttributes attributes = tokenManager.decodeToken(result.token());
+        TokenAttributes attributes = tokenManager.decodeToken(result.accessToken());
 
         assertThat(attributes.userId()).isEqualTo("user123");
         assertThat(attributes.roles()).containsExactlyInAnyOrder("ADMIN", "USER");
@@ -54,11 +53,11 @@ class TokenManagerImplTest {
         );
 
         TokenResult original = tokenManager.createTokens(request);
-        TokenResult renewed = tokenManager.renew(original.token());
+        TokenResult renewed = tokenManager.renew(original.accessToken());
 
-        assertThat(renewed.token()).isNotEqualTo(original.token());
+        assertThat(renewed.accessToken()).isNotEqualTo(original.accessToken());
 
-        TokenAttributes renewedAttrs = tokenManager.decodeToken(renewed.token());
+        TokenAttributes renewedAttrs = tokenManager.decodeToken(renewed.accessToken());
         assertThat(renewedAttrs.userId()).isEqualTo("user999");
         assertThat(renewedAttrs.roles()).containsExactly("READER");
         assertThat(renewedAttrs.claims().get("info")).isEqualTo("xyz");
@@ -80,7 +79,7 @@ class TokenManagerImplTest {
                 3600,
                 86400
         );
-        String token = tokenManager.createTokens(request).token();
+        String token = tokenManager.createTokens(request).accessToken();
         String tampered = token.replaceFirst("\\..*?\\.", ".tampered.");
 
         assertThatThrownBy(() -> tokenManager.decodeToken(tampered))

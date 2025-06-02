@@ -2,18 +2,22 @@ package one.xis.spring;
 
 
 import lombok.Setter;
+import one.xis.PathVariable;
 import one.xis.server.*;
+import org.springframework.http.HttpRequest;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Locale;
 import java.util.Map;
 
 @Setter
 @RestController
 @RequestMapping
-class SpringController implements FrameworkController<ResponseEntity<ServerResponse>, HttpServletRequest> {
+class SpringController implements FrameworkController<ResponseEntity<ServerResponse>, HttpRequest, ResponseEntity<?>> {
 
     private FrontendService frontendService;
 
@@ -72,9 +76,42 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
     }
 
     @Override
-    @GetMapping("/xis/page/javascript/**")
-    public String getPageJavascript(HttpServletRequest request) {
-        return frontendService.getPageJavascript(request.getRequestURI());
+    @GetMapping("/xis/auth/{provider}")
+    public ResponseEntity<?> auth(HttpRequest request, @PathVariable("provider") String provider) {
+        AuthenticationData authData = frontendService.authenticationCallback(provider, request.getURI().getQuery());
+        var accessCookie = ResponseCookie.from("access_token", authData.getAccessToken())
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("Strict")
+                .maxAge(Duration.ofSeconds(authData.getAccessTokenExpiresAt() - Instant.now().getEpochSecond()))
+                .path("/")
+                .build();
+
+        var renewCookie = ResponseCookie.from("refresh_token", authData.getRenewToken())
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("Strict")
+                .maxAge(Duration.ofDays(7))  // Oder dynamisch, falls du das auch speicherst
+                .path("/")
+                .build();
+        
+        return ResponseEntity.status(302)
+                .header("Location", authData.getUrl()) // z. B. "/dashboard"
+                .header("Set-Cookie", accessCookie.toString())
+                .header("Set-Cookie", renewCookie.toString())
+                .build();
+    }
+
+    @Override
+    @PostMapping("/xis/token/renew")
+    public RenewTokenResponse renewToken(RenewTokenRequest request) {
+        return frontendService.processRenewTokenRequest(request);
+    }
+
+    @Override
+    @GetMapping("/xis/page/javascript/{javascriptPath}")
+    public String getPageJavascript(@PathVariable("javascriptPath") String javascriptPath) {
+        return frontendService.getPageJavascript(javascriptPath);
     }
 
     @Override

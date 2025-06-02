@@ -162,7 +162,15 @@ class HttpClient extends Client{
             .then(response => _this.deserializeResponse(response));
     }
 
-
-
-
+    /**
+     * @public
+     * @override
+     * @param {string} renewToken
+     * @returns {Promise<TokenResponse>}
+     */
+    renew(renewToken) {
+        var _this = this;
+        return this.httpConnector.post('/xis/token/renew', { renewToken: renewToken }, {})
+            .then(response => _this.deserializeResponse(response));
+    }
 }

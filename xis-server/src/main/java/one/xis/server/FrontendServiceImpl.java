@@ -9,11 +9,15 @@ import one.xis.context.XISComponent;
 import one.xis.context.XISInit;
 import one.xis.resource.Resource;
 import one.xis.resource.Resources;
+import one.xis.security.AuthenticationProviderServices;
+import one.xis.security.InvalidTokenException;
+import one.xis.security.TokenManager;
 import org.tinylog.Logger;
 
 import java.time.ZoneId;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 
 /**
@@ -27,6 +31,8 @@ public class FrontendServiceImpl implements FrontendService {
     private final ClientConfigService configService;
     private final ResourceService resourceService;
     private final Resources resources;
+    private final AuthenticationProviderServices authenticationProviderServices;
+    private final TokenManager tokenManager;
     private final Collection<RequestFilter> requestFilters;
     private Resource appJsResource;
     private Resource classesJsResource;
@@ -76,6 +82,33 @@ public class FrontendServiceImpl implements FrontendService {
         } finally {
             removeUserContext();
         }
+    }
+
+    @Override
+    public RenewTokenResponse processRenewTokenRequest(RenewTokenRequest request) {
+        try {
+            var result = tokenManager.renew(request.getRenewToken());
+            return new RenewTokenResponse(result.accessToken(),
+                    result.accessTokenExpiresAt().toEpochMilli(),
+                    result.renewToken(),
+                    result.renewTokenExpiresAt().toEpochMilli());
+        } catch (InvalidTokenException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public AuthenticationData authenticationCallback(String provider, String queryString) {
+        var service = Objects.requireNonNull(authenticationProviderServices.getAuthenticationProviderService(provider));
+        var authenticationProviderData = service.verifyStateAndExtractCode(queryString);
+        var tokenResponse = service.requestTokens(authenticationProviderData.getCode());
+        var now = System.currentTimeMillis();
+        var authenticationData = new AuthenticationData();
+        authenticationData.setAccessToken(tokenResponse.getAccessToken());
+        authenticationData.setAccessTokenExpiresAt(now + tokenResponse.getExpiresInSeconds() * 1000L);
+        authenticationData.setRenewToken(tokenResponse.getRefreshToken());
+        authenticationData.setUrl(authenticationProviderData.getStateParameterPayload().getRedirect());
+        return authenticationData;
     }
 
 

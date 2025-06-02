@@ -80,8 +80,7 @@ class ResourceService {
     }
 
     String getJavascript(String path) {
-        var id = path.substring("/xis/page/javascript/".length());
-        return pageJavascriptResources.get(id).getContent();
+        return pageJavascriptResources.get(path).getContent();
     }
 
     String getPageHead(String id) {

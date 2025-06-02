@@ -11,6 +11,10 @@ public interface FrontendService {
 
     ServerResponse processFormDataRequest(ClientRequest request);
 
+    RenewTokenResponse processRenewTokenRequest(RenewTokenRequest request);
+
+    AuthenticationData authenticationCallback(String provider, String queryString);
+
     String getPage(String id);
 
     String getPageHead(String id);

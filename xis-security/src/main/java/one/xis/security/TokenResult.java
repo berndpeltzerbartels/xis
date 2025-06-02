@@ -2,6 +2,7 @@ package one.xis.security;
 
 import java.time.Instant;
 
-public record TokenResult(String token, Instant expiresAt, String renewToken, Instant renewExpiresAt) {
+public record TokenResult(String accessToken, Instant accessTokenExpiresAt, String renewToken,
+                          Instant renewTokenExpiresAt) {
 
 }

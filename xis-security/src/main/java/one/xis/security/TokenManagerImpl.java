@@ -2,16 +2,17 @@ package one.xis.security;
 
 import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
+import one.xis.context.XISComponent;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
-import java.security.SecureRandom;
+import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
+@XISComponent
 @RequiredArgsConstructor
 public class TokenManagerImpl implements TokenManager {
 
@@ -23,19 +24,23 @@ public class TokenManagerImpl implements TokenManager {
     private static final byte[] HEADER = """
             {"alg":"HS256","typ":"JWT"}""".getBytes();
 
-    public TokenManagerImpl(int tokenAliveTimeSeconds, int renewTokenAliveTimeSeconds) {
-        this(generateSecret(), tokenAliveTimeSeconds, renewTokenAliveTimeSeconds);
+    public TokenManagerImpl() {
+        this(SecurityUtil.createRandomKey(32), Duration.of(15, ChronoUnit.MINUTES).getSeconds(), Duration.of(1, ChronoUnit.HOURS).getSeconds());
     }
 
     @Override
     public TokenResult createTokens(TokenRequest request) {
-        String token = createToken(request, tokenAliveTimeSeconds);
-        String renewToken = createToken(request, renewTokenAliveTimeSeconds);
+        Instant now = Instant.now();
+        Instant tokenExpiration = now.plusSeconds(request.tokenAliveTimeSeconds());
+        Instant renewTokenExpiration = now.plusSeconds(request.renewTokenAliveTimeSeconds());
+        String token = createToken(request, tokenExpiration);
+        String renewToken = createToken(request, renewTokenExpiration);
+
         return new TokenResult(
                 token,
-                Instant.now().plusSeconds(tokenAliveTimeSeconds),
+                tokenExpiration,
                 renewToken,
-                Instant.now().plusSeconds(renewTokenAliveTimeSeconds)
+                renewTokenExpiration
         );
     }
 
@@ -44,7 +49,7 @@ public class TokenManagerImpl implements TokenManager {
     public TokenAttributes decodeToken(String token) throws InvalidTokenException {
         try {
             String[] parts = token.split("\\.");
-            if (parts.length != 3) throw new InvalidTokenException("Invalid token format");
+            if (parts.length != 3) throw new InvalidTokenException("Invalid accessToken format");
 
             String headerPayload = parts[0] + "." + parts[1];
             String signature = parts[2];
@@ -71,7 +76,7 @@ public class TokenManagerImpl implements TokenManager {
         } catch (InvalidTokenException e) {
             throw e; // nicht doppelt wrappen
         } catch (Exception e) {
-            throw new InvalidTokenException("Failed to decode token", e);
+            throw new InvalidTokenException("Failed to decode accessToken", e);
         }
     }
 
@@ -83,17 +88,12 @@ public class TokenManagerImpl implements TokenManager {
         return createTokens(request);
     }
 
-    private String createToken(TokenRequest request, long validitySeconds) {
+    private String createToken(TokenRequest request, Instant expiresAt) {
         String header = Base64.getUrlEncoder().withoutPadding().encodeToString(HEADER);
-        Map<String, Object> payload = new LinkedHashMap<>();
+        Map<String, Object> payload = new LinkedHashMap<>(request.claims());
         payload.put("sub", request.userId());
         payload.put("roles", request.roles());
-        payload.put("exp", LocalDateTime.now().plusSeconds(validitySeconds).toEpochSecond(ZoneOffset.UTC));
-        request.claims().forEach((key, value) -> {
-            if (!key.equals("roles") && !key.equals("sub") && !key.equals("exp")) {
-                payload.put(key, value);
-            }
-        });
+        payload.put("exp", expiresAt.toEpochMilli());
         String payloadJson = toJson(payload);
         String payloadEncoded = Base64.getUrlEncoder().withoutPadding().encodeToString(payloadJson.getBytes(StandardCharsets.UTF_8));
         String tokenData = header + "." + payloadEncoded;
@@ -112,13 +112,6 @@ public class TokenManagerImpl implements TokenManager {
         }
     }
 
-    private static String generateSecret() {
-        byte[] keyBytes = new byte[32];
-        new SecureRandom().nextBytes(keyBytes);
-        return Base64.getEncoder().withoutPadding().encodeToString(keyBytes);
-    }
-
-    // Placeholder: replace with real JSON logic
     private String toJson(Map<String, Object> map) {
         return gson.toJson(map);
     }

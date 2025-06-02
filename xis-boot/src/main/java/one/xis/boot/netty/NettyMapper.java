@@ -5,12 +5,12 @@ import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;
 import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
-import one.xis.server.ClientConfig;
-import one.xis.server.ClientRequest;
-import one.xis.server.ServerResponse;
+import one.xis.server.*;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.Instant;
 
 import static io.netty.buffer.Unpooled.copiedBuffer;
 
@@ -43,6 +43,33 @@ public class NettyMapper {
                 HttpResponseStatus.OK,
                 Unpooled.wrappedBuffer(content)
         );
+    }
+
+    public RenewTokenRequest toRenewTokenRequest(FullHttpRequest request) throws IOException {
+        String json = request.content().toString(StandardCharsets.UTF_8);
+        return objectMapper.readValue(json, RenewTokenRequest.class);
+    }
+
+
+    public FullHttpResponse toRedirectWithCookies(String location, AuthenticationData authData) {
+        long accessTokenMaxAge = authData.getAccessTokenExpiresAt() - Instant.now().getEpochSecond();
+
+        DefaultFullHttpResponse response = new DefaultFullHttpResponse(
+                HttpVersion.HTTP_1_1,
+                HttpResponseStatus.FOUND
+        );
+
+        response.headers().set(HttpHeaderNames.LOCATION, location);
+
+        response.headers().add(HttpHeaderNames.SET_COOKIE,
+                ServerCookieEncoder.encode("access_token", authData.getAccessToken()) +
+                        "; HttpOnly; Secure; Path=/; SameSite=Strict; Max-Age=" + accessTokenMaxAge);
+
+        response.headers().add(HttpHeaderNames.SET_COOKIE,
+                ServerCookieEncoder.encode("refresh_token", authData.getRenewToken()) +
+                        "; HttpOnly; Secure; Path=/; SameSite=Strict; Max-Age=" + Duration.ofDays(7).getSeconds());
+
+        return response;
     }
 
 
