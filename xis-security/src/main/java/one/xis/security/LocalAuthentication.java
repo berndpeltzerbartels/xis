@@ -2,9 +2,11 @@ package one.xis.security;
 
 public interface LocalAuthentication {
 
-    LocalAuthenticationCodeResponse login(String user, String password) throws InvalidCredentialsException;
+    String login(String user, String password) throws InvalidCredentialsException;
 
-    LocalAuthenticationTokenResponse issueToken(String code, String state) throws InvalidStateParameterException;
+    LocalAuthenticationTokenResponse issueToken(String code, String state) throws AuthenticationException;
+
+    LocalAuthenticationTokenResponse refresh(String refreshToken) throws InvalidTokenException, AuthenticationException;
 
     LocalUserInfo getUserInfo(String accessToken) throws InvalidTokenException;
 

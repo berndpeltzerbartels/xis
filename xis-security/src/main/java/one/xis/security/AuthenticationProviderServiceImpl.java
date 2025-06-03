@@ -9,13 +9,17 @@ import one.xis.utils.lang.StringUtils;
 import java.net.HttpURLConnection;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Map;
 
+import static java.time.temporal.ChronoUnit.MINUTES;
 import static one.xis.utils.lang.StringUtils.isNotEmpty;
 
 @XISComponent
 @RequiredArgsConstructor
 class AuthenticationProviderServiceImpl implements AuthenticationProviderService {
+
+    private static final Duration STATE_PARAMETER_EXPIRATION = Duration.of(15, MINUTES);
 
     private final AuthenticationProviderConnectionFactory connectionFactory;
     private final AuthenticationConfiguration configuration;
@@ -164,6 +168,10 @@ class AuthenticationProviderServiceImpl implements AuthenticationProviderService
         if (iat <= 0 || iat > currentTime) {
             throw new IllegalArgumentException("Invalid issued at time in state parameter");
         }
+        long expiresAt = payload.getExpiresAtSeconds();
+        if (expiresAt <= 0 || expiresAt <= iat || expiresAt < currentTime) {
+            throw new IllegalArgumentException("State parameter has expired");
+        }
         return payload;
     }
 
@@ -181,6 +189,7 @@ class AuthenticationProviderServiceImpl implements AuthenticationProviderService
         payload.setCsrf(SecurityUtil.createRandomKey(32));
         payload.setRedirect(urlAfterLogin);
         payload.setIat(System.currentTimeMillis() / 1000);
+        payload.setExpiresAtSeconds(payload.getIat() + STATE_PARAMETER_EXPIRATION.getSeconds());
         return payload;
     }
 

@@ -1,7 +1,10 @@
 package one.xis.security;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
+
+import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.Base64;
@@ -15,14 +18,11 @@ class SecurityUtil {
     }
 
     static String signHmacSHA256(String data, String secret) {
-        try {
-            Mac mac = Mac.getInstance("HmacSHA256");
-            mac.init(new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
-            byte[] sig = mac.doFinal(data.getBytes(StandardCharsets.UTF_8));
-            return Base64.getUrlEncoder().withoutPadding().encodeToString(sig);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to sign JWT", e);
-        }
+        SecretKey key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        return Jwts.builder()
+                .setPayload(data)
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
     }
 
     static String encodeBase64UrlSafe(String s) {
