@@ -92,8 +92,12 @@ public class NettyController implements FrameworkController<FullHttpResponse, Fu
     }
 
     @Override
-    public RenewTokenResponse renewToken(RenewTokenRequest request) {
-        return frontendService.processRenewTokenRequest(request);
+    public FullHttpResponse renewTokens(String renewToken) {
+        try {
+            return mapper.toFullHttpResponse(frontendService.processRenewTokenRequest(renewToken));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

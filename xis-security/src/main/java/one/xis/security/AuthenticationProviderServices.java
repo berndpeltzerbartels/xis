@@ -19,8 +19,7 @@ import java.util.Map;
 @XISComponent
 @RequiredArgsConstructor
 public class AuthenticationProviderServices {
-
-    private final AuthenticationConfiguration authenticationConfiguration;
+    
     private final Collection<AuthenticationProviderConfiguration> authenticationProviderConfigurations;
     private final AuthenticationProviderConnectionFactory connectionFactory;
     private final Map<String, AuthenticationProviderService> authenticationProviderServices = new HashMap<>();
@@ -31,7 +30,7 @@ public class AuthenticationProviderServices {
     @XISInit
     public void initialize() {
         for (AuthenticationProviderConfiguration providerConfiguration : authenticationProviderConfigurations) {
-            AuthenticationProviderService service = new AuthenticationProviderServiceImpl(authenticationConfiguration, providerConfiguration, connectionFactory);
+            AuthenticationProviderService service = new AuthenticationProviderServiceImpl(providerConfiguration, connectionFactory);
             authenticationProviderServices.put(service.getProviderId(), service);
         }
     }

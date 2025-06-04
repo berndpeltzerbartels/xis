@@ -6,10 +6,7 @@ import lombok.Setter;
 import org.tinylog.Logger;
 
 import java.lang.reflect.Parameter;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 abstract class SingletonProducerImpl implements SingletonProducer {
     private final List<SingletonConsumer> consumers = new ArrayList<>();
@@ -55,6 +52,13 @@ abstract class SingletonProducerImpl implements SingletonProducer {
         var args = getArgs();
         var o = invoke(args);
         if (o != null) {
+            if (o instanceof Optional<?> optional) {
+                if (optional.isEmpty()) {
+                    Logger.debug("Singleton created by method returned empty Optional: {}", o);
+                    return;
+                }
+                o = optional.get();
+            }
             Logger.debug("Singleton created by method: {}", o);
             notifySingletonCreationListeners(o);
             assignValueInConsumers(o);

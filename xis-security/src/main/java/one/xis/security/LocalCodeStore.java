@@ -3,14 +3,12 @@ package one.xis.security;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import lombok.RequiredArgsConstructor;
-import one.xis.context.XISComponent;
 
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
-@XISComponent
 @RequiredArgsConstructor
-public class LocalCodeStore {
+class LocalCodeStore {
 
     private final Duration expiry = Duration.ofMinutes(15);
 

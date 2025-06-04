@@ -1,7 +1,6 @@
 package one.xis.security;
 
 import com.google.gson.Gson;
-import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
 
 import javax.crypto.Mac;
@@ -13,7 +12,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @XISComponent
-@RequiredArgsConstructor
 public class TokenManagerImpl implements TokenManager {
 
     private final String secret;
@@ -25,7 +23,9 @@ public class TokenManagerImpl implements TokenManager {
             {"alg":"HS256","typ":"JWT"}""".getBytes();
 
     public TokenManagerImpl() {
-        this(SecurityUtil.createRandomKey(32), Duration.of(15, ChronoUnit.MINUTES).getSeconds(), Duration.of(1, ChronoUnit.HOURS).getSeconds());
+        this.secret = SecurityUtil.createRandomKey(32);
+        this.tokenAliveTimeSeconds = Duration.of(15, ChronoUnit.MINUTES).getSeconds();
+        this.renewTokenAliveTimeSeconds = Duration.of(1, ChronoUnit.HOURS).getSeconds();
     }
 
     @Override

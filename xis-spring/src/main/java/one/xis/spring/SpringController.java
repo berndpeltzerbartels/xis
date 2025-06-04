@@ -1,6 +1,7 @@
 package one.xis.spring;
 
 
+import lombok.NonNull;
 import lombok.Setter;
 import one.xis.PathVariable;
 import one.xis.server.*;
@@ -94,7 +95,7 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
                 .maxAge(Duration.ofDays(7))  // Oder dynamisch, falls du das auch speicherst
                 .path("/")
                 .build();
-        
+
         return ResponseEntity.status(302)
                 .header("Location", authData.getUrl()) // z. B. "/dashboard"
                 .header("Set-Cookie", accessCookie.toString())
@@ -104,8 +105,29 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
 
     @Override
     @PostMapping("/xis/token/renew")
-    public RenewTokenResponse renewToken(RenewTokenRequest request) {
-        return frontendService.processRenewTokenRequest(request);
+    public ResponseEntity<?> renewTokens(@NonNull @RequestHeader("Authentication") String renewToken) {
+        var renewTokenResponse = frontendService.processRenewTokenRequest(renewToken.substring("Bearer ".length()));
+
+        var accessCookie = ResponseCookie.from("access_token", renewTokenResponse.getAccessToken())
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("Strict")
+                .maxAge(Duration.ofSeconds(renewTokenResponse.getAccessTokenExpiresAt() - Instant.now().getEpochSecond()))
+                .path("/")
+                .build();
+
+        var renewCookie = ResponseCookie.from("refresh_token", renewTokenResponse.getRenewToken())
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("Strict")
+                .maxAge(Duration.ofDays(7))  // Oder dynamisch, falls du das auch speicherst
+                .path("/")
+                .build();
+
+        return ResponseEntity.status(201)
+                .header("Set-Cookie", accessCookie.toString())
+                .header("Set-Cookie", renewCookie.toString())
+                .build();
     }
 
     @Override

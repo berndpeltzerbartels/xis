@@ -36,6 +36,33 @@ public class NettyMapper {
         return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, copiedBuffer(json, StandardCharsets.UTF_8));
     }
 
+    /**
+     * Converts a RenewTokenResponse to a FullHttpResponse. Th
+     *
+     * @param renewTokenResponse the RenewTokenResponse to convert
+     * @return a FullHttpResponse containing the JSON representation of the RenewTokenResponse
+     * @throws IOException if there is an error during conversion
+     */
+    public FullHttpResponse toFullHttpResponse(RenewTokenResponse renewTokenResponse) throws IOException {
+        long accessTokenMaxAge = renewTokenResponse.getAccessTokenExpiresAt() - Instant.now().getEpochSecond();
+
+        DefaultFullHttpResponse response = new DefaultFullHttpResponse(
+                HttpVersion.HTTP_1_1,
+                HttpResponseStatus.NO_CONTENT
+        );
+
+        response.headers().add(HttpHeaderNames.SET_COOKIE,
+                ServerCookieEncoder.encode("access_token", renewTokenResponse.getAccessToken()) +
+                        "; HttpOnly; Secure; Path=/; SameSite=Strict; Max-Age=" + accessTokenMaxAge);
+
+        response.headers().add(HttpHeaderNames.SET_COOKIE,
+                ServerCookieEncoder.encode("refresh_token", renewTokenResponse.getRenewToken()) +
+                        "; HttpOnly; Secure; Path=/; SameSite=Strict; Max-Age=" + Duration.ofDays(7).getSeconds());
+
+        return response;
+
+    }
+
     public FullHttpResponse toFullHttpResponse(Object obj) throws IOException {
         byte[] content = objectMapper.writeValueAsBytes(obj);
         return new DefaultFullHttpResponse(
@@ -44,12 +71,6 @@ public class NettyMapper {
                 Unpooled.wrappedBuffer(content)
         );
     }
-
-    public RenewTokenRequest toRenewTokenRequest(FullHttpRequest request) throws IOException {
-        String json = request.content().toString(StandardCharsets.UTF_8);
-        return objectMapper.readValue(json, RenewTokenRequest.class);
-    }
-
 
     public FullHttpResponse toRedirectWithCookies(String location, AuthenticationData authData) {
         long accessTokenMaxAge = authData.getAccessTokenExpiresAt() - Instant.now().getEpochSecond();

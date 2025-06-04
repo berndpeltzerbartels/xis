@@ -85,9 +85,9 @@ public class FrontendServiceImpl implements FrontendService {
     }
 
     @Override
-    public RenewTokenResponse processRenewTokenRequest(RenewTokenRequest request) {
+    public RenewTokenResponse processRenewTokenRequest(String renewToken) {
         try {
-            var result = tokenManager.renew(request.getRenewToken());
+            var result = tokenManager.renew(renewToken);
             return new RenewTokenResponse(result.accessToken(),
                     result.accessTokenExpiresAt().toEpochMilli(),
                     result.renewToken(),

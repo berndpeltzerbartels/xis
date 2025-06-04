@@ -3,20 +3,18 @@ package one.xis.security;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
-import one.xis.context.XISComponent;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.*;
 
-import static java.time.temporal.ChronoUnit.MILLIS;
 import static java.time.temporal.ChronoUnit.MINUTES;
+import static java.time.temporal.ChronoUnit.SECONDS;
 
-@XISComponent
 @RequiredArgsConstructor
-public class LocalAuthenticationImpl implements LocalAuthentication {
+class LocalAuthenticationServiceImpl implements LocalAuthenticationService {
 
-    private final LocalCodeStore codeStore;
+    private final LocalCodeStore codeStore = new LocalCodeStore();
     private final UserService userService;
     private final String secret = SecurityUtil.createRandomKey(32);
     private final Duration lifetime = Duration.of(15, MINUTES);
@@ -32,7 +30,7 @@ public class LocalAuthenticationImpl implements LocalAuthentication {
     }
 
     @Override
-    public LocalAuthenticationTokenResponse issueToken(String code, String state) throws InvalidStateParameterException, AuthenticationException {
+    public LocalAuthenticationTokenResponse issueToken(String code, String state) throws AuthenticationException {
         String userId = codeStore.getUserIdForCode(code);
         if (userId == null) {
             throw new InvalidStateParameterException();
@@ -70,11 +68,12 @@ public class LocalAuthenticationImpl implements LocalAuthentication {
 
     private LocalAuthenticationTokenResponse generateTokenResponse(String userId, String state) throws AuthenticationException {
         long now = System.currentTimeMillis();
-        Date expiry = new Date(now + lifetime.get(MILLIS));
+        Date expiry = new Date(now + lifetime.get(SECONDS) * 1000L);
 
         LocalUserInfo userInfo = userService.getUserInfo(userId);
 
         String jwt = Jwts.builder()
+                .setId(UUID.randomUUID().toString())
                 .setSubject(userId)
                 .claim("roles", userInfo.getRoles())
                 .claim("claims", userInfo.getClaims())
@@ -84,6 +83,7 @@ public class LocalAuthenticationImpl implements LocalAuthentication {
                 .compact();
 
         String refreshToken = Jwts.builder()
+                .setId(UUID.randomUUID().toString())
                 .setSubject(userId)
                 .claim("type", "refresh")
                 .setIssuedAt(new Date(now))

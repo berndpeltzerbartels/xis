@@ -32,9 +32,11 @@ var gsonVersion = "2.10.1"
 dependencies {
 
     // Local project dependencies
-    implementation(project(":xis-deserializer"))
+    compileOnly(project(":xis-deserializer"))
+    compileOnly(project(":xis-resources"))
     implementation(project(":xis-context"))
     implementation(project(":xis-util"))
+    compileOnly(project(":xis-adapter-spi"))
 
     // Gson dependency
     implementation "com.google.code.gson:gson:$gsonVersion"
@@ -55,6 +57,7 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
     testImplementation "org.mockito:mockito-core:$mockitoVersion"
     testImplementation("org.assertj:assertj-core:3.16.1")
+    testCompileOnly(project(":xis-adapter-spi"))
 }
 
 test {

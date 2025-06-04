@@ -5,6 +5,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Configuration for an authentication provider, such as OIDC (OpenID Connect).
+ * This class holds the necessary details to connect to an authentication provider,
+ * including client credentials, endpoints, and application root URL.
+ * <p>
+ * For each instance in context an {@link AuthenticationProviderService} is created
+ */
 @Data
 @Builder
 @NoArgsConstructor
@@ -26,6 +33,7 @@ public class AuthenticationProviderConfiguration {
     /**
      * The id of the authentication provider, like "oidc", "oidc-google", "oidc-github" or "oidc-azure".
      * It is used to identify the provider in the system. Name is of free choice, but should be unique.
+     * We append this to authentication callback url, so it is used to identify the provider in the system.
      */
     private String authenticationProviderId;
 
@@ -50,4 +58,24 @@ public class AuthenticationProviderConfiguration {
      * It is used to get the user id, roles and other attributes.
      */
     private String userInfoEndpoint;
+
+    public static final String CALLBACK_URL = "/xis/auth";
+
+
+    /**
+     * The root URL of this application like <a href="http://localhost:8080">http://localhost:8080</a>
+     * or <a href="https://example.com">.https://example.co</a>. It might end with context path, too.
+     */
+    private String applicationRootEndpoint = "";
+
+
+    /**
+     * Returns the callback URL for the authentication provider.
+     * This URL is used to redirect users back to the application after successful authentication.
+     *
+     * @return The callback URL as a String.
+     */
+    public String getCallbackUrl() {
+        return applicationRootEndpoint + CALLBACK_URL;
+    }
 }

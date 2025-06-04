@@ -9,8 +9,6 @@ import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
 import one.xis.server.ClientRequest;
 import one.xis.server.FrontendService;
-import one.xis.server.RenewTokenRequest;
-import one.xis.server.RenewTokenResponse;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -92,11 +90,8 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
             case "/xis/page/action" -> controller.onPageLinkAction(clientRequest, clientRequest.getLocale());
             case "/xis/form/action" -> controller.onFormAction(clientRequest, clientRequest.getLocale());
             case "/xis/widget/action" -> controller.onWidgetLinkAction(clientRequest, clientRequest.getLocale());
-            case "/xis/token/renew" -> {
-                RenewTokenRequest renewRequest = mapper.toRenewTokenRequest(request);
-                RenewTokenResponse renewResponse = controller.renewToken(renewRequest);
-                yield mapper.toFullHttpResponse(renewResponse);
-            }
+            case "/xis/token/renew" ->
+                    controller.renewTokens(request.headers().get("Authentication").substring("Bearer ".length()));
             default -> notFound(HttpMethod.POST, uri);
         };
     }

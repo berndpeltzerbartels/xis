@@ -18,14 +18,12 @@ class AuthenticationProviderServiceImplTest {
     @BeforeEach
     void setup() {
         AuthenticationProviderConnectionFactory connectionFactory = mock(AuthenticationProviderConnectionFactory.class);
-        AuthenticationConfiguration authenticationConfiguration = new AuthenticationConfiguration();
-        authenticationConfiguration.setApplicationRootEndpoint("https://myapp");
         AuthenticationProviderConfiguration providerConfiguration = new AuthenticationProviderConfiguration();
         providerConfiguration.setAuthorizationEndpoint("https://provider/auth");
         providerConfiguration.setTokenEndpoint("https://provider/token");
         providerConfiguration.setClientId("my-client-id");
         providerConfiguration.setClientSecret("my-secret");
-        service = new AuthenticationProviderServiceImpl(authenticationConfiguration, providerConfiguration, connectionFactory);
+        service = new AuthenticationProviderServiceImpl(providerConfiguration, connectionFactory);
     }
 
     @Test

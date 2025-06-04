@@ -2,8 +2,6 @@ package one.xis.security;
 
 import com.google.gson.Gson;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import one.xis.context.XISComponent;
 import one.xis.utils.lang.StringUtils;
 
 import java.net.HttpURLConnection;
@@ -15,22 +13,17 @@ import java.util.Map;
 import static java.time.temporal.ChronoUnit.MINUTES;
 import static one.xis.utils.lang.StringUtils.isNotEmpty;
 
-@XISComponent
-@RequiredArgsConstructor
 class AuthenticationProviderServiceImpl implements AuthenticationProviderService {
 
     private static final Duration STATE_PARAMETER_EXPIRATION = Duration.of(15, MINUTES);
 
     private final AuthenticationProviderConnectionFactory connectionFactory;
-    private final AuthenticationConfiguration configuration;
     private final AuthenticationProviderConfiguration providerConfiguration;
     private final String stateSignatureKey;
     private final Gson gson = new Gson();
 
-    AuthenticationProviderServiceImpl(AuthenticationConfiguration configuration,
-                                      AuthenticationProviderConfiguration providerConfiguration,
+    AuthenticationProviderServiceImpl(AuthenticationProviderConfiguration providerConfiguration,
                                       AuthenticationProviderConnectionFactory connectionFactory) {
-        this.configuration = configuration;
         this.providerConfiguration = providerConfiguration;
         this.connectionFactory = connectionFactory;
         this.stateSignatureKey = SecurityUtil.createRandomKey(32);
@@ -38,14 +31,12 @@ class AuthenticationProviderServiceImpl implements AuthenticationProviderService
 
     @Override
     public String createAuthorizationUrl() {
-        return createAuthorizationUrl(configuration.getApplicationRootEndpoint());
+        return createAuthorizationUrl(providerConfiguration.getApplicationRootEndpoint());
     }
 
     @Override
     public String createAuthorizationUrl(String urlAfterLogin) {
-        String state = createStateParameter(urlAfterLogin);
-        String stateSignature = SecurityUtil.signHmacSHA256(state, stateSignatureKey);
-        String stateParameter = SecurityUtil.encodeBase64UrlSafe(state + "." + stateSignature);
+        String stateParameter = createStateParameter(urlAfterLogin);
         StringBuilder urlBuilder = new StringBuilder(providerConfiguration.getAuthorizationEndpoint())
                 .append("?response_type=code")
                 .append("&redirect_uri=").append(getFullAuthenticationCallbackUrl())
@@ -79,7 +70,7 @@ class AuthenticationProviderServiceImpl implements AuthenticationProviderService
         StringBuilder requestBody = new StringBuilder()
                 .append("grant_type=authorization_code")
                 .append("&code=").append(code)
-                .append("&redirect_uri=").append(configuration.getCallbackUrl());
+                .append("&redirect_uri=").append(providerConfiguration.getCallbackUrl());
         if (StringUtils.isNotEmpty(providerConfiguration.getClientId())) {
             requestBody.append("&client_id=").append(providerConfiguration.getClientId());
         }
@@ -109,7 +100,7 @@ class AuthenticationProviderServiceImpl implements AuthenticationProviderService
     }
 
     private String getFullAuthenticationCallbackUrl() {
-        return configuration.getCallbackUrl() + "/" + providerConfiguration.getAuthenticationProviderId();
+        return providerConfiguration.getCallbackUrl();
     }
 
     private String readErrorStream(HttpURLConnection connection) {
