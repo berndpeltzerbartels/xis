@@ -4,6 +4,8 @@ package one.xis.spring;
 import lombok.NonNull;
 import lombok.Setter;
 import one.xis.PathVariable;
+import one.xis.security.InvalidCredentialsException;
+import one.xis.security.Login;
 import one.xis.server.*;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.ResponseCookie;
@@ -11,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
-import java.time.Instant;
 import java.util.Locale;
 import java.util.Map;
 
@@ -77,18 +78,32 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
     }
 
     @Override
+    @PostMapping("/xis/token-provider/login")
+    public ResponseEntity<?> localTokenProviderLogin(Login login) {
+        try {
+            var code = frontendService.localTokenProviderLogin(login);
+            var state = login.getState();
+            return ResponseEntity.status(301)
+                    .header("Location", "/xis/auth/local?code=" + code + "&state=" + state) // Redirect to the auth endpoint
+                    .build();
+        } catch (InvalidCredentialsException e) {
+            return ResponseEntity.status(401).body("Invalid credentials");
+        }
+    }
+
+    @Override
     @GetMapping("/xis/auth/{provider}")
-    public ResponseEntity<?> auth(HttpRequest request, @PathVariable("provider") String provider) {
+    public ResponseEntity<?> authenticationCallback(HttpRequest request, @PathVariable("provider") String provider) {
         AuthenticationData authData = frontendService.authenticationCallback(provider, request.getURI().getQuery());
-        var accessCookie = ResponseCookie.from("access_token", authData.getAccessToken())
+        var accessCookie = ResponseCookie.from("access_token", authData.getApiTokens().getAccessToken())
                 .httpOnly(true)
                 .secure(true)
                 .sameSite("Strict")
-                .maxAge(Duration.ofSeconds(authData.getAccessTokenExpiresAt() - Instant.now().getEpochSecond()))
+                .maxAge(authData.getApiTokens().getAccessTokenExpiresIn())
                 .path("/")
                 .build();
 
-        var renewCookie = ResponseCookie.from("refresh_token", authData.getRenewToken())
+        var renewCookie = ResponseCookie.from("refresh_token", authData.getApiTokens().getRenewToken())
                 .httpOnly(true)
                 .secure(true)
                 .sameSite("Strict")
@@ -105,14 +120,14 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
 
     @Override
     @PostMapping("/xis/token/renew")
-    public ResponseEntity<?> renewTokens(@NonNull @RequestHeader("Authentication") String renewToken) {
-        var renewTokenResponse = frontendService.processRenewTokenRequest(renewToken.substring("Bearer ".length()));
+    public ResponseEntity<?> renewApiTokens(@NonNull @RequestHeader("Authentication") String renewToken) {
+        var renewTokenResponse = frontendService.processRenewApiTokenRequest(renewToken.substring("Bearer ".length()));
 
         var accessCookie = ResponseCookie.from("access_token", renewTokenResponse.getAccessToken())
                 .httpOnly(true)
                 .secure(true)
                 .sameSite("Strict")
-                .maxAge(Duration.ofSeconds(renewTokenResponse.getAccessTokenExpiresAt() - Instant.now().getEpochSecond()))
+                .maxAge(renewTokenResponse.getAccessTokenExpiresIn())
                 .path("/")
                 .build();
 
@@ -128,12 +143,6 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
                 .header("Set-Cookie", accessCookie.toString())
                 .header("Set-Cookie", renewCookie.toString())
                 .build();
-    }
-
-    @Override
-    @GetMapping("/xis/page/javascript/{javascriptPath}")
-    public String getPageJavascript(@PathVariable("javascriptPath") String javascriptPath) {
-        return frontendService.getPageJavascript(javascriptPath);
     }
 
     @Override

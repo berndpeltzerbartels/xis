@@ -6,6 +6,6 @@ import lombok.Data;
 public class LocalAuthenticationTokenResponse {
     private String accessToken;
     private String refreshToken;
-    private long expiresIn;
+    private long expiresInSeconds;
     private String state;
 }

@@ -2,7 +2,7 @@ package one.xis.security;
 
 import lombok.NonNull;
 
-public interface AuthenticationProviderService {
+public interface AuthenticationService {
     /**
      * Creates an authorization URL for the authentication provider.
      * This URL is used to redirect users to the provider's login page.

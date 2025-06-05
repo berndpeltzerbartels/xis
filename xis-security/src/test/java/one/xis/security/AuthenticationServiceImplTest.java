@@ -11,9 +11,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 
-class AuthenticationProviderServiceImplTest {
+class AuthenticationServiceImplTest {
 
-    private AuthenticationProviderServiceImpl service;
+    private AuthenticationServiceImpl service;
 
     @BeforeEach
     void setup() {
@@ -23,7 +23,7 @@ class AuthenticationProviderServiceImplTest {
         providerConfiguration.setTokenEndpoint("https://provider/token");
         providerConfiguration.setClientId("my-client-id");
         providerConfiguration.setClientSecret("my-secret");
-        service = new AuthenticationProviderServiceImpl(providerConfiguration, connectionFactory);
+        service = new AuthenticationServiceImpl(providerConfiguration, connectionFactory);
     }
 
     @Test
@@ -69,7 +69,7 @@ class AuthenticationProviderServiceImplTest {
     private String getStateKey() {
         // Reflection workaround for accessing private final field
         try {
-            var field = AuthenticationProviderServiceImpl.class.getDeclaredField("stateSignatureKey");
+            var field = AuthenticationServiceImpl.class.getDeclaredField("stateSignatureKey");
             field.setAccessible(true);
             return (String) field.get(service);
         } catch (Exception e) {

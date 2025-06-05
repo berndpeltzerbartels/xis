@@ -9,15 +9,15 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class LocalAuthenticationServiceTest {
+class LocalAuthenticationProviderServiceTest {
 
-    private LocalAuthenticationServiceImpl authentication;
+    private LocalAuthenticationProviderServiceImpl authentication;
     private UserService userService;
 
     @BeforeEach
     void setUp() {
         userService = new TestUserService();
-        authentication = new LocalAuthenticationServiceImpl(userService);
+        authentication = new LocalAuthenticationProviderServiceImpl(userService);
     }
 
     @Test

@@ -5,12 +5,11 @@ import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;
 import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
+import one.xis.security.Login;
 import one.xis.server.*;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.time.Instant;
 
 import static io.netty.buffer.Unpooled.copiedBuffer;
 
@@ -37,14 +36,16 @@ public class NettyMapper {
     }
 
     /**
-     * Converts a RenewTokenResponse to a FullHttpResponse. Th
+     * Converts a RenewTokenResponse to a FullHttpResponse. This method creates a response with
+     * HTTP status NO_CONTENT and sets the access and refresh tokens as cookies in the response headers.
      *
-     * @param renewTokenResponse the RenewTokenResponse to convert
+     * @param tokenResponse the RenewTokenResponse to convert
      * @return a FullHttpResponse containing the JSON representation of the RenewTokenResponse
      * @throws IOException if there is an error during conversion
      */
-    public FullHttpResponse toFullHttpResponse(RenewTokenResponse renewTokenResponse) throws IOException {
-        long accessTokenMaxAge = renewTokenResponse.getAccessTokenExpiresAt() - Instant.now().getEpochSecond();
+    public FullHttpResponse toFullHttpResponse(ApiTokens tokenResponse) throws IOException {
+        long accessTokenMaxAge = tokenResponse.getAccessTokenExpiresIn().getSeconds();
+        long renewTokenMaxAge = tokenResponse.getRenewTokenExpiresIn().getSeconds();
 
         DefaultFullHttpResponse response = new DefaultFullHttpResponse(
                 HttpVersion.HTTP_1_1,
@@ -52,12 +53,12 @@ public class NettyMapper {
         );
 
         response.headers().add(HttpHeaderNames.SET_COOKIE,
-                ServerCookieEncoder.encode("access_token", renewTokenResponse.getAccessToken()) +
+                ServerCookieEncoder.encode("access_token", tokenResponse.getAccessToken()) +
                         "; HttpOnly; Secure; Path=/; SameSite=Strict; Max-Age=" + accessTokenMaxAge);
 
         response.headers().add(HttpHeaderNames.SET_COOKIE,
-                ServerCookieEncoder.encode("refresh_token", renewTokenResponse.getRenewToken()) +
-                        "; HttpOnly; Secure; Path=/; SameSite=Strict; Max-Age=" + Duration.ofDays(7).getSeconds());
+                ServerCookieEncoder.encode("refresh_token", tokenResponse.getRenewToken()) +
+                        "; HttpOnly; Secure; Path=/; SameSite=Strict; Max-Age=" + renewTokenMaxAge);
 
         return response;
 
@@ -73,8 +74,8 @@ public class NettyMapper {
     }
 
     public FullHttpResponse toRedirectWithCookies(String location, AuthenticationData authData) {
-        long accessTokenMaxAge = authData.getAccessTokenExpiresAt() - Instant.now().getEpochSecond();
-
+        long accessTokenMaxAge = authData.getApiTokens().getAccessTokenExpiresIn().getSeconds();
+        long renewTokenMaxAge = authData.getApiTokens().getRenewTokenExpiresIn().getSeconds();
         DefaultFullHttpResponse response = new DefaultFullHttpResponse(
                 HttpVersion.HTTP_1_1,
                 HttpResponseStatus.FOUND
@@ -83,15 +84,31 @@ public class NettyMapper {
         response.headers().set(HttpHeaderNames.LOCATION, location);
 
         response.headers().add(HttpHeaderNames.SET_COOKIE,
-                ServerCookieEncoder.encode("access_token", authData.getAccessToken()) +
+                ServerCookieEncoder.encode("access_token", authData.getApiTokens().getAccessToken()) +
                         "; HttpOnly; Secure; Path=/; SameSite=Strict; Max-Age=" + accessTokenMaxAge);
 
         response.headers().add(HttpHeaderNames.SET_COOKIE,
-                ServerCookieEncoder.encode("refresh_token", authData.getRenewToken()) +
-                        "; HttpOnly; Secure; Path=/; SameSite=Strict; Max-Age=" + Duration.ofDays(7).getSeconds());
+                ServerCookieEncoder.encode("refresh_token", authData.getApiTokens().getRenewToken()) +
+                        "; HttpOnly; Secure; Path=/; SameSite=Strict; Max-Age=" + renewTokenMaxAge);
 
         return response;
     }
 
 
+    public FullHttpResponse toRedirectWithCodeAndState(String code, String state) {
+        DefaultFullHttpResponse response = new DefaultFullHttpResponse(
+                HttpVersion.HTTP_1_1,
+                HttpResponseStatus.FOUND
+        );
+
+        String location = "/xis/auth/local?code=" + code + "&state=" + state;
+        response.headers().set(HttpHeaderNames.LOCATION, location);
+
+        return response;
+    }
+
+    public Login toLoginRequest(FullHttpRequest request) throws IOException {
+        String json = request.content().toString(StandardCharsets.UTF_8);
+        return objectMapper.readValue(json, Login.class);
+    }
 }

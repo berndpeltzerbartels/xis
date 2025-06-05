@@ -9,16 +9,17 @@ import one.xis.context.XISComponent;
 import one.xis.context.XISInit;
 import one.xis.resource.Resource;
 import one.xis.resource.Resources;
-import one.xis.security.AuthenticationProviderServices;
-import one.xis.security.InvalidTokenException;
-import one.xis.security.TokenManager;
+import one.xis.security.*;
 import org.tinylog.Logger;
 
+import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
+
+import static java.time.temporal.ChronoUnit.SECONDS;
 
 /**
  * Encapsulates all methods, required by the framework's controller.
@@ -31,8 +32,9 @@ public class FrontendServiceImpl implements FrontendService {
     private final ClientConfigService configService;
     private final ResourceService resourceService;
     private final Resources resources;
-    private final AuthenticationProviderServices authenticationProviderServices;
+    private final AuthenticationServices authenticationServices;
     private final TokenManager tokenManager;
+    private final LocalAuthenticationProviderService authenticationProviderService;
     private final Collection<RequestFilter> requestFilters;
     private Resource appJsResource;
     private Resource classesJsResource;
@@ -85,13 +87,13 @@ public class FrontendServiceImpl implements FrontendService {
     }
 
     @Override
-    public RenewTokenResponse processRenewTokenRequest(String renewToken) {
+    public ApiTokens processRenewApiTokenRequest(String renewToken) {
         try {
             var result = tokenManager.renew(renewToken);
-            return new RenewTokenResponse(result.accessToken(),
-                    result.accessTokenExpiresAt().toEpochMilli(),
+            return new ApiTokens(result.accessToken(),
+                    result.accessTokenExpiresAt(),
                     result.renewToken(),
-                    result.renewTokenExpiresAt().toEpochMilli());
+                    result.renewTokenExpiresAt());
         } catch (InvalidTokenException e) {
             throw new RuntimeException(e);
         }
@@ -99,18 +101,38 @@ public class FrontendServiceImpl implements FrontendService {
 
     @Override
     public AuthenticationData authenticationCallback(String provider, String queryString) {
-        var service = Objects.requireNonNull(authenticationProviderServices.getAuthenticationProviderService(provider));
+        var service = Objects.requireNonNull(authenticationServices.getAuthenticationProviderService(provider));
         var authenticationProviderData = service.verifyStateAndExtractCode(queryString);
         var tokenResponse = service.requestTokens(authenticationProviderData.getCode());
-        var now = System.currentTimeMillis();
+        return getAuthenticationData(tokenResponse, authenticationProviderData);
+    }
+
+    private static AuthenticationData getAuthenticationData(AuthenticationProviderTokenResponse tokenResponse, AuthenticationProviderStateData authenticationProviderData) {
+        var apiTokens = new ApiTokens();
+        apiTokens.setAccessToken(tokenResponse.getAccessToken());
+        apiTokens.setRenewTokenExpiresIn(tokenResponse.getRefreshExpiresIn());
+        apiTokens.setRenewToken(tokenResponse.getRefreshToken());
+        apiTokens.setRenewTokenExpiresIn(tokenResponse.getRefreshExpiresIn());
         var authenticationData = new AuthenticationData();
-        authenticationData.setAccessToken(tokenResponse.getAccessToken());
-        authenticationData.setAccessTokenExpiresAt(now + tokenResponse.getExpiresInSeconds() * 1000L);
-        authenticationData.setRenewToken(tokenResponse.getRefreshToken());
+        authenticationData.setApiTokens(apiTokens);
         authenticationData.setUrl(authenticationProviderData.getStateParameterPayload().getRedirect());
         return authenticationData;
     }
 
+    @Override
+    public String localTokenProviderLogin(Login login) throws InvalidCredentialsException {
+        return authenticationProviderService.login(login);
+    }
+
+    @Override
+    public BearerTokens localTokenProviderGetTokens(String code, String state) throws AuthenticationException {
+        var tokenResponse = authenticationProviderService.issueToken(code, state);
+        var bearerTokens = new BearerTokens();
+        bearerTokens.setAccessToken(tokenResponse.getAccessToken());
+        bearerTokens.setAccessTokenExpiresAt(Instant.now().plus(tokenResponse.getExpiresInSeconds(), SECONDS));
+        bearerTokens.setRenewToken(tokenResponse.getRefreshToken());
+        return bearerTokens;
+    }
 
     @Override
     public String getPage(String id) {
@@ -170,12 +192,7 @@ public class FrontendServiceImpl implements FrontendService {
     public String getBundleJs() {
         return bundleJsResource.getContent();
     }
-
-    @Override
-    public String getPageJavascript(String javascriptPath) {
-        return resourceService.getJavascript(javascriptPath);
-    }
-
+    
     private void addUserContext(ClientRequest request) {
         var userContext = new UserContext();
         userContext.setClientId(request.getClientId());

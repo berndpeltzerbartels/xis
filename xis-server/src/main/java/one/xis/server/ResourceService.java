@@ -41,7 +41,6 @@ class ResourceService {
 
     private Map<String, Resource> widgetHtmlResources;
     private Map<String, Resource> pageHtmlResources;
-    private final Map<String, Resource> pageJavascriptResources = new HashMap<>();
     private ResourceCache<String> pageBodyResourceCache;
     private ResourceCache<String> pageHeadResourceCache;
     private ResourceCache<Map<String, String>> pageAttributesResourceCache;
@@ -55,12 +54,6 @@ class ResourceService {
     void initPageResources() {
         pageHtmlResources = pageControllers.stream()
                 .collect(Collectors.toMap(pathResolver::normalizedPath, this::htmlResource));
-        pageControllers.forEach(pageController -> {
-            var path = getJavascriptResourcePath(pageController);
-            if (resources.exists(path)) {
-                pageJavascriptResources.put(PageUtil.getJavascriptResourcePath(pageController), resources.getByPath(path));
-            }
-        });
         pageHeadResourceCache = new ResourceCache<>(this::extractPageHead, pageHtmlResources);
         pageBodyResourceCache = new ResourceCache<>(this::extractPageBody, pageHtmlResources);
         pageAttributesResourceCache = new ResourceCache<>(this::extractBodyAttributes, pageHtmlResources);
@@ -77,10 +70,6 @@ class ResourceService {
 
     String getPage(String id) {
         return pageHtmlResources.get(id).getContent();
-    }
-
-    String getJavascript(String path) {
-        return pageJavascriptResources.get(path).getContent();
     }
 
     String getPageHead(String id) {

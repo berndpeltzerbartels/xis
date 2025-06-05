@@ -1,5 +1,8 @@
 package one.xis.security;
 
+import one.xis.ImportInstances;
+
+@ImportInstances
 public interface UserService {
 
     boolean checkCredentials(String userId, String password);

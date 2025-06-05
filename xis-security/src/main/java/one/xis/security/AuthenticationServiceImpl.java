@@ -13,7 +13,7 @@ import java.util.Map;
 import static java.time.temporal.ChronoUnit.MINUTES;
 import static one.xis.utils.lang.StringUtils.isNotEmpty;
 
-class AuthenticationProviderServiceImpl implements AuthenticationProviderService {
+class AuthenticationServiceImpl implements AuthenticationService {
 
     private static final Duration STATE_PARAMETER_EXPIRATION = Duration.of(15, MINUTES);
 
@@ -22,8 +22,8 @@ class AuthenticationProviderServiceImpl implements AuthenticationProviderService
     private final String stateSignatureKey;
     private final Gson gson = new Gson();
 
-    AuthenticationProviderServiceImpl(AuthenticationProviderConfiguration providerConfiguration,
-                                      AuthenticationProviderConnectionFactory connectionFactory) {
+    AuthenticationServiceImpl(AuthenticationProviderConfiguration providerConfiguration,
+                              AuthenticationProviderConnectionFactory connectionFactory) {
         this.providerConfiguration = providerConfiguration;
         this.connectionFactory = connectionFactory;
         this.stateSignatureKey = SecurityUtil.createRandomKey(32);

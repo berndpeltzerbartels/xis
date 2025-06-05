@@ -8,7 +8,7 @@ import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 @RequiredArgsConstructor
-class LocalCodeStore {
+class LocalAuthenticationCodeStore {
 
     private final Duration expiry = Duration.ofMinutes(15);
 

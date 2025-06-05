@@ -12,20 +12,20 @@ import static java.time.temporal.ChronoUnit.MINUTES;
 import static java.time.temporal.ChronoUnit.SECONDS;
 
 @RequiredArgsConstructor
-class LocalAuthenticationServiceImpl implements LocalAuthenticationService {
+class LocalAuthenticationProviderServiceImpl implements LocalAuthenticationProviderService {
 
-    private final LocalCodeStore codeStore = new LocalCodeStore();
+    private final LocalAuthenticationCodeStore codeStore = new LocalAuthenticationCodeStore();
     private final UserService userService;
     private final String secret = SecurityUtil.createRandomKey(32);
     private final Duration lifetime = Duration.of(15, MINUTES);
 
     @Override
-    public String login(String userId, String password) throws InvalidCredentialsException {
-        if (!userService.checkCredentials(userId, password)) {
+    public String login(Login login) throws InvalidCredentialsException {
+        if (!userService.checkCredentials(login.getUsername(), login.getPassword())) {
             throw new InvalidCredentialsException();
         }
         String code = UUID.randomUUID().toString();
-        codeStore.store(code, userId);
+        codeStore.store(code, login.getUsername());
         return code;
     }
 
@@ -94,7 +94,7 @@ class LocalAuthenticationServiceImpl implements LocalAuthenticationService {
         LocalAuthenticationTokenResponse response = new LocalAuthenticationTokenResponse();
         response.setAccessToken(jwt);
         response.setRefreshToken(refreshToken);
-        response.setExpiresIn(lifetime.getSeconds());
+        response.setExpiresInSeconds(lifetime.getSeconds());
         response.setState(state);
         return response;
     }

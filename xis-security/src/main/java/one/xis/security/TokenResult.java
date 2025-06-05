@@ -1,8 +1,8 @@
 package one.xis.security;
 
-import java.time.Instant;
+import java.time.Duration;
 
-public record TokenResult(String accessToken, Instant accessTokenExpiresAt, String renewToken,
-                          Instant renewTokenExpiresAt) {
+public record TokenResult(String accessToken, Duration accessTokenExpiresAt, String renewToken,
+                          Duration renewTokenExpiresAt) {
 
 }

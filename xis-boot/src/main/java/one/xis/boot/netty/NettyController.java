@@ -5,6 +5,8 @@ import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.QueryStringDecoder;
 import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
+import one.xis.security.InvalidCredentialsException;
+import one.xis.security.Login;
 import one.xis.server.*;
 
 import java.io.IOException;
@@ -85,24 +87,31 @@ public class NettyController implements FrameworkController<FullHttpResponse, Fu
     }
 
     @Override
-    public FullHttpResponse auth(FullHttpRequest request, String provider) {
+    public FullHttpResponse localTokenProviderLogin(Login login) {
+        String code;
+        try {
+            code = frontendService.localTokenProviderLogin(login);
+        } catch (InvalidCredentialsException e) {
+            throw new RuntimeException(e);
+        }
+        var state = login.getState();
+        return mapper.toRedirectWithCodeAndState(code, state);
+    }
+
+    @Override
+    public FullHttpResponse authenticationCallback(FullHttpRequest request, String provider) {
         String query = new QueryStringDecoder(request.uri()).rawQuery();
         AuthenticationData authData = frontendService.authenticationCallback(provider, query);
         return mapper.toRedirectWithCookies(authData.getUrl(), authData);
     }
 
     @Override
-    public FullHttpResponse renewTokens(String renewToken) {
+    public FullHttpResponse renewApiTokens(String renewToken) {
         try {
-            return mapper.toFullHttpResponse(frontendService.processRenewTokenRequest(renewToken));
+            return mapper.toFullHttpResponse(frontendService.processRenewApiTokenRequest(renewToken));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    @Override
-    public String getPageJavascript(String path) {
-        return frontendService.getPageJavascript(path);
     }
 
     @Override

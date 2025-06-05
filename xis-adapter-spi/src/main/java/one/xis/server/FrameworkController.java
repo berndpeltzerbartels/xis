@@ -1,5 +1,7 @@
 package one.xis.server;
 
+import one.xis.security.Login;
+
 import java.util.Locale;
 import java.util.Map;
 
@@ -19,6 +21,8 @@ public interface FrameworkController<RESP_WRAPPER, REQ, RESP> {
 
     RESP_WRAPPER onFormAction(ClientRequest request, Locale locale);
 
+    RESP localTokenProviderLogin(Login login);
+
     /**
      * Authenticates a user with the given request and provider. This is the callback url
      * the authentication provider will redirect to after successful authentication.
@@ -27,11 +31,9 @@ public interface FrameworkController<RESP_WRAPPER, REQ, RESP> {
      * @param provider the authentication provider to use
      * @return a response containing the authentication result
      */
-    RESP auth(REQ request, String provider);
+    RESP authenticationCallback(REQ request, String provider);
 
-    RESP renewTokens(String renewToken);
-
-    String getPageJavascript(String path);
+    RESP renewApiTokens(String renewToken);
 
     String getPage(String id);
 

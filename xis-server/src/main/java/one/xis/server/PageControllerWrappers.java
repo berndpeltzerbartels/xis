@@ -13,7 +13,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-@Slf4j // TODO May this doese not produce any logs for micronaut
+@Slf4j // TODO May be, this does not produce any logs for micronaut
 @XISComponent
 @RequiredArgsConstructor
 class PageControllerWrappers {

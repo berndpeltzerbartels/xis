@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
  * This class holds the necessary details to connect to an authentication provider,
  * including client credentials, endpoints, and application root URL.
  * <p>
- * For each instance in context an {@link AuthenticationProviderService} is created
+ * For each instance in context an {@link AuthenticationService} is created
  */
 @Data
 @Builder

@@ -1,24 +1,16 @@
 package one.xis.security;
 
-import com.google.gson.annotations.SerializedName;
 import lombok.Data;
+
+import java.time.Duration;
 
 @Data
 public class AuthenticationProviderTokenResponse {
-    @SerializedName("access_token")
     private String accessToken;
-
-    @SerializedName("expires_in")
-    private int expiresInSeconds;
-
-    @SerializedName("refresh_token")
+    private Duration expiresInSeconds;
     private String refreshToken;
     private String scope;
-
-    @SerializedName("token_type")
     private String tokenType;
-
-    @SerializedName("id_token")
     private String idToken;
-
+    private Duration refreshExpiresIn;
 }

@@ -7,6 +7,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
 import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
+import one.xis.security.Login;
 import one.xis.server.ClientRequest;
 import one.xis.server.FrontendService;
 
@@ -48,19 +49,15 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
         }
     }
 
-
     private FullHttpResponse handleGetRequest(String uri, FullHttpRequest request) throws IOException {
         if (uri.equals("/") || uri.endsWith(".html")) {
             return mapper.toFullHttpResponse(frontendService.getRootPageHtml());
         }
         if (uri.startsWith("/xis/auth/")) {
             String provider = uri.substring("/xis/auth/".length());
-            return controller.auth(request, provider);
+            return controller.authenticationCallback(request, provider);
         }
-        if (uri.startsWith("/xis/page/javascript/")) {
-            String path = uri.substring("/xis/page/javascript/".length());
-            return mapper.toFullHttpResponse(controller.getPageJavascript(path));
-        }
+
         return switch (uri) {
             case "/xis/config" -> mapper.toFullHttpResponse(controller.getComponentConfig());
             case "/xis/page" -> mapper.toFullHttpResponse(controller.getPage(request.headers().get("uri")));
@@ -90,11 +87,19 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
             case "/xis/page/action" -> controller.onPageLinkAction(clientRequest, clientRequest.getLocale());
             case "/xis/form/action" -> controller.onFormAction(clientRequest, clientRequest.getLocale());
             case "/xis/widget/action" -> controller.onWidgetLinkAction(clientRequest, clientRequest.getLocale());
-            case "/xis/token/renew" ->
-                    controller.renewTokens(request.headers().get("Authentication").substring("Bearer ".length()));
+            case "/xis/token/renew" -> {
+                String header = request.headers().get("Authentication");
+                if (header == null || !header.startsWith("Bearer ")) yield unauthorized();
+                yield controller.renewApiTokens(header.substring("Bearer ".length()));
+            }
+            case "/xis/token-provider/login" -> {
+                Login login = mapper.toLoginRequest(request);
+                yield controller.localTokenProviderLogin(login);
+            }
             default -> notFound(HttpMethod.POST, uri);
         };
     }
+
 
     private FullHttpResponse notFound(HttpMethod method, String uri) {
         return new DefaultFullHttpResponse(
@@ -103,4 +108,21 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
                 Unpooled.copiedBuffer("Not found " + method + " " + uri, StandardCharsets.UTF_8)
         );
     }
+
+    private FullHttpResponse unauthorized() {
+        String responseBody = "Unauthorized";
+        byte[] content = responseBody.getBytes(StandardCharsets.UTF_8);
+
+        FullHttpResponse response = new DefaultFullHttpResponse(
+                HttpVersion.HTTP_1_1,
+                HttpResponseStatus.UNAUTHORIZED,
+                Unpooled.wrappedBuffer(content)
+        );
+
+        response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
+        response.headers().set(HttpHeaderNames.CONTENT_LENGTH, content.length);
+
+        return response;
+    }
+
 }

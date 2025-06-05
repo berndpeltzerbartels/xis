@@ -18,11 +18,11 @@ import java.util.Map;
  */
 @XISComponent
 @RequiredArgsConstructor
-public class AuthenticationProviderServices {
-    
+public class AuthenticationServices {
+
     private final Collection<AuthenticationProviderConfiguration> authenticationProviderConfigurations;
     private final AuthenticationProviderConnectionFactory connectionFactory;
-    private final Map<String, AuthenticationProviderService> authenticationProviderServices = new HashMap<>();
+    private final Map<String, AuthenticationService> authenticationProviderServices = new HashMap<>();
 
     /**
      * Initializes the authentication provider services based on the provided configurations.
@@ -30,7 +30,7 @@ public class AuthenticationProviderServices {
     @XISInit
     public void initialize() {
         for (AuthenticationProviderConfiguration providerConfiguration : authenticationProviderConfigurations) {
-            AuthenticationProviderService service = new AuthenticationProviderServiceImpl(providerConfiguration, connectionFactory);
+            AuthenticationService service = new AuthenticationServiceImpl(providerConfiguration, connectionFactory);
             authenticationProviderServices.put(service.getProviderId(), service);
         }
     }
@@ -42,7 +42,7 @@ public class AuthenticationProviderServices {
      * @return the authentication provider service
      */
     @NonNull
-    public AuthenticationProviderService getAuthenticationProviderService(String providerId) {
+    public AuthenticationService getAuthenticationProviderService(String providerId) {
         var service = authenticationProviderServices.get(providerId);
         if (service == null) {
             throw new IllegalArgumentException("No authentication provider service found for provider ID: " + providerId);

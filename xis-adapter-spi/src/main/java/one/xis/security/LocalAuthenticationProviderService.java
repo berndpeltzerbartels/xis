@@ -6,17 +6,16 @@ package one.xis.security;
  * <p>
  * This the application itself is the token issuer and verifier.
  */
-public interface LocalAuthenticationService {
+public interface LocalAuthenticationProviderService {
 
     /**
      * Logs in a user with the provided credentials.
      *
-     * @param user     the username of the user
-     * @param password the password of the user
+     * @param login
      * @return a unique code representing the login session
      * @throws InvalidCredentialsException if the credentials are invalid
      */
-    String login(String user, String password) throws InvalidCredentialsException;
+    String login(Login login) throws InvalidCredentialsException;
 
     /**
      * Issues an authentication token based on the provided code and state.

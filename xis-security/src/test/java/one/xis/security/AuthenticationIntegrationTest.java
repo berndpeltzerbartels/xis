@@ -38,9 +38,9 @@ class AuthenticationIntegrationTest {
     @Test
     void integrationLocalAuthWithStateParameterVerification() throws AuthenticationException, InvalidTokenException {
         // Arrange
-        var codeStore = new LocalCodeStore();
+        var codeStore = new LocalAuthenticationCodeStore();
         var userService = new DummyUserService();
-        var localAuth = new LocalAuthenticationServiceImpl(userService);
+        var localAuth = new LocalAuthenticationProviderServiceImpl(userService);
         var connectionFactory = new AuthenticationProviderConnectionFactory();
 
         var providerConfig = new AuthenticationProviderConfiguration();
@@ -48,7 +48,7 @@ class AuthenticationIntegrationTest {
         providerConfig.setAuthorizationEndpoint("https://auth.example.com/authorize");
         providerConfig.setTokenEndpoint("https://auth.example.com/token");
 
-        var providerService = new AuthenticationProviderServiceImpl(providerConfig, connectionFactory);
+        var providerService = new AuthenticationServiceImpl(providerConfig, connectionFactory);
 
         // Act
         String authorizationUrl = providerService.createAuthorizationUrl("/dashboard");
