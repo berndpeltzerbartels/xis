@@ -16,10 +16,10 @@ public interface AuthenticationService {
      * Creates an authorization URL for the authentication provider.
      * This URL is used to redirect users to the provider's login page.
      *
-     * @param landingPage The landing page to redirect to after successful login.
+     * @param providerLoginFormUrl The landing page to redirect to after successful login.
      * @return The authorization URL as a String.
      */
-    String createAuthorizationUrl(String landingPage);
+    String createLoginUrl(String providerLoginFormUrl);
 
 
     /**

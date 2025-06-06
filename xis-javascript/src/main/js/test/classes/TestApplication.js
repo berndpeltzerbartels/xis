@@ -5,7 +5,8 @@ class TestApplication {
         this.localStorage = new LocalStore();
         this.httpConnector = new HttpConnectorMock();
         this.domAccessor = new DomAccessor();
-        this.client = new HttpClient(this.httpConnector);
+        this.tokenManager = new TokenManagerMock();
+        this.client = new HttpClient(this.httpConnector, this.tokenManager);
         this.pages = new Pages(this.client);
         this.urlResolver = new URLResolver(this.pages);
         this.widgetContainers = new WidgetContainers();

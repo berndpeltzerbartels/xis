@@ -23,14 +23,16 @@ class AuthenticationServiceImplTest {
         providerConfiguration.setTokenEndpoint("https://provider/token");
         providerConfiguration.setClientId("my-client-id");
         providerConfiguration.setClientSecret("my-secret");
+        providerConfiguration.setAuthenticationProviderId("my-provider");
+        providerConfiguration.setApplicationRootEndpoint("https://myapp");
         service = new AuthenticationServiceImpl(providerConfiguration, connectionFactory);
     }
 
     @Test
-    void createAuthorizationUrl_containsRequiredParameters() {
+    void createLoginUrl_containsRequiredParameters() {
         String url = service.createAuthorizationUrl();
         assertThat(url).contains("response_type=code")
-                .contains("redirect_uri=https://myapp/callback")
+                .contains("redirect_uri=https://myapp/xis/auth/my-provider")
                 .contains("client_id=my-client-id")
                 .contains("client_secret=my-secret")
                 .contains("state=")
@@ -44,6 +46,7 @@ class AuthenticationServiceImplTest {
         payload.setCsrf("csrf");
         payload.setRedirect("https://bla");
         payload.setIat(Instant.now().getEpochSecond());
+        payload.setExpiresAtSeconds(Instant.now().getEpochSecond() + 2000);
         String statePayload = new Gson().toJson(payload);
         String encodedPayload = Base64.getUrlEncoder().withoutPadding().encodeToString(statePayload.getBytes());
         String signature = SecurityUtil.signHmacSHA256(encodedPayload, getStateKey());

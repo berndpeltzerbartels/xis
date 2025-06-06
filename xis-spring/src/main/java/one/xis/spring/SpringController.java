@@ -95,22 +95,8 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
     @GetMapping("/xis/auth/{provider}")
     public ResponseEntity<?> authenticationCallback(HttpRequest request, @PathVariable("provider") String provider) {
         AuthenticationData authData = frontendService.authenticationCallback(provider, request.getURI().getQuery());
-        var accessCookie = ResponseCookie.from("access_token", authData.getApiTokens().getAccessToken())
-                .httpOnly(true)
-                .secure(true)
-                .sameSite("Strict")
-                .maxAge(authData.getApiTokens().getAccessTokenExpiresIn())
-                .path("/")
-                .build();
-
-        var renewCookie = ResponseCookie.from("refresh_token", authData.getApiTokens().getRenewToken())
-                .httpOnly(true)
-                .secure(true)
-                .sameSite("Strict")
-                .maxAge(Duration.ofDays(7))  // Oder dynamisch, falls du das auch speicherst
-                .path("/")
-                .build();
-
+        var accessCookie = createAccessTokenCookie(authData.getApiTokens().getAccessToken(), authData.getApiTokens().getAccessTokenExpiresIn());
+        var renewCookie = createRenewTokenCookie(authData.getApiTokens().getRenewToken(), authData.getApiTokens().getRenewTokenExpiresIn());
         return ResponseEntity.status(302)
                 .header("Location", authData.getUrl()) // z. B. "/dashboard"
                 .header("Set-Cookie", accessCookie.toString())
@@ -122,23 +108,8 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
     @PostMapping("/xis/token/renew")
     public ResponseEntity<?> renewApiTokens(@NonNull @RequestHeader("Authentication") String renewToken) {
         var renewTokenResponse = frontendService.processRenewApiTokenRequest(renewToken.substring("Bearer ".length()));
-
-        var accessCookie = ResponseCookie.from("access_token", renewTokenResponse.getAccessToken())
-                .httpOnly(true)
-                .secure(true)
-                .sameSite("Strict")
-                .maxAge(renewTokenResponse.getAccessTokenExpiresIn())
-                .path("/")
-                .build();
-
-        var renewCookie = ResponseCookie.from("refresh_token", renewTokenResponse.getRenewToken())
-                .httpOnly(true)
-                .secure(true)
-                .sameSite("Strict")
-                .maxAge(Duration.ofDays(7))  // Oder dynamisch, falls du das auch speicherst
-                .path("/")
-                .build();
-
+        var accessCookie = createAccessTokenCookie(renewTokenResponse.getAccessToken(), renewTokenResponse.getAccessTokenExpiresIn());
+        var renewCookie = createRenewTokenCookie(renewTokenResponse.getRenewToken(), renewTokenResponse.getRenewTokenExpiresIn());
         return ResponseEntity.status(201)
                 .header("Set-Cookie", accessCookie.toString())
                 .header("Set-Cookie", renewCookie.toString())
@@ -204,5 +175,23 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
     @GetMapping("/bundle.min.js")
     public String getBundleJs() {
         return frontendService.getBundleJs();
+    }
+
+    private ResponseCookie createAccessTokenCookie(String accessToken, Duration maxAge) {
+        return createCookie("access_token", accessToken, maxAge);
+    }
+
+    private ResponseCookie createRenewTokenCookie(String renewToken, Duration maxAge) {
+        return createCookie("refresh_token", renewToken, maxAge);
+    }
+
+    private ResponseCookie createCookie(String name, String value, Duration maxAge) {
+        return ResponseCookie.from(name, value)
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("Strict")
+                .maxAge(maxAge)
+                .path("/")
+                .build();
     }
 }

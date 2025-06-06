@@ -4,22 +4,12 @@
  */
 class TokenManager {
   /**
-   * @param {Client} client
+   * @constructor
    */
-  constructor(client) {
-    /** @private */
-    this.client = client;
-
-    /** @private */
+  constructor() {
     this.accessToken = null;
-
-    /** @private */
     this.accessTokenExpiresAt = 0;
-
-    /** @private */
     this.renewToken = null;
-
-    /** @private */
     this.renewTokenExpiresAt = 0;
   }
 
@@ -44,7 +34,7 @@ class TokenManager {
    * @returns {boolean}
    */
   isAccessTokenExpired() {
-    return !this.accessToken || Date.now() > this.accessTokenExpiresAt;
+    return !this.accessToken || Date.now() > (this.accessTokenExpiresAt - 5000); // 5 seconds buffer
   }
 
   /**
@@ -66,7 +56,10 @@ class TokenManager {
    * 
    * @returns {Promise<string|false>}
    */
-  async actualToken() {
+  async actualAccessToken() {
+    if (!this.accessToken) {
+      return null;
+    }
     if (!this.isAccessTokenExpired()) {
       return this.token;
     }
@@ -76,7 +69,7 @@ class TokenManager {
     }
 
     try {
-      const response = await this.client.renew(this.renewToken);
+      const response = await app.client.renew(this.renewToken);
       this.setTokens(response);
       return this.token;
     } catch (e) {

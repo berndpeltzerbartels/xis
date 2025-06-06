@@ -31,15 +31,15 @@ class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public String createAuthorizationUrl() {
-        return createAuthorizationUrl(providerConfiguration.getApplicationRootEndpoint());
+        return createLoginUrl(providerConfiguration.getApplicationRootEndpoint());
     }
 
     @Override
-    public String createAuthorizationUrl(String urlAfterLogin) {
-        String stateParameter = createStateParameter(urlAfterLogin);
+    public String createLoginUrl(String providerLoginFormUrl) {
+        String stateParameter = createStateParameter(providerLoginFormUrl);
         StringBuilder urlBuilder = new StringBuilder(providerConfiguration.getAuthorizationEndpoint())
                 .append("?response_type=code")
-                .append("&redirect_uri=").append(getFullAuthenticationCallbackUrl())
+                .append("&redirect_uri=").append(getAuthenticationCallbackUrl())
                 .append("&state=").append(stateParameter)
                 .append("&nonce=").append(SecurityUtil.createRandomKey(32));
         if (isNotEmpty(providerConfiguration.getClientId())) {
@@ -99,7 +99,7 @@ class AuthenticationServiceImpl implements AuthenticationService {
         return providerConfiguration.getAuthenticationProviderId();
     }
 
-    private String getFullAuthenticationCallbackUrl() {
+    private String getAuthenticationCallbackUrl() {
         return providerConfiguration.getCallbackUrl();
     }
 

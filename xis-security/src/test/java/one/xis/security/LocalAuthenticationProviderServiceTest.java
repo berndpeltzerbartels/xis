@@ -23,7 +23,7 @@ class LocalAuthenticationProviderServiceTest {
     @Test
     void fullAuthenticationCycle() throws Exception {
         // Login
-        String code = authentication.login("user1", "secret");
+        String code = authentication.login(new Login("user1", "secret", "state"));
         assertThat(code).isNotBlank();
 
         // Token issuance
@@ -47,7 +47,7 @@ class LocalAuthenticationProviderServiceTest {
 
     @Test
     void loginFailsOnWrongPassword() {
-        assertThatThrownBy(() -> authentication.login("user1", "wrong"))
+        assertThatThrownBy(() -> authentication.login(new Login("user1", "wrong", "state")))
                 .isInstanceOf(InvalidCredentialsException.class);
     }
 
@@ -70,7 +70,7 @@ class LocalAuthenticationProviderServiceTest {
         Set<String> roles = Set.of("admin", "user");
         Map<String, Object> claims = Map.of("email", userId + "@example.com");
 
-        String code = authentication.login(userId, "secret");
+        String code = authentication.login(new Login("user1", "secret", "state"));
         LocalAuthenticationTokenResponse initialToken = authentication.issueToken(code, "xyz");
 
         // when

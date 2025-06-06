@@ -27,7 +27,7 @@ class HttpConnectorMock {
         var _this = this;
         return new Promise((resolve, reject) => {
             var response = _this.responseForGet(uri, headers);
-            resolve(response);;
+            resolve(response);
         });
     }
 

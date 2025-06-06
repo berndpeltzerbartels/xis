@@ -51,7 +51,7 @@ class AuthenticationIntegrationTest {
         var providerService = new AuthenticationServiceImpl(providerConfig, connectionFactory);
 
         // Act
-        String authorizationUrl = providerService.createAuthorizationUrl("/dashboard");
+        String authorizationUrl = providerService.createLoginUrl("/dashboard");
         assertThat(authorizationUrl).contains("state=");
 
         // Extract and verify state
@@ -60,7 +60,7 @@ class AuthenticationIntegrationTest {
         AuthenticationProviderStateData stateData = providerService.verifyStateAndExtractCode(queryString);
 
         // Simulate login and token issue
-        String code = localAuth.login("user1", "secret");
+        String code = localAuth.login(new Login("user1", "secret", "state"));
         LocalAuthenticationTokenResponse tokenResponse = localAuth.issueToken(code, stateData.getStateParameterPayload().getRedirect());
 
         // Assert

@@ -1,12 +1,22 @@
 class Client {
 
 
-    constructor() {
+    /**
+     * 
+     * @param {TokenManager} tokenManager 
+     */
+    constructor(tokenManager) {
         this.config = undefined;
         this.clientId = randomString();
         this.userId = '';
         this.zoneId = timeZone();
-        this.clientState = {}
+        this.clientState = {};
+        this.tokenManager = tokenManager;
+    }
+
+
+    actualAccessToken() {
+        return this.tokenManager.actualToken();
     }
 
     /**
@@ -130,7 +140,7 @@ class Client {
      * @param {string} renewToken
      * @returns {Promise<TokenResponse>}
      */
-    renew(renewToken) {
+    sendRenewTokenRequest(renewToken) {
         throw new Error('Not implemented');
     }
 

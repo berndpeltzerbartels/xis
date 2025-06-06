@@ -3,7 +3,9 @@ package one.xis.security;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 
@@ -25,14 +27,12 @@ class TokenManagerImplTest {
                 "user123",
                 List.of("ADMIN", "USER"),
                 Map.of("customClaim", "abc"),
-                3600,
-                86400
+                Duration.of(6, ChronoUnit.SECONDS),
+                Duration.of(24, ChronoUnit.HOURS)
         );
 
         TokenResult result = tokenManager.createTokens(request);
-
         assertThat(result.accessToken()).isNotBlank();
-        assertThat(result.accessTokenExpiresAt()).isAfter(Instant.now());
 
         TokenAttributes attributes = tokenManager.decodeToken(result.accessToken());
 
@@ -48,8 +48,8 @@ class TokenManagerImplTest {
                 "user999",
                 List.of("READER"),
                 Map.of("info", "xyz"),
-                3600,
-                86400
+                Duration.of(6, ChronoUnit.SECONDS),
+                Duration.of(24, ChronoUnit.HOURS)
         );
 
         TokenResult original = tokenManager.createTokens(request);
@@ -76,8 +76,8 @@ class TokenManagerImplTest {
                 "hacker",
                 List.of(),
                 Map.of(),
-                3600,
-                86400
+                Duration.of(6, ChronoUnit.SECONDS),
+                Duration.of(24, ChronoUnit.HOURS)
         );
         String token = tokenManager.createTokens(request).accessToken();
         String tampered = token.replaceFirst("\\..*?\\.", ".tampered.");

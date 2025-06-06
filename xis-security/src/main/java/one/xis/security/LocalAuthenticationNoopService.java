@@ -9,9 +9,9 @@ package one.xis.security;
 class LocalAuthenticationNoopService implements LocalAuthenticationProviderService {
 
     private static final String ERROR_MESSAGE = "Local authentication is not supported in this environment. Please use an external authentication provider.";
-
+    
     @Override
-    public String login(String user, String password) throws InvalidCredentialsException {
+    public String login(Login login) throws InvalidCredentialsException {
         throw new UnsupportedOperationException(ERROR_MESSAGE);
     }
 

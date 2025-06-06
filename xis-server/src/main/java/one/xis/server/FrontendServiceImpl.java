@@ -91,9 +91,9 @@ public class FrontendServiceImpl implements FrontendService {
         try {
             var result = tokenManager.renew(renewToken);
             return new ApiTokens(result.accessToken(),
-                    result.accessTokenExpiresAt(),
+                    result.accessTokenExpiresIn(),
                     result.renewToken(),
-                    result.renewTokenExpiresAt());
+                    result.renewTokenExpiresIn());
         } catch (InvalidTokenException e) {
             throw new RuntimeException(e);
         }
@@ -192,7 +192,7 @@ public class FrontendServiceImpl implements FrontendService {
     public String getBundleJs() {
         return bundleJsResource.getContent();
     }
-    
+
     private void addUserContext(ClientRequest request) {
         var userContext = new UserContext();
         userContext.setClientId(request.getClientId());

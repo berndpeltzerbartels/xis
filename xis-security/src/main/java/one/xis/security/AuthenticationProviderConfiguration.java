@@ -76,6 +76,6 @@ public class AuthenticationProviderConfiguration {
      * @return The callback URL as a String.
      */
     public String getCallbackUrl() {
-        return applicationRootEndpoint + CALLBACK_URL;
+        return applicationRootEndpoint + CALLBACK_URL + "/" + authenticationProviderId;
     }
 }

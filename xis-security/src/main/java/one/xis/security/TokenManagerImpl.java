@@ -15,8 +15,8 @@ import java.util.*;
 public class TokenManagerImpl implements TokenManager {
 
     private final String secret;
-    private final long tokenAliveTimeSeconds;
-    private final long renewTokenAliveTimeSeconds;
+    private final Duration tokenAliveTimeSeconds;
+    private final Duration renewTokenAliveTimeSeconds;
     private final Gson gson = new Gson();
 
     private static final byte[] HEADER = """
@@ -24,23 +24,23 @@ public class TokenManagerImpl implements TokenManager {
 
     public TokenManagerImpl() {
         this.secret = SecurityUtil.createRandomKey(32);
-        this.tokenAliveTimeSeconds = Duration.of(15, ChronoUnit.MINUTES).getSeconds();
-        this.renewTokenAliveTimeSeconds = Duration.of(1, ChronoUnit.HOURS).getSeconds();
+        this.tokenAliveTimeSeconds = Duration.of(15, ChronoUnit.MINUTES);
+        this.renewTokenAliveTimeSeconds = Duration.of(1, ChronoUnit.HOURS);
     }
 
     @Override
     public TokenResult createTokens(TokenRequest request) {
         Instant now = Instant.now();
-        Instant tokenExpiration = now.plusSeconds(request.tokenAliveTimeSeconds());
-        Instant renewTokenExpiration = now.plusSeconds(request.renewTokenAliveTimeSeconds());
+        Instant tokenExpiration = now.plus(request.tokenAliveTime());
+        Instant renewTokenExpiration = now.plus(request.renewTokenAliveTime());
         String token = createToken(request, tokenExpiration);
         String renewToken = createToken(request, renewTokenExpiration);
 
         return new TokenResult(
                 token,
-                tokenExpiration,
+                request.tokenAliveTime(),
                 renewToken,
-                renewTokenExpiration
+                request.renewTokenAliveTime()
         );
     }
 

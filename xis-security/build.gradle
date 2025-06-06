@@ -58,7 +58,7 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
     testImplementation "org.mockito:mockito-core:$mockitoVersion"
     testImplementation("org.assertj:assertj-core:3.16.1")
-    testCompileOnly(project(":xis-adapter-spi"))
+    testImplementation(project(":xis-adapter-spi"))
 }
 
 test {
