@@ -8,6 +8,7 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
 
 class LocalAuthenticationProviderServiceTest {
 
@@ -17,7 +18,7 @@ class LocalAuthenticationProviderServiceTest {
     @BeforeEach
     void setUp() {
         userService = new TestUserService();
-        authentication = new LocalAuthenticationProviderServiceImpl(userService);
+        authentication = new LocalAuthenticationProviderServiceImpl(mock(), userService);
     }
 
     @Test
@@ -27,7 +28,7 @@ class LocalAuthenticationProviderServiceTest {
         assertThat(code).isNotBlank();
 
         // Token issuance
-        LocalAuthenticationTokenResponse tokenResponse = authentication.issueToken(code, "testState");
+        LocalAuthenticationTokens tokenResponse = authentication.issueToken(code, "testState");
         assertThat(tokenResponse.getAccessToken()).isNotBlank();
         assertThat(tokenResponse.getRefreshToken()).isNotBlank();
         assertThat(tokenResponse.getState()).isEqualTo("testState");
@@ -39,7 +40,7 @@ class LocalAuthenticationProviderServiceTest {
         assertThat(userInfo.getClaims()).containsEntry("email", "user1@example.com");
 
         // Refresh
-        LocalAuthenticationTokenResponse refreshed = authentication.refresh(tokenResponse.getRefreshToken());
+        LocalAuthenticationTokens refreshed = authentication.refresh(tokenResponse.getRefreshToken());
         assertThat(refreshed.getAccessToken()).isNotEqualTo(tokenResponse.getAccessToken());
         assertThat(refreshed.getRefreshToken()).isNotEqualTo(tokenResponse.getRefreshToken());
         assertThat(refreshed.getState()).isNull();
@@ -59,7 +60,7 @@ class LocalAuthenticationProviderServiceTest {
 
     @Test
     void refreshFailsOnTamperedToken() {
-        assertThatThrownBy(() -> authentication.refresh("invalid.token.here"))
+        assertThatThrownBy(() -> authentication.refresh("invalid"))
                 .isInstanceOf(InvalidTokenException.class);
     }
 
@@ -71,10 +72,10 @@ class LocalAuthenticationProviderServiceTest {
         Map<String, Object> claims = Map.of("email", userId + "@example.com");
 
         String code = authentication.login(new Login("user1", "secret", "state"));
-        LocalAuthenticationTokenResponse initialToken = authentication.issueToken(code, "xyz");
+        LocalAuthenticationTokens initialToken = authentication.issueToken(code, "xyz");
 
         // when
-        LocalAuthenticationTokenResponse refreshedToken = authentication.refresh(initialToken.getRefreshToken());
+        LocalAuthenticationTokens refreshedToken = authentication.refresh(initialToken.getRefreshToken());
 
         LocalUserInfo originalInfo = authentication.getUserInfo(initialToken.getAccessToken());
         LocalUserInfo refreshedInfo = authentication.getUserInfo(refreshedToken.getAccessToken());

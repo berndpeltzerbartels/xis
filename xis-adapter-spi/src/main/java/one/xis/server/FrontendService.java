@@ -15,6 +15,8 @@ public interface FrontendService {
 
     ServerResponse processFormDataRequest(ClientRequest request);
 
+    ApiTokens processLoginRequest(ClientRequest request) throws InvalidCredentialsException;
+
     ApiTokens processRenewApiTokenRequest(String renewToken);
 
     AuthenticationData authenticationCallback(String provider, String queryString);
@@ -44,5 +46,5 @@ public interface FrontendService {
     String getFunctionsJs();
 
     String getBundleJs();
-    
+
 }

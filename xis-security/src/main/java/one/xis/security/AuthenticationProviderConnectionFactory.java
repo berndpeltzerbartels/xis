@@ -8,7 +8,7 @@ import java.net.HttpURLConnection;
 @XISComponent
 class AuthenticationProviderConnectionFactory {
 
-    HttpURLConnection createPostConnection(@NonNull String url, @NonNull String requestBody) {
+    HttpURLConnection createPostConnectionFormUrlEncoded(@NonNull String url, @NonNull String requestBody) {
         try {
             HttpURLConnection connection = (HttpURLConnection) new java.net.URL(url).openConnection();
             connection.setRequestMethod("POST");

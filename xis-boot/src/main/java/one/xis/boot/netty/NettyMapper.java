@@ -10,6 +10,7 @@ import one.xis.server.*;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 import static io.netty.buffer.Unpooled.copiedBuffer;
 
@@ -52,25 +53,44 @@ public class NettyMapper {
                 HttpResponseStatus.NO_CONTENT
         );
 
-        response.headers().add(HttpHeaderNames.SET_COOKIE,
-                ServerCookieEncoder.encode("access_token", tokenResponse.getAccessToken()) +
-                        "; HttpOnly; Secure; Path=/; SameSite=Strict; Max-Age=" + accessTokenMaxAge);
-
-        response.headers().add(HttpHeaderNames.SET_COOKIE,
-                ServerCookieEncoder.encode("refresh_token", tokenResponse.getRenewToken()) +
-                        "; HttpOnly; Secure; Path=/; SameSite=Strict; Max-Age=" + renewTokenMaxAge);
-
+        response.headers().add(HttpHeaderNames.SET_COOKIE, createCookie("access_token", tokenResponse.getAccessToken(), accessTokenMaxAge));
+        response.headers().add(HttpHeaderNames.SET_COOKIE, createCookie("refresh_token", tokenResponse.getRenewToken(), renewTokenMaxAge));
         return response;
-
     }
 
-    public FullHttpResponse toFullHttpResponse(Object obj) throws IOException {
-        byte[] content = objectMapper.writeValueAsBytes(obj);
+    @SuppressWarnings("deprecation")
+    private String createCookie(String name, String value, long maxAge) {
+        return ServerCookieEncoder.encode(name, value) +
+                "; HttpOnly; Secure; Path=/; SameSite=Strict; Max-Age=" + maxAge;
+    }
+
+    public FullHttpResponse toFullHttpResponse(String s) throws IOException {
+        byte[] content = objectMapper.writeValueAsBytes(s);
         return new DefaultFullHttpResponse(
                 HttpVersion.HTTP_1_1,
                 HttpResponseStatus.OK,
                 Unpooled.wrappedBuffer(content)
         );
+    }
+
+    public FullHttpResponse toFullHttpResponse(Map<String, String> map) throws IOException {
+        byte[] content = objectMapper.writeValueAsBytes(map);
+        return new DefaultFullHttpResponse(
+                HttpVersion.HTTP_1_1,
+                HttpResponseStatus.OK,
+                Unpooled.wrappedBuffer(content));
+    }
+
+    public FullHttpResponse toFullHttpResponse(BearerTokens tokens) {
+        long accessTokenMaxAge = tokens.getAccessTokenExpiresIn().getSeconds();
+        long renewTokenMaxAge = tokens.getRenewTokenExpiresIn().getSeconds();
+        DefaultFullHttpResponse response = new DefaultFullHttpResponse(
+                HttpVersion.HTTP_1_1,
+                HttpResponseStatus.CREATED
+        );
+        response.headers().add(HttpHeaderNames.SET_COOKIE, createCookie("access_token", tokens.getAccessToken(), accessTokenMaxAge));
+        response.headers().add(HttpHeaderNames.SET_COOKIE, createCookie("refresh_token", tokens.getRenewToken(), renewTokenMaxAge));
+        return response;
     }
 
     public FullHttpResponse toRedirectWithCookies(String location, AuthenticationData authData) {
@@ -82,15 +102,8 @@ public class NettyMapper {
         );
 
         response.headers().set(HttpHeaderNames.LOCATION, location);
-
-        response.headers().add(HttpHeaderNames.SET_COOKIE,
-                ServerCookieEncoder.encode("access_token", authData.getApiTokens().getAccessToken()) +
-                        "; HttpOnly; Secure; Path=/; SameSite=Strict; Max-Age=" + accessTokenMaxAge);
-
-        response.headers().add(HttpHeaderNames.SET_COOKIE,
-                ServerCookieEncoder.encode("refresh_token", authData.getApiTokens().getRenewToken()) +
-                        "; HttpOnly; Secure; Path=/; SameSite=Strict; Max-Age=" + renewTokenMaxAge);
-
+        response.headers().add(HttpHeaderNames.SET_COOKIE, createCookie("access_token", authData.getApiTokens().getAccessToken(), accessTokenMaxAge));
+        response.headers().add(HttpHeaderNames.SET_COOKIE, createCookie("refresh_token", authData.getApiTokens().getRenewToken(), renewTokenMaxAge));
         return response;
     }
 
@@ -110,5 +123,11 @@ public class NettyMapper {
     public Login toLoginRequest(FullHttpRequest request) throws IOException {
         String json = request.content().toString(StandardCharsets.UTF_8);
         return objectMapper.readValue(json, Login.class);
+    }
+
+    public FullHttpResponse toErrorResponse(String message, HttpResponseStatus status) {
+        return new DefaultFullHttpResponse(
+                HttpVersion.HTTP_1_1,
+                status);
     }
 }

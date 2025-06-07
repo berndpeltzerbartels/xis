@@ -13,6 +13,7 @@ import one.xis.server.FrontendService;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Locale;
 
 @ChannelHandler.Sharable
@@ -96,10 +97,15 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
                 Login login = mapper.toLoginRequest(request);
                 yield controller.localTokenProviderLogin(login);
             }
+            case "/xis/token-provider/tokens" -> {
+                QueryStringDecoder decoder = new QueryStringDecoder(uri);
+                String code = decoder.parameters().getOrDefault("code", List.of()).stream().findFirst().orElse(null);
+                String state = decoder.parameters().getOrDefault("state", List.of()).stream().findFirst().orElse(null);
+                yield controller.localTokenProviderGetTokens(code, state);
+            }
             default -> notFound(HttpMethod.POST, uri);
         };
     }
-
 
     private FullHttpResponse notFound(HttpMethod method, String uri) {
         return new DefaultFullHttpResponse(

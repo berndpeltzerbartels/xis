@@ -12,7 +12,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @XISComponent
-public class TokenManagerImpl implements TokenManager {
+public class ApiTokenManagerImpl implements ApiTokenManager {
 
     private final String secret;
     private final Duration tokenAliveTimeSeconds;
@@ -22,7 +22,7 @@ public class TokenManagerImpl implements TokenManager {
     private static final byte[] HEADER = """
             {"alg":"HS256","typ":"JWT"}""".getBytes();
 
-    public TokenManagerImpl() {
+    public ApiTokenManagerImpl() {
         this.secret = SecurityUtil.createRandomKey(32);
         this.tokenAliveTimeSeconds = Duration.of(15, ChronoUnit.MINUTES);
         this.renewTokenAliveTimeSeconds = Duration.of(1, ChronoUnit.HOURS);

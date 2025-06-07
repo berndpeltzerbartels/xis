@@ -16,6 +16,8 @@ public class Document {
 
     public Location location = new Location();
 
+    public String cookie; // TODO improve
+
     public Document(String rootTagName) {
         this(new Element(rootTagName));
     }

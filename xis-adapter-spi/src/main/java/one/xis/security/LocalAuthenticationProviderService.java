@@ -11,7 +11,7 @@ public interface LocalAuthenticationProviderService {
     /**
      * Logs in a user with the provided credentials.
      *
-     * @param login
+     * @param login the login credentials containing username and password and state
      * @return a unique code representing the login session
      * @throws InvalidCredentialsException if the credentials are invalid
      */
@@ -25,7 +25,7 @@ public interface LocalAuthenticationProviderService {
      * @return a response containing access and refresh tokens
      * @throws AuthenticationException if the code is invalid or expired
      */
-    LocalAuthenticationTokenResponse issueToken(String code, String state) throws AuthenticationException;
+    LocalAuthenticationTokens issueToken(String code, String state) throws AuthenticationException;
 
     /**
      * Refreshes the authentication token using the provided refresh token.
@@ -35,7 +35,7 @@ public interface LocalAuthenticationProviderService {
      * @throws InvalidTokenException   if the refresh token is invalid or expired
      * @throws AuthenticationException if there is an error during the refresh process
      */
-    LocalAuthenticationTokenResponse refresh(String refreshToken) throws InvalidTokenException, AuthenticationException;
+    LocalAuthenticationTokens refresh(String refreshToken) throws InvalidTokenException, AuthenticationException; // TODO Wird nur in Tests verwendet, entfernen?
 
     /**
      * Retrieves user information based on the provided access token.

@@ -12,13 +12,13 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class TokenManagerImplTest {
+class ApiTokenManagerImplTest {
 
-    private TokenManagerImpl tokenManager;
+    private ApiTokenManagerImpl tokenManager;
 
     @BeforeEach
     void setUp() {
-        tokenManager = new TokenManagerImpl();
+        tokenManager = new ApiTokenManagerImpl();
     }
 
     @Test

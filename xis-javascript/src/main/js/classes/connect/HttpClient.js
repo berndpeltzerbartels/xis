@@ -98,7 +98,7 @@ class HttpClient extends Client{
     * @public
     * @override
     * @param {WidgetInstance} widgetInstance
-    * @returns {Promise<ServerReponse>}
+    * @returns {Promise<ServerResponse>}
     */
     loadWidgetData(widgetInstance, widgetState) {
         var _this = this;
@@ -128,7 +128,7 @@ class HttpClient extends Client{
      * @param {WidgetInstance} widgetInstance
      * @param {string} action
      * @param {string} actionParameters
-     * @returns {Promise<ServerReponse>}
+     * @returns {Promise<ServerResponse>}
      */
     widgetLinkAction(widgetInstance, widgetState, action, actionParameters) {
         var _this = this;
@@ -143,7 +143,7 @@ class HttpClient extends Client{
      * @param {ResolvedURL} resolvedURL 
      * @param {string} action
      * @param {any} actionParameters
-     * @returns {Promise<ServerReponse>}
+     * @returns {Promise<ServerResponse>}
      */
     pageLinkAction(resolvedURL, action, actionParameters) {
         var _this = this;
@@ -157,11 +157,11 @@ class HttpClient extends Client{
      * @override
      * @param {ResolvedURL} resolvedURL 
      * @param {String} widgetId
-     * @param {sring:string} formData
+     * @param {string:string} formData
      * @param {string} action
      * @param {any} actionParameters
      * @param {string} binding
-     * @returns {Promise<ServerReponse>}
+     * @returns {Promise<ServerResponse>}
      */
     formAction(resolvedURL, widgetId, formData, action, formBindigKey, formBindingParameters) {
         var _this = this;

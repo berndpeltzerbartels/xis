@@ -1,6 +1,6 @@
 package one.xis.security;
 
-public interface TokenManager {
+public interface ApiTokenManager {
 
     TokenResult createTokens(TokenRequest tokenRequest) throws InvalidTokenException;
 

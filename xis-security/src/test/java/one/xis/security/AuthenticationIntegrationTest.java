@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 class AuthenticationIntegrationTest {
 
@@ -38,14 +39,14 @@ class AuthenticationIntegrationTest {
     @Test
     void integrationLocalAuthWithStateParameterVerification() throws AuthenticationException, InvalidTokenException {
         // Arrange
-        var codeStore = new LocalAuthenticationCodeStore();
+        var codeStore = new LocalAuthenticationProviderCodeStore();
         var userService = new DummyUserService();
-        var localAuth = new LocalAuthenticationProviderServiceImpl(userService);
+        var localAuth = new LocalAuthenticationProviderServiceImpl(mock(), userService);
         var connectionFactory = new AuthenticationProviderConnectionFactory();
 
         var providerConfig = new AuthenticationProviderConfiguration();
         providerConfig.setAuthenticationProviderId("dummy");
-        providerConfig.setAuthorizationEndpoint("https://auth.example.com/authorize");
+        providerConfig.setLoginFormUrl("https://auth.example.com/authorize");
         providerConfig.setTokenEndpoint("https://auth.example.com/token");
 
         var providerService = new AuthenticationServiceImpl(providerConfig, connectionFactory);
@@ -61,7 +62,7 @@ class AuthenticationIntegrationTest {
 
         // Simulate login and token issue
         String code = localAuth.login(new Login("user1", "secret", "state"));
-        LocalAuthenticationTokenResponse tokenResponse = localAuth.issueToken(code, stateData.getStateParameterPayload().getRedirect());
+        LocalAuthenticationTokens tokenResponse = localAuth.issueToken(code, stateData.getStateParameterPayload().getRedirect());
 
         // Assert
         assertThat(tokenResponse).isNotNull();

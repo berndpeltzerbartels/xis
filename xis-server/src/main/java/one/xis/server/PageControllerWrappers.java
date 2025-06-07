@@ -24,7 +24,6 @@ class PageControllerWrappers {
     @XISInject(annotatedWith = Page.class)
     private Collection<Object> pageControllers;
 
-
     @Getter
     private Collection<ControllerWrapper> pageControllerWrappers;
 

@@ -37,7 +37,7 @@ class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public String createLoginUrl(String providerLoginFormUrl) {
         String stateParameter = createStateParameter(providerLoginFormUrl);
-        StringBuilder urlBuilder = new StringBuilder(providerConfiguration.getAuthorizationEndpoint())
+        StringBuilder urlBuilder = new StringBuilder(providerConfiguration.getLoginFormUrl())
                 .append("?response_type=code")
                 .append("&redirect_uri=").append(getAuthenticationCallbackUrl())
                 .append("&state=").append(stateParameter)
@@ -60,16 +60,28 @@ class AuthenticationServiceImpl implements AuthenticationService {
         if (state == null || state.isEmpty()) {
             throw new IllegalArgumentException("Missing or empty 'state' parameter in the query string");
         }
-        StateParameterPayload stateParameterPayload = verifyStateParameter(state);
-        return new AuthenticationProviderStateData(code, stateParameterPayload);
+        String[] parts = state.split("\\.");
+        if (parts.length != 2) {
+            throw new IllegalArgumentException("Invalid state parameter format");
+        }
+        String encodedPayload = parts[0];
+        String signature = parts[1];
+        StateParameterPayload stateParameterPayload = verifyStateParameter(encodedPayload, signature);
+        return new AuthenticationProviderStateData(code, state, stateParameterPayload);
     }
 
     @Override
-    public AuthenticationProviderTokenResponse requestTokens(@NonNull String code) {
+    public void verifyState(@NonNull String state) {
+        verifyStateParameter(state);
+    }
+
+    @Override
+    public AuthenticationProviderTokens requestTokens(@NonNull String code, @NonNull String state) {
         String url = providerConfiguration.getTokenEndpoint();
         StringBuilder requestBody = new StringBuilder()
                 .append("grant_type=authorization_code")
                 .append("&code=").append(code)
+                .append("&state=").append(state)
                 .append("&redirect_uri=").append(providerConfiguration.getCallbackUrl());
         if (StringUtils.isNotEmpty(providerConfiguration.getClientId())) {
             requestBody.append("&client_id=").append(providerConfiguration.getClientId());
@@ -78,7 +90,7 @@ class AuthenticationServiceImpl implements AuthenticationService {
             requestBody.append("&client_secret=").append(providerConfiguration.getClientSecret());
         }
 
-        HttpURLConnection connection = connectionFactory.createPostConnection(url, requestBody.toString());
+        HttpURLConnection connection = connectionFactory.createPostConnectionFormUrlEncoded(url, requestBody.toString());
         try {
             int responseCode = connection.getResponseCode();
             if (responseCode != HttpURLConnection.HTTP_OK) {
@@ -86,12 +98,21 @@ class AuthenticationServiceImpl implements AuthenticationService {
                 throw new RuntimeException("Failed to request tokens: " + responseCode + " - " + body);
             }
             String responseBody = new String(connection.getInputStream().readAllBytes());
-            return gson.fromJson(responseBody, AuthenticationProviderTokenResponse.class);
+            return gson.fromJson(responseBody, AuthenticationProviderTokens.class);
         } catch (Exception e) {
             throw new RuntimeException("Failed to request tokens", e);
         } finally {
             connection.disconnect();
         }
+    }
+
+    @Override
+    public String createStateParameter(String urlAfterLogin) {
+        StateParameterPayload payload = createStateParameterPayload(urlAfterLogin);
+        String payloadJson = gson.toJson(payload);
+        String encodedPayload = SecurityUtil.encodeBase64UrlSafe(payloadJson);
+        String signature = SecurityUtil.signHmacSHA256(encodedPayload, stateSignatureKey);
+        return encodedPayload + "." + signature;
     }
 
     @Override
@@ -130,13 +151,7 @@ class AuthenticationServiceImpl implements AuthenticationService {
         return params;
     }
 
-    private StateParameterPayload verifyStateParameter(@NonNull String stateParameter) {
-        String[] parts = stateParameter.split("\\.");
-        if (parts.length != 2) {
-            throw new IllegalArgumentException("Invalid state parameter format");
-        }
-        String encodedPayload = parts[0];
-        String signature = parts[1];
+    private StateParameterPayload verifyStateParameter(@NonNull String encodedPayload, String signature) {
         String expectedSignature = SecurityUtil.signHmacSHA256(encodedPayload, stateSignatureKey);
         if (!expectedSignature.equals(signature)) {
             throw new IllegalArgumentException("Invalid state parameter signature");
@@ -163,17 +178,20 @@ class AuthenticationServiceImpl implements AuthenticationService {
         if (expiresAt <= 0 || expiresAt <= iat || expiresAt < currentTime) {
             throw new IllegalArgumentException("State parameter has expired");
         }
+        // Do not check redirect URI here, as it may be dynamic and not known in advance
         return payload;
     }
 
-
-    private String createStateParameter(String urlAfterLogin) {
-        StateParameterPayload payload = createStateParameterPayload(urlAfterLogin);
-        String payloadJson = gson.toJson(payload);
-        String encodedPayload = SecurityUtil.encodeBase64UrlSafe(payloadJson);
-        String signature = SecurityUtil.signHmacSHA256(encodedPayload, stateSignatureKey);
-        return encodedPayload + "." + signature;
+    private StateParameterPayload verifyStateParameter(@NonNull String stateParameter) {
+        String[] parts = stateParameter.split("\\.");
+        if (parts.length != 2) {
+            throw new IllegalArgumentException("Invalid state parameter format");
+        }
+        String encodedPayload = parts[0];
+        String signature = parts[1];
+        return verifyStateParameter(encodedPayload, signature);
     }
+
 
     private StateParameterPayload createStateParameterPayload(String urlAfterLogin) {
         StateParameterPayload payload = new StateParameterPayload();

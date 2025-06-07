@@ -18,7 +18,7 @@ import java.util.Map;
  */
 @XISComponent
 @RequiredArgsConstructor
-public class AuthenticationServices {
+public class AuthenticationProviderServices {
 
     private final Collection<AuthenticationProviderConfiguration> authenticationProviderConfigurations;
     private final AuthenticationProviderConnectionFactory connectionFactory;

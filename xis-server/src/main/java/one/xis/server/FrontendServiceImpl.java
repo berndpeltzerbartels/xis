@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import one.xis.Page;
 import one.xis.UserContext;
 import one.xis.UserContextAccess;
+import one.xis.context.AppContext;
 import one.xis.context.XISComponent;
 import one.xis.context.XISInit;
 import one.xis.resource.Resource;
@@ -12,14 +13,11 @@ import one.xis.resource.Resources;
 import one.xis.security.*;
 import org.tinylog.Logger;
 
-import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
-
-import static java.time.temporal.ChronoUnit.SECONDS;
 
 /**
  * Encapsulates all methods, required by the framework's controller.
@@ -32,9 +30,9 @@ public class FrontendServiceImpl implements FrontendService {
     private final ClientConfigService configService;
     private final ResourceService resourceService;
     private final Resources resources;
-    private final AuthenticationServices authenticationServices;
-    private final TokenManager tokenManager;
-    private final LocalAuthenticationProviderService authenticationProviderService;
+    private final AuthenticationProviderServices authenticationProviderServices;
+    private final ApiTokenManager tokenManager;
+    private final AppContext appContext;
     private final Collection<RequestFilter> requestFilters;
     private Resource appJsResource;
     private Resource classesJsResource;
@@ -101,13 +99,13 @@ public class FrontendServiceImpl implements FrontendService {
 
     @Override
     public AuthenticationData authenticationCallback(String provider, String queryString) {
-        var service = Objects.requireNonNull(authenticationServices.getAuthenticationProviderService(provider));
+        var service = Objects.requireNonNull(authenticationProviderServices.getAuthenticationProviderService(provider));
         var authenticationProviderData = service.verifyStateAndExtractCode(queryString);
-        var tokenResponse = service.requestTokens(authenticationProviderData.getCode());
+        var tokenResponse = service.requestTokens(authenticationProviderData.getCode(), authenticationProviderData.getState());
         return getAuthenticationData(tokenResponse, authenticationProviderData);
     }
 
-    private static AuthenticationData getAuthenticationData(AuthenticationProviderTokenResponse tokenResponse, AuthenticationProviderStateData authenticationProviderData) {
+    private static AuthenticationData getAuthenticationData(AuthenticationProviderTokens tokenResponse, AuthenticationProviderStateData authenticationProviderData) {
         var apiTokens = new ApiTokens();
         apiTokens.setAccessToken(tokenResponse.getAccessToken());
         apiTokens.setRenewTokenExpiresIn(tokenResponse.getRefreshExpiresIn());
@@ -121,16 +119,18 @@ public class FrontendServiceImpl implements FrontendService {
 
     @Override
     public String localTokenProviderLogin(Login login) throws InvalidCredentialsException {
-        return authenticationProviderService.login(login);
+        return authenticationProviderService().login(login);
     }
 
     @Override
     public BearerTokens localTokenProviderGetTokens(String code, String state) throws AuthenticationException {
+        var authenticationProviderService = authenticationProviderService();
         var tokenResponse = authenticationProviderService.issueToken(code, state);
         var bearerTokens = new BearerTokens();
         bearerTokens.setAccessToken(tokenResponse.getAccessToken());
-        bearerTokens.setAccessTokenExpiresAt(Instant.now().plus(tokenResponse.getExpiresInSeconds(), SECONDS));
+        bearerTokens.setAccessTokenExpiresIn(tokenResponse.getExpiresIn());
         bearerTokens.setRenewToken(tokenResponse.getRefreshToken());
+        bearerTokens.setRenewTokenExpiresIn(tokenResponse.getRefreshTokenExpiresIn());
         return bearerTokens;
     }
 
@@ -193,6 +193,11 @@ public class FrontendServiceImpl implements FrontendService {
         return bundleJsResource.getContent();
     }
 
+    @Override
+    public ApiTokens processLoginRequest(ClientRequest request) {
+        return null; // TODO
+    }
+
     private void addUserContext(ClientRequest request) {
         var userContext = new UserContext();
         userContext.setClientId(request.getClientId());
@@ -213,6 +218,12 @@ public class FrontendServiceImpl implements FrontendService {
         response = filterChain.getServerResponse();
         requestHandler.accept(request, response);
         return response;
+    }
+
+
+    private LocalAuthenticationProviderService authenticationProviderService() {
+        return appContext.getOptionalSingleton(LocalAuthenticationProviderService.class)
+                .orElseThrow(() -> new UnsupportedOperationException("Local authentication is not activated"));
     }
 
     boolean isRunningFromJar() {

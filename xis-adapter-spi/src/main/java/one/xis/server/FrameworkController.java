@@ -19,9 +19,11 @@ public interface FrameworkController<RESP_WRAPPER, REQ, RESP> {
 
     RESP_WRAPPER onWidgetLinkAction(ClientRequest request, Locale locale);
 
-    RESP_WRAPPER onFormAction(ClientRequest request, Locale locale);
+    RESP onFormAction(ClientRequest request, Locale locale);
 
     RESP localTokenProviderLogin(Login login);
+
+    RESP localTokenProviderGetTokens(String code, String state);
 
     /**
      * Authenticates a user with the given request and provider. This is the callback url
@@ -34,6 +36,7 @@ public interface FrameworkController<RESP_WRAPPER, REQ, RESP> {
     RESP authenticationCallback(REQ request, String provider);
 
     RESP renewApiTokens(String renewToken);
+
 
     String getPage(String id);
 

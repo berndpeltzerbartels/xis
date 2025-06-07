@@ -5,9 +5,9 @@ import lombok.Data;
 import java.time.Duration;
 
 @Data
-public class AuthenticationProviderTokenResponse {
+public class AuthenticationProviderTokens {
     private String accessToken;
-    private Duration expiresInSeconds;
+    private Duration expiresIn;
     private String refreshToken;
     private String scope;
     private String tokenType;

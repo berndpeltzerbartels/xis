@@ -6,41 +6,43 @@ import lombok.RequiredArgsConstructor;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 
 import static java.time.temporal.ChronoUnit.MINUTES;
-import static java.time.temporal.ChronoUnit.SECONDS;
 
 @RequiredArgsConstructor
 class LocalAuthenticationProviderServiceImpl implements LocalAuthenticationProviderService {
 
-    private final LocalAuthenticationCodeStore codeStore = new LocalAuthenticationCodeStore();
+    private final AuthenticationService authenticationService;
     private final UserService userService;
-    private final String secret = SecurityUtil.createRandomKey(32);
+    private final LocalAuthenticationProviderCodeStore codeStore = new LocalAuthenticationProviderCodeStore();
+    private final String secret = SecurityUtil.createRandomKey(32); // TODO add to form data
     private final Duration lifetime = Duration.of(15, MINUTES);
+    private final Duration refreshLifetime = Duration.of(30, MINUTES);
 
     @Override
     public String login(Login login) throws InvalidCredentialsException {
         if (!userService.checkCredentials(login.getUsername(), login.getPassword())) {
             throw new InvalidCredentialsException();
         }
+        authenticationService.verifyState(login.getState());
         String code = UUID.randomUUID().toString();
         codeStore.store(code, login.getUsername());
         return code;
     }
 
     @Override
-    public LocalAuthenticationTokenResponse issueToken(String code, String state) throws AuthenticationException {
+    public LocalAuthenticationTokens issueToken(String code, String state) throws AuthenticationException {
         String userId = codeStore.getUserIdForCode(code);
         if (userId == null) {
             throw new InvalidStateParameterException();
         }
-
         return generateTokenResponse(userId, state);
     }
 
     @Override
-    public LocalAuthenticationTokenResponse refresh(String refreshToken) throws InvalidTokenException, AuthenticationException {
+    public LocalAuthenticationTokens refresh(String refreshToken) throws InvalidTokenException, AuthenticationException {
         String userId = verifyRefreshToken(refreshToken);
         return generateTokenResponse(userId, null);
     }
@@ -66,9 +68,10 @@ class LocalAuthenticationProviderServiceImpl implements LocalAuthenticationProvi
         }
     }
 
-    private LocalAuthenticationTokenResponse generateTokenResponse(String userId, String state) throws AuthenticationException {
+    private LocalAuthenticationTokens generateTokenResponse(String userId, String state) throws AuthenticationException {
         long now = System.currentTimeMillis();
-        Date expiry = new Date(now + lifetime.get(SECONDS) * 1000L);
+        Date expiry = Date.from(Instant.now().plus(lifetime));
+        Date expiryRefresh = Date.from(Instant.now().plus(refreshLifetime));
 
         LocalUserInfo userInfo = userService.getUserInfo(userId);
 
@@ -87,14 +90,15 @@ class LocalAuthenticationProviderServiceImpl implements LocalAuthenticationProvi
                 .setSubject(userId)
                 .claim("type", "refresh")
                 .setIssuedAt(new Date(now))
-                .setExpiration(expiry)
+                .setExpiration(expiryRefresh)
                 .signWith(SignatureAlgorithm.HS256, secret.getBytes(StandardCharsets.UTF_8))
                 .compact();
 
-        LocalAuthenticationTokenResponse response = new LocalAuthenticationTokenResponse();
+        LocalAuthenticationTokens response = new LocalAuthenticationTokens();
         response.setAccessToken(jwt);
         response.setRefreshToken(refreshToken);
-        response.setExpiresInSeconds(lifetime.getSeconds());
+        response.setExpiresIn(lifetime);
+        response.setRefreshTokenExpiresIn(refreshLifetime);
         response.setState(state);
         return response;
     }

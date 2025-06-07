@@ -2,9 +2,11 @@ package one.xis.boot.netty;
 
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.QueryStringDecoder;
 import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
+import one.xis.security.AuthenticationException;
 import one.xis.security.InvalidCredentialsException;
 import one.xis.security.Login;
 import one.xis.server.*;
@@ -79,8 +81,14 @@ public class NettyController implements FrameworkController<FullHttpResponse, Fu
     @Override
     public FullHttpResponse onFormAction(ClientRequest request, Locale locale) {
         request.setLocale(locale);
+
         try {
+            if (request.getAction().equals("login")) {
+                return mapper.toFullHttpResponse(frontendService.processLoginRequest(request));
+            }
             return mapper.toFullHttpResponse(frontendService.processActionRequest(request));
+        } catch (InvalidCredentialsException e) {
+            return mapper.toErrorResponse(e.getMessage(), HttpResponseStatus.UNAUTHORIZED);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -96,6 +104,16 @@ public class NettyController implements FrameworkController<FullHttpResponse, Fu
         }
         var state = login.getState();
         return mapper.toRedirectWithCodeAndState(code, state);
+    }
+
+    public FullHttpResponse localTokenProviderGetTokens(String code, String state) {
+        BearerTokens tokens;
+        try {
+            tokens = frontendService.localTokenProviderGetTokens(code, state);
+            return mapper.toFullHttpResponse(tokens);
+        } catch (AuthenticationException e) {
+            return mapper.toErrorResponse(e.getMessage(), HttpResponseStatus.UNAUTHORIZED);
+        }
     }
 
     @Override

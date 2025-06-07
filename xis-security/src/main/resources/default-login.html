@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:xis="http://xis.one/html">
+<head>
+    <title>MultipleAttributesPage</title>
+</head>
+<body>
+<div class="container">
+    <form>
+        <h1>Login</h1>
+        <div class="form-group">
+            <label xis:binding="username" xis:error-class="error" for="username">Username:</label>
+            <input xis:binding="username" type="text" id="username" name="username" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label xis:binding="password" xis:error-class="error" for="password">Password:</label>
+            <input xis:binding="password" type="password" id="password" name="password" class="form-control" required>
+        </div>
+        <button xis:action="login" type="submit" class="btn btn-primary">Login</button>
+    </form>
+</div>
+</body>
+</html>

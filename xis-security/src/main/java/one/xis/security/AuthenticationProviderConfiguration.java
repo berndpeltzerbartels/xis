@@ -41,7 +41,7 @@ public class AuthenticationProviderConfiguration {
      * The url of the authentication provider we redirect to for login.
      * It might end with context path, too.
      */
-    private String authorizationEndpoint;
+    private String loginFormUrl;
 
 
     /**

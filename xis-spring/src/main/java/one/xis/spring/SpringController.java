@@ -4,10 +4,12 @@ package one.xis.spring;
 import lombok.NonNull;
 import lombok.Setter;
 import one.xis.PathVariable;
+import one.xis.security.AuthenticationException;
 import one.xis.security.InvalidCredentialsException;
 import one.xis.security.Login;
 import one.xis.server.*;
 import org.springframework.http.HttpRequest;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -71,10 +73,24 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
 
     @Override
     @PostMapping("/xis/form/action")
-    public ResponseEntity<ServerResponse> onFormAction(@RequestBody ClientRequest request, Locale locale) {
+    public ResponseEntity<?> onFormAction(@RequestBody ClientRequest request, Locale locale) {
         request.setLocale(locale);
-        var serverResponse = frontendService.processActionRequest(request);
-        return ResponseEntity.status(serverResponse.getStatus()).body(serverResponse);
+        if (request.getAction().equals("login")) {
+            try {
+                var tokens = frontendService.processLoginRequest(request);
+                var accessCookie = createAccessTokenCookie(tokens.getAccessToken(), tokens.getAccessTokenExpiresIn());
+                var renewCookie = createRenewTokenCookie(tokens.getRenewToken(), tokens.getRenewTokenExpiresIn());
+                return ResponseEntity.status(201)
+                        .header("Set-Cookie", accessCookie.toString())
+                        .header("Set-Cookie", renewCookie.toString())
+                        .build();
+            } catch (InvalidCredentialsException e) {
+                return ResponseEntity.status(401).body("Invalid credentials");
+            }
+        } else {
+            var serverResponse = frontendService.processActionRequest(request);
+            return ResponseEntity.status(serverResponse.getStatus()).body(serverResponse);
+        }
     }
 
     @Override
@@ -89,6 +105,24 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
         } catch (InvalidCredentialsException e) {
             return ResponseEntity.status(401).body("Invalid credentials");
         }
+    }
+
+    @Override
+    @PostMapping(value = "/xis/token-provider/tokens", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public ResponseEntity<?> localTokenProviderGetTokens(@RequestParam("code") String code,
+                                                         @RequestParam("state") String state) {
+        BearerTokens tokens;
+        try {
+            tokens = frontendService.localTokenProviderGetTokens(code, state);
+        } catch (AuthenticationException e) {
+            return ResponseEntity.status(401).body("Authentication failed");
+        }
+        var accessCookie = createAccessTokenCookie(tokens.getAccessToken(), tokens.getAccessTokenExpiresIn());
+        var renewCookie = createRenewTokenCookie(tokens.getRenewToken(), tokens.getRenewTokenExpiresIn());
+        return ResponseEntity.status(201)
+                .header("Set-Cookie", accessCookie.toString())
+                .header("Set-Cookie", renewCookie.toString())
+                .build();
     }
 
     @Override

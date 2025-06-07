@@ -229,3 +229,4 @@ function cloneElement(element) {
 function cloneTextNode(node) {
     return document.createTextNode(node.nodeValue);
 }
+

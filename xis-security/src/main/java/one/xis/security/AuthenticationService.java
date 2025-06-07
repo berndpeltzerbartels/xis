@@ -32,13 +32,24 @@ public interface AuthenticationService {
     AuthenticationProviderStateData verifyStateAndExtractCode(@NonNull String queryString);
 
     /**
+     * Verifies the state and code parameters.
+     * This method checks if the provided state matches the expected state
+     * and if the code is valid.
+     *
+     * @param state
+     */
+    void verifyState(@NonNull String state);
+
+    /**
      * Requests tokens from the authentication provider using the provided authorization code.
      * This method exchanges the authorization code for access and refresh tokens.
      *
      * @param code The authorization code received from the authentication provider.
-     * @return An instance of {@link AuthenticationProviderTokenResponse} containing the tokens.
+     * @return An instance of {@link AuthenticationProviderTokens} containing the tokens.
      */
-    AuthenticationProviderTokenResponse requestTokens(@NonNull String code);
+    AuthenticationProviderTokens requestTokens(@NonNull String code, @NonNull String state);
+
+    String createStateParameter(String urlAfterLogin);
 
     String getProviderId();
 

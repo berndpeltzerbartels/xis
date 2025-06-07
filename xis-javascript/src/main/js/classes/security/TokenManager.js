@@ -13,19 +13,27 @@ class TokenManager {
     this.renewTokenExpiresAt = 0;
   }
 
-  /**
-   * @public
-   * Sets the token and expiration values.
-   * Should be called after login or token renewal.
-   * 
-   * @param {{token: string, exp: number, renewToken: string, renewExp: number}} tokens
-   */
-  setTokens(tokens) {
-    this.accessToken = tokens.token;
-    this.accessTokenExpiresAt = tokens.accessTokenExpiresAt;
-    this.renewToken = tokens.renewToken;
-    this.renewTokenExpiresAt = tokens.renewTokenExpiresAtwExp;
+
+  init() {
+    this.accessToken = this.readAccessTokenFromCookies();
+    this.renewToken = this.readRenewTokenFromCookies();
+    this.tokenAttributes = new TokenAttributes();
+    if (this.accessToken) {
+      var accessTokenDecoded = this.parseJwt(this.accessToken);
+      this.tokenAttributes.userId = accessTokenDecoded.sub || '';
+      this.tokenAttributes.roles = accessTokenDecoded.roles || [];
+      this.tokenAttributes.claims = accessTokenDecoded.claims || {};
+      this.accessTokenExpiresAt = accessTokenDecoded.exp || -1;
+    }
+    if (this.renewToken) {
+      var renewTokenDecoded = this.parseJwt(this.renewToken);
+      this.tokenAttributes.userId = renewTokenDecoded.sub || this.tokenAttributes.userId;
+      this.tokenAttributes.roles = renewTokenDecoded.roles || this.tokenAttributes.roles;
+      this.tokenAttributes.claims = renewTokenDecoded.claims || this.tokenAttributes.claims;
+      this.renewTokenExpiresAt = renewTokenDecoded.exp || -1;
+    }
   }
+
 
   /**
    * @private
@@ -63,11 +71,9 @@ class TokenManager {
     if (!this.isAccessTokenExpired()) {
       return this.token;
     }
-
     if (this.isRenewTokenExpired()) {
-      return false;
+      return false; // Both tokens are expired
     }
-
     try {
       const response = await app.client.renew(this.renewToken);
       this.setTokens(response);
@@ -75,5 +81,30 @@ class TokenManager {
     } catch (e) {
       return false;
     }
+  }
+
+  readAccessTokenFromCookies() {
+    return this.readCookieValue('access_token');
+  }
+
+  readRenewTokenFromCookies() {
+    return this.readCookieValue('renew_token');
+  }
+
+
+  parseJwt(token) {
+    try {
+      const payload = token.split('.')[1];
+      return JSON.parse(atob(payload));
+    } catch (e) {
+      return null;
+    }
+  }
+
+  readCookieValue(name) {
+    const value = document.cookie
+      .split('; ')
+      .find(row => row.startsWith(name + '='));
+    return value ? value.split('=')[1] : null;
   }
 }

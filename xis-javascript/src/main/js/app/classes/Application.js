@@ -19,15 +19,14 @@ class Application {
 
 
     start() {
-        var _this = this;
+        this.tokenManager.init();
         this.client.loadConfig()
-            .then(config => _this.pageController.setConfig(config))
-            .then(config => _this.backendService.setConfig(config))
-            .then(config => _this.widgets.loadWidgets(config))
-            .then(config => _this.pages.loadPages(config))
-            .then(() => _this.pageController.displayPageForUrlLater(document.location.pathname))
+            .then(config => this.pageController.setConfig(config))
+            .then(config => this.backendService.setConfig(config))
+            .then(config => this.widgets.loadWidgets(config))
+            .then(config => this.pages.loadPages(config))
+            .then(() => this.pageController.displayPageForUrlLater(document.location.pathname))
             .catch(e => console.error(e));
-
     }
 
 }

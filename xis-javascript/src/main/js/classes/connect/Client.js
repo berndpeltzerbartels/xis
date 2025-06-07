@@ -246,7 +246,6 @@ class Client {
         return this.clientStateData(this.config.pageAttributes[pageId]);
     }
 
-
     clientStateDataWidget(widgetId) {
         return this.clientStateData(this.config.widgetAttributes[widgetId]);
     }

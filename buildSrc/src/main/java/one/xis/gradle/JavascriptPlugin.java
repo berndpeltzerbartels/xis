@@ -30,7 +30,7 @@ public class JavascriptPlugin implements Plugin<Project> {
         List<JSFile> allJsFiles = getAllJsFiles(project);
 
         writeGroupedFiles(project, allJsFiles);
-        writeJsToFile(JSFileSorter.sort(releaseJsFiles), releaseJsFile, false);
+        writeJsToFileIIFE(JSFileSorter.sort(releaseJsFiles), releaseJsFile, false);
         evalWithGraalVM(releaseJsFile);
     }
 
@@ -71,6 +71,20 @@ public class JavascriptPlugin implements Plugin<Project> {
                 log("add script content: %s", file.getFile().getName());
                 writer.println(file.getContent());
             }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to write JS file", e);
+        }
+    }
+
+    private void writeJsToFileIIFE(Collection<JSFile> jsFiles, File outFile, boolean append) {
+        log("js-outfile: '%s'", outFile);
+        try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(outFile, append)))) {
+            writer.println("(function() {"); // TODO : Klappt das auch mit GraalVM?
+            for (JSFile file : jsFiles) {
+                log("add script content: %s", file.getFile().getName());
+                writer.println(file.getContent());
+            }
+            writer.println("})();");
         } catch (IOException e) {
             throw new RuntimeException("Failed to write JS file", e);
         }

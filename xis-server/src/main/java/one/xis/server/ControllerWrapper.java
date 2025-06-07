@@ -64,10 +64,6 @@ public class ControllerWrapper {
         return controller.getClass().isAnnotationPresent(Widget.class);
     }
 
-    boolean isPageController() {
-        return !isWidgetController();
-    }
-
     Class<?> getControllerClass() {
         return controller.getClass();
     }
