@@ -19,11 +19,12 @@ class TestApplication {
 
 
     start() {
-        // Noop
+        // TODO Hier scheint es Probleme zu geben, wenn alle Tests ausgeführt werden.
     }
 
     openPage(uri) {
         document.location.pathname = uri;
+        this.tokenManager.init();
         return this.client.loadConfig()
             .then(config => this.pageController.setConfig(config))
             .then(config => this.backendService.setConfig(config))

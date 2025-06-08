@@ -20,15 +20,27 @@ class HtmlObjects {
     private Window window;
     private Console console;
     private final Function<String, Element> htmlToElement;
+    private final Function<String, String> atob;
 
     HtmlObjects() {
         this.htmlToElement = HtmlObjects::htmlToElement;
+        this.atob = HtmlObjects::atob;
         this.init();
     }
 
     public static Element htmlToElement(String content) {
         var doc = Document.of(content);
         return doc.rootNode;
+    }
+
+
+    public static String atob(String base64) {
+        StringBuilder input = new StringBuilder(base64.replace("-", "+").replace("_", "/"));
+        while (input.length() % 4 != 0) {
+            input.append("=");
+        }
+        byte[] decoded = java.util.Base64.getDecoder().decode(input.toString());
+        return new String(decoded, java.nio.charset.StandardCharsets.UTF_8);
     }
 
     void reset() {

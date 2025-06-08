@@ -122,11 +122,13 @@ class ResourceService {
         var templateDoc = DocumentHelper.createDocument();
         var templateElement = DocumentHelper.createElement("xis:template");
         templateDoc.add(templateElement);
-        ((List<Node>) element.elements())
-                .forEach(e -> {
-                    element.remove(e);
-                    templateElement.add(e);
-                });
+
+        List<Node> children = new ArrayList<>(element.content()); // nicht element.elements()
+        for (Node child : children) {
+            element.remove(child);
+            templateElement.add(child);
+        }
+
         return serialize(templateElement);
     }
 

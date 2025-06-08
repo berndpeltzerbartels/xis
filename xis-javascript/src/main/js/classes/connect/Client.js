@@ -13,11 +13,6 @@ class Client {
         this.tokenManager = tokenManager;
     }
 
-
-    actualAccessToken() {
-        return this.tokenManager.actualToken();
-    }
-
     /**
   * @public
   * @return {Promise<ClientConfig>}

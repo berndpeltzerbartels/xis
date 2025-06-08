@@ -59,7 +59,7 @@ public class ApiTokenManagerImpl implements ApiTokenManager {
             String headerPayload = parts[0] + "." + parts[1];
             String signature = parts[2];
 
-            String expectedSig = sign(headerPayload);
+            String expectedSig = signAndEncodeBase64(headerPayload);
             if (!Objects.equals(expectedSig, signature)) {
                 throw new InvalidTokenException("Invalid signature");
             }
@@ -96,19 +96,19 @@ public class ApiTokenManagerImpl implements ApiTokenManager {
     }
 
     private String createToken(TokenRequest request, Instant expiresAt) {
-        String header = Base64.getUrlEncoder().withoutPadding().encodeToString(HEADER);
+        String headerBase64 = Base64.getUrlEncoder().withoutPadding().encodeToString(HEADER);
         Map<String, Object> payload = new LinkedHashMap<>(request.claims());
         payload.put("sub", request.userId());
         payload.put("roles", request.roles());
         payload.put("exp", expiresAt.toEpochMilli());
         String payloadJson = toJson(payload);
-        String payloadEncoded = Base64.getUrlEncoder().withoutPadding().encodeToString(payloadJson.getBytes(StandardCharsets.UTF_8));
-        String tokenData = header + "." + payloadEncoded;
-        String signature = sign(tokenData);
-        return tokenData + "." + signature;
+        String payloadBase64 = Base64.getUrlEncoder().withoutPadding().encodeToString(payloadJson.getBytes(StandardCharsets.UTF_8));
+        String tokenData = headerBase64 + "." + payloadBase64;
+        String signatureBase64 = signAndEncodeBase64(tokenData);
+        return headerBase64 + "." + payloadBase64 + "." + signatureBase64;
     }
 
-    private String sign(String data) {
+    private String signAndEncodeBase64(String data) {
         try {
             Mac mac = Mac.getInstance("HmacSHA256");
             mac.init(new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));

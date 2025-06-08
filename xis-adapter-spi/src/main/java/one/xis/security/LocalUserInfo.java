@@ -9,6 +9,6 @@ import java.util.Set;
 public class LocalUserInfo {
     private String userId;
     private String password;
-    private Set<String> roles;
-    private Map<String, Object> claims;
+    private Set<String> roles = Set.of();
+    private Map<String, Object> claims = Map.of();
 }

@@ -25,9 +25,7 @@ class ControllerMethodParameter {
         if (parameter.isAnnotationPresent(FormData.class)) {
             return deserializeFormDataParameter(parameter, request, postProcessingResults, accessToken);
         } else if (parameter.isAnnotationPresent(UserId.class)) {
-            if (accessToken == null) {
-                throw new AuthenticationException();
-            }
+            checkAccessToken(accessToken);
             return validateAndRetrieve(accessToken::getUserId, "UserId expected, but it was null");
         } else if (parameter.isAnnotationPresent(ClientId.class)) {
             return validateAndRetrieve(request::getClientId, "ClientId expected, but it was null");
@@ -80,6 +78,15 @@ class ControllerMethodParameter {
             controllerMethodResult.getLocalStorage().put(parameter.getAnnotation(LocalStorage.class).value(), parameterValue);
         } else {
             throw new IllegalStateException(method + ": parameter without annotation=" + parameter);
+        }
+    }
+
+    private void checkAccessToken(AccessToken accessToken) {
+        if (accessToken == null) {
+            throw new AuthenticationException("UserId required for method " + method + ", but no access token provided");
+        }
+        if (accessToken.isAuthenticated()) {
+            throw new AuthenticationException("UserId required for method " + method + ", but access token is not authenticated");
         }
     }
 

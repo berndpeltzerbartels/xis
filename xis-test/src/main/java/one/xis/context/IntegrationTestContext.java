@@ -113,12 +113,8 @@ public class IntegrationTestContext {
             return this;
         }
 
-        public Builder withLoggedInUser(String userName, String passwd, String... roles) {
-            userInfo = new LocalUserInfo();
-            userInfo.setUserId(userName);
-            userInfo.setPassword(passwd);
-            userInfo.setRoles(Set.of(roles));
-            userInfo.setClaims(Map.of("password", passwd));
+        public Builder withLoggedInUser(LocalUserInfo userInfo) {
+            this.userInfo = userInfo;
             return this;
         }
 
@@ -128,11 +124,13 @@ public class IntegrationTestContext {
         }
 
         private static void addTokenCookies(LocalUserInfo userInfo, IntegrationTestContext context) {
+            System.err.println("Adding token cookies for user: " + userInfo.getUserId());
             context.getOptionalSingleton(ApiTokenManager.class).ifPresent(tokenManager -> {
+                System.err.println("Creating tokens for user: " + userInfo.getUserId());
                 var tokens = tokenManager.createTokens(userInfo.getUserId(), userInfo.getRoles(), userInfo.getClaims());
                 var document = context.environment.getHTML_OBJECTS().getDocument();
-                document.addCookie("accessToken", tokens.accessToken());
-                document.addCookie("refreshToken", tokens.renewToken());
+                document.addCookie("access_token", tokens.accessToken());
+                document.addCookie("refresh_token", tokens.renewToken());
             });
         }
     }

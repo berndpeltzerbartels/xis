@@ -33,6 +33,23 @@ public class Console {
         }
     }
 
+    public void warn(Object message) {
+        System.err.println(message);
+    }
+
+    public void warn(Object message, Object arg) {
+        System.err.println(message);
+    }
+
+    public void debug(Object message) {
+        System.out.println(message);
+    }
+
+    public void debug(Object message, Object arg) {
+        System.out.println(message);
+    }
+
+
     private void printError(Object message) throws NoSuchFieldException, IllegalAccessException {
         var guestObjectField = message.getClass().getDeclaredField("guestObject");
         guestObjectField.setAccessible(true);

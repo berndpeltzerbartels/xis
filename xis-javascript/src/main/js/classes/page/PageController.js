@@ -73,16 +73,17 @@ class PageController {
     handleActionResponse(response) {
         switch (response.status) {
             case 200:
-                this.handleActionResponseOK(response);
+            case 401:
+            case 422:
+                this.handleActionResponse(response);
                 break;
             case 204:
                 this.handleActionResponseNoContent(response);
                 break;
-            case 422:
-                this.handleActionResponseUnprocessableEntity(response);
             default:
                 throw new Error('status: ' + response.status);
         }
+        this.backendService.triggerAdditionalReloadsOnDemand(response);
     }
 
     /**
@@ -91,19 +92,8 @@ class PageController {
      * @public
      * @param {ServerResponse} response
      */
-    handleActionResponseOK(response) {
-        if (response.nextPageURL) {
-            var resolvedURL = this.urlResolver.resolve(response.nextPageURL);
-            if (!resolvedURL) {
-                throw new Error('no page for ' + response.nextPageURL);
-            }
-            this.resolvedURL = resolvedURL;
-            if (resolvedURL.page != this.page) {
-                this.page = resolvedURL.page;
-                this.htmlTagHandler.unbindPage();
-                this.htmlTagHandler.bindPage(resolvedURL.page);
-            }
-        }
+    handleActionResponse(response) {
+        this.handleActionResponseNoContent(response);
         var data = response.data;
         data.scope = 'TREE';
         this.doRefresh(data);
@@ -111,7 +101,7 @@ class PageController {
 
     triggerPageReload(response) {
         var data = response.data;
-        data.scope = 'CONTROLER';
+        data.scope = 'CONTROLLER';
         this.doRefresh(response);
     }
 
@@ -233,13 +223,21 @@ class PageController {
     * @returns {Promise<string>}
     */
     refreshCurrentPage() {
-        var _this = this;
         return this.client.loadPageData(this.resolvedURL).then(response => {
+            debugger;
+            var nextResolvedURL = this.urlResolver.resolve(response.nextPageURL);
+            if (!nextResolvedURL) {
+                throw new Error('no page for ' + response.nextPageURL);
+            }
+            if (nextResolvedURL.page != this.page) {
+                this.displayPageForUrl(nextResolvedURL.url);
+                return;
+            }
             var data = response.data;
             data.setValue(['pathVariables'], this.resolvedURL.pathVariablesAsMap());
             data.setValue(['urlParameters'], this.resolvedURL.urlParameters);
             this.page.data = data;
-            _this.htmlTagHandler.refresh(data);
+            this.htmlTagHandler.refresh(data);
         });
     }
 
