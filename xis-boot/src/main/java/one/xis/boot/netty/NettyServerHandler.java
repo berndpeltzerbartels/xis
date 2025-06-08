@@ -60,7 +60,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
         }
         var token = extractBearerToken(request);
         return switch (uri) {
-            case "/xis/config" -> mapper.toFullHttpResponse(controller.getComponentConfig(token));
+            case "/xis/config" -> mapper.toFullHttpResponse(controller.getComponentConfig());
             case "/xis/page" -> mapper.toFullHttpResponse(controller.getPage(request.headers().get("uri")));
             case "/xis/page/head" -> mapper.toFullHttpResponse(controller.getPageHead(request.headers().get("uri")));
             case "/xis/page/body" -> mapper.toFullHttpResponse(controller.getPageBody(request.headers().get("uri")));

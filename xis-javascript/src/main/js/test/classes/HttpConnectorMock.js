@@ -31,17 +31,6 @@ class HttpConnectorMock {
         });
     }
 
-    responseForGet(uri, headers) {
-        switch (uri) {
-            case '/xis/config': return backendBridge.getComponentConfig(uri, headers);
-            case '/xis/page/head': return backendBridge.getPageHead(uri, headers);
-            case '/xis/page/body': return backendBridge.getPageBody(uri, headers);
-            case '/xis/page/body-attributes': return backendBridge.getBodyAttributes(uri, headers);
-            case '/xis/widget/html': return backendBridge.getWidgetHtml(uri, headers);
-            default: throw new Error('unknown uri for http-get: ' + uri);
-        }
-    }
-
     responseForPost(uri, payload, headers) {
         var requestJson = JSON.stringify(payload);
         switch (uri) {
@@ -51,8 +40,24 @@ class HttpConnectorMock {
             case '/xis/page/action': return backendBridge.onPageLinkAction(uri, requestJson, headers);
             case '/xis/widget/action': return backendBridge.onWidgetLinkAction(uri, requestJson, headers);
             case '/xis/form/action': return backendBridge.onFormAction(uri, requestJson, headers);
+            case '/xis/token-provider/login': return backendBridge.localTokenProviderLogin(uri, requestJson, headers);
             default: throw new Error('unknown uri for http-post: ' + uri);
         }
     }
 
+    responseForGet(uri, headers) {
+        switch (uri) {
+            case '/xis/config': return backendBridge.getComponentConfig(uri, headers);
+            case '/xis/page': return backendBridge.getPage(uri, headers);
+            case '/xis/page/head': return backendBridge.getPageHead(uri, headers);
+            case '/xis/page/body': return backendBridge.getPageBody(uri, headers);
+            case '/xis/page/body-attributes': return backendBridge.getBodyAttributes(uri, headers);
+            case '/xis/widget/html': return backendBridge.getWidgetHtml(uri, headers);
+            case '/xis/token-provider/tokens': return backendBridge.localTokenProviderGetTokens(uri, headers);
+            case '/xis/token/renew': return backendBridge.renewApiTokens(uri, headers);
+            default: throw new Error('unknown uri for http-get: ' + uri);
+        }
+    }
 }
+
+

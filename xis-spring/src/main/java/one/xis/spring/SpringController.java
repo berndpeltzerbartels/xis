@@ -27,7 +27,7 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
 
     @Override
     @GetMapping("/xis/config")
-    public ClientConfig getComponentConfig(@RequestHeader(value = "Authentication", required = false) String authenticationHeader) {
+    public ClientConfig getComponentConfig() {
         return frontendService.getConfig();
     }
 
@@ -134,7 +134,6 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
     @Override
     @GetMapping("/xis/auth/{provider}")
     public ResponseEntity<?> authenticationCallback(HttpRequest request,
-
                                                     @PathVariable("provider") String provider) {
         AuthenticationData authData = frontendService.authenticationCallback(provider, request.getURI().getQuery());
         return addTokenCookies(ResponseEntity.status(302).header("Location", authData.getUrl()), authData.getApiTokens()).build();
@@ -208,9 +207,14 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
     }
 
     private void addTokenToRequest(ClientRequest request, String authenticationHeader) {
+        request.setAccessToken(extractAccessToken(authenticationHeader));
+    }
+
+    private String extractAccessToken(String authenticationHeader) {
         if (authenticationHeader != null && authenticationHeader.startsWith("Bearer ")) {
-            request.setAccessToken(authenticationHeader.substring("Bearer ".length()));
+            return authenticationHeader.substring("Bearer ".length());
         }
+        return null;
     }
 
 

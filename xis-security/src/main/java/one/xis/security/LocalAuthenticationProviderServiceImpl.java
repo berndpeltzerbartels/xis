@@ -17,7 +17,7 @@ class LocalAuthenticationProviderServiceImpl implements LocalAuthenticationProvi
     private final AuthenticationService authenticationService;
     private final UserService userService;
     private final LocalAuthenticationProviderCodeStore codeStore = new LocalAuthenticationProviderCodeStore();
-    private final String secret = SecurityUtil.createRandomKey(32); // TODO add to form data
+    private final String secret = SecurityUtil.createRandomKey(32);
     private final Duration lifetime = Duration.of(15, MINUTES);
     private final Duration refreshLifetime = Duration.of(30, MINUTES);
 

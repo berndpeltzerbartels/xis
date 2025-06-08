@@ -7,7 +7,7 @@ import java.util.Map;
 
 public interface FrameworkController<RESP_WRAPPER, REQ, RESP> {
 
-    ClientConfig getComponentConfig(String authenticationHeader);
+    ClientConfig getComponentConfig();
 
     RESP_WRAPPER getPageModel(ClientRequest request, String authenticationHeader, Locale locale);
 

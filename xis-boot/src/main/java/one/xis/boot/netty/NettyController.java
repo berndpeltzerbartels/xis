@@ -23,7 +23,7 @@ public class NettyController implements FrameworkController<FullHttpResponse, Fu
     private final NettyMapper mapper;
 
     @Override
-    public ClientConfig getComponentConfig(String authenticationHeader) {
+    public ClientConfig getComponentConfig() {
         return frontendService.getConfig();
     }
 

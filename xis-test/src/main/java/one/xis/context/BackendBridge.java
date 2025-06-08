@@ -3,10 +3,10 @@ package one.xis.context;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import one.xis.server.ClientRequest;
-import one.xis.server.FrontendService;
-import one.xis.server.ResourcePathProvider;
-import one.xis.server.ServerResponse;
+import one.xis.security.AuthenticationException;
+import one.xis.security.InvalidCredentialsException;
+import one.xis.security.Login;
+import one.xis.server.*;
 import one.xis.validation.ValidatorMessages;
 
 import java.util.Locale;
@@ -14,9 +14,6 @@ import java.util.Map;
 
 import static one.xis.context.BackendBridgeVerboseRunner.run;
 
-/**
- * Mediator between the compiled javascript and backend classes during testing.
- */
 @XISComponent
 @SuppressWarnings("unused")
 @RequiredArgsConstructor
@@ -27,77 +24,103 @@ public class BackendBridge implements ResourcePathProvider {
     private final AppContext appContext;
 
     public BackendBridgeResponse getComponentConfig(String uri, Map<String, String> headers) {
-        return toBridgeResponse(run(frontendService::getConfig));
+        return toBridgeResponse(frontendService.getConfig());
     }
 
     public BackendBridgeResponse getPageModel(String uri, String requestJson, Map<String, String> headers) {
-        return toBridgeResponse(run(frontendService::processModelDataRequest, request(requestJson)));
+        return toBridgeResponse(run(frontendService::processModelDataRequest, request(requestJson, headers)));
     }
 
     public BackendBridgeResponse getFormModel(String uri, String requestJson, Map<String, String> headers) {
-        return toBridgeResponse(run(frontendService::processFormDataRequest, request(requestJson)));
+        return toBridgeResponse(run(frontendService::processFormDataRequest, request(requestJson, headers)));
     }
 
     public BackendBridgeResponse getWidgetModel(String uri, String requestJson, Map<String, String> headers) {
-        return toBridgeResponse(run(frontendService::processModelDataRequest, request(requestJson)));
+        return toBridgeResponse(run(frontendService::processModelDataRequest, request(requestJson, headers)));
     }
 
     public BackendBridgeResponse onPageLinkAction(String uri, String requestJson, Map<String, String> headers) {
-        return toBridgeResponse(run(frontendService::processActionRequest, request(requestJson)));
+        return toBridgeResponse(run(frontendService::processActionRequest, request(requestJson, headers)));
     }
 
     public BackendBridgeResponse onWidgetLinkAction(String uri, String requestJson, Map<String, String> headers) {
-        return toBridgeResponse(run(frontendService::processActionRequest, request(requestJson)));
+        return toBridgeResponse(run(frontendService::processActionRequest, request(requestJson, headers)));
     }
 
     public BackendBridgeResponse onFormAction(String uri, String requestJson, Map<String, String> headers) {
-        return toBridgeResponse(run(frontendService::processActionRequest, request(requestJson)));
+        return toBridgeResponse(run(frontendService::processActionRequest, request(requestJson, headers)));
+    }
+
+    public BackendBridgeResponse getPage(String uri, Map<String, String> headers) {
+        return stringToBridgeResponse(frontendService.getPage(headers.get("uri")));
     }
 
     public BackendBridgeResponse getPageHead(String uri, Map<String, String> headers) {
-        return stringToBridgeResponse(run(frontendService::getPageHead, headers.get("uri")));
+        return stringToBridgeResponse(frontendService.getPageHead(headers.get("uri")));
     }
 
     public BackendBridgeResponse getPageBody(String uri, Map<String, String> headers) {
-        return stringToBridgeResponse(run(frontendService::getPageBody, headers.get("uri")));
+        return stringToBridgeResponse(frontendService.getPageBody(headers.get("uri")));
     }
 
     public BackendBridgeResponse getBodyAttributes(String uri, Map<String, String> headers) {
-        return toBridgeResponse(run(frontendService::getBodyAttributes, headers.get("uri")));
+        return toBridgeResponse(frontendService.getBodyAttributes(headers.get("uri")));
     }
 
     public BackendBridgeResponse getWidgetHtml(String uri, Map<String, String> headers) {
-        return stringToBridgeResponse(run(frontendService::getWidgetHtml, headers.get("uri")));
+        return stringToBridgeResponse(frontendService.getWidgetHtml(headers.get("uri")));
     }
 
-    private BackendBridgeResponse stringToBridgeResponse(String str) {
-        return new BackendBridgeResponse(str, 200, new ValidatorMessages());
+    public BackendBridgeResponse localTokenProviderLogin(String uri, String loginJson, Map<String, String> headers) {
+        try {
+            Login login = objectMapper.readValue(loginJson, Login.class);
+            String code = frontendService.localTokenProviderLogin(login);
+            return new BackendBridgeResponse("{\"code\":\"" + code + "\",\"state\":\"" + login.getState() + "\"}", 200, new ValidatorMessages());
+        } catch (InvalidCredentialsException | JsonProcessingException e) {
+            return new BackendBridgeResponse(e.getMessage(), 401, new ValidatorMessages());
+        }
     }
 
+    public BackendBridgeResponse localTokenProviderGetTokens(String uri, Map<String, String> headers) {
+        String code = headers.get("code");
+        String state = headers.get("state");
+        try {
+            BearerTokens tokens = frontendService.localTokenProviderGetTokens(code, state);
+            return toBridgeResponse(tokens);
+        } catch (AuthenticationException e) {
+            return new BackendBridgeResponse(e.getMessage(), 401, new ValidatorMessages());
+        }
+    }
+
+    public BackendBridgeResponse renewApiTokens(String uri, Map<String, String> headers) {
+        try {
+            return toBridgeResponse(frontendService.processRenewApiTokenRequest(headers.get("renewToken")));
+        } catch (Exception e) {
+            return new BackendBridgeResponse(e.getMessage(), 500, new ValidatorMessages());
+        }
+    }
+
+    private ClientRequest request(String requestJson, Map<String, String> headers) {
+        try {
+            var request = objectMapper.readValue(requestJson, ClientRequest.class);
+            request.setLocale(Locale.GERMANY); // TODO konfigurierbar machen
+            request.setZoneId("Europe/Berlin");
+            var authenticationHeader = headers.get("Authorization");
+            if (authenticationHeader != null && authenticationHeader.startsWith("Bearer ")) {
+                request.setAccessToken(authenticationHeader.substring("Bearer ".length()));
+            }
+            return request;
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to deserialize request", e);
+        }
+    }
 
     private <T> BackendBridgeResponse toBridgeResponse(T o) {
         return new BackendBridgeResponse(serialialize(o), 200, new ValidatorMessages());
     }
 
-
     private <T> BackendBridgeResponse toBridgeResponse(ServerResponse o) {
         return new BackendBridgeResponse(serialialize(o), o.getStatus(), o.getValidatorMessages());
-    }
-
-
-    private String resourceId(String uri) {
-        return uri.substring(uri.lastIndexOf("/") + 1);
-    }
-
-    private ClientRequest request(String requestJson) {
-        try {
-            var request = objectMapper.readValue(requestJson, ClientRequest.class);
-            request.setLocale(Locale.GERMANY); // TODO
-            request.setZoneId("Europe/Berlin");
-            return request;
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Failed to deserialize request", e);
-        }
     }
 
     private String serialialize(Object o) {
@@ -106,6 +129,10 @@ public class BackendBridge implements ResourcePathProvider {
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Failed to serialize", e);
         }
+    }
+
+    private BackendBridgeResponse stringToBridgeResponse(String str) {
+        return new BackendBridgeResponse(str, 200, new ValidatorMessages());
     }
 
     @Override

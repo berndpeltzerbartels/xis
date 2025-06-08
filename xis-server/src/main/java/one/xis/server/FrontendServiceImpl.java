@@ -2,7 +2,6 @@ package one.xis.server;
 
 
 import lombok.RequiredArgsConstructor;
-import one.xis.Page;
 import one.xis.UserContextAccess;
 import one.xis.UserContextImpl;
 import one.xis.context.AppContext;
@@ -59,6 +58,9 @@ public class FrontendServiceImpl implements FrontendService {
         try {
             addUserContext(request);
             return applyFilterChain(request, controllerService::processActionRequest);
+        } catch (AuthenticationException e) {
+            Logger.error("Authentication error: {}", e.getMessage());
+            return authenticationErrorResponse(request.getPageId());
         } finally {
             removeUserContext();
         }
@@ -103,18 +105,6 @@ public class FrontendServiceImpl implements FrontendService {
         var authenticationProviderData = service.verifyStateAndExtractCode(queryString);
         var tokenResponse = service.requestTokens(authenticationProviderData.getCode(), authenticationProviderData.getState());
         return getAuthenticationData(tokenResponse, authenticationProviderData);
-    }
-
-    private static AuthenticationData getAuthenticationData(AuthenticationProviderTokens tokenResponse, AuthenticationProviderStateData authenticationProviderData) {
-        var apiTokens = new ApiTokens();
-        apiTokens.setAccessToken(tokenResponse.getAccessToken());
-        apiTokens.setRenewTokenExpiresIn(tokenResponse.getRefreshExpiresIn());
-        apiTokens.setRenewToken(tokenResponse.getRefreshToken());
-        apiTokens.setRenewTokenExpiresIn(tokenResponse.getRefreshExpiresIn());
-        var authenticationData = new AuthenticationData();
-        authenticationData.setApiTokens(apiTokens);
-        authenticationData.setUrl(authenticationProviderData.getStateParameterPayload().getRedirect());
-        return authenticationData;
     }
 
     @Override
@@ -225,10 +215,27 @@ public class FrontendServiceImpl implements FrontendService {
                 .orElseThrow(() -> new UnsupportedOperationException("Local authentication is not activated"));
     }
 
-    boolean isRunningFromJar() {
-        String path = Page.class.getResource(Page.class.getSimpleName() + ".class").toString();
-        return path.startsWith("jar:");
+
+    private static AuthenticationData getAuthenticationData(AuthenticationProviderTokens tokenResponse, AuthenticationProviderStateData authenticationProviderData) {
+        var apiTokens = new ApiTokens();
+        apiTokens.setAccessToken(tokenResponse.getAccessToken());
+        apiTokens.setRenewTokenExpiresIn(tokenResponse.getRefreshExpiresIn());
+        apiTokens.setRenewToken(tokenResponse.getRefreshToken());
+        apiTokens.setRenewTokenExpiresIn(tokenResponse.getRefreshExpiresIn());
+        var authenticationData = new AuthenticationData();
+        authenticationData.setApiTokens(apiTokens);
+        authenticationData.setUrl(authenticationProviderData.getStateParameterPayload().getRedirect());
+        return authenticationData;
     }
 
-
+    private static ServerResponse authenticationErrorResponse(String uri) {
+        var response = new ServerResponse();
+        response.setStatus(401);
+        response.setNextPageURL("/login.html");
+        response.getFormData().put("redirect", uri);
+        response.getValidatorMessages().getMessages().put("username", "Invalid username or password"); // TODO: i18n
+        response.getValidatorMessages().getMessages().put("password", "Invalid username or password"); // TODO: i18n
+        response.getValidatorMessages().getGlobalMessages().add("Invalid username or password"); // TODO: i18n
+        return response;
+    }
 }

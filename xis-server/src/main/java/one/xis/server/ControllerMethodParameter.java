@@ -6,6 +6,7 @@ import one.xis.PathVariable;
 import one.xis.deserialize.MainDeserializer;
 import one.xis.deserialize.PostProcessingResults;
 import one.xis.security.AccessToken;
+import one.xis.security.AuthenticationException;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -24,6 +25,9 @@ class ControllerMethodParameter {
         if (parameter.isAnnotationPresent(FormData.class)) {
             return deserializeFormDataParameter(parameter, request, postProcessingResults, accessToken);
         } else if (parameter.isAnnotationPresent(UserId.class)) {
+            if (accessToken == null) {
+                throw new AuthenticationException();
+            }
             return validateAndRetrieve(accessToken::getUserId, "UserId expected, but it was null");
         } else if (parameter.isAnnotationPresent(ClientId.class)) {
             return validateAndRetrieve(request::getClientId, "ClientId expected, but it was null");

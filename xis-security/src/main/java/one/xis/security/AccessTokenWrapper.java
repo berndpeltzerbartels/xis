@@ -22,7 +22,7 @@ class AccessTokenWrapper implements AccessToken {
                 try {
                     tokenAttributes = tokenManager.decodeToken(accessToken);
                 } catch (InvalidTokenException e) {
-                    throw new RuntimeException(e); // TODO Exception mit 401
+                    throw new AuthenticationException(); // TODO Exception mit 401
                 }
             } else {
                 tokenAttributes = new TokenAttributes(null, Collections.emptySet(), Map.of(), null);
