@@ -8,7 +8,6 @@ class Client {
     constructor(tokenManager) {
         this.config = undefined;
         this.clientId = randomString();
-        this.userId = '';
         this.zoneId = timeZone();
         this.clientState = {};
         this.tokenManager = tokenManager;
@@ -156,7 +155,6 @@ class Client {
         var normalizedPath = resolvedURL.normalizedPath;
         var request = new ClientRequest();
         request.clientId = this.clientId;
-        request.userId = this.userId;
         request.pageId = normalizedPath;
         request.action = action;
         request.formData = formData ? formData.values : {};
@@ -187,7 +185,6 @@ class Client {
         var normalizedPath = resolvedURL.normalizedPath;
         var request = new ClientRequest();
         request.clientId = this.clientId;
-        request.userId = this.userId;
         request.widgetId = widgetId;
         request.pageId = normalizedPath;
         request.formBinding = formBindingKey;
@@ -222,7 +219,6 @@ class Client {
     createWidgetRequest(widgetInstance, widgetState, action, formData, actionParameters) {
         var request = new ClientRequest();
         request.clientId = this.clientId;
-        request.userId = this.userId;
         request.widgetId = widgetInstance.widget.id;
         request.action = action;
         request.formData = formData ? formData.values : {};

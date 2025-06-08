@@ -3,10 +3,10 @@ package one.xis;
 public class UserContextAccess {
 
     public static void removeInstance() {
-        UserContext.removeInstance();
+        UserContextImpl.removeInstance();
     }
 
-    public static void setInstance(UserContext context) {
-        UserContext.setInstance(context);
+    public static void setInstance(UserContextImpl context) {
+        UserContextImpl.setInstance(context);
     }
 }

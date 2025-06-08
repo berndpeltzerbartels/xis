@@ -14,6 +14,7 @@ class ControllerMethodResult {
     private String nextPageURL;
     private String nextWidgetId;
     private String widgetContainerId;
+    private ApiTokens tokens;
     private final Collection<String> widgetsToReload = new HashSet<>();
     private final Map<String, Object> widgetParameters = new HashMap<>();
     private final Map<String, Object> urlParameters = new HashMap<>();

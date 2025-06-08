@@ -5,6 +5,7 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import one.xis.deserialize.MainDeserializer;
 import one.xis.deserialize.PostProcessingResults;
+import one.xis.security.AccessToken;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -31,9 +32,9 @@ class ControllerMethod {
         }
     }
 
-    ControllerMethodResult invoke(@NonNull ClientRequest request, @NonNull Object controller, Map<String, Object> requestScope) throws Exception {
+    ControllerMethodResult invoke(@NonNull ClientRequest request, @NonNull Object controller, Map<String, Object> requestScope, AccessToken accessToken) throws Exception {
         var postProcessingResults = new PostProcessingResults();
-        var args = prepareArgs(method, request, postProcessingResults, requestScope);
+        var args = prepareArgs(method, request, postProcessingResults, requestScope, accessToken);
         if (postProcessingResults.authenticate()) {
             // TODO
         }
@@ -83,10 +84,10 @@ class ControllerMethod {
                 .collect(Collectors.toSet());
     }
 
-    protected Object[] prepareArgs(Method method, ClientRequest request, PostProcessingResults postProcessingResults, Map<String, Object> requestScope) throws Exception {
+    protected Object[] prepareArgs(Method method, ClientRequest request, PostProcessingResults postProcessingResults, Map<String, Object> requestScope, AccessToken accessToken) throws Exception {
         var args = new Object[method.getParameterCount()];
         for (var i = 0; i < method.getParameterCount(); i++) {
-            args[i] = controllerMethodParameters[i].prepareParameter(request, postProcessingResults, requestScope);
+            args[i] = controllerMethodParameters[i].prepareParameter(request, postProcessingResults, requestScope, accessToken);
         }
         return args;
     }

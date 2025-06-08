@@ -1,8 +1,10 @@
 package one.xis.context;
 
+import one.xis.utils.lang.MethodUtils;
 import org.tinylog.Logger;
 
 import java.lang.reflect.Method;
+import java.util.Optional;
 
 class BeanCreationMethod extends SingletonMethod {
     BeanCreationMethod(Method method, SingletonWrapper parent, ParameterFactory parameterFactory) {
@@ -27,7 +29,11 @@ class BeanCreationMethod extends SingletonMethod {
 
     @Override
     public Class<?> getSingletonClass() {
-        return getMethod().getReturnType();
+        var returnType = getMethod().getReturnType();
+        if (returnType.equals(Optional.class)) {
+            return MethodUtils.getGenericTypeParameterOfReturnType(getMethod());
+        }
+        return returnType;
     }
 
     @Override

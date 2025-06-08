@@ -32,7 +32,8 @@ public class ServerResponse {
     private ValidatorMessages validatorMessages = new ValidatorMessages();
     private boolean reloadPage; // TODO do we need this?
     private String widgetContainerId;
-    private String token;
+    @JsonIgnore
+    private ApiTokens tokens;
 
     void clear() {
         // do not clear store data
@@ -45,5 +46,6 @@ public class ServerResponse {
         validatorMessages = new ValidatorMessages();
         reloadPage = false;
         widgetContainerId = null;
+        tokens = null;
     }
 }

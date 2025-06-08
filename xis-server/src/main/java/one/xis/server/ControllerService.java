@@ -4,6 +4,8 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import one.xis.context.XISComponent;
 import one.xis.context.XISInject;
+import one.xis.security.AccessToken;
+import one.xis.security.ApiTokenManager;
 import one.xis.utils.lang.StringUtils;
 import org.tinylog.Logger;
 
@@ -26,13 +28,17 @@ class ControllerService {
     @XISInject
     private PathResolver pathResolver;
 
+    @XISInject
+    private ApiTokenManager tokenManager;
+
     void processModelDataRequest(@NonNull ClientRequest request, @NonNull ServerResponse response) {
         Logger.info("Process model data request: {}", request);
+        var accessToken = AccessToken.create(request.getAccessToken(), tokenManager);
         var controllerResult = new ControllerResult();
         controllerResult.setCurrentPageURL(request.getPageId());
         controllerResult.setCurrentWidgetId(request.getWidgetId());
         var wrapper = controllerWrapper(request);
-        wrapper.invokeGetModelMethods(request, controllerResult);
+        wrapper.invokeGetModelMethods(request, controllerResult, accessToken);
         if (controllerResult.getNextPageURL() == null) {
             controllerResult.setNextPageURL(request.getPageId());
         }
@@ -44,11 +50,12 @@ class ControllerService {
 
     void processFormDataRequest(@NonNull ClientRequest request, @NonNull ServerResponse response) {
         Logger.info("Process form data request: {}", request);
+        var accessToken = AccessToken.create(request.getAccessToken(), tokenManager);
         var controllerResult = new ControllerResult();
         controllerResult.setCurrentPageURL(request.getPageId());
         controllerResult.setCurrentWidgetId(request.getWidgetId());
         var wrapper = controllerWrapper(request);
-        wrapper.invokeFormDataMethods(request, controllerResult);
+        wrapper.invokeFormDataMethods(request, controllerResult, accessToken);
         if (controllerResult.getNextPageURL() == null) {
             controllerResult.setNextPageURL(request.getPageId());
         }
@@ -60,32 +67,32 @@ class ControllerService {
 
     void processActionRequest(@NonNull ClientRequest request, @NonNull ServerResponse response) {
         Logger.info("Process action request: {}", request);
+        var accessToken = AccessToken.create(request.getAccessToken(), tokenManager);
         var controllerResult = new ControllerResult();
         controllerResult.setCurrentPageURL(request.getPageId());
         controllerResult.setCurrentWidgetId(request.getWidgetId());
         var invokerControllerWrapper = controllerWrapper(request);
-        invokerControllerWrapper.invokeActionMethod(request, controllerResult);
+        invokerControllerWrapper.invokeActionMethod(request, controllerResult, accessToken);
         if (!resultContainsNextController(controllerResult)) {
             usePreviousController(controllerResult, invokerControllerWrapper);
         }
         mapResultToResponse(response, controllerResult);
         var nextControllerWrapper = nextControllerWrapperAfterAction(controllerResult);
         if (nextControllerWrapper.equals(invokerControllerWrapper)) {
-            invokerControllerWrapper.invokeGetModelMethods(request, controllerResult);
+            invokerControllerWrapper.invokeGetModelMethods(request, controllerResult, accessToken);
             mapResultToResponse(response, controllerResult);
         } else {
-            processNextController(request, controllerResult, response, nextControllerWrapper);
+            processNextController(request, controllerResult, response, nextControllerWrapper, accessToken);
         }
     }
 
-    private void processNextController(ClientRequest request, ControllerResult controllerResult, ServerResponse response, ControllerWrapper nextControllerWrapper) {
+    private void processNextController(ClientRequest request, ControllerResult controllerResult, ServerResponse response, ControllerWrapper nextControllerWrapper, AccessToken accessToken) {
         Logger.info("Process next controller: {}, request: {}", nextControllerWrapper, request);
         var nextRequest = new ClientRequest();
         // userdata is the same
         nextRequest.setLocale(request.getLocale());
         nextRequest.setZoneId(request.getZoneId());
         nextRequest.setClientId(request.getClientId());
-        nextRequest.setUserId(request.getUserId());
         nextRequest.getLocalStorageData().putAll(request.getLocalStorageData());
         nextRequest.getClientStateData().putAll(request.getClientStateData());
         controllerResultMapper.mapControllerResultToNextRequest(controllerResult, nextRequest);
@@ -97,7 +104,7 @@ class ControllerService {
             nextControllerResult.setNextPageURL(nextControllerWrapper.getId());
         }
         // get model data for next controller
-        nextControllerWrapper.invokeGetModelMethods(nextRequest, nextControllerResult);
+        nextControllerWrapper.invokeGetModelMethods(nextRequest, nextControllerResult, accessToken);
         // map result to response
         response.clear();
         mapResultToResponse(response, nextControllerResult);

@@ -22,15 +22,15 @@ public class NettyController implements FrameworkController<FullHttpResponse, Fu
     private final FrontendService frontendService;
     private final NettyMapper mapper;
 
-
     @Override
-    public ClientConfig getComponentConfig() {
+    public ClientConfig getComponentConfig(String authenticationHeader) {
         return frontendService.getConfig();
     }
 
     @Override
-    public FullHttpResponse getPageModel(ClientRequest request, Locale locale) {
+    public FullHttpResponse getPageModel(ClientRequest request, String authenticationHeader, Locale locale) {
         request.setLocale(locale);
+        request.setAccessToken(extractToken(authenticationHeader));
         try {
             return mapper.toFullHttpResponse(frontendService.processModelDataRequest(request));
         } catch (IOException e) {
@@ -39,8 +39,9 @@ public class NettyController implements FrameworkController<FullHttpResponse, Fu
     }
 
     @Override
-    public FullHttpResponse getFormModel(ClientRequest request, Locale locale) {
+    public FullHttpResponse getFormModel(ClientRequest request, String authenticationHeader, Locale locale) {
         request.setLocale(locale);
+        request.setAccessToken(extractToken(authenticationHeader));
         try {
             return mapper.toFullHttpResponse(frontendService.processFormDataRequest(request));
         } catch (IOException e) {
@@ -49,8 +50,9 @@ public class NettyController implements FrameworkController<FullHttpResponse, Fu
     }
 
     @Override
-    public FullHttpResponse getWidgetModel(ClientRequest request, Locale locale) {
+    public FullHttpResponse getWidgetModel(ClientRequest request, String authenticationHeader, Locale locale) {
         request.setLocale(locale);
+        request.setAccessToken(extractToken(authenticationHeader));
         try {
             return mapper.toFullHttpResponse(frontendService.processModelDataRequest(request));
         } catch (IOException e) {
@@ -59,8 +61,9 @@ public class NettyController implements FrameworkController<FullHttpResponse, Fu
     }
 
     @Override
-    public FullHttpResponse onPageLinkAction(ClientRequest request, Locale locale) {
+    public FullHttpResponse onPageLinkAction(ClientRequest request, String authenticationHeader, Locale locale) {
         request.setLocale(locale);
+        request.setAccessToken(extractToken(authenticationHeader));
         try {
             return mapper.toFullHttpResponse(frontendService.processActionRequest(request));
         } catch (IOException e) {
@@ -69,8 +72,9 @@ public class NettyController implements FrameworkController<FullHttpResponse, Fu
     }
 
     @Override
-    public FullHttpResponse onWidgetLinkAction(ClientRequest request, Locale locale) {
+    public FullHttpResponse onWidgetLinkAction(ClientRequest request, String authenticationHeader, Locale locale) {
         request.setLocale(locale);
+        request.setAccessToken(extractToken(authenticationHeader));
         try {
             return mapper.toFullHttpResponse(frontendService.processActionRequest(request));
         } catch (IOException e) {
@@ -79,11 +83,11 @@ public class NettyController implements FrameworkController<FullHttpResponse, Fu
     }
 
     @Override
-    public FullHttpResponse onFormAction(ClientRequest request, Locale locale) {
+    public FullHttpResponse onFormAction(ClientRequest request, String authenticationHeader, Locale locale) {
         request.setLocale(locale);
-
+        request.setAccessToken(extractToken(authenticationHeader));
         try {
-            if (request.getAction().equals("login")) {
+            if ("login".equals(request.getAction())) {
                 return mapper.toFullHttpResponse(frontendService.processLoginRequest(request));
             }
             return mapper.toFullHttpResponse(frontendService.processActionRequest(request));
@@ -102,10 +106,11 @@ public class NettyController implements FrameworkController<FullHttpResponse, Fu
         } catch (InvalidCredentialsException e) {
             throw new RuntimeException(e);
         }
-        var state = login.getState();
+        String state = login.getState();
         return mapper.toRedirectWithCodeAndState(code, state);
     }
 
+    @Override
     public FullHttpResponse localTokenProviderGetTokens(String code, String state) {
         BearerTokens tokens;
         try {
@@ -182,5 +187,10 @@ public class NettyController implements FrameworkController<FullHttpResponse, Fu
         return frontendService.getBundleJs();
     }
 
-
+    private String extractToken(String authenticationHeader) {
+        if (authenticationHeader != null && authenticationHeader.startsWith("Bearer ")) {
+            return authenticationHeader.substring("Bearer ".length());
+        }
+        return null;
+    }
 }

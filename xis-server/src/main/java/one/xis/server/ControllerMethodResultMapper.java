@@ -27,6 +27,8 @@ class ControllerMethodResultMapper {
             mapWidgetResponse(widgetResponse, controllerMethodResult);
         } else if (returnValue instanceof Class<?> controllerClass) {
             updateControllerClass(controllerMethodResult, controllerClass);
+        } else if (returnValue instanceof ApiTokens tokens) {
+            controllerMethodResult.setTokens(tokens);
         }
         if (method.isAnnotationPresent(ModelData.class)) {
             mapModelResult(method.getAnnotation(ModelData.class).value(), returnValue, controllerMethodResult);
@@ -90,7 +92,7 @@ class ControllerMethodResultMapper {
         if (widgetResponse.getWidgetParameters() != null) {
             result.getWidgetParameters().putAll(widgetResponse.getWidgetParameters());
         }
-        
+
     }
 
     private void mapPageResponse(PageResponse pageResponse, ControllerMethodResult controllerMethodResult) {

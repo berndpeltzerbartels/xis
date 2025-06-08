@@ -3,8 +3,8 @@ package one.xis.server;
 
 import lombok.RequiredArgsConstructor;
 import one.xis.Page;
-import one.xis.UserContext;
 import one.xis.UserContextAccess;
+import one.xis.UserContextImpl;
 import one.xis.context.AppContext;
 import one.xis.context.XISComponent;
 import one.xis.context.XISInit;
@@ -194,14 +194,13 @@ public class FrontendServiceImpl implements FrontendService {
     }
 
     @Override
-    public ApiTokens processLoginRequest(ClientRequest request) {
-        return null; // TODO
+    public ServerResponse processLoginRequest(ClientRequest request) {
+        return null; // TODO Status ist 201 - Created, wenn Login erfolgreich ist
     }
 
     private void addUserContext(ClientRequest request) {
-        var userContext = new UserContext();
+        var userContext = new UserContextImpl();
         userContext.setClientId(request.getClientId());
-        userContext.setUserId(request.getUserId());
         userContext.setLocale(request.getLocale());
         userContext.setZoneId(ZoneId.of(request.getZoneId()));
         UserContextAccess.setInstance(userContext);

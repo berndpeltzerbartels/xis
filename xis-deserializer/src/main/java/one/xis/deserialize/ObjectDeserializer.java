@@ -74,7 +74,7 @@ class ObjectDeserializer implements JsonDeserializer<Object> {
         }
         // We need this in case the field is not present in the JSON:
         mandatoryFields.forEach(field -> {
-            var context = new DeserializationContext(path(path, field), field, Mandatory.class, UserContext.getInstance());
+            var context = new DeserializationContext(path(path, field), field, Mandatory.class, userContext);
             results.add(new InvalidValueError(context, MISSING_MANDATORY_PROPERTY.getMessageKey(), MISSING_MANDATORY_PROPERTY.getGlobalMessageKey(), o));
         });
         return Optional.of(o);

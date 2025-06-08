@@ -18,6 +18,7 @@ class ControllerResultMapper {
         if (controllerMethodResult.getWidgetContainerId() != null) {
             controllerResult.setWidgetContainerId(controllerMethodResult.getWidgetContainerId());
         }
+        controllerResult.setTokens(controllerMethodResult.getTokens());
         controllerResult.getModelData().putAll(controllerMethodResult.getModelData());
         controllerResult.getFormData().putAll(controllerMethodResult.getFormData());
         controllerResult.getBindingParameters().putAll(controllerMethodResult.getWidgetParameters());

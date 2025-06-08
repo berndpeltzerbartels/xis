@@ -58,9 +58,9 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
             String provider = uri.substring("/xis/auth/".length());
             return controller.authenticationCallback(request, provider);
         }
-
+        var token = extractBearerToken(request);
         return switch (uri) {
-            case "/xis/config" -> mapper.toFullHttpResponse(controller.getComponentConfig());
+            case "/xis/config" -> mapper.toFullHttpResponse(controller.getComponentConfig(token));
             case "/xis/page" -> mapper.toFullHttpResponse(controller.getPage(request.headers().get("uri")));
             case "/xis/page/head" -> mapper.toFullHttpResponse(controller.getPageHead(request.headers().get("uri")));
             case "/xis/page/body" -> mapper.toFullHttpResponse(controller.getPageBody(request.headers().get("uri")));
@@ -80,14 +80,14 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
     private FullHttpResponse handlePostRequest(String uri, FullHttpRequest request) throws IOException {
         ClientRequest clientRequest = mapper.toClientRequest(request);
         clientRequest.setLocale(Locale.getDefault());
-
+        var token = extractBearerToken(request);
         return switch (uri) {
-            case "/xis/page/model" -> controller.getPageModel(clientRequest, clientRequest.getLocale());
-            case "/xis/form/model" -> controller.getFormModel(clientRequest, clientRequest.getLocale());
-            case "/xis/widget/model" -> controller.getWidgetModel(clientRequest, clientRequest.getLocale());
-            case "/xis/page/action" -> controller.onPageLinkAction(clientRequest, clientRequest.getLocale());
-            case "/xis/form/action" -> controller.onFormAction(clientRequest, clientRequest.getLocale());
-            case "/xis/widget/action" -> controller.onWidgetLinkAction(clientRequest, clientRequest.getLocale());
+            case "/xis/page/model" -> controller.getPageModel(clientRequest, token, clientRequest.getLocale());
+            case "/xis/form/model" -> controller.getFormModel(clientRequest, token, clientRequest.getLocale());
+            case "/xis/widget/model" -> controller.getWidgetModel(clientRequest, token, clientRequest.getLocale());
+            case "/xis/page/action" -> controller.onPageLinkAction(clientRequest, token, clientRequest.getLocale());
+            case "/xis/form/action" -> controller.onFormAction(clientRequest, token, clientRequest.getLocale());
+            case "/xis/widget/action" -> controller.onWidgetLinkAction(clientRequest, token, clientRequest.getLocale());
             case "/xis/token/renew" -> {
                 String header = request.headers().get("Authentication");
                 if (header == null || !header.startsWith("Bearer ")) yield unauthorized();
@@ -130,5 +130,14 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
 
         return response;
     }
+
+    public static String extractBearerToken(FullHttpRequest request) {
+        String authHeader = request.headers().get(HttpHeaderNames.AUTHORIZATION);
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring("Bearer ".length());
+        }
+        return null;
+    }
+
 
 }

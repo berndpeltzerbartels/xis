@@ -3,7 +3,6 @@
  * @property {HttpConnector} httpConnector
  * @property {ClientConfig} config
  * @property {string} clientId
- * @property {string} userId
  * @property {zoneId}
  */
 class HttpClient extends Client{

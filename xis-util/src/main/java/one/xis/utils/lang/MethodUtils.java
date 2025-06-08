@@ -62,6 +62,21 @@ public class MethodUtils {
         throw new IllegalArgumentException(parameter + " has no generic type");
     }
 
+    public static Class<?> getGenericTypeParameterOfReturnType(Method method) {
+        var genericReturnType = method.getGenericReturnType();
+        if (genericReturnType instanceof ParameterizedType parameterizedType) {
+            var type = parameterizedType.getActualTypeArguments()[0];
+            if (type instanceof WildcardType wildcardType) {
+                return (Class<?>) wildcardType.getUpperBounds()[0];
+            }
+            if (type instanceof ParameterizedType parameterizedType2) {
+                return (Class<?>) parameterizedType2.getRawType(); // We do not want to dive deeper
+            }
+            return (Class<?>) type;
+        }
+        throw new IllegalArgumentException(method + " has no generic return type");
+
+    }
 
     /**
      * Creates a list containing the given class and it's superclasses

@@ -2,12 +2,14 @@ package one.xis.server;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import one.xis.DefaultHtmlFile;
 import one.xis.HtmlFile;
 import one.xis.Page;
 import one.xis.Widget;
 import one.xis.context.XISComponent;
 import one.xis.context.XISInit;
 import one.xis.context.XISInject;
+import one.xis.resource.NoSuchResourceException;
 import one.xis.resource.Resource;
 import one.xis.resource.ResourceCache;
 import one.xis.resource.Resources;
@@ -20,8 +22,6 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static one.xis.server.PageUtil.getJavascriptResourcePath;
 
 @XISComponent
 @RequiredArgsConstructor
@@ -147,14 +147,13 @@ class ResourceService {
 
 
     private Resource htmlResource(Object controller) {
-        return resources.getByPath(getHtmlTemplatePath(controller));
-    }
-
-    private Optional<Resource> getJavascriptResource(Object pageController) {
         try {
-            return Optional.of(resources.getByPath(getJavascriptResourcePath(pageController)));
-        } catch (Exception e) {
-            return Optional.empty();
+            return resources.getByPath(getHtmlTemplatePath(controller));
+        } catch (NoSuchResourceException e) {
+            if (!controller.getClass().isAnnotationPresent(DefaultHtmlFile.class)) {
+                throw new RuntimeException("Failed to load HTML template for controller: " + controller.getClass().getName(), e);
+            }
+            return resources.getByPath(controller.getClass().getAnnotation(DefaultHtmlFile.class).value());
         }
     }
 

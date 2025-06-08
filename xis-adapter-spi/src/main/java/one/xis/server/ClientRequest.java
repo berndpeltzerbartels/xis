@@ -10,7 +10,6 @@ import java.util.Map;
 @Data
 public class ClientRequest {
     private String clientId;
-    private String userId;
     private String action;
     private String formBinding;
     private String pageId;
@@ -19,6 +18,7 @@ public class ClientRequest {
     private Locale locale;
     private String zoneId;
     private RequestType type;
+    private String accessToken;
 
     @JsonDeserialize(using = MapDeserializer.class)
     private Map<String, String> formData = new HashMap<>();

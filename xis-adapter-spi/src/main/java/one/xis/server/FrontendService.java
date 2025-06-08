@@ -15,7 +15,7 @@ public interface FrontendService {
 
     ServerResponse processFormDataRequest(ClientRequest request);
 
-    ApiTokens processLoginRequest(ClientRequest request) throws InvalidCredentialsException;
+    ServerResponse processLoginRequest(ClientRequest request) throws InvalidCredentialsException;
 
     ApiTokens processRenewApiTokenRequest(String renewToken);
 
@@ -46,5 +46,11 @@ public interface FrontendService {
     String getFunctionsJs();
 
     String getBundleJs();
+
+    default void extractAccessToken(ClientRequest request, String authenticationHeader) {
+        if (authenticationHeader != null && authenticationHeader.startsWith("Bearer ")) {
+            request.setAccessToken(authenticationHeader.substring("Bearer ".length()));
+        }
+    }
 
 }

@@ -14,7 +14,6 @@ import java.util.Map;
 
 import static io.netty.buffer.Unpooled.copiedBuffer;
 
-
 @XISComponent
 @RequiredArgsConstructor
 public class NettyMapper {
@@ -27,8 +26,20 @@ public class NettyMapper {
     }
 
     public FullHttpResponse toFullHttpResponse(ServerResponse serverResponse) throws IOException {
-        String json = objectMapper.writeValueAsString(serverResponse);
-        return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(serverResponse.getStatus()), copiedBuffer(json, StandardCharsets.UTF_8));
+        DefaultFullHttpResponse response = new DefaultFullHttpResponse(
+                HttpVersion.HTTP_1_1,
+                HttpResponseStatus.valueOf(serverResponse.getStatus()),
+                copiedBuffer(objectMapper.writeValueAsString(serverResponse), StandardCharsets.UTF_8));
+
+        if (serverResponse.getTokens() != null) {
+            long accessTokenMaxAge = serverResponse.getTokens().getAccessTokenExpiresIn().getSeconds();
+            long renewTokenMaxAge = serverResponse.getTokens().getRenewTokenExpiresIn().getSeconds();
+
+            response.headers().add(HttpHeaderNames.SET_COOKIE, createCookie("access_token", serverResponse.getTokens().getAccessToken(), accessTokenMaxAge));
+            response.headers().add(HttpHeaderNames.SET_COOKIE, createCookie("refresh_token", serverResponse.getTokens().getRenewToken(), renewTokenMaxAge));
+        }
+
+        return response;
     }
 
     public FullHttpResponse toFullHttpResponse(ClientConfig clientConfig) throws IOException {
@@ -36,14 +47,6 @@ public class NettyMapper {
         return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, copiedBuffer(json, StandardCharsets.UTF_8));
     }
 
-    /**
-     * Converts a RenewTokenResponse to a FullHttpResponse. This method creates a response with
-     * HTTP status NO_CONTENT and sets the access and refresh tokens as cookies in the response headers.
-     *
-     * @param tokenResponse the RenewTokenResponse to convert
-     * @return a FullHttpResponse containing the JSON representation of the RenewTokenResponse
-     * @throws IOException if there is an error during conversion
-     */
     public FullHttpResponse toFullHttpResponse(ApiTokens tokenResponse) throws IOException {
         long accessTokenMaxAge = tokenResponse.getAccessTokenExpiresIn().getSeconds();
         long renewTokenMaxAge = tokenResponse.getRenewTokenExpiresIn().getSeconds();
@@ -106,7 +109,6 @@ public class NettyMapper {
         response.headers().add(HttpHeaderNames.SET_COOKIE, createCookie("refresh_token", authData.getApiTokens().getRenewToken(), renewTokenMaxAge));
         return response;
     }
-
 
     public FullHttpResponse toRedirectWithCodeAndState(String code, String state) {
         DefaultFullHttpResponse response = new DefaultFullHttpResponse(

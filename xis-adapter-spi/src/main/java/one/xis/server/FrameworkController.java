@@ -7,19 +7,19 @@ import java.util.Map;
 
 public interface FrameworkController<RESP_WRAPPER, REQ, RESP> {
 
-    ClientConfig getComponentConfig();
+    ClientConfig getComponentConfig(String authenticationHeader);
 
-    RESP_WRAPPER getPageModel(ClientRequest request, Locale locale);
+    RESP_WRAPPER getPageModel(ClientRequest request, String authenticationHeader, Locale locale);
 
-    RESP_WRAPPER getFormModel(ClientRequest request, Locale locale);
+    RESP_WRAPPER getFormModel(ClientRequest request, String authenticationHeader, Locale locale);
 
-    RESP_WRAPPER getWidgetModel(ClientRequest request, Locale locale);
+    RESP_WRAPPER getWidgetModel(ClientRequest request, String authenticationHeader, Locale locale);
 
-    RESP_WRAPPER onPageLinkAction(ClientRequest request, Locale locale);
+    RESP_WRAPPER onPageLinkAction(ClientRequest request, String authenticationHeader, Locale locale);
 
-    RESP_WRAPPER onWidgetLinkAction(ClientRequest request, Locale locale);
+    RESP_WRAPPER onWidgetLinkAction(ClientRequest request, String authenticationHeader, Locale locale);
 
-    RESP onFormAction(ClientRequest request, Locale locale);
+    RESP onFormAction(ClientRequest request, String authenticationHeader, Locale locale);
 
     RESP localTokenProviderLogin(Login login);
 
@@ -36,7 +36,6 @@ public interface FrameworkController<RESP_WRAPPER, REQ, RESP> {
     RESP authenticationCallback(REQ request, String provider);
 
     RESP renewApiTokens(String renewToken);
-
 
     String getPage(String id);
 
@@ -57,4 +56,12 @@ public interface FrameworkController<RESP_WRAPPER, REQ, RESP> {
     String getFunctionsJs();
 
     String getBundleJs();
+
+
+    default String token(String authenticationHeader) {
+        if (authenticationHeader != null && authenticationHeader.startsWith("Bearer ")) {
+            return authenticationHeader.substring("Bearer ".length());
+        }
+        return null;
+    }
 }

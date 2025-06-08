@@ -27,69 +27,80 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
 
     @Override
     @GetMapping("/xis/config")
-    public ClientConfig getComponentConfig() {
+    public ClientConfig getComponentConfig(@RequestHeader(value = "Authentication", required = false) String authenticationHeader) {
         return frontendService.getConfig();
     }
 
     @Override
     @PostMapping("/xis/page/model")
-    public ResponseEntity<ServerResponse> getPageModel(@RequestBody ClientRequest request, Locale locale) {
+    public ResponseEntity<ServerResponse> getPageModel(@RequestBody ClientRequest request,
+                                                       @RequestHeader(value = "Authentication", required = false) String authenticationHeader,
+                                                       Locale locale) {
+        addTokenToRequest(request, authenticationHeader);
         request.setLocale(locale);
         var serverResponse = frontendService.processModelDataRequest(request);
-        return ResponseEntity.status(serverResponse.getStatus()).body(serverResponse);
+        return responseBuilder(serverResponse).build();
     }
 
     @Override
     @PostMapping("/xis/form/model")
-    public ResponseEntity<ServerResponse> getFormModel(@RequestBody ClientRequest request, Locale locale) {
+    public ResponseEntity<ServerResponse> getFormModel(@RequestBody ClientRequest request,
+                                                       @RequestHeader(value = "Authentication", required = false) String authenticationHeader,
+                                                       Locale locale) {
+        addTokenToRequest(request, authenticationHeader);
         request.setLocale(locale);
         var serverResponse = frontendService.processFormDataRequest(request);
-        return ResponseEntity.status(serverResponse.getStatus()).body(serverResponse);
+        return responseBuilder(serverResponse).build();
     }
 
     @Override
     @PostMapping("/xis/widget/model")
-    public ResponseEntity<ServerResponse> getWidgetModel(@RequestBody ClientRequest request, Locale locale) {
+    public ResponseEntity<ServerResponse> getWidgetModel(@RequestBody ClientRequest request,
+                                                         @RequestHeader(value = "Authentication", required = false) String authenticationHeader,
+                                                         Locale locale) {
+        addTokenToRequest(request, authenticationHeader);
         request.setLocale(locale);
         var serverResponse = frontendService.processModelDataRequest(request);
-        return ResponseEntity.status(serverResponse.getStatus()).body(serverResponse);
+        return responseBuilder(serverResponse).build();
     }
 
     @Override
     @PostMapping("/xis/page/action")
-    public ResponseEntity<ServerResponse> onPageLinkAction(@RequestBody ClientRequest request, Locale locale) {
+    public ResponseEntity<ServerResponse> onPageLinkAction(@RequestBody ClientRequest request,
+                                                           @RequestHeader(value = "Authentication", required = false) String authenticationHeader,
+                                                           Locale locale) {
+        addTokenToRequest(request, authenticationHeader);
         request.setLocale(locale);
         var serverResponse = frontendService.processActionRequest(request);
-        return ResponseEntity.status(serverResponse.getStatus()).body(serverResponse);
+        return responseBuilder(serverResponse).build();
     }
 
     @Override
     @PostMapping("/xis/widget/action")
-    public ResponseEntity<ServerResponse> onWidgetLinkAction(@RequestBody ClientRequest request, Locale locale) {
+    public ResponseEntity<ServerResponse> onWidgetLinkAction(@RequestBody ClientRequest request,
+                                                             @RequestHeader(value = "Authentication", required = false) String authenticationHeader,
+                                                             Locale locale) {
+        addTokenToRequest(request, authenticationHeader);
         request.setLocale(locale);
         var serverResponse = frontendService.processActionRequest(request);
-        return ResponseEntity.status(serverResponse.getStatus()).body(serverResponse);
+        return responseBuilder(serverResponse).build();
     }
 
     @Override
     @PostMapping("/xis/form/action")
-    public ResponseEntity<?> onFormAction(@RequestBody ClientRequest request, Locale locale) {
+    public ResponseEntity<?> onFormAction(@RequestBody ClientRequest request,
+                                          @RequestHeader(value = "Authentication", required = false) String authenticationHeader,
+                                          Locale locale) {
+        addTokenToRequest(request, authenticationHeader);
         request.setLocale(locale);
-        if (request.getAction().equals("login")) {
+        if ("login".equals(request.getAction())) {
             try {
-                var tokens = frontendService.processLoginRequest(request);
-                var accessCookie = createAccessTokenCookie(tokens.getAccessToken(), tokens.getAccessTokenExpiresIn());
-                var renewCookie = createRenewTokenCookie(tokens.getRenewToken(), tokens.getRenewTokenExpiresIn());
-                return ResponseEntity.status(201)
-                        .header("Set-Cookie", accessCookie.toString())
-                        .header("Set-Cookie", renewCookie.toString())
-                        .build();
+                return responseBuilder(frontendService.processLoginRequest(request)).build();
             } catch (InvalidCredentialsException e) {
                 return ResponseEntity.status(401).body("Invalid credentials");
             }
         } else {
-            var serverResponse = frontendService.processActionRequest(request);
-            return ResponseEntity.status(serverResponse.getStatus()).body(serverResponse);
+            return responseBuilder(frontendService.processActionRequest(request)).build();
         }
     }
 
@@ -100,7 +111,7 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
             var code = frontendService.localTokenProviderLogin(login);
             var state = login.getState();
             return ResponseEntity.status(301)
-                    .header("Location", "/xis/auth/local?code=" + code + "&state=" + state) // Redirect to the auth endpoint
+                    .header("Location", "/xis/auth/local?code=" + code + "&state=" + state)
                     .build();
         } catch (InvalidCredentialsException e) {
             return ResponseEntity.status(401).body("Invalid credentials");
@@ -117,37 +128,23 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
         } catch (AuthenticationException e) {
             return ResponseEntity.status(401).body("Authentication failed");
         }
-        var accessCookie = createAccessTokenCookie(tokens.getAccessToken(), tokens.getAccessTokenExpiresIn());
-        var renewCookie = createRenewTokenCookie(tokens.getRenewToken(), tokens.getRenewTokenExpiresIn());
-        return ResponseEntity.status(201)
-                .header("Set-Cookie", accessCookie.toString())
-                .header("Set-Cookie", renewCookie.toString())
-                .build();
+        return addTokenCookies(ResponseEntity.status(201), tokens).build();
     }
 
     @Override
     @GetMapping("/xis/auth/{provider}")
-    public ResponseEntity<?> authenticationCallback(HttpRequest request, @PathVariable("provider") String provider) {
+    public ResponseEntity<?> authenticationCallback(HttpRequest request,
+
+                                                    @PathVariable("provider") String provider) {
         AuthenticationData authData = frontendService.authenticationCallback(provider, request.getURI().getQuery());
-        var accessCookie = createAccessTokenCookie(authData.getApiTokens().getAccessToken(), authData.getApiTokens().getAccessTokenExpiresIn());
-        var renewCookie = createRenewTokenCookie(authData.getApiTokens().getRenewToken(), authData.getApiTokens().getRenewTokenExpiresIn());
-        return ResponseEntity.status(302)
-                .header("Location", authData.getUrl()) // z. B. "/dashboard"
-                .header("Set-Cookie", accessCookie.toString())
-                .header("Set-Cookie", renewCookie.toString())
-                .build();
+        return addTokenCookies(ResponseEntity.status(302).header("Location", authData.getUrl()), authData.getApiTokens()).build();
     }
 
     @Override
     @PostMapping("/xis/token/renew")
     public ResponseEntity<?> renewApiTokens(@NonNull @RequestHeader("Authentication") String renewToken) {
         var renewTokenResponse = frontendService.processRenewApiTokenRequest(renewToken.substring("Bearer ".length()));
-        var accessCookie = createAccessTokenCookie(renewTokenResponse.getAccessToken(), renewTokenResponse.getAccessTokenExpiresIn());
-        var renewCookie = createRenewTokenCookie(renewTokenResponse.getRenewToken(), renewTokenResponse.getRenewTokenExpiresIn());
-        return ResponseEntity.status(201)
-                .header("Set-Cookie", accessCookie.toString())
-                .header("Set-Cookie", renewCookie.toString())
-                .build();
+        return addTokenCookies(ResponseEntity.status(201), renewTokenResponse).build();
     }
 
     @Override
@@ -155,7 +152,6 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
     public String getPage(@RequestHeader("uri") String id) {
         return frontendService.getPage(id);
     }
-
 
     @Override
     @GetMapping("/xis/page/head")
@@ -209,6 +205,28 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
     @GetMapping("/bundle.min.js")
     public String getBundleJs() {
         return frontendService.getBundleJs();
+    }
+
+    private void addTokenToRequest(ClientRequest request, String authenticationHeader) {
+        if (authenticationHeader != null && authenticationHeader.startsWith("Bearer ")) {
+            request.setAccessToken(authenticationHeader.substring("Bearer ".length()));
+        }
+    }
+
+
+    private ResponseEntity.BodyBuilder responseBuilder(ServerResponse serverResponse) {
+        var responseBuilder = ResponseEntity.status(serverResponse.getStatus());
+        if (serverResponse.getTokens() != null) {
+            addTokenCookies(responseBuilder, serverResponse.getTokens());
+        }
+        responseBuilder.body(serverResponse);
+        return responseBuilder;
+    }
+
+    private ResponseEntity.BodyBuilder addTokenCookies(@NonNull ResponseEntity.BodyBuilder responseBuilder, @NonNull ApiTokens tokens) {
+        responseBuilder.header("Set-Cookie", createAccessTokenCookie(tokens.getAccessToken(), tokens.getAccessTokenExpiresIn()).toString());
+        responseBuilder.header("Set-Cookie", createRenewTokenCookie(tokens.getRenewToken(), tokens.getRenewTokenExpiresIn()).toString());
+        return responseBuilder;
     }
 
     private ResponseCookie createAccessTokenCookie(String accessToken, Duration maxAge) {

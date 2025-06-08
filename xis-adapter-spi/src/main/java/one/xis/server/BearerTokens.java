@@ -1,13 +1,5 @@
 package one.xis.server;
 
-import lombok.Data;
+public class BearerTokens extends ApiTokens {
 
-import java.time.Duration;
-
-@Data
-public class BearerTokens {
-    private String accessToken;
-    private Duration accessTokenExpiresIn;
-    private String renewToken;
-    private Duration renewTokenExpiresIn;
 }

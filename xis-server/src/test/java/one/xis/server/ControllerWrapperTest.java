@@ -28,7 +28,7 @@ class ControllerWrapperTest {
 
     @Test
     void invokeGetModelMethods() {
-        controllerWrapper.invokeGetModelMethods(new ClientRequest(), new ControllerResult());
+        controllerWrapper.invokeGetModelMethods(new ClientRequest(), new ControllerResult(), mock());
 
         // Verify the order of method invocations
         var invocationOrder = controller.getInvocationOrder();

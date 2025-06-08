@@ -45,7 +45,12 @@ public class ApiTokenManagerImpl implements ApiTokenManager {
     }
 
     @Override
+    public TokenResult createTokens(String userId, Collection<String> roles, Map<String, Object> claims) {
+        TokenRequest request = new TokenRequest(userId, roles, claims, tokenAliveTimeSeconds, renewTokenAliveTimeSeconds);
+        return createTokens(request);
+    }
 
+    @Override
     public TokenAttributes decodeToken(String token) throws InvalidTokenException {
         try {
             String[] parts = token.split("\\.");
@@ -66,8 +71,10 @@ public class ApiTokenManagerImpl implements ApiTokenManager {
 
             long exp = ((Number) claimsRaw.get("exp")).longValue();
             Instant expiresAt = Instant.ofEpochSecond(exp);
-
-            Map<String, String> claims = new HashMap<>();
+            if (expiresAt.isBefore(Instant.now())) {
+                throw new InvalidTokenException("Token has expired");
+            }
+            Map<String, Object> claims = new HashMap<>();
             for (Map.Entry<String, Object> entry : claimsRaw.entrySet()) {
                 claims.put(entry.getKey(), String.valueOf(entry.getValue()));
             }

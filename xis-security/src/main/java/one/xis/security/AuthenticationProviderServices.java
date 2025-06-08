@@ -1,7 +1,6 @@
 package one.xis.security;
 
 
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
 import one.xis.context.XISInit;
@@ -41,12 +40,7 @@ public class AuthenticationProviderServices {
      * @param providerId the ID of the authentication provider
      * @return the authentication provider service
      */
-    @NonNull
     public AuthenticationService getAuthenticationProviderService(String providerId) {
-        var service = authenticationProviderServices.get(providerId);
-        if (service == null) {
-            throw new IllegalArgumentException("No authentication provider service found for provider ID: " + providerId);
-        }
-        return service;
+        return authenticationProviderServices.get(providerId);
     }
 }
