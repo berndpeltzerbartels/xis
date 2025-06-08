@@ -126,6 +126,11 @@ class ResourceService {
         List<Node> children = new ArrayList<>(element.content()); // nicht element.elements()
         for (Node child : children) {
             element.remove(child);
+            if (child instanceof org.dom4j.Text textNode) {
+                if (textNode.getText().trim().isEmpty()) {
+                    continue; // leere Textknoten entfernen
+                }
+            }
             templateElement.add(child);
         }
 
