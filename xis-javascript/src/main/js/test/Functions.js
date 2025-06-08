@@ -4,6 +4,7 @@ function openPage(uri) {
 
 function reset() {
     app.reset();
+    document.cookies = '';
 }
 
 

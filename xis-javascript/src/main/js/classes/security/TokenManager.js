@@ -34,6 +34,14 @@ class TokenManager {
     }
   }
 
+  reset() {
+    this.accessToken = null;
+    this.accessTokenExpiresAt = -1;
+    this.renewToken = null;
+    this.renewTokenExpiresAt = -1;
+    this.tokenAttributes = new TokenAttributes();
+  }
+
 
   /**
    * @private

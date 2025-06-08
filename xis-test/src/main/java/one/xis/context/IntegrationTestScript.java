@@ -54,7 +54,7 @@ class IntegrationTestScript {
         bindings.put("backendBridge", testEnvironment.getBackendBridge());
         bindings.put("localStorage", testEnvironment.getHTML_OBJECTS().getLocalStorage());
         bindings.put("sessionStorage", testEnvironment.getHTML_OBJECTS().getSessionStorage());
-        bindings.put("document", testEnvironment.getHTML_OBJECTS().getRootPage());
+        bindings.put("document", testEnvironment.getHTML_OBJECTS().getDocument());
         bindings.put("window", testEnvironment.getHTML_OBJECTS().getWindow());
         bindings.put("htmlToElement", testEnvironment.getHTML_OBJECTS().getHtmlToElement());
         bindings.put("console", testEnvironment.getHTML_OBJECTS().getConsole());
@@ -65,7 +65,7 @@ class IntegrationTestScript {
         invoker.setBinding("backendBridge", testEnvironment.getBackendBridge());
         invoker.setBinding("localStorage", testEnvironment.getHTML_OBJECTS().getLocalStorage());
         invoker.setBinding("sessionStorage", testEnvironment.getHTML_OBJECTS().getSessionStorage());
-        invoker.setBinding("document", testEnvironment.getHTML_OBJECTS().getRootPage());
+        invoker.setBinding("document", testEnvironment.getHTML_OBJECTS().getDocument());
         invoker.setBinding("window", testEnvironment.getHTML_OBJECTS().getWindow());
         invoker.setBinding("htmlToElement", testEnvironment.getHTML_OBJECTS().getHtmlToElement());
         invoker.setBinding("console", testEnvironment.getHTML_OBJECTS().getConsole());

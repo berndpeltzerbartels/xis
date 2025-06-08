@@ -14,7 +14,7 @@ import java.util.function.Function;
 @Data
 class HtmlObjects {
 
-    private Document rootPage;
+    private Document document;
     private LocalStorage localStorage;
     private SessionStorage sessionStorage;
     private Window window;
@@ -38,7 +38,7 @@ class HtmlObjects {
     }
 
     private void init() {
-        this.rootPage = Document.of(new Resources().getByPath("index.html").getContent());
+        this.document = Document.of(new Resources().getByPath("index.html").getContent());
         this.localStorage = new LocalStorage();
         this.sessionStorage = new SessionStorage();
         this.window = new Window();

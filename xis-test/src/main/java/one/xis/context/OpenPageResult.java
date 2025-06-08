@@ -13,7 +13,7 @@ public class OpenPageResult {
     private final IntegrationTestEnvironment testEnvironment;
 
     public Document getDocument() {
-        return testEnvironment.getHTML_OBJECTS().getRootPage();
+        return testEnvironment.getHTML_OBJECTS().getDocument();
     }
 
     public LocalStorage getLocalStorage() {

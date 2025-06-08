@@ -3,12 +3,11 @@ package one.xis.context;
 
 import lombok.Getter;
 import one.xis.resource.Resources;
+import one.xis.security.ApiTokenManager;
+import one.xis.security.LocalUserInfo;
 import one.xis.server.PageUtil;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class IntegrationTestContext {
@@ -53,6 +52,10 @@ public class IntegrationTestContext {
         return appContext.getSingleton(type);
     }
 
+    public <T> Optional<T> getOptionalSingleton(Class<T> type) {
+        return appContext.getOptionalSingleton(type);
+    }
+
     private AppContext internalContext(Collection<String> packages, Object... controllers) {
         var builder = AppContextBuilder.createInstance()
                 .withXIS()
@@ -67,6 +70,8 @@ public class IntegrationTestContext {
         private final Collection<Object> singletons = new HashSet<>();
         private final Collection<String> packages = new HashSet<>();
         private final Collection<String> ignorePackages = new HashSet<>();
+        private LocalUserInfo userInfo;
+
 
         private static IntegrationTestEnvironment testSingletons;
         private static final Resources RESOURCES = new Resources();
@@ -81,7 +86,11 @@ public class IntegrationTestContext {
         }
 
         public IntegrationTestContext build() {
-            return new IntegrationTestContext(packages, singletons.toArray());
+            var context = new IntegrationTestContext(packages, singletons.toArray());
+            if (userInfo != null) {
+                addTokenCookies(userInfo, context);
+            }
+            return context;
         }
 
         public Builder withPackage(String packageName) {
@@ -102,6 +111,29 @@ public class IntegrationTestContext {
         public Builder withoutBasePackageClass(Class<?> type) {
             ignorePackages.add(type.getPackageName());
             return this;
+        }
+
+        public Builder withLoggedInUser(String userName, String passwd, String... roles) {
+            userInfo = new LocalUserInfo();
+            userInfo.setUserId(userName);
+            userInfo.setPassword(passwd);
+            userInfo.setRoles(Set.of(roles));
+            userInfo.setClaims(Map.of("password", passwd));
+            return this;
+        }
+
+        public Builder withTestUserService(LocalUserInfo... users) {
+            singletons.add(new TestUserService(users));
+            return this;
+        }
+
+        private static void addTokenCookies(LocalUserInfo userInfo, IntegrationTestContext context) {
+            context.getOptionalSingleton(ApiTokenManager.class).ifPresent(tokenManager -> {
+                var tokens = tokenManager.createTokens(userInfo.getUserId(), userInfo.getRoles(), userInfo.getClaims());
+                var document = context.environment.getHTML_OBJECTS().getDocument();
+                document.addCookie("accessToken", tokens.accessToken());
+                document.addCookie("refreshToken", tokens.renewToken());
+            });
         }
     }
 
