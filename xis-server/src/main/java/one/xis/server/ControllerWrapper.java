@@ -4,8 +4,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import one.xis.Widget;
 import one.xis.security.AccessToken;
+import one.xis.security.AuthenticationException;
 import one.xis.validation.ValidatorMessages;
-import org.tinylog.Logger;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -77,8 +77,9 @@ public class ControllerWrapper {
                 throw exceptionForValidationErrors(controllerMethodResult.getValidatorMessages());
             }
             controllerResultMapper.mapMethodResultToControllerResult(controllerMethodResult, controllerResult);
+        } catch (AuthenticationException e) {
+            throw e; // rethrow authentication exceptions to be handled by the server
         } catch (Exception e) {
-            Logger.error(e, "Failed to invoke model-method");
             throw new RuntimeException("Failed to invoke model-method " + method, e);
         }
     }
@@ -90,8 +91,9 @@ public class ControllerWrapper {
         try {
             var controllerMethodResult = method.invoke(request, controller, controllerResult.getRequestScope(), accessToken);
             controllerResultMapper.mapMethodResultToControllerResult(controllerMethodResult, controllerResult);
+        } catch (AuthenticationException e) {
+            throw e;
         } catch (Exception e) {
-            Logger.error(e, "Failed to invoke action-method");
             throw new RuntimeException("Failed to invoke action-method: " + method, e);
         }
     }

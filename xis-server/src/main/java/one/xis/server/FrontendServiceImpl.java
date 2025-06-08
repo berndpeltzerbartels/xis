@@ -71,6 +71,9 @@ public class FrontendServiceImpl implements FrontendService {
         try {
             addUserContext(request);
             return applyFilterChain(request, controllerService::processModelDataRequest);
+        } catch (AuthenticationException e) {
+            Logger.error("Authentication error: {}", e.getMessage());
+            return authenticationErrorResponse(request.getPageId());
         } finally {
             removeUserContext();
         }
@@ -81,6 +84,9 @@ public class FrontendServiceImpl implements FrontendService {
         try {
             addUserContext(request);
             return applyFilterChain(request, controllerService::processFormDataRequest);
+        } catch (AuthenticationException e) {
+            Logger.error("Authentication error: {}", e.getMessage());
+            return authenticationErrorResponse(request.getPageId());
         } finally {
             removeUserContext();
         }

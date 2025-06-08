@@ -37,6 +37,7 @@ class ControllerMethod {
     }
 
     ControllerMethodResult invoke(@NonNull ClientRequest request, @NonNull Object controller, Map<String, Object> requestScope, AccessToken accessToken) throws Exception {
+        checkRoles(accessToken);
         var postProcessingResults = new PostProcessingResults();
         var args = prepareArgs(method, request, postProcessingResults, requestScope, accessToken);
         if (postProcessingResults.authenticate()) {
