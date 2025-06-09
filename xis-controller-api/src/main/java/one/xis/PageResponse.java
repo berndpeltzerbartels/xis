@@ -24,8 +24,8 @@ public class PageResponse implements Response {
         return this;
     }
 
-    public static PageResponse of(@NonNull Class<?> controllerClass, @NonNull String pathVariable, @NonNull Object pathVariabelValue) {
-        return new PageResponse(controllerClass).pathVariable(pathVariable, asString(pathVariabelValue));
+    public static PageResponse of(@NonNull Class<?> controllerClass, @NonNull String pathVariable, @NonNull Object pathVariableValue) {
+        return new PageResponse(controllerClass).pathVariable(pathVariable, asString(pathVariableValue));
     }
 
     private static String asString(@NonNull Object o) {

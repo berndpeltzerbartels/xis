@@ -1,6 +1,7 @@
 /**
  * @property {string} clientId
  * @property {string} pageId
+ * @property {string} pageUrl
  * @property {string} widgetId 
  * @property {string} action
  * @property {string: string} pathVariables
@@ -16,6 +17,7 @@ class ClientRequest {
     constructor() {
         this.clientId = '';
         this.pageId = '';
+        this.pageUrl = '';
         this.widgetId = '';
         this.action = '';
         this.pathVariables = {};

@@ -156,7 +156,7 @@ class PageController {
             throw new Error('No page found for URL: ' + realUrl);
         }
 
-        if (!this.page || (resolved.page.normalizedPath !== this.page.normalizedPath)) {
+        if (!this.page || resolved.page.normalizedPath !== this.page.normalizedPath) {
             this.htmlTagHandler.unbindPage();
             this.htmlTagHandler.bindPage(resolved.page);
         }
@@ -216,20 +216,20 @@ class PageController {
      */
     refreshCurrentPage() {
         return this.client.loadPageData(this.resolvedURL).then(response => {
-            const redirectedURL = this.urlResolver.resolve(response.nextPageURL);
-            if (!redirectedURL) {
-                throw new Error('No page found for URL: ' + response.nextPageURL);
+            debugger;
+            var samePage = true;
+            if (!this.page) {
+                samePage = false;
+            } else if (!response.nextPageId) {
+                samePage = true;
+            } else {
+                samePage = response.nextPageId === this.page.normalizedPath;
             }
-
-            const samePage = this.page ? redirectedURL.page.normalizedPath === this.page.normalizedPath : false;
-            const sameResolvedUrl = redirectedURL.url === this.resolvedURL.url;
-
             // If redirect occurred, apply target page without history pollution
-            if (!samePage || !sameResolvedUrl) {
-                this.displayPageForUrl(redirectedURL.url, /* skipHistoryUpdate */ true);
+            if (!samePage) {
+                this.displayPageForUrl(response.nextPageURL, /* skipHistoryUpdate */ true);
                 return;
             }
-
             const data = response.data;
             data.setValue(['pathVariables'], this.resolvedURL.pathVariablesAsMap());
             data.setValue(['urlParameters'], this.resolvedURL.urlParameters);

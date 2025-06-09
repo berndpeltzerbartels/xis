@@ -14,6 +14,7 @@ class ControllerResult {
     private String currentPageURL;
     private String currentWidgetId;
     private String nextPageURL;
+    private String nextPageId;
     private String nextWidgetId;
     private String widgetContainerId;
     private ApiTokens tokens;

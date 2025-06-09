@@ -25,4 +25,12 @@ class StringUtilsTest {
         assertThat(StringUtils.removeFirstChar("abc")).isEqualTo("bc");
     }
 
+    @Test
+    void before() {
+        assertThat(StringUtils.before("abc", 'b')).isEqualTo("a");
+        assertThat(StringUtils.before("abc", 'c')).isEqualTo("ab");
+        assertThat(StringUtils.before("abc", 'a')).isEqualTo("");
+        assertThat(StringUtils.before("abc", 'd')).isEqualTo("abc");
+        assertThat(StringUtils.before("", 'a')).isEqualTo("");
+    }
 }

@@ -238,6 +238,7 @@ public class FrontendServiceImpl implements FrontendService {
         var response = new ServerResponse();
         response.setStatus(401);
         response.setNextPageURL("/login.html");
+        response.setNextPageId("/login.html");
         response.getFormData().put("redirect", uri);
         response.getValidatorMessages().getMessages().put("username", "Invalid username or password"); // TODO: i18n
         response.getValidatorMessages().getMessages().put("password", "Invalid username or password"); // TODO: i18n

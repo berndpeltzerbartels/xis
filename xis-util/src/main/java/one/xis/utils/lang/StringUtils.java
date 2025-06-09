@@ -83,4 +83,11 @@ public class StringUtils {
         return o.toString();
     }
 
+    public static String before(String s, char c) {
+        var index = s.indexOf(c);
+        if (index < 0) {
+            return s;
+        }
+        return s.substring(0, index);
+    }
 }

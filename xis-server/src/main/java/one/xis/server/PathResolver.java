@@ -17,7 +17,11 @@ class PathResolver {
     }
 
     String normalizedPath(Object controller) {
-        var path = createPath(PageUtil.getUrl(controller.getClass()));
+        return normalizedPath(controller.getClass());
+    }
+
+    String normalizedPath(Class<?> controllerClass) {
+        var path = createPath(PageUtil.getUrl(controllerClass));
         return path.normalized();
     }
 

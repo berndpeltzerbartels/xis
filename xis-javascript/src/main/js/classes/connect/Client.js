@@ -151,6 +151,7 @@ class Client {
         var request = new ClientRequest();
         request.clientId = this.clientId;
         request.pageId = normalizedPath;
+        request.pageUrl = resolvedURL.url;
         request.action = action;
         request.formData = formData ? formData.values : {};
         request.urlParameters = resolvedURL.urlParameters;
@@ -179,9 +180,11 @@ class Client {
         }
         var normalizedPath = resolvedURL.normalizedPath;
         var request = new ClientRequest();
+        debugger;
         request.clientId = this.clientId;
         request.widgetId = widgetId;
         request.pageId = normalizedPath;
+        request.pageUrl = resolvedURL.url;
         request.formBinding = formBindingKey;
         request.action = action;
         request.formData = mappedFormData;
@@ -307,6 +310,7 @@ class Client {
         serverResponse.data = data;
         serverResponse.formData = formData;
         serverResponse.nextPageURL = obj.nextPageURL;
+        serverResponse.nextPageId = obj.nextPageId;
         serverResponse.nextWidgetId = obj.nextWidgetId;
         serverResponse.status = response.status;
         serverResponse.validatorMessages = new ValidatorMessages(obj.validatorMessages);

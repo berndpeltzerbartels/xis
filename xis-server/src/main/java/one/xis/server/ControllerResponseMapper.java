@@ -10,11 +10,8 @@ class ControllerResponseMapper {
     private final PathResolver pathResolver;
 
     void mapResultToResponse(ServerResponse response, ControllerResult result) {
-        if (result.getNextPageURL() != null) {
-            var path = pathResolver.createPath(result.getNextPageURL());
-            var pathString = pathResolver.evaluateRealPath(path, result.getPathVariables(), result.getUrlParameters());
-            response.setNextPageURL(pathString);
-        }
+        response.setNextPageURL(result.getNextPageURL());
+        response.setNextPageId(result.getNextPageId());
         response.setData(result.getModelData());
         response.setFormData(result.getFormData());
         response.setNextWidgetId(result.getNextWidgetId());

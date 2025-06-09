@@ -28,6 +28,7 @@ public class ServerResponse {
     private Map<String, Object> clientStateData = new HashMap<>();
     private Collection<String> reloadWidgets = new ArrayList<>();
     private String nextPageURL;
+    private String nextPageId;
     private String nextWidgetId;
     private ValidatorMessages validatorMessages = new ValidatorMessages();
     private boolean reloadPage; // TODO do we need this?

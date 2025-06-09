@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.Data;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 
@@ -13,6 +14,7 @@ public class ClientRequest {
     private String action;
     private String formBinding;
     private String pageId;
+    private String pageUrl;
     private String widgetId;
     private String widgetContainerId;
     private Locale locale;
@@ -27,7 +29,7 @@ public class ClientRequest {
     private Map<String, String> pathVariables = new HashMap<>();
 
     @JsonDeserialize(using = MapDeserializer.class)
-    private Map<String, String> urlParameters = new HashMap<>();
+    private LinkedHashMap<String, String> urlParameters = new LinkedHashMap<>();
 
     @JsonDeserialize(using = MapDeserializer.class)
     private Map<String, String> bindingParameters = new HashMap<>();
@@ -43,6 +45,5 @@ public class ClientRequest {
 
     @JsonDeserialize(using = MapDeserializer.class)
     private final Map<String, String> localDatabaseData = new HashMap<>();
-
 
 }

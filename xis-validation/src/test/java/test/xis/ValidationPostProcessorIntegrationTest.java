@@ -160,6 +160,7 @@ class ValidationPostProcessorIntegrationTest {
 
         var request = new ClientRequest();
         request.setPageId("/person-list.html");
+        request.setPageUrl("/person-list.html");
         request.setAction("save");
         request.setLocale(Locale.GERMANY);
         request.setZoneId("Europe/Berlin");
@@ -186,6 +187,7 @@ class ValidationPostProcessorIntegrationTest {
         var personData = objectMapper.writeValueAsString(data);
         var request = new ClientRequest();
         request.setPageId("/person.html");
+        request.setPageUrl("/person.html");
         request.setAction("save");
         request.setFormData(Map.of("person", personData));
         request.setLocale(Locale.GERMANY);
@@ -197,6 +199,7 @@ class ValidationPostProcessorIntegrationTest {
         var personDataList = objectMapper.writeValueAsString(data);
         var request = new ClientRequest();
         request.setPageId("/person-list.html");
+        request.setPageUrl("/person-list.html");
         request.setAction("save");
         request.setLocale(Locale.GERMANY);
         request.setZoneId("Europe/Berlin");

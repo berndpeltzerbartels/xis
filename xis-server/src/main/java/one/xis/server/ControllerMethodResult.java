@@ -12,6 +12,7 @@ import java.util.Map;
 class ControllerMethodResult {
 
     private String nextPageURL;
+    private String nextPageId;
     private String nextWidgetId;
     private String widgetContainerId;
     private ApiTokens tokens;

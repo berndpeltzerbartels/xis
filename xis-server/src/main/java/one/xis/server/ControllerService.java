@@ -2,6 +2,7 @@ package one.xis.server;
 
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import one.xis.Page;
 import one.xis.context.XISComponent;
 import one.xis.context.XISInject;
 import one.xis.security.AccessToken;
@@ -40,7 +41,8 @@ class ControllerService {
         var wrapper = controllerWrapper(request);
         wrapper.invokeGetModelMethods(request, controllerResult, accessToken);
         if (controllerResult.getNextPageURL() == null) {
-            controllerResult.setNextPageURL(request.getPageId());
+            controllerResult.setNextPageURL(request.getPageUrl());
+            controllerResult.setNextPageId(request.getPageId());
         }
         if (controllerResult.getNextWidgetId() == null) {
             controllerResult.setNextWidgetId(request.getWidgetId());
@@ -57,8 +59,10 @@ class ControllerService {
         var wrapper = controllerWrapper(request);
         wrapper.invokeFormDataMethods(request, controllerResult, accessToken);
         if (controllerResult.getNextPageURL() == null) {
-            controllerResult.setNextPageURL(request.getPageId());
+            controllerResult.setNextPageURL(request.getPageUrl());  // TODO replace this hack
+            controllerResult.setNextPageId(request.getPageId());
         }
+
         if (controllerResult.getNextWidgetId() == null) {
             controllerResult.setNextWidgetId(request.getWidgetId());
         }
@@ -74,7 +78,7 @@ class ControllerService {
         var invokerControllerWrapper = controllerWrapper(request);
         invokerControllerWrapper.invokeActionMethod(request, controllerResult, accessToken);
         if (!resultContainsNextController(controllerResult)) {
-            usePreviousController(controllerResult, invokerControllerWrapper);
+            usePreviousController(controllerResult, invokerControllerWrapper, request);
         }
         mapResultToResponse(response, controllerResult);
         var nextControllerWrapper = nextControllerWrapperAfterAction(controllerResult);
@@ -101,7 +105,9 @@ class ControllerService {
         if (nextControllerWrapper.isWidgetController()) {
             nextControllerResult.setNextWidgetId(nextControllerWrapper.getId());
         } else {
-            nextControllerResult.setNextPageURL(nextControllerWrapper.getId());
+            var path = pathResolver.createPath(nextControllerWrapper.getController().getClass().getAnnotation(Page.class).value());
+            nextControllerResult.setNextPageId(nextControllerWrapper.getId());
+            nextControllerResult.setNextPageURL(this.pathResolver.evaluateRealPath(path, controllerResult.getPathVariables(), controllerResult.getUrlParameters()));
         }
         // get model data for next controller
         nextControllerWrapper.invokeGetModelMethods(nextRequest, nextControllerResult, accessToken);
@@ -126,11 +132,12 @@ class ControllerService {
     }
 
 
-    private void usePreviousController(ControllerResult controllerResult, ControllerWrapper controllerWrapper) {
+    private void usePreviousController(ControllerResult controllerResult, ControllerWrapper controllerWrapper, ClientRequest request) {
         if (controllerWrapper.isWidgetController()) {
             controllerResult.setNextWidgetId(controllerWrapper.getId());
         } else {
-            controllerResult.setNextPageURL(controllerWrapper.getId());
+            controllerResult.setNextPageURL(request.getPageUrl());
+            controllerResult.setNextPageId(request.getPageId());
         }
     }
 
@@ -139,7 +146,7 @@ class ControllerService {
             return widgetControllerWrapperById(controllerResult.getNextWidgetId());
         }
         if (StringUtils.isNotEmpty(controllerResult.getNextPageURL())) {
-            return pageControllerWrapperById(controllerResult.getNextPageURL());
+            return pageControllerWrapperById(controllerResult.getNextPageId());
         }
         throw new IllegalStateException("no controller found for request: " + controllerResult);
     }
@@ -157,6 +164,5 @@ class ControllerService {
         return pageControllerWrappers.findByPath(pathResolver.createPath(id))
                 .orElseThrow(() -> new IllegalStateException("page-controller not found for path:" + id));
     }
-
 
 }
