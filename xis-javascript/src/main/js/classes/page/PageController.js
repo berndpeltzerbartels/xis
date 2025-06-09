@@ -156,7 +156,7 @@ class PageController {
             throw new Error('No page found for URL: ' + realUrl);
         }
 
-        if (resolved.page !== this.page) {
+        if (!this.page || (resolved.page.normalizedPath !== this.page.normalizedPath)) {
             this.htmlTagHandler.unbindPage();
             this.htmlTagHandler.bindPage(resolved.page);
         }
@@ -221,7 +221,7 @@ class PageController {
                 throw new Error('No page found for URL: ' + response.nextPageURL);
             }
 
-            const samePage = redirectedURL.page === this.page;
+            const samePage = this.page ? redirectedURL.page.normalizedPath === this.page.normalizedPath : false;
             const sameResolvedUrl = redirectedURL.url === this.resolvedURL.url;
 
             // If redirect occurred, apply target page without history pollution

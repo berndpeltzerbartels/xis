@@ -110,6 +110,8 @@ class ControllerService {
         mapResultToResponse(response, nextControllerResult);
     }
 
+    // TODO Besser Url imm als Klasse, damit keine Verwechslung mit PageId = normalisierter Pfad passiert
+
     private ControllerWrapper controllerWrapper(ClientRequest request) {
         if (request.getType() == RequestType.widget) {
             return widgetControllerWrapperById(request.getWidgetId());

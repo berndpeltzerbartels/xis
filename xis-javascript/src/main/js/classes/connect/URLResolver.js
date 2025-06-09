@@ -32,6 +32,9 @@ class URLResolver {
      * @returns {ResolvedURL} or false if the url does not match
      */
     resolve(url) {
+        if (url.indexOf("*") !== -1) {
+            throw new Error('URL must not contain a wildcard (*)');
+        }
         if (this.staticPathMap == undefined) {
             this.init(); // fails in constructor, because pages are not loaded yet
         }
