@@ -103,11 +103,7 @@ class HttpConnector {
                 // TODO Add headers to allow 304
                 // Readystaet == 4 for 304 ?
                 if (xmlHttp.readyState == 4) { // TODO In Java 204 if there is no server-method
-                    if (xmlHttp.status < 400 || xmlHttp.status == 422) {
-                        resolve(xmlHttp);
-                    } else {
-                        reject();
-                    }
+                    resolve(xmlHttp);
                 }
                 // TODO use errorhandler
             }

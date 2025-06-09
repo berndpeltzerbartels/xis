@@ -14,13 +14,15 @@ class TestApplication {
         this.tagHandlers = new TagHandlers();
         this.initializer = new Initializer(this.domAccessor, this.client, this.widgets, this.widgetContainers, this.tagHandlers);
         this.pageController = new PageController(this.client, this.pages, this.initializer, this.urlResolver, this.tagHandlers);
+        this.history = new PageHistory(this.pageController);
         this.backendService = new BackendService();
     }
 
 
     start() {
-        // TODO Hier scheint es Probleme zu geben, wenn alle Tests ausgeführt werden.
+        // TODO Hier scheint es Probleme zu geben, wenn meherer Tests ausgeführt werden.
     }
+
 
     openPage(uri) {
         document.location.pathname = uri;

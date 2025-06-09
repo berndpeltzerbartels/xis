@@ -16,31 +16,24 @@ class HttpClient extends Client {
     }
 
     async loadConfig() {
-        const headers = await this.authenticationHeader();
-        const response = await this.httpConnector.get('/xis/config', headers);
+        const response = await this.httpConnector.get('/xis/config', {});
         const config = this.deserializeConfig(response.responseText);
         this.config = config;
         return config;
     }
 
     async loadPageHead(pageId) {
-        const headers = await this.authenticationHeader();
-        headers.uri = pageId;
-        const response = await this.httpConnector.get('/xis/page/head', headers);
+        const response = await this.httpConnector.get('/xis/page/head', { uri: pageId });
         return response.responseText;
     }
 
     async loadPageBody(pageId) {
-        const headers = await this.authenticationHeader();
-        headers.uri = pageId;
-        const response = await this.httpConnector.get('/xis/page/body', headers);
+        const response = await this.httpConnector.get('/xis/page/body', { uri: pageId });
         return response.responseText;
     }
 
     async loadPageBodyAttributes(pageId) {
-        const headers = await this.authenticationHeader();
-        headers.uri = pageId;
-        const response = await this.httpConnector.get('/xis/page/body-attributes', headers);
+        const response = await this.httpConnector.get('/xis/page/body-attributes', { uri: pageId });
         return JSON.parse(response.responseText);
     }
 
@@ -94,8 +87,7 @@ class HttpClient extends Client {
     }
 
     async sendRenewTokenRequest(renewToken) {
-        const headers = await this.authenticationHeaderForRenew();
-        const response = await this.httpConnector.post('/xis/token/renew', {}, headers);
+        const response = await this.httpConnector.post('/xis/token/renew', { Authorization: 'Bearer ' + renewToken, renewToken: renewToken }, {});
         return this.deserializeResponse(response);
     }
 

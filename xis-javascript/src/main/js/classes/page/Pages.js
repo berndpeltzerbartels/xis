@@ -54,14 +54,20 @@ class Pages {
     * @returns {Promise<string>}
     */
     loadPageHead(pageId) {
-        var _this = this;
         return this.client.loadPageHead(pageId).then(content => {
             var templateElement = htmlToElement(content);
             initializeElement(templateElement);
             var headChildArray = nodeListToArray(templateElement.childNodes);
-            var page = _this.pages[pageId];
+            var page = this.pages[pageId];
             page.headChildArray = headChildArray;
             page.headTemplate = templateElement;
+            page.titleExpression = { evaluate(_) { } };
+            for (var child of headChildArray) {
+                if (child.localName == 'title') {
+                    page.titleExpression = new TextContentParser(child.innerText, this.client).parse();
+                    break;
+                } 
+            }
             return pageId;
         });
     }
@@ -81,11 +87,10 @@ class Pages {
     * @returns {Promise<string>}
     */
     loadPageBody(pageId) {
-        var _this = this;
         return this.client.loadPageBody(pageId).then(content => {
             var templateElement = htmlToElement(content);
             initializeElement(templateElement);
-            var page = _this.pages[pageId];
+            var page = this.pages[pageId];
             page.bodyTemplate = templateElement;
             return pageId;
         });

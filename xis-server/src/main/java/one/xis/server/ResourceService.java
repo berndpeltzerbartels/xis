@@ -128,12 +128,11 @@ class ResourceService {
             element.remove(child);
             if (child instanceof org.dom4j.Text textNode) {
                 if (textNode.getText().trim().isEmpty()) {
-                    continue; // leere Textknoten entfernen
+                    continue; // remove empty text nodes
                 }
             }
             templateElement.add(child);
         }
-
         return serialize(templateElement);
     }
 

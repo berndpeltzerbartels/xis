@@ -39,7 +39,7 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
         addTokenToRequest(request, authenticationHeader);
         request.setLocale(locale);
         var serverResponse = frontendService.processModelDataRequest(request);
-        return responseBuilder(serverResponse).build();
+        return responseEntity(serverResponse);
     }
 
     @Override
@@ -50,7 +50,7 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
         addTokenToRequest(request, authenticationHeader);
         request.setLocale(locale);
         var serverResponse = frontendService.processFormDataRequest(request);
-        return responseBuilder(serverResponse).build();
+        return responseEntity(serverResponse);
     }
 
     @Override
@@ -61,7 +61,7 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
         addTokenToRequest(request, authenticationHeader);
         request.setLocale(locale);
         var serverResponse = frontendService.processModelDataRequest(request);
-        return responseBuilder(serverResponse).build();
+        return responseEntity(serverResponse);
     }
 
     @Override
@@ -72,7 +72,7 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
         addTokenToRequest(request, authenticationHeader);
         request.setLocale(locale);
         var serverResponse = frontendService.processActionRequest(request);
-        return responseBuilder(serverResponse).build();
+        return responseEntity(serverResponse);
     }
 
     @Override
@@ -83,7 +83,7 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
         addTokenToRequest(request, authenticationHeader);
         request.setLocale(locale);
         var serverResponse = frontendService.processActionRequest(request);
-        return responseBuilder(serverResponse).build();
+        return responseEntity(serverResponse);
     }
 
     @Override
@@ -95,12 +95,12 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
         request.setLocale(locale);
         if ("login".equals(request.getAction())) {
             try {
-                return responseBuilder(frontendService.processLoginRequest(request)).build();
+                return responseEntity(frontendService.processLoginRequest(request));
             } catch (InvalidCredentialsException e) {
                 return ResponseEntity.status(401).body("Invalid credentials");
             }
         } else {
-            return responseBuilder(frontendService.processActionRequest(request)).build();
+            return responseEntity(frontendService.processActionRequest(request));
         }
     }
 
@@ -218,13 +218,12 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
     }
 
 
-    private ResponseEntity.BodyBuilder responseBuilder(ServerResponse serverResponse) {
+    private ResponseEntity<ServerResponse> responseEntity(ServerResponse serverResponse) {
         var responseBuilder = ResponseEntity.status(serverResponse.getStatus());
         if (serverResponse.getTokens() != null) {
             addTokenCookies(responseBuilder, serverResponse.getTokens());
         }
-        responseBuilder.body(serverResponse);
-        return responseBuilder;
+        return responseBuilder.body(serverResponse);
     }
 
     private ResponseEntity.BodyBuilder addTokenCookies(@NonNull ResponseEntity.BodyBuilder responseBuilder, @NonNull ApiTokens tokens) {

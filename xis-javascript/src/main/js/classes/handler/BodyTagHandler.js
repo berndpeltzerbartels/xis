@@ -20,7 +20,6 @@ class BodyTagHandler extends TagHandler {
     * @param {Element} bodyTemplate
     */
     bind(bodyTemplate) {
-        debugger;
         for (var node of this.nodeListToArray(bodyTemplate.childNodes)) {
             bodyTemplate.removeChild(node);
             this.tag.appendChild(node);

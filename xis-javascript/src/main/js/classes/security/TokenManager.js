@@ -87,7 +87,6 @@ class TokenManager {
    * @returns {Promise<string|false>}
    */
    async actualAccessToken() {
-    debugger;
     if (!this.accessToken) {
       console.warn('No access token available');
       return null;

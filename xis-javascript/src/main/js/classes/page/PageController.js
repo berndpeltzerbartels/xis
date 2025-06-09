@@ -47,9 +47,8 @@ class PageController {
      * @returns {Promise<void>}
      */
     submitPageLinkAction(action, actionParameters) {
-        var _this = this;
         return this.client.pageLinkAction(this.resolvedURL, action, actionParameters)
-            .then(response => _this.handleActionResponse(response));
+            .then(response => this.handleActionResponse(response));
     }
 
     /**
@@ -65,25 +64,8 @@ class PageController {
    * @returns {Promise<void>}
    */
     submitFormAction(action, formData) {
-        var _this = this;
         return this.client.pageAction(this.resolvedURL, formData, action, {})
-            .then(response => _this.handleActionResponse(response));
-    }
-
-    handleActionResponse(response) {
-        switch (response.status) {
-            case 200:
-            case 401:
-            case 422:
-                this.handleActionResponse(response);
-                break;
-            case 204:
-                this.handleActionResponseNoContent(response);
-                break;
-            default:
-                throw new Error('status: ' + response.status);
-        }
-        this.backendService.triggerAdditionalReloadsOnDemand(response);
+            .then(response => this.handleActionResponse(response));
     }
 
     /**
@@ -94,6 +76,9 @@ class PageController {
      */
     handleActionResponse(response) {
         this.handleActionResponseNoContent(response);
+        if (response.status == 204) {
+            return;
+        }
         var data = response.data;
         data.scope = 'TREE';
         this.doRefresh(data);
@@ -158,26 +143,34 @@ class PageController {
     }
 
     /**
-     * Displays page by it's location from
-     * browser's address-field.
-     * 
-     * @public
-     * @param {string} realUrl url from address-line
-     */
-    displayPageForUrl(realUrl) {
-        this.resolvedURL = this.urlResolver.resolve(realUrl);
-        if (!this.resolvedURL) {
-            this.resolvedURL = this.welcomePageUrl();
+    * Displays a page from a given URL.
+    * Optionally skips browser history update (used e.g. for popstate navigation).
+    * 
+    * @param {string} realUrl - The URL to resolve and load the page for.
+    * @param {boolean} [skipHistoryUpdate=false] - If true, skips adding to browser history.
+    */
+    displayPageForUrl(realUrl, skipHistoryUpdate = false) {
+        debugger;
+        const resolved = this.urlResolver.resolve(realUrl) || this.welcomePageUrl();
+        if (!resolved) {
+            throw new Error('No page found for URL: ' + realUrl);
         }
-        if (!this.resolvedURL) throw new Error('no page for url: ' + realUrl);
-        if (this.resolvedURL.page != this.page) {
+
+        if (resolved.page !== this.page) {
             this.htmlTagHandler.unbindPage();
-            this.htmlTagHandler.bindPage(this.resolvedURL.page);
+            this.htmlTagHandler.bindPage(resolved.page);
         }
-        this.page = this.resolvedURL.page;
-        this.updateHistory(this.resolvedURL);
-        this.refreshCurrentPage().catch(e => console.error(e));
+
+        this.resolvedURL = resolved;
+        this.page = resolved.page;
+
+        if (!skipHistoryUpdate) {
+            this.updateHistory(this.resolvedURL);
+        }
+
+        this.refreshCurrentPage().catch(console.error);
     }
+
 
     /**
      * 
@@ -185,9 +178,8 @@ class PageController {
      * @returns {Promise<void>}
      */
     displayPageForUrlLater(realUrl) {
-        var _this = this;
         return new Promise((resolve, _) => {
-            _this.displayPageForUrl(realUrl);
+            this.displayPageForUrl(realUrl);
             resolve();
         });
     }
@@ -198,9 +190,8 @@ class PageController {
      * @returns {Promise<ClientConfig>}
      */
     setConfig(config) {
-        var _this = this;
         return new Promise((resolve, _) => {
-            _this.config = config;
+            this.config = config;
             resolve(config);
         });
     }
@@ -218,22 +209,28 @@ class PageController {
 
 
     /**
-    * @private
-    * @param {ResolvedURL} resolvedURL
-    * @returns {Promise<string>}
-    */
+     * Reloads the current page, possibly following a redirect (e.g. login).
+     * Automatically handles change of page and avoids corrupting history.
+     * 
+     * @returns {Promise<void>}
+     */
     refreshCurrentPage() {
         return this.client.loadPageData(this.resolvedURL).then(response => {
-            debugger;
-            var nextResolvedURL = this.urlResolver.resolve(response.nextPageURL);
-            if (!nextResolvedURL) {
-                throw new Error('no page for ' + response.nextPageURL);
+            const redirectedURL = this.urlResolver.resolve(response.nextPageURL);
+            if (!redirectedURL) {
+                throw new Error('No page found for URL: ' + response.nextPageURL);
             }
-            if (nextResolvedURL.page != this.page) {
-                this.displayPageForUrl(nextResolvedURL.url);
+
+            const samePage = redirectedURL.page === this.page;
+            const sameResolvedUrl = redirectedURL.url === this.resolvedURL.url;
+
+            // If redirect occurred, apply target page without history pollution
+            if (!samePage || !sameResolvedUrl) {
+                this.displayPageForUrl(redirectedURL.url, /* skipHistoryUpdate */ true);
                 return;
             }
-            var data = response.data;
+
+            const data = response.data;
             data.setValue(['pathVariables'], this.resolvedURL.pathVariablesAsMap());
             data.setValue(['urlParameters'], this.resolvedURL.urlParameters);
             this.page.data = data;
@@ -261,7 +258,7 @@ class PageController {
      */
     updateHistory(resolvedURL) {
         var title = this.htmlTagHandler.getTitle();
-        window.history.replaceState({}, title, resolvedURL.url);
+        app.history.appendPage(resolvedURL, title);
     }
 
 
