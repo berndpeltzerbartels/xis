@@ -10,17 +10,17 @@ class PageHistory {
     
     /**
      * Adds a page to the history.
-     * @param {string} resolvedURL
+     * @param {string} url
      */
-    appendPage(resolvedURL, title) {
+    appendPage(url, title) {
         // Remove all pages after the current index
         this.history = this.history.slice(0, this.currentIndex + 1);
         // Add the new page
-        this.history.push({resolvedURL: resolvedURL, title: title});
+        this.history.push({url: url, title: title});
         this.currentIndex++;
         
         // Update the browser history
-       window.history.pushState({ index: this.currentIndex }, title, resolvedURL.url);
+       window.history.pushState({ index: this.currentIndex }, title, url);
     }
 
     onPopState(event) {
@@ -36,7 +36,7 @@ class PageHistory {
                 console.warn('No item found in history for index:', this.currentIndex);
                 return;
             }
-            this.pageController.displayPageForUrl(item.resolvedURL.url, {skipHistoryUpdate: true}); // Skip updating history to avoid infinite loop
+            this.pageController.displayPageForUrl(item.url, {skipHistoryUpdate: true}); // Skip updating history to avoid infinite loop
             const titleElement = document.querySelector('title');
             if (titleElement) {
                 titleElement.innerText = item.title; // Update the document title

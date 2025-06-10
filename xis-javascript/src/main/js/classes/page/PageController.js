@@ -258,7 +258,7 @@ class PageController {
      */
     updateHistory(resolvedURL) {
         var title = this.htmlTagHandler.getTitle();
-        app.history.appendPage(resolvedURL, title);
+        app.history.appendPage(resolvedURL.url, title);
     }
 
 

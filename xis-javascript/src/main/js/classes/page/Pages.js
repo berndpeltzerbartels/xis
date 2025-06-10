@@ -72,15 +72,6 @@ class Pages {
         });
     }
 
-    loadJavascript(pageId) {
-        var _this = this;
-        return this.client.loadJavascriptUrl(pageId).then(url => {
-            _this.pages[pageId].headTemplate.appendChild(scriptElement);
-            return pageId;
-        });
-    }
-
-
     /**
     * @private
     * @param {string} pageId

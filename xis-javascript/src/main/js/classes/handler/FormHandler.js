@@ -99,7 +99,7 @@ class FormHandler extends TagHandler {
         if (!response.validatorMessages.isEmpty()) {
             return;
         }
-        if (response.nextPageURL) {
+        if (response.nextPageId) {
             app.pageController.handleActionResponse(response);
         } else {
             targetContainerHandler.handleActionResponse(response);
