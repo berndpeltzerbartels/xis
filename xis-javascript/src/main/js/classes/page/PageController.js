@@ -142,34 +142,53 @@ class PageController {
         return this.page ? this.page.data : undefined;
     }
 
+
     /**
-    * Displays a page from a given URL.
-    * Optionally skips browser history update (used e.g. for popstate navigation).
-    * 
-    * @param {string} realUrl - The URL to resolve and load the page for.
-    * @param {boolean} [skipHistoryUpdate=false] - If true, skips adding to browser history.
-    */
+     * Displays a page from a given URL.
+     * Optionally skips browser history update (used e.g. for popstate navigation).
+     * 
+     * @param {string} realUrl
+     * @param {boolean} [skipHistoryUpdate=false]
+     * @returns {Promise<void>}
+     */
+    /**
+   * Displays a page from a given URL.
+   * Optionally skips browser history update (used e.g. for popstate navigation).
+   *
+   * @param {string} realUrl
+   * @param {boolean} [skipHistoryUpdate=false]
+   * @returns {Promise<void>}
+   */
     displayPageForUrl(realUrl, skipHistoryUpdate = false) {
-        debugger;
         const resolved = this.urlResolver.resolve(realUrl) || this.welcomePageUrl();
         if (!resolved) {
             throw new Error('No page found for URL: ' + realUrl);
         }
 
-        if (!this.page || resolved.page.normalizedPath !== this.page.normalizedPath) {
+        return this.client.loadPageData(resolved).then(response => {
+           if (response.nextPageId && resolved.normalizedPath != response.nextPageId) {
+                // Redirect – do not pollute browser history
+                return this.displayPageForUrl(response.nextPageURL, true);
+            }
+
+            this.resolvedURL = resolved;
+            this.page = resolved.page;
+
+            const data = response.data;
+            data.setValue(['pathVariables'], this.resolvedURL.pathVariablesAsMap());
+            data.setValue(['urlParameters'], this.resolvedURL.urlParameters);
+            this.page.data = data;
+
             this.htmlTagHandler.unbindPage();
-            this.htmlTagHandler.bindPage(resolved.page);
-        }
+            this.htmlTagHandler.bindPage(this.page);
+            this.htmlTagHandler.refresh(data);
 
-        this.resolvedURL = resolved;
-        this.page = resolved.page;
-
-        if (!skipHistoryUpdate) {
-            this.updateHistory(this.resolvedURL);
-        }
-
-        this.refreshCurrentPage().catch(console.error);
+            if (!skipHistoryUpdate) {
+                this.updateHistory(this.resolvedURL);
+            }
+        });
     }
+
 
 
     /**
