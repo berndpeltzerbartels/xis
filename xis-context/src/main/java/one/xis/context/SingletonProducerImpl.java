@@ -55,6 +55,7 @@ abstract class SingletonProducerImpl implements SingletonProducer {
             if (o instanceof Optional<?> optional) {
                 if (optional.isEmpty()) {
                     Logger.debug("Singleton created by method returned empty Optional: {}", o);
+                    decrementProducerCountMultiValueConsumers();
                     return;
                 }
                 o = optional.get();
@@ -75,6 +76,15 @@ abstract class SingletonProducerImpl implements SingletonProducer {
     protected void assignValueInConsumers(@NonNull Object o) {
         for (var i = 0; i < consumers.size(); i++) {
             consumers.get(i).assignValueIfMatching(o);
+        }
+    }
+
+    private void decrementProducerCountMultiValueConsumers() {
+        for (var i = 0; i < consumers.size(); i++) {
+            var consumer = consumers.get(i);
+            if (consumer instanceof MultiValueConsumer multiValueConsumer) {
+                multiValueConsumer.decrementProducerCount();
+            }
         }
     }
 

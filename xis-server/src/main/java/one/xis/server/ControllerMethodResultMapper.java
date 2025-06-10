@@ -108,9 +108,7 @@ class ControllerMethodResultMapper {
         if (pageResponse.getUrlParameters() != null) {
             controllerMethodResult.getUrlParameters().putAll(pageResponse.getUrlParameters());
         }
-
     }
-
 
     private void updateController(@NonNull ControllerMethodResult result, @NonNull Class<?> controllerClass, Map<String, Object> pathVariables) {
         if (controllerClass.isAnnotationPresent(Widget.class)) {

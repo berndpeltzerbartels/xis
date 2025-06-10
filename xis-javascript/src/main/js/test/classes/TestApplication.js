@@ -33,7 +33,7 @@ class TestApplication {
             .then(config => this.widgets.loadWidgets(config))
             .then(config => this.pages.loadPages(config))
             .then(() => this.urlResolver.init())
-            .then(() => this.pageController.displayPageForUrlLater(document.location.pathname))
+            .then(() => this.pageController.displayPageForUrl(document.location.pathname))
             .catch(e => console.error(e));
     }
 

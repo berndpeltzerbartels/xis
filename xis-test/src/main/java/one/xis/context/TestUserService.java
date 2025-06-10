@@ -2,13 +2,13 @@ package one.xis.context;
 
 import one.xis.security.AuthenticationException;
 import one.xis.security.LocalUserInfo;
-import one.xis.security.UserService;
+import one.xis.security.LocalUserInfoService;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TestUserService implements UserService {
+public class TestUserService implements LocalUserInfoService {
     private final Map<String, LocalUserInfo> users = new HashMap<>();
 
     public TestUserService(LocalUserInfo... users) {

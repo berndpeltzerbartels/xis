@@ -40,7 +40,7 @@ class ControllerService {
         controllerResult.setCurrentWidgetId(request.getWidgetId());
         var wrapper = controllerWrapper(request);
         wrapper.invokeGetModelMethods(request, controllerResult, accessToken);
-        if (controllerResult.getNextPageURL() == null) {
+        if (controllerResult.getNextPageId() == null) {
             controllerResult.setNextPageURL(request.getPageUrl());
             controllerResult.setNextPageId(request.getPageId());
         }
@@ -58,11 +58,10 @@ class ControllerService {
         controllerResult.setCurrentWidgetId(request.getWidgetId());
         var wrapper = controllerWrapper(request);
         wrapper.invokeFormDataMethods(request, controllerResult, accessToken);
-        if (controllerResult.getNextPageURL() == null) {
+        if (controllerResult.getNextPageId() == null) {
             controllerResult.setNextPageURL(request.getPageUrl());  // TODO replace this hack
             controllerResult.setNextPageId(request.getPageId());
         }
-
         if (controllerResult.getNextWidgetId() == null) {
             controllerResult.setNextWidgetId(request.getWidgetId());
         }
@@ -145,7 +144,7 @@ class ControllerService {
         if (StringUtils.isNotEmpty(controllerResult.getNextWidgetId())) {
             return widgetControllerWrapperById(controllerResult.getNextWidgetId());
         }
-        if (StringUtils.isNotEmpty(controllerResult.getNextPageURL())) {
+        if (StringUtils.isNotEmpty(controllerResult.getNextPageId())) {
             return pageControllerWrapperById(controllerResult.getNextPageId());
         }
         throw new IllegalStateException("no controller found for request: " + controllerResult);

@@ -3,7 +3,7 @@ package one.xis.security;
 import one.xis.ImportInstances;
 
 @ImportInstances
-public interface UserService {
+public interface LocalUserInfoService {
 
     boolean checkCredentials(String userId, String password);
 

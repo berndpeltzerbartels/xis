@@ -7,4 +7,6 @@ interface MultiValueConsumer {
     AtomicInteger getProducerCount();
 
     void notifyParent();
+
+    void decrementProducerCount();
 }

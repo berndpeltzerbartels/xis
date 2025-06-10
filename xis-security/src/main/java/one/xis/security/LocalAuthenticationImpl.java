@@ -6,7 +6,7 @@ import one.xis.server.ApiTokens;
 @RequiredArgsConstructor
 class LocalAuthenticationImpl implements LocalAuthentication {
 
-    private final UserService userService;
+    private final LocalUserInfoService userService;
     private final ApiTokenManager tokenManager;
 
     @Override

@@ -26,7 +26,7 @@ class Application {
             .then(config => this.backendService.setConfig(config))
             .then(config => this.widgets.loadWidgets(config))
             .then(config => this.pages.loadPages(config))
-            .then(() => this.pageController.displayPageForUrlLater(document.location.pathname))
+            .then(() => this.pageController.displayPageForUrl(document.location.pathname))
             .catch(e => console.error(e));
     }
 

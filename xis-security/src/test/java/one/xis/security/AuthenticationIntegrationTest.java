@@ -21,7 +21,7 @@ class AuthenticationIntegrationTest {
         userInfo.setClaims(Map.of("email", "user1@example.com"));
     }
 
-    class DummyUserService implements UserService {
+    class DummyUserService implements LocalUserInfoService {
         @Override
         public boolean checkCredentials(String userId, String password) {
             return "user1".equals(userId) && "secret".equals(password);

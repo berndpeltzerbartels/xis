@@ -64,10 +64,9 @@ class Client {
      * @returns {Promise<any>}
      */
     loadPageData(resolvedURL) {
-        var _this = this;
         var request = this.createPageRequest(resolvedURL, null, null);
         return this.httpConnector.post('/xis/page/model', request, {})
-            .then(response => _this.deserializeResponse(response));
+            .then(response => this.deserializeResponse(response));
     }
 
     /**
@@ -76,10 +75,9 @@ class Client {
     * @returns {Promise<ServerReponse>}
     */
     loadWidgetData(widgetInstance, widgetState) {
-        var _this = this;
         var request = this.createWidgetRequest(widgetInstance, widgetState, null, null, null);
         return this.httpConnector.post('/xis/widget/model', request)
-            .then(response => _this.deserializeResponse(response));
+            .then(response => this.deserializeResponse(response));
     }
 
     /**
@@ -334,13 +332,20 @@ class Client {
     }
 
     storeLocalStorageData(localStorageData) {
+        if (!localStorageData) {
+            return;
+        }
         app.localStorage.saveData(localStorageData);
     }
 
     storeClientStateData(clientStateData) {
+
         app.clientState.saveData(clientStateData);
     }
     storeLocalDatabaseData(localDatabaseData) {
+        if (!localDatabaseData) {
+            return;
+        }
         // TODO create and configure db
         for (var key of Object.keys(localDatabaseData)) {
             this.localDatabase.setItem(key, localDatabaseData[key]);

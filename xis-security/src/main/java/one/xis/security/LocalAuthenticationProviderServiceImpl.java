@@ -15,7 +15,7 @@ import static java.time.temporal.ChronoUnit.MINUTES;
 class LocalAuthenticationProviderServiceImpl implements LocalAuthenticationProviderService {
 
     private final AuthenticationService authenticationService;
-    private final UserService userService;
+    private final LocalUserInfoService userService;
     private final LocalAuthenticationProviderCodeStore codeStore = new LocalAuthenticationProviderCodeStore();
     private final String secret = SecurityUtil.createRandomKey(32);
     private final Duration lifetime = Duration.of(15, MINUTES);

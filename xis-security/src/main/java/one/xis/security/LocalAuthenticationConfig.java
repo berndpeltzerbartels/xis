@@ -16,6 +16,6 @@ class LocalAuthenticationConfig {
 
     @XISBean
     Optional<LocalAuthentication> localAuthentication() {
-        return context.getOptionalSingleton(UserService.class).map(userService -> new LocalAuthenticationImpl(userService, tokenManager));
+        return context.getOptionalSingleton(LocalUserInfoService.class).map(userService -> new LocalAuthenticationImpl(userService, tokenManager));
     }
 }

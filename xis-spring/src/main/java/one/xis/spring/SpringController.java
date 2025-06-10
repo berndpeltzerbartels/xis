@@ -93,15 +93,7 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
                                           Locale locale) {
         addTokenToRequest(request, authenticationHeader);
         request.setLocale(locale);
-        if ("login".equals(request.getAction())) {
-            try {
-                return responseEntity(frontendService.processLoginRequest(request));
-            } catch (InvalidCredentialsException e) {
-                return ResponseEntity.status(401).body("Invalid credentials");
-            }
-        } else {
-            return responseEntity(frontendService.processActionRequest(request));
-        }
+        return responseEntity(frontendService.processActionRequest(request));
     }
 
     @Override

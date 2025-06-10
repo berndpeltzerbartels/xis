@@ -189,20 +189,6 @@ class PageController {
         });
     }
 
-
-
-    /**
-     * 
-     * @param {string} realUrl 
-     * @returns {Promise<void>}
-     */
-    displayPageForUrlLater(realUrl) {
-        return new Promise((resolve, _) => {
-            this.displayPageForUrl(realUrl);
-            resolve();
-        });
-    }
-
     /**
      * @public
      * @param {ClientConfig} config

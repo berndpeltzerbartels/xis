@@ -13,7 +13,7 @@ import static org.mockito.Mockito.mock;
 class LocalAuthenticationProviderServiceTest {
 
     private LocalAuthenticationProviderServiceImpl authentication;
-    private UserService userService;
+    private LocalUserInfoService userService;
 
     @BeforeEach
     void setUp() {
@@ -88,7 +88,7 @@ class LocalAuthenticationProviderServiceTest {
 
 
     // Dummy UserService
-    static class TestUserService implements UserService {
+    static class TestUserService implements LocalUserInfoService {
 
         @Override
         public boolean checkCredentials(String userId, String password) {
