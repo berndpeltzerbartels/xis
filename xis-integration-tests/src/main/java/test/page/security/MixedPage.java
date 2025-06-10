@@ -4,7 +4,7 @@ import one.xis.ModelData;
 import one.xis.Page;
 import one.xis.Roles;
 
-@Page("/mixed")
+@Page("/mixed.html")
 class MixedPage {
 
 

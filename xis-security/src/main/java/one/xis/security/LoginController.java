@@ -32,7 +32,7 @@ class LoginController {
     @Action("login")
     public ApiTokens login(@FormData("login") LoginFormData login) {
         if (localAuthentication == null) {
-            throw new IllegalStateException("Local authentication is not configured. This may be because no implementation of UserService is available.");
+            throw new IllegalStateException("Local authentication is not present. This may be because no implementation of " + LocalUserInfoService.class + " is available.");
         }
         // Logic for handling login action
         return localAuthentication.login(login.username, login.password);

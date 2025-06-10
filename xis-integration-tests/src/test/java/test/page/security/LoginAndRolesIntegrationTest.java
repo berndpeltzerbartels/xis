@@ -3,10 +3,8 @@ package test.page.security;
 import one.xis.context.IntegrationTestContext;
 import one.xis.security.LocalUserInfo;
 import one.xis.security.LocalUserInfoService;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 
 import java.util.Map;
 import java.util.Set;
@@ -15,13 +13,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@Disabled
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+
 class LoginAndRolesIntegrationTest {
 
     private IntegrationTestContext testContext;
 
-    @BeforeAll
+    @BeforeEach
     void setup() {
         var userInfoService = mock(LocalUserInfoService.class);
 
@@ -49,20 +46,20 @@ class LoginAndRolesIntegrationTest {
     @Test
     void successfulLoginGrantsAccessToAdminPage() {
         var loginPage = testContext.openPage("/login.html").getDocument();
-        loginPage.getInputElementById("login.username").setValue("admin");
-        loginPage.getInputElementById("login.password").setValue("pw");
-        loginPage.getElementById("login").click();
+        loginPage.getInputElementById("username").setValue("admin");
+        loginPage.getInputElementById("password").setValue("pw");
+        loginPage.getElementByTagName("button").click();
 
         var adminPage = testContext.openPage("/admin.html").getDocument();
-        assertThat(adminPage.getElementByTagName("title").innerText).isEqualTo("Admin");
+        assertThat(adminPage.getElementByTagName("title").innerText).isEqualTo("AdminPage");
     }
 
     @Test
     void failedLoginReturnsToLoginPage() {
         var loginPage = testContext.openPage("/login.html").getDocument();
-        loginPage.getInputElementById("login.username").setValue("admin");
-        loginPage.getInputElementById("login.password").setValue("wrong");
-        loginPage.getElementById("login").click();
+        loginPage.getInputElementById("username").setValue("admin");
+        loginPage.getInputElementById("password").setValue("wrong");
+        loginPage.getElementByTagName("button").click();
 
         var doc = testContext.openPage("/login.html").getDocument();
         assertThat(doc.getElementByTagName("title").innerText).isEqualTo("Login");
@@ -71,23 +68,23 @@ class LoginAndRolesIntegrationTest {
     @Test
     void openPageAccessibleWithoutLogin() {
         var doc = testContext.openPage("/open.html").getDocument();
-        assertThat(doc.getElementByTagName("title").innerText).isEqualTo("Open");
+        assertThat(doc.getElementByTagName("title").innerText).isEqualTo("OpenPage");
     }
 
     @Test
     void methodProtectedPageBlockedWithoutLogin() {
-        var doc = testContext.openPage("/mixed/method.html").getDocument();
+        var doc = testContext.openPage("/mixed.html").getDocument();
         assertThat(doc.getElementByTagName("title").innerText).isEqualTo("Login");
     }
 
     @Test
     void methodProtectedPageAccessibleAfterLogin() {
         var loginPage = testContext.openPage("/login.html").getDocument();
-        loginPage.getInputElementById("login.username").setValue("admin");
-        loginPage.getInputElementById("login.password").setValue("pw");
-        loginPage.getElementById("login").click();
+        loginPage.getInputElementById("username").setValue("admin");
+        loginPage.getInputElementById("password").setValue("pw");
+        loginPage.getElementByTagName("button").click();
 
-        var doc = testContext.openPage("/mixed/method.html").getDocument();
-        assertThat(doc.getElementByTagName("title").innerText).isEqualTo("Mixed Method");
+        var doc = testContext.openPage("/mixed.html").getDocument();
+        assertThat(doc.getElementByTagName("title").innerText).isEqualTo("MixedPage");
     }
 }
