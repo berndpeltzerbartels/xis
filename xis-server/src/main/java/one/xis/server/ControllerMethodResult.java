@@ -11,7 +11,7 @@ import java.util.Map;
 @Data
 class ControllerMethodResult {
 
-    private String nextPageURL;
+    private String nextURL;
     private String nextPageId;
     private String nextWidgetId;
     private String widgetContainerId;

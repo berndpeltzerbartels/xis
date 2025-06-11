@@ -9,8 +9,8 @@ import java.util.stream.Collectors;
 class ControllerResultMapper {
 
     void mapMethodResultToControllerResult(ControllerMethodResult controllerMethodResult, ControllerResult controllerResult) {
-        if (controllerMethodResult.getNextPageURL() != null) {
-            controllerResult.setNextURL(controllerMethodResult.getNextPageURL());
+        if (controllerMethodResult.getNextURL() != null) {
+            controllerResult.setNextURL(controllerMethodResult.getNextURL());
         }
         if (controllerMethodResult.getNextPageId() != null) {
             controllerResult.setNextPageId(controllerMethodResult.getNextPageId());

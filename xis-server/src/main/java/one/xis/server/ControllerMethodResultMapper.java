@@ -117,7 +117,7 @@ class ControllerMethodResultMapper {
         } else if (controllerClass.isAnnotationPresent(Page.class)) {
             var realPath = pathResolver.createPath(PageUtil.getUrl(controllerClass));
             var pathString = pathResolver.evaluateRealPath(realPath, pathVariables, emptyMap());
-            result.setNextPageURL(pathString);
+            result.setNextURL(pathString);
             result.setNextPageId(realPath.normalized());
         } else {
             throw new IllegalStateException("not a widget-controller or page-controller:" + controllerClass);
