@@ -307,8 +307,7 @@ class Client {
         var serverResponse = new ServerResponse();
         serverResponse.data = data;
         serverResponse.formData = formData;
-        serverResponse.nextPageURL = obj.nextPageURL;
-        serverResponse.nextPageId = obj.nextPageId;
+        serverResponse.nextURL = obj.nextURL;
         serverResponse.nextWidgetId = obj.nextWidgetId;
         serverResponse.status = response.status;
         serverResponse.validatorMessages = new ValidatorMessages(obj.validatorMessages);

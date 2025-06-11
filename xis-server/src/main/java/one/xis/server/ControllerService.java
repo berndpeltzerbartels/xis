@@ -40,14 +40,10 @@ class ControllerService {
         controllerResult.setCurrentWidgetId(request.getWidgetId());
         var wrapper = controllerWrapper(request);
         wrapper.invokeGetModelMethods(request, controllerResult, accessToken);
-        if (controllerResult.getNextPageId() == null) {
-            controllerResult.setNextPageURL(request.getPageUrl());
-            controllerResult.setNextPageId(request.getPageId());
-        }
         if (controllerResult.getNextWidgetId() == null) {
             controllerResult.setNextWidgetId(request.getWidgetId());
         }
-        mapResultToResponse(response, controllerResult);
+        mapResultToResponse(request, response, controllerResult);
     }
 
     void processFormDataRequest(@NonNull ClientRequest request, @NonNull ServerResponse response) {
@@ -58,14 +54,10 @@ class ControllerService {
         controllerResult.setCurrentWidgetId(request.getWidgetId());
         var wrapper = controllerWrapper(request);
         wrapper.invokeFormDataMethods(request, controllerResult, accessToken);
-        if (controllerResult.getNextPageId() == null) {
-            controllerResult.setNextPageURL(request.getPageUrl());  // TODO replace this hack
-            controllerResult.setNextPageId(request.getPageId());
-        }
         if (controllerResult.getNextWidgetId() == null) {
             controllerResult.setNextWidgetId(request.getWidgetId());
         }
-        mapResultToResponse(response, controllerResult);
+        mapResultToResponse(request, response, controllerResult);
     }
 
     void processActionRequest(@NonNull ClientRequest request, @NonNull ServerResponse response) {
@@ -79,11 +71,11 @@ class ControllerService {
         if (!resultContainsNextController(controllerResult)) {
             usePreviousController(controllerResult, invokerControllerWrapper, request);
         }
-        mapResultToResponse(response, controllerResult);
+        mapResultToResponse(request, response, controllerResult);
         var nextControllerWrapper = nextControllerWrapperAfterAction(controllerResult);
         if (nextControllerWrapper.equals(invokerControllerWrapper)) {
             invokerControllerWrapper.invokeGetModelMethods(request, controllerResult, accessToken);
-            mapResultToResponse(response, controllerResult);
+            mapResultToResponse(request, response, controllerResult);
         } else {
             processNextController(request, controllerResult, response, nextControllerWrapper, accessToken);
         }
@@ -105,17 +97,14 @@ class ControllerService {
             nextControllerResult.setNextWidgetId(nextControllerWrapper.getId());
         } else {
             var path = pathResolver.createPath(nextControllerWrapper.getController().getClass().getAnnotation(Page.class).value());
-            nextControllerResult.setNextPageId(nextControllerWrapper.getId());
-            nextControllerResult.setNextPageURL(this.pathResolver.evaluateRealPath(path, controllerResult.getPathVariables(), controllerResult.getUrlParameters()));
+            nextControllerResult.setNextURL(this.pathResolver.evaluateRealPath(path, controllerResult.getPathVariables(), controllerResult.getUrlParameters()));
         }
         // get model data for next controller
         nextControllerWrapper.invokeGetModelMethods(nextRequest, nextControllerResult, accessToken);
         // map result to response
         response.clear();
-        mapResultToResponse(response, nextControllerResult);
+        mapResultToResponse(request, response, nextControllerResult);
     }
-
-    // TODO Besser Url imm als Klasse, damit keine Verwechslung mit PageId = normalisierter Pfad passiert
 
     private ControllerWrapper controllerWrapper(ClientRequest request) {
         if (request.getType() == RequestType.widget) {
@@ -127,7 +116,7 @@ class ControllerService {
     }
 
     private boolean resultContainsNextController(ControllerResult controllerResult) {
-        return StringUtils.isNotEmpty(controllerResult.getNextWidgetId()) || StringUtils.isNotEmpty(controllerResult.getNextPageURL());
+        return StringUtils.isNotEmpty(controllerResult.getNextWidgetId()) || StringUtils.isNotEmpty(controllerResult.getNextURL());
     }
 
 
@@ -135,8 +124,7 @@ class ControllerService {
         if (controllerWrapper.isWidgetController()) {
             controllerResult.setNextWidgetId(controllerWrapper.getId());
         } else {
-            controllerResult.setNextPageURL(request.getPageUrl());
-            controllerResult.setNextPageId(request.getPageId());
+            controllerResult.setNextURL(request.getPageUrl());
         }
     }
 
@@ -144,14 +132,35 @@ class ControllerService {
         if (StringUtils.isNotEmpty(controllerResult.getNextWidgetId())) {
             return widgetControllerWrapperById(controllerResult.getNextWidgetId());
         }
-        if (StringUtils.isNotEmpty(controllerResult.getNextPageId())) {
+        if (controllerResult.getNextPageControllerClass() != null) {
+            return pageControllerWrapperByClass(controllerResult.getNextPageControllerClass());
+        }
+        if (controllerResult.getNextPageId() != null) {
             return pageControllerWrapperById(controllerResult.getNextPageId());
+        }
+        if (controllerResult.getNextURL() != null) {
+            var path = pathResolver.createPath(controllerResult.getNextURL());
+            return pageControllerWrapperById(path.normalized());
         }
         throw new IllegalStateException("no controller found for request: " + controllerResult);
     }
 
-    private void mapResultToResponse(ServerResponse response, ControllerResult result) {
-        responseMapper.mapResultToResponse(response, result);
+    private String getNextUrl(ClientRequest request, ControllerResult controllerResult) {
+        if (StringUtils.isNotEmpty(controllerResult.getNextURL())) {
+            return controllerResult.getNextURL();
+        }
+        if (controllerResult.getNextPageControllerClass() != null) {
+            var path = pathResolver.createPath(PageUtil.getUrl(controllerResult.getNextPageControllerClass()));
+            return pathResolver.evaluateRealPath(path, controllerResult.getPathVariables(), controllerResult.getUrlParameters());
+        }
+        return request.getPageUrl();
+    }
+
+    private void mapResultToResponse(ClientRequest request, ServerResponse response, ControllerResult controllerResult) {
+        if (controllerResult.getNextURL() == null) {
+            controllerResult.setNextURL(getNextUrl(request, controllerResult));
+        }
+        responseMapper.mapResultToResponse(response, controllerResult);
     }
 
     protected ControllerWrapper widgetControllerWrapperById(@NonNull String id) {
@@ -159,9 +168,15 @@ class ControllerService {
                 .orElseThrow(() -> new IllegalStateException("not a widget-controller:" + id));
     }
 
-    protected ControllerWrapper pageControllerWrapperById(@NonNull String id) {
-        return pageControllerWrappers.findByPath(pathResolver.createPath(id))
-                .orElseThrow(() -> new IllegalStateException("page-controller not found for path:" + id));
+    protected ControllerWrapper pageControllerWrapperByClass(@NonNull Class<?> controllerClass) {
+        return pageControllerWrappers.findByClass(controllerClass)
+                .orElseThrow(() -> new IllegalStateException("page-controller not found:" + controllerClass.getSimpleName()));
+    }
+
+
+    protected ControllerWrapper pageControllerWrapperById(@NonNull String normalizedPath) {
+        return pageControllerWrappers.findByPath(normalizedPath)
+                .orElseThrow(() -> new IllegalStateException("page-controller not found:" + normalizedPath));
     }
 
 }

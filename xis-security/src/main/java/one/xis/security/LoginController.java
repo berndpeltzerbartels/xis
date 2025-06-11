@@ -4,7 +4,6 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import one.xis.*;
 import one.xis.context.XISInit;
-import one.xis.server.ApiTokens;
 import one.xis.server.FrontendService;
 
 import java.util.List;
@@ -30,12 +29,12 @@ class LoginController {
     }
 
     @Action("login")
-    public ApiTokens login(@FormData("login") LoginFormData login) {
+    public LocalLoginResponse login(@FormData("login") LoginFormData login) {
         if (localAuthentication == null) {
             throw new IllegalStateException("Local authentication is not present. This may be because no implementation of " + LocalUserInfoService.class + " is available.");
         }
         // Logic for handling login action
-        return localAuthentication.login(login.username, login.password);
+        return new LocalLoginResponse(localAuthentication.login(login.username, login.password), login.redirect);
     }
 
     @Data

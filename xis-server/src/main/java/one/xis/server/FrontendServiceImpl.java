@@ -60,7 +60,7 @@ public class FrontendServiceImpl implements FrontendService {
             return applyFilterChain(request, controllerService::processActionRequest);
         } catch (AuthenticationException e) {
             Logger.error("Authentication error: {}", e.getMessage());
-            return authenticationErrorResponse(request.getPageId());
+            return authenticationErrorResponse(request.getPageUrl());
         } finally {
             removeUserContext();
         }
@@ -237,8 +237,7 @@ public class FrontendServiceImpl implements FrontendService {
     private static ServerResponse authenticationErrorResponse(String uri) {
         var response = new ServerResponse();
         response.setStatus(401);
-        response.setNextPageURL("/login.html");
-        response.setNextPageId("/login.html");
+        response.setNextURL("/login.html");
         response.getFormData().put("redirect", uri);
         response.getValidatorMessages().getMessages().put("username", "Invalid username or password"); // TODO: i18n
         response.getValidatorMessages().getMessages().put("password", "Invalid username or password"); // TODO: i18n

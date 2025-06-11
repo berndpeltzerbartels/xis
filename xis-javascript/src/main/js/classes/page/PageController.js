@@ -90,6 +90,10 @@ class PageController {
         this.doRefresh(response);
     }
 
+    /**
+     * 
+     * @param {Datas} data 
+     */
     doRefresh(data) {
         data.setValue(['pathVariables'], this.resolvedURL.pathVariablesAsMap());
         data.setValue(['urlParameters'], this.resolvedURL.urlParameters);
@@ -111,10 +115,10 @@ class PageController {
      * @param {ServerResponse} response
      */
     handleActionResponseNoContent(response) {
-        if (response.nextPageURL) {
-            var resolvedURL = this.urlResolver.resolve(response.nextPageURL);
+        if (response.nextURL) {
+            var resolvedURL = this.urlResolver.resolve(response.nextURL);
             if (!resolvedURL) {
-                throw new Error('no page for ' + response.nextPageURL);
+                throw new Error('no page for ' + response.nextURL);
             }
             this.resolvedURL = resolvedURL;
             if (resolvedURL.page != this.page) {
@@ -126,17 +130,6 @@ class PageController {
         this.updateHistory(this.resolvedURL);
     }
 
-
-    /**
-     * Handels server-response after submitting an action.
-     *  @public
-     * @param {ServerResponse} response
-     * @returns {Promise<void>}
-     *  
-     * */
-    handleActionResponseUnprocessableEntity(response) {
-
-    }
 
     getData() {
         return this.page ? this.page.data : undefined;
@@ -162,15 +155,26 @@ class PageController {
     displayPageForUrl(realUrl, skipHistoryUpdate = false) {
         const resolved = this.urlResolver.resolve(realUrl) || this.welcomePageUrl();
         if (!resolved) {
-            throw new Error('No page found for URL: ' + realUrl);
+            throw new Error("Cannot resolve URL: " + realUrl);
         }
+        return this.displayPageForResolvedURL(resolved, skipHistoryUpdate);
+    }
 
+    /**
+     *
+     * @param {ResolvedURL} resolved
+     * @param {boolean} skipHistoryUpdate
+     * @returns {Promise<void>}
+     */
+    displayPageForResolvedURL(resolved, skipHistoryUpdate = false) {
         return this.client.loadPageData(resolved).then(response => {
-           if (response.nextPageId && resolved.normalizedPath != response.nextPageId) {
-                // Redirect – do not pollute browser history
-                return this.displayPageForUrl(response.nextPageURL, true);
+            if (response.nextURL) {
+                const nextResolved = this.urlResolver.resolve(response.nextURL);
+                if (resolved.normalizedPath !== nextResolved.normalizedPath) {
+                    // Redirect – do not pollute browser history
+                    return this.displayPageForUrl(response.nextURL, true);
+                }
             }
-
             this.resolvedURL = resolved;
             this.page = resolved.page;
 
@@ -221,19 +225,15 @@ class PageController {
      */
     refreshCurrentPage() {
         return this.client.loadPageData(this.resolvedURL).then(response => {
-            debugger;
-            var samePage = true;
-            if (!this.page) {
-                samePage = false;
-            } else if (!response.nextPageId) {
-                samePage = true;
-            } else {
-                samePage = response.nextPageId === this.page.normalizedPath;
-            }
-            // If redirect occurred, apply target page without history pollution
-            if (!samePage) {
-                this.displayPageForUrl(response.nextPageURL, /* skipHistoryUpdate */ true);
-                return;
+            const nextUrl = response.nextURL;
+            if (nextUrl) {
+                const nextResolved = this.urlResolver.resolve(nextUrl);
+                if (!nextResolved) {
+                    throw new Error("Cannot resolve redirected URL: " + nextUrl);
+                }
+                if (nextResolved.normalizedPath !== this.resolvedURL.normalizedPath) {
+                    return this.displayPageForResolvedURL(nextResolved, /* skipHistoryUpdate */ true);
+                }
             }
             const data = response.data;
             data.setValue(['pathVariables'], this.resolvedURL.pathVariablesAsMap());
@@ -242,6 +242,7 @@ class PageController {
             this.htmlTagHandler.refresh(data);
         });
     }
+
 
     /**
      * @private

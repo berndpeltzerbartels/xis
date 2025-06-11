@@ -41,11 +41,11 @@ class FormHandler extends TagHandler {
     }
 
     widgetId() {
-        const handler  = this.findParentWidgetContainerHandler();
+        const handler = this.findParentWidgetContainerHandler();
         if (!handler) {
             return null;
         }
-        return handler.currentWidgetId();   
+        return handler.currentWidgetId();
     }
 
     targetContainerHandler() {
@@ -99,10 +99,10 @@ class FormHandler extends TagHandler {
         if (!response.validatorMessages.isEmpty()) {
             return;
         }
-        if (response.nextPageId) {
-            app.pageController.handleActionResponse(response);
-        } else {
+        if (response.nextWidgetId) {
             targetContainerHandler.handleActionResponse(response);
+        } else {
+            app.pageController.handleActionResponse(response);
         }
     }
 }

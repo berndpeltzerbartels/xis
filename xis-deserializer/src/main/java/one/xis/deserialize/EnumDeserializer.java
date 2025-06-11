@@ -23,6 +23,9 @@ class EnumDeserializer implements JsonDeserializer<Enum> {
         try {
             return Optional.of(Enum.valueOf((Class<Enum>) getType(target), input));
         } catch (Exception e) {
+            if ("".equals(input)) {
+                return Optional.empty();
+            }
             throw new DeserializationException(e, input);
         }
     }

@@ -10,7 +10,7 @@ class ControllerResultMapper {
 
     void mapMethodResultToControllerResult(ControllerMethodResult controllerMethodResult, ControllerResult controllerResult) {
         if (controllerMethodResult.getNextPageURL() != null) {
-            controllerResult.setNextPageURL(controllerMethodResult.getNextPageURL());
+            controllerResult.setNextURL(controllerMethodResult.getNextPageURL());
         }
         if (controllerMethodResult.getNextPageId() != null) {
             controllerResult.setNextPageId(controllerMethodResult.getNextPageId());

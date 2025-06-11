@@ -78,7 +78,7 @@ class HttpConnector {
                 }
                 return tokens;
             }
-            console.error('No Set-Cookie header found in the response.');
+           throw Error('No Set-Cookie header found in the response.');
         }
         return null;
     }

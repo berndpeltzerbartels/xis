@@ -45,8 +45,8 @@ class WidgetContainerHandler extends TagHandler {
     */
     handleActionResponse(response) {
         this.backendService.triggerAdditionalReloadsOnDemand(response); // TODO move it
-        if (response.nextPageId) {
-            app.pageController.handleActionResponse(response.nextPageId, response.nextPageParameters);
+        if (response.nextURL) {
+            app.pageController.handleActionResponse(response);
         }
         if (response.nextWidgetId) {
             this.ensureWidgetBound(response.nextWidgetId);

@@ -27,8 +27,7 @@ public class ServerResponse {
     private Map<String, Object> localDatabaseData = new HashMap<>();
     private Map<String, Object> clientStateData = new HashMap<>();
     private Collection<String> reloadWidgets = new ArrayList<>();
-    private String nextPageURL;
-    private String nextPageId;
+    private String nextURL;
     private String nextWidgetId;
     private ValidatorMessages validatorMessages = new ValidatorMessages();
     private boolean reloadPage; // TODO do we need this?
@@ -42,7 +41,7 @@ public class ServerResponse {
         data.clear();
         formData.clear();
         reloadWidgets.clear();
-        nextPageURL = null;
+        nextURL = null;
         nextWidgetId = null;
         validatorMessages = new ValidatorMessages();
         reloadPage = false;

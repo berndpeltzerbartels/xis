@@ -1,8 +1,7 @@
 /**
  * @property {Number} status
  * @property {any} data
- * @property {string} nextPageURL
- * @property {string} nextPageId
+ * @property {string} nextURL
  * @property {string} nextWidgetId
  * @property {any} formData
  * @property {any} localStorageData
@@ -18,8 +17,7 @@ class ServerResponse {
     constructor() {
         this.status = -1;
         this.data = {};
-        this.nextPageURL = '';
-        this.nextPageId = '';
+        this.nextURL = '';
         this.nextWidgetId = '';
         this.formData = {};
         this.localStorageData = {};

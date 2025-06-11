@@ -46,6 +46,9 @@ class NumberDeserializer implements JsonDeserializer<Number> {
                 return Optional.of(parseNumber((String) value, target));
             }
         } catch (Exception e) {
+            if ("".equals(value)) {
+                return Optional.empty();
+            }
             throw new DeserializationException(e, value != null ? value.toString() : "");
         }
         return Optional.empty();

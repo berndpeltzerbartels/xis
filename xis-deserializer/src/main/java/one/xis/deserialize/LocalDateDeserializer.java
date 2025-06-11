@@ -26,8 +26,11 @@ class LocalDateDeserializer implements JsonDeserializer<LocalDate> { // TODO: Im
                                            PostProcessingResults results) throws IOException {
         var value = reader.nextString();
         try {
-            return Optional.of(LocalDate.parse(value));
+            return Optional.ofNullable(LocalDate.parse(value));
         } catch (Exception e) {
+            if ("".equals(value)) {
+                return Optional.empty();
+            }
             throw new DeserializationException(e, value);
         }
 

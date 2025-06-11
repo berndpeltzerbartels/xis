@@ -32,9 +32,9 @@ class PageControllerWrappers {
         pageControllerWrappers = pageControllerWrappers();
     }
 
-    Optional<ControllerWrapper> findByPath(Path path) {
+    Optional<ControllerWrapper> findByPath(String normalizedPath) {
         return pageControllerWrappers.stream()
-                .filter(controller -> controller.getId().equals(path.normalized()))
+                .filter(controller -> controller.getId().equals(normalizedPath))
                 .findFirst();
     }
 
@@ -53,4 +53,9 @@ class PageControllerWrappers {
         return pathResolver.normalizedPath(pageController);
     }
 
+    public Optional<ControllerWrapper> findByClass(Class<?> controllerClass) {
+        return pageControllerWrappers.stream()
+                .filter(wrapper -> wrapper.getControllerClass().equals(controllerClass))
+                .findFirst();
+    }
 }
