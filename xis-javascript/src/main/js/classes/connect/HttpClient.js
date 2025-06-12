@@ -83,6 +83,14 @@ class HttpClient extends Client {
         const request = this.createFormRequest(resolvedURL, widgetId, formData, action, formBindigKey, formBindingParameters);
         const headers = await this.authenticationHeader();
         const response = await this.httpConnector.post('/xis/form/action', request, headers);
+        debugger;
+        const cookies = this.readCookies(response);
+        if (cookies['access_token']) {
+            this.tokenManager.setAccessToken(cookies['access_token']);
+        }
+        if (cookies['refresh_token']) {
+            this.tokenManager.setRenewToken(cookies['refresh_token']);
+        }
         return this.deserializeResponse(response);
     }
 
@@ -105,5 +113,27 @@ class HttpClient extends Client {
             header['Authorization'] = 'Bearer ' + token;
         }
         return header;
+    }
+
+    /**
+   * Liest alle Cookies aus dem Set-Cookie-Header der Response und gibt ein Objekt mit Key-Value-Paaren zurück.
+   * @param {XMLHttpRequest} response - Die XMLHttpRequest-Response
+   * @returns {Object} - Objekt mit Cookie-Namen als Keys und deren Werte als Values
+   */
+    readCookies(response) {
+        const allHeaders = response.getAllResponseHeaders();
+        const setCookieHeaders = allHeaders
+            .split('\r\n')
+            .filter(header => header.toLowerCase().startsWith('set-cookie:'));
+
+        const cookieObj = {};
+        for (const header of setCookieHeaders) {
+            const cookieString = header.substring('set-cookie:'.length).trim();
+            const [name, ...rest] = cookieString.split('=');
+            if (name && rest.length > 0) {
+                cookieObj[name] = rest.join('=').split(';')[0]; // Nur den Wert vor dem ersten Semikolon nehmen
+            }
+        }
+        return cookieObj;
     }
 }

@@ -5,6 +5,7 @@ import one.xis.context.AppContext;
 import one.xis.context.XISBean;
 import one.xis.context.XISComponent;
 
+import java.util.List;
 import java.util.Optional;
 
 @XISComponent
@@ -13,12 +14,18 @@ class LocalAuthenticationProviderServiceConfig {
 
     private final AppContext context;
     private final AuthenticationProviderConnectionFactory connectionFactory;
+    private final List<LocalUserInfoService> localUserInfoServices;
 
 
     @XISBean
     Optional<LocalAuthenticationProviderService> localAuthenticationProviderService() {
-        return context.getOptionalSingleton(LocalUserInfoService.class)
-                .map(userService -> new LocalAuthenticationProviderServiceImpl(localAuthenticationService(), userService));
+        return switch (localUserInfoServices.size()) {
+            case 0 -> Optional.empty();
+            case 1 ->
+                    Optional.of(new LocalAuthenticationProviderServiceImpl(localAuthenticationService(), localUserInfoServices.get(0)));
+            default ->
+                    throw new IllegalStateException("Multiple LocalUserInfoService instances found: " + localUserInfoServices.size());
+        };
     }
 
 

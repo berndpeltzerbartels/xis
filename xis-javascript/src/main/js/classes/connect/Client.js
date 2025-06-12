@@ -178,7 +178,6 @@ class Client {
         }
         var normalizedPath = resolvedURL.normalizedPath;
         var request = new ClientRequest();
-        debugger;
         request.clientId = this.clientId;
         request.widgetId = widgetId;
         request.pageId = normalizedPath;

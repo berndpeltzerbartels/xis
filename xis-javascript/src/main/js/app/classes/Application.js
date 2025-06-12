@@ -20,7 +20,6 @@ class Application {
 
 
     start() {
-        this.tokenManager.init();
         this.client.loadConfig()
             .then(config => this.pageController.setConfig(config))
             .then(config => this.backendService.setConfig(config))

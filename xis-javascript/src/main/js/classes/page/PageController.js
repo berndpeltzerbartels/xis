@@ -99,7 +99,7 @@ class PageController {
         data.setValue(['urlParameters'], this.resolvedURL.urlParameters);
         this.page.data = data;
         this.htmlTagHandler.refresh(this.page.data);
-        this.updateHistory(this.resolvedURL);
+        //this.updateHistory(this.resolvedURL);
     }
 
     triggerAdditionalReloads(response) {
@@ -127,7 +127,9 @@ class PageController {
                 this.htmlTagHandler.bindPage(resolvedURL.page);
             }
         }
-        this.updateHistory(this.resolvedURL);
+        if (response.status < 300) {
+            this.updateHistory(this.resolvedURL);
+        }
     }
 
 
@@ -187,7 +189,7 @@ class PageController {
             this.htmlTagHandler.bindPage(this.page);
             this.htmlTagHandler.refresh(data);
 
-            if (!skipHistoryUpdate) {
+            if (!skipHistoryUpdate && response.status < 300) {
                 this.updateHistory(this.resolvedURL);
             }
         });

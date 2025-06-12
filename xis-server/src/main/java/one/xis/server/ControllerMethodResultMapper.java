@@ -33,6 +33,7 @@ class ControllerMethodResultMapper {
             updateController(controllerMethodResult, controllerClass, emptyMap());
         } else if (returnValue instanceof LocalLoginResponse loginResponse) {
             controllerMethodResult.setTokens(loginResponse.getTokens());
+            controllerMethodResult.setNextURL(loginResponse.getRedirectUrl());
         }
         if (method.isAnnotationPresent(ModelData.class)) {
             mapModelResult(method.getAnnotation(ModelData.class).value(), returnValue, controllerMethodResult);

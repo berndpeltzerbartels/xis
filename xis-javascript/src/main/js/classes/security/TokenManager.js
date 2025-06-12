@@ -11,14 +11,7 @@ class TokenManager {
     this.accessTokenExpiresAt = 0;
     this.renewToken = null;
     this.renewTokenExpiresAt = 0;
-  }
-
-
-  init() {
-    console.log('Initializing TokenManager');
-    this.accessToken = this.readAccessTokenFromCookies();
-    this.renewToken = this.readRenewTokenFromCookies();
-    this.parseTokens();
+    this.tokenAttributes = new TokenAttributes();
   }
 
   parseTokens() {
@@ -33,48 +26,44 @@ class TokenManager {
     }
     if (this.renewToken) {
       var renewTokenDecoded = this.decodeToken(this.renewToken);
-      this.tokenAttributes.userId = renewTokenDecoded.sub || this.tokenAttributes.userId;
-      this.tokenAttributes.roles = renewTokenDecoded.roles || this.tokenAttributes.roles;
-      this.tokenAttributes.claims = renewTokenDecoded.claims || this.tokenAttributes.claims;
+      this.tokenAttributes.userId = renewTokenDecoded.sub || '';
+      this.tokenAttributes.roles = renewTokenDecoded.roles || [];
+      this.tokenAttributes.claims = renewTokenDecoded.claims || {};
       this.renewTokenExpiresAt = renewTokenDecoded.exp || -1;
     }
     console.log('Parsing tokens completed');
   }
 
+    setAccessToken(token) {
+        this.accessToken = token;
+        const decodedToken = this.decodeToken(token);
+        this.accessTokenExpiresAt = decodedToken.exp || -1;
+        this.tokenAttributes.userId = decodedToken.sub || '';
+        this.tokenAttributes.roles = decodedToken.roles || [];
+        this.tokenAttributes.claims = decodedToken.claims || {};
+    }
+
+    setRenewToken(token) {
+        this.renewToken = token;
+        const decodedToken = this.decodeToken(token);
+        this.renewTokenExpiresAt = decodedToken.exp || -1;
+        this.tokenAttributes.userId = decodedToken.sub || this.tokenAttributes.userId;
+        this.tokenAttributes.roles = decodedToken.roles || this.tokenAttributes.roles;
+        this.tokenAttributes.claims = decodedToken.claims || this.tokenAttributes.claims;
+    }
+
   setTokens(response) {
-    debugger;
     this.accessToken = response.accessToken;
     this.renewToken = response.renewToken; // Use existing renew token if not provided
     this.parseTokens();
   }
 
   reset() {
-    this.accessToken = null;
-    this.accessTokenExpiresAt = -1;
+   // this.accessToken = null;
+   // this.accessTokenExpiresAt = -1;
     this.renewToken = null;
     this.renewTokenExpiresAt = -1;
     this.tokenAttributes = new TokenAttributes();
-  }
-
-
-  /**
-   * @private
-   * Checks if the access token has expired.
-   * 
-   * @returns {boolean}
-   */
-  isAccessTokenExpiring() {
-    return !this.accessToken || Date.now() > (this.accessTokenExpiresAt - 5000); // 5 seconds buffer
-  }
-
-  /**
-   * @private
-   * Checks if the refresh token has expired.
-   * 
-   * @returns {boolean}
-   */
-  isRenewTokenExpired() {
-    return !this.renewToken || Date.now() > this.renewTokenExpiresAt;
   }
 
   /**
@@ -111,14 +100,21 @@ class TokenManager {
     }
   }
 
-  readAccessTokenFromCookies() {
-    return this.readCookieValue('access_token');
+  isAccessTokenExpiring() {
+    if (!this.accessToken || this.accessTokenExpiresAt <= 0) {
+      return false; // No access token or invalid expiration
+    }
+    const now = Math.floor(Date.now() / 1000); // Current time in seconds
+    return this.accessTokenExpiresAt - now < 60; // Less than 60 seconds to expiration
   }
 
-  readRenewTokenFromCookies() {
-    return this.readCookieValue('refresh_token');
+  isRenewTokenExpired() {
+    if (!this.renewToken || this.renewTokenExpiresAt <= 0) {
+      return true; // No renew token or invalid expiration
+    }
+    const now = Math.floor(Date.now() / 1000); // Current time in seconds
+    return this.renewTokenExpiresAt <= now; // Renew token is expired
   }
-
 
   decodeToken(token) {
     try {
