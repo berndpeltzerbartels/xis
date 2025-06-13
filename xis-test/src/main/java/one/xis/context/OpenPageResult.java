@@ -3,7 +3,6 @@ package one.xis.context;
 import lombok.Data;
 import one.xis.test.dom.Document;
 import one.xis.test.dom.Window;
-import one.xis.test.js.Console;
 import one.xis.test.js.LocalStorage;
 import one.xis.test.js.SessionStorage;
 
@@ -28,9 +27,12 @@ public class OpenPageResult {
         return testEnvironment.getHTML_OBJECTS().getWindow();
     }
 
+    /*
     public Console getConsole() {
         return testEnvironment.getHTML_OBJECTS().getConsole();
     }
+
+     */
 }
 
 

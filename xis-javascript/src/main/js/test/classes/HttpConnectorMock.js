@@ -8,7 +8,7 @@ class HttpConnectorMock {
      *
      */
     post(uri, payload, headers) {
-        console.log('HTTP - POST: ' + uri + ' : ' + JSON.stringify(payload));
+        console.log('post: ' + uri + ' : ' + JSON.stringify(payload));
         var _this = this;
         return new Promise((resolve, reject) => {
             var response = _this.responseForPost(uri, payload, headers);
@@ -23,7 +23,7 @@ class HttpConnectorMock {
      * @return {Promise<any, int>}
      */
     get(uri, headers) {
-        console.log('HTTP - GET: ' + uri);
+        console.log('get ' + uri);
         var _this = this;
         return new Promise((resolve, reject) => {
             var response = _this.responseForGet(uri, headers);

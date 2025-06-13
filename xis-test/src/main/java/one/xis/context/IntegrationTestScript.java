@@ -58,7 +58,7 @@ class IntegrationTestScript {
         bindings.put("window", testEnvironment.getHTML_OBJECTS().getWindow());
         bindings.put("htmlToElement", testEnvironment.getHTML_OBJECTS().getHtmlToElement());
         bindings.put("atob", testEnvironment.getHTML_OBJECTS().getAtob());
-        bindings.put("console", testEnvironment.getHTML_OBJECTS().getConsole());
+        // bindings.put("console", testEnvironment.getHTML_OBJECTS().getConsole());
         return bindings;
     }
 
@@ -70,6 +70,6 @@ class IntegrationTestScript {
         invoker.setBinding("window", testEnvironment.getHTML_OBJECTS().getWindow());
         invoker.setBinding("htmlToElement", testEnvironment.getHTML_OBJECTS().getHtmlToElement());
         invoker.setBinding("atob", testEnvironment.getHTML_OBJECTS().getAtob());
-        invoker.setBinding("console", testEnvironment.getHTML_OBJECTS().getConsole());
+        //  invoker.setBinding("console", testEnvironment.getHTML_OBJECTS().getConsole());
     }
 }
