@@ -2,6 +2,9 @@ package one.xis.security;
 
 import lombok.NonNull;
 
+
+// TODO Die interfaces sind für den User nicht sinnvoll zusammengefasst.
+// TODO Es sollte eine Interface für den LocalAuthenticationProvider geben und eines für Authentication
 public interface AuthenticationService {
     /**
      * Creates an authorization URL for the authentication provider.
@@ -38,7 +41,7 @@ public interface AuthenticationService {
      *
      * @param state
      */
-    void verifyState(@NonNull String state);
+    StateParameterPayload verifyState(@NonNull String state);
 
     /**
      * Requests tokens from the authentication provider using the provided authorization code.

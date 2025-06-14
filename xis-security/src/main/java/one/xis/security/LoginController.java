@@ -1,6 +1,5 @@
 package one.xis.security;
 
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import one.xis.*;
 import one.xis.context.XISInit;
@@ -17,6 +16,7 @@ class LoginController {
     public static final String URL = "/login";
     private final FrontendService frontendService;
     private LocalAuthentication localAuthentication;
+    private AuthenticationService authenticationService;
 
     @XISInit
     void init(List<LocalAuthentication> localAuthentications) {
@@ -28,22 +28,19 @@ class LoginController {
         };
     }
 
+    @FormData("login")
+    LoginFormData createLoginFormData(@QueryParameter("state") String state) {
+        var payload = authenticationService.verifyState(state);
+        return new LoginFormData(null, null, payload.getRedirect());
+    }
+
     @Action("login")
     public LocalLoginResponse login(@FormData("login") LoginFormData login) {
         if (localAuthentication == null) {
             throw new IllegalStateException("Local authentication is not present. This may be because no implementation of " + LocalUserInfoService.class + " is available.");
         }
         // Logic for handling login action
-        return new LocalLoginResponse(localAuthentication.login(login.username, login.password), login.redirect);
-    }
-
-    @Data
-    static class LoginFormData {
-        private String username;
-        private String password;
-        private String redirect;
-
-        // Getters and setters can be added here if needed
+        return new LocalLoginResponse(localAuthentication.login(login.getUsername(), login.getPassword()), login.getRedirect());
     }
 
 }

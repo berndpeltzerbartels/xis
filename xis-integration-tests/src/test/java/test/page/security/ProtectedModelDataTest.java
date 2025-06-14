@@ -1,4 +1,4 @@
-package test.security;
+package test.page.security;
 
 import one.xis.context.IntegrationTestContext;
 import one.xis.security.LocalUserInfo;
@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
 
 public class ProtectedModelDataTest {
 
@@ -96,11 +97,22 @@ public class ProtectedModelDataTest {
             var result = testContext.openPage("/page1.html");
             var document = result.getDocument();
             var link = document.getElementById("link");
+            System.err.println(document.asString());
+            assertThat(document.getElementByTagName("title").innerText).isEqualTo("Page 1");
+
 
             link.click();
 
+            assertThat(document.getElementByTagName("title").innerText).isEqualTo("Login");
+            assertThat(document.getElementById("redirect").getAttribute("value")).isEqualTo("/page2.html");
+
+            document.getInputElementById("username").setValue("user1");
+            document.getInputElementById("password").setValue("passwd");
+            document.getElementByTagName("button").click();
+
             assertThat(document.getElementByTagName("title").innerText).isEqualTo("Page 2");
-            assertThat(document.getElementByTagName("body").innerText.trim()).isEqualTo("xyz");
+
+
         }
     }
 

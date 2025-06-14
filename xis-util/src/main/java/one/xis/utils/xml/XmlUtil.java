@@ -84,9 +84,7 @@ public class XmlUtil {
 
     public static String asString(Element element) {
         try {
-            var result = new XmlSerializer().serialize(element);
-            Logger.info("serializer-result:" + result);
-            return result;
+            return new XmlSerializer().serialize(element);
         } catch (TransformerException e) {
             throw new RuntimeException(e);
         }

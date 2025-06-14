@@ -2,7 +2,6 @@ package one.xis.context;
 
 
 import lombok.Getter;
-import one.xis.resource.Resources;
 import one.xis.security.ApiTokenManager;
 import one.xis.security.LocalUserInfo;
 import one.xis.server.PageUtil;
@@ -10,7 +9,7 @@ import one.xis.server.PageUtil;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class IntegrationTestContext {
+public class IntegrationTestContext implements AppContext {
 
     @Getter
     private final AppContext appContext;
@@ -56,6 +55,16 @@ public class IntegrationTestContext {
         return appContext.getOptionalSingleton(type);
     }
 
+    @Override
+    public Collection<Object> getSingletons() {
+        return appContext.getSingletons();
+    }
+
+    @Override
+    public Collection<Object> getSingletons(Class<?> type) {
+        return appContext.getSingletons();
+    }
+
     private AppContext internalContext(Collection<String> packages, Object... controllers) {
         var builder = AppContextBuilder.createInstance()
                 .withXIS()
@@ -72,10 +81,6 @@ public class IntegrationTestContext {
         private final Collection<String> ignorePackages = new HashSet<>();
         private LocalUserInfo userInfo;
 
-
-        private static IntegrationTestEnvironment testSingletons;
-        private static final Resources RESOURCES = new Resources();
-
         public Builder withSingleton(Object o) {
             singletons.add(o);
             return this;
@@ -90,6 +95,7 @@ public class IntegrationTestContext {
             if (userInfo != null) {
                 addTokenCookies(userInfo, context);
             }
+            context.environment.getIntegrationTestScript().reset();
             return context;
         }
 
@@ -128,7 +134,7 @@ public class IntegrationTestContext {
             context.getOptionalSingleton(ApiTokenManager.class).ifPresent(tokenManager -> {
                 System.err.println("Creating tokens for user: " + userInfo.getUserId());
                 var tokens = tokenManager.createTokens(userInfo.getUserId(), userInfo.getRoles(), userInfo.getClaims());
-                var document = context.environment.getHTML_OBJECTS().getDocument();
+                var document = context.environment.getHtmlObjects().getDocument();
                 document.addCookie("access_token", tokens.accessToken());
                 document.addCookie("refresh_token", tokens.renewToken());
             });

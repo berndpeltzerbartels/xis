@@ -71,8 +71,8 @@ class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public void verifyState(@NonNull String state) {
-        verifyStateParameter(state);
+    public StateParameterPayload verifyState(@NonNull String state) {
+        return verifyStateParameter(state);
     }
 
     @Override

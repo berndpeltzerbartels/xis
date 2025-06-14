@@ -48,10 +48,6 @@ public class Element extends Node {
             setFirstChild(node);
         } else {
             var last = firstChild.getLastSibling();
-            System.out.println("--------------------------------------");
-            System.out.println(this.asString());
-            System.out.println("--------------------------------------");
-
             last.setNextSibling(node);
             if (last == last.nextSibling) {
                 throw new IllegalStateException();

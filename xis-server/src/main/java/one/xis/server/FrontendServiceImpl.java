@@ -31,6 +31,7 @@ public class FrontendServiceImpl implements FrontendService {
     private final Resources resources;
     private final AuthenticationProviderServices authenticationProviderServices;
     private final ApiTokenManager tokenManager;
+    private final AuthenticationService authenticationService;
     private final AppContext appContext;
     private final Collection<RequestFilter> requestFilters;
     private Resource appJsResource;
@@ -234,11 +235,11 @@ public class FrontendServiceImpl implements FrontendService {
         return authenticationData;
     }
 
-    private static ServerResponse authenticationErrorResponse(String uri) {
+    private ServerResponse authenticationErrorResponse(String uri) {
+        var state = authenticationService.createStateParameter(uri);
         var response = new ServerResponse();
         response.setStatus(401);
-        response.setNextURL("/login.html");
-        response.getFormData().put("redirect", uri);
+        response.setNextURL("/login.html?state=" + state);
         response.getValidatorMessages().getMessages().put("username", "Invalid username or password"); // TODO: i18n
         response.getValidatorMessages().getMessages().put("password", "Invalid username or password"); // TODO: i18n
         response.getValidatorMessages().getGlobalMessages().add("Invalid username or password"); // TODO: i18n

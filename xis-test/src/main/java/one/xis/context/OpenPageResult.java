@@ -12,19 +12,19 @@ public class OpenPageResult {
     private final IntegrationTestEnvironment testEnvironment;
 
     public Document getDocument() {
-        return testEnvironment.getHTML_OBJECTS().getDocument();
+        return testEnvironment.getHtmlObjects().getDocument();
     }
 
     public LocalStorage getLocalStorage() {
-        return testEnvironment.getHTML_OBJECTS().getLocalStorage();
+        return testEnvironment.getHtmlObjects().getLocalStorage();
     }
 
     public SessionStorage getSessionStorage() {
-        return testEnvironment.getHTML_OBJECTS().getSessionStorage();
+        return testEnvironment.getHtmlObjects().getSessionStorage();
     }
 
     public Window getWindow() {
-        return testEnvironment.getHTML_OBJECTS().getWindow();
+        return testEnvironment.getHtmlObjects().getWindow();
     }
 
     /*

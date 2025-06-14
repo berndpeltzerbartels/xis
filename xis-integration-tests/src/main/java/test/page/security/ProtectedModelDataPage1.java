@@ -1,4 +1,4 @@
-package test.security;
+package test.page.security;
 
 import one.xis.Page;
 

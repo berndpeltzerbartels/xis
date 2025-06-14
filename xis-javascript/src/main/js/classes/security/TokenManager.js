@@ -35,6 +35,7 @@ class TokenManager {
   }
 
     setAccessToken(token) {
+        console.log('Setting access token:', token);
         this.accessToken = token;
         const decodedToken = this.decodeToken(token);
         this.accessTokenExpiresAt = decodedToken.exp || -1;
@@ -44,6 +45,7 @@ class TokenManager {
     }
 
     setRenewToken(token) {
+        console.log('Setting renew token:', token);
         this.renewToken = token;
         const decodedToken = this.decodeToken(token);
         this.renewTokenExpiresAt = decodedToken.exp || -1;
@@ -59,8 +61,9 @@ class TokenManager {
   }
 
   reset() {
-   // this.accessToken = null;
-   // this.accessTokenExpiresAt = -1;
+    console.log('Resetting TokenManager');
+    this.accessToken = null;
+    this.accessTokenExpiresAt = -1;
     this.renewToken = null;
     this.renewTokenExpiresAt = -1;
     this.tokenAttributes = new TokenAttributes();
@@ -77,17 +80,17 @@ class TokenManager {
    */
    async actualAccessToken() {
     if (!this.accessToken) {
-      console.warn('No access token available');
+      console.log('No access token available');
       return null;
     }
     if (!this.isAccessTokenExpiring()) {
-      console.debug('Access token is still valid');
+      console.log('Access token is still valid');
       return this.accessToken;
     }
     console.warn('Access token is expiring, attempting to renew');
 
     if (this.isRenewTokenExpired()) {
-      console.warn('Renew token is expired, cannot renew access token');
+      console.log('Renew token is expired, cannot renew access token');
       return false; // Both tokens are expired
     }
     try {

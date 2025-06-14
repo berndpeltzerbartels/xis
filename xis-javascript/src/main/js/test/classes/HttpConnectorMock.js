@@ -4,14 +4,16 @@ class HttpConnectorMock {
      * @public
      * @param {string} uri
      * @param {any} payload
+     * @param {any} headers
      * @return {Promise<any,int>}
      *
      */
     post(uri, payload, headers) {
-        console.log('post: ' + uri + ' : ' + JSON.stringify(payload));
-        var _this = this;
+        this.logRequest(uri, payload, headers);
         return new Promise((resolve, reject) => {
-            var response = _this.responseForPost(uri, payload, headers);
+            console.log('----------------------------------response------------------------------------');
+            var response = this.responseForPost(uri, payload, headers);
+            this.logResponse(response);
             resolve(response);
         });
     }
@@ -23,12 +25,13 @@ class HttpConnectorMock {
      * @return {Promise<any, int>}
      */
     get(uri, headers) {
-        console.log('get ' + uri);
-        var _this = this;
+        this.logRequest(uri, {}, headers);
         return new Promise((resolve, reject) => {
-            var response = _this.responseForGet(uri, headers);
+            var response = this.responseForGet(uri, headers);
+            this.logResponse(response);
             resolve(response);
         });
+        console.log('----------------------------------------------------------------------');
     }
 
     responseForPost(uri, payload, headers) {
@@ -57,6 +60,22 @@ class HttpConnectorMock {
             case '/xis/token/renew': return backendBridge.renewApiTokens(uri, headers);
             default: throw new Error('unknown uri for http-get: ' + uri);
         }
+    }
+
+    logRequest(uri, payload, headers) {
+        console.log('---------------------------------request-------------------------------------');
+        for (var key in headers) {
+            console.log('header: ' + key + ' : ' + headers[key]);
+        }
+        console.log('post: ' + uri + ' : ' + payload);
+    }
+
+    logResponse(response) {
+        console.log('----------------------------------response------------------------------------');
+        console.log('status: ' + response.status);
+        // log headers
+        console.log('headers:', response.getAllResponseHeaders());
+        console.log('response: ' + response);
     }
 }
 

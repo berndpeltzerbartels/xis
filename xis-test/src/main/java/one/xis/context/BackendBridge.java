@@ -24,7 +24,7 @@ public class BackendBridge implements ResourcePathProvider {
     private final AppContext appContext;
 
     public BackendBridgeResponse getComponentConfig(String uri, Map<String, String> headers) {
-        return toBridgeResponse(frontendService.getConfig());
+        return toBridgeResponse(run(frontendService::getConfig));
     }
 
     public BackendBridgeResponse getPageModel(String uri, String requestJson, Map<String, String> headers) {
