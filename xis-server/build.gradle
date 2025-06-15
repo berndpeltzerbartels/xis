@@ -46,6 +46,7 @@ dependencies {
     implementation project(':xis-gson')
     implementation project(':xis-validation')
     implementation project(':xis-adapter-spi')
+    implementation project(':xis-security')
 
     // Compile-only dependencies
     compileOnly project(':xis-resources')

@@ -1,12 +1,16 @@
 class Client {
 
 
-    constructor() {
+    /**
+     * 
+     * @param {TokenManager} tokenManager 
+     */
+    constructor(tokenManager) {
         this.config = undefined;
         this.clientId = randomString();
-        this.userId = '';
         this.zoneId = timeZone();
-        this.clientState = {}
+        this.clientState = {};
+        this.tokenManager = tokenManager;
     }
 
     /**
@@ -60,10 +64,9 @@ class Client {
      * @returns {Promise<any>}
      */
     loadPageData(resolvedURL) {
-        var _this = this;
         var request = this.createPageRequest(resolvedURL, null, null);
         return this.httpConnector.post('/xis/page/model', request, {})
-            .then(response => _this.deserializeResponse(response));
+            .then(response => this.deserializeResponse(response));
     }
 
     /**
@@ -72,10 +75,9 @@ class Client {
     * @returns {Promise<ServerReponse>}
     */
     loadWidgetData(widgetInstance, widgetState) {
-        var _this = this;
         var request = this.createWidgetRequest(widgetInstance, widgetState, null, null, null);
         return this.httpConnector.post('/xis/widget/model', request)
-            .then(response => _this.deserializeResponse(response));
+            .then(response => this.deserializeResponse(response));
     }
 
     /**
@@ -126,6 +128,15 @@ class Client {
     }
 
     /**
+     * @public
+     * @param {string} renewToken
+     * @returns {Promise<TokenResponse>}
+     */
+    sendRenewTokenRequest(renewToken) {
+        throw new Error('Not implemented');
+    }
+
+    /**
      * @protected
      * @param {ResolvedURL} resolvedURL 
      * @param {string} action (nullable)
@@ -137,8 +148,8 @@ class Client {
         var normalizedPath = resolvedURL.normalizedPath;
         var request = new ClientRequest();
         request.clientId = this.clientId;
-        request.userId = this.userId;
         request.pageId = normalizedPath;
+        request.pageUrl = resolvedURL.url;
         request.action = action;
         request.formData = formData ? formData.values : {};
         request.urlParameters = resolvedURL.urlParameters;
@@ -168,9 +179,9 @@ class Client {
         var normalizedPath = resolvedURL.normalizedPath;
         var request = new ClientRequest();
         request.clientId = this.clientId;
-        request.userId = this.userId;
         request.widgetId = widgetId;
         request.pageId = normalizedPath;
+        request.pageUrl = resolvedURL.url;
         request.formBinding = formBindingKey;
         request.action = action;
         request.formData = mappedFormData;
@@ -203,7 +214,6 @@ class Client {
     createWidgetRequest(widgetInstance, widgetState, action, formData, actionParameters) {
         var request = new ClientRequest();
         request.clientId = this.clientId;
-        request.userId = this.userId;
         request.widgetId = widgetInstance.widget.id;
         request.action = action;
         request.formData = formData ? formData.values : {};
@@ -226,7 +236,6 @@ class Client {
     clientStateDataPage(pageId) {
         return this.clientStateData(this.config.pageAttributes[pageId]);
     }
-
 
     clientStateDataWidget(widgetId) {
         return this.clientStateData(this.config.widgetAttributes[widgetId]);
@@ -297,7 +306,7 @@ class Client {
         var serverResponse = new ServerResponse();
         serverResponse.data = data;
         serverResponse.formData = formData;
-        serverResponse.nextPageURL = obj.nextPageURL;
+        serverResponse.nextURL = obj.nextURL;
         serverResponse.nextWidgetId = obj.nextWidgetId;
         serverResponse.status = response.status;
         serverResponse.validatorMessages = new ValidatorMessages(obj.validatorMessages);
@@ -321,13 +330,20 @@ class Client {
     }
 
     storeLocalStorageData(localStorageData) {
+        if (!localStorageData) {
+            return;
+        }
         app.localStorage.saveData(localStorageData);
     }
 
     storeClientStateData(clientStateData) {
+
         app.clientState.saveData(clientStateData);
     }
     storeLocalDatabaseData(localDatabaseData) {
+        if (!localDatabaseData) {
+            return;
+        }
         // TODO create and configure db
         for (var key of Object.keys(localDatabaseData)) {
             this.localDatabase.setItem(key, localDatabaseData[key]);

@@ -86,7 +86,7 @@ class ActionLinkHandler extends TagHandler {
 
 
     handleActionResponse(response, targetContainerHandler) {
-        if (response.nextPageURL) {
+        if (response.nextURL) {
             app.pageController.handleActionResponse(response);
         } else {
             targetContainerHandler.handleActionResponse(response);

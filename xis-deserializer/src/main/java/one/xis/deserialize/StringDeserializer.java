@@ -8,6 +8,7 @@ import one.xis.context.XISComponent;
 import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 @XISComponent
 class StringDeserializer implements JsonDeserializer<String> {
@@ -24,7 +25,7 @@ class StringDeserializer implements JsonDeserializer<String> {
                                         MainDeserializer mainDeserializer,
                                         PostProcessingResults results) throws IOException {
         try {
-            return Optional.of(reader.nextString());
+            return Optional.ofNullable(reader.nextString()).filter(Predicate.not(String::isEmpty));
         } catch (IOException e) {
             throw new DeserializationException(e, null);
         }

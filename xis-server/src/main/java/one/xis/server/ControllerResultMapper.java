@@ -9,8 +9,11 @@ import java.util.stream.Collectors;
 class ControllerResultMapper {
 
     void mapMethodResultToControllerResult(ControllerMethodResult controllerMethodResult, ControllerResult controllerResult) {
-        if (controllerMethodResult.getNextPageURL() != null) {
-            controllerResult.setNextPageURL(controllerMethodResult.getNextPageURL());
+        if (controllerMethodResult.getNextURL() != null) {
+            controllerResult.setNextURL(controllerMethodResult.getNextURL());
+        }
+        if (controllerMethodResult.getNextPageId() != null) {
+            controllerResult.setNextPageId(controllerMethodResult.getNextPageId());
         }
         if (controllerMethodResult.getNextWidgetId() != null) {
             controllerResult.setNextWidgetId(controllerMethodResult.getNextWidgetId());
@@ -18,6 +21,7 @@ class ControllerResultMapper {
         if (controllerMethodResult.getWidgetContainerId() != null) {
             controllerResult.setWidgetContainerId(controllerMethodResult.getWidgetContainerId());
         }
+        controllerResult.setTokens(controllerMethodResult.getTokens());
         controllerResult.getModelData().putAll(controllerMethodResult.getModelData());
         controllerResult.getFormData().putAll(controllerMethodResult.getFormData());
         controllerResult.getBindingParameters().putAll(controllerMethodResult.getWidgetParameters());
@@ -35,7 +39,7 @@ class ControllerResultMapper {
     }
 
     void mapControllerResultToNextRequest(ControllerResult controllerResult, ClientRequest nextRequest) {
-        nextRequest.setUrlParameters(controllerResult.getUrlParameters().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString())));
+        nextRequest.getUrlParameters().putAll(controllerResult.getUrlParameters().entrySet().stream().map(e -> Map.entry(e.getKey(), e.getValue().toString())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
         nextRequest.setPathVariables(controllerResult.getPathVariables().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString())));
         nextRequest.setWidgetContainerId(controllerResult.getWidgetContainerId());
         nextRequest.setBindingParameters(controllerResult.getBindingParameters().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString())));

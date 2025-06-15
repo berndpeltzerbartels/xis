@@ -3,8 +3,9 @@ package one.xis.server;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import one.xis.Widget;
+import one.xis.security.AccessToken;
+import one.xis.security.AuthenticationException;
 import one.xis.validation.ValidatorMessages;
-import org.tinylog.Logger;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -32,20 +33,20 @@ public class ControllerWrapper {
     private Collection<ControllerMethod> clientStateOnlyMethods;
     private ControllerResultMapper controllerResultMapper;
 
-    void invokeGetModelMethods(ClientRequest request, ControllerResult controllerResult) {
+    void invokeGetModelMethods(ClientRequest request, ControllerResult controllerResult, AccessToken accessToken) {
         var methodsToExecute = new ArrayList<>(modelMethods);
         methodsToExecute.addAll(localStorageOnlyMethods);
         methodsToExecute.addAll(clientStateOnlyMethods);
         var methods = RequestScopeSorter.sortMethods(methodsToExecute, requestScopeMethods);
-        methods.forEach(m -> invokeModelDataMethod(request, controllerResult, m));
+        methods.forEach(m -> invokeModelDataMethod(request, controllerResult, m, accessToken));
     }
 
-    void invokeFormDataMethods(ClientRequest request, ControllerResult controllerResult) {
+    void invokeFormDataMethods(ClientRequest request, ControllerResult controllerResult, AccessToken accessToken) {
         var methods = RequestScopeSorter.sortMethods(formDataMethods, requestScopeMethods);
-        methods.forEach(m -> invokeModelDataMethod(request, controllerResult, m));
+        methods.forEach(m -> invokeModelDataMethod(request, controllerResult, m, accessToken));
     }
 
-    void invokeActionMethod(ClientRequest request, ControllerResult controllerResult) {
+    void invokeActionMethod(ClientRequest request, ControllerResult controllerResult, AccessToken accessToken) {
         var method = actionMethods.get(request.getAction());
         if (method == null) {
             throw new RuntimeException("No action-method found for action " + request.getAction() + " in controller " + controller.getClass().getName());
@@ -53,9 +54,9 @@ public class ControllerWrapper {
         var methods = RequestScopeSorter.sortMethods(Set.of(method), requestScopeMethods);
         methods.forEach(m -> {
             if (m.equals(method)) {
-                invokeActionMethod(request, controllerResult, m);
+                invokeActionMethod(request, controllerResult, m, accessToken);
             } else {
-                invokeModelDataMethod(request, controllerResult, m); // TODO Schrott ?
+                invokeModelDataMethod(request, controllerResult, m, accessToken); // TODO Schrott ?
             }
         });
     }
@@ -64,37 +65,35 @@ public class ControllerWrapper {
         return controller.getClass().isAnnotationPresent(Widget.class);
     }
 
-    boolean isPageController() {
-        return !isWidgetController();
-    }
-
     Class<?> getControllerClass() {
         return controller.getClass();
     }
 
-    private void invokeModelDataMethod(ClientRequest request, ControllerResult controllerResult, ControllerMethod method) {
+    private void invokeModelDataMethod(ClientRequest request, ControllerResult controllerResult, ControllerMethod method, AccessToken accessToken) {
         try {
-            var controllerMethodResult = method.invoke(request, controller, controllerResult.getRequestScope());
+            var controllerMethodResult = method.invoke(request, controller, controllerResult.getRequestScope(), accessToken);
             if (controllerMethodResult.isValidationFailed()) {
                 // these validation errors are unexpected, so we throw an exception
                 throw exceptionForValidationErrors(controllerMethodResult.getValidatorMessages());
             }
             controllerResultMapper.mapMethodResultToControllerResult(controllerMethodResult, controllerResult);
+        } catch (AuthenticationException e) {
+            throw e; // rethrow authentication exceptions to be handled by the server
         } catch (Exception e) {
-            Logger.error(e, "Failed to invoke model-method");
             throw new RuntimeException("Failed to invoke model-method " + method, e);
         }
     }
 
-    private void invokeActionMethod(ClientRequest request, ControllerResult controllerResult, ControllerMethod method) {
+    private void invokeActionMethod(ClientRequest request, ControllerResult controllerResult, ControllerMethod method, AccessToken accessToken) {
         if (method == null) {
             throw new RuntimeException("No action-method found for action " + request.getAction());
         }
         try {
-            var controllerMethodResult = method.invoke(request, controller, controllerResult.getRequestScope());
+            var controllerMethodResult = method.invoke(request, controller, controllerResult.getRequestScope(), accessToken);
             controllerResultMapper.mapMethodResultToControllerResult(controllerMethodResult, controllerResult);
+        } catch (AuthenticationException e) {
+            throw e;
         } catch (Exception e) {
-            Logger.error(e, "Failed to invoke action-method");
             throw new RuntimeException("Failed to invoke action-method: " + method, e);
         }
     }

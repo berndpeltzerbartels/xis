@@ -33,6 +33,13 @@ class ArrayParam implements Param, MultiValueConsumer {
     }
 
     @Override
+    public void decrementProducerCount() {
+        if (producerCount.decrementAndGet() == 0) {
+            parentProducer.doNotify();
+        }
+    }
+
+    @Override
     public boolean isConsumerFor(Class<?> c) {
         return componentType.isAssignableFrom(c);
     }

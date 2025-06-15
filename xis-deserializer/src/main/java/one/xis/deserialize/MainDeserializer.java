@@ -47,7 +47,7 @@ public class MainDeserializer {
         if (reader.peek().equals(JsonToken.NULL)) {
             reader.nextNull();
             if (target.isAnnotationPresent(Mandatory.class)) {
-                var context = new DeserializationContext(path, target, Mandatory.class, UserContext.getInstance());
+                var context = new DeserializationContext(path, target, Mandatory.class, userContext);
                 postProcessingResults.add(new InvalidValueError(context, MISSING_MANDATORY_PROPERTY.getMessageKey(), MISSING_MANDATORY_PROPERTY.getGlobalMessageKey(), null));
             }
             return Optional.empty();
@@ -58,7 +58,7 @@ public class MainDeserializer {
             value.ifPresent(o -> deserializationPostProcessing.postProcess(path, o, target, userContext, postProcessingResults));
             return value;
         } catch (DeserializationException e) {
-            var context = new DeserializationContext(path, target, NoAnnotation.class, UserContext.getInstance());
+            var context = new DeserializationContext(path, target, NoAnnotation.class, userContext);
             postProcessingResults.add(new InvalidValueError(context, CONVERSION_ERROR.getMessageKey(), CONVERSION_ERROR.getGlobalMessageKey(), e.getUserInput()));
             return Optional.empty();
         }

@@ -59,10 +59,10 @@ class CollectionDeserializer implements JsonDeserializer<Collection> {
             index++;
         }
         if (deserialiaztionFailed) {
-            handleDeserializationError(collection, path, target, postProcessingResults);
+            handleDeserializationError(collection, path, target, postProcessingResults, userContext);
         }
         reader.endArray();
-        checkMandatory(collection, target, postProcessingResults, path);
+        checkMandatory(collection, target, postProcessingResults, path, userContext);
         return Optional.of(collection);
     }
 
@@ -71,15 +71,15 @@ class CollectionDeserializer implements JsonDeserializer<Collection> {
         return DeserializerPriority.FRAMEWORK_HIGHEST;
     }
 
-    private void checkMandatory(Collection<?> collection, AnnotatedElement target, PostProcessingResults postProcessingResults, String path) {
+    private void checkMandatory(Collection<?> collection, AnnotatedElement target, PostProcessingResults postProcessingResults, String path, UserContext userContext) {
         if (target.isAnnotationPresent(Mandatory.class) && collection.isEmpty()) {
-            var context = new DeserializationContext(path, target, Mandatory.class, UserContext.getInstance());
+            var context = new DeserializationContext(path, target, Mandatory.class, userContext);
             postProcessingResults.add(new InvalidValueError(context, MISSING_MANDATORY_PROPERTY.getMessageKey(), MISSING_MANDATORY_PROPERTY.getGlobalMessageKey(), collection));
         }
     }
 
-    private void handleDeserializationError(Collection<?> values, String path, AnnotatedElement target, PostProcessingResults postProcessingResults) {
-        var context = new DeserializationContext(path, target, NoAnnotation.class, UserContext.getInstance());
+    private void handleDeserializationError(Collection<?> values, String path, AnnotatedElement target, PostProcessingResults postProcessingResults, UserContext userContext) {
+        var context = new DeserializationContext(path, target, NoAnnotation.class, userContext);
         postProcessingResults.add(new InvalidValueError(context, CONVERSION_ERROR.getMessageKey(), CONVERSION_ERROR.getGlobalMessageKey(), values));
     }
 

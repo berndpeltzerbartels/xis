@@ -16,6 +16,8 @@ public class Document {
 
     public Location location = new Location();
 
+    public String cookie = "";
+
     public Document(String rootTagName) {
         this(new Element(rootTagName));
     }
@@ -96,5 +98,13 @@ public class Document {
 
     public static Document of(String html) {
         return DocumentBuilder.build(html);
+    }
+
+    public void addCookie(String name, String value) {
+        if (cookie.isEmpty()) {
+            cookie = name + "=" + value;
+        } else {
+            cookie += "; " + name + "=" + value;
+        }
     }
 }

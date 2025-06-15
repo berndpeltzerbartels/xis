@@ -19,7 +19,7 @@ public class DOMStringList {
     }
 
     /**
-     * Returns true if token is present, and false otherwise.
+     * Returns true if accessToken is present, and false otherwise.
      * <p>
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/DOMTokenList/contains)
      */
@@ -28,7 +28,7 @@ public class DOMStringList {
     }
 
     /**
-     * Returns the token with index index.
+     * Returns the accessToken with index index.
      * <p>
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/DOMTokenList/item)
      */

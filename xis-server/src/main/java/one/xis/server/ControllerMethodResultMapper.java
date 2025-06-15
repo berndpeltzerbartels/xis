@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import one.xis.*;
 import one.xis.context.XISComponent;
 import one.xis.deserialize.PostProcessingResult;
+import one.xis.security.LocalLoginResponse;
 import one.xis.validation.ValidatorMessageResolver;
 
 import java.lang.reflect.Method;
@@ -14,11 +15,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.emptyMap;
+
 @XISComponent
 @RequiredArgsConstructor
 class ControllerMethodResultMapper {
 
     private final ValidatorMessageResolver validatorMessageResolver;
+    private final PathResolver pathResolver;
 
     void mapReturnValueToResult(ControllerMethodResult controllerMethodResult, Method method, Object returnValue, Map<String, Object> requestScope) {
         if (returnValue instanceof PageResponse pageResponse) {
@@ -26,7 +30,10 @@ class ControllerMethodResultMapper {
         } else if (returnValue instanceof WidgetResponse widgetResponse) {
             mapWidgetResponse(widgetResponse, controllerMethodResult);
         } else if (returnValue instanceof Class<?> controllerClass) {
-            updateControllerClass(controllerMethodResult, controllerClass);
+            updateController(controllerMethodResult, controllerClass, emptyMap());
+        } else if (returnValue instanceof LocalLoginResponse loginResponse) {
+            controllerMethodResult.setTokens(loginResponse.getTokens());
+            controllerMethodResult.setNextURL(loginResponse.getRedirectUrl());
         }
         if (method.isAnnotationPresent(ModelData.class)) {
             mapModelResult(method.getAnnotation(ModelData.class).value(), returnValue, controllerMethodResult);
@@ -78,7 +85,7 @@ class ControllerMethodResultMapper {
 
     private void mapWidgetResponse(WidgetResponse widgetResponse, ControllerMethodResult result) {
         if (widgetResponse.getControllerClass() != null) {
-            updateControllerClass(result, widgetResponse.getControllerClass());
+            updateController(result, widgetResponse.getControllerClass(), emptyMap());
         }
         if (widgetResponse.getTargetContainer() != null) {
             result.setWidgetContainerId(widgetResponse.getTargetContainer());
@@ -90,12 +97,12 @@ class ControllerMethodResultMapper {
         if (widgetResponse.getWidgetParameters() != null) {
             result.getWidgetParameters().putAll(widgetResponse.getWidgetParameters());
         }
-        
+
     }
 
     private void mapPageResponse(PageResponse pageResponse, ControllerMethodResult controllerMethodResult) {
         if (pageResponse.getControllerClass() != null) {
-            updateControllerClass(controllerMethodResult, pageResponse.getControllerClass());
+            updateController(controllerMethodResult, pageResponse.getControllerClass(), pageResponse.getPathVariables());
         }
         if (pageResponse.getPathVariables() != null) {
             controllerMethodResult.getPathVariables().putAll(pageResponse.getPathVariables());
@@ -103,15 +110,16 @@ class ControllerMethodResultMapper {
         if (pageResponse.getUrlParameters() != null) {
             controllerMethodResult.getUrlParameters().putAll(pageResponse.getUrlParameters());
         }
-
     }
 
-
-    private void updateControllerClass(@NonNull ControllerMethodResult result, @NonNull Class<?> controllerClass) {
+    private void updateController(@NonNull ControllerMethodResult result, @NonNull Class<?> controllerClass, Map<String, Object> pathVariables) {
         if (controllerClass.isAnnotationPresent(Widget.class)) {
             result.setNextWidgetId(WidgetUtil.getId(controllerClass));
         } else if (controllerClass.isAnnotationPresent(Page.class)) {
-            result.setNextPageURL(PageUtil.getUrl(controllerClass));
+            var realPath = pathResolver.createPath(PageUtil.getUrl(controllerClass));
+            var pathString = pathResolver.evaluateRealPath(realPath, pathVariables, emptyMap());
+            result.setNextURL(pathString);
+            result.setNextPageId(realPath.normalized());
         } else {
             throw new IllegalStateException("not a widget-controller or page-controller:" + controllerClass);
         }

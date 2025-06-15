@@ -1,33 +1,16 @@
 package one.xis;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.time.ZoneId;
 import java.util.Locale;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class UserContext {
+public interface UserContext {
 
-    static ThreadLocal<UserContext> instance = ThreadLocal.withInitial(UserContext::new);
 
-    private Locale locale;
-    private ZoneId zoneId;
-    private String userId;
-    private String clientId;
+    Locale getLocale();
 
-    public static UserContext getInstance() {
-        return instance.get();
-    }
+    String getUserId();
 
-    static void setInstance(UserContext context) {
-        instance.set(context);
-    }
+    ZoneId getZoneId();
 
-    static void removeInstance() {
-        instance.remove();
-    }
+    String getClientId();
 }

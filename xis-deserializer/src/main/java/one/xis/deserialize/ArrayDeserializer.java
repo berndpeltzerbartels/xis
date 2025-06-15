@@ -56,9 +56,9 @@ class ArrayDeserializer implements JsonDeserializer<Object> {
             index++;
         }
         if (deserializationFailed) {
-            handleDeserializationError(list, path, target, postProcessingResults);
+            handleDeserializationError(list, path, target, postProcessingResults, userContext);
         }
-        checkMandatory(list, target, postProcessingResults, path);
+        checkMandatory(list, target, postProcessingResults, path, userContext);
         return Optional.of(toArray(list, componentType));
     }
 

@@ -15,11 +15,12 @@ class IntegrationTestScript {
 
     private final IntegrationTestEnvironment testEnvironment;
     private final String script;
-    private static IntegrationTestFunctions integrationTestFunctions;
+    private final IntegrationTestFunctions integrationTestFunctions;
 
     IntegrationTestScript(IntegrationTestEnvironment testEnvironment) {
         this.testEnvironment = testEnvironment;
         this.script = testScript();
+        this.integrationTestFunctions = createIntegrationTestFunctions();
     }
 
     private String testScript() {
@@ -30,44 +31,45 @@ class IntegrationTestScript {
         return getIntegrationTestFunctions().getInvoker();
     }
 
-    private IntegrationTestFunctions getIntegrationTestFunctions() {
-        if (integrationTestFunctions == null) {
-            integrationTestFunctions = createIntegrationTestFunctions();
-        } else {
-            integrationTestFunctions.getReset().execute();
-            updateBindings(integrationTestFunctions.getInvoker());
-        }
-        return integrationTestFunctions;
+    void reset() {
+        var resetFunction = getIntegrationTestFunctions().getReset();
+        updateBindings(resetFunction);
+        resetFunction.execute();
     }
+
 
     private IntegrationTestFunctions createIntegrationTestFunctions() {
         var context = JSUtil.context(createBindings());
         var value = JSUtil.execute(script, context);
         var invoker = new JavascriptFunctionContext(value.getArrayElement(0), context);
         var reset = new JavascriptFunctionContext(value.getArrayElement(1), context);
-        return new IntegrationTestFunctions(invoker, reset);
+        var setAccessToken = new JavascriptFunctionContext(value.getArrayElement(2), context);
+        var setRenewToken = new JavascriptFunctionContext(value.getArrayElement(3), context);
+        return new IntegrationTestFunctions(invoker, reset, setAccessToken, setRenewToken);
 
     }
 
     private Map<String, Object> createBindings() {
         var bindings = new HashMap<String, Object>();
         bindings.put("backendBridge", testEnvironment.getBackendBridge());
-        bindings.put("localStorage", testEnvironment.getHTML_OBJECTS().getLocalStorage());
-        bindings.put("sessionStorage", testEnvironment.getHTML_OBJECTS().getSessionStorage());
-        bindings.put("document", testEnvironment.getHTML_OBJECTS().getRootPage());
-        bindings.put("window", testEnvironment.getHTML_OBJECTS().getWindow());
-        bindings.put("htmlToElement", testEnvironment.getHTML_OBJECTS().getHtmlToElement());
-        bindings.put("console", testEnvironment.getHTML_OBJECTS().getConsole());
+        bindings.put("localStorage", testEnvironment.getHtmlObjects().getLocalStorage());
+        bindings.put("sessionStorage", testEnvironment.getHtmlObjects().getSessionStorage());
+        bindings.put("document", testEnvironment.getHtmlObjects().getDocument());
+        bindings.put("window", testEnvironment.getHtmlObjects().getWindow());
+        bindings.put("htmlToElement", testEnvironment.getHtmlObjects().getHtmlToElement());
+        bindings.put("atob", testEnvironment.getHtmlObjects().getAtob());
+        // bindings.put("console", testEnvironment.getHTML_OBJECTS().getConsole());
         return bindings;
     }
 
     private void updateBindings(JavascriptFunction invoker) {
         invoker.setBinding("backendBridge", testEnvironment.getBackendBridge());
-        invoker.setBinding("localStorage", testEnvironment.getHTML_OBJECTS().getLocalStorage());
-        invoker.setBinding("sessionStorage", testEnvironment.getHTML_OBJECTS().getSessionStorage());
-        invoker.setBinding("document", testEnvironment.getHTML_OBJECTS().getRootPage());
-        invoker.setBinding("window", testEnvironment.getHTML_OBJECTS().getWindow());
-        invoker.setBinding("htmlToElement", testEnvironment.getHTML_OBJECTS().getHtmlToElement());
-        invoker.setBinding("console", testEnvironment.getHTML_OBJECTS().getConsole());
+        invoker.setBinding("localStorage", testEnvironment.getHtmlObjects().getLocalStorage());
+        invoker.setBinding("sessionStorage", testEnvironment.getHtmlObjects().getSessionStorage());
+        invoker.setBinding("document", testEnvironment.getHtmlObjects().getDocument());
+        invoker.setBinding("window", testEnvironment.getHtmlObjects().getWindow());
+        invoker.setBinding("htmlToElement", testEnvironment.getHtmlObjects().getHtmlToElement());
+        invoker.setBinding("atob", testEnvironment.getHtmlObjects().getAtob());
+        //  invoker.setBinding("console", testEnvironment.getHTML_OBJECTS().getConsole());
     }
 }

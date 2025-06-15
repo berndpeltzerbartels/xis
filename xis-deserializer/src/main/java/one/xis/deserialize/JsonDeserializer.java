@@ -10,6 +10,7 @@ import one.xis.validation.Mandatory;
 import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
+import java.lang.reflect.RecordComponent;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,6 +48,9 @@ public interface JsonDeserializer<T> extends Comparable<JsonDeserializer<?>> {
         if (target instanceof Class<?> classTarget) {
             return classTarget;
         }
+        if (target instanceof RecordComponent) {
+            return ((RecordComponent) target).getType();
+        }
         throw new IllegalArgumentException("Unsupported target type: " + target.getClass());
     }
 
@@ -60,15 +64,15 @@ public interface JsonDeserializer<T> extends Comparable<JsonDeserializer<?>> {
     }
 
 
-    default void checkMandatory(List<?> values, AnnotatedElement target, PostProcessingResults postProcessingResults, String path) {
+    default void checkMandatory(List<?> values, AnnotatedElement target, PostProcessingResults postProcessingResults, String path, UserContext userContext) {
         if (target.isAnnotationPresent(Mandatory.class) && values.isEmpty()) {
-            var context = new DeserializationContext(path, target, Mandatory.class, UserContext.getInstance());
+            var context = new DeserializationContext(path, target, Mandatory.class, userContext);
             postProcessingResults.add(new InvalidValueError(context, MISSING_MANDATORY_PROPERTY.getMessageKey(), MISSING_MANDATORY_PROPERTY.getGlobalMessageKey(), values));
         }
     }
 
-    default void handleDeserializationError(List<?> values, String path, AnnotatedElement target, PostProcessingResults postProcessingResults) {
-        var context = new DeserializationContext(path, target, NoAnnotation.class, UserContext.getInstance());
+    default void handleDeserializationError(List<?> values, String path, AnnotatedElement target, PostProcessingResults postProcessingResults, UserContext userContext) {
+        var context = new DeserializationContext(path, target, NoAnnotation.class, userContext);
         postProcessingResults.add(new InvalidValueError(context, CONVERSION_ERROR.getMessageKey(), CONVERSION_ERROR.getGlobalMessageKey(), values));
     }
 

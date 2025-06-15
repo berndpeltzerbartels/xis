@@ -5,11 +5,7 @@ function main() {
     app.start();
 
     // backward-button
-    window.addEventListener('popstate', function (event) {
-        if (event.state) {
-            app.pageController.displayPageForUrl(event.target.location.pathname);
-        }
-    });
+    window.addEventListener('popstate', event => app.history.onPopState(event));
 
 }
 

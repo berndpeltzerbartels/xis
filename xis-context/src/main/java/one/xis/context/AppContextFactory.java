@@ -168,7 +168,7 @@ class AppContextFactory implements SingletonCreationListener {
                 singletonProducers.add(singletonMethod);
             }
             if (!singletonMethod.getReturnType().equals(Void.TYPE) && !singletonMethod.getReturnType().equals(Void.class)) {
-                evaluate(new SingletonWrapper(singletonMethod.getReturnType()));
+                evaluate(new SingletonWrapper(singletonMethod.getSingletonClass()));
             }
         });
     }

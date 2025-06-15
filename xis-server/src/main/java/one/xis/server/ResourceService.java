@@ -2,12 +2,14 @@ package one.xis.server;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import one.xis.DefaultHtmlFile;
 import one.xis.HtmlFile;
 import one.xis.Page;
 import one.xis.Widget;
 import one.xis.context.XISComponent;
 import one.xis.context.XISInit;
 import one.xis.context.XISInject;
+import one.xis.resource.NoSuchResourceException;
 import one.xis.resource.Resource;
 import one.xis.resource.ResourceCache;
 import one.xis.resource.Resources;
@@ -20,8 +22,6 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static one.xis.server.PageUtil.getJavascriptResourcePath;
 
 @XISComponent
 @RequiredArgsConstructor
@@ -41,7 +41,6 @@ class ResourceService {
 
     private Map<String, Resource> widgetHtmlResources;
     private Map<String, Resource> pageHtmlResources;
-    private final Map<String, Resource> pageJavascriptResources = new HashMap<>();
     private ResourceCache<String> pageBodyResourceCache;
     private ResourceCache<String> pageHeadResourceCache;
     private ResourceCache<Map<String, String>> pageAttributesResourceCache;
@@ -55,12 +54,6 @@ class ResourceService {
     void initPageResources() {
         pageHtmlResources = pageControllers.stream()
                 .collect(Collectors.toMap(pathResolver::normalizedPath, this::htmlResource));
-        pageControllers.forEach(pageController -> {
-            var path = getJavascriptResourcePath(pageController);
-            if (resources.exists(path)) {
-                pageJavascriptResources.put(PageUtil.getJavascriptResourcePath(pageController), resources.getByPath(path));
-            }
-        });
         pageHeadResourceCache = new ResourceCache<>(this::extractPageHead, pageHtmlResources);
         pageBodyResourceCache = new ResourceCache<>(this::extractPageBody, pageHtmlResources);
         pageAttributesResourceCache = new ResourceCache<>(this::extractBodyAttributes, pageHtmlResources);
@@ -77,11 +70,6 @@ class ResourceService {
 
     String getPage(String id) {
         return pageHtmlResources.get(id).getContent();
-    }
-
-    String getJavascript(String path) {
-        var id = path.substring("/xis/page/javascript/".length());
-        return pageJavascriptResources.get(id).getContent();
     }
 
     String getPageHead(String id) {
@@ -134,11 +122,17 @@ class ResourceService {
         var templateDoc = DocumentHelper.createDocument();
         var templateElement = DocumentHelper.createElement("xis:template");
         templateDoc.add(templateElement);
-        ((List<Node>) element.elements())
-                .forEach(e -> {
-                    element.remove(e);
-                    templateElement.add(e);
-                });
+
+        List<Node> children = new ArrayList<>(element.content()); // nicht element.elements()
+        for (Node child : children) {
+            element.remove(child);
+            if (child instanceof org.dom4j.Text textNode) {
+                if (textNode.getText().trim().isEmpty()) {
+                    continue; // remove empty text nodes
+                }
+            }
+            templateElement.add(child);
+        }
         return serialize(templateElement);
     }
 
@@ -159,14 +153,13 @@ class ResourceService {
 
 
     private Resource htmlResource(Object controller) {
-        return resources.getByPath(getHtmlTemplatePath(controller));
-    }
-
-    private Optional<Resource> getJavascriptResource(Object pageController) {
         try {
-            return Optional.of(resources.getByPath(getJavascriptResourcePath(pageController)));
-        } catch (Exception e) {
-            return Optional.empty();
+            return resources.getByPath(getHtmlTemplatePath(controller));
+        } catch (NoSuchResourceException e) {
+            if (!controller.getClass().isAnnotationPresent(DefaultHtmlFile.class)) {
+                throw new RuntimeException("Failed to load HTML template for controller: " + controller.getClass().getName(), e);
+            }
+            return resources.getByPath(controller.getClass().getAnnotation(DefaultHtmlFile.class).value());
         }
     }
 

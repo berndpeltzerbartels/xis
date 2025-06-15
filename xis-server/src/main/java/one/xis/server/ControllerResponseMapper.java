@@ -10,11 +10,7 @@ class ControllerResponseMapper {
     private final PathResolver pathResolver;
 
     void mapResultToResponse(ServerResponse response, ControllerResult result) {
-        if (result.getNextPageURL() != null) {
-            var path = pathResolver.createPath(result.getNextPageURL());
-            var pathString = pathResolver.evaluateRealPath(path, result.getPathVariables(), result.getUrlParameters());
-            response.setNextPageURL(pathString);
-        }
+        response.setNextURL(result.getNextURL());
         response.setData(result.getModelData());
         response.setFormData(result.getFormData());
         response.setNextWidgetId(result.getNextWidgetId());
@@ -24,6 +20,7 @@ class ControllerResponseMapper {
         response.setReloadWidgets(result.getWidgetsToReload());
         response.getClientStateData().putAll(result.getClientState());
         response.getLocalStorageData().putAll(result.getLocalStorage());
+        response.setTokens(result.getTokens());
         // TODO navigation test. reload widgets ? set widget in another container ?
     }
 }

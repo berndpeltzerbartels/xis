@@ -47,9 +47,8 @@ class PageController {
      * @returns {Promise<void>}
      */
     submitPageLinkAction(action, actionParameters) {
-        var _this = this;
         return this.client.pageLinkAction(this.resolvedURL, action, actionParameters)
-            .then(response => _this.handleActionResponse(response));
+            .then(response => this.handleActionResponse(response));
     }
 
     /**
@@ -65,24 +64,8 @@ class PageController {
    * @returns {Promise<void>}
    */
     submitFormAction(action, formData) {
-        var _this = this;
         return this.client.pageAction(this.resolvedURL, formData, action, {})
-            .then(response => _this.handleActionResponse(response));
-    }
-
-    handleActionResponse(response) {
-        switch (response.status) {
-            case 200:
-                this.handleActionResponseOK(response);
-                break;
-            case 204:
-                this.handleActionResponseNoContent(response);
-                break;
-            case 422:
-                this.handleActionResponseUnprocessableEntity(response);
-            default:
-                throw new Error('status: ' + response.status);
-        }
+            .then(response => this.handleActionResponse(response));
     }
 
     /**
@@ -91,18 +74,10 @@ class PageController {
      * @public
      * @param {ServerResponse} response
      */
-    handleActionResponseOK(response) {
-        if (response.nextPageURL) {
-            var resolvedURL = this.urlResolver.resolve(response.nextPageURL);
-            if (!resolvedURL) {
-                throw new Error('no page for ' + response.nextPageURL);
-            }
-            this.resolvedURL = resolvedURL;
-            if (resolvedURL.page != this.page) {
-                this.page = resolvedURL.page;
-                this.htmlTagHandler.unbindPage();
-                this.htmlTagHandler.bindPage(resolvedURL.page);
-            }
+    handleActionResponse(response) {
+        this.handleActionResponseNoContent(response);
+        if (response.status == 204) {
+            return;
         }
         var data = response.data;
         data.scope = 'TREE';
@@ -111,16 +86,20 @@ class PageController {
 
     triggerPageReload(response) {
         var data = response.data;
-        data.scope = 'CONTROLER';
+        data.scope = 'CONTROLLER';
         this.doRefresh(response);
     }
 
+    /**
+     * 
+     * @param {Datas} data 
+     */
     doRefresh(data) {
         data.setValue(['pathVariables'], this.resolvedURL.pathVariablesAsMap());
         data.setValue(['urlParameters'], this.resolvedURL.urlParameters);
         this.page.data = data;
         this.htmlTagHandler.refresh(this.page.data);
-        this.updateHistory(this.resolvedURL);
+        //this.updateHistory(this.resolvedURL);
     }
 
     triggerAdditionalReloads(response) {
@@ -136,10 +115,10 @@ class PageController {
      * @param {ServerResponse} response
      */
     handleActionResponseNoContent(response) {
-        if (response.nextPageURL) {
-            var resolvedURL = this.urlResolver.resolve(response.nextPageURL);
+        if (response.nextURL) {
+            var resolvedURL = this.urlResolver.resolve(response.nextURL);
             if (!resolvedURL) {
-                throw new Error('no page for ' + response.nextPageURL);
+                throw new Error('no page for ' + response.nextURL);
             }
             this.resolvedURL = resolvedURL;
             if (resolvedURL.page != this.page) {
@@ -148,57 +127,71 @@ class PageController {
                 this.htmlTagHandler.bindPage(resolvedURL.page);
             }
         }
-        this.updateHistory(this.resolvedURL);
+        if (response.status < 300) {
+            this.updateHistory(this.resolvedURL);
+        }
     }
 
-
-    /**
-     * Handels server-response after submitting an action.
-     *  @public
-     * @param {ServerResponse} response
-     * @returns {Promise<void>}
-     *  
-     * */
-    handleActionResponseUnprocessableEntity(response) {
-
-    }
 
     getData() {
         return this.page ? this.page.data : undefined;
     }
 
+
     /**
-     * Displays page by it's location from
-     * browser's address-field.
+     * Displays a page from a given URL.
+     * Optionally skips browser history update (used e.g. for popstate navigation).
      * 
-     * @public
-     * @param {string} realUrl url from address-line
+     * @param {string} realUrl
+     * @param {boolean} [skipHistoryUpdate=false]
+     * @returns {Promise<void>}
      */
-    displayPageForUrl(realUrl) {
-        this.resolvedURL = this.urlResolver.resolve(realUrl);
-        if (!this.resolvedURL) {
-            this.resolvedURL = this.welcomePageUrl();
+    /**
+   * Displays a page from a given URL.
+   * Optionally skips browser history update (used e.g. for popstate navigation).
+   *
+   * @param {string} realUrl
+   * @param {boolean} [skipHistoryUpdate=false]
+   * @returns {Promise<void>}
+   */
+    displayPageForUrl(realUrl, skipHistoryUpdate = false) {
+        const resolved = this.urlResolver.resolve(realUrl) || this.welcomePageUrl();
+        if (!resolved) {
+            throw new Error("Cannot resolve URL: " + realUrl);
         }
-        if (!this.resolvedURL) throw new Error('no page for url: ' + realUrl);
-        if (this.resolvedURL.page != this.page) {
-            this.htmlTagHandler.unbindPage();
-            this.htmlTagHandler.bindPage(this.resolvedURL.page);
-        }
-        this.page = this.resolvedURL.page;
-        this.updateHistory(this.resolvedURL);
-        this.refreshCurrentPage().catch(e => console.error(e));
+        return this.displayPageForResolvedURL(resolved, skipHistoryUpdate);
     }
 
     /**
-     * 
-     * @param {string} realUrl 
+     *
+     * @param {ResolvedURL} resolved
+     * @param {boolean} skipHistoryUpdate
      * @returns {Promise<void>}
      */
-    displayPageForUrlLater(realUrl) {
-        var _this = this;
-        return new Promise((resolve, _) => {
-            _this.displayPageForUrl(realUrl);
-            resolve();
+    displayPageForResolvedURL(resolved, skipHistoryUpdate = false) {
+        return this.client.loadPageData(resolved).then(response => {
+            if (response.nextURL) {
+                const nextResolved = this.urlResolver.resolve(response.nextURL);
+                if (resolved.normalizedPath !== nextResolved.normalizedPath) {
+                    // Redirect – do not pollute browser history
+                    return this.displayPageForUrl(response.nextURL, true);
+                }
+            }
+            this.resolvedURL = resolved;
+            this.page = resolved.page;
+
+            const data = response.data;
+            data.setValue(['pathVariables'], this.resolvedURL.pathVariablesAsMap());
+            data.setValue(['urlParameters'], this.resolvedURL.urlParameters);
+            this.page.data = data;
+
+            this.htmlTagHandler.unbindPage();
+            this.htmlTagHandler.bindPage(this.page);
+            this.htmlTagHandler.refresh(data);
+
+            if (!skipHistoryUpdate && response.status < 300) {
+                this.updateHistory(this.resolvedURL);
+            }
         });
     }
 
@@ -208,9 +201,8 @@ class PageController {
      * @returns {Promise<ClientConfig>}
      */
     setConfig(config) {
-        var _this = this;
         return new Promise((resolve, _) => {
-            _this.config = config;
+            this.config = config;
             resolve(config);
         });
     }
@@ -228,20 +220,31 @@ class PageController {
 
 
     /**
-    * @private
-    * @param {ResolvedURL} resolvedURL
-    * @returns {Promise<string>}
-    */
+     * Reloads the current page, possibly following a redirect (e.g. login).
+     * Automatically handles change of page and avoids corrupting history.
+     * 
+     * @returns {Promise<void>}
+     */
     refreshCurrentPage() {
-        var _this = this;
         return this.client.loadPageData(this.resolvedURL).then(response => {
-            var data = response.data;
+            const nextUrl = response.nextURL;
+            if (nextUrl) {
+                const nextResolved = this.urlResolver.resolve(nextUrl);
+                if (!nextResolved) {
+                    throw new Error("Cannot resolve redirected URL: " + nextUrl);
+                }
+                if (nextResolved.normalizedPath !== this.resolvedURL.normalizedPath) {
+                    return this.displayPageForResolvedURL(nextResolved, /* skipHistoryUpdate */ true);
+                }
+            }
+            const data = response.data;
             data.setValue(['pathVariables'], this.resolvedURL.pathVariablesAsMap());
             data.setValue(['urlParameters'], this.resolvedURL.urlParameters);
             this.page.data = data;
-            _this.htmlTagHandler.refresh(data);
+            this.htmlTagHandler.refresh(data);
         });
     }
+
 
     /**
      * @private
@@ -263,7 +266,7 @@ class PageController {
      */
     updateHistory(resolvedURL) {
         var title = this.htmlTagHandler.getTitle();
-        window.history.replaceState({}, title, resolvedURL.url);
+        app.history.appendPage(resolvedURL.url, title);
     }
 
 

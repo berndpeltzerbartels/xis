@@ -45,7 +45,7 @@ class HtmlTagHandler extends TagHandler {
     * @param {Page} page
     */
     getTitle() {
-        return this.headTagHandler.tag.innerText;
+        return this.headTagHandler.title.innerText;
     }
 
     /**

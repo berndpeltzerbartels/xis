@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 
@@ -26,7 +26,7 @@ class MapDeserializer extends JsonDeserializer<Map<String, String>> {
         ObjectNode node = mapper.readTree(jp);
         // var map = mapper.treeToValue(node, Map.class);
         var names = node.fieldNames();
-        var map = new HashMap<String, String>();
+        var map = new LinkedHashMap<String, String>();
         while (names.hasNext()) {
             var name = names.next();
             var valueNode = node.get(name);

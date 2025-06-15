@@ -19,9 +19,6 @@ class HeadTagHandler extends TagHandler {
     bind(page) {
         this.setTitleExpression(page);
         this.addScriptTags(page);
-        if (page.pageAttributes.pageJavascriptSource) {
-            this.addPageJavascript(page.pageAttributes.pageJavascriptSource);
-        }
         for (var node of this.nodeListToArray(page.headTemplate.childNodes)) {
             if (isElement(node) && node.localName == 'title') {
                 continue;
@@ -49,16 +46,6 @@ class HeadTagHandler extends TagHandler {
         }
     }
 
-    /**
-    * @private
-    * @param {string} pageJavascriptSource
-    */
-    addPageJavascript(pageJavascriptSource) {
-        var scriptElement = document.createElement('script');
-        scriptElement.setAttribute('type', 'text/javascript');
-        scriptElement.setAttribute('src', pageJavascriptSource);
-        this.tag.appendChild(scriptElement);
-    }
 
     /**
     * Removes all children from head-tag and put them bag to headTemplate, except title.
@@ -67,6 +54,7 @@ class HeadTagHandler extends TagHandler {
     * @param {Element} headTemplate
     */
     release(headTemplate) {
+        debugger;
         for (var node of this.nodeListToArray(this.tag.childNodes)) {
             if (isElement(node) && node.getAttribute('ignore')) {
                 continue;
@@ -112,20 +100,14 @@ class HeadTagHandler extends TagHandler {
     }
 
     setTitleExpression(page) {
-        var arr = this.extractFromArrayInPlace(page.headChildArray, node => node.localName == 'title');
-        if (arr.length > 0) {
-            var expressionSrc = arr[0].innerText;
-            this.titleExpression = new TextContentParser(expressionSrc, this).parse();
-        } else {
-            this.titleExpression = {
-                evaluate(_) { }
-            }
+        if (!page.titleExpression) {
+            throw new Error('Page does not have a titleExpression defined.');
         }
+        this.titleExpression = page.titleExpression ;
     }
 
     clearTitle() {
-        this.innerText = '';
-        this.titleExpression = undefined;
+        this.title.innerText = '';
         innerTextChanged(this.title);
     }
 

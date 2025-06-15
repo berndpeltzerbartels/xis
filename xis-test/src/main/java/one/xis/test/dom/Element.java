@@ -48,10 +48,6 @@ public class Element extends Node {
             setFirstChild(node);
         } else {
             var last = firstChild.getLastSibling();
-            System.out.println("--------------------------------------");
-            System.out.println(this.asString());
-            System.out.println("--------------------------------------");
-
             last.setNextSibling(node);
             if (last == last.nextSibling) {
                 throw new IllegalStateException();
@@ -303,11 +299,16 @@ public class Element extends Node {
         if (predicate.test(this)) {
             result.add(this);
         }
-        if (nextSibling != null && nextSibling instanceof Element) {
-            ((Element) nextSibling).findElements(predicate, result);
+        var sibling = nextSibling;
+        while (sibling != null) {
+            if (sibling instanceof Element element) {
+                element.findElements(predicate, result);
+                break;
+            }
+            sibling = sibling.nextSibling;
         }
-        if (firstChild != null && firstChild instanceof Element) {
-            ((Element) firstChild).findElements(predicate, result);
+        if (firstChild != null && firstChild instanceof Element element) {
+            element.findElements(predicate, result);
         }
     }
 

@@ -129,7 +129,8 @@ class TagHandler {
         if (handler) {
             return handler;
         }
-        throw new Error('no parent form-handler for ' + this.tag);
+        throw new Error('no parent form-handler for ' + this.tag 
+            +". May be you forgot to add xis:binding to the form?");
     }
 
     findParentFormHandler() {

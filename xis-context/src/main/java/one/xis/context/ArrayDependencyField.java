@@ -37,6 +37,13 @@ class ArrayDependencyField implements DependencyField, MultiValueConsumer {
     }
 
     @Override
+    public void decrementProducerCount() {
+        if (producerCount.decrementAndGet() == 0) {
+            parent.fieldValueAssigned(this);
+        }
+    }
+
+    @Override
     public boolean isConsumerFor(Class<?> c) {
         if (field.isAnnotationPresent(XISInject.class)) {
             var componentAnnotation = field.getAnnotation(XISInject.class).annotatedWith();
@@ -83,4 +90,6 @@ class ArrayDependencyField implements DependencyField, MultiValueConsumer {
     public void notifyParent() {
         parent.fieldValueAssigned(this);
     }
+
+
 }

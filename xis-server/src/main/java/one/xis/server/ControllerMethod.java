@@ -3,12 +3,17 @@ package one.xis.server;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import one.xis.Roles;
 import one.xis.deserialize.MainDeserializer;
 import one.xis.deserialize.PostProcessingResults;
+import one.xis.security.AccessToken;
+import one.xis.security.AuthenticationException;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -31,9 +36,10 @@ class ControllerMethod {
         }
     }
 
-    ControllerMethodResult invoke(@NonNull ClientRequest request, @NonNull Object controller, Map<String, Object> requestScope) throws Exception {
+    ControllerMethodResult invoke(@NonNull ClientRequest request, @NonNull Object controller, Map<String, Object> requestScope, AccessToken accessToken) throws Exception {
+        checkRoles(accessToken);
         var postProcessingResults = new PostProcessingResults();
-        var args = prepareArgs(method, request, postProcessingResults, requestScope);
+        var args = prepareArgs(method, request, postProcessingResults, requestScope, accessToken);
         if (postProcessingResults.authenticate()) {
             // TODO
         }
@@ -83,12 +89,45 @@ class ControllerMethod {
                 .collect(Collectors.toSet());
     }
 
-    protected Object[] prepareArgs(Method method, ClientRequest request, PostProcessingResults postProcessingResults, Map<String, Object> requestScope) throws Exception {
+    protected Object[] prepareArgs(Method method, ClientRequest request, PostProcessingResults postProcessingResults, Map<String, Object> requestScope, AccessToken accessToken) throws Exception {
         var args = new Object[method.getParameterCount()];
         for (var i = 0; i < method.getParameterCount(); i++) {
-            args[i] = controllerMethodParameters[i].prepareParameter(request, postProcessingResults, requestScope);
+            args[i] = controllerMethodParameters[i].prepareParameter(request, postProcessingResults, requestScope, accessToken);
         }
         return args;
     }
 
+
+    private void checkRoles(AccessToken accessToken) {
+        var requiredRoles = getRequiredRoles();
+        if (requiredRoles.isEmpty()) {
+            return;
+        }
+        if (accessToken == null || !accessToken.isAuthenticated()) {
+            throw new AuthenticationException("Access token is required for method: " + method.getName());
+        }
+        var userRoles = accessToken.getRoles();
+        // check if user has at least one of the required roles
+        if (userRoles == null || userRoles.isEmpty() || requiredRoles.stream().noneMatch(userRoles::contains)) {
+            throw new AuthenticationException("User does not have required roles for method: " + method.getName());
+        }
+    }
+
+    private Set<String> getRequiredRoles() {
+        var roles = new HashSet<Roles>();
+        if (method.isAnnotationPresent(Roles.class)) {
+            roles.add(method.getAnnotation(Roles.class));
+        }
+        var c = method.getDeclaringClass();
+        while (c != null && c != Object.class) {
+            if (c.isAnnotationPresent(Roles.class)) {
+                roles.add(c.getAnnotation(Roles.class));
+            }
+            c = c.getSuperclass();
+        }
+        return roles.stream()
+                .flatMap(role -> Stream.of(role.value()))
+                .collect(Collectors.toSet());
+
+    }
 }

@@ -3,6 +3,7 @@ package one.xis.utils.lang;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -45,6 +46,10 @@ class ClassUtilsTest {
 
         }
 
+        Optional<String> optionalMethod() {
+            return Optional.empty();
+        }
+
         @Test
         void testSimpleGenericType() {
             assertThat(ClassUtils.getGenericInterfacesTypeParameter(SimpleGenericTestType.class, GenericInterface.class, 0)).isEqualTo(String.class);
@@ -54,7 +59,7 @@ class ClassUtilsTest {
         void testWildcardType() {
             assertThat(ClassUtils.getGenericInterfacesTypeParameter(WildcarTypeTestType.class, GenericInterface.class, 0)).isEqualTo(GenericInterface.class);
         }
-
+        
     }
 
 

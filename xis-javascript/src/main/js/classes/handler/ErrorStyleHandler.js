@@ -3,7 +3,7 @@ class ErrorStyleHandler extends TagHandler {
     constructor(tag) {
         super(tag);
         this.type = 'error-style-handler';
-        this.errorStyleClnassExpression = new TextContentParser(this.tag.getAttribute('xis:error-class'), this).parse();
+        this.errorStyleClassExpression = new TextContentParser(this.tag.getAttribute('xis:error-class'), this).parse();
         this.bindingExpression = new TextContentParser(this.tag.getAttribute('xis:binding'), this).parse();
         this.lastErrorStyle = null;
     }

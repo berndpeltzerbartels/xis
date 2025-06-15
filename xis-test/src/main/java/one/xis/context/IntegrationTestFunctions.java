@@ -8,4 +8,6 @@ import lombok.RequiredArgsConstructor;
 class IntegrationTestFunctions {
     private final JavascriptFunction invoker;
     private final JavascriptFunction reset;
+    private final JavascriptFunction setAccessToken;
+    private final JavascriptFunction setRenewToken;
 }

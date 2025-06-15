@@ -13,7 +13,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-@Slf4j // TODO May this doese not produce any logs for micronaut
+@Slf4j // TODO May be, this does not produce any logs for micronaut
 @XISComponent
 @RequiredArgsConstructor
 class PageControllerWrappers {
@@ -24,7 +24,6 @@ class PageControllerWrappers {
     @XISInject(annotatedWith = Page.class)
     private Collection<Object> pageControllers;
 
-
     @Getter
     private Collection<ControllerWrapper> pageControllerWrappers;
 
@@ -33,9 +32,9 @@ class PageControllerWrappers {
         pageControllerWrappers = pageControllerWrappers();
     }
 
-    Optional<ControllerWrapper> findByPath(Path path) {
+    Optional<ControllerWrapper> findByPath(String normalizedPath) {
         return pageControllerWrappers.stream()
-                .filter(controller -> controller.getId().equals(path.normalized()))
+                .filter(controller -> controller.getId().equals(normalizedPath))
                 .findFirst();
     }
 
@@ -54,4 +53,9 @@ class PageControllerWrappers {
         return pathResolver.normalizedPath(pageController);
     }
 
+    public Optional<ControllerWrapper> findByClass(Class<?> controllerClass) {
+        return pageControllerWrappers.stream()
+                .filter(wrapper -> wrapper.getControllerClass().equals(controllerClass))
+                .findFirst();
+    }
 }

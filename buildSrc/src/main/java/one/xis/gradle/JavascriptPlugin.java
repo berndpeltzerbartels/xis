@@ -5,97 +5,108 @@ import org.graalvm.polyglot.PolyglotAccess;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 
-import javax.script.Compilable;
-import javax.script.ScriptEngineManager;
 import java.io.*;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-
-/**
- * Writes all javascript-sources into a single file and compiles the result
- */
 public class JavascriptPlugin implements Plugin<Project> {
 
     private static final String RELEASE_JS_OUTFILE = "xis-prod.js";
 
     @Override
     public void apply(Project project) {
-        printfln("apply plugin for project %s", project.getDisplayName());
+        log("apply plugin for project %s", project.getDisplayName());
         process(project);
     }
 
     private void process(Project project) {
-        var releaseJsFile = getReleaseOutFile(project);
-        if (releaseJsFile.exists() && !releaseJsFile.delete()) {
-            throw new RuntimeException("can not delete " + releaseJsFile);
-        }
+        File releaseJsFile = getReleaseOutFile(project);
+        deleteIfExists(releaseJsFile);
 
-        var allJsFiles = sourceDirs(project).stream()
-                .flatMap(dir -> FileUtils.files(dir, "js").stream())
-                .map(this::toJSFile)
-                .collect(Collectors.toSet());
+        List<JSFile> releaseJsFiles = getReleaseJsFiles(project);
+        List<JSFile> allJsFiles = getAllJsFiles(project);
 
-        // 🔁 Einzelne .js-Dateien wie bisher (für Debugging oder Tests)
-        var groupedByTopFolder = allJsFiles.stream()
+        writeGroupedFiles(project, allJsFiles);
+        writeJsToFileIIFE(JSFileSorter.sort(releaseJsFiles), releaseJsFile, false);
+        evalWithGraalVM(releaseJsFile);
+    }
+
+    private void writeGroupedFiles(Project project, List<JSFile> jsFiles) {
+        var grouped = jsFiles.stream()
                 .collect(Collectors.groupingBy(file -> {
                     var fullPath = file.getFile().toPath();
                     var rootPath = getJsApiSrcRoot(project).toPath();
-                    return rootPath.relativize(fullPath).getName(0).toString(); // top-level dir
+                    return rootPath.relativize(fullPath).getName(0).toString();
                 }));
 
-        groupedByTopFolder.forEach((dirName, files) -> {
-            var outFile = new File(getOutDir(project), dirName + ".js");
-            var sorted = JSFileSorter.sort(files);
-            writeToOutFile(sorted, outFile, false);
+        grouped.forEach((dirName, files) -> {
+            File outFile = new File(getOutDir(project), dirName + ".js");
+            writeJsToFile(JSFileSorter.sort(files), outFile, false);
         });
-
-        // ✅ Finale Release-Datei mit globaler Sortierung
-        var globallySorted = JSFileSorter.sort(allJsFiles);
-        globallySorted.add(toJSFile(getMainFile(project)));
-        writeJsToFile(globallySorted, releaseJsFile, false);
     }
 
-    private Collection<File> sourceDirs(Project project) {
-        var root = getJsApiSrcRoot(project);
-        var files = root.listFiles();
-        if (files == null) {
-            return Collections.emptyList();
-        }
-        return Arrays.stream(files)
-                .filter(File::isDirectory)
-                .filter(f -> !f.getName().equals("test"))
-                .collect(Collectors.toSet());
+    private List<JSFile> getReleaseJsFiles(Project project) {
+        var rootPath = getJsApiSrcRoot(project).toPath();
+        return releaseSourceDirs(project).stream()
+                .flatMap(dir -> FileUtils.files(dir, "js").stream())
+                .filter(file -> file.toPath().getNameCount() > rootPath.getNameCount())
+                .map(this::toJSFile)
+                .collect(Collectors.toList());
     }
 
-
-    private void writeToOutFile(List<JSFile> jsFiles, File outFile, boolean append) {
-        printfln("js-outfile: '%s'", outFile);
-        writeJsToFile(jsFiles, outFile, append);
-        compileAndEval(outFile);
+    private List<JSFile> getAllJsFiles(Project project) {
+        return allSourceDirs(project).stream()
+                .flatMap(dir -> FileUtils.files(dir, "js").stream())
+                .map(this::toJSFile)
+                .collect(Collectors.toList());
     }
 
-    private File getReleaseOutFile(Project project) {
-        return new File(getOutDir(project), RELEASE_JS_OUTFILE);
-    }
-
-    private File getOutDir(Project project) {
-        var outDir = new File(project.getProjectDir(), "src/main/resources");
-        if (!outDir.exists()) {
-            printfln("creating %s", outDir);
-            if (!outDir.mkdirs()) {
-                throw new RuntimeException("can not create " + outDir);
+    private void writeJsToFile(Collection<JSFile> jsFiles, File outFile, boolean append) {
+        log("js-outfile: '%s'", outFile);
+        try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(outFile, append)))) {
+            for (JSFile file : jsFiles) {
+                log("add script content: %s", file.getFile().getName());
+                writer.println(file.getContent());
             }
-        } else {
-            printfln("already present: %s", outDir);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to write JS file", e);
         }
-        if (!outDir.isDirectory()) {
-            throw new RuntimeException("not a directory: " + outDir);
+    }
+
+    private void writeJsToFileIIFE(Collection<JSFile> jsFiles, File outFile, boolean append) {
+        log("js-outfile: '%s'", outFile);
+        try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(outFile, append)))) {
+            writer.println("(function() {"); // TODO : Klappt das auch mit GraalVM?
+            for (JSFile file : jsFiles) {
+                log("add script content: %s", file.getFile().getName());
+                writer.println(file.getContent());
+            }
+            writer.println("})();");
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to write JS file", e);
         }
-        return outDir;
+    }
+
+    private void evalWithGraalVM(File jsFile) {
+        var content = FileUtils.getContent(jsFile, "utf-8");
+        Context context = Context.newBuilder("js")
+                .allowAllAccess(true)
+                .allowExperimentalOptions(true)
+                .allowHostClassLoading(true)
+                .allowHostClassLookup(c -> true)
+                .allowPolyglotAccess(PolyglotAccess.ALL)
+                .allowNativeAccess(true)
+                .build();
+        context.eval("js", content);
+    }
+
+    private void deleteIfExists(File file) {
+        if (file.exists() && !file.delete()) {
+            throw new RuntimeException("Unable to delete file: " + file);
+        }
     }
 
     private JSFile toJSFile(File file) {
@@ -105,46 +116,43 @@ public class JavascriptPlugin implements Plugin<Project> {
         return new JSFile(file, content, analyzer.getDeclaredClasses(), analyzer.getSuperClasses());
     }
 
-    private void writeJsToFile(Collection<JSFile> jsSrcFiles, File jsOutFile, boolean append) {
-        try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(jsOutFile, append)))) {
-            jsSrcFiles.forEach(file -> {
-                printfln("add script content: %s", file.getFile().getName());
-                writer.println(file.getContent());
-            });
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
+    private File getOutDir(Project project) {
+        File outDir = new File(project.getProjectDir(), "src/main/resources");
+        if (!outDir.exists() && !outDir.mkdirs()) {
+            throw new RuntimeException("Unable to create output directory: " + outDir);
         }
+        if (!outDir.isDirectory()) {
+            throw new RuntimeException("Not a directory: " + outDir);
+        }
+        return outDir;
     }
 
-    private void compileAndEval(File jsFile) {
-        var content = FileUtils.getContent(jsFile, "utf-8");
-        Context context = Context.newBuilder("js")
-                .allowAllAccess(true)
-                .allowExperimentalOptions(true)
-                .allowHostClassLoading(true)
-                .allowHostClassLookup(c -> true)
-                .allowPolyglotAccess(PolyglotAccess.ALL)
-                .allowNativeAccess(true)
-                .allowAllAccess(true)
-                .build();
-        context.eval("js", content);
+    private File getReleaseOutFile(Project project) {
+        return new File(getOutDir(project), RELEASE_JS_OUTFILE);
     }
 
-    private Compilable getCompiler() {
-        return (Compilable) new ScriptEngineManager().getEngineByName("js");
+    private Stream<File> sourceDirs(Project project) {
+        File root = getJsApiSrcRoot(project);
+        File[] files = root.listFiles();
+        if (files == null) return Stream.empty();
+        return Arrays.stream(files).filter(File::isDirectory);
+    }
+
+    private Collection<File> releaseSourceDirs(Project project) {
+        return sourceDirs(project)
+                .filter(f -> !f.getName().equals("test"))
+                .collect(Collectors.toSet());
+    }
+
+    private Collection<File> allSourceDirs(Project project) {
+        return sourceDirs(project).collect(Collectors.toSet());
     }
 
     private File getJsApiSrcRoot(Project project) {
         return new File(project.getProjectDir(), "src/main/js");
     }
 
-    private File getMainFile(Project project) {
-        return new File(project.getProjectDir(), "src/main/resources/main.js");
+    private void log(String pattern, Object... args) {
+        System.out.printf((pattern) + "%n", args);
     }
-
-    private void printfln(String pattern, Object... args) {
-        System.out.printf(pattern, args);
-        System.out.println();
-    }
-
 }

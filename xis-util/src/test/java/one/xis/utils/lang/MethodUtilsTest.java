@@ -3,6 +3,7 @@ package one.xis.utils.lang;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -22,6 +23,18 @@ class MethodUtilsTest {
 
         assertThat(result).isEqualTo(String.class);
 
+    }
+
+    Optional<String> optionalMethod() {
+        return Optional.empty();
+    }
+
+    @Test
+    void getGenericTypeParameterOptional() throws NoSuchMethodException {
+        var method = this.getClass().getDeclaredMethod("optionalMethod");
+        var result = MethodUtils.getGenericTypeParameterOfReturnType(method);
+
+        assertThat(result).isEqualTo(String.class);
     }
 
     class TestClass1 {

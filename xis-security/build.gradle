@@ -27,12 +27,27 @@ repositories {
 // Local variables for versions
 var lombokVersion = rootProject.ext.libraryVersions.lombok
 var junitVersion = "5.7.0"
+var gsonVersion = "2.10.1"
 
 dependencies {
 
     // Local project dependencies
-    implementation(project(":xis-deserializer"))
+    compileOnly(project(":xis-deserializer"))
+    compileOnly(project(":xis-resources"))
     implementation(project(":xis-context"))
+    implementation(project(":xis-util"))
+    compileOnly(project(":xis-adapter-spi"))
+    compileOnly(project(":xis-controller-api"))
+
+    // Gson dependency
+    implementation "com.google.code.gson:gson:$gsonVersion"
+    implementation 'com.google.guava:guava:33.1.0-jre'
+
+
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-gson:0.11.5' // nutzt Gson statt Jackson
+
 
     // Lombok dependencies
     annotationProcessor("org.projectlombok:lombok:$lombokVersion")
@@ -41,6 +56,9 @@ dependencies {
     // JUnit dependencies
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
+    testImplementation "org.mockito:mockito-core:$mockitoVersion"
+    testImplementation("org.assertj:assertj-core:3.16.1")
+    testImplementation(project(":xis-adapter-spi"))
 }
 
 test {

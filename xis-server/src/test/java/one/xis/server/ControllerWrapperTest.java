@@ -21,14 +21,14 @@ class ControllerWrapperTest {
     void setUp() {
         var deserializer = mock(MainDeserializer.class);
         var controllerResultMapper = mock(ControllerResultMapper.class);
-        var wrapperFactory = new ControllerWrapperFactory(deserializer, new ControllerMethodResultMapper(mock()), controllerResultMapper);
+        var wrapperFactory = new ControllerWrapperFactory(deserializer, new ControllerMethodResultMapper(mock(), new PathResolver()), controllerResultMapper);
         controller = new ExampleController();
         controllerWrapper = wrapperFactory.createControllerWrapper("test", controller, ControllerWrapper.class);
     }
 
     @Test
     void invokeGetModelMethods() {
-        controllerWrapper.invokeGetModelMethods(new ClientRequest(), new ControllerResult());
+        controllerWrapper.invokeGetModelMethods(new ClientRequest(), new ControllerResult(), mock());
 
         // Verify the order of method invocations
         var invocationOrder = controller.getInvocationOrder();

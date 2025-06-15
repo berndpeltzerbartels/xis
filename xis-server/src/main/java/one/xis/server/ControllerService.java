@@ -2,8 +2,11 @@ package one.xis.server;
 
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import one.xis.Page;
 import one.xis.context.XISComponent;
 import one.xis.context.XISInject;
+import one.xis.security.AccessToken;
+import one.xis.security.ApiTokenManager;
 import one.xis.utils.lang.StringUtils;
 import org.tinylog.Logger;
 
@@ -26,81 +29,86 @@ class ControllerService {
     @XISInject
     private PathResolver pathResolver;
 
+    @XISInject
+    private ApiTokenManager tokenManager;
+
     void processModelDataRequest(@NonNull ClientRequest request, @NonNull ServerResponse response) {
         Logger.info("Process model data request: {}", request);
+        var accessToken = AccessToken.create(request.getAccessToken(), tokenManager);
         var controllerResult = new ControllerResult();
         controllerResult.setCurrentPageURL(request.getPageId());
         controllerResult.setCurrentWidgetId(request.getWidgetId());
         var wrapper = controllerWrapper(request);
-        wrapper.invokeGetModelMethods(request, controllerResult);
-        if (controllerResult.getNextPageURL() == null) {
-            controllerResult.setNextPageURL(request.getPageId());
-        }
+        wrapper.invokeGetModelMethods(request, controllerResult, accessToken);
         if (controllerResult.getNextWidgetId() == null) {
             controllerResult.setNextWidgetId(request.getWidgetId());
         }
-        mapResultToResponse(response, controllerResult);
+        mapResultToResponse(request, response, controllerResult);
     }
 
     void processFormDataRequest(@NonNull ClientRequest request, @NonNull ServerResponse response) {
         Logger.info("Process form data request: {}", request);
+        var accessToken = AccessToken.create(request.getAccessToken(), tokenManager);
         var controllerResult = new ControllerResult();
         controllerResult.setCurrentPageURL(request.getPageId());
         controllerResult.setCurrentWidgetId(request.getWidgetId());
         var wrapper = controllerWrapper(request);
-        wrapper.invokeFormDataMethods(request, controllerResult);
-        if (controllerResult.getNextPageURL() == null) {
-            controllerResult.setNextPageURL(request.getPageId());
-        }
+        wrapper.invokeFormDataMethods(request, controllerResult, accessToken);
         if (controllerResult.getNextWidgetId() == null) {
             controllerResult.setNextWidgetId(request.getWidgetId());
         }
-        mapResultToResponse(response, controllerResult);
+        mapResultToResponse(request, response, controllerResult);
     }
 
     void processActionRequest(@NonNull ClientRequest request, @NonNull ServerResponse response) {
         Logger.info("Process action request: {}", request);
+        var accessToken = AccessToken.create(request.getAccessToken(), tokenManager);
         var controllerResult = new ControllerResult();
         controllerResult.setCurrentPageURL(request.getPageId());
         controllerResult.setCurrentWidgetId(request.getWidgetId());
         var invokerControllerWrapper = controllerWrapper(request);
-        invokerControllerWrapper.invokeActionMethod(request, controllerResult);
+        invokerControllerWrapper.invokeActionMethod(request, controllerResult, accessToken);
         if (!resultContainsNextController(controllerResult)) {
-            usePreviousController(controllerResult, invokerControllerWrapper);
+            usePreviousController(controllerResult, invokerControllerWrapper, request);
         }
-        mapResultToResponse(response, controllerResult);
+        mapResultToResponse(request, response, controllerResult);
         var nextControllerWrapper = nextControllerWrapperAfterAction(controllerResult);
         if (nextControllerWrapper.equals(invokerControllerWrapper)) {
-            invokerControllerWrapper.invokeGetModelMethods(request, controllerResult);
-            mapResultToResponse(response, controllerResult);
+            invokerControllerWrapper.invokeGetModelMethods(request, controllerResult, accessToken);
+            mapResultToResponse(request, response, controllerResult);
         } else {
-            processNextController(request, controllerResult, response, nextControllerWrapper);
+            processNextController(request, controllerResult, response, nextControllerWrapper, accessToken);
         }
     }
 
-    private void processNextController(ClientRequest request, ControllerResult controllerResult, ServerResponse response, ControllerWrapper nextControllerWrapper) {
+    private void processNextController(ClientRequest request, ControllerResult controllerResult, ServerResponse response, ControllerWrapper nextControllerWrapper, AccessToken accessToken) {
         Logger.info("Process next controller: {}, request: {}", nextControllerWrapper, request);
         var nextRequest = new ClientRequest();
         // userdata is the same
         nextRequest.setLocale(request.getLocale());
         nextRequest.setZoneId(request.getZoneId());
         nextRequest.setClientId(request.getClientId());
-        nextRequest.setUserId(request.getUserId());
         nextRequest.getLocalStorageData().putAll(request.getLocalStorageData());
         nextRequest.getClientStateData().putAll(request.getClientStateData());
+        nextRequest.setAccessToken(request.getAccessToken());
+        if (controllerResult.getTokens() != null) {
+            //accessToken.
+        }
         controllerResultMapper.mapControllerResultToNextRequest(controllerResult, nextRequest);
         var nextControllerResult = new ControllerResult();
         // one of these 2 values changed
         if (nextControllerWrapper.isWidgetController()) {
             nextControllerResult.setNextWidgetId(nextControllerWrapper.getId());
         } else {
-            nextControllerResult.setNextPageURL(nextControllerWrapper.getId());
+            var path = pathResolver.createPath(nextControllerWrapper.getController().getClass().getAnnotation(Page.class).value());
+            nextControllerResult.setNextURL(this.pathResolver.evaluateRealPath(path, controllerResult.getPathVariables(), controllerResult.getUrlParameters()));
         }
         // get model data for next controller
-        nextControllerWrapper.invokeGetModelMethods(nextRequest, nextControllerResult);
+        AccessToken token = controllerResult.getTokens() != null ? AccessToken.create(controllerResult.getTokens().getAccessToken(), tokenManager) : accessToken;
+        nextControllerWrapper.invokeGetModelMethods(nextRequest, nextControllerResult, token);
         // map result to response
         response.clear();
-        mapResultToResponse(response, nextControllerResult);
+        mapResultToResponse(request, response, nextControllerResult);
     }
 
     private ControllerWrapper controllerWrapper(ClientRequest request) {
@@ -113,15 +121,15 @@ class ControllerService {
     }
 
     private boolean resultContainsNextController(ControllerResult controllerResult) {
-        return StringUtils.isNotEmpty(controllerResult.getNextWidgetId()) || StringUtils.isNotEmpty(controllerResult.getNextPageURL());
+        return StringUtils.isNotEmpty(controllerResult.getNextWidgetId()) || StringUtils.isNotEmpty(controllerResult.getNextURL());
     }
 
 
-    private void usePreviousController(ControllerResult controllerResult, ControllerWrapper controllerWrapper) {
+    private void usePreviousController(ControllerResult controllerResult, ControllerWrapper controllerWrapper, ClientRequest request) {
         if (controllerWrapper.isWidgetController()) {
             controllerResult.setNextWidgetId(controllerWrapper.getId());
         } else {
-            controllerResult.setNextPageURL(controllerWrapper.getId());
+            controllerResult.setNextURL(request.getPageUrl());
         }
     }
 
@@ -129,14 +137,35 @@ class ControllerService {
         if (StringUtils.isNotEmpty(controllerResult.getNextWidgetId())) {
             return widgetControllerWrapperById(controllerResult.getNextWidgetId());
         }
-        if (StringUtils.isNotEmpty(controllerResult.getNextPageURL())) {
-            return pageControllerWrapperById(controllerResult.getNextPageURL());
+        if (controllerResult.getNextPageControllerClass() != null) {
+            return pageControllerWrapperByClass(controllerResult.getNextPageControllerClass());
+        }
+        if (controllerResult.getNextPageId() != null) {
+            return pageControllerWrapperById(controllerResult.getNextPageId());
+        }
+        if (controllerResult.getNextURL() != null) {
+            var path = pathResolver.createPath(controllerResult.getNextURL());
+            return pageControllerWrapperById(path.normalized());
         }
         throw new IllegalStateException("no controller found for request: " + controllerResult);
     }
 
-    private void mapResultToResponse(ServerResponse response, ControllerResult result) {
-        responseMapper.mapResultToResponse(response, result);
+    private String getNextUrl(ClientRequest request, ControllerResult controllerResult) {
+        if (StringUtils.isNotEmpty(controllerResult.getNextURL())) {
+            return controllerResult.getNextURL();
+        }
+        if (controllerResult.getNextPageControllerClass() != null) {
+            var path = pathResolver.createPath(PageUtil.getUrl(controllerResult.getNextPageControllerClass()));
+            return pathResolver.evaluateRealPath(path, controllerResult.getPathVariables(), controllerResult.getUrlParameters());
+        }
+        return request.getPageUrl();
+    }
+
+    private void mapResultToResponse(ClientRequest request, ServerResponse response, ControllerResult controllerResult) {
+        if (controllerResult.getNextURL() == null) {
+            controllerResult.setNextURL(getNextUrl(request, controllerResult));
+        }
+        responseMapper.mapResultToResponse(response, controllerResult);
     }
 
     protected ControllerWrapper widgetControllerWrapperById(@NonNull String id) {
@@ -144,9 +173,15 @@ class ControllerService {
                 .orElseThrow(() -> new IllegalStateException("not a widget-controller:" + id));
     }
 
-    protected ControllerWrapper pageControllerWrapperById(@NonNull String id) {
-        return pageControllerWrappers.findByPath(pathResolver.createPath(id))
-                .orElseThrow(() -> new IllegalStateException("page-controller not found for path:" + id));
+    protected ControllerWrapper pageControllerWrapperByClass(@NonNull Class<?> controllerClass) {
+        return pageControllerWrappers.findByClass(controllerClass)
+                .orElseThrow(() -> new IllegalStateException("page-controller not found:" + controllerClass.getSimpleName()));
+    }
+
+
+    protected ControllerWrapper pageControllerWrapperById(@NonNull String normalizedPath) {
+        return pageControllerWrappers.findByPath(normalizedPath)
+                .orElseThrow(() -> new IllegalStateException("page-controller not found:" + normalizedPath));
     }
 
 }
