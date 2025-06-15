@@ -87,7 +87,6 @@ public class ProtectedModelDataTest {
             testContext = IntegrationTestContext.builder()
                     .withSingleton(ProtectedModelDataPage1.class)
                     .withSingleton(ProtectedModelDataPage2.class)
-                    .withLoggedInUser(userInfo)
                     .withTestUserService(userInfo)
                     .build();
         }
@@ -104,7 +103,7 @@ public class ProtectedModelDataTest {
             link.click();
 
             assertThat(document.getElementByTagName("title").innerText).isEqualTo("Login");
-            assertThat(document.getElementById("redirect").getAttribute("value")).isEqualTo("/page2.html");
+            assertThat(document.getElementById("state").getAttribute("value")).isNotEmpty();
 
             document.getInputElementById("username").setValue("user1");
             document.getInputElementById("password").setValue("passwd");

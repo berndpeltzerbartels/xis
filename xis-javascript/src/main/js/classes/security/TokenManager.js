@@ -34,29 +34,29 @@ class TokenManager {
     console.log('Parsing tokens completed');
   }
 
-    setAccessToken(token) {
-        console.log('Setting access token:', token);
-        this.accessToken = token;
-        const decodedToken = this.decodeToken(token);
-        this.accessTokenExpiresAt = decodedToken.exp || -1;
-        this.tokenAttributes.userId = decodedToken.sub || '';
-        this.tokenAttributes.roles = decodedToken.roles || [];
-        this.tokenAttributes.claims = decodedToken.claims || {};
-    }
+  setAccessToken(token) {
+    console.log('Setting access token:', token);
+    this.accessToken = token;
+    const decodedToken = this.decodeToken(token);
+    this.accessTokenExpiresAt = decodedToken.exp || -1;
+    this.tokenAttributes.userId = decodedToken.sub || '';
+    this.tokenAttributes.roles = decodedToken.roles || [];
+    this.tokenAttributes.claims = decodedToken.claims || {};
+  }
 
-    setRenewToken(token) {
-        console.log('Setting renew token:', token);
-        this.renewToken = token;
-        const decodedToken = this.decodeToken(token);
-        this.renewTokenExpiresAt = decodedToken.exp || -1;
-        this.tokenAttributes.userId = decodedToken.sub || this.tokenAttributes.userId;
-        this.tokenAttributes.roles = decodedToken.roles || this.tokenAttributes.roles;
-        this.tokenAttributes.claims = decodedToken.claims || this.tokenAttributes.claims;
-    }
+  setRenewToken(token) {
+    console.log('Setting renew token:', token);
+    this.renewToken = token;
+    const decodedToken = this.decodeToken(token);
+    this.renewTokenExpiresAt = decodedToken.exp || -1;
+    this.tokenAttributes.userId = decodedToken.sub || this.tokenAttributes.userId;
+    this.tokenAttributes.roles = decodedToken.roles || this.tokenAttributes.roles;
+    this.tokenAttributes.claims = decodedToken.claims || this.tokenAttributes.claims;
+  }
 
   setTokens(response) {
     this.accessToken = response.accessToken;
-    this.renewToken = response.renewToken; // Use existing renew token if not provided
+    this.renewToken = response.renewToken;
     this.parseTokens();
   }
 
@@ -78,7 +78,7 @@ class TokenManager {
    * 
    * @returns {Promise<string|false>}
    */
-   async actualAccessToken() {
+  async actualAccessToken() {
     if (!this.accessToken) {
       console.log('No access token available');
       return null;

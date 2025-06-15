@@ -32,6 +32,9 @@ public class ClientRequest {
     private LinkedHashMap<String, String> urlParameters = new LinkedHashMap<>();
 
     @JsonDeserialize(using = MapDeserializer.class)
+    private LinkedHashMap<String, String> queryParameters = new LinkedHashMap<>();
+
+    @JsonDeserialize(using = MapDeserializer.class)
     private Map<String, String> bindingParameters = new HashMap<>();
 
     @JsonDeserialize(using = MapDeserializer.class)

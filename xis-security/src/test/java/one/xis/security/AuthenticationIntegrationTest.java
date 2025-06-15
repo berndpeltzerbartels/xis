@@ -58,7 +58,7 @@ class AuthenticationIntegrationTest {
         // Extract and verify state
         String stateParam = authorizationUrl.split("state=")[1].split("&")[0];
         String queryString = "code=someCode&state=" + stateParam;
-        AuthenticationProviderStateData stateData = providerService.verifyStateAndExtractCode(queryString);
+        AuthenticationProviderStateData stateData = providerService.verifyAndDecodeCodeAndStateQuery(queryString);
 
         // Simulate login and token issue
         String code = localAuth.login(new Login("user1", "secret", "state"));

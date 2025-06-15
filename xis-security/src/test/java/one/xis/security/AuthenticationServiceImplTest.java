@@ -40,7 +40,7 @@ class AuthenticationServiceImplTest {
     }
 
     @Test
-    void verifyStateAndExtractCode_validState_returnsCode() {
+    void verifyAndDecodeCodeAndState_valid_returnsCodeCodeAndStateQuery() {
         // valid signed state payload
         var payload = new StateParameterPayload();
         payload.setCsrf("csrf");
@@ -54,17 +54,17 @@ class AuthenticationServiceImplTest {
 
         String url = "https://myapp/callback?code=authCode123&state=" + state;
 
-        AuthenticationProviderStateData stateData = service.verifyStateAndExtractCode(url);
+        AuthenticationProviderStateData stateData = service.verifyAndDecodeCodeAndStateQuery(url);
 
         assertThat(stateData.getCode()).isEqualTo("authCode123");
     }
 
     @Test
-    void verifyStateAndExtractCode_invalidState_throwsException() {
+    void verifyAndDecodeCodeAndState_invalid_throwsExceptionCodeAndStateQuery() {
         String fakeState = "invalid.state.signature";
         String url = "https://myapp/callback?code=authCode123&state=" + fakeState;
 
-        assertThatThrownBy(() -> service.verifyStateAndExtractCode(url))
+        assertThatThrownBy(() -> service.verifyAndDecodeCodeAndStateQuery(url))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Invalid state parameter format");
     }
@@ -72,7 +72,7 @@ class AuthenticationServiceImplTest {
     private String getStateKey() {
         // Reflection workaround for accessing private final field
         try {
-            var field = AuthenticationServiceImpl.class.getDeclaredField("stateSignatureKey");
+            var field = StateParameter.class.getDeclaredField("stateSignatureKey");
             field.setAccessible(true);
             return (String) field.get(service);
         } catch (Exception e) {

@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.Map;
 
 @RequiredArgsConstructor
-class AccessTokenWrapper implements AccessToken {
+public class AccessTokenWrapper implements AccessToken {
     private final String accessToken;
     private final ApiTokenManager tokenManager;
     private TokenAttributes tokenAttributes;

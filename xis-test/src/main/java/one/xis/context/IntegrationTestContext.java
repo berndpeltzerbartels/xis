@@ -93,7 +93,7 @@ public class IntegrationTestContext implements AppContext {
         public IntegrationTestContext build() {
             var context = new IntegrationTestContext(packages, singletons.toArray());
             if (userInfo != null) {
-                addTokenCookies(userInfo, context);
+                addTokens(userInfo, context);
             }
             context.environment.getIntegrationTestScript().reset();
             return context;
@@ -129,14 +129,14 @@ public class IntegrationTestContext implements AppContext {
             return this;
         }
 
-        private static void addTokenCookies(LocalUserInfo userInfo, IntegrationTestContext context) {
+        private static void addTokens(LocalUserInfo userInfo, IntegrationTestContext context) {
             System.err.println("Adding token cookies for user: " + userInfo.getUserId());
             context.getOptionalSingleton(ApiTokenManager.class).ifPresent(tokenManager -> {
                 System.err.println("Creating tokens for user: " + userInfo.getUserId());
                 var tokens = tokenManager.createTokens(userInfo.getUserId(), userInfo.getRoles(), userInfo.getClaims());
-                var document = context.environment.getHtmlObjects().getDocument();
-                document.addCookie("access_token", tokens.accessToken());
-                document.addCookie("refresh_token", tokens.renewToken());
+                var functions = context.environment.getIntegrationTestScript().getIntegrationTestFunctions();
+                functions.getSetAccessToken().execute(tokens.accessToken());
+                functions.getSetRenewToken().execute(tokens.renewToken());
             });
         }
     }

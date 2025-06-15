@@ -67,7 +67,7 @@ class HttpConnectorMock {
         for (var key in headers) {
             console.log('header: ' + key + ' : ' + headers[key]);
         }
-        console.log('post: ' + uri + ' : ' + payload);
+        console.log('post: ' + uri + ' : ' + JSON.stringify(payload || {}));
     }
 
     logResponse(response) {

@@ -90,6 +90,10 @@ class ControllerService {
         nextRequest.setClientId(request.getClientId());
         nextRequest.getLocalStorageData().putAll(request.getLocalStorageData());
         nextRequest.getClientStateData().putAll(request.getClientStateData());
+        nextRequest.setAccessToken(request.getAccessToken());
+        if (controllerResult.getTokens() != null) {
+            //accessToken.
+        }
         controllerResultMapper.mapControllerResultToNextRequest(controllerResult, nextRequest);
         var nextControllerResult = new ControllerResult();
         // one of these 2 values changed
@@ -100,7 +104,8 @@ class ControllerService {
             nextControllerResult.setNextURL(this.pathResolver.evaluateRealPath(path, controllerResult.getPathVariables(), controllerResult.getUrlParameters()));
         }
         // get model data for next controller
-        nextControllerWrapper.invokeGetModelMethods(nextRequest, nextControllerResult, accessToken);
+        AccessToken token = controllerResult.getTokens() != null ? AccessToken.create(controllerResult.getTokens().getAccessToken(), tokenManager) : accessToken;
+        nextControllerWrapper.invokeGetModelMethods(nextRequest, nextControllerResult, token);
         // map result to response
         response.clear();
         mapResultToResponse(request, response, nextControllerResult);

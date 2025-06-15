@@ -31,7 +31,6 @@ public class FrontendServiceImpl implements FrontendService {
     private final Resources resources;
     private final AuthenticationProviderServices authenticationProviderServices;
     private final ApiTokenManager tokenManager;
-    private final AuthenticationService authenticationService;
     private final AppContext appContext;
     private final Collection<RequestFilter> requestFilters;
     private Resource appJsResource;
@@ -109,7 +108,7 @@ public class FrontendServiceImpl implements FrontendService {
     @Override
     public AuthenticationData authenticationCallback(String provider, String queryString) {
         var service = Objects.requireNonNull(authenticationProviderServices.getAuthenticationProviderService(provider));
-        var authenticationProviderData = service.verifyStateAndExtractCode(queryString);
+        var authenticationProviderData = service.verifyAndDecodeCodeAndStateQuery(queryString);
         var tokenResponse = service.requestTokens(authenticationProviderData.getCode(), authenticationProviderData.getState());
         return getAuthenticationData(tokenResponse, authenticationProviderData);
     }
@@ -236,7 +235,7 @@ public class FrontendServiceImpl implements FrontendService {
     }
 
     private ServerResponse authenticationErrorResponse(String uri) {
-        var state = authenticationService.createStateParameter(uri);
+        var state = StateParameter.create(uri);
         var response = new ServerResponse();
         response.setStatus(401);
         response.setNextURL("/login.html?state=" + state);

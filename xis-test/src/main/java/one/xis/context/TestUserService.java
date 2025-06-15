@@ -7,6 +7,7 @@ import one.xis.security.LocalUserInfoService;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class TestUserService implements LocalUserInfoService {
     private final Map<String, LocalUserInfo> users = new HashMap<>();
@@ -22,7 +23,7 @@ public class TestUserService implements LocalUserInfoService {
             throw new AuthenticationException("User not found: " + userId);
         }
         // For testing, we assume the password is always "password"
-        if (!"password".equals(password)) {
+        if (!Objects.equals(password, user.getPassword())) {
             throw new AuthenticationException("Invalid credentials for user: " + userId);
         }
         return true;

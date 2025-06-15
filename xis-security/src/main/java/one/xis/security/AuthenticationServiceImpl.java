@@ -7,26 +7,20 @@ import one.xis.utils.lang.StringUtils;
 import java.net.HttpURLConnection;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.util.Map;
 
-import static java.time.temporal.ChronoUnit.MINUTES;
 import static one.xis.utils.lang.StringUtils.isNotEmpty;
 
 class AuthenticationServiceImpl implements AuthenticationService {
 
-    private static final Duration STATE_PARAMETER_EXPIRATION = Duration.of(15, MINUTES);
-
     private final AuthenticationProviderConnectionFactory connectionFactory;
     private final AuthenticationProviderConfiguration providerConfiguration;
-    private final String stateSignatureKey;
     private final Gson gson = new Gson();
 
     AuthenticationServiceImpl(AuthenticationProviderConfiguration providerConfiguration,
                               AuthenticationProviderConnectionFactory connectionFactory) {
         this.providerConfiguration = providerConfiguration;
         this.connectionFactory = connectionFactory;
-        this.stateSignatureKey = SecurityUtil.createRandomKey(32);
     }
 
     @Override
@@ -53,7 +47,7 @@ class AuthenticationServiceImpl implements AuthenticationService {
 
 
     @Override
-    public AuthenticationProviderStateData verifyStateAndExtractCode(@NonNull String queryString) {
+    public AuthenticationProviderStateData verifyAndDecodeCodeAndStateQuery(@NonNull String queryString) {
         Map<String, String> queryParams = parseQueryParameters(queryString);
         String state = queryParams.get("state");
         String code = queryParams.get("code");
@@ -64,15 +58,13 @@ class AuthenticationServiceImpl implements AuthenticationService {
         if (parts.length != 2) {
             throw new IllegalArgumentException("Invalid state parameter format");
         }
-        String encodedPayload = parts[0];
-        String signature = parts[1];
-        StateParameterPayload stateParameterPayload = verifyStateParameter(encodedPayload, signature);
+        StateParameterPayload stateParameterPayload = StateParameter.decodeAndVerify(state);
         return new AuthenticationProviderStateData(code, state, stateParameterPayload);
     }
 
     @Override
     public StateParameterPayload verifyState(@NonNull String state) {
-        return verifyStateParameter(state);
+        return StateParameter.decodeAndVerify(state);
     }
 
     @Override
@@ -108,11 +100,7 @@ class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public String createStateParameter(String urlAfterLogin) {
-        StateParameterPayload payload = createStateParameterPayload(urlAfterLogin);
-        String payloadJson = gson.toJson(payload);
-        String encodedPayload = SecurityUtil.encodeBase64UrlSafe(payloadJson);
-        String signature = SecurityUtil.signHmacSHA256(encodedPayload, stateSignatureKey);
-        return encodedPayload + "." + signature;
+        return StateParameter.create(urlAfterLogin);
     }
 
     @Override
@@ -134,9 +122,6 @@ class AuthenticationServiceImpl implements AuthenticationService {
 
     private Map<String, String> parseQueryParameters(@NonNull String url) {
         int queryStart = url.indexOf('?');
-        if (queryStart < 0) {
-            queryStart = 0;
-        }
         String query = url.substring(queryStart + 1);
         String[] pairs = query.split("&");
         Map<String, String> params = new java.util.HashMap<>();
@@ -149,57 +134,6 @@ class AuthenticationServiceImpl implements AuthenticationService {
             }
         }
         return params;
-    }
-
-    private StateParameterPayload verifyStateParameter(@NonNull String encodedPayload, String signature) {
-        String expectedSignature = SecurityUtil.signHmacSHA256(encodedPayload, stateSignatureKey);
-        if (!expectedSignature.equals(signature)) {
-            throw new IllegalArgumentException("Invalid state parameter signature");
-        }
-        String payloadJson = new String(SecurityUtil.decodeBase64UrlSafe(encodedPayload));
-        StateParameterPayload payload;
-        try {
-            payload = gson.fromJson(payloadJson, StateParameterPayload.class);
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Invalid state parameter payload", e);
-        }
-        if (payload.getCsrf() == null || payload.getCsrf().isEmpty()) {
-            throw new IllegalArgumentException("Missing CSRF token in state parameter");
-        }
-        if (payload.getRedirect() == null || payload.getRedirect().isEmpty()) {
-            throw new IllegalArgumentException("Missing redirect URI in state parameter");
-        }
-        long iat = payload.getIat();
-        long currentTime = System.currentTimeMillis() / 1000;
-        if (iat <= 0 || iat > currentTime) {
-            throw new IllegalArgumentException("Invalid issued at time in state parameter");
-        }
-        long expiresAt = payload.getExpiresAtSeconds();
-        if (expiresAt <= 0 || expiresAt <= iat || expiresAt < currentTime) {
-            throw new IllegalArgumentException("State parameter has expired");
-        }
-        // Do not check redirect URI here, as it may be dynamic and not known in advance
-        return payload;
-    }
-
-    private StateParameterPayload verifyStateParameter(@NonNull String stateParameter) {
-        String[] parts = stateParameter.split("\\.");
-        if (parts.length != 2) {
-            throw new IllegalArgumentException("Invalid state parameter format");
-        }
-        String encodedPayload = parts[0];
-        String signature = parts[1];
-        return verifyStateParameter(encodedPayload, signature);
-    }
-
-
-    private StateParameterPayload createStateParameterPayload(String urlAfterLogin) {
-        StateParameterPayload payload = new StateParameterPayload();
-        payload.setCsrf(SecurityUtil.createRandomKey(32));
-        payload.setRedirect(urlAfterLogin);
-        payload.setIat(System.currentTimeMillis() / 1000);
-        payload.setExpiresAtSeconds(payload.getIat() + STATE_PARAMETER_EXPIRATION.getSeconds());
-        return payload;
     }
 
 

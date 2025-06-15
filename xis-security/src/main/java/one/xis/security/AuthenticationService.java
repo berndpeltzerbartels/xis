@@ -32,7 +32,7 @@ public interface AuthenticationService {
      * @param queryString The query-string to verify, which should contain the state and code parameters.
      * @return The extracted authorization code as a String.
      */
-    AuthenticationProviderStateData verifyStateAndExtractCode(@NonNull String queryString);
+    AuthenticationProviderStateData verifyAndDecodeCodeAndStateQuery(@NonNull String queryString);
 
     /**
      * Verifies the state and code parameters.

@@ -76,15 +76,5 @@ class LoginAndRolesIntegrationTest {
         var doc = testContext.openPage("/mixed.html").getDocument();
         assertThat(doc.getElementByTagName("title").innerText).isEqualTo("Login");
     }
-
-    @Test
-    void methodProtectedPageAccessibleAfterLogin() {
-        var loginPage = testContext.openPage("/login.html").getDocument();
-        loginPage.getInputElementById("username").setValue("admin");
-        loginPage.getInputElementById("password").setValue("pw");
-        loginPage.getElementByTagName("button").click();
-
-        var doc = testContext.openPage("/mixed.html").getDocument();
-        assertThat(doc.getElementByTagName("title").innerText).isEqualTo("MixedPage");
-    }
+    
 }

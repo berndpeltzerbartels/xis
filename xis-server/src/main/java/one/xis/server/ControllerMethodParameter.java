@@ -10,6 +10,7 @@ import one.xis.security.AuthenticationException;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.time.ZoneId;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -17,7 +18,7 @@ import java.util.function.Supplier;
 @RequiredArgsConstructor
 class ControllerMethodParameter {
     private final Method method;
-    private final java.lang.reflect.Parameter parameter;
+    private final Parameter parameter;
     private final MainDeserializer deserializer;
 
     // TODO Validation: only one of these annotation in parameter
@@ -98,19 +99,19 @@ class ControllerMethodParameter {
         return value;
     }
 
-    private Object deserializeFormDataParameter(java.lang.reflect.Parameter parameter, ClientRequest request, PostProcessingResults postProcessingResults, AccessToken accessToken) throws IOException {
+    private Object deserializeFormDataParameter(Parameter parameter, ClientRequest request, PostProcessingResults postProcessingResults, AccessToken accessToken) throws IOException {
         var key = parameter.getAnnotation(FormData.class).value();
         var paramValue = request.getFormData().get(key);
         return deserializeParameter(paramValue, request, parameter, postProcessingResults, accessToken);
     }
 
-    private Object deserializeUrlParameter(java.lang.reflect.Parameter parameter, ClientRequest request, PostProcessingResults postProcessingResults, AccessToken accessToken) throws IOException {
+    private Object deserializeUrlParameter(Parameter parameter, ClientRequest request, PostProcessingResults postProcessingResults, AccessToken accessToken) throws IOException {
         var key = parameter.getAnnotation(URLParameter.class).value();
         var paramValue = request.getUrlParameters().get(key);
         return deserializeParameter(paramValue, request, parameter, postProcessingResults, accessToken);
     }
 
-    private Object deserializePathVariable(java.lang.reflect.Parameter parameter, ClientRequest request, PostProcessingResults postProcessingResults, AccessToken accessToken) throws IOException {
+    private Object deserializePathVariable(Parameter parameter, ClientRequest request, PostProcessingResults postProcessingResults, AccessToken accessToken) throws IOException {
         var key = parameter.getAnnotation(PathVariable.class).value();
         if (!request.getPathVariables().containsKey(key)) {
             throw new IllegalStateException("No path variable found for key " + key);
@@ -119,7 +120,7 @@ class ControllerMethodParameter {
         return deserializeParameter(paramValue, request, parameter, postProcessingResults, accessToken);
     }
 
-    private Object deserializeWidgetParameter(java.lang.reflect.Parameter parameter, ClientRequest request, PostProcessingResults postProcessingResults, AccessToken accessToken) throws IOException {
+    private Object deserializeWidgetParameter(Parameter parameter, ClientRequest request, PostProcessingResults postProcessingResults, AccessToken accessToken) throws IOException {
         var key = parameter.getAnnotation(WidgetParameter.class).value();
         if (!request.getBindingParameters().containsKey(key)) {
             throw new IllegalStateException("No widget parameter found for key " + key);
@@ -128,7 +129,7 @@ class ControllerMethodParameter {
         return deserializeParameter(paramValue, request, parameter, postProcessingResults, accessToken);
     }
 
-    private Object deserializeParameter(String jsonValue, ClientRequest request, java.lang.reflect.Parameter parameter, PostProcessingResults postProcessingResults, AccessToken accessToken) throws IOException {
+    private Object deserializeParameter(String jsonValue, ClientRequest request, Parameter parameter, PostProcessingResults postProcessingResults, AccessToken accessToken) throws IOException {
         if (jsonValue == null) {
             return null;
         }

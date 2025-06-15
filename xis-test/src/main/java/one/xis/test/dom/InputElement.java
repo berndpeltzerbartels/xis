@@ -24,4 +24,12 @@ public class InputElement extends Element {
             fireEvent("change");
         }
     }
+
+    @Override
+    public String getAttribute(String name) {
+        if ("value".equals(name)) {
+            return value != null ? value : "";
+        }
+        return super.getAttribute(name);
+    }
 }

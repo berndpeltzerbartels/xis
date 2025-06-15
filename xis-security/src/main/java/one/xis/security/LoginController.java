@@ -16,7 +16,6 @@ class LoginController {
     public static final String URL = "/login";
     private final FrontendService frontendService;
     private LocalAuthentication localAuthentication;
-    private AuthenticationService authenticationService;
 
     @XISInit
     void init(List<LocalAuthentication> localAuthentications) {
@@ -29,9 +28,8 @@ class LoginController {
     }
 
     @FormData("login")
-    LoginFormData createLoginFormData(@QueryParameter("state") String state) {
-        var payload = authenticationService.verifyState(state);
-        return new LoginFormData(null, null, payload.getRedirect());
+    LoginFormData createLoginFormData(@URLParameter("state") String state) {
+        return new LoginFormData(null, null, state);
     }
 
     @Action("login")
@@ -39,8 +37,9 @@ class LoginController {
         if (localAuthentication == null) {
             throw new IllegalStateException("Local authentication is not present. This may be because no implementation of " + LocalUserInfoService.class + " is available.");
         }
+        var payload = StateParameter.decodeAndVerify(login.getState());
         // Logic for handling login action
-        return new LocalLoginResponse(localAuthentication.login(login.getUsername(), login.getPassword()), login.getRedirect());
+        return new LocalLoginResponse(localAuthentication.login(login.getUsername(), login.getPassword()), payload.getRedirect());
     }
 
 }

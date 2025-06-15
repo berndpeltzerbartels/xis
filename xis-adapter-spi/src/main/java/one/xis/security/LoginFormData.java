@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 public class LoginFormData {
     private String username;
     private String password;
-    private String redirect;
+    private String state;
 
     // Getters and setters can be added here if needed
 }
