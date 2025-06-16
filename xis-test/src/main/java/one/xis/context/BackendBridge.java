@@ -4,8 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import one.xis.security.AuthenticationException;
-import one.xis.security.InvalidCredentialsException;
-import one.xis.security.Login;
 import one.xis.server.*;
 import one.xis.validation.ValidatorMessages;
 
@@ -69,16 +67,6 @@ public class BackendBridge implements ResourcePathProvider {
 
     public BackendBridgeResponse getWidgetHtml(String uri, Map<String, String> headers) {
         return stringToBridgeResponse(frontendService.getWidgetHtml(headers.get("uri")));
-    }
-
-    public BackendBridgeResponse localTokenProviderLogin(String uri, String loginJson, Map<String, String> headers) {
-        try {
-            Login login = objectMapper.readValue(loginJson, Login.class);
-            String code = frontendService.localTokenProviderLogin(login);
-            return new BackendBridgeResponse("{\"code\":\"" + code + "\",\"state\":\"" + login.getState() + "\"}", 200, new ValidatorMessages());
-        } catch (InvalidCredentialsException | JsonProcessingException e) {
-            return new BackendBridgeResponse(e.getMessage(), 401, new ValidatorMessages());
-        }
     }
 
     public BackendBridgeResponse localTokenProviderGetTokens(String uri, Map<String, String> headers) {

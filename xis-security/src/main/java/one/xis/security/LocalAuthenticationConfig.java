@@ -15,8 +15,8 @@ class LocalAuthenticationConfig {
     private final List<LocalUserInfoService> localUserInfoServices;
 
     @XISBean
-    Optional<LocalAuthentication> localAuthentication() {
-        return localUserInfoService().map(userService -> new LocalAuthenticationImpl(userService, tokenManager));
+    Optional<Authentication> localAuthentication() {
+        return localUserInfoService().map(userService -> new AuthenticationImpl(userService, tokenManager));
     }
 
     private Optional<LocalUserInfoService> localUserInfoService() {
@@ -24,7 +24,7 @@ class LocalAuthenticationConfig {
             case 0 -> Optional.empty();
             case 1 -> Optional.of(localUserInfoServices.get(0));
             default ->
-                    throw new IllegalStateException("Multiple LocalUserInfoService instances found: " + localUserInfoServices.size());
+                    throw new IllegalStateException("Multiple " + LocalUserInfoService.class.getSimpleName() + " instances found: " + localUserInfoServices.size());
         };
     }
 }

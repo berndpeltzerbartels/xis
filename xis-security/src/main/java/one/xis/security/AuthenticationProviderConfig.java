@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AuthenticationProviderConfiguration {
+public class AuthenticationProviderConfig {
 
     /**
      * The client id is used to identify the client application with the authentication provider.
@@ -50,6 +50,14 @@ public class AuthenticationProviderConfiguration {
      * It is used to exchange the code for access and renew tokens.
      */
     private String tokenEndpoint;
+
+    /**
+     * This url is used to renew the access token.
+     * It will start with providers server url, like <a href="https://oidc.example.com/renew">https://oidc.example.com/renew</a>.
+     * It is used to renew the access token using the refresh token.
+     * It is optional, if the provider does not support token renewal.
+     */
+    private String renewTokenEndpoint;
 
 
     /**

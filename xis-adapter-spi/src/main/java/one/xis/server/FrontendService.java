@@ -2,7 +2,6 @@ package one.xis.server;
 
 import one.xis.security.AuthenticationException;
 import one.xis.security.InvalidCredentialsException;
-import one.xis.security.Login;
 
 import java.util.Map;
 
@@ -20,8 +19,6 @@ public interface FrontendService {
     ApiTokens processRenewApiTokenRequest(String renewToken);
 
     AuthenticationData authenticationCallback(String provider, String queryString);
-
-    String localTokenProviderLogin(Login login) throws InvalidCredentialsException;
 
     BearerTokens localTokenProviderGetTokens(String code, String state) throws AuthenticationException;
 

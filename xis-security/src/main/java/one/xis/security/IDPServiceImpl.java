@@ -13,29 +13,27 @@ import static java.time.temporal.ChronoUnit.MINUTES;
 
 
 @RequiredArgsConstructor
-class LocalAuthenticationProviderServiceImpl implements LocalAuthenticationProviderService {
+class IDPServiceImpl implements IDPService {
 
-    private final AuthenticationService authenticationService;
-    private final LocalUserInfoService userService;
-    private final LocalAuthenticationProviderCodeStore codeStore = new LocalAuthenticationProviderCodeStore();
+    private final IDPUserService idpUserService;
+    private final IDPCodeStore idpCodeStore = new IDPCodeStore();
     private final String secret = SecurityUtil.createRandomKey(32);
     private final Duration lifetime = Duration.of(15, MINUTES);
     private final Duration refreshLifetime = Duration.of(30, MINUTES);
 
     @Override
-    public String login(Login login) throws InvalidCredentialsException {
-        if (!userService.checkCredentials(login.getUsername(), login.getPassword())) {
+    public String login(IDPLogin login) throws InvalidCredentialsException {
+        if (!idpUserService.checkCredentials(login.getUsername(), login.getPassword())) {
             throw new InvalidCredentialsException();
         }
-        authenticationService.verifyState(login.getState());
         String code = UUID.randomUUID().toString();
-        codeStore.store(code, login.getUsername());
+        idpCodeStore.store(code, login.getUsername());
         return code;
     }
 
     @Override
-    public LocalAuthenticationTokens issueToken(String code, String state) throws AuthenticationException {
-        String userId = codeStore.getUserIdForCode(code);
+    public IDPTokens issueToken(String code, String state) throws AuthenticationException {
+        String userId = idpCodeStore.getUserIdForCode(code);
         if (userId == null) {
             throw new InvalidStateParameterException();
         }
@@ -43,7 +41,7 @@ class LocalAuthenticationProviderServiceImpl implements LocalAuthenticationProvi
     }
 
     @Override
-    public LocalAuthenticationTokens refresh(String refreshToken) throws InvalidTokenException, AuthenticationException {
+    public IDPTokens refresh(String refreshToken) throws InvalidTokenException, AuthenticationException {
         String userId = verifyRefreshToken(refreshToken);
         return generateTokenResponse(userId, null);
     }
@@ -69,12 +67,19 @@ class LocalAuthenticationProviderServiceImpl implements LocalAuthenticationProvi
         }
     }
 
-    private LocalAuthenticationTokens generateTokenResponse(String userId, String state) throws AuthenticationException {
+    @Override
+    public void checkRedirectUrl(String redirectUrl) throws InvalidRedirectUrlException {
+        if (idpUserService.getAllowedRedirectUrls().stream().noneMatch(redirectUrl::startsWith)) {
+            throw new InvalidRedirectUrlException(redirectUrl);
+        }
+    }
+
+    private IDPTokens generateTokenResponse(String userId, String state) throws AuthenticationException {
         long now = System.currentTimeMillis();
         Date expiry = Date.from(Instant.now().plus(lifetime));
         Date expiryRefresh = Date.from(Instant.now().plus(refreshLifetime));
 
-        LocalUserInfo userInfo = userService.getUserInfo(userId);
+        LocalUserInfo userInfo = idpUserService.getUserInfo(userId);
 
         String jwt = Jwts.builder()
                 .setId(UUID.randomUUID().toString())
@@ -95,7 +100,7 @@ class LocalAuthenticationProviderServiceImpl implements LocalAuthenticationProvi
                 .signWith(SignatureAlgorithm.HS256, secret.getBytes(StandardCharsets.UTF_8))
                 .compact();
 
-        LocalAuthenticationTokens response = new LocalAuthenticationTokens();
+        IDPTokens response = new IDPTokens();
         response.setAccessToken(jwt);
         response.setRefreshToken(refreshToken);
         response.setExpiresIn(lifetime);

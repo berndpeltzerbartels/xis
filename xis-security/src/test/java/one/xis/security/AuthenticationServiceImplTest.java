@@ -18,7 +18,7 @@ class AuthenticationServiceImplTest {
     @BeforeEach
     void setup() {
         AuthenticationProviderConnectionFactory connectionFactory = mock(AuthenticationProviderConnectionFactory.class);
-        AuthenticationProviderConfiguration providerConfiguration = new AuthenticationProviderConfiguration();
+        AuthenticationProviderConfig providerConfiguration = new AuthenticationProviderConfig();
         providerConfiguration.setLoginFormUrl("https://provider/auth");
         providerConfiguration.setTokenEndpoint("https://provider/token");
         providerConfiguration.setClientId("my-client-id");

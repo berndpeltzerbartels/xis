@@ -7,8 +7,9 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Login {
+public class IDPLogin {
     private String username;
     private String password;
     private String state;
+    private String redirectUrl;
 }

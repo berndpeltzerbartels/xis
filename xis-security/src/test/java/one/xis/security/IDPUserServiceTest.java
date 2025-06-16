@@ -3,32 +3,33 @@ package one.xis.security;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.mock;
 
-class LocalAuthenticationProviderServiceTest {
+class IDPUserServiceTest {
 
-    private LocalAuthenticationProviderServiceImpl authentication;
-    private LocalUserInfoService userService;
+    private IDPServiceImpl authentication;
+    private IDPUserService userService;
 
     @BeforeEach
     void setUp() {
         userService = new TestUserService();
-        authentication = new LocalAuthenticationProviderServiceImpl(mock(), userService);
+        authentication = new IDPServiceImpl(userService);
     }
 
     @Test
     void fullAuthenticationCycle() throws Exception {
         // Login
-        String code = authentication.login(new Login("user1", "secret", "state"));
+        String code = authentication.login(new IDPLogin("user1", "secret", "state", ""));
         assertThat(code).isNotBlank();
 
         // Token issuance
-        LocalAuthenticationTokens tokenResponse = authentication.issueToken(code, "testState");
+        IDPTokens tokenResponse = authentication.issueToken(code, "testState");
         assertThat(tokenResponse.getAccessToken()).isNotBlank();
         assertThat(tokenResponse.getRefreshToken()).isNotBlank();
         assertThat(tokenResponse.getState()).isEqualTo("testState");
@@ -40,7 +41,7 @@ class LocalAuthenticationProviderServiceTest {
         assertThat(userInfo.getClaims()).containsEntry("email", "user1@example.com");
 
         // Refresh
-        LocalAuthenticationTokens refreshed = authentication.refresh(tokenResponse.getRefreshToken());
+        IDPTokens refreshed = authentication.refresh(tokenResponse.getRefreshToken());
         assertThat(refreshed.getAccessToken()).isNotEqualTo(tokenResponse.getAccessToken());
         assertThat(refreshed.getRefreshToken()).isNotEqualTo(tokenResponse.getRefreshToken());
         assertThat(refreshed.getState()).isNull();
@@ -48,7 +49,7 @@ class LocalAuthenticationProviderServiceTest {
 
     @Test
     void loginFailsOnWrongPassword() {
-        assertThatThrownBy(() -> authentication.login(new Login("user1", "wrong", "state")))
+        assertThatThrownBy(() -> authentication.login(new IDPLogin("user1", "wrong", "state", "")))
                 .isInstanceOf(InvalidCredentialsException.class);
     }
 
@@ -71,11 +72,11 @@ class LocalAuthenticationProviderServiceTest {
         Set<String> roles = Set.of("admin", "user");
         Map<String, Object> claims = Map.of("email", userId + "@example.com");
 
-        String code = authentication.login(new Login("user1", "secret", "state"));
-        LocalAuthenticationTokens initialToken = authentication.issueToken(code, "xyz");
+        String code = authentication.login(new IDPLogin("user1", "secret", "state", ""));
+        IDPTokens initialToken = authentication.issueToken(code, "xyz");
 
         // when
-        LocalAuthenticationTokens refreshedToken = authentication.refresh(initialToken.getRefreshToken());
+        IDPTokens refreshedToken = authentication.refresh(initialToken.getRefreshToken());
 
         LocalUserInfo originalInfo = authentication.getUserInfo(initialToken.getAccessToken());
         LocalUserInfo refreshedInfo = authentication.getUserInfo(refreshedToken.getAccessToken());
@@ -88,7 +89,12 @@ class LocalAuthenticationProviderServiceTest {
 
 
     // Dummy UserService
-    static class TestUserService implements LocalUserInfoService {
+    static class TestUserService implements IDPUserService {
+
+        @Override
+        public Collection<String> getAllowedRedirectUrls() {
+            return List.of("");
+        }
 
         @Override
         public boolean checkCredentials(String userId, String password) {

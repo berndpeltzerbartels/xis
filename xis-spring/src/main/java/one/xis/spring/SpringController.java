@@ -5,8 +5,6 @@ import lombok.NonNull;
 import lombok.Setter;
 import one.xis.PathVariable;
 import one.xis.security.AuthenticationException;
-import one.xis.security.InvalidCredentialsException;
-import one.xis.security.Login;
 import one.xis.server.*;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.MediaType;
@@ -97,23 +95,9 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
     }
 
     @Override
-    @PostMapping("/xis/token-provider/login")
-    public ResponseEntity<?> localTokenProviderLogin(Login login) {
-        try {
-            var code = frontendService.localTokenProviderLogin(login);
-            var state = login.getState();
-            return ResponseEntity.status(301)
-                    .header("Location", "/xis/auth/local?code=" + code + "&state=" + state)
-                    .build();
-        } catch (InvalidCredentialsException e) {
-            return ResponseEntity.status(401).body("Invalid credentials");
-        }
-    }
-
-    @Override
-    @PostMapping(value = "/xis/token-provider/tokens", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public ResponseEntity<?> localTokenProviderGetTokens(@RequestParam("code") String code,
-                                                         @RequestParam("state") String state) {
+    @PostMapping(value = "/xis/idp/tokens", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public ResponseEntity<?> idpGetTokens(@RequestParam("code") String code,
+                                          @RequestParam("state") String state) {
         BearerTokens tokens;
         try {
             tokens = frontendService.localTokenProviderGetTokens(code, state);
@@ -214,6 +198,9 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
         var responseBuilder = ResponseEntity.status(serverResponse.getStatus());
         if (serverResponse.getTokens() != null) {
             addTokenCookies(responseBuilder, serverResponse.getTokens());
+        }
+        if (serverResponse.getRedirectUrl() != null) {
+            return responseBuilder.header("Location", serverResponse.getRedirectUrl()).build();
         }
         return responseBuilder.body(serverResponse);
     }

@@ -3,7 +3,6 @@ package one.xis.security;
 import lombok.RequiredArgsConstructor;
 import one.xis.*;
 import one.xis.context.XISInit;
-import one.xis.server.FrontendService;
 
 import java.util.List;
 
@@ -14,14 +13,13 @@ import java.util.List;
 @RequiredArgsConstructor
 class LoginController {
     public static final String URL = "/login";
-    private final FrontendService frontendService;
-    private LocalAuthentication localAuthentication;
+    private Authentication authentication;
 
     @XISInit
-    void init(List<LocalAuthentication> localAuthentications) {
-        localAuthentication = switch (localAuthentications.size()) {
+    void init(List<Authentication> authentications) {
+        authentication = switch (authentications.size()) {
             case 0 -> null;
-            case 1 -> localAuthentications.get(0);
+            case 1 -> authentications.get(0);
             default ->
                     throw new IllegalStateException("Multiple LocalAuthentication implementations found. Please ensure only one is configured.");
         };
@@ -34,12 +32,12 @@ class LoginController {
 
     @Action("login")
     public LocalLoginResponse login(@FormData("login") LoginFormData login) {
-        if (localAuthentication == null) {
+        if (authentication == null) {
             throw new IllegalStateException("Local authentication is not present. This may be because no implementation of " + LocalUserInfoService.class + " is available.");
         }
         var payload = StateParameter.decodeAndVerify(login.getState());
         // Logic for handling login action
-        return new LocalLoginResponse(localAuthentication.login(login.getUsername(), login.getPassword()), payload.getRedirect());
+        return new LocalLoginResponse(authentication.login(login.getUsername(), login.getPassword()), payload.getRedirect());
     }
 
 }

@@ -15,12 +15,17 @@ class ControllerResponseMapper {
         response.setFormData(result.getFormData());
         response.setNextWidgetId(result.getNextWidgetId());
         response.setValidatorMessages(result.getValidatorMessages());
-        response.setStatus(result.isValidationFailed() ? 422 : 200);
         response.setWidgetContainerId(result.getWidgetContainerId());
         response.setReloadWidgets(result.getWidgetsToReload());
         response.getClientStateData().putAll(result.getClientState());
         response.getLocalStorageData().putAll(result.getLocalStorage());
         response.setTokens(result.getTokens());
+        if (result.getRedirectUrl() != null) {
+            response.setRedirectUrl(result.getRedirectUrl());
+            response.setStatus(302);
+        } else {
+            response.setStatus(result.isValidationFailed() ? 422 : 200);
+        }
         // TODO navigation test. reload widgets ? set widget in another container ?
     }
 }

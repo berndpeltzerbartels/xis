@@ -21,6 +21,9 @@ class ControllerResultMapper {
         if (controllerMethodResult.getWidgetContainerId() != null) {
             controllerResult.setWidgetContainerId(controllerMethodResult.getWidgetContainerId());
         }
+        if (controllerMethodResult.getRedirectUrl() != null) {
+            controllerResult.setRedirectUrl(controllerMethodResult.getRedirectUrl());
+        }
         controllerResult.setTokens(controllerMethodResult.getTokens());
         controllerResult.getModelData().putAll(controllerMethodResult.getModelData());
         controllerResult.getFormData().putAll(controllerMethodResult.getFormData());

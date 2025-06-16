@@ -5,7 +5,7 @@ import lombok.Data;
 import java.time.Duration;
 
 @Data
-public class LocalAuthenticationTokens {
+public class IDPTokens {
     private String accessToken;
     private String refreshToken;
     private Duration expiresIn;

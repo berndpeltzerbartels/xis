@@ -14,10 +14,10 @@ import static one.xis.utils.lang.StringUtils.isNotEmpty;
 class AuthenticationServiceImpl implements AuthenticationService {
 
     private final AuthenticationProviderConnectionFactory connectionFactory;
-    private final AuthenticationProviderConfiguration providerConfiguration;
+    private final AuthenticationProviderConfig providerConfiguration;
     private final Gson gson = new Gson();
 
-    AuthenticationServiceImpl(AuthenticationProviderConfiguration providerConfiguration,
+    AuthenticationServiceImpl(AuthenticationProviderConfig providerConfiguration,
                               AuthenticationProviderConnectionFactory connectionFactory) {
         this.providerConfiguration = providerConfiguration;
         this.connectionFactory = connectionFactory;

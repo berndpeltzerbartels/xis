@@ -1,12 +1,11 @@
 package one.xis.security;
 
 /**
- * LocalAuthenticationServiceImpl provides a local authentication service implementation.
- * It handles user login, token issuance, and user information retrieval.
- * <p>
- * This the application itself is the token issuer and verifier.
+ * Interface for Identity Provider (IDP) services that handle user authentication,
+ * issue tokens, and manage user sessions.
+ * This service is designed to use XIS for identity management and authentication.
  */
-public interface LocalAuthenticationProviderService {
+public interface IDPService {
 
     /**
      * Logs in a user with the provided credentials.
@@ -15,7 +14,7 @@ public interface LocalAuthenticationProviderService {
      * @return a unique code representing the login session
      * @throws InvalidCredentialsException if the credentials are invalid
      */
-    String login(Login login) throws InvalidCredentialsException;
+    String login(IDPLogin login) throws InvalidCredentialsException;
 
     /**
      * Issues an authentication token based on the provided code and state.
@@ -25,7 +24,7 @@ public interface LocalAuthenticationProviderService {
      * @return a response containing access and refresh tokens
      * @throws AuthenticationException if the code is invalid or expired
      */
-    LocalAuthenticationTokens issueToken(String code, String state) throws AuthenticationException;
+    IDPTokens issueToken(String code, String state) throws AuthenticationException;
 
     /**
      * Refreshes the authentication token using the provided refresh token.
@@ -35,7 +34,7 @@ public interface LocalAuthenticationProviderService {
      * @throws InvalidTokenException   if the refresh token is invalid or expired
      * @throws AuthenticationException if there is an error during the refresh process
      */
-    LocalAuthenticationTokens refresh(String refreshToken) throws InvalidTokenException, AuthenticationException; // TODO Wird nur in Tests verwendet, entfernen?
+    IDPTokens refresh(String refreshToken) throws InvalidTokenException, AuthenticationException;
 
     /**
      * Retrieves user information based on the provided access token.
@@ -45,5 +44,7 @@ public interface LocalAuthenticationProviderService {
      * @throws InvalidTokenException if the access token is invalid or expired
      */
     LocalUserInfo getUserInfo(String accessToken) throws InvalidTokenException;
+
+    void checkRedirectUrl(String redirectUrl) throws InvalidRedirectUrlException;
 
 }

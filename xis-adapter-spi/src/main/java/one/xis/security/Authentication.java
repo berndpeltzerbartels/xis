@@ -8,7 +8,7 @@ import one.xis.server.ApiTokens;
  * <p>
  * Is only present in case we have an instance of one.xis.security.UserService.
  */
-public interface LocalAuthentication {
+public interface Authentication {
 
     ApiTokens login(String username, String password) throws AuthenticationException;
 }

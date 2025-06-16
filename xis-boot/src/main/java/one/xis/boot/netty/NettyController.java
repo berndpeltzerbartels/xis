@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
 import one.xis.security.AuthenticationException;
 import one.xis.security.InvalidCredentialsException;
-import one.xis.security.Login;
 import one.xis.server.*;
 
 import java.io.IOException;
@@ -99,19 +98,7 @@ public class NettyController implements FrameworkController<FullHttpResponse, Fu
     }
 
     @Override
-    public FullHttpResponse localTokenProviderLogin(Login login) {
-        String code;
-        try {
-            code = frontendService.localTokenProviderLogin(login);
-        } catch (InvalidCredentialsException e) {
-            throw new RuntimeException(e);
-        }
-        String state = login.getState();
-        return mapper.toRedirectWithCodeAndState(code, state);
-    }
-
-    @Override
-    public FullHttpResponse localTokenProviderGetTokens(String code, String state) {
+    public FullHttpResponse idpGetTokens(String code, String state) {
         BearerTokens tokens;
         try {
             tokens = frontendService.localTokenProviderGetTokens(code, state);

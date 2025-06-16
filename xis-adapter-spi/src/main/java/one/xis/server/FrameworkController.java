@@ -1,7 +1,5 @@
 package one.xis.server;
 
-import one.xis.security.Login;
-
 import java.util.Locale;
 import java.util.Map;
 
@@ -21,9 +19,7 @@ public interface FrameworkController<RESP_WRAPPER, REQ, RESP> {
 
     RESP onFormAction(ClientRequest request, String authenticationHeader, Locale locale);
 
-    RESP localTokenProviderLogin(Login login);
-
-    RESP localTokenProviderGetTokens(String code, String state);
+    RESP idpGetTokens(String code, String state);
 
     /**
      * Authenticates a user with the given request and provider. This is the callback url

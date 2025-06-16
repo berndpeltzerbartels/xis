@@ -7,7 +7,6 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
 import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
-import one.xis.security.Login;
 import one.xis.server.ClientRequest;
 import one.xis.server.FrontendService;
 
@@ -93,15 +92,11 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
                 if (header == null || !header.startsWith("Bearer ")) yield unauthorized();
                 yield controller.renewApiTokens(header.substring("Bearer ".length()));
             }
-            case "/xis/token-provider/login" -> {
-                Login login = mapper.toLoginRequest(request);
-                yield controller.localTokenProviderLogin(login);
-            }
-            case "/xis/token-provider/tokens" -> {
+            case "/xis/idp/tokens" -> {
                 QueryStringDecoder decoder = new QueryStringDecoder(uri);
                 String code = decoder.parameters().getOrDefault("code", List.of()).stream().findFirst().orElse(null);
                 String state = decoder.parameters().getOrDefault("state", List.of()).stream().findFirst().orElse(null);
-                yield controller.localTokenProviderGetTokens(code, state);
+                yield controller.idpGetTokens(code, state);
             }
             default -> notFound(HttpMethod.POST, uri);
         };

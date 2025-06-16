@@ -112,11 +112,7 @@ public class FrontendServiceImpl implements FrontendService {
         var tokenResponse = service.requestTokens(authenticationProviderData.getCode(), authenticationProviderData.getState());
         return getAuthenticationData(tokenResponse, authenticationProviderData);
     }
-
-    @Override
-    public String localTokenProviderLogin(Login login) throws InvalidCredentialsException {
-        return authenticationProviderService().login(login);
-    }
+    
 
     @Override
     public BearerTokens localTokenProviderGetTokens(String code, String state) throws AuthenticationException {
@@ -216,8 +212,8 @@ public class FrontendServiceImpl implements FrontendService {
     }
 
 
-    private LocalAuthenticationProviderService authenticationProviderService() {
-        return appContext.getOptionalSingleton(LocalAuthenticationProviderService.class)
+    private IDPService authenticationProviderService() {
+        return appContext.getOptionalSingleton(IDPService.class)
                 .orElseThrow(() -> new UnsupportedOperationException("Local authentication is not activated"));
     }
 

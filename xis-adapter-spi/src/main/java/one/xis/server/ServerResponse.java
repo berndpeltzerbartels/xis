@@ -34,6 +34,7 @@ public class ServerResponse {
     private String widgetContainerId;
     @JsonIgnore
     private ApiTokens tokens;
+    private String redirectUrl;
 
     void clear() {
         // do not clear store data

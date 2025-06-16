@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import one.xis.server.ApiTokens;
 
 @RequiredArgsConstructor
-class LocalAuthenticationImpl implements LocalAuthentication {
+class AuthenticationImpl implements Authentication {
 
     private final LocalUserInfoService userService;
     private final ApiTokenManager tokenManager;
