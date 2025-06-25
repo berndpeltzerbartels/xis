@@ -17,4 +17,8 @@ public interface SingletonConsumer {
     default boolean hasProducer() {
         return getProducerCount().get() > 0;
     }
+
+    default boolean isOptional() {
+        return false;
+    }
 }

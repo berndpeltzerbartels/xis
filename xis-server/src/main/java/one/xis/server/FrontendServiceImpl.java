@@ -4,7 +4,6 @@ package one.xis.server;
 import lombok.RequiredArgsConstructor;
 import one.xis.UserContextAccess;
 import one.xis.UserContextImpl;
-import one.xis.context.AppContext;
 import one.xis.context.XISComponent;
 import one.xis.context.XISInit;
 import one.xis.resource.Resource;
@@ -15,8 +14,9 @@ import org.tinylog.Logger;
 import java.time.ZoneId;
 import java.util.Collection;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.BiConsumer;
+
+import static one.xis.utils.http.HttpUtils.parseQueryParameters;
 
 /**
  * Encapsulates all methods, required by the framework's controller.
@@ -29,9 +29,8 @@ public class FrontendServiceImpl implements FrontendService {
     private final ClientConfigService configService;
     private final ResourceService resourceService;
     private final Resources resources;
-    private final AuthenticationProviderServices authenticationProviderServices;
-    private final ApiTokenManager tokenManager;
-    private final AppContext appContext;
+    private final IDPClientService idpClientService;
+    private final LocalUrlHolder localUrlHolder;
     private final Collection<RequestFilter> requestFilters;
     private Resource appJsResource;
     private Resource classesJsResource;
@@ -95,7 +94,7 @@ public class FrontendServiceImpl implements FrontendService {
     @Override
     public ApiTokens processRenewApiTokenRequest(String renewToken) {
         try {
-            var result = tokenManager.renew(renewToken);
+            var result = idpClientService.renew(renewToken);
             return new ApiTokens(result.accessToken(),
                     result.accessTokenExpiresIn(),
                     result.renewToken(),
@@ -107,24 +106,20 @@ public class FrontendServiceImpl implements FrontendService {
 
     @Override
     public AuthenticationData authenticationCallback(String provider, String queryString) {
-        var service = Objects.requireNonNull(authenticationProviderServices.getAuthenticationProviderService(provider));
-        var authenticationProviderData = service.verifyAndDecodeCodeAndStateQuery(queryString);
-        var tokenResponse = service.requestTokens(authenticationProviderData.getCode(), authenticationProviderData.getState());
-        return getAuthenticationData(tokenResponse, authenticationProviderData);
+        Map<String, String> queryParams = parseQueryParameters(queryString);
+        String state = queryParams.get("state");
+        String code = queryParams.get("code");
+        if (state == null || state.isEmpty()) {
+            throw new IllegalArgumentException("Missing or empty 'state' parameter in the query string");
+        }
+        var stateParameterPayload = StateParameter.decodeAndVerify(state);
+        var tokens = idpClientService.requestTokens(code, state);
+        var authenticationData = new AuthenticationData();
+        authenticationData.setApiTokens(tokens);
+        authenticationData.setUrl(stateParameterPayload.getRedirect());
+        return authenticationData;
     }
-    
 
-    @Override
-    public BearerTokens localTokenProviderGetTokens(String code, String state) throws AuthenticationException {
-        var authenticationProviderService = authenticationProviderService();
-        var tokenResponse = authenticationProviderService.issueToken(code, state);
-        var bearerTokens = new BearerTokens();
-        bearerTokens.setAccessToken(tokenResponse.getAccessToken());
-        bearerTokens.setAccessTokenExpiresIn(tokenResponse.getExpiresIn());
-        bearerTokens.setRenewToken(tokenResponse.getRefreshToken());
-        bearerTokens.setRenewTokenExpiresIn(tokenResponse.getRefreshTokenExpiresIn());
-        return bearerTokens;
-    }
 
     @Override
     public String getPage(String id) {
@@ -186,15 +181,16 @@ public class FrontendServiceImpl implements FrontendService {
     }
 
     @Override
-    public ServerResponse processLoginRequest(ClientRequest request) {
-        return null; // TODO Status ist 201 - Created, wenn Login erfolgreich ist
+    public void setLocalUrl(String hostUrl) {
+        this.localUrlHolder.setLocalUrl(hostUrl);
     }
 
-    private void addUserContext(ClientRequest request) {
+    private void addUserContext(ClientRequest request) throws InvalidTokenException, AuthenticationException {
         var userContext = new UserContextImpl();
         userContext.setClientId(request.getClientId());
         userContext.setLocale(request.getLocale());
         userContext.setZoneId(ZoneId.of(request.getZoneId()));
+        userContext.setAccessToken(new AccessTokenWrapper(request.getAccessToken(), idpClientService));
         UserContextAccess.setInstance(userContext);
     }
 
@@ -212,28 +208,21 @@ public class FrontendServiceImpl implements FrontendService {
     }
 
 
-    private IDPService authenticationProviderService() {
-        return appContext.getOptionalSingleton(IDPService.class)
-                .orElseThrow(() -> new UnsupportedOperationException("Local authentication is not activated"));
-    }
-
-
-    private static AuthenticationData getAuthenticationData(AuthenticationProviderTokens tokenResponse, AuthenticationProviderStateData authenticationProviderData) {
-        var apiTokens = new ApiTokens();
-        apiTokens.setAccessToken(tokenResponse.getAccessToken());
-        apiTokens.setRenewTokenExpiresIn(tokenResponse.getRefreshExpiresIn());
-        apiTokens.setRenewToken(tokenResponse.getRefreshToken());
-        apiTokens.setRenewTokenExpiresIn(tokenResponse.getRefreshExpiresIn());
-        var authenticationData = new AuthenticationData();
-        authenticationData.setApiTokens(apiTokens);
-        authenticationData.setUrl(authenticationProviderData.getStateParameterPayload().getRedirect());
-        return authenticationData;
-    }
-
     private ServerResponse authenticationErrorResponse(String uri) {
         var state = StateParameter.create(uri);
         var response = new ServerResponse();
-        response.setStatus(401);
+        response.setStatus(303);
+        response.setNextURL("/login.html?state=" + state);
+        response.getValidatorMessages().getMessages().put("username", "Invalid username or password"); // TODO: i18n
+        response.getValidatorMessages().getMessages().put("password", "Invalid username or password"); // TODO: i18n
+        response.getValidatorMessages().getGlobalMessages().add("Invalid username or password"); // TODO: i18n
+        return response;
+    }
+
+    private ServerResponse localAuthenticationErrorResponse(String uri) {
+        var state = StateParameter.create(uri);
+        var response = new ServerResponse();
+        response.setStatus(303);
         response.setNextURL("/login.html?state=" + state);
         response.getValidatorMessages().getMessages().put("username", "Invalid username or password"); // TODO: i18n
         response.getValidatorMessages().getMessages().put("password", "Invalid username or password"); // TODO: i18n

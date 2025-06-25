@@ -4,7 +4,7 @@ import one.xis.ModelData;
 import one.xis.Page;
 import one.xis.Roles;
 
-@Page("/local-authentication.html")
+@Page("/idp-test.html")
 class IDPTestPage {
 
     @Roles("admin")

@@ -1,7 +1,7 @@
 package test.page.security;
 
 import one.xis.context.IntegrationTestContext;
-import one.xis.security.LocalUserInfo;
+import one.xis.security.UserInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -46,9 +46,8 @@ public class ProtectedModelDataTest {
 
         @BeforeEach
         void init() {
-            var userInfo = new LocalUserInfo();
+            var userInfo = new UserInfo();
             userInfo.setUserId("user1");
-            userInfo.setPassword("passwd");
             userInfo.setRoles(Set.of("simple-user"));
 
 
@@ -79,9 +78,8 @@ public class ProtectedModelDataTest {
 
         @BeforeEach
         void init() {
-            var userInfo = new LocalUserInfo();
+            var userInfo = new UserInfo();
             userInfo.setUserId("user1");
-            userInfo.setPassword("passwd");
             userInfo.setRoles(Set.of("simple-user", "admin"));
 
             testContext = IntegrationTestContext.builder()

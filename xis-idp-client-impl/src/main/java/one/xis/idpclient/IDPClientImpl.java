@@ -1,0 +1,154 @@
+package one.xis.idpclient;
+
+import com.google.gson.Gson;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import one.xis.http.HttpClientException;
+import one.xis.http.RestClient;
+import one.xis.ipdclient.IDPClient;
+import one.xis.ipdclient.IDPClientConfig;
+import one.xis.ipdclient.IDPPublicKeyResponse;
+import one.xis.ipdclient.IDPWellKnownOpenIdConfig;
+import one.xis.security.AuthenticationException;
+import one.xis.security.UserInfo;
+import one.xis.server.ApiTokens;
+
+import java.util.HashMap;
+
+import static java.net.URLEncoder.encode;
+import static java.nio.charset.StandardCharsets.UTF_8;
+
+@RequiredArgsConstructor
+class IDPClientImpl implements IDPClient {
+
+    private final RestClient restClient;
+    private final IDPClientConfig idpClientConfig;
+    private final String redirectUri;
+    private final Gson gson = new Gson();
+
+    private volatile IDPWellKnownOpenIdConfig openIdConfig;
+    private volatile String publicKey;
+
+    @Override
+    public ApiTokens requestTokens(@NonNull String code) throws AuthenticationException {
+        try {
+            String formBody = "grant_type=authorization_code" +
+                    "&code=" + encode(code, UTF_8) +
+                    "&redirect_uri=" + encode(redirectUri, UTF_8) +
+                    "&client_id=" + encode(idpClientConfig.getClientId(), UTF_8) +
+                    "&client_secret=" + encode(idpClientConfig.getClientSecret(), UTF_8);
+
+            var httpClient = restClient.getHttpClient();
+            var headers = new HashMap<String, String>();
+            headers.put("Content-Type", "application/x-www-form-urlencoded");
+            headers.put("Accept", "application/json");
+
+            var response = httpClient.doPost(getOpenIdConfig().getTokenEndpoint(), formBody, headers);
+
+            if (response.getStatusCode() != 200) {
+                throw new AuthenticationException("Failed to request tokens from IDP. Status: " + response.getStatusCode() + ", Body: " + response.getContent());
+            }
+
+            // Die JSON-Antwort manuell parsen.
+            return gson.fromJson(response.getContent(), ApiTokens.class);
+        } catch (HttpClientException e) {
+            throw new AuthenticationException("Failed to request tokens from IDP", e);
+        }
+    }
+
+    @Override
+    public ApiTokens renewTokens(@NonNull String refreshToken) throws AuthenticationException {
+        try {
+            String formBody = "grant_type=refresh_token" +
+                    "&refresh_token=" + encode(refreshToken, UTF_8) +
+                    "&client_id=" + encode(idpClientConfig.getClientId(), UTF_8) +
+                    "&client_secret=" + encode(idpClientConfig.getClientSecret(), UTF_8);
+
+            var httpClient = restClient.getHttpClient();
+            var headers = new HashMap<String, String>();
+            headers.put("Content-Type", "application/x-www-form-urlencoded");
+            headers.put("Accept", "application/json");
+
+            var response = httpClient.doPost(getOpenIdConfig().getTokenEndpoint(), formBody, headers);
+
+            if (response.getStatusCode() != 200) {
+                throw new AuthenticationException("Failed to renew tokens from IDP. Status: " + response.getStatusCode() + ", Body: " + response.getContent());
+            }
+            return gson.fromJson(response.getContent(), ApiTokens.class);
+        } catch (HttpClientException e) {
+            throw new AuthenticationException("Failed to renew tokens from IDP", e);
+        }
+    }
+
+    @Override
+    public UserInfo getUserInfo(@NonNull String accessToken) throws AuthenticationException {
+        try {
+            var httpClient = restClient.getHttpClient();
+            var headers = new HashMap<String, String>();
+            headers.put("Authorization", "Bearer " + accessToken);
+            headers.put("Accept", "application/json");
+
+            var response = httpClient.doGet(getOpenIdConfig().getUserInfoEndpoint(), headers);
+
+            if (response.getStatusCode() != 200) {
+                throw new AuthenticationException("Failed to fetch user info from IDP. Status: " + response.getStatusCode() + ", Body: " + response.getContent());
+            }
+
+            return gson.fromJson(response.getContent(), UserInfo.class);
+        } catch (HttpClientException e) {
+            throw new AuthenticationException("Failed to fetch user info from IDP", e);
+        }
+    }
+
+    @Override
+    public IDPPublicKeyResponse getPublicKeys() throws AuthenticationException {
+        try {
+            var httpClient = restClient.getHttpClient();
+            var headers = new HashMap<String, String>();
+            headers.put("Accept", "application/json");
+
+            var response = httpClient.doGet(getOpenIdConfig().getJwksUri(), headers);
+
+            if (response.getStatusCode() != 200) {
+                throw new AuthenticationException("Failed to fetch public keys (JWKS) from IDP. Status: " + response.getStatusCode() + ", Body: " + response.getContent());
+            }
+
+            return gson.fromJson(response.getContent(), IDPPublicKeyResponse.class);
+        } catch (HttpClientException e) {
+            throw new AuthenticationException("Failed to fetch public keys (JWKS) from IDP", e);
+        }
+    }
+
+    @Override
+    public String getIdpId() {
+        return idpClientConfig.getIdpId();
+    }
+
+
+    @Override
+    public String getAuthorizationEndpoint() {
+        return getOpenIdConfig().getAuthorizationEndpoint();
+    }
+
+    @Override
+    public String getIssuer() {
+        return getOpenIdConfig().getIssuer();
+    }
+
+    private IDPWellKnownOpenIdConfig getOpenIdConfig() {
+        if (openIdConfig == null) {
+            synchronized (this) {
+                if (openIdConfig == null) {
+                    try {
+                        openIdConfig = restClient.get("/.well-known/openid-configuration", IDPWellKnownOpenIdConfig.class);
+                    } catch (HttpClientException e) {
+                        throw new AuthenticationException("Failed to load OpenID configuration from IDP", e);
+                    }
+                }
+            }
+        }
+        return openIdConfig;
+    }
+
+
+}

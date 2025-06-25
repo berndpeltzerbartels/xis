@@ -7,7 +7,6 @@ import io.netty.handler.codec.http.QueryStringDecoder;
 import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
 import one.xis.security.AuthenticationException;
-import one.xis.security.InvalidCredentialsException;
 import one.xis.server.*;
 
 import java.io.IOException;
@@ -86,12 +85,7 @@ public class NettyController implements FrameworkController<FullHttpResponse, Fu
         request.setLocale(locale);
         request.setAccessToken(extractToken(authenticationHeader));
         try {
-            if ("login".equals(request.getAction())) {
-                return mapper.toFullHttpResponse(frontendService.processLoginRequest(request));
-            }
             return mapper.toFullHttpResponse(frontendService.processActionRequest(request));
-        } catch (InvalidCredentialsException e) {
-            return mapper.toErrorResponse(e.getMessage(), HttpResponseStatus.UNAUTHORIZED);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

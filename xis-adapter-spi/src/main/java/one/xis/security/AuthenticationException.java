@@ -1,12 +1,8 @@
 package one.xis.security;
 
 public class AuthenticationException extends RuntimeException {
-    public AuthenticationException(String s) {
-        super(s);
-    }
-
-    public AuthenticationException(String s, Throwable cause) {
-        super(s, cause);
+    public AuthenticationException(String message) {
+        super(message);
     }
 
     public AuthenticationException(Throwable cause) {
@@ -14,6 +10,9 @@ public class AuthenticationException extends RuntimeException {
     }
 
     public AuthenticationException() {
-        super();
+    }
+
+    public AuthenticationException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

@@ -6,7 +6,7 @@ import one.xis.Page;
 import one.xis.context.XISComponent;
 import one.xis.context.XISInject;
 import one.xis.security.AccessToken;
-import one.xis.security.ApiTokenManager;
+import one.xis.security.IDPClientService;
 import one.xis.utils.lang.StringUtils;
 import org.tinylog.Logger;
 
@@ -30,11 +30,11 @@ class ControllerService {
     private PathResolver pathResolver;
 
     @XISInject
-    private ApiTokenManager tokenManager;
+    private IDPClientService idpClientService;
 
     void processModelDataRequest(@NonNull ClientRequest request, @NonNull ServerResponse response) {
         Logger.info("Process model data request: {}", request);
-        var accessToken = AccessToken.create(request.getAccessToken(), tokenManager);
+        var accessToken = AccessToken.create(request.getAccessToken(), idpClientService);
         var controllerResult = new ControllerResult();
         controllerResult.setCurrentPageURL(request.getPageId());
         controllerResult.setCurrentWidgetId(request.getWidgetId());
@@ -48,7 +48,7 @@ class ControllerService {
 
     void processFormDataRequest(@NonNull ClientRequest request, @NonNull ServerResponse response) {
         Logger.info("Process form data request: {}", request);
-        var accessToken = AccessToken.create(request.getAccessToken(), tokenManager);
+        var accessToken = AccessToken.create(request.getAccessToken(), idpClientService);
         var controllerResult = new ControllerResult();
         controllerResult.setCurrentPageURL(request.getPageId());
         controllerResult.setCurrentWidgetId(request.getWidgetId());
@@ -62,7 +62,7 @@ class ControllerService {
 
     void processActionRequest(@NonNull ClientRequest request, @NonNull ServerResponse response) {
         Logger.info("Process action request: {}", request);
-        var accessToken = AccessToken.create(request.getAccessToken(), tokenManager);
+        var accessToken = AccessToken.create(request.getAccessToken(), idpClientService);
         var controllerResult = new ControllerResult();
         controllerResult.setCurrentPageURL(request.getPageId());
         controllerResult.setCurrentWidgetId(request.getWidgetId());
@@ -104,7 +104,7 @@ class ControllerService {
             nextControllerResult.setNextURL(this.pathResolver.evaluateRealPath(path, controllerResult.getPathVariables(), controllerResult.getUrlParameters()));
         }
         // get model data for next controller
-        AccessToken token = controllerResult.getTokens() != null ? AccessToken.create(controllerResult.getTokens().getAccessToken(), tokenManager) : accessToken;
+        AccessToken token = controllerResult.getTokens() != null ? AccessToken.create(controllerResult.getTokens().getAccessToken(), idpClientService) : accessToken;
         nextControllerWrapper.invokeGetModelMethods(nextRequest, nextControllerResult, token);
         // map result to response
         response.clear();

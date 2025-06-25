@@ -1,24 +1,25 @@
 package one.xis.context;
 
 import one.xis.security.AuthenticationException;
+import one.xis.security.LocalUserAuthenticator;
 import one.xis.security.LocalUserInfo;
-import one.xis.security.LocalUserInfoService;
+import one.xis.security.UserInfo;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public class TestUserService implements LocalUserInfoService {
-    private final Map<String, LocalUserInfo> users = new HashMap<>();
+public class TestUserService implements LocalUserAuthenticator {
+    private final Map<String, UserInfo> users = new HashMap<>();
 
-    public TestUserService(LocalUserInfo... users) {
+    public TestUserService(UserInfo... users) {
         Arrays.stream(users).forEach(user -> this.users.put(user.getUserId(), user));
     }
 
     @Override
     public boolean checkCredentials(String userId, String password) {
-        LocalUserInfo user = users.get(userId);
+        UserInfo user = users.get(userId);
         if (user == null) {
             throw new AuthenticationException("User not found: " + userId);
         }

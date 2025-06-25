@@ -20,7 +20,6 @@ public class StateParameter {
         String encodedPayload = SecurityUtil.encodeBase64UrlSafe(payloadJson);
         String signature = SecurityUtil.signHmacSHA256(encodedPayload, stateSignatureKey);
         return encodedPayload + "." + signature;
-
     }
 
     public static StateParameterPayload decodeAndVerify(String stateParameter) {

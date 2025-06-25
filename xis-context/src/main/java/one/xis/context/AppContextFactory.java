@@ -80,7 +80,7 @@ class AppContextFactory implements SingletonCreationListener {
                     consumer.mapProducer(producer);
                 }
             }
-            if (!(consumer instanceof MultiValueConsumer) && !consumer.hasProducer()) {
+            if (!(consumer instanceof MultiValueConsumer) && !consumer.hasProducer() && !consumer.isOptional()) {
                 throw new UnsatisfiedDependencyException(consumer.getConsumedClass(), consumer);
             }
         }
@@ -140,13 +140,13 @@ class AppContextFactory implements SingletonCreationListener {
 
     private Collection<DependencyField> dependencyFields(SingletonWrapper singleton) {
         return FieldUtil.getFields(singleton.getBeanClass(), annotations::isDependencyField).stream()
-                .map(field -> Fields.createField(field, singleton)).collect(Collectors.toList());
+                .map(field -> DependencyFields.createField(field, singleton)).collect(Collectors.toList());
     }
 
     private Collection<DependencyField> unassignedDependencyFields(Object bean, SingletonWrapper wrapper) {
         return FieldUtil.getFields(bean.getClass(), annotations::isDependencyField).stream()
                 .filter(field -> FieldUtil.getFieldValue(bean, field) == null)
-                .map(field -> Fields.createField(field, wrapper)).collect(Collectors.toList());
+                .map(field -> DependencyFields.createField(field, wrapper)).collect(Collectors.toList());
     }
 
 

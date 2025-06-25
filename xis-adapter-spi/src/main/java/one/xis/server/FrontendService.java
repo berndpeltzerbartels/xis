@@ -1,8 +1,5 @@
 package one.xis.server;
 
-import one.xis.security.AuthenticationException;
-import one.xis.security.InvalidCredentialsException;
-
 import java.util.Map;
 
 public interface FrontendService {
@@ -14,13 +11,9 @@ public interface FrontendService {
 
     ServerResponse processFormDataRequest(ClientRequest request);
 
-    ServerResponse processLoginRequest(ClientRequest request) throws InvalidCredentialsException;
-
     ApiTokens processRenewApiTokenRequest(String renewToken);
 
     AuthenticationData authenticationCallback(String provider, String queryString);
-
-    BearerTokens localTokenProviderGetTokens(String code, String state) throws AuthenticationException;
 
     String getPage(String id);
 
@@ -43,6 +36,8 @@ public interface FrontendService {
     String getFunctionsJs();
 
     String getBundleJs();
+
+    void setLocalUrl(String hostUrl);
 
     default void extractAccessToken(ClientRequest request, String authenticationHeader) {
         if (authenticationHeader != null && authenticationHeader.startsWith("Bearer ")) {

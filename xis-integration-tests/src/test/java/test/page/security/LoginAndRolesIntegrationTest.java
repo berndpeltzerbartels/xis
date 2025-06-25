@@ -1,8 +1,8 @@
 package test.page.security;
 
 import one.xis.context.IntegrationTestContext;
-import one.xis.security.LocalUserInfo;
-import one.xis.security.LocalUserInfoService;
+import one.xis.security.LocalUserAuthenticator;
+import one.xis.security.LocalUserInfoImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -20,10 +20,10 @@ class LoginAndRolesIntegrationTest {
 
     @BeforeEach
     void setup() {
-        var userInfoService = mock(LocalUserInfoService.class);
+        var userInfoService = mock(LocalUserAuthenticator.class);
 
         // Erfolgreiches Login
-        var userInfo = new LocalUserInfo();
+        var userInfo = new LocalUserInfoImpl();
         userInfo.setUserId("admin");
         userInfo.setPassword("pw");
         userInfo.setRoles(Set.of("admin", "user"));
@@ -76,5 +76,5 @@ class LoginAndRolesIntegrationTest {
         var doc = testContext.openPage("/mixed.html").getDocument();
         assertThat(doc.getElementByTagName("title").innerText).isEqualTo("Login");
     }
-    
+
 }

@@ -11,7 +11,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.Duration;
 import java.util.Locale;
 import java.util.Map;
@@ -25,7 +27,8 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
 
     @Override
     @GetMapping("/xis/config")
-    public ClientConfig getComponentConfig() {
+    public ClientConfig getComponentConfig(HttpServletRequest request) {
+        String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
         return frontendService.getConfig();
     }
 

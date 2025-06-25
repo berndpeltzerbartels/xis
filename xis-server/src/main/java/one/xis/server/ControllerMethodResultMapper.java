@@ -31,9 +31,11 @@ class ControllerMethodResultMapper {
             mapWidgetResponse(widgetResponse, controllerMethodResult);
         } else if (returnValue instanceof Class<?> controllerClass) {
             updateController(controllerMethodResult, controllerClass, emptyMap());
-        } else if (returnValue instanceof LocalLoginResponse loginResponse) {
-            controllerMethodResult.setTokens(loginResponse.getTokens());
-            controllerMethodResult.setNextURL(loginResponse.getRedirectUrl());
+        } else if (returnValue instanceof RedirectControllerResponse redirectControllerResponse) {
+            if (redirectControllerResponse instanceof LocalLoginResponse loginResponse) {
+                controllerMethodResult.setTokens(loginResponse.getTokens());
+            }
+            controllerMethodResult.setNextURL(redirectControllerResponse.getRedirectUrlWithParameters());
         }
         if (method.isAnnotationPresent(ModelData.class)) {
             mapModelResult(method.getAnnotation(ModelData.class).value(), returnValue, controllerMethodResult);

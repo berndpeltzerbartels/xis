@@ -12,11 +12,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class AuthenticationIntegrationTest {
 
-    private LocalUserInfo userInfo;
+    private LocalUserInfoImpl userInfo;
 
     @BeforeEach
     void init() {
-        userInfo = new LocalUserInfo();
+        userInfo = new LocalUserInfoImpl();
         userInfo.setUserId("user1");
         userInfo.setRoles(Set.of("user"));
         userInfo.setClaims(Map.of("email", "user1@example.com"));

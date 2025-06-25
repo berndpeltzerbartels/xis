@@ -3,20 +3,20 @@ package test.security;
 import one.xis.context.IntegrationTestContext;
 import one.xis.security.IDPUserService;
 import one.xis.security.LocalUserInfo;
-import one.xis.security.StateParameter;
-import one.xis.security.XISIDPProviderConfig;
+import one.xis.security.LocalUserInfoImpl;
+import one.xis.security.XISIDPConfig;
+import one.xis.server.ClientRequest;
 import one.xis.server.FrontendService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 class IDPTest {
 
-    static final LocalUserInfo TEST_USER = new LocalUserInfo("testUser", "password", Set.of("admin"), Map.of("email", "testUser@example.com"));
+    static final LocalUserInfo TEST_USER = new LocalUserInfoImpl("testUser", "password", Set.of("admin"), Map.of("email", "testUser@example.com"));
 
 
     private IntegrationTestContext testContext;
@@ -25,7 +25,7 @@ class IDPTest {
     @BeforeEach
     void init() {
         // config to use the IDP
-        var providerConfig = new XISIDPProviderConfig("http://localhost:8080", "http://localhost:8080");
+        var providerConfig = new XISIDPConfig("http://localhost:8080", "http://localhost:8080");
 
         testContext = IntegrationTestContext.builder()
                 .withSingleton(new TestIDPUserService())
@@ -36,9 +36,19 @@ class IDPTest {
     }
 
     @Test
-    void redirectIfLackOfPrivileges() {
-        var state = StateParameter.create("/xyz.html");
-        // TODO
+    void testIDP() {
+        // we ander a protected page and expect a redirect to the IDP login page
+        var clientRequest = new ClientRequest();
+        clientRequest.setPageId("/idp-test.html");
+        clientRequest.setClientId("abc123");
+        clientRequest.setLocale(Locale.GERMAN);
+        clientRequest.setZoneId("Europe/Berlin");
+
+        var serverResponse = frontendService.processModelDataRequest(clientRequest);
+
+        assertThat(serverResponse.getStatus()).isEqualTo(302);
+        var nextUrl = serverResponse.getNextURL();
+
     }
 
     static class TestIDPUserService implements IDPUserService {

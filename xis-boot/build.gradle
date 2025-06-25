@@ -48,6 +48,7 @@ dependencies {
     implementation project(":xis-server")
     implementation project(":xis-adapter-spi")
     implementation project(":xis-validation")
+    implementation project(":xis-idp")
 
     // Compile-only dependencies
     compileOnly project(":xis-deserializer")

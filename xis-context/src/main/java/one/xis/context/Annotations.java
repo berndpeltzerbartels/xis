@@ -8,6 +8,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -80,6 +81,21 @@ public class Annotations {
         componentClassAnnotations.addAll(annotations.componentClassAnnotations);
         dependencyFieldAnnotations.addAll(annotations.dependencyFieldAnnotations);
         return this;
+    }
+
+    /**
+     * Ruft die erste gefundene Abhängigkeitsannotation eines Feldes ab.
+     *
+     * @param field Das zu prüfende Feld.
+     * @return Ein Optional, das die Annotation enthält, oder ein leeres Optional, wenn keine Abhängigkeitsannotation gefunden wird.
+     */
+    public Optional<Annotation> getDependencyAnnotation(Field field) {
+        for (Annotation annotation : field.getAnnotations()) {
+            if (dependencyFieldAnnotations.contains(annotation.annotationType())) {
+                return Optional.of(annotation);
+            }
+        }
+        return Optional.empty();
     }
 
     /**

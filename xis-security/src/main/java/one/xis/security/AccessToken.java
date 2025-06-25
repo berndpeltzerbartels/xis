@@ -17,8 +17,8 @@ public interface AccessToken {
 
     boolean isExpired();
 
-    static AccessToken create(String accessToken, ApiTokenManager tokenManager) {
-        return new AccessTokenWrapper(accessToken, tokenManager);
+    static AccessToken create(String accessToken, IDPClientService idpClientService) {
+        return new AccessTokenWrapper(accessToken, idpClientService);
     }
 
 }

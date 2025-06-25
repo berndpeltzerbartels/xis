@@ -12,18 +12,14 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AccessTokenWrapper implements AccessToken {
     private final String accessToken;
-    private final ApiTokenManager tokenManager;
+    private final IDPClientService accessTokenDecoder;
     private TokenAttributes tokenAttributes;
 
 
-    private TokenAttributes getTokenAttributes() {
+    private synchronized TokenAttributes getTokenAttributes() {
         if (tokenAttributes == null) {
             if (StringUtils.isNotEmpty(accessToken)) {
-                try {
-                    tokenAttributes = tokenManager.decodeToken(accessToken);
-                } catch (InvalidTokenException e) {
-                    throw new AuthenticationException(); // TODO Exception mit 401
-                }
+                tokenAttributes = accessTokenDecoder.decodeToken(accessToken);
             } else {
                 tokenAttributes = new TokenAttributes(null, Collections.emptySet(), Map.of(), null);
             }

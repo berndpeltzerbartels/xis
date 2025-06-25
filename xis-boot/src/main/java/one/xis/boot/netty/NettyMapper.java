@@ -5,7 +5,6 @@ import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;
 import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
-import one.xis.security.IDPLogin;
 import one.xis.server.*;
 
 import java.io.IOException;
@@ -110,22 +109,6 @@ public class NettyMapper {
         return response;
     }
 
-    public FullHttpResponse toRedirectWithCodeAndState(String code, String state) {
-        DefaultFullHttpResponse response = new DefaultFullHttpResponse(
-                HttpVersion.HTTP_1_1,
-                HttpResponseStatus.FOUND
-        );
-
-        String location = "/xis/auth/local?code=" + code + "&state=" + state;
-        response.headers().set(HttpHeaderNames.LOCATION, location);
-
-        return response;
-    }
-
-    public IDPLogin toLoginRequest(FullHttpRequest request) throws IOException {
-        String json = request.content().toString(StandardCharsets.UTF_8);
-        return objectMapper.readValue(json, IDPLogin.class);
-    }
 
     public FullHttpResponse toErrorResponse(String message, HttpResponseStatus status) {
         return new DefaultFullHttpResponse(

@@ -103,7 +103,7 @@ class IDPUserServiceTest {
 
         @Override
         public LocalUserInfo getUserInfo(String userId) {
-            LocalUserInfo info = new LocalUserInfo();
+            LocalUserInfoImpl info = new LocalUserInfoImpl();
             info.setUserId(userId);
             info.setRoles(Set.of("admin", "user"));
             info.setClaims(Map.of("email", userId + "@example.com"));
