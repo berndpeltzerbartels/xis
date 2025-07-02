@@ -40,7 +40,6 @@ class ResourceService {
     private final PathResolver pathResolver;
 
     private Map<String, Resource> widgetHtmlResources;
-    private Map<String, Resource> pageHtmlResources;
     private ResourceCache<String> pageBodyResourceCache;
     private ResourceCache<String> pageHeadResourceCache;
     private ResourceCache<Map<String, String>> pageAttributesResourceCache;
@@ -52,7 +51,7 @@ class ResourceService {
 
     @XISInit
     void initPageResources() {
-        pageHtmlResources = pageControllers.stream()
+        var pageHtmlResources = pageControllers.stream()
                 .collect(Collectors.toMap(pathResolver::normalizedPath, this::htmlResource));
         pageHeadResourceCache = new ResourceCache<>(this::extractPageHead, pageHtmlResources);
         pageBodyResourceCache = new ResourceCache<>(this::extractPageBody, pageHtmlResources);
@@ -66,10 +65,6 @@ class ResourceService {
 
     String getWidgetHtml(String id) {
         return widgetHtmlResources.get(id).getContent();
-    }
-
-    String getPage(String id) {
-        return pageHtmlResources.get(id).getContent();
     }
 
     String getPageHead(String id) {

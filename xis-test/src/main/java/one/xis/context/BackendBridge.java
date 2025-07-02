@@ -3,6 +3,7 @@ package one.xis.context;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import one.xis.idp.IDPFrontendService;
 import one.xis.security.AuthenticationException;
 import one.xis.server.*;
 import one.xis.validation.ValidatorMessages;
@@ -18,6 +19,7 @@ import static one.xis.context.BackendBridgeVerboseRunner.run;
 public class BackendBridge implements ResourcePathProvider {
 
     private final FrontendService frontendService;
+    private final IDPFrontendService idpFrontendService;
     private final ObjectMapper objectMapper;
     private final AppContext appContext;
 
@@ -47,10 +49,6 @@ public class BackendBridge implements ResourcePathProvider {
 
     public BackendBridgeResponse onFormAction(String uri, String requestJson, Map<String, String> headers) {
         return toBridgeResponse(run(frontendService::processActionRequest, request(requestJson, headers)));
-    }
-
-    public BackendBridgeResponse getPage(String uri, Map<String, String> headers) {
-        return stringToBridgeResponse(frontendService.getPage(headers.get("uri")));
     }
 
     public BackendBridgeResponse getPageHead(String uri, Map<String, String> headers) {

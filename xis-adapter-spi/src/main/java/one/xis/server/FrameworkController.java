@@ -5,7 +5,7 @@ import java.util.Map;
 
 public interface FrameworkController<RESP_WRAPPER, REQ, RESP> {
 
-    ClientConfig getComponentConfig();
+    ClientConfig getComponentConfig(REQ request);
 
     RESP_WRAPPER getPageModel(ClientRequest request, String authenticationHeader, Locale locale);
 
@@ -32,8 +32,6 @@ public interface FrameworkController<RESP_WRAPPER, REQ, RESP> {
     RESP authenticationCallback(REQ request, String provider);
 
     RESP renewApiTokens(String renewToken);
-
-    String getPage(String id);
 
     String getPageHead(String id);
 

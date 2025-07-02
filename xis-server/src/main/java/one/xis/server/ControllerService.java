@@ -3,10 +3,10 @@ package one.xis.server;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import one.xis.Page;
+import one.xis.auth.token.AccessToken;
+import one.xis.auth.token.TokenService;
 import one.xis.context.XISComponent;
 import one.xis.context.XISInject;
-import one.xis.security.AccessToken;
-import one.xis.security.IDPClientService;
 import one.xis.utils.lang.StringUtils;
 import org.tinylog.Logger;
 
@@ -30,7 +30,7 @@ class ControllerService {
     private PathResolver pathResolver;
 
     @XISInject
-    private IDPClientService idpClientService;
+    private TokenService idpClientService;
 
     void processModelDataRequest(@NonNull ClientRequest request, @NonNull ServerResponse response) {
         Logger.info("Process model data request: {}", request);

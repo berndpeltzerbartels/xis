@@ -4,9 +4,9 @@ import lombok.Data;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import one.xis.Roles;
+import one.xis.auth.token.AccessToken;
 import one.xis.deserialize.MainDeserializer;
 import one.xis.deserialize.PostProcessingResults;
-import one.xis.security.AccessToken;
 import one.xis.security.AuthenticationException;
 
 import java.lang.reflect.Method;

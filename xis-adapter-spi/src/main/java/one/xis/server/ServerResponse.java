@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import one.xis.auth.token.ApiTokens;
 import one.xis.validation.ValidatorMessages;
 
 import java.util.ArrayList;

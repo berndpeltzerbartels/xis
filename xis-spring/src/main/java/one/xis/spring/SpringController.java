@@ -13,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import javax.servlet.http.HttpServletRequest;
 import java.time.Duration;
 import java.util.Locale;
 import java.util.Map;
@@ -27,8 +26,9 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
 
     @Override
     @GetMapping("/xis/config")
-    public ClientConfig getComponentConfig(HttpServletRequest request) {
+    public ClientConfig getComponentConfig(HttpRequest request) {
         String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
+        frontendService.setLocalUrl(baseUrl); // TODO implement in Xis-boot
         return frontendService.getConfig();
     }
 
@@ -114,7 +114,7 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
     @GetMapping("/xis/auth/{provider}")
     public ResponseEntity<?> authenticationCallback(HttpRequest request,
                                                     @PathVariable("provider") String provider) {
-        AuthenticationData authData = frontendService.authenticationCallback(provider, request.getURI().getQuery());
+        ApiTokensAndUrl authData = frontendService.authenticationCallback(provider, request.getURI().getQuery());
         return addTokenCookies(ResponseEntity.status(302).header("Location", authData.getUrl()), authData.getApiTokens()).build();
     }
 
@@ -123,12 +123,6 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
     public ResponseEntity<?> renewApiTokens(@NonNull @RequestHeader("Authentication") String renewToken) {
         var renewTokenResponse = frontendService.processRenewApiTokenRequest(renewToken.substring("Bearer ".length()));
         return addTokenCookies(ResponseEntity.status(201), renewTokenResponse).build();
-    }
-
-    @Override
-    @GetMapping("/xis/page")
-    public String getPage(@RequestHeader("uri") String id) {
-        return frontendService.getPage(id);
     }
 
     @Override

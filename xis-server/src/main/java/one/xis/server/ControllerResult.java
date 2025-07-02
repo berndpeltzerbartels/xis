@@ -1,6 +1,7 @@
 package one.xis.server;
 
 import lombok.Data;
+import one.xis.auth.token.ApiTokens;
 import one.xis.validation.ValidatorMessages;
 
 import java.util.Collection;

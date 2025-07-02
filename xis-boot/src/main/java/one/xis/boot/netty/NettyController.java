@@ -5,6 +5,7 @@ import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.QueryStringDecoder;
 import lombok.RequiredArgsConstructor;
+import one.xis.auth.token.ApiTokensAndUrl;
 import one.xis.context.XISComponent;
 import one.xis.security.AuthenticationException;
 import one.xis.server.*;
@@ -21,7 +22,21 @@ public class NettyController implements FrameworkController<FullHttpResponse, Fu
     private final NettyMapper mapper;
 
     @Override
-    public ClientConfig getComponentConfig() {
+    public ClientConfig getComponentConfig(FullHttpRequest request) {
+        String host = request.headers().get("Host");
+        String scheme;
+        if (request.headers().contains("X-Forwarded-Proto")) {
+            // Priorität 1: Header vom Reverse-Proxy
+            scheme = request.headers().get("X-Forwarded-Proto");
+        } else if (request.headers().contains("X-Internal-Scheme")) {
+            // Priorität 2: Intern gesetzter Header für direkte Verbindungen
+            scheme = request.headers().get("X-Internal-Scheme");
+        } else {
+            // Fallback, falls der SchemeInjectorHandler nicht konfiguriert ist
+            scheme = "http";
+        }
+        String baseUrl = scheme + "://" + host;
+        frontendService.setLocalUrl(baseUrl);
         return frontendService.getConfig();
     }
 
@@ -105,7 +120,7 @@ public class NettyController implements FrameworkController<FullHttpResponse, Fu
     @Override
     public FullHttpResponse authenticationCallback(FullHttpRequest request, String provider) {
         String query = new QueryStringDecoder(request.uri()).rawQuery();
-        AuthenticationData authData = frontendService.authenticationCallback(provider, query);
+        ApiTokensAndUrl authData = frontendService.authenticationCallback(provider, query);
         return mapper.toRedirectWithCookies(authData.getUrl(), authData);
     }
 

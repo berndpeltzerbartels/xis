@@ -3,9 +3,9 @@ package one.xis.server;
 import lombok.RequiredArgsConstructor;
 import one.xis.*;
 import one.xis.PathVariable;
+import one.xis.auth.token.AccessToken;
 import one.xis.deserialize.MainDeserializer;
 import one.xis.deserialize.PostProcessingResults;
-import one.xis.security.AccessToken;
 import one.xis.security.AuthenticationException;
 
 import java.io.IOException;

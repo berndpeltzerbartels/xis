@@ -47,7 +47,9 @@ dependencies {
     implementation project(':xis-adapter-spi')
     implementation project(':xis-gson')
     implementation project(':xis-javascript')
-    implementation project(':xis-security')
+    implementation project(':xis-authentication:xis-idp')
+    implementation project(':xis-authentication:xis-token')
+    implementation project(':xis-security') // TODO ? remove
 
     // Annotation processors
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"

@@ -4,19 +4,21 @@ package one.xis.server;
 import lombok.RequiredArgsConstructor;
 import one.xis.UserContextAccess;
 import one.xis.UserContextImpl;
+import one.xis.auth.token.AccessTokenWrapper;
+import one.xis.auth.token.StateParameter;
+import one.xis.auth.token.TokenService;
 import one.xis.context.XISComponent;
 import one.xis.context.XISInit;
 import one.xis.resource.Resource;
 import one.xis.resource.Resources;
-import one.xis.security.*;
+import one.xis.security.AuthenticationException;
+import one.xis.security.InvalidTokenException;
 import org.tinylog.Logger;
 
 import java.time.ZoneId;
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.BiConsumer;
-
-import static one.xis.utils.http.HttpUtils.parseQueryParameters;
 
 /**
  * Encapsulates all methods, required by the framework's controller.
@@ -29,8 +31,8 @@ public class FrontendServiceImpl implements FrontendService {
     private final ClientConfigService configService;
     private final ResourceService resourceService;
     private final Resources resources;
-    private final IDPClientService idpClientService;
     private final LocalUrlHolder localUrlHolder;
+    private final TokenService tokenService;
     private final Collection<RequestFilter> requestFilters;
     private Resource appJsResource;
     private Resource classesJsResource;
@@ -89,41 +91,6 @@ public class FrontendServiceImpl implements FrontendService {
         } finally {
             removeUserContext();
         }
-    }
-
-    @Override
-    public ApiTokens processRenewApiTokenRequest(String renewToken) {
-        try {
-            var result = idpClientService.renew(renewToken);
-            return new ApiTokens(result.accessToken(),
-                    result.accessTokenExpiresIn(),
-                    result.renewToken(),
-                    result.renewTokenExpiresIn());
-        } catch (InvalidTokenException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public AuthenticationData authenticationCallback(String provider, String queryString) {
-        Map<String, String> queryParams = parseQueryParameters(queryString);
-        String state = queryParams.get("state");
-        String code = queryParams.get("code");
-        if (state == null || state.isEmpty()) {
-            throw new IllegalArgumentException("Missing or empty 'state' parameter in the query string");
-        }
-        var stateParameterPayload = StateParameter.decodeAndVerify(state);
-        var tokens = idpClientService.requestTokens(code, state);
-        var authenticationData = new AuthenticationData();
-        authenticationData.setApiTokens(tokens);
-        authenticationData.setUrl(stateParameterPayload.getRedirect());
-        return authenticationData;
-    }
-
-
-    @Override
-    public String getPage(String id) {
-        return resourceService.getPage(id);
     }
 
     @Override
@@ -190,7 +157,7 @@ public class FrontendServiceImpl implements FrontendService {
         userContext.setClientId(request.getClientId());
         userContext.setLocale(request.getLocale());
         userContext.setZoneId(ZoneId.of(request.getZoneId()));
-        userContext.setAccessToken(new AccessTokenWrapper(request.getAccessToken(), idpClientService));
+        userContext.setAccessToken(new AccessTokenWrapper(request.getAccessToken(), tokenService));
         UserContextAccess.setInstance(userContext);
     }
 

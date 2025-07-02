@@ -46,8 +46,10 @@ dependencies {
     implementation project(':xis-gson')
     implementation project(':xis-validation')
     implementation project(':xis-adapter-spi')
-    implementation project(':xis-security')
-    implementation project(':xis-idp-client')
+    implementation project(':xis-security') // TODO rmeove ?
+    implementation project(':xis-authentication')
+    implementation project(':xis-authentication:xis-idp-client')
+    implementation project(':xis-authentication:xis-token')
 
     // Compile-only dependencies
     compileOnly project(':xis-resources')
@@ -57,7 +59,7 @@ dependencies {
 
     // Implementation dependencies
     implementation "org.projectlombok:lombok:$lombokVersion"
-    implementation "dom4j:dom4j:$dom4jVersion"
+    implementation "dom4j:dom4j:$dom4jVersion" // TODO: Version
     implementation "org.slf4j:slf4j-api:$slf4jVersion"
     implementation "com.fasterxml.jackson.core:jackson-databind:$jacksonDatabindVersion"
     implementation "org.tinylog:tinylog-api:$tinylogVersion"

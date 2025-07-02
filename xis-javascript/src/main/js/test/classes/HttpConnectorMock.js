@@ -51,7 +51,6 @@ class HttpConnectorMock {
     responseForGet(uri, headers) {
         switch (uri) {
             case '/xis/config': return backendBridge.getComponentConfig(uri, headers);
-            case '/xis/page': return backendBridge.getPage(uri, headers);
             case '/xis/page/head': return backendBridge.getPageHead(uri, headers);
             case '/xis/page/body': return backendBridge.getPageBody(uri, headers);
             case '/xis/page/body-attributes': return backendBridge.getBodyAttributes(uri, headers);

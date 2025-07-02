@@ -7,7 +7,6 @@ import one.xis.Page;
 import one.xis.Push;
 import one.xis.Widget;
 import one.xis.context.AppContextBuilder;
-import one.xis.security.Authentication;
 import one.xis.server.*;
 import one.xis.utils.lang.ClassUtils;
 import org.springframework.beans.BeansException;
@@ -66,7 +65,6 @@ public class SpringContextAdapter implements BeanPostProcessor, ApplicationConte
         springFilter.setFrontendService(frontendService);
         springController.setFrontendService(frontendService);
         context.getSingletons(PushClientProxy.class).forEach(this::addToSpringContext);
-        context.getOptionalSingleton(Authentication.class).ifPresent(this::addToSpringContext);
     }
 
     private Collection<Class<?>> pushClientClasses() {
