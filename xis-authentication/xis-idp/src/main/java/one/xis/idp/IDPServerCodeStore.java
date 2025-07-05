@@ -8,7 +8,7 @@ import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 @RequiredArgsConstructor
-class LocalIDPCodeStore {
+class IDPServerCodeStore {
 
     private final Duration expiry = Duration.ofMinutes(15);
 

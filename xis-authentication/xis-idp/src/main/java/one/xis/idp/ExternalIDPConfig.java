@@ -11,7 +11,7 @@ public interface ExternalIDPConfig {
 
     String getClientSecret();
 
-    String getAuthenticationProviderId();
+    String getIdpId();
 
     String getLoginFormUrl();
 
@@ -21,5 +21,4 @@ public interface ExternalIDPConfig {
 
     String getUserInfoEndpoint();
 
-    String getApplicationRootEndpoint();
 }

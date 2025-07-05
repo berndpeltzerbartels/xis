@@ -2,8 +2,8 @@ package one.xis.context;
 
 
 import lombok.Getter;
-import one.xis.security.IDPClientService;
-import one.xis.security.UserInfo;
+import one.xis.auth.token.TokenService;
+import one.xis.idp.IDPUserInfo;
 import one.xis.server.PageUtil;
 
 import java.util.*;
@@ -79,7 +79,7 @@ public class IntegrationTestContext implements AppContext {
         private final Collection<Object> singletons = new HashSet<>();
         private final Collection<String> packages = new HashSet<>();
         private final Collection<String> ignorePackages = new HashSet<>();
-        private UserInfo userInfo;
+        private IDPUserInfo userInfo;
 
         public Builder withSingleton(Object o) {
             singletons.add(o);
@@ -119,24 +119,24 @@ public class IntegrationTestContext implements AppContext {
             return this;
         }
 
-        public Builder withLoggedInUser(UserInfo userInfo) {
+        public Builder withLoggedInUser(IDPUserInfo userInfo) {
             this.userInfo = userInfo;
             return this;
         }
 
-        public Builder withTestUserService(UserInfo... users) {
+        public Builder withTestUserService(IDPUserInfo... users) {
             singletons.add(new TestUserService(users));
             return this;
         }
 
-        private static void addTokens(UserInfo userInfo, IntegrationTestContext context) {
+        private static void addTokens(IDPUserInfo userInfo, IntegrationTestContext context) {
             System.err.println("Adding token cookies for user: " + userInfo.getUserId());
-            context.getOptionalSingleton(IDPClientService.class).ifPresent(tokenManager -> {
+            context.getOptionalSingleton(TokenService.class).ifPresent(tokenService -> {
                 System.err.println("Creating tokens for user: " + userInfo.getUserId());
-                var tokens = tokenManager.createTokens(userInfo.getUserId(), userInfo.getRoles(), userInfo.getClaims());
+                var tokens = tokenService.newTokens(userInfo.getUserId(), userInfo.getRoles(), userInfo.getClaims());
                 var functions = context.environment.getIntegrationTestScript().getIntegrationTestFunctions();
-                functions.getSetAccessToken().execute(tokens.accessToken());
-                functions.getSetRenewToken().execute(tokens.renewToken());
+                functions.getSetAccessToken().execute(tokens.getAccessToken());
+                functions.getSetRenewToken().execute(tokens.getRenewToken());
             });
         }
     }

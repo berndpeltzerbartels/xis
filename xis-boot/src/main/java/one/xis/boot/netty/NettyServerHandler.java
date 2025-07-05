@@ -12,7 +12,6 @@ import one.xis.server.FrontendService;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 import java.util.Locale;
 
 @ChannelHandler.Sharable
@@ -53,14 +52,9 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
         if (uri.equals("/") || uri.endsWith(".html")) {
             return mapper.toFullHttpResponse(frontendService.getRootPageHtml());
         }
-        if (uri.startsWith("/xis/auth/")) {
-            String provider = uri.substring("/xis/auth/".length());
-            return controller.authenticationCallback(request, provider);
-        }
-        var token = extractBearerToken(request);
+        var token = extractBearerToken(request); // TODO ?
         return switch (uri) {
             case "/xis/config" -> mapper.toFullHttpResponse(controller.getComponentConfig(request));
-            case "/xis/page" -> mapper.toFullHttpResponse(controller.getPage(request.headers().get("uri")));
             case "/xis/page/head" -> mapper.toFullHttpResponse(controller.getPageHead(request.headers().get("uri")));
             case "/xis/page/body" -> mapper.toFullHttpResponse(controller.getPageBody(request.headers().get("uri")));
             case "/xis/page/body-attributes" ->
@@ -87,17 +81,6 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
             case "/xis/page/action" -> controller.onPageLinkAction(clientRequest, token, clientRequest.getLocale());
             case "/xis/form/action" -> controller.onFormAction(clientRequest, token, clientRequest.getLocale());
             case "/xis/widget/action" -> controller.onWidgetLinkAction(clientRequest, token, clientRequest.getLocale());
-            case "/xis/token/renew" -> {
-                String header = request.headers().get("Authentication");
-                if (header == null || !header.startsWith("Bearer ")) yield unauthorized();
-                yield controller.renewApiTokens(header.substring("Bearer ".length()));
-            }
-            case "/xis/idp/tokens" -> {
-                QueryStringDecoder decoder = new QueryStringDecoder(uri);
-                String code = decoder.parameters().getOrDefault("code", List.of()).stream().findFirst().orElse(null);
-                String state = decoder.parameters().getOrDefault("state", List.of()).stream().findFirst().orElse(null);
-                yield controller.idpGetTokens(code, state);
-            }
             default -> notFound(HttpMethod.POST, uri);
         };
     }

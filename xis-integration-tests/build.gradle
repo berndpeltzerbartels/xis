@@ -40,6 +40,7 @@ dependencies {
     implementation project(':xis-validation')
     implementation project(':xis-adapter-spi')
     implementation project(':xis-security')
+    implementation project(':xis-authentication:xis-idp')
     // Local test dependencies
     testImplementation project(":xis-test")
 

@@ -6,14 +6,16 @@ import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.RequiredArgsConstructor;
+import one.xis.auth.UserInfo;
+import one.xis.auth.UserInfoImpl;
 import one.xis.auth.token.ApiTokens;
 import one.xis.auth.token.StateParameter;
+import one.xis.context.XISDefaultComponent;
 import one.xis.context.XISInit;
 import one.xis.context.XISInject;
 import one.xis.ipdclient.*;
 import one.xis.security.AuthenticationException;
-import one.xis.security.LocalUserAuthenticator;
-import one.xis.security.UserInfo;
+import one.xis.security.UserInfoService;
 
 import java.math.BigInteger;
 import java.security.KeyFactory;
@@ -31,6 +33,7 @@ import java.util.stream.Collectors;
 import static java.net.URLEncoder.encode;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+@XISDefaultComponent
 @RequiredArgsConstructor
 class IDPClientServiceImpl implements IDPClientService {
 
@@ -38,10 +41,7 @@ class IDPClientServiceImpl implements IDPClientService {
     private Collection<IDPClientConfig> idpClientConfigs;
 
     @XISInject(optional = true)
-    private LocalUserAuthenticator localUserAuthenticator;
-
-    @XISInject(optional = true)
-    private UserInfoProvisioningService userInfoProvisioningService;
+    private UserInfoService<UserInfo> userInfoService;
 
     @XISInject
     private IDPClientFactory idpClientFactory;
@@ -51,16 +51,12 @@ class IDPClientServiceImpl implements IDPClientService {
 
     @XISInit
     void init() {
-        if (localUserAuthenticator != null) {
-            var localIdpClient = idpClientFactory.createLocalIDPClient();
-            idpClients.put(localIdpClient.getIdpId(), localIdpClient);
-        }
         idpClientConfigs.stream().map(idpClientFactory::createConfiguredIDPClient)
                 .forEach(idpClient -> idpClients.put(idpClient.getIdpId(), idpClient));
     }
 
     @Override
-    public String getIDPLoginFormUrl(String idpId, String redirectUri) {
+    public String loginFormUrl(String idpId, String redirectUri) {
         var idpClientConfig = getIDPClientConfig(idpId);
         var idpClient = getIDPClient(idpId);
         var state = StateParameter.create(redirectUri);
@@ -95,7 +91,7 @@ class IDPClientServiceImpl implements IDPClientService {
      * @return The user information retrieved from the IDP, potentially enriched by the UserProvisioningService.
      */
     @Override
-    public UserInfo fetchUserInfoFromIdp(String idpId, String accessToken) {
+    public UserInfoImpl fetchUserInfoFromIdp(String idpId, String accessToken) {
         var idpClient = getIDPClient(idpId);
         var userInfo = idpClient.fetchUserInfo(accessToken);
         return provisionUserIfServicePresent(userInfo, idpId);
@@ -103,7 +99,7 @@ class IDPClientServiceImpl implements IDPClientService {
 
 
     @Override
-    public UserInfo verifyAndDecodeToken(String idpId, String accessToken) {
+    public UserInfoImpl verifyAndDecodeToken(String idpId, String accessToken) {
         try {
             var signedJWT = SignedJWT.parse(accessToken);
             var kid = signedJWT.getHeader().getKeyID();
@@ -145,9 +141,9 @@ class IDPClientServiceImpl implements IDPClientService {
         }
     }
 
-    private UserInfo provisionUserIfServicePresent(UserInfo userInfo, String idpId) {
-        if (userInfoProvisioningService != null) {
-            return userInfoProvisioningService.provisionUser(userInfo, idpId);
+    private UserInfoImpl provisionUserIfServicePresent(UserInfoImpl userInfo, String idpId) {
+        if (userInfoService != null) {
+            userInfoService.saveUserInfo(userInfo, idpId);
         }
         return userInfo;
     }

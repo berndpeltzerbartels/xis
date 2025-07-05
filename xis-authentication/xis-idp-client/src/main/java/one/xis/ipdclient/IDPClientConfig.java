@@ -3,7 +3,7 @@ package one.xis.ipdclient;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import one.xis.ImportInstances;
-import one.xis.security.UserInfo;
+import one.xis.auth.UserInfoImpl;
 
 import java.text.ParseException;
 import java.util.Collections;
@@ -29,16 +29,12 @@ public interface IDPClientConfig {
      * @param claims The set of claims from the validated JWT.
      * @return UserInfo populated from the claims.
      */
-    default UserInfo extractUserInfo(JWTClaimsSet claims) throws ParseException {
+    default UserInfoImpl extractUserInfo(JWTClaimsSet claims) throws ParseException {
         var roles = claims.getStringListClaim("roles");
 
-        return UserInfo.builder()
+        return UserInfoImpl.builder()
                 .userId(claims.getSubject())
-                .name(claims.getStringClaim("name"))
-                .givenName(claims.getStringClaim("given_name"))
-                .familyName(claims.getStringClaim("family_name"))
                 .email(claims.getStringClaim("email"))
-                .emailVerified(claims.getBooleanClaim("email_verified"))
                 .roles(roles != null ? new HashSet<>(roles) : Collections.emptySet())
                 .build();
     }

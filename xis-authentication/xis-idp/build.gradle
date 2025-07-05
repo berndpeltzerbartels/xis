@@ -22,7 +22,7 @@ dependencies {
     //compileOnly(project(":xis-adapter-spi"))
     compileOnly(project(":xis-controller-api"))
     implementation(project(":xis-context"))
-    implementation(project(":xis-security"))
+    // implementation(project(":xis-security"))
     compileOnly(project(":xis-controller-api"))
     compileOnly(project(":xis-adapter-spi"))
     implementation(project(":xis-authentication"))

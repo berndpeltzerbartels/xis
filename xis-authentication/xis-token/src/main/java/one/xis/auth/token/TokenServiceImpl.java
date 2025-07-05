@@ -23,6 +23,12 @@ class TokenServiceImpl implements TokenService {
     private final Gson gson = new Gson();
 
     @Override
+    public ApiTokens newTokens(String userId, Collection<String> roles, Map<String, Object> claims) {
+        return newTokens(new TokenCreationAttributes(userId, roles, claims, Duration.ofHours(15)), // TODO constant
+                new TokenCreationAttributes(userId, roles, claims, Duration.ofDays(5)));// TODO constant
+    }
+
+    @Override
     public ApiTokens newTokens(TokenCreationAttributes tokenCreationAttributes, TokenCreationAttributes renewTokenCreationAttributes) {
         String accessToken = createToken(tokenCreationAttributes);
         String renewToken = createToken(renewTokenCreationAttributes);

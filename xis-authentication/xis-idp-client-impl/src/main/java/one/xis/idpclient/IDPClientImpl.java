@@ -3,6 +3,7 @@ package one.xis.idpclient;
 import com.google.gson.Gson;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import one.xis.auth.UserInfoImpl;
 import one.xis.auth.token.ApiTokens;
 import one.xis.http.HttpClientException;
 import one.xis.http.RestClient;
@@ -11,7 +12,6 @@ import one.xis.ipdclient.IDPClientConfig;
 import one.xis.ipdclient.IDPPublicKeyResponse;
 import one.xis.ipdclient.IDPWellKnownOpenIdConfig;
 import one.xis.security.AuthenticationException;
-import one.xis.security.UserInfo;
 
 import java.util.HashMap;
 
@@ -81,7 +81,7 @@ class IDPClientImpl implements IDPClient {
     }
 
     @Override
-    public UserInfo fetchUserInfo(@NonNull String accessToken) throws AuthenticationException {
+    public UserInfoImpl fetchUserInfo(@NonNull String accessToken) throws AuthenticationException {
         try {
             var httpClient = restClient.getHttpClient();
             var headers = new HashMap<String, String>();
@@ -94,7 +94,7 @@ class IDPClientImpl implements IDPClient {
                 throw new AuthenticationException("Failed to fetch user info from IDP. Status: " + response.getStatusCode() + ", Body: " + response.getContent());
             }
 
-            return gson.fromJson(response.getContent(), UserInfo.class);
+            return gson.fromJson(response.getContent(), UserInfoImpl.class);
         } catch (HttpClientException e) {
             throw new AuthenticationException("Failed to fetch user info from IDP", e);
         }
@@ -135,7 +135,8 @@ class IDPClientImpl implements IDPClient {
         return getOpenIdConfig().getIssuer();
     }
 
-    private IDPWellKnownOpenIdConfig getOpenIdConfig() {
+    @Override
+    public IDPWellKnownOpenIdConfig getOpenIdConfig() {
         if (openIdConfig == null) {
             synchronized (this) {
                 if (openIdConfig == null) {

@@ -18,20 +18,7 @@ public interface FrameworkController<RESP_WRAPPER, REQ, RESP> {
     RESP_WRAPPER onWidgetLinkAction(ClientRequest request, String authenticationHeader, Locale locale);
 
     RESP onFormAction(ClientRequest request, String authenticationHeader, Locale locale);
-
-    RESP idpGetTokens(String code, String state);
-
-    /**
-     * Authenticates a user with the given request and provider. This is the callback url
-     * the authentication provider will redirect to after successful authentication.
-     *
-     * @param request  the authentication request containing user credentials
-     * @param provider the authentication provider to use
-     * @return a response containing the authentication result
-     */
-    RESP authenticationCallback(REQ request, String provider);
-
-    RESP renewApiTokens(String renewToken);
+    
 
     String getPageHead(String id);
 

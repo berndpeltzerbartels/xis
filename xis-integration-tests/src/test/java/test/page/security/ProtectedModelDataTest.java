@@ -1,7 +1,7 @@
 package test.page.security;
 
 import one.xis.context.IntegrationTestContext;
-import one.xis.security.UserInfo;
+import one.xis.idp.IDPUserInfoImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -46,7 +46,7 @@ public class ProtectedModelDataTest {
 
         @BeforeEach
         void init() {
-            var userInfo = new UserInfo();
+            var userInfo = new IDPUserInfoImpl();
             userInfo.setUserId("user1");
             userInfo.setRoles(Set.of("simple-user"));
 
@@ -78,7 +78,7 @@ public class ProtectedModelDataTest {
 
         @BeforeEach
         void init() {
-            var userInfo = new UserInfo();
+            var userInfo = new IDPUserInfoImpl();
             userInfo.setUserId("user1");
             userInfo.setRoles(Set.of("simple-user", "admin"));
 

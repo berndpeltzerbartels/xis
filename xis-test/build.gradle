@@ -1,5 +1,5 @@
 plugins {
-    id 'java'
+    id 'java-library'
     id 'maven-publish'
     id 'signing'
 }
@@ -47,7 +47,8 @@ dependencies {
     implementation project(':xis-adapter-spi')
     implementation project(':xis-gson')
     implementation project(':xis-javascript')
-    implementation project(':xis-authentication:xis-idp')
+    api(project(':xis-authentication'))
+    api(project(':xis-authentication:xis-idp'))
     implementation project(':xis-authentication:xis-token')
     implementation project(':xis-security') // TODO ? remove
 

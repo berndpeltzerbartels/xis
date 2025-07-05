@@ -7,6 +7,9 @@ import one.xis.auth.token.ApiTokensAndUrl;
  * Xis is used as an iDP (Identity Provider) for authentication.
  */
 public interface IDPFrontendService {
+
+    public static final String CALLBACK_URL = "/xis/auth/callback";
+
     ApiTokensAndUrl authenticationCallback(String provider, String queryString);
 
     String createLoginFormUrl(String provider, String redirectUri);

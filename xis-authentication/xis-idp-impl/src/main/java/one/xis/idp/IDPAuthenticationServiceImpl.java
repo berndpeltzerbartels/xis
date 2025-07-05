@@ -3,12 +3,7 @@ package one.xis.idp;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
-import one.xis.auth.AuthenticationException;
-import one.xis.auth.InvalidCredentialsException;
-import one.xis.auth.InvalidRedirectUrlException;
-import one.xis.auth.InvalidStateParameterException;
-import one.xis.context.XISComponent;
-import one.xis.security.InvalidTokenException;
+import one.xis.auth.*;
 import one.xis.security.SecurityUtil;
 
 import java.nio.charset.StandardCharsets;
@@ -18,19 +13,21 @@ import java.util.*;
 
 import static java.time.temporal.ChronoUnit.MINUTES;
 
-@XISComponent
 @RequiredArgsConstructor
-class LocalIDPServiceImpl implements LocalIDPService {
+class IDPAuthenticationServiceImpl implements IDPAuthenticationService {
 
-    private final LocalIDPUserService idpUserService;
-    private final LocalIDPCodeStore idpCodeStore = new LocalIDPCodeStore();
+    private final IPDUserService idpUserService;
+    private final IDPServerCodeStore idpCodeStore = new IDPServerCodeStore();
     private final String secret = SecurityUtil.createRandomKey(32);
     private final Duration lifetime = Duration.of(15, MINUTES);
     private final Duration refreshLifetime = Duration.of(30, MINUTES);
 
     @Override
-    public String login(LocalIDPLogin login) throws InvalidCredentialsException {
-        if (!idpUserService.checkCredentials(login.getUsername(), login.getPassword())) {
+    public String login(IDPServerLogin login) throws InvalidCredentialsException {
+        if (idpUserService.findUserInfo(login.getUsername())
+                .map(IDPUserInfo::getPassword)
+                .map(login.getPassword()::equals)
+                .orElse(false)) {
             throw new InvalidCredentialsException();
         }
         String code = UUID.randomUUID().toString();
@@ -39,7 +36,7 @@ class LocalIDPServiceImpl implements LocalIDPService {
     }
 
     @Override
-    public LocalIDPTokens issueToken(String code, String state) throws AuthenticationException {
+    public IDPServerTokens issueToken(String code, String state) throws AuthenticationException {
         String userId = idpCodeStore.getUserIdForCode(code);
         if (userId == null) {
             throw new InvalidStateParameterException();
@@ -49,14 +46,14 @@ class LocalIDPServiceImpl implements LocalIDPService {
 
 
     @Override
-    public LocalIDPTokens refresh(String refreshToken) throws InvalidTokenException, one.xis.auth.AuthenticationException {
+    public IDPServerTokens refresh(String refreshToken) throws InvalidTokenException, AuthenticationException {
         String userId = verifyRefreshToken(refreshToken);
         return generateTokenResponse(userId, null);
     }
 
 
     @Override
-    public UserInfo content(String accessToken) throws InvalidTokenException {
+    public IDPUserInfo content(String accessToken) throws InvalidTokenException {
         try {
             var claims = Jwts.parser()
                     .setSigningKey(secret.getBytes(StandardCharsets.UTF_8))
@@ -66,7 +63,7 @@ class LocalIDPServiceImpl implements LocalIDPService {
             List<String> roles = (List<String>) claims.get("roles");
             Map<String, Object> additionalClaims = (Map<String, Object>) claims.get("claims");
 
-            UserInfoImpl userInfo = new UserInfoImpl();
+            IDPUserInfoImpl userInfo = new IDPUserInfoImpl();
             userInfo.setUserId(userId);
             userInfo.setRoles(new HashSet<>(roles));
             userInfo.setClaims(additionalClaims);
@@ -77,18 +74,21 @@ class LocalIDPServiceImpl implements LocalIDPService {
     }
 
 
-    public void checkRedirectUrl(String redirectUrl) throws InvalidRedirectUrlException {
-        if (idpUserService.getAllowedRedirectUrls().stream().noneMatch(redirectUrl::startsWith)) {
+    public void checkRedirectUrl(String userId, String redirectUrl) throws InvalidRedirectUrlException {
+        if (idpUserService.findUserInfo(userId)
+                .map(IDPUserInfo::getPermittedRedirectUrls)
+                .map(urls -> urls.contains(redirectUrl))
+                .orElse(false)) {
             throw new InvalidRedirectUrlException(redirectUrl);
         }
     }
 
-    private LocalIDPTokens generateTokenResponse(String userId, String state) throws one.xis.auth.AuthenticationException {
+    private IDPServerTokens generateTokenResponse(String userId, String state) throws AuthenticationException {
         long now = System.currentTimeMillis();
         Date expiry = Date.from(Instant.now().plus(lifetime));
         Date expiryRefresh = Date.from(Instant.now().plus(refreshLifetime));
 
-        UserInfo userInfo = idpUserService.getUserInfo(userId);
+        UserInfo userInfo = idpUserService.findUserInfo(userId).orElseThrow(() -> new AuthenticationException("User not found: " + userId));
 
         String jwt = Jwts.builder()
                 .setId(UUID.randomUUID().toString())
@@ -109,7 +109,7 @@ class LocalIDPServiceImpl implements LocalIDPService {
                 .signWith(SignatureAlgorithm.HS256, secret.getBytes(StandardCharsets.UTF_8))
                 .compact();
 
-        LocalIDPTokens response = new LocalIDPTokens();
+        IDPServerTokens response = new IDPServerTokens();
         response.setAccessToken(jwt);
         response.setRefreshToken(refreshToken);
         response.setExpiresIn(lifetime);

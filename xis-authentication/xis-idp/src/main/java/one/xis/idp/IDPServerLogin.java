@@ -7,9 +7,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class LocalIDPLogin {
+public class IDPServerLogin {
     private String username;
     private String password;
     private String state;
-    private String redirectUrl;
 }

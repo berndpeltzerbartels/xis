@@ -1,8 +1,9 @@
 package test.page.security;
 
+import one.xis.auth.InvalidTokenException;
 import one.xis.context.IntegrationTestContext;
-import one.xis.security.LocalUserAuthenticator;
-import one.xis.security.LocalUserInfoImpl;
+import one.xis.idp.IDPUserInfoImpl;
+import one.xis.idp.IDPUserInfoService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -19,11 +20,11 @@ class LoginAndRolesIntegrationTest {
     private IntegrationTestContext testContext;
 
     @BeforeEach
-    void setup() {
-        var userInfoService = mock(LocalUserAuthenticator.class);
+    void setup() throws InvalidTokenException {
+        var userInfoService = mock(IDPUserInfoService.class);
 
         // Erfolgreiches Login
-        var userInfo = new LocalUserInfoImpl();
+        var userInfo = new IDPUserInfoImpl();
         userInfo.setUserId("admin");
         userInfo.setPassword("pw");
         userInfo.setRoles(Set.of("admin", "user"));

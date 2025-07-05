@@ -3,11 +3,9 @@ package one.xis.spring;
 
 import lombok.NonNull;
 import lombok.Setter;
-import one.xis.PathVariable;
-import one.xis.security.AuthenticationException;
+import one.xis.auth.token.ApiTokens;
 import one.xis.server.*;
 import org.springframework.http.HttpRequest;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -95,34 +93,6 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
         addTokenToRequest(request, authenticationHeader);
         request.setLocale(locale);
         return responseEntity(frontendService.processActionRequest(request));
-    }
-
-    @Override
-    @PostMapping(value = "/xis/idp/tokens", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public ResponseEntity<?> idpGetTokens(@RequestParam("code") String code,
-                                          @RequestParam("state") String state) {
-        BearerTokens tokens;
-        try {
-            tokens = frontendService.localTokenProviderGetTokens(code, state);
-        } catch (AuthenticationException e) {
-            return ResponseEntity.status(401).body("Authentication failed");
-        }
-        return addTokenCookies(ResponseEntity.status(201), tokens).build();
-    }
-
-    @Override
-    @GetMapping("/xis/auth/{provider}")
-    public ResponseEntity<?> authenticationCallback(HttpRequest request,
-                                                    @PathVariable("provider") String provider) {
-        ApiTokensAndUrl authData = frontendService.authenticationCallback(provider, request.getURI().getQuery());
-        return addTokenCookies(ResponseEntity.status(302).header("Location", authData.getUrl()), authData.getApiTokens()).build();
-    }
-
-    @Override
-    @PostMapping("/xis/token/renew")
-    public ResponseEntity<?> renewApiTokens(@NonNull @RequestHeader("Authentication") String renewToken) {
-        var renewTokenResponse = frontendService.processRenewApiTokenRequest(renewToken.substring("Bearer ".length()));
-        return addTokenCookies(ResponseEntity.status(201), renewTokenResponse).build();
     }
 
     @Override

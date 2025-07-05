@@ -5,14 +5,13 @@ import lombok.RequiredArgsConstructor;
 import one.xis.UserContextAccess;
 import one.xis.UserContextImpl;
 import one.xis.auth.token.AccessTokenWrapper;
-import one.xis.auth.token.StateParameter;
 import one.xis.auth.token.TokenService;
 import one.xis.context.XISComponent;
 import one.xis.context.XISInit;
 import one.xis.resource.Resource;
 import one.xis.resource.Resources;
 import one.xis.security.AuthenticationException;
-import one.xis.security.InvalidTokenException;
+import one.xis.security.AuthenticationService;
 import org.tinylog.Logger;
 
 import java.time.ZoneId;
@@ -33,6 +32,7 @@ public class FrontendServiceImpl implements FrontendService {
     private final Resources resources;
     private final LocalUrlHolder localUrlHolder;
     private final TokenService tokenService;
+    private final AuthenticationService authenticationService;
     private final Collection<RequestFilter> requestFilters;
     private Resource appJsResource;
     private Resource classesJsResource;
@@ -152,7 +152,7 @@ public class FrontendServiceImpl implements FrontendService {
         this.localUrlHolder.setLocalUrl(hostUrl);
     }
 
-    private void addUserContext(ClientRequest request) throws InvalidTokenException, AuthenticationException {
+    private void addUserContext(ClientRequest request) throws AuthenticationException {
         var userContext = new UserContextImpl();
         userContext.setClientId(request.getClientId());
         userContext.setLocale(request.getLocale());
@@ -176,24 +176,9 @@ public class FrontendServiceImpl implements FrontendService {
 
 
     private ServerResponse authenticationErrorResponse(String uri) {
-        var state = StateParameter.create(uri);
         var response = new ServerResponse();
         response.setStatus(303);
-        response.setNextURL("/login.html?state=" + state);
-        response.getValidatorMessages().getMessages().put("username", "Invalid username or password"); // TODO: i18n
-        response.getValidatorMessages().getMessages().put("password", "Invalid username or password"); // TODO: i18n
-        response.getValidatorMessages().getGlobalMessages().add("Invalid username or password"); // TODO: i18n
-        return response;
-    }
-
-    private ServerResponse localAuthenticationErrorResponse(String uri) {
-        var state = StateParameter.create(uri);
-        var response = new ServerResponse();
-        response.setStatus(303);
-        response.setNextURL("/login.html?state=" + state);
-        response.getValidatorMessages().getMessages().put("username", "Invalid username or password"); // TODO: i18n
-        response.getValidatorMessages().getMessages().put("password", "Invalid username or password"); // TODO: i18n
-        response.getValidatorMessages().getGlobalMessages().add("Invalid username or password"); // TODO: i18n
+        response.setNextURL(authenticationService.loginUrl(uri));
         return response;
     }
 }

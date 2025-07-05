@@ -4,8 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import one.xis.idp.IDPFrontendService;
-import one.xis.security.AuthenticationException;
-import one.xis.server.*;
+import one.xis.server.ClientRequest;
+import one.xis.server.FrontendService;
+import one.xis.server.ResourcePathProvider;
+import one.xis.server.ServerResponse;
 import one.xis.validation.ValidatorMessages;
 
 import java.util.Locale;
@@ -67,24 +69,6 @@ public class BackendBridge implements ResourcePathProvider {
         return stringToBridgeResponse(frontendService.getWidgetHtml(headers.get("uri")));
     }
 
-    public BackendBridgeResponse localTokenProviderGetTokens(String uri, Map<String, String> headers) {
-        String code = headers.get("code");
-        String state = headers.get("state");
-        try {
-            BearerTokens tokens = frontendService.localTokenProviderGetTokens(code, state);
-            return toBridgeResponse(tokens);
-        } catch (AuthenticationException e) {
-            return new BackendBridgeResponse(e.getMessage(), 401, new ValidatorMessages());
-        }
-    }
-
-    public BackendBridgeResponse renewApiTokens(String uri, Map<String, String> headers) {
-        try {
-            return toBridgeResponse(frontendService.processRenewApiTokenRequest(headers.get("renewToken")));
-        } catch (Exception e) {
-            return new BackendBridgeResponse(e.getMessage(), 500, new ValidatorMessages());
-        }
-    }
 
     private ClientRequest request(String requestJson, Map<String, String> headers) {
         try {

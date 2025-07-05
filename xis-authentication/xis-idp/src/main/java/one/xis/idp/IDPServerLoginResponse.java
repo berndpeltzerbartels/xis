@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 @Data
 @RequiredArgsConstructor
-public class LocalIDPLoginResponse {
+public class IDPServerLoginResponse {
     /**
      * The tokens to be used for API access.
      */

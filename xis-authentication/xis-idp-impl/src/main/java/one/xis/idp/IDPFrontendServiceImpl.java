@@ -36,7 +36,7 @@ class IDPFrontendServiceImpl implements IDPFrontendService {
 
     @Override
     public String createLoginFormUrl(String provider, String redirectUri) {
-        return idpClientService.getIDPLoginFormUrl(provider, redirectUri);
+        return idpClientService.loginFormUrl(provider, redirectUri);
     }
 
 }

@@ -20,10 +20,10 @@ public interface ExternalIDPService {
      * Creates an authorization URL for the authentication provider.
      * This URL is used to redirect users to the provider's login page.
      *
-     * @param providerLoginFormUrl The landing page to redirect to after successful login.
+     * @param postLoginRedirectUrl The URL to redirect to after the user has logged in.
      * @return The authorization URL as a String.
      */
-    String createLoginUrl(String providerLoginFormUrl);
+    String createLoginUrl(String postLoginRedirectUrl);
 
 
     /**

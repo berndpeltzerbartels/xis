@@ -2,13 +2,12 @@ package one.xis.boot.netty;
 
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
-import io.netty.handler.codec.http.HttpResponseStatus;
-import io.netty.handler.codec.http.QueryStringDecoder;
 import lombok.RequiredArgsConstructor;
-import one.xis.auth.token.ApiTokensAndUrl;
 import one.xis.context.XISComponent;
-import one.xis.security.AuthenticationException;
-import one.xis.server.*;
+import one.xis.server.ClientConfig;
+import one.xis.server.ClientRequest;
+import one.xis.server.FrameworkController;
+import one.xis.server.FrontendService;
 
 import java.io.IOException;
 import java.util.Locale;
@@ -104,38 +103,6 @@ public class NettyController implements FrameworkController<FullHttpResponse, Fu
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    @Override
-    public FullHttpResponse idpGetTokens(String code, String state) {
-        BearerTokens tokens;
-        try {
-            tokens = frontendService.localTokenProviderGetTokens(code, state);
-            return mapper.toFullHttpResponse(tokens);
-        } catch (AuthenticationException e) {
-            return mapper.toErrorResponse(e.getMessage(), HttpResponseStatus.UNAUTHORIZED);
-        }
-    }
-
-    @Override
-    public FullHttpResponse authenticationCallback(FullHttpRequest request, String provider) {
-        String query = new QueryStringDecoder(request.uri()).rawQuery();
-        ApiTokensAndUrl authData = frontendService.authenticationCallback(provider, query);
-        return mapper.toRedirectWithCookies(authData.getUrl(), authData);
-    }
-
-    @Override
-    public FullHttpResponse renewApiTokens(String renewToken) {
-        try {
-            return mapper.toFullHttpResponse(frontendService.processRenewApiTokenRequest(renewToken));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public String getPage(String id) {
-        return frontendService.getPage(id);
     }
 
     @Override

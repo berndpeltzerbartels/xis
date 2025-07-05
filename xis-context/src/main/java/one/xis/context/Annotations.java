@@ -2,6 +2,7 @@ package one.xis.context;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -10,6 +11,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * This class encapsulates annotation reflection for a framework witch custom proxy-annotations.
@@ -24,6 +26,9 @@ public class Annotations {
     private final Set<Class<? extends Annotation>> componentClassAnnotations = new HashSet<>();
     private final Set<Class<? extends Annotation>> dependencyFieldAnnotations = new HashSet<>();
     private final Set<Class<? extends Annotation>> proxyAnnotations = new HashSet<>();
+
+    @Setter
+    private Predicate<Annotation> isDefault = annotation -> false;
 
     public Annotations addInitAnnotation(Class<? extends Annotation> annotation) {
         initAnnotations.add(annotation);
@@ -152,6 +157,17 @@ public class Annotations {
         }
         return false;
     }
+
+    boolean isDefaultComponent(Class<?> c) {
+        for (var i = 0; i < c.getAnnotations().length; i++) {
+            Annotation annotation = c.getAnnotations()[i];
+            if (isDefault.test(annotation)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     /**
      * Determines if a field is a dependency.

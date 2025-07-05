@@ -10,7 +10,7 @@ import one.xis.auth.InvalidTokenException;
  * issue tokens, and manage user sessions.
  * This service is designed to use XIS for identity management and authentication.
  */
-public interface LocalIDPService {
+public interface IDPAuthenticationService {
 
     /**
      * Logs in a user with the provided credentials.
@@ -19,7 +19,7 @@ public interface LocalIDPService {
      * @return a unique code representing the login session
      * @throws InvalidCredentialsException if the credentials are invalid
      */
-    String login(LocalIDPLogin login) throws InvalidCredentialsException;
+    String login(IDPServerLogin login) throws InvalidCredentialsException;
 
     /**
      * Issues an authentication token based on the provided code and state.
@@ -29,7 +29,7 @@ public interface LocalIDPService {
      * @return a response containing access and refresh tokens
      * @throws AuthenticationException if the code is invalid or expired
      */
-    LocalIDPTokens issueToken(String code, String state) throws AuthenticationException;
+    IDPServerTokens issueToken(String code, String state) throws AuthenticationException;
 
     /**
      * Refreshes the authentication token using the provided refresh token.
@@ -39,7 +39,7 @@ public interface LocalIDPService {
      * @throws InvalidTokenException   if the refresh token is invalid or expired
      * @throws AuthenticationException if there is an error during the refresh process
      */
-    LocalIDPTokens refresh(String refreshToken) throws InvalidTokenException, AuthenticationException;
+    IDPServerTokens refresh(String refreshToken) throws InvalidTokenException, AuthenticationException;
 
     /**
      * Retrieves user information based on the provided access token.
@@ -48,14 +48,15 @@ public interface LocalIDPService {
      * @return a LocalUserInfo object containing user details
      * @throws InvalidTokenException if the access token is invalid or expired
      */
-    UserInfo content(String accessToken) throws InvalidTokenException;
+    IDPUserInfo content(String accessToken) throws InvalidTokenException;
 
     /**
      * Checks if the provided redirect URL is valid and safe for redirection.
      *
+     * @param userId      the ID of the user requesting the redirect
      * @param redirectUrl the URL to check
      * @throws InvalidRedirectUrlException if the redirect URL is invalid or unsafe
      */
-    void checkRedirectUrl(String redirectUrl) throws InvalidRedirectUrlException;
+    void checkRedirectUrl(String userId, String redirectUrl) throws InvalidRedirectUrlException;
 
 }

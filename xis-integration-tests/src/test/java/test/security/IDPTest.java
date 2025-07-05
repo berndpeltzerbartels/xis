@@ -1,33 +1,34 @@
 package test.security;
 
 import one.xis.context.IntegrationTestContext;
-import one.xis.security.IDPUserService;
-import one.xis.security.LocalUserInfo;
-import one.xis.security.LocalUserInfoImpl;
-import one.xis.security.XISIDPConfig;
+import one.xis.idp.IDPUserInfo;
+import one.xis.idp.IDPUserInfoImpl;
+import one.xis.idp.IDPUserInfoService;
+import one.xis.idp.XisIDPConfig;
 import one.xis.server.ClientRequest;
 import one.xis.server.FrontendService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.*;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class IDPTest {
 
-    static final LocalUserInfo TEST_USER = new LocalUserInfoImpl("testUser", "password", Set.of("admin"), Map.of("email", "testUser@example.com"));
+    static final IDPUserInfo TEST_USER = new IDPUserInfoImpl("testUser", "password", "email", Set.of("admin"), Map.of(), Set.of());
 
 
-    private IntegrationTestContext testContext;
     private FrontendService frontendService;
 
     @BeforeEach
     void init() {
         // config to use the IDP
-        var providerConfig = new XISIDPConfig("http://localhost:8080", "http://localhost:8080");
+        var providerConfig = new XisIDPConfig();
 
-        testContext = IntegrationTestContext.builder()
+        IntegrationTestContext testContext = IntegrationTestContext.builder()
                 .withSingleton(new TestIDPUserService())
                 .withSingleton(IDPTestPage.class)
                 .withSingleton(providerConfig)
@@ -51,18 +52,19 @@ class IDPTest {
 
     }
 
-    static class TestIDPUserService implements IDPUserService {
+    static class TestIDPUserService implements IDPUserInfoService {
 
 
         @Override
-        public LocalUserInfo getUserInfo(String userId) {
+        public IDPUserInfo getUserInfo(String userId) {
             return userId.equals(TEST_USER.getUserId()) ? TEST_USER : null;
         }
 
         @Override
-        public Collection<String> getAllowedRedirectUrls() {
-            return List.of("/xyz");
+        public void saveUserInfo(IDPUserInfo userInfo, String idpId) {
+
         }
+
 
         @Override
         public boolean checkCredentials(String userId, String password) {

@@ -1,9 +1,9 @@
 package one.xis.ipdclient;
 
 import lombok.NonNull;
+import one.xis.auth.UserInfoImpl;
 import one.xis.auth.token.ApiTokens;
 import one.xis.security.AuthenticationException;
-import one.xis.security.UserInfo;
 
 public interface IDPClient {
     /**
@@ -33,7 +33,7 @@ public interface IDPClient {
      * @return Die Informationen des Benutzers.
      * @throws AuthenticationException wenn der Access-Token ungültig oder abgelaufen ist.
      */
-    UserInfo fetchUserInfo(@NonNull String accessToken) throws AuthenticationException;
+    UserInfoImpl fetchUserInfo(@NonNull String accessToken) throws AuthenticationException;
 
     /**
      * Holt die öffentlichen Schlüssel vom IDP, typischerweise von einem JWKS (JSON Web Key Set) Endpunkt.
@@ -67,4 +67,6 @@ public interface IDPClient {
      * @return the token endpoint URL
      */
     String getIssuer();
+
+    IDPWellKnownOpenIdConfig getOpenIdConfig();
 }

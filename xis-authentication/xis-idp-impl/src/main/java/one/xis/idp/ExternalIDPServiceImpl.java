@@ -2,9 +2,11 @@ package one.xis.idp;
 
 import com.google.gson.Gson;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import one.xis.auth.token.StateParameter;
 import one.xis.auth.token.StateParameterPayload;
 import one.xis.security.SecurityUtil;
+import one.xis.server.LocalUrlHolder;
 import one.xis.utils.lang.StringUtils;
 
 import java.net.HttpURLConnection;
@@ -14,26 +16,24 @@ import java.util.Map;
 import static one.xis.utils.http.HttpUtils.parseQueryParameters;
 import static one.xis.utils.lang.StringUtils.isNotEmpty;
 
+
+@RequiredArgsConstructor
 class ExternalIDPServiceImpl implements ExternalIDPService {
 
-    private final ExternalIDPConnectionFactory connectionFactory;
     private final ExternalIDPConfig providerConfiguration;
+    private final ExternalIDPConnectionFactory connectionFactory;
+    private final LocalUrlHolder localUrlHolder;
     private final Gson gson = new Gson();
 
-    ExternalIDPServiceImpl(ExternalIDPConfig providerConfiguration,
-                           ExternalIDPConnectionFactory connectionFactory) {
-        this.providerConfiguration = providerConfiguration;
-        this.connectionFactory = connectionFactory;
-    }
 
     @Override
     public String createAuthorizationUrl() {
-        return createLoginUrl(providerConfiguration.getApplicationRootEndpoint());
+        return createLoginUrl(localUrlHolder.getLocalUrl());
     }
 
     @Override
-    public String createLoginUrl(String providerLoginFormUrl) {
-        String stateParameter = createStateParameter(providerLoginFormUrl);
+    public String createLoginUrl(String postLoginRedirectUrl) {
+        String stateParameter = createStateParameter(postLoginRedirectUrl);
         StringBuilder urlBuilder = new StringBuilder(providerConfiguration.getLoginFormUrl())
                 .append("?response_type=code")
                 .append("&redirect_uri=").append(getAuthenticationCallbackUrl())
@@ -108,7 +108,7 @@ class ExternalIDPServiceImpl implements ExternalIDPService {
 
     @Override
     public String getProviderId() {
-        return providerConfiguration.getAuthenticationProviderId();
+        return providerConfiguration.getIdpId();
     }
 
     private String getAuthenticationCallbackUrl() {

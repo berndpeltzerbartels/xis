@@ -1,11 +1,11 @@
-package one.xis.idp;
+package one.xis.auth;
 
 import java.util.Map;
 
 public interface UserInfo {
     String getUserId();
 
-    String getPassword();
+    String getEmail();
 
     java.util.Set<String> getRoles();
 

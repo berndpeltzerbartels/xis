@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'java-library'
     id 'maven-publish'
     id 'signing'
 }
@@ -33,7 +34,7 @@ var junitVersion = "5.7.0"
 dependencies {
     implementation project(':xis-controller-api')
     implementation project(':xis-authentication')
-    implementation project(':xis-authentication:xis-token')
+    api project(':xis-authentication:xis-token')
     implementation project(':xis-util')
     implementation "org.reflections:reflections:$reflectionsVersion"
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
