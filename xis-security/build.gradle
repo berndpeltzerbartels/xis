@@ -63,6 +63,10 @@ dependencies {
     testImplementation "org.mockito:mockito-core:$mockitoVersion"
     testImplementation("org.assertj:assertj-core:3.16.1")
     testImplementation(project(":xis-adapter-spi"))
+
+    testCompileOnly(project(':xis-authentication'))
+    testCompileOnly(project(':xis-authentication:xis-idp'))
+    testCompileOnly(project(':xis-authentication:xis-idp-impl'))
 }
 
 test {

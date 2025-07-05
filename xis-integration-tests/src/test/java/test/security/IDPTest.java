@@ -1,10 +1,11 @@
 package test.security;
 
+import one.xis.auth.UserInfo;
 import one.xis.context.IntegrationTestContext;
 import one.xis.idp.IDPUserInfo;
 import one.xis.idp.IDPUserInfoImpl;
-import one.xis.idp.IDPUserInfoService;
 import one.xis.idp.XisIDPConfig;
+import one.xis.security.UserInfoService;
 import one.xis.server.ClientRequest;
 import one.xis.server.FrontendService;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,17 +53,17 @@ class IDPTest {
 
     }
 
-    static class TestIDPUserService implements IDPUserInfoService {
+    static class TestIDPUserService implements UserInfoService<UserInfo> {
 
 
         @Override
-        public IDPUserInfo getUserInfo(String userId) {
+        public UserInfo getUserInfo(String userId) {
             return userId.equals(TEST_USER.getUserId()) ? TEST_USER : null;
         }
 
         @Override
-        public void saveUserInfo(IDPUserInfo userInfo, String idpId) {
-
+        public void saveUserInfo(UserInfo userInfo, String idpId) {
+            
         }
 
 

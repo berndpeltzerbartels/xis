@@ -4,6 +4,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
 import one.xis.auth.*;
+import one.xis.context.XISComponent;
 import one.xis.security.SecurityUtil;
 
 import java.nio.charset.StandardCharsets;
@@ -13,6 +14,7 @@ import java.util.*;
 
 import static java.time.temporal.ChronoUnit.MINUTES;
 
+@XISComponent
 @RequiredArgsConstructor
 class IDPAuthenticationServiceImpl implements IDPAuthenticationService {
 

@@ -15,6 +15,7 @@ var reflectionsVersion = rootProject.ext.libraryVersions.reflections
 var jacksonDatabindVersion = rootProject.ext.libraryVersions.jacksonDatabind
 var gsonVersion = rootProject.ext.gsonVersion
 var junitVersion = "5.7.0"
+var assertjVersion = rootProject.ext.libraryVersions.assertj
 
 
 dependencies {
@@ -39,6 +40,9 @@ dependencies {
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
+
+    // AssertJ dependencies
+    testImplementation "org.assertj:assertj-core:$assertjVersion"
 }
 
 test {

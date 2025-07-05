@@ -3,7 +3,7 @@ package test.page.security;
 import one.xis.auth.InvalidTokenException;
 import one.xis.context.IntegrationTestContext;
 import one.xis.idp.IDPUserInfoImpl;
-import one.xis.idp.IDPUserInfoService;
+import one.xis.security.UserInfoService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -21,7 +21,7 @@ class LoginAndRolesIntegrationTest {
 
     @BeforeEach
     void setup() throws InvalidTokenException {
-        var userInfoService = mock(IDPUserInfoService.class);
+        var userInfoService = mock(UserInfoService.class);
 
         // Erfolgreiches Login
         var userInfo = new IDPUserInfoImpl();
