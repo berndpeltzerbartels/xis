@@ -4,6 +4,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
 import one.xis.auth.*;
+import one.xis.auth.token.ApiTokens;
 import one.xis.context.XISComponent;
 import one.xis.security.SecurityUtil;
 
@@ -18,7 +19,7 @@ import static java.time.temporal.ChronoUnit.MINUTES;
 @RequiredArgsConstructor
 class IDPAuthenticationServiceImpl implements IDPAuthenticationService {
 
-    private final IPDUserService idpUserService;
+    private final IDPService idpService;
     private final IDPServerCodeStore idpCodeStore = new IDPServerCodeStore();
     private final String secret = SecurityUtil.createRandomKey(32);
     private final Duration lifetime = Duration.of(15, MINUTES);
@@ -26,7 +27,7 @@ class IDPAuthenticationServiceImpl implements IDPAuthenticationService {
 
     @Override
     public String login(IDPServerLogin login) throws InvalidCredentialsException {
-        if (idpUserService.findUserInfo(login.getUsername())
+        if (!idpService.findUserInfo(login.getUsername())
                 .map(IDPUserInfo::getPassword)
                 .map(login.getPassword()::equals)
                 .orElse(false)) {
@@ -38,19 +39,19 @@ class IDPAuthenticationServiceImpl implements IDPAuthenticationService {
     }
 
     @Override
-    public IDPServerTokens issueToken(String code, String state) throws AuthenticationException {
+    public ApiTokens issueToken(String code) throws AuthenticationException {
         String userId = idpCodeStore.getUserIdForCode(code);
         if (userId == null) {
             throw new InvalidStateParameterException();
         }
-        return generateTokenResponse(userId, state);
+        return generateTokenResponse(userId);
     }
 
 
     @Override
-    public IDPServerTokens refresh(String refreshToken) throws InvalidTokenException, AuthenticationException {
+    public ApiTokens refresh(String refreshToken) throws InvalidTokenException, AuthenticationException {
         String userId = verifyRefreshToken(refreshToken);
-        return generateTokenResponse(userId, null);
+        return generateTokenResponse(userId);
     }
 
 
@@ -77,20 +78,24 @@ class IDPAuthenticationServiceImpl implements IDPAuthenticationService {
 
 
     public void checkRedirectUrl(String userId, String redirectUrl) throws InvalidRedirectUrlException {
-        if (idpUserService.findUserInfo(userId)
-                .map(IDPUserInfo::getPermittedRedirectUrls)
+        if (!idpService.findUserInfo(userId)
+                .map(IDPUserInfo::getClientId)
+                .map(idpService::findClientInfo)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(IDPClientInfo::getPermittedRedirectUrls)
                 .map(urls -> urls.contains(redirectUrl))
                 .orElse(false)) {
             throw new InvalidRedirectUrlException(redirectUrl);
         }
     }
 
-    private IDPServerTokens generateTokenResponse(String userId, String state) throws AuthenticationException {
+    private ApiTokens generateTokenResponse(String userId) throws AuthenticationException {
         long now = System.currentTimeMillis();
         Date expiry = Date.from(Instant.now().plus(lifetime));
         Date expiryRefresh = Date.from(Instant.now().plus(refreshLifetime));
 
-        UserInfo userInfo = idpUserService.findUserInfo(userId).orElseThrow(() -> new AuthenticationException("User not found: " + userId));
+        UserInfo userInfo = idpService.findUserInfo(userId).orElseThrow(() -> new AuthenticationException("User not found: " + userId));
 
         String jwt = Jwts.builder()
                 .setId(UUID.randomUUID().toString())
@@ -111,13 +116,12 @@ class IDPAuthenticationServiceImpl implements IDPAuthenticationService {
                 .signWith(SignatureAlgorithm.HS256, secret.getBytes(StandardCharsets.UTF_8))
                 .compact();
 
-        IDPServerTokens response = new IDPServerTokens();
-        response.setAccessToken(jwt);
-        response.setRefreshToken(refreshToken);
-        response.setExpiresIn(lifetime);
-        response.setRefreshTokenExpiresIn(refreshLifetime);
-        response.setState(state);
-        return response;
+        ApiTokens tokens = new ApiTokens();
+        tokens.setAccessToken(jwt);
+        tokens.setRenewToken(refreshToken);
+        tokens.setAccessTokenExpiresIn(lifetime);
+        tokens.setRenewTokenExpiresIn(refreshLifetime);
+        return tokens;
     }
 
     private String verifyRefreshToken(String refreshToken) throws InvalidTokenException {
@@ -134,62 +138,4 @@ class IDPAuthenticationServiceImpl implements IDPAuthenticationService {
             throw new InvalidTokenException(refreshToken);
         }
     }
-
-    /*
-    private static AuthenticationData getAuthenticationData(AuthenticationProviderTokens tokenResponse, AuthenticationProviderStateData authenticationProviderData) {
-        var apiTokens = new ApiTokens();
-        apiTokens.setAccessToken(tokenResponse.getAccessToken());
-        apiTokens.setRenewTokenExpiresIn(tokenResponse.getRefreshExpiresIn());
-        apiTokens.setRenewToken(tokenResponse.getRefreshToken());
-        apiTokens.setRenewTokenExpiresIn(tokenResponse.getRefreshExpiresIn());
-        var authenticationData = new AuthenticationData();
-        authenticationData.setApiTokens(apiTokens);
-        authenticationData.setUrl(authenticationProviderData.getStateParameterPayload().getRedirect());
-        return authenticationData;
-    }
-
-    private ServerResponse authenticationErrorResponse(String uri) {
-        var state = StateParameter.create(uri);
-        var response = new ServerResponse();
-        response.setStatus(303);
-        response.setNextURL("/login.html?state=" + state);
-        response.getValidatorMessages().getMessages().put("username", "Invalid username or password"); // TODO: i18n
-        response.getValidatorMessages().getMessages().put("password", "Invalid username or password"); // TODO: i18n
-        response.getValidatorMessages().getGlobalMessages().add("Invalid username or password"); // TODO: i18n
-        return response;
-    }
-
-    private ServerResponse localAuthenticationErrorResponse(String uri) {
-        var state = StateParameter.create(uri);
-        var response = new ServerResponse();
-        response.setStatus(303);
-        response.setNextURL("/login.html?state=" + state);
-        response.getValidatorMessages().getMessages().put("username", "Invalid username or password"); // TODO: i18n
-        response.getValidatorMessages().getMessages().put("password", "Invalid username or password"); // TODO: i18n
-        response.getValidatorMessages().getGlobalMessages().add("Invalid username or password"); // TODO: i18n
-        return response;
-    }
-
-    @Override
-    public AuthenticationData authenticationCallback(String provider, String queryString) {
-        var service = Objects.requireNonNull(authenticationProviderServices.getAuthenticationProviderService(provider));
-        var authenticationProviderData = service.verifyAndDecodeCodeAndStateQuery(queryString);
-        var tokenResponse = service.requestTokens(authenticationProviderData.getCode(), authenticationProviderData.getState());
-        return getAuthenticationData(tokenResponse, authenticationProviderData);
-    }
-
-
-    @Override
-    public BearerTokens localTokenProviderGetTokens(String code, String state) throws AuthenticationException {
-        var authenticationProviderService = authenticationProviderService();
-        var tokenResponse = authenticationProviderService.issueToken(code, state);
-        var bearerTokens = new BearerTokens();
-        bearerTokens.setAccessToken(tokenResponse.getAccessToken());
-        bearerTokens.setAccessTokenExpiresIn(tokenResponse.getExpiresIn());
-        bearerTokens.setRenewToken(tokenResponse.getRefreshToken());
-        bearerTokens.setRenewTokenExpiresIn(tokenResponse.getRefreshTokenExpiresIn());
-        return bearerTokens;
-    }
-    */
-
 }

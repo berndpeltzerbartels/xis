@@ -44,7 +44,7 @@ class HttpClient extends Client {
         return response.responseText;
     }
 
-    async loadPageData(resolvedURL) {
+    async loadPageData(resolvedURL, queryParameters) {
         const request = this.createPageRequest(resolvedURL, null, null);
         const headers = await this.authenticationHeader();
         const response = await this.httpConnector.post('/xis/page/model', request, headers);

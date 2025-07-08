@@ -2,6 +2,8 @@ package one.xis.auth.token;
 
 import com.google.gson.Gson;
 import lombok.NonNull;
+import one.xis.auth.ExpiredStateParameterException;
+import one.xis.auth.InvalidStateParameterException;
 import one.xis.security.SecurityUtil;
 import one.xis.utils.lang.StringUtils;
 
@@ -40,7 +42,7 @@ public class StateParameter {
         String payloadJson = new String(SecurityUtil.decodeBase64UrlSafe(encodedPayload), StandardCharsets.UTF_8);
         StateParameterPayload payload = gson.fromJson(payloadJson, StateParameterPayload.class);
         if (payload.getExpiresAtSeconds() < System.currentTimeMillis() / 1000) {
-            throw new IllegalArgumentException("State parameter has expired");
+            throw new ExpiredStateParameterException();
         }
         return payload;
     }
@@ -57,7 +59,7 @@ public class StateParameter {
     private StateParameterPayload verifyStateParameter(@NonNull String encodedPayload, String signature) {
         String expectedSignature = SecurityUtil.signHmacSHA256(encodedPayload, stateSignatureKey);
         if (!expectedSignature.equals(signature)) {
-            throw new IllegalArgumentException("Invalid state parameter signature");
+            throw new InvalidStateParameterException();
         }
         String payloadJson = new String(SecurityUtil.decodeBase64UrlSafe(encodedPayload));
         StateParameterPayload payload;

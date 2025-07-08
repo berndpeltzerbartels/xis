@@ -10,6 +10,9 @@ class SingletonMethod extends SingletonProducerImpl {
     private final Method method;
     private final SingletonWrapper parent;
 
+    @Getter
+    private boolean invoked;
+
     SingletonMethod(Method method, SingletonWrapper parent, ParameterFactory parameterFactory) {
         super(method.getParameters(), parameterFactory);
         this.method = method;
@@ -24,12 +27,20 @@ class SingletonMethod extends SingletonProducerImpl {
 
     @Override
     protected Object invoke(Object[] args) {
+        invoked = true;
         return MethodUtils.invoke(parent.getBean(), method, args);
     }
 
     @Override
     public boolean isInvocable() {
         if (parent.getBean() == null) return false;
+        if (!getParent().getSingletonFields().isEmpty()) return false;
+        return super.isInvocable();
+    }
+
+    boolean isFinalizable() {
+        if (parent.getBean() == null) return false;
+        if (getParent().getSingletonFields().stream().anyMatch(field -> !field.isOptional())) return false;
         return super.isInvocable();
     }
 

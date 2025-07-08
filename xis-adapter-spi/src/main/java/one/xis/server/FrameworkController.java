@@ -18,7 +18,8 @@ public interface FrameworkController<RESP_WRAPPER, REQ, RESP> {
     RESP_WRAPPER onWidgetLinkAction(ClientRequest request, String authenticationHeader, Locale locale);
 
     RESP onFormAction(ClientRequest request, String authenticationHeader, Locale locale);
-    
+
+    RESP getIdpTokens(String payload);
 
     String getPageHead(String id);
 
@@ -45,4 +46,10 @@ public interface FrameworkController<RESP_WRAPPER, REQ, RESP> {
         }
         return null;
     }
+
+    RESP getOpenIdConfiguration();
+
+    RESP getIdpPublicKey();
+
+    RESP authenticationCallback(String code, String state);
 }

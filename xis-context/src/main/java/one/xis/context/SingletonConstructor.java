@@ -1,5 +1,8 @@
 package one.xis.context;
 
+import lombok.Getter;
+import lombok.NonNull;
+
 import java.lang.reflect.Constructor;
 
 public class SingletonConstructor extends SingletonProducerImpl {
@@ -7,13 +10,17 @@ public class SingletonConstructor extends SingletonProducerImpl {
 
     private final Constructor<?> constructor;
 
-    SingletonConstructor(Constructor<?> constructor, ParameterFactory parameterFactory) {
+    @Getter
+    private boolean invoked;
+
+    SingletonConstructor(@NonNull Constructor<?> constructor, @NonNull ParameterFactory parameterFactory) {
         super(constructor.getParameters(), parameterFactory);
         this.constructor = constructor;
     }
 
     @Override
     protected Object invoke(Object[] args) {
+        invoked = true;
         try {
             constructor.setAccessible(true);
             return constructor.newInstance(args);

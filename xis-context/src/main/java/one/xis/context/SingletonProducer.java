@@ -1,5 +1,7 @@
 package one.xis.context;
 
+import java.util.Collection;
+
 public interface SingletonProducer {
 
     Class<?> getSingletonClass();
@@ -8,6 +10,8 @@ public interface SingletonProducer {
 
     void addConsumer(SingletonConsumer consumer);
 
+    Collection<SingletonConsumer> getConsumers();
+
     void addListener(SingletonCreationListener listener);
 
     void invoke();
@@ -15,4 +19,6 @@ public interface SingletonProducer {
     default void doNotify() {
         if (isInvocable()) invoke();
     }
+
+    boolean isInvoked();
 }

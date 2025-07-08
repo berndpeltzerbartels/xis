@@ -21,7 +21,7 @@ public class ImportedTypes {
     }
 
     private static void init() {
-        var reflections = new Reflections("one.xis.server", new TypeAnnotationsScanner(), new SubTypesScanner());
+        var reflections = new Reflections("one.xis", new TypeAnnotationsScanner(), new SubTypesScanner());
         importedTypes = reflections.getTypesAnnotatedWith(ImportInstances.class);
     }
 }

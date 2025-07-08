@@ -5,9 +5,11 @@ import lombok.RequiredArgsConstructor;
 import one.xis.UserContextAccess;
 import one.xis.UserContextImpl;
 import one.xis.auth.token.AccessTokenWrapper;
+import one.xis.auth.token.ApiTokensAndUrl;
 import one.xis.auth.token.TokenService;
 import one.xis.context.XISComponent;
 import one.xis.context.XISInit;
+import one.xis.context.XISInject;
 import one.xis.resource.Resource;
 import one.xis.resource.Resources;
 import one.xis.security.AuthenticationException;
@@ -30,9 +32,10 @@ public class FrontendServiceImpl implements FrontendService {
     private final ClientConfigService configService;
     private final ResourceService resourceService;
     private final Resources resources;
-    private final LocalUrlHolder localUrlHolder;
     private final TokenService tokenService;
-    private final AuthenticationService authenticationService;
+
+    @XISInject(optional = true)
+    private AuthenticationService authenticationService;
     private final Collection<RequestFilter> requestFilters;
     private Resource appJsResource;
     private Resource classesJsResource;
@@ -61,7 +64,7 @@ public class FrontendServiceImpl implements FrontendService {
             return applyFilterChain(request, controllerService::processActionRequest);
         } catch (AuthenticationException e) {
             Logger.error("Authentication error: {}", e.getMessage());
-            return authenticationErrorResponse(request.getPageUrl());
+            return authenticationErrorResponse(request);
         } finally {
             removeUserContext();
         }
@@ -74,7 +77,7 @@ public class FrontendServiceImpl implements FrontendService {
             return applyFilterChain(request, controllerService::processModelDataRequest);
         } catch (AuthenticationException e) {
             Logger.error("Authentication error: {}", e.getMessage());
-            return authenticationErrorResponse(request.getPageId());
+            return authenticationErrorResponse(request);
         } finally {
             removeUserContext();
         }
@@ -87,7 +90,7 @@ public class FrontendServiceImpl implements FrontendService {
             return applyFilterChain(request, controllerService::processFormDataRequest);
         } catch (AuthenticationException e) {
             Logger.error("Authentication error: {}", e.getMessage());
-            return authenticationErrorResponse(request.getPageId());
+            return authenticationErrorResponse(request);
         } finally {
             removeUserContext();
         }
@@ -148,8 +151,8 @@ public class FrontendServiceImpl implements FrontendService {
     }
 
     @Override
-    public void setLocalUrl(String hostUrl) {
-        this.localUrlHolder.setLocalUrl(hostUrl);
+    public ApiTokensAndUrl authenticationCallback(String code, String state) {
+        return authenticationService.authenticate(code, state);
     }
 
     private void addUserContext(ClientRequest request) throws AuthenticationException {
@@ -175,10 +178,10 @@ public class FrontendServiceImpl implements FrontendService {
     }
 
 
-    private ServerResponse authenticationErrorResponse(String uri) {
+    private ServerResponse authenticationErrorResponse(ClientRequest request) {
         var response = new ServerResponse();
-        response.setStatus(303);
-        response.setNextURL(authenticationService.loginUrl(uri));
+        response.setStatus(412);
+        response.setRedirectUrl(authenticationService.loginUrl(request.getPageUrl()));
         return response;
     }
 }

@@ -43,17 +43,15 @@ class HttpConnector {
      * @throws {Error} If the request fails or the response does not contain the expected token data.
      */
     sendRenewTokenRequest(renewToken) {
-        return this.httpConnector.post('/xis/token/renew', { renewToken: renewToken }, {'Authetication': 'Bearer ' + renewToken})
+        return this.httpConnector.post('/xis/token/renew', { renewToken: renewToken }, { 'Authetication': 'Bearer ' + renewToken })
             .then(response => this.readTokenData(response));
     }
-
-    
 
     /**
      * the repsonse contains tokens as cookies like this:
      * "access_token", tokenResponse.getAccessToken()) +
                         "; HttpOnly; Secure; Path=/; SameSite=Strict; Max-Age="
-
+ 
                         This method reads the token data from the response.
      * @param {Tokens} response 
      * @returns 
@@ -78,7 +76,7 @@ class HttpConnector {
                 }
                 return tokens;
             }
-           throw Error('No Set-Cookie header found in the response.');
+            throw Error('No Set-Cookie header found in the response.');
         }
         return null;
     }
@@ -103,6 +101,14 @@ class HttpConnector {
                 // TODO Add headers to allow 304
                 // Readystaet == 4 for 304 ?
                 if (xmlHttp.readyState == 4) { // TODO In Java 204 if there is no server-method
+                    // Redirect-Handling für 302 + Location-Header
+                    const location = xmlHttp.getResponseHeader('X-Redirect-Location');
+                    if (xmlHttp.status === 412 && location) {
+                        debugger;
+                        document.location.href = location;
+                        reject('Redirected');
+                        return;
+                    }
                     resolve(xmlHttp);
                 }
                 // TODO use errorhandler

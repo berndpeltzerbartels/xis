@@ -47,11 +47,30 @@ class AppContextFactory implements SingletonCreationListener {
         createSingletons();
         long t3 = System.currentTimeMillis();
         Logger.info("Creating singletons took {} ms", t3 - t2);
-        context.lockModification();
+        finalizeSingletonInitialization();
         long t4 = System.currentTimeMillis();
-        Logger.info("Context lock took {} ms", t4 - t3);
+        Logger.info("Finalizing singletons took {} ms", t4 - t3);
+        context.lockModification();
+        long t5 = System.currentTimeMillis();
+        Logger.info("Context lock took {} ms", t5 - t3);
         return context;
     }
+
+    private void finalizeSingletonInitialization() {
+        singletonConsumers.stream()
+                .filter(SingletonWrapper.class::isInstance)
+                .map(SingletonWrapper.class::cast)
+                .forEach(SingletonWrapper::doFinalize);
+
+        singletonProducers.stream()
+                .filter(producer -> !producer.isInvoked())
+                .findFirst()
+                .ifPresent(uninvokedProducer -> {
+                    throw new IllegalStateException("Could not create all beans. Check for circular dependencies or missing beans. " +
+                            "Uninvoked producer: " + uninvokedProducer.getClass().getSimpleName() + " for " + uninvokedProducer.getSingletonClass());
+                });
+    }
+
 
     private void createSingletons() {
         for (var i = 0; i < multiValueConsumers.size(); i++) {
@@ -73,17 +92,39 @@ class AppContextFactory implements SingletonCreationListener {
             if (consumer instanceof MultiValueConsumer) {
                 multiValueConsumers.add((MultiValueConsumer) consumer);
             }
+            var matchingProducers = new ArrayList<SingletonProducer>();
+            var matchingDefaultProducers = new ArrayList<SingletonProducer>();
             for (var j = 0; j < singletonProducers.size(); j++) {
                 var producer = singletonProducers.get(j);
                 if (consumer.isConsumerFor(producer.getSingletonClass())) {
-                    producer.addConsumer(consumer);
-                    consumer.mapProducer(producer);
+                    if (isDefaultProducer(producer)) {
+                        matchingDefaultProducers.add(producer);
+                    } else {
+                        matchingProducers.add(producer);
+                    }
+                }
+            }
+            List<SingletonProducer> producersToUse = matchingProducers.isEmpty() ? matchingDefaultProducers : matchingProducers;
+            for (var k = 0; k < producersToUse.size(); k++) {
+                var producer = producersToUse.get(k);
+                consumer.mapProducer(producer);
+                producer.addConsumer(consumer);
+                if (producer instanceof SingletonCreationListener) {
+                    producer.addListener(this);
                 }
             }
             if (!(consumer instanceof MultiValueConsumer) && !consumer.hasProducer() && !consumer.isOptional()) {
-                throw new UnsatisfiedDependencyException(consumer.getConsumedClass(), consumer);
+                throw new UnsatisfiedDependencyException(consumer);
             }
         }
+    }
+
+
+    private boolean isDefaultProducer(SingletonProducer producer) {
+        if (producer instanceof SingletonConstructor constructor) {
+            return constructor.getSingletonClass().isAnnotationPresent(XISDefaultComponent.class);
+        }
+        return false;
     }
 
     private void evaluateAnnotatedComponents() {

@@ -16,6 +16,7 @@ dependencies {
 
 
     implementation project(':xis-context')
+    compileOnly project(':xis-adapter-spi')
 
     implementation "com.google.code.gson:gson:$gsonVersion"
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"

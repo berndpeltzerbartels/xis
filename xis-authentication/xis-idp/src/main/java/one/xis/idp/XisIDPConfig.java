@@ -66,7 +66,7 @@ public class XisIDPConfig implements ExternalIDPConfig {
      * and the state parameter. It will start with providers server url, like <a href="https://oidc.example.com/token">https://oidc.example.com/token</a>.
      * It is used to exchange the code for access and renew tokens.
      */
-    private final String tokenEndpoint = "/xis/idp/token";
+    private final String tokenEndpoint = "/xis/idp/tokens";
 
     /**
      * This url is used to renew the access token.

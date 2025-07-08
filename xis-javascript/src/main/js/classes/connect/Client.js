@@ -64,9 +64,7 @@ class Client {
      * @returns {Promise<any>}
      */
     loadPageData(resolvedURL) {
-        var request = this.createPageRequest(resolvedURL, null, null);
-        return this.httpConnector.post('/xis/page/model', request, {})
-            .then(response => this.deserializeResponse(response));
+        throw new Error('Not implemented');
     }
 
     /**
@@ -75,9 +73,7 @@ class Client {
     * @returns {Promise<ServerReponse>}
     */
     loadWidgetData(widgetInstance, widgetState) {
-        var request = this.createWidgetRequest(widgetInstance, widgetState, null, null, null);
-        return this.httpConnector.post('/xis/widget/model', request)
-            .then(response => this.deserializeResponse(response));
+        throw new Error('Not implemented');
     }
 
     /**

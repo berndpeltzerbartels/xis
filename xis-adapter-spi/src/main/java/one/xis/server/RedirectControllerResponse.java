@@ -8,8 +8,7 @@ import java.util.Map;
  * Represents a response that indicates a redirect to a different URL.
  * <p>
  * This is a special case for controller responses. Unlike other responses that might load new content
- * into the existing page skeleton (e.g., via AJAX), this response signifies a "real" HTTP redirect
- * (e.g., with a 302/303 status code and a Location header).
+ * into the existing page skeleton (e.g., via AJAX), this response signifies a "real" HTTP redirect.
  * <p>
  * Its primary intended use is for internal purposes, especially within authentication and authorization flows,
  * like redirecting a user to an identity provider (IDP) login page.

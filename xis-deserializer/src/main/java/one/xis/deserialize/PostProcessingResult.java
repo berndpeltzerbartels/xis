@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Data
-@RequiredArgsConstructor
+@RequiredArgsConstructor // TODO : Verschieben. Wird auch in xis-server benötigt
 public abstract class PostProcessingResult {
 
     private final DeserializationContext deserializationContext;

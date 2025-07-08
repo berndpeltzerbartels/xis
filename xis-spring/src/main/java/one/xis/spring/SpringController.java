@@ -4,29 +4,31 @@ package one.xis.spring;
 import lombok.NonNull;
 import lombok.Setter;
 import one.xis.auth.token.ApiTokens;
+import one.xis.context.AppContext;
+import one.xis.idp.IDPFrontendService;
 import one.xis.server.*;
-import org.springframework.http.HttpRequest;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.Duration;
 import java.util.Locale;
 import java.util.Map;
 
+import static one.xis.server.FrontendService.AUTHENTICATION_PATH;
+
 @Setter
 @RestController
 @RequestMapping
-class SpringController implements FrameworkController<ResponseEntity<ServerResponse>, HttpRequest, ResponseEntity<?>> {
+class SpringController implements FrameworkController<ResponseEntity<ServerResponse>, HttpServletRequest, ResponseEntity<?>> {
 
     private FrontendService frontendService;
+    private AppContext appContext;
 
     @Override
     @GetMapping("/xis/config")
-    public ClientConfig getComponentConfig(HttpRequest request) {
-        String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
-        frontendService.setLocalUrl(baseUrl); // TODO implement in Xis-boot
+    public ClientConfig getComponentConfig(HttpServletRequest request) {
         return frontendService.getConfig();
     }
 
@@ -35,7 +37,7 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
     public ResponseEntity<ServerResponse> getPageModel(@RequestBody ClientRequest request,
                                                        @RequestHeader(value = "Authentication", required = false) String authenticationHeader,
                                                        Locale locale) {
-        addTokenToRequest(request, authenticationHeader);
+        addAuthenticationHeaderToRequest(request, authenticationHeader);
         request.setLocale(locale);
         var serverResponse = frontendService.processModelDataRequest(request);
         return responseEntity(serverResponse);
@@ -46,7 +48,7 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
     public ResponseEntity<ServerResponse> getFormModel(@RequestBody ClientRequest request,
                                                        @RequestHeader(value = "Authentication", required = false) String authenticationHeader,
                                                        Locale locale) {
-        addTokenToRequest(request, authenticationHeader);
+        addAuthenticationHeaderToRequest(request, authenticationHeader);
         request.setLocale(locale);
         var serverResponse = frontendService.processFormDataRequest(request);
         return responseEntity(serverResponse);
@@ -57,7 +59,7 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
     public ResponseEntity<ServerResponse> getWidgetModel(@RequestBody ClientRequest request,
                                                          @RequestHeader(value = "Authentication", required = false) String authenticationHeader,
                                                          Locale locale) {
-        addTokenToRequest(request, authenticationHeader);
+        addAuthenticationHeaderToRequest(request, authenticationHeader);
         request.setLocale(locale);
         var serverResponse = frontendService.processModelDataRequest(request);
         return responseEntity(serverResponse);
@@ -68,7 +70,7 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
     public ResponseEntity<ServerResponse> onPageLinkAction(@RequestBody ClientRequest request,
                                                            @RequestHeader(value = "Authentication", required = false) String authenticationHeader,
                                                            Locale locale) {
-        addTokenToRequest(request, authenticationHeader);
+        addAuthenticationHeaderToRequest(request, authenticationHeader);
         request.setLocale(locale);
         var serverResponse = frontendService.processActionRequest(request);
         return responseEntity(serverResponse);
@@ -79,7 +81,7 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
     public ResponseEntity<ServerResponse> onWidgetLinkAction(@RequestBody ClientRequest request,
                                                              @RequestHeader(value = "Authentication", required = false) String authenticationHeader,
                                                              Locale locale) {
-        addTokenToRequest(request, authenticationHeader);
+        addAuthenticationHeaderToRequest(request, authenticationHeader);
         request.setLocale(locale);
         var serverResponse = frontendService.processActionRequest(request);
         return responseEntity(serverResponse);
@@ -90,7 +92,7 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
     public ResponseEntity<?> onFormAction(@RequestBody ClientRequest request,
                                           @RequestHeader(value = "Authentication", required = false) String authenticationHeader,
                                           Locale locale) {
-        addTokenToRequest(request, authenticationHeader);
+        addAuthenticationHeaderToRequest(request, authenticationHeader);
         request.setLocale(locale);
         return responseEntity(frontendService.processActionRequest(request));
     }
@@ -149,7 +151,50 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
         return frontendService.getBundleJs();
     }
 
-    private void addTokenToRequest(ClientRequest request, String authenticationHeader) {
+    @Override
+    @GetMapping("/.well-known/openid-configuration")
+    public ResponseEntity<?> getOpenIdConfiguration() {
+        return appContext.getOptionalSingleton(IDPFrontendService.class).map(
+                        idpFrontendService -> ResponseEntity.ok(idpFrontendService.getOpenIdConfigJson()))
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @Override
+    @GetMapping("/.well-known/jwks.json")
+    public ResponseEntity<?> getIdpPublicKey() {
+        return appContext.getOptionalSingleton(IDPFrontendService.class).map(
+                        idpFrontendService -> ResponseEntity.ok(idpFrontendService.getPublicKey()))
+                .orElseGet(() -> ResponseEntity.notFound().build());
+
+    }
+
+    @Override
+    @GetMapping(AUTHENTICATION_PATH)
+    public ResponseEntity<?> authenticationCallback(@RequestParam("code") String code, @RequestParam("state") String state) {
+        var tokensAndUrl = frontendService.authenticationCallback(code, state);
+        return addTokenCookies(ResponseEntity.status(302) // Not an ajax request. We are using a real browser redirect.
+                .header("Location", tokensAndUrl.getUrl()), tokensAndUrl.getApiTokens()).build();
+    }
+
+    @Override
+    @PostMapping(value = "/xis/auth/tokens", consumes = "application/x-www-form-urlencoded", produces = "application/json")
+    public ResponseEntity<?> getIdpTokens(@RequestBody String body) {
+        return appContext.getOptionalSingleton(IDPFrontendService.class)
+                .map(idpFrontendService -> {
+                    try {
+                        var tokensAndUrl = idpFrontendService.provideTokens(body);
+                        var responseBuilder = ResponseEntity.ok();
+                        addTokenCookies(responseBuilder, tokensAndUrl.getApiTokens());
+                        return responseBuilder.body(tokensAndUrl.getApiTokens());
+                    } catch (Exception e) {
+                        // Hier könnten Sie spezifischere Exceptions fangen und entsprechende Fehler-Responses generieren
+                        return ResponseEntity.status(400).body(e.getMessage());
+                    }
+                })
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    private void addAuthenticationHeaderToRequest(ClientRequest request, String authenticationHeader) {
         request.setAccessToken(extractAccessToken(authenticationHeader));
     }
 
@@ -167,7 +212,7 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
             addTokenCookies(responseBuilder, serverResponse.getTokens());
         }
         if (serverResponse.getRedirectUrl() != null) {
-            return responseBuilder.header("Location", serverResponse.getRedirectUrl()).build();
+            return responseBuilder.header("X-Redirect-Location", serverResponse.getRedirectUrl()).build();
         }
         return responseBuilder.body(serverResponse);
     }

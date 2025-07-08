@@ -130,6 +130,7 @@ class ControllerService {
             controllerResult.setNextWidgetId(controllerWrapper.getId());
         } else {
             controllerResult.setNextURL(request.getPageUrl());
+            controllerResult.setNextPageId(request.getPageId());
         }
     }
 
@@ -142,10 +143,6 @@ class ControllerService {
         }
         if (controllerResult.getNextPageId() != null) {
             return pageControllerWrapperById(controllerResult.getNextPageId());
-        }
-        if (controllerResult.getNextURL() != null) {
-            var path = pathResolver.createPath(controllerResult.getNextURL());
-            return pageControllerWrapperById(path.normalized());
         }
         throw new IllegalStateException("no controller found for request: " + controllerResult);
     }

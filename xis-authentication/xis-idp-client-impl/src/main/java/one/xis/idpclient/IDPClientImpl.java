@@ -1,8 +1,10 @@
 package one.xis.idpclient;
 
 import com.google.gson.Gson;
+import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import one.xis.auth.IDPWellKnownOpenIdConfig;
 import one.xis.auth.UserInfoImpl;
 import one.xis.auth.token.ApiTokens;
 import one.xis.http.HttpClientException;
@@ -10,7 +12,6 @@ import one.xis.http.RestClient;
 import one.xis.ipdclient.IDPClient;
 import one.xis.ipdclient.IDPClientConfig;
 import one.xis.ipdclient.IDPPublicKeyResponse;
-import one.xis.ipdclient.IDPWellKnownOpenIdConfig;
 import one.xis.security.AuthenticationException;
 
 import java.util.HashMap;
@@ -21,13 +22,13 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 @RequiredArgsConstructor
 class IDPClientImpl implements IDPClient {
 
+    @Getter
     private final RestClient restClient;
     private final IDPClientConfig idpClientConfig;
     private final String redirectUri;
     private final Gson gson = new Gson();
 
     private volatile IDPWellKnownOpenIdConfig openIdConfig;
-    private volatile String publicKey;
 
     @Override
     public ApiTokens fetchNewTokens(@NonNull String code) throws AuthenticationException {
@@ -150,6 +151,5 @@ class IDPClientImpl implements IDPClient {
         }
         return openIdConfig;
     }
-
-
+    
 }

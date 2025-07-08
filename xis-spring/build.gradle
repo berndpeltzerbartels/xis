@@ -43,14 +43,17 @@ dependencies {
     implementation project(":xis-deserializer")
     implementation project(":xis-context")
     implementation project(":xis-util")
-    implementation project(":xis-controller-api")
+    api project(":xis-controller-api")
     implementation project(":xis-server")
     implementation project(":xis-adapter-spi")
     implementation project(":xis-validation")
 
     // Compile-only dependencies
     compileOnly project(":xis-deserializer")
+    compileOnly project(':xis-authentication')
+    compileOnly project(':xis-authentication:xis-idp')
     compileOnly "org.springframework.boot:spring-boot-starter-web:$springBootStarterWebVersion"
+
 
     // Annotation processors
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"

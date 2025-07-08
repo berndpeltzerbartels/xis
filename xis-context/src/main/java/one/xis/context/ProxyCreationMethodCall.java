@@ -1,5 +1,6 @@
 package one.xis.context;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.lang.reflect.Method;
@@ -12,9 +13,14 @@ import java.util.Set;
 public class ProxyCreationMethodCall implements SingletonProducer {
     private final SingletonWrapper parent;
     private final Class<?> interf;
+    @Getter
     private final List<SingletonConsumer> consumers = new ArrayList<>();
     private final Set<SingletonCreationListener> creationListeners = new HashSet<>();
     private static final Method METHOD;
+
+
+    @Getter
+    private boolean invoked;
 
 
     static {
@@ -48,6 +54,7 @@ public class ProxyCreationMethodCall implements SingletonProducer {
     @Override
     public void invoke() {
         try {
+            invoked = true;
             var proxy = METHOD.invoke(parent.getBean(), interf);
             notifySingletonCreationListeners(proxy);
             notifyConsumers(proxy);

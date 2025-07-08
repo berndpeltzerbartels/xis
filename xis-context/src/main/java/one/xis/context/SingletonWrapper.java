@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 
 @Getter
-class SingletonWrapper implements SingletonConsumer {
+class SingletonWrapper implements SingletonConsumer, Finalizable {
     private Object bean;
     private final Class<?> beanClass;
     @Setter
@@ -86,6 +86,36 @@ class SingletonWrapper implements SingletonConsumer {
         }
     }
 
+    @Override
+    public void doFinalize() {
+        Logger.debug("{}: finalizing bean", this);
+        if (bean == null) {
+            return;
+        }
+        if (fieldsFinalized()) {
+            finalizeInitMethods();
+            if (initMethods.isEmpty()) {
+                finalizeBeanMethods();
+                notifyProxyCreationMethodCalls();
+            }
+        }
+    }
+
+
+    private boolean fieldsFinalized() {
+        for (var field : singletonFields) {
+            if (field instanceof MultiValueConsumer) {
+                continue;
+            }
+            if (field instanceof SimpleDependencyField simpleDependencyField) {
+                if (!simpleDependencyField.isValueAssigned() && !simpleDependencyField.isOptional()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     void fieldValueAssigned(@NonNull DependencyField field) {
         doSetFieldValue(field);
     }
@@ -115,6 +145,20 @@ class SingletonWrapper implements SingletonConsumer {
         }
     }
 
+    private void finalizeInitMethods() {
+        if (Logger.isDebugEnabled()) {
+            Logger.debug("{}: notify {} init methods ", this, this.initMethods.size());
+        }
+        var initMethods = new ArrayList<>(this.initMethods);
+        for (var i = 0; i < initMethods.size(); i++) {
+            var initMethod = initMethods.get(i);
+            if (initMethod.isFinalizable()) {
+                this.initMethods.remove(initMethod);
+                initMethod.invoke();
+            }
+        }
+    }
+
     private void notifyBeanMethods() {
         if (Logger.isDebugEnabled()) {
             Logger.debug("{}: notify {} bean methods ", this, this.beanCreationMethods.size());
@@ -123,6 +167,20 @@ class SingletonWrapper implements SingletonConsumer {
         for (var i = 0; i < beanMethods.size(); i++) {
             var beanMethod = beanMethods.get(i);
             if (beanMethod.isInvocable()) {
+                this.beanCreationMethods.remove(beanMethod);
+                beanMethod.invoke();
+            }
+        }
+    }
+
+    private void finalizeBeanMethods() {
+        if (Logger.isDebugEnabled()) {
+            Logger.debug("{}: notify {} bean methods ", this, this.beanCreationMethods.size());
+        }
+        var beanMethods = new ArrayList<>(this.beanCreationMethods);
+        for (var i = 0; i < beanMethods.size(); i++) {
+            var beanMethod = beanMethods.get(i);
+            if (beanMethod.isFinalizable()) {
                 this.beanCreationMethods.remove(beanMethod);
                 beanMethod.invoke();
             }

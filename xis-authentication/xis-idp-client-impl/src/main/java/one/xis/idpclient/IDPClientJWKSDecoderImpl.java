@@ -1,6 +1,6 @@
 package one.xis.idpclient;
 
-import one.xis.ipdclient.JsonWebKey;
+import one.xis.auth.JsonWebKey;
 
 import java.util.Collection;
 

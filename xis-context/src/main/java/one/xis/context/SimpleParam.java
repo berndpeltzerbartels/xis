@@ -14,6 +14,7 @@ class SimpleParam implements Param {
 
     @Delegate
     private final Parameter parameter;
+    private final int index;
     private final SingletonProducer parentProducer;
     private Object value;
 

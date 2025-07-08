@@ -1,60 +1,61 @@
 package one.xis.security;
 
-import lombok.RequiredArgsConstructor;
 import one.xis.auth.token.ApiTokensAndUrl;
 import one.xis.auth.token.StateParameter;
-import one.xis.context.XISDefaultComponent;
-import one.xis.context.XISInit;
 import one.xis.ipdclient.IDPClient;
 import one.xis.ipdclient.IDPClientConfigImpl;
 import one.xis.ipdclient.IDPClientFactory;
-import one.xis.ipdclient.IDPClientService;
 import one.xis.server.LocalUrlHolder;
-import one.xis.utils.http.HttpUtils;
 
-import static java.net.URLEncoder.encode;
-import static java.nio.charset.StandardCharsets.UTF_8;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
-@XISDefaultComponent
-@RequiredArgsConstructor
+import static one.xis.server.FrontendService.AUTHENTICATION_PATH;
+
+
 class AuthenticationServiceImpl implements AuthenticationService {
 
-    private final LocalUrlHolder localUrlHolder;
-    private final IDPClientService idpClientService;
     private final IDPClientFactory idpClientFactory;
     private final AuthenticationConfig authenticationConfig;
+    private final LocalUrlHolder localUrlHolder;
     private IDPClient idpClient;
 
-    @XISInit
-    void init() {
+    AuthenticationServiceImpl(IDPClientFactory idpClientFactory, AuthenticationConfig authenticationConfig, LocalUrlHolder localUrlHolder) {
+        this.idpClientFactory = idpClientFactory;
+        this.authenticationConfig = authenticationConfig;
+        this.localUrlHolder = localUrlHolder;
+    }
+
+    private IDPClient createIdpClient() {
         var idpClientConfig = new IDPClientConfigImpl();
         idpClientConfig.setClientSecret(authenticationConfig.getClientSecret());
         idpClientConfig.setClientId(authenticationConfig.getClientId());
         idpClientConfig.setIdpServerUrl(authenticationConfig.getIdpUrl());
         idpClientConfig.setIdpId("idp-local");
-        idpClient = idpClientFactory.createConfiguredIDPClient(idpClientConfig);
+        return idpClientFactory.createConfiguredIDPClient(idpClientConfig);
     }
 
     @Override
     public String loginUrl(String redirectUri) {
-        return idpClient.getOpenIdConfig().getAuthorizationEndpoint()
+        return getIdpClient().getOpenIdConfig().getAuthorizationEndpoint()
                 + "?response_type=code"
                 + "&client_id=" + authenticationConfig.getClientId()
-                + "&redirect_uri=" + encode(redirectUri, UTF_8)
+                + "&redirect_uri=" + URLEncoder.encode(localUrlHolder.getUrl() + AUTHENTICATION_PATH, StandardCharsets.UTF_8)
                 + "&scope=openid"
                 + "&state=" + StateParameter.create(redirectUri);
     }
 
-    @Override // TODO: duplicated in IDPClientServiceImpl
-    public ApiTokensAndUrl authenticationCallback(String query) {
-        var parameters = HttpUtils.parseQueryParameters(query);
-        var state = parameters.get("state");
-        var code = parameters.get("code");
+    @Override
+    public ApiTokensAndUrl authenticate(String code, String state) {
         var payload = StateParameter.decodeAndVerify(state);
-        var tokens = idpClient.fetchNewTokens(code);
-        var authenticationData = new ApiTokensAndUrl();
-        authenticationData.setApiTokens(tokens);
-        authenticationData.setUrl(payload.getRedirect());
-        return authenticationData;
+        var tokens = getIdpClient().fetchNewTokens(code);
+        return new ApiTokensAndUrl(tokens, payload.getRedirect());
+    }
+
+    private synchronized IDPClient getIdpClient() {
+        if (idpClient == null) {
+            idpClient = createIdpClient();
+        }
+        return idpClient;
     }
 }

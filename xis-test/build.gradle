@@ -50,7 +50,7 @@ dependencies {
     api(project(':xis-authentication'))
     api(project(':xis-authentication:xis-idp'))
     implementation project(':xis-authentication:xis-token')
-    implementation project(':xis-security') // TODO ? remove
+    implementation project(':xis-authentication:xis-idp-client') // TODO ? remove
 
     // Annotation processors
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"

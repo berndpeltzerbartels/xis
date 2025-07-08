@@ -1,5 +1,6 @@
 package one.xis.context;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.util.ArrayList;
@@ -11,6 +12,10 @@ import java.util.Set;
 class AdditionalSingleton implements SingletonProducer {
     private final Object singleton;
 
+    @Getter
+    private boolean invoked;
+
+    @Getter
     private final List<SingletonConsumer> consumers = new ArrayList<>();
     private final Set<SingletonCreationListener> creationListeners = new HashSet<>();
 
@@ -36,6 +41,7 @@ class AdditionalSingleton implements SingletonProducer {
 
     @Override
     public void invoke() {
+        invoked = true;
         assignValueInConsumers(singleton);
         notifySingletonCreationListeners(singleton);
     }

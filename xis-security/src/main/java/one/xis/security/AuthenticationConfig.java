@@ -1,8 +1,10 @@
 package one.xis.security;
 
+import one.xis.server.UrlHolder;
+
 public interface AuthenticationConfig {
 
-    String getIdpUrl();
+    UrlHolder getIdpUrl();
 
     String getClientId();
 

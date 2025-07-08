@@ -1,6 +1,8 @@
 package one.xis.http;
 
+import one.xis.server.UrlHolder;
+
 public interface RestClientFactory {
 
-    RestClient createRestClient(String serverUrl) throws HttpClientException;
+    RestClient createRestClient(UrlHolder serverUrl) throws HttpClientException;
 }

@@ -2,10 +2,13 @@ package one.xis.idp;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import one.xis.server.RedirectControllerResponse;
+
+import java.util.Map;
 
 @Data
 @RequiredArgsConstructor
-public class IDPServerLoginResponse {
+public class IDPServerLoginResponse implements RedirectControllerResponse {
     /**
      * The tokens to be used for API access.
      */
@@ -29,5 +32,10 @@ public class IDPServerLoginResponse {
             sb.append("code=").append(code).append("&state=").append(state);
         }
         return sb.toString();
+    }
+
+    @Override
+    public Map<String, Object> getUrlParameters() {
+        return Map.of("state", state, "code", code);
     }
 }

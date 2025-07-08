@@ -61,9 +61,12 @@ public class SpringContextAdapter implements BeanPostProcessor, ApplicationConte
                 .withSingletonClasses(pushClientClasses())
                 .withXIS()
                 .build();
-        var frontendService = context.getSingleton(FrontendServiceImpl.class);
+        var frontendService = context.getSingleton(FrontendService.class);
+        var localUrlHolder = context.getSingleton(LocalUrlHolder.class);
         springFilter.setFrontendService(frontendService);
+        springFilter.setLocalUrlHolder(localUrlHolder);
         springController.setFrontendService(frontendService);
+        springController.setAppContext(context);
         context.getSingletons(PushClientProxy.class).forEach(this::addToSpringContext);
     }
 

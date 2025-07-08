@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @RequiredArgsConstructor
 class SimpleDependencyField implements DependencyField {
 
+    @Getter
     private final Field field;
     private final SingletonWrapper parent;
 
@@ -52,7 +53,7 @@ class SimpleDependencyField implements DependencyField {
     public void doInject() {
         FieldUtil.setFieldValue(parent.getBean(), field, fieldValue);
     }
-    
+
     @Override
     public String toString() {
         return "SimpleDependencyField{" +

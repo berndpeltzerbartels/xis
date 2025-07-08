@@ -4,6 +4,7 @@ package one.xis.ipdclient;
 import com.nimbusds.jwt.JWTClaimsSet;
 import one.xis.ImportInstances;
 import one.xis.auth.UserInfoImpl;
+import one.xis.server.UrlHolder;
 
 import java.text.ParseException;
 import java.util.Collections;
@@ -14,7 +15,7 @@ public interface IDPClientConfig {
 
     String getIdpId();
 
-    String getIdpServerUrl();
+    UrlHolder getIdpServerUrl();
 
     String getClientId();
 

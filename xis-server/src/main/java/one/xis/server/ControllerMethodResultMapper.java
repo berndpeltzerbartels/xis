@@ -35,7 +35,8 @@ class ControllerMethodResultMapper {
             if (redirectControllerResponse instanceof LocalLoginResponse loginResponse) {
                 controllerMethodResult.setTokens(loginResponse.getTokens());
             }
-            controllerMethodResult.setNextURL(redirectControllerResponse.getRedirectUrlWithParameters());
+            controllerMethodResult.setRedirectUrl(redirectControllerResponse.getRedirectUrl());
+            controllerMethodResult.getUrlParameters().putAll(redirectControllerResponse.getUrlParameters());
         }
         if (method.isAnnotationPresent(ModelData.class)) {
             mapModelResult(method.getAnnotation(ModelData.class).value(), returnValue, controllerMethodResult);

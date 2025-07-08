@@ -131,6 +131,33 @@ public class Annotations {
         return false;
     }
 
+    /**
+     * Checks if a class is a default component, either directly via @XISComponent
+     * or indirectly via a meta-annotation.
+     *
+     * @param type The class to check.
+     * @return true if the class is marked as a default component.
+     */
+    boolean isDefault(Class<?> type) {
+        // Check for direct annotation
+        if (type.isAnnotationPresent(XISDefaultComponent.class)) {
+            return true;
+        }
+
+        // Check for meta-annotations recursively
+        for (Annotation annotation : type.getAnnotations()) {
+            Class<? extends Annotation> annotationType = annotation.annotationType();
+            // Avoid recursion into standard Java annotations
+            if (!annotationType.getPackage().getName().startsWith("java.lang.annotation")) {
+                if (isDefault(annotationType)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     boolean isProxyMethod(Method method) {
         for (var i = 0; i < method.getAnnotations().length; i++) {
             Annotation annotation = method.getAnnotations()[i];

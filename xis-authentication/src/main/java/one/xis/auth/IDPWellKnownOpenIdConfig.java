@@ -1,4 +1,4 @@
-package one.xis.ipdclient;
+package one.xis.auth;
 
 import com.google.gson.annotations.SerializedName;
 import lombok.Data;

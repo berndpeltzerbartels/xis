@@ -15,7 +15,7 @@ class PathResolver {
     Path createPath(String path) {
         return new Path(evaluate(new StringCharacterIterator(path)));
     }
-
+    
     String normalizedPath(Object controller) {
         return normalizedPath(controller.getClass());
     }

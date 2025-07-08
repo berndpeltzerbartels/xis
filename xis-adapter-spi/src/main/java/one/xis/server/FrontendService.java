@@ -1,5 +1,7 @@
 package one.xis.server;
 
+import one.xis.auth.token.ApiTokensAndUrl;
+
 import java.util.Map;
 
 /**
@@ -9,9 +11,12 @@ import java.util.Map;
  */
 public interface FrontendService {
 
+    String AUTHENTICATION_PATH = "/xis/auth/callback";
+
     /**
      * Returns the configuration of the frontend service. It contains the list of pages, widgets, and other configuration details.
      * Its content is not secret, and contains information required to run the frontend application.
+     * .
      *
      * @return The ClientConfig object containing the configuration details.
      */
@@ -131,11 +136,16 @@ public interface FrontendService {
     String getBundleJs();
 
     /**
-     * With one of the first requests, the frontend service is informed about the local URL of the server.
+     * Handles the authentication callback from the IDP after the user has authenticated.
+     * <p>
+     * The `queryString` contains the parameters returned by the IDP, such as the authorization code and state.
+     * The `provider` is the name of the authentication provider (e.g., "local", "google", etc.).
      *
-     * @param hostUrl
+     * @param code  The authorization code returned by the IDP.
+     * @param state The state parameter returned by the IDP, used to maintain state between the request and callback.
+     * @return An object containing API tokens and a URL to redirect to after successful authentication.
      */
-    void setLocalUrl(String hostUrl);
+    ApiTokensAndUrl authenticationCallback(String code, String state);
 
     default void extractAccessToken(ClientRequest request, String authenticationHeader) {
         if (authenticationHeader != null && authenticationHeader.startsWith("Bearer ")) {

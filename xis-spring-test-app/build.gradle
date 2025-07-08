@@ -31,8 +31,11 @@ var junitVersion = rootProject.ext.libraryVersions.junit
 dependencies {
 
     // Local project dependencies
-    implementation project(':xis-controller-api')
+
     implementation project(':xis-spring')
+    implementation project(':xis-authentication')
+    runtimeOnly project(':xis-authentication:xis-idp-impl')
+    compileOnly project(':xis-authentication:xis-idp')
     implementation project(':xis-test')
 
     // implementation "org.slf4j:slf4j-api:1.7.32"

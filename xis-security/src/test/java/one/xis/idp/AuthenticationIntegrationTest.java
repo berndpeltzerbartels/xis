@@ -18,7 +18,7 @@ class AuthenticationIntegrationTest {
         userInfo.setClaims(Map.of("email", "user1@example.com"));
     }
 
-    class DummyUserService implements IPDUserService {
+    class DummyUserService implements IDPUserService {
 
         @Override
         public Optional<IDPUserInfo> findUserInfo(String userId) {

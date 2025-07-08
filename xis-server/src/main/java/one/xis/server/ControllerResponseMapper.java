@@ -22,7 +22,7 @@ class ControllerResponseMapper {
         response.setTokens(result.getTokens());
         if (result.getRedirectUrl() != null) {
             response.setRedirectUrl(result.getRedirectUrl());
-            response.setStatus(302);
+            response.setStatus(412);
         } else {
             response.setStatus(result.isValidationFailed() ? 422 : 200);
         }

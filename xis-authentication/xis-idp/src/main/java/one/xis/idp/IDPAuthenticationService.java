@@ -4,6 +4,7 @@ import one.xis.auth.AuthenticationException;
 import one.xis.auth.InvalidCredentialsException;
 import one.xis.auth.InvalidRedirectUrlException;
 import one.xis.auth.InvalidTokenException;
+import one.xis.auth.token.ApiTokens;
 
 /**
  * Interface for Identity Provider (IDP) services that handle user authentication,
@@ -24,12 +25,11 @@ public interface IDPAuthenticationService {
     /**
      * Issues an authentication token based on the provided code and state.
      *
-     * @param code  the unique code obtained from login
-     * @param state an optional state parameter for maintaining session state
+     * @param code the unique code obtained from login
      * @return a response containing access and refresh tokens
      * @throws AuthenticationException if the code is invalid or expired
      */
-    IDPServerTokens issueToken(String code, String state) throws AuthenticationException;
+    ApiTokens issueToken(String code) throws AuthenticationException;
 
     /**
      * Refreshes the authentication token using the provided refresh token.
@@ -39,7 +39,7 @@ public interface IDPAuthenticationService {
      * @throws InvalidTokenException   if the refresh token is invalid or expired
      * @throws AuthenticationException if there is an error during the refresh process
      */
-    IDPServerTokens refresh(String refreshToken) throws InvalidTokenException, AuthenticationException;
+    ApiTokens refresh(String refreshToken) throws InvalidTokenException, AuthenticationException;
 
     /**
      * Retrieves user information based on the provided access token.

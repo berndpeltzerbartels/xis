@@ -1,23 +1,28 @@
 package one.xis.http;
 
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+import one.xis.server.UrlHolder;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Map;
 
-@RequiredArgsConstructor
+@Getter
+@Setter
+@AllArgsConstructor
 class HttpClientImpl implements HttpClient {
     private static final long DEFAULT_CONNECTION_TIMEOUT_MILLIS = 10000L; // Verbindungs-Timeout: 10 Sekunden
     private static final long READ_TIMEOUT_MILLIS = 10000L; // Lese-Timeout: 10 Sekunden
 
-    private final String serverUrl;
+    private UrlHolder serverUrlHolder;
 
     @Override
     public HttpResponse doGet(String url, Map<String, String> headers) throws HttpClientException {
         try {
-            URL urlObj = new URL(serverUrl + url);
+            URL urlObj = new URL(serverUrlHolder.getUrl() + url);
             HttpURLConnection connection = getHttpURLConnection("GET", headers, urlObj);
 
             int responseCode = connection.getResponseCode();
@@ -35,7 +40,7 @@ class HttpClientImpl implements HttpClient {
             if (headers.keySet().stream().map(String::toLowerCase).noneMatch(h -> h.equals("content-length")) && requestBody != null) {
                 headers.put("Content-Length", String.valueOf(requestBody.length()));
             }
-            URL urlObj = new URL(serverUrl + url);
+            URL urlObj = url.startsWith("http") ? new URL(url) : new URL(serverUrlHolder.getUrl() + url);
             HttpURLConnection connection = getHttpURLConnection("POST", headers, urlObj);
             connection.setDoOutput(true);
 

@@ -1,8 +1,12 @@
 package one.xis.server;
 
-public interface LocalUrlHolder {
+import java.util.function.Consumer;
+
+public interface LocalUrlHolder extends UrlHolder {
 
     void setLocalUrl(String localUrl);
 
-    String getLocalUrl();
+    boolean localUrlIsSet();
+
+    void addUrlAssignmentListener(Consumer<String> listener);
 }

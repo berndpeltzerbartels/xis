@@ -22,7 +22,7 @@ dependencies {
 
     implementation project(':xis-context')
     implementation project(':xis-adapter-spi')
-    implementation project(':xis-security')
+    // implementation project(':xis-security')
     implementation project(':xis-util')
     implementation project(':xis-http-client')
     implementation project(':xis-controller-api')

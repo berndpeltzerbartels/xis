@@ -1,9 +1,12 @@
 package one.xis.idp;
 
+import one.xis.ImportInstances;
+
 import java.util.Optional;
 
-public interface IPDUserService {
+@ImportInstances
+public interface IDPUserService {
 
     Optional<IDPUserInfo> findUserInfo(String userId);
-    
+
 }

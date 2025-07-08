@@ -22,20 +22,6 @@ public class NettyController implements FrameworkController<FullHttpResponse, Fu
 
     @Override
     public ClientConfig getComponentConfig(FullHttpRequest request) {
-        String host = request.headers().get("Host");
-        String scheme;
-        if (request.headers().contains("X-Forwarded-Proto")) {
-            // Priorität 1: Header vom Reverse-Proxy
-            scheme = request.headers().get("X-Forwarded-Proto");
-        } else if (request.headers().contains("X-Internal-Scheme")) {
-            // Priorität 2: Intern gesetzter Header für direkte Verbindungen
-            scheme = request.headers().get("X-Internal-Scheme");
-        } else {
-            // Fallback, falls der SchemeInjectorHandler nicht konfiguriert ist
-            scheme = "http";
-        }
-        String baseUrl = scheme + "://" + host;
-        frontendService.setLocalUrl(baseUrl);
         return frontendService.getConfig();
     }
 
@@ -106,6 +92,11 @@ public class NettyController implements FrameworkController<FullHttpResponse, Fu
     }
 
     @Override
+    public FullHttpResponse getIdpTokens(String payload) {
+        return null;
+    }
+
+    @Override
     public String getPageHead(String id) {
         return frontendService.getPageHead(id);
     }
@@ -148,6 +139,21 @@ public class NettyController implements FrameworkController<FullHttpResponse, Fu
     @Override
     public String getBundleJs() {
         return frontendService.getBundleJs();
+    }
+
+    @Override
+    public FullHttpResponse getOpenIdConfiguration() {
+        return null; // TODO
+    }
+
+    @Override
+    public FullHttpResponse getIdpPublicKey() {
+        return null; // TODO
+    }
+
+    @Override
+    public FullHttpResponse authenticationCallback(String code, String state) {
+        return null;
     }
 
     private String extractToken(String authenticationHeader) {

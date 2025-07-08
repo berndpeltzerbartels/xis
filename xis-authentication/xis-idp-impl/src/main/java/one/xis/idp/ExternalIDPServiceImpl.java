@@ -28,7 +28,7 @@ class ExternalIDPServiceImpl implements ExternalIDPService {
 
     @Override
     public String createAuthorizationUrl() {
-        return createLoginUrl(localUrlHolder.getLocalUrl());
+        return createLoginUrl(localUrlHolder.getUrl());
     }
 
     @Override

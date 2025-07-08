@@ -9,6 +9,7 @@ import java.lang.reflect.Parameter;
 import java.util.*;
 
 abstract class SingletonProducerImpl implements SingletonProducer {
+    @Getter
     private final List<SingletonConsumer> consumers = new ArrayList<>();
     private final Set<SingletonCreationListener> creationListeners = new HashSet<>();
     @Getter
@@ -21,7 +22,7 @@ abstract class SingletonProducerImpl implements SingletonProducer {
     SingletonProducerImpl(Parameter[] params, ParameterFactory parameterFactory) {
         this.parameters = new ArrayList<>(params.length);
         for (var i = 0; i < params.length; i++) {
-            this.parameters.add(parameterFactory.createParam(params[i], this));
+            this.parameters.add(parameterFactory.createParam(params[i], i, this));
         }
     }
 

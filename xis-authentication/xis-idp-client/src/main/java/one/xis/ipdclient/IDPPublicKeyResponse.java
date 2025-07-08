@@ -1,6 +1,7 @@
 package one.xis.ipdclient;
 
 import lombok.Data;
+import one.xis.auth.JsonWebKey;
 
 import java.util.Collection;
 

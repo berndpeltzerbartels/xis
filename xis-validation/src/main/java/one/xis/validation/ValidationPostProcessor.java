@@ -26,7 +26,7 @@ class ValidationPostProcessor implements DeserializationPostProcessor {
         var validator = getValidator(validatorClass);
         var typeParameter = ClassUtils.getGenericInterfacesTypeParameter(validatorClass, Validator.class, 0);
         if (!typeParameter.isAssignableFrom(getTargetType(deserializationContext.getTarget()))) {
-            throw new IllegalArgumentException("Validator " + validatorClass + " in annotataion " + deserializationContext.getAnnotationClass()
+            throw new IllegalArgumentException("Validator " + validatorClass + " in annotation " + deserializationContext.getAnnotationClass()
                     + " is not applicable to " + deserializationContext.getTarget());
         }
         try {

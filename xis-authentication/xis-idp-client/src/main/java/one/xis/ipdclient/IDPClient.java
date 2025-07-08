@@ -1,6 +1,7 @@
 package one.xis.ipdclient;
 
 import lombok.NonNull;
+import one.xis.auth.IDPWellKnownOpenIdConfig;
 import one.xis.auth.UserInfoImpl;
 import one.xis.auth.token.ApiTokens;
 import one.xis.security.AuthenticationException;
@@ -69,4 +70,5 @@ public interface IDPClient {
     String getIssuer();
 
     IDPWellKnownOpenIdConfig getOpenIdConfig();
+    
 }

@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'java-library'
     id 'maven-publish'
     id 'signing'
 }
@@ -40,6 +41,8 @@ dependencies {
     compileOnly(project(":xis-controller-api"))
     compileOnly(project(":xis-authentication"))
     compileOnly(project(":xis-authentication:xis-idp-client"))
+    compileOnly(project(":xis-authentication:xis-idp"))
+    implementation(project(":xis-authentication:xis-idp-client-impl"))
     // compileOnly(project(":xis-authentication:xis-idp"))
     compileOnly(project(":xis-authentication:xis-token"))
 

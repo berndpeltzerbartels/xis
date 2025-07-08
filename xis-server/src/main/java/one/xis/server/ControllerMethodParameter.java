@@ -11,6 +11,8 @@ import one.xis.security.AuthenticationException;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.time.ZoneId;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -108,7 +110,16 @@ class ControllerMethodParameter {
     private Object deserializeUrlParameter(Parameter parameter, ClientRequest request, PostProcessingResults postProcessingResults, AccessToken accessToken) throws IOException {
         var key = parameter.getAnnotation(URLParameter.class).value();
         var paramValue = request.getUrlParameters().get(key);
-        return deserializeParameter(paramValue, request, parameter, postProcessingResults, accessToken);
+        var deserialized = deserializeParameter(paramValue, request, parameter, postProcessingResults, accessToken);
+        if (deserialized instanceof String str) {
+            try {
+                return URLDecoder.decode(str, StandardCharsets.UTF_8);
+            } catch (Exception e) {
+                throw new IllegalStateException("Failed to decode URL parameter '" + key + "' with value '" + str + "'", e);
+            }
+        } else {
+            return deserialized;
+        }
     }
 
     private Object deserializePathVariable(Parameter parameter, ClientRequest request, PostProcessingResults postProcessingResults, AccessToken accessToken) throws IOException {

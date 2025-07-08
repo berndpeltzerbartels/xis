@@ -13,10 +13,10 @@ import java.util.Set;
 @AllArgsConstructor
 public class IDPUserInfoImpl implements IDPUserInfo {
     private String userId;
+    private String clientId;
     private String password;
     private String email;
     private Set<String> roles;
     private Map<String, Object> claims;
-    private Set<String> permittedRedirectUrls;
 
 }

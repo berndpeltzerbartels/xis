@@ -22,7 +22,7 @@ class IDPConfig {
 
     @XISInit
     void init() {
-        loginController.setAuthenticationService(authenticationService);
+        loginController.setIdpAuthenticationService(authenticationService);
     }
 
     @XISInit
