@@ -10,6 +10,7 @@ import one.xis.server.*;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.Duration;
@@ -35,9 +36,9 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
     @Override
     @PostMapping("/xis/page/model")
     public ResponseEntity<ServerResponse> getPageModel(@RequestBody ClientRequest request,
-                                                       @RequestHeader(value = "Authentication", required = false) String authenticationHeader,
+                                                       @CookieValue(name = "access_token", required = false) String accessToken,
                                                        Locale locale) {
-        addAuthenticationHeaderToRequest(request, authenticationHeader);
+        request.setAccessToken(accessToken);
         request.setLocale(locale);
         var serverResponse = frontendService.processModelDataRequest(request);
         return responseEntity(serverResponse);
@@ -46,9 +47,9 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
     @Override
     @PostMapping("/xis/form/model")
     public ResponseEntity<ServerResponse> getFormModel(@RequestBody ClientRequest request,
-                                                       @RequestHeader(value = "Authentication", required = false) String authenticationHeader,
+                                                       @CookieValue(name = "access_token", required = false) String accessToken,
                                                        Locale locale) {
-        addAuthenticationHeaderToRequest(request, authenticationHeader);
+        request.setAccessToken(accessToken);
         request.setLocale(locale);
         var serverResponse = frontendService.processFormDataRequest(request);
         return responseEntity(serverResponse);
@@ -57,9 +58,9 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
     @Override
     @PostMapping("/xis/widget/model")
     public ResponseEntity<ServerResponse> getWidgetModel(@RequestBody ClientRequest request,
-                                                         @RequestHeader(value = "Authentication", required = false) String authenticationHeader,
+                                                         @CookieValue(name = "access_token", required = false) String accessToken,
                                                          Locale locale) {
-        addAuthenticationHeaderToRequest(request, authenticationHeader);
+        request.setAccessToken(accessToken);
         request.setLocale(locale);
         var serverResponse = frontendService.processModelDataRequest(request);
         return responseEntity(serverResponse);
@@ -68,9 +69,9 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
     @Override
     @PostMapping("/xis/page/action")
     public ResponseEntity<ServerResponse> onPageLinkAction(@RequestBody ClientRequest request,
-                                                           @RequestHeader(value = "Authentication", required = false) String authenticationHeader,
+                                                           @CookieValue(name = "access_token", required = false) String accessToken,
                                                            Locale locale) {
-        addAuthenticationHeaderToRequest(request, authenticationHeader);
+        request.setAccessToken(accessToken);
         request.setLocale(locale);
         var serverResponse = frontendService.processActionRequest(request);
         return responseEntity(serverResponse);
@@ -79,9 +80,9 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
     @Override
     @PostMapping("/xis/widget/action")
     public ResponseEntity<ServerResponse> onWidgetLinkAction(@RequestBody ClientRequest request,
-                                                             @RequestHeader(value = "Authentication", required = false) String authenticationHeader,
+                                                             @CookieValue(name = "access_token", required = false) String accessToken,
                                                              Locale locale) {
-        addAuthenticationHeaderToRequest(request, authenticationHeader);
+        request.setAccessToken(accessToken);
         request.setLocale(locale);
         var serverResponse = frontendService.processActionRequest(request);
         return responseEntity(serverResponse);
@@ -90,9 +91,9 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
     @Override
     @PostMapping("/xis/form/action")
     public ResponseEntity<?> onFormAction(@RequestBody ClientRequest request,
-                                          @RequestHeader(value = "Authentication", required = false) String authenticationHeader,
+                                          @CookieValue(name = "access_token", required = false) String accessToken,
                                           Locale locale) {
-        addAuthenticationHeaderToRequest(request, authenticationHeader);
+        request.setAccessToken(accessToken);
         request.setLocale(locale);
         return responseEntity(frontendService.processActionRequest(request));
     }
@@ -170,7 +171,7 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
 
     @Override
     @GetMapping(AUTHENTICATION_PATH)
-    public ResponseEntity<?> authenticationCallback(@RequestParam("code") String code, @RequestParam("state") String state) {
+    public ResponseEntity<?> authenticationCallback(@RequestParam("code") String code, @RequestParam("state") String state, @PathVariable("idpId") String idpId) {
         var tokensAndUrl = frontendService.authenticationCallback(code, state);
         return addTokenCookies(ResponseEntity.status(302) // Not an ajax request. We are using a real browser redirect.
                 .header("Location", tokensAndUrl.getUrl()), tokensAndUrl.getApiTokens()).build();
@@ -182,10 +183,10 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
         return appContext.getOptionalSingleton(IDPFrontendService.class)
                 .map(idpFrontendService -> {
                     try {
-                        var tokensAndUrl = idpFrontendService.provideTokens(body);
+                        var idpResponse = idpFrontendService.provideTokens(body);
                         var responseBuilder = ResponseEntity.ok();
-                        addTokenCookies(responseBuilder, tokensAndUrl.getApiTokens());
-                        return responseBuilder.body(tokensAndUrl.getApiTokens());
+                        addTokenCookies(responseBuilder, idpResponse.getApiTokens());
+                        return responseBuilder.body(idpResponse.toOAuth2Response());
                     } catch (Exception e) {
                         // Hier könnten Sie spezifischere Exceptions fangen und entsprechende Fehler-Responses generieren
                         return ResponseEntity.status(400).body(e.getMessage());
@@ -193,18 +194,6 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
                 })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
-
-    private void addAuthenticationHeaderToRequest(ClientRequest request, String authenticationHeader) {
-        request.setAccessToken(extractAccessToken(authenticationHeader));
-    }
-
-    private String extractAccessToken(String authenticationHeader) {
-        if (authenticationHeader != null && authenticationHeader.startsWith("Bearer ")) {
-            return authenticationHeader.substring("Bearer ".length());
-        }
-        return null;
-    }
-
 
     private ResponseEntity<ServerResponse> responseEntity(ServerResponse serverResponse) {
         var responseBuilder = ResponseEntity.status(serverResponse.getStatus());
@@ -218,9 +207,11 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
     }
 
     private ResponseEntity.BodyBuilder addTokenCookies(@NonNull ResponseEntity.BodyBuilder responseBuilder, @NonNull ApiTokens tokens) {
-        responseBuilder.header("Set-Cookie", createAccessTokenCookie(tokens.getAccessToken(), tokens.getAccessTokenExpiresIn()).toString());
-        responseBuilder.header("Set-Cookie", createRenewTokenCookie(tokens.getRenewToken(), tokens.getRenewTokenExpiresIn()).toString());
-        return responseBuilder;
+        String accessTokenCookie = createAccessTokenCookie(tokens.getAccessToken(), tokens.getAccessTokenExpiresIn()).toString();
+        String refreshTokenCookie = createRenewTokenCookie(tokens.getRenewToken(), tokens.getRenewTokenExpiresIn()).toString();
+        // Fügen Sie beide "Set-Cookie"-Header in einem Aufruf hinzu, um ein Überschreiben zu verhindern.
+        // Spring wird daraus zwei separate "Set-Cookie"-Header in der HTTP-Antwort generieren.
+        return responseBuilder.header("Set-Cookie", accessTokenCookie, refreshTokenCookie);
     }
 
     private ResponseCookie createAccessTokenCookie(String accessToken, Duration maxAge) {
@@ -235,7 +226,7 @@ class SpringController implements FrameworkController<ResponseEntity<ServerRespo
         return ResponseCookie.from(name, value)
                 .httpOnly(true)
                 .secure(true)
-                .sameSite("Strict")
+                .sameSite("Lax")
                 .maxAge(maxAge)
                 .path("/")
                 .build();

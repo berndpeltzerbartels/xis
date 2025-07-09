@@ -2,9 +2,11 @@ package one.xis.server;
 
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import one.xis.AccessToken;
 import one.xis.Page;
-import one.xis.auth.token.AccessToken;
-import one.xis.auth.token.TokenService;
+import one.xis.UserContextImpl;
+import one.xis.auth.token.AccessTokenCache;
+import one.xis.auth.token.AccessTokenWrapper;
 import one.xis.context.XISComponent;
 import one.xis.context.XISInject;
 import one.xis.utils.lang.StringUtils;
@@ -30,11 +32,11 @@ class ControllerService {
     private PathResolver pathResolver;
 
     @XISInject
-    private TokenService idpClientService;
+    private AccessTokenCache accessTokenCache;
 
     void processModelDataRequest(@NonNull ClientRequest request, @NonNull ServerResponse response) {
         Logger.info("Process model data request: {}", request);
-        var accessToken = AccessToken.create(request.getAccessToken(), idpClientService);
+        var accessToken = UserContextImpl.getInstance().getAccessToken();
         var controllerResult = new ControllerResult();
         controllerResult.setCurrentPageURL(request.getPageId());
         controllerResult.setCurrentWidgetId(request.getWidgetId());
@@ -48,7 +50,7 @@ class ControllerService {
 
     void processFormDataRequest(@NonNull ClientRequest request, @NonNull ServerResponse response) {
         Logger.info("Process form data request: {}", request);
-        var accessToken = AccessToken.create(request.getAccessToken(), idpClientService);
+        var accessToken = UserContextImpl.getInstance().getAccessToken();
         var controllerResult = new ControllerResult();
         controllerResult.setCurrentPageURL(request.getPageId());
         controllerResult.setCurrentWidgetId(request.getWidgetId());
@@ -62,7 +64,7 @@ class ControllerService {
 
     void processActionRequest(@NonNull ClientRequest request, @NonNull ServerResponse response) {
         Logger.info("Process action request: {}", request);
-        var accessToken = AccessToken.create(request.getAccessToken(), idpClientService);
+        var accessToken = UserContextImpl.getInstance().getAccessToken();
         var controllerResult = new ControllerResult();
         controllerResult.setCurrentPageURL(request.getPageId());
         controllerResult.setCurrentWidgetId(request.getWidgetId());
@@ -104,7 +106,7 @@ class ControllerService {
             nextControllerResult.setNextURL(this.pathResolver.evaluateRealPath(path, controllerResult.getPathVariables(), controllerResult.getUrlParameters()));
         }
         // get model data for next controller
-        AccessToken token = controllerResult.getTokens() != null ? AccessToken.create(controllerResult.getTokens().getAccessToken(), idpClientService) : accessToken;
+        AccessToken token = controllerResult.getTokens() != null ? new AccessTokenWrapper(controllerResult.getTokens().getAccessToken(), accessTokenCache) : accessToken;
         nextControllerWrapper.invokeGetModelMethods(nextRequest, nextControllerResult, token);
         // map result to response
         response.clear();

@@ -6,6 +6,7 @@ import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.RequiredArgsConstructor;
+import one.xis.auth.AuthenticationException;
 import one.xis.auth.JsonWebKey;
 import one.xis.auth.UserInfo;
 import one.xis.auth.UserInfoImpl;
@@ -15,7 +16,6 @@ import one.xis.context.XISDefaultComponent;
 import one.xis.context.XISInit;
 import one.xis.context.XISInject;
 import one.xis.ipdclient.*;
-import one.xis.security.AuthenticationException;
 import one.xis.security.UserInfoService;
 
 import java.math.BigInteger;

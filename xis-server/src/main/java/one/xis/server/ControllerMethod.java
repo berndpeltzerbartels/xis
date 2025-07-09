@@ -3,11 +3,11 @@ package one.xis.server;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import one.xis.AccessToken;
 import one.xis.Roles;
-import one.xis.auth.token.AccessToken;
+import one.xis.auth.AuthenticationException;
 import one.xis.deserialize.MainDeserializer;
 import one.xis.deserialize.PostProcessingResults;
-import one.xis.security.AuthenticationException;
 
 import java.lang.reflect.Method;
 import java.util.Collection;

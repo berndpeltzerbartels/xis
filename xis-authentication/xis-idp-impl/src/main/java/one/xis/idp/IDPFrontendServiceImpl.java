@@ -2,6 +2,7 @@ package one.xis.idp;
 
 import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
+import one.xis.auth.AuthenticationException;
 import one.xis.auth.IDPWellKnownOpenIdConfig;
 import one.xis.auth.JsonWebKey;
 import one.xis.auth.token.ApiTokensAndUrl;
@@ -9,7 +10,6 @@ import one.xis.auth.token.StateParameter;
 import one.xis.auth.token.TokenService;
 import one.xis.context.XISComponent;
 import one.xis.ipdclient.IDPClientService;
-import one.xis.security.AuthenticationException;
 import one.xis.server.LocalUrlHolder;
 
 import java.util.Map;
@@ -54,7 +54,7 @@ class IDPFrontendServiceImpl implements IDPFrontendService {
     public String getOpenIdConfigJson() {
         var config = new IDPWellKnownOpenIdConfig();
         config.setIssuer(localUrlHolder.getUrl());
-        config.setJwksUri(localUrlHolder.getUrl() + "/.well-known/jwks.json");
+        config.setJwksUri(localUrlHolder.getUrl() + "/.well-known/jwks.json"); // TODO create constants for these URLs
         config.setAuthorizationEndpoint(localUrlHolder.getUrl() + XisIDPConfig.IDP_LOGIN_URL);
         config.setTokenEndpoint(localUrlHolder.getUrl() + "/xis/auth/tokens");
         config.setUserInfoEndpoint(localUrlHolder.getUrl() + "/xis/auth/userinfo");
@@ -67,9 +67,12 @@ class IDPFrontendServiceImpl implements IDPFrontendService {
     }
 
     @Override
-    public ApiTokensAndUrl provideTokens(String tokenRequestPayload) throws AuthenticationException {
+    public IDPResponse provideTokens(String tokenRequestPayload) throws AuthenticationException {
         var parameters = parseQueryParameters(tokenRequestPayload);
         var request = gson.fromJson(gson.toJson(parameters), IDPTokenRequest.class);
+        if (!request.getRedirectUri().startsWith("http")) {
+            throw new AuthenticationException("Invalid redirect URI: " + request.getRedirectUri() + ". It must start with 'http(s)'.");
+        }
         var clientInfo = idpService.findClientInfo(request.getClientId()).orElseThrow(() -> new AuthenticationException("Client not found: " + request.getClientId()));
         if (!clientInfo.getClientSecret().equals(request.getClientSecret())) {
             throw new AuthenticationException("Invalid client secret for client: " + request.getClientId());
@@ -80,7 +83,7 @@ class IDPFrontendServiceImpl implements IDPFrontendService {
         if (!clientInfo.getPermittedRedirectUrls().contains(request.getRedirectUri())) {
             throw new AuthenticationException("Invalid redirect URI: " + request.getRedirectUri());
         }
-        return new ApiTokensAndUrl(idpAuthenticationService.issueToken(request.getCode()), request.getRedirectUri());
+        return new IDPResponse(idpAuthenticationService.issueToken(request.getCode()));
     }
 
 }

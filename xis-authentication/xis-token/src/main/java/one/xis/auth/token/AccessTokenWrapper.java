@@ -2,7 +2,7 @@ package one.xis.auth.token;
 
 
 import lombok.RequiredArgsConstructor;
-import one.xis.auth.InvalidTokenException;
+import one.xis.AccessToken;
 import one.xis.utils.lang.StringUtils;
 
 import java.time.Instant;
@@ -13,18 +13,13 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AccessTokenWrapper implements AccessToken {
     private final String accessToken;
-    private final TokenService accessTokenDecoder;
+    private final AccessTokenCache accessTokenCache;
     private TokenAttributes tokenAttributes;
-
 
     private synchronized TokenAttributes getTokenAttributes() {
         if (tokenAttributes == null) {
             if (StringUtils.isNotEmpty(accessToken)) {
-                try {
-                    tokenAttributes = accessTokenDecoder.decodeToken(accessToken);
-                } catch (InvalidTokenException e) {
-                    throw new RuntimeException(e);
-                }
+                tokenAttributes = accessTokenCache.getAttributes(accessToken);
             } else {
                 tokenAttributes = new TokenAttributes(null, Collections.emptySet(), Map.of(), null);
             }

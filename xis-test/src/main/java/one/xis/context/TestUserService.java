@@ -1,7 +1,7 @@
 package one.xis.context;
 
+import one.xis.auth.AuthenticationException;
 import one.xis.idp.IDPUserInfo;
-import one.xis.security.AuthenticationException;
 import one.xis.security.UserInfoService;
 
 import java.util.Arrays;

@@ -1,5 +1,6 @@
 package one.xis.security;
 
+import lombok.RequiredArgsConstructor;
 import one.xis.auth.token.ApiTokensAndUrl;
 import one.xis.auth.token.StateParameter;
 import one.xis.ipdclient.IDPClient;
@@ -12,7 +13,7 @@ import java.nio.charset.StandardCharsets;
 
 import static one.xis.server.FrontendService.AUTHENTICATION_PATH;
 
-
+@RequiredArgsConstructor
 class AuthenticationServiceImpl implements AuthenticationService {
 
     private final IDPClientFactory idpClientFactory;
@@ -20,27 +21,15 @@ class AuthenticationServiceImpl implements AuthenticationService {
     private final LocalUrlHolder localUrlHolder;
     private IDPClient idpClient;
 
-    AuthenticationServiceImpl(IDPClientFactory idpClientFactory, AuthenticationConfig authenticationConfig, LocalUrlHolder localUrlHolder) {
-        this.idpClientFactory = idpClientFactory;
-        this.authenticationConfig = authenticationConfig;
-        this.localUrlHolder = localUrlHolder;
-    }
-
-    private IDPClient createIdpClient() {
-        var idpClientConfig = new IDPClientConfigImpl();
-        idpClientConfig.setClientSecret(authenticationConfig.getClientSecret());
-        idpClientConfig.setClientId(authenticationConfig.getClientId());
-        idpClientConfig.setIdpServerUrl(authenticationConfig.getIdpUrl());
-        idpClientConfig.setIdpId("idp-local");
-        return idpClientFactory.createConfiguredIDPClient(idpClientConfig);
-    }
 
     @Override
     public String loginUrl(String redirectUri) {
-        return getIdpClient().getOpenIdConfig().getAuthorizationEndpoint()
+        var idpClient = getIdpClient(); // must be first !
+        var callbackUrl = (localUrlHolder.getUrl() + AUTHENTICATION_PATH).replace("{idpId}", idpClient.getIdpId());
+        return idpClient.getOpenIdConfig().getAuthorizationEndpoint()
                 + "?response_type=code"
                 + "&client_id=" + authenticationConfig.getClientId()
-                + "&redirect_uri=" + URLEncoder.encode(localUrlHolder.getUrl() + AUTHENTICATION_PATH, StandardCharsets.UTF_8)
+                + "&redirect_uri=" + URLEncoder.encode(callbackUrl, StandardCharsets.UTF_8)
                 + "&scope=openid"
                 + "&state=" + StateParameter.create(redirectUri);
     }
@@ -57,5 +46,14 @@ class AuthenticationServiceImpl implements AuthenticationService {
             idpClient = createIdpClient();
         }
         return idpClient;
+    }
+    
+    private IDPClient createIdpClient() {
+        var idpClientConfig = new IDPClientConfigImpl();
+        idpClientConfig.setClientSecret(authenticationConfig.getClientSecret());
+        idpClientConfig.setClientId(authenticationConfig.getClientId());
+        idpClientConfig.setIdpServerUrl(authenticationConfig.getIdpUrl());
+        idpClientConfig.setIdpId("local-idp"); // TODO constant
+        return idpClientFactory.createConfiguredIDPClient(idpClientConfig);
     }
 }

@@ -1,4 +1,4 @@
-package one.xis.auth.token;
+package one.xis;
 
 import java.time.Instant;
 import java.util.Collection;
@@ -16,9 +16,5 @@ public interface AccessToken {
     Collection<String> getRoles();
 
     boolean isExpired();
-
-    static AccessToken create(String accessToken, TokenService tokenService) {
-        return new AccessTokenWrapper(accessToken, tokenService);
-    }
 
 }

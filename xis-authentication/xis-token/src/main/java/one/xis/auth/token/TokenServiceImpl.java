@@ -4,6 +4,7 @@ package one.xis.auth.token;
 import com.google.gson.Gson;
 import one.xis.auth.InvalidTokenException;
 import one.xis.auth.JsonWebKey;
+import one.xis.auth.UserInfo;
 import one.xis.context.XISComponent;
 
 import java.nio.charset.StandardCharsets;
@@ -32,14 +33,44 @@ class TokenServiceImpl implements TokenService {
         this.keyPair = generateRsaKeyPair();
     }
 
-    private KeyPair generateRsaKeyPair() {
-        try {
-            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-            keyPairGenerator.initialize(2048);
-            return keyPairGenerator.generateKeyPair();
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("Could not generate RSA key pair", e);
-        }
+    @Override
+    public ApiTokens newTokens(UserInfo userInfo) {
+        return newTokens(userInfo.getUserId(),
+                userInfo.getRoles(),
+                userInfo.getClaims());
+    }
+
+    @Override
+    public ApiTokens newTokens(String userId, Collection<String> roles, Map<String, Object> claims) {
+        return newTokens(new TokenCreationAttributes(userId, roles, claims, Duration.ofHours(15)),
+                new TokenCreationAttributes(userId, roles, claims, Duration.ofDays(5)));
+    }
+
+    @Override
+    public ApiTokens newTokens(TokenCreationAttributes tokenCreationAttributes, TokenCreationAttributes renewTokenCreationAttributes) {
+        String accessToken = createToken(tokenCreationAttributes);
+        String renewToken = createToken(renewTokenCreationAttributes);
+        return new ApiTokens(accessToken, tokenCreationAttributes.expiresIn(), renewToken, renewTokenCreationAttributes.expiresIn());
+    }
+
+    @Override
+    public ApiTokens renewTokens(String token, Duration tokenExpiresIn, Duration renewTokenExpiresIn) throws InvalidTokenException {
+        TokenAttributes attributes = decodeToken(token);
+        TokenCreationAttributes tokenCreationAttributes = new TokenCreationAttributes(
+                attributes.userId(),
+                attributes.roles(),
+                attributes.claims(),
+                tokenExpiresIn
+        );
+        TokenCreationAttributes renewTokenCreationAttributes = new TokenCreationAttributes(
+                attributes.userId(),
+                attributes.roles(),
+                attributes.claims(),
+                renewTokenExpiresIn
+        );
+        String accessToken = createToken(tokenCreationAttributes);
+        String renewToken = createToken(renewTokenCreationAttributes);
+        return new ApiTokens(accessToken, tokenExpiresIn, renewToken, renewTokenExpiresIn);
     }
 
     /**
@@ -136,40 +167,16 @@ class TokenServiceImpl implements TokenService {
         }
     }
 
-    // --- Unveränderte Methoden ---
-
-    @Override
-    public ApiTokens newTokens(String userId, Collection<String> roles, Map<String, Object> claims) {
-        return newTokens(new TokenCreationAttributes(userId, roles, claims, Duration.ofHours(15)),
-                new TokenCreationAttributes(userId, roles, claims, Duration.ofDays(5)));
+    private KeyPair generateRsaKeyPair() {
+        try {
+            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+            keyPairGenerator.initialize(2048);
+            return keyPairGenerator.generateKeyPair();
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("Could not generate RSA key pair", e);
+        }
     }
 
-    @Override
-    public ApiTokens newTokens(TokenCreationAttributes tokenCreationAttributes, TokenCreationAttributes renewTokenCreationAttributes) {
-        String accessToken = createToken(tokenCreationAttributes);
-        String renewToken = createToken(renewTokenCreationAttributes);
-        return new ApiTokens(accessToken, tokenCreationAttributes.expiresIn(), renewToken, renewTokenCreationAttributes.expiresIn());
-    }
-
-    @Override
-    public ApiTokens renewTokens(String token, Duration tokenExpiresIn, Duration renewTokenExpiresIn) throws InvalidTokenException {
-        TokenAttributes attributes = decodeToken(token);
-        TokenCreationAttributes tokenCreationAttributes = new TokenCreationAttributes(
-                attributes.userId(),
-                attributes.roles(),
-                attributes.claims(),
-                tokenExpiresIn
-        );
-        TokenCreationAttributes renewTokenCreationAttributes = new TokenCreationAttributes(
-                attributes.userId(),
-                attributes.roles(),
-                attributes.claims(),
-                renewTokenExpiresIn
-        );
-        String accessToken = createToken(tokenCreationAttributes);
-        String renewToken = createToken(renewTokenCreationAttributes);
-        return new ApiTokens(accessToken, tokenExpiresIn, renewToken, renewTokenExpiresIn);
-    }
 
     private String toJson(Map<String, Object> map) {
         return gson.toJson(map);

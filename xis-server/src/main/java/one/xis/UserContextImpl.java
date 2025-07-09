@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Delegate;
-import one.xis.auth.token.AccessToken;
 
 import java.time.ZoneId;
 import java.util.Locale;

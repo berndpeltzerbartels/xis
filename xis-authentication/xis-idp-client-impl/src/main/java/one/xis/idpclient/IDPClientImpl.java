@@ -4,15 +4,16 @@ import com.google.gson.Gson;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import one.xis.auth.AuthenticationException;
 import one.xis.auth.IDPWellKnownOpenIdConfig;
 import one.xis.auth.UserInfoImpl;
 import one.xis.auth.token.ApiTokens;
 import one.xis.http.HttpClientException;
 import one.xis.http.RestClient;
+import one.xis.idp.IDPResponse;
 import one.xis.ipdclient.IDPClient;
 import one.xis.ipdclient.IDPClientConfig;
 import one.xis.ipdclient.IDPPublicKeyResponse;
-import one.xis.security.AuthenticationException;
 
 import java.util.HashMap;
 
@@ -36,7 +37,7 @@ class IDPClientImpl implements IDPClient {
             String formBody = "grant_type=authorization_code" +
                     "&code=" + encode(code, UTF_8) +
                     "&redirect_uri=" + encode(redirectUri, UTF_8) +
-                    "&client_id=" + encode(idpClientConfig.getClientId(), UTF_8) +
+                    "&client_id=" + encode(idpClientConfig.getClientId(), UTF_8) + // TODO scope ? Not required by OpenID Connect, but might be useful for IDP-specific scopes.
                     "&client_secret=" + encode(idpClientConfig.getClientSecret(), UTF_8);
 
             var httpClient = restClient.getHttpClient();
@@ -49,9 +50,7 @@ class IDPClientImpl implements IDPClient {
             if (response.getStatusCode() != 200) {
                 throw new AuthenticationException("Failed to request tokens from IDP. Status: " + response.getStatusCode() + ", Body: " + response.getContent());
             }
-
-            // Die JSON-Antwort manuell parsen.
-            return gson.fromJson(response.getContent(), ApiTokens.class);
+            return IDPResponse.fromOAuth2Json(response.getContent()).getApiTokens();
         } catch (HttpClientException e) {
             throw new AuthenticationException("Failed to request tokens from IDP", e);
         }
@@ -151,5 +150,5 @@ class IDPClientImpl implements IDPClient {
         }
         return openIdConfig;
     }
-    
+
 }

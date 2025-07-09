@@ -15,7 +15,7 @@ class IDPTestService implements IDPService {
     private static final IDPClientInfo TEST_CLIENT_INFO = new IDPClientInfoImpl(
             "idp-client-id",
             "idp-client-secret",
-            Set.of("http://localhost:8080/xis/auth/callback", "http://localhost:8080/another/callback"));
+            Set.of("http://localhost:8080/xis/auth/callback/local-idp", "http://localhost:8080/another/callback"));
 
     @Override
     public Optional<IDPUserInfo> findUserInfo(String userId) {

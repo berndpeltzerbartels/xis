@@ -2,9 +2,9 @@ package one.xis.server;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import one.xis.AccessToken;
 import one.xis.Widget;
-import one.xis.auth.token.AccessToken;
-import one.xis.security.AuthenticationException;
+import one.xis.auth.AuthenticationException;
 import one.xis.validation.ValidatorMessages;
 
 import java.util.*;

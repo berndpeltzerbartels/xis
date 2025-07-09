@@ -24,7 +24,7 @@ dependencies {
     // compileOnly(project(":xis-controller-api"))
     //  implementation(project(":xis-context"))
     //implementation(project(":xis-security"))
-    //  compileOnly(project(":xis-controller-api"))
+    compileOnly(project(":xis-controller-api"))
     //   compileOnly(project(":xis-adapter-spi"))
 
     // Gson dependency
@@ -35,6 +35,8 @@ dependencies {
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-gson:0.11.5' // nutzt Gson statt Jackson
+
+    implementation 'com.github.ben-manes.caffeine:caffeine:3.1.8'
 
 
     // Lombok dependencies

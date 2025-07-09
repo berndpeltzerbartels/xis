@@ -48,7 +48,7 @@ public interface IDPAuthenticationService {
      * @return a LocalUserInfo object containing user details
      * @throws InvalidTokenException if the access token is invalid or expired
      */
-    IDPUserInfo content(String accessToken) throws InvalidTokenException;
+    IDPUserInfo verifyAndExtractUserInfo(String accessToken) throws InvalidTokenException;
 
     /**
      * Checks if the provided redirect URL is valid and safe for redirection.

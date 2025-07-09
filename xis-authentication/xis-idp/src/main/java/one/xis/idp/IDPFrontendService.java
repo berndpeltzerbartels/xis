@@ -1,8 +1,8 @@
 package one.xis.idp;
 
+import one.xis.auth.AuthenticationException;
 import one.xis.auth.JsonWebKey;
 import one.xis.auth.token.ApiTokensAndUrl;
-import one.xis.security.AuthenticationException;
 
 /**
  * Binds controller endpoints of a framework to the IDP service. These are the endpoints in case
@@ -51,5 +51,5 @@ public interface IDPFrontendService {
     JsonWebKey getPublicKey();
 
 
-    ApiTokensAndUrl provideTokens(String tokenRequestPayload) throws AuthenticationException;
+    IDPResponse provideTokens(String tokenRequestPayload) throws AuthenticationException;
 }

@@ -51,5 +51,5 @@ public interface FrameworkController<RESP_WRAPPER, REQ, RESP> {
 
     RESP getIdpPublicKey();
 
-    RESP authenticationCallback(String code, String state);
+    RESP authenticationCallback(String code, String state, String idpId);
 }

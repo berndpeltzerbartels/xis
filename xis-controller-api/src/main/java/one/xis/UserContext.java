@@ -13,4 +13,6 @@ public interface UserContext {
     ZoneId getZoneId();
 
     String getClientId();
+
+    AccessToken getAccessToken();
 }

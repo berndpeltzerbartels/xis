@@ -152,8 +152,8 @@ public class NettyController implements FrameworkController<FullHttpResponse, Fu
     }
 
     @Override
-    public FullHttpResponse authenticationCallback(String code, String state) {
-        return null;
+    public FullHttpResponse authenticationCallback(String code, String state, String idpId) {
+        return null; // TODO
     }
 
     private String extractToken(String authenticationHeader) {

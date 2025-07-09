@@ -4,15 +4,15 @@ package one.xis.server;
 import lombok.RequiredArgsConstructor;
 import one.xis.UserContextAccess;
 import one.xis.UserContextImpl;
+import one.xis.auth.AuthenticationException;
+import one.xis.auth.token.AccessTokenCache;
 import one.xis.auth.token.AccessTokenWrapper;
 import one.xis.auth.token.ApiTokensAndUrl;
-import one.xis.auth.token.TokenService;
 import one.xis.context.XISComponent;
 import one.xis.context.XISInit;
 import one.xis.context.XISInject;
 import one.xis.resource.Resource;
 import one.xis.resource.Resources;
-import one.xis.security.AuthenticationException;
 import one.xis.security.AuthenticationService;
 import org.tinylog.Logger;
 
@@ -32,7 +32,7 @@ public class FrontendServiceImpl implements FrontendService {
     private final ClientConfigService configService;
     private final ResourceService resourceService;
     private final Resources resources;
-    private final TokenService tokenService;
+    private final AccessTokenCache accessTokenCache;
 
     @XISInject(optional = true)
     private AuthenticationService authenticationService;
@@ -160,7 +160,7 @@ public class FrontendServiceImpl implements FrontendService {
         userContext.setClientId(request.getClientId());
         userContext.setLocale(request.getLocale());
         userContext.setZoneId(ZoneId.of(request.getZoneId()));
-        userContext.setAccessToken(new AccessTokenWrapper(request.getAccessToken(), tokenService));
+        userContext.setAccessToken(new AccessTokenWrapper(request.getAccessToken(), accessTokenCache));
         UserContextAccess.setInstance(userContext);
     }
 
