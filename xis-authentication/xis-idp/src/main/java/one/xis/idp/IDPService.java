@@ -12,7 +12,6 @@ public interface IDPService {
 
     Optional<IDPClientInfo> findClientInfo(String clientId);
 
-    IDPClientInfo createClientInfo(Collection<String> permittedRedirectUrls);
-
+    IDPClientInfo createClientInfo(String clientId, String clientSecret, Collection<String> permittedRedirectUrls);
 
 }

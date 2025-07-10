@@ -1,14 +1,18 @@
 package one.xis.idp;
 
+import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import one.xis.auth.*;
 import one.xis.auth.token.ApiTokens;
 import one.xis.auth.token.TokenService;
 import one.xis.context.XISComponent;
+import one.xis.server.LocalUrlHolder;
 
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.UUID;
+
+import static one.xis.utils.http.HttpUtils.parseQueryParameters;
 
 @XISComponent
 @RequiredArgsConstructor
@@ -16,7 +20,10 @@ class IDPAuthenticationServiceImpl implements IDPAuthenticationService {
 
     private final IDPService idpService;
     private final TokenService tokenService;
+    private final LocalUrlHolder localUrlHolder;
     private final IDPServerCodeStore idpCodeStore = new IDPServerCodeStore();
+    private final Gson gson = new Gson();
+
 
     /**
      * Logs in a user using the provided credentials.
@@ -46,8 +53,7 @@ class IDPAuthenticationServiceImpl implements IDPAuthenticationService {
      * @throws AuthenticationException if the code is invalid or expired
      */
 
-    @Override
-    public ApiTokens issueToken(String code) throws AuthenticationException {
+    private ApiTokens issueToken(String code) throws AuthenticationException {
         String userId = idpCodeStore.getUserIdForCode(code);
         if (userId == null) {
             throw new InvalidStateParameterException();
@@ -107,6 +113,37 @@ class IDPAuthenticationServiceImpl implements IDPAuthenticationService {
                 .orElse(false)) {
             throw new InvalidRedirectUrlException(redirectUrl);
         }
+    }
+
+    @Override
+    public String getOpenIdConfigJson() {
+        var config = new IDPWellKnownOpenIdConfig();
+        config.setIssuer(localUrlHolder.getUrl());
+        config.setJwksUri(localUrlHolder.getUrl() + "/.well-known/jwks.json"); // TODO create constants for these URLs
+        config.setAuthorizationEndpoint(localUrlHolder.getUrl() + XisIDPConfig.IDP_LOGIN_URL);
+        config.setTokenEndpoint(localUrlHolder.getUrl() + "/xis/auth/tokens");
+        config.setUserInfoEndpoint(localUrlHolder.getUrl() + "/xis/auth/userinfo");
+        return gson.toJson(config);
+    }
+
+    @Override
+    public IDPResponse provideTokens(String tokenRequestPayload) throws AuthenticationException {
+        var parameters = parseQueryParameters(tokenRequestPayload);
+        var request = gson.fromJson(gson.toJson(parameters), IDPTokenRequest.class);
+        if (!request.getRedirectUri().startsWith("http")) {
+            throw new AuthenticationException("Invalid redirect URI: " + request.getRedirectUri() + ". It must start with 'http(s)'.");
+        }
+        var clientInfo = idpService.findClientInfo(request.getClientId()).orElseThrow(() -> new AuthenticationException("Client not found: " + request.getClientId()));
+        if (!clientInfo.getClientSecret().equals(request.getClientSecret())) {
+            throw new AuthenticationException("Invalid client secret for client: " + request.getClientId());
+        }
+        if (request.getCode() == null || request.getCode().isEmpty()) {
+            throw new AuthenticationException("Missing or empty 'code' parameter in the request");
+        }
+        if (!clientInfo.getPermittedRedirectUrls().contains(request.getRedirectUri())) {
+            throw new AuthenticationException("Invalid redirect URI: " + request.getRedirectUri());
+        }
+        return new IDPResponse(issueToken(request.getCode()));
     }
 
     /**

@@ -23,15 +23,6 @@ public interface IDPAuthenticationService {
     String login(IDPServerLogin login) throws InvalidCredentialsException;
 
     /**
-     * Issues an authentication token based on the provided code and state.
-     *
-     * @param code the unique code obtained from login
-     * @return a response containing access and refresh tokens
-     * @throws AuthenticationException if the code is invalid or expired
-     */
-    ApiTokens issueToken(String code) throws AuthenticationException;
-
-    /**
      * Refreshes the authentication token using the provided refresh token.
      *
      * @param refreshToken the refresh token to use for obtaining a new access token
@@ -59,4 +50,7 @@ public interface IDPAuthenticationService {
      */
     void checkRedirectUrl(String userId, String redirectUrl) throws InvalidRedirectUrlException;
 
+    String getOpenIdConfigJson();
+
+    IDPResponse provideTokens(String tokenRequestPayload);
 }

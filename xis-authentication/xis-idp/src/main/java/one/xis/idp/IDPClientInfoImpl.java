@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Set;
+import java.util.Collection;
 
 @Data
 @NoArgsConstructor
@@ -12,5 +12,5 @@ import java.util.Set;
 public class IDPClientInfoImpl implements IDPClientInfo {
     private String clientId;
     private String clientSecret;
-    private Set<String> permittedRedirectUrls;
+    private Collection<String> permittedRedirectUrls;
 }

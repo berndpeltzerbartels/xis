@@ -1,0 +1,39 @@
+plugins {
+    id 'java'
+}
+
+group = 'one.xis'
+version = '0.1.1'
+
+repositories {
+    mavenCentral()
+}
+
+var lombokVersion = rootProject.ext.libraryVersions.lombok
+var gsonVersion = rootProject.ext.gsonVersion
+
+def junitVersion = "5.7.0"
+def assertjVersion = "3.16.1"
+
+dependencies {
+
+    implementation(project(":xis-context"))
+    implementation(project(":xis-util"))
+
+    // Lombok dependencies
+    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+    implementation "org.projectlombok:lombok:$lombokVersion"
+    testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"
+
+    implementation "com.google.code.gson:gson:$gsonVersion"
+
+
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+    implementation "org.mockito:mockito-core:$mockitoVersion"
+    testImplementation "org.assertj:assertj-core:$assertjVersion"
+}
+
+test {
+    useJUnitPlatform()
+}

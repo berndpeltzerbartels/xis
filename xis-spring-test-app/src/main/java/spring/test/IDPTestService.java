@@ -12,10 +12,10 @@ import java.util.Set;
 @Component
 class IDPTestService implements IDPService {
 
-    private static final IDPClientInfo TEST_CLIENT_INFO = new IDPClientInfoImpl(
-            "idp-client-id",
-            "idp-client-secret",
-            Set.of("http://localhost:8080/xis/auth/callback/local-idp", "http://localhost:8080/another/callback"));
+    private static final String CLIENT_ID = "idp-client-id";
+    private static final String CLIENT_SECRET = "idp-client-secret";
+
+    private IDPClientInfo clientInfo;
 
     @Override
     public Optional<IDPUserInfo> findUserInfo(String userId) {
@@ -28,13 +28,14 @@ class IDPTestService implements IDPService {
     @Override
     public Optional<IDPClientInfo> findClientInfo(String clientId) {
         if (clientId.equals("idp-client-id")) {
-            return Optional.of(TEST_CLIENT_INFO);
+            return Optional.of(clientInfo);
         }
         return Optional.empty();
     }
 
     @Override
     public IDPClientInfo createClientInfo(Collection<String> permittedRedirectUrls) {
-        return TEST_CLIENT_INFO;
+        clientInfo = new IDPClientInfoImpl(CLIENT_ID, CLIENT_SECRET, permittedRedirectUrls);
+        return clientInfo;
     }
 }

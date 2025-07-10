@@ -41,7 +41,7 @@ class IDPClientServiceImpl implements IDPClientService {
     @XISInject
     private Collection<IDPClientConfig> idpClientConfigs;
 
-    @XISInject(optional = true)
+    @XISInject(optional = true) // TODO make required in future versions
     private UserInfoService<UserInfo> userInfoService;
 
     @XISInject

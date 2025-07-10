@@ -40,5 +40,6 @@ include 'xis-authentication:xis-local-ipd'
 include 'xis-authentication:xis-local-idp-impl'
 include 'xis-netty'
 include 'xis-authentication:xis-token'
-
+include 'xis-local-authentication'
+include 'xis-http-controller'
 
