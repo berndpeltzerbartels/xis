@@ -54,12 +54,11 @@ public class ControllerService {
         }
     }
 
-    void doInvocation(HttpRequest request, HttpResponse response) {
+    public void doInvocation(HttpRequest request, HttpResponse response) {
         Optional<InvocationContext> invocationContextOptional = findInvocationContext(request);
 
         if (invocationContextOptional.isEmpty()) {
             response.setStatusCode(404);
-            response.setBody("Not Found");
             return;
         }
 
@@ -76,12 +75,12 @@ public class ControllerService {
         // Parameter vorbereiten
         Object[] args = prepareParameters(method, request, response, methodMatchResult);
         Object result = MethodUtils.invoke(controllerInstance, method, args);
-        handleResponse(result, method, response);
+        handleResponse(result, method, request, response);
     }
 
 
-    private void handleResponse(Object returnValue, Method method, HttpResponse response) {
-        responseWriter.write(returnValue, method, response);
+    private void handleResponse(Object returnValue, Method method, HttpRequest request, HttpResponse response) {
+        responseWriter.write(returnValue, method, request, response);
 
     }
 
@@ -89,6 +88,7 @@ public class ControllerService {
         Parameter[] parameters = method.getParameters();
         Object[] args = new Object[parameters.length];
         Map<String, String> pathVariables = methodMatchResult.getPathVariables();
+        Map<String, String> cookies = cookies(request);
         for (int i = 0; i < parameters.length; i++) {
             Parameter param = parameters[i];
             if (param.isAnnotationPresent(PathVariable.class)) {
@@ -99,6 +99,8 @@ public class ControllerService {
                 args[i] = handleRequestBody(param, request);
             } else if (param.isAnnotationPresent(Header.class)) {
                 args[i] = handleHeader(param, request);
+            } else if (param.isAnnotationPresent(CookieValue.class)) {
+                args[i] = handleCookieValue(param, cookies);
             } else if (param.getType().isAssignableFrom(HttpRequest.class)) {
                 args[i] = request;
             } else if (param.getType().isAssignableFrom(HttpResponse.class)) {
@@ -109,6 +111,14 @@ public class ControllerService {
             }
         }
         return args;
+    }
+
+    private Object handleCookieValue(Parameter param, Map<String, String> cookies) {
+        CookieValue annotation = param.getAnnotation(CookieValue.class);
+        String cookieName = annotation.value();
+        String value = cookies.get(cookieName);
+        return TypeUtils.convertSimple(value, param.getType());
+
     }
 
     private Object handlePathVariable(Parameter param, Map<String, String> pathVariables) {
@@ -189,6 +199,21 @@ public class ControllerService {
         String cleanBase = base.endsWith("/") ? base.substring(0, base.length() - 1) : base;
         String cleanMethod = method.startsWith("/") ? method : "/" + method;
         return cleanBase + cleanMethod;
+    }
+
+    private Map<String, String> cookies(HttpRequest request) {
+        Map<String, String> cookies = new HashMap<>();
+        String cookieHeader = request.getHeaders().get("Cookie");
+        if (cookieHeader != null) {
+            String[] cookiePairs = cookieHeader.split(";");
+            for (String pair : cookiePairs) {
+                String[] keyValue = pair.split("=");
+                if (keyValue.length == 2) {
+                    cookies.put(keyValue[0].trim(), keyValue[1].trim());
+                }
+            }
+        }
+        return cookies;
     }
 
 

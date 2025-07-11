@@ -1,0 +1,31 @@
+plugins {
+    id 'java'
+}
+
+group = 'one.xis'
+version = '0.1.1'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compileOnly(project(":xis-context"))
+    compileOnly(project(":xis-controller-api"))
+    compileOnly(project(":xis-idp:xis-idp-server"))
+    compileOnly(project(":xis-authentication"))
+
+    // Annotation processors
+    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+    testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"
+
+    // Implementation dependencies
+    implementation "org.projectlombok:lombok:$lombokVersion"
+
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+    useJUnitPlatform()
+}

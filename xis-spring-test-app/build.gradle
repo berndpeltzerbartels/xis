@@ -24,7 +24,7 @@ java {
 
 // Local variables for versions
 var lombokVersion = rootProject.ext.libraryVersions.lombok
-var springBootStarterWebVersion = "2.6.4"
+var springBootVersion = rootProject.ext.libraryVersions.springBoot
 var junitVersion = rootProject.ext.libraryVersions.junit
 
 
@@ -33,9 +33,9 @@ dependencies {
     // Local project dependencies
 
     implementation project(':xis-spring')
-    implementation project(':xis-authentication')
-    runtimeOnly project(':xis-authentication:xis-idp-impl')
-    compileOnly project(':xis-authentication:xis-idp')
+    //implementation project(':xis-idp')
+    //runtimeOnly project(':xis-idp:xis-idp-server-impl')
+    // compileOnly project(':xis-idp:xis-idp-server')
     implementation project(':xis-test')
 
     // implementation "org.slf4j:slf4j-api:1.7.32"
@@ -50,7 +50,7 @@ dependencies {
 
     // Implementation dependencies
     implementation "org.projectlombok:lombok:$lombokVersion"
-    implementation "org.springframework.boot:spring-boot-starter-web:$springBootStarterWebVersion"
+    implementation "org.springframework.boot:spring-boot-starter-web:$springBootVersion"
 
     // Test dependencies
     testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"

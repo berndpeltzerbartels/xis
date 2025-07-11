@@ -6,7 +6,9 @@ import one.xis.EnablePushClients;
 import one.xis.Page;
 import one.xis.Push;
 import one.xis.Widget;
+import one.xis.context.AppContext;
 import one.xis.context.AppContextBuilder;
+import one.xis.http.ControllerService;
 import one.xis.server.*;
 import one.xis.utils.lang.ClassUtils;
 import org.springframework.beans.BeansException;
@@ -37,7 +39,7 @@ import java.util.stream.Stream;
 public class SpringContextAdapter implements BeanPostProcessor, ApplicationContextAware, ResourcePathProvider {
 
     private final SpringFilter springFilter;
-    private final SpringController springController;
+    private AppContext context;
 
     @Setter
     private ApplicationContext applicationContext;
@@ -56,18 +58,22 @@ public class SpringContextAdapter implements BeanPostProcessor, ApplicationConte
     @EventListener(ContextRefreshedEvent.class)
     public void init() {
         singletons.add(this);
-        var context = AppContextBuilder.createInstance()
+        context = createXisContext();
+        var frontendService = context.getSingleton(FrontendService.class);
+        var localUrlHolder = context.getSingleton(LocalUrlHolder.class);
+        var controllerService = context.getSingleton(ControllerService.class);
+        springFilter.setFrontendService(frontendService);
+        springFilter.setLocalUrlHolder(localUrlHolder);
+        springFilter.setControllerService(controllerService);
+        context.getSingletons(PushClientProxy.class).forEach(this::addToSpringContext);
+    }
+
+    private AppContext createXisContext() {
+        return AppContextBuilder.createInstance()
                 .withSingletons(singletons)
                 .withSingletonClasses(pushClientClasses())
                 .withXIS()
                 .build();
-        var frontendService = context.getSingleton(FrontendService.class);
-        var localUrlHolder = context.getSingleton(LocalUrlHolder.class);
-        springFilter.setFrontendService(frontendService);
-        springFilter.setLocalUrlHolder(localUrlHolder);
-        springController.setFrontendService(frontendService);
-        springController.setAppContext(context);
-        context.getSingletons(PushClientProxy.class).forEach(this::addToSpringContext);
     }
 
     private Collection<Class<?>> pushClientClasses() {

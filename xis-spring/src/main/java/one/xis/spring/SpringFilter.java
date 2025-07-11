@@ -1,40 +1,46 @@
 package one.xis.spring;
 
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpFilter;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.Setter;
+import one.xis.http.ControllerService;
 import one.xis.server.FrontendService;
 import one.xis.server.LocalUrlHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpFilter;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+@Setter
 @Component
 class SpringFilter extends HttpFilter {
 
-    @Setter
     private FrontendService frontendService;
-
-    @Setter
+    private ControllerService controllerService;
     private LocalUrlHolder localUrlHolder;
 
     @Override
-    protected void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
+    protected void doFilter(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain chain) throws IOException, ServletException {
         if (!localUrlHolder.localUrlIsSet()) {
             String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
             localUrlHolder.setLocalUrl(baseUrl);
         }
-        if (request.getRequestURI().equals("/") || request.getRequestURI().isEmpty() || request.getRequestURI().endsWith(".html")) {
-            response.setContentType("text/html");
-            try (var writer = response.getWriter()) {
+        if (httpServletRequest.getRequestURI().equals("/") || httpServletRequest.getRequestURI().isEmpty() || httpServletRequest.getRequestURI().endsWith(".html")) {
+            httpServletResponse.setContentType("text/html");
+            try (var writer = httpServletResponse.getWriter()) {
                 writer.println(frontendService.getRootPageHtml());
             }
         } else {
-            super.doFilter(request, response, chain);
+            var request = new SpringHttpRequest(httpServletRequest);
+            var response = new SpringHttpResponse(httpServletResponse);
+            controllerService.doInvocation(request, response);
+            if (!Integer.valueOf(404).equals(response.getStatusCode())) {
+                return;
+            }
+            super.doFilter(httpServletRequest, httpServletResponse, chain);
         }
     }
 }

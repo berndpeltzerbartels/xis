@@ -1,5 +1,6 @@
 package one.xis.http;
 
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -43,4 +44,25 @@ public interface HttpRequest {
     Object getBodyAsBytes();
 
     Map<String, String> getFormParameters();
+
+    Locale getLocale();
+
+    /**
+     * Extracts the file suffix from the request path.
+     * For example, for a path "/static/main.js", it returns ".js".
+     *
+     * @return The file suffix including the dot, or an empty string if not present.
+     */
+    default String getSuffix() {
+        String path = getPath();
+        if (path == null) {
+            return "";
+        }
+        int lastDotIndex = path.lastIndexOf('.');
+        if (lastDotIndex >= 0) {
+            return path.substring(lastDotIndex);
+        }
+        return "";
+    }
+
 }

@@ -11,5 +11,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @XISComponent
 public @interface Controller {
-    String value();
+    String value() default "";
 }

@@ -1,0 +1,36 @@
+plugins {
+    id 'java'
+}
+
+group = 'one.xis'
+version = '0.1.1'
+
+repositories {
+    mavenCentral()
+}
+
+var lombokVersion = rootProject.ext.libraryVersions.lombok
+var springBootVersion = rootProject.ext.libraryVersions.springBoot
+
+dependencies {
+    implementation(project(":xis-context"))
+    implementation(project(":xis-util"))
+    implementation(project(":xis-http-controller"))
+
+    // Fremdbibliotheken
+    compileOnly "org.springframework.boot:spring-boot-starter-web:${springBootVersion}"
+
+    // Lombok dependencies
+    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+    implementation "org.projectlombok:lombok:$lombokVersion"
+    testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"
+
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+
+
+}
+
+test {
+    useJUnitPlatform()
+}

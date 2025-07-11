@@ -1,5 +1,6 @@
 package one.xis.utils.http;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
@@ -81,6 +82,65 @@ class HttpUtilsTest {
         // The current implementation adds an extra '&' because the url does not end with it.
         String expected = "http://example.com/path?&param1=value1";
         String actual = HttpUtils.appendQueryParameters(url, params);
+
+        assertEquals(expected, actual);
+    }
+
+
+    @Nested
+    class LocalizeUrlTests {
+
+        @Test
+        void localizeUrl_withProtocolAndHost() {
+            String url = "http://example.com/path/to/resource";
+            String expected = "/path/to/resource";
+            String actual = HttpUtils.localizeUrl(url);
+            assertEquals(expected, actual);
+        }
+
+        @Test
+        void localizeUrl_withProtocolRelativeUrl() {
+            String url = "//example.com/path/to/resource";
+            String expected = "/path/to/resource";
+            String actual = HttpUtils.localizeUrl(url);
+            assertEquals(expected, actual);
+        }
+
+        @Test
+        void localizeUrl_withOnlyPath() {
+            String url = "/path/to/resource";
+            String expected = "/path/to/resource";
+            String actual = HttpUtils.localizeUrl(url);
+            assertEquals(expected, actual);
+        }
+
+        @Test
+        void localizeUrl_withJavascriptUrl() {
+            String url = "javascript:alert('Hello')";
+            String expected = "/";
+            String actual = HttpUtils.localizeUrl(url);
+            assertEquals(expected, actual);
+        }
+
+        @Test
+        void localizeUrl_withDataUrl() {
+            String url = "data:text/plain;base64,SGVsbG8sIFdvcmxkIQ==";
+            String expected = "/";
+            String actual = HttpUtils.localizeUrl(url);
+            assertEquals(expected, actual);
+        }
+    }
+
+    @Test
+    void parseQueryParameters() {
+        String query = "param1=value1&param2=value2&param3=value3";
+        Map<String, String> expected = Map.of(
+                "param1", "value1",
+                "param2", "value2",
+                "param3", "value3"
+        );
+
+        Map<String, String> actual = HttpUtils.parseQueryParameters(query);
 
         assertEquals(expected, actual);
     }

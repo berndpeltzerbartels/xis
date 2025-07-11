@@ -43,7 +43,7 @@ dependencies {
     implementation("org.projectlombok:lombok:$lombokVersion")
 
     // Spring Context dependency
-    implementation("org.springframework:spring-context:$springContextVersion")
+    compileOnly("org.springframework:spring-context:$springContextVersion")
 
     // Reflections dependency
     implementation("org.reflections:reflections:$reflectionsVersion")

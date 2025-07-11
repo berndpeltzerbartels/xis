@@ -1,5 +1,7 @@
 package one.xis.http;
 
+import java.time.Duration;
+
 public interface HttpResponse {
     void setStatusCode(int i);
 
@@ -13,4 +15,8 @@ public interface HttpResponse {
     Integer getStatusCode();
 
     ContentType getContentType();
+
+    void addHeader(String name, String value);
+
+    void addSecureCookie(String name, String value, Duration maxAge);
 }

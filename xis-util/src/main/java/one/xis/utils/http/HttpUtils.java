@@ -31,6 +31,43 @@ public class HttpUtils {
         return sb.toString();
     }
 
+
+    /**
+     * Localizes the given URL by removing protocol and host parts,
+     *
+     * @param url the URL to localize
+     * @return the localized URL
+     */
+    public static String localizeUrl(@NonNull String url) {
+        String trimmedUrl = url.trim();
+
+        // Verhindert Javascript- oder Daten-URLs
+        if (trimmedUrl.matches("(?i)^(javascript|data|vbscript):.*")) {
+            return "/";
+        }
+
+        // Behandelt protokollrelative URLs wie //example.com/path
+        if (trimmedUrl.startsWith("//")) {
+            int pathStart = trimmedUrl.indexOf('/', 2);
+            return pathStart != -1 ? trimmedUrl.substring(pathStart) : "/";
+        }
+
+        // Behandelt absolute URLs wie http://example.com/path
+        int protocolEnd = trimmedUrl.indexOf("://");
+        if (protocolEnd != -1) {
+            int pathStart = trimmedUrl.indexOf('/', protocolEnd + 3);
+            return pathStart != -1 ? trimmedUrl.substring(pathStart) : "/";
+        }
+
+        // Nimmt an, dass es sich bereits um einen lokalen Pfad handelt.
+        // Stellt sicher, dass er mit einem Slash beginnt.
+        if (!trimmedUrl.startsWith("/")) {
+            return "/" + trimmedUrl;
+        }
+
+        return trimmedUrl;
+    }
+
     public static Map<String, String> parseQueryParameters(@NonNull String url) {
         int queryStart = url.indexOf('?');
         String query = url.substring(queryStart + 1);

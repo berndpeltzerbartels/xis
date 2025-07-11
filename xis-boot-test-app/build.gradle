@@ -24,7 +24,7 @@ java {
 
 // Local variables for versions
 var lombokVersion = rootProject.ext.libraryVersions.lombok
-var springBootStarterWebVersion = "2.6.4"
+var springBootVersion = rootProject.ext.libraryVersions.springBoot
 var junitVersion = rootProject.ext.libraryVersions.junit
 
 
@@ -46,7 +46,7 @@ dependencies {
 
     // Implementation dependencies
     implementation "org.projectlombok:lombok:$lombokVersion"
-    implementation "org.springframework.boot:spring-boot-starter-web:$springBootStarterWebVersion"
+    implementation "org.springframework.boot:spring-boot-starter-web:$springBootVersion"
 
     // Test dependencies
     testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"

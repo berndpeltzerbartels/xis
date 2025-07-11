@@ -1,6 +1,7 @@
 package one.xis.spring;
 
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.NonNull;
 import lombok.Setter;
 import one.xis.auth.token.ApiTokens;
@@ -12,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import javax.servlet.http.HttpServletRequest;
 import java.time.Duration;
 import java.util.Locale;
 import java.util.Map;

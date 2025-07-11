@@ -3,7 +3,6 @@ package spring.test;
 import one.xis.idp.*;
 import org.springframework.stereotype.Component;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -11,10 +10,7 @@ import java.util.Set;
 
 @Component
 class IDPTestService implements IDPService {
-
-    private static final String CLIENT_ID = "idp-client-id";
-    private static final String CLIENT_SECRET = "idp-client-secret";
-
+    
     private IDPClientInfo clientInfo;
 
     @Override
@@ -34,8 +30,9 @@ class IDPTestService implements IDPService {
     }
 
     @Override
-    public IDPClientInfo createClientInfo(Collection<String> permittedRedirectUrls) {
-        clientInfo = new IDPClientInfoImpl(CLIENT_ID, CLIENT_SECRET, permittedRedirectUrls);
+    public IDPClientInfo createClientInfo(String clientId, String clientSecret, Set<String> permittedRedirectUrls) {
+        clientInfo = new IDPClientInfoImpl(clientId, clientSecret, permittedRedirectUrls);
         return clientInfo;
     }
+
 }

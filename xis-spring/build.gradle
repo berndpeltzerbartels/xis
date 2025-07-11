@@ -33,7 +33,7 @@ var assertjVersion = rootProject.ext.libraryVersions.assertj
 var gsonVersion = rootProject.ext.libraryVersions.gson
 var jacksonVersion = rootProject.ext.libraryVersions.jackson
 var mockitoVersion = rootProject.ext.libraryVersions.mockito
-var springBootStarterWebVersion = "2.6.4"
+var springBootVersion = rootProject.ext.libraryVersions.springBoot
 var slf4jLog4j12Version = "2.0.3"
 
 
@@ -47,12 +47,14 @@ dependencies {
     implementation project(":xis-server")
     implementation project(":xis-adapter-spi")
     implementation project(":xis-validation")
+    implementation(project(":xis-http-controller-spring"))
 
     // Compile-only dependencies
     compileOnly project(":xis-deserializer")
-    compileOnly project(':xis-authentication')
-    compileOnly project(':xis-authentication:xis-idp')
-    compileOnly "org.springframework.boot:spring-boot-starter-web:$springBootStarterWebVersion"
+    compileOnly project(':xis-idp')
+    compileOnly project(':xis-idp:xis-idp-server')
+    compileOnly project(':xis-http-controller')
+    compileOnly "org.springframework.boot:spring-boot-starter-web:$springBootVersion"
 
 
     // Annotation processors
@@ -61,7 +63,6 @@ dependencies {
     // Implementation dependencies
     implementation "org.projectlombok:lombok:$lombokVersion"
     implementation "org.reflections:reflections:$reflectionsVersion"
-    implementation "org.slf4j:slf4j-log4j12:$slf4jLog4j12Version"
 
     // Test dependencies
     testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"

@@ -35,4 +35,5 @@ public interface RedirectControllerResponse {
     default String getRedirectUrlWithParameters() {
         return HttpUtils.appendQueryParameters(getRedirectUrl(), getUrlParameters());
     }
+    
 }

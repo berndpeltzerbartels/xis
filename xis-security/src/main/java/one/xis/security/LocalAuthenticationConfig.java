@@ -6,8 +6,6 @@ import one.xis.idp.IDPService;
 import one.xis.server.LocalUrlHolder;
 import one.xis.server.UrlHolder;
 
-import java.util.Set;
-
 @Data
 public class LocalAuthenticationConfig implements AuthenticationConfig {
     private final IDPService idpService;
@@ -38,6 +36,6 @@ public class LocalAuthenticationConfig implements AuthenticationConfig {
     private void createClientInfo(String url) {
         // This method should interact with the IDPService to create a client info
         // based on the provided redirect URIs.
-        this.clientInfo = idpService.createClientInfo(Set.of(url));
+        // TODO this.clientInfo = idpService.createClientInfo(Set.of(url));
     }
 }

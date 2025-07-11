@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 import one.xis.context.XISComponent;
 import one.xis.utils.lang.FieldUtil;
+import one.xis.utils.lang.TypeUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
@@ -20,7 +21,17 @@ class ResponseWriter {
         this.gson = gson;
     }
 
-    void write(Object returnValue, Method method, HttpResponse response) {
+    void write(Object returnValue, Method method, HttpRequest request, HttpResponse response) {
+        if (returnValue instanceof ResponseEntity<?> responseEntity) {
+            response.setStatusCode(responseEntity.getStatusCode());
+            for (var headerName : responseEntity.getHeaders().keySet()) {
+                var headerValues = responseEntity.getHeaders().get(headerName);
+                for (String headerValue : headerValues) {
+                    response.addHeader(headerName, headerValue);
+                }
+            }
+            returnValue = responseEntity.getBody();
+        }
         if (returnValue == null) {
             if (response.getStatusCode() == null) {
                 response.setStatusCode(204); // No Content
@@ -32,24 +43,67 @@ class ResponseWriter {
             response.setStatusCode(200);
         }
 
-        determineContentType(returnValue, method, response);
+        determineContentType(returnValue, method, request, response);
         setResponseBody(returnValue, response);
     }
 
-    private void determineContentType(Object returnValue, Method method, HttpResponse response) {
+    private void determineContentType(Object returnValue, Method method, HttpRequest request, HttpResponse response) {
+
         Produces produces = method.getAnnotation(Produces.class);
         if (produces != null) {
             response.setContentType(produces.value());
-        } else {
-            // Fallback-Logik, wenn @Produces nicht vorhanden ist
-            if (one.xis.utils.lang.TypeUtils.isSimple(returnValue.getClass())) {
-                response.setContentType(ContentType.TEXT_PLAIN);
-            } else if (returnValue instanceof byte[]) {
-                response.setContentType(ContentType.APPLICATION_OCTET_STREAM);
-            } else {
-                response.setContentType(ContentType.JSON);
-            }
+            return;
         }
+        if (response.getContentType() != null) {
+            // Wenn bereits ein Content-Type gesetzt ist, verwenden wir diesen
+            return;
+        }
+
+        // Content-Type basierend auf dem Suffix des Request-Pfads bestimmen
+        switch (request.getSuffix().toLowerCase()) {
+            case ".js":
+                response.setContentType(ContentType.JAVASCRIPT);
+                return;
+            case ".css":
+                response.setContentType(ContentType.CSS);
+                return;
+            case ".html":
+            case ".htm":
+                response.setContentType(ContentType.TEXT_HTML);
+                return;
+            case ".pdf":
+                response.setContentType(ContentType.PDF);
+                return;
+            case ".xml":
+                response.setContentType(ContentType.XML);
+                return;
+            case ".jpeg":
+            case ".jpg":
+                response.setContentType(ContentType.JPEG);
+                return;
+            case ".png":
+                response.setContentType(ContentType.PNG);
+                return;
+            case ".gif":
+                response.setContentType(ContentType.GIF);
+                return;
+            case ".svg":
+                response.setContentType(ContentType.SVG);
+                return;
+            case ".zip":
+                response.setContentType(ContentType.ZIP);
+                return;
+        }
+
+        // Fallback-Logik, wenn @Produces nicht vorhanden ist
+        if (one.xis.utils.lang.TypeUtils.isSimple(returnValue.getClass())) {
+            response.setContentType(ContentType.TEXT_PLAIN);
+        } else if (returnValue instanceof byte[]) {
+            response.setContentType(ContentType.APPLICATION_OCTET_STREAM);
+        } else {
+            response.setContentType(ContentType.JSON);
+        }
+
     }
 
     private void setResponseBody(Object returnValue, HttpResponse response) {
@@ -60,8 +114,9 @@ class ResponseWriter {
             case FORM_URLENCODED:
                 if (returnValue instanceof Map) {
                     response.setBody(toUrlEncoded((Map<?, ?>) returnValue));
+                } else if (!TypeUtils.isSimple(returnValue.getClass())) {
+                    response.setBody(toUrlEncoded(returnValue));
                 } else {
-                    // Fallback oder Fehlerbehandlung, falls der Typ nicht passt
                     response.setBody(String.valueOf(returnValue));
                 }
                 break;
