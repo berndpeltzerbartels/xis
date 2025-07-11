@@ -1,5 +1,6 @@
 package one.xis.idpclient;
 
+import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
 import one.xis.http.HttpClientException;
@@ -15,13 +16,14 @@ class IDPClientFactoryImpl implements IDPClientFactory {
 
     private final RestClientFactory restClientFactory;
     private final LocalUrlHolder localUrlHolder;
+    private final Gson gson;
 
     private static final String CALLBACK_PATH = "/xis/auth/callback"; // TODO: Change it in all controllers
 
     @Override
     public IDPClient createConfiguredIDPClient(IDPClientConfig idpClientConfig) {
         try {
-            return new IDPClientImpl(restClientFactory.createRestClient(idpClientConfig.getIdpServerUrl()), idpClientConfig, authenticationCallbackUrl(idpClientConfig.getIdpId()));
+            return new IDPClientImpl(restClientFactory.createRestClient(idpClientConfig.getIdpServerUrl()), idpClientConfig, authenticationCallbackUrl(idpClientConfig.getIdpId()), gson);
         } catch (HttpClientException e) {
             throw new RuntimeException(e);
         }

@@ -1,5 +1,6 @@
 package one.xis.idp;
 
+import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import one.xis.context.XISDefaultComponent;
 import one.xis.context.XISInit;
@@ -16,6 +17,7 @@ class IDPConfig {
     private final Collection<ExternalIDPConfig> externalIDPConfigs;
     private final ExternalIDPConnectionFactory connectionFactory;
     private final LocalUrlHolder localUrlHolder;
+    private final Gson gson;
 
     @XISInject(optional = true)
     private IDPAuthenticationService authenticationService;
@@ -28,7 +30,7 @@ class IDPConfig {
     @XISInit
     public void initializeExternalIDPs() {
         loginController.setExternalIDPServices(externalIDPConfigs.stream()
-                .map(providerConfiguration -> new ExternalIDPServiceImpl(providerConfiguration, connectionFactory, localUrlHolder))
+                .map(providerConfiguration -> new ExternalIDPServiceImpl(providerConfiguration, connectionFactory, localUrlHolder, gson))
                 .collect(Collectors.toList()));
 
     }

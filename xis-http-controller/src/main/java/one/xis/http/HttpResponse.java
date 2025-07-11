@@ -12,6 +12,8 @@ public interface HttpResponse {
 
     void setContentType(ContentType contentType);
 
+    void setContentLength(int contentLength);
+
     Integer getStatusCode();
 
     ContentType getContentType();

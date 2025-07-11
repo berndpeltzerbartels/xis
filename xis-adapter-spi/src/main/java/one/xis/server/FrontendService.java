@@ -1,7 +1,5 @@
 package one.xis.server;
 
-import one.xis.auth.token.ApiTokensAndUrl;
-
 import java.util.Map;
 
 /**
@@ -135,17 +133,6 @@ public interface FrontendService {
      */
     String getBundleJs();
 
-    /**
-     * Handles the authentication callback from the IDP after the user has authenticated.
-     * <p>
-     * The `queryString` contains the parameters returned by the IDP, such as the authorization code and state.
-     * The `provider` is the name of the authentication provider (e.g., "local", "google", etc.).
-     *
-     * @param code  The authorization code returned by the IDP.
-     * @param state The state parameter returned by the IDP, used to maintain state between the request and callback.
-     * @return An object containing API tokens and a URL to redirect to after successful authentication.
-     */
-    ApiTokensAndUrl authenticationCallback(String code, String state);
 
     default void extractAccessToken(ClientRequest request, String authenticationHeader) {
         if (authenticationHeader != null && authenticationHeader.startsWith("Bearer ")) {

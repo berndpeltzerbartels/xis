@@ -93,6 +93,7 @@ class ResponseWriter {
             case ".zip":
                 response.setContentType(ContentType.ZIP);
                 return;
+
         }
 
         // Fallback-Logik, wenn @Produces nicht vorhanden ist
@@ -109,35 +110,41 @@ class ResponseWriter {
     private void setResponseBody(Object returnValue, HttpResponse response) {
         switch (response.getContentType()) {
             case JSON:
-                response.setBody(gson.toJson(returnValue));
+                var json = gson.toJson(returnValue);
+                response.setBody(json);
+                response.setContentLength(json.length());
                 break;
             case FORM_URLENCODED:
                 if (returnValue instanceof Map) {
-                    response.setBody(toUrlEncoded((Map<?, ?>) returnValue));
+                    var formData = toUrlEncoded((Map<?, ?>) returnValue);
+                    response.setBody(formData);
+                    response.setContentLength(formData.length());
                 } else if (!TypeUtils.isSimple(returnValue.getClass())) {
-                    response.setBody(toUrlEncoded(returnValue));
+                    var urlEncoded = toUrlEncoded(returnValue);
+                    response.setContentLength(urlEncoded.length());
+                    response.setBody(urlEncoded);
                 } else {
-                    response.setBody(String.valueOf(returnValue));
+                    var str = String.valueOf(returnValue);
+                    response.setContentLength(str.length());
+                    response.setBody(str);
                 }
                 break;
             case APPLICATION_OCTET_STREAM:
                 if (returnValue == null) {
                     response.setBody(new byte[0]); // Leerer Body für null
+                    response.setContentLength(0);
                 } else if (returnValue instanceof byte[]) {
                     response.setBody((byte[]) returnValue);
+                    response.setContentLength(((byte[]) returnValue).length);
                 } else if (returnValue instanceof CharSequence) {
-                    response.setBody(((CharSequence) returnValue).toString().getBytes(StandardCharsets.UTF_8));
+                    var bytes = ((CharSequence) returnValue).toString().getBytes(StandardCharsets.UTF_8);
+                    response.setBody(bytes);
+                    response.setContentLength(bytes.length);
                 } else {
                     // Fallback oder Fehlerbehandlung, falls der Typ nicht passt
-                    response.setBody(String.valueOf(returnValue).getBytes(StandardCharsets.UTF_8));
-                }
-                if (returnValue instanceof byte[]) {
-                    response.setBody((byte[]) returnValue);
-                } else if (returnValue instanceof CharSequence) {
-                    response.setBody(((CharSequence) returnValue).toString().getBytes(StandardCharsets.UTF_8));
-                } else {
-                    // Fallback oder Fehlerbehandlung, falls der Typ nicht passt
-                    response.setBody(String.valueOf(returnValue).getBytes(StandardCharsets.UTF_8));
+                    var str = String.valueOf(returnValue).getBytes(StandardCharsets.UTF_8);
+                    response.setBody(str);
+                    response.setContentLength(str.length);
                 }
                 break;
             case TEXT_PLAIN:
@@ -145,16 +152,22 @@ class ResponseWriter {
             default:
                 if (returnValue == null) {
                     response.setBody("");
+                    response.setContentLength(0);
                 } else if (returnValue instanceof CharSequence) {
-                    response.setBody(returnValue.toString());
+                    var str = returnValue.toString();
+                    response.setBody(str);
+                    response.setContentLength(str.length());
                 } else if (returnValue instanceof Map || returnValue instanceof Iterable) {
                     // Für komplexe Objekte, die nicht direkt in Text umgewandelt werden können
-                    response.setBody(gson.toJson(returnValue));
+                    var mapAsJson = gson.toJson(returnValue);
+                    response.setBody(mapAsJson);
+                    response.setContentLength(mapAsJson.length());
                 } else {
                     // Fallback für andere Typen
-                    response.setBody(String.valueOf(returnValue));
+                    var str = String.valueOf(returnValue);
+                    response.setContentLength(str.length());
+                    response.setBody(str);
                 }
-                response.setBody(String.valueOf(returnValue));
                 break;
         }
     }

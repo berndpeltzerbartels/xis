@@ -51,7 +51,7 @@ dependencies {
     implementation project(':xis-idp:xis-idp-client')
     implementation project(':xis-idp:xis-token')
     implementation(project(":xis-http-controller")) // TODO: Remove if not needed
-
+    implementation(project(":xis-authentication")) // TODO: Remove if not needed
     // Compile-only dependencies
     compileOnly project(':xis-resources')
 

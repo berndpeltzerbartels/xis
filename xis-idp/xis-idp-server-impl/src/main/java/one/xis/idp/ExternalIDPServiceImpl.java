@@ -23,7 +23,7 @@ class ExternalIDPServiceImpl implements ExternalIDPService {
     private final ExternalIDPConfig providerConfiguration;
     private final ExternalIDPConnectionFactory connectionFactory;
     private final LocalUrlHolder localUrlHolder;
-    private final Gson gson = new Gson();
+    private final Gson gson;
 
 
     @Override

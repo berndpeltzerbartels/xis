@@ -1,6 +1,7 @@
 package one.xis.idp;
 
 
+import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
 import one.xis.context.XISInit;
@@ -23,6 +24,7 @@ public class ExternalIDPServices {
     private final Collection<ExternalIDPConfig> authenticationProviderConfigurations;
     private final ExternalIDPConnectionFactory connectionFactory;
     private final LocalUrlHolder localUrlHolder;
+    private final Gson gson;
     private final Map<String, ExternalIDPService> externalIDPServiceMap = new HashMap<>();
 
     /**
@@ -31,7 +33,7 @@ public class ExternalIDPServices {
     @XISInit
     public void initialize() {
         for (ExternalIDPConfig providerConfiguration : authenticationProviderConfigurations) {
-            ExternalIDPService service = new ExternalIDPServiceImpl(providerConfiguration, connectionFactory, localUrlHolder);
+            ExternalIDPService service = new ExternalIDPServiceImpl(providerConfiguration, connectionFactory, localUrlHolder, gson);
             externalIDPServiceMap.put(service.getProviderId(), service);
         }
     }

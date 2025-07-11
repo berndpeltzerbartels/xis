@@ -44,6 +44,11 @@ public class SpringHttpResponse implements HttpResponse {
     }
 
     @Override
+    public void setContentLength(int contentLength) {
+        response.setContentLength(contentLength);
+    }
+
+    @Override
     public Integer getStatusCode() {
         return response.getStatus();
     }

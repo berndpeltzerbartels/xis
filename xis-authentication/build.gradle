@@ -11,6 +11,7 @@ repositories {
 
 dependencies {
     compileOnly(project(":xis-controller-api"))
+    compileOnly(project(":xis-context"))
 
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'

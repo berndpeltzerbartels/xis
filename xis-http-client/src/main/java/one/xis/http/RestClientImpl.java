@@ -11,7 +11,7 @@ class RestClientImpl implements RestClient {
 
     @Getter
     private final HttpClient httpClient;
-    private final Gson gson = new Gson();
+    private final Gson gson;
 
     @Override
     public <R> R get(String url, Class<R> responseType) throws HttpClientException {

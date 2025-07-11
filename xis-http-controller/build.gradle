@@ -19,6 +19,7 @@ dependencies {
 
     implementation(project(":xis-context"))
     implementation(project(":xis-util"))
+    runtimeOnly(project(":xis-gson"))
 
     // Lombok dependencies
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"

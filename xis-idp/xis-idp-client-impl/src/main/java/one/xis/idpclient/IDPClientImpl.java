@@ -27,7 +27,7 @@ class IDPClientImpl implements IDPClient {
     private final RestClient restClient;
     private final IDPClientConfig idpClientConfig;
     private final String redirectUri;
-    private final Gson gson = new Gson();
+    private final Gson gson;
 
     private volatile IDPWellKnownOpenIdConfig openIdConfig;
 

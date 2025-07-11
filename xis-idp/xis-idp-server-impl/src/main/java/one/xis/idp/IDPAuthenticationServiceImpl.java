@@ -22,7 +22,7 @@ class IDPAuthenticationServiceImpl implements IDPAuthenticationService {
     private final TokenService tokenService;
     private final LocalUrlHolder localUrlHolder;
     private final IDPServerCodeStore idpCodeStore = new IDPServerCodeStore();
-    private final Gson gson = new Gson();
+    private final Gson gson;
 
 
     /**

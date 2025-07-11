@@ -1,5 +1,6 @@
 package one.xis.spring;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import one.xis.EnablePushClients;
@@ -32,6 +33,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+
+@Getter
 @Configuration
 @ComponentScan(basePackages = {"one.xis.spring"})
 @ServletComponentScan(basePackages = {"one.xis.spring"})
@@ -66,6 +69,11 @@ public class SpringContextAdapter implements BeanPostProcessor, ApplicationConte
         springFilter.setLocalUrlHolder(localUrlHolder);
         springFilter.setControllerService(controllerService);
         context.getSingletons(PushClientProxy.class).forEach(this::addToSpringContext);
+    }
+
+
+    public void importInstances() {
+
     }
 
     private AppContext createXisContext() {

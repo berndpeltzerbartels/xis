@@ -20,6 +20,7 @@ dependencies {
     implementation(project(":xis-context"))
     implementation(project(":xis-util"))
     implementation(project(":xis-idp"))
+    compileOnly(project(":xis-gson"))
     //compileOnly(project(":xis-adapter-spi"))
     // compileOnly(project(":xis-controller-api"))
     //  implementation(project(":xis-context"))

@@ -27,7 +27,8 @@ public class ControllerService {
     @XISInject(annotatedWith = Controller.class)
     private Collection<Object> controllers;
 
-    private final Gson gson = new Gson();
+    @XISInject
+    private Gson gson;
 
     private Map<MethodMatcher, Method> methods;
 

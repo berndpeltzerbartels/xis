@@ -25,9 +25,10 @@ class TokenServiceImpl implements TokenService {
             {"alg":"RS256","typ":"JWT"}""".getBytes();
 
     private final KeyPair keyPair;
-    private final Gson gson = new Gson();
+    private final Gson gson;
 
-    public TokenServiceImpl() {
+    public TokenServiceImpl(Gson gson) {
+        this.gson = gson;
         // In einer echten Anwendung sollten die Schlüssel aus einem sicheren Speicher
         // (z.B. Vault, JKS) geladen und nicht bei jedem Start neu erstellt werden.
         this.keyPair = generateRsaKeyPair();

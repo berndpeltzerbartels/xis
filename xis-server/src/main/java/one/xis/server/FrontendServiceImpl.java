@@ -2,18 +2,16 @@ package one.xis.server;
 
 
 import lombok.RequiredArgsConstructor;
+import one.xis.LoginUrlProvider;
 import one.xis.UserContextAccess;
 import one.xis.UserContextImpl;
 import one.xis.auth.AuthenticationException;
 import one.xis.auth.token.AccessTokenCache;
 import one.xis.auth.token.AccessTokenWrapper;
-import one.xis.auth.token.ApiTokensAndUrl;
 import one.xis.context.XISComponent;
 import one.xis.context.XISInit;
-import one.xis.context.XISInject;
 import one.xis.resource.Resource;
 import one.xis.resource.Resources;
-import one.xis.security.AuthenticationService;
 import org.tinylog.Logger;
 
 import java.time.ZoneId;
@@ -33,10 +31,8 @@ public class FrontendServiceImpl implements FrontendService {
     private final ResourceService resourceService;
     private final Resources resources;
     private final AccessTokenCache accessTokenCache;
-
-    @XISInject(optional = true)
-    private AuthenticationService authenticationService;
     private final Collection<RequestFilter> requestFilters;
+    private final LoginUrlProvider loginUrlProvider;
     private Resource appJsResource;
     private Resource classesJsResource;
     private Resource mainJsResource;
@@ -150,11 +146,6 @@ public class FrontendServiceImpl implements FrontendService {
         return bundleJsResource.getContent();
     }
 
-    @Override
-    public ApiTokensAndUrl authenticationCallback(String code, String state) {
-        return authenticationService.authenticate(code, state);
-    }
-
     private void addUserContext(ClientRequest request) throws AuthenticationException {
         var userContext = new UserContextImpl();
         userContext.setClientId(request.getClientId());
@@ -181,7 +172,7 @@ public class FrontendServiceImpl implements FrontendService {
     private ServerResponse authenticationErrorResponse(ClientRequest request) {
         var response = new ServerResponse();
         response.setStatus(412);
-        response.setRedirectUrl(authenticationService.loginUrl(request.getPageUrl()));
+        response.setRedirectUrl(loginUrlProvider.loginUrl(request.getPageUrl()));
         return response;
     }
 }
