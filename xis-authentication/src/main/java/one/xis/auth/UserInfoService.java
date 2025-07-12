@@ -9,7 +9,7 @@ import java.util.Optional;
  * It is used for user authentication and profile management. Creating an implementation of this interface
  * will activate local authentication and user profile management in the XIS security context.
  */
-@ImportInstances // TODO : move to xis-local-authentication
+@ImportInstances
 public interface UserInfoService<U extends UserInfo> {
 
 

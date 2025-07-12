@@ -2,8 +2,8 @@ package test.page.security;
 
 import one.xis.auth.InvalidTokenException;
 import one.xis.auth.UserInfoImpl;
+import one.xis.auth.UserInfoService;
 import one.xis.context.IntegrationTestContext;
-import one.xis.security.UserInfoService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

@@ -25,4 +25,17 @@ public class JsonMap extends LinkedHashMap<String, String> {
     public String toString() {
         return "JsonMap" + super.toString();
     }
+
+    public static JsonMap of(String key, String json) {
+        JsonMap map = new JsonMap();
+        map.put(key, json);
+        return map;
+    }
+
+    public static JsonMap of(String key1, String json1, String key2, String json2) {
+        JsonMap map = new JsonMap();
+        map.put(key1, json1);
+        map.put(key2, json2);
+        return map;
+    }
 }

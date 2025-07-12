@@ -12,6 +12,7 @@ import one.xis.ModelData;
 import one.xis.Page;
 import one.xis.context.IntegrationTestContext;
 import one.xis.context.XISInit;
+import one.xis.gson.JsonMap;
 import one.xis.server.ClientRequest;
 import one.xis.server.FrontendServiceImpl;
 import one.xis.validation.EMail;
@@ -164,7 +165,7 @@ class ValidationPostProcessorIntegrationTest {
         request.setAction("save");
         request.setLocale(Locale.GERMANY);
         request.setZoneId("Europe/Berlin");
-        request.setFormData(Map.of("persons", personDataList));
+        request.setFormData(JsonMap.of("persons", personDataList));
 
         // when
         var response = frontendService.processActionRequest(request);
@@ -189,7 +190,7 @@ class ValidationPostProcessorIntegrationTest {
         request.setPageId("/person.html");
         request.setPageUrl("/person.html");
         request.setAction("save");
-        request.setFormData(Map.of("person", personData));
+        request.setFormData(JsonMap.of("person", personData));
         request.setLocale(Locale.GERMANY);
         request.setZoneId("Europe/Berlin");
         return request;
@@ -203,7 +204,7 @@ class ValidationPostProcessorIntegrationTest {
         request.setAction("save");
         request.setLocale(Locale.GERMANY);
         request.setZoneId("Europe/Berlin");
-        request.setFormData(Map.of("persons", personDataList));
+        request.setFormData(JsonMap.of("persons", personDataList));
         return request;
     }
 

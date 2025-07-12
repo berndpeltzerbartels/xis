@@ -62,6 +62,7 @@ dependencies {
 
     // AssertJ dependencies
     testImplementation group: 'org.assertj', name: 'assertj-core', version: assertjVersion
+    testImplementation project(':xis-authentication')
 
 }
 

@@ -58,7 +58,7 @@ dependencies {
     testImplementation project(":xis-server")
     testImplementation project(":xis-test")
     testImplementation project(":xis-adapter-spi")
-    testImplementation "com.google.code.gson:gson:$gsonVersion"
+    testImplementation project(":xis-gson")
     testImplementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion"
     testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"
 }
