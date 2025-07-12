@@ -5,7 +5,6 @@ import lombok.Setter;
 import one.xis.*;
 import one.xis.auth.token.TokenService;
 import one.xis.idp.ExternalIDPService;
-import one.xis.idp.IDPAuthenticationService;
 import one.xis.security.UserInfoService;
 import one.xis.utils.http.HttpUtils;
 
@@ -24,14 +23,7 @@ class LocalLoginFormController<U extends UserInfo> {
 
     private final UserInfoService<U> userInfoService;
     private final TokenService tokenService;
-
-    private IDPAuthenticationService idpAuthenticationService;
-    private Collection<ExternalIDPService> externalIDPServices;
-
-    @ModelData("displayLoginForm")
-    boolean displayLoginForm() {
-        return idpAuthenticationService != null;
-    }
+    private final Collection<ExternalIDPService> externalIDPServices;
 
     @ModelData("externalIdpIds")
     Collection<String> getExternalIdpIds() {

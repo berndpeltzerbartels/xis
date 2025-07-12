@@ -112,7 +112,7 @@ public class MainController {
     }
 
     private ResponseEntity<?> responseEntity(ServerResponse serverResponse) {
-        ResponseEntity<?> entity = ResponseEntity.ok(serverResponse);
+        ResponseEntity<?> entity = ResponseEntity.status(serverResponse.getStatus(), serverResponse);
         if (serverResponse.getTokens() != null) {
             addTokenCookies(entity, serverResponse.getTokens());
         }

@@ -36,8 +36,7 @@ class LocalAuthenticationController {
     public ResponseEntity<?> authenticationCallback(@UrlParameter("code") String code, @UrlParameter("state") String state, @PathVariable("idpId") String idpId) {
         var stateParameterPayload = StateParameter.decodeAndVerify(state);
         var tokens = idpClientService.fetchNewTokens(idpId, code, state);
-        return ResponseEntity.noContent().
-                addHeader("Location", HttpUtils.localizeUrl(stateParameterPayload.getRedirect()))
+        return ResponseEntity.redirect(HttpUtils.localizeUrl(stateParameterPayload.getRedirect()))
                 .addSecureCookie("access_token", tokens.getAccessToken(), tokens.getAccessTokenExpiresIn())
                 .addSecureCookie("refresh_token", tokens.getRenewToken(), tokens.getRenewTokenExpiresIn());
     }
@@ -60,5 +59,5 @@ class LocalAuthenticationController {
                 .addSecureCookie("access_token", tokens.getAccessToken(), tokens.getAccessTokenExpiresIn())
                 .addSecureCookie("refresh_token", tokens.getRenewToken(), tokens.getRenewTokenExpiresIn());
     }
-    
+
 }

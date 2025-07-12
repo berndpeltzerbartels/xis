@@ -41,6 +41,7 @@ dependencies {
     // Lombok dependencies
     annotationProcessor("org.projectlombok:lombok:$lombokVersion")
     implementation("org.projectlombok:lombok:$lombokVersion")
+    implementation(project(":xis-http-controller"))
 
     // Spring Context dependency
     compileOnly("org.springframework:spring-context:$springContextVersion")

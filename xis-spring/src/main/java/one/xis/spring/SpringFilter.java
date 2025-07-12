@@ -6,7 +6,7 @@ import jakarta.servlet.http.HttpFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.Setter;
-import one.xis.http.ControllerService;
+import one.xis.http.RestControllerService;
 import one.xis.server.FrontendService;
 import one.xis.server.LocalUrlHolder;
 import org.springframework.stereotype.Component;
@@ -19,7 +19,7 @@ import java.io.IOException;
 class SpringFilter extends HttpFilter {
 
     private FrontendService frontendService;
-    private ControllerService controllerService;
+    private RestControllerService restControllerService;
     private LocalUrlHolder localUrlHolder;
 
     @Override
@@ -36,11 +36,8 @@ class SpringFilter extends HttpFilter {
         } else {
             var request = new SpringHttpRequest(httpServletRequest);
             var response = new SpringHttpResponse(httpServletResponse);
-            controllerService.doInvocation(request, response);
-            if (!Integer.valueOf(404).equals(response.getStatusCode())) {
-                return;
-            }
-            super.doFilter(httpServletRequest, httpServletResponse, chain);
+            restControllerService.doInvocation(request, response);
+
         }
     }
 }

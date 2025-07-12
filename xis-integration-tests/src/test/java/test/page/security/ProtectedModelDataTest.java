@@ -55,7 +55,6 @@ public class ProtectedModelDataTest {
                     .withSingleton(ProtectedModelDataPage1.class)
                     .withSingleton(ProtectedModelDataPage2.class)
                     .withLoggedInUser(userInfo)
-                    .withTestUserService(userInfo)
                     .build();
         }
 
@@ -85,7 +84,7 @@ public class ProtectedModelDataTest {
             testContext = IntegrationTestContext.builder()
                     .withSingleton(ProtectedModelDataPage1.class)
                     .withSingleton(ProtectedModelDataPage2.class)
-                    .withTestUserService(userInfo)
+                    .withLoggedInUser(userInfo)
                     .build();
         }
 

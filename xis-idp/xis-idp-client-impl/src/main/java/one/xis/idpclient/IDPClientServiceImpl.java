@@ -8,7 +8,6 @@ import com.nimbusds.jwt.SignedJWT;
 import lombok.RequiredArgsConstructor;
 import one.xis.auth.AuthenticationException;
 import one.xis.auth.JsonWebKey;
-import one.xis.auth.UserInfo;
 import one.xis.auth.UserInfoImpl;
 import one.xis.auth.token.ApiTokens;
 import one.xis.auth.token.StateParameter;
@@ -16,7 +15,6 @@ import one.xis.context.XISDefaultComponent;
 import one.xis.context.XISInit;
 import one.xis.context.XISInject;
 import one.xis.ipdclient.*;
-import one.xis.security.UserInfoService;
 
 import java.math.BigInteger;
 import java.security.KeyFactory;
@@ -40,9 +38,6 @@ class IDPClientServiceImpl implements IDPClientService {
 
     @XISInject
     private Collection<IDPClientConfig> idpClientConfigs;
-
-    @XISInject(optional = true) // TODO make required in future versions
-    private UserInfoService<UserInfo> userInfoService;
 
     @XISInject
     private IDPClientFactory idpClientFactory;
@@ -94,8 +89,7 @@ class IDPClientServiceImpl implements IDPClientService {
     @Override
     public UserInfoImpl fetchUserInfoFromIdp(String idpId, String accessToken) {
         var idpClient = getIDPClient(idpId);
-        var userInfo = idpClient.fetchUserInfo(accessToken);
-        return provisionUserIfServicePresent(userInfo);
+        return idpClient.fetchUserInfo(accessToken);
     }
 
 
@@ -132,21 +126,13 @@ class IDPClientServiceImpl implements IDPClientService {
                 throw new AuthenticationException("Invalid token issuer. Expected '" + expectedIssuer + "', but got '" + claims.getIssuer() + "'.");
             }
 
-            var userInfo = idpClientConfig.extractUserInfo(claims);
-            return provisionUserIfServicePresent(userInfo);
+            return idpClientConfig.extractUserInfo(claims);
 
         } catch (ParseException e) {
             throw new AuthenticationException("Failed to parse JWT.", e);
         } catch (JOSEException e) {
             throw new AuthenticationException("Failed to verify JWT signature.", e);
         }
-    }
-
-    private UserInfoImpl provisionUserIfServicePresent(UserInfoImpl userInfo) {
-        if (userInfoService != null) {
-            userInfoService.saveUserInfo(userInfo);
-        }
-        return userInfo;
     }
 
     private IDPClient getIDPClient(String idpId) {

@@ -47,6 +47,7 @@ dependencies {
     implementation project(':xis-adapter-spi')
     implementation project(':xis-gson')
     implementation project(':xis-javascript')
+    implementation project(":xis-idp:xis-token")
     api(project(':xis-idp'))
     api(project(':xis-idp:xis-idp-server'))
     implementation project(':xis-idp:xis-token')
@@ -65,6 +66,7 @@ dependencies {
     implementation "org.tinylog:tinylog-impl:$tinylogVersion"
     implementation "org.openjdk.nashorn:nashorn-core:$nashornVersion"
     implementation "com.fasterxml.jackson.core:jackson-databind:$jacksonDatabindVersion"
+
 
     // Test dependencies
     testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"

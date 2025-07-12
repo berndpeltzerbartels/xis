@@ -42,9 +42,23 @@ public class ResponseEntity<T> {
         return new ResponseEntity<>(404);
     }
 
+    public static ResponseEntity<?> status(int statusCode) {
+        return new ResponseEntity<>(null, statusCode);
+    }
+
+    public static <T> ResponseEntity<T> status(int statusCode, T body) {
+        return new ResponseEntity<>(body, statusCode);
+    }
+
     public ResponseEntity<T> addHeader(String name, String value) {
         headers.computeIfAbsent(name, k -> new ArrayList<>()).add(value);
         return this;
+    }
+
+    public static ResponseEntity<?> redirect(String location) {
+        ResponseEntity<?> response = new ResponseEntity<>(302);
+        response.addHeader("Location", location);
+        return response;
     }
 
     public ResponseEntity<T> addSecureCookie(String name, String value, Duration maxAge) {

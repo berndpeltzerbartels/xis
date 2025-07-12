@@ -21,9 +21,9 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ControllerService Integration Test")
-class ControllerServiceIntegrationTest {
+class RestControllerServiceIntegrationTest {
 
-    private ControllerService controllerService;
+    private RestControllerService restControllerService;
 
     @Mock
     private ResponseWriter responseWriter;
@@ -46,11 +46,11 @@ class ControllerServiceIntegrationTest {
 
         @BeforeEach
         void setUp() {
-            controllerService = new ControllerService();
+            restControllerService = new RestControllerService();
             // Injiziere Mocks und Spies manuell, da wir kein DI-Framework im Test haben
-            FieldUtil.setFieldValue(controllerService, "responseWriter", responseWriter);
-            FieldUtil.setFieldValue(controllerService, "controllers", List.of(testController));
-            controllerService.initMethods(); // Simuliert @XISInit
+            FieldUtil.setFieldValue(restControllerService, "responseWriter", responseWriter);
+            FieldUtil.setFieldValue(restControllerService, "controllers", List.of(testController));
+            restControllerService.initMethods(); // Simuliert @XISInit
         }
 
         @Test
@@ -59,7 +59,7 @@ class ControllerServiceIntegrationTest {
             when(request.getHttpMethod()).thenReturn(HttpMethod.GET);
             when(request.getPath()).thenReturn("/api/users");
 
-            controllerService.doInvocation(request, response);
+            restControllerService.doInvocation(request, response);
 
             verify(testController).getAllUsers();
             verify(responseWriter).write(eq("all-users"), any(Method.class), eq(request), eq(response));
@@ -71,7 +71,7 @@ class ControllerServiceIntegrationTest {
             when(request.getHttpMethod()).thenReturn(HttpMethod.GET);
             when(request.getPath()).thenReturn("/api/users/123");
 
-            controllerService.doInvocation(request, response);
+            restControllerService.doInvocation(request, response);
 
             verify(testController).getUserById("123");
             verify(responseWriter).write(eq("user-123"), any(Method.class), eq(request), eq(response));
@@ -84,7 +84,7 @@ class ControllerServiceIntegrationTest {
             when(request.getPath()).thenReturn("/api/users");
             when(request.getBodyAsString()).thenReturn("test-user");
 
-            controllerService.doInvocation(request, response);
+            restControllerService.doInvocation(request, response);
 
             verify(testController).createUser("test-user");
             verify(responseWriter).write(eq("created-test-user"), any(Method.class), eq(request), eq(response));
@@ -97,7 +97,7 @@ class ControllerServiceIntegrationTest {
             when(request.getPath()).thenReturn("/api/info");
             when(request.getHeaders()).thenReturn(Map.of("X-Test-Header", "header-val", "Cookie", "test_cookie=cookie-val"));
 
-            controllerService.doInvocation(request, response);
+            restControllerService.doInvocation(request, response);
 
             verify(testController).getInfo("header-val", "cookie-val");
             verify(responseWriter).write(eq("header:header-val;cookie:cookie-val"), any(Method.class), eq(request), eq(response));
@@ -109,7 +109,7 @@ class ControllerServiceIntegrationTest {
             when(request.getHttpMethod()).thenReturn(HttpMethod.GET);
             when(request.getPath()).thenReturn("/non-existing");
 
-            controllerService.doInvocation(request, response);
+            restControllerService.doInvocation(request, response);
 
             verify(response).setStatusCode(404);
         }
@@ -272,12 +272,12 @@ class ControllerServiceIntegrationTest {
                 controllers.add(new PerfController9());
             }
 
-            controllerService = new ControllerService();
-            FieldUtil.setFieldValue(controllerService, "responseWriter", responseWriter);
-            FieldUtil.setFieldValue(controllerService, "controllers", controllers);
+            restControllerService = new RestControllerService();
+            FieldUtil.setFieldValue(restControllerService, "responseWriter", responseWriter);
+            FieldUtil.setFieldValue(restControllerService, "controllers", controllers);
 
             long startInit = System.nanoTime();
-            controllerService.initMethods();
+            restControllerService.initMethods();
             long endInit = System.nanoTime();
             System.out.printf("Initialization with %d controllers (%d types) took: %.2f ms%n", TOTAL_CONTROLLERS, CONTROLLER_TYPES, (endInit - startInit) / 1_000_000.0);
 
@@ -291,7 +291,7 @@ class ControllerServiceIntegrationTest {
 
             long startFound = System.nanoTime();
             for (int i = 0; i < INVOCATION_COUNT; i++) {
-                controllerService.doInvocation(request, response);
+                restControllerService.doInvocation(request, response);
             }
             long endFound = System.nanoTime();
 
@@ -306,7 +306,7 @@ class ControllerServiceIntegrationTest {
 
             long startFound = System.nanoTime();
             for (int i = 0; i < INVOCATION_COUNT; i++) {
-                controllerService.doInvocation(request, response);
+                restControllerService.doInvocation(request, response);
             }
             long endFound = System.nanoTime();
 
@@ -321,7 +321,7 @@ class ControllerServiceIntegrationTest {
 
             long startNotFound = System.nanoTime();
             for (int i = 0; i < INVOCATION_COUNT; i++) {
-                controllerService.doInvocation(request, response);
+                restControllerService.doInvocation(request, response);
             }
             long endNotFound = System.nanoTime();
 

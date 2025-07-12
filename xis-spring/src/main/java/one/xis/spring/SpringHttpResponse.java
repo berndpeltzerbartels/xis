@@ -78,4 +78,13 @@ public class SpringHttpResponse implements HttpResponse {
                 .build();
         response.addHeader("Set-Cookie", cookie.toString());
     }
+
+    @Override
+    public void sendRedirect(String location) {
+        try {
+            response.sendRedirect(location);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

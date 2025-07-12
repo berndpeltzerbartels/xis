@@ -9,7 +9,7 @@ import one.xis.Push;
 import one.xis.Widget;
 import one.xis.context.AppContext;
 import one.xis.context.AppContextBuilder;
-import one.xis.http.ControllerService;
+import one.xis.http.RestControllerService;
 import one.xis.server.*;
 import one.xis.utils.lang.ClassUtils;
 import org.springframework.beans.BeansException;
@@ -64,10 +64,10 @@ public class SpringContextAdapter implements BeanPostProcessor, ApplicationConte
         context = createXisContext();
         var frontendService = context.getSingleton(FrontendService.class);
         var localUrlHolder = context.getSingleton(LocalUrlHolder.class);
-        var controllerService = context.getSingleton(ControllerService.class);
+        var controllerService = context.getSingleton(RestControllerService.class);
         springFilter.setFrontendService(frontendService);
         springFilter.setLocalUrlHolder(localUrlHolder);
-        springFilter.setControllerService(controllerService);
+        springFilter.setRestControllerService(controllerService);
         context.getSingletons(PushClientProxy.class).forEach(this::addToSpringContext);
     }
 

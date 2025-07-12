@@ -6,6 +6,9 @@ import one.xis.PathVariable;
 import one.xis.auth.AuthenticationException;
 import one.xis.deserialize.MainDeserializer;
 import one.xis.deserialize.PostProcessingResults;
+import one.xis.http.HttpRequest;
+import one.xis.http.HttpResponse;
+import one.xis.http.RequestContext;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -24,7 +27,13 @@ class ControllerMethodParameter {
 
     // TODO Validation: only one of these annotation in parameter
     Object prepareParameter(ClientRequest request, PostProcessingResults postProcessingResults, Map<String, Object> requestScope, AccessToken accessToken) throws Exception {
-        if (parameter.isAnnotationPresent(FormData.class)) {
+        if (parameter.getType().equals(HttpRequest.class)) {
+            return RequestContext.getInstance().getRequest();
+        } else if (parameter.getType().equals(HttpResponse.class)) {
+            return RequestContext.getInstance().getResponse();
+        } else if (parameter.getType().equals(RequestContext.class)) {
+            return RequestContext.getInstance();
+        } else if (parameter.isAnnotationPresent(FormData.class)) {
             return deserializeFormDataParameter(parameter, request, postProcessingResults, accessToken);
         } else if (parameter.isAnnotationPresent(UserId.class)) {
             checkAccessToken(accessToken);

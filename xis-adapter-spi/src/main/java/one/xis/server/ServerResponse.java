@@ -1,7 +1,6 @@
 package one.xis.server;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,9 +18,8 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ServerResponse {
-
-    @JsonIgnore
-    private int status;
+    
+    private transient int status;
     private Map<String, Object> data = new HashMap<>();
     private Map<String, Object> formData = new HashMap<>();
     private Map<String, Object> localStorageData = new HashMap<>();
@@ -33,8 +31,7 @@ public class ServerResponse {
     private ValidatorMessages validatorMessages = new ValidatorMessages();
     private boolean reloadPage; // TODO do we need this?
     private String widgetContainerId;
-    @JsonIgnore
-    private ApiTokens tokens;
+    private transient ApiTokens tokens;
     private String redirectUrl;
 
     void clear() {

@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @XISComponent
-public class ControllerService {
+public class RestControllerService {
 
     @XISInject
     private ResponseWriter responseWriter;
@@ -75,7 +75,14 @@ public class ControllerService {
 
         // Parameter vorbereiten
         Object[] args = prepareParameters(method, request, response, methodMatchResult);
-        Object result = MethodUtils.invoke(controllerInstance, method, args);
+
+        RequestContext.createInstance(request, response);
+        Object result;
+        try {
+            result = MethodUtils.invoke(controllerInstance, method, args);
+        } finally {
+            RequestContext.clear();
+        }
         handleResponse(result, method, request, response);
     }
 
@@ -147,6 +154,10 @@ public class ControllerService {
                 if (targetType.equals(String.class)) {
                     return request.getBodyAsString();
                 }
+                if (request.getContentLength() == 0) {
+                    return null; // Leerer Body, kein JSON zu deserialisieren
+                }
+                System.out.println("**** target=" + targetType + ",body:" + request.getBodyAsString());
                 return gson.fromJson(request.getBodyAsString(), targetType);
 
             case TEXT:

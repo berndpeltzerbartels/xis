@@ -1,6 +1,7 @@
 package one.xis.server;
 
 import one.xis.context.XISComponent;
+import one.xis.gson.JsonMap;
 
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -43,9 +44,20 @@ class ControllerResultMapper {
 
     void mapControllerResultToNextRequest(ControllerResult controllerResult, ClientRequest nextRequest) {
         nextRequest.getUrlParameters().putAll(controllerResult.getUrlParameters().entrySet().stream().map(e -> Map.entry(e.getKey(), e.getValue().toString())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-        nextRequest.setPathVariables(controllerResult.getPathVariables().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString())));
+        nextRequest.setPathVariables(toJsonMap(controllerResult.getPathVariables()));
         nextRequest.setWidgetContainerId(controllerResult.getWidgetContainerId());
-        nextRequest.setBindingParameters(controllerResult.getBindingParameters().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString())));
+        nextRequest.setBindingParameters(toJsonMap(controllerResult.getBindingParameters()));
         nextRequest.setWidgetId(controllerResult.getNextWidgetId());
+    }
+
+
+    private JsonMap toJsonMap(Map<?, ?> data) {
+        JsonMap jsonMap = new JsonMap();
+        for (Map.Entry<?, ?> entry : data.entrySet()) {
+            String key = String.valueOf(entry.getKey());
+            String value = String.valueOf(entry.getValue());
+            jsonMap.put(key, value);
+        }
+        return jsonMap;
     }
 }

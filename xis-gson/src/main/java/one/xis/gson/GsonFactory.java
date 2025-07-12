@@ -27,6 +27,7 @@ public class GsonFactory {
                         return Duration.parse(json.getAsString());
                     }
                 })
+                .registerTypeAdapter(JsonMap.class, new JsonMapTypeAdapter())
                 .create();
     }
 }

@@ -2,8 +2,8 @@ package one.xis.context;
 
 
 import lombok.Getter;
+import one.xis.auth.UserInfo;
 import one.xis.auth.token.TokenService;
-import one.xis.idp.IDPUserInfo;
 import one.xis.server.PageUtil;
 
 import java.util.*;
@@ -79,7 +79,7 @@ public class IntegrationTestContext implements AppContext {
         private final Collection<Object> singletons = new HashSet<>();
         private final Collection<String> packages = new HashSet<>();
         private final Collection<String> ignorePackages = new HashSet<>();
-        private IDPUserInfo userInfo;
+        private UserInfo userInfo;
 
         public Builder withSingleton(Object o) {
             singletons.add(o);
@@ -119,17 +119,12 @@ public class IntegrationTestContext implements AppContext {
             return this;
         }
 
-        public Builder withLoggedInUser(IDPUserInfo userInfo) {
+        public Builder withLoggedInUser(UserInfo userInfo) {
             this.userInfo = userInfo;
             return this;
         }
 
-        public Builder withTestUserService(IDPUserInfo... users) {
-            singletons.add(new TestUserService(users));
-            return this;
-        }
-
-        private static void addTokens(IDPUserInfo userInfo, IntegrationTestContext context) {
+        private static void addTokens(UserInfo userInfo, IntegrationTestContext context) {
             System.err.println("Adding token cookies for user: " + userInfo.getUserId());
             context.getOptionalSingleton(TokenService.class).ifPresent(tokenService -> {
                 System.err.println("Creating tokens for user: " + userInfo.getUserId());

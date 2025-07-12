@@ -21,4 +21,6 @@ public interface HttpResponse {
     void addHeader(String name, String value);
 
     void addSecureCookie(String name, String value, Duration maxAge);
+
+    void sendRedirect(String location);
 }
