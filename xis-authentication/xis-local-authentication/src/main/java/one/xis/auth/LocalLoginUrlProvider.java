@@ -1,6 +1,5 @@
 package one.xis.auth;
 
-import one.xis.LoginUrlProvider;
 import one.xis.context.XISComponent;
 
 import java.net.URLEncoder;

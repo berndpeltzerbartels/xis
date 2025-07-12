@@ -39,12 +39,14 @@ dependencies {
     implementation(project(":xis-util"))
     compileOnly(project(":xis-adapter-spi"))
     compileOnly(project(":xis-controller-api"))
-    compileOnly(project(":xis-idp"))
-    compileOnly(project(":xis-idp:xis-idp-client"))
-    compileOnly(project(":xis-idp:xis-idp-server"))
-    implementation(project(":xis-idp:xis-idp-client-impl"))
+    compileOnly(project(":xis-authentication"))
+    compileOnly(project(":xis-authentication:xis-idp"))
+    compileOnly(project(":xis-authentication:xis-idp:xis-idp-client"))
+    compileOnly(project(":xis-authentication:xis-idp:xis-idp-server"))
+
     // compileOnly(project(":xis-idp:xis-idp-server"))
-    compileOnly(project(":xis-idp:xis-token"))
+    compileOnly(project(":xis-authentication:xis-token"))
+    //implementation(project(":xis-authentication:xis-idp:xis-idp-client-impl"))
 
     // Gson dependency
     implementation "com.google.code.gson:gson:$gsonVersion"
@@ -67,9 +69,9 @@ dependencies {
     testImplementation("org.assertj:assertj-core:3.16.1")
     testImplementation(project(":xis-adapter-spi"))
 
-    testCompileOnly(project(':xis-idp'))
-    testCompileOnly(project(':xis-idp:xis-idp-server'))
-    testCompileOnly(project(':xis-idp:xis-idp-server-impl'))
+    testCompileOnly(project(':xis-authentication'))
+    testCompileOnly(project(':xis-authentication:xis-idp:xis-idp-server'))
+//    testCompileOnly(project(':xis-authentication:xis-idp:xis-idp-server-impl'))
 }
 
 test {

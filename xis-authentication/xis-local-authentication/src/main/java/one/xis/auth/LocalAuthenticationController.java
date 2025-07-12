@@ -5,7 +5,6 @@ import one.xis.auth.token.StateParameter;
 import one.xis.auth.token.TokenService;
 import one.xis.http.*;
 import one.xis.ipdclient.IDPClientService;
-import one.xis.security.UserInfoService;
 import one.xis.utils.http.HttpUtils;
 
 /**

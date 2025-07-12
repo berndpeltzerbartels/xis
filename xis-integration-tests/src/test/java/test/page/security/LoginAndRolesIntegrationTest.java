@@ -1,13 +1,14 @@
 package test.page.security;
 
 import one.xis.auth.InvalidTokenException;
+import one.xis.auth.UserInfoImpl;
 import one.xis.context.IntegrationTestContext;
-import one.xis.idp.IDPUserInfoImpl;
 import one.xis.security.UserInfoService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,17 +25,13 @@ class LoginAndRolesIntegrationTest {
         var userInfoService = mock(UserInfoService.class);
 
         // Erfolgreiches Login
-        var userInfo = new IDPUserInfoImpl();
+        var userInfo = new UserInfoImpl();
         userInfo.setUserId("admin");
         userInfo.setPassword("pw");
         userInfo.setRoles(Set.of("admin", "user"));
         userInfo.setClaims(Map.of());
 
-        when(userInfoService.checkCredentials("admin", "pw")).thenReturn(true);
-        when(userInfoService.getUserInfo("admin")).thenReturn(userInfo);
-
-        // Fehlgeschlagene Authentifizierung
-        when(userInfoService.checkCredentials("admin", "wrong")).thenReturn(false);
+        when(userInfoService.getUserInfo("admin")).thenReturn(Optional.of(userInfo));
 
         testContext = IntegrationTestContext.builder()
                 .withSingleton(userInfoService)

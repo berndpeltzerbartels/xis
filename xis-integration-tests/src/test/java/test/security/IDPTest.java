@@ -53,7 +53,7 @@ class IDPTest {
 
     }
 
-    static class TestIDPUserService implements UserInfoService<UserInfo> {
+    static class TestIDPUserService implements  {
 
 
         @Override

@@ -12,7 +12,7 @@ repositories {
 dependencies {
     compileOnly(project(":xis-context"))
     compileOnly(project(":xis-controller-api"))
-    compileOnly(project(":xis-idp:xis-idp-server"))
+    compileOnly(project(":xis-authentication:xis-idp:xis-idp-server"))
     compileOnly(project(":xis-authentication"))
 
     // Annotation processors

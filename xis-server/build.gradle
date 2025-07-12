@@ -47,11 +47,11 @@ dependencies {
     implementation project(':xis-validation')
     implementation project(':xis-adapter-spi')
     implementation project(':xis-security') // TODO rmeove ?
-    implementation project(':xis-idp')
-    implementation project(':xis-idp:xis-idp-client')
-    implementation project(':xis-idp:xis-token')
+    implementation project(':xis-authentication:xis-idp')
+    implementation project(':xis-authentication:xis-idp:xis-idp-client')
+    implementation project(':xis-authentication:xis-token')
     implementation(project(":xis-http-controller"))
-    implementation(project(":xis-authentication")) // TODO: Remove if not needed
+    implementation(project(":xis-authentication"))
     // Compile-only dependencies
     compileOnly project(':xis-resources')
 

@@ -2,7 +2,6 @@ package one.xis.auth;
 
 import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
-import one.xis.security.UserInfoService;
 import one.xis.validation.Validator;
 import one.xis.validation.ValidatorException;
 

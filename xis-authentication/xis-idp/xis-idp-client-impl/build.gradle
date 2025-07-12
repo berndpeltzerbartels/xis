@@ -1,0 +1,51 @@
+plugins {
+    id 'java'
+}
+
+group = 'one.xis'
+version = '0.1.1'
+
+repositories {
+    mavenCentral()
+}
+
+
+var lombokVersion = rootProject.ext.libraryVersions.lombok
+var reflectionsVersion = rootProject.ext.libraryVersions.reflections
+var jacksonDatabindVersion = rootProject.ext.libraryVersions.jacksonDatabind
+var gsonVersion = rootProject.ext.gsonVersion
+var junitVersion = "5.7.0"
+var assertjVersion = rootProject.ext.libraryVersions.assertj
+
+
+dependencies {
+
+    implementation project(':xis-context')
+    implementation project(':xis-adapter-spi')
+    // implementation project(':xis-security')
+    implementation project(':xis-util')
+    implementation project(':xis-http-client')
+    implementation project(':xis-controller-api')
+    implementation project(':xis-authentication')
+    implementation project(':xis-authentication:xis-idp')
+    implementation project(':xis-authentication:xis-token')
+
+    compileOnly project(':xis-authentication:xis-idp:xis-idp-client')
+
+    implementation 'com.nimbusds:nimbus-jose-jwt:9.39.1'
+    implementation "com.google.code.gson:gson:$gsonVersion"
+    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+    implementation "org.projectlombok:lombok:$lombokVersion"
+    implementation "com.fasterxml.jackson.core:jackson-databind:$jacksonDatabindVersion"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+
+    // AssertJ dependencies
+    testImplementation "org.assertj:assertj-core:$assertjVersion"
+}
+
+test {
+    useJUnitPlatform()
+}

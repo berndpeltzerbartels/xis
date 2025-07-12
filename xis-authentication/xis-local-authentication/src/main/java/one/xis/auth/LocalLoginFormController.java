@@ -5,7 +5,6 @@ import lombok.Setter;
 import one.xis.*;
 import one.xis.auth.token.TokenService;
 import one.xis.idp.ExternalIDPService;
-import one.xis.security.UserInfoService;
 import one.xis.utils.http.HttpUtils;
 
 import java.util.Collection;

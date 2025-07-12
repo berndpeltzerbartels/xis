@@ -1,7 +1,6 @@
 package one.xis.auth;
 
 import lombok.RequiredArgsConstructor;
-import one.xis.LoginUrlProvider;
 import one.xis.context.XISDefaultComponent;
 import one.xis.idp.ExternalIDPService;
 
