@@ -44,11 +44,11 @@ class LocalLoginFormController<U extends UserInfo> {
 
     @Action("login")
     public LocalLoginResponse login(@FormData("login") LocalLoginData login) {
-        var userInfo = userInfoService.getUserInfo(login.getUsername()).orElseThrow(IllegalStateException::new);
-        if (!userInfoService.validateCredentials(login.getUsername(), login.getPassword())) {
-            throw new IllegalStateException();
+        if (userInfoService.validateCredentials(login.getUsername(), login.getPassword())) {
+            var userInfo = userInfoService.getUserInfo(login.getUsername()).orElseThrow(IllegalStateException::new);
+            return new LocalLoginResponse(HttpUtils.localizeUrl(login.getRedirectUri()), tokenService.newTokens(userInfo));
         }
-        return new LocalLoginResponse(HttpUtils.localizeUrl(login.getRedirectUri()), tokenService.newTokens(userInfo));
+        throw new IllegalStateException("Invalid username or password");
     }
 
 }

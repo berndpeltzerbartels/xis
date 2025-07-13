@@ -1,5 +1,6 @@
 package one.xis.http;
 
+import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
 
@@ -37,7 +38,9 @@ public interface HttpRequest {
 
     int getContentLength();
 
-    Map<String, String> getHeaders();
+    Collection<String> getHeaderNames();
+
+    String getHeader(String name);
 
     HttpMethod getHttpMethod();
 

@@ -24,12 +24,12 @@ class ResponseWriter {
     void write(Object returnValue, Method method, HttpRequest request, HttpResponse response) {
         if (returnValue instanceof ResponseEntity<?> responseEntity) {
             response.setStatusCode(responseEntity.getStatusCode());
-            for (var headerName : responseEntity.getHeaders().keySet()) {
-                var headerValues = responseEntity.getHeaders().get(headerName);
-                for (String headerValue : headerValues) {
+            for (var headerName : responseEntity.getHeaderNames()) {
+                for (var headerValue : responseEntity.getHeaders(headerName)) {
                     response.addHeader(headerName, headerValue);
                 }
             }
+
             returnValue = responseEntity.getBody();
         }
         if (returnValue == null) {

@@ -100,11 +100,8 @@ class HttpClient extends Client {
         const response = await this.httpConnector.post('/xis/form/action', request, headers);
         debugger;
         const cookies = this.readCookies(response);
-        if (cookies['access_token']) {
-            this.tokenManager.setAccessToken(cookies['access_token']);
-        }
-        if (cookies['refresh_token']) {
-            this.tokenManager.setRenewToken(cookies['refresh_token']);
+        if (response.getResponseHeader('X-Access-Token')) {
+            this.tokenManager.setAccessToken(response.getResponseHeader('X-Access-Token'));
         }
         if (this.handleRedirect(response)) {
             return Promise.reject();

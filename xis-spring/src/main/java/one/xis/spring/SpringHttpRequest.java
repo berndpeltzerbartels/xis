@@ -8,8 +8,8 @@ import one.xis.http.HttpRequest;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -76,14 +76,16 @@ public class SpringHttpRequest implements HttpRequest {
     }
 
     @Override
-    public Map<String, String> getHeaders() {
-        Map<String, String> headers = new java.util.HashMap<>();
-        Enumeration<String> headerNames = request.getHeaderNames();
-        while (headerNames.hasMoreElements()) {
-            String headerName = headerNames.nextElement();
-            headers.put(headerName, request.getHeader(headerName));
-        }
-        return Collections.unmodifiableMap(headers);
+    public Collection<String> getHeaderNames() {
+        return Collections.list(request.getHeaderNames())
+                .stream()
+                .map(String::toLowerCase)
+                .collect(Collectors.toSet());
+    }
+
+    @Override
+    public String getHeader(String name) {
+        return request.getHeader(name) != null ? request.getHeader(name) : "";
     }
 
     @Override

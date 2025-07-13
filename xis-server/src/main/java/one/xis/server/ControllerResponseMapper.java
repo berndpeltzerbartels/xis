@@ -22,10 +22,9 @@ class ControllerResponseMapper {
         response.setTokens(result.getTokens());
         if (result.getRedirectUrl() != null) {
             response.setRedirectUrl(result.getRedirectUrl());
-            response.setStatus(412);
-        } else {
-            response.setStatus(result.isValidationFailed() ? 422 : 200);
         }
+        response.setStatus(result.isValidationFailed() ? 422 : 200);
+
         // TODO navigation test. reload widgets ? set widget in another container ?
     }
 }

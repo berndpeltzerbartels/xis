@@ -9,4 +9,6 @@ public interface LocalUrlHolder extends UrlHolder {
     boolean localUrlIsSet();
 
     void addUrlAssignmentListener(Consumer<String> listener);
+
+    boolean isSecure();
 }

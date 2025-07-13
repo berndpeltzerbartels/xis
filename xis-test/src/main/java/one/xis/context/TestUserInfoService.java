@@ -11,11 +11,7 @@ class TestUserInfoService implements UserInfoService<UserInfo> {
 
     private final Collection<UserInfo> userInfos = new HashSet<>();
     private final Map<String, String> userPasswords = new HashMap<>();
-
-    void addUserInfo(UserInfo userInfo) {
-        userInfos.add(new UserInfoImpl(userInfo.getUserId(), userInfo.getRoles(), userInfo.getClaims()));
-    }
-
+    
     @Override
     public boolean validateCredentials(String userId, String password) {
         return userPasswords.getOrDefault(userId, "").equals(password);
@@ -28,7 +24,6 @@ class TestUserInfoService implements UserInfoService<UserInfo> {
                 .findFirst();
     }
 
-    @Override
     public void saveUserInfo(UserInfo userInfo, String password) {
         getUserInfo(userInfo.getUserId()).map(UserInfoImpl.class::cast).ifPresentOrElse(
                 existingUserInfo -> {

@@ -171,7 +171,7 @@ public class FrontendServiceImpl implements FrontendService {
 
     private ServerResponse authenticationErrorResponse(ClientRequest request) {
         var response = new ServerResponse();
-        response.setStatus(412);
+        response.setStatus(200);
         response.setRedirectUrl(loginUrlProvider.loginUrl(request.getPageUrl()));
         return response;
     }

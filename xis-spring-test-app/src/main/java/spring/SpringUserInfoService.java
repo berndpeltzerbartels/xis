@@ -2,26 +2,28 @@ package spring;
 
 import one.xis.auth.InvalidTokenException;
 import one.xis.auth.UserInfo;
+import one.xis.auth.UserInfoImpl;
 import one.xis.auth.UserInfoService;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 @Component
 public class SpringUserInfoService implements UserInfoService<UserInfo> {
+
+    private final UserInfo userInfo = new UserInfoImpl("admin", Set.of("admin"), Map.of("email", ""));
+    private final String password = "bla";
+
     @Override
     public boolean validateCredentials(String userId, String password) {
-        return true;
+        return userInfo.getUserId().equals(userId) && this.password.equals(password);
     }
 
     @Override
     public Optional<UserInfo> getUserInfo(String userId) throws InvalidTokenException {
-        return Optional.empty();
+        return Optional.ofNullable(userInfo.getUserId().equals(userId) ? userInfo : null);
     }
 
-    @Override
-    public void saveUserInfo(UserInfo userInfo, String password) {
-        // No implementation needed for this example
-
-    }
 }

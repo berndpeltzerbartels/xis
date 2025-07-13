@@ -37,6 +37,11 @@ class LocalUrlHolderImpl implements LocalUrlHolder {
         urlAssignmentListeners.add(listener);
     }
 
+    @Override
+    public boolean isSecure() {
+        return localUrl != null && localUrl.startsWith("https://");
+    }
+
     private void invokeUrlAssignmentListeners(String url) {
         for (Consumer<String> listener : urlAssignmentListeners) {
             listener.accept(url);

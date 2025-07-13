@@ -3,9 +3,9 @@ package one.xis.server;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import one.xis.auth.token.ApiTokens;
 import one.xis.http.*;
 
+import java.time.Duration;
 import java.util.Map;
 
 @Controller
@@ -13,6 +13,7 @@ import java.util.Map;
 public class MainController {
 
     private final FrontendService frontendService;
+    private final LocalUrlHolder localUrlHolder;
 
     @Get("/xis/config")
     public ResponseEntity<?> getComponentConfig() {
@@ -20,7 +21,7 @@ public class MainController {
     }
 
     @Post("/xis/page/model")
-    public ResponseEntity<?> getPageModel(@RequestBody ClientRequest request, @CookieValue("access_token") String accessToken, HttpRequest httpRequest) {
+    public ResponseEntity<?> getPageModel(@RequestBody ClientRequest request, @BearerToken(optional = true) String accessToken, HttpRequest httpRequest) {
         request.setAccessToken(accessToken);
         request.setLocale(httpRequest.getLocale());
         ServerResponse serverResponse = frontendService.processModelDataRequest(request);
@@ -28,7 +29,7 @@ public class MainController {
     }
 
     @Post("/xis/form/model")
-    public ResponseEntity<?> getFormModel(@RequestBody ClientRequest request, @CookieValue("access_token") String accessToken, HttpRequest httpRequest) {
+    public ResponseEntity<?> getFormModel(@RequestBody ClientRequest request, @BearerToken(optional = true) String accessToken, HttpRequest httpRequest) {
         request.setAccessToken(accessToken);
         request.setLocale(httpRequest.getLocale());
         ServerResponse serverResponse = frontendService.processFormDataRequest(request);
@@ -36,7 +37,7 @@ public class MainController {
     }
 
     @Post("/xis/widget/model")
-    public ResponseEntity<?> getWidgetModel(@RequestBody ClientRequest request, @CookieValue("access_token") String accessToken, HttpRequest httpRequest) {
+    public ResponseEntity<?> getWidgetModel(@RequestBody ClientRequest request, @BearerToken(optional = true) String accessToken, HttpRequest httpRequest) {
         request.setAccessToken(accessToken);
         request.setLocale(httpRequest.getLocale());
         ServerResponse serverResponse = frontendService.processModelDataRequest(request);
@@ -44,7 +45,7 @@ public class MainController {
     }
 
     @Post("/xis/page/action")
-    public ResponseEntity<?> onPageLinkAction(@RequestBody ClientRequest request, @CookieValue("access_token") String accessToken, HttpRequest httpRequest) {
+    public ResponseEntity<?> onPageLinkAction(@RequestBody ClientRequest request, @BearerToken(optional = true) String accessToken, HttpRequest httpRequest) {
         request.setAccessToken(accessToken);
         request.setLocale(httpRequest.getLocale());
         ServerResponse serverResponse = frontendService.processActionRequest(request);
@@ -52,7 +53,7 @@ public class MainController {
     }
 
     @Post("/xis/widget/action")
-    public ResponseEntity<?> onWidgetLinkAction(@RequestBody ClientRequest request, @CookieValue("access_token") String accessToken, HttpRequest httpRequest) {
+    public ResponseEntity<?> onWidgetLinkAction(@RequestBody ClientRequest request, @BearerToken(optional = true) String accessToken, HttpRequest httpRequest) {
         request.setAccessToken(accessToken);
         request.setLocale(httpRequest.getLocale());
         ServerResponse serverResponse = frontendService.processActionRequest(request);
@@ -60,7 +61,7 @@ public class MainController {
     }
 
     @Post("/xis/form/action")
-    public ResponseEntity<?> onFormAction(@RequestBody ClientRequest request, @CookieValue("access_token") String accessToken, HttpRequest httpRequest) {
+    public ResponseEntity<?> onFormAction(@RequestBody ClientRequest request, @BearerToken(optional = true) String accessToken, HttpRequest httpRequest) {
         request.setAccessToken(accessToken);
         request.setLocale(httpRequest.getLocale());
         return responseEntity(frontendService.processActionRequest(request));
@@ -114,7 +115,8 @@ public class MainController {
     private ResponseEntity<?> responseEntity(ServerResponse serverResponse) {
         ResponseEntity<?> entity = ResponseEntity.status(serverResponse.getStatus(), serverResponse);
         if (serverResponse.getTokens() != null) {
-            addTokenCookies(entity, serverResponse.getTokens());
+            addAccessTokenXHeader(entity, serverResponse.getTokens().getAccessToken());
+            addRenewTokenHeader(entity, serverResponse.getTokens().getRenewToken(), serverResponse.getTokens().getAccessTokenExpiresIn());
         }
         if (serverResponse.getRedirectUrl() != null) {
             return entity.addHeader("X-Redirect-Location", serverResponse.getRedirectUrl());
@@ -122,9 +124,18 @@ public class MainController {
         return entity;
     }
 
-    private void addTokenCookies(@NonNull ResponseEntity<?> entity, @NonNull ApiTokens tokens) {
-        entity.addSecureCookie("access_token", tokens.getAccessToken(), tokens.getAccessTokenExpiresIn());
-        entity.addSecureCookie("refresh_token", tokens.getRenewToken(), tokens.getRenewTokenExpiresIn());
+    private void addAccessTokenXHeader(@NonNull ResponseEntity<?> entity, String accessToken) {
+        entity.addHeader("X-Access-Token", accessToken);
+    }
+
+    private void addRenewTokenHeader(@NonNull ResponseEntity<?> entity, String renewToken, Duration renewTokenExpiresIn) {
+        if (localUrlHolder.isSecure()) {
+            //entity.addSecureCookie("access_token", tokens.getAccessToken(), tokens.getAccessTokenExpiresIn());
+            entity.addSecureCookie("refresh_token", renewToken, renewTokenExpiresIn);
+        } else {
+            entity.addCookie("refresh_token", renewToken, renewTokenExpiresIn);
+            //entity.addCookie("refresh_token", tokens.getRenewToken(), tokens.getRenewTokenExpiresIn());
+        }
     }
 
 }

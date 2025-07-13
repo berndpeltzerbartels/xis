@@ -65,6 +65,9 @@ public class RestControllerService {
 
         InvocationContext context = invocationContextOptional.get();
         doInvoke(context, request, response);
+        if (response.getStatusCode() == null || response.getStatusCode() == 0) {
+            response.setStatusCode(200); // Default to 200 OK if no status code was set
+        }
     }
 
 
@@ -109,6 +112,8 @@ public class RestControllerService {
                 args[i] = handleHeader(param, request);
             } else if (param.isAnnotationPresent(CookieValue.class)) {
                 args[i] = handleCookieValue(param, cookies);
+            } else if (param.isAnnotationPresent(BearerToken.class)) {
+                args[i] = handleBearerToken(param, request);
             } else if (param.getType().isAssignableFrom(HttpRequest.class)) {
                 args[i] = request;
             } else if (param.getType().isAssignableFrom(HttpResponse.class)) {
@@ -119,6 +124,18 @@ public class RestControllerService {
             }
         }
         return args;
+    }
+
+    private String handleBearerToken(Parameter param, HttpRequest request) {
+        BearerToken annotation = param.getAnnotation(BearerToken.class);
+        String header = request.getHeader("Authorization");
+        if (header != null && header.startsWith("Bearer ")) {
+            return header.substring(7).trim();
+        }
+        if (!annotation.optional()) {
+            throw new IllegalArgumentException("Bearer token is required but not provided in the request.");
+        }
+        return null;
     }
 
     private Object handleCookieValue(Parameter param, Map<String, String> cookies) {
@@ -201,7 +218,7 @@ public class RestControllerService {
     private Object handleHeader(Parameter param, HttpRequest request) {
         Header annotation = param.getAnnotation(Header.class);
         String headerName = annotation.value();
-        String value = request.getHeaders().get(headerName);
+        String value = request.getHeader(headerName);
         return TypeUtils.convertSimple(value, param.getType());
     }
 
@@ -215,7 +232,7 @@ public class RestControllerService {
 
     private Map<String, String> cookies(HttpRequest request) {
         Map<String, String> cookies = new HashMap<>();
-        String cookieHeader = request.getHeaders().get("Cookie");
+        String cookieHeader = request.getHeader("Cookie");
         if (cookieHeader != null) {
             String[] cookiePairs = cookieHeader.split(";");
             for (String pair : cookiePairs) {

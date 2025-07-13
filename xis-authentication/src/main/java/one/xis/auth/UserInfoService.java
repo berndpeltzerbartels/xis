@@ -29,11 +29,5 @@ public interface UserInfoService<U extends UserInfo> {
      * @return the user information
      */
     Optional<U> getUserInfo(String userId);
-
-    /**
-     * Saves the user information. This methode is used for creating or updating user profiles.
-     *
-     * @param userInfo the user information to save
-     */
-    void saveUserInfo(U userInfo, String password);
+    
 }

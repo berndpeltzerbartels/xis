@@ -5,10 +5,13 @@ import lombok.Getter;
 import java.time.Duration;
 import java.util.*;
 
-@Getter
+
 public class ResponseEntity<T> {
 
+    @Getter
     private T body;
+
+    @Getter
     private final int statusCode;
     private final Map<String, List<String>> headers = new HashMap<>();
 
@@ -51,8 +54,23 @@ public class ResponseEntity<T> {
     }
 
     public ResponseEntity<T> addHeader(String name, String value) {
-        headers.computeIfAbsent(name, k -> new ArrayList<>()).add(value);
+        headers.computeIfAbsent(name.toUpperCase(), k -> new ArrayList<>()).add(value);
         return this;
+    }
+
+    public String getHeader(String name) {
+        List<String> values = headers.get(name.toUpperCase());
+        return values != null && !values.isEmpty() ? values.get(0) : null;
+    }
+
+    public List<String> getHeaders(String name) {
+        List<String> values = headers.get(name.toUpperCase());
+        return values != null ? Collections.unmodifiableList(values) : Collections.emptyList();
+    }
+
+
+    public Collection<String> getHeaderNames() {
+        return headers.keySet();
     }
 
     public static ResponseEntity<?> redirect(String location) {
@@ -70,7 +88,20 @@ public class ResponseEntity<T> {
         cookieValue.add("Max-Age=" + maxAge.getSeconds());
         cookieValue.add("Path=/");
 
-        headers.computeIfAbsent("Set-Cookie", k -> new ArrayList<>()).add(cookieValue.toString());
+        headers.computeIfAbsent("SET-COOKIE", k -> new ArrayList<>()).add(cookieValue.toString());
+
+        return this;
+    }
+
+    public ResponseEntity<T> addCookie(String name, String value, Duration maxAge) {
+        StringJoiner cookieValue = new StringJoiner("; ");
+        cookieValue.add(name + "=" + value);
+        cookieValue.add("HttpOnly");
+        cookieValue.add("SameSite=Lax");
+        cookieValue.add("Max-Age=" + maxAge.getSeconds());
+        cookieValue.add("Path=/");
+
+        headers.computeIfAbsent("SET-COOKIE", k -> new ArrayList<>()).add(cookieValue.toString());
 
         return this;
     }

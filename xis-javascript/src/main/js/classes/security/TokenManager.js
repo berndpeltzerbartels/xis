@@ -41,13 +41,6 @@ class TokenManager {
     this.tokenAttributes.claims = decodedToken.claims || {};
   }
 
-  setRenewToken(token) {
-    console.log('Setting renew token:', token);
-    this.renewToken = token;
-    const decodedToken = this.decodeToken(token);
-    this.renewTokenExpiresAt = decodedToken.exp || -1;
-  }
-
   setTokens(response) {
     this.accessToken = response.accessToken;
     this.renewToken = response.renewToken;
@@ -85,7 +78,10 @@ class TokenManager {
     try {
       console.debug('Renewing access token using renew token');
       const response = await app.client.renew(this.renewToken);
-      this.setTokens(response);
+      const newAccessToken = response.getResponseHeader('X-Access-Token');
+      if (newAccessToken) {
+         this.tokenManager.setAccessToken(newAccessToken);
+      }
       return this.accessToken;
     } catch (e) {
       return false;
