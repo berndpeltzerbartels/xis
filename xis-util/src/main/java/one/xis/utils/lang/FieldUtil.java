@@ -62,7 +62,11 @@ public class FieldUtil {
 
 
     public Collection<Field> getDeclaredFields(Class<?> clazz) {
-        return Arrays.asList(clazz.getDeclaredFields());
+        try {
+            return Arrays.asList(clazz.getDeclaredFields());
+        } catch (NoClassDefFoundError e) {
+            throw new RuntimeException("no class definition found for field type " + clazz.getName(), e);
+        }
     }
 
     public static Field getDeclaredField(Class<?> clazz, String name, boolean forceAccess) {

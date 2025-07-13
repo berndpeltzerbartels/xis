@@ -144,7 +144,7 @@ class TokenServiceImpl implements TokenService {
 
     private String createToken(TokenCreationAttributes attributes) {
         String headerBase64 = Base64.getUrlEncoder().withoutPadding().encodeToString(HEADER);
-        Map<String, Object> payload = new LinkedHashMap<>(attributes.claims());
+        Map<String, Object> payload = attributes.claims() == null ? new LinkedHashMap<>() : new LinkedHashMap<>(attributes.claims());
         payload.put("sub", attributes.userId());
         payload.put("roles", attributes.roles());
         payload.put("exp", Instant.now().plus(attributes.expiresIn()).getEpochSecond());

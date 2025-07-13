@@ -25,7 +25,9 @@ class ControllerResultMapper {
         if (controllerMethodResult.getRedirectUrl() != null) {
             controllerResult.setRedirectUrl(controllerMethodResult.getRedirectUrl());
         }
-        controllerResult.setTokens(controllerMethodResult.getTokens());
+        if (controllerMethodResult.getTokens() != null) {
+            controllerResult.setTokens(controllerMethodResult.getTokens());
+        }
         controllerResult.getModelData().putAll(controllerMethodResult.getModelData());
         controllerResult.getFormData().putAll(controllerMethodResult.getFormData());
         controllerResult.getBindingParameters().putAll(controllerMethodResult.getWidgetParameters());

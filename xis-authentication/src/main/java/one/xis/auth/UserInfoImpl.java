@@ -21,13 +21,7 @@ public class UserInfoImpl implements UserInfo {
      * The unique identifier for the user (Subject). Corresponds to the 'sub' claim.
      */
     private String userId;
-
-
-    /**
-     * The password of the user. This is typically not stored in the token but may be used for local authentication.
-     * It is included here for convenience, but should be handled securely and not exposed unnecessarily.
-     */
-    private String password;
+    
 
     /**
      * The roles assigned to the user (e.g., 'admin', 'user').

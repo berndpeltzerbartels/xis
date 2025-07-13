@@ -39,11 +39,7 @@ dependencies {
     implementation project(':xis-util')
     implementation project(':xis-validation')
     implementation project(':xis-adapter-spi')
-    implementation project(':xis-security')
-    implementation project(':xis-authentication:xis-idp:xis-idp-server')
-    implementation(project(':xis-authentication:xis-local-authentication')) {
-        exclude group: 'org.slf4j', module: 'slf4j-api'
-    }
+
     // Local test dependencies
     testImplementation project(":xis-test")
 
@@ -62,7 +58,7 @@ dependencies {
 
     // AssertJ dependencies
     testImplementation group: 'org.assertj', name: 'assertj-core', version: assertjVersion
-    testImplementation project(':xis-authentication')
+    testImplementation project(':xis-authentication:xis-local-authentication')
 
 }
 

@@ -50,6 +50,7 @@ project(':xis-authentication:xis-idp').name = 'xis-idp'
 project(':xis-authentication:xis-idp:xis-idp-server').name = 'xis-idp-server'
 //project(':xis-authentication:xis-idp:xis-idp-server-impl').name = 'xis-idp-server-imp'
 project(':xis-authentication:xis-idp:xis-idp-client').name = 'xis-idp-client'
-project(':xis-authentication:xis-idp:xis-idp-client-impl').name = 'xis-idp-client-imp'
-
+project(':xis-authentication:xis-idp:xis-idp-client-impl').name = 'xis-idp-client-impl'
+include 'xis-authentication:xis-idp:xis-external-idp'
+findProject(':xis-authentication:xis-idp:xis-external-idp')?.name = 'xis-external-idp'
 

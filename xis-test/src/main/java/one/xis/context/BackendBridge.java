@@ -1,7 +1,7 @@
 package one.xis.context;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import lombok.RequiredArgsConstructor;
 import one.xis.server.ClientRequest;
 import one.xis.server.FrontendService;
@@ -20,7 +20,7 @@ import static one.xis.context.BackendBridgeVerboseRunner.run;
 public class BackendBridge implements ResourcePathProvider {
 
     private final FrontendService frontendService;
-    private final ObjectMapper objectMapper; // TODO use gson
+    private final Gson gson;
     private final AppContext appContext;
 
     public BackendBridgeResponse getComponentConfig(String uri, Map<String, String> headers) {
@@ -70,7 +70,7 @@ public class BackendBridge implements ResourcePathProvider {
 
     private ClientRequest request(String requestJson, Map<String, String> headers) {
         try {
-            var request = objectMapper.readValue(requestJson, ClientRequest.class);
+            var request = gson.fromJson(requestJson, ClientRequest.class);
             request.setLocale(Locale.GERMANY); // TODO konfigurierbar machen
             request.setZoneId("Europe/Berlin");
             var authenticationHeader = headers.get("Authorization");
@@ -78,7 +78,7 @@ public class BackendBridge implements ResourcePathProvider {
                 request.setAccessToken(authenticationHeader.substring("Bearer ".length()));
             }
             return request;
-        } catch (JsonProcessingException e) {
+        } catch (JsonSyntaxException e) {
             throw new RuntimeException("Failed to deserialize request", e);
         }
     }
@@ -93,15 +93,14 @@ public class BackendBridge implements ResourcePathProvider {
             response.addResponseHeader("Set-Cookie", "access_token=" + o.getTokens().getAccessToken() + "; HttpOnly; Secure; Path=/; SameSite=Strict");
             response.addResponseHeader("Set-Cookie", "refresh_token=" + o.getTokens().getRenewToken() + "; HttpOnly; Secure; Path=/; SameSite=Strict");
         }
+        if (o.getRedirectUrl() != null) {
+            response.addResponseHeader("X-Redirect-Location", o.getRedirectUrl());
+        }
         return response;
     }
 
     private String serialialize(Object o) {
-        try {
-            return objectMapper.writeValueAsString(o);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Failed to serialize", e);
-        }
+        return gson.toJson(o);
     }
 
     private BackendBridgeResponse stringToBridgeResponse(String str) {

@@ -35,5 +35,5 @@ public interface UserInfoService<U extends UserInfo> {
      *
      * @param userInfo the user information to save
      */
-    void saveUserInfo(U userInfo);
+    void saveUserInfo(U userInfo, String password);
 }

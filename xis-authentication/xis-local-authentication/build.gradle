@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'java-library'
 }
 
 group = 'one.xis'
@@ -15,14 +16,14 @@ dependencies {
     implementation(project(":xis-context"))
     implementation(project(":xis-util"))
     implementation(project(":xis-authentication:xis-token"))
-    runtimeOnly(project(":xis-authentication:xis-idp:xis-idp-server-impl"))
-    compileOnly(project(":xis-authentication:xis-idp:xis-idp-client"))
+    //runtimeOnly(project(":xis-authentication:xis-idp:xis-idp-server-impl"))
     compileOnly(project(":xis-adapter-spi"))
     compileOnly(project(":xis-controller-api"))
     compileOnly(project(":xis-authentication:xis-idp"))
     compileOnly(project(":xis-authentication"))
-    compileOnly(project(":xis-authentication:xis-idp:xis-idp-server"))
-    compileOnly(project(":xis-authentication:xis-idp:xis-idp-client"))
+    // compileOnly(project(":xis-authentication:xis-idp:xis-idp-server"))
+    implementation(project(":xis-authentication:xis-idp:xis-idp-client"))
+    api(project(":xis-authentication:xis-idp:xis-external-idp"))
     compileOnly(project(":xis-validation"))
     compileOnly(project(":xis-http-controller"))
 

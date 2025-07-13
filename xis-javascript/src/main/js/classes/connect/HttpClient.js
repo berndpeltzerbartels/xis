@@ -48,6 +48,9 @@ class HttpClient extends Client {
         const request = this.createPageRequest(resolvedURL, null, null);
         const headers = await this.authenticationHeader();
         const response = await this.httpConnector.post('/xis/page/model', request, headers);
+        if (this.handleRedirect(response)) {
+            return Promise.reject();
+        }
         return this.deserializeResponse(response);
     }
 
@@ -55,6 +58,9 @@ class HttpClient extends Client {
         const request = this.createWidgetRequest(widgetInstance, widgetState, null, null, null);
         const headers = await this.authenticationHeader();
         const response = await this.httpConnector.post('/xis/widget/model', request, headers);
+        if (this.handleRedirect(response)) {
+            return Promise.reject();
+        }
         return this.deserializeResponse(response);
     }
 
@@ -62,6 +68,9 @@ class HttpClient extends Client {
         const request = this.createFormRequest(resolvedURL, widgetId, {}, null, formBindingKey, formBindingParameters);
         const headers = await this.authenticationHeader();
         const response = await this.httpConnector.post('/xis/form/model', request, headers);
+        if (this.handleRedirect(response)) {
+            return Promise.reject();
+        }
         return this.deserializeResponse(response);
     }
 
@@ -69,6 +78,9 @@ class HttpClient extends Client {
         const request = this.createWidgetRequest(widgetInstance, widgetState, action, {}, actionParameters);
         const headers = await this.authenticationHeader();
         const response = await this.httpConnector.post('/xis/widget/action', request, headers);
+        if (this.handleRedirect(response)) {
+            return Promise.reject();
+        }
         return this.deserializeResponse(response);
     }
 
@@ -76,6 +88,9 @@ class HttpClient extends Client {
         const request = this.createPageRequest(resolvedURL, {}, action, actionParameters);
         const headers = await this.authenticationHeader();
         const response = await this.httpConnector.post('/xis/page/action', request, headers);
+        if (this.handleRedirect(response)) {
+            return Promise.reject();
+        }
         return this.deserializeResponse(response);
     }
 
@@ -91,7 +106,20 @@ class HttpClient extends Client {
         if (cookies['refresh_token']) {
             this.tokenManager.setRenewToken(cookies['refresh_token']);
         }
+        if (this.handleRedirect(response)) {
+            return Promise.reject();
+        }
         return this.deserializeResponse(response);
+    }
+
+
+    handleRedirect(response) {
+        const location = response.getResponseHeader('X-Redirect-Location');
+        if (location) {
+            app.pageController.displayPageForUrl(location);
+            return true;
+        }
+        return false;
     }
 
     async sendRenewTokenRequest(renewToken) {
@@ -107,6 +135,7 @@ class HttpClient extends Client {
      * @returns {Promise<Object>} The authentication header with the access token.
      */
     async authenticationHeader() {
+        debugger;
         const token = await this.tokenManager.actualAccessToken();
         const header = {};
         if (token) {

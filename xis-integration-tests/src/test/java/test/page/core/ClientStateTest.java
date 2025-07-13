@@ -26,7 +26,7 @@ class ClientStateTest {
         var page = testContext.getAppContext().getSingleton(ClientStatePage.class);
 
         result.getDocument().getElementById("action-link").click();
-        assertThat(page.getInvokateddMethods()).containsExactly("data", "linkAction", "data");
+        assertThat(page.getInvokedMethods()).containsExactly("data", "linkAction", "data");
         assertThat(page.getClientStatePageData().getId()).isEqualTo(200);
         assertThat(page.getClientStatePageData().getValue()).isEqualTo("test2");
         assertThat(result.getSessionStorage().getItem("data")).contains("\"id\":200");
@@ -35,7 +35,7 @@ class ClientStateTest {
         assertThat(result.getDocument().getElementById("clientStateValue").innerText).isEqualTo("200");
 
         result.getDocument().getElementById("save-button").click();
-        assertThat(page.getInvokateddMethods()).containsExactly("data", "linkAction", "data", "formAction", "data");
+        assertThat(page.getInvokedMethods()).containsExactly("data", "linkAction", "data", "formAction", "data");
         assertThat(page.getClientStatePageData().getId()).isEqualTo(300);
         assertThat(page.getClientStatePageData().getValue()).isEqualTo("test3");
         assertThat(result.getSessionStorage().getItem("data")).contains("\"id\":300");

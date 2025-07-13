@@ -27,7 +27,6 @@ class LoginAndRolesIntegrationTest {
         // Erfolgreiches Login
         var userInfo = new UserInfoImpl();
         userInfo.setUserId("admin");
-        userInfo.setPassword("pw");
         userInfo.setRoles(Set.of("admin", "user"));
         userInfo.setClaims(Map.of());
 

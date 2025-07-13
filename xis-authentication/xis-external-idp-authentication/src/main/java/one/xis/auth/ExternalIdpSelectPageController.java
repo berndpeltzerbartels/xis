@@ -3,7 +3,7 @@ package one.xis.auth;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import one.xis.*;
-import one.xis.idp.ExternalIDPService;
+import one.xis.auth.idp.ExternalIDPService;
 
 import java.util.Collection;
 import java.util.Map;

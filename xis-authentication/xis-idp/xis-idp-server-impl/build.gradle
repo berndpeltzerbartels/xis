@@ -26,9 +26,11 @@ dependencies {
     compileOnly(project(":xis-server"))
     compileOnly(project(":xis-validation"))
     compileOnly(project(":xis-authentication"))
+    compileOnly(project(":xis-authentication:xis-idp:xis-idp-client"))
+    compileOnly(project(":xis-authentication:xis-idp:xis-external-idp"))
     compileOnly(project(":xis-authentication:xis-idp"))
     compileOnly(project(':xis-authentication:xis-token'))
-    compileOnly(project(":xis-authentication:xis-idp:xis-idp-client"))
+
     compileOnly(project(":xis-gson"))
 
     // Gson dependency

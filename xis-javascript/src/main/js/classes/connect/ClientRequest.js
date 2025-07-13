@@ -7,6 +7,7 @@
  * @property {string: string} pathVariables
  * @property {string: string} urlParameters
  * @property {string: string} bindingParameters
+ * @property {string: string} actionParameters
  * @property {string: string} type;
  * @property {string: string} clientState
  * @property {string: string} localStorage
@@ -23,6 +24,7 @@ class ClientRequest {
         this.pathVariables = {};
         this.urlParameters = {};
         this.bindingParameters = {};
+        this.actionParameters = {};
         this.type = '';
         this.clientStateData = {};
         this.localStorageData = {};

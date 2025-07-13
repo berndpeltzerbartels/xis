@@ -20,7 +20,8 @@ public class SpringUserInfoService implements UserInfoService<UserInfo> {
     }
 
     @Override
-    public void saveUserInfo(UserInfo userInfo) {
+    public void saveUserInfo(UserInfo userInfo, String password) {
+        // No implementation needed for this example
 
     }
 }

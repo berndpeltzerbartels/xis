@@ -150,7 +150,7 @@ class Client {
         request.formData = formData ? formData.values : {};
         request.urlParameters = resolvedURL.urlParameters;
         request.pathVariables = resolvedURL.pathVariablesAsMap();
-        request.actionParameters = actionParameters;
+        request.actionParameters = actionParameters ? actionParameters : {};
         request.zoneId = this.zoneId;
         request.clientStateData = this.clientStateDataPage(normalizedPath);
         request.localStorageData = this.localStorageDataPage(normalizedPath);
@@ -216,7 +216,7 @@ class Client {
         request.urlParameters = widgetState.resolvedURL.urlParameters;
         request.pathVariables = widgetState.resolvedURL.pathVariablesAsMap();
         request.bindingParameters = widgetState.widgetParameters;
-        request.actionParameters = actionParameters
+        request.actionParameters = actionParameters ? actionParameters : {};
         request.zoneId = this.zoneId;         // TODO locale ?
         request.clientStateData = this.clientStateDataWidget(widgetInstance.widget.id);
         request.localStorageData = this.localStorageDataWidget(widgetInstance.widget.id);

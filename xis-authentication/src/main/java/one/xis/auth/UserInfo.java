@@ -1,13 +1,12 @@
 package one.xis.auth;
 
 import java.util.Map;
+import java.util.Set;
 
 public interface UserInfo {
     String getUserId();
 
-    String getPassword();
-
-    java.util.Set<String> getRoles();
+    Set<String> getRoles();
 
     Map<String, Object> getClaims();
 }

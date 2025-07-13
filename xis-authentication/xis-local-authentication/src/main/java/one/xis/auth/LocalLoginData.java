@@ -5,10 +5,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
+@LocalLogin
 @NoArgsConstructor
 @AllArgsConstructor
 class LocalLoginData {
     private String username;
     private String password;
-    private String redirectUrl;
+    private String redirectUri;
 }

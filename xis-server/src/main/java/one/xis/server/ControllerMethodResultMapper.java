@@ -38,6 +38,9 @@ class ControllerMethodResultMapper {
             controllerMethodResult.setRedirectUrl(redirectControllerResponse.getRedirectUrl());
             controllerMethodResult.getUrlParameters().putAll(redirectControllerResponse.getUrlParameters());
         }
+        if (returnValue instanceof TokenResponse) {
+            controllerMethodResult.setTokens(((TokenResponse) returnValue).getApiTokens());
+        }
         if (method.isAnnotationPresent(ModelData.class)) {
             mapModelResult(method.getAnnotation(ModelData.class).value(), returnValue, controllerMethodResult);
         }

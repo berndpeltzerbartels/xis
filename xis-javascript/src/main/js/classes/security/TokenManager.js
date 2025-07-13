@@ -26,9 +26,6 @@ class TokenManager {
     }
     if (this.renewToken) {
       var renewTokenDecoded = this.decodeToken(this.renewToken);
-      this.tokenAttributes.userId = renewTokenDecoded.sub || '';
-      this.tokenAttributes.roles = renewTokenDecoded.roles || [];
-      this.tokenAttributes.claims = renewTokenDecoded.claims || {};
       this.renewTokenExpiresAt = renewTokenDecoded.exp || -1;
     }
     console.log('Parsing tokens completed');
@@ -49,9 +46,6 @@ class TokenManager {
     this.renewToken = token;
     const decodedToken = this.decodeToken(token);
     this.renewTokenExpiresAt = decodedToken.exp || -1;
-    this.tokenAttributes.userId = decodedToken.sub || this.tokenAttributes.userId;
-    this.tokenAttributes.roles = decodedToken.roles || this.tokenAttributes.roles;
-    this.tokenAttributes.claims = decodedToken.claims || this.tokenAttributes.claims;
   }
 
   setTokens(response) {
@@ -80,21 +74,16 @@ class TokenManager {
    */
   async actualAccessToken() {
     if (!this.accessToken) {
-      console.log('No access token available');
+      console.debug('No access token available');
       return null;
     }
     if (!this.isAccessTokenExpiring()) {
-      console.log('Access token is still valid');
+      console.debug('Access token is still valid');
       return this.accessToken;
     }
-    console.warn('Access token is expiring, attempting to renew');
-
-    if (this.isRenewTokenExpired()) {
-      console.log('Renew token is expired, cannot renew access token');
-      return false; // Both tokens are expired
-    }
+    console.log('Access token is expiring, attempting to renew');
     try {
-      console.log('Renewing access token using renew token');
+      console.debug('Renewing access token using renew token');
       const response = await app.client.renew(this.renewToken);
       this.setTokens(response);
       return this.accessToken;
@@ -109,14 +98,6 @@ class TokenManager {
     }
     const now = Math.floor(Date.now() / 1000); // Current time in seconds
     return this.accessTokenExpiresAt - now < 60; // Less than 60 seconds to expiration
-  }
-
-  isRenewTokenExpired() {
-    if (!this.renewToken || this.renewTokenExpiresAt <= 0) {
-      return true; // No renew token or invalid expiration
-    }
-    const now = Math.floor(Date.now() / 1000); // Current time in seconds
-    return this.renewTokenExpiresAt <= now; // Renew token is expired
   }
 
   decodeToken(token) {

@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'java-library'
 }
 
 group = 'one.xis'
@@ -28,6 +29,8 @@ dependencies {
     compileOnly(project(":xis-validation"))
     implementation(project(":xis-authentication"))
     implementation project(':xis-authentication:xis-token')
+    implementation project(':xis-authentication:xis-idp:xis-external-idp')
+    api project(':xis-authentication:xis-idp:xis-external-idp')
 
     // Gson dependency
     implementation "com.google.code.gson:gson:$gsonVersion"

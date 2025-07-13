@@ -16,8 +16,7 @@ class LocalLoginValidator implements Validator<LocalLoginData> {
 
     @Override
     public void validate(LocalLoginData login, AnnotatedElement annotatedElement) throws ValidatorException {
-        var userInfo = userInfoService.getUserInfo(login.getUsername()).orElseThrow(ValidatorException::new);
-        if (!userInfo.getPassword().equals(login.getPassword())) {
+        if (!userInfoService.validateCredentials(login.getUsername(), login.getPassword())) {
             throw new ValidatorException();
         }
     }

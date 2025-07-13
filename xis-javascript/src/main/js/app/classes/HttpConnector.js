@@ -59,7 +59,7 @@ class HttpConnector {
     readTokenData(response) {
         if (response.status == 200) {
             const tokens = new Tokens();
-            const cookies = response.getResponseHeader('Set-Cookie');
+            const cookies = response.getResponseHeaders('Set-Cookie');
             if (cookies) {
                 const cookieArray = cookies.split(';');
                 for (const cookie of cookieArray) {
@@ -101,14 +101,6 @@ class HttpConnector {
                 // TODO Add headers to allow 304
                 // Readystaet == 4 for 304 ?
                 if (xmlHttp.readyState == 4) { // TODO In Java 204 if there is no server-method
-                    // Redirect-Handling für 302 + Location-Header
-                    const location = xmlHttp.getResponseHeader('X-Redirect-Location');
-                    if (xmlHttp.status === 412 && location) {
-                        debugger;
-                        document.location.href = location;
-                        reject('Redirected');
-                        return;
-                    }
                     resolve(xmlHttp);
                 }
                 // TODO use errorhandler

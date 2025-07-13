@@ -15,13 +15,14 @@ public class BackendBridgeResponse {
     public final int status;
     public final ValidatorMessages validatorMessages;
     public final Map<String, List<String>> headers = new HashMap<>();
-    
+
     public void addResponseHeader(String name, String value) {
         headers.computeIfAbsent(name, k -> new ArrayList<>()).add(value);
     }
 
-    public List<String> getResponseHeader(String name) {
-        return headers.getOrDefault(name, List.of());
+    public String getResponseHeader(String name) {
+        List<String> values = getResponseHeaders(name);
+        return values.isEmpty() ? null : values.get(0);
     }
 
     public String getAllResponseHeaders() {
@@ -30,4 +31,10 @@ public class BackendBridgeResponse {
                         .map(value -> entry.getKey() + ": " + value))
                 .collect(Collectors.joining("\r\n"));
     }
+
+
+    private List<String> getResponseHeaders(String name) {
+        return headers.getOrDefault(name, List.of());
+    }
+
 }

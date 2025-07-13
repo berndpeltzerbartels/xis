@@ -1,8 +1,8 @@
 package one.xis.auth;
 
 import lombok.RequiredArgsConstructor;
+import one.xis.auth.idp.ExternalIDPService;
 import one.xis.context.XISDefaultComponent;
-import one.xis.idp.ExternalIDPService;
 
 import java.util.ArrayList;
 import java.util.Collection;

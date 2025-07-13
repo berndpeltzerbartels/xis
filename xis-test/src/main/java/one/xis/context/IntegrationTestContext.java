@@ -3,6 +3,7 @@ package one.xis.context;
 
 import lombok.Getter;
 import one.xis.auth.UserInfo;
+import one.xis.auth.UserInfoService;
 import one.xis.auth.token.TokenService;
 import one.xis.server.PageUtil;
 
@@ -80,6 +81,7 @@ public class IntegrationTestContext implements AppContext {
         private final Collection<String> packages = new HashSet<>();
         private final Collection<String> ignorePackages = new HashSet<>();
         private UserInfo userInfo;
+        private String userPassword;
 
         public Builder withSingleton(Object o) {
             singletons.add(o);
@@ -93,7 +95,7 @@ public class IntegrationTestContext implements AppContext {
         public IntegrationTestContext build() {
             var context = new IntegrationTestContext(packages, singletons.toArray());
             if (userInfo != null) {
-                addTokens(userInfo, context);
+                addTokens(userInfo, userPassword, context);
             }
             context.environment.getIntegrationTestScript().reset();
             return context;
@@ -119,20 +121,24 @@ public class IntegrationTestContext implements AppContext {
             return this;
         }
 
-        public Builder withLoggedInUser(UserInfo userInfo) {
+        public Builder withLoggedInUser(UserInfo userInfo, String userPassword) {
             this.userInfo = userInfo;
+            this.userPassword = userPassword;
             return this;
         }
 
-        private static void addTokens(UserInfo userInfo, IntegrationTestContext context) {
-            System.err.println("Adding token cookies for user: " + userInfo.getUserId());
-            context.getOptionalSingleton(TokenService.class).ifPresent(tokenService -> {
-                System.err.println("Creating tokens for user: " + userInfo.getUserId());
-                var tokens = tokenService.newTokens(userInfo.getUserId(), userInfo.getRoles(), userInfo.getClaims());
-                var functions = context.environment.getIntegrationTestScript().getIntegrationTestFunctions();
-                functions.getSetAccessToken().execute(tokens.getAccessToken());
-                functions.getSetRenewToken().execute(tokens.getRenewToken());
-            });
+        private static void addTokens(UserInfo user, String password, IntegrationTestContext context) {
+            System.err.println("Adding token cookies for user: " + user.getUserId());
+            var userService = context.getSingleton(UserInfoService.class);
+            if (userService instanceof TestUserInfoService testUserInfoService) {
+                testUserInfoService.saveUserInfo(user, password);
+            }
+            System.err.println("Creating tokens for user: " + user.getUserId());
+            var tokenService = context.getSingleton(TokenService.class);
+            var tokens = tokenService.newTokens(user);
+            var functions = context.environment.getIntegrationTestScript().getIntegrationTestFunctions();
+            functions.getSetAccessToken().execute(tokens.getAccessToken());
+            functions.getSetRenewToken().execute(tokens.getRenewToken());
         }
     }
 

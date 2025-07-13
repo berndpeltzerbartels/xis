@@ -1,7 +1,7 @@
 package test.page.security;
 
+import one.xis.auth.UserInfoImpl;
 import one.xis.context.IntegrationTestContext;
-import one.xis.idp.IDPUserInfoImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -46,7 +46,7 @@ public class ProtectedModelDataTest {
 
         @BeforeEach
         void init() {
-            var userInfo = new IDPUserInfoImpl();
+            var userInfo = new UserInfoImpl();
             userInfo.setUserId("user1");
             userInfo.setRoles(Set.of("simple-user"));
 
@@ -54,7 +54,7 @@ public class ProtectedModelDataTest {
             testContext = IntegrationTestContext.builder()
                     .withSingleton(ProtectedModelDataPage1.class)
                     .withSingleton(ProtectedModelDataPage2.class)
-                    .withLoggedInUser(userInfo)
+                    .withLoggedInUser(userInfo, "passwd")
                     .build();
         }
 
@@ -77,14 +77,14 @@ public class ProtectedModelDataTest {
 
         @BeforeEach
         void init() {
-            var userInfo = new IDPUserInfoImpl();
+            var userInfo = new UserInfoImpl();
             userInfo.setUserId("user1");
             userInfo.setRoles(Set.of("simple-user", "admin"));
 
             testContext = IntegrationTestContext.builder()
                     .withSingleton(ProtectedModelDataPage1.class)
                     .withSingleton(ProtectedModelDataPage2.class)
-                    .withLoggedInUser(userInfo)
+                    .withLoggedInUser(userInfo, "passwd")
                     .build();
         }
 
@@ -100,7 +100,7 @@ public class ProtectedModelDataTest {
             link.click();
 
             assertThat(document.getElementByTagName("title").innerText).isEqualTo("Login");
-            assertThat(document.getElementById("state").getAttribute("value")).isNotEmpty();
+            assertThat(document.getElementById("redirectUri").getAttribute("value")).isNotEmpty();
 
             document.getInputElementById("username").setValue("user1");
             document.getInputElementById("password").setValue("passwd");

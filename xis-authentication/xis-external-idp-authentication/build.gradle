@@ -14,6 +14,7 @@ dependencies {
     compileOnly(project(":xis-controller-api"))
     compileOnly(project(":xis-authentication:xis-idp:xis-idp-server"))
     compileOnly(project(":xis-authentication"))
+    compileOnly(project(":xis-authentication:xis-idp:xis-external-idp"))
 
     // Annotation processors
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"

@@ -3,8 +3,8 @@ package one.xis.auth;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import one.xis.*;
+import one.xis.auth.idp.ExternalIDPService;
 import one.xis.auth.token.TokenService;
-import one.xis.idp.ExternalIDPService;
 import one.xis.utils.http.HttpUtils;
 
 import java.util.Collection;
@@ -45,10 +45,10 @@ class LocalLoginFormController<U extends UserInfo> {
     @Action("login")
     public LocalLoginResponse login(@FormData("login") LocalLoginData login) {
         var userInfo = userInfoService.getUserInfo(login.getUsername()).orElseThrow(IllegalStateException::new);
-        if (!userInfo.getPassword().equals(login.getPassword())) {
+        if (!userInfoService.validateCredentials(login.getUsername(), login.getPassword())) {
             throw new IllegalStateException();
         }
-        return new LocalLoginResponse(HttpUtils.localizeUrl(login.getRedirectUrl()), tokenService.newTokens(userInfo));
+        return new LocalLoginResponse(HttpUtils.localizeUrl(login.getRedirectUri()), tokenService.newTokens(userInfo));
     }
 
 }
