@@ -15,7 +15,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import static org.mockito.Mockito.*;
 
@@ -95,7 +94,8 @@ class RestControllerServiceIntegrationTest {
         void shouldInvokeMethodWithHeaderAndCookie() {
             when(request.getHttpMethod()).thenReturn(HttpMethod.GET);
             when(request.getPath()).thenReturn("/api/info");
-            when(request.getHeaders()).thenReturn(Map.of("X-Test-Header", "header-val", "Cookie", "test_cookie=cookie-val"));
+            when(request.getHeader("X-Test-Header")).thenReturn("header-val");
+            when(request.getHeader("Cookie")).thenReturn("test_cookie=cookie-val");
 
             restControllerService.doInvocation(request, response);
 
