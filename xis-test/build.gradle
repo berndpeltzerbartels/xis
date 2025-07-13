@@ -47,7 +47,6 @@ dependencies {
     implementation project(':xis-adapter-spi')
     implementation project(':xis-gson')
     implementation project(':xis-javascript')
-    implementation project(":xis-authentication:xis-token")
     compileOnly project(":xis-authentication:xis-idp:xis-idp-client")
     implementation project(":xis-authentication:xis-idp:xis-idp-client-impl")
     api(project(':xis-authentication'))

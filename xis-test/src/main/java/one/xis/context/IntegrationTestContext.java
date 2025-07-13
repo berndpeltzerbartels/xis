@@ -4,7 +4,6 @@ package one.xis.context;
 import lombok.Getter;
 import one.xis.auth.UserInfo;
 import one.xis.auth.UserInfoService;
-import one.xis.auth.token.TokenService;
 import one.xis.server.PageUtil;
 
 import java.util.*;
@@ -133,12 +132,7 @@ public class IntegrationTestContext implements AppContext {
             if (userService instanceof TestUserInfoService testUserInfoService) {
                 testUserInfoService.saveUserInfo(user, password);
             }
-            System.err.println("Creating tokens for user: " + user.getUserId());
-            var tokenService = context.getSingleton(TokenService.class);
-            var tokens = tokenService.newTokens(user);
-            var functions = context.environment.getIntegrationTestScript().getIntegrationTestFunctions();
-            functions.getSetAccessToken().execute(tokens.getAccessToken());
-            functions.getSetRenewToken().execute(tokens.getRenewToken());
+            // If the user added a custom UserInfoService, we assume it handles the desired authentication logic
         }
     }
 
