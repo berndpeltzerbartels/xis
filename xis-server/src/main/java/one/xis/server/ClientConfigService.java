@@ -38,7 +38,7 @@ class ClientConfigService {
 
     @XISInit
     void init() {
-        var configBuilder = ClientConfig.builder().useWebsockets(useWebsockets);
+        var configBuilder = ClientConfig.builder().useWebsockets(useWebsockets).loginPage("/login.html");
         addPageAttributes(configBuilder);
         addWidgetAttributes(configBuilder);
         config = configBuilder.build();

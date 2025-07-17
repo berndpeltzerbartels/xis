@@ -11,5 +11,5 @@ import lombok.NoArgsConstructor;
 class LocalLoginData {
     private String username;
     private String password;
-    private String redirectUri;
+    private String state;
 }

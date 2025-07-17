@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import one.xis.UserContextAccess;
 import one.xis.UserContextImpl;
 import one.xis.auth.AuthenticationException;
-import one.xis.auth.LoginUrlProvider;
 import one.xis.auth.token.AccessTokenCache;
 import one.xis.auth.token.AccessTokenWrapper;
 import one.xis.context.XISComponent;
@@ -32,7 +31,6 @@ public class FrontendServiceImpl implements FrontendService {
     private final Resources resources;
     private final AccessTokenCache accessTokenCache;
     private final Collection<RequestFilter> requestFilters;
-    private final LoginUrlProvider loginUrlProvider;
     private Resource appJsResource;
     private Resource classesJsResource;
     private Resource mainJsResource;
@@ -58,9 +56,6 @@ public class FrontendServiceImpl implements FrontendService {
         try {
             addUserContext(request);
             return applyFilterChain(request, controllerService::processActionRequest);
-        } catch (AuthenticationException e) {
-            Logger.error("Authentication error: {}", e.getMessage());
-            return authenticationErrorResponse(request);
         } finally {
             removeUserContext();
         }
@@ -71,9 +66,6 @@ public class FrontendServiceImpl implements FrontendService {
         try {
             addUserContext(request);
             return applyFilterChain(request, controllerService::processModelDataRequest);
-        } catch (AuthenticationException e) {
-            Logger.error("Authentication error: {}", e.getMessage());
-            return authenticationErrorResponse(request);
         } finally {
             removeUserContext();
         }
@@ -84,9 +76,6 @@ public class FrontendServiceImpl implements FrontendService {
         try {
             addUserContext(request);
             return applyFilterChain(request, controllerService::processFormDataRequest);
-        } catch (AuthenticationException e) {
-            Logger.error("Authentication error: {}", e.getMessage());
-            return authenticationErrorResponse(request);
         } finally {
             removeUserContext();
         }
@@ -168,11 +157,4 @@ public class FrontendServiceImpl implements FrontendService {
         return response;
     }
 
-
-    private ServerResponse authenticationErrorResponse(ClientRequest request) {
-        var response = new ServerResponse();
-        response.setStatus(200);
-        response.setRedirectUrl(loginUrlProvider.loginUrl(request.getPageUrl()));
-        return response;
-    }
 }

@@ -7,8 +7,6 @@ import one.xis.context.XISComponent;
 @RequiredArgsConstructor
 class ControllerResponseMapper {
 
-    private final PathResolver pathResolver;
-
     void mapResultToResponse(ServerResponse response, ControllerResult result) {
         response.setNextURL(result.getNextURL());
         response.setData(result.getModelData());
@@ -20,11 +18,9 @@ class ControllerResponseMapper {
         response.getClientStateData().putAll(result.getClientState());
         response.getLocalStorageData().putAll(result.getLocalStorage());
         response.setTokens(result.getTokens());
-        if (result.getRedirectUrl() != null) {
-            response.setRedirectUrl(result.getRedirectUrl());
-        }
-        response.setStatus(result.isValidationFailed() ? 422 : 200);
-
+        response.setRedirectUrl(result.getRedirectUrl());
+        if (response.getStatus() < 1)
+            response.setStatus(result.isValidationFailed() ? 422 : 200);
         // TODO navigation test. reload widgets ? set widget in another container ?
     }
 }

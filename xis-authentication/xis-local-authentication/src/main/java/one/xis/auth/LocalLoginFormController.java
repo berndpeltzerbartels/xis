@@ -1,11 +1,12 @@
 package one.xis.auth;
 
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import one.xis.*;
 import one.xis.auth.idp.ExternalIDPService;
+import one.xis.auth.token.StateParameter;
 import one.xis.auth.token.TokenService;
-import one.xis.utils.http.HttpUtils;
 
 import java.util.Collection;
 import java.util.Map;
@@ -38,15 +39,14 @@ class LocalLoginFormController<U extends UserInfo> {
     }
 
     @FormData("login")
-    LocalLoginData createLoginFormData(@URLParameter("redirect_uri") String redirectUrl) {
-        return new LocalLoginData(null, null, redirectUrl);
+    LocalLoginData createLoginFormData(@URLParameter("redirect_uri") @NonNull String redirectUrl) {
+        return new LocalLoginData(null, null, StateParameter.create(redirectUrl));
     }
 
     @Action("login")
     public LocalLoginResponse login(@FormData("login") LocalLoginData login) {
         if (userInfoService.validateCredentials(login.getUsername(), login.getPassword())) {
-            var userInfo = userInfoService.getUserInfo(login.getUsername()).orElseThrow(IllegalStateException::new);
-            return new LocalLoginResponse(HttpUtils.localizeUrl(login.getRedirectUri()), tokenService.newTokens(userInfo));
+            return new LocalLoginResponse(login.getState(), ""); // TODO code generation
         }
         throw new IllegalStateException("Invalid username or password");
     }

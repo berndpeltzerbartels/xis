@@ -18,7 +18,7 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ServerResponse {
-    
+
     private transient int status;
     private Map<String, Object> data = new HashMap<>();
     private Map<String, Object> formData = new HashMap<>();

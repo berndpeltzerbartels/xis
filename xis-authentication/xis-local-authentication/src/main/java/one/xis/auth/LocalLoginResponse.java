@@ -1,29 +1,9 @@
 package one.xis.auth;
 
-import lombok.Data;
-import one.xis.auth.token.ApiTokens;
-import one.xis.server.RedirectControllerResponse;
-import one.xis.server.TokenResponse;
+import one.xis.server.RedirectResponse;
 
-import java.util.Map;
-
-@Data
-public class LocalLoginResponse implements RedirectControllerResponse, TokenResponse {
-    private final String redirectUrl;
-    private final ApiTokens apiTokens;
-
-    @Override
-    public String toString() {
-        return redirectUrl;
-    }
-
-    @Override
-    public String getRedirectUrl() {
-        return redirectUrl;
-    }
-
-    @Override
-    public Map<String, Object> getUrlParameters() {
-        return Map.of();
+public class LocalLoginResponse extends RedirectResponse {
+    public LocalLoginResponse(String state, String code) {
+        super("/xis/auth/callback/local?state=" + state + "&code=" + code);
     }
 }

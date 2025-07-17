@@ -29,6 +29,14 @@ public class StateParameter {
     }
 
     public static StateParameterPayload decodeAndVerify(String stateParameter) {
+        StateParameterPayload payload = decode(stateParameter);
+        if (payload.getExpiresAtSeconds() < System.currentTimeMillis() / 1000) {
+            throw new ExpiredStateParameterException();
+        }
+        return payload;
+    }
+
+    public static StateParameterPayload decode(@NonNull String stateParameter) {
         String[] parts = stateParameter.split("\\.");
         if (parts.length != 2) {
             throw new IllegalArgumentException("Invalid state parameter format");
@@ -40,11 +48,7 @@ public class StateParameter {
             throw new IllegalArgumentException("Invalid state parameter signature");
         }
         String payloadJson = new String(SecurityUtil.decodeBase64UrlSafe(encodedPayload), StandardCharsets.UTF_8);
-        StateParameterPayload payload = gson.fromJson(payloadJson, StateParameterPayload.class);
-        if (payload.getExpiresAtSeconds() < System.currentTimeMillis() / 1000) {
-            throw new ExpiredStateParameterException();
-        }
-        return payload;
+        return gson.fromJson(payloadJson, StateParameterPayload.class);
     }
 
     private static StateParameterPayload createStateParameterPayload(String urlAfterLogin) {

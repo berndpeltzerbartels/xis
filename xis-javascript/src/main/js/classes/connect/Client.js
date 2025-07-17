@@ -270,6 +270,7 @@ class Client {
         var obj = JSON.parse(content);
         var config = new ClientConfig();
         config.welcomePageId = obj.welcomePageId;
+        config.loginPage = obj.loginPage;
         config.pageIds = obj.pageIds ? obj.pageIds : [];
         config.widgetIds = obj.widgetIds ? obj.widgetIds : [];
         config.pageAttributes = {};
@@ -312,6 +313,7 @@ class Client {
         serverResponse.localStorageData = obj.localStorageData;
         serverResponse.clientStateData = obj.clientStateData;
         serverResponse.widgetContainerId = obj.widgetContainerId;
+        serverResponse.redirectUrl = obj.redirectUrl;
         data.setValue(['state'], serverResponse.clientStateData);
         data.setValue(['localStorage'], serverResponse.localStorageData);
         data.setValue(['validation'], obj.validatorMessages);

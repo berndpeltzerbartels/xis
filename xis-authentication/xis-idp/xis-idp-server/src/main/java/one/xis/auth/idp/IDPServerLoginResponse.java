@@ -3,6 +3,7 @@ package one.xis.auth.idp;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import one.xis.server.RedirectControllerResponse;
+import one.xis.server.RedirectResponse;
 
 import java.util.Map;
 
@@ -32,6 +33,11 @@ public class IDPServerLoginResponse implements RedirectControllerResponse {
             sb.append("code=").append(code).append("&state=").append(state);
         }
         return sb.toString();
+    }
+
+    @Override
+    public RedirectResponse getRedirect() {
+        return null;
     }
 
     @Override

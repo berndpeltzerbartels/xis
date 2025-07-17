@@ -1,7 +1,5 @@
 package one.xis.server;
 
-import one.xis.utils.http.HttpUtils;
-
 import java.util.Map;
 
 /**
@@ -23,7 +21,8 @@ public interface RedirectControllerResponse {
      *
      * @return The redirect URL.
      */
-    String getRedirectUrl();
+    RedirectResponse getRedirect();
+
 
     /**
      * Gets any parameters that should be appended to the redirect URL as a query string.
@@ -32,8 +31,5 @@ public interface RedirectControllerResponse {
      */
     Map<String, Object> getUrlParameters();
 
-    default String getRedirectUrlWithParameters() {
-        return HttpUtils.appendQueryParameters(getRedirectUrl(), getUrlParameters());
-    }
-    
+
 }

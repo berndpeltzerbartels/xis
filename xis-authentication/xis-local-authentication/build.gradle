@@ -26,6 +26,7 @@ dependencies {
     api(project(":xis-authentication:xis-idp:xis-external-idp"))
     compileOnly(project(":xis-validation"))
     compileOnly(project(":xis-http-controller"))
+    compileOnly(project(":xis-resources"))
 
 
     // Annotation processors

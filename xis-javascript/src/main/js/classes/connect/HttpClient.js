@@ -13,6 +13,7 @@ class HttpClient extends Client {
     constructor(httpConnector, tokenManager) {
         super(tokenManager);
         this.httpConnector = httpConnector;
+        this.resolvedURL = undefined;
     }
 
     async loadConfig() {
@@ -38,128 +39,101 @@ class HttpClient extends Client {
     }
 
     async loadWidget(widgetId) {
-        const headers = await this.authenticationHeader();
-        headers.uri = widgetId;
-        const response = await this.httpConnector.get('/xis/widget/html', headers);
+        const response = await this.httpConnector.get('/xis/widget/html', { uri: widgetId });
         return response.responseText;
     }
 
-    async loadPageData(resolvedURL, queryParameters) {
-        const request = this.createPageRequest(resolvedURL, null, null);
-        const headers = await this.authenticationHeader();
-        const response = await this.httpConnector.post('/xis/page/model', request, headers);
-        if (this.handleRedirect(response)) {
+
+    async handleResponse(response) {
+        if (this.serverError(response)) {
+            this.handleServerError(response); // TODO use errorhandler
             return Promise.reject();
         }
-        return this.deserializeResponse(response);
+        if (this.isRedirect(response)) {
+            // follow redirect in browser
+            return Promise.reject();
+        }
+
+        if (this.authorizationRequired(response)) {
+            this.forwardToLoginPage();
+            return Promise.reject();
+        }
+        var responseObject = this.deserializeResponse(response);
+        if (responseObject.redirectUrl) {
+            this.forward(responseObject.redirectUrl);
+            return Promise.reject();
+        }
+        return Promise.resolve(responseObject);
+    }
+
+    async loadPageData(resolvedURL) {
+        this.resolvedURL = resolvedURL;
+        const request = this.createPageRequest(resolvedURL, null, null);
+        const response = await this.httpConnector.post('/xis/page/model', request, {});
+        return this.handleResponse(response);
     }
 
     async loadWidgetData(widgetInstance, widgetState) {
         const request = this.createWidgetRequest(widgetInstance, widgetState, null, null, null);
-        const headers = await this.authenticationHeader();
-        const response = await this.httpConnector.post('/xis/widget/model', request, headers);
-        if (this.handleRedirect(response)) {
-            return Promise.reject();
-        }
-        return this.deserializeResponse(response);
+        const response = await this.httpConnector.post('/xis/widget/model', request, {});
+        return this.handleResponse(response);
     }
 
     async loadFormData(resolvedURL, widgetId, formBindingKey, formBindingParameters) {
         const request = this.createFormRequest(resolvedURL, widgetId, {}, null, formBindingKey, formBindingParameters);
-        const headers = await this.authenticationHeader();
-        const response = await this.httpConnector.post('/xis/form/model', request, headers);
-        if (this.handleRedirect(response)) {
-            return Promise.reject();
-        }
-        return this.deserializeResponse(response);
+        const response = await this.httpConnector.post('/xis/form/model', request, {});
+        return this.handleResponse(response);
     }
 
     async widgetLinkAction(widgetInstance, widgetState, action, actionParameters) {
         const request = this.createWidgetRequest(widgetInstance, widgetState, action, {}, actionParameters);
         const headers = await this.authenticationHeader();
         const response = await this.httpConnector.post('/xis/widget/action', request, headers);
-        if (this.handleRedirect(response)) {
-            return Promise.reject();
-        }
-        return this.deserializeResponse(response);
+        return this.handleResponse(response);
     }
 
     async pageLinkAction(resolvedURL, action, actionParameters) {
         const request = this.createPageRequest(resolvedURL, {}, action, actionParameters);
         const headers = await this.authenticationHeader();
         const response = await this.httpConnector.post('/xis/page/action', request, headers);
-        if (this.handleRedirect(response)) {
-            return Promise.reject();
-        }
-        return this.deserializeResponse(response);
+        return this.handleResponse(response);
     }
 
     async formAction(resolvedURL, widgetId, formData, action, formBindigKey, formBindingParameters) {
         const request = this.createFormRequest(resolvedURL, widgetId, formData, action, formBindigKey, formBindingParameters);
-        const headers = await this.authenticationHeader();
-        const response = await this.httpConnector.post('/xis/form/action', request, headers);
-        debugger;
-        const cookies = this.readCookies(response);
-        if (response.getResponseHeader('X-Access-Token')) {
-            this.tokenManager.setAccessToken(response.getResponseHeader('X-Access-Token'));
-        }
-        if (this.handleRedirect(response)) {
-            return Promise.reject();
-        }
-        return this.deserializeResponse(response);
+        const response = await this.httpConnector.post('/xis/form/action', request, {});
+        return this.handleResponse(response);
     }
 
-
-    handleRedirect(response) {
-        const location = response.getResponseHeader('X-Redirect-Location');
-        if (location) {
-            app.pageController.displayPageForUrl(location);
-            return true;
-        }
-        return false;
-    }
 
     async sendRenewTokenRequest(renewToken) {
         const response = await this.httpConnector.post('/xis/token/renew', { Authorization: 'Bearer ' + renewToken, renewToken: renewToken }, {});
         return this.deserializeResponse(response);
     }
 
-    /**
-     * @private
-     * Returns the authentication header for the current user.
-     * This header is used for all requests that require authentication.
-     * 
-     * @returns {Promise<Object>} The authentication header with the access token.
-     */
-    async authenticationHeader() {
-        debugger;
-        const token = await this.tokenManager.actualAccessToken();
-        const header = {};
-        if (token) {
-            header['Authorization'] = 'Bearer ' + token;
-        }
-        return header;
+    forwardToLoginPage() {
+        var redirectUri = this.resolvedURL ? this.resolvedURL.toURL() : "/";
+        this.forward(this.config.loginPage + '?redirect_uri=' + encodeURIComponent(redirectUri));
     }
 
-    /**
-   * Liest alle Cookies aus dem Set-Cookie-Header der Response und gibt ein Objekt mit Key-Value-Paaren zurück.
-   * @param {XMLHttpRequest} response - Die XMLHttpRequest-Response
-   * @returns {Object} - Objekt mit Cookie-Namen als Keys und deren Werte als Values
-   */
-    readCookies(response) {
-        const allHeaders = response.getAllResponseHeaders();
-        const setCookieHeaders = allHeaders
-            .split('\r\n')
-            .filter(header => header.toLowerCase().startsWith('set-cookie:'));
+    forward(redirectUri) {
+        window.location.href = redirectUri;
+    }
 
-        const cookieObj = {};
-        for (const header of setCookieHeaders) {
-            const cookieString = header.substring('set-cookie:'.length).trim();
-            const [name, ...rest] = cookieString.split('=');
-            if (name && rest.length > 0) {
-                cookieObj[name] = rest.join('=').split(';')[0]; // Nur den Wert vor dem ersten Semikolon nehmen
-            }
-        }
-        return cookieObj;
+    authorizationRequired(response) {
+        return response.status === 401 || response.status === 403;
+    }
+
+    serverError(response) {
+        return response.status >= 500 && response.status < 600;
+    }
+
+    isRedirect(response) {
+        return response.status == 302 || response.status == 303 || response.status == 307 || response.status == 308;
+    }
+
+    handleServerError(response) {
+        console.error('Server error occurred:', response);
+        // Optionally, you can redirect to an error page or show a user-friendly message
     }
 }

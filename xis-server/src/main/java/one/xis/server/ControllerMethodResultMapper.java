@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import one.xis.*;
 import one.xis.context.XISComponent;
 import one.xis.deserialize.PostProcessingResult;
-import one.xis.security.LocalLoginResponse;
 import one.xis.validation.ValidatorMessageResolver;
 
 import java.lang.reflect.Method;
@@ -31,12 +30,8 @@ class ControllerMethodResultMapper {
             mapWidgetResponse(widgetResponse, controllerMethodResult);
         } else if (returnValue instanceof Class<?> controllerClass) {
             updateController(controllerMethodResult, controllerClass, emptyMap());
-        } else if (returnValue instanceof RedirectControllerResponse redirectControllerResponse) {
-            if (redirectControllerResponse instanceof LocalLoginResponse loginResponse) {
-                controllerMethodResult.setTokens(loginResponse.getTokens());
-            }
-            controllerMethodResult.setRedirectUrl(redirectControllerResponse.getRedirectUrl());
-            controllerMethodResult.getUrlParameters().putAll(redirectControllerResponse.getUrlParameters());
+        } else if (returnValue instanceof RedirectResponse redirect) {
+            controllerMethodResult.setRedirectUrl(redirect.getRedirectUrl());
         }
         if (returnValue instanceof TokenResponse) {
             controllerMethodResult.setTokens(((TokenResponse) returnValue).getApiTokens());

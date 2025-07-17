@@ -45,7 +45,7 @@ public class ResponseEntity<T> {
         return new ResponseEntity<>(404);
     }
 
-    public static ResponseEntity<?> status(int statusCode) {
+    public static <T> ResponseEntity<T> status(int statusCode) {
         return new ResponseEntity<>(null, statusCode);
     }
 

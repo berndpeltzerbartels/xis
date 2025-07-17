@@ -3,9 +3,11 @@ package one.xis.server;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import one.xis.auth.AuthenticationException;
+import one.xis.auth.token.ApiTokens;
 import one.xis.http.*;
+import org.tinylog.Logger;
 
-import java.time.Duration;
 import java.util.Map;
 
 @Controller
@@ -21,50 +23,75 @@ public class MainController {
     }
 
     @Post("/xis/page/model")
-    public ResponseEntity<?> getPageModel(@RequestBody ClientRequest request, @BearerToken(optional = true) String accessToken, HttpRequest httpRequest) {
+    public ResponseEntity<?> getPageModel(@RequestBody ClientRequest request, @CookieValue("access_token") String accessToken, HttpRequest httpRequest) {
         request.setAccessToken(accessToken);
         request.setLocale(httpRequest.getLocale());
-        ServerResponse serverResponse = frontendService.processModelDataRequest(request);
-        return responseEntity(serverResponse);
+        try {
+            return responseEntity(frontendService.processModelDataRequest(request)); // TODO ControllerAdvice
+        } catch (AuthenticationException e) {
+            Logger.error("Authentication error: {}", e.getMessage());
+            return authenticationErrorResponse(request);
+        }
     }
 
     @Post("/xis/form/model")
     public ResponseEntity<?> getFormModel(@RequestBody ClientRequest request, @BearerToken(optional = true) String accessToken, HttpRequest httpRequest) {
         request.setAccessToken(accessToken);
         request.setLocale(httpRequest.getLocale());
-        ServerResponse serverResponse = frontendService.processFormDataRequest(request);
-        return responseEntity(serverResponse);
+        try {
+            return responseEntity(frontendService.processFormDataRequest(request));
+        } catch (AuthenticationException e) {
+            Logger.error("Authentication error: {}", e.getMessage());
+            return authenticationErrorResponse(request);
+        }
     }
 
     @Post("/xis/widget/model")
     public ResponseEntity<?> getWidgetModel(@RequestBody ClientRequest request, @BearerToken(optional = true) String accessToken, HttpRequest httpRequest) {
         request.setAccessToken(accessToken);
         request.setLocale(httpRequest.getLocale());
-        ServerResponse serverResponse = frontendService.processModelDataRequest(request);
-        return responseEntity(serverResponse);
+        try {
+            return responseEntity(frontendService.processModelDataRequest(request));
+        } catch (AuthenticationException e) {
+            Logger.error("Authentication error: {}", e.getMessage());
+            return authenticationErrorResponse(request);
+        }
     }
 
     @Post("/xis/page/action")
     public ResponseEntity<?> onPageLinkAction(@RequestBody ClientRequest request, @BearerToken(optional = true) String accessToken, HttpRequest httpRequest) {
         request.setAccessToken(accessToken);
         request.setLocale(httpRequest.getLocale());
-        ServerResponse serverResponse = frontendService.processActionRequest(request);
-        return responseEntity(serverResponse);
+        try {
+            return responseEntity(frontendService.processActionRequest(request));
+        } catch (AuthenticationException e) {
+            Logger.error("Authentication error: {}", e.getMessage());
+            return authenticationErrorResponse(request);
+        }
     }
 
     @Post("/xis/widget/action")
     public ResponseEntity<?> onWidgetLinkAction(@RequestBody ClientRequest request, @BearerToken(optional = true) String accessToken, HttpRequest httpRequest) {
         request.setAccessToken(accessToken);
         request.setLocale(httpRequest.getLocale());
-        ServerResponse serverResponse = frontendService.processActionRequest(request);
-        return responseEntity(serverResponse);
+        try {
+            return responseEntity(frontendService.processActionRequest(request));
+        } catch (AuthenticationException e) {
+            Logger.error("Authentication error: {}", e.getMessage());
+            return authenticationErrorResponse(request);
+        }
     }
 
     @Post("/xis/form/action")
     public ResponseEntity<?> onFormAction(@RequestBody ClientRequest request, @BearerToken(optional = true) String accessToken, HttpRequest httpRequest) {
         request.setAccessToken(accessToken);
         request.setLocale(httpRequest.getLocale());
-        return responseEntity(frontendService.processActionRequest(request));
+        try {
+            return responseEntity(frontendService.processActionRequest(request));
+        } catch (AuthenticationException e) {
+            Logger.error("Authentication error: {}", e.getMessage());
+            return authenticationErrorResponse(request);
+        }
     }
 
     @Get("/xis/page/head")
@@ -112,98 +139,34 @@ public class MainController {
         return ResponseEntity.ok(frontendService.getBundleJs());
     }
 
+    private ResponseEntity<?> authenticationErrorResponse(ClientRequest request) {
+        ServerResponse serverResponse = new ServerResponse();
+        serverResponse.setStatus(401);
+        return responseEntity(serverResponse);
+    }
+
     private ResponseEntity<?> responseEntity(ServerResponse serverResponse) {
-        ResponseEntity<?> entity = ResponseEntity.status(serverResponse.getStatus(), serverResponse);
-        if (serverResponse.getTokens() != null) {
-            addAccessTokenXHeader(entity, serverResponse.getTokens().getAccessToken());
-            addRenewTokenHeader(entity, serverResponse.getTokens().getRenewToken(), serverResponse.getTokens().getAccessTokenExpiresIn());
-        }
+        ResponseEntity<?> entity;
         if (serverResponse.getRedirectUrl() != null) {
-            return entity.addHeader("X-Redirect-Location", serverResponse.getRedirectUrl());
+            entity = ResponseEntity.redirect(serverResponse.getRedirectUrl());
+        } else {
+            entity = ResponseEntity.status(serverResponse.getStatus()).body(serverResponse);
+        }
+        if (serverResponse.getTokens() != null) {
+            addTokenHeaders(entity, serverResponse.getTokens());
         }
         return entity;
     }
 
-    private void addAccessTokenXHeader(@NonNull ResponseEntity<?> entity, String accessToken) {
-        entity.addHeader("X-Access-Token", accessToken);
-    }
 
-    private void addRenewTokenHeader(@NonNull ResponseEntity<?> entity, String renewToken, Duration renewTokenExpiresIn) {
+    private void addTokenHeaders(@NonNull ResponseEntity<?> entity, ApiTokens tokens) {
         if (localUrlHolder.isSecure()) {
-            //entity.addSecureCookie("access_token", tokens.getAccessToken(), tokens.getAccessTokenExpiresIn());
-            entity.addSecureCookie("refresh_token", renewToken, renewTokenExpiresIn);
+            entity.addSecureCookie("access_token", tokens.getAccessToken(), tokens.getAccessTokenExpiresIn());
+            entity.addSecureCookie("refresh_token", tokens.getRenewToken(), tokens.getRenewTokenExpiresIn());
         } else {
-            entity.addCookie("refresh_token", renewToken, renewTokenExpiresIn);
-            //entity.addCookie("refresh_token", tokens.getRenewToken(), tokens.getRenewTokenExpiresIn());
+            entity.addCookie("refresh_token", tokens.getRenewToken(), tokens.getRenewTokenExpiresIn());
+            entity.addCookie("refresh_token", tokens.getRenewToken(), tokens.getRenewTokenExpiresIn());
         }
     }
-
 }
 
-    /*
-
-    @Get("/.well-known/openid-configuration")
-    public ResponseEntity<String> getOpenIdConfiguration() {
-        return appContext.getOptionalSingleton(IDPFrontendService.class)
-                .map(idp -> ResponseEntity.ok(idp.getOpenIdConfigJson()))
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    @Get("/.well-known/jwks.json")
-    public ResponseEntity<String> getIdpPublicKey() {
-        return appContext.getOptionalSingleton(IDPFrontendService.class)
-                .map(idp -> ResponseEntity.ok(idp.getPublicKey()))
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    @Get("/auth/callback/{idpId}")
-    public ResponseEntity<?> authenticationCallback(@RequestParam("code") String code, @RequestParam("state") String state) {
-        TokensAndUrl tokensAndUrl = frontendService.authenticationCallback(code, state);
-        ResponseEntity.Builder<?> builder = ResponseEntity.status(302).header("Location", tokensAndUrl.getUrl());
-        addTokenCookies(builder, tokensAndUrl.getApiTokens());
-        return builder.build();
-    }
-
-    @Post(value = "/xis/auth/tokens", consumes = "application/x-www-form-urlencoded", produces = "application/json")
-    public ResponseEntity<?> getIdpTokens(@RequestBody String body) {
-        return appContext.getOptionalSingleton(IDPFrontendService.class)
-                .map(idpFrontendService -> {
-                    try {
-                        var idpResponse = idpFrontendService.provideTokens(body);
-                        var builder = ResponseEntity.ok(idpResponse.toOAuth2Response());
-                        addTokenCookies(builder, idpResponse.getApiTokens());
-                        return builder.build();
-                    } catch (Exception e) {
-                        return ResponseEntity.status(400).body(e.getMessage());
-                    }
-                })
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    private ResponseEntity<?> responseEntity(ServerResponse serverResponse) {
-        ResponseEntity.Builder<ServerResponse> builder = ResponseEntity.status(serverResponse.getStatus());
-        if (serverResponse.getTokens() != null) {
-            addTokenCookies(builder, serverResponse.getTokens());
-        }
-        if (serverResponse.getRedirectUrl() != null) {
-            return builder.header("X-Redirect-Location", serverResponse.getRedirectUrl()).build();
-        }
-        return builder.body(serverResponse);
-    }
-
-    private void addTokenCookies(@NonNull ResponseEntity.Builder<?> builder, @NonNull ApiTokens tokens) {
-        builder.cookie(createCookie("access_token", tokens.getAccessToken(), tokens.getAccessTokenExpiresIn()));
-        builder.cookie(createCookie("refresh_token", tokens.getRenewToken(), tokens.getRenewTokenExpiresIn()));
-    }
-
-    private Cookie createCookie(String name, String value, Duration maxAge) {
-        Cookie cookie = new Cookie(name, value);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setSameSite("Lax");
-        cookie.setMaxAge(maxAge.getSeconds());
-        cookie.setPath("/");
-        return cookie;
-    }
-
-     */

@@ -19,6 +19,7 @@ public class ClientConfig {
     private final Collection<String> pageIds;
     private final boolean useWebsockets; // TODO remove this, use websockets only if configured in server config
 
+    private final String loginPage;
     /**
      * Normalized path of the welcome-page.
      */
@@ -43,6 +44,7 @@ public class ClientConfig {
         private Collection<String> widgetIds = List.of();
         private Collection<String> pageIds = List.of();
         private boolean useWebsockets = false;
+        private String loginPage; // default login page, can be overridden by server config
 
         @Getter
         private String welcomePageId;
@@ -79,11 +81,17 @@ public class ClientConfig {
             return this;
         }
 
+        ClientConfigBuilder loginPage(String loginPage) {
+            this.loginPage = loginPage;
+            return this;
+        }
+
         ClientConfig build() {
             return new ClientConfig(
                     widgetIds,
                     pageIds,
                     useWebsockets,
+                    loginPage,
                     welcomePageId,
                     pageAttributes,
                     widgetAttributes
