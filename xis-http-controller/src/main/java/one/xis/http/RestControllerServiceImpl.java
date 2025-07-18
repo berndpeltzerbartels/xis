@@ -130,7 +130,6 @@ public class RestControllerServiceImpl implements RestControllerService {
         Object controllerInstance = context.controllerInstance();
         MethodMatchResult methodMatchResult = context.matchResult();
 
-        // Parameter vorbereiten
         Object[] args = prepareParameters(method, request, response, methodMatchResult);
 
         RequestContext.createInstance(request, response);
@@ -138,17 +137,25 @@ public class RestControllerServiceImpl implements RestControllerService {
         try {
             result = MethodUtils.invoke(controllerInstance, method, args);
         } catch (InvocationTargetException e) {
-            if (e.getTargetException() instanceof Exception exception) {
-                result = findExceptionHandler(exception)
-                        .map(handler -> handler.handleException(method, args, exception))
-                        .orElseThrow(() -> new RuntimeException("Unhandled exception in controller method: " + method.getName(), e));
-            } else {
-                throw new RuntimeException("Unexpected error invoking controller method: " + method.getName(), e);
-            }
+            result = handleControllerException(e, method, args);
         } finally {
             RequestContext.clear();
         }
         handleResponse(result, method, request, response);
+    }
+
+    private Object handleControllerException(InvocationTargetException e, Method method, Object[] args) {
+        Throwable targetException = e.getTargetException();
+        if (targetException instanceof RuntimeException runtimeException) {
+            throw runtimeException;
+        }
+        if (targetException instanceof Exception exception) {
+            return findExceptionHandler(exception)
+                    .map(handler -> handler.handleException(method, args, exception))
+                    .orElseThrow(() -> new RuntimeException("Unhandled exception in controller method: " + method.getName(), e));
+        } else {
+            throw new RuntimeException("Unexpected error invoking controller method: " + method.getName(), e);
+        }
     }
 
     @SuppressWarnings("unchecked")
