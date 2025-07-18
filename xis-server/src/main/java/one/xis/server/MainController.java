@@ -1,12 +1,8 @@
 package one.xis.server;
 
 
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import one.xis.auth.AuthenticationException;
-import one.xis.auth.token.ApiTokens;
 import one.xis.http.*;
-import org.tinylog.Logger;
 
 import java.util.Map;
 
@@ -15,7 +11,6 @@ import java.util.Map;
 public class MainController {
 
     private final FrontendService frontendService;
-    private final LocalUrlHolder localUrlHolder;
 
     @Get("/xis/config")
     public ResponseEntity<?> getComponentConfig() {
@@ -26,72 +21,42 @@ public class MainController {
     public ResponseEntity<?> getPageModel(@RequestBody ClientRequest request, @CookieValue("access_token") String accessToken, HttpRequest httpRequest) {
         request.setAccessToken(accessToken);
         request.setLocale(httpRequest.getLocale());
-        try {
-            return responseEntity(frontendService.processModelDataRequest(request)); // TODO ControllerAdvice
-        } catch (AuthenticationException e) {
-            Logger.error("Authentication error: {}", e.getMessage());
-            return authenticationErrorResponse(request);
-        }
+        return responseEntity(frontendService.processModelDataRequest(request));
     }
 
     @Post("/xis/form/model")
-    public ResponseEntity<?> getFormModel(@RequestBody ClientRequest request, @BearerToken(optional = true) String accessToken, HttpRequest httpRequest) {
+    public ResponseEntity<?> getFormModel(@RequestBody ClientRequest request, @CookieValue("access_token") String accessToken, HttpRequest httpRequest) {
         request.setAccessToken(accessToken);
         request.setLocale(httpRequest.getLocale());
-        try {
-            return responseEntity(frontendService.processFormDataRequest(request));
-        } catch (AuthenticationException e) {
-            Logger.error("Authentication error: {}", e.getMessage());
-            return authenticationErrorResponse(request);
-        }
+        return responseEntity(frontendService.processFormDataRequest(request));
     }
 
     @Post("/xis/widget/model")
-    public ResponseEntity<?> getWidgetModel(@RequestBody ClientRequest request, @BearerToken(optional = true) String accessToken, HttpRequest httpRequest) {
+    public ResponseEntity<?> getWidgetModel(@RequestBody ClientRequest request, @CookieValue("access_token") String accessToken, HttpRequest httpRequest) {
         request.setAccessToken(accessToken);
         request.setLocale(httpRequest.getLocale());
-        try {
-            return responseEntity(frontendService.processModelDataRequest(request));
-        } catch (AuthenticationException e) {
-            Logger.error("Authentication error: {}", e.getMessage());
-            return authenticationErrorResponse(request);
-        }
+        return responseEntity(frontendService.processModelDataRequest(request));
     }
 
     @Post("/xis/page/action")
-    public ResponseEntity<?> onPageLinkAction(@RequestBody ClientRequest request, @BearerToken(optional = true) String accessToken, HttpRequest httpRequest) {
+    public ResponseEntity<?> onPageLinkAction(@RequestBody ClientRequest request, @CookieValue("access_token") String accessToken, HttpRequest httpRequest) {
         request.setAccessToken(accessToken);
         request.setLocale(httpRequest.getLocale());
-        try {
-            return responseEntity(frontendService.processActionRequest(request));
-        } catch (AuthenticationException e) {
-            Logger.error("Authentication error: {}", e.getMessage());
-            return authenticationErrorResponse(request);
-        }
+        return responseEntity(frontendService.processActionRequest(request));
     }
 
     @Post("/xis/widget/action")
-    public ResponseEntity<?> onWidgetLinkAction(@RequestBody ClientRequest request, @BearerToken(optional = true) String accessToken, HttpRequest httpRequest) {
+    public ResponseEntity<?> onWidgetLinkAction(@RequestBody ClientRequest request, @CookieValue("access_token") String accessToken, HttpRequest httpRequest) {
         request.setAccessToken(accessToken);
         request.setLocale(httpRequest.getLocale());
-        try {
-            return responseEntity(frontendService.processActionRequest(request));
-        } catch (AuthenticationException e) {
-            Logger.error("Authentication error: {}", e.getMessage());
-            return authenticationErrorResponse(request);
-        }
+        return responseEntity(frontendService.processActionRequest(request));
     }
 
     @Post("/xis/form/action")
-    public ResponseEntity<?> onFormAction(@RequestBody ClientRequest request, @BearerToken(optional = true) String accessToken, HttpRequest httpRequest) {
+    public ResponseEntity<?> onFormAction(@RequestBody ClientRequest request, @CookieValue("access_token") String accessToken, HttpRequest httpRequest) {
         request.setAccessToken(accessToken);
         request.setLocale(httpRequest.getLocale());
-        try {
-            return responseEntity(frontendService.processActionRequest(request));
-        } catch (AuthenticationException e) {
-            Logger.error("Authentication error: {}", e.getMessage());
-            return authenticationErrorResponse(request);
-        }
+        return responseEntity(frontendService.processActionRequest(request));
     }
 
     @Get("/xis/page/head")
@@ -139,34 +104,11 @@ public class MainController {
         return ResponseEntity.ok(frontendService.getBundleJs());
     }
 
-    private ResponseEntity<?> authenticationErrorResponse(ClientRequest request) {
-        ServerResponse serverResponse = new ServerResponse();
-        serverResponse.setStatus(401);
-        return responseEntity(serverResponse);
-    }
-
     private ResponseEntity<?> responseEntity(ServerResponse serverResponse) {
-        ResponseEntity<?> entity;
         if (serverResponse.getRedirectUrl() != null) {
-            entity = ResponseEntity.redirect(serverResponse.getRedirectUrl());
-        } else {
-            entity = ResponseEntity.status(serverResponse.getStatus()).body(serverResponse);
+            return ResponseEntity.redirect(serverResponse.getRedirectUrl());
         }
-        if (serverResponse.getTokens() != null) {
-            addTokenHeaders(entity, serverResponse.getTokens());
-        }
-        return entity;
-    }
-
-
-    private void addTokenHeaders(@NonNull ResponseEntity<?> entity, ApiTokens tokens) {
-        if (localUrlHolder.isSecure()) {
-            entity.addSecureCookie("access_token", tokens.getAccessToken(), tokens.getAccessTokenExpiresIn());
-            entity.addSecureCookie("refresh_token", tokens.getRenewToken(), tokens.getRenewTokenExpiresIn());
-        } else {
-            entity.addCookie("refresh_token", tokens.getRenewToken(), tokens.getRenewTokenExpiresIn());
-            entity.addCookie("refresh_token", tokens.getRenewToken(), tokens.getRenewTokenExpiresIn());
-        }
+        return ResponseEntity.status(serverResponse.getStatus()).body(serverResponse);
     }
 }
 

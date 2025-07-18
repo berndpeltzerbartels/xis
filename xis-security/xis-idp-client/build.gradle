@@ -1,0 +1,45 @@
+plugins {
+    id 'java'
+}
+
+group = 'one.xis'
+version = '0.1.1'
+
+repositories {
+    mavenCentral()
+}
+
+var lombokVersion = rootProject.ext.libraryVersions.lombok
+var reflectionsVersion = rootProject.ext.libraryVersions.reflections
+var jacksonDatabindVersion = rootProject.ext.libraryVersions.jacksonDatabind
+var gsonVersion = rootProject.ext.gsonVersion
+var junitVersion = "5.7.0"
+
+
+dependencies {
+
+    implementation project(':xis-context')
+    implementation project(':xis-adapter-spi')
+    implementation project(':xis-util')
+    implementation project(':xis-http-client')
+    implementation project(':xis-controller-api')
+    implementation project(':xis-security:xis-idp')
+    implementation project(':xis-security:xis-token')
+    implementation project(':xis-security')
+
+    implementation 'com.nimbusds:nimbus-jose-jwt:9.39.1'
+
+
+    // Gson dependency
+    implementation "com.google.code.gson:gson:$gsonVersion"
+    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+    implementation "org.projectlombok:lombok:$lombokVersion"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+    useJUnitPlatform()
+}

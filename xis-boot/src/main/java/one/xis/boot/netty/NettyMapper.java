@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import one.xis.auth.token.ApiTokens;
 import one.xis.auth.token.ApiTokensAndUrl;
 import one.xis.context.XISComponent;
-import one.xis.server.BearerTokens;
 import one.xis.server.ClientConfig;
 import one.xis.server.ClientRequest;
 import one.xis.server.ServerResponse;
@@ -30,20 +29,10 @@ public class NettyMapper {
     }
 
     public FullHttpResponse toFullHttpResponse(ServerResponse serverResponse) throws IOException {
-        DefaultFullHttpResponse response = new DefaultFullHttpResponse(
+        return new DefaultFullHttpResponse(
                 HttpVersion.HTTP_1_1,
                 HttpResponseStatus.valueOf(serverResponse.getStatus()),
                 copiedBuffer(objectMapper.writeValueAsString(serverResponse), StandardCharsets.UTF_8));
-
-        if (serverResponse.getTokens() != null) {
-            long accessTokenMaxAge = serverResponse.getTokens().getAccessTokenExpiresIn().getSeconds();
-            long renewTokenMaxAge = serverResponse.getTokens().getRenewTokenExpiresIn().getSeconds();
-
-            response.headers().add(HttpHeaderNames.SET_COOKIE, createCookie("access_token", serverResponse.getTokens().getAccessToken(), accessTokenMaxAge));
-            response.headers().add(HttpHeaderNames.SET_COOKIE, createCookie("refresh_token", serverResponse.getTokens().getRenewToken(), renewTokenMaxAge));
-        }
-
-        return response;
     }
 
     public FullHttpResponse toFullHttpResponse(ClientConfig clientConfig) throws IOException {
@@ -87,18 +76,7 @@ public class NettyMapper {
                 HttpResponseStatus.OK,
                 Unpooled.wrappedBuffer(content));
     }
-
-    public FullHttpResponse toFullHttpResponse(BearerTokens tokens) {
-        long accessTokenMaxAge = tokens.getAccessTokenExpiresIn().getSeconds();
-        long renewTokenMaxAge = tokens.getRenewTokenExpiresIn().getSeconds();
-        DefaultFullHttpResponse response = new DefaultFullHttpResponse(
-                HttpVersion.HTTP_1_1,
-                HttpResponseStatus.CREATED
-        );
-        response.headers().add(HttpHeaderNames.SET_COOKIE, createCookie("access_token", tokens.getAccessToken(), accessTokenMaxAge));
-        response.headers().add(HttpHeaderNames.SET_COOKIE, createCookie("refresh_token", tokens.getRenewToken(), renewTokenMaxAge));
-        return response;
-    }
+    
 
     public FullHttpResponse toRedirectWithCookies(String location, ApiTokensAndUrl authData) {
         long accessTokenMaxAge = authData.getApiTokens().getAccessTokenExpiresIn().getSeconds();

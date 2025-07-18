@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import one.xis.*;
 import one.xis.PathVariable;
 import one.xis.auth.AuthenticationException;
+import one.xis.auth.token.AccessToken;
 import one.xis.deserialize.MainDeserializer;
 import one.xis.deserialize.PostProcessingResults;
 import one.xis.http.HttpRequest;
@@ -43,13 +44,13 @@ class ControllerMethodParameter {
         } else if (parameter.isAnnotationPresent(URLParameter.class)) {
             return deserializeUrlParameter(parameter, request, postProcessingResults, accessToken);
         } else if (parameter.isAnnotationPresent(one.xis.PathVariable.class)) {
-            return deserializePathVariable(parameter, request, postProcessingResults, accessToken);
+            return deserializePathVariable(parameter, request, postProcessingResults);
         } else if (parameter.isAnnotationPresent(WidgetParameter.class)) {
-            return deserializeWidgetParameter(parameter, request, postProcessingResults, accessToken);
+            return deserializeWidgetParameter(parameter, request, postProcessingResults);
         } else if (parameter.isAnnotationPresent(ActionParameter.class)) {
             var key = parameter.getAnnotation(ActionParameter.class).value();
             var paramValue = request.getActionParameters().get(key);
-            return deserializeParameter(paramValue, request, parameter, postProcessingResults, accessToken);
+            return deserializeParameter(paramValue, request, parameter, postProcessingResults);
         } else if (parameter.isAnnotationPresent(RequestScope.class)) {
             var key = parameter.getAnnotation(RequestScope.class).value();
             var paramValue = requestScope.get(key);
@@ -60,11 +61,11 @@ class ControllerMethodParameter {
         } else if (parameter.isAnnotationPresent(ClientState.class)) {
             var key = parameter.getAnnotation(ClientState.class).value();
             var paramValue = request.getClientStateData().get(key);
-            return deserializeParameter(paramValue, request, parameter, postProcessingResults, accessToken);
+            return deserializeParameter(paramValue, request, parameter, postProcessingResults);
         } else if (parameter.isAnnotationPresent(LocalStorage.class)) {
             var key = parameter.getAnnotation(LocalStorage.class).value();
             var paramValue = request.getLocalStorageData().get(key);
-            return deserializeParameter(paramValue, request, parameter, postProcessingResults, accessToken);
+            return deserializeParameter(paramValue, request, parameter, postProcessingResults);
         } else {
             throw new IllegalStateException(method + ": parameter without annotation=" + parameter);
         }
@@ -112,13 +113,13 @@ class ControllerMethodParameter {
     private Object deserializeFormDataParameter(Parameter parameter, ClientRequest request, PostProcessingResults postProcessingResults, AccessToken accessToken) throws IOException {
         var key = parameter.getAnnotation(FormData.class).value();
         var paramValue = request.getFormData().get(key);
-        return deserializeParameter(paramValue, request, parameter, postProcessingResults, accessToken);
+        return deserializeParameter(paramValue, request, parameter, postProcessingResults);
     }
 
     private Object deserializeUrlParameter(Parameter parameter, ClientRequest request, PostProcessingResults postProcessingResults, AccessToken accessToken) throws IOException {
         var key = parameter.getAnnotation(URLParameter.class).value();
         var paramValue = request.getUrlParameters().get(key);
-        var deserialized = deserializeParameter(paramValue, request, parameter, postProcessingResults, accessToken);
+        var deserialized = deserializeParameter(paramValue, request, parameter, postProcessingResults);
         if (deserialized instanceof String str) {
             try {
                 return URLDecoder.decode(str, StandardCharsets.UTF_8);
@@ -130,29 +131,29 @@ class ControllerMethodParameter {
         }
     }
 
-    private Object deserializePathVariable(Parameter parameter, ClientRequest request, PostProcessingResults postProcessingResults, AccessToken accessToken) throws IOException {
+    private Object deserializePathVariable(Parameter parameter, ClientRequest request, PostProcessingResults postProcessingResults) throws IOException {
         var key = parameter.getAnnotation(PathVariable.class).value();
         if (!request.getPathVariables().containsKey(key)) {
             throw new IllegalStateException("No path variable found for key " + key);
         }
         var paramValue = request.getPathVariables().get(key);
-        return deserializeParameter(paramValue, request, parameter, postProcessingResults, accessToken);
+        return deserializeParameter(paramValue, request, parameter, postProcessingResults);
     }
 
-    private Object deserializeWidgetParameter(Parameter parameter, ClientRequest request, PostProcessingResults postProcessingResults, AccessToken accessToken) throws IOException {
+    private Object deserializeWidgetParameter(Parameter parameter, ClientRequest request, PostProcessingResults postProcessingResults) throws IOException {
         var key = parameter.getAnnotation(WidgetParameter.class).value();
         if (!request.getBindingParameters().containsKey(key)) {
             throw new IllegalStateException("No widget parameter found for key " + key);
         }
         var paramValue = request.getBindingParameters().get(key);
-        return deserializeParameter(paramValue, request, parameter, postProcessingResults, accessToken);
+        return deserializeParameter(paramValue, request, parameter, postProcessingResults);
     }
 
-    private Object deserializeParameter(String jsonValue, ClientRequest request, Parameter parameter, PostProcessingResults postProcessingResults, AccessToken accessToken) throws IOException {
+    private Object deserializeParameter(String jsonValue, ClientRequest request, Parameter parameter, PostProcessingResults postProcessingResults) throws IOException {
         if (jsonValue == null) {
             return null;
         }
-        var userContext = new UserContextImpl(request.getLocale(), ZoneId.of(request.getZoneId()), request.getClientId(), accessToken);
+        var userContext = new UserContextImpl(request.getLocale(), ZoneId.of(request.getZoneId()), request.getClientId());
         return deserializer.deserialize(jsonValue, parameter, userContext, postProcessingResults);
     }
 

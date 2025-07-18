@@ -1,5 +1,6 @@
 package spring;
 
+import lombok.NonNull;
 import one.xis.auth.InvalidTokenException;
 import one.xis.auth.UserInfo;
 import one.xis.auth.UserInfoImpl;
@@ -17,12 +18,12 @@ public class SpringUserInfoService implements UserInfoService<UserInfo> {
     private final String password = "bla";
 
     @Override
-    public boolean validateCredentials(String userId, String password) {
+    public boolean validateCredentials(@NonNull String userId, @NonNull String password) {
         return userInfo.getUserId().equals(userId) && this.password.equals(password);
     }
 
     @Override
-    public Optional<UserInfo> getUserInfo(String userId) throws InvalidTokenException {
+    public Optional<UserInfo> getUserInfo(@NonNull String userId) throws InvalidTokenException {
         return Optional.ofNullable(userInfo.getUserId().equals(userId) ? userInfo : null);
     }
 

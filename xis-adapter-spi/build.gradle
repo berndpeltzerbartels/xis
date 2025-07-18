@@ -34,9 +34,7 @@ var junitVersion = "5.7.0"
 dependencies {
     implementation project(':xis-controller-api')
     implementation project(':xis-gson')
-    api project(':xis-authentication:xis-token')
     implementation project(':xis-util')
-    //implementation project(':xis-authentication:xis-idp')
     implementation "org.reflections:reflections:$reflectionsVersion"
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
     implementation "org.projectlombok:lombok:$lombokVersion"

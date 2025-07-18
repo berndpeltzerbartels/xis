@@ -1,7 +1,6 @@
 package one.xis.server;
 
 import lombok.Data;
-import one.xis.auth.token.ApiTokens;
 import one.xis.validation.ValidatorMessages;
 
 import java.util.Collection;
@@ -16,7 +15,6 @@ class ControllerMethodResult {
     private String nextPageId;
     private String nextWidgetId;
     private String widgetContainerId;
-    private ApiTokens tokens;
     private final Collection<String> widgetsToReload = new HashSet<>();
     private final Map<String, Object> widgetParameters = new HashMap<>();
     private final Map<String, Object> urlParameters = new HashMap<>();

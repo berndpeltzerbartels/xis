@@ -22,7 +22,7 @@ import static org.mockito.Mockito.*;
 @DisplayName("ControllerService Integration Test")
 class RestControllerServiceIntegrationTest {
 
-    private RestControllerService restControllerService;
+    private RestControllerServiceImpl restControllerService;
 
     @Mock
     private ResponseWriter responseWriter;
@@ -45,7 +45,7 @@ class RestControllerServiceIntegrationTest {
 
         @BeforeEach
         void setUp() {
-            restControllerService = new RestControllerService();
+            restControllerService = new RestControllerServiceImpl();
             // Injiziere Mocks und Spies manuell, da wir kein DI-Framework im Test haben
             FieldUtil.setFieldValue(restControllerService, "responseWriter", responseWriter);
             FieldUtil.setFieldValue(restControllerService, "controllers", List.of(testController));
@@ -272,7 +272,7 @@ class RestControllerServiceIntegrationTest {
                 controllers.add(new PerfController9());
             }
 
-            restControllerService = new RestControllerService();
+            restControllerService = new RestControllerServiceImpl();
             FieldUtil.setFieldValue(restControllerService, "responseWriter", responseWriter);
             FieldUtil.setFieldValue(restControllerService, "controllers", controllers);
 

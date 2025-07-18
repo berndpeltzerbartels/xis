@@ -1,0 +1,45 @@
+plugins {
+    id 'java'
+    id 'java-library'
+}
+
+group = 'one.xis'
+version = '0.1.1'
+
+var lombokVersion = rootProject.ext.libraryVersions.lombok
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation(project(":xis-context"))
+    implementation(project(":xis-util"))
+    implementation(project(":xis-security:xis-token"))
+    //runtimeOnly(project(":xis-security:xis-idp-server-impl"))
+    compileOnly(project(":xis-adapter-spi"))
+    compileOnly(project(":xis-controller-api"))
+    compileOnly(project(":xis-security:xis-idp"))
+    compileOnly(project(":xis-security"))
+    // compileOnly(project(":xis-security:xis-idp-server"))
+    implementation(project(":xis-security:xis-idp-client"))
+    api(project(":xis-security:xis-external-idp"))
+    compileOnly(project(":xis-validation"))
+    compileOnly(project(":xis-http-controller"))
+    compileOnly(project(":xis-resources"))
+
+
+    // Annotation processors
+    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+    testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"
+
+    // Implementation dependencies
+    implementation "org.projectlombok:lombok:$lombokVersion"
+
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+    useJUnitPlatform()
+}

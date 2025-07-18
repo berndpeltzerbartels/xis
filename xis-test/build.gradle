@@ -47,10 +47,10 @@ dependencies {
     implementation project(':xis-adapter-spi')
     implementation project(':xis-gson')
     implementation project(':xis-javascript')
-    compileOnly project(":xis-authentication:xis-idp:xis-idp-client")
-    implementation project(":xis-authentication:xis-idp:xis-idp-client-impl")
-    api(project(':xis-authentication'))
-    implementation project(':xis-authentication:xis-local-authentication')
+    compileOnly project(":xis-security:xis-idp-client")
+    implementation project(":xis-security:xis-idp-client-impl")
+    api(project(':xis-security'))
+    implementation project(':xis-security:xis-authentication')
 
     // Annotation processors
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"

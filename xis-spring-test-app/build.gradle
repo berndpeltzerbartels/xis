@@ -34,11 +34,10 @@ dependencies {
 
     implementation project(':xis-spring')
     //implementation project(':xis-idp')
-    //runtimeOnly project(':xis-idp:xis-idp-server-impl')
-    // compileOnly project(':xis-idp:xis-idp-server')
+    //runtimeOnly project(':xis-idp-server-impl')
+    // compileOnly project(':xis-idp-server')
     implementation project(':xis-test')
-    implementation(project(":xis-authentication:xis-local-authentication"))
-    implementation(project(":xis-authentication"))
+    implementation(project(":xis-security"))
 
     // implementation "org.slf4j:slf4j-api:1.7.32"
 

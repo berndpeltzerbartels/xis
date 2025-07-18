@@ -37,11 +37,11 @@ public class MethodUtils {
         return String.format("%s(%s)", method.getName(), parameterString(method));
     }
 
-    public static Object invoke(Object o, Method method, Object[] args) {
+    public static Object invoke(Object o, Method method, Object[] args) throws InvocationTargetException {
         try {
             method.setAccessible(true);
             return method.invoke(o, args);
-        } catch (IllegalAccessException | InvocationTargetException e) {
+        } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
     }

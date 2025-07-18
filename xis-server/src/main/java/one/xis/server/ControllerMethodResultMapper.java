@@ -33,9 +33,6 @@ class ControllerMethodResultMapper {
         } else if (returnValue instanceof RedirectResponse redirect) {
             controllerMethodResult.setRedirectUrl(redirect.getRedirectUrl());
         }
-        if (returnValue instanceof TokenResponse) {
-            controllerMethodResult.setTokens(((TokenResponse) returnValue).getApiTokens());
-        }
         if (method.isAnnotationPresent(ModelData.class)) {
             mapModelResult(method.getAnnotation(ModelData.class).value(), returnValue, controllerMethodResult);
         }

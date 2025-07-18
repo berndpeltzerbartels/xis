@@ -1,82 +1,36 @@
 plugins {
     id 'java'
     id 'java-library'
-    id 'maven-publish'
-    id 'signing'
 }
 
-group = rootProject.ext.projectGroup
-version = rootProject.ext.projectVersion
-
-tasks.withType(JavaCompile) {
-    sourceCompatibility = rootProject.ext.javaVersion.toString()
-    targetCompatibility = rootProject.ext.javaVersion.toString()
-}
-
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(rootProject.ext.javaVersionInt)
-    }
-    withSourcesJar()
-    withJavadocJar()
-}
+group = 'one.xis'
+version = '0.1.1'
 
 repositories {
     mavenCentral()
 }
 
-// Local variables for versions
 var lombokVersion = rootProject.ext.libraryVersions.lombok
-var junitVersion = "5.7.0"
-var gsonVersion = "2.10.1"
 
 dependencies {
-
-    // Local project dependencies
-    compileOnly(project(":xis-deserializer"))
-    compileOnly(project(":xis-resources"))
-    implementation(project(":xis-context"))
-    implementation(project(":xis-util"))
+    compileOnly(project(":xis-context"))
+    compileOnly(project(":xis-gson"))
+    compileOnly(project(":xis-util"))
     compileOnly(project(":xis-adapter-spi"))
     compileOnly(project(":xis-controller-api"))
-    compileOnly(project(":xis-authentication"))
-    compileOnly(project(":xis-authentication:xis-idp"))
-    compileOnly(project(":xis-authentication:xis-idp:xis-idp-client"))
-    compileOnly(project(":xis-authentication:xis-idp:xis-idp-server"))
-
-    // compileOnly(project(":xis-idp:xis-idp-server"))
-    compileOnly(project(":xis-authentication:xis-token"))
-    //implementation(project(":xis-authentication:xis-idp:xis-idp-client-impl"))
-
-    // Gson dependency
-    implementation "com.google.code.gson:gson:$gsonVersion"
-    implementation 'com.google.guava:guava:33.1.0-jre'
-
-
-    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
-    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
-    runtimeOnly 'io.jsonwebtoken:jjwt-gson:0.11.5' // nutzt Gson statt Jackson
+    compileOnly(project(":xis-validation"))
+    compileOnly(project(":xis-http-controller"))
+    compileOnly(project(":xis-resources"))
 
 
     // Lombok dependencies
     annotationProcessor("org.projectlombok:lombok:$lombokVersion")
-    implementation("org.projectlombok:lombok:$lombokVersion")
+    compileOnly("org.projectlombok:lombok:$lombokVersion")
 
-    // JUnit dependencies
-    testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
-    testImplementation "org.mockito:mockito-core:$mockitoVersion"
-    testImplementation("org.assertj:assertj-core:3.16.1")
-    testImplementation(project(":xis-adapter-spi"))
-
-    testCompileOnly(project(':xis-authentication'))
-    testCompileOnly(project(':xis-authentication:xis-idp:xis-idp-server'))
-//    testCompileOnly(project(':xis-authentication:xis-idp:xis-idp-server-impl'))
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
 }
 
 test {
     useJUnitPlatform()
-    afterTest { desc, result ->
-        logger.quiet "${desc.className} - ${desc.name}: ${result.resultType}"
-    }
 }

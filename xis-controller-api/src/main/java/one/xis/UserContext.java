@@ -5,14 +5,13 @@ import java.util.Locale;
 
 public interface UserContext {
 
+    String CONTEXT_KEY = "userContext";
 
     Locale getLocale();
-
-    String getUserId();
 
     ZoneId getZoneId();
 
     String getClientId();
 
-    AccessToken getAccessToken();
+
 }

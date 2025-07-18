@@ -94,11 +94,6 @@ public class BackendBridge implements ResourcePathProvider {
         } else {
             response = new BackendBridgeResponse(o.getRedirectUrl(), 302, o.getValidatorMessages());
         }
-        if (o.getTokens() != null) {
-            response.addResponseHeader("X-Access-Token", o.getTokens().getAccessToken());
-            response.addResponseHeader("Set-Cookie", "refresh_token=" + o.getTokens().getRenewToken() + "; HttpOnly; Secure; Path=/; SameSite=Strict");
-        }
-
         return response;
     }
 

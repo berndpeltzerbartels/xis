@@ -4,7 +4,6 @@ package one.xis.server;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import one.xis.auth.token.ApiTokens;
 import one.xis.validation.ValidatorMessages;
 
 import java.util.ArrayList;
@@ -31,7 +30,6 @@ public class ServerResponse {
     private ValidatorMessages validatorMessages = new ValidatorMessages();
     private boolean reloadPage; // TODO do we need this?
     private String widgetContainerId;
-    private transient ApiTokens tokens;
     private String redirectUrl;
 
     void clear() {
@@ -45,6 +43,5 @@ public class ServerResponse {
         validatorMessages = new ValidatorMessages();
         reloadPage = false;
         widgetContainerId = null;
-        tokens = null;
     }
 }

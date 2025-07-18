@@ -1,0 +1,43 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>one.xis</groupId>
+    <artifactId>xis-idp-server</artifactId>
+    <packaging>jar</packaging>
+
+    <name>XIS IDP-Server API</name>
+    <description>Public API for the XIS IDP-Server, which is a component of the XIS platform that provides identity
+        management and authentication services for applications built on the XIS framework. It allows applications to
+        authenticate users, manage user identities, and provide secure access to resources within the XIS ecosystem.
+        It can be used as an IDP server for any other application that supports OpenID Connect.
+    </description>
+    <url>https://github.com/berndpeltzerbartels/xis</url>
+
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <scm>
+        <url>https://github.com/berndpeltzerbartels/xis</url>
+        <connection>scm:git:https://github.com/berndpeltzerbartels/xis.git</connection>
+        <developerConnection>scm:git:git@github.com:berndpeltzerbartels/xis.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+
+    <developers>
+        <developer>
+            <id>bernd</id>
+            <name>Bernd Peltzer-Bartels</name>
+            <email>bernd@xis.one</email> <!-- Optional -->
+        </developer>
+    </developers>
+
+</project>

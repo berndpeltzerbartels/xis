@@ -2,13 +2,13 @@ package one.xis.server;
 
 
 import lombok.RequiredArgsConstructor;
-import one.xis.UserContextAccess;
+import one.xis.UserContext;
 import one.xis.UserContextImpl;
 import one.xis.auth.AuthenticationException;
-import one.xis.auth.token.AccessTokenCache;
-import one.xis.auth.token.AccessTokenWrapper;
+import one.xis.auth.token.AccessToken;
 import one.xis.context.XISComponent;
 import one.xis.context.XISInit;
+import one.xis.http.RequestContext;
 import one.xis.resource.Resource;
 import one.xis.resource.Resources;
 import org.tinylog.Logger;
@@ -53,32 +53,20 @@ public class FrontendServiceImpl implements FrontendService {
 
     @Override
     public ServerResponse processActionRequest(ClientRequest request) {
-        try {
-            addUserContext(request);
-            return applyFilterChain(request, controllerService::processActionRequest);
-        } finally {
-            removeUserContext();
-        }
+        addRequestAttributes(request);
+        return applyFilterChain(request, controllerService::processActionRequest);
     }
 
     @Override
     public ServerResponse processModelDataRequest(ClientRequest request) {
-        try {
-            addUserContext(request);
-            return applyFilterChain(request, controllerService::processModelDataRequest);
-        } finally {
-            removeUserContext();
-        }
+        addRequestAttributes(request);
+        return applyFilterChain(request, controllerService::processModelDataRequest);
     }
 
     @Override
     public ServerResponse processFormDataRequest(ClientRequest request) {
-        try {
-            addUserContext(request);
-            return applyFilterChain(request, controllerService::processFormDataRequest);
-        } finally {
-            removeUserContext();
-        }
+        addRequestAttributes(request);
+        return applyFilterChain(request, controllerService::processFormDataRequest);
     }
 
     @Override
@@ -135,17 +123,13 @@ public class FrontendServiceImpl implements FrontendService {
         return bundleJsResource.getContent();
     }
 
-    private void addUserContext(ClientRequest request) throws AuthenticationException {
+    private void addRequestAttributes(ClientRequest request) throws AuthenticationException {
         var userContext = new UserContextImpl();
         userContext.setClientId(request.getClientId());
         userContext.setLocale(request.getLocale());
         userContext.setZoneId(ZoneId.of(request.getZoneId()));
-        userContext.setAccessToken(new AccessTokenWrapper(request.getAccessToken(), accessTokenCache));
-        UserContextAccess.setInstance(userContext);
-    }
-
-    private void removeUserContext() {
-        UserContextAccess.removeInstance();
+        RequestContext.getInstance().setAttribute(UserContext.CONTEXT_KEY, userContext);
+        RequestContext.getInstance().setAttribute(AccessToken.CONTEXT_KEY, new AccessTokenWrapper(request.getAccessToken(), accessTokenCache));
     }
 
     private ServerResponse applyFilterChain(ClientRequest request, BiConsumer<ClientRequest, ServerResponse> requestHandler) {

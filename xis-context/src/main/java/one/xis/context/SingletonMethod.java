@@ -3,6 +3,7 @@ package one.xis.context;
 import lombok.Getter;
 import one.xis.utils.lang.MethodUtils;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 @Getter
@@ -28,7 +29,11 @@ class SingletonMethod extends SingletonProducerImpl {
     @Override
     protected Object invoke(Object[] args) {
         invoked = true;
-        return MethodUtils.invoke(parent.getBean(), method, args);
+        try {
+            return MethodUtils.invoke(parent.getBean(), method, args);
+        } catch (InvocationTargetException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
