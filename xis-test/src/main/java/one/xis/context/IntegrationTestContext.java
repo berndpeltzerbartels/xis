@@ -4,6 +4,7 @@ package one.xis.context;
 import lombok.Getter;
 import one.xis.auth.UserInfo;
 import one.xis.auth.UserInfoService;
+import one.xis.http.RestControllerService;
 import one.xis.server.PageUtil;
 
 import java.util.*;
@@ -23,7 +24,7 @@ public class IntegrationTestContext implements AppContext {
 
     IntegrationTestContext(Collection<String> packages, Object... controllers) {
         this.appContext = internalContext(packages, controllers);
-        this.environment = new IntegrationTestEnvironment(appContext.getSingleton(BackendBridge.class));
+        this.environment = new IntegrationTestEnvironment(new BackendBridge(appContext.getSingleton(RestControllerService.class)));
     }
 
     public OpenPageResult openPage(String uri, Map<String, Object> parameters) {

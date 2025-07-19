@@ -8,15 +8,17 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-class BackendBridgeHttpRequest implements HttpRequest {
+public class HttpTestRequest implements HttpRequest {
 
+    private final HttpMethod method;
     private final String path;
     private final Map<String, String> queryParameters;
     private final byte[] body;
     private final Map<String, String> headers;
     private final ContentType contentType;
 
-    BackendBridgeHttpRequest(String uri, String requestJson, Map<String, String> headers) {
+    public HttpTestRequest(HttpMethod method, String uri, String requestJson, Map<String, String> headers) {
+        this.method = method;
         this.headers = headers != null ? new HashMap<>(headers) : new HashMap<>();
         this.body = requestJson != null ? requestJson.getBytes(StandardCharsets.UTF_8) : new byte[0];
         if (this.getHeader("Content-Type") == null) {
@@ -97,7 +99,7 @@ class BackendBridgeHttpRequest implements HttpRequest {
 
     @Override
     public HttpMethod getHttpMethod() {
-        return body.length > 0 ? HttpMethod.POST : HttpMethod.GET;
+        return method;
     }
 
     @Override

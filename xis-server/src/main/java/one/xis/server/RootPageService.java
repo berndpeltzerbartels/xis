@@ -1,6 +1,7 @@
 package one.xis.server;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import one.xis.context.MainClassUtil;
 import one.xis.context.XISComponent;
 import one.xis.context.XISInit;
@@ -10,39 +11,36 @@ import org.w3c.dom.Document;
 
 
 @XISComponent
+@RequiredArgsConstructor
 class RootPageService {
+
+    private static final String CUSTOM_PUBLIC_RESOURCE_PATH = "/public";
+
     private final Resources resources;
-    private final ResourcePathProvider resourcePathProvider;
 
     @Getter
     private String rootPageHtml;
 
-    private String prodRootPageHtml;
-
-    RootPageService(Resources resources, ResourcePathProvider resourcePathProvider) {
-        this.resources = resources;
-        this.resourcePathProvider = resourcePathProvider;
-    }
+    private String prodRootPageHtml; // TODO ?
 
     @XISInit
     void init() {
         var resourcePath = MainClassUtil.isRunningFromJar() ? "index.prod.html" : "index.html";
         var rootPageHtml = resources.getByPath(resourcePath).getContent();
         var rootPageDocument = XmlUtil.loadDocument(rootPageHtml);
-        var customGlobalResourcePath = resourcePathProvider.getCustomStaticResourcePath() + "/global";
-        addCssLinks(customGlobalResourcePath, rootPageDocument);
-        addJsReferences(customGlobalResourcePath, rootPageDocument);
+        addCssLinks(rootPageDocument);
+        addJsReferences(rootPageDocument);
         this.rootPageHtml = XmlUtil.asString(rootPageDocument);
     }
 
-    private void addCssLinks(String customStaticResourcePath, Document rootPageDocument) {
-        resources.getClassPathResources(customStaticResourcePath, ".css")
-                .forEach(resource -> addCssLink(resource.getResourcePath().substring(customStaticResourcePath.length()), rootPageDocument));
+    private void addCssLinks(Document rootPageDocument) {
+        resources.getClassPathResources(CUSTOM_PUBLIC_RESOURCE_PATH, ".css")
+                .forEach(resource -> addCssLink(resource.getResourcePath().substring(CUSTOM_PUBLIC_RESOURCE_PATH.length()), rootPageDocument));
     }
 
-    private void addJsReferences(String customGlobalResourcePath, Document rootPageDocument) {
-        resources.getClassPathResources(customGlobalResourcePath, ".js")
-                .forEach(resource -> addJsReference(resource.getResourcePath().substring(resourcePathProvider.getCustomStaticResourcePath().length()), rootPageDocument));
+    private void addJsReferences(Document rootPageDocument) {
+        resources.getClassPathResources(CUSTOM_PUBLIC_RESOURCE_PATH, ".js")
+                .forEach(resource -> addJsReference(resource.getResourcePath().substring(CUSTOM_PUBLIC_RESOURCE_PATH.length()), rootPageDocument));
     }
 
     private void addCssLink(String cssPath, Document rootPageDocument) {

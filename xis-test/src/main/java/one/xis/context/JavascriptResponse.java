@@ -1,20 +1,19 @@
 package one.xis.context;
 
+import lombok.Builder;
 import lombok.Data;
-import one.xis.validation.ValidatorMessages;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @Data
-public class BackendBridgeResponse {
+@Builder
+public class JavascriptResponse {
     public final String responseText;
     public final int status;
-    public final ValidatorMessages validatorMessages;
-    public final Map<String, List<String>> headers = new HashMap<>();
+    public final Map<String, List<String>> headers;
 
     public void addResponseHeader(String name, String value) {
         headers.computeIfAbsent(name, k -> new ArrayList<>()).add(value);
