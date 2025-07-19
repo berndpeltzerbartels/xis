@@ -3,6 +3,7 @@ package one.xis.js.tags;
 import one.xis.js.Javascript;
 import one.xis.test.dom.Document;
 import one.xis.test.dom.Element;
+import one.xis.test.dom.Location;
 import one.xis.test.dom.Window;
 import one.xis.test.js.JSUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,7 +50,7 @@ class ForeachHandlerTest {
         script += "var handler = new ForeachHandler(foreach, tagHandlers);";
         script += "handler.refresh(data);";
 
-        JSUtil.execute(script, Map.of("foreach", foreach, "document", document, "window", new Window()));
+        JSUtil.execute(script, Map.of("foreach", foreach, "document", document, "window", new Window(new Location())));
 
         var childElementClasses = foreach.getChildElements().stream()
                 .map(Element::getCssClasses)
@@ -76,7 +77,7 @@ class ForeachHandlerTest {
         script += "var handler = new ForeachHandler(foreach, tagHandlers);";
         script += "handler.refresh(data1);"; // length = 3
         script += "handler.refresh(data2);";// length = 1
-        JSUtil.execute(script, Map.of("foreach", foreach, "document", document, "window", new Window()));
+        JSUtil.execute(script, Map.of("foreach", foreach, "document", document, "window", new Window(new Location())));
 
         assertThat(foreach.getChildNodes().length).isEqualTo(2); // 2 subtags for every array-element
     }

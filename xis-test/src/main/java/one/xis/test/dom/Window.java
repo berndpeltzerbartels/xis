@@ -1,9 +1,12 @@
 package one.xis.test.dom;
 
+import lombok.RequiredArgsConstructor;
+
 import java.util.function.Consumer;
 
+@RequiredArgsConstructor
 public class Window {
-    public Location location = new Location();
+    public final Location location;
     public History history = new History();
 
 

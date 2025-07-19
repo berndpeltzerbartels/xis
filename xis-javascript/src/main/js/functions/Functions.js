@@ -230,3 +230,12 @@ function cloneTextNode(node) {
     return document.createTextNode(node.nodeValue);
 }
 
+function handleError(error) {
+    debugger;
+    if (error && error.type === 'redirect') {
+        return {redirected: true};
+    }
+    console.error('Unhandled error:', error);
+    throw error; // Fehler weiterwerfen, damit er nicht verschluckt wird
+}
+

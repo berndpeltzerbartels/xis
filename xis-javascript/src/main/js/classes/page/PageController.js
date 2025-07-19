@@ -48,11 +48,7 @@ class PageController {
      */
     submitPageLinkAction(action, actionParameters) {
         return this.client.pageLinkAction(this.resolvedURL, action, actionParameters)
-            .then(response => this.handleActionResponse(response))
-            .catch(err => {
-                console.error('Error in submitPageLinkAction:', err);
-                throw err;
-            });
+            .then(response => this.handleActionResponse(response));
     }
 
     /**
@@ -69,11 +65,7 @@ class PageController {
    */
     submitFormAction(action, formData) {
         return this.client.pageAction(this.resolvedURL, formData, action, {})
-            .then(response => this.handleActionResponse(response))
-             .catch(err => {
-                console.error('Error in submitFormAction:', err);
-                throw err;
-            });
+            .then(response => this.handleActionResponse(response));
     }
 
     /**
@@ -167,11 +159,7 @@ class PageController {
         if (!resolved) {
             throw new Error("Cannot resolve URL: " + realUrl);
         }
-        return this.displayPageForResolvedURL(resolved, skipHistoryUpdate)
-            .catch(err => {
-                console.error('Error in displayPageForUrl:', err);
-                throw err;
-            });
+        return this.displayPageForResolvedURL(resolved, skipHistoryUpdate);
     }
 
     /**

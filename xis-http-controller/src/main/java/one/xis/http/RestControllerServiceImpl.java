@@ -146,9 +146,10 @@ public class RestControllerServiceImpl implements RestControllerService {
 
     private Object handleControllerException(InvocationTargetException e, Method method, Object[] args) {
         Throwable targetException = e.getTargetException();
-        if (targetException instanceof RuntimeException runtimeException) {
-            throw runtimeException;
+        if (targetException instanceof InvocationTargetException invocationTargetException) {
+            targetException = invocationTargetException.getTargetException();
         }
+
         if (targetException instanceof Exception exception) {
             return findExceptionHandler(exception)
                     .map(handler -> handler.handleException(method, args, exception))

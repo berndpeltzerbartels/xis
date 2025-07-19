@@ -2,6 +2,7 @@ package one.xis.js;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import one.xis.test.dom.Location;
 import one.xis.test.dom.Window;
 import one.xis.test.js.JSUtil;
 import one.xis.test.js.SessionStorage;
@@ -31,7 +32,7 @@ class ClientStateTest {
         js = Javascript.getScript(CLASSES);
         js += "var clientState = new ClientState();";
         js += "clientState";
-        var result = JSUtil.execute(js, Map.of("sessionStorage", new SessionStorage(), "window", new Window()));
+        var result = JSUtil.execute(js, Map.of("sessionStorage", new SessionStorage(), "window", new Window(new Location())));
         activatePath = result.getMember("activatePath").as(Consumer.class);
         getValue = result.getMember("getValue").as(Function.class);
         publish = result.getMember("saveData").as(Consumer.class);
@@ -124,7 +125,7 @@ class ClientStateTest {
             js = Javascript.getScript(CLASSES);
             js += "var clientState = new ClientState();";
             js += "clientState";
-            var result = JSUtil.execute(js, Map.of("sessionStorage", new SessionStorage(), "window", new Window()));
+            var result = JSUtil.execute(js, Map.of("sessionStorage", new SessionStorage(), "window", new Window(new Location())));
             activatePath = result.getMember("activatePath").as(Consumer.class);
             mapTextContent = result.getMember("mapTextContent").as(Consumer.class);
             getValue = result.getMember("getValue").as(Function.class);

@@ -52,7 +52,7 @@ class HtmlObjects {
         this.document = Document.of(new Resources().getByPath("index.html").getContent());
         this.localStorage = new LocalStorage();
         this.sessionStorage = new SessionStorage();
-        this.window = new Window();
+        this.window = new Window(document.location);
         //  this.console = new Console();
     }
 }

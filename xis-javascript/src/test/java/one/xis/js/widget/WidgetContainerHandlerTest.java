@@ -33,7 +33,7 @@ class WidgetContainerHandlerTest {
         bindings.put("tag", container);
         bindings.put("widgets", new WidgetsMock());
         bindings.put("debug", new Debug());
-        bindings.put("window", new Window());
+        bindings.put("window", new Window(document.location));
 
         JSUtil.execute(script, bindings);
 

@@ -46,7 +46,7 @@ class HttpClient extends Client {
 
     async handleResponse(response) {
         if (this.serverError(response)) {
-            this.handleServerError(response); // TODO use errorhandler
+            this.handleServerError(response);
             return Promise.reject();
         }
         if (this.isRedirect(response)) {

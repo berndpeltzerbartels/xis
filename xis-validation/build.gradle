@@ -59,6 +59,7 @@ dependencies {
     testImplementation project(":xis-test")
     testImplementation project(":xis-adapter-spi")
     testImplementation project(":xis-gson")
+    testImplementation project(":xis-http-controller")
     testImplementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion"
     testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"
 }

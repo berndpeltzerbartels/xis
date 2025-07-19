@@ -13,6 +13,7 @@ import one.xis.Page;
 import one.xis.context.IntegrationTestContext;
 import one.xis.context.XISInit;
 import one.xis.gson.JsonMap;
+import one.xis.http.RequestContext;
 import one.xis.server.ClientRequest;
 import one.xis.server.FrontendServiceImpl;
 import one.xis.validation.EMail;
@@ -42,6 +43,7 @@ class ValidationPostProcessorIntegrationTest {
                 .withSingleton(PersonDataListController.class)
                 .build();
         frontendService = context.getSingleton(FrontendServiceImpl.class);
+        RequestContext.createInstance(null, null);
     }
 
     @Test
