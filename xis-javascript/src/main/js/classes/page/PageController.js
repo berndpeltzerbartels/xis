@@ -65,7 +65,8 @@ class PageController {
    */
     submitFormAction(action, formData) {
         return this.client.pageAction(this.resolvedURL, formData, action, {})
-            .then(response => this.handleActionResponse(response));
+            .then(response => this.handleActionResponse(response))
+            .catch(error => handleError(error));
     }
 
     /**
@@ -159,7 +160,8 @@ class PageController {
         if (!resolved) {
             throw new Error("Cannot resolve URL: " + realUrl);
         }
-        return this.displayPageForResolvedURL(resolved, skipHistoryUpdate);
+        return this.displayPageForResolvedURL(resolved, skipHistoryUpdate)
+            .catch(error => handleError(error));
     }
 
     /**
@@ -192,7 +194,7 @@ class PageController {
             if (!skipHistoryUpdate && response.status < 300) {
                 this.updateHistory(this.resolvedURL);
             }
-        });
+        }).catch(error => handleError(error));
     }
 
     /**
@@ -242,7 +244,7 @@ class PageController {
             data.setValue(['urlParameters'], this.resolvedURL.urlParameters);
             this.page.data = data;
             this.htmlTagHandler.refresh(data);
-        });
+        }).catch(error => handleError(error));
     }
 
 
