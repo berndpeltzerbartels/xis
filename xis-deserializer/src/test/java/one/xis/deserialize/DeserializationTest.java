@@ -42,7 +42,6 @@ class DeserializationTest {
         userContext = mock();
         when(userContext.getLocale()).thenReturn(Locale.GERMAN);
         when(userContext.getZoneId()).thenReturn(ZoneId.of("Europe/Berlin"));
-        when(userContext.getUserId()).thenReturn("123");
     }
 
     @Test

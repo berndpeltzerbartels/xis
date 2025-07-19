@@ -11,6 +11,8 @@ public interface IDPService {
 
     Optional<IDPClientInfo> findClientInfo(String clientId);
 
+    boolean validateCredentials(String username, String password);
+
     boolean validateClientSecret(String clientId, String clientSecret);
 
 

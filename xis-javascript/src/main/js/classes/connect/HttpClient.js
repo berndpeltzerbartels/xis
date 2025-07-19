@@ -87,15 +87,13 @@ class HttpClient extends Client {
 
     async widgetLinkAction(widgetInstance, widgetState, action, actionParameters) {
         const request = this.createWidgetRequest(widgetInstance, widgetState, action, {}, actionParameters);
-        const headers = await this.authenticationHeader();
-        const response = await this.httpConnector.post('/xis/widget/action', request, headers);
+        const response = await this.httpConnector.post('/xis/widget/action', request, {});
         return this.handleResponse(response);
     }
 
     async pageLinkAction(resolvedURL, action, actionParameters) {
         const request = this.createPageRequest(resolvedURL, {}, action, actionParameters);
-        const headers = await this.authenticationHeader();
-        const response = await this.httpConnector.post('/xis/page/action', request, headers);
+        const response = await this.httpConnector.post('/xis/page/action', request, {});
         return this.handleResponse(response);
     }
 

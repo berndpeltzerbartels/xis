@@ -35,13 +35,7 @@ class IDPAuthenticationServiceImpl implements IDPAuthenticationService {
      */
     @Override
     public String login(IDPServerLogin login) throws InvalidCredentialsException {
-        if (idpService.findUserInfo(login.getUsername())
-                .map(IDPUserInfo::getClientId)
-                .map(idpService::findClientInfo)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .map(clientInfo -> idpService.validateClientSecret(clientInfo.getClientId(), login.getUsername(), login.getPassword()))
-                .orElse(false)) {
+        if (!idpService.validateCredentials(login.getUsername(), login.getPassword())) {
             throw new InvalidCredentialsException();
         }
         String code = UUID.randomUUID().toString();

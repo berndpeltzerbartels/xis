@@ -34,4 +34,5 @@ public enum ContentType {
     public String getValue() {
         return value;
     }
+    
 }

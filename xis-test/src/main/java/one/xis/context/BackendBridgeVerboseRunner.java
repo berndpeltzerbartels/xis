@@ -7,20 +7,20 @@ import java.util.function.Supplier;
 
 class BackendBridgeVerboseRunner {
     static <R> R run(Supplier<R> fct) {
-        try {
-            return fct.get();
-        } catch (Exception e) {
-            Logger.error(e, "Backendbridge failed");
-            throw e; // Bad code, but otherwise stack-trace is lost
-        }
+        return executeAndLogOnError(fct);
     }
 
     static <P, R> R run(Function<P, R> fct, P param) {
+        return executeAndLogOnError(() -> fct.apply(param));
+    }
+
+    private static <R> R executeAndLogOnError(Supplier<R> supplier) {
         try {
-            return fct.apply(param);
+            return supplier.get();
         } catch (Exception e) {
             Logger.error(e, "Backendbridge failed");
-            throw e; // Bad code, but otherwise stack-trace is lost
+            // Das erneute Werfen der Exception erhält den ursprünglichen Stack-Trace.
+            throw e;
         }
     }
 }

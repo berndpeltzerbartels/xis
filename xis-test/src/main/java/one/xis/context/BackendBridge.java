@@ -3,14 +3,19 @@ package one.xis.context;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import lombok.RequiredArgsConstructor;
+import one.xis.http.HttpResponse;
+import one.xis.http.RequestContext;
 import one.xis.server.ClientRequest;
 import one.xis.server.FrontendService;
 import one.xis.server.ResourcePathProvider;
 import one.xis.server.ServerResponse;
 import one.xis.validation.ValidatorMessages;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import static one.xis.context.BackendBridgeVerboseRunner.run;
 
@@ -24,49 +29,57 @@ public class BackendBridge implements ResourcePathProvider {
     private final AppContext appContext;
 
     public BackendBridgeResponse getComponentConfig(String uri, Map<String, String> headers) {
-        return toBridgeResponse(run(frontendService::getConfig));
+        return executeInRequestContext(uri, null, headers, () -> toBridgeResponse(run(frontendService::getConfig)));
     }
 
     public BackendBridgeResponse getPageModel(String uri, String requestJson, Map<String, String> headers) {
-        return toBridgeResponse(run(frontendService::processModelDataRequest, request(requestJson, headers)));
+        return executeInRequestContext(uri, requestJson, headers, () -> toBridgeResponse(run(frontendService::processModelDataRequest, request(requestJson, headers))));
     }
 
     public BackendBridgeResponse getFormModel(String uri, String requestJson, Map<String, String> headers) {
-        return toBridgeResponse(run(frontendService::processFormDataRequest, request(requestJson, headers)));
+        return executeInRequestContext(uri, requestJson, headers, () -> toBridgeResponse(run(frontendService::processFormDataRequest, request(requestJson, headers))));
     }
 
     public BackendBridgeResponse getWidgetModel(String uri, String requestJson, Map<String, String> headers) {
-        return toBridgeResponse(run(frontendService::processModelDataRequest, request(requestJson, headers)));
+        return executeInRequestContext(uri, requestJson, headers, () -> toBridgeResponse(run(frontendService::processModelDataRequest, request(requestJson, headers))));
     }
 
     public BackendBridgeResponse onPageLinkAction(String uri, String requestJson, Map<String, String> headers) {
-        return toBridgeResponse(run(frontendService::processActionRequest, request(requestJson, headers)));
+        return executeInRequestContext(uri, requestJson, headers, () -> toBridgeResponse(run(frontendService::processActionRequest, request(requestJson, headers))));
     }
 
     public BackendBridgeResponse onWidgetLinkAction(String uri, String requestJson, Map<String, String> headers) {
-        return toBridgeResponse(run(frontendService::processActionRequest, request(requestJson, headers)));
+        return executeInRequestContext(uri, requestJson, headers, () -> toBridgeResponse(run(frontendService::processActionRequest, request(requestJson, headers))));
     }
 
     public BackendBridgeResponse onFormAction(String uri, String requestJson, Map<String, String> headers) {
-        return toBridgeResponse(run(frontendService::processActionRequest, request(requestJson, headers)));
+        return executeInRequestContext(uri, requestJson, headers, () -> toBridgeResponse(run(frontendService::processActionRequest, request(requestJson, headers))));
     }
 
     public BackendBridgeResponse getPageHead(String uri, Map<String, String> headers) {
-        return stringToBridgeResponse(frontendService.getPageHead(headers.get("uri")));
+        return executeInRequestContext(uri, null, headers, () -> stringToBridgeResponse(frontendService.getPageHead(headers.get("uri"))));
     }
 
     public BackendBridgeResponse getPageBody(String uri, Map<String, String> headers) {
-        return stringToBridgeResponse(frontendService.getPageBody(headers.get("uri")));
+        return executeInRequestContext(uri, null, headers, () -> stringToBridgeResponse(frontendService.getPageBody(headers.get("uri"))));
     }
 
     public BackendBridgeResponse getBodyAttributes(String uri, Map<String, String> headers) {
-        return toBridgeResponse(frontendService.getBodyAttributes(headers.get("uri")));
+        return executeInRequestContext(uri, null, headers, () -> toBridgeResponse(frontendService.getBodyAttributes(headers.get("uri"))));
     }
 
     public BackendBridgeResponse getWidgetHtml(String uri, Map<String, String> headers) {
-        return stringToBridgeResponse(frontendService.getWidgetHtml(headers.get("uri")));
+        return executeInRequestContext(uri, null, headers, () -> stringToBridgeResponse(frontendService.getWidgetHtml(headers.get("uri"))));
     }
 
+    private BackendBridgeResponse executeInRequestContext(String uri, String requestJson, Map<String, String> headers, Supplier<BackendBridgeResponse> action) {
+        addRequestContext(uri, requestJson, headers);
+        try {
+            return action.get();
+        } finally {
+            clearRequestContext();
+        }
+    }
 
     private ClientRequest request(String requestJson, Map<String, String> headers) {
         try {
@@ -109,4 +122,15 @@ public class BackendBridge implements ResourcePathProvider {
     public String getCustomStaticResourcePath() {
         return "public";
     }
+
+    private void addRequestContext(String uri, String requestJson, Map<String, String> headers) {
+        var request = new BackendBridgeHttpRequest(uri, requestJson, headers);
+        var response = (HttpResponse) Proxy.newProxyInstance(getClass().getClassLoader(), new Class[]{HttpResponse.class}, (Object proxy, Method method, Object... args) -> null);
+        RequestContext.createInstance(request, response);
+    }
+
+    private void clearRequestContext() {
+        RequestContext.clear();
+    }
+
 }

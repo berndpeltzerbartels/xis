@@ -1,0 +1,121 @@
+package one.xis.context;
+
+import one.xis.http.ContentType;
+import one.xis.http.HttpMethod;
+import one.xis.http.HttpRequest;
+
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+
+class BackendBridgeHttpRequest implements HttpRequest {
+
+    private final String path;
+    private final Map<String, String> queryParameters;
+    private final byte[] body;
+    private final Map<String, String> headers;
+    private final ContentType contentType;
+
+    BackendBridgeHttpRequest(String uri, String requestJson, Map<String, String> headers) {
+        this.headers = headers != null ? new HashMap<>(headers) : new HashMap<>();
+        this.body = requestJson != null ? requestJson.getBytes(StandardCharsets.UTF_8) : new byte[0];
+        if (this.getHeader("Content-Type") == null) {
+            this.headers.put("Content-Type", ContentType.JSON.getValue());
+        }
+        String tempPath = uri;
+        int queryIndex = uri.indexOf('?');
+        if (queryIndex != -1) {
+            tempPath = uri.substring(0, queryIndex);
+            String query = uri.substring(queryIndex + 1);
+            this.queryParameters = parseUrlEncoded(query);
+        } else {
+            this.queryParameters = Map.of();
+        }
+        this.path = tempPath;
+        // ContentType.fromString wurde in der Enum-Datei zu fromValue geändert
+        this.contentType = ContentType.fromValue(getHeader("Content-Type"));
+    }
+
+    private Map<String, String> parseUrlEncoded(String encodedString) {
+        if (encodedString == null || encodedString.isEmpty()) {
+            return new HashMap<>();
+        }
+        Map<String, String> parameters = new HashMap<>();
+        String[] pairs = encodedString.split("&");
+        for (String pair : pairs) {
+            int idx = pair.indexOf("=");
+            String key = idx > 0 ? URLDecoder.decode(pair.substring(0, idx), StandardCharsets.UTF_8) : pair;
+            String value = idx > 0 && pair.length() > idx + 1 ? URLDecoder.decode(pair.substring(idx + 1), StandardCharsets.UTF_8) : null;
+            parameters.put(key, value);
+        }
+        return parameters;
+    }
+
+    @Override
+    public String getPath() {
+        return path;
+    }
+
+    @Override
+    public String getRealPath() {
+        return path;
+    }
+
+    @Override
+    public Map<String, String> getQueryParameters() {
+        return Collections.unmodifiableMap(queryParameters);
+    }
+
+    @Override
+    public byte[] getBody() {
+        return body;
+    }
+
+    @Override
+    public ContentType getContentType() {
+        return contentType;
+    }
+
+    @Override
+    public int getContentLength() {
+        return body.length;
+    }
+
+    @Override
+    public Collection<String> getHeaderNames() {
+        return headers.keySet();
+    }
+
+    @Override
+    public String getHeader(String name) {
+        return headers.entrySet().stream()
+                .filter(entry -> entry.getKey().equalsIgnoreCase(name))
+                .map(Map.Entry::getValue)
+                .findFirst()
+                .orElse(null);
+    }
+
+    @Override
+    public HttpMethod getHttpMethod() {
+        return body.length > 0 ? HttpMethod.POST : HttpMethod.GET;
+    }
+
+    @Override
+    public Object getBodyAsBytes() {
+        return body;
+    }
+
+    @Override
+    public Map<String, String> getFormParameters() {
+        if (contentType == ContentType.FORM_URLENCODED) {
+            return Collections.unmodifiableMap(parseUrlEncoded(new String(body, StandardCharsets.UTF_8)));
+        }
+        return Map.of();
+    }
+
+    @Override
+    public Locale getLocale() {
+        String languageTag = getHeader("Accept-Language");
+        return languageTag != null ? Locale.forLanguageTag(languageTag.split(",")[0]) : Locale.getDefault();
+    }
+}

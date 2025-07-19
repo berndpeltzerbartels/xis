@@ -20,6 +20,11 @@ public class SpringIDPService implements IDPService {
     }
 
     @Override
+    public boolean validateCredentials(String username, String password) {
+        return false;
+    }
+
+    @Override
     public boolean validateClientSecret(String clientId, String clientSecret) {
         return false;
     }
