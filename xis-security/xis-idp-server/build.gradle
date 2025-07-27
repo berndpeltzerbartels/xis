@@ -24,7 +24,6 @@ dependencies {
     compileOnly(project(":xis-validation"))
     implementation(project(":xis-security"))
     implementation project(':xis-security:xis-token')
-    implementation project(':xis-security:xis-idp')
 
     // Gson dependency
     implementation "com.google.code.gson:gson:$gsonVersion"

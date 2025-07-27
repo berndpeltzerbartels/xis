@@ -21,7 +21,7 @@ public class UserInfoImpl implements UserInfo {
      * The unique identifier for the user (Subject). Corresponds to the 'sub' claim.
      */
     private String userId;
-    
+
 
     /**
      * The roles assigned to the user (e.g., 'admin', 'user').
@@ -33,5 +33,5 @@ public class UserInfoImpl implements UserInfo {
      * A map containing all claims from the token.
      * Useful for accessing custom or non-standard claims from the IDP.
      */
-    private Map<String, Object> claims;
+    private Map<String, String> claims;
 }

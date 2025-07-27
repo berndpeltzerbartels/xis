@@ -1,12 +1,7 @@
 package one.xis.auth.idp;
 
 import one.xis.ImportInstances;
-import one.xis.auth.AuthenticationException;
-import one.xis.auth.InvalidCredentialsException;
-import one.xis.auth.InvalidRedirectUrlException;
-import one.xis.auth.InvalidTokenException;
-import one.xis.auth.token.ApiTokens;
-import one.xis.idp.IDPResponse;
+import one.xis.auth.*;
 
 /**
  * Interface for Identity Provider (IDP) services that handle user authentication,
@@ -33,16 +28,7 @@ public interface IDPAuthenticationService {
      * @throws InvalidTokenException   if the refresh token is invalid or expired
      * @throws AuthenticationException if there is an error during the refresh process
      */
-    ApiTokens refresh(String refreshToken) throws InvalidTokenException, AuthenticationException;
-
-    /**
-     * Retrieves user information based on the provided access token.
-     *
-     * @param accessToken the access token to verify and extract user information
-     * @return a LocalUserInfo object containing user details
-     * @throws InvalidTokenException if the access token is invalid or expired
-     */
-    IDPUserInfo verifyAndExtractUserInfo(String accessToken) throws InvalidTokenException;
+    IDPTokenResponse refresh(String refreshToken) throws InvalidTokenException, AuthenticationException;
 
     /**
      * Checks if the provided redirect URL is valid and safe for redirection.
@@ -53,7 +39,9 @@ public interface IDPAuthenticationService {
      */
     void checkRedirectUrl(String userId, String redirectUrl) throws InvalidRedirectUrlException;
 
-    String getOpenIdConfigJson();
+    IDPWellKnownOpenIdConfig getOpenIdConfigJson();
 
-    IDPResponse provideTokens(String tokenRequestPayload);
+    IDPTokenResponse provideTokens(IDPTokenRequest request);
+
+    JsonWebKey getPublicJsonWebKey();
 }

@@ -10,8 +10,8 @@ class HttpClient extends Client {
     /**
      * @param {HttpConnector} httpConnector
      */
-    constructor(httpConnector, tokenManager) {
-        super(tokenManager);
+    constructor(httpConnector) {
+        super();
         this.httpConnector = httpConnector;
         this.resolvedURL = undefined;
     }
@@ -49,15 +49,18 @@ class HttpClient extends Client {
             this.handleServerError(response);
             return Promise.reject();
         }
-        if (this.isRedirect(response)) {
+        if (this.isAjaxRedirect(response)) {
             // follow redirect in browser
             return Promise.reject();
         }
-
         if (this.authorizationRequired(response)) {
-            this.forwardToLoginPage();
+            this.forwardToLoginPage(response);
             return Promise.reject();
         }
+          if (this.isBrowserRedirect(response)) {
+                   this.doBrowserRedirect(response);
+                   return Promise.reject();
+                }
         var responseObject = this.deserializeResponse(response);
         if (responseObject.redirectUrl) {
             this.forward(responseObject.redirectUrl);
@@ -109,9 +112,9 @@ class HttpClient extends Client {
         return this.deserializeResponse(response);
     }
 
-    forwardToLoginPage() {
-        var redirectUri = this.resolvedURL ? this.resolvedURL.toURL() : "/";
-        this.forward(this.config.loginPage + '?redirect_uri=' + encodeURIComponent(redirectUri));
+    forwardToLoginPage(response) {
+        var redirectUri = response.getResponseHeader('Location');
+        this.forward(redirectUri);
     }
 
     forward(redirectUri) {
@@ -119,15 +122,24 @@ class HttpClient extends Client {
     }
 
     authorizationRequired(response) {
-        return response.status === 401 || response.status === 403;
+        return response.status === 401;
     }
 
     serverError(response) {
         return response.status >= 500 && response.status < 600;
     }
 
-    isRedirect(response) {
+    isAjaxRedirect(response) {
         return response.status == 302 || response.status == 303 || response.status == 307 || response.status == 308;
+    }
+
+    doBrowserRedirect(response) {
+        var redirectUri = response.getResponseHeader('Location');
+        this.forward(redirectUri);
+    }
+
+    isBrowserRedirect(response) {
+        return !this.isAjaxRedirect(response) && response.getResponseHeader('Location');
     }
 
     handleServerError(response) {

@@ -1,16 +1,16 @@
 class Client {
 
 
-    /**
-     * 
-     * @param {TokenManager} tokenManager 
+    /** * @constructor
+     * Initializes a new instance of the Client class.
+     * This class serves as a base for HTTP clients that interact with the server.
+     * It provides methods to load configuration, page data, widget data, and handle server responses
      */
-    constructor(tokenManager) {
+    constructor() {
         this.config = undefined;
         this.clientId = randomString();
         this.zoneId = timeZone();
         this.clientState = {};
-        this.tokenManager = tokenManager;
     }
 
     /**
@@ -270,7 +270,6 @@ class Client {
         var obj = JSON.parse(content);
         var config = new ClientConfig();
         config.welcomePageId = obj.welcomePageId;
-        config.loginPage = obj.loginPage;
         config.pageIds = obj.pageIds ? obj.pageIds : [];
         config.widgetIds = obj.widgetIds ? obj.widgetIds : [];
         config.pageAttributes = {};

@@ -22,7 +22,7 @@ public class AccessTokenWrapper implements AccessToken {
             if (StringUtils.isNotEmpty(accessToken)) {
                 tokenAttributes = accessTokenCache.getAttributes(accessToken);
             } else {
-                tokenAttributes = new TokenAttributes(null, Collections.emptySet(), Map.of(), null);
+                tokenAttributes = new TokenAttributes(null, null, Collections.emptySet(), Map.of(), null);
             }
         }
         return tokenAttributes;

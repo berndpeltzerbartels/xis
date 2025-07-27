@@ -5,8 +5,7 @@ class TestApplication {
         this.localStorage = new LocalStore();
         this.httpConnector = new HttpConnectorMock();
         this.domAccessor = new DomAccessor();
-        this.tokenManager = new TokenManager();
-        this.client = new HttpClient(this.httpConnector, this.tokenManager);
+        this.client = new HttpClient(this.httpConnector);
         this.pages = new Pages(this.client);
         this.urlResolver = new URLResolver(this.pages);
         this.widgetContainers = new WidgetContainers();
@@ -48,7 +47,6 @@ class TestApplication {
         this.pages.reset();
         this.widgets.reset();
         this.widgetContainers.reset();
-        this.tokenManager.reset();
     }
 
 }

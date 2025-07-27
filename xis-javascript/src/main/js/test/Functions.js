@@ -7,10 +7,6 @@ function reset() {
     document.cookies = '';
 }
 
-function setAccessToken(token) {
-    app.tokenManager.setAccessToken(token);
-}
-
 function innerTextChanged(element) {
     element.innerTextChanged();
 }

@@ -3,6 +3,7 @@ package one.xis.http;
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 import one.xis.context.XISComponent;
+import one.xis.context.XISDefaultComponent;
 import one.xis.context.XISInit;
 import one.xis.context.XISInject;
 import one.xis.utils.lang.ClassUtils;
@@ -14,10 +15,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @XISComponent
 public class RestControllerServiceImpl implements RestControllerService {
@@ -52,9 +50,31 @@ public class RestControllerServiceImpl implements RestControllerService {
     @SuppressWarnings("unchecked")
     void initExceptionHandlers() {
         exceptionHandlerMap = new HashMap<>();
+        Map<Class<? extends Exception>, ControllerExceptionHandler<?>> defaultHandlers = new HashMap<>();
+        Map<Class<? extends Exception>, ControllerExceptionHandler<?>> handlers = new HashMap<>();
+        Collection<Class<? extends Exception>> exceptions = new HashSet<>();
         for (ControllerExceptionHandler<?> handler : exceptionHandlers) {
-            Class<? extends Exception> exceptionType = (Class<? extends Exception>) ClassUtils.getGenericInterfacesTypeParameter(handler.getClass(), ControllerExceptionHandler.class, 0);
-            exceptionHandlerMap.put(exceptionType, handler);
+            Class<? extends Exception> exceptionType = (Class<? extends Exception>)
+                    ClassUtils.getGenericInterfacesTypeParameter(handler.getClass(), ControllerExceptionHandler.class, 0);
+            exceptions.add(exceptionType);
+            if (handler.getClass().isAnnotationPresent(XISDefaultComponent.class)) {
+                defaultHandlers.put(exceptionType, handler);
+            } else {
+                if (handlers.containsKey(exceptionType)) {
+                    throw new IllegalStateException("Ambiguous ExceptionHandlers for " + exceptionType.getName() + ": "
+                            + handlers.get(exceptionType).getClass().getName() + " and " + handler.getClass().getName());
+                }
+                handlers.put(exceptionType, handler);
+            }
+        }
+
+        // Füge alle Default-Handler hinzu, die nicht von Component überschrieben wurden
+        for (var exceptionType : exceptions) {
+            if (handlers.containsKey(exceptionType)) {
+                exceptionHandlerMap.put(exceptionType, handlers.get(exceptionType));
+            } else {
+                exceptionHandlerMap.put(exceptionType, defaultHandlers.get(exceptionType));
+            }
         }
     }
 

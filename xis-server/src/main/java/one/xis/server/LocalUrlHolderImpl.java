@@ -1,22 +1,21 @@
 package one.xis.server;
 
+import lombok.RequiredArgsConstructor;
+import one.xis.context.EventEmitter;
 import one.xis.context.XISComponent;
-
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.function.Consumer;
 
 
 @XISComponent
+@RequiredArgsConstructor
 class LocalUrlHolderImpl implements LocalUrlHolder {
 
     private String localUrl;
-    private final Collection<Consumer<String>> urlAssignmentListeners = new HashSet<>();
+    private final EventEmitter eventEmitter;
 
     @Override
     public void setLocalUrl(String localUrl) {
         this.localUrl = localUrl;
-        invokeUrlAssignmentListeners(localUrl);
+        eventEmitter.emitEvent(new LocalUrlAssignedEvent(localUrl));
     }
 
     @Override
@@ -33,18 +32,8 @@ class LocalUrlHolderImpl implements LocalUrlHolder {
     }
 
     @Override
-    public void addUrlAssignmentListener(Consumer<String> listener) {
-        urlAssignmentListeners.add(listener);
-    }
-
-    @Override
     public boolean isSecure() {
         return localUrl != null && localUrl.startsWith("https://");
     }
 
-    private void invokeUrlAssignmentListeners(String url) {
-        for (Consumer<String> listener : urlAssignmentListeners) {
-            listener.accept(url);
-        }
-    }
 }

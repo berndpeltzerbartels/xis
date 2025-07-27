@@ -2,12 +2,10 @@ package one.xis.auth;
 
 import lombok.RequiredArgsConstructor;
 import one.xis.auth.idp.ExternalIDPServices;
-import one.xis.auth.idp.IDPCodeStore;
 import one.xis.auth.token.StateParameter;
 import one.xis.auth.token.TokenService;
-import one.xis.context.XISInit;
+import one.xis.context.AppContext;
 import one.xis.http.*;
-import one.xis.resource.Resources;
 import one.xis.server.ServerResponse;
 import one.xis.utils.http.HttpUtils;
 
@@ -21,21 +19,10 @@ import one.xis.utils.http.HttpUtils;
 class AuthenticationController {
 
     private final TokenService tokenService;
-    private final UserInfoService<?> userInfoService;
+    private final AppContext appContext;
     private final ExternalIDPServices externalIDPServices;
-    private final Resources resources;
-    private final IDPCodeStore codeStore;
+    private final CodeStore codeStore;
 
-    private String loginHtmlTemplate;
-
-    @XISInit
-    void initLoginForm() {
-        if (resources.exists("/login.html")) {
-            loginHtmlTemplate = resources.getByPath("/login.html").getContent();
-        } else {
-            loginHtmlTemplate = resources.getByPath("/default-login.html").getContent();
-        }
-    }
 
     /**
      * Handles the authentication callback from an IDP.
@@ -55,13 +42,18 @@ class AuthenticationController {
     public ResponseEntity<?> authenticationCallback(@UrlParameter("code") String code, @UrlParameter("state") String state) {
         var stateParameterPayload = StateParameter.decodeAndVerify(state);
         var userId = codeStore.getUserIdForCode(code);
+        if (userId == null) {
+            throw new AuthenticationException("No user found for code: " + code);
+        }
         var serverResponse = new ServerResponse();
         serverResponse.setRedirectUrl(HttpUtils.localizeUrl(stateParameterPayload.getRedirect()));
         if ("local".equals(stateParameterPayload.getProviderId())) {
             // Local login, no IDP involved
-            var userInfo = userInfoService.getUserInfo(userId).orElseThrow();
+            var userInfoService = appContext.getOptionalSingleton(UserInfoService.class)
+                    .orElseThrow(() -> new IllegalStateException("UserInfoService is required for local authentication"));
+            var userInfo = (UserInfo) userInfoService.getUserInfo(userId).orElseThrow();
             var tokens = tokenService.newTokens(userInfo);
-            return ResponseEntity.ok(serverResponse)
+            return ResponseEntity.redirect(stateParameterPayload.getRedirect())
                     .addSecureCookie("access_token", tokens.getAccessToken(), tokens.getAccessTokenExpiresIn())
                     .addSecureCookie("refresh_token", tokens.getRenewToken(), tokens.getRenewTokenExpiresIn());
 
@@ -71,11 +63,11 @@ class AuthenticationController {
             if (externalIDPService == null) {
                 throw new IllegalStateException("No IDP client service found for provider: " + stateParameterPayload.getProviderId());
             }
-            var externalTokens = externalIDPService.requestTokens(code, state); // TODO: handle exceptions properly
-            return null;
+            var externalTokens = externalIDPService.fetchTokens(code);
+            return ResponseEntity.noContent().addSecureCookie("access_token", externalTokens.getAccessToken(), externalTokens.getExpiresInSeconds())
+                    .addSecureCookie("refresh_token", externalTokens.getRefreshToken(), externalTokens.getRefreshExpiresInSeconds());
+
         }
-
-
     }
 
 
@@ -86,15 +78,18 @@ class AuthenticationController {
      * @param refreshToken The refresh token used to renew the tokens.
      * @return A response entity with no content, but with updated secure cookies for access and refresh tokens.
      */
+
     @Post("/token")
     public ResponseEntity<?> renewTokens(@CookieValue("refresh_token") String refreshToken) {
         var tokenAttributes = tokenService.decodeToken(refreshToken);
+        @SuppressWarnings("unchecked") var userInfoService = (UserInfoService<UserInfo>) appContext.getOptionalSingleton(UserInfoService.class).orElseThrow(() -> new IllegalStateException("UserInfoService is required for token renewal"));
         var userInfo = userInfoService.getUserInfo(tokenAttributes.userId())
-                .orElseThrow(() -> new IllegalStateException("User not found for token: " + refreshToken));
+                .orElseThrow(() -> new AuthenticationException("User not found for userId: " + tokenAttributes.userId()));
         var tokens = tokenService.newTokens(userInfo);
         return ResponseEntity.noContent()
                 .addSecureCookie("access_token", tokens.getAccessToken(), tokens.getAccessTokenExpiresIn())
                 .addSecureCookie("refresh_token", tokens.getRenewToken(), tokens.getRenewTokenExpiresIn());
     }
+
 
 }

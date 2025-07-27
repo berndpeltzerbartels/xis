@@ -1,19 +1,14 @@
 package one.xis.auth.idp;
 
-import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import one.xis.auth.*;
-import one.xis.auth.token.ApiTokens;
 import one.xis.auth.token.TokenService;
 import one.xis.context.XISDefaultComponent;
-import one.xis.idp.IDPResponse;
 import one.xis.server.LocalUrlHolder;
 
-import java.util.HashSet;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
-
-import static one.xis.utils.http.HttpUtils.parseQueryParameters;
 
 @XISDefaultComponent
 @RequiredArgsConstructor
@@ -23,7 +18,6 @@ class IDPAuthenticationServiceImpl implements IDPAuthenticationService {
     private final TokenService tokenService;
     private final LocalUrlHolder localUrlHolder;
     private final IDPCodeStore idpCodeStore;
-    private final Gson gson;
 
 
     /**
@@ -51,7 +45,7 @@ class IDPAuthenticationServiceImpl implements IDPAuthenticationService {
      * @throws AuthenticationException if the code is invalid or expired
      */
 
-    private ApiTokens issueToken(String code) throws AuthenticationException {
+    private IDPTokenResponse issueToken(String code) throws AuthenticationException {
         String userId = idpCodeStore.getUserIdForCode(code);
         if (userId == null) {
             throw new InvalidStateParameterException();
@@ -69,26 +63,9 @@ class IDPAuthenticationServiceImpl implements IDPAuthenticationService {
      */
 
     @Override
-    public ApiTokens refresh(String refreshToken) throws InvalidTokenException, AuthenticationException {
+    public IDPTokenResponse refresh(String refreshToken) throws InvalidTokenException, AuthenticationException {
         String userId = verifyRefreshToken(refreshToken);
         return generateTokenResponse(userId);
-    }
-
-
-    /**
-     * Verifies the provided access token and extracts user information from it.
-     *
-     * @param accessToken the access token to verify and extract user information
-     * @return an IDPUserInfo object containing user details
-     */
-    @Override
-    public IDPUserInfo verifyAndExtractUserInfo(String accessToken) throws InvalidTokenException {
-        var attributes = tokenService.decodeToken(accessToken);
-        IDPUserInfoImpl userInfo = new IDPUserInfoImpl();
-        userInfo.setUserId(attributes.userId());
-        userInfo.setRoles(new HashSet<>(attributes.roles()));
-        userInfo.setClaims(attributes.claims());
-        return userInfo;
     }
 
 
@@ -101,7 +78,7 @@ class IDPAuthenticationServiceImpl implements IDPAuthenticationService {
      */
     @Override
     public void checkRedirectUrl(String userId, String redirectUrl) throws InvalidRedirectUrlException {
-        if (!idpService.findUserInfo(userId)
+        if (!idpService.userInfo(userId)
                 .map(IDPUserInfo::getClientId)
                 .map(idpService::findClientInfo)
                 .filter(Optional::isPresent)
@@ -114,20 +91,18 @@ class IDPAuthenticationServiceImpl implements IDPAuthenticationService {
     }
 
     @Override
-    public String getOpenIdConfigJson() {
+    public IDPWellKnownOpenIdConfig getOpenIdConfigJson() {
         var config = new IDPWellKnownOpenIdConfig();
         config.setIssuer(localUrlHolder.getUrl());
         config.setJwksUri(localUrlHolder.getUrl() + "/.well-known/jwks.json"); // TODO create constants for these URLs
         config.setAuthorizationEndpoint(localUrlHolder.getUrl() + "/idp/login.html");
-        config.setTokenEndpoint(localUrlHolder.getUrl() + "/xis/auth/tokens");
-        config.setUserInfoEndpoint(localUrlHolder.getUrl() + "/xis/auth/userinfo");
-        return gson.toJson(config);
+        config.setTokenEndpoint(localUrlHolder.getUrl() + "/xis/idp/tokens");
+        // config.setUserInfoEndpoint(localUrlHolder.getUrl() + "/xis/idp/userinfo"); // TODO add to controller
+        return config;
     }
 
     @Override
-    public IDPResponse provideTokens(String tokenRequestPayload) throws AuthenticationException {
-        var parameters = parseQueryParameters(tokenRequestPayload);
-        var request = gson.fromJson(gson.toJson(parameters), IDPTokenRequest.class);
+    public IDPTokenResponse provideTokens(IDPTokenRequest request) throws AuthenticationException {
         if (!request.getRedirectUri().startsWith("http")) {
             throw new AuthenticationException("Invalid redirect URI: " + request.getRedirectUri() + ". It must start with 'http(s)'.");
         }
@@ -141,7 +116,12 @@ class IDPAuthenticationServiceImpl implements IDPAuthenticationService {
         if (!clientInfo.getPermittedRedirectUrls().contains(request.getRedirectUri())) {
             throw new AuthenticationException("Invalid redirect URI: " + request.getRedirectUri());
         }
-        return new IDPResponse(issueToken(request.getCode()));
+        return issueToken(request.getCode());
+    }
+
+    @Override
+    public JsonWebKey getPublicJsonWebKey() {
+        return tokenService.getPublicJsonWebKey();
     }
 
     /**
@@ -152,10 +132,52 @@ class IDPAuthenticationServiceImpl implements IDPAuthenticationService {
      * @throws AuthenticationException if the user is not found or token generation fails
      */
 
-    private ApiTokens generateTokenResponse(String userId) throws AuthenticationException {
-        UserInfo userInfo = idpService.findUserInfo(userId).orElseThrow(() -> new AuthenticationException("User not found: " + userId));
-        return tokenService.newTokens(userInfo);
+    private IDPTokenResponse generateTokenResponse(String userId) throws AuthenticationException {
+        IDPUserInfo userInfo = idpService.userInfo(userId).orElseThrow(() -> new AuthenticationException("User not found: " + userId));
+
+        IDPAccessTokenClaims accessTokenClaims = idpService.accessTokenClaims(userId)
+                .map(IDPAccessTokenClaims::new)
+                .map(claims -> completeTokenClaims(claims, userInfo))
+                .orElseThrow(() -> new AuthenticationException("Access token claims not found for user: " + userId));
+
+        IDPIDTokenClaims idTokenClaims = idpService.idTokenClaims(userId)
+                .map(IDPIDTokenClaims::new)
+                .map(claims -> completeIdTokenClaims(claims, userInfo))
+                .orElseThrow(() -> new AuthenticationException("ID token claims not found for user: " + userId));
+        RenewTokenClaims renewTokenClaims = idpService.renewTokenClaims(userId);
+
+        String accessToken = tokenService.createToken(accessTokenClaims);
+        String idToken = tokenService.createToken(idTokenClaims);
+        String refreshToken = tokenService.createToken(renewTokenClaims);
+
+        IDPTokenResponse tokenResponse = new IDPTokenResponse();
+        tokenResponse.setAccessToken(accessToken);
+        tokenResponse.setIdToken(idToken);
+        tokenResponse.setRefreshToken(refreshToken);
+        tokenResponse.setExpiresIn(accessTokenClaims.getExpiresAtSeconds());
+        tokenResponse.setRefreshExpiresIn(renewTokenClaims.getExpiresAtSeconds());
+        return tokenResponse;
     }
+
+    private IDPAccessTokenClaims completeTokenClaims(IDPAccessTokenClaims accessTokenClaims, IDPUserInfo userInfo) {
+        accessTokenClaims.setUserId(userInfo.getUserId());
+        accessTokenClaims.setIssuedAt(Instant.now().getEpochSecond());
+        accessTokenClaims.setExpiresAtSeconds(accessTokenClaims.getIssuedAt() + idpService.getConfig().getAccessTokenValidity().getSeconds());
+        accessTokenClaims.setNotBefore(accessTokenClaims.getIssuedAt());
+        accessTokenClaims.setClientId(userInfo.getClientId());
+        accessTokenClaims.setIssuer(localUrlHolder.getUrl());
+        accessTokenClaims.setJwtId(UUID.randomUUID().toString());
+        return accessTokenClaims;
+    }
+
+    private IDPIDTokenClaims completeIdTokenClaims(IDPIDTokenClaims idTokenClaims, IDPUserInfo userInfo) {
+        idTokenClaims.setUserId(userInfo.getUserId());
+        idTokenClaims.setIssuedAt(Instant.now().getEpochSecond());
+        idTokenClaims.setExpiresAt(idTokenClaims.getIssuedAt() + idpService.getConfig().getIdTokenValidity().getSeconds());
+        idTokenClaims.setIssuer(localUrlHolder.getUrl());
+        return idTokenClaims;
+    }
+
 
     /**
      * Verifies the refresh token and extracts the user ID.
@@ -167,4 +189,5 @@ class IDPAuthenticationServiceImpl implements IDPAuthenticationService {
     private String verifyRefreshToken(String refreshToken) throws InvalidTokenException {
         return tokenService.decodeToken(refreshToken).userId();
     }
+
 }

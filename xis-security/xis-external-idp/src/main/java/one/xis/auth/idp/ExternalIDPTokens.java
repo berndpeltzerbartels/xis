@@ -9,7 +9,7 @@ public class ExternalIDPTokens {
     private String accessToken;
 
     @SerializedName("expires_in")
-    private long expiresIn; // Geändert zu long
+    private long expiresInSeconds;
 
     @SerializedName("refresh_token")
     private String refreshToken;
@@ -23,5 +23,5 @@ public class ExternalIDPTokens {
     private String idToken;
 
     @SerializedName("refresh_expires_in")
-    private long refreshExpiresIn; // Geändert zu long
+    private long refreshExpiresInSeconds;
 }

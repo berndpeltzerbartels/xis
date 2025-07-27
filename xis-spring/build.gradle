@@ -50,7 +50,6 @@ dependencies {
 
     // Compile-only dependencies
     compileOnly project(":xis-deserializer")
-    compileOnly project(':xis-security:xis-idp')
     compileOnly project(':xis-security:xis-idp-server')
     compileOnly project(':xis-http-controller')
     compileOnly "org.springframework.boot:spring-boot-starter-web:$springBootVersion"

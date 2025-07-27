@@ -8,5 +8,5 @@ public interface UserInfo {
 
     Set<String> getRoles();
 
-    Map<String, Object> getClaims();
+    Map<String, String> getClaims();
 }

@@ -37,7 +37,7 @@ public class MethodUtils {
         return String.format("%s(%s)", method.getName(), parameterString(method));
     }
 
-    public static Object invoke(Object o, Method method, Object[] args) throws InvocationTargetException {
+    public static Object invoke(Object o, Method method, Object... args) throws InvocationTargetException {
         try {
             method.setAccessible(true);
             return method.invoke(o, args);

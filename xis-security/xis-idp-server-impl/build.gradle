@@ -23,9 +23,7 @@ dependencies {
     compileOnly(project(":xis-server"))
     compileOnly(project(":xis-validation"))
     compileOnly(project(":xis-security"))
-    compileOnly(project(":xis-security:xis-idp-client"))
     compileOnly(project(":xis-security:xis-external-idp"))
-    compileOnly(project(":xis-security:xis-idp"))
     compileOnly(project(':xis-security:xis-token'))
 
     compileOnly(project(":xis-gson"))

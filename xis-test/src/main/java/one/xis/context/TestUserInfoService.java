@@ -6,12 +6,12 @@ import one.xis.auth.UserInfoService;
 
 import java.util.*;
 
-@XISDefaultComponent
+
 class TestUserInfoService implements UserInfoService<UserInfo> {
 
     private final Collection<UserInfo> userInfos = new HashSet<>();
     private final Map<String, String> userPasswords = new HashMap<>();
-    
+
     @Override
     public boolean validateCredentials(String userId, String password) {
         return userPasswords.getOrDefault(userId, "").equals(password);

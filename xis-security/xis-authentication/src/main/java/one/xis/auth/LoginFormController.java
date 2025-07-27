@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import one.xis.*;
 import one.xis.auth.idp.ExternalIDPService;
-import one.xis.auth.idp.IDPCodeStore;
 import one.xis.auth.token.StateParameter;
 import one.xis.security.SecurityUtil;
 
@@ -21,7 +20,7 @@ import java.util.stream.Collectors;
 class LoginFormController<U extends UserInfo> {
 
     private final UserInfoService<U> userInfoService;
-    private final IDPCodeStore codeStore;
+    private final CodeStore codeStore;
     private final Collection<ExternalIDPService> externalIDPServices;
 
     @ModelData("externalIdpIds")

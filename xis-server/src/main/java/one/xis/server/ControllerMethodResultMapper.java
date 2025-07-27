@@ -26,12 +26,16 @@ class ControllerMethodResultMapper {
     void mapReturnValueToResult(ControllerMethodResult controllerMethodResult, Method method, Object returnValue, Map<String, Object> requestScope) {
         if (returnValue instanceof PageResponse pageResponse) {
             mapPageResponse(pageResponse, controllerMethodResult);
+        } else if (returnValue instanceof PageUrlResponse pageUrlResponse) {
+            controllerMethodResult.setNextURL(pageUrlResponse.getUrl());
+        } else if (returnValue instanceof WidgetResponse widgetResponse && widgetResponse.getControllerClass() == null) {
+            mapWidgetResponse(widgetResponse, controllerMethodResult);
         } else if (returnValue instanceof WidgetResponse widgetResponse) {
             mapWidgetResponse(widgetResponse, controllerMethodResult);
         } else if (returnValue instanceof Class<?> controllerClass) {
             updateController(controllerMethodResult, controllerClass, emptyMap());
-        } else if (returnValue instanceof RedirectResponse redirect) {
-            controllerMethodResult.setRedirectUrl(redirect.getRedirectUrl());
+        } else if (returnValue instanceof RedirectControllerResponse redirectControllerResponse) {
+            controllerMethodResult.setRedirectUrl(redirectControllerResponse.getRedirectUrl());
         }
         if (method.isAnnotationPresent(ModelData.class)) {
             mapModelResult(method.getAnnotation(ModelData.class).value(), returnValue, controllerMethodResult);

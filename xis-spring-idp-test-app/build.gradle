@@ -33,9 +33,6 @@ dependencies {
     // Local project dependencies
 
     implementation project(':xis-spring')
-    //implementation project(':xis-idp')
-    //runtimeOnly project(':xis-idp-server-impl')
-    // compileOnly project(':xis-idp-server')
     implementation project(':xis-test')
     implementation(project(":xis-security:xis-idp-server"))
 

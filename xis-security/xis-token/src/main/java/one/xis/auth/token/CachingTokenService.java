@@ -6,13 +6,12 @@ import com.github.benmanes.caffeine.cache.Expiry;
 import lombok.NonNull;
 import one.xis.auth.InvalidTokenException;
 import one.xis.auth.JsonWebKey;
+import one.xis.auth.TokenClaims;
 import one.xis.auth.UserInfo;
 import one.xis.context.XISComponent;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Collection;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @XISComponent
@@ -34,16 +33,6 @@ public class CachingTokenService implements TokenService {
     }
 
     @Override
-    public ApiTokens newTokens(String userId, Collection<String> roles, Map<String, Object> claims) {
-        return delegate.newTokens(userId, roles, claims);
-    }
-
-    @Override
-    public ApiTokens newTokens(TokenCreationAttributes accessTokenAttributes, TokenCreationAttributes renewTokenAttributes) {
-        return delegate.newTokens(accessTokenAttributes, renewTokenAttributes);
-    }
-
-    @Override
     public JsonWebKey getPublicJsonWebKey() {
         return delegate.getPublicJsonWebKey();
     }
@@ -56,6 +45,11 @@ public class CachingTokenService implements TokenService {
     @Override
     public ApiTokens renewTokens(String token, Duration tokenExpiresIn, Duration renewTokenExpiresIn) throws InvalidTokenException {
         return delegate.renewTokens(token, tokenExpiresIn, renewTokenExpiresIn);
+    }
+
+    @Override
+    public String createToken(TokenClaims claims) {
+        return delegate.createToken(claims);
     }
 
     private static class TokenExpiry implements Expiry<String, TokenAttributes> {

@@ -21,6 +21,7 @@ class AppContextFactory implements SingletonCreationListener {
     private final Annotations annotations;
     private final Class<?>[] annotatedComponentClasses;
     private final PackageScanResult scanResult;
+    private final EventDispatcher eventDispatcher = new EventDispatcher();
 
     AppContextFactory(List<Object> additionalSingletons,
                       Class<?>[] additionalSingletonClasses,
@@ -36,6 +37,7 @@ class AppContextFactory implements SingletonCreationListener {
         long t0 = System.currentTimeMillis();
         var context = new AppContextImpl(singletons);
         additionalSingletons.add(context);
+        additionalSingletons.add(new EventEmitterImpl(eventDispatcher));
         evaluateAnnotatedComponents();
         evaluateAdditionalSingletonClasses();
         evaluateAdditionalSingletons();
@@ -91,34 +93,62 @@ class AppContextFactory implements SingletonCreationListener {
             var consumer = singletonConsumers.get(i);
             if (consumer instanceof MultiValueConsumer) {
                 multiValueConsumers.add((MultiValueConsumer) consumer);
+                mapProducersForMultiValueConsumer(consumer);
+            } else {
+                mapProducersForSingleValueConsumer(consumer);
             }
-            var matchingProducers = new ArrayList<SingletonProducer>();
-            var matchingDefaultProducers = new ArrayList<SingletonProducer>();
-            for (var j = 0; j < singletonProducers.size(); j++) {
-                var producer = singletonProducers.get(j);
-                if (consumer.isConsumerFor(producer.getSingletonClass())) {
-                    if (isDefaultProducer(producer)) {
-                        matchingDefaultProducers.add(producer);
-                    } else {
-                        matchingProducers.add(producer);
-                    }
+        }
+    }
+
+    private void mapProducers2() {
+        for (var i = 0; i < singletonConsumers.size(); i++) {
+            var consumer = singletonConsumers.get(i);
+            if (consumer instanceof MultiValueConsumer) {
+                mapProducersForMultiValueConsumer(consumer);
+            } else {
+                mapProducersForSingleValueConsumer(consumer);
+                if (!consumer.hasProducer() && !consumer.isOptional()) {
+                    throw new UnsatisfiedDependencyException(consumer);
                 }
             }
-            List<SingletonProducer> producersToUse = matchingProducers.isEmpty() ? matchingDefaultProducers : matchingProducers;
-            for (var k = 0; k < producersToUse.size(); k++) {
-                var producer = producersToUse.get(k);
+        }
+    }
+
+    private void mapProducersForMultiValueConsumer(SingletonConsumer consumer) {
+        for (var j = 0; j < singletonProducers.size(); j++) {
+            var producer = singletonProducers.get(j);
+            if (consumer.isConsumerFor(producer.getSingletonClass())) {
                 consumer.mapProducer(producer);
                 producer.addConsumer(consumer);
                 if (producer instanceof SingletonCreationListener) {
                     producer.addListener(this);
                 }
             }
-            if (!(consumer instanceof MultiValueConsumer) && !consumer.hasProducer() && !consumer.isOptional()) {
-                throw new UnsatisfiedDependencyException(consumer);
-            }
         }
     }
 
+    private void mapProducersForSingleValueConsumer(SingletonConsumer consumer) {
+        var matchingProducers = new ArrayList<SingletonProducer>();
+        var matchingDefaultProducers = new ArrayList<SingletonProducer>();
+        for (var j = 0; j < singletonProducers.size(); j++) {
+            var producer = singletonProducers.get(j);
+            if (consumer.isConsumerFor(producer.getSingletonClass())) {
+                if (isDefaultProducer(producer)) {
+                    matchingDefaultProducers.add(producer);
+                } else {
+                    matchingProducers.add(producer);
+                }
+            }
+        }
+        List<SingletonProducer> producersToUse = matchingProducers.isEmpty() ? matchingDefaultProducers : matchingProducers;
+        for (var producer : producersToUse) {
+            consumer.mapProducer(producer);
+            producer.addConsumer(consumer);
+            if (producer instanceof SingletonCreationListener) {
+                producer.addListener(this);
+            }
+        }
+    }
 
     private boolean isDefaultProducer(SingletonProducer producer) {
         if (producer instanceof SingletonConstructor constructor) {
@@ -203,7 +233,9 @@ class AppContextFactory implements SingletonCreationListener {
                 singleton.addBeanMethod(beanMethod);
                 singletonMethod = beanMethod;
             }
-            singletonConsumers.addAll(singletonMethod.getParameters());
+            if (!isEventListenerMethod(singletonMethod.getMethod())) {
+                singletonConsumers.addAll(singletonMethod.getParameters());
+            }
             if (singletonMethod.getReturnType() != Void.TYPE) {
                 singletonMethod.addListener(this);
                 singletonProducers.add(singletonMethod);
@@ -211,7 +243,24 @@ class AppContextFactory implements SingletonCreationListener {
             if (!singletonMethod.getReturnType().equals(Void.TYPE) && !singletonMethod.getReturnType().equals(Void.class)) {
                 evaluate(new SingletonWrapper(singletonMethod.getSingletonClass()));
             }
+            if (isEventListenerMethod(method)) {
+                validateEventMethod(method);
+                eventDispatcher.addEventListenerMethod(new EventListenerMethod(singleton, method));
+            }
         });
+    }
+
+    private boolean isEventListenerMethod(Method method) {
+        return annotations.isEventListenerMethod(method);
+    }
+
+    private void validateEventMethod(Method method) {
+        if (!"void".equals(method.getReturnType().getName()) && !method.getReturnType().equals(Void.TYPE)) {
+            throw new IllegalStateException("Event listener method must return void: " + method);
+        }
+        if (method.getParameterCount() != 1) {
+            throw new IllegalStateException("Event listener method must have exactly one parameter: " + method);
+        }
     }
 
     private void evaluateConstructor(SingletonWrapper singleton) {

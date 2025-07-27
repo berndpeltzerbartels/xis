@@ -5,8 +5,7 @@ class Application {
         this.localStorage = new LocalStore();
         this.httpConnector = new HttpConnector();
         this.domAccessor = new DomAccessor();
-        this.tokenManager = new TokenManager();
-        this.client = new HttpClient(this.httpConnector, this.tokenManager);
+        this.client = new HttpClient(this.httpConnector);
         this.pages = new Pages(this.client);
         this.urlResolver = new URLResolver(this.pages);
         this.widgetContainers = new WidgetContainers();
@@ -26,7 +25,7 @@ class Application {
             .then(config => this.widgets.loadWidgets(config))
             .then(config => this.pages.loadPages(config))
             .then(() => this.pageController.displayPageForUrl(document.location.pathname + document.location.search))
-            .catch(e => console.error(e));
+            .catch(e => handleError(e));
     }
 
 }

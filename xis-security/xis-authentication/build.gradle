@@ -19,16 +19,15 @@ dependencies {
     //runtimeOnly(project(":xis-security:xis-idp-server-impl"))
     compileOnly(project(":xis-adapter-spi"))
     compileOnly(project(":xis-controller-api"))
-    compileOnly(project(":xis-security:xis-idp"))
     compileOnly(project(":xis-security"))
-    // compileOnly(project(":xis-security:xis-idp-server"))
-    implementation(project(":xis-security:xis-idp-client"))
+    compileOnly(project(":xis-server"))
     api(project(":xis-security:xis-external-idp"))
     compileOnly(project(":xis-validation"))
     compileOnly(project(":xis-http-controller"))
     compileOnly(project(":xis-resources"))
 
-
+    implementation 'com.google.guava:guava:33.1.0-jre'
+    
     // Annotation processors
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
     testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"

@@ -26,6 +26,7 @@ public class Annotations {
     private final Set<Class<? extends Annotation>> componentClassAnnotations = new HashSet<>();
     private final Set<Class<? extends Annotation>> dependencyFieldAnnotations = new HashSet<>();
     private final Set<Class<? extends Annotation>> proxyAnnotations = new HashSet<>();
+    private Class<? extends Annotation> eventListenerAnnotation;
 
     @Setter
     private Predicate<Annotation> isDefault = annotation -> false;
@@ -114,7 +115,8 @@ public class Annotations {
             Annotation annotation = method.getAnnotations()[i];
             if (beanMethodAnnotations.contains(annotation.annotationType())
                     || initAnnotations.contains(annotation.annotationType())
-                    || proxyAnnotations.contains(annotation.annotationType())) {
+                    || proxyAnnotations.contains(annotation.annotationType())
+                    || (eventListenerAnnotation != null && eventListenerAnnotation.equals(annotation.annotationType()))) {
                 return true;
             }
         }
@@ -220,5 +222,14 @@ public class Annotations {
             }
         }
         return false;
+    }
+
+    public Annotations setEventListenerAnnotation(Class<? extends Annotation> eventListenerAnnotation) {
+        this.eventListenerAnnotation = eventListenerAnnotation;
+        return this;
+    }
+
+    public boolean isEventListenerMethod(Method method) {
+        return eventListenerAnnotation != null && method.isAnnotationPresent(eventListenerAnnotation);
     }
 }

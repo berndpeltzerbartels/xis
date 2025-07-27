@@ -4,6 +4,7 @@ package one.xis.auth.token;
 import com.google.gson.Gson;
 import one.xis.auth.InvalidTokenException;
 import one.xis.auth.JsonWebKey;
+import one.xis.auth.TokenClaims;
 import one.xis.auth.UserInfo;
 import one.xis.context.XISComponent;
 
@@ -16,6 +17,7 @@ import java.security.interfaces.RSAPublicKey;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @XISComponent
 class TokenServiceImpl implements TokenService {
@@ -34,42 +36,45 @@ class TokenServiceImpl implements TokenService {
         this.keyPair = generateRsaKeyPair();
     }
 
+    private JsonWebKey jsonWebKey;
+
+    /**
+     * @param userInfo
+     * @return
+     */
     @Override
     public ApiTokens newTokens(UserInfo userInfo) {
-        return newTokens(userInfo.getUserId(),
-                userInfo.getRoles(),
-                userInfo.getClaims());
+        Duration expiresIn = Duration.ofHours(5);
+        Duration renewExpiresIn = Duration.ofDays(1);
+        Map<String, String> accessTokenClaims = new HashMap<>(userInfo.getClaims());
+        accessTokenClaims.put("sub", userInfo.getUserId());
+        accessTokenClaims.put("exp", String.valueOf(Instant.now().plus(expiresIn).getEpochSecond()));
+        accessTokenClaims.put("iat", String.valueOf(Instant.now().getEpochSecond()));
+        accessTokenClaims.put("roles", userInfo.getRoles().stream()
+                .map(String::valueOf)
+                .collect(Collectors.joining(",")));
+        String accessToken = createToken(accessTokenClaims);
+        Map<String, String> renewTokenClaims = new HashMap<>(accessTokenClaims);
+        renewTokenClaims.put("renew", "true");
+        renewTokenClaims.put("sub", userInfo.getUserId());
+        renewTokenClaims.put("exp", String.valueOf(Instant.now().plus(renewExpiresIn).getEpochSecond()));
+        renewTokenClaims.put("iat", String.valueOf(Instant.now().getEpochSecond()));
+        String renewToken = createToken(renewTokenClaims);
+        return new ApiTokens(accessToken, expiresIn, renewToken, renewExpiresIn);
     }
 
-    @Override
-    public ApiTokens newTokens(String userId, Collection<String> roles, Map<String, Object> claims) {
-        return newTokens(new TokenCreationAttributes(userId, roles, claims, Duration.ofHours(15)),
-                new TokenCreationAttributes(userId, roles, claims, Duration.ofDays(5)));
-    }
-
-    @Override
-    public ApiTokens newTokens(TokenCreationAttributes tokenCreationAttributes, TokenCreationAttributes renewTokenCreationAttributes) {
-        String accessToken = createToken(tokenCreationAttributes);
-        String renewToken = createToken(renewTokenCreationAttributes);
-        return new ApiTokens(accessToken, tokenCreationAttributes.expiresIn(), renewToken, renewTokenCreationAttributes.expiresIn());
-    }
 
     @Override
     public ApiTokens renewTokens(String token, Duration tokenExpiresIn, Duration renewTokenExpiresIn) throws InvalidTokenException {
         TokenAttributes attributes = decodeToken(token);
-        TokenCreationAttributes tokenCreationAttributes = new TokenCreationAttributes(
-                attributes.userId(),
-                attributes.roles(),
-                attributes.claims(),
-                tokenExpiresIn
-        );
-        TokenCreationAttributes renewTokenCreationAttributes = new TokenCreationAttributes(
-                attributes.userId(),
-                attributes.roles(),
-                attributes.claims(),
-                renewTokenExpiresIn
-        );
-        String accessToken = createToken(tokenCreationAttributes);
+        Map<String, String> claims = new HashMap<>(attributes.asClaims());
+        claims.put("exp", String.valueOf(Instant.now().plus(tokenExpiresIn).getEpochSecond()));
+        claims.put("iat", String.valueOf(Instant.now().getEpochSecond()));
+        String accessToken = createToken(claims);
+        Map<String, String> renewTokenCreationAttributes = new HashMap<>(claims);
+        renewTokenCreationAttributes.put("renew", "true");
+        renewTokenCreationAttributes.put("exp", String.valueOf(Instant.now().plus(renewTokenExpiresIn).getEpochSecond()));
+        renewTokenCreationAttributes.put("iat", String.valueOf(Instant.now().getEpochSecond()));
         String renewToken = createToken(renewTokenCreationAttributes);
         return new ApiTokens(accessToken, tokenExpiresIn, renewToken, renewTokenExpiresIn);
     }
@@ -83,6 +88,13 @@ class TokenServiceImpl implements TokenService {
      */
     @Override
     public JsonWebKey getPublicJsonWebKey() {
+        if (jsonWebKey == null) {
+            jsonWebKey = createJsonWebKey();
+        }
+        return jsonWebKey;
+    }
+
+    private JsonWebKey createJsonWebKey() {
         RSAPublicKey publicKey = (RSAPublicKey) this.keyPair.getPublic();
 
         JsonWebKey jwk = new JsonWebKey();
@@ -122,19 +134,24 @@ class TokenServiceImpl implements TokenService {
             String payloadJson = new String(Base64.getUrlDecoder().decode(parts[1]), StandardCharsets.UTF_8);
             Map<String, Object> claimsRaw = parseJson(payloadJson);
             String userId = (String) claimsRaw.get("sub");
-            List<String> roles = (List<String>) claimsRaw.getOrDefault("roles", List.of());
+            List<String> roles = new ArrayList<>();
+
 
             long exp = ((Number) claimsRaw.get("exp")).longValue();
             Instant expiresAt = Instant.ofEpochSecond(exp);
             if (expiresAt.isBefore(Instant.now())) {
                 throw new InvalidTokenException("Token has expired");
             }
-            Map<String, Object> claims = new HashMap<>();
+            Map<String, String> claims = new HashMap<>();
             for (Map.Entry<String, Object> entry : claimsRaw.entrySet()) {
                 claims.put(entry.getKey(), String.valueOf(entry.getValue()));
             }
+            String issuer = (String) claimsRaw.get("iss");
+            if (issuer == null || issuer.isBlank()) {
+                throw new InvalidTokenException("Token issuer is missing or empty");
+            }
 
-            return new TokenAttributes(userId, roles, claims, expiresAt);
+            return new TokenAttributes(userId, issuer, roles, claims, expiresAt);
         } catch (InvalidTokenException e) {
             throw e;
         } catch (Exception e) {
@@ -142,13 +159,17 @@ class TokenServiceImpl implements TokenService {
         }
     }
 
-    private String createToken(TokenCreationAttributes attributes) {
+    @Override
+    public String createToken(TokenClaims claims) {
+        return createToken(gson.toJson(claims));
+    }
+
+    private String createToken(Map<String, String> claims) {
+        return createToken(toJson(claims));
+    }
+
+    private String createToken(String payloadJson) {
         String headerBase64 = Base64.getUrlEncoder().withoutPadding().encodeToString(HEADER);
-        Map<String, Object> payload = attributes.claims() == null ? new LinkedHashMap<>() : new LinkedHashMap<>(attributes.claims());
-        payload.put("sub", attributes.userId());
-        payload.put("roles", attributes.roles());
-        payload.put("exp", Instant.now().plus(attributes.expiresIn()).getEpochSecond());
-        String payloadJson = toJson(payload);
         String payloadBase64 = Base64.getUrlEncoder().withoutPadding().encodeToString(payloadJson.getBytes(StandardCharsets.UTF_8));
         String tokenData = headerBase64 + "." + payloadBase64;
         String signatureBase64 = signAndEncodeBase64(tokenData);
@@ -179,7 +200,7 @@ class TokenServiceImpl implements TokenService {
     }
 
 
-    private String toJson(Map<String, Object> map) {
+    private String toJson(Map<String, String> map) {
         return gson.toJson(map);
     }
 

@@ -5,10 +5,12 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import one.xis.Roles;
 import one.xis.auth.AuthenticationException;
+import one.xis.auth.URLForbiddenException;
 import one.xis.auth.token.AccessToken;
 import one.xis.deserialize.MainDeserializer;
 import one.xis.deserialize.PostProcessingResults;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashSet;
@@ -49,7 +51,19 @@ class ControllerMethod {
             controllerMethodResultMapper.mapValidationErrors(controllerMethodResult, postProcessingResults.getResults());
             return controllerMethodResult;
         }
-        var returnValue = method.invoke(controller, args);
+        Object returnValue;
+        try {
+            returnValue = method.invoke(controller, args);
+        } catch (InvocationTargetException e) {
+            if (e.getCause() instanceof AuthenticationException) {
+                throw (AuthenticationException) e.getCause();
+            } else if (e.getCause() instanceof URLForbiddenException) {
+                throw (URLForbiddenException) e.getCause();
+            } else {
+                log.error("Error invoking controller method: " + method.getName(), e);
+                throw new RuntimeException("Error invoking controller method: " + method.getName(), e);
+            }
+        }
         // let parameters override request values
         controllerMethodResultMapper.mapMethodParameterToResultAfterInvocation(controllerMethodResult, controllerMethodParameters, args);
         // let return values override parameters

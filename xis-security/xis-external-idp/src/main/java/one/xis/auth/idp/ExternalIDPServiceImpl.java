@@ -1,8 +1,8 @@
 package one.xis.auth.idp;
 
-import com.google.gson.Gson;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import one.xis.auth.ipdclient.IDPClient;
 import one.xis.auth.token.StateParameter;
 import one.xis.auth.token.StateParameterPayload;
 import one.xis.security.SecurityUtil;
@@ -11,6 +11,7 @@ import one.xis.utils.http.HttpUtils;
 import one.xis.utils.lang.StringUtils;
 
 import java.net.HttpURLConnection;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
@@ -18,23 +19,16 @@ import java.util.Map;
 @RequiredArgsConstructor
 class ExternalIDPServiceImpl implements ExternalIDPService {
 
+    private final IDPClient idpClient;
     private final ExternalIDPConfig providerConfiguration;
-    private final ExternalIDPConnectionFactory connectionFactory;
     private final LocalUrlHolder localUrlHolder;
-    private final Gson gson;
-
-
-    @Override
-    public String createAuthorizationUrl() {
-        return createLoginUrl(localUrlHolder.getUrl());
-    }
 
     @Override
     public String createLoginUrl(String postLoginRedirectUrl) {
         String stateParameter = createStateParameter(postLoginRedirectUrl);
-        StringBuilder urlBuilder = new StringBuilder(providerConfiguration.getLoginFormUrl())
+        StringBuilder urlBuilder = new StringBuilder(idpClient.getOpenIdConfig().getAuthorizationEndpoint())
                 .append("?response_type=code")
-                .append("&redirect_uri=").append(getAuthenticationCallbackUrl())
+                .append("&redirect_uri=").append(URLEncoder.encode(getAuthenticationCallbackUrl(localUrlHolder.getUrl()), StandardCharsets.UTF_8))
                 .append("&state=").append(stateParameter)
                 .append("&nonce=").append(SecurityUtil.createRandomKey(32))
                 .append("&client_id=").append(providerConfiguration.getClientId());
@@ -67,34 +61,14 @@ class ExternalIDPServiceImpl implements ExternalIDPService {
     }
 
     @Override
-    public ExternalIDPTokens requestTokens(@NonNull String code, @NonNull String state) {
-        String url = providerConfiguration.getTokenEndpoint();
-        StringBuilder requestBody = new StringBuilder()
-                .append("grant_type=authorization_code")
-                .append("&code=").append(code)
-                .append("&state=").append(state)
-                .append("&redirect_uri=").append(providerConfiguration.getCallbackUrl());
-        if (StringUtils.isNotEmpty(providerConfiguration.getClientId())) {
-            requestBody.append("&client_id=").append(providerConfiguration.getClientId());
-        }
-        if (StringUtils.isNotEmpty(providerConfiguration.getClientSecret())) {
-            requestBody.append("&client_secret=").append(providerConfiguration.getClientSecret());
-        }
-
-        HttpURLConnection connection = connectionFactory.createPostConnectionFormUrlEncoded(url, requestBody.toString());
-        try {
-            int responseCode = connection.getResponseCode();
-            if (responseCode != HttpURLConnection.HTTP_OK) {
-                String body = readErrorStream(connection);
-                throw new RuntimeException("Failed to request tokens: " + responseCode + " - " + body);
-            }
-            String responseBody = new String(connection.getInputStream().readAllBytes());
-            return gson.fromJson(responseBody, ExternalIDPTokens.class);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to request tokens", e);
-        } finally {
-            connection.disconnect();
-        }
+    public ExternalIDPTokens fetchTokens(@NonNull String code) {
+        var apiTokens = idpClient.fetchNewTokens(code);
+        var externalTokens = new ExternalIDPTokens();
+        externalTokens.setAccessToken(apiTokens.getAccessToken());
+        externalTokens.setRefreshToken(apiTokens.getRenewToken());
+        externalTokens.setExpiresInSeconds(apiTokens.getAccessTokenExpiresIn().getSeconds());
+        externalTokens.setRefreshExpiresInSeconds(apiTokens.getRenewTokenExpiresIn().getSeconds());
+        return externalTokens;
     }
 
     @Override
@@ -107,8 +81,8 @@ class ExternalIDPServiceImpl implements ExternalIDPService {
         return providerConfiguration.getIdpId();
     }
 
-    private String getAuthenticationCallbackUrl() {
-        return providerConfiguration.getCallbackUrl();
+    private String getAuthenticationCallbackUrl(String localUrl) {
+        return localUrl + "/xis/auth/callback/" + providerConfiguration.getIdpId();
     }
 
     private String readErrorStream(HttpURLConnection connection) {

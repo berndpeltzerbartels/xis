@@ -4,12 +4,12 @@ import com.google.gson.annotations.SerializedName;
 import lombok.Data;
 
 @Data
-class IDPTokenResponse {
+public class IDPTokenResponse {
     @SerializedName("access_token")
     private String accessToken;
 
     @SerializedName("expires_in")
-    private long expiresIn; // Geändert zu long
+    private long expiresIn;
 
     @SerializedName("refresh_token")
     private String refreshToken;

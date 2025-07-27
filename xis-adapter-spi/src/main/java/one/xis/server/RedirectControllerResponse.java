@@ -1,7 +1,5 @@
 package one.xis.server;
 
-import java.util.Map;
-
 /**
  * Represents a response that indicates a redirect to a different URL.
  * <p>
@@ -21,15 +19,7 @@ public interface RedirectControllerResponse {
      *
      * @return The redirect URL.
      */
-    RedirectResponse getRedirect();
-
-
-    /**
-     * Gets any parameters that should be appended to the redirect URL as a query string.
-     *
-     * @return A map of URL parameters.
-     */
-    Map<String, Object> getUrlParameters();
+    String getRedirectUrl();
 
 
 }

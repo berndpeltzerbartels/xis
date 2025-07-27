@@ -79,18 +79,22 @@ public class ResponseEntity<T> {
         return response;
     }
 
-    public ResponseEntity<T> addSecureCookie(String name, String value, Duration maxAge) {
+    public ResponseEntity<T> addSecureCookie(String name, String value, Long maxAgeSeconds) {
         StringJoiner cookieValue = new StringJoiner("; ");
         cookieValue.add(name + "=" + value);
         cookieValue.add("HttpOnly");
         cookieValue.add("Secure");
         cookieValue.add("SameSite=Lax");
-        cookieValue.add("Max-Age=" + maxAge.getSeconds());
+        cookieValue.add("Max-Age=" + maxAgeSeconds);
         cookieValue.add("Path=/");
 
         headers.computeIfAbsent("SET-COOKIE", k -> new ArrayList<>()).add(cookieValue.toString());
 
         return this;
+    }
+
+    public ResponseEntity<T> addSecureCookie(String name, String value, Duration maxAge) {
+        return addSecureCookie(name, value, maxAge.toSeconds());
     }
 
     public ResponseEntity<T> addCookie(String name, String value, Duration maxAge) {
@@ -108,6 +112,11 @@ public class ResponseEntity<T> {
 
     public ResponseEntity<T> body(T body) {
         this.body = body;
+        return this;
+    }
+
+    public ResponseEntity<T> emptyBody(Class<T> bodyType) {
+        this.body = null;
         return this;
     }
 

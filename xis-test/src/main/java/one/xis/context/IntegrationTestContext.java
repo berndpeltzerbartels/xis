@@ -69,6 +69,7 @@ public class IntegrationTestContext implements AppContext {
     private AppContext internalContext(Collection<String> packages, Object... controllers) {
         var builder = AppContextBuilder.createInstance()
                 .withXIS()
+                .withSingletonClass(TestUserInfoService.class)
                 .withSingletons(controllers);
         packages.forEach(builder::withPackage);
         return builder.build();

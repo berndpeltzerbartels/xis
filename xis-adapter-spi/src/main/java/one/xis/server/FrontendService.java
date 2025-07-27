@@ -9,8 +9,6 @@ import java.util.Map;
  */
 public interface FrontendService {
 
-    String AUTHENTICATION_PATH = "/xis/auth/callback/{idpId}";
-
     /**
      * Returns the configuration of the frontend service. It contains the list of pages, widgets, and other configuration details.
      * Its content is not secret, and contains information required to run the frontend application.

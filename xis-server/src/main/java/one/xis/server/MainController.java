@@ -106,7 +106,7 @@ public class MainController {
 
     private ResponseEntity<?> responseEntity(ServerResponse serverResponse) {
         if (serverResponse.getRedirectUrl() != null) {
-            return ResponseEntity.redirect(serverResponse.getRedirectUrl());
+            return ResponseEntity.noContent().addHeader("Location", serverResponse.getRedirectUrl());
         }
         return ResponseEntity.status(serverResponse.getStatus()).body(serverResponse);
     }
