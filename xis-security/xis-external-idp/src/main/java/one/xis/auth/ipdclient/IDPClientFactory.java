@@ -9,9 +9,9 @@ public interface IDPClientFactory {
     /**
      * Creates a configured IDP client service based on the provided configuration.
      *
-     * @param idpClientConfig the configuration for the IDP client.
+     * @param localUrl the local URL of the server, used for constructing the IDP client.
      * @return an instance of IDPClientService configured with the provided settings.
      */
-    IDPClient createConfiguredIDPClient(IDPClientConfig idpClientConfig, String idpUrl);
+    IDPClient createConfiguredIDPClient(IDPClientConfig idpClientConfig, String localUrl);
 
 }

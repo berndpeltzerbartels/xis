@@ -1,6 +1,5 @@
 package one.xis.auth;
 
-import java.util.Map;
 import java.util.Set;
 
 public interface UserInfo {
@@ -8,5 +7,4 @@ public interface UserInfo {
 
     Set<String> getRoles();
 
-    Map<String, String> getClaims();
 }

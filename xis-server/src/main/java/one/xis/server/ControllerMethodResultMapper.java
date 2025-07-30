@@ -27,7 +27,7 @@ class ControllerMethodResultMapper {
         if (returnValue instanceof PageResponse pageResponse) {
             mapPageResponse(pageResponse, controllerMethodResult);
         } else if (returnValue instanceof PageUrlResponse pageUrlResponse) {
-            controllerMethodResult.setNextURL(pageUrlResponse.getUrl());
+            controllerMethodResult.setRedirectUrl(pageUrlResponse.getUrl());
         } else if (returnValue instanceof WidgetResponse widgetResponse && widgetResponse.getControllerClass() == null) {
             mapWidgetResponse(widgetResponse, controllerMethodResult);
         } else if (returnValue instanceof WidgetResponse widgetResponse) {

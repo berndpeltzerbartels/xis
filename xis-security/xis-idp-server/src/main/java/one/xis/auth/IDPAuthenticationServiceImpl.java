@@ -1,8 +1,6 @@
-package one.xis.auth.idp;
+package one.xis.auth;
 
 import lombok.RequiredArgsConstructor;
-import one.xis.auth.*;
-import one.xis.auth.token.TokenService;
 import one.xis.context.XISDefaultComponent;
 import one.xis.server.LocalUrlHolder;
 
@@ -135,16 +133,14 @@ class IDPAuthenticationServiceImpl implements IDPAuthenticationService {
     private IDPTokenResponse generateTokenResponse(String userId) throws AuthenticationException {
         IDPUserInfo userInfo = idpService.userInfo(userId).orElseThrow(() -> new AuthenticationException("User not found: " + userId));
 
-        IDPAccessTokenClaims accessTokenClaims = idpService.accessTokenClaims(userId)
-                .map(IDPAccessTokenClaims::new)
+        AccessTokenClaims accessTokenClaims = idpService.accessTokenClaims(userId)
                 .map(claims -> completeTokenClaims(claims, userInfo))
                 .orElseThrow(() -> new AuthenticationException("Access token claims not found for user: " + userId));
 
-        IDPIDTokenClaims idTokenClaims = idpService.idTokenClaims(userId)
-                .map(IDPIDTokenClaims::new)
-                .map(claims -> completeIdTokenClaims(claims, userInfo))
+        IDTokenClaims idTokenClaims = idpService.idTokenClaims(userId)
+                .map(claims -> completeTokenClaims(claims, userInfo))
                 .orElseThrow(() -> new AuthenticationException("ID token claims not found for user: " + userId));
-        RenewTokenClaims renewTokenClaims = idpService.renewTokenClaims(userId);
+        RenewTokenClaims renewTokenClaims = completeTokenClaims(idpService.renewTokenClaims(userId), userInfo);
 
         String accessToken = tokenService.createToken(accessTokenClaims);
         String idToken = tokenService.createToken(idTokenClaims);
@@ -159,23 +155,14 @@ class IDPAuthenticationServiceImpl implements IDPAuthenticationService {
         return tokenResponse;
     }
 
-    private IDPAccessTokenClaims completeTokenClaims(IDPAccessTokenClaims accessTokenClaims, IDPUserInfo userInfo) {
-        accessTokenClaims.setUserId(userInfo.getUserId());
-        accessTokenClaims.setIssuedAt(Instant.now().getEpochSecond());
-        accessTokenClaims.setExpiresAtSeconds(accessTokenClaims.getIssuedAt() + idpService.getConfig().getAccessTokenValidity().getSeconds());
-        accessTokenClaims.setNotBefore(accessTokenClaims.getIssuedAt());
-        accessTokenClaims.setClientId(userInfo.getClientId());
-        accessTokenClaims.setIssuer(localUrlHolder.getUrl());
-        accessTokenClaims.setJwtId(UUID.randomUUID().toString());
-        return accessTokenClaims;
-    }
-
-    private IDPIDTokenClaims completeIdTokenClaims(IDPIDTokenClaims idTokenClaims, IDPUserInfo userInfo) {
-        idTokenClaims.setUserId(userInfo.getUserId());
-        idTokenClaims.setIssuedAt(Instant.now().getEpochSecond());
-        idTokenClaims.setExpiresAt(idTokenClaims.getIssuedAt() + idpService.getConfig().getIdTokenValidity().getSeconds());
-        idTokenClaims.setIssuer(localUrlHolder.getUrl());
-        return idTokenClaims;
+    private <C extends TokenClaims> C completeTokenClaims(C tokenClaims, IDPUserInfo userInfo) {
+        tokenClaims.setUserId(userInfo.getUserId());
+        tokenClaims.setIssuedAtSeconds(Instant.now().getEpochSecond());
+        tokenClaims.setExpiresAtSeconds(tokenClaims.getIssuedAtSeconds() + idpService.getConfig().getAccessTokenValidity().getSeconds());
+        tokenClaims.setNotBeforeSeconds(tokenClaims.getIssuedAtSeconds());
+        tokenClaims.setClientId(userInfo.getClientId());
+        tokenClaims.setIssuer(localUrlHolder.getUrl());
+        return tokenClaims;
     }
 
 
@@ -187,7 +174,7 @@ class IDPAuthenticationServiceImpl implements IDPAuthenticationService {
      * @throws InvalidTokenException if the refresh token is invalid or expired
      */
     private String verifyRefreshToken(String refreshToken) throws InvalidTokenException {
-        return tokenService.decodeToken(refreshToken).userId();
+        return tokenService.decodeRenewToken(refreshToken).getUserId();
     }
 
 }

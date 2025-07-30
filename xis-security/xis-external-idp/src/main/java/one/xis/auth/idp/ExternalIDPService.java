@@ -1,7 +1,7 @@
 package one.xis.auth.idp;
 
 import lombok.NonNull;
-import one.xis.auth.token.StateParameterPayload;
+import one.xis.auth.StateParameterPayload;
 
 
 // TODO Die interfaces sind für den User nicht sinnvoll zusammengefasst.
@@ -13,7 +13,6 @@ public interface ExternalIDPService {
      * Creates an authorization URL for the authentication provider.
      * This URL is used to redirect users to the provider's login page.
      *
-     * @param localUrl             The local URL of the application, which is used to construct the redirect URI.
      * @param postLoginRedirectUrl The URL to redirect to after the user has logged in.
      * @return The authorization URL as a String.
      */

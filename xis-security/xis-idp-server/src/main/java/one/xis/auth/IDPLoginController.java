@@ -1,15 +1,13 @@
-package one.xis.auth.idp;
+package one.xis.auth;
 
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import one.xis.*;
-import one.xis.auth.AuthenticationException;
-import one.xis.auth.InvalidCredentialsException;
-import one.xis.auth.InvalidRedirectUrlException;
 import one.xis.validation.Validator;
 import one.xis.validation.ValidatorException;
 
 import java.lang.reflect.AnnotatedElement;
+import java.util.Map;
 
 
 @Setter
@@ -44,7 +42,7 @@ class IDPLoginController implements Validator<IDPServerLogin> {
     }
 
     @Action("login")
-    public IDPServerLoginResponse login(@FormData("login") IDPServerLogin login) throws InvalidCredentialsException {
+    public PageUrlResponse login(@FormData("login") IDPServerLogin login) throws InvalidCredentialsException {
         // Logic for handling login action
         String code;
         try {
@@ -53,7 +51,7 @@ class IDPLoginController implements Validator<IDPServerLogin> {
         } catch (InvalidCredentialsException e) {
             throw new IllegalArgumentException("Invalid redirect URL", e);
         }
-        return new IDPServerLoginResponse(login.getRedirectUri(), login.getState(), code);
+        return new PageUrlResponse(login.getRedirectUri(), Map.of("code", code, "state", login.getState()));
     }
 
     @Override

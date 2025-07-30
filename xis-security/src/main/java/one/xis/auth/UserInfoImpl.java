@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -29,9 +28,4 @@ public class UserInfoImpl implements UserInfo {
      */
     private Set<String> roles;
 
-    /**
-     * A map containing all claims from the token.
-     * Useful for accessing custom or non-standard claims from the IDP.
-     */
-    private Map<String, String> claims;
 }

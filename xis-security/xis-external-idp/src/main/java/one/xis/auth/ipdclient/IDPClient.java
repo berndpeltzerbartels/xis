@@ -1,10 +1,10 @@
 package one.xis.auth.ipdclient;
 
 import lombok.NonNull;
+import one.xis.auth.ApiTokens;
 import one.xis.auth.AuthenticationException;
 import one.xis.auth.IDPWellKnownOpenIdConfig;
 import one.xis.auth.UserInfoImpl;
-import one.xis.auth.token.ApiTokens;
 
 public interface IDPClient {
     /**

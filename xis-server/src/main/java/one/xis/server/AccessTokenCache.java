@@ -4,11 +4,10 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Expiry;
 import lombok.NonNull;
-import one.xis.auth.token.TokenAttributes;
-import one.xis.auth.token.TokenService;
+import one.xis.auth.AccessTokenClaims;
+import one.xis.auth.TokenService;
 import one.xis.context.XISComponent;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 
@@ -17,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 public class AccessTokenCache {
 
     private final TokenService tokenService;
-    private final Cache<String, TokenAttributes> cache;
+    private final Cache<String, AccessTokenClaims> cache;
 
     AccessTokenCache(TokenService tokenService) {
         this.tokenService = tokenService;
@@ -26,24 +25,24 @@ public class AccessTokenCache {
                 .build();
     }
 
-    public TokenAttributes getAttributes(String token) {
-        return cache.get(token, tokenService::decodeToken);
+    public AccessTokenClaims getClaims(String token) {
+        return cache.get(token, tokenService::decodeAccessToken);
     }
 
-    private static class TokenExpiry implements Expiry<String, TokenAttributes> {
+    private static class TokenExpiry implements Expiry<String, AccessTokenClaims> {
         @Override
-        public long expireAfterCreate(@NonNull String key, @NonNull TokenAttributes value, long currentTime) {
-            long millis = Duration.between(Instant.now(), value.expiresAt()).toMillis();
-            return TimeUnit.MILLISECONDS.toNanos(Math.max(0, millis));
+        public long expireAfterCreate(@NonNull String key, @NonNull AccessTokenClaims value, long currentTime) {
+            long seconds = value.getExpiresAtSeconds() - Instant.now().getEpochSecond();
+            return TimeUnit.SECONDS.toNanos(Math.max(0, seconds));
         }
 
         @Override
-        public long expireAfterUpdate(@NonNull String key, @NonNull TokenAttributes value, long currentTime, long currentDuration) {
+        public long expireAfterUpdate(@NonNull String key, @NonNull AccessTokenClaims value, long currentTime, long currentDuration) {
             return expireAfterCreate(key, value, currentTime);
         }
 
         @Override
-        public long expireAfterRead(@NonNull String key, @NonNull TokenAttributes value, long currentTime, long currentDuration) {
+        public long expireAfterRead(@NonNull String key, @NonNull AccessTokenClaims value, long currentTime, long currentDuration) {
             return currentDuration;
         }
     }

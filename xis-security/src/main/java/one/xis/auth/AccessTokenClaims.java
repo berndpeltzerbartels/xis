@@ -1,12 +1,14 @@
 package one.xis.auth;
 
 import com.google.gson.annotations.SerializedName;
-import lombok.Data;
+import lombok.*;
 
+import java.util.Collection;
 import java.util.List;
 
 @Data
-public class AccessTokenClaims implements TokenClaims {
+@EqualsAndHashCode(callSuper = true)
+public class AccessTokenClaims extends TokenClaims {
 
     @SerializedName("aud")
     private String audience;
@@ -25,7 +27,7 @@ public class AccessTokenClaims implements TokenClaims {
 
     @SerializedName("resource_access")
     private ResourceAccess resourceAccess;
-    
+
     @SerializedName("username")
     private String username;
 
@@ -34,20 +36,28 @@ public class AccessTokenClaims implements TokenClaims {
 
 
     @Data
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class RealmAccess {
         @SerializedName("roles")
-        private List<String> roles;
+        private Collection<String> roles;
     }
 
     @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class ResourceAccess {
         @SerializedName("account")
         private Account account;
 
         @Data
+        @NoArgsConstructor
+        @AllArgsConstructor
         public static class Account {
             @SerializedName("roles")
-            private List<String> roles;
+            private Collection<String> roles;
         }
     }
+
 }

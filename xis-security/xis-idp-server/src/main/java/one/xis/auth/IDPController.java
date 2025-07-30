@@ -1,9 +1,6 @@
-package one.xis.auth.idp;
+package one.xis.auth;
 
 import lombok.RequiredArgsConstructor;
-import one.xis.auth.AuthenticationException;
-import one.xis.auth.IDPWellKnownOpenIdConfig;
-import one.xis.auth.JsonWebKey;
 import one.xis.http.*;
 
 @Controller

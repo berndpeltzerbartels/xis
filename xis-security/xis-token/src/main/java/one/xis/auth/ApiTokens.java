@@ -1,4 +1,4 @@
-package one.xis.auth.token;
+package one.xis.auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -3,7 +3,7 @@ package one.xis.idp;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import lombok.Data;
-import one.xis.auth.token.ApiTokens;
+import one.xis.auth.ApiTokens;
 
 import java.time.Duration;
 import java.util.LinkedHashMap;

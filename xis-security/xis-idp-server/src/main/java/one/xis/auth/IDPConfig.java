@@ -1,4 +1,4 @@
-package one.xis.auth.idp;
+package one.xis.auth;
 
 import java.time.Duration;
 
@@ -9,5 +9,5 @@ public interface IDPConfig {
     Duration getRefreshTokenValidity();
 
     Duration getIdTokenValidity();
-    
+
 }

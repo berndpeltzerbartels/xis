@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;
 import lombok.RequiredArgsConstructor;
-import one.xis.auth.token.ApiTokens;
-import one.xis.auth.token.ApiTokensAndUrl;
+import one.xis.auth.ApiTokens;
+import one.xis.auth.ApiTokensAndUrl;
 import one.xis.context.XISComponent;
 import one.xis.server.ClientConfig;
 import one.xis.server.ClientRequest;
@@ -76,7 +76,7 @@ public class NettyMapper {
                 HttpResponseStatus.OK,
                 Unpooled.wrappedBuffer(content));
     }
-    
+
 
     public FullHttpResponse toRedirectWithCookies(String location, ApiTokensAndUrl authData) {
         long accessTokenMaxAge = authData.getApiTokens().getAccessTokenExpiresIn().getSeconds();

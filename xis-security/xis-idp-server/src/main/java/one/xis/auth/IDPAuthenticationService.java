@@ -1,7 +1,6 @@
-package one.xis.auth.idp;
+package one.xis.auth;
 
 import one.xis.ImportInstances;
-import one.xis.auth.*;
 
 /**
  * Interface for Identity Provider (IDP) services that handle user authentication,

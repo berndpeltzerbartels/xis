@@ -1,9 +1,7 @@
-package one.xis.auth.token;
+package one.xis.auth;
 
 import com.google.gson.Gson;
 import lombok.NonNull;
-import one.xis.auth.ExpiredStateParameterException;
-import one.xis.auth.InvalidStateParameterException;
 import one.xis.security.SecurityUtil;
 import one.xis.utils.lang.StringUtils;
 

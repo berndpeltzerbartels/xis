@@ -1,9 +1,7 @@
 package spring;
 
 import jakarta.annotation.PostConstruct;
-import one.xis.auth.AccessTokenClaims;
-import one.xis.auth.IDTokenClaims;
-import one.xis.auth.idp.*;
+import one.xis.auth.*;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;

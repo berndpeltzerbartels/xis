@@ -7,6 +7,7 @@ import lombok.Setter;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 @Getter
@@ -71,6 +72,14 @@ class HttpClientImpl implements HttpClient {
             }
         }
         return connection;
+    }
+
+    private String readErrorStream(HttpURLConnection connection) {
+        try {
+            return new String(connection.getErrorStream().readAllBytes(), StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            return "Failed to read error stream: " + e.getMessage();
+        }
     }
 
 

@@ -5,16 +5,14 @@ import one.xis.auth.InvalidTokenException;
 import one.xis.auth.UserInfo;
 import one.xis.auth.UserInfoImpl;
 import one.xis.auth.UserInfoService;
-import org.springframework.stereotype.Component;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-@Component
+//@Component
 public class SpringUserInfoService implements UserInfoService<UserInfo> {
 
-    private final UserInfo userInfo = new UserInfoImpl("admin", Set.of("admin"), Map.of("email", ""));
+    private final UserInfo userInfo = new UserInfoImpl("admin", Set.of("admin"));
     private final String password = "bla";
 
     @Override

@@ -19,6 +19,7 @@ dependencies {
     implementation(project(":xis-util"))
     implementation(project(":xis-security"))
     compileOnly(project(":xis-gson"))
+    compileOnly(project(":xis-adapter-spi"))
 
     // Gson dependency
     implementation "com.google.code.gson:gson:$gsonVersion"

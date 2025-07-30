@@ -2,9 +2,12 @@ package one.xis.auth.idp;
 
 
 import lombok.RequiredArgsConstructor;
+import one.xis.auth.JsonWebKey;
+import one.xis.auth.JsonWebKeyProvider;
 import one.xis.auth.ipdclient.IDPClientFactory;
 import one.xis.context.XISComponent;
-import one.xis.context.XISInit;
+import one.xis.context.XISEventListener;
+import one.xis.server.LocalUrlAssignedEvent;
 import one.xis.server.LocalUrlHolder;
 
 import java.util.Collection;
@@ -19,22 +22,24 @@ import java.util.Map;
  */
 @XISComponent
 @RequiredArgsConstructor
-public class ExternalIDPServices {
+public class ExternalIDPServices implements JsonWebKeyProvider {
 
     private final Collection<ExternalIDPConfig> authenticationProviderConfigurations;
     private final IDPClientFactory idpClientFactory;
     private final LocalUrlHolder localUrlHolder;
     private final Map<String, ExternalIDPService> externalIDPServiceMap = new HashMap<>();
+    private final Map<String, Collection<JsonWebKey>> keysForIssuer = new HashMap<>();
 
     /**
      * Initializes the authentication provider services based on the provided configurations.
      */
-    @XISInit
-    public void initialize() {
+    @XISEventListener
+    public void initialize(LocalUrlAssignedEvent event) {
         for (ExternalIDPConfig providerConfiguration : authenticationProviderConfigurations) {
-            var idpClient = idpClientFactory.createConfiguredIDPClient(providerConfiguration, providerConfiguration.getIdpServerUrl());
+            var idpClient = idpClientFactory.createConfiguredIDPClient(providerConfiguration, event.localUrl());
             ExternalIDPService service = new ExternalIDPServiceImpl(idpClient, providerConfiguration, localUrlHolder);
             externalIDPServiceMap.put(service.getProviderId(), service);
+            keysForIssuer.put(idpClient.getIssuer(), idpClient.fetchPublicKeys().getKeys());
         }
     }
 
@@ -55,5 +60,11 @@ public class ExternalIDPServices {
      */
     public Collection<ExternalIDPService> getExternalIDPServices() {
         return externalIDPServiceMap.values();
+    }
+
+
+    @Override
+    public Map<String, Collection<JsonWebKey>> getKeysForIssuer(String issuer) {
+        return keysForIssuer;
     }
 }

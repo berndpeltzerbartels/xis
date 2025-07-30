@@ -1,8 +1,9 @@
 package spring;
 
 import one.xis.auth.idp.ExternalIDPConfig;
+import org.springframework.context.annotation.Configuration;
 
-//@Configuration
+@Configuration
 class SpringIDPTestConfig implements ExternalIDPConfig {
 
     @Override

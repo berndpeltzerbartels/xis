@@ -26,11 +26,8 @@ class TestUserInfoService implements UserInfoService<UserInfo> {
 
     public void saveUserInfo(UserInfo userInfo, String password) {
         getUserInfo(userInfo.getUserId()).map(UserInfoImpl.class::cast).ifPresentOrElse(
-                existingUserInfo -> {
-                    existingUserInfo.setRoles(userInfo.getRoles());
-                    existingUserInfo.setClaims(userInfo.getClaims());
-                },
-                () -> userInfos.add(new UserInfoImpl(userInfo.getUserId(), userInfo.getRoles(), userInfo.getClaims()))
+                existingUserInfo -> existingUserInfo.setRoles(userInfo.getRoles()),
+                () -> userInfos.add(new UserInfoImpl(userInfo.getUserId(), userInfo.getRoles()))
         );
         userPasswords.put(userInfo.getUserId(), password);
     }

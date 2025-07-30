@@ -2,8 +2,6 @@ package one.xis.auth;
 
 import lombok.RequiredArgsConstructor;
 import one.xis.auth.idp.ExternalIDPServices;
-import one.xis.auth.token.StateParameter;
-import one.xis.auth.token.TokenService;
 import one.xis.context.AppContext;
 import one.xis.http.*;
 import one.xis.server.ServerResponse;
@@ -41,13 +39,14 @@ class AuthenticationController {
     @Get("/callback/{idpId}")
     public ResponseEntity<?> authenticationCallback(@UrlParameter("code") String code, @UrlParameter("state") String state) {
         var stateParameterPayload = StateParameter.decodeAndVerify(state);
-        var userId = codeStore.getUserIdForCode(code);
-        if (userId == null) {
-            throw new AuthenticationException("No user found for code: " + code);
-        }
+
         var serverResponse = new ServerResponse();
         serverResponse.setRedirectUrl(HttpUtils.localizeUrl(stateParameterPayload.getRedirect()));
         if ("local".equals(stateParameterPayload.getProviderId())) {
+            var userId = codeStore.getUserIdForCode(code);
+            if (userId == null) {
+                throw new AuthenticationException("No user found for code: " + code);
+            }
             // Local login, no IDP involved
             var userInfoService = appContext.getOptionalSingleton(UserInfoService.class)
                     .orElseThrow(() -> new IllegalStateException("UserInfoService is required for local authentication"));
@@ -64,7 +63,7 @@ class AuthenticationController {
                 throw new IllegalStateException("No IDP client service found for provider: " + stateParameterPayload.getProviderId());
             }
             var externalTokens = externalIDPService.fetchTokens(code);
-            return ResponseEntity.noContent().addSecureCookie("access_token", externalTokens.getAccessToken(), externalTokens.getExpiresInSeconds())
+            return ResponseEntity.redirect(stateParameterPayload.getRedirect()).addSecureCookie("access_token", externalTokens.getAccessToken(), externalTokens.getExpiresInSeconds())
                     .addSecureCookie("refresh_token", externalTokens.getRefreshToken(), externalTokens.getRefreshExpiresInSeconds());
 
         }
@@ -81,10 +80,10 @@ class AuthenticationController {
 
     @Post("/token")
     public ResponseEntity<?> renewTokens(@CookieValue("refresh_token") String refreshToken) {
-        var tokenAttributes = tokenService.decodeToken(refreshToken);
+        var renewTokenClaims = tokenService.decodeRenewToken(refreshToken);
         @SuppressWarnings("unchecked") var userInfoService = (UserInfoService<UserInfo>) appContext.getOptionalSingleton(UserInfoService.class).orElseThrow(() -> new IllegalStateException("UserInfoService is required for token renewal"));
-        var userInfo = userInfoService.getUserInfo(tokenAttributes.userId())
-                .orElseThrow(() -> new AuthenticationException("User not found for userId: " + tokenAttributes.userId()));
+        var userInfo = userInfoService.getUserInfo(renewTokenClaims.getUserId())
+                .orElseThrow(() -> new AuthenticationException("User not found for userId: " + renewTokenClaims.getUserId()));
         var tokens = tokenService.newTokens(userInfo);
         return ResponseEntity.noContent()
                 .addSecureCookie("access_token", tokens.getAccessToken(), tokens.getAccessTokenExpiresIn())

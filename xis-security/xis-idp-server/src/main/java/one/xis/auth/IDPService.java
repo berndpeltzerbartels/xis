@@ -1,11 +1,7 @@
-package one.xis.auth.idp;
+package one.xis.auth;
 
 import one.xis.ImportInstances;
-import one.xis.auth.AccessTokenClaims;
-import one.xis.auth.IDTokenClaims;
-import one.xis.auth.RenewTokenClaims;
 
-import java.time.Instant;
 import java.util.Optional;
 
 /**
@@ -63,8 +59,9 @@ public interface IDPService {
         if (userInfo(userId).isEmpty()) {
             throw new IllegalArgumentException("User not found: " + userId);
         }
-        var expiresAt = Instant.now().getEpochSecond() + getConfig().getRefreshTokenValidity().getSeconds();
-        return new RenewTokenClaims(userId, expiresAt);
+        RenewTokenClaims claims = new RenewTokenClaims();
+        claims.setUserId(userId);
+        return claims;
     }
 
     /**

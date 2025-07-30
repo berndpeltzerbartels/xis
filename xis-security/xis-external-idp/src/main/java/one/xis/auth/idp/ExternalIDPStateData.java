@@ -1,7 +1,7 @@
 package one.xis.auth.idp;
 
 import lombok.Data;
-import one.xis.auth.token.StateParameterPayload;
+import one.xis.auth.StateParameterPayload;
 
 @Data
 public class ExternalIDPStateData {

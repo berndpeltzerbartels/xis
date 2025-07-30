@@ -2,31 +2,18 @@ package one.xis.server;
 
 
 import lombok.RequiredArgsConstructor;
+import one.xis.auth.AccessTokenClaims;
 import one.xis.auth.token.AccessToken;
-import one.xis.auth.token.TokenAttributes;
 import one.xis.utils.lang.StringUtils;
 
 import java.time.Instant;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
 
 @RequiredArgsConstructor
 public class AccessTokenWrapper implements AccessToken {
     private final String accessToken;
     private final AccessTokenCache accessTokenCache;
-    private TokenAttributes tokenAttributes;
-
-    private synchronized TokenAttributes getTokenAttributes() {
-        if (tokenAttributes == null) {
-            if (StringUtils.isNotEmpty(accessToken)) {
-                tokenAttributes = accessTokenCache.getAttributes(accessToken);
-            } else {
-                tokenAttributes = new TokenAttributes(null, null, Collections.emptySet(), Map.of(), null);
-            }
-        }
-        return tokenAttributes;
-    }
+    private AccessTokenClaims accessTokenClaims;
 
     @Override
     public String getToken() {
@@ -35,26 +22,38 @@ public class AccessTokenWrapper implements AccessToken {
 
     @Override
     public boolean isAuthenticated() {
-        return StringUtils.isNotEmpty(getTokenAttributes().userId());
+        return StringUtils.isNotEmpty(getAccessTokenClaims().getUsername());
     }
 
     @Override
     public String getUserId() {
-        return getTokenAttributes().userId();
+        return getAccessTokenClaims().getUsername();
     }
 
     @Override
     public Instant getExpiresAt() {
-        return getTokenAttributes().expiresAt();
+        var seconds = getAccessTokenClaims().getExpiresAtSeconds();
+        return seconds == null ? null : Instant.ofEpochSecond(seconds);
     }
 
     @Override
     public Collection<String> getRoles() {
-        return getTokenAttributes().roles();
+        return getAccessTokenClaims().getResourceAccess().getAccount().getRoles();
     }
 
     @Override
     public boolean isExpired() {
-        return getTokenAttributes().expiresAt() == null || getTokenAttributes().expiresAt().isBefore(Instant.now());
+        return getExpiresAt() == null || Instant.now().isAfter(getExpiresAt());
+    }
+
+    private synchronized AccessTokenClaims getAccessTokenClaims() {
+        if (accessTokenClaims == null) {
+            if (StringUtils.isNotEmpty(accessToken)) {
+                accessTokenClaims = accessTokenCache.getClaims(accessToken);
+            } else {
+                accessTokenClaims = new AccessTokenClaims();
+            }
+        }
+        return accessTokenClaims;
     }
 }

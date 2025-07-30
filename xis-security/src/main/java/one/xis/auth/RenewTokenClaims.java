@@ -1,15 +1,12 @@
 package one.xis.auth;
 
-import com.google.gson.annotations.SerializedName;
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Setter;
 
-@Data
-public class RenewTokenClaims implements TokenClaims {
 
-    @SerializedName("sub")
-    private final String userId;
+@Setter
+@AllArgsConstructor
+public class RenewTokenClaims extends TokenClaims {
 
-    @SerializedName("exp")
-    private final Long expiresAtSeconds;
 
 }

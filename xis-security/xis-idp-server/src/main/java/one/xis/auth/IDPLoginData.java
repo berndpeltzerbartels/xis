@@ -1,4 +1,4 @@
-package one.xis.auth.idp;
+package one.xis.auth;
 
 
 import one.xis.validation.Validate;

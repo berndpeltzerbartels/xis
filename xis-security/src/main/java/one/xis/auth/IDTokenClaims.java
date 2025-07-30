@@ -4,8 +4,8 @@ import com.google.gson.annotations.SerializedName;
 import lombok.Data;
 
 @Data
-public class IDTokenClaims implements TokenClaims {
-    
+public class IDTokenClaims extends TokenClaims {
+
     @SerializedName("aud")
     private String audience;
 

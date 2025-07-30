@@ -1,7 +1,7 @@
 package one.xis.auth.ipdclient;
 
+import one.xis.auth.ApiTokens;
 import one.xis.auth.UserInfoImpl;
-import one.xis.auth.token.ApiTokens;
 
 public interface IDPClientService {
     String loginFormUrl(String idpId, String redirectUri);
