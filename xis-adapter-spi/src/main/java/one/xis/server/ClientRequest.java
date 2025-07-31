@@ -18,6 +18,7 @@ public class ClientRequest {
     private String zoneId;
     private RequestType type;
     private String accessToken;
+    private String renewToken;
 
     private JsonMap formData = new JsonMap();
     private JsonMap pathVariables = new JsonMap();

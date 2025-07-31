@@ -1,10 +1,9 @@
 package one.xis.auth.ipdclient;
 
 import lombok.NonNull;
-import one.xis.auth.ApiTokens;
-import one.xis.auth.AuthenticationException;
-import one.xis.auth.IDPWellKnownOpenIdConfig;
-import one.xis.auth.UserInfoImpl;
+import one.xis.auth.*;
+
+import java.util.Collection;
 
 public interface IDPClient {
     /**
@@ -37,15 +36,6 @@ public interface IDPClient {
     UserInfoImpl fetchUserInfo(@NonNull String accessToken) throws AuthenticationException;
 
     /**
-     * Holt die öffentlichen Schlüssel vom IDP, typischerweise von einem JWKS (JSON Web Key Set) Endpunkt.
-     * Diese Schlüssel werden verwendet, um die Signatur von JWTs zu überprüfen, die vom IDP ausgestellt wurden.
-     *
-     * @return Ein Objekt, das die öffentlichen Schlüssel enthält.
-     * @throws AuthenticationException wenn die Schlüssel nicht abgerufen werden können.
-     */
-    IDPPublicKeyResponse fetchPublicKeys() throws AuthenticationException;
-
-    /**
      * Returns the IDP's unique identifier.
      *
      * @return the IDP identifier
@@ -71,4 +61,9 @@ public interface IDPClient {
 
     IDPWellKnownOpenIdConfig getOpenIdConfig();
 
+    void loadOpenIdConfig() throws Exception;
+
+    void loadPublicKeys() throws AuthenticationException;
+
+    Collection<JsonWebKey> getPublicKeys();
 }

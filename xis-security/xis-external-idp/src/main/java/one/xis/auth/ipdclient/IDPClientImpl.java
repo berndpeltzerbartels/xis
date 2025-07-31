@@ -4,14 +4,12 @@ import com.google.gson.Gson;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import one.xis.auth.ApiTokens;
-import one.xis.auth.AuthenticationException;
-import one.xis.auth.IDPWellKnownOpenIdConfig;
-import one.xis.auth.UserInfoImpl;
+import one.xis.auth.*;
 import one.xis.http.client.HttpClientException;
 import one.xis.http.client.RestClient;
 import one.xis.idp.IDPResponse;
 
+import java.util.Collection;
 import java.util.HashMap;
 
 import static java.net.URLEncoder.encode;
@@ -25,8 +23,10 @@ class IDPClientImpl implements IDPClient {
     private final IDPClientConfig idpClientConfig;
     private final String redirectUri;
     private final Gson gson;
-
-    private volatile IDPWellKnownOpenIdConfig openIdConfig;
+    @Getter
+    private Collection<JsonWebKey> publicKeys;
+    @Getter
+    private IDPWellKnownOpenIdConfig openIdConfig;
 
     @Override
     public ApiTokens fetchNewTokens(@NonNull String code) throws AuthenticationException {
@@ -98,25 +98,6 @@ class IDPClientImpl implements IDPClient {
     }
 
     @Override
-    public IDPPublicKeyResponse fetchPublicKeys() throws AuthenticationException {
-        try {
-            var httpClient = restClient.getHttpClient();
-            var headers = new HashMap<String, String>();
-            headers.put("Accept", "application/json");
-
-            var response = httpClient.doGet(getOpenIdConfig().getJwksUri(), headers);
-
-            if (response.getStatusCode() != 200) {
-                throw new AuthenticationException("Failed to fetch public keys (JWKS) from IDP. Status: " + response.getStatusCode() + ", Body: " + response.getContent());
-            }
-
-            return gson.fromJson(response.getContent(), IDPPublicKeyResponse.class);
-        } catch (HttpClientException e) {
-            throw new AuthenticationException("Failed to fetch public keys (JWKS) from IDP", e);
-        }
-    }
-
-    @Override
     public String getIdpId() {
         return idpClientConfig.getIdpId();
     }
@@ -132,20 +113,33 @@ class IDPClientImpl implements IDPClient {
         return getOpenIdConfig().getIssuer();
     }
 
+
     @Override
-    public IDPWellKnownOpenIdConfig getOpenIdConfig() {
-        if (openIdConfig == null) {
-            synchronized (this) {
-                if (openIdConfig == null) {
-                    try {
-                        openIdConfig = restClient.get("/.well-known/openid-configuration", IDPWellKnownOpenIdConfig.class);
-                    } catch (HttpClientException e) {
-                        throw new AuthenticationException("Failed to load OpenID configuration from IDP", e);
-                    }
-                }
+    public void loadOpenIdConfig() throws Exception {
+        openIdConfig = restClient.get(idpClientConfig.getIdpServerUrl() + "/.well-known/openid-configuration", IDPWellKnownOpenIdConfig.class);
+    }
+
+    @Override
+    public void loadPublicKeys() throws AuthenticationException {
+        this.publicKeys = fetchPublicKeys().getKeys();
+    }
+
+    private IDPPublicKeyResponse fetchPublicKeys() throws AuthenticationException {
+        try {
+            var httpClient = restClient.getHttpClient();
+            var headers = new HashMap<String, String>();
+            headers.put("Accept", "application/json");
+
+            var response = httpClient.doGet(getOpenIdConfig().getJwksUri(), headers);
+
+            if (response.getStatusCode() != 200) {
+                throw new AuthenticationException("Failed to fetch public keys (JWKS) from IDP. Status: " + response.getStatusCode() + ", Body: " + response.getContent());
             }
+
+            return gson.fromJson(response.getContent(), IDPPublicKeyResponse.class);
+        } catch (HttpClientException e) {
+            throw new AuthenticationException("Failed to fetch public keys (JWKS) from IDP", e);
         }
-        return openIdConfig;
     }
 
 }

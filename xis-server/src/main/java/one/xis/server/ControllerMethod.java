@@ -4,9 +4,9 @@ import lombok.Data;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import one.xis.Roles;
+import one.xis.UserContextImpl;
 import one.xis.auth.AuthenticationException;
 import one.xis.auth.URLForbiddenException;
-import one.xis.auth.token.AccessToken;
 import one.xis.deserialize.MainDeserializer;
 import one.xis.deserialize.PostProcessingResults;
 
@@ -38,10 +38,10 @@ class ControllerMethod {
         }
     }
 
-    ControllerMethodResult invoke(@NonNull ClientRequest request, @NonNull Object controller, Map<String, Object> requestScope, AccessToken accessToken) throws Exception {
-        checkRoles(accessToken);
+    ControllerMethodResult invoke(@NonNull ClientRequest request, @NonNull Object controller, Map<String, Object> requestScope) throws Exception {
+        checkRoles();
         var postProcessingResults = new PostProcessingResults();
-        var args = prepareArgs(method, request, postProcessingResults, requestScope, accessToken);
+        var args = prepareArgs(method, request, postProcessingResults, requestScope);
         if (postProcessingResults.authenticate()) {
             // TODO
         }
@@ -103,24 +103,24 @@ class ControllerMethod {
                 .collect(Collectors.toSet());
     }
 
-    protected Object[] prepareArgs(Method method, ClientRequest request, PostProcessingResults postProcessingResults, Map<String, Object> requestScope, AccessToken accessToken) throws Exception {
+    protected Object[] prepareArgs(Method method, ClientRequest request, PostProcessingResults postProcessingResults, Map<String, Object> requestScope) throws Exception {
         var args = new Object[method.getParameterCount()];
         for (var i = 0; i < method.getParameterCount(); i++) {
-            args[i] = controllerMethodParameters[i].prepareParameter(request, postProcessingResults, requestScope, accessToken);
+            args[i] = controllerMethodParameters[i].prepareParameter(request, postProcessingResults, requestScope);
         }
         return args;
     }
 
 
-    private void checkRoles(AccessToken accessToken) {
+    private void checkRoles() {
         var requiredRoles = getRequiredRoles();
         if (requiredRoles.isEmpty()) {
             return;
         }
-        if (accessToken == null || !accessToken.isAuthenticated()) {
+        if (!UserContextImpl.getInstance().isAuthenticated()) {
             throw new AuthenticationException("Access token is required for method: " + method.getName());
         }
-        var userRoles = accessToken.getRoles();
+        var userRoles = UserContextImpl.getInstance().getRoles();
         // check if user has at least one of the required roles
         if (userRoles == null || userRoles.isEmpty() || requiredRoles.stream().noneMatch(userRoles::contains)) {
             throw new AuthenticationException("User does not have required roles for method: " + method.getName());

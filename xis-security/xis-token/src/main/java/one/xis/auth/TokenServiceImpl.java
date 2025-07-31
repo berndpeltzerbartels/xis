@@ -15,7 +15,6 @@ import java.security.spec.RSAPublicKeySpec;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
-import java.util.Collection;
 
 @XISComponent
 class TokenServiceImpl implements TokenService {
@@ -28,19 +27,16 @@ class TokenServiceImpl implements TokenService {
     private final KeyPair keyPair;
     private final Gson gson;
     private final LocalUrlHolder localUrlHolder;
-    private final Collection<JsonWebKeyProvider> jsonWebKeyProviders;
 
-    private JsonWebKey jsonWebKey;
+    private JsonWebKey localJsonWebKey; // TODO : in eigener Klasse speichern, so dass der TokenService für alle IDP einschließlich lokal dem selben Muster folgt
 
-    public TokenServiceImpl(Gson gson, LocalUrlHolder localUrlHolder, Collection<JsonWebKeyProvider> jsonWebKeyProviders) {
+    public TokenServiceImpl(Gson gson, LocalUrlHolder localUrlHolder) {
         this.gson = gson;
         this.localUrlHolder = localUrlHolder;
-        this.jsonWebKeyProviders = jsonWebKeyProviders;
         // In einer echten Anwendung sollten die Schlüssel aus einem sicheren Speicher
         // (z.B. Vault, JKS) geladen und nicht bei jedem Start neu erstellt werden.
         this.keyPair = generateRsaKeyPair();
     }
-
 
     /**
      * @param userInfo
@@ -77,8 +73,8 @@ class TokenServiceImpl implements TokenService {
 
 
     @Override
-    public ApiTokens renewTokens(String token, Duration tokenExpiresIn, Duration renewTokenExpiresIn) throws InvalidTokenException {
-        RenewTokenClaims oldRenewToken = decodeRenewToken(token);
+    public ApiTokens renewTokens(String token, Duration tokenExpiresIn, Duration renewTokenExpiresIn, JsonWebKey jsonWebKey) throws InvalidTokenException {
+        RenewTokenClaims oldRenewToken = decodeRenewToken(token, jsonWebKey);
 
         // Neue AccessTokenClaims erstellen
         AccessTokenClaims accessTokenClaims = new AccessTokenClaims();
@@ -115,10 +111,10 @@ class TokenServiceImpl implements TokenService {
      */
     @Override
     public JsonWebKey getPublicJsonWebKey() {
-        if (jsonWebKey == null) {
-            jsonWebKey = createJsonWebKey();
+        if (localJsonWebKey == null) {
+            localJsonWebKey = createJsonWebKey();
         }
-        return jsonWebKey;
+        return localJsonWebKey;
     }
 
     private JsonWebKey createJsonWebKey() {
@@ -147,17 +143,44 @@ class TokenServiceImpl implements TokenService {
 
     @Override
     public AccessTokenClaims decodeAccessToken(String token) throws InvalidTokenException {
-        return decodeToken(token, AccessTokenClaims.class);
+        return decodeAccessToken(token, localJsonWebKey);
     }
 
     @Override
-    public IDTokenClaims decodeIdToken(String token) throws InvalidTokenException {
-        return decodeToken(token, IDTokenClaims.class);
+    public AccessTokenClaims decodeAccessToken(String token, JsonWebKey jwk) throws InvalidTokenException {
+        try {
+            return decodeToken(token, AccessTokenClaims.class, jwk);
+        } catch (TokenExpiredException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
-    public RenewTokenClaims decodeRenewToken(String token) throws InvalidTokenException {
-        return decodeToken(token, RenewTokenClaims.class);
+    public IDTokenClaims decodeIdToken(String token, JsonWebKey jwk) throws InvalidTokenException {
+        return decodeToken(token, IDTokenClaims.class, jwk);
+    }
+
+    @Override
+    public RenewTokenClaims decodeRenewToken(String token, JsonWebKey jwk) throws InvalidTokenException {
+        return decodeToken(token, RenewTokenClaims.class, jwk);
+    }
+
+    @Override
+    public String extractKeyId(String token) throws InvalidTokenException {
+        JsonObject header = extractHeader(token);
+        if (header.has("kid")) {
+            return header.get("kid").getAsString();
+        } else {
+            throw new InvalidTokenException("Token header does not contain 'kid'");
+        }
+    }
+
+    @Override
+    public String extractIssuer(String token) throws InvalidTokenException {
+        String[] parts = token.split("\\.");
+        if (parts.length != 3) throw new InvalidTokenException("Invalid token format");
+        String payloadJson = new String(Base64.getUrlDecoder().decode(parts[1]), StandardCharsets.UTF_8);
+        return gson.fromJson(payloadJson, JsonObject.class).get("iss").getAsString();
     }
 
     // Extrahiert den Header als JsonObject
@@ -176,16 +199,6 @@ class TokenServiceImpl implements TokenService {
         return gson.fromJson(payloadJson, claimsClass);
     }
 
-    // Findet das passende JWK
-    private JsonWebKey findJwk(String issuer, String kid) throws InvalidTokenException {
-        return jsonWebKeyProviders.stream()
-                .map(provider -> provider.getKeysForIssuer(issuer).get(kid))
-                .filter(collection -> collection != null && !collection.isEmpty())
-                .flatMap(Collection::stream)
-                .findFirst()
-                .orElseThrow(() -> new InvalidTokenException("No matching JWK for kid: " + kid + " and issuer: " + issuer));
-    }
-
     // Erzeugt den PublicKey aus JWK
     private PublicKey createPublicKey(JsonWebKey jwk) throws Exception {
         byte[] nBytes = Base64.getUrlDecoder().decode(jwk.getRsaModulus());
@@ -196,16 +209,12 @@ class TokenServiceImpl implements TokenService {
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
         return keyFactory.generatePublic(spec);
     }
-    
-    private <C extends TokenClaims> C decodeToken(String token, Class<C> claimsClass) throws InvalidTokenException {
+
+    private <C extends TokenClaims> C decodeToken(String token, Class<C> claimsClass, JsonWebKey jwk) throws InvalidTokenException {
         try {
-            JsonObject header = extractHeader(token);
+            JsonObject header = extractHeader(token); // TODO validate header
             C claims = extractClaims(token, claimsClass);
             validateClaims(claims);
-            String issuer = claims.getIssuer();
-            String kid = header.get("kid").getAsString();
-
-            JsonWebKey jwk = findJwk(issuer, kid);
             PublicKey publicKey = createPublicKey(jwk);
 
             String[] parts = token.split("\\.");
@@ -247,7 +256,7 @@ class TokenServiceImpl implements TokenService {
         // Ablauf prüfen
         Instant expiresAt = Instant.ofEpochSecond(claims.getExpiresAtSeconds());
         if (expiresAt.isBefore(Instant.now())) {
-            throw new InvalidTokenException("Token has expired");
+            throw new TokenExpiredException();
         }
 
         // Optionale Felder validieren, falls vorhanden

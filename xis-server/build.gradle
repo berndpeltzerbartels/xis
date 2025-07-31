@@ -49,6 +49,7 @@ dependencies {
     implementation project(':xis-security:xis-token')
     implementation(project(":xis-http-controller"))
     implementation(project(":xis-security"))
+    implementation(project(":xis-security:xis-external-idp"))
     // Compile-only dependencies
     compileOnly project(':xis-resources')
 

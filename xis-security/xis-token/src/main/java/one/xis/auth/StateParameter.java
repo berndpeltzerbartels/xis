@@ -18,8 +18,8 @@ public class StateParameter {
     private static final String stateSignatureKey = SecurityUtil.createRandomKey(32);
 
 
-    public static String create(String redirectUrl, String providerId) {
-        StateParameterPayload payload = createStateParameterPayload(redirectUrl, providerId);
+    public static String create(String redirectUrl, String issuer) {
+        StateParameterPayload payload = createStateParameterPayload(redirectUrl, issuer);
         String payloadJson = gson.toJson(payload);
         String encodedPayload = SecurityUtil.encodeBase64UrlSafe(payloadJson);
         String signature = SecurityUtil.signHmacSHA256(encodedPayload, stateSignatureKey);
@@ -49,13 +49,13 @@ public class StateParameter {
         return gson.fromJson(payloadJson, StateParameterPayload.class);
     }
 
-    private static StateParameterPayload createStateParameterPayload(String urlAfterLogin, String providerId) {
+    private static StateParameterPayload createStateParameterPayload(String urlAfterLogin, String issuer) {
         StateParameterPayload payload = new StateParameterPayload();
         payload.setCsrf(SecurityUtil.createRandomKey(32));
         payload.setRedirect(urlAfterLogin);
         payload.setIat(System.currentTimeMillis() / 1000);
         payload.setExpiresAtSeconds(payload.getIat() + STATE_PARAMETER_EXPIRATION.getSeconds());
-        payload.setProviderId(providerId);
+        payload.setIssuer(issuer);
         return payload;
     }
 
@@ -86,7 +86,7 @@ public class StateParameter {
         if (expiresAt <= 0 || expiresAt <= iat || expiresAt < currentTime) {
             throw new IllegalArgumentException("State parameter has expired");
         }
-        if (StringUtils.isEmpty(payload.getProviderId())) {
+        if (StringUtils.isEmpty(payload.getIssuer())) {
             throw new IllegalArgumentException("Missing provider ID in state parameter");
         }
         // Do not check redirect URI here, as it may be dynamic and not known in advance

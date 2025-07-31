@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import one.xis.*;
 import one.xis.PathVariable;
 import one.xis.auth.AuthenticationException;
-import one.xis.auth.token.AccessToken;
 import one.xis.deserialize.MainDeserializer;
 import one.xis.deserialize.PostProcessingResults;
 import one.xis.http.HttpRequest;
@@ -16,7 +15,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.time.ZoneId;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -27,7 +25,8 @@ class ControllerMethodParameter {
     private final MainDeserializer deserializer;
 
     // TODO Validation: only one of these annotation in parameter
-    Object prepareParameter(ClientRequest request, PostProcessingResults postProcessingResults, Map<String, Object> requestScope, AccessToken accessToken) throws Exception {
+    Object prepareParameter(ClientRequest request, PostProcessingResults postProcessingResults, Map<String, Object> requestScope) throws Exception {
+        var userContext = UserContextImpl.getInstance();
         if (parameter.getType().equals(HttpRequest.class)) {
             return RequestContext.getInstance().getRequest();
         } else if (parameter.getType().equals(HttpResponse.class)) {
@@ -35,14 +34,14 @@ class ControllerMethodParameter {
         } else if (parameter.getType().equals(RequestContext.class)) {
             return RequestContext.getInstance();
         } else if (parameter.isAnnotationPresent(FormData.class)) {
-            return deserializeFormDataParameter(parameter, request, postProcessingResults, accessToken);
+            return deserializeFormDataParameter(parameter, request, postProcessingResults);
         } else if (parameter.isAnnotationPresent(UserId.class)) {
-            checkAccessToken(accessToken);
-            return validateAndRetrieve(accessToken::getUserId, "UserId expected, but it was null");
+            checkAuthenticated();
+            return validateAndRetrieve(userContext::getUserId, "UserId expected, but it was null");
         } else if (parameter.isAnnotationPresent(ClientId.class)) {
             return validateAndRetrieve(request::getClientId, "ClientId expected, but it was null");
         } else if (parameter.isAnnotationPresent(URLParameter.class)) {
-            return deserializeUrlParameter(parameter, request, postProcessingResults, accessToken);
+            return deserializeUrlParameter(parameter, request, postProcessingResults);
         } else if (parameter.isAnnotationPresent(one.xis.PathVariable.class)) {
             return deserializePathVariable(parameter, request, postProcessingResults);
         } else if (parameter.isAnnotationPresent(WidgetParameter.class)) {
@@ -93,12 +92,9 @@ class ControllerMethodParameter {
         }
     }
 
-    private void checkAccessToken(AccessToken accessToken) {
-        if (accessToken == null) {
-            throw new AuthenticationException("UserId required for method " + method + ", but no access token provided");
-        }
-        if (accessToken.isAuthenticated()) {
-            throw new AuthenticationException("UserId required for method " + method + ", but access token is not authenticated");
+    private void checkAuthenticated() {
+        if (!UserContextImpl.getInstance().isAuthenticated()) {
+            throw new AuthenticationException("User is not authenticated");
         }
     }
 
@@ -110,13 +106,13 @@ class ControllerMethodParameter {
         return value;
     }
 
-    private Object deserializeFormDataParameter(Parameter parameter, ClientRequest request, PostProcessingResults postProcessingResults, AccessToken accessToken) throws IOException {
+    private Object deserializeFormDataParameter(Parameter parameter, ClientRequest request, PostProcessingResults postProcessingResults) throws IOException {
         var key = parameter.getAnnotation(FormData.class).value();
         var paramValue = request.getFormData().get(key);
         return deserializeParameter(paramValue, request, parameter, postProcessingResults);
     }
 
-    private Object deserializeUrlParameter(Parameter parameter, ClientRequest request, PostProcessingResults postProcessingResults, AccessToken accessToken) throws IOException {
+    private Object deserializeUrlParameter(Parameter parameter, ClientRequest request, PostProcessingResults postProcessingResults) throws IOException {
         var key = parameter.getAnnotation(URLParameter.class).value();
         var paramValue = request.getUrlParameters().get(key);
         var deserialized = deserializeParameter(paramValue, request, parameter, postProcessingResults);
@@ -153,7 +149,7 @@ class ControllerMethodParameter {
         if (jsonValue == null) {
             return null;
         }
-        var userContext = new UserContextImpl(request.getLocale(), ZoneId.of(request.getZoneId()), request.getClientId());
+        var userContext = UserContextImpl.getInstance();
         return deserializer.deserialize(jsonValue, parameter, userContext, postProcessingResults);
     }
 

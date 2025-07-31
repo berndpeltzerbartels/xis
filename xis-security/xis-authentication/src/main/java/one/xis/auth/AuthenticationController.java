@@ -42,7 +42,7 @@ class AuthenticationController {
 
         var serverResponse = new ServerResponse();
         serverResponse.setRedirectUrl(HttpUtils.localizeUrl(stateParameterPayload.getRedirect()));
-        if ("local".equals(stateParameterPayload.getProviderId())) {
+        if ("local".equals(stateParameterPayload.getIssuer())) {
             var userId = codeStore.getUserIdForCode(code);
             if (userId == null) {
                 throw new AuthenticationException("No user found for code: " + code);
@@ -58,9 +58,9 @@ class AuthenticationController {
 
         } else {
             // IDP login, use the IDP client service to fetch tokens
-            var externalIDPService = externalIDPServices.getExternalIDPService(stateParameterPayload.getProviderId());
+            var externalIDPService = externalIDPServices.getExternalIDPService(stateParameterPayload.getIssuer());
             if (externalIDPService == null) {
-                throw new IllegalStateException("No IDP client service found for provider: " + stateParameterPayload.getProviderId());
+                throw new IllegalStateException("No IDP client service found for provider: " + stateParameterPayload.getIssuer());
             }
             var externalTokens = externalIDPService.fetchTokens(code);
             return ResponseEntity.redirect(stateParameterPayload.getRedirect()).addSecureCookie("access_token", externalTokens.getAccessToken(), externalTokens.getExpiresInSeconds())
@@ -80,7 +80,7 @@ class AuthenticationController {
 
     @Post("/token")
     public ResponseEntity<?> renewTokens(@CookieValue("refresh_token") String refreshToken) {
-        var renewTokenClaims = tokenService.decodeRenewToken(refreshToken);
+        var renewTokenClaims = tokenService.decodeRenewToken(refreshToken, tokenService.getPublicJsonWebKey());
         @SuppressWarnings("unchecked") var userInfoService = (UserInfoService<UserInfo>) appContext.getOptionalSingleton(UserInfoService.class).orElseThrow(() -> new IllegalStateException("UserInfoService is required for token renewal"));
         var userInfo = userInfoService.getUserInfo(renewTokenClaims.getUserId())
                 .orElseThrow(() -> new AuthenticationException("User not found for userId: " + renewTokenClaims.getUserId()));

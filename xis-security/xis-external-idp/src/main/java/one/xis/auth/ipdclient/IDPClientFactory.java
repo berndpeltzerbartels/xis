@@ -12,6 +12,6 @@ public interface IDPClientFactory {
      * @param localUrl the local URL of the server, used for constructing the IDP client.
      * @return an instance of IDPClientService configured with the provided settings.
      */
-    IDPClient createConfiguredIDPClient(IDPClientConfig idpClientConfig, String localUrl);
+    IDPClient createConfiguredIDPClient(IDPClientConfig idpClientConfig, String localUrl) throws Exception;
 
 }

@@ -8,7 +8,12 @@ import one.xis.context.XISComponent;
 @RequiredArgsConstructor
 class HttpClientFactoryImpl implements HttpClientFactory {
     @Override
-    public HttpClient createHttpClient(String urlHolder) {
-        return new HttpClientImpl(urlHolder);
+    public HttpClient createHttpClient(String serverUrl) {
+        return new HttpClientImpl(serverUrl);
+    }
+
+    @Override
+    public HttpClient createHttpClient() {
+        return new HttpClientImpl("");
     }
 }

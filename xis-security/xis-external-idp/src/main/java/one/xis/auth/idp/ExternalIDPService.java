@@ -1,6 +1,7 @@
 package one.xis.auth.idp;
 
 import lombok.NonNull;
+import one.xis.auth.JsonWebKey;
 import one.xis.auth.StateParameterPayload;
 
 
@@ -46,8 +47,13 @@ public interface ExternalIDPService {
      */
     ExternalIDPTokens fetchTokens(@NonNull String code);
 
+    ExternalIDPTokens fetchRenewedTokens(@NonNull String refreshToken);
+
     String createStateParameter(String urlAfterLogin);
 
     String getProviderId();
 
+    String getIssuer();
+
+    JsonWebKey getJsonWebKey(String kid);
 }

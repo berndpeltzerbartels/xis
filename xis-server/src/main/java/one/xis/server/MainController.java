@@ -2,6 +2,7 @@ package one.xis.server;
 
 
 import lombok.RequiredArgsConstructor;
+import one.xis.auth.token.TokenStatus;
 import one.xis.http.*;
 
 import java.util.Map;
@@ -18,36 +19,41 @@ public class MainController {
     }
 
     @Post("/xis/page/model")
-    public ResponseEntity<?> getPageModel(@RequestBody ClientRequest request, @CookieValue("access_token") String accessToken, HttpRequest httpRequest) {
+    public ResponseEntity<?> getPageModel(@RequestBody ClientRequest request, @CookieValue("access_token") String accessToken, @CookieValue("renew_token") String renewToken, HttpRequest httpRequest) {
         request.setAccessToken(accessToken);
+        request.setRenewToken(renewToken);
         request.setLocale(httpRequest.getLocale());
         return responseEntity(frontendService.processModelDataRequest(request));
     }
 
     @Post("/xis/form/model")
-    public ResponseEntity<?> getFormModel(@RequestBody ClientRequest request, @CookieValue("access_token") String accessToken, HttpRequest httpRequest) {
+    public ResponseEntity<?> getFormModel(@RequestBody ClientRequest request, @CookieValue("access_token") String accessToken, @CookieValue("renew_token") String renewToken, HttpRequest httpRequest) {
         request.setAccessToken(accessToken);
+        request.setRenewToken(renewToken);
         request.setLocale(httpRequest.getLocale());
         return responseEntity(frontendService.processFormDataRequest(request));
     }
 
     @Post("/xis/widget/model")
-    public ResponseEntity<?> getWidgetModel(@RequestBody ClientRequest request, @CookieValue("access_token") String accessToken, HttpRequest httpRequest) {
+    public ResponseEntity<?> getWidgetModel(@RequestBody ClientRequest request, @CookieValue("access_token") String accessToken, @CookieValue("renew_token") String renewToken, HttpRequest httpRequest) {
         request.setAccessToken(accessToken);
+        request.setRenewToken(renewToken);
         request.setLocale(httpRequest.getLocale());
         return responseEntity(frontendService.processModelDataRequest(request));
     }
 
     @Post("/xis/page/action")
-    public ResponseEntity<?> onPageLinkAction(@RequestBody ClientRequest request, @CookieValue("access_token") String accessToken, HttpRequest httpRequest) {
+    public ResponseEntity<?> onPageLinkAction(@RequestBody ClientRequest request, @CookieValue("access_token") String accessToken, @CookieValue("renew_token") String renewToken, HttpRequest httpRequest) {
         request.setAccessToken(accessToken);
+        request.setRenewToken(renewToken);
         request.setLocale(httpRequest.getLocale());
         return responseEntity(frontendService.processActionRequest(request));
     }
 
     @Post("/xis/widget/action")
-    public ResponseEntity<?> onWidgetLinkAction(@RequestBody ClientRequest request, @CookieValue("access_token") String accessToken, HttpRequest httpRequest) {
+    public ResponseEntity<?> onWidgetLinkAction(@RequestBody ClientRequest request, @CookieValue("access_token") String accessToken, @CookieValue("renew_token") String renewToken, HttpRequest httpRequest) {
         request.setAccessToken(accessToken);
+        request.setRenewToken(renewToken);
         request.setLocale(httpRequest.getLocale());
         return responseEntity(frontendService.processActionRequest(request));
     }
@@ -108,7 +114,13 @@ public class MainController {
         if (serverResponse.getRedirectUrl() != null) {
             return ResponseEntity.noContent().addHeader("Location", serverResponse.getRedirectUrl());
         }
-        return ResponseEntity.status(serverResponse.getStatus()).body(serverResponse);
+        var tokenStatus = (TokenStatus) RequestContext.getInstance().getAttribute(TokenStatus.CONTEXT_KEY);
+        var entity = ResponseEntity.status(serverResponse.getStatus()).body(serverResponse);
+        if (tokenStatus.isRenewed()) {
+            entity.addCookie("access_token", tokenStatus.getAccessToken(), tokenStatus.getExpiresIn())
+                    .addCookie("renew_token", tokenStatus.getRenewToken(), tokenStatus.getRenewExpiresIn());
+        }
+        return entity;
     }
 }
 

@@ -18,17 +18,7 @@ public interface IDPAuthenticationService {
      * @throws InvalidCredentialsException if the credentials are invalid
      */
     String login(IDPServerLogin login) throws InvalidCredentialsException;
-
-    /**
-     * Refreshes the authentication token using the provided refresh token.
-     *
-     * @param refreshToken the refresh token to use for obtaining a new access token
-     * @return a response containing a new access token and possibly a new refresh token
-     * @throws InvalidTokenException   if the refresh token is invalid or expired
-     * @throws AuthenticationException if there is an error during the refresh process
-     */
-    IDPTokenResponse refresh(String refreshToken) throws InvalidTokenException, AuthenticationException;
-
+    
     /**
      * Checks if the provided redirect URL is valid and safe for redirection.
      *

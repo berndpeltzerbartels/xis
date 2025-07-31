@@ -52,22 +52,6 @@ class IDPAuthenticationServiceImpl implements IDPAuthenticationService {
     }
 
     /**
-     * Refreshes the access token using the provided refresh token.
-     *
-     * @param refreshToken the refresh token to use for generating a new access token
-     * @return an ApiTokens object containing the new access and refresh tokens
-     * @throws InvalidTokenException   if the refresh token is invalid or expired
-     * @throws AuthenticationException if the user associated with the refresh token is not found
-     */
-
-    @Override
-    public IDPTokenResponse refresh(String refreshToken) throws InvalidTokenException, AuthenticationException {
-        String userId = verifyRefreshToken(refreshToken);
-        return generateTokenResponse(userId);
-    }
-
-
-    /**
      * Checks if the provided redirect URL is valid for the given user ID.
      *
      * @param userId      the ID of the user
@@ -164,17 +148,6 @@ class IDPAuthenticationServiceImpl implements IDPAuthenticationService {
         tokenClaims.setIssuer(localUrlHolder.getUrl());
         return tokenClaims;
     }
-
-
-    /**
-     * Verifies the refresh token and extracts the user ID.
-     *
-     * @param refreshToken the refresh token to verify
-     * @return the user ID associated with the refresh token
-     * @throws InvalidTokenException if the refresh token is invalid or expired
-     */
-    private String verifyRefreshToken(String refreshToken) throws InvalidTokenException {
-        return tokenService.decodeRenewToken(refreshToken).getUserId();
-    }
+    
 
 }

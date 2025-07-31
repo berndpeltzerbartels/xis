@@ -5,29 +5,32 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Expiry;
 import lombok.NonNull;
 import one.xis.auth.AccessTokenClaims;
-import one.xis.auth.TokenService;
 import one.xis.context.XISComponent;
 
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 
 @XISComponent
 public class AccessTokenCache {
 
-    private final TokenService tokenService;
     private final Cache<String, AccessTokenClaims> cache;
 
-    AccessTokenCache(TokenService tokenService) {
-        this.tokenService = tokenService;
+    AccessTokenCache() {
         this.cache = Caffeine.newBuilder()
                 .expireAfter(new TokenExpiry())
                 .build();
     }
 
-    public AccessTokenClaims getClaims(String token) {
-        return cache.get(token, tokenService::decodeAccessToken);
+    public AccessTokenClaims getClaims(String token, Function<String, AccessTokenClaims> decoderFunction) {
+        return cache.get(token, decoderFunction);
     }
+
+    public void putClaims(String token, AccessTokenClaims claims) {
+        cache.put(token, claims);
+    }
+
 
     private static class TokenExpiry implements Expiry<String, AccessTokenClaims> {
         @Override

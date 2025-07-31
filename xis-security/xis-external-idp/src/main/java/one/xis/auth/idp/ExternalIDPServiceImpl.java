@@ -2,6 +2,7 @@ package one.xis.auth.idp;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import one.xis.auth.JsonWebKey;
 import one.xis.auth.StateParameter;
 import one.xis.auth.StateParameterPayload;
 import one.xis.auth.ipdclient.IDPClient;
@@ -66,13 +67,37 @@ class ExternalIDPServiceImpl implements ExternalIDPService {
     }
 
     @Override
+    public ExternalIDPTokens fetchRenewedTokens(@NonNull String refreshToken) {
+        var apiTokens = idpClient.fetchRenewedTokens(refreshToken);
+        var externalTokens = new ExternalIDPTokens();
+        externalTokens.setAccessToken(apiTokens.getAccessToken());
+        externalTokens.setRefreshToken(apiTokens.getRenewToken());
+        externalTokens.setExpiresInSeconds(apiTokens.getAccessTokenExpiresIn().getSeconds());
+        externalTokens.setRefreshExpiresInSeconds(apiTokens.getRenewTokenExpiresIn().getSeconds());
+        return externalTokens;
+    }
+
+    @Override
     public String createStateParameter(String urlAfterLogin) {
-        return StateParameter.create(urlAfterLogin, providerConfiguration.getIdpId());
+        return StateParameter.create(urlAfterLogin, getIssuer());
     }
 
     @Override
     public String getProviderId() {
         return providerConfiguration.getIdpId();
+    }
+
+    @Override
+    public String getIssuer() {
+        return idpClient.getOpenIdConfig().getIssuer();
+    }
+
+    @Override
+    public JsonWebKey getJsonWebKey(String kid) {
+        return idpClient.getPublicKeys().stream()
+                .filter(key -> key.getKeyId().equals(kid))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("No JSON Web Key found with kid: " + kid));
     }
 
     private String getAuthenticationCallbackUrl(String localUrl) {

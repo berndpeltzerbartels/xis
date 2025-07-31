@@ -1,18 +1,12 @@
 package one.xis.auth.idp;
 
 
-import lombok.RequiredArgsConstructor;
-import one.xis.auth.JsonWebKey;
-import one.xis.auth.JsonWebKeyProvider;
+import one.xis.auth.ipdclient.IDPClient;
 import one.xis.auth.ipdclient.IDPClientFactory;
 import one.xis.context.XISComponent;
-import one.xis.context.XISEventListener;
-import one.xis.server.LocalUrlAssignedEvent;
 import one.xis.server.LocalUrlHolder;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 
 /**
@@ -20,26 +14,40 @@ import java.util.Map;
  * This class initializes authentication provider services for each instance of
  * AuthenticationProviderConfiguration in context and provides access to these services.
  */
-@XISComponent
-@RequiredArgsConstructor
-public class ExternalIDPServices implements JsonWebKeyProvider {
 
-    private final Collection<ExternalIDPConfig> authenticationProviderConfigurations;
+@XISComponent
+public class ExternalIDPServices {
+
+    private final List<ExternalIDPConfig> idpConfigs;
     private final IDPClientFactory idpClientFactory;
     private final LocalUrlHolder localUrlHolder;
-    private final Map<String, ExternalIDPService> externalIDPServiceMap = new HashMap<>();
-    private final Map<String, Collection<JsonWebKey>> keysForIssuer = new HashMap<>();
+    private final Map<String, ExternalIDPService> externalIDPServices = new HashMap<>();
 
-    /**
-     * Initializes the authentication provider services based on the provided configurations.
-     */
-    @XISEventListener
-    public void initialize(LocalUrlAssignedEvent event) {
-        for (ExternalIDPConfig providerConfiguration : authenticationProviderConfigurations) {
-            var idpClient = idpClientFactory.createConfiguredIDPClient(providerConfiguration, event.localUrl());
-            ExternalIDPService service = new ExternalIDPServiceImpl(idpClient, providerConfiguration, localUrlHolder);
-            externalIDPServiceMap.put(service.getProviderId(), service);
-            keysForIssuer.put(idpClient.getIssuer(), idpClient.fetchPublicKeys().getKeys());
+    public ExternalIDPServices(Collection<ExternalIDPConfig> idpConfigs, IDPClientFactory idpClientFactory, LocalUrlHolder localUrlHolder) {
+        this.idpConfigs = new ArrayList<>(idpConfigs);
+        this.idpClientFactory = idpClientFactory;
+        this.localUrlHolder = localUrlHolder;
+    }
+
+    public synchronized ExternalIDPService getServiceForIssuer(String issuer) {
+        if (!externalIDPServices.containsKey(issuer)) {
+            tryToLoadExternalIDPServices();
+        }
+        return externalIDPServices.get(issuer);
+    }
+
+
+    private void tryToLoadExternalIDPServices() {
+        for (Iterator<ExternalIDPConfig> it = idpConfigs.iterator(); it.hasNext(); ) {
+            ExternalIDPConfig config = it.next();
+            try {
+                IDPClient client = idpClientFactory.createConfiguredIDPClient(config, localUrlHolder.getUrl());
+                it.remove();
+                var service = new ExternalIDPServiceImpl(client, config, localUrlHolder);
+                externalIDPServices.put(service.getIssuer(), service);
+            } catch (Exception e) {
+                // TODO log
+            }
         }
     }
 
@@ -50,7 +58,7 @@ public class ExternalIDPServices implements JsonWebKeyProvider {
      * @return the authentication provider service
      */
     public ExternalIDPService getExternalIDPService(String providerId) {
-        return externalIDPServiceMap.get(providerId);
+        return externalIDPServices.get(providerId);
     }
 
     /**
@@ -59,12 +67,7 @@ public class ExternalIDPServices implements JsonWebKeyProvider {
      * @return a collection of authentication provider services
      */
     public Collection<ExternalIDPService> getExternalIDPServices() {
-        return externalIDPServiceMap.values();
+        return externalIDPServices.values();
     }
 
-
-    @Override
-    public Map<String, Collection<JsonWebKey>> getKeysForIssuer(String issuer) {
-        return keysForIssuer;
-    }
 }

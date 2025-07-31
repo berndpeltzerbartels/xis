@@ -5,7 +5,8 @@ import lombok.RequiredArgsConstructor;
 import one.xis.UserContext;
 import one.xis.UserContextImpl;
 import one.xis.auth.AuthenticationException;
-import one.xis.auth.token.AccessToken;
+import one.xis.auth.token.TokenManager;
+import one.xis.auth.token.TokenStatus;
 import one.xis.context.XISComponent;
 import one.xis.context.XISInit;
 import one.xis.http.RequestContext;
@@ -29,7 +30,7 @@ public class FrontendServiceImpl implements FrontendService {
     private final ClientConfigService configService;
     private final ResourceService resourceService;
     private final Resources resources;
-    private final AccessTokenCache accessTokenCache;
+    private final TokenManager tokenManager;
     private final Collection<RequestFilter> requestFilters;
     private Resource appJsResource;
     private Resource classesJsResource;
@@ -128,8 +129,10 @@ public class FrontendServiceImpl implements FrontendService {
         userContext.setClientId(request.getClientId());
         userContext.setLocale(request.getLocale());
         userContext.setZoneId(ZoneId.of(request.getZoneId()));
+        var tokenStatus = new TokenStatus(request.getAccessToken(), request.getRenewToken());
+        tokenManager.updateUserContext(tokenStatus, userContext);
         RequestContext.getInstance().setAttribute(UserContext.CONTEXT_KEY, userContext);
-        RequestContext.getInstance().setAttribute(AccessToken.CONTEXT_KEY, new AccessTokenWrapper(request.getAccessToken(), accessTokenCache));
+        RequestContext.getInstance().setAttribute(TokenStatus.CONTEXT_KEY, tokenStatus);
     }
 
     private ServerResponse applyFilterChain(ClientRequest request, BiConsumer<ClientRequest, ServerResponse> requestHandler) {

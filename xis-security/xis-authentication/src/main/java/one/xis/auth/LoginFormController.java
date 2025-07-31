@@ -6,6 +6,7 @@ import lombok.Setter;
 import one.xis.*;
 import one.xis.auth.idp.ExternalIDPService;
 import one.xis.security.SecurityUtil;
+import one.xis.server.LocalUrlHolder;
 
 import java.util.Collection;
 import java.util.Map;
@@ -21,6 +22,7 @@ class LoginFormController<U extends UserInfo> {
     private final UserInfoService<U> userInfoService;
     private final CodeStore codeStore;
     private final Collection<ExternalIDPService> externalIDPServices;
+    private final LocalUrlHolder localUrlHolder;
 
     @ModelData("externalIdpIds")
     Collection<String> getExternalIdpIds() {
