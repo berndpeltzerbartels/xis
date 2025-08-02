@@ -19,7 +19,7 @@ public class MainController {
     }
 
     @Post("/xis/page/model")
-    public ResponseEntity<?> getPageModel(@RequestBody ClientRequest request, @CookieValue("access_token") String accessToken, @CookieValue("renew_token") String renewToken, HttpRequest httpRequest) {
+    public ResponseEntity<?> getPageModel(@RequestBody ClientRequest request, @CookieValue("access_token") String accessToken, @CookieValue("refresh_token") String renewToken, HttpRequest httpRequest) {
         request.setAccessToken(accessToken);
         request.setRenewToken(renewToken);
         request.setLocale(httpRequest.getLocale());
@@ -27,7 +27,7 @@ public class MainController {
     }
 
     @Post("/xis/form/model")
-    public ResponseEntity<?> getFormModel(@RequestBody ClientRequest request, @CookieValue("access_token") String accessToken, @CookieValue("renew_token") String renewToken, HttpRequest httpRequest) {
+    public ResponseEntity<?> getFormModel(@RequestBody ClientRequest request, @CookieValue("access_token") String accessToken, @CookieValue("refresh_token") String renewToken, HttpRequest httpRequest) {
         request.setAccessToken(accessToken);
         request.setRenewToken(renewToken);
         request.setLocale(httpRequest.getLocale());
@@ -35,7 +35,7 @@ public class MainController {
     }
 
     @Post("/xis/widget/model")
-    public ResponseEntity<?> getWidgetModel(@RequestBody ClientRequest request, @CookieValue("access_token") String accessToken, @CookieValue("renew_token") String renewToken, HttpRequest httpRequest) {
+    public ResponseEntity<?> getWidgetModel(@RequestBody ClientRequest request, @CookieValue("access_token") String accessToken, @CookieValue("refresh_token") String renewToken, HttpRequest httpRequest) {
         request.setAccessToken(accessToken);
         request.setRenewToken(renewToken);
         request.setLocale(httpRequest.getLocale());
@@ -43,7 +43,7 @@ public class MainController {
     }
 
     @Post("/xis/page/action")
-    public ResponseEntity<?> onPageLinkAction(@RequestBody ClientRequest request, @CookieValue("access_token") String accessToken, @CookieValue("renew_token") String renewToken, HttpRequest httpRequest) {
+    public ResponseEntity<?> onPageLinkAction(@RequestBody ClientRequest request, @CookieValue("access_token") String accessToken, @CookieValue("refresh_token") String renewToken, HttpRequest httpRequest) {
         request.setAccessToken(accessToken);
         request.setRenewToken(renewToken);
         request.setLocale(httpRequest.getLocale());
@@ -51,7 +51,7 @@ public class MainController {
     }
 
     @Post("/xis/widget/action")
-    public ResponseEntity<?> onWidgetLinkAction(@RequestBody ClientRequest request, @CookieValue("access_token") String accessToken, @CookieValue("renew_token") String renewToken, HttpRequest httpRequest) {
+    public ResponseEntity<?> onWidgetLinkAction(@RequestBody ClientRequest request, @CookieValue("access_token") String accessToken, @CookieValue("refresh_token") String renewToken, HttpRequest httpRequest) {
         request.setAccessToken(accessToken);
         request.setRenewToken(renewToken);
         request.setLocale(httpRequest.getLocale());

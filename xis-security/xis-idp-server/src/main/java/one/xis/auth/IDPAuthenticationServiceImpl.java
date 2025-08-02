@@ -5,6 +5,7 @@ import one.xis.context.XISDefaultComponent;
 import one.xis.server.LocalUrlHolder;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -13,9 +14,9 @@ import java.util.UUID;
 class IDPAuthenticationServiceImpl implements IDPAuthenticationService {
 
     private final IDPService idpService;
-    private final TokenService tokenService;
     private final LocalUrlHolder localUrlHolder;
     private final IDPCodeStore idpCodeStore;
+    private final LocalTokenService localTokenService;
 
 
     /**
@@ -102,8 +103,8 @@ class IDPAuthenticationServiceImpl implements IDPAuthenticationService {
     }
 
     @Override
-    public JsonWebKey getPublicJsonWebKey() {
-        return tokenService.getPublicJsonWebKey();
+    public Collection<JsonWebKey> getPublicJsonWebKeys() {
+        return localTokenService.getJsonWebKeys();
     }
 
     /**
@@ -126,9 +127,9 @@ class IDPAuthenticationServiceImpl implements IDPAuthenticationService {
                 .orElseThrow(() -> new AuthenticationException("ID token claims not found for user: " + userId));
         RenewTokenClaims renewTokenClaims = completeTokenClaims(idpService.renewTokenClaims(userId), userInfo);
 
-        String accessToken = tokenService.createToken(accessTokenClaims);
-        String idToken = tokenService.createToken(idTokenClaims);
-        String refreshToken = tokenService.createToken(renewTokenClaims);
+        String accessToken = localTokenService.createToken(accessTokenClaims);
+        String idToken = localTokenService.createToken(idTokenClaims);
+        String refreshToken = localTokenService.createToken(renewTokenClaims);
 
         IDPTokenResponse tokenResponse = new IDPTokenResponse();
         tokenResponse.setAccessToken(accessToken);
@@ -148,6 +149,6 @@ class IDPAuthenticationServiceImpl implements IDPAuthenticationService {
         tokenClaims.setIssuer(localUrlHolder.getUrl());
         return tokenClaims;
     }
-    
+
 
 }

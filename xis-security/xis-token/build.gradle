@@ -16,6 +16,7 @@ var tinylogVersion = rootProject.ext.libraryVersions.tinylog
 dependencies {
     // Local project dependencies
     implementation(project(":xis-context"))
+    implementation(project(":xis-controller-api"))
     implementation(project(":xis-util"))
     implementation(project(":xis-security"))
     compileOnly(project(":xis-gson"))

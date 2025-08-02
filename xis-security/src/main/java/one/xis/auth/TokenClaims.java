@@ -7,7 +7,7 @@ import lombok.Setter;
 
 public class TokenClaims {
 
-    @Getter(AccessLevel.PACKAGE)
+    @Getter
     @Setter(AccessLevel.PACKAGE)
     @SerializedName("sub")
     private String userId;

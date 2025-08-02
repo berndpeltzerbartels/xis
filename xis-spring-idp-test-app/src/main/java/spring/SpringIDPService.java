@@ -4,6 +4,7 @@ import jakarta.annotation.PostConstruct;
 import one.xis.auth.*;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -46,6 +47,7 @@ public class SpringIDPService implements IDPService {
         // Beispiel: AccessTokenClaims mit Username, aber ohne Email
         AccessTokenClaims claims = new AccessTokenClaims();
         claims.setUsername(user.getUserId());
+        claims.setRoles(List.of("admin"));
         // weitere Felder nach Bedarf setzen
         return Optional.of(claims);
     }

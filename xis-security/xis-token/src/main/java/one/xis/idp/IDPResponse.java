@@ -6,30 +6,17 @@ import lombok.Data;
 import one.xis.auth.ApiTokens;
 
 import java.time.Duration;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 @Data
 public class IDPResponse {
+    private final String idToken;
     private final ApiTokens apiTokens;
-
-    public Map<String, Object> toOAuth2Response() {
-        Map<String, Object> jsonResponse = new LinkedHashMap<>(); // LinkedHashMap behält die Reihenfolge bei
-        jsonResponse.put("access_token", apiTokens.getAccessToken());
-        jsonResponse.put("refresh_token", apiTokens.getRenewToken());
-        jsonResponse.put("expires_in", apiTokens.getAccessTokenExpiresIn().toSeconds());
-        jsonResponse.put("token_type", "Bearer");
-        if (apiTokens.getRenewTokenExpiresIn() != null) {
-            jsonResponse.put("refresh_expires_in", apiTokens.getRenewTokenExpiresIn().toSeconds());
-        }
-        return jsonResponse;
-    }
-
 
     public static IDPResponse fromOAuth2Json(String oauth2Json) {
         Gson gson = new Gson();
         JsonObject jsonObject = gson.fromJson(oauth2Json, JsonObject.class);
 
+        String idToken = jsonObject.get("id_token").getAsString();
         String accessToken = jsonObject.get("access_token").getAsString();
         String refreshToken = jsonObject.has("refresh_token") ? jsonObject.get("refresh_token").getAsString() : null;
         long expiresIn = jsonObject.get("expires_in").getAsLong();
@@ -46,6 +33,6 @@ public class IDPResponse {
                 refreshTokenDuration
         );
 
-        return new IDPResponse(apiTokens);
+        return new IDPResponse(idToken, apiTokens);
     }
 }

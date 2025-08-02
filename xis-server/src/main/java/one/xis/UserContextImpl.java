@@ -3,6 +3,7 @@ package one.xis;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import one.xis.auth.token.SecurityAttributes;
 import one.xis.http.RequestContext;
 
 import java.time.ZoneId;
@@ -17,12 +18,21 @@ public class UserContextImpl implements UserContext {
     private Locale locale;
     private ZoneId zoneId;
     private String clientId;
-    private String userId;
-    private Set<String> roles;
+    private SecurityAttributes securityAttributes;
 
+
+    @Override
+    public String getUserId() {
+        return securityAttributes.getUserId();
+    }
+
+    @Override
+    public Set<String> getRoles() {
+        return securityAttributes.getRoles();
+    }
 
     public boolean isAuthenticated() {
-        return userId != null && !userId.isEmpty();
+        return securityAttributes.getUserId() != null;
     }
 
     public static UserContext getInstance() {

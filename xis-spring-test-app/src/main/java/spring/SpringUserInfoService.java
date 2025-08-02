@@ -5,14 +5,14 @@ import one.xis.auth.InvalidTokenException;
 import one.xis.auth.UserInfo;
 import one.xis.auth.UserInfoImpl;
 import one.xis.auth.UserInfoService;
+import org.springframework.stereotype.Component;
 
 import java.util.Optional;
-import java.util.Set;
 
-//@Component
-public class SpringUserInfoService implements UserInfoService<UserInfo> {
+@Component
+public class SpringUserInfoService implements UserInfoService<UserInfoImpl> {
 
-    private final UserInfo userInfo = new UserInfoImpl("admin", Set.of("admin"));
+    private final UserInfoImpl userInfo = UserInfoImpl.builder().userId("user123").build();
     private final String password = "bla";
 
     @Override
@@ -21,8 +21,16 @@ public class SpringUserInfoService implements UserInfoService<UserInfo> {
     }
 
     @Override
-    public Optional<UserInfo> getUserInfo(@NonNull String userId) throws InvalidTokenException {
-        return Optional.ofNullable(userInfo.getUserId().equals(userId) ? userInfo : null);
+    public Optional<UserInfoImpl> getUserInfo(@NonNull String userId) throws InvalidTokenException {
+        if (userId.equals(userInfo.getUserId())) {
+            return Optional.of(userInfo);
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public void saveUserInfo(UserInfo userInfo) {
+
     }
 
 }

@@ -11,7 +11,7 @@
 
     <name>XIS IDP-Server API</name>
     <description>Public API for the XIS IDP-Server, which is a component of the XIS platform that provides identity
-        management and authentication services for applications built on the XIS framework. It allows applications to
+        management and apiTokens services for applications built on the XIS framework. It allows applications to
         authenticate users, manage user identities, and provide secure access to resources within the XIS ecosystem.
         It can be used as an IDP server for any other application that supports OpenID Connect.
     </description>

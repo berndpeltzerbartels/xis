@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName;
 import lombok.*;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.Set;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -31,8 +31,29 @@ public class AccessTokenClaims extends TokenClaims {
     @SerializedName("username")
     private String username;
 
-    @SerializedName("roles")
-    private List<String> roles;
+    public void setRoles(Collection<String> roles) {
+        if (realmAccess == null) {
+            realmAccess = new RealmAccess();
+        }
+        realmAccess.setRoles(roles);
+        if (resourceAccess == null) {
+            resourceAccess = new ResourceAccess();
+        }
+        if (resourceAccess.account == null) {
+            resourceAccess.account = new ResourceAccess.Account();
+        }
+        resourceAccess.account.setRoles(roles);
+    }
+
+    public Set<String> getRoles() {
+        if (realmAccess != null) {
+            return Set.copyOf(realmAccess.getRoles());
+        }
+        if (resourceAccess != null && resourceAccess.account != null) {
+            return Set.copyOf(resourceAccess.account.getRoles());
+        }
+        return Set.of();
+    }
 
 
     @Data

@@ -1,6 +1,6 @@
 ## 16. Security
 
-This chapter introduces the security model of XIS, which is based on JSON Web Tokens (JWT). All authentication
+This chapter introduces the security model of XIS, which is based on JSON Web Tokens (JWT). All apiTokens
 mechanisms, including Keycloak and future community logins, are unified under a common token format used internally by
 XIS.
 
@@ -8,7 +8,7 @@ XIS.
 
 ### 13.1 Concept
 
-XIS uses a custom JWT token for all authentication flows. Even when using third-party identity providers such as
+XIS uses a custom JWT token for all apiTokens flows. Even when using third-party identity providers such as
 Keycloak or future community-based logins (e.g. Google, Facebook), XIS **does not forward their tokens directly**.
 Instead, it issues its own signed token upon successful login.
 

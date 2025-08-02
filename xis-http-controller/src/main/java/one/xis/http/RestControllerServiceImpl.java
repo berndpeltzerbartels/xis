@@ -2,10 +2,7 @@ package one.xis.http;
 
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
-import one.xis.context.XISComponent;
-import one.xis.context.XISDefaultComponent;
-import one.xis.context.XISInit;
-import one.xis.context.XISInject;
+import one.xis.context.*;
 import one.xis.utils.lang.ClassUtils;
 import one.xis.utils.lang.FieldUtil;
 import one.xis.utils.lang.MethodUtils;
@@ -31,6 +28,9 @@ public class RestControllerServiceImpl implements RestControllerService {
 
     @XISInject
     private Gson gson;
+
+    @XISInject
+    private EventEmitter eventEmitter;
 
     private Map<MethodMatcher, Method> methods;
     private Map<Class<? extends Exception>, ControllerExceptionHandler<?>> exceptionHandlerMap;
@@ -138,10 +138,12 @@ public class RestControllerServiceImpl implements RestControllerService {
         }
 
         InvocationContext context = invocationContextOptional.get();
+        eventEmitter.emitEvent(new BeforeRequestProcessingEvent(request));
         doInvoke(context, request, response);
         if (response.getStatusCode() == null || response.getStatusCode() == 0) {
             response.setStatusCode(200); // Default to 200 OK if no status code was set
         }
+        eventEmitter.emitEvent(new RequestProcessedEvent(request, response));
     }
 
 

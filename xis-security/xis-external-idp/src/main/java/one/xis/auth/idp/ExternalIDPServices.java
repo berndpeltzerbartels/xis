@@ -6,7 +6,12 @@ import one.xis.auth.ipdclient.IDPClientFactory;
 import one.xis.context.XISComponent;
 import one.xis.server.LocalUrlHolder;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 
 /**
@@ -21,32 +26,30 @@ public class ExternalIDPServices {
     private final List<ExternalIDPConfig> idpConfigs;
     private final IDPClientFactory idpClientFactory;
     private final LocalUrlHolder localUrlHolder;
-    private final Map<String, ExternalIDPService> externalIDPServices = new HashMap<>();
+    private final Map<String, ExternalIDPService> externalIDPServices = new ConcurrentHashMap<>();
 
     public ExternalIDPServices(Collection<ExternalIDPConfig> idpConfigs, IDPClientFactory idpClientFactory, LocalUrlHolder localUrlHolder) {
-        this.idpConfigs = new ArrayList<>(idpConfigs);
+        this.idpConfigs = new CopyOnWriteArrayList<>(idpConfigs);
         this.idpClientFactory = idpClientFactory;
         this.localUrlHolder = localUrlHolder;
     }
 
     public synchronized ExternalIDPService getServiceForIssuer(String issuer) {
-        if (!externalIDPServices.containsKey(issuer)) {
-            tryToLoadExternalIDPServices();
-        }
+        tryToLoadExternalIDPServices();
         return externalIDPServices.get(issuer);
     }
 
 
     private void tryToLoadExternalIDPServices() {
-        for (Iterator<ExternalIDPConfig> it = idpConfigs.iterator(); it.hasNext(); ) {
-            ExternalIDPConfig config = it.next();
+        for (var config : new ArrayList<>(idpConfigs)) {
             try {
                 IDPClient client = idpClientFactory.createConfiguredIDPClient(config, localUrlHolder.getUrl());
-                it.remove();
+                idpConfigs.remove(config);
                 var service = new ExternalIDPServiceImpl(client, config, localUrlHolder);
                 externalIDPServices.put(service.getIssuer(), service);
             } catch (Exception e) {
                 // TODO log
+                e.printStackTrace();
             }
         }
     }
@@ -54,11 +57,12 @@ public class ExternalIDPServices {
     /**
      * Returns the authentication provider service for the given provider ID.
      *
-     * @param providerId the ID of the authentication provider
+     * @param issuer the provider ID (issuer) of the authentication provider
      * @return the authentication provider service
      */
-    public ExternalIDPService getExternalIDPService(String providerId) {
-        return externalIDPServices.get(providerId);
+    public ExternalIDPService getExternalIDPService(String issuer) {
+        tryToLoadExternalIDPServices();
+        return externalIDPServices.get(issuer);
     }
 
     /**
@@ -67,6 +71,7 @@ public class ExternalIDPServices {
      * @return a collection of authentication provider services
      */
     public Collection<ExternalIDPService> getExternalIDPServices() {
+        tryToLoadExternalIDPServices();
         return externalIDPServices.values();
     }
 

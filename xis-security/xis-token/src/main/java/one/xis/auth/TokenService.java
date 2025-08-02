@@ -1,15 +1,9 @@
 package one.xis.auth;
 
-import java.time.Duration;
+import java.security.KeyPair;
 
 public interface TokenService {
-    ApiTokens newTokens(UserInfo userInfo);
-
-    JsonWebKey getPublicJsonWebKey();
-
-    ApiTokens renewTokens(String token, Duration tokenExpiresIn, Duration renewTokenExpiresIn, JsonWebKey jsonWebKey) throws InvalidTokenException;
-
-    AccessTokenClaims decodeAccessToken(String token) throws InvalidTokenException;
+    ApiTokens newTokens(UserInfo userInfo, String issuer, String keyId, KeyPair keyPair);
 
     AccessTokenClaims decodeAccessToken(String token, JsonWebKey jwk) throws InvalidTokenException;
 
@@ -17,9 +11,12 @@ public interface TokenService {
 
     RenewTokenClaims decodeRenewToken(String token, JsonWebKey jwk) throws InvalidTokenException;
 
-    String createToken(TokenClaims claims);
+    String createToken(TokenClaims claims, String keyId, KeyPair keyPair);
 
     String extractKeyId(String token) throws InvalidTokenException;
 
     String extractIssuer(String token) throws InvalidTokenException;
+
+    String extractUserId(String token) throws InvalidTokenException;
+    
 }

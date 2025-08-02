@@ -21,21 +21,23 @@ class HttpClientImpl implements HttpClient {
 
     @Override
     public HttpResponse doGet(String url, Map<String, String> headers) throws HttpClientException {
+        int responseCode = 0;
         try {
             URL urlObj = new URL(serverUrl + url);
             HttpURLConnection connection = getHttpURLConnection("GET", headers, urlObj);
 
-            int responseCode = connection.getResponseCode();
+            responseCode = connection.getResponseCode();
             String responseBody = new String(connection.getInputStream().readAllBytes());
 
             return new HttpResponse(responseBody, responseCode);
         } catch (Exception e) {
-            throw new HttpClientException("Error during GET request", e);
+            throw new HttpClientException("Error during GET request", e, responseCode);
         }
     }
 
     @Override
     public HttpResponse doPost(String url, String requestBody, Map<String, String> headers) throws HttpClientException {
+        int responseCode = 0;
         try {
             if (headers.keySet().stream().map(String::toLowerCase).noneMatch(h -> h.equals("content-length")) && requestBody != null) {
                 headers.put("Content-Length", String.valueOf(requestBody.length()));
@@ -49,12 +51,12 @@ class HttpClientImpl implements HttpClient {
                 connection.getOutputStream().write(requestBody.getBytes());
             }
 
-            int responseCode = connection.getResponseCode();
+            responseCode = connection.getResponseCode();
             String responseBody = new String(connection.getInputStream().readAllBytes());
 
             return new HttpResponse(responseBody, responseCode);
         } catch (Exception e) {
-            throw new HttpClientException("Error during POST request", e);
+            throw new HttpClientException("Error during POST request", e, responseCode);
         }
     }
 

@@ -3,54 +3,43 @@ package one.xis.auth;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
 import one.xis.security.SecurityUtil;
-import one.xis.server.LocalUrlHolder;
 
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.security.*;
-import java.security.interfaces.RSAPublicKey;
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.PublicKey;
+import java.security.Signature;
 import java.security.spec.RSAPublicKeySpec;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
 
 @XISComponent
+@RequiredArgsConstructor
 class TokenServiceImpl implements TokenService {
 
-    private static final String KEY_ID = "xis-signing-key-rsa-1"; // Eindeutige Key-ID für den JWK
-    // Header für RS256
-    private static final byte[] HEADER = """
-            {"alg":"RS256","typ":"JWT", "kid": "${KEY_ID}"}""".replace("${KEY_ID}", KEY_ID).getBytes(StandardCharsets.UTF_8);
+    private static final String HEADER_TEMPLATE = """
+            {"alg":"RS256","typ":"JWT", "kid": "${KEY_ID}"}""";
 
-    private final KeyPair keyPair;
     private final Gson gson;
-    private final LocalUrlHolder localUrlHolder;
-
-    private JsonWebKey localJsonWebKey; // TODO : in eigener Klasse speichern, so dass der TokenService für alle IDP einschließlich lokal dem selben Muster folgt
-
-    public TokenServiceImpl(Gson gson, LocalUrlHolder localUrlHolder) {
-        this.gson = gson;
-        this.localUrlHolder = localUrlHolder;
-        // In einer echten Anwendung sollten die Schlüssel aus einem sicheren Speicher
-        // (z.B. Vault, JKS) geladen und nicht bei jedem Start neu erstellt werden.
-        this.keyPair = generateRsaKeyPair();
-    }
 
     /**
      * @param userInfo
      * @return
      */
     @Override
-    public ApiTokens newTokens(UserInfo userInfo) {
-        Duration expiresIn = Duration.ofHours(5);
-        Duration renewExpiresIn = Duration.ofDays(1);
+    public ApiTokens newTokens(UserInfo userInfo, String issuer, String keyId, KeyPair keyPair) {
+        Duration expiresIn = Duration.ofMinutes(5);
+        Duration renewExpiresIn = Duration.ofMinutes(30);
 
         AccessTokenClaims accessTokenClaims = new AccessTokenClaims();
         accessTokenClaims.setUsername(userInfo.getUserId());
         accessTokenClaims.setJwtId(SecurityUtil.createRandomKey(12));
-        accessTokenClaims.setIssuer(localUrlHolder.getUrl());
+        accessTokenClaims.setIssuer(issuer);
         accessTokenClaims.setResourceAccess(new AccessTokenClaims.ResourceAccess(new AccessTokenClaims.ResourceAccess.Account(userInfo.getRoles())));
         accessTokenClaims.setRealmAccess(new AccessTokenClaims.RealmAccess(userInfo.getRoles()));
         accessTokenClaims.setExpiresAtSeconds(Instant.now().plus(expiresIn).getEpochSecond());
@@ -60,90 +49,21 @@ class TokenServiceImpl implements TokenService {
 
         RenewTokenClaims renewTokenClaims = new RenewTokenClaims();
         renewTokenClaims.setUserId(userInfo.getUserId());
-        renewTokenClaims.setIssuer(localUrlHolder.getUrl());
+        renewTokenClaims.setIssuer(issuer);
         renewTokenClaims.setClientId("xis-api");
         renewTokenClaims.setExpiresAtSeconds(Instant.now().plus(renewExpiresIn).getEpochSecond());
         renewTokenClaims.setIssuedAtSeconds(Instant.now().getEpochSecond());
         renewTokenClaims.setNotBeforeSeconds(Instant.now().getEpochSecond());
 
-        String accessToken = createToken(accessTokenClaims);
-        String renewToken = createToken(renewTokenClaims);
+        String accessToken = createToken(accessTokenClaims, keyId, keyPair);
+        String renewToken = createToken(renewTokenClaims, keyId, keyPair);
         return new ApiTokens(accessToken, expiresIn, renewToken, renewExpiresIn);
     }
 
 
     @Override
-    public ApiTokens renewTokens(String token, Duration tokenExpiresIn, Duration renewTokenExpiresIn, JsonWebKey jsonWebKey) throws InvalidTokenException {
-        RenewTokenClaims oldRenewToken = decodeRenewToken(token, jsonWebKey);
-
-        // Neue AccessTokenClaims erstellen
-        AccessTokenClaims accessTokenClaims = new AccessTokenClaims();
-        accessTokenClaims.setUsername(oldRenewToken.getUserId());
-        accessTokenClaims.setJwtId(SecurityUtil.createRandomKey(12));
-        accessTokenClaims.setIssuer(localUrlHolder.getUrl());
-        // Rollen können hier ggf. aus einer UserInfo-Quelle geladen werden, falls nötig
-        accessTokenClaims.setExpiresAtSeconds(Instant.now().plus(tokenExpiresIn).getEpochSecond());
-        accessTokenClaims.setIssuedAtSeconds(Instant.now().getEpochSecond());
-        accessTokenClaims.setNotBeforeSeconds(Instant.now().getEpochSecond());
-        accessTokenClaims.setClientId("xis-api");
-
-        // Neues RenewTokenClaims erstellen
-        RenewTokenClaims renewTokenClaims = new RenewTokenClaims();
-        renewTokenClaims.setUserId(oldRenewToken.getUserId());
-        renewTokenClaims.setIssuer(localUrlHolder.getUrl());
-        renewTokenClaims.setClientId("xis-api");
-        renewTokenClaims.setExpiresAtSeconds(Instant.now().plus(renewTokenExpiresIn).getEpochSecond());
-        renewTokenClaims.setIssuedAtSeconds(Instant.now().getEpochSecond());
-        renewTokenClaims.setNotBeforeSeconds(Instant.now().getEpochSecond());
-
-        String accessToken = createToken(accessTokenClaims);
-        String renewToken = createToken(renewTokenClaims);
-
-        return new ApiTokens(accessToken, tokenExpiresIn, renewToken, renewTokenExpiresIn);
-    }
-
-    /**
-     * Erstellt einen öffentlichen JSON Web Key (JWK) aus dem Public Key des Schlüsselpaars.
-     * Dieser JWK kann sicher über einen öffentlichen Endpunkt (z.B. /.well-known/jwks.json)
-     * bereitgestellt werden, damit andere Services die Token verifizieren können.
-     *
-     * @return Eine Map, die den öffentlichen JWK darstellt.
-     */
-    @Override
-    public JsonWebKey getPublicJsonWebKey() {
-        if (localJsonWebKey == null) {
-            localJsonWebKey = createJsonWebKey();
-        }
-        return localJsonWebKey;
-    }
-
-    private JsonWebKey createJsonWebKey() {
-        RSAPublicKey publicKey = (RSAPublicKey) this.keyPair.getPublic();
-
-        JsonWebKey jwk = new JsonWebKey();
-        jwk.setKeyType("RSA");
-        jwk.setAlgorithm("RS256");
-        jwk.setPublicKeyUse("sig"); // "sig" für Signatur-Verwendung
-        jwk.setKeyId("xis-signing-key-rsa-1"); // Eindeutige Key-ID
-
-        // Modulus und Exponent müssen Base64URL-kodiert sein.
-        String n = Base64.getUrlEncoder().withoutPadding().encodeToString(publicKey.getModulus().toByteArray());
-        String e = Base64.getUrlEncoder().withoutPadding().encodeToString(publicKey.getPublicExponent().toByteArray());
-
-        jwk.setRsaModulus(n);
-        jwk.setRsaExponent(e);
-
-        return jwk;
-    }
-
-    @Override
-    public String createToken(TokenClaims claims) {
-        return createToken(gson.toJson(claims));
-    }
-
-    @Override
-    public AccessTokenClaims decodeAccessToken(String token) throws InvalidTokenException {
-        return decodeAccessToken(token, localJsonWebKey);
+    public String createToken(TokenClaims claims, String keyId, KeyPair keyPair) {
+        return createToken(gson.toJson(claims), keyId, keyPair);
     }
 
     @Override
@@ -177,10 +97,12 @@ class TokenServiceImpl implements TokenService {
 
     @Override
     public String extractIssuer(String token) throws InvalidTokenException {
-        String[] parts = token.split("\\.");
-        if (parts.length != 3) throw new InvalidTokenException("Invalid token format");
-        String payloadJson = new String(Base64.getUrlDecoder().decode(parts[1]), StandardCharsets.UTF_8);
-        return gson.fromJson(payloadJson, JsonObject.class).get("iss").getAsString();
+        return gson.fromJson(extractPayload(token), JsonObject.class).get("iss").getAsString();
+    }
+
+    @Override
+    public String extractUserId(String token) throws InvalidTokenException {
+        return gson.fromJson(extractPayload(token), JsonObject.class).get("sub").getAsString();
     }
 
     // Extrahiert den Header als JsonObject
@@ -189,6 +111,12 @@ class TokenServiceImpl implements TokenService {
         if (parts.length != 3) throw new InvalidTokenException("Invalid token format");
         String headerJson = new String(Base64.getUrlDecoder().decode(parts[0]), StandardCharsets.UTF_8);
         return gson.fromJson(headerJson, JsonObject.class);
+    }
+
+    private String extractPayload(String token) throws InvalidTokenException {
+        String[] parts = token.split("\\.");
+        if (parts.length != 3) throw new InvalidTokenException("Invalid token format");
+        return new String(Base64.getUrlDecoder().decode(parts[1]), StandardCharsets.UTF_8);
     }
 
     // Extrahiert die Claims
@@ -271,15 +199,15 @@ class TokenServiceImpl implements TokenService {
         }
     }
 
-    private String createToken(String payloadJson) {
-        String headerBase64 = Base64.getUrlEncoder().withoutPadding().encodeToString(HEADER);
+    private String createToken(String payloadJson, String keyId, KeyPair keyPair) {
+        String headerBase64 = Base64.getUrlEncoder().withoutPadding().encodeToString(createHeader(keyId));
         String payloadBase64 = Base64.getUrlEncoder().withoutPadding().encodeToString(payloadJson.getBytes(StandardCharsets.UTF_8));
         String tokenData = headerBase64 + "." + payloadBase64;
-        String signatureBase64 = signAndEncodeBase64(tokenData);
+        String signatureBase64 = signAndEncodeBase64(tokenData, keyPair);
         return headerBase64 + "." + payloadBase64 + "." + signatureBase64;
     }
 
-    private String signAndEncodeBase64(String data) {
+    private String signAndEncodeBase64(String data, KeyPair keyPair) {
         try {
             // Signiere mit dem privaten Schlüssel
             Signature signature = Signature.getInstance("SHA256withRSA");
@@ -292,15 +220,7 @@ class TokenServiceImpl implements TokenService {
         }
     }
 
-    private KeyPair generateRsaKeyPair() {
-        try {
-            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-            keyPairGenerator.initialize(2048);
-            return keyPairGenerator.generateKeyPair();
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("Could not generate RSA key pair", e);
-        }
+    private byte[] createHeader(String keyId) {
+        return HEADER_TEMPLATE.replace("${KEY_ID}", keyId).getBytes(StandardCharsets.UTF_8);
     }
-
-
 }

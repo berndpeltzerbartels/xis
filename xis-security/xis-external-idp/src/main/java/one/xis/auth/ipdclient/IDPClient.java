@@ -2,6 +2,7 @@ package one.xis.auth.ipdclient;
 
 import lombok.NonNull;
 import one.xis.auth.*;
+import one.xis.idp.IDPResponse;
 
 import java.util.Collection;
 
@@ -14,7 +15,7 @@ public interface IDPClient {
      * @return Die API-Tokens, die den Access- und Refresh-Token enthalten.
      * @throws AuthenticationException wenn der Code ungültig oder abgelaufen ist oder ein anderer Fehler beim Token-Austausch auftritt.
      */
-    ApiTokens fetchNewTokens(@NonNull String code) throws AuthenticationException;
+    IDPResponse fetchNewTokens(@NonNull String code) throws AuthenticationException;
 
     /**
      * Erneuert die API-Tokens unter Verwendung eines Refresh-Tokens.

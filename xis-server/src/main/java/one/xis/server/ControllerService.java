@@ -58,7 +58,6 @@ class ControllerService {
 
     void processActionRequest(@NonNull ClientRequest request, @NonNull ServerResponse response) {
         Logger.info("Process action request: {}", request);
-        ;
         var controllerResult = new ControllerResult();
         controllerResult.setCurrentPageURL(request.getPageId());
         controllerResult.setCurrentWidgetId(request.getWidgetId());

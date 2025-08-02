@@ -13,19 +13,11 @@ class RestClientFactoryImpl implements RestClientFactory {
 
     @Override
     public RestClient createRestClient(String serverUrl) throws HttpClientException {
-        try {
-            return new RestClientImpl(httpClientFactory.createHttpClient(serverUrl), gson);
-        } catch (Exception e) {
-            throw new HttpClientException("Failed to create RestClient for " + serverUrl, e);
-        }
+        return new RestClientImpl(httpClientFactory.createHttpClient(serverUrl), gson);
     }
 
     @Override
     public RestClient createRestClient() throws HttpClientException {
-        try {
-            return new RestClientImpl(httpClientFactory.createHttpClient(), gson);
-        } catch (Exception e) {
-            throw new HttpClientException("Failed to create RestClient", e);
-        }
+        return new RestClientImpl(httpClientFactory.createHttpClient(), gson);
     }
 }

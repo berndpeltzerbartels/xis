@@ -99,21 +99,7 @@ class AppContextFactory implements SingletonCreationListener {
             }
         }
     }
-
-    private void mapProducers2() {
-        for (var i = 0; i < singletonConsumers.size(); i++) {
-            var consumer = singletonConsumers.get(i);
-            if (consumer instanceof MultiValueConsumer) {
-                mapProducersForMultiValueConsumer(consumer);
-            } else {
-                mapProducersForSingleValueConsumer(consumer);
-                if (!consumer.hasProducer() && !consumer.isOptional()) {
-                    throw new UnsatisfiedDependencyException(consumer);
-                }
-            }
-        }
-    }
-
+    
     private void mapProducersForMultiValueConsumer(SingletonConsumer consumer) {
         for (var j = 0; j < singletonProducers.size(); j++) {
             var producer = singletonProducers.get(j);

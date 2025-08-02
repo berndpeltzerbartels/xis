@@ -37,16 +37,17 @@ public class StateParameter {
     public static StateParameterPayload decode(@NonNull String stateParameter) {
         String[] parts = stateParameter.split("\\.");
         if (parts.length != 2) {
-            throw new IllegalArgumentException("Invalid state parameter format");
+            throw new InvalidStateParameterException("Invalid state parameter format");
         }
         String encodedPayload = parts[0];
         String signature = parts[1];
+        String payloadJson = new String(SecurityUtil.decodeBase64UrlSafe(encodedPayload), StandardCharsets.UTF_8);
+        StateParameterPayload payload = gson.fromJson(payloadJson, StateParameterPayload.class);
         String expectedSignature = SecurityUtil.signHmacSHA256(encodedPayload, stateSignatureKey);
         if (!expectedSignature.equals(signature)) {
-            throw new IllegalArgumentException("Invalid state parameter signature");
+            throw new InvalidStateParameterException("Invalid state parameter signature", payload);
         }
-        String payloadJson = new String(SecurityUtil.decodeBase64UrlSafe(encodedPayload), StandardCharsets.UTF_8);
-        return gson.fromJson(payloadJson, StateParameterPayload.class);
+        return payload;
     }
 
     private static StateParameterPayload createStateParameterPayload(String urlAfterLogin, String issuer) {
@@ -69,25 +70,25 @@ public class StateParameter {
         try {
             payload = gson.fromJson(payloadJson, StateParameterPayload.class);
         } catch (Exception e) {
-            throw new IllegalArgumentException("Invalid state parameter payload", e);
+            throw new InvalidStateParameterException("Invalid state parameter payload", e);
         }
         if (StringUtils.isEmpty(payload.getCsrf())) {
-            throw new IllegalArgumentException("Missing CSRF token in state parameter");
+            throw new InvalidStateParameterException("Missing CSRF token in state parameter", payload);
         }
         if (payload.getRedirect() == null || payload.getRedirect().isEmpty()) {
-            throw new IllegalArgumentException("Missing redirect URI in state parameter");
+            throw new InvalidStateParameterException("Missing redirect URI in state parameter", payload);
         }
         long iat = payload.getIat();
         long currentTime = System.currentTimeMillis() / 1000;
         if (iat <= 0 || iat > currentTime) {
-            throw new IllegalArgumentException("Invalid issued at time in state parameter");
+            throw new InvalidStateParameterException("Invalid issued at time in state parameter", payload);
         }
         long expiresAt = payload.getExpiresAtSeconds();
         if (expiresAt <= 0 || expiresAt <= iat || expiresAt < currentTime) {
-            throw new IllegalArgumentException("State parameter has expired");
+            throw new InvalidStateParameterException("State parameter has expired", payload);
         }
         if (StringUtils.isEmpty(payload.getIssuer())) {
-            throw new IllegalArgumentException("Missing provider ID in state parameter");
+            throw new InvalidStateParameterException("Missing provider ID in state parameter", payload);
         }
         // Do not check redirect URI here, as it may be dynamic and not known in advance
         return payload;

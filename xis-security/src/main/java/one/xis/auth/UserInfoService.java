@@ -12,7 +12,6 @@ import java.util.Optional;
 @ImportInstances
 public interface UserInfoService<U extends UserInfo> {
 
-
     /**
      * Validates the user credentials against the stored user information.
      *
@@ -29,5 +28,7 @@ public interface UserInfoService<U extends UserInfo> {
      * @return the user information
      */
     Optional<U> getUserInfo(String userId);
-    
+
+    void saveUserInfo(UserInfo userInfo);
+
 }

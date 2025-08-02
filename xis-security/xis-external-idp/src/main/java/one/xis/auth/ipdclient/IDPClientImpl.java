@@ -9,6 +9,7 @@ import one.xis.http.client.HttpClientException;
 import one.xis.http.client.RestClient;
 import one.xis.idp.IDPResponse;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -29,7 +30,7 @@ class IDPClientImpl implements IDPClient {
     private IDPWellKnownOpenIdConfig openIdConfig;
 
     @Override
-    public ApiTokens fetchNewTokens(@NonNull String code) throws AuthenticationException {
+    public IDPResponse fetchNewTokens(@NonNull String code) throws AuthenticationException {
         try {
             String formBody = "grant_type=authorization_code" +
                     "&code=" + encode(code, UTF_8) +
@@ -47,7 +48,7 @@ class IDPClientImpl implements IDPClient {
             if (response.getStatusCode() != 200) {
                 throw new AuthenticationException("Failed to request tokens from IDP. Status: " + response.getStatusCode() + ", Body: " + response.getContent());
             }
-            return IDPResponse.fromOAuth2Json(response.getContent()).getApiTokens();
+            return IDPResponse.fromOAuth2Json(response.getContent());
         } catch (HttpClientException e) {
             throw new AuthenticationException("Failed to request tokens from IDP", e);
         }
@@ -136,7 +137,7 @@ class IDPClientImpl implements IDPClient {
                 throw new AuthenticationException("Failed to fetch public keys (JWKS) from IDP. Status: " + response.getStatusCode() + ", Body: " + response.getContent());
             }
 
-            return gson.fromJson(response.getContent(), IDPPublicKeyResponse.class);
+            return new IDPPublicKeyResponse(Arrays.asList(gson.fromJson(response.getContent(), JsonWebKey[].class)));
         } catch (HttpClientException e) {
             throw new AuthenticationException("Failed to fetch public keys (JWKS) from IDP", e);
         }

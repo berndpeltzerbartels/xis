@@ -5,8 +5,8 @@ import lombok.RequiredArgsConstructor;
 import one.xis.UserContext;
 import one.xis.UserContextImpl;
 import one.xis.auth.AuthenticationException;
-import one.xis.auth.token.TokenManager;
 import one.xis.auth.token.TokenStatus;
+import one.xis.auth.token.UserSecurityService;
 import one.xis.context.XISComponent;
 import one.xis.context.XISInit;
 import one.xis.http.RequestContext;
@@ -30,7 +30,7 @@ public class FrontendServiceImpl implements FrontendService {
     private final ClientConfigService configService;
     private final ResourceService resourceService;
     private final Resources resources;
-    private final TokenManager tokenManager;
+    private final UserSecurityService userSecurityService;
     private final Collection<RequestFilter> requestFilters;
     private Resource appJsResource;
     private Resource classesJsResource;
@@ -125,12 +125,12 @@ public class FrontendServiceImpl implements FrontendService {
     }
 
     private void addRequestAttributes(ClientRequest request) throws AuthenticationException {
+        var tokenStatus = new TokenStatus(request.getAccessToken(), request.getRenewToken());
         var userContext = new UserContextImpl();
         userContext.setClientId(request.getClientId());
         userContext.setLocale(request.getLocale());
         userContext.setZoneId(ZoneId.of(request.getZoneId()));
-        var tokenStatus = new TokenStatus(request.getAccessToken(), request.getRenewToken());
-        tokenManager.updateUserContext(tokenStatus, userContext);
+        userContext.setSecurityAttributes(new SecurityAttributesImpl(tokenStatus, userSecurityService));
         RequestContext.getInstance().setAttribute(UserContext.CONTEXT_KEY, userContext);
         RequestContext.getInstance().setAttribute(TokenStatus.CONTEXT_KEY, tokenStatus);
     }

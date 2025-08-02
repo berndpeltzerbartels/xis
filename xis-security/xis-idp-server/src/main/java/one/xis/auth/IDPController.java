@@ -3,6 +3,8 @@ package one.xis.auth;
 import lombok.RequiredArgsConstructor;
 import one.xis.http.*;
 
+import java.util.Collection;
+
 @Controller
 @RequiredArgsConstructor
 class IDPController {
@@ -17,8 +19,8 @@ class IDPController {
 
     @Get("/.well-known/jwks.json")
     @Produces(ContentType.JSON)
-    ResponseEntity<JsonWebKey> getPublicJsonWebKey() {
-        return ResponseEntity.ok(idpAuthenticationService.getPublicJsonWebKey());
+    ResponseEntity<Collection<JsonWebKey>> getPublicJsonWebKey() {
+        return ResponseEntity.ok(idpAuthenticationService.getPublicJsonWebKeys());
     }
 
     @Post("/xis/idp/tokens")
@@ -27,7 +29,7 @@ class IDPController {
             IDPTokenResponse response = idpAuthenticationService.provideTokens(request);
             return ResponseEntity.ok(response);
         } catch (AuthenticationException e) {
-            return ResponseEntity.status(422);
+            return ResponseEntity.status(401);
         }
     }
 

@@ -28,4 +28,19 @@ public class UserInfoImpl implements UserInfo {
      */
     private Set<String> roles;
 
+    private String name;
+
+    private String email;
+
+    private boolean emailVerified;
+
+    private String preferredUsername;
+
+    private String givenName;
+
+    private String familyName;
+
+    private String locale;
+    private String pictureUrl;
+
 }

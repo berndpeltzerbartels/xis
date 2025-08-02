@@ -8,7 +8,7 @@ import java.util.Collection;
 @Data
 public class IDPPublicKeyResponse {
 
-    private Collection<JsonWebKey> keys;
+    private final Collection<JsonWebKey> keys;
 
 }
 

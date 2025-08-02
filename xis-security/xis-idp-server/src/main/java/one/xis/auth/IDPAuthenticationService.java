@@ -2,6 +2,8 @@ package one.xis.auth;
 
 import one.xis.ImportInstances;
 
+import java.util.Collection;
+
 /**
  * Interface for Identity Provider (IDP) services that handle user authentication,
  * issue tokens, and manage user sessions.
@@ -18,7 +20,7 @@ public interface IDPAuthenticationService {
      * @throws InvalidCredentialsException if the credentials are invalid
      */
     String login(IDPServerLogin login) throws InvalidCredentialsException;
-    
+
     /**
      * Checks if the provided redirect URL is valid and safe for redirection.
      *
@@ -32,5 +34,5 @@ public interface IDPAuthenticationService {
 
     IDPTokenResponse provideTokens(IDPTokenRequest request);
 
-    JsonWebKey getPublicJsonWebKey();
+    Collection<JsonWebKey> getPublicJsonWebKeys();
 }

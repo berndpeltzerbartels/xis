@@ -17,7 +17,7 @@ class RestClientImpl implements RestClient {
     public <R> R get(String url, Class<R> responseType) throws HttpClientException {
         HttpResponse response = httpClient.doGet(url, Map.of("Accept", "application/json"));
         if (response.getStatusCode() != 200) {
-            throw new HttpClientException("Failed to fetch data: " + response.getStatusCode());
+            throw new HttpClientException("Failed to fetch data ", response.getStatusCode());
         }
         return gson.fromJson(response.getContent(), responseType);
     }
@@ -27,7 +27,7 @@ class RestClientImpl implements RestClient {
         String jsonBody = gson.toJson(requestBody);
         HttpResponse response = httpClient.doPost(url, jsonBody, Map.of("Content-Type", "application/json", "Accept", "application/json"));
         if (response.getStatusCode() != 200) {
-            throw new HttpClientException("Failed to post data: " + response.getStatusCode());
+            throw new HttpClientException("Failed to post data: ", response.getStatusCode());
         }
         return gson.fromJson(response.getContent(), responseType);
     }
