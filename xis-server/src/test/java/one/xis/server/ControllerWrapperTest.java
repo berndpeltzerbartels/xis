@@ -3,6 +3,7 @@ package one.xis.server;
 import one.xis.ModelData;
 import one.xis.RequestScope;
 import one.xis.deserialize.MainDeserializer;
+import one.xis.http.RequestContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -19,6 +20,7 @@ class ControllerWrapperTest {
 
     @BeforeEach
     void setUp() {
+        RequestContext.createInstance(mock(), mock());
         var deserializer = mock(MainDeserializer.class);
         var controllerResultMapper = mock(ControllerResultMapper.class);
         var wrapperFactory = new ControllerWrapperFactory(deserializer, new ControllerMethodResultMapper(mock(), new PathResolver()), controllerResultMapper);
@@ -28,7 +30,7 @@ class ControllerWrapperTest {
 
     @Test
     void invokeGetModelMethods() {
-        controllerWrapper.invokeGetModelMethods(new ClientRequest(), new ControllerResult(), mock());
+        controllerWrapper.invokeGetModelMethods(new ClientRequest(), new ControllerResult());
 
         // Verify the order of method invocations
         var invocationOrder = controller.getInvocationOrder();

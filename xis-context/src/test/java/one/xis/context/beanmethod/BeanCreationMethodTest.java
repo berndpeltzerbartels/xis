@@ -19,6 +19,6 @@ class BeanCreationMethodTest {
         assertThat(context.getSingleton(Comp3.class)).isNotNull();
         assertThat(context.getSingleton(Comp3.class).getComp2()).isNotNull();
         assertThat(context.getSingleton(AppContext.class)).isNotNull();
-        assertThat(context.getSingletons()).hasSize(4);
+        assertThat(context.getSingletons()).hasSize(5); // AppContext and EventEmitterImpl are also included
     }
 }

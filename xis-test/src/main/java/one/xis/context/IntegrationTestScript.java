@@ -43,8 +43,7 @@ class IntegrationTestScript {
         var value = JSUtil.execute(script, context);
         var invoker = new JavascriptFunctionContext(value.getArrayElement(0), context);
         var reset = new JavascriptFunctionContext(value.getArrayElement(1), context);
-        var setAccessToken = new JavascriptFunctionContext(value.getArrayElement(2), context);
-        return new IntegrationTestFunctions(invoker, reset, setAccessToken);
+        return new IntegrationTestFunctions(invoker, reset);
 
     }
 

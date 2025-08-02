@@ -7,7 +7,6 @@ class LocalKeyProviderTest {
     @Test
     void createJsonWebKey() {
         LocalInMemoryKeyProvider provider = new LocalInMemoryKeyProvider();
-        provider.init();
         String keyId = provider.getKeyIds().iterator().next();
 
         long start = System.nanoTime();

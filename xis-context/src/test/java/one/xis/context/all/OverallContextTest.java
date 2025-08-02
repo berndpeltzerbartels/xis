@@ -13,7 +13,7 @@ class OverallContextTest {
                 .withPackage("one.xis.context.all")
                 .build();
 
-        assertThat(context.getSingletons()).hasSize(7);
+        assertThat(context.getSingletons()).hasSize(8); // AppContext and EventEmitterImpl are also included
 
         assertThat(context.getSingleton(Comp1.class)).isNotNull();
         assertThat(context.getSingleton(Comp2.class)).isNotNull();

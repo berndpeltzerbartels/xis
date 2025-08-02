@@ -1,5 +1,6 @@
 package one.xis.http;
 
+import one.xis.context.EventEmitter;
 import one.xis.utils.lang.FieldUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -31,6 +32,9 @@ class RestControllerServiceIntegrationTest {
     @Mock
     private HttpResponse response;
 
+    @Mock
+    private EventEmitter eventEmitter;
+
     @Captor
     private ArgumentCaptor<Object> responseValueCaptor;
     @Captor
@@ -49,6 +53,7 @@ class RestControllerServiceIntegrationTest {
             // Injiziere Mocks und Spies manuell, da wir kein DI-Framework im Test haben
             FieldUtil.setFieldValue(restControllerService, "responseWriter", responseWriter);
             FieldUtil.setFieldValue(restControllerService, "controllers", List.of(testController));
+            FieldUtil.setFieldValue(restControllerService, "eventEmitter", eventEmitter);
             restControllerService.initMethods(); // Simuliert @XISInit
         }
 
@@ -275,6 +280,7 @@ class RestControllerServiceIntegrationTest {
             restControllerService = new RestControllerServiceImpl();
             FieldUtil.setFieldValue(restControllerService, "responseWriter", responseWriter);
             FieldUtil.setFieldValue(restControllerService, "controllers", controllers);
+            FieldUtil.setFieldValue(restControllerService, "eventEmitter", eventEmitter);
 
             long startInit = System.nanoTime();
             restControllerService.initMethods();

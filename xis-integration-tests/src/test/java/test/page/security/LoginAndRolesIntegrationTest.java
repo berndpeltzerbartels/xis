@@ -8,7 +8,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -29,7 +28,6 @@ class LoginAndRolesIntegrationTest {
         var userInfo = new UserInfoImpl();
         userInfo.setUserId("admin");
         userInfo.setRoles(Set.of("admin", "user"));
-        userInfo.setClaims(Map.of());
 
         when(userInfoService.getUserInfo("admin")).thenReturn(Optional.of(userInfo));
 
