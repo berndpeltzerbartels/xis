@@ -110,7 +110,7 @@ public class UserSecurityServiceImpl implements UserSecurityService {
         }
         var externalIdpService = externalIDPServices.getServiceForIssuer(issuer);
         if (externalIdpService == null) {
-            throw new IllegalStateException("No external IDP service found for issuer: " + issuer);
+            throw new AuthenticationException("No external IDP service found for issuer: " + issuer);
         }
         var keyId = tokenService.extractKeyId(token);
         var publicKey = externalIdpService.getJsonWebKey(keyId);
