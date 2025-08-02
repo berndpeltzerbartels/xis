@@ -5,11 +5,10 @@ import one.xis.auth.InvalidTokenException;
 import one.xis.auth.UserInfo;
 import one.xis.auth.UserInfoImpl;
 import one.xis.auth.UserInfoService;
-import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
-@Component
+//@Component
 public class SpringUserInfoService implements UserInfoService<UserInfoImpl> {
 
     private final UserInfoImpl userInfo = UserInfoImpl.builder().userId("user123").build();

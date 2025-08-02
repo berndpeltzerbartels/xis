@@ -5,8 +5,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import one.xis.*;
 import one.xis.auth.idp.ExternalIDPService;
+import one.xis.auth.idp.ExternalIDPServices;
+import one.xis.context.AppContext;
 import one.xis.security.SecurityUtil;
-import one.xis.server.LocalUrlHolder;
 
 import java.util.Collection;
 import java.util.Map;
@@ -21,20 +22,27 @@ class LoginFormController<U extends UserInfo> {
 
     private final UserInfoService<U> userInfoService;
     private final CodeStore codeStore;
-    private final Collection<ExternalIDPService> externalIDPServices;
-    private final LocalUrlHolder localUrlHolder;
+    private final ExternalIDPServices externalIDPServices;
+    private final AppContext appContext;
 
     @ModelData("externalIdpIds")
     Collection<String> getExternalIdpIds() {
-        return externalIDPServices.stream()
+        return externalIDPServices.getExternalIDPServices().stream()
                 .map(ExternalIDPService::getProviderId)
                 .toList();
     }
 
     @ModelData("externalIdpUrls")
     Map<String, String> getExternalIdpUrls(@URLParameter("redirect_uri") String postLoginRedirectUrl) { // Annotation korrigiert
-        return externalIDPServices.stream()
+        return externalIDPServices.getExternalIDPServices().stream()
                 .collect(Collectors.toMap(ExternalIDPService::getProviderId, service -> service.createLoginUrl(postLoginRedirectUrl)));
+    }
+
+    @ModelData("displayLoginForm")
+    boolean isDisplayLoginForm() {
+        return appContext.getOptionalSingleton(UserInfoService.class)
+                .filter(c -> !(c instanceof UserServicePlaceholder))
+                .isPresent();
     }
 
     @FormData("login")
@@ -49,7 +57,7 @@ class LoginFormController<U extends UserInfo> {
             codeStore.store(code, login.getUsername());
             return new LoginResponse(login.getState(), code);
         }
-        throw new IllegalStateException("Invalid username or password");
+        throw new IllegalStateException("Invalid username or password"); // Already validated by LoginValidator
     }
 
 }
