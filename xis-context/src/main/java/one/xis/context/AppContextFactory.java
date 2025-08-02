@@ -36,8 +36,9 @@ class AppContextFactory implements SingletonCreationListener {
     public AppContext createContext() {
         long t0 = System.currentTimeMillis();
         var context = new AppContextImpl(singletons);
+        var eventEmitter = new EventEmitterImpl(eventDispatcher);
         additionalSingletons.add(context);
-        additionalSingletons.add(new EventEmitterImpl(eventDispatcher));
+        additionalSingletons.add(eventEmitter);
         evaluateAnnotatedComponents();
         evaluateAdditionalSingletonClasses();
         evaluateAdditionalSingletons();
@@ -55,6 +56,7 @@ class AppContextFactory implements SingletonCreationListener {
         context.lockModification();
         long t5 = System.currentTimeMillis();
         Logger.info("Context lock took {} ms", t5 - t3);
+        eventEmitter.emitEvent(new AppContextInitializedEvent(context));
         return context;
     }
 
@@ -99,7 +101,7 @@ class AppContextFactory implements SingletonCreationListener {
             }
         }
     }
-    
+
     private void mapProducersForMultiValueConsumer(SingletonConsumer consumer) {
         for (var j = 0; j < singletonProducers.size(); j++) {
             var producer = singletonProducers.get(j);
