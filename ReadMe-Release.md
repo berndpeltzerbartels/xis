@@ -33,10 +33,20 @@ Upload the generated ZIP file via the Sonatype Central web interface.
 
 1. Navigate to the Sonatype Central Portal: **https://central.sonatype.com/publishing/deployments**
 2. Log in using the project's credentials:
-    * **Username:** `berndpb`
-    * **Password:** Stored in the `/xis.kdbx` Keepass file.
-3. Follow the on-screen instructions to upload the deployment bundle. Select the `one.xis-<version>.zip` file from
-   your home directory that you created in Step 2.
 
-After the upload is processed by Sonatype, the artifacts should become available on Maven Central. This can take some
-time.
+* **Username:** `berndpb`
+* **Password:** Stored in the `/xis.kdbx` Keepass file.
+
+3. Follow the on-screen instructions to upload the deployment bundle.
+
+* Select the `one.xis-<version>.zip` file from your home directory that you created in Step 2.
+* **Important:** The description you provide on the upload form is publicly readable.
+
+### Step 4: Publish the Deployment
+
+After the upload, Sonatype validates the bundle. Once validation is complete, you must manually publish it.
+
+1. Wait for Sonatype to finish the validation process for your upload.
+2. Navigate to the deployment details (usually under `Deployments` -> `Deployment Info`).
+3. Click the **"Publish"** button to finalize the release and make it available on Maven Central. This can take some
+   time.
