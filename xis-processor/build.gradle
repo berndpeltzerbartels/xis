@@ -7,6 +7,9 @@ plugins {
 group = rootProject.ext.projectGroup
 version = rootProject.ext.projectVersion
 
+var lombokVersion = rootProject.ext.libraryVersions.lombok
+var mockitoVersion = rootProject.ext.libraryVersions.mockito
+
 tasks.withType(JavaCompile) {
     sourceCompatibility = rootProject.ext.javaVersion.toString()
     targetCompatibility = rootProject.ext.javaVersion.toString()

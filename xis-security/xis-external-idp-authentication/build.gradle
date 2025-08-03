@@ -2,12 +2,11 @@ plugins {
     id 'java'
 }
 
-group = 'one.xis'
-version = '0.1.1'
-
 repositories {
     mavenCentral()
 }
+
+var lombokVersion = rootProject.ext.libraryVersions.lombok
 
 dependencies {
     compileOnly(project(":xis-context"))

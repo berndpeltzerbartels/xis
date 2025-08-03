@@ -41,7 +41,7 @@ dependencies {
     // Implementation dependencies
     implementation "org.projectlombok:lombok:$lombokVersion"
     implementation "org.springframework.boot:spring-boot-starter-web:$springBootVersion"
-    implementation project(":xis-security:xis-authentication")
+    // implementation project(":xis-security:xis-authentication")
     // Test dependencies
     testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"

@@ -30,7 +30,7 @@ var lombokVersion = rootProject.ext.libraryVersions.lombok
 var junitVersion = rootProject.ext.libraryVersions.junit
 var assertjVersion = rootProject.ext.libraryVersions.assertj
 var jacksonVersion = "2.14.1"
-var gsonVersion = rootProject.ext.gsonVersion
+var gsonVersion = rootProject.ext.libraryVersions.gson
 var mockitoVersion = "5.2.0"
 
 

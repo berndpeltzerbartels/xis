@@ -3,13 +3,12 @@ plugins {
 }
 
 group = 'one.xis'
-version = '0.1.1'
 
 repositories {
     mavenCentral()
 }
 
-var gsonVersion = rootProject.ext.gsonVersion
+var gsonVersion = rootProject.ext.libraryVersions.gson
 var lombokVersion = rootProject.ext.libraryVersions.lombok
 
 dependencies {

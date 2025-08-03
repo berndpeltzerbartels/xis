@@ -2,16 +2,13 @@ plugins {
     id 'java'
 }
 
-group = 'one.xis'
-version = '0.1.1'
-
 repositories {
     mavenCentral()
 }
 
 var lombokVersion = rootProject.ext.libraryVersions.lombok
-var gsonVersion = rootProject.ext.gsonVersion
-
+var gsonVersion = rootProject.ext.libraryVersions.gson
+var mockitoVersion = rootProject.ext.libraryVersions.mockito
 def junitVersion = "5.7.0"
 def assertjVersion = "3.16.1"
 

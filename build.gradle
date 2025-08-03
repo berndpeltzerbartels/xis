@@ -27,12 +27,11 @@ ext {
 
     // Zentrale Gruppen- und Versionsdefinition
     projectGroup = "one.xis"
-    projectVersion = "0.1.1"
 }
 
 allprojects {
     group = rootProject.ext.projectGroup
-    version = rootProject.ext.projectVersion
+    version = project.projectVersion
 
     repositories {
         mavenCentral()
@@ -48,6 +47,29 @@ subprojects {
     }
 
 }
+
+task createReleaseZip(type: JavaExec) {
+    group = 'distribution'
+    description = 'Creates a zip file with all release artifacts for Maven Central.'
+
+    // Korrekte Deklaration der Abhängigkeit von den Tasks der Subprojekte.
+    // Die Closure wird zur Konfigurationszeit ausgeführt, um die Abhängigkeiten korrekt aufzulösen.
+    dependsOn {
+        subprojects.collect { it.tasks.withType(PublishToMavenLocal) }
+    }
+
+    // Erzwingt zusätzlich die Ausführungsreihenfolge.
+    mustRunAfter {
+        subprojects.collect { it.tasks.withType(PublishToMavenLocal) }
+    }
+
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'ReleaseZip'
+
+    // Hier ist die Referenz auf die Eigenschaft aus gradle.properties
+    args project.group, project.projectVersion
+}
+
 
 test {
     useJUnitPlatform()

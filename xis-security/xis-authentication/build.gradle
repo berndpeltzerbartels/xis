@@ -3,9 +3,6 @@ plugins {
     id 'java-library'
 }
 
-group = 'one.xis'
-version = '0.1.1'
-
 var lombokVersion = rootProject.ext.libraryVersions.lombok
 
 repositories {
@@ -27,7 +24,7 @@ dependencies {
     compileOnly(project(":xis-resources"))
 
     implementation 'com.google.guava:guava:33.1.0-jre'
-    
+
     // Annotation processors
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
     testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"

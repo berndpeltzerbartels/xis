@@ -155,6 +155,10 @@ public class ReleaseZip {
 
 
     public static void main(String[] args) {
-        new ReleaseZip().createZipFile("one.xis", "0.1.1");
+        if (args.length < 2) {
+            System.err.println("Usage: java ReleaseZip <version>");
+            System.exit(1);
+        }
+        new ReleaseZip().createZipFile(args[0], args[1]);
     }
 }

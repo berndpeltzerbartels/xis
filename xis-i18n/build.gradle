@@ -26,7 +26,7 @@ java {
 
 // Local variables for versions
 var lombokVersion = rootProject.ext.libraryVersions.lombok
-var gsonVersion = "2.10.1"
+var gsonVersion = rootProject.ext.libraryVersions.gson
 var junitVersion = "5.7.0"
 
 

@@ -3,16 +3,14 @@ plugins {
     id 'java-library'
 }
 
-group = 'one.xis'
-version = '0.1.1'
-
 repositories {
     mavenCentral()
 }
 var lombokVersion = rootProject.ext.libraryVersions.lombok
 var junitVersion = rootProject.ext.libraryVersions.junit
 var assertjVersion = rootProject.ext.libraryVersions.assertj
-var tinylogVersion = rootProject.ext.libraryVersions.tinylog
+var gsonVersion = rootProject.ext.libraryVersions.gson
+var mockitoVersion = rootProject.ext.libraryVersions.mockito
 
 dependencies {
     // Local project dependencies

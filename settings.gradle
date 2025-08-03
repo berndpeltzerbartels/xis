@@ -1,4 +1,24 @@
 pluginManagement {
+
+    def props = new Properties()
+    def propertiesFile = new File(settingsDir, "gradle.properties")
+    if (!propertiesFile.exists()) {
+        throw new GradleException("Konnte gradle.properties im Verzeichnis ${settingsDir} nicht finden.")
+    }
+    propertiesFile.withReader('UTF-8') { reader ->
+        props.load(reader)
+    }
+    def versionFromProperties = props.getProperty('projectVersion')
+    if (versionFromProperties == null) {
+        throw new GradleException("Eigenschaft 'projectVersion' nicht in gradle.properties gefunden.")
+    }
+
+
+    plugins {
+        // Definiere hier die Version für dein Plugin.
+        // Alle subprojects können es dann ohne Versionsangabe anwenden.
+        id 'one.xis.spring-plugin' version versionFromProperties
+    }
     repositories {
         mavenLocal()
         gradlePluginPortal()
