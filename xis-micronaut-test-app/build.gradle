@@ -4,8 +4,6 @@ plugins {
     id("io.micronaut.test-resources") version "3.5.1"
 }
 
-version = "0.0.1"
-group = "one.xis"
 
 repositories {
     mavenCentral()

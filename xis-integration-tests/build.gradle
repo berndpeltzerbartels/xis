@@ -2,8 +2,11 @@ import one.xis.gradle.XISPlugin
 
 plugins {
     id 'java'
+    id 'maven-publish'
+    id 'signing'
     id 'xis'
 }
+
 
 group = rootProject.ext.projectGroup
 version = rootProject.ext.projectVersion
@@ -58,7 +61,6 @@ dependencies {
 
     // AssertJ dependencies
     testImplementation group: 'org.assertj', name: 'assertj-core', version: assertjVersion
-    testImplementation project(':xis-security:xis-login')
 
 }
 

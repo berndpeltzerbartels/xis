@@ -51,15 +51,12 @@ include 'xis-boot-test-app'
 
 include 'xis-http-client'
 include 'xis-http-controller'
-include 'xis-security'
 include 'xis-token'
-include 'xis-security:xis-login'
 include 'xis-idp-server'
 include 'xis-authentication'
 
 
 include 'xis-spring-idp-test-app'
-include 'xis-authentication'
 include 'xis-security-common'
 include 'xis-idp-client'
 

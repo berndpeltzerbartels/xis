@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>one.xis</groupId>
-    <artifactId>xis-adapter-api</artifactId>
+    <artifactId>xis-ipd-client</artifactId>
     <packaging>jar</packaging>
 
     <name>XIS Controller API</name>
