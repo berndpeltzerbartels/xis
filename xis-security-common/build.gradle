@@ -1,0 +1,26 @@
+plugins {
+    id 'java'
+}
+
+group = 'one.xis'
+version = '0.1.2'
+
+repositories {
+    mavenCentral()
+}
+
+var lombokVersion = rootProject.ext.libraryVersions.lombok
+
+dependencies {
+    compileOnly(project(':xis-context'))
+    compileOnly(project(':xis-controller-api'))
+    compileOnly(project(':xis-http-controller'))
+    compileOnly(project(':xis-gson'))
+    compileOnly(project(':xis-util'))
+    compileOnly "org.projectlombok:lombok:$lombokVersion"
+    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+}
+
+test {
+    useJUnitPlatform()
+}

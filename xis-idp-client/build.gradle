@@ -1,0 +1,32 @@
+plugins {
+    id 'java'
+}
+
+repositories {
+    mavenCentral()
+}
+
+var lombokVersion = rootProject.ext.libraryVersions.lombok
+
+dependencies {
+    // Lombok dependencies
+    annotationProcessor("org.projectlombok:lombok:$lombokVersion")
+    implementation("org.projectlombok:lombok:$lombokVersion")
+    compileOnly(project(":xis-context"))
+    compileOnly(project(":xis-security-common"))
+    compileOnly(project(":xis-token"))
+    compileOnly(project(":xis-adapter-spi"))
+    compileOnly(project(":xis-controller-api"))
+    compileOnly(project(":xis-gson"))
+    compileOnly(project(":xis-util"))
+    implementation project(':xis-http-client')
+
+    implementation 'com.nimbusds:nimbus-jose-jwt:9.39.1'
+
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+    useJUnitPlatform()
+}

@@ -11,6 +11,11 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+
+/**
+ * XISPlugin is a Gradle plugin that configures a project to use the XIS framework.
+ * It ensures that the project uses Java 17, adds necessary dependencies, and configures resources.
+ */
 public class XISPlugin implements Plugin<Project> {
     @Override
     public void apply(@NotNull Project project) {

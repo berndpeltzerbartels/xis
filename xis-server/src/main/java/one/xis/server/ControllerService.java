@@ -27,9 +27,6 @@ class ControllerService {
     @XISInject
     private PathResolver pathResolver;
 
-    @XISInject
-    private AccessTokenCache accessTokenCache;
-
     void processModelDataRequest(@NonNull ClientRequest request, @NonNull ServerResponse response) {
         Logger.info("Process model data request: {}", request);
         var controllerResult = new ControllerResult();

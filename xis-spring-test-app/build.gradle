@@ -34,6 +34,7 @@ dependencies {
 
     implementation project(':xis-spring')
     implementation project(':xis-test')
+    implementation project(':xis-authentication')
 
     // Annotation processors
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
@@ -41,7 +42,7 @@ dependencies {
     // Implementation dependencies
     implementation "org.projectlombok:lombok:$lombokVersion"
     implementation "org.springframework.boot:spring-boot-starter-web:$springBootVersion"
-    // implementation project(":xis-security:xis-authentication")
+    // implementation project(":xis-security:xis-login")
     // Test dependencies
     testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"

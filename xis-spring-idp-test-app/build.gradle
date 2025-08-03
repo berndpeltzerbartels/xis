@@ -4,7 +4,7 @@ plugins {
     // id 'one.xis.spring-plugin' version '1.0.0'
 }
 
-group = rootProject.ext.projectGroup
+group = 'test'
 version = rootProject.ext.projectVersion
 
 repositories {
@@ -34,7 +34,7 @@ dependencies {
 
     implementation project(':xis-spring')
     implementation project(':xis-test')
-    implementation(project(":xis-security:xis-idp-server"))
+    implementation project(':xis-idp-server')
 
     // implementation "org.slf4j:slf4j-api:1.7.32"
 

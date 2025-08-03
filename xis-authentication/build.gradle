@@ -1,11 +1,16 @@
 plugins {
     id 'java'
+    id 'java-library'
     id 'maven-publish'
     id 'signing'
 }
 
 group = rootProject.ext.projectGroup
 version = rootProject.ext.projectVersion
+
+repositories {
+    mavenCentral()
+}
 
 tasks.withType(JavaCompile) {
     sourceCompatibility = rootProject.ext.javaVersion.toString()
@@ -20,53 +25,35 @@ java {
     withJavadocJar()
 }
 
-repositories {
-    mavenCentral()
-}
-
 // Local variables for versions
 var lombokVersion = rootProject.ext.libraryVersions.lombok
-var reflectionsVersion = rootProject.ext.libraryVersions.reflections
-var junitVersion = rootProject.ext.libraryVersions.junit
-var assertjVersion = rootProject.ext.libraryVersions.assertj
-var gsonVersion = rootProject.ext.libraryVersions.gson
-var jacksonVersion = rootProject.ext.libraryVersions.jackson
-var mockitoVersion = rootProject.ext.libraryVersions.mockito
-
 
 dependencies {
 
     // Local project dependencies
-    implementation project(":xis-deserializer")
-    implementation project(":xis-context")
-    implementation project(":xis-util")
-    implementation project(":xis-controller-api")
-    implementation project(":xis-adapter-spi")
-
-    // Annotation processors
+    implementation project(":xis-security-common")
+    api project(":xis-idp-client")
+    implementation project(':xis-token')
+    compileOnly(project(':xis-controller-api'))
+    compileOnly project(":xis-context")
+    compileOnly project(":xis-util")
+    compileOnly project(":xis-validation")
+    compileOnly project(":xis-adapter-spi")
+    compileOnly project(":xis-http-controller")
+    implementation(project(':xis-controller-api'))
+    compileOnly "org.projectlombok:lombok:$lombokVersion"
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
 
-    // Implementation dependencies
-    implementation "org.projectlombok:lombok:$lombokVersion"
-    implementation "org.reflections:reflections:$reflectionsVersion"
+    implementation 'com.google.guava:guava:33.1.0-jre'
+    implementation 'com.github.ben-manes.caffeine:caffeine:3.1.8'
 
-    // Test dependencies
-    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
-    testImplementation "org.mockito:mockito-core:$mockitoVersion"
-    testImplementation "org.mockito:mockito-junit-jupiter:$mockitoVersion"
-    testImplementation "org.assertj:assertj-core:$assertjVersion"
-    testImplementation project(":xis-server")
-    testImplementation project(":xis-test")
-    testImplementation project(":xis-adapter-spi")
-    testImplementation project(":xis-gson")
-    testImplementation project(":xis-http-controller")
-    testImplementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion"
-    testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"
 }
 
 test {
     useJUnitPlatform()
+    afterTest { desc, result ->
+        logger.quiet "${desc.className} - ${desc.name}: ${result.resultType}"
+    }
 }
 
 publishing {
@@ -125,3 +112,4 @@ tasks.withType(Javadoc) {
     options.addBooleanOption('Xdoclint:none', true)
     options.addStringOption('encoding', 'UTF-8')
 }
+

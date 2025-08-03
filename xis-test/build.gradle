@@ -48,8 +48,9 @@ dependencies {
     implementation project(':xis-gson')
     implementation project(':xis-javascript')
     implementation project(':xis-http-controller')
-    api(project(':xis-security'))
-    //implementation project(':xis-security:xis-authentication')
+    api(project(':xis-security-common'))
+    implementation project(':xis-authentication')
+    //implementation project(':xis-security:xis-login')
 
     // Annotation processors
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
