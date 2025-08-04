@@ -7,12 +7,12 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
 import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
-import one.xis.server.ClientRequest;
+import one.xis.http.ContentType;
+import one.xis.http.RestControllerService;
 import one.xis.server.FrontendService;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Locale;
+import java.util.Optional;
 
 @ChannelHandler.Sharable
 @XISComponent
@@ -20,102 +20,52 @@ import java.util.Locale;
 public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
     private final FrontendService frontendService;
-    private final NettyController controller;
-    private final NettyMapper mapper;
+    private final RestControllerService restControllerService;
+    private final NettyResourceHandler resourceHandler;
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) {
-        String uri = new QueryStringDecoder(request.uri()).path();
-        HttpMethod method = request.method();
-        FullHttpResponse response;
+    protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest nettyRequest) {
+        var request = new NettyHttpRequest(nettyRequest);
+        var response = new NettyHttpResponse();
+
+        FullHttpResponse nettyResponse;
 
         try {
-            if (method.equals(HttpMethod.GET)) {
-                response = handleGetRequest(uri, request);
-            } else if (method.equals(HttpMethod.POST)) {
-                response = handlePostRequest(uri, request);
+            String uri = request.getPath();
+            if (uri.equals("/") || uri.isEmpty() || uri.endsWith(".html")) {
+                response.setContentType(ContentType.TEXT_HTML);
+                response.setBody(frontendService.getRootPageHtml());
+                nettyResponse = response.getFullHttpResponse();
             } else {
-                response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.METHOD_NOT_ALLOWED);
+                restControllerService.doInvocation(request, response);
+                // Prüfen, ob der RestControllerService die Anfrage nicht verarbeiten konnte (und 404 gesetzt hat)
+                if (response.getStatusCode() != null && response.getStatusCode() == HttpResponseStatus.NOT_FOUND.code()) {
+                    // Dann versuchen, als statische Ressource zu laden
+                    Optional<FullHttpResponse> resourceResponse = resourceHandler.handle(uri);
+                    // Wenn auch das fehlschlägt, die 404-Antwort vom RestController verwenden oder eine neue erstellen
+                    nettyResponse = resourceResponse.orElseGet(response::getFullHttpResponse);
+                } else {
+                    // Der RestController hatte einen passenden Endpunkt
+                    nettyResponse = response.getFullHttpResponse();
+                }
             }
         } catch (Exception e) {
-            response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR);
+            nettyResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR);
         }
 
-        HttpUtil.setContentLength(response, response.content().readableBytes());
-        ctx.writeAndFlush(response);
-        if (!HttpUtil.isKeepAlive(request)) {
+        HttpUtil.setContentLength(nettyResponse, nettyResponse.content().readableBytes());
+        ctx.writeAndFlush(nettyResponse);
+        if (!HttpUtil.isKeepAlive(nettyRequest)) {
             ctx.close();
         }
     }
 
-    private FullHttpResponse handleGetRequest(String uri, FullHttpRequest request) throws IOException {
-        if (uri.equals("/") || uri.endsWith(".html")) {
-            return mapper.toFullHttpResponse(frontendService.getRootPageHtml());
-        }
-        var token = extractBearerToken(request); // TODO ?
-        return switch (uri) {
-            case "/xis/config" -> mapper.toFullHttpResponse(controller.getComponentConfig(request));
-            case "/xis/page/head" -> mapper.toFullHttpResponse(controller.getPageHead(request.headers().get("uri")));
-            case "/xis/page/body" -> mapper.toFullHttpResponse(controller.getPageBody(request.headers().get("uri")));
-            case "/xis/page/body-attributes" ->
-                    mapper.toFullHttpResponse(controller.getBodyAttributes(request.headers().get("uri")));
-            case "/xis/widget/html" ->
-                    mapper.toFullHttpResponse(controller.getWidgetHtml(request.headers().get("uri")));
-            case "/app.js" -> mapper.toFullHttpResponse(controller.getAppJs());
-            case "/classes.js" -> mapper.toFullHttpResponse(controller.getClassesJs());
-            case "/main.js" -> mapper.toFullHttpResponse(controller.getMainJs());
-            case "/functions.js" -> mapper.toFullHttpResponse(controller.getFunctionsJs());
-            case "/bundle.min.js" -> mapper.toFullHttpResponse(controller.getBundleJs());
-            default -> notFound(HttpMethod.GET, uri);
-        };
-    }
-
-    private FullHttpResponse handlePostRequest(String uri, FullHttpRequest request) throws IOException {
-        ClientRequest clientRequest = mapper.toClientRequest(request);
-        clientRequest.setLocale(Locale.getDefault());
-        var token = extractBearerToken(request);
-        return switch (uri) {
-            case "/xis/page/model" -> controller.getPageModel(clientRequest, token, clientRequest.getLocale());
-            case "/xis/form/model" -> controller.getFormModel(clientRequest, token, clientRequest.getLocale());
-            case "/xis/widget/model" -> controller.getWidgetModel(clientRequest, token, clientRequest.getLocale());
-            case "/xis/page/action" -> controller.onPageLinkAction(clientRequest, token, clientRequest.getLocale());
-            case "/xis/form/action" -> controller.onFormAction(clientRequest, token, clientRequest.getLocale());
-            case "/xis/widget/action" -> controller.onWidgetLinkAction(clientRequest, token, clientRequest.getLocale());
-            default -> notFound(HttpMethod.POST, uri);
-        };
-    }
-
-    private FullHttpResponse notFound(HttpMethod method, String uri) {
+    private FullHttpResponse notFound(one.xis.http.HttpMethod method, String uri) {
+        String body = "Not found " + method.name() + " " + uri;
         return new DefaultFullHttpResponse(
                 HttpVersion.HTTP_1_1,
                 HttpResponseStatus.NOT_FOUND,
-                Unpooled.copiedBuffer("Not found " + method + " " + uri, StandardCharsets.UTF_8)
+                Unpooled.copiedBuffer(body, StandardCharsets.UTF_8)
         );
     }
-
-    private FullHttpResponse unauthorized() {
-        String responseBody = "Unauthorized";
-        byte[] content = responseBody.getBytes(StandardCharsets.UTF_8);
-
-        FullHttpResponse response = new DefaultFullHttpResponse(
-                HttpVersion.HTTP_1_1,
-                HttpResponseStatus.UNAUTHORIZED,
-                Unpooled.wrappedBuffer(content)
-        );
-
-        response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
-        response.headers().set(HttpHeaderNames.CONTENT_LENGTH, content.length);
-
-        return response;
-    }
-
-    public static String extractBearerToken(FullHttpRequest request) {
-        String authHeader = request.headers().get(HttpHeaderNames.AUTHORIZATION);
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            return authHeader.substring("Bearer ".length());
-        }
-        return null;
-    }
-
-
 }
