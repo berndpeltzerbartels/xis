@@ -25,6 +25,11 @@ public class ReleaseZip {
             throw new RuntimeException("No artefact dirs found for " + groupId + ":" + version);
         }
         var zipFile = new File(homeDir(), groupId + "." + version + ".zip");
+        if (zipFile.exists()) {
+            if (!zipFile.delete()) {
+                throw new RuntimeException("Could not delete existing zip file: " + zipFile.getAbsolutePath());
+            }
+        }
         try (var zipOutputStream = new ZipOutputStream(new FileOutputStream(zipFile))) {
             for (File artefactDir : artefactDirs) {
                 for (File file : Objects.requireNonNull(artefactDir.listFiles())) {

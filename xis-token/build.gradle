@@ -20,6 +20,7 @@ dependencies {
     implementation(project(":xis-controller-api"))
     implementation(project(":xis-util"))
     implementation(project(":xis-security-common"))
+    compileOnly project(":xis-authentication-api")
     compileOnly(project(":xis-gson"))
     compileOnly(project(":xis-adapter-spi"))
 
@@ -51,6 +52,14 @@ test {
     useJUnitPlatform()
 }
 
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(rootProject.ext.javaVersionInt)
+    }
+    withSourcesJar()
+    withJavadocJar()
+}
 
 publishing {
     publications {

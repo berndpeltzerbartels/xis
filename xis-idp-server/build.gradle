@@ -9,6 +9,16 @@ plugins {
 repositories {
     mavenCentral()
 }
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(rootProject.ext.javaVersionInt)
+    }
+    withSourcesJar()
+    withJavadocJar()
+}
+
+
 var lombokVersion = rootProject.ext.libraryVersions.lombok
 var junitVersion = rootProject.ext.libraryVersions.junit
 var assertjVersion = rootProject.ext.libraryVersions.assertj
@@ -23,7 +33,7 @@ dependencies {
     compileOnly(project(":xis-http-controller"))
     compileOnly(project(":xis-adapter-spi"))
     compileOnly(project(":xis-validation"))
-    implementation(project(":xis-security-common"))
+    api(project(":xis-security-common"))
     api project(':xis-token')
 
     // Gson dependency

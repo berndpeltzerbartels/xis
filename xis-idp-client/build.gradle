@@ -9,6 +9,15 @@ repositories {
     mavenCentral()
 }
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(rootProject.ext.javaVersionInt)
+    }
+    withSourcesJar()
+    withJavadocJar()
+}
+
+
 var lombokVersion = rootProject.ext.libraryVersions.lombok
 
 dependencies {
@@ -22,6 +31,7 @@ dependencies {
     compileOnly(project(":xis-controller-api"))
     compileOnly(project(":xis-gson"))
     compileOnly(project(":xis-util"))
+    compileOnly project(":xis-authentication-api")
     implementation project(':xis-http-client')
 
     implementation 'com.nimbusds:nimbus-jose-jwt:9.39.1'

@@ -59,4 +59,5 @@ include 'xis-authentication'
 include 'xis-spring-idp-test-app'
 include 'xis-security-common'
 include 'xis-idp-client'
+include 'xis-authentication-api'
 

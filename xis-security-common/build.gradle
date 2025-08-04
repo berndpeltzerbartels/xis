@@ -9,6 +9,15 @@ repositories {
     mavenCentral()
 }
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(rootProject.ext.javaVersionInt)
+    }
+    withSourcesJar()
+    withJavadocJar()
+}
+
+
 var lombokVersion = rootProject.ext.libraryVersions.lombok
 
 dependencies {

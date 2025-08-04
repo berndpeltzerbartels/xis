@@ -5,10 +5,16 @@ plugins {
     id 'signing'
 }
 
-group = 'one.xis'
+group = rootProject.ext.projectGroup
+version = rootProject.ext.projectVersion
 
 repositories {
     mavenCentral()
+}
+
+tasks.withType(JavaCompile) {
+    sourceCompatibility = rootProject.ext.javaVersion.toString()
+    targetCompatibility = rootProject.ext.javaVersion.toString()
 }
 
 java {
@@ -19,27 +25,23 @@ java {
     withJavadocJar()
 }
 
-
-var gsonVersion = rootProject.ext.libraryVersions.gson
+// Local variables for versions
 var lombokVersion = rootProject.ext.libraryVersions.lombok
 
 dependencies {
 
-
-    implementation project(':xis-context')
-    compileOnly project(':xis-adapter-spi')
-    runtimeOnly(project(":xis-gson"))
-
-    implementation "com.google.code.gson:gson:$gsonVersion"
+    compileOnly project(":xis-context")
+    compileOnly project(":xis-controller-api")
+    compileOnly "org.projectlombok:lombok:$lombokVersion"
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
-    implementation "org.projectlombok:lombok:$lombokVersion"
 
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
 }
 
 test {
     useJUnitPlatform()
+    afterTest { desc, result ->
+        logger.quiet "${desc.className} - ${desc.name}: ${result.resultType}"
+    }
 }
 
 publishing {
@@ -92,3 +94,10 @@ signing {
     sign publishing.publications.mavenJava
     useGpgCmd()
 }
+
+
+tasks.withType(Javadoc) {
+    options.addBooleanOption('Xdoclint:none', true)
+    options.addStringOption('encoding', 'UTF-8')
+}
+
