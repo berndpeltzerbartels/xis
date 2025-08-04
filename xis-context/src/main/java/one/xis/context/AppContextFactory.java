@@ -66,13 +66,17 @@ class AppContextFactory implements SingletonCreationListener {
                 .map(SingletonWrapper.class::cast)
                 .forEach(SingletonWrapper::doFinalize);
 
-        singletonProducers.stream()
+        List<SingletonProducer> uninvokedProducers = singletonProducers.stream()
                 .filter(producer -> !producer.isInvoked())
-                .findFirst()
-                .ifPresent(uninvokedProducer -> {
-                    throw new IllegalStateException("Could not create all beans. Check for circular dependencies or missing beans. " +
-                            "Uninvoked producer: " + uninvokedProducer.getClass().getSimpleName() + " for " + uninvokedProducer.getSingletonClass());
-                });
+                .collect(Collectors.toList());
+
+        // In AppContextFactory.java, innerhalb von finalizeSingletonInitialization()
+
+        if (!uninvokedProducers.isEmpty()) {
+            // Übergebe alle Producer, damit der Analyzer die gesamte Abhängigkeitskarte hat
+            String errorMessage = new UnresolvedDependencyAnalyzer(uninvokedProducers, singletonProducers).analyze();
+            throw new IllegalStateException(errorMessage);
+        }
     }
 
 

@@ -2,16 +2,15 @@ package one.xis.server;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import one.xis.Roles;
 import one.xis.UserContextImpl;
 import one.xis.Widget;
 import one.xis.auth.AuthenticationException;
 import one.xis.auth.URLForbiddenException;
+import one.xis.security.SecurityUtil;
 import one.xis.validation.ValidatorMessages;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Data
 @NoArgsConstructor
@@ -37,7 +36,7 @@ public class ControllerWrapper {
     private ControllerResultMapper controllerResultMapper;
 
     void invokeGetModelMethods(ClientRequest request, ControllerResult controllerResult) {
-        checkRoles();
+        SecurityUtil.checkRoles(controller.getClass(), UserContextImpl.getInstance().getRoles());
         var methodsToExecute = new ArrayList<>(modelMethods);
         methodsToExecute.addAll(localStorageOnlyMethods);
         methodsToExecute.addAll(clientStateOnlyMethods);
@@ -46,13 +45,13 @@ public class ControllerWrapper {
     }
 
     void invokeFormDataMethods(ClientRequest request, ControllerResult controllerResult) {
-        checkRoles();
+        SecurityUtil.checkRoles(controller.getClass(), UserContextImpl.getInstance().getRoles());
         var methods = RequestScopeSorter.sortMethods(formDataMethods, requestScopeMethods);
         methods.forEach(m -> invokeModelDataMethod(request, controllerResult, m));
     }
 
     void invokeActionMethod(ClientRequest request, ControllerResult controllerResult) {
-        checkRoles();
+        SecurityUtil.checkRoles(controller.getClass(), UserContextImpl.getInstance().getRoles());
         var method = actionMethods.get(request.getAction());
         if (method == null) {
             throw new RuntimeException("No action-method found for action " + request.getAction() + " in controller " + controller.getClass().getName());
@@ -185,33 +184,5 @@ public class ControllerWrapper {
             visited.add(current);
             result.add(current);
         }
-    }
-
-    void checkRoles() {
-        var requiredRoles = getRequiredRoles(controller.getClass());
-        if (requiredRoles.isEmpty()) {
-            return;
-        }
-        if (!UserContextImpl.getInstance().isAuthenticated()) {
-            throw new AuthenticationException("Access token is required for method: " + controller.getClass().getSimpleName());
-        }
-        var userRoles = UserContextImpl.getInstance().getRoles();
-        // check if user has at least one of the required roles
-        if (userRoles == null || userRoles.isEmpty() || requiredRoles.stream().noneMatch(userRoles::contains)) {
-            throw new AuthenticationException("User does not have required roles for method: " + controller.getClass().getSimpleName());
-        }
-    }
-
-    static Set<String> getRequiredRoles(Class<?> c) {
-        var roles = new HashSet<Roles>();
-        while (c != null && c != Object.class) {
-            if (c.isAnnotationPresent(Roles.class)) {
-                roles.add(c.getAnnotation(Roles.class));
-            }
-            c = c.getSuperclass();
-        }
-        return roles.stream()
-                .flatMap(role -> Stream.of(role.value()))
-                .collect(Collectors.toSet());
     }
 }

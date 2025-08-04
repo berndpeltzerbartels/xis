@@ -2,6 +2,8 @@ package one.xis.server;
 
 import one.xis.ModelData;
 import one.xis.RequestScope;
+import one.xis.UserContext;
+import one.xis.UserContextImpl;
 import one.xis.deserialize.MainDeserializer;
 import one.xis.http.RequestContext;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,6 +28,8 @@ class ControllerWrapperTest {
         var wrapperFactory = new ControllerWrapperFactory(deserializer, new ControllerMethodResultMapper(mock(), new PathResolver()), controllerResultMapper);
         controller = new ExampleController();
         controllerWrapper = wrapperFactory.createControllerWrapper("test", controller, ControllerWrapper.class);
+        RequestContext.createInstance(mock(), mock());
+        RequestContext.getInstance().setAttribute(UserContextImpl.CONTEXT_KEY, mock(UserContext.class));
     }
 
     @Test

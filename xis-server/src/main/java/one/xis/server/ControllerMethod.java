@@ -3,19 +3,17 @@ package one.xis.server;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import one.xis.Roles;
 import one.xis.UserContextImpl;
 import one.xis.auth.AuthenticationException;
 import one.xis.auth.URLForbiddenException;
 import one.xis.deserialize.MainDeserializer;
 import one.xis.deserialize.PostProcessingResults;
+import one.xis.security.SecurityUtil;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -39,7 +37,7 @@ class ControllerMethod {
     }
 
     ControllerMethodResult invoke(@NonNull ClientRequest request, @NonNull Object controller, Map<String, Object> requestScope) throws Exception {
-        checkRoles();
+        SecurityUtil.checkRoles(method, UserContextImpl.getInstance().getRoles());
         var postProcessingResults = new PostProcessingResults();
         var args = prepareArgs(method, request, postProcessingResults, requestScope);
         if (postProcessingResults.authenticate()) {
@@ -109,39 +107,5 @@ class ControllerMethod {
             args[i] = controllerMethodParameters[i].prepareParameter(request, postProcessingResults, requestScope);
         }
         return args;
-    }
-
-
-    private void checkRoles() {
-        var requiredRoles = getRequiredRoles();
-        if (requiredRoles.isEmpty()) {
-            return;
-        }
-        if (!UserContextImpl.getInstance().isAuthenticated()) {
-            throw new AuthenticationException("Access token is required for method: " + method.getName());
-        }
-        var userRoles = UserContextImpl.getInstance().getRoles();
-        // check if user has at least one of the required roles
-        if (userRoles == null || userRoles.isEmpty() || requiredRoles.stream().noneMatch(userRoles::contains)) {
-            throw new AuthenticationException("User does not have required roles for method: " + method.getName());
-        }
-    }
-
-    private Set<String> getRequiredRoles() {
-        var roles = new HashSet<Roles>();
-        if (method.isAnnotationPresent(Roles.class)) {
-            roles.add(method.getAnnotation(Roles.class));
-        }
-        var c = method.getDeclaringClass();
-        while (c != null && c != Object.class) {
-            if (c.isAnnotationPresent(Roles.class)) {
-                roles.add(c.getAnnotation(Roles.class));
-            }
-            c = c.getSuperclass();
-        }
-        return roles.stream()
-                .flatMap(role -> Stream.of(role.value()))
-                .collect(Collectors.toSet());
-
     }
 }
