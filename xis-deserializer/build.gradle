@@ -1,7 +1,7 @@
 plugins {
     id 'java'
     id 'maven-publish'
-    id 'signing'
+    // id 'signing'
 }
 
 group = rootProject.ext.projectGroup
@@ -122,11 +122,12 @@ publishing {
     }
 }
 
+/*
 signing {
     sign publishing.publications.mavenJava
     useGpgCmd()
 }
-
+*/
 
 tasks.withType(Javadoc) {
     options.addBooleanOption('Xdoclint:none', true)

@@ -28,5 +28,5 @@ import java.lang.annotation.Target;
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ModelData {
-    String value();
+    String value() default ""; // The name under which the model object will be accessible in the template
 }

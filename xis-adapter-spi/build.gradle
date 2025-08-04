@@ -2,7 +2,7 @@ plugins {
     id 'java'
     id 'java-library'
     id 'maven-publish'
-    id 'signing'
+    //  id 'signing'
 }
 
 group = rootProject.ext.projectGroup
@@ -94,10 +94,13 @@ publishing {
     }
 }
 
+/*
 signing {
     sign publishing.publications.mavenJava
     useGpgCmd()
 }
+
+ */
 
 
 tasks.withType(Javadoc) {

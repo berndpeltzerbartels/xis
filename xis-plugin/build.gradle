@@ -3,7 +3,7 @@ plugins {
     id 'java-gradle-plugin'
     id 'groovy'
     id 'maven-publish'
-    id 'signing'
+    // id 'signing'
     id 'com.gradle.plugin-publish' version '0.15.0' // optional für Plugin-Portal
 }
 
@@ -96,11 +96,12 @@ publishing {
         }
     }
 }
-
+/*
 signing {
     sign publishing.publications.pluginPublication
     useGpgCmd()
 }
+*/
 
 // ✍️ Kleine Zusatzaufgaben für Version-Dateien
 task writeVersionToFile {

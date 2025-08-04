@@ -38,7 +38,7 @@ class ControllerMethodResultMapper {
             controllerMethodResult.setRedirectUrl(redirectControllerResponse.getRedirectUrl());
         }
         if (method.isAnnotationPresent(ModelData.class)) {
-            mapModelResult(method.getAnnotation(ModelData.class).value(), returnValue, controllerMethodResult);
+            mapModelResult(getModelDataKey(method), returnValue, controllerMethodResult);
         }
         if (method.isAnnotationPresent(FormData.class)) {
             mapFormData(method.getAnnotation(FormData.class).value(), returnValue, controllerMethodResult);
@@ -160,5 +160,10 @@ class ControllerMethodResultMapper {
                 error.getMessageParameters(),
                 error.getDeserializationContext().getTarget(),
                 error.getDeserializationContext().getUserContext());
+    }
+
+    private String getModelDataKey(Method method) {
+        var modelData = method.getAnnotation(ModelData.class);
+        return modelData.value().isEmpty() ? method.getName() : modelData.value();
     }
 }

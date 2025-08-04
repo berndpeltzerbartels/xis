@@ -9,7 +9,7 @@
     <artifactId>xis-deserializer</artifactId>
     <packaging>jar</packaging>
 
-    <name>XIS Controller API</name>
+    <name>DeserializerI</name>
     <description>Public API for defining declarative web controllers in XIS applications.</description>
     <url>https://github.com/berndpeltzerbartels/xis</url>
 

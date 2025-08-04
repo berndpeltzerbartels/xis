@@ -2,7 +2,7 @@ plugins {
     id 'java'
     id 'java-library'
     id 'maven-publish'
-    id 'signing'
+    // id 'signing'
 }
 
 group = 'one.xis'
@@ -88,7 +88,9 @@ publishing {
     }
 }
 
+/*
 signing {
     sign publishing.publications.mavenJava
     useGpgCmd()
 }
+*/

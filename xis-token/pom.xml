@@ -9,7 +9,7 @@
     <artifactId>xis-token</artifactId>
     <packaging>jar</packaging>
 
-    <name>XIS Authentication API</name>
+    <name>Token</name>
     <description>Public API for using OAuth2</description>
     <url>https://github.com/berndpeltzerbartels/xis</url>
 

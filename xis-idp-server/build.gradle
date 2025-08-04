@@ -2,7 +2,7 @@ plugins {
     id 'java'
     id 'java-library'
     id 'maven-publish'
-    id 'signing'
+    // id 'signing'
 }
 
 
@@ -108,7 +108,9 @@ publishing {
     }
 }
 
+/*
 signing {
     sign publishing.publications.mavenJava
     useGpgCmd()
 }
+*/

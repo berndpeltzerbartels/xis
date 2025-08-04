@@ -3,7 +3,7 @@ import one.xis.gradle.XISPlugin
 plugins {
     id 'java'
     id 'maven-publish'
-    id 'signing'
+    // id 'signing'
     id 'xis'
 }
 

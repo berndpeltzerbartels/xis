@@ -6,10 +6,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>one.xis</groupId>
-    <artifactId>xis-controller-api</artifactId>
+    <artifactId>xis-micronaut</artifactId>
     <packaging>jar</packaging>
 
-    <name>Controller API</name>
+    <name>Security-Common</name>
     <description>Public API for defining declarative web controllers in XIS applications.</description>
     <url>https://github.com/berndpeltzerbartels/xis</url>
 

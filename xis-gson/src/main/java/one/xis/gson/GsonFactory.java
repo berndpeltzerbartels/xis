@@ -12,7 +12,7 @@ import java.time.Duration;
 @RequiredArgsConstructor
 public class GsonFactory {
 
-    @XISBean
+    @XISBean // TODO Wrapper verwenden um Konflikte zu vermeiden
     public Gson gson() {
         return new GsonConfiguration().builder()
                 .registerTypeAdapter(Duration.class, new JsonSerializer<Duration>() {
