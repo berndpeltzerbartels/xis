@@ -50,6 +50,7 @@ dependencies {
     implementation project(':xis-http-controller')
     api(project(':xis-security-common'))
     implementation project(':xis-authentication')
+    implementation project(':xis-authentication-api')
     //implementation project(':xis-security:xis-login')
 
     // Annotation processors

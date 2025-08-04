@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import one.xis.UserContext;
 import one.xis.UserContextImpl;
 import one.xis.auth.AuthenticationException;
+import one.xis.auth.URLForbiddenException;
 import one.xis.auth.token.TokenStatus;
 import one.xis.auth.token.UserSecurityService;
 import one.xis.context.XISComponent;
@@ -140,7 +141,11 @@ public class FrontendServiceImpl implements FrontendService {
         var filterChain = new RequestFilterChain(requestHandler, requestFilters);
         filterChain.doFilter(request, response, filterChain);
         response = filterChain.getServerResponse();
-        requestHandler.accept(request, response);
+        try {
+            requestHandler.accept(request, response);
+        } catch (AuthenticationException e) {
+            throw new URLForbiddenException(request.getPageUrl());
+        }
         return response;
     }
 

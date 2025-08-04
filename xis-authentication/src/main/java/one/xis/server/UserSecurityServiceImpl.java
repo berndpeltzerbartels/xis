@@ -2,7 +2,6 @@ package one.xis.server;
 
 
 import lombok.RequiredArgsConstructor;
-import one.xis.UserContext;
 import one.xis.auth.*;
 import one.xis.auth.idp.ExternalIDPServices;
 import one.xis.auth.idp.ExternalIDPTokens;
@@ -32,26 +31,21 @@ public class UserSecurityServiceImpl implements UserSecurityService {
     @Override
     public void update(TokenStatus tokenStatus, SecurityAttributes securityAttributes) {
         if (tokenStatus.getAccessToken() == null || tokenStatus.getAccessToken().isEmpty()) {
+            securityAttributes.setRoles(new HashSet<>());
             return;
         }
-        if (isAccessTokenValid(tokenStatus)) {
-            updateUserContextWithValidAccessToken(tokenStatus, securityAttributes);
-            return;
-        }
-        String issuer = tokenService.extractIssuer(tokenStatus.getAccessToken());
-        if ("local".equals(issuer)) {
-            renewLocalTokensAndUpdateContext(tokenStatus, (UserContext) securityAttributes);
-        } else {
-            renewExternalTokensAndUpdateContext(tokenStatus, (UserContext) securityAttributes, issuer);
-        }
-    }
 
-    private boolean isAccessTokenValid(TokenStatus tokenStatus) {
         try {
-            AccessTokenClaims claims = accessTokenCache.getClaims(tokenStatus.getAccessToken(), this::decodeAccessToken);
-            return claims.getExpiresAtSeconds() > Instant.now().getEpochSecond();
+            // Attempt to use the existing access token
+            updateUserContextWithValidAccessToken(tokenStatus, securityAttributes);
         } catch (TokenExpiredException e) {
-            return false;
+            // If expired, renew it
+            renewTokensAndUpdateContext(tokenStatus, securityAttributes);
+        } catch (InvalidTokenException e) {
+            // Token is invalid (e.g., bad signature after key rotation).
+            // Treat as an anonymous user without throwing an exception.
+            securityAttributes.setUserId(null);
+            securityAttributes.setRoles(new HashSet<>());
         }
     }
 
@@ -65,7 +59,16 @@ public class UserSecurityServiceImpl implements UserSecurityService {
                 .orElse(new HashSet<>()));
     }
 
-    private void renewLocalTokensAndUpdateContext(TokenStatus tokenStatus, UserContext userContext) {
+    private void renewTokensAndUpdateContext(TokenStatus tokenStatus, SecurityAttributes securityAttributes) {
+        String issuer = tokenService.extractIssuer(tokenStatus.getAccessToken());
+        if ("local".equals(issuer)) {
+            renewLocalTokens(tokenStatus, securityAttributes);
+        } else {
+            renewExternalTokens(tokenStatus, securityAttributes, issuer);
+        }
+    }
+
+    private void renewLocalTokens(TokenStatus tokenStatus, SecurityAttributes securityAttributes) {
         String userId = tokenService.extractUserId(tokenStatus.getAccessToken());
         var userInfoService = appContext.getOptionalSingleton(UserInfoService.class)
                 .orElseThrow(() -> new IllegalStateException("UserInfoService not found in AppContext"));
@@ -75,11 +78,11 @@ public class UserSecurityServiceImpl implements UserSecurityService {
         tokenStatus.setRenewToken(tokens.getRenewToken());
         tokenStatus.setExpiresIn(tokens.getAccessTokenExpiresIn());
         tokenStatus.setRenewExpiresIn(tokens.getRenewTokenExpiresIn());
-        userContext.getSecurityAttributes().setUserId(userId);
-        userContext.getSecurityAttributes().setRoles(userInfo.getRoles());
+        securityAttributes.setUserId(userId);
+        securityAttributes.setRoles(userInfo.getRoles());
     }
 
-    private void renewExternalTokensAndUpdateContext(TokenStatus tokenStatus, UserContext userContext, String issuer) {
+    private void renewExternalTokens(TokenStatus tokenStatus, SecurityAttributes securityAttributes, String issuer) {
         var externalIdpService = externalIDPServices.getServiceForIssuer(issuer);
         if (externalIdpService == null) {
             throw new IllegalStateException("No external IDP service found for issuer: " + issuer);
@@ -96,8 +99,8 @@ public class UserSecurityServiceImpl implements UserSecurityService {
         tokenStatus.setRenewToken(tokens.getRefreshToken());
         tokenStatus.setExpiresIn(Duration.between(Instant.now(), Instant.ofEpochSecond(accessTokenClaims.getExpiresAtSeconds())));
         tokenStatus.setRenewExpiresIn(Duration.between(Instant.now(), Instant.ofEpochSecond(renewTokenClaims.getExpiresAtSeconds())));
-        userContext.getSecurityAttributes().setUserId(renewTokenClaims.getUserId());
-        userContext.getSecurityAttributes().setRoles(new HashSet<>(accessTokenClaims.getRoles()));
+        securityAttributes.setUserId(renewTokenClaims.getUserId());
+        securityAttributes.setRoles(new HashSet<>(accessTokenClaims.getRoles()));
     }
 
     private AccessTokenClaims decodeAccessToken(String token) {
@@ -107,7 +110,7 @@ public class UserSecurityServiceImpl implements UserSecurityService {
         }
         var externalIdpService = externalIDPServices.getServiceForIssuer(issuer);
         if (externalIdpService == null) {
-            throw new AuthenticationException("No external IDP service found for issuer: " + issuer);
+            throw new InvalidTokenException("No external IDP service found for issuer: " + issuer);
         }
         var keyId = tokenService.extractKeyId(token);
         var publicKey = externalIdpService.getJsonWebKey(keyId);
@@ -118,7 +121,7 @@ public class UserSecurityServiceImpl implements UserSecurityService {
     private RenewTokenClaims decodeRenewToken(String token) {
         var issuer = tokenService.extractIssuer(token);
         if (issuer.equals("local")) {
-            throw new IllegalArgumentException("Renew token cannot be decoded for local issuer");
+            return localTokenService.decodeRenewToken(token);
         }
         var externalIdpService = externalIDPServices.getServiceForIssuer(issuer);
         if (externalIdpService == null) {

@@ -5,7 +5,6 @@ import lombok.NoArgsConstructor;
 import one.xis.UserContextImpl;
 import one.xis.Widget;
 import one.xis.auth.AuthenticationException;
-import one.xis.auth.URLForbiddenException;
 import one.xis.security.SecurityUtil;
 import one.xis.validation.ValidatorMessages;
 
@@ -83,7 +82,7 @@ public class ControllerWrapper {
             }
             controllerResultMapper.mapMethodResultToControllerResult(controllerMethodResult, controllerResult);
         } catch (AuthenticationException e) {
-            throw new URLForbiddenException(request.getPageUrl());
+            throw e;
         } catch (Exception e) {
             throw new RuntimeException("Failed to invoke model-method " + method, e);
         }
@@ -97,7 +96,7 @@ public class ControllerWrapper {
             var controllerMethodResult = method.invoke(request, controller, controllerResult.getRequestScope());
             controllerResultMapper.mapMethodResultToControllerResult(controllerMethodResult, controllerResult);
         } catch (AuthenticationException e) {
-            throw new URLForbiddenException(request.getPageUrl());
+            throw e;
         } catch (Exception e) {
             throw new RuntimeException("Failed to invoke action-method: " + method, e);
         }

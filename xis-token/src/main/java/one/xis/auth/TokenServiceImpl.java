@@ -67,12 +67,9 @@ class TokenServiceImpl implements TokenService {
     }
 
     @Override
-    public AccessTokenClaims decodeAccessToken(String token, JsonWebKey jwk) throws InvalidTokenException {
-        try {
-            return decodeToken(token, AccessTokenClaims.class, jwk);
-        } catch (TokenExpiredException e) {
-            throw new RuntimeException(e);
-        }
+    public AccessTokenClaims decodeAccessToken(String token, JsonWebKey jwk) throws InvalidTokenException, TokenExpiredException {
+        return decodeToken(token, AccessTokenClaims.class, jwk);
+
     }
 
     @Override

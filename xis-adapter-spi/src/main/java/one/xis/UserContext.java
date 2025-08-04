@@ -24,4 +24,8 @@ public interface UserContext {
 
     SecurityAttributes getSecurityAttributes();
 
+    static UserContext getInstance() {
+        return UserContextImpl.getInstance();
+    }
+
 }
