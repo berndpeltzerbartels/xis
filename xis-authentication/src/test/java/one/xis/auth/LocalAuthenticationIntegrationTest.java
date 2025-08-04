@@ -85,8 +85,8 @@ class LocalAuthenticationIntegrationTest {
         @Test
         void processModelDataRequest_shouldReturnForbidden() {
             FrontendService frontendService = context.getSingleton(FrontendService.class);
-            
-            assertThrows(AuthenticationException.class, () -> frontendService.processModelDataRequest(clientRequest));
+
+            assertThrows(URLForbiddenException.class, () -> frontendService.processModelDataRequest(clientRequest));
         }
     }
 
