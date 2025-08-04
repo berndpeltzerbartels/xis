@@ -43,14 +43,17 @@ dependencies {
     implementation project(":xis-deserializer")
     implementation project(":xis-context")
     implementation project(":xis-util")
-    api project(":xis-controller-api")
-    api project(":xis-validation")
     implementation project(":xis-server")
     implementation project(":xis-adapter-spi")
 
-    // Compile-only dependencies
-    compileOnly project(":xis-deserializer")
+    api project(":xis-controller-api")
+    api project(":xis-validation")
     api project(':xis-http-controller')
+
+
+    // Compile-only dependencies
+
+
     compileOnly "org.springframework.boot:spring-boot-starter-web:$springBootVersion"
 
 

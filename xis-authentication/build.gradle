@@ -41,8 +41,8 @@ dependencies {
     compileOnly project(":xis-util")
     compileOnly project(":xis-validation")
     compileOnly project(":xis-adapter-spi")
-    implementation project(":xis-http-controller")
-    implementation project(':xis-controller-api')
+    compileOnly project(":xis-http-controller")
+    compileOnly project(':xis-controller-api')
 
     compileOnly "org.projectlombok:lombok:$lombokVersion"
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
