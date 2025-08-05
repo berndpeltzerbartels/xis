@@ -46,7 +46,6 @@ dependencies {
 
     // Implementation dependencies
     implementation "org.projectlombok:lombok:$lombokVersion"
-    implementation "org.springframework.boot:spring-boot-starter-web:$springBootVersion"
 
     // Test dependencies
     testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"

@@ -2,7 +2,6 @@ package spring;
 
 import lombok.NonNull;
 import one.xis.auth.InvalidTokenException;
-import one.xis.auth.UserInfo;
 import one.xis.auth.UserInfoImpl;
 import one.xis.auth.UserInfoService;
 
@@ -28,7 +27,7 @@ public class SpringUserInfoService implements UserInfoService<UserInfoImpl> {
     }
 
     @Override
-    public void saveUserInfo(UserInfo userInfo) {
+    public void saveUserInfo(UserInfoImpl userInfo) {
 
     }
 

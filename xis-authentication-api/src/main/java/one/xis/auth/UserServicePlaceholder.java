@@ -17,7 +17,7 @@ public class UserServicePlaceholder implements UserInfoService<UserInfoImpl> {
     }
 
     @Override
-    public void saveUserInfo(UserInfo userInfo) {
+    public void saveUserInfo(UserInfoImpl userInfo) {
 
     }
 }

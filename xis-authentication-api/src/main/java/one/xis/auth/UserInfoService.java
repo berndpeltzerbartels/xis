@@ -29,6 +29,6 @@ public interface UserInfoService<U extends UserInfo> {
      */
     Optional<U> getUserInfo(String userId);
 
-    void saveUserInfo(UserInfo userInfo);
+    void saveUserInfo(U userInfo);
 
 }

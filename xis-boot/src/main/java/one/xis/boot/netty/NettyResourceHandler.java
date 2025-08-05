@@ -1,10 +1,7 @@
 package one.xis.boot.netty;
 
 import io.netty.buffer.Unpooled;
-import io.netty.handler.codec.http.DefaultFullHttpResponse;
-import io.netty.handler.codec.http.FullHttpResponse;
-import io.netty.handler.codec.http.HttpResponseStatus;
-import io.netty.handler.codec.http.HttpVersion;
+import io.netty.handler.codec.http.*;
 import lombok.extern.java.Log;
 import one.xis.context.XISComponent;
 
@@ -23,23 +20,32 @@ public class NettyResourceHandler {
 
     public Optional<FullHttpResponse> handle(String uri) {
         try {
-            // Path-Traversal-Angriffe durch Normalisierung verhindern
             String normalizedUri = Path.of(uri).normalize().toString();
             if (normalizedUri.startsWith("/..")) {
-                return Optional.empty(); // Ungültiger Pfad
+                return Optional.empty();
             }
 
-            String resourcePath = PUBLIC_RESOURCE_PATH + normalizedUri;
-            URL resourceUrl = getClass().getResource(resourcePath);
+            String resourcePath = (PUBLIC_RESOURCE_PATH + normalizedUri).substring(1);
+            ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+            URL resourceUrl = classLoader.getResource(resourcePath);
 
             if (resourceUrl == null) {
+                log.info("Resource not found at classpath path: " + resourcePath);
                 return Optional.empty();
             }
 
             try (InputStream inputStream = resourceUrl.openStream()) {
                 byte[] bytes = inputStream.readAllBytes();
                 FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.wrappedBuffer(bytes));
-                response.headers().set("Content-Type", mimeTypesMap.getContentType(normalizedUri));
+
+                // KORREKTUR: Content-Type und Content-Length setzen
+                if (normalizedUri.endsWith(".css")) {
+                    response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/css");
+                } else {
+                    response.headers().set(HttpHeaderNames.CONTENT_TYPE, mimeTypesMap.getContentType(resourcePath));
+                }
+                response.headers().set(HttpHeaderNames.CONTENT_LENGTH, bytes.length);
+
                 return Optional.of(response);
             }
         } catch (IOException e) {
