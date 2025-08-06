@@ -54,7 +54,6 @@ task bundleJs(type: Exec) {
             "--sourcemap"  // hilft bei Nachvollziehbarkeit
 
 }
-/*
 
 tasks.named('processResources', ProcessResources) {
     // Wir filtern die Standard-Ressourcen, anstatt neue Quellen hinzuzufügen.
@@ -71,7 +70,7 @@ tasks.named('processResources', ProcessResources) {
         exclude 'index.prod.html'
     }
 }
-*/
+
 // 2. Vereinfachen Sie den jar-Task. Er muss sich nicht mehr um die HTML-Dateien kümmern.
 jar {
     dependsOn bundleJs

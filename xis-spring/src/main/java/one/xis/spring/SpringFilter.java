@@ -9,22 +9,20 @@ import lombok.Setter;
 import one.xis.http.RestControllerService;
 import one.xis.server.FrontendService;
 import one.xis.server.LocalUrlHolder;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
-import java.util.Set;
 
 @Setter
 @Component
+@Order(0)
 class SpringFilter extends HttpFilter {
 
     private FrontendService frontendService;
     private RestControllerService restControllerService;
     private LocalUrlHolder localUrlHolder;
-    private static final Set<String> SPRING_PUBLIC_RESOURCE_FILES = Set.of(
-            "/favicon.ico", "/favicon.png", "/favicon.svg", "/robots.txt"
-    );
 
     @Override
     protected void doFilter(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain chain) throws IOException, ServletException {
