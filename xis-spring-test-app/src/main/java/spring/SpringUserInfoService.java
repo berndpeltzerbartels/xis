@@ -10,7 +10,12 @@ import java.util.Optional;
 //@Component
 public class SpringUserInfoService implements UserInfoService<UserInfoImpl> {
 
-    private final UserInfoImpl userInfo = UserInfoImpl.builder().userId("user123").build();
+    private final UserInfoImpl userInfo = new UserInfoImpl();
+
+    {
+        userInfo.setUserId("testUser");
+    }
+
     private final String password = "bla";
 
     @Override

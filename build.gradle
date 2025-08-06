@@ -47,6 +47,18 @@ subprojects {
     }
 
 }
+// In der root build.gradle Datei
+
+// Prüfen, ob der Release-Task aufgerufen wurde. Dies geschieht früh in der Konfigurationsphase.
+// Wir prüfen auf den Namen und den qualifizierten Pfad, um sicherzugehen.
+if (gradle.startParameter.taskNames.any { it.endsWith('createReleaseZip') }) {
+    println "Release mode activated by 'createReleaseZip' task."
+    // Wenn ja, wird die 'profile'-Eigenschaft für alle Unterprojekte gesetzt.
+    // Dies geschieht, bevor die Tasks der Unterprojekte konfiguriert werden.
+    subprojects {
+        ext.profile = 'release'
+    }
+}
 
 task createReleaseZip(type: JavaExec) {
     group = 'distribution'

@@ -100,7 +100,12 @@ public class JavascriptPlugin implements Plugin<Project> {
                 .allowPolyglotAccess(PolyglotAccess.ALL)
                 .allowNativeAccess(true)
                 .build();
+        context.getBindings("js").putMember("window", System.out);
+        var fixedContent = content + "\nvar window = {  addEventListener: function(a,b){}};\n";
         context.eval("js", content);
+    }
+
+    public static class WindowMock {
     }
 
     private void deleteIfExists(File file) {

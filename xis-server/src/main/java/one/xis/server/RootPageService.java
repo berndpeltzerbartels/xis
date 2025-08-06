@@ -2,7 +2,6 @@ package one.xis.server;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import one.xis.context.MainClassUtil;
 import one.xis.context.XISComponent;
 import one.xis.context.XISInit;
 import one.xis.resource.Resources;
@@ -25,7 +24,7 @@ class RootPageService {
 
     @XISInit
     void init() {
-        var resourcePath = MainClassUtil.isRunningFromJar() ? "index.prod.html" : "index.html";
+        var resourcePath = "index.html";
         var rootPageHtml = resources.getByPath(resourcePath).getContent();
         var rootPageDocument = XmlUtil.loadDocument(rootPageHtml);
         addCssLinks(rootPageDocument);

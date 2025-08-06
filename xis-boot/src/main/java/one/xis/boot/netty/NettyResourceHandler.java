@@ -19,38 +19,48 @@ public class NettyResourceHandler {
     private final MimetypesFileTypeMap mimeTypesMap = new MimetypesFileTypeMap();
 
     public Optional<FullHttpResponse> handle(String uri) {
-        try {
-            String normalizedUri = Path.of(uri).normalize().toString();
-            if (normalizedUri.startsWith("/..")) {
-                return Optional.empty();
-            }
+        return findResourceUrl(uri)
+                .flatMap(this::readResourceBytes)
+                .map(bytes -> createHttpResponse(bytes, uri));
+    }
 
-            String resourcePath = (PUBLIC_RESOURCE_PATH + normalizedUri).substring(1);
-            ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-            URL resourceUrl = classLoader.getResource(resourcePath);
+    private Optional<URL> findResourceUrl(String uri) {
+        String normalizedUri = Path.of(uri).normalize().toString();
+        if (normalizedUri.startsWith("/..")) {
+            return Optional.empty(); // Path-Traversal-Versuch
+        }
 
-            if (resourceUrl == null) {
-                log.info("Resource not found at classpath path: " + resourcePath);
-                return Optional.empty();
-            }
+        String resourcePath = (PUBLIC_RESOURCE_PATH + normalizedUri).substring(1);
+        URL resourceUrl = Thread.currentThread().getContextClassLoader().getResource(resourcePath);
 
-            try (InputStream inputStream = resourceUrl.openStream()) {
-                byte[] bytes = inputStream.readAllBytes();
-                FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.wrappedBuffer(bytes));
-
-                // KORREKTUR: Content-Type und Content-Length setzen
-                if (normalizedUri.endsWith(".css")) {
-                    response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/css");
-                } else {
-                    response.headers().set(HttpHeaderNames.CONTENT_TYPE, mimeTypesMap.getContentType(resourcePath));
-                }
-                response.headers().set(HttpHeaderNames.CONTENT_LENGTH, bytes.length);
-
-                return Optional.of(response);
-            }
-        } catch (IOException e) {
-            log.warning("Could not read resource: " + uri + ". " + e.getMessage());
+        if (resourceUrl == null) {
+            log.info("Resource not found at classpath path: " + resourcePath);
             return Optional.empty();
         }
+        return Optional.of(resourceUrl);
+    }
+
+    private Optional<byte[]> readResourceBytes(URL resourceUrl) {
+        try (InputStream inputStream = resourceUrl.openStream()) {
+            return Optional.of(inputStream.readAllBytes());
+        } catch (IOException e) {
+            log.warning("Could not read resource: " + resourceUrl + ". " + e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    private FullHttpResponse createHttpResponse(byte[] content, String uri) {
+        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.wrappedBuffer(content));
+        response.headers().set(HttpHeaderNames.CONTENT_LENGTH, content.length);
+        response.headers().set(HttpHeaderNames.CONTENT_TYPE, getContentType(uri));
+        return response;
+    }
+
+    private String getContentType(String uri) {
+        if (uri.endsWith(".css")) {
+            return "text/css";
+        }
+        // Verwende den URI (z.B. /style.css) statt des vollen Classpath-Pfades
+        return mimeTypesMap.getContentType(uri);
     }
 }

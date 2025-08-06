@@ -1,7 +1,8 @@
 xis.js
 xis-test.js
-xis-prod.js_
 classes.js
 app.js
 test.js
 functions.js
+/xis-prod.js
+/main.js

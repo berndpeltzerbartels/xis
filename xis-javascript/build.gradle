@@ -30,64 +30,60 @@ apply plugin: JavascriptPlugin
 
 def jsSrcDir = file("src/main/resources")
 def buildDirEs = file("$buildDir/esbuild")
-def indexTemplate = file("${jsSrcDir}/index.html")
-def indexMaven = file("${buildDirEs}/index.prod.html")
+def xisProdJs = file("${jsSrcDir}/xis-prod.js")
 def bundledJs = file("${buildDirEs}/bundle.min.js")
-def xisProdJs = file("${jsSrcDir}/xis-prod.js") // vom Plugin erzeugt
 
-// JS-Minification: Erzeuge bundle.min.js aus xis-prod.js
 task bundleJs(type: Exec) {
-    inputs.file xisProdJs
-    outputs.file bundledJs
+    dependsOn classes
 
     doFirst {
+        // Erstelle build-Verzeichnis für esbuild, falls nicht vorhanden
         buildDirEs.mkdirs()
     }
 
-    commandLine "npx", "esbuild",
+    workingDir project.projectDir
+
+    commandLine 'npx', 'esbuild',
             xisProdJs.absolutePath,
-            "--bundle",
-            "--minify",
-            "--keep-names",
-            "--format=iife",
-            "--target=es2017",
-            "--outfile=${bundledJs.absolutePath}"
+            '--minify',
+            '--keep-names',
+            "--log-level=info",
+            "--outfile=${bundledJs.absolutePath}",
+            "--log-level=debug",  // mehr Ausgaben
+            "--metafile=${buildDirEs}/meta.json",  // enthält Infos, was gebundled wurde
+            "--sourcemap"  // hilft bei Nachvollziehbarkeit
+
 }
+/*
 
-// Erzeuge eine index.prod.html mit Verweis auf bundle.min.js
-task generateMavenIndex {
-    dependsOn bundleJs
-    inputs.file indexTemplate
-    outputs.file indexMaven
-
-    doLast {
-        def content = indexTemplate.text
-                .replaceAll(/<script.*?src=".*?\.js".*?><\/script>/, "")
-                .replace("</head>", '    <script src="bundle.min.js" ignore="true"></script>\n</head>')
-        indexMaven.text = content
+tasks.named('processResources', ProcessResources) {
+    // Wir filtern die Standard-Ressourcen, anstatt neue Quellen hinzuzufügen.
+    // Dies vermeidet Duplikate und Konfigurationskonflikte.
+    if (project.hasProperty('profile') && project.profile == 'release') {
+        // RELEASE BUILD
+        // Schließe die Entwicklungs-HTML aus.
+        exclude 'index.html'
+        // Benenne die Produktions-HTML um.
+        rename 'index.prod.html', 'index.html'
+    } else {
+        // DEVELOPMENT BUILD
+        // Schließe die Produktions-HTML aus.
+        exclude 'index.prod.html'
     }
 }
-
-// JAR-Konfiguration
+*/
+// 2. Vereinfachen Sie den jar-Task. Er muss sich nicht mehr um die HTML-Dateien kümmern.
 jar {
-    dependsOn generateMavenIndex
+    dependsOn bundleJs
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
-    // Originale index.html und alle *.js-Dateien (außer xis-prod.js) ins Root
+    // Die HTML-Dateien werden bereits korrekt von processResources bereitgestellt.
+    // Wir müssen nur noch die JS-Dateien hinzufügen.
     from(jsSrcDir) {
-        include "index.html"
         include "*.js"
-        exclude "xis-prod.js" // nur temporär zur Bundle-Erzeugung
+        exclude "xis-prod.js"
         into ""
     }
-
-    // index.prod.html ins Root
-    from(buildDirEs) {
-        include "index.prod.html"
-        into ""
-    }
-
-    // bundle.min.js ins JAR (z. B. für Doku, externe Tools)
     from(buildDirEs) {
         include "bundle.min.js"
         into ""

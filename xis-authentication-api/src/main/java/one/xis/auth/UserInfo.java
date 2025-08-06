@@ -7,6 +7,7 @@ public interface UserInfo {
 
     Set<String> getRoles();
 
+    
     String getName();
 
     String getEmail();
