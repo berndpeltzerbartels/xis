@@ -29,6 +29,10 @@ java {
     withJavadocJar()
 }
 
+processResources {
+    expand(project.properties)
+}
+
 dependencies {
     implementation gradleApi()
     implementation localGroovy()
@@ -43,7 +47,7 @@ pluginBundle {
 gradlePlugin {
     plugins {
         springPlugin {
-            id = 'one.xis.xis-plugin'
+            id = 'one.xis.plugin'
             implementationClass = 'one.xis.plugin.XISPlugin'
         }
     }

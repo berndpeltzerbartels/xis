@@ -10,7 +10,7 @@ import one.xis.server.PageUtil;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class IntegrationTestContext implements AppContext {
+public class IntegrationTestContext {
 
     @Getter
     private final AppContext appContext;
@@ -56,12 +56,12 @@ public class IntegrationTestContext implements AppContext {
         return appContext.getOptionalSingleton(type);
     }
 
-    @Override
+    //@Override
     public Collection<Object> getSingletons() {
         return appContext.getSingletons();
     }
 
-    @Override
+    //@Override
     public Collection<Object> getSingletons(Class<?> type) {
         return appContext.getSingletons();
     }

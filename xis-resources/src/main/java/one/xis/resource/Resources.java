@@ -38,10 +38,10 @@ public class Resources {
             Enumeration<URL> urls = getClass().getClassLoader().getResources(prefix);
             while (urls.hasMoreElements()) {
                 URL url = urls.nextElement();
-                if (url.getProtocol().equals("file")) {
-                    File dir = new File(url.toURI());
-                    scanDirectoryRecursive(dir, prefix, suffix, result);
-                } else if (url.getProtocol().equals("jar")) {
+                if ("file".equals(url.getProtocol())) {
+                    File baseDir = new File(url.toURI());
+                    scanDirectoryRecursive(baseDir, prefix, suffix, result, baseDir);
+                } else if ("jar".equals(url.getProtocol())) {
                     scanJarFile(url, prefix, suffix, result);
                 }
             }
@@ -51,19 +51,21 @@ public class Resources {
         }
     }
 
-    private void scanDirectoryRecursive(File dir, String prefix, String suffix, List<Resource> result) {
-        File[] files = dir.listFiles();
+    private void scanDirectoryRecursive(File currentDir, String currentPath, String suffix, List<Resource> result, File baseDir) {
+        File[] files = currentDir.listFiles();
         if (files == null) return;
 
         for (File file : files) {
             if (file.isDirectory()) {
-                scanDirectoryRecursive(file, prefix, suffix, result);
+                scanDirectoryRecursive(file, currentPath, suffix, result, baseDir);
             } else if (file.getName().endsWith(suffix)) {
-                String path = prefix + "/" + relativizePath(file, new File(getClass().getClassLoader().getResource(prefix).getFile()));
-                result.add(new StaticResource(path));
+                String relativePath = baseDir.toURI().relativize(file.toURI()).getPath();
+                String resourcePath = (currentPath + "/" + relativePath).replaceAll("/+", "/");
+                result.add(new StaticResource(resourcePath));
             }
         }
     }
+
 
     private void scanJarFile(URL url, String prefix, String suffix, List<Resource> result) throws IOException {
         String path = url.getPath();
@@ -76,10 +78,6 @@ public class Resources {
                 }
             }
         }
-    }
-
-    private String relativizePath(File file, File baseDir) {
-        return baseDir.toURI().relativize(file.toURI()).getPath();
     }
 
     public boolean exists(String path) {

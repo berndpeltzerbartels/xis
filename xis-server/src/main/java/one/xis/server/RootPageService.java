@@ -14,17 +14,18 @@ import org.w3c.dom.Document;
 class RootPageService {
 
     private static final String CUSTOM_PUBLIC_RESOURCE_PATH = "/public";
+    private static final String DEFAULT_ROOT_PAGE = "default-index.html";
+    private static final String CUSTOM_ROOT_PAGE = "index.html";
+
 
     private final Resources resources;
 
     @Getter
     private String rootPageHtml;
 
-    private String prodRootPageHtml; // TODO ?
-
     @XISInit
     void init() {
-        var resourcePath = "index.html";
+        var resourcePath = resources.exists(CUSTOM_ROOT_PAGE) ? CUSTOM_ROOT_PAGE : DEFAULT_ROOT_PAGE;
         var rootPageHtml = resources.getByPath(resourcePath).getContent();
         var rootPageDocument = XmlUtil.loadDocument(rootPageHtml);
         addCssLinks(rootPageDocument);
@@ -57,4 +58,6 @@ class RootPageService {
         scriptElement.setAttribute("src", jsPath);
         headElement.appendChild(scriptElement);
     }
+
+
 }

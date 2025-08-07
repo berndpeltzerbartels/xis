@@ -7,9 +7,11 @@ import org.gradle.api.tasks.compile.JavaCompile;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Properties;
 
 
 /**
@@ -19,11 +21,11 @@ import java.nio.file.Paths;
 public class XISPlugin implements Plugin<Project> {
     @Override
     public void apply(@NotNull Project project) {
-        addDependencies(project);
+        configureDependencyManagement(project);
         configureResources(project);
         // checkJavaHome();
-        checkGradleJavaVersion(project);
-        checkCompilerJavaVersion(project);
+        // checkGradleJavaVersion(project);
+        // checkCompilerJavaVersion(project);
     }
 
     /**
@@ -39,6 +41,21 @@ public class XISPlugin implements Plugin<Project> {
         project.getDependencies().add("testImplementation", "one.xis:xis-test:"+version);
 
          */
+    }
+
+    /**
+     * Configures dependency constraints for optional XIS modules. This allows users
+     * to add a dependency without specifying the version.
+     *
+     * @param project The project to configure.
+     */
+    private void configureDependencyManagement(Project project) {
+        var version = xisVersion();
+        var constraints = project.getDependencies().getConstraints();
+        constraints.add("implementation", "one.xis:xis-spring:" + version);
+        constraints.add("implementation", "one.xis:xis-authentication:" + version);
+        constraints.add("implementation", "one.xis:xis-idp-server:" + version);
+        constraints.add("testImplementation", "one.xis:xis-test:" + version);
     }
 
     /**
@@ -101,8 +118,18 @@ public class XISPlugin implements Plugin<Project> {
         });
     }
 
+
     private String xisVersion() {
-        return "1.0.0";
+        try (InputStream input = getClass().getResourceAsStream("/xis.properties")) {
+            Properties prop = new Properties();
+            if (input == null) {
+                throw new IllegalStateException("Sorry, unable to find xis.properties");
+            }
+            prop.load(input);
+            return prop.getProperty("version");
+        } catch (IOException ex) {
+            throw new RuntimeException("Error reading xis.properties", ex);
+        }
     }
 
     private String javaTargetVersion() {
