@@ -4,7 +4,7 @@ plugins {
     id 'groovy'
     id 'maven-publish'
     // id 'signing'
-    id 'com.gradle.plugin-publish' version '0.15.0' // optional für Plugin-Portal
+    id 'com.gradle.plugin-publish' version '1.1.0'
 }
 
 group = rootProject.ext.projectGroup
@@ -38,17 +38,17 @@ dependencies {
     implementation localGroovy()
 }
 
-pluginBundle {
-    website = 'https://example.com' // optional, für Plugin-Portal
-    vcsUrl = 'https://github.com/example/repo'
-    tags = ['java', 'dependency', 'java-version']
-}
 
 gradlePlugin {
+    website = 'https://github.com/berndpeltzerbartels/xis' // URL zur Projekt-Webseite
+    vcsUrl = 'https://github.com:berndpeltzerbartels/xis.git' // URL zum Git-Repository
     plugins {
-        springPlugin {
+        xisPlugin {
             id = 'one.xis.plugin'
             implementationClass = 'one.xis.plugin.XISPlugin'
+            displayName = 'XIS Framework Plugin' // Angezeigter Name im Portal
+            description = project.description // Beschreibung aus dem POM wiederverwenden
+            tags = ['xis', 'web', 'framework', 'declarative'] // Such-Tags
         }
     }
 }
@@ -100,29 +100,23 @@ publishing {
         }
     }
 }
-/*
-signing {
-    sign publishing.publications.pluginPublication
-    useGpgCmd()
-}
-*/
 
-// ✍️ Kleine Zusatzaufgaben für Version-Dateien
+def mainResourcesDir = sourceSets.main.output.resourcesDir
+
 task writeVersionToFile {
+    def versionValue = project.version.toString()
+    inputs.property("version", versionValue)
+
+    // Die Ausgabedatei im Ressourcen-Verzeichnis deklarieren
+    def versionFile = file("$mainResourcesDir/plugin-version.txt")
+    outputs.file(versionFile)
+
     doLast {
-        def versionFile = new File(buildDir, "plugin-version.txt")
-        versionFile.text = project.version.toString()
+        versionFile.parentFile.mkdirs() // Sicherstellen, dass das Verzeichnis existiert
+        versionFile.text = versionValue
         println "Plugin version written to: " + versionFile
     }
 }
 
-task writeJavaVersionIntToFile {
-    doLast {
-        def versionFile = new File(buildDir, "java-version.txt")
-        versionFile.text = rootProject.ext.javaVersionInt
-        println "Java version written to: " + versionFile
-    }
-}
-
 classes.dependsOn writeVersionToFile
-classes.dependsOn writeJavaVersionIntToFile
+

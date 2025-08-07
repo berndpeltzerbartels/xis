@@ -14,8 +14,6 @@ import org.w3c.dom.Document;
 class RootPageService {
 
     private static final String CUSTOM_PUBLIC_RESOURCE_PATH = "/public";
-    private static final String DEFAULT_ROOT_PAGE = "default-index.html";
-    private static final String CUSTOM_ROOT_PAGE = "index.html";
 
 
     private final Resources resources;
@@ -25,7 +23,7 @@ class RootPageService {
 
     @XISInit
     void init() {
-        var resourcePath = resources.exists(CUSTOM_ROOT_PAGE) ? CUSTOM_ROOT_PAGE : DEFAULT_ROOT_PAGE;
+        var resourcePath = getRootPageResourcePath();
         var rootPageHtml = resources.getByPath(resourcePath).getContent();
         var rootPageDocument = XmlUtil.loadDocument(rootPageHtml);
         addCssLinks(rootPageDocument);
@@ -57,6 +55,28 @@ class RootPageService {
         var scriptElement = rootPageDocument.createElement("script");
         scriptElement.setAttribute("src", jsPath);
         headElement.appendChild(scriptElement);
+    }
+
+    private static final String DEFAULT_DEVELOP_ROOT_PAGE = "default-develop-index.html";
+    private static final String DEVELOP_ROOT_PAGE = "develop-index.html";
+    private static final String DEFAULT_ROOT_PAGE = "default-index.html";
+    private static final String ROOT_PAGE = "index.html";
+
+
+    private String getRootPageResourcePath() {
+        if (Boolean.parseBoolean(System.getProperty("develop"))) {
+            if (resources.exists(DEVELOP_ROOT_PAGE)) {
+                return DEVELOP_ROOT_PAGE;
+            } else if (resources.exists(DEFAULT_DEVELOP_ROOT_PAGE)) {
+                return DEFAULT_DEVELOP_ROOT_PAGE;
+            }
+        }
+        if (resources.exists(ROOT_PAGE)) {
+            return ROOT_PAGE;
+        } else if (resources.exists(DEFAULT_ROOT_PAGE)) {
+            return DEFAULT_ROOT_PAGE;
+        }
+        throw new IllegalStateException("No root page found. Please provide a 'default-develop-index.html' or 'default-default-develop-index.html' in the resources directory.");
     }
 
 

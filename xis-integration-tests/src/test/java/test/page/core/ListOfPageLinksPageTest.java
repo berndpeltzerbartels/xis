@@ -18,7 +18,7 @@ class ListOfPageLinksPageTest {
                 .withSingleton(TitlePage.class)
                 .build();
         var listOfPageLinksPage = testContext.getSingleton(ListOfPageLinksPage.class);
-        var links = new Link[]{new Link("index.html", "Index"), new Link("title.html", "Title test page")};
+        var links = new Link[]{new Link("default-develop-index.html", "Index"), new Link("title.html", "Title test page")};
         listOfPageLinksPage.setLinks(links);
     }
 

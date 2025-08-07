@@ -49,7 +49,7 @@ class HtmlObjects {
     }
 
     private void init() {
-        this.document = Document.of(new Resources().getByPath("index.html").getContent());
+        this.document = Document.of(new Resources().getByPath("default-develop-index.html").getContent());
         this.localStorage = new LocalStorage();
         this.sessionStorage = new SessionStorage();
         this.window = new Window(document.location);

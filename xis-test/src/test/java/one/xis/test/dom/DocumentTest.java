@@ -39,9 +39,9 @@ class DocumentTest {
     }
 
     @Test
-    @DisplayName("Create document from index.html")
+    @DisplayName("Create document from default-develop-index.html")
     void of2() {
-        var html = new Resources().getByPath("/index.html").getContent();
+        var html = new Resources().getByPath("/default-develop-index.html").getContent();
         var document = Document.of(html);
 
         assertThat(document.rootNode.localName).isEqualTo("html");

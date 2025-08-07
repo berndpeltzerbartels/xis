@@ -54,14 +54,14 @@ class PagesTest {
         var initializedNodes = (Collection<Node>) result.get("initializedNodes");
         assertThat(initializedNodes).hasSize(2);
 
-        assertThat(pages).containsKey("index.html");
-        var page = (Map<String, Object>) pages.get("index.html");
-        assertThat(page.get("id")).isEqualTo("index.html");
+        assertThat(pages).containsKey("default-develop-index.html");
+        var page = (Map<String, Object>) pages.get("default-develop-index.html");
+        assertThat(page.get("id")).isEqualTo("default-develop-index.html");
         assertThat(page.get("title")).isEqualTo("Title");
         assertThat(((Node[]) page.get("headChildArray"))).hasSize(2);
         assertThat(((Node[]) page.get("bodyChildArray"))).hasSize(1);
         assertThat(page.get("bodyAttributes")).isEqualTo("{\"class\": \"test\"}");
-        assertThat(page.get("id")).isEqualTo("index.html");
+        assertThat(page.get("id")).isEqualTo("default-develop-index.html");
 
          */
 

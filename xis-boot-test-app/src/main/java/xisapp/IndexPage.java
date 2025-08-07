@@ -4,6 +4,6 @@ import one.xis.Page;
 import one.xis.WelcomePage;
 
 @WelcomePage
-@Page("/index.html")
+@Page("/default-develop-index.html")
 class IndexPage {
 }

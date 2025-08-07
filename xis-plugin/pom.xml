@@ -10,7 +10,7 @@
     <packaging>jar</packaging>
 
     <name>Plugin</name>
-    <description>Public API for defining declarative web controllers in XIS applications.</description>
+    <description>Plugin to set dependency versions and other conveniences when working with xis</description>
     <url>https://github.com/berndpeltzerbartels/xis</url>
 
     <licenses>
