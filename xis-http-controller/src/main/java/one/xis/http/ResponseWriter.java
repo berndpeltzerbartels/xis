@@ -111,63 +111,64 @@ class ResponseWriter {
         switch (response.getContentType()) {
             case JSON:
                 var json = gson.toJson(returnValue);
-                response.setBody(json);
-                response.setContentLength(json.length());
+                // JSON ist per Definition UTF-8, daher ist getBytes() hier sicher.
+                var jsonBytes = json.getBytes(StandardCharsets.UTF_8);
+                response.setBody(jsonBytes);
+                response.setContentLength(jsonBytes.length);
                 break;
             case FORM_URLENCODED:
+                String formData;
                 if (returnValue instanceof Map) {
-                    var formData = toUrlEncoded((Map<?, ?>) returnValue);
-                    response.setBody(formData);
-                    response.setContentLength(formData.length());
+                    formData = toUrlEncoded((Map<?, ?>) returnValue);
                 } else if (!TypeUtils.isSimple(returnValue.getClass())) {
-                    var urlEncoded = toUrlEncoded(returnValue);
-                    response.setContentLength(urlEncoded.length());
-                    response.setBody(urlEncoded);
+                    formData = toUrlEncoded(returnValue);
                 } else {
-                    var str = String.valueOf(returnValue);
-                    response.setContentLength(str.length());
-                    response.setBody(str);
+                    formData = String.valueOf(returnValue);
                 }
+                var formBytes = formData.getBytes(StandardCharsets.UTF_8);
+                response.setBody(formBytes);
+                response.setContentLength(formBytes.length);
                 break;
             case APPLICATION_OCTET_STREAM:
                 if (returnValue == null) {
-                    response.setBody(new byte[0]); // Leerer Body für null
+                    response.setBody(new byte[0]);
                     response.setContentLength(0);
                 } else if (returnValue instanceof byte[]) {
-                    response.setBody((byte[]) returnValue);
-                    response.setContentLength(((byte[]) returnValue).length);
-                } else if (returnValue instanceof CharSequence) {
-                    var bytes = ((CharSequence) returnValue).toString().getBytes(StandardCharsets.UTF_8);
+                    var bytes = (byte[]) returnValue;
                     response.setBody(bytes);
                     response.setContentLength(bytes.length);
                 } else {
-                    // Fallback oder Fehlerbehandlung, falls der Typ nicht passt
-                    var str = String.valueOf(returnValue).getBytes(StandardCharsets.UTF_8);
-                    response.setBody(str);
-                    response.setContentLength(str.length);
+                    var bytes = String.valueOf(returnValue).getBytes(StandardCharsets.UTF_8);
+                    response.setBody(bytes);
+                    response.setContentLength(bytes.length);
                 }
                 break;
+            case JAVASCRIPT: // Explizit hinzufügen für Klarheit
             case TEXT_PLAIN:
             case TEXT_HTML:
+            case CSS:
+            case XML:
+            case SVG:
             default:
                 if (returnValue == null) {
-                    response.setBody("");
+                    response.setBody(new byte[0]);
                     response.setContentLength(0);
-                } else if (returnValue instanceof CharSequence) {
-                    var str = returnValue.toString();
-                    response.setBody(str);
-                    response.setContentLength(str.length());
-                } else if (returnValue instanceof Map || returnValue instanceof Iterable) {
-                    // Für komplexe Objekte, die nicht direkt in Text umgewandelt werden können
-                    var mapAsJson = gson.toJson(returnValue);
-                    response.setBody(mapAsJson);
-                    response.setContentLength(mapAsJson.length());
-                } else {
-                    // Fallback für andere Typen
-                    var str = String.valueOf(returnValue);
-                    response.setContentLength(str.length());
-                    response.setBody(str);
+                    break;
                 }
+
+                String textBody;
+                if (returnValue instanceof CharSequence) {
+                    textBody = returnValue.toString();
+                } else if (returnValue instanceof Map || returnValue instanceof Iterable) {
+                    // Fallback für komplexe Typen, die als Text/HTML etc. gesendet werden
+                    textBody = gson.toJson(returnValue);
+                } else {
+                    textBody = String.valueOf(returnValue);
+                }
+
+                var textBytes = textBody.getBytes(StandardCharsets.UTF_8);
+                response.setBody(textBytes);
+                response.setContentLength(textBytes.length);
                 break;
         }
     }

@@ -132,10 +132,6 @@ public interface FrontendService {
     String getBundleJs();
 
 
-    default void extractAccessToken(ClientRequest request, String authenticationHeader) {
-        if (authenticationHeader != null && authenticationHeader.startsWith("Bearer ")) {
-            request.setAccessToken(authenticationHeader.substring("Bearer ".length()));
-        }
-    }
+    String getBundleJsMap();
 
 }

@@ -38,6 +38,7 @@ public class FrontendServiceImpl implements FrontendService {
     private Resource mainJsResource;
     private Resource functionsJsResource;
     private Resource bundleJsResource;
+    private Resource bundleJsMapResource;
 
     @XISInit
     void init() {
@@ -46,6 +47,7 @@ public class FrontendServiceImpl implements FrontendService {
         mainJsResource = resources.getByPath("main.js");
         functionsJsResource = resources.getByPath("functions.js");
         bundleJsResource = resources.getByPath("bundle.min.js");
+        bundleJsMapResource = resources.getByPath("bundle.min.js.map");
     }
 
     @Override
@@ -123,6 +125,11 @@ public class FrontendServiceImpl implements FrontendService {
     @Override
     public String getBundleJs() {
         return bundleJsResource.getContent();
+    }
+
+    @Override
+    public String getBundleJsMap() {
+        return bundleJsMapResource.getContent();
     }
 
     private void addRequestAttributes(ClientRequest request) throws AuthenticationException {

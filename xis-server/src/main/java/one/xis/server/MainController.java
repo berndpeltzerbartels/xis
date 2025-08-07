@@ -110,6 +110,13 @@ public class MainController {
         return ResponseEntity.ok(frontendService.getBundleJs());
     }
 
+
+    @Get("/bundle.min.js.map")
+    public ResponseEntity<String> getBundleJsMap() {
+        return ResponseEntity.ok(frontendService.getBundleJs());
+    }
+
+
     private ResponseEntity<?> responseEntity(ServerResponse serverResponse) {
         if (serverResponse.getRedirectUrl() != null) {
             return ResponseEntity.noContent().addHeader("Location", serverResponse.getRedirectUrl());

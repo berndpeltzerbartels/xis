@@ -84,7 +84,7 @@ jar {
         into ""
     }
     from(buildDirEs) {
-        include "bundle.min.js"
+        include "bundle.min.js", "bundle.min.js.map"
         into ""
     }
 }
