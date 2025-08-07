@@ -3,7 +3,7 @@ plugins {
     id 'java-gradle-plugin'
     id 'groovy'
     id 'maven-publish'
-    // id 'signing'
+    id 'signing' // <-- 1. Signatur-Plugin aktivieren
     id 'com.gradle.plugin-publish' version '1.1.0'
 }
 
@@ -41,19 +41,18 @@ dependencies {
 
 gradlePlugin {
     website = 'https://github.com/berndpeltzerbartels/xis' // URL zur Projekt-Webseite
-    vcsUrl = 'https://github.com:berndpeltzerbartels/xis.git' // URL zum Git-Repository
+    vcsUrl = 'https://github.com/berndpeltzerbartels/xis.git' // URL zum Git-Repository
     plugins {
         xisPlugin {
             id = 'one.xis.plugin'
             implementationClass = 'one.xis.plugin.XISPlugin'
             displayName = 'XIS Framework Plugin' // Angezeigter Name im Portal
-            description = project.description // Beschreibung aus dem POM wiederverwenden
+            description = 'Gradle plugin module for the XIS declarative web framework.'
             tags = ['xis', 'web', 'framework', 'declarative'] // Such-Tags
         }
     }
 }
 
-// ✔ Eigene Publication für Maven Central
 publishing {
     publications {
         pluginPublication(MavenPublication) {
@@ -82,7 +81,7 @@ publishing {
 
                 scm {
                     connection = 'scm:git:https://github.com/berndpeltzerbartels/xis.git'
-                    developerConnection = 'scm:git:git@github.com:berndpeltzerbartels/xis.git'
+                    developerConnection = 'scm:git:git@github.com/berndpeltzerbartels/xis.git'
                     url = 'https://github.com/berndpeltzerbartels/xis'
                 }
             }
@@ -101,22 +100,34 @@ publishing {
     }
 }
 
+signing {
+    // Prüft, ob die GPG-Properties gesetzt sind, bevor die Signierung versucht wird.
+    def signingKeyId = findProperty("signing.keyId")
+    def signingKey = findProperty("signing.secretKeyRingFile")
+    def signingPassword = findProperty("signing.password")
+
+    useGpgCmd() // Verwendet das gpg Kommandozeilen-Tool, was oft zuverlässiger ist
+
+    // Signiert nur, wenn alle notwendigen Properties vorhanden sind
+    if (signingKeyId && signingKey && signingPassword) {
+        sign publishing.publications
+    }
+}
+
 def mainResourcesDir = sourceSets.main.output.resourcesDir
 
 task writeVersionToFile {
     def versionValue = project.version.toString()
     inputs.property("version", versionValue)
 
-    // Die Ausgabedatei im Ressourcen-Verzeichnis deklarieren
     def versionFile = file("$mainResourcesDir/plugin-version.txt")
     outputs.file(versionFile)
 
     doLast {
-        versionFile.parentFile.mkdirs() // Sicherstellen, dass das Verzeichnis existiert
+        versionFile.parentFile.mkdirs()
         versionFile.text = versionValue
         println "Plugin version written to: " + versionFile
     }
 }
 
 classes.dependsOn writeVersionToFile
-
