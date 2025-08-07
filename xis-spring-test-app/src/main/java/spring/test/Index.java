@@ -7,7 +7,7 @@ import one.xis.WelcomePage;
 import java.util.List;
 
 @WelcomePage
-@Page("/default-develop-index.html")
+@Page("/index.html")
 class Index {
 
     @ModelData("pages")

@@ -11,11 +11,12 @@ import java.time.Duration;
 
 @RequiredArgsConstructor
 public class SpringHttpResponse implements HttpResponse {
+    private int statusCode;
     private final HttpServletResponse response;
 
     @Override
     public void setStatusCode(int statusCode) {
-        response.setStatus(statusCode);
+        this.statusCode = statusCode;
     }
 
     @Override
@@ -86,5 +87,9 @@ public class SpringHttpResponse implements HttpResponse {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void commitStatusCode() {
+        response.setStatus(statusCode);
     }
 }
