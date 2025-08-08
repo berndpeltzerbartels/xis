@@ -15,7 +15,6 @@ public class HttpTestResponse implements HttpResponse {
 
     private Integer statusCode;
     private String body;
-    private byte[] bodyBytes;
     private ContentType contentType;
     private int contentLength;
     private String redirectLocation;
@@ -33,7 +32,7 @@ public class HttpTestResponse implements HttpResponse {
 
     @Override
     public void setBody(byte[] body) {
-        this.bodyBytes = body;
+        this.body = new String(body);
     }
 
     @Override

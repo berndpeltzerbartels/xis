@@ -47,7 +47,7 @@ gradlePlugin {
             id = 'one.xis.plugin'
             implementationClass = 'one.xis.plugin.XISPlugin'
             displayName = 'XIS Framework Plugin' // Angezeigter Name im Portal
-            description = 'Gradle plugin module for the XIS declarative web framework.'
+            description = 'Gradle plugin module for the XIS declarative web framework manages the version number and allows to place html templates in java source folder additional to main/resources.'
             tags = ['xis', 'web', 'framework', 'declarative'] // Such-Tags
         }
     }
