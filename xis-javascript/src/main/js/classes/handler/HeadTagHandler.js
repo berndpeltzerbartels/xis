@@ -54,7 +54,6 @@ class HeadTagHandler extends TagHandler {
     * @param {Element} headTemplate
     */
     release(headTemplate) {
-        debugger;
         for (var node of this.nodeListToArray(this.tag.childNodes)) {
             if (isElement(node) && node.getAttribute('ignore')) {
                 continue;
