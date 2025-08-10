@@ -7,6 +7,8 @@ public abstract class Node {
     public Element parentNode;
     public Consumer<Object> _refresh; // We add this method during initialization
 
+    public static final int ELEMENT_NODE = 4;
+
     void insertPreviousSibling(Node node) {
         node.parentNode = this.parentNode;
         var previousSibling = getPreviousSibling();

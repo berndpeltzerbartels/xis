@@ -51,7 +51,7 @@ class DocumentTest {
         assertThat(head.getChildElementNames()).contains("title", "script");
 
         var body = document.getElementByTagName("body");
-        assertThat(body.getChildList()).isEmpty();
+        assertThat(body.getChildList()).hasSize(1); // messages-div
         assertThat(body.getAttribute("onload")).isEqualTo("main()");
     }
 

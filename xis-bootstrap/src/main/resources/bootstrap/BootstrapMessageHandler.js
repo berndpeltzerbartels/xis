@@ -93,3 +93,4 @@ class BootstrapMessageHandler {
             toast.remove();
         }, 4000);
     }
+}

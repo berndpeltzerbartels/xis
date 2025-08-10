@@ -19,8 +19,10 @@ class WidgetContainerHandlerTest {
 
     @Test
     void refresh() throws ScriptException {
-        var document = Document.of("<html><body><xis:widget-container id=\"container\" default-widget=\"${x}\"/></body></html>");
+        var document = Document.of("<html><body><xis:widget-container id=\"container\" default-widget=\"${x}\"/><div id=\"messages\"></div></body></html>");
         var container = document.getElementById("container");
+        var nodeMock = new HashMap<>();
+        nodeMock.put("ELEMENT_NODE", 1);
 
         var script = Javascript.getScript(CLASSES, FUNCTIONS, TEST, TEST_APP_INSTANCE);
         script += IOUtils.getResourceAsString("one/xis/widget/WidgetContainerHandlerTestMocks.js");
@@ -34,6 +36,7 @@ class WidgetContainerHandlerTest {
         bindings.put("widgets", new WidgetsMock());
         bindings.put("debug", new Debug());
         bindings.put("window", new Window(document.location));
+        bindings.put("Node", nodeMock);
 
         JSUtil.execute(script, bindings);
 
