@@ -31,8 +31,7 @@ var reflectionsVersion = rootProject.ext.libraryVersions.reflections
 var mockitoVersion = rootProject.ext.libraryVersions.mockito
 var graalVmVersion = "23.0.1"
 var tinylogVersion = "2.6.1"
-var nashornVersion = "15.4"
-var jacksonDatabindVersion = "2.14.1"
+var jacksonVersion = rootProject.ext.libraryVersions.jackson
 var junitVersion = rootProject.ext.libraryVersions.junit
 var assertjVersion = rootProject.ext.libraryVersions.assertj
 
@@ -64,8 +63,8 @@ dependencies {
     implementation "org.graalvm.js:js-scriptengine:$graalVmVersion"
     implementation "org.graalvm.truffle:truffle-api:$graalVmVersion"
     implementation "org.tinylog:tinylog-impl:$tinylogVersion"
-    implementation "org.openjdk.nashorn:nashorn-core:$nashornVersion"
-    implementation "com.fasterxml.jackson.core:jackson-databind:$jacksonDatabindVersion"
+    implementation 'org.jsoup:jsoup:1.17.2'
+    implementation "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
 
 
     // Test dependencies

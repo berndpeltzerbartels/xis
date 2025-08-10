@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NonNull;
 import one.xis.test.js.Event;
 import one.xis.utils.lang.StringUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.select.Elements;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -384,6 +386,74 @@ public class Element extends Node {
         var builder = new StringBuilder();
         evaluateContent(builder, 0);
         return builder.toString();
+    }
+
+    /**
+     * Finds the first descendant element that matches the specified CSS selector.
+     *
+     * @param selector The CSS selector string.
+     * @return The first matching Element, or null if no match is found.
+     */
+    public Element querySelector(String selector) {
+        List<Element> results = querySelectorAll(selector, true);
+        return results.isEmpty() ? null : results.get(0);
+    }
+
+    /**
+     * Finds all descendant elements that match the specified CSS selector.
+     *
+     * @param selector The CSS selector string.
+     * @return A List of matching Elements. The list is empty if no matches are found.
+     */
+    public List<Element> querySelectorAll(String selector) {
+        return querySelectorAll(selector, false);
+    }
+
+    private List<Element> querySelectorAll(String selector, boolean firstOnly) {
+        // 1. Erstelle eine Map, um temporäre IDs auf echte Element-Objekte abzubilden.
+        final String tempIdAttribute = "data-temp-id";
+        Map<String, Element> elementMap = new HashMap<>();
+
+        // Weise jedem Element im Baum eine eindeutige ID zu.
+        this.findDescendants(e -> true).forEach(e -> {
+            String uuid = UUID.randomUUID().toString();
+            e.setAttribute(tempIdAttribute, uuid);
+            elementMap.put(uuid, e);
+        });
+        // Füge auch das Wurzelelement hinzu
+        String rootUuid = UUID.randomUUID().toString();
+        this.setAttribute(tempIdAttribute, rootUuid);
+        elementMap.put(rootUuid, this);
+
+        // 2. Konvertiere den aktuellen Elementbaum in einen HTML-String.
+        String html = this.asString();
+
+        // 3. Parse den HTML-String mit Jsoup und führe den Selektor aus.
+        org.jsoup.nodes.Document doc = Jsoup.parseBodyFragment(html);
+        List<Element> result = new ArrayList<>();
+
+        if (firstOnly) {
+            org.jsoup.nodes.Element foundJsoupElement = doc.selectFirst(selector);
+            if (foundJsoupElement != null) {
+                String tempId = foundJsoupElement.attr(tempIdAttribute);
+                if (elementMap.containsKey(tempId)) {
+                    result.add(elementMap.get(tempId));
+                }
+            }
+        } else {
+            Elements foundJsoupElements = doc.select(selector);
+            for (org.jsoup.nodes.Element jsoupElement : foundJsoupElements) {
+                String tempId = jsoupElement.attr(tempIdAttribute);
+                if (elementMap.containsKey(tempId)) {
+                    result.add(elementMap.get(tempId));
+                }
+            }
+        }
+
+        // 4. Bereinige die temporären Attribute aus dem echten DOM.
+        elementMap.values().forEach(e -> e.removeAttribute(tempIdAttribute));
+
+        return result;
     }
 
     String asString(int indent) {

@@ -1,6 +1,8 @@
 class TestApplication {
 
     constructor() {
+        this.initializers = [];
+        this.messageHandler = new MessageHandler();
         this.clientState = new ClientState();
         this.localStorage = new LocalStore();
         this.httpConnector = new HttpConnectorMock();
@@ -15,6 +17,18 @@ class TestApplication {
         this.pageController = new PageController(this.client, this.pages, this.initializer, this.urlResolver, this.tagHandlers);
         this.history = new PageHistory(this.pageController);
         this.backendService = new BackendService();
+        this.runInitializers();
+    }
+
+    
+    /**     
+     * Runs all initializers that have been registered.
+     * @private
+     */
+    runInitializers() {
+        this.initializers.forEach(initializer => {
+            initializer.initialize(this);
+        });
     }
 
 
