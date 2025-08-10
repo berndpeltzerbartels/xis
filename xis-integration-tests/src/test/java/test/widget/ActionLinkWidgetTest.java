@@ -59,7 +59,7 @@ class ActionLinkWidgetTest {
 
         verify(service, times(1)).getData(); // once, because a new page was loaded after action
         // redirect to index
-        assertThat(result.getDocument().getElementByTagName("title").innerText).isEqualTo("Index");
+        assertThat(result.getDocument().getElementByTagName("title").getInnerText()).isEqualTo("Index");
         assertThat(testContext.getSingleton(IndexPage.class).getInvocations()).isEqualTo(1); // model from next page has to be loaded;
     }
 
@@ -69,7 +69,7 @@ class ActionLinkWidgetTest {
         var result = testContext.openPage(WidgetPage.class);
         result.getDocument().getElementById("action-link4").click(); // "action-link3"is set by model variable "action3"
 
-        assertThat(result.getDocument().getElementById("greeting").innerText).isEqualTo("Huhu !");
+        assertThat(result.getDocument().getElementById("greeting").getInnerText()).isEqualTo("Huhu !");
 
     }
 }

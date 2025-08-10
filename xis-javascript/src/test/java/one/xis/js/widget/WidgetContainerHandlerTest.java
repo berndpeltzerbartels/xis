@@ -2,7 +2,8 @@ package one.xis.js.widget;
 
 import one.xis.js.Javascript;
 import one.xis.test.dom.Document;
-import one.xis.test.dom.Element;
+import one.xis.test.dom.DocumentImpl;
+import one.xis.test.dom.ElementImpl;
 import one.xis.test.dom.Window;
 import one.xis.test.js.Debug;
 import one.xis.test.js.JSUtil;
@@ -19,8 +20,10 @@ class WidgetContainerHandlerTest {
 
     @Test
     void refresh() throws ScriptException {
-        var document = Document.of("<html><body><xis:widget-container id=\"container\" default-widget=\"${x}\"/></body></html>");
+        var document = Document.of("<html><body><xis:widget-container id=\"container\" default-widget=\"${x}\"/><div id=\"messages\"></div></body></html>");
         var container = document.getElementById("container");
+        var nodeMock = new HashMap<>();
+        nodeMock.put("ELEMENT_NODE", 1);
 
         var script = Javascript.getScript(CLASSES, FUNCTIONS, TEST, TEST_APP_INSTANCE);
         script += IOUtils.getResourceAsString("one/xis/widget/WidgetContainerHandlerTestMocks.js");
@@ -33,18 +36,19 @@ class WidgetContainerHandlerTest {
         bindings.put("tag", container);
         bindings.put("widgets", new WidgetsMock());
         bindings.put("debug", new Debug());
-        bindings.put("window", new Window(document.location));
+        bindings.put("window", new Window(((DocumentImpl) document).getLocation()));
+        bindings.put("Node", nodeMock);
 
         JSUtil.execute(script, bindings);
 
-        assertThat(container.firstChild).isNotNull();
-        assertThat(container.firstChild).isInstanceOf(Element.class);
-        assertThat((((Element) container.firstChild).getAttribute("id"))).isEqualTo("widgetRoot");
+        assertThat(container.getFirstChild()).isNotNull();
+        assertThat(container.getFirstChild()).isInstanceOf(ElementImpl.class);
+        assertThat((((ElementImpl) container.getFirstChild()).getAttribute("id"))).isEqualTo("widgetRoot");
 
     }
 
     public static class WidgetInstance {
-        public Element root;
+        public ElementImpl root;
         public Object widgetState;
         public Object rootHandler;
     }
@@ -61,7 +65,7 @@ class WidgetContainerHandlerTest {
         @SuppressWarnings("unused")
         public WidgetInstance getWidgetInstance(String id) {
             var widget = new WidgetInstance();
-            widget.root = new Element("div");
+            widget.root = new ElementImpl("div");
             widget.root.setAttribute("id", "widgetRoot");
             widget.rootHandler = new RootHandler();
             return widget;

@@ -1,9 +1,7 @@
 package one.xis.js.page;
 
 import one.xis.js.Javascript;
-import one.xis.test.dom.Document;
-import one.xis.test.dom.Element;
-import one.xis.test.dom.Node;
+import one.xis.test.dom.*;
 import one.xis.test.js.JSUtil;
 import one.xis.utils.io.IOUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,14 +19,14 @@ import static one.xis.js.JavascriptSource.CLASSES;
 class PagesTest {
 
     private String javascript;
-    private Document document;
+    private DocumentImpl document;
 
     @BeforeEach
     void init() {
         javascript = Javascript.getScript(CLASSES);
         javascript += IOUtils.getResourceAsString("one/xis/page/PagesTestMocks.js");
         javascript += "var pages = new Pages(client);";
-        document = new Document("html");
+        document = new DocumentImpl("html");
     }
 
 
@@ -68,8 +66,8 @@ class PagesTest {
     }
 
     private Map<String, Object> createBindings() {
-        var title = document.createElement("title");
-        title.innerText = "Title";
+        var title = (ElementImpl) document.createElement("title");
+        title.setInnerText("Title");
 
         var style = document.createElement("style");
         var div = document.createElement("div");
@@ -85,14 +83,14 @@ class PagesTest {
         bindings.put("document", document);
         bindings.put("nodeListToArray", nodeListToArray);
         bindings.put("isElement", isElement);
-        Function<String, Element> htmlToElement = this::htmlToElement;
+        Function<String, ElementImpl> htmlToElement = this::htmlToElement;
         bindings.put("htmlToElement", htmlToElement);
         return bindings;
     }
 
-    public Element htmlToElement(String content) {
-        var doc = Document.of(content);
-        return doc.rootNode;
+    public ElementImpl htmlToElement(String content) {
+        var doc = (DocumentImpl) Document.of(content);
+        return doc.getDocumentElement();
     }
 
 

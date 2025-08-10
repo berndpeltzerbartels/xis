@@ -79,7 +79,6 @@ class HeadTagHandler extends TagHandler {
      */
     refreshTitle(data) {
         this.title.innerText = this.titleExpression.evaluate(data);
-        innerTextChanged(this.title);
     }
 
     /**
@@ -107,7 +106,6 @@ class HeadTagHandler extends TagHandler {
 
     clearTitle() {
         this.title.innerText = '';
-        innerTextChanged(this.title);
     }
 
 

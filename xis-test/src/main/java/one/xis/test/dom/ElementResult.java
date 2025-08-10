@@ -27,7 +27,7 @@ public class ElementResult {
     }
 
     public ElementResult assertNoChildElement(String name) {
-        assertTrue(element, element.getChildElementsByName(name).isEmpty(), "It must not have child-element <%s>", name);
+        assertTrue(element, element.getElementsByTagName(name).isEmpty(), "It must not have child-element <%s>", name);
         return this;
     }
 
@@ -47,13 +47,13 @@ public class ElementResult {
     }
 
     public ElementResult assertTextContent(String content) {
-        assertTrue(element, content.equals(element.getTextContent()), "Expected text-content to be '%s', bit it was '%s'", content, element.getTextContent());
+        assertTrue(element, content.equals(element.getInnerText()), "Expected text-content to be '%s', bit it was '%s'", content, element.getInnerText());
         return this;
     }
 
 
     public ElementResult assertTrimmedContent(String content) {
-        assertTrue(element, content.equals(StringUtils.trimNullSafe(element.getTextContent())), "Expected text-content to be '%s', bit it was '%s'", content, element.getTextContent());
+        assertTrue(element, content.equals(StringUtils.trimNullSafe(element.getInnerText())), "Expected text-content to be '%s', bit it was '%s'", content, element.getInnerText());
         return this;
     }
 

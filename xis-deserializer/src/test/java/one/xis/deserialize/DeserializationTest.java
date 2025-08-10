@@ -22,6 +22,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.format.FormatStyle;
 import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -152,9 +153,7 @@ class DeserializationTest {
         var json = "{\"intField\":123,\"testBeanField\":{\"intField\":\"abc\"}}";
         var ppObjects = new PostProcessingResults();
         mainDeserializer.deserialize(json, parameter, userContext, ppObjects);
-        assertThat(ppObjects.postProcessingResults(InvalidValueError.class)).hasSize(1);
-        var error = CollectionUtils.first(ppObjects.postProcessingResults(InvalidValueError.class));
-        assertThat(error.getDeserializationContext().getPath()).isEqualTo("/test/testBeanField/intField");
+        assertThat(ppObjects.postProcessingResults(InvalidValueError.class).stream().map(InvalidValueError::getDeserializationContext).map(DeserializationContext::getPath)).anyMatch("/test/testBeanField/intField"::equals);
     }
 
     @Test
@@ -163,7 +162,6 @@ class DeserializationTest {
         var json = "{\"intArrayField\":[0,1,\"a\",3]}";
         var ppObjects = new PostProcessingResults();
         var testBean = (TestBean) mainDeserializer.deserialize(json, parameter, userContext, ppObjects);
-        assertThat(ppObjects.postProcessingResults(InvalidValueError.class)).hasSize(2);
         assertThat(ppObjects.postProcessingResults(InvalidValueError.class).stream().map(InvalidValueError::getDeserializationContext).map(DeserializationContext::getPath)).anyMatch("/testObject/intArrayField[2]"::equals);
         assertThat(ppObjects.postProcessingResults(InvalidValueError.class).stream().map(InvalidValueError::getDeserializationContext).map(DeserializationContext::getPath)).anyMatch("/testObject/intArrayField"::equals);
         assertThat(testBean.getIntArrayField()).containsExactly(0, 1, 0, 3);
@@ -175,7 +173,6 @@ class DeserializationTest {
         var json = "{\"intCollectionField\":[\"a\",\"b\",3]}";
         var ppObjects = new PostProcessingResults();
         var testBean = (TestBean) mainDeserializer.deserialize(json, parameter, userContext, ppObjects);
-        assertThat(ppObjects.postProcessingResults(InvalidValueError.class)).hasSize(3);
         assertThat(ppObjects.postProcessingResults(InvalidValueError.class).stream().map(InvalidValueError::getDeserializationContext).map(DeserializationContext::getPath)).anyMatch("/testObject/intCollectionField[0]"::equals);
         assertThat(ppObjects.postProcessingResults(InvalidValueError.class).stream().map(InvalidValueError::getDeserializationContext).map(DeserializationContext::getPath)).anyMatch("/testObject/intCollectionField[1]"::equals);
         assertThat(ppObjects.postProcessingResults(InvalidValueError.class).stream().map(InvalidValueError::getDeserializationContext).map(DeserializationContext::getPath)).anyMatch("/testObject/intCollectionField"::equals);
@@ -242,6 +239,78 @@ class DeserializationTest {
         assertThat(testRecord.intField()).isEqualTo(123);
         assertThat(testRecord.stringField()).isEqualTo("test");
         assertThat(testRecord.localDateField()).isEqualTo(LocalDate.of(2021, 1, 1));
+    }
+
+    @Test
+    void deserializeBooleanField() throws NoSuchMethodException {
+        var parameter = getClass().getDeclaredMethod("testMethodBeanParameter", TestBean.class).getParameters()[0];
+        var json = "{\"booleanField\":true}";
+        var testBean = (TestBean) mainDeserializer.deserialize(json, parameter, userContext, new PostProcessingResults());
+        assertThat(testBean.isBooleanField()).isTrue();
+    }
+
+    @Test
+    void deserializeBooleanFieldFromString() throws NoSuchMethodException {
+        var parameter = getClass().getDeclaredMethod("testMethodBeanParameter", TestBean.class).getParameters()[0];
+        var json = "{\"booleanField\":\"true\"}";
+        var testBean = (TestBean) mainDeserializer.deserialize(json, parameter, userContext, new PostProcessingResults());
+        assertThat(testBean.isBooleanField()).isTrue();
+    }
+
+    @Test
+    void deserializeBooleanFieldFailed() throws NoSuchMethodException {
+        var parameter = getClass().getDeclaredMethod("testMethodBeanParameter", TestBean.class).getParameters()[0];
+        var json = "{\"booleanField\":\"abc\"}";
+        var ppObjects = new PostProcessingResults();
+        var testBean = (TestBean) mainDeserializer.deserialize(json, parameter, userContext, ppObjects);
+        assertThat(ppObjects.postProcessingResults(InvalidValueError.class).stream().map(InvalidValueError::getDeserializationContext).map(DeserializationContext::getPath)).anyMatch("/testObject/booleanField"::equals);
+        assertThat(testBean.isBooleanField()).isFalse();
+    }
+
+    @Test
+    void deserializeCharField() throws NoSuchMethodException {
+        var parameter = getClass().getDeclaredMethod("testMethodBeanParameter", TestBean.class).getParameters()[0];
+        var json = "{\"charField\":\"a\"}";
+        var testBean = (TestBean) mainDeserializer.deserialize(json, parameter, userContext, new PostProcessingResults());
+        assertThat(testBean.getCharField()).isEqualTo('a');
+    }
+
+    @Test
+    void deserializeCharFieldFailed_TooLong() throws NoSuchMethodException {
+        var parameter = getClass().getDeclaredMethod("testMethodBeanParameter", TestBean.class).getParameters()[0];
+        var json = "{\"charField\":\"abc\", \"intField\":123}";
+        var ppObjects = new PostProcessingResults();
+        var testBean = (TestBean) mainDeserializer.deserialize(json, parameter, userContext, ppObjects);
+        assertThat(ppObjects.postProcessingResults(InvalidValueError.class)).hasSize(1);
+        var error = CollectionUtils.first(ppObjects.postProcessingResults(InvalidValueError.class));
+        assertThat(error.getDeserializationContext().getPath()).isEqualTo("/testObject/charField");
+        assertThat(testBean.getCharField()).isEqualTo('\u0000');
+    }
+
+    @Test
+    void deserializeCharFieldFailed_WrongType() throws NoSuchMethodException {
+        var parameter = getClass().getDeclaredMethod("testMethodBeanParameter", TestBean.class).getParameters()[0];
+        var json = "{\"charField\":123, \"intField\":123}";
+        var ppObjects = new PostProcessingResults();
+        var testBean = (TestBean) mainDeserializer.deserialize(json, parameter, userContext, ppObjects);
+        assertThat(ppObjects.postProcessingResults(InvalidValueError.class)).hasSize(1);
+        var error = CollectionUtils.first(ppObjects.postProcessingResults(InvalidValueError.class));
+        assertThat(error.getDeserializationContext().getPath()).isEqualTo("/testObject/charField");
+        assertThat(testBean.getCharField()).isEqualTo('\u0000');
+    }
+
+    @Test
+    void emptyObject() throws NoSuchMethodException {
+        var json = "{}";
+        var parameter = getClass().getDeclaredMethod("testMethodBeanParameter", TestBean.class).getParameters()[0];
+        var ppObjects = new PostProcessingResults();
+        var testBean = (TestBean) mainDeserializer.deserialize(json, parameter, userContext, ppObjects);
+        assertThat(testBean).isNotNull();
+        assertThat(testBean.getIntField()).isEqualTo(0);
+        assertThat(testBean.getStringField()).isNull();
+        assertThat(testBean.getLocalDateField()).isNull();
+        assertThat(testBean.isBooleanField()).isFalse();
+        assertThat(testBean.getCharField()).isEqualTo('\u0000');
     }
 
 
@@ -397,6 +466,8 @@ class DeserializationTest {
         private int intField;
         private String stringField;
         private LocalDate localDateField;
+        private boolean booleanField;
+        private char charField;
 
         @AllElementsMandatory
         private String[] stringArrayField;
@@ -512,5 +583,105 @@ class DeserializationTest {
 
         @PostProcessorTestAnnotation
         LocalDate localDate;
+    }
+
+
+    @Nested
+    class CollectionFieldTest {
+
+        @Data
+        static class ListModel {
+            private List<Integer> intList;
+        }
+
+        @Test
+        void deserializeIntegerList_empty() throws NoSuchMethodException {
+            var parameter = getClass().getDeclaredMethod("testMethodListModel", ListModel.class).getParameters()[0];
+            var json = "{\"intList\":[]}";
+            var model = (ListModel) mainDeserializer.deserialize(json, parameter, userContext, new PostProcessingResults());
+            assertThat(model.getIntList()).isEmpty();
+        }
+
+        @Test
+        void deserializeIntegerList_oneElement() throws NoSuchMethodException {
+            var parameter = getClass().getDeclaredMethod("testMethodListModel", ListModel.class).getParameters()[0];
+            var json = "{\"intList\":[42]}";
+            var model = (ListModel) mainDeserializer.deserialize(json, parameter, userContext, new PostProcessingResults());
+            assertThat(model.getIntList()).containsExactly(42);
+        }
+
+        @Test
+        void deserializeIntegerList_twoElements() throws NoSuchMethodException {
+            var parameter = getClass().getDeclaredMethod("testMethodListModel", ListModel.class).getParameters()[0];
+            var json = "{\"intList\":[1,2]}";
+            var model = (ListModel) mainDeserializer.deserialize(json, parameter, userContext, new PostProcessingResults());
+            assertThat(model.getIntList()).containsExactly(1, 2);
+        }
+
+        @Test
+        void deserializeIntegerList_fieldNotPresent() throws NoSuchMethodException {
+            var parameter = getClass().getDeclaredMethod("testMethodListModel", ListModel.class).getParameters()[0];
+            var json = "{}";
+            var model = (ListModel) mainDeserializer.deserialize(json, parameter, userContext, new PostProcessingResults());
+            assertThat(model.getIntList()).isNotNull();
+        }
+
+        @SuppressWarnings("unused")
+        void testMethodListModel(@FormData("model") ListModel model) {
+        }
+    }
+
+
+    @Nested
+    class ArrayFieldTest {
+
+        @Data
+        static class ListModel {
+            private ItemModel[] items;
+        }
+
+        @Data
+        static class ItemModel {
+            private Integer item;
+        }
+
+        @Test
+        void deserializeIntegerList_empty() throws NoSuchMethodException {
+            var parameter = getClass().getDeclaredMethod("testMethodListModel", ListModel.class).getParameters()[0];
+            var json = "{\"items\":[]}";
+            var model = (ListModel) mainDeserializer.deserialize(json, parameter, userContext, new PostProcessingResults());
+            assertThat(model.getItems()).isEmpty();
+        }
+
+        @Test
+        void deserializeIntegerList_oneElement() throws NoSuchMethodException {
+            var parameter = getClass().getDeclaredMethod("testMethodListModel", ListModel.class).getParameters()[0];
+            var json = "{\"items\":[{\"item\":42}]}";
+            var model = (ListModel) mainDeserializer.deserialize(json, parameter, userContext, new PostProcessingResults());
+            assertThat(model.getItems()).singleElement().extracting(ItemModel::getItem).isEqualTo(42);
+        }
+
+        @Test
+        void deserializeIntegerList_twoElements() throws NoSuchMethodException {
+            var parameter = getClass().getDeclaredMethod("testMethodListModel", ListModel.class).getParameters()[0];
+            var json = "{\"items\":[{\"item\":1},{\"item\":2}]}";
+            var model = (ListModel) mainDeserializer.deserialize(json, parameter, userContext, new PostProcessingResults());
+            assertThat(model.getItems())
+                    .hasSize(2)
+                    .extracting(ItemModel::getItem)
+                    .containsExactly(1, 2);
+        }
+
+        @Test
+        void deserializeIntegerList_fieldNotPresent() throws NoSuchMethodException {
+            var parameter = getClass().getDeclaredMethod("testMethodListModel", ListModel.class).getParameters()[0];
+            var json = "{}";
+            var model = (ListModel) mainDeserializer.deserialize(json, parameter, userContext, new PostProcessingResults());
+            assertThat(model.getItems()).isNotNull();
+        }
+
+        @SuppressWarnings("unused")
+        void testMethodListModel(@FormData("model") ListModel model) {
+        }
     }
 }

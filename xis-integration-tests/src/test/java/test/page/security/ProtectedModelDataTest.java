@@ -32,7 +32,7 @@ public class ProtectedModelDataTest {
 
             link.click();
 
-            assertThat(document.getElementByTagName("title").innerText).isEqualTo("Login");
+            assertThat(document.getElementByTagName("title").getInnerText()).isEqualTo("Login");
         }
     }
 
@@ -63,7 +63,7 @@ public class ProtectedModelDataTest {
 
             link.click();
 
-            assertThat(document.getElementByTagName("title").innerText).isEqualTo("Login");
+            assertThat(document.getElementByTagName("title").getInnerText()).isEqualTo("Login");
         }
     }
 
@@ -91,19 +91,19 @@ public class ProtectedModelDataTest {
             var document = result.getDocument();
             var link = document.getElementById("link");
             System.err.println(document.asString());
-            assertThat(document.getElementByTagName("title").innerText).isEqualTo("Page 1");
+            assertThat(document.getElementByTagName("title").getInnerText()).isEqualTo("Page 1");
 
 
             link.click();
 
-            assertThat(document.getElementByTagName("title").innerText).isEqualTo("Login");
+            assertThat(document.getElementByTagName("title").getInnerText()).isEqualTo("Login");
             assertThat(document.getElementById("redirectUri").getAttribute("value")).isNotEmpty();
 
             document.getInputElementById("username").setValue("user1");
             document.getInputElementById("password").setValue("passwd");
             document.getElementByTagName("button").click();
 
-            assertThat(document.getElementByTagName("title").innerText).isEqualTo("Page 2");
+            assertThat(document.getElementByTagName("title").getInnerText()).isEqualTo("Page 2");
 
 
         }

@@ -16,14 +16,14 @@ class IntegrationTestContextTest {
                 .build();
 
         var result = context.openPage(TitlePage.class);
-        assertThat(result.getDocument().getElementByTagName("title").innerText).isEqualTo("Hello ! I am the title");
+        assertThat(result.getDocument().getElementByTagName("title").getInnerText()).isEqualTo("Hello ! I am the title");
 
         context = IntegrationTestContext.builder()
                 .withSingleton(IndexPage.class)
                 .build();
         result = context.openPage(IndexPage.class);
 
-        assertThat(result.getDocument().getElementByTagName("title").innerText).isEqualTo("Index");
+        assertThat(result.getDocument().getElementByTagName("title").getInnerText()).isEqualTo("Index");
 
 
     }

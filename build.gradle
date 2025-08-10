@@ -11,7 +11,7 @@ ext {
     // Zentrale Abhängigkeitsversionen
     libraryVersions = [
             junit            : "5.8.2",
-            assertj          : "3.16.1",
+            assertj          : "3.26.0",
             lombok           : "1.18.22",
             reflections      : "0.10.2",
             guava            : "31.1-jre",

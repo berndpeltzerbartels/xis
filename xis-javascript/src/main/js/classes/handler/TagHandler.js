@@ -86,6 +86,9 @@ class TagHandler {
                 node.parentNode.removeChild(node);
             }
         }
+        for (var handler of this.descendantHandlers) {
+           handler.parentHandler = null;
+        }
         this.descendantHandlers = [];
     }
 

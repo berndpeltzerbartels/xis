@@ -30,7 +30,7 @@ class ParameterWidgetTest {
     void urlParameter() {
         var result = testContext.openPage("/3/parameterWidgetPage.html?b=8");
 
-        assertThat(result.getDocument().getElementById("urlParameter").innerText).isEqualTo("8");
+        assertThat(result.getDocument().getElementById("urlParameter").getInnerText()).isEqualTo("8");
 
     }
 
@@ -40,7 +40,7 @@ class ParameterWidgetTest {
     void pathVariable() {
         var result = testContext.openPage("/3/parameterWidgetPage.html");
 
-        assertThat(result.getDocument().getElementById("pathVariable").innerText).isEqualTo("3");
+        assertThat(result.getDocument().getElementById("pathVariable").getInnerText()).isEqualTo("3");
     }
 
     @Test

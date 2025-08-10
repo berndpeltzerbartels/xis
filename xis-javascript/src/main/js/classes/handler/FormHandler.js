@@ -28,17 +28,17 @@ class FormHandler extends TagHandler {
         });
     }
 
-    formData() {
-        var data = {}
-        for (var key of Object.keys(this.formElementHandlers)) {
-            if (!data[key]) {
-                data[key] = [];
-            }
-            var arr = data[key];
-            arr.push(this.formElementHandlers[key].getValue());
-        }
-        return data;
+  formData() {
+    const data = {};
+    for (const key of Object.keys(this.formElementHandlers)) {
+        const handlers = this.formElementHandlers[key];
+        // Sammle alle Werte der Handler für diesen Key
+        const values = handlers.map(h => h.getValue()).filter(v => v !== undefined && v !== null);
+        // Für Checkboxen: Array, für andere Felder: Einzelwert
+        data[key] = (values.length > 1) ? values : (values[0] !== undefined ? values[0] : null);
     }
+    return data;
+}
 
     widgetId() {
         const handler = this.findParentWidgetContainerHandler();
@@ -62,12 +62,11 @@ class FormHandler extends TagHandler {
         this.binding = this.bindingExpression.evaluate(data);
         var formBindingParameters = urlParameters(this.binding);
         var formBindingKey = stripQuery(this.binding);
-        var formHandler = this;
         this.formElementHandlers = {};
         data.validationPath = '/' + formBindingKey;
         this.refreshDescendantHandlers(data);
         this.client.loadFormData(app.pageController.resolvedURL, this.widgetId(), formBindingKey, formBindingParameters)
-            .then(response => formHandler.refreshFormData(formHandler.subData(response, formBindingKey)));
+            .then(response => this.refreshFormData(this.subData(response, formBindingKey)));
     }
 
     /**
@@ -86,8 +85,11 @@ class FormHandler extends TagHandler {
      * @param {String} binding
      */
     onElementHandlerRefreshed(handler, binding) {
-        this.formElementHandlers[binding] = handler;
+    if (!this.formElementHandlers[binding]) {
+        this.formElementHandlers[binding] = [];
     }
+    this.formElementHandlers[binding].push(handler);
+}
 
     /**
      * @private

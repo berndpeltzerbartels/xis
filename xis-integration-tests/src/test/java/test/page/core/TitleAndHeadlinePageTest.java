@@ -20,7 +20,7 @@ class TitleAndHeadlinePageTest {
     @Test
     void test() {
         var result = testContext.openPage("/titleAndHeadline.html");
-        assertThat(result.getDocument().getElementByTagName("title").innerText).isEqualTo("title");
-        assertThat(result.getDocument().getElementByTagName("h1").innerText).isEqualTo("headline");
+        assertThat(result.getDocument().getElementByTagName("title").getInnerText()).isEqualTo("title");
+        assertThat(result.getDocument().getElementByTagName("h1").getInnerText()).isEqualTo("headline");
     }
 }

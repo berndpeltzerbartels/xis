@@ -43,21 +43,28 @@ class DomNormalizer {
      * @private
      * @param {Element} element 
      */
-    doNormalize(element) {
+   doNormalize(element) {
+        var normalizedElement = element;
         if (this.isFrameworkLink(element) || this.isFrameworkActionLink(element)) {
-            this.replaceFrameworkLinkByHtml(element);
+            normalizedElement = this.replaceFrameworkLinkByHtml(element);
         } else if (this.isFrameworkForm(element)) {
-            this.replaceFrameworkFormTagByHtml(element);
+            normalizedElement = this.replaceFrameworkFormTagByHtml(element);
         } else if (this.isFrameworkInput(element)) {
-            this.replaceFrameworkInputByHtml(element);
+            normalizedElement = this.replaceFrameworkInputByHtml(element);
         } else if (this.isFrameworkSubmit(element)) {
-            this.replaceFrameworkSubmitByHtml(element);
+            normalizedElement = this.replaceFrameworkSubmitByHtml(element);
         } else if (this.isFrameworkButton(element)) {
-            this.replaceFrameworkButtonByHtml(element);
+            normalizedElement = this.replaceFrameworkButtonByHtml(element);
+        } else if (this.isFrameworkSelect(element)) {
+            normalizedElement = this.replaceFrameworkSelectByHtml(element);
+        } else if (this.isFrameworkCheckbox(element)) {
+            normalizedElement = this.replaceFrameworkCheckboxByHtml(element);
+        } else if (this.isFrameworkRadio(element)) {
+            normalizedElement = this.replaceFrameworkRadioByHtml(element);
         } else {
             this.normalizeHtmlElement(element);
         }
-        for (var child of nodeListToArray(element.childNodes)) {
+        for (var child of nodeListToArray(normalizedElement.childNodes)) {
             if (isElement(child)) {
                 this.doNormalize(child);
             }
@@ -72,24 +79,30 @@ class DomNormalizer {
     */
     normalizeHtmlElement(element) {
         if (element.getAttribute('xis:repeat')) {
-            return this.surroundWithForeachTag(element);
+            this.surroundWithForeachTag(element);
+            element.removeAttribute('xis:repeat');
         }
         if (element.getAttribute('xis:foreach')) {
             this.embedForeachTag(element);
+            element.removeAttribute('xis:foreach');
         }
         if (element.getAttribute('xis:widget-container')) {
             this.initializeWidgetContainerByAttribute(element);
+            element.removeAttribute('xis:widget-container');
         }
         if (element.getAttribute('xis:message-for')) {
             this.replaceMessageAttributeByChildMessageElement(element);
+            element.removeAttribute('xis:message-for');
         }
         if (element.getAttribute('xis:global-messages')) {
             this.replaceGlobalMessagesAttributeByChildGlobalMessagesElement(element);
+            element.removeAttribute('xis:global-messages');
         }
-
         if (element.getAttribute('xis:if')) {
             this.surroundWithIfTag(element);
+            element.removeAttribute('xis:if');
         }
+        return element;
 
     }
 
@@ -149,6 +162,65 @@ class DomNormalizer {
     }
 
     /**
+    * @private 
+    * @param {Element} element
+    * @returns {boolean}
+    */
+    isFrameworkSelect(element) {
+        return element.localName === 'xis:select';
+    }
+
+      /**
+     * @private
+     * @param {Element} element
+     * @returns {boolean}
+     */
+    isFrameworkCheckbox(element) {
+        return element.localName === 'xis:checkbox';
+    }
+
+    /**
+     * @private
+     * @param {Element} element
+     * @returns {boolean}
+     */
+    isFrameworkRadio(element) {
+        return element.localName === 'xis:radio';
+    }
+
+    /**
+     * @private
+     * @param {Element} frameworkCheckbox
+     * @returns {Element}
+     */
+    replaceFrameworkCheckboxByHtml(frameworkCheckbox) {
+        return this.replaceFrameworkElementByHtml(frameworkCheckbox, 'input', { type: 'checkbox' });
+    }
+
+    /**
+     * @private
+     * @param {Element} frameworkRadio
+     * @returns {Element}
+     */
+    replaceFrameworkRadioByHtml(frameworkRadio) {
+        return this.replaceFrameworkElementByHtml(frameworkRadio, 'input', { type: 'radio' });
+    }
+
+
+
+    /**
+     * Replaces a framework element by a valid HTML element.
+     * Optionally sets additional attributes (e.g. type).
+     * @param {Element} frameworkElement 
+     * @param {string} elementName 
+     * @param {Object} [additionalAttributes]
+     * @returns {Element}
+     */
+    replaceFrameworkSelectByHtml(frameworkSelect) {
+        return this.replaceFrameworkElementByHtml(frameworkSelect, 'select');
+    }
+
+    /**
     * @private
     * @param {string} varName 
     * @param {string} array key for array to iterate
@@ -165,12 +237,14 @@ class DomNormalizer {
         message.setAttribute('message-for', element.getAttribute('xis:message-for'));
         element.removeAttribute('xis:message');
         this.domAccessor.insertChild(element, message);
+        return message;
     }
 
     replaceGlobalMessagesAttributeByChildGlobalMessagesElement(element) {
         var globalMessages = createElement('xis:global-messages');
         element.removeAttribute('xis:global-messages');
         this.domAccessor.insertChild(element, globalMessages);
+        return globalMessages;
     }
 
     replaceFrameworkLinkByHtml(frameworkLink) {
@@ -196,13 +270,16 @@ class DomNormalizer {
         return this.replaceFrameworkElementByHtml(frameworkButton, 'button');
     }
 
-    /**
-     * 
+        /**
+     * Replaces a framework element by a valid HTML element.
+     * Optionally sets additional attributes (e.g. type).
      * @param {Element} frameworkElement 
-     * @returns {Element} (Anchor)
+     * @param {string} elementName 
+     * @param {Object} [additionalAttributes]
+     * @returns {Element}
      */
-    replaceFrameworkElementByHtml(frameworkElement, elementName) {
-        var anchor = document.createElement(elementName);
+    replaceFrameworkElementByHtml(frameworkElement, elementName, additionalAttributes = {}) {
+        var element = document.createElement(elementName);
         for (var attrName of frameworkElement.getAttributeNames()) {
             var attrValue = frameworkElement.getAttribute(attrName);
             switch (attrName) {
@@ -213,16 +290,20 @@ class DomNormalizer {
                 case 'repeat':
                 case 'target-container':
                 case 'parameters':
-                case 'action': anchor.setAttribute('xis:' + attrName, attrValue);
-                default: anchor.setAttribute(attrName, attrValue);
+                case 'action': element.setAttribute('xis:' + attrName, attrValue);
+                default: element.setAttribute(attrName, attrValue);
             }
         }
-        this.domAccessor.replaceElement(frameworkElement, anchor);
+        // Set additional attributes (e.g. type for checkbox/radio)
+        for (const [key, value] of Object.entries(additionalAttributes)) {
+            element.setAttribute(key, value);
+        }
+        this.domAccessor.replaceElement(frameworkElement, element);
         for (var child of nodeListToArray(frameworkElement.childNodes)) {
             frameworkElement.removeChild(child);
-            anchor.appendChild(child);
+            element.appendChild(child);
         }
-        return anchor;
+        return element;
     }
 
     /**
@@ -254,7 +335,7 @@ class DomNormalizer {
         var foreach = this.createForeach(arr[0], arr[1]);
         this.domAccessor.insertChild(element, foreach);
         element.removeAttribute('xis:foreach');// Otherwise endless recursion
-        return element;
+        return foreach;
     }
 
     /**

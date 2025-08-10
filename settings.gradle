@@ -25,7 +25,6 @@ pluginManagement {
     }
 }
 
-
 rootProject.name = 'xis'
 include 'xis-controller-api'
 include 'xis-validation'

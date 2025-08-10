@@ -211,13 +211,6 @@ function cloneElement(element) {
     for (var name of element.getAttributeNames()) {
         clone.setAttribute(name, element.getAttribute(name));
     }
-    // Attributes with variables are getting removed and treated
-    // with a handler, instead
-    if (element._removedAttributes) {
-        for (var name of Object.keys(element._removedAttributes)) {
-            clone.setAttribute(name, element._removedAttributes[name]);
-        }
-    }
     for (let index = 0; index < element.childNodes.length; index++) {
         const child = element.childNodes.item(index);
         clone.appendChild(cloneNode(child));
@@ -231,7 +224,6 @@ function cloneTextNode(node) {
 }
 
 function handleError(error) {
-    debugger;
     if (error && error.type === 'redirect') {
         return {redirected: true};
     }
@@ -239,3 +231,6 @@ function handleError(error) {
     throw error; // Fehler weiterwerfen, damit er nicht verschluckt wird
 }
 
+function isSet(value) {
+    return value !== undefined && value !== null;
+}

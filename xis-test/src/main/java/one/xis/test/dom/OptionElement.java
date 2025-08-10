@@ -1,7 +1,9 @@
 package one.xis.test.dom;
 
-public class OptionElement extends Element {
-    public OptionElement() {
-        super("option");
-    }
+public interface OptionElement extends Element {
+    void select();
+
+    void deselect();
+
+    boolean isSelected();
 }

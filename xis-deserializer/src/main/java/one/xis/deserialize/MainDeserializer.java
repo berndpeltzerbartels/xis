@@ -55,6 +55,10 @@ public class MainDeserializer {
         Optional<?> value;
         try {
             value = getDeserializer(reader, target).deserialize(reader, path, target, userContext, this, postProcessingResults);
+            if (value.isEmpty() && target.isAnnotationPresent(Mandatory.class)) {
+                var context = new DeserializationContext(path, target, Mandatory.class, userContext);
+                postProcessingResults.add(new InvalidValueError(context, MISSING_MANDATORY_PROPERTY.getMessageKey(), MISSING_MANDATORY_PROPERTY.getGlobalMessageKey(), null));
+            }
             value.ifPresent(o -> deserializationPostProcessing.postProcess(path, o, target, userContext, postProcessingResults));
             return value;
         } catch (DeserializationException e) {

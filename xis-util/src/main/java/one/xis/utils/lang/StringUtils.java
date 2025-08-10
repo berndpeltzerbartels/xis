@@ -29,6 +29,21 @@ public class StringUtils {
         return Arrays.stream(sequence.toString().split("[\\n\\r]+"));
     }
 
+    public String firstToUpperCase(String s) {
+        if (s == null || s.isEmpty()) {
+            return s;
+        }
+        return Character.toUpperCase(s.charAt(0)) + s.substring(1);
+    }
+
+    public String firstToLowerCase(String s) {
+        if (s == null || s.isEmpty()) {
+            return s;
+        }
+        return Character.toLowerCase(s.charAt(0)) + s.substring(1);
+    }
+
+
     public boolean isSeparatorsOnly(String s) {
         return s.matches("[\n\r ]+");
     }

@@ -32,7 +32,7 @@ class ClientStateTest {
         assertThat(result.getSessionStorage().getItem("data")).contains("\"id\":200");
         assertThat(result.getSessionStorage().getItem("data")).contains("\"value\":\"test2\"");
 
-        assertThat(result.getDocument().getElementById("clientStateValue").innerText).isEqualTo("200");
+        assertThat(result.getDocument().getElementById("clientStateValue").getInnerText()).isEqualTo("200");
 
         result.getDocument().getElementById("save-button").click();
         assertThat(page.getInvokedMethods()).containsExactly("data", "linkAction", "data", "formAction", "data");
@@ -42,7 +42,7 @@ class ClientStateTest {
         assertThat(result.getSessionStorage().getItem("data")).contains("\"value\":\"test3\"");
 
 
-        assertThat(result.getDocument().getElementById("clientStateValue").innerText).isEqualTo("300");
+        assertThat(result.getDocument().getElementById("clientStateValue").getInnerText()).isEqualTo("300");
     }
 
 }

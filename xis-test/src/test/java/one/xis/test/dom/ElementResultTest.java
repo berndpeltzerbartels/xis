@@ -12,19 +12,19 @@ class ElementResultTest {
 
         @Test
         void assertChildElements() {
-            var result = new ElementResult(Document.of("<a><b/></a>").rootNode);
+            var result = new ElementResult(Document.of("<a><b/></a>").getDocumentElement());
             assertThrows(DomAssertionException.class, () -> result.assertChildElements("b", "c"));
         }
 
         @Test
         void assertNoChildElement() {
-            var result = new ElementResult(Document.of("<a><b/></a>").rootNode);
+            var result = new ElementResult(Document.of("<a><b/></a>").getDocumentElement());
             assertThrows(DomAssertionException.class, () -> result.assertNoChildElement("b"));
         }
 
         @Test
         void assertAttribute() {
-            var element = new Element("a");
+            var element = new ElementImpl("a");
             var result = new ElementResult(element);
 
             assertThrows(DomAssertionException.class, () -> result.assertAttribute("b"));
@@ -34,19 +34,19 @@ class ElementResultTest {
 
         @Test
         void assertTextContent() {
-            var result = new ElementResult(Document.of("<a>x</a>").rootNode);
+            var result = new ElementResult(Document.of("<a>x</a>").getDocumentElement());
             assertThrows(DomAssertionException.class, () -> result.assertTextContent("y"));
         }
 
         @Test
         void assertTrimmedContent() {
-            var result = new ElementResult(Document.of("<a> x </a>").rootNode);
+            var result = new ElementResult(Document.of("<a> x </a>").getDocumentElement());
             assertThrows(DomAssertionException.class, () -> result.assertTrimmedContent("y"));
         }
 
         @Test
         void assertNoChildElements() {
-            var result = new ElementResult(Document.of("<a><b/></a>").rootNode);
+            var result = new ElementResult(Document.of("<a><b/></a>").getDocumentElement());
             assertThrows(DomAssertionException.class, result::assertNoChildElements);
         }
 
@@ -63,19 +63,19 @@ class ElementResultTest {
 
         @Test
         void assertChildElements() {
-            var result = new ElementResult(Document.of("<a><b/><c/></a>").rootNode);
+            var result = new ElementResult(Document.of("<a><b/><c/></a>").getDocumentElement());
             result.assertChildElements("b", "c");
         }
 
         @Test
         void assertNoChildElement() {
-            var result = new ElementResult(Document.of("<a></a>").rootNode);
+            var result = new ElementResult(Document.of("<a></a>").getDocumentElement());
             result.assertNoChildElement("b");
         }
 
         @Test
         void assertAttribute() {
-            var element = new Element("a");
+            var element = new ElementImpl("a");
             element.setAttribute("b", "c");
             var result = new ElementResult(element);
             result.assertAttribute("b");
@@ -84,19 +84,19 @@ class ElementResultTest {
 
         @Test
         void assertTextContent() {
-            var result = new ElementResult(Document.of("<a>x</a>").rootNode);
+            var result = new ElementResult(Document.of("<a>x</a>").getDocumentElement());
             result.assertTextContent("x");
         }
 
         @Test
         void assertTrimmedContent() {
-            var result = new ElementResult(Document.of("<a> x </a>").rootNode);
+            var result = new ElementResult(Document.of("<a> x </a>").getDocumentElement());
             result.assertTrimmedContent("x");
         }
 
         @Test
         void assertNoChildElements() {
-            var result = new ElementResult(Document.of("<a></a>").rootNode);
+            var result = new ElementResult(Document.of("<a></a>").getDocumentElement());
             result.assertNoChildElements();
         }
 

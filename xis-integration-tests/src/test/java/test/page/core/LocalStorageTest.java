@@ -32,6 +32,6 @@ class LocalStorageTest {
         assertThat(result.getLocalStorage().getItem("data")).contains("\"id\":600");
         assertThat(result.getLocalStorage().getItem("data")).contains("\"value\":\"updatedLocalTest\"");
 
-        assertThat(result.getDocument().getElementById("localStorageValue").innerText).isEqualTo("600");
+        assertThat(result.getDocument().getElementById("localStorageValue").getInnerText()).isEqualTo("600");
     }
 }

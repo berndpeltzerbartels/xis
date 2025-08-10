@@ -1,7 +1,7 @@
 package test.page.core;
 
 import one.xis.context.IntegrationTestContext;
-import one.xis.test.dom.Element;
+import one.xis.test.dom.ElementImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -25,8 +25,8 @@ class ClientStateListTest {
 
         // Verify that the list is rendered correctly
         var li = result.getDocument().getElementsByTagName("li").stream()
-                .map(Element.class::cast)
-                .map(Element::getTextContent)
+                .map(ElementImpl.class::cast)
+                .map(ElementImpl::getInnerText)
                 .toList();
         assertThat(li).hasSize(5);
         assertThat(li)

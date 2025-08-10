@@ -35,7 +35,7 @@ dependencies {
     implementation project(':xis-spring')
     implementation project(':xis-test')
     implementation project(':xis-authentication')
-    implementation project(':xis-bootstrap')
+    // implementation project(':xis-bootstrap')
 
     // Annotation processors
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"

@@ -7,10 +7,3 @@ function reset() {
     document.cookies = '';
 }
 
-function innerTextChanged(element) {
-    element.innerTextChanged();
-}
-
-function nodeValueChanged(node) {
-    node.nodeValueChanged();
-}

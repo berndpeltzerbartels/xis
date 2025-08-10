@@ -1,5 +1,6 @@
 package one.xis.utils.lang;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -15,6 +16,112 @@ class MethodUtilsTest {
 
         }
     }
+
+
+    @Nested
+    @SuppressWarnings("unused")
+    class FindGettersByFieldName {
+
+        class TestClass1 {
+            String getName() {
+                return null;
+            }
+        }
+
+        class TestClass2 extends TestClass1 {
+            String getName() {
+                return null;
+            }
+
+            int getAge() {
+                return 0;
+            }
+
+            boolean isActive() {
+                return true;
+            }
+        }
+
+
+        @Test
+        void findGettersByFieldName() {
+            var result = MethodUtils.findGettersByFieldName(FindGettersByFieldName.TestClass2.class);
+            
+            assertThat(result).containsKey("name");
+            assertThat(result).containsKey("age");
+            assertThat(result.get("name").getDeclaringClass()).isEqualTo(FindGettersByFieldName.TestClass2.class);
+            assertThat(result.get("age").getDeclaringClass()).isEqualTo(FindGettersByFieldName.TestClass2.class);
+
+            // Assert the overridden method is the one from the current class
+        }
+
+        @Test
+        void findGettersByFieldNameWithBooleanGetter() {
+            var result = MethodUtils.findGettersByFieldName(FindGettersByFieldName.TestClass2.class);
+
+            assertThat(result).containsKey("active");
+            assertThat(result.get("active")).isNotNull();
+            assertThat(result.get("active").getDeclaringClass()).isEqualTo(FindGettersByFieldName.TestClass2.class);
+        }
+
+    }
+
+    /**
+     * Tests the {@link MethodUtils#findSettersByFieldName(Class)} method.
+     * It should return all methods of the class, including inherited ones
+     * and should allow overriding methods and let the current class replace
+     * methods of the base class.
+     */
+
+    @Test
+    void findSettersByFieldName() {
+        class TestClass1 {
+            void setName(String name) {
+            }
+        }
+
+        class TestClass2 extends TestClass1 {
+            void setName(String name) {
+            }
+
+            void setAge(int age) {
+            }
+        }
+
+        var result = MethodUtils.findSettersByFieldName(TestClass2.class);
+        assertThat(result).hasSize(2);
+        assertThat(result).containsKey("name");
+        assertThat(result).containsKey("age");
+        // Assert the overridden method is the one from the current class
+        assertThat(result.get("name").getDeclaringClass()).isEqualTo(TestClass2.class);
+    }
+
+    @Test
+    void findGettersByFieldName() {
+        class TestClass1 {
+            String getName() {
+                return null;
+            }
+        }
+
+        class TestClass2 extends TestClass1 {
+            String getName() {
+                return null;
+            }
+
+            int getAge() {
+                return 0;
+            }
+        }
+
+        var result = MethodUtils.findGettersByFieldName(TestClass2.class);
+        assertThat(result).hasSize(2);
+        assertThat(result).containsKey("name");
+        assertThat(result).containsKey("age");
+        // Assert the overridden method is the one from the current class
+        assertThat(result.get("name").getDeclaringClass()).isEqualTo(TestClass2.class);
+    }
+
 
     @Test
     void getGenericTypeParameter() throws NoSuchMethodException {

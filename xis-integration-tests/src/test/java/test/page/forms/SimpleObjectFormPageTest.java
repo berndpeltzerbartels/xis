@@ -53,14 +53,14 @@ class SimpleObjectFormPageTest {
             var inputField2 = document.getInputElementById("field2");
 
             // Check controller values
-            assertThat(titleElement.innerText).isEqualTo("Form");
+            assertThat(titleElement.getInnerText()).isEqualTo("Form");
 
-            assertThat(inputField1.value).isEqualTo("p1");
-            assertThat(inputField2.value).isEqualTo("p2");
+            assertThat(inputField1.getValue()).isEqualTo("p1");
+            assertThat(inputField2.getValue()).isEqualTo("p2");
 
             // Edit field values
-            inputField1.value = "v1";
-            inputField2.value = "v2";
+            inputField1.setValue("v1");
+            inputField2.setValue("v2");
             document.getElementById("save").click();
             assertThat(simpleObject.getProperty1()).isEqualTo("v1");
             assertThat(simpleObject.getProperty2()).isEqualTo("v2");
@@ -68,13 +68,13 @@ class SimpleObjectFormPageTest {
             verify(service).save(any());
 
             // After saving object, the details page should be displayed
-            assertThat(titleElement.innerText).isEqualTo("Details");
+            assertThat(titleElement.getInnerText()).isEqualTo("Details");
 
             // The details page should display the saved values
             var p1 = document.getElementById("v1");
             var p2 = document.getElementById("v2");
-            assertThat(p1.innerText).isEqualTo("v1");
-            assertThat(p2.innerText).isEqualTo("v2");
+            assertThat(p1.getInnerText()).isEqualTo("v1");
+            assertThat(p2.getInnerText()).isEqualTo("v2");
         }
 
     }

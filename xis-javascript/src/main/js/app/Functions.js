@@ -14,11 +14,3 @@ function htmlToElement(html) {
 
 
 
-function innerTextChanged(element) {
-    // Not needed here, but in testcode
-}
-
-function nodeValueChanged(node) {
-    // Not needed here, but in testcode
-}
-

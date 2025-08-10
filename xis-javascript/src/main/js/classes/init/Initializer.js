@@ -15,7 +15,7 @@ class Initializer {
      * @param {TagHandlers} tagHandlers
      */
     constructor(domAccessor, client, widgets, widgetContainers, tagHandlers) {
-        this.tagHandlerDecorator = new NodeDecorator(domAccessor, client, widgets, widgetContainers, tagHandlers);
+        this.handlerBuilder = new HandlerBuilder(domAccessor, client, widgets, widgetContainers, tagHandlers);
         this.domAccessor = domAccessor;
     }
 
@@ -29,6 +29,6 @@ class Initializer {
         if (isElement(node)) {
             new DomNormalizer(node, this.domAccessor).normalize();
         }
-        return this.tagHandlerDecorator.decorate(node, parentHandler);
+        return this.handlerBuilder.create(node, parentHandler);
     }
 }

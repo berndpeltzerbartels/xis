@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import one.xis.UserContext;
 import one.xis.context.XISComponent;
 import one.xis.utils.lang.ClassUtils;
+import one.xis.utils.lang.CollectionUtils;
 import one.xis.utils.lang.FieldUtil;
 import one.xis.validation.Mandatory;
 
@@ -77,7 +78,7 @@ class ObjectDeserializer implements JsonDeserializer<Object> {
             var context = new DeserializationContext(path(path, field), field, Mandatory.class, userContext);
             results.add(new InvalidValueError(context, MISSING_MANDATORY_PROPERTY.getMessageKey(), MISSING_MANDATORY_PROPERTY.getGlobalMessageKey(), o));
         });
-        return Optional.of(o);
+        return Optional.of(fixEmptyArrays(o));
     }
 
 
@@ -126,7 +127,7 @@ class ObjectDeserializer implements JsonDeserializer<Object> {
 
     private Set<Field> getMandatoryFields(Class<?> objectType) {
         return FieldUtil.getAllFields(objectType).stream()
-                .filter(f -> f.isAnnotationPresent(Mandatory.class))
+                .filter(f -> f.isAnnotationPresent(Mandatory.class) || (f.getType().isPrimitive() && !f.getType().equals(Boolean.TYPE)))
                 .collect(Collectors.toSet());
     }
 
@@ -141,6 +142,21 @@ class ObjectDeserializer implements JsonDeserializer<Object> {
 
     private String path(String path, Field field) {
         return path + "/" + getName(field);
+    }
+
+    @SuppressWarnings("unchecked")
+    private Object fixEmptyArrays(Object o) {
+        for (Field field : FieldUtil.getAllFields(o.getClass())) {
+            if (field.getType().isArray() && FieldUtil.getFieldValue(o, field) == null) {
+                field.setAccessible(true);
+                FieldUtil.setFieldValue(o, field, Array.newInstance(field.getType().getComponentType(), 0));
+
+            } else if (Collection.class.isAssignableFrom(field.getType()) && FieldUtil.getFieldValue(o, field) == null) {
+                Class<? extends Collection<?>> fieldType = (Class<? extends Collection<?>>) field.getType();
+                FieldUtil.setFieldValue(o, field, CollectionUtils.emptyInstance(fieldType));
+            }
+        }
+        return o;
     }
 
 

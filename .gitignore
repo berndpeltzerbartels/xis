@@ -48,3 +48,5 @@ Thumbs.db
 build
 out
 xis-zips/
+/xis-bootstrap/src/main/resources/bootstrap.js
+/xis-bootstrap/src/main/resources/META-INF/resources/js/bootstrap.js

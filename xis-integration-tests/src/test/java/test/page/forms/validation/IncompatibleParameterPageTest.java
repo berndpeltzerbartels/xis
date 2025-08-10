@@ -1,8 +1,8 @@
 package test.page.forms.validation;
 
 import one.xis.context.IntegrationTestContext;
+import one.xis.test.dom.ElementImpl;
 import one.xis.test.dom.Document;
-import one.xis.test.dom.Element;
 import one.xis.test.dom.InputElement;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -41,8 +41,8 @@ class IncompatibleParameterPageTest {
 
             button.click();
 
-            assertThat(integerFieldMandatoryMessage(document).getTextContent()).isEqualTo("erforderlich");
-            assertThat(integerField(document).getTextContent()).isEmpty();
+            assertThat(integerFieldMandatoryMessage(document).getInnerText()).isEqualTo("erforderlich");
+            assertThat(integerField(document).getInnerText()).isEmpty();
 
         }
 
@@ -65,14 +65,14 @@ class IncompatibleParameterPageTest {
         void test() {
             var result = appContext.openPage(IncompatibleParameterPage.class);
             var document = result.getDocument();
-            integerFieldMandatory(document).value = "abc";
-            integerField(document).value = "def";
+            integerFieldMandatory(document).setValue("abc");
+            integerField(document).setValue("def");
             var button = document.getElementByTagName("button");
 
             button.click();
 
-            assertThat(integerFieldMandatoryMessage(document).getTextContent()).isEqualTo("Ungültige Eingabe");
-            assertThat(integerFieldMessage(document).getTextContent()).isEqualTo("Ungültige Eingabe");
+            assertThat(integerFieldMandatoryMessage(document).getInnerText()).isEqualTo("Ungültige Eingabe");
+            assertThat(integerFieldMessage(document).getInnerText()).isEqualTo("Ungültige Eingabe");
 
         }
 
@@ -86,21 +86,21 @@ class IncompatibleParameterPageTest {
         return (InputElement) document.getElementById("integerFieldMandatory");
     }
 
-    Element integerFieldMessage(Document document) {
+    ElementImpl integerFieldMessage(Document document) {
         return messageElements(document)
                 .filter(e -> e.getAttribute("message-for").equals("integerField"))
                 .findFirst().orElseThrow();
     }
 
-    Element integerFieldMandatoryMessage(Document document) {
+    ElementImpl integerFieldMandatoryMessage(Document document) {
         return messageElements(document)
                 .filter(e -> e.getAttribute("message-for").equals("integerFieldMandatory"))
                 .findFirst().orElseThrow();
     }
 
-    Stream<Element> messageElements(Document document) {
+    Stream<ElementImpl> messageElements(Document document) {
         return document.getElementsByTagName("xis:message").stream()
-                .filter(Element.class::isInstance)
-                .map(Element.class::cast);
+                .filter(ElementImpl.class::isInstance)
+                .map(ElementImpl.class::cast);
     }
 }

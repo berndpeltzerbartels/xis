@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 class SimpleObject {
 
-    private int id;
+    private Integer id;
     private String title;
     private String property1;
     private String property2;

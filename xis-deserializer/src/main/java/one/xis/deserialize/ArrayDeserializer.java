@@ -5,6 +5,7 @@ import com.google.gson.stream.JsonToken;
 import one.xis.UserContext;
 import one.xis.context.XISComponent;
 import one.xis.validation.AllElementsMandatory;
+import one.xis.validation.Mandatory;
 
 import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
@@ -12,6 +13,8 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import static one.xis.deserialize.DefaultDeserializationErrorType.MISSING_MANDATORY_PROPERTY;
 
 @XISComponent
 class ArrayDeserializer implements JsonDeserializer<Object> {
@@ -28,6 +31,33 @@ class ArrayDeserializer implements JsonDeserializer<Object> {
                                         UserContext userContext,
                                         MainDeserializer mainDeserializer,
                                         PostProcessingResults postProcessingResults) throws DeserializationException, IOException {
+        if (reader.peek() == JsonToken.BEGIN_ARRAY) {
+            return deserializeArray(reader, path, target, userContext, mainDeserializer, postProcessingResults);
+        }
+        if (reader.peek() == JsonToken.NULL) {
+            reader.nextNull();
+            if (target.isAnnotationPresent(Mandatory.class)) {
+                var context = new DeserializationContext(path, target, Mandatory.class, userContext);
+                postProcessingResults.add(new InvalidValueError(context, MISSING_MANDATORY_PROPERTY.getMessageKey(), MISSING_MANDATORY_PROPERTY.getGlobalMessageKey(), null));
+            }
+            return Optional.of(Array.newInstance(getType(target).getComponentType(), 0));
+        }
+        var value = mainDeserializer.deserialize(reader, path, target, userContext, postProcessingResults);
+        if (value.isEmpty()) {
+            return Optional.of(Array.newInstance(getType(target).getComponentType(), 0));
+        }
+        var array = (Object[]) Array.newInstance(getType(target).getComponentType(), 1);
+        array[0] = value.get();
+        return Optional.of(array);
+    }
+    
+
+    private Optional<Object> deserializeArray(JsonReader reader,
+                                              String path,
+                                              AnnotatedElement target,
+                                              UserContext userContext,
+                                              MainDeserializer mainDeserializer,
+                                              PostProcessingResults postProcessingResults) throws DeserializationException, IOException {
         var list = new ArrayList<>();
         reader.beginArray();
         int index = 0;
