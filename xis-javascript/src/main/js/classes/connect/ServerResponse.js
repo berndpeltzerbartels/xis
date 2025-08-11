@@ -9,6 +9,7 @@
  * @property {string} widgetContainerId
  * @property {Array} reloadWidgets
  * @property {any} clientStateData
+ * @property {any} validatorMessages
  * 
  */
 
@@ -25,6 +26,7 @@ class ServerResponse {
         this.widgetContainerId = '';
         this.reloadWidgets = [];
         this.clientStateData = {};
+        this.validatorMessages = { };
     }
 }
 

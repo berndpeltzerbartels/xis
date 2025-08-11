@@ -43,11 +43,14 @@ class HttpClient extends Client {
         return response.responseText;
     }
 
-
     async handleResponse(response) {
         if (this.serverError(response)) {
             this.handleServerError(response);
             return Promise.reject();
+        }
+        const globalValidatormessges = this.globalValidatormessges(response);
+        if (globalValidatormessges.lenght > 0) {
+            app.messageHandler.addValidationErrors(globalValidatormessges);
         }
         if (this.isAjaxRedirect(response)) {
             // follow redirect in browser
@@ -57,10 +60,10 @@ class HttpClient extends Client {
             this.forwardToLoginPage(response);
             return Promise.reject();
         }
-          if (this.isBrowserRedirect(response)) {
-                   this.doBrowserRedirect(response);
-                   return Promise.reject();
-                }
+        if (this.isBrowserRedirect(response)) {
+            this.doBrowserRedirect(response);
+            return Promise.reject();
+        }
         var responseObject = this.deserializeResponse(response);
         if (responseObject.redirectUrl) {
             this.forward(responseObject.redirectUrl);
@@ -70,6 +73,7 @@ class HttpClient extends Client {
     }
 
     async loadPageData(resolvedURL) {
+        app.messageHandler.clearMessages();
         this.resolvedURL = resolvedURL;
         const request = this.createPageRequest(resolvedURL, null, null);
         const response = await this.httpConnector.post('/xis/page/model', request, {});
@@ -77,6 +81,7 @@ class HttpClient extends Client {
     }
 
     async loadWidgetData(widgetInstance, widgetState) {
+        app.messageHandler.clearMessages();
         const request = this.createWidgetRequest(widgetInstance, widgetState, null, null, null);
         const response = await this.httpConnector.post('/xis/widget/model', request, {});
         return this.handleResponse(response);
@@ -89,18 +94,21 @@ class HttpClient extends Client {
     }
 
     async widgetLinkAction(widgetInstance, widgetState, action, actionParameters) {
+        app.messageHandler.clearMessages();
         const request = this.createWidgetRequest(widgetInstance, widgetState, action, {}, actionParameters);
         const response = await this.httpConnector.post('/xis/widget/action', request, {});
         return this.handleResponse(response);
     }
 
     async pageLinkAction(resolvedURL, action, actionParameters) {
+        app.messageHandler.clearMessages();
         const request = this.createPageRequest(resolvedURL, {}, action, actionParameters);
         const response = await this.httpConnector.post('/xis/page/action', request, {});
         return this.handleResponse(response);
     }
 
     async formAction(resolvedURL, widgetId, formData, action, formBindigKey, formBindingParameters) {
+        app.messageHandler.clearMessages();
         const request = this.createFormRequest(resolvedURL, widgetId, formData, action, formBindigKey, formBindingParameters);
         const response = await this.httpConnector.post('/xis/form/action', request, {});
         return this.handleResponse(response);
@@ -143,7 +151,14 @@ class HttpClient extends Client {
     }
 
     handleServerError(response) {
-        console.error('Server error occurred:', response);
-        // Optionally, you can redirect to an error page or show a user-friendly message
+        console.info('Server error occurred:', response); // do not use console.error(...), here
+        return app.messageHandler.reportServerError(JSON.parse(response.responseText).message);
+    }
+
+    globalValidatormessges(response) {
+        if (response.validatorMessages && response.validatorMessages.globalMessages) {
+            return response.validatorMessages.globalMessages.filter(s => s && s.trim().length > 0);
+        }
+        return [];
     }
 }
