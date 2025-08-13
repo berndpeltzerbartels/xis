@@ -1,11 +1,10 @@
 /**
- * Decorates the dom tag with handlers. 
+ * Factory for creating TagHandlers for DOM tags.
+ * (Formerly: Decorator, now Factory pattern)
  */
-// TODO rename to factory
-class NodeDecorator {
+class HandlerBuilder {
 
     /**
-     *
      * @param {DomAccessor} domAccessor
      * @param {HttpClient} client
      * @param {Widgets} widgets
@@ -22,70 +21,81 @@ class NodeDecorator {
     }
 
     /**
-     * 
+     * Creates handlers for a node (recursively for child nodes).
      * @param {Node} node 
      * @param {TagHandler} parentHandler 
      */
-    decorate(node, parentHandler) {
+    create(node, parentHandler) {
         if (!parentHandler) {
             parentHandler = new RootTagHandler(node);
             this.tagHandlers.mapRootHandler(node, parentHandler);
         }
         if (isElement(node)) {
             if (!node.getAttribute('ignore')) {
-                this.decorateElement(node, parentHandler);
+                this.createElementHandler(node, parentHandler);
             }
         } else {
-           this.decorateTextNode(node, parentHandler);
+           this.createTextNodeHandler(node, parentHandler);
         }
         return parentHandler;
     }
 
     /**
+    * Creates a handler for an element and its attributes/children.
     * @private
     * @param {Element} element
     * @param {TagHandler} parentHandler
     */
-    decorateElement(element, parentHandler) {
-        var handler;
+    createElementHandler(element, parentHandler) {
+        let handler;
         if (element.getAttribute('xis:binding') && element.getAttribute('xis:error-class')) {
             // TODO write a test
             parentHandler.addDescendantHandler(new ErrorStyleHandler(element));
         }
         switch (element.localName) {
             case 'xis:foreach':
-                handler = parentHandler.addDescendantHandler(this.decorateForeach(element));
+                handler = parentHandler.addDescendantHandler(this.createForeachHandler(element));
                 this.tagHandlers.mapHandler(element, handler);
-                return; // Do not evaluate child nodes, here !
+                return; // Do not evaluate child nodes here!
             case 'xis:widget-container':
-                handler = this.decorateWidgetContainer(element);
+                handler = this.createWidgetContainerHandler(element);
                 this.tagHandlers.mapHandler(element, handler);
                 parentHandler.addDescendantHandler(handler);
-                this.decorateChildNodes(element, handler);
+                this.createChildNodeHandlers(element, handler);
                 return;
             case 'xis:parameter':
                 handler = new ParameterTagHandler(element, parentHandler);
                 parentHandler.addDescendantHandler(handler);
                 break;
-            case 'input': if (element.getAttribute('xis:binding')) {
-                handler = this.decorateInputElement(element);
-            }
+            case 'input': 
+                if (element.getAttribute('xis:binding')) {
+                    handler = this.createInputHandler(element);
+                }
                 break;
-            case 'form': if (element.getAttribute('xis:binding')) {
-                handler = this.decorateForm(element);
-            }
+            case 'select': 
+                if (element.getAttribute('xis:binding')) {
+                    handler = this.createSelectHandler(element);
+                }
                 break;
-            case 'submit': if (element.getAttribute('xis:action')) {
-                handler = this.decorateSubmitElement(element);
-            }
+            case 'form': 
+                if (element.getAttribute('xis:binding')) {
+                    handler = this.createFormHandler(element);
+                }
                 break;
-            case 'button': if (element.getAttribute('xis:action')) {
-                handler = this.decorateSubmitElement(element);
-            }
+            case 'submit': 
+                if (element.getAttribute('xis:action')) {
+                    handler = this.createSubmitHandler(element);
+                }
                 break;
-            case 'a': if (element.getAttribute('xis:page') || element.getAttribute('xis:widget') || element.getAttribute('xis:action')) {
-                handler = this.decorateLinkByAttribute(element);
-            }
+            case 'button': 
+                if (element.getAttribute('xis:action')) {
+                    handler = this.createSubmitHandler(element);
+                }
+                break;
+            case 'a': 
+                if (element.getAttribute('xis:page') || element.getAttribute('xis:widget') || element.getAttribute('xis:action')) {
+                    handler = this.createLinkHandler(element);
+                }
                 break;
             case 'xis:message':
                 handler = new MessageTagHandler(element);
@@ -102,77 +112,94 @@ class NodeDecorator {
         if (handler) {
             parentHandler.addDescendantHandler(handler);
             this.tagHandlers.mapHandler(element, handler);
-            this.decorateChildNodes(element, handler);
+            this.createChildNodeHandlers(element, handler);
         } else {
-            this.decorateChildNodes(element, parentHandler);
+            this.createChildNodeHandlers(element, parentHandler);
         }
         return handler;
     }
 
-    decorateInputElement(element) {
+    /**
+     * Creates an InputTagHandler.
+     * @private
+     * @param {Element} element
+     */
+    createInputHandler(element) {
         return new InputTagHandler(element);
     }
 
     /**
+     * Creates a SelectTagHandler.
+     * @private
+     * @param {Element} element
+     */
+    createSelectHandler(element) {
+        return new SelectTagHandler(element, this.tagHandlers);
+    }
+    
+    /**
+     * Initializes attribute handlers for dynamic attributes.
      * @private
      * @param {Element} element 
      * @param {TagHandler} parentHandler
      */
     initializeAttributes(element, parentHandler) {
-        element._removedAttributes = {}; // we need removed attributes to clone an element
-        for (var attrName of element.getAttributeNames()) {
-            var attrValue = element.getAttribute(attrName);
-            if (attrValue.indexOf('${') != -1) {
+        element._removedAttributes = {}; // needed to clone an element
+        for (let attrName of element.getAttributeNames()) {
+            let attrValue = element.getAttribute(attrName);
+            if (attrValue.indexOf('${') !== -1) {
                 parentHandler.addDescendantHandler(new AttributeHandler(element, attrName));
                 element.removeAttribute(attrName);
                 element._removedAttributes[attrName] = attrValue;
             }
-
         }
     }
 
     /**
+    * Creates a FormHandler.
     * @private
     * @param {Element} formElement 
     */
-    decorateForm(formElement) {
+    createFormHandler(formElement) {
         return new FormHandler(formElement, this.client);
     }
 
     /**
+     * Creates a TextNodeHandler for dynamic text nodes.
      * @private
-     * @param {Element} element
+     * @param {Element} node
      * @param {TagHandler} parentHandler
      */
-    decorateTextNode(node, parentHandler) {
-        if (node.nodeValue && node.nodeValue.indexOf('${') != -1) {
-            var handler = new TextNodeHandler(node);
+    createTextNodeHandler(node, parentHandler) {
+        if (node.nodeValue && node.nodeValue.indexOf('${') !== -1) {
+            let handler = new TextNodeHandler(node);
             parentHandler.addDescendantHandler(handler);
             return handler;
         }
     }
 
     /**
+    * Creates handlers for all child nodes.
     * @private
     * @param {Element} element
     * @param {TagHandler} parentHandler 
     */
-    decorateChildNodes(element, parentHandler) {
-        for (var index = 0; index < element.childNodes.length; index++) {
-            var child = element.childNodes.item(index);
-            this.decorate(child, parentHandler);
+    createChildNodeHandlers(element, parentHandler) {
+        for (let index = 0; index < element.childNodes.length; index++) {
+            let child = element.childNodes.item(index);
+            this.create(child, parentHandler);
         }
     }
 
     /**
-     * <a xis:page..> or 
-     * <a xis:widget..>
+     * Creates a link handler depending on the attribute.
+     * <a xis:page..> or <a xis:widget..> or <a xis:action..>
      * @private
      * @param {Element} element
      * @returns {TagHandler}
      */
-    decorateLinkByAttribute(element) {
-        var handler;
+    createLinkHandler(element) {
+        let handler;
         if (element.getAttribute('xis:page')) {
             handler = new PageLinkHandler(element);
         }
@@ -185,29 +212,37 @@ class NodeDecorator {
     }
 
     /**
+     * Creates a ForeachHandler.
      * @private
      * @param {Element} foreach 
      * @returns {TagHandler}
      */
-    decorateForeach(foreach) {
-        return new ForeachHandler(foreach, this.tagHandlers); // never CompositeTagHandler, here
+    createForeachHandler(foreach) {
+        return new ForeachHandler(foreach, this.tagHandlers); // never CompositeTagHandler here
     }
 
-    decorateSubmitElement(element) {
+    /**
+     * Creates a FormSubmitterHandler.
+     * @private
+     * @param {Element} element
+     */
+    createSubmitHandler(element) {
         return new FormSubmitterHandler(element);
     }
 
     /**
+     * Creates a WidgetContainerHandler.
      * @private
      * @param {Element} container 
      * @returns {TagHandler}
      */
-    decorateWidgetContainer(container) {
-        var handler = new WidgetContainerHandler(container,
+    createWidgetContainerHandler(container) {
+        return new WidgetContainerHandler(
+            container,
             this.backendService,
             this.widgets,
             this.widgetContainers,
-            this.tagHandlers);
-        return handler;
+            this.tagHandlers
+        );
     }
 }

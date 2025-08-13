@@ -27,7 +27,13 @@ public class Document {
     }
 
     public Element createElement(String name) {
-        return new Element(name);
+        return switch (name) {
+            case "input" -> new InputElement();
+            case "select" -> new SelectElement();
+            case "option" -> new OptionElement();
+            case "textarea" -> throw new UnsupportedOperationException("TODO implement textarea");
+            default -> new Element(name);
+        };
     }
 
     public TextNode createTextNode(String content) {

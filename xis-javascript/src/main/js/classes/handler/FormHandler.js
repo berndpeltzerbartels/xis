@@ -67,7 +67,7 @@ class FormHandler extends TagHandler {
         data.validationPath = '/' + formBindingKey;
         this.refreshDescendantHandlers(data);
         this.client.loadFormData(app.pageController.resolvedURL, this.widgetId(), formBindingKey, formBindingParameters)
-            .then(response => formHandler.refreshFormData(formHandler.subData(response, formBindingKey)));
+            .then(response => this.refreshFormData(this.subData(response, formBindingKey)));
     }
 
     /**

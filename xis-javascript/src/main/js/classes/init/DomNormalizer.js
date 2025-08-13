@@ -44,20 +44,23 @@ class DomNormalizer {
      * @param {Element} element 
      */
     doNormalize(element) {
+        var normalizedElement = element;
         if (this.isFrameworkLink(element) || this.isFrameworkActionLink(element)) {
-            this.replaceFrameworkLinkByHtml(element);
+            normalizedElement = this.replaceFrameworkLinkByHtml(element);
         } else if (this.isFrameworkForm(element)) {
-            this.replaceFrameworkFormTagByHtml(element);
+            normalizedElement = this.replaceFrameworkFormTagByHtml(element);
         } else if (this.isFrameworkInput(element)) {
-            this.replaceFrameworkInputByHtml(element);
+            normalizedElement = this.replaceFrameworkInputByHtml(element);
         } else if (this.isFrameworkSubmit(element)) {
-            this.replaceFrameworkSubmitByHtml(element);
+            normalizedElement = this.replaceFrameworkSubmitByHtml(element);
         } else if (this.isFrameworkButton(element)) {
-            this.replaceFrameworkButtonByHtml(element);
+            normalizedElement = this.replaceFrameworkButtonByHtml(element);
+        } else if (this.isFrameworkSelect(element)) {
+            normalizedElement = this.replaceFrameworkSelectByHtml(element);
         } else {
             this.normalizeHtmlElement(element);
         }
-        for (var child of nodeListToArray(element.childNodes)) {
+        for (var child of nodeListToArray(normalizedElement.childNodes)) {
             if (isElement(child)) {
                 this.doNormalize(child);
             }
@@ -72,24 +75,30 @@ class DomNormalizer {
     */
     normalizeHtmlElement(element) {
         if (element.getAttribute('xis:repeat')) {
-            return this.surroundWithForeachTag(element);
+            this.surroundWithForeachTag(element);
+            element.removeAttribute('xis:repeat');
         }
         if (element.getAttribute('xis:foreach')) {
             this.embedForeachTag(element);
+            element.removeAttribute('xis:foreach');
         }
         if (element.getAttribute('xis:widget-container')) {
             this.initializeWidgetContainerByAttribute(element);
+            element.removeAttribute('xis:widget-container');
         }
         if (element.getAttribute('xis:message-for')) {
             this.replaceMessageAttributeByChildMessageElement(element);
+            element.removeAttribute('xis:message-for');
         }
         if (element.getAttribute('xis:global-messages')) {
             this.replaceGlobalMessagesAttributeByChildGlobalMessagesElement(element);
+            element.removeAttribute('xis:global-messages');
         }
-
         if (element.getAttribute('xis:if')) {
             this.surroundWithIfTag(element);
+            element.removeAttribute('xis:if');
         }
+        return element;
 
     }
 
@@ -149,6 +158,19 @@ class DomNormalizer {
     }
 
     /**
+    * @private 
+    * @param {Element} element
+    * @returns {boolean}
+    */
+    isFrameworkSelect(element) {
+        return element.localName === 'xis:select';
+    }
+
+    replaceFrameworkSelectByHtml(frameworkSelect) {
+        return this.replaceFrameworkElementByHtml(frameworkSelect, 'select');
+    }
+
+    /**
     * @private
     * @param {string} varName 
     * @param {string} array key for array to iterate
@@ -165,12 +187,14 @@ class DomNormalizer {
         message.setAttribute('message-for', element.getAttribute('xis:message-for'));
         element.removeAttribute('xis:message');
         this.domAccessor.insertChild(element, message);
+        return message;
     }
 
     replaceGlobalMessagesAttributeByChildGlobalMessagesElement(element) {
         var globalMessages = createElement('xis:global-messages');
         element.removeAttribute('xis:global-messages');
         this.domAccessor.insertChild(element, globalMessages);
+        return globalMessages;
     }
 
     replaceFrameworkLinkByHtml(frameworkLink) {
@@ -254,7 +278,7 @@ class DomNormalizer {
         var foreach = this.createForeach(arr[0], arr[1]);
         this.domAccessor.insertChild(element, foreach);
         element.removeAttribute('xis:foreach');// Otherwise endless recursion
-        return element;
+        return foreach;
     }
 
     /**
