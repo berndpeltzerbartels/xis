@@ -43,7 +43,7 @@ class DomNormalizer {
      * @private
      * @param {Element} element 
      */
-    doNormalize(element) {
+   doNormalize(element) {
         var normalizedElement = element;
         if (this.isFrameworkLink(element) || this.isFrameworkActionLink(element)) {
             normalizedElement = this.replaceFrameworkLinkByHtml(element);
@@ -57,6 +57,10 @@ class DomNormalizer {
             normalizedElement = this.replaceFrameworkButtonByHtml(element);
         } else if (this.isFrameworkSelect(element)) {
             normalizedElement = this.replaceFrameworkSelectByHtml(element);
+        } else if (this.isFrameworkCheckbox(element)) {
+            normalizedElement = this.replaceFrameworkCheckboxByHtml(element);
+        } else if (this.isFrameworkRadio(element)) {
+            normalizedElement = this.replaceFrameworkRadioByHtml(element);
         } else {
             this.normalizeHtmlElement(element);
         }
@@ -166,6 +170,52 @@ class DomNormalizer {
         return element.localName === 'xis:select';
     }
 
+      /**
+     * @private
+     * @param {Element} element
+     * @returns {boolean}
+     */
+    isFrameworkCheckbox(element) {
+        return element.localName === 'xis:checkbox';
+    }
+
+    /**
+     * @private
+     * @param {Element} element
+     * @returns {boolean}
+     */
+    isFrameworkRadio(element) {
+        return element.localName === 'xis:radio';
+    }
+
+    /**
+     * @private
+     * @param {Element} frameworkCheckbox
+     * @returns {Element}
+     */
+    replaceFrameworkCheckboxByHtml(frameworkCheckbox) {
+        return this.replaceFrameworkElementByHtml(frameworkCheckbox, 'input', { type: 'checkbox' });
+    }
+
+    /**
+     * @private
+     * @param {Element} frameworkRadio
+     * @returns {Element}
+     */
+    replaceFrameworkRadioByHtml(frameworkRadio) {
+        return this.replaceFrameworkElementByHtml(frameworkRadio, 'input', { type: 'radio' });
+    }
+
+
+
+    /**
+     * Replaces a framework element by a valid HTML element.
+     * Optionally sets additional attributes (e.g. type).
+     * @param {Element} frameworkElement 
+     * @param {string} elementName 
+     * @param {Object} [additionalAttributes]
+     * @returns {Element}
+     */
     replaceFrameworkSelectByHtml(frameworkSelect) {
         return this.replaceFrameworkElementByHtml(frameworkSelect, 'select');
     }
@@ -220,13 +270,16 @@ class DomNormalizer {
         return this.replaceFrameworkElementByHtml(frameworkButton, 'button');
     }
 
-    /**
-     * 
+        /**
+     * Replaces a framework element by a valid HTML element.
+     * Optionally sets additional attributes (e.g. type).
      * @param {Element} frameworkElement 
-     * @returns {Element} (Anchor)
+     * @param {string} elementName 
+     * @param {Object} [additionalAttributes]
+     * @returns {Element}
      */
-    replaceFrameworkElementByHtml(frameworkElement, elementName) {
-        var anchor = document.createElement(elementName);
+    replaceFrameworkElementByHtml(frameworkElement, elementName, additionalAttributes = {}) {
+        var element = document.createElement(elementName);
         for (var attrName of frameworkElement.getAttributeNames()) {
             var attrValue = frameworkElement.getAttribute(attrName);
             switch (attrName) {
@@ -237,16 +290,20 @@ class DomNormalizer {
                 case 'repeat':
                 case 'target-container':
                 case 'parameters':
-                case 'action': anchor.setAttribute('xis:' + attrName, attrValue);
-                default: anchor.setAttribute(attrName, attrValue);
+                case 'action': element.setAttribute('xis:' + attrName, attrValue);
+                default: element.setAttribute(attrName, attrValue);
             }
         }
-        this.domAccessor.replaceElement(frameworkElement, anchor);
+        // Set additional attributes (e.g. type for checkbox/radio)
+        for (const [key, value] of Object.entries(additionalAttributes)) {
+            element.setAttribute(key, value);
+        }
+        this.domAccessor.replaceElement(frameworkElement, element);
         for (var child of nodeListToArray(frameworkElement.childNodes)) {
             frameworkElement.removeChild(child);
-            anchor.appendChild(child);
+            element.appendChild(child);
         }
-        return anchor;
+        return element;
     }
 
     /**

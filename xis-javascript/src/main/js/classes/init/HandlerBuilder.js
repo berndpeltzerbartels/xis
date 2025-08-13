@@ -125,7 +125,17 @@ class HandlerBuilder {
      * @param {Element} element
      */
     createInputHandler(element) {
-        return new InputTagHandler(element);
+        debugger;
+        switch (element.getAttribute('type')) {
+            case 'checkbox':
+                return new CheckboxTagHandler(element);
+            case 'radio':
+                return new RadioTagHandler(element);
+            case 'file':
+                return null; // TODO new FileInputHandler(element);
+            default:
+                return new InputTagHandler(element);
+        }
     }
 
     /**
