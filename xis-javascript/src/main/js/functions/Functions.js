@@ -231,7 +231,6 @@ function cloneTextNode(node) {
 }
 
 function handleError(error) {
-    debugger;
     if (error && error.type === 'redirect') {
         return {redirected: true};
     }
@@ -239,3 +238,6 @@ function handleError(error) {
     throw error; // Fehler weiterwerfen, damit er nicht verschluckt wird
 }
 
+function isSet(value) {
+    return value !== undefined && value !== null;
+}

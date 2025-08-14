@@ -3,14 +3,12 @@ package test.page.forms;
 import one.xis.context.IntegrationTestContext;
 import one.xis.test.dom.CheckboxElement;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-@Disabled
 class CheckBoxPageTest {
 
     private IntegrationTestContext context;
@@ -40,9 +38,11 @@ class CheckBoxPageTest {
 
         // User checks the box and submits
         checkbox.click();
+        assertThat(checkbox.isChecked()).isTrue();
+
         submitButton.click();
 
-        assertThat(checkbox.isChecked()).isTrue();
+        //
 
         // Verify the saved state
         var formModelCaptor = ArgumentCaptor.forClass(CheckBoxFormModel.class);
@@ -66,9 +66,9 @@ class CheckBoxPageTest {
 
         // User unchecks the box and submits
         checkbox.click();
-        submitButton.click();
-
         assertThat(checkbox.isChecked()).isFalse();
+
+        submitButton.click();
 
         // Verify the saved state
         var formModelCaptor = ArgumentCaptor.forClass(CheckBoxFormModel.class);

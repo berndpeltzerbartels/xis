@@ -24,7 +24,6 @@ class PageHistory {
     }
 
     onPopState(event) {
-        debugger;
         if (event.state && event.state.index !== undefined) {
             this.currentIndex = event.state.index;
             if (this.currentIndex < 0 || this.currentIndex >= this.history.length) {

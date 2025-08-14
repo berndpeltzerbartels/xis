@@ -173,18 +173,18 @@ public class RestControllerServiceImpl implements RestControllerService {
         }
 
         if (targetException instanceof Exception exception) {
+            final Throwable finalException = exception;
             return findExceptionHandler(exception)
                     .map(handler -> (Object) handler.handleException(method, args, exception))
-                    .orElseGet(() -> {
-                        System.err.println("No handler found for exception: " + exception.getClass().getName());
-                        return defaultErrorResponse(exception);
-                    });
+                    .orElseGet(() -> defaultErrorResponse(finalException));
         }
         // Falls es keine Exception ist, gib sie einfach zurück
         return defaultErrorResponse(targetException);
     }
 
     private ResponseEntity<?> defaultErrorResponse(Throwable exception) {
+        System.err.println("Unhandled exception: " + exception.getClass().getName() + " - " + exception.getMessage());// TODO logging
+        exception.printStackTrace(); // TODO logging
         ErrorResponse errorResponse = new ErrorResponse(exception.getMessage());
         return ResponseEntity.status(500).body(errorResponse);
     }

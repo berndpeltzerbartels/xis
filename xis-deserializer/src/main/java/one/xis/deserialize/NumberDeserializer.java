@@ -45,13 +45,18 @@ class NumberDeserializer implements JsonDeserializer<Number> {
                 value = reader.nextString();
                 return Optional.of(parseNumber((String) value, target));
             }
+            if (reader.peek().equals(JsonToken.NULL)) {
+                reader.nextNull();
+                throw new DeserializationException("Null value encountered for character deserialization, expected a number.", null);
+            }
+            reader.skipValue();
+            throw new DeserializationException("Expected a number or string for number deserialization, but found: ", reader.peek());
         } catch (Exception e) {
             if ("".equals(value)) {
                 return Optional.empty();
             }
             throw new DeserializationException(e, value != null ? value.toString() : "");
         }
-        return Optional.empty();
     }
 
     @Override

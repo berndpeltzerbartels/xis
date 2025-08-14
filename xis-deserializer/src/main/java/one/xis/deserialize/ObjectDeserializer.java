@@ -126,7 +126,7 @@ class ObjectDeserializer implements JsonDeserializer<Object> {
 
     private Set<Field> getMandatoryFields(Class<?> objectType) {
         return FieldUtil.getAllFields(objectType).stream()
-                .filter(f -> f.isAnnotationPresent(Mandatory.class))
+                .filter(f -> f.isAnnotationPresent(Mandatory.class) || (f.getType().isPrimitive() && !f.getType().equals(Boolean.TYPE)))
                 .collect(Collectors.toSet());
     }
 

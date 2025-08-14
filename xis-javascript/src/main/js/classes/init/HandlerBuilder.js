@@ -125,7 +125,6 @@ class HandlerBuilder {
      * @param {Element} element
      */
     createInputHandler(element) {
-        debugger;
         switch (element.getAttribute('type')) {
             case 'checkbox':
                 return new CheckboxTagHandler(element);

@@ -11,6 +11,6 @@ public class CheckboxElement extends InputElement {
     }
 
     public void check(Object event) {
-        checked = true;
+        checked = !checked;
     }
 }
