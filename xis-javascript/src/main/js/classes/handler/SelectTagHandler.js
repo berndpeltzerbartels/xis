@@ -12,8 +12,6 @@ class SelectTagHandler extends InputTagHandler {
             var path = doSplit(this.binding, '.');
             var value = data.getValue(path);
             this.updateOptions(value);
-            const formHandler = this.getParentFormHandler();
-            formHandler.onElementHandlerRefreshed(this, this.binding);
         }
     }
 

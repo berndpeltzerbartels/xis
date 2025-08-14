@@ -32,18 +32,11 @@ class DocumentBuilder {
 
     private static Element translateElement(org.w3c.dom.Element w3cElement) {
         return switch (w3cElement.getTagName()) {
-            case "input" -> translateInputElement(w3cElement);
+            case "input" -> new InputElement();
             case "select" -> new SelectElement();
             case "option" -> new OptionElement();
+            case "textarea" -> new TextareaElement();
             default -> new Element(w3cElement.getTagName());
-        };
-    }
-
-    private static Element translateInputElement(org.w3c.dom.Element w3cElement) {
-        return switch (w3cElement.getAttribute("type")) {
-            case "checkbox" -> new CheckboxElement();
-            case "radio" -> new RadioElement();
-            default -> new InputElement();
         };
     }
 

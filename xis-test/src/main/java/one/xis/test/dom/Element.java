@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 @SuppressWarnings("unused")
 public class Element extends Node {
 
-    // TODO interface, not everyrhing here should be accesssible
+    // TODO interface, not everything here should be accesssible
     public final String localName;
     public Node firstChild;
     public String innerText = "";

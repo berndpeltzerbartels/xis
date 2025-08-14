@@ -1,7 +1,6 @@
 package test.page.forms;
 
 import one.xis.context.IntegrationTestContext;
-import one.xis.test.dom.CheckboxElement;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -31,7 +30,7 @@ class CheckBoxPageTest {
         when(checkBoxFormService.getCheckBoxFormModel()).thenReturn(initialModel);
 
         var result = context.openPage(CheckBoxPage.class);
-        var checkbox = (CheckboxElement) result.getDocument().getElementById("theCheckbox");
+        var checkbox = result.getDocument().getInputElementById("theCheckbox");
         var submitButton = result.getDocument().getElementById("submitButton");
 
         assertThat(checkbox.isChecked()).isFalse();
@@ -59,7 +58,7 @@ class CheckBoxPageTest {
         when(checkBoxFormService.getCheckBoxFormModel()).thenReturn(initialModel);
 
         var result = context.openPage(CheckBoxPage.class);
-        var checkbox = (CheckboxElement) result.getDocument().getElementById("theCheckbox");
+        var checkbox = result.getDocument().getInputElementById("theCheckbox");
         var submitButton = result.getDocument().getElementById("submitButton");
 
         assertThat(checkbox.isChecked()).isTrue();

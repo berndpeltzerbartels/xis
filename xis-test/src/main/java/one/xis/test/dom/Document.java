@@ -31,10 +31,11 @@ public class Document {
             case "input" -> new InputElement();
             case "select" -> new SelectElement();
             case "option" -> new OptionElement();
-            case "textarea" -> throw new UnsupportedOperationException("TODO implement textarea");
+            case "textarea" -> new TextareaElement();
             default -> new Element(name);
         };
     }
+
 
     public TextNode createTextNode(String content) {
         return new TextNode(content);
@@ -112,5 +113,10 @@ public class Document {
         } else {
             cookie += "; " + name + "=" + value;
         }
+    }
+
+
+    private InputElement createInputElement(String type) {
+        return new InputElement();
     }
 }

@@ -16,8 +16,6 @@ class CheckboxTagHandler extends InputTagHandler {
             } else {
                 this.updateCheckedStateForSingleValue(value);
             }
-            const formHandler = this.getParentFormHandler();
-            formHandler.onElementHandlerRefreshed(this, this.binding);
         }
     }
 

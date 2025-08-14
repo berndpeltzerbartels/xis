@@ -39,6 +39,8 @@ class ForeachHandler extends TagHandler {
                         this.tag.appendChild(child);
                     }
                     const childHandler = this.tagHandlers.getRootHandler(child);
+                    childHandler.parentHandler = this;
+                    this.descendantHandlers.push(childHandler);
                     childHandler.refresh(subData);
                 }
             } else {

@@ -13,6 +13,8 @@ class FormElementHandler extends TagHandler {
 
     refresh(data) {
         this.binding = this.bindingExpression.evaluate(data);
+        const formHandler = this.getParentFormHandler();
+        formHandler.onElementHandlerRefreshed(this, this.binding);
         this.refreshDescendantHandlers(data);
     }
 
@@ -24,9 +26,6 @@ class FormElementHandler extends TagHandler {
                 value = '';
             }
             this.tag.value = value;
-            const formHandler = this.getParentFormHandler();
-           
-            formHandler.onElementHandlerRefreshed(this, this.binding);
         }
         super.refreshFormData(data);
     }
