@@ -20,12 +20,11 @@ public class RepeatIT {
     void listElementsArePresent() {
         repeat.open();
 
-        assertThat( $("title").innerText().trim()).isEqualTo("Repeat");
+        assertThat($("title").getInnerText() ().trim()).isEqualTo("Repeat");
 
-        assertThat($(".item > span", 0).innerText().trim()).isEqualTo("title1");
-        assertThat($(".item > span", 1).innerText().trim()).isEqualTo("title2");
-        assertThat($(".item > span", 2).innerText().trim()).isEqualTo("title3");
-
+        assertThat($(".item > span", 0).getInnerText() ().trim()).isEqualTo("title1");
+        assertThat($(".item > span", 1).getInnerText() ().trim()).isEqualTo("title2");
+        assertThat($(".item > span", 2).getInnerText() ().trim()).isEqualTo("title3");
 
 
     }

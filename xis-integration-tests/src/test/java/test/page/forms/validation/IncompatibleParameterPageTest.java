@@ -65,8 +65,8 @@ class IncompatibleParameterPageTest {
         void test() {
             var result = appContext.openPage(IncompatibleParameterPage.class);
             var document = result.getDocument();
-            integerFieldMandatory(document).value = "abc";
-            integerField(document).value = "def";
+            integerFieldMandatory(document).setValue("abc");
+            integerField(document).setValue("def");
             var button = document.getElementByTagName("button");
 
             button.click();

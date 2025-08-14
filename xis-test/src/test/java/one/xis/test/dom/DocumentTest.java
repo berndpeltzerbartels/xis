@@ -14,12 +14,12 @@ class DocumentTest {
         var html = "<html><head><title>Title</title></head><body><div>123</div><div/></body></html>";
         var document = Document.of(html);
 
-        assertThat(document.rootNode.localName).isEqualTo("html");
+        assertThat(document.rootNode.getLocalName()).isEqualTo("html");
         assertThat(document.rootNode.getChildList().stream().map(Node::getName)).containsExactly("head", "body");
 
         var head = document.getElementByTagName("head");
         assertThat(head.getChildList().size()).isEqualTo(1);
-        assertThat(head.childElement(0).localName).isEqualTo("title");
+        assertThat(head.childElement(0).getLocalName()).isEqualTo("title");
 
         var title = document.getElementByTagName("title");
         assertThat(title.getTextContent()).isEqualTo("Title");
@@ -33,7 +33,7 @@ class DocumentTest {
 
         assertThat(div1.getChildList().size()).isEqualTo(1);
         assertThat(div2.getChildList()).isEmpty();
-        assertThat(div1.getChildList().get(0)).isInstanceOf(TextNode.class);
+        assertThat(div1.getChildList().get(0)).isInstanceOf(TextNodeIml.class);
         assertThat(div1.getTextContent()).isEqualTo("123");
 
     }
@@ -44,7 +44,7 @@ class DocumentTest {
         var html = new Resources().getByPath("/default-develop-index.html").getContent();
         var document = Document.of(html);
 
-        assertThat(document.rootNode.localName).isEqualTo("html");
+        assertThat(document.rootNode.getLocalName()).isEqualTo("html");
         assertThat(document.rootNode.getChildElementNames()).containsExactly("head", "body");
 
         var head = document.getElementByTagName("head");
@@ -116,13 +116,13 @@ class DocumentTest {
 
         x.insertBefore(b, a);
 
-        assertThat(x.firstChild).isEqualTo(b);
+        assertThat(x.getFirstChild()).isEqualTo(b);
 
         assertThat(b.getPreviousSibling()).isNull();
         assertThat(a.getPreviousSibling()).isEqualTo(b);
 
-        assertThat(b.nextSibling).isEqualTo(a);
-        assertThat(a.nextSibling).isNull();
+        assertThat(b.getNextSibling()).isEqualTo(a);
+        assertThat(a.getNextSibling()).isNull();
     }
 
     @Test
@@ -137,14 +137,14 @@ class DocumentTest {
 
         x.insertBefore(c, b);
 
-        assertThat(x.firstChild).isEqualTo(a);
+        assertThat(x.getFirstChild()).isEqualTo(a);
 
         assertThat(c.getPreviousSibling()).isEqualTo(a);
         assertThat(b.getPreviousSibling()).isEqualTo(c);
 
-        assertThat(a.nextSibling).isEqualTo(c);
-        assertThat(c.nextSibling).isEqualTo(b);
-        assertThat(b.nextSibling).isNull();
+        assertThat(a.getNextSibling()).isEqualTo(c);
+        assertThat(c.getNextSibling()).isEqualTo(b);
+        assertThat(b.getNextSibling()).isNull();
     }
 
     @Test
@@ -158,11 +158,11 @@ class DocumentTest {
 
         a.remove();
 
-        assertThat(x.firstChild).isEqualTo(b);
-        assertThat(a.nextSibling).isNull();
-        assertThat(a.parentNode).isNull();
+        assertThat(x.getFirstChild()).isEqualTo(b);
+        assertThat(a.getNextSibling()).isNull();
+        assertThat(a.getParentNode()).isNull();
 
-        assertThat(x.childNodes.length).isEqualTo(1);
+        assertThat(x.getChildNodes().length).isEqualTo(1);
 
     }
 
@@ -174,7 +174,7 @@ class DocumentTest {
         var element = document.getElementById("123");
 
         assertThat(element).isNotNull();
-        assertThat(element.localName).isEqualTo("b");
+        assertThat(element.getLocalName()).isEqualTo("b");
     }
 
     @Test
@@ -185,7 +185,7 @@ class DocumentTest {
         var element = document.findElement(e -> "123".equals(e.getId()));
 
         assertThat(element).isNotNull();
-        assertThat(element.localName).isEqualTo("b");
+        assertThat(element.getLocalName()).isEqualTo("b");
 
     }
 

@@ -4,6 +4,7 @@ import lombok.Data;
 import one.xis.resource.Resources;
 import one.xis.test.dom.Document;
 import one.xis.test.dom.Element;
+import one.xis.test.dom.ElementImpl;
 import one.xis.test.dom.Window;
 import one.xis.test.js.LocalStorage;
 import one.xis.test.js.SessionStorage;
@@ -27,7 +28,7 @@ class HtmlObjects {
         this.init();
     }
 
-    public static Element htmlToElement(String content) {
+    public static ElementImpl htmlToElement(String content) {
         var doc = Document.of(content);
         return doc.rootNode;
     }

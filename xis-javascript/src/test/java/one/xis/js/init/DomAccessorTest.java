@@ -3,7 +3,7 @@ package one.xis.js.init;
 import one.xis.js.Javascript;
 import one.xis.test.dom.Document;
 import one.xis.test.dom.DomAssert;
-import one.xis.test.dom.Element;
+import one.xis.test.dom.ElementImpl;
 import one.xis.test.js.JSUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,7 +20,7 @@ class DomAccessorTest {
     @Test
     @DisplayName("Element e2 is a child of element e1 and e2 is getting replaced by element x")
     void replaceElement1() throws ScriptException {
-        var document = new Document(new Element("root"));
+        var document = new Document(new ElementImpl("root"));
         document.rootNode.appendChild(document.createElement("e1"));
         document.rootNode.appendChild(document.createElement("e2"));
 
@@ -41,21 +41,21 @@ class DomAccessorTest {
         assertThat(e2).isNull();
         assertThat(x).isNotNull();
 
-        assertThat(e1.nextSibling).isEqualTo(x);
-        assertThat(x.nextSibling).isNull();
+        assertThat(e1.getNextSibling()).isEqualTo(x);
+        assertThat(x.getNextSibling()).isNull();
 
-        assertThat(e1.parentNode).isEqualTo(root);
-        assertThat(x.parentNode).isEqualTo(root);
+        assertThat(e1.getParentNode()).isEqualTo(root);
+        assertThat(x.getParentNode()).isEqualTo(root);
 
-        assertThat(root.childNodes.length).isEqualTo(2);
-        assertThat(root.childNodes.item(0)).isEqualTo(e1);
-        assertThat(root.childNodes.item(1)).isEqualTo(x);
+        assertThat(root.getChildNodes().length).isEqualTo(2);
+        assertThat(root.getChildNodes().item(0)).isEqualTo(e1);
+        assertThat(root.getChildNodes().item(1)).isEqualTo(x);
     }
 
     @Test
     @DisplayName("Element e1 is getting replaced by element x")
     void replaceElement2() throws ScriptException {
-        var document = new Document(new Element("root"));
+        var document = new Document(new ElementImpl("root"));
         document.rootNode.appendChild(document.createElement("e1"));
 
         var js = Javascript.getScript(CLASSES, FUNCTIONS);
@@ -70,8 +70,8 @@ class DomAccessorTest {
         var x = document.getElementByTagName("x");
 
         assertThat(e1).isNull();
-        assertThat(x.nextSibling).isNull();
-        assertThat(x.parentNode).isEqualTo(root);
+        assertThat(x.getNextSibling()).isNull();
+        assertThat(x.getParentNode()).isEqualTo(root);
 
         DomAssert.assertAndGetRootElement(document, "root")
                 .assertChildElements("x").assertNoChildElement("e1");
@@ -80,7 +80,7 @@ class DomAccessorTest {
     @Test
     @DisplayName("e1 has next sibling e2 and e2 is replaced by x")
     void replaceElement3() throws ScriptException {
-        var document = new Document(new Element("root"));
+        var document = new Document(new ElementImpl("root"));
         var e1 = document.createElement("e1");
         var e2 = document.createElement("e2");
         var e3 = document.createElement("e3");
@@ -107,18 +107,18 @@ class DomAccessorTest {
         assertThat(e2).isNotNull();
         assertThat(x).isNotNull();
 
-        assertThat(x.nextSibling).isEqualTo(e2);
-        assertThat(e2.parentNode).isEqualTo(root);
-        assertThat(x.parentNode).isEqualTo(root);
+        assertThat(x.getNextSibling()).isEqualTo(e2);
+        assertThat(e2.getParentNode()).isEqualTo(root);
+        assertThat(x.getParentNode()).isEqualTo(root);
 
-        assertThat(root.childNodes.length).isEqualTo(2);
-        assertThat(root.childNodes.item(0)).isEqualTo(x);
-        assertThat(root.childNodes.item(1)).isEqualTo(e2);
+        assertThat(root.getChildNodes().length).isEqualTo(2);
+        assertThat(root.getChildNodes().item(0)).isEqualTo(x);
+        assertThat(root.getChildNodes().item(1)).isEqualTo(e2);
     }
 
     @Test
     void insertParent() throws ScriptException {
-        var document = new Document(new Element("root"));
+        var document = new Document(new ElementImpl("root"));
         document.rootNode.appendChild(document.createElement("e2"));
 
         var js = Javascript.getScript(CLASSES, FUNCTIONS);
@@ -133,8 +133,8 @@ class DomAccessorTest {
         var e1 = document.getElementByTagName("e1");
         var e2 = document.getElementByTagName("e2");
 
-        assertThat(root.firstChild).isEqualTo(e1);
-        assertThat(e1.firstChild).isEqualTo(e2);
+        assertThat(root.getFirstChild()).isEqualTo(e1);
+        assertThat(e1.getFirstChild()).isEqualTo(e2);
 
     }
 

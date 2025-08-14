@@ -21,11 +21,11 @@ class FormActionAndModelTest {
     void testModelAction() {
         var result = context.openPage("/formActionAndModel.html");
         var inputElement = result.getDocument().getInputElementById("field1");
-        inputElement.value = "input";
+        inputElement.setValue("input");
         result.getDocument().getElementById("save").click();
         // Retrieve the value provided as model data. The key corresponds to the @ModelData annotation.
 
-        String modelData = result.getDocument().getElementById("result").innerText;
+        String modelData = result.getDocument().getElementById("result").getInnerText();
         assertThat(modelData).isEqualTo("Processed: input");
     }
 }

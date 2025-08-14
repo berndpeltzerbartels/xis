@@ -3,6 +3,7 @@ package one.xis.js.widget;
 import one.xis.js.Javascript;
 import one.xis.test.dom.Document;
 import one.xis.test.dom.Element;
+import one.xis.test.dom.ElementImpl;
 import one.xis.test.dom.Window;
 import one.xis.test.js.Debug;
 import one.xis.test.js.JSUtil;
@@ -40,14 +41,14 @@ class WidgetContainerHandlerTest {
 
         JSUtil.execute(script, bindings);
 
-        assertThat(container.firstChild).isNotNull();
-        assertThat(container.firstChild).isInstanceOf(Element.class);
-        assertThat((((Element) container.firstChild).getAttribute("id"))).isEqualTo("widgetRoot");
+        assertThat(container.getFirstChild()).isNotNull();
+        assertThat(container.getFirstChild()).isInstanceOf(ElementImpl.class);
+        assertThat((((Element) container.getFirstChild()).getAttribute("id"))).isEqualTo("widgetRoot");
 
     }
 
     public static class WidgetInstance {
-        public Element root;
+        public ElementImpl root;
         public Object widgetState;
         public Object rootHandler;
     }
@@ -64,7 +65,7 @@ class WidgetContainerHandlerTest {
         @SuppressWarnings("unused")
         public WidgetInstance getWidgetInstance(String id) {
             var widget = new WidgetInstance();
-            widget.root = new Element("div");
+            widget.root = new ElementImpl("div");
             widget.root.setAttribute("id", "widgetRoot");
             widget.rootHandler = new RootHandler();
             return widget;

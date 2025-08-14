@@ -24,7 +24,7 @@ class ActionAndModelTest {
         var result = testContext.openPage("/actionAndModel.html");
         result.getDocument().getElementById("action-link").click();
         // Retrieve the value provided as model data. The key corresponds to the @ModelData annotation.
-        String modelData = result.getDocument().getElementById("result").innerText;
+        String modelData = result.getDocument().getElementById("result").getInnerText();
         assertThat(modelData).isEqualTo("Processed: input");
     }
 }

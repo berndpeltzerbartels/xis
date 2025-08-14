@@ -13,7 +13,7 @@ public class RepeatInsideRepeat {
 
     public void open() {
         Selenide.open("http://localhost:8080" + URL);
-        assertThat($("title").innerText()).isEqualTo(TITLE);
+        assertThat($("title").getInnerText() ()).isEqualTo(TITLE);
     }
 
 }

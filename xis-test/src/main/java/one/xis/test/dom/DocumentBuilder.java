@@ -2,6 +2,7 @@ package one.xis.test.dom;
 
 import one.xis.utils.lang.StringUtils;
 import one.xis.utils.xml.XmlUtil;
+import org.w3c.dom.Node;
 
 class DocumentBuilder {
 
@@ -17,26 +18,26 @@ class DocumentBuilder {
     private static void evaluate(org.w3c.dom.Element src, Element dest) {
         var nodeList = src.getChildNodes();
         for (var i = 0; i < nodeList.getLength(); i++) {
-            org.w3c.dom.Node node = nodeList.item(i);
+            Node node = nodeList.item(i);
             if (node instanceof org.w3c.dom.Element w3cElement) {
                 var e = translateElement(w3cElement);
                 dest.appendChild(e);
                 copyAttributes(w3cElement, e);
                 evaluate(w3cElement, e);
             } else if (StringUtils.isNotEmpty(node.getNodeValue())) {
-                dest.appendChild(new TextNode(node.getNodeValue()));
-                dest.innerText = node.getNodeValue();
+                dest.appendChild(new TextNodeIml(node.getNodeValue()));
+                dest.setInnerText(node.getNodeValue());
             }
         }
     }
 
     private static Element translateElement(org.w3c.dom.Element w3cElement) {
         return switch (w3cElement.getTagName()) {
-            case "input" -> new InputElement();
+            case "input" -> new InputElementImpl();
             case "select" -> new SelectElement();
-            case "option" -> new OptionElement();
+            case "option" -> new OptionElementImpl();
             case "textarea" -> new TextareaElement();
-            default -> new Element(w3cElement.getTagName());
+            default -> new ElementImpl(w3cElement.getTagName());
         };
     }
 

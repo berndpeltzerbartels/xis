@@ -26,11 +26,11 @@ class AnchorReplaceTest {
 
         var pageLink = result.getDocument().getElementById("page-link");
         var widgetLink = result.getDocument().getElementById("widget-link");
-        
+
         assertThat(pageLink.getChildElements()).isEmpty();
         assertThat(widgetLink.getChildElements()).isEmpty();
 
-        assertThat(pageLink.parentNode.localName).isEqualTo("body");
-        assertThat(widgetLink.parentNode.localName).isEqualTo("body");
+        assertThat(pageLink.getParentNode().getLocalName()).isEqualTo("body");
+        assertThat(widgetLink.getParentNode().getLocalName()).isEqualTo("body");
     }
 }

@@ -60,7 +60,7 @@ public class ElementResults {
     }
 
     public ElementResults pickAll(String name) {
-        return new ElementResults(elements.stream().filter(e -> e.localName.equals(name)).collect(Collectors.toList()));
+        return new ElementResults(elements.stream().filter(e -> e.getLocalName().equals(name)).collect(Collectors.toList()));
     }
 
     public void andThen(Consumer<List<Element>> elementConsumer) {

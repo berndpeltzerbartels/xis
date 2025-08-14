@@ -1,5 +1,6 @@
 package one.xis.test.dom;
 
+import lombok.Getter;
 import one.xis.utils.io.IOUtils;
 
 import java.util.*;
@@ -12,33 +13,34 @@ import java.util.function.Predicate;
 @SuppressWarnings("unused")
 public class Document {
 
-    public Element rootNode;
+    @Getter
+    public ElementImpl rootNode;
 
     public Location location = new Location();
 
     public String cookie = "";
 
     public Document(String rootTagName) {
-        this(new Element(rootTagName));
+        this(new ElementImpl(rootTagName));
     }
 
-    public Document(Element rootNode) {
+    public Document(ElementImpl rootNode) {
         this.rootNode = rootNode;
     }
 
     public Element createElement(String name) {
         return switch (name) {
-            case "input" -> new InputElement();
+            case "input" -> new InputElementImpl();
             case "select" -> new SelectElement();
-            case "option" -> new OptionElement();
+            case "option" -> new OptionElementImpl();
             case "textarea" -> new TextareaElement();
-            default -> new Element(name);
+            default -> new ElementImpl(name);
         };
     }
 
 
     public TextNode createTextNode(String content) {
-        return new TextNode(content);
+        return new TextNodeIml(content);
     }
 
     public NodeList getElementsByTagName(String name) {
@@ -67,7 +69,7 @@ public class Document {
             case 0:
                 return null;
             case 1:
-                return (Element) list.item(0);
+                return (ElementImpl) list.item(0);
             default:
                 throw new IllegalStateException("too many results for " + name);
         }
@@ -99,7 +101,7 @@ public class Document {
         return results;
     }
 
-    public void replaceRoot(Element element) {
+    public void replaceRoot(ElementImpl element) {
         this.rootNode = element;
     }
 
@@ -117,6 +119,6 @@ public class Document {
 
 
     private InputElement createInputElement(String type) {
-        return new InputElement();
+        return new InputElementImpl();
     }
 }

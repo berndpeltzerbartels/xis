@@ -23,8 +23,8 @@ class LinkWithParamTest {
         var result = context.openPage("/linkWithParamPage1.html"); // open link 1 first time
         result.getDocument().getElementById("page-link").click();
 
-        assertThat(result.getDocument().getElementByTagName("title").innerText).isEqualTo("The title is 'bla'");
-        assertThat(result.getDocument().getElementByTagName("h1").innerText).isEqualTo("The title is 'bla'");
+        assertThat(result.getDocument().getElementByTagName("title").getInnerText()).isEqualTo("The title is 'bla'");
+        assertThat(result.getDocument().getElementByTagName("h1").getInnerText()).isEqualTo("The title is 'bla'");
 
     }
 }

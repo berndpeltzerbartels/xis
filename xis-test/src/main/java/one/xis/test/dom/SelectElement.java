@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class SelectElement extends Element {
+public class SelectElement extends ElementImpl {
     public boolean multiple;
     public int selectedIndex;
     public String value;
@@ -25,10 +25,10 @@ public class SelectElement extends Element {
     }
 
     void updateSingleSelectionState() {
-        var options = this.findDescendants(e -> e.localName.equals("option"));
+        var options = this.findDescendants(e -> e.getLocalName().equals("option"));
         for (var i = 0; i < options.size(); i++) {
             var option = (OptionElement) options.get(i);
-            if (option.selected) {
+            if (option.isSelected()) {
                 selectedOptions = List.of(option);
                 this.setAttribute("value", option.getAttribute("value"));
                 this.value = option.getAttribute("value");

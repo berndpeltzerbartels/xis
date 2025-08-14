@@ -3,6 +3,7 @@ package one.xis.js.page;
 import one.xis.js.Javascript;
 import one.xis.test.dom.Document;
 import one.xis.test.dom.Element;
+import one.xis.test.dom.ElementImpl;
 import one.xis.test.dom.Node;
 import one.xis.test.js.JSUtil;
 import one.xis.utils.io.IOUtils;
@@ -69,7 +70,7 @@ class PagesTest {
 
     private Map<String, Object> createBindings() {
         var title = document.createElement("title");
-        title.innerText = "Title";
+        title.setInnerText("Title");
 
         var style = document.createElement("style");
         var div = document.createElement("div");
@@ -79,7 +80,7 @@ class PagesTest {
         nodeArrays.add(new Node[]{div});
 
         Function<Object, Node[]> nodeListToArray = list -> nodeArrays.remove(0);
-        Function<Object, Boolean> isElement = Element.class::isInstance;
+        Function<Object, Boolean> isElement = ElementImpl.class::isInstance;
 
         var bindings = new HashMap<String, Object>();
         bindings.put("document", document);

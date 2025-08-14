@@ -48,6 +48,9 @@ class HandlerBuilder {
     */
     createElementHandler(element, parentHandler) {
         let handler;
+        if (element.classList.contains('item')) {
+            debugger;
+        }
         if (element.getAttribute('xis:binding') && element.getAttribute('xis:error-class')) {
             // TODO write a test
             parentHandler.addDescendantHandler(new ErrorStyleHandler(element));
@@ -153,13 +156,10 @@ class HandlerBuilder {
      * @param {TagHandler} parentHandler
      */
     initializeAttributes(element, parentHandler) {
-        element._removedAttributes = {}; // needed to clone an element
         for (let attrName of element.getAttributeNames()) {
             let attrValue = element.getAttribute(attrName);
             if (attrValue.indexOf('${') !== -1) {
                 parentHandler.addDescendantHandler(new AttributeHandler(element, attrName));
-                element.removeAttribute(attrName);
-                element._removedAttributes[attrName] = attrValue;
             }
         }
     }

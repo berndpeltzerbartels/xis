@@ -1,10 +1,7 @@
 package one.xis.js.tags;
 
 import one.xis.js.Javascript;
-import one.xis.test.dom.Document;
-import one.xis.test.dom.Element;
-import one.xis.test.dom.Location;
-import one.xis.test.dom.Window;
+import one.xis.test.dom.*;
 import one.xis.test.js.JSUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ForeachHandlerTest {
 
     private Document document;
-    private Element foreach;
+    private ElementImpl foreach;
     private Map<String, Object> nodeMock;
 
 
@@ -36,7 +33,7 @@ class ForeachHandlerTest {
         div1.setAttribute("class", "div1");
         div2.setAttribute("class", "div2");
 
-        foreach = new Element("xis:foreach");
+        foreach = new ElementImpl("xis:foreach");
         foreach.setAttribute("array", "a.b.c");
         foreach.setAttribute("var", "x");
         foreach.appendChild(div1);

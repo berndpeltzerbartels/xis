@@ -2,7 +2,7 @@ package one.xis.context;
 
 import lombok.Getter;
 import one.xis.js.Javascript;
-import one.xis.test.dom.Node;
+import one.xis.test.dom.NodeImpl;
 import one.xis.test.js.Array;
 import one.xis.test.js.JSUtil;
 
@@ -58,7 +58,7 @@ class IntegrationTestScript {
         bindings.put("window", testEnvironment.getHtmlObjects().getWindow());
         bindings.put("htmlToElement", testEnvironment.getHtmlObjects().getHtmlToElement());
         bindings.put("atob", testEnvironment.getHtmlObjects().getAtob());
-        bindings.put("Node", Node.class);
+        bindings.put("Node", NodeImpl.class);
         bindings.put("Array", new Array());
         // bindings.put("console", testEnvironment.getHTML_OBJECTS().getConsole());
         return bindings;
@@ -72,7 +72,7 @@ class IntegrationTestScript {
         invoker.setBinding("window", testEnvironment.getHtmlObjects().getWindow());
         invoker.setBinding("htmlToElement", testEnvironment.getHtmlObjects().getHtmlToElement());
         invoker.setBinding("atob", testEnvironment.getHtmlObjects().getAtob());
-        invoker.setBinding("Node", Node.class);
+        invoker.setBinding("Node", NodeImpl.class);
         invoker.setBinding("Array", new Array());
         //  invoker.setBinding("console", testEnvironment.getHTML_OBJECTS().getConsole());
     }

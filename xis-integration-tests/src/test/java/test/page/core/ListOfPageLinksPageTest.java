@@ -29,17 +29,17 @@ class ListOfPageLinksPageTest {
         var document = result.getDocument();
         var titleElement = document.getElementByTagName("title");
 
-        assertThat(titleElement.innerText).isEqualTo("List of links");
+        assertThat(titleElement.getInnerText()).isEqualTo("List of links");
 
         var link0 = document.getElementById("link_0");
-        assertThat(link0.innerText).isEqualTo("Index");
+        assertThat(link0.getInnerText()).isEqualTo("Index");
 
         var link1 = document.getElementById("link_1");
-        assertThat(link1.innerText).isEqualTo("Title test page");
+        assertThat(link1.getInnerText()).isEqualTo("Title test page");
 
         link1.click();
 
-        assertThat(titleElement.innerText).isEqualTo("Hello ! I am the title");
+        assertThat(titleElement.getInnerText()).isEqualTo("Hello ! I am the title");
 
     }
 }

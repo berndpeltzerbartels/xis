@@ -4,6 +4,7 @@ import one.xis.js.Javascript;
 import one.xis.js.JavascriptSource;
 import one.xis.test.dom.Document;
 import one.xis.test.dom.Element;
+import one.xis.test.dom.ElementImpl;
 import one.xis.test.js.JSUtil;
 import one.xis.utils.io.IOUtils;
 import org.junit.jupiter.api.Test;
@@ -24,8 +25,8 @@ class WidgetsTest {
         script += "widgets.loadWidgets(config);widgets.widgets";
 
         Function<String, Element> createElement = name -> {
-            var element = new Element(name);
-            element.appendChild(new Element("div"));
+            var element = new ElementImpl(name);
+            element.appendChild(new ElementImpl("div"));
             return element;
         };
         Function<String, String> trim = String::trim;

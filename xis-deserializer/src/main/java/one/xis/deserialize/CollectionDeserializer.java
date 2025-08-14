@@ -25,7 +25,7 @@ class CollectionDeserializer implements JsonDeserializer<Collection> {
 
     @Override
     public boolean matches(@NonNull JsonToken token, @NonNull AnnotatedElement target) {
-        return Collection.class.isAssignableFrom(getType(target)) && JsonToken.BEGIN_ARRAY.equals(token);
+        return Collection.class.isAssignableFrom(getType(target));
     }
 
     @Override
@@ -35,6 +35,35 @@ class CollectionDeserializer implements JsonDeserializer<Collection> {
                                             UserContext userContext,
                                             MainDeserializer mainDeserializer,
                                             PostProcessingResults postProcessingResults) throws IOException {
+        if (reader.peek() == JsonToken.BEGIN_ARRAY) {
+            return deserializeArray(reader, path, target, userContext, mainDeserializer, postProcessingResults);
+        }
+        if (reader.peek() == JsonToken.NULL) {
+            reader.nextNull();
+            if (target.isAnnotationPresent(Mandatory.class)) {
+                var context = new DeserializationContext(path, target, Mandatory.class, userContext);
+                postProcessingResults.add(new InvalidValueError(context, MISSING_MANDATORY_PROPERTY.getMessageKey(), MISSING_MANDATORY_PROPERTY.getGlobalMessageKey(), null));
+            }
+            return Optional.of(createCollection(getType(target)));
+        }
+        var elementTarget = getTypeParameter(target);
+        var value = mainDeserializer.deserialize(reader, path, elementTarget, userContext, postProcessingResults);
+        if (value.isEmpty()) {
+            return Optional.of(createCollection(getType(target)));
+        }
+        var collectionType = getType(target);
+        var collection = createCollection(collectionType);
+        collection.add(value);
+        return Optional.of(collection);
+    }
+
+
+    private Optional<Collection> deserializeArray(JsonReader reader,
+                                                  String path,
+                                                  AnnotatedElement target,
+                                                  UserContext userContext,
+                                                  MainDeserializer mainDeserializer,
+                                                  PostProcessingResults postProcessingResults) throws IOException {
         var collectionType = getType(target);
         var collection = createCollection(collectionType);
         var elementTarget = getTypeParameter(target);

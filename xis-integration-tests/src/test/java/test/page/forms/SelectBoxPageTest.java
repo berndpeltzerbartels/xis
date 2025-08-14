@@ -45,12 +45,12 @@ class SelectBoxPageTest {
         void options() {
             var result = context.openPage(SelectBoxPage.class);
             var form = result.getDocument().getElementByTagName("form");
-            var selectBox = form.findDescendant(element -> "select".equals(element.localName));
+            var selectBox = form.findDescendant(element -> "select".equals(element.getLocalName()));
 
-            assertThat(selectBox.findDescendants(e -> e.localName.equals("option"))).singleElement().satisfies(
+            assertThat(selectBox.findDescendants(e -> e.getLocalName().equals("option"))).singleElement().satisfies(
                     option -> {
                         assertThat(option.getAttribute("value")).isEqualTo("2");
-                        assertThat(option.innerText).isEqualTo("two");
+                        assertThat(option.getInnerText()).isEqualTo("two");
                     }
             );
 

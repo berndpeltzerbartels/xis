@@ -30,16 +30,16 @@ public class NodeList {
     }
 
     List<Element> getElementsByName(String name) {
-        return stream().filter(Element.class::isInstance)
-                .map(Element.class::cast)
-                .filter(e -> e.localName.equals(name))
+        return stream().filter(ElementImpl.class::isInstance)
+                .map(ElementImpl.class::cast)
+                .filter(e -> e.getLocalName().equals(name))
                 .collect(Collectors.toList());
     }
 
     Element getElementByName(String name) {
-        return stream().filter(Element.class::isInstance)
-                .map(Element.class::cast)
-                .filter(e -> e.localName.equals(name))
+        return stream().filter(ElementImpl.class::isInstance)
+                .map(ElementImpl.class::cast)
+                .filter(e -> e.getLocalName().equals(name))
                 .collect(CollectorUtils.toOnlyOptional(list -> new IllegalStateException("too many results for " + name)))
                 .orElse(null);
     }
@@ -55,11 +55,11 @@ public class NodeList {
     }
 
     void removeTextNodes() {
-        var textNodes = nodes.stream().filter(TextNode.class::isInstance).collect(Collectors.toSet());
+        var textNodes = nodes.stream().filter(TextNodeIml.class::isInstance).collect(Collectors.toSet());
         textNodes.forEach(nodes::remove);
     }
 
     Stream<Element> elements() {
-        return stream().filter(Element.class::isInstance).map(Element.class::cast);
+        return stream().filter(ElementImpl.class::isInstance).map(ElementImpl.class::cast);
     }
 }

@@ -6,7 +6,7 @@ import java.util.Collections;
 public class DomAssert {
 
     public static ElementResult assertAndGetRootElement(Document document, String name) {
-        assertTrue(document.rootNode.localName.equals(name), "Root element was expected to be <%s>, but it was <%s>", name, document.rootNode.localName);
+        assertTrue(document.rootNode.getLocalName().equals(name), "Root element was expected to be <%s>, but it was <%s>", name, document.rootNode.getLocalName());
         return new ElementResult(document.rootNode);
     }
 
@@ -28,7 +28,7 @@ public class DomAssert {
         for (int i = 0; i < names.length; i++) {
             var name = names[i];
             var e = childElements.get(i);
-            assertTrue(element, e.localName.equals(name), "Expected child element at index %d to be <%s>, but it was <%s>", i, name, e.localName);
+            assertTrue(element, e.getLocalName().equals(name), "Expected child element at index %d to be <%s>, but it was <%s>", i, name, e.getLocalName());
             elements.add(e);
         }
         return new ElementResults(Collections.unmodifiableList(elements));
@@ -45,12 +45,12 @@ public class DomAssert {
     }
 
     public static void assertTagName(Element element, String name) {
-        assertTrue(element, element.localName.equals(name), "Expected element to have tag name '%s'", name);
+        assertTrue(element, element.getLocalName().equals(name), "Expected element to have tag name '%s'", name);
     }
 
     public static ElementResult assertAndGetParentElement(Element element, String name) {
-        assertTrue(element, element.parentNode.localName.equals(name), "Expected element to have parent tag '%s'", name);
-        return new ElementResult(element.parentNode);
+        assertTrue(element, element.getParentNode().getLocalName().equals(name), "Expected element to have parent tag '%s'", name);
+        return new ElementResult(element.getParentNode());
     }
 
     static void assertTrue(boolean result, String errorMessage, Object... args) {

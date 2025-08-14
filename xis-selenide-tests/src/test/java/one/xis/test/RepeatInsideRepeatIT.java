@@ -21,13 +21,13 @@ public class RepeatInsideRepeatIT {
     void listElementsArePresent() {
         repeatInsideRepeat.open();
 
-        assertThat($("h5", 0).innerText().trim()).isEqualTo("title1");
-        assertThat($("h5", 1).innerText().trim()).isEqualTo("title2");
-        assertThat($("h5", 2).innerText().trim()).isEqualTo("title3");
+        assertThat($("h5", 0).getInnerText() ().trim()).isEqualTo("title1");
+        assertThat($("h5", 1).getInnerText() ().trim()).isEqualTo("title2");
+        assertThat($("h5", 2).getInnerText() ().trim()).isEqualTo("title3");
 
-        assertThat($("div.item", 0).find(".subItem").innerText().trim()).isEqualTo("subItem1");
-        assertThat($("div.item", 1).find(".subItem", 0).innerText().trim()).isEqualTo("subItem2");
-        assertThat($("div.item", 1).find(".subItem", 1).innerText().trim()).isEqualTo("subItem3");
+        assertThat($("div.item", 0).find(".subItem").getInnerText() ().trim()).isEqualTo("subItem1");
+        assertThat($("div.item", 1).find(".subItem", 0).getInnerText() ().trim()).isEqualTo("subItem2");
+        assertThat($("div.item", 1).find(".subItem", 1).getInnerText() ().trim()).isEqualTo("subItem3");
         assertThat($("div.item", 2).find(".subItem").exists()).isFalse();
 
     }

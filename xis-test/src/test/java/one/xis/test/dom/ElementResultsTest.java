@@ -14,7 +14,7 @@ class ElementResultsTest {
     class SuccessTest {
         @Test
         void assertSize() {
-            var results = new ElementResults(List.of(new Element("a")));
+            var results = new ElementResults(List.of(new ElementImpl("a")));
             results.assertSize(1);
         }
 
@@ -26,19 +26,19 @@ class ElementResultsTest {
 
         @Test
         void size() {
-            var results = new ElementResults(List.of(new Element("a")));
+            var results = new ElementResults(List.of(new ElementImpl("a")));
             assertThat(results.size()).isEqualTo(1);
         }
 
         @Test
         void toUniqueResult() {
-            var results = new ElementResults(List.of(new Element("a")));
+            var results = new ElementResults(List.of(new ElementImpl("a")));
             results.toUniqueResult().assertTagName("a");
         }
 
         @Test
         void pick() {
-            var results = new ElementResults(List.of(new Element("a")));
+            var results = new ElementResults(List.of(new ElementImpl("a")));
             results.pick(0).assertTagName("a");
             results.pick("a").assertTagName("a");
         }
@@ -55,13 +55,13 @@ class ElementResultsTest {
     class ExceptionTest {
         @Test
         void assertSize() {
-            var results = new ElementResults(List.of(new Element("a")));
+            var results = new ElementResults(List.of(new ElementImpl("a")));
             assertThrows(DomAssertionException.class, () -> results.assertSize(2));
         }
 
         @Test
         void assertEmpty() {
-            var results = new ElementResults(List.of(new Element("a")));
+            var results = new ElementResults(List.of(new ElementImpl("a")));
             assertThrows(DomAssertionException.class, results::assertEmpty);
         }
 

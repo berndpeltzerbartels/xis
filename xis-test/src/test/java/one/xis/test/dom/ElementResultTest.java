@@ -24,7 +24,7 @@ class ElementResultTest {
 
         @Test
         void assertAttribute() {
-            var element = new Element("a");
+            var element = new ElementImpl("a");
             var result = new ElementResult(element);
 
             assertThrows(DomAssertionException.class, () -> result.assertAttribute("b"));
@@ -75,7 +75,7 @@ class ElementResultTest {
 
         @Test
         void assertAttribute() {
-            var element = new Element("a");
+            var element = new ElementImpl("a");
             element.setAttribute("b", "c");
             var result = new ElementResult(element);
             result.assertAttribute("b");

@@ -24,6 +24,6 @@ class SimpleWidgetTest {
         var result = testContext.openPage(WidgetPage.class);
 
         System.out.println(result.getDocument().asString());
-        assertThat(result.getDocument().getElementById("greeting").innerText).isEqualTo("Huhu !");
+        assertThat(result.getDocument().getElementById("greeting").getInnerText()).isEqualTo("Huhu !");
     }
 }
