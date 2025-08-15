@@ -59,9 +59,9 @@ dependencies {
     implementation "org.projectlombok:lombok:$lombokVersion"
     implementation "org.reflections:reflections:$reflectionsVersion"
     implementation "org.mockito:mockito-core:$mockitoVersion"
-    implementation "org.graalvm.js:js:$graalVmVersion"
-    implementation "org.graalvm.js:js-scriptengine:$graalVmVersion"
-    implementation "org.graalvm.truffle:truffle-api:$graalVmVersion"
+    api "org.graalvm.js:js:$graalVmVersion"
+    api "org.graalvm.js:js-scriptengine:$graalVmVersion"
+    api "org.graalvm.truffle:truffle-api:$graalVmVersion"
     implementation "org.tinylog:tinylog-impl:$tinylogVersion"
     implementation 'org.jsoup:jsoup:1.17.2'
     implementation "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"

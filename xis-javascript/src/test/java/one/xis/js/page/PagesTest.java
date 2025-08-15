@@ -1,10 +1,7 @@
 package one.xis.js.page;
 
 import one.xis.js.Javascript;
-import one.xis.test.dom.Document;
-import one.xis.test.dom.Element;
-import one.xis.test.dom.ElementImpl;
-import one.xis.test.dom.Node;
+import one.xis.test.dom.*;
 import one.xis.test.js.JSUtil;
 import one.xis.utils.io.IOUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,14 +19,14 @@ import static one.xis.js.JavascriptSource.CLASSES;
 class PagesTest {
 
     private String javascript;
-    private Document document;
+    private DocumentImpl document;
 
     @BeforeEach
     void init() {
         javascript = Javascript.getScript(CLASSES);
         javascript += IOUtils.getResourceAsString("one/xis/page/PagesTestMocks.js");
         javascript += "var pages = new Pages(client);";
-        document = new Document("html");
+        document = new DocumentImpl("html");
     }
 
 
@@ -92,8 +89,8 @@ class PagesTest {
     }
 
     public Element htmlToElement(String content) {
-        var doc = Document.of(content);
-        return doc.rootNode;
+        var doc = (DocumentImpl) Document.of(content);
+        return doc.getDocumentElement();
     }
 
 

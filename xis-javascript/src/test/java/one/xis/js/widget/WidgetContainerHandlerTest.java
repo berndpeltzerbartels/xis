@@ -36,7 +36,7 @@ class WidgetContainerHandlerTest {
         bindings.put("tag", container);
         bindings.put("widgets", new WidgetsMock());
         bindings.put("debug", new Debug());
-        bindings.put("window", new Window(document.location));
+        bindings.put("window", new Window(document.getLocation()));
         bindings.put("Node", nodeMock);
 
         JSUtil.execute(script, bindings);

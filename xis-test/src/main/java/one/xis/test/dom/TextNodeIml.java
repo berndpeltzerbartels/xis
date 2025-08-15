@@ -9,13 +9,14 @@ import java.util.List;
 public class TextNodeIml extends NodeImpl implements TextNode {
 
     @Getter
-    public Object nodeValue;
+    public String nodeValue;
 
     @SuppressWarnings("unused") // used in js
     public static final int nodeType = 3;
     public Object _expression;
 
-    public TextNodeIml(Object nodeValue) {
+    public TextNodeIml(String nodeValue) {
+        super(TEXT_NODE);
         this.nodeValue = nodeValue;
     }
 
@@ -48,8 +49,7 @@ public class TextNodeIml extends NodeImpl implements TextNode {
 
 
     @SuppressWarnings("unused")
-    @Override
-    public void setNodeValue(Object nodeValue) {
+    public void setNodeValue(String nodeValue) {
         this.nodeValue = nodeValue;
     }
 

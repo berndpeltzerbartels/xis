@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class ForeachHandlerTest {
 
-    private Document document;
+    private DocumentImpl document;
     private ElementImpl foreach;
     private Map<String, Object> nodeMock;
 
@@ -24,7 +24,7 @@ class ForeachHandlerTest {
     void initDocument() {
         nodeMock = new HashMap<>();
         nodeMock.put("ELEMENT_NODE", 1);
-        document = Document.of("<html><body><div id=\"messages\"></div></body></html>");
+        document = (DocumentImpl) Document.of("<html><body><div id=\"messages\"></div></body></html>");
 
         var body = document.getElementByTagName("body");
         var div1 = document.createElement("div");

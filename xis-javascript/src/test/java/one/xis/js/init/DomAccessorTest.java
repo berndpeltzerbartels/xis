@@ -2,6 +2,7 @@ package one.xis.js.init;
 
 import one.xis.js.Javascript;
 import one.xis.test.dom.Document;
+import one.xis.test.dom.DocumentImpl;
 import one.xis.test.dom.DomAssert;
 import one.xis.test.dom.ElementImpl;
 import one.xis.test.js.JSUtil;
@@ -20,9 +21,9 @@ class DomAccessorTest {
     @Test
     @DisplayName("Element e2 is a child of element e1 and e2 is getting replaced by element x")
     void replaceElement1() throws ScriptException {
-        var document = new Document(new ElementImpl("root"));
-        document.rootNode.appendChild(document.createElement("e1"));
-        document.rootNode.appendChild(document.createElement("e2"));
+        var document = new DocumentImpl(new ElementImpl("root"));
+        document.getDocumentElement().appendChild(document.createElement("e1"));
+        document.getDocumentElement().appendChild(document.createElement("e2"));
 
         var js = Javascript.getScript(CLASSES, FUNCTIONS);
         js += "var accessor = new DomAccessor();";
@@ -55,8 +56,8 @@ class DomAccessorTest {
     @Test
     @DisplayName("Element e1 is getting replaced by element x")
     void replaceElement2() throws ScriptException {
-        var document = new Document(new ElementImpl("root"));
-        document.rootNode.appendChild(document.createElement("e1"));
+        var document = new DocumentImpl(new ElementImpl("root"));
+        document.getDocumentElement().appendChild(document.createElement("e1"));
 
         var js = Javascript.getScript(CLASSES, FUNCTIONS);
         js += "var accessor = new DomAccessor();";
@@ -80,13 +81,13 @@ class DomAccessorTest {
     @Test
     @DisplayName("e1 has next sibling e2 and e2 is replaced by x")
     void replaceElement3() throws ScriptException {
-        var document = new Document(new ElementImpl("root"));
+        var document = new DocumentImpl(new ElementImpl("root"));
         var e1 = document.createElement("e1");
         var e2 = document.createElement("e2");
         var e3 = document.createElement("e3");
         e1.appendChild(e3);
-        document.rootNode.appendChild(e1);
-        document.rootNode.appendChild(e2);
+        document.getDocumentElement().appendChild(e1);
+        document.getDocumentElement().appendChild(e2);
 
 
         var js = Javascript.getScript(CLASSES, FUNCTIONS);
@@ -118,8 +119,8 @@ class DomAccessorTest {
 
     @Test
     void insertParent() throws ScriptException {
-        var document = new Document(new ElementImpl("root"));
-        document.rootNode.appendChild(document.createElement("e2"));
+        var document = new DocumentImpl(new ElementImpl("root"));
+        document.getDocumentElement().appendChild(document.createElement("e2"));
 
         var js = Javascript.getScript(CLASSES, FUNCTIONS);
         js += "var accessor = new DomAccessor();";
@@ -150,7 +151,7 @@ class DomAccessorTest {
 
         JSUtil.execute(js, Map.of("document", document));
 
-        assertThat(document.rootNode.getChildElementNames()).containsExactly("x");
+        assertThat(document.getDocumentElement().getChildElementNames()).containsExactly("x");
         assertThat(document.getElementByTagName("x").getChildElementNames()).containsExactly("b", "c");
 
     }

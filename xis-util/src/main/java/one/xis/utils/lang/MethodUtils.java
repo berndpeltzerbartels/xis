@@ -13,6 +13,48 @@ public class MethodUtils {
 
     public static final Predicate<Method> NON_PRIVATE = method -> !Modifier.isPrivate(method.getModifiers());
 
+    public static Optional<Method> findSetter(@NonNull Class<?> clazz, @NonNull String propertyName) {
+        String methodName = "set" + StringUtils.firstToUpperCase(propertyName);
+        Class<?> currentClass = clazz;
+        while (currentClass != null && !currentClass.equals(Object.class)) {
+            for (Method method : currentClass.getDeclaredMethods()) {
+                if (method.getName().equals(methodName) && method.getParameterCount() == 1) {
+                    return Optional.of(method);
+                }
+            }
+            currentClass = currentClass.getSuperclass();
+        }
+        return Optional.empty();
+    }
+
+
+    public static Optional<Method> findGetter(@NonNull Class<?> clazz, @NonNull String propertyName) {
+        String methodName = "get" + StringUtils.firstToUpperCase(propertyName);
+        Class<?> currentClass = clazz;
+        while (currentClass != null && !currentClass.equals(Object.class)) {
+            for (Method method : currentClass.getDeclaredMethods()) {
+                if (method.getName().equals(methodName) && method.getParameterCount() == 0) {
+                    return Optional.of(method);
+                }
+            }
+            currentClass = currentClass.getSuperclass();
+        }
+        return Optional.empty();
+    }
+
+    public static Method findMethod(@NonNull Class<?> clazz, @NonNull String methodName, Class<?>... parameterTypes) {
+        Class<?> currentClass = clazz;
+        while (currentClass != null && !currentClass.equals(Object.class)) {
+            try {
+                return currentClass.getDeclaredMethod(methodName, parameterTypes);
+            } catch (NoSuchMethodException e) {
+                // Methode in der aktuellen Klasse nicht gefunden, versuche die Superklasse
+                currentClass = currentClass.getSuperclass();
+            }
+        }
+        throw new RuntimeException("Method " + methodName + " not found in class " + clazz.getName() + " or its superclasses");
+    }
+
     public static <A extends Annotation> Predicate<Method> annotatedWith(Class<A> annotationClass) {
         return method -> method.isAnnotationPresent(annotationClass);
     }
@@ -43,6 +85,14 @@ public class MethodUtils {
             return method.invoke(o, args);
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public static Object doInvoke(Object o, Method method, Object... args) {
+        try {
+            return invoke(o, method, args);
+        } catch (InvocationTargetException e) {
+            throw new RuntimeException(e.getTargetException());
         }
     }
 
@@ -96,6 +146,7 @@ public class MethodUtils {
         Collections.reverse(classes);
         return classes;
     }
+
 
     private static Stream<Method> declaredMethods(Class<?> type) {
         return Arrays.stream(type.getDeclaredMethods());

@@ -14,8 +14,8 @@ class DocumentTest {
         var html = "<html><head><title>Title</title></head><body><div>123</div><div/></body></html>";
         var document = Document.of(html);
 
-        assertThat(document.rootNode.getLocalName()).isEqualTo("html");
-        assertThat(document.rootNode.getChildList().stream().map(Node::getName)).containsExactly("head", "body");
+        assertThat(document.getDocumentElement().getLocalName()).isEqualTo("html");
+        assertThat(document.getDocumentElement().getChildList().stream().map(Node::getName)).containsExactly("head", "body");
 
         var head = document.getElementByTagName("head");
         assertThat(head.getChildList().size()).isEqualTo(1);
@@ -44,8 +44,8 @@ class DocumentTest {
         var html = new Resources().getByPath("/default-develop-index.html").getContent();
         var document = Document.of(html);
 
-        assertThat(document.rootNode.getLocalName()).isEqualTo("html");
-        assertThat(document.rootNode.getChildElementNames()).containsExactly("head", "body");
+        assertThat(document.getDocumentElement().getLocalName()).isEqualTo("html");
+        assertThat(document.getDocumentElement().getChildElementNames()).containsExactly("head", "body");
 
         var head = document.getElementByTagName("head");
         assertThat(head.getChildElementNames()).contains("title", "script");
@@ -82,11 +82,11 @@ class DocumentTest {
     @DisplayName("Attributes from root-element in source are present in document-mock")
     void attributes2() {
         var xml = "<a x=\"1\" y=\"2\"><e/></a>";
-        var document = Document.of(xml);
+        var document = ((DocumentImpl) Document.of(xml));
 
         var e = document.getElementByTagName("e");
-        assertThat(document.rootNode.getAttribute("x")).isEqualTo("1");
-        assertThat(document.rootNode.getAttribute("y")).isEqualTo("2");
+        assertThat(document.getDocumentElement().getAttribute("x")).isEqualTo("1");
+        assertThat(document.getDocumentElement().getAttribute("y")).isEqualTo("2");
     }
 
     @Test
@@ -129,7 +129,7 @@ class DocumentTest {
     void insertBefore2() {
         var xml = "<x><a/><b/></x>";
 
-        var document = Document.of(xml);
+        var document = (DocumentImpl) Document.of(xml);
         var x = document.getElementByTagName("x");
         var a = document.getElementByTagName("a");
         var b = document.getElementByTagName("b");

@@ -10,9 +10,9 @@ import java.util.stream.Collectors;
 public interface Element extends Node {
     static Element of(String html) {
         var doc = DocumentBuilder.build(html);
-        return doc.getRootNode();
+        return doc.getDocumentElement();
     }
-
+    
     void appendChild(Node node);
 
     String getId();

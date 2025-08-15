@@ -46,7 +46,7 @@ class ElementResultsTest {
 
         @Test
         void pickAll() {
-            var results = new ElementResults(Document.of("<a><c/><b/><c/></a>").rootNode.getChildElements());
+            var results = new ElementResults(Document.of("<a><c/><b/><c/></a>").getDocumentElement().getChildElements());
             assertThat(results.pickAll("c").size()).isEqualTo(2);
         }
     }

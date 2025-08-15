@@ -6,8 +6,8 @@ import java.util.Collections;
 public class DomAssert {
 
     public static ElementResult assertAndGetRootElement(Document document, String name) {
-        assertTrue(document.rootNode.getLocalName().equals(name), "Root element was expected to be <%s>, but it was <%s>", name, document.rootNode.getLocalName());
-        return new ElementResult(document.rootNode);
+        assertTrue(document.getDocumentElement().getLocalName().equals(name), "Root element was expected to be <%s>, but it was <%s>", name, document.getDocumentElement().getLocalName());
+        return new ElementResult(document.getDocumentElement());
     }
 
 

@@ -3,6 +3,7 @@ package one.xis.js.widget;
 import one.xis.js.Javascript;
 import one.xis.js.JavascriptSource;
 import one.xis.test.dom.Document;
+import one.xis.test.dom.DocumentImpl;
 import one.xis.test.dom.Element;
 import one.xis.test.dom.ElementImpl;
 import one.xis.test.js.JSUtil;
@@ -32,7 +33,7 @@ class WidgetsTest {
         Function<String, String> trim = String::trim;
 
         var bindings = new HashMap<String, Object>();
-        bindings.put("document", new Document("html"));
+        bindings.put("document", new DocumentImpl("html"));
         bindings.put("createElement", createElement);
         bindings.put("trim", trim);
         Function<String, Element> htmlToElement = this::htmlToElement;
@@ -51,7 +52,7 @@ class WidgetsTest {
 
     public Element htmlToElement(String content) {
         var doc = Document.of(content);
-        return doc.rootNode;
+        return doc.getDocumentElement();
     }
 
 

@@ -9,9 +9,9 @@ class DocumentBuilder {
     static Document build(String html) {
         var w3cDoc = XmlUtil.loadDocument(html);
         var rootName = w3cDoc.getDocumentElement().getTagName();
-        var document = new Document(rootName);
-        copyAttributes(w3cDoc.getDocumentElement(), document.rootNode);
-        evaluate(w3cDoc.getDocumentElement(), document.rootNode);
+        var document = new DocumentImpl(rootName);
+        copyAttributes(w3cDoc.getDocumentElement(), document.getDocumentElement());
+        evaluate(w3cDoc.getDocumentElement(), document.getDocumentElement());
         return document;
     }
 

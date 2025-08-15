@@ -1,6 +1,8 @@
 package one.xis.test.dom;
 
 public interface Node {
+    String getTextContent();
+
     void insertPreviousSibling(Node node);
 
     void remove();

@@ -3,6 +3,7 @@ package one.xis.test.dom;
 
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 import one.xis.test.js.Event;
 import one.xis.utils.lang.StringUtils;
 import org.graalvm.polyglot.Value;
@@ -17,11 +18,11 @@ import java.util.stream.Collectors;
 @SuppressWarnings("unused")
 public class ElementImpl extends NodeImpl implements Element {
 
+    @Setter
+    private String id;
     public final String localName;
-    public Node firstChild;
     public DOMStringList classList = new DOMStringList();
     public final int nodeType = 1;
-    public final NodeList childNodes = new NodeList();
     private final Map<String, String> attributes = new HashMap<>();
     private final Map<String, Collection<Consumer<Object>>> eventListeners = new HashMap<>();
     public static ElementImpl elementInFocus;
@@ -53,31 +54,15 @@ public class ElementImpl extends NodeImpl implements Element {
             "cloneNode");
 
     public ElementImpl(@NonNull String tagName) {
+        super(ELEMENT_NODE);
         this.localName = tagName;
         setAttribute("childNodes", childNodes);
     }
 
-    @Override
-    public String getId() {
-        return attributes.get("id");
+    public String getTagName() {
+        return localName;
     }
 
-    public void appendChild(@NonNull Node node) {
-        node.setNextSibling(null);
-        if (firstChild == null) {
-            setFirstChild(node);
-        } else {
-            var last = (NodeImpl) firstChild.getLastSibling();
-            last.setNextSibling(node);
-            if (last == last.getNextSibling()) {
-                throw new IllegalStateException();
-            }
-        }
-
-        ((NodeImpl) node).parentNode = this;
-        updateChildNodes();
-
-    }
 
     @Override
     public void insertBefore(Node node, Node referenceNode) {
@@ -266,16 +251,6 @@ public class ElementImpl extends NodeImpl implements Element {
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public String getTextContent() {
-        return childNodes.stream()
-                .filter(TextNodeIml.class::isInstance)
-                .map(TextNodeIml.class::cast)
-                .map(TextNode::getNodeValue)
-                .map(StringUtils::toString)
-                .filter(Objects::nonNull)
-                .collect(Collectors.joining()).trim();
-    }
 
     @Override
     public Element getDescendantById(String id) {
@@ -426,14 +401,6 @@ public class ElementImpl extends NodeImpl implements Element {
         return result;
     }
 
-    void updateChildNodes() {
-        childNodes.clear();
-        var child = firstChild;
-        while (child != null) {
-            childNodes.addNode(child);
-            child = child.getNextSibling();
-        }
-    }
 
     public void setFirstChild(Node node) {
         if (this.equals(node)) {
