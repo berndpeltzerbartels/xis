@@ -2,7 +2,7 @@ package one.xis.js.widget;
 
 import one.xis.js.Javascript;
 import one.xis.test.dom.Document;
-import one.xis.test.dom.Element;
+import one.xis.test.dom.DocumentImpl;
 import one.xis.test.dom.ElementImpl;
 import one.xis.test.dom.Window;
 import one.xis.test.js.Debug;
@@ -36,14 +36,14 @@ class WidgetContainerHandlerTest {
         bindings.put("tag", container);
         bindings.put("widgets", new WidgetsMock());
         bindings.put("debug", new Debug());
-        bindings.put("window", new Window(document.getLocation()));
+        bindings.put("window", new Window(((DocumentImpl) document).getLocation()));
         bindings.put("Node", nodeMock);
 
         JSUtil.execute(script, bindings);
 
         assertThat(container.getFirstChild()).isNotNull();
         assertThat(container.getFirstChild()).isInstanceOf(ElementImpl.class);
-        assertThat((((Element) container.getFirstChild()).getAttribute("id"))).isEqualTo("widgetRoot");
+        assertThat((((ElementImpl) container.getFirstChild()).getAttribute("id"))).isEqualTo("widgetRoot");
 
     }
 

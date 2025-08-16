@@ -1,9 +1,6 @@
 package one.xis.test.dom;
 
 import lombok.Getter;
-import org.graalvm.polyglot.Value;
-
-import java.util.List;
 
 
 public class TextNodeIml extends NodeImpl implements TextNode {
@@ -21,25 +18,12 @@ public class TextNodeIml extends NodeImpl implements TextNode {
     }
 
     @Override
-    public NodeImpl cloneNode() {
+    public Node cloneNode() {
         return new TextNodeIml(nodeValue);
     }
 
-    @Override
-    public String getName() {
-        return "TextNode";
-    }
-
-    @Override
     public String asString() {
         return nodeValue != null ? nodeValue.toString() : "";
-    }
-
-    @Override
-    protected void evaluateContent(StringBuilder builder, int indent) {
-        if (nodeValue != null) {
-            builder.append(nodeValue);
-        }
     }
 
     @Override
@@ -54,29 +38,7 @@ public class TextNodeIml extends NodeImpl implements TextNode {
     }
 
     @Override
-    public Object getMember(String key) {
-        if ("nodeValue".equals(key)) {
-            return nodeValue;
-        }
-        throw new IllegalArgumentException("Unknown member: " + key);
-    }
-
-    @Override
-    public Object getMemberKeys() {
-        return List.of("nodeValue");
-    }
-
-    @Override
-    public boolean hasMember(String key) {
-        return "nodeValue".equals(key);
-    }
-
-    @Override
-    public void putMember(String key, Value value) {
-        if ("nodeValue".equals(key)) {
-            setNodeValue(value.asString());
-        } else {
-            throw new IllegalArgumentException("Unknown member: " + key);
-        }
+    protected void evaluateContent(StringBuilder builder, int i) {
+        builder.append(nodeValue == null ? "" : nodeValue);
     }
 }

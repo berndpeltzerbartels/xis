@@ -4,7 +4,6 @@ import one.xis.js.Javascript;
 import one.xis.js.JavascriptSource;
 import one.xis.test.dom.Document;
 import one.xis.test.dom.DocumentImpl;
-import one.xis.test.dom.Element;
 import one.xis.test.dom.ElementImpl;
 import one.xis.test.js.JSUtil;
 import one.xis.utils.io.IOUtils;
@@ -25,7 +24,7 @@ class WidgetsTest {
         script += "var widgets = new Widgets(client);\n";
         script += "widgets.loadWidgets(config);widgets.widgets";
 
-        Function<String, Element> createElement = name -> {
+        Function<String, ElementImpl> createElement = name -> {
             var element = new ElementImpl(name);
             element.appendChild(new ElementImpl("div"));
             return element;
@@ -36,7 +35,7 @@ class WidgetsTest {
         bindings.put("document", new DocumentImpl("html"));
         bindings.put("createElement", createElement);
         bindings.put("trim", trim);
-        Function<String, Element> htmlToElement = this::htmlToElement;
+        Function<String, ElementImpl> htmlToElement = this::htmlToElement;
         bindings.put("htmlToElement", htmlToElement);
 
         var result = JSUtil.execute(script, bindings);
@@ -50,9 +49,9 @@ class WidgetsTest {
         assertThat(widgetData.getMember("widgetAttributes")).isNotNull();
     }
 
-    public Element htmlToElement(String content) {
+    public ElementImpl htmlToElement(String content) {
         var doc = Document.of(content);
-        return doc.getDocumentElement();
+        return (ElementImpl) doc.getDocumentElement();
     }
 
 

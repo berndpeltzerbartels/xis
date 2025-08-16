@@ -2,9 +2,9 @@ package one.xis.test.dom;
 
 import lombok.Getter;
 
+@Getter
 public class OptionElementImpl extends ElementImpl implements OptionElement {
 
-    @Getter
     public boolean selected;
 
     public OptionElementImpl() {
@@ -18,6 +18,23 @@ public class OptionElementImpl extends ElementImpl implements OptionElement {
         if (select != null) {
             select.updateSelectionState(this);
         }
+    }
+
+    @Override
+    public void deselect() {
+        selected = false;
+        var select = findParentSelect();
+        if (select != null) {
+            select.updateSelectionState(this);
+        }
+    }
+
+    SelectElementImpl findParentSelect() {
+        var parent = this.getParentNode();
+        while (parent != null && !(parent instanceof SelectElementImpl)) {
+            parent = parent.getParentNode();
+        }
+        return (SelectElementImpl) parent;
     }
 
 }

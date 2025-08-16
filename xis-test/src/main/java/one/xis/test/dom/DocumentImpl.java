@@ -1,15 +1,14 @@
 package one.xis.test.dom;
 
 import lombok.Getter;
-import one.xis.utils.io.IOUtils;
 
-import java.util.*;
-import java.util.function.Predicate;
+import java.util.List;
+import java.util.Optional;
 
 @Getter
 public class DocumentImpl implements Document {
 
-    public ElementImpl documentElement;
+    public final ElementImpl documentElement;
 
     public Location location = new Location();
 
@@ -24,13 +23,7 @@ public class DocumentImpl implements Document {
     }
 
     public Element createElement(String name) {
-        return switch (name) {
-            case "input" -> new InputElementImpl();
-            case "select" -> new SelectElement();
-            case "option" -> new OptionElementImpl();
-            case "textarea" -> new TextareaElement();
-            default -> new ElementImpl(name);
-        };
+        return Element.createElement(name);
     }
 
     @Override
@@ -43,87 +36,54 @@ public class DocumentImpl implements Document {
         return documentElement.querySelectorAll(selector);
     }
 
+    @Override
     public TextNode createTextNode(String content) {
         return new TextNodeIml(content);
     }
 
-    public void setTextContent(String text) {
-        if (documentElement != null) {
-            documentElement.setInnerText(text);
-        }
-    }
-
-    @Override
-    public String getTextContent() {
+    public String getInnerText() {
         return documentElement != null ? documentElement.getInnerText() : null;
     }
 
-    @Override
-    public Element getBody() {
-        return documentElement.getChildElementByName("body");
+    Element getBody() {
+        return documentElement.getElementByTagName("body");
     }
 
-    @Override
-    public Element getHead() {
-        return documentElement.getChildElementByName("head");
+    Element getHead() {
+        return documentElement.getElementByTagName("head");
     }
 
-    @Override
-    public String getTitle() {
-        return Optional.ofNullable(getHead())
-                .map(head -> head.getChildElementByName("title"))
-                .map(Element::getInnerText)
+    String getTitle() {
+        return Optional.ofNullable((ElementImpl) getHead())
+                .map(head -> (ElementImpl) head.getElementByTagName("title"))
+                .map(ElementImpl::getInnerText)
                 .orElse(null);
     }
 
     @Override
     public NodeList getElementsByTagName(String name) {
-        var nodeList = new NodeList();
-        documentElement.findByTagName(name, nodeList);
-        return nodeList;
+        return documentElement.getElementsByTagName(name);
     }
 
     @Override
     public Element getElementById(String id) {
-        return documentElement.getDescendantById(id);
+        return documentElement.getElementById(id);
     }
 
     @Override
     public InputElement getInputElementById(String id) {
-        return (InputElement) documentElement.getDescendantById(id);
+        var e = getElementById(id);
+        return e instanceof InputElement inputElement ? inputElement : null;
     }
 
-    @Override
-    public List<Element> getElementsByClass(String cssClass) {
-        var list = new ArrayList<Element>();
-        documentElement.findByClass(cssClass, list);
-        return list;
-    }
 
     @Override
     public Element getElementByTagName(String name) {
         var list = getElementsByTagName(name);
-        switch (list.length) {
-            case 0:
-                return null;
-            case 1:
-                return (ElementImpl) list.item(0);
-            default:
-                throw new IllegalStateException("too many results for " + name);
-        }
-    }
-
-    public static Document fromResource(String classPathResource) {
-        return of(IOUtils.getResourceAsString(classPathResource));
-    }
-
-    @Override
-    public Element findElement(Predicate<Element> predicate) {
-        var result = new ArrayList<>(findElements(predicate));
-        return switch (result.size()) {
-            case 0 -> throw new NoSuchElementException();
-            case 1 -> result.get(0);
-            default -> throw new IllegalStateException("too many results");
+        return switch (list.length) {
+            case 0 -> null;
+            case 1 -> (ElementImpl) list.item(0);
+            default -> throw new IllegalStateException("too many results for " + name);
         };
     }
 
@@ -132,18 +92,9 @@ public class DocumentImpl implements Document {
         return documentElement != null ? documentElement.asString() : null;
     }
 
-    // TODO test
     @Override
-    public Collection<Element> findElements(Predicate<Element> predicate) {
-        var results = new HashSet<Element>();
-        if (this.getDocumentElement() != null) {
-            documentElement.findElements(predicate, results);
-        }
-        return results;
-    }
-
-    public static Document of(String html) {
-        return DocumentBuilder.build(html);
+    public List<Element> getElementsByClass(String item) {
+        return documentElement.getElementsByClass(item);
     }
 
 }

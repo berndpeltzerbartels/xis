@@ -1,6 +1,8 @@
 package test.page.forms;
 
 import one.xis.context.IntegrationTestContext;
+import one.xis.test.dom.Element;
+import one.xis.test.dom.ElementImpl;
 import one.xis.test.dom.OptionElement;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -45,12 +47,12 @@ class SelectBoxPageTest {
         void options() {
             var result = context.openPage(SelectBoxPage.class);
             var form = result.getDocument().getElementByTagName("form");
-            var selectBox = form.findDescendant(element -> "select".equals(element.getLocalName()));
+            var selectBox = form.findDescendant(e -> e instanceof ElementImpl element && "select".equals(element.getLocalName()));
 
-            assertThat(selectBox.findDescendants(e -> e.getLocalName().equals("option"))).singleElement().satisfies(
+            assertThat(((Element) selectBox).findDescendants(e -> e instanceof ElementImpl element && element.getLocalName().equals("option"))).singleElement().satisfies(
                     option -> {
-                        assertThat(option.getAttribute("value")).isEqualTo("2");
-                        assertThat(option.getInnerText()).isEqualTo("two");
+                        assertThat(((Element) option).getAttribute("value")).isEqualTo("2");
+                        assertThat(((ElementImpl) option).getInnerText()).isEqualTo("two");
                     }
             );
 

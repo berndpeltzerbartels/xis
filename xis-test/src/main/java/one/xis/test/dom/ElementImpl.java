@@ -1,83 +1,61 @@
 package one.xis.test.dom;
 
-
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.Setter;
-import one.xis.test.js.Event;
-import one.xis.utils.lang.StringUtils;
-import org.graalvm.polyglot.Value;
-import org.graalvm.polyglot.proxy.ProxyExecutable;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
 
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
+
 
 @Getter
 @SuppressWarnings("unused")
 public class ElementImpl extends NodeImpl implements Element {
 
-    @Setter
-    private String id;
     public final String localName;
-    public DOMStringList classList = new DOMStringList();
+    public final DOMStringList classList = new DOMStringList();
     public final int nodeType = 1;
     private final Map<String, String> attributes = new HashMap<>();
     private final Map<String, Collection<Consumer<Object>>> eventListeners = new HashMap<>();
-    public static ElementImpl elementInFocus;
 
-    static final Set<String> MEMEBERS = Set.of("childNodes",
-            "firstChild",
-            "parentNode",
-            "nextSibling",
-            "localName",
-            "tagName",
-            "classList",
-            "id",
-            "innerText",
-            "textContent",
-            "innerHTML",
-            // Methoden hinzufügen
-            "getAttributeNames",
-            "getAttribute",
-            "setAttribute",
-            "hasAttribute",
-            "removeAttribute",
-            "removeChild",
-            "appendChild",
-            "nodeType",
-            "asString",
-            "addEventListener",
-            "click",
-            "insertBefore",
-            "cloneNode");
-
-    public ElementImpl(@NonNull String tagName) {
-        super(ELEMENT_NODE);
-        this.localName = tagName;
-        setAttribute("childNodes", childNodes);
+    public ElementImpl(String localName) {
+        super(NodeImpl.ELEMENT_NODE);
+        this.localName = localName;
     }
-
-    public String getTagName() {
-        return localName;
-    }
-
 
     @Override
-    public void insertBefore(Node node, Node referenceNode) {
-        if (((NodeImpl) referenceNode).parentNode != this) {
-            throw new IllegalStateException();
+    public void setAttribute(String name, String value) {
+        if (name.equals("class")) {
+            classList.clear();
+            for (String item : value.split(" ")) {
+                if (!item.isBlank()) {
+                    classList.add(item);
+                }
+            }
         }
-        referenceNode.insertPreviousSibling(node);
-        updateChildNodes();
+        attributes.put(name, value);
     }
 
-    public void removeChild(NodeImpl node) {
-        if (node.parentNode != this) {
-            return; //throw new IllegalStateException("not a child");
-        }
+    @Override
+    public void removeChild(Node b) {
+        var node = getChildNodes().stream().filter(n -> n == b).findFirst().orElseThrow(() -> new IllegalStateException("Node not found"));
         node.remove();
+    }
+
+    @Override
+    public void insertBefore(@NonNull Node before, @NonNull Node marker) {
+        var previousChild = ((NodeImpl) marker).getPreviousSibling();
+        if (previousChild == null) {
+            setFirstChild((NodeImpl) before);
+        } else {
+            previousChild.setNextSibling((NodeImpl) before);
+        }
+        ((NodeImpl) before).setNextSibling((NodeImpl) marker);
+        ((NodeImpl) before).setParentNode(this);
+        updateChildNodes();
     }
 
     @Override
@@ -90,41 +68,64 @@ public class ElementImpl extends NodeImpl implements Element {
         return attributes.get(name);
     }
 
-    public void setAttribute(String name, String value) {
-        attributes.put(name, value);
-        if (name.equals("class")) {
-            addClasses(value);
-        }
+    @Override
+    public Element querySelector(String selector) {
+        List<Element> results = querySelectorAll(selector, true);
+        return results.isEmpty() ? null : results.get(0);
+    }
+
+    @Override
+    public List<Element> querySelectorAll(String selector) {
+        return querySelectorAll(selector, false);
+    }
+
+    @Override
+    public ElementImpl cloneNode() {
+        var clone = new ElementImpl(localName);
+        this.getAttributes().forEach(clone::setAttribute);
+        this.classList.getValues().forEach(clone.classList::add);
+        getChildNodes().stream().forEach(child -> clone.appendChild(child.cloneNode()));
+        return clone;
     }
 
 
-    public void setAttribute(String name, Object value) {
-        setAttribute(name, value == null ? null : value.toString());
+    @Override
+    public Element getElementById(@NonNull String id) {
+        if (id.equals(getAttribute("id"))) {
+            return this;
+        }
+        var child = getFirstChild();
+        while (child != null) {
+            if (child instanceof ElementImpl element) {
+                var result = element.getElementById(id);
+                if (result != null) {
+                    return result;
+                }
+            }
+            child = child.getNextSibling();
+        }
+        return null;
     }
 
-// in xis-test/src/main/java/one/xis/test/dom/ElementImpl.java
+    @Override
+    public NodeList getElementsByTagName(String name) {
+        var list = new ArrayList<Node>();
+        findElements(e -> e.getLocalName().equals(name), list);
+        return new NodeList(list);
 
-    private void setAttribute(String name, Value value) {
-        if (value == null || value.isNull()) {
-            setAttribute(name, (String) null);
-            return;
-        }
+    }
 
-        String stringValue;
-        if (value.isString()) {
-            stringValue = value.asString();
-        } else if (value.isNumber()) {
-            // Konvertiert JS-Zahlen explizit in einen String.
-            stringValue = value.as(Number.class).toString();
-        } else if (value.isBoolean()) {
-            // Konvertiert JS-Booleans explizit in einen String.
-            stringValue = String.valueOf(value.asBoolean());
-        } else {
-            // Fallback, der versucht, eine allgemeine String-Konvertierung durchzuführen.
-            stringValue = value.toString();
-        }
+    @Override
+    public void click() {
 
-        setAttribute(name, stringValue);
+    }
+
+    @Override
+    public List<Element> getChildElements() {
+        return getChildNodes().stream()
+                .filter(Element.class::isInstance)
+                .map(Element.class::cast)
+                .toList();
     }
 
     @Override
@@ -132,320 +133,219 @@ public class ElementImpl extends NodeImpl implements Element {
         return classList.getValues();
     }
 
-    @Override
-    public boolean hasChildNodes() {
-        return childNodes.length > 0;
-    }
 
-    public void setInnerText(String text) {
-        this.childNodes.clear();
-        this.setFirstChild(null);
-        this.appendChild(new TextNodeIml(text));
-    }
-
-    @Override
-    public List<Element> querySelectorAll(String selector, boolean firstOnly) {
-        return Element.super.querySelectorAll(selector, firstOnly);
-    }
-
-    public void removeAttribute(String name) {
-        attributes.remove(name);
-        if (name.equals("class")) {
-            classList.clear();
-        }
-    }
-
-    public boolean hasAttribute(String name) {
-        if ("childNodes".equals(name)) {
-            return true; // childNodes is a special attribute
-        }
-        return attributes.containsKey(name);
-    }
-
-    @Override
-    public List<Node> getChildList() {
-        return childNodes.list();
-    }
-
-    @Override
-    public String getName() {
-        return localName;
-    }
-
-    @Override
-    public List<Element> getChildElementsByName(String name) {
-        return childNodes.getElementsByName(name);
-    }
-
-    @Override
-    public Element getChildElementByName(String name) {
-        return childNodes.getElementByName(name);
-    }
-
-    private void addClasses(String classes) {
-        Arrays.stream(classes.split(" "))
-                .filter(StringUtils::isNotEmpty)
-                .forEach(classList::add);
-
-    }
-
-    @Override
-    public NodeImpl cloneNode() {
-        var clone = new ElementImpl(localName);
-        this.attributes.forEach(clone::setAttribute);
-        childNodes.stream().forEach(child -> clone.appendChild(child.cloneNode()));
-        return clone;
-    }
-
-    public Element childElement(int index) {
-        var elementList = getChildElements();
-        if (index >= elementList.size()) {
-            return null;
-        }
-        return elementList.get(index);
-    }
-
-
-    public void removeChild(Node node) {
-        if (node.getParentNode() != this) {
-            return; //throw new IllegalStateException("not a child");
-        }
-        node.remove();
-    }
-
-
-    @Override
-    public List<Element> findDescendants(Predicate<Element> predicate) {
-        var result = new ArrayList<Element>();
-        for (var child : this.getChildElements()) {
-            child.findElements(predicate, result);
-        }
-        return result;
-    }
-
-    @Override
-    public Element findDescendant(Predicate<Element> predicate) {
-        var result = new ArrayList<>(findDescendants(predicate));
-        return switch (result.size()) {
-            case 0 -> throw new NoSuchElementException();
-            case 1 -> result.get(0);
-            default -> throw new IllegalStateException("too many results");
-        };
-    }
-
-    public void addEventListener(String name, Consumer<Object> listener) {
-        eventListeners.computeIfAbsent(name, n -> new HashSet<>()).add(listener);
-    }
-
-    @Override
-    public List<Element> getChildElements() {
-        return childNodes.stream().filter(ElementImpl.class::isInstance).map(ElementImpl.class::cast).collect(Collectors.toList());
-    }
-
-    @Override
-    public List<String> getChildElementNames() {
-        return childNodes.stream()
-                .filter(ElementImpl.class::isInstance)
-                .map(ElementImpl.class::cast)
-                .map(Element::getLocalName)
-                .collect(Collectors.toList());
-    }
-
-
-    @Override
-    public Element getDescendantById(String id) {
-        if (id.equals(attributes.get("id"))) {
-            return this;
-        }
-        if (nextSibling != null && nextSibling instanceof ElementImpl) {
-            var element = ((Element) nextSibling).getDescendantById(id);
-            if (element != null) {
+    Element getElementByTagName(String name) {
+        var child = getFirstChild();
+        while (child != null) {
+            if (child instanceof ElementImpl element && name.equals(element.getLocalName())) {
                 return element;
             }
-        }
-        if (firstChild != null && firstChild instanceof ElementImpl) {
-            var element = ((Element) firstChild).getDescendantById(id);
-            if (element != null) {
-                return element;
-            }
+            child = child.getNextSibling();
         }
         return null;
     }
 
     @Override
-    public void click() {
-        focus(this);
-        fireEvent("click");
-    }
-
-    @Override
-    public String getInnerText() {
+    public String getInnerHTML() {
         var sb = new StringBuilder();
-        for (var child : childNodes.list()) {
-            if (child instanceof TextNodeIml) {
-                sb.append(((TextNode) child).getNodeValue());
-            } else if (child instanceof ElementImpl) {
-                sb.append(((Element) child).getInnerText());
+        for (var child : getChildNodes().list()) {
+            if (child instanceof ElementImpl element) {
+                sb.append(element.asString());
+            } else if (child instanceof TextNode textNode) {
+                sb.append(textNode.getNodeValue());
             }
         }
         return sb.toString();
     }
 
-    protected void focus(ElementImpl element) {
-        if (elementInFocus != this) {
-            if (elementInFocus != null) {
-                elementInFocus.fireEvent("blur");
-                element.fireEvent("focus");
+    void setInnerHTML(String html) {
+        getChildNodes().clear();
+        var doc = Jsoup.parseBodyFragment(html);
+        var body = doc.body();
+        for (var child : body.childNodes()) {
+            if (child instanceof org.jsoup.nodes.Element element) {
+                var newElement = Element.createElement(element.tagName());
+                newElement.setInnerText(element.ownText());
+                for (var attr : element.attributes()) {
+                    newElement.setAttribute(attr.getKey(), attr.getValue());
+                }
+                appendChild(newElement);
+            } else if (child instanceof org.jsoup.nodes.TextNode textNode) {
+                appendChild(new TextNodeIml(textNode.text()));
             }
-            elementInFocus = this;
         }
-    }
-
-    protected void fireEvent(String eventType) {
-        var listeners = eventListeners.get(eventType);
-        if (listeners != null) {
-            var event = new Event(eventType);
-            listeners.forEach(listener -> listener.accept(event));
-        }
-    }
-
-
-    @Override
-    public void findByTagName(String name, NodeList result) {
-        if (localName.equals(name)) {
-            result.addNode(this);
-        }
-        if (nextSibling != null && nextSibling instanceof ElementImpl) {
-            ((Element) nextSibling).findByTagName(name, result);
-        }
-        if (firstChild != null && firstChild instanceof ElementImpl) {
-            ((Element) firstChild).findByTagName(name, result);
-        }
+        updateChildNodes();
     }
 
     @Override
-    public void findByClass(String cssClass, List<Element> result) {
-        if (classList.contains(cssClass)) {
-            result.add(this);
+    public String getInnerText() {
+        var sb = new StringBuilder();
+        for (var child : getChildNodes().list()) {
+            if (child instanceof TextNode textNode) {
+                sb.append(textNode.getNodeValue());
+            } else if (child instanceof ElementImpl element) {
+                sb.append(element.getInnerText());
+            }
         }
-        if (nextSibling != null && nextSibling instanceof ElementImpl) {
-            ((Element) nextSibling).findByClass(cssClass, result);
-        }
-        if (firstChild != null && firstChild instanceof ElementImpl) {
-            ((Element) firstChild).findByClass(cssClass, result);
-        }
+        return sb.toString();
     }
 
     @Override
-    public void findElements(Predicate<Element> predicate, Collection<Element> result) {
+    public Node findDescendant(Predicate<Node> predicate) {
+        return null;
+    }
+
+    @Override
+    public List<Node> findDescendants(Predicate<Node> predicate) {
+        var result = new ArrayList<Node>();
+        findDescendants(predicate, result);
+        return result;
+    }
+
+    @Override
+    public String getTagName() {
+        return localName;
+    }
+
+    @Override
+    public List<Element> getElementsByClass(String item) {
+        var list = new ArrayList<Node>();
+        if (classList.contains(item)) {
+            list.add(this);
+        }
+        findElements(e -> e.classList.contains(item), list);
+        return list.stream().filter(Element.class::isInstance)
+                .map(Element.class::cast)
+                .toList();
+    }
+
+    void findDescendants(Predicate<Node> predicate, Collection<Node> result) {
+        var child = getFirstChild();
+        while (child != null) {
+            if (child instanceof ElementImpl element) {
+                if (predicate.test(element)) {
+                    result.add(element);
+                }
+                element.findDescendants(predicate, result);
+            }
+            child = child.getNextSibling();
+        }
+    }
+
+    void setTextContent(String text) {
+        getChildNodes().clear();
+        setFirstChild(new TextNodeIml(text));
+        updateChildNodes();
+    }
+
+    ElementImpl findChildByName(String name) {
+        var child = getFirstChild();
+        while (child != null) {
+            if (child instanceof ElementImpl element && name.equals(element.getLocalName())) {
+                return element;
+            }
+            child = child.getNextSibling();
+        }
+        return null;
+    }
+
+    ElementImpl findChildById(String id) {
+        var child = getFirstChild();
+        while (child != null) {
+            if (child instanceof ElementImpl element && id.equals(element.getAttribute("id"))) {
+                return element;
+            }
+            child = child.getNextSibling();
+        }
+        return null;
+    }
+
+    private List<Element> findElements(Predicate<ElementImpl> predicate) {
+        var result = new ArrayList<Node>();
+        for (var i = 0; i < getChildNodes().length; i++) {
+            var child = getChildNodes().item(i);
+            if (child instanceof ElementImpl element) {
+                element.findElements(predicate, result);
+            }
+        }
+        return result.stream().filter(Element.class::isInstance).map(Element.class::cast).toList();
+    }
+
+    protected void findElements(Predicate<ElementImpl> predicate, Collection<Node> result) {
         if (predicate.test(this)) {
             result.add(this);
         }
-        var sibling = nextSibling;
+        var sibling = getNextSibling();
         while (sibling != null) {
-            if (sibling instanceof Element element) {
+            if (sibling instanceof ElementImpl element) {
                 element.findElements(predicate, result);
                 break;
             }
             sibling = sibling.getNextSibling();
         }
-        if (firstChild != null && firstChild instanceof Element element) {
+        if (getFirstChild() != null && getFirstChild() instanceof ElementImpl element) {
             element.findElements(predicate, result);
         }
     }
 
 
-    @Override
-    public TextNode getTextNode() {
-        var child = firstChild;
-        while (child != null) {
-            if (child instanceof TextNodeIml) {
-                return (TextNode) child;
+    private List<Element> querySelectorAll(String selector, boolean firstOnly) {
+        // 1. Erstelle eine Map, um temporäre IDs auf echte Element-Objekte abzubilden.
+        final String tempIdAttribute = "data-temp-id";
+        Map<String, Element> elementMap = new HashMap<>();
+
+        // Weise jedem Element im Baum eine eindeutige ID zu.
+        this.findElements(e -> true).forEach(e -> {
+            String uuid = UUID.randomUUID().toString();
+            e.setAttribute(tempIdAttribute, uuid);
+            elementMap.put(uuid, e);
+        });
+        // Füge auch das Wurzelelement hinzu
+        String rootUuid = UUID.randomUUID().toString();
+        this.setAttribute(tempIdAttribute, rootUuid);
+        elementMap.put(rootUuid, this);
+
+        // 2. Konvertiere den aktuellen Elementbaum in einen HTML-String.
+        String html = this.asString();
+
+        // 3. Parse den HTML-String mit Jsoup und führe den Selektor aus.
+        Document doc = Jsoup.parseBodyFragment(html);
+        List<Element> result = new ArrayList<>();
+
+        if (firstOnly) {
+            org.jsoup.nodes.Element foundJsoupElement = doc.selectFirst(selector);
+            if (foundJsoupElement != null) {
+                String tempId = foundJsoupElement.attr(tempIdAttribute);
+                if (elementMap.containsKey(tempId)) {
+                    result.add(elementMap.get(tempId));
+                }
             }
-            if (child instanceof Element element) {
-                child = element.getNextSibling();
+        } else {
+            Elements foundJsoupElements = doc.select(selector);
+            for (org.jsoup.nodes.Element jsoupElement : foundJsoupElements) {
+                String tempId = jsoupElement.attr(tempIdAttribute);
+                if (elementMap.containsKey(tempId)) {
+                    result.add(elementMap.get(tempId));
+                }
             }
         }
-        return null;
-    }
 
-    @Override
-    public String toString() {
-        StringBuilder s = new StringBuilder();
-        s.append(super.toString());
-        s.append(" ");
-        s.append("<");
-        s.append(localName);
-        if (!attributes.isEmpty()) {
-            s.append(" ");
-            s.append(attributes.entrySet().stream().map(e -> String.format("%s=\"%s\"", e.getKey(), e.getValue())).collect(Collectors.joining(" ")));
-        }
-        s.append(">");
-        return s.toString();
-    }
+        // 4. Bereinige die temporären Attribute aus dem echten DOM.
+        elementMap.values().stream().map(ElementImpl.class::cast).forEach(e -> e.removeAttribute(tempIdAttribute));
 
-    @Override
-    public List<Element> getChildElementsByClassName(String cssClass) {
-        return getChildElements().stream().filter(e -> e.getClassList().contains(cssClass)).collect(Collectors.toList());
-    }
-
-    @Override
-    public List<Element> getDescendantElementsByClassName(String cssClass) {
-        var result = new ArrayList<Element>();
-        for (var child : getChildElements()) {
-            if (child.getClassList().contains(cssClass)) {
-                result.add(child);
-            }
-            result.addAll(child.getDescendantElementsByClassName(cssClass));
-        }
         return result;
     }
 
-
-    public void setFirstChild(Node node) {
-        if (this.equals(node)) {
-            throw new IllegalStateException();
-        }
-        firstChild = node;
+    private void removeAttribute(String key) {
+        attributes.remove(key);
     }
 
-    @Override
-    public String asString() {
-        var builder = new StringBuilder();
+    String asString() {
+        StringBuilder builder = new StringBuilder();
         evaluateContent(builder, 0);
         return builder.toString();
     }
 
-    /**
-     * Finds the first descendant element that matches the specified CSS selector.
-     *
-     * @param selector The CSS selector string.
-     * @return The first matching Element, or null if no match is found.
-     */
-    @Override
-    public Element querySelector(String selector) {
-        List<Element> results = querySelectorAll(selector, true);
-        return results.isEmpty() ? null : results.get(0);
-    }
-
-    /**
-     * Finds all descendant elements that match the specified CSS selector.
-     *
-     * @param selector The CSS selector string.
-     * @return A List of matching Elements. The list is empty if no matches are found.
-     */
-    @Override
-    public List<Element> querySelectorAll(String selector) {
-        return querySelectorAll(selector, false);
-    }
-
-    String asString(int indent) {
-        var builder = new StringBuilder();
-        evaluateContent(builder, indent);
-        return builder.toString();
-    }
-
-    @Override
     protected void evaluateContent(StringBuilder builder, int indent) {
         for (int i = 0; i < indent; i++) {
             builder.append("\t");
@@ -459,12 +359,12 @@ public class ElementImpl extends NodeImpl implements Element {
             builder.append(value);
             builder.append("\"");
         });
-        if (childNodes.list().isEmpty()) {
+        if (getChildNodes().list().isEmpty()) {
             builder.append("/>\n");
             return;
         }
         builder.append(">\n");
-        childNodes.stream().forEach(node -> ((NodeImpl) node).evaluateContent(builder, indent + 1));
+        getChildNodes().stream().forEach(node -> ((NodeImpl) node).evaluateContent(builder, indent + 1));
         for (int i = 0; i < indent; i++) {
             builder.append("\t");
         }
@@ -473,124 +373,7 @@ public class ElementImpl extends NodeImpl implements Element {
         builder.append(">\n");
     }
 
-
-    private String innerHtmlAsString() {
-        var s = new StringBuilder();
-        var e = firstChild;
-        while (e != null) {
-            s.append(e.asString());
-            e = e.getNextSibling();
-        }
-        return s.toString();
+    public void setInnerText(String text) {
+        setTextContent(text);
     }
-
-    @Override
-    public Object getMember(String key) {
-        return switch (key) {
-            // Felder
-            case "childNodes" -> this.childNodes;
-            case "firstChild" -> this.firstChild;
-            case "parentNode" -> this.parentNode;
-            case "nextSibling" -> this.nextSibling;
-            case "localName", "tagName" -> this.localName;
-            case "classList" -> this.classList;
-            case "id" -> getId();
-            case "innerText" -> getInnerText();
-            case "textContent" -> getTextContent();
-            case "innerHTML" -> innerHtmlAsString();
-
-            // Methoden als aufrufbare ProxyExecutables
-            case "getAttribute" -> (ProxyExecutable) arguments -> getAttribute(arguments[0].asString());
-            case "hasAttribute" -> (ProxyExecutable) arguments -> hasAttribute(arguments[0].asString());
-            case "removeChild" -> (ProxyExecutable) arguments -> {
-                if (arguments[0].isProxyObject()) {
-                    removeChild((Node) arguments[0].asProxyObject());
-                }
-                return null; // JS-Funktionen geben oft undefined (null) zurück
-            };
-            case "appendChild" -> (ProxyExecutable) arguments -> {
-                if (arguments[0].isProxyObject()) {
-                    appendChild((Node) arguments[0].asProxyObject());
-                }
-                return null;
-            };
-            case "addEventListener" -> (ProxyExecutable) arguments -> {
-                Value type = arguments[0];
-                Value listener = arguments[1];
-                addEventListener(type.asString(), event -> listener.execute(event));
-                return null;
-            };
-            case "getAttributeNames" -> (ProxyExecutable) arguments -> getAttributeNames().toArray(new String[0]);
-            case "removeAttribute" -> (ProxyExecutable) arguments -> {
-                removeAttribute(arguments[0].asString());
-                return null;
-            };
-            case "nodeType" -> nodeType;
-            case "asString" -> (ProxyExecutable) arguments -> asString();
-            case "setAttribute" -> (ProxyExecutable) arguments -> { // Hinzugefügt
-                setAttribute(arguments[0].asString(), arguments[1]);
-                return null; // setAttribute gibt in JS undefined zurück
-            };
-            case "click" -> (ProxyExecutable) arguments -> {
-                click();
-                return null; // click gibt in JS undefined zurück
-            };
-            case "insertBefore" -> (ProxyExecutable) arguments -> {
-                if (arguments[0].isProxyObject() && arguments[1].isProxyObject()) {
-                    insertBefore(arguments[0].asProxyObject(), arguments[1].asProxyObject());
-                }
-                return null; // insertBefore gibt in JS undefined zurück
-            };
-
-            case "cloneNode" -> (ProxyExecutable) arguments -> cloneNode();
-            // Fallback auf die Attribut-Map
-            default -> attributes.get(key);
-        };
-    }
-
-    @Override
-    public boolean hasMember(String key) {
-        return MEMEBERS.contains(key);
-    }
-
-    @Override
-    public Object getMemberKeys() {
-        return new ArrayList<>(MEMEBERS);
-    }
-
-    @Override
-    public void putMember(String key, Value value) {
-        attributes.put(key, value == null ? "" : value.asString());
-        switch (key) {
-            case "class" -> {
-                classList.clear();
-                if (value != null && value.isString()) {
-                    addClasses(value.asString());
-                }
-            }
-            case "id", "title", "style" -> attributes.put(key, value == null ? "" : value.asString());
-            case "innerText" -> {
-                if (!value.isString()) {
-                    throw new IllegalArgumentException("innerText must be a String, but was: " + value.getClass());
-                }
-                setInnerText(value.asString());
-            }
-            case "innerHTML" -> {
-                if (value == null || value.isNull()) {
-                    firstChild = null;
-                } else if (value.isString()) {
-                    firstChild = Element.of(value.asString());
-                } else {
-                    throw new IllegalArgumentException("innerHTML must be a String or null, but was: " + value.getClass());
-                }
-                updateChildNodes();
-            }
-        }
-    }
-
-    @Override
-    public boolean removeMember(String key) {
-        return super.removeMember(key);
-    }
-
 }

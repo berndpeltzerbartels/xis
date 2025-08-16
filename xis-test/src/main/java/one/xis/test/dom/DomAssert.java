@@ -6,8 +6,9 @@ import java.util.Collections;
 public class DomAssert {
 
     public static ElementResult assertAndGetRootElement(Document document, String name) {
-        assertTrue(document.getDocumentElement().getLocalName().equals(name), "Root element was expected to be <%s>, but it was <%s>", name, document.getDocumentElement().getLocalName());
-        return new ElementResult(document.getDocumentElement());
+        var documentImpl = (DocumentImpl) document;
+        assertTrue(documentImpl.getDocumentElement().getLocalName().equals(name), "Root element was expected to be <%s>, but it was <%s>", name, documentImpl.getDocumentElement().getLocalName());
+        return new ElementResult(documentImpl.getDocumentElement());
     }
 
 
@@ -41,7 +42,7 @@ public class DomAssert {
 
 
     public static void assertNoChildElement(Element element, String name) {
-        assertTrue(element, element.getChildElementsByName(name).isEmpty(), "It must not have child-element <%s>", name);
+        assertTrue(element, element.getElementsByTagName(name).isEmpty(), "It must not have child-element <%s>", name);
     }
 
     public static void assertTagName(Element element, String name) {
@@ -49,8 +50,8 @@ public class DomAssert {
     }
 
     public static ElementResult assertAndGetParentElement(Element element, String name) {
-        assertTrue(element, element.getParentNode().getLocalName().equals(name), "Expected element to have parent tag '%s'", name);
-        return new ElementResult(element.getParentNode());
+        assertTrue(element, ((ElementImpl) element.getParentNode()).getLocalName().equals(name), "Expected element to have parent tag '%s'", name);
+        return new ElementResult((ElementImpl) element.getParentNode());
     }
 
     static void assertTrue(boolean result, String errorMessage, Object... args) {

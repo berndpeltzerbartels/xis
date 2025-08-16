@@ -1,5 +1,6 @@
 package one.xis.test.dom;
 
+import lombok.NonNull;
 import one.xis.utils.lang.FieldUtil;
 import one.xis.utils.lang.MethodUtils;
 import org.graalvm.polyglot.Value;
@@ -29,7 +30,10 @@ public interface ProxyAttributes {
         }
     }
 
-    default Object getFieldValue(Object base) {
+    default Object getFieldValue(@NonNull Object base) {
+        if (!isUseField()) {
+            throw new UnsupportedOperationException("Cannot get value using field for attribute: " + getName() + " in " + base.getClass().getName());
+        }
         return FieldUtil.getFieldValue(base, getField());
     }
 

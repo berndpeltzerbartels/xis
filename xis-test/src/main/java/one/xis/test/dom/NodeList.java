@@ -1,11 +1,8 @@
 package one.xis.test.dom;
 
-import one.xis.utils.lang.CollectorUtils;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class NodeList {
@@ -15,6 +12,11 @@ public class NodeList {
 
     public NodeList() {
         this.nodes = new ArrayList<>();
+    }
+
+    public NodeList(List<Node> nodes) {
+        this.nodes = new ArrayList<>(nodes);
+        this.length = nodes.size();
     }
 
     public Node item(int index) {
@@ -29,19 +31,8 @@ public class NodeList {
         return Collections.unmodifiableList(nodes);
     }
 
-    List<Element> getElementsByName(String name) {
-        return stream().filter(ElementImpl.class::isInstance)
-                .map(ElementImpl.class::cast)
-                .filter(e -> e.getLocalName().equals(name))
-                .collect(Collectors.toList());
-    }
-
-    Element getElementByName(String name) {
-        return stream().filter(ElementImpl.class::isInstance)
-                .map(ElementImpl.class::cast)
-                .filter(e -> e.getLocalName().equals(name))
-                .collect(CollectorUtils.toOnlyOptional(list -> new IllegalStateException("too many results for " + name)))
-                .orElse(null);
+    public boolean isEmpty() {
+        return nodes.isEmpty();
     }
 
     void addNode(Node node) {
@@ -54,12 +45,12 @@ public class NodeList {
         length = 0;
     }
 
-    void removeTextNodes() {
-        var textNodes = nodes.stream().filter(TextNodeIml.class::isInstance).collect(Collectors.toSet());
-        textNodes.forEach(nodes::remove);
-    }
-
-    Stream<Element> elements() {
-        return stream().filter(ElementImpl.class::isInstance).map(ElementImpl.class::cast);
+    void updateChildNodes(NodeImpl element) {
+        clear();
+        var child = element.getFirstChild();
+        while (child != null) {
+            addNode(child);
+            child = child.getNextSibling();
+        }
     }
 }

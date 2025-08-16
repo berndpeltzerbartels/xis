@@ -12,29 +12,33 @@ class DocumentTest {
     @DisplayName("Create document from source")
     void of1() {
         var html = "<html><head><title>Title</title></head><body><div>123</div><div/></body></html>";
-        var document = Document.of(html);
+        var document = (DocumentImpl) Document.of(html);
 
         assertThat(document.getDocumentElement().getLocalName()).isEqualTo("html");
-        assertThat(document.getDocumentElement().getChildList().stream().map(Node::getName)).containsExactly("head", "body");
+        assertThat(((ElementImpl) document.getDocumentElement()).getChildElements().stream()
+                .filter(ElementImpl.class::isInstance)
+                .map(ElementImpl.class::cast)
+                .map(ElementImpl::getLocalName)).containsExactly("head", "body");
 
         var head = document.getElementByTagName("head");
-        assertThat(head.getChildList().size()).isEqualTo(1);
-        assertThat(head.childElement(0).getLocalName()).isEqualTo("title");
+        assertThat(head.getChildElements()).singleElement()
+                .satisfies(e -> assertThat(e.getLocalName()).isEqualTo("head"));
+        assertThat(head.getChildElements().get(0).getLocalName()).isEqualTo("title");
 
         var title = document.getElementByTagName("title");
-        assertThat(title.getTextContent()).isEqualTo("Title");
+        assertThat(title.getInnerText()).isEqualTo("Title");
 
         var body = document.getElementByTagName("body");
-        assertThat(body.getChildList().size()).isEqualTo(2);
+        assertThat(body.getChildElements().size()).isEqualTo(2);
 
-        var divs = body.getChildElementsByName("div");
-        var div1 = divs.get(0);
-        var div2 = divs.get(1);
+        var divs = body.getElementsByTagName("div");
+        var div1 = (ElementImpl) divs.item(0);
+        var div2 = (ElementImpl) divs.item(1);
 
-        assertThat(div1.getChildList().size()).isEqualTo(1);
-        assertThat(div2.getChildList()).isEmpty();
-        assertThat(div1.getChildList().get(0)).isInstanceOf(TextNodeIml.class);
-        assertThat(div1.getTextContent()).isEqualTo("123");
+        assertThat(div1.getChildElements().size()).isEqualTo(1);
+        assertThat(div2.getChildElements()).isEmpty();
+        assertThat(div1.getChildElements().get(0)).isInstanceOf(TextNodeIml.class);
+        assertThat(div1.getInnerText()).isEqualTo("123");
 
     }
 
@@ -45,13 +49,13 @@ class DocumentTest {
         var document = Document.of(html);
 
         assertThat(document.getDocumentElement().getLocalName()).isEqualTo("html");
-        assertThat(document.getDocumentElement().getChildElementNames()).containsExactly("head", "body");
+        assertThat(document.getDocumentElement().getChildElements().stream().map(Element::getTagName)).containsExactly("head", "body");
 
         var head = document.getElementByTagName("head");
-        assertThat(head.getChildElementNames()).contains("title", "script");
+        assertThat(head.getChildElements().stream().map(Element::getTagName)).contains("title", "script");
 
         var body = document.getElementByTagName("body");
-        assertThat(body.getChildList()).hasSize(1); // messages-div
+        assertThat(body.getChildNodes().length).isEqualTo(1); // messages-div
         assertThat(body.getAttribute("onload")).isEqualTo("main()");
     }
 
@@ -94,9 +98,9 @@ class DocumentTest {
         var xml = "<x><a/><b/><c/></x>";
 
         var document = Document.of(xml);
-        var a = document.getElementByTagName("a");
-        var b = document.getElementByTagName("b");
-        var c = document.getElementByTagName("c");
+        var a = (ElementImpl) document.getElementByTagName("a");
+        var b = (ElementImpl) document.getElementByTagName("b");
+        var c = (ElementImpl) document.getElementByTagName("c");
 
         assertThat(a.getPreviousSibling()).isNull();
         assertThat(b.getPreviousSibling()).isEqualTo(a);
@@ -109,8 +113,8 @@ class DocumentTest {
 
         var document = Document.of(xml);
         var x = document.getElementByTagName("x");
-        var a = document.getElementByTagName("a");
-        var b = document.getElementByTagName("b");
+        var a = (ElementImpl) document.getElementByTagName("a");
+        var b = (ElementImpl) document.getElementByTagName("b");
 
         x.removeChild(b);
 
@@ -131,9 +135,9 @@ class DocumentTest {
 
         var document = (DocumentImpl) Document.of(xml);
         var x = document.getElementByTagName("x");
-        var a = document.getElementByTagName("a");
-        var b = document.getElementByTagName("b");
-        var c = document.createElement("c");
+        var a = (ElementImpl) document.getElementByTagName("a");
+        var b = (ElementImpl) document.getElementByTagName("b");
+        var c = (ElementImpl) document.createElement("c");
 
         x.insertBefore(c, b);
 
@@ -176,28 +180,6 @@ class DocumentTest {
         assertThat(element).isNotNull();
         assertThat(element.getLocalName()).isEqualTo("b");
     }
-
-    @Test
-    void findElement() {
-        var xml = "<x><a/><b id=\"123\" /></x>";
-        var document = Document.of(xml);
-
-        var element = document.findElement(e -> "123".equals(e.getId()));
-
-        assertThat(element).isNotNull();
-        assertThat(element.getLocalName()).isEqualTo("b");
-
-    }
-
-    @Test
-    void findElements() {
-        var xml = "<x id=\"123\"><a/><b id=\"123\" /></x>";
-        var document = Document.of(xml);
-
-        var element = document.findElements(e -> "123".equals(e.getId()));
-
-        assertThat(element).hasSize(2);
-    }
-
+    
 
 }

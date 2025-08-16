@@ -66,7 +66,7 @@ class PagesTest {
     }
 
     private Map<String, Object> createBindings() {
-        var title = document.createElement("title");
+        var title = (ElementImpl) document.createElement("title");
         title.setInnerText("Title");
 
         var style = document.createElement("style");
@@ -77,18 +77,18 @@ class PagesTest {
         nodeArrays.add(new Node[]{div});
 
         Function<Object, Node[]> nodeListToArray = list -> nodeArrays.remove(0);
-        Function<Object, Boolean> isElement = ElementImpl.class::isInstance;
+        Function<Object, Boolean> isElement = Element.class::isInstance;
 
         var bindings = new HashMap<String, Object>();
         bindings.put("document", document);
         bindings.put("nodeListToArray", nodeListToArray);
         bindings.put("isElement", isElement);
-        Function<String, Element> htmlToElement = this::htmlToElement;
+        Function<String, ElementImpl> htmlToElement = this::htmlToElement;
         bindings.put("htmlToElement", htmlToElement);
         return bindings;
     }
 
-    public Element htmlToElement(String content) {
+    public ElementImpl htmlToElement(String content) {
         var doc = (DocumentImpl) Document.of(content);
         return doc.getDocumentElement();
     }

@@ -15,7 +15,7 @@ class DocumentBuilder {
         return document;
     }
 
-    private static void evaluate(org.w3c.dom.Element src, Element dest) {
+    private static void evaluate(org.w3c.dom.Element src, ElementImpl dest) {
         var nodeList = src.getChildNodes();
         for (var i = 0; i < nodeList.getLength(); i++) {
             Node node = nodeList.item(i);
@@ -26,22 +26,15 @@ class DocumentBuilder {
                 evaluate(w3cElement, e);
             } else if (StringUtils.isNotEmpty(node.getNodeValue())) {
                 dest.appendChild(new TextNodeIml(node.getNodeValue()));
-                dest.setInnerText(node.getNodeValue());
             }
         }
     }
 
-    private static Element translateElement(org.w3c.dom.Element w3cElement) {
-        return switch (w3cElement.getTagName()) {
-            case "input" -> new InputElementImpl();
-            case "select" -> new SelectElement();
-            case "option" -> new OptionElementImpl();
-            case "textarea" -> new TextareaElement();
-            default -> new ElementImpl(w3cElement.getTagName());
-        };
+    private static ElementImpl translateElement(org.w3c.dom.Element w3cElement) {
+        return Element.createElement(w3cElement.getTagName());
     }
 
-    private static void copyAttributes(org.w3c.dom.Element src, Element dest) {
+    private static void copyAttributes(org.w3c.dom.Element src, ElementImpl dest) {
         for (int i = 0; i < src.getAttributes().getLength(); i++) {
             var attribute = src.getAttributes().item(i);
             dest.setAttribute(attribute.getNodeName(), attribute.getNodeValue());

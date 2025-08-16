@@ -1,10 +1,7 @@
 package one.xis.js.init;
 
 import one.xis.js.Javascript;
-import one.xis.test.dom.Document;
-import one.xis.test.dom.DocumentImpl;
-import one.xis.test.dom.DomAssert;
-import one.xis.test.dom.ElementImpl;
+import one.xis.test.dom.*;
 import one.xis.test.js.JSUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -151,8 +148,8 @@ class DomAccessorTest {
 
         JSUtil.execute(js, Map.of("document", document));
 
-        assertThat(document.getDocumentElement().getChildElementNames()).containsExactly("x");
-        assertThat(document.getElementByTagName("x").getChildElementNames()).containsExactly("b", "c");
+        assertThat(document.getDocumentElement().getChildElements().stream().map(Element::getTagName)).containsExactly("x");
+        assertThat(document.getElementByTagName("x").getChildElements().stream().map(Element::getTagName)).containsExactly("b", "c");
 
     }
 

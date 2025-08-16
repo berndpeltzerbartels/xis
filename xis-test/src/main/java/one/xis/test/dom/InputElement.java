@@ -6,4 +6,7 @@ public interface InputElement extends Element {
     boolean isChecked();
 
     void setValue(String v1);
+
+    // Non standard methods
+    
 }

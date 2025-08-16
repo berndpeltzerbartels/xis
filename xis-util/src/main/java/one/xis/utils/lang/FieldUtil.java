@@ -125,7 +125,7 @@ public class FieldUtil {
         return field.getType().isArray();
     }
 
-    public static Object getFieldValue(Object owner, Field field) {
+    public static Object getFieldValue(@NonNull Object owner, @NonNull Field field) {
         field.setAccessible(true);
         try {
             return field.get(owner);

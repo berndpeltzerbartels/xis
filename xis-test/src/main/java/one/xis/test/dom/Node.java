@@ -1,25 +1,23 @@
 package one.xis.test.dom;
 
 public interface Node {
-    String getTextContent();
 
-    void insertPreviousSibling(Node node);
+    int ELEMENT_NODE = 1;
+    int TEXT_NODE = 3;
 
     void remove();
 
-    void setNextSibling(Node node);
+    Node cloneNode();
+
+    void appendChild(Node node);
+
+    // Non standard methods for testing purposes
+
+    Node getParentNode();
+
+    Node getFirstChild();
 
     Node getNextSibling();
 
-    Node cloneNode();
-
-    String getName();
-
-    Node getLastSibling();
-
-    Node getPreviousSibling();
-
-    Element getParentNode();
-
-    String asString();
+    NodeList getChildNodes();
 }

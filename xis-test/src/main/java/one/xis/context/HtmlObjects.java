@@ -2,7 +2,10 @@ package one.xis.context;
 
 import lombok.Data;
 import one.xis.resource.Resources;
-import one.xis.test.dom.*;
+import one.xis.test.dom.Document;
+import one.xis.test.dom.DocumentImpl;
+import one.xis.test.dom.ElementImpl;
+import one.xis.test.dom.Window;
 import one.xis.test.js.LocalStorage;
 import one.xis.test.js.SessionStorage;
 
@@ -13,12 +16,12 @@ import java.util.function.Function;
 @Data
 class HtmlObjects {
 
-    private DocumentProxy document;
+    private DocumentImpl document;
     private LocalStorage localStorage;
     private SessionStorage sessionStorage;
     private Window window;
     // private Console console;
-    private final Function<String, ElementProxy> htmlToElement;
+    private final Function<String, ElementImpl> htmlToElement;
     private final Function<String, String> atob;
 
     HtmlObjects() {
@@ -27,9 +30,9 @@ class HtmlObjects {
         this.init();
     }
 
-    public static ElementProxy htmlToElement(String content) {
+    public static ElementImpl htmlToElement(String content) {
         var doc = ((DocumentImpl) Document.of(content));
-        return new ElementProxy(doc.getDocumentElement());
+        return doc.getDocumentElement();
     }
 
 
@@ -49,11 +52,10 @@ class HtmlObjects {
     }
 
     private void init() {
-        var documentImpl = (DocumentImpl) Document.of(new Resources().getByPath("default-develop-index.html").getContent());
-        this.document = new DocumentProxy(documentImpl);
+        this.document = (DocumentImpl) Document.of(new Resources().getByPath("default-develop-index.html").getContent());
         this.localStorage = new LocalStorage();
         this.sessionStorage = new SessionStorage();
-        this.window = new Window(documentImpl.getLocation());
+        this.window = new Window(document.getLocation());
         //  this.console = new Console();
     }
 }
