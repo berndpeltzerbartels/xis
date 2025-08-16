@@ -3,9 +3,10 @@
 package one.xis.test.dom;
 
 import one.xis.test.js.JSUtil;
+import one.xis.utils.xml.XmlUtil;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.Value;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
@@ -17,8 +18,8 @@ class ElementJsIntegrationTest {
     static DocumentImpl document;
     static Context context;
 
-    @BeforeAll
-    static void setUp() {
+    @BeforeEach
+    void setUp() {
         document = (DocumentImpl) Document.of("<html><body><div id='main'></div></body></html>");
         context = JSUtil.context(Map.of("document", document));
     }
@@ -68,7 +69,8 @@ class ElementJsIntegrationTest {
     void testInnerHTML() {
         JSUtil.execute("var div = document.getElementById('main'); div.innerHTML = '<span>Text</span>';", context);
         Value result = JSUtil.execute("document.getElementById('main').innerHTML;", context);
-        assertThat(result.asString()).contains("<span>Text</span>");
+        var doc = XmlUtil.loadDocument(result.asString());
+        assertThat(doc.getDocumentElement().getTagName()).isEqualTo("span");
     }
 
     @Test

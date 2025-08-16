@@ -50,8 +50,9 @@ class CheckboxTagHandler extends InputTagHandler {
      * @param {any} value 
      */
     updateCheckedStateForSingleValue(value) {
+        debugger;
         if (!isSet(this.tag.value) || this.tag.value === '') {
-            this.tag.checked = value;
+            this.tag.checked = false;
         } else {
             this.tag.checked = isSet(value) && String(value) === String(this.tag.value);
         }

@@ -2,6 +2,7 @@ package one.xis.test.dom;
 
 import lombok.Getter;
 import lombok.NonNull;
+import one.xis.test.js.Event;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -117,7 +118,7 @@ public class ElementImpl extends NodeImpl implements Element {
 
     @Override
     public void click() {
-
+        fireEvent("click", new Event("click"));
     }
 
     @Override
@@ -133,6 +134,26 @@ public class ElementImpl extends NodeImpl implements Element {
         return classList.getValues();
     }
 
+
+    public void removeAttribute(String name) {
+        if (name.equals("class")) {
+            classList.clear();
+        }
+        attributes.remove(name);
+    }
+
+
+    void addEventListener(String event, Consumer<Object> listener) {
+        eventListeners.computeIfAbsent(event, k -> new ArrayList<>()).add(listener);
+    }
+
+    void fireEvent(String event, Object data) {
+        if (eventListeners.containsKey(event)) {
+            for (var listener : eventListeners.get(event)) {
+                listener.accept(data);
+            }
+        }
+    }
 
     Element getElementByTagName(String name) {
         var child = getFirstChild();
@@ -336,9 +357,6 @@ public class ElementImpl extends NodeImpl implements Element {
         return result;
     }
 
-    private void removeAttribute(String key) {
-        attributes.remove(key);
-    }
 
     String asString() {
         StringBuilder builder = new StringBuilder();

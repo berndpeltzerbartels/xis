@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class InputElementImpl extends ElementImpl {
+public class InputElementImpl extends ElementImpl implements InputElement {
 
     private String type;
     private String value;
