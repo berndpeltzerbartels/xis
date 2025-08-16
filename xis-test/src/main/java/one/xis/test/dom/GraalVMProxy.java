@@ -41,7 +41,7 @@ public class GraalVMProxy implements ProxyObject {
         if (key.equals("toString")) {
             return this.toString();
         }
-        System.out.println("getMember called with key: " + key);
+        // System.out.println("getMember called with key: " + key);
         var getter = getters.get(key);
         if (getter != null) {
             return MethodUtils.doInvoke(this, getter);
@@ -64,7 +64,7 @@ public class GraalVMProxy implements ProxyObject {
 
     @Override
     public void putMember(String key, Value value) {
-        System.out.println("putMember called with key: " + key + ", value: " + value);
+        //   System.out.println("putMember called with key: " + key + ", value: " + value);
         var setter = setters.get(key);
         if (setter != null) {
             Object convertedValue = ProxyUtils.convertValue(setter.getParameterTypes()[0], value);
@@ -76,18 +76,22 @@ public class GraalVMProxy implements ProxyObject {
 
     private ProxyExecutable toProxyExecutable(Method method) {
         return arguments -> {
-            System.out.println("invoke " + method.getName());
-            var args = new Object[method.getParameterCount()];
-            for (var i = 0; i < args.length; i++) {
-                var parameter = method.getParameters()[i];
-                args[i] = ProxyUtils.convertValue(parameter.getType(), arguments[i]);
+            try {
+                //   System.out.println("invoke " + method.getName());
+                var args = new Object[method.getParameterCount()];
+                for (var i = 0; i < args.length; i++) {
+                    var parameter = method.getParameters()[i];
+                    args[i] = ProxyUtils.convertValue(parameter.getType(), arguments[i]);
+                }
+                // System.out.println("args: " + Arrays.toString(args));
+                var result = MethodUtils.doInvoke(this, method, args);
+                if (result instanceof String str) {
+                    return org.graalvm.polyglot.Value.asValue(str).asString();
+                }
+                return result;
+            } catch (Exception e) {
+                throw new RuntimeException("Invocation failed for method: " + method.getName() + ", base=" + toString(), e);
             }
-            System.out.println("args: " + Arrays.toString(args));
-            var result = MethodUtils.doInvoke(this, method, args);
-            if (result instanceof String str) {
-                return org.graalvm.polyglot.Value.asValue(str).asString();
-            }
-            return result;
         };
     }
 

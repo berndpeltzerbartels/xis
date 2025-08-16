@@ -213,7 +213,8 @@ public class ElementImpl extends NodeImpl implements Element {
 
     @Override
     public Node findDescendant(Predicate<Node> predicate) {
-        return null;
+        var descendants = findDescendants(predicate);
+        return descendants.isEmpty() ? null : descendants.get(0);
     }
 
     @Override
