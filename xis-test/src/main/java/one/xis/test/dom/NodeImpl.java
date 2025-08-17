@@ -38,18 +38,18 @@ public abstract class NodeImpl extends GraalVMProxy implements Node {
 
     @Override
     public void appendChild(Node node) {
-        var proxy = (NodeImpl) node;
-        proxy.parentNode = this;
+        var nodeImpl = (NodeImpl) node;
+        nodeImpl.parentNode = this;
         if (firstChild == null) {
-            firstChild = proxy;
+            firstChild = nodeImpl;
         } else {
             var lastChild = firstChild;
             while (lastChild.getNextSibling() != null) {
                 lastChild = lastChild.getNextSibling();
             }
-            lastChild.setNextSibling(proxy);
+            lastChild.setNextSibling(nodeImpl);
         }
-        proxy.setNextSibling(null);
+        nodeImpl.setNextSibling(null);
         updateChildNodes();
     }
 

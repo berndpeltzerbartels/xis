@@ -38,13 +38,15 @@ class DomAccessor {
      */
     replaceElement(old, replacement) {
         var parent = old.parentNode;
-        var nextSibling = old.nextSibling;
-        parent.removeChild(old);
-        if (nextSibling) {
-            parent.insertBefore(replacement, nextSibling);
-        } else {
-            parent.appendChild(replacement);
+        if (parent) {
+            var nextSibling = old.nextSibling;
+            parent.removeChild(old);
+            if (nextSibling) {
+                parent.insertBefore(replacement, nextSibling);
+            } else {
+                parent.appendChild(replacement);
+            }
+            // TODO move child nodes ?
         }
-        // TODO move child nodes ?
     }
 }

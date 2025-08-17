@@ -33,4 +33,8 @@ public interface Document {
     List<Element> getElementsByClass(String item);
 
     Element getDocumentElement();
+
+    String getTextContent();
+
+    String getTitle();
 }

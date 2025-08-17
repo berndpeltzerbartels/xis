@@ -7,7 +7,7 @@ class WidgetInstance {
     constructor(widget, widgets) {
         this.widget = widget;
         this.widgets = widgets;
-        this.root = htmlToElement(widget.html);
+        this.root = assertNotNull(normalizeElement(htmlToElement(widget.html)));
         this.rootHandler = assertNotNull(initializeElement(this.root));
     }
 

@@ -36,14 +36,14 @@ class DomNormalizer {
      * @public
      */
     normalize() {
-        this.doNormalize(this.root);
+        return this.doNormalize(this.root);
     }
 
     /**
      * @private
      * @param {Element} element 
      */
-   doNormalize(element) {
+    doNormalize(element) {
         var normalizedElement = element;
         if (this.isFrameworkLink(element) || this.isFrameworkActionLink(element)) {
             normalizedElement = this.replaceFrameworkLinkByHtml(element);
@@ -62,13 +62,14 @@ class DomNormalizer {
         } else if (this.isFrameworkRadio(element)) {
             normalizedElement = this.replaceFrameworkRadioByHtml(element);
         } else {
-            this.normalizeHtmlElement(element);
+            normalizedElement = this.normalizeHtmlElement(element);
         }
         for (var child of nodeListToArray(normalizedElement.childNodes)) {
             if (isElement(child)) {
                 this.doNormalize(child);
             }
         }
+        return normalizedElement;
     }
 
     /**
@@ -170,11 +171,11 @@ class DomNormalizer {
         return element.localName === 'xis:select';
     }
 
-      /**
-     * @private
-     * @param {Element} element
-     * @returns {boolean}
-     */
+    /**
+   * @private
+   * @param {Element} element
+   * @returns {boolean}
+   */
     isFrameworkCheckbox(element) {
         return element.localName === 'xis:checkbox';
     }
@@ -256,6 +257,7 @@ class DomNormalizer {
     * @returns {Element} 
     */
     replaceFrameworkFormTagByHtml(frameworkForm) {
+        debugger;
         return this.replaceFrameworkElementByHtml(frameworkForm, 'form');
     }
 
@@ -270,14 +272,14 @@ class DomNormalizer {
         return this.replaceFrameworkElementByHtml(frameworkButton, 'button');
     }
 
-        /**
-     * Replaces a framework element by a valid HTML element.
-     * Optionally sets additional attributes (e.g. type).
-     * @param {Element} frameworkElement 
-     * @param {string} elementName 
-     * @param {Object} [additionalAttributes]
-     * @returns {Element}
-     */
+    /**
+ * Replaces a framework element by a valid HTML element.
+ * Optionally sets additional attributes (e.g. type).
+ * @param {Element} frameworkElement 
+ * @param {string} elementName 
+ * @param {Object} [additionalAttributes]
+ * @returns {Element}
+ */
     replaceFrameworkElementByHtml(frameworkElement, elementName, additionalAttributes = {}) {
         var element = document.createElement(elementName);
         for (var attrName of frameworkElement.getAttributeNames()) {

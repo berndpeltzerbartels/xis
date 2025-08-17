@@ -154,7 +154,11 @@ class ResourceService {
             if (!controller.getClass().isAnnotationPresent(DefaultHtmlFile.class)) {
                 throw new RuntimeException("Failed to load HTML template for controller: " + controller.getClass().getName(), e);
             }
-            return resources.getByPath(controller.getClass().getAnnotation(DefaultHtmlFile.class).value());
+            var data = resources.getByPath(controller.getClass().getAnnotation(DefaultHtmlFile.class).value());
+            if (data == null || data.getLength() == 0) {
+                throw new RuntimeException("Default HTML template is empty for controller: " + controller.getClass().getName());
+            }
+            return data;
         }
     }
 

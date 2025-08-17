@@ -11,7 +11,6 @@ class ForeachHandler extends TagHandler {
         this.varName = this.getAttribute('var');
         this.type = 'foreach-handler';
         this.priority = 'high';
-        debugger;
         this.cache = new ForEachNodeCache(nodeListToArray(this.tag.childNodes));
         this.clearChildren();
 

@@ -53,6 +53,9 @@ class ForEachNodeCache {
         var clones = [];
         for (var node of this.templateNodeArray) {
             var clone = cloneNode(node);
+            if (isElement(clone)) {
+                clone = this.normalize(clone);
+            }
             this.initialize(clone);
             clones.push(clone);
         }
@@ -65,6 +68,11 @@ class ForEachNodeCache {
      */
     initialize(node) {
         app.initializer.initialize(node, null)
+    }
+
+
+    normalize(element) {
+        return app.initializer.normalizeElement(element);
     }
 }
 

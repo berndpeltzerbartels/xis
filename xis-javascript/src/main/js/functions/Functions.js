@@ -120,10 +120,18 @@ function createElement(name) {
     return document.createElement(name);
 }
 
+function normalizeElement(element) {
+    return app.initializer.normalizeElement(element);
+}
 
+/**
+ * @param {TagHandler} element 
+ * @returns 
+ */
 function initializeElement(element) {
    return app.initializer.initialize(element);
 }
+
 
 function assertNotNull(o, errorText) {
     if (!errorText) errorText = 'Assertion failed. Value is null.'

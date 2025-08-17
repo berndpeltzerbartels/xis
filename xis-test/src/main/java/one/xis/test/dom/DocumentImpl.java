@@ -53,7 +53,8 @@ public class DocumentImpl implements Document {
         return documentElement.getElementByTagName("head");
     }
 
-    String getTitle() {
+    @Override
+    public String getTitle() {
         return Optional.ofNullable((ElementImpl) getHead())
                 .map(head -> (ElementImpl) head.getElementByTagName("title"))
                 .map(ElementImpl::getInnerText)
@@ -95,6 +96,11 @@ public class DocumentImpl implements Document {
     @Override
     public List<Element> getElementsByClass(String item) {
         return documentElement.getElementsByClass(item);
+    }
+
+    @Override
+    public String getTextContent() {
+        return getDocumentElement().asString();
     }
 
 }

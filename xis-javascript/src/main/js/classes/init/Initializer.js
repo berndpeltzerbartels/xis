@@ -26,9 +26,18 @@ class Initializer {
      * @param {TagHandler} parentHandler 
      */
     initialize(node, parentHandler) {
-        if (isElement(node)) {
-            new DomNormalizer(node, this.domAccessor).normalize();
-        }
         return this.handlerBuilder.create(node, parentHandler);
+    }
+
+    /**
+     * 
+     * @param {Element} element 
+     * @returns 
+     */
+    normalizeElement(element) {
+        if (!isElement(element)) {
+            return element;
+        }
+        return new DomNormalizer(element, this.domAccessor).normalize();
     }
 }

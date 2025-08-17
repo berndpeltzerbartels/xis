@@ -56,6 +56,7 @@ class Pages {
     loadPageHead(pageId) {
         return this.client.loadPageHead(pageId).then(content => {
             var templateElement = htmlToElement(content);
+            templateElement = normalizeElement(templateElement);
             initializeElement(templateElement);
             var headChildArray = nodeListToArray(templateElement.childNodes);
             var page = this.pages[pageId];
@@ -80,6 +81,7 @@ class Pages {
     loadPageBody(pageId) {
         return this.client.loadPageBody(pageId).then(content => {
             var templateElement = htmlToElement(content);
+            templateElement = normalizeElement(templateElement);
             initializeElement(templateElement);
             var page = this.pages[pageId];
             page.bodyTemplate = templateElement;
