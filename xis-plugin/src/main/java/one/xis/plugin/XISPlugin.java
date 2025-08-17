@@ -40,6 +40,7 @@ public class XISPlugin implements Plugin<Project> {
         constraints.add("implementation", "one.xis:xis-spring:" + version);
         constraints.add("implementation", "one.xis:xis-authentication:" + version);
         constraints.add("implementation", "one.xis:xis-idp-server:" + version);
+        constraints.add("implementation", "one.xis:xis-bootstrap:" + version);
         constraints.add("testImplementation", "one.xis:xis-test:" + version);
     }
 
