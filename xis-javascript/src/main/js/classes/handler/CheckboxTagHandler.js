@@ -1,6 +1,7 @@
 class CheckboxTagHandler extends InputTagHandler {
     constructor(element) {
         super(element);
+        this.type = 'checkbox-handler';
     }
 
     /**
@@ -52,7 +53,7 @@ class CheckboxTagHandler extends InputTagHandler {
     updateCheckedStateForSingleValue(value) {
         debugger;
         if (!isSet(this.tag.value) || this.tag.value === '') {
-            this.tag.checked = false;
+            this.tag.checked = isSet(value) && value !== false;
         } else {
             this.tag.checked = isSet(value) && String(value) === String(this.tag.value);
         }

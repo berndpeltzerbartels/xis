@@ -4,7 +4,7 @@ package one.xis.test.dom;
 
 import org.graalvm.polyglot.Value;
 
-class ProxyUtils {
+class GraalVMUtils {
     @SuppressWarnings("unchecked")
     static <T> T convertValue(Class<T> targetType, Value value) {
         if (value.isNull()) {

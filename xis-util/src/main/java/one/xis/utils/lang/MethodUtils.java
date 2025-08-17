@@ -38,7 +38,7 @@ public class MethodUtils {
     }
 
     private static boolean isGetter(Method method) {
-        return method.getName().startsWith("get") && method.getParameterCount() == 0;
+        return ((method.getReturnType().equals(Boolean.TYPE) && method.getName().startsWith("is")) || method.getName().startsWith("get")) && method.getParameterCount() == 0;
     }
 
     public static Optional<Method> findSetter(@NonNull Class<?> clazz, @NonNull String propertyName) {
@@ -186,7 +186,9 @@ public class MethodUtils {
 
     private static String toFieldName(Method method) {
         String name = method.getName();
-        if (name.startsWith("set")) {
+        if (name.startsWith("is")) {
+            return StringUtils.firstToLowerCase(name.substring(2));
+        } else if (name.startsWith("set")) {
             return StringUtils.firstToLowerCase(name.substring(3));
         } else if (name.startsWith("get")) {
             return StringUtils.firstToLowerCase(name.substring(3));

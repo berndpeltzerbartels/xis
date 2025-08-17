@@ -53,7 +53,6 @@ public abstract class NodeImpl extends GraalVMProxy implements Node {
         updateChildNodes();
     }
 
-
     void updateChildNodes() {
         childNodes.updateChildNodes(this);
     }

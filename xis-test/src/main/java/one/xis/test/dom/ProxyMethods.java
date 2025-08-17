@@ -46,10 +46,10 @@ public interface ProxyMethods {
         }
         return args;
     }
-    
+
     default Object convertForParameter(Method method, Value value) {
         var parameterType = method.getParameterTypes()[0];
-        return ProxyUtils.convertValue(parameterType, value);
+        return GraalVMUtils.convertValue(parameterType, value);
     }
 
 }

@@ -47,7 +47,7 @@ public interface ProxyAttributes {
             throw new UnsupportedOperationException("Cannot set value using method for attribute: " + getName());
         }
         var type = getField().getType();
-        Object convertedValue = ProxyUtils.convertValue(type, value);
+        Object convertedValue = GraalVMUtils.convertValue(type, value);
         FieldUtil.setFieldValue(base, getField(), convertedValue);
     }
 }

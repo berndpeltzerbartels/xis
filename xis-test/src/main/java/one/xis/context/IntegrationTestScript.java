@@ -8,6 +8,7 @@ import one.xis.test.js.JSUtil;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 import static one.xis.js.JavascriptSource.*;
 
@@ -60,6 +61,7 @@ class IntegrationTestScript {
         bindings.put("atob", testEnvironment.getHtmlObjects().getAtob());
         bindings.put("Node", Node.class);
         bindings.put("Array", new Array());
+        bindings.put("debug", debugFunction);
         // bindings.put("console", testEnvironment.getHTML_OBJECTS().getConsole());
         return bindings;
     }
@@ -74,6 +76,13 @@ class IntegrationTestScript {
         invoker.setBinding("atob", testEnvironment.getHtmlObjects().getAtob());
         invoker.setBinding("Node", Node.class);
         invoker.setBinding("Array", new Array());
+        invoker.setBinding("debug", debugFunction);
         //  invoker.setBinding("console", testEnvironment.getHTML_OBJECTS().getConsole());
+    }
+
+    private final BiConsumer<String, Object> debugFunction = this::debug;
+
+    public void debug(String text, Object args) {
+        System.out.printf("DEBUG: " + text + "\n", args);
     }
 }

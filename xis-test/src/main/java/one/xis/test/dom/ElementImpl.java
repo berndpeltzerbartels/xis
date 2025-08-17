@@ -66,6 +66,10 @@ public class ElementImpl extends NodeImpl implements Element {
 
     @Override
     public String getAttribute(String name) {
+        if (name.equals("class")) {
+            return String.join(" ", classList.getValues());
+        }
+        // We do not to have take care for getters here, because those are handled as attributes, too
         return attributes.get(name);
     }
 
@@ -134,6 +138,14 @@ public class ElementImpl extends NodeImpl implements Element {
         return classList.getValues();
     }
 
+
+    @Override
+    public boolean hasAttribute(String name) {
+        if (name.equals("class")) {
+            return classList.length > 0;
+        }
+        return attributes.containsKey(name);
+    }
 
     public void removeAttribute(String name) {
         if (name.equals("class")) {

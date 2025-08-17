@@ -53,7 +53,7 @@ class CollectionDeserializer implements JsonDeserializer<Collection> {
         }
         var collectionType = getType(target);
         var collection = createCollection(collectionType);
-        collection.add(value);
+        collection.add(value.get());
         return Optional.of(collection);
     }
 

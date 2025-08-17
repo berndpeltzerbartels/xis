@@ -41,10 +41,12 @@ public interface Element extends Node {
     }
 
 
+    boolean hasAttribute(String name);
+
+
     // Non standard methods for testing purposes
 
     void click();
-
 
     String getInnerHTML();
 
