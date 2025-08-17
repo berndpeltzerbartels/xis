@@ -4,6 +4,8 @@ package one.xis.test.dom;
 
 import org.graalvm.polyglot.Value;
 
+import java.util.Set;
+
 class GraalVMUtils {
     @SuppressWarnings("unchecked")
     static <T> T convertValue(Class<T> targetType, Value value) {
@@ -75,5 +77,20 @@ class GraalVMUtils {
         }
         // Fallback: GraalVM-Konvertierung
         return value.as(targetType);
+    }
+
+    static Set<String> allElementAttributeNames() {
+        return Set.of(
+                "id", "class", "style", "title", "lang", "dir", "hidden", "tabindex", "accesskey", "draggable", "spellcheck",
+                "contenteditable", "data-*", "role", "aria-*", "autofocus", "disabled", "readonly", "required", "name",
+                "value", "type", "placeholder", "checked", "selected", "multiple", "maxlength", "minlength", "min", "max",
+                "step", "pattern", "src", "alt", "width", "height", "href", "target", "rel", "download", "media", "hreflang",
+                "coords", "shape", "for", "form", "formaction", "formenctype", "formmethod", "formnovalidate", "formtarget",
+                "accept", "accept-charset", "action", "enctype", "method", "novalidate", "autocomplete", "autoplay", "controls",
+                "loop", "muted", "poster", "preload", "sandbox", "srcdoc", "charset", "content", "http-equiv", "scheme",
+                "rows", "cols", "wrap", "label", "size", "optimum",
+                "low", "high", "open", "start", "reversed", "span", "summary", "cite", "datetime", "pubdate", "itemprop",
+                "itemscope", "itemtype", "itemid", "itemref", "inputmode", "is", "nonce", "crossorigin", "integrity"
+        );
     }
 }

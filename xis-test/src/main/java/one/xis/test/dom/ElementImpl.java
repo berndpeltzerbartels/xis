@@ -3,6 +3,9 @@ package one.xis.test.dom;
 import lombok.Getter;
 import lombok.NonNull;
 import one.xis.test.js.Event;
+import one.xis.utils.lang.MethodUtils;
+import one.xis.utils.lang.TypeUtils;
+import org.graalvm.polyglot.Value;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -38,6 +41,14 @@ public class ElementImpl extends NodeImpl implements Element {
             }
         }
         attributes.put(name, value);
+        if (getGetters().containsKey(name) && !getSetters().containsKey(name)) {
+            throw new IllegalStateException("Attribute '" + name + "' is defined as a getter but not as a setter.");
+        }
+        if (!"setAttribute".equals(name) && getSetters().containsKey(name)) {
+            var setter = getSetters().get(name);
+            MethodUtils.doInvoke(this, setter, TypeUtils.convertSimple(value, setter.getParameterTypes()[0]));
+        }
+
     }
 
     @Override
@@ -147,6 +158,12 @@ public class ElementImpl extends NodeImpl implements Element {
         return attributes.containsKey(name);
     }
 
+    @Override
+    public void putMember(String key, Value value) {
+        attributes.put(key, GraalVMUtils.convertValue(String.class, value));
+        super.putMember(key, value);
+    }
+
     public void removeAttribute(String name) {
         if (name.equals("class")) {
             classList.clear();
@@ -251,6 +268,14 @@ public class ElementImpl extends NodeImpl implements Element {
         return list.stream().filter(Element.class::isInstance)
                 .map(Element.class::cast)
                 .toList();
+    }
+
+    @Override
+    public Object getMemberKeys() {
+        var parentList = Arrays.asList((String[]) super.getMemberKeys());
+        var list = new ArrayList<>(parentList);
+        list.addAll(GraalVMUtils.allElementAttributeNames());
+        return list.toArray(new String[list.size()]);
     }
 
     void findDescendants(Predicate<Node> predicate, Collection<Node> result) {
@@ -402,6 +427,23 @@ public class ElementImpl extends NodeImpl implements Element {
         builder.append("</");
         builder.append(localName);
         builder.append(">\n");
+    }
+
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("<");
+        builder.append(localName);
+        attributes.forEach((key, value) -> {
+            builder.append(" ");
+            builder.append(key);
+            builder.append("=\"");
+            builder.append(value);
+            builder.append("\"");
+        });
+        builder.append("/>");
+        return builder.toString();
     }
 
     public void setInnerText(String text) {

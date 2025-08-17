@@ -22,7 +22,7 @@ class DocumentTest {
 
         var head = document.getElementByTagName("head");
         assertThat(head.getChildElements()).singleElement()
-                .satisfies(e -> assertThat(e.getLocalName()).isEqualTo("head"));
+                .satisfies(e -> assertThat(e.getLocalName()).isEqualTo("title"));
         assertThat(head.getChildElements().get(0).getLocalName()).isEqualTo("title");
 
         var title = document.getElementByTagName("title");
@@ -35,10 +35,12 @@ class DocumentTest {
         var div1 = (ElementImpl) divs.item(0);
         var div2 = (ElementImpl) divs.item(1);
 
-        assertThat(div1.getChildElements().size()).isEqualTo(1);
-        assertThat(div2.getChildElements()).isEmpty();
-        assertThat(div1.getChildElements().get(0)).isInstanceOf(TextNodeIml.class);
+        assertThat(div1.getChildNodes().length).isEqualTo(1);
+        assertThat(div2.getChildNodes().length).isEqualTo(0);
+        assertThat(div1.getChildNodes().item(0)).isInstanceOf(TextNodeIml.class);
+        var textNode = (TextNodeIml) div1.getChildNodes().item(0);
         assertThat(div1.getInnerText()).isEqualTo("123");
+        assertThat(textNode.nodeValue).isEqualTo("123");
 
     }
 
@@ -180,6 +182,6 @@ class DocumentTest {
         assertThat(element).isNotNull();
         assertThat(element.getLocalName()).isEqualTo("b");
     }
-    
+
 
 }

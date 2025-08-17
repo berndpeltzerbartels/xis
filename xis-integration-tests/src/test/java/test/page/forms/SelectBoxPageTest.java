@@ -3,6 +3,7 @@ package test.page.forms;
 import one.xis.context.IntegrationTestContext;
 import one.xis.test.dom.Element;
 import one.xis.test.dom.ElementImpl;
+import one.xis.test.dom.Node;
 import one.xis.test.dom.OptionElement;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -18,7 +19,6 @@ class SelectBoxPageTest {
 
     private IntegrationTestContext context;
     private SelectBoxFormService selectBoxFormService;
-    private SelectBoxFormModel selectBoxFormModel;
 
     @BeforeEach
     void init() {
@@ -36,7 +36,7 @@ class SelectBoxPageTest {
         void init() {
             reset(selectBoxFormService);
 
-            selectBoxFormModel = new SelectBoxFormModel();
+            SelectBoxFormModel selectBoxFormModel = new SelectBoxFormModel();
             selectBoxFormModel.setSelectedValue(2);
 
             when(selectBoxFormService.options()).thenReturn(List.of(new SelectBoxFormOption(2, "two")));
@@ -47,9 +47,9 @@ class SelectBoxPageTest {
         void options() {
             var result = context.openPage(SelectBoxPage.class);
             var form = result.getDocument().getElementByTagName("form");
-            var selectBox = form.findDescendant(e -> e instanceof ElementImpl element && "select".equals(element.getLocalName()));
+            var selectBox = form.findDescendant(this::isSelect);
 
-            assertThat(((Element) selectBox).findDescendants(e -> e instanceof ElementImpl element && element.getLocalName().equals("option"))).singleElement().satisfies(
+            assertThat(((Element) selectBox).findDescendants(this::isOption)).singleElement().satisfies(
                     option -> {
                         assertThat(((Element) option).getAttribute("value")).isEqualTo("2");
                         assertThat(((ElementImpl) option).getInnerText()).isEqualTo("two");
@@ -65,6 +65,14 @@ class SelectBoxPageTest {
             verify(selectBoxFormService).saveSelectBoxFormModel(formModelCaptor.capture());
 
             assertThat(formModelCaptor.getValue().getSelectedValue()).isEqualTo(2);
+        }
+
+        private boolean isSelect(Node node) {
+            return node instanceof ElementImpl element && "select".equals(element.getLocalName());
+        }
+
+        private boolean isOption(Node node) {
+            return node instanceof ElementImpl element && "option".equals(element.getLocalName());
         }
 
     }

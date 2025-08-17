@@ -22,6 +22,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.format.FormatStyle;
 import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -582,5 +583,105 @@ class DeserializationTest {
 
         @PostProcessorTestAnnotation
         LocalDate localDate;
+    }
+
+
+    @Nested
+    class CollectionFieldTest {
+
+        @Data
+        static class ListModel {
+            private List<Integer> intList;
+        }
+
+        @Test
+        void deserializeIntegerList_empty() throws NoSuchMethodException {
+            var parameter = getClass().getDeclaredMethod("testMethodListModel", ListModel.class).getParameters()[0];
+            var json = "{\"intList\":[]}";
+            var model = (ListModel) mainDeserializer.deserialize(json, parameter, userContext, new PostProcessingResults());
+            assertThat(model.getIntList()).isEmpty();
+        }
+
+        @Test
+        void deserializeIntegerList_oneElement() throws NoSuchMethodException {
+            var parameter = getClass().getDeclaredMethod("testMethodListModel", ListModel.class).getParameters()[0];
+            var json = "{\"intList\":[42]}";
+            var model = (ListModel) mainDeserializer.deserialize(json, parameter, userContext, new PostProcessingResults());
+            assertThat(model.getIntList()).containsExactly(42);
+        }
+
+        @Test
+        void deserializeIntegerList_twoElements() throws NoSuchMethodException {
+            var parameter = getClass().getDeclaredMethod("testMethodListModel", ListModel.class).getParameters()[0];
+            var json = "{\"intList\":[1,2]}";
+            var model = (ListModel) mainDeserializer.deserialize(json, parameter, userContext, new PostProcessingResults());
+            assertThat(model.getIntList()).containsExactly(1, 2);
+        }
+
+        @Test
+        void deserializeIntegerList_fieldNotPresent() throws NoSuchMethodException {
+            var parameter = getClass().getDeclaredMethod("testMethodListModel", ListModel.class).getParameters()[0];
+            var json = "{}";
+            var model = (ListModel) mainDeserializer.deserialize(json, parameter, userContext, new PostProcessingResults());
+            assertThat(model.getIntList()).isNotNull();
+        }
+
+        @SuppressWarnings("unused")
+        void testMethodListModel(@FormData("model") ListModel model) {
+        }
+    }
+
+
+    @Nested
+    class ArrayFieldTest {
+
+        @Data
+        static class ListModel {
+            private ItemModel[] items;
+        }
+
+        @Data
+        static class ItemModel {
+            private Integer item;
+        }
+
+        @Test
+        void deserializeIntegerList_empty() throws NoSuchMethodException {
+            var parameter = getClass().getDeclaredMethod("testMethodListModel", ListModel.class).getParameters()[0];
+            var json = "{\"items\":[]}";
+            var model = (ListModel) mainDeserializer.deserialize(json, parameter, userContext, new PostProcessingResults());
+            assertThat(model.getItems()).isEmpty();
+        }
+
+        @Test
+        void deserializeIntegerList_oneElement() throws NoSuchMethodException {
+            var parameter = getClass().getDeclaredMethod("testMethodListModel", ListModel.class).getParameters()[0];
+            var json = "{\"items\":[{\"item\":42}]}";
+            var model = (ListModel) mainDeserializer.deserialize(json, parameter, userContext, new PostProcessingResults());
+            assertThat(model.getItems()).singleElement().extracting(ItemModel::getItem).isEqualTo(42);
+        }
+
+        @Test
+        void deserializeIntegerList_twoElements() throws NoSuchMethodException {
+            var parameter = getClass().getDeclaredMethod("testMethodListModel", ListModel.class).getParameters()[0];
+            var json = "{\"items\":[{\"item\":1},{\"item\":2}]}";
+            var model = (ListModel) mainDeserializer.deserialize(json, parameter, userContext, new PostProcessingResults());
+            assertThat(model.getItems())
+                    .hasSize(2)
+                    .extracting(ItemModel::getItem)
+                    .containsExactly(1, 2);
+        }
+
+        @Test
+        void deserializeIntegerList_fieldNotPresent() throws NoSuchMethodException {
+            var parameter = getClass().getDeclaredMethod("testMethodListModel", ListModel.class).getParameters()[0];
+            var json = "{}";
+            var model = (ListModel) mainDeserializer.deserialize(json, parameter, userContext, new PostProcessingResults());
+            assertThat(model.getItems()).isNotNull();
+        }
+
+        @SuppressWarnings("unused")
+        void testMethodListModel(@FormData("model") ListModel model) {
+        }
     }
 }

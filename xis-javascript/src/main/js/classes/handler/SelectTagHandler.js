@@ -44,7 +44,7 @@ class SelectTagHandler extends InputTagHandler {
             } else if (value === null) {
                 option.selected = (option.value === '' || option.value === null);
             } else {
-                option.selected = (option.value === value);
+                option.selected = this.isEqual(option.value, value);
             }
         }
     }
@@ -55,9 +55,26 @@ class SelectTagHandler extends InputTagHandler {
      */
     optionElements() {
         var selectTag = this.tag;
-        return Array.prototype.filter.call(
-            selectTag.childNodes,
-            node => node.nodeType === 1 && node.tagName === 'OPTION'
-        );
+        var options = [];
+        for (var i = 0; i < selectTag.options.length; i++) {
+            options.push(selectTag.options.item(i));
+        }
+        return options;
     }
+
+    /**
+ * Compares two values for equality, treating numbers and strings with the same content as equal.
+ * @private
+ * @param {any} v1
+ * @param {any} v2
+ * @returns {boolean}
+ */
+isEqual(v1, v2) {
+    // Treat null and undefined as not equal to anything except themselves
+    if (!isSet(v1)) {
+        return !isSet(v2);
+    }
+    // Compare as strings
+    return String(v1) === String(v2);
+}
 }
