@@ -40,6 +40,7 @@ public interface Element extends Node {
         };
     }
 
+    String getTextContent();
 
     boolean hasAttribute(String name);
 
@@ -69,4 +70,6 @@ public interface Element extends Node {
     List<Element> getChildElements();
 
     Collection<String> getCssClasses();
+
+
 }

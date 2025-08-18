@@ -73,4 +73,9 @@ public abstract class NodeImpl extends GraalVMProxy implements Node {
 
 
     protected abstract void evaluateContent(StringBuilder builder, int i);
+
+    @Override
+    public Element getParentElement() {
+        return (Element) parentNode;
+    }
 }

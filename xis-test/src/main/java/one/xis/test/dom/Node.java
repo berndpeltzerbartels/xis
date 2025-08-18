@@ -20,4 +20,8 @@ public interface Node {
     Node getNextSibling();
 
     NodeList getChildNodes();
+
+    Element getParentElement();
+
+    String asString();
 }

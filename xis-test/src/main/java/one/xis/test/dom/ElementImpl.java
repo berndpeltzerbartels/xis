@@ -132,6 +132,11 @@ public class ElementImpl extends NodeImpl implements Element {
     }
 
     @Override
+    public String getTextContent() {
+        return getInnerText();
+    }
+
+    @Override
     public void click() {
         fireEvent("click", new Event("click"));
     }
@@ -255,7 +260,7 @@ public class ElementImpl extends NodeImpl implements Element {
 
     @Override
     public String getTagName() {
-        return localName;
+        return localName.toUpperCase();
     }
 
     @Override
@@ -396,7 +401,8 @@ public class ElementImpl extends NodeImpl implements Element {
     }
 
 
-    String asString() {
+    @Override
+    public String asString() {
         StringBuilder builder = new StringBuilder();
         evaluateContent(builder, 0);
         return builder.toString();

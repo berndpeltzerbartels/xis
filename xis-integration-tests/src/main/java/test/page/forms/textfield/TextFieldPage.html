@@ -1,0 +1,18 @@
+<!-- Datei: xis-integration-tests/src/main/java/test/page/forms/textfield/TextField.html -->
+<!DOCTYPE html>
+<html xmlns:xis="http://xis.one/schema" lang="de">
+<head>
+    <title>TextField Test</title>
+</head>
+<body>
+<xis:form binding="formData" id="form">
+    <input type="text" xis:binding="number" id="theTextField"/>
+    <span xis:message-for="number" id="fieldMessage"/>
+    <button xis:action="submit" id="submitButton">Submit</button>
+    <div>
+        <ul xis:global-messages="true"></ul>
+    </div>
+</xis:form>
+
+</body>
+</html>

@@ -14,11 +14,19 @@
     <div>
         <input type="text" xis:binding="property2" id="field2"/>
         <label for="field2">Property 2</label>
-        <div>${validation.messages.property2'</div>
+        <div>${validation.messages.property2}</div>
     </div>
 
     <div>
         <button xis:action="save" id="save">Speichern</button>
+    </div>
+
+    <input type="hidden" xis:binding="id" id="objectId"/>
+
+    <div>
+        <ul>
+            <li xis:repeat="message:validation.globalMessages">${message}</li>
+        </ul>
     </div>
 </form>
 

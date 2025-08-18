@@ -48,6 +48,7 @@ dependencies {
     implementation project(':xis-javascript')
     implementation project(':xis-http-controller')
     api(project(':xis-security-common'))
+    api(project(':xis-validation'))
     implementation project(':xis-authentication')
     implementation project(':xis-authentication-api')
     //implementation project(':xis-security:xis-login')

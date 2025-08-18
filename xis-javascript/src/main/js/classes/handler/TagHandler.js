@@ -71,12 +71,6 @@ class TagHandler {
         }
     }
 
-    refreshValidatorMessages(messages) {
-        for (var handler of this.descendantHandlers) {
-            handler.refreshValidatorMessages(messages);
-        }
-    }
-
     clearChildren() {
         for (var node of this.nodeListToArray(this.tag.childNodes)) {
             if (node.getAttribute && node.getAttribute('ignore')) {

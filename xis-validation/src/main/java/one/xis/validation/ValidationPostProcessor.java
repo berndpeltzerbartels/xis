@@ -24,15 +24,13 @@ class ValidationPostProcessor implements DeserializationPostProcessor {
         var validateAnnotation = deserializationContext.getAnnotationClass().getAnnotation(Validate.class);
         var validatorClass = validateAnnotation.validatorClass();
         var validator = getValidator(validatorClass);
-        var typeParameter = ClassUtils.getGenericInterfacesTypeParameter(validatorClass, Validator.class, 0);
-        if (!typeParameter.isAssignableFrom(getTargetType(deserializationContext.getTarget()))) {
-            throw new IllegalArgumentException("Validator " + validatorClass + " in annotation " + deserializationContext.getAnnotationClass()
-                    + " is not applicable to " + deserializationContext.getTarget());
-        }
         try {
             validator.validate(value, deserializationContext.getTarget());
         } catch (ValidatorException e) {
             postProcessingResults.add(new InvalidValueError(deserializationContext, validateAnnotation.messageKey(), validateAnnotation.globalMessageKey(), value, e.getMessageParameters()));
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Validator " + validatorClass + " in annotation " + deserializationContext.getAnnotationClass()
+                    + " is not applicable to " + deserializationContext.getTarget());
         }
     }
 

@@ -12,7 +12,7 @@ import java.util.Map;
 
 @Setter
 @Page("/idp/login.html")
-@HtmlFile("/idp-login.html")
+@HtmlFile("idp-login.html")
 @DefaultHtmlFile("/default-idp-login.html")
 @RequiredArgsConstructor
 class IDPLoginController implements Validator<IDPServerLogin> {

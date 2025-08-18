@@ -22,6 +22,7 @@ public class TextNodeIml extends NodeImpl implements TextNode {
         return new TextNodeIml(nodeValue);
     }
 
+    @Override
     public String asString() {
         return nodeValue != null ? nodeValue.toString() : "";
     }

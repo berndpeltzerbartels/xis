@@ -9,7 +9,6 @@ import one.xis.Widget;
 import one.xis.context.XISComponent;
 import one.xis.context.XISInit;
 import one.xis.context.XISInject;
-import one.xis.resource.NoSuchResourceException;
 import one.xis.resource.Resource;
 import one.xis.resource.ResourceCache;
 import one.xis.resource.Resources;
@@ -148,31 +147,35 @@ class ResourceService {
 
 
     private Resource htmlResource(Object controller) {
-        try {
-            return resources.getByPath(getHtmlTemplatePath(controller));
-        } catch (NoSuchResourceException e) {
-            if (!controller.getClass().isAnnotationPresent(DefaultHtmlFile.class)) {
-                throw new RuntimeException("Failed to load HTML template for controller: " + controller.getClass().getName(), e);
+        Class<?> clazz = controller.getClass();
+        String path;
+        if (clazz.isAnnotationPresent(HtmlFile.class)) {
+            var htmlFile = clazz.getAnnotation(HtmlFile.class).value();
+            path = htmlFile.startsWith("/") ? htmlFile.substring(1)
+                    : clazz.getPackageName().replace('.', '/') + "/" + htmlFile;
+            if (!path.endsWith(".html")) {
+                path += ".html";
             }
-            var data = resources.getByPath(controller.getClass().getAnnotation(DefaultHtmlFile.class).value());
+            if (resources.exists(path)) {// Allows to use @HtmlDefaultFile as a fallback
+                return resources.getByPath(path);
+            }
+        }
+        if (clazz.isAnnotationPresent(DefaultHtmlFile.class)) {
+            var defaultFile = clazz.getAnnotation(DefaultHtmlFile.class).value();
+            path = defaultFile.startsWith("/") ? defaultFile.substring(1)
+                    : clazz.getPackageName().replace('.', '/') + "/" + defaultFile;
+            if (!path.endsWith(".html")) {
+                path += ".html";
+            }
+            var data = resources.getByPath(path);
             if (data == null || data.getLength() == 0) {
-                throw new RuntimeException("Default HTML template is empty for controller: " + controller.getClass().getName());
+                throw new RuntimeException("Default HTML template is empty for controller: " + clazz.getName());
             }
             return data;
         }
-    }
-
-    private String getHtmlTemplatePath(Object controller) {
-        var path = new StringBuilder(controller.getClass().getPackageName().replace('.', '/')).append("/");
-        if (controller.getClass().isAnnotationPresent(HtmlFile.class)) {
-            path.append(controller.getClass().getAnnotation(HtmlFile.class).value());
-        } else {
-            path.append(controller.getClass().getSimpleName());
-        }
-        if (!path.toString().endsWith(".html")) {
-            path.append(".html");
-        }
-        return path.toString();
+        // Fallback: qualifiedName + ".html"
+        path = clazz.getName().replace('.', '/') + ".html";
+        return resources.getByPath(path);
     }
 
 

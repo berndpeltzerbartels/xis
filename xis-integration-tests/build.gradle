@@ -45,6 +45,8 @@ dependencies {
 
     // Local test dependencies
     testImplementation project(":xis-test")
+    testImplementation project(":xis-gson")
+    testImplementation project(":xis-http-controller")
 
     // Lombok dependencies
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"

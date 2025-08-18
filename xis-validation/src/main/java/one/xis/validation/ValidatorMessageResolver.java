@@ -1,6 +1,7 @@
 package one.xis.validation;
 
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import one.xis.*;
 import one.xis.context.XISComponent;
 
@@ -8,10 +9,12 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Parameter;
 import java.util.*;
-import java.util.stream.Stream;
 
 @XISComponent
+@RequiredArgsConstructor
 public class ValidatorMessageResolver {
+
+    private final ValidatorMessagePropertiesLoader messagePropertiesLoader;
 
     public String createMessage(@NonNull String messageKey, @NonNull Map<String, Object> messageParameters, @NonNull AnnotatedElement annotatedElement, @NonNull UserContext userContext) {
         var labelKey = getLabelKey(annotatedElement);
@@ -111,28 +114,13 @@ public class ValidatorMessageResolver {
 
 
     private String getMessage(String messageKey, UserContext userContext) {
-        return Stream.of(getCustomValidationResourceBundle(userContext), getMessagesResourceBundle(userContext), getDefaultValidationResourceBundle(userContext))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .map(bundle -> getString(messageKey, bundle))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .findFirst()
-                .orElse(null);
+        return messagePropertiesLoader.getMessage(messageKey, userContext.getLocale());
 
     }
 
     private Optional<ResourceBundle> getCustomValidationResourceBundle(UserContext userContext) {
         try {
-            return Optional.of(ResourceBundle.getBundle("validation.messages", userContext.getLocale()));
-        } catch (MissingResourceException e) {
-            return Optional.empty();
-        }
-    }
-
-    private Optional<ResourceBundle> getDefaultValidationResourceBundle(UserContext userContext) {
-        try {
-            return Optional.of(ResourceBundle.getBundle("validation.default-messages", userContext.getLocale()));
+            return Optional.of(ResourceBundle.getBundle("messages", userContext.getLocale()));
         } catch (MissingResourceException e) {
             return Optional.empty();
         }
@@ -140,7 +128,7 @@ public class ValidatorMessageResolver {
 
     private Optional<ResourceBundle> getMessagesResourceBundle(UserContext userContext) {
         try {
-            return Optional.of(ResourceBundle.getBundle("messages", userContext.getLocale()));
+            return Optional.of(ResourceBundle.getBundle("messages"));
         } catch (MissingResourceException e) {
             return Optional.empty();
         }

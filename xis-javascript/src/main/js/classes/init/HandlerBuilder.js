@@ -104,6 +104,7 @@ class HandlerBuilder {
                 handler = new MessageTagHandler(element);
                 break;
             case 'xis:global-messages':
+                debugger;
                 handler = new GlobalMessagesTagHandler(element);
                 break;
             case 'xis:if':

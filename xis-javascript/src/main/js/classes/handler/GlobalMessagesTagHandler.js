@@ -7,6 +7,7 @@ class GlobalMessagesTagHandler extends TagHandler {
     constructor(tag) {
         super(tag);
         this.singleMessageTag = undefined;
+        debugger;
     }
 
     /**
@@ -15,10 +16,11 @@ class GlobalMessagesTagHandler extends TagHandler {
      * @param {Data} data 
      */
     refresh(data) {
+        debugger;
         this.refreshDescendantHandlers(data);
         this.singleMessageTag = getFirstChildElement(this.tag);
         if (!this.singleMessageTag) {
-            switch (this.tag.tagName) {
+            switch (this.tag.parentNode.tagName) {
                 case 'UL':
                 case 'OL':
                     this.singleMessageTag = document.createElement('li');
@@ -27,6 +29,7 @@ class GlobalMessagesTagHandler extends TagHandler {
                     this.singleMessageTag = document.createElement('div');
             }
         }
+         this.getParentFormHandler().onGlobalMessageHandlerRefreshed(this);
     }
 
     /**
