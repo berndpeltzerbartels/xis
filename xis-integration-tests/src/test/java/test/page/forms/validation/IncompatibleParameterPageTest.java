@@ -1,8 +1,8 @@
 package test.page.forms.validation;
 
 import one.xis.context.IntegrationTestContext;
-import one.xis.test.dom.ElementImpl;
 import one.xis.test.dom.Document;
+import one.xis.test.dom.ElementImpl;
 import one.xis.test.dom.InputElement;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -41,7 +41,7 @@ class IncompatibleParameterPageTest {
 
             button.click();
 
-            assertThat(integerFieldMandatoryMessage(document).getInnerText()).isEqualTo("erforderlich");
+            assertThat(integerFieldMandatoryMessage(document).getInnerText()).isEqualTo("Benutzerdefinierte Pflichtfeldmeldung");
             assertThat(integerField(document).getInnerText()).isEmpty();
 
         }
