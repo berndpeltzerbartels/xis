@@ -6,10 +6,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.Data;
 import lombok.Getter;
-import one.xis.Action;
-import one.xis.FormData;
-import one.xis.ModelData;
-import one.xis.Page;
+import one.xis.*;
 import one.xis.context.IntegrationTestContext;
 import one.xis.context.XISInit;
 import one.xis.gson.JsonMap;
@@ -236,6 +233,7 @@ class ValidationPostProcessorIntegrationTest {
     }
 
 
+    @HtmlFile("/PersonController.html")
     @Page("/person.html")
     static class PersonController {
 
@@ -263,6 +261,7 @@ class ValidationPostProcessorIntegrationTest {
         }
     }
 
+    @HtmlFile("/PersonDataListController.html")
     @Page("/person-list.html")
     static class PersonDataListController {
 

@@ -67,7 +67,7 @@ public class ElementTest {
     void getElementByIdShouldReturnSelfOrDescendant() {
         var div = document.getElementById("main");
         assertThat(div.getElementById("main")).isEqualTo(div);
-        assertThat(div.getElementById("sp1").getTagName()).isEqualTo("span");
+        assertThat(div.getElementById("sp1").getLocalName()).isEqualTo("span");
     }
 
     @Test
@@ -90,7 +90,7 @@ public class ElementTest {
         var div = document.getElementById("main");
         List<Element> children = div.getChildElements();
         assertThat(children).hasSize(1);
-        assertThat(children.get(0).getTagName()).isEqualTo("span");
+        assertThat(children.get(0).getLocalName()).isEqualTo("span");
     }
 
     @Test
@@ -106,17 +106,17 @@ public class ElementTest {
     }
 
     @Test
-    void getTagNameShouldReturnTagName() {
+    void getLocalNameShouldReturnTagName() {
         var div = document.getElementById("main");
-        assertThat(div.getTagName()).isEqualTo("div");
+        assertThat(div.getLocalName()).isEqualTo("div");
     }
 
     @Test
     void findDescendantsShouldReturnMatchingNodes() {
         var div = document.getElementById("main");
-        var result = div.findDescendants(node -> node instanceof Element && ((Element) node).getTagName().equals("span"));
+        var result = div.findDescendants(node -> node instanceof Element && ((Element) node).getLocalName().equals("span"));
         assertThat(result).hasSize(1);
-        assertThat(((Element) result.get(0)).getTagName()).isEqualTo("span");
+        assertThat(((Element) result.get(0)).getLocalName()).isEqualTo("span");
     }
 
     @Test

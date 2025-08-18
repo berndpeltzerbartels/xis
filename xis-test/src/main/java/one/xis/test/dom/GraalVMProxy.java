@@ -8,6 +8,7 @@ import org.graalvm.polyglot.proxy.ProxyObject;
 
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -20,17 +21,36 @@ public class GraalVMProxy implements ProxyObject {
 
     private final Set<String> memberKeys;
 
+    private static final ConcurrentHashMap<Class<?>, SubtypeMeta> META_CACHE = new ConcurrentHashMap<>();
+
+    private final SubtypeMeta meta;
+
     GraalVMProxy() {
-        this.getters = MethodUtils.findGettersByFieldName(getClass());
-        this.setters = MethodUtils.findSettersByFieldName(getClass());
-        this.nonSettersOrGetters = MethodUtils.allMethods(getClass())
-                .stream()
-                .filter(MethodUtils.NON_PRIVATE)
-                .filter(method -> !getters.containsKey(method.getName()) && !setters.containsKey(method.getName()))
-                .collect(Collectors.toMap(Method::getName, Function.identity(), (existing, replacement) -> existing));
-        memberKeys = new HashSet<>(getters.keySet());
-        memberKeys.addAll(setters.keySet());
-        memberKeys.addAll(nonSettersOrGetters.keySet());
+        this.meta = META_CACHE.computeIfAbsent(getClass(), SubtypeMeta::new);
+        this.getters = this.meta.getters;
+        this.setters = this.meta.setters;
+        this.nonSettersOrGetters = this.meta.nonSettersOrGetters;
+        this.memberKeys = this.meta.memberKeys;
+    }
+
+    private static class SubtypeMeta {
+        final Map<String, Method> getters;
+        final Map<String, Method> setters;
+        final Map<String, Method> nonSettersOrGetters;
+        final Set<String> memberKeys;
+
+        SubtypeMeta(Class<?> clazz) {
+            this.getters = MethodUtils.findGettersByFieldName(clazz);
+            this.setters = MethodUtils.findSettersByFieldName(clazz);
+            this.nonSettersOrGetters = MethodUtils.allMethods(clazz)
+                    .stream()
+                    .filter(MethodUtils.NON_PRIVATE)
+                    .filter(method -> !getters.containsKey(method.getName()) && !setters.containsKey(method.getName()))
+                    .collect(Collectors.toMap(Method::getName, Function.identity(), (existing, replacement) -> existing));
+            memberKeys = new HashSet<>(getters.keySet());
+            memberKeys.addAll(setters.keySet());
+            memberKeys.addAll(nonSettersOrGetters.keySet());
+        }
     }
 
     public Object getMemberKeys() {

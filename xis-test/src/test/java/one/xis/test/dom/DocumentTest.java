@@ -51,10 +51,10 @@ class DocumentTest {
         var document = Document.of(html);
 
         assertThat(document.getDocumentElement().getLocalName()).isEqualTo("html");
-        assertThat(document.getDocumentElement().getChildElements().stream().map(Element::getTagName)).containsExactly("head", "body");
+        assertThat(document.getDocumentElement().getChildElements().stream().map(Element::getLocalName)).containsExactly("head", "body");
 
         var head = document.getElementByTagName("head");
-        assertThat(head.getChildElements().stream().map(Element::getTagName)).contains("title", "script");
+        assertThat(head.getChildElements().stream().map(Element::getLocalName)).contains("title", "script");
 
         var body = document.getElementByTagName("body");
         assertThat(body.getChildNodes().length).isEqualTo(1); // messages-div
