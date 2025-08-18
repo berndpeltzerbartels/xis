@@ -148,8 +148,8 @@ class DomAccessorTest {
 
         JSUtil.execute(js, Map.of("document", document));
 
-        assertThat(document.getDocumentElement().getChildElements().stream().map(Element::getTagName)).containsExactly("x");
-        assertThat(document.getElementByTagName("x").getChildElements().stream().map(Element::getTagName)).containsExactly("b", "c");
+        assertThat(document.getDocumentElement().getChildElements().stream().map(Element::getTagName)).containsExactly("X"); // uppercase tag name
+        assertThat(document.getElementByTagName("x").getChildElements().stream().map(Element::getTagName)).containsExactly("B", "C"); // uppercase tag name
 
     }
 
