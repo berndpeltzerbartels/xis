@@ -1,5 +1,5 @@
 plugins {
-    id 'java'
+    id 'java-library'
     id 'maven-publish'
     // id 'signing'
 }
@@ -10,6 +10,7 @@ version = rootProject.ext.projectVersion
 repositories {
     mavenCentral()
 }
+
 
 tasks.withType(JavaCompile) {
     sourceCompatibility = rootProject.ext.javaVersion.toString()
@@ -24,57 +25,18 @@ java {
     withJavadocJar()
 }
 
-// Local variables for versions
-var lombokVersion = rootProject.ext.libraryVersions.lombok
-var dom4jVersion = rootProject.ext.libraryVersions.dom4j
-var slf4jVersion = rootProject.ext.libraryVersions.slf4j
-var jacksonDatabindVersion = rootProject.ext.libraryVersions.jackson
-var tinylogVersion = rootProject.ext.libraryVersions.tinylog
-var gsonVersion = rootProject.ext.libraryVersions.gson
-var junitVersion = rootProject.ext.libraryVersions.junit
-var mockitoVersion = rootProject.ext.libraryVersions.mockito
-var assertjVersion = rootProject.ext.libraryVersions.assertj
+
+repositories {
+    mavenCentral()
+}
 
 dependencies {
-
-    // Local project dependencies
-    implementation project(':xis-context')
-    implementation project(':xis-util')
-    implementation project(':xis-controller-api')
-    implementation project(':xis-javascript')
-    implementation project(':xis-deserializer')
-    implementation project(':xis-gson')
-    implementation project(':xis-validation')
-    implementation project(':xis-adapter-spi')
-//    implementation project(':xis-security:xis-token')
-    implementation(project(":xis-http-controller"))
-    implementation(project(":xis-security-common"))
-    // Compile-only dependencies
-    compileOnly project(':xis-resources')
-
-
-    implementation 'com.github.ben-manes.caffeine:caffeine:3.1.8'
-
-    // Annotation processors
-    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
-
-    // Implementation dependencies
-    implementation "org.projectlombok:lombok:$lombokVersion"
-    implementation "dom4j:dom4j:$dom4jVersion" // TODO: Version
-    implementation "org.slf4j:slf4j-api:$slf4jVersion"
-    implementation "com.fasterxml.jackson.core:jackson-databind:$jacksonDatabindVersion"
-    implementation "org.tinylog:tinylog-api:$tinylogVersion"
-    implementation "com.google.code.gson:gson:$gsonVersion"
-
-    // Test dependencies
-    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
-    testImplementation "org.mockito:mockito-core:$mockitoVersion"
-    testImplementation "org.assertj:assertj-core:$assertjVersion"
-    testImplementation project(':xis-resources')
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
 }
 
 test {
+    maxParallelForks = 4
     useJUnitPlatform()
     afterTest { desc, result ->
         logger.quiet "${desc.className} - ${desc.name}: ${result.resultType}"

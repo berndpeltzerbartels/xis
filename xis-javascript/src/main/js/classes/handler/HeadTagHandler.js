@@ -91,6 +91,7 @@ class HeadTagHandler extends TagHandler {
                 var expression = scriptElement.srcexpr;
                 if (expression) {
                     scriptElement.setAttribute('src', expression.evaluate(data));
+                    nodeValueChanged(scriptElement);
                 }
             }
         }

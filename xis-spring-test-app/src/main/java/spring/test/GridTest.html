@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Grid-Demo 2</title>
+    <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+<main style="max-width: 1100px; margin: 28px auto; padding: 0 16px; display: grid; gap: 24px;">
+    <h1>Grid-Demo für Formulare und Inhalte</h1>
+    <p>Container: <code>col1...col8</code> → Anzahl Spalten. Elemente: <code>spanX</code> → Spaltenbreite,
+        <code>offX</code> → linke Leerspalten.</p>
+
+
+    <!-- Beispiel 1: Grid mit Text-Content -->
+    <div class="grid col4 demo-a demo-striped">
+        <div class="group-title">Beispiel 1 – Grid mit Text</div>
+        <div class="span2">
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus
+                ante dapibus diam.</p>
+        </div>
+        <div class="span2">
+            <p>Sed nisi. Nulla quis sem at nibh elementum imperdiet. Duis sagittis ipsum. Praesent mauris.</p>
+        </div>
+        <div class="span4">
+            <p>Fusce nec tellus sed augue semper porta. Mauris massa. Vestibulum lacinia arcu eget nulla.</p>
+        </div>
+    </div>
+
+
+    <!-- Beispiel 2: Formular mit Inputs -->
+    <form class="grid col6 demo-b demo-striped">
+        <div class="group-title">Beispiel 2 – Formular</div>
+        <div class="field span3">
+            <label for="name">Name</label>
+            <input id="name" type="text"/>
+        </div>
+        <div class="field span3">
+            <label for="email">E-Mail</label>
+            <input id="email" type="email"/>
+        </div>
+        <div class="field span6">
+            <label for="nachricht">Nachricht</label>
+            <textarea id="nachricht" rows="3"></textarea>
+        </div>
+        <div class="actions">
+            <button type="reset" class="ghost">Zurücksetzen</button>
+            <button type="submit" class="primary">Absenden</button>
+        </div>
+    </form>
+
+
+    <!-- Beispiel 3: Mix aus Text und Formular -->
+    <div class="grid col8 demo-c demo-striped">
+        <div class="group-title">Beispiel 3 – Mischung</div>
+        <div class="span4">
+            <p>Hier ein normaler Textblock, der vier Spalten breit ist. Links daneben könnte ein Formularteil
+                stehen.</p>
+        </div>
+        <div class="field span4">
+            <label for="stadt">Stadt</label>
+            <input id="stadt" type="text" placeholder="Hamburg"/>
+        </div>
+    </div>
+</main>
+</body>
+</html>

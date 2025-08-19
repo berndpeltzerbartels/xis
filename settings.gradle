@@ -60,4 +60,5 @@ include 'xis-security-common'
 include 'xis-idp-client'
 include 'xis-authentication-api'
 include 'xis-bootstrap'
+include 'xis-theme'
 

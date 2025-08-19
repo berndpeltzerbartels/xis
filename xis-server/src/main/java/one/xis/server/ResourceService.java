@@ -2,8 +2,6 @@ package one.xis.server;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import one.xis.DefaultHtmlFile;
-import one.xis.HtmlFile;
 import one.xis.Page;
 import one.xis.Widget;
 import one.xis.context.XISComponent;
@@ -34,6 +32,9 @@ class ResourceService {
 
     @XISInject
     private RootPageService rootPageService;
+
+    @XISInject
+    private HtmlResourcePathResolver htmlResourcePathResolver;
 
     private final Resources resources;
     private final PathResolver pathResolver;
@@ -147,37 +148,9 @@ class ResourceService {
 
 
     private Resource htmlResource(Object controller) {
-        Class<?> clazz = controller.getClass();
-        String path;
-        if (clazz.isAnnotationPresent(HtmlFile.class)) {
-            var htmlFile = clazz.getAnnotation(HtmlFile.class).value();
-            path = htmlFile.startsWith("/") ? htmlFile.substring(1)
-                    : clazz.getPackageName().replace('.', '/') + "/" + htmlFile;
-            if (!path.endsWith(".html")) {
-                path += ".html";
-            }
-            if (resources.exists(path)) {// Allows to use @HtmlDefaultFile as a fallback
-                return resources.getByPath(path);
-            }
-        }
-        if (clazz.isAnnotationPresent(DefaultHtmlFile.class)) {
-            var defaultFile = clazz.getAnnotation(DefaultHtmlFile.class).value();
-            path = defaultFile.startsWith("/") ? defaultFile.substring(1)
-                    : clazz.getPackageName().replace('.', '/') + "/" + defaultFile;
-            if (!path.endsWith(".html")) {
-                path += ".html";
-            }
-            var data = resources.getByPath(path);
-            if (data == null || data.getLength() == 0) {
-                throw new RuntimeException("Default HTML template is empty for controller: " + clazz.getName());
-            }
-            return data;
-        }
-        // Fallback: qualifiedName + ".html"
-        path = clazz.getName().replace('.', '/') + ".html";
+        var path = htmlResourcePathResolver.htmlResourcePath(controller.getClass());
         return resources.getByPath(path);
     }
-
 
     private Document createDocument(String xml) {
         try {
@@ -190,7 +163,7 @@ class ResourceService {
     @SneakyThrows
     private String serialize(org.dom4j.Element element) {
         StringWriter stringWriter = new StringWriter();
-        XMLWriter xmlWriter = new XMLWriter();
+        XMLWriter xmlWriter = new HtmlWriter();
         xmlWriter.setWriter(stringWriter);
         try {
             xmlWriter.write(element);
