@@ -76,48 +76,91 @@ class HttpClient extends Client {
         app.messageHandler.clearMessages();
         this.resolvedURL = resolvedURL;
         const request = this.createPageRequest(resolvedURL, null, null);
-        const response = await this.httpConnector.post('/xis/page/model', request, {});
-        return this.handleResponse(response);
+        try {
+            const response = await this.httpConnector.post('/xis/page/model', request, {});
+            return this.handleResponse(response);
+        } catch (error) {
+            console.error('Error during HTTP request to /xis/page/model', error);
+              app.messageHandler.reportServerError('connection problem');
+            return Promise.reject(error);
+        }
     }
 
     async loadWidgetData(widgetInstance, widgetState) {
         app.messageHandler.clearMessages();
         const request = this.createWidgetRequest(widgetInstance, widgetState, null, null, null);
-        const response = await this.httpConnector.post('/xis/widget/model', request, {});
-        return this.handleResponse(response);
+        try {
+            const response = await this.httpConnector.post('/xis/widget/model', request, {});
+            return this.handleResponse(response);
+        } catch (error) {
+            console.error('Error during HTTP request to /xis/widget/model', error);
+              app.messageHandler.reportServerError('connection problem');
+            return Promise.reject(error);
+        }
     }
 
     async loadFormData(resolvedURL, widgetId, formBindingKey, formBindingParameters) {
         const request = this.createFormRequest(resolvedURL, widgetId, {}, null, formBindingKey, formBindingParameters);
-        const response = await this.httpConnector.post('/xis/form/model', request, {});
+        try {
+            const response = await this.httpConnector.post('/xis/form/model', request, {});
+            return this.handleResponse(response);
+        } catch (error) {
+            console.error('Error during HTTP request to /xis/form/model', error);
+              app.messageHandler.reportServerError('connection problem');
+            return Promise.reject(error);
+        }
         return this.handleResponse(response);
     }
 
     async widgetLinkAction(widgetInstance, widgetState, action, actionParameters) {
         app.messageHandler.clearMessages();
         const request = this.createWidgetRequest(widgetInstance, widgetState, action, {}, actionParameters);
-        const response = await this.httpConnector.post('/xis/widget/action', request, {});
-        return this.handleResponse(response);
+        try {
+            const response = await this.httpConnector.post('/xis/widget/action', request, {});
+            return this.handleResponse(response);
+        } catch (error) {
+            console.error('Error during HTTP request to /xis/widget/action', error);
+              app.messageHandler.reportServerError('connection problem');
+            return Promise.reject(error);
+        }
     }
 
     async pageLinkAction(resolvedURL, action, actionParameters) {
         app.messageHandler.clearMessages();
         const request = this.createPageRequest(resolvedURL, {}, action, actionParameters);
-        const response = await this.httpConnector.post('/xis/page/action', request, {});
-        return this.handleResponse(response);
+        try {
+            const response = await this.httpConnector.post('/xis/page/action', request, {});
+            return this.handleResponse(response);
+        } catch (error) {
+            console.error('Error during HTTP request to /xis/page/action', error);
+            return Promise.reject(error);
+        }
+
     }
 
     async formAction(resolvedURL, widgetId, formData, action, formBindigKey, formBindingParameters) {
         app.messageHandler.clearMessages();
         const request = this.createFormRequest(resolvedURL, widgetId, formData, action, formBindigKey, formBindingParameters);
-        const response = await this.httpConnector.post('/xis/form/action', request, {});
-        return this.handleResponse(response);
+        try {
+            const response = await this.httpConnector.post('/xis/form/action', request, {});
+            return this.handleResponse(response);
+        } catch (error) {
+            console.error('Error during HTTP request to /xis/form/action', error);
+              app.messageHandler.reportServerError('connection problem');
+            return Promise.reject(error);
+        }
     }
 
 
     async sendRenewTokenRequest(renewToken) {
-        const response = await this.httpConnector.post('/xis/token/renew', { Authorization: 'Bearer ' + renewToken, renewToken: renewToken }, {});
-        return this.deserializeResponse(response);
+        try {
+            const response = await this.httpConnector.post('/xis/token/renew', { Authorization: 'Bearer ' + renewToken, renewToken: renewToken }, {});
+            return this.deserializeResponse(response);
+        } catch (error) {
+            console.error('Error during HTTP request to /xis/token/renew', error);
+            app.messageHandler.reportServerError('connection problem');
+            return Promise.reject(error);
+        }
     }
 
     forwardToLoginPage(response) {

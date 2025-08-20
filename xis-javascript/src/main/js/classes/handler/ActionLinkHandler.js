@@ -62,7 +62,6 @@ class ActionLinkHandler extends TagHandler {
         if (!targetContainerHandler) {
             targetContainerHandler = widgetcontainerHandler;
         }
-        debugger;
         this.client.widgetLinkAction(widgetcontainerHandler.widgetInstance, widgetcontainerHandler.widgetState, this.action, this.actionParameters)
             .then(response => this.handleActionResponse(response, targetContainerHandler));
     }

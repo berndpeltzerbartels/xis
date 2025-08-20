@@ -7,7 +7,6 @@ class GlobalMessagesTagHandler extends TagHandler {
     constructor(tag) {
         super(tag);
         this.singleMessageTag = undefined;
-        debugger;
     }
 
     /**
@@ -16,7 +15,6 @@ class GlobalMessagesTagHandler extends TagHandler {
      * @param {Data} data 
      */
     refresh(data) {
-        debugger;
         this.refreshDescendantHandlers(data);
         this.singleMessageTag = getFirstChildElement(this.tag);
         if (!this.singleMessageTag) {
@@ -30,6 +28,10 @@ class GlobalMessagesTagHandler extends TagHandler {
             }
         }
          this.getParentFormHandler().onGlobalMessageHandlerRefreshed(this);
+    }
+
+    reset() {
+        this.tag.innerHTML = '';
     }
 
     /**

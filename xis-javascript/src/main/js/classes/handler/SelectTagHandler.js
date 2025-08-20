@@ -24,7 +24,6 @@ class SelectTagHandler extends InputTagHandler {
      * @returns {any}
      */
     getValue() {
-        debugger;
         const isMultiple = this.tag.multiple;
         if (isMultiple) {
             return Array.from(this.tag.selectedOptions).map(option => option.value);

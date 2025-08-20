@@ -11,7 +11,6 @@ class IfTagHandler extends TagHandler {
     }
 
     refresh(data) {
-        debugger;
         var newConditionValue = this.expression.evaluate(data);
         if (this.conditionValue != newConditionValue) {
             if (newConditionValue) {

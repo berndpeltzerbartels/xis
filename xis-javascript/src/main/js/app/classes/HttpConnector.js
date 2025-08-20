@@ -59,6 +59,11 @@ class HttpConnector {
         }
         var promise = new Promise((resolve, reject) => {
             xmlHttp.onreadystatechange = function () {
+                debugger;
+                if (xmlHttp.status === 0) {
+                    // NICHT auflösen, auf onerror warten!
+                    return;
+                }
                 // TODO Handle errors and "304 NOT MODIFIED"
                 // TODO Add headers to allow 304
                 // Readystaet == 4 for 304 ?
@@ -67,6 +72,11 @@ class HttpConnector {
                 }
                 // TODO use errorhandler
             }
+            xmlHttp.onerror = function (e) {
+                debugger;
+                console.error('Error during HTTP request to ' + uri, e);
+                reject(xmlHttp);
+            };
 
         });
 

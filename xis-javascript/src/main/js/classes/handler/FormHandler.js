@@ -94,6 +94,10 @@ class FormHandler extends TagHandler {
         this.formElementHandlers[binding].push(handler);
     }
 
+    onFormValueChanges(handler) {
+        this.clearMessageHandlers();
+    }
+
     onMessageHandlerRefreshed(handler, binding) {
         if (!this.messageHandlers[binding]) {
             this.messageHandlers[binding] = [];
@@ -124,8 +128,7 @@ class FormHandler extends TagHandler {
     }
 
     refreshValidatorMessages(validatorMessages) {
-        debugger;
-       for (var binding of Object.keys(validatorMessages.messages)) {
+        for (var binding of Object.keys(validatorMessages.messages)) {
             if (this.messageHandlers[binding]) {
                 for (var handler of this.messageHandlers[binding]) {
                     handler.refreshValidatorMessages(validatorMessages);
@@ -144,5 +147,12 @@ class FormHandler extends TagHandler {
     clearMessageHandlers() {
         this.globalMessageHandlers = [];
         this.messageHandlers = {};
+    }
+
+    resetMessageHandlers() {
+        this.globalMessageHandlers.forEach(handler => handler.reset());
+        for (var binding of Object.keys(this.messageHandlers)) {
+            this.messageHandlers[binding].forEach(handler => handler.reset());
+        }
     }
 }

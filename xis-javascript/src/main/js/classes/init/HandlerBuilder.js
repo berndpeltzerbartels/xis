@@ -48,9 +48,6 @@ class HandlerBuilder {
     */
     createElementHandler(element, parentHandler) {
         let handler;
-        if (element.classList.contains('item')) {
-            debugger;
-        }
         if (element.getAttribute('xis:binding') && element.getAttribute('xis:error-class')) {
             // TODO write a test
             parentHandler.addDescendantHandler(new ErrorStyleHandler(element));
@@ -104,7 +101,6 @@ class HandlerBuilder {
                 handler = new MessageTagHandler(element);
                 break;
             case 'xis:global-messages':
-                debugger;
                 handler = new GlobalMessagesTagHandler(element);
                 break;
             case 'xis:if':

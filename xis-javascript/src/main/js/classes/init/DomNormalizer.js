@@ -257,7 +257,6 @@ class DomNormalizer {
     * @returns {Element} 
     */
     replaceFrameworkFormTagByHtml(frameworkForm) {
-        debugger;
         return this.replaceFrameworkElementByHtml(frameworkForm, 'form');
     }
 

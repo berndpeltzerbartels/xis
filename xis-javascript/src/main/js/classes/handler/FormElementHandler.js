@@ -8,6 +8,10 @@ class FormElementHandler extends TagHandler {
         super(element);
         this.bindingExpression = new TextContentParser(element.getAttribute('xis:binding'), this).parse();
         this.binding = undefined;
+        element.addEventListener('change', () => {
+            const formHandler = this.getParentFormHandler();
+            formHandler.onFormValueChanges(this);
+        });
     }
 
 

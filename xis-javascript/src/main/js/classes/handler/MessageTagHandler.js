@@ -16,6 +16,10 @@ class MessageTagHandler extends TagHandler {
         this.binding = '';
     }
 
+    reset() {
+        this.tag.innerHTML = '';
+    }
+
 
     /**
      * @public
@@ -31,7 +35,7 @@ class MessageTagHandler extends TagHandler {
     /**
      * @public
      * @override
-     * @param {ValidatorMessages} messages 
+     * @param {ValidatorMessages} messages head
      */
     refreshValidatorMessages(messages) {
         this.tag.innerText = messages.getMessageFor(this.binding);
