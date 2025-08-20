@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:xis="http://xis.one/schema" lang="de">
+<head>
+    <title>Textarea Test</title>
+</head>
+<body>
+<xis:form binding="formData" id="form">
+    <textarea xis:binding="text" id="theTextarea"></textarea>
+    <span xis:message-for="text" id="fieldMessage"></span>
+    <button xis:action="submit" id="submitButton">Submit</button>
+    <div>
+        <ul xis:global-messages="true"></ul>
+    </div>
+</xis:form>
+</body>
+</html>

@@ -69,6 +69,14 @@ public class IOUtils {
         }
     }
 
+    public static String getClassPathResourceContent(String resourcePath) {
+        try (InputStream inputStream = getResourceAsStream(resourcePath)) {
+            return getContent(inputStream, StandardCharsets.UTF_8.name());
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read resource: " + resourcePath, e);
+        }
+    }
+
     public static PrintWriter printWriter(File file) {
         return printWriter(file, StandardCharsets.UTF_8.name());
     }

@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class TextareaElementImpl extends InputElementImpl {
+public class TextareaElementImpl extends InputElementImpl implements TextareaElement {
 
     private int cols;
     private int rows;
