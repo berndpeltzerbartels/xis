@@ -1,4 +1,4 @@
-package test.page.forms;
+package test.page.forms.checkbox;
 
 public interface CheckBoxFormService {
     CheckBoxFormModel getCheckBoxFormModel();

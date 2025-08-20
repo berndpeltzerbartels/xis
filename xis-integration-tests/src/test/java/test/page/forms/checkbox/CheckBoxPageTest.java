@@ -1,4 +1,4 @@
-package test.page.forms;
+package test.page.forms.checkbox;
 
 import one.xis.context.IntegrationTestContext;
 import org.junit.jupiter.api.BeforeEach;

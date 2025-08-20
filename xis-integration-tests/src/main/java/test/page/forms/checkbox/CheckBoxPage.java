@@ -1,4 +1,4 @@
-package test.page.forms;
+package test.page.forms.checkbox;
 
 import lombok.RequiredArgsConstructor;
 import one.xis.Action;
