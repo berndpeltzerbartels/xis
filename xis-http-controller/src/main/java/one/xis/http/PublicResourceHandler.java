@@ -16,6 +16,7 @@ public class PublicResourceHandler {
     private final List<String> publicPaths;
     private static final String CACHE_CONTROL_HEADER = "Cache-Control";
     private static final String CACHE_CONTROL_VALUE = "private, max-age=3600";
+    private final long startTime = System.currentTimeMillis();
 
     public PublicResourceHandler(List<String> publicPaths) {
         this.publicPaths = publicPaths;
@@ -88,7 +89,7 @@ public class PublicResourceHandler {
     private boolean isNotModified(long lastModified, String ifModifiedSince) {
         if (ifModifiedSince != null && !ifModifiedSince.isEmpty()) {
             long ifModifiedSinceEpoch = parseHttpDate(ifModifiedSince);
-            return lastModified > 0 && lastModified <= ifModifiedSinceEpoch;
+            return lastModified > 0 && lastModified <= ifModifiedSinceEpoch && ifModifiedSinceEpoch >= startTime;
         }
         return false;
     }

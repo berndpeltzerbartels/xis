@@ -6,6 +6,8 @@ import one.xis.auth.token.TokenStatus;
 import one.xis.http.*;
 import one.xis.resource.Resource;
 
+import java.util.function.Function;
+
 @Controller
 @PublicResources("/public")
 @RequiredArgsConstructor
@@ -66,7 +68,7 @@ public class MainController {
     }
 
     @SuppressWarnings("unchecked")
-    private <T> ResponseEntity<T> handleResourceResponse(Resource resource, String ifModifiedSince, java.util.function.Function<Resource, T> contentExtractor) {
+    private <T> ResponseEntity<T> handleResourceResponse(Resource resource, String ifModifiedSince, Function<Resource, T> contentExtractor) {
         long lastModified = resource.getLastModified();
         String cacheControl = "private, max-age=3600";
         if (ifModifiedSince != null && !ifModifiedSince.isEmpty()) {

@@ -34,7 +34,7 @@ class SpringFilter extends HttpFilter {
             String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
             localUrlHolder.setLocalUrl(baseUrl);
         }
-        if (httpServletRequest.getRequestURI().equals("/") || httpServletRequest.getRequestURI().isEmpty() || httpServletRequest.getRequestURI().endsWith(".html")) {
+        if (isRootPageRequest(httpServletRequest)) {
             httpServletResponse.setContentType("text/html");
             try (var writer = httpServletResponse.getWriter()) {
                 writer.println(frontendService.getRootPageHtml());
@@ -48,12 +48,18 @@ class SpringFilter extends HttpFilter {
         var request = new SpringHttpRequest(httpServletRequest);
         var response = new HttpResponseImpl();
         restControllerService.doInvocation(request, response);
-        if (response.getStatusCode() != null & response.getStatusCode() == 404) {
+        if (response.getStatusCode() != null && response.getStatusCode() == 404) {
             chain.doFilter(httpServletRequest, httpServletResponse);
         } else {
             commit(response, httpServletResponse);
         }
 
+    }
+
+
+    private boolean isRootPageRequest(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        return (path.equals("/") || path.isEmpty() || path.endsWith("index.html")) && !path.startsWith("/xis");
     }
 
     private void commit(HttpResponseImpl response, HttpServletResponse httpServletResponse) throws IOException {
