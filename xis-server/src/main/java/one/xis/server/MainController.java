@@ -101,7 +101,7 @@ public class MainController {
         return handleResourceResponse(resource, ifModifiedSince, Resource::getContent);
     }
 
-    @Get("/xis/widget/html}")
+    @Get("/xis/widget/html")
     public ResponseEntity<String> getWidgetHtml(@UrlParameter("widgetId") String widgetId, @Header("If-Modified-Since") String ifModifiedSince) {
         Resource resource = frontendService.getWidgetHtml(widgetId);
         return handleResourceResponse(resource, ifModifiedSince, Resource::getContent);
