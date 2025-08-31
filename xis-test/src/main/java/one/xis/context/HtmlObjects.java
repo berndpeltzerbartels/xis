@@ -13,6 +13,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.function.Function;
 
+import static java.net.URLEncoder.encode;
+
 @Data
 class HtmlObjects {
 
@@ -23,6 +25,7 @@ class HtmlObjects {
     // private Console console;
     private final Function<String, ElementImpl> htmlToElement;
     private final Function<String, String> atob;
+    private final Function<String, String> encodeURIComponent = HtmlObjects::encodeURIComponent;
 
     HtmlObjects() {
         this.htmlToElement = HtmlObjects::htmlToElement;
@@ -43,6 +46,10 @@ class HtmlObjects {
         }
         byte[] decoded = Base64.getDecoder().decode(input.toString());
         return new String(decoded, StandardCharsets.UTF_8);
+    }
+
+    public static String encodeURIComponent(String uri) {
+        return encode(uri, StandardCharsets.UTF_8);
     }
 
     void reset() {

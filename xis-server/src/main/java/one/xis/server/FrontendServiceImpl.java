@@ -17,7 +17,6 @@ import org.tinylog.Logger;
 
 import java.time.ZoneId;
 import java.util.Collection;
-import java.util.Map;
 import java.util.function.BiConsumer;
 
 /**
@@ -74,24 +73,24 @@ public class FrontendServiceImpl implements FrontendService {
     }
 
     @Override
-    public String getPageHead(String id) {
+    public Resource getPageHead(String id) {
         var head = resourceService.getPageHead(id);
         Logger.debug(head);
         return head;
     }
 
     @Override
-    public String getPageBody(String id) {
+    public Resource getPageBody(String id) {
         return resourceService.getPageBody(id);
     }
 
     @Override
-    public Map<String, String> getBodyAttributes(String id) {
+    public Resource getBodyAttributes(String id) {
         return resourceService.getBodyAttributes(id);
     }
 
     @Override
-    public String getWidgetHtml(String id) {
+    public Resource getWidgetHtml(String id) {
         return resourceService.getWidgetHtml(id);
     }
 

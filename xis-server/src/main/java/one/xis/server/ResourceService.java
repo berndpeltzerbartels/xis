@@ -7,6 +7,7 @@ import one.xis.Widget;
 import one.xis.context.XISComponent;
 import one.xis.context.XISInit;
 import one.xis.context.XISInject;
+import one.xis.resource.GenericResource;
 import one.xis.resource.Resource;
 import one.xis.resource.ResourceCache;
 import one.xis.resource.Resources;
@@ -39,23 +40,25 @@ class ResourceService {
     private final Resources resources;
     private final PathResolver pathResolver;
 
-    private Map<String, Resource> widgetHtmlResources;
-    private ResourceCache<String> pageBodyResourceCache;
-    private ResourceCache<String> pageHeadResourceCache;
-    private ResourceCache<Map<String, String>> pageAttributesResourceCache;
+    private ResourceCache<Resource> widgetHtmlResourceCache;
+    private ResourceCache<Resource> pageBodyResourceCache;
+    private ResourceCache<Resource> pageHeadResourceCache;
+    private ResourceCache<Resource> pageAttributesResourceCache;
 
     @XISInit
     void initWidgetResources() {
-        widgetHtmlResources = widgetControllers.stream().collect(Collectors.toMap(WidgetUtil::getId, this::htmlResource));
+        Map<String, Resource> widgetHtmlResources = widgetControllers.stream()
+                .collect(Collectors.toMap(WidgetUtil::getId, this::htmlResource));
+        widgetHtmlResourceCache = new ResourceCache<>(r -> r, widgetHtmlResources);
     }
 
     @XISInit
     void initPageResources() {
         var pageHtmlResources = pageControllers.stream()
                 .collect(Collectors.toMap(pathResolver::normalizedPath, this::htmlResource));
-        pageHeadResourceCache = new ResourceCache<>(this::extractPageHead, pageHtmlResources);
-        pageBodyResourceCache = new ResourceCache<>(this::extractPageBody, pageHtmlResources);
-        pageAttributesResourceCache = new ResourceCache<>(this::extractBodyAttributes, pageHtmlResources);
+        pageHeadResourceCache = new ResourceCache<>(r -> r, pageHtmlResources);
+        pageBodyResourceCache = new ResourceCache<>(r -> r, pageHtmlResources);
+        pageAttributesResourceCache = new ResourceCache<>(r -> r, pageHtmlResources);
     }
 
 
@@ -63,20 +66,26 @@ class ResourceService {
         return rootPageService.getRootPageHtml();
     }
 
-    String getWidgetHtml(String id) {
-        return widgetHtmlResources.get(id).getContent();
+    Resource getWidgetHtml(String id) {
+        return widgetHtmlResourceCache.getResourceContent(id).orElseThrow();
     }
 
-    String getPageHead(String id) {
-        return pageHeadResourceCache.getResourceContent(id).orElseThrow();
+    Resource getPageHead(String id) {
+        Resource resource = pageHeadResourceCache.getResourceContent(id).orElseThrow();
+        String headContent = extractPageHead(resource);
+        return new GenericResource<>(headContent, resource.getLastModified(), resource.getResourcePath());
     }
 
-    String getPageBody(String id) {
-        return pageBodyResourceCache.getResourceContent(id).orElseThrow();
+    Resource getPageBody(String id) {
+        Resource resource = pageBodyResourceCache.getResourceContent(id).orElseThrow();
+        String bodyContent = extractPageBody(resource);
+        return new GenericResource<>(bodyContent, resource.getLastModified(), resource.getResourcePath());
     }
 
-    Map<String, String> getBodyAttributes(String id) {
-        return pageAttributesResourceCache.getResourceContent(id).orElseThrow();
+    GenericResource<Map<String, String>> getBodyAttributes(String id) {
+        Resource resource = pageAttributesResourceCache.getResourceContent(id).orElseThrow();
+        Map<String, String> attributes = extractBodyAttributes(resource);
+        return new GenericResource<>(attributes, resource.getLastModified(), resource.getResourcePath());
     }
 
     private String extractPageHead(Resource pageResource) {

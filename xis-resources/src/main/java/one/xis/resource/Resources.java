@@ -5,8 +5,6 @@ import one.xis.context.XISComponent;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -22,10 +20,14 @@ public class Resources {
         if (url == null) {
             throw new NoSuchResourceException(path);
         }
-        URI uri;
         try {
-            uri = url.toURI();
-        } catch (URISyntaxException e) {
+            if ("file".equals(url.getProtocol())) {
+                File file = new File(url.toURI());
+                if (file.exists()) {
+                    return new DevelopmentResource(resourcePath, file);
+                }
+            }
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
         return new StaticResource(resourcePath);

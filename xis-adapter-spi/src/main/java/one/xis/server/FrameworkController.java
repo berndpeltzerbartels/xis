@@ -1,7 +1,8 @@
 package one.xis.server;
 
+import one.xis.resource.Resource;
+
 import java.util.Locale;
-import java.util.Map;
 
 public interface FrameworkController<RESP_WRAPPER, REQ, RESP> {
 
@@ -21,13 +22,13 @@ public interface FrameworkController<RESP_WRAPPER, REQ, RESP> {
 
     RESP getIdpTokens(String payload);
 
-    String getPageHead(String id);
+    Resource getPageHead(String id);
 
-    String getPageBody(String id);
+    Resource getPageBody(String id);
 
-    Map<String, String> getBodyAttributes(String id);
+    Resource getBodyAttributes(String id);
 
-    String getWidgetHtml(String id);
+    Resource getWidgetHtml(String id);
 
     String getAppJs();
 

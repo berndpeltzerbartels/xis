@@ -4,10 +4,10 @@ package one.xis.server;
 import lombok.RequiredArgsConstructor;
 import one.xis.auth.token.TokenStatus;
 import one.xis.http.*;
-
-import java.util.Map;
+import one.xis.resource.Resource;
 
 @Controller
+@PublicResources("/public")
 @RequiredArgsConstructor
 public class MainController {
 
@@ -65,24 +65,46 @@ public class MainController {
         return responseEntity(frontendService.processActionRequest(request));
     }
 
+    @SuppressWarnings("unchecked")
+    private <T> ResponseEntity<T> handleResourceResponse(Resource resource, String ifModifiedSince, java.util.function.Function<Resource, T> contentExtractor) {
+        long lastModified = resource.getLastModified();
+        String cacheControl = "private, max-age=3600";
+        if (ifModifiedSince != null && !ifModifiedSince.isEmpty()) {
+            long ifModifiedSinceEpoch = parseHttpDate(ifModifiedSince);
+            if (lastModified > 0 && lastModified <= ifModifiedSinceEpoch) {
+                return (ResponseEntity<T>) ResponseEntity.status(304)
+                        .addHeader("Last-Modified", formatHttpDate(lastModified))
+                        .addHeader("Cache-Control", cacheControl);
+            }
+        }
+        T body = contentExtractor.apply(resource);
+        return ResponseEntity.ok(body)
+                .addHeader("Last-Modified", formatHttpDate(lastModified))
+                .addHeader("Cache-Control", cacheControl);
+    }
+
     @Get("/xis/page/head")
-    public ResponseEntity<String> getPageHead(@Header("uri") String id) {
-        return ResponseEntity.ok(frontendService.getPageHead(id));
+    public ResponseEntity<String> getPageHead(@UrlParameter("pageId") String pageId, @Header("If-Modified-Since") String ifModifiedSince) {
+        Resource resource = frontendService.getPageHead(pageId);
+        return handleResourceResponse(resource, ifModifiedSince, Resource::getContent);
     }
 
     @Get("/xis/page/body")
-    public ResponseEntity<String> getPageBody(@Header("uri") String id) {
-        return ResponseEntity.ok(frontendService.getPageBody(id));
+    public ResponseEntity<String> getPageBody(@UrlParameter("pageId") String pageId, @Header("If-Modified-Since") String ifModifiedSince) {
+        Resource resource = frontendService.getPageBody(pageId);
+        return handleResourceResponse(resource, ifModifiedSince, Resource::getContent);
     }
 
     @Get("/xis/page/body-attributes")
-    public ResponseEntity<Map<String, String>> getBodyAttributes(@Header("uri") String id) {
-        return ResponseEntity.ok(frontendService.getBodyAttributes(id));
+    public ResponseEntity<?> getBodyAttributes(@UrlParameter("pageId") String pageId, @Header("If-Modified-Since") String ifModifiedSince) {
+        Resource resource = frontendService.getBodyAttributes(pageId);
+        return handleResourceResponse(resource, ifModifiedSince, Resource::getContent);
     }
 
-    @Get("/xis/widget/html")
-    public ResponseEntity<String> getWidgetHtml(@Header("uri") String id) {
-        return ResponseEntity.ok(frontendService.getWidgetHtml(id));
+    @Get("/xis/widget/html}")
+    public ResponseEntity<String> getWidgetHtml(@UrlParameter("widgetId") String widgetId, @Header("If-Modified-Since") String ifModifiedSince) {
+        Resource resource = frontendService.getWidgetHtml(widgetId);
+        return handleResourceResponse(resource, ifModifiedSince, Resource::getContent);
     }
 
     @Get("/app.js")
@@ -129,5 +151,18 @@ public class MainController {
         }
         return entity;
     }
-}
 
+    private long parseHttpDate(String httpDate) {
+        try {
+            return java.time.ZonedDateTime.parse(httpDate, java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME)
+                    .toInstant().toEpochMilli();
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    private String formatHttpDate(long epochMilli) {
+        return java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME
+                .format(java.time.Instant.ofEpochMilli(epochMilli).atZone(java.time.ZoneId.of("GMT")));
+    }
+}

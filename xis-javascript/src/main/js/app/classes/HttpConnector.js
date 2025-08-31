@@ -54,12 +54,14 @@ class HttpConnector {
     doRequest(uri, headers, method, payload) {
         var xmlHttp = new XMLHttpRequest();
         xmlHttp.open(method, uri, true); // true for asynchronous
+        if (headers == null) {
+            headers = {};
+        }
         for (var name of Object.keys(headers)) {
             xmlHttp.setRequestHeader(name, headers[name]);
         }
         var promise = new Promise((resolve, reject) => {
             xmlHttp.onreadystatechange = function () {
-                debugger;
                 if (xmlHttp.status === 0) {
                     // NICHT auflösen, auf onerror warten!
                     return;
@@ -73,7 +75,6 @@ class HttpConnector {
                 // TODO use errorhandler
             }
             xmlHttp.onerror = function (e) {
-                debugger;
                 console.error('Error during HTTP request to ' + uri, e);
                 reject(xmlHttp);
             };

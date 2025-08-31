@@ -24,22 +24,25 @@ class HttpClient extends Client {
     }
 
     async loadPageHead(pageId) {
-        const response = await this.httpConnector.get('/xis/page/head', { uri: pageId });
+        // pageId kann Umlaute, Leerzeichen, Sonderzeichen enthalten
+        // encodeURIComponent ist robust für alle Fälle
+        const response = await this.httpConnector.get('/xis/page/head?pageId='+encodeURIComponent(pageId), {});
         return response.responseText;
     }
 
     async loadPageBody(pageId) {
-        const response = await this.httpConnector.get('/xis/page/body', { uri: pageId });
+        const response = await this.httpConnector.get('/xis/page/body?pageId='+encodeURIComponent(pageId), {});
         return response.responseText;
     }
 
     async loadPageBodyAttributes(pageId) {
-        const response = await this.httpConnector.get('/xis/page/body-attributes', { uri: pageId });
+        const response = await this.httpConnector.get('/xis/page/body-attributes?pageId='+encodeURIComponent(pageId), {});
         return JSON.parse(response.responseText);
     }
 
     async loadWidget(widgetId) {
-        const response = await this.httpConnector.get('/xis/widget/html', { uri: widgetId });
+        // widgetId kann ebenfalls Sonderzeichen enthalten
+        const response = await this.httpConnector.get('/xis/widget/html?widgetId='+encodeURIComponent(widgetId), {});
         return response.responseText;
     }
 

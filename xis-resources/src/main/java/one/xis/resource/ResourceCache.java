@@ -13,7 +13,6 @@ public class ResourceCache<T> {
     private final Map<String, Resource> resources;
     private final Map<String, T> cache = new ConcurrentHashMap<>();
 
-
     public Optional<T> getResourceContent(String id) {
         if (!resources.containsKey(id)) {
             return Optional.empty();

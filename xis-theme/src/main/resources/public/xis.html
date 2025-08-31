@@ -4,74 +4,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="stylesheet" href="xis.css">
     <title>Document</title>
 </head>
 
 <body>
-    <nav class="nav">
-        <div class="logo">
-            <img src="Xis1.svg" alt="Logo">
+<nav class="nav">
+    <div class="logo">
+        <img src="Xis1.svg" alt="Logo">
+    </div>
+    <ul>
+        <li><a href="#">Pricing</a></li>
+        <li><a href="#">Link 2</a></li>
+        <li><a href="#">Link 3</a>
+            <ul>
+                <li><a href="#">Sub-Link 1</a></li>
+                <li><a href="#">Sub-Link 2</a></li>
+                <li><a href="#">Sub-Link 3</a></li>
+            </ul>
+        </li>
+    </ul>
+</nav>
+<form>
+    <div class="form-error-global">
+        Bitte korrigieren Sie die markierten Felder.
+    </div>
+
+    <h1>Käuferdaten eingeben</h1>
+    <p>
+
+
+        Alles im Leben passiert aus einem Grund – und manchmal ist es der Anfang von etwas Besserem.
+
+
+        Alles im Leben passiert aus einem Grund – und manchmal ist es der Anfang von etwas Besserem.
+
+
+        Alles im Leben passiert aus einem Grund – und manchmal ist es der Anfang von etwas Besserem.
+
+
+        Alles im Leben passiert aus einem Grund – und manchmal ist es der Anfang von etwas Besserem.
+
+    </p>
+    <div class="col2">
+
+        <div class="span2">
+            <input type="text" placeholder="Input 1">
+            <label>Vorname</label>
         </div>
-        <ul>
-            <li><a href="#">Pricing</a></li>
-            <li><a href="#">Link 2</a></li>
-            <li><a href="#">Link 3</a>
-                <ul>
-                    <li><a href="#">Sub-Link 1</a></li>
-                    <li><a href="#">Sub-Link 2</a></li>
-                    <li><a href="#">Sub-Link 3</a></li>
-                </ul>
-            </li>
-        </ul>
-    </nav>
-    <form>
-          <div class="form-error-global">
-            Bitte korrigieren Sie die markierten Felder.
+        <div class="span1">
+            <input type="text" placeholder="Input 1" class="field">
+            <label>EMail</label>
+            <div class="form-error">Bitte geben Sie eine gültige E-Mail-Adresse ein.</div>
         </div>
-
-        <h1>Käuferdaten eingeben</h1>
-        <div class="col2">
-
-            <div class="span2">
-                <input type="text" placeholder="Input 1">
-                <label>Vorname</label>
-            </div>
-            <div class="span1">
-                <input type="text" placeholder="Input 1" class="field">
-                <label>EMail</label>
-                 <div class="form-error">Bitte geben Sie eine gültige E-Mail-Adresse ein.</div>
-            </div>
-            <div class="span1">
-                <input type="text" placeholder="Input 1" class="field">
-                <label>EMail</label>
-            </div>
-             <div class="span2">
-                <input type="text" placeholder="Input 1">
-                <label>Vorname</label>
-            </div>
-            <div class="span1">
-                <input type="text" placeholder="Input 1" class="field">
-                <label>EMail</label>
-                 <div class="form-error">Bitte geben Sie eine gültige E-Mail-Adresse ein.</div>
-            </div>
-            <div class="span1">
-                <input type="text" placeholder="Input 1" class="field">
-                <label>EMail</label>
-            </div>
-            <div class="span2">
-                <input type="button" value="Button">
-            </div>
+        <div class="span1">
+            <input type="text" placeholder="Input 1" class="field">
+            <label>EMail</label>
         </div>
+        <div class="span2">
+            <input type="text" placeholder="Input 1">
+            <label>Vorname</label>
+        </div>
+        <div class="span1">
+            <input type="text" placeholder="Input 1" class="field">
+            <label>EMail</label>
+            <div class="form-error">Bitte geben Sie eine gültige E-Mail-Adresse ein.</div>
+        </div>
+        <div class="span1">
+            <input type="text" placeholder="Input 1" class="field">
+            <label>EMail</label>
+        </div>
+        <div class="span2">
+            <input type="button" value="Button">
+        </div>
+    </div>
 
 
-    </form>
-    <div class="toast-container">
-  <!-- einzelne Toast-Meldung -->
-  <div class="toast error">
-    Ein unerwarteter Serverfehler ist aufgetreten.
-  </div>
+</form>
+<div class="toast-container">
+    <!-- einzelne Toast-Meldung -->
+    <div class="toast error">
+        Ein unerwarteter Serverfehler ist aufgetreten.
+    </div>
 </div>
 </body>
 

@@ -1,6 +1,6 @@
 package one.xis.server;
 
-import java.util.Map;
+import one.xis.resource.Resource;
 
 /**
  * The FrontendService interface defines the contract for the frontend service in the XIS (Xis Integration Service) system.
@@ -53,7 +53,7 @@ public interface FrontendService {
      * @param id The ID of the page.
      * @return The HTML content of the body element.
      */
-    String getPageHead(String id);
+    Resource getPageHead(String id);
 
     /**
      * Returns the HTML content of the body element for a page with the given ID.
@@ -61,15 +61,15 @@ public interface FrontendService {
      * @param id The ID of the page.
      * @return The HTML content of the body element.
      */
-    String getPageBody(String id);
+    Resource getPageBody(String id);
 
     /**
      * Returns the attributes of the body element for a page with the given ID.
      *
      * @param id The ID of the page.
-     * @return A map containing the attributes of the body element.
+     * @return BodyAttributesResource containing the attributes and lastModified.
      */
-    Map<String, String> getBodyAttributes(String id);
+    Resource getBodyAttributes(String id);
 
     /**
      * Returns the HTML template of a widget with the given ID.
@@ -77,7 +77,7 @@ public interface FrontendService {
      * @param id The ID of the widget.
      * @return The HTML content of the widget.
      */
-    String getWidgetHtml(String id);
+    Resource getWidgetHtml(String id);
 
     /**
      * Returns the HTML content of the root page, which is the skeleton of the frontend application. It will

@@ -41,6 +41,10 @@ class SpringFilter extends HttpFilter {
             }
             return;
         }
+        if (httpServletRequest.getRequestURI().startsWith("/public/")) {
+            chain.doFilter(httpServletRequest, httpServletResponse);
+            return;
+        }
         var request = new SpringHttpRequest(httpServletRequest);
         var response = new HttpResponseImpl();
         restControllerService.doInvocation(request, response);

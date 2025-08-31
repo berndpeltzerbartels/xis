@@ -34,15 +34,24 @@ public class RestControllerServiceImpl implements RestControllerService {
 
     private Map<MethodMatcher, Method> methods;
     private Map<Class<? extends Exception>, ControllerExceptionHandler<?>> exceptionHandlerMap;
+    private PublicResourceHandler publicResourceHandler;
 
     @XISInit
     void initMethods() {
         methods = new HashMap<>();
+        List<String> publicPaths = new ArrayList<>();
         for (Object controller : controllers) {
             Class<?> controllerClass = controller.getClass();
             Controller controllerAnnotation = controllerClass.getAnnotation(Controller.class);
             String basePath = controllerAnnotation.value();
             addController(basePath, controller);
+            if (controllerClass.isAnnotationPresent(PublicResources.class)) {
+                String[] paths = controllerClass.getAnnotation(PublicResources.class).value();
+                publicPaths.addAll(Arrays.asList(paths));
+            }
+        }
+        if (!publicPaths.isEmpty()) {
+            publicResourceHandler = new PublicResourceHandler(publicPaths);
         }
     }
 
@@ -130,18 +139,21 @@ public class RestControllerServiceImpl implements RestControllerService {
 
     @Override
     public void doInvocation(HttpRequest request, HttpResponse response) {
+        eventEmitter.emitEvent(new BeforeRequestProcessingEvent(request));
         Optional<InvocationContext> invocationContextOptional = findInvocationContext(request);
-
-        if (invocationContextOptional.isEmpty()) {
-            response.setStatusCode(404);
+        if (invocationContextOptional.isPresent()) {
+            InvocationContext context = invocationContextOptional.get();
+            doInvoke(context, request, response);
+            if (response.getStatusCode() == null || response.getStatusCode() == 0) {
+                response.setStatusCode(200); // Default to 200 OK if no status code was set
+            }
+            eventEmitter.emitEvent(new RequestProcessedEvent(request, response));
             return;
         }
-
-        InvocationContext context = invocationContextOptional.get();
+        // Kein Controller-Match: PublicResource versuchen
         eventEmitter.emitEvent(new BeforeRequestProcessingEvent(request));
-        doInvoke(context, request, response);
-        if (response.getStatusCode() == null || response.getStatusCode() == 0) {
-            response.setStatusCode(200); // Default to 200 OK if no status code was set
+        if (publicResourceHandler == null || !publicResourceHandler.handle(request, response)) {
+            response.setStatusCode(404);
         }
         eventEmitter.emitEvent(new RequestProcessedEvent(request, response));
     }

@@ -10,6 +10,7 @@ public class ResponseEntity<T> {
 
     @Getter
     private T body;
+    private long lastModified;
 
     @Getter
     private final int statusCode;
@@ -51,6 +52,11 @@ public class ResponseEntity<T> {
 
     public static <T> ResponseEntity<T> status(int statusCode, T body) {
         return new ResponseEntity<>(body, statusCode);
+    }
+
+    public ResponseEntity<T> lastModified(long epochMilli) {
+        this.lastModified = epochMilli;
+        return this;
     }
 
     public ResponseEntity<T> addHeader(String name, String value) {
