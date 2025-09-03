@@ -70,7 +70,7 @@ public class MainController {
     @SuppressWarnings("unchecked")
     private <T> ResponseEntity<T> handleResourceResponse(Resource resource, String ifModifiedSince, Function<Resource, T> contentExtractor) {
         long lastModified = resource.getLastModified();
-        String cacheControl = "private, max-age=3600";
+        String cacheControl = "no-cache";
         if (ifModifiedSince != null && !ifModifiedSince.isEmpty()) {
             long ifModifiedSinceEpoch = parseHttpDate(ifModifiedSince);
             if (lastModified > 0 && lastModified <= ifModifiedSinceEpoch) {

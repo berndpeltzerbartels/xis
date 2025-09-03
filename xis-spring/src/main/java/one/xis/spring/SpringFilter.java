@@ -59,7 +59,7 @@ class SpringFilter extends HttpFilter {
 
     private boolean isRootPageRequest(HttpServletRequest request) {
         String path = request.getRequestURI();
-        return (path.equals("/") || path.isEmpty() || path.endsWith("index.html")) && !path.startsWith("/xis");
+        return (path.equals("/") || path.isEmpty() || path.endsWith(".html")) && !path.startsWith("/xis");
     }
 
     private void commit(HttpResponseImpl response, HttpServletResponse httpServletResponse) throws IOException {

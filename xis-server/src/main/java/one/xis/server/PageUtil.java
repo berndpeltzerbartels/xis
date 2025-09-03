@@ -16,6 +16,9 @@ public class PageUtil {
 
     public static String getUrl(@NonNull Class<?> controllerClass) {
         var url = controllerClass.getAnnotation(Page.class).value();
+        if (url.startsWith("/xis/")) {
+            throw new IllegalStateException("Page url must not start with /xis/: " + url);
+        }
         return url.endsWith(".html") ? url : url + ".html";
     }
 

@@ -9,13 +9,15 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import static java.time.ZonedDateTime.parse;
+
 /**
  * Handler für die Auslieferung von Public Resources, inkl. 304-Handling.
  */
 public class PublicResourceHandler {
     private final List<String> publicPaths;
     private static final String CACHE_CONTROL_HEADER = "Cache-Control";
-    private static final String CACHE_CONTROL_VALUE = "private, max-age=3600";
+    private static final String CACHE_CONTROL_VALUE = "no-cache";
     private final long startTime = System.currentTimeMillis();
 
     public PublicResourceHandler(List<String> publicPaths) {
@@ -121,8 +123,7 @@ public class PublicResourceHandler {
 
     private long parseHttpDate(String httpDate) {
         try {
-            return java.time.ZonedDateTime.parse(httpDate, DateTimeFormatter.RFC_1123_DATE_TIME)
-                    .toInstant().toEpochMilli();
+            return parse(httpDate, DateTimeFormatter.RFC_1123_DATE_TIME).toInstant().toEpochMilli();
         } catch (Exception e) {
             return 0;
         }

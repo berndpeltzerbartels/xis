@@ -18,6 +18,20 @@ import java.util.stream.Stream;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class XmlUtil {
 
+    public static String getTextContent(Element element) {
+        if (element == null) {
+            return null;
+        }
+        StringBuilder sb = new StringBuilder();
+        NodeList nodeList = element.getChildNodes();
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Node node = nodeList.item(i);
+            if (node.getNodeType() == Node.TEXT_NODE) {
+                sb.append(node.getNodeValue());
+            }
+        }
+        return sb.toString().trim();
+    }
 
     public static Document loadDocument(File file) throws IOException, SAXException {
         return new XmlLoader().loadDocument(file);
