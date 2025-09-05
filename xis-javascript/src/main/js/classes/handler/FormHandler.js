@@ -95,7 +95,7 @@ class FormHandler extends TagHandler {
     }
 
     onFormValueChanges(handler) {
-        this.clearMessageHandlers();
+        this.resetMessageHandlers();
     }
 
     onMessageHandlerRefreshed(handler, binding) {

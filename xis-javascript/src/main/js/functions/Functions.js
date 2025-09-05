@@ -235,10 +235,16 @@ function handleError(error) {
     if (error && error.type === 'redirect') {
         return {redirected: true};
     }
-    console.error('Unhandled error:', error);
+    const msg = error && error.message ? error.message : String(error);
+    reportError('Unhandled error: ' + msg, error);
     throw error; // Fehler weiterwerfen, damit er nicht verschluckt wird
 }
 
 function isSet(value) {
     return value !== undefined && value !== null;
+}
+
+function reportError(message, error)    {
+    console.error(message, error);
+    app.messageHandler.addErrorMessage(message);
 }

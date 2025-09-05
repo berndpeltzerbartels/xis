@@ -21,7 +21,7 @@ class Pages {
         config.pageIds.forEach(id => promises.push(_this.loadPageHead(id)));
         config.pageIds.forEach(id => promises.push(_this.loadPageBody(id)));
         config.pageIds.forEach(id => promises.push(_this.loadPageBodyAttributes(id)));
-        return Promise.all(promises).then(() => config).catch(e => console.error(e));
+        return Promise.all(promises).then(() => config).catch(e => reportError(e));
     }
 
     /**

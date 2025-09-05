@@ -163,7 +163,7 @@ class WidgetContainerHandler extends TagHandler {
                 .then(data => { console.log("data"+(typeof data)); data.parentData = parentData; data.scope = scope; return data; })
                 .then(data => { this.widgetState.data = data; return data; })
                 .then(data => this.refreshDescendantHandlers(data))
-                .catch(e => console.error(e));
+                .catch(e => reportError(e));
         }
     }
 

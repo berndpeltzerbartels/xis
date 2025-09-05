@@ -21,7 +21,7 @@ class HttpConnectorMock {
                 this.logResponse(response);
                 resolve(response);
             } catch (e) {
-                console.error("Error during backend invocation: " + e);
+                reportError("Error during backend invocation: " + e);
                 reject(e);
             }
         });
@@ -47,7 +47,7 @@ class HttpConnectorMock {
                 this.logResponse(response);
                 resolve(response);
             } catch (e) {
-                console.error("Error during backend invocation: " + e);
+                reportError("Error during backend invocation: " + e);
                 reject(e);
             }
         });

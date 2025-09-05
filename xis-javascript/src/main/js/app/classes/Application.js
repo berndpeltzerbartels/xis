@@ -2,7 +2,7 @@ class Application {
 
     constructor() {
         this.initializers = [];
-        this.messageHandler = new MessageHandler();
+        this.messageHandler = window.messageHandler ?  window.messageHandler : new MessageHandler();
         this.clientState = new ClientState();
         this.localStorage = new LocalStore();
         this.httpConnector = new HttpConnector();

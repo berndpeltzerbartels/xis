@@ -75,7 +75,7 @@ class HttpConnector {
                 // TODO use errorhandler
             }
             xmlHttp.onerror = function (e) {
-                console.error('Error during HTTP request to ' + uri, e);
+                reportError('Error during HTTP request to ' + uri, e);
                 reject(xmlHttp);
             };
 

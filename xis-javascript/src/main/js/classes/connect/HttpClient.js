@@ -51,10 +51,6 @@ class HttpClient extends Client {
             this.handleServerError(response);
             return Promise.reject();
         }
-        const globalValidatormessges = this.globalValidatormessges(response);
-        if (globalValidatormessges.lenght > 0) {
-            app.messageHandler.addValidationErrors(globalValidatormessges);
-        }
         if (this.isAjaxRedirect(response)) {
             // follow redirect in browser
             return Promise.reject();
@@ -72,6 +68,10 @@ class HttpClient extends Client {
             this.forward(responseObject.redirectUrl);
             return Promise.reject();
         }
+        const globalValidatormessges = this.globalValidatormessges(response);
+        if (globalValidatormessges.lenght > 0) {
+            app.messageHandler.addValidationErrors(globalValidatormessges);
+        }
         return Promise.resolve(responseObject);
     }
 
@@ -83,8 +83,8 @@ class HttpClient extends Client {
             const response = await this.httpConnector.post('/xis/page/model', request, {});
             return this.handleResponse(response);
         } catch (error) {
-            console.error('Error during HTTP request to /xis/page/model', error);
-              app.messageHandler.reportServerError('connection problem');
+            reportError('Error during HTTP request to /xis/page/model', error);
+            app.messageHandler.reportServerError('connection problem');
             return Promise.reject(error);
         }
     }
@@ -96,7 +96,7 @@ class HttpClient extends Client {
             const response = await this.httpConnector.post('/xis/widget/model', request, {});
             return this.handleResponse(response);
         } catch (error) {
-            console.error('Error during HTTP request to /xis/widget/model', error);
+            reportError('Error during HTTP request to /xis/widget/model', error);
               app.messageHandler.reportServerError('connection problem');
             return Promise.reject(error);
         }
@@ -108,7 +108,7 @@ class HttpClient extends Client {
             const response = await this.httpConnector.post('/xis/form/model', request, {});
             return this.handleResponse(response);
         } catch (error) {
-            console.error('Error during HTTP request to /xis/form/model', error);
+            reportError('Error during HTTP request to /xis/form/model', error);
               app.messageHandler.reportServerError('connection problem');
             return Promise.reject(error);
         }
@@ -122,7 +122,7 @@ class HttpClient extends Client {
             const response = await this.httpConnector.post('/xis/widget/action', request, {});
             return this.handleResponse(response);
         } catch (error) {
-            console.error('Error during HTTP request to /xis/widget/action', error);
+            reportError('Error during HTTP request to /xis/widget/action', error);
               app.messageHandler.reportServerError('connection problem');
             return Promise.reject(error);
         }
@@ -135,7 +135,7 @@ class HttpClient extends Client {
             const response = await this.httpConnector.post('/xis/page/action', request, {});
             return this.handleResponse(response);
         } catch (error) {
-            console.error('Error during HTTP request to /xis/page/action', error);
+            reportError('Error during HTTP request to /xis/page/action', error);
             return Promise.reject(error);
         }
 
@@ -148,7 +148,7 @@ class HttpClient extends Client {
             const response = await this.httpConnector.post('/xis/form/action', request, {});
             return this.handleResponse(response);
         } catch (error) {
-            console.error('Error during HTTP request to /xis/form/action', error);
+            reportError('Error during HTTP request to /xis/form/action', error);
               app.messageHandler.reportServerError('connection problem');
             return Promise.reject(error);
         }
@@ -160,7 +160,7 @@ class HttpClient extends Client {
             const response = await this.httpConnector.post('/xis/token/renew', { Authorization: 'Bearer ' + renewToken, renewToken: renewToken }, {});
             return this.deserializeResponse(response);
         } catch (error) {
-            console.error('Error during HTTP request to /xis/token/renew', error);
+            reportError('Error during HTTP request to /xis/token/renew', error);
             app.messageHandler.reportServerError('connection problem');
             return Promise.reject(error);
         }
@@ -197,7 +197,7 @@ class HttpClient extends Client {
     }
 
     handleServerError(response) {
-        console.info('Server error occurred:', response); // do not use console.error(...), here
+        console.info('Server error occurred:', response); // do not use reportError(...), here
         return app.messageHandler.reportServerError(JSON.parse(response.responseText).message);
     }
 
