@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 
 public class JavascriptPlugin implements Plugin<Project> {
 
-    private static final String RELEASE_JS_OUTFILE = "xis-prod.js";
+    private static final String RELEASE_JS_OUTFILE = "xis.js";
 
     @Override
     public void apply(Project project) {

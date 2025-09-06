@@ -34,17 +34,17 @@ public class Resources {
     }
 
 
-    public Collection<Resource> getClassPathResources(String prefix, @NonNull String suffix) {
+    public Collection<Resource> getClassPathResources(String folder, @NonNull String suffix) {
         try {
             List<Resource> result = new ArrayList<>();
-            Enumeration<URL> urls = getClass().getClassLoader().getResources(prefix);
+            Enumeration<URL> urls = getClass().getClassLoader().getResources(folder);
             while (urls.hasMoreElements()) {
                 URL url = urls.nextElement();
                 if ("file".equals(url.getProtocol())) {
                     File baseDir = new File(url.toURI());
-                    scanDirectoryRecursive(baseDir, prefix, suffix, result, baseDir);
+                    scanDirectoryRecursive(baseDir, folder, suffix, result, baseDir);
                 } else if ("jar".equals(url.getProtocol())) {
-                    scanJarFile(url, prefix, suffix, result);
+                    scanJarFile(url, folder, suffix, result);
                 }
             }
             return result;

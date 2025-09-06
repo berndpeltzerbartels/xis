@@ -18,6 +18,19 @@ tasks.withType(JavaCompile) {
     targetCompatibility = rootProject.ext.javaVersion.toString()
 }
 
+processTestResources {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+
+sourceSets {
+    test {
+        resources {
+            srcDir 'src/test/resources'
+        }
+    }
+}
+
+
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(rootProject.ext.javaVersionInt)
@@ -99,10 +112,17 @@ def graalVersion = "23.0.1"
 dependencies {
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
     implementation "org.projectlombok:lombok:$lombokVersion"
+    implementation project(':xis-util')
+    implementation project(':xis-context')
 
     implementation project(':xis-resources')
     testImplementation project(':xis-test')
     testImplementation project(':xis-util')
+
+// https://mvnrepository.com/artifact/com.google.javascript/closure-compiler
+// https://mvnrepository.com/artifact/com.google.javascript/closure-compiler
+    implementation("com.google.javascript:closure-compiler:v20240317")
+
 
     testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"

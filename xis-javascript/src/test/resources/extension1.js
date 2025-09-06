@@ -1,0 +1,1 @@
+console.log("Extension 1 loaded");

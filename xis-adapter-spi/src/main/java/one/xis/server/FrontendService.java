@@ -88,50 +88,14 @@ public interface FrontendService {
     String getRootPageHtml();
 
     /**
-     * Returns the content of the app.js file, which is the main JavaScript file for the frontend application.
-     * This file is responsible for initializing the application and setting up the main components.
-     * This is not used for production builds, but it is useful for development and debugging purposes.
-     *
-     * @return The URL of the app.js file.
-     */
-    String getAppJs();
-
-    /**
-     * Returns the content of the classes.js file, which contains the JavaScript classes
-     * used by the frontend application. This is not used for production builds,
-     * but it is useful for development and debugging purposes.
-     *
-     * @return The URL of the classes.js file.
-     */
-    String getClassesJs();
-
-    /**
-     * Returns the content of the main.js file, which is the entry point for the frontend application.
-     * This file is responsible for initializing the application and setting up the main components.
-     * This is not used for production builds, but it is useful for development and debugging purposes.
-     *
-     * @return The URL of the main.js file.
-     */
-    String getMainJs();
-
-    /**
-     * Returns the content of the functions.js file, which contains utility functions
-     * used by the frontend application. This is not used for production builds,
-     * but it is useful for development and debugging purposes.
-     *
-     * @return The URL of the functions.js file.
-     */
-    String getFunctionsJs();
-
-    /**
      * Returns the URL of the bundle.js file, which contains the frontend code.
      * This file is loaded by the browser to run the frontend application.
      *
      * @return The URL of the bundle.js file.
      */
-    String getBundleJs();
+    Resource getBundleJs();
 
 
-    String getBundleJsMap();
+    Resource getBundleJsMap();
 
 }

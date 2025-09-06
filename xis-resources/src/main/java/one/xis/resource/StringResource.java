@@ -7,6 +7,13 @@ import lombok.RequiredArgsConstructor;
 public class StringResource implements Resource {
     @Getter
     private final String content;
+    private final int lastModified;
+
+
+    public StringResource(String content) {
+        this.content = content;
+        this.lastModified = (int) System.currentTimeMillis();
+    }
 
     @Override
     public int getLength() {
@@ -15,7 +22,7 @@ public class StringResource implements Resource {
 
     @Override
     public long getLastModified() {
-        return 0;
+        return lastModified;
     }
 
     @Override

@@ -14,8 +14,10 @@ class XisThemeMessageHandler extends MessageHandler {
         if (!validatorMessageContainer) return;
         validatorMessageContainer.innerHTML = '';
         errors.forEach(error => {
-            const tag = '<div class="form-error-global">'+error+'</div>';
-            validatorMessageContainer.innerHTML += tag
+            const div = document.createElement('div');
+            div.className = 'form-error-global';
+            div.textContent = error;
+            validatorMessageContainer.appendChild(div);
         });
     }
 

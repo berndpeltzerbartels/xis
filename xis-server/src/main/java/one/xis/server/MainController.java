@@ -109,35 +109,17 @@ public class MainController {
         return handleResourceResponse(resource, ifModifiedSince, Resource::getContent);
     }
 
-    @Get("/app.js")
-    public ResponseEntity<String> getAppJs() {
-        return ResponseEntity.ok(frontendService.getAppJs());
-    }
-
-    @Get("/classes.js")
-    public ResponseEntity<String> getClassesJs() {
-        return ResponseEntity.ok(frontendService.getClassesJs());
-    }
-
-    @Get("/main.js")
-    public ResponseEntity<String> getMainJs() {
-        return ResponseEntity.ok(frontendService.getMainJs());
-    }
-
-    @Get("/functions.js")
-    public ResponseEntity<String> getFunctionsJs() {
-        return ResponseEntity.ok(frontendService.getFunctionsJs());
-    }
-
     @Get("/bundle.min.js")
-    public ResponseEntity<String> getBundleJs() {
-        return ResponseEntity.ok(frontendService.getBundleJs());
+    public ResponseEntity<String> getBundleJs(@Header("If-Modified-Since") String ifModifiedSince) {
+        Resource resource = frontendService.getBundleJs();
+        return handleResourceResponse(resource, ifModifiedSince, Resource::getContent);
     }
 
 
     @Get("/bundle.min.js.map")
-    public ResponseEntity<String> getBundleJsMap() {
-        return ResponseEntity.ok(frontendService.getBundleJs());
+    public ResponseEntity<String> getBundleJsMap(@Header("If-Modified-Since") String ifModifiedSince) {
+        Resource resource = frontendService.getBundleJsMap();
+        return handleResourceResponse(resource, ifModifiedSince, Resource::getContent);
     }
 
 

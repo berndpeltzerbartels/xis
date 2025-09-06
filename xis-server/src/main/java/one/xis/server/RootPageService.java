@@ -13,7 +13,7 @@ import org.w3c.dom.Document;
 @RequiredArgsConstructor
 class RootPageService {
 
-    private static final String CUSTOM_PUBLIC_RESOURCE_PATH = "/public";
+    private static final String CUSTOM_PUBLIC_RESOURCE_PATH = "public";
 
 
     private final Resources resources;

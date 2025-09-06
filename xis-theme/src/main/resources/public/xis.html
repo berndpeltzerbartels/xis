@@ -4,91 +4,210 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
     <link rel="stylesheet" href="xis.css">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/panda-syntax-light.min.css">
+    <script src="prism.js"></script>
     <title>Document</title>
 </head>
 
 <body>
-<nav class="nav">
-    <div class="logo">
-        <img src="Xis1.svg" alt="Logo">
-    </div>
-    <ul>
-        <li><a href="#">Pricing</a></li>
-        <li><a href="#">Link 2</a></li>
-        <li><a href="#">Link 3</a>
+<div class="wrapper">
+
+    <!-- ------------------------------ HEADER ------------------------------ -->
+    <nav class="nav">
+        <div class="logo">
+            <img src="Xis1.svg" alt="Logo">
+        </div>
+        <ul>
+            <li><a href="#">Pricing</a></li>
+            <li><a href="#">Link 2</a></li>
+            <li><a href="#">Link 3</a>
+                <ul>
+                    <li><a href="#">Sub-Link 1</a></li>
+                    <li><a href="#">Sub-Link 2</a></li>
+                    <li><a href="#">Sub-Link 3</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- ------------------------------ SIDEBAR ------------------------------ -->
+    <div class="sidebar">
+        <div class="contenttable">
             <ul>
-                <li><a href="#">Sub-Link 1</a></li>
-                <li><a href="#">Sub-Link 2</a></li>
-                <li><a href="#">Sub-Link 3</a></li>
+                <h5>Table of Content</h5>
+                <li><strong><a href="#">1. Introduction</a></strong></li>
+                <li><a href="#">1.1 Purpose</a></li>
+                <li><a href="#">1.2 Scope</a></li>
+                <li><a href="#">1.3 Definitions, Acronyms and Abbreviations</a></li>
+                <li><a href="#">1.4 References</a></li>
             </ul>
-        </li>
-    </ul>
-</nav>
-
-<div class="form-error-global">
-    Bitte korrigieren Sie die markierten Felder.
-</div>
-
-<h1>Käuferdaten eingeben</h1>
-<p>
-
-
-    Alles im Leben passiert aus einem Grund – und manchmal ist es der Anfang von etwas Besserem.
-
-
-    Alles im Leben passiert aus einem Grund – und manchmal ist es der Anfang von etwas Besserem.
-
-
-    Alles im Leben passiert aus einem Grund – und manchmal ist es der Anfang von etwas Besserem.
-
-
-    Alles im Leben passiert aus einem Grund – und manchmal ist es der Anfang von etwas Besserem.
-
-</p>
-<form>
-    <div class="col2">
-
-        <div class="span2">
-            <input type="text" placeholder="Input 1">
-            <label>Vorname</label>
+            <ul>
+                <li><strong><a href="#">2. System Overview</a></strong></li>
+            </ul>
+            <ul>
+                <li><strong><a href="#">3. System Components</a></strong></li>
+                <li><a href="#">3.1 Decomposition Description</a></li>
+                <li><a href="#">3.2 Dependency Description</a></li>
+                <li><a href="#">3.3 Interface Description</a></li>
+                <li><a href="#">3.2.1 Trip Planner to Session Manager Interface</a></li>
+                <li><a href="#">3.2.2 Trip Planner to Optimized Path Finder Interface</a></li>
+                <li><a href="#">3.2.3 Trip Planner to User Profile Interface</a></li>
+                <li><a href="#">3.2.4 Trip Planner to UI Controller Interface</a></li>
+                <li><a href="#">3.4 Module Interfaces</a></li>
+                <li><a href="#">3.5 User Interfaces (GUI)</a></li>
+            </ul>
+            <ul>
+                <li><strong><a href="#">4. Detailed Design</a></strong></li>
+                <li><a href="#">4.1 Module Detailed Design</a></li>
+                <li><a href="#">4.1.1 Mark Current Location</a></li>
+                <li><a href="#">4.2 Data Detailed Design</a></li>
+                <li><a href="#">4.3 RTM</a></li>
+            </ul>
         </div>
+    </div>
+
+    <div class="maincontent">
+        <!-- ------------------------------ HEADLINES & TEXT ------------------------------ -->
+        <h1>H1 & H2 | Käuferdaten eingeben</h1>
+        <h3>H3 | Käuferdaten eingeben</h3>
+        <h4>H4 | Käuferdaten eingeben</h4>
+        <h5>H5 | Käuferdaten eingeben</h5>
+        <h6>H6 | Käuferdaten eingeben</h6>
+        <p>
+            Alles im Leben passiert aus einem Grund – und manchmal ist es der Anfang von etwas Besserem. Alles im Leben
+            passiert aus einem Grund – und manchmal ist es der Anfang von etwas Besserem. Alles im Leben passiert aus
+            einem Grund – und manchmal ist es der Anfang von etwas Besserem. Alles im Leben passiert aus einem Grund –
+            und manchmal ist es der Anfang von etwas Besserem.
+        </p>
+
+        <!-- ------------------------------ FORM ------------------------------ -->
+        <br><h5>Formular</h5>
+        <form>
+            <div class="col2">
+
+                <div class="span2">
+                    <input type="text" placeholder="Vor- und Nachname">
+                    <label>Vor- und Nachname</label>
+                </div>
+                <div class="span1">
+                    <input type="text" placeholder="E-Mail" class="field">
+                    <div class="form-error">Bitte geben Sie eine gültige E-Mail-Adresse ein.</div>
+                    <label>E-Mail</label>
+                </div>
+                <div class="span1">
+                    <input type="text" placeholder="E-Mail 2" class="field">
+                    <div class="form-error">Bitte geben Sie eine gültige E-Mail-Adresse ein.</div>
+                    <label>E-Mail 2</label>
+                </div>
+
+                <div class="span1">
+                    <textarea placeholder="Kommentare">Kommentare</textarea>
+                    <label>Kommentare</label>
+                </div>
+                <div class="span1">
+                    <textarea placeholder="Kommentare-Platzhalter"></textarea>
+                    <label>Kommentare 2</label>
+                </div>
+
+                <div class="span1">
+                    <fieldset>
+                        <legend>Radiobuttons</legend>
+                        <input type="radio" name="zutat" value="kaese" checked><label for="check1">Käse</label>
+                        <input type="radio" name="zutat" value="schinken"><label for="check2">Schinken</label>
+                        <input type="radio" name="zutat" value="salami"><label for="check3">Salami</label>
+                        <input type="radio" name="zutat" value="oliven"><label for="check4">Oliven</label>
+                    </fieldset>
+                </div>
+                <div class="span1">
+                    <fieldset>
+                        <legend>Checkboxes</legend>
+                        <input type="checkbox" name="zutat" value="kaese" checked><label for="check1">Käse</label>
+                        <input type="checkbox" name="zutat" value="schinken" checked><label
+                            for="check2">Schinken</label>
+                        <input type="checkbox" name="zutat" value="salami"><label for="check3">Salami</label>
+                        <input type="checkbox" name="zutat" value="oliven"><label for="check4">Oliven</label>
+                    </fieldset>
+                </div>
+
+                <div class="span0">
+                    <div class="form-error-global">Bitte korrigieren Sie die markierten Felder.</div>
+                    <input type="button" value="Absenden">
+                </div>
+            </div>
+        </form>
+
+        <!-- ------------------------------ PANELS ------------------------------ -->
+        <br><h5>Panels</h5>
         <div class="span1">
-            <input type="text" placeholder="Input 1" class="field">
-            <label>EMail</label>
-            <div class="form-error">Bitte geben Sie eine gültige E-Mail-Adresse ein.</div>
+            <div class="warning">
+                <strong>Error or Warning</strong> Controller for handling local authentication callbacks. This
+                controller is responsible for processing the authentication callback for IDPs and local
+                authentication.<br>
+                It retrieves the authorization code and state from the request parameters, decodes and verifies the
+                state, fetches new tokens using the IDP client service, and returns the tokens along with a redirect
+                URL.
+            </div>
+            <div class="tipp">
+                <strong>Tipp</strong> Controller for handling local authentication callbacks. This controller is
+                responsible for processing the authentication callback for IDPs and local authentication.<br>
+                It retrieves the authorization code and state from the request parameters, decodes and verifies the
+                state, fetches new tokens using the IDP client service, and returns the tokens along with a redirect
+                URL.
+            </div>
+            <div class="message">
+                <strong>Message</strong> Controller for handling local authentication callbacks. This controller is
+                responsible for processing the authentication callback for IDPs and local authentication.<br>
+                It retrieves the authorization code and state from the request parameters, decodes and verifies the
+                state, fetches new tokens using the IDP client service, and returns the tokens along with a redirect
+                URL.
+            </div>
         </div>
-        <div class="span1">
-            <input type="text" placeholder="Input 1" class="field">
-            <label>EMail</label>
-        </div>
-        <div class="span2">
-            <input type="text" placeholder="Input 1">
-            <label>Vorname</label>
-        </div>
-        <div class="span1">
-            <input type="text" placeholder="Input 1" class="field">
-            <label>EMail</label>
-            <div class="form-error">Bitte geben Sie eine gültige E-Mail-Adresse ein.</div>
-        </div>
-        <div class="span1">
-            <input type="text" placeholder="Input 1" class="field">
-            <label>EMail</label>
-        </div>
-        <div class="span2">
-            <input type="button" value="Button">
+
+
+        <!-- ------------------------------ CODE ------------------------------ -->
+        <br><h5>Code</h5>
+        <div class="col2">
+            <div class="span2">
+            <pre><code class="language-java">
+              /**
+              * Controller for handling local authentication callbacks.
+              * This controller is responsible for processing the authentication callback for IDPs
+              * and local authentication.
+              * It retrieves the authorization code and state from the request parameters,
+              * decodes and verifies the state, fetches new tokens using the IDP client service,
+              * and returns the tokens along with a redirect URL.
+              */
+              
+              @Controller("/xis/auth")
+              @RequiredArgsConstructor
+              class AuthenticationController {
+              private final TokenService tokenService;
+              private final LocalTokenService localTokenService;
+              private final AppContext appContext;
+              private final ExternalIDPServices externalIDPServices;
+              private final CodeStore
+              }
+            </code></pre>
+            </div>
         </div>
     </div>
 
 
-</form>
-<div class="toast-container" id="toast-container">
+</div>
+<div class="toast-container">
     <!-- einzelne Toast-Meldung -->
     <div class="toast error">
         Ein unerwarteter Serverfehler ist aufgetreten.
     </div>
 </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>hljs.highlightAll();</script>
+
 </body>
 
 </html>
+

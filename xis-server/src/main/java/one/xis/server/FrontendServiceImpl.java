@@ -9,10 +9,9 @@ import one.xis.auth.URLForbiddenException;
 import one.xis.auth.token.TokenStatus;
 import one.xis.auth.token.UserSecurityService;
 import one.xis.context.XISComponent;
-import one.xis.context.XISInit;
 import one.xis.http.RequestContext;
+import one.xis.js.JavascriptProvider;
 import one.xis.resource.Resource;
-import one.xis.resource.Resources;
 import org.tinylog.Logger;
 
 import java.time.ZoneId;
@@ -29,25 +28,9 @@ public class FrontendServiceImpl implements FrontendService {
     private final ControllerService controllerService;
     private final ClientConfigService configService;
     private final ResourceService resourceService;
-    private final Resources resources;
+    private final JavascriptProvider javascriptProvider;
     private final UserSecurityService userSecurityService;
     private final Collection<RequestFilter> requestFilters;
-    private Resource appJsResource;
-    private Resource classesJsResource;
-    private Resource mainJsResource;
-    private Resource functionsJsResource;
-    private Resource bundleJsResource;
-    private Resource bundleJsMapResource;
-
-    @XISInit
-    void init() {
-        appJsResource = resources.getByPath("app.js");
-        classesJsResource = resources.getByPath("classes.js");
-        mainJsResource = resources.getByPath("main.js");
-        functionsJsResource = resources.getByPath("functions.js");
-        bundleJsResource = resources.getByPath("bundle.min.js");
-        bundleJsMapResource = resources.getByPath("bundle.min.js.map");
-    }
 
     @Override
     public ClientConfig getConfig() {
@@ -101,34 +84,13 @@ public class FrontendServiceImpl implements FrontendService {
 
 
     @Override
-    public String getAppJs() {
-        return appJsResource.getContent();
+    public Resource getBundleJs() {
+        return javascriptProvider.getCompressedJavascript();
     }
 
     @Override
-    public String getClassesJs() {
-        return classesJsResource.getContent();
-    }
-
-    @Override
-    public String getMainJs() {
-        return mainJsResource.getContent();
-    }
-
-    @Override
-    public String getFunctionsJs() {
-        return functionsJsResource.getContent();
-    }
-
-
-    @Override
-    public String getBundleJs() {
-        return bundleJsResource.getContent();
-    }
-
-    @Override
-    public String getBundleJsMap() {
-        return bundleJsMapResource.getContent();
+    public Resource getBundleJsMap() {
+        return javascriptProvider.getSourceMap();
     }
 
     private void addRequestAttributes(ClientRequest request) throws AuthenticationException {
