@@ -6,7 +6,12 @@ import one.xis.auth.token.TokenStatus;
 import one.xis.http.*;
 import one.xis.resource.Resource;
 
+import java.time.Instant;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.function.Function;
+
+import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 
 @Controller
 @PublicResources("/public")
@@ -68,56 +73,60 @@ public class MainController {
     }
 
     @SuppressWarnings("unchecked")
-    private <T> ResponseEntity<T> handleResourceResponse(Resource resource, String ifModifiedSince, Function<Resource, T> contentExtractor) {
+    private <T> ResponseEntity<T> handleResourceResponse(Resource resource, String ifModifiedSinceStr, Function<Resource, T> contentExtractor) {
         long lastModified = resource.getLastModified();
         String cacheControl = "no-cache";
-        if (ifModifiedSince != null && !ifModifiedSince.isEmpty()) {
-            long ifModifiedSinceEpoch = parseHttpDate(ifModifiedSince);
-            if (lastModified > 0 && lastModified <= ifModifiedSinceEpoch) {
+        Instant lastModifiedResource = Instant.ofEpochMilli(lastModified).truncatedTo(ChronoUnit.SECONDS);
+        if (ifModifiedSinceStr != null && !ifModifiedSinceStr.isEmpty()) {
+            Instant ifModifiedSince = parseHttpDate(ifModifiedSinceStr);
+            if (ifModifiedSince != null && lastModifiedResource != null && !lastModifiedResource.isAfter(ifModifiedSince)) {
                 return (ResponseEntity<T>) ResponseEntity.status(304)
-                        .addHeader("Last-Modified", formatHttpDate(lastModified))
+                        .addHeader("Last-Modified", formatHttpDate(lastModifiedResource))
                         .addHeader("Cache-Control", cacheControl);
+
             }
         }
         T body = contentExtractor.apply(resource);
         return ResponseEntity.ok(body)
-                .addHeader("Last-Modified", formatHttpDate(lastModified))
+                .addHeader("Last-Modified", formatHttpDate(lastModifiedResource))
                 .addHeader("Cache-Control", cacheControl);
     }
 
     @Get("/xis/page/head")
-    public ResponseEntity<String> getPageHead(@UrlParameter("pageId") String pageId, @Header("If-Modified-Since") String ifModifiedSince) {
+    public ResponseEntity<String> getPageHead(@UrlParameter("pageId") String pageId, @RequestHeader("If-Modified-Since") String ifModifiedSince) {
         Resource resource = frontendService.getPageHead(pageId);
         return handleResourceResponse(resource, ifModifiedSince, Resource::getContent);
     }
 
     @Get("/xis/page/body")
-    public ResponseEntity<String> getPageBody(@UrlParameter("pageId") String pageId, @Header("If-Modified-Since") String ifModifiedSince) {
+    public ResponseEntity<String> getPageBody(@UrlParameter("pageId") String pageId, @RequestHeader("If-Modified-Since") String ifModifiedSince) {
         Resource resource = frontendService.getPageBody(pageId);
         return handleResourceResponse(resource, ifModifiedSince, Resource::getContent);
     }
 
     @Get("/xis/page/body-attributes")
-    public ResponseEntity<?> getBodyAttributes(@UrlParameter("pageId") String pageId, @Header("If-Modified-Since") String ifModifiedSince) {
+    public ResponseEntity<?> getBodyAttributes(@UrlParameter("pageId") String pageId, @RequestHeader("If-Modified-Since") String ifModifiedSince) {
         Resource resource = frontendService.getBodyAttributes(pageId);
         return handleResourceResponse(resource, ifModifiedSince, Resource::getContent);
     }
 
     @Get("/xis/widget/html")
-    public ResponseEntity<String> getWidgetHtml(@UrlParameter("widgetId") String widgetId, @Header("If-Modified-Since") String ifModifiedSince) {
+    public ResponseEntity<String> getWidgetHtml(@UrlParameter("widgetId") String widgetId, @RequestHeader("If-Modified-Since") String ifModifiedSince) {
         Resource resource = frontendService.getWidgetHtml(widgetId);
         return handleResourceResponse(resource, ifModifiedSince, Resource::getContent);
     }
 
     @Get("/bundle.min.js")
-    public ResponseEntity<String> getBundleJs(@Header("If-Modified-Since") String ifModifiedSince) {
+    @ResponseHeader(name = "SourceMap", value = "/bundle.min.js.map")
+    public ResponseEntity<String> getBundleJs(@RequestHeader("If-Modified-Since") String ifModifiedSince) {
         Resource resource = frontendService.getBundleJs();
         return handleResourceResponse(resource, ifModifiedSince, Resource::getContent);
     }
 
 
     @Get("/bundle.min.js.map")
-    public ResponseEntity<String> getBundleJsMap(@Header("If-Modified-Since") String ifModifiedSince) {
+    @ResponseHeader(name = "Content-Type", value = "application/json")
+    public ResponseEntity<String> getBundleJsMap(@RequestHeader("If-Modified-Since") String ifModifiedSince) {
         Resource resource = frontendService.getBundleJsMap();
         return handleResourceResponse(resource, ifModifiedSince, Resource::getContent);
     }
@@ -136,17 +145,15 @@ public class MainController {
         return entity;
     }
 
-    private long parseHttpDate(String httpDate) {
+    private Instant parseHttpDate(String httpDate) {
         try {
-            return java.time.ZonedDateTime.parse(httpDate, java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME)
-                    .toInstant().toEpochMilli();
+            return ZonedDateTime.parse(httpDate, RFC_1123_DATE_TIME).toInstant();
         } catch (Exception e) {
-            return 0;
+            return null;
         }
     }
 
-    private String formatHttpDate(long epochMilli) {
-        return java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME
-                .format(java.time.Instant.ofEpochMilli(epochMilli).atZone(java.time.ZoneId.of("GMT")));
+    private String formatHttpDate(Instant instant) {
+        return RFC_1123_DATE_TIME.format(instant.atZone(java.time.ZoneId.of("GMT")));
     }
 }

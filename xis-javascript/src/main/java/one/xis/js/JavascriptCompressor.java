@@ -6,8 +6,8 @@ import one.xis.context.XISComponent;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 
 @XISComponent
@@ -16,42 +16,57 @@ class JavascriptCompressor {
     /**
      * Uses Google Closure Compiler to compress JavaScript sources.
      *
-     * @param sources List of JavaScript source code strings.
+     * @param sources Map of JavaScript source code strings by name.
      * @return A JavascriptCompressionResult containing the compressed code and source map (if any).
      */
-    JavascriptCompressionResult compress(List<String> sources) {
+    JavascriptCompressionResult compress(Map<String, String> sources) {
+        final String outputJsName = "bundle.min.js";     // muss zum ausgelieferten JS passen!
+        final String outputMapName = "bundle.min.js.map"; // darf beliebig sein; steuert den Kommentar
+
         Compiler.setLoggingLevel(Level.OFF);
         Compiler compiler = new Compiler();
         CompilerOptions options = new CompilerOptions();
+
+        // SIMPLE oder ADVANCED – wie du magst
         CompilationLevel.SIMPLE_OPTIMIZATIONS.setOptionsForCompilationLevel(options);
-        options.setSourceMapOutputPath("./sourcemap.map"); // Dummy-Pfad, wird nicht in eine Datei geschrieben
+
+        // Map ERZEUGEN (Schalter) + Kommentar-Ziel
+        options.setSourceMapOutputPath(outputMapName);
         options.setSourceMapFormat(SourceMap.Format.V3);
 
-        List<SourceFile> externs = Collections.emptyList();
+        // sehr wichtig bei fromCode(...):
+        options.setSourceMapIncludeSourcesContent(true);
+        options.setApplyInputSourceMaps(true);
+
+        // keine goog.exportSymbol-Generierung
+        options.setGenerateExports(false);
+        
         List<SourceFile> inputs = new ArrayList<>();
-
-        int i = 0;
-        for (String source : sources) {
-            inputs.add(SourceFile.fromCode("input" + i++ + ".js", source));
+        sources.forEach((name, code) -> inputs.add(SourceFile.fromCode(name, code)));
+        Result result = compiler.compile(List.of(), inputs, options);
+        if (!result.success) {
+            StringBuilder sb = new StringBuilder();
+            for (JSError e : result.errors) sb.append(e).append('\n');
+            throw new RuntimeException("JavaScript-Komprimierung fehlgeschlagen:\n" + sb);
         }
 
-        Result result = compiler.compile(externs, inputs, options);
+        // Minified JS holen …
+        String js = compiler.toSource();
 
-        if (result.success) {
-            String compressedSource = compiler.toSource();
-            StringBuilder sourceMapBuilder = new StringBuilder();
-            if (result.sourceMap != null) {
-                try {
-                    result.sourceMap.appendTo(sourceMapBuilder, "sourcemap.map");
-                } catch (IOException e) {
-                    throw new RuntimeException("Konnte Source Map nicht erstellen", e);
-                }
-            }
-            return new JavascriptCompressionResult(compressedSource, sourceMapBuilder.toString());
-        } else {
-            // Fehlerbehandlung, falls die Kompilierung fehlschlägt
-            throw new RuntimeException("JavaScript-Kompilierung fehlgeschlagen");
+        // … optional den automatisch angehängten Kommentar entfernen,
+        // weil du den HTTP-Header 'SourceMap' nutzt:
+        js = js.replaceFirst("(?m)\\R?//#\\s*sourceMappingURL=.*$", "");
+
+        // Map-JSON erzeugen: 'file' MUSS dem JS-Namen entsprechen
+        String mapJson;
+        try (var sw = new java.io.StringWriter()) {
+            compiler.getSourceMap().appendTo(sw, outputJsName);
+            mapJson = sw.toString();
+        } catch (IOException e) {
+            throw new RuntimeException("Konnte Source Map nicht erstellen", e);
         }
+
+        return new JavascriptCompressionResult(js, mapJson);
     }
-}
 
+}

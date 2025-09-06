@@ -3,6 +3,7 @@ package one.xis.http;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
@@ -11,8 +12,8 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * This is typically used in RESTful web services to retrieve values from HTTP headers.
  */
 @Retention(RUNTIME)
-@Target(PARAMETER)
-public @interface Header {
+@Target({PARAMETER, METHOD})
+public @interface RequestHeader {
     String value();
 
 }

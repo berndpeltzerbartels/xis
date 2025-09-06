@@ -32,6 +32,14 @@ class ResponseWriter {
 
             returnValue = responseEntity.getBody();
         }
+        if (method.isAnnotationPresent(ResponseHeader.class)) {
+            var annotation = method.getAnnotation(ResponseHeader.class);
+            if ("Content-Type".equalsIgnoreCase(annotation.name())) {
+                response.setContentType(ContentType.fromValue(annotation.value()));
+            } else {
+                response.addHeader(annotation.name(), annotation.value());
+            }
+        }
         if (returnValue == null) {
             if (response.getStatusCode() == null) {
                 response.setStatusCode(204); // No Content
@@ -43,7 +51,10 @@ class ResponseWriter {
             response.setStatusCode(200);
         }
 
-        determineContentType(returnValue, method, request, response);
+        if (response.getContentType() == null) {
+            determineContentType(returnValue, method, request, response);
+        }
+        // may be it contains content type information. So we do this after checking the suffix
         setResponseBody(returnValue, response);
     }
 

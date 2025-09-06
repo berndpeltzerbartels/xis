@@ -17,6 +17,7 @@ class TestApplication {
         this.pageController = new PageController(this.client, this.pages, this.initializer, this.urlResolver, this.tagHandlers);
         this.history = new PageHistory(this.pageController);
         this.backendService = new BackendService();
+        this.eventPublisher = new EventPublisher();
         this.runInitializers();
     }
 
@@ -46,6 +47,7 @@ class TestApplication {
             .then(config => this.pages.loadPages(config))
             .then(() => this.urlResolver.init())
             .then(() => this.pageController.displayPageForUrl(document.location.pathname))
+            .then(() => { this.eventPublisher.publish(EventType.APP_INITIALIZED, app); })
             .catch(e => reportError(e));
     }
 

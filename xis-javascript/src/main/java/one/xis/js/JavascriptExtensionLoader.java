@@ -9,27 +9,25 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
+import java.util.*;
 
 /**
- * Checks for all occurrences of META-INF/xis/js-extension in the classpath. Reads a list vor
+ * Checks for all occurrences of META-INF/xis/js/extension in the classpath. Reads a list vor
  * resource paths (private  method) and loads the js code (another private method).
  * Returns a list of js code snippets created with empty lines in between.
  */
 @XISComponent
 class JavascriptExtensionLoader {
-    List<String> loadExtensions() {
-        List<String> extensions = new ArrayList<>();
+    Map<String, String> loadExtensions() {
+        Map<String, String> extensions = new LinkedHashMap<>();
         try {
-            Enumeration<URL> resources = getClass().getClassLoader().getResources("META-INF/xis/extensions");
+            Enumeration<URL> resources = getClass().getClassLoader().getResources("META-INF/xis/js/extensions");
             while (resources.hasMoreElements()) {
                 URL url = resources.nextElement();
                 List<String> resourcePaths = readResourcePaths(url);
                 for (String resourcePath : resourcePaths) {
                     String jsCode = loadJsResource(resourcePath);
-                    extensions.add(jsCode);
+                    extensions.put(resourcePath, jsCode);
                 }
             }
         } catch (IOException e) {

@@ -20,7 +20,7 @@ class TestController {
     }
 
     @Get("/info")
-    public String getInfo(@Header("X-Test-Header") String headerValue, @CookieValue("test_cookie") String cookieValue) {
+    public String getInfo(@RequestHeader("X-Test-Header") String headerValue, @CookieValue("test_cookie") String cookieValue) {
         return "header:" + headerValue + ";cookie:" + cookieValue;
     }
 }

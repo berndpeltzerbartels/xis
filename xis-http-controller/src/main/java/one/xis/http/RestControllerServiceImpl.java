@@ -229,7 +229,7 @@ public class RestControllerServiceImpl implements RestControllerService {
                 args[i] = handleRequestParam(param, request);
             } else if (param.isAnnotationPresent(RequestBody.class)) {
                 args[i] = handleRequestBody(param, request);
-            } else if (param.isAnnotationPresent(Header.class)) {
+            } else if (param.isAnnotationPresent(RequestHeader.class)) {
                 args[i] = handleHeader(param, request);
             } else if (param.isAnnotationPresent(CookieValue.class)) {
                 args[i] = handleCookieValue(param, cookies);
@@ -337,7 +337,7 @@ public class RestControllerServiceImpl implements RestControllerService {
     }
 
     private Object handleHeader(Parameter param, HttpRequest request) {
-        Header annotation = param.getAnnotation(Header.class);
+        RequestHeader annotation = param.getAnnotation(RequestHeader.class);
         String headerName = annotation.value();
         String value = request.getHeader(headerName);
         return TypeUtils.convertSimple(value, param.getType());

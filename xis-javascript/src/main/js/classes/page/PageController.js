@@ -194,6 +194,7 @@ class PageController {
             if (!skipHistoryUpdate && response.status < 300) {
                 this.updateHistory(this.resolvedURL);
             }
+            app.eventPublisher.publish(EventType.PAGE_LOADED, { page: this.page, url: this.resolvedURL });  
         }).catch(error => handleError(error));
     }
 

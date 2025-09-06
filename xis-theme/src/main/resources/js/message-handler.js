@@ -1,6 +1,5 @@
-class XisThemeMessageHandler extends MessageHandler {
+class XisThemeMessageHandler {
     constructor() {
-        super();
         this.validatorMessages = [];
     }
 
@@ -61,4 +60,6 @@ class XisThemeMessageHandler extends MessageHandler {
 }
 
 
-window.messageHandler = new XisThemeMessageHandler();
+eventListenerRegistry.addEventListener(EventType.APP_INITIALIZED , app => {
+    app.messageHandler = new XisThemeMessageHandler();
+});

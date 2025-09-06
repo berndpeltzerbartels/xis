@@ -2,6 +2,7 @@ class Application {
 
     constructor() {
         this.initializers = [];
+        this.initializationListeners = [];
         this.messageHandler = window.messageHandler ?  window.messageHandler : new MessageHandler();
         this.clientState = new ClientState();
         this.localStorage = new LocalStore();
@@ -17,6 +18,7 @@ class Application {
         this.pageController = new PageController(this.client, this.pages, this.initializer, this.urlResolver, this.tagHandlers);
         this.history = new PageHistory(this.pageController);
         this.backendService = new BackendService();
+        this.eventPublisher = new EventPublisher();
         this.runInitializers();
     }
 
@@ -32,6 +34,7 @@ class Application {
 
 
     start() {
+        this.eventPublisher.publish(EventType.APP_INITIALIZED, this);
         this.client.loadConfig()
             .then(config => this.pageController.setConfig(config))
             .then(config => this.backendService.setConfig(config))

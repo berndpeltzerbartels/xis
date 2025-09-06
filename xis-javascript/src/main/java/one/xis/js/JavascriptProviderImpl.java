@@ -8,7 +8,7 @@ import one.xis.resource.Resource;
 import one.xis.resource.StringResource;
 import one.xis.utils.io.IOUtils;
 
-import java.util.ArrayList;
+import java.util.LinkedHashMap;
 
 @XISComponent
 @RequiredArgsConstructor
@@ -25,9 +25,9 @@ class JavascriptProviderImpl implements JavascriptProvider {
 
     @XISInit
     public void init() {
-        var sources = new ArrayList<String>();
-        sources.add(xisJs());
-        sources.addAll(extensionLoader.loadExtensions());
+        var sources = new LinkedHashMap<String, String>();
+        sources.put("bundle.min.js", xisJs());
+        sources.putAll(extensionLoader.loadExtensions());
         var result = javascriptCompressor.compress(sources);
         this.compressedJavascript = new StringResource(result.compressed());
         this.sourceMap = new StringResource(result.sourceMap());
