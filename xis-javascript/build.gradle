@@ -41,33 +41,6 @@ java {
 
 apply plugin: JavascriptPlugin
 
-def jsSrcDir = file("src/main/resources")
-def buildDirEs = file("$buildDir/esbuild")
-def xisProdJs = file("${jsSrcDir}/xis-prod.js")
-def bundledJs = file("${buildDirEs}/bundle.min.js")
-
-task bundleJs(type: Exec) {
-    dependsOn classes
-
-    doFirst {
-        // Erstelle build-Verzeichnis für esbuild, falls nicht vorhanden
-        buildDirEs.mkdirs()
-    }
-
-    workingDir project.projectDir
-
-    commandLine 'npx', 'esbuild',
-            xisProdJs.absolutePath,
-            '--minify',
-            '--keep-names',
-            "--log-level=info",
-            "--outfile=${bundledJs.absolutePath}",
-            "--log-level=debug",  // mehr Ausgaben
-            "--metafile=${buildDirEs}/meta.json",  // enthält Infos, was gebundled wurde
-            "--sourcemap"  // hilft bei Nachvollziehbarkeit
-
-}
-
 tasks.named('processResources', ProcessResources) {
     // Wir filtern die Standard-Ressourcen, anstatt neue Quellen hinzuzufügen.
     // Dies vermeidet Duplikate und Konfigurationskonflikte.
@@ -84,23 +57,6 @@ tasks.named('processResources', ProcessResources) {
     }
 }
 
-// 2. Vereinfachen Sie den jar-Task. Er muss sich nicht mehr um die HTML-Dateien kümmern.
-jar {
-    dependsOn bundleJs
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-
-    // Die HTML-Dateien werden bereits korrekt von processResources bereitgestellt.
-    // Wir müssen nur noch die JS-Dateien hinzufügen.
-    from(jsSrcDir) {
-        include "*.js"
-        exclude "xis-prod.js"
-        into ""
-    }
-    from(buildDirEs) {
-        include "bundle.min.js", "bundle.min.js.map"
-        into ""
-    }
-}
 
 // Bibliotheks- und Tooling-Setup
 def lombokVersion = rootProject.ext.libraryVersions.lombok

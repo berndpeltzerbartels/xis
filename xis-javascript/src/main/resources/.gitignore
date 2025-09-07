@@ -4,5 +4,6 @@ classes.js
 app.js
 test.js
 functions.js
+event-registry.js
 /xis-prod.js
 /main.js

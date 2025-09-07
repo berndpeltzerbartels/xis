@@ -2,12 +2,13 @@ package one.xis.server;
 
 import one.xis.context.XISComponent;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 @XISComponent
 class PathResolver {
@@ -37,11 +38,7 @@ class PathResolver {
                 if (e.getValue() == null) {
                     return null;
                 }
-                try {
-                    return e.getKey() + "=" + URLEncoder.encode(e.getValue().toString(), "UTF-8");
-                } catch (UnsupportedEncodingException ex) {
-                    throw new RuntimeException("unsupported encoding ", ex);
-                }
+                return e.getKey() + "=" + URLEncoder.encode(e.getValue().toString(), UTF_8);
             }).collect(Collectors.joining("&")));
         }
         return realPath.toString();

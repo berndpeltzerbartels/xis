@@ -1,7 +1,6 @@
 package one.xis.server;
 
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import one.xis.Page;
 import one.xis.Widget;
 import one.xis.context.XISComponent;
@@ -11,14 +10,17 @@ import one.xis.resource.GenericResource;
 import one.xis.resource.Resource;
 import one.xis.resource.ResourceCache;
 import one.xis.resource.Resources;
-import one.xis.utils.xml.XmlUtil;
-import org.dom4j.*;
-import org.dom4j.io.SAXReader;
-import org.dom4j.io.XMLWriter;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+import org.jsoup.nodes.TextNode;
+import org.jsoup.parser.Parser;
+import org.jsoup.parser.Tag;
 
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @XISComponent
@@ -61,7 +63,6 @@ class ResourceService {
         pageAttributesResourceCache = new ResourceCache<>(r -> r, pageHtmlResources);
     }
 
-
     String getRootPageHtml() {
         return rootPageService.getRootPageHtml();
     }
@@ -88,16 +89,12 @@ class ResourceService {
         return new GenericResource<>(attributes, resource.getLastModified(), resource.getResourcePath());
     }
 
+    // ---------- jsoup-basierte Extraktion ----------
+
     private String extractPageHead(Resource pageResource) {
         try {
-            var content = pageResource.getContent();
-            var doc = createDocument(content);
-            var html = doc.getRootElement();
-            var head = doc.getRootElement().element("head");
-            html.remove(head);
-            if (head == null) {
-                throw new IllegalStateException("page must contain head element");
-            }
+            Document doc = parse(pageResource.getContent());
+            Element head = doc.head();
             return toTemplateString(head);
         } catch (Exception e) {
             throw new RuntimeException("Unable to extract head", e);
@@ -106,83 +103,66 @@ class ResourceService {
 
     private String extractPageBody(Resource pageResource) {
         try {
-            var content = pageResource.getContent();
-            var doc = createDocument(content);
-            var html = doc.getRootElement();
-            var body = doc.getRootElement().element("body");
-            if (body == null) {
-                throw new IllegalStateException("page must contain body element");
-            }
-            html.remove(body);
+            Document doc = parse(pageResource.getContent());
+            Element body = doc.body();
             return toTemplateString(body);
         } catch (Exception e) {
             throw new RuntimeException("Unable to extract body", e);
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private String toTemplateString(Element element) {
-        fixScriptElements(element);
-        var templateDoc = DocumentHelper.createDocument();
-        var templateElement = DocumentHelper.createElement("xis:template");
-        templateDoc.add(templateElement);
-
-        List<Node> children = new ArrayList<>(element.content()); // nicht element.elements()
-        for (Node child : children) {
-            element.remove(child);
-            if (child instanceof org.dom4j.Text textNode) {
-                if (textNode.getText().trim().isEmpty()) {
-                    continue; // remove empty text nodes
-                }
-            }
-            templateElement.add(child);
-        }
-        return serialize(templateElement);
-    }
-
-    private void fixScriptElements(Element element) {
-        if ("script".equalsIgnoreCase(element.getName()) && element.content().isEmpty()) {
-            element.addText("");
-        }
-        for (Iterator<?> it = element.elementIterator(); it.hasNext(); ) {
-            fixScriptElements((Element) it.next());
-        }
-    }
-
     private Map<String, String> extractBodyAttributes(Resource pageResource) {
-        var content = pageResource.getContent();
-        var doc = XmlUtil.loadDocument(content);
-        return XmlUtil.getElementByTagName(doc.getDocumentElement(), "body").map(XmlUtil::getAttributes).orElse(Collections.emptyMap());
+        Document doc = parse(pageResource.getContent());
+        Element body = doc.body();
+        Map<String, String> map = new LinkedHashMap<>();
+        body.attributes().forEach(attr -> map.put(attr.getKey(), attr.getValue()));
+        return map;
     }
-
 
     private Resource htmlResource(Object controller) {
         var path = htmlResourcePathResolver.htmlResourcePath(controller.getClass());
         return resources.getByPath(path);
     }
 
-    private Document createDocument(String xml) {
-        try {
-            return new SAXReader().read(new StringReader(xml));
-        } catch (DocumentException e) {
-            throw new RuntimeException("Failed to read document:\n" + xml, e);
-        }
+    // ---------- Helpers ----------
+
+    /**
+     * Robuster HTML5-Parser, tolerant gegenüber nicht geschlossenen Tags.
+     */
+    private Document parse(String html) {
+        // htmlParser() = HTML5-Regeln (tolerant). baseUri leer, damit relative URLs unverändert bleiben.
+        Document doc = Jsoup.parse(html, "", Parser.htmlParser());
+        // Ausgabe-Einstellungen: kein Pretty-Print, HTML-Syntax
+        doc.outputSettings(new Document.OutputSettings()
+                .prettyPrint(false)
+                .syntax(Document.OutputSettings.Syntax.html));
+        return doc;
     }
 
-    @SneakyThrows
-    private String serialize(org.dom4j.Element element) {
-        StringWriter stringWriter = new StringWriter();
-        XMLWriter xmlWriter = new HtmlWriter();
-        xmlWriter.setWriter(stringWriter);
-        try {
-            xmlWriter.write(element);
-        } catch (Exception e) {
-            throw new RuntimeException("", e);
-        } finally {
-            xmlWriter.close();
+    /**
+     * Baut <xis:template>…</xis:template> und hängt alle Kinder (inkl. Text/Kommentare) von 'host' hinein.
+     * Leere <script>-Tags werden zu <script></script>.
+     */
+    private String toTemplateString(Element host) {
+        Document templateDoc = new Document("");
+        templateDoc.outputSettings(new Document.OutputSettings()
+                .prettyPrint(false)
+                .syntax(Document.OutputSettings.Syntax.html));
+
+        Element templateEl = new Element(Tag.valueOf("xis:template"), "");
+        templateDoc.appendChild(templateEl);
+
+        // Alle Child-Nodes (auch Text/Comments) übernehmen; leere Whitespaces weglassen
+        for (Node n : host.childNodes()) {
+            if (n instanceof TextNode t && t.isBlank()) continue;
+            templateEl.appendChild(n.clone());
         }
-        return stringWriter.toString();
+
+        // Script-Fix: selbstschließende Skripte vermeiden
+        for (Element s : templateEl.select("script")) {
+            if (s.childNodeSize() == 0) s.append(""); // sorgt für <script></script>
+        }
+
+        return templateEl.outerHtml();
     }
-
-
 }

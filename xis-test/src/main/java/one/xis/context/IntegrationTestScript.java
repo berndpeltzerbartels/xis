@@ -27,7 +27,7 @@ class IntegrationTestScript {
     }
 
     private String testScript() {
-        return Javascript.getScript(CLASSES, FUNCTIONS, TEST, TEST_MAIN);
+        return Javascript.getScript(EVENT_REGISTRY, CLASSES, FUNCTIONS, TEST, TEST_MAIN);
     }
 
     JavascriptFunction getInvoker() {

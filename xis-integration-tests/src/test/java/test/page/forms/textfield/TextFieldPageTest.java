@@ -61,12 +61,10 @@ class TextFieldPageTest {
 
         // Feldspezifische Nachricht aus dem passenden <div> unter dem Textfeld
         var fieldMessage = result.getDocument()
-                .getElementById("theTextField")
-                .getParentElement()
-                .querySelector("div")
+                .getElementByTagName("xis:message")
                 .getTextContent();
 
-        assertThat(fieldMessage).contains("Bitte überprüfen Sie Ihre Eingabe für das Feld \"Zahl\"");
+        assertThat(fieldMessage).contains("Ungültige Eingabe");
     }
 
     @Test

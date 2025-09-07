@@ -1,43 +1,27 @@
 package one.xis.test.dom;
 
-import one.xis.utils.lang.StringUtils;
-import one.xis.utils.xml.XmlUtil;
-import org.w3c.dom.Node;
+import org.jsoup.Jsoup;
+import org.jsoup.parser.Parser;
 
 class DocumentBuilder {
 
     static Document build(String html) {
-        var w3cDoc = XmlUtil.loadDocument(html);
-        var rootName = w3cDoc.getDocumentElement().getTagName();
-        var document = new DocumentImpl(rootName);
-        copyAttributes(w3cDoc.getDocumentElement(), document.getDocumentElement());
-        evaluate(w3cDoc.getDocumentElement(), document.getDocumentElement());
-        return document;
-    }
+        // HTML5-tolerantes Parsing
+        org.jsoup.nodes.Document js = Jsoup.parse(html, "", Parser.htmlParser());
+        js.outputSettings(new org.jsoup.nodes.Document.OutputSettings()
+                .prettyPrint(false)
+                .syntax(org.jsoup.nodes.Document.OutputSettings.Syntax.html));
 
-    private static void evaluate(org.w3c.dom.Element src, ElementImpl dest) {
-        var nodeList = src.getChildNodes();
-        for (var i = 0; i < nodeList.getLength(); i++) {
-            Node node = nodeList.item(i);
-            if (node instanceof org.w3c.dom.Element w3cElement) {
-                var e = translateElement(w3cElement);
-                dest.appendChild(e);
-                copyAttributes(w3cElement, e);
-                evaluate(w3cElement, e);
-            } else if (StringUtils.isNotEmpty(node.getNodeValue())) {
-                dest.appendChild(new TextNodeIml(node.getNodeValue()));
-            }
+        // Root bestimmen: bevorzugt <html>, sonst erstes Top-Level-Element, sonst <div>
+        org.jsoup.nodes.Element rootJs = js.selectFirst("html");
+        if (rootJs == null) {
+            rootJs = js.children().isEmpty()
+                    ? js.createElement("div")
+                    : js.child(0);
         }
-    }
 
-    private static ElementImpl translateElement(org.w3c.dom.Element w3cElement) {
-        return Element.createElement(w3cElement.getTagName());
-    }
-
-    private static void copyAttributes(org.w3c.dom.Element src, ElementImpl dest) {
-        for (int i = 0; i < src.getAttributes().getLength(); i++) {
-            var attribute = src.getAttributes().item(i);
-            dest.setAttribute(attribute.getNodeName(), attribute.getNodeValue());
-        }
+        // 1x konvertieren, fertig
+        ElementImpl root = ElementBuilder.fromJsoupElement(rootJs);
+        return new DocumentImpl(root);
     }
 }

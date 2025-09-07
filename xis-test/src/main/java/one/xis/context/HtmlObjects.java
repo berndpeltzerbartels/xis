@@ -3,8 +3,7 @@ package one.xis.context;
 import lombok.Data;
 import one.xis.resource.Resources;
 import one.xis.test.dom.Document;
-import one.xis.test.dom.DocumentImpl;
-import one.xis.test.dom.ElementImpl;
+import one.xis.test.dom.Element;
 import one.xis.test.dom.Window;
 import one.xis.test.js.LocalStorage;
 import one.xis.test.js.SessionStorage;
@@ -18,12 +17,14 @@ import static java.net.URLEncoder.encode;
 @Data
 class HtmlObjects {
 
-    private DocumentImpl document;
+    private Document document;                         // jsoup Document
     private LocalStorage localStorage;
     private SessionStorage sessionStorage;
     private Window window;
     // private Console console;
-    private final Function<String, ElementImpl> htmlToElement;
+
+    // htmlToElement liefert jetzt ein jsoup Element
+    private final Function<String, Element> htmlToElement;
     private final Function<String, String> atob;
     private final Function<String, String> encodeURIComponent = HtmlObjects::encodeURIComponent;
 
@@ -33,17 +34,16 @@ class HtmlObjects {
         this.init();
     }
 
-    public static ElementImpl htmlToElement(String content) {
-        var doc = ((DocumentImpl) Document.of(content));
-        return doc.getDocumentElement();
+    /**
+     * Parst HTML robust (HTML5-Regeln) und liefert die Wurzel: bevorzugt <html>, sonst <body>.
+     */
+    public static Element htmlToElement(String content) {
+        return Element.of(content);
     }
-
 
     public static String atob(String base64) {
         StringBuilder input = new StringBuilder(base64.replace("-", "+").replace("_", "/"));
-        while (input.length() % 4 != 0) {
-            input.append("=");
-        }
+        while (input.length() % 4 != 0) input.append("=");
         byte[] decoded = Base64.getDecoder().decode(input.toString());
         return new String(decoded, StandardCharsets.UTF_8);
     }
@@ -59,10 +59,14 @@ class HtmlObjects {
     }
 
     private void init() {
-        this.document = (DocumentImpl) Document.of(new Resources().getByPath("default-develop-index.html").getContent());
+        String content = new Resources()
+                .getByPath("default-develop-index.html")
+                .getContent();
+
+        // Toleranter HTML5-Parser, keine hübsche Formatierung (beibehaltung der Eingabe-Struktur)
+        this.document = Document.of(content);
         this.localStorage = new LocalStorage();
         this.sessionStorage = new SessionStorage();
         this.window = new Window(document.getLocation());
-        //  this.console = new Console();
     }
 }

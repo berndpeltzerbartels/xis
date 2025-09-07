@@ -3,6 +3,7 @@ package one.xis.test.dom;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 public class NodeList {
@@ -25,6 +26,13 @@ public class NodeList {
 
     public Stream<Node> stream() {
         return list().stream();
+    }
+
+    /**
+     * Führt die gegebene Aktion für jedes Node aus.
+     */
+    public void forEach(Consumer<? super Node> action) {
+        nodes.forEach(action);
     }
 
     public List<Node> list() {

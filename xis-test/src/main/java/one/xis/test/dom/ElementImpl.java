@@ -8,16 +8,20 @@ import one.xis.utils.lang.TypeUtils;
 import org.graalvm.polyglot.Value;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
 
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-
 @Getter
 @SuppressWarnings("unused")
 public class ElementImpl extends NodeImpl implements Element {
+
+    // HTML-void-Tags (haben keinen End-Tag; nie als <tag/> serialisieren)
+    private static final Set<String> HTML_VOID = Set.of(
+            "area", "base", "br", "col", "embed", "hr", "img", "input",
+            "link", "meta", "param", "source", "track", "wbr"
+    );
 
     public final String localName;
     public final DOMStringList classList = new DOMStringList();
@@ -48,12 +52,12 @@ public class ElementImpl extends NodeImpl implements Element {
             var setter = getSetters().get(name);
             MethodUtils.doInvoke(this, setter, TypeUtils.convertSimple(value, setter.getParameterTypes()[0]));
         }
-
     }
 
     @Override
     public void removeChild(Node b) {
-        var node = getChildNodes().stream().filter(n -> n == b).findFirst().orElseThrow(() -> new IllegalStateException("Node not found"));
+        var node = getChildNodes().stream().filter(n -> n == b).findFirst()
+                .orElseThrow(() -> new IllegalStateException("Node not found"));
         node.remove();
     }
 
@@ -80,7 +84,7 @@ public class ElementImpl extends NodeImpl implements Element {
         if (name.equals("class")) {
             return String.join(" ", classList.getValues());
         }
-        // We do not to have take care for getters here, because those are handled as attributes, too
+        // Getter werden als Attribute behandelt
         return attributes.get(name);
     }
 
@@ -100,10 +104,9 @@ public class ElementImpl extends NodeImpl implements Element {
         var clone = new ElementImpl(localName);
         this.getAttributes().forEach(clone::setAttribute);
         this.classList.getValues().forEach(clone.classList::add);
-        getChildNodes().stream().forEach(child -> clone.appendChild(child.cloneNode()));
+        getChildNodes().forEach(child -> clone.appendChild(child.cloneNode()));
         return clone;
     }
-
 
     @Override
     public Element getElementById(@NonNull String id) {
@@ -128,7 +131,6 @@ public class ElementImpl extends NodeImpl implements Element {
         var list = new ArrayList<Node>();
         findElements(e -> e.getLocalName().equals(name), list);
         return new NodeList(list);
-
     }
 
     @Override
@@ -154,6 +156,15 @@ public class ElementImpl extends NodeImpl implements Element {
         return classList.getValues();
     }
 
+    @Override
+    public void setClassName(String className) {
+        this.classList.clear();
+        for (String item : className.split(" ")) {
+            if (!item.isBlank()) {
+                this.classList.add(item);
+            }
+        }
+    }
 
     @Override
     public boolean hasAttribute(String name) {
@@ -175,7 +186,6 @@ public class ElementImpl extends NodeImpl implements Element {
         }
         attributes.remove(name);
     }
-
 
     void addEventListener(String event, Consumer<Object> listener) {
         eventListeners.computeIfAbsent(event, k -> new ArrayList<>()).add(listener);
@@ -215,21 +225,33 @@ public class ElementImpl extends NodeImpl implements Element {
 
     void setInnerHTML(String html) {
         getChildNodes().clear();
-        var doc = Jsoup.parseBodyFragment(html);
+        Document doc = Jsoup.parseBodyFragment(html);
         var body = doc.body();
         for (var child : body.childNodes()) {
-            if (child instanceof org.jsoup.nodes.Element element) {
-                var newElement = Element.createElement(element.tagName());
-                newElement.setInnerText(element.ownText());
-                for (var attr : element.attributes()) {
-                    newElement.setAttribute(attr.getKey(), attr.getValue());
-                }
-                appendChild(newElement);
-            } else if (child instanceof org.jsoup.nodes.TextNode textNode) {
-                appendChild(new TextNodeIml(textNode.text()));
-            }
+            appendChild(convertFromJsoup(child)); // tief rekursiv
         }
         updateChildNodes();
+    }
+
+    /**
+     * Tiefe Konvertierung von jsoup-Knoten in deine Node/Element-Implementierungen.
+     */
+    private NodeImpl convertFromJsoup(org.jsoup.nodes.Node n) {
+        if (n instanceof org.jsoup.nodes.TextNode tn) {
+            return new TextNodeIml(tn.text());
+        }
+        if (n instanceof org.jsoup.nodes.Element e) {
+            ElementImpl el = Element.createElement(e.tagName());
+            // Attribute
+            e.attributes().forEach(a -> el.setAttribute(a.getKey(), a.getValue()));
+            // Kinder
+            for (org.jsoup.nodes.Node c : e.childNodes()) {
+                el.appendChild(convertFromJsoup(c));
+            }
+            return el;
+        }
+        // Andere Knotentypen (Kommentare etc.) optional: hier ignorieren
+        return new TextNodeIml(""); // oder: return null und beim Aufrufer überspringen
     }
 
     @Override
@@ -352,51 +374,54 @@ public class ElementImpl extends NodeImpl implements Element {
         }
     }
 
-
     private List<Element> querySelectorAll(String selector, boolean firstOnly) {
-        // 1. Erstelle eine Map, um temporäre IDs auf echte Element-Objekte abzubilden.
-        final String tempIdAttribute = "data-temp-id";
+        final String TEMP = "data-temp-id";
         Map<String, Element> elementMap = new HashMap<>();
 
-        // Weise jedem Element im Baum eine eindeutige ID zu.
+        // 1) Marker aufbauen (alle Descendants + Root)
         this.findElements(e -> true).forEach(e -> {
-            String uuid = UUID.randomUUID().toString();
-            e.setAttribute(tempIdAttribute, uuid);
-            elementMap.put(uuid, e);
+            String id = UUID.randomUUID().toString();
+            e.setAttribute(TEMP, id);
+            elementMap.put(id, e);
         });
-        // Füge auch das Wurzelelement hinzu
-        String rootUuid = UUID.randomUUID().toString();
-        this.setAttribute(tempIdAttribute, rootUuid);
-        elementMap.put(rootUuid, this);
+        String rootId = UUID.randomUUID().toString();
+        this.setAttribute(TEMP, rootId);
+        elementMap.put(rootId, this);
 
-        // 2. Konvertiere den aktuellen Elementbaum in einen HTML-String.
-        String html = this.asString();
-
-        // 3. Parse den HTML-String mit Jsoup und führe den Selektor aus.
-        Document doc = Jsoup.parseBodyFragment(html);
         List<Element> result = new ArrayList<>();
+        try {
+            String html = this.asString();
 
-        if (firstOnly) {
-            org.jsoup.nodes.Element foundJsoupElement = doc.selectFirst(selector);
-            if (foundJsoupElement != null) {
-                String tempId = foundJsoupElement.attr(tempIdAttribute);
-                if (elementMap.containsKey(tempId)) {
-                    result.add(elementMap.get(tempId));
+            // ⬇️ WICHTIG: Parser nach Root-Typ wählen
+            org.jsoup.nodes.Document doc;
+            if ("html".equalsIgnoreCase(this.getLocalName())) {
+                // Volles Dokument parsen (head/body bleiben korrekt erhalten)
+                doc = org.jsoup.Jsoup.parse(html, "", org.jsoup.parser.Parser.htmlParser());
+            } else {
+                // Fragment in <body> parsen (wie bisher)
+                doc = org.jsoup.Jsoup.parseBodyFragment(html, "");
+            }
+
+            if (firstOnly) {
+                org.jsoup.nodes.Element found = doc.selectFirst(selector);
+                if (found != null) {
+                    String id = found.attr(TEMP);
+                    Element hit = elementMap.get(id);
+                    if (hit != null) result.add(hit);
+                }
+            } else {
+                for (org.jsoup.nodes.Element el : doc.select(selector)) {
+                    String id = el.attr(TEMP);
+                    Element hit = elementMap.get(id);
+                    if (hit != null) result.add(hit);
                 }
             }
-        } else {
-            Elements foundJsoupElements = doc.select(selector);
-            for (org.jsoup.nodes.Element jsoupElement : foundJsoupElements) {
-                String tempId = jsoupElement.attr(tempIdAttribute);
-                if (elementMap.containsKey(tempId)) {
-                    result.add(elementMap.get(tempId));
-                }
-            }
+        } finally {
+            // 4) Marker IMMER entfernen
+            elementMap.values().stream()
+                    .map(ElementImpl.class::cast)
+                    .forEach(e -> e.removeAttribute(TEMP));
         }
-
-        // 4. Bereinige die temporären Attribute aus dem echten DOM.
-        elementMap.values().stream().map(ElementImpl.class::cast).forEach(e -> e.removeAttribute(tempIdAttribute));
-
         return result;
     }
 
@@ -408,48 +433,51 @@ public class ElementImpl extends NodeImpl implements Element {
         return builder.toString();
     }
 
+    @Override
     protected void evaluateContent(StringBuilder builder, int indent) {
-        for (int i = 0; i < indent; i++) {
-            builder.append("\t");
-        }
-        builder.append("<");
-        builder.append(localName);
+        for (int i = 0; i < indent; i++) builder.append('\t');
+        builder.append('<').append(localName);
         attributes.forEach((key, value) -> {
-            builder.append(" ");
-            builder.append(key);
-            builder.append("=\"");
-            builder.append(value);
-            builder.append("\"");
+            builder.append(' ')
+                    .append(key)
+                    .append("=\"")
+                    .append(value)
+                    .append('"');
         });
-        if (getChildNodes().list().isEmpty()) {
-            builder.append("/>\n");
+
+        boolean hasChildren = !getChildNodes().list().isEmpty();
+        String ln = localName.toLowerCase();
+
+        if (!hasChildren) {
+            if (HTML_VOID.contains(ln)) {
+                builder.append(">\n");                // <br>
+                return;
+            }
+            builder.append("></").append(localName).append(">\n"); // <script></script>
             return;
         }
-        builder.append(">\n");
-        getChildNodes().stream().forEach(node -> ((NodeImpl) node).evaluateContent(builder, indent + 1));
-        for (int i = 0; i < indent; i++) {
-            builder.append("\t");
-        }
-        builder.append("</");
-        builder.append(localName);
-        builder.append(">\n");
-    }
 
+        builder.append(">\n");
+        getChildNodes().forEach(node -> ((NodeImpl) node).evaluateContent(builder, indent + 1));
+        for (int i = 0; i < indent; i++) builder.append('\t');
+        builder.append("</").append(localName).append(">\n");
+    }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("<");
-        builder.append(localName);
+        builder.append('<').append(localName);
         attributes.forEach((key, value) -> {
-            builder.append(" ");
-            builder.append(key);
-            builder.append("=\"");
-            builder.append(value);
-            builder.append("\"");
+            builder.append(' ')
+                    .append(key)
+                    .append("=\"")
+                    .append(value)
+                    .append('"');
         });
-        builder.append("/>");
-        return builder.toString();
+        if (HTML_VOID.contains(localName.toLowerCase())) {
+            return builder.append('>').toString();
+        }
+        return builder.append("/>").toString(); // nur Debug (Einzeiler)
     }
 
     public void setInnerText(String text) {

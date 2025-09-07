@@ -37,4 +37,8 @@ public interface Document {
     String getTextContent();
 
     String getTitle();
+
+    Element createElement(String name);
+
+    Location getLocation();
 }

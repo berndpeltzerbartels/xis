@@ -7,6 +7,7 @@ import one.xis.resource.StringResource;
 
 @Getter
 public enum JavascriptSource {
+    EVENT_REGISTRY(getResource("event-registry.js")),
     CLASSES(getResource("classes.js")),
     FUNCTIONS(getResource("functions.js")),
     TEST(getResource("test.js")),

@@ -9,6 +9,10 @@ import java.util.function.Predicate;
 
 public interface Element extends Node {
 
+    static Element of(String html) {
+        return ElementBuilder.build(html);
+    }
+
     List<String> getAttributeNames();
 
     String getAttribute(String name);
@@ -70,6 +74,8 @@ public interface Element extends Node {
     List<Element> getChildElements();
 
     Collection<String> getCssClasses();
+
+    void setClassName(String className);
 
 
 }
