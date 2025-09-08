@@ -62,3 +62,5 @@ include 'xis-authentication-api'
 include 'xis-bootstrap'
 include 'xis-theme'
 
+
+include 'xis-html'

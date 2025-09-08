@@ -15,6 +15,7 @@ class GlobalMessagesTagHandler extends TagHandler {
      * @param {Data} data 
      */
     refresh(data) {
+        debugger;
         this.refreshDescendantHandlers(data);
         this.singleMessageTag = getFirstChildElement(this.tag);
         if (!this.singleMessageTag) {
@@ -31,6 +32,7 @@ class GlobalMessagesTagHandler extends TagHandler {
     }
 
     reset() {
+        debugger;
         this.tag.innerHTML = '';
     }
 
@@ -40,6 +42,7 @@ class GlobalMessagesTagHandler extends TagHandler {
      * @param {ValidatorMessages} messages 
      */
     refreshValidatorMessages(messages) {
+        debugger;
         this.tag.innerHTML = '';
         for (var message of messages.globalMessages) {
             var messageTag = this.singleMessageTag.cloneNode(true);

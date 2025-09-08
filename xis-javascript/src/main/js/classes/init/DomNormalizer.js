@@ -242,6 +242,7 @@ class DomNormalizer {
     }
 
     replaceGlobalMessagesAttributeByChildGlobalMessagesElement(element) {
+        debugger;
         var globalMessages = createElement('xis:global-messages');
         element.removeAttribute('xis:global-messages');
         this.domAccessor.insertChild(element, globalMessages);
