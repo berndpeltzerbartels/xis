@@ -3,124 +3,145 @@ package one.xis.html.document;
 import lombok.RequiredArgsConstructor;
 import one.xis.html.parts.Part;
 import one.xis.html.parts.Tag;
+import one.xis.html.parts.TagType;
 import one.xis.html.parts.TextPart;
 
 import java.util.List;
+import java.util.Set;
 
 /**
- * Baut aus einer linearen Part-Liste (Tags/Text) einen Element-Baum.
- * Regeln:
- * - Öffnende und schließende Tags sind je ein Part (Tag).
- * - Leere Tags (empty=true) kommen nur einmal vor.
- * - Kein gefundenes Schließ-Tag -> autoclose.
- * - Fremde Schließ-Tags werden nicht konsumiert (Caller verarbeitet sie).
+ * Builds a node tree from a linear Part list (tags/text).
+ * <p>
+ * Rules:
+ * - Opening and closing tags are each a Part (Tag).
+ * - NO_CONTENT (self-closing) tags appear only once and cannot have children.
+ * - Missing end tags are an error, except for a small allow-list (we allow <p>).
+ * - Foreign CLOSING tags are not consumed here (caller processes them).
+ * - HTML5 void elements must not have content or an explicit end tag.
+ * <p>
+ * All comments and exceptions are in English.
  */
 @RequiredArgsConstructor
 public class ElementBuilder {
 
+    private static final Set<String> OPTIONAL_END_TAGS = Set.of("p");
+
     private final List<Part> parts;
-    private int index = 0;                 // aktueller Lesekopf
-    private final int end = -1;            // ungenutzt, behalten für evtl. Grenzen
-    // (falls du Subbereiche parsen willst, kann man end/limit nachrüsten)
+    private int index = 0;
+    private final int end = -1; // reserved for potential subrange parsing
 
     /**
-     * Baut ab dem aktuellen Index genau EIN Element.
+     * Builds exactly ONE element at the current index.
      */
     public Element build() {
-        Tag startTag = requireOpenOrEmptyTag(peekOrFail());
-        consume(); // öffnendes/empty Tag konsumieren
-        Element element = createElementFrom(startTag);
+        Tag startTag = requireOpeningOrEmptyTag(peekOrFail());
+        String name = startTag.getLocalName();
 
-        if (startTag.isEmpty()) {
-            return element; // keine Kinder bei empty
+        consume(); // consume the opening/NO_CONTENT tag
+
+        Element element = createElementFrom(startTag);
+        element.getAttributes().putAll(startTag.getAttributes());
+
+        // NEW: Treat HTML5 void elements as empty regardless of syntax (<img> or <img/>)
+        if (SelfClosingTags.isSelfClosing(name)) {
+            // No children, no end tag expected
+            return element;
         }
 
-        parseChildrenUntilClose(element, startTag.getLocalName());
+        // Existing behavior for non-void tags
+        if (startTag.getTagType() == TagType.NO_CONTENT) {
+            return element;
+        }
+
+        boolean closed = parseChildrenUntilClose(element, name);
+        if (!closed && !OPTIONAL_END_TAGS.contains(name)) {
+            throw new IllegalStateException(err("Missing closing tag for <" + name + ">."));
+        }
         return element;
     }
 
-    /* --------------------------------- Parsing-Hilfen --------------------------------- */
+    /* ------------------------------- Parsing helpers ------------------------------- */
 
     /**
-     * Parst Kinder bis passendes Closing erscheint oder Input zu Ende ist (autoclose).
+     * Parses children until a matching closing tag appears or input ends (autoclose).
+     * Returns true if a matching closing tag was consumed, false if we stopped without it.
      */
-    private void parseChildrenUntilClose(Element parent, String parentName) {
-        Element firstChild = null;
+    private boolean parseChildrenUntilClose(Element parent, String parentName) {
+        Node firstChild = null;
         Node prev = null;
 
         while (!atEnd()) {
             Part p = peek();
 
+            // Stop on our matching closing tag
             if (isMatchingClosingTag(p, parentName)) {
-                consume(); // schließendes Tag konsumieren, fertig
-                break;
+                consume(); // consume </parentName>
+                return true;
             }
+            // Stop (but do not consume) on a foreign closing tag belonging to an outer level
             if (isForeignClosingTag(p)) {
-                // Closing einer äußeren Ebene -> hier abbrechen, Caller soll es verarbeiten
                 break;
             }
 
-            if (p instanceof Tag t && (t.isOpenTag() || t.isEmpty())) {
-                Element child = build(); // rekursiv
+            if (p instanceof Tag t && (t.getTagType() == TagType.OPENING || t.getTagType() == TagType.NO_CONTENT)) {
+                Element child = build(); // recursive
                 prev = attachChild(parent, firstChild, prev, child);
-                if (firstChild == null) {
-                    firstChild = child;
-                }
+                if (firstChild == null) firstChild = child;
                 continue;
             }
 
             if (p instanceof TextPart) {
                 TextPart textPart = (TextPart) consume();
-                prev = attachChild(parent, firstChild, prev, new TextNode(textPart.getText()));
+                TextNode child = new TextNode(textPart.getText());
+                prev = attachChild(parent, firstChild, prev, child);
+                if (firstChild == null) firstChild = child;
                 continue;
             }
 
-            // Unbekannter Part – sicherheitshalber konsumieren
+            // Unknown part — consume defensively
             consume();
         }
 
-        // parent.setFirstChild(firstChild);
+        // No matching closing tag consumed (autoclose)
+        return false;
     }
 
     /**
-     * Hängt child an parent an; setzt parent/nextSibling; liefert das neue 'prev' zurück.
+     * Attaches child to parent, maintains firstChild/nextSibling links, returns new 'prev'.
      */
-    private Node attachChild(Element parent, Element firstChild, Node prev, Node child) {
+    private Node attachChild(Element parent, Node firstChild, Node prev, Node child) {
         if (firstChild == null) {
             parent.setFirstChild(child);
-        } else if (prev instanceof Element) {
-            ((Element) prev).setNextSibling(child);
+        } else if (prev != null) {
+            // Link after ANY previous node (works for TextNode and Element)
+            prev.setNextSibling(child);
         }
         child.setParentNode(parent);
         return child;
     }
 
-    /**
-     * Liefert true, wenn p ein schließendes Tag für den gegebenen Namen ist.
-     */
+    /* ------------------------------- Tag utilities ------------------------------- */
+
     private boolean isMatchingClosingTag(Part p, String name) {
-        return (p instanceof Tag t) && !t.isOpenTag() && t.getLocalName().equals(name);
+        return (p instanceof Tag t)
+                && t.getTagType() == TagType.CLOSING
+                && t.getLocalName().equals(name);
     }
 
-    /**
-     * Liefert true, wenn p irgendein schließendes Tag ist (aber nicht unseres).
-     */
     private boolean isForeignClosingTag(Part p) {
-        return (p instanceof Tag t) && !t.isOpenTag();
+        return (p instanceof Tag t) && t.getTagType() == TagType.CLOSING;
     }
-
-    /* --------------------------------- Element/Tag-Utilities --------------------------------- */
 
     private Element createElementFrom(Tag t) {
         return new Element(t.getLocalName());
     }
 
-    private Tag requireOpenOrEmptyTag(Part p) {
+    private Tag requireOpeningOrEmptyTag(Part p) {
         if (!(p instanceof Tag t)) {
-            throw new IllegalStateException(err("Erwartetes öffnendes/empty Tag, gefunden: " + p));
+            throw new IllegalStateException(err("Expected opening or self-closing tag, found: " + p));
         }
-        if (!t.isOpenTag() && !t.isEmpty()) {
-            throw new IllegalStateException(err("Erwartetes öffnendes/empty Tag, gefunden schließendes Tag: " + t));
+        if (t.getTagType() != TagType.OPENING && t.getTagType() != TagType.NO_CONTENT) {
+            throw new IllegalStateException(err("Expected opening or self-closing tag, found closing tag: " + t));
         }
         return t;
     }
@@ -129,14 +150,14 @@ public class ElementBuilder {
         return "[index=" + index + "] " + msg;
     }
 
-    /* --------------------------------- Cursor/Stream --------------------------------- */
+    /* ------------------------------- Cursor/stream ------------------------------- */
 
     private boolean atEnd() {
         return index >= parts.size();
     }
 
     private Part peekOrFail() {
-        if (atEnd()) throw new IllegalStateException(err("Keine Parts mehr vorhanden."));
+        if (atEnd()) throw new IllegalStateException(err("No more parts available."));
         return parts.get(index);
     }
 

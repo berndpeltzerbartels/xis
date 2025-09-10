@@ -1,11 +1,13 @@
 package one.xis.html.document;
 
 public interface Node {
-    String asString();
+    String toHtml();
 
     Node getNextSibling();
 
     void setParentNode(Element parent);
 
     Element getParentNode();
+
+    void setNextSibling(Node nextSibling);
 }

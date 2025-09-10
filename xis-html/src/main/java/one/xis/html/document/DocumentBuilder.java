@@ -9,9 +9,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DocumentBuilder {
     private final List<Part> parts;
-    private final Document document = new Document();
-    
-    public Document build() {
+    private final HtmlDocument document = new HtmlDocument();
+
+    public HtmlDocument build() {
         if (parts.isEmpty()) {
             throw new HtmlParseException("No parts to build document from");
         }

@@ -1,13 +1,25 @@
 package one.xis.html.parts;
 
 import lombok.RequiredArgsConstructor;
+import one.xis.html.document.SelfClosingTags;
 import one.xis.html.tokens.*;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Token-to-Part parser with early validation and small focused methods.
+ * <p>
+ * Guarantees:
+ * - Does not throw just because the document doesn't start with a DOCTYPE.
+ * - Emits one Part per XML-style self-closing tag (&lt;ns:tag/&gt;).
+ * - Forbids closing tags for HTML5 void elements (e.g. &lt;/br&gt;).
+ * - Detects duplicate attribute names and basic attribute syntax errors.
+ * <p>
+ * All comments and error messages are in English.
+ */
 @RequiredArgsConstructor
 public class PartParser {
 
@@ -15,119 +27,198 @@ public class PartParser {
     private final List<Part> parts = new ArrayList<>();
     private int index = 0;
 
+    /* --------------------------- Public API --------------------------- */
+
     public List<Part> parse() {
         parts.clear();
-        var doctype = readDoctype();
+
+        DoctypePart doctype = tryReadDoctype();
         if (doctype != null) {
             parts.add(doctype);
         }
+
         while (index < tokens.size()) {
-            read();
+            readOne();
         }
         return parts;
     }
 
-    private void read() {
-        if (index >= tokens.size() - 1) {
+    /* --------------------------- Main loop --------------------------- */
+
+    private void readOne() {
+        if (index >= tokens.size()) return;
+
+        Token token = currentToken();
+
+        if (token instanceof TextToken text) {
+            parts.add(new TextPart(text.getText()));
+            index++;
             return;
         }
 
-        Token token = currentToken();
-        if (token instanceof TextToken textToken) {
-            parts.add(new TextPart(textToken.getText()));
-            index++;
-        } else if (token instanceof OpenBracketToken) {
+        if (token instanceof OpenBracketToken) {
             parts.add(readTag());
-        } else {
-            throw new HtmlParseException("Unexpected token: " + token + " at position " + index);
+            return;
         }
+
+        throw error("Unexpected token: " + tokenToString(token) + " at position " + index);
     }
 
+    /* --------------------------- Tag parsing --------------------------- */
+
     private Tag readTag() {
-        skipToken(OpenBracketToken.class);
-        // </name>
-        if (currentToken() instanceof SlashToken) {
-            skipToken(SlashToken.class);
-            var nameToken = skipToken(TextToken.class);
-            var tag = new Tag(nameToken.getText());
-            tag.setOpenTag(false);
-            skipToken(CloseBracketToken.class);
-            return tag;
+        skip(OpenBracketToken.class);
+
+        if (is(SlashToken.class)) {
+            return readClosingTag();
         }
-        var nameToken = skipToken(TextToken.class);
-        var tag = new Tag(nameToken.getText());
-        // <name  attr="value"/>
-        // read attributes
-        if (currentToken() instanceof TextToken) {
+        return readOpeningOrSelfClosingTag();
+    }
+
+    private Tag readClosingTag() {
+        skip(SlashToken.class);
+        TextToken nameTok = skip(TextToken.class);
+        String name = nameTok.getText();
+
+        // Early validation: HTML5 void elements must not have a closing form.
+        if (SelfClosingTags.isSelfClosing(name)) {
+            throw error("Void element </" + name + "> is not allowed. Void elements must not have end tags.");
+        }
+
+        Tag tag = new Tag(name);
+        tag.setTagType(TagType.CLOSING);
+
+        skip(CloseBracketToken.class);
+        return tag;
+    }
+
+    private Tag readOpeningOrSelfClosingTag() {
+        TextToken nameTok = skip(TextToken.class);
+        String name = nameTok.getText();
+
+        Tag tag = new Tag(name);
+
+        if (is(TextToken.class)) {
             tag.setAttributes(readAttributes());
         }
-        if (currentToken() instanceof SlashToken) {
-            tag.setOpenTag(true);
-            tag.setEmpty(true);
-            skipToken(SlashToken.class);
-            skipToken(CloseBracketToken.class);
+
+        if (is(SlashToken.class)) {
+            // <name .../>
+            skip(SlashToken.class);
+            skip(CloseBracketToken.class);
+            tag.setTagType(TagType.NO_CONTENT);
             return tag;
         }
-        if (currentToken() instanceof CloseBracketToken) {
-            tag.setEmpty(false);
-            tag.setOpenTag(true);
-            skipToken(CloseBracketToken.class);
+
+        if (is(CloseBracketToken.class)) {
+            // <name ...>
+            skip(CloseBracketToken.class);
+            tag.setTagType(TagType.OPENING);
             return tag;
         }
-        throw new HtmlParseException("Unexpected token in tag: " + currentToken() + " at position " + index
+
+        throw error("Unexpected token in tag: " + tokenToString(currentToken()) + " at position " + index
                 + ". Expected '/', '>' or attribute name.");
     }
 
-    private DoctypePart readDoctype() {
-        if (!(currentToken() instanceof OpenBracketToken)) {
-            throw new HtmlParseException("Expected '<' at position " + index);
-        }
-        skipToken(OpenBracketToken.class);
-        if (!(currentToken() instanceof TextToken textToken) || !"!DOCTYPE".equalsIgnoreCase(textToken.getText())) {
-            index = 0;
+    /* --------------------------- DOCTYPE --------------------------- */
+
+    /**
+     * Attempts to read a leading DOCTYPE. If not present, returns null and does not throw.
+     */
+    private DoctypePart tryReadDoctype() {
+        int save = index;
+        if (index >= tokens.size()) return null;
+        if (!(currentToken() instanceof OpenBracketToken)) return null;
+
+        skip(OpenBracketToken.class);
+
+        if (!(currentToken() instanceof TextToken tt) || !"!DOCTYPE".equalsIgnoreCase(tt.getText())) {
+            index = save;
             return null;
         }
-        skipToken(TextToken.class); // DOCTYPE
-        // read name
-        var nameToken = skipToken(TextToken.class);
-        var doctype = new DoctypePart(nameToken.getText());
-        skipToken(CloseBracketToken.class);
-        return doctype;
+        skip(TextToken.class); // "!DOCTYPE"
+
+        if (!(currentToken() instanceof TextToken nameTok)) {
+            // Be lenient: restore and ignore malformed doctype
+            index = save;
+            return null;
+        }
+        String name = nameTok.getText();
+        skip(TextToken.class);
+
+        // Be lenient: consume up to the next '>'
+        while (index < tokens.size() && !(currentToken() instanceof CloseBracketToken)) {
+            index++;
+        }
+        if (index < tokens.size()) skip(CloseBracketToken.class);
+
+        return new DoctypePart(name);
     }
+
+    /* --------------------------- Attributes --------------------------- */
 
     private Map<String, String> readAttributes() {
-        var attributes = new HashMap<String, String>();
-        while (currentToken() instanceof TextToken) {
-            var nameToken = skipToken(TextToken.class);
-            var name = nameToken.getText();
-            skipToken(EqualsToken.class);
-            var valueToken = skipToken(TextToken.class);
-            var value = valueToken.getText();
-            attributes.put(name, value);
+        Map<String, String> attrs = new LinkedHashMap<>();
+        while (is(TextToken.class)) {
+            readAttributePairInto(attrs);
         }
-        return attributes;
+        return attrs;
     }
 
-    private <T extends Token> T skipToken(Class<T> expectedType) throws HtmlParseException {
-        if (index >= tokens.size()) {
-            throw new HtmlParseException("Unexpected end of input at position " + index);
+    private void readAttributePairInto(Map<String, String> attrs) {
+        TextToken nameTok = skip(TextToken.class);
+        String attrName = nameTok.getText();
+
+        if (attrs.containsKey(attrName)) {
+            throw error("Duplicate attribute '" + attrName + "' at position " + (index - 1));
         }
-        var token = tokens.get(index++);
-        if (!expectedType.isInstance(token)) {
-            throw new HtmlParseException("Expected " + expectedType.getSimpleName() + " at position " + index);
+
+        if (!is(EqualsToken.class)) {
+            throw error("Expected '=' after attribute name '" + attrName + "' at position " + index);
         }
-        return expectedType.cast(token);
+        skip(EqualsToken.class);
+
+        if (!(currentToken() instanceof TextToken valueTok)) {
+            throw error("Expected attribute value for '" + attrName + "' at position " + index);
+        }
+        skip(TextToken.class);
+
+        attrs.put(attrName, valueTok.getText());
     }
 
-    private Token nextToken() {
-        if (index + 1 >= tokens.size()) {
-            throw new HtmlParseException("Unexpected end of input at position " + (index + 1));
+    /* --------------------------- Token helpers --------------------------- */
+
+    private <T extends Token> T skip(Class<T> expected) {
+        ensureNotEof(expected.getSimpleName());
+        Token tok = tokens.get(index++);
+        if (!expected.isInstance(tok)) {
+            throw error("Expected " + expected.getSimpleName() + " at position " + (index - 1)
+                    + " but found " + tokenToString(tok) + ".");
         }
-        return tokens.get(index + 1);
+        return expected.cast(tok);
+    }
+
+    private boolean is(Class<? extends Token> type) {
+        return index < tokens.size() && type.isInstance(tokens.get(index));
     }
 
     private Token currentToken() {
         return tokens.get(index);
     }
 
+    private void ensureNotEof(String expected) {
+        if (index >= tokens.size()) {
+            throw error("Unexpected end of input at position " + index + " (expected " + expected + ").");
+        }
+    }
+
+    private HtmlParseException error(String message) {
+        return new HtmlParseException(message);
+    }
+
+    private static String tokenToString(Token t) {
+        if (t == null) return "null";
+        return t.getClass().getSimpleName() + (t instanceof TextToken tt ? "('" + tt.getText() + "')" : "");
+    }
 }

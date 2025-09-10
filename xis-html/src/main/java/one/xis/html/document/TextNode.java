@@ -10,7 +10,7 @@ public class TextNode implements Node {
     private Element parentNode;
 
     @Override
-    public String asString() {
+    public String toHtml() {
         return text;
     }
 }

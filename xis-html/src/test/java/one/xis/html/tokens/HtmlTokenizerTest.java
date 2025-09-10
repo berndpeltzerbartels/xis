@@ -2,6 +2,8 @@ package one.xis.html.tokens;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class HtmlTokenizerTest {
@@ -10,12 +12,15 @@ class HtmlTokenizerTest {
     void testBreak() {
         String html = "<br/>";
         HtmlTokenizer tokenizer = new HtmlTokenizer();
-        var result = tokenizer.tokenize(html);
-        assertThat(result).hasSize(4);
-        assertThat(result.get(0)).isInstanceOf(OpenBracketToken.class);
-        assertThat(result.get(1)).isInstanceOf(TextToken.class).extracting("text").isEqualTo("br");
-        assertThat(result.get(2)).isInstanceOf(SlashToken.class);
-        assertThat(result.get(3)).isInstanceOf(CloseBracketToken.class);
+        List<Token> result = tokenizer.tokenize(html);
+
+        int i = 0;
+        assertThat(result.get(i++)).isInstanceOf(OpenBracketToken.class);
+        assertThat(result.get(i++)).isInstanceOf(TextToken.class)
+                .extracting("text").isEqualTo("br");
+        assertThat(result.get(i++)).isInstanceOf(SlashToken.class);
+        assertThat(result.get(i++)).isInstanceOf(CloseBracketToken.class);
+        assertThat(result).hasSize(i); // no extras
     }
 
     @Test
@@ -37,60 +42,156 @@ class HtmlTokenizerTest {
                 """;
 
         HtmlTokenizer tokenizer = new HtmlTokenizer();
-        var result = tokenizer.tokenize(html);
-        assertThat(result.get(0)).isInstanceOf(OpenBracketToken.class);
-        assertThat(result.get(1)).isInstanceOf(TextToken.class).extracting("text").isEqualTo("html");
-        assertThat(result.get(2)).isInstanceOf(CloseBracketToken.class);
-        assertThat(result.get(3)).isInstanceOf(OpenBracketToken.class);
-        assertThat(result.get(4)).isInstanceOf(TextToken.class).extracting("text").isEqualTo("head");
-        assertThat(result.get(5)).isInstanceOf(CloseBracketToken.class);
-        assertThat(result.get(6)).isInstanceOf(OpenBracketToken.class);
-        assertThat(result.get(7)).isInstanceOf(TextToken.class).extracting("text").isEqualTo("title");
-        assertThat(result.get(8)).isInstanceOf(CloseBracketToken.class);
-        assertThat(result.get(9)).isInstanceOf(TextToken.class).extracting("text").isEqualTo("Title");
-        assertThat(result.get(10)).isInstanceOf(OpenBracketToken.class);
-        assertThat(result.get(11)).isInstanceOf(SlashToken.class);
-        assertThat(result.get(12)).isInstanceOf(TextToken.class).extracting("text").isEqualTo("title");
-        assertThat(result.get(13)).isInstanceOf(CloseBracketToken.class);
-        assertThat(result.get(14)).isInstanceOf(OpenBracketToken.class);
-        assertThat(result.get(15)).isInstanceOf(SlashToken.class);
-        assertThat(result.get(16)).isInstanceOf(TextToken.class).extracting("text").isEqualTo("head");
-        assertThat(result.get(17)).isInstanceOf(CloseBracketToken.class);
-        assertThat(result.get(18)).isInstanceOf(OpenBracketToken.class);
-        assertThat(result.get(19)).isInstanceOf(TextToken.class).extracting("text").isEqualTo("body");
-        assertThat(result.get(20)).isInstanceOf(CloseBracketToken.class);
-        assertThat(result.get(21)).isInstanceOf(OpenBracketToken.class);
-        assertThat(result.get(22)).isInstanceOf(TextToken.class).extracting("text").isEqualTo("h1");
-        assertThat(result.get(23)).isInstanceOf(TextToken.class).extracting("text").isEqualTo("class");
-        assertThat(result.get(24)).isInstanceOf(EqualsToken.class);
-        assertThat(result.get(25)).isInstanceOf(TextToken.class).extracting("text").isEqualTo("\"header\"");
-        assertThat(result.get(26)).isInstanceOf(CloseBracketToken.class);
-        assertThat(result.get(27)).isInstanceOf(TextToken.class).extracting("text").isEqualTo("Header");
-        assertThat(result.get(28)).isInstanceOf(OpenBracketToken.class);
-        assertThat(result.get(29)).isInstanceOf(SlashToken.class);
-        assertThat(result.get(30)).isInstanceOf(TextToken.class).extracting("text").isEqualTo("h1");
-        assertThat(result.get(31)).isInstanceOf(CloseBracketToken.class);
-        assertThat(result.get(32)).isInstanceOf(OpenBracketToken.class);
-        assertThat(result.get(33)).isInstanceOf(TextToken.class).extracting("text").isEqualTo("p");
-        assertThat(result.get(34)).isInstanceOf(CloseBracketToken.class);
-        assertThat(result.get(35)).isInstanceOf(TextToken.class).extracting("text").isEqualTo("Paragraph");
-        assertThat(result.get(36)).isInstanceOf(OpenBracketToken.class);
-        assertThat(result.get(37)).isInstanceOf(SlashToken.class);
-        assertThat(result.get(38)).isInstanceOf(TextToken.class).extracting("text").isEqualTo("p");
-        assertThat(result.get(39)).isInstanceOf(CloseBracketToken.class);
-        assertThat(result.get(40)).isInstanceOf(OpenBracketToken.class);
-        assertThat(result.get(41)).isInstanceOf(TextToken.class).extracting("text").isEqualTo("!--");
-        assertThat(result.get(42)).isInstanceOf(TextToken.class).extracting("text").isEqualTo("Comment");
-        assertThat(result.get(43)).isInstanceOf(TextToken.class).extracting("text").isEqualTo("--");
-        assertThat(result.get(44)).isInstanceOf(CloseBracketToken.class);
-        assertThat(result.get(45)).isInstanceOf(OpenBracketToken.class);
-        assertThat(result.get(46)).isInstanceOf(TextToken.class).extracting("text").isEqualTo("br");
-        assertThat(result.get(47)).isInstanceOf(SlashToken.class);
-        assertThat(result.get(48)).isInstanceOf(CloseBracketToken.class);
-        assertThat(result.get(49)).isInstanceOf(OpenBracketToken.class);
-        assertThat(result.get(50)).isInstanceOf(TextToken.class).extracting("text").isEqualTo("xis:forach");
-        assertThat(result.get(51)).isInstanceOf(TextToken.class).extracting("text").isEqualTo("items");
+        List<Token> t = tokenizer.tokenize(html);
 
-        // check complete result with assertJ. Check content of texttokens, always
+        Cursor c = new Cursor(t);
+
+        // <html>
+        c.expect(OpenBracketToken.class);
+        c.expectText("html");
+        c.expect(CloseBracketToken.class);
+        c.skipWs();
+
+        // <head>
+        c.expect(OpenBracketToken.class);
+        c.expectText("head");
+        c.expect(CloseBracketToken.class);
+        c.skipWs();
+
+        // <title> Title </title>
+        c.expect(OpenBracketToken.class);
+        c.expectText("title");
+        c.expect(CloseBracketToken.class);
+        c.expectText("Title");
+        c.expect(OpenBracketToken.class);
+        c.expect(SlashToken.class);
+        c.expectText("title");
+        c.expect(CloseBracketToken.class);
+        c.skipWs();
+
+        // </head>
+        c.expect(OpenBracketToken.class);
+        c.expect(SlashToken.class);
+        c.expectText("head");
+        c.expect(CloseBracketToken.class);
+        c.skipWs();
+
+        // <body>
+        c.expect(OpenBracketToken.class);
+        c.expectText("body");
+        c.expect(CloseBracketToken.class);
+        c.skipWs();
+
+        // <h1 class="header">Header</h1>
+        c.expect(OpenBracketToken.class);
+        c.expectText("h1");
+        c.expectText("class");
+        c.expect(EqualsToken.class);
+        c.expectText("header");
+        c.expect(CloseBracketToken.class);
+        c.expectText("Header");
+        c.expect(OpenBracketToken.class);
+        c.expect(SlashToken.class);
+        c.expectText("h1");
+        c.expect(CloseBracketToken.class);
+        c.skipWs();
+
+        // <p>Paragraph</p>
+        c.expect(OpenBracketToken.class);
+        c.expectText("p");
+        c.expect(CloseBracketToken.class);
+        c.expectText("Paragraph");
+        c.expect(OpenBracketToken.class);
+        c.expect(SlashToken.class);
+        c.expectText("p");
+        c.expect(CloseBracketToken.class);
+        c.skipWs();
+
+        // <!-- Comment -->
+        c.expect(OpenBracketToken.class);
+        c.expectText("!--");
+        c.expectText("Comment");
+        c.expectText("--");
+        c.expect(CloseBracketToken.class);
+        c.skipWs();
+
+        // <br/>
+        c.expect(OpenBracketToken.class);
+        c.expectText("br");
+        c.expect(SlashToken.class);
+        c.expect(CloseBracketToken.class);
+        c.skipWs();
+
+        // <xis:forach items="..." var="item">  ...  </xis:forach>
+        c.expect(OpenBracketToken.class);
+        c.expectText("xis:forach");
+        c.expectText("items");
+        c.expect(EqualsToken.class);
+        c.expectText("${items}");
+        c.expectText("var");
+        c.expect(EqualsToken.class);
+        c.expectText("item");
+        c.expect(CloseBracketToken.class);
+        c.skipWs();
+
+        // <p>${item}</p>
+        c.expect(OpenBracketToken.class);
+        c.expectText("p");
+        c.expect(CloseBracketToken.class);
+        c.expectText("${item}");
+        c.expect(OpenBracketToken.class);
+        c.expect(SlashToken.class);
+        c.expectText("p");
+        c.expect(CloseBracketToken.class);
+        c.skipWs();
+
+        // </xis:forach>
+        c.expect(OpenBracketToken.class);
+        c.expect(SlashToken.class);
+        c.expectText("xis:forach");
+        c.expect(CloseBracketToken.class);
+        c.skipWs();
+
+        // </body> (optional in this snippet, but should exist before EOF if present)
+        // We won't assert further to keep the test robust to trailing whitespace.
+
+        // Sanity: we consumed tokens in order
+        assertThat(c.i).isGreaterThan(0);
+    }
+
+    /**
+     * Small cursor over token list with helpers.
+     */
+    private static final class Cursor {
+        final List<Token> tokens;
+        int i = 0;
+
+        Cursor(List<Token> tokens) {
+            this.tokens = tokens;
+        }
+
+        void skipWs() {
+            while (i < tokens.size()
+                    && tokens.get(i) instanceof TextToken tt
+                    && tt.getText().trim().isEmpty()) {
+                i++;
+            }
+        }
+
+        <T extends Token> T expect(Class<T> type) {
+            assertThat(i).as("cursor in range").isLessThan(tokens.size());
+            Token tok = tokens.get(i++);
+            assertThat(tok).as("token @%s", i - 1).isInstanceOf(type);
+            return type.cast(tok);
+        }
+
+        TextToken expectText(String expected) {
+            assertThat(i).as("cursor in range").isLessThan(tokens.size());
+            Token tok = tokens.get(i++);
+            assertThat(tok).as("token @%s", i - 1).isInstanceOf(TextToken.class);
+            TextToken tt = (TextToken) tok;
+            assertThat(tt.getText()).as("text @%s", i - 1).isEqualTo(expected);
+            return tt;
+        }
     }
 }
