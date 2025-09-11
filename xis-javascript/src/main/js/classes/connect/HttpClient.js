@@ -68,9 +68,9 @@ class HttpClient extends Client {
             this.forward(responseObject.redirectUrl);
             return Promise.reject();
         }
-        const globalValidatormessges = this.globalValidatormessges(response);
-        if (globalValidatormessges.lenght > 0) {
-            app.messageHandler.addValidationErrors(globalValidatormessges);
+        const globalMessages = this.globalValidatormessges(responseObject);
+        if (globalMessages.length > 0) {
+            app.messageHandler.addValidationErrors(globalMessages);
         }
         return Promise.resolve(responseObject);
     }

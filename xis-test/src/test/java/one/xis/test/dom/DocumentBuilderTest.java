@@ -20,7 +20,7 @@ class DocumentBuilderTest {
             """;
 
     @Test
-    void of_parsesFullHtmlDocument() {
+    void parsesFullHtmlDocument() {
         Document document = DocumentBuilder.build(HTML);
         assertThat(document).isNotNull();
 

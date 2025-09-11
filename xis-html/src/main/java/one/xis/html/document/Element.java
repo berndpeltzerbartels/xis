@@ -39,4 +39,26 @@ public class Element implements Node {
     public String toString() {
         return "<" + localName + ">";
     }
+
+    public String getTagName() {
+        return localName.toUpperCase();
+    }
+
+
+    public Element getElementByTagName(String tagName) {
+        if (this.localName.equalsIgnoreCase(tagName)) {
+            return this;
+        }
+        Node child = firstChild;
+        while (child != null) {
+            if (child instanceof Element) {
+                Element found = ((Element) child).getElementByTagName(tagName);
+                if (found != null) {
+                    return found;
+                }
+            }
+            child = child.getNextSibling();
+        }
+        return null;
+    }
 }

@@ -3,15 +3,16 @@ package one.xis.test.dom;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Collection;
+import java.util.function.Predicate;
+
 
 @Getter
 @Setter
 @SuppressWarnings("unused")
 public abstract class NodeImpl extends GraalVMProxy implements Node {
 
-    /**
-     * Optional: zugehöriger jsoup-Knoten (falls vorhanden)
-     */
+
     private org.jsoup.nodes.Node jsoupNode;
 
     private NodeImpl parentNode;
@@ -20,28 +21,11 @@ public abstract class NodeImpl extends GraalVMProxy implements Node {
     private final NodeList childNodes = new NodeList();
     private final int nodeType;
 
-    /**
-     * Standard-Konstruktor (ohne jsoup-Back­ing)
-     */
+
     public NodeImpl(int nodeType) {
         this.nodeType = nodeType;
     }
-
-    /**
-     * Optionaler Konstruktor mit jsoup-Back­ing-Knoten
-     */
-    public NodeImpl(int nodeType, org.jsoup.nodes.Node jsoupNode) {
-        this.nodeType = nodeType;
-        this.jsoupNode = jsoupNode;
-    }
-
-    /**
-     * Kann von Unterklassen (z. B. ElementImpl/TextNodeImpl) benutzt werden,
-     * um nachträglich einen jsoup-Knoten zu hinterlegen.
-     */
-    protected void attachJsoupNode(org.jsoup.nodes.Node jsoupNode) {
-        this.jsoupNode = jsoupNode;
-    }
+    
 
     @Override
     public void remove() {
@@ -96,9 +80,15 @@ public abstract class NodeImpl extends GraalVMProxy implements Node {
 
     void updateChildNodes() {
         childNodes.updateChildNodes(this);
-        // Hinweis: die jsoup-Kindliste wird durch append/remove bereits aktuell gehalten.
-        // Wenn du eine explizite Resync-Strategie brauchst (z. B. aus jsoup -> eigener Baum),
-        // könntest du sie hier optional implementieren.
+        /*
+        if (firstChild != null) {
+            firstChild.updateChildNodes();
+        }
+        if (nextSibling != null) {
+            nextSibling.updateChildNodes();
+        }
+
+         */
     }
 
     void updateTreeByChildNodes() {
@@ -122,6 +112,20 @@ public abstract class NodeImpl extends GraalVMProxy implements Node {
             previous = previous.getNextSibling();
         }
         return previous;
+    }
+
+    protected void findElements(Predicate<ElementImpl> predicate, Collection<Node> result) {
+        var sibling = getNextSibling();
+        while (sibling != null) {
+            if (sibling instanceof ElementImpl element) {
+                element.findElements(predicate, result);
+                break;
+            }
+            sibling = sibling.getNextSibling();
+        }
+        if (getFirstChild() != null) {
+            getFirstChild().findElements(predicate, result);
+        }
     }
 
     /**

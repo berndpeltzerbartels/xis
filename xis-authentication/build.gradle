@@ -61,6 +61,7 @@ dependencies {
     testImplementation project(":xis-adapter-spi")
     testImplementation project(":xis-http-controller")
     testImplementation project(':xis-controller-api')
+    testImplementation project(':xis-html')
     testImplementation "org.mockito:mockito-core:$mockitoVersion"
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0' // TOO use properties from root project

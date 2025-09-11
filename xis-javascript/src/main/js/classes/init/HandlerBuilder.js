@@ -100,9 +100,6 @@ class HandlerBuilder {
             case 'xis:message':
                 handler = new MessageTagHandler(element);
                 break;
-            case 'xis:global-messages':
-                handler = new GlobalMessagesTagHandler(element);
-                break;
             case 'xis:if':
                 handler = new IfTagHandler(element);
                 break; 

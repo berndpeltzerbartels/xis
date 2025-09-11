@@ -1,7 +1,6 @@
 package test.page.forms.textarea;
 
 import one.xis.context.IntegrationTestContext;
-import one.xis.test.dom.Element;
 import one.xis.test.dom.TextareaElement;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,12 +35,9 @@ class TextareaPageTest {
         textarea.setValue(""); // leer lassen
         submitButton.click();
 
-        var li = result.getDocument()
-                .getElementsByTagName("li");
-        assertThat(li.length).isEqualTo(1);
-        assertThat((Element) li.item(0))
-                .extracting(Element::getTextContent)
-                .isEqualTo("Benutzerdefinierte globale Pflichtfeldmeldung");
+        assertThat(result.getDocument().getElementsByClass("error")).isNotEmpty();
+        var divError = result.getDocument().getElementsByClass("error").get(0);
+        assertThat(divError.getInnerHTML()).contains("Benutzerdefinierte globale Pflichtfeldmeldung");
 
         assertThat(result.getDocument().getElementById("fieldMessage").getInnerText()).isEqualTo("Benutzerdefinierte Pflichtfeldmeldung");
     }
@@ -58,13 +54,9 @@ class TextareaPageTest {
         textarea.setValue("\u0000\u0001"); // ungültige Eingabe
         submitButton.click();
 
-        var fieldMessage = result.getDocument()
-                .getElementById("theTextarea")
-                .getParentElement()
-                .querySelector("div")
-                .getTextContent();
-
-        assertThat(fieldMessage).contains("Benutzerdefinierte globale Pflichtfeldmeldung");
+        assertThat(result.getDocument().getElementsByClass("error")).isNotEmpty();
+        var divError = result.getDocument().getElementsByClass("error").get(0);
+        assertThat(divError.getInnerHTML()).contains("Benutzerdefinierte globale Pflichtfeldmeldung");
     }
 
     @Test
@@ -79,8 +71,8 @@ class TextareaPageTest {
 
         submitButton.click();
 
-        var globalMessages = result.getDocument().querySelectorAll("li");
-        assertThat(globalMessages)
-                .anyMatch(li -> li.getTextContent().contains("Benutzerdefinierte globale Pflichtfeldmeldung"));
+        assertThat(result.getDocument().getElementsByClass("error")).isNotEmpty();
+        var divError = result.getDocument().getElementsByClass("error").get(0);
+        assertThat(divError.getInnerHTML()).contains("Benutzerdefinierte globale Pflichtfeldmeldung");
     }
 }

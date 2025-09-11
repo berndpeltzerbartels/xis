@@ -1,9 +1,6 @@
 package one.xis.test.dom;
 
 import lombok.Getter;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.parser.Parser;
 
 import java.net.URI;
 import java.util.List;
@@ -42,36 +39,6 @@ public class DocumentImpl implements one.xis.test.dom.Document {
         this.documentElement = documentElement;
     }
 
-    /**
-     * Fabrik: parse HTML (Tag-Soup) per jsoup + konvertiere in deinen DOM.
-     *
-     * @param html     HTML-String (darf „schmutzig“ sein)
-     * @param baseHref Basis-URL (für location); kann null sein
-     */
-    public static DocumentImpl fromHtml(String html, String baseHref) {
-        String base = baseHref == null ? "" : baseHref;
-        Document d = Jsoup.parse(html, base, Parser.htmlParser());
-        d.outputSettings(new Document.OutputSettings().prettyPrint(false)
-                .syntax(Document.OutputSettings.Syntax.html));
-
-        // „Root“ bestimmen: bevorzugt <html>, sonst erstes Kind, sonst <div>
-        org.jsoup.nodes.Element rootJs;
-        if (d.selectFirst("html") != null) {
-            rootJs = d.selectFirst("html");
-        } else if (d.childNodeSize() > 0 && d.childNode(0) instanceof org.jsoup.nodes.Element e0) {
-            rootJs = e0;
-        } else {
-            rootJs = d.createElement("div");
-        }
-
-        // jsoup -> eigener DOM
-        ElementImpl root = convertFromJsoupElement(rootJs);
-        DocumentImpl doc = new DocumentImpl(root);
-
-        // Location setzen
-        doc.setLocationFromHref(d.location());
-        return doc;
-    }
 
     /* ------------------------------------------
      * Document-API
@@ -94,7 +61,7 @@ public class DocumentImpl implements one.xis.test.dom.Document {
 
     @Override
     public TextNode createTextNode(String content) {
-        return new TextNodeIml(content);
+        return new TextNodeImpl(content);
     }
 
     public String getInnerText() {
@@ -182,7 +149,7 @@ public class DocumentImpl implements one.xis.test.dom.Document {
         // Kinder rekursiv übernehmen
         e.childNodes().forEach(n -> {
             if (n instanceof org.jsoup.nodes.TextNode tn) {
-                el.appendChild(new TextNodeIml(tn.text()));
+                el.appendChild(new TextNodeImpl(tn.text()));
             } else if (n instanceof org.jsoup.nodes.Element ce) {
                 el.appendChild(convertFromJsoupElement(ce));
             } // Kommentare/andere Knotentypen: optional ignorieren

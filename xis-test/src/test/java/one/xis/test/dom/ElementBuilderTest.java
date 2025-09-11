@@ -63,7 +63,7 @@ class ElementBuilderTest {
         String html = "<h1>Hi</h1><p>Para</p>";
         assertThatThrownBy(() -> ElementBuilder.build(html))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("genau EIN Top-Level-Element");
+                .hasMessageContaining("Expected exactly one top-level element, found extra content after it");
     }
 
     @Test
@@ -72,7 +72,7 @@ class ElementBuilderTest {
         String html = "  text <b>bold</b> ";
         assertThatThrownBy(() -> ElementBuilder.build(html))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("genau EIN Top-Level-Element");
+                .hasMessageContaining("Expected opening or self-closing tag, found");
     }
 
     @Test

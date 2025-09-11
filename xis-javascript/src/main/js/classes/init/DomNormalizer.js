@@ -95,10 +95,6 @@ class DomNormalizer {
             this.replaceMessageAttributeByChildMessageElement(element);
             element.removeAttribute('xis:message-for');
         }
-        if (element.getAttribute('xis:global-messages')) {
-            this.replaceGlobalMessagesAttributeByChildGlobalMessagesElement(element);
-            element.removeAttribute('xis:global-messages');
-        }
         if (element.getAttribute('xis:if')) {
             this.surroundWithIfTag(element);
             element.removeAttribute('xis:if');
@@ -239,14 +235,6 @@ class DomNormalizer {
         element.removeAttribute('xis:message');
         this.domAccessor.insertChild(element, message);
         return message;
-    }
-
-    replaceGlobalMessagesAttributeByChildGlobalMessagesElement(element) {
-        debugger;
-        var globalMessages = createElement('xis:global-messages');
-        element.removeAttribute('xis:global-messages');
-        this.domAccessor.insertChild(element, globalMessages);
-        return globalMessages;
     }
 
     replaceFrameworkLinkByHtml(frameworkLink) {

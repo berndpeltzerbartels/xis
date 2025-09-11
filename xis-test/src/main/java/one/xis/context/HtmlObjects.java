@@ -1,15 +1,18 @@
 package one.xis.context;
 
 import lombok.Data;
+import one.xis.html.HtmlParser;
 import one.xis.resource.Resources;
 import one.xis.test.dom.Document;
 import one.xis.test.dom.Element;
+import one.xis.test.dom.ElementMapper;
 import one.xis.test.dom.Window;
 import one.xis.test.js.LocalStorage;
 import one.xis.test.js.SessionStorage;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import static java.net.URLEncoder.encode;
@@ -17,16 +20,16 @@ import static java.net.URLEncoder.encode;
 @Data
 class HtmlObjects {
 
-    private Document document;                         // jsoup Document
+    private Document document;
     private LocalStorage localStorage;
     private SessionStorage sessionStorage;
     private Window window;
     // private Console console;
 
-    // htmlToElement liefert jetzt ein jsoup Element
     private final Function<String, Element> htmlToElement;
     private final Function<String, String> atob;
     private final Function<String, String> encodeURIComponent = HtmlObjects::encodeURIComponent;
+    private final BiConsumer<Runnable, Integer> setTimeout = HtmlObjects::setTimeout;
 
     HtmlObjects() {
         this.htmlToElement = HtmlObjects::htmlToElement;
@@ -38,7 +41,19 @@ class HtmlObjects {
      * Parst HTML robust (HTML5-Regeln) und liefert die Wurzel: bevorzugt <html>, sonst <body>.
      */
     public static Element htmlToElement(String content) {
-        return Element.of(content);
+        var htmlDoc = new HtmlParser().parse(content);
+        return ElementMapper.map(htmlDoc.getDocumentElement());
+    }
+
+    public static void setTimeout(Runnable func, int time) {
+        new Thread(() -> {
+            try {
+                Thread.sleep(time);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            func.run();
+        }).start();
     }
 
     public static String atob(String base64) {

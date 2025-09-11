@@ -6,17 +6,13 @@ import one.xis.Widget;
 import one.xis.context.XISComponent;
 import one.xis.context.XISInit;
 import one.xis.context.XISInject;
+import one.xis.html.HtmlParser;
+import one.xis.html.document.Element;
+import one.xis.html.document.HtmlDocument;
 import one.xis.resource.GenericResource;
 import one.xis.resource.Resource;
 import one.xis.resource.ResourceCache;
 import one.xis.resource.Resources;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.nodes.Node;
-import org.jsoup.nodes.TextNode;
-import org.jsoup.parser.Parser;
-import org.jsoup.parser.Tag;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -41,6 +37,8 @@ class ResourceService {
 
     private final Resources resources;
     private final PathResolver pathResolver;
+
+    private final HtmlParser htmlParser = new HtmlParser();
 
     private ResourceCache<Resource> widgetHtmlResourceCache;
     private ResourceCache<Resource> pageBodyResourceCache;
@@ -88,14 +86,12 @@ class ResourceService {
         Map<String, String> attributes = extractBodyAttributes(resource);
         return new GenericResource<>(attributes, resource.getLastModified(), resource.getResourcePath());
     }
-
-    // ---------- jsoup-basierte Extraktion ----------
-
+    
     private String extractPageHead(Resource pageResource) {
         try {
-            Document doc = parse(pageResource.getContent());
-            Element head = doc.head();
-            return toTemplateString(head);
+            HtmlDocument doc = htmlParser.parse(pageResource.getContent());
+            Element head = doc.getDocumentElement().getElementByTagName("head");
+            return head.toHtml();
         } catch (Exception e) {
             throw new RuntimeException("Unable to extract head", e);
         }
@@ -103,19 +99,18 @@ class ResourceService {
 
     private String extractPageBody(Resource pageResource) {
         try {
-            Document doc = parse(pageResource.getContent());
-            Element body = doc.body();
-            return toTemplateString(body);
+            HtmlDocument doc = htmlParser.parse(pageResource.getContent());
+            Element body = doc.getDocumentElement().getElementByTagName("body");
+            return body.toHtml();
         } catch (Exception e) {
             throw new RuntimeException("Unable to extract body", e);
         }
     }
 
     private Map<String, String> extractBodyAttributes(Resource pageResource) {
-        Document doc = parse(pageResource.getContent());
-        Element body = doc.body();
-        Map<String, String> map = new LinkedHashMap<>();
-        body.attributes().forEach(attr -> map.put(attr.getKey(), attr.getValue()));
+        HtmlDocument doc = htmlParser.parse(pageResource.getContent());
+        Element body = doc.getDocumentElement().getElementByTagName("body");
+        Map<String, String> map = new LinkedHashMap<>(body.getAttributes());
         return map;
     }
 
@@ -124,45 +119,5 @@ class ResourceService {
         return resources.getByPath(path);
     }
 
-    // ---------- Helpers ----------
 
-    /**
-     * Robuster HTML5-Parser, tolerant gegenüber nicht geschlossenen Tags.
-     */
-    private Document parse(String html) {
-        // htmlParser() = HTML5-Regeln (tolerant). baseUri leer, damit relative URLs unverändert bleiben.
-        Document doc = Jsoup.parse(html, "", Parser.htmlParser());
-        // Ausgabe-Einstellungen: kein Pretty-Print, HTML-Syntax
-        doc.outputSettings(new Document.OutputSettings()
-                .prettyPrint(false)
-                .syntax(Document.OutputSettings.Syntax.html));
-        return doc;
-    }
-
-    /**
-     * Baut <xis:template>…</xis:template> und hängt alle Kinder (inkl. Text/Kommentare) von 'host' hinein.
-     * Leere <script>-Tags werden zu <script></script>.
-     */
-    private String toTemplateString(Element host) {
-        Document templateDoc = new Document("");
-        templateDoc.outputSettings(new Document.OutputSettings()
-                .prettyPrint(false)
-                .syntax(Document.OutputSettings.Syntax.html));
-
-        Element templateEl = new Element(Tag.valueOf("xis:template"), "");
-        templateDoc.appendChild(templateEl);
-
-        // Alle Child-Nodes (auch Text/Comments) übernehmen; leere Whitespaces weglassen
-        for (Node n : host.childNodes()) {
-            if (n instanceof TextNode t && t.isBlank()) continue;
-            templateEl.appendChild(n.clone());
-        }
-
-        // Script-Fix: selbstschließende Skripte vermeiden
-        for (Element s : templateEl.select("script")) {
-            if (s.childNodeSize() == 0) s.append(""); // sorgt für <script></script>
-        }
-
-        return templateEl.outerHtml();
-    }
 }

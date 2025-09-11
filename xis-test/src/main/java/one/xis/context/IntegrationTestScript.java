@@ -60,6 +60,7 @@ class IntegrationTestScript {
         bindings.put("htmlToElement", testEnvironment.getHtmlObjects().getHtmlToElement());
         bindings.put("atob", testEnvironment.getHtmlObjects().getAtob());
         bindings.put("encodeURIComponent", testEnvironment.getHtmlObjects().getEncodeURIComponent());
+        bindings.put("setTimeout", testEnvironment.getHtmlObjects().getSetTimeout());
         bindings.put("Node", Node.class);
         bindings.put("Array", new Array());
         bindings.put("debug", debugFunction);
@@ -76,6 +77,7 @@ class IntegrationTestScript {
         invoker.setBinding("htmlToElement", testEnvironment.getHtmlObjects().getHtmlToElement());
         invoker.setBinding("atob", testEnvironment.getHtmlObjects().getAtob());
         invoker.setBinding("encodeURIComponent", testEnvironment.getHtmlObjects().getEncodeURIComponent());
+        invoker.setBinding("setTimeout", testEnvironment.getHtmlObjects().getSetTimeout());
         invoker.setBinding("Node", Node.class);
         invoker.setBinding("Array", new Array());
         invoker.setBinding("debug", debugFunction);

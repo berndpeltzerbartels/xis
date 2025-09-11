@@ -3,7 +3,7 @@ package one.xis.test.dom;
 import lombok.Getter;
 
 
-public class TextNodeIml extends NodeImpl implements TextNode {
+public class TextNodeImpl extends NodeImpl implements TextNode {
 
     @Getter
     public String nodeValue;
@@ -12,14 +12,14 @@ public class TextNodeIml extends NodeImpl implements TextNode {
     public static final int nodeType = 3;
     public Object _expression;
 
-    public TextNodeIml(String nodeValue) {
+    public TextNodeImpl(String nodeValue) {
         super(TEXT_NODE);
         this.nodeValue = nodeValue;
     }
 
     @Override
     public Node cloneNode() {
-        return new TextNodeIml(nodeValue);
+        return new TextNodeImpl(nodeValue);
     }
 
     @Override

@@ -1,7 +1,6 @@
 package test.page.forms.textfield;
 
 import one.xis.context.IntegrationTestContext;
-import one.xis.test.dom.Element;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -36,14 +35,9 @@ class TextFieldPageTest {
         submitButton.click();
 
         // Feldspezifische Nachricht aus dem passenden <div> unter dem Textfeld
-        var li = result.getDocument()
-                .getElementsByTagName("li");
-        assertThat(li.length).isEqualTo(1);
-        assertThat((Element) li.item(0))
-                .extracting(Element::getTextContent)
-                .isEqualTo("Benutzerdefinierte globale Pflichtfeldmeldung");
-
-
+        assertThat(result.getDocument().getElementsByClass("error")).isNotEmpty();
+        var divError = result.getDocument().getElementsByClass("error").get(0);
+        assertThat(divError.getInnerHTML()).contains("Benutzerdefinierte globale Pflichtfeldmeldung");
         assertThat(result.getDocument().getElementById("fieldMessage").getInnerText()).isEqualTo("Benutzerdefinierte Pflichtfeldmeldung");
     }
 
@@ -79,9 +73,8 @@ class TextFieldPageTest {
 
         submitButton.click();
 
-        // Globale Nachrichten als <li>-Elemente unter dem Formular
-        var globalMessages = result.getDocument().querySelectorAll("li");
-        assertThat(globalMessages)
-                .anyMatch(li -> li.getTextContent().contains("Benutzerdefinierte globale Pflichtfeldmeldung"));
+        assertThat(result.getDocument().getElementsByClass("error")).isNotEmpty();
+        var divError = result.getDocument().getElementsByClass("error").get(0);
+        assertThat(divError.getInnerHTML()).contains("Benutzerdefinierte globale Pflichtfeldmeldung");
     }
 }

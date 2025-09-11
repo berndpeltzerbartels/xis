@@ -1,5 +1,6 @@
 package one.xis.html.document;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import one.xis.html.parts.Part;
 import one.xis.html.parts.Tag;
@@ -21,6 +22,7 @@ import java.util.Set;
  * <p>
  * All comments and exceptions are in English.
  */
+@Getter
 @RequiredArgsConstructor
 public class ElementBuilder {
 
@@ -34,6 +36,14 @@ public class ElementBuilder {
      * Builds exactly ONE element at the current index.
      */
     public Element build() {
+        var element = doBuild();
+        if (!atEnd()) {
+            throw new IllegalArgumentException(err("Expected exactly one top-level element, found extra content after it: " + peek()));
+        }
+        return element;
+    }
+
+    public Element doBuild() {
         Tag startTag = requireOpeningOrEmptyTag(peekOrFail());
         String name = startTag.getLocalName();
 
@@ -84,7 +94,7 @@ public class ElementBuilder {
             }
 
             if (p instanceof Tag t && (t.getTagType() == TagType.OPENING || t.getTagType() == TagType.NO_CONTENT)) {
-                Element child = build(); // recursive
+                Element child = doBuild(); // recursive
                 prev = attachChild(parent, firstChild, prev, child);
                 if (firstChild == null) firstChild = child;
                 continue;
@@ -138,10 +148,10 @@ public class ElementBuilder {
 
     private Tag requireOpeningOrEmptyTag(Part p) {
         if (!(p instanceof Tag t)) {
-            throw new IllegalStateException(err("Expected opening or self-closing tag, found: " + p));
+            throw new IllegalArgumentException(err("Expected opening or self-closing tag, found: " + p));
         }
         if (t.getTagType() != TagType.OPENING && t.getTagType() != TagType.NO_CONTENT) {
-            throw new IllegalStateException(err("Expected opening or self-closing tag, found closing tag: " + t));
+            throw new IllegalArgumentException(err("Expected opening or self-closing tag, found closing tag: " + t));
         }
         return t;
     }

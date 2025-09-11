@@ -134,6 +134,14 @@ public class ElementImpl extends NodeImpl implements Element {
     }
 
     @Override
+    protected void findElements(Predicate<ElementImpl> predicate, Collection<Node> result) {
+        if (predicate.test(this)) {
+            result.add(this);
+        }
+        super.findElements(predicate, result);
+    }
+
+    @Override
     public String getTextContent() {
         return getInnerText();
     }
@@ -238,7 +246,7 @@ public class ElementImpl extends NodeImpl implements Element {
      */
     private NodeImpl convertFromJsoup(org.jsoup.nodes.Node n) {
         if (n instanceof org.jsoup.nodes.TextNode tn) {
-            return new TextNodeIml(tn.text());
+            return new TextNodeImpl(tn.text());
         }
         if (n instanceof org.jsoup.nodes.Element e) {
             ElementImpl el = Element.createElement(e.tagName());
@@ -251,7 +259,7 @@ public class ElementImpl extends NodeImpl implements Element {
             return el;
         }
         // Andere Knotentypen (Kommentare etc.) optional: hier ignorieren
-        return new TextNodeIml(""); // oder: return null und beim Aufrufer überspringen
+        return new TextNodeImpl(""); // oder: return null und beim Aufrufer überspringen
     }
 
     @Override
@@ -320,7 +328,7 @@ public class ElementImpl extends NodeImpl implements Element {
 
     void setTextContent(String text) {
         getChildNodes().clear();
-        setFirstChild(new TextNodeIml(text));
+        setFirstChild(new TextNodeImpl(text));
         updateChildNodes();
     }
 
@@ -357,22 +365,6 @@ public class ElementImpl extends NodeImpl implements Element {
         return result.stream().filter(Element.class::isInstance).map(Element.class::cast).toList();
     }
 
-    protected void findElements(Predicate<ElementImpl> predicate, Collection<Node> result) {
-        if (predicate.test(this)) {
-            result.add(this);
-        }
-        var sibling = getNextSibling();
-        while (sibling != null) {
-            if (sibling instanceof ElementImpl element) {
-                element.findElements(predicate, result);
-                break;
-            }
-            sibling = sibling.getNextSibling();
-        }
-        if (getFirstChild() != null && getFirstChild() instanceof ElementImpl element) {
-            element.findElements(predicate, result);
-        }
-    }
 
     private List<Element> querySelectorAll(String selector, boolean firstOnly) {
         final String TEMP = "data-temp-id";
@@ -483,4 +475,5 @@ public class ElementImpl extends NodeImpl implements Element {
     public void setInnerText(String text) {
         setTextContent(text);
     }
+    
 }
