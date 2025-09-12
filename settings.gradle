@@ -64,3 +64,4 @@ include 'xis-theme'
 
 
 include 'xis-html'
+include 'xis-apt'

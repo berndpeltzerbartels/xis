@@ -11,11 +11,11 @@ import java.util.*;
  * <p>
  * Guarantees:
  * - Does not throw just because the document doesn't start with a DOCTYPE.
- * - Emits one Part per XML-style self-closing tag (<ns:tag/>).
- * - Forbids closing tags for HTML5 void elements (e.g. </br>).
+ * - Emits one Part per XML-style self-closing tag (&lt;ns:tag/>).
+ * - Forbids closing tags for HTML5 void elements (e.g. &lt;/br>).
  * - Detects duplicate attribute names and basic attribute syntax errors.
  * - Allows HTML boolean attributes (attribute without a value) on non-namespaced tags.
- * For namespaced/XML-style tags (e.g. <xis:...>), attributes must have values.
+ * For namespaced/XML-style tags (e.g. &lt;xis:...>), attributes must have values.
  * <p>
  * All comments and error messages are in English.
  */

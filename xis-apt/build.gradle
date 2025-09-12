@@ -1,0 +1,94 @@
+plugins {
+    id 'java'
+    id 'java-library'
+    id 'maven-publish'
+}
+
+
+group = rootProject.ext.projectGroup
+version = rootProject.ext.projectVersion
+
+dependencies {
+    // optional, erzeugt META-INF/services automatisch
+    compileOnly 'com.google.auto.service:auto-service-annotations:1.1.1'
+    annotationProcessor 'com.google.auto.service:auto-service:1.1.1'
+
+    // nur falls du eigene Annotations definierst:
+    api project(':xis-controller-api')
+    // sonst keine Runtime-APIs einbinden!
+}
+
+java {
+    toolchain { languageVersion = JavaLanguageVersion.of(17) }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs += ['-Xlint:deprecation', '-Xlint:unchecked']
+}
+
+// Gradle inkrementell (empfohlen)
+tasks.processResources {
+    from('src/processor/resources') // enthält META-INF/gradle/incremental.annotation.processors
+}
+
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifactId = project.name
+
+            pom {
+                name = 'XIS ' + project.name.capitalize()
+                description = 'Module ' + project.name + ' of the XIS declarative web framework.'
+                url = 'https://github.com/berndpeltzerbartels/xis'
+
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = 'bernd'
+                        name = 'Bernd Peltzer-Bartels'
+                        email = 'bernd@xis.one'
+                    }
+                }
+
+                scm {
+                    connection = 'scm:git:https://github.com/berndpeltzerbartels/xis.git'
+                    developerConnection = 'scm:git:git@github.com:berndpeltzerbartels/xis.git'
+                    url = 'https://github.com/berndpeltzerbartels/xis'
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = "OSSRH"
+            url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2")
+            credentials {
+                username = project.findProperty("ossrhUsername") ?: ""
+                password = project.findProperty("ossrhPassword") ?: ""
+            }
+        }
+    }
+}
+
+/*
+signing {
+    sign publishing.publications.mavenJava
+    useGpgCmd()
+}
+*/
+
+
+tasks.withType(Javadoc) {
+    options.addBooleanOption('Xdoclint:none', true)
+    options.addStringOption('encoding', 'UTF-8')
+}
+
+

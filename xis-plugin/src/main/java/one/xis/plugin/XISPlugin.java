@@ -2,38 +2,36 @@ package one.xis.plugin;
 
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.artifacts.Dependency;
+import org.gradle.api.plugins.JavaPlugin;
+import org.gradle.api.tasks.SourceSet;
+import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.api.tasks.Sync;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-
-/**
- * XISPlugin is a Gradle plugin that configures a project to use the XIS framework.
- * It ensures that the project uses Java 17, adds necessary dependencies, and configures resources.
- */
+@SuppressWarnings("unused")
 public class XISPlugin implements Plugin<Project> {
+
     @Override
     public void apply(@NotNull Project project) {
+        project.getPlugins().apply(JavaPlugin.class);
+
         configureDependencyManagement(project);
         configureResources(project);
+        configureTemplatesTask(project);
     }
 
+    /* ----------------------------- deps & resources ----------------------------- */
 
-    /**
-     * Configures dependency constraints for optional XIS modules. This allows users
-     * to add a dependency without specifying the version.
-     *
-     * @param project The project to configure.
-     */
     private void configureDependencyManagement(Project project) {
         var version = pluginVersion();
         var constraints = project.getDependencies().getConstraints();
@@ -41,45 +39,111 @@ public class XISPlugin implements Plugin<Project> {
         constraints.add("implementation", "one.xis:xis-authentication:" + version);
         constraints.add("implementation", "one.xis:xis-idp-server:" + version);
         constraints.add("implementation", "one.xis:xis-bootstrap:" + version);
+        constraints.add("implementation", "one.xis:xis-theme:" + version);
         constraints.add("testImplementation", "one.xis:xis-test:" + version);
     }
 
     /**
-     * Configures to look for resources in the src/main/java directory
-     *
-     * @param project
+     * keep: copy src/main/java into resources
      */
     private void configureResources(Project project) {
-        // Zugriff auf das ProcessResources-Task
         project.getTasks().withType(Sync.class).configureEach(sync -> {
-            // Füge Ressourcen aus dem Verzeichnis src/main/resources hinzu
             sync.from(project.file("src/main/java"));
             sync.into(project.getBuildDir().toPath().resolve("resources/main"));
         });
     }
 
+    /* ----------------------------- templates task ------------------------------- */
+
+    private void configureTemplatesTask(Project project) {
+        SourceSet main = mainSourceSet(project);
+
+        Configuration apClasspath = buildApClasspath(project);
+
+        File javaSrcBase = javaSourceBase(main, project);         // default
+        File resourcesOutput = new File(project.getProjectDir(), "src/main/resources"); // --useResources
+
+        project.getTasks().register("templates", XISTemplateTask.class, task -> {
+            task.setGroup("xis");
+            task.setDescription("Runs the XIS annotation processor to scaffold missing templates (no compilation).");
+
+            // inputs for javac/AP
+            task.setSource(main.getAllJava());
+            task.setClasspath(main.getCompileClasspath());
+
+            // AP path: only the processor, pinned to plugin version
+            task.getOptions().setAnnotationProcessorPath(apClasspath);
+
+            // fixed processor FQCN & output roots
+            task.getProcessorFqcn().set("one.xis.processor.TemplateProcessor");
+            task.getDefaultJavaOutputDir().set(javaSrcBase);
+            task.getResourcesOutputDir().set(resourcesOutput);
+
+            // lock to prevent user mutation
+            lock(task);
+
+            // up-to-date inputs
+            task.getInputs()
+                    .files(main.getAllJava().getSourceDirectories())
+                    .withPropertyName("xisSources");
+        });
+    }
+
+    /* ----------------------------- helpers -------------------------------------- */
+
+    private SourceSet mainSourceSet(Project project) {
+        SourceSetContainer sets = project.getExtensions().getByType(SourceSetContainer.class);
+        return sets.getByName(SourceSet.MAIN_SOURCE_SET_NAME);
+    }
+
+    /**
+     * Build AP classpath: only xis-apt pinned to this plugin's version (user cannot override).
+     */
+    private Configuration buildApClasspath(Project project) {
+        String apCoord = "one.xis:xis-apt:" + pluginVersion();
+        Dependency apDep = project.getDependencies().create(apCoord);
+        Configuration apConf = project.getConfigurations().detachedConfiguration(apDep);
+        apConf.setCanBeConsumed(false);
+        apConf.setCanBeResolved(true);
+        apConf.setTransitive(true);
+        return apConf;
+    }
+
+    /**
+     * First Java src dir or fallback to src/main/java.
+     */
+    private File javaSourceBase(SourceSet main, Project project) {
+        Set<File> srcDirs = main.getJava().getSrcDirs();
+        return srcDirs.isEmpty()
+                ? new File(project.getProjectDir(), "src/main/java")
+                : srcDirs.iterator().next();
+    }
+
+    private void lock(XISTemplateTask task) {
+        task.getProcessorFqcn().finalizeValue();
+        task.getProcessorFqcn().disallowChanges();
+        task.getDefaultJavaOutputDir().finalizeValue();
+        task.getDefaultJavaOutputDir().disallowChanges();
+        task.getResourcesOutputDir().finalizeValue();
+        task.getResourcesOutputDir().disallowChanges();
+    }
+
+    /* ----------------------------- version & io --------------------------------- */
 
     private String pluginVersion() {
-        // Die Ressource befindet sich im Stammverzeichnis des JARs, daher der führende Schrägstrich.
         try (InputStream input = getClass().getResourceAsStream("/plugin-version.txt")) {
             if (input == null) {
-                // Diese Datei sollte vom Build-Prozess erstellt und verpackt worden sein.
-                // Wenn sie fehlt, liegt ein Build-Problem vor.
-                throw new IllegalStateException("Konnte die Ressource 'plugin-version.txt' nicht finden. Stellen Sie sicher, dass das Plugin korrekt gebaut wurde.");
+                throw new IllegalStateException("Unable to find 'plugin-version.txt' in classpath.");
             }
-            // Lese den gesamten Inhalt des Streams als String.
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8))) {
                 return reader.lines().collect(Collectors.joining(System.lineSeparator())).trim();
             }
         } catch (IOException ex) {
-            throw new RuntimeException("Fehler beim Lesen von 'plugin-version.txt'", ex);
+            throw new RuntimeException("Error reading 'plugin-version.txt' from classpath.", ex);
         }
     }
 
-    private String javaTargetVersion() {
-        return "17";
-    }
-
+    @SuppressWarnings("unused")
     private String readContent(String resource) {
         try {
             return Files.readString(Paths.get(getClass().getResource(resource).toURI()));
@@ -87,6 +151,4 @@ public class XISPlugin implements Plugin<Project> {
             throw new RuntimeException(e);
         }
     }
-
-
 }
