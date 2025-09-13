@@ -2,13 +2,11 @@ package one.xis.processor;
 
 import com.google.auto.service.AutoService;
 
-import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.annotation.processing.Processor;
-import javax.annotation.processing.RoundEnvironment;
+import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,6 +18,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
 
+@SupportedOptions({"xis.outputDir"})
 @AutoService(Processor.class)
 public class TemplateProcessor extends AbstractProcessor {
 
@@ -133,12 +132,80 @@ public class TemplateProcessor extends AbstractProcessor {
     /*                                IO & paths                               */
     /* ====================================================================== */
 
+
     private Path targetPath(Path outRoot, TypeElement type) {
-        String pkg = processingEnv.getElementUtils().getPackageOf(type).getQualifiedName().toString();
+        // 1) Optionaler Override via @one.xis.HtmlFile(value = "..."):
+        Optional<String> override = resolveHtmlFileOverride(type);
+        if (override.isPresent()) {
+            String rel = normalizeRelativePath(override.get());
+            return outRoot.resolve(rel);
+        }
+
+        // 2) Default: Paketpfad + SimpleName.html
+        String pkg = processingEnv.getElementUtils()
+                .getPackageOf(type)
+                .getQualifiedName()
+                .toString();
         String file = type.getSimpleName() + ".html";
         Path base = pkg.isEmpty() ? outRoot : outRoot.resolve(pkg.replace('.', '/'));
         return base.resolve(file);
     }
+
+    /* ----------------- helpers ----------------- */
+
+    /**
+     * Liest den Stringwert von @one.xis.HtmlFile(value=...), ohne harte Abhängigkeit auf die Annotation-Klasse.
+     */
+    private Optional<String> resolveHtmlFileOverride(TypeElement type) {
+        return findAnnotationStringValue(type, "one.xis.HtmlFile", "value");
+    }
+
+    /**
+     * Sucht ein AnnotationMirror per FQCN und liefert den Stringwert des gewünschten Elements.
+     * Beachtet auch Default-Werte, falls das Element nicht explizit gesetzt wurde.
+     */
+    private Optional<String> findAnnotationStringValue(TypeElement type, String annotationFqcn, String elementName) {
+        for (var mirror : type.getAnnotationMirrors()) {
+            var annType = mirror.getAnnotationType();
+            var annElement = (TypeElement) annType.asElement();
+            if (!annElement.getQualifiedName().contentEquals(annotationFqcn)) continue;
+
+            // Map der explizit gesetzten Werte:
+            var values = mirror.getElementValues();
+
+            // Gesuchten Methodenslot finden:
+            for (var method : annElement.getEnclosedElements()) {
+                if (method.getKind() != ElementKind.METHOD) continue;
+                var exec = (ExecutableElement) method;
+                if (!exec.getSimpleName().contentEquals(elementName)) continue;
+
+                // explizit gesetzter Wert?
+                var explicit = values.get(exec);
+                if (explicit != null) {
+                    Object v = explicit.getValue();
+                    return Optional.ofNullable(v).map(Object::toString);
+                }
+                // Default-Wert verwenden (falls vorhanden)
+                var def = exec.getDefaultValue();
+                if (def != null) {
+                    Object v = def.getValue();
+                    return Optional.ofNullable(v).map(Object::toString);
+                }
+                return Optional.empty();
+            }
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * Normalisiert einen (relativen) Pfad: Trim, Backslashes → '/', führende '/' entfernen.
+     */
+    private String normalizeRelativePath(String p) {
+        String s = p == null ? "" : p.trim().replace('\\', '/');
+        while (s.startsWith("/")) s = s.substring(1);
+        return s;
+    }
+
 
     private void writeFile(Path target, String content) {
         try {

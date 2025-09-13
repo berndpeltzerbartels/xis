@@ -23,6 +23,17 @@ class Path {
         return rv;
     }
 
+    boolean hasPathVariables() {
+        var element = pathElement;
+        while (element != null) {
+            if (element instanceof one.xis.server.PathVariable) {
+                return true;
+            }
+            element = element.getNext();
+        }
+        return false;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

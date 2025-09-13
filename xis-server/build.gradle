@@ -50,8 +50,8 @@ dependencies {
     implementation(project(":xis-http-controller"))
     implementation(project(":xis-security-common"))
     // Compile-only dependencies
-    compileOnly project(":xis-resources")
-    compileOnly project(":xis-html")
+    implementation project(":xis-resources")
+    implementation project(":xis-html")
 
 
     implementation 'com.github.ben-manes.caffeine:caffeine:3.1.8'

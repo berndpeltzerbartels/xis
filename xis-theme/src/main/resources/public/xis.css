@@ -341,7 +341,7 @@ input[type="submit"]:disabled {
         color: var(--accent);
     }
     .maincontent {
-      width: calc(100% - 300px);
+      width: calc(90%);
       font-size: var(--form-font);
       float: right;
     }

@@ -7,7 +7,7 @@ import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
-import org.gradle.api.tasks.Sync;
+import org.gradle.language.jvm.tasks.ProcessResources;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
@@ -40,6 +40,7 @@ public class XISPlugin implements Plugin<Project> {
         constraints.add("implementation", "one.xis:xis-idp-server:" + version);
         constraints.add("implementation", "one.xis:xis-bootstrap:" + version);
         constraints.add("implementation", "one.xis:xis-theme:" + version);
+        constraints.add("implementation", "one.xis:xis-util:" + version);
         constraints.add("testImplementation", "one.xis:xis-test:" + version);
     }
 
@@ -47,9 +48,10 @@ public class XISPlugin implements Plugin<Project> {
      * keep: copy src/main/java into resources
      */
     private void configureResources(Project project) {
-        project.getTasks().withType(Sync.class).configureEach(sync -> {
-            sync.from(project.file("src/main/java"));
-            sync.into(project.getBuildDir().toPath().resolve("resources/main"));
+        project.getTasks().withType(ProcessResources.class).configureEach(sync -> {
+            File javaSrcBase = javaSourceBase(mainSourceSet(project), project);         // default
+            File resourceDir = new File(project.getProjectDir(), "src/main/resources");
+            new HtmlSynchronizer(javaSrcBase, resourceDir).sync();
         });
     }
 
@@ -149,6 +151,46 @@ public class XISPlugin implements Plugin<Project> {
             return Files.readString(Paths.get(getClass().getResource(resource).toURI()));
         } catch (IOException | URISyntaxException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    static class HtmlSynchronizer {
+        private final File src;
+        private final File dest;
+
+        HtmlSynchronizer(File src, File dest) {
+            this.src = src;
+            this.dest = dest;
+        }
+
+        void sync() {
+            syncFile(src, dest);
+        }
+
+        private void syncFile(File sourceFile, File destFile) {
+            File[] files = sourceFile.listFiles();
+            if (files == null) {
+                return;
+            }
+            for (File file : files) {
+                File targetFile = new File(destFile, file.getName());
+                if (file.isDirectory()) {
+                    syncFile(file, targetFile);
+                } else if (file.isFile() && file.getName().endsWith(".html")) {
+                    if (targetFile.exists()) {
+                        targetFile.delete();
+                    }
+                    File dir = targetFile.getParentFile();
+                    if (!dir.exists() && !dir.mkdirs()) {
+                        throw new IllegalStateException("Failed to create directory: " + dir);
+                    }
+                    try {
+                        Files.copy(file.toPath(), targetFile.toPath());
+                    } catch (IOException e) {
+                        throw new UncheckedIOException(e);
+                    }
+                }
+            }
         }
     }
 }

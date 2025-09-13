@@ -22,6 +22,9 @@ class PageAttributesFactory extends AttributesFactory {
         attributes.setWelcomePage(controller.getClass().isAnnotationPresent(WelcomePage.class));
         attributes.setPath(path);
         attributes.setNormalizedPath(path.normalized());
+        if (attributes.isWelcomePage() && path.hasPathVariables()) {
+            throw new IllegalStateException("WelcomePage cannot have path variables: " + controller.getClass());
+        }
         addParameterAttributes(controller.getClass(), attributes);
         getJavascriptResource(controller).ifPresent(attributes::setPageJavascriptSource);
         return attributes;

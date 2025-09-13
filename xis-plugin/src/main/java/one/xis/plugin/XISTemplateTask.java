@@ -38,7 +38,7 @@ public class XISTemplateTask extends JavaCompile {
                 getUseResources().flatMap(flag -> flag ? getResourcesOutputDir() : getDefaultJavaOutputDir());
 
         // Declare outputs at configuration time (important!)
-        getOutputs().dir(outDir);
+        //  getOutputs().dir(outDir);
 
         // Provide compiler args lazily & correctly
         getOptions().getCompilerArgumentProviders().add(new CommandLineArgumentProvider() {
