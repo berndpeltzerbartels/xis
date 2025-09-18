@@ -64,7 +64,7 @@ public class IOUtils {
     }
 
     public static InputStream getResourceAsStream(String resourcePath) {
-        InputStream in = ClassLoader.getSystemResourceAsStream(resourcePath);
+        InputStream in = Thread.currentThread().getContextClassLoader().getSystemResourceAsStream(resourcePath);
         if (in == null) {
             throw new NoSuchResourceException(resourcePath);
         }
@@ -73,7 +73,7 @@ public class IOUtils {
 
     public static InputStream getResourceForClass(Class<?> aClass, String resourcName) {
         String path = aClass.getPackageName().replace('.', '/') + '/' + resourcName;
-        return aClass.getClassLoader().getResourceAsStream(path);
+        return getResourceAsStream(path);
     }
 
     public static List<String> getContentLines(InputStream inputStream, String charset) {
@@ -106,8 +106,8 @@ public class IOUtils {
                 while ((line = br.readLine()) != null) {
                     resultStringBuilder.append(line).append("\n");
                 }
+                return resultStringBuilder.toString();
             }
-            return resultStringBuilder.toString();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

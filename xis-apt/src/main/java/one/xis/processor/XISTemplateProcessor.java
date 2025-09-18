@@ -20,7 +20,7 @@ import java.util.*;
 
 @SupportedOptions({"xis.outputDir"})
 @AutoService(Processor.class)
-public class TemplateProcessor extends AbstractProcessor {
+public class XISTemplateProcessor extends AbstractProcessor {
 
     /* ---- options & markers ---- */
     private static final String OPT_OUT = "xis.outputDir";

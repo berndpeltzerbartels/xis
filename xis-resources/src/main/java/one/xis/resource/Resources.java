@@ -16,7 +16,7 @@ import java.util.jar.JarFile;
 public class Resources {
     public synchronized Resource getByPath(String path) {
         String resourcePath = removeTrailingSlash(path);
-        URL url = ClassLoader.getSystemClassLoader().getResource(resourcePath);
+        URL url = Thread.currentThread().getContextClassLoader().getResource(resourcePath);
         if (url == null) {
             throw new NoSuchResourceException(path);
         }
@@ -37,7 +37,7 @@ public class Resources {
     public Collection<Resource> getClassPathResources(String folder, @NonNull String suffix) {
         try {
             List<Resource> result = new ArrayList<>();
-            Enumeration<URL> urls = getClass().getClassLoader().getResources(folder);
+            Enumeration<URL> urls = Thread.currentThread().getContextClassLoader().getResources(folder);
             while (urls.hasMoreElements()) {
                 URL url = urls.nextElement();
                 if ("file".equals(url.getProtocol())) {
@@ -83,7 +83,13 @@ public class Resources {
     }
 
     public boolean exists(String path) {
-        return ClassLoader.getSystemClassLoader().getResource(path) != null;
+        String resourcePath = removeTrailingSlash(path);
+        try (var in = Thread.currentThread().getContextClassLoader().getResourceAsStream(resourcePath)) {
+            return in != null;
+
+        } catch (IOException e) {
+            return false;
+        }
     }
 
     private String removeTrailingSlash(String path) {

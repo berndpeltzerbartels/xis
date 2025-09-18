@@ -1,6 +1,7 @@
 package one.xis.js;
 
 import one.xis.context.AppContext;
+import one.xis.resource.Resources;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -9,7 +10,7 @@ class JavascriptProviderTest {
 
     @Test
     void getCompressedJavascript() {
-        var context = AppContext.builder().withBasePackageClass(JavascriptProvider.class).build();
+        var context = AppContext.builder().withBasePackageClass(JavascriptProvider.class).withSingletonClass(Resources.class).build();
         var provider = context.getSingleton(JavascriptProvider.class);
 
         long start = System.currentTimeMillis();

@@ -28,6 +28,7 @@ public class XISPlugin implements Plugin<Project> {
         configureDependencyManagement(project);
         configureResources(project);
         configureTemplatesTask(project);
+        configureFatJarCreation(project);
     }
 
     /* ----------------------------- deps & resources ----------------------------- */
@@ -35,6 +36,7 @@ public class XISPlugin implements Plugin<Project> {
     private void configureDependencyManagement(Project project) {
         var version = pluginVersion();
         var constraints = project.getDependencies().getConstraints();
+        constraints.add("implementation", "one.xis:xis-boot:" + version);
         constraints.add("implementation", "one.xis:xis-spring:" + version);
         constraints.add("implementation", "one.xis:xis-authentication:" + version);
         constraints.add("implementation", "one.xis:xis-idp-server:" + version);
@@ -42,6 +44,7 @@ public class XISPlugin implements Plugin<Project> {
         constraints.add("implementation", "one.xis:xis-theme:" + version);
         constraints.add("implementation", "one.xis:xis-util:" + version);
         constraints.add("testImplementation", "one.xis:xis-test:" + version);
+        project.getDependencies().add("annotationProcessor", "one.xis:xis-apt:" + version);
     }
 
     /**
@@ -54,6 +57,30 @@ public class XISPlugin implements Plugin<Project> {
             new HtmlSynchronizer(javaSrcBase, resourceDir).sync();
         });
     }
+
+
+    private void configureFatJarCreation(Project project) {
+        project.afterEvaluate(p -> {
+            boolean usesXisBoot = project.getConfigurations()
+                    .getByName("implementation")
+                    .getAllDependencies()
+                    .stream()
+                    .anyMatch(dep -> dep.getGroup() != null && dep.getGroup().equals("one.xis") && dep.getName().equals("xis-boot"));
+
+            if (usesXisBoot) {
+                project.getTasks().register("runnableJar", XISBootRunnableJarTask.class, jar -> {
+                    jar.getManifest().getAttributes().put("Main-Class", "one.xis.boot.Runner");
+                    jar.configure(project);
+                    jar.dependsOn(
+                            project.getTasks().getByName("processResources"),
+                            project.getTasks().getByName("compileJava")
+                    );
+                });
+            }
+        });
+    }
+
+
 
     /* ----------------------------- templates task ------------------------------- */
 
@@ -77,7 +104,7 @@ public class XISPlugin implements Plugin<Project> {
             task.getOptions().setAnnotationProcessorPath(apClasspath);
 
             // fixed processor FQCN & output roots
-            task.getProcessorFqcn().set("one.xis.processor.TemplateProcessor");
+            task.getProcessorFqcn().set("one.xis.processor.XISTemplateProcessor");
             task.getDefaultJavaOutputDir().set(javaSrcBase);
             task.getResourcesOutputDir().set(resourcesOutput);
 

@@ -1,9 +1,9 @@
 package xisapp;
 
-import one.xis.boot.XISBootApplication;
+import one.xis.boot.XISBootRunner;
 
 public class Main {
     public static void main(String[] args) throws InterruptedException {
-        XISBootApplication.run(Main.class, args);
+        XISBootRunner.run(Main.class, args);
     }
 }

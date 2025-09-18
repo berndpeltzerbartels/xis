@@ -5,8 +5,8 @@ import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
 import one.xis.context.XISInit;
 import one.xis.resource.Resource;
+import one.xis.resource.Resources;
 import one.xis.resource.StringResource;
-import one.xis.utils.io.IOUtils;
 
 import java.util.LinkedHashMap;
 
@@ -16,6 +16,7 @@ class JavascriptProviderImpl implements JavascriptProvider {
 
     private final JavascriptExtensionLoader extensionLoader;
     private final JavascriptCompressor javascriptCompressor;
+    private final Resources resources;
 
     @Getter
     private Resource compressedJavascript;
@@ -35,6 +36,6 @@ class JavascriptProviderImpl implements JavascriptProvider {
 
 
     private String xisJs() {
-        return IOUtils.getClassPathResourceContent("xis.js");
+        return resources.getByPath("xis.js").getContent();
     }
 }

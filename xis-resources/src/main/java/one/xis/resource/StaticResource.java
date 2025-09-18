@@ -18,7 +18,7 @@ class StaticResource implements Resource {
     StaticResource(String resourcePath) {
         log.info("loading {}", resourcePath);
         this.resource = resourcePath;
-        content = IOUtils.getResourceAsString(resourcePath);
+        content = IOUtils.getContent(getClass().getClassLoader().getResourceAsStream(resourcePath), "UTF-8"); // TODO : encoding ?
         lastModified = System.currentTimeMillis();
     }
 

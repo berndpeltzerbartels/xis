@@ -1,16 +1,12 @@
 package one.xis.boot;
 
-import one.xis.boot.netty.NettyServer;
-import one.xis.context.AppContext;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public class XISBootApplication {
+import static java.lang.annotation.ElementType.TYPE;
 
-    public static void run(Class<?> applicationCLass, String[] args) throws InterruptedException {
-        var context = AppContext.builder()
-                .withPackage(applicationCLass.getPackage().getName())
-                .withXIS()
-                .build();
-
-        context.getSingleton(NettyServer.class).start();
-    }
+@Target(TYPE)
+@Retention(RetentionPolicy.SOURCE)
+public @interface XISBootApplication {
 }
