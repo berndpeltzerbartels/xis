@@ -11,6 +11,7 @@ class TagHandler {
         this.parentHandler = null;
         this.type = 'tag-handler';
         this.priority = 'normal';
+        this.expressionParser = new ExpressionParser(elFunctions);
     }
 
     addDescendantHandler(handler) {
@@ -104,10 +105,17 @@ class TagHandler {
         return new TextContentParser(src, this).parse();
     }
 
-    expressionFromAttribute(attrName) {
+    variableTextContentFromAttribute(attrName) {
         var attr = this.tag.getAttribute(attrName);
         if (attr) {
             return new TextContentParser(attr, this).parse();
+        }
+    }
+
+    expressionFromAttribute(attrName) {
+        var attr = this.tag.getAttribute(attrName);
+        if (attr) {
+            return this.expressionParser.parse(attr);
         }
     }
 

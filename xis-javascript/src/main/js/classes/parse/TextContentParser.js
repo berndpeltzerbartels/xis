@@ -65,7 +65,7 @@ class TextContentParser {
     }
 
     tryCreateVarPart(src) {
-        var expression = new ExpressionParser().parse(src);
+        var expression = new ExpressionParser(elFunctions).parse(src);
         if (expression) {
             return {
                 expression: expression,

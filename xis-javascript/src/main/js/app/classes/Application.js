@@ -14,6 +14,7 @@ class Application {
         this.widgetContainers = new WidgetContainers();
         this.widgets = new Widgets(this.client);
         this.tagHandlers = new TagHandlers();
+        this.elFunctions = new ELFunctions();
         this.initializer = new Initializer(this.domAccessor, this.client, this.widgets, this.widgetContainers, this.tagHandlers);
         this.pageController = new PageController(this.client, this.pages, this.initializer, this.urlResolver, this.tagHandlers);
         this.history = new PageHistory(this.pageController);

@@ -2,7 +2,7 @@ class FormSubmitterHandler extends TagHandler {
 
     constructor(element) {
         super(element);
-        this.actionExpression = this.expressionFromAttribute('xis:action'); // mandatory
+        this.actionExpression = this.variableTextContentFromAttribute('xis:action'); // mandatory
         element.addEventListener('click', event => {
             event.preventDefault();
             this.onClick(event);

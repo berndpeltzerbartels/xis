@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:xis="http://xis.one/schema" lang="us-en" xml:lang="us-en">
+<head>
+    <title>ActionAndModel</title>
+</head>
+<body>
+<xis:if condition="true">Simple true</xis:if>
+<xis:if condition="notEmpty('123')">True with function</xis:if>
+<xis:if condition="notEmpty(data)">True with function and variable</xis:if>
+<div id="condition-tag1" xis:if="notEmpty(data)">True with function and variable in attribute style</div>
+<div id="condition-tag2" xis:if="empty(data)">False with function and variable in attribute style</div>
+</body>
+</html>

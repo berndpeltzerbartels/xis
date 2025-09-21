@@ -34,8 +34,8 @@ class WidgetContainerHandler extends TagHandler {
         this.tagHandlers = tagHandlers;
         this.widgetInstance = undefined;
         this.containerId = undefined;
-        this.containerIdExpression = this.expressionFromAttribute('container-id');
-        this.defaultWidgetExpression = this.expressionFromAttribute('default-widget');
+        this.containerIdExpression = this.variableTextContentFromAttribute('container-id');
+        this.defaultWidgetExpression = this.variableTextContentFromAttribute('default-widget');
         this.type = 'widget-container-handler';
     }
 

@@ -12,7 +12,7 @@ class MessageTagHandler extends TagHandler {
      */
     constructor(tag) {
         super(tag);
-        this.bindingExpression = this.expressionFromAttribute('message-for');
+        this.bindingExpression = this.variableTextContentFromAttribute('message-for');
         this.binding = '';
     }
 
