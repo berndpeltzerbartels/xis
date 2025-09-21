@@ -95,12 +95,15 @@ class DomNormalizer {
             this.replaceMessageAttributeByChildMessageElement(element);
             element.removeAttribute('xis:message-for');
         }
-        if (element.getAttribute('xis:if')) {
+        if (element.getAttribute('xis:visible')) {
             this.surroundWithIfTag(element);
+            element.removeAttribute('xis:visible');
+        }
+        if (element.getAttribute('xis:if')) {
+            this.wrapContentWithIfTag(element);
             element.removeAttribute('xis:if');
         }
         return element;
-
     }
 
     /**
@@ -306,9 +309,9 @@ class DomNormalizer {
      */
     surroundWithIfTag(element) {
         var ifTag = createElement('xis:if');
-        ifTag.setAttribute('condition', element.getAttribute('xis:if'));
+        ifTag.setAttribute('condition', element.getAttribute('xis:visible'));
         this.domAccessor.insertParent(element, ifTag);
-        element.removeAttribute('xis:if'); // Otherwise endless recursion
+        element.removeAttribute('xis:visible'); // Otherwise endless recursion
         return element;
     }
 
@@ -340,6 +343,24 @@ class DomNormalizer {
         this.domAccessor.insertParent(element, foreach);
         element.removeAttribute('xis:repeat'); // Otherwise endless recursion
     }
+
+
+    /**
+     * Wraps the content of the given element with a xis:if tag.
+     * @param {Element} element 
+     */
+    wrapContentWithIfTag(element) {
+        var ifTag = createElement('xis:if');
+        ifTag.setAttribute('condition', element.getAttribute('xis:if'));
+        var childArray = nodeListToArray(element.childNodes);
+        for (var child of childArray) {
+            element.removeChild(child);
+            ifTag.appendChild(child);
+        }
+        element.appendChild(ifTag);
+        element.removeAttribute('xis:if');
+    }
+
 
     /**
      * @private

@@ -43,6 +43,6 @@ class IfConditionTest {
 
         // 5. <div id="condition-tag2" xis:if="empty(data)">
         Element tag2 = result.getDocument().getElementById("condition-tag2");
-        assertThat(tag2).isNull(); // Sollte nicht sichtbar sein
+        assertThat(tag2.getTextContent()).isEmpty();
     }
 }
