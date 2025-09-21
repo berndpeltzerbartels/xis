@@ -70,7 +70,7 @@ class WidgetLinkHandler extends TagHandler {
                 throw new Error('no handler for target container: ' + this.targetContainerId);
             }
             var widgetParametersInUrl = urlParameters(this.targetWidgetUrl);
-            for (var key of widgetParametersInUrl) {
+            for (var key of Object.keys(widgetParametersInUrl)) {
                 this.widgetParameters[key] = widgetParametersInUrl[key];
             }
             var widgetState = new WidgetState(app.pageController.resolvedURL, this.widgetParameters);

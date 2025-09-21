@@ -207,7 +207,7 @@ class HandlerBuilder {
             handler = new PageLinkHandler(element);
         }
         if (element.getAttribute('xis:widget')) {
-            handler = new WidgetLinkHandler(element);
+            handler = new WidgetLinkHandler(element, this.widgetContainers);
         } else if (element.getAttribute('xis:action')) {
             handler = new ActionLinkHandler(element, this.client, this.widgetContainers);
         }

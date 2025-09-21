@@ -59,9 +59,9 @@ class AstGenerator {
                         row.push(this.createPropertyVariable());
                     } else {
                         const identifierToken = this.consumeToken(IDENTIFIER);
-                        if (identifierToken.value.startsWith("state.")) {
+                        if (identifierToken.value.startsWith("state.") || identifierToken.value === 'state') {
                             row.push(this.createClientStateVariable(identifierToken.value));
-                        } else if (identifierToken.value.startsWith("localStorage.")) {
+                        } else if (identifierToken.value.startsWith("localStorage.") || identifierToken.value === 'localStorage') {
                             row.push(this.createLocalStoreVariable(identifierToken.value));
                         } else {
                             row.push(this.createVariable(identifierToken));

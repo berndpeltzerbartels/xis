@@ -31,7 +31,6 @@ class MessageHandler {
      * Accepts: string[], or { field: string[] }.
      */
     addValidationErrors(errors) {
-    debugger;
         if (Array.isArray(errors)) {
             errors.forEach(msg => this.addMessage(msg, 'error', { render: false, autoHide: false }));
         } else if (errors && typeof errors === 'object') {

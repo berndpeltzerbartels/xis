@@ -2,7 +2,6 @@ var app;
 
 /** @noinline */
 function main() {
-debugger;
     app = new Application();
     app.eventPublisher.listeners = eventListenerRegistry.listeners;
     window['app'] = app;
