@@ -16,10 +16,11 @@ class Store {
      * 
      * @public
      * @param {string} path 
+     * @param {Refreshable} refreshable
      */
-    activatePath(path) {
-        this.paths.push(path);
-    }
+    registerListener(path, refreshable) {
+            this.paths.push(path);
+        }
 
 
     /**
@@ -41,7 +42,6 @@ class Store {
                 this.pathMap[key].add(textContent);
             }
         }
-        this.paths = [];
     }
 
 

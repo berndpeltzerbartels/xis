@@ -7,3 +7,15 @@ function reset() {
     document.cookies = '';
 }
 
+
+function readHeadChildArray(html) {
+    var arr = [];
+    var holder = document.createElement('div');
+    holder.innerHTML = html;
+    for (var child of nodeListToArray(holder.childNodes)) {
+        if (isElement(child)) {
+            arr.push(child);
+        }
+    }
+    return arr;
+}

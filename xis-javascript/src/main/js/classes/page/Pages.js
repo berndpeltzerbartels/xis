@@ -55,10 +55,10 @@ class Pages {
     */
     loadPageHead(pageId) {
         return this.client.loadPageHead(pageId).then(content => {
+            var headChildArray = readHeadChildArray(content);
             var templateElement = htmlToElement(content);
             templateElement = normalizeElement(templateElement);
             initializeElement(templateElement);
-            var headChildArray = nodeListToArray(templateElement.childNodes);
             var page = this.pages[pageId];
             page.headChildArray = headChildArray;
             page.headTemplate = templateElement;
@@ -72,6 +72,7 @@ class Pages {
             return pageId;
         });
     }
+
 
     /**
     * @private

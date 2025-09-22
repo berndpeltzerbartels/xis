@@ -1,6 +1,5 @@
 class TagHandlers {
 
-    // TODO ein Tag kann mehr als einen hanlder haben
     constructor() {
         this.rootHandlers = new Map();
         this.handlers  = new Map();
