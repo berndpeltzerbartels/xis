@@ -104,7 +104,18 @@ class HandlerBuilder {
                 handler = new IfTagHandler(element);
                 break; 
         }
-
+        if (element.getAttribute('xis:local-storage')) {
+            var localStorageHandler = new LocalStoreContentHandler(element, app.localStore);
+            handler.addDescendantHandler(localStorageHandler);
+            this.tagHandlers.mapHandler(element, localStorageHandler);
+            return localStorageHandler; // Do not evaluate child nodes here!
+        }
+         if (element.getAttribute('xis:client-state')) {
+            var clientStateHandler = new ClientStateContentHandler(element, app.clientState);
+            handler.addDescendantHandler(clientStateHandler);
+            this.tagHandlers.mapHandler(element, clientStateHandler);
+            return clientStateHandler; // Do not evaluate child nodes here!
+        }
         this.initializeAttributes(element, handler ? handler : parentHandler);
         if (handler) {
             parentHandler.addDescendantHandler(handler);

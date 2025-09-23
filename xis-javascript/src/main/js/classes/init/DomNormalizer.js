@@ -361,7 +361,6 @@ class DomNormalizer {
         element.removeAttribute('xis:if');
     }
 
-
     /**
      * @private
      * @param {Element} foreach 
