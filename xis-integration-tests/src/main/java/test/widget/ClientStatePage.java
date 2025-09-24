@@ -1,4 +1,4 @@
-package test.page.core;
+package test.widget;
 
 import lombok.Getter;
 import lombok.NonNull;
@@ -7,6 +7,7 @@ import one.xis.ClientState;
 import one.xis.FormData;
 import one.xis.Page;
 import one.xis.context.XISInit;
+import test.page.core.ClientStatePageData;
 
 import java.util.ArrayList;
 import java.util.List;

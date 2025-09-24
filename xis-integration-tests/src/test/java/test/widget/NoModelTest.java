@@ -1,10 +1,11 @@
-package test.page.core;
+package test.widget;
 
 
 import one.xis.context.IntegrationTestContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import test.page.core.NoModel;
 
 @DisplayName("Page without Model")
 class NoModelTest {
