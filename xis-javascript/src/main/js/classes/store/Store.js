@@ -4,52 +4,8 @@ class Store {
      */
     constructor(storageArea) {
         this.storageArea = storageArea;
-        this.paths = []
         this.pathMap = {};
         window.addEventListener('storage', (event) => this.onEvent(event));
-    }
-
-    /**
-     * Adds a path to the list of paths to be activated.
-     * This method is used to track paths that need to be monitored for changes.
-     * The paths are stored in the `paths` array and will be mapped to handlers later.
-     * 
-     * @public
-     * @param {string} path 
-     * @param {Refreshable} refreshable
-     */
-    registerListener(path, refreshable) {
-            this.paths.push(path);
-        }
-
-
-
-    /**
-     * @private
-     */
-    publishStoreEvent(pathStr, invoker) {
-        const path = doSplit(pathStr, '.');
-    }
-
-    /**
-     * Maps the current text content to all listeners and clears the listener list.
-     * @param {TextContent>} textContent 
-     */
-    mapTextContent(textContent) {
-        for (const path of this.paths) {
-            var key = '';
-            for (var subpath of path.split('.')) {
-                if (key !== '') {
-                    key += '.';
-                }
-                key += subpath;
-
-                if (this.pathMap[key] === undefined) {
-                    this.pathMap[key] = new Set();
-                }
-                this.pathMap[key].add(textContent);
-            }
-        }
     }
 
 

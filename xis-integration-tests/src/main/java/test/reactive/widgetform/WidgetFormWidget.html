@@ -1,0 +1,9 @@
+<xis:template xmlns:xis="http://xis.one/schema">
+    <div>
+        <p>Counter in Widget: <span id="counter-value-widget">${state.counterValue}</span></p>
+        <form xis:binding="formData">
+            <input type="text" xis:binding="incrementValue" id="increment-input"/>
+            <button xis:action="increment-form" type="submit" id="increment-form-button">Add Value</button>
+        </form>
+    </div>
+</xis:template>

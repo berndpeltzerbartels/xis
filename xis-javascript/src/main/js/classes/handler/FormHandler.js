@@ -73,6 +73,23 @@ class FormHandler extends TagHandler {
     }
 
     /**
+     * State refresh - updates form with current state data without reloading from backend.
+     * This prevents infinite recursion during reactive state updates.
+     * @public
+     * @param {Data} data - Current state data
+     * @param {TagHandler} invoker - The handler that initiated the state refresh
+     */
+    stateRefresh(data, invoker) {
+        // Anti-recursion: Skip if we triggered the state refresh
+        if (this === invoker) {
+            return;
+        }
+        
+        // Only refresh form with current data, don't reload from backend
+        this.refreshDescendantHandlers(data);
+    }
+
+    /**
      * Creates a new Data object for embedded for elements from the response
      * @param {ServerResponse} response 
      * @returns 
@@ -120,6 +137,11 @@ class FormHandler extends TagHandler {
         if (!response.validatorMessages.isEmpty()) {
             return;
         }
+        
+        // Trigger reactive state updates with this FormHandler as the invoker
+        // This ensures the anti-recursion logic stops at this level
+        app.backendService.triggerReactiveStateUpdates(response, this);
+        
         if (response.nextWidgetId) {
             targetContainerHandler.handleActionResponse(response);
         } else {

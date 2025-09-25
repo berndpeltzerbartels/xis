@@ -104,8 +104,13 @@ class PageController {
     }
 
 
-    storeRefresh(invoker) {
-        this.htmlTagHandler.storeRefresh(this.page.data, invoker);
+    stateRefresh(invoker) {
+        const data = this.page.data;
+        
+        // No need to load state data into Data object anymore
+        // ClientStateVariable and LocalStoreVariable access stores directly
+        
+        this.htmlTagHandler.stateRefresh(data, invoker);
     }
 
     triggerAdditionalReloads(response) {

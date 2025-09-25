@@ -49,7 +49,6 @@ class TagHandler {
             // Skip the invoker to prevent infinite recursion
             return;
         }
-        this.refresh(data); 
         for (var handler of this.descendantHandlers) {
             handler.stateRefresh(data, invoker);
         }

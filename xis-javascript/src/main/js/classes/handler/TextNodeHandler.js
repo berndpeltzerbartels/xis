@@ -14,4 +14,9 @@ class TextNodeHandler extends TagHandler {
     refresh(data) {
         this.node.nodeValue = this.expression.evaluate(data);
     }
+
+
+    stateRefresh(data, invoker) {
+        this.node.nodeValue = this.expression.evaluate(data);
+    }
 }

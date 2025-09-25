@@ -59,13 +59,7 @@ class AstGenerator {
                         row.push(this.createPropertyVariable());
                     } else {
                         const identifierToken = this.consumeToken(IDENTIFIER);
-                        if (identifierToken.value.startsWith("state.") || identifierToken.value === 'state') {
-                            row.push(this.createClientStateVariable(identifierToken.value));
-                        } else if (identifierToken.value.startsWith("localStorage.") || identifierToken.value === 'localStorage') {
-                            row.push(this.createLocalStoreVariable(identifierToken.value));
-                        } else {
-                            row.push(this.createVariable(identifierToken));
-                        }
+                        row.push(this.createVariable(identifierToken));
                     }
                     break;
                 case FLOAT:
@@ -396,26 +390,39 @@ class AstGenerator {
      * @returns 
      */
     createVariable(token) {
-        return new Variable(token.value);
+        const path = token.value;
+        
+        // Check if this is a special state or localStorage variable
+        if (path.startsWith('state.')) {
+            return this.createClientStateVariable(path.substring(6)); // Remove 'state.' prefix
+        }
+        
+        if (path.startsWith('localStorage.')) {
+            return this.createLocalStoreVariable(path.substring(13)); // Remove 'localStorage.' prefix
+        }
+        
+        // Default variable for regular data access
+        return new Variable(path);
     }
 
     /**
-     *
-     * @param {string} token
-     * @returns
+     * Creates a ClientStateVariable for direct access to client state.
+     * @param {string} path - The state path without 'state.' prefix
+     * @returns {ClientStateVariable}
      */
-    createClientStateVariable(token) {
-        return new ClientStateVariable(token);
+    createClientStateVariable(path) {
+        return new ClientStateVariable(path);
     }
 
     /**
-     * 
-     * @param {string} token 
-     * @returns 
+     * Creates a LocalStoreVariable for direct access to localStorage.
+     * @param {string} path - The localStorage path without 'localStorage.' prefix  
+     * @returns {LocalStoreVariable}
      */
-    createLocalStoreVariable(token) {
-        return new LocalStoreVariable(token);
+    createLocalStoreVariable(path) {
+        return new LocalStoreVariable(path);
     }
+
     /**
      * 
      * @param {string} token 
@@ -692,70 +699,6 @@ class Variable {
     }
 }
 
-class LocalStoreVariable {
-    /**
-     * @param {string} path
-     * @throws Error if the path does not start with "local."
-     * */
-    constructor(path) {
-        this.negated = false;
-        if (!path.startsWith("localStorage.")) {
-            throw new Error(`Invalid path for LocalStoreVariable: ${path}. Path must start with "localStorage."`);
-        }
-        this.path = path.substring(13); // Entfernt den "localStorage."-Präfix
-        this.type = 'LOCAL_STORE_VARIABLE';
-        app.localStorage.activatePath(this.path);
-    }
-    /**
-     * @param {Data} data
-     * @returns {string}
-     */
-    evaluate(data) {
-        const value = app.localStorage.getValue(this.path);
-        return this.negated ? !value : value;
-    }
-    /**
-     * @public
-     * @returns {string}
-     */
-    toString() {
-        return 'localStorage.' + this.path;
-    }
-}
-class ClientStateVariable {
-    /**
-     * @param {string} path
-     * @throws Error if the path does not start with "state."
-     */
-    constructor(path) {
-        this.negated = false;
-        if (!path.startsWith("state.")) {
-            throw new Error(`Invalid path for ClientStateVariable: ${path}. Path must start with "state."`);
-        }
-        this.path = path.substring(6); // Entfernt den "state."-Präfix
-        this.type = 'CLIENT_STATE_VARIABLE';
-        app.clientState.activatePath(this.path);
-    }
-
-    /**
-    * 
-    * @param {Data} data 
-    * @returns 
-    */
-    evaluate(data) {
-        const value = app.clientState.getValue(this.path);
-        return this.negated ? !value : value;
-    }
-
-    /**
-     * @public
-     * @returns {string}
-     */
-    toString() {
-        return 'state.' + this.path;
-    }
-}
-
 
 /**
  * @class NoopAst
@@ -879,6 +822,42 @@ class TernaryOperator {
      */
     toString() {
         return this.condition.toString() + ' ? ' + this.trueExpression.toString() + ' : ' + this.falseExpression.toString();
+    }
+}
+
+/**
+ * Variable that accesses client state directly from the store.
+ * This bypasses the Data object configuration and allows access to any client state value.
+ */
+class ClientStateVariable {
+    constructor(path) {
+        this.path = path;
+    }
+
+    evaluate(data) {
+        return app.clientState.getValue(this.path);
+    }
+
+    toString() {
+        return `\${state.${this.path}}`;
+    }
+}
+
+/**
+ * Variable that accesses localStorage directly from the store.  
+ * This bypasses the Data object configuration and allows access to any localStorage value.
+ */
+class LocalStoreVariable {
+    constructor(path) {
+        this.path = path;
+    }
+
+    evaluate(data) {
+        return app.localStorage.getValue(this.path);
+    }
+
+    toString() {
+        return `\${localStorage.${this.path}}`;
     }
 }
 

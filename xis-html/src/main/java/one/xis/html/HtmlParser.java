@@ -7,7 +7,8 @@ import one.xis.html.tokens.HtmlParseException;
 import one.xis.html.tokens.HtmlTokenizer;
 
 
-public class HtmlParser {
+public class
+HtmlParser {
 
     private final HtmlTokenizer htmlTokenizer = new HtmlTokenizer();
 

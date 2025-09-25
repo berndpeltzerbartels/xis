@@ -5,7 +5,6 @@
  * @access public
  * @description This handler is responsible for handling a tag for presenting widgets.
  * 
- * @property {BackendService} backendService
  * @property {Widgets} widgets
  * @property {WidgetContainers} widgetContainers
  * @property {TagHandlers} tagHandlers
@@ -22,13 +21,11 @@ class WidgetContainerHandler extends TagHandler {
     /**
      *
      * @param {Element} tag
-     * @param {BackendService} backendService
      * @param {Widgets} widgets
      * @param {WidgetContainers} widgetContainers
      */
-    constructor(tag, backendService, widgets, widgetContainers, tagHandlers) {
+    constructor(tag, widgets, widgetContainers, tagHandlers) {
         super(tag);
-        this.backendService = backendService;
         this.widgets = widgets;
         this.widgetContainers = widgetContainers;
         this.tagHandlers = tagHandlers;
@@ -44,7 +41,12 @@ class WidgetContainerHandler extends TagHandler {
     * @param {ServerResponse} response 
     */
     handleActionResponse(response) {
-        this.backendService.triggerAdditionalReloadsOnDemand(response); // TODO move it
+        app.backendService.triggerAdditionalReloadsOnDemand(response); // TODO move it
+        
+        // Trigger reactive state updates with this WidgetContainerHandler as the invoker
+        // This ensures the anti-recursion logic stops at this level
+        app.backendService.triggerReactiveStateUpdates(response, this);
+        
         if (response.nextURL) {
             app.pageController.handleActionResponse(response);
         }
@@ -70,6 +72,31 @@ class WidgetContainerHandler extends TagHandler {
         this.widgetState = new WidgetState(app.pageController.resolvedURL, widgetParameters);
         if (this.widgetInstance) {
             this.reloadDataAndRefresh(data);
+        }
+    }
+
+    /**
+     * State refresh - updates widget with current state data without reloading from backend.
+     * This prevents infinite recursion during reactive state updates.
+     * @public
+     * @param {Data} data - Current state data
+     * @param {TagHandler} invoker - The handler that initiated the state refresh
+     */
+    stateRefresh(data, invoker) {
+        // Anti-recursion: Skip if we triggered the state refresh
+        if (this === invoker) {
+            return;
+        }
+        
+        // Only refresh existing widget with current data, don't reload from backend
+        if (this.widgetInstance && this.widgetState && this.widgetState.data) {
+            // No need to load state data into Data object anymore  
+            // ClientStateVariable and LocalStoreVariable access stores directly
+            
+            // Update the widget's data with new state values
+            this.widgetState.data = data;
+            // Refresh descendant handlers with the new state data
+            this.refreshDescendantHandlers(data);
         }
     }
 
@@ -158,7 +185,7 @@ class WidgetContainerHandler extends TagHandler {
 
     doLoad(parentData, scope) {
         if (this.widgetInstance) {
-            this.backendService.loadWidgetData(this.widgetInstance, this.widgetState, this)
+            app.backendService.loadWidgetData(this.widgetInstance, this.widgetState, this)
                 .then(data => { data.parentData = parentData; data.scope = scope; return data; })
                 .then(data => { console.log("data"+(typeof data)); data.parentData = parentData; data.scope = scope; return data; })
                 .then(data => { this.widgetState.data = data; return data; })

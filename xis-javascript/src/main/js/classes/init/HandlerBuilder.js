@@ -14,7 +14,6 @@ class HandlerBuilder {
     constructor(domAccessor, client, widgets, widgetContainers, tagHandlers) {
         this.domAccessor = domAccessor;
         this.client = client;
-        this.backendService = new BackendService(this.client);
         this.widgets = widgets;
         this.widgetContainers = widgetContainers;
         this.tagHandlers = tagHandlers;
@@ -242,7 +241,6 @@ class HandlerBuilder {
     createWidgetContainerHandler(container) {
         return new WidgetContainerHandler(
             container,
-            this.backendService,
             this.widgets,
             this.widgetContainers,
             this.tagHandlers

@@ -47,8 +47,9 @@ class BackendService {
      */
     triggerReactiveStateUpdates(response, invokingHandler) {
         // Check if response contains any reactive state updates
+        debugger;
         if (this.hasStateVariables(response)) {
-            this.pageController.storeRefresh(invokingHandler);
+            this.pageController.stateRefresh(invokingHandler);
         }
         return response;
     }
