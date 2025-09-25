@@ -27,6 +27,15 @@ class HtmlTagHandler extends TagHandler {
         this.bodyTagHandler.refresh(data);
     }
 
+
+    /**
+    * @public
+    * @param {TagHandler} invoker
+    */
+    stateRefresh(data, invoker) {
+        this.headTagHandler.stateRefresh(data, invoker);
+        this.bodyTagHandler.stateRefresh(data, invoker);
+    }
     /**
      * @public
      * @param {Page} page 

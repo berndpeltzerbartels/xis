@@ -75,6 +75,14 @@ class HeadTagHandler extends TagHandler {
     }
 
     /**
+     * @param {Data} data
+     * @param {TagHandler} invoker
+     */
+    stateRefresh(data, invoker) {
+        // TODO
+    }
+
+    /**
      * @param {Data} data 
      */
     refreshTitle(data) {

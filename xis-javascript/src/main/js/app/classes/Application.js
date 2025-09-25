@@ -18,7 +18,7 @@ class Application {
         this.initializer = new Initializer(this.domAccessor, this.client, this.widgets, this.widgetContainers, this.tagHandlers);
         this.pageController = new PageController(this.client, this.pages, this.initializer, this.urlResolver, this.tagHandlers);
         this.history = new PageHistory(this.pageController);
-        this.backendService = new BackendService();
+        this.backendService = new BackendService(this.client, this.pageController);
         this.eventPublisher = new EventPublisher();
         this.runInitializers();
     }

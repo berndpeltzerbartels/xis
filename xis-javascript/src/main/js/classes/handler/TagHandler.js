@@ -38,6 +38,25 @@ class TagHandler {
     }
 
     /**
+     * Refreshes this handler and all descendants with state-aware data.
+     * Prevents infinite recursion by skipping the original invoker.
+     * 
+     * @param {Data} data - Combined data including updated state values
+     * @param {TagHandler} invoker - The handler that initiated the state change (will be skipped)
+     */
+    stateRefresh(data, invoker) {
+        if (this === invoker) {
+            // Skip the invoker to prevent infinite recursion
+            return;
+        }
+        this.refresh(data); 
+        for (var handler of this.descendantHandlers) {
+            handler.stateRefresh(data, invoker);
+        }
+    }
+
+
+    /**
      * @protected
      */
     publishBindEvent() {
@@ -65,6 +84,7 @@ class TagHandler {
         }
         return data;
     }
+
 
     refreshFormData(data) {
         for (var handler of this.descendantHandlers) {

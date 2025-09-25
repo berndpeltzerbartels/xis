@@ -103,6 +103,11 @@ class PageController {
         //this.updateHistory(this.resolvedURL);
     }
 
+
+    storeRefresh(invoker) {
+        this.htmlTagHandler.storeRefresh(this.page.data, invoker);
+    }
+
     triggerAdditionalReloads(response) {
         app.backendService.triggerWidgetReloadsonDemand(response);
         return response;

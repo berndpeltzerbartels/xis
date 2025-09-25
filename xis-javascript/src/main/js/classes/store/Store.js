@@ -23,6 +23,14 @@ class Store {
         }
 
 
+
+    /**
+     * @private
+     */
+    publishStoreEvent(pathStr, invoker) {
+        const path = doSplit(pathStr, '.');
+    }
+
     /**
      * Maps the current text content to all listeners and clears the listener list.
      * @param {TextContent>} textContent 

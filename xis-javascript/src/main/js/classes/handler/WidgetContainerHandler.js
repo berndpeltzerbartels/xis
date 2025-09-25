@@ -158,7 +158,7 @@ class WidgetContainerHandler extends TagHandler {
 
     doLoad(parentData, scope) {
         if (this.widgetInstance) {
-            this.backendService.loadWidgetData(this.widgetInstance, this.widgetState)
+            this.backendService.loadWidgetData(this.widgetInstance, this.widgetState, this)
                 .then(data => { data.parentData = parentData; data.scope = scope; return data; })
                 .then(data => { console.log("data"+(typeof data)); data.parentData = parentData; data.scope = scope; return data; })
                 .then(data => { this.widgetState.data = data; return data; })
