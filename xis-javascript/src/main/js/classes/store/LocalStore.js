@@ -1,6 +1,6 @@
 class LocalStore extends Store{
     constructor() {
-        super();
+        super(localStorage);
     }
 
     /**
@@ -18,6 +18,10 @@ class LocalStore extends Store{
      * @param {*} value 
      */
     saveValue(path, value) {
-        localStorage.setItem(path, value);
+        if (value === undefined || value === null) {
+            localStorage.removeItem(path);
+        } else {
+            localStorage.setItem(path, value);
+        }
     }
 }

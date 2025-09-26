@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Button Behavior Test</title>
+</head>
+<body>
+    <h1>Button Behavior Tests</h1>
+    
+    <h2>1. Button ohne type-Attribut (außerhalb Form)</h2>
+    <button onclick="console.log('Button ohne type geklickt')">Button ohne type</button>
+    
+    <h2>2. Button mit type="button" (außerhalb Form)</h2>
+    <button type="button" onclick="console.log('Button type=button geklickt')">Button type="button"</button>
+    
+    <h2>3. Button mit type="submit" (außerhalb Form)</h2>
+    <button type="submit" onclick="console.log('Button type=submit geklickt')">Button type="submit"</button>
+    
+    <h2>4. Buttons in Formular</h2>
+    <form onsubmit="console.log('Form submitted!'); return false;">
+        <input type="text" placeholder="Test input" />
+        
+        <h3>Button ohne type in Form:</h3>
+        <button onclick="console.log('Form: Button ohne type')">Submit (kein type)</button>
+        
+        <h3>Button mit type="button" in Form:</h3>
+        <button type="button" onclick="console.log('Form: Button type=button')">Kein Submit</button>
+        
+        <h3>Button mit type="submit" in Form:</h3>
+        <button type="submit" onclick="console.log('Form: Button type=submit')">Expliziter Submit</button>
+    </form>
+    
+    <h2>JavaScript Test</h2>
+    <div id="results"></div>
+    
+    <script>
+        // Test: Was ist das Standard-Verhalten?
+        const buttons = document.querySelectorAll('button');
+        const results = document.getElementById('results');
+        
+        results.innerHTML = '<h3>Button Default Types:</h3>';
+        
+        buttons.forEach((button, index) => {
+            const text = button.textContent.substring(0, 30);
+            const type = button.type;
+            const inForm = button.form !== null;
+            
+            results.innerHTML += `<p>Button ${index + 1}: "${text}" - type="${type}" - inForm: ${inForm}</p>`;
+        });
+    </script>
+</body>
+</html>

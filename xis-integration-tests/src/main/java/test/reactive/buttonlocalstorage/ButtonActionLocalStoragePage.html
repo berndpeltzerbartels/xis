@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:xis="https://xis.one/xsd">
+<head>
+    <title>Button Action LocalStorage Test</title>
+</head>
+<body>
+    <h1>Button Action LocalStorage Test</h1>
+    
+    <!-- Display current counter value from localStorage -->
+    <p>Counter: <span id="counter-value">${localStorage.counter}</span></p>
+    
+    <!-- Standalone action buttons outside forms -->
+    <div>
+        <h2>Standalone Buttons (localStorage)</h2>
+        <button id="increment-standalone" xis:action="increment-standalone" type="button">
+            +1 (localStorage)
+        </button>
+        <button id="decrement-standalone" xis:action="decrement-standalone" type="button">
+            -1 (localStorage)
+        </button>
+    </div>
+</body>
+</html>

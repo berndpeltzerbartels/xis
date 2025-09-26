@@ -3,6 +3,8 @@ package one.xis.js.tags;
 import one.xis.js.Javascript;
 import one.xis.test.dom.*;
 import one.xis.test.js.JSUtil;
+import one.xis.test.js.LocalStorage;
+import one.xis.test.js.SessionStorage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -52,7 +54,8 @@ class ForeachHandlerTest {
         script += "var handler = new ForeachHandler(foreach, tagHandlers);";
         script += "handler.refresh(data);";
 
-        JSUtil.execute(script, Map.of("foreach", foreach, "document", document, "window", new Window(new Location()), "Node", nodeMock));
+        JSUtil.execute(script, Map.of("foreach", foreach, "document", document, "window", new Window(new Location()), "Node", nodeMock,
+                "localStorage", new LocalStorage(), "sessionStorage", new SessionStorage()));
 
         var childElementClasses = foreach.getChildElements().stream()
                 .map(Element::getCssClasses)
@@ -80,8 +83,8 @@ class ForeachHandlerTest {
         script += "var handler = new ForeachHandler(foreach, tagHandlers);";
         script += "handler.refresh(data1);"; // length = 3
         script += "handler.refresh(data2);";// length = 1
-        JSUtil.execute(script, Map.of("foreach", foreach, "document", document, "window", new Window(new Location()), "Node", nodeMock));
-
+        JSUtil.execute(script, Map.of("foreach", foreach, "document", document, "window", new Window(new Location()), "Node", nodeMock,
+                "localStorage", new LocalStorage(), "sessionStorage", new SessionStorage()));
         assertThat(foreach.getChildNodes().length).isEqualTo(2); // 2 subtags for every array-element
     }
 
