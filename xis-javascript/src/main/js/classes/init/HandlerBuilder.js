@@ -88,7 +88,7 @@ class HandlerBuilder {
                 break;
             case 'button': 
                 if (element.getAttribute('xis:action')) {
-                    handler = this.createSubmitHandler(element);
+                    handler = this.createButtonHandler(element);
                 }
                 break;
             case 'a': 
@@ -230,6 +230,15 @@ class HandlerBuilder {
      */
     createSubmitHandler(element) {
         return new FormSubmitterHandler(element);
+    }
+
+    /**
+     * Creates an ActionButtonHandler.
+     * @private
+     * @param {Element} element
+     */
+    createButtonHandler(element) {
+        return new ActionButtonHandler(element, this.client, this.widgetContainers);
     }
 
     /**
