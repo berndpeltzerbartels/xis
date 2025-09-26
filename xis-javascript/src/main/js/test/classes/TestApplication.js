@@ -18,6 +18,7 @@ class TestApplication {
         this.history = new PageHistory(this.pageController);
         this.backendService = new BackendService(this.client, this.pageController);
         this.eventPublisher = new EventPublisher();
+        this.globals = new GlobalStore(this.eventPublisher);
         this.runInitializers();
     }
 

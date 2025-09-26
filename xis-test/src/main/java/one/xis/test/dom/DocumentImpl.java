@@ -95,6 +95,11 @@ public class DocumentImpl implements one.xis.test.dom.Document {
     }
 
     @Override
+    public <E extends Element> E getElementById(String id, Class<E> elementClass) {
+        return elementClass.cast(getElementById(id));
+    }
+
+    @Override
     public InputElement getInputElementById(String id) {
         var e = getElementById(id);
         return e instanceof InputElement inputElement ? inputElement : null;

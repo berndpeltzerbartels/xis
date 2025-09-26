@@ -32,6 +32,7 @@ public class ControllerWrapper {
     private Collection<ControllerMethod> formDataMethods;
     private Collection<ControllerMethod> localStorageOnlyMethods;
     private Collection<ControllerMethod> clientStateOnlyMethods;
+    private Collection<ControllerMethod> globalVariableOnlyMethods;
     private ControllerResultMapper controllerResultMapper;
 
     void invokeGetModelMethods(ClientRequest request, ControllerResult controllerResult) {
@@ -39,6 +40,7 @@ public class ControllerWrapper {
         var methodsToExecute = new ArrayList<>(modelMethods);
         methodsToExecute.addAll(localStorageOnlyMethods);
         methodsToExecute.addAll(clientStateOnlyMethods);
+        methodsToExecute.addAll(globalVariableOnlyMethods);
         var methods = RequestScopeSorter.sortMethods(methodsToExecute, requestScopeMethods);
         methods.forEach(m -> invokeModelDataMethod(request, controllerResult, m));
     }

@@ -28,6 +28,7 @@ class ClientRequest {
         this.type = '';
         this.clientStateData = {};
         this.localStorageData = {};
+        this.globalVariableData = {};
         this.localDatabaseData = {}; // TODO
     }
 }

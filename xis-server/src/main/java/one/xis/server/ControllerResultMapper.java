@@ -36,6 +36,7 @@ class ControllerResultMapper {
         controllerResult.getClientState().putAll(controllerMethodResult.getClientState());
         controllerResult.getRequestScope().putAll(controllerMethodResult.getRequestScope());
         controllerResult.getLocalStorage().putAll(controllerMethodResult.getLocalStorage());
+        controllerResult.getGlobalVariables().putAll(controllerMethodResult.getGlobalVariables());
         if (controllerMethodResult.isValidationFailed()) {
             controllerResult.setValidationFailed(true);
         }

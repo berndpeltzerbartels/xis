@@ -78,6 +78,10 @@ class BackendService {
      * @returns {boolean} - True if reactive state updates are needed
      */
     hasStateVariables(serverResponse) {
+
+        if (serverResponse.globalVariableData && Object.keys(serverResponse.globalVariableData).length > 0) {
+            return true;
+        }
         // Check for client state data
         if (serverResponse.clientStateData && Object.keys(serverResponse.clientStateData).length > 0) {
             return true;

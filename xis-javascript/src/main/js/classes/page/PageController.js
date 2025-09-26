@@ -83,6 +83,7 @@ class PageController {
         var data = response.data;
         data.scope = 'TREE';
         this.doRefresh(data);
+     //   app.eventPublisher.publish(EventType.REQUEST_COMPLETED);
     }
 
     triggerPageReload(response) {
@@ -204,7 +205,7 @@ class PageController {
             if (!skipHistoryUpdate && response.status < 300) {
                 this.updateHistory(this.resolvedURL);
             }
-            app.eventPublisher.publish(EventType.PAGE_LOADED, { page: this.page, url: this.resolvedURL });  
+            app.eventPublisher.publish(EventType.PAGE_LOADED, { page: this.page, url: this.resolvedURL });
         }).catch(error => handleError(error));
     }
 

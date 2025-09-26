@@ -59,6 +59,7 @@ class WidgetContainerHandler extends TagHandler {
         var data = response.data;
         this.refreshContainerId(data);
         this.refreshDescendantHandlers(data);
+       // app.eventPublisher.publish(EventType.REQUEST_COMPLETED);
     }
 
     /**
@@ -111,6 +112,7 @@ class WidgetContainerHandler extends TagHandler {
         this.ensureWidgetBound(widgetId);
         this.widgetState = widgetState;
         this.reloadDataAndRefresh(this.parentData());
+      //  app.eventPublisher.publish(EventType.REQUEST_COMPLETED);
     }
 
     /**
@@ -190,7 +192,7 @@ class WidgetContainerHandler extends TagHandler {
                 .then(data => { console.log("data"+(typeof data)); data.parentData = parentData; data.scope = scope; return data; })
                 .then(data => { this.widgetState.data = data; return data; })
                 .then(data => this.refreshDescendantHandlers(data))
-                .then(data => { app.eventPublisher.publish(EventType.WIDGET_LOADED, { widget: this.widgetInstance, data }); })
+                .then(data => { app.eventPublisher.publish(EventType.WIDGET_LOADED, { widget: this.widgetInstance, data }); return data; })
                 .catch(e => reportError(e));
         }
     }

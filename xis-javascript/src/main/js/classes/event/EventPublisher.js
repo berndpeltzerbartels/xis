@@ -18,7 +18,7 @@ class EventPublisher {
         }
     }
 
-    publish(event, data) {
+    publish(event, data = {}) {
         if (!this.listeners[event]) return;
         this.listeners[event].forEach(listener => listener(data));
     }

@@ -1,6 +1,7 @@
 package one.xis.server;
 
 import one.xis.ClientState;
+import one.xis.GlobalVariable;
 import one.xis.LocalDatabase;
 import one.xis.LocalStorage;
 
@@ -24,6 +25,9 @@ class AttributesFactory {
             }
             if (parameter.isAnnotationPresent(LocalStorage.class)) {
                 attributes.getLocalStorageKeys().add(parameter.getAnnotation(LocalStorage.class).value());
+            }
+            if (parameter.isAnnotationPresent(GlobalVariable.class)) {
+                attributes.getGlobalVariableKeys().add(parameter.getAnnotation(GlobalVariable.class).value());
             }
             if (parameter.isAnnotationPresent(LocalDatabase.class)) {
                 attributes.getLocalDatabaseKeys().add(parameter.getAnnotation(LocalDatabase.class).value());

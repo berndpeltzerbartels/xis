@@ -22,6 +22,7 @@ class ServerResponse {
         this.nextWidgetId = '';
         this.formData = {};
         this.localStorageData = {};
+        this.globalVariableData = {};
         this.localDatabaseData = {};
         this.widgetContainerId = '';
         this.reloadWidgets = [];

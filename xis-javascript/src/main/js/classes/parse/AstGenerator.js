@@ -401,6 +401,10 @@ class AstGenerator {
             return this.createLocalStoreVariable(path.substring(13)); // Remove 'localStorage.' prefix
         }
         
+        if (path.startsWith('global.')) {
+            return this.createGlobalVariable(path.substring(7)); // Remove 'global.' prefix
+        }
+        
         // Default variable for regular data access
         return new Variable(path);
     }
@@ -421,6 +425,15 @@ class AstGenerator {
      */
     createLocalStoreVariable(path) {
         return new LocalStoreVariable(path);
+    }
+
+    /**
+     * Creates a GlobalVariable for direct access to global variables.
+     * @param {string} path - The global path without 'global.' prefix
+     * @returns {GlobalVariable}
+     */
+    createGlobalVariable(path) {
+        return new GlobalVariable(path);
     }
 
     /**
@@ -858,6 +871,25 @@ class LocalStoreVariable {
 
     toString() {
         return `\${localStorage.${this.path}}`;
+    }
+}
+
+/**
+ * Variable that accesses global variables directly from the global store.
+ * Global variables are temporary and cleared at the end of each request processing.
+ * This allows sharing data between widgets during a single request.
+ */
+class GlobalVariable {
+    constructor(path) {
+        this.path = path;
+    }
+
+    evaluate(data) {
+        return app.globals.getValue(this.path);
+    }
+
+    toString() {
+        return `\${global.${this.path}}`;
     }
 }
 

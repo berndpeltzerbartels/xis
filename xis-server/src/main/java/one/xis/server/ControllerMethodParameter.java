@@ -65,6 +65,10 @@ class ControllerMethodParameter {
             var key = parameter.getAnnotation(LocalStorage.class).value();
             var paramValue = request.getLocalStorageData().get(key);
             return deserializeParameter(paramValue, request, parameter, postProcessingResults);
+        } else if (parameter.isAnnotationPresent(GlobalVariable.class)) {
+            var key = parameter.getAnnotation(GlobalVariable.class).value();
+            var paramValue = request.getGlobalVariableData().get(key);
+            return deserializeParameter(paramValue, request, parameter, postProcessingResults);
         } else {
             throw new IllegalStateException(method + ": parameter without annotation=" + parameter);
         }
@@ -87,6 +91,8 @@ class ControllerMethodParameter {
             controllerMethodResult.getClientState().put(parameter.getAnnotation(ClientState.class).value(), parameterValue);
         } else if (parameter.isAnnotationPresent(LocalStorage.class)) {
             controllerMethodResult.getLocalStorage().put(parameter.getAnnotation(LocalStorage.class).value(), parameterValue);
+        } else if (parameter.isAnnotationPresent(GlobalVariable.class)) {
+            controllerMethodResult.getGlobalVariables().put(parameter.getAnnotation(GlobalVariable.class).value(), parameterValue);
         } else {
             throw new IllegalStateException(method + ": parameter without annotation=" + parameter);
         }

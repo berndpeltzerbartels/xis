@@ -17,6 +17,7 @@ class ControllerResponseMapper {
         response.setReloadWidgets(result.getWidgetsToReload());
         response.getClientStateData().putAll(result.getClientState());
         response.getLocalStorageData().putAll(result.getLocalStorage());
+        response.getGlobalVariableData().putAll(result.getGlobalVariables());
         response.setRedirectUrl(result.getRedirectUrl());
         if (response.getStatus() < 1)
             response.setStatus(result.isValidationFailed() ? 422 : 200);

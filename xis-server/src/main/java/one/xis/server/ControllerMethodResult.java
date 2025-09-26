@@ -26,6 +26,7 @@ class ControllerMethodResult {
     private final Map<String, Object> requestScope = new HashMap<>();
     private final Map<String, Object> clientState = new HashMap<>();
     private final Map<String, Object> localStorage = new HashMap<>();
+    private final Map<String, Object> globalVariables = new HashMap<>();
     private String redirectUrl;
 
 
