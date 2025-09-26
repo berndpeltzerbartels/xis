@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:xis="https://xis.one/xsd">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XIS Boot Exception Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        button { padding: 10px 20px; margin: 10px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+        .danger { background-color: #dc3545; }
+        .danger:hover { background-color: #c82333; }
+        .info { background-color: #17a2b8; padding: 15px; border-radius: 4px; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>XIS Boot Exception Handling Test</h1>
+        
+        <div class="info">
+            <strong>Test Message:</strong> ${testMessage}
+        </div>
+        
+        <h2>Exception Testing</h2>
+        <p>Click the buttons below to test different types of exceptions in xis-boot:</p>
+        
+        <button xis:action="throw-exception" class="danger">
+            Throw RuntimeException
+        </button>
+        
+        <button xis:action="throw-npe" class="danger">
+            Throw NullPointerException
+        </button>
+        
+        <h3>Expected Behavior:</h3>
+        <ul>
+            <li><strong>Before Fix:</strong> Exceptions would be silently swallowed, only appearing in logs as brief messages</li>
+            <li><strong>After Fix:</strong> Full stack traces printed to console, detailed error pages displayed in browser</li>
+        </ul>
+        
+        <p><em>Note: The error pages will show full exception details including stack traces for debugging.</em></p>
+    </div>
+</body>
+</html>
