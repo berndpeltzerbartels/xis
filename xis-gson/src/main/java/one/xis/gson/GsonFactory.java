@@ -15,6 +15,7 @@ public class GsonFactory {
     @XISBean // TODO Wrapper verwenden um Konflikte zu vermeiden
     public Gson gson() {
         return new GsonConfiguration().builder()
+                .serializeNulls() // Enable null serialization for ClientState deletion behavior
                 .registerTypeAdapter(Duration.class, new JsonSerializer<Duration>() {
                     @Override
                     public JsonElement serialize(Duration src, java.lang.reflect.Type typeOfSrc, JsonSerializationContext context) {

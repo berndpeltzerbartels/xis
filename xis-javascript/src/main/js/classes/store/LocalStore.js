@@ -24,4 +24,12 @@ class LocalStore extends Store{
             localStorage.setItem(path, value);
         }
     }
+
+    /**
+     * @override
+     * @param {string} path 
+     */
+    removeValue(path) {
+        localStorage.removeItem(path);
+    }
 }

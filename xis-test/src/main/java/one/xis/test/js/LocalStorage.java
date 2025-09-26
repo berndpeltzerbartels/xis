@@ -22,6 +22,10 @@ public class LocalStorage {
         return items.get(name);
     }
 
+    public void removeItem(String name) {
+        items.remove(name);
+    }
+
     /**
      * Get the parsed value from localStorage, handling XIS JSON wrapper format.
      * LocalStorage values are stored as JSON objects like {"value": actualValue}.

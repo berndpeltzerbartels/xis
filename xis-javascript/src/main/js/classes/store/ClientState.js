@@ -22,4 +22,13 @@ class ClientState extends Store {
         sessionStorage.setItem(path, value);
     }
 
+
+    /**
+     * @override
+     * @param {string} path 
+     */
+    removeValue(path) {
+        sessionStorage.removeItem(path);
+    }
+
 }

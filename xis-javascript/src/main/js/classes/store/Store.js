@@ -59,6 +59,10 @@ class Store {
         throw new Error('getValue must be implemented in the subclass');
     }
 
+    removeValue(path) {
+       throw new Error('removeValue must be implemented in the subclass');
+    }
+
     /**
      * @protected
     * @param {string} path 
@@ -94,7 +98,7 @@ class Store {
                 continue;
             }
             if (val === undefined || val === null) {
-                this.saveValue(path, undefined);
+                this.removeValue(path);
             } else {
                 this.saveValue(path, this.toStoreString(val));
             }

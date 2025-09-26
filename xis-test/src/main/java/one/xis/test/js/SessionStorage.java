@@ -16,6 +16,10 @@ public class SessionStorage {
         return items.get(name);
     }
 
+    public void removeItem(String name) {
+        items.remove(name);
+    }
+
 
     public void reset() {
         items.clear();

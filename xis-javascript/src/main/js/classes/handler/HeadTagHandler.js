@@ -79,7 +79,7 @@ class HeadTagHandler extends TagHandler {
      * @param {TagHandler} invoker
      */
     stateRefresh(data, invoker) {
-        // TODO
+        this.refresh(data)
     }
 
     /**
