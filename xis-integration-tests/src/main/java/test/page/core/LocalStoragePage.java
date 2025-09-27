@@ -15,12 +15,15 @@ class LocalStoragePage {
     private final List<String> invokedMethods = new ArrayList<>();
     private LocalStoragePageData localStoragePageData;
 
-    @LocalStorage("data")
-    LocalStoragePageData data() {
-        invokedMethods.add("data");
+    LocalStoragePage() {
         this.localStoragePageData = new LocalStoragePageData();
         this.localStoragePageData.setId(500);
         this.localStoragePageData.setValue("localTest");
+    }
+
+    @LocalStorage("data")
+    LocalStoragePageData data() {
+        invokedMethods.add("data");
         return this.localStoragePageData;
     }
 

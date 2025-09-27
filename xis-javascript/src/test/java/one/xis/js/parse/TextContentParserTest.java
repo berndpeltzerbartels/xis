@@ -117,7 +117,7 @@ class TextContentParserTest {
         var result = JSUtil.execute(testScript);
 
         // Überprüfen, ob das Ergebnis korrekt ist
-        assertThat(result.asString()).isEqualTo("This is not a variable: undefined");
+        assertThat(result.asString()).isEqualTo("This is not a variable: ");
     }
 
     @Test

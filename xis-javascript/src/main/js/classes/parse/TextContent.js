@@ -25,7 +25,16 @@ class TextContent {
     evaluate(data) {
         this.data = data;
         if (this.parts.length == 0) return '';
-        return this.parts.map(part => part.asString(data)).reduce((s1, s2) => s1 + s2);
+        
+        let result = '';
+        for (let part of this.parts) {
+            var partResult = part.asString(data);
+            if (partResult === undefined || partResult === null) {
+               continue;
+            }
+            result += partResult;
+        }
+        return result;
     }
 
     /**
