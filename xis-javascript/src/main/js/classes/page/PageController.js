@@ -103,16 +103,6 @@ class PageController {
         //this.updateHistory(this.resolvedURL);
     }
 
-
-    stateRefresh(invoker) {
-        const data = this.page.data;
-        
-        // No need to load state data into Data object anymore
-        // ClientStateVariable and LocalStoreVariable access stores directly
-        
-        this.htmlTagHandler.stateRefresh(data, invoker);
-    }
-
     triggerAdditionalReloads(response) {
         app.backendService.triggerWidgetReloadsonDemand(response);
         return response;
@@ -204,7 +194,7 @@ class PageController {
             if (!skipHistoryUpdate && response.status < 300) {
                 this.updateHistory(this.resolvedURL);
             }
-            app.eventPublisher.publish(EventType.PAGE_LOADED, { page: this.page, url: this.resolvedURL });  
+            app.eventPublisher.publish(EventType.PAGE_LOADED, { page: this.page, url: this.resolvedURL });
         }).catch(error => handleError(error));
     }
 

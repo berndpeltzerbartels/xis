@@ -13,6 +13,7 @@ class RootTagHandler extends TagHandler {
      * @param {Data} data 
      */
     refresh(data) {
+        this.data = data;
         this.refreshDescendantHandlers(data);
     }
 

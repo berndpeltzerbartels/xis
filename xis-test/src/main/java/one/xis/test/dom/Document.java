@@ -19,6 +19,8 @@ public interface Document {
 
     Element getElementById(String id);
 
+    <E extends Element> E getElementById(String id, Class<E> elementClass);
+
     static Document of(String html) {
         return DocumentBuilder.build(html);
     }

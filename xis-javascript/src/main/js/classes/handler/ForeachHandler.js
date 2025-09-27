@@ -7,7 +7,7 @@ class ForeachHandler extends TagHandler {
     constructor(tag, tagHandlers) {
         super(tag);
         this.tagHandlers = tagHandlers;
-        this.arrayPathExpression = this.createExpression(this.getAttribute('array'), '.');
+        this.arrayPathExpression = this.variableTextContentFromAttribute('array');
         this.varName = this.getAttribute('var');
         this.type = 'foreach-handler';
         this.priority = 'high';
@@ -21,6 +21,15 @@ class ForeachHandler extends TagHandler {
      * @param {Data} data
      */
     refresh(data) {
+        this.data = data;
+        this.renderItems(data);
+    }
+
+    reapply() {
+        this.renderItems(this.data);
+    }
+
+    renderItems(data) {
         var arrayPath = this.doSplit(this.arrayPathExpression.evaluate(data), '.');
         var arr = data.getValue(arrayPath);
         if (!arr) {
@@ -54,19 +63,6 @@ class ForeachHandler extends TagHandler {
                 }
             }
         }
-    }
-
-    /**
-     * State-aware refresh: rebuilds iteration but children get normal refresh
-     * since transformed values (item) are no longer state variables.
-     */
-    stateRefresh(data, invoker) {
-        if (this === invoker) {
-            return;
-        }
-        // Rebuild iteration with new state data
-        this.refresh(data);
-        // Note: child handlers already refreshed in refresh() method with transformed data
     }
 
     setValidationPath(subData, varName, index) {

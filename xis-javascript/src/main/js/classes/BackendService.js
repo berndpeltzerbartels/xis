@@ -5,13 +5,13 @@ class BackendService {
         this.pageController = pageController;
         this.config = undefined;
     }
-    
-     /**
-     * @public
-     * @param {ClientConfig} config
-     * @returns {Promise<ClientConfig>}
-     */
-     setConfig(config) {
+
+    /**
+    * @public
+    * @param {ClientConfig} config
+    * @returns {Promise<ClientConfig>}
+    */
+    setConfig(config) {
         var _this = this;
         return new Promise((resolve, _) => {
             _this.config = config;
@@ -23,33 +23,35 @@ class BackendService {
      * 
      * @param {WidgetInstance} widgetInstance
      * @param {WidgetState} widgetState
-     * @param {WidgetContainerHandler| FormHandler} invokingHandler
      * @returns Promise<Data>
      */
-    loadWidgetData(widgetInstance, widgetState, invokingHandler) {
+    loadWidgetData(widgetInstance, widgetState) {
         var resolvedURL = widgetState.resolvedURL;
         return this.client.loadWidgetData(widgetInstance, widgetState)
-            .then(response => this.triggerAdditionalReloadsOnDemand(response)) 
-            .then(response => this.triggerReactiveStateUpdates(response, invokingHandler))
+            .then(response => this.triggerAdditionalReloadsOnDemand(response))
+            .then(response => this.triggerReactiveStateUpdates(response))
             .then(response => response.data)
             .then(data => { data.setValue(['urlParameters'], resolvedURL.urlParameters); return data; })
             .then(data => { data.setValue(['pathVariables'], resolvedURL.pathVariablesAsMap()); return data; })
             .then(data => { data.setValue(['widgetParameters'], widgetState.widgetParameters); return data; })
     }
 
-    /**
-     * Triggers reactive state updates when widget data contains client state changes.
-     * This ensures that other parts of the page (like title, other widgets) that depend 
-     * on the same state variables get refreshed.
-     * 
-     * @param {ServerResponse} response - Server response from widget data loading
+        /**
+     * Triggers reactive state updates after receiving server response
+     * @param {ServerResponse} response
      * @returns {ServerResponse} - The same response for chaining
      */
-    triggerReactiveStateUpdates(response, invokingHandler) {
-        // Check if response contains any reactive state updates
-        if (this.hasStateVariables(response)) {
-            this.pageController.stateRefresh(invokingHandler);
+    triggerReactiveStateUpdates(response) {
+        // Check for any reactive data changes
+        const hasReactiveChanges = (response.globalVariableData && Object.keys(response.globalVariableData).length > 0) ||
+                                  (response.clientStateData && Object.keys(response.clientStateData).length > 0) ||
+                                  (response.localStorageData && Object.keys(response.localStorageData).length > 0) ||
+                                  (response.localDatabaseData && Object.keys(response.localDatabaseData).length > 0);
+        
+        if (hasReactiveChanges) {
+            app.eventPublisher.publish(EventType.REACTIVE_DATA_CHANGED, response);
         }
+        
         return response;
     }
 
@@ -70,43 +72,19 @@ class BackendService {
             .then(response => this.triggerReactiveStateUpdates(response, invokingHandler))
     }
 
-    /**
-     * Checks if the server response contains any reactive state variables that require
-     * the stateRefresh mechanism to update other parts of the page.
-     * 
-     * @param {ServerResponse} serverResponse - The server response to check
-     * @returns {boolean} - True if reactive state updates are needed
-     */
-    hasStateVariables(serverResponse) {
-        // Check for client state data
-        if (serverResponse.clientStateData && Object.keys(serverResponse.clientStateData).length > 0) {
-            return true;
-        }
-        
-        // Check for local storage data  
-        if (serverResponse.localStorageData && Object.keys(serverResponse.localStorageData).length > 0) {
-            return true;
-        }
-        
-        // Check for local database data
-        if (serverResponse.localDatabaseData && Object.keys(serverResponse.localDatabaseData).length > 0) {
-            return true;
-        }
-        
-        return false;
-    }
+
 
     triggerAdditionalReloadsOnDemand(response) {
-      this.triggerWidgetReloadsOnDemand(response);
-      this.triggerPageReloadOnDemand(response);
+        this.triggerWidgetReloadsOnDemand(response);
+        this.triggerPageReloadOnDemand(response);
         return response;
     }
 
     triggerPageReloadOnDemand(serverResponse) {
         if (serverResponse.reloadPage) {
             app.pageController.triggerPageReload();
-         }
-         return serverResponse;
+        }
+        return serverResponse;
     }
 
     triggerWidgetReloadsOnDemand(serverResponse) {
@@ -115,7 +93,7 @@ class BackendService {
             if (containerHandler) {
                 containerHandler.triggerWidgetReload();
             }
-         }
-         return serverResponse;
+        }
+        return serverResponse;
     }
 }

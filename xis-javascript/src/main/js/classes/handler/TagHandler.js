@@ -12,6 +12,12 @@ class TagHandler {
         this.type = 'tag-handler';
         this.priority = 'normal';
         this.expressionParser = new ExpressionParser(elFunctions);
+        this.reactiveVariables = new Set();
+    }
+
+
+    registerReactiveListener(context, path, listener) {
+       this.appendAttribute.eventPublisher.addEventListener(context, path, listener);
     }
 
     addDescendantHandler(handler) {
@@ -23,37 +29,24 @@ class TagHandler {
     }
 
     removeDescendantHandler(handler) {
-        const handlers =[];
+        const handlers = [];
         for (var h of this.descendantHandlers) {
             if (h != handler) {
                 handlers.push(h);
             }
         }
         this.descendantHandlers = handlers;
-        handler.parentHandler = null;   
+        handler.parentHandler = null;
     }
 
     refresh(data) {
         throw new Error('abstract method');
     }
 
-    /**
-     * Refreshes this handler and all descendants with state-aware data.
-     * Prevents infinite recursion by skipping the original invoker.
-     * 
-     * @param {Data} data - Combined data including updated state values
-     * @param {TagHandler} invoker - The handler that initiated the state change (will be skipped)
-     */
-    stateRefresh(data, invoker) {
-        if (this === invoker) {
-            // Skip the invoker to prevent infinite recursion
-            return;
-        }
-        for (var handler of this.descendantHandlers) {
-            handler.stateRefresh(data, invoker);
-        }
+    reapply() {
+        // Default: do nothing - most handlers don't need reactive updates
+        // Override in specific handlers like IfTagHandler, ForeachHandler, WidgetHandler
     }
-
 
     /**
      * @protected
@@ -101,7 +94,7 @@ class TagHandler {
             }
         }
         for (var handler of this.descendantHandlers) {
-           handler.parentHandler = null;
+            handler.parentHandler = null;
         }
         this.descendantHandlers = [];
     }
@@ -121,20 +114,47 @@ class TagHandler {
     }
 
     createExpression(src) {
-        return new TextContentParser(src, this).parse();
+        const listener = (context, path) => {
+            const key = `${context}.${path}`;
+            if (!this.reactiveVariables.has(key)) {
+                this.reactiveVariables.add(key);
+                app.eventPublisher.addEventListener(EventType.REACTIVE_DATA_CHANGED, () => {
+                    this.reapply();
+                });
+            }
+        };
+        return new TextContentParser(src, listener).parse();
     }
 
     variableTextContentFromAttribute(attrName) {
         var attr = this.tag.getAttribute(attrName);
         if (attr) {
-            return new TextContentParser(attr, this).parse();
+            const listener = (context, path) => {
+                const key = `${context}.${path}`;
+                if (!this.reactiveVariables.has(key)) {
+                    this.reactiveVariables.add(key);
+                    app.eventPublisher.addEventListener(EventType.REACTIVE_DATA_CHANGED, () => {
+                        this.reapply();
+                    });
+                }
+            };
+            return new TextContentParser(attr, listener).parse();
         }
     }
 
     expressionFromAttribute(attrName) {
         var attr = this.tag.getAttribute(attrName);
         if (attr) {
-            return this.expressionParser.parse(attr);
+            const listener = (context, path) => {
+                const key = `${context}.${path}`;
+                if (!this.reactiveVariables.has(key)) {
+                    this.reactiveVariables.add(key);
+                    app.eventPublisher.addEventListener(EventType.REACTIVE_DATA_CHANGED, () => {
+                        this.reapply();
+                    });
+                }
+            };
+            return this.expressionParser.parse(attr, listener);
         }
     }
 
@@ -148,13 +168,13 @@ class TagHandler {
         }
     }
 
-    getParentFormHandler()  {
+    getParentFormHandler() {
         var handler = this.findParentFormHandler();
         if (handler) {
             return handler;
         }
-        throw new Error('no parent form-handler for ' + this.tag 
-            +". May be you forgot to add xis:binding to the form?");
+        throw new Error('no parent form-handler for ' + this.tag
+            + ". May be you forgot to add xis:binding to the form?");
     }
 
     findParentFormHandler() {

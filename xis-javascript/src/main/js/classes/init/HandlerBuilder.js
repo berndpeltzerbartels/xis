@@ -220,7 +220,7 @@ class HandlerBuilder {
      * @returns {TagHandler}
      */
     createForeachHandler(foreach) {
-        return new ForeachHandler(foreach, this.tagHandlers); // never CompositeTagHandler here
+        return new ForeachHandler(foreach, this.tagHandlers);
     }
 
     /**

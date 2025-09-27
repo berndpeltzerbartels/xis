@@ -11,6 +11,7 @@ class IfTagHandler extends TagHandler {
     }
 
     refresh(data) {
+        this.data = data;
         var newConditionValue = this.expression.evaluate(data);
         if (this.conditionValue != newConditionValue) {
             if (newConditionValue) {
@@ -25,6 +26,17 @@ class IfTagHandler extends TagHandler {
         }
     }
 
+    reapply() {
+        var newConditionValue = this.expression.evaluate(this.data);
+        if (this.conditionValue != newConditionValue) {
+            if (newConditionValue) {
+                this.linkChildNodes();
+            } else {
+                this.unlinkChildNodes();
+            }
+            this.conditionValue = newConditionValue;
+        }
+    }
 
     unlinkChildNodes() {
         for (var i = 0; i < this.childNodes.length; i++) {

@@ -5,15 +5,17 @@ class AstGenerator {
 
     /**
      * 
-     * @param {array<any>} tokens 
-     * @param {any} functions 
-     * @param {string} originalExpression 
+     * @param {array<any>} tokens - the tokens of the expression.
+     * @param {any} functions - a map of function names to functions that can be used in the expression.
+     * @param {string} originalExpression - The original expression string. Used for error messages.
+     * @param {function} onReactiveVariableDetected - Callback function called when a reactive variable is detected. Receives (context, path) where context is 'state'/'localStorage'/'global' and path is the variable path without prefix.
      */
-    constructor(tokens, functions, originalExpression) {
+    constructor(tokens, functions, originalExpression, onReactiveVariableDetected=null) {
         this.tokens = tokens;
         this.functions = functions;
         this.originalExpression = originalExpression;
         this.index = 0;
+        this.onReactiveVariableDetected = onReactiveVariableDetected;
     }
 
     /**
@@ -394,13 +396,29 @@ class AstGenerator {
         
         // Check if this is a special state or localStorage variable
         if (path.startsWith('state.')) {
-            return this.createClientStateVariable(path.substring(6)); // Remove 'state.' prefix
+            const variablePath = path.substring(6); // Remove 'state.' prefix
+            if (this.onReactiveVariableDetected) {
+                this.onReactiveVariableDetected('state', variablePath);
+            }
+            return this.createClientStateVariable(variablePath);
         }
         
         if (path.startsWith('localStorage.')) {
-            return this.createLocalStoreVariable(path.substring(13)); // Remove 'localStorage.' prefix
+            const variablePath = path.substring(13); // Remove 'localStorage.' prefix
+            if (this.onReactiveVariableDetected) {
+                this.onReactiveVariableDetected('localStorage', variablePath);
+            }
+            return this.createLocalStoreVariable(variablePath);
         }
         
+        if (path.startsWith('global.')) {
+            const variablePath = path.substring(7); // Remove 'global.' prefix
+            if (this.onReactiveVariableDetected) {
+                this.onReactiveVariableDetected('global', variablePath);
+            }
+            return this.createGlobalVariable(variablePath);
+        }
+
         // Default variable for regular data access
         return new Variable(path);
     }
@@ -421,6 +439,15 @@ class AstGenerator {
      */
     createLocalStoreVariable(path) {
         return new LocalStoreVariable(path);
+    }
+
+    /**
+     * Creates a GlobalVariable for direct access to global variables.
+     * @param {string} path - The global path without 'global.' prefix
+     * @returns {GlobalVariable}
+     */
+    createGlobalVariable(path) {
+        return new GlobalVariable(path);
     }
 
     /**
@@ -858,6 +885,25 @@ class LocalStoreVariable {
 
     toString() {
         return `\${localStorage.${this.path}}`;
+    }
+}
+
+/**
+ * Variable that accesses global variables directly from the global store.
+ * Global variables are temporary and cleared at the end of each request processing.
+ * This allows sharing data between widgets during a single request.
+ */
+class GlobalVariable {
+    constructor(path) {
+        this.path = path;
+    }
+
+    evaluate(data) {
+        return app.globals.getValue(this.path);
+    }
+
+    toString() {
+        return `\${global.${this.path}}`;
     }
 }
 

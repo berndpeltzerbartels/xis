@@ -9,5 +9,6 @@ import java.util.HashSet;
 class ComponentAttributes {
     private final Collection<String> clientStateKeys = new HashSet<>();
     private final Collection<String> localStorageKeys = new HashSet<>();
+    private final Collection<String> globalVariableKeys = new HashSet<>();
     private final Collection<String> localDatabaseKeys = new HashSet<>(); // TODO
 }

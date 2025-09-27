@@ -16,7 +16,7 @@ class FormHandler extends TagHandler {
         if (!formTag.getAttribute('xis:binding')) {
             throw new Error('form has no binding: ' + this.tag);
         }
-        this.bindingExpression = new TextContentParser(formTag.getAttribute('xis:binding'), this).parse();
+        this.bindingExpression = new TextContentParser(formTag.getAttribute('xis:binding'), () => this.reapply()).parse();
         formTag.addEventListener('submit', event => event.preventDefault());
     }
 
@@ -61,6 +61,7 @@ class FormHandler extends TagHandler {
      * @param {Data} data 
      */
     refresh(data) {
+        this.data = data;
         this.binding = this.bindingExpression.evaluate(data);
         var formBindingParameters = urlParameters(this.binding);
         var formBindingKey = stripQuery(this.binding);
@@ -70,23 +71,6 @@ class FormHandler extends TagHandler {
         this.refreshDescendantHandlers(data);
         app.backendService.loadFormData(app.pageController.resolvedURL, this.widgetId(), formBindingKey, formBindingParameters, this)
             .then(response => this.refreshFormData(this.subData(response, formBindingKey)));
-    }
-
-    /**
-     * State refresh - updates form with current state data without reloading from backend.
-     * This prevents infinite recursion during reactive state updates.
-     * @public
-     * @param {Data} data - Current state data
-     * @param {TagHandler} invoker - The handler that initiated the state refresh
-     */
-    stateRefresh(data, invoker) {
-        // Anti-recursion: Skip if we triggered the state refresh
-        if (this === invoker) {
-            return;
-        }
-        
-        // Only refresh form with current data, don't reload from backend
-        this.refreshDescendantHandlers(data);
     }
 
     /**

@@ -65,7 +65,7 @@ class Pages {
             page.titleExpression = { evaluate(_) { } };
             for (var child of headChildArray) {
                 if (child.localName == 'title') {
-                    page.titleExpression = new TextContentParser(child.innerText, this.client).parse();
+                    page.titleElement = child;
                     break;
                 } 
             }

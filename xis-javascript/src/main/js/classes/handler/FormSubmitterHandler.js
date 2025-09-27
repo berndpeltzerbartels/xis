@@ -10,6 +10,7 @@ class FormSubmitterHandler extends TagHandler {
     }
 
     refresh(data) {
+        this.data = data;
         this.action = this.actionExpression.evaluate(data);
     }
 

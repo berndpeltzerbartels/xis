@@ -30,6 +30,7 @@ class ActionButtonHandler extends TagHandler {
      * @param {Data} data 
      */
     refresh(data) {
+        this.data = data;
         this.action = this.actionExpression.evaluate(data);
     }
 

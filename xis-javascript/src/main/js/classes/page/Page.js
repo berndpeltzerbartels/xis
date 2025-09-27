@@ -6,7 +6,7 @@
  * @property {Element} bodyTemplate
  * @property {{string: string}} bodyAttributes
  * @property {PageAttributes} pageAttributes
- * @property {TextContent} titleExpression
+ * @property {Element} titleElement
  * @property {Data} data
  * @property {RootTagHandler} rootTagHandler;
  */
@@ -21,7 +21,7 @@ class Page {
     constructor(normalizedPath, pageAttributes) {
         this.normalizedPath = normalizedPath;
         this.pageAttributes = pageAttributes;
-        this.titleExpression = undefined;
+        this.titleElement = undefined;
         this.headTemplate = undefined;
         this.bodyTemplate = undefined;
         this.scriptSourceExpressions = [];

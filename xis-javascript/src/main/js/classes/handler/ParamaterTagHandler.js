@@ -5,6 +5,7 @@ class ParameterTagHandler extends TagHandler {
     }
 
     refresh(data) {
+        this.data = data;
         this.refreshDescendantHandlers(data); // AttributeHandler !
         var name = this.getAttribute('name');
         var value = this.hasAttribute("value") ? this.getAttribute('value') : this.tag.innerText;

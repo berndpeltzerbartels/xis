@@ -1,17 +1,37 @@
+/**
+* Parses text content with embedded expressions in the form of ${expression}.
+* Example: "Hello, ${user.name}! You have ${user.notifications.length} new notifications."
+*/
 class TextContentParser {
 
-    constructor(src, handler) {
-        this.handler = handler;
+    /**
+    * Parses text content with embedded expressions in the form of ${expression}.
+    * @param {string} src - The source text to parse.
+    * @param {function} onReactiveVariableDetected - Optional callback called when a reactive variable is detected. Receives (context, path) where context is 'state'/'localStorage'/'global' and path is the variable path without prefix.
+    * @returns {TextContent} The parsed TextContent object.
+    */
+    constructor(src, onReactiveVariableDetected = () => {}) {
+        this.onReactiveVariableDetected = onReactiveVariableDetected;
         this.chars = new CharIterator(src);
         this.parts = [];
     }
 
+    /**
+    * @public
+    * Parses the source text and returns a TextContent object.
+    * @returns {TextContent} The parsed TextContent object.
+    */
     parse() {
         this.readText();
-        return new TextContent(this.parts, this.handler);
+        return new TextContent(this.parts, this.onReactiveVariableDetected);
     }
 
 
+    /**
+    * @private
+    * Reads text until an expression is found and processes it.
+    * @returns {string}
+    */
     readText() {
         var buff = '';
         while (this.chars.hasNext()) {
@@ -33,6 +53,10 @@ class TextContentParser {
 
     }
 
+    /**
+    * @private
+    * Reads an expression until the closing brace is found and processes it.
+    */
     readVar() {
         var buff = '';
         while (this.chars.hasNext()) {
@@ -52,6 +76,12 @@ class TextContentParser {
         }
     }
 
+    /**
+    * @private
+    * Creates a text part object.
+    * @param {string} text - The text content.
+    * @returns {TextPart} The text part object.
+    */
     createTextPart(text) {
         return {
             text: text,
@@ -61,8 +91,14 @@ class TextContentParser {
         };
     }
 
+    /**
+    * @private
+    * Tries to create a variable part object by parsing the expression.
+    * @param {string} src - The expression source.
+    * @returns {VarPart|false} The variable part object or false if parsing failed.
+    */
     tryCreateVarPart(src) {
-        var expression = new ExpressionParser(elFunctions).parse(src);
+        var expression = new ExpressionParser(elFunctions).parse(src, this.onReactiveVariableDetected);
         if (expression) {
             return {
                 expression: expression,

@@ -26,6 +26,7 @@ class ActionLinkHandler extends TagHandler {
      * @param {Data} data 
      */
     refresh(data) {
+        this.data = data;
         this.actionParameters = {};
         this.data = data;
         this.refreshDescendantHandlers(data);

@@ -20,6 +20,7 @@ class PageLinkHandler extends TagHandler {
      * @param {Data} data 
      */
     refresh(data) {
+        this.data = data;
         this.parameters = {};
         this.data = data;
         this.refreshDescendantHandlers(data); // attributes might have variables !

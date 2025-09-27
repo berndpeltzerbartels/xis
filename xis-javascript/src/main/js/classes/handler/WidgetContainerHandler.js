@@ -66,37 +66,13 @@ class WidgetContainerHandler extends TagHandler {
      * @param {Data} data
      */
     refresh(data) {
+        this.data = data;
         this.refreshContainerId(data);
         this.bindDefaultWidgetInitial(data);
         var widgetParameters = this.widgetState ? this.widgetState.widgetParameters : {};
         this.widgetState = new WidgetState(app.pageController.resolvedURL, widgetParameters);
         if (this.widgetInstance) {
             this.reloadDataAndRefresh(data);
-        }
-    }
-
-    /**
-     * State refresh - updates widget with current state data without reloading from backend.
-     * This prevents infinite recursion during reactive state updates.
-     * @public
-     * @param {Data} data - Current state data
-     * @param {TagHandler} invoker - The handler that initiated the state refresh
-     */
-    stateRefresh(data, invoker) {
-        // Anti-recursion: Skip if we triggered the state refresh
-        if (this === invoker) {
-            return;
-        }
-        
-        // Only refresh existing widget with current data, don't reload from backend
-        if (this.widgetInstance && this.widgetState && this.widgetState.data) {
-            // No need to load state data into Data object anymore  
-            // ClientStateVariable and LocalStoreVariable access stores directly
-            
-            // Update the widget's data with new state values
-            this.widgetState.data = data;
-            // Refresh descendant handlers with the new state data
-            this.refreshDescendantHandlers(data);
         }
     }
 
@@ -190,7 +166,7 @@ class WidgetContainerHandler extends TagHandler {
                 .then(data => { console.log("data"+(typeof data)); data.parentData = parentData; data.scope = scope; return data; })
                 .then(data => { this.widgetState.data = data; return data; })
                 .then(data => this.refreshDescendantHandlers(data))
-                .then(data => { app.eventPublisher.publish(EventType.WIDGET_LOADED, { widget: this.widgetInstance, data }); })
+                .then(data => { app.eventPublisher.publish(EventType.WIDGET_LOADED, { widget: this.widgetInstance, data }); return data; })
                 .catch(e => reportError(e));
         }
     }

@@ -27,6 +27,7 @@ class MessageTagHandler extends TagHandler {
      * @param {Data} data
      */
     refresh(data) {
+        this.data = data;
         this.binding = data.validationPath + '/' + this.bindingExpression.evaluate(data);
         this.refreshDescendantHandlers(data);
         this.getParentFormHandler().onMessageHandlerRefreshed(this, this.binding);

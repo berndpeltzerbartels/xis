@@ -73,6 +73,19 @@ dependencies {
 test {
     maxParallelForks = 4
     useJUnitPlatform()
+    
+    // Allow debug mode to be controlled via multiple methods:
+    // 1. Gradle project property: -Pdebug=true
+    // 2. System property: -Ddebug=true
+    // 3. Environment variable: export debug=true
+    def debugEnabled = project.hasProperty('debug') && project.property('debug') == 'true' ||
+                       System.getProperty('debug') == 'true' ||
+                       System.getenv('debug') == 'true'
+    
+    if (debugEnabled) {
+        environment 'debug', 'true'
+    }
+    
     afterTest { desc, result ->
         logger.quiet "${desc.className} - ${desc.name}: ${result.resultType}"
     }

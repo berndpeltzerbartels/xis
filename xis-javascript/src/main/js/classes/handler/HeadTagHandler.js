@@ -37,7 +37,7 @@ class HeadTagHandler extends TagHandler {
     addScriptTags(page) {
         this.scriptSourceExpressions = this.extractFromArrayInPlace(page.headChildArray, node => node.localName == 'script')
             .map(node => node.getAttribute('src'))
-            .map(src => new TextContentParser(src, this).parse());
+            .map(src => new TextContentParser(src, () => this.reapply()).parse());
         for (var scriptSourceExpression of this.scriptSourceExpressions) {
             var scriptElement = document.createElement('script');
             scriptElement.setAttribute('type', 'text/javascript');
@@ -69,23 +69,19 @@ class HeadTagHandler extends TagHandler {
      * @param {Data} data 
      */
     refresh(data) {
+        this.data = data;
         this.refreshTitle(data);
         this.refreshDescendantHandlers(data);
         this.refreshScriptTags(data);
     }
 
     /**
-     * @param {Data} data
-     * @param {TagHandler} invoker
-     */
-    stateRefresh(data, invoker) {
-        this.refresh(data)
-    }
-
-    /**
      * @param {Data} data 
      */
     refreshTitle(data) {
+        if (!this.titleExpression) {
+            return;
+        }
         this.title.innerText = this.titleExpression.evaluate(data);
     }
 
@@ -105,10 +101,11 @@ class HeadTagHandler extends TagHandler {
     }
 
     setTitleExpression(page) {
-        if (!page.titleExpression) {
-            throw new Error('Page does not have a titleExpression defined.');
+        if (!page.titleElement) {
+            this.titleExpression = undefined;
+           return;
         }
-        this.titleExpression = page.titleExpression ;
+        this.titleExpression = new TextContentParser(page.titleElement.innerText, () => this.refreshTitle(this.data)).parse();
     }
 
     clearTitle() {

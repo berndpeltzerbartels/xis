@@ -7,7 +7,8 @@ const EventType = {
     WIDGET_ACTION: 'widget_action',
     PAGE_ACTION: 'page_action',
     FORM_ACTION: 'form_action',
-    SUBMIT: 'submit'
+    SUBMIT: 'submit',
+    REACTIVE_DATA_CHANGED: 'reactive_data_changed'
 };
 
 window['EventType'] = EventType;

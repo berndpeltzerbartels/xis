@@ -39,6 +39,7 @@ class WidgetLinkHandler extends TagHandler {
      * @param {Data} data 
      */
     refresh(data) {
+        this.data = data;
         this.widgetParameters = {};
         this.data = data;
         this.refreshDescendantHandlers(data); // attributes might have variables !

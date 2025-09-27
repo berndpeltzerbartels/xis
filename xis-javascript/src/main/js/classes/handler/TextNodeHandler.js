@@ -1,9 +1,39 @@
 class TextNodeHandler extends TagHandler {
 
-    constructor(node) {
+    /**
+     * @param {Node} node
+     * @param {function} onReactiveVariableDetected - Optional callback called when a reactive variable is detected. Receives (context, path).
+     */
+    constructor(node, onReactiveVariableDetected = null) {
         super(node);
         this.node = node;
-        this.expression = new TextContentParser(node.nodeValue, this).parse();
+        this.reactiveVariables = [];
+        
+        const listener = (context, path) => {
+            this.addReactiveVariable(context, path);
+            if (onReactiveVariableDetected) {
+                onReactiveVariableDetected(context, path);
+            }
+        };
+        
+        this.expression = new TextContentParser(node.nodeValue, listener).parse();
+        this.registerEventListeners();
+    }
+
+    addReactiveVariable(context, path) {
+        this.reactiveVariables.push({ context, path });
+    }
+
+    registerEventListeners() {
+        this.reactiveVariables.forEach(variable => {
+            app.eventPublisher.addEventListener(EventType.REACTIVE_DATA_CHANGED, () => {
+                this.updateText();
+            });
+        });
+    }
+
+    updateText() {
+        this.node.nodeValue = this.expression.evaluate(this.data);
     }
 
     /**
@@ -12,11 +42,7 @@ class TextNodeHandler extends TagHandler {
      * @param {Data} data 
      */
     refresh(data) {
-        this.node.nodeValue = this.expression.evaluate(data);
-    }
-
-
-    stateRefresh(data, invoker) {
-        this.node.nodeValue = this.expression.evaluate(data);
+        this.data = data;
+        this.updateText();
     }
 }

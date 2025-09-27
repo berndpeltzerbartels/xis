@@ -154,6 +154,7 @@ class Client {
         request.zoneId = this.zoneId;
         request.clientStateData = this.clientStateDataPage(normalizedPath);
         request.localStorageData = this.localStorageDataPage(normalizedPath);
+        request.globalVariableData = this.globalVariableDataPage(normalizedPath);
         request.localDatabaseData = {};
         request.type = 'page';
         return request;
@@ -189,10 +190,12 @@ class Client {
         if (widgetId) { // TODO write a test
             request.clientStateData = this.clientStateDataWidget(widgetId);
             request.localStorageData = this.localStorageDataWidget(widgetId);
+            request.globalVariableData = this.globalVariableDataWidget(widgetId);
         }
         if (normalizedPath) {// TODO write a test
             request.clientStateData = this.clientStateDataPage(normalizedPath);
             request.localStorageData = this.localStorageDataPage(normalizedPath);
+            request.globalVariableData = this.globalVariableDataPage(normalizedPath);
         }
         return request;
     }
@@ -220,6 +223,7 @@ class Client {
         request.zoneId = this.zoneId;         // TODO locale ?
         request.clientStateData = this.clientStateDataWidget(widgetInstance.widget.id);
         request.localStorageData = this.localStorageDataWidget(widgetInstance.widget.id);
+        request.globalVariableData = this.globalVariableDataWidget(widgetInstance.widget.id);
         request.localDatabaseData = {};
         request.type = 'widget';
         return request;
@@ -241,6 +245,14 @@ class Client {
         return this.localStorageData(this.config.widgetAttributes[widgetId]);
     }
 
+    globalVariableDataPage(pageId) {
+        return this.globalVariableData(this.config.pageAttributes[pageId]);
+    }
+
+    globalVariableDataWidget(widgetId) {
+        return this.globalVariableData(this.config.widgetAttributes[widgetId]);
+    }
+
 
     clientStateData(attributes) {
         var data = {};
@@ -255,6 +267,14 @@ class Client {
         var data = {};
         for (var key of attributes.localStorageKeys) {
             data[key] = app.localStorage.getValue(key);
+        }
+        return data;
+    }
+
+    globalVariableData(attributes) {
+        var data = {};
+        for (var key of attributes.globalVariableKeys) {
+            data[key] = app.globals.getValue(key);
         }
         return data;
     }
@@ -310,6 +330,7 @@ class Client {
         serverResponse.reloadWidgets = obj.reloadWidgets;
         serverResponse.localDatabaseData = obj.localDatabaseData;
         serverResponse.localStorageData = obj.localStorageData;
+        serverResponse.globalVariableData = obj.globalVariableData;
         serverResponse.clientStateData = obj.clientStateData;
         serverResponse.widgetContainerId = obj.widgetContainerId;
         serverResponse.redirectUrl = obj.redirectUrl;
@@ -323,6 +344,7 @@ class Client {
     storeData(response) {
         this.storeLocalStorageData(response.localStorageData);
         this.storeClientStateData(response.clientStateData);
+        this.storeGlobalVariableData(response.globalVariableData);
         this.storeLocalDatabaseData(response.localDatabaseData);
     }
 
@@ -337,6 +359,14 @@ class Client {
 
         app.clientState.saveData(clientStateData);
     }
+
+    storeGlobalVariableData(globalVariableData) {
+        if (!globalVariableData) {
+            return;
+        }
+        app.globals.saveData(globalVariableData);
+    }
+
     storeLocalDatabaseData(localDatabaseData) {
         if (!localDatabaseData) {
             return;

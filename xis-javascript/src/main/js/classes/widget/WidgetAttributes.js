@@ -5,6 +5,7 @@
  * @property {array<string>} localDatabaseKeys
  * @property {array<string>} localStorageKeys
  * @property {array<string>} clientStateKeys
+ * @property {array<string>} globalVariableKeys
  */
 
 
@@ -16,5 +17,6 @@ class WidgetAttributes {
         this.localDatabaseKeys = obj.localDatabaseKeys || [];
         this.localStorageKeys = obj.localStorageKeys || [];
         this.clientStateKeys = obj.clientStateKeys || [];
+        this.globalVariableKeys = obj.globalVariableKeys || [];
     }
 }

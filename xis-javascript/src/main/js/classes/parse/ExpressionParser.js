@@ -25,13 +25,18 @@ class ExpressionParser {
     constructor(functions={}) {
         this.functions = functions;
     }
-
-    parse(expression) {
+    /**
+    * Parses an expression and returns its AST representation.
+    * @param {string} expression - The expression to parse.
+    * @param {function} onReactiveVariableDetected - Optional callback called when a reactive variable is detected. Receives (context, path) where context is 'state'/'localStorage'/'global' and path is the variable path without prefix.
+    * @returns {object} The AST representation of the expression.
+    */
+    parse(expression, onReactiveVariableDetected=null) {
         if (expression && expression.startsWith('${') && expression.endsWith('}')) {
             expression = expression.substring(2, expression.length - 1).trim();
         }
         const tokens = new ScriptTokenizer(expression).tokenize();
-        return new AstGenerator(tokens, this.functions, expression).createAst();
+        return new AstGenerator(tokens, this.functions, expression, onReactiveVariableDetected).createAst();
     }
 }
 

@@ -6,7 +6,7 @@ class FormElementHandler extends TagHandler {
      */
     constructor(element) {
         super(element);
-        this.bindingExpression = new TextContentParser(element.getAttribute('xis:binding'), this).parse();
+        this.bindingExpression = new TextContentParser(element.getAttribute('xis:binding'), () => this.reapply()).parse();
         this.binding = undefined;
         element.addEventListener('change', () => {
             const formHandler = this.getParentFormHandler();
@@ -16,6 +16,7 @@ class FormElementHandler extends TagHandler {
 
 
     refresh(data) {
+        this.data = data;
         this.binding = this.bindingExpression.evaluate(data);
         const formHandler = this.getParentFormHandler();
         formHandler.onElementHandlerRefreshed(this, this.binding);
