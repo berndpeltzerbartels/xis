@@ -11,11 +11,22 @@ public class XISBootRunner {
                 .withXIS()
                 .build();
 
+        NettyServer server = context.getSingleton(NettyServer.class);
+        if (args != null && args.length > 0) {
+            try {
+                int port = Integer.parseInt(args[0]);
+                server.setPort(port);
+            } catch (NumberFormatException ignored) {
+                throw new RuntimeException("Invalid port number: " + args[0]);
+            }
+        }
+        System.out.println("Starting server on port " + server.getPort());
         try {
-            context.getSingleton(NettyServer.class).start();
+            server.start();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
     }
 }
 
+    

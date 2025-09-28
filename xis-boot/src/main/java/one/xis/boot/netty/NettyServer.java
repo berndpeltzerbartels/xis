@@ -10,6 +10,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.HttpServerExpectContinueHandler;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import one.xis.context.XISComponent;
@@ -19,6 +20,7 @@ import one.xis.context.XISComponent;
 public class NettyServer {
 
     @Setter
+    @Getter
     private int port = 8080;
     private final NettyServerHandler nettyServerHandler;
 
