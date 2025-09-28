@@ -33,7 +33,7 @@ class LoginFormController<U extends UserInfo> {
     }
 
     @ModelData("externalIdpUrls")
-    Map<String, String> getExternalIdpUrls(@URLParameter("redirect_uri") String postLoginRedirectUrl) { // Annotation korrigiert
+    Map<String, String> getExternalIdpUrls(@QueryParameter("redirect_uri") String postLoginRedirectUrl) { // Annotation korrigiert
         return externalIDPServices.getExternalIDPServices().stream()
                 .collect(Collectors.toMap(ExternalIDPService::getProviderId, service -> service.createLoginUrl(postLoginRedirectUrl)));
     }
@@ -45,7 +45,7 @@ class LoginFormController<U extends UserInfo> {
     }
 
     @FormData("login")
-    LoginData createLoginFormData(@URLParameter("redirect_uri") @NonNull String redirectUrl) {
+    LoginData createLoginFormData(@QueryParameter("redirect_uri") @NonNull String redirectUrl) {
         return new LoginData(null, null, StateParameter.create(redirectUrl, "local"));
     }
 

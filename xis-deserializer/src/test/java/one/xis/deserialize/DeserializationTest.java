@@ -430,7 +430,7 @@ class DeserializationTest {
 
 
     @SuppressWarnings("unused")
-    void testMethodInt(@URLParameter("integer") int i) {
+    void testMethodInt(@QueryParameter("integer") int i) {
 
     }
 

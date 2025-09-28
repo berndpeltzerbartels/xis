@@ -33,7 +33,7 @@ class IDPLoginController implements Validator<IDPServerLogin> {
      */
 
     @FormData("login")
-    IDPServerLogin createLoginFormData(@URLParameter("client_id") String clientId, @URLParameter("state") String state, @URLParameter("redirect_uri") String redirectUri) {
+    IDPServerLogin createLoginFormData(@QueryParameter("client_id") String clientId, @QueryParameter("state") String state, @QueryParameter("redirect_uri") String redirectUri) {
         var clientInfo = idpService.findClientInfo(clientId).orElseThrow(() -> new AuthenticationException("invalid client-id: " + clientId));
         if (!clientInfo.getPermittedRedirectUrls().contains(redirectUri)) {
             throw new AuthenticationException("invalid redirect-uri: " + redirectUri);

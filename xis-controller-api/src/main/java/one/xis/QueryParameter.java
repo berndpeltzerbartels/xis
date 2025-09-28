@@ -2,8 +2,10 @@ package one.xis;
 
 import java.lang.annotation.*;
 
+// TODO Kommentar und Umsetzung sind falsch. QueryParameter ist fuer Query-Parameter, nicht fuer Path-Parameter
+
 /**
- * Annotation  for url-parameters {@link URLParameter}. url parameters
+ * Annotation  for url-parameters {@link QueryParameter}. url parameters
  * are defined in value of {@link Page} annotation.
  * <p>
  * Example:
@@ -16,10 +18,10 @@ import java.lang.annotation.*;
  * </pre>
  * <p>
  * The name of the parameter in the example is "a".
- * To use this url-parameter as a method parameter, it has to be annotated with {@link URLParameter} like this:
+ * To use this url-parameter as a method parameter, it has to be annotated with {@link QueryParameter} like this:
  * <pre>
  *     <code>
- *         public void method(@URLParameter("a") String a) {
+ *         public void method(@QueryParameter("a") String a) {
  *         ...
  *         }
  *         </code>
@@ -28,6 +30,6 @@ import java.lang.annotation.*;
 @Documented
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface URLParameter {
+public @interface QueryParameter {
     String value();
 }

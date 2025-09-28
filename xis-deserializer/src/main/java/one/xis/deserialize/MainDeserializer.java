@@ -96,8 +96,8 @@ public class MainDeserializer {
         if (target.isAnnotationPresent(FormData.class)) {
             return target.getAnnotation(FormData.class).value();
         }
-        if (target.isAnnotationPresent(URLParameter.class)) {
-            return target.getAnnotation(URLParameter.class).value();
+        if (target.isAnnotationPresent(QueryParameter.class)) {
+            return target.getAnnotation(QueryParameter.class).value();
         }
         if (target.isAnnotationPresent(ActionParameter.class)) {
             return target.getAnnotation(ActionParameter.class).value();

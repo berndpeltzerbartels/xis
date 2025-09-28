@@ -40,7 +40,7 @@ class ControllerMethodParameter {
             return validateAndRetrieve(userContext::getUserId, "UserId expected, but it was null");
         } else if (parameter.isAnnotationPresent(ClientId.class)) {
             return validateAndRetrieve(request::getClientId, "ClientId expected, but it was null");
-        } else if (parameter.isAnnotationPresent(URLParameter.class)) {
+        } else if (parameter.isAnnotationPresent(QueryParameter.class)) {
             return deserializeUrlParameter(parameter, request, postProcessingResults);
         } else if (parameter.isAnnotationPresent(one.xis.PathVariable.class)) {
             return deserializePathVariable(parameter, request, postProcessingResults);
@@ -79,8 +79,8 @@ class ControllerMethodParameter {
             controllerMethodResult.getModelData().put(parameter.getAnnotation(ActionParameter.class).value(), parameterValue);
         } else if (parameter.isAnnotationPresent(FormData.class)) {
             controllerMethodResult.getFormData().put(parameter.getAnnotation(FormData.class).value(), parameterValue);
-        } else if (parameter.isAnnotationPresent(URLParameter.class)) {
-            controllerMethodResult.getUrlParameters().put(parameter.getAnnotation(URLParameter.class).value(), parameterValue);
+        } else if (parameter.isAnnotationPresent(QueryParameter.class)) {
+            controllerMethodResult.getUrlParameters().put(parameter.getAnnotation(QueryParameter.class).value(), parameterValue);
         } else if (parameter.isAnnotationPresent(PathVariable.class)) {
             controllerMethodResult.getPathVariables().put(parameter.getAnnotation(PathVariable.class).value(), parameterValue);
         } else if (parameter.isAnnotationPresent(WidgetParameter.class)) {
@@ -119,7 +119,7 @@ class ControllerMethodParameter {
     }
 
     private Object deserializeUrlParameter(Parameter parameter, ClientRequest request, PostProcessingResults postProcessingResults) throws IOException {
-        var key = parameter.getAnnotation(URLParameter.class).value();
+        var key = parameter.getAnnotation(QueryParameter.class).value();
         var paramValue = request.getUrlParameters().get(key);
         var deserialized = deserializeParameter(paramValue, request, parameter, postProcessingResults);
         if (deserialized instanceof String str) {

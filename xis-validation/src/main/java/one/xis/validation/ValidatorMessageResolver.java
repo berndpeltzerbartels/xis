@@ -28,7 +28,7 @@ public class ValidatorMessageResolver {
         }
         return message;
     }
-    
+
     private String createMessage(@NonNull String messageKey, @NonNull Map<String, Object> messageParameters, @NonNull UserContext userContext) {
         var message = getMessage(messageKey, userContext);
         if (message == null) {
@@ -73,8 +73,8 @@ public class ValidatorMessageResolver {
         if (parameter.isAnnotationPresent(PathVariable.class)) {
             return parameter.getAnnotation(PathVariable.class).value();
         }
-        if (parameter.isAnnotationPresent(URLParameter.class)) {
-            return parameter.getAnnotation(URLParameter.class).value();
+        if (parameter.isAnnotationPresent(QueryParameter.class)) {
+            return parameter.getAnnotation(QueryParameter.class).value();
         }
         if (parameter.isAnnotationPresent(UserId.class)) {
             return "userId";

@@ -12,7 +12,7 @@ class SimpleObjectUpdateController {
     private final SimpleObjectService simpleObjectService;
 
     @FormData("formObject")
-    SimpleObject formObject(@URLParameter("id") Integer id) {
+    SimpleObject formObject(@QueryParameter("id") Integer id) {
         return simpleObjectService.getById(id);
     }
 
