@@ -3,6 +3,8 @@ package one.xis.html.document;
 import lombok.Data;
 import one.xis.html.HtmlParser;
 
+import java.util.List;
+
 @Data
 public class HtmlDocument {
     private Doctype doctype;
@@ -19,5 +21,21 @@ public class HtmlDocument {
         }
         sb.append(documentElement.toHtml());
         return sb.toString();
+    }
+
+    public Element createElement(String tagName) {
+        return new Element(tagName);
+    }
+
+    public List<Element> getElementsByTagName(String name) {
+        if (documentElement == null) {
+            return null;
+        }
+        return documentElement.getElementsByTagName(name);
+    }
+
+
+    public String toHtml() {
+        return asString();
     }
 }

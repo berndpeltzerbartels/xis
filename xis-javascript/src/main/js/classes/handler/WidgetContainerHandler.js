@@ -136,7 +136,9 @@ class WidgetContainerHandler extends TagHandler {
             if (this.widgetInstance.widget.id == widgetId) {
                 return;
             } else {
-                this.tag.removeChild(this.widgetInstance.root);
+                if (this.widgetInstance.root.parentNode == this.tag) {
+                    this.tag.removeChild(this.widgetInstance.root);
+                }
                 this.removeDescendantHandler(this.widgetInstance.rootHandler);
                 this.widgetInstance.dispose();
             }

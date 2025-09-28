@@ -4,9 +4,9 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import one.xis.context.XISComponent;
 import one.xis.context.XISInit;
+import one.xis.html.HtmlParser;
+import one.xis.html.document.HtmlDocument;
 import one.xis.resource.Resources;
-import one.xis.utils.xml.XmlUtil;
-import org.w3c.dom.Document;
 
 
 @XISComponent
@@ -18,6 +18,8 @@ class RootPageService {
 
     private final Resources resources;
 
+    private final HtmlParser htmlParser = new HtmlParser();
+
     @Getter
     private String rootPageHtml;
 
@@ -25,24 +27,24 @@ class RootPageService {
     void init() {
         var resourcePath = getRootPageResourcePath();
         var rootPageHtml = resources.getByPath(resourcePath).getContent();
-        var rootPageDocument = XmlUtil.loadDocument(rootPageHtml);
+        var rootPageDocument = htmlParser.parse(rootPageHtml);
         addCssLinks(rootPageDocument);
         addJsReferences(rootPageDocument);
-        this.rootPageHtml = XmlUtil.asString(rootPageDocument);
+        this.rootPageHtml = rootPageDocument.toHtml();
     }
 
-    private void addCssLinks(Document rootPageDocument) {
+    private void addCssLinks(HtmlDocument rootPageDocument) {
         resources.getClassPathResources(CUSTOM_PUBLIC_RESOURCE_PATH, ".css")
                 .forEach(resource -> addCssLink(resource.getResourcePath().substring(CUSTOM_PUBLIC_RESOURCE_PATH.length()), rootPageDocument));
     }
 
-    private void addJsReferences(Document rootPageDocument) {
+    private void addJsReferences(HtmlDocument rootPageDocument) {
         resources.getClassPathResources(CUSTOM_PUBLIC_RESOURCE_PATH, ".js")
                 .forEach(resource -> addJsReference(resource.getResourcePath().substring(CUSTOM_PUBLIC_RESOURCE_PATH.length()), rootPageDocument));
     }
 
-    private void addCssLink(String cssPath, Document rootPageDocument) {
-        var headElement = rootPageDocument.getElementsByTagName("head").item(0);
+    private void addCssLink(String cssPath, HtmlDocument rootPageDocument) {
+        var headElement = rootPageDocument.getElementsByTagName("head").get(0);
         var linkElement = rootPageDocument.createElement("link");
         linkElement.setAttribute("rel", "stylesheet");
         linkElement.setAttribute("type", "text/css");
@@ -50,8 +52,8 @@ class RootPageService {
         headElement.appendChild(linkElement);
     }
 
-    private void addJsReference(String jsPath, Document rootPageDocument) {
-        var headElement = rootPageDocument.getElementsByTagName("head").item(0);
+    private void addJsReference(String jsPath, HtmlDocument rootPageDocument) {
+        var headElement = rootPageDocument.getElementsByTagName("head").get(0);
         var scriptElement = rootPageDocument.createElement("script");
         scriptElement.setAttribute("src", jsPath);
         headElement.appendChild(scriptElement);

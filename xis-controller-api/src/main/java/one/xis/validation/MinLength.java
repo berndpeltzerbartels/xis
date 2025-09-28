@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  * <p>
  * Otherwise the corresponding field is validated to be filled.
  */
-@Target(ElementType.FIELD)
+@Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface MinLength {
     int value() default -1;

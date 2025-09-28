@@ -19,7 +19,7 @@ class HeadTagHandler extends TagHandler {
     bind(page) {
         this.setTitleExpression(page);
         this.addScriptTags(page);
-        for (var node of this.nodeListToArray(page.headTemplate.childNodes)) {
+        for (var node of page.headChildArray) {
             if (isElement(node) && node.localName == 'title') {
                 continue;
             }

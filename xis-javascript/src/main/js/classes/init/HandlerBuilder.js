@@ -52,6 +52,26 @@ class HandlerBuilder {
             parentHandler.addDescendantHandler(new ErrorStyleHandler(element));
         }
         switch (element.localName) {
+            case 'xis:raw': {
+                // Insert content as HTML (default) or as text if text="true"
+                const isText = element.getAttribute('text') === 'true';
+                const rawContent = Array.from(element.childNodes).map(n => n.nodeType === 3 ? n.nodeValue : n.outerHTML).join('');
+                if (isText) {
+                    // Insert as plain text node
+                    const textNode = document.createTextNode(rawContent);
+                    element.parentNode.replaceChild(textNode, element);
+                } else {
+                    // Insert as HTML, but keep DOM structure and listeners
+                    const parent = element.parentNode;
+                    // Füge alle ChildNodes von <xis:raw> vor dem Element ein
+                    while (element.firstChild) {
+                        parent.insertBefore(element.firstChild, element);
+                    }
+                    // Entferne das <xis:raw>-Element selbst
+                    parent.removeChild(element);
+                }
+                return;
+            }
             case 'xis:foreach':
                 handler = parentHandler.addDescendantHandler(this.createForeachHandler(element));
                 this.tagHandlers.mapHandler(element, handler);
@@ -187,8 +207,7 @@ class HandlerBuilder {
     * @param {TagHandler} parentHandler 
     */
     createChildNodeHandlers(element, parentHandler) {
-        for (let index = 0; index < element.childNodes.length; index++) {
-            let child = element.childNodes.item(index);
+        for (const child of nodeListToArray(element.childNodes)) {
             this.create(child, parentHandler);
         }
     }
