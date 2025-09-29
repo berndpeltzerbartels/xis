@@ -36,6 +36,7 @@ class ControllerWrapperFactory {
             controllerWrapper.setLocalStorageOnlyMethods(localStorageOnlyMethods(controller));
             controllerWrapper.setClientStateOnlyMethods(clientStateOnlyMethods(controller));
             controllerWrapper.setGlobalVariableOnlyMethods(globalVariableOnlyMethods(controller));
+            controllerWrapper.setTagContentOnlyMethods(tagContentOnlyMethods(controller));
             controllerWrapper.setControllerResultMapper(controllerResultMapper);
             return controllerWrapper;
         } catch (Exception e) {
@@ -123,6 +124,15 @@ class ControllerWrapperFactory {
         } catch (Exception e) {
             throw new RuntimeException("Failed to initialize " + method, e);
         }
+    }
+
+    private Collection<ControllerMethod> tagContentOnlyMethods(@NonNull Object controller) {
+        return annotatedMethods(controller, TagContent.class)
+                .filter(m -> !m.isAnnotationPresent(Action.class))
+                .filter(method -> !method.isAnnotationPresent(ModelData.class))
+                .filter(method -> !method.isAnnotationPresent(FormData.class))
+                .map(this::createControllerMethod)
+                .collect(Collectors.toSet());
     }
 
 

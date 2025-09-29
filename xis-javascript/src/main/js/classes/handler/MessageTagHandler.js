@@ -29,8 +29,9 @@ class MessageTagHandler extends TagHandler {
     refresh(data) {
         this.data = data;
         this.binding = data.validationPath + '/' + this.bindingExpression.evaluate(data);
-        this.refreshDescendantHandlers(data);
+        const descendantPromise = this.refreshDescendantHandlers(data);
         this.getParentFormHandler().onMessageHandlerRefreshed(this, this.binding);
+        return descendantPromise;
     }
 
     /**

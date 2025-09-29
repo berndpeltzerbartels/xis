@@ -44,5 +44,6 @@ class TextNodeHandler extends TagHandler {
     refresh(data) {
         this.data = data;
         this.updateText();
+        return Promise.resolve();
     }
 }

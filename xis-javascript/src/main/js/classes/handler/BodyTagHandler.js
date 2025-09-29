@@ -28,8 +28,9 @@ class BodyTagHandler extends TagHandler {
 
     refresh(data, formData) {
         this.data = data;
-        this.attributeHandlers.forEach(h => h.refresh(data));
-        this.refreshDescendantHandlers(data, formData);
+        const attributePromises = this.attributeHandlers.map(h => h.refresh(data));
+        const descendantPromise = this.refreshDescendantHandlers(data, formData);
+        return Promise.all(attributePromises.concat([descendantPromise]));
     }
 
     /**

@@ -40,6 +40,8 @@ class ControllerResultMapper {
         if (controllerMethodResult.isValidationFailed()) {
             controllerResult.setValidationFailed(true);
         }
+        controllerResult.getTagVariables().putAll(controllerMethodResult.getTagVariables());
+        controllerResult.getIdVariables().putAll(controllerMethodResult.getIdVariables());
     }
 
     void mapControllerResultToNextRequest(ControllerResult controllerResult, ClientRequest nextRequest) {

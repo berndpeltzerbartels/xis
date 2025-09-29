@@ -14,7 +14,7 @@ class RootTagHandler extends TagHandler {
      */
     refresh(data) {
         this.data = data;
-        this.refreshDescendantHandlers(data);
+        return this.refreshDescendantHandlers(data);
     }
 
     /**

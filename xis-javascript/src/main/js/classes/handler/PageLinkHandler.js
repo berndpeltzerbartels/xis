@@ -23,10 +23,11 @@ class PageLinkHandler extends TagHandler {
         this.data = data;
         this.parameters = {};
         this.data = data;
-        this.refreshDescendantHandlers(data); // attributes might have variables !
+        const descendantPromise = this.refreshDescendantHandlers(data); // attributes might have variables !
         this.targetPageUrl = this.tag.getAttribute('xis:page');
         this.targetWidgetUrl = this.tag.getAttribute('xis:widget');
         this.targetContainerId = this.tag.getAttribute('xis:target-container');
+        return descendantPromise;
     }
 
     addParameter(name, value) {

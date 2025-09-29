@@ -4,18 +4,16 @@
 class AstGenerator {
 
     /**
-     * 
+     *
      * @param {array<any>} tokens - the tokens of the expression.
      * @param {any} functions - a map of function names to functions that can be used in the expression.
      * @param {string} originalExpression - The original expression string. Used for error messages.
-     * @param {function} onReactiveVariableDetected - Callback function called when a reactive variable is detected. Receives (context, path) where context is 'state'/'localStorage'/'global' and path is the variable path without prefix.
      */
-    constructor(tokens, functions, originalExpression, onReactiveVariableDetected=null) {
+    constructor(tokens, functions, originalExpression) {
         this.tokens = tokens;
         this.functions = functions;
         this.originalExpression = originalExpression;
         this.index = 0;
-        this.onReactiveVariableDetected = onReactiveVariableDetected;
     }
 
     /**
@@ -397,25 +395,16 @@ class AstGenerator {
         // Check if this is a special state or localStorage variable
         if (path.startsWith('state.')) {
             const variablePath = path.substring(6); // Remove 'state.' prefix
-            if (this.onReactiveVariableDetected) {
-                this.onReactiveVariableDetected('state', variablePath);
-            }
             return this.createClientStateVariable(variablePath);
         }
-        
+
         if (path.startsWith('localStorage.')) {
             const variablePath = path.substring(13); // Remove 'localStorage.' prefix
-            if (this.onReactiveVariableDetected) {
-                this.onReactiveVariableDetected('localStorage', variablePath);
-            }
             return this.createLocalStoreVariable(variablePath);
         }
-        
+
         if (path.startsWith('global.')) {
             const variablePath = path.substring(7); // Remove 'global.' prefix
-            if (this.onReactiveVariableDetected) {
-                this.onReactiveVariableDetected('global', variablePath);
-            }
             return this.createGlobalVariable(variablePath);
         }
 

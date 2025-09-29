@@ -51,5 +51,6 @@ class AttributeHandler extends TagHandler {
     refresh(data) {
         this.data = data;
         this.updateAttribute();
+        return Promise.resolve();
     }
 }

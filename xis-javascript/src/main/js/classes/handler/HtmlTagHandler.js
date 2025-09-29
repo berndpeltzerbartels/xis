@@ -24,8 +24,10 @@ class HtmlTagHandler extends TagHandler {
      */
     refresh(data) {
         this.data = data;
-        this.headTagHandler.refresh(data);
-        this.bodyTagHandler.refresh(data);
+        return Promise.all([
+            this.headTagHandler.refresh(data),
+            this.bodyTagHandler.refresh(data)
+        ]);
     }
 
     /**

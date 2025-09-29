@@ -32,6 +32,7 @@ class ActionButtonHandler extends TagHandler {
     refresh(data) {
         this.data = data;
         this.action = this.actionExpression.evaluate(data);
+        return Promise.resolve();
     }
 
     addParameter(name, value) {

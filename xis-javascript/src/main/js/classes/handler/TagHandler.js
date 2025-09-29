@@ -13,6 +13,7 @@ class TagHandler {
         this.priority = 'normal';
         this.expressionParser = new ExpressionParser(elFunctions);
         this.reactiveVariables = new Set();
+        this.hasGlobals = false;
     }
 
 
@@ -21,7 +22,6 @@ class TagHandler {
     }
 
     addDescendantHandler(handler) {
-        console.log('type: ' + this.type + 'handler: ' + handler.type);
         handler.parentHandler = this;
         this.descendantHandlers.push(handler);
         handler.publishBindEvent();
@@ -43,9 +43,20 @@ class TagHandler {
         throw new Error('abstract method');
     }
 
-    reapply() {
-        // Default: do nothing - most handlers don't need reactive updates
-        // Override in specific handlers like IfTagHandler, ForeachHandler, WidgetHandler
+
+    refreshWithStoredData(invoker) {
+        if (invoker == this) {
+            return;
+        }
+        for (var handler of this.descendantHandlers) {
+            handler.refreshWithStoredData(invoker);
+        }
+    }
+
+    notifyGlobals() {
+        if (this.parentHandler) {
+            this.parentHandler.notifyGlobals();
+        }
     }
 
     /**
@@ -69,12 +80,14 @@ class TagHandler {
      * Refreshes descendant handlers.
      * 
      * @param {Data} data 
+     * @returns {Promise<void>}
      */
     refreshDescendantHandlers(data) {
-        for (var handler of this.descendantHandlers) {
-            handler.refresh(data);
+        const promises = [];
+        for (const handler of this.descendantHandlers) {
+            promises.push(handler.refresh(data));
         }
-        return data;
+        return Promise.all(promises).then(() => {});
     }
 
 
@@ -145,16 +158,7 @@ class TagHandler {
     expressionFromAttribute(attrName) {
         var attr = this.tag.getAttribute(attrName);
         if (attr) {
-            const listener = (context, path) => {
-                const key = `${context}.${path}`;
-                if (!this.reactiveVariables.has(key)) {
-                    this.reactiveVariables.add(key);
-                    app.eventPublisher.addEventListener(EventType.REACTIVE_DATA_CHANGED, () => {
-                        this.reapply();
-                    });
-                }
-            };
-            return this.expressionParser.parse(attr, listener);
+            return this.expressionParser.parse(attr);
         }
     }
 

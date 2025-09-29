@@ -20,7 +20,7 @@ class FormElementHandler extends TagHandler {
         this.binding = this.bindingExpression.evaluate(data);
         const formHandler = this.getParentFormHandler();
         formHandler.onElementHandlerRefreshed(this, this.binding);
-        this.refreshDescendantHandlers(data);
+        return this.refreshDescendantHandlers(data);
     }
 
     refreshFormData(data) {

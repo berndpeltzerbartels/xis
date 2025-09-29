@@ -19,10 +19,11 @@ class ForeachHandler extends TagHandler {
     /**
      * @public
      * @param {Data} data
+     * @returns {Promise<void>}
      */
     refresh(data) {
         this.data = data;
-        this.renderItems(data);
+        return this.renderItems(data);
     }
 
     reapply() {
@@ -30,39 +31,33 @@ class ForeachHandler extends TagHandler {
     }
 
     renderItems(data) {
-        var arrayPath = this.doSplit(this.arrayPathExpression.evaluate(data), '.');
-        var arr = data.getValue(arrayPath);
-        if (!arr) {
-          return;
-        }
+        const arrayPath = this.doSplit(this.arrayPathExpression.evaluate(data), '.');
+        const arr = data.getValue(arrayPath);
+        if (!arr) throw new Error('No array found for foreach');
         this.cache.sizeUp(arr.length);
-        for (var i = 0; i < this.cache.length; i++) {
-            var subData = new Data({}, data);
+        const promises = [];
+        for (let i = 0; i < this.cache.length; i++) {
+            const subData = new Data({}, data);
             this.setValidationPath(subData, this.varName, i);
             subData.setValue([this.varName + 'Index'], i);
             subData.setValue([this.varName], arr[i]);
-            var children = this.cache.getChildren(i);
+            const children = this.cache.getChildren(i);
             if (i < arr.length) {
-                for (var child of children) {
-                    if (child.parentNode != this.tag) {
-                        this.tag.appendChild(child);
-                    }
-                    const childHandler = this.tagHandlers.getRootHandler(child);
-                    childHandler.parentHandler = this;
-                    this.descendantHandlers.push(childHandler);
-                    childHandler.refresh(subData);
+                for (const child of children) {
+                    if (child.parentNode !== this.tag) this.tag.appendChild(child);
+                    const handler = this.tagHandlers.getRootHandler(child);
+                    handler.parentHandler = this;
+                    this.descendantHandlers.push(handler);
+                    promises.push(handler.refresh(subData));
                 }
             } else {
-                // Cache is too long. We remove unused elements 
-                for (var child of children) {
-                    if (child.parentNode == this.tag) {
-                        this.tag.removeChild(child);
-                    } else {
-                        break;
-                    }
+                for (const child of children) {
+                    if (child.parentNode === this.tag) this.tag.removeChild(child);
+                    else break;
                 }
             }
         }
+        return Promise.all(promises).then(() => {});
     }
 
     setValidationPath(subData, varName, index) {

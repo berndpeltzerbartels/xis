@@ -10,7 +10,8 @@
  * @property {Array} reloadWidgets
  * @property {any} clientStateData
  * @property {any} validatorMessages
- * 
+ * @property {Object} tagVariables
+ * @property {Object} idVariables
  */
 
 class ServerResponse {
@@ -27,7 +28,15 @@ class ServerResponse {
         this.widgetContainerId = '';
         this.reloadWidgets = [];
         this.clientStateData = {};
-        this.validatorMessages = { };
+    this.validatorMessages = { };
+    /**
+     * Tag-gebundene Variablen, z.B. { title: "Seitentitel" }
+     */
+    this.tagVariables = {};
+    /**
+     * ID-gebundene Variablen, z.B. { headline: "Produktname" }
+     */
+    this.idVariables = {};
     }
 }
 

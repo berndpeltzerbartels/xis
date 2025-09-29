@@ -1,3 +1,5 @@
+
+// Annahme: TagContentSetter ist global verfügbar (z.B. window.TagContentSetter)
 class Client {
 
 
@@ -11,6 +13,7 @@ class Client {
         this.clientId = randomString();
         this.zoneId = timeZone();
         this.clientState = {};
+        this.tagContentSetter = new TagContentSetter();
     }
 
     /**
@@ -334,10 +337,13 @@ class Client {
         serverResponse.clientStateData = obj.clientStateData;
         serverResponse.widgetContainerId = obj.widgetContainerId;
         serverResponse.redirectUrl = obj.redirectUrl;
+        serverResponse.tagVariables = obj.tagVariables || {};
+        serverResponse.idVariables = obj.idVariables || {};
         data.setValue(['state'], serverResponse.clientStateData);
         data.setValue(['localStorage'], serverResponse.localStorageData);
         data.setValue(['validation'], obj.validatorMessages);
         this.storeData(serverResponse);
+        this.tagContentSetter.apply(document, serverResponse.idVariables, serverResponse.tagVariables);
         return serverResponse;
     }
 

@@ -7,11 +7,9 @@ class TextContentParser {
     /**
     * Parses text content with embedded expressions in the form of ${expression}.
     * @param {string} src - The source text to parse.
-    * @param {function} onReactiveVariableDetected - Optional callback called when a reactive variable is detected. Receives (context, path) where context is 'state'/'localStorage'/'global' and path is the variable path without prefix.
     * @returns {TextContent} The parsed TextContent object.
     */
-    constructor(src, onReactiveVariableDetected = () => {}) {
-        this.onReactiveVariableDetected = onReactiveVariableDetected;
+    constructor(src) {
         this.chars = new CharIterator(src);
         this.parts = [];
     }
@@ -23,7 +21,7 @@ class TextContentParser {
     */
     parse() {
         this.readText();
-        return new TextContent(this.parts, this.onReactiveVariableDetected);
+        return new TextContent(this.parts);
     }
 
 
@@ -98,7 +96,7 @@ class TextContentParser {
     * @returns {VarPart|false} The variable part object or false if parsing failed.
     */
     tryCreateVarPart(src) {
-        var expression = new ExpressionParser(elFunctions).parse(src, this.onReactiveVariableDetected);
+    var expression = new ExpressionParser(elFunctions).parse(src);
         if (expression) {
             return {
                 expression: expression,

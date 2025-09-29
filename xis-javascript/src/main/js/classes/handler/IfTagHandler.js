@@ -12,8 +12,8 @@ class IfTagHandler extends TagHandler {
 
     refresh(data) {
         this.data = data;
-        var newConditionValue = this.expression.evaluate(data);
-        if (this.conditionValue != newConditionValue) {
+        const newConditionValue = this.expression.evaluate(data);
+        if (this.conditionValue !== newConditionValue) {
             if (newConditionValue) {
                 this.linkChildNodes();
             } else {
@@ -22,8 +22,9 @@ class IfTagHandler extends TagHandler {
         }
         this.conditionValue = newConditionValue;
         if (this.conditionValue) {
-            this.refreshDescendantHandlers(data);
+            return this.refreshDescendantHandlers(data);
         }
+        return Promise.resolve();
     }
 
     reapply() {

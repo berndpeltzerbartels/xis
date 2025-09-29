@@ -9,10 +9,8 @@ class TextContent {
 
     /**
      * @param {array} parts
-     * @param {TagHandler} handler
      */
-    constructor(parts, handler) {
-        this.handler = handler;
+    constructor(parts) {
         this.parts = parts;
     }
 
@@ -70,7 +68,7 @@ class TextContent {
                 });
             }
         }
-        return new TextContent(parts, this.handler);
+    return new TextContent(parts);
     }
 
 }

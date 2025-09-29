@@ -15,6 +15,9 @@
  * @property {String} type
  */
 // TODO Widget-RootHandler darf kein descendant handler sein, sondern muss in WidgetContainerHandler integriert werden.
+
+import { TagContentSetter } from "../TagContentSetter";
+
 // Die Descendanthandler werden eventuell entfernt. Die WidgetInstance ist besser geeignet.
 class WidgetContainerHandler extends TagHandler {
 
@@ -34,6 +37,7 @@ class WidgetContainerHandler extends TagHandler {
         this.containerIdExpression = this.variableTextContentFromAttribute('container-id');
         this.defaultWidgetExpression = this.variableTextContentFromAttribute('default-widget');
         this.type = 'widget-container-handler';
+        this.tagContentSetter = new TagContentSetter();
     }
 
     /**
@@ -71,9 +75,11 @@ class WidgetContainerHandler extends TagHandler {
         this.bindDefaultWidgetInitial(data);
         var widgetParameters = this.widgetState ? this.widgetState.widgetParameters : {};
         this.widgetState = new WidgetState(app.pageController.resolvedURL, widgetParameters);
+        var promises = [];
         if (this.widgetInstance) {
-            this.reloadDataAndRefresh(data);
+           promises.push(this.reloadDataAndRefresh(data));
         }
+        return Promise.all(promises.concat([this.refreshDescendantHandlers(data)]));
     }
 
     /**
@@ -154,22 +160,24 @@ class WidgetContainerHandler extends TagHandler {
      * @private
      */
     reloadDataAndRefresh(parentData) {
-        this.doLoad(parentData, SCOPE_TREE);
+        return this.doLoad(parentData, SCOPE_TREE);
     }
 
     triggerWidgetReload() {
-        this.doLoad(new Data({}), SCOPE_CONTROLLER);
+        return this.doLoad(new Data({}), SCOPE_CONTROLLER);
     }
 
     doLoad(parentData, scope) {
         if (this.widgetInstance) {
-            app.backendService.loadWidgetData(this.widgetInstance, this.widgetState, this)
+            return app.backendService.loadWidgetData(this.widgetInstance, this.widgetState, this)
                 .then(data => { data.parentData = parentData; data.scope = scope; return data; })
                 .then(data => { console.log("data"+(typeof data)); data.parentData = parentData; data.scope = scope; return data; })
                 .then(data => { this.widgetState.data = data; return data; })
-                .then(data => this.refreshDescendantHandlers(data))
+                .then(data => this.refreshDescendantHandlers(data).then(() => data))
+                .then(data => this.tagContentSetter.apply(document, data.idVariables, data.tagVariables))
                 .catch(e => reportError(e));
         }
+        return Promise.resolve();
     }
 
 

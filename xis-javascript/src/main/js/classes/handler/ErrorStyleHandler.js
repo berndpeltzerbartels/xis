@@ -16,14 +16,15 @@ class ErrorStyleHandler extends TagHandler {
         }
         var errorStyleClass = this.errorStyleClassExpression.evaluate(data);
         if (!errorStyleClass) {
-            return;
+            return Promise.resolve();
         }
         var errorMessagePath = ['validation', 'errors', this.bindingExpression.evaluate(data)];
         var errorMessage = data.getValue(errorMessagePath);
         if (!errorMessage) {
-            return; // no error message, nothing to do
+            return Promise.resolve(); // no error message, nothing to do
         }
         this.lastErrorStyle = errorStyleClass;
         this.tag.classList.add(errorStyleClass);
+        return Promise.resolve();
     }
 }

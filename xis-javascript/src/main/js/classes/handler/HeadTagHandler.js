@@ -71,8 +71,8 @@ class HeadTagHandler extends TagHandler {
     refresh(data) {
         this.data = data;
         this.refreshTitle(data);
-        this.refreshDescendantHandlers(data);
         this.refreshScriptTags(data);
+        return this.refreshDescendantHandlers(data);
     }
 
     /**
