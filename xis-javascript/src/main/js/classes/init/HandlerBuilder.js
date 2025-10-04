@@ -29,12 +29,10 @@ class HandlerBuilder {
             parentHandler = new RootTagHandler(node);
             this.tagHandlers.mapRootHandler(node, parentHandler);
         }
-        if (isElement(node)) {
-            if (!node.getAttribute('ignore')) {
-                this.createElementHandler(node, parentHandler);
-            }
+        if ((isElement(node) && !node.getAttribute('ignore')) || isDocumentFragment(node)) {
+            this.createElementHandler(node, parentHandler);
         } else {
-           this.createTextNodeHandler(node, parentHandler);
+            this.createTextNodeHandler(node, parentHandler);
         }
         return parentHandler;
     }
@@ -47,7 +45,7 @@ class HandlerBuilder {
     */
     createElementHandler(element, parentHandler) {
         let handler;
-        if (element.getAttribute('xis:binding') && element.getAttribute('xis:error-class')) {
+        if (element.getAttribute && element.getAttribute('xis:binding') && element.getAttribute('xis:error-class')) {
             // TODO write a test
             parentHandler.addDescendantHandler(new ErrorStyleHandler(element));
         }
@@ -86,32 +84,32 @@ class HandlerBuilder {
                 handler = new ParameterTagHandler(element, parentHandler);
                 parentHandler.addDescendantHandler(handler);
                 break;
-            case 'input': 
+            case 'input':
                 if (element.getAttribute('xis:binding')) {
                     handler = this.createInputHandler(element);
                 }
                 break;
-            case 'select': 
+            case 'select':
                 if (element.getAttribute('xis:binding')) {
                     handler = this.createSelectHandler(element);
                 }
                 break;
-            case 'form': 
+            case 'form':
                 if (element.getAttribute('xis:binding')) {
                     handler = this.createFormHandler(element);
                 }
                 break;
-            case 'submit': 
+            case 'submit':
                 if (element.getAttribute('xis:action')) {
                     handler = this.createSubmitHandler(element);
                 }
                 break;
-            case 'button': 
+            case 'button':
                 if (element.getAttribute('xis:action')) {
                     handler = this.createButtonHandler(element);
                 }
                 break;
-            case 'a': 
+            case 'a':
                 if (element.getAttribute('xis:page') || element.getAttribute('xis:widget') || element.getAttribute('xis:action')) {
                     handler = this.createLinkHandler(element);
                 }
@@ -121,10 +119,11 @@ class HandlerBuilder {
                 break;
             case 'xis:if':
                 handler = new IfTagHandler(element);
-                break; 
+                break;
         }
-
-        this.initializeAttributes(element, handler ? handler : parentHandler);
+        if (isElement(element)) { 
+            this.initializeAttributes(element, handler ? handler : parentHandler); 
+        }
         if (handler) {
             parentHandler.addDescendantHandler(handler);
             this.tagHandlers.mapHandler(element, handler);
@@ -161,7 +160,7 @@ class HandlerBuilder {
     createSelectHandler(element) {
         return new SelectTagHandler(element, this.tagHandlers);
     }
-    
+
     /**
      * Initializes attribute handlers for dynamic attributes.
      * @private

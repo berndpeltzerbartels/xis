@@ -34,7 +34,6 @@ public class ControllerWrapper {
     private Collection<ControllerMethod> localStorageOnlyMethods;
     private Collection<ControllerMethod> clientStateOnlyMethods;
     private Collection<ControllerMethod> globalVariableOnlyMethods;
-    private Collection<ControllerMethod> tagContentOnlyMethods;
     private ControllerResultMapper controllerResultMapper;
 
     void invokeGetModelMethods(ClientRequest request, ControllerResult controllerResult) {

@@ -35,7 +35,7 @@ class Initializer {
      * @returns 
      */
     normalizeElement(element) {
-        if (!isElement(element)) {
+        if (!isElement(element) && !isDocumentFragment(element)) {
             return element;
         }
         return new DomNormalizer(element, this.domAccessor).normalize();

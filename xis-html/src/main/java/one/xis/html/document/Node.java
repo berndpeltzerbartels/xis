@@ -10,4 +10,7 @@ public interface Node {
     Element getParentNode();
 
     void setNextSibling(Node nextSibling);
+
+    int getNodeType();
+
 }

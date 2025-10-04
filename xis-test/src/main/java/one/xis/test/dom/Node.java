@@ -4,6 +4,7 @@ public interface Node {
 
     int ELEMENT_NODE = 1;
     int TEXT_NODE = 3;
+    int DOCUMENT_FRAGMENT_NODE = 11;
 
     void remove();
 
@@ -21,7 +22,13 @@ public interface Node {
 
     NodeList getChildNodes();
 
-    Element getParentElement();
+    Node getParentElement();
 
     String asString();
+
+    void removeChild(Node b);
+
+    void insertBefore(Node b, Node a);
+
+    NodeList getElementsByTagName(String name);
 }

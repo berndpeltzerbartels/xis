@@ -1,5 +1,6 @@
 class BodyTagHandler extends TagHandler {
 
+
     /**
      * @param {TagHandlers} tagHandlers
      */
@@ -9,6 +10,8 @@ class BodyTagHandler extends TagHandler {
         this.type = 'body-handler';
         this.attributeHandlers = [];
         this.persistentNodes = { start: [], end: [] };
+        this.data = undefined;
+        this.buffer = undefined;
 
         // Find, remove, and store persistent nodes from the body once at initialization.
         const nodesToScan = this.nodeListToArray(this.tag.childNodes);
@@ -25,34 +28,63 @@ class BodyTagHandler extends TagHandler {
             }
         }
     }
+    /**
+     * Commits the buffer to the real body element.
+     * Removes all non-persistent children and inserts the buffer between persistent start and end nodes.
+     */
 
-    refresh(data, formData) {
+    commitBuffer() {
+        while (this.buffer.firstChild) {
+            this.tag.appendChild(this.buffer.firstChild);
+        }
+    }
+
+
+    initBuffer() {
+        // Create a DocumentFragment as buffer
+        this.buffer = document.createDocumentFragment();
+        // Add persistent start nodes
+        for (const node of this.persistentNodes.start) {
+            this.buffer.appendChild(node);
+        }
+        while (this.tag.firstChild) {
+            this.buffer.appendChild(this.tag.firstChild);
+        }
+        // Add persistent end nodes
+        for (const node of this.persistentNodes.end) {
+            this.buffer.appendChild(node);
+        }
+    }
+
+
+
+    refresh(data) {
         this.data = data;
+        this.initBuffer();
         const attributePromises = this.attributeHandlers.map(h => h.refresh(data));
-        const descendantPromise = this.refreshDescendantHandlers(data, formData);
-        return Promise.all(attributePromises.concat([descendantPromise]));
+        const descendantPromise = this.refreshDescendantHandlers(data);
+        return Promise.all(attributePromises.concat([descendantPromise])).then(() => {
+            this.commitBuffer();
+        });
     }
 
     /**
     * Rebuilds the body with persistent nodes and new content from the template.
     * @public
-    * @param {Element} bodyTemplate Contains the new content.
+    * @param {DocumentFragment} bodyTemplate Contains the new content.
     */
     bind(bodyTemplate) {
-        // 1. Add persistent "start" nodes to the empty body.
-        this.persistentNodes.start.forEach(node => this.tag.appendChild(node));
-
-        // 2. Move new content from the template into the body.
-        const newContentNodes = this.nodeListToArray(bodyTemplate.childNodes);
-        newContentNodes.forEach(node => {
-            bodyTemplate.removeChild(node);
+        this.bodyTemplate = bodyTemplate;
+       // Add persistent start nodes
+        for (const node of this.persistentNodes.start) {
             this.tag.appendChild(node);
-        });
-
-        // 3. Add persistent "end" nodes.
-        this.persistentNodes.end.forEach(node => this.tag.appendChild(node));
-
-        // 4. Set up handlers for the new content.
+        }
+        while (bodyTemplate.firstChild) {
+            this.tag.appendChild(bodyTemplate.firstChild);
+        }
+        for (const node of this.persistentNodes.end) {
+            this.tag.appendChild(node);
+        }
         var bodyTemplateHandler = this.tagHandlers.getRootHandler(bodyTemplate);
         this.addDescendantHandler(bodyTemplateHandler);
     }
@@ -64,6 +96,7 @@ class BodyTagHandler extends TagHandler {
     * @param {Element} bodyTemplate
     */
     release(bodyTemplate) {
+        // Move all dynamic children from the body tag back to the bodyTemplate. The body will be empty after this call.
         for (var node of this.nodeListToArray(this.tag.childNodes)) {
             this.tag.removeChild(node);
             bodyTemplate.appendChild(node);
@@ -76,6 +109,7 @@ class BodyTagHandler extends TagHandler {
     * @param {any} attributes
     */
     bindAttributes(attributes) {
+        // Bind attributes to the body tag, creating AttributeHandlers for dynamic values
         for (var name of Object.keys(attributes)) {
             var attribute = attributes[name];
             if (attribute.indexOf('${') != -1) {
@@ -91,6 +125,7 @@ class BodyTagHandler extends TagHandler {
     * @public
     */
     clearAttributes() {
+        // Removes all attributes from the body tag, except 'onload'.
         for (var name of this.tag.getAttributeNames()) {
             if (name == 'onload') {
                 continue;

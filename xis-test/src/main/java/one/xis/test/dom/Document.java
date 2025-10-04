@@ -40,6 +40,8 @@ public interface Document {
 
     String getTitle();
 
+    DocumentFragmentImpl createDocumentFragment();
+
     Element createElement(String name);
 
     Location getLocation();

@@ -30,7 +30,7 @@ public class ElementImpl extends NodeImpl implements Element {
     private final Map<String, Collection<Consumer<Object>>> eventListeners = new HashMap<>();
 
     public ElementImpl(String localName) {
-        super(NodeImpl.ELEMENT_NODE);
+        super(Node.ELEMENT_NODE);
         this.localName = localName;
     }
 
@@ -54,25 +54,6 @@ public class ElementImpl extends NodeImpl implements Element {
         }
     }
 
-    @Override
-    public void removeChild(Node b) {
-        var node = getChildNodes().stream().filter(n -> n == b).findFirst()
-                .orElseThrow(() -> new IllegalStateException("Node not found"));
-        node.remove();
-    }
-
-    @Override
-    public void insertBefore(@NonNull Node before, @NonNull Node marker) {
-        var previousChild = ((NodeImpl) marker).getPreviousSibling();
-        if (previousChild == null) {
-            setFirstChild((NodeImpl) before);
-        } else {
-            previousChild.setNextSibling((NodeImpl) before);
-        }
-        ((NodeImpl) before).setNextSibling((NodeImpl) marker);
-        ((NodeImpl) before).setParentNode(this);
-        updateChildNodes();
-    }
 
     @Override
     public List<String> getAttributeNames() {
@@ -126,12 +107,6 @@ public class ElementImpl extends NodeImpl implements Element {
         return null;
     }
 
-    @Override
-    public NodeList getElementsByTagName(String name) {
-        var list = new ArrayList<Node>();
-        findElements(e -> e.getLocalName().equals(name), list);
-        return new NodeList(list);
-    }
 
     @Override
     protected void findElements(Predicate<ElementImpl> predicate, Collection<Node> result) {
@@ -475,5 +450,5 @@ public class ElementImpl extends NodeImpl implements Element {
     public void setInnerText(String text) {
         setTextContent(text);
     }
-    
+
 }

@@ -7,6 +7,15 @@ function isElement(node) {
 }
 
 /**
+ * @param {Node} node
+ * @returns {boolean}
+ */
+function isDocumentFragment(node) {
+    return node.nodeType == 11;
+}
+
+
+/**
  * Finds a unique element
  * 
  * @param {string} name 

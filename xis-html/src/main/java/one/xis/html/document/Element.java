@@ -41,6 +41,11 @@ public class Element implements Node {
         return "<" + localName + ">";
     }
 
+    @Override
+    public int getNodeType() {
+        return 1; // ELEMENT_NODE
+    }
+
     public String getTagName() {
         return localName.toUpperCase();
     }
@@ -56,8 +61,8 @@ public class Element implements Node {
         }
         Node child = firstChild;
         while (child != null) {
-            if (child instanceof Element) {
-                Element found = ((Element) child).getElementByTagName(tagName);
+            if (child instanceof Element childElement) {
+                Element found = childElement.getElementByTagName(tagName);
                 if (found != null) {
                     return found;
                 }
@@ -69,7 +74,7 @@ public class Element implements Node {
 
     public void appendChild(Node newChild) {
         if (newChild instanceof Element) {
-            ((Element) newChild).setParentNode(this);
+            newChild.setParentNode(this);
         }
         if (firstChild == null) {
             firstChild = newChild;
@@ -89,8 +94,8 @@ public class Element implements Node {
         }
         Node child = firstChild;
         while (child != null) {
-            if (child instanceof Element) {
-                result.addAll(((Element) child).getElementsByTagName(name));
+            if (child instanceof Element childElement) {
+                result.addAll(childElement.getElementsByTagName(name));
             }
             child = child.getNextSibling();
         }

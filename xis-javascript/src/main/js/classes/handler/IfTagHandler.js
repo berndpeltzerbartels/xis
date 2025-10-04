@@ -7,7 +7,7 @@ class IfTagHandler extends TagHandler {
         this.type = 'if-tag-handler';
         this.expression = this.expressionFromAttribute('condition');
         this.childNodes = this.nodeListToArray(tag.childNodes);
-        this.conditionValue = true;
+        this.conditionValue = undefined;
     }
 
     refresh(data) {

@@ -16,8 +16,6 @@
  */
 // TODO Widget-RootHandler darf kein descendant handler sein, sondern muss in WidgetContainerHandler integriert werden.
 
-import { TagContentSetter } from "../TagContentSetter";
-
 // Die Descendanthandler werden eventuell entfernt. Die WidgetInstance ist besser geeignet.
 class WidgetContainerHandler extends TagHandler {
 

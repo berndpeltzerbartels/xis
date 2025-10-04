@@ -40,9 +40,14 @@ public class DocumentImpl implements one.xis.test.dom.Document {
     }
 
 
-    /* ------------------------------------------
-     * Document-API
-     * ------------------------------------------ */
+    /**
+     * Creates a DocumentFragment like in the DOM-API.
+     */
+    @Override
+    public DocumentFragmentImpl createDocumentFragment() {
+        return new DocumentFragmentImpl();
+    }
+
 
     @Override
     public Element createElement(String name) {

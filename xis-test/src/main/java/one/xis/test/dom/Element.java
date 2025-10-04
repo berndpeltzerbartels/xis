@@ -25,13 +25,8 @@ public interface Element extends Node {
 
     Map<String, String> getAttributes();
 
-    void removeChild(Node b);
-
-    void insertBefore(Node b, Node a);
 
     Element getElementById(@NonNull String id);
-
-    NodeList getElementsByTagName(String name);
 
 
     static ElementImpl createElement(String name) {

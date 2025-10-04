@@ -81,7 +81,11 @@ class Pages {
     */
     loadPageBody(pageId) {
         return this.client.loadPageBody(pageId).then(content => {
-            var templateElement = htmlToElement(content);
+            var body = htmlToElement(content);
+            var templateElement = document.createDocumentFragment();
+            for (const node of nodeListToArray(body.childNodes)) {
+                templateElement.appendChild(node);
+            }
             templateElement = normalizeElement(templateElement);
             initializeElement(templateElement);
             var page = this.pages[pageId];

@@ -65,7 +65,7 @@ class DomNormalizer {
             normalizedElement = this.normalizeHtmlElement(element);
         }
         for (var child of nodeListToArray(normalizedElement.childNodes)) {
-            if (isElement(child)) {
+            if (isElement(child) || isDocumentFragment(child)) {
                 this.doNormalize(child);
             }
         }
@@ -79,6 +79,9 @@ class DomNormalizer {
     * @param {Element} element
     */
     normalizeHtmlElement(element) {
+        if (!element.getAttributeNames) {
+            return element; // DocumentFragment
+        }
         if (element.getAttribute('xis:repeat')) {
             this.surroundWithForeachTag(element);
             element.removeAttribute('xis:repeat');

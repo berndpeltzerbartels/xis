@@ -1,8 +1,10 @@
 package one.xis.test.dom;
 
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.function.Predicate;
 
@@ -25,7 +27,7 @@ public abstract class NodeImpl extends GraalVMProxy implements Node {
     public NodeImpl(int nodeType) {
         this.nodeType = nodeType;
     }
-    
+
 
     @Override
     public void remove() {
@@ -37,7 +39,7 @@ public abstract class NodeImpl extends GraalVMProxy implements Node {
                 throw new IllegalStateException();
             }
         }
-        if (parentNode != null && parentNode.firstChild == this) {
+        if (parentNode != null && parentNode.getFirstChild() == this) {
             parentNode.setFirstChild(getNextSibling());
         }
         setNextSibling(null);
@@ -56,7 +58,9 @@ public abstract class NodeImpl extends GraalVMProxy implements Node {
     @Override
     public void appendChild(Node node) {
         var nodeImpl = (NodeImpl) node;
-
+        if (nodeImpl.getParentNode() != null) {
+            nodeImpl.remove();
+        }
         // 1) eigene Baumstruktur verketten
         nodeImpl.parentNode = this;
         if (firstChild == null) {
@@ -78,17 +82,40 @@ public abstract class NodeImpl extends GraalVMProxy implements Node {
         }
     }
 
+    @Override
+    public void removeChild(Node b) {
+        getChildNodes().stream().filter(n -> n == b).findFirst().ifPresent(Node::remove);
+    }
+
+    @Override
+    public void insertBefore(@NonNull Node before, @NonNull Node marker) {
+        NodeImpl beforeImpl = (NodeImpl) before;
+        NodeImpl markerImpl = (NodeImpl) marker;
+        // 1. Aus altem Parent entfernen (falls vorhanden)
+        if (beforeImpl.getParentNode() != null) {
+            beforeImpl.remove();
+        }
+        // 2. In neuen Parent einhängen
+        var previousChild = markerImpl.getPreviousSibling();
+        if (previousChild == null) {
+            setFirstChild(beforeImpl);
+        } else {
+            previousChild.setNextSibling(beforeImpl);
+        }
+        beforeImpl.setNextSibling(markerImpl);
+        beforeImpl.setParentNode(this);
+        updateChildNodes();
+    }
+
+    @Override
+    public NodeList getElementsByTagName(String name) {
+        var list = new ArrayList<Node>();
+        findElements(e -> e.getLocalName().equals(name), list);
+        return new NodeList(list);
+    }
+
     void updateChildNodes() {
         childNodes.updateChildNodes(this);
-        /*
-        if (firstChild != null) {
-            firstChild.updateChildNodes();
-        }
-        if (nextSibling != null) {
-            nextSibling.updateChildNodes();
-        }
-
-         */
     }
 
     void updateTreeByChildNodes() {
@@ -134,7 +161,12 @@ public abstract class NodeImpl extends GraalVMProxy implements Node {
     protected abstract void evaluateContent(StringBuilder builder, int indent);
 
     @Override
-    public Element getParentElement() {
-        return (Element) parentNode;
+    public Node getParentElement() {
+        NodeImpl p = getParentNode();
+        while (p != null && !(p instanceof ElementImpl)) {
+            p = p.getParentNode();
+        }
+        return p;
     }
+
 }

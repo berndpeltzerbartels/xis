@@ -1,6 +1,12 @@
 class ParameterTagHandler extends TagHandler {
     constructor(element, parentHandler) {
         super(element);
+        if(!parentHandler) {
+            throw new Error("ParameterTagHandler must have a parent handler.");
+        }
+        if (!parentHandler.addParameter) {
+            throw new Error("Parent handler must implement addParameter method.");
+        }
         this.parentHandler = parentHandler;
     }
 
@@ -9,6 +15,7 @@ class ParameterTagHandler extends TagHandler {
         const descendantPromise = this.refreshDescendantHandlers(data); // AttributeHandler !
         var name = this.getAttribute('name');
         var value = this.hasAttribute("value") ? this.getAttribute('value') : this.tag.innerText;
+        debugger;
         this.parentHandler.addParameter(name, value);
         return descendantPromise;
     }

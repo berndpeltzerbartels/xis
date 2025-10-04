@@ -7,6 +7,7 @@ import org.graalvm.polyglot.proxy.ProxyExecutable;
 import org.graalvm.polyglot.proxy.ProxyObject;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -20,6 +21,7 @@ public class GraalVMProxy implements ProxyObject {
     private final Map<String, Method> nonSettersOrGetters;
 
     private final Set<String> memberKeys;
+    private final Map<String, Object> staticFields;
 
     private static final ConcurrentHashMap<Class<?>, SubtypeMeta> META_CACHE = new ConcurrentHashMap<>();
 
@@ -31,6 +33,7 @@ public class GraalVMProxy implements ProxyObject {
         this.setters = this.meta.setters;
         this.nonSettersOrGetters = this.meta.nonSettersOrGetters;
         this.memberKeys = this.meta.memberKeys;
+        this.staticFields = this.meta.staticFields;
     }
 
     private static class SubtypeMeta {
@@ -38,6 +41,7 @@ public class GraalVMProxy implements ProxyObject {
         final Map<String, Method> setters;
         final Map<String, Method> nonSettersOrGetters;
         final Set<String> memberKeys;
+        final Map<String, Object> staticFields;
 
         SubtypeMeta(Class<?> clazz) {
             this.getters = MethodUtils.findGettersByFieldName(clazz);
@@ -50,6 +54,23 @@ public class GraalVMProxy implements ProxyObject {
             memberKeys = new HashSet<>(getters.keySet());
             memberKeys.addAll(setters.keySet());
             memberKeys.addAll(nonSettersOrGetters.keySet());
+
+            // Find all public static final fields (constants)
+            staticFields = new HashMap<>();
+            Class<?> c = clazz;
+            while (c != null) {
+                for (var field : c.getFields()) {
+                    int mod = field.getModifiers();
+                    if (Modifier.isStatic(mod) && Modifier.isFinal(mod) && Modifier.isPublic(mod)) {
+                        try {
+                            staticFields.put(field.getName(), field.get(null));
+                        } catch (IllegalAccessException ignored) {
+                        }
+                    }
+                }
+                c = c.getSuperclass();
+            }
+            memberKeys.addAll(staticFields.keySet());
         }
     }
 
@@ -63,7 +84,9 @@ public class GraalVMProxy implements ProxyObject {
         if (key.equals("toString")) {
             return this.toString();
         }
-        // System.out.println("getMember called with key: " + key);
+        if (staticFields.containsKey(key)) {
+            return staticFields.get(key);
+        }
         var getter = getters.get(key);
         if (getter != null) {
             return MethodUtils.doInvoke(this, getter);

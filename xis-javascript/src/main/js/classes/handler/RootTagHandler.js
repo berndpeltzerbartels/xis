@@ -6,6 +6,7 @@ class RootTagHandler extends TagHandler {
 
     constructor(tag) {
         super(tag);
+        this.type = 'root-handler';
     }
 
     /**

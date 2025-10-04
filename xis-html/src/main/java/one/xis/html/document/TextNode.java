@@ -13,4 +13,9 @@ public class TextNode implements Node {
     public String toHtml() {
         return text;
     }
+
+    @Override
+    public int getNodeType() {
+        return 3; // TEXT_NODE
+    }
 }

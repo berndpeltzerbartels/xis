@@ -61,4 +61,9 @@ public class NodeList {
             child = child.getNextSibling();
         }
     }
+
+    public void remove(Node node) {
+        nodes.remove(node);
+        length = nodes.size();
+    }
 }

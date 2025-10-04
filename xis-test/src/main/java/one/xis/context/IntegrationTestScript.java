@@ -2,7 +2,7 @@ package one.xis.context;
 
 import lombok.Getter;
 import one.xis.js.Javascript;
-import one.xis.test.dom.Node;
+import one.xis.test.dom.NodeConstants;
 import one.xis.test.js.Array;
 import one.xis.test.js.JSUtil;
 
@@ -61,7 +61,7 @@ class IntegrationTestScript {
         bindings.put("atob", testEnvironment.getHtmlObjects().getAtob());
         bindings.put("encodeURIComponent", testEnvironment.getHtmlObjects().getEncodeURIComponent());
         bindings.put("setTimeout", testEnvironment.getHtmlObjects().getSetTimeout());
-        bindings.put("Node", Node.class);
+        bindings.put("Node", new NodeConstants());
         bindings.put("Array", new Array());
         bindings.put("debug", debugFunction);
         // bindings.put("console", testEnvironment.getHTML_OBJECTS().getConsole());
@@ -78,7 +78,7 @@ class IntegrationTestScript {
         invoker.setBinding("atob", testEnvironment.getHtmlObjects().getAtob());
         invoker.setBinding("encodeURIComponent", testEnvironment.getHtmlObjects().getEncodeURIComponent());
         invoker.setBinding("setTimeout", testEnvironment.getHtmlObjects().getSetTimeout());
-        invoker.setBinding("Node", Node.class);
+        invoker.setBinding("Node", new NodeConstants());
         invoker.setBinding("Array", new Array());
         invoker.setBinding("debug", debugFunction);
         //  invoker.setBinding("console", testEnvironment.getHTML_OBJECTS().getConsole());
