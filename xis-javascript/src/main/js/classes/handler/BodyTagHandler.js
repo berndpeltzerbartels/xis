@@ -58,12 +58,37 @@ class BodyTagHandler extends TagHandler {
 
 
 
+    /**
+     * @public
+     * @param {Data} data
+     * @returns {Promise}
+     */
     refresh(data) {
         this.data = data;
+        return this.refreshDescendantHandlers(data).then(() => {
+            return this.refreshWithData(data);
+        });
+    }
+
+    /**
+     * @public
+     * @returns {Promise}
+     */
+    reapply(invoker) {
+        return this.reapplyDescendantHandlers(invoker).then(() => {
+            return this.refreshWithData(this.data);
+        });
+    }
+
+    /**
+     * @private
+     * @param {Data} data
+     * @returns {Promise}
+     */
+    refreshWithData(data) {
         this.initBuffer();
         const attributePromises = this.attributeHandlers.map(h => h.refresh(data));
-        const descendantPromise = this.refreshDescendantHandlers(data);
-        return Promise.all(attributePromises.concat([descendantPromise])).then(() => {
+        return Promise.all(attributePromises).then(() => {
             this.commitBuffer();
         });
     }

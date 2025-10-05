@@ -23,34 +23,49 @@ class ForeachHandler extends TagHandler {
      */
     refresh(data) {
         this.data = data;
-        return this.renderItems(data);
+        return this.renderItemsRefresh(data);
     }
 
-    reapply() {
-        this.renderItems(this.data);
+    /**
+     * @public
+     * @returns {Promise<void>}
+     */
+    reapply(invoker) {
+        return this.renderItemsReapply(this.data, invoker);
     }
 
-    renderItems(data) {
-        const path = this.arrayPathExpression.evaluate(data);
-        const arrayPath = this.doSplit(path, '.');
-        const arr = data.getValue(arrayPath);
-        if (!arr) throw new Error('No array with key "' + path + '" found for foreach');
+
+    /**
+     * @private
+     * @param {Data} data
+     * @returns {Promise<void>}
+     */
+    renderItemsRefresh(data) {
+        return this.doRenderItems(data, (handler, subData) => handler.refresh(subData));
+    }
+
+    /**
+     * @private
+     * @param {Data} data
+     * @returns {Promise<void>}
+     */
+    renderItemsReapply(data, invoker) {
+        return this.doRenderItems(data, (handler, subData) => handler.reapply(invoker));
+    }
+
+    /**
+     * @private
+     * Shared logic for rendering items, param handlerCall is a function (handler, subData) => Promise
+     */
+    doRenderItems(data, handlerCall) {
+        const { arr, path } = this.getArrayData(data);
         this.cache.sizeUp(arr.length);
         const promises = [];
         for (let i = 0; i < this.cache.length; i++) {
-            const subData = new Data({}, data);
-            this.setValidationPath(subData, this.varName, i);
-            subData.setValue([this.varName + 'Index'], i);
-            subData.setValue([this.varName], arr[i]);
+            const subData = this.prepareSubData(data, i, arr[i]);
             const children = this.cache.getChildren(i);
             if (i < arr.length) {
-                for (const child of children) {
-                    if (child.parentNode !== this.tag) this.tag.appendChild(child);
-                    const handler = this.tagHandlers.getRootHandler(child);
-                    handler.parentHandler = this;
-                    this.descendantHandlers.push(handler);
-                    promises.push(handler.refresh(subData));
-                }
+                promises.push(...this.handleChildren(children, subData, handlerCall));
             } else {
                 for (const child of children) {
                     if (child.parentNode === this.tag) this.tag.removeChild(child);
@@ -60,6 +75,47 @@ class ForeachHandler extends TagHandler {
         }
         return Promise.all(promises).then(() => {});
     }
+
+    /**
+     * @private
+     * Gets array and path from data
+     */
+    getArrayData(data) {
+        const path = this.arrayPathExpression.evaluate(data);
+        const arrayPath = this.doSplit(path, '.');
+        const arr = data.getValue(arrayPath);
+        if (!arr) throw new Error('No array with key "' + path + '" found for foreach');
+        return { arr, path };
+    }
+
+    /**
+     * @private
+     * Prepares subData for each item
+     */
+    prepareSubData(data, i, value) {
+        const subData = new Data({}, data);
+        this.setValidationPath(subData, this.varName, i);
+        subData.setValue([this.varName + 'Index'], i);
+        subData.setValue([this.varName], value);
+        return subData;
+    }
+
+    /**
+     * @private
+     * Handles children for each item, returns array of promises
+     */
+    handleChildren(children, subData, handlerCall) {
+        const promises = [];
+        for (const child of children) {
+            if (child.parentNode !== this.tag) this.tag.appendChild(child);
+            const handler = this.tagHandlers.getRootHandler(child);
+            handler.parentHandler = this;
+            this.descendantHandlers.push(handler);
+            promises.push(handlerCall(handler, subData));
+        }
+        return promises;
+    }
+
 
     setValidationPath(subData, varName, index) {
         if (!subData.validationPath) {

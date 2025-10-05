@@ -17,13 +17,32 @@ class HtmlTagHandler extends TagHandler {
 
 
 
+
     /**
      * @public
      * @override
      * @param {Data} data 
+     * @returns {Promise}
      */
     refresh(data) {
         this.data = data;
+        return this.refreshWithData(data);
+    }
+
+    /**
+     * @public
+     * @returns {Promise}
+     */
+    reapply() {
+        return this.refreshWithData(this.data);
+    }
+
+    /**
+     * @private
+     * @param {Data} data
+     * @returns {Promise}
+     */
+    refreshWithData(data) {
         return Promise.all([
             this.headTagHandler.refresh(data),
             this.bodyTagHandler.refresh(data)

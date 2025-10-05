@@ -15,7 +15,15 @@ class ParameterTagHandler extends TagHandler {
         const descendantPromise = this.refreshDescendantHandlers(data); // AttributeHandler !
         var name = this.getAttribute('name');
         var value = this.hasAttribute("value") ? this.getAttribute('value') : this.tag.innerText;
-        debugger;
+        this.parentHandler.addParameter(name, value);
+        return descendantPromise;
+    }
+
+    reapply(invoker) {
+        this.data = data;
+        const descendantPromise = this.reapplyDescendantHandlers(invoker); // AttributeHandler !
+        var name = this.getAttribute('name');
+        var value = this.hasAttribute("value") ? this.getAttribute('value') : this.tag.innerText;
         this.parentHandler.addParameter(name, value);
         return descendantPromise;
     }

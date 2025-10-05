@@ -74,6 +74,21 @@ class FormHandler extends TagHandler {
         return Promise.all([descendantPromise, formDataPromise]);
     }
 
+
+    /**
+     * @public
+     * @override
+     * @param {Data} data 
+     */
+    reapply(invoker) {
+        this.binding = this.bindingExpression.evaluate(this.data);
+        var formBindingKey = stripQuery(this.binding);
+        this.formElementHandlers = {};
+        this.data.validationPath = '/' + formBindingKey;
+        this.clearMessageHandlers();
+        return this.reapplyDescendantHandlers(invoker);
+    }
+
     /**
      * Creates a new Data object for embedded for elements from the response
      * @param {ServerResponse} response 

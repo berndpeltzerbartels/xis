@@ -63,16 +63,37 @@ class HeadTagHandler extends TagHandler {
         }
     }
 
+
     /**
      * @public
      * @override
      * @param {Data} data 
+     * @returns {Promise}
      */
     refresh(data) {
         this.data = data;
+        this.refreshWithData(data);
+        return this.refreshDescendantHandlers(data);
+    }
+
+    /**
+     * @public
+     * @returns {Promise}
+     */
+    reapply(invoker) {
+        this.refreshWithData(this.data);
+        return this.reapplyDescendantHandlers(invoker);
+    }
+
+    /**
+     * @private
+     * @param {Data} data
+     * @returns {Promise}
+     */
+    refreshWithData(data) {
         this.refreshTitle(data);
         this.refreshScriptTags(data);
-        return this.refreshDescendantHandlers(data);
+        return Promise.resolve();
     }
 
     /**

@@ -15,12 +15,35 @@ class FormElementHandler extends TagHandler {
     }
 
 
+    /**
+     * @public
+     * @param {Data} data
+     * @returns {Promise}
+     */
     refresh(data) {
         this.data = data;
+        this.refreshWithData(data);
+        return this.refreshDescendantHandlers(data);
+    }
+
+    /**
+     * @public
+     * @returns {Promise}
+     * @param {TagHandler} invoker
+     */
+    reapply(invoker) {
+        this.refreshWithData(this.data);
+        return this.reapplyDescendantHandlers(invoker);
+    }
+    
+    /**
+     * @private
+     * @param {Data} data
+     */
+    refreshWithData(data) {
         this.binding = this.bindingExpression.evaluate(data);
         const formHandler = this.getParentFormHandler();
         formHandler.onElementHandlerRefreshed(this, this.binding);
-        return this.refreshDescendantHandlers(data);
     }
 
     refreshFormData(data) {

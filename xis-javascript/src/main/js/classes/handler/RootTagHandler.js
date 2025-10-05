@@ -18,6 +18,10 @@ class RootTagHandler extends TagHandler {
         return this.refreshDescendantHandlers(data);
     }
 
+    reapply(invoker) {
+        return this.reapplyDescendantHandlers(invoker);
+    }
+
     /**
      * TODO : seems to be never used. Check for bug.
      * @param {TagHandler} parentHandler 

@@ -9,8 +9,35 @@ class FormSubmitterHandler extends TagHandler {
         });
     }
 
+
+    /**
+     * @public
+     * @param {Data} data
+     * @returns {Promise}
+     */
     refresh(data) {
         this.data = data;
+        return this.refreshWithData(data). then(() => {
+            return this.refreshDescendantHandlers(data);
+        });
+    }
+
+    /**
+     * @public
+     * @returns {Promise}
+     */
+    reapply(invoker) {
+        return this.refreshWithData(this.data). then(() => {
+            return this.reapplyDescendantHandlers(invoker);
+        });
+    }
+
+    /**
+     * @private
+     * @param {Data} data
+     * @returns {Promise}
+     */
+    refreshWithData(data) {
         this.action = this.actionExpression.evaluate(data);
         return Promise.resolve();
     }

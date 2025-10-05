@@ -27,4 +27,8 @@ class ErrorStyleHandler extends TagHandler {
         this.tag.classList.add(errorStyleClass);
         return Promise.resolve();
     }
+
+    reapply(invoker) {
+       //noop
+    }
 }

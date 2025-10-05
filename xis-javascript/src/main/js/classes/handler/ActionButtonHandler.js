@@ -28,8 +28,29 @@ class ActionButtonHandler extends TagHandler {
     /**
      * @public
      * @param {Data} data 
+     * @returns {Promise}
      */
     refresh(data) {
+        this.data = data;
+        return this.refreshWithData(data);
+    }
+
+
+    /**
+     * @public
+     * @param {TagHandler} invoker
+     */
+    reapply(invoker) {
+       return this.refreshWithData(this.data);
+    }
+
+
+    /**
+     * @private
+     * @param {Data} data
+     * @returns {Promise}
+     */
+    refreshWithData(data) {
         this.data = data;
         this.action = this.actionExpression.evaluate(data);
         return Promise.resolve();

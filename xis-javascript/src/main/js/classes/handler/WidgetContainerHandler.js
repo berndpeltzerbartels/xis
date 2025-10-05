@@ -82,6 +82,23 @@ class WidgetContainerHandler extends TagHandler {
 
     /**
      * @public
+     * @param {TagHandler} invoker
+     */
+    reapply(invoker) {
+        const data = this.data;
+        this.refreshContainerId(data);
+        this.bindDefaultWidgetInitial(data);
+        var widgetParameters = this.widgetState ? this.widgetState.widgetParameters : {};
+        this.widgetState = new WidgetState(app.pageController.resolvedURL, widgetParameters);
+        var promises = [];
+        if (this.widgetInstance) {
+           promises.push(this.reloadDataAndRefresh(data));
+        }
+        return Promise.all(promises.concat([this.reapplyDescendantHandlers(data)]));
+    }
+
+    /**
+     * @public
      * @param {string} widgetId 
      * @param {WidgetState} widgetState
      * @returns {Promise<void>}

@@ -21,17 +21,35 @@ class MessageTagHandler extends TagHandler {
     }
 
 
+
     /**
      * @public
      * @override
      * @param {Data} data
+     * @returns {Promise}
      */
     refresh(data) {
         this.data = data;
+        this.refreshWithData(data);
+        return this.refreshDescendantHandlers(data);
+    }
+
+    /**
+     * @public
+     * @returns {Promise}
+     */
+    reapply(invoker) {
+        this.refreshWithData(this.data);
+        return this.reapplyDescendantHandlers(this.data, invoker);
+    }
+
+    /**
+     * @private
+     * @param {Data} data
+     */
+    refreshWithData(data) {
         this.binding = data.validationPath + '/' + this.bindingExpression.evaluate(data);
-        const descendantPromise = this.refreshDescendantHandlers(data);
         this.getParentFormHandler().onMessageHandlerRefreshed(this, this.binding);
-        return descendantPromise;
     }
 
     /**

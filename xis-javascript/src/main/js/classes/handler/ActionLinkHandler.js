@@ -24,15 +24,34 @@ class ActionLinkHandler extends TagHandler {
     /**
      * @public
      * @param {Data} data 
+     * @returns {Promise}
      */
     refresh(data) {
         this.data = data;
-        this.actionParameters = {};
+        return this.refreshDescendantHandlers(data).then(() => {
+            this.refreshWithData(data);
+        });
+    }
+
+
+    /**
+     * @public
+     */
+    reapply(invoker) {
+        return this.reapplyDescendantHandlers(invoker).then(() => {
+            this.refreshWithData(this.data);
+        });
+    }
+
+
+    /**
+     * @private
+     * @param {Data} data
+     */
+    refreshWithData(data) {
         this.data = data;
-        const descendantPromise = this.refreshDescendantHandlers(data);
         this.targetContainerId = this.tag.getAttribute('xis:target-container');
         this.action = this.tag.getAttribute('xis:action');
-        return descendantPromise;
     }
 
 

@@ -27,9 +27,13 @@ class IfTagHandler extends TagHandler {
         return Promise.resolve();
     }
 
-    reapply() {
-        var newConditionValue = this.expression.evaluate(this.data);
-        if (this.conditionValue != newConditionValue) {
+    /**
+     * @public
+     * @returns {Promise}
+     */
+    reapply(invoker) {
+        const newConditionValue = this.expression.evaluate(this.data);
+        if (this.conditionValue !== newConditionValue) {
             if (newConditionValue) {
                 this.linkChildNodes();
             } else {
@@ -37,6 +41,10 @@ class IfTagHandler extends TagHandler {
             }
             this.conditionValue = newConditionValue;
         }
+        if (this.conditionValue) {
+            return this.reapplyDescendantHandlers(invoker);
+        }
+        return Promise.resolve();
     }
 
     unlinkChildNodes() {
