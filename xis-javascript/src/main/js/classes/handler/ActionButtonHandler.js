@@ -13,12 +13,12 @@ class ActionButtonHandler extends TagHandler {
         this.actionParameters = {};
         this.actionExpression = this.variableTextContentFromAttribute('xis:action'); // mandatory
         this.targetContainerId = element.getAttribute('xis:target-container');
-        
+
         // Fix: Set type="button" to prevent form submission
         if (element.tagName.toLowerCase() === 'button' && !element.getAttribute('type')) {
             element.setAttribute('type', 'button');
         }
-        
+
         element.addEventListener('click', event => {
             event.preventDefault();
             this.onClick(event);
@@ -32,16 +32,15 @@ class ActionButtonHandler extends TagHandler {
      */
     refresh(data) {
         this.data = data;
-        return this.refreshWithData(data);
+        return this.renderWithData(data);
     }
 
 
     /**
      * @public
-     * @param {TagHandler} invoker
      */
-    reapply(invoker) {
-       return this.refreshWithData(this.data);
+    reapply() {
+        return this.renderWithData(this.data);
     }
 
 
@@ -50,7 +49,7 @@ class ActionButtonHandler extends TagHandler {
      * @param {Data} data
      * @returns {Promise}
      */
-    refreshWithData(data) {
+    renderWithData(data) {
         this.data = data;
         this.action = this.actionExpression.evaluate(data);
         return Promise.resolve();
@@ -81,6 +80,7 @@ class ActionButtonHandler extends TagHandler {
 
     widgetAction(widgetcontainerHandler, targetContainerHandler) {
         if (!targetContainerHandler) {
+            // if taget container is not set explicitly, use the parent container
             targetContainerHandler = widgetcontainerHandler;
         }
         this.client.widgetLinkAction(widgetcontainerHandler.widgetInstance, widgetcontainerHandler.widgetState, this.action, this.actionParameters)
@@ -96,10 +96,19 @@ class ActionButtonHandler extends TagHandler {
     }
 
     handleActionResponse(response, targetContainerHandler) {
-        if (response.nextURL) {
-            app.pageController.handleActionResponse(response);
-        } else {
-            targetContainerHandler.handleActionResponse(response);
+        switch (response.actionProcessing) {
+            case 'NONE':
+                break;
+            case 'PAGE':
+                app.pageController.handleActionResponse(response);
+                break;
+            case 'WIDGET':
+                if (targetContainerHandler) {
+                    targetContainerHandler.handleActionResponse(response);
+                }
+                break;
+            default:
+                throw new Error('Unknown action processing type: ' + response.actionProcessing);
         }
     }
 

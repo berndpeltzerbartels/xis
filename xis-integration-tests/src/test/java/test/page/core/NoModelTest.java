@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 class NoModelTest {
 
     private IntegrationTestContext testContext;
-    private ClientStatePage page;
 
     @BeforeEach
     void init() {

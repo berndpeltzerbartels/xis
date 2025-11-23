@@ -8,10 +8,11 @@
  * @property {any} localDatabaseData
  * @property {string} widgetContainerId
  * @property {Array} reloadWidgets
- * @property {any} clientStateData
+ * @property {any} sessionStorageData
  * @property {any} validatorMessages
  * @property {Object} tagVariables
  * @property {Object} idVariables
+ * @property {string} actionProcessing
  */
 
 class ServerResponse {
@@ -27,8 +28,9 @@ class ServerResponse {
         this.localDatabaseData = {};
         this.widgetContainerId = '';
         this.reloadWidgets = [];
-        this.clientStateData = {};
-    this.validatorMessages = { };
+        this.sessionStorageData = {};
+        this.validatorMessages = { };
+        this.actionProcessing = 'NONE';
     /**
      * Tag-gebundene Variablen, z.B. { title: "Seitentitel" }
      */

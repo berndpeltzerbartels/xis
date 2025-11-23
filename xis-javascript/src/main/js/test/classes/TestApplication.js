@@ -3,7 +3,7 @@ class TestApplication {
     constructor() {
         this.initializers = [];
         this.messageHandler = new MessageHandler();
-        this.clientState = new ClientState();
+        this.sessionStorage = new SessionStore();
         this.localStorage = new LocalStore();
         this.httpConnector = new HttpConnectorMock();
         this.domAccessor = new DomAccessor();
@@ -16,7 +16,6 @@ class TestApplication {
         this.initializer = new Initializer(this.domAccessor, this.client, this.widgets, this.widgetContainers, this.tagHandlers);
         this.pageController = new PageController(this.client, this.pages, this.initializer, this.urlResolver, this.tagHandlers);
         this.history = new PageHistory(this.pageController);
-        this.backendService = new BackendService(this.client, this.pageController);
         this.eventPublisher = new EventPublisher();
         this.globals = new GlobalStore(this.eventPublisher);
         this.runInitializers();
@@ -43,7 +42,6 @@ class TestApplication {
         document.location.pathname = uri;
         return this.client.loadConfig()
             .then(config => this.pageController.setConfig(config))
-            .then(config => this.backendService.setConfig(config))
             .then(config => this.widgets.loadWidgets(config))
             .then(config => this.pages.loadPages(config))
             .then(() => this.urlResolver.init())

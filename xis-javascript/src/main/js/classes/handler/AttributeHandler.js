@@ -57,7 +57,7 @@ class AttributeHandler extends TagHandler {
     /**
      * @public
      */
-    reapply(invoker) {
+    reapply() {
         return this.refreshWithData(this.data);
     }
 

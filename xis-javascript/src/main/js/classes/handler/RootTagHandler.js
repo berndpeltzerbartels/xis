@@ -18,8 +18,8 @@ class RootTagHandler extends TagHandler {
         return this.refreshDescendantHandlers(data);
     }
 
-    reapply(invoker) {
-        return this.reapplyDescendantHandlers(invoker);
+    reapply() {
+        return this.reapplyDescendantHandlers();
     }
 
     /**

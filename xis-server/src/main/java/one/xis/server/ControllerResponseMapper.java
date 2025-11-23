@@ -8,6 +8,9 @@ import one.xis.context.XISComponent;
 class ControllerResponseMapper {
 
     void mapResultToResponse(ServerResponse response, ControllerResult result) {
+        if (result.getActionProcessing() != null && result.getActionProcessing() != ActionProcessing.NONE) {
+            response.setActionProcessing(result.getActionProcessing());
+        }
         response.setNextURL(result.getNextURL());
         response.setData(result.getModelData());
         response.setFormData(result.getFormData());
@@ -15,7 +18,7 @@ class ControllerResponseMapper {
         response.setValidatorMessages(result.getValidatorMessages());
         response.setWidgetContainerId(result.getWidgetContainerId());
         response.setReloadWidgets(result.getWidgetsToReload());
-        response.getClientStateData().putAll(result.getClientState());
+        response.getSessionStorageData().putAll(result.getSessionStorage());
         response.getLocalStorageData().putAll(result.getLocalStorage());
         response.getGlobalVariableData().putAll(result.getGlobalVariables());
         response.setRedirectUrl(result.getRedirectUrl());

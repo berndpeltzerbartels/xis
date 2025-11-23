@@ -18,6 +18,7 @@ class ControllerResult {
     private Class<?> nextPageControllerClass;
     private String nextWidgetId;
     private String widgetContainerId;
+    private ActionProcessing actionProcessing = ActionProcessing.NONE;
     private Collection<String> widgetsToReload = new HashSet<>();
     private final Map<String, Object> bindingParameters = new HashMap<>();
     private final Map<String, Object> urlParameters = new HashMap<>();
@@ -27,7 +28,7 @@ class ControllerResult {
     private boolean validationFailed;
     private final ValidatorMessages validatorMessages = new ValidatorMessages();
     private final Map<String, Object> requestScope = new HashMap<>();
-    private final Map<String, Object> clientState = new HashMap<>();
+    private final Map<String, Object> sessionStorage = new HashMap<>();
     private final Map<String, Object> localStorage = new HashMap<>();
     private final Map<String, Object> globalVariables = new HashMap<>();
     private String redirectUrl;

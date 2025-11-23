@@ -393,9 +393,9 @@ class AstGenerator {
         const path = token.value;
         
         // Check if this is a special state or localStorage variable
-        if (path.startsWith('state.')) {
-            const variablePath = path.substring(6); // Remove 'state.' prefix
-            return this.createClientStateVariable(variablePath);
+        if (path.startsWith('sessionStorage.')) {
+            const variablePath = path.substring(15); // Remove 'sessionStorage.' prefix
+            return this.createSessionStorageVariable(variablePath);
         }
 
         if (path.startsWith('localStorage.')) {
@@ -413,12 +413,12 @@ class AstGenerator {
     }
 
     /**
-     * Creates a ClientStateVariable for direct access to client state.
-     * @param {string} path - The state path without 'state.' prefix
-     * @returns {ClientStateVariable}
+     * Creates a SessionStorageVariable for direct access to sessionStorage.
+     * @param {string} path - The state path without 'sessionStorage.' prefix
+     * @returns {SessionStorageVariable}
      */
-    createClientStateVariable(path) {
-        return new ClientStateVariable(path);
+    createSessionStorageVariable(path) {
+        return new SessionStorageVariable(path);
     }
 
     /**
@@ -845,17 +845,17 @@ class TernaryOperator {
  * Variable that accesses client state directly from the store.
  * This bypasses the Data object configuration and allows access to any client state value.
  */
-class ClientStateVariable {
+class SessionStorageVariable {
     constructor(path) {
         this.path = path;
     }
 
     evaluate(data) {
-        return app.clientState.getValue(this.path);
+        return app.sessionStorage.getValue(this.path);
     }
 
     toString() {
-        return `\${state.${this.path}}`;
+        return `\${sessionStorage.${this.path}}`;
     }
 }
 

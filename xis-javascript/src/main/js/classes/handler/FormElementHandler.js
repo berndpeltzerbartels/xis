@@ -29,11 +29,10 @@ class FormElementHandler extends TagHandler {
     /**
      * @public
      * @returns {Promise}
-     * @param {TagHandler} invoker
      */
-    reapply(invoker) {
+    reapply() {
         this.refreshWithData(this.data);
-        return this.reapplyDescendantHandlers(invoker);
+        return this.reapplyDescendantHandlers();
     }
     
     /**

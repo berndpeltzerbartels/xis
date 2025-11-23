@@ -12,7 +12,6 @@ class Client {
         this.config = undefined;
         this.clientId = randomString();
         this.zoneId = timeZone();
-        this.clientState = {};
         this.tagContentSetter = new TagContentSetter();
     }
 
@@ -155,7 +154,7 @@ class Client {
         request.pathVariables = resolvedURL.pathVariablesAsMap();
         request.actionParameters = actionParameters ? actionParameters : {};
         request.zoneId = this.zoneId;
-        request.clientStateData = this.clientStateDataPage(normalizedPath);
+        request.sessionStorageData = this.sessionStorageDataPage(normalizedPath);
         request.localStorageData = this.localStorageDataPage(normalizedPath);
         request.globalVariableData = this.globalVariableDataPage(normalizedPath);
         request.localDatabaseData = {};
@@ -191,12 +190,12 @@ class Client {
         request.zoneId = this.zoneId;
         request.type = request.widgetId ? 'widget' : 'page';
         if (widgetId) { // TODO write a test
-            request.clientStateData = this.clientStateDataWidget(widgetId);
+            request.sessionStorageData = this.sessionStorageDataWidget(widgetId);
             request.localStorageData = this.localStorageDataWidget(widgetId);
             request.globalVariableData = this.globalVariableDataWidget(widgetId);
         }
         if (normalizedPath) {// TODO write a test
-            request.clientStateData = this.clientStateDataPage(normalizedPath);
+            request.sessionStorageData = this.sessionStorageDataPage(normalizedPath);
             request.localStorageData = this.localStorageDataPage(normalizedPath);
             request.globalVariableData = this.globalVariableDataPage(normalizedPath);
         }
@@ -224,7 +223,7 @@ class Client {
         request.bindingParameters = widgetState.widgetParameters;
         request.actionParameters = actionParameters ? actionParameters : {};
         request.zoneId = this.zoneId;         // TODO locale ?
-        request.clientStateData = this.clientStateDataWidget(widgetInstance.widget.id);
+        request.sessionStorageData = this.sessionStorageDataWidget(widgetInstance.widget.id);
         request.localStorageData = this.localStorageDataWidget(widgetInstance.widget.id);
         request.globalVariableData = this.globalVariableDataWidget(widgetInstance.widget.id);
         request.localDatabaseData = {};
@@ -236,12 +235,12 @@ class Client {
         return this.localStorageData(this.config.pageAttributes[pageId]);
     }
 
-    clientStateDataPage(pageId) {
-        return this.clientStateData(this.config.pageAttributes[pageId]);
+    sessionStorageDataPage(pageId) {
+        return this.sessionStorageData(this.config.pageAttributes[pageId]);
     }
 
-    clientStateDataWidget(widgetId) {
-        return this.clientStateData(this.config.widgetAttributes[widgetId]);
+    sessionStorageDataWidget(widgetId) {
+        return this.sessionStorageData(this.config.widgetAttributes[widgetId]);
     }
 
     localStorageDataWidget(widgetId) {
@@ -257,10 +256,10 @@ class Client {
     }
 
 
-    clientStateData(attributes) {
+    sessionStorageData(attributes) {
         var data = {};
-        for (var key of attributes.clientStateKeys) {
-            data[key] = app.clientState.getValue(key);
+        for (var key of attributes.sessionStorageKeys) {
+            data[key] = app.sessionStorage.getValue(key);
         }
         return data;
     }
@@ -334,13 +333,15 @@ class Client {
         serverResponse.localDatabaseData = obj.localDatabaseData;
         serverResponse.localStorageData = obj.localStorageData;
         serverResponse.globalVariableData = obj.globalVariableData;
-        serverResponse.clientStateData = obj.clientStateData;
+        serverResponse.sessionStorageData = obj.sessionStorageData;
         serverResponse.widgetContainerId = obj.widgetContainerId;
         serverResponse.redirectUrl = obj.redirectUrl;
         serverResponse.tagVariables = obj.tagVariables || {};
         serverResponse.idVariables = obj.idVariables || {};
-        data.setValue(['state'], serverResponse.clientStateData);
+        serverResponse.actionProcessing = obj.actionProcessing || 'NONE';
+        data.setValue(['sessionStorage'], serverResponse.sessionStorageData);
         data.setValue(['localStorage'], serverResponse.localStorageData);
+        data.setValue(['global'], serverResponse.globalVariableData);
         data.setValue(['validation'], obj.validatorMessages);
         this.storeData(serverResponse);
         this.tagContentSetter.apply(document, serverResponse.idVariables, serverResponse.tagVariables);
@@ -348,8 +349,9 @@ class Client {
     }
 
     storeData(response) {
+        debugger;
         this.storeLocalStorageData(response.localStorageData);
-        this.storeClientStateData(response.clientStateData);
+        this.storeSessionStorageData(response.sessionStorageData);
         this.storeGlobalVariableData(response.globalVariableData);
         this.storeLocalDatabaseData(response.localDatabaseData);
     }
@@ -361,9 +363,8 @@ class Client {
         app.localStorage.saveData(localStorageData);
     }
 
-    storeClientStateData(clientStateData) {
-
-        app.clientState.saveData(clientStateData);
+    storeSessionStorageData(sessionStorageData) {
+        app.sessionStorage.saveData(sessionStorageData);
     }
 
     storeGlobalVariableData(globalVariableData) {

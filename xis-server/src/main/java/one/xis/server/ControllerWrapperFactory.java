@@ -34,7 +34,7 @@ class ControllerWrapperFactory {
             controllerWrapper.setActionMethods(actionMethodMap(controller));
             controllerWrapper.setRequestScopeMethods(requestScopeMethods(controller));
             controllerWrapper.setLocalStorageOnlyMethods(localStorageOnlyMethods(controller));
-            controllerWrapper.setClientStateOnlyMethods(clientStateOnlyMethods(controller));
+            controllerWrapper.setSessionStorageOnlyMethods(sessionStorageOnlyMethods(controller));
             controllerWrapper.setGlobalVariableOnlyMethods(globalVariableOnlyMethods(controller));
             controllerWrapper.setTagContentOnlyMethods(tagContentOnlyMethods(controller));
             controllerWrapper.setControllerResultMapper(controllerResultMapper);
@@ -53,7 +53,7 @@ class ControllerWrapperFactory {
                 .collect(Collectors.toSet());
     }
 
-    private Collection<ControllerMethod> clientStateOnlyMethods(@NonNull Object controller) {
+    private Collection<ControllerMethod> sessionStorageOnlyMethods(@NonNull Object controller) {
         return annotatedMethods(controller, SessionStorage.class)
                 .filter(m -> !m.isAnnotationPresent(Action.class))
                 .filter(method -> !method.isAnnotationPresent(ModelData.class))

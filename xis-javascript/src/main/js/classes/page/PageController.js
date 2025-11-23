@@ -90,21 +90,16 @@ class PageController {
      * 
      * @public
      * @param {ServerResponse} response
+     * @returns {Promise<void>}
      */
     handleActionResponse(response) {
         this.handleActionResponseNoContent(response);
         if (response.status == 204) {
-            return;
+            return Promise.resolve(rv);
         }
         var data = response.data;
         data.scope = 'TREE';
-        this.doRefresh(data);
-    }
-
-    triggerPageReload(response) {
-        var data = response.data;
-        data.scope = 'CONTROLLER';
-        this.doRefresh(response);
+        return this.doRefresh(data);
     }
 
     /**
@@ -112,39 +107,30 @@ class PageController {
      * @param {Data} data 
      */
     doRefresh(data) {
+        debugger;
         data.setValue(['pathVariables'], this.resolvedURL.pathVariablesAsMap());
         data.setValue(['urlParameters'], this.resolvedURL.urlParameters);
         this.page.data = data;
-        this.htmlTagHandler.refresh(this.page.data);
+        return this.initBuffer()
+            .then(() => this.htmlTagHandler.refresh(this.page.data))
+            .then(() => this.htmlTagHandler.reapply())
+            .then(() => this.commitBuffer());
         //this.updateHistory(this.resolvedURL);
     }
 
-
-    /**
-     * @public
-     * @param {Handler} invokerHandler 
-     */
-    doReapply(invokerHandler) {
-        const data = this.page.data;
-        data.setValue(['pathVariables'], this.resolvedURL.pathVariablesAsMap());
-        data.setValue(['urlParameters'], this.resolvedURL.urlParameters);
-        this.page.data = data;
-        this.htmlTagHandler.reapply(invokerHandler);
+    doReapply() {
+        return this.htmlTagHandler.reapply();
     }
-
-    triggerAdditionalReloads(response) {
-        app.backendService.triggerWidgetReloadsonDemand(response);
-        return response;
-    }
-
 
     /** 
      * Handels server-response after submitting an action.
      * 
      * @public
      * @param {ServerResponse} response
+     * @returns {boolean} true, if page was replaced
      */
     handleActionResponseNoContent(response) {
+        var rv = false;
         if (response.nextURL) {
             var resolvedURL = this.urlResolver.resolve(response.nextURL);
             if (!resolvedURL) {
@@ -155,11 +141,13 @@ class PageController {
                 this.page = resolvedURL.page;
                 this.htmlTagHandler.unbindPage();
                 this.htmlTagHandler.bindPage(resolvedURL.page);
+                rv = true;
             }
         }
         if (response.status < 300) {
             this.updateHistory(this.resolvedURL);
         }
+        return rv;
     }
 
 
@@ -218,7 +206,11 @@ class PageController {
 
             this.htmlTagHandler.unbindPage();
             this.htmlTagHandler.bindPage(this.page);
-            this.htmlTagHandler.refresh(data);
+
+            this.initBuffer()
+                .then(() => this.htmlTagHandler.refresh(data))
+                .then(() => this.htmlTagHandler.reapply())
+                .then(() => this.commitBuffer());
 
             if (!skipHistoryUpdate && response.status < 300) {
                 this.updateHistory(this.resolvedURL);

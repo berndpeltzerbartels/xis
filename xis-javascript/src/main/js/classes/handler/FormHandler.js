@@ -50,6 +50,7 @@ class FormHandler extends TagHandler {
     }
 
     targetContainerHandler() {
+        debugger;
         var container = this.findParentWidgetContainer();
         return container ? app.tagHandlers.getHandler(container) : null;
     }
@@ -134,24 +135,23 @@ class FormHandler extends TagHandler {
     handleActionResponse(response, targetContainerHandler) {
         this.refreshValidatorMessages(response.validatorMessages);
         if (!response.validatorMessages.isEmpty()) {
-            return Promise.resolve();
+            return;
+        }
+        switch (response.actionProcessing) {
+            case 'NONE':
+                break;
+            case 'PAGE':
+                app.pageController.handleActionResponse(response);
+                break;
+            case 'WIDGET':
+                if (targetContainerHandler) {
+                    targetContainerHandler.handleActionResponse(response);
+                }
+                break;
+            default:
+                throw new Error('Unknown action processing type: ' + response.actionProcessing);
         }
 
-        return app.pageController.initBuffer()
-            .then(() => this.delegateResponseToHandler(response, targetContainerHandler))
-            .then(() => app.pageController.commitBuffer())
-            .catch(e => {
-                app.pageController.commitBuffer(); // auch bei Fehler committen
-                throw e;
-            });
-    }
-
-    delegateResponseToHandler(response, targetContainerHandler) {
-        if (response.nextWidgetId) {
-            return Promise.resolve(targetContainerHandler.handleActionResponse(response));
-        } else {
-            return Promise.resolve(app.pageController.handleActionResponse(response));
-        }
     }
 
 

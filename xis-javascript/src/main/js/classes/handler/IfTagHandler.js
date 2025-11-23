@@ -31,7 +31,7 @@ class IfTagHandler extends TagHandler {
      * @public
      * @returns {Promise}
      */
-    reapply(invoker) {
+    reapply() {
         const newConditionValue = this.expression.evaluate(this.data);
         if (this.conditionValue !== newConditionValue) {
             if (newConditionValue) {
@@ -42,7 +42,7 @@ class IfTagHandler extends TagHandler {
             this.conditionValue = newConditionValue;
         }
         if (this.conditionValue) {
-            return this.reapplyDescendantHandlers(invoker);
+            return this.reapplyDescendantHandlers();
         }
         return Promise.resolve();
     }

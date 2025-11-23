@@ -26,9 +26,9 @@ class FormSubmitterHandler extends TagHandler {
      * @public
      * @returns {Promise}
      */
-    reapply(invoker) {
+    reapply() {
         return this.refreshWithData(this.data). then(() => {
-            return this.reapplyDescendantHandlers(invoker);
+            return this.reapplyDescendantHandlers();
         });
     }
 

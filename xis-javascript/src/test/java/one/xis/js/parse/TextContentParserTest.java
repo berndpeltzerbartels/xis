@@ -21,7 +21,7 @@ class TextContentParserTest {
         javascript += """
                 
                     var app = {
-                        clientState: {
+                        sessionStorage: {
                             mapTextContent: function (textContent) {
                 
                             }

@@ -9,7 +9,7 @@
  * @property {string: string} bindingParameters
  * @property {string: string} actionParameters
  * @property {string: string} type;
- * @property {string: string} clientState
+ * @property {string: string} sessionStorageData
  * @property {string: string} localStorage
  * @property {string: string} localDatabase
 */
@@ -26,7 +26,7 @@ class ClientRequest {
         this.bindingParameters = {};
         this.actionParameters = {};
         this.type = '';
-        this.clientStateData = {};
+        this.sessionStorageData = {};
         this.localStorageData = {};
         this.globalVariableData = {};
         this.localDatabaseData = {}; // TODO

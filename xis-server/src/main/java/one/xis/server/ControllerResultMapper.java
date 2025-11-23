@@ -25,6 +25,9 @@ class ControllerResultMapper {
         if (controllerMethodResult.getRedirectUrl() != null) {
             controllerResult.setRedirectUrl(controllerMethodResult.getRedirectUrl());
         }
+        if (controllerMethodResult.getActionProcessing() != null && controllerMethodResult.getActionProcessing() != ActionProcessing.NONE) {
+            controllerResult.setActionProcessing(controllerMethodResult.getActionProcessing());
+        }
         controllerResult.getModelData().putAll(controllerMethodResult.getModelData());
         controllerResult.getFormData().putAll(controllerMethodResult.getFormData());
         controllerResult.getBindingParameters().putAll(controllerMethodResult.getWidgetParameters());
@@ -33,7 +36,7 @@ class ControllerResultMapper {
         controllerResult.getValidatorMessages().getGlobalMessages().addAll(controllerMethodResult.getValidatorMessages().getGlobalMessages());
         controllerResult.getValidatorMessages().getMessages().putAll(controllerMethodResult.getValidatorMessages().getMessages());
         controllerResult.getWidgetsToReload().addAll(controllerMethodResult.getWidgetsToReload());
-        controllerResult.getClientState().putAll(controllerMethodResult.getClientState());
+        controllerResult.getSessionStorage().putAll(controllerMethodResult.getSessionStorage());
         controllerResult.getRequestScope().putAll(controllerMethodResult.getRequestScope());
         controllerResult.getLocalStorage().putAll(controllerMethodResult.getLocalStorage());
         controllerResult.getGlobalVariables().putAll(controllerMethodResult.getGlobalVariables());

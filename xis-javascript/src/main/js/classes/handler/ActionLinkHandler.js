@@ -37,8 +37,8 @@ class ActionLinkHandler extends TagHandler {
     /**
      * @public
      */
-    reapply(invoker) {
-        return this.reapplyDescendantHandlers(invoker).then(() => {
+    reapply() {
+        return this.reapplyDescendantHandlers().then(() => {
             this.refreshWithData(this.data);
         });
     }
@@ -84,12 +84,7 @@ class ActionLinkHandler extends TagHandler {
             targetContainerHandler = widgetcontainerHandler;
         }
         this.client.widgetLinkAction(widgetcontainerHandler.widgetInstance, widgetcontainerHandler.widgetState, this.action, this.actionParameters)
-            .then(response => {
-                app.pageController.initBuffer();
-                return response;
-            })
-            .then(response => this.handleActionResponse(response, targetContainerHandler))
-            .then(() => app.pageController.commitBuffer());
+            .then(response => this.handleActionResponse(response, targetContainerHandler));
     }
 
     /**
@@ -111,10 +106,19 @@ class ActionLinkHandler extends TagHandler {
 
 
     handleActionResponse(response, targetContainerHandler) {
-        if (response.nextURL) {
-            app.pageController.handleActionResponse(response);
-        } else {
-            targetContainerHandler.handleActionResponse(response);
+       switch (response.actionProcessing) {
+            case 'NONE':
+                break;
+            case 'PAGE':
+                app.pageController.handleActionResponse(response);
+                break;
+            case 'WIDGET':
+                if (targetContainerHandler) {
+                    targetContainerHandler.handleActionResponse(response);
+                }
+                break;
+            default:
+                throw new Error('Unknown action processing type: ' + response.actionProcessing);
         }
     }
 

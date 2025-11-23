@@ -35,7 +35,7 @@ class ActionLinkWidgetTest {
         var result = testContext.openPage(WidgetPage.class);
 
         result.getDocument().getElementById("action-link1").click();
-
+        // Model data is loaded once initially, and once after action
         verify(service, times(2)).getData();
         verify(service, times(1)).action("value1");
     }

@@ -26,7 +26,7 @@ public class ServerResponse {
     private Map<String, Object> formData = new HashMap<>();
     private Map<String, Object> localStorageData = new HashMap<>();
     private Map<String, Object> localDatabaseData = new HashMap<>();
-    private Map<String, Object> clientStateData = new HashMap<>();
+    private Map<String, Object> sessionStorageData = new HashMap<>();
     private Map<String, Object> globalVariableData = new HashMap<>();
     private Collection<String> reloadWidgets = new ArrayList<>();
     private String nextURL;
@@ -35,6 +35,7 @@ public class ServerResponse {
     private boolean reloadPage; // TODO do we need this?
     private String widgetContainerId;
     private String redirectUrl;
+    private ActionProcessing actionProcessing = ActionProcessing.NONE;
 
     void clear() {
         // do not clear store data

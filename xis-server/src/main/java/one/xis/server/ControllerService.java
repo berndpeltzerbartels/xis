@@ -64,7 +64,7 @@ class ControllerService {
         var invokerControllerWrapper = controllerWrapper(request);
         invokerControllerWrapper.invokeActionMethod(request, controllerResult);
         if (!resultContainsNextController(controllerResult)) {
-            usePreviousController(controllerResult, invokerControllerWrapper, request);
+            usePreviousControllerAfterAction(controllerResult, invokerControllerWrapper, request);
         }
         mapResultToResponse(request, response, controllerResult);
         var nextControllerWrapper = nextControllerWrapperAfterAction(controllerResult);
@@ -84,7 +84,7 @@ class ControllerService {
         nextRequest.setZoneId(request.getZoneId());
         nextRequest.setClientId(request.getClientId());
         nextRequest.getLocalStorageData().putAll(request.getLocalStorageData());
-        nextRequest.getClientStateData().putAll(request.getClientStateData());
+        nextRequest.getSessionStorageData().putAll(request.getSessionStorageData());
         nextRequest.setAccessToken(request.getAccessToken());
         controllerResultMapper.mapControllerResultToNextRequest(controllerResult, nextRequest);
         var nextControllerResult = new ControllerResult();
@@ -116,12 +116,14 @@ class ControllerService {
     }
 
 
-    private void usePreviousController(ControllerResult controllerResult, ControllerWrapper controllerWrapper, ClientRequest request) {
+    private void usePreviousControllerAfterAction(ControllerResult controllerResult, ControllerWrapper controllerWrapper, ClientRequest request) {
         if (controllerWrapper.isWidgetController()) {
             controllerResult.setNextWidgetId(controllerWrapper.getId());
+            controllerResult.setActionProcessing(ActionProcessing.WIDGET);
         } else {
             controllerResult.setNextURL(request.getPageUrl());
             controllerResult.setNextPageId(request.getPageId());
+            controllerResult.setActionProcessing(ActionProcessing.PAGE);
         }
     }
 

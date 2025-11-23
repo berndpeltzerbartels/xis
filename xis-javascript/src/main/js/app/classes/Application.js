@@ -4,7 +4,7 @@ class Application {
         this.initializers = [];
         this.initializationListeners = [];
         this.messageHandler = window.messageHandler ?  window.messageHandler : new MessageHandler();
-        this.clientState = new ClientState();
+        this.sessionStorage = new SessionStore();
         this.localStorage = new LocalStore();
         this.httpConnector = new HttpConnector();
         this.domAccessor = new DomAccessor();
@@ -18,7 +18,6 @@ class Application {
         this.initializer = new Initializer(this.domAccessor, this.client, this.widgets, this.widgetContainers, this.tagHandlers);
         this.pageController = new PageController(this.client, this.pages, this.initializer, this.urlResolver, this.tagHandlers);
         this.history = new PageHistory(this.pageController);
-        this.backendService = new BackendService(this.client, this.pageController);
         this.eventPublisher = new EventPublisher();
         this.globals = new GlobalStore(this.eventPublisher);
         this.runInitializers();
@@ -39,7 +38,6 @@ class Application {
         this.eventPublisher.publish(EventType.APP_INITIALIZED, this);
         this.client.loadConfig()
             .then(config => this.pageController.setConfig(config))
-            .then(config => this.backendService.setConfig(config))
             .then(config => this.widgets.loadWidgets(config))
             .then(config => this.pages.loadPages(config))
             .then(() => this.pageController.displayPageForUrl(document.location.pathname + document.location.search))

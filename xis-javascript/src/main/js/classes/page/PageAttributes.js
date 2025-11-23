@@ -8,7 +8,8 @@
  * @property {boolean} welcomePage
  * @property {array<string>} localDatabaseKeys
  * @property {array<string>} localStorageKeys
- * @property {array<string>} clientStateKeys
+ * @property {array<string>} sessionStorageKeys
+ * @property {array<string>} globalVariableKeys
  */
 
 class PageAttributes {
@@ -23,7 +24,7 @@ class PageAttributes {
         this.welcomePage = obj.welcomePage;
         this.localDatabaseKeys = obj.localDatabaseKeys || [];
         this.localStorageKeys = obj.localStorageKeys || [];
-        this.clientStateKeys = obj.clientStateKeys || [];
+        this.sessionStorageKeys = obj.sessionStorageKeys || [];
         this.globalVariableKeys = obj.globalVariableKeys || [];
     }
 }

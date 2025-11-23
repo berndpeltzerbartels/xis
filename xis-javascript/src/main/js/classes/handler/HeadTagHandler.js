@@ -72,7 +72,7 @@ class HeadTagHandler extends TagHandler {
      */
     refresh(data) {
         this.data = data;
-        this.refreshWithData(data);
+        this.renderhWithData(data);
         return this.refreshDescendantHandlers(data);
     }
 
@@ -80,9 +80,9 @@ class HeadTagHandler extends TagHandler {
      * @public
      * @returns {Promise}
      */
-    reapply(invoker) {
-        this.refreshWithData(this.data);
-        return this.reapplyDescendantHandlers(invoker);
+    reapply() {
+        this.renderhWithData(this.data);
+        return this.reapplyDescendantHandlers();
     }
 
     /**
@@ -90,7 +90,7 @@ class HeadTagHandler extends TagHandler {
      * @param {Data} data
      * @returns {Promise}
      */
-    refreshWithData(data) {
+    renderhWithData(data) {
         this.refreshTitle(data);
         this.refreshScriptTags(data);
         return Promise.resolve();

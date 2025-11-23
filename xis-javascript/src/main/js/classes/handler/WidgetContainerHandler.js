@@ -41,13 +41,9 @@ class WidgetContainerHandler extends TagHandler {
     /**
     * @public
     * @param {ServerResponse} response 
+    * @returns {Promise<void>}
     */
     handleActionResponse(response) {
-        app.backendService.triggerAdditionalReloadsOnDemand(response); // TODO move it
-        
-        if (response.nextURL) {
-            app.pageController.handleActionResponse(response);
-        }
         if (response.nextWidgetId) {
             this.ensureWidgetBound(response.nextWidgetId);
         }
@@ -56,7 +52,11 @@ class WidgetContainerHandler extends TagHandler {
         }
         var data = response.data;
         this.refreshContainerId(data);
-        this.refreshDescendantHandlers(data);
+        return app.pageController.initBuffer()
+            .then(() => this.refreshDescendantHandlers(data))
+            .then(() => app.pageController.doReapply())
+            .then(() => app.pageController.commitBuffer());
+
     }
 
     /**
@@ -71,26 +71,20 @@ class WidgetContainerHandler extends TagHandler {
         this.widgetState = new WidgetState(app.pageController.resolvedURL, widgetParameters);
         var promises = [];
         if (this.widgetInstance) {
-           promises.push(this.reloadDataAndRefresh(data));
+            promises.push(this.reloadDataAndRefresh(data));
         }
         return Promise.all(promises.concat([this.refreshDescendantHandlers(data)]));
     }
 
     /**
      * @public
-     * @param {TagHandler} invoker
      */
-    reapply(invoker) {
-        const data = this.data;
-        this.refreshContainerId(data);
-        this.bindDefaultWidgetInitial(data);
+    reapply() {
+        this.refreshContainerId(this.data);
+        this.bindDefaultWidgetInitial(this.data);
         var widgetParameters = this.widgetState ? this.widgetState.widgetParameters : {};
         this.widgetState = new WidgetState(app.pageController.resolvedURL, widgetParameters);
-        var promises = [];
-        if (this.widgetInstance) {
-           promises.push(this.reloadDataAndRefresh(data));
-        }
-        return Promise.all(promises.concat([this.reapplyDescendantHandlers(data)]));
+        return this.reapplyDescendantHandlers();
     }
 
     /**
@@ -163,7 +157,7 @@ class WidgetContainerHandler extends TagHandler {
         this.widgetInstance = assertNotNull(this.widgets.getWidgetInstance(widgetId), 'no such widget: ' + widgetId);
         var widgetRoot = assertNotNull(this.widgetInstance.root, 'no widget root: ' + widgetId);
         this.tag.appendChild(widgetRoot);
-        var widgetHandler = assertNotNull(this.widgetInstance.rootHandler, 'no widget handler: ' + widgetId);   
+        var widgetHandler = assertNotNull(this.widgetInstance.rootHandler, 'no widget handler: ' + widgetId);
         this.addDescendantHandler(widgetHandler);
     }
 
@@ -174,29 +168,18 @@ class WidgetContainerHandler extends TagHandler {
         return this.doLoad(parentData, SCOPE_TREE);
     }
 
-    triggerWidgetReload() {
-        return this.doLoad(new Data({}), SCOPE_CONTROLLER);
-    }
-
     doLoad(parentData, scope) {
         if (this.widgetInstance) {
             return app.client.loadWidgetData(this.widgetInstance, this.widgetState, this)
                 .then(response => response.data)
                 .then(data => { data.parentData = parentData; data.scope = scope; return data; })
-                .then(data => { console.log("data"+(typeof data)); data.parentData = parentData; data.scope = scope; return data; })
+                .then(data => { console.log("data" + (typeof data)); data.parentData = parentData; data.scope = scope; return data; })
                 .then(data => { this.widgetState.data = data; return data; })
                 .then(data => this.refreshDescendantHandlers(data).then(() => data))
                 .then(data => this.tagContentSetter.apply(document, data.idVariables, data.tagVariables))
                 .catch(e => reportError(e));
         }
         return Promise.resolve();
-    }
-
-
-    triggerAdditionalReloads(response) {
-       app.backendService.triggerPageReloadOnDemand(response);
-       app.backendService.triggerWidgetReloadsOnDemand(response);
-       return response;
     }
 
     /**

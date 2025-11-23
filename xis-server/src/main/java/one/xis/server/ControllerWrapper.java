@@ -32,7 +32,7 @@ public class ControllerWrapper {
     private Map<String, ControllerMethod> actionMethods;
     private Collection<ControllerMethod> formDataMethods;
     private Collection<ControllerMethod> localStorageOnlyMethods;
-    private Collection<ControllerMethod> clientStateOnlyMethods;
+    private Collection<ControllerMethod> sessionStorageOnlyMethods;
     private Collection<ControllerMethod> globalVariableOnlyMethods;
     private ControllerResultMapper controllerResultMapper;
 
@@ -40,7 +40,7 @@ public class ControllerWrapper {
         SecurityUtil.checkRoles(controller.getClass(), UserContextImpl.getInstance().getRoles());
         var methodsToExecute = new ArrayList<>(modelMethods);
         methodsToExecute.addAll(localStorageOnlyMethods);
-        methodsToExecute.addAll(clientStateOnlyMethods);
+        methodsToExecute.addAll(sessionStorageOnlyMethods);
         methodsToExecute.addAll(globalVariableOnlyMethods);
         methodsToExecute.addAll(tagContentOnlyMethods);
         var methods = RequestScopeSorter.sortMethods(methodsToExecute, requestScopeMethods);
@@ -98,6 +98,11 @@ public class ControllerWrapper {
         }
         try {
             var controllerMethodResult = method.invoke(request, controller, controllerResult.getRequestScope());
+            if (controllerMethodResult.getNextURL() != null) {
+                controllerResult.setActionProcessing(ActionProcessing.PAGE);
+            } else if (controllerMethodResult.getNextWidgetId() != null) {
+                controllerResult.setActionProcessing(ActionProcessing.WIDGET);
+            }
             controllerResultMapper.mapMethodResultToControllerResult(controllerMethodResult, controllerResult);
         } catch (AuthenticationException e) {
             throw e;
