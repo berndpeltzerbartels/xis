@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class ClientStateListTest {
+class SessionStorageListTest {
 
     private IntegrationTestContext testContext;
     private ClientStatePage page;

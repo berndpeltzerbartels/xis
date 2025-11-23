@@ -54,7 +54,7 @@ class ControllerWrapperFactory {
     }
 
     private Collection<ControllerMethod> clientStateOnlyMethods(@NonNull Object controller) {
-        return annotatedMethods(controller, ClientState.class)
+        return annotatedMethods(controller, SessionStorage.class)
                 .filter(m -> !m.isAnnotationPresent(Action.class))
                 .filter(method -> !method.isAnnotationPresent(ModelData.class))
                 .filter(method -> !method.isAnnotationPresent(FormData.class))

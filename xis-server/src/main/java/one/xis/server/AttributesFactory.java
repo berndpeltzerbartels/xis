@@ -1,9 +1,9 @@
 package one.xis.server;
 
-import one.xis.ClientState;
 import one.xis.GlobalVariable;
 import one.xis.LocalDatabase;
 import one.xis.LocalStorage;
+import one.xis.SessionStorage;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -20,8 +20,8 @@ class AttributesFactory {
 
     private void addParameterAttributes(Method method, ComponentAttributes attributes) {
         for (var parameter : method.getParameters()) {
-            if (parameter.isAnnotationPresent(ClientState.class)) {
-                attributes.getClientStateKeys().add(parameter.getAnnotation(ClientState.class).value());
+            if (parameter.isAnnotationPresent(SessionStorage.class)) {
+                attributes.getSessionStorageKeys().add(parameter.getAnnotation(SessionStorage.class).value());
             }
             if (parameter.isAnnotationPresent(LocalStorage.class)) {
                 attributes.getLocalStorageKeys().add(parameter.getAnnotation(LocalStorage.class).value());

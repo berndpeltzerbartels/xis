@@ -2,14 +2,14 @@ package test.reactive.button;
 
 import one.xis.Action;
 import one.xis.Page;
-import one.xis.ClientState;
+import one.xis.SessionStorage;
 
 @Page("/button-test.html")
 public class ButtonActionTestPage {
 
     private int counterValue = 0;
 
-    @ClientState("counterValue")
+    @SessionStorage("counterValue")
     public int getCounterValue() {
         return counterValue;
     }

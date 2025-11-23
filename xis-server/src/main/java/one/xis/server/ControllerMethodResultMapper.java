@@ -47,8 +47,8 @@ class ControllerMethodResultMapper {
             var key = method.getAnnotation(RequestScope.class).value();
             requestScope.put(key, returnValue);
         }
-        if (method.isAnnotationPresent(ClientState.class)) {
-            var key = method.getAnnotation(ClientState.class).value();
+        if (method.isAnnotationPresent(SessionStorage.class)) {
+            var key = method.getAnnotation(SessionStorage.class).value();
             controllerMethodResult.getClientState().put(key, returnValue);
         }
         if (method.isAnnotationPresent(LocalStorage.class)) {

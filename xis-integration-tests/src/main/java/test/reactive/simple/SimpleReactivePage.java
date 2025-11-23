@@ -2,14 +2,14 @@ package test.reactive.simple;
 
 
 import one.xis.Action;
-import one.xis.ClientState;
 import one.xis.Page;
+import one.xis.SessionStorage;
 
 @Page("/simpleReactive.html")
 class SimpleReactivePage {
     private int counter = 1;
 
-    @ClientState("counterValue")
+    @SessionStorage("counterValue")
     int count() {
         return counter;
     }

@@ -1,14 +1,14 @@
 package test.reactive.widgetaction;
 
 import one.xis.Action;
-import one.xis.ClientState;
+import one.xis.SessionStorage;
 import one.xis.Widget;
 
 @Widget
 class WidgetActionWidget {
     private int counter = 5;
 
-    @ClientState("counterValue")
+    @SessionStorage("counterValue")
     int count() {
         return counter;
     }

@@ -3,9 +3,9 @@ package test.page.core;
 import lombok.Getter;
 import lombok.NonNull;
 import one.xis.Action;
-import one.xis.ClientState;
 import one.xis.FormData;
 import one.xis.Page;
+import one.xis.SessionStorage;
 import one.xis.context.XISInit;
 
 import java.util.ArrayList;
@@ -26,15 +26,15 @@ class ClientStatePage {
     }
 
 
-    @ClientState("data")
+    @SessionStorage("data")
     ClientStatePageData data() {
         invokedMethods.add("data");
         return this.clientStatePageData;
     }
 
     @Action("link-action")
-    @ClientState("data")
-    ClientStatePageData linkAction(@ClientState("data") ClientStatePageData data) {
+    @SessionStorage("data")
+    ClientStatePageData linkAction(@SessionStorage("data") ClientStatePageData data) {
         invokedMethods.add("linkAction");
         this.clientStatePageData = new ClientStatePageData();
         this.clientStatePageData.setId(data.getId() + 100);
@@ -43,8 +43,8 @@ class ClientStatePage {
     }
 
     @Action("form-action")
-    @ClientState("data")
-    ClientStatePageData formAction(@NonNull @ClientState("data") ClientStatePageData clientState, @NonNull @FormData("formData") ClientStatePageData formData) {
+    @SessionStorage("data")
+    ClientStatePageData formAction(@NonNull @SessionStorage("data") ClientStatePageData clientState, @NonNull @FormData("formData") ClientStatePageData formData) {
         this.clientStatePageData = clientState;
         invokedMethods.add("formAction");
         this.clientStatePageData.setId(300);

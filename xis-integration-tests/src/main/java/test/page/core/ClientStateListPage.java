@@ -1,7 +1,7 @@
 package test.page.core;
 
-import one.xis.ClientState;
 import one.xis.Page;
+import one.xis.SessionStorage;
 
 import java.util.List;
 
@@ -17,7 +17,7 @@ class ClientStateListPage {
     );
 
 
-    @ClientState("data")
+    @SessionStorage("data")
     List<ClientStateListItem> data() {
         return clientStateListItems;
     }
