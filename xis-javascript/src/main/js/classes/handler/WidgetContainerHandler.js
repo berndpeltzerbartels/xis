@@ -45,10 +45,6 @@ class WidgetContainerHandler extends TagHandler {
     handleActionResponse(response) {
         app.backendService.triggerAdditionalReloadsOnDemand(response); // TODO move it
         
-        // Trigger reactive state updates with this WidgetContainerHandler as the invoker
-        // This ensures the anti-recursion logic stops at this level
-        app.backendService.triggerReactiveStateUpdates(response, this);
-        
         if (response.nextURL) {
             app.pageController.handleActionResponse(response);
         }
@@ -184,7 +180,8 @@ class WidgetContainerHandler extends TagHandler {
 
     doLoad(parentData, scope) {
         if (this.widgetInstance) {
-            return app.backendService.loadWidgetData(this.widgetInstance, this.widgetState, this)
+            return app.client.loadWidgetData(this.widgetInstance, this.widgetState, this)
+                .then(response => response.data)
                 .then(data => { data.parentData = parentData; data.scope = scope; return data; })
                 .then(data => { console.log("data"+(typeof data)); data.parentData = parentData; data.scope = scope; return data; })
                 .then(data => { this.widgetState.data = data; return data; })

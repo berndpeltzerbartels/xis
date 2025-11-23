@@ -43,6 +43,7 @@ class BackendService {
      */
     triggerReactiveStateUpdates(response) {
         // Check for any reactive data changes
+        debugger;
         const hasReactiveChanges = (response.globalVariableData && Object.keys(response.globalVariableData).length > 0) ||
                                   (response.clientStateData && Object.keys(response.clientStateData).length > 0) ||
                                   (response.localStorageData && Object.keys(response.localStorageData).length > 0) ||
@@ -50,6 +51,15 @@ class BackendService {
         
         if (hasReactiveChanges) {
             app.eventPublisher.publish(EventType.REACTIVE_DATA_CHANGED, response);
+            // If a RenderCoordinator is available and globals are present, run the coordinated update
+            if (app.renderCoordinator && response.globalVariableData && Object.keys(response.globalVariableData).length > 0) {
+                try {
+                    app.renderCoordinator.applyGlobalUpdate(response.globalVariableData, null);
+                } catch (e) {
+                    // swallow to avoid breaking reactive flow
+                    console.error('RenderCoordinator.applyGlobalUpdate failed', e);
+                }
+            }
         }
         
         return response;

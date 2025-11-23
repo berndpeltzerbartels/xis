@@ -31,29 +31,39 @@ class BodyTagHandler extends TagHandler {
     /**
      * Commits the buffer to the real body element.
      * Removes all non-persistent children and inserts the buffer between persistent start and end nodes.
-     */
-
+     * @public
+     * @returns {Promise<void>} 
+    */
     commitBuffer() {
-        while (this.buffer.firstChild) {
-            this.tag.appendChild(this.buffer.firstChild);
-        }
+        return new Promise((resolve, _) => {
+            while (this.buffer.firstChild) {
+                this.tag.appendChild(this.buffer.firstChild);
+            }
+            resolve();
+        });
     }
 
 
+    /**
+     * @returns {Promise<void>}
+     */
     initBuffer() {
-        // Create a DocumentFragment as buffer
-        this.buffer = document.createDocumentFragment();
-        // Add persistent start nodes
-        for (const node of this.persistentNodes.start) {
-            this.buffer.appendChild(node);
-        }
-        while (this.tag.firstChild) {
-            this.buffer.appendChild(this.tag.firstChild);
-        }
-        // Add persistent end nodes
-        for (const node of this.persistentNodes.end) {
-            this.buffer.appendChild(node);
-        }
+        return new Promise((resolve, _) => {
+            // Create a DocumentFragment as buffer
+            this.buffer = document.createDocumentFragment();
+            // Add persistent start nodes
+            for (const node of this.persistentNodes.start) {
+                this.buffer.appendChild(node);
+            }
+            while (this.tag.firstChild) {
+                this.buffer.appendChild(this.tag.firstChild);
+            }
+            // Add persistent end nodes
+            for (const node of this.persistentNodes.end) {
+                this.buffer.appendChild(node);
+            }
+            resolve();
+        });
     }
 
 
@@ -65,9 +75,8 @@ class BodyTagHandler extends TagHandler {
      */
     refresh(data) {
         this.data = data;
-        return this.refreshDescendantHandlers(data).then(() => {
-            return this.refreshWithData(data);
-        });
+        return this.refreshAttributes(this.data)
+            .then(() => this.refreshDescendantHandlers(data));
     }
 
     /**
@@ -75,9 +84,8 @@ class BodyTagHandler extends TagHandler {
      * @returns {Promise}
      */
     reapply(invoker) {
-        return this.reapplyDescendantHandlers(invoker).then(() => {
-            return this.refreshWithData(this.data);
-        });
+        return this.refreshAttributesa(this.data)
+            .then(() => this.reapplyDescendantHandlers(invoker));
     }
 
     /**
@@ -85,12 +93,9 @@ class BodyTagHandler extends TagHandler {
      * @param {Data} data
      * @returns {Promise}
      */
-    refreshWithData(data) {
-        this.initBuffer();
+    refreshAttributes(data) {
         const attributePromises = this.attributeHandlers.map(h => h.refresh(data));
-        return Promise.all(attributePromises).then(() => {
-            this.commitBuffer();
-        });
+        return Promise.all(attributePromises);
     }
 
     /**
@@ -100,7 +105,7 @@ class BodyTagHandler extends TagHandler {
     */
     bind(bodyTemplate) {
         this.bodyTemplate = bodyTemplate;
-       // Add persistent start nodes
+        // Add persistent start nodes
         for (const node of this.persistentNodes.start) {
             this.tag.appendChild(node);
         }

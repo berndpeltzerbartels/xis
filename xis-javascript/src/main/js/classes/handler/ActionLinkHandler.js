@@ -84,15 +84,20 @@ class ActionLinkHandler extends TagHandler {
             targetContainerHandler = widgetcontainerHandler;
         }
         this.client.widgetLinkAction(widgetcontainerHandler.widgetInstance, widgetcontainerHandler.widgetState, this.action, this.actionParameters)
-            .then(response => this.handleActionResponse(response, targetContainerHandler));
+            .then(response => {
+                app.pageController.initBuffer();
+                return response;
+            })
+            .then(response => this.handleActionResponse(response, targetContainerHandler))
+            .then(() => app.pageController.commitBuffer());
     }
 
     /**
      * @private
-     * @param {string} action 
+     * @returns {Promise<void>}
      */
     pageAction() {
-        app.pageController.submitPageLinkAction(this.action, this.actionParameters);
+        return app.pageController.submitPageLinkAction(this.action, this.actionParameters);
     }
 
 

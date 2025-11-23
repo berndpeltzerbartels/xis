@@ -58,6 +58,7 @@ class ForeachHandler extends TagHandler {
      * Shared logic for rendering items, param handlerCall is a function (handler, subData) => Promise
      */
     doRenderItems(data, handlerCall) {
+        debugger;
         const { arr, path } = this.getArrayData(data);
         this.cache.sizeUp(arr.length);
         const promises = [];

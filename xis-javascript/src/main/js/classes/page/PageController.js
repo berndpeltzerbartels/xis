@@ -35,6 +35,22 @@ class PageController {
     }
 
     /**
+     * @public
+     * @returns {Promise<void>}
+     */
+    initBuffer() {
+        return this.htmlTagHandler.bodyTagHandler.initBuffer();
+    }
+
+    /**
+     * @public
+     * @returns {Promise<void>}
+     */
+    commitBuffer() {
+        this.htmlTagHandler.bodyTagHandler.commitBuffer();
+    }
+
+    /**
      * Should be used in case of the source 
      * of the action has no parent widget-container
      * and invoker has no data.
@@ -92,8 +108,8 @@ class PageController {
     }
 
     /**
-     * 
-     * @param {Datas} data 
+     * @public
+     * @param {Data} data 
      */
     doRefresh(data) {
         data.setValue(['pathVariables'], this.resolvedURL.pathVariablesAsMap());
@@ -101,6 +117,19 @@ class PageController {
         this.page.data = data;
         this.htmlTagHandler.refresh(this.page.data);
         //this.updateHistory(this.resolvedURL);
+    }
+
+
+    /**
+     * @public
+     * @param {Handler} invokerHandler 
+     */
+    doReapply(invokerHandler) {
+        const data = this.page.data;
+        data.setValue(['pathVariables'], this.resolvedURL.pathVariablesAsMap());
+        data.setValue(['urlParameters'], this.resolvedURL.urlParameters);
+        this.page.data = data;
+        this.htmlTagHandler.reapply(invokerHandler);
     }
 
     triggerAdditionalReloads(response) {

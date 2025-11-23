@@ -22,11 +22,10 @@ class FormHandler extends TagHandler {
 
     submit(action) {
         var resolvedUrl = app.pageController.resolvedURL;
-        var formHandler = this;
         var formBindingParameters = urlParameters(this.binding);
         var formBindingKey = stripQuery(this.binding);
         this.client.formAction(resolvedUrl, this.widgetId(), this.formData(), action, formBindingKey, formBindingParameters).then(response => {
-            formHandler.handleActionResponse(response, formHandler.targetContainerHandler());
+            this.handleActionResponse(response, this.targetContainerHandler());
         });
     }
 
@@ -69,7 +68,7 @@ class FormHandler extends TagHandler {
         data.validationPath = '/' + formBindingKey;
         this.clearMessageHandlers();
         const descendantPromise = this.refreshDescendantHandlers(data);
-        const formDataPromise = app.backendService.loadFormData(app.pageController.resolvedURL, this.widgetId(), formBindingKey, formBindingParameters, this)
+        const formDataPromise = this.client.loadFormData(app.pageController.resolvedURL, this.widgetId(), formBindingKey, formBindingParameters, this)
             .then(response => this.refreshFormData(this.subData(response, formBindingKey)));
         return Promise.all([descendantPromise, formDataPromise]);
     }
@@ -135,19 +134,26 @@ class FormHandler extends TagHandler {
     handleActionResponse(response, targetContainerHandler) {
         this.refreshValidatorMessages(response.validatorMessages);
         if (!response.validatorMessages.isEmpty()) {
-            return;
+            return Promise.resolve();
         }
-        
-        // Trigger reactive state updates with this FormHandler as the invoker
-        // This ensures the anti-recursion logic stops at this level
-        app.backendService.triggerReactiveStateUpdates(response, this);
-        
+
+        return app.pageController.initBuffer()
+            .then(() => this.delegateResponseToHandler(response, targetContainerHandler))
+            .then(() => app.pageController.commitBuffer())
+            .catch(e => {
+                app.pageController.commitBuffer(); // auch bei Fehler committen
+                throw e;
+            });
+    }
+
+    delegateResponseToHandler(response, targetContainerHandler) {
         if (response.nextWidgetId) {
-            targetContainerHandler.handleActionResponse(response);
+            return Promise.resolve(targetContainerHandler.handleActionResponse(response));
         } else {
-            app.pageController.handleActionResponse(response);
+            return Promise.resolve(app.pageController.handleActionResponse(response));
         }
     }
+
 
     refreshValidatorMessages(validatorMessages) {
         for (var binding of Object.keys(validatorMessages.messages)) {

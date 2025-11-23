@@ -133,6 +133,14 @@ class HeadTagHandler extends TagHandler {
         this.title.innerText = '';
     }
 
+    /**
+     * Commit any buffered head changes. Present for coordinator compatibility.
+     */
+    commitBuffer() {
+        // Head currently updates live DOM (title.innerText and script src attributes).
+        // No additional commit steps required, but method provided for symmetry.
+    }
+
 
     /**
      * @param {Array} array

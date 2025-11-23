@@ -26,7 +26,9 @@ class HtmlTagHandler extends TagHandler {
      */
     refresh(data) {
         this.data = data;
-        return this.refreshWithData(data);
+       return this.headTagHandler.refresh(data).then(() =>
+            this.bodyTagHandler.refresh(data)
+        );
     }
 
     /**
@@ -34,19 +36,10 @@ class HtmlTagHandler extends TagHandler {
      * @returns {Promise}
      */
     reapply() {
-        return this.refreshWithData(this.data);
-    }
-
-    /**
-     * @private
-     * @param {Data} data
-     * @returns {Promise}
-     */
-    refreshWithData(data) {
-        return Promise.all([
-            this.headTagHandler.refresh(data),
-            this.bodyTagHandler.refresh(data)
-        ]);
+        return this.headTagHandler.reapply(this.data).then(() =>
+            this.bodyTagHandler.reapply(this.data)
+        );
+    
     }
 
     /**
@@ -79,6 +72,19 @@ class HtmlTagHandler extends TagHandler {
             this.headTagHandler.release(this.page.headTemplate);
             this.bodyTagHandler.release(this.page.bodyTemplate);
             this.page = undefined;
+        }
+    }
+
+    /**
+     * Commits any buffered changes in head and body handlers.
+     * Html-level single commit to avoid creating new head/body nodes during operations.
+     */
+    commitBuffer() {
+        if (this.headTagHandler && typeof this.headTagHandler.commitBuffer === 'function') {
+            this.headTagHandler.commitBuffer();
+        }
+        if (this.bodyTagHandler && typeof this.bodyTagHandler.commitBuffer === 'function') {
+            this.bodyTagHandler.commitBuffer();
         }
     }
 

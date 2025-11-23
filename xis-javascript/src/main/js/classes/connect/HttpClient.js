@@ -89,6 +89,11 @@ class HttpClient extends Client {
         }
     }
 
+    /**
+     * @param {WidgetInstance} widgetInstance 
+     * @param {WidgetState} widgetState 
+     * @returns {Promise<ServerResponse>}
+     */
     async loadWidgetData(widgetInstance, widgetState) {
         app.messageHandler.clearMessages();
         const request = this.createWidgetRequest(widgetInstance, widgetState, null, null, null);
