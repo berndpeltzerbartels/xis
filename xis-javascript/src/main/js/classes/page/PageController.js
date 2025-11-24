@@ -98,7 +98,6 @@ class PageController {
             return Promise.resolve(rv);
         }
         var data = response.data;
-        data.scope = 'TREE';
         data.setValue(['pathVariables'], this.resolvedURL.pathVariablesAsMap());
         data.setValue(['urlParameters'], this.resolvedURL.urlParameters);
         this.page.data = data;

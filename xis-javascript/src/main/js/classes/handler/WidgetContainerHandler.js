@@ -153,15 +153,14 @@ class WidgetContainerHandler extends TagHandler {
      * @private
      */
     reloadDataAndRefresh(parentData) {
-        return this.doLoad(parentData, SCOPE_TREE);
+        return this.doLoad(parentData);
     }
 
-    doLoad(parentData, scope) {
+    doLoad(parentData) {
         if (this.widgetInstance) {
             return app.client.loadWidgetData(this.widgetInstance, this.widgetState, this)
                 .then(response => response.data)
-                .then(data => { data.parentData = parentData; data.scope = scope; return data; })
-                .then(data => { console.log("data" + (typeof data)); data.parentData = parentData; data.scope = scope; return data; })
+                .then(data => { data.parentData = parentData; return data; })
                 .then(data => { this.widgetState.data = data; return data; })
                 .then(data => this.refreshDescendantHandlers(data).then(() => data))
                 .then(data => this.tagContentSetter.apply(document, data.idVariables, data.tagVariables))

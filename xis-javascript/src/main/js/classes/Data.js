@@ -1,6 +1,3 @@
-const SCOPE_TREE = 'tree';
-const SCOPE_CONTROLLER = 'controller';
-
 /**
  * Hierarchical page-data
  */
@@ -15,7 +12,6 @@ class Data {
         this.values = values;
         this.parentData = parentData;
         this.validationPath = '';
-        this.scope = SCOPE_TREE;
     }
     /**
      * @public
