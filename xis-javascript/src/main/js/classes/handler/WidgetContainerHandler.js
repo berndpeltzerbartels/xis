@@ -54,7 +54,11 @@ class WidgetContainerHandler extends TagHandler {
         this.refreshContainerId(data);
         return app.pageController.initBuffer()
             .then(() => this.refreshDescendantHandlers(data))
-            .then(() => app.pageController.doReapply())
+            .then(() => {
+                if (response.containsGlobals()) {
+                    app.pageController.doReapply();
+                }
+            })
             .then(() => app.pageController.commitBuffer());
 
     }

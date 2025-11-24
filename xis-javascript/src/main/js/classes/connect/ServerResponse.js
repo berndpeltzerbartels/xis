@@ -40,6 +40,23 @@ class ServerResponse {
      */
     this.idVariables = {};
     }
+
+
+    containsGlobals() {
+       if (this.globalVariableData && Object.keys(this.globalVariableData).length > 0) {
+           return true;
+       }
+       if (this.localStorageData && Object.keys(this.localStorageData).length > 0) {
+           return true;
+       }
+       if (this.localDatabaseData && Object.keys(this.localDatabaseData).length > 0) {
+           return true;
+       }
+       if (this.sessionStorageData && Object.keys(this.sessionStorageData).length > 0) {
+           return true;
+       }
+       return false;
+    }
 }
 
 

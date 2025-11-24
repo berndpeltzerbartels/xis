@@ -99,28 +99,24 @@ class PageController {
         }
         var data = response.data;
         data.scope = 'TREE';
-        return this.doRefresh(data);
-    }
-
-    /**
-     * @public
-     * @param {Data} data 
-     */
-    doRefresh(data) {
-        debugger;
         data.setValue(['pathVariables'], this.resolvedURL.pathVariablesAsMap());
         data.setValue(['urlParameters'], this.resolvedURL.urlParameters);
         this.page.data = data;
         return this.initBuffer()
             .then(() => this.htmlTagHandler.refresh(this.page.data))
-            .then(() => this.htmlTagHandler.reapply())
+            .then(() => {
+                if (response.containsGlobals()) {
+                    this.htmlTagHandler.reapply();
+                }
+            })
             .then(() => this.commitBuffer());
-        //this.updateHistory(this.resolvedURL);
     }
+
 
     doReapply() {
         return this.htmlTagHandler.reapply();
     }
+
 
     /** 
      * Handels server-response after submitting an action.
