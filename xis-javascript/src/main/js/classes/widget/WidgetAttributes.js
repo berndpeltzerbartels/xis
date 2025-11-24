@@ -6,6 +6,7 @@
  * @property {array<string>} localStorageKeys
  * @property {array<string>} sessionStorageKeys
  * @property {array<string>} globalVariableKeys
+ * @property {array<string>} updateEventKeys
  */
 
 
@@ -18,5 +19,6 @@ class WidgetAttributes {
         this.localStorageKeys = obj.localStorageKeys || [];
         this.sessionStorageKeys = obj.sessionStorageKeys || [];
         this.globalVariableKeys = obj.globalVariableKeys || [];
+        this.updateEventKeys = obj.updateEventKeys || [];
     }
 }

@@ -19,13 +19,34 @@ class WidgetContainers {
         return this.containers[id];
     }
 
+    /**
+     * 
+     * @param {ClientConfig} config 
+     * @returns 
+     */
     setConfig(config) {
         this.config = config;
         return config;
     }
 
     publishUpdateEvent(eventId) {
+       const widgetIds = this.widgetIdForUpdateEvent(eventId);
+       widgetIds.forEach(widgetId => {
+        const handlers = this.findContainerHandlersByWidgetId(widgetId);
+        handlers.forEach(handler => handler.handleUpdateEvent());
+       });
+        
+    }
 
+    widgetIdForUpdateEvent(eventId) {
+        var widgetIds = [];
+        for (var widgetId in Object.keys(this.config.widgetAttributes)) {
+            var widgetAttributes = this.config.widgetAttributes[widgetId];
+            if (widgetAttributes.updateEventKeys.includes(eventId)) {
+                widgetIds.push(widgetId);
+            }
+        }
+        return widgetIds;
     }
        
 
@@ -34,15 +55,16 @@ class WidgetContainers {
      * @param {string} widgetId 
      * @returns {WidgetContainerHandler}  
      */
-    findContainerHandlerByWidgetId(widgetId) {
+    findContainerHandlersByWidgetId(widgetId) {
+        const handlers = [];
         for (var key in this.containers) {
             var container = this.containers[key];
             var handler = app.tagHandlers.getHandler(container);
             if (handler.widgetInstance.id === widgetId) {
-                return handler;
+                handlers.push(handler);
             }
         }
-        return undefined;
+        return handlers;
     }
 
     /**

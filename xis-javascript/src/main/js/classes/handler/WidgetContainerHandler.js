@@ -72,6 +72,10 @@ class WidgetContainerHandler extends TagHandler {
         return Promise.all(promises.concat([this.refreshDescendantHandlers(data)]));
     }
 
+    handleUpdateEvent() {
+        this.refresh(this.data);
+    }
+
     /**
      * @public
      * @param {string} widgetId 
