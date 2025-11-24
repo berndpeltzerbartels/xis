@@ -19,6 +19,15 @@ class WidgetContainers {
         return this.containers[id];
     }
 
+    setConfig(config) {
+        this.config = config;
+        return config;
+    }
+
+    publishUpdateEvent(eventId) {
+
+    }
+       
 
     /**
      * 

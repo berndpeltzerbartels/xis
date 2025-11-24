@@ -38,6 +38,7 @@ class Application {
         this.eventPublisher.publish(EventType.APP_INITIALIZED, this);
         this.client.loadConfig()
             .then(config => this.pageController.setConfig(config))
+            .then(config => this.widgetContainers.setConfig(config))
             .then(config => this.widgets.loadWidgets(config))
             .then(config => this.pages.loadPages(config))
             .then(() => this.pageController.displayPageForUrl(document.location.pathname + document.location.search))

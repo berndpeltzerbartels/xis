@@ -69,6 +69,7 @@ class Widgets {
      */
     disposeInstance(widgetInstance) {
         var instances = this.widgetInstances[widgetInstance.widget.id];
+        widgetInstance.containerHandler = undefined;
         instances.push(widgetInstance);
     }
 

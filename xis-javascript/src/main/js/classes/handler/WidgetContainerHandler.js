@@ -14,9 +14,6 @@
  * @property {Expression} defaultWidgetExpression
  * @property {String} type
  */
-// TODO Widget-RootHandler darf kein descendant handler sein, sondern muss in WidgetContainerHandler integriert werden.
-
-// Die Descendanthandler werden eventuell entfernt. Die WidgetInstance ist besser geeignet.
 class WidgetContainerHandler extends TagHandler {
 
     /**
@@ -143,6 +140,7 @@ class WidgetContainerHandler extends TagHandler {
             }
         }
         this.widgetInstance = assertNotNull(this.widgets.getWidgetInstance(widgetId), 'no such widget: ' + widgetId);
+        this.widgetInstance.containerHandler = this;
         var widgetRoot = assertNotNull(this.widgetInstance.root, 'no widget root: ' + widgetId);
         this.tag.appendChild(widgetRoot);
         var widgetHandler = assertNotNull(this.widgetInstance.rootHandler, 'no widget handler: ' + widgetId);

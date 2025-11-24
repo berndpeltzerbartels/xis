@@ -42,6 +42,7 @@ class TestApplication {
         document.location.pathname = uri;
         return this.client.loadConfig()
             .then(config => this.pageController.setConfig(config))
+            .then(config => this.widgetContainers.setConfig(config))
             .then(config => this.widgets.loadWidgets(config))
             .then(config => this.pages.loadPages(config))
             .then(() => this.urlResolver.init())
