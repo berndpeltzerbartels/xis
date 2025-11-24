@@ -339,6 +339,7 @@ class Client {
         serverResponse.tagVariables = obj.tagVariables || {};
         serverResponse.idVariables = obj.idVariables || {};
         serverResponse.actionProcessing = obj.actionProcessing || 'NONE';
+        serverResponse.updateEventKeys = obj.updateEventKeys || [];
         data.setValue(['sessionStorage'], serverResponse.sessionStorageData);
         data.setValue(['localStorage'], serverResponse.localStorageData);
         data.setValue(['global'], serverResponse.globalVariableData);

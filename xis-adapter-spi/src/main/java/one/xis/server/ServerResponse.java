@@ -28,7 +28,8 @@ public class ServerResponse {
     private Map<String, Object> localDatabaseData = new HashMap<>();
     private Map<String, Object> sessionStorageData = new HashMap<>();
     private Map<String, Object> globalVariableData = new HashMap<>();
-    private Collection<String> reloadWidgets = new ArrayList<>();
+    private Collection<String> updateEventKeys = new ArrayList<>();
+    private Collection<String> reloadWidgets = new ArrayList<>(); // TODO remove?
     private String nextURL;
     private String nextWidgetId;
     private ValidatorMessages validatorMessages = new ValidatorMessages();

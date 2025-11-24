@@ -31,6 +31,7 @@ class ServerResponse {
         this.sessionStorageData = {};
         this.validatorMessages = { };
         this.actionProcessing = 'NONE';
+        this.updateEventKeys = [];
     /**
      * Tag-gebundene Variablen, z.B. { title: "Seitentitel" }
      */

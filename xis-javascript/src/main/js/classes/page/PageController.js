@@ -134,6 +134,15 @@ class PageController {
         return rv;
     }
 
+    doEventBasedUpdate(response) {
+        response.updateEventkeys.forEach(eventKey => {
+            this.widgetContainers.publishUpdateEvent(eventKey);
+        });
+    }
+
+    handleUpdateEvent() {
+        this.htmlTagHandler.refresh(this.page.data);
+    }
 
     getData() {
         return this.page ? this.page.data : undefined;
