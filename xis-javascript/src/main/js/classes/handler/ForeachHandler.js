@@ -27,30 +27,12 @@ class ForeachHandler extends TagHandler {
     }
 
     /**
-     * @public
-     * @returns {Promise<void>}
-     */
-    reapply() {
-        return this.renderItemsReapply(this.data);
-    }
-
-
-    /**
      * @private
      * @param {Data} data
      * @returns {Promise<void>}
      */
     renderItemsRefresh(data) {
         return this.doRenderItems(data, (handler, subData) => handler.refresh(subData));
-    }
-
-    /**
-     * @private
-     * @param {Data} data
-     * @returns {Promise<void>}
-     */
-    renderItemsReapply(data) {
-        return this.doRenderItems(data, (handler, subData) => handler.reapply());
     }
 
     /**

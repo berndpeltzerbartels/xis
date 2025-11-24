@@ -55,13 +55,6 @@ class AttributeHandler extends TagHandler {
     }
 
     /**
-     * @public
-     */
-    reapply() {
-        return this.refreshWithData(this.data);
-    }
-
-    /**
      * @private
      * @param {Data} data
      * @returns {Promise}

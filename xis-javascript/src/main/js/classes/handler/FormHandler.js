@@ -16,7 +16,7 @@ class FormHandler extends TagHandler {
         if (!formTag.getAttribute('xis:binding')) {
             throw new Error('form has no binding: ' + this.tag);
         }
-        this.bindingExpression = new TextContentParser(formTag.getAttribute('xis:binding'), () => this.reapply()).parse();
+        this.bindingExpression = new TextContentParser(formTag.getAttribute('xis:binding')).parse();
         formTag.addEventListener('submit', event => event.preventDefault());
     }
 
@@ -72,21 +72,6 @@ class FormHandler extends TagHandler {
         const formDataPromise = this.client.loadFormData(app.pageController.resolvedURL, this.widgetId(), formBindingKey, formBindingParameters, this)
             .then(response => this.refreshFormData(this.subData(response, formBindingKey)));
         return Promise.all([descendantPromise, formDataPromise]);
-    }
-
-
-    /**
-     * @public
-     * @override
-     * @param {Data} data 
-     */
-    reapply(invoker) {
-        this.binding = this.bindingExpression.evaluate(this.data);
-        var formBindingKey = stripQuery(this.binding);
-        this.formElementHandlers = {};
-        this.data.validationPath = '/' + formBindingKey;
-        this.clearMessageHandlers();
-        return this.reapplyDescendantHandlers(invoker);
     }
 
     /**

@@ -47,13 +47,4 @@ class TextNodeHandler extends TagHandler {
         return Promise.resolve();
     }
 
-    /**
-     * @public
-     * @override
-     * @param {TagHandler} invoker 
-     */
-    reapply(invoker) {
-        this.updateText();
-        return Promise.resolve();
-    }   
 }

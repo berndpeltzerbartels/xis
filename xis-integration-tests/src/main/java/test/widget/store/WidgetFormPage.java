@@ -1,4 +1,4 @@
-package test.reactive.widgetform;
+package test.widget.store;
 
 import one.xis.Page;
 

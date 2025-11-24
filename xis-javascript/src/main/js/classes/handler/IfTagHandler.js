@@ -27,26 +27,6 @@ class IfTagHandler extends TagHandler {
         return Promise.resolve();
     }
 
-    /**
-     * @public
-     * @returns {Promise}
-     */
-    reapply() {
-        const newConditionValue = this.expression.evaluate(this.data);
-        if (this.conditionValue !== newConditionValue) {
-            if (newConditionValue) {
-                this.linkChildNodes();
-            } else {
-                this.unlinkChildNodes();
-            }
-            this.conditionValue = newConditionValue;
-        }
-        if (this.conditionValue) {
-            return this.reapplyDescendantHandlers();
-        }
-        return Promise.resolve();
-    }
-
     unlinkChildNodes() {
         for (var i = 0; i < this.childNodes.length; i++) {
             this.tag.removeChild(this.childNodes[i]);

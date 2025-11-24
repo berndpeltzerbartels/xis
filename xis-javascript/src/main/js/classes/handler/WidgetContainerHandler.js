@@ -54,11 +54,6 @@ class WidgetContainerHandler extends TagHandler {
         this.refreshContainerId(data);
         return app.pageController.initBuffer()
             .then(() => this.refreshDescendantHandlers(data))
-            .then(() => {
-                if (response.containsGlobals()) {
-                    app.pageController.doReapply();
-                }
-            })
             .then(() => app.pageController.commitBuffer());
 
     }
@@ -78,17 +73,6 @@ class WidgetContainerHandler extends TagHandler {
             promises.push(this.reloadDataAndRefresh(data));
         }
         return Promise.all(promises.concat([this.refreshDescendantHandlers(data)]));
-    }
-
-    /**
-     * @public
-     */
-    reapply() {
-        this.refreshContainerId(this.data);
-        this.bindDefaultWidgetInitial(this.data);
-        var widgetParameters = this.widgetState ? this.widgetState.widgetParameters : {};
-        this.widgetState = new WidgetState(app.pageController.resolvedURL, widgetParameters);
-        return this.reapplyDescendantHandlers();
     }
 
     /**

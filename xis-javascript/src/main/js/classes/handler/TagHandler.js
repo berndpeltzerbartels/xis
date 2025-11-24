@@ -16,38 +16,6 @@ class TagHandler {
         this.hasGlobals = false;
     }
 
-    /**
-     * Default reapply implementation: reapply on descendants.
-     * Handlers may override to implement custom behavior.
-     * @returns {Promise<void>}
-     */
-    reapply() {
-        return this.reapplyDescendantHandlers();
-    }
-
-    /**
-     * Re-applies (evaluates) descendant handlers. The invoker is forwarded to children.
-     * Note: many handlers use this.data internally; callers may pass an invoker or nothing.
-     * @returns {Promise<void>}
-     */
-    reapplyDescendantHandlers() {
-        const promises = [];
-        for (const handler of this.descendantHandlers) {
-            if (typeof handler.reapply === 'function') {
-                try {
-                    promises.push(handler.reapply());
-                } catch (e) {
-                    // ensure a promise is present even if handler.reapply throws synchronously
-                    promises.push(Promise.reject(e));
-                }
-            } else {
-                promises.push(Promise.resolve());
-            }
-        }
-        return Promise.all(promises).then(() => {});
-    }
-
-
     registerReactiveListener(context, path, listener) {
        this.appendAttribute.eventPublisher.addEventListener(context, path, listener);
     }
@@ -158,31 +126,13 @@ class TagHandler {
     }
 
     createExpression(src) {
-        const listener = (context, path) => {
-            const key = `${context}.${path}`;
-            if (!this.reactiveVariables.has(key)) {
-                this.reactiveVariables.add(key);
-                app.eventPublisher.addEventListener(EventType.REACTIVE_DATA_CHANGED, () => {
-                    this.reapply();
-                });
-            }
-        };
         return new TextContentParser(src, listener).parse();
     }
 
     variableTextContentFromAttribute(attrName) {
         var attr = this.tag.getAttribute(attrName);
         if (attr) {
-            const listener = (context, path) => {
-                const key = `${context}.${path}`;
-                if (!this.reactiveVariables.has(key)) {
-                    this.reactiveVariables.add(key);
-                    app.eventPublisher.addEventListener(EventType.REACTIVE_DATA_CHANGED, () => {
-                        this.reapply();
-                    });
-                }
-            };
-            return new TextContentParser(attr, listener).parse();
+            return new TextContentParser(attr).parse();
         }
     }
 

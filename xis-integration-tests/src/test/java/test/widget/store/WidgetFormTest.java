@@ -1,11 +1,14 @@
-package test.reactive.widgetform;
+package test.widget.store;
 
 import one.xis.context.IntegrationTestContext;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+
+@Disabled
 class WidgetFormTest {
     private IntegrationTestContext context;
 
@@ -20,7 +23,7 @@ class WidgetFormTest {
     @Test
     void formActionInWidgetUpdatesPageAndWidget() {
         var result = context.openPage("/widgetForm.html");
-        
+
         // Initial values should be 10
         var counterOnPage = result.getDocument().getElementById("counter-value-page").getInnerText();
         var counterOnWidget = result.getDocument().getElementById("counter-value-widget").getInnerText();

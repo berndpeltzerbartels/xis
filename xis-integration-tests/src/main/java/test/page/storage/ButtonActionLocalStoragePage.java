@@ -1,4 +1,4 @@
-package test.reactive.buttonlocalstorage;
+package test.page.storage;
 
 import lombok.Getter;
 import one.xis.Action;

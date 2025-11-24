@@ -35,15 +35,6 @@ class ActionButtonHandler extends TagHandler {
         return this.renderWithData(data);
     }
 
-
-    /**
-     * @public
-     */
-    reapply() {
-        return this.renderWithData(this.data);
-    }
-
-
     /**
      * @private
      * @param {Data} data

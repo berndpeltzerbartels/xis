@@ -47,16 +47,7 @@ class WidgetLinkHandler extends TagHandler {
         this.targetContainerId = this.tag.getAttribute('xis:target-container');
         return descendantPromise;
     }
-
-    reapply() {
-        this.widgetParameters = {};
-        const descendantPromise = this.reapplyDescendantHandlers(); // attributes might have variables !
-        this.targetPageUrl = this.tag.getAttribute('xis:page');
-        this.targetWidgetUrl = this.tag.getAttribute('xis:widget');
-        this.targetContainerId = this.tag.getAttribute('xis:target-container');
-        return descendantPromise;
-    }
-
+    
     /**
      * 
      * @param {String} name 

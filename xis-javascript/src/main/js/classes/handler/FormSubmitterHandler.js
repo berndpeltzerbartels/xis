@@ -23,16 +23,6 @@ class FormSubmitterHandler extends TagHandler {
     }
 
     /**
-     * @public
-     * @returns {Promise}
-     */
-    reapply() {
-        return this.refreshWithData(this.data). then(() => {
-            return this.reapplyDescendantHandlers();
-        });
-    }
-
-    /**
      * @private
      * @param {Data} data
      * @returns {Promise}

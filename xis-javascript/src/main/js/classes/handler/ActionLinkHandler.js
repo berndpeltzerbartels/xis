@@ -33,17 +33,6 @@ class ActionLinkHandler extends TagHandler {
         });
     }
 
-
-    /**
-     * @public
-     */
-    reapply() {
-        return this.reapplyDescendantHandlers().then(() => {
-            this.refreshWithData(this.data);
-        });
-    }
-
-
     /**
      * @private
      * @param {Data} data

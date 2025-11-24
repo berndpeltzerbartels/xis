@@ -104,19 +104,8 @@ class PageController {
         this.page.data = data;
         return this.initBuffer()
             .then(() => this.htmlTagHandler.refresh(this.page.data))
-            .then(() => {
-                if (response.containsGlobals()) {
-                    this.htmlTagHandler.reapply();
-                }
-            })
             .then(() => this.commitBuffer());
     }
-
-
-    doReapply() {
-        return this.htmlTagHandler.reapply();
-    }
-
 
     /** 
      * Handels server-response after submitting an action.
@@ -205,7 +194,6 @@ class PageController {
 
             this.initBuffer()
                 .then(() => this.htmlTagHandler.refresh(data))
-                .then(() => this.htmlTagHandler.reapply())
                 .then(() => this.commitBuffer());
 
             if (!skipHistoryUpdate && response.status < 300) {

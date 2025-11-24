@@ -18,7 +18,6 @@ class HeadTagHandler extends TagHandler {
      */
     bind(page) {
         this.setTitleExpression(page);
-        this.addScriptTags(page);
         for (var node of page.headChildArray) {
             if (isElement(node) && node.localName == 'title') {
                 continue;
@@ -28,24 +27,6 @@ class HeadTagHandler extends TagHandler {
         var headTemplateRootHandler = this.tagHandlers.getRootHandler(page.headTemplate);
         this.addDescendantHandler(headTemplateRootHandler);
     }
-
-    /**
-    * @private
-    * @param {Page} page
-    * @param {string} pageSpecificJsSource
-    */
-    addScriptTags(page) {
-        this.scriptSourceExpressions = this.extractFromArrayInPlace(page.headChildArray, node => node.localName == 'script')
-            .map(node => node.getAttribute('src'))
-            .map(src => new TextContentParser(src, () => this.reapply()).parse());
-        for (var scriptSourceExpression of this.scriptSourceExpressions) {
-            var scriptElement = document.createElement('script');
-            scriptElement.setAttribute('type', 'text/javascript');
-            scriptElement.srcexpr = scriptSourceExpression;
-            this.tag.appendChild(scriptElement);
-        }
-    }
-
 
     /**
     * Removes all children from head-tag and put them bag to headTemplate, except title.
@@ -75,16 +56,6 @@ class HeadTagHandler extends TagHandler {
         this.renderhWithData(data);
         return this.refreshDescendantHandlers(data);
     }
-
-    /**
-     * @public
-     * @returns {Promise}
-     */
-    reapply() {
-        this.renderhWithData(this.data);
-        return this.reapplyDescendantHandlers();
-    }
-
     /**
      * @private
      * @param {Data} data
@@ -92,7 +63,6 @@ class HeadTagHandler extends TagHandler {
      */
     renderhWithData(data) {
         this.refreshTitle(data);
-        this.refreshScriptTags(data);
         return Promise.resolve();
     }
 
@@ -104,21 +74,6 @@ class HeadTagHandler extends TagHandler {
             return;
         }
         this.title.innerText = this.titleExpression.evaluate(data);
-    }
-
-    /**
-    * @private
-    * @param {Data} data
-    */
-    refreshScriptTags(data) {
-        for (var scriptElement of this.nodeListToArray(this.tag.childNodes)) {
-            if (isElement(scriptElement) && scriptElement.localName == 'script') {
-                var expression = scriptElement.srcexpr;
-                if (expression) {
-                    scriptElement.setAttribute('src', expression.evaluate(data));
-                }
-            }
-        }
     }
 
     setTitleExpression(page) {

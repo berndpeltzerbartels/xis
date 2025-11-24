@@ -80,15 +80,6 @@ class BodyTagHandler extends TagHandler {
     }
 
     /**
-     * @public
-     * @returns {Promise}
-     */
-    reapply() {
-        return this.refreshAttributes(this.data)
-            .then(() => this.reapplyDescendantHandlers());
-    }
-
-    /**
      * @private
      * @param {Data} data
      * @returns {Promise}

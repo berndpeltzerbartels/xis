@@ -67,7 +67,7 @@ class Pages {
                 if (child.localName == 'title') {
                     page.titleElement = child;
                     break;
-                } 
+                }
             }
             return pageId;
         });
@@ -83,8 +83,10 @@ class Pages {
         return this.client.loadPageBody(pageId).then(content => {
             var body = htmlToElement(content);
             var templateElement = document.createDocumentFragment();
-            for (const node of nodeListToArray(body.childNodes)) {
-                templateElement.appendChild(node);
+            if (body) {
+                for (const node of nodeListToArray(body.childNodes)) {
+                    templateElement.appendChild(node);
+                }
             }
             templateElement = normalizeElement(templateElement);
             initializeElement(templateElement);

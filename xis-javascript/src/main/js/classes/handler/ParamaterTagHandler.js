@@ -19,11 +19,4 @@ class ParameterTagHandler extends TagHandler {
         return descendantPromise;
     }
 
-    reapply() {
-        const descendantPromise = this.reapplyDescendantHandlers(); // AttributeHandler !
-        var name = this.getAttribute('name');
-        var value = this.hasAttribute("value") ? this.getAttribute('value') : this.tag.innerText;
-        this.parentHandler.addParameter(name, value);
-        return descendantPromise;
-    }
 }

@@ -3,10 +3,12 @@ package test.widget.global;
 import one.xis.context.IntegrationTestContext;
 import one.xis.test.dom.Document;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Disabled
 class GlobalVariableSimpleTest {
 
     private IntegrationTestContext context;

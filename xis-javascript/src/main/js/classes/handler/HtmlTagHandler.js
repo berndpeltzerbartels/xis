@@ -33,17 +33,6 @@ class HtmlTagHandler extends TagHandler {
 
     /**
      * @public
-     * @returns {Promise}
-     */
-    reapply() {
-        return this.headTagHandler.reapply(this.data).then(() =>
-            this.bodyTagHandler.reapply(this.data)
-        );
-    
-    }
-
-    /**
-     * @public
      * @param {Page} page 
      */
     bindPage(page) {

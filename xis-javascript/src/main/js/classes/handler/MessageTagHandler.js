@@ -35,15 +35,6 @@ class MessageTagHandler extends TagHandler {
     }
 
     /**
-     * @public
-     * @returns {Promise}
-     */
-    reapply() {
-        this.refreshWithData(this.data);
-        return this.reapplyDescendantHandlers(this.data);
-    }
-
-    /**
      * @private
      * @param {Data} data
      */
