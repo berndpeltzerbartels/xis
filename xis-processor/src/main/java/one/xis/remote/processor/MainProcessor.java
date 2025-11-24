@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 public class MainProcessor extends AnnotationProcessor {
 
+    // TODO Validieren @Action updateEventKeys bei Page nicht sinnvoll
     private ProcessingResult processingResult;
 
     @Override

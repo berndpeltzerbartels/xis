@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:xis="https://xis.one/xsd">
+<head>
+    <title>Update Event Test Page</title>
+</head>
+<body>
+<div>
+    <h1>Update Event Test</h1>
+    
+    <div id="container1-wrapper">
+        <h2>Widget Container 1</h2>
+        <xis:widget-container default-widget="UpdateEventWidget1" container-id="container1"/>
+    </div>
+    
+    <div id="container2-wrapper">
+        <h2>Widget Container 2</h2>
+        <xis:widget-container default-widget="UpdateEventWidget2" container-id="container2"/>
+    </div>
+    
+    <a xis:action="triggerUpdate" id="page-action-link" href="#">Trigger Update from Page</a>
+</div>
+</body>
+</html>

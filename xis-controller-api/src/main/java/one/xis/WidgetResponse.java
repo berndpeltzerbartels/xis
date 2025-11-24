@@ -21,6 +21,12 @@ public class WidgetResponse implements Response {
         this.controllerClass = controllerClass;
     }
 
+    public WidgetResponse(@NonNull Class<?> controllerClass, @NonNull String targetContainer) {
+        this.controllerClass = controllerClass;
+        this.targetContainer = targetContainer;
+    }
+
+
     public WidgetResponse() {
 
     }
