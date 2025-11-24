@@ -134,14 +134,29 @@ class PageController {
         return rv;
     }
 
-    doEventBasedUpdate(response) {
-        response.updateEventkeys.forEach(eventKey => {
-            this.widgetContainers.publishUpdateEvent(eventKey);
-        });
+     /**
+     * @public
+     * @param {Array<String>} eventIds
+     * @returns {Promise<boolean>}
+     */
+    handleUpdateEvents(eventIds) {
+        if (!this.resolvedURL) {
+            return Promise.resolve(false);
+        }
+        for (const eventId of eventIds) {
+            if (this.resolvedURL.page.updateEventKeys.includes(eventId)) {
+                return this.handleUpdateEvent().then(() => true);
+            }
+        }
+        return Promise.resolve(false);
     }
 
+    /**
+     * @private
+     * @returns {Promise<void>}
+     */
     handleUpdateEvent() {
-        this.htmlTagHandler.refresh(this.page.data);
+        return this.displayPageForResolvedURL(this.resolvedURL, /* skipHistoryUpdate */ true);
     }
 
     getData() {

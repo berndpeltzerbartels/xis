@@ -29,13 +29,15 @@ class WidgetContainers {
         return config;
     }
 
-    publishUpdateEvent(eventId) {
-       const widgetIds = this.widgetIdForUpdateEvent(eventId);
-       widgetIds.forEach(widgetId => {
-        const handlers = this.findContainerHandlersByWidgetId(widgetId);
-        handlers.forEach(handler => handler.handleUpdateEvent());
-       });
-        
+    handleUpdateEvents(eventIds) {
+        eventIds.forEach(eventId => {
+            const widgetIds = this.widgetIdForUpdateEvent(eventId);
+            widgetIds.forEach(widgetId => {
+                const handlers = this.findContainerHandlersByWidgetId(widgetId);
+                handlers.forEach(handler => handler.handleUpdateEvent());
+            });
+        });
+
     }
 
     widgetIdForUpdateEvent(eventId) {
@@ -48,7 +50,7 @@ class WidgetContainers {
         }
         return widgetIds;
     }
-       
+
 
     /**
      * 
