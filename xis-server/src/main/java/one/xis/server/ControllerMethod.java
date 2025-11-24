@@ -3,6 +3,7 @@ package one.xis.server;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import one.xis.Action;
 import one.xis.UserContextImpl;
 import one.xis.auth.AuthenticationException;
 import one.xis.auth.URLForbiddenException;
@@ -12,7 +13,9 @@ import one.xis.security.SecurityUtil;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -25,6 +28,7 @@ class ControllerMethod {
     protected final MainDeserializer deserializer;
     protected final ControllerMethodResultMapper controllerMethodResultMapper;
     protected final ControllerMethodParameter[] controllerMethodParameters;
+    private Collection<String> updateEventKeys = new HashSet<>();
 
     ControllerMethod(Method method, MainDeserializer deserializer, ControllerMethodResultMapper controllerMethodResultMapper) {
         this.method = method;
@@ -34,6 +38,10 @@ class ControllerMethod {
         for (var i = 0; i < method.getParameterCount(); i++) {
             controllerMethodParameters[i] = new ControllerMethodParameter(method, method.getParameters()[i], deserializer);
         }
+        if (method.isAnnotationPresent(Action.class)) {
+            this.updateEventKeys.addAll(Arrays.asList(method.getAnnotation(Action.class).updateEventKeys()));
+        }
+
     }
 
     ControllerMethodResult invoke(@NonNull ClientRequest request, @NonNull Object controller, Map<String, Object> requestScope) throws Exception {
@@ -62,6 +70,7 @@ class ControllerMethod {
                 throw new RuntimeException("Error invoking controller method: " + method.getName(), e);
             }
         }
+        controllerMethodResult.getUpdateEventKeys().addAll(this.updateEventKeys);
         // let parameters override request values
         controllerMethodResultMapper.mapMethodParameterToResultAfterInvocation(controllerMethodResult, controllerMethodParameters, args);
         // let return values override parameters

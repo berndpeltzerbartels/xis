@@ -1,9 +1,6 @@
 package one.xis.server;
 
-import one.xis.GlobalVariable;
-import one.xis.LocalDatabase;
-import one.xis.LocalStorage;
-import one.xis.SessionStorage;
+import one.xis.*;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -15,6 +12,12 @@ class AttributesFactory {
             if (isAnnotatedFrameworkMethod(method)) {
                 addParameterAttributes(method, attributes);
             }
+        }
+    }
+
+    void addUpdateEventKeys(Class<?> controllerClass, ComponentAttributes attributes) {
+        if (controllerClass.isAnnotationPresent(RefreshOnUpdateEvents.class)) {
+            attributes.getUpdateEventKeys().addAll(Arrays.asList(controllerClass.getAnnotation(RefreshOnUpdateEvents.class).value()));
         }
     }
 

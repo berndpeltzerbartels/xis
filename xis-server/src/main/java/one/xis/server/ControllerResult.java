@@ -20,6 +20,7 @@ class ControllerResult {
     private String widgetContainerId;
     private ActionProcessing actionProcessing = ActionProcessing.NONE;
     private Collection<String> widgetsToReload = new HashSet<>();
+    private Collection<String> updateEventKeys = new HashSet<>();
     private final Map<String, Object> bindingParameters = new HashMap<>();
     private final Map<String, Object> urlParameters = new HashMap<>();
     private final Map<String, Object> pathVariables = new HashMap<>();

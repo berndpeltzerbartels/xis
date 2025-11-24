@@ -11,6 +11,7 @@ class WidgetAttributesFactory extends AttributesFactory {
         attributes.setHost(null); // TODO
         attributes.setId(WidgetUtil.getId(controller));
         addParameterAttributes(controller.getClass(), attributes);
+        addUpdateEventKeys(controller.getClass(), attributes);
         return attributes;
     }
 }

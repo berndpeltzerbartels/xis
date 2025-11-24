@@ -11,6 +11,7 @@ class ControllerResponseMapper {
         if (result.getActionProcessing() != null && result.getActionProcessing() != ActionProcessing.NONE) {
             response.setActionProcessing(result.getActionProcessing());
         }
+        response.setUpdateEventKeys(result.getUpdateEventKeys());
         response.setNextURL(result.getNextURL());
         response.setData(result.getModelData());
         response.setFormData(result.getFormData());

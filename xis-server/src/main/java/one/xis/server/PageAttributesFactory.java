@@ -27,6 +27,7 @@ class PageAttributesFactory extends AttributesFactory {
         }
         addParameterAttributes(controller.getClass(), attributes);
         getJavascriptResource(controller).ifPresent(attributes::setPageJavascriptSource);
+        addUpdateEventKeys(controller.getClass(), attributes);
         return attributes;
     }
 
