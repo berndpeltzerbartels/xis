@@ -8,7 +8,7 @@
  * @property {PageAttributes} pageAttributes
  * @property {Element} titleElement
  * @property {Data} data
- * @property {RootTagHandler} rootTagHandler;
+ * @property {RootTagHandler} rootTagHandler
  */
 
 class Page {
@@ -27,6 +27,7 @@ class Page {
         this.scriptSourceExpressions = [];
         this.bodyAttributes = {};
         this.data = new Data({});
+        this.updateEventKeys = pageAttributes.updateEventKeys || [];
     }
 
 }

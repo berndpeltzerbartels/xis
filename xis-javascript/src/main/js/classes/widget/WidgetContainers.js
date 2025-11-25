@@ -42,7 +42,7 @@ class WidgetContainers {
 
     widgetIdForUpdateEvent(eventId) {
         var widgetIds = [];
-        for (var widgetId in Object.keys(this.config.widgetAttributes)) {
+        for (var widgetId of Object.keys(this.config.widgetAttributes)) {
             var widgetAttributes = this.config.widgetAttributes[widgetId];
             if (widgetAttributes.updateEventKeys.includes(eventId)) {
                 widgetIds.push(widgetId);
@@ -62,7 +62,7 @@ class WidgetContainers {
         for (var key in this.containers) {
             var container = this.containers[key];
             var handler = app.tagHandlers.getHandler(container);
-            if (handler.widgetInstance.id === widgetId) {
+            if (handler.widgetInstance && handler.widgetInstance.widget.id === widgetId) {
                 handlers.push(handler);
             }
         }

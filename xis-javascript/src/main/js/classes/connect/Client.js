@@ -350,7 +350,6 @@ class Client {
     }
 
     storeData(response) {
-        debugger;
         this.storeLocalStorageData(response.localStorageData);
         this.storeSessionStorageData(response.sessionStorageData);
         this.storeGlobalVariableData(response.globalVariableData);
