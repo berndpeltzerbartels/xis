@@ -10,6 +10,12 @@ import java.util.zip.ZipOutputStream;
 
 public class ReleaseZip {
 
+    private final boolean skipSigning;
+
+    public ReleaseZip(boolean skipSigning) {
+        this.skipSigning = skipSigning;
+    }
+
     private File m2RepositoryDir() {
         var m2Home = System.getProperty("user.home") + "/.m2/repository";
         return new File(m2Home);
@@ -36,11 +42,10 @@ public class ReleaseZip {
                     if (isArtefactFile(file)) {
                         var md5File = addMd5File(file);
                         var sha1File = addSha1File(file);
-                        var ascFile = addAscFile(file);
                         var filePathInZip = file.getAbsolutePath().replace(m2RepositoryDir().getAbsolutePath(), "");
                         var md5PathInZip = md5File.getAbsolutePath().replace(m2RepositoryDir().getAbsolutePath(), "");
                         var sha1PathInZip = sha1File.getAbsolutePath().replace(m2RepositoryDir().getAbsolutePath(), "");
-                        var ascPathInZip = ascFile.getAbsolutePath().replace(m2RepositoryDir().getAbsolutePath(), "");
+                        
                         zipOutputStream.putNextEntry(new ZipEntry(filePathInZip));
                         zipOutputStream.write(Files.readAllBytes(file.toPath()));
                         zipOutputStream.closeEntry();
@@ -51,9 +56,13 @@ public class ReleaseZip {
                         zipOutputStream.write(Files.readAllBytes(sha1File.toPath()));
                         zipOutputStream.closeEntry();
 
-                        zipOutputStream.putNextEntry(new ZipEntry(ascPathInZip));
-                        zipOutputStream.write(Files.readAllBytes(ascFile.toPath()));
-                        zipOutputStream.closeEntry();
+                        if (!skipSigning) {
+                            var ascFile = addAscFile(file);
+                            var ascPathInZip = ascFile.getAbsolutePath().replace(m2RepositoryDir().getAbsolutePath(), "");
+                            zipOutputStream.putNextEntry(new ZipEntry(ascPathInZip));
+                            zipOutputStream.write(Files.readAllBytes(ascFile.toPath()));
+                            zipOutputStream.closeEntry();
+                        }
 
 
                     }
@@ -161,9 +170,10 @@ public class ReleaseZip {
 
     public static void main(String[] args) {
         if (args.length < 2) {
-            System.err.println("Usage: java ReleaseZip <version>");
+            System.err.println("Usage: java ReleaseZip <groupId> <version> [skipSigning]");
             System.exit(1);
         }
-        new ReleaseZip().createZipFile(args[0], args[1]);
+        boolean skipSigning = args.length > 2 && "true".equalsIgnoreCase(args[2]);
+        new ReleaseZip(skipSigning).createZipFile(args[0], args[1]);
     }
 }

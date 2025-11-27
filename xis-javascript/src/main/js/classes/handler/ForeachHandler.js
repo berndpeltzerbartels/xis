@@ -66,7 +66,7 @@ class ForeachHandler extends TagHandler {
         const path = this.arrayPathExpression.evaluate(data);
         const arrayPath = this.doSplit(path, '.');
         const arr = data.getValue(arrayPath);
-        if (!arr) throw new Error('No array with key "' + path + '" found for foreach');
+        if (!arr) throw new Error('No array with key "' + path + '" found for iteration (foreach/repeat)');
         return { arr, path };
     }
 

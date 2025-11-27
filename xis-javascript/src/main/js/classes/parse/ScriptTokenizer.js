@@ -43,7 +43,7 @@ class ScriptTokenizer {
                 this.addToken({ type: COMMA });
                 this.index++;
             } else {
-                throw new Error("Unrecognized character: '" + c + "'");
+                throw new Error("Unrecognized character: '" + c + "' in '" + this.script + "' at position " + this.index);
             }
         }
         return this.tokens;

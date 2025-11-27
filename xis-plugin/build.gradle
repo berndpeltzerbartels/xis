@@ -21,6 +21,10 @@ tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
 
+tasks.withType(PublishToMavenLocal) {
+    onlyIf { !name.contains('sign') }
+}
+
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(rootProject.ext.javaVersionInt)
@@ -105,11 +109,12 @@ signing {
     def signingKeyId = findProperty("signing.keyId")
     def signingKey = findProperty("signing.secretKeyRingFile")
     def signingPassword = findProperty("signing.password")
+    def skipSigning = findProperty("skipSigning") == "true"
 
-    useGpgCmd() // Verwendet das gpg Kommandozeilen-Tool, was oft zuverlässiger ist
-
-    // Signiert nur, wenn alle notwendigen Properties vorhanden sind
-    if (signingKeyId && signingKey && signingPassword) {
+    required = signingKeyId && signingKey && signingPassword && !skipSigning
+    
+    if (required) {
+        useGpgCmd() // Verwendet das gpg Kommandozeilen-Tool, was oft zuverlässiger ist
         sign publishing.publications
     }
 }
