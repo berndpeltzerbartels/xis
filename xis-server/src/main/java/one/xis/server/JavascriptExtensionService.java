@@ -10,6 +10,7 @@ import one.xis.resource.Resources;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
+// TODO : D we need another way to add script extensions ?
 @XISComponent
 @RequiredArgsConstructor
 class JavascriptExtensionService {
