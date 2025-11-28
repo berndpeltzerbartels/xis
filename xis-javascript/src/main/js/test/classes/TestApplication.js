@@ -5,6 +5,7 @@ class TestApplication {
         this.messageHandler = new MessageHandler();
         this.sessionStorage = new SessionStore();
         this.localStorage = new LocalStore();
+        this.clientStorage = new ClientStore();
         this.httpConnector = new HttpConnectorMock();
         this.domAccessor = new DomAccessor();
         this.client = new HttpClient(this.httpConnector);

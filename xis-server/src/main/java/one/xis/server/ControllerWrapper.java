@@ -33,6 +33,7 @@ public class ControllerWrapper {
     private Collection<ControllerMethod> formDataMethods;
     private Collection<ControllerMethod> localStorageOnlyMethods;
     private Collection<ControllerMethod> sessionStorageOnlyMethods;
+    private Collection<ControllerMethod> clientStorageOnlyMethods;
     private Collection<ControllerMethod> globalVariableOnlyMethods;
     private ControllerResultMapper controllerResultMapper;
 
@@ -41,6 +42,7 @@ public class ControllerWrapper {
         var methodsToExecute = new ArrayList<>(modelMethods);
         methodsToExecute.addAll(localStorageOnlyMethods);
         methodsToExecute.addAll(sessionStorageOnlyMethods);
+        methodsToExecute.addAll(clientStorageOnlyMethods);
         methodsToExecute.addAll(globalVariableOnlyMethods);
         methodsToExecute.addAll(tagContentOnlyMethods);
         var methods = RequestScopeSorter.sortMethods(methodsToExecute, requestScopeMethods);

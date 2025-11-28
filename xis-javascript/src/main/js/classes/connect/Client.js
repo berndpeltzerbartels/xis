@@ -156,6 +156,7 @@ class Client {
         request.zoneId = this.zoneId;
         request.sessionStorageData = this.sessionStorageDataPage(normalizedPath);
         request.localStorageData = this.localStorageDataPage(normalizedPath);
+        request.clientStorageData = this.clientStorageDataPage(normalizedPath);
         request.globalVariableData = this.globalVariableDataPage(normalizedPath);
         request.localDatabaseData = {};
         request.type = 'page';
@@ -192,11 +193,13 @@ class Client {
         if (widgetId) { // TODO write a test
             request.sessionStorageData = this.sessionStorageDataWidget(widgetId);
             request.localStorageData = this.localStorageDataWidget(widgetId);
+            request.clientStorageData = this.clientStorageDataWidget(widgetId);
             request.globalVariableData = this.globalVariableDataWidget(widgetId);
         }
         if (normalizedPath) {// TODO write a test
             request.sessionStorageData = this.sessionStorageDataPage(normalizedPath);
             request.localStorageData = this.localStorageDataPage(normalizedPath);
+            request.clientStorageData = this.clientStorageDataPage(normalizedPath);
             request.globalVariableData = this.globalVariableDataPage(normalizedPath);
         }
         return request;
@@ -225,6 +228,7 @@ class Client {
         request.zoneId = this.zoneId;         // TODO locale ?
         request.sessionStorageData = this.sessionStorageDataWidget(widgetInstance.widget.id);
         request.localStorageData = this.localStorageDataWidget(widgetInstance.widget.id);
+        request.clientStorageData = this.clientStorageDataWidget(widgetInstance.widget.id);
         request.globalVariableData = this.globalVariableDataWidget(widgetInstance.widget.id);
         request.localDatabaseData = {};
         request.type = 'widget';
@@ -245,6 +249,14 @@ class Client {
 
     localStorageDataWidget(widgetId) {
         return this.localStorageData(this.config.widgetAttributes[widgetId]);
+    }
+
+    clientStorageDataPage(pageId) {
+        return this.clientStorageData(this.config.pageAttributes[pageId]);
+    }
+
+    clientStorageDataWidget(widgetId) {
+        return this.clientStorageData(this.config.widgetAttributes[widgetId]);
     }
 
     globalVariableDataPage(pageId) {
@@ -269,6 +281,14 @@ class Client {
         var data = {};
         for (var key of attributes.localStorageKeys) {
             data[key] = app.localStorage.getValue(key);
+        }
+        return data;
+    }
+
+    clientStorageData(attributes) {
+        var data = {};
+        for (var key of attributes.clientStorageKeys) {
+            data[key] = app.clientStorage.getValue(key);
         }
         return data;
     }
@@ -332,6 +352,7 @@ class Client {
         serverResponse.reloadWidgets = obj.reloadWidgets;
         serverResponse.localDatabaseData = obj.localDatabaseData;
         serverResponse.localStorageData = obj.localStorageData;
+        serverResponse.clientStorageData = obj.clientStorageData;
         serverResponse.globalVariableData = obj.globalVariableData;
         serverResponse.sessionStorageData = obj.sessionStorageData;
         serverResponse.widgetContainerId = obj.widgetContainerId;
@@ -342,6 +363,7 @@ class Client {
         serverResponse.updateEventKeys = obj.updateEventKeys || [];
         data.setValue(['sessionStorage'], serverResponse.sessionStorageData);
         data.setValue(['localStorage'], serverResponse.localStorageData);
+        data.setValue(['clientStorage'], serverResponse.clientStorageData);
         data.setValue(['global'], serverResponse.globalVariableData);
         data.setValue(['validation'], obj.validatorMessages);
         this.storeData(serverResponse);
@@ -352,6 +374,7 @@ class Client {
     storeData(response) {
         this.storeLocalStorageData(response.localStorageData);
         this.storeSessionStorageData(response.sessionStorageData);
+        this.storeClientStorageData(response.clientStorageData);
         this.storeGlobalVariableData(response.globalVariableData);
         this.storeLocalDatabaseData(response.localDatabaseData);
     }
@@ -365,6 +388,13 @@ class Client {
 
     storeSessionStorageData(sessionStorageData) {
         app.sessionStorage.saveData(sessionStorageData);
+    }
+
+    storeClientStorageData(clientStorageData) {
+        if (!clientStorageData) {
+            return;
+        }
+        app.clientStorage.saveData(clientStorageData);
     }
 
     storeGlobalVariableData(globalVariableData) {

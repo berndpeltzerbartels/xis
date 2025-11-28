@@ -21,6 +21,7 @@ class ControllerResponseMapper {
         response.setReloadWidgets(result.getWidgetsToReload());
         response.getSessionStorageData().putAll(result.getSessionStorage());
         response.getLocalStorageData().putAll(result.getLocalStorage());
+        response.getClientStorageData().putAll(result.getClientStorage());
         response.getGlobalVariableData().putAll(result.getGlobalVariables());
         response.setRedirectUrl(result.getRedirectUrl());
         response.getTagVariables().putAll(result.getTagVariables());

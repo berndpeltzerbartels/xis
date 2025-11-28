@@ -6,6 +6,8 @@ class Application {
         this.messageHandler = window.messageHandler ?  window.messageHandler : new MessageHandler();
         this.sessionStorage = new SessionStore();
         this.localStorage = new LocalStore();
+        this.clientStorage = new ClientStore();
+        this.httpConnector = new HttpConnector();
         this.httpConnector = new HttpConnector();
         this.domAccessor = new DomAccessor();
         this.client = new HttpClient(this.httpConnector);

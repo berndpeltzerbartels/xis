@@ -9,6 +9,7 @@
  * @property {string} widgetContainerId
  * @property {Array} reloadWidgets
  * @property {any} sessionStorageData
+ * @property {any} clientStorageData
  * @property {any} validatorMessages
  * @property {Object} tagVariables
  * @property {Object} idVariables
@@ -29,6 +30,7 @@ class ServerResponse {
         this.widgetContainerId = '';
         this.reloadWidgets = [];
         this.sessionStorageData = {};
+        this.clientStorageData = {};
         this.validatorMessages = { };
         this.actionProcessing = 'NONE';
         this.updateEventKeys = [];
@@ -54,6 +56,9 @@ class ServerResponse {
            return true;
        }
        if (this.sessionStorageData && Object.keys(this.sessionStorageData).length > 0) {
+           return true;
+       }
+       if (this.clientStorageData && Object.keys(this.clientStorageData).length > 0) {
            return true;
        }
        return false;

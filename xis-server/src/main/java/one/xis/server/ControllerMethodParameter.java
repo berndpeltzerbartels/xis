@@ -65,6 +65,10 @@ class ControllerMethodParameter {
             var key = parameter.getAnnotation(LocalStorage.class).value();
             var paramValue = request.getLocalStorageData().get(key);
             return deserializeParameter(paramValue, request, parameter, postProcessingResults);
+        } else if (parameter.isAnnotationPresent(ClientStorage.class)) {
+            var key = parameter.getAnnotation(ClientStorage.class).value();
+            var paramValue = request.getClientStorageData().get(key);
+            return deserializeParameter(paramValue, request, parameter, postProcessingResults);
         } else if (parameter.isAnnotationPresent(GlobalVariable.class)) {
             var key = parameter.getAnnotation(GlobalVariable.class).value();
             var paramValue = request.getGlobalVariableData().get(key);
@@ -91,6 +95,8 @@ class ControllerMethodParameter {
             controllerMethodResult.getSessionStorage().put(parameter.getAnnotation(SessionStorage.class).value(), parameterValue);
         } else if (parameter.isAnnotationPresent(LocalStorage.class)) {
             controllerMethodResult.getLocalStorage().put(parameter.getAnnotation(LocalStorage.class).value(), parameterValue);
+        } else if (parameter.isAnnotationPresent(ClientStorage.class)) {
+            controllerMethodResult.getClientStorage().put(parameter.getAnnotation(ClientStorage.class).value(), parameterValue);
         } else if (parameter.isAnnotationPresent(GlobalVariable.class)) {
             controllerMethodResult.getGlobalVariables().put(parameter.getAnnotation(GlobalVariable.class).value(), parameterValue);
         } else {

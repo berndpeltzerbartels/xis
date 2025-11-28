@@ -403,6 +403,11 @@ class AstGenerator {
             return this.createLocalStoreVariable(variablePath);
         }
 
+        if (path.startsWith('clientStorage.')) {
+            const variablePath = path.substring(14); // Remove 'clientStorage.' prefix
+            return this.createClientStoreVariable(variablePath);
+        }
+
         if (path.startsWith('global.')) {
             const variablePath = path.substring(7); // Remove 'global.' prefix
             return this.createGlobalVariable(variablePath);
@@ -428,6 +433,15 @@ class AstGenerator {
      */
     createLocalStoreVariable(path) {
         return new LocalStoreVariable(path);
+    }
+
+    /**
+     * Creates a ClientStoreVariable for direct access to server-side clientStorage.
+     * @param {string} path - The clientStorage path without 'clientStorage.' prefix  
+     * @returns {ClientStoreVariable}
+     */
+    createClientStoreVariable(path) {
+        return new ClientStoreVariable(path);
     }
 
     /**
@@ -874,6 +888,25 @@ class LocalStoreVariable {
 
     toString() {
         return `\${localStorage.${this.path}}`;
+    }
+}
+
+/**
+ * Variable that accesses clientStorage directly from the server-side store.
+ * Client storage is kept on the server and never exposed to the browser.
+ * This allows storing sensitive data that should not be accessible via browser DevTools.
+ */
+class ClientStoreVariable {
+    constructor(path) {
+        this.path = path;
+    }
+
+    evaluate(data) {
+        return app.clientStorage.getValue(this.path);
+    }
+
+    toString() {
+        return `\${clientStorage.${this.path}}`;
     }
 }
 

@@ -40,6 +40,7 @@ class ControllerResultMapper {
         controllerResult.getSessionStorage().putAll(controllerMethodResult.getSessionStorage());
         controllerResult.getRequestScope().putAll(controllerMethodResult.getRequestScope());
         controllerResult.getLocalStorage().putAll(controllerMethodResult.getLocalStorage());
+        controllerResult.getClientStorage().putAll(controllerMethodResult.getClientStorage());
         controllerResult.getGlobalVariables().putAll(controllerMethodResult.getGlobalVariables());
         if (controllerMethodResult.isValidationFailed()) {
             controllerResult.setValidationFailed(true);
