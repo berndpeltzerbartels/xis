@@ -28,11 +28,21 @@ class WidgetContainerHandler extends TagHandler {
         this.widgetContainers = widgetContainers;
         this.tagHandlers = tagHandlers;
         this.widgetInstance = undefined;
+        this.widgetParameters = {};
         this.containerId = undefined;
         this.containerIdExpression = this.variableTextContentFromAttribute('container-id');
         this.defaultWidgetExpression = this.variableTextContentFromAttribute('default-widget');
         this.type = 'widget-container-handler';
         this.tagContentSetter = new TagContentSetter();
+    }
+    
+    /**
+     * @public
+     * @param {String} name 
+     * @param {String} value 
+     */
+    addParameter(name, value) {
+        this.widgetParameters[name] = value;
     }
 
     /**
@@ -62,7 +72,9 @@ class WidgetContainerHandler extends TagHandler {
      */
     refresh(data) {
     this.data = data;
+    this.widgetParameters = {};
     this.refreshContainerId(data);
+    const descendantPromise = this.refreshDescendantHandlers(data); // xis:parameter tags will call addParameter
     this.bindDefaultWidgetInitial(data);
     var widgetParameters = this.widgetState ? this.widgetState.widgetParameters : {};
     this.widgetState = new WidgetState(app.pageController.resolvedURL, widgetParameters);
@@ -70,7 +82,7 @@ class WidgetContainerHandler extends TagHandler {
     if (this.widgetInstance) {
         promises.push(this.reloadDataAndRefresh(data));
     }
-    return Promise.all(promises.concat([this.refreshDescendantHandlers(data)]));
+    return Promise.all(promises.concat([descendantPromise]));
 }
 
 handleUpdateEvent() {
@@ -121,10 +133,14 @@ refreshContainerId(parentData) {
 bindDefaultWidgetInitial(parentData) {
     if (this.defaultWidgetExpression && !this.widgetInstance) { // once, only
         var widgetUrl = this.defaultWidgetExpression.evaluate(parentData);
-        var widgetParameters = urlParameters(widgetUrl);
+        var widgetParametersInUrl = urlParameters(widgetUrl);
+        // Merge URL parameters with xis:parameter tag parameters
+        for (var key of Object.keys(widgetParametersInUrl)) {
+            this.widgetParameters[key] = widgetParametersInUrl[key];
+        }
         var widgetId = stripQuery(widgetUrl);
         this.ensureWidgetBound(widgetId);
-        this.widgetState = new WidgetState(app.pageController.resolvedURL, widgetParameters);
+        this.widgetState = new WidgetState(app.pageController.resolvedURL, this.widgetParameters);
     }
 }
 
