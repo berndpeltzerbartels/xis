@@ -34,6 +34,7 @@ class WidgetContainerHandler extends TagHandler {
         this.defaultWidgetExpression = this.variableTextContentFromAttribute('default-widget');
         this.type = 'widget-container-handler';
         this.tagContentSetter = new TagContentSetter();
+        this.scrollToTop = tag.getAttribute('scroll-to-top') === 'true';
     }
     
     /**
@@ -52,7 +53,7 @@ class WidgetContainerHandler extends TagHandler {
     */
     handleActionResponse(response) {
         if (response.nextWidgetId) {
-            this.ensureWidgetBound(response.nextWidgetId);
+            this.ensureWidgetBound(response.nextWidgetId, true);
         }
         if (!this.widgetState) {
             this.widgetState = new WidgetState(app.pageController.resolvedURL, {});
@@ -97,7 +98,7 @@ handleUpdateEvent() {
  */
 showWidget(widgetId, widgetState) {
     this.widgetState = widgetState;
-    this.ensureWidgetBound(widgetId);
+    this.ensureWidgetBound(widgetId, true);
     this.widgetState = widgetState;
     this.reloadDataAndRefresh(this.parentData());
 }
@@ -147,8 +148,9 @@ bindDefaultWidgetInitial(parentData) {
 /**
  * @private
  * @param {string} widgetId
+ * @param {boolean} shouldScroll - whether to scroll after binding widget
  */
-ensureWidgetBound(widgetId) {
+ensureWidgetBound(widgetId, shouldScroll = false) {
     if (this.widgetInstance) {
         if (this.widgetInstance.widget.id == widgetId) {
             return;
@@ -165,9 +167,11 @@ ensureWidgetBound(widgetId) {
     var widgetRoot = assertNotNull(this.widgetInstance.root, 'no widget root: ' + widgetId);
     this.tag.appendChild(widgetRoot);
     var widgetHandler = assertNotNull(this.widgetInstance.rootHandler, 'no widget handler: ' + widgetId);
+    if (shouldScroll && this.scrollToTop) {
+        window.scrollTo(0, 0);
+    }
     this.addDescendantHandler(widgetHandler);
 }
-
 /**
  * @private
  */

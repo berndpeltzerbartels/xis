@@ -150,7 +150,10 @@ bindDefaultWidgetInitial(parentData) {
  * @param {string} widgetId
  * @param {boolean} shouldScroll - whether to scroll after binding widget
  */
-ensureWidgetBound(widgetId, shouldScroll = false) {
+ensureWidgetBound(widgetId, shouldScroll) {
+    if (shouldScroll === undefined) {
+        shouldScroll = false;
+    }
     if (this.widgetInstance) {
         if (this.widgetInstance.widget.id == widgetId) {
             return;
