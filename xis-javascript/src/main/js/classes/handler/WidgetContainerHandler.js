@@ -185,17 +185,18 @@ ensureWidgetBound(widgetId, shouldScroll) {
     if (shouldScroll === undefined) {
         shouldScroll = false;
     }
-    if (this.widgetInstance) {
-        if (this.widgetInstance.widget.id == widgetId) {
-            return;
-        } else {
-            if (this.widgetInstance.root.parentNode == this.tag) {
-                this.tag.removeChild(this.widgetInstance.root);
+        if (this.widgetInstance) {
+            if (this.widgetInstance.widget.id == widgetId) {
+                return;
+            } else {
+                var parent = this.widgetInstance.root.parentNode;
+                if (parent == this.tag || parent == this.buffer) {
+                    parent.removeChild(this.widgetInstance.root);
+                }
+                this.removeDescendantHandler(this.widgetInstance.rootHandler);
+                this.widgetInstance.dispose();
             }
-            this.removeDescendantHandler(this.widgetInstance.rootHandler);
-            this.widgetInstance.dispose();
         }
-    }
     this.widgetInstance = assertNotNull(this.widgets.getWidgetInstance(widgetId), 'no such widget: ' + widgetId);
     this.widgetInstance.containerHandler = this;
     var widgetRoot = assertNotNull(this.widgetInstance.root, 'no widget root: ' + widgetId);
