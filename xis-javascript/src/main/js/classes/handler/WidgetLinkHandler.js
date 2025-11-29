@@ -77,8 +77,10 @@ class WidgetLinkHandler extends TagHandler {
             }
             var widgetState = new WidgetState(app.pageController.resolvedURL, this.widgetParameters);
             var widgetId = stripQuery(this.targetWidgetUrl);
-            handler.showWidget(widgetId, widgetState);
-            resolve();
+            handler.initBuffer()
+                .then(() => handler.showWidget(widgetId, widgetState))
+                .then(() => handler.commitBuffer())
+                .then(() => resolve());
         });
     }
 

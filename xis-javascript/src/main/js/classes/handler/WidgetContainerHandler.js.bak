@@ -35,6 +35,7 @@ class WidgetContainerHandler extends TagHandler {
         this.type = 'widget-container-handler';
         this.tagContentSetter = new TagContentSetter();
         this.scrollToTop = tag.getAttribute('scroll-to-top') === 'true';
+        this.buffer = undefined;
     }
     
     /**
@@ -91,6 +92,7 @@ handleUpdateEvent() {
 }
 
 /**
+/**
  * @public
  * @param {string} widgetId 
  * @param {WidgetState} widgetState
@@ -98,10 +100,41 @@ handleUpdateEvent() {
  */
 showWidget(widgetId, widgetState) {
     this.widgetState = widgetState;
-    this.ensureWidgetBound(widgetId, true);
-    this.widgetState = widgetState;
-    this.reloadDataAndRefresh(this.parentData());
+    return app.pageController.initBuffer()
+        .then(() => {
+            this.ensureWidgetBound(widgetId, true);
+            this.widgetState = widgetState;
+            return this.reloadDataAndRefresh(this.parentData());
+        })
+        .then(() => app.pageController.commitBuffer());
 }
+    /**
+     * @public
+     * @returns {Promise<void>}
+     */
+    initBuffer() {
+        return new Promise((resolve, _) => {
+            this.buffer = document.createDocumentFragment();
+            while (this.tag.firstChild) {
+                this.buffer.appendChild(this.tag.firstChild);
+            }
+            resolve();
+        });
+    }
+
+    /**
+     * @public
+     * @returns {Promise<void>}
+     */
+    commitBuffer() {
+        return new Promise((resolve, _) => {
+            while (this.buffer.firstChild) {
+                this.tag.appendChild(this.buffer.firstChild);
+            }
+            resolve();
+        });
+    }
+
 
 /**
  * @private
@@ -150,7 +183,10 @@ bindDefaultWidgetInitial(parentData) {
  * @param {string} widgetId
  * @param {boolean} shouldScroll - whether to scroll after binding widget
  */
-ensureWidgetBound(widgetId, shouldScroll = false) {
+ensureWidgetBound(widgetId, shouldScroll) {
+    if (shouldScroll === undefined) {
+        shouldScroll = false;
+    }
     if (this.widgetInstance) {
         if (this.widgetInstance.widget.id == widgetId) {
             return;

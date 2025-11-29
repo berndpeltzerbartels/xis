@@ -35,6 +35,7 @@ class WidgetContainerHandler extends TagHandler {
         this.type = 'widget-container-handler';
         this.tagContentSetter = new TagContentSetter();
         this.scrollToTop = tag.getAttribute('scroll-to-top') === 'true';
+        this.buffer = undefined;
     }
     
     /**
@@ -52,19 +53,21 @@ class WidgetContainerHandler extends TagHandler {
     * @returns {Promise<void>}
     */
     handleActionResponse(response) {
-        if (response.nextWidgetId) {
-            this.ensureWidgetBound(response.nextWidgetId, true);
-        }
         if (!this.widgetState) {
             this.widgetState = new WidgetState(app.pageController.resolvedURL, {});
         }
         var data = response.data;
         this.refreshContainerId(data);
-        return app.pageController.initBuffer()
-            .then(() => this.refreshDescendantHandlers(data))
+        return this.initBuffer()
+            .then(() => {
+                if (response.nextWidgetId) {
+                    this.ensureWidgetBound(response.nextWidgetId, true);
+                }
+                return this.refreshDescendantHandlers(data);
+            })
             .then(() => app.pageController.handleUpdateEvents(response.updateEventKeys))
             .then(pageUpdated => pageUpdated ? Promise.resolve() : app.widgetContainers.handleUpdateEvents(response.updateEventKeys))
-            .then(() => app.pageController.commitBuffer());
+            .then(() => this.commitBuffer());
     }
 
     /**
@@ -91,6 +94,7 @@ handleUpdateEvent() {
 }
 
 /**
+/**
  * @public
  * @param {string} widgetId 
  * @param {WidgetState} widgetState
@@ -100,8 +104,35 @@ showWidget(widgetId, widgetState) {
     this.widgetState = widgetState;
     this.ensureWidgetBound(widgetId, true);
     this.widgetState = widgetState;
-    this.reloadDataAndRefresh(this.parentData());
+    return this.reloadDataAndRefresh(this.parentData());
 }
+    /**
+     * @public
+     * @returns {Promise<void>}
+     */
+    initBuffer() {
+        return new Promise((resolve, _) => {
+            this.buffer = document.createDocumentFragment();
+            while (this.tag.firstChild) {
+                this.buffer.appendChild(this.tag.firstChild);
+            }
+            resolve();
+        });
+    }
+
+    /**
+     * @public
+     * @returns {Promise<void>}
+     */
+    commitBuffer() {
+        return new Promise((resolve, _) => {
+            while (this.buffer.firstChild) {
+                this.tag.appendChild(this.buffer.firstChild);
+            }
+            resolve();
+        });
+    }
+
 
 /**
  * @private
@@ -168,7 +199,8 @@ ensureWidgetBound(widgetId, shouldScroll) {
     this.widgetInstance = assertNotNull(this.widgets.getWidgetInstance(widgetId), 'no such widget: ' + widgetId);
     this.widgetInstance.containerHandler = this;
     var widgetRoot = assertNotNull(this.widgetInstance.root, 'no widget root: ' + widgetId);
-    this.tag.appendChild(widgetRoot);
+    var target = this.buffer ? this.buffer : this.tag;
+    target.appendChild(widgetRoot);
     var widgetHandler = assertNotNull(this.widgetInstance.rootHandler, 'no widget handler: ' + widgetId);
     if (shouldScroll && this.scrollToTop) {
         window.scrollTo(0, 0);

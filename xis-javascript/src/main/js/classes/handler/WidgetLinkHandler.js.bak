@@ -68,7 +68,8 @@ class WidgetLinkHandler extends TagHandler {
             var container = this.getTargetContainer();
             var handler = app.tagHandlers.getHandler(container);
             if (!handler) {
-                throw new Error('no handler for target container: ' + this.targetContainerId);
+                var containerId = this.targetContainerId || 'parent container';
+                throw new Error('No widget container handler found for "' + containerId + '". This should not happen - please report this as a bug.');
             }
             var widgetParametersInUrl = urlParameters(this.targetWidgetUrl);
             for (var key of Object.keys(widgetParametersInUrl)) {
@@ -87,9 +88,17 @@ class WidgetLinkHandler extends TagHandler {
      */
     getTargetContainer() {
         if (this.targetContainerId) {
-            return this.widgetContainers.findContainer(this.targetContainerId);
+            var container = this.widgetContainers.findContainer(this.targetContainerId);
+            if (!container) {
+                throw new Error('Widget container with id "' + this.targetContainerId + '" not found. Make sure a widget-container with this container-id exists on the page.');
+            }
+            return container;
         }
-        return this.findParentWidgetContainer();
+        var parentContainer = this.findParentWidgetContainer();
+        if (!parentContainer) {
+            throw new Error('No target container specified and no parent widget container found. Either add xis:target-container="containerId" to the link or place it inside a widget-container.');
+        }
+        return parentContainer;
     }
 
 
