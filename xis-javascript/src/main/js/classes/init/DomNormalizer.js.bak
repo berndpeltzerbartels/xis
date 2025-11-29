@@ -378,10 +378,6 @@ class DomNormalizer {
             container.setAttribute('default-widget', defaultWidget);
         }
         this.domAccessor.insertChild(element, container);
-        var scrollToTop = element.getAttribute('xis:scroll-to-top');
-        if (scrollToTop) {
-            container.setAttribute('scroll-to-top', scrollToTop);
-        }
         return container;
     }
 
