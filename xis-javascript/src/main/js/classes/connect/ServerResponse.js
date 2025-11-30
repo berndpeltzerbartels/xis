@@ -14,6 +14,7 @@
  * @property {Object} tagVariables
  * @property {Object} idVariables
  * @property {string} actionProcessing
+ * @property {string} title
  */
 
 class ServerResponse {
@@ -34,6 +35,7 @@ class ServerResponse {
         this.validatorMessages = { };
         this.actionProcessing = 'NONE';
         this.updateEventKeys = [];
+        this.title = '';
     /**
      * Tag-gebundene Variablen, z.B. { title: "Seitentitel" }
      */

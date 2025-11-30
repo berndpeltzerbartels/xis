@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import one.xis.Action;
+import one.xis.MethodParameter;
 import one.xis.UserContextImpl;
 import one.xis.auth.AuthenticationException;
 import one.xis.auth.URLForbiddenException;
@@ -97,16 +98,16 @@ class ControllerMethod {
     }
 
     String getReturnValueRequestScopeKey() {
-        if (method.isAnnotationPresent(one.xis.RequestScope.class)) {
-            return method.getAnnotation(one.xis.RequestScope.class).value();
+        if (method.isAnnotationPresent(MethodParameter.class)) {
+            return method.getAnnotation(MethodParameter.class).value();
         }
         return null;
     }
 
     Collection<String> getParameterRequestScopeKeys() {
         return Stream.of(method.getParameters())
-                .filter(p -> p.isAnnotationPresent(one.xis.RequestScope.class))
-                .map(p -> p.getAnnotation(one.xis.RequestScope.class).value())
+                .filter(p -> p.isAnnotationPresent(MethodParameter.class))
+                .map(p -> p.getAnnotation(MethodParameter.class).value())
                 .collect(Collectors.toSet());
     }
 

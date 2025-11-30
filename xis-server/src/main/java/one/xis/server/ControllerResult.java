@@ -18,6 +18,7 @@ class ControllerResult {
     private Class<?> nextPageControllerClass;
     private String nextWidgetId;
     private String widgetContainerId;
+    private String title;
     private ActionProcessing actionProcessing = ActionProcessing.NONE;
     private Collection<String> widgetsToReload = new HashSet<>();
     private Collection<String> updateEventKeys = new HashSet<>();

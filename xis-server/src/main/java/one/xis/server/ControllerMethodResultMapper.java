@@ -43,8 +43,8 @@ class ControllerMethodResultMapper {
         if (method.isAnnotationPresent(FormData.class)) {
             mapFormData(method.getAnnotation(FormData.class).value(), returnValue, controllerMethodResult);
         }
-        if (method.isAnnotationPresent(RequestScope.class)) {
-            var key = method.getAnnotation(RequestScope.class).value();
+        if (method.isAnnotationPresent(MethodParameter.class)) {
+            var key = method.getAnnotation(MethodParameter.class).value();
             requestScope.put(key, returnValue);
         }
         if (method.isAnnotationPresent(SessionStorage.class)) {
@@ -62,6 +62,27 @@ class ControllerMethodResultMapper {
         if (method.isAnnotationPresent(GlobalVariable.class)) {
             var key = method.getAnnotation(GlobalVariable.class).value();
             controllerMethodResult.getGlobalVariables().put(key, returnValue);
+        }
+        if (method.isAnnotationPresent(Title.class)) {
+            controllerMethodResult.setTitle(returnValue != null ? returnValue.toString() : null);
+        }
+        if (method.isAnnotationPresent(WidgetInContainer.class)) {
+            if (returnValue instanceof Class<?> widgetControllerClass) {
+                controllerMethodResult.setNextWidgetId(WidgetUtil.getId(widgetControllerClass));
+            } else if (returnValue instanceof WidgetResponse widgetResponse) {
+                var widgetResponseCloned = new WidgetResponse()
+                        .controllerClass(widgetResponse.getControllerClass())
+                        .targetContainer(method.getAnnotation(WidgetInContainer.class).value());
+                widgetResponse.getWidgetParameters().forEach(widgetResponseCloned::widgetParameter);
+                for (String widgetId : widgetResponse.getWidgetsToReload()) {
+                    widgetResponseCloned.reloadWidget(widgetId);
+                }
+                mapWidgetResponse(widgetResponse, controllerMethodResult);
+            } else if (returnValue instanceof String widgetId) {
+                controllerMethodResult.setNextWidgetId(widgetId);
+            } else {
+                throw new IllegalStateException("Invalid return type for @WidgetInContainer method: " + method);
+            }
         }
     }
 

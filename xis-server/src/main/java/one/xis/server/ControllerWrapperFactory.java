@@ -38,6 +38,8 @@ class ControllerWrapperFactory {
             controllerWrapper.setClientStorageOnlyMethods(clientStorageOnlyMethods(controller));
             controllerWrapper.setGlobalVariableOnlyMethods(globalVariableOnlyMethods(controller));
             controllerWrapper.setTagContentOnlyMethods(tagContentOnlyMethods(controller));
+            controllerWrapper.setTitleOnlyMethods(titleOnlyMethods(controller));
+            controllerWrapper.setWidgetInContainerOnlyMethods(widgetInContainerOnlyMethods(controller));
             controllerWrapper.setControllerResultMapper(controllerResultMapper);
             return controllerWrapper;
         } catch (Exception e) {
@@ -82,7 +84,7 @@ class ControllerWrapperFactory {
     }
 
     private Collection<ControllerMethod> requestScopeMethods(Object controller) {
-        return annotatedMethods(controller, RequestScope.class)
+        return annotatedMethods(controller, MethodParameter.class)
                 .map(this::createControllerMethod)
                 .collect(Collectors.toSet());
     }
@@ -138,6 +140,24 @@ class ControllerWrapperFactory {
 
     private Collection<ControllerMethod> tagContentOnlyMethods(@NonNull Object controller) {
         return annotatedMethods(controller, TagContent.class)
+                .filter(m -> !m.isAnnotationPresent(Action.class))
+                .filter(method -> !method.isAnnotationPresent(ModelData.class))
+                .filter(method -> !method.isAnnotationPresent(FormData.class))
+                .map(this::createControllerMethod)
+                .collect(Collectors.toSet());
+    }
+
+    private Collection<ControllerMethod> titleOnlyMethods(@NonNull Object controller) {
+        return annotatedMethods(controller, Title.class)
+                .filter(m -> !m.isAnnotationPresent(Action.class))
+                .filter(method -> !method.isAnnotationPresent(ModelData.class))
+                .filter(method -> !method.isAnnotationPresent(FormData.class))
+                .map(this::createControllerMethod)
+                .collect(Collectors.toSet());
+    }
+
+    private Collection<ControllerMethod> widgetInContainerOnlyMethods(@NonNull Object controller) {
+        return annotatedMethods(controller, WidgetInContainer.class)
                 .filter(m -> !m.isAnnotationPresent(Action.class))
                 .filter(method -> !method.isAnnotationPresent(ModelData.class))
                 .filter(method -> !method.isAnnotationPresent(FormData.class))

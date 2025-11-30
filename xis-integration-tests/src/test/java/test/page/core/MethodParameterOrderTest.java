@@ -6,16 +6,16 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class RequestScopeOrderTest {
+class MethodParameterOrderTest {
 
-    private RequestScopeOrderPageService service;
+    private MethodParameterOrderPageService service;
     private IntegrationTestContext testContext;
 
     @BeforeEach
     void init() {
-        service = new RequestScopeOrderPageService();
+        service = new MethodParameterOrderPageService();
         testContext = IntegrationTestContext.builder()
-                .withSingleton(RequestScopeOrderPage.class)
+                .withSingleton(MethodParameterOrderPage.class)
                 .withSingleton(service)
                 .build();
     }
@@ -29,6 +29,6 @@ class RequestScopeOrderTest {
         // check d and e are the last 2 elements in any order
         assertThat(calls.subList(calls.size() - 2, calls.size()))
                 .containsExactlyInAnyOrder("d", "e");
-        
+
     }
 }

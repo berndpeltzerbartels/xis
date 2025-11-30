@@ -3,7 +3,7 @@ package test.page.core;
 import java.util.ArrayList;
 import java.util.List;
 
-class RequestScopeOrderPageService {
+class MethodParameterOrderPageService {
     private final Recorder recorder = new Recorder();
 
     void record(String msg) {

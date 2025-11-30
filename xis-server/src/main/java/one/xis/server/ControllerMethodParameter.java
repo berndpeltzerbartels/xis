@@ -50,8 +50,8 @@ class ControllerMethodParameter {
             var key = parameter.getAnnotation(ActionParameter.class).value();
             var paramValue = request.getActionParameters().get(key);
             return deserializeParameter(paramValue, request, parameter, postProcessingResults);
-        } else if (parameter.isAnnotationPresent(RequestScope.class)) {
-            var key = parameter.getAnnotation(RequestScope.class).value();
+        } else if (parameter.isAnnotationPresent(MethodParameter.class)) {
+            var key = parameter.getAnnotation(MethodParameter.class).value();
             var paramValue = requestScope.get(key);
             if (paramValue == null) {
                 throw new IllegalStateException(method + ": No request scope value found for key " + key);
@@ -89,8 +89,8 @@ class ControllerMethodParameter {
             controllerMethodResult.getPathVariables().put(parameter.getAnnotation(PathVariable.class).value(), parameterValue);
         } else if (parameter.isAnnotationPresent(WidgetParameter.class)) {
             controllerMethodResult.getWidgetParameters().put(parameter.getAnnotation(WidgetParameter.class).value(), parameterValue);
-        } else if (parameter.isAnnotationPresent(RequestScope.class)) {
-            controllerMethodResult.getRequestScope().put(parameter.getAnnotation(RequestScope.class).value(), parameterValue);
+        } else if (parameter.isAnnotationPresent(MethodParameter.class)) {
+            controllerMethodResult.getRequestScope().put(parameter.getAnnotation(MethodParameter.class).value(), parameterValue);
         } else if (parameter.isAnnotationPresent(SessionStorage.class)) {
             controllerMethodResult.getSessionStorage().put(parameter.getAnnotation(SessionStorage.class).value(), parameterValue);
         } else if (parameter.isAnnotationPresent(LocalStorage.class)) {

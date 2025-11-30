@@ -361,6 +361,7 @@ class Client {
         serverResponse.idVariables = obj.idVariables || {};
         serverResponse.actionProcessing = obj.actionProcessing || 'NONE';
         serverResponse.updateEventKeys = obj.updateEventKeys || [];
+        serverResponse.title = obj.title || '';
         data.setValue(['sessionStorage'], serverResponse.sessionStorageData);
         data.setValue(['localStorage'], serverResponse.localStorageData);
         data.setValue(['clientStorage'], serverResponse.clientStorageData);

@@ -1,7 +1,7 @@
 package one.xis.server;
 
+import one.xis.MethodParameter;
 import one.xis.ModelData;
-import one.xis.RequestScope;
 import one.xis.UserContext;
 import one.xis.UserContextImpl;
 import one.xis.deserialize.MainDeserializer;
@@ -48,21 +48,21 @@ class ControllerWrapperTest {
 
         private final Queue<String> invocationOrder = new LinkedList<>();
 
-        @RequestScope("queue")
+        @MethodParameter("queue")
         public Queue<String> initializeQueue() {
             invocationOrder.add("initializeQueue");
             return new LinkedList<>();
         }
 
-        @RequestScope("processedQueue")
-        public Queue<String> processQueue(@RequestScope("queue") Queue<String> queue) {
+        @MethodParameter("processedQueue")
+        public Queue<String> processQueue(@MethodParameter("queue") Queue<String> queue) {
             invocationOrder.add("processQueue");
             queue.add("processed");
             return queue;
         }
 
         @ModelData("finalModel")
-        public String generateModel(@RequestScope("processedQueue") Queue<String> processedQueue) {
+        public String generateModel(@MethodParameter("processedQueue") Queue<String> processedQueue) {
             invocationOrder.add("generateModel");
             return "Model with data: " + processedQueue.toString();
         }

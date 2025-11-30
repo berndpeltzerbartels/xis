@@ -38,6 +38,7 @@ public class ServerResponse {
     private String widgetContainerId;
     private String redirectUrl;
     private ActionProcessing actionProcessing = ActionProcessing.NONE;
+    private String title;
 
     void clear() {
         // do not clear store data

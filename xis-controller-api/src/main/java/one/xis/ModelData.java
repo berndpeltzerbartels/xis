@@ -15,12 +15,12 @@ import java.lang.annotation.Target;
  * accessible in the template. This should match the data-binding expression in the HTML.</p>
  *
  * <p>Each page or widget must have exactly one {@code @ModelData} method.
- * The method can take parameters (e.g. {@code @RequestScope} or {@code @LocalStorage})
+ * The method can take parameters (e.g. {@code @MethodParameter} or {@code @LocalStorage})
  * which are resolved before rendering.</p>
  *
  * <pre>{@code
  * @ModelData("product")
- * public Product loadProduct(@RequestScope Product product) {
+ * public Product loadProduct(@MethodParameter Product product) {
  *     return product;
  * }
  * }</pre>
