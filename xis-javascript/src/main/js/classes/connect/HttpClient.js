@@ -53,20 +53,20 @@ class HttpClient extends Client {
         }
         if (this.isAjaxRedirect(response)) {
             // follow redirect in browser
-            return Promise.reject();
+            return Promise.reject({type: 'redirect'});
         }
         if (this.authorizationRequired(response)) {
             this.forwardToLoginPage(response);
-            return Promise.reject();
+            return Promise.reject({type: 'redirect'});
         }
         if (this.isBrowserRedirect(response)) {
             this.doBrowserRedirect(response);
-            return Promise.reject();
+            return Promise.reject({type: 'redirect'});
         }
         var responseObject = this.deserializeResponse(response);
         if (responseObject.redirectUrl) {
             this.forward(responseObject.redirectUrl);
-            return Promise.reject();
+            return Promise.reject({type: 'redirect'});
         }
         const globalMessages = this.globalValidatormessges(responseObject);
         if (globalMessages.length > 0) {

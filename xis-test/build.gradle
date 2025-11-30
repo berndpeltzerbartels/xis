@@ -52,11 +52,12 @@ dependencies {
     api project(':xis-html')
     implementation project(':xis-authentication')
     implementation project(':xis-authentication-api')
+    compileOnly(project(":xis-token"))
     //implementation project(':xis-security:xis-login')
 
     // Annotation processors
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
-    
+
     // Implementation dependencies
     implementation "org.projectlombok:lombok:$lombokVersion"
     implementation "org.reflections:reflections:$reflectionsVersion"

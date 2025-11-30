@@ -28,6 +28,6 @@ class ControllerResponseMapper {
         response.getIdVariables().putAll(result.getIdVariables());
         if (response.getStatus() < 1)
             response.setStatus(result.isValidationFailed() ? 422 : 200);
-        // TODO navigation test. reload widgets ? set widget in another container ?
+        // TODO navigation test. reload widgets ? set widget in another container ?Contr
     }
 }

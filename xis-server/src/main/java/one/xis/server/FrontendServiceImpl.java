@@ -3,11 +3,13 @@ package one.xis.server;
 
 import lombok.RequiredArgsConstructor;
 import one.xis.UserContext;
+import one.xis.UserContextCreatedEvent;
 import one.xis.UserContextImpl;
 import one.xis.auth.AuthenticationException;
 import one.xis.auth.URLForbiddenException;
 import one.xis.auth.token.TokenStatus;
 import one.xis.auth.token.UserSecurityService;
+import one.xis.context.EventEmitter;
 import one.xis.context.XISComponent;
 import one.xis.http.RequestContext;
 import one.xis.js.JavascriptProvider;
@@ -31,6 +33,7 @@ public class FrontendServiceImpl implements FrontendService {
     private final JavascriptProvider javascriptProvider;
     private final UserSecurityService userSecurityService;
     private final Collection<RequestFilter> requestFilters;
+    private final EventEmitter eventEmitter;
 
     @Override
     public ClientConfig getConfig() {
@@ -102,6 +105,7 @@ public class FrontendServiceImpl implements FrontendService {
         userContext.setSecurityAttributes(new SecurityAttributesImpl(tokenStatus, userSecurityService));
         RequestContext.getInstance().setAttribute(UserContext.CONTEXT_KEY, userContext);
         RequestContext.getInstance().setAttribute(TokenStatus.CONTEXT_KEY, tokenStatus);
+        eventEmitter.emitEvent(new UserContextCreatedEvent(userContext));
     }
 
     private ServerResponse applyFilterChain(ClientRequest request, BiConsumer<ClientRequest, ServerResponse> requestHandler) {

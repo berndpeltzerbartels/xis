@@ -6,14 +6,11 @@ import one.xis.auth.AuthenticationException;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.*;
+
 
 public class SecurityUtil {
 
@@ -51,47 +48,80 @@ public class SecurityUtil {
 
 
     public static void checkRoles(Method method, Set<String> presentRoles) {
-        var requiredRoles = getRequiredRoles(method);
-        if (requiredRoles.isEmpty()) {
+        var roleRequirement = getRoleRequirement(method);
+        if (!roleRequirement.hasAnyRequirement()) {
             return;
         }
-        // check if user has at least one of the required roles
-        if (presentRoles == null || presentRoles.isEmpty() || requiredRoles.stream().noneMatch(presentRoles::contains)) {
-            throw new AuthenticationException("User does not have required roles for method: " + method.getName());
+        if (!roleRequirement.isSatisfiedBy(presentRoles)) {
+            throw new AuthenticationException("User does not have required roles for method: " + method.getName()
+                    + ". Required: " + roleRequirement);
         }
     }
 
     public static void checkRoles(Class<?> c, Set<String> presentRoles) {
-        var requiredRoles = getRequiredRoles(c);
-        if (requiredRoles.isEmpty()) {
+        var controllerRoles = getControllerRoles(c);
+        var roleRequirement = new RoleRequirement(controllerRoles, Collections.emptySet(), Collections.emptySet());
+        if (!roleRequirement.hasAnyRequirement()) {
             return;
         }
-        // check if user has at least one of the required roles
-        if (presentRoles == null || presentRoles.isEmpty() || requiredRoles.stream().noneMatch(presentRoles::contains)) {
-            throw new AuthenticationException("User does not have required roles for class: " + c.getName());
+        if (!roleRequirement.isSatisfiedBy(presentRoles)) {
+            throw new AuthenticationException("User does not have required roles for class: " + c.getName()
+                    + ". Required: " + roleRequirement);
         }
     }
 
-    public static Set<String> getRequiredRoles(Method method) {
+    public static RoleRequirement getRoleRequirement(Method method) {
+        Set<String> controllerRoles = getControllerRoles(method.getDeclaringClass());
+        Set<String> methodRoles = getMethodRoles(method);
+        Set<String> parameterRoles = getParameterRoles(method);
+
+        return new RoleRequirement(controllerRoles, methodRoles, parameterRoles);
+    }
+
+    private static Set<String> getControllerRoles(Class<?> c) {
         var roles = new HashSet<String>();
-        if (method.isAnnotationPresent(Roles.class)) {
-            roles.addAll(Arrays.asList(method.getAnnotation(Roles.class).value()));
-        }
-        roles.addAll(getRequiredRoles(method.getDeclaringClass()));
-        return roles;
-
-    }
-
-    public static Set<String> getRequiredRoles(Class<?> c) {
-        var roles = new HashSet<Roles>();
         while (c != null && c != Object.class) {
             if (c.isAnnotationPresent(Roles.class)) {
-                roles.add(c.getAnnotation(Roles.class));
+                roles.addAll(Arrays.asList(c.getAnnotation(Roles.class).value()));
             }
             c = c.getSuperclass();
         }
-        return roles.stream()
-                .flatMap(role -> Stream.of(role.value()))
-                .collect(Collectors.toSet());
+        return roles;
+    }
+
+    private static Set<String> getMethodRoles(Method method) {
+        if (method.isAnnotationPresent(Roles.class)) {
+            return new HashSet<>(Arrays.asList(method.getAnnotation(Roles.class).value()));
+        }
+        return Collections.emptySet();
+    }
+
+    private static Set<String> getParameterRoles(Method method) {
+        var roles = new HashSet<String>();
+        for (Parameter parameter : method.getParameters()) {
+            Class<?> parameterType = parameter.getType();
+            while (parameterType != null && parameterType != Object.class) {
+                if (parameterType.isAnnotationPresent(Roles.class)) {
+                    roles.addAll(Arrays.asList(parameterType.getAnnotation(Roles.class).value()));
+                }
+                parameterType = parameterType.getSuperclass();
+            }
+        }
+        return roles;
+    }
+
+    @Deprecated
+    public static Set<String> getRequiredRoles(Method method) {
+        var roleRequirement = getRoleRequirement(method);
+        var allRoles = new HashSet<String>();
+        allRoles.addAll(roleRequirement.getControllerRoles());
+        allRoles.addAll(roleRequirement.getMethodRoles());
+        allRoles.addAll(roleRequirement.getParameterRoles());
+        return allRoles;
+    }
+
+    @Deprecated
+    public static Set<String> getRequiredRoles(Class<?> c) {
+        return getControllerRoles(c);
     }
 }

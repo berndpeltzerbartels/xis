@@ -2,8 +2,14 @@ package one.xis.context;
 
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import one.xis.UserContextCreatedEvent;
+import one.xis.UserContextImpl;
 import one.xis.auth.UserInfo;
-import one.xis.auth.UserInfoService;
+import one.xis.auth.UserInfoImpl;
+import one.xis.auth.token.SecurityAttributes;
+import one.xis.http.RequestContext;
 import one.xis.http.RestControllerService;
 import one.xis.server.PageUtil;
 
@@ -15,6 +21,7 @@ public class IntegrationTestContext {
     @Getter
     private final AppContext appContext;
     private final IntegrationTestEnvironment environment;
+    private final UserInfo userInfo;
 
     private static final Object SYNC_LOCK = new Object();
 
@@ -22,9 +29,10 @@ public class IntegrationTestContext {
         return new Builder();
     }
 
-    IntegrationTestContext(Collection<String> packages, Object... controllers) {
+    IntegrationTestContext(Collection<String> packages, UserInfo userInfo, Object... controllers) {
         this.appContext = internalContext(packages, controllers);
         this.environment = new IntegrationTestEnvironment(new BackendBridge(appContext.getSingleton(RestControllerService.class)));
+        this.userInfo = userInfo;
     }
 
     public OpenPageResult openPage(String uri, Map<String, Object> parameters) {
@@ -33,6 +41,8 @@ public class IntegrationTestContext {
                 uri += "?";
                 uri += parameters.entrySet().stream().map(e -> e.getKey() + "=" + e.getValue()).collect(Collectors.joining("&"));
             }
+            var userInfoFaker = appContext.getSingleton(UserContextFaker.class);
+            userInfoFaker.setUserInfo(userInfo);
             environment.openPage(uri);
             return new OpenPageResult(appContext, environment);
         }
@@ -63,13 +73,14 @@ public class IntegrationTestContext {
 
     //@Override
     public Collection<Object> getSingletons(Class<?> type) {
-        return appContext.getSingletons();
+        return appContext.getSingletons().stream().filter(type::isInstance).toList();
     }
 
     private AppContext internalContext(Collection<String> packages, Object... controllers) {
         var builder = AppContextBuilder.createInstance()
                 .withXIS()
                 .withSingletonClass(TestUserInfoService.class)
+                .withSingleton(new UserContextFaker())
                 .withSingletons(controllers);
         packages.forEach(builder::withPackage);
         return builder.build();
@@ -94,10 +105,7 @@ public class IntegrationTestContext {
         }
 
         public IntegrationTestContext build() {
-            var context = new IntegrationTestContext(packages, singletons.toArray());
-            if (userInfo != null) {
-                addTokens(userInfo, userPassword, context);
-            }
+            var context = new IntegrationTestContext(packages, userInfo, singletons.toArray());
             context.environment.getIntegrationTestScript().reset();
             return context;
         }
@@ -128,13 +136,48 @@ public class IntegrationTestContext {
             return this;
         }
 
-        private static void addTokens(UserInfo user, String password, IntegrationTestContext context) {
-            System.err.println("Adding token cookies for user: " + user.getUserId());
-            var userService = context.getSingleton(UserInfoService.class);
-            if (userService instanceof TestUserInfoService testUserInfoService) {
-                testUserInfoService.saveUserInfo(user, password);
+        private static void bindUser(UserInfoImpl userInfo) {
+            RequestContext.getInstance();
+        }
+    }
+
+    @Setter
+    static class UserContextFaker {
+        private UserInfo userInfo;
+
+        @XISEventListener
+        public void onUserContextCreated(UserContextCreatedEvent event) {
+            if (userInfo == null) {
+                return;
             }
-            // If the user added a custom UserInfoService, we assume it handles the desired authentication logic
+            ((UserContextImpl) event.getUserContext()).setSecurityAttributes(new TestSecurityAttributes(userInfo));
+
+        }
+    }
+
+    @RequiredArgsConstructor
+    static class TestSecurityAttributes implements SecurityAttributes {
+
+        private final UserInfo userInfo;
+
+        @Override
+        public String getUserId() {
+            return userInfo.getUserId();
+        }
+
+        @Override
+        public Set<String> getRoles() {
+            return userInfo.getRoles();
+        }
+
+        @Override
+        public void setUserId(String userId) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void setRoles(Set<String> roles) {
+            throw new UnsupportedOperationException();
         }
     }
 

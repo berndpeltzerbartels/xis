@@ -167,6 +167,7 @@ public class RestControllerServiceImpl implements RestControllerService {
         Object[] args = prepareParameters(method, request, response, methodMatchResult);
 
         RequestContext.createInstance(request, response);
+        eventEmitter.emitEvent(new RequestContextCreatedEvent(RequestContext.getInstance()));
         Object result;
         try {
             result = MethodUtils.invoke(controllerInstance, method, args);

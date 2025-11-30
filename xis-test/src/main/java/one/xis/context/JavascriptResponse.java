@@ -16,7 +16,7 @@ public class JavascriptResponse {
     public final Map<String, List<String>> headers;
 
     public void addResponseHeader(String name, String value) {
-        headers.computeIfAbsent(name, k -> new ArrayList<>()).add(value);
+        headers.computeIfAbsent(name.toUpperCase(), k -> new ArrayList<>()).add(value);
     }
 
     public String getResponseHeader(String name) {
@@ -33,7 +33,7 @@ public class JavascriptResponse {
 
 
     private List<String> getResponseHeaders(String name) {
-        return headers.getOrDefault(name, List.of());
+        return headers.getOrDefault(name.toUpperCase(), List.of());
     }
 
 }
