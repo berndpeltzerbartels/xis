@@ -223,7 +223,7 @@ class PageController {
                 .then(() => this.commitBuffer());
 
             if (!skipHistoryUpdate && response.status < 300) {
-                this.updateHistory(this.resolvedURL, response.address);
+                this.updateHistory(this.resolvedURL);
             }
             app.eventPublisher.publish(EventType.PAGE_LOADED, { page: this.page, url: this.resolvedURL });
         }).catch(error => handleError(error));
@@ -310,9 +310,10 @@ class PageController {
      * @param {string} address - Optional custom address from @Address annotation
      * @private
      */
-    updateHistory(resolvedURL, address) {
+    updateHistory(resolvedURL) {
         var title = this.htmlTagHandler.getTitle();
-        var url = address || resolvedURL.url;
-        app.history.appendPage(url, title);
+        app.history.appendPage(resolvedURL.url, title);
     }
+
+
 }

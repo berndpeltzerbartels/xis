@@ -31,6 +31,9 @@ class ControllerResultMapper {
         if (controllerMethodResult.getTitle() != null) {
             controllerResult.setTitle(controllerMethodResult.getTitle());
         }
+        if (controllerMethodResult.getAddress() != null) {
+            controllerResult.setAddress(controllerMethodResult.getAddress());
+        }
         controllerResult.getUpdateEventKeys().addAll(controllerMethodResult.getUpdateEventKeys());
         controllerResult.getModelData().putAll(controllerMethodResult.getModelData());
         controllerResult.getFormData().putAll(controllerMethodResult.getFormData());

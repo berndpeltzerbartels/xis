@@ -369,9 +369,26 @@ class Client {
         data.setValue(['global'], serverResponse.globalVariableData);
         data.setValue(['validation'], obj.validatorMessages);
         this.storeData(serverResponse);
+        this.setTitle(serverResponse);
+        this.updateAddress(serverResponse);
         this.tagContentSetter.apply(document, serverResponse.idVariables, serverResponse.tagVariables);
         return serverResponse;
     }
+
+    setTitle(response) {
+        if (response.title && response.title.length > 0) {
+          const result = document.getElementsByTagName('title');
+          if (result.length > 0) {
+              result[0].innerText = response.title;
+          }
+        }
+      }
+
+      updateAddress(response) {
+        if (response.address && response.address.length > 0) {
+            app.pageController.setAddress(response.address);
+        }
+       }
 
     storeData(response) {
         this.storeLocalStorageData(response.localStorageData);
