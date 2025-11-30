@@ -28,6 +28,9 @@ class ControllerResultMapper {
         if (controllerMethodResult.getActionProcessing() != null && controllerMethodResult.getActionProcessing() != ActionProcessing.NONE) {
             controllerResult.setActionProcessing(controllerMethodResult.getActionProcessing());
         }
+        if (controllerMethodResult.getTitle() != null) {
+            controllerResult.setTitle(controllerMethodResult.getTitle());
+        }
         controllerResult.getUpdateEventKeys().addAll(controllerMethodResult.getUpdateEventKeys());
         controllerResult.getModelData().putAll(controllerMethodResult.getModelData());
         controllerResult.getFormData().putAll(controllerMethodResult.getFormData());

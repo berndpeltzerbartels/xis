@@ -165,6 +165,9 @@ refreshContainerId(parentData) {
 bindDefaultWidgetInitial(parentData) {
     if (this.defaultWidgetExpression && !this.widgetInstance) { // once, only
         var widgetUrl = this.defaultWidgetExpression.evaluate(parentData);
+        if (!widgetUrl) {
+            return;
+        }
         var widgetParametersInUrl = urlParameters(widgetUrl);
         // Merge URL parameters with xis:parameter tag parameters
         for (var key of Object.keys(widgetParametersInUrl)) {
