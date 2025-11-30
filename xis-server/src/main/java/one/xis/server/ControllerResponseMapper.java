@@ -29,6 +29,9 @@ class ControllerResponseMapper {
         if (result.getTitle() != null) {
             response.setTitle(result.getTitle());
         }
+        if (result.getAddress() != null) {
+            response.setAddress(result.getAddress());
+        }
         if (response.getStatus() < 1)
             response.setStatus(result.isValidationFailed() ? 422 : 200);
         // TODO navigation test. reload widgets ? set widget in another container ?Contr

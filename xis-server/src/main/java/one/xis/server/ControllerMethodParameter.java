@@ -52,11 +52,7 @@ class ControllerMethodParameter {
             return deserializeParameter(paramValue, request, parameter, postProcessingResults);
         } else if (parameter.isAnnotationPresent(MethodParameter.class)) {
             var key = parameter.getAnnotation(MethodParameter.class).value();
-            var paramValue = requestScope.get(key);
-            if (paramValue == null) {
-                throw new IllegalStateException(method + ": No request scope value found for key " + key);
-            }
-            return paramValue;
+            return requestScope.get(key);
         } else if (parameter.isAnnotationPresent(SessionStorage.class)) {
             var key = parameter.getAnnotation(SessionStorage.class).value();
             var paramValue = request.getSessionStorageData().get(key);

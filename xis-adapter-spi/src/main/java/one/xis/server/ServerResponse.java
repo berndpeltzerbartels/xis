@@ -39,6 +39,7 @@ public class ServerResponse {
     private String redirectUrl;
     private ActionProcessing actionProcessing = ActionProcessing.NONE;
     private String title;
+    private String address;
 
     void clear() {
         // do not clear store data

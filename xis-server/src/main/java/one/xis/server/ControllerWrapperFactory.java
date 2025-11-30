@@ -39,7 +39,7 @@ class ControllerWrapperFactory {
             controllerWrapper.setGlobalVariableOnlyMethods(globalVariableOnlyMethods(controller));
             controllerWrapper.setTagContentOnlyMethods(tagContentOnlyMethods(controller));
             controllerWrapper.setTitleOnlyMethods(titleOnlyMethods(controller));
-            controllerWrapper.setWidgetInContainerOnlyMethods(widgetInContainerOnlyMethods(controller));
+            controllerWrapper.setAddressOnlyMethods(addressOnlyMethods(controller));
             controllerWrapper.setControllerResultMapper(controllerResultMapper);
             return controllerWrapper;
         } catch (Exception e) {
@@ -156,14 +156,12 @@ class ControllerWrapperFactory {
                 .collect(Collectors.toSet());
     }
 
-    private Collection<ControllerMethod> widgetInContainerOnlyMethods(@NonNull Object controller) {
-        return annotatedMethods(controller, WidgetInContainer.class)
+    private Collection<ControllerMethod> addressOnlyMethods(@NonNull Object controller) {
+        return annotatedMethods(controller, Address.class)
                 .filter(m -> !m.isAnnotationPresent(Action.class))
                 .filter(method -> !method.isAnnotationPresent(ModelData.class))
                 .filter(method -> !method.isAnnotationPresent(FormData.class))
                 .map(this::createControllerMethod)
                 .collect(Collectors.toSet());
     }
-
-
 }

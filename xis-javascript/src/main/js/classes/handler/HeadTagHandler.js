@@ -76,6 +76,10 @@ class HeadTagHandler extends TagHandler {
         this.title.innerText = this.titleExpression.evaluate(data);
     }
 
+    setTitle(title) {
+        this.title.innerText = title;
+    }
+
     setTitleExpression(page) {
         if (!page.titleElement) {
             this.titleExpression = undefined;

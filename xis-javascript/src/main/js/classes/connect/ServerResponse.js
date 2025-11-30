@@ -15,6 +15,7 @@
  * @property {Object} idVariables
  * @property {string} actionProcessing
  * @property {string} title
+ * @property {string} address
  */
 
 class ServerResponse {
@@ -36,6 +37,7 @@ class ServerResponse {
         this.actionProcessing = 'NONE';
         this.updateEventKeys = [];
         this.title = '';
+        this.address = '';
     /**
      * Tag-gebundene Variablen, z.B. { title: "Seitentitel" }
      */

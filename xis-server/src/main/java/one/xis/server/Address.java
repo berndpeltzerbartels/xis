@@ -1,4 +1,5 @@
-package one.xis;
+package one.xis.server;
+
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -6,10 +7,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Enables widgets to define the page title.
+ * Marks a method or a parameter that provides an address for browser's address bar.
  */
 @Target({ElementType.PARAMETER, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Title {
-  
+public @interface Address {
 }

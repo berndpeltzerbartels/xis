@@ -66,23 +66,8 @@ class ControllerMethodResultMapper {
         if (method.isAnnotationPresent(Title.class)) {
             controllerMethodResult.setTitle(returnValue != null ? returnValue.toString() : null);
         }
-        if (method.isAnnotationPresent(WidgetInContainer.class)) {
-            if (returnValue instanceof Class<?> widgetControllerClass) {
-                controllerMethodResult.setNextWidgetId(WidgetUtil.getId(widgetControllerClass));
-            } else if (returnValue instanceof WidgetResponse widgetResponse) {
-                var widgetResponseCloned = new WidgetResponse()
-                        .controllerClass(widgetResponse.getControllerClass())
-                        .targetContainer(method.getAnnotation(WidgetInContainer.class).value());
-                widgetResponse.getWidgetParameters().forEach(widgetResponseCloned::widgetParameter);
-                for (String widgetId : widgetResponse.getWidgetsToReload()) {
-                    widgetResponseCloned.reloadWidget(widgetId);
-                }
-                mapWidgetResponse(widgetResponse, controllerMethodResult);
-            } else if (returnValue instanceof String widgetId) {
-                controllerMethodResult.setNextWidgetId(widgetId);
-            } else {
-                throw new IllegalStateException("Invalid return type for @WidgetInContainer method: " + method);
-            }
+        if (method.isAnnotationPresent(Address.class)) {
+            controllerMethodResult.setAddress(returnValue != null ? returnValue.toString() : null);
         }
     }
 
