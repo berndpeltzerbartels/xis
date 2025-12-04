@@ -50,8 +50,8 @@ class ControllerMethodParameter {
             var key = parameter.getAnnotation(ActionParameter.class).value();
             var paramValue = request.getActionParameters().get(key);
             return deserializeParameter(paramValue, request, parameter, postProcessingResults);
-        } else if (parameter.isAnnotationPresent(MethodParameter.class)) {
-            var key = parameter.getAnnotation(MethodParameter.class).value();
+        } else if (parameter.isAnnotationPresent(SharedValue.class)) {
+            var key = parameter.getAnnotation(SharedValue.class).value();
             return requestScope.get(key);
         } else if (parameter.isAnnotationPresent(SessionStorage.class)) {
             var key = parameter.getAnnotation(SessionStorage.class).value();
@@ -85,8 +85,8 @@ class ControllerMethodParameter {
             controllerMethodResult.getPathVariables().put(parameter.getAnnotation(PathVariable.class).value(), parameterValue);
         } else if (parameter.isAnnotationPresent(WidgetParameter.class)) {
             controllerMethodResult.getWidgetParameters().put(parameter.getAnnotation(WidgetParameter.class).value(), parameterValue);
-        } else if (parameter.isAnnotationPresent(MethodParameter.class)) {
-            controllerMethodResult.getRequestScope().put(parameter.getAnnotation(MethodParameter.class).value(), parameterValue);
+        } else if (parameter.isAnnotationPresent(SharedValue.class)) {
+            controllerMethodResult.getRequestScope().put(parameter.getAnnotation(SharedValue.class).value(), parameterValue);
         } else if (parameter.isAnnotationPresent(SessionStorage.class)) {
             controllerMethodResult.getSessionStorage().put(parameter.getAnnotation(SessionStorage.class).value(), parameterValue);
         } else if (parameter.isAnnotationPresent(LocalStorage.class)) {

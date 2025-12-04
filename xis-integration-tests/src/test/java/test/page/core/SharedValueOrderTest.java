@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class MethodParameterOrderTest {
+class SharedValueOrderTest {
 
     private MethodParameterOrderPageService service;
     private IntegrationTestContext testContext;

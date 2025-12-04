@@ -43,8 +43,8 @@ class ControllerMethodResultMapper {
         if (method.isAnnotationPresent(FormData.class)) {
             mapFormData(method.getAnnotation(FormData.class).value(), returnValue, controllerMethodResult);
         }
-        if (method.isAnnotationPresent(MethodParameter.class)) {
-            var key = method.getAnnotation(MethodParameter.class).value();
+        if (method.isAnnotationPresent(SharedValue.class)) {
+            var key = method.getAnnotation(SharedValue.class).value();
             requestScope.put(key, returnValue);
         }
         if (method.isAnnotationPresent(SessionStorage.class)) {

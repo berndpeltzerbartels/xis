@@ -82,6 +82,15 @@ class DomNormalizer {
         if (!element.getAttributeNames) {
             return element; // DocumentFragment
         }
+        // Normalize selection-class and selection-group attributes (HTML -> xis:...)
+        if (element.hasAttribute('selection-class')) {
+            element.setAttribute('xis:selection-class', element.getAttribute('selection-class'));
+            element.removeAttribute('selection-class');
+        }
+        if (element.hasAttribute('selection-group')) {
+            element.setAttribute('xis:selection-group', element.getAttribute('selection-group'));
+            element.removeAttribute('selection-group');
+        }
         if (element.getAttribute('xis:repeat')) {
             this.surroundWithForeachTag(element);
             element.removeAttribute('xis:repeat');
@@ -286,8 +295,13 @@ class DomNormalizer {
                 case 'repeat':
                 case 'target-container':
                 case 'parameters':
-                case 'action': element.setAttribute('xis:' + attrName, attrValue);
-                default: element.setAttribute(attrName, attrValue);
+                case 'action':
+                case 'selection-class':
+                case 'selection-group':
+                    element.setAttribute('xis:' + attrName, attrValue);
+                    break;
+                default:
+                    element.setAttribute(attrName, attrValue);
             }
         }
         // Set additional attributes (e.g. type for checkbox/radio)

@@ -32,7 +32,7 @@ class ControllerWrapperFactory {
             controllerWrapper.setModelMethods(modelMethods(controller));
             controllerWrapper.setFormDataMethods(formDataMethods(controller));
             controllerWrapper.setActionMethods(actionMethodMap(controller));
-            controllerWrapper.setRequestScopeMethods(requestScopeMethods(controller));
+            controllerWrapper.setSharedValueMethods(sharedValueMethods(controller));
             controllerWrapper.setLocalStorageOnlyMethods(localStorageOnlyMethods(controller));
             controllerWrapper.setSessionStorageOnlyMethods(sessionStorageOnlyMethods(controller));
             controllerWrapper.setClientStorageOnlyMethods(clientStorageOnlyMethods(controller));
@@ -83,8 +83,8 @@ class ControllerWrapperFactory {
                 .collect(Collectors.toSet());
     }
 
-    private Collection<ControllerMethod> requestScopeMethods(Object controller) {
-        return annotatedMethods(controller, MethodParameter.class)
+    private Collection<ControllerMethod> sharedValueMethods(Object controller) {
+        return annotatedMethods(controller, SharedValue.class)
                 .map(this::createControllerMethod)
                 .collect(Collectors.toSet());
     }

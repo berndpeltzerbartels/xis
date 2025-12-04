@@ -26,7 +26,7 @@ public class ControllerWrapper {
      */
     private Object controller;
 
-    private Collection<ControllerMethod> requestScopeMethods;
+    private Collection<ControllerMethod> sharedValueMethods;
     private Collection<ControllerMethod> modelMethods;
     private Collection<ControllerMethod> tagContentOnlyMethods;
     private Map<String, ControllerMethod> actionMethods;
@@ -49,13 +49,13 @@ public class ControllerWrapper {
         methodsToExecute.addAll(tagContentOnlyMethods);
         methodsToExecute.addAll(titleOnlyMethods);
         methodsToExecute.addAll(addressOnlyMethods);
-        var methods = RequestScopeSorter.sortMethods(methodsToExecute, requestScopeMethods);
+        var methods = MethodSorter.sortMethods(methodsToExecute, sharedValueMethods);
         methods.forEach(m -> invokeModelDataMethod(request, controllerResult, m));
     }
 
     void invokeFormDataMethods(ClientRequest request, ControllerResult controllerResult) {
         SecurityUtil.checkRoles(controller.getClass(), UserContextImpl.getInstance().getRoles());
-        var methods = RequestScopeSorter.sortMethods(formDataMethods, requestScopeMethods);
+        var methods = MethodSorter.sortMethods(formDataMethods, sharedValueMethods);
         methods.forEach(m -> invokeModelDataMethod(request, controllerResult, m));
     }
 
@@ -65,7 +65,7 @@ public class ControllerWrapper {
         if (method == null) {
             throw new RuntimeException("No action-method found for action " + request.getAction() + " in controller " + controller.getClass().getName());
         }
-        var methods = RequestScopeSorter.sortMethods(Set.of(method), requestScopeMethods);
+        var methods = MethodSorter.sortMethods(Set.of(method), sharedValueMethods);
         methods.forEach(m -> {
             if (m.equals(method)) {
                 invokeActionMethod(request, controllerResult, m);
@@ -129,7 +129,7 @@ public class ControllerWrapper {
     }
 
 
-    static class RequestScopeSorter {
+    static class MethodSorter {
         public static List<ControllerMethod> sortMethods(Collection<ControllerMethod> mandatoryMethods, Collection<ControllerMethod> conditionalMethods) {
             Map<String, ControllerMethod> providedBy = new HashMap<>();
             for (ControllerMethod method : conditionalMethods) {
