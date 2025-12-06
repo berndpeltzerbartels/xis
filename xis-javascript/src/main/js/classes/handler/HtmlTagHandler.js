@@ -22,7 +22,7 @@ class HtmlTagHandler extends TagHandler {
      * @public
      * @override
      * @param {Data} data 
-     * @returns {Promise}
+     * @returns {Promise}Tag
      */
     refresh(data) {
         this.data = data;

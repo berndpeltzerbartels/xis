@@ -79,10 +79,11 @@ class TagHandler {
      * @param {Data} data 
      */
     refreshDescendantHandlers(data) {
+        var promises = [];
         for (var handler of this.descendantHandlers) {
-            handler.refresh(data);
+            promises.push(handler.refresh(data));
         }
-        return data;
+        return Promise.all(promises);
     }
 
     refreshFormData(data) {

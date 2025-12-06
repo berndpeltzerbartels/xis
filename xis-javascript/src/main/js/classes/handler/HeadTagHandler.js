@@ -53,7 +53,7 @@ class HeadTagHandler extends TagHandler {
      */
     refresh(data) {
         this.data = data;
-        this.renderhWithData(data);
+        this.renderWithData(data);
         return this.refreshDescendantHandlers(data);
     }
     /**
@@ -61,7 +61,7 @@ class HeadTagHandler extends TagHandler {
      * @param {Data} data
      * @returns {Promise}
      */
-    renderhWithData(data) {
+    renderWithData(data) {
         this.refreshTitle(data);
         return Promise.resolve();
     }
