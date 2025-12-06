@@ -104,7 +104,7 @@ class PageController {
 
         return this.initBuffer()
             .then(() => this.htmlTagHandler.refresh(this.page.data))
-            .then(() => {if (response.title) this.setTitle(response.title);})
+            .then(() => {if (isSet(response.title)) this.setTitle(response.title);})
             .then(() => {if (response.address) this.setAddress(response.address);})
             .then(() => this.commitBuffer());
     }

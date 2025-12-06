@@ -361,7 +361,7 @@ class Client {
         serverResponse.idVariables = obj.idVariables || {};
         serverResponse.actionProcessing = obj.actionProcessing || 'NONE';
         serverResponse.updateEventKeys = obj.updateEventKeys || [];
-        serverResponse.title = obj.title || '';
+        serverResponse.title = obj.title; // difference between null and '' is important
         serverResponse.address = obj.address || '';
         data.setValue(['sessionStorage'], serverResponse.sessionStorageData);
         data.setValue(['localStorage'], serverResponse.localStorageData);
@@ -376,10 +376,11 @@ class Client {
     }
 
     setTitle(response) {
-        if (response.title && response.title.length > 0) {
-          const result = document.getElementsByTagName('title');
-          if (result.length > 0) {
-              result[0].innerText = response.title;
+        if (isSet(response.title)) {  //"" should remove title
+          const titleList = document.getElementsByTagName('title');
+          if (titleList.length > 0) {
+              const title = titleList.item(0);
+              title.innerText = response.title;
           }
         }
       }
