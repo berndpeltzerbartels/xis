@@ -218,7 +218,7 @@ public class PartParser {
             throw error("Attribute '" + attrName + "' requires a value in XML-style tags.");
         }
 
-        if (HTML_BOOLEAN_ATTRS.contains(attrNameLc)) {
+        if (HTML_BOOLEAN_ATTRS.contains(attrNameLc) || !attrs.containsKey(attrNameLc)) {
             // Represent boolean attribute presence; choose "" or "true" consistently.
             attrs.put(attrName, "true");
         } else {

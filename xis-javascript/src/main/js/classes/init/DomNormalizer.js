@@ -64,6 +64,15 @@ class DomNormalizer {
         } else {
             normalizedElement = this.normalizeHtmlElement(element);
         }
+         // Normalize selection-class and selection-group attributes (HTML -> xis:...)
+        if (isElement(element) && element.hasAttribute('selection-class')) {
+            element.setAttribute('xis:selection-class', element.getAttribute('selection-class'));
+            element.removeAttribute('selection-class');
+        }
+        if (isElement(element) && element.hasAttribute('selection-group')) {
+            element.setAttribute('xis:selection-group', element.getAttribute('selection-group'));
+            element.removeAttribute('selection-group');
+        }
         for (var child of nodeListToArray(normalizedElement.childNodes)) {
             if (isElement(child) || isDocumentFragment(child)) {
                 this.doNormalize(child);
@@ -73,7 +82,7 @@ class DomNormalizer {
     }
 
     /**
-    * Initializes a html-element, which means 
+    * Normalizes a html-element, which means
     * this is not a xis-element like e.g. <xis:foreach/>
     * @private
     * @param {Element} element
@@ -81,15 +90,6 @@ class DomNormalizer {
     normalizeHtmlElement(element) {
         if (!element.getAttributeNames) {
             return element; // DocumentFragment
-        }
-        // Normalize selection-class and selection-group attributes (HTML -> xis:...)
-        if (element.hasAttribute('selection-class')) {
-            element.setAttribute('xis:selection-class', element.getAttribute('selection-class'));
-            element.removeAttribute('selection-class');
-        }
-        if (element.hasAttribute('selection-group')) {
-            element.setAttribute('xis:selection-group', element.getAttribute('selection-group'));
-            element.removeAttribute('selection-group');
         }
         if (element.getAttribute('xis:repeat')) {
             this.surroundWithForeachTag(element);

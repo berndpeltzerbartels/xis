@@ -12,15 +12,10 @@ class TagHandler {
         this.type = 'tag-handler';
         this.priority = 'normal';
         this.expressionParser = new ExpressionParser(elFunctions);
-        this.reactiveVariables = new Set();
-        this.hasGlobals = false;
-    }
-
-    registerReactiveListener(context, path, listener) {
-       this.appendAttribute.eventPublisher.addEventListener(context, path, listener);
     }
 
     addDescendantHandler(handler) {
+        console.log('type: ' + this.type + 'handler: ' + handler.type);
         handler.parentHandler = this;
         this.descendantHandlers.push(handler);
         handler.publishBindEvent();
@@ -28,35 +23,38 @@ class TagHandler {
     }
 
     removeDescendantHandler(handler) {
-        const handlers = [];
+        const handlers =[];
         for (var h of this.descendantHandlers) {
             if (h != handler) {
                 handlers.push(h);
             }
         }
         this.descendantHandlers = handlers;
-        handler.parentHandler = null;
+        handler.parentHandler = null;   
     }
 
     refresh(data) {
         throw new Error('abstract method');
     }
 
-
-    refreshWithStoredData(invoker) {
-        if (invoker == this) {
+    /**
+     * Refreshes this handler and all descendants with state-aware data.
+     * Prevents infinite recursion by skipping the original invoker.
+     * 
+     * @param {Data} data - Combined data including updated state values
+     * @param {TagHandler} invoker - The handler that initiated the state change (will be skipped)
+     */
+    stateRefresh(data, invoker) {
+        if (this === invoker) {
+            // Skip the invoker to prevent infinite recursion
             return;
         }
+        this.refresh(data); 
         for (var handler of this.descendantHandlers) {
-            handler.refreshWithStoredData(invoker);
+            handler.stateRefresh(data, invoker);
         }
     }
 
-    notifyGlobals() {
-        if (this.parentHandler) {
-            this.parentHandler.notifyGlobals();
-        }
-    }
 
     /**
      * @protected
@@ -79,16 +77,13 @@ class TagHandler {
      * Refreshes descendant handlers.
      * 
      * @param {Data} data 
-     * @returns {Promise<void>}
      */
     refreshDescendantHandlers(data) {
-        const promises = [];
-        for (const handler of this.descendantHandlers) {
-            promises.push(handler.refresh(data));
+        for (var handler of this.descendantHandlers) {
+            handler.refresh(data);
         }
-        return Promise.all(promises).then(() => {});
+        return data;
     }
-
 
     refreshFormData(data) {
         for (var handler of this.descendantHandlers) {
@@ -106,7 +101,7 @@ class TagHandler {
             }
         }
         for (var handler of this.descendantHandlers) {
-            handler.parentHandler = null;
+           handler.parentHandler = null;
         }
         this.descendantHandlers = [];
     }
@@ -126,13 +121,13 @@ class TagHandler {
     }
 
     createExpression(src) {
-        return new TextContentParser(src, listener).parse();
+        return new TextContentParser(src, this).parse();
     }
 
     variableTextContentFromAttribute(attrName) {
         var attr = this.tag.getAttribute(attrName);
         if (attr) {
-            return new TextContentParser(attr).parse();
+            return new TextContentParser(attr, this).parse();
         }
     }
 
@@ -153,13 +148,13 @@ class TagHandler {
         }
     }
 
-    getParentFormHandler() {
+    getParentFormHandler()  {
         var handler = this.findParentFormHandler();
         if (handler) {
             return handler;
         }
-        throw new Error('no parent form-handler for ' + this.tag
-            + ". May be you forgot to add xis:binding to the form?");
+        throw new Error('no parent form-handler for ' + this.tag 
+            +". May be you forgot to add xis:binding to the form?");
     }
 
     findParentFormHandler() {

@@ -162,6 +162,20 @@ class HtmlParserTest {
         }
     }
 
+
+    @Nested
+    class UnknownBooleanAttributeTest {
+        private final String html = "<input type=\"checkbox\" xis:abc>";
+
+        @Test
+        void parse() {
+            var document = parser.parse(html);
+            var htmlResult = document.asString();
+
+            assertThat(htmlResult).isEqualToIgnoringWhitespace("<input type=\"checkbox\" xis:abc=\"true\">");
+        }
+    }
+
     @Nested
     class BigTest {
         private final String html = """
