@@ -1,26 +1,31 @@
 package one.xis.test.dom;
 
+import lombok.Getter;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class History {
 
-    private static class Entry {
-        Object state;
+    @Getter
+    public static class Entry {
+        Map<String, Object> state;
         String title;
-        Object id;
+        String id;
 
-        Entry(Object state, String title, Object id) {
+        Entry(Map<String, Object> state, String title, String id) {
             this.state = state;
             this.title = title;
             this.id = id;
         }
     }
 
+    @Getter
     private final List<Entry> entries = new ArrayList<>();
     private int currentIndex = -1;
 
-    public void pushState(Object state, String title, Object id) {
+    public void pushState(Map<String, Object> state, String title, String id) {
         // Entferne alle „zukünftigen“ Einträge
         while (entries.size() > currentIndex + 1) {
             entries.remove(entries.size() - 1);
@@ -29,11 +34,11 @@ public class History {
         currentIndex++;
     }
 
-    public void pushState(Object state, String title) {
+    public void pushState(Map<String, Object> state, String title) {
         pushState(state, title, null); // ID optional
     }
 
-    public void replaceState(Object state, String title, Object id) {
+    public void replaceState(Map<String, Object> state, String title, String id) {
         if (currentIndex >= 0) {
             entries.set(currentIndex, new Entry(state, title, id));
         } else {
@@ -46,14 +51,14 @@ public class History {
         currentIndex = -1;
     }
 
-    public Object getCurrentState() {
+    public Map<String, Object> getCurrentState() {
         if (currentIndex >= 0 && currentIndex < entries.size()) {
             return entries.get(currentIndex).state;
         }
         return null;
     }
 
-    public Object getCurrentId() {
+    public String getCurrentId() {
         if (currentIndex >= 0 && currentIndex < entries.size()) {
             return entries.get(currentIndex).id;
         }

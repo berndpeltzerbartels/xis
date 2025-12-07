@@ -1,12 +1,17 @@
 package one.xis.test.dom;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.util.function.Consumer;
 
 @RequiredArgsConstructor
 public class Window {
+
+    @Getter
     public final Location location;
+
+    @Getter
     public History history = new History();
     private int scrollX = 0;
     private int scrollY = 0;

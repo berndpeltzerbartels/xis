@@ -104,8 +104,7 @@ class PageController {
 
         return this.initBuffer()
             .then(() => this.htmlTagHandler.refresh(this.page.data))
-            .then(() => {if (isSet(response.title)) this.setTitle(response.title);})
-            .then(() => {if (response.address) this.setAddress(response.address);})
+            .then(() => {if (isSet(response.annotatedTitle)) this.setTitle(response.annotatedTitle);})
             .then(() => this.commitBuffer());
     }
 
@@ -132,7 +131,7 @@ class PageController {
             }
         }
         if (response.status < 300) {
-            this.updateHistory(this.resolvedURL);
+            this.updateHistory(this.resolvedURL, response.annotatedTitle);
         }
         return rv;
     }
@@ -219,11 +218,11 @@ class PageController {
 
             this.initBuffer()
                 .then(() => this.htmlTagHandler.refresh(data))
-                .then(() => {if (response.title) this.setTitle(response.title);})
+                .then(() => {if (response.annotatedTitle) this.setTitle(response.annotatedTitle);})
                 .then(() => this.commitBuffer());
 
             if (!skipHistoryUpdate && response.status < 300) {
-                this.updateHistory(this.resolvedURL);
+                this.updateHistory(this.resolvedURL, response.annotatedTitle);
             }
             app.eventPublisher.publish(EventType.PAGE_LOADED, { page: this.page, url: this.resolvedURL });
         }).catch(error => handleError(error));
@@ -297,22 +296,17 @@ class PageController {
         this.htmlTagHandler.headTagHandler.setTitle(title);
     }
 
-    setAddress(address) {
-        // Address is handled via updateHistory with custom address parameter
-        // This method is called from handleActionResponse to update browser URL
-        var title = this.htmlTagHandler.getTitle();
-        app.history.appendPage(address, title);
-    }
-
     /**
      * Updates value displayed in browser's address-input.
      * @param {ResolvedURL} resolvedURL
-     * @param {string} address - Optional custom address from @Address annotation
+     * @param {string} annotatedAddress - Optional custom address from @Address annotation
+     * @param {string} annotatedTitle - Optional custom title from @Title annotation
      * @private
      */
-    updateHistory(resolvedURL) {
-        var title = this.htmlTagHandler.getTitle();
-        app.history.appendPage(resolvedURL.url, title);
+    updateHistory(resolvedURL, annotatedAddress, annotatedTitle) {
+        var title = annotatedTitle || this.htmlTagHandler.getTitle();
+        var address = annotatedAddress || resolvedURL.url;
+        app.history.appendPage(address, title);
     }
 
 

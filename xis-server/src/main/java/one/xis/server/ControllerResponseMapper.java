@@ -26,11 +26,8 @@ class ControllerResponseMapper {
         response.setRedirectUrl(result.getRedirectUrl());
         response.getTagVariables().putAll(result.getTagVariables());
         response.getIdVariables().putAll(result.getIdVariables());
-        if (result.getTitle() != null) {
-            response.setTitle(result.getTitle());
-        }
-        if (result.getAddress() != null) {
-            response.setAddress(result.getAddress());
+        if (result.getAnnotatedTitle() != null) {
+            response.setAnnotatedTitle(result.getAnnotatedTitle());
         }
         if (response.getStatus() < 1)
             response.setStatus(result.isValidationFailed() ? 422 : 200);

@@ -361,8 +361,7 @@ class Client {
         serverResponse.idVariables = obj.idVariables || {};
         serverResponse.actionProcessing = obj.actionProcessing || 'NONE';
         serverResponse.updateEventKeys = obj.updateEventKeys || [];
-        serverResponse.title = obj.title; // difference between null and '' is important
-        serverResponse.address = obj.address || '';
+        serverResponse.annotatedTitle = obj.annotatedTitle; // difference between null and '' is important
         data.setValue(['sessionStorage'], serverResponse.sessionStorageData);
         data.setValue(['localStorage'], serverResponse.localStorageData);
         data.setValue(['clientStorage'], serverResponse.clientStorageData);
@@ -370,26 +369,19 @@ class Client {
         data.setValue(['validation'], obj.validatorMessages);
         this.storeData(serverResponse);
         this.setTitle(serverResponse);
-        this.updateAddress(serverResponse);
         this.tagContentSetter.apply(document, serverResponse.idVariables, serverResponse.tagVariables);
         return serverResponse;
     }
 
     setTitle(response) {
-        if (isSet(response.title)) {  //"" should remove title
+        if (isSet(response.annotatedTitle)) {  //"" should remove title
           const titleList = document.getElementsByTagName('title');
           if (titleList.length > 0) {
               const title = titleList.item(0);
-              title.innerText = response.title;
+              title.innerText = response.annotatedTitle;
           }
         }
       }
-
-      updateAddress(response) {
-        if (response.address && response.address.length > 0) {
-            app.pageController.setAddress(response.address);
-        }
-       }
 
     storeData(response) {
         this.storeLocalStorageData(response.localStorageData);

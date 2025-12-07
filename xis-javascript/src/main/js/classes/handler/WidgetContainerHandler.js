@@ -65,6 +65,11 @@ class WidgetContainerHandler extends TagHandler {
                 }
                 return this.refreshDescendantHandlers(data);
             })
+            .then(() => {
+                if (response.annotatedTitle) {
+                    app.pageController.setTitle(response.annotatedTitle);
+                }
+            })
             .then(() => app.pageController.handleUpdateEvents(response.updateEventKeys))
             .then(pageUpdated => pageUpdated ? Promise.resolve() : app.widgetContainers.handleUpdateEvents(response.updateEventKeys))
             .then(() => this.commitBuffer());

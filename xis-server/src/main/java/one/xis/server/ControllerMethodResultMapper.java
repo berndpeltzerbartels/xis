@@ -64,10 +64,7 @@ class ControllerMethodResultMapper {
             controllerMethodResult.getGlobalVariables().put(key, returnValue);
         }
         if (method.isAnnotationPresent(Title.class)) {
-            controllerMethodResult.setTitle(returnValue != null ? returnValue.toString() : "");
-        }
-        if (method.isAnnotationPresent(Address.class)) {
-            controllerMethodResult.setAddress(returnValue != null ? returnValue.toString() : null);
+            controllerMethodResult.setAnnotatedTitle(returnValue != null ? returnValue.toString() : "");
         }
     }
 

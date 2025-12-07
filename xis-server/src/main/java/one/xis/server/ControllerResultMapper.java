@@ -28,11 +28,8 @@ class ControllerResultMapper {
         if (controllerMethodResult.getActionProcessing() != null && controllerMethodResult.getActionProcessing() != ActionProcessing.NONE) {
             controllerResult.setActionProcessing(controllerMethodResult.getActionProcessing());
         }
-        if (controllerMethodResult.getTitle() != null) {
-            controllerResult.setTitle(controllerMethodResult.getTitle());
-        }
-        if (controllerMethodResult.getAddress() != null) {
-            controllerResult.setAddress(controllerMethodResult.getAddress());
+        if (controllerMethodResult.getAnnotatedTitle() != null) {
+            controllerResult.setAnnotatedTitle(controllerMethodResult.getAnnotatedTitle());
         }
         controllerResult.getUpdateEventKeys().addAll(controllerMethodResult.getUpdateEventKeys());
         controllerResult.getModelData().putAll(controllerMethodResult.getModelData());

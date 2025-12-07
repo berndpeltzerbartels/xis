@@ -36,8 +36,8 @@ class ServerResponse {
         this.validatorMessages = { };
         this.actionProcessing = 'NONE';
         this.updateEventKeys = [];
-        this.title = '';
-        this.address = '';
+        this.annotatedTitle = undefined;
+        this.annotatedAddress = undefined;
     /**
      * Tag-gebundene Variablen, z.B. { title: "Seitentitel" }
      */
