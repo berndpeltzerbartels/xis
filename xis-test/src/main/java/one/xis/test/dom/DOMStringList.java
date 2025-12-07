@@ -2,8 +2,9 @@ package one.xis.test.dom;
 
 import lombok.Getter;
 
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Objects;
 
 public class DOMStringList {
@@ -13,10 +14,16 @@ public class DOMStringList {
     @Getter
     private final LinkedHashSet<String> values = new LinkedHashSet<>();
 
-    public final void add(String... tokens) {
-        values.addAll(Arrays.asList(tokens));
+    public final void add(Collection<String> tokens) {
+        values.addAll(tokens);
         length = values.size();
     }
+
+    public final void add(String tokens) {
+        values.add(tokens);
+        length = values.size();
+    }
+
 
     /**
      * Returns true if accessToken is present, and false otherwise.
@@ -35,6 +42,11 @@ public class DOMStringList {
     public String item(int index) {
         Objects.checkIndex(index, values.size());
         return (String) values.toArray()[index];
+    }
+
+    public void remove(List<String> tokens) {
+        tokens.forEach(values::remove);
+        length = values.size();
     }
 
     void clear() {

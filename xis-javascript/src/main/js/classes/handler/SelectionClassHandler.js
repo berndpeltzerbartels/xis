@@ -2,48 +2,47 @@ class SelectionClassHandler extends TagHandler {
     constructor(element) {
         super(element);
         this.element = element;
+        this.groupHandler = null;
         this.selectionClassExpression = new TextContentParser(this.tag.getAttribute('xis:selection-class')).parse();;
-        this.groupHandler = this.findParentSelectionGroupHandler();
-        if (!this.groupHandler) {
-           throw new Error('SelectionClassHandler must be inside a selection-group-handler');
-        }
         this.currentSelectionClass = null;
         this.element.addEventListener('click', event => this.onClick(event));
     }
 
-    registerToGroup() {
-        let parent = this.element.parentElement;
-        while (parent) {
-            if (parent.hasAttribute && parent.hasAttribute('xis:selection-group') && parent._xisSelectionGroupHandler) {
-                this.groupHandler = parent._xisSelectionGroupHandler;
-                this.groupHandler.register(this);
-                break;
-            }
-            parent = parent.parentElement;
-        }
-    }
-
     refresh(data) {
-        this.selectionClass = this.selectionClassExpression.evaluate(data) ||
-        this.registerToGroup();
+        this.selectionClass = this.selectionClassExpression.evaluate(data) || '';
+        this.getGroupHandler().register(this);
         this.refreshDescendantHandlers(data);
     }
 
     onClick(event) {
-        this.groupHandler.unselectAll();
-        this.element.classList.add(this.selectionClass);
         this.currentSelectionClass = this.selectionClass;
+        this.getGroupHandler().unselectAll();
+        this.element.classList.add(this.selectionClass);
     }
 
     unselect() {
-        this.element.classList.remove(this.currentSelectionClass);
+        this.element.classList.remove([this.currentSelectionClass]);
+    }
+
+
+    getGroupHandler() {
+        if (!this.groupHandler) {
+            this.groupHandler = this.findParentSelectionGroupHandler();
+        }
+        if (!this.groupHandler) {
+            throw new Error('SelectionClassHandler: No parent SelectionGroupHandler found.');
+        }
+        return this.groupHandler;
     }
 
     findParentSelectionGroupHandler() {
         var handler = this;
         while (handler) {
-            if (handler.type == 'selection-group-handler') {
-                return handler;
+            //  SelectionGroupHandler is always a direct descendant of its parent
+            for (let descendantHandler of handler.descendantHandlers) {
+                if (descendantHandler.type == 'selection-group-handler') {
+                    return descendantHandler;
+                }
             }
             handler = handler.parentHandler;
         }

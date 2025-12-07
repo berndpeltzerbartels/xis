@@ -170,7 +170,13 @@ class HandlerBuilder {
     initializeAttributes(element, parentHandler) {
         for (let attrName of element.getAttributeNames()) {
             let attrValue = element.getAttribute(attrName);
-            if (attrValue.indexOf('${') !== -1) {
+            if (attrName === 'xis:selection-group') {
+                parentHandler.addDescendantHandler(new SelectionGroupHandler(element, attrName));
+            }
+            else if (attrName === 'xis:selection-class') {
+                parentHandler.addDescendantHandler(new SelectionClassHandler(element, attrName));
+            }
+            else if (attrValue.indexOf('${') !== -1) {
                 parentHandler.addDescendantHandler(new AttributeHandler(element, attrName));
             }
         }

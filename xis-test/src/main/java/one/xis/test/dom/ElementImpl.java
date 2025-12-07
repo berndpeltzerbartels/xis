@@ -40,7 +40,7 @@ public class ElementImpl extends NodeImpl implements Element {
             classList.clear();
             for (String item : value.split(" ")) {
                 if (!item.isBlank()) {
-                    classList.add(item);
+                    classList.add(List.of(item));
                 }
             }
         }
@@ -84,7 +84,7 @@ public class ElementImpl extends NodeImpl implements Element {
     public ElementImpl cloneNode() {
         var clone = new ElementImpl(localName);
         this.getAttributes().forEach(clone::setAttribute);
-        this.classList.getValues().forEach(clone.classList::add);
+        clone.classList.add(this.classList.getValues());
         getChildNodes().forEach(child -> clone.appendChild(child.cloneNode()));
         return clone;
     }
@@ -144,7 +144,7 @@ public class ElementImpl extends NodeImpl implements Element {
         this.classList.clear();
         for (String item : className.split(" ")) {
             if (!item.isBlank()) {
-                this.classList.add(item);
+                this.classList.add(List.of(item));
             }
         }
     }
