@@ -31,6 +31,9 @@ class ControllerResultMapper {
         if (controllerMethodResult.getAnnotatedTitle() != null) {
             controllerResult.setAnnotatedTitle(controllerMethodResult.getAnnotatedTitle());
         }
+        if (controllerMethodResult.getAnnotatedAddress() != null) {
+            controllerResult.setAnnotatedAddress(controllerMethodResult.getAnnotatedAddress());
+        }
         controllerResult.getUpdateEventKeys().addAll(controllerMethodResult.getUpdateEventKeys());
         controllerResult.getModelData().putAll(controllerMethodResult.getModelData());
         controllerResult.getFormData().putAll(controllerMethodResult.getFormData());

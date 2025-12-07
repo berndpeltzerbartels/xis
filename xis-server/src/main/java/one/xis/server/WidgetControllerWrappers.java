@@ -42,6 +42,15 @@ class WidgetControllerWrappers {
         return widgetControllerWrappers.stream().filter(c -> c.getControllerClass().equals(cl)).findFirst();
     }
 
+    Optional<ControllerWrapper> findWidgetByUrl(String url) {
+        return widgetControllerWrappers.stream()
+                .filter(wrapper -> {
+                    var widgetUrl = WidgetUtil.getUrl(wrapper.getControllerClass());
+                    return !widgetUrl.isEmpty() && widgetUrl.equals(url);
+                })
+                .findFirst();
+    }
+
     private Collection<ControllerWrapper> widgetControllerWrappers() {
         return widgetControllers.stream()
                 .map(controller -> createControllerWrapper(controller, WidgetUtil::getId))

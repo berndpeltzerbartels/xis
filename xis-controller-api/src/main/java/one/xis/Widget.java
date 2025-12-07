@@ -48,4 +48,12 @@ import java.lang.annotation.*;
 @XISComponent
 public @interface Widget {
     String value() default "";
+
+    String id() default ""; // alias for value()
+
+    String url() default "";
+
+    String title() default "";
+
+    String containerId() default "";
 }

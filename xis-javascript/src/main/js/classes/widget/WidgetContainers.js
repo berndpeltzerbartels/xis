@@ -20,6 +20,19 @@ class WidgetContainers {
     }
 
     /**
+     * Get the handler for a widget container by its ID
+     * @param {String} id
+     * @returns {WidgetContainerHandler} 
+     */
+    get(id) {
+        var element = this.containers[id];
+        if (!element) {
+            return undefined;
+        }
+        return app.tagHandlers.getHandler(element);
+    }
+
+    /**
      * 
      * @param {ClientConfig} config 
      * @returns 

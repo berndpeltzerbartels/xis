@@ -37,6 +37,22 @@ class ControllerService {
         if (controllerResult.getNextWidgetId() == null) {
             controllerResult.setNextWidgetId(request.getWidgetId());
         }
+        // Extract widget metadata (url, title, containerId) if this is a widget controller
+        if (wrapper.isWidgetController()) {
+            var widgetClass = wrapper.getControllerClass();
+            var url = WidgetUtil.getUrl(widgetClass);
+            if (!url.isEmpty()) {
+                controllerResult.setAnnotatedAddress(url);
+            }
+            var title = WidgetUtil.getTitle(widgetClass);
+            if (!title.isEmpty()) {
+                controllerResult.setAnnotatedTitle(title);
+            }
+            var containerId = WidgetUtil.getContainerId(widgetClass);
+            if (!containerId.isEmpty()) {
+                controllerResult.setWidgetContainerId(containerId);
+            }
+        }
         mapResultToResponse(request, response, controllerResult);
     }
 
@@ -106,6 +122,11 @@ class ControllerService {
         if (request.getType() == RequestType.widget) {
             return widgetControllerWrapperById(request.getWidgetId());
         } else if (request.getType() == RequestType.page) {
+            // First check if a widget with this URL exists
+            var widgetByUrl = widgetControllerWrappers.findWidgetByUrl(request.getPageId());
+            if (widgetByUrl.isPresent()) {
+                return widgetByUrl.get();
+            }
             return pageControllerWrapperById(request.getPageId());
         }
         return pageControllerWrapperById(request.getPageId());

@@ -128,6 +128,18 @@ class ControllerMethodResultMapper {
     private void updateController(@NonNull ControllerMethodResult result, @NonNull Class<?> controllerClass, Map<String, Object> pathVariables) {
         if (controllerClass.isAnnotationPresent(Widget.class)) {
             result.setNextWidgetId(WidgetUtil.getId(controllerClass));
+            var url = WidgetUtil.getUrl(controllerClass);
+            if (!url.isEmpty()) {
+                result.setAnnotatedAddress(url);
+            }
+            var title = WidgetUtil.getTitle(controllerClass);
+            if (!title.isEmpty()) {
+                result.setAnnotatedTitle(title);
+            }
+            var containerId = WidgetUtil.getContainerId(controllerClass);
+            if (!containerId.isEmpty()) {
+                result.setWidgetContainerId(containerId);
+            }
         } else if (controllerClass.isAnnotationPresent(Page.class)) {
             var realPath = pathResolver.createPath(PageUtil.getUrl(controllerClass));
             var pathString = pathResolver.evaluateRealPath(realPath, pathVariables, emptyMap());

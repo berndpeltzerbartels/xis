@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:xis="https://xis.one/xsd" lang="en">
+<head>
+    <title>${title}</title>
+</head>
+<body>
+<h1>${title}</h1>
+
+<!-- Container A: Has default-widget attribute pointing to WidgetMetadata -->
+<div id="containerA" xis:widget-container="containerA" xis:default-widget="WidgetMetadata"></div>
+
+<!-- Container B: No default-widget, but DeepLinkWidget annotation points here -->
+<div id="containerB" xis:widget-container="containerB"></div>
+
+</body>
+</html>

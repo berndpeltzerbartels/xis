@@ -14,7 +14,28 @@ public class WidgetUtil {
 
     public static String getId(@NonNull Class<?> controllerClass) {
         @NonNull var anno = controllerClass.getAnnotation(Widget.class);
-        return anno.value().isEmpty() ? controllerClass.getSimpleName() : anno.value();
+        if (!anno.id().isEmpty()) {
+            return anno.id();
+        }
+        if (anno.value().isEmpty()) {
+            return controllerClass.getSimpleName();
+        }
+        return anno.value();
+    }
+
+    public static String getUrl(@NonNull Class<?> controllerClass) {
+        var anno = controllerClass.getAnnotation(Widget.class);
+        return anno != null ? anno.url() : "";
+    }
+
+    public static String getTitle(@NonNull Class<?> controllerClass) {
+        var anno = controllerClass.getAnnotation(Widget.class);
+        return anno != null ? anno.title() : "";
+    }
+
+    public static String getContainerId(@NonNull Class<?> controllerClass) {
+        var anno = controllerClass.getAnnotation(Widget.class);
+        return anno != null ? anno.containerId() : "";
     }
 
     public static Collection<Object> getAllWidgetControllers() {

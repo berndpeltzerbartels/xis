@@ -29,6 +29,9 @@ class ControllerResponseMapper {
         if (result.getAnnotatedTitle() != null) {
             response.setAnnotatedTitle(result.getAnnotatedTitle());
         }
+        if (result.getAnnotatedAddress() != null) {
+            response.setAnnotatedAddress(result.getAnnotatedAddress());
+        }
         if (response.getStatus() < 1)
             response.setStatus(result.isValidationFailed() ? 422 : 200);
         // TODO navigation test. reload widgets ? set widget in another container ?Contr

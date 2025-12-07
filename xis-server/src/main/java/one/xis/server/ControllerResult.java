@@ -19,6 +19,7 @@ class ControllerResult {
     private String nextWidgetId;
     private String widgetContainerId;
     private String annotatedTitle;
+    private String annotatedAddress;
     private ActionProcessing actionProcessing = ActionProcessing.NONE;
     private Collection<String> widgetsToReload = new HashSet<>();
     private Collection<String> updateEventKeys = new HashSet<>();
