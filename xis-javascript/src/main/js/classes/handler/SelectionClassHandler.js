@@ -21,7 +21,9 @@ class SelectionClassHandler extends TagHandler {
     }
 
     unselect() {
-        this.element.classList.remove([this.currentSelectionClass]);
+        if (this.currentSelectionClass) {
+            this.element.classList.remove([this.currentSelectionClass]);
+        }
     }
 
 

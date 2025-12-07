@@ -303,10 +303,9 @@ class PageController {
      * @param {string} annotatedTitle - Optional custom title from @Title annotation
      * @private
      */
-    updateHistory(resolvedURL, annotatedAddress, annotatedTitle) {
+    updateHistory(resolvedURL, annotatedTitle) {
         var title = annotatedTitle || this.htmlTagHandler.getTitle();
-        var address = annotatedAddress || resolvedURL.url;
-        app.history.appendPage(address, title);
+        app.history.appendPage(resolvedURL.url, title);
     }
 
 
