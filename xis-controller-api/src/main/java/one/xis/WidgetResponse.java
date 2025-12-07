@@ -14,6 +14,7 @@ import java.util.Map;
 public class WidgetResponse implements Response {
     private Class<?> controllerClass;
     private String targetContainer; // TODO
+    private final Map<String, Object> pathVariables = new HashMap<>();
     private final Map<String, Object> widgetParameters = new HashMap<>();
     private final Collection<String> widgetsToReload = new HashSet<>(); // TODO
 
@@ -34,6 +35,11 @@ public class WidgetResponse implements Response {
 
     public WidgetResponse controllerClass(@NonNull Class<?> controllerClass) {
         this.controllerClass = controllerClass;
+        return this;
+    }
+
+    public WidgetResponse pathVariable(@NonNull String name, @NonNull Object value) {
+        pathVariables.put(name, asString(value));
         return this;
     }
 
@@ -63,6 +69,10 @@ public class WidgetResponse implements Response {
 
     public static WidgetResponse of(@NonNull Class<?> controllerClass, @NonNull String paramName, @NonNull Object paramValue) {
         return new WidgetResponse(controllerClass).widgetParameter(paramName, asString(paramValue));
+    }
+
+    public static WidgetResponse ofPathVariable(@NonNull Class<?> controllerClass, @NonNull String pathVariable, @NonNull Object pathVariableValue) {
+        return new WidgetResponse(controllerClass).pathVariable(pathVariable, asString(pathVariableValue));
     }
 
     private static String asString(@NonNull Object o) {

@@ -98,7 +98,10 @@ class ControllerMethodResultMapper {
 
     private void mapWidgetResponse(WidgetResponse widgetResponse, ControllerMethodResult result) {
         if (widgetResponse.getControllerClass() != null) {
-            updateController(result, widgetResponse.getControllerClass(), emptyMap());
+            updateController(result, widgetResponse.getControllerClass(), widgetResponse.getPathVariables());
+        }
+        if (widgetResponse.getPathVariables() != null) {
+            result.getPathVariables().putAll(widgetResponse.getPathVariables());
         }
         if (widgetResponse.getTargetContainer() != null) {
             result.setWidgetContainerId(widgetResponse.getTargetContainer());
