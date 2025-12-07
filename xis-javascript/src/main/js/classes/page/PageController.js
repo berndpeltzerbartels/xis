@@ -312,4 +312,9 @@ class PageController {
     }
 
 
+    setAddress(url) {
+      app.history.appendPage(url, this.htmlTagHandler.getTitle());
+    }
+
+
 }

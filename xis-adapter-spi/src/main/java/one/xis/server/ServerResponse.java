@@ -6,10 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import one.xis.validation.ValidatorMessages;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 
 //TODO do not serialize null fields. requires edits in client, too
@@ -40,6 +37,7 @@ public class ServerResponse {
     private ActionProcessing actionProcessing = ActionProcessing.NONE;
     private String annotatedTitle;
     private String annotatedAddress;
+    private Collection<DefaultWidget> defaultWidgets = new HashSet<>();
 
     void clear() {
         // do not clear store data
@@ -52,5 +50,6 @@ public class ServerResponse {
         validatorMessages = new ValidatorMessages();
         reloadPage = false;
         widgetContainerId = null;
+        defaultWidgets.clear();
     }
 }

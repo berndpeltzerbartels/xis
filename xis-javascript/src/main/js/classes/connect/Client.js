@@ -362,6 +362,7 @@ class Client {
         serverResponse.actionProcessing = obj.actionProcessing || 'NONE';
         serverResponse.updateEventKeys = obj.updateEventKeys || [];
         serverResponse.annotatedTitle = obj.annotatedTitle; // difference between null and '' is important
+        serverResponse.defaultWidgets = obj.defaultWidgets || [];
         data.setValue(['sessionStorage'], serverResponse.sessionStorageData);
         data.setValue(['localStorage'], serverResponse.localStorageData);
         data.setValue(['clientStorage'], serverResponse.clientStorageData);

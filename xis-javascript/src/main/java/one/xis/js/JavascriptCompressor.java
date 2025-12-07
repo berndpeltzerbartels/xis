@@ -41,6 +41,12 @@ class JavascriptCompressor {
         // keine goog.exportSymbol-Generierung
         options.setGenerateExports(false);
         
+        // Besseres Debugging: Klassennamen und Property-Namen beibehalten
+        options.setRenamingPolicy(VariableRenamingPolicy.OFF, PropertyRenamingPolicy.OFF);
+        
+        // Bessere Fehlerberichte
+        options.setPrettyPrint(false);  // false = kompakt, true = lesbarer aber größer
+        
         List<SourceFile> inputs = new ArrayList<>();
         sources.forEach((name, code) -> inputs.add(SourceFile.fromCode(name, code)));
         Result result = compiler.compile(List.of(), inputs, options);

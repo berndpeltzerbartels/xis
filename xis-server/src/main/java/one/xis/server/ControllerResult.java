@@ -38,5 +38,5 @@ class ControllerResult {
     private String redirectUrl;
     private final Map<String, String> tagVariables = new HashMap<>();
     private final Map<String, String> idVariables = new HashMap<>();
-
+    
 }

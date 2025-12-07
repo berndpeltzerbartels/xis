@@ -1,7 +1,6 @@
 package test.widget.pathvariables;
 
 import one.xis.context.IntegrationTestContext;
-import one.xis.WidgetResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -15,54 +14,70 @@ class WidgetPathVariablesTest {
     void init() {
         testContext = IntegrationTestContext.builder()
                 .withSingleton(PathVariablesPage.class)
-                .withSingleton(ProductWidget.class)
-                .withSingleton(CategoryWidget.class)
+                .withSingleton(ProductWidget1.class)
+                .withSingleton(ProductWidget2.class)
                 .build();
     }
 
     @Test
-    void widgetReceivesPathVariablesFromPageUrl() {
-        // Open page with path variable in URL
-        var pageResult = testContext.openPage("/product/12345.html");
+    void widgetsLoadInCorrectContainersBasedOnAnnotation() {
+        // Open page with category path variable
+        var pageResult = testContext.openPage("/products/electronics.html");
 
-        // Verify widget received path variable from page URL
-        var productIdElement = pageResult.getDocument().getElementById("productId");
-        assertThat(productIdElement).isNotNull();
-        assertThat(productIdElement.getTextContent()).isEqualTo("12345");
+        // DEBUG: Print full document
+        var docString = pageResult.getDocument().asString();
+        System.out.println("\n\n========== FULL DOCUMENT ==========");
+        System.out.println(docString);
+        System.out.println("========== END DOCUMENT ==========\n\n");
+        
+        // Check containers exist
+        var container1 = pageResult.getDocument().getElementById("container1");
+        System.out.println("Container1: " + (container1 != null ? container1.asString() : "NULL"));
+        
+        var container2 = pageResult.getDocument().getElementById("container2");
+        System.out.println("Container2: " + (container2 != null ? container2.asString() : "NULL"));
 
-        var productNameElement = pageResult.getDocument().getElementById("productName");
-        assertThat(productNameElement).isNotNull();
-        assertThat(productNameElement.getTextContent()).isEqualTo("Product 12345");
+        // Verify ProductWidget1 loaded in container1 (annotation containerId wins over default-widget)
+        // Note: HTML has default-widget="ProductWidget2" but annotation says containerId="container1"
+        var widget1Category = pageResult.getDocument().getElementById("widget1-category");
+        System.out.println("widget1-category element: " + (widget1Category != null ? "FOUND" : "NULL"));
+        assertThat(widget1Category).isNotNull();
+        assertThat(widget1Category.getTextContent()).isEqualTo("electronics");
 
-        // Verify title from widget annotation
-        assertThat(pageResult.getDocument().getTitle()).isEqualTo("Product Details");
+        var widget1Data = pageResult.getDocument().getElementById("widget1-data");
+        assertThat(widget1Data).isNotNull();
+        assertThat(widget1Data.getTextContent()).isEqualTo("Widget1: electronics");
+
+        // Verify ProductWidget2 loaded in container2 (annotation containerId wins over default-widget)
+        // Note: HTML has default-widget="ProductWidget1" but annotation says containerId="container2"
+        var widget2Category = pageResult.getDocument().getElementById("widget2-category");
+        assertThat(widget2Category).isNotNull();
+        assertThat(widget2Category.getTextContent()).isEqualTo("electronics");
+
+        var widget2Data = pageResult.getDocument().getElementById("widget2-data");
+        assertThat(widget2Data).isNotNull();
+        assertThat(widget2Data.getTextContent()).isEqualTo("Widget2: electronics");
     }
 
     @Test
-    void widgetActionsCanNavigateWithPathVariables() {
-        // Open page with path variable
-        var pageResult = testContext.openPage("/product/999.html");
+    void pathVariablesExtractedFromUrl() {
+        // Open page with different path variable
+        var pageResult = testContext.openPage("/products/books.html");
 
-        // Verify initial widget loaded with path variable
-        var productIdElement = pageResult.getDocument().getElementById("productId");
-        assertThat(productIdElement).isNotNull();
-        assertThat(productIdElement.getTextContent()).isEqualTo("999");
+        // Verify both widgets received the correct path variable
+        var widget1Category = pageResult.getDocument().getElementById("widget1-category");
+        assertThat(widget1Category).isNotNull();
+        assertThat(widget1Category.getTextContent()).isEqualTo("books");
 
-        // Click action that navigates to another widget with path variable
-        var loadCategoryButton = pageResult.getDocument().getElementById("loadCategory");
-        assertThat(loadCategoryButton).isNotNull();
-        loadCategoryButton.click();
+        var widget2Category = pageResult.getDocument().getElementById("widget2-category");
+        assertThat(widget2Category).isNotNull();
+        assertThat(widget2Category.getTextContent()).isEqualTo("books");
 
-        // Verify second widget received path variable from WidgetResponse.ofPathVariable()
-        var categoryIdElement = pageResult.getDocument().getElementById("categoryId");
-        assertThat(categoryIdElement).isNotNull();
-        assertThat(categoryIdElement.getTextContent()).isEqualTo("electronics");
+        // Verify widgets processed path variable in their model data
+        var widget1Data = pageResult.getDocument().getElementById("widget1-data");
+        assertThat(widget1Data.getTextContent()).isEqualTo("Widget1: books");
 
-        var categoryNameElement = pageResult.getDocument().getElementById("categoryName");
-        assertThat(categoryNameElement).isNotNull();
-        assertThat(categoryNameElement.getTextContent()).isEqualTo("Category: electronics");
-
-        // Verify URL and title updated from widget annotation
-        assertThat(pageResult.getDocument().getTitle()).isEqualTo("Category");
+        var widget2Data = pageResult.getDocument().getElementById("widget2-data");
+        assertThat(widget2Data.getTextContent()).isEqualTo("Widget2: books");
     }
 }

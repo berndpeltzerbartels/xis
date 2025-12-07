@@ -38,14 +38,7 @@ class ServerResponse {
         this.updateEventKeys = [];
         this.annotatedTitle = undefined;
         this.annotatedAddress = undefined;
-    /**
-     * Tag-gebundene Variablen, z.B. { title: "Seitentitel" }
-     */
-    this.tagVariables = {};
-    /**
-     * ID-gebundene Variablen, z.B. { headline: "Produktname" }
-     */
-    this.idVariables = {};
+        this.defaultWidgets = [];
     }
 
 

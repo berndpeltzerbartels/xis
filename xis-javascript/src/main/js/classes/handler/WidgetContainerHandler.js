@@ -64,7 +64,6 @@ class WidgetContainerHandler extends TagHandler {
     * @returns {Promise<void>}
     */
     handleActionResponse(response) {
-        // If response specifies a different container via annotation, delegate to that container
         if (this.shouldDelegateToTargetContainer(response)) {
             var targetContainer = app.widgetContainers.get(response.widgetContainerId);
             if (targetContainer) {
@@ -196,7 +195,14 @@ class WidgetContainerHandler extends TagHandler {
         if (this.widgetInstance) {
             return; // Already bound, only run once
         }
-
+        var response = app.pageController.currentResponse;
+        for (var defaultWidget of response.defaultWidgets) {
+            if (defaultWidget.containerId === this.containerId) {
+                this.ensureWidgetBound(defaultWidget.widgetId);
+                this.widgetState = new WidgetState(app.pageController.resolvedURL, this.widgetParameters);
+                return;
+            }
+        }
         // Priority 1: Annotation-based widget assignment (for deep linking)
         if (this.bindAnnotatedWidget()) {
             return;
@@ -212,15 +218,18 @@ class WidgetContainerHandler extends TagHandler {
      * @private
      * @returns {boolean} true if widget was bound, false otherwise
      */
-    bindAnnotatedWidget() {
+    bindAnnotatedWidget(response) {
         var response = app.pageController.currentResponse;
-        if (!response || !response.nextWidgetId || response.widgetContainerId !== this.containerId) {
+        if (!response) {
             return false;
         }
+        if (response.nextWidgetId && response.widgetContainerId === this.containerId) {
+            this.ensureWidgetBound(response.nextWidgetId);
+            this.widgetState = new WidgetState(app.pageController.resolvedURL, this.widgetParameters);
+            return true;
+        }
 
-        this.ensureWidgetBound(response.nextWidgetId);
-        this.widgetState = new WidgetState(app.pageController.resolvedURL, this.widgetParameters);
-        return true;
+        return false;
     }
 
     /**

@@ -5,6 +5,8 @@
 </head>
 <body>
 <h1>${title}</h1>
-<div id="widgetContainer" xis:widget-container="widgetContainer" xis:default-widget="ProductWidget"></div>
+<!-- Note: default-widgets are intentionally swapped to show that @Widget annotation wins -->
+<div id="container1" xis:widget-container="container1" xis:default-widget="ProductWidget2"></div>
+<div id="container2" xis:widget-container="container2" xis:default-widget="ProductWidget1"></div>
 </body>
 </html>

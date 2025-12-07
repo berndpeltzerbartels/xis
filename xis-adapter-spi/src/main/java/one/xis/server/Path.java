@@ -34,6 +34,58 @@ class Path {
         return false;
     }
 
+    /**
+     * Checks if this path pattern matches the given concrete path.
+     * For example, pattern "/product/{id}.html" matches "/product/123.html"
+     * 
+     * @param concretePath the concrete path to check
+     * @return true if the pattern matches the concrete path
+     */
+    boolean matches(String concretePath) {
+        if (concretePath == null) {
+            return false;
+        }
+        return matchesRecursive(pathElement, concretePath, 0);
+    }
+
+    private boolean matchesRecursive(PathElement element, String path, int position) {
+        if (element == null) {
+            // Pattern exhausted - match only if path is also exhausted
+            return position == path.length();
+        }
+
+        if (element instanceof PathVariable) {
+            // Path variable matches until next static part or end of path
+            PathElement next = element.getNext();
+            if (next == null) {
+                // Last element is a variable - it matches the rest of the path
+                return position < path.length();
+            }
+            // Find where the next static part starts
+            if (next instanceof PathString) {
+                String nextContent = ((PathString) next).getContent();
+                int nextPos = path.indexOf(nextContent, position);
+                if (nextPos == -1) {
+                    return false;
+                }
+                // Check that we matched at least one character for the variable
+                if (nextPos == position) {
+                    return false;
+                }
+                return matchesRecursive(next, path, nextPos);
+            }
+            return false;
+        } else if (element instanceof PathString) {
+            String content = ((PathString) element).getContent();
+            if (!path.startsWith(content, position)) {
+                return false;
+            }
+            return matchesRecursive(element.getNext(), path, position + content.length());
+        }
+        
+        return false;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

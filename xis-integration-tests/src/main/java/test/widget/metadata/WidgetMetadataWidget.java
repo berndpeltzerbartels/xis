@@ -2,10 +2,16 @@ package test.widget.metadata;
 
 import one.xis.Action;
 import one.xis.ModelData;
+import one.xis.Title;
 import one.xis.Widget;
 
-@Widget(id = "WidgetMetadata", url = "/custom-url", title = "Custom Widget Title", containerId = "widgetContainer")
+@Widget
 class WidgetMetadataWidget {
+
+    @Title
+    String getTitle() {
+        return "Custom Widget Title";
+    }
 
     @ModelData("message")
     String getMessage() {

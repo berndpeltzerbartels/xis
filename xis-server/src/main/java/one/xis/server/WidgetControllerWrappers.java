@@ -24,6 +24,9 @@ class WidgetControllerWrappers {
     @XISInject(annotatedWith = Widget.class)
     private Collection<Object> widgetControllers;
 
+    @XISInject
+    private PathResolver pathResolver;
+
     @Getter
     private Collection<ControllerWrapper> widgetControllerWrappers;
 
@@ -42,6 +45,10 @@ class WidgetControllerWrappers {
         return widgetControllerWrappers.stream().filter(c -> c.getControllerClass().equals(cl)).findFirst();
     }
 
+    Collection<ControllerWrapper> getAllWidgets() {
+        return widgetControllerWrappers;
+    }
+
     Optional<ControllerWrapper> findWidgetByUrl(String url) {
         return widgetControllerWrappers.stream()
                 .filter(wrapper -> {
@@ -49,6 +56,31 @@ class WidgetControllerWrappers {
                     return !widgetUrl.isEmpty() && widgetUrl.equals(url);
                 })
                 .findFirst();
+    }
+
+
+    Collection<DefaultWidget> findDefaultWidgetsByPageUrl(String url) {
+        return widgetControllerWrappers.stream()
+                .filter(wrapper -> matchesUrl(wrapper, url))
+                .map(wrapper -> new DefaultWidget(wrapper.getId(), containerId(wrapper)))
+                .toList();
+    }
+
+    private boolean matchesUrl(ControllerWrapper controllerWrapper, String url) {
+        var widgetUrl = WidgetUtil.getUrl(controllerWrapper.getControllerClass());
+        if (widgetUrl.isEmpty()) {
+            return false;
+        }
+        var pattern = pathResolver.createPath(widgetUrl);
+        return pattern.matches(url);
+    }
+
+    private String containerId(ControllerWrapper controllerWrapper) {
+        String containerId = WidgetUtil.getContainerId(controllerWrapper.getControllerClass());
+        if (containerId.isEmpty()) {
+            throw new IllegalStateException("Widget " + controllerWrapper.getId() + " is linked to a path and does not have a containerId defined.");
+        }
+        return containerId;
     }
 
     private Collection<ControllerWrapper> widgetControllerWrappers() {
