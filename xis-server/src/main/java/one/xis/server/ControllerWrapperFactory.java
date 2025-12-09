@@ -23,6 +23,7 @@ class ControllerWrapperFactory {
     private final MainDeserializer deserializer;
     private final ControllerMethodResultMapper controllerMethodResultMapper;
     private final ControllerResultMapper controllerResultMapper;
+    private final PathResolver pathResolver;
 
     <W extends ControllerWrapper> W createControllerWrapper(@NonNull String id, @NonNull Object controller, Class<W> wrapperClass) {
         try {
@@ -41,9 +42,41 @@ class ControllerWrapperFactory {
             controllerWrapper.setTitleOnlyMethods(titleOnlyMethods(controller));
             controllerWrapper.setAddressOnlyMethods(addressOnlyMethods(controller));
             controllerWrapper.setControllerResultMapper(controllerResultMapper);
+            
+            // Validate WelcomePage redirectTo if present
+            if (controller.getClass().isAnnotationPresent(WelcomePage.class)) {
+                validateWelcomePageRedirect(controller.getClass());
+            }
+            
             return controllerWrapper;
         } catch (Exception e) {
             throw new RuntimeException("Failed to initialize " + controller.getClass(), e);
+        }
+    }
+    
+    private void validateWelcomePageRedirect(Class<?> controllerClass) {
+        var welcomePage = controllerClass.getAnnotation(WelcomePage.class);
+        var concreteUrl = welcomePage.value();
+        
+        if (concreteUrl.isEmpty()) {
+            return; // No concrete URL specified, nothing to validate
+        }
+        
+        // Get the page URL pattern
+        var pageAnnotation = controllerClass.getAnnotation(Page.class);
+        if (pageAnnotation == null) {
+            throw new IllegalStateException("@WelcomePage can only be used on @Page controllers: " + controllerClass.getName());
+        }
+        
+        var pageUrlPattern = pageAnnotation.value();
+        var pagePattern = pathResolver.createPath(pageUrlPattern);
+        
+        // Validate that concrete URL matches the page pattern
+        if (!pagePattern.matches(concreteUrl)) {
+            throw new IllegalStateException(
+                "WelcomePage value '" + concreteUrl + "' does not match page URL pattern '" + 
+                pageUrlPattern + "' for " + controllerClass.getSimpleName()
+            );
         }
     }
 

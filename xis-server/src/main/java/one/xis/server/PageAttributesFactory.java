@@ -22,9 +22,24 @@ class PageAttributesFactory extends AttributesFactory {
         attributes.setWelcomePage(controller.getClass().isAnnotationPresent(WelcomePage.class));
         attributes.setPath(path);
         attributes.setNormalizedPath(path.normalized());
+        
         if (attributes.isWelcomePage() && path.hasPathVariables()) {
-            throw new IllegalStateException("WelcomePage cannot have path variables: " + controller.getClass());
+            // For WelcomePage with path variables, a concrete URL must be specified
+            var welcomePageAnnotation = controller.getClass().getAnnotation(WelcomePage.class);
+            var concreteUrl = welcomePageAnnotation.value();
+            
+            if (concreteUrl.isEmpty()) {
+                throw new IllegalStateException(
+                    "WelcomePage with path variables must specify a concrete URL: " + controller.getClass().getName() + 
+                    " URL pattern: " + PageUtil.getUrl(controller)
+                );
+            }
+            
+            // Store the concrete URL separately for client-side resolution
+            attributes.setWelcomePageUrl(concreteUrl);
+            // Keep normalizedPath as the pattern for page registration
         }
+        
         addParameterAttributes(controller.getClass(), attributes);
         getJavascriptResource(controller).ifPresent(attributes::setPageJavascriptSource);
         addUpdateEventKeys(controller.getClass(), attributes);

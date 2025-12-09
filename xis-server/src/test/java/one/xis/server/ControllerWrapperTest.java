@@ -25,7 +25,7 @@ class ControllerWrapperTest {
         RequestContext.createInstance(mock(), mock());
         var deserializer = mock(MainDeserializer.class);
         var controllerResultMapper = mock(ControllerResultMapper.class);
-        var wrapperFactory = new ControllerWrapperFactory(deserializer, new ControllerMethodResultMapper(mock(), new PathResolver()), controllerResultMapper);
+        var wrapperFactory = new ControllerWrapperFactory(deserializer, new ControllerMethodResultMapper(mock(), new PathResolver()), controllerResultMapper, new PathResolver());
         controller = new ExampleController();
         controllerWrapper = wrapperFactory.createControllerWrapper("test", controller, ControllerWrapper.class);
         RequestContext.createInstance(mock(), mock());

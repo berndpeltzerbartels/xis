@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import one.xis.UserContextCreatedEvent;
 import one.xis.UserContextImpl;
+import one.xis.WelcomePage;
 import one.xis.auth.UserInfo;
 import one.xis.auth.UserInfoImpl;
 import one.xis.auth.token.SecurityAttributes;
@@ -54,6 +55,9 @@ public class IntegrationTestContext {
 
 
     public OpenPageResult openPage(Class<?> pageController) {
+        if (pageController.isAnnotationPresent(WelcomePage.class)) {
+            return openPage("/", Collections.emptyMap());
+        }
         return openPage(PageUtil.getUrl(pageController), Collections.emptyMap());
     }
 

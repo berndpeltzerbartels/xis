@@ -6,6 +6,7 @@
  * @property {Path} path
  * @property {string} normalizedPath
  * @property {boolean} welcomePage
+ * @property {string} welcomePageUrl - Concrete URL for welcome page with path variables
  * @property {array<string>} localDatabaseKeys
  * @property {array<string>} localStorageKeys
  * @property {array<string>} sessionStorageKeys
@@ -24,6 +25,7 @@ class PageAttributes {
         this.path = new Path(new PathElement(obj.path.pathElement));
         this.normalizedPath = obj.normalizedPath;
         this.welcomePage = obj.welcomePage;
+        this.welcomePageUrl = obj.welcomePageUrl;
         this.localDatabaseKeys = obj.localDatabaseKeys || [];
         this.localStorageKeys = obj.localStorageKeys || [];
         this.sessionStorageKeys = obj.sessionStorageKeys || [];

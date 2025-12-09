@@ -287,11 +287,26 @@ class PageController {
      * @returns {ResolvedURL}
      */
     welcomePageUrl() {
-        // TODO Validate: Welcome Page must have no path-variables
+    debugger;
         var welcomePage = this.pages.getWelcomePage();
         if (!welcomePage) return undefined;
-        // normalizedPath works here, because welcome-page never has path-variables
-        var path = new Path(new PathElement({ type: 'static', content: welcomePage.normalizedPath }));
+        
+        var pageAttributes = welcomePage.pageAttributes;
+        
+        // If welcome page has a concrete URL (for pages with path variables),
+        // resolve it through URLResolver to extract path variables
+        if (pageAttributes.welcomePageUrl) {
+            // Use URLResolver to match the concrete URL against page patterns
+            // and extract path variables
+            var resolved = this.urlResolver.resolve(pageAttributes.welcomePageUrl);
+            if (resolved) {
+                return resolved;
+            }
+        }
+
+        // Fallback for pages without path variables
+        var normalizedPath = pageAttributes.normalizedPath;
+        var path = new Path(new PathElement({ type: 'static', content: normalizedPath }));
         return new ResolvedURL(path, [], {}, welcomePage, path.normalized());
     }
 

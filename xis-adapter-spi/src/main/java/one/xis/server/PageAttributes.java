@@ -17,6 +17,14 @@ class PageAttributes extends ComponentAttributes {
      */
     private String normalizedPath;
     private boolean welcomePage;
+    
+    /**
+     * Concrete URL for welcome page with path variables.
+     * Only set if this is a welcome page AND has path variables.
+     * e.g. /category/electronics.html
+     */
+    private String welcomePageUrl;
+    
     private String host;
     private String pageJavascriptSource;
 
