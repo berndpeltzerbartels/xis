@@ -64,10 +64,12 @@ class DomNormalizer {
             normalizedElement = this.replaceFrameworkCheckboxByHtml(element);
         } else if (this.isFrameworkRadio(element)) {
             normalizedElement = this.replaceFrameworkRadioByHtml(element);
+        } else if (this.isShortWidgetTag(element)) {
+            normalizedElement = this.initializeWidgetContainerByShortWidgetTag(element)
         } else {
             normalizedElement = this.normalizeHtmlElement(element);
         }
-         // Normalize selection-class and selection-group attributes (HTML -> xis:...)
+        // Normalize selection-class and selection-group attributes (HTML -> xis:...)
         if (isElement(element) && element.hasAttribute('selection-class')) {
             element.setAttribute('xis:selection-class', element.getAttribute('selection-class'));
             element.removeAttribute('selection-class');
@@ -121,6 +123,10 @@ class DomNormalizer {
         if (element.getAttribute('xis:if')) {
             this.wrapContentWithIfTag(element);
             element.removeAttribute('xis:if');
+        }
+        if (element.getAttribute('xis:include-widget')) {
+            this.initializeWidgetContainerByShortWidgetTag(element);
+            element.removeAttribute('xis:include-widget');
         }
         return element;
     }
@@ -216,6 +222,26 @@ class DomNormalizer {
         return element.localName === 'xis:radio';
     }
 
+
+    /**
+    * Inserts a xis:widget tag as child of the given element.
+    * @private
+    * @param {Element} element
+    */
+    insertWidgetContainerTag(element) {
+        var widgetTag = createElement('xis:widget');
+        this.domAccessor.insertChild(element, widgetTag);
+    }
+
+
+    /**
+    * @private
+    * @param {Element} element
+    * @returns {boolean}
+    */
+    isShortWidgetTag(element) {
+        return element.localName == 'xis:widget';
+    }
     /**
      * @private
      * @param {Element} frameworkCheckbox
@@ -292,13 +318,13 @@ class DomNormalizer {
     }
 
     /**
- * Replaces a framework element by a valid HTML element.
- * Optionally sets additional attributes (e.g. type).
- * @param {Element} frameworkElement 
- * @param {string} elementName 
- * @param {Object} [additionalAttributes]
- * @returns {Element}
- */
+     * Replaces a framework element by a valid HTML element.
+     * Optionally sets additional attributes (e.g. type).
+     * @param {Element} frameworkElement 
+     * @param {string} elementName 
+     * @param {Object} [additionalAttributes]
+     * @returns {Element}
+     */
     replaceFrameworkElementByHtml(frameworkElement, elementName, additionalAttributes = {}) {
         var element = document.createElement(elementName);
         for (var attrName of frameworkElement.getAttributeNames()) {
@@ -413,6 +439,28 @@ class DomNormalizer {
             container.setAttribute('scroll-to-top', scrollToTop);
         }
         return container;
+    }
+
+    /**
+    * Create container by short widget tag
+    * <p>
+    * e.g. &lt;xis:widget" name="navi"/&gt;
+    *
+    * @private
+    * @param {Element} element
+    */
+    initializeWidgetContainerByShortWidgetTag(element) {
+        var widgetId = element.getAttribute('name');
+        var container = createElement('xis:widget-container');
+        container.setAttribute('default-widget', widgetId);
+
+        this.domAccessor.insertChild(element, container);
+        var scrollToTop = element.getAttribute('scroll-to-top');
+        if (scrollToTop) {
+            container.setAttribute('scroll-to-top', scrollToTop);
+        }
+        return container;
+
     }
 
     /**
