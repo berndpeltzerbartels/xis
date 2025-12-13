@@ -1,52 +1,148 @@
-# XIS Documentation
+# XIS – Java Web Framework
 
-Welcome to the official documentation of **XIS**, a lightweight and transparent Java web framework designed to keep
-things simple, explicit, and robust.
+**Server-side rendered HTML meets Single Page Application**
 
-## What is XIS?
-
-XIS offers a modern approach to building server-side rendered HTML applications in Java. It combines plain HTML and
-plain Java in a predictable and testable way. Instead of hiding behavior behind configuration and annotations, XIS
-promotes clarity and directness.
+XIS is a lightweight Java web framework that brings back the simplicity of server-side rendering while keeping the
+smooth user experience of modern SPAs.
 
 ## Why XIS?
 
-Most Java frameworks are either overly complex or rely heavily on conventions that are hard to trace and debug. XIS was
-built as an alternative to these approaches, aiming for:
+Most Java web frameworks force you to choose between:
 
-- Minimal "magic"
-- Simple and intuitive API, easy to learn
-- Fast and lightweight
-- Works with Spring and Micronaut, or standalone
-- Supports java 17+ and Groovy
-- Transparent view-controller coupling
-- Strict separation of responsibilities
-- IDE-friendly structures
-- Optional but clean support for modern patterns like microfrontends
+- Server-side rendering (full page reloads, no smooth navigation)
+- REST APIs + JavaScript framework (complex, lots of boilerplate, coordination overhead)
 
-With XIS, you define views as standard HTML files and back them with Java controller classes that are easy to test,
-navigate, and evolve. The result is a framework that's accessible for beginners and powerful enough for advanced use
-cases.
+XIS gives you both: Write plain Java controllers and plain HTML templates, get SPA navigation automatically.
 
-## Structure of this documentation
+**No REST endpoints. No fetch() calls. No Redux. Just Java and HTML.**
 
-This documentation is divided into clearly structured chapters. You can start with an overview or jump directly to a
-specific topic:
+## Hello World in 5 Minutes
 
-- [1. Introduction & Philosophy](docs/documentation.old/01-introduction.md)
-- [2. Module Overview](docs/documentation.old/02-overview)
-- [2b. HTML Integration Overview](docs/documentation.old/02b-html-integration-overview.md)
-- [3. Pages (`@Page`)](docs/documentation.old/03-pages.md)
-- [4. Pagelets (`@Pagelet`)](docs/documentation.old/04-pagelets.md)
-- [5. Data Lifecycle & Model Binding](docs/documentation.old/05-data.md)
-- [6. Actions & Navigation](docs/documentation.old/06-actions.md)
-- [7. Template Language (Full Reference)](docs/documentation.old/07-template-reference.md)
-- [8. Forms & Validation](docs/documentation.old/08-forms.md)
-- [9. Extension Points](docs/documentation.old/09-extension.md)
-- [10. Deployment & Build](docs/documentation.old/10-deployment.md)
-- [11. Appendix & Reference](docs/documentation.old/11-appendix.md)
+**1. Add the dependency:**
 
-If you're new to XIS, we recommend starting with the [Quickstart Guide](quickstart/index.md).
+```groovy
+plugins {
+    id 'one.xis.plugin' version '0.2.0'
+}
+```
 
----
-→ [Start with Chapter 1: Introduction & Philosophy](docs/01-introduction.md)
+**2. Create a page controller:**
+
+```java
+package com.example;
+
+import one.xis.Page;
+import one.xis.ModelData;
+import one.xis.Action;
+
+@Page("/hello.html)
+public class HelloPage {
+
+    private int counter = 0;
+
+    @ModelData
+    public String message() {
+        return "Hello World!";
+    }
+
+    @ModelData
+    public int count() {
+        return counter;
+    }
+
+    @Action
+    public void increment() {
+        counter++;
+    }
+}
+```
+
+**3. Create the HTML template (same package):**
+
+```html
+
+<html xmlns:xis="https://xis.one/xsd" lang="en">
+    <head>
+        <title>Example</title>
+    </head>
+    <body>
+        <h1>${message}</h1>
+        <p>Counter: ${count}</p>
+        <button xis:action="increment">Click me</button>
+    </body>
+</html>
+```
+
+**That's it!** The button calls your Java method without page reload. Navigation between pages happens smoothly. No
+JavaScript needed.
+
+## How Does It Work?
+
+XIS automatically:
+
+- Maps URLs to page controllers
+- Renders HTML templates with your data
+- Handles form submissions and button clicks
+- Updates only changed parts of the page (SPA behavior)
+- Manages browser history and deep linking
+
+All communication between frontend and backend is handled by the framework. You just write business logic.
+
+## Key Features
+
+✅ **Plain Java + Plain HTML** – No template language to learn, no DSL  
+✅ **Single Page Navigation** – Smooth transitions without full reloads  
+✅ **Zero JavaScript** – Actions, forms, navigation work declaratively  
+✅ **Convention over Configuration** – HTML files next to Java classes  
+✅ **Testable** – Pure Java controllers, easy to unit test  
+✅ **Spring & Micronaut** – Works with your favorite framework  
+✅ **Micro-Frontend Ready** – Built for vertical modularity
+
+## Real-World Example
+
+```java
+
+@Page("/products/{id}")
+public class ProductDetailPage {
+
+    @Inject
+    ProductService productService;
+
+    @ModelData
+    public Product product(@PathVariable("id") Long id) {
+        return productService.findById(id);
+    }
+
+    @Action
+    public Class<?> deleteProduct() {
+        productService.delete(product.getId());
+        return ProductListPage.class;  // Navigate to list
+    }
+}
+```
+
+```html
+
+<html xmlns:xis="https://xis.one/xsd" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0
+    <h1>${product.name}</h1>
+
+    <button xis:action="deleteProduct">Delete Product</button>
+
+    <a xis:page="ProductListPage">Back to list</a>
+</html>
+```
+
+Navigation, confirmation dialogs, and page transitions all work without writing a single line of JavaScript.
+
+## Learn More
+
+📖 **[Documentation](https://xis.one/docs/introduction.html)** – Complete guide  
+🚀 **[Quickstart](https://xis.one/quickstart/index.html)** – Get started in 10 minutes  
+📚 **[JavaDoc](https://xis.one/javadoc/index.html)** – API reference
+
+## License
+
+Apache License 2.0
