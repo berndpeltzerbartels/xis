@@ -30,6 +30,8 @@ public interface FrameworkController<RESP_WRAPPER, REQ, RESP> {
 
     Resource getWidgetHtml(String id);
 
+    Resource getIncludeHtml(String key);
+
     String getAppJs();
 
     String getClassesJs();

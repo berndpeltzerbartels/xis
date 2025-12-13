@@ -116,6 +116,12 @@ public class MainController {
         return handleResourceResponse(resource, ifModifiedSince, Resource::getContent);
     }
 
+    @Get("/xis/include/html")
+    public ResponseEntity<String> getIncludeHtml(@UrlParameter("key") String key, @RequestHeader("If-Modified-Since") String ifModifiedSince) {
+        Resource resource = frontendService.getIncludeHtml(key);
+        return handleResourceResponse(resource, ifModifiedSince, Resource::getContent);
+    }
+
     @Get("/bundle.min.js")
     @ResponseHeader(name = "SourceMap", value = "/bundle.min.js.map")
     public ResponseEntity<String> getBundleJs(@RequestHeader("If-Modified-Since") String ifModifiedSince) {

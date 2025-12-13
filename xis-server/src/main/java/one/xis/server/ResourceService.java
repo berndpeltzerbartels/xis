@@ -1,6 +1,7 @@
 package one.xis.server;
 
 import lombok.RequiredArgsConstructor;
+import one.xis.IncludeRegistry;
 import one.xis.Page;
 import one.xis.Widget;
 import one.xis.context.XISComponent;
@@ -14,9 +15,7 @@ import one.xis.resource.Resource;
 import one.xis.resource.ResourceCache;
 import one.xis.resource.Resources;
 
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @XISComponent
@@ -28,6 +27,9 @@ class ResourceService {
 
     @XISInject(annotatedWith = Page.class)
     private Collection<Object> pageControllers;
+
+    @XISInject
+    private Collection<IncludeRegistry> includeRegistries = Collections.emptyList();
 
     @XISInject
     private RootPageService rootPageService;
@@ -44,6 +46,7 @@ class ResourceService {
     private ResourceCache<Resource> pageBodyResourceCache;
     private ResourceCache<Resource> pageHeadResourceCache;
     private ResourceCache<Resource> pageAttributesResourceCache;
+    private ResourceCache<Resource> includeHtmlResourceCache;
 
     @XISInit
     void initWidgetResources() {
@@ -61,12 +64,28 @@ class ResourceService {
         pageAttributesResourceCache = new ResourceCache<>(r -> r, pageHtmlResources);
     }
 
+    @XISInit
+    void initIncludeResources() {
+        Map<String, Resource> includeHtmlResources = new HashMap<>();
+        for (var registry : includeRegistries) {
+            for (var include : registry.includes()) {
+                var resource = resources.getByPath(include.getPath());
+                includeHtmlResources.put(include.getKey(), resource);
+            }
+        }
+        includeHtmlResourceCache = new ResourceCache<>(r -> r, includeHtmlResources);
+    }
+
     String getRootPageHtml() {
         return rootPageService.getRootPageHtml();
     }
 
     Resource getWidgetHtml(String id) {
         return widgetHtmlResourceCache.getResourceContent(id).orElseThrow();
+    }
+
+    Resource getIncludeHtml(String key) {
+        return includeHtmlResourceCache.getResourceContent(key).orElseThrow();
     }
 
     Resource getPageHead(String id) {
@@ -86,7 +105,7 @@ class ResourceService {
         Map<String, String> attributes = extractBodyAttributes(resource);
         return new GenericResource<>(attributes, resource.getLastModified(), resource.getResourcePath());
     }
-    
+
     private String extractPageHead(Resource pageResource) {
         try {
             HtmlDocument doc = htmlParser.parse(pageResource.getContent());

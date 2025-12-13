@@ -45,7 +45,10 @@ class DomNormalizer {
      */
     doNormalize(element) {
         var normalizedElement = element;
-        if (this.isFrameworkLink(element) || this.isFrameworkActionLink(element)) {
+        if (this.isFrameworkInclude(element)) {
+            // Include tags are not normalized, just processed by IncludeHandler
+            normalizedElement = element;
+        } else if (this.isFrameworkLink(element) || this.isFrameworkActionLink(element)) {
             normalizedElement = this.replaceFrameworkLinkByHtml(element);
         } else if (this.isFrameworkForm(element)) {
             normalizedElement = this.replaceFrameworkFormTagByHtml(element);
@@ -99,6 +102,10 @@ class DomNormalizer {
             this.embedForeachTag(element);
             element.removeAttribute('xis:foreach');
         }
+        if (element.getAttribute('xis:include')) {
+            this.replaceIncludeAttributeByTag(element);
+            element.removeAttribute('xis:include');
+        }
         if (element.getAttribute('xis:widget-container')) {
             this.initializeWidgetContainerByAttribute(element);
             element.removeAttribute('xis:widget-container');
@@ -116,6 +123,15 @@ class DomNormalizer {
             element.removeAttribute('xis:if');
         }
         return element;
+    }
+
+    /**
+   * @private
+   * @param {Element} element 
+   * @returns {boolean}
+   */
+    isFrameworkInclude(element) {
+        return element.localName == 'xis:include';
     }
 
     /**
@@ -397,6 +413,19 @@ class DomNormalizer {
             container.setAttribute('scroll-to-top', scrollToTop);
         }
         return container;
+    }
+
+    /**
+     * Replaces an element with xis:include attribute by an xis:include tag
+     * @private
+     * @param {Element} element 
+     */
+    replaceIncludeAttributeByTag(element) {
+        var key = element.getAttribute('xis:include');
+        var includeTag = createElement('xis:include');
+        includeTag.setAttribute('key', key);
+        this.domAccessor.replaceElement(element, includeTag);
+        return includeTag;
     }
 
 }

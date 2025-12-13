@@ -80,6 +80,14 @@ public interface FrontendService {
     Resource getWidgetHtml(String id);
 
     /**
+     * Returns the HTML content of an include with the given key.
+     *
+     * @param key The key of the include.
+     * @return The HTML content of the include.
+     */
+    Resource getIncludeHtml(String key);
+
+    /**
      * Returns the HTML content of the root page, which is the skeleton of the frontend application. It will
      * not get replaced by any other page, but the page's content and head will get merged into it.
      *

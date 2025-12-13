@@ -26,6 +26,10 @@ public interface Node {
 
     String asString();
 
+    default String asHTML() {
+        return asString();
+    }
+
     void removeChild(Node b);
 
     void insertBefore(Node b, Node a);

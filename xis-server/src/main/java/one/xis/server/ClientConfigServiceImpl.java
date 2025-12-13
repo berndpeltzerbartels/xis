@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import one.xis.IncludeRegistry;
 import one.xis.Page;
 import one.xis.Widget;
 import one.xis.context.XISComponent;
@@ -29,6 +30,9 @@ class ClientConfigServiceImpl implements ClientConfigService {
     @XISInject(annotatedWith = Widget.class)
     private Collection<Object> widgetControllers;
 
+    @XISInject
+    private Collection<IncludeRegistry> includeRegistries = Collections.emptyList();
+
     @Setter
     private boolean useWebsockets;
 
@@ -41,6 +45,7 @@ class ClientConfigServiceImpl implements ClientConfigService {
                 .useWebsockets(useWebsockets);
         addPageAttributes(configBuilder);
         addWidgetAttributes(configBuilder);
+        addIncludeIds(configBuilder);
         config = configBuilder.build();
         log.info("configuration : {}", config);
     }
@@ -82,5 +87,15 @@ class ClientConfigServiceImpl implements ClientConfigService {
                 .widgetAttributes(widgetAttributesHashMap);
     }
 
+    private void addIncludeIds(ClientConfig.ClientConfigBuilder configBuilder) {
+        var includeIds = new HashSet<String>();
+        for (IncludeRegistry includeRegistry : includeRegistries) {
+            var includes = includeRegistry.includes();
+            for (var include : includes) {
+                includeIds.add(include.getKey());
+            }
+        }
+        configBuilder.includeIds(Collections.unmodifiableSet(includeIds));
+    }
 
 }

@@ -34,7 +34,7 @@ class TagHandler {
     }
 
     refresh(data) {
-        throw new Error('abstract method');
+        throw new Error('abstract method: refresh must be implemented by subclass');
     }
 
     /**

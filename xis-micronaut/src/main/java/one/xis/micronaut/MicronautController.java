@@ -93,6 +93,12 @@ class MicronautController implements FrameworkController<HttpResponse<ServerResp
     }
 
     @Override
+    @Get("/xis/include/html")
+    public String getIncludeHtml(@Header("uri") String key) {
+        return frontendService.getIncludeHtml(key);
+    }
+
+    @Override
     @Get("/app.js")
     public String getAppJs() {
         return frontendService.getAppJs();

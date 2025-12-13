@@ -19,6 +19,7 @@ public class ClientConfig {
 
     private final Collection<String> widgetIds;
     private final Collection<String> pageIds;
+    private final Collection<String> includeIds;
     private final boolean useWebsockets; // TODO remove this, use websockets only if configured in server config
     /**
      * Normalized path of the welcome-page.
@@ -43,6 +44,7 @@ public class ClientConfig {
     static class ClientConfigBuilder {
         private Collection<String> widgetIds = List.of();
         private Collection<String> pageIds = List.of();
+        private Collection<String> includeIds = List.of();
         private boolean useWebsockets = false;
 
         @Getter
@@ -57,6 +59,11 @@ public class ClientConfig {
 
         ClientConfigBuilder pageIds(Collection<String> pageIds) {
             this.pageIds = pageIds;
+            return this;
+        }
+
+        ClientConfigBuilder includeIds(Collection<String> includeIds) {
+            this.includeIds = includeIds;
             return this;
         }
 
@@ -84,6 +91,7 @@ public class ClientConfig {
             return new ClientConfig(
                     widgetIds,
                     pageIds,
+                    includeIds,
                     useWebsockets,
                     welcomePageId,
                     pageAttributes,

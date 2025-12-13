@@ -46,6 +46,11 @@ class HttpClient extends Client {
         return response.responseText;
     }
 
+    async loadInclude(key) {
+        const response = await this.httpConnector.get('/xis/include/html?key='+encodeURIComponent(key), {});
+        return response.responseText;
+    }
+
     async handleResponse(response) {
         if (this.serverError(response)) {
             this.handleServerError(response);

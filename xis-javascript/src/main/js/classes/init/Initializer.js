@@ -11,11 +11,12 @@ class Initializer {
      * @param {DomAccessor} domAccessor
      * @param {HttpClient} client
      * @param {Widgets} widgets
+     * @param {Includes} includes
      * @param {WidgetContainers} widgetContainers
      * @param {TagHandlers} tagHandlers
      */
-    constructor(domAccessor, client, widgets, widgetContainers, tagHandlers) {
-        this.handlerBuilder = new HandlerBuilder(domAccessor, client, widgets, widgetContainers, tagHandlers);
+    constructor(domAccessor, client, widgets, includes, widgetContainers, tagHandlers) {
+        this.handlerBuilder = new HandlerBuilder(domAccessor, client, widgets, includes, widgetContainers, tagHandlers, this);
         this.domAccessor = domAccessor;
     }
 

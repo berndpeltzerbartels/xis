@@ -45,4 +45,5 @@ public interface Document {
     Element createElement(String name);
 
     Location getLocation();
+    
 }

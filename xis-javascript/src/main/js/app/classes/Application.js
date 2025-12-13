@@ -17,7 +17,8 @@ class Application {
         this.widgets = new Widgets(this.client);
         this.tagHandlers = new TagHandlers();
         this.elFunctions = new ELFunctions();
-        this.initializer = new Initializer(this.domAccessor, this.client, this.widgets, this.widgetContainers, this.tagHandlers);
+        this.includes = new Includes(this.client);
+        this.initializer = new Initializer(this.domAccessor, this.client, this.widgets, this.includes, this.widgetContainers, this.tagHandlers);
         this.pageController = new PageController(this.client, this.pages, this.initializer, this.urlResolver, this.tagHandlers);
         this.history = new PageHistory(this.pageController);
         this.eventPublisher = new EventPublisher();
@@ -41,6 +42,7 @@ class Application {
         this.client.loadConfig()
             .then(config => this.pageController.setConfig(config))
             .then(config => this.widgetContainers.setConfig(config))
+            .then(config => this.includes.loadIncludes(config))
             .then(config => this.widgets.loadWidgets(config))
             .then(config => this.pages.loadPages(config))
             .then(() => this.pageController.displayPageForUrl(document.location.pathname + document.location.search))

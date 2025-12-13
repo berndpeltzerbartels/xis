@@ -81,6 +81,11 @@ public class FrontendServiceImpl implements FrontendService {
     }
 
     @Override
+    public Resource getIncludeHtml(String key) {
+        return resourceService.getIncludeHtml(key);
+    }
+
+    @Override
     public String getRootPageHtml() {
         return resourceService.getRootPageHtml();
     }

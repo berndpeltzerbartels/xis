@@ -8,15 +8,19 @@ class HandlerBuilder {
      * @param {DomAccessor} domAccessor
      * @param {HttpClient} client
      * @param {Widgets} widgets
+     * @param {Includes} includes
      * @param {WidgetContainers} widgetContainers
      * @param {TagHandlers} tagHandlers
+     * @param {Initializer} initializer
      */
-    constructor(domAccessor, client, widgets, widgetContainers, tagHandlers) {
+    constructor(domAccessor, client, widgets, includes, widgetContainers, tagHandlers, initializer) {
         this.domAccessor = domAccessor;
         this.client = client;
         this.widgets = widgets;
+        this.includes = includes;
         this.widgetContainers = widgetContainers;
         this.tagHandlers = tagHandlers;
+        this.initializer = initializer;
     }
 
     /**
@@ -70,6 +74,11 @@ class HandlerBuilder {
                 }
                 return;
             }
+            case 'xis:include':
+                handler = this.createIncludeHandler(element);
+                this.tagHandlers.mapHandler(element, handler);
+                parentHandler.addDescendantHandler(handler);
+                return; // Include has no child handlers - content gets replaced
             case 'xis:foreach':
                 handler = parentHandler.addDescendantHandler(this.createForeachHandler(element));
                 this.tagHandlers.mapHandler(element, handler);
@@ -263,6 +272,16 @@ class HandlerBuilder {
      */
     createButtonHandler(element) {
         return new ActionButtonHandler(element, this.client, this.widgetContainers);
+    }
+
+    /**
+     * Creates an IncludeHandler.
+     * @private
+     * @param {Element} element
+     * @returns {IncludeHandler}
+     */
+    createIncludeHandler(element) {
+        return new IncludeHandler(element, this.includes, this.initializer);
     }
 
     /**
