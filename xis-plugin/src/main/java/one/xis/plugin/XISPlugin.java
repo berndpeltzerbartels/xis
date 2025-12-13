@@ -48,13 +48,13 @@ public class XISPlugin implements Plugin<Project> {
     }
 
     /**
-     * keep: copy src/main/java into resources
+     * keep: copy src/main/java into build/resources/main (not src/main/resources to avoid Git issues)
      */
     private void configureResources(Project project) {
         project.getTasks().withType(ProcessResources.class).configureEach(sync -> {
-            File javaSrcBase = javaSourceBase(mainSourceSet(project), project);         // default
-            File resourceDir = new File(project.getProjectDir(), "src/main/resources");
-            new HtmlSynchronizer(javaSrcBase, resourceDir).sync();
+            File javaSrcBase = javaSourceBase(mainSourceSet(project), project);
+            File buildResourceDir = new File(project.getBuildDir(), "resources/main");
+            new HtmlSynchronizer(javaSrcBase, buildResourceDir).sync();
         });
     }
 
@@ -89,8 +89,7 @@ public class XISPlugin implements Plugin<Project> {
 
         Configuration apClasspath = buildApClasspath(project);
 
-        File javaSrcBase = javaSourceBase(main, project);         // default
-        File resourcesOutput = new File(project.getProjectDir(), "src/main/resources"); // --useResources
+        File buildResourcesOutput = new File(project.getBuildDir(), "resources/main");
 
         project.getTasks().register("templates", XISTemplateTask.class, task -> {
             task.setGroup("xis");
@@ -103,10 +102,9 @@ public class XISPlugin implements Plugin<Project> {
             // AP path: only the processor, pinned to plugin version
             task.getOptions().setAnnotationProcessorPath(apClasspath);
 
-            // fixed processor FQCN & output roots
+            // fixed processor FQCN & output to build/resources/main
             task.getProcessorFqcn().set("one.xis.processor.XISTemplateProcessor");
-            task.getDefaultJavaOutputDir().set(javaSrcBase);
-            task.getResourcesOutputDir().set(resourcesOutput);
+            task.getOutputDir().set(buildResourcesOutput);
 
             // lock to prevent user mutation
             lock(task);
@@ -151,10 +149,8 @@ public class XISPlugin implements Plugin<Project> {
     private void lock(XISTemplateTask task) {
         task.getProcessorFqcn().finalizeValue();
         task.getProcessorFqcn().disallowChanges();
-        task.getDefaultJavaOutputDir().finalizeValue();
-        task.getDefaultJavaOutputDir().disallowChanges();
-        task.getResourcesOutputDir().finalizeValue();
-        task.getResourcesOutputDir().disallowChanges();
+        task.getOutputDir().finalizeValue();
+        task.getOutputDir().disallowChanges();
     }
 
     /* ----------------------------- version & io --------------------------------- */
