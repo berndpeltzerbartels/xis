@@ -3,10 +3,7 @@ package one.xis.spring;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import one.xis.EnablePushClients;
-import one.xis.Page;
-import one.xis.Push;
-import one.xis.Widget;
+import one.xis.*;
 import one.xis.context.AppContext;
 import one.xis.context.AppContextBuilder;
 import one.xis.http.RestControllerServiceImpl;
@@ -97,6 +94,7 @@ public class SpringContextAdapter implements BeanPostProcessor, ApplicationConte
     private boolean isFrameworkBeanClass(Class<?> clazz) {
         return clazz.isAnnotationPresent(Page.class)
                 || clazz.isAnnotationPresent(Widget.class)
+                || clazz.isAnnotationPresent(Include.class)
                 || isTypeForImport(clazz);
     }
 
@@ -126,5 +124,5 @@ public class SpringContextAdapter implements BeanPostProcessor, ApplicationConte
                 .map(BeanDefinition::getBeanClassName)
                 .map(ClassUtils::classForName);
     }
-    
+
 }

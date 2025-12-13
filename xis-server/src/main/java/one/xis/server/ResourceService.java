@@ -1,7 +1,7 @@
 package one.xis.server;
 
 import lombok.RequiredArgsConstructor;
-import one.xis.IncludeRegistry;
+import one.xis.Include;
 import one.xis.Page;
 import one.xis.Widget;
 import one.xis.context.XISComponent;
@@ -15,7 +15,9 @@ import one.xis.resource.Resource;
 import one.xis.resource.ResourceCache;
 import one.xis.resource.Resources;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @XISComponent
@@ -28,8 +30,8 @@ class ResourceService {
     @XISInject(annotatedWith = Page.class)
     private Collection<Object> pageControllers;
 
-    @XISInject
-    private Collection<IncludeRegistry> includeRegistries = Collections.emptyList();
+    @XISInject(annotatedWith = Include.class)
+    private Collection<Object> includes;
 
     @XISInject
     private RootPageService rootPageService;
@@ -66,13 +68,8 @@ class ResourceService {
 
     @XISInit
     void initIncludeResources() {
-        Map<String, Resource> includeHtmlResources = new HashMap<>();
-        for (var registry : includeRegistries) {
-            for (var include : registry.includes()) {
-                var resource = resources.getByPath(include.getPath());
-                includeHtmlResources.put(include.getKey(), resource);
-            }
-        }
+        var includeHtmlResources = includes.stream()
+                .collect(Collectors.toMap(inc -> inc.getClass().getAnnotation(Include.class).value(), this::htmlResource));
         includeHtmlResourceCache = new ResourceCache<>(r -> r, includeHtmlResources);
     }
 
