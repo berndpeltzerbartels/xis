@@ -116,12 +116,8 @@ class DomNormalizer {
             this.replaceMessageAttributeByChildMessageElement(element);
             element.removeAttribute('xis:message-for');
         }
-        if (element.getAttribute('xis:visible')) {
-            this.surroundWithIfTag(element);
-            element.removeAttribute('xis:visible');
-        }
         if (element.getAttribute('xis:if')) {
-            this.wrapContentWithIfTag(element);
+            this.surroundWithIfTag(element);
             element.removeAttribute('xis:if');
         }
         if (element.getAttribute('xis:include-widget')) {
@@ -359,8 +355,7 @@ class DomNormalizer {
     }
 
     /**
-     * Creates a xis-if-tag and appends as a child of the
-     * given element.
+     * Creates a xis-if-tag and wraps the element with it
      * 
      * @private
      * @param {Element} element 
@@ -368,9 +363,9 @@ class DomNormalizer {
      */
     surroundWithIfTag(element) {
         var ifTag = createElement('xis:if');
-        ifTag.setAttribute('condition', element.getAttribute('xis:visible'));
+        ifTag.setAttribute('condition', element.getAttribute('xis:if'));
         this.domAccessor.insertParent(element, ifTag);
-        element.removeAttribute('xis:visible'); // Otherwise endless recursion
+        element.removeAttribute('xis:if'); // Otherwise endless recursion
         return element;
     }
 

@@ -27,6 +27,13 @@ class Data {
             var key = path[i];
             if (dataNode[key] != undefined) {  // false failes for 0
                 dataNode = dataNode[key];
+                
+                // Special handling for Store objects (localStorage, sessionStorage, etc.)
+                if (dataNode && typeof dataNode.getValue === 'function' && i < path.length - 1) {
+                    // Remaining path should be resolved by the Store
+                    const remainingPath = path.slice(i + 1).join('.');
+                    return dataNode.getValue(remainingPath);
+                }
             } else {
                 dataNode = undefined;
                 break;

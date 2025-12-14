@@ -66,6 +66,8 @@ class TestApplication {
         this.pages.reset();
         this.widgets.reset();
         this.widgetContainers.reset();
+        localStorage.reset();
+        sessionStorage.reset();
     }
 
 }

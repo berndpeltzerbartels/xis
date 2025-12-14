@@ -41,8 +41,8 @@ class IfConditionTest {
         assertThat(tag1).isNotNull();
         assertThat(tag1.getInnerText()).isEqualTo("True with function and variable in attribute style");
 
-        // 5. <div id="condition-tag2" xis:if="empty(data)">
+        // 5. <div id="condition-tag2" xis:if="empty(data)"> - should not exist because data is not empty
         Element tag2 = result.getDocument().getElementById("condition-tag2");
-        assertThat(tag2.getTextContent()).isEmpty();
+        assertThat(tag2).isNull();
     }
 }

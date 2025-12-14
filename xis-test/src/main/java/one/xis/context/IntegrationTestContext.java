@@ -12,6 +12,8 @@ import one.xis.auth.token.SecurityAttributes;
 import one.xis.http.RequestContext;
 import one.xis.http.RestControllerService;
 import one.xis.server.PageUtil;
+import one.xis.test.js.LocalStorage;
+import one.xis.test.js.SessionStorage;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -20,6 +22,7 @@ public class IntegrationTestContext {
 
     @Getter
     private final AppContext appContext;
+    @Getter
     private final IntegrationTestEnvironment environment;
     private final UserInfo userInfo;
 
@@ -57,6 +60,13 @@ public class IntegrationTestContext {
         return openPage(PageUtil.getUrl(pageController), Collections.emptyMap());
     }
 
+    public LocalStorage getLocalStorage() {
+        return environment.getHtmlObjects().getLocalStorage();
+    }
+
+    public SessionStorage getSessionStorage() {
+        return environment.getHtmlObjects().getSessionStorage();
+    }
 
     public <T> T getSingleton(Class<T> type) {
         return appContext.getSingleton(type);
