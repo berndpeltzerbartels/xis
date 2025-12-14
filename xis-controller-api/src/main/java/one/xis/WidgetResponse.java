@@ -38,11 +38,6 @@ public class WidgetResponse implements Response {
         return this;
     }
 
-    public WidgetResponse pathVariable(@NonNull String name, @NonNull Object value) {
-        pathVariables.put(name, asString(value));
-        return this;
-    }
-
     public WidgetResponse widgetParameter(@NonNull String name, @NonNull Object value) {
         widgetParameters.put(name, asString(value));
         return this;
@@ -71,9 +66,6 @@ public class WidgetResponse implements Response {
         return new WidgetResponse(controllerClass).widgetParameter(paramName, asString(paramValue));
     }
 
-    public static WidgetResponse ofPathVariable(@NonNull Class<?> controllerClass, @NonNull String pathVariable, @NonNull Object pathVariableValue) {
-        return new WidgetResponse(controllerClass).pathVariable(pathVariable, asString(pathVariableValue));
-    }
 
     private static String asString(@NonNull Object o) {
         if (o instanceof String str) {

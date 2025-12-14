@@ -6,11 +6,16 @@ import one.xis.context.AppContext;
 public class XISBootRunner {
 
     public static void run(Class<?> applicationCLass, String[] args) {
-        var context = AppContext.builder()
+        var springCompatibility = new SpringCompatibility();
+        var builder = AppContext.builder()
+                .withComponentAnnotations(springCompatibility.getSpringComponentAnnotationsInClassPath().toList())
+                .withBeanInitAnnotations(springCompatibility.getSpringInitAnnotationsInClassPath().toList())
+                .withDependencyFieldAnnotations(springCompatibility.getSpringDependencyInjectionAnnotationsInClassPath().toList())
                 .withPackage(applicationCLass.getPackage().getName())
-                .withXIS()
-                .build();
-
+                .withXIS();
+        springCompatibility.getSpringBeanMethodAnnotationInClassPath().ifPresent(builder::withBeanMethodAnnotation);
+        
+        var context = builder.build();
         NettyServer server = context.getSingleton(NettyServer.class);
         if (args != null && args.length > 0) {
             try {

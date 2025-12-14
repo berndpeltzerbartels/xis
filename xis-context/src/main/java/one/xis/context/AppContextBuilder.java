@@ -50,7 +50,17 @@ public interface AppContextBuilder {
         return this;
     }
 
+    default AppContextBuilder withComponentAnnotations(Collection<Class<? extends Annotation>> componentAnnotations) {
+       componentAnnotations.forEach(this::withComponentAnnotations);
+        return this;
+    }
+
     AppContextBuilder withDependencyFieldAnnotation(Class<? extends Annotation> dependencyFieldAnnotation);
+
+    default AppContextBuilder withDependencyFieldAnnotations(Collection<Class<? extends Annotation>> dependencyFieldAnnotations) {
+        dependencyFieldAnnotations.forEach(this::withDependencyFieldAnnotation);
+        return this;
+    }
 
     default AppContextBuilder withDependencyFieldAnnotations(Class<? extends Annotation>... dependencyFieldAnnotations) {
         Arrays.stream(dependencyFieldAnnotations).forEach(this::withDependencyFieldAnnotation);
@@ -59,6 +69,11 @@ public interface AppContextBuilder {
 
 
     AppContextBuilder withBeanInitAnnotation(Class<? extends Annotation> beanInitAnnotation);
+
+    default AppContextBuilder withBeanInitAnnotations(Collection<Class<? extends Annotation>> beanInitAnnotations) {
+        beanInitAnnotations.forEach(this::withBeanInitAnnotation);
+        return this;
+    }
 
     default AppContextBuilder withBeanInitAnnotations(Class<? extends Annotation>... beanInitAnnotations) {
         Arrays.stream(beanInitAnnotations).forEach(this::withBeanInitAnnotation);

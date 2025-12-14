@@ -364,8 +364,8 @@ class Client {
         serverResponse.updateEventKeys = obj.updateEventKeys || [];
         serverResponse.annotatedTitle = obj.annotatedTitle; // difference between null and '' is important
         serverResponse.defaultWidgets = obj.defaultWidgets || [];
-        data.setValue(['sessionStorage'], sessionStorage);
-        data.setValue(['localStorage'], localStorage);
+        data.setValue(['sessionStorage'], app.sessionStorage);
+        data.setValue(['localStorage'], app.localStorage);
         data.setValue(['clientStorage'], serverResponse.clientStorageData);
         data.setValue(['global'], serverResponse.globalVariableData);
         data.setValue(['validation'], obj.validatorMessages);
