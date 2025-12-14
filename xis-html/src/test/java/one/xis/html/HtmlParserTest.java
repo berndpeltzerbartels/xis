@@ -224,13 +224,7 @@ class HtmlParserTest {
                     &lt;div class="status-active"&gt;User is active&lt;/div&gt;
                 &lt;/div&gt;</code></pre>
                 
-                        <p><strong>Attribute syntax (xis:visible):</strong></p>
-                        <pre><code class="language-html">&lt;div class="status-active" xis:visible="&#036;&#123;user.isActive}"&gt;
-                    User is active
-                &lt;/div&gt;</code></pre>
-                
-                        <p><strong>DOM Result:</strong> The xis:visible version surrounds the element with an if-tag, while xis:if wraps
-                            only the content.</p>
+                        <p><strong>DOM Result:</strong> The xis:if attribute surrounds the entire element with an if-tag.</p>
                 
                         <h6>&lt;xis:widget-container&gt;</h6>
                         <p>Creates a container for dynamic widget loading.</p>
@@ -393,7 +387,7 @@ class HtmlParserTest {
                 
                         <pre><code class="language-html">&lt;div xis:if="&#036;&#123;users.size&#040;) > 0}"&gt;
                     &lt&lt;div xis:foreach="user:&#036;&#123;users}"&gt;
-                        &lt;div class="user-card" xis:visible="&#036;&#123;user.isActive}"&gt;
+                        &lt;div class="user-card" xis:if="&#036;&#123;user.isActive}"&gt;
                             &lt;h3&gt;&#036;&#123;user.name}&lt;/h3&gt;
                             &lt&lt;xis:form binding="user"&gt;
                                 &lt&lt;xis:input binding="email" type="email"/&gt;
