@@ -364,11 +364,15 @@ class Client {
         serverResponse.updateEventKeys = obj.updateEventKeys || [];
         serverResponse.annotatedTitle = obj.annotatedTitle; // difference between null and '' is important
         serverResponse.defaultWidgets = obj.defaultWidgets || [];
-        data.setValue(['sessionStorage'], serverResponse.sessionStorageData);
-        data.setValue(['localStorage'], serverResponse.localStorageData);
+        data.setValue(['sessionStorage'], sessionStorage);
+        data.setValue(['localStorage'], localStorage);
         data.setValue(['clientStorage'], serverResponse.clientStorageData);
         data.setValue(['global'], serverResponse.globalVariableData);
         data.setValue(['validation'], obj.validatorMessages);
+        data.setValue(['url'], window.location.href);
+        data.setValue(['pathname'], window.location.pathname);
+        data.setValue(['origin'], window.location.origin);
+        data.setValue(['queryParams'], this.queryToObject(window.location.search));
         this.storeData(serverResponse);
         this.setTitle(serverResponse);
         this.tagContentSetter.apply(document, serverResponse.idVariables, serverResponse.tagVariables);
@@ -426,6 +430,20 @@ class Client {
         for (var key of Object.keys(localDatabaseData)) {
             this.localDatabase.setItem(key, localDatabaseData[key]);
         }
+    }
+
+
+    queryToObject(queryString) {
+        if (!queryString) {
+            return {};
+        }
+        var query = {};
+        var pairs = (queryString[0] === '?' ? queryString.substr(1) : queryString).split('&');
+        for (var i = 0; i < pairs.length; i++) {
+            var pair = pairs[i].split('=');
+            query[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1] || '');
+        }
+        return query;
     }
 
 
