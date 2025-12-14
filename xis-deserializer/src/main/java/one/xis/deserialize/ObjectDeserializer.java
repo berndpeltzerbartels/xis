@@ -107,9 +107,10 @@ class ObjectDeserializer implements JsonDeserializer<Object> {
         }
         reader.endObject();
 
-        // Collect mandatory components for validation
-        Set<RecordComponent> mandatoryComponents = Arrays.stream(clazz.getRecordComponents())
+        // Collect mandatory component names for validation
+        Set<String> mandatoryComponentNames = Arrays.stream(clazz.getRecordComponents())
                 .filter(c -> c.isAnnotationPresent(Mandatory.class) || (c.getType().isPrimitive() && !c.getType().equals(Boolean.TYPE)))
+                .map(RecordComponent::getName)
                 .collect(Collectors.toSet());
 
         Object[] args = new Object[components.size()];
@@ -123,7 +124,7 @@ class ObjectDeserializer implements JsonDeserializer<Object> {
                 args[i] = values.get(componentName);
             } else {
                 // Missing field - check if mandatory
-                if (mandatoryComponents.contains(component)) {
+                if (mandatoryComponentNames.contains(componentName)) {
                     var context = new DeserializationContext(path + "/" + componentName, component, Mandatory.class, userContext);
                     results.add(new InvalidValueError(context, MISSING_MANDATORY_PROPERTY.getMessageKey(), MISSING_MANDATORY_PROPERTY.getGlobalMessageKey(), null));
                 }

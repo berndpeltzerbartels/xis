@@ -8,6 +8,7 @@ import one.xis.context.XISComponent;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Parameter;
+import java.lang.reflect.RecordComponent;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -93,6 +94,9 @@ public class ValidatorMessageResolver {
         if (annotatedElement instanceof Parameter parameter) {
             return getLabelKey(parameter);
         }
+        if (annotatedElement instanceof RecordComponent component) {
+            return getLabelKey(component);
+        }
         if (annotatedElement instanceof Class<?> clazz) {
             return getLabelKey(clazz);
         }
@@ -105,6 +109,10 @@ public class ValidatorMessageResolver {
 
     private String getLabelKey(@NonNull Parameter parameter) {
         return parameter.isAnnotationPresent(LabelKey.class) ? parameter.getAnnotation(LabelKey.class).value() : getParameterName(parameter);
+    }
+
+    private String getLabelKey(@NonNull RecordComponent component) {
+        return component.isAnnotationPresent(LabelKey.class) ? component.getAnnotation(LabelKey.class).value() : component.getName();
     }
 
     private String getLabelKey(@NonNull Class<?> field) {

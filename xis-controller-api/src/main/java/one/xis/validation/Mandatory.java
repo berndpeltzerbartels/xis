@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  * <p>
  * Otherwise the corresponding field is validated to be filled.
  */
-@Target({ElementType.FIELD, ElementType.PARAMETER})
+@Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.RECORD_COMPONENT})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Mandatory {
 

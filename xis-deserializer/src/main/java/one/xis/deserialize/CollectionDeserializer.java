@@ -7,6 +7,7 @@ import one.xis.UserContext;
 import one.xis.context.XISComponent;
 import one.xis.utils.lang.FieldUtil;
 import one.xis.utils.lang.ParameterUtil;
+import one.xis.utils.lang.RecordUtil;
 import one.xis.validation.AllElementsMandatory;
 import one.xis.validation.Mandatory;
 
@@ -14,6 +15,7 @@ import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Parameter;
+import java.lang.reflect.RecordComponent;
 import java.util.*;
 
 import static one.xis.deserialize.DefaultDeserializationErrorType.CONVERSION_ERROR;
@@ -122,6 +124,9 @@ class CollectionDeserializer implements JsonDeserializer<Collection> {
         }
         if (target instanceof Parameter parameter) {
             return ParameterUtil.getGenericTypeParameter(parameter);
+        }
+        if (target instanceof RecordComponent recordComponent) {
+            return RecordUtil.getGenericTypeParameter(recordComponent);
         }
         throw new IllegalArgumentException("Unsupported target type: " + target);
     }
