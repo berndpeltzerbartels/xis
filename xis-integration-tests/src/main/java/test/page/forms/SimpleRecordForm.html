@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:xis="http://xis.one/html">
+<head>
+    <title>Record Form Test</title>
+</head>
+<body>
+
+<form xis:binding="recordForm">
+    <div>
+        <label for="firstName">First Name</label>
+        <input type="text" xis:binding="firstName" id="firstName"/>
+    </div>
+
+    <div>
+        <label for="lastName">Last Name</label>
+        <input type="text" xis:binding="lastName" id="lastName"/>
+    </div>
+
+    <div>
+        <button xis:action="save" id="saveButton">Save</button>
+    </div>
+</form>
+
+<div id="savedData" xis:if="${savedRecord != null}">
+    <h2>Saved Data</h2>
+    <div id="savedFirstName">${savedRecord.firstName}</div>
+    <div id="savedLastName">${savedRecord.lastName}</div>
+    <div id="savedTitle">${savedRecord.title}</div>
+</div>
+
+</body>
+</html>

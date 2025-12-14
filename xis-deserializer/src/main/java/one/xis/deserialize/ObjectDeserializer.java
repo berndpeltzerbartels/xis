@@ -107,15 +107,44 @@ class ObjectDeserializer implements JsonDeserializer<Object> {
         }
         reader.endObject();
 
+        // Collect mandatory components for validation
+        Set<RecordComponent> mandatoryComponents = Arrays.stream(clazz.getRecordComponents())
+                .filter(c -> c.isAnnotationPresent(Mandatory.class) || (c.getType().isPrimitive() && !c.getType().equals(Boolean.TYPE)))
+                .collect(Collectors.toSet());
+
         Object[] args = new Object[components.size()];
         Class<?>[] types = new Class<?>[components.size()];
         int i = 0;
         for (RecordComponent component : clazz.getRecordComponents()) {
-            if (!values.containsKey(component.getName())) {
-                throw new IllegalStateException("Missing required record component: " + component.getName());
+            String componentName = component.getName();
+            Class<?> componentType = component.getType();
+            
+            if (values.containsKey(componentName)) {
+                args[i] = values.get(componentName);
+            } else {
+                // Missing field - check if mandatory
+                if (mandatoryComponents.contains(component)) {
+                    var context = new DeserializationContext(path + "/" + componentName, component, Mandatory.class, userContext);
+                    results.add(new InvalidValueError(context, MISSING_MANDATORY_PROPERTY.getMessageKey(), MISSING_MANDATORY_PROPERTY.getGlobalMessageKey(), null));
+                }
+                
+                // Provide default value for constructor
+                if (componentType.isPrimitive()) {
+                    // Default values for primitives
+                    if (componentType == int.class) args[i] = 0;
+                    else if (componentType == long.class) args[i] = 0L;
+                    else if (componentType == double.class) args[i] = 0.0;
+                    else if (componentType == float.class) args[i] = 0.0f;
+                    else if (componentType == boolean.class) args[i] = false;
+                    else if (componentType == byte.class) args[i] = (byte) 0;
+                    else if (componentType == short.class) args[i] = (short) 0;
+                    else if (componentType == char.class) args[i] = '\0';
+                } else {
+                    // null for reference types
+                    args[i] = null;
+                }
             }
-            args[i] = values.get(component.getName());
-            types[i] = component.getType();
+            types[i] = componentType;
             i++;
         }
 

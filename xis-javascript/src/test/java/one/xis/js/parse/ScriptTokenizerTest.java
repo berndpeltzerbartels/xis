@@ -47,6 +47,7 @@ class ScriptTokenizerTest {
     private static final int CLOSING_SQUARE_BRACKET = 38;
     private static final int QUESTION_MARK = 39;
     private static final int COLON = 40;
+    private static final int DOT = 41;
 
     private String javascript;
 
@@ -361,9 +362,19 @@ class ScriptTokenizerTest {
     void objectVarWithField() throws ScriptException {
         var testScript = javascript + "new ScriptTokenizer('a.b').tokenize();";
         var result = JSUtil.execute(testScript);
-        var value = result.getArrayElement(0);
-        assertThat(value.getMember("type").asInt()).isEqualTo(IDENTIFIER);
-        assertThat(value.getMember("name").asString()).isEqualTo("a.b");
+        
+        assertThat(result.getArraySize()).isEqualTo(3);
+        
+        var a = result.getArrayElement(0);
+        assertThat(a.getMember("type").asInt()).isEqualTo(IDENTIFIER);
+        assertThat(a.getMember("name").asString()).isEqualTo("a");
+        
+        var dot = result.getArrayElement(1);
+        assertThat(dot.getMember("type").asInt()).isEqualTo(DOT);
+        
+        var b = result.getArrayElement(2);
+        assertThat(b.getMember("type").asInt()).isEqualTo(IDENTIFIER);
+        assertThat(b.getMember("name").asString()).isEqualTo("b");
     }
 
 

@@ -120,10 +120,6 @@ class DomNormalizer {
             this.surroundWithIfTag(element);
             element.removeAttribute('xis:if');
         }
-        if (element.getAttribute('xis:include-widget')) {
-            this.initializeWidgetContainerByShortWidgetTag(element);
-            element.removeAttribute('xis:include-widget');
-        }
         return element;
     }
 
@@ -217,18 +213,6 @@ class DomNormalizer {
     isFrameworkRadio(element) {
         return element.localName === 'xis:radio';
     }
-
-
-    /**
-    * Inserts a xis:widget tag as child of the given element.
-    * @private
-    * @param {Element} element
-    */
-    insertWidgetContainerTag(element) {
-        var widgetTag = createElement('xis:widget');
-        this.domAccessor.insertChild(element, widgetTag);
-    }
-
 
     /**
     * @private
