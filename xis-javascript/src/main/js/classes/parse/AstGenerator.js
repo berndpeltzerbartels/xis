@@ -54,12 +54,17 @@ class AstGenerator {
                     return this.toExpression(row);
                 case IDENTIFIER:
                     if (this.nextToken().type === OPEN_BRACKET) {
+                        // Function call
                         row.push(this.parseFunctionCall());
                     } else if (this.nextToken().type === OPENING_SQUARE_BRACKET) {
                         row.push(this.createPropertyVariable());
                     } else {
+                        // Variable - might have method calls or property access after it
                         const identifierToken = this.consumeToken(IDENTIFIER);
-                        row.push(this.createVariable(identifierToken));
+                        let variable = this.createVariable(identifierToken);
+                        // Check for chained property access or method calls (.property or .method())
+                        variable = this.parsePropertyOrMethodChain(variable);
+                        row.push(variable);
                     }
                     break;
                 case FLOAT:
@@ -330,6 +335,63 @@ class AstGenerator {
         }
         this.consumeToken(CLOSE_BRACKET);
         return new FunctionCall(fct, parameters);
+    }
+
+    /**
+     * Parse a method call from an identifier that includes a dot (e.g., "user.getName")
+     * Supports chaining: user.getAddress().getStreet()
+     * @returns {object} MethodCall or chain of MethodCalls
+     */
+    /**
+     * Parse property access or method calls after a base expression
+     * Handles: variable.property, variable.method(), variable.method().property, etc.
+     * @param {object} baseExpression - The base expression (Variable, MethodCall, etc.)
+     * @returns {object} The potentially wrapped expression
+     */
+    parsePropertyOrMethodChain(baseExpression) {
+        let result = baseExpression;
+        
+        // Loop while we see DOT tokens
+        while (this.currentToken() && this.currentToken().type === DOT) {
+            this.consumeToken(DOT);
+            
+            // Next must be an identifier
+            if (!this.currentToken() || this.currentToken().type !== IDENTIFIER) {
+                throw new Error('Expected identifier after dot in \'' + this.originalExpression + '\'');
+            }
+            
+            const propertyOrMethodName = this.consumeToken(IDENTIFIER).value;
+            
+            // Check if it's a method call (followed by parentheses)
+            if (this.currentToken() && this.currentToken().type === OPEN_BRACKET) {
+                // It's a method call
+                this.consumeToken(OPEN_BRACKET);
+                const parameters = [];
+                let expectComma = false;
+                
+                while (this.currentToken() && this.currentToken().type !== CLOSE_BRACKET) {
+                    if (this.currentToken().type === COMMA) {
+                        if (!expectComma) {
+                            throw new Error('Unexpected comma in \'' + this.originalExpression + '\'');
+                        }
+                        this.consumeToken(COMMA);
+                        expectComma = false;
+                    } else {
+                        parameters.push(this.parse());
+                        expectComma = true;
+                    }
+                }
+                
+                this.consumeToken(CLOSE_BRACKET);
+                result = new MethodCall(result, propertyOrMethodName, parameters);
+            } else {
+                // It's property access - create a new Variable with compound path
+                const basePath = result.type === 'VARIABLE' ? result.path : result.toString();
+                result = new Variable(basePath + '.' + propertyOrMethodName);
+            }
+        }
+        
+        return result;
     }
 
     /** 
@@ -726,6 +788,53 @@ class Variable {
      */
     toString() {
         return this.path;
+    }
+}
+
+/**
+ * @class MethodCall
+ * @description Represents a method call on an object (e.g., user.getName(), text.toUpperCase())
+ */
+class MethodCall {
+    /**
+     * @param {object} objectExpression - The object on which the method is called (can be Variable, MethodCall, etc.)
+     * @param {string} methodName - The name of the method to call
+     * @param {array} parameters - Array of parameter expressions
+     */
+    constructor(objectExpression, methodName, parameters) {
+        this.type = 'METHOD_CALL';
+        this.object = objectExpression;
+        this.methodName = methodName;
+        this.parameters = parameters;
+        this.negated = false;
+    }
+
+    /**
+     * @public
+     * @param {Data} data
+     * @returns {any}
+     */
+    evaluate(data) {
+        const obj = this.object.evaluate(data);
+        if (obj === null || obj === undefined) {
+            return undefined;
+        }
+        const method = obj[this.methodName];
+        if (typeof method !== 'function') {
+            throw new Error(this.methodName + ' is not a function on object');
+        }
+        const parameterValues = this.parameters.map(p => p.evaluate(data));
+        const result = method.apply(obj, parameterValues);
+        return this.negated ? !result : result;
+    }
+
+    /**
+     * @public
+     * @returns {string}
+     */
+    toString() {
+        const params = this.parameters.map(p => p.toString()).join(', ');
+        return this.object.toString() + '.' + this.methodName + '(' + params + ')';
     }
 }
 

@@ -25,6 +25,9 @@ class ScriptTokenizer {
             } else if (this.isQuestionMark(c)) {
                 this.addToken({ type: QUESTION_MARK });
                 this.index++;
+            } else if (this.isDot(c)) {
+                this.addToken({ type: DOT });
+                this.index++;
             } else if (this.isOpeningSquareBracket(c)) {
                 this.processArrayStart();
             } else if (this.isClosingSquareBracket(c)) {
@@ -79,6 +82,10 @@ class ScriptTokenizer {
 
     isQuestionMark(c) {
         return c === '?';
+    }
+
+    isDot(c) {
+        return c === '.';
     }
 
     processArrayStart() {
@@ -178,7 +185,7 @@ class ScriptTokenizer {
 
     readIdentifier() {
         let idStr = '';
-        while (this.index < this.script.length && /[a-zA-Z0-9_\.]/.test(this.peekChar())) {
+        while (this.index < this.script.length && /[a-zA-Z0-9_]/.test(this.peekChar())) {
             idStr += this.peekChar();
             this.index++;
         }
@@ -292,3 +299,4 @@ const OPENING_SQUARE_BRACKET = 37;
 const CLOSING_SQUARE_BRACKET = 38;
 const QUESTION_MARK = 39;
 const COLON = 40;
+const DOT = 41;

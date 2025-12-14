@@ -450,6 +450,89 @@ class ExpressionParserTest {
     }
 
 
+    @Nested
+    @DisplayName("Method Calls")
+    class MethodCallTests {
+
+        @Test
+        @DisplayName("Simple method call on string - toUpperCase()")
+        void testSimpleMethodCall() throws ScriptException {
+            var result = evaluate("text.toUpperCase()", "{text: 'hello'}");
+            assertThat(result.asString()).isEqualTo("HELLO");
+        }
+
+        @Test
+        @DisplayName("Method call with parameter - substring()")
+        void testMethodCallWithParameter() throws ScriptException {
+            var result = evaluate("text.substring(0, 3)", "{text: 'hello world'}");
+            assertThat(result.asString()).isEqualTo("hel");
+        }
+
+        @Test
+        @DisplayName("Chained method calls - trim().toUpperCase()")
+        void testChainedMethodCalls() throws ScriptException {
+            var result = evaluate("text.trim().toUpperCase()", "{text: '  hello  '}");
+            assertThat(result.asString()).isEqualTo("HELLO");
+        }
+
+        @Test
+        @DisplayName("Method call on nested object - user.name.toUpperCase()")
+        void testMethodCallOnNestedObject() throws ScriptException {
+            var result = evaluate("user.name.toUpperCase()", "{user: {name: 'john'}}");
+            assertThat(result.asString()).isEqualTo("JOHN");
+        }
+
+        @Test
+        @DisplayName("Array length property access")
+        void testArrayLength() throws ScriptException {
+            var result = evaluate("items.length", "{items: [1, 2, 3]}");
+            assertThat(result.asInt()).isEqualTo(3);
+        }
+
+        @Test
+        @DisplayName("Method call with expression as parameter")
+        void testMethodCallWithExpressionParameter() throws ScriptException {
+            var result = evaluate("text.substring(start, start + 3)", "{text: 'hello world', start: 6}");
+            assertThat(result.asString()).isEqualTo("wor");
+        }
+
+        @Test
+        @DisplayName("String replace method")
+        void testReplaceMethod() throws ScriptException {
+            var result = evaluate("text.replace('world', 'there')", "{text: 'hello world'}");
+            assertThat(result.asString()).isEqualTo("hello there");
+        }
+
+        @Test
+        @DisplayName("Null safety - method call on null returns undefined")
+        void testMethodCallOnNull() throws ScriptException {
+            var result = evaluate("text.toUpperCase()", "{text: null}");
+            assertThat(result.isNull()).isTrue();
+        }
+
+        @Test
+        @DisplayName("Method call in arithmetic expression")
+        void testMethodCallInArithmetic() throws ScriptException {
+            var result = evaluate("items.length + 5", "{items: [1, 2, 3]}");
+            assertThat(result.asInt()).isEqualTo(8);
+        }
+
+        @Test
+        @DisplayName("Method call in conditional expression")
+        void testMethodCallInConditional() throws ScriptException {
+            var result = evaluate("text.length > 5", "{text: 'hello world'}");
+            assertThat(result.asBoolean()).isTrue();
+        }
+
+        @Test
+        @DisplayName("Triple chained method calls")
+        void testTripleChainedMethodCalls() throws ScriptException {
+            var result = evaluate("text.trim().substring(0, 5).toUpperCase()", "{text: '  hello world  '}");
+            assertThat(result.asString()).isEqualTo("HELLO");
+        }
+    }
+
+
     private Value evaluate(String expression, String data) throws ScriptException {
         var testScript = (javascript + """
                 
