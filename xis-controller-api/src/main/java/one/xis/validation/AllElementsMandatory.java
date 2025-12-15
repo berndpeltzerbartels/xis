@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  * <p>
  * In case the element type is a primitive type, the validation will fail without this annotation, too.
  */
-@Target({ElementType.FIELD, ElementType.PARAMETER})
+@Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.RECORD_COMPONENT})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface AllElementsMandatory {
 }

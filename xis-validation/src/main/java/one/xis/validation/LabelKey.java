@@ -185,7 +185,7 @@ import java.lang.annotation.Target;
  * }</pre>
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD, ElementType.PARAMETER})
+@Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.RECORD_COMPONENT})
 public @interface LabelKey {
     String value();
 }

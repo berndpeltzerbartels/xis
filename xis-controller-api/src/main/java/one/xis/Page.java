@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 import java.lang.annotation.*;
 
-@Target({ElementType.TYPE, ElementType.FIELD})
+@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Qualifier // for micronaut
 @Singleton // for micronaut

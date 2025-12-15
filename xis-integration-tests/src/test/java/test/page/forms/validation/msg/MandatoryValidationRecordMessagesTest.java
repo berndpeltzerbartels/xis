@@ -109,10 +109,6 @@ class MandatoryValidationRecordMessagesTest {
         var response = frontendService.processActionRequest(request);
 
         // Should handle missing fields gracefully and trigger mandatory validation
-        System.out.println("Response status: " + response.getStatus());
-        System.out.println("Validation messages: " + response.getValidatorMessages().getMessages());
-        System.out.println("Global messages: " + response.getValidatorMessages().getGlobalMessages());
-        
         assertThat(response.getStatus()).isEqualTo(422);
         assertThat(response.getValidatorMessages().getMessages().values())
                 .contains("mandatory");

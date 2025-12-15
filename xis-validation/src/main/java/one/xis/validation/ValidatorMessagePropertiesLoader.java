@@ -5,6 +5,8 @@ import one.xis.context.XISComponent;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -55,7 +57,7 @@ class ValidatorMessagePropertiesLoader {
         Properties props = new Properties();
         try (InputStream stream = getClass().getClassLoader().getResourceAsStream(name + ".properties")) {
             if (stream != null) {
-                props.load(stream);
+                props.load(new InputStreamReader(stream, StandardCharsets.UTF_8));
             }
         } catch (IOException ignored) {
         }

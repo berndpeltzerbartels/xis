@@ -102,7 +102,7 @@ class ObjectDeserializer implements JsonDeserializer<Object> {
                 reader.skipValue();
                 continue;
             }
-            Object value = mainDeserializer.deserialize(reader, path, component, userContext, results).orElse(null);
+            Object value = mainDeserializer.deserialize(reader, path(path, component), component, userContext, results).orElse(null);
             values.put(name, value);
         }
         reader.endObject();
@@ -172,6 +172,10 @@ class ObjectDeserializer implements JsonDeserializer<Object> {
 
     private String path(String path, Field field) {
         return path + "/" + getName(field);
+    }
+
+    private String path(String path, RecordComponent component) {
+        return path + "/" + component.getName();
     }
 
     @SuppressWarnings("unchecked")
