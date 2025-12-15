@@ -23,6 +23,9 @@ import java.lang.annotation.*;
  *     return PageResponse.of(SuccessPage.class);
  * }
  * }</pre>
+ * <p>
+ * If the value of the annotation is empty, the model will be accessible under the method name.
+ * * If the method is a getter (e.g. {@code getUser()}), the model will be accessible under the property name.
  */
 @Documented
 @Target({ElementType.METHOD, ElementType.PARAMETER})

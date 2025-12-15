@@ -14,6 +14,13 @@ public class MethodUtils {
 
     public static final Predicate<Method> NON_PRIVATE = method -> !Modifier.isPrivate(method.getModifiers());
 
+    public static Optional<String> propertyNameByGetter(@NonNull Method method) {
+        if (isGetter(method)) {
+            return Optional.of(toFieldName(method));
+        }
+        return Optional.empty();
+    }
+
     public static Map<String, Method> findSettersByFieldName(@NonNull Class<?> clazz) {
         return methods(clazz, MethodUtils::isSetter)
                 .stream()
@@ -34,12 +41,35 @@ public class MethodUtils {
 
 
     private static boolean isSetter(Method method) {
-        return method.getName().startsWith("set") && method.getParameterCount() == 1;
+        String name = method.getName();
+        if (!name.startsWith("set")) {
+            return false;
+        }
+        // Stelle nach "set" muss existieren und ein Großbuchstabe sein
+        if (name.length() <= 3 || !Character.isUpperCase(name.charAt(3))) {
+            return false;
+        }
+        return method.getParameterCount() == 1;
     }
 
     private static boolean isGetter(Method method) {
-        return ((method.getReturnType().equals(Boolean.TYPE) && method.getName().startsWith("is")) || method.getName().startsWith("get")) && method.getParameterCount() == 0;
+        String name = method.getName();
+        if (name.startsWith("is")) {
+            // "is" getter braucht boolean Rückgabetyp, Stelle nach "is" muss existieren und ein Großbuchstabe sein
+            if (name.length() <= 2 || !Character.isUpperCase(name.charAt(2))) {
+                return false;
+            }
+            return method.getReturnType().equals(Boolean.TYPE) && method.getParameterCount() == 0;
+        } else if (name.startsWith("get")) {
+            // "get" getter: Stelle nach "get" muss existieren und ein Großbuchstabe sein
+            if (name.length() <= 3 || !Character.isUpperCase(name.charAt(3))) {
+                return false;
+            }
+            return method.getParameterCount() == 0;
+        }
+        return false;
     }
+
 
     public static Optional<Method> findSetter(@NonNull Class<?> clazz, @NonNull String propertyName) {
         String methodName = "set" + StringUtils.firstToUpperCase(propertyName);

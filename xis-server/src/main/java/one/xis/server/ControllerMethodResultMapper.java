@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import one.xis.*;
 import one.xis.context.XISComponent;
 import one.xis.deserialize.PostProcessingResult;
+import one.xis.utils.lang.MethodUtils;
 import one.xis.validation.ValidatorMessageResolver;
 
 import java.lang.reflect.Method;
@@ -41,7 +42,7 @@ class ControllerMethodResultMapper {
             mapModelResult(getModelDataKey(method), returnValue, controllerMethodResult);
         }
         if (method.isAnnotationPresent(FormData.class)) {
-            mapFormData(method.getAnnotation(FormData.class).value(), returnValue, controllerMethodResult);
+            mapFormData(getFormDataKey(method), returnValue, controllerMethodResult);
         }
         if (method.isAnnotationPresent(SharedValue.class)) {
             var key = method.getAnnotation(SharedValue.class).value();
@@ -190,6 +191,17 @@ class ControllerMethodResultMapper {
 
     private String getModelDataKey(Method method) {
         var modelData = method.getAnnotation(ModelData.class);
-        return modelData.value().isEmpty() ? method.getName() : modelData.value();
+        if (!modelData.value().isEmpty()) {
+            return modelData.value();
+        }
+        return MethodUtils.propertyNameByGetter(method).orElse(method.getName());
+    }
+
+    private String getFormDataKey(Method method) {
+        var formData = method.getAnnotation(FormData.class);
+        if (!formData.value().isEmpty()) {
+            return formData.value();
+        }
+        return MethodUtils.propertyNameByGetter(method).orElse(method.getName());
     }
 }

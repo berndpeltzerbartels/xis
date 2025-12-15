@@ -24,6 +24,8 @@ import java.lang.annotation.Target;
  *     return product;
  * }
  * }</pre>
+ * If the value of the annotation is empty, the model will be accessible under the method name.
+ * If the method is a getter (e.g. {@code getUser()}), the model will be accessible under the property name.
  */
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
