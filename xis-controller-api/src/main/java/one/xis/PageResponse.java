@@ -12,15 +12,15 @@ import java.util.Map;
 public class PageResponse implements Response {
     private final Class<?> controllerClass;
     private final Map<String, Object> pathVariables = new HashMap<>();
-    private final Map<String, Object> urlParameters = new HashMap<>();
+    private final Map<String, Object> queryParameters = new HashMap<>();
 
     public PageResponse pathVariable(@NonNull String name, @NonNull Object value) {
         pathVariables.put(name, asString(value));
         return this;
     }
 
-    public PageResponse urlParameter(@NonNull String name, @NonNull Object value) {
-        urlParameters.put(name, asString(value));
+    public PageResponse queryParameter(@NonNull String name, @NonNull Object value) {
+        queryParameters.put(name, asString(value));
         return this;
     }
 

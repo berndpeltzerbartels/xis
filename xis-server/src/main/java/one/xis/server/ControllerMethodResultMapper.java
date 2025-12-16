@@ -4,6 +4,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import one.xis.*;
 import one.xis.context.XISComponent;
+import one.xis.context.XISInject;
 import one.xis.deserialize.PostProcessingResult;
 import one.xis.utils.lang.MethodUtils;
 import one.xis.validation.ValidatorMessageResolver;
@@ -24,7 +25,19 @@ class ControllerMethodResultMapper {
     private final ValidatorMessageResolver validatorMessageResolver;
     private final PathResolver pathResolver;
 
+    @XISInject
+    private PageControllerWrappers pageControllerWrappers;
+
     void mapReturnValueToResult(ControllerMethodResult controllerMethodResult, Method method, Object returnValue, Map<String, Object> requestScope) {
+        if (returnValue instanceof String str && method.getDeclaringClass().isAnnotationPresent(Page.class)) {
+            var match = pageControllerWrappers.findByRealPath(str);
+            if (match.isPresent()) {
+                var pageResponse = new PageResponse(match.get().getPageControllerWrapper().getControllerClass());
+                pageResponse.getPathVariables().putAll(match.get().getPathVariables());
+                pageResponse.getQueryParameters().putAll(match.get().getQueryParameters());
+                returnValue = pageResponse;
+            }
+        }
         if (returnValue instanceof PageResponse pageResponse) {
             mapPageResponse(pageResponse, controllerMethodResult);
         } else if (returnValue instanceof PageUrlResponse pageUrlResponse) {
@@ -67,6 +80,7 @@ class ControllerMethodResultMapper {
         if (method.isAnnotationPresent(Title.class)) {
             controllerMethodResult.setAnnotatedTitle(returnValue != null ? returnValue.toString() : "");
         }
+
     }
 
     void mapMethodParameterToResultAfterInvocation(ControllerMethodResult controllerMethodResult, ControllerMethodParameter[] parameters, Object[] args) {
@@ -124,8 +138,8 @@ class ControllerMethodResultMapper {
         if (pageResponse.getPathVariables() != null) {
             controllerMethodResult.getPathVariables().putAll(pageResponse.getPathVariables());
         }
-        if (pageResponse.getUrlParameters() != null) {
-            controllerMethodResult.getUrlParameters().putAll(pageResponse.getUrlParameters());
+        if (pageResponse.getQueryParameters() != null) {
+            controllerMethodResult.getUrlParameters().putAll(pageResponse.getQueryParameters());
         }
     }
 

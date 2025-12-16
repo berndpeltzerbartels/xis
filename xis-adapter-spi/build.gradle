@@ -44,6 +44,7 @@ dependencies {
     implementation "org.projectlombok:lombok:$lombokVersion"
     testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+    testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.16.1'
 }
 
 test {

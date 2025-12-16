@@ -7,13 +7,14 @@ import one.xis.Page;
 import one.xis.context.XISComponent;
 import one.xis.context.XISInit;
 import one.xis.context.XISInject;
+import one.xis.utils.http.HttpUtils;
 
 import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-@Slf4j // TODO May be, this does not produce any logs for micronaut
+@Slf4j
 @XISComponent
 @RequiredArgsConstructor
 class PageControllerWrappers {
@@ -25,36 +26,73 @@ class PageControllerWrappers {
     private Collection<Object> pageControllers;
 
     @Getter
-    private Collection<ControllerWrapper> pageControllerWrappers;
+    private Collection<PageControllerEntry> pageControllerEntries;
 
     @XISInit
     void init() {
-        pageControllerWrappers = pageControllerWrappers();
+        pageControllerEntries = createEntries();
     }
 
     Optional<ControllerWrapper> findByPath(String normalizedPath) {
-        return pageControllerWrappers.stream()
-                .filter(controller -> controller.getId().equals(normalizedPath))
+        return pageControllerEntries.stream()
+                .map(PageControllerEntry::getWrapper)
+                .filter(wrapper -> wrapper.getId().equals(normalizedPath))
                 .findFirst();
     }
 
-    private Collection<ControllerWrapper> pageControllerWrappers() {
+    Optional<PageControllerMatch> findByRealPath(String realPath) {
+        int queryIndex = realPath.indexOf('?');
+        String pathWithoutQuery =
+                queryIndex != -1 ? realPath.substring(0, queryIndex) : realPath;
+
+        for (var entry : pageControllerEntries) {
+            var match = entry.getPageUrl().matches(pathWithoutQuery);
+            if (match.isPresent()) {
+                return match.map(vars ->
+                        new PageControllerMatch(
+                                entry.getWrapper(),
+                                vars,
+                                HttpUtils.parseQueryParameters(realPath)
+                        )
+                );
+            }
+        }
+        return Optional.empty();
+    }
+
+    private Collection<PageControllerEntry> createEntries() {
         return pageControllers.stream()
-                .map(controller -> createControllerWrapper(controller, this::getPagePath))
-                .peek(wrapper -> log.info("url: {} -> controller: {}", wrapper.getId(), wrapper.getController().getClass().getSimpleName()))
+                .map(controller -> {
+                    PageControllerWrapper wrapper =
+                            (PageControllerWrapper) createControllerWrapper(controller, this::getPagePath);
+
+                    // ID ist z.B. /{xyz}/x.html
+                    PageUrl pageUrl = new PageUrl(PageUtil.getUrl(controller.getClass()));
+
+                    log.info("url: {} -> controller: {}",
+                            wrapper.getId(),
+                            wrapper.getControllerClass().getSimpleName());
+
+                    return new PageControllerEntry(wrapper, pageUrl);
+                })
                 .collect(Collectors.toSet());
     }
 
     private ControllerWrapper createControllerWrapper(Object controller, Function<Object, String> idMapper) {
-        return controllerWrapperFactory.createControllerWrapper(idMapper.apply(controller), controller, PageControllerWrapper.class);
+        return controllerWrapperFactory.createControllerWrapper(
+                idMapper.apply(controller),
+                controller,
+                PageControllerWrapper.class
+        );
     }
 
     private String getPagePath(Object pageController) {
         return pathResolver.normalizedPath(pageController);
     }
 
-    public Optional<ControllerWrapper> findByClass(Class<?> controllerClass) {
-        return pageControllerWrappers.stream()
+    Optional<ControllerWrapper> findByClass(Class<?> controllerClass) {
+        return pageControllerEntries.stream()
+                .map(PageControllerEntry::getWrapper)
                 .filter(wrapper -> wrapper.getControllerClass().equals(controllerClass))
                 .findFirst();
     }

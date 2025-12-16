@@ -32,6 +32,9 @@ class PathString extends PathElement {
         StringBuilder content = new StringBuilder();
         char ch = path.current();
         while (ch != CharacterIterator.DONE) {
+            if (ch == '?') {
+                break;
+            }
             if (!isLegalPathCharacter(ch)) {
                 throw new IllegalStateException("illegal character '" + ch + "' in path: " + path);
             }
