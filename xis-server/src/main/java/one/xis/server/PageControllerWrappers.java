@@ -28,7 +28,6 @@ class PageControllerWrappers {
     @Getter
     private Collection<PageControllerEntry> pageControllerEntries;
 
-    /* ========================= INIT ========================= */
 
     @XISInit
     void init() {
@@ -37,7 +36,6 @@ class PageControllerWrappers {
                 .collect(Collectors.toSet());
     }
 
-    /* ========================= FIND ========================= */
 
     Optional<ControllerWrapper> findByPath(String normalizedPath) {
         return pageControllerEntries.stream()
@@ -48,17 +46,10 @@ class PageControllerWrappers {
 
     Optional<PageControllerMatch> findByRealPath(String realPath) {
         String path = stripQuery(realPath);
-
         for (PageControllerEntry entry : pageControllerEntries) {
             Optional<Map<String, String>> match = entry.getPageUrl().matches(path);
             if (match.isPresent()) {
-                return match.map(vars ->
-                        new PageControllerMatch(
-                                entry.getWrapper(),
-                                vars,
-                                HttpUtils.parseQueryParameters(realPath)
-                        )
-                );
+                return match.map(vars -> new PageControllerMatch(entry.getWrapper(), vars, HttpUtils.parseQueryParameters(realPath)));
             }
         }
         return Optional.empty();

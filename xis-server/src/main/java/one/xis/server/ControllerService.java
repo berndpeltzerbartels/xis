@@ -177,4 +177,9 @@ class ControllerService {
                 .orElseThrow(() -> new IllegalStateException("page-controller not found:" + normalizedPath));
     }
 
+    protected ControllerWrapper pageControllerWrapperByPath(@NonNull String realPath) {
+        return pageControllerWrappers.findByRealPath(realPath).map(PageControllerMatch::getPageControllerWrapper)
+                .orElseThrow(() -> new IllegalStateException("page-controller not found for path:" + realPath));
+    }
+
 }
