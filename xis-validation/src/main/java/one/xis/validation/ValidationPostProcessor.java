@@ -1,6 +1,7 @@
 package one.xis.validation;
 
 import lombok.RequiredArgsConstructor;
+import one.xis.UserContext;
 import one.xis.context.XISComponent;
 import one.xis.deserialize.DeserializationContext;
 import one.xis.deserialize.DeserializationPostProcessor;
@@ -25,7 +26,7 @@ class ValidationPostProcessor implements DeserializationPostProcessor {
         var validatorClass = validateAnnotation.validatorClass();
         var validator = getValidator(validatorClass);
         try {
-            validator.validate(value, deserializationContext.getTarget());
+            validator.validate(value, deserializationContext.getTarget(), UserContext.getInstance());
         } catch (ValidatorException e) {
             postProcessingResults.add(new InvalidValueError(deserializationContext, validateAnnotation.messageKey(), validateAnnotation.globalMessageKey(), value, e.getMessageParameters()));
         } catch (IllegalArgumentException e) {

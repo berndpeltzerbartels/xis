@@ -1,5 +1,6 @@
 package one.xis.validation;
 
+import one.xis.UserContext;
 import one.xis.context.XISComponent;
 
 import java.lang.reflect.AnnotatedElement;
@@ -12,7 +13,7 @@ class EMailValidator implements Validator<String> {
     private static final Pattern PATTERN_NOT_TO_MATCH = Pattern.compile("\\.\\.+|@\\.+|@\\.+\\.|@\\.+\\.+|@\\.+\\.+\\.");
 
     @Override
-    public void validate(String value, AnnotatedElement annotatedElement) throws ValidatorException {
+    public void validate(String value, AnnotatedElement annotatedElement, UserContext userContext) throws ValidatorException {
         if (value == null || value.isBlank()) {
             return;
         }

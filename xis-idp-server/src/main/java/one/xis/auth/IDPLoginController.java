@@ -55,7 +55,7 @@ class IDPLoginController implements Validator<IDPServerLogin> {
     }
 
     @Override
-    public void validate(IDPServerLogin login, AnnotatedElement annotatedElement) throws ValidatorException {
+    public void validate(IDPServerLogin login, AnnotatedElement annotatedElement, UserContext userContext) throws ValidatorException {
         if (idpAuthenticationService == null) {
             throw new IllegalStateException("Local authentication is not present. This may be because no implementation of " + IDPService.class + " is available.");
         }
