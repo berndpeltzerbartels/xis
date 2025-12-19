@@ -10,21 +10,36 @@ class ErrorStyleHandler extends TagHandler {
 
     refresh(data) {
         this.data = data;
-        if (this.lastErrorStyle) {
-            this.tag.classList.remove(this.lastErrorStyle);
-            this.lastErrorStyle = null;
+        this.binding =  data.validationPath + '/' + this.bindingExpression.evaluate(data);
+        this.errorClass = this.errorStyleClassExpression.evaluate(data);
+        const formHandler = this.findParentFormHandler();
+        formHandler.onMessageHandlerRefreshed(this, this.binding);
+        return this.refreshDescendantHandlers(data);
+    }
+
+    refreshValidatorMessages(validatorMessages) {
+         if (this.errorClass) {
+           const errorMessage = validatorMessages.messages[this.binding];
+           if (errorMessage) {
+               this.lastErrorClass = this.errorClass;
+               this.addCssClass(this.errorClass);
+           } else if (this.lastErrorClass) {
+               this.removeCssClass(this.lastErrorClass);
+               this.lastErrorClass = null;
+           }
+       }
+    }
+
+    /**
+     * @protected
+     * @param {string} cssClass
+     */
+    addCssClass(cssClass) {
+        if (!this.tag.classList.contains(cssClass)) {
+            this.tag.classList.add(cssClass);
         }
-        var errorStyleClass = this.errorStyleClassExpression.evaluate(data);
-        if (!errorStyleClass) {
-            return Promise.resolve();
-        }
-        var errorMessagePath = ['validation', 'errors', this.bindingExpression.evaluate(data)];
-        var errorMessage = data.getValue(errorMessagePath);
-        if (!errorMessage) {
-            return Promise.resolve(); // no error message, nothing to do
-        }
-        this.lastErrorStyle = errorStyleClass;
-        this.tag.classList.add(errorStyleClass);
-        return Promise.resolve();
+    }
+
+    reset() {
     }
 }

@@ -8,7 +8,8 @@ class ELFunctions {
         this.functions['toUpperCase'] = arg => this.toUpperCase(arg);
         this.functions['toLowerCase'] = arg => this.toLowerCase(arg);
         this.functions['empty'] = arg => this.empty(arg);
-        this.notEmpty = arg => !this.empty(arg);
+        debugger;
+        this.functions['notEmpty'] = arg => this.notEmpty(arg);
 
         // Date/Time formatter functions
         this.functions['formatDate'] = (date, locale) => this.formatDate(date, locale);
@@ -230,6 +231,23 @@ class ELFunctions {
         }
         if (arg instanceof Set) {
             return arg.size === 0;
+        }
+        return false;
+    }
+
+    notEmpty(arg) {
+        if (arg == null) return false;
+        if (typeof arg === 'string') {
+            return arg.length > 0;
+        }
+        if (Array.isArray(arg)) {
+            return arg.length > 0;
+        }
+        if (arg instanceof Map) {
+            return arg.size > 0;
+        }
+        if (arg instanceof Set) {
+            return arg.size > 0;
         }
         return false;
     }

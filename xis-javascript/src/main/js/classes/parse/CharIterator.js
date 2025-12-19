@@ -9,6 +9,9 @@ class CharIterator {
      * @param {string} src
      */
     constructor(src) {
+        if (!isSet(src)) {
+            src = '';
+        }
         this.src = src;
         this.index = -1;
     }

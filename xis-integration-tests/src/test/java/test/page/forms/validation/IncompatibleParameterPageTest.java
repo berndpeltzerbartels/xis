@@ -2,6 +2,7 @@ package test.page.forms.validation;
 
 import one.xis.context.IntegrationTestContext;
 import one.xis.test.dom.Document;
+import one.xis.test.dom.Element;
 import one.xis.test.dom.ElementImpl;
 import one.xis.test.dom.InputElement;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,8 +43,12 @@ class IncompatibleParameterPageTest {
             button.click();
 
             assertThat(integerFieldMandatoryMessage(document).getInnerText()).isEqualTo("Benutzerdefinierte Pflichtfeldmeldung");
-            assertThat(integerField(document).getInnerText()).isEmpty();
+            assertThat(integerFieldMandatory(document).getAttribute("class")).contains("error");
+            assertThat(integerFieldMandatoryLabel(document).getAttribute("class")).contains("error");
 
+            assertThat(integerField(document).getInnerText()).isEmpty();
+            assertThat(integerFieldMessage(document).getInnerText()).isEmpty();
+            assertThat(integerField(document).getAttribute("class")).doesNotContain("error");
         }
 
     }
@@ -71,9 +76,51 @@ class IncompatibleParameterPageTest {
 
             button.click();
 
+            assertThat(integerFieldMandatory(document).getAttribute("class")).contains("error");
             assertThat(integerFieldMandatoryMessage(document).getInnerText()).isEqualTo("Ungültige Eingabe");
-            assertThat(integerFieldMessage(document).getInnerText()).isEqualTo("Ungültige Eingabe");
+            assertThat(integerFieldMandatoryLabel(document).getAttribute("class")).contains("error");
 
+
+            // Verify error CSS class is added to both fields with validation errors
+            assertThat(integerField(document).getAttribute("class")).contains("error");
+            assertThat(integerFieldLabel(document).getAttribute("class")).contains("error");
+            assertThat(integerFieldMessage(document).getInnerText()).isEqualTo("Ungültige Eingabe");
+        }
+
+    }
+
+    @Nested
+    @DisplayName("Error CSS class is removed when field value changes")
+    class ErrorClassRemovalTest {
+
+        private IntegrationTestContext appContext;
+
+        @BeforeEach
+        void initContext() {
+            appContext = IntegrationTestContext.builder()
+                    .withSingleton(IncompatibleParameterPage.class)
+                    .build();
+        }
+
+        @Test
+        void test() {
+            var result = appContext.openPage(IncompatibleParameterPage.class);
+            var document = result.getDocument();
+            var button = document.getElementByTagName("button");
+
+            // Submit empty form to trigger validation error
+            button.click();
+
+            // Verify error class is present
+            assertThat(integerFieldMandatory(document).getAttribute("class")).contains("error");
+
+            // User corrects the value
+            integerFieldMandatory(document).setValue("42");
+
+            // Verify error class is removed after value change
+            assertThat(integerFieldMandatory(document).getAttribute("class")).isEmpty();
+            assertThat(integerFieldMandatoryLabel(document).getAttribute("class")).contains("error");
+            assertThat(integerFieldMandatoryMessage(document).getInnerText()).isEmpty();
         }
 
     }
@@ -95,6 +142,20 @@ class IncompatibleParameterPageTest {
     ElementImpl integerFieldMandatoryMessage(Document document) {
         return messageElements(document)
                 .filter(e -> e.getAttribute("message-for").equals("integerFieldMandatory"))
+                .findFirst().orElseThrow();
+    }
+
+    private Element integerFieldLabel(Document document) {
+        return document.getElementsByTagName("label").stream()
+                .filter(e -> ((Element) e).getAttribute("for").equals("integerField"))
+                .map(Element.class::cast)
+                .findFirst().orElseThrow();
+    }
+
+    private Element integerFieldMandatoryLabel(Document document) {
+        return document.getElementsByTagName("label").stream()
+                .filter(e -> ((Element) e).getAttribute("for").equals("integerFieldMandatory"))
+                .map(Element.class::cast)
                 .findFirst().orElseThrow();
     }
 

@@ -49,6 +49,11 @@ public class DOMStringList {
         length = values.size();
     }
 
+    public void remove(String token) {
+        remove(List.of(token));
+    }
+
+
     void clear() {
         values.clear();
         length = 0;

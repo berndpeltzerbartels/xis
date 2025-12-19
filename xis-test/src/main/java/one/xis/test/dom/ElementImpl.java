@@ -207,6 +207,10 @@ public class ElementImpl extends NodeImpl implements Element {
     }
 
     void setInnerHTML(String html) {
+        if (html == null || html.isEmpty()) {
+            setInnerText("");
+            return;
+        }
         getChildNodes().clear();
         Document doc = Jsoup.parseBodyFragment(html);
         var body = doc.body();

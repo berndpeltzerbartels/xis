@@ -97,7 +97,7 @@ class FormHandler extends TagHandler {
     }
 
     onFormValueChanges(handler) {
-        this.resetMessageHandlers();
+        handler.errorBinding && this.resetMessageHandlers(handler.errorBinding);
     }
 
     onMessageHandlerRefreshed(handler, binding) {
@@ -162,10 +162,11 @@ class FormHandler extends TagHandler {
         this.messageHandlers = {};
     }
 
-    resetMessageHandlers() {
+    resetMessageHandlers(binding) {
         this.globalMessageHandlers.forEach(handler => handler.reset());
-        for (var binding of Object.keys(this.messageHandlers)) {
-            this.messageHandlers[binding].forEach(handler => handler.reset());
+        if (!binding || !this.messageHandlers[binding]) {
+            return;
         }
+        this.messageHandlers[binding].forEach(handler => handler.reset());
     }
 }

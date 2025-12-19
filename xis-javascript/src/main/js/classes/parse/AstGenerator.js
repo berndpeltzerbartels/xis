@@ -315,7 +315,7 @@ class AstGenerator {
         const fct = this.functions[functionName.value];
         const parameters = [];
         if (fct === undefined) {
-            throw new Error(`Function ${functionName.value} not found`);
+            throw new Error('Function '+ functionName.value +' not found');
         }
         this.consumeToken(OPEN_BRACKET);
         var expectCommata = false;

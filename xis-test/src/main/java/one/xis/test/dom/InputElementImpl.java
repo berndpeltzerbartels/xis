@@ -2,6 +2,7 @@ package one.xis.test.dom;
 
 import lombok.Getter;
 import lombok.Setter;
+import one.xis.test.js.Event;
 
 @Getter
 @Setter
@@ -17,6 +18,13 @@ public class InputElementImpl extends ElementImpl implements InputElement {
 
     protected InputElementImpl(String name) {
         super(name);
+    }
+
+    @Override
+    public void setValue(String value) {
+        this.value = value;
+        // Fire change event when value is set programmatically (like user typing)
+        fireEvent("change", new Event("change"));
     }
 
     private void onClick() {

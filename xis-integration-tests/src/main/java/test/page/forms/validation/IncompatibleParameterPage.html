@@ -7,14 +7,14 @@
 <body>
 <form xis:binding="test-object">
     <div>
-        <input xis:binding="integerFieldMandatory" id="integerFieldMandatory"/>
-        <label for="integerFieldMandatory">Integer-Field</label>
+        <input xis:binding="integerFieldMandatory" id="integerFieldMandatory" xis:error-class="error"/>
+        <label for="integerFieldMandatory" xis:binding="integerFieldMandatory"
+               xis:error-class="error">Integer-Field</label>
         <div xis:message-for="integerFieldMandatory"></div>
     </div>
     <div>
-        <input xis:binding="integerField" id="integerField"/>
-        <label for="integerField">Integer-Field</label>
-        <label for="integerField">Integer-Field</label>
+        <input xis:binding="integerField" id="integerField" xis:error-class="error"/>
+        <label for="integerField" xis:binding="integerField" xis:error-class="error">Integer-Field</label>
         <div xis:message-for="integerField"></div>
     </div>
     <div>

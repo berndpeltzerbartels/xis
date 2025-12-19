@@ -369,6 +369,7 @@ class Client {
         data.setValue(['clientStorage'], serverResponse.clientStorageData);
         data.setValue(['global'], serverResponse.globalVariableData);
         data.setValue(['validation'], obj.validatorMessages);
+        data.setValue(['validation','globalMessages'], obj.validatorMessages.globalMessages);
         data.setValue(['url'], window.location.href);
         data.setValue(['pathname'], window.location.pathname);
         data.setValue(['origin'], window.location.origin);

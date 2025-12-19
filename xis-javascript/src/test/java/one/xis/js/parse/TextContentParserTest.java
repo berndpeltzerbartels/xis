@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import javax.script.ScriptException;
 
 import static one.xis.js.JavascriptSource.CLASSES;
+import static one.xis.js.JavascriptSource.FUNCTIONS;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class TextContentParserTest {
@@ -17,7 +18,7 @@ class TextContentParserTest {
 
     @BeforeEach
     void init() {
-        javascript = Javascript.getScript(CLASSES);
+        javascript = Javascript.getScript(FUNCTIONS, CLASSES);
         javascript += """
                 
                     var app = {

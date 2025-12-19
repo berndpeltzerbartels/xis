@@ -7,10 +7,15 @@ class FormElementHandler extends TagHandler {
     constructor(element) {
         super(element);
         this.bindingExpression = new TextContentParser(element.getAttribute('xis:binding')).parse();
+        this.errorClassExpression = new TextContentParser(element.getAttribute('xis:error-class')).parse();;
         this.binding = undefined;
         element.addEventListener('change', () => {
             const formHandler = this.getParentFormHandler();
             formHandler.onFormValueChanges(this);
+            if (this.lastErrorClass) {
+                this.removeCssClass(this.lastErrorClass);
+                this.lastErrorClass = null;
+            }
         });
     }
 
@@ -23,6 +28,7 @@ class FormElementHandler extends TagHandler {
     refresh(data) {
         this.data = data;
         this.refreshWithData(data);
+        this.refreshErrorBinding(data);
         return this.refreshDescendantHandlers(data);
     }
 
@@ -32,6 +38,7 @@ class FormElementHandler extends TagHandler {
      */
     refreshWithData(data) {
         this.binding = this.bindingExpression.evaluate(data);
+        this.errorBinding = data.validationPath + '/' + this.binding;
         const formHandler = this.getParentFormHandler();
         formHandler.onElementHandlerRefreshed(this, this.binding);
     }
@@ -48,6 +55,31 @@ class FormElementHandler extends TagHandler {
         super.refreshFormData(data);
     }
 
+    refreshErrorBinding(data) {
+        const errorClass = this.errorClassExpression.evaluate(data);
+        if (this.lastErrorClass) {
+            this.removeCssClass(this.lastErrorClass);
+            this.lastErrorClass = null;
+        }
+        if (errorClass) {
+            this.errorClass = errorClass;
+            const formHandler = this.getParentFormHandler();
+            formHandler.onMessageHandlerRefreshed(this, this.errorBinding);
+        }
+    }
+
+    refreshValidatorMessages(validatorMessages) {
+        if (this.errorClass) {
+            const errorMessage = validatorMessages.messages[this.errorBinding];
+            if (errorMessage) {
+                this.lastErrorClass = this.errorClass;
+                this.addCssClass(this.errorClass);
+            } else if (this.lastErrorClass) {
+                this.removeCssClass(this.lastErrorClass);
+                this.lastErrorClass = null;
+            }
+        }
+    }
 
     getValue() {
         return this.tag.value;
@@ -64,14 +96,26 @@ class FormElementHandler extends TagHandler {
 
     /**
      * @protected
-     * @param {string} state 
+     * @param {string} cssClass 
      */
-    updateState(state) {
-        this.state = state;
-        if (!this.tag.classList.contains(state)) {
-            this.tag.classList.add(state);
+    addCssClass(cssClass) {
+        if (!this.tag.classList.contains(cssClass)) {
+            this.tag.classList.add(cssClass);
         }
+    }
 
+    /**
+     * @protected
+     * @param {string} cssClass 
+     */
+    removeCssClass(cssClass) {
+        if (this.tag.classList.contains(cssClass)) {
+            this.tag.classList.remove(cssClass);
+        }
+    }
+
+
+    reset() {
     }
 }
 
