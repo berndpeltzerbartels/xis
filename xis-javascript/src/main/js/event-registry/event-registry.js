@@ -8,6 +8,7 @@ const EventType = {
     PAGE_ACTION: 'page_action',
     FORM_ACTION: 'form_action',
     SUBMIT: 'submit',
+    BUFFER_COMMITTED: 'buffer_commited',
     REACTIVE_DATA_CHANGED: 'reactive_data_changed'
 };
 

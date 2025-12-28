@@ -130,6 +130,7 @@ class HandlerBuilder {
                 handler = new IfTagHandler(element);
                 break;
         }
+        
         if (isElement(element)) { 
             this.initializeAttributes(element, handler ? handler : parentHandler); 
         }

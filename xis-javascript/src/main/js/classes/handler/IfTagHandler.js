@@ -8,6 +8,10 @@ class IfTagHandler extends TagHandler {
         this.expression = this.expressionFromAttribute('condition');
         this.childNodes = this.nodeListToArray(tag.childNodes);
         this.conditionValue = undefined;
+        // Make <xis:if> transparent in layout to avoid breaking table/grid structures
+        if (this.tag.style) {
+            this.tag.style.display = 'contents';
+        }
     }
 
     refresh(data) {
@@ -21,6 +25,7 @@ class IfTagHandler extends TagHandler {
             }
         }
         this.conditionValue = newConditionValue;
+        
         if (this.conditionValue) {
             return this.refreshDescendantHandlers(data);
         }

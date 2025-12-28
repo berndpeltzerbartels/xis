@@ -7,13 +7,16 @@ class ForeachHandler extends TagHandler {
     constructor(tag, tagHandlers) {
         super(tag);
         this.tagHandlers = tagHandlers;
-        this.arrayPathExpression = this.createExpression(this.getAttribute('array'), '.');
+        this.arrayPathExpression = this.createExpression(this.variableToKey(this.getAttribute('array')), '.');
         this.varName = this.getAttribute('var');
         this.type = 'foreach-handler';
         this.priority = 'high';
         this.cache = new ForEachNodeCache(nodeListToArray(this.tag.childNodes));
         this.clearChildren();
-
+        // Make <xis:foreach> transparent in layout (works in all modern browsers)
+        if (this.tag.style) {
+            this.tag.style.display = 'contents';
+        }
     }
 
     /**
@@ -23,6 +26,14 @@ class ForeachHandler extends TagHandler {
     refresh(data) {
         var arrayPath = this.doSplit(this.arrayPathExpression.evaluate(data), '.');
         var arr = data.getValue(arrayPath);
+        
+        // Handle indirect array references: if arr is a string, resolve it as a path
+        // Example: array="${arrayName}" where arrayName="list1" -> resolve to data.list1
+        if (typeof arr === 'string') {
+            var resolvedPath = this.doSplit(arr, '.');
+            arr = data.getValue(resolvedPath);
+        }
+        
         if (!arr) {
           return;
         }
@@ -74,5 +85,19 @@ class ForeachHandler extends TagHandler {
             return; // we are not inside a form
         }
         subData.validationPath += '/' + varName + '[' + index + ']';
+    }
+
+    /**
+    * if variable starts with '${' and ends with '}', it is an expression.
+    * This method removes ${ and }, because here we do not deal with a textual expression,
+    * but with a variable name used in data binding.
+    * @param {string} variable
+    * @returns {string} the key for data binding
+    */
+    variableToKey(variable) {
+       if (variable.startsWith('${') && variable.endsWith('}')) {
+           return variable.slice(2, -1);
+       }
+       return variable;
     }
 }

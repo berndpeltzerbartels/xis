@@ -1,3 +1,5 @@
+// Custom event type for theme content updates
+var THEME_CONTENT_LOADED = 'xis_theme_content_loaded';
 
 function addNavLogo() {
    var nav = findNavElement();
@@ -27,6 +29,11 @@ function containsLogo(nav) {
 
 
 function addLogoDiv(nav) {
+    // Double-check to prevent race conditions
+    if (containsLogo(nav)) {
+        return;
+    }
+    
     var div = document.createElement('div');
     div.classList.add('logo');
     var logoImg = document.createElement('img');
@@ -39,9 +46,11 @@ function addLogoDiv(nav) {
     nav.insertBefore(div, nav.firstChild);
 }
 
-// Wait for the DOM to be fully loaded
-eventListenerRegistry.addEventListener(EventType.PAGE_LOADED, function() {
+// Try to add logo immediately when script loads
+eventListenerRegistry.addEventListener(EventType.PAGE_LOADED, function(event) {
     addNavLogo();
 });
+
+
 
 // Add the logo to the navigation bar

@@ -1,0 +1,204 @@
+<xis:template xmlns:xis="https://xis.one/xsd">
+    <h1>Add Contact</h1>
+
+    <xis:form binding="contact">
+
+        <!-- Personal Information -->
+        <fieldset>
+            <legend>Personal Information</legend>
+
+            <div class="col2">
+                <div class="span1">
+                    <xis:input binding="firstName" type="text" placeholder="First Name" required="true"/>
+                    <xis:message message-for="firstName"/>
+                    <label>First Name *</label>
+                </div>
+
+                <div class="span1">
+                    <xis:input binding="lastName" type="text" placeholder="Last Name" required="true"/>
+                    <xis:message message-for="lastName"/>
+                    <label>Last Name *</label>
+                </div>
+            </div>
+
+            <div class="col2">
+                <div class="span1">
+                    <xis:input binding="email" type="email" placeholder="Email" required="true"/>
+                    <xis:message message-for="email"/>
+                    <label>Email Address *</label>
+                </div>
+
+                <div class="span1">
+                    <xis:input binding="phone" type="tel" placeholder="Phone"/>
+                    <xis:message message-for="phone"/>
+                    <label>Phone Number</label>
+                </div>
+            </div>
+        </fieldset>
+
+        <!-- Company Information -->
+        <fieldset>
+            <legend>Company Information</legend>
+
+            <div class="col2">
+                <div class="span1">
+                    <xis:input binding="company" type="text" placeholder="Company"/>
+                    <xis:message message-for="company"/>
+                    <label>Company Name</label>
+                </div>
+
+                <div class="span1">
+                    <xis:input binding="position" type="text" placeholder="Position"/>
+                    <xis:message message-for="position"/>
+                    <label>Position/Title</label>
+                </div>
+            </div>
+        </fieldset>
+
+        <!-- Classification -->
+        <fieldset>
+            <legend>Classification</legend>
+
+            <div class="col2">
+                <div class="span1">
+                    <xis:select binding="type" items="${contactTypes}"
+                                item-label="displayName" item-value="name" required="true">
+                        <option value="">-- Select Type --</option>
+                    </xis:select>
+                    <xis:message message-for="type"/>
+                    <label>Contact Type *</label>
+                </div>
+
+                <div class="span1">
+                    <xis:select binding="status" items="${contactStatuses}"
+                                item-label="displayName" item-value="name" required="true">
+                        <option value="">-- Select Status --</option>
+                    </xis:select>
+                    <xis:message message-for="status"/>
+                    <label>Status *</label>
+                </div>
+            </div>
+
+            <div class="span0">
+                <label>Tags (Checkboxes)</label>
+                <div class="checkbox-group">
+                    <div xis:foreach="tag:${availableTags}">
+                        <xis:checkbox binding="tags" value="${tag}" id="tag-${tag}"/>
+                        <label for="tag-${tag}">${tag}</label>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+
+        <!-- Address -->
+        <fieldset>
+            <legend>Address</legend>
+
+            <div class="span0">
+                <xis:input binding="street" type="text" placeholder="Street"/>
+                <xis:message message-for="street"/>
+                <label>Street Address</label>
+            </div>
+
+            <div class="col2">
+                <div class="span1">
+                    <xis:input binding="city" type="text" placeholder="City"/>
+                    <xis:message message-for="city"/>
+                    <label>City</label>
+                </div>
+
+                <div class="span1">
+                    <xis:input binding="zipCode" type="text" placeholder="ZIP"/>
+                    <xis:message message-for="zipCode"/>
+                    <label>ZIP Code</label>
+                </div>
+            </div>
+
+            <div class="span0">
+                <xis:select binding="country" items="${countries}">
+                    <option value="">-- Select Country --</option>
+                </xis:select>
+                <xis:message message-for="country"/>
+                <label>Country</label>
+            </div>
+        </fieldset>
+
+        <!-- Notes -->
+        <fieldset>
+            <legend>Additional Information</legend>
+
+            <div class="span0">
+                <xis:textarea binding="notes" rows="5" placeholder="Notes"/>
+                <xis:message message-for="notes"/>
+                <label>Notes</label>
+            </div>
+        </fieldset>
+
+        <!-- Actions -->
+        <div class="col2">
+            <div class="span1">
+                <xis:button action="save" class="btn btn-primary">
+                    Save Contact
+                </xis:button>
+            </div>
+            <div class="span1">
+                <xis:button action="cancel" class="btn">
+                    Cancel
+                </xis:button>
+            </div>
+        </div>
+
+    </xis:form>
+
+    <div class="info-box" style="margin-top: 2rem;">
+        <h4>✅ Form Elements Demonstrated</h4>
+        <ul>
+            <li>Text Input, Email Input, Tel Input</li>
+            <li>Select Dropdowns (Type, Status, Country)</li>
+            <li>Checkboxes (Tags - multiple selection)</li>
+            <li>Textarea (Notes)</li>
+            <li>Required Field Validation</li>
+            <li>Fieldset Grouping</li>
+        </ul>
+    </div>
+
+    <style>
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .checkbox-group > div {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+
+        .checkbox-group label {
+            margin: 0;
+            font-weight: normal;
+        }
+
+        .info-box {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .info-box h4 {
+            margin-top: 0;
+        }
+
+        .info-box ul {
+            margin-bottom: 0;
+        }
+    </style>
+</xis:template>

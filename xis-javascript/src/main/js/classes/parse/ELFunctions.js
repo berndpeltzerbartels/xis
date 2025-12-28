@@ -8,7 +8,7 @@ class ELFunctions {
         this.functions['toUpperCase'] = arg => this.toUpperCase(arg);
         this.functions['toLowerCase'] = arg => this.toLowerCase(arg);
         this.functions['empty'] = arg => this.empty(arg);
-        debugger;
+        this.functions['empty'] = arg => this.empty(arg);
         this.functions['notEmpty'] = arg => this.notEmpty(arg);
 
         // Date/Time formatter functions

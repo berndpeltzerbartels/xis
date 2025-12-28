@@ -76,7 +76,8 @@ class TagHandler {
     /**
      * Refreshes descendant handlers.
      * 
-     * @param {Data} data 
+     * @param {Data} data
+     * @returns {Promise}
      */
     refreshDescendantHandlers(data) {
         var promises = [];

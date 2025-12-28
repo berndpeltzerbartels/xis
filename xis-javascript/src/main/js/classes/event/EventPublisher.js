@@ -4,6 +4,7 @@ class EventPublisher {
     }
 
     addEventListener(event, listener) {
+        console.log(`Adding listener for event: ${event}`);
         if (!this.listeners[event]) {
             this.listeners[event] = [];
         }
@@ -19,6 +20,7 @@ class EventPublisher {
     }
 
     publish(event, data = {}) {
+        console.log(`Publishing event: ${event}`, data);
         if (!this.listeners[event]) return;
         this.listeners[event].forEach(listener => listener(data));
     }

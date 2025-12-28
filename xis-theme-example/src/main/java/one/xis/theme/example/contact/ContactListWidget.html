@@ -1,0 +1,118 @@
+<xis:template xmlns:xis="https://xis.one/xsd">
+    <h1>Contacts</h1>
+
+    <div class="header-actions">
+        <a xis:widget="ContactFormWidget" class="btn btn-primary">
+            ➕ Add Contact
+        </a>
+    </div>
+
+    <div class="stats-row">
+        <div class="stat-box">
+            <span class="stat-value">${totalCount}</span>
+            <span class="stat-label">Total</span>
+        </div>
+        <div class="stat-box">
+            <span class="stat-value">${leadsCount}</span>
+            <span class="stat-label">Leads</span>
+        </div>
+        <div class="stat-box">
+            <span class="stat-value">${customersCount}</span>
+            <span class="stat-label">Customers</span>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Company</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr xis:repeat="contact:${contacts}">
+            <td><strong>${contact.firstName} ${contact.lastName}</strong></td>
+            <td>${contact.email}</td>
+            <td>${contact.phone}</td>
+            <td>${contact.company}</td>
+            <td>
+                    <span class="badge badge-${toLowerCase(contact.type)}">
+                        ${contact.type.displayName}
+                    </span>
+            </td>
+            <td>
+                    <span class="badge badge-${toLowerCase(contact.status)}">
+                        ${contact.status.displayName}
+                    </span>
+            </td>
+            <td>
+                <button xis:action="delete" class="btn btn-sm">
+                    <xis:parameter name="contactId" value="${contact.id}"/>
+                    Delete
+                </button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div xis:if="${empty(contacts)}">
+        <p>No contacts found. <a xis:widget="ContactFormWidget">Add your first contact</a>
+        </p>
+    </div>
+
+    <style>
+        .header-actions {
+            margin: 1rem 0;
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .stat-box {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .stat-value {
+            display: block;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .stat-label {
+            display: block;
+            font-size: 0.75rem;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.875rem;
+        }
+
+        .badge-lead { background: #fff3cd; color: #856404; }
+        .badge-customer { background: #d1ecf1; color: #0c5460; }
+        .badge-partner { background: #d4edda; color: #155724; }
+        .badge-supplier { background: #e2e3e5; color: #383d41; }
+        .badge-active { background: #d4edda; color: #155724; }
+        .badge-inactive { background: #e2e3e5; color: #383d41; }
+        .badge-lost { background: #f8d7da; color: #721c24; }
+        .badge-pending { background: #fff3cd; color: #856404; }
+    </style>
+</xis:template>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:xis="https://xis.one/xsd">
+<head>
+    <meta charset="UTF-8">
+    <title>${title}</title>
+</head>
+<body>
+<div class="wrapper">
+
+    <!-- Navigation -->
+    <nav class="nav">
+        <ul>
+            <li><a xis:widget="DashboardWidget" xis:target-container="main">Dashboard</a></li>
+            <li><a xis:widget="ContactListWidget" xis:target-container="main">Contacts</a></li>
+            <li><a xis:widget="ContactFormWidget" xis:target-container="main">Add Contact</a></li>
+            <li><a href="#">More</a>
+                <ul>
+                    <li><a href="#">Companies</a></li>
+                    <li><a href="#">Activities</a></li>
+                    <li><a href="#">Reports</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Main Content Area -->
+    <div class="maincontent">
+        <xis:widget-container container-id="main" default-widget="DashboardWidget"/>
+    </div>
+
+</div>
+</body>
+</html>

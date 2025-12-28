@@ -117,12 +117,18 @@ class ControllerMethodParameter {
     private Object deserializeFormDataParameter(Parameter parameter, ClientRequest request, PostProcessingResults postProcessingResults) throws IOException {
         var key = parameter.getAnnotation(FormData.class).value();
         var paramValue = request.getFormData().get(key);
+        if (!isMandatory(parameter) && paramValue == null) {
+            return null;
+        }
         return deserializeParameter(paramValue, request, parameter, postProcessingResults);
     }
 
     private Object deserializeUrlParameter(Parameter parameter, ClientRequest request, PostProcessingResults postProcessingResults) throws IOException {
         var key = parameter.getAnnotation(QueryParameter.class).value();
         var paramValue = request.getUrlParameters().get(key);
+        if (!isMandatory(parameter) && paramValue == null) {
+            return null;
+        }
         var deserialized = deserializeParameter(paramValue, request, parameter, postProcessingResults);
         if (deserialized instanceof String str) {
             try {
@@ -137,7 +143,7 @@ class ControllerMethodParameter {
 
     private Object deserializePathVariable(Parameter parameter, ClientRequest request, PostProcessingResults postProcessingResults) throws IOException {
         var key = parameter.getAnnotation(PathVariable.class).value();
-        if (!request.getPathVariables().containsKey(key)) {
+        if (isMandatory(parameter) && !request.getPathVariables().containsKey(key)) {
             throw new IllegalStateException("No path variable found for key " + key);
         }
         var paramValue = request.getPathVariables().get(key);
@@ -146,7 +152,7 @@ class ControllerMethodParameter {
 
     private Object deserializeWidgetParameter(Parameter parameter, ClientRequest request, PostProcessingResults postProcessingResults) throws IOException {
         var key = parameter.getAnnotation(WidgetParameter.class).value();
-        if (!request.getBindingParameters().containsKey(key)) {
+        if (isMandatory(parameter) && !request.getBindingParameters().containsKey(key)) {
             throw new IllegalStateException("No widget parameter found for key " + key);
         }
         var paramValue = request.getBindingParameters().get(key);
@@ -154,11 +160,15 @@ class ControllerMethodParameter {
     }
 
     private Object deserializeParameter(String jsonValue, ClientRequest request, Parameter parameter, PostProcessingResults postProcessingResults) throws IOException {
-        if (jsonValue == null) {
+        if (!isMandatory(parameter) && jsonValue == null) {
             return null;
         }
         var userContext = UserContextImpl.getInstance();
         return deserializer.deserialize(jsonValue, parameter, userContext, postProcessingResults);
+    }
+
+    private boolean isMandatory(Parameter parameter) {
+        return !parameter.isAnnotationPresent(NullAllowed.class);
     }
 
 

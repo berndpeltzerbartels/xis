@@ -32,7 +32,8 @@ class ActionButtonHandler extends TagHandler {
      */
     refresh(data) {
         this.data = data;
-        return this.renderWithData(data);
+        this.renderWithData(data);
+        return this.refreshDescendantHandlers(data);
     }
 
     /**

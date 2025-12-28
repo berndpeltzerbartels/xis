@@ -222,12 +222,14 @@ class PageController {
             this.initBuffer()
                 .then(() => this.htmlTagHandler.refresh(data))
                 .then(() => {if (response.annotatedTitle) this.setTitle(response.annotatedTitle);})
-                .then(() => this.commitBuffer());
-
-            if (!skipHistoryUpdate && response.status < 300) {
-                this.updateHistory(this.resolvedURL, response.annotatedTitle);
-            }
-            app.eventPublisher.publish(EventType.PAGE_LOADED, { page: this.page, url: this.resolvedURL });
+                .then(() => this.commitBuffer())
+                .then(() =>  app.eventPublisher.publish(EventType.BUFFER_COMMITTED))
+                .then(() => {
+                    if (!skipHistoryUpdate && response.status < 300) {
+                        this.updateHistory(this.resolvedURL, response.annotatedTitle);
+                    }
+                    app.eventPublisher.publish(EventType.PAGE_LOADED, { page: this.page, url: this.resolvedURL });
+                });
         }).catch(error => handleError(error));
     }
 

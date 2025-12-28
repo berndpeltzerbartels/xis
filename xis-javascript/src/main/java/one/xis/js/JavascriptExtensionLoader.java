@@ -17,11 +17,12 @@ import java.util.*;
  * Returns a list of js code snippets created with empty lines in between.
  */
 @XISComponent
-class JavascriptExtensionLoader {
-    Map<String, String> loadExtensions() {
+public class JavascriptExtensionLoader {
+
+    public Map<String, String> loadExtensions() {
         Map<String, String> extensions = new LinkedHashMap<>();
         try {
-            Enumeration<URL> resources = getClass().getClassLoader().getResources("META-INF/xis/js/extensions");
+            Enumeration<URL> resources = Thread.currentThread().getContextClassLoader().getResources("META-INF/xis/js/extensions");
             while (resources.hasMoreElements()) {
                 URL url = resources.nextElement();
                 List<String> resourcePaths = readResourcePaths(url);
