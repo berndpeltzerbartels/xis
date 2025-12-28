@@ -1,6 +1,7 @@
 package one.xis.utils.io;
 
 import java.io.*;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,11 +65,15 @@ public class IOUtils {
     }
 
     public static InputStream getResourceAsStream(String resourcePath) {
-        InputStream in = Thread.currentThread().getContextClassLoader().getSystemResourceAsStream(resourcePath);
+        URL in = Thread.currentThread().getContextClassLoader().getResource(resourcePath);
         if (in == null) {
             throw new NoSuchResourceException(resourcePath);
         }
-        return in;
+        try {
+            return in.openStream();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static InputStream getResourceForClass(Class<?> aClass, String resourcName) {
@@ -114,6 +119,9 @@ public class IOUtils {
     }
 
     public static String getClassPathResourceContent(String resourcePath) {
+        if (resourcePath.startsWith("/")) {
+            resourcePath = resourcePath.substring(1);
+        }
         try (InputStream inputStream = getResourceAsStream(resourcePath)) {
             return getContent(inputStream, StandardCharsets.UTF_8.name());
         } catch (IOException e) {

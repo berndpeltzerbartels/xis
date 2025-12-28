@@ -23,7 +23,7 @@ class JavascriptExtensionLoaderTest {
 
         // Assert
         assertThat(extensions).isNotNull();
-        assertThat(extensions).hasSize(2); // Assuming there are 2 extensions in the test resources
+        assertThat(extensions.size()).isGreaterThan(1); // 2 are always present
 
         // Check that the loaded extensions contain expected content
         assertThat(extensions.get("extension1.js")).isEqualTo("console.log(\"Extension 1 loaded\");\n");

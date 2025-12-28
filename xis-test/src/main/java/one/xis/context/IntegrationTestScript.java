@@ -2,6 +2,7 @@ package one.xis.context;
 
 import lombok.Getter;
 import one.xis.js.Javascript;
+import one.xis.js.JavascriptExtensionLoader;
 import one.xis.test.dom.NodeConstants;
 import one.xis.test.js.Array;
 import one.xis.test.js.JSUtil;
@@ -19,6 +20,7 @@ class IntegrationTestScript {
     private final IntegrationTestEnvironment testEnvironment;
     private final String script;
     private final IntegrationTestFunctions integrationTestFunctions;
+    private final JavascriptExtensionLoader extensionLoader = new JavascriptExtensionLoader();
 
     IntegrationTestScript(IntegrationTestEnvironment testEnvironment) {
         this.testEnvironment = testEnvironment;
@@ -27,7 +29,11 @@ class IntegrationTestScript {
     }
 
     private String testScript() {
-        return Javascript.getScript(EVENT_REGISTRY, CLASSES, FUNCTIONS, TEST, TEST_MAIN);
+        return Javascript.getScript(EVENT_REGISTRY, TAG_REGISTRY, CLASSES, FUNCTIONS, TEST, EXTENSIONS, TEST_MAIN);
+    }
+
+    private String getExtensionScript() {
+        return String.join("\n", extensionLoader.loadExtensions().values());
     }
 
     JavascriptFunction getInvoker() {

@@ -2,6 +2,7 @@ class TestApplication {
 
     constructor() {
         this.initializers = [];
+        this.tagRegistry = new CustomTagRegistry();
         this.messageHandler = new MessageHandler();
         this.sessionStorage = new SessionStore();
         this.localStorage = new LocalStore();
@@ -15,7 +16,7 @@ class TestApplication {
         this.widgets = new Widgets(this.client);
         this.tagHandlers = new TagHandlers();
         this.includes = new Includes(this.client);
-        this.initializer = new Initializer(this.domAccessor, this.client, this.widgets, this.includes, this.widgetContainers, this.tagHandlers);
+        this.initializer = new Initializer(this.domAccessor, this.client, this.widgets, this.includes, this.widgetContainers, this.tagHandlers, this.tagRegistry);
         this.pageController = new PageController(this.client, this.pages, this.initializer, this.urlResolver, this.tagHandlers);
         this.history = new PageHistory(this.pageController);
         this.eventPublisher = new EventPublisher();

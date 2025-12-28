@@ -12,8 +12,9 @@ class HandlerBuilder {
      * @param {WidgetContainers} widgetContainers
      * @param {TagHandlers} tagHandlers
      * @param {Initializer} initializer
+     * @param {TagRegistry} tagRegistry
      */
-    constructor(domAccessor, client, widgets, includes, widgetContainers, tagHandlers, initializer) {
+    constructor(domAccessor, client, widgets, includes, widgetContainers, tagHandlers, initializer, tagRegistry) {
         this.domAccessor = domAccessor;
         this.client = client;
         this.widgets = widgets;
@@ -21,6 +22,7 @@ class HandlerBuilder {
         this.widgetContainers = widgetContainers;
         this.tagHandlers = tagHandlers;
         this.initializer = initializer;
+        this.tagRegistry = tagRegistry;
     }
 
     /**

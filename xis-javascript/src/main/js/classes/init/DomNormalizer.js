@@ -26,10 +26,17 @@ class DomNormalizer {
     * 
     * @param {Element} root
     * @param {DomAccessor} domAccessor
+    * @param {TagRegistry} tagRegistry
      */
-    constructor(root, domAccessor) {
+    constructor(root, domAccessor, tagRegistry) {
         this.root = root;
         this.domAccessor = domAccessor;
+        this.tagRegistry = tagRegistry;
+    }
+
+
+    addCustomTagConfig(tagConfig) {
+        this.customTagConfigs.push(tagConfig);
     }
 
     /**
@@ -77,6 +84,11 @@ class DomNormalizer {
         if (isElement(element) && element.hasAttribute('selection-group')) {
             element.setAttribute('xis:selection-group', element.getAttribute('selection-group'));
             element.removeAttribute('selection-group');
+        }
+        for (var tagConfig of this.tagRegistry.getAllTagConfigs()) {
+            if (tagConfig.matches(normalizedElement)) {
+                normalizedElement = tagConfig.normalize(normalizedElement);
+            }
         }
         for (var child of nodeListToArray(normalizedElement.childNodes)) {
             if (isElement(child) || isDocumentFragment(child)) {

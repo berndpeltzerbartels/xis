@@ -3,6 +3,18 @@
  */
 class DomAccessor {
 
+/**
+ * Surrounds the given element with the given elementToInsert. Is equivalent to
+ * inserting elementToInsert as parent of element.
+
+ * @public
+ * @param {Element} element
+ * @param {Element} elementToInsert
+ */
+    surroundWith(element, elementToInsert) {
+        this.insertParent(element, elementToInsert);
+    }
+
     /**
      * @public
      * @param {Element} element 

@@ -20,3 +20,7 @@ window['eventListenerRegistry'] = {
     this.listeners[type].push(listener);
   }
 };
+
+var tagRegistry = {
+    tagConfigs: []
+}

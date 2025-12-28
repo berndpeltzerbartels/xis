@@ -25,7 +25,6 @@ public class IntegrationTestContext {
     @Getter
     private final IntegrationTestEnvironment environment;
     private final UserInfo userInfo;
-
     private static final Object SYNC_LOCK = new Object();
 
     public static Builder builder() {

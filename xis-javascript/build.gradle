@@ -71,6 +71,8 @@ dependencies {
     implementation project(':xis-util')
     implementation project(':xis-context')
 
+    implementation project(':xis-tags')
+
     implementation project(':xis-resources')
     testImplementation project(':xis-test')
     testImplementation project(':xis-util')

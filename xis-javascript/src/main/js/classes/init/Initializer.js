@@ -14,11 +14,13 @@ class Initializer {
      * @param {Includes} includes
      * @param {WidgetContainers} widgetContainers
      * @param {TagHandlers} tagHandlers
+     * @param {TagRegistry} tagRegistry
      */
-    constructor(domAccessor, client, widgets, includes, widgetContainers, tagHandlers) {
-        this.handlerBuilder = new HandlerBuilder(domAccessor, client, widgets, includes, widgetContainers, tagHandlers, this);
+    constructor(domAccessor, client, widgets, includes, widgetContainers, tagHandlers, tagRegistry) {
+        this.handlerBuilder = new HandlerBuilder(domAccessor, client, widgets, includes, widgetContainers, tagHandlers, this, tagRegistry);
         this.domAccessor = domAccessor;
-    }
+        this.tagRegistry = tagRegistry;
+   }
 
 
     /**
@@ -39,6 +41,6 @@ class Initializer {
         if (!isElement(element) && !isDocumentFragment(element)) {
             return element;
         }
-        return new DomNormalizer(element, this.domAccessor).normalize();
+        return new DomNormalizer(element, this.domAccessor, this.tagRegistry).normalize();
     }
 }

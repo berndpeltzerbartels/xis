@@ -8,11 +8,13 @@ import one.xis.resource.StringResource;
 @Getter
 public enum JavascriptSource {
     EVENT_REGISTRY(getResource("event-registry.js")),
+    TAG_REGISTRY(getResource("tag-registry.js")),
     CLASSES(getResource("classes.js")),
     FUNCTIONS(getResource("functions.js")),
     TEST(getResource("test.js")),
     TEST_MAIN(getResource("test-main.js")),
-    TEST_APP_INSTANCE(new StringResource("var app = new TestApplication();"));
+    TEST_APP_INSTANCE(new StringResource("var app = new TestApplication();")),
+    EXTENSIONS(getExtensionsResource());
 
     private final String content;
     private final Resource resource;
@@ -24,5 +26,13 @@ public enum JavascriptSource {
 
     static Resource getResource(String path) {
         return new Resources().getByPath(path);
+    }
+
+    static Resource getExtensionsResource() {
+        var extensions = new JavascriptExtensionLoader().loadExtensions();
+        if (extensions.isEmpty()) {
+            return new StringResource("// no extensions");
+        }
+        return new StringResource(String.join("\n", extensions.values()));
     }
 }

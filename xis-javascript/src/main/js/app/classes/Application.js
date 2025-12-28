@@ -3,6 +3,7 @@ class Application {
     constructor() {
         this.initializers = [];
         this.initializationListeners = [];
+        this.tagRegistry = new CustomTagRegistry();
         this.messageHandler = window.messageHandler ?  window.messageHandler : new MessageHandler();
         this.sessionStorage = new SessionStore();
         this.localStorage = new LocalStore();
@@ -18,7 +19,7 @@ class Application {
         this.tagHandlers = new TagHandlers();
         this.elFunctions = new ELFunctions();
         this.includes = new Includes(this.client);
-        this.initializer = new Initializer(this.domAccessor, this.client, this.widgets, this.includes, this.widgetContainers, this.tagHandlers);
+        this.initializer = new Initializer(this.domAccessor, this.client, this.widgets, this.includes, this.widgetContainers, this.tagHandlers, this.tagRegistry);
         this.pageController = new PageController(this.client, this.pages, this.initializer, this.urlResolver, this.tagHandlers);
         this.history = new PageHistory(this.pageController);
         this.eventPublisher = new EventPublisher();
