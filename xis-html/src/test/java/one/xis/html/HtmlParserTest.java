@@ -162,6 +162,109 @@ class HtmlParserTest {
         }
     }
 
+    @Nested
+    class GlobalMessagesTest {
+        private final String html = """
+                <xis:template xmlns:xis="https://xis.one/xsd">
+                                   <h1>Add Contact</h1>
+                
+                                   <xis:form binding="contact">
+                                       <xis:global-messages/>
+                
+                                       <h4>Personal Information</h4>
+                
+                                       <div class="col2">
+                                           <div>
+                                               <input xis:binding="firstName" type="text" placeholder="First Name"/>
+                                               <xis:message message-for="firstName"/>
+                                               <label>First Name *</label>
+                                           </div>
+                
+                                           <div>
+                                               <input xis:binding="lastName" type="text" placeholder="Last Name"/>
+                                               <xis:message message-for="lastName"/>
+                                               <label>Last Name *</label>
+                                           </div>
+                                       </div>
+                
+                                       <div class="col2">
+                                           <div>
+                                               <input xis:binding="email" type="email" placeholder="Email"/>
+                                               <xis:message message-for="email"/>
+                                               <label>Email Address *</label>
+                                           </div>
+                
+                                           <div>
+                                               <input xis:binding="phone" type="tel" placeholder="Phone"/>
+                                               <xis:message message-for="phone"/>
+                                               <label>Phone Number</label>
+                                           </div>
+                                       </div>
+                
+                                       <h4>Company Information</h4>
+                
+                                       <div class="col2">
+                                           <div>
+                                               <input xis:binding="company" type="text" placeholder="Company"/>
+                                               <xis:message message-for="company"/>
+                                               <label>Company Name</label>
+                                           </div>
+                
+                                           <div>
+                                               <input xis:binding="position" type="text" placeholder="Position"/>
+                                               <xis:message message-for="position"/>
+                                               <label>Position/Title</label>
+                                           </div>
+                                       </div>
+                
+                                       <h4>Classification</h4>
+                
+                                       <div class="col2">
+                                           <div>
+                                               <select xis:binding="type">
+                                                   <option value="">-- Select Type --</option>
+                                                   <option xis:foreach="t:${contactTypes}" value="${t.name}">${t.displayName}</option>
+                                               </select>
+                                               <xis:message message-for="type"/>
+                                               <label>Contact Type *</label>
+                                           </div>
+                
+                                           <div>
+                                               <select xis:binding="status">
+                                                   <option value="">-- Select Status --</option>
+                                                   <option xis:foreach="s:${contactStatuses}" value="${s.name}">${s.displayName}</option>
+                                               </select>
+                                               <xis:message message-for="status"/>
+                                               <label>Status *</label>
+                                           </div>
+                                           </div>
+                
+                                           <div class="span0">
+                                               <label>Tags (Checkboxes)</label>
+                                               <div class="checkbox-group">
+                                                   <div xis:foreach="tag:${availableTags}">
+                                                       <xis:checkbox binding="tags" value="${tag}" id="tag-${tag}"/>
+                                                       <label for="tag-${tag}">${tag}</label>
+                                                   </div>
+                                               </div>
+                                           </div>
+                
+                
+                                   </xis:form>
+                
+                               </xis:template>
+                
+                """;
+
+        @Test
+        void parse() {
+            var document = parser.parse(html);
+            var htmlResult = document.asString();
+
+            //assertThat(htmlResult).isEqualToIgnoringWhitespace("<div xis:global-messages=\"true\"></div>");
+        }
+    }
+
 
     @Nested
     class UnknownBooleanAttributeTest {

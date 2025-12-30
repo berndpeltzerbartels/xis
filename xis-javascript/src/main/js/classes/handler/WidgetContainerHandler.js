@@ -28,7 +28,6 @@ class WidgetContainerHandler extends TagHandler {
         this.widgetContainers = widgetContainers;
         this.tagHandlers = tagHandlers;
         this.widgetInstance = undefined;
-        this.widgetParameters = {};
         this.containerId = undefined;
         this.containerIdExpression = this.variableTextContentFromAttribute('container-id');
         this.defaultWidgetExpression = this.variableTextContentFromAttribute('default-widget');
@@ -36,6 +35,7 @@ class WidgetContainerHandler extends TagHandler {
         this.tagContentSetter = new TagContentSetter();
         this.scrollToTop = tag.getAttribute('scroll-to-top') === 'true';
         this.buffer = undefined;
+        this.widgetParameters = {};
     }
 
     /**
@@ -44,7 +44,7 @@ class WidgetContainerHandler extends TagHandler {
      * @param {String} value 
      */
     addParameter(name, value) {
-        this.widgetParameters[name] = value;
+       this.widgetParameters[name] = value;
     }
 
     /**
@@ -71,29 +71,19 @@ class WidgetContainerHandler extends TagHandler {
             }
             console.warn('Target container not found:', response.widgetContainerId);
         }
-
+        this.widgetParameters = mergeObjects(this.widgetParameters, response.widgetParameters);
         if (!this.widgetState) {
-            this.widgetState = new WidgetState(app.pageController.resolvedURL, {});
+            this.widgetState = new WidgetState(app.pageController.resolvedURL, this.widgetParameters);
         }
         var data = response.data;
+        data.setValue(['widgetParameters'], this.widgetParameters);
         this.refreshContainerId(data);
         return this.initBuffer()
-            .then(() => {
-                if (response.nextWidgetId) {
-                    this.ensureWidgetBound(response.nextWidgetId, true);
-                }
-                return this.refreshDescendantHandlers(data);
-            })
-            .then(() => {
-                if (response.annotatedTitle) {
-                    app.pageController.setTitle(response.annotatedTitle);
-                }
-                if (response.annotatedAddress) {
-                    app.pageController.setAddress(response.annotatedAddress);
-                }
-            })
+            .then(() => this.bindNextWidgetIfNeeded(response))
+            .then(() => this.refreshDescendantHandlers(data))
+            .then(() => this.updatePageMetadata(response))
             .then(() => app.pageController.handleUpdateEvents(response.updateEventKeys))
-            .then(pageUpdated => pageUpdated ? Promise.resolve() : app.widgetContainers.handleUpdateEvents(response.updateEventKeys))
+            .then(pageUpdated => this.handleWidgetContainerUpdates(pageUpdated, response.updateEventKeys))
             .then(() => this.commitBuffer());
     }
 
@@ -105,10 +95,12 @@ class WidgetContainerHandler extends TagHandler {
         this.data = data;
         this.widgetParameters = {};
         this.refreshContainerId(data);
-        const descendantPromise = this.refreshDescendantHandlers(data); // xis:parameter tags will call addParameter
         this.bindWidgetInitial(data);
-        var widgetParameters = this.widgetState ? this.widgetState.widgetParameters : {};
-        this.widgetState = new WidgetState(app.pageController.resolvedURL, widgetParameters);
+        this.widgetParameters = mergeObjects(this.widgetParameters, data.getValue(['widgetParameters']));
+        this.widgetState = new WidgetState(app.pageController.resolvedURL, this.widgetParameters);
+        data.setValue(['widgetParameters'], this.widgetParameters);
+        debugger;
+        const descendantPromise = this.refreshDescendantHandlers(data); // xis:parameter tags will call addParameter
         var promises = [];
         if (this.widgetInstance) {
             promises.push(this.reloadDataAndRefresh(data));
@@ -161,11 +153,12 @@ class WidgetContainerHandler extends TagHandler {
     }
 
 
-    /**
-     * @private
-     */
     currentWidgetId() {
         return this.widgetInstance ? this.widgetInstance.widget.id : undefined;
+    }
+
+    currentWidgetParameters() {
+        return this.widgetParameters;
     }
 
 
@@ -292,6 +285,76 @@ class WidgetContainerHandler extends TagHandler {
     }
     /**
      * @private
+     * @param {ServerResponse} response
+     */
+    bindNextWidgetIfNeeded(response) {
+        if (response.nextWidgetId) {
+            this.ensureWidgetBound(response.nextWidgetId, true);
+        }
+    }
+
+    /**
+     * @private
+     * @param {ServerResponse} response
+     */
+    updatePageMetadata(response) {
+        if (response.annotatedTitle) {
+            app.pageController.setTitle(response.annotatedTitle);
+        }
+        if (response.annotatedAddress) {
+            app.pageController.setAddress(response.annotatedAddress);
+        }
+        return response;
+    }
+
+    /**
+     * @private
+     * @param {boolean} pageUpdated
+     * @param {Array} updateEventKeys
+     * @returns {Promise<void>}
+     */
+    handleWidgetContainerUpdates(pageUpdated, updateEventKeys) {
+        if (pageUpdated) {
+            return Promise.resolve();
+        }
+        return app.widgetContainers.handleUpdateEvents(updateEventKeys);
+    }
+
+    /**
+     * @private
+     * @param {Data} data
+     * @param {Data} parentData
+     * @returns {Data}
+     */
+    attachParentData(data, parentData) {
+        data.parentData = parentData;
+        return data;
+    }
+
+    /**
+     * @private
+     * @param {Data} data
+     * @returns {Data}
+     */
+    updateWidgetStateData(data) {
+        this.widgetState.data = data;
+        return data;
+    }
+
+    /**
+     * @private
+     * @param {Data} data
+     * @returns {Data}
+     */
+    mergeWidgetParameters(data) {
+        this.widgetParameters = mergeObjects(this.widgetParameters, data.getValue(['widgetParameters']));
+        this.widgetState.widgetParameters = this.widgetParameters;
+        data.setValue(['widgetParameters'], this.widgetParameters);
+        return data;
+    }
+
+    /**
+     * @private
      */
     reloadDataAndRefresh(parentData) {
         return this.doLoad(parentData);
@@ -300,17 +363,11 @@ class WidgetContainerHandler extends TagHandler {
     doLoad(parentData) {
         if (this.widgetInstance) {
             return app.client.loadWidgetData(this.widgetInstance, this.widgetState, this)
-                .then(response => {
-                    if (response.annotatedTitle) {
-                        app.pageController.setTitle(response.annotatedTitle);
-                    }
-                    if (response.annotatedAddress) {
-                        app.pageController.setAddress(response.annotatedAddress);
-                    }
-                    return response.data;
-                })
-                .then(data => { data.parentData = parentData; return data; })
-                .then(data => { this.widgetState.data = data; return data; })
+                .then(response => this.updatePageMetadata(response))
+                .then(response => response.data)
+                .then(data => this.attachParentData(data, parentData))
+                .then(data => this.updateWidgetStateData(data))
+                .then(data => this.mergeWidgetParameters(data))
                 .then(data => this.refreshDescendantHandlers(data).then(() => data))
                 .then(data => this.tagContentSetter.apply(document, data.idVariables, data.tagVariables))
                 .catch(e => reportError(e));

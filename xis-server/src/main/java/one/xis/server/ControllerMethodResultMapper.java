@@ -92,7 +92,7 @@ class ControllerMethodResultMapper {
     void mapRequestToResult(ClientRequest request, ControllerMethodResult controllerMethodResult) {
         // Do not map widgetId or pageURL here !
         controllerMethodResult.setWidgetContainerId(request.getWidgetContainerId());
-        controllerMethodResult.getWidgetParameters().putAll(castStringMap(request.getBindingParameters()));
+        controllerMethodResult.getWidgetParameters().putAll(castStringMap(request.getWidgetParameters()));
         controllerMethodResult.getPathVariables().putAll(castStringMap(request.getPathVariables()));
         controllerMethodResult.getUrlParameters().putAll(castStringMap(request.getUrlParameters()));
     }

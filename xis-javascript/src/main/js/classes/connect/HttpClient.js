@@ -112,8 +112,8 @@ class HttpClient extends Client {
         }
     }
 
-    async loadFormData(resolvedURL, widgetId, formBindingKey, formBindingParameters) {
-        const request = this.createFormRequest(resolvedURL, widgetId, {}, null, formBindingKey, formBindingParameters);
+    async loadFormData(resolvedURL, widgetId, formBindingKey, widgetParameters) {
+        const request = this.createFormRequest(resolvedURL, widgetId, {}, null, formBindingKey, widgetParameters);
         try {
             const response = await this.httpConnector.post('/xis/form/model', request, {});
             return this.handleResponse(response);

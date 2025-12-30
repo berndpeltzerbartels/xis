@@ -93,6 +93,9 @@ class HandlerBuilder {
                 handler = new ParameterTagHandler(element, parentHandler);
                 parentHandler.addDescendantHandler(handler);
                 break;
+            case 'xis:global-messages':
+                handler = new GlobalMessageTagHandler(element);
+                break;
             case 'input':
                 if (element.getAttribute('xis:binding')) {
                     handler = this.createInputHandler(element);

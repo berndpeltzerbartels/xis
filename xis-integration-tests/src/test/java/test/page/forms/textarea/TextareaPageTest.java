@@ -35,9 +35,8 @@ class TextareaPageTest {
         textarea.setValue(""); // leer lassen
         submitButton.click();
 
-        assertThat(result.getDocument().getElementsByClass("error")).isNotEmpty();
-        var divError = result.getDocument().getElementsByClass("error").get(0);
-        assertThat(divError.getInnerHTML()).contains("Benutzerdefinierte globale Pflichtfeldmeldung");
+        var liError = result.getDocument().getElementByTagName("li");
+        assertThat(liError.getInnerHTML()).contains("Benutzerdefinierte globale Pflichtfeldmeldung");
 
         assertThat(result.getDocument().getElementById("fieldMessage").getInnerText()).isEqualTo("Benutzerdefinierte Pflichtfeldmeldung");
     }
@@ -54,9 +53,8 @@ class TextareaPageTest {
         textarea.setValue("\u0000\u0001"); // ungültige Eingabe
         submitButton.click();
 
-        assertThat(result.getDocument().getElementsByClass("error")).isNotEmpty();
-        var divError = result.getDocument().getElementsByClass("error").get(0);
-        assertThat(divError.getInnerHTML()).contains("Benutzerdefinierte globale Pflichtfeldmeldung");
+        var liError = result.getDocument().getElementByTagName("li");
+        assertThat(liError.getInnerHTML()).contains("Benutzerdefinierte globale Pflichtfeldmeldung");
     }
 
     @Test
@@ -71,8 +69,7 @@ class TextareaPageTest {
 
         submitButton.click();
 
-        assertThat(result.getDocument().getElementsByClass("error")).isNotEmpty();
-        var divError = result.getDocument().getElementsByClass("error").get(0);
-        assertThat(divError.getInnerHTML()).contains("Benutzerdefinierte globale Pflichtfeldmeldung");
+        var liError = result.getDocument().getElementByTagName("li");
+        assertThat(liError.getInnerHTML()).contains("Benutzerdefinierte globale Pflichtfeldmeldung");
     }
 }

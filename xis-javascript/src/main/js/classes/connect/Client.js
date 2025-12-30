@@ -171,7 +171,7 @@ class Client {
      * @param {String} action 
      * @param {any} actionParameters 
      */
-    createFormRequest(resolvedURL, widgetId, formData, action, formBindingKey, formBindingParameters) {
+    createFormRequest(resolvedURL, widgetId, formData, action, formBindingKey, widgetParameters) {
         var mappedFormData = {};
         if (formBindingKey) {
             mappedFormData[formBindingKey] = formData;
@@ -187,7 +187,7 @@ class Client {
         request.formData = mappedFormData;
         request.urlParameters = resolvedURL.urlParameters;
         request.pathVariables = resolvedURL.pathVariablesAsMap();
-        request.bindingParameters = formBindingParameters;
+        request.widgetParameters = widgetParameters;
         request.zoneId = this.zoneId;
         request.type = request.widgetId ? 'widget' : 'page';
         if (widgetId) { // TODO write a test
@@ -223,7 +223,7 @@ class Client {
         request.formData = formData ? formData.values : {};
         request.urlParameters = widgetState.resolvedURL.urlParameters;
         request.pathVariables = widgetState.resolvedURL.pathVariablesAsMap();
-        request.bindingParameters = widgetState.widgetParameters;
+        request.widgetParameters = widgetState.widgetParameters;
         request.actionParameters = actionParameters ? actionParameters : {};
         request.zoneId = this.zoneId;         // TODO locale ?
         request.sessionStorageData = this.sessionStorageDataWidget(widgetInstance.widget.id);
@@ -356,6 +356,7 @@ class Client {
         serverResponse.clientStorageData = obj.clientStorageData;
         serverResponse.globalVariableData = obj.globalVariableData;
         serverResponse.sessionStorageData = obj.sessionStorageData;
+        serverResponse.widgetParameters = obj.widgetParameters;
         serverResponse.widgetContainerId = obj.widgetContainerId;
         serverResponse.redirectUrl = obj.redirectUrl;
         serverResponse.tagVariables = obj.tagVariables || {};
@@ -374,6 +375,7 @@ class Client {
         data.setValue(['pathname'], window.location.pathname);
         data.setValue(['origin'], window.location.origin);
         data.setValue(['queryParams'], this.queryToObject(window.location.search));
+        data.setValue(['widgetParameters'], obj.widgetParameters);
         this.storeData(serverResponse);
         this.setTitle(serverResponse);
         this.tagContentSetter.apply(document, serverResponse.idVariables, serverResponse.tagVariables);

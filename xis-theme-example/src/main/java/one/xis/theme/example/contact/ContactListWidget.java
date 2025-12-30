@@ -1,10 +1,7 @@
 package one.xis.theme.example.contact;
 
 import lombok.RequiredArgsConstructor;
-import one.xis.Action;
-import one.xis.ActionParameter;
-import one.xis.ModelData;
-import one.xis.Widget;
+import one.xis.*;
 
 import java.util.List;
 
@@ -32,6 +29,11 @@ public class ContactListWidget {
     @ModelData
     public long customersCount() {
         return contactService.countByType(ContactType.CUSTOMER);
+    }
+
+    @Action("edit")
+    public WidgetResponse editContact(@ActionParameter("contactId") Long contactId) {
+        return WidgetResponse.of(ContactFormWidget.class, "contactId", contactId);
     }
 
     @Action("delete")

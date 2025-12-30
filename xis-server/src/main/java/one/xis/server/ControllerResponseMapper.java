@@ -26,6 +26,7 @@ class ControllerResponseMapper {
         response.setRedirectUrl(result.getRedirectUrl());
         response.getTagVariables().putAll(result.getTagVariables());
         response.getIdVariables().putAll(result.getIdVariables());
+        response.getWidgetParameters().putAll(result.getWidgetParameters());
         if (result.getAnnotatedTitle() != null) {
             response.setAnnotatedTitle(result.getAnnotatedTitle());
         }

@@ -78,7 +78,9 @@ class ResourceService {
     }
 
     Resource getWidgetHtml(String id) {
-        return widgetHtmlResourceCache.getResourceContent(id).orElseThrow();
+        Resource resource = widgetHtmlResourceCache.getResourceContent(id).orElseThrow();
+        HtmlDocument doc = htmlParser.parse(resource.getContent());
+        return new GenericResource<>(doc.toHtml(), resource.getLastModified(), resource.getResourcePath());
     }
 
     Resource getIncludeHtml(String key) {

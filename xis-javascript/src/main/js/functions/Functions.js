@@ -257,3 +257,16 @@ function reportError(message, error)    {
     console.error(message, error);
     app.messageHandler.addErrorMessage(message);
 }
+
+function mergeObjects(object1, object2) {
+    const result = {};
+    if (!object1) object1 = {};
+    if (!object2) object2 = {};
+    for (const key of Object.keys(object1)) {
+        result[key] = object1[key];
+    }
+    for (const key of Object.keys(object2)) {
+        result[key] = object2[key];
+    }
+    return result;
+}

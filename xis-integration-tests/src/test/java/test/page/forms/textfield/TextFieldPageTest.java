@@ -35,9 +35,8 @@ class TextFieldPageTest {
         submitButton.click();
 
         // Feldspezifische Nachricht aus dem passenden <div> unter dem Textfeld
-        assertThat(result.getDocument().getElementsByClass("error")).isNotEmpty();
-        var divError = result.getDocument().getElementsByClass("error").get(0);
-        assertThat(divError.getInnerHTML()).contains("Benutzerdefinierte globale Pflichtfeldmeldung");
+        var liError = result.getDocument().getElementByTagName("li");
+        assertThat(liError.getInnerHTML()).contains("Benutzerdefinierte globale Pflichtfeldmeldung");
         assertThat(result.getDocument().getElementById("fieldMessage").getInnerText()).isEqualTo("Benutzerdefinierte Pflichtfeldmeldung");
     }
 
@@ -73,8 +72,7 @@ class TextFieldPageTest {
 
         submitButton.click();
 
-        assertThat(result.getDocument().getElementsByClass("error")).isNotEmpty();
-        var divError = result.getDocument().getElementsByClass("error").get(0);
-        assertThat(divError.getInnerHTML()).contains("Benutzerdefinierte globale Pflichtfeldmeldung");
+        var liError = result.getDocument().getElementByTagName("li");
+        assertThat(liError.getInnerHTML()).contains("Benutzerdefinierte globale Pflichtfeldmeldung");
     }
 }

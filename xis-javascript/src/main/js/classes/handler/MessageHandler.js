@@ -6,7 +6,7 @@ class MessageHandler {
      *        ms per level; null disables auto-hide for that level.
      */
     constructor(container, options = {}) {
-        this.messageTag = container || document.getElementById('messages');
+        this.messageTag = container || document.getElementById('system-messages');
         if (!this.messageTag) {
             console.warn('[MessageHandler] No container element found (id="messages"). Rendering is disabled.');
         }

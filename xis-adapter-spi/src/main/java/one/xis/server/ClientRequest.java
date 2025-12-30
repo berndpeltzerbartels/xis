@@ -24,7 +24,7 @@ public class ClientRequest {
     private JsonMap pathVariables = new JsonMap();
     private JsonMap urlParameters = new JsonMap();
     private JsonMap queryParameters = new JsonMap();
-    private JsonMap bindingParameters = new JsonMap();
+    private JsonMap widgetParameters = new JsonMap();
     private JsonMap actionParameters = new JsonMap();
     private final JsonMap sessionStorageData = new JsonMap();
     private final JsonMap localStorageData = new JsonMap();

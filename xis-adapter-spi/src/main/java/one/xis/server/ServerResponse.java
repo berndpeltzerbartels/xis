@@ -26,6 +26,7 @@ public class ServerResponse {
     private Map<String, Object> sessionStorageData = new HashMap<>();
     private Map<String, Object> clientStorageData = new HashMap<>();
     private Map<String, Object> globalVariableData = new HashMap<>();
+    private Map<String, Object> widgetParameters = new HashMap<>();
     private Collection<String> updateEventKeys = new ArrayList<>();
     private Collection<String> reloadWidgets = new ArrayList<>(); // TODO remove?
     private String nextURL;
@@ -45,6 +46,7 @@ public class ServerResponse {
         data.clear();
         formData.clear();
         reloadWidgets.clear();
+        widgetParameters.clear();
         nextURL = null;
         nextWidgetId = null;
         validatorMessages = new ValidatorMessages();

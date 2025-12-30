@@ -6,6 +6,8 @@
  * @property {any} formData
  * @property {any} localStorageData
  * @property {any} localDatabaseData
+ * @property {any} globalVariableData
+ * @property {Object} widgetParameters
  * @property {string} widgetContainerId
  * @property {Array} reloadWidgets
  * @property {any} sessionStorageData
@@ -29,6 +31,7 @@ class ServerResponse {
         this.localStorageData = {};
         this.globalVariableData = {};
         this.localDatabaseData = {};
+        this.widgetParameters = {};
         this.widgetContainerId = '';
         this.reloadWidgets = [];
         this.sessionStorageData = {};

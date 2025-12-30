@@ -51,6 +51,10 @@
                     </span>
             </td>
             <td>
+                <button xis:action="edit" class="btn btn-sm">
+                    <xis:parameter name="contactId" value="${contact.id}"/>
+                    Edit
+                </button>
                 <button xis:action="delete" class="btn btn-sm">
                     <xis:parameter name="contactId" value="${contact.id}"/>
                     Delete

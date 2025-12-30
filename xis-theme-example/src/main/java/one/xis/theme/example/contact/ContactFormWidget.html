@@ -2,138 +2,122 @@
     <h1>Add Contact</h1>
 
     <xis:form binding="contact">
-        <ul xis:global-messages="true" class="form-error-global"></ul>
+        <xis:global-messages/>
 
-        <!-- Personal Information -->
-        <fieldset>
-            <legend>Personal Information</legend>
+        <h4>Personal Information</h4>
 
-            <div class="col2">
-                <div class="span1">
-                    <xis:input binding="firstName" type="text" placeholder="First Name" required="true"/>
-                    <xis:message message-for="firstName"/>
-                    <label>First Name *</label>
-                </div>
-
-                <div class="span1">
-                    <xis:input binding="lastName" type="text" placeholder="Last Name" required="true"/>
-                    <xis:message message-for="lastName"/>
-                    <label>Last Name *</label>
-                </div>
+        <div class="col2">
+            <div>
+                <input xis:binding="firstName" type="text" placeholder="First Name"/>
+                <xis:message message-for="firstName"/>
+                <label>First Name *</label>
             </div>
 
-            <div class="col2">
-                <div class="span1">
-                    <xis:input binding="email" type="email" placeholder="Email" required="true"/>
-                    <xis:message message-for="email"/>
-                    <label>Email Address *</label>
-                </div>
-
-                <div class="span1">
-                    <xis:input binding="phone" type="tel" placeholder="Phone"/>
-                    <xis:message message-for="phone"/>
-                    <label>Phone Number</label>
-                </div>
+            <div>
+                <input xis:binding="lastName" type="text" placeholder="Last Name"/>
+                <xis:message message-for="lastName"/>
+                <label>Last Name *</label>
             </div>
-        </fieldset>
+        </div>
 
-        <!-- Company Information -->
-        <fieldset>
-            <legend>Company Information</legend>
-
-            <div class="col2">
-                <div class="span1">
-                    <xis:input binding="company" type="text" placeholder="Company"/>
-                    <xis:message message-for="company"/>
-                    <label>Company Name</label>
-                </div>
-
-                <div class="span1">
-                    <xis:input binding="position" type="text" placeholder="Position"/>
-                    <xis:message message-for="position"/>
-                    <label>Position/Title</label>
-                </div>
-            </div>
-        </fieldset>
-
-        <!-- Classification -->
-        <fieldset>
-            <legend>Classification</legend>
-
-            <div class="col2">
-                <div class="span1">
-                    <xis:select binding="type" items="${contactTypes}"
-                                item-label="displayName" item-value="name" required="true">
-                        <option value="">-- Select Type --</option>
-                    </xis:select>
-                    <xis:message message-for="type"/>
-                    <label>Contact Type *</label>
-                </div>
-
-                <div class="span1">
-                    <xis:select binding="status" items="${contactStatuses}"
-                                item-label="displayName" item-value="name" required="true">
-                        <option value="">-- Select Status --</option>
-                    </xis:select>
-                    <xis:message message-for="status"/>
-                    <label>Status *</label>
-                </div>
+        <div class="col2">
+            <div>
+                <input xis:binding="email" type="email" placeholder="Email"/>
+                <xis:message message-for="email"/>
+                <label>Email Address *</label>
             </div>
 
-            <div class="span0">
-                <label>Tags (Checkboxes)</label>
-                <div class="checkbox-group">
-                    <div xis:foreach="tag:${availableTags}">
-                        <xis:checkbox binding="tags" value="${tag}" id="tag-${tag}"/>
-                        <label for="tag-${tag}">${tag}</label>
-                    </div>
+            <div>
+                <input xis:binding="phone" type="tel" placeholder="Phone"/>
+                <xis:message message-for="phone"/>
+                <label>Phone Number</label>
+            </div>
+        </div>
+
+        <h4>Company Information</h4>
+
+        <div class="col2">
+            <div>
+                <input xis:binding="company" type="text" placeholder="Company"/>
+                <xis:message message-for="company"/>
+                <label>Company Name</label>
+            </div>
+
+            <div>
+                <input xis:binding="position" type="text" placeholder="Position"/>
+                <xis:message message-for="position"/>
+                <label>Position/Title</label>
+            </div>
+        </div>
+
+        <h4>Classification</h4>
+
+        <div class="col2">
+            <div>
+                <select xis:binding="type">
+                    <option value="">-- Select Type --</option>
+                    <option xis:foreach="t:${contactTypes}" value="${t.name}">${t.displayName}</option>
+                </select>
+                <xis:message message-for="type"/>
+                <label>Contact Type *</label>
+            </div>
+
+            <div>
+                <select xis:binding="status">
+                    <option value="">-- Select Status --</option>
+                    <option xis:foreach="s:${contactStatuses}" value="${s.name}">${s.displayName}</option>
+                </select>
+                <xis:message message-for="status"/>
+                <label>Status *</label>
+            </div>
+        </div>
+
+        <div class="span0">
+            <label>Tags (Checkboxes)</label>
+            <div class="checkbox-group" xis:foreach="tag:${availableTags}">
+                <div>
+                    <xis:checkbox binding="tags" value="${tag}" id="tag-${tag}"/>
+                    <label for="tag-${tag}">${tag}</label>
                 </div>
             </div>
-        </fieldset>
+        </div>
 
         <!-- Address -->
-        <fieldset>
-            <legend>Address</legend>
 
-            <div class="span0">
-                <xis:input binding="street" type="text" placeholder="Street"/>
-                <xis:message message-for="street"/>
-                <label>Street Address</label>
+
+        <div class="span0">
+            <xis:input binding="street" type="text" placeholder="Street"/>
+            <xis:message message-for="street"/>
+            <label>Street Address</label>
+        </div>
+
+        <div class="col2">
+            <div class="span1">
+                <xis:input binding="city" type="text" placeholder="City"/>
+                <xis:message message-for="city"/>
+                <label>City</label>
             </div>
 
-            <div class="col2">
-                <div class="span1">
-                    <xis:input binding="city" type="text" placeholder="City"/>
-                    <xis:message message-for="city"/>
-                    <label>City</label>
-                </div>
-
-                <div class="span1">
-                    <xis:input binding="zipCode" type="text" placeholder="ZIP"/>
-                    <xis:message message-for="zipCode"/>
-                    <label>ZIP Code</label>
-                </div>
+            <div class="span1">
+                <xis:input binding="zipCode" type="text" placeholder="ZIP"/>
+                <xis:message message-for="zipCode"/>
+                <label>ZIP Code</label>
             </div>
+        </div>
 
-            <div class="span0">
-                <xis:select binding="country" items="${countries}">
-                    <option value="">-- Select Country --</option>
-                </xis:select>
-                <xis:message message-for="country"/>
-                <label>Country</label>
-            </div>
-        </fieldset>
-
+        <div class="span0">
+            <xis:select binding="country" items="${countries}">
+                <option value="">-- Select Country --</option>
+            </xis:select>
+            <xis:message message-for="country"/>
+            <label>Country</label>
+        </div>
         <!-- Notes -->
-        <fieldset>
-            <legend>Additional Information</legend>
-
-            <div class="span0">
-                <xis:textarea binding="notes" rows="5" placeholder="Notes"/>
-                <xis:message message-for="notes"/>
-                <label>Notes</label>
-            </div>
-        </fieldset>
+        <div class="span0">
+            <xis:textarea binding="notes" rows="5" placeholder="Notes"/>
+            <xis:message message-for="notes"/>
+            <label>Notes</label>
+        </div>
 
         <!-- Actions -->
         <div class="col2">

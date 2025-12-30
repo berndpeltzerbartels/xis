@@ -37,7 +37,7 @@ class ControllerResultMapper {
         controllerResult.getUpdateEventKeys().addAll(controllerMethodResult.getUpdateEventKeys());
         controllerResult.getModelData().putAll(controllerMethodResult.getModelData());
         controllerResult.getFormData().putAll(controllerMethodResult.getFormData());
-        controllerResult.getBindingParameters().putAll(controllerMethodResult.getWidgetParameters());
+        controllerResult.getWidgetParameters().putAll(controllerMethodResult.getWidgetParameters());
         controllerResult.getPathVariables().putAll(controllerMethodResult.getPathVariables());
         controllerResult.getUrlParameters().putAll(controllerMethodResult.getUrlParameters());
         controllerResult.getValidatorMessages().getGlobalMessages().addAll(controllerMethodResult.getValidatorMessages().getGlobalMessages());
@@ -59,7 +59,7 @@ class ControllerResultMapper {
         nextRequest.getUrlParameters().putAll(controllerResult.getUrlParameters().entrySet().stream().map(e -> Map.entry(e.getKey(), e.getValue().toString())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
         nextRequest.setPathVariables(toJsonMap(controllerResult.getPathVariables()));
         nextRequest.setWidgetContainerId(controllerResult.getWidgetContainerId());
-        nextRequest.setBindingParameters(toJsonMap(controllerResult.getBindingParameters()));
+        nextRequest.setWidgetParameters(toJsonMap(controllerResult.getWidgetParameters()));
         nextRequest.setWidgetId(controllerResult.getNextWidgetId());
     }
 

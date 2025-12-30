@@ -152,10 +152,10 @@ class ControllerMethodParameter {
 
     private Object deserializeWidgetParameter(Parameter parameter, ClientRequest request, PostProcessingResults postProcessingResults) throws IOException {
         var key = parameter.getAnnotation(WidgetParameter.class).value();
-        if (isMandatory(parameter) && !request.getBindingParameters().containsKey(key)) {
+        if (isMandatory(parameter) && !request.getWidgetParameters().containsKey(key)) {
             throw new IllegalStateException("No widget parameter found for key " + key);
         }
-        var paramValue = request.getBindingParameters().get(key);
+        var paramValue = request.getWidgetParameters().get(key);
         return deserializeParameter(paramValue, request, parameter, postProcessingResults);
     }
 
