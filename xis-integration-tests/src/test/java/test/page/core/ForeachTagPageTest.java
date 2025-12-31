@@ -23,6 +23,12 @@ class ForeachTagPageTest {
     @DisplayName("foreach-tag with simple data")
     void test() {
         var result = testContext.openPage("/foreachTag.html");
+        
+        // Debug: print document to see what's happening
+        System.out.println("=== DOCUMENT HTML ===");
+        System.out.println(result.getDocument().asString());
+        System.out.println("=== END DOCUMENT ===");
+        
         var items = result.getDocument().getElementsByClass("item")
                 .stream().map(Element::getInnerText).toList();
 
