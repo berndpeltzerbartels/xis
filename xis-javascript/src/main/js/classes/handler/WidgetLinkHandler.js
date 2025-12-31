@@ -66,8 +66,8 @@ class WidgetLinkHandler extends TagHandler {
     onClick(e) {
         return new Promise((resolve, _) => {
             var container = this.getTargetContainer();
-            var handler = app.tagHandlers.getHandler(container);
-            if (!handler) {
+            var widgetContainerHandler = app.tagHandlers.getHandler(container);
+            if (!widgetContainerHandler) {
                 var containerId = this.targetContainerId || 'parent container';
                 throw new Error('No widget container handler found for "' + containerId + '". This should not happen - please report this as a bug.');
             }
@@ -77,9 +77,9 @@ class WidgetLinkHandler extends TagHandler {
             }
             var widgetState = new WidgetState(app.pageController.resolvedURL, this.widgetParameters);
             var widgetId = stripQuery(this.targetWidgetUrl);
-            handler.initBuffer()
-                .then(() => handler.showWidget(widgetId, widgetState))
-                .then(() => handler.commitBuffer())
+            widgetContainerHandler.initBuffer()
+                .then(() => widgetContainerHandler.showWidget(widgetId, widgetState))
+                .then(() => widgetContainerHandler.commitBuffer())
                 .then(() => resolve());
         });
     }
