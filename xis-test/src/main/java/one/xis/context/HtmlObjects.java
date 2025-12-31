@@ -7,6 +7,7 @@ import one.xis.test.dom.Document;
 import one.xis.test.dom.Element;
 import one.xis.test.dom.ElementMapper;
 import one.xis.test.dom.Window;
+import one.xis.test.js.Console;
 import one.xis.test.js.LocalStorage;
 import one.xis.test.js.SessionStorage;
 
@@ -24,7 +25,7 @@ class HtmlObjects {
     private LocalStorage localStorage;
     private SessionStorage sessionStorage;
     private Window window;
-    // private Console console;
+    private Console console;
 
     private final Function<String, Element> htmlToElement;
     private final Function<String, String> atob;
@@ -34,6 +35,7 @@ class HtmlObjects {
     HtmlObjects() {
         this.htmlToElement = HtmlObjects::htmlToElement;
         this.atob = HtmlObjects::atob;
+        this.console = new Console();
         this.init();
     }
 

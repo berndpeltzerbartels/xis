@@ -23,6 +23,7 @@ public class Console {
         } catch (NoSuchFieldException | IllegalAccessException e) {
             System.err.println(message);
         }
+        throw new RuntimeException(message.toString());
     }
 
     public void error(Object message, Object arg) {
@@ -31,6 +32,7 @@ public class Console {
         } catch (NoSuchFieldException | IllegalAccessException e) {
             System.err.println(message);
         }
+        throw new RuntimeException(message.toString());
     }
 
     public void warn(Object message) {

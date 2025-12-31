@@ -64,7 +64,7 @@ class IntegrationTestScript {
         bindings.put("Node", new NodeConstants());
         bindings.put("Array", new Array());
         bindings.put("debug", debugFunction);
-        // bindings.put("console", testEnvironment.getHTML_OBJECTS().getConsole());
+        bindings.put("console", testEnvironment.getHtmlObjects().getConsole());
         return bindings;
     }
 
@@ -81,7 +81,7 @@ class IntegrationTestScript {
         invoker.setBinding("Node", new NodeConstants());
         invoker.setBinding("Array", new Array());
         invoker.setBinding("debug", debugFunction);
-        //  invoker.setBinding("console", testEnvironment.getHTML_OBJECTS().getConsole());
+        invoker.setBinding("console", testEnvironment.getHtmlObjects().getConsole());
     }
 
     private final BiConsumer<String, Object> debugFunction = this::debug;

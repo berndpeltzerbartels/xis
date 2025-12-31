@@ -27,7 +27,6 @@ class BodyTagHandler extends TagHandler {
                 }
             }
         }
-        this.buffer = document.createDocumentFragment();
     }
     /**
      * Commits the buffer to the real body element.
@@ -37,16 +36,9 @@ class BodyTagHandler extends TagHandler {
     */
     commitBuffer() {
         return new Promise((resolve, _) => {
-            for (const node of this.persistentNodes.start) {
-                this.tag.appendChild(node);
-            }
             while (this.buffer.firstChild) {
                 this.tag.appendChild(this.buffer.firstChild);
             }
-            for (const node of this.persistentNodes.end) {
-                this.tag.appendChild(node);
-            }
-            this.buffer = document.createDocumentFragment();
             resolve();
         });
     }
@@ -57,6 +49,19 @@ class BodyTagHandler extends TagHandler {
      */
     initBuffer() {
         return new Promise((resolve, _) => {
+            // Create a DocumentFragment as buffer
+            this.buffer = document.createDocumentFragment();
+            // Add persistent start nodes
+            for (const node of this.persistentNodes.start) {
+                this.buffer.appendChild(node);
+            }
+            while (this.tag.firstChild) {
+                this.buffer.appendChild(this.tag.firstChild);
+            }
+            // Add persistent end nodes
+            for (const node of this.persistentNodes.end) {
+                this.buffer.appendChild(node);
+            }
             resolve();
         });
     }
@@ -91,8 +96,15 @@ class BodyTagHandler extends TagHandler {
     */
     bind(bodyTemplate) {
         this.bodyTemplate = bodyTemplate;
+        // Add persistent start nodes
+        for (const node of this.persistentNodes.start) {
+            this.tag.appendChild(node);
+        }
         while (bodyTemplate.firstChild) {
-            this.buffer.appendChild(bodyTemplate.firstChild);
+            this.tag.appendChild(bodyTemplate.firstChild);
+        }
+        for (const node of this.persistentNodes.end) {
+            this.tag.appendChild(node);
         }
         var bodyTemplateHandler = this.tagHandlers.getRootHandler(bodyTemplate);
         this.addDescendantHandler(bodyTemplateHandler);

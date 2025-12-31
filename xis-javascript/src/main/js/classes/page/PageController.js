@@ -39,6 +39,14 @@ class PageController {
      * @public
      * @returns {Promise<void>}
      */
+    initBuffer() {
+        return this.htmlTagHandler.bodyTagHandler.initBuffer();
+    }
+
+    /**
+     * @public
+     * @returns {Promise<void>}
+     */
     commitBuffer() {
         this.htmlTagHandler.bodyTagHandler.commitBuffer();
     }
@@ -95,7 +103,8 @@ class PageController {
         data.setValue(['urlParameters'], this.resolvedURL.urlParameters);
         this.page.data = data;
 
-        return this.htmlTagHandler.refresh(this.page.data)
+        return this.initBuffer()
+            .then(() => this.htmlTagHandler.refresh(this.page.data))
             .then(() => {if (isSet(response.annotatedTitle)) this.setTitle(response.annotatedTitle);})
             .then(() => {if (isSet(response.annotatedAddress)) this.setAddress(response.annotatedAddress);})
             .then(() => this.commitBuffer());
@@ -210,7 +219,8 @@ class PageController {
             this.htmlTagHandler.unbindPage();
             this.htmlTagHandler.bindPage(this.page);
 
-            this.htmlTagHandler.refresh(data)
+            this.initBuffer()
+                .then(() => this.htmlTagHandler.refresh(data))
                 .then(() => {if (response.annotatedTitle) this.setTitle(response.annotatedTitle);})
                 .then(() => this.commitBuffer())
                 .then(() =>  app.eventPublisher.publish(EventType.BUFFER_COMMITTED))
