@@ -59,6 +59,28 @@ public class PartParser {
 
         Token token = currentToken();
 
+        if (token instanceof OpenCommentToken) {
+            index++;
+
+            StringBuilder sb = new StringBuilder();
+
+            while (!(tokens.get(index) instanceof CloseCommentToken)) {
+                Token t = tokens.get(index);
+
+                if (t instanceof TextToken tt) {
+                    sb.append(tt.getText());
+                } else {
+                    throw new HtmlParseException("Invalid token inside comment");
+                }
+
+                index++;
+            }
+
+            index++; // consume EndCommentToken
+            parts.add(new CommentPart(sb.toString().trim()));
+            return;
+        }
+
         if (token instanceof TextToken textToken) {
             // Skip whitespace-only text tokens at this stage
             if (!textToken.getText().trim().isEmpty()) {

@@ -108,11 +108,9 @@ class HtmlTokenizerTest {
         c.skipWs();
 
         // <!-- Comment -->
-        c.expect(OpenBracketToken.class);
-        c.expectText("!--");
-        c.expectText("Comment");
-        c.expectText("--");
-        c.expect(CloseBracketToken.class);
+        c.expect(OpenCommentToken.class);
+        c.expectText(" Comment ");
+        c.expect(CloseCommentToken.class);
         c.skipWs();
 
         // <br/>

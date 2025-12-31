@@ -1,5 +1,6 @@
 package one.xis.html;
 
+import one.xis.html.document.Element;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -159,6 +160,38 @@ class HtmlParserTest {
             var htmlResult = document.asString();
 
             assertThat(htmlResult).isEqualToIgnoringWhitespace("<input type=\"checkbox\" checked=\"checked\">");
+        }
+    }
+
+    @Nested
+    class CommentTest {
+        private final String html = """
+                <div>
+                    <!-- This is a comment -->
+                    <p>Content</p>
+                </div>
+                """;
+
+        @Test
+        void parse() {
+            var document = parser.parse(html);
+
+            assertThat(document.getDocumentElement()).isNotNull();
+
+            var div = document.getDocumentElement();
+            assertThat(div.getLocalName()).isEqualTo("div");
+
+            var commentNode = div.getFirstChild();
+            assertThat(commentNode.getNodeType()).isEqualTo(8); // COMMENT_NODE
+            assertThat(commentNode.toHtml().trim()).isEqualTo("This is a comment");
+            assertThat(commentNode.getParentNode()).isEqualTo(div);
+            assertThat(commentNode.getNextSibling().getNodeType()).isEqualTo(1); // ELEMENT_NODE
+
+            var p = (Element) commentNode.getNextSibling();
+            assertThat(p.getLocalName()).isEqualTo("p");
+            assertThat(p.getFirstChild().getNodeType()).isEqualTo(3); // TEXT_NODE
+            assertThat(p.getFirstChild().toHtml().trim()).isEqualTo("Content");
+
         }
     }
 

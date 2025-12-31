@@ -15,6 +15,29 @@ public class HtmlTokenizer {
             char c = source.charAt(i);
 
             if (!inTag) {
+                if (source.startsWith("<!--", i)) {
+
+                    flushText(text, out);
+
+                    out.add(new OpenCommentToken());
+                    i += 4; // <!--
+
+                    int end = source.indexOf("-->", i);
+                    if (end < 0) {
+                        throw new HtmlParseException("Unclosed comment");
+                    }
+
+                    String commentText = source.substring(i, end);
+                    if (!commentText.isEmpty()) {
+                        out.add(new TextToken(commentText));
+                    }
+
+                    out.add(new CloseCommentToken());
+                    i = end + 3; // -->
+                    continue;
+                }
+
+
                 // TEXT-MODUS: alles bis zum nächsten '<' sammeln (inkl. Leerzeichen)
                 if (c == '<') {
                     flushText(text, out);

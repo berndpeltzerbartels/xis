@@ -2,10 +2,7 @@ package one.xis.html.document;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import one.xis.html.parts.Part;
-import one.xis.html.parts.Tag;
-import one.xis.html.parts.TagType;
-import one.xis.html.parts.TextPart;
+import one.xis.html.parts.*;
 
 import java.util.List;
 import java.util.Set;
@@ -105,6 +102,15 @@ public class ElementBuilder {
                 TextNode child = new TextNode(textPart.getText());
                 prev = attachChild(parent, firstChild, prev, child);
                 if (firstChild == null) firstChild = child;
+                continue;
+            }
+
+            if (p instanceof CommentPart cp) {
+                CommentNode node = new CommentNode(cp.getText());
+                attachChild(parent, firstChild, prev, node);
+                consume();
+                if (firstChild == null) firstChild = node;
+                prev = node;
                 continue;
             }
 

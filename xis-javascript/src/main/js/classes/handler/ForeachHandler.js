@@ -13,10 +13,8 @@ class ForeachHandler extends TagHandler {
         this.priority = 'high';
         this.cache = new ForEachNodeCache(nodeListToArray(this.tag.childNodes));
         this.clearChildren();
-        // Make <xis:foreach> transparent in layout (works in all modern browsers)
-        if (this.tag.style) {
-            this.tag.style.display = 'contents';
-        }
+        this.parentElement = this.tag.parentNode;
+        this.siblingBehind = this.tag.nextSibling;
     }
 
     /**
@@ -26,14 +24,14 @@ class ForeachHandler extends TagHandler {
     refresh(data) {
         var arrayPath = this.doSplit(this.arrayPathExpression.evaluate(data), '.');
         var arr = data.getValue(arrayPath);
-        
+
         // Handle indirect array references: if arr is a string, resolve it as a path
         // Example: array="${arrayName}" where arrayName="list1" -> resolve to data.list1
         if (typeof arr === 'string') {
             var resolvedPath = this.doSplit(arr, '.');
             arr = data.getValue(resolvedPath);
         }
-        
+
         if (!arr) {
           return;
         }
@@ -55,7 +53,7 @@ class ForeachHandler extends TagHandler {
                     childHandler.refresh(subData);
                 }
             } else {
-                // Cache is too long. We remove unused elements 
+                // Cache is too long. We remove unused elements
                 for (var child of children) {
                     if (child.parentNode == this.tag) {
                         this.tag.removeChild(child);
