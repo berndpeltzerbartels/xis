@@ -153,4 +153,59 @@ class DomAccessorTest {
 
     }
 
+    @Test
+    @DisplayName("Call insert-before-method in case the parent has no other children")
+    void insertBeforeNoSiblings() throws ScriptException {
+        var document = Document.of("<a/>");
+
+        var js = Javascript.getScript(CLASSES, FUNCTIONS);
+        js += "var accessor = new DomAccessor();";
+        js += "var a = document.getElementsByTagName('a').item(0);";
+        js += "var x = document.createElement('x');";
+        js += "var y = document.createElement('y');";
+        js += "accessor.insertBefore(a, [x,y], undefined);";
+
+        JSUtil.execute(js, Map.of("document", document));
+
+        assertThat(document.getDocumentElement().getChildElements().stream().map(Element::getTagName)).containsExactly("X", "Y"); // uppercase tag name
+    }
+
+
+    @Test
+    @DisplayName("Call insert-before-method to insert siblings before the only existing child")
+    void insertBeforeExistingElement() throws ScriptException {
+        var document = Document.of("<a><b/></a>");
+
+        var js = Javascript.getScript(CLASSES, FUNCTIONS);
+        js += "var accessor = new DomAccessor();";
+        js += "var a = document.getElementsByTagName('a').item(0);";
+        js += "var b = document.getElementsByTagName('b').item(0);";
+        js += "var x = document.createElement('x');";
+        js += "var y = document.createElement('y');";
+        js += "accessor.insertBefore(a, [x,y], b);";
+
+        JSUtil.execute(js, Map.of("document", document));
+
+        assertThat(document.getDocumentElement().getChildElements().stream().map(Element::getTagName)).containsExactly("X", "Y", "B"); // uppercase tag name
+    }
+
+
+    @Test
+    @DisplayName("Call insert-before-method to insert siblings between two existing children")
+    void insertBetween2Elements() throws ScriptException {
+        var document = Document.of("<a><b/><c/></a>");
+
+        var js = Javascript.getScript(CLASSES, FUNCTIONS);
+        js += "var accessor = new DomAccessor();";
+        js += "var a = document.getElementsByTagName('a').item(0);";
+        js += "var c = document.getElementsByTagName('c').item(0);";
+        js += "var x = document.createElement('x');";
+        js += "var y = document.createElement('y');";
+        js += "accessor.insertBefore(a, [x,y], c);";
+
+        JSUtil.execute(js, Map.of("document", document));
+
+        assertThat(document.getDocumentElement().getChildElements().stream().map(Element::getTagName)).containsExactly("B", "X", "Y", "C"); // uppercase tag name
+    }
+
 }

@@ -29,6 +29,21 @@ class DomAccessor {
         }
     }
 
+
+    insertBefore(parent, siblings, behind) {
+        if (parent) {
+            if (!behind) {
+              for (var sibling of siblings) {
+                 parent.appendChild(sibling);
+              }
+            } else {
+                  for (var sibling of siblings) {
+                    parent.insertBefore(sibling, behind);
+                }
+            }
+        }
+    }
+
     /**
      * @public
      * @param {Element} element 
