@@ -1,101 +1,123 @@
 class ForeachHandler extends TagHandler {
 
-    /**
-     * @param {Element} tag the custom tag '<xis:foreach/>'
-     * @param {TagHandler} tagHandlers
-     */
     constructor(tag, tagHandlers) {
         super(tag);
+
         this.tagHandlers = tagHandlers;
-        this.arrayPathExpression = this.createExpression(this.variableToKey(this.getAttribute('array')), '.');
+
+        this.arrayPathExpression =
+            this.createExpression(
+                this.variableToKey(this.getAttribute('array')),
+                '.'
+            );
+
         this.varName = this.getAttribute('var');
         this.type = 'foreach-handler';
         this.priority = 'high';
-        this.cache = new ForEachNodeCache(nodeListToArray(this.tag.childNodes));
-        this.clearChildren();
-        this.parentElement = this.tag.parentNode;
-        this.siblingBehind = this.tag.nextSibling;
+
+        // --- Anchors ---
+        this.startAnchor = document.createComment('xis:foreach');
+        this.endAnchor   = document.createComment('/xis:foreach');
+
+        const parent = tag.parentNode;
+        parent.insertBefore(this.startAnchor, tag);
+        parent.insertBefore(this.endAnchor, tag.nextSibling);
+
+        // --- Template snapshot ---
+        const templateNodes = nodeListToArray(tag.childNodes);
+
+        this.cache = new ForEachNodeCache(templateNodes);
+
+        // remove tag completely
+        tag.remove();
+
+        // Note: We don't store parentElement because it can change (e.g., when moved to DocumentFragment buffer).
+        // Instead, we always derive it from the anchors.
     }
 
-    /**
-     * @public
-     * @param {Data} data
-     */
     refresh(data) {
-        var arrayPath = this.doSplit(this.arrayPathExpression.evaluate(data), '.');
-        var arr = data.getValue(arrayPath);
+        let arrayPath = this.doSplit(
+            this.arrayPathExpression.evaluate(data),
+            '.'
+        );
 
-        // Handle indirect array references: if arr is a string, resolve it as a path
-        // Example: array="${arrayName}" where arrayName="list1" -> resolve to data.list1
+        let arr = data.getValue(arrayPath);
+
+        // indirect array reference
         if (typeof arr === 'string') {
-            var resolvedPath = this.doSplit(arr, '.');
-            arr = data.getValue(resolvedPath);
+            arr = data.getValue(this.doSplit(arr, '.'));
         }
 
-        if (!arr) {
-          return;
+        if (!Array.isArray(arr)) {
+            this.clearRange();
+            return;
         }
+
         this.cache.sizeUp(arr.length);
-        for (var i = 0; i < this.cache.length; i++) {
-            var subData = new Data({}, data);
-            this.setValidationPath(subData, this.varName, i);
-            subData.setValue([this.varName + 'Index'], i);
-            subData.setValue([this.varName], arr[i]);
-            var children = this.cache.getChildren(i);
+
+        for (let i = 0; i < this.cache.length; i++) {
+
+            const children = this.cache.getChildren(i);
+
             if (i < arr.length) {
-                for (var child of children) {
-                    if (child.parentNode != this.tag) {
-                        this.tag.appendChild(child);
+
+                const subData = new Data({}, data);
+                this.setValidationPath(subData, this.varName, i);
+
+                subData.setValue([this.varName + 'Index'], i);
+                subData.setValue([this.varName], arr[i]);
+
+                for (const child of children) {
+
+                    // Get current parent from anchor (handles DocumentFragment buffer case)
+                    const currentParent = this.startAnchor.parentNode;
+                    
+                    if (child.parentNode !== currentParent) {
+                        currentParent.insertBefore(child, this.endAnchor);
                     }
-                    const childHandler = this.tagHandlers.getRootHandler(child);
-                    childHandler.parentHandler = this;
-                    this.descendantHandlers.push(childHandler);
-                    childHandler.refresh(subData);
+
+                    const handler = this.tagHandlers.getRootHandler(child);
+                    handler.parentHandler = this;
+                    this.descendantHandlers.push(handler);
+
+                    handler.refresh(subData);
                 }
+
             } else {
-                // Cache is too long. We remove unused elements
-                for (var child of children) {
-                    if (child.parentNode == this.tag) {
-                        this.tag.removeChild(child);
-                    } else {
-                        break;
+                // cache too long → detach unused nodes
+                const currentParent = this.startAnchor.parentNode;
+                for (const child of children) {
+                    if (child.parentNode === currentParent) {
+                        child.remove();
                     }
                 }
             }
         }
     }
 
-    /**
-     * State-aware refresh: rebuilds iteration but children get normal refresh
-     * since transformed values (item) are no longer state variables.
-     */
     stateRefresh(data, invoker) {
-        if (this === invoker) {
-            return;
-        }
-        // Rebuild iteration with new state data
+        if (this === invoker) return;
         this.refresh(data);
-        // Note: child handlers already refreshed in refresh() method with transformed data
+    }
+
+    clearRange() {
+        let n = this.startAnchor.nextSibling;
+        while (n && n !== this.endAnchor) {
+            const next = n.nextSibling;
+            n.remove();
+            n = next;
+        }
     }
 
     setValidationPath(subData, varName, index) {
-        if (!subData.validationPath) {
-            return; // we are not inside a form
-        }
+        if (!subData.validationPath) return;
         subData.validationPath += '/' + varName + '[' + index + ']';
     }
 
-    /**
-    * if variable starts with '${' and ends with '}', it is an expression.
-    * This method removes ${ and }, because here we do not deal with a textual expression,
-    * but with a variable name used in data binding.
-    * @param {string} variable
-    * @returns {string} the key for data binding
-    */
     variableToKey(variable) {
-       if (variable.startsWith('${') && variable.endsWith('}')) {
-           return variable.slice(2, -1);
-       }
-       return variable;
+        if (variable.startsWith('${') && variable.endsWith('}')) {
+            return variable.slice(2, -1);
+        }
+        return variable;
     }
 }

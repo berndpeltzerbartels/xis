@@ -15,6 +15,8 @@ public interface Document {
 
     TextNode createTextNode(String content);
 
+    CommentNode createComment(String content);
+
     NodeList getElementsByTagName(String name);
 
     Element getElementById(String id);
@@ -45,5 +47,5 @@ public interface Document {
     Element createElement(String name);
 
     Location getLocation();
-    
+
 }

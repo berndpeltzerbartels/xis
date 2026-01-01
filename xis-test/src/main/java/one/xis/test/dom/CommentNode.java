@@ -1,6 +1,6 @@
 package one.xis.test.dom;
 
-public interface CommentNode {
+public interface CommentNode extends Node {
     @SuppressWarnings("unused")
     void setNodeValue(String nodeValue);
 

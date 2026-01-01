@@ -88,14 +88,17 @@ public abstract class NodeImpl extends GraalVMProxy implements Node {
     }
 
     @Override
-    public void insertBefore(@NonNull Node before, @NonNull Node marker) {
+    public void insertBefore(@NonNull Node before, Node marker) {
         NodeImpl beforeImpl = (NodeImpl) before;
         NodeImpl markerImpl = (NodeImpl) marker;
-        // 1. Aus altem Parent entfernen (falls vorhanden)
+        if (markerImpl == null) {
+            appendChild(beforeImpl);
+            updateChildNodes();
+            return;
+        }
         if (beforeImpl.getParentNode() != null) {
             beforeImpl.remove();
         }
-        // 2. In neuen Parent einhängen
         var previousChild = markerImpl.getPreviousSibling();
         if (previousChild == null) {
             setFirstChild(beforeImpl);

@@ -55,6 +55,11 @@ public class DocumentImpl implements one.xis.test.dom.Document {
     }
 
     @Override
+    public CommentNode createComment(String content) {
+        return new CommentNodeImpl(content);
+    }
+
+    @Override
     public Element querySelector(String selector) {
         return documentElement.querySelector(selector);
     }
@@ -68,6 +73,7 @@ public class DocumentImpl implements one.xis.test.dom.Document {
     public TextNode createTextNode(String content) {
         return new TextNodeImpl(content);
     }
+
 
     public String getInnerText() {
         return documentElement != null ? documentElement.getInnerText() : null;

@@ -26,7 +26,7 @@ class ForeachHandlerTest {
     void initDocument() {
         nodeMock = new HashMap<>();
         nodeMock.put("ELEMENT_NODE", 1);
-        document = (DocumentImpl) Document.of("<html><body><div id=\"messages\"></div></body></html>");
+        document = (DocumentImpl) Document.of("<html><body><div id=\"system-messages\"></div></body></html>");
 
         var body = document.getElementByTagName("body");
         var div1 = document.createElement("div");
@@ -57,12 +57,15 @@ class ForeachHandlerTest {
         JSUtil.execute(script, Map.of("foreach", foreach, "document", document, "window", new Window(new Location()), "Node", nodeMock,
                 "localStorage", new LocalStorage(), "sessionStorage", new SessionStorage()));
 
-        var childElementClasses = foreach.getChildElements().stream()
+        var body = document.getElementByTagName("body");
+        var childElementClasses = body.getChildElements().stream()
+                .filter(e -> !"system-messages".equals(e.getAttribute("id"))) // String literal first to avoid NPE
                 .map(Element::getCssClasses)
                 .map(cl -> String.join(" ", cl))
                 .toList();
 
-        assertThat(foreach.getChildNodes().length).isEqualTo(6);
+        // Body should contain: system-messages div + 6 generated elements + 2 comment anchors
+        assertThat(body.getChildNodes().length).isEqualTo(9); // 1 system-messages + 6 elements + 2 comments
 
         assertThat(childElementClasses.get(0)).isEqualTo("div1");
         assertThat(childElementClasses.get(1)).isEqualTo("div2");
@@ -85,7 +88,10 @@ class ForeachHandlerTest {
         script += "handler.refresh(data2);";// length = 1
         JSUtil.execute(script, Map.of("foreach", foreach, "document", document, "window", new Window(new Location()), "Node", nodeMock,
                 "localStorage", new LocalStorage(), "sessionStorage", new SessionStorage()));
-        assertThat(foreach.getChildNodes().length).isEqualTo(2); // 2 subtags for every array-element
+        
+        var body = document.getElementByTagName("body");
+        // Body should contain: system-messages div + 2 generated elements (1 iteration) + 2 comment anchors
+        assertThat(body.getChildNodes().length).isEqualTo(5); // 1 system-messages + 2 elements + 2 comments
     }
 
 }
