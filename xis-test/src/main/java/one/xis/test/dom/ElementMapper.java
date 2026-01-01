@@ -32,8 +32,11 @@ public class ElementMapper {
                 doMap(child, srcEl); // recurse
                 lastSibling = child;
             } else if (srcChild instanceof one.xis.html.document.TextNode srcText) {
-                // FIX: TextNodeImpl (not "Iml")
                 var child = new TextNodeImpl(srcText.getText());
+                appendChild(target, child, lastSibling);
+                lastSibling = child;
+            } else if (srcChild instanceof one.xis.html.document.CommentNode srcComment) {
+                var child = new CommentNodeImpl(srcComment.getText());
                 appendChild(target, child, lastSibling);
                 lastSibling = child;
             }

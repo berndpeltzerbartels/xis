@@ -3,7 +3,7 @@ package one.xis.html.document;
 import lombok.Data;
 
 @Data
-class CommentNode implements Node {
+public class CommentNode implements Node {
     private final String text;
     private Node nextSibling;
     private Element parentNode;

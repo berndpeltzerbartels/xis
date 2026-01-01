@@ -40,7 +40,7 @@ class DocumentTest {
         assertThat(div1.getChildNodes().item(0)).isInstanceOf(TextNodeImpl.class);
         var textNode = (TextNodeImpl) div1.getChildNodes().item(0);
         assertThat(div1.getInnerText()).isEqualTo("123");
-        assertThat(textNode.nodeValue).isEqualTo("123");
+        assertThat(textNode.getNodeValue()).isEqualTo("123");
 
     }
 

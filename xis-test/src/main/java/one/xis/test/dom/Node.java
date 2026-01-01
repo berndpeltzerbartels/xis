@@ -4,6 +4,7 @@ public interface Node {
 
     int ELEMENT_NODE = 1;
     int TEXT_NODE = 3;
+    int COMMENT_NODE = 8;
     int DOCUMENT_FRAGMENT_NODE = 11;
 
     void remove();
