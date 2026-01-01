@@ -44,32 +44,41 @@ class ResourceService {
 
     private final HtmlParser htmlParser = new HtmlParser();
 
-    private ResourceCache<Resource> widgetHtmlResourceCache;
-    private ResourceCache<Resource> pageBodyResourceCache;
-    private ResourceCache<Resource> pageHeadResourceCache;
-    private ResourceCache<Resource> pageAttributesResourceCache;
+    private Map<String, GenericResource<HtmlDocument>> widgetDocumentCache;
+    private Map<String, GenericResource<HtmlDocument>> pageDocumentCache;
     private ResourceCache<Resource> includeHtmlResourceCache;
 
     @XISInit
     void initWidgetResources() {
-        Map<String, Resource> widgetHtmlResources = widgetControllers.stream()
-                .collect(Collectors.toMap(WidgetUtil::getId, this::htmlResource));
-        widgetHtmlResourceCache = new ResourceCache<>(r -> r, widgetHtmlResources);
+        widgetDocumentCache = widgetControllers.stream()
+                .collect(Collectors.toMap(
+                        WidgetUtil::getId,
+                        controller -> {
+                            HtmlDocument doc = parseAndValidate(controller, "Widget");
+                            return toResource(controller, doc);
+                        }
+                ));
     }
 
     @XISInit
     void initPageResources() {
-        var pageHtmlResources = pageControllers.stream()
-                .collect(Collectors.toMap(pathResolver::normalizedPath, this::htmlResource));
-        pageHeadResourceCache = new ResourceCache<>(r -> r, pageHtmlResources);
-        pageBodyResourceCache = new ResourceCache<>(r -> r, pageHtmlResources);
-        pageAttributesResourceCache = new ResourceCache<>(r -> r, pageHtmlResources);
+        pageDocumentCache = pageControllers.stream()
+                .collect(Collectors.toMap(
+                        pathResolver::normalizedPath,
+                        controller -> {
+                            HtmlDocument doc = parseAndValidate(controller, "Page");
+                            return toResource(controller, doc);
+                        }
+                ));
     }
 
     @XISInit
     void initIncludeResources() {
         var includeHtmlResources = includes.stream()
-                .collect(Collectors.toMap(inc -> inc.getClass().getAnnotation(Include.class).value(), this::htmlResource));
+                .collect(Collectors.toMap(
+                        inc -> inc.getClass().getAnnotation(Include.class).value(),
+                        this::htmlResource
+                ));
         includeHtmlResourceCache = new ResourceCache<>(r -> r, includeHtmlResources);
     }
 
@@ -78,9 +87,9 @@ class ResourceService {
     }
 
     Resource getWidgetHtml(String id) {
-        Resource resource = widgetHtmlResourceCache.getResourceContent(id).orElseThrow();
-        HtmlDocument doc = htmlParser.parse(resource.getContent());
-        return new GenericResource<>(doc.toHtml(), resource.getLastModified(), resource.getResourcePath());
+        GenericResource<HtmlDocument> docResource = widgetDocumentCache.get(id);
+        if (docResource == null) throw new IllegalArgumentException("Widget not found: " + id);
+        return new GenericResource<>(docResource.getObjectContent().toHtml(), docResource.getLastModified(), docResource.getResourcePath());
     }
 
     Resource getIncludeHtml(String key) {
@@ -88,54 +97,52 @@ class ResourceService {
     }
 
     Resource getPageHead(String id) {
-        Resource resource = pageHeadResourceCache.getResourceContent(id).orElseThrow();
-        String headContent = extractPageHead(resource);
-        return new GenericResource<>(headContent, resource.getLastModified(), resource.getResourcePath());
+        GenericResource<HtmlDocument> docResource = pageDocumentCache.get(id);
+        if (docResource == null) throw new IllegalArgumentException("Page not found: " + id);
+        Element head = docResource.getObjectContent().getDocumentElement().getElementByTagName("head");
+        return new GenericResource<>(head.toHtml(), docResource.getLastModified(), docResource.getResourcePath());
     }
 
     Resource getPageBody(String id) {
-        Resource resource = pageBodyResourceCache.getResourceContent(id).orElseThrow();
-        String bodyContent = extractPageBody(resource);
-        return new GenericResource<>(bodyContent, resource.getLastModified(), resource.getResourcePath());
+        GenericResource<HtmlDocument> docResource = pageDocumentCache.get(id);
+        if (docResource == null) throw new IllegalArgumentException("Page not found: " + id);
+        Element body = docResource.getObjectContent().getDocumentElement().getElementByTagName("body");
+        return new GenericResource<>(body.toHtml(), docResource.getLastModified(), docResource.getResourcePath());
     }
 
     GenericResource<Map<String, String>> getBodyAttributes(String id) {
-        Resource resource = pageAttributesResourceCache.getResourceContent(id).orElseThrow();
-        Map<String, String> attributes = extractBodyAttributes(resource);
-        return new GenericResource<>(attributes, resource.getLastModified(), resource.getResourcePath());
+        GenericResource<HtmlDocument> docResource = pageDocumentCache.get(id);
+        if (docResource == null) throw new IllegalArgumentException("Page not found: " + id);
+        Element body = docResource.getObjectContent().getDocumentElement().getElementByTagName("body");
+        return new GenericResource<>(new LinkedHashMap<>(body.getAttributes()), docResource.getLastModified(), docResource.getResourcePath());
     }
 
-    private String extractPageHead(Resource pageResource) {
+    private HtmlDocument parseAndValidate(Object controller, String type) {
+        var path = htmlResourcePathResolver.htmlResourcePath(controller.getClass());
+        var resource = resources.getByPath(path);
         try {
-            HtmlDocument doc = htmlParser.parse(pageResource.getContent());
-            Element head = doc.getDocumentElement().getElementByTagName("head");
-            return head.toHtml();
+            return htmlParser.parse(resource.getContent());
         } catch (Exception e) {
-            throw new RuntimeException("Unable to extract head", e);
+            throw new IllegalStateException(
+                    String.format("%s template parsing failed: %s (%s)\n  Controller: %s\n  Path: %s",
+                            type,
+                            e.getMessage(),
+                            e.getClass().getSimpleName(),
+                            controller.getClass().getName(),
+                            path),
+                    e
+            );
         }
     }
 
-    private String extractPageBody(Resource pageResource) {
-        try {
-            HtmlDocument doc = htmlParser.parse(pageResource.getContent());
-            Element body = doc.getDocumentElement().getElementByTagName("body");
-            return body.toHtml();
-        } catch (Exception e) {
-            throw new RuntimeException("Unable to extract body", e);
-        }
-    }
-
-    private Map<String, String> extractBodyAttributes(Resource pageResource) {
-        HtmlDocument doc = htmlParser.parse(pageResource.getContent());
-        Element body = doc.getDocumentElement().getElementByTagName("body");
-        Map<String, String> map = new LinkedHashMap<>(body.getAttributes());
-        return map;
+    private GenericResource<HtmlDocument> toResource(Object controller, HtmlDocument doc) {
+        var path = htmlResourcePathResolver.htmlResourcePath(controller.getClass());
+        var resource = resources.getByPath(path);
+        return new GenericResource<>(doc, resource.getLastModified(), resource.getResourcePath());
     }
 
     private Resource htmlResource(Object controller) {
         var path = htmlResourcePathResolver.htmlResourcePath(controller.getClass());
         return resources.getByPath(path);
     }
-
-
 }

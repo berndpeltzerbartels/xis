@@ -103,6 +103,25 @@ public class HtmlTokenizer {
 
         // Restlichen Text (falls Datei nicht mit '<' endet) flushen
         flushText(text, out);
+        
+        // DEBUG: Write all tokens to file
+        try (java.io.PrintWriter pw = new java.io.PrintWriter("/tmp/xis-tokens.txt")) {
+            pw.println("=== TOKENIZER OUTPUT (" + out.size() + " tokens) ===");
+            for (int idx = 0; idx < out.size(); idx++) {
+                Token token = out.get(idx);
+                if (token instanceof TextToken tt) {
+                    String preview = tt.getText().replace("\n", "\\n").replace("\r", "\\r");
+                    if (preview.length() > 60) preview = preview.substring(0, 60) + "...";
+                    pw.println(idx + ": TextToken(\"" + preview + "\")");
+                } else {
+                    pw.println(idx + ": " + token.getClass().getSimpleName());
+                }
+            }
+            pw.println("=== END TOKENS ===");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
         return out;
     }
 

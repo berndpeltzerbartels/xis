@@ -49,6 +49,27 @@ public class PartParser {
         while (index < tokens.size()) {
             readOne();
         }
+        
+        // DEBUG: Write all parts to file
+        try (java.io.PrintWriter pw = new java.io.PrintWriter("/tmp/xis-parts.txt")) {
+            pw.println("=== PARTPARSER OUTPUT (" + parts.size() + " parts) ===");
+            for (int idx = 0; idx < parts.size(); idx++) {
+                Part part = parts.get(idx);
+                if (part instanceof TextPart tp) {
+                    String preview = tp.getText().replace("\n", "\\n").replace("\r", "\\r");
+                    if (preview.length() > 60) preview = preview.substring(0, 60) + "...";
+                    pw.println(idx + ": TextPart(\"" + preview + "\")");
+                } else if (part instanceof Tag tag) {
+                    pw.println(idx + ": Tag(" + tag.getLocalName() + ", type=" + tag.getTagType() + ")");
+                } else {
+                    pw.println(idx + ": " + part.getClass().getSimpleName());
+                }
+            }
+            pw.println("=== END PARTS ===");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
         return parts;
     }
 
@@ -153,7 +174,12 @@ public class PartParser {
         if (is(CloseBracketToken.class)) {
             // <name ...>
             skip(CloseBracketToken.class);
-            tag.setTagType(TagType.OPENING);
+            // HTML5 void elements are always self-closing, even without '/'
+            if (SelfClosingTags.isSelfClosing(name)) {
+                tag.setTagType(TagType.NO_CONTENT);
+            } else {
+                tag.setTagType(TagType.OPENING);
+            }
             return tag;
         }
 
