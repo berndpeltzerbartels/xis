@@ -6,12 +6,22 @@ class IfTagHandler extends TagHandler {
         super(tag);
         this.type = 'if-tag-handler';
         this.expression = this.expressionFromAttribute('condition');
+        
+        // --- Anchors ---
+        this.startAnchor = document.createComment('xis:if');
+        this.endAnchor   = document.createComment('/xis:if');
+        
+        const parent = tag.parentNode;
+        parent.insertBefore(this.startAnchor, tag);
+        parent.insertBefore(this.endAnchor, tag.nextSibling);
+        
+        // Store child nodes before removing tag
         this.childNodes = this.nodeListToArray(tag.childNodes);
+        
+        // Remove tag completely
+        tag.remove();
+        
         this.conditionValue = undefined;
-        // Make <xis:if> transparent in layout to avoid breaking table/grid structures
-        if (this.tag.style) {
-            this.tag.style.display = 'contents';
-        }
     }
 
     refresh(data) {
@@ -34,13 +44,17 @@ class IfTagHandler extends TagHandler {
 
     unlinkChildNodes() {
         for (var i = 0; i < this.childNodes.length; i++) {
-            this.tag.removeChild(this.childNodes[i]);
+            const child = this.childNodes[i];
+            if (child.parentNode) {
+                child.remove();
+            }
         }
     }
 
     linkChildNodes() {
+        const parent = this.startAnchor.parentNode;
         for (var i = 0; i < this.childNodes.length; i++) {
-            this.tag.appendChild(this.childNodes[i]);
+            parent.insertBefore(this.childNodes[i], this.endAnchor);
         }
     }
 
