@@ -1,5 +1,9 @@
 package one.xis.theme.example.contact;
 
+
+import lombok.Getter;
+
+@Getter
 public enum ContactType {
     LEAD("Lead"),
     CUSTOMER("Customer"),

@@ -56,7 +56,7 @@
             <div>
                 <select xis:binding="type">
                     <option value="">-- Select Type --</option>
-                    <option xis:foreach="t:${contactTypes}" value="${t.name}">${t.displayName}</option>
+                    <option xis:repeat="t:${contactTypes}" value="${t.name}">${t.displayName}</option>
                 </select>
                 <xis:message message-for="type"/>
                 <label>Contact Type *</label>
