@@ -183,7 +183,7 @@ class HtmlParserTest {
 
             var commentNode = div.getFirstChild();
             assertThat(commentNode.getNodeType()).isEqualTo(8); // COMMENT_NODE
-            assertThat(commentNode.toHtml().trim()).isEqualTo("This is a comment");
+            assertThat(commentNode.toHtml().trim()).isEqualTo("<!--This is a comment-->");
             assertThat(commentNode.getParentNode()).isEqualTo(div);
             assertThat(commentNode.getNextSibling().getNodeType()).isEqualTo(1); // ELEMENT_NODE
 

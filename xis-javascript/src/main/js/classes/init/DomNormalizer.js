@@ -53,7 +53,9 @@ class DomNormalizer {
         } else if (this.isFrameworkForm(element)) {
             normalizedElement = this.replaceFrameworkFormTagByHtml(element);
         } else if (this.isFrameworkInput(element)) {
-            normalizedElement = this.replaceFrameworkInputByHtml(element);
+           normalizedElement = this.replaceFrameworkInputByHtml(element);
+        } else if (this.isFrameworkTextarea(element)) {
+            normalizedElement = this.replaceFrameworkTextareaByHtml(element);
         } else if (this.isFrameworkSubmit(element)) {
             normalizedElement = this.replaceFrameworkSubmitByHtml(element);
         } else if (this.isFrameworkButton(element)) {
@@ -64,6 +66,8 @@ class DomNormalizer {
             normalizedElement = this.replaceFrameworkCheckboxByHtml(element);
         } else if (this.isFrameworkRadio(element)) {
             normalizedElement = this.replaceFrameworkRadioByHtml(element);
+        } else if (this.isShortWidgetTag(element)) {
+            normalizedElement = this.initializeWidgetContainerByShortWidgetTag(element)
         } else if (this.isShortWidgetTag(element)) {
             normalizedElement = this.initializeWidgetContainerByShortWidgetTag(element)
         } else {
@@ -161,6 +165,15 @@ class DomNormalizer {
     }
 
     /**
+   * @private
+   * @param {Element} element
+   * @returns {boolean}
+   */
+    isFrameworkTextarea(element) {
+        return element.localName == 'xis:textarea';
+    }
+
+    /**
      * 
      * @param {Element} element 
      * @returns 
@@ -222,6 +235,7 @@ class DomNormalizer {
     isShortWidgetTag(element) {
         return element.localName == 'xis:widget';
     }
+
     /**
      * @private
      * @param {Element} frameworkCheckbox
@@ -229,6 +243,15 @@ class DomNormalizer {
      */
     replaceFrameworkCheckboxByHtml(frameworkCheckbox) {
         return this.replaceFrameworkElementByHtml(frameworkCheckbox, 'input', { type: 'checkbox' });
+    }
+
+    /**
+     * @private
+     * @param {Element} frameworkCheckbox
+     * @returns {Element}
+     */
+    replaceFrameworkTextareaByHtml(frameworkTextarea) {
+        return this.replaceFrameworkElementByHtml(frameworkTextarea, 'textarea');
     }
 
     /**

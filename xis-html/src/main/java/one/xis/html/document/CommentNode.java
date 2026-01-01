@@ -10,7 +10,7 @@ public class CommentNode implements Node {
 
     @Override
     public String toHtml() {
-        return text;
+        return "<!--" + text + "-->";
     }
 
     @Override

@@ -247,21 +247,105 @@ label{
     color:var(--muted); 
     margin: 0 0 15px 0;
 }
-input[type="checkbox"], input[type="radio"] {
+
+/* Checkboxes & Radio Buttons */
+input[type="checkbox"], 
+input[type="radio"] {
     width: 18px;
-	height: 18px;
-	margin: 8px 5px -2px 15px;
+    height: 18px;
+    margin: 0;
     background-color: #000;
-	border: 1px solid #fff;
-	border-radius: 2px;
-	display: inline-block;
-	cursor: pointer;
+    border: 1px solid #fff;
+    border-radius: 2px;
+    display: inline-block;
+    cursor: pointer;
+    vertical-align: middle;
+    flex-shrink: 0;
 }
 
-input[type="checkbox"] + label, input[type="radio"] + label {
-  margin: 0 0 -30px 0;
-  font-size:.9rem; 
-  font-weight: 400;
+input[type="radio"] {
+    border-radius: 50%;
+}
+
+/* Labels next to checkboxes/radios: horizontal alignment */
+input[type="checkbox"] + label, 
+input[type="radio"] + label {
+    display: inline-block;
+    margin: 0 0 0 8px;
+    font-size: 1rem; 
+    font-weight: 400;
+    color: var(--text);
+    cursor: pointer;
+    vertical-align: middle;
+    line-height: 1.4;
+}
+
+/* Checkbox/Radio Groups with optional title and border */
+.checkbox-group,
+.radio-group {
+    border: 1px solid var(--field-border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 32px;
+    background: var(--bg);
+}
+
+/* First child as group title (if not an input) */
+.checkbox-group > :first-child:not(input):not(:has(input)),
+.radio-group > :first-child:not(input):not(:has(input)) {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 8px;
+}
+
+/* Container with checkboxes - larger top margin for spacing from title */
+.checkbox-group > .col2,
+.checkbox-group > .col3,
+.checkbox-group > .col4,
+.radio-group > .col2,
+.radio-group > .col3,
+.radio-group > .col4 {
+    margin-top: 4px;
+    row-gap: 12px !important;
+}
+
+/* All children after title - includes the checkbox containers */
+.checkbox-group > :not(:first-child),
+.radio-group > :not(:first-child) {
+    margin-bottom: 0;
+}
+
+/* Checkbox/Radio items inside groups - indented */
+.checkbox-group > :has(> input[type="checkbox"]),
+.radio-group > :has(> input[type="radio"]) {
+    padding-left: 12px;
+    margin-bottom: 12px;
+}
+
+.checkbox-group > :has(> input[type="checkbox"]):last-child,
+.radio-group > :has(> input[type="radio"]):last-child {
+    margin-bottom: 0;
+}
+
+/* Container auto-styling for checkbox/radio + label pairs */
+:has(> input[type="checkbox"]), 
+:has(> input[type="radio"]) {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Outside of groups, add vertical spacing */
+:not(.checkbox-group):not(.radio-group) > :has(> input[type="checkbox"]),
+:not(.checkbox-group):not(.radio-group) > :has(> input[type="radio"]) {
+    margin-bottom: 16px;
+}
+
+:has(> input[type="checkbox"]) label,
+:has(> input[type="radio"]) label {
+    margin: 0;
 }
 
 input:focus,select:focus,textarea:focus{

@@ -72,13 +72,13 @@
             </div>
         </div>
 
-        <div class="span0">
-            <label>Tags (Checkboxes)</label>
-            <div class="checkbox-group" xis:foreach="tag:${availableTags}">
-                <div>
-                    <xis:checkbox binding="tags" value="${tag}" id="tag-${tag}"/>
-                    <label for="tag-${tag}">${tag}</label>
-                </div>
+        <div class="checkbox-group">
+            <span>Tags auswählen</span>
+
+            <div class="col2" xis:foreach="tag:${availableTags}">
+
+                <input type="checkbox" xis:binding="tags" value="${tag}" id="tag-${tag}"/>
+                <label for="tag-${tag}">${tag}</label>
             </div>
         </div>
 
