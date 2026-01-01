@@ -65,7 +65,7 @@
             <div>
                 <select xis:binding="status">
                     <option value="">-- Select Status --</option>
-                    <option xis:foreach="s:${contactStatuses}" value="${s.name}">${s.displayName}</option>
+                    <option xis:repeat="s:${contactStatuses}" value="${s.name}">${s.displayName}</option>
                 </select>
                 <xis:message message-for="status"/>
                 <label>Status *</label>
