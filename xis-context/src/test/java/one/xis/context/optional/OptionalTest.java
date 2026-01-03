@@ -3,7 +3,7 @@ package one.xis.context.optional;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import one.xis.context.AppContext;
-import one.xis.context.XISBean;
+import one.xis.context.Bean;
 import one.xis.context.Component;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -44,7 +44,7 @@ public class OptionalTest {
         @Component
         static class Bean1 {
 
-            @XISBean
+            @Bean
             Optional<Bean2> bean2() {
                 return Optional.empty();
             }

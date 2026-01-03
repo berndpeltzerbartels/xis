@@ -66,7 +66,7 @@ public class RestControllerServiceImpl implements RestControllerService {
             Class<? extends Exception> exceptionType = (Class<? extends Exception>)
                     ClassUtils.getGenericInterfacesTypeParameter(handler.getClass(), ControllerExceptionHandler.class, 0);
             exceptions.add(exceptionType);
-            if (handler.getClass().isAnnotationPresent(XISDefaultComponent.class)) {
+            if (handler.getClass().isAnnotationPresent(DefaultComponent.class)) {
                 defaultHandlers.put(exceptionType, handler);
             } else {
                 if (handlers.containsKey(exceptionType)) {

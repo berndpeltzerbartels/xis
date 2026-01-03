@@ -142,7 +142,7 @@ public class Annotations {
      */
     boolean isDefault(Class<?> type) {
         // Check for direct annotation
-        if (type.isAnnotationPresent(XISDefaultComponent.class)) {
+        if (type.isAnnotationPresent(DefaultComponent.class)) {
             return true;
         }
 

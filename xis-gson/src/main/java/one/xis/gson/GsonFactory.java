@@ -3,7 +3,7 @@ package one.xis.gson;
 import com.google.gson.*;
 import io.goodforgod.gson.configuration.GsonConfiguration;
 import lombok.RequiredArgsConstructor;
-import one.xis.context.XISBean;
+import one.xis.context.Bean;
 import one.xis.context.Component;
 
 import java.lang.reflect.Method;
@@ -16,7 +16,7 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class GsonFactory {
 
-    @XISBean // TODO Wrapper verwenden um Konflikte zu vermeiden
+    @Bean // TODO Wrapper verwenden um Konflikte zu vermeiden
     public Gson gson() {
         return new GsonConfiguration().builder()
                 .serializeNulls() // Enable null serialization for SessionStorage deletion behavior

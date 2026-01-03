@@ -93,11 +93,11 @@ public class AppContextBuilderImpl implements AppContextBuilder {
     private Annotations annotations() {
         var annotations = new Annotations()
                 .addComponentClassAnnotation(Component.class)
-                .addComponentClassAnnotation(XISDefaultComponent.class)
+                .addComponentClassAnnotation(DefaultComponent.class)
                 .addDependencyFieldAnnotation(Inject.class)
                 .addInitAnnotation(Init.class)
-                .addBeanMethodAnnotation(XISBean.class)
-                .setEventListenerAnnotation(XISEventListener.class);
+                .addBeanMethodAnnotation(Bean.class)
+                .setEventListenerAnnotation(EventListener.class);
         annotations.addComponentClassAnnotations(componentAnnotations);
         annotations.addDependencyFieldAnnotations(dependencyFieldAnnotations);
         annotations.addInitAnnotations(initAnnotation);

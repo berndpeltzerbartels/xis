@@ -2,7 +2,7 @@ package one.xis.context.all;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import one.xis.context.XISBean;
+import one.xis.context.Bean;
 import one.xis.context.Component;
 import one.xis.context.Inject;
 
@@ -16,7 +16,7 @@ class Comp1 {
     @Inject
     private Comp2 comp2;
 
-    @XISBean
+    @Bean
     Comp5 comp5(Comp4 comp4) {
         return new Comp5(comp4);
     }

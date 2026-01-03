@@ -3,7 +3,6 @@ package one.xis;
 import jakarta.inject.Qualifier;
 import jakarta.inject.Singleton;
 import one.xis.context.Component;
-import org.springframework.stereotype.Component;
 
 import java.lang.annotation.*;
 
@@ -44,7 +43,7 @@ import java.lang.annotation.*;
 @Target({ElementType.TYPE})
 @Qualifier // for micronaut
 @Singleton // for micronaut
-@Component
+@org.springframework.stereotype.Component
 @Component
 public @interface Widget {
     String value() default "";
