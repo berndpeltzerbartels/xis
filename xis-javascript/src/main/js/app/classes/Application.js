@@ -46,7 +46,68 @@ class Application {
             .then(config => this.widgets.loadWidgets(config))
             .then(config => this.pages.loadPages(config))
             .then(() => this.pageController.displayPageForUrl(document.location.pathname + document.location.search))
+            .then(() => this.setupLinkInterceptor())
             .catch(e => handleError(e));
+    }
+
+    /**
+     * Sets up global link interceptor to prevent full page reloads for internal links.
+     * Intercepts all <a href> clicks and routes internal links through the PageController.
+     * @private
+     */
+    setupLinkInterceptor() {
+        document.addEventListener('click', (event) => {
+            // Find the closest anchor element
+            const link = event.target.closest('a[href]');
+            if (!link) return;
+
+            // Skip if link already has XIS handler (xis:page, xis:widget, xis:action)
+            if (link.hasAttribute('xis:page') ||
+                link.hasAttribute('xis:widget') ||
+                link.hasAttribute('xis:action')) {
+                return;
+            }
+
+            const href = link.getAttribute('href');
+
+            // Only intercept internal links
+            if (this.isInternalLink(href)) {
+                event.preventDefault();
+                this.pageController.displayPageForUrl(href);
+            }
+        });
+    }
+
+    /**
+     * Checks if a link is internal (same-origin, not external protocol).
+     * @private
+     * @param {string} href - The href attribute value
+     * @returns {boolean} True if the link is internal
+     */
+    isInternalLink(href) {
+        if (!href) return false;
+
+        // External protocols
+        if (href.startsWith('http://') ||
+            href.startsWith('https://') ||
+            href.startsWith('//') ||
+            href.startsWith('mailto:') ||
+            href.startsWith('tel:') ||
+            href.startsWith('javascript:')) {
+            return false;
+        }
+
+        // Hash-only links (same page anchor)
+        if (href.startsWith('#')) {
+            return false;
+        }
+
+        // Download links
+        if (href.startsWith('data:') || href.startsWith('blob:')) {
+            return false;
+        }
+
+        return true;
     }
 
 }
