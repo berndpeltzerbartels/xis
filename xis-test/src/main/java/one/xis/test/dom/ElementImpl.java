@@ -17,7 +17,7 @@ import java.util.function.Predicate;
 @SuppressWarnings("unused")
 public class ElementImpl extends NodeImpl implements Element {
 
-    // HTML-void-Tags (haben keinen End-Tag; nie als <tag/> serialisieren)
+    // HTML-void-Tags (haben keinen End-OpeningTag; nie als <tag/> serialisieren)
     private static final Set<String> HTML_VOID = Set.of(
             "area", "base", "br", "col", "embed", "hr", "img", "input",
             "link", "meta", "param", "source", "track", "wbr"

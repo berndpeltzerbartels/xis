@@ -23,6 +23,48 @@ class HtmlTokenizerTest {
         assertThat(result).hasSize(i); // no extras
     }
 
+
+    @Test
+    void testScript() {
+        String html = """
+                  <script>
+                // Add custom EL functions
+                    elFunctions.addFunction('formatCurrency', (value, currency) => {
+                        return new Intl.NumberFormat('en-US', {
+                            style: 'currency',
+                            currency: currency || 'USD'
+                        }).format(value);
+                    });
+                
+                    elFunctions.addFunction('capitalize', (str) => {
+                        if (!str || typeof str !== 'string') return str;
+                        return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+                    });
+                
+                    elFunctions.addFunction('pluralize', (count, singular, plural) => {
+                        return count === 1 ? singular : (plural || singular + 's');
+                    });
+                
+                    elFunctions.addFunction('truncate', (str, maxLength) => {
+                        if (!str || typeof str !== 'string') return str;
+                        if (str.length <= maxLength) return str;
+                        return str.substring(0, maxLength) + '...';
+                            });
+                </script>
+                """;
+        HtmlTokenizer tokenizer = new HtmlTokenizer();
+        List<Token> result = tokenizer.tokenize(html);
+
+        int i = 0;
+        assertThat(result.get(i++)).isInstanceOf(OpenBracketToken.class);
+        assertThat(result.get(i++)).isInstanceOf(TextToken.class)
+                .extracting("text").isEqualTo("br");
+        assertThat(result.get(i++)).isInstanceOf(SlashToken.class);
+        assertThat(result.get(i++)).isInstanceOf(CloseBracketToken.class);
+        assertThat(result).hasSize(i); // no extras
+    }
+
+
     @Test
     void tokenizeBig() {
         String html = """

@@ -29,7 +29,7 @@ public class DocumentBuilder {
     private void skipWhitespaceParts() {
         do {
             parts.remove(0); // remove whitespace after doctype
-        } while (!parts.isEmpty() && parts.get(0) instanceof TextPart tp && tp.getText().trim().isEmpty());
+        } while (!parts.isEmpty() && parts.get(0) instanceof TextPart tp && tp.toString().trim().isEmpty());
     }
 
 }

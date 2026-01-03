@@ -1,5 +1,7 @@
 package one.xis.html.tokens;
 
+import one.xis.html.document.ParenthesisToken;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,125 +10,74 @@ public class HtmlTokenizer {
     public List<Token> tokenize(String source) {
         List<Token> out = new ArrayList<>();
         StringBuilder text = new StringBuilder();
-        boolean inTag = false;
         int i = 0, n = source.length();
 
         while (i < n) {
-            char c = source.charAt(i);
+            // Kommentare erkennen
+            if (source.startsWith("<!--", i)) {
+                flushText(text, out);
+                out.add(new OpenCommentToken());
+                i += 4;
 
-            if (!inTag) {
-                if (source.startsWith("<!--", i)) {
-
-                    flushText(text, out);
-
-                    out.add(new OpenCommentToken());
-                    i += 4; // <!--
-
-                    int end = source.indexOf("-->", i);
-                    if (end < 0) {
-                        throw new HtmlParseException("Unclosed comment");
-                    }
-
-                    String commentText = source.substring(i, end);
-                    if (!commentText.isEmpty()) {
-                        out.add(new TextToken(commentText));
-                    }
-
-                    out.add(new CloseCommentToken());
-                    i = end + 3; // -->
-                    continue;
+                int end = source.indexOf("-->", i);
+                if (end < 0) {
+                    throw new HtmlParseException("Unclosed comment");
                 }
 
-
-                // TEXT-MODUS: alles bis zum nächsten '<' sammeln (inkl. Leerzeichen)
-                if (c == '<') {
-                    flushText(text, out);
-                    out.add(new OpenBracketToken());
-                    inTag = true;
-                    i++;
-                } else {
-                    text.append(c);
-                    i++;
+                String commentText = source.substring(i, end);
+                if (!commentText.isEmpty()) {
+                    out.add(new TextToken(commentText));
                 }
+
+                out.add(new CloseCommentToken());
+                i = end + 3;
                 continue;
             }
 
-            // TAG-MODUS (zwischen '<' und '>')
+            char c = source.charAt(i);
+
+            // Spezielle Zeichen als eigene Tokens
             switch (c) {
+                case '<' -> {
+                    flushText(text, out);
+                    out.add(new OpenBracketToken());
+                    i++;
+                }
                 case '>' -> {
+                    flushText(text, out);
                     out.add(new CloseBracketToken());
-                    inTag = false;
                     i++;
                 }
                 case '/' -> {
+                    flushText(text, out);
                     out.add(new SlashToken());
                     i++;
                 }
                 case '=' -> {
+                    flushText(text, out);
                     out.add(new EqualsToken());
                     i++;
                 }
-                case '"', '\'' -> {
-                    // QUOTED STRING als EIN TextToken (ohne Anführungszeichen)
-                    char quote = c;
-                    i++; // öffnendes Quote überspringen
-                    StringBuilder q = new StringBuilder();
-                    while (i < n) {
-                        char qc = source.charAt(i++);
-                        if (qc == quote) break;
-                        q.append(qc);
-                    }
-                    out.add(new TextToken(q.toString()));
+                case '"' -> {
+                    flushText(text, out);
+                    out.add(new ParenthesisToken());
+                    i++;
+                }
+                case ' ', '\n' -> {
+                    flushText(text, out);
+                    out.add(new WhitespaceToken(c));
+                    i++;
                 }
                 default -> {
-                    if (isSpace(c)) {
-                        // Whitespace im Tagkopf = Separator -> ignorieren
-                        i++;
-                    } else {
-                        // Unquoted Name/Value: bis zu Trennzeichen lesen
-                        StringBuilder sb = new StringBuilder();
-                        sb.append(c);
-                        i++;
-                        while (i < n) {
-                            char x = source.charAt(i);
-                            if (x == '<' || x == '>' || x == '=' || x == '/' || isSpace(x) || x == '"' || x == '\'') {
-                                break;
-                            }
-                            sb.append(x);
-                            i++;
-                        }
-                        out.add(new TextToken(sb.toString()));
-                    }
+                    // Alles andere ist Text
+                    text.append(c);
+                    i++;
                 }
             }
         }
 
-        // Restlichen Text (falls Datei nicht mit '<' endet) flushen
         flushText(text, out);
-        
-        // DEBUG: Write all tokens to file
-        try (java.io.PrintWriter pw = new java.io.PrintWriter("/tmp/xis-tokens.txt")) {
-            pw.println("=== TOKENIZER OUTPUT (" + out.size() + " tokens) ===");
-            for (int idx = 0; idx < out.size(); idx++) {
-                Token token = out.get(idx);
-                if (token instanceof TextToken tt) {
-                    String preview = tt.getText().replace("\n", "\\n").replace("\r", "\\r");
-                    if (preview.length() > 60) preview = preview.substring(0, 60) + "...";
-                    pw.println(idx + ": TextToken(\"" + preview + "\")");
-                } else {
-                    pw.println(idx + ": " + token.getClass().getSimpleName());
-                }
-            }
-            pw.println("=== END TOKENS ===");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        
         return out;
-    }
-
-    private static boolean isSpace(char c) {
-        return c == ' ' || c == '\n' || c == '\r' || c == '\t' || c == '\f';
     }
 
     private static void flushText(StringBuilder text, List<Token> out) {

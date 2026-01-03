@@ -25,7 +25,7 @@ public class DocumentImpl implements one.xis.test.dom.Document {
      * ------------------------------------------ */
 
     /**
-     * Baut ein leeres Dokument mit einem Root-Tag deiner Wahl.
+     * Baut ein leeres Dokument mit einem Root-OpeningTag deiner Wahl.
      */
     public DocumentImpl(String rootTagName) {
         this.documentElement = new ElementImpl(rootTagName);

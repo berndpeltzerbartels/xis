@@ -60,7 +60,7 @@ class DocumentBuilderTest {
         assertThat(messages.getAttribute("ignore")).isEqualTo("true");
         assertThat(messages.getAttribute("ignore-position")).isEqualTo("end");
 
-        // Tag-Counts (jeweils genau 1x vorhanden)
+        // OpeningTag-Counts (jeweils genau 1x vorhanden)
         assertThat(document.getElementsByTagName("head").length).isEqualTo(1);
         assertThat(document.getElementsByTagName("body").length).isEqualTo(1);
         assertThat(document.getElementsByTagName("title").length).isEqualTo(1);

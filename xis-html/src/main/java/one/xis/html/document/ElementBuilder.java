@@ -11,7 +11,7 @@ import java.util.Set;
  * Builds a node tree from a linear Part list (tags/text).
  * <p>
  * Rules:
- * - Opening and closing tags are each a Part (Tag).
+ * - Opening and closing tags are each a Part (OpeningTag).
  * - NO_CONTENT (self-closing) tags appear only once and cannot have children.
  * - Missing end tags are an error, except for a small allow-list (we allow <p>).
  * - Foreign CLOSING tags are not consumed here (caller processes them).
@@ -47,8 +47,12 @@ public class ElementBuilder {
         consume(); // consume the opening/NO_CONTENT tag
 
         Element element = createElementFrom(startTag);
-        element.getAttributes().putAll(startTag.getAttributes());
-
+        if (startTag instanceof OpeningTag openingTag) {
+            element.getAttributes().putAll(openingTag.getAttributes());
+        }
+        if (startTag instanceof EmptyTag emptyTag) {
+            element.getAttributes().putAll(emptyTag.getAttributes());
+        }
         // NEW: Treat HTML5 void elements as empty regardless of syntax (<img> or <img/>)
         if (SelfClosingTags.isSelfClosing(name)) {
             // No children, no end tag expected
@@ -56,7 +60,7 @@ public class ElementBuilder {
         }
 
         // Existing behavior for non-void tags
-        if (startTag.getTagType() == TagType.NO_CONTENT) {
+        if (startTag instanceof EmptyTag) {
             return element;
         }
 
@@ -90,7 +94,14 @@ public class ElementBuilder {
                 break;
             }
 
-            if (p instanceof Tag t && (t.getTagType() == TagType.OPENING || t.getTagType() == TagType.NO_CONTENT)) {
+            if (p instanceof OpeningTag) {
+                Element child = doBuild(); // recursive
+                prev = attachChild(parent, firstChild, prev, child);
+                if (firstChild == null) firstChild = child;
+                continue;
+            }
+
+            if (p instanceof EmptyTag) {
                 Element child = doBuild(); // recursive
                 prev = attachChild(parent, firstChild, prev, child);
                 if (firstChild == null) firstChild = child;
@@ -99,14 +110,14 @@ public class ElementBuilder {
 
             if (p instanceof TextPart) {
                 TextPart textPart = (TextPart) consume();
-                TextNode child = new TextNode(textPart.getText());
+                TextNode child = new TextNode(textPart.toString());
                 prev = attachChild(parent, firstChild, prev, child);
                 if (firstChild == null) firstChild = child;
                 continue;
             }
 
-            if (p instanceof CommentPart cp) {
-                CommentNode node = new CommentNode(cp.getText());
+            if (p instanceof CommentOpen cp) {
+                CommentNode node = new CommentNode(cp.toString());
                 attachChild(parent, firstChild, prev, node);
                 consume();
                 if (firstChild == null) firstChild = node;
@@ -136,16 +147,15 @@ public class ElementBuilder {
         return child;
     }
 
-    /* ------------------------------- Tag utilities ------------------------------- */
+    /* ------------------------------- OpeningTag utilities ------------------------------- */
 
     private boolean isMatchingClosingTag(Part p, String name) {
-        return (p instanceof Tag t)
-                && t.getTagType() == TagType.CLOSING
+        return (p instanceof ClosingTag t)
                 && t.getLocalName().equals(name);
     }
 
     private boolean isForeignClosingTag(Part p) {
-        return (p instanceof Tag t) && t.getTagType() == TagType.CLOSING;
+        return p instanceof ClosingTag;
     }
 
     private Element createElementFrom(Tag t) {
@@ -153,13 +163,10 @@ public class ElementBuilder {
     }
 
     private Tag requireOpeningOrEmptyTag(Part p) {
-        if (!(p instanceof Tag t)) {
+        if (!OpeningTag.class.isInstance(p) && !EmptyTag.class.isInstance(p)) {
             throw new IllegalArgumentException(err("Expected opening or self-closing tag, found: " + p));
         }
-        if (t.getTagType() != TagType.OPENING && t.getTagType() != TagType.NO_CONTENT) {
-            throw new IllegalArgumentException(err("Expected opening or self-closing tag, found closing tag: " + t));
-        }
-        return t;
+        return (Tag) p;
     }
 
     private String err(String msg) {
