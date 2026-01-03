@@ -1,23 +1,41 @@
 package one.xis.html;
 
-import one.xis.html.document.DocumentBuilder;
+import one.xis.html.document.Doctype;
 import one.xis.html.document.HtmlDocument;
-import one.xis.html.parts.PartParser2;
-import one.xis.html.tokens.HtmlParseException;
-import one.xis.html.tokens.HtmlTokenizer;
 
+import java.util.Optional;
 
 public class HtmlParser {
 
-    private final HtmlTokenizer htmlTokenizer = new HtmlTokenizer();
+    public HtmlDocument parse(String html) {
+        var document = new HtmlDocument();
+        var htmlBuilder = new StringBuilder(html);
+        var doctypeOpt = readDoctype(htmlBuilder);
+        doctypeOpt.ifPresent(doctypeText -> document.setDoctype(new Doctype(doctypeText)));
 
-    public HtmlDocument parse(String html) throws HtmlParseException {
-        var tokens = htmlTokenizer.tokenize(html);
-        var partParser = new PartParser2(tokens);
-        var parts = partParser.parse();
-
-        var builder = new DocumentBuilder(parts);
-        return builder.build();
+        var element = new ElementParser().parse(htmlBuilder.toString());
+        document.setDocumentElement(element);
+        return document;
     }
 
+    private Optional<String> readDoctype(StringBuilder html) {
+        if (!html.toString().toUpperCase().startsWith("<!DOCTYPE")) {
+            return Optional.empty();
+        }
+        StringBuilder doctype = new StringBuilder();
+        int index = 9; // length of "<!DOCTYPE"
+        while (index < html.length()) {
+            char c = html.charAt(index);
+            if (c == '>') {
+                break;
+            }
+            doctype.append(c);
+            index++;
+        }
+        html.delete(0, index + 1); // remove doctype from html
+        return Optional.of(doctype.toString().trim());
+    }
+
+
 }
+

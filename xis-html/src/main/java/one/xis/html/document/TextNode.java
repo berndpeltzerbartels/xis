@@ -21,6 +21,10 @@ public class TextNode implements Node {
         text.append(s);
     }
 
+    public String getText() {
+        return text.toString();
+    }
+
     @Override
     public String toHtml() {
         return text.toString();

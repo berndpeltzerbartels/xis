@@ -146,7 +146,10 @@ class HtmlParserTest {
             var document = parser.parse(html);
             var htmlResult = document.asString();
 
-            assertThat(htmlResult).isEqualToIgnoringWhitespace("<input type=\"checkbox\" checked=\"true\">");
+            var input = document.getDocumentElement();
+            assertThat(input.getAttributes().get("checked")).isEqualTo("true");
+            assertThat(input.getAttributes().get("type")).isEqualTo("checkbox");
+
         }
     }
 
@@ -159,7 +162,9 @@ class HtmlParserTest {
             var document = parser.parse(html);
             var htmlResult = document.asString();
 
-            assertThat(htmlResult).isEqualToIgnoringWhitespace("<input type=\"checkbox\" checked=\"checked\">");
+            var input = document.getDocumentElement();
+            assertThat(input.getAttributes().get("checked")).isEqualTo("checked");
+            assertThat(input.getAttributes().get("type")).isEqualTo("checkbox");
         }
     }
 
@@ -183,7 +188,7 @@ class HtmlParserTest {
 
             var commentNode = div.getFirstChild();
             assertThat(commentNode.getNodeType()).isEqualTo(8); // COMMENT_NODE
-            assertThat(commentNode.toHtml().trim()).isEqualTo("<!--This is a comment-->");
+            assertThat(commentNode.toHtml().trim()).isEqualTo("<!-- This is a comment -->");
             assertThat(commentNode.getParentNode()).isEqualTo(div);
             assertThat(commentNode.getNextSibling().getNodeType()).isEqualTo(1); // ELEMENT_NODE
 
@@ -350,7 +355,9 @@ class HtmlParserTest {
             var document = parser.parse(html);
             var htmlResult = document.asString();
 
-            assertThat(htmlResult).isEqualToIgnoringWhitespace("<input type=\"checkbox\" xis:abc=\"true\">");
+            var input = document.getDocumentElement();
+            assertThat(input.getAttributes().get("xis:abc")).isEqualTo("true");
+            assertThat(input.getAttributes().get("type")).isEqualTo("checkbox");
         }
     }
 

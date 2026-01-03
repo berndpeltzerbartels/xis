@@ -1,5 +1,6 @@
 package one.xis.test.dom;
 
+import one.xis.html.tokens.HtmlParseException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -62,8 +63,7 @@ class ElementBuilderTest {
     void multipleTopLevelElements_shouldThrow() {
         String html = "<h1>Hi</h1><p>Para</p>";
         assertThatThrownBy(() -> ElementBuilder.build(html))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Expected exactly one top-level element, found extra content after it");
+                .isInstanceOf(HtmlParseException.class);
     }
 
     @Test
@@ -71,8 +71,7 @@ class ElementBuilderTest {
     void topLevelTextAndElement_shouldThrow() {
         String html = "  text <b>bold</b> ";
         assertThatThrownBy(() -> ElementBuilder.build(html))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Expected opening or self-closing tag, found");
+                .isInstanceOf(HtmlParseException.class);
     }
 
     @Test

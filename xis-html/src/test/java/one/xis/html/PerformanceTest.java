@@ -22,7 +22,7 @@ class PerformanceTest {
     void parseLargeDocumentWithinTimeBudget() {
         int sections = Integer.getInteger("parser.perf.sections", 120);
         int itemsPerSection = Integer.getInteger("parser.perf.items", 40);
-        int timeoutSeconds = Integer.getInteger("parser.perf.timeoutSeconds", 3);
+        int timeoutSeconds = Integer.getInteger("parser.perf.timeoutSeconds", 1);
 
         String html = generateLargeHtml(sections, itemsPerSection);
 

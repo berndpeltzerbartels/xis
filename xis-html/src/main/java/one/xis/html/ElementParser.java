@@ -1,4 +1,4 @@
-package one.xis.html.document2;
+package one.xis.html;
 
 import lombok.Data;
 import lombok.Getter;
@@ -142,28 +142,50 @@ public class ElementParser {
                 if (!consumeWhitespaces()) {
                     return attributes;
                 }
-                String name = consumeName();
-                if (name == null) {
-                    return attributes;
+                int attributeMark = index;
+                String[] nameValue = tryReadAttribute();
+                if (nameValue != null) {
+                    attributes.put(nameValue[0], nameValue[1]);
+                    continue;
                 }
-                if (!consume('=')) {
-                    return null;
+                index = attributeMark;
+                String booleanAttribute = tryReadBooleanAttribute();
+                if (booleanAttribute != null) {
+                    attributes.put(booleanAttribute, "true");
+                    continue;
                 }
-                if (!consume('"')) {
-                    return null;
-                }
-                String value = consumeString();
-                if (value == null) {
-                    return null;
-                }
-                attributes.put(name, value);
+                index = attributeMark;
+                break;
             }
+            consumeWhitespaces();
             return attributes;
+        }
+
+        private String[] tryReadAttribute() {
+            String name = consumeName();
+            if (name == null) {
+                return null;
+            }
+            if (!consume('=')) {
+                return null;
+            }
+            if (!consume('"')) {
+                return null;
+            }
+            String value = consumeString();
+            if (value == null) {
+                return null;
+            }
+            return new String[]{name, value};
+        }
+
+        private String tryReadBooleanAttribute() {
+            return consumeName();
         }
 
         private boolean consumeWhitespaces() {
             boolean consumed = false;
-            while (index < html.length() && Character.isSpaceChar(html.charAt(index))) {
+            while (index < html.length() && Character.isWhitespace(html.charAt(index))) {
                 index++;
                 consumed = true;
             }
@@ -355,24 +377,45 @@ public class ElementParser {
         private final List<ClosableNode> openTags = new ArrayList<>();
 
         void build() {
+            if (parts.isEmpty()) {
+                throw new HtmlParseException("Cannot build element from empty document");
+            }
             trim();
             evaluate();
         }
 
         private void evaluate() {
+            skipWhitespaces();
+            if (parts.isEmpty()) {
+                throw new HtmlParseException("Cannot build element tree: no root element found");
+            }
+
+            ResultPart part = parts.removeFirst();
+            if (part instanceof Tag tag) {
+                root = toElement(tag);
+                if (tag.isClosed()) {
+                    return;
+                }
+                evaluateChild(root);
+                evaluateSibling(root); // for syntax checks, should fail if there is extra content
+                if (root.getNextSibling() != null) {
+                    throw new HtmlParseException("Expected exactly one top-level element, found extra content after it");
+                }
+                return;
+            }
+            throw new HtmlParseException("There should be no content outside of root element: " + part);
+
+        }
+
+
+        private void skipWhitespaces() {
             while (!parts.isEmpty()) {
-                ResultPart part = parts.removeFirst();
-                if (part instanceof Tag tag) {
-                    root = toElement(tag);
-                    if (tag.isClosed()) {
-                        return;
-                    }
-                    evaluateChild(root);
+                ResultPart part = parts.getFirst();
+                if (part instanceof Text text && text.isWhitespaceOnly()) {
+                    parts.removeFirst();
+                } else {
                     break;
                 }
-            }
-            if (root == null) {
-                throw new HtmlParseException("Cannot build element tree: no root element found");
             }
         }
 

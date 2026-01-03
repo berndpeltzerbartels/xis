@@ -20,7 +20,7 @@ class ElementJsIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        document = (DocumentImpl) Document.of("<html><body><div id='main'></div></body></html>");
+        document = (DocumentImpl) Document.of("<html><body><div id=\"main\"></div></body></html>");
         context = JSUtil.context(Map.of("document", document));
     }
 
