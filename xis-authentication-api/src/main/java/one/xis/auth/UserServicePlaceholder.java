@@ -1,10 +1,10 @@
 package one.xis.auth;
 
-import one.xis.context.XISDefaultComponent;
+import one.xis.context.DefaultComponent;
 
 import java.util.Optional;
 
-@XISDefaultComponent
+@DefaultComponent
 public class UserServicePlaceholder implements UserInfoService<UserInfoImpl> {
     @Override
     public boolean validateCredentials(String userId, String password) {

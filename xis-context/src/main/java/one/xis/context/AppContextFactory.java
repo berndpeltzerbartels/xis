@@ -144,7 +144,7 @@ class AppContextFactory implements SingletonCreationListener {
 
     private boolean isDefaultProducer(SingletonProducer producer) {
         if (producer instanceof SingletonConstructor constructor) {
-            return constructor.getSingletonClass().isAnnotationPresent(XISDefaultComponent.class);
+            return constructor.getSingletonClass().isAnnotationPresent(DefaultComponent.class);
         }
         return false;
     }

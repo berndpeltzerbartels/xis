@@ -1,8 +1,8 @@
 package one.xis.auth.token;
 
-import one.xis.context.XISDefaultComponent;
+import one.xis.context.DefaultComponent;
 
-@XISDefaultComponent
+@DefaultComponent
 public class DefaultUserSecurityService implements UserSecurityService {
 
     @Override

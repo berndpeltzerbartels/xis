@@ -1,14 +1,14 @@
 // LocalInMemoryKeyProvider.java
 package one.xis.auth;
 
-import one.xis.context.XISDefaultComponent;
+import one.xis.context.DefaultComponent;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
-@XISDefaultComponent
+@DefaultComponent
 public class LocalInMemoryKeyProvider implements LocalKeyProvider {
     private final Map<String, KeyPair> keyPairMap = new HashMap<>();
     private final List<String> keyIds = new ArrayList<>();

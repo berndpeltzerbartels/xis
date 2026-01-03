@@ -1,7 +1,7 @@
 package one.xis.auth;
 
 import lombok.RequiredArgsConstructor;
-import one.xis.context.XISDefaultComponent;
+import one.xis.context.DefaultComponent;
 import one.xis.server.LocalUrlHolder;
 
 import java.time.Instant;
@@ -9,7 +9,7 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 
-@XISDefaultComponent
+@DefaultComponent
 @RequiredArgsConstructor
 class IDPAuthenticationServiceImpl implements IDPAuthenticationService {
 

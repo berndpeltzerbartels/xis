@@ -1,14 +1,14 @@
 package one.xis.auth;
 
 import lombok.RequiredArgsConstructor;
-import one.xis.context.XISDefaultComponent;
+import one.xis.context.DefaultComponent;
 import one.xis.server.LocalUrlHolder;
 
 import java.security.KeyPair;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@XISDefaultComponent
+@DefaultComponent
 @RequiredArgsConstructor
 public class LocalTokenServiceImpl implements LocalTokenService {
 
