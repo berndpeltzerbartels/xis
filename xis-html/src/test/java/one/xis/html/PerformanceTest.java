@@ -28,15 +28,17 @@ class PerformanceTest {
 
         // Use preemptive timeout to avoid flakiness while still guarding performance.
         assertTimeoutPreemptively(Duration.ofSeconds(timeoutSeconds), () -> {
-            long t0 = System.currentTimeMillis();
-            var document = parser.parse(html);
-            long t1 = System.currentTimeMillis();
-            System.out.printf("Parsed %,d chars in %d ms (%,.1f chars/sec)%n",
-                    html.length(), (t1 - t0), html.length() * 1000.0 / (t1 - t0));
-            // sanity checks (avoid asserting exact serialization for perf test)
-            assertThat(document).isNotNull();
-            assertThat(document.getDocumentElement().getLocalName()).isEqualTo("html");
-            assertThat(document.asString()).isNotEmpty();
+            for (var i = 0; i < 10; i++) {
+                long t0 = System.currentTimeMillis();
+                var document = parser.parse(html);
+                long t1 = System.currentTimeMillis();
+                System.out.printf("Parsed %,d chars in %d ms (%,.1f chars/sec)%n",
+                        html.length(), (t1 - t0), html.length() * 1000.0 / (t1 - t0));
+                // sanity checks (avoid asserting exact serialization for perf test)
+                assertThat(document).isNotNull();
+                assertThat(document.getDocumentElement().getLocalName()).isEqualTo("html");
+                assertThat(document.asString()).isNotEmpty();
+            }
         });
     }
 
