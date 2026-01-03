@@ -6,8 +6,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.Getter;
 import one.xis.*;
+import one.xis.context.Init;
 import one.xis.context.IntegrationTestContext;
-import one.xis.context.XISInit;
 import one.xis.gson.JsonMap;
 import one.xis.http.RequestContext;
 import one.xis.server.ClientRequest;
@@ -55,7 +55,7 @@ class FormatterRecordIntegrationTest {
         assertThat(response.getStatus()).isEqualTo(200);
         var dataTree = objectMapper.valueToTree(response.getFormData());
         var savedProduct = objectMapper.treeToValue(dataTree.at("/product"), ProductRecord.class);
-        
+
         assertThat(savedProduct.name()).isEqualTo("Laptop");
         assertThat(savedProduct.availableUntil()).isEqualTo(LocalDate.of(2025, 12, 31));
     }
@@ -95,7 +95,7 @@ class FormatterRecordIntegrationTest {
         @Getter
         private ProductRecord productData;
 
-        @XISInit
+        @Init
         void init() {
             productData = new ProductRecord("Default Product", LocalDate.of(2025, 12, 31));
         }

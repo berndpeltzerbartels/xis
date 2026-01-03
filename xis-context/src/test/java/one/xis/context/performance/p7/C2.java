@@ -3,7 +3,7 @@ package one.xis.context.performance.p7;
 import lombok.RequiredArgsConstructor;
 import one.xis.context.Bean;
 import one.xis.context.Component;
-import one.xis.context.XISInit;
+import one.xis.context.Init;
 import one.xis.context.performance.XI;
 
 @Component
@@ -17,27 +17,27 @@ public class C2 implements XI {
         return new C4(c9);
     }
 
-    @XISInit
+    @Init
     void init0() {
 
     }
 
-    @XISInit
+    @Init
     void init1() {
 
     }
 
-    @XISInit
+    @Init
     void init2() {
 
     }
 
-    @XISInit
+    @Init
     void init3() {
 
     }
 
-    @XISInit
+    @Init
     void init4() {
 
     }

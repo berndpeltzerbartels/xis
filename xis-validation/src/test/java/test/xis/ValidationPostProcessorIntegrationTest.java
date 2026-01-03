@@ -7,8 +7,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.Data;
 import lombok.Getter;
 import one.xis.*;
+import one.xis.context.Init;
 import one.xis.context.IntegrationTestContext;
-import one.xis.context.XISInit;
 import one.xis.gson.JsonMap;
 import one.xis.http.RequestContext;
 import one.xis.server.ClientRequest;
@@ -239,7 +239,7 @@ class ValidationPostProcessorIntegrationTest {
 
         private PersonData personData;
 
-        @XISInit
+        @Init
         void init() {
             personData = new PersonData();
             personData.setName("Max Mustermann");

@@ -3,7 +3,7 @@ package one.xis.context.performance.p8;
 
 import lombok.RequiredArgsConstructor;
 import one.xis.context.Component;
-import one.xis.context.XISInit;
+import one.xis.context.Init;
 import one.xis.context.performance.XI;
 
 import java.util.Collection;
@@ -14,27 +14,27 @@ class C0 implements XI {
     private final one.xis.context.performance.p7.C2 c2;
 
 
-    @XISInit
+    @Init
     void init0(Collection<I0> i0s) {
 
     }
 
-    @XISInit
+    @Init
     void init1(Collection<I0> i0s) {
 
     }
 
-    @XISInit
+    @Init
     void init2() {
 
     }
 
-    @XISInit
+    @Init
     void init3() {
 
     }
 
-    @XISInit
+    @Init
     void init4() {
 
     }

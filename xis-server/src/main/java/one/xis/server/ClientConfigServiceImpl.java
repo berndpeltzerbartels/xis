@@ -8,8 +8,8 @@ import one.xis.Include;
 import one.xis.Page;
 import one.xis.Widget;
 import one.xis.context.Component;
-import one.xis.context.XISInit;
-import one.xis.context.XISInject;
+import one.xis.context.Init;
+import one.xis.context.Inject;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -25,13 +25,13 @@ class ClientConfigServiceImpl implements ClientConfigService {
     private final PageAttributesFactory pageAttributesFactory;
     private final WidgetAttributesFactory widgetAttributesFactory;
 
-    @XISInject(annotatedWith = Page.class)
+    @Inject(annotatedWith = Page.class)
     private Collection<Object> pageControllers;
 
-    @XISInject(annotatedWith = Widget.class)
+    @Inject(annotatedWith = Widget.class)
     private Collection<Object> widgetControllers;
 
-    @XISInject(annotatedWith = Include.class)
+    @Inject(annotatedWith = Include.class)
     private Collection<Object> includes;
 
     @Setter
@@ -40,7 +40,7 @@ class ClientConfigServiceImpl implements ClientConfigService {
     @Getter
     private ClientConfig config;
 
-    @XISInit
+    @Init
     void init() {
         var configBuilder = ClientConfig.builder()
                 .useWebsockets(useWebsockets);

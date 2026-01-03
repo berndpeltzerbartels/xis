@@ -3,13 +3,13 @@ package one.xis.context.beanmethod;
 import lombok.Getter;
 import one.xis.context.Bean;
 import one.xis.context.Component;
-import one.xis.context.XISInject;
+import one.xis.context.Inject;
 
 @Getter
 @Component
 class Comp1 {
 
-    @XISInject
+    @Inject
     private Comp2 comp2;
 
     @Bean

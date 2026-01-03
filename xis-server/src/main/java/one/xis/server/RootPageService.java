@@ -3,7 +3,7 @@ package one.xis.server;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import one.xis.context.Component;
-import one.xis.context.XISInit;
+import one.xis.context.Init;
 import one.xis.html.HtmlParser;
 import one.xis.html.document.HtmlDocument;
 import one.xis.resource.Resources;
@@ -23,7 +23,7 @@ class RootPageService {
     @Getter
     private String rootPageHtml;
 
-    @XISInit
+    @Init
     void init() {
         var resourcePath = getRootPageResourcePath();
         var rootPageHtml = resources.getByPath(resourcePath).getContent();

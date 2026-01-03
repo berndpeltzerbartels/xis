@@ -4,8 +4,8 @@ package one.xis.context.initmethod;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import one.xis.context.Component;
-import one.xis.context.XISInit;
-import one.xis.context.XISInject;
+import one.xis.context.Init;
+import one.xis.context.Inject;
 
 @Component
 @Getter
@@ -13,12 +13,12 @@ import one.xis.context.XISInject;
 class Comp1 {
     private final Comp3 comp3;
 
-    @XISInject
+    @Inject
     private Comp2 comp2;
 
     private int result;
 
-    @XISInit
+    @Init
     void init() {
         result = comp2.getInt() + comp3.getInt();
     }

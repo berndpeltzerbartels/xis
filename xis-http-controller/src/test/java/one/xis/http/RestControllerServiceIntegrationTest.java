@@ -54,7 +54,7 @@ class RestControllerServiceIntegrationTest {
             FieldUtil.setFieldValue(restControllerService, "responseWriter", responseWriter);
             FieldUtil.setFieldValue(restControllerService, "controllers", List.of(testController));
             FieldUtil.setFieldValue(restControllerService, "eventEmitter", eventEmitter);
-            restControllerService.initMethods(); // Simuliert @XISInit
+            restControllerService.initMethods(); // Simuliert @Init
         }
 
         @Test

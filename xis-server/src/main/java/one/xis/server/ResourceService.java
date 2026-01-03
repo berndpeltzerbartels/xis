@@ -5,8 +5,8 @@ import one.xis.Include;
 import one.xis.Page;
 import one.xis.Widget;
 import one.xis.context.Component;
-import one.xis.context.XISInit;
-import one.xis.context.XISInject;
+import one.xis.context.Init;
+import one.xis.context.Inject;
 import one.xis.html.HtmlParser;
 import one.xis.html.document.Element;
 import one.xis.html.document.HtmlDocument;
@@ -24,19 +24,19 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 class ResourceService {
 
-    @XISInject(annotatedWith = Widget.class)
+    @Inject(annotatedWith = Widget.class)
     private Collection<Object> widgetControllers;
 
-    @XISInject(annotatedWith = Page.class)
+    @Inject(annotatedWith = Page.class)
     private Collection<Object> pageControllers;
 
-    @XISInject(annotatedWith = Include.class)
+    @Inject(annotatedWith = Include.class)
     private Collection<Object> includes;
 
-    @XISInject
+    @Inject
     private RootPageService rootPageService;
 
-    @XISInject
+    @Inject
     private HtmlResourcePathResolver htmlResourcePathResolver;
 
     private final Resources resources;
@@ -48,7 +48,7 @@ class ResourceService {
     private Map<String, GenericResource<HtmlDocument>> pageDocumentCache;
     private ResourceCache<Resource> includeHtmlResourceCache;
 
-    @XISInit
+    @Init
     void initWidgetResources() {
         widgetDocumentCache = widgetControllers.stream()
                 .collect(Collectors.toMap(
@@ -60,7 +60,7 @@ class ResourceService {
                 ));
     }
 
-    @XISInit
+    @Init
     void initPageResources() {
         pageDocumentCache = pageControllers.stream()
                 .collect(Collectors.toMap(
@@ -72,7 +72,7 @@ class ResourceService {
                 ));
     }
 
-    @XISInit
+    @Init
     void initIncludeResources() {
         var includeHtmlResources = includes.stream()
                 .collect(Collectors.toMap(

@@ -50,7 +50,7 @@ class AppContextArrayOfObjectsFieldTest {
     @Component
     static class Comp1 {
 
-        @XISInject
+        @Inject
         Interf1[] arr;
     }
 

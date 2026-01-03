@@ -5,8 +5,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import one.xis.Page;
 import one.xis.context.Component;
-import one.xis.context.XISInit;
-import one.xis.context.XISInject;
+import one.xis.context.Init;
+import one.xis.context.Inject;
 import one.xis.utils.http.HttpUtils;
 
 import java.util.Collection;
@@ -22,14 +22,14 @@ class PageControllerWrappers {
     private final ControllerWrapperFactory controllerWrapperFactory;
     private final PathResolver pathResolver;
 
-    @XISInject(annotatedWith = Page.class)
+    @Inject(annotatedWith = Page.class)
     private Collection<Object> pageControllers;
 
     @Getter
     private Collection<PageControllerEntry> pageControllerEntries;
 
 
-    @XISInit
+    @Init
     void init() {
         pageControllerEntries = pageControllers.stream()
                 .map(this::createEntry)

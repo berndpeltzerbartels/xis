@@ -50,7 +50,7 @@ class AppContextInitializerCollectionTest {
     @Component
     static class Comp11 {
 
-        @XISInject
+        @Inject
         LinkedList<Interf1> linkedList;
     }
 

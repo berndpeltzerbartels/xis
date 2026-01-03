@@ -2,8 +2,11 @@ package test.page.storage;
 
 import lombok.Getter;
 import lombok.NonNull;
-import one.xis.*;
-import one.xis.context.XISInit;
+import one.xis.Action;
+import one.xis.ClientStorage;
+import one.xis.FormData;
+import one.xis.Page;
+import one.xis.context.Init;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +18,7 @@ class ClientStoragePage {
     private final List<String> invokedMethods = new ArrayList<>();
     private ClientStoragePageData clientStoragePageData;
 
-    @XISInit
+    @Init
     void init() {
         this.clientStoragePageData = new ClientStoragePageData();
         this.clientStoragePageData.setId(100);

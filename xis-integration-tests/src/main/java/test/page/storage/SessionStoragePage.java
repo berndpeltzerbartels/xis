@@ -6,7 +6,7 @@ import one.xis.Action;
 import one.xis.FormData;
 import one.xis.Page;
 import one.xis.SessionStorage;
-import one.xis.context.XISInit;
+import one.xis.context.Init;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +18,7 @@ class SessionStoragePage {
     private final List<String> invokedMethods = new ArrayList<>();
     private SessionStoragePageData sessionStoragePageData;
 
-    @XISInit
+    @Init
     void init() {
         this.sessionStoragePageData = new SessionStoragePageData();
         this.sessionStoragePageData.setId(100);

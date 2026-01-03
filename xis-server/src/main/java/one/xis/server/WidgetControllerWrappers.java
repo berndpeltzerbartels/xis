@@ -6,8 +6,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import one.xis.Widget;
 import one.xis.context.Component;
-import one.xis.context.XISInit;
-import one.xis.context.XISInject;
+import one.xis.context.Init;
+import one.xis.context.Inject;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -21,16 +21,16 @@ class WidgetControllerWrappers {
 
     private final ControllerWrapperFactory controllerWrapperFactory;
 
-    @XISInject(annotatedWith = Widget.class)
+    @Inject(annotatedWith = Widget.class)
     private Collection<Object> widgetControllers;
 
-    @XISInject
+    @Inject
     private PathResolver pathResolver;
 
     @Getter
     private Collection<ControllerWrapper> widgetControllerWrappers;
 
-    @XISInit
+    @Init
     void init() {
         widgetControllerWrappers = widgetControllerWrappers();
     }

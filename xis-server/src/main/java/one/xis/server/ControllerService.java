@@ -4,7 +4,7 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import one.xis.Page;
 import one.xis.context.Component;
-import one.xis.context.XISInject;
+import one.xis.context.Inject;
 import one.xis.utils.lang.StringUtils;
 import org.tinylog.Logger;
 
@@ -12,19 +12,19 @@ import org.tinylog.Logger;
 @Component
 class ControllerService {
 
-    @XISInject
+    @Inject
     private ControllerResponseMapper responseMapper;
 
-    @XISInject
+    @Inject
     private PageControllerWrappers pageControllerWrappers;
 
-    @XISInject
+    @Inject
     private WidgetControllerWrappers widgetControllerWrappers;
 
-    @XISInject
+    @Inject
     private ControllerResultMapper controllerResultMapper;
 
-    @XISInject
+    @Inject
     private PathResolver pathResolver;
 
     void processModelDataRequest(@NonNull ClientRequest request, @NonNull ServerResponse response) {

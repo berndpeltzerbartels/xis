@@ -17,8 +17,8 @@ class DependencyFields {
             return new ArrayDependencyField(f, parent);
         }
         boolean optional = false;
-        if (f.isAnnotationPresent(XISInject.class)) {
-            optional = f.getAnnotation(XISInject.class).optional();
+        if (f.isAnnotationPresent(Inject.class)) {
+            optional = f.getAnnotation(Inject.class).optional();
         }
         return new SimpleDependencyField(f, parent, optional);
     }

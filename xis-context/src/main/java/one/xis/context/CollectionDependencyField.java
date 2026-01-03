@@ -49,8 +49,8 @@ class CollectionDependencyField implements DependencyField, MultiValueConsumer {
 
     @Override
     public boolean isConsumerFor(Class<?> c) {
-        if (field.isAnnotationPresent(XISInject.class)) {
-            var componentAnnotation = field.getAnnotation(XISInject.class).annotatedWith();
+        if (field.isAnnotationPresent(Inject.class)) {
+            var componentAnnotation = field.getAnnotation(Inject.class).annotatedWith();
             if (!componentAnnotation.equals(None.class) && !ClassUtils.isAnnotationPresentInHierarchy(c, componentAnnotation)) {
                 return false;
 

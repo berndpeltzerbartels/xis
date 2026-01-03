@@ -17,26 +17,26 @@ import java.util.*;
 @Component
 public class RestControllerServiceImpl implements RestControllerService {
 
-    @XISInject
+    @Inject
     private ResponseWriter responseWriter;
 
-    @XISInject(annotatedWith = Controller.class)
+    @Inject(annotatedWith = Controller.class)
     private Collection<Object> controllers;
 
-    @XISInject
+    @Inject
     private Collection<ControllerExceptionHandler<?>> exceptionHandlers;
 
-    @XISInject
+    @Inject
     private Gson gson;
 
-    @XISInject
+    @Inject
     private EventEmitter eventEmitter;
 
     private Map<MethodMatcher, Method> methods;
     private Map<Class<? extends Exception>, ControllerExceptionHandler<?>> exceptionHandlerMap;
     private PublicResourceHandler publicResourceHandler;
 
-    @XISInit
+    @Init
     void initMethods() {
         methods = new HashMap<>();
         List<String> publicPaths = new ArrayList<>();
@@ -55,7 +55,7 @@ public class RestControllerServiceImpl implements RestControllerService {
         }
     }
 
-    @XISInit
+    @Init
     @SuppressWarnings("unchecked")
     void initExceptionHandlers() {
         exceptionHandlerMap = new HashMap<>();

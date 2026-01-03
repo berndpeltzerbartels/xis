@@ -32,9 +32,9 @@ public interface AppContextBuilder {
     AppContextBuilder withPackage(String pack);
 
     default AppContextBuilder withXIS() {
-        return withBeanInitAnnotation(XISInit.class)
+        return withBeanInitAnnotation(Init.class)
                 .withComponentAnnotation(Component.class)
-                .withDependencyFieldAnnotation(XISInject.class)
+                .withDependencyFieldAnnotation(Inject.class)
                 .withPackage("one.xis");
     }
 
@@ -51,7 +51,7 @@ public interface AppContextBuilder {
     }
 
     default AppContextBuilder withComponentAnnotations(Collection<Class<? extends Annotation>> componentAnnotations) {
-       componentAnnotations.forEach(this::withComponentAnnotations);
+        componentAnnotations.forEach(this::withComponentAnnotations);
         return this;
     }
 

@@ -3,7 +3,7 @@ package one.xis.js;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import one.xis.context.Component;
-import one.xis.context.XISInit;
+import one.xis.context.Init;
 import one.xis.resource.Resource;
 import one.xis.resource.Resources;
 import one.xis.resource.StringResource;
@@ -24,7 +24,7 @@ class JavascriptProviderImpl implements JavascriptProvider {
     @Getter
     private Resource sourceMap;
 
-    @XISInit
+    @Init
     public void init() {
         var sources = new LinkedHashMap<String, String>();
         sources.put("bundle.min.js", xisJs());

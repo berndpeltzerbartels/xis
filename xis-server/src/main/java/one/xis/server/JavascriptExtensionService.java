@@ -3,8 +3,8 @@ package one.xis.server;
 import lombok.RequiredArgsConstructor;
 import one.xis.JavascriptExtension;
 import one.xis.context.Component;
-import one.xis.context.XISInit;
-import one.xis.context.XISInject;
+import one.xis.context.Init;
+import one.xis.context.Inject;
 import one.xis.resource.Resources;
 
 import java.util.Collection;
@@ -14,10 +14,10 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor
 class JavascriptExtensionService {
-    @XISInject(annotatedWith = JavascriptExtension.class)
+    @Inject(annotatedWith = JavascriptExtension.class)
     private Collection<Object> javascriptExtensions;
 
-    @XISInject
+    @Inject
     private Resources resources;
     private String script = "";
 
@@ -25,7 +25,7 @@ class JavascriptExtensionService {
         return script;
     }
 
-    @XISInit
+    @Init
     void createScript() {
         script = javascriptExtensions.stream()
                 .map(Object::getClass)

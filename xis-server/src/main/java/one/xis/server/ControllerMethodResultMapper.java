@@ -4,7 +4,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import one.xis.*;
 import one.xis.context.Component;
-import one.xis.context.XISInject;
+import one.xis.context.Inject;
 import one.xis.deserialize.PostProcessingResult;
 import one.xis.utils.lang.MethodUtils;
 import one.xis.validation.ValidatorMessageResolver;
@@ -25,7 +25,7 @@ class ControllerMethodResultMapper {
     private final ValidatorMessageResolver validatorMessageResolver;
     private final PathResolver pathResolver;
 
-    @XISInject
+    @Inject
     private PageControllerWrappers pageControllerWrappers;
 
     void mapReturnValueToResult(ControllerMethodResult controllerMethodResult, Method method, Object returnValue, Map<String, Object> requestScope) {
