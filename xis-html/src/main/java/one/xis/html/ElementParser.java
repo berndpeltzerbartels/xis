@@ -37,7 +37,8 @@ public class ElementParser {
         private final List<Supplier<Boolean>> readerFunctions = List.of(
                 this::tryReadTag,
                 this::tryReadComment,
-                this::consumeText
+                this::consumeText,
+                this::consumeTextWithOpenBracket
         );
 
         @Getter
@@ -47,7 +48,7 @@ public class ElementParser {
             index = 0;
             result.clear();
             final LinkedList<Supplier<Boolean>> readers = new LinkedList<>(readerFunctions);
-            while (index < html.length() && !readers.isEmpty()) { // empty readers means no progress
+            while (index < html.length()) { // empty readers means no progress
                 Supplier<Boolean> reader = readers.getFirst();
                 if (reader.get()) {
                     readers.clear();
@@ -250,9 +251,19 @@ public class ElementParser {
 
         }
 
-        private boolean consumeText() {
-            boolean escaped = false;
+        private boolean consumeTextWithOpenBracket() {
+            consume('<');
             StringBuilder s = new StringBuilder();
+            s.append('<');
+            return consumeText(s);
+        }
+
+        private boolean consumeText() {
+            return consumeText(new StringBuilder());
+        }
+
+        private boolean consumeText(StringBuilder s) {
+            boolean escaped = false;
             while (index < html.length()) {
                 char c = html.charAt(index);
                 if (c == '\\') {
@@ -372,9 +383,10 @@ public class ElementParser {
     static class TreeBuilder {
         private final LinkedList<ResultPart> parts;
 
+
         @Getter
         private Element root;
-        private final List<ClosableNode> openTags = new ArrayList<>();
+        private final LinkedList<ClosableNode> openTags = new LinkedList<>();
 
         void build() {
             if (parts.isEmpty()) {
@@ -393,13 +405,16 @@ public class ElementParser {
             ResultPart part = parts.removeFirst();
             if (part instanceof Tag tag) {
                 root = toElement(tag);
-                if (tag.isClosed()) {
-                    return;
-                }
-                evaluateChild(root);
-                evaluateSibling(root); // for syntax checks, should fail if there is extra content
-                if (root.getNextSibling() != null) {
-                    throw new HtmlParseException("Expected exactly one top-level element, found extra content after it");
+                if (!tag.isClosed()) {
+                    openTags.add(tag);
+                    evaluateChild(root);
+                    evaluateSibling(root); // for syntax checks, should fail if there is extra content
+                    if (root.getNextSibling() != null) {
+                        throw new HtmlParseException("Expected exactly one top-level element, found extra content after it");
+                    }
+                    if (!openTags.isEmpty()) {
+                        throw new HtmlParseException("No closing tag found for : " + openTags);
+                    }
                 }
                 return;
             }
@@ -427,6 +442,7 @@ public class ElementParser {
             ResultPart part = parts.removeFirst();
             if (part instanceof Tag tag) {
                 if (tag.isClosing()) {
+                    checkClosingTag(tag);
                     return;
                 }
                 Element element = toElement(tag);
@@ -435,6 +451,7 @@ public class ElementParser {
                 if (tag.isClosed()) {
                     evaluateSibling(element);
                 } else {
+                    openTags.add(tag);
                     evaluateChild(element);
                     evaluateSibling(element);
                 }
@@ -462,6 +479,7 @@ public class ElementParser {
             ResultPart part = parts.removeFirst();
             if (part instanceof Tag tag) {
                 if (tag.isClosing()) {
+                    checkClosingTag(tag);
                     return;
                 }
                 Element element = toElement(tag);
@@ -470,6 +488,7 @@ public class ElementParser {
                 if (tag.isClosed()) {
                     evaluateSibling(element);
                 } else {
+                    openTags.add(tag);
                     evaluateChild(element);
                     evaluateSibling(element);
                 }
@@ -488,6 +507,17 @@ public class ElementParser {
                     evaluateChild(parent);
                     evaluateSibling(parent);
                 }
+            }
+        }
+
+
+        private void checkClosingTag(Tag closingTag) {
+            if (openTags.isEmpty()) {
+                throw new HtmlParseException("Unexpected closing tag </" + closingTag.getName() + "> with no matching opening tag");
+            }
+            Tag openTag = (Tag) openTags.removeLast();
+            if (!openTag.getName().equalsIgnoreCase(closingTag.getName())) {
+                throw new HtmlParseException("Mismatched closing tag: expected </" + openTag.getName() + "> but found </" + closingTag.getName() + ">");
             }
         }
 
