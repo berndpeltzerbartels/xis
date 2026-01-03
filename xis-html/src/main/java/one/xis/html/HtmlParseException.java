@@ -1,4 +1,4 @@
-package one.xis.html.tokens;
+package one.xis.html;
 
 public class HtmlParseException extends RuntimeException {
     public HtmlParseException() {

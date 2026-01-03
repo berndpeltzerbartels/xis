@@ -1,6 +1,6 @@
 package one.xis.test.dom;
 
-import one.xis.html.tokens.HtmlParseException;
+import one.xis.html.HtmlParseException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

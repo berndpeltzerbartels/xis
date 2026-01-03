@@ -7,7 +7,6 @@ import one.xis.html.document.CommentNode;
 import one.xis.html.document.Element;
 import one.xis.html.document.Node;
 import one.xis.html.document.TextNode;
-import one.xis.html.tokens.HtmlParseException;
 
 import java.util.*;
 import java.util.function.Supplier;
