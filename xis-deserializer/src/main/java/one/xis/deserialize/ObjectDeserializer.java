@@ -119,7 +119,7 @@ class ObjectDeserializer implements JsonDeserializer<Object> {
         for (RecordComponent component : clazz.getRecordComponents()) {
             String componentName = component.getName();
             Class<?> componentType = component.getType();
-            
+
             if (values.containsKey(componentName)) {
                 args[i] = values.get(componentName);
             } else {
@@ -128,7 +128,7 @@ class ObjectDeserializer implements JsonDeserializer<Object> {
                     var context = new DeserializationContext(path + "/" + componentName, component, Mandatory.class, userContext);
                     results.add(new InvalidValueError(context, MISSING_MANDATORY_PROPERTY.getMessageKey(), MISSING_MANDATORY_PROPERTY.getGlobalMessageKey(), null));
                 }
-                
+
                 // Provide default value for constructor
                 if (componentType.isPrimitive()) {
                     // Default values for primitives

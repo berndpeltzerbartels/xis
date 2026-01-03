@@ -9,10 +9,9 @@ import one.xis.http.client.RestClientFactory;
 @RequiredArgsConstructor
 class IDPClientFactoryImpl implements IDPClientFactory {
 
+    private static final String CALLBACK_PATH = "/xis/auth/callback"; // TODO: Change it in all controllers
     private final RestClientFactory restClientFactory;
     private final Gson gson;
-
-    private static final String CALLBACK_PATH = "/xis/auth/callback"; // TODO: Change it in all controllers
 
     @Override
     public IDPClient createConfiguredIDPClient(IDPClientConfig idpClientConfig, String localUrl) throws Exception {

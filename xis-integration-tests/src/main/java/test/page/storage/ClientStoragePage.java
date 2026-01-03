@@ -2,10 +2,7 @@ package test.page.storage;
 
 import lombok.Getter;
 import lombok.NonNull;
-import one.xis.Action;
-import one.xis.ClientStorage;
-import one.xis.FormData;
-import one.xis.Page;
+import one.xis.*;
 import one.xis.context.Init;
 
 import java.util.ArrayList;

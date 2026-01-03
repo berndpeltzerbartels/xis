@@ -6,8 +6,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.Getter;
 import one.xis.*;
-import one.xis.context.Init;
 import one.xis.context.IntegrationTestContext;
+import one.xis.context.Init;
 import one.xis.gson.JsonMap;
 import one.xis.http.RequestContext;
 import one.xis.server.ClientRequest;
@@ -23,9 +23,9 @@ import java.util.Locale;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class FormatterRecordIntegrationTest {
+    private final ObjectMapper objectMapper = createObjectMapper();
     private FrontendServiceImpl frontendService;
     private IntegrationTestContext context;
-    private final ObjectMapper objectMapper = createObjectMapper();
 
     @BeforeEach
     void initFrontendService() {

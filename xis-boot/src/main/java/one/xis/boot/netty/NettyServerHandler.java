@@ -32,7 +32,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
             // Log the full exception with stack trace, not just the message
             log.severe("Error during request handling: " + e.getMessage());
             e.printStackTrace(); // Ensure stack trace is printed to stderr
-            
+
             nettyResponse = createErrorResponse(e);
         }
         HttpUtil.setContentLength(nettyResponse, nettyResponse.content().readableBytes());
@@ -61,11 +61,11 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
         var response = new NettyHttpResponse();
         response.setStatusCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
         response.setContentType(ContentType.TEXT_HTML);
-        
+
         // Create a simple error page with exception details (only in development)
         String errorBody = createErrorPageHtml(e);
         response.setBody(errorBody);
-        
+
         return response.getFullHttpResponse();
     }
 
@@ -81,7 +81,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
         sb.append("<h1>Internal Server Error</h1>");
         sb.append("<h2>Exception: ").append(e.getClass().getSimpleName()).append("</h2>");
         sb.append("<p><strong>Message:</strong> ").append(escapeHtml(e.getMessage())).append("</p>");
-        
+
         // Add stack trace for debugging (consider making this configurable for production)
         sb.append("<h3>Stack Trace:</h3>");
         sb.append("<pre>");
@@ -89,7 +89,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
             sb.append(escapeHtml(element.toString())).append("\n");
         }
         sb.append("</pre>");
-        
+
         sb.append("</body></html>");
         return sb.toString();
     }
@@ -100,10 +100,10 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
     private String escapeHtml(String text) {
         if (text == null) return "null";
         return text.replace("&", "&amp;")
-                   .replace("<", "&lt;")
-                   .replace(">", "&gt;")
-                   .replace("\"", "&quot;")
-                   .replace("'", "&#39;");
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&#39;");
     }
 
     private FullHttpResponse handleRequest(FullHttpRequest nettyRequest) {

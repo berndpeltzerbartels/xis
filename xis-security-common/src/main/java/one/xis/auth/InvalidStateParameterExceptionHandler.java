@@ -11,7 +11,7 @@ import java.lang.reflect.Method;
 @Component
 @RequiredArgsConstructor
 class InvalidStateParameterExceptionHandler implements ControllerExceptionHandler<InvalidStateParameterException> {
-    
+
     @Override
     public ResponseEntity<?> handleException(Method method, Object[] args, InvalidStateParameterException exception) {
         if (exception.getStateParameterPayload() != null) {

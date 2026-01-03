@@ -19,10 +19,10 @@ import one.xis.context.Component;
 @RequiredArgsConstructor
 public class NettyServer {
 
+    private final NettyServerHandler nettyServerHandler;
     @Setter
     @Getter
     private int port = 8080;
-    private final NettyServerHandler nettyServerHandler;
 
     public void start() throws InterruptedException {
         NioEventLoopGroup bossGroup = new NioEventLoopGroup(1);

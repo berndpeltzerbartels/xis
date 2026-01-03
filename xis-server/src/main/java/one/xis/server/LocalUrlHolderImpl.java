@@ -9,8 +9,8 @@ import one.xis.context.Component;
 @RequiredArgsConstructor
 class LocalUrlHolderImpl implements LocalUrlHolder {
 
-    private String localUrl;
     private final EventEmitter eventEmitter;
+    private String localUrl;
 
     @Override
     public void setLocalUrl(String localUrl) {

@@ -66,7 +66,7 @@ public class RestControllerServiceImpl implements RestControllerService {
             Class<? extends Exception> exceptionType = (Class<? extends Exception>)
                     ClassUtils.getGenericInterfacesTypeParameter(handler.getClass(), ControllerExceptionHandler.class, 0);
             exceptions.add(exceptionType);
-            if (handler.getClass().isAnnotationPresent(DefaultComponent.class)) {
+            if (handler.getClass().isAnnotationPresent(XISDefaultComponent.class)) {
                 defaultHandlers.put(exceptionType, handler);
             } else {
                 if (handlers.containsKey(exceptionType)) {
@@ -367,10 +367,6 @@ public class RestControllerServiceImpl implements RestControllerService {
         return cookies;
     }
 
-
-    private record InvocationContext(Object controllerInstance, Method method, MethodMatchResult matchResult) {
-    }
-
     private Optional<InvocationContext> findInvocationContext(HttpRequest request) {
         for (Map.Entry<MethodMatcher, Method> entry : methods.entrySet()) {
             MethodMatcher matcher = entry.getKey();
@@ -391,6 +387,9 @@ public class RestControllerServiceImpl implements RestControllerService {
         return controllers.stream()
                 .filter(controller -> controller.getClass().equals(controllerClass))
                 .findFirst();
+    }
+
+    private record InvocationContext(Object controllerInstance, Method method, MethodMatchResult matchResult) {
     }
 
 

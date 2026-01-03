@@ -1,7 +1,7 @@
 package one.xis.context.beanmethod;
 
 import lombok.Getter;
-import one.xis.context.Bean;
+import one.xis.context.XISBean;
 import one.xis.context.Component;
 import one.xis.context.Inject;
 
@@ -12,7 +12,7 @@ class Comp1 {
     @Inject
     private Comp2 comp2;
 
-    @Bean
+    @XISBean
     Comp3 comp3() {
         return new Comp3(comp2);
     }

@@ -130,6 +130,81 @@ class RestControllerServiceIntegrationTest {
         private static final int TOTAL_CONTROLLERS = CONTROLLER_TYPES * INSTANCES_PER_TYPE;
         private static final int INVOCATION_COUNT = 1000;
 
+        @BeforeEach
+        void setUp() throws Exception {
+            List<Object> controllers = new ArrayList<>();
+            for (int i = 0; i < INSTANCES_PER_TYPE; i++) {
+                controllers.add(new PerfController0());
+                controllers.add(new PerfController1());
+                controllers.add(new PerfController2());
+                controllers.add(new PerfController3());
+                controllers.add(new PerfController4());
+                controllers.add(new PerfController5());
+                controllers.add(new PerfController6());
+                controllers.add(new PerfController7());
+                controllers.add(new PerfController8());
+                controllers.add(new PerfController9());
+            }
+
+            restControllerService = new RestControllerServiceImpl();
+            FieldUtil.setFieldValue(restControllerService, "responseWriter", responseWriter);
+            FieldUtil.setFieldValue(restControllerService, "controllers", controllers);
+            FieldUtil.setFieldValue(restControllerService, "eventEmitter", eventEmitter);
+
+            long startInit = System.nanoTime();
+            restControllerService.initMethods();
+            long endInit = System.nanoTime();
+            System.out.printf("Initialization with %d controllers (%d types) took: %.2f ms%n", TOTAL_CONTROLLERS, CONTROLLER_TYPES, (endInit - startInit) / 1_000_000.0);
+
+            when(request.getHttpMethod()).thenReturn(HttpMethod.GET);
+        }
+
+        @Test
+        @DisplayName("should handle requests with one path variable quickly")
+        void performanceTestWithOnePathVariable() {
+            when(request.getPath()).thenReturn("/perf/7/some-id");
+
+            long startFound = System.nanoTime();
+            for (int i = 0; i < INVOCATION_COUNT; i++) {
+                restControllerService.doInvocation(request, response);
+            }
+            long endFound = System.nanoTime();
+
+            System.out.printf("Routing %d paths with one variable took: %.2f ms%n", INVOCATION_COUNT, (endFound - startFound) / 1_000_000.0);
+            verify(responseWriter, atLeast(INVOCATION_COUNT)).write(eq("7"), any(), eq(request), eq(response));
+        }
+
+        @Test
+        @DisplayName("should handle requests with three path variables quickly")
+        void performanceTestWithThreePathVariables() {
+            when(request.getPath()).thenReturn("/perf/8/val1/val2/val3");
+
+            long startFound = System.nanoTime();
+            for (int i = 0; i < INVOCATION_COUNT; i++) {
+                restControllerService.doInvocation(request, response);
+            }
+            long endFound = System.nanoTime();
+
+            System.out.printf("Routing %d paths with three variables took: %.2f ms%n", INVOCATION_COUNT, (endFound - startFound) / 1_000_000.0);
+            verify(responseWriter, atLeast(INVOCATION_COUNT)).write(eq("8-3"), any(), eq(request), eq(response));
+        }
+
+        @Test
+        @DisplayName("should handle non-existing paths quickly (404)")
+        void performanceTestForNotFound() {
+            when(request.getPath()).thenReturn("/non-existing-path-for-performance-test");
+
+            long startNotFound = System.nanoTime();
+            for (int i = 0; i < INVOCATION_COUNT; i++) {
+                restControllerService.doInvocation(request, response);
+            }
+            long endNotFound = System.nanoTime();
+
+            System.out.printf("Routing %d non-existing paths (404) took: %.2f ms%n", INVOCATION_COUNT, (endNotFound - startNotFound) / 1_000_000.0);
+            verify(response, atLeast(INVOCATION_COUNT)).setStatusCode(404);
+            verify(responseWriter, never()).write(any(), any(), any(), any());
+        }
+
         // Controller-Definitionen mit jeweils zwei Methoden
         @Controller
         class PerfController0 {
@@ -259,81 +334,6 @@ class RestControllerServiceIntegrationTest {
             public String threeVars(@PathVariable("a") String a, @PathVariable("b") String b, @PathVariable("c") String c) {
                 return "9-3";
             }
-        }
-
-        @BeforeEach
-        void setUp() throws Exception {
-            List<Object> controllers = new ArrayList<>();
-            for (int i = 0; i < INSTANCES_PER_TYPE; i++) {
-                controllers.add(new PerfController0());
-                controllers.add(new PerfController1());
-                controllers.add(new PerfController2());
-                controllers.add(new PerfController3());
-                controllers.add(new PerfController4());
-                controllers.add(new PerfController5());
-                controllers.add(new PerfController6());
-                controllers.add(new PerfController7());
-                controllers.add(new PerfController8());
-                controllers.add(new PerfController9());
-            }
-
-            restControllerService = new RestControllerServiceImpl();
-            FieldUtil.setFieldValue(restControllerService, "responseWriter", responseWriter);
-            FieldUtil.setFieldValue(restControllerService, "controllers", controllers);
-            FieldUtil.setFieldValue(restControllerService, "eventEmitter", eventEmitter);
-
-            long startInit = System.nanoTime();
-            restControllerService.initMethods();
-            long endInit = System.nanoTime();
-            System.out.printf("Initialization with %d controllers (%d types) took: %.2f ms%n", TOTAL_CONTROLLERS, CONTROLLER_TYPES, (endInit - startInit) / 1_000_000.0);
-
-            when(request.getHttpMethod()).thenReturn(HttpMethod.GET);
-        }
-
-        @Test
-        @DisplayName("should handle requests with one path variable quickly")
-        void performanceTestWithOnePathVariable() {
-            when(request.getPath()).thenReturn("/perf/7/some-id");
-
-            long startFound = System.nanoTime();
-            for (int i = 0; i < INVOCATION_COUNT; i++) {
-                restControllerService.doInvocation(request, response);
-            }
-            long endFound = System.nanoTime();
-
-            System.out.printf("Routing %d paths with one variable took: %.2f ms%n", INVOCATION_COUNT, (endFound - startFound) / 1_000_000.0);
-            verify(responseWriter, atLeast(INVOCATION_COUNT)).write(eq("7"), any(), eq(request), eq(response));
-        }
-
-        @Test
-        @DisplayName("should handle requests with three path variables quickly")
-        void performanceTestWithThreePathVariables() {
-            when(request.getPath()).thenReturn("/perf/8/val1/val2/val3");
-
-            long startFound = System.nanoTime();
-            for (int i = 0; i < INVOCATION_COUNT; i++) {
-                restControllerService.doInvocation(request, response);
-            }
-            long endFound = System.nanoTime();
-
-            System.out.printf("Routing %d paths with three variables took: %.2f ms%n", INVOCATION_COUNT, (endFound - startFound) / 1_000_000.0);
-            verify(responseWriter, atLeast(INVOCATION_COUNT)).write(eq("8-3"), any(), eq(request), eq(response));
-        }
-
-        @Test
-        @DisplayName("should handle non-existing paths quickly (404)")
-        void performanceTestForNotFound() {
-            when(request.getPath()).thenReturn("/non-existing-path-for-performance-test");
-
-            long startNotFound = System.nanoTime();
-            for (int i = 0; i < INVOCATION_COUNT; i++) {
-                restControllerService.doInvocation(request, response);
-            }
-            long endNotFound = System.nanoTime();
-
-            System.out.printf("Routing %d non-existing paths (404) took: %.2f ms%n", INVOCATION_COUNT, (endNotFound - startNotFound) / 1_000_000.0);
-            verify(response, atLeast(INVOCATION_COUNT)).setStatusCode(404);
-            verify(responseWriter, never()).write(any(), any(), any(), any());
         }
     }
 }

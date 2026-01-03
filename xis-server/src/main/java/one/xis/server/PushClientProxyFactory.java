@@ -1,8 +1,8 @@
 package one.xis.server;
 
 import lombok.RequiredArgsConstructor;
-import one.xis.context.Component;
 import one.xis.context.ProxyFactory;
+import one.xis.context.Component;
 
 import java.lang.reflect.Proxy;
 

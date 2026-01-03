@@ -42,8 +42,8 @@ public class UnresolvedDependencyTest {
     }
 
     @Nested
-    @DisplayName("Circular Dependency with @Bean")
-    class BeanCircularDependency {
+    @DisplayName("Circular Dependency with @XISBean")
+    class XISBeanCircularDependency {
 
         @Test
         void shouldThrowException() {
@@ -53,10 +53,10 @@ public class UnresolvedDependencyTest {
 
             String message = exception.getMessage();
             assertThat(message).contains("Circular Dependency Found");
-            assertThat(message).contains("Bean 'one.xis.context.UnresolvedDependencyTest$BeanCircularDependency$BeanA'");
-            assertThat(message).contains("depends on 'one.xis.context.UnresolvedDependencyTest$BeanCircularDependency$BeanB'");
-            assertThat(message).contains("Bean 'one.xis.context.UnresolvedDependencyTest$BeanCircularDependency$BeanB'");
-            assertThat(message).contains("depends on 'one.xis.context.UnresolvedDependencyTest$BeanCircularDependency$BeanA'");
+            assertThat(message).contains("Bean 'one.xis.context.UnresolvedDependencyTest$XISBeanCircularDependency$BeanA'");
+            assertThat(message).contains("depends on 'one.xis.context.UnresolvedDependencyTest$XISBeanCircularDependency$BeanB'");
+            assertThat(message).contains("Bean 'one.xis.context.UnresolvedDependencyTest$XISBeanCircularDependency$BeanB'");
+            assertThat(message).contains("depends on 'one.xis.context.UnresolvedDependencyTest$XISBeanCircularDependency$BeanA'");
         }
 
         static class BeanA {
@@ -67,12 +67,12 @@ public class UnresolvedDependencyTest {
 
         @Component
         static class CircularBeanConfig {
-            @Bean
+            @XISBean
             BeanA beanA(BeanB b) {
                 return new BeanA();
             }
 
-            @Bean
+            @XISBean
             BeanB beanB(BeanA a) {
                 return new BeanB();
             }

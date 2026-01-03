@@ -24,26 +24,19 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 class ResourceService {
 
-    @Inject(annotatedWith = Widget.class)
-    private Collection<Object> widgetControllers;
-
-    @Inject(annotatedWith = Page.class)
-    private Collection<Object> pageControllers;
-
-    @Inject(annotatedWith = Include.class)
-    private Collection<Object> includes;
-
-    @Inject
-    private RootPageService rootPageService;
-
-    @Inject
-    private HtmlResourcePathResolver htmlResourcePathResolver;
-
     private final Resources resources;
     private final PathResolver pathResolver;
-
     private final HtmlParser htmlParser = new HtmlParser();
-
+    @Inject(annotatedWith = Widget.class)
+    private Collection<Object> widgetControllers;
+    @Inject(annotatedWith = Page.class)
+    private Collection<Object> pageControllers;
+    @Inject(annotatedWith = Include.class)
+    private Collection<Object> includes;
+    @Inject
+    private RootPageService rootPageService;
+    @Inject
+    private HtmlResourcePathResolver htmlResourcePathResolver;
     private Map<String, GenericResource<HtmlDocument>> widgetDocumentCache;
     private Map<String, GenericResource<HtmlDocument>> pageDocumentCache;
     private ResourceCache<Resource> includeHtmlResourceCache;

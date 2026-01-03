@@ -14,12 +14,12 @@ import one.xis.resource.Resources;
 class RootPageService {
 
     private static final String CUSTOM_PUBLIC_RESOURCE_PATH = "public";
-
-
+    private static final String DEFAULT_DEVELOP_ROOT_PAGE = "default-develop-index.html";
+    private static final String DEVELOP_ROOT_PAGE = "develop-index.html";
+    private static final String DEFAULT_ROOT_PAGE = "default-index.html";
+    private static final String ROOT_PAGE = "index.html";
     private final Resources resources;
-
     private final HtmlParser htmlParser = new HtmlParser();
-
     @Getter
     private String rootPageHtml;
 
@@ -58,12 +58,6 @@ class RootPageService {
         scriptElement.setAttribute("src", jsPath);
         headElement.appendChild(scriptElement);
     }
-
-    private static final String DEFAULT_DEVELOP_ROOT_PAGE = "default-develop-index.html";
-    private static final String DEVELOP_ROOT_PAGE = "develop-index.html";
-    private static final String DEFAULT_ROOT_PAGE = "default-index.html";
-    private static final String ROOT_PAGE = "index.html";
-
 
     private String getRootPageResourcePath() {
         if (Boolean.parseBoolean(System.getProperty("develop"))) {

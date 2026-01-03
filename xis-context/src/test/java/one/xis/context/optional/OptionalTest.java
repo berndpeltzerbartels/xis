@@ -3,7 +3,7 @@ package one.xis.context.optional;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import one.xis.context.AppContext;
-import one.xis.context.Bean;
+import one.xis.context.XISBean;
 import one.xis.context.Component;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -19,26 +19,6 @@ public class OptionalTest {
 
     @Nested
     class EmptyTest {
-
-        @Component
-        static class Bean1 {
-
-            @Bean
-            Optional<Bean2> bean2() {
-                return Optional.empty();
-            }
-        }
-
-        static class Bean2 {
-
-        }
-
-        @Component
-        @RequiredArgsConstructor
-        static class Bean3 {
-            @Getter
-            private final List<Bean2> bean2List;
-        }
 
         private AppContext context;
 
@@ -59,6 +39,26 @@ public class OptionalTest {
             assertThat(bean2).isEmpty();
             assertThat(bean3).isPresent();
             assertThat(bean3.get().getBean2List()).isEmpty();
+        }
+
+        @Component
+        static class Bean1 {
+
+            @XISBean
+            Optional<Bean2> bean2() {
+                return Optional.empty();
+            }
+        }
+
+        static class Bean2 {
+
+        }
+
+        @Component
+        @RequiredArgsConstructor
+        static class Bean3 {
+            @Getter
+            private final List<Bean2> bean2List;
         }
     }
 

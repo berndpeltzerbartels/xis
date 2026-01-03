@@ -28,6 +28,10 @@ class PageControllerWrappers {
     @Getter
     private Collection<PageControllerEntry> pageControllerEntries;
 
+    private static String stripQuery(String realPath) {
+        int idx = realPath.indexOf('?');
+        return idx != -1 ? realPath.substring(0, idx) : realPath;
+    }
 
     @Init
     void init() {
@@ -35,7 +39,6 @@ class PageControllerWrappers {
                 .map(this::createEntry)
                 .collect(Collectors.toSet());
     }
-
 
     Optional<ControllerWrapper> findByPath(String normalizedPath) {
         return pageControllerEntries.stream()
@@ -55,14 +58,14 @@ class PageControllerWrappers {
         return Optional.empty();
     }
 
+    /* ========================= FACTORY ========================= */
+
     Optional<ControllerWrapper> findByClass(Class<?> controllerClass) {
         return pageControllerEntries.stream()
                 .map(PageControllerEntry::getWrapper)
                 .filter(wrapper -> wrapper.getControllerClass().equals(controllerClass))
                 .findFirst();
     }
-
-    /* ========================= FACTORY ========================= */
 
     private PageControllerEntry createEntry(Object controller) {
         PageControllerWrapper wrapper = createPageWrapper(controller);
@@ -87,14 +90,9 @@ class PageControllerWrappers {
         return new PageUrl(PageUtil.getUrl(controller.getClass()));
     }
 
-    private String getPagePath(Object controller) {
-        return pathResolver.normalizedPath(controller);
-    }
-
     /* ========================= UTIL ========================= */
 
-    private static String stripQuery(String realPath) {
-        int idx = realPath.indexOf('?');
-        return idx != -1 ? realPath.substring(0, idx) : realPath;
+    private String getPagePath(Object controller) {
+        return pathResolver.normalizedPath(controller);
     }
 }

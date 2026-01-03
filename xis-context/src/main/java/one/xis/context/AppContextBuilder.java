@@ -7,13 +7,13 @@ import java.util.Collection;
 @SuppressWarnings({"unchecked", "unused"})
 public interface AppContextBuilder {
 
-    AppContextBuilder withBeanMethodAnnotation(Class<? extends Annotation> beanMethodAnnotation);
-
-    AppContext build();
-
     static AppContextBuilder createInstance() {
         return new AppContextBuilderImpl();
     }
+
+    AppContextBuilder withBeanMethodAnnotation(Class<? extends Annotation> beanMethodAnnotation);
+
+    AppContext build();
 
     AppContextBuilder withSingletonClass(Class<?> clazz);
 

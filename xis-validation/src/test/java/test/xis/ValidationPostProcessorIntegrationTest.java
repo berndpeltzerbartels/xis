@@ -7,8 +7,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.Data;
 import lombok.Getter;
 import one.xis.*;
-import one.xis.context.Init;
 import one.xis.context.IntegrationTestContext;
+import one.xis.context.Init;
 import one.xis.gson.JsonMap;
 import one.xis.http.RequestContext;
 import one.xis.server.ClientRequest;
@@ -28,10 +28,9 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ValidationPostProcessorIntegrationTest {
+    private final ObjectMapper objectMapper = createObjectMapper();
     private FrontendServiceImpl frontendService;
     private IntegrationTestContext context;
-    private final ObjectMapper objectMapper = createObjectMapper();
-
 
     @BeforeEach
     void initFrontendService() {

@@ -46,10 +46,10 @@ class PathResolver {
 
     /**
      * Extracts path variables from a concrete path that matches a pattern.
-     * For example, pattern "/product/{id}.html" and path "/product/123.html" 
+     * For example, pattern "/product/{id}.html" and path "/product/123.html"
      * returns map with "id" -> "123"
-     * 
-     * @param pattern the path pattern with variables
+     *
+     * @param pattern      the path pattern with variables
      * @param concretePath the concrete path to extract from
      * @return map of variable names to their values, or empty map if no match
      */
@@ -70,13 +70,13 @@ class PathResolver {
         if (element instanceof PathVariable) {
             PathVariable variable = (PathVariable) element;
             PathElement next = element.getNext();
-            
+
             if (next == null) {
                 // Last element is a variable - capture rest of path
                 result.put(variable.getKey(), path.substring(position));
                 return path.length();
             }
-            
+
             if (next instanceof PathString) {
                 String nextContent = ((PathString) next).getContent();
                 int nextPos = path.indexOf(nextContent, position);
@@ -94,7 +94,7 @@ class PathResolver {
                 return extractPathVariablesRecursive(element.getNext(), path, position + content.length(), result);
             }
         }
-        
+
         return position;
     }
 

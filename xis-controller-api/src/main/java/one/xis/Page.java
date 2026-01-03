@@ -3,6 +3,7 @@ package one.xis;
 import jakarta.inject.Qualifier;
 import jakarta.inject.Singleton;
 import one.xis.context.Component;
+import org.springframework.stereotype.Component;
 
 import java.lang.annotation.*;
 
@@ -10,7 +11,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Qualifier // for micronaut
 @Singleton // for micronaut
-@org.springframework.stereotype.Component // for spring
+@Component // for spring
 @Component
 @Documented
 public @interface Page {

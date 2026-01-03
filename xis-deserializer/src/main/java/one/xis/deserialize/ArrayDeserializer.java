@@ -50,7 +50,7 @@ class ArrayDeserializer implements JsonDeserializer<Object> {
         array[0] = value.get();
         return Optional.of(array);
     }
-    
+
 
     private Optional<Object> deserializeArray(JsonReader reader,
                                               String path,
