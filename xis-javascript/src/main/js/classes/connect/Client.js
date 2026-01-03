@@ -371,10 +371,7 @@ class Client {
         data.setValue(['global'], serverResponse.globalVariableData);
         data.setValue(['validation'], obj.validatorMessages);
         data.setValue(['validation','globalMessages'], obj.validatorMessages.globalMessages);
-        data.setValue(['url'], window.location.href);
-        data.setValue(['pathname'], window.location.pathname);
         data.setValue(['origin'], window.location.origin);
-        data.setValue(['queryParams'], this.queryToObject(window.location.search));
         data.setValue(['widgetParameters'], obj.widgetParameters);
         this.storeData(serverResponse);
         this.setTitle(serverResponse);

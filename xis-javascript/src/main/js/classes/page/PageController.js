@@ -99,8 +99,12 @@ class PageController {
             return Promise.resolve(rv);
         }
         var data = response.data;
+        const pathname = this.resolvedURL.url.split('?')[0]; // Remove query string
         data.setValue(['pathVariables'], this.resolvedURL.pathVariablesAsMap());
         data.setValue(['urlParameters'], this.resolvedURL.urlParameters);
+        data.setValue(['url'], this.resolvedURL.url);
+        data.setValue(['pathname'], pathname);
+        data.setValue(['queryParams'], this.resolvedURL.urlParameters);
         this.page.data = data;
 
         return this.initBuffer()
@@ -212,8 +216,12 @@ class PageController {
             this.page = resolved.page;
 
             const data = response.data;
+            const pathname = resolved.url.split('?')[0]; // Remove query string
             data.setValue(['pathVariables'], this.resolvedURL.pathVariablesAsMap());
             data.setValue(['urlParameters'], this.resolvedURL.urlParameters);
+            data.setValue(['url'], this.resolvedURL.url);
+            data.setValue(['pathname'], pathname);
+            data.setValue(['queryParams'], this.resolvedURL.urlParameters);
             this.page.data = data;
 
             this.htmlTagHandler.unbindPage();

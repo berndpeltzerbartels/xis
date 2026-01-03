@@ -343,7 +343,7 @@ class WidgetContainerHandler extends TagHandler {
         if (this.widgetInstance) {
             return app.client.loadWidgetData(this.widgetInstance, this.widgetState, this)
                 .then(response => this.updatePageMetadata(response))
-                .then(response => response.data)
+                .then(response => this.enrichResponseDataWithUrlInfo(response))
                 .then(data => this.attachParentData(data, parentData))
                 .then(data => this.updateWidgetStateData(data))
                 .then(data => this.mergeWidgetParameters(data))
@@ -352,6 +352,25 @@ class WidgetContainerHandler extends TagHandler {
                 .catch(e => reportError(e));
         }
         return Promise.resolve();
+    }
+
+    /**
+     * Enriches response data with current URL information.
+     * @private
+     * @param {ServerResponse} response
+     * @returns {Data}
+     */
+    enrichResponseDataWithUrlInfo(response) {
+        const data = response.data;
+        if (this.widgetState && this.widgetState.resolvedURL) {
+        debugger;
+            const url = this.widgetState.resolvedURL.url;
+            const pathname = url.split('?')[0]; // Remove query string
+            data.setValue(['url'], url);
+            data.setValue(['pathname'], pathname);
+            data.setValue(['queryParams'], this.widgetState.resolvedURL.urlParameters);
+        }
+        return data;
     }
 
     /**
