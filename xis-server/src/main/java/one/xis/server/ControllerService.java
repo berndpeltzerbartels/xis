@@ -37,9 +37,9 @@ class ControllerService {
         if (controllerResult.getNextWidgetId() == null) {
             controllerResult.setNextWidgetId(request.getWidgetId());
         }
-        if (request.getType() == RequestType.page) {
-            response.getDefaultWidgets().addAll(widgetControllerWrappers.findDefaultWidgetsByPageUrl(request.getPageUrl()));
-        }
+        //       if (request.getType() == RequestType.page) {
+        response.getDefaultWidgets().addAll(widgetControllerWrappers.findDefaultWidgetsByPageUrl(request.getPageUrl()));
+        //     }
         mapResultToResponse(request, response, controllerResult);
     }
 

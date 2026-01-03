@@ -95,7 +95,9 @@ class WidgetContainerHandler extends TagHandler {
         this.data = data;
         this.widgetParameters = {};
         this.refreshContainerId(data);
-        this.bindWidgetInitial(data);
+        if (!this.bindByWidgetAnnotation()) {
+            this.bindWidgetInitial(data);
+        }
         this.widgetParameters = mergeObjects(this.widgetParameters, data.getValue(['widgetParameters']));
         this.widgetState = new WidgetState(app.pageController.resolvedURL, this.widgetParameters);
         data.setValue(['widgetParameters'], this.widgetParameters);
@@ -180,7 +182,6 @@ class WidgetContainerHandler extends TagHandler {
 
     /**
      * Binds the initial widget to this container on first load.
-     * Checks annotation-based containerId first (deep linking), then falls back to default-widget attribute.
      * @private
      * @param {Data} parentData
      */
@@ -188,40 +189,18 @@ class WidgetContainerHandler extends TagHandler {
         if (this.widgetInstance) {
             return; // Already bound, only run once
         }
+        this.bindDefaultWidget(parentData);
+    }
+
+    bindByWidgetAnnotation() {
         var response = app.pageController.currentResponse;
         for (var defaultWidget of response.defaultWidgets) {
             if (defaultWidget.containerId === this.containerId) {
                 this.ensureWidgetBound(defaultWidget.widgetId);
                 this.widgetState = new WidgetState(app.pageController.resolvedURL, this.widgetParameters);
-                return;
+                return true;
             }
         }
-        // Priority 1: Annotation-based widget assignment (for deep linking)
-        if (this.bindAnnotatedWidget()) {
-            return;
-        }
-
-        // Priority 2: Default widget from HTML attribute
-        this.bindDefaultWidget(parentData);
-    }
-
-    /**
-     * Attempts to bind a widget specified by @Widget(containerId) annotation.
-     * This enables deep linking where the widget's annotation determines the target container.
-     * @private
-     * @returns {boolean} true if widget was bound, false otherwise
-     */
-    bindAnnotatedWidget(response) {
-        var response = app.pageController.currentResponse;
-        if (!response) {
-            return false;
-        }
-        if (response.nextWidgetId && response.widgetContainerId === this.containerId) {
-            this.ensureWidgetBound(response.nextWidgetId);
-            this.widgetState = new WidgetState(app.pageController.resolvedURL, this.widgetParameters);
-            return true;
-        }
-
         return false;
     }
 
