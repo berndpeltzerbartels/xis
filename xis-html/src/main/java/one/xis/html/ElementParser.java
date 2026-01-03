@@ -504,7 +504,6 @@ public class ElementParser {
                     evaluateSibling(textNode);
                 } else {
                     evaluateChild(parent);
-                    evaluateSibling(parent);
                 }
             }
         }

@@ -1,6 +1,7 @@
 package one.xis.html;
 
 import one.xis.html.document.Element;
+import one.xis.html.document.TextNode;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -598,5 +599,60 @@ class HtmlParserTest {
             // assertThat(htmlResult).isEqualToIgnoringWhitespace("<input type=\"checkbox\" checked=\"true\">");
         }
     }
+
+    // checks a fix  to be valid
+    @Nested
+    class EvaluationProblemTest {
+        private final String html = """
+                <div>
+                    <a>text</a>
+                    <b>sibling</b>
+                </div>
+                """;
+
+        @Test
+        void parse() {
+            var document = parser.parse(html);
+            var htmlResult = document.asString();
+
+            var div = document.getDocumentElement();
+
+            var a = document.getDocumentElement().getElementByTagName("a");
+            assertThat(a.getParentNode()).isEqualTo(div);
+            var b = document.getDocumentElement().getElementByTagName("b");
+            assertThat(b.getParentNode()).isEqualTo(div);
+
+            var textNode = a.getFirstChild();
+            assertThat(textNode.getNodeType()).isEqualTo(3); // TEXT_NODE
+            assertThat(textNode.toHtml().trim()).isEqualTo("text");
+
+            var textNode2 = b.getFirstChild();
+            assertThat(textNode2.getNodeType()).isEqualTo(3); // TEXT_NODE
+            assertThat(textNode2.toHtml().trim()).isEqualTo("sibling");
+
+        }
+
+    }
+
+
+    // checks a fix  to be valid
+    @Nested
+    class EvaluationProblemTest2 {
+        private final String html = "<a>bla<b/></a>";
+
+        @Test
+        void parse() {
+            var document = parser.parse(html);
+            var htmlResult = document.asString();
+            
+            var a = document.getDocumentElement().getElementByTagName("a");
+            assertThat(a.getFirstChild()).isInstanceOf(TextNode.class);
+            var b = document.getDocumentElement().getElementByTagName("b");
+            assertThat(a.getFirstChild().getNextSibling()).isEqualTo(b);
+
+        }
+
+    }
+
 
 }
