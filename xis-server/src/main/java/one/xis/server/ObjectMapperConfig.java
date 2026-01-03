@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import one.xis.context.Bean;
 import one.xis.context.Component;
-import one.xis.context.XISBean;
 
 import java.io.IOException;
 
@@ -14,7 +14,7 @@ import java.io.IOException;
 @Component
 class ObjectMapperConfig {
 
-    @XISBean
+    @Bean
     ObjectMapper objectMapper() {
         var objectMapper = new ObjectMapper();
         var objectMapper2 = new ObjectMapper();

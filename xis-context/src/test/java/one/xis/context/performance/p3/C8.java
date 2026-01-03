@@ -1,8 +1,8 @@
 package one.xis.context.performance.p3;
 
 import lombok.RequiredArgsConstructor;
+import one.xis.context.Bean;
 import one.xis.context.Component;
-import one.xis.context.XISBean;
 import one.xis.context.XISInit;
 import one.xis.context.performance.XI;
 
@@ -36,7 +36,7 @@ class C8 implements XI {
 
     }
 
-    @XISBean
+    @Bean
     C9 c9() {
         return new C9();
     }

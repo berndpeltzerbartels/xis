@@ -3,8 +3,8 @@ package one.xis.gson;
 import com.google.gson.*;
 import io.goodforgod.gson.configuration.GsonConfiguration;
 import lombok.RequiredArgsConstructor;
+import one.xis.context.Bean;
 import one.xis.context.Component;
-import one.xis.context.XISBean;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -16,7 +16,7 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class GsonFactory {
 
-    @XISBean // TODO Wrapper verwenden um Konflikte zu vermeiden
+    @Bean // TODO Wrapper verwenden um Konflikte zu vermeiden
     public Gson gson() {
         return new GsonConfiguration().builder()
                 .serializeNulls() // Enable null serialization for SessionStorage deletion behavior
@@ -40,7 +40,7 @@ public class GsonFactory {
                         if (hasAdditionalFields(src.getClass())) {
                             JsonObject obj = new JsonObject();
                             obj.addProperty("name", src.name());
-                            
+
                             // Serialize all public getters
                             for (Method method : src.getClass().getMethods()) {
                                 if (isGetter(method) && !isEnumBuiltInMethod(method)) {
@@ -68,9 +68,9 @@ public class GsonFactory {
      */
     private boolean hasAdditionalFields(Class<?> enumClass) {
         return Arrays.stream(enumClass.getDeclaredFields())
-                .anyMatch(field -> !field.isSynthetic() && 
-                                 !field.isEnumConstant() && 
-                                 !Modifier.isStatic(field.getModifiers()));
+                .anyMatch(field -> !field.isSynthetic() &&
+                        !field.isEnumConstant() &&
+                        !Modifier.isStatic(field.getModifiers()));
     }
 
     /**
@@ -87,8 +87,8 @@ public class GsonFactory {
             return false;
         }
         String name = method.getName();
-        return (name.startsWith("get") && name.length() > 3) || 
-               (name.startsWith("is") && name.length() > 2);
+        return (name.startsWith("get") && name.length() > 3) ||
+                (name.startsWith("is") && name.length() > 2);
     }
 
     /**
@@ -96,10 +96,10 @@ public class GsonFactory {
      */
     private boolean isEnumBuiltInMethod(Method method) {
         String name = method.getName();
-        return "name".equals(name) || 
-               "ordinal".equals(name) || 
-               "getDeclaringClass".equals(name) ||
-               "getClass".equals(name);
+        return "name".equals(name) ||
+                "ordinal".equals(name) ||
+                "getDeclaringClass".equals(name) ||
+                "getClass".equals(name);
     }
 
     /**
