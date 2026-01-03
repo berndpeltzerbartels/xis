@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.ANNOTATION_TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface XISProxy {
+public @interface Proxy {
     Class<? extends ProxyFactory> factory() default NoProxyFactoryClass.class;
 
     String factoryName() default "";

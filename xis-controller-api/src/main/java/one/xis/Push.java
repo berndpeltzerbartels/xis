@@ -2,7 +2,7 @@ package one.xis;
 
 import jakarta.inject.Qualifier;
 import jakarta.inject.Singleton;
-import one.xis.context.XISProxy;
+import one.xis.context.Proxy;
 import org.springframework.stereotype.Component;
 
 import java.lang.annotation.ElementType;
@@ -10,7 +10,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@XISProxy(factoryName = "one.xis.server.PushClientProxyFactory")
+@Proxy(factoryName = "one.xis.server.PushClientProxyFactory")
 @Component
 @Qualifier // for micronaut
 @Singleton // for micronaut

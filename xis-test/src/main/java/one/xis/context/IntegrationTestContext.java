@@ -155,7 +155,7 @@ public class IntegrationTestContext {
     static class UserContextFaker {
         private UserInfo userInfo;
 
-        @XISEventListener
+        @EventListener
         public void onUserContextCreated(UserContextCreatedEvent event) {
             if (userInfo == null) {
                 return;

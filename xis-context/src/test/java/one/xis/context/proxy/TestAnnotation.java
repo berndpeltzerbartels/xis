@@ -1,6 +1,6 @@
 package one.xis.context.proxy;
 
-import one.xis.context.XISProxy;
+import one.xis.context.Proxy;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -9,6 +9,6 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-@XISProxy(factory = TestProxyFactory.class)
+@Proxy(factory = TestProxyFactory.class)
 public @interface TestAnnotation {
 }

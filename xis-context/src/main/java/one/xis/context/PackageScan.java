@@ -85,7 +85,7 @@ class PackageScan {
 
 
     private <F extends ProxyFactory<?>> Class<F> getFactoryClass(Class<? extends Annotation> annotation) {
-        XISProxy proxyAnnotation = annotation.getAnnotation(XISProxy.class);
+        Proxy proxyAnnotation = annotation.getAnnotation(Proxy.class);
         if (!proxyAnnotation.factory().equals(NoProxyFactoryClass.class)) {
             return (Class<F>) proxyAnnotation.factory();
         }
@@ -94,7 +94,7 @@ class PackageScan {
 
 
     private <A extends Annotation> Stream<Class<A>> proxyAnnotations() {
-        return reflections.getTypesAnnotatedWith(XISProxy.class).stream()
+        return reflections.getTypesAnnotatedWith(Proxy.class).stream()
                 .filter(Class::isAnnotation)
                 .map(clazz -> (Class<A>) clazz);
     }

@@ -98,7 +98,7 @@ public class AppContextBuilderImpl implements AppContextBuilder {
                 .addDependencyFieldAnnotation(Inject.class)
                 .addInitAnnotation(Init.class)
                 .addBeanMethodAnnotation(Bean.class)
-                .setEventListenerAnnotation(XISEventListener.class);
+                .setEventListenerAnnotation(EventListener.class);
         annotations.addComponentClassAnnotations(componentAnnotations);
         annotations.addDependencyFieldAnnotations(dependencyFieldAnnotations);
         annotations.addInitAnnotations(initAnnotation);
