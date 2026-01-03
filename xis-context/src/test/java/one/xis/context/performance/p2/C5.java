@@ -1,10 +1,10 @@
 package one.xis.context.performance.p2;
 
 import lombok.RequiredArgsConstructor;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 import one.xis.context.performance.XI;
 
-@XISComponent
+@Component
 @RequiredArgsConstructor
 class C5 implements I0, XI {
     private final C1 c0;

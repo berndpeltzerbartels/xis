@@ -2,10 +2,10 @@ package one.xis.context.arrayfieldinject;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 import one.xis.context.XISInject;
 
-@XISComponent
+@Component
 @Getter
 @RequiredArgsConstructor
 class Comp1 {

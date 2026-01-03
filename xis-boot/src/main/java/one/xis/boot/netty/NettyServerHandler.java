@@ -6,7 +6,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 import one.xis.http.ContentType;
 import one.xis.http.RestControllerService;
 import one.xis.server.FrontendService;
@@ -15,7 +15,7 @@ import java.util.Optional;
 
 @Log
 @ChannelHandler.Sharable
-@XISComponent
+@Component
 @RequiredArgsConstructor
 public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 

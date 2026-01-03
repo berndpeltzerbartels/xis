@@ -134,7 +134,7 @@ public class Annotations {
     }
 
     /**
-     * Checks if a class is a default component, either directly via @XISComponent
+     * Checks if a class is a default component, either directly via @Component
      * or indirectly via a meta-annotation.
      *
      * @param type The class to check.

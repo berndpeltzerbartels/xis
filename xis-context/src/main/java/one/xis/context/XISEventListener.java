@@ -47,7 +47,7 @@ import java.lang.annotation.Target;
  * }
  * </pre>
  * 
- * @see XISComponent
+ * @see Component
  * @see EventEmitter
  */
 @Target(ElementType.METHOD)

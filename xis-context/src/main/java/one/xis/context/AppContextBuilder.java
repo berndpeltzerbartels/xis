@@ -33,7 +33,7 @@ public interface AppContextBuilder {
 
     default AppContextBuilder withXIS() {
         return withBeanInitAnnotation(XISInit.class)
-                .withComponentAnnotation(XISComponent.class)
+                .withComponentAnnotation(Component.class)
                 .withDependencyFieldAnnotation(XISInject.class)
                 .withPackage("one.xis");
     }

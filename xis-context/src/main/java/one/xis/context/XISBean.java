@@ -32,7 +32,7 @@ import java.lang.annotation.Target;
  * </pre>
  * 
  * @see XISInit
- * @see XISComponent
+ * @see Component
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)

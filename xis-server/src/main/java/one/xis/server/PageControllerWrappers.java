@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import one.xis.Page;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 import one.xis.context.XISInit;
 import one.xis.context.XISInject;
 import one.xis.utils.http.HttpUtils;
@@ -15,7 +15,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
-@XISComponent
+@Component
 @RequiredArgsConstructor
 class PageControllerWrappers {
 

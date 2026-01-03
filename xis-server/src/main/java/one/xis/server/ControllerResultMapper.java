@@ -1,12 +1,12 @@
 package one.xis.server;
 
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 import one.xis.gson.JsonMap;
 
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@XISComponent
+@Component
 class ControllerResultMapper {
 
     void mapMethodResultToControllerResult(ControllerMethodResult controllerMethodResult, ControllerResult controllerResult) {

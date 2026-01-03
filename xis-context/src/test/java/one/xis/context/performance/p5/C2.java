@@ -2,11 +2,11 @@ package one.xis.context.performance.p5;
 
 import lombok.RequiredArgsConstructor;
 import one.xis.context.XISBean;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 import one.xis.context.XISInit;
 import one.xis.context.performance.XI;
 
-@XISComponent
+@Component
 @RequiredArgsConstructor
 public class C2 implements XI {
 

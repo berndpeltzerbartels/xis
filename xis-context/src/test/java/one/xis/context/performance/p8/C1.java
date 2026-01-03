@@ -1,12 +1,12 @@
 package one.xis.context.performance.p8;
 
 import lombok.RequiredArgsConstructor;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 import one.xis.context.XISInit;
 import one.xis.context.performance.XI;
 
 
-@XISComponent
+@Component
 @RequiredArgsConstructor
 class C1 implements XI {
     private final C4 c4;

@@ -1,6 +1,6 @@
 package one.xis.server;
 
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 
 import java.net.URLEncoder;
 import java.text.CharacterIterator;
@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-@XISComponent
+@Component
 class PathResolver {
 
     Path createPath(String path) {

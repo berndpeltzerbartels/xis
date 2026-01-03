@@ -3,13 +3,13 @@ package one.xis.server;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import one.xis.Page;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 import one.xis.context.XISInject;
 import one.xis.utils.lang.StringUtils;
 import org.tinylog.Logger;
 
 @Slf4j
-@XISComponent
+@Component
 class ControllerService {
 
     @XISInject

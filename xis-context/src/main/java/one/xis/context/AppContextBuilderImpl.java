@@ -92,7 +92,7 @@ public class AppContextBuilderImpl implements AppContextBuilder {
 
     private Annotations annotations() {
         var annotations = new Annotations()
-                .addComponentClassAnnotation(XISComponent.class)
+                .addComponentClassAnnotation(Component.class)
                 .addComponentClassAnnotation(XISDefaultComponent.class)
                 .addDependencyFieldAnnotation(XISInject.class)
                 .addInitAnnotation(XISInit.class)

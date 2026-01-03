@@ -1,11 +1,11 @@
 package one.xis.server;
 
 import one.xis.context.MethodHandler;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 
 import java.lang.reflect.Method;
 
-@XISComponent
+@Component
 class PushClientInvocationHandler extends MethodHandler {
 
     @Override

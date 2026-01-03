@@ -2,14 +2,14 @@ package one.xis.deserialize;
 
 import lombok.RequiredArgsConstructor;
 import one.xis.UserContext;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 import one.xis.utils.lang.ClassUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.util.List;
 
-@XISComponent
+@Component
 @RequiredArgsConstructor
 public class PostProcessing {
 

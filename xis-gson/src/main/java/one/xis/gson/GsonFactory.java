@@ -3,8 +3,8 @@ package one.xis.gson;
 import com.google.gson.*;
 import io.goodforgod.gson.configuration.GsonConfiguration;
 import lombok.RequiredArgsConstructor;
+import one.xis.context.Component;
 import one.xis.context.XISBean;
-import one.xis.context.XISComponent;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -12,7 +12,7 @@ import java.lang.reflect.Type;
 import java.time.Duration;
 import java.util.Arrays;
 
-@XISComponent
+@Component
 @RequiredArgsConstructor
 public class GsonFactory {
 

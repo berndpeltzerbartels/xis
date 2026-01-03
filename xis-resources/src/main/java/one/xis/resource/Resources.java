@@ -1,7 +1,7 @@
 package one.xis.resource;
 
 import lombok.NonNull;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,7 +12,7 @@ import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-@XISComponent
+@Component
 public class Resources {
     public synchronized Resource getByPath(String path) {
         String resourcePath = removeTrailingSlash(path);

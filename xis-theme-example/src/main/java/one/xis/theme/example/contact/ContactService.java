@@ -1,6 +1,6 @@
 package one.xis.theme.example.contact;
 
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
-@XISComponent
+@Component
 public class ContactService {
     
     private final Map<Long, Contact> contacts = new ConcurrentHashMap<>();

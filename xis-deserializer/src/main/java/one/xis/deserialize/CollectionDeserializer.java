@@ -4,7 +4,7 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import lombok.NonNull;
 import one.xis.UserContext;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 import one.xis.utils.lang.FieldUtil;
 import one.xis.utils.lang.ParameterUtil;
 import one.xis.utils.lang.RecordUtil;
@@ -21,7 +21,7 @@ import java.util.*;
 import static one.xis.deserialize.DefaultDeserializationErrorType.CONVERSION_ERROR;
 import static one.xis.deserialize.DefaultDeserializationErrorType.MISSING_MANDATORY_PROPERTY;
 
-@XISComponent
+@Component
 @SuppressWarnings("rawtypes")
 class CollectionDeserializer implements JsonDeserializer<Collection> {
 

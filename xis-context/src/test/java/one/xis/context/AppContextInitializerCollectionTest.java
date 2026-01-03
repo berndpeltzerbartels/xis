@@ -47,19 +47,19 @@ class AppContextInitializerCollectionTest {
     }
 
 
-    @XISComponent
+    @Component
     static class Comp11 {
 
         @XISInject
         LinkedList<Interf1> linkedList;
     }
 
-    @XISComponent
+    @Component
     static class Comp12 implements Interf1 {
 
     }
 
-    @XISComponent
+    @Component
     static class Comp13 implements Interf1 {
 
     }

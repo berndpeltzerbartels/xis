@@ -2,10 +2,10 @@ package one.xis.auth.ipdclient;
 
 import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 import one.xis.http.client.RestClientFactory;
 
-@XISComponent
+@Component
 @RequiredArgsConstructor
 class IDPClientFactoryImpl implements IDPClientFactory {
 

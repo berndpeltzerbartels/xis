@@ -2,14 +2,14 @@ package one.xis.auth;
 
 import lombok.RequiredArgsConstructor;
 import one.xis.UserContext;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 import one.xis.validation.Validator;
 import one.xis.validation.ValidatorException;
 
 import java.lang.reflect.AnnotatedElement;
 
 
-@XISComponent
+@Component
 @RequiredArgsConstructor
 class LoginValidator implements Validator<LoginData> {
 

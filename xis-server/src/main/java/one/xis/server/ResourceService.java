@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import one.xis.Include;
 import one.xis.Page;
 import one.xis.Widget;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 import one.xis.context.XISInit;
 import one.xis.context.XISInject;
 import one.xis.html.HtmlParser;
@@ -20,7 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@XISComponent
+@Component
 @RequiredArgsConstructor
 class ResourceService {
 

@@ -3,7 +3,7 @@ package one.xis.server;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import one.xis.*;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 import one.xis.deserialize.MainDeserializer;
 import one.xis.utils.lang.ClassUtils;
 import one.xis.utils.lang.MethodUtils;
@@ -16,7 +16,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@XISComponent
+@Component
 @RequiredArgsConstructor
 class ControllerWrapperFactory {
 

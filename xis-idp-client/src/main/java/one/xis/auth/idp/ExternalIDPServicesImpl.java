@@ -3,7 +3,7 @@ package one.xis.auth.idp;
 
 import one.xis.auth.ipdclient.IDPClient;
 import one.xis.auth.ipdclient.IDPClientFactory;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 import one.xis.server.LocalUrlHolder;
 
 import java.util.ArrayList;
@@ -20,7 +20,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * AuthenticationProviderConfiguration in context and provides access to these services.
  */
 
-@XISComponent
+@Component
 public class ExternalIDPServicesImpl implements ExternalIDPServices {
 
     private final List<ExternalIDPConfig> idpConfigs;

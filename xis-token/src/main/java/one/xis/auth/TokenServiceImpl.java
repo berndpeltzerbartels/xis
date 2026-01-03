@@ -4,7 +4,7 @@ package one.xis.auth;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import lombok.RequiredArgsConstructor;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 import one.xis.security.SecurityUtil;
 
 import java.math.BigInteger;
@@ -18,7 +18,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
 
-@XISComponent
+@Component
 @RequiredArgsConstructor
 class TokenServiceImpl implements TokenService {
 

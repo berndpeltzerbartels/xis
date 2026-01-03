@@ -1,7 +1,7 @@
 package one.xis.theme.example.contact;
 
 import one.xis.UserContext;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 import one.xis.validation.Validator;
 import one.xis.validation.ValidatorException;
 
@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
  * Validator for international phone numbers.
  * Accepts various formats: +1-555-0123, (555) 123-4567, +49 30 12345678, etc.
  */
-@XISComponent
+@Component
 public class PhoneNumberValidator implements Validator<String> {
 
     // Allows: + at start, digits, spaces, dashes, parentheses

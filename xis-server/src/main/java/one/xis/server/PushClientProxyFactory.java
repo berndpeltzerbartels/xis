@@ -1,12 +1,12 @@
 package one.xis.server;
 
 import lombok.RequiredArgsConstructor;
+import one.xis.context.Component;
 import one.xis.context.ProxyFactory;
-import one.xis.context.XISComponent;
 
 import java.lang.reflect.Proxy;
 
-@XISComponent
+@Component
 @RequiredArgsConstructor
 class PushClientProxyFactory implements ProxyFactory<Object> {
 

@@ -1,5 +1,5 @@
 package one.xis.context;
 
-@XISComponent
+@Component
 @interface None {
 }

@@ -2,12 +2,12 @@ package one.xis.context.collectionfieldinject;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 import one.xis.context.XISInject;
 
 import java.util.Collection;
 
-@XISComponent
+@Component
 @Getter
 @RequiredArgsConstructor
 class Comp1 {

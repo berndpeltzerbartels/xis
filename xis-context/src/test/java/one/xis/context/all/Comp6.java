@@ -2,10 +2,10 @@ package one.xis.context.all;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 
 @Getter
-@XISComponent
+@Component
 @RequiredArgsConstructor
 class Comp6 {
     private final Comp5 comp5;

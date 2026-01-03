@@ -3,14 +3,14 @@ package one.xis.deserialize;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import one.xis.UserContext;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 
 import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
 import java.time.LocalDate;
 import java.util.Optional;
 
-@XISComponent
+@Component
 class LocalDateDeserializer implements JsonDeserializer<LocalDate> { // TODO: Implement JsonDeserializer for all date types
     @Override
     public boolean matches(JsonToken token, AnnotatedElement target) {

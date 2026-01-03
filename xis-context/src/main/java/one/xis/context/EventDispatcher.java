@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import java.util.ArrayList;
 import java.util.Collection;
 
-@XISComponent
+@Component
 @RequiredArgsConstructor
 class EventDispatcher {
 

@@ -1,12 +1,12 @@
 package one.xis.auth.idp;
 
 import lombok.NonNull;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 import one.xis.utils.http.HttpUtils;
 
 import java.net.HttpURLConnection;
 
-@XISComponent
+@Component
 class ExternalIDPConnectionFactory {
 
     HttpURLConnection createPostConnectionFormUrlEncoded(@NonNull String url, @NonNull String requestBody) {

@@ -1,8 +1,8 @@
 package one.xis.context.initmethod;
 
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 
-@XISComponent
+@Component
 class Comp3 {
 
     int getInt() {

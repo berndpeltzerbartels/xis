@@ -2,7 +2,7 @@ package one.xis.js;
 
 import com.google.javascript.jscomp.*;
 import com.google.javascript.jscomp.Compiler;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
-@XISComponent
+@Component
 class JavascriptCompressor {
 
     /**

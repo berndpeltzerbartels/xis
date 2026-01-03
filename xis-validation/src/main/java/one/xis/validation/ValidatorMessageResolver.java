@@ -3,7 +3,7 @@ package one.xis.validation;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import one.xis.*;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
@@ -12,7 +12,7 @@ import java.lang.reflect.RecordComponent;
 import java.util.HashMap;
 import java.util.Map;
 
-@XISComponent
+@Component
 @RequiredArgsConstructor
 public class ValidatorMessageResolver {
 

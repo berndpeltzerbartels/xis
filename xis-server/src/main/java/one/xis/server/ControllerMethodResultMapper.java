@@ -3,7 +3,7 @@ package one.xis.server;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import one.xis.*;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 import one.xis.context.XISInject;
 import one.xis.deserialize.PostProcessingResult;
 import one.xis.utils.lang.MethodUtils;
@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyMap;
 
-@XISComponent
+@Component
 @RequiredArgsConstructor
 class ControllerMethodResultMapper {
 

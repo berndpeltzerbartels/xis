@@ -2,7 +2,7 @@ package one.xis.validation;
 
 import lombok.RequiredArgsConstructor;
 import one.xis.UserContext;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 import one.xis.deserialize.DeserializationContext;
 import one.xis.deserialize.DeserializationPostProcessor;
 import one.xis.deserialize.InvalidValueError;
@@ -14,7 +14,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Parameter;
 import java.util.List;
 
-@XISComponent
+@Component
 @RequiredArgsConstructor
 class ValidationPostProcessor implements DeserializationPostProcessor {
 

@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import one.xis.Formatter;
 import one.xis.UseFormatter;
 import one.xis.UserContext;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 import one.xis.utils.lang.ClassUtils;
 
 import java.io.IOException;
@@ -14,7 +14,7 @@ import java.lang.reflect.AnnotatedElement;
 import java.util.Collection;
 import java.util.Optional;
 
-@XISComponent
+@Component
 @SuppressWarnings("rawtypes")
 @RequiredArgsConstructor
 class FormattedDeserializer implements JsonDeserializer<Object> {

@@ -1,7 +1,7 @@
 package one.xis.context.annofilter;
 
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 
-@XISComponent
+@Component
 class ComponentWithoutTestAnnotation {
 }

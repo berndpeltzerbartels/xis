@@ -1,7 +1,7 @@
 package one.xis.validation;
 
 
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * This class is a result of my desperation when using ResourceBundle.loadProperties for validation messages.
  * It alway ignored the message.properties.
  */
-@XISComponent
+@Component
 class ValidatorMessagePropertiesLoader {
 
     private final Map<Locale, Properties> propertiesCache = new ConcurrentHashMap<>();

@@ -9,14 +9,14 @@ import one.xis.auth.token.SecurityAttributes;
 import one.xis.auth.token.TokenStatus;
 import one.xis.auth.token.UserSecurityService;
 import one.xis.context.AppContext;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.Optional;
 
-@XISComponent
+@Component
 @RequiredArgsConstructor
 public class UserSecurityServiceImpl implements UserSecurityService {
 

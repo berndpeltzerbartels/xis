@@ -1,11 +1,11 @@
 package one.xis.i18n;
 
 import lombok.RequiredArgsConstructor;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 
 import java.util.Collection;
 
-@XISComponent
+@Component
 @RequiredArgsConstructor
 class Mappers {
     private final Collection<Mapper<?>> mappers;

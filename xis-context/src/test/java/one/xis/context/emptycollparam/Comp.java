@@ -3,11 +3,11 @@ package one.xis.context.emptycollparam;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 
 import java.util.Collection;
 
-@XISComponent
+@Component
 @RequiredArgsConstructor
 class Comp {
 

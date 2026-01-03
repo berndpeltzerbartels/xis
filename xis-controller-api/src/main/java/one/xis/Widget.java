@@ -2,8 +2,7 @@ package one.xis;
 
 import jakarta.inject.Qualifier;
 import jakarta.inject.Singleton;
-import one.xis.context.XISComponent;
-import org.springframework.stereotype.Component;
+import one.xis.context.Component;
 
 import java.lang.annotation.*;
 
@@ -23,9 +22,9 @@ import java.lang.annotation.*;
  * It is compatible with Micronaut and includes {@code @Singleton} and {@code @Qualifier}
  * for proper registration as a bean.</p>
  *
- * <p>This annotation is itself marked with {@link XISComponent}, so classes annotated
+ * <p>This annotation is itself marked with {@link Component}, so classes annotated
  * with {@code @Widget} are automatically discovered and registered for dependency injection.
- * There is no need to annotate the class separately with {@code @XISComponent}.</p>
+ * There is no need to annotate the class separately with {@code @Component}.</p>
  *
  * <p>Example usage:</p>
  * <pre>{@code
@@ -44,8 +43,8 @@ import java.lang.annotation.*;
 @Target({ElementType.TYPE})
 @Qualifier // for micronaut
 @Singleton // for micronaut
+@org.springframework.stereotype.Component
 @Component
-@XISComponent
 public @interface Widget {
     String value() default "";
 

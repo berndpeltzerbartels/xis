@@ -2,11 +2,11 @@ package one.xis.context.beanmethod;
 
 import lombok.Getter;
 import one.xis.context.XISBean;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 import one.xis.context.XISInject;
 
 @Getter
-@XISComponent
+@Component
 class Comp1 {
 
     @XISInject

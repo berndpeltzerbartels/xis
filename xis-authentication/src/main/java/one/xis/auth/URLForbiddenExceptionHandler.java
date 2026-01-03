@@ -3,7 +3,7 @@ package one.xis.auth;
 import lombok.RequiredArgsConstructor;
 import one.xis.auth.idp.ExternalIDPServices;
 import one.xis.context.AppContext;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 import one.xis.http.ControllerExceptionHandler;
 import one.xis.http.ResponseEntity;
 
@@ -11,7 +11,7 @@ import java.lang.reflect.Method;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
-@XISComponent
+@Component
 @RequiredArgsConstructor
 class URLForbiddenExceptionHandler implements ControllerExceptionHandler<URLForbiddenException> {
 

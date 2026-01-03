@@ -3,7 +3,7 @@ package one.xis.deserialize;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import one.xis.UserContext;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 import one.xis.validation.AllElementsMandatory;
 import one.xis.validation.Mandatory;
 
@@ -16,7 +16,7 @@ import java.util.Optional;
 
 import static one.xis.deserialize.DefaultDeserializationErrorType.MISSING_MANDATORY_PROPERTY;
 
-@XISComponent
+@Component
 class ArrayDeserializer implements JsonDeserializer<Object> {
 
     @Override

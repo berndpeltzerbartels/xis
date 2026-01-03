@@ -5,7 +5,7 @@ import com.google.gson.stream.JsonToken;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import one.xis.*;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 import one.xis.validation.Mandatory;
 
 import java.io.StringReader;
@@ -18,7 +18,7 @@ import java.util.Optional;
 import static one.xis.deserialize.DefaultDeserializationErrorType.CONVERSION_ERROR;
 import static one.xis.deserialize.DefaultDeserializationErrorType.MISSING_MANDATORY_PROPERTY;
 
-@XISComponent
+@Component
 @SuppressWarnings("rawtypes")
 public class MainDeserializer {
 

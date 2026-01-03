@@ -3,7 +3,7 @@ package one.xis.server;
 
 import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 
 import java.util.Map;
 
@@ -15,7 +15,7 @@ import java.util.Map;
  * Mainly micronaut's default serialization leaves attributes with
  * empty arrays etc.
  */
-@XISComponent
+@Component
 @RequiredArgsConstructor
 class DataSerializerImpl implements DataSerializer {
 

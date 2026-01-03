@@ -5,7 +5,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import one.xis.Widget;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 import one.xis.context.XISInit;
 import one.xis.context.XISInject;
 
@@ -15,7 +15,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
-@XISComponent
+@Component
 @RequiredArgsConstructor
 class WidgetControllerWrappers {
 

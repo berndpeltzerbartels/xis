@@ -1,14 +1,14 @@
 package one.xis.auth;
 
 import lombok.RequiredArgsConstructor;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 import one.xis.http.ControllerExceptionHandler;
 import one.xis.http.ResponseEntity;
 
 import java.lang.reflect.Method;
 
 
-@XISComponent
+@Component
 @RequiredArgsConstructor
 class InvalidStateParameterExceptionHandler implements ControllerExceptionHandler<InvalidStateParameterException> {
     

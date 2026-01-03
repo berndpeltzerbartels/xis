@@ -2,7 +2,7 @@ package one.xis.http;
 
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 import one.xis.utils.lang.FieldUtil;
 import one.xis.utils.lang.TypeUtils;
 
@@ -13,7 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@XISComponent
+@Component
 class ResponseWriter {
     private final Gson gson;
 

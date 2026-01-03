@@ -14,7 +14,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.*;
 
-@XISComponent
+@Component
 public class RestControllerServiceImpl implements RestControllerService {
 
     @XISInject

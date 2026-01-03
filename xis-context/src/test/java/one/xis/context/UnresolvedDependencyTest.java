@@ -10,8 +10,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class UnresolvedDependencyTest {
 
     @Nested
-    @DisplayName("Circular Dependency with @XISComponent")
-    class XISComponentCircularDependency {
+    @DisplayName("Circular Dependency with @Component")
+    class ComponentCircularDependency {
 
         @Test
         void shouldThrowException() {
@@ -21,19 +21,19 @@ public class UnresolvedDependencyTest {
 
             String message = exception.getMessage();
             assertThat(message).contains("Circular Dependency Found");
-            assertThat(message).contains("Bean 'one.xis.context.UnresolvedDependencyTest$XISComponentCircularDependency$CircularA'");
-            assertThat(message).contains("depends on 'one.xis.context.UnresolvedDependencyTest$XISComponentCircularDependency$CircularB'");
-            assertThat(message).contains("Bean 'one.xis.context.UnresolvedDependencyTest$XISComponentCircularDependency$CircularB'");
-            assertThat(message).contains("depends on 'one.xis.context.UnresolvedDependencyTest$XISComponentCircularDependency$CircularA'");
+            assertThat(message).contains("Bean 'one.xis.context.UnresolvedDependencyTest$ComponentCircularDependency$CircularA'");
+            assertThat(message).contains("depends on 'one.xis.context.UnresolvedDependencyTest$ComponentCircularDependency$CircularB'");
+            assertThat(message).contains("Bean 'one.xis.context.UnresolvedDependencyTest$ComponentCircularDependency$CircularB'");
+            assertThat(message).contains("depends on 'one.xis.context.UnresolvedDependencyTest$ComponentCircularDependency$CircularA'");
         }
 
-        @XISComponent
+        @Component
         static class CircularA {
             CircularA(CircularB b) {
             }
         }
 
-        @XISComponent
+        @Component
         static class CircularB {
 
             CircularB(CircularA a) {
@@ -65,7 +65,7 @@ public class UnresolvedDependencyTest {
         static class BeanB {
         }
 
-        @XISComponent
+        @Component
         static class CircularBeanConfig {
             @XISBean
             BeanA beanA(BeanB b) {
@@ -95,7 +95,7 @@ public class UnresolvedDependencyTest {
             assertThat(message).contains("requires bean of type 'one.xis.context.UnresolvedDependencyTest$MissingDependency$MissingDependencyBean' which was not found");
         }
 
-        @XISComponent
+        @Component
         static class Dependent {
 
             Dependent(MissingDependencyBean missing) {
@@ -103,7 +103,7 @@ public class UnresolvedDependencyTest {
         }
 
         // This bean is never registered with the context
-        @XISComponent
+        @Component
         static class MissingDependencyBean {
         }
     }

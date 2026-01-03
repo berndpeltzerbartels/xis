@@ -3,13 +3,13 @@ package one.xis.deserialize;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import one.xis.UserContext;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 
 import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
 import java.util.Optional;
 
-@XISComponent
+@Component
 @SuppressWarnings({"unchecked", "rawtypes"})
 class EnumDeserializer implements JsonDeserializer<Enum> {
     @Override

@@ -13,9 +13,9 @@ import io.netty.handler.codec.http.HttpServerExpectContinueHandler;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 
-@XISComponent
+@Component
 @RequiredArgsConstructor
 public class NettyServer {
 

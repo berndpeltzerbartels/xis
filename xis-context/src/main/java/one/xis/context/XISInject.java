@@ -30,7 +30,7 @@ import java.lang.annotation.*;
  * private DataSource dataSource;
  * </pre>
  * 
- * @see XISComponent
+ * @see Component
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)

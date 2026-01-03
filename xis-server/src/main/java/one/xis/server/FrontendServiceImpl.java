@@ -9,8 +9,8 @@ import one.xis.auth.AuthenticationException;
 import one.xis.auth.URLForbiddenException;
 import one.xis.auth.token.TokenStatus;
 import one.xis.auth.token.UserSecurityService;
+import one.xis.context.Component;
 import one.xis.context.EventEmitter;
-import one.xis.context.XISComponent;
 import one.xis.http.RequestContext;
 import one.xis.js.JavascriptProvider;
 import one.xis.resource.Resource;
@@ -23,7 +23,7 @@ import java.util.function.BiConsumer;
 /**
  * Encapsulates all methods, required by the framework's controller.
  */
-@XISComponent
+@Component
 @RequiredArgsConstructor
 public class FrontendServiceImpl implements FrontendService {
 

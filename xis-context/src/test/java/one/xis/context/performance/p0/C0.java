@@ -2,13 +2,13 @@ package one.xis.context.performance.p0;
 
 
 import lombok.RequiredArgsConstructor;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 import one.xis.context.XISInit;
 import one.xis.context.performance.XI;
 
 import java.util.Collection;
 
-@XISComponent
+@Component
 @RequiredArgsConstructor
 class C0 implements XI {
     private final C2 c2;

@@ -6,7 +6,7 @@ import io.netty.handler.codec.http.*;
 import lombok.RequiredArgsConstructor;
 import one.xis.auth.ApiTokens;
 import one.xis.auth.ApiTokensAndUrl;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 import one.xis.server.ClientConfig;
 import one.xis.server.ClientRequest;
 import one.xis.server.ServerResponse;
@@ -17,7 +17,7 @@ import java.util.Map;
 
 import static io.netty.buffer.Unpooled.copiedBuffer;
 
-@XISComponent
+@Component
 @RequiredArgsConstructor
 public class NettyMapper {
 

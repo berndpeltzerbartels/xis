@@ -3,7 +3,7 @@ package one.xis.boot.netty;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;
 import lombok.extern.java.Log;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 
 import javax.activation.MimetypesFileTypeMap;
 import java.io.IOException;
@@ -13,7 +13,7 @@ import java.nio.file.Path;
 import java.util.Optional;
 
 @Log
-@XISComponent
+@Component
 public class NettyResourceHandler {
     private static final String PUBLIC_RESOURCE_PATH = "/public";
     private final MimetypesFileTypeMap mimeTypesMap = new MimetypesFileTypeMap();

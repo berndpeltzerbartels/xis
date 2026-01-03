@@ -2,15 +2,14 @@ package one.xis;
 
 import jakarta.inject.Qualifier;
 import jakarta.inject.Singleton;
-import one.xis.context.XISComponent;
-import org.springframework.stereotype.Component;
+import one.xis.context.Component;
 
 import java.lang.annotation.*;
 
 @Qualifier // for micronaut
 @Singleton // for micronaut
-@Component // for spring
-@XISComponent
+@org.springframework.stereotype.Component // for spring
+@Component
 @Documented
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)

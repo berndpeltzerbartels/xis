@@ -1,9 +1,9 @@
 package one.xis.context.all;
 
 import lombok.RequiredArgsConstructor;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 
-@XISComponent
+@Component
 @RequiredArgsConstructor
 class Comp3 {
 

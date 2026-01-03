@@ -4,12 +4,12 @@ package one.xis.server;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import one.xis.WelcomePage;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 import one.xis.resource.Resources;
 
 import java.util.Optional;
 
-@XISComponent
+@Component
 @RequiredArgsConstructor
 class PageAttributesFactory extends AttributesFactory {
 

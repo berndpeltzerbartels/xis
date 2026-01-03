@@ -3,10 +3,10 @@ package one.xis.server;
 import lombok.RequiredArgsConstructor;
 import one.xis.DefaultHtmlFile;
 import one.xis.HtmlFile;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 import one.xis.resource.Resources;
 
-@XISComponent
+@Component
 @RequiredArgsConstructor
 class HtmlResourcePathResolver {
 

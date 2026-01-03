@@ -2,14 +2,14 @@ package one.xis.server;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 import one.xis.context.XISInit;
 import one.xis.html.HtmlParser;
 import one.xis.html.document.HtmlDocument;
 import one.xis.resource.Resources;
 
 
-@XISComponent
+@Component
 @RequiredArgsConstructor
 class RootPageService {
 

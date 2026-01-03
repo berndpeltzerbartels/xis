@@ -5,13 +5,13 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import one.xis.context.Component;
 import one.xis.context.XISBean;
-import one.xis.context.XISComponent;
 
 import java.io.IOException;
 
 
-@XISComponent
+@Component
 class ObjectMapperConfig {
 
     @XISBean

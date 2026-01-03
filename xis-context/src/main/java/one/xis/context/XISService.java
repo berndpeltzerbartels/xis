@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
  * when using annotation-based configuration and classpath scanning.
  * <p>
  * Similar to spring's @Service annotation, this is just an alias
- * for @{@link XISComponent}
+ * for @{@link Component}
  */
 
 @Retention(RetentionPolicy.RUNTIME)

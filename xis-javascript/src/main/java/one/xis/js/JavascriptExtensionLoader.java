@@ -1,6 +1,6 @@
 package one.xis.js;
 
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 import one.xis.utils.io.IOUtils;
 
 import java.io.BufferedReader;
@@ -16,7 +16,7 @@ import java.util.*;
  * resource paths (private  method) and loads the js code (another private method).
  * Returns a list of js code snippets created with empty lines in between.
  */
-@XISComponent
+@Component
 public class JavascriptExtensionLoader {
 
     public Map<String, String> loadExtensions() {

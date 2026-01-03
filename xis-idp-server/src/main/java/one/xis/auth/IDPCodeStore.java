@@ -2,12 +2,12 @@ package one.xis.auth;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
-@XISComponent
+@Component
 public class IDPCodeStore {
 
     private final Duration expiry = Duration.ofMinutes(15);

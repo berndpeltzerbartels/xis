@@ -2,12 +2,12 @@ package one.xis.context.all;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import one.xis.context.Component;
 import one.xis.context.XISBean;
-import one.xis.context.XISComponent;
 import one.xis.context.XISInject;
 
 @Getter
-@XISComponent
+@Component
 @RequiredArgsConstructor
 class Comp1 {
 

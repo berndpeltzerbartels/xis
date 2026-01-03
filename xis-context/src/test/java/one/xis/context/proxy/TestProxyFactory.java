@@ -1,12 +1,12 @@
 package one.xis.context.proxy;
 
+import one.xis.context.Component;
 import one.xis.context.ProxyFactory;
-import one.xis.context.XISComponent;
 
 import java.lang.reflect.Proxy;
 
 
-@XISComponent
+@Component
 class TestProxyFactory implements ProxyFactory<TestInterface> {
 
     @Override

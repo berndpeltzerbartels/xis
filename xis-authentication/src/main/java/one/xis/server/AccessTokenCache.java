@@ -5,14 +5,14 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Expiry;
 import lombok.NonNull;
 import one.xis.auth.AccessTokenClaims;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 
-@XISComponent
+@Component
 public class AccessTokenCache {
 
     private final Cache<String, AccessTokenClaims> cache;

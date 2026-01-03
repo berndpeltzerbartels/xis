@@ -2,7 +2,7 @@ package one.xis.server;
 
 import lombok.RequiredArgsConstructor;
 import one.xis.JavascriptExtension;
-import one.xis.context.XISComponent;
+import one.xis.context.Component;
 import one.xis.context.XISInit;
 import one.xis.context.XISInject;
 import one.xis.resource.Resources;
@@ -11,7 +11,7 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 // TODO : D we need another way to add script extensions ?
-@XISComponent
+@Component
 @RequiredArgsConstructor
 class JavascriptExtensionService {
     @XISInject(annotatedWith = JavascriptExtension.class)
