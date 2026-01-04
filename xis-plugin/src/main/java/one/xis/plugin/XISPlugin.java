@@ -28,6 +28,7 @@ public class XISPlugin implements Plugin<Project> {
         configureDependencyManagement(project);
         configureResources(project);
         configureTemplatesTask(project);
+        configureTestsTask(project);
         configureFatJarCreation(project);
     }
 
@@ -117,6 +118,43 @@ public class XISPlugin implements Plugin<Project> {
         });
     }
 
+    /* ----------------------------- tests task ----------------------------------- */
+
+    private void configureTestsTask(Project project) {
+        SourceSet main = mainSourceSet(project);
+        SourceSetContainer sets = project.getExtensions().getByType(SourceSetContainer.class);
+        SourceSet test = sets.getByName(SourceSet.TEST_SOURCE_SET_NAME);
+
+        Configuration apClasspath = buildApClasspath(project);
+
+        // Tests should go to src/test/java
+        File testJavaDir = test.getAllJava().getSourceDirectories().getSingleFile();
+
+        project.getTasks().register("tests", XISTestTask.class, task -> {
+            task.setGroup("xis");
+            task.setDescription("Runs the XIS annotation processor to scaffold missing test files (no compilation).");
+
+            // inputs for javac/AP
+            task.setSource(main.getAllJava());
+            task.setClasspath(main.getCompileClasspath());
+
+            // AP path: only the processor, pinned to plugin version
+            task.getOptions().setAnnotationProcessorPath(apClasspath);
+
+            // fixed processor FQCN & output to src/test/java
+            task.getProcessorFqcn().set("one.xis.processor.XISTestProcessor");
+            task.getOutputDir().set(testJavaDir);
+
+            // lock to prevent user mutation
+            lockTestTask(task);
+
+            // up-to-date inputs
+            task.getInputs()
+                    .files(main.getAllJava().getSourceDirectories())
+                    .withPropertyName("xisSources");
+        });
+    }
+
     /* ----------------------------- helpers -------------------------------------- */
 
     private SourceSet mainSourceSet(Project project) {
@@ -148,6 +186,13 @@ public class XISPlugin implements Plugin<Project> {
     }
 
     private void lock(XISTemplateTask task) {
+        task.getProcessorFqcn().finalizeValue();
+        task.getProcessorFqcn().disallowChanges();
+        task.getOutputDir().finalizeValue();
+        task.getOutputDir().disallowChanges();
+    }
+
+    private void lockTestTask(XISTestTask task) {
         task.getProcessorFqcn().finalizeValue();
         task.getProcessorFqcn().disallowChanges();
         task.getOutputDir().finalizeValue();
