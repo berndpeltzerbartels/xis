@@ -90,7 +90,7 @@ public class XISTemplateProcessor extends AbstractProcessor {
         if (Files.exists(target)) return; // never overwrite
 
         String template = loadTemplate(kind, themePresent);
-        if (template == null) template = minimalTemplate(type.getSimpleName().toString());
+        if (template == null) template = minimalTemplate(type.getSimpleName().toString(), kind);
 
         writeFile(target, template);
     }
@@ -238,13 +238,22 @@ public class XISTemplateProcessor extends AbstractProcessor {
         return result;
     }
 
-    private String minimalTemplate(String title) {
-        return """
-                <!doctype html>
-                <html>
-                  <head><meta charset="utf-8"><title>%s</title></head>
-                  <body><h1>%s</h1><!-- @generated --></body>
-                </html>
-                """.formatted(title, title);
+    private String minimalTemplate(String title, TemplateKind kind) {
+        if (kind == TemplateKind.PAGE) {
+            return """
+                    <!DOCTYPE html>
+                    <html xmlns:xis="https://xis.one/xsd">
+                      <head><meta charset="utf-8"><title>%s</title></head>
+                      <body><h1>%s</h1><!-- @generated --></body>
+                    </html>
+                    """.formatted(title, title);
+        } else {
+            // Widget: generate fragment
+            return """
+                    <xis:template xmlns:xis="https://xis.one/xsd">
+                        <div><!-- @generated --></div>
+                    </xis:template>
+                    """;
+        }
     }
 }
