@@ -62,14 +62,14 @@ public class HelloPage {
 ```html
 
 <html xmlns:xis="https://xis.one/xsd" lang="en">
-    <head>
-        <title>Example</title>
-    </head>
-    <body>
-        <h1>${message}</h1>
-        <p>Counter: ${count}</p>
-        <button xis:action="increment">Click me</button>
-    </body>
+<head>
+    <title>Example</title>
+</head>
+<body>
+<h1>${message}</h1>
+<p>Counter: ${count}</p>
+<button xis:action="increment">Click me</button>
+</body>
 </html>
 ```
 
@@ -129,7 +129,8 @@ public class ProductDetailPage {
     <meta name="viewport" content="width=device-width, initial-scale=1.0
     <h1>${product.name}</h1>
 
-    <button xis:action="deleteProduct">Delete Product</button>
+    <button xis:action=" deleteProduct
+    ">Delete Product</button>
 
     <a xis:page="ProductListPage">Back to list</a>
 </html>
@@ -140,8 +141,8 @@ Navigation, confirmation dialogs, and page transitions all work without writing 
 ## Learn More
 
 📖 **[Documentation](https://xis.one/docs/introduction.html)** – Complete guide  
-🚀 **[Quickstart](https://xis.one/quickstart/index.html)** – Get started in 10 minutes  
-📚 **[JavaDoc](https://xis.one/javadoc/index.html)** – API reference
+🚀 **[Quickstart](https://xis.one/quickstart/installation.html)** – Get started in 10 minutes  
+📚 **[JavaDoc](https://xis.one/docs/introduction.html)** – API reference
 
 ## License
 
