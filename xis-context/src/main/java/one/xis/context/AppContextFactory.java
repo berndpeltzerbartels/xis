@@ -1,14 +1,15 @@
 package one.xis.context;
 
+import lombok.extern.slf4j.Slf4j;
 import one.xis.utils.lang.ClassUtils;
 import one.xis.utils.lang.FieldUtil;
 import one.xis.utils.lang.MethodUtils;
-import org.tinylog.Logger;
 
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 class AppContextFactory implements SingletonCreationListener {
     private final List<SingletonProducer> singletonProducers = new ArrayList<>();
     private final List<SingletonConsumer> singletonConsumers = new ArrayList<>();
@@ -43,19 +44,19 @@ class AppContextFactory implements SingletonCreationListener {
         evaluateAdditionalSingletonClasses();
         evaluateAdditionalSingletons();
         long t1 = System.currentTimeMillis();
-        Logger.info("Evaluating singletons took {} ms", t1 - t0);
+        log.info("Evaluating singletons took {} ms", t1 - t0);
         mapProducers();
         long t2 = System.currentTimeMillis();
-        Logger.info("Mapping producers took {} ms", t2 - t1);
+        log.info("Mapping producers took {} ms", t2 - t1);
         createSingletons();
         long t3 = System.currentTimeMillis();
-        Logger.info("Creating singletons took {} ms", t3 - t2);
+        log.info("Creating singletons took {} ms", t3 - t2);
         finalizeSingletonInitialization();
         long t4 = System.currentTimeMillis();
-        Logger.info("Finalizing singletons took {} ms", t4 - t3);
+        log.info("Finalizing singletons took {} ms", t4 - t3);
         context.lockModification();
         long t5 = System.currentTimeMillis();
-        Logger.info("Context lock took {} ms", t5 - t3);
+        log.info("Context lock took {} ms", t5 - t3);
         eventEmitter.emitEvent(new AppContextInitializedEvent(context));
         return context;
     }
@@ -309,8 +310,8 @@ class AppContextFactory implements SingletonCreationListener {
 
     @Override
     public void onSingletonCreated(Object o) {
-        if (Logger.isDebugEnabled()) {
-            Logger.debug("Singleton created: {}", o);
+        if (log.isDebugEnabled()) {
+            log.debug("Singleton created: {}", o);
         }
         singletons.add(o);
     }

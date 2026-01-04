@@ -3,7 +3,7 @@ package one.xis.utils.xml;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.tinylog.Logger;
+import lombok.extern.slf4j.Slf4j;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
@@ -15,6 +15,7 @@ import java.util.*;
 import java.util.stream.Stream;
 
 
+@Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class XmlUtil {
 
@@ -57,10 +58,10 @@ public class XmlUtil {
         NodeList nodeList = parent.getElementsByTagName(tagName);
         switch (nodeList.getLength()) {
             case 0:
-                Logger.info("nodelist empty");
+                log.info("nodelist empty");
                 return Optional.empty();
             case 1:
-                Logger.info(tagName + " - nodelist one: " + nodeList.item(0));
+                log.info(tagName + " - nodelist one: " + nodeList.item(0));
                 return Optional.of(nodeList.item(0)).filter(Element.class::isInstance).map(Element.class::cast);
             default:
                 throw new IllegalStateException("too many results");

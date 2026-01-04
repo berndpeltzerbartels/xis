@@ -12,7 +12,7 @@ public abstract class XISBootRunnableJarTask extends Jar {
     public XISBootRunnableJarTask() {
         setGroup("xis");
         setDescription("Creates an executable JAR with all dependencies.");
-        getArchiveClassifier().set("all");
+        getArchiveClassifier().set("runnable");
         setDuplicatesStrategy(DuplicatesStrategy.EXCLUDE);
 
         // Konfiguration erfolgt im Plugin beim Registrieren

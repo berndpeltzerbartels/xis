@@ -33,25 +33,24 @@ var assertjVersion = rootProject.ext.libraryVersions.assertj
 var gsonVersion = rootProject.ext.libraryVersions.gson
 var jacksonVersion = rootProject.ext.libraryVersions.jackson
 var mockitoVersion = rootProject.ext.libraryVersions.mockito
-var tinylogVersion = "2.6.1"
-var slf4jLog4j12Version = "2.0.3"
+var slf4jVersion = rootProject.ext.libraryVersions.slf4j
 
 
 dependencies {
 
     // Local project dependencies
     implementation project(":xis-deserializer")
-    api project(":xis-context")
     implementation project(":xis-util")
-    api project(":xis-controller-api")
     implementation project(":xis-resources")
     implementation project(":xis-server")
-    api project(":xis-adapter-spi")
     implementation project(":xis-validation")
     implementation project(":xis-token")
-
     implementation project(":xis-http-controller")
 
+    api project(":xis-context")
+    api project(":xis-controller-api")
+    api project(":xis-adapter-spi")
+    
     // Compile-only dependencies
     compileOnly project(":xis-deserializer")
 
@@ -62,9 +61,11 @@ dependencies {
     implementation "com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion"
 
 
-    // Tinylog dependencies
-    implementation("org.tinylog:tinylog-api:$tinylogVersion")
-    implementation("org.tinylog:tinylog-impl:$tinylogVersion")
+    // SLF4J API + Tinylog implementation for xis-boot applications
+    implementation("org.slf4j:slf4j-api:$slf4jVersion")
+    implementation("org.tinylog:tinylog-api:2.7.0")
+    implementation("org.tinylog:tinylog-impl:2.7.0")
+    implementation("org.tinylog:slf4j-tinylog:2.7.0")
 
 
     // Annotation processors
@@ -73,7 +74,6 @@ dependencies {
     // Implementation dependencies
     implementation "org.projectlombok:lombok:$lombokVersion"
     implementation "org.reflections:reflections:$reflectionsVersion"
-    implementation "org.slf4j:slf4j-log4j12:$slf4jLog4j12Version"
 
     implementation 'com.sun.activation:javax.activation:1.2.0'
 

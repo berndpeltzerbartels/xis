@@ -30,7 +30,7 @@ var lombokVersion = rootProject.ext.libraryVersions.lombok
 var reflectionsVersion = rootProject.ext.libraryVersions.reflections
 var mockitoVersion = rootProject.ext.libraryVersions.mockito
 var graalVmVersion = "23.0.1"
-var tinylogVersion = "2.6.1"
+var slf4jVersion = rootProject.ext.libraryVersions.slf4j
 var jacksonVersion = rootProject.ext.libraryVersions.jackson
 var junitVersion = rootProject.ext.libraryVersions.junit
 var assertjVersion = rootProject.ext.libraryVersions.assertj
@@ -65,7 +65,7 @@ dependencies {
     api "org.graalvm.js:js:$graalVmVersion"
     api "org.graalvm.js:js-scriptengine:$graalVmVersion"
     api "org.graalvm.truffle:truffle-api:$graalVmVersion"
-    implementation "org.tinylog:tinylog-impl:$tinylogVersion"
+    implementation "org.slf4j:slf4j-api:$slf4jVersion"
     implementation 'org.jsoup:jsoup:1.17.2'
     implementation "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
 

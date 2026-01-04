@@ -1,11 +1,12 @@
 package one.xis.context;
 
+import lombok.extern.slf4j.Slf4j;
 import one.xis.utils.lang.MethodUtils;
-import org.tinylog.Logger;
 
 import java.lang.reflect.Method;
 import java.util.Optional;
 
+@Slf4j
 class BeanCreationMethod extends SingletonMethod {
     BeanCreationMethod(Method method, SingletonWrapper parent, ParameterFactory parameterFactory) {
         super(method, parent, parameterFactory);
@@ -13,8 +14,8 @@ class BeanCreationMethod extends SingletonMethod {
 
     @Override
     public void invoke() {
-        if (Logger.isDebugEnabled()) {
-            Logger.debug("invoking bean method {} of {}", getMethod().getName(), getParent().getBeanClass().getName());
+        if (log.isDebugEnabled()) {
+            log.debug("invoking bean method {} of {}", getMethod().getName(), getParent().getBeanClass().getName());
         }
         super.invoke();
     }

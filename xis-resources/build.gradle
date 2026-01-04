@@ -27,9 +27,8 @@ repositories {
 // Local variables for versions
 var lombokVersion = rootProject.ext.libraryVersions.lombok
 var reflectionsVersion = rootProject.ext.libraryVersions.reflections
-var slf4jVersion = "2.0.3"
-var tinylogVersion = "2.6.1"
-var junitVersion = "5.7.0"
+var slf4jVersion = rootProject.ext.libraryVersions.slf4j
+var junitVersion = rootProject.ext.libraryVersions.junit
 
 
 dependencies {
@@ -47,10 +46,6 @@ dependencies {
 
     // Reflections dependency
     implementation("org.reflections:reflections:$reflectionsVersion")
-
-    // Tinylog dependencies
-    implementation("org.tinylog:tinylog-api:$tinylogVersion")
-    implementation("org.tinylog:tinylog-impl:$tinylogVersion")
 
     // JUnit dependencies
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")

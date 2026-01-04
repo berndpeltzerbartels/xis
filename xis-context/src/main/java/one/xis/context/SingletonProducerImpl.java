@@ -3,11 +3,12 @@ package one.xis.context;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
-import org.tinylog.Logger;
+import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Parameter;
 import java.util.*;
 
+@Slf4j
 abstract class SingletonProducerImpl implements SingletonProducer {
     @Getter
     private final List<SingletonConsumer> consumers = new ArrayList<>();
@@ -55,13 +56,13 @@ abstract class SingletonProducerImpl implements SingletonProducer {
         if (o != null) {
             if (o instanceof Optional<?> optional) {
                 if (optional.isEmpty()) {
-                    Logger.debug("Singleton created by method returned empty Optional: {}", o);
+                    log.debug("Singleton created by method returned empty Optional: {}", o);
                     decrementProducerCountMultiValueConsumers();
                     return;
                 }
                 o = optional.get();
             }
-            Logger.debug("Singleton created by method: {}", o);
+            log.debug("Singleton created by method: {}", o);
             notifySingletonCreationListeners(o);
             assignValueInConsumers(o);
         }

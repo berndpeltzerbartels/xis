@@ -3,7 +3,7 @@ package one.xis.context;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
-import org.tinylog.Logger;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
+@Slf4j
 @Getter
 class SingletonWrapper implements SingletonConsumer, Finalizable {
     private Object bean;
@@ -43,20 +44,20 @@ class SingletonWrapper implements SingletonConsumer, Finalizable {
 
     @Override
     public void assignValueIfMatching(Object o) {
-        Logger.debug("{}: trying to assign bean {}", this, o);
+        log.debug("{}: trying to assign bean {}", this, o);
         if (beanClass.isAssignableFrom(o.getClass())) {
             this.bean = o;
-            Logger.debug("{}: bean assigned", this);
-            Logger.debug("{}: unassigned field count: {}", this, this.singletonFields.size());
+            log.debug("{}: bean assigned", this);
+            log.debug("{}: unassigned field count: {}", this, this.singletonFields.size());
             for (var singletonField : new ArrayList<>(singletonFields)) {
-                Logger.debug("{}: field {}, assigned={}", this, singletonField, singletonField.isValueAssigned());
+                log.debug("{}: field {}, assigned={}", this, singletonField, singletonField.isValueAssigned());
                 if (singletonField.isValueAssigned()) {
                     doSetFieldValue(singletonField);
                 }
             }
             doNotify();
         } else {
-            Logger.debug("{}: {} bean not assignable", o, this);
+            log.debug("{}: {} bean not assignable", o, this);
         }
     }
 
@@ -65,30 +66,30 @@ class SingletonWrapper implements SingletonConsumer, Finalizable {
     }
 
     void doNotify() {
-        Logger.debug("{}: notify", this);
+        log.debug("{}: notify", this);
         if (bean == null) {
-            Logger.debug("{}: bean is null", this);
+            log.debug("{}: bean is null", this);
             return;
         }
-        Logger.debug("{}: notify fields", this);
+        log.debug("{}: notify fields", this);
         if (singletonFields.isEmpty()) {
-            Logger.debug("{}: notify init methods", this);
+            log.debug("{}: notify init methods", this);
             notifyInitMethods();
             if (initMethods.isEmpty()) {
-                Logger.debug("{}: notify bean methods", this);
+                log.debug("{}: notify bean methods", this);
                 notifyBeanMethods();
                 notifyProxyCreationMethodCalls();
             } else {
-                Logger.debug("{}: init methods not executed: {}", this, initMethods.size());
+                log.debug("{}: init methods not executed: {}", this, initMethods.size());
             }
         } else {
-            Logger.debug("{}: fields not assigned: {}", this, singletonFields);
+            log.debug("{}: fields not assigned: {}", this, singletonFields);
         }
     }
 
     @Override
     public void doFinalize() {
-        Logger.debug("{}: finalizing bean", this);
+        log.debug("{}: finalizing bean", this);
         if (bean == null) {
             return;
         }
@@ -122,18 +123,18 @@ class SingletonWrapper implements SingletonConsumer, Finalizable {
 
     private void doSetFieldValue(@NonNull DependencyField field) {
         if (bean != null) {
-            Logger.debug("{}: set field value to {}", this, field);
+            log.debug("{}: set field value to {}", this, field);
             singletonFields.remove(field);
             field.doInject();
             doNotify();
         } else {
-            Logger.debug("{}: can not set field value. bean is null", this);
+            log.debug("{}: can not set field value. bean is null", this);
         }
     }
 
     private void notifyInitMethods() {
-        if (Logger.isDebugEnabled()) {
-            Logger.debug("{}: notify {} init methods ", this, this.initMethods.size());
+        if (log.isDebugEnabled()) {
+            log.debug("{}: notify {} init methods ", this, this.initMethods.size());
         }
         var initMethods = new ArrayList<>(this.initMethods);
         for (var i = 0; i < initMethods.size(); i++) {
@@ -146,8 +147,8 @@ class SingletonWrapper implements SingletonConsumer, Finalizable {
     }
 
     private void finalizeInitMethods() {
-        if (Logger.isDebugEnabled()) {
-            Logger.debug("{}: notify {} init methods ", this, this.initMethods.size());
+        if (log.isDebugEnabled()) {
+            log.debug("{}: notify {} init methods ", this, this.initMethods.size());
         }
         var initMethods = new ArrayList<>(this.initMethods);
         for (var i = 0; i < initMethods.size(); i++) {
@@ -160,8 +161,8 @@ class SingletonWrapper implements SingletonConsumer, Finalizable {
     }
 
     private void notifyBeanMethods() {
-        if (Logger.isDebugEnabled()) {
-            Logger.debug("{}: notify {} bean methods ", this, this.beanCreationMethods.size());
+        if (log.isDebugEnabled()) {
+            log.debug("{}: notify {} bean methods ", this, this.beanCreationMethods.size());
         }
         var beanMethods = new ArrayList<>(this.beanCreationMethods);
         for (var i = 0; i < beanMethods.size(); i++) {
@@ -174,8 +175,8 @@ class SingletonWrapper implements SingletonConsumer, Finalizable {
     }
 
     private void finalizeBeanMethods() {
-        if (Logger.isDebugEnabled()) {
-            Logger.debug("{}: notify {} bean methods ", this, this.beanCreationMethods.size());
+        if (log.isDebugEnabled()) {
+            log.debug("{}: notify {} bean methods ", this, this.beanCreationMethods.size());
         }
         var beanMethods = new ArrayList<>(this.beanCreationMethods);
         for (var i = 0; i < beanMethods.size(); i++) {
@@ -197,17 +198,17 @@ class SingletonWrapper implements SingletonConsumer, Finalizable {
 
 
     void addInitMethod(InitMethod method) {
-        Logger.debug("add init method {} to {}", method, this);
+        log.debug("add init method {} to {}", method, this);
         initMethods.add(method);
     }
 
     void addBeanMethod(BeanCreationMethod method) {
-        Logger.debug("add bean method {} to {}", method, this);
+        log.debug("add bean method {} to {}", method, this);
         beanCreationMethods.add(method);
     }
 
     void removeInitMethod(InitMethod method) {
-        Logger.debug("remove init method {} from {}", method, this);
+        log.debug("remove init method {} from {}", method, this);
         initMethods.remove(method);
     }
 

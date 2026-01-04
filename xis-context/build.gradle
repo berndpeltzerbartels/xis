@@ -31,13 +31,13 @@ var lombokVersion = rootProject.ext.libraryVersions.lombok
 var junitVersion = rootProject.ext.libraryVersions.junit
 var assertjVersion = rootProject.ext.libraryVersions.assertj
 var reflectionsVersion = rootProject.ext.libraryVersions.reflections
-var tinylogVersion = rootProject.ext.libraryVersions.tinylog
+var slf4jVersion = "2.0.9"
 
 
 dependencies {
 
     implementation project(':xis-util')
-    implementation "org.tinylog:tinylog-api:$tinylogVersion"
+    implementation "org.slf4j:slf4j-api:$slf4jVersion"
 
     implementation "org.reflections:reflections:$reflectionsVersion"
 

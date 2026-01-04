@@ -29,7 +29,6 @@ var lombokVersion = rootProject.ext.libraryVersions.lombok
 var dom4jVersion = rootProject.ext.libraryVersions.dom4j
 var slf4jVersion = rootProject.ext.libraryVersions.slf4j
 var jacksonDatabindVersion = rootProject.ext.libraryVersions.jackson
-var tinylogVersion = rootProject.ext.libraryVersions.tinylog
 var gsonVersion = rootProject.ext.libraryVersions.gson
 var junitVersion = rootProject.ext.libraryVersions.junit
 var mockitoVersion = rootProject.ext.libraryVersions.mockito
@@ -64,7 +63,7 @@ dependencies {
     implementation "dom4j:dom4j:$dom4jVersion" // TODO: Version
     implementation "org.slf4j:slf4j-api:$slf4jVersion"
     implementation "com.fasterxml.jackson.core:jackson-databind:$jacksonDatabindVersion"
-    implementation "org.tinylog:tinylog-api:$tinylogVersion"
+    implementation "org.slf4j:slf4j-api:$slf4jVersion"
     implementation "com.google.code.gson:gson:$gsonVersion"
 
     // Test dependencies

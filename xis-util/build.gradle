@@ -28,7 +28,7 @@ java {
 
 // Local variables for versions
 var lombokVersion = rootProject.ext.libraryVersions.lombok
-var tinylogVersion = rootProject.ext.libraryVersions.tinylog
+var slf4jVersion = rootProject.ext.libraryVersions.slf4j
 var junitVersion = rootProject.ext.libraryVersions.junit
 var assertjVersion = rootProject.ext.libraryVersions.assertj
 
@@ -40,8 +40,7 @@ dependencies {
 
     // Implementation dependencies
     implementation "org.projectlombok:lombok:$lombokVersion"
-    implementation "org.tinylog:tinylog-api:$tinylogVersion"
-    implementation "org.tinylog:tinylog-impl:$tinylogVersion"
+    implementation "org.slf4j:slf4j-api:$slf4jVersion"
 
     // Test dependencies
     testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"

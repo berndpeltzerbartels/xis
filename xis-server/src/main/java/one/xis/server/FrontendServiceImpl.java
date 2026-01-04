@@ -2,6 +2,7 @@ package one.xis.server;
 
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import one.xis.UserContext;
 import one.xis.UserContextCreatedEvent;
 import one.xis.UserContextImpl;
@@ -14,7 +15,6 @@ import one.xis.context.Component;
 import one.xis.http.RequestContext;
 import one.xis.js.JavascriptProvider;
 import one.xis.resource.Resource;
-import org.tinylog.Logger;
 
 import java.time.ZoneId;
 import java.util.Collection;
@@ -23,6 +23,7 @@ import java.util.function.BiConsumer;
 /**
  * Encapsulates all methods, required by the framework's controller.
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class FrontendServiceImpl implements FrontendService {
@@ -61,7 +62,7 @@ public class FrontendServiceImpl implements FrontendService {
     @Override
     public Resource getPageHead(String id) {
         var head = resourceService.getPageHead(id);
-        Logger.debug(head);
+        log.debug("Page head: {}", head);
         return head;
     }
 

@@ -6,7 +6,6 @@ import one.xis.Page;
 import one.xis.context.Component;
 import one.xis.context.Inject;
 import one.xis.utils.lang.StringUtils;
-import org.tinylog.Logger;
 
 @Slf4j
 @Component
@@ -28,7 +27,7 @@ class ControllerService {
     private PathResolver pathResolver;
 
     void processModelDataRequest(@NonNull ClientRequest request, @NonNull ServerResponse response) {
-        Logger.info("Process model data request: {}", request);
+        log.info("Process model data request: {}", request);
         var controllerResult = new ControllerResult();
         controllerResult.setCurrentPageURL(request.getPageId());
         controllerResult.setCurrentWidgetId(request.getWidgetId());
@@ -44,7 +43,7 @@ class ControllerService {
     }
 
     void processFormDataRequest(@NonNull ClientRequest request, @NonNull ServerResponse response) {
-        Logger.info("Process form data request: {}", request);
+        log.info("Process form data request: {}", request);
         var controllerResult = new ControllerResult();
         controllerResult.setCurrentPageURL(request.getPageId());
         controllerResult.setCurrentWidgetId(request.getWidgetId());
@@ -57,7 +56,7 @@ class ControllerService {
     }
 
     void processActionRequest(@NonNull ClientRequest request, @NonNull ServerResponse response) {
-        Logger.info("Process action request: {}", request);
+        log.info("Process action request: {}", request);
         if (request.getAction() == null) {
             throw new IllegalArgumentException("action is null");
         }
@@ -80,7 +79,7 @@ class ControllerService {
     }
 
     private void processNextController(ClientRequest request, ControllerResult controllerResult, ServerResponse response, ControllerWrapper nextControllerWrapper) {
-        Logger.info("Process next controller: {}, request: {}", nextControllerWrapper, request);
+        log.info("Process next controller: {}, request: {}", nextControllerWrapper, request);
         var nextRequest = new ClientRequest();
         // userdata is the same
         nextRequest.setLocale(request.getLocale());

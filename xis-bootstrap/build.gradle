@@ -22,9 +22,6 @@ java {
     withJavadocJar()
 }
 
-
-var tinylogVersion = rootProject.ext.libraryVersions.tinylog
-
 dependencies {
 
 }
