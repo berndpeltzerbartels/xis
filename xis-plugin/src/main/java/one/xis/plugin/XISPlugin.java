@@ -111,6 +111,10 @@ public class XISPlugin implements Plugin<Project> {
             // lock to prevent user mutation
             lock(task);
 
+            // Always run - don't cache based on inputs
+            // This ensures deleted templates are regenerated
+            task.getOutputs().upToDateWhen(t -> false);
+
             // up-to-date inputs
             task.getInputs()
                     .files(main.getAllJava().getSourceDirectories())
@@ -147,6 +151,10 @@ public class XISPlugin implements Plugin<Project> {
 
             // lock to prevent user mutation
             lockTestTask(task);
+
+            // Always run - don't cache based on inputs
+            // This ensures deleted tests are regenerated
+            task.getOutputs().upToDateWhen(t -> false);
 
             // up-to-date inputs
             task.getInputs()
