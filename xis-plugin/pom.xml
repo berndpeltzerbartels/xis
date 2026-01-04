@@ -11,7 +11,7 @@
 
     <name>Plugin</name>
     <description>Plugin to set dependency versions and other conveniences when working with xis</description>
-    <url>https://github.com/berndpeltzerbartels/xis</url>
+    <url>https://xis.one/docs/gradleplugin.html</url>
 
     <licenses>
         <license>
