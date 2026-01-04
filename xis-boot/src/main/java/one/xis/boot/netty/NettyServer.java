@@ -10,6 +10,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.HttpServerExpectContinueHandler;
+import io.netty.util.concurrent.DefaultThreadFactory;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -25,8 +26,19 @@ public class NettyServer {
     private int port = 8080;
 
     public void start() throws InterruptedException {
-        NioEventLoopGroup bossGroup = new NioEventLoopGroup(1);
-        NioEventLoopGroup workerGroup = new NioEventLoopGroup();
+        // Create thread factories with non-daemon threads
+        DefaultThreadFactory bossThreadFactory = new DefaultThreadFactory("netty-boss", false);
+        DefaultThreadFactory workerThreadFactory = new DefaultThreadFactory("netty-worker", false);
+        
+        NioEventLoopGroup bossGroup = new NioEventLoopGroup(1, bossThreadFactory);
+        NioEventLoopGroup workerGroup = new NioEventLoopGroup(0, workerThreadFactory);
+
+        // Add shutdown hook to gracefully stop server
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            System.out.println("Shutting down server gracefully...");
+            workerGroup.shutdownGracefully();
+            bossGroup.shutdownGracefully();
+        }));
 
         try {
             ServerBootstrap b = new ServerBootstrap();
@@ -45,6 +57,7 @@ public class NettyServer {
                     .childOption(ChannelOption.SO_KEEPALIVE, true);
 
             ChannelFuture f = b.bind(port).sync();
+            System.out.println("Server started successfully on port " + port);
             f.channel().closeFuture().sync();
         } finally {
             workerGroup.shutdownGracefully();

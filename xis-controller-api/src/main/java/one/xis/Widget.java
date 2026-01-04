@@ -3,6 +3,7 @@ package one.xis;
 import jakarta.inject.Qualifier;
 import jakarta.inject.Singleton;
 import one.xis.context.Component;
+import org.springframework.core.annotation.AliasFor;
 
 import java.lang.annotation.*;
 
@@ -46,6 +47,7 @@ import java.lang.annotation.*;
 @org.springframework.stereotype.Component
 @Component
 public @interface Widget {
+    @AliasFor(annotation = org.springframework.stereotype.Component.class)
     String value() default "";
 
     String id() default ""; // alias for value()

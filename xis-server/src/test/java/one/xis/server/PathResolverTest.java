@@ -66,5 +66,15 @@ class PathResolverTest {
         assertThat(path.getPathElements().get(4)).isEqualTo(new PathString("/c.html"));
     }
 
+    @Test
+    void pathMatching() {
+        var path = pathResolver.createPath("/product/{id}/view.html");
+
+        assertThat(path.matches("/product/123/view.html")).isTrue();
+        assertThat(path.matches("/product/abc/view.html")).isTrue();
+        assertThat(path.matches("/product/123/edit.html")).isFalse();
+        assertThat(path.matches("/product/123/view.htm")).isFalse();
+    }
+
 
 }

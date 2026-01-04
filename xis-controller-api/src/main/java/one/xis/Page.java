@@ -3,6 +3,7 @@ package one.xis;
 import jakarta.inject.Qualifier;
 import jakarta.inject.Singleton;
 import one.xis.context.Component;
+import org.springframework.core.annotation.AliasFor;
 
 import java.lang.annotation.*;
 
@@ -14,5 +15,6 @@ import java.lang.annotation.*;
 @Component
 @Documented
 public @interface Page {
+    @AliasFor(annotation = org.springframework.stereotype.Component.class)
     String value();
 }
