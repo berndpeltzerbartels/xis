@@ -21,4 +21,11 @@ function readHeadChildArray(content) {
 }
 
 
+function readBodyChildArray(html) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    const body = doc.body;
+    return body ? Array.from(body.children) : [];
+}
+
 

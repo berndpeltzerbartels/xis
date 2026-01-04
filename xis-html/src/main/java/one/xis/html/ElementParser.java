@@ -32,6 +32,7 @@ public class ElementParser {
         private int index;
         private int mark;
         private final String html;
+        private static final char EOF = (char) -1;
 
         private final List<Supplier<Boolean>> readerFunctions = List.of(
                 this::tryReadTag,
@@ -209,7 +210,7 @@ public class ElementParser {
         }
 
         private char currentChar() {
-            return html.charAt(index);
+            return index < html.length() ? html.charAt(index) : EOF;
         }
 
         private boolean consume(char c) {

@@ -644,7 +644,7 @@ class HtmlParserTest {
         void parse() {
             var document = parser.parse(html);
             var htmlResult = document.asString();
-            
+
             var a = document.getDocumentElement().getElementByTagName("a");
             assertThat(a.getFirstChild()).isInstanceOf(TextNode.class);
             var b = document.getDocumentElement().getElementByTagName("b");
@@ -652,6 +652,38 @@ class HtmlParserTest {
 
         }
 
+    }
+
+    @Nested
+    class DashboardPageTest {
+        private final String html = """
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8"/>
+                    <title>Dashboard</title>
+                </head>
+                <body>
+                <h1>Dashboard 123</h1>Page
+                <h2>XIS Examples</h2>
+                <p>
+                    <a href="/hello-world.html">Hello World Example (1)</a><br/>
+                    <a xis:page="/hello-world.html">Hello World Example (2)</a><br/>
+                    <xis:a page="/hello-world.html">Hello World Example (3)</xis:a>
+                    <br/>
+                </p>
+                </body>
+                </html>
+                """;
+
+
+        @Test
+        void parse() {
+            var document = parser.parse(html);
+            var htmlResult = document.asString();
+
+
+        }
     }
 
 

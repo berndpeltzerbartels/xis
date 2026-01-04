@@ -89,7 +89,8 @@ public class XISPlugin implements Plugin<Project> {
 
         Configuration apClasspath = buildApClasspath(project);
 
-        File buildResourcesOutput = new File(project.getBuildDir(), "resources/main");
+        // Templates should go to src/main/java, not build output
+        File sourceJavaDir = main.getAllJava().getSourceDirectories().getSingleFile();
 
         project.getTasks().register("templates", XISTemplateTask.class, task -> {
             task.setGroup("xis");
@@ -102,9 +103,9 @@ public class XISPlugin implements Plugin<Project> {
             // AP path: only the processor, pinned to plugin version
             task.getOptions().setAnnotationProcessorPath(apClasspath);
 
-            // fixed processor FQCN & output to build/resources/main
+            // fixed processor FQCN & output to src/main/java
             task.getProcessorFqcn().set("one.xis.processor.XISTemplateProcessor");
-            task.getOutputDir().set(buildResourcesOutput);
+            task.getOutputDir().set(sourceJavaDir);
 
             // lock to prevent user mutation
             lock(task);
