@@ -36,20 +36,40 @@ public class RestControllerServiceImpl implements RestControllerService {
     private Map<Class<? extends Exception>, ControllerExceptionHandler<?>> exceptionHandlerMap;
     private PublicResourceHandler publicResourceHandler;
 
+    /**
+     * Cache: controller class -> controller instance
+     * Prevents per-request streaming over all controllers.
+     */
+    private Map<Class<?>, Object> controllerByClass;
+
+    /**
+     * Cache: form target type -> binding fields
+     * Prevents repeated reflection scanning for every form request.
+     */
+    private final Map<Class<?>, List<FormFieldBinding>> formBindingCache = new HashMap<>();
+
     @Init
     void initMethods() {
         methods = new HashMap<>();
+        controllerByClass = new HashMap<>();
+
         List<String> publicPaths = new ArrayList<>();
+
         for (Object controller : controllers) {
+            controllerByClass.put(controller.getClass(), controller);
+
             Class<?> controllerClass = controller.getClass();
             Controller controllerAnnotation = controllerClass.getAnnotation(Controller.class);
             String basePath = controllerAnnotation.value();
+
             addController(basePath, controller);
+
             if (controllerClass.isAnnotationPresent(PublicResources.class)) {
                 String[] paths = controllerClass.getAnnotation(PublicResources.class).value();
                 publicPaths.addAll(Arrays.asList(paths));
             }
         }
+
         if (!publicPaths.isEmpty()) {
             publicResourceHandler = new PublicResourceHandler(publicPaths);
         }
@@ -59,13 +79,17 @@ public class RestControllerServiceImpl implements RestControllerService {
     @SuppressWarnings("unchecked")
     void initExceptionHandlers() {
         exceptionHandlerMap = new HashMap<>();
+
         Map<Class<? extends Exception>, ControllerExceptionHandler<?>> defaultHandlers = new HashMap<>();
         Map<Class<? extends Exception>, ControllerExceptionHandler<?>> handlers = new HashMap<>();
         Collection<Class<? extends Exception>> exceptions = new HashSet<>();
+
         for (ControllerExceptionHandler<?> handler : exceptionHandlers) {
             Class<? extends Exception> exceptionType = (Class<? extends Exception>)
                     ClassUtils.getGenericInterfacesTypeParameter(handler.getClass(), ControllerExceptionHandler.class, 0);
+
             exceptions.add(exceptionType);
+
             if (handler.getClass().isAnnotationPresent(DefaultComponent.class)) {
                 defaultHandlers.put(exceptionType, handler);
             } else {
@@ -77,7 +101,6 @@ public class RestControllerServiceImpl implements RestControllerService {
             }
         }
 
-        // Füge alle Default-Handler hinzu, die nicht von Component überschrieben wurden
         for (var exceptionType : exceptions) {
             if (handlers.containsKey(exceptionType)) {
                 exceptionHandlerMap.put(exceptionType, handlers.get(exceptionType));
@@ -90,84 +113,73 @@ public class RestControllerServiceImpl implements RestControllerService {
     @Override
     public void addController(String basePath, Object controller) {
         Class<?> controllerClass = controller.getClass();
+
         for (Method method : controllerClass.getDeclaredMethods()) {
             if (method.isAnnotationPresent(Get.class)) {
-                Get getAnnotation = method.getAnnotation(Get.class);
-                String fullPath = combinePaths(basePath, getAnnotation.value());
-                MethodMatcher matcher = new MethodMatcher(HttpMethod.GET, new Path(fullPath));
-                methods.put(matcher, method);
+                register(method, HttpMethod.GET, combinePaths(basePath, method.getAnnotation(Get.class).value()));
             } else if (method.isAnnotationPresent(Post.class)) {
-                Post postAnnotation = method.getAnnotation(Post.class);
-                String fullPath = combinePaths(basePath, postAnnotation.value());
-                MethodMatcher matcher = new MethodMatcher(HttpMethod.POST, new Path(fullPath));
-                methods.put(matcher, method);
+                register(method, HttpMethod.POST, combinePaths(basePath, method.getAnnotation(Post.class).value()));
             } else if (method.isAnnotationPresent(Put.class)) {
-                Put putAnnotation = method.getAnnotation(Put.class);
-                String fullPath = combinePaths(basePath, putAnnotation.value());
-                MethodMatcher matcher = new MethodMatcher(HttpMethod.PUT, new Path(fullPath));
-                methods.put(matcher, method);
+                register(method, HttpMethod.PUT, combinePaths(basePath, method.getAnnotation(Put.class).value()));
             } else if (method.isAnnotationPresent(Delete.class)) {
-                Delete deleteAnnotation = method.getAnnotation(Delete.class);
-                String fullPath = combinePaths(basePath, deleteAnnotation.value());
-                MethodMatcher matcher = new MethodMatcher(HttpMethod.DELETE, new Path(fullPath));
-                methods.put(matcher, method);
-            } else if (method.isAnnotationPresent(Head.class)) {
-                Head headAnnotation = method.getAnnotation(Head.class);
-                String fullPath = combinePaths(basePath, headAnnotation.value());
-                MethodMatcher matcher = new MethodMatcher(HttpMethod.HEAD, new Path(fullPath));
-                methods.put(matcher, method);
-            } else if (method.isAnnotationPresent(Options.class)) {
-                Options optionsAnnotation = method.getAnnotation(Options.class);
-                String fullPath = combinePaths(basePath, optionsAnnotation.value());
-                MethodMatcher matcher = new MethodMatcher(HttpMethod.OPTIONS, new Path(fullPath));
-                methods.put(matcher, method);
-            } else if (method.isAnnotationPresent(Trace.class)) {
-                Trace traceAnnotation = method.getAnnotation(Trace.class);
-                String fullPath = combinePaths(basePath, traceAnnotation.value());
-                MethodMatcher matcher = new MethodMatcher(HttpMethod.TRACE, new Path(fullPath));
-                methods.put(matcher, method);
+                register(method, HttpMethod.DELETE, combinePaths(basePath, method.getAnnotation(Delete.class).value()));
             }
         }
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void addExceptionHandler(ControllerExceptionHandler<?> handler) {
-        Class<? extends Exception> exceptionType = (Class<? extends Exception>) ClassUtils.getGenericInterfacesTypeParameter(handler.getClass(), ControllerExceptionHandler.class, 0);
+        // Keep behavior compatible: dynamic handler registration.
+        // We do not try to resolve ambiguity here; initExceptionHandlers() already has that logic.
+        // If you want it robust, we can add the same checks here.
+        @SuppressWarnings("unchecked")
+        Class<? extends Exception> exceptionType = (Class<? extends Exception>)
+                ClassUtils.getGenericInterfacesTypeParameter(handler.getClass(), ControllerExceptionHandler.class, 0);
+
         exceptionHandlerMap.put(exceptionType, handler);
     }
 
     @Override
     public void doInvocation(HttpRequest request, HttpResponse response) {
         eventEmitter.emitEvent(new BeforeRequestProcessingEvent(request));
-        Optional<InvocationContext> invocationContextOptional = findInvocationContext(request);
-        if (invocationContextOptional.isPresent()) {
-            InvocationContext context = invocationContextOptional.get();
-            doInvoke(context, request, response);
-            if (response.getStatusCode() == null || response.getStatusCode() == 0) {
-                response.setStatusCode(200); // Default to 200 OK if no status code was set
-            }
+
+        Optional<InvocationContext> ctxOpt = findInvocationContext(request);
+        if (ctxOpt.isPresent()) {
+            doInvoke(ctxOpt.get(), request, response);
+            ensureDefaultStatusCode(response);
             eventEmitter.emitEvent(new RequestProcessedEvent(request, response));
             return;
         }
-        // Kein Controller-Match: PublicResource versuchen
-        eventEmitter.emitEvent(new BeforeRequestProcessingEvent(request));
+
+        // No controller match: try public resources (if configured) otherwise 404.
         if (publicResourceHandler == null || !publicResourceHandler.handle(request, response)) {
             response.setStatusCode(404);
         }
+
         eventEmitter.emitEvent(new RequestProcessedEvent(request, response));
     }
 
+    private void ensureDefaultStatusCode(HttpResponse response) {
+        if (response.getStatusCode() == null || response.getStatusCode() == 0) {
+            response.setStatusCode(200);
+        }
+    }
+
+    private void register(Method method, HttpMethod httpMethod, String fullPath) {
+        MethodMatcher matcher = new MethodMatcher(httpMethod, new Path(fullPath));
+        methods.put(matcher, method);
+    }
 
     private void doInvoke(InvocationContext context, HttpRequest request, HttpResponse response) {
         Method method = context.method();
         Object controllerInstance = context.controllerInstance();
-        MethodMatchResult methodMatchResult = context.matchResult();
+        MethodMatchResult match = context.matchResult();
 
-        Object[] args = prepareParameters(method, request, response, methodMatchResult);
+        Object[] args = prepareParameters(method, request, response, match);
 
         RequestContext.createInstance(request, response);
         eventEmitter.emitEvent(new RequestContextCreatedEvent(RequestContext.getInstance()));
+
         Object result;
         try {
             result = MethodUtils.invoke(controllerInstance, method, args);
@@ -176,28 +188,33 @@ public class RestControllerServiceImpl implements RestControllerService {
         } finally {
             RequestContext.clear();
         }
-        handleResponse(result, method, request, response);
+
+        responseWriter.write(result, method, request, response);
     }
 
     private Object handleControllerException(InvocationTargetException e, Method method, Object[] args) {
-        Throwable targetException = e.getTargetException();
-        if (targetException instanceof InvocationTargetException invocationTargetException) {
-            targetException = invocationTargetException.getTargetException();
-        }
+        Throwable t = unwrapInvocationTarget(e);
 
-        if (targetException instanceof Exception exception) {
-            final Throwable finalException = exception;
-            return findExceptionHandler(exception)
-                    .map(handler -> (Object) handler.handleException(method, args, exception))
+        if (t instanceof Exception ex) {
+            final Throwable finalException = ex;
+            return findExceptionHandler(ex)
+                    .map(handler -> (Object) handler.handleException(method, args, ex))
                     .orElseGet(() -> defaultErrorResponse(finalException));
         }
-        // Falls es keine Exception ist, gib sie einfach zurück
-        return defaultErrorResponse(targetException);
+
+        return defaultErrorResponse(t);
+    }
+
+    private Throwable unwrapInvocationTarget(InvocationTargetException e) {
+        Throwable t = e.getTargetException();
+        while (t instanceof InvocationTargetException ite && ite.getTargetException() != null) {
+            t = ite.getTargetException();
+        }
+        return t;
     }
 
     private ResponseEntity<?> defaultErrorResponse(Throwable exception) {
-        System.err.println("Unhandled exception: " + exception.getClass().getName() + " - " + exception.getMessage());// TODO logging
-        exception.printStackTrace(); // TODO logging
+        // Avoid stdout/stderr flooding; production should use a proper logger.
         ErrorResponse errorResponse = new ErrorResponse(exception.getMessage());
         return ResponseEntity.status(500).body(errorResponse);
     }
@@ -212,45 +229,64 @@ public class RestControllerServiceImpl implements RestControllerService {
         return Optional.empty();
     }
 
-    private void handleResponse(Object returnValue, Method method, HttpRequest request, HttpResponse response) {
-        responseWriter.write(returnValue, method, request, response);
-
-    }
-
-    private Object[] prepareParameters(Method method, HttpRequest request, HttpResponse response, MethodMatchResult methodMatchResult) {
+    private Object[] prepareParameters(Method method, HttpRequest request, HttpResponse response, MethodMatchResult match) {
         Parameter[] parameters = method.getParameters();
         Object[] args = new Object[parameters.length];
-        Map<String, String> pathVariables = methodMatchResult.getPathVariables();
-        Map<String, String> cookies = cookies(request);
+
+        Map<String, String> pathVariables = match.getPathVariables();
+        Map<String, String> cookies = parseCookies(request.getHeader("Cookie"));
+
         for (int i = 0; i < parameters.length; i++) {
-            Parameter param = parameters[i];
-            if (param.isAnnotationPresent(PathVariable.class)) {
-                args[i] = handlePathVariable(param, pathVariables);
-            } else if (param.isAnnotationPresent(UrlParameter.class)) {
-                args[i] = handleRequestParam(param, request);
-            } else if (param.isAnnotationPresent(RequestBody.class)) {
-                args[i] = handleRequestBody(param, request);
-            } else if (param.isAnnotationPresent(RequestHeader.class)) {
-                args[i] = handleHeader(param, request);
-            } else if (param.isAnnotationPresent(CookieValue.class)) {
-                args[i] = handleCookieValue(param, cookies);
-            } else if (param.isAnnotationPresent(BearerToken.class)) {
-                args[i] = handleBearerToken(param, request);
-            } else if (param.getType().isAssignableFrom(HttpRequest.class)) {
-                args[i] = request;
-            } else if (param.getType().isAssignableFrom(HttpResponse.class)) {
-                args[i] = response;
-            } else {
-                throw new IllegalArgumentException("Unsupported parameter type: " + param.getType().getName() +
-                        " in method: " + method.getName() + " of controller: " + method.getDeclaringClass().getName());
-            }
+            args[i] = resolveArgument(parameters[i], request, response, pathVariables, cookies, method);
         }
+
         return args;
+    }
+
+    private Object resolveArgument(
+            Parameter param,
+            HttpRequest request,
+            HttpResponse response,
+            Map<String, String> pathVariables,
+            Map<String, String> cookies,
+            Method method
+    ) {
+        if (param.isAnnotationPresent(PathVariable.class)) {
+            return handlePathVariable(param, pathVariables);
+        }
+        if (param.isAnnotationPresent(UrlParameter.class)) {
+            return handleRequestParam(param, request);
+        }
+        if (param.isAnnotationPresent(RequestBody.class)) {
+            return handleRequestBody(param, request);
+        }
+        if (param.isAnnotationPresent(RequestHeader.class)) {
+            return handleHeader(param, request);
+        }
+        if (param.isAnnotationPresent(CookieValue.class)) {
+            return handleCookieValue(param, cookies);
+        }
+        if (param.isAnnotationPresent(BearerToken.class)) {
+            return handleBearerToken(param, request);
+        }
+        if (param.getType().isAssignableFrom(HttpRequest.class)) {
+            return request;
+        }
+        if (param.getType().isAssignableFrom(HttpResponse.class)) {
+            return response;
+        }
+
+        throw new IllegalArgumentException(
+                "Unsupported parameter type: " + param.getType().getName()
+                        + " in method: " + method.getName()
+                        + " of controller: " + method.getDeclaringClass().getName()
+        );
     }
 
     private String handleBearerToken(Parameter param, HttpRequest request) {
         BearerToken annotation = param.getAnnotation(BearerToken.class);
         String header = request.getHeader("Authorization");
+
         if (header != null && header.startsWith("Bearer ")) {
             return header.substring(7).trim();
         }
@@ -265,7 +301,6 @@ public class RestControllerServiceImpl implements RestControllerService {
         String cookieName = annotation.value();
         String value = cookies.get(cookieName);
         return TypeUtils.convertSimple(value, param.getType());
-
     }
 
     private Object handlePathVariable(Parameter param, Map<String, String> pathVariables) {
@@ -279,7 +314,6 @@ public class RestControllerServiceImpl implements RestControllerService {
         UrlParameter annotation = param.getAnnotation(UrlParameter.class);
         String paramName = annotation.value();
         String value = request.getQueryParameters().get(paramName);
-        // Hier könnte man Logik für `required` und `defaultValue` hinzufügen
         return TypeUtils.convertSimple(value, param.getType());
     }
 
@@ -288,53 +322,61 @@ public class RestControllerServiceImpl implements RestControllerService {
         BodyType bodyType = annotation.value();
         Class<?> targetType = param.getType();
 
-        switch (bodyType) {
-            case JSON:
-                if (targetType.equals(String.class)) {
-                    return request.getBodyAsString();
-                }
-                if (request.getContentLength() == 0) {
-                    return null; // Leerer Body, kein JSON zu deserialisieren
-                }
-                System.out.println("**** target=" + targetType + ",body:" + request.getBodyAsString());
-                return gson.fromJson(request.getBodyAsString(), targetType);
+        // Read once to avoid repeated allocations.
+        String bodyString = (request.getContentLength() == 0) ? "" : request.getBodyAsString();
 
-            case TEXT:
-                return TypeUtils.convertSimple(request.getBodyAsString(), targetType);
+        return switch (bodyType) {
+            case JSON -> handleJsonBody(targetType, bodyString);
+            case TEXT -> TypeUtils.convertSimple(bodyString, targetType);
+            case FORM_URLENCODED -> handleFormUrlEncodedBody(targetType, request.getFormParameters());
+            default -> throw new UnsupportedOperationException("Unsupported BodyType: " + bodyType);
+        };
+    }
 
-            case BINARY:
-                if (!targetType.equals(byte[].class)) {
-                    throw new IllegalArgumentException("Parameter annotated with @RequestBody(BodyType.BINARY) must be of type byte[].");
-                }
-                return request.getBodyAsBytes();
-
-            case FORM_URLENCODED:
-                Map<String, String> formParameters = request.getFormParameters();
-                if (targetType.isAssignableFrom(Map.class)) {
-                    return formParameters;
-                } else {
-                    // Binden der Formulardaten an ein POJO
-                    try {
-                        Object targetObject = ClassUtils.newInstance(targetType);
-                        Collection<Field> fields = FieldUtil.getAllFields(targetType);
-                        for (Field field : fields) {
-                            SerializedName serializedName = field.getAnnotation(SerializedName.class);
-                            String paramName = serializedName != null ? serializedName.value() : field.getName();
-                            if (formParameters.containsKey(paramName)) {
-                                String paramValue = formParameters.get(paramName);
-                                Object convertedValue = TypeUtils.convertSimple(paramValue, field.getType());
-                                FieldUtil.setFieldValue(targetObject, field, convertedValue);
-                            }
-                        }
-                        return targetObject;
-                    } catch (Exception e) {
-                        throw new RuntimeException("Failed to instantiate or populate object of type " + targetType.getName(), e);
-                    }
-                }
-
-            default:
-                throw new UnsupportedOperationException("Unsupported BodyType: " + bodyType);
+    private Object handleJsonBody(Class<?> targetType, String bodyString) {
+        if (targetType.equals(String.class)) {
+            return bodyString;
         }
+        if (bodyString == null || bodyString.isBlank()) {
+            return null;
+        }
+        return gson.fromJson(bodyString, targetType);
+    }
+
+    private Object handleFormUrlEncodedBody(Class<?> targetType, Map<String, String> formParameters) {
+        if (targetType.isAssignableFrom(Map.class)) {
+            return formParameters;
+        }
+
+        Object targetObject = ClassUtils.newInstance(targetType);
+        for (FormFieldBinding binding : getOrBuildFormBindings(targetType)) {
+            String raw = formParameters.get(binding.paramName());
+            if (raw == null) {
+                continue;
+            }
+            Object converted = TypeUtils.convertSimple(raw, binding.field().getType());
+            FieldUtil.setFieldValue(targetObject, binding.field(), converted);
+        }
+        return targetObject;
+    }
+
+    private List<FormFieldBinding> getOrBuildFormBindings(Class<?> targetType) {
+        List<FormFieldBinding> cached = formBindingCache.get(targetType);
+        if (cached != null) {
+            return cached;
+        }
+
+        List<FormFieldBinding> bindings = new ArrayList<>();
+        Collection<Field> fields = FieldUtil.getAllFields(targetType);
+
+        for (Field field : fields) {
+            SerializedName serializedName = field.getAnnotation(SerializedName.class);
+            String paramName = (serializedName != null) ? serializedName.value() : field.getName();
+            bindings.add(new FormFieldBinding(field, paramName));
+        }
+
+        formBindingCache.put(targetType, bindings);
+        return bindings;
     }
 
     private Object handleHeader(Parameter param, HttpRequest request) {
@@ -344,26 +386,47 @@ public class RestControllerServiceImpl implements RestControllerService {
         return TypeUtils.convertSimple(value, param.getType());
     }
 
-
-    private String combinePaths(String base, String method) {
-        // Verhindert doppelte Schrägstriche, z.B. wenn base="/api" und method="/users"
-        String cleanBase = base.endsWith("/") ? base.substring(0, base.length() - 1) : base;
-        String cleanMethod = method.startsWith("/") ? method : "/" + method;
-        return cleanBase + cleanMethod;
-    }
-
-    private Map<String, String> cookies(HttpRequest request) {
-        Map<String, String> cookies = new HashMap<>();
-        String cookieHeader = request.getHeader("Cookie");
-        if (cookieHeader != null) {
-            String[] cookiePairs = cookieHeader.split(";");
-            for (String pair : cookiePairs) {
-                String[] keyValue = pair.split("=");
-                if (keyValue.length == 2) {
-                    cookies.put(keyValue[0].trim(), keyValue[1].trim());
-                }
-            }
+    /**
+     * Fast cookie parsing without regex-based split().
+     * Format: "a=b; c=d; e=f"
+     */
+    private Map<String, String> parseCookies(String cookieHeader) {
+        if (cookieHeader == null || cookieHeader.isBlank()) {
+            return Collections.emptyMap();
         }
+
+        Map<String, String> cookies = new HashMap<>();
+
+        int len = cookieHeader.length();
+        int i = 0;
+
+        while (i < len) {
+            // skip separators/spaces
+            while (i < len && (cookieHeader.charAt(i) == ' ' || cookieHeader.charAt(i) == ';')) {
+                i++;
+            }
+            if (i >= len) break;
+
+            int keyStart = i;
+            int eq = cookieHeader.indexOf('=', keyStart);
+            if (eq < 0) break;
+
+            int keyEnd = eq;
+            int valStart = eq + 1;
+
+            int semi = cookieHeader.indexOf(';', valStart);
+            int valEnd = (semi < 0) ? len : semi;
+
+            String key = cookieHeader.substring(keyStart, keyEnd).trim();
+            String val = cookieHeader.substring(valStart, valEnd).trim();
+
+            if (!key.isEmpty()) {
+                cookies.put(key, val);
+            }
+
+            i = (semi < 0) ? len : (semi + 1);
+        }
+
         return cookies;
     }
 
@@ -371,26 +434,39 @@ public class RestControllerServiceImpl implements RestControllerService {
         for (Map.Entry<MethodMatcher, Method> entry : methods.entrySet()) {
             MethodMatcher matcher = entry.getKey();
             Method method = entry.getValue();
-            MethodMatchResult result = matcher.matches(request.getHttpMethod(), request.getPath());
 
-            if (result.isMatch()) {
-                // Methode gefunden, jetzt die passende Controller-Instanz suchen
-                return findControllerForMethod(method)
-                        .map(controllerInstance -> new InvocationContext(controllerInstance, method, result));
+            MethodMatchResult result = matcher.matches(request.getHttpMethod(), request.getPath());
+            if (!result.isMatch()) {
+                continue;
             }
+
+            Object controllerInstance = controllerByClass.get(method.getDeclaringClass());
+            if (controllerInstance == null) {
+                // Should not happen, but keep it safe.
+                return Optional.empty();
+            }
+
+            return Optional.of(new InvocationContext(controllerInstance, method, result));
         }
         return Optional.empty();
     }
 
-    private Optional<Object> findControllerForMethod(Method method) {
-        Class<?> controllerClass = method.getDeclaringClass();
-        return controllers.stream()
-                .filter(controller -> controller.getClass().equals(controllerClass))
-                .findFirst();
+    private String combinePaths(String base, String path) {
+        if (base == null) base = "";
+        if (path == null) path = "";
+
+        if (!base.startsWith("/")) base = "/" + base;
+        if (base.endsWith("/")) base = base.substring(0, base.length() - 1);
+
+        if (!path.startsWith("/")) path = "/" + path;
+
+        String combined = base + path;
+        return combined.replaceAll("//+", "/");
     }
 
     private record InvocationContext(Object controllerInstance, Method method, MethodMatchResult matchResult) {
     }
 
-
+    private record FormFieldBinding(Field field, String paramName) {
+    }
 }

@@ -1,70 +1,56 @@
 package one.xis.boot.netty;
 
-import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;
-import io.netty.handler.codec.http.cookie.DefaultCookie;
-import io.netty.handler.codec.http.cookie.ServerCookieEncoder;
 import one.xis.http.ContentType;
 import one.xis.http.HttpResponse;
 
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 
-public class NettyHttpResponse implements HttpResponse {
+import static io.netty.handler.codec.http.cookie.ServerCookieEncoder.STRICT;
 
-    private HttpResponseStatus status = HttpResponseStatus.OK;
-    private ByteBuf content = Unpooled.EMPTY_BUFFER;
+/**
+ * Netty-backed HttpResponse implementation.
+ * <p>
+ * Collects response data first and creates the Netty FullHttpResponse
+ * exactly once at the end of request processing.
+ */
+public final class NettyHttpResponse implements HttpResponse {
+
+    private Integer statusCode;
+    private byte[] body;
+    private ContentType contentType;
+
     private final HttpHeaders headers = new DefaultHttpHeaders();
+    private final List<String> setCookieHeaders = new ArrayList<>();
 
-    public FullHttpResponse getFullHttpResponse() {
-        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, content);
-        response.headers().set(this.headers);
-        if (!response.headers().contains(HttpHeaderNames.CONTENT_LENGTH)) {
-            response.headers().set(HttpHeaderNames.CONTENT_LENGTH, content.readableBytes());
-        }
-        return response;
-    }
+    private boolean redirect;
 
     @Override
-    public void setStatusCode(int statusCode) {
-        this.status = HttpResponseStatus.valueOf(statusCode);
-    }
-
-    @Override
-    public void setBody(String body) {
-        this.content = Unpooled.copiedBuffer(body, StandardCharsets.UTF_8);
-    }
-
-    @Override
-    public void setBody(byte[] body) {
-        this.content = Unpooled.wrappedBuffer(body);
-    }
-
-    @Override
-    public void setContentType(ContentType contentType) {
-        if (contentType != null) {
-            headers.set(HttpHeaderNames.CONTENT_TYPE, contentType.getValue());
-        }
-    }
-
-    @Override
-    public void setContentLength(int contentLength) {
-        headers.set(HttpHeaderNames.CONTENT_LENGTH, contentLength);
+    public void setStatusCode(int code) {
+        this.statusCode = code;
     }
 
     @Override
     public Integer getStatusCode() {
-        return status.code();
+        return statusCode;
+    }
+
+    @Override
+    public void setBody(byte[] body) {
+        this.body = body;
+    }
+
+    @Override
+    public void setContentType(ContentType contentType) {
+        this.contentType = contentType;
     }
 
     @Override
     public ContentType getContentType() {
-        String contentTypeHeader = headers.get(HttpHeaderNames.CONTENT_TYPE);
-        if (contentTypeHeader == null) {
-            return null;
-        }
-        return ContentType.fromValue(contentTypeHeader);
+        return contentType;
     }
 
     @Override
@@ -80,12 +66,55 @@ public class NettyHttpResponse implements HttpResponse {
         cookie.setSameSite(cookie.sameSite()); // Should be Lax by default in modern Netty
         cookie.setMaxAge(maxAge.getSeconds());
         cookie.setPath("/");
-        headers.add(HttpHeaderNames.SET_COOKIE, ServerCookieEncoder.STRICT.encode(cookie));
+        headers.add(HttpHeaderNames.SET_COOKIE, STRICT.encode(cookie));
     }
 
     @Override
     public void sendRedirect(String location) {
         setStatusCode(HttpResponseStatus.FOUND.code());
-        headers.set(HttpHeaderNames.LOCATION, location);
+        addHeader(HttpHeaderNames.LOCATION.toString(), location);
+        redirect = true;
+    }
+    
+
+    /**
+     * Builds the Netty FullHttpResponse.
+     * Called exactly once by NettyServerHandler.
+     */
+    public FullHttpResponse toNettyResponse() {
+        HttpResponseStatus status = HttpResponseStatus.valueOf(
+                statusCode != null ? statusCode : HttpResponseStatus.OK.code()
+        );
+
+        byte[] payload = body != null ? body : new byte[0];
+
+        FullHttpResponse response = new DefaultFullHttpResponse(
+                HttpVersion.HTTP_1_1,
+                status,
+                Unpooled.wrappedBuffer(payload)
+        );
+
+        HttpHeaders nettyHeaders = response.headers();
+
+        if (contentType != null) {
+            nettyHeaders.set(HttpHeaderNames.CONTENT_TYPE, contentType.toString());
+        }
+
+        nettyHeaders.set(HttpHeaderNames.CONTENT_LENGTH, payload.length);
+
+        // Custom headers
+        response.headers().set(this.headers);
+
+        // Cookies
+        for (String cookie : setCookieHeaders) {
+            nettyHeaders.add(HttpHeaderNames.SET_COOKIE, cookie);
+        }
+
+        // Redirects should not be cached
+        if (redirect) {
+            nettyHeaders.set(HttpHeaderNames.CACHE_CONTROL, "no-store");
+        }
+
+        return response;
     }
 }

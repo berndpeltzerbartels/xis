@@ -16,18 +16,12 @@ public class HttpTestResponse implements HttpResponse {
     private Integer statusCode;
     private String body;
     private ContentType contentType;
-    private int contentLength;
     private String redirectLocation;
     private final Map<String, List<String>> headers = new HashMap<>();
 
     @Override
     public void setStatusCode(int statusCode) {
         this.statusCode = statusCode;
-    }
-
-    @Override
-    public void setBody(String body) {
-        this.body = body;
     }
 
     @Override
@@ -38,11 +32,6 @@ public class HttpTestResponse implements HttpResponse {
     @Override
     public void setContentType(ContentType contentType) {
         this.contentType = contentType;
-    }
-
-    @Override
-    public void setContentLength(int contentLength) {
-        this.contentLength = contentLength;
     }
 
     @Override

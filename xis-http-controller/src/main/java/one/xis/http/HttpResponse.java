@@ -5,14 +5,9 @@ import java.time.Duration;
 public interface HttpResponse {
     void setStatusCode(int i);
 
-    void setBody(String s);
-
-
     void setBody(byte[] body);
 
     void setContentType(ContentType contentType);
-
-    void setContentLength(int contentLength);
 
     Integer getStatusCode();
 

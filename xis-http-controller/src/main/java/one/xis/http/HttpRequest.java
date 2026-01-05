@@ -1,6 +1,6 @@
 package one.xis.http;
 
-import java.util.Collection;
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.Map;
 
@@ -24,27 +24,25 @@ public interface HttpRequest {
      *
      * @return the real path as a String.
      */
-    String getRealPath();
+    //  String getRealPath();
 
     Map<String, String> getQueryParameters();
 
     byte[] getBody();
 
     default String getBodyAsString() {
-        return new String(getBody());
+        return new String(getBody(), StandardCharsets.UTF_8);
     }
 
     ContentType getContentType();
 
     int getContentLength();
 
-    Collection<String> getHeaderNames();
+    //Collection<String> getHeaderNames();
 
     String getHeader(String name);
 
     HttpMethod getHttpMethod();
-
-    Object getBodyAsBytes();
 
     Map<String, String> getFormParameters();
 
@@ -68,4 +66,5 @@ public interface HttpRequest {
         return "";
     }
 
+    String getRemoteHost();
 }

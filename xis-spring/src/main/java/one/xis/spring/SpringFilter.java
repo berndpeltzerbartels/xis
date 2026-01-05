@@ -107,15 +107,6 @@ class SpringFilter extends HttpFilter {
         }
 
         @Override
-        public void setBody(String s) {
-            if (s == null) {
-                this.body = null;
-                return;
-            }
-            this.body = s.getBytes(java.nio.charset.StandardCharsets.UTF_8);
-        }
-
-        @Override
         public void setBody(byte[] body) {
             this.body = body;
         }
@@ -124,12 +115,7 @@ class SpringFilter extends HttpFilter {
         public void setContentType(ContentType contentType) {
             this.contentType = contentType;
         }
-
-        @Override
-        public void setContentLength(int contentLength) {
-            this.contentLength = contentLength;
-        }
-
+        
         @Override
         public Integer getStatusCode() {
             return statusCode;

@@ -87,6 +87,7 @@ class RestControllerServiceIntegrationTest {
             when(request.getHttpMethod()).thenReturn(HttpMethod.POST);
             when(request.getPath()).thenReturn("/api/users");
             when(request.getBodyAsString()).thenReturn("test-user");
+            when(request.getContentLength()).thenReturn("test-user".length());
 
             restControllerService.doInvocation(request, response);
 

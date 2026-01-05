@@ -19,14 +19,6 @@ public class SpringHttpResponse implements HttpResponse {
         this.statusCode = statusCode;
     }
 
-    @Override
-    public void setBody(String body) {
-        try {
-            response.getWriter().write(body);
-        } catch (IOException e) {
-            throw new RuntimeException("Could not write response body", e);
-        }
-    }
 
     @Override
     public void setBody(byte[] body) {
@@ -43,12 +35,7 @@ public class SpringHttpResponse implements HttpResponse {
             response.setContentType(contentType.getValue());
         }
     }
-
-    @Override
-    public void setContentLength(int contentLength) {
-        response.setContentLength(contentLength);
-    }
-
+    
     @Override
     public Integer getStatusCode() {
         return response.getStatus();

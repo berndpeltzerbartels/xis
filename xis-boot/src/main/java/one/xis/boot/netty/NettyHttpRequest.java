@@ -1,76 +1,63 @@
 package one.xis.boot.netty;
 
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.QueryStringDecoder;
 import one.xis.http.ContentType;
 import one.xis.http.HttpMethod;
 import one.xis.http.HttpRequest;
 
+import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.*;
 
-public class NettyHttpRequest implements HttpRequest {
+public final class NettyHttpRequest implements HttpRequest {
 
     private final FullHttpRequest request;
+    private final ChannelHandlerContext ctx;
     private final QueryStringDecoder queryStringDecoder;
-    private byte[] body;
+
+
+    private String cachedBody;
     private Map<String, String> queryParameters;
     private Map<String, String> formParameters;
 
-    public NettyHttpRequest(FullHttpRequest request) {
-        this.request = request;
-        this.queryStringDecoder = new QueryStringDecoder(request.uri());
+    public NettyHttpRequest(FullHttpRequest request, ChannelHandlerContext ctx) {
+        this.request = Objects.requireNonNull(request, "request");
+        this.ctx = Objects.requireNonNull(ctx, "ctx");
+        queryStringDecoder = new QueryStringDecoder(request.uri(), StandardCharsets.UTF_8);
+    }
+
+    @Override
+    public HttpMethod getHttpMethod() {
+        return HttpMethod.valueOf(request.method().name());
     }
 
     @Override
     public String getPath() {
-        return queryStringDecoder.path();
-    }
-
-    @Override
-    public String getRealPath() {
-        return queryStringDecoder.path(); // In Netty, there's no context path, so it's the same as getPath()
-    }
-
-    @Override
-    public Map<String, String> getQueryParameters() {
-        if (queryParameters == null) {
-            queryParameters = queryStringDecoder.parameters().entrySet().stream()
-                    .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().get(0), (a, b) -> b));
-        }
-        return queryParameters;
-    }
-
-    @Override
-    public byte[] getBody() {
-        if (body == null) {
-            int length = request.content().readableBytes();
-            body = new byte[length];
-            request.content().getBytes(request.content().readerIndex(), body);
-        }
-        return body;
+        String uri = request.uri();
+        int q = uri.indexOf('?');
+        return q >= 0 ? uri.substring(0, q) : uri;
     }
 
     @Override
     public String getBodyAsString() {
-        return new String(getBody(), StandardCharsets.UTF_8);
+        if (cachedBody != null) {
+            return cachedBody;
+        }
+        if (!request.content().isReadable()) {
+            cachedBody = "";
+            return cachedBody;
+        }
+        cachedBody = request.content().toString(StandardCharsets.UTF_8);
+        return cachedBody;
     }
 
     @Override
     public ContentType getContentType() {
-        String contentTypeHeader = request.headers().get("Content-Type");
-        if (contentTypeHeader == null) {
-            return null;
-        }
-        for (ContentType ct : ContentType.values()) {
-            if (contentTypeHeader.toLowerCase().startsWith(ct.getValue().toLowerCase())) {
-                return ct;
-            }
-        }
-        return null;
+        return request.headers().get("Content-Type") != null ?
+                ContentType.fromValue(request.headers().get("Content-Type")) :
+                null;
     }
 
     @Override
@@ -79,37 +66,27 @@ public class NettyHttpRequest implements HttpRequest {
     }
 
     @Override
-    public Collection<String> getHeaderNames() {
-        return request.headers().names().stream()
-                .map(String::toLowerCase)
-                .collect(Collectors.toSet());
-    }
-
-    @Override
     public String getHeader(String name) {
         return request.headers().get(name);
     }
 
     @Override
-    public HttpMethod getHttpMethod() {
-        return HttpMethod.valueOf(request.method().name().toUpperCase());
+    public Map<String, String> getQueryParameters() {
+        if (queryParameters == null) {
+            queryParameters = parseQueryParameters(request.uri());
+        }
+        return queryParameters;
     }
 
     @Override
-    public Object getBodyAsBytes() {
-        return getBody();
+    public byte[] getBody() {
+        return request.content().array();
     }
 
     @Override
     public Map<String, String> getFormParameters() {
         if (formParameters == null) {
-            if (ContentType.FORM_URLENCODED.equals(getContentType())) {
-                QueryStringDecoder formDecoder = new QueryStringDecoder("?" + getBodyAsString());
-                formParameters = formDecoder.parameters().entrySet().stream()
-                        .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().get(0), (a, b) -> b));
-            } else {
-                formParameters = Map.of();
-            }
+            formParameters = parseFormParametersIfPresent();
         }
         return formParameters;
     }
@@ -117,9 +94,78 @@ public class NettyHttpRequest implements HttpRequest {
     @Override
     public Locale getLocale() {
         String acceptLanguage = request.headers().get("Accept-Language");
-        if (acceptLanguage == null) {
+        if (acceptLanguage == null || acceptLanguage.isBlank()) {
             return Locale.getDefault();
         }
-        return Locale.forLanguageTag(acceptLanguage.split(",")[0]);
+        int comma = acceptLanguage.indexOf(',');
+        String tag = (comma >= 0 ? acceptLanguage.substring(0, comma) : acceptLanguage).trim();
+        return tag.isEmpty() ? Locale.getDefault() : Locale.forLanguageTag(tag);
+    }
+
+    /**
+     * Returns the client IP (supports reverse proxies via X-Forwarded-For).
+     */
+    @Override
+    public String getRemoteHost() {
+        String xff = request.headers().get("X-Forwarded-For");
+        if (xff != null && !xff.isBlank()) {
+            int comma = xff.indexOf(',');
+            return (comma > 0 ? xff.substring(0, comma) : xff).trim();
+        }
+
+        if (ctx.channel().remoteAddress() instanceof InetSocketAddress addr && addr.getAddress() != null) {
+            return addr.getAddress().getHostAddress();
+        }
+        return "unknown";
+    }
+
+    private Map<String, String> parseQueryParameters(String uri) {
+        QueryStringDecoder decoder = new QueryStringDecoder(uri, StandardCharsets.UTF_8);
+        Map<String, List<String>> params = decoder.parameters();
+        if (params.isEmpty()) {
+            return Map.of();
+        }
+
+        Map<String, String> flat = new HashMap<>(params.size());
+        for (var e : params.entrySet()) {
+            List<String> values = e.getValue();
+            flat.put(e.getKey(), (values == null || values.isEmpty()) ? null : values.get(0));
+        }
+        return Collections.unmodifiableMap(flat);
+    }
+
+    private Map<String, String> parseFormParametersIfPresent() {
+        // Only parse form params when content-type is actually form-urlencoded.
+        String ct = request.headers().get("Content-Type");
+        if (ct == null) {
+            return Map.of();
+        }
+
+        String lower = ct.toLowerCase(Locale.ROOT);
+        boolean isFormUrlEncoded = lower.startsWith(ContentType.FORM_URLENCODED.toString());
+        if (!isFormUrlEncoded) {
+            return Map.of();
+        }
+
+        // Body is small/aggregated (your pipeline uses HttpObjectAggregator).
+        // If you later switch to streaming, this logic must be changed.
+        String body = getBodyAsString();
+        if (body.isBlank()) {
+            return Map.of();
+        }
+
+        // Parse "a=1&b=2" via QueryStringDecoder trick by prefixing "?".
+        QueryStringDecoder decoder = new QueryStringDecoder("?" + body, StandardCharsets.UTF_8);
+        Map<String, List<String>> params = decoder.parameters();
+        if (params.isEmpty()) {
+            return Map.of();
+        }
+
+        Map<String, String> flat = new HashMap<>(params.size());
+        for (var e : params.entrySet()) {
+            List<String> values = e.getValue();
+            flat.put(e.getKey(), (values == null || values.isEmpty()) ? null : values.get(0));
+        }
+        return Collections.unmodifiableMap(flat);
     }
 }

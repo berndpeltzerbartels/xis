@@ -121,11 +121,9 @@ class ResponseWriter {
     private void setResponseBody(Object returnValue, HttpResponse response) {
         switch (response.getContentType()) {
             case JSON:
-                var json = gson.toJson(returnValue);
+                var json = toJsonBytes(returnValue);
                 // JSON ist per Definition UTF-8, daher ist getBytes() hier sicher.
-                var jsonBytes = json.getBytes(StandardCharsets.UTF_8);
-                response.setBody(jsonBytes);
-                response.setContentLength(jsonBytes.length);
+                response.setBody(json);
                 break;
             case FORM_URLENCODED:
                 String formData;
@@ -138,20 +136,15 @@ class ResponseWriter {
                 }
                 var formBytes = formData.getBytes(StandardCharsets.UTF_8);
                 response.setBody(formBytes);
-                response.setContentLength(formBytes.length);
                 break;
             case APPLICATION_OCTET_STREAM:
                 if (returnValue == null) {
                     response.setBody(new byte[0]);
-                    response.setContentLength(0);
-                } else if (returnValue instanceof byte[]) {
-                    var bytes = (byte[]) returnValue;
+                } else if (returnValue instanceof byte[] bytes) {
                     response.setBody(bytes);
-                    response.setContentLength(bytes.length);
                 } else {
                     var bytes = String.valueOf(returnValue).getBytes(StandardCharsets.UTF_8);
                     response.setBody(bytes);
-                    response.setContentLength(bytes.length);
                 }
                 break;
             case JAVASCRIPT: // Explizit hinzufügen für Klarheit
@@ -163,25 +156,26 @@ class ResponseWriter {
             default:
                 if (returnValue == null) {
                     response.setBody(new byte[0]);
-                    response.setContentLength(0);
                     break;
                 }
 
-                String textBody;
+                byte[] textBody;
                 if (returnValue instanceof CharSequence) {
-                    textBody = returnValue.toString();
+                    textBody = returnValue.toString().getBytes(StandardCharsets.UTF_8);
                 } else if (returnValue instanceof Map || returnValue instanceof Iterable) {
                     // Fallback für komplexe Typen, die als Text/HTML etc. gesendet werden
-                    textBody = gson.toJson(returnValue);
+                    textBody = toJsonBytes(returnValue);
                 } else {
-                    textBody = String.valueOf(returnValue);
+                    textBody = String.valueOf(returnValue).getBytes();
                 }
 
-                var textBytes = textBody.getBytes(StandardCharsets.UTF_8);
-                response.setBody(textBytes);
-                response.setContentLength(textBytes.length);
+                response.setBody(textBody);
                 break;
         }
+    }
+
+    private byte[] toJsonBytes(Object data) {
+        return gson.toJson(data).getBytes(StandardCharsets.UTF_8);
     }
 
     private String toUrlEncoded(Map<?, ?> data) {

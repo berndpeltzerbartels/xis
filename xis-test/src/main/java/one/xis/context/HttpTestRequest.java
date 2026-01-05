@@ -6,7 +6,10 @@ import one.xis.http.HttpRequest;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
 public class HttpTestRequest implements HttpRequest {
 
@@ -59,11 +62,6 @@ public class HttpTestRequest implements HttpRequest {
     }
 
     @Override
-    public String getRealPath() {
-        return path;
-    }
-
-    @Override
     public Map<String, String> getQueryParameters() {
         return Collections.unmodifiableMap(queryParameters);
     }
@@ -74,6 +72,11 @@ public class HttpTestRequest implements HttpRequest {
     }
 
     @Override
+    public String getBodyAsString() {
+        return HttpRequest.super.getBodyAsString();
+    }
+
+    @Override
     public ContentType getContentType() {
         return contentType;
     }
@@ -81,11 +84,6 @@ public class HttpTestRequest implements HttpRequest {
     @Override
     public int getContentLength() {
         return body.length;
-    }
-
-    @Override
-    public Collection<String> getHeaderNames() {
-        return headers.keySet();
     }
 
     @Override
@@ -102,10 +100,6 @@ public class HttpTestRequest implements HttpRequest {
         return method;
     }
 
-    @Override
-    public Object getBodyAsBytes() {
-        return body;
-    }
 
     @Override
     public Map<String, String> getFormParameters() {
@@ -119,5 +113,15 @@ public class HttpTestRequest implements HttpRequest {
     public Locale getLocale() {
         String languageTag = getHeader("Accept-Language");
         return languageTag != null ? Locale.forLanguageTag(languageTag.split(",")[0]) : Locale.getDefault();
+    }
+
+    @Override
+    public String getSuffix() {
+        return HttpRequest.super.getSuffix();
+    }
+
+    @Override
+    public String getRemoteHost() {
+        return "localhost";
     }
 }

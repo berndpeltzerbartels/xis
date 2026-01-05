@@ -8,8 +8,6 @@ import one.xis.http.HttpRequest;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -26,11 +24,6 @@ public class SpringHttpRequest implements HttpRequest {
     @Override
     public String getPath() {
         return request.getRequestURI().substring(request.getContextPath().length());
-    }
-
-    @Override
-    public String getRealPath() {
-        return request.getRequestURI();
     }
 
     @Override
@@ -76,14 +69,6 @@ public class SpringHttpRequest implements HttpRequest {
     }
 
     @Override
-    public Collection<String> getHeaderNames() {
-        return Collections.list(request.getHeaderNames())
-                .stream()
-                .map(String::toLowerCase)
-                .collect(Collectors.toSet());
-    }
-
-    @Override
     public String getHeader(String name) {
         return request.getHeader(name) != null ? request.getHeader(name) : "";
     }
@@ -91,11 +76,6 @@ public class SpringHttpRequest implements HttpRequest {
     @Override
     public HttpMethod getHttpMethod() {
         return HttpMethod.valueOf(request.getMethod().toUpperCase());
-    }
-
-    @Override
-    public Object getBodyAsBytes() {
-        return getBody();
     }
 
     @Override
@@ -109,5 +89,15 @@ public class SpringHttpRequest implements HttpRequest {
     @Override
     public Locale getLocale() {
         return request.getLocale();
+    }
+
+    @Override
+    public String getSuffix() {
+        return HttpRequest.super.getSuffix();
+    }
+
+    @Override
+    public String getRemoteHost() {
+        return request.getRemoteHost();
     }
 }
