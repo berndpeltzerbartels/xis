@@ -80,7 +80,7 @@ class ResponseWriter {
                 return;
             case ".html":
             case ".htm":
-                response.setContentType(ContentType.TEXT_HTML);
+                response.setContentType(ContentType.TEXT_HTML_UTF8);
                 return;
             case ".pdf":
                 response.setContentType(ContentType.PDF);
@@ -113,14 +113,14 @@ class ResponseWriter {
         } else if (returnValue instanceof byte[]) {
             response.setContentType(ContentType.APPLICATION_OCTET_STREAM);
         } else {
-            response.setContentType(ContentType.JSON);
+            response.setContentType(ContentType.JSON_UTF8);
         }
 
     }
 
     private void setResponseBody(Object returnValue, HttpResponse response) {
         switch (response.getContentType()) {
-            case JSON:
+            case JSON_UTF8:
                 var json = toJsonBytes(returnValue);
                 // JSON ist per Definition UTF-8, daher ist getBytes() hier sicher.
                 response.setBody(json);
@@ -149,7 +149,7 @@ class ResponseWriter {
                 break;
             case JAVASCRIPT: // Explizit hinzufügen für Klarheit
             case TEXT_PLAIN:
-            case TEXT_HTML:
+            case TEXT_HTML_UTF8:
             case CSS:
             case XML:
             case SVG:

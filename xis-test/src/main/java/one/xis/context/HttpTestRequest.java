@@ -25,7 +25,7 @@ public class HttpTestRequest implements HttpRequest {
         this.headers = headers != null ? new HashMap<>(headers) : new HashMap<>();
         this.body = requestJson != null ? requestJson.getBytes(StandardCharsets.UTF_8) : new byte[0];
         if (this.getHeader("Content-Type") == null) {
-            this.headers.put("Content-Type", ContentType.JSON.getValue());
+            this.headers.put("Content-Type", ContentType.JSON_UTF8.getValue());
         }
         String tempPath = uri;
         int queryIndex = uri.indexOf('?');

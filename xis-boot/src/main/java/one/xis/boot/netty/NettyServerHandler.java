@@ -33,19 +33,40 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest nettyRequest) {
-        FullHttpResponse response = null;
+        FullHttpResponse response;
         try {
             response = routeRequest(nettyRequest, ctx);
             writeResponse(ctx, nettyRequest, response);
-        } catch (Exception e) {
-            log.error("Request handling failed: {}", e.getMessage(), e);
-            FullHttpResponse errorResponse = createInternalServerError(e);
+        } catch (Throwable t) {
+            if (isFatal(t)) {
+                // log once and terminate process - systemd will handle restart policy
+                log.error("Fatal error in request handling, terminating JVM", t);
+                System.exit(1);
+                return;
+            }
+
+            log.error("Request handling failed: {}", t.getMessage(), t);
+            FullHttpResponse errorResponse = createInternalServerError(t);
             writeResponse(ctx, nettyRequest, errorResponse);
-        } finally {
-            // SimpleChannelInboundHandler (default autoRelease=true) releases nettyRequest for us.
-            // Do not release here, unless you changed autoRelease behavior.
         }
     }
+
+    private boolean isFatal(Throwable t) {
+        // unwrap common wrappers
+        Throwable root = unwrap(t);
+
+        return root instanceof LinkageError
+                || root instanceof VirtualMachineError; // optional custom
+    }
+
+    private Throwable unwrap(Throwable t) {
+        Throwable cur = t;
+        while (cur.getCause() != null && cur.getCause() != cur) {
+            cur = cur.getCause();
+        }
+        return cur;
+    }
+
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
@@ -82,7 +103,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
         restControllerService.doInvocation(request, response);
 
         if (isNotFound(response)) {
-            return resourceHandler.handle(request.getPath()).orElseThrow();
+            return notFound();
         }
 
         return response.toNettyResponse();
@@ -133,13 +154,12 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
                 Unpooled.wrappedBuffer(bytes)
         );
 
-        response.headers().set(CONTENT_TYPE, ContentType.TEXT_HTML.toString());
-        response.headers().set(CONTENT_ENCODING, "utf-8");
+        response.headers().set(CONTENT_TYPE, ContentType.TEXT_HTML_UTF8.toString());
         response.headers().set(CONTENT_LENGTH, bytes.length);
         return response;
     }
 
-    private FullHttpResponse createInternalServerError(Exception e) {
+    private FullHttpResponse createInternalServerError(Throwable e) {
         String body = buildSafeErrorPage(e);
         byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
 
@@ -149,14 +169,28 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
                 Unpooled.wrappedBuffer(bytes)
         );
 
-        response.headers().set(CONTENT_TYPE, ContentType.TEXT_HTML.toString());
-        response.headers().set(CONTENT_ENCODING, "utf-8");
+        response.headers().set(CONTENT_TYPE, ContentType.TEXT_HTML_UTF8.toString());
         response.headers().set(CONTENT_LENGTH, bytes.length);
         response.headers().set(CACHE_CONTROL, NO_STORE);
         return response;
     }
 
-    private String buildSafeErrorPage(Exception e) {
+    private FullHttpResponse notFound() {
+        byte[] body = "Not Found".getBytes(java.nio.charset.StandardCharsets.UTF_8);
+
+        FullHttpResponse res = new DefaultFullHttpResponse(
+                HttpVersion.HTTP_1_1,
+                HttpResponseStatus.NOT_FOUND,
+                Unpooled.wrappedBuffer(body)
+        );
+
+        res.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=utf-8");
+        res.headers().setInt(HttpHeaderNames.CONTENT_LENGTH, body.length);
+        return res;
+    }
+
+
+    private String buildSafeErrorPage(Throwable e) {
         // Keep it short to reduce allocations and avoid leaking internal details in production.
         String message = e.getMessage() == null ? "" : escapeHtml(e.getMessage());
 

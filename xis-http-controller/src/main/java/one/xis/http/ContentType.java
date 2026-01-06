@@ -1,10 +1,10 @@
 package one.xis.http;
 
 public enum ContentType {
-    JSON("application/json"),
+    JSON_UTF8("application/json; charset=utf-8"),
     FORM_URLENCODED("application/x-www-form-urlencoded"),
     TEXT_PLAIN("text/plain"),
-    TEXT_HTML("text/html"),
+    TEXT_HTML_UTF8("text/html; charset=utf-8"),
     APPLICATION_OCTET_STREAM("application/octet-stream"),
     PDF("application/pdf"),
     JAVASCRIPT("application/javascript"),
@@ -34,5 +34,5 @@ public enum ContentType {
     public String getValue() {
         return value;
     }
-    
+
 }

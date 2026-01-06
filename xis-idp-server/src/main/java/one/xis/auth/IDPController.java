@@ -12,13 +12,13 @@ class IDPController {
     private final IDPAuthenticationService idpAuthenticationService;
 
     @Get("/.well-known/openid-configuration")
-    @Produces(ContentType.JSON)
+    @Produces(ContentType.JSON_UTF8)
     ResponseEntity<IDPWellKnownOpenIdConfig> getOpenIdConfig() {
         return ResponseEntity.ok(idpAuthenticationService.getOpenIdConfigJson());
     }
 
     @Get("/.well-known/jwks.json")
-    @Produces(ContentType.JSON)
+    @Produces(ContentType.JSON_UTF8)
     ResponseEntity<Collection<JsonWebKey>> getPublicJsonWebKey() {
         return ResponseEntity.ok(idpAuthenticationService.getPublicJsonWebKeys());
     }
