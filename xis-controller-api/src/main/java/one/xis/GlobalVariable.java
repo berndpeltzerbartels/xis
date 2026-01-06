@@ -8,10 +8,9 @@ import java.lang.annotation.Target;
 /**
  * Binds a value from global variables to a method parameter,
  * or stores a method's return value in global variables.
- * 
- * Global variables are temporary and exist only during the processing
- * of a single request. They are cleared at the end of each request
- * and allow sharing data between widgets during that request.
+ * <p>
+ * Global variables behave similarly to variables in LocalStorage or SessionStorage,
+ * but they are shared across all users and sessions of the application.
  *
  * <p><strong>Usage on method parameters:</strong><br>
  * The value associated with the given key will be read from global variables
