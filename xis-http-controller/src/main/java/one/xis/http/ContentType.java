@@ -1,6 +1,7 @@
 package one.xis.http;
 
 public enum ContentType {
+    JSON("application/json"),
     JSON_UTF8("application/json; charset=utf-8"),
     FORM_URLENCODED("application/x-www-form-urlencoded"),
     TEXT_PLAIN("text/plain"),

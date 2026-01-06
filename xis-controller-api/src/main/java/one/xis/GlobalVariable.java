@@ -9,8 +9,7 @@ import java.lang.annotation.Target;
  * Binds a value from global variables to a method parameter,
  * or stores a method's return value in global variables.
  * <p>
- * Global variables behave similarly to variables in LocalStorage or SessionStorage,
- * but they are shared across all users and sessions of the application.
+ * Global variables behave similarly to variables in LocalStorage or SessionStorage.
  *
  * <p><strong>Usage on method parameters:</strong><br>
  * The value associated with the given key will be read from global variables

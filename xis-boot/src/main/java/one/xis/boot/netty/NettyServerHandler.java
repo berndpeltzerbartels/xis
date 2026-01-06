@@ -14,6 +14,7 @@ import one.xis.http.RestControllerService;
 import one.xis.server.FrontendService;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 
 import static io.netty.handler.codec.http.HttpHeaderNames.*;
 import static io.netty.handler.codec.http.HttpHeaderValues.NO_STORE;
@@ -67,7 +68,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        log.error("Uncaught channel exception: " + cause.getMessage(), cause);
+        log.error("Uncaught channel exception: {} ", cause.getMessage(), cause);
         ctx.close();
     }
 
@@ -96,7 +97,8 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
         restControllerService.doInvocation(request, response);
 
         if (isNotFound(response)) {
-            return notFound();
+            Optional<FullHttpResponse> resourceResponse = resourceHandler.handle(request.getPath());
+            return resourceResponse.orElseGet(this::notFound);
         }
 
         return response.toNettyResponse();

@@ -24,7 +24,7 @@ public class MainController {
     public ResponseEntity<?> getComponentConfig() {
         return ResponseEntity.ok(frontendService.getConfig());
     }
-
+    
     @Post("/xis/page/model")
     public ResponseEntity<?> getPageModel(@RequestBody ClientRequest request, @CookieValue("access_token") String accessToken, @CookieValue("refresh_token") String renewToken, HttpRequest httpRequest) {
         request.setAccessToken(accessToken);

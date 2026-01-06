@@ -46,6 +46,7 @@ public final class NettyHttpResponse implements HttpResponse {
     @Override
     public void setContentType(ContentType contentType) {
         this.contentType = contentType;
+        headers.add(HttpHeaderNames.CONTENT_TYPE, contentType.getValue());
     }
 
     @Override
@@ -75,7 +76,7 @@ public final class NettyHttpResponse implements HttpResponse {
         addHeader(HttpHeaderNames.LOCATION.toString(), location);
         redirect = true;
     }
-    
+
 
     /**
      * Builds the Netty FullHttpResponse.
