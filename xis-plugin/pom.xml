@@ -10,7 +10,9 @@
     <packaging>jar</packaging>
 
     <name>Plugin</name>
-    <description>Plugin to set dependency versions and other conveniences when working with xis</description>
+    <description>Plugin for dependency version management and other conveniences when working with xis1
+        (https://xis.one)
+    </description>
     <url>https://xis.one/docs/gradleplugin.html</url>
 
     <licenses>
