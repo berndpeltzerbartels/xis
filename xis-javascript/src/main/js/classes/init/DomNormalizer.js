@@ -474,7 +474,7 @@ class DomNormalizer {
         var key = element.getAttribute('xis:include');
         var includeTag = createElement('xis:include');
         includeTag.setAttribute('key', key);
-        this.domAccessor.replaceElement(element, includeTag);
+        this.domAccessor.insertChild(element, includeTag);
         return includeTag;
     }
 

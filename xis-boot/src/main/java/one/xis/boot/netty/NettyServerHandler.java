@@ -12,8 +12,6 @@ import one.xis.context.Component;
 import one.xis.http.ContentType;
 import one.xis.http.RestControllerService;
 import one.xis.server.FrontendService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
 
@@ -29,7 +27,6 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
     private final FrontendService frontendService;
     private final RestControllerService restControllerService;
     private final NettyResourceHandler resourceHandler;
-    private Logger acessLogger = LoggerFactory.getLogger("ACCESS");
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest nettyRequest) {
@@ -75,12 +72,8 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
     }
 
     private FullHttpResponse routeRequest(FullHttpRequest nettyRequest, ChannelHandlerContext ctx) {
-
-
         NettyHttpRequest request = new NettyHttpRequest(nettyRequest, ctx);
         String path = request.getPath();
-        acessLogger.info("{} {}", request.getHttpMethod(), path);
-
         if (isFrontendRequest(path)) {
             return handleFrontendRequest();
         }

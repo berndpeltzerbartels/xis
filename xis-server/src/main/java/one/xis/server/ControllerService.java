@@ -27,7 +27,6 @@ class ControllerService {
     private PathResolver pathResolver;
 
     void processModelDataRequest(@NonNull ClientRequest request, @NonNull ServerResponse response) {
-        log.info("Process model data request: {}", request);
         var controllerResult = new ControllerResult();
         controllerResult.setCurrentPageURL(request.getPageId());
         controllerResult.setCurrentWidgetId(request.getWidgetId());
@@ -43,7 +42,6 @@ class ControllerService {
     }
 
     void processFormDataRequest(@NonNull ClientRequest request, @NonNull ServerResponse response) {
-        log.info("Process form data request: {}", request);
         var controllerResult = new ControllerResult();
         controllerResult.setCurrentPageURL(request.getPageId());
         controllerResult.setCurrentWidgetId(request.getWidgetId());
@@ -56,7 +54,6 @@ class ControllerService {
     }
 
     void processActionRequest(@NonNull ClientRequest request, @NonNull ServerResponse response) {
-        log.info("Process action request: {}", request);
         if (request.getAction() == null) {
             throw new IllegalArgumentException("action is null");
         }
@@ -79,7 +76,6 @@ class ControllerService {
     }
 
     private void processNextController(ClientRequest request, ControllerResult controllerResult, ServerResponse response, ControllerWrapper nextControllerWrapper) {
-        log.info("Process next controller: {}, request: {}", nextControllerWrapper, request);
         var nextRequest = new ClientRequest();
         // userdata is the same
         nextRequest.setLocale(request.getLocale());
