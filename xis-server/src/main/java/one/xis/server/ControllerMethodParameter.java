@@ -9,12 +9,15 @@ import one.xis.deserialize.PostProcessingResults;
 import one.xis.http.HttpRequest;
 import one.xis.http.HttpResponse;
 import one.xis.http.RequestContext;
+import one.xis.utils.lang.CollectionUtils;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -56,18 +59,23 @@ class ControllerMethodParameter {
         } else if (parameter.isAnnotationPresent(SessionStorage.class)) {
             var key = parameter.getAnnotation(SessionStorage.class).value();
             var paramValue = request.getSessionStorageData().get(key);
+            if (paramValue == null) {
+                return isMandatory(parameter) ? createDefault(parameter) : null;
+            }
             return deserializeParameter(paramValue, request, parameter, postProcessingResults);
         } else if (parameter.isAnnotationPresent(LocalStorage.class)) {
             var key = parameter.getAnnotation(LocalStorage.class).value();
             var paramValue = request.getLocalStorageData().get(key);
+            if (paramValue == null) {
+                return isMandatory(parameter) ? createDefault(parameter) : null;
+            }
             return deserializeParameter(paramValue, request, parameter, postProcessingResults);
         } else if (parameter.isAnnotationPresent(ClientStorage.class)) {
             var key = parameter.getAnnotation(ClientStorage.class).value();
             var paramValue = request.getClientStorageData().get(key);
-            return deserializeParameter(paramValue, request, parameter, postProcessingResults);
-        } else if (parameter.isAnnotationPresent(GlobalVariable.class)) {
-            var key = parameter.getAnnotation(GlobalVariable.class).value();
-            var paramValue = request.getGlobalVariableData().get(key);
+            if (paramValue == null) {
+                return isMandatory(parameter) ? createDefault(parameter) : null;
+            }
             return deserializeParameter(paramValue, request, parameter, postProcessingResults);
         } else {
             throw new IllegalStateException(method + ": parameter without annotation=" + parameter);
@@ -93,8 +101,6 @@ class ControllerMethodParameter {
             controllerMethodResult.getLocalStorage().put(parameter.getAnnotation(LocalStorage.class).value(), parameterValue);
         } else if (parameter.isAnnotationPresent(ClientStorage.class)) {
             controllerMethodResult.getClientStorage().put(parameter.getAnnotation(ClientStorage.class).value(), parameterValue);
-        } else if (parameter.isAnnotationPresent(GlobalVariable.class)) {
-            controllerMethodResult.getGlobalVariables().put(parameter.getAnnotation(GlobalVariable.class).value(), parameterValue);
         } else {
             throw new IllegalStateException(method + ": parameter without annotation=" + parameter);
         }
@@ -171,5 +177,18 @@ class ControllerMethodParameter {
         return !parameter.isAnnotationPresent(NullAllowed.class);
     }
 
+
+    @SuppressWarnings("unchecked")
+    private Object createDefault(Parameter parameter) {
+        if (Collections.class.isAssignableFrom(parameter.getType())) {
+            Class<Collection<?>> collectionType = (Class<Collection<?>>) parameter.getType();
+            return CollectionUtils.emptyInstance(collectionType);
+        }
+        try {
+            return parameter.getType().getDeclaredConstructor().newInstance();
+        } catch (Exception e) {
+            throw new IllegalStateException("Cannot create default instance of type " + parameter.getType());
+        }
+    }
 
 }

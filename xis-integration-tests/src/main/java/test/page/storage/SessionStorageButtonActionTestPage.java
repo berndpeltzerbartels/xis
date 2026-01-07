@@ -2,14 +2,13 @@ package test.page.storage;
 
 import one.xis.Action;
 import one.xis.Page;
-import one.xis.SessionStorage;
 
 @Page("/button-test.html")
 public class SessionStorageButtonActionTestPage {
 
     private int counterValue = 0;
 
-    @SessionStorage("counterValue")
+    //@SessionStorage("counterValue")
     public int getCounterValue() {
         return counterValue;
     }

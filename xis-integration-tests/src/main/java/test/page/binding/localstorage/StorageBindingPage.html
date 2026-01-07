@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:xis="https://xis.one/xsd">
+<head>
+    <title>Storage Binding Test</title>
+</head>
+<body>
+<h1>Storage Binding Test</h1>
+
+
+<!-- Storage binding for products directly -->
+<p>
+    Items in cart (via products):
+    <span id="item-count-products" xis:storage-binding="products:localStorage.shoppingCard.products">
+            ${length(products)} items
+        </span>
+</p>
+
+<!-- Storage binding for shopping card item count -->
+<p>
+    Items in cart (via card):
+    <span id="item-count-card" xis:storage-binding="card:localStorage.shoppingCard">
+            ${length(card.products)} items
+        </span>
+</p>
+
+
+<!-- Storage binding for total price -->
+<p>
+    Total price:
+    <span id="total-price" xis:storage-binding="card:localStorage.shoppingCard">
+        €${sum(flatMap(card, 'products.price'))}
+        </span>
+</p>
+
+<!-- Widget with product links -->
+<div id="product-widget-container" xis:widget-container="product-widget-container" xis:default-widget="ProductWidget">
+</div>
+</body>
+</html>

@@ -32,7 +32,6 @@ class PageController {
         this.page = undefined;
         this.resolvedURL = undefined;
         this.config = undefined;
-        this.currentResponse = undefined;
     }
 
     /**
@@ -111,6 +110,7 @@ class PageController {
             .then(() => this.htmlTagHandler.refresh(this.page.data))
             .then(() => {if (isSet(response.annotatedTitle)) this.setTitle(response.annotatedTitle);})
             .then(() => {if (isSet(response.annotatedAddress)) this.setAddress(response.annotatedAddress);})
+            .then(() => updateStores(response))
             .then(() => this.commitBuffer());
     }
 
@@ -204,7 +204,6 @@ class PageController {
      */
     displayPageForResolvedURL(resolved, skipHistoryUpdate = false) {
         return this.client.loadPageData(resolved).then(response => {
-            this.currentResponse = response;
             if (response.nextURL) {
                 const nextResolved = this.urlResolver.resolve(response.nextURL);
                 if (resolved.normalizedPath !== nextResolved.normalizedPath) {
@@ -230,6 +229,7 @@ class PageController {
             this.initBuffer()
                 .then(() => this.htmlTagHandler.refresh(data))
                 .then(() => {if (response.annotatedTitle) this.setTitle(response.annotatedTitle);})
+                .then(() => updateStores(response))
                 .then(() => this.commitBuffer())
                 .then(() =>  app.eventPublisher.publish(EventType.BUFFER_COMMITTED))
                 .then(() => {

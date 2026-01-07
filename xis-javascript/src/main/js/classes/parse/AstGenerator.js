@@ -312,10 +312,12 @@ class AstGenerator {
 
     parseFunctionCall() {
         const functionName = this.consumeToken(IDENTIFIER);
-        const fct = this.functions[functionName.value];
+        // Support both direct function map and ELFunctions instance with .functions property
+        const functionMap = this.functions.functions || this.functions;
+        const fct = functionMap[functionName.value];
         const parameters = [];
         if (fct === undefined) {
-            throw new Error('Function '+ functionName.value +' not found');
+            throw new Error('Function ' + functionName.value + ' not found');
         }
         this.consumeToken(OPEN_BRACKET);
         var expectCommata = false;
@@ -350,25 +352,25 @@ class AstGenerator {
      */
     parsePropertyOrMethodChain(baseExpression) {
         let result = baseExpression;
-        
+
         // Loop while we see DOT tokens
         while (this.currentToken() && this.currentToken().type === DOT) {
             this.consumeToken(DOT);
-            
+
             // Next must be an identifier
             if (!this.currentToken() || this.currentToken().type !== IDENTIFIER) {
                 throw new Error('Expected identifier after dot in \'' + this.originalExpression + '\'');
             }
-            
+
             const propertyOrMethodName = this.consumeToken(IDENTIFIER).value;
-            
+
             // Check if it's a method call (followed by parentheses)
             if (this.currentToken() && this.currentToken().type === OPEN_BRACKET) {
                 // It's a method call
                 this.consumeToken(OPEN_BRACKET);
                 const parameters = [];
                 let expectComma = false;
-                
+
                 while (this.currentToken() && this.currentToken().type !== CLOSE_BRACKET) {
                     if (this.currentToken().type === COMMA) {
                         if (!expectComma) {
@@ -381,7 +383,7 @@ class AstGenerator {
                         expectComma = true;
                     }
                 }
-                
+
                 this.consumeToken(CLOSE_BRACKET);
                 result = new MethodCall(result, propertyOrMethodName, parameters);
             } else {
@@ -390,7 +392,7 @@ class AstGenerator {
                 result = new Variable(basePath + '.' + propertyOrMethodName);
             }
         }
-        
+
         return result;
     }
 
@@ -453,7 +455,7 @@ class AstGenerator {
      */
     createVariable(token) {
         const path = token.value;
-        
+
         // Check if this is a special state or localStorage variable
         if (path.startsWith('sessionStorage.')) {
             const variablePath = path.substring(15); // Remove 'sessionStorage.' prefix

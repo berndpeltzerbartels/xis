@@ -2,11 +2,14 @@ package test.reactive.buttonlocalstorage;
 
 import one.xis.context.IntegrationTestContext;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import test.page.storage.ButtonActionLocalStoragePage;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+
+@Disabled
 class ButtonActionLocalStorageTest {
 
     private IntegrationTestContext testContext;

@@ -3,12 +3,12 @@ package one.xis.context;
 import lombok.Getter;
 import one.xis.js.Javascript;
 import one.xis.test.dom.NodeConstants;
-import one.xis.test.js.Array;
 import one.xis.test.js.JSUtil;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 import static one.xis.js.JavascriptSource.*;
 
@@ -36,7 +36,7 @@ class IntegrationTestScript {
 
     void reset() {
         var resetFunction = getIntegrationTestFunctions().getReset();
-        updateBindings(resetFunction);
+        updateBindings(resetFunction, createBindings());
         resetFunction.execute();
     }
 
@@ -50,7 +50,7 @@ class IntegrationTestScript {
 
     }
 
-    private Map<String, Object> createBindings() {
+    public Map<String, Object> createBindings() {
         var bindings = new HashMap<String, Object>();
         bindings.put("backendBridge", testEnvironment.getBackendBridge());
         bindings.put("localStorage", testEnvironment.getHtmlObjects().getLocalStorage());
@@ -62,31 +62,79 @@ class IntegrationTestScript {
         bindings.put("encodeURIComponent", testEnvironment.getHtmlObjects().getEncodeURIComponent());
         bindings.put("setTimeout", testEnvironment.getHtmlObjects().getSetTimeout());
         bindings.put("Node", new NodeConstants());
-        bindings.put("Array", new Array());
-        bindings.put("debug", debugFunction);
+        bindings.putAll(BrowserFunctions.BINDINGS);
         bindings.put("console", testEnvironment.getHtmlObjects().getConsole());
         return bindings;
     }
 
-    private void updateBindings(JavascriptFunction invoker) {
-        invoker.setBinding("backendBridge", testEnvironment.getBackendBridge());
-        invoker.setBinding("localStorage", testEnvironment.getHtmlObjects().getLocalStorage());
-        invoker.setBinding("sessionStorage", testEnvironment.getHtmlObjects().getSessionStorage());
-        invoker.setBinding("document", testEnvironment.getHtmlObjects().getDocument());
-        invoker.setBinding("window", testEnvironment.getHtmlObjects().getWindow());
-        invoker.setBinding("htmlToElement", testEnvironment.getHtmlObjects().getHtmlToElement());
-        invoker.setBinding("atob", testEnvironment.getHtmlObjects().getAtob());
-        invoker.setBinding("encodeURIComponent", testEnvironment.getHtmlObjects().getEncodeURIComponent());
-        invoker.setBinding("setTimeout", testEnvironment.getHtmlObjects().getSetTimeout());
-        invoker.setBinding("Node", new NodeConstants());
-        invoker.setBinding("Array", new Array());
-        invoker.setBinding("debug", debugFunction);
-        invoker.setBinding("console", testEnvironment.getHtmlObjects().getConsole());
+    private void updateBindings(JavascriptFunction invoker, Map<String, Object> bindings) {
+        bindings.forEach(invoker::setBinding);
     }
 
     private final BiConsumer<String, Object> debugFunction = this::debug;
+    private final Function<Object, Boolean> isFloatFunction = this::isFloat;
+    private final Function<Object, Boolean> isIntFunction = this::isInt;
+    private final Function<Object, Object> parseFloatFunction = this::parseFloat;
+    private final Function<Object, Object> parseIntFunction = this::parseInt;
+    private final Function<Object, Boolean> isNaNFunction = this::isNaN;
 
     public void debug(String text, Object args) {
         System.out.printf("DEBUG: " + text + "\n", args);
     }
+
+    public boolean isFloat(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (obj instanceof Number) {
+            double value = ((Number) obj).doubleValue();
+            return !Double.isNaN(value) && !Double.isInfinite(value);
+        }
+        return false;
+    }
+
+    public boolean isInt(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (obj instanceof Number) {
+            double value = ((Number) obj).doubleValue();
+            return !Double.isNaN(value) && !Double.isInfinite(value) && value == Math.floor(value);
+        }
+        return false;
+    }
+
+    public Object parseFloat(Object obj) {
+        if (obj == null) {
+            return null;
+        }
+        if (obj instanceof Number) {
+            return ((Number) obj).doubleValue();
+        }
+        try {
+            return Double.parseDouble(obj.toString());
+        } catch (NumberFormatException e) {
+            return NaN;
+        }
+    }
+
+    public Object parseInt(Object obj) {
+        if (obj == null) {
+            return null;
+        }
+        if (obj instanceof Number) {
+            return ((Number) obj).intValue();
+        }
+        try {
+            return Integer.parseInt(obj.toString());
+        } catch (NumberFormatException e) {
+            return NaN;
+        }
+    }
+
+    public boolean isNaN(Object obj) {
+        return obj == NaN;
+    }
+
+    static final Object NaN = new Object();
 }

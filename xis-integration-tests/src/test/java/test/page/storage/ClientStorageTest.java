@@ -24,18 +24,10 @@ class ClientStorageTest {
         var page = testContext.getAppContext().getSingleton(ClientStoragePage.class);
 
         result.getDocument().getElementById("action-link").click();
-        assertThat(page.getInvokedMethods()).containsExactly("data", "linkAction", "data");
-        assertThat(page.getClientStoragePageData().getId()).isEqualTo(200);
-        assertThat(page.getClientStoragePageData().getValue()).isEqualTo("test2");
-
-        assertThat(result.getDocument().getElementById("clientStorageValue").getInnerText()).isEqualTo("200");
+        assertThat(page.getStoreData().getItems()).containsExactly("linkAction");
 
         result.getDocument().getElementById("save-button").click();
-        assertThat(page.getInvokedMethods()).containsExactly("data", "linkAction", "data", "formAction", "data");
-        assertThat(page.getClientStoragePageData().getId()).isEqualTo(300);
-        assertThat(page.getClientStoragePageData().getValue()).isEqualTo("test3");
-
-        assertThat(result.getDocument().getElementById("clientStorageValue").getInnerText()).isEqualTo("300");
+        assertThat(page.getStoreData().getItems()).containsExactly("linkAction", "formInput");
     }
 
 }

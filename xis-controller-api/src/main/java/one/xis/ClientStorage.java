@@ -6,53 +6,51 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Binds a value from server-side client storage to a method parameter,
- * or stores a method's return value in server-side client storage.
+ * Binds a value from client-side memory storage to an action method parameter.
  *
- * <p>Unlike {@link LocalStorage} and {@link SessionStorage} which store data
- * in the browser, ClientStorage maintains data on the server per client/session.
- * This makes it suitable for sensitive data, larger datasets, or data that should
- * not be accessible via browser DevTools.</p>
+ * <p>The client sends the specified storage key to the server.
+ * The server deserializes the value, passes it to the method, and any modifications
+ * made to the object are automatically saved back to client storage after method execution.</p>
  *
- * <p><strong>Usage on method parameters:</strong><br>
- * The value associated with the given key will be read from server-side client storage
- * and passed into the method as an argument.
- *
+ * <p><strong>Example:</strong></p>
  * <pre>{@code
- * public String render(@ClientStorage("userPreferences") UserPreferences prefs) {
- *     return "Theme: " + prefs.getTheme();
+ * @Action("updatePreferences")
+ * public void updatePreferences(@ClientStorage("userPreferences") UserPreferences prefs,
+ *                               @ActionParameter("theme") String theme) {
+ *     prefs.setTheme(theme);
+ *     // prefs is automatically saved back to client storage
  * }
  * }</pre>
  *
- * <p><strong>Usage on methods:</strong><br>
- * The return value of the method will be stored in server-side client storage under
- * the given key after the request has been processed.
+ * <p><strong>Initialization:</strong><br>
+ * If no value exists in storage, the parameter will be initialized with a default value.
+ * For objects, this is typically a new instance. Use {@link NullAllowed} to allow null values instead.</p>
  *
- * <pre>{@code
- * @ClientStorage("userPreferences")
- * public UserPreferences getPreferences() {
- *     return new UserPreferences("dark", "en");
- * }
- * }</pre>
+ * <p><strong>Storage Location:</strong><br>
+ * Data is stored client-side in JavaScript memory (as a field), not in browser storage APIs.
+ * Unlike {@link LocalStorage} and {@link SessionStorage}, this data is not visible in browser
+ * DevTools Storage tab. However, the data may not survive page reloads and is more
+ * short-lived than sessionStorage.</p>
  *
- * <p><strong>Update Events:</strong><br>
- * Changes to client storage do not automatically trigger updates in other components.
- * Use {@link Action#updateEventKeys()} to emit events, and {@link RefreshOnUpdateEvents}
- * on widget classes to listen for those events.
+ * <p><strong>Comparison:</strong></p>
+ * <ul>
+ *   <li>{@link LocalStorage}: Browser localStorage - persists across browser sessions</li>
+ *   <li>{@link SessionStorage}: Browser sessionStorage - persists within tab, survives page reloads</li>
+ *   <li>{@link ClientStorage}: JavaScript field - not visible in DevTools, may not survive page reloads</li>
+ * </ul>
  *
- * <pre>{@code
- * @Action(value = "updatePreferences", updateEventKeys = {"prefs-changed"})
- * @ClientStorage("userPreferences")
- * public UserPreferences savePreferences(@ActionParameter("theme") String theme) {
- *     return new UserPreferences(theme, "en");
- * }
- * }</pre>
+ * <p><strong>Use Cases:</strong></p>
+ * <ul>
+ *   <li>Temporary data that should not be visible in browser DevTools Storage tab</li>
+ *   <li>Short-lived state within a single page interaction</li>
+ *   <li>Data that doesn't need to persist across page reloads</li>
+ * </ul>
  *
  * @see LocalStorage
  * @see SessionStorage
- * @see RefreshOnUpdateEvents
+ * @see NullAllowed
  */
-@Target({ElementType.METHOD, ElementType.PARAMETER})
+@Target({ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ClientStorage {
     /**

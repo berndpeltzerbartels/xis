@@ -1,14 +1,13 @@
 package test.widget.store;
 
 import one.xis.Action;
-import one.xis.SessionStorage;
 import one.xis.Widget;
 
 @Widget
 class WidgetActionWidget {
     private int counter = 5;
 
-    @SessionStorage("counterValue")
+    //@SessionStorage("counterValue")
     int count() {
         return counter;
     }

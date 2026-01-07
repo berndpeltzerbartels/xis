@@ -1,52 +1,32 @@
 package test.page.storage;
 
 import lombok.Getter;
-import lombok.NonNull;
-import one.xis.*;
-import one.xis.context.Init;
-
-import java.util.ArrayList;
-import java.util.List;
+import one.xis.Action;
+import one.xis.ClientStorage;
+import one.xis.FormData;
+import one.xis.Page;
 
 @Getter
 @Page("/client-storage.html")
 class ClientStoragePage {
 
-    private final List<String> invokedMethods = new ArrayList<>();
-    private ClientStoragePageData clientStoragePageData;
+    private ClientStorageStoreData storeData;
 
-    @Init
-    void init() {
-        this.clientStoragePageData = new ClientStoragePageData();
-        this.clientStoragePageData.setId(100);
-        this.clientStoragePageData.setValue("test");
-    }
-
-
-    @ClientStorage("data")
-    ClientStoragePageData data() {
-        invokedMethods.add("data");
-        return this.clientStoragePageData;
+    @FormData("formData")
+    ClientStorageFormData formData() {
+        return new ClientStorageFormData("formInput");
     }
 
     @Action("link-action")
-    @ClientStorage("data")
-    ClientStoragePageData linkAction(@ClientStorage("data") ClientStoragePageData data) {
-        invokedMethods.add("linkAction");
-        this.clientStoragePageData = new ClientStoragePageData();
-        this.clientStoragePageData.setId(data.getId() + 100);
-        this.clientStoragePageData.setValue("test2");
-        return this.clientStoragePageData;
+    void linkAction(@ClientStorage("storeData") ClientStorageStoreData storeData) {
+        storeData.addItem("linkAction");
+        this.storeData = storeData;
     }
 
     @Action("form-action")
-    @ClientStorage("data")
-    ClientStoragePageData formAction(@NonNull @ClientStorage("data") ClientStoragePageData clientState, @NonNull @FormData("formData") ClientStoragePageData formData) {
-        this.clientStoragePageData = clientState;
-        invokedMethods.add("formAction");
-        this.clientStoragePageData.setId(300);
-        this.clientStoragePageData.setValue("test3");
-        return this.clientStoragePageData;
+    void formAction(@FormData(("formData")) ClientStorageFormData formData, @ClientStorage("storeData") ClientStorageStoreData storeData) {
+        storeData.addItem(formData.text());
+        this.storeData = storeData;
     }
 
 }

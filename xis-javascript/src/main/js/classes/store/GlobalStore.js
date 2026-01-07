@@ -1,7 +1,7 @@
 class GlobalStore extends Store {
     constructor(eventPublisher) {
         // GlobalStore doesn't use any real storage area, so we pass null
-        super(null);
+        super(eventPublisher, null, 'globalStore');
         this.globalData = new Data({});
     }
 

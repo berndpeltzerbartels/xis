@@ -32,7 +32,6 @@ class IncludeHandler extends TagHandler {
      * @returns {Promise}
      */
     refresh(data) {
-        debugger;
         var include = this.includes.getInclude(this.key);
         if (this.includeInstance) {
             if (this.includeInstance.key === include.key) {

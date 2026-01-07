@@ -18,14 +18,12 @@ public class ServerResponse {
 
     private transient int status;
     private Map<String, Object> data = new HashMap<>();
-    private Map<String, String> tagVariables = new HashMap<>();
     private Map<String, String> idVariables = new HashMap<>();
     private Map<String, Object> formData = new HashMap<>();
     private Map<String, Object> localStorageData = new HashMap<>();
     private Map<String, Object> localDatabaseData = new HashMap<>();
     private Map<String, Object> sessionStorageData = new HashMap<>();
     private Map<String, Object> clientStorageData = new HashMap<>();
-    private Map<String, Object> globalVariableData = new HashMap<>();
     private Map<String, Object> widgetParameters = new HashMap<>();
     private Collection<String> updateEventKeys = new ArrayList<>();
     private Collection<String> reloadWidgets = new ArrayList<>(); // TODO remove?

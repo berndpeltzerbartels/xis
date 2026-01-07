@@ -2,48 +2,52 @@ class ELFunctions {
 
     constructor() {
         this.functions = {};
-        this.functions['length'] = arg => this.length(arg);
-        this.functions['size'] = arg => this.length(arg);
-        this.functions['count'] = arg => this.length(arg);
-        this.functions['toUpperCase'] = arg => this.toUpperCase(arg);
-        this.functions['toLowerCase'] = arg => this.toLowerCase(arg);
-        this.functions['empty'] = arg => this.empty(arg);
-        this.functions['empty'] = arg => this.empty(arg);
-        this.functions['notEmpty'] = arg => this.notEmpty(arg);
+        this.functions['length'] = this.length.bind(this);
+        this.functions['size'] = this.length.bind(this);
+        this.functions['count'] = this.length.bind(this);
+        this.functions['toUpperCase'] = this.toUpperCase.bind(this);
+        this.functions['toLowerCase'] = this.toLowerCase.bind(this);
+        this.functions['empty'] = this.empty.bind(this);
+        this.functions['isEmpty'] = this.empty.bind(this);
+        this.functions['notEmpty'] = this.notEmpty.bind(this);
 
         // Date/Time formatter functions
-        this.functions['formatDate'] = (date, locale) => this.formatDate(date, locale);
-        this.functions['formatDateTime'] = (date, locale) => this.formatDateTime(date, locale);
-        this.functions['formatTime'] = (date, locale) => this.formatTime(date, locale);
+        this.functions['formatDate'] = this.formatDate.bind(this);
+        this.functions['formatDateTime'] = this.formatDateTime.bind(this);
+        this.functions['formatTime'] = this.formatTime.bind(this);
 
         // String/Array utilities
-        this.functions['join'] = (arr, sep) => this.join(arr, sep);
-        this.functions['split'] = (str, sep) => this.split(str, sep);
-        this.functions['substring'] = (str, start, end) => this.substring(str, start, end);
-        this.functions['replace'] = (str, search, replaceVal) => this.replace(str, search, replaceVal);
-        this.functions['trim'] = str => this.trim(str);
+        this.functions['join'] = this.join.bind(this);
+        this.functions['split'] = this.split.bind(this);
+        this.functions['substring'] = this.substring.bind(this);
+        this.functions['replace'] = this.replace.bind(this);
+        this.functions['trim'] = this.trim.bind(this);
 
         // Number/Math
-        this.functions['round'] = (val, digits) => this.round(val, digits);
-        this.functions['floor'] = val => this.floor(val);
-        this.functions['ceil'] = val => this.ceil(val);
-        this.functions['abs'] = val => this.abs(val);
+        this.functions['round'] = this.round.bind(this);
+        this.functions['floor'] = this.floor.bind(this);
+        this.functions['ceil'] = this.ceil.bind(this);
+        this.functions['abs'] = this.abs.bind(this);
+        this.functions['sum'] = this.sum.bind(this);
 
         // Logic
-        this.functions['default'] = (val, fallback) => this.defaultValue(val, fallback);
-        this.functions['contains'] = (container, value) => this.contains(container, value);
+        this.functions['default'] = this.defaultValue.bind(this);
+        this.functions['defaultValue'] = this.defaultValue.bind(this);
+        this.functions['contains'] = this.contains.bind(this);
+        this.functions['flatMap'] = this.flatMap.bind(this);
+        this.functions['filter'] = this.filter.bind(this);
 
         // Object/Array
-        this.functions['keys'] = obj => this.keys(obj);
-        this.functions['values'] = obj => this.values(obj);
-        this.functions['hasKey'] = (obj, key) => this.hasKey(obj, key);
+        this.functions['keys'] = this.keys.bind(this);
+        this.functions['values'] = this.values.bind(this);
+        this.functions['hasKey'] = this.hasKey.bind(this);
 
         // Date/Time extractors
-        this.functions['year'] = date => this.year(date);
-        this.functions['month'] = date => this.month(date);
-        this.functions['day'] = date => this.day(date);
-        this.functions['hour'] = date => this.hour(date);
-        this.functions['minute'] = date => this.minute(date);
+        this.functions['year'] = this.year.bind(this);
+        this.functions['month'] = this.month.bind(this);
+        this.functions['day'] = this.day.bind(this);
+        this.functions['hour'] = this.hour.bind(this);
+        this.functions['minute'] = this.minute.bind(this);
     }
 
     // String/Array utilities
@@ -90,6 +94,85 @@ class ELFunctions {
         if (typeof val !== 'number') val = Number(val);
         if (isNaN(val)) return 0;
         return Math.abs(val);
+    }
+
+    sum(v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18, v19) {
+        if (!arguments || arguments.length === 0) return 0;
+        let total = 0;
+        for (let i = 0; i < arguments.length; i++) {
+            const value = arguments[i];
+            if (!value) continue;
+            if (Array.isArray(value)) {
+                for (const item of value) {
+                    if (isFloat(item)) {
+                        total += item;
+                        continue;
+                    }
+                    if (isInt(item)) {
+                        total += item;
+                        continue;
+                    }
+                    const integerValue = parseInt(item, 10);
+                    if (!isNaN(integerValue)) {
+                        total += integerValue;
+                        continue;
+                    }
+                    const floatValue = parseFloat(item);
+                    if (!isNaN(floatValue)) {
+                        total += floatValue;
+                        continue;
+                    }
+                }
+
+            } else if (isFloat(value)) {
+                return total += value;
+            } else if (isInt(value)) {
+                total += value;
+            } else {
+                const integerValue = parseInt(value, 10);
+                if (!isNaN(integerValue)) {
+                    total += integerValue;
+                }
+                const floatValue = parseFloat(value);
+                if (!isNaN(floatValue)) {
+                    total += floatValue;
+                }
+            }
+
+        }
+        return total;
+    }
+
+    flatMap(value, path) {
+        if (!Array.isArray(value)) {
+            value = [value];
+        }
+        
+        const pathParts = doSplit(path, '.');
+        let results = value;
+        
+        // Navigate through each path segment
+        for (const pathPart of pathParts) {
+            const nextResults = [];
+            
+            for (const item of results) {
+                if (item == null) continue;
+                
+                const data = new Data(item);
+                const val = data.getValue([pathPart]);
+                
+                // If value is array, flatten it
+                if (Array.isArray(val)) {
+                    nextResults.push(...val);
+                } else if (val != null) {
+                    nextResults.push(val);
+                }
+            }
+            
+            results = nextResults;
+        }
+        
+        return results;
     }
 
     // Logic
@@ -207,13 +290,13 @@ class ELFunctions {
     }
 
     toUpperCase(str) {
-        if (str == null) return null;
+        if (str == null) return '';
         if (typeof str !== 'string') return str;
         return str.toUpperCase();
     }
 
     toLowerCase(str) {
-        if (str == null) return null;
+        if (str == null) return '';
         if (typeof str !== 'string') return str;
         return str.toLowerCase();
     }
@@ -250,6 +333,18 @@ class ELFunctions {
             return arg.size > 0;
         }
         return false;
+    }
+
+    // Filter array by property value
+    filter(arr, property, value) {
+        if (!Array.isArray(arr)) return [];
+        return arr.filter(item => {
+            if (item == null) return false;
+            const data = new Data(item);
+            const pathParts = doSplit(property, '.');
+            const propValue = data.getValue(pathParts);
+            return propValue === value;
+        });
     }
 
 }

@@ -251,7 +251,7 @@ public class ElementImpl extends NodeImpl implements Element {
                 sb.append(element.getInnerText());
             }
         }
-        return sb.toString();
+        return sb.toString().trim();
     }
 
     @Override

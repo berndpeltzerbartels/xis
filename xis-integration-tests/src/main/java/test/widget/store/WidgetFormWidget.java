@@ -2,14 +2,13 @@ package test.widget.store;
 
 import one.xis.Action;
 import one.xis.FormData;
-import one.xis.SessionStorage;
 import one.xis.Widget;
 
 @Widget
 class WidgetFormWidget {
     private int counter = 10;
 
-    @SessionStorage("counterValue")
+    //@SessionStorage("counterValue")
     int count() {
         return counter;
     }

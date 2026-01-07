@@ -33,11 +33,6 @@ class ControllerWrapperFactory {
             controllerWrapper.setFormDataMethods(formDataMethods(controller));
             controllerWrapper.setActionMethods(actionMethodMap(controller));
             controllerWrapper.setSharedValueMethods(sharedValueMethods(controller));
-            controllerWrapper.setLocalStorageOnlyMethods(localStorageOnlyMethods(controller));
-            controllerWrapper.setSessionStorageOnlyMethods(sessionStorageOnlyMethods(controller));
-            controllerWrapper.setClientStorageOnlyMethods(clientStorageOnlyMethods(controller));
-            controllerWrapper.setGlobalVariableOnlyMethods(globalVariableOnlyMethods(controller));
-            controllerWrapper.setTagContentOnlyMethods(tagContentOnlyMethods(controller));
             controllerWrapper.setTitleOnlyMethods(titleOnlyMethods(controller));
             controllerWrapper.setAddressOnlyMethods(addressOnlyMethods(controller));
             controllerWrapper.setControllerResultMapper(controllerResultMapper);
@@ -45,42 +40,6 @@ class ControllerWrapperFactory {
         } catch (Exception e) {
             throw new RuntimeException("Failed to initialize " + controller.getClass(), e);
         }
-    }
-
-    private Collection<ControllerMethod> localStorageOnlyMethods(@NonNull Object controller) {
-        return annotatedMethods(controller, LocalStorage.class)
-                .filter(m -> !m.isAnnotationPresent(Action.class))
-                .filter(method -> !method.isAnnotationPresent(ModelData.class))
-                .filter(method -> !method.isAnnotationPresent(FormData.class))
-                .map(this::createControllerMethod)
-                .collect(Collectors.toSet());
-    }
-
-    private Collection<ControllerMethod> sessionStorageOnlyMethods(@NonNull Object controller) {
-        return annotatedMethods(controller, SessionStorage.class)
-                .filter(m -> !m.isAnnotationPresent(Action.class))
-                .filter(method -> !method.isAnnotationPresent(ModelData.class))
-                .filter(method -> !method.isAnnotationPresent(FormData.class))
-                .map(this::createControllerMethod)
-                .collect(Collectors.toSet());
-    }
-
-    private Collection<ControllerMethod> clientStorageOnlyMethods(@NonNull Object controller) {
-        return annotatedMethods(controller, ClientStorage.class)
-                .filter(m -> !m.isAnnotationPresent(Action.class))
-                .filter(method -> !method.isAnnotationPresent(ModelData.class))
-                .filter(method -> !method.isAnnotationPresent(FormData.class))
-                .map(this::createControllerMethod)
-                .collect(Collectors.toSet());
-    }
-
-    private Collection<ControllerMethod> globalVariableOnlyMethods(@NonNull Object controller) {
-        return annotatedMethods(controller, GlobalVariable.class)
-                .filter(m -> !m.isAnnotationPresent(Action.class))
-                .filter(method -> !method.isAnnotationPresent(ModelData.class))
-                .filter(method -> !method.isAnnotationPresent(FormData.class))
-                .map(this::createControllerMethod)
-                .collect(Collectors.toSet());
     }
 
     private Collection<ControllerMethod> sharedValueMethods(Object controller) {
@@ -136,15 +95,6 @@ class ControllerWrapperFactory {
         } catch (Exception e) {
             throw new RuntimeException("Failed to initialize " + method, e);
         }
-    }
-
-    private Collection<ControllerMethod> tagContentOnlyMethods(@NonNull Object controller) {
-        return annotatedMethods(controller, TagContent.class)
-                .filter(m -> !m.isAnnotationPresent(Action.class))
-                .filter(method -> !method.isAnnotationPresent(ModelData.class))
-                .filter(method -> !method.isAnnotationPresent(FormData.class))
-                .map(this::createControllerMethod)
-                .collect(Collectors.toSet());
     }
 
     private Collection<ControllerMethod> titleOnlyMethods(@NonNull Object controller) {

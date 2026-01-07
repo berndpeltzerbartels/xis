@@ -1,6 +1,6 @@
 class LocalStore extends Store{
-    constructor() {
-        super(localStorage);
+    constructor(eventPublisher) {
+        super(eventPublisher, localStorage, 'localStorageUpdated');
     }
 
     /**

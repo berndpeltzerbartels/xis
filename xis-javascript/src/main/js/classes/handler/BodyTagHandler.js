@@ -47,6 +47,7 @@ class BodyTagHandler extends TagHandler {
     /**
      * @returns {Promise<void>}
      */
+     // TODO : Is this used anywhere?
     initBuffer() {
         return new Promise((resolve, _) => {
             // Create a DocumentFragment as buffer

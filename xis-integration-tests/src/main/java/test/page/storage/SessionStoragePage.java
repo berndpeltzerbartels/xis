@@ -26,14 +26,14 @@ class SessionStoragePage {
     }
 
 
-    @SessionStorage("data")
+    // @SessionStorage("data")
     SessionStoragePageData data() {
         invokedMethods.add("data");
         return this.sessionStoragePageData;
     }
 
     @Action("link-action")
-    @SessionStorage("data")
+        // @SessionStorage("data")
     SessionStoragePageData linkAction(@SessionStorage("data") SessionStoragePageData data) {
         invokedMethods.add("linkAction");
         this.sessionStoragePageData = new SessionStoragePageData();
@@ -43,7 +43,7 @@ class SessionStoragePage {
     }
 
     @Action("form-action")
-    @SessionStorage("data")
+        //@SessionStorage("data")
     SessionStoragePageData formAction(@NonNull @SessionStorage("data") SessionStoragePageData clientState, @NonNull @FormData("formData") SessionStoragePageData formData) {
         this.sessionStoragePageData = clientState;
         invokedMethods.add("formAction");

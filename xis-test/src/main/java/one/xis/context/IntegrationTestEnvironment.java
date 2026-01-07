@@ -1,10 +1,12 @@
 package one.xis.context;
 
 import lombok.Getter;
+import lombok.experimental.Delegate;
 
 @Getter
-class IntegrationTestEnvironment {
+public class IntegrationTestEnvironment {
 
+    @Delegate
     private final HtmlObjects htmlObjects = new HtmlObjects();
     private final IntegrationTestScript integrationTestScript;
     private final BackendBridge backendBridge;
@@ -21,17 +23,17 @@ class IntegrationTestEnvironment {
 
     private void updateLocationProperties(String uri) {
         var location = htmlObjects.getWindow().getLocation();
-        
+
         // Parse URI in pathname and search
         String pathname = uri;
         String search = "";
-        
+
         int queryStart = uri.indexOf('?');
         if (queryStart != -1) {
             pathname = uri.substring(0, queryStart);
             search = uri.substring(queryStart);
         }
-        
+
         // Set location properties
         location.setPathname(pathname);
         location.setHref("http://testserver" + uri);

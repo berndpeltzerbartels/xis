@@ -28,13 +28,8 @@ public class ControllerWrapper {
 
     private Collection<ControllerMethod> sharedValueMethods;
     private Collection<ControllerMethod> modelMethods;
-    private Collection<ControllerMethod> tagContentOnlyMethods;
     private Map<String, ControllerMethod> actionMethods;
     private Collection<ControllerMethod> formDataMethods;
-    private Collection<ControllerMethod> localStorageOnlyMethods;
-    private Collection<ControllerMethod> sessionStorageOnlyMethods;
-    private Collection<ControllerMethod> clientStorageOnlyMethods;
-    private Collection<ControllerMethod> globalVariableOnlyMethods;
     private Collection<ControllerMethod> titleOnlyMethods;
     private Collection<ControllerMethod> addressOnlyMethods;
     private ControllerResultMapper controllerResultMapper;
@@ -42,11 +37,6 @@ public class ControllerWrapper {
     void invokeGetModelMethods(ClientRequest request, ControllerResult controllerResult) {
         SecurityUtil.checkRoles(controller.getClass(), UserContextImpl.getInstance().getRoles());
         var methodsToExecute = new ArrayList<>(modelMethods);
-        methodsToExecute.addAll(localStorageOnlyMethods);
-        methodsToExecute.addAll(sessionStorageOnlyMethods);
-        methodsToExecute.addAll(clientStorageOnlyMethods);
-        methodsToExecute.addAll(globalVariableOnlyMethods);
-        methodsToExecute.addAll(tagContentOnlyMethods);
         methodsToExecute.addAll(titleOnlyMethods);
         methodsToExecute.addAll(addressOnlyMethods);
         var methods = MethodSorter.sortMethods(methodsToExecute, sharedValueMethods);

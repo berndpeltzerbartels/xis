@@ -1,5 +1,4 @@
 
-// Annahme: TagContentSetter ist global verfügbar (z.B. window.TagContentSetter)
 class Client {
 
 
@@ -12,7 +11,6 @@ class Client {
         this.config = undefined;
         this.clientId = randomString();
         this.zoneId = timeZone();
-        this.tagContentSetter = new TagContentSetter();
     }
 
     /**
@@ -359,7 +357,6 @@ class Client {
         serverResponse.widgetParameters = obj.widgetParameters;
         serverResponse.widgetContainerId = obj.widgetContainerId;
         serverResponse.redirectUrl = obj.redirectUrl;
-        serverResponse.tagVariables = obj.tagVariables || {};
         serverResponse.idVariables = obj.idVariables || {};
         serverResponse.actionProcessing = obj.actionProcessing || 'NONE';
         serverResponse.updateEventKeys = obj.updateEventKeys || [];
@@ -373,9 +370,9 @@ class Client {
         data.setValue(['validation','globalMessages'], obj.validatorMessages.globalMessages);
         data.setValue(['origin'], window.location.origin);
         data.setValue(['widgetParameters'], obj.widgetParameters);
-        this.storeData(serverResponse);
+       // this.storeData(serverResponse);
         this.setTitle(serverResponse);
-        this.tagContentSetter.apply(document, serverResponse.idVariables, serverResponse.tagVariables);
+        app.currentResponse = serverResponse;
         return serverResponse;
     }
 

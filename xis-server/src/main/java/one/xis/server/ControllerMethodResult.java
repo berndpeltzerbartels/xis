@@ -29,9 +29,7 @@ class ControllerMethodResult {
     private final Map<String, Object> sessionStorage = new HashMap<>();
     private final Map<String, Object> localStorage = new HashMap<>();
     private final Map<String, Object> clientStorage = new HashMap<>();
-    private final Map<String, Object> globalVariables = new HashMap<>();
     private String redirectUrl;
-    private final Map<String, String> tagVariables = new HashMap<>();
     private final Map<String, String> idVariables = new HashMap<>();
     private String annotatedTitle;
     private String annotatedAddress;

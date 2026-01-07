@@ -124,6 +124,10 @@ class DomNormalizer {
             this.surroundWithIfTag(element);
             element.removeAttribute('xis:if');
         }
+        if (element.getAttribute('xis:storage-binding')) {
+            this.surroundWithStorageBindingTag(element);
+            element.removeAttribute('xis:storage-binding');
+        }
         return element;
     }
 
@@ -375,6 +379,32 @@ class DomNormalizer {
         element.removeAttribute('xis:if'); // Otherwise endless recursion
         return element;
     }
+
+
+    surroundWithStorageBindingTag(element) {
+        const storeBindingTag = createElement('xis:storage-binding');
+        const binding = element.getAttribute('xis:storage-binding');
+        const varAndPath = doSplit(binding, ':');
+        if (varAndPath.length != 2) {
+            throw new Error("'xis:store-binding' attribute must be in the format 'localVariable:storeName.keyPath'.");
+        }
+        storeBindingTag.setAttribute('var', varAndPath[0]);
+        const storeAndPropertyPath = varAndPath[1];
+        const dotIndex = storeAndPropertyPath.indexOf('.');
+        if (dotIndex == -1) {
+            throw new Error("'xis:store-binding' attribute must be in the format 'localVariable:storeName.keyPath'.");
+        }
+        const storeName = storeAndPropertyPath.substring(0, dotIndex);
+        const propertyPath = storeAndPropertyPath.substring(dotIndex + 1);
+
+        storeBindingTag.setAttribute('store', storeName);
+        storeBindingTag.setAttribute('binding', propertyPath);
+
+        this.domAccessor.insertParent(element, storeBindingTag);
+        element.removeAttribute('xis:storage-binding');
+        return element;
+    }
+
 
 
     /**

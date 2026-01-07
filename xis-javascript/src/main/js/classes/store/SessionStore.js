@@ -1,6 +1,6 @@
 class SessionStore extends Store {
-    constructor() {
-        super();
+    constructor(eventPublisher) {
+        super(eventPublisher, sessionStorage, 'sessionStorageUpdated');
     }
 
     /**

@@ -132,6 +132,9 @@ class HandlerBuilder {
             case 'xis:if':
                 handler = new IfTagHandler(element);
                 break;
+            case 'xis:storage-binding':
+                handler = new StoreBindingHandler(element);
+                break;
         }
         
         if (isElement(element)) { 

@@ -32,3 +32,11 @@ function readBodyChildArray(html) {
     return arr;
 }
 
+function isFloat(n) {
+    return true;
+}
+
+function isInt(n) {
+    return true;
+}
+

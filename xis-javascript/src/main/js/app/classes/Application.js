@@ -4,9 +4,10 @@ class Application {
         this.initializers = [];
         this.initializationListeners = [];
         this.messageHandler = window.messageHandler ?  window.messageHandler : new MessageHandler();
-        this.sessionStorage = new SessionStore();
-        this.localStorage = new LocalStore();
-        this.clientStorage = new ClientStore();
+        this.eventPublisher = new EventPublisher();
+        this.sessionStorage = new SessionStore(this.eventPublisher);
+        this.localStorage = new LocalStore(this.eventPublisher);
+        this.clientStorage = new ClientStore(this.eventPublisher);
         this.httpConnector = new HttpConnector();
         this.httpConnector = new HttpConnector();
         this.domAccessor = new DomAccessor();
@@ -21,7 +22,6 @@ class Application {
         this.initializer = new Initializer(this.domAccessor, this.client, this.widgets, this.includes, this.widgetContainers, this.tagHandlers);
         this.pageController = new PageController(this.client, this.pages, this.initializer, this.urlResolver, this.tagHandlers);
         this.history = new PageHistory(this.pageController);
-        this.eventPublisher = new EventPublisher();
         this.globals = new GlobalStore(this.eventPublisher);
         this.runInitializers();
     }

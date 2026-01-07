@@ -1,6 +1,6 @@
 class ClientStore extends Store {
-    constructor() {
-        super();
+    constructor(eventPublisher) {
+        super(eventPublisher, undefined, 'clientStorageUpdated');
         this.data = new Map();
     }
 

@@ -13,7 +13,6 @@
  * @property {any} sessionStorageData
  * @property {any} clientStorageData
  * @property {any} validatorMessages
- * @property {Object} tagVariables
  * @property {Object} idVariables
  * @property {string} actionProcessing
  * @property {string} title

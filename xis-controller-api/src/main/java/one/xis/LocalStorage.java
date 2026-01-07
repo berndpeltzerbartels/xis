@@ -6,35 +6,41 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Binds a value from the browser's LocalStorage to a method parameter,
- * or stores a method's return value in LocalStorage.
+ * Binds a value from the browser's localStorage to an action method parameter.
  *
- * <p><strong>Usage on method parameters:</strong><br>
- * The value associated with the given key will be read from LocalStorage
- * and passed into the method as an argument.
+ * <p>The client sends only the specified localStorage key to the server.
+ * The server deserializes the value, passes it to the method, and any modifications
+ * made to the object are automatically saved back to localStorage after method execution.</p>
  *
+ * <p><strong>Example:</strong></p>
  * <pre>{@code
- * public String render(@LocalStorage("username") String name) {
- *     return "Hello " + name;
+ * @Action("addToCart")
+ * public void addToCart(@LocalStorage("cart") ShoppingCart cart,
+ *                       @ActionParameter("productId") String productId) {
+ *     cart.addProduct(productId);
+ *     // cart is automatically saved back to localStorage
  * }
  * }</pre>
  *
- * <p><strong>Usage on methods:</strong><br>
- * The return value of the method will be stored in LocalStorage under the given key
- * after the request has been processed.
+ * <p><strong>Initialization:</strong><br>
+ * If no value exists in localStorage, the parameter will be initialized with a default value.
+ * For objects, this is typically a new instance. Use {@link NullAllowed} to allow null values instead.</p>
  *
- * <pre>{@code
- * @LocalStorage("username")
- * public String getNameToStore() {
- *     return currentUser.getName();
- * }
- * }</pre>
+ * <p><strong>Storage Location:</strong><br>
+ * Data is stored client-side in the browser's localStorage and persists across browser sessions.
+ * All values are serialized as JSON.</p>
  *
- * <p>Note: Storage is handled client-side in the user's browser. Values are automatically
- * restored during later page requests. All values are serialized as JSON.</p>
+ * @see SessionStorage
+ * @see ClientStorage
+ * @see NullAllowed
  */
-@Target({ElementType.PARAMETER, ElementType.METHOD})
+@Target({ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface LocalStorage {
+    /**
+     * The localStorage key to read from and write to.
+     *
+     * @return the storage key
+     */
     String value();
 }

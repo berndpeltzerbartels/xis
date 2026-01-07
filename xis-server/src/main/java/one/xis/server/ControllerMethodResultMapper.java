@@ -73,10 +73,6 @@ class ControllerMethodResultMapper {
             var key = method.getAnnotation(ClientStorage.class).value();
             controllerMethodResult.getClientStorage().put(key, returnValue);
         }
-        if (method.isAnnotationPresent(GlobalVariable.class)) {
-            var key = method.getAnnotation(GlobalVariable.class).value();
-            controllerMethodResult.getGlobalVariables().put(key, returnValue);
-        }
         if (method.isAnnotationPresent(Title.class)) {
             controllerMethodResult.setAnnotatedTitle(returnValue != null ? returnValue.toString() : "");
         }

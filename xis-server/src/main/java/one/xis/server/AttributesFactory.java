@@ -32,9 +32,6 @@ class AttributesFactory {
             if (parameter.isAnnotationPresent(ClientStorage.class)) {
                 attributes.getClientStorageKeys().add(parameter.getAnnotation(ClientStorage.class).value());
             }
-            if (parameter.isAnnotationPresent(GlobalVariable.class)) {
-                attributes.getGlobalVariableKeys().add(parameter.getAnnotation(GlobalVariable.class).value());
-            }
             if (parameter.isAnnotationPresent(LocalDatabase.class)) {
                 attributes.getLocalDatabaseKeys().add(parameter.getAnnotation(LocalDatabase.class).value());
             }

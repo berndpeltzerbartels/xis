@@ -32,7 +32,6 @@ class WidgetContainerHandler extends TagHandler {
         this.containerIdExpression = this.variableTextContentFromAttribute('container-id');
         this.defaultWidgetExpression = this.variableTextContentFromAttribute('default-widget');
         this.type = 'widget-container-handler';
-        this.tagContentSetter = new TagContentSetter();
         this.scrollToTop = tag.getAttribute('scroll-to-top') === 'true';
         this.buffer = undefined;
         this.widgetParameters = {};
@@ -84,6 +83,7 @@ class WidgetContainerHandler extends TagHandler {
             .then(() => this.updatePageMetadata(response))
             .then(() => app.pageController.handleUpdateEvents(response.updateEventKeys))
             .then(pageUpdated => this.handleWidgetContainerUpdates(pageUpdated, response.updateEventKeys))
+            .then(() => updateStores(response))
             .then(() => this.commitBuffer());
     }
 
@@ -101,7 +101,6 @@ class WidgetContainerHandler extends TagHandler {
         this.widgetParameters = mergeObjects(this.widgetParameters, data.getValue(['widgetParameters']));
         this.widgetState = new WidgetState(app.pageController.resolvedURL, this.widgetParameters);
         data.setValue(['widgetParameters'], this.widgetParameters);
-        debugger;
         const descendantPromise = this.refreshDescendantHandlers(data); // xis:parameter tags will call addParameter
         var promises = [];
         if (this.widgetInstance) {
@@ -193,7 +192,7 @@ class WidgetContainerHandler extends TagHandler {
     }
 
     bindByWidgetAnnotation() {
-        var response = app.pageController.currentResponse;
+        var response = app.currentResponse;
         for (var defaultWidget of response.defaultWidgets) {
             if (defaultWidget.containerId === this.containerId) {
                 this.ensureWidgetBound(defaultWidget.widgetId);
@@ -341,6 +340,7 @@ class WidgetContainerHandler extends TagHandler {
 
     doLoad(parentData) {
         if (this.widgetInstance) {
+            const response = app.currentResponse;
             return app.client.loadWidgetData(this.widgetInstance, this.widgetState, this)
                 .then(response => this.updatePageMetadata(response))
                 .then(response => this.enrichResponseDataWithUrlInfo(response))
@@ -348,7 +348,7 @@ class WidgetContainerHandler extends TagHandler {
                 .then(data => this.updateWidgetStateData(data))
                 .then(data => this.mergeWidgetParameters(data))
                 .then(data => this.refreshDescendantHandlers(data).then(() => data))
-                .then(data => this.tagContentSetter.apply(document, data.idVariables, data.tagVariables))
+                .then(() => updateStores(response))
                 .catch(e => reportError(e));
         }
         return Promise.resolve();

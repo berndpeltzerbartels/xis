@@ -3,9 +3,10 @@ class TestApplication {
     constructor() {
         this.initializers = [];
         this.messageHandler = new MessageHandler();
-        this.sessionStorage = new SessionStore();
-        this.localStorage = new LocalStore();
-        this.clientStorage = new ClientStore();
+        this.eventPublisher = new EventPublisher();
+        this.sessionStorage = new SessionStore(this.eventPublisher);
+        this.localStorage = new LocalStore(this.eventPublisher);
+        this.clientStorage = new ClientStore(this.eventPublisher);
         this.httpConnector = new HttpConnectorMock();
         this.domAccessor = new DomAccessor();
         this.client = new HttpClient(this.httpConnector);
@@ -18,7 +19,6 @@ class TestApplication {
         this.initializer = new Initializer(this.domAccessor, this.client, this.widgets, this.includes, this.widgetContainers, this.tagHandlers);
         this.pageController = new PageController(this.client, this.pages, this.initializer, this.urlResolver, this.tagHandlers);
         this.history = new PageHistory(this.pageController);
-        this.eventPublisher = new EventPublisher();
         this.globals = new GlobalStore(this.eventPublisher);
         this.runInitializers();
     }

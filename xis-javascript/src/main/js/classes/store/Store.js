@@ -1,9 +1,13 @@
 class Store {
-    /**
-     * @param {Storage} storageArea - The storage area to use (e.g., localStorage or sessionStorage)
-     */
-    constructor(storageArea) {
+    /*
+        * @param {EventPublisher} eventPublisher
+        * @param {Storage} storageArea
+        * @param {string} eventKey
+        */
+    constructor( eventPublisher, storageArea, eventKey) {
+        this.eventPublisher = eventPublisher;
         this.storageArea = storageArea;
+        this.eventKey = eventKey;
         this.pathMap = {};
         window.addEventListener('storage', (event) => this.onEvent(event));
     }
@@ -103,6 +107,7 @@ class Store {
                 this.saveValue(path, this.toStoreString(val));
             }
             this.startUpdate(path);
+            this.eventPublisher.publish(this.eventKey, new StorageUpdateEvent(path, val, !val));
         }
        
     }

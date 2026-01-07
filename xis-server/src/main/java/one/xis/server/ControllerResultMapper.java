@@ -47,11 +47,9 @@ class ControllerResultMapper {
         controllerResult.getRequestScope().putAll(controllerMethodResult.getRequestScope());
         controllerResult.getLocalStorage().putAll(controllerMethodResult.getLocalStorage());
         controllerResult.getClientStorage().putAll(controllerMethodResult.getClientStorage());
-        controllerResult.getGlobalVariables().putAll(controllerMethodResult.getGlobalVariables());
         if (controllerMethodResult.isValidationFailed()) {
             controllerResult.setValidationFailed(true);
         }
-        controllerResult.getTagVariables().putAll(controllerMethodResult.getTagVariables());
         controllerResult.getIdVariables().putAll(controllerMethodResult.getIdVariables());
     }
 

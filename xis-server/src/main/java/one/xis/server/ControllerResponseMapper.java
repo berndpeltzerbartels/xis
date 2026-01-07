@@ -22,9 +22,7 @@ class ControllerResponseMapper {
         response.getSessionStorageData().putAll(result.getSessionStorage());
         response.getLocalStorageData().putAll(result.getLocalStorage());
         response.getClientStorageData().putAll(result.getClientStorage());
-        response.getGlobalVariableData().putAll(result.getGlobalVariables());
         response.setRedirectUrl(result.getRedirectUrl());
-        response.getTagVariables().putAll(result.getTagVariables());
         response.getIdVariables().putAll(result.getIdVariables());
         response.getWidgetParameters().putAll(result.getWidgetParameters());
         if (result.getAnnotatedTitle() != null) {
