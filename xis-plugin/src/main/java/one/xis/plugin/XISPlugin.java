@@ -44,7 +44,7 @@ public class XISPlugin implements Plugin<Project> {
         constraints.add("implementation", "one.xis:xis-bootstrap:" + version);
         constraints.add("implementation", "one.xis:xis-theme:" + version);
         constraints.add("implementation", "one.xis:xis-util:" + version);
-        constraints.add("implementation", "one.xis:xis-http:" + version);
+        constraints.add("implementation", "one.xis:xis-http-controller:" + version);
         constraints.add("testImplementation", "one.xis:xis-test:" + version);
         project.getDependencies().add("annotationProcessor", "one.xis:xis-apt:" + version);
     }
