@@ -7,5 +7,6 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
+// TODO may be remove it
 public @interface MainClass { // TODO noch erforderlich ?
 }

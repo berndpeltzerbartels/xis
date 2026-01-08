@@ -21,7 +21,7 @@ class IncludeHandler extends TagHandler {
         super(tag);
         this.includes = includes;
         this.initializer = initializer;
-        this.key = tag.getAttribute('key');
+        this.key = tag.getAttribute('name');
         this.type = 'include-handler';
         this.includeInstance = null;
     }

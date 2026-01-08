@@ -6,6 +6,7 @@ import java.lang.annotation.*;
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface CssFile { // TODO
+// TODO: may be remove it
+public @interface CssFile {
     String value();
 }

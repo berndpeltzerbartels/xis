@@ -4,7 +4,7 @@ import java.lang.annotation.*;
 
 
 /**
- * Annotation to indicate that a parameter is allowed to be null.
+ * Annotation to indicate that a parameter of a controller method is allowed to be null.
  */
 @Documented
 @Target(ElementType.PARAMETER)

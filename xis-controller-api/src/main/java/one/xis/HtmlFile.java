@@ -10,8 +10,8 @@ import java.lang.annotation.*;
  * if (path starts with a slash, it is considered absolute, otherwise relative to the controller's package.
  * For example:
  * <pre>
- * @HtmlFile("TestPage.html") // file is inside controller's package
- * @HtmlFile("/test/TestPage.html") // absolute path
+ * &#064;HtmlFile("TestPage.html") // file is inside controller's package
+ * &#064;HtmlFile("/test/TestPage.html")  // absolute path
  * </pre>
  */
 @Target({ElementType.TYPE})

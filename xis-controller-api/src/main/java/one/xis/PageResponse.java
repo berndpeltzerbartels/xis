@@ -7,6 +7,10 @@ import lombok.RequiredArgsConstructor;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Represents a response that navigates to a specific page (controller) with optional path variables and query parameters.
+ * Can be used within pages or widgets.
+ */
 @Getter
 @RequiredArgsConstructor
 public class PageResponse implements Response {

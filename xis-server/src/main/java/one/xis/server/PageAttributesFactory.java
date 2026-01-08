@@ -7,8 +7,6 @@ import one.xis.WelcomePage;
 import one.xis.context.Component;
 import one.xis.resource.Resources;
 
-import java.util.Optional;
-
 @Component
 @RequiredArgsConstructor
 class PageAttributesFactory extends AttributesFactory {
@@ -26,14 +24,9 @@ class PageAttributesFactory extends AttributesFactory {
             throw new IllegalStateException("WelcomePage cannot have path variables: " + controller.getClass());
         }
         addParameterAttributes(controller.getClass(), attributes);
-        getJavascriptResource(controller).ifPresent(attributes::setPageJavascriptSource);
         addUpdateEventKeys(controller.getClass(), attributes);
         return attributes;
     }
 
-    private Optional<String> getJavascriptResource(@NonNull Object controller) {
-        var javascriptPath = PageUtil.getJavascriptResourcePath(controller.getClass());
-        return resources.exists(javascriptPath) ? Optional.of("/xis/page/javascript/" + javascriptPath) : Optional.empty();
-    }
 
 }

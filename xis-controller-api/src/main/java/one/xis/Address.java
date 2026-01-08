@@ -11,5 +11,6 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
+// TODO: may be remove it
 public @interface Address {
 }
