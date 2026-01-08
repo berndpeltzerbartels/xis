@@ -9,10 +9,7 @@ import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * Annotation for local login parameters.
- * <p>
- * This annotation is used to mark parameters in methods that handle local login requests.
- * It indicates that the parameter should be extracted from the request body or URL.
+ * Annotation for local login form objects fo binding a validator to them.
  */
 @Retention(RUNTIME)
 @Target(TYPE)
