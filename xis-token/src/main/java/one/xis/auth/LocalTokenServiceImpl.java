@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @DefaultComponent
 @RequiredArgsConstructor
-public class LocalTokenServiceImpl implements LocalTokenService {
+class LocalTokenServiceImpl implements LocalTokenService {
 
     private final TokenService tokenService;
     private final LocalKeyProvider localKeyProvider;

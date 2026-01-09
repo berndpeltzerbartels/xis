@@ -138,7 +138,7 @@ public class ClassUtils {
             return new HashMap<>();
         }
     }
-    
+
     private static <T> T createRecordInstance(Class<T> recordClass) {
         try {
             // Get canonical constructor for record
@@ -311,4 +311,24 @@ public class ClassUtils {
     }
 
 
+    public static Collection<Class<?>> getAllInterfaces(Class<?> clazz) {
+        return Arrays.stream(clazz.getInterfaces())
+                .flatMap(i -> {
+                    Collection<Class<?>> interfaces = new ArrayList<>();
+                    interfaces.add(i);
+                    interfaces.addAll(getAllInterfaces(i));
+                    return interfaces.stream();
+                })
+                .collect(Collectors.toSet());
+    }
+
+    public static Collection<Class<?>> getSuperClasses(Class<?> clazz) {
+        Collection<Class<?>> superClasses = new ArrayList<>();
+        Class<?> c = clazz.getSuperclass();
+        while (c != null && !c.equals(Object.class)) {
+            superClasses.add(c);
+            c = c.getSuperclass();
+        }
+        return superClasses;
+    }
 }
