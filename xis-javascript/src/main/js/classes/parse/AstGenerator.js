@@ -760,7 +760,6 @@ class Variable {
      * @param {string} path 
      */
     constructor(path) {
-    debugger;
         this.type = 'VARIABLE';
         this.path = path;
         this.negated = false;
@@ -871,7 +870,6 @@ class ObjectProperty {
      * @param {string} key
      */
     constructor(path, key) {
-    debugger;
         this.type = 'OBJECT_PROPERTY';
         this.path = path;
         this.key = key;
@@ -966,14 +964,12 @@ class TernaryOperator {
 class SessionStorageVariable {
 
     constructor(path) {
-    debugger;
       this.type = 'SESSION_STORAGE_VARIABLE';
       this.path = path;
       this.negated = false;
     }
 
     evaluate(data) {
-    debugger;
         const subpath = this.path.substring('sessionStorage.'.length);
         return app.sessionStorage.getValue(subpath);
     }

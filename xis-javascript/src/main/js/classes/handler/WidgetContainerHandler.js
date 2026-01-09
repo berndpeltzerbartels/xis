@@ -363,7 +363,6 @@ class WidgetContainerHandler extends TagHandler {
     enrichResponseDataWithUrlInfo(response) {
         const data = response.data;
         if (this.widgetState && this.widgetState.resolvedURL) {
-        debugger;
             const url = this.widgetState.resolvedURL.url;
             const pathname = url.split('?')[0]; // Remove query string
             data.setValue(['url'], url);

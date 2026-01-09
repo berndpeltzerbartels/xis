@@ -272,7 +272,6 @@ function mergeObjects(object1, object2) {
 }
 
 function updateStores(response) {
-debugger;
    new StoreUpdater().updateStores(response);
    return Promise.resolve();
 }

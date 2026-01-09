@@ -15,7 +15,6 @@ class TagHandler {
     }
 
     addDescendantHandler(handler) {
-        console.log('type: ' + this.type + 'handler: ' + handler.type);
         handler.parentHandler = this;
         this.descendantHandlers.push(handler);
         handler.publishBindEvent();

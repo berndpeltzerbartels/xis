@@ -50,7 +50,6 @@ class FormHandler extends TagHandler {
     }
 
     targetContainerHandler() {
-        debugger;
         var container = this.findParentWidgetContainer();
         return container ? app.tagHandlers.getHandler(container) : null;
     }
@@ -68,7 +67,6 @@ class FormHandler extends TagHandler {
         this.formElementHandlers = {};
         data.validationPath = '/' + formBindingKey;
         this.clearMessageHandlers();
-        debugger;
         const descendantPromise = this.refreshDescendantHandlers(data);
         const formDataPromise = this.client.loadFormData(app.pageController.resolvedURL, this.widgetId(), formBindingKey, widgetParameters, this)
             .then(response => this.refreshFormData(this.subData(response, formBindingKey)));

@@ -18,7 +18,6 @@ class HttpConnectorMock {
                     headers || {},
                     JSON.stringify(payload || {})
                 );
-                this.logResponse(response);
                 resolve(response);
             } catch (e) {
                 reportError("Error during backend invocation: " + e);
@@ -44,7 +43,6 @@ class HttpConnectorMock {
                     headers || {},
                     null
                 );
-                this.logResponse(response);
                 resolve(response);
             } catch (e) {
                 reportError("Error during backend invocation: " + e);
@@ -54,21 +52,11 @@ class HttpConnectorMock {
     }
 
     logRequest(method, uri, payload, headers) {
-        console.log('---------------------------------request-------------------------------------');
         console.log('method: ' + method);
         if (headers) {
             for (const key in headers) {
                 console.log('header: ' + key + ' : ' + headers[key]);
             }
         }
-        console.log('uri: ' + uri);
-        console.log('payload: ' + JSON.stringify(payload || {}));
-    }
-
-    logResponse(response) {
-        console.log('----------------------------------response------------------------------------');
-        // Die 'response' ist das JavascriptResponse-Objekt aus Java
-        console.log('status: ' + response.status);
-        console.log('response body: ' + response.responseText);
     }
 }
