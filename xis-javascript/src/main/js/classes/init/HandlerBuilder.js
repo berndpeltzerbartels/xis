@@ -117,7 +117,7 @@ class HandlerBuilder {
                 }
                 break;
             case 'button':
-                if (element.getAttribute('xis:action')) {
+                  if (element.getAttribute('xis:page') || element.getAttribute('xis:widget') || element.getAttribute('xis:action')) {
                     handler = this.createButtonHandler(element);
                 }
                 break;
@@ -133,7 +133,7 @@ class HandlerBuilder {
                 handler = new IfTagHandler(element);
                 break;
             case 'xis:storage-binding':
-                handler = new StoreBindingHandler(element);
+                handler = new StorageBindingHandler(element);
                 break;
         }
         
@@ -278,7 +278,15 @@ class HandlerBuilder {
      * @param {Element} element
      */
     createButtonHandler(element) {
-        return new ActionButtonHandler(element, this.client, this.widgetContainers);
+        if (element.getAttribute('xis:action')) {
+            return new ActionButtonHandler(element, this.client, this.widgetContainers);
+        }
+        if (element.getAttribute('xis:page')) {
+            return new PageButtonHandler(element);
+        }
+        if (element.getAttribute('xis:widget')) {
+            return new WidgetButtonHandler(element, this.widgetContainers);
+        }
     }
 
     /**

@@ -1,11 +1,11 @@
 /**
- * @class WidgetLinkHandler
+ * @class WidgetButtonHandler
  * @extends {WidgetLinkHandlerBase}
  * @package classes/handler
  * @access public
- * @description Handler for <a> elements linking to widgets.
+ * @description Handler for <button> elements linking to widgets.
  */
-class WidgetLinkHandler extends WidgetLinkHandlerBase {
+class WidgetButtonHandler extends WidgetLinkHandlerBase {
 
     /**
      * 
@@ -14,10 +14,7 @@ class WidgetLinkHandler extends WidgetLinkHandlerBase {
      */
     constructor(element, widgetContainers) {
         super(element, widgetContainers);
-        this.type = 'widget-link-handler';
-        element.setAttribute("href", "#");
+        this.type = 'widget-button-handler';
     }
 
 }
-
-

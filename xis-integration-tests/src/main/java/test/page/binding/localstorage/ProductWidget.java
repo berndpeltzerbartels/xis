@@ -14,7 +14,7 @@ import java.util.List;
 @Widget
 public class ProductWidget {
 
-    private List<Product> products = new ArrayList<>();
+    private final List<Product> products = new ArrayList<>();
 
     ProductWidget() {
         products.add(new Product("Product 1", 10.99));

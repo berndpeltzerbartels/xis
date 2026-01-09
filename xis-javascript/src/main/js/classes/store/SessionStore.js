@@ -9,6 +9,7 @@ class SessionStore extends Store {
      * @returns {any}
      */
     readValue(path) {
+    debugger;
         return sessionStorage.getItem(path);
     }
 
@@ -19,6 +20,7 @@ class SessionStore extends Store {
      * @param {any} value 
      */
     saveValue(path, value) {
+    debugger;
         sessionStorage.setItem(path, value);
     }
 

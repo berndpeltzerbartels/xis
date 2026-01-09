@@ -11,12 +11,15 @@ class EventPublisher {
         this.listeners[eventKey].push(listener);
     }
 
-    removeEventListener(eventKey, listener) {
-        if (!this.listeners[eventKey]) return;
-        const index = this.listeners[eventKey].indexOf(listener);
-        if (index > -1) {
-            this.listeners[eventKey].splice(index, 1);
-        }
+    removeEventListener(listener) {
+       for (const eventKey in this.listeners) {
+            const listeners = this.listeners[eventKey];
+            const index = listeners.indexOf(listener);
+            if (index > -1) {
+                listeners.splice(index, 1);
+                console.log(`Removed listener from event: ${eventKey}`);
+            }
+       }
     }
 
     publish(eventKey, data) {

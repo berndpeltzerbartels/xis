@@ -22,43 +22,36 @@ class StorageBindingTest {
     void testInitialEmptyShoppingCard() {
         var result = testContext.openPage(StorageBindingPage.class);
 
-        var spanItemCountCard = result.getDocument().getElementById("item-count-card");
-        var spanItemCountProducts = result.getDocument().getElementById("item-count-products");
+        var spanItemCount = result.getDocument().getElementById("item-count");
         var spanTotalPrice = result.getDocument().getElementById("total-price");
 
-        assertThat(spanItemCountCard).isNotNull();
-        assertThat(spanItemCountProducts).isNotNull();
+        assertThat(spanItemCount).isNotNull();
         assertThat(spanTotalPrice).isNotNull();
 
-        assertThat(spanItemCountCard.getInnerText()).isEqualTo("0 items");
-        assertThat(spanItemCountProducts.getInnerText()).isEqualTo("0 items");
-        //assertThat(spanTotalPrice.getInnerText()).isEqualTo("€0");
+        assertThat(spanItemCount.getInnerText()).isEqualTo("0 items");
+        assertThat(spanTotalPrice.getInnerText()).isEqualTo("€0");
     }
 
     @Test
     void testAddSingleProduct() {
         var result = testContext.openPage(StorageBindingPage.class);
 
-        var spanItemCountCard = result.getDocument().getElementById("item-count-card");
-        var spanItemCountProducts = result.getDocument().getElementById("item-count-products");
+        var spanItemCount = result.getDocument().getElementById("item-count");
         var spanTotalPrice = result.getDocument().getElementById("total-price");
 
-        assertThat(spanItemCountCard).isNotNull();
-        assertThat(spanItemCountProducts).isNotNull();
+        assertThat(spanItemCount).isNotNull();
         assertThat(spanTotalPrice).isNotNull();
 
-        assertThat(spanItemCountCard.getInnerText()).isEqualTo("0 items");
-        assertThat(spanItemCountProducts.getInnerText()).isEqualTo("0 items");
-        //assertThat(spanTotalPrice.getInnerText()).isEqualTo("€0");
+        assertThat(spanItemCount.getInnerText()).isEqualTo("0 items");
+        assertThat(spanTotalPrice.getInnerText()).isEqualTo("€0");
 
         // Click first product link
         var link1 = result.getDocument().getElementById("add-product-1");
         link1.click();
 
         // Check updated cart
-        assertThat(spanItemCountCard.getInnerText()).contains("1 items");
-        assertThat(spanItemCountProducts.getInnerText()).contains("1 items");
-        //  assertThat(spanTotalPrice.getInnerText()).contains("€10.99");
+        assertThat(spanItemCount.getInnerText()).contains("1 items");
+        assertThat(spanTotalPrice.getInnerText()).contains("€10.99");
     }
 
     @Test
@@ -74,13 +67,11 @@ class StorageBindingTest {
         link2.click();
         link3.click();
 
-        var spanItemCountCard = result.getDocument().getElementById("item-count-card");
-        var spanItemCountProducts = result.getDocument().getElementById("item-count-products");
+        var spanItemCount = result.getDocument().getElementById("item-count");
         var spanTotalPrice = result.getDocument().getElementById("total-price");
 
 
-        assertThat(spanItemCountCard.getInnerText()).contains("3 items");
-        assertThat(spanItemCountProducts.getInnerText()).contains("3 items");
+        assertThat(spanItemCount.getInnerText()).contains("3 items");
 
         // Total: 10.99 + 25.50 + 15.75 = 52.24
         assertThat(spanTotalPrice.getInnerText()).contains("€52.24");
@@ -90,36 +81,30 @@ class StorageBindingTest {
     void testAddSameProductMultipleTimes() {
         var result = testContext.openPage(StorageBindingPage.class);
 
-        var spanItemCountCard = result.getDocument().getElementById("item-count-card");
-        var spanItemCountProducts = result.getDocument().getElementById("item-count-products");
+        var spanItemCount = result.getDocument().getElementById("item-count");
         var spanTotalPrice = result.getDocument().getElementById("total-price");
 
-        assertThat(spanItemCountCard).isNotNull();
-        assertThat(spanItemCountProducts).isNotNull();
+        assertThat(spanItemCount).isNotNull();
         assertThat(spanTotalPrice).isNotNull();
 
-        assertThat(spanItemCountCard.getInnerText()).isEqualTo("0 items");
-        assertThat(spanItemCountProducts.getInnerText()).isEqualTo("0 items");
+        assertThat(spanItemCount.getInnerText()).isEqualTo("0 items");
         assertThat(spanTotalPrice.getInnerText()).isEqualTo("€0");
 
         // Click first product link
         var link1 = result.getDocument().getElementById("add-product-1");
         link1.click();
 
-        assertThat(spanItemCountCard.getInnerText()).contains("1 items");
-        assertThat(spanItemCountProducts.getInnerText()).contains("1 items");
+        assertThat(spanItemCount.getInnerText()).contains("1 items");
         assertThat(spanTotalPrice.getInnerText()).contains("€10.99");
 
         link1.click(); // Add same product again
 
-        assertThat(spanItemCountCard.getInnerText()).contains("2 items");
-        assertThat(spanItemCountProducts.getInnerText()).contains("2 items");
+        assertThat(spanItemCount.getInnerText()).contains("2 items");
         assertThat(spanTotalPrice.getInnerText()).contains("€21.98");
 
         link1.click();
 
-        assertThat(spanItemCountCard.getInnerText()).contains("3 items");
-        assertThat(spanItemCountProducts.getInnerText()).contains("3 items");
+        assertThat(spanItemCount.getInnerText()).contains("3 items");
         assertThat(spanTotalPrice.getInnerText()).contains("€32.97");
     }
 }

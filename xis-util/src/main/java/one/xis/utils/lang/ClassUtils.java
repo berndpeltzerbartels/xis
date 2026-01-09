@@ -34,11 +34,133 @@ public class ClassUtils {
             constructor.setAccessible(true);
             return constructor.newInstance();
         } catch (NoSuchMethodException e) {
-            throw new RuntimeException(aClass + " must have a default contructor");
+            return newInstanceWithDefaults(aClass);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
+
+    private static <T> T newInstanceWithDefaults(Class<T> aClass) {
+        Constructor<?>[] constructors = aClass.getDeclaredConstructors();
+        Arrays.sort(constructors, Comparator.comparingInt(Constructor::getParameterCount));
+
+        for (Constructor<?> constructor : constructors) {
+            try {
+                constructor.setAccessible(true);
+                Object[] parameters = createDefaultParameters(constructor);
+                @SuppressWarnings("unchecked")
+                T instance = (T) constructor.newInstance(parameters);
+                return instance;
+            } catch (Exception e) {
+                // Try next constructor
+            }
+        }
+        throw new RuntimeException("Could not instantiate class " + aClass.getName());
+    }
+
+    private static Object[] createDefaultParameters(Constructor<?> constructor) {
+        Class<?>[] parameterTypes = constructor.getParameterTypes();
+        Object[] parameters = new Object[parameterTypes.length];
+
+        for (int i = 0; i < parameterTypes.length; i++) {
+            parameters[i] = getDefaultValue(parameterTypes[i]);
+        }
+
+        return parameters;
+    }
+
+    private static Object getDefaultValue(Class<?> type) {
+        // Primitives
+        if (type == boolean.class) return false;
+        if (type == byte.class) return (byte) 0;
+        if (type == short.class) return (short) 0;
+        if (type == int.class) return 0;
+        if (type == long.class) return 0L;
+        if (type == float.class) return 0.0f;
+        if (type == double.class) return 0.0;
+        if (type == char.class) return '\u0000';
+
+        // Common types
+        if (type == String.class) return "";
+        if (type == Boolean.class) return Boolean.FALSE;
+        if (type == Integer.class) return 0;
+        if (type == Long.class) return 0L;
+        if (type == Double.class) return 0.0;
+        if (type == Float.class) return 0.0f;
+        if (type == Short.class) return (short) 0;
+        if (type == Byte.class) return (byte) 0;
+        if (type == Character.class) return '\u0000';
+
+        // Collections
+        if (Collection.class.isAssignableFrom(type)) {
+            @SuppressWarnings("unchecked")
+            Class<? extends Collection<?>> collectionType = (Class<? extends Collection<?>>) type;
+            return CollectionUtils.emptyInstance(collectionType);
+        }
+
+        if (Map.class.isAssignableFrom(type)) {
+            return defaultMap(type);
+        }
+
+        // Arrays
+        if (type.isArray()) {
+            return java.lang.reflect.Array.newInstance(type.getComponentType(), 0);
+        }
+
+        // Enums
+        if (type.isEnum()) {
+            Object[] enumConstants = type.getEnumConstants();
+            return enumConstants.length > 0 ? enumConstants[0] : null;
+        }
+
+        // Records
+        if (type.isRecord()) {
+            return createRecordInstance(type);
+        }
+
+        // Complex types - recursively instantiate
+        try {
+            return newInstance(type);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private static Map<?, ?> defaultMap(Class<?> type) {
+        if (type.isInterface() || Modifier.isAbstract(type.getModifiers())) {
+            return new HashMap<>();
+        }
+        try {
+            Constructor<?> constructor = type.getDeclaredConstructor();
+            constructor.setAccessible(true);
+            return (Map<?, ?>) constructor.newInstance();
+        } catch (Exception e) {
+            return new HashMap<>();
+        }
+    }
+    
+    private static <T> T createRecordInstance(Class<T> recordClass) {
+        try {
+            // Get canonical constructor for record
+            var recordComponents = recordClass.getRecordComponents();
+            Class<?>[] parameterTypes = Arrays.stream(recordComponents)
+                    .map(java.lang.reflect.RecordComponent::getType)
+                    .toArray(Class<?>[]::new);
+
+            Constructor<T> constructor = recordClass.getDeclaredConstructor(parameterTypes);
+            constructor.setAccessible(true);
+
+            Object[] parameters = new Object[parameterTypes.length];
+            for (int i = 0; i < parameterTypes.length; i++) {
+                parameters[i] = getDefaultValue(parameterTypes[i]);
+            }
+
+            return constructor.newInstance(parameters);
+        } catch (Exception e) {
+            throw new RuntimeException("Could not instantiate record " + recordClass.getName(), e);
+        }
+    }
+
 
     public boolean areRelated(Class<?> c1, Class<?> c2) {
         return c1.isAssignableFrom(c2) || c2.isAssignableFrom(c1);

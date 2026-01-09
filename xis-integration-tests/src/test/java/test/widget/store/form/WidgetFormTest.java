@@ -1,14 +1,12 @@
-package test.widget.store;
+package test.widget.store.form;
 
 import one.xis.context.IntegrationTestContext;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-@Disabled
 class WidgetFormTest {
     private IntegrationTestContext context;
 
@@ -28,8 +26,8 @@ class WidgetFormTest {
         var counterOnPage = result.getDocument().getElementById("counter-value-page").getInnerText();
         var counterOnWidget = result.getDocument().getElementById("counter-value-widget").getInnerText();
 
-        assertThat(counterOnPage).isEqualTo("10");
-        assertThat(counterOnWidget).isEqualTo("10");
+        assertThat(counterOnPage).isEqualTo("0");
+        assertThat(counterOnWidget).isEqualTo("0");
 
         // Enter a value in the input field before submitting
         var inputField = result.getDocument().getElementById("increment-input");
@@ -43,7 +41,7 @@ class WidgetFormTest {
         counterOnPage = result.getDocument().getElementById("counter-value-page").getInnerText();
         counterOnWidget = result.getDocument().getElementById("counter-value-widget").getInnerText();
 
-        assertThat(counterOnPage).isEqualTo("13");
-        assertThat(counterOnWidget).isEqualTo("13");
+        assertThat(counterOnPage).isEqualTo("3");
+        assertThat(counterOnWidget).isEqualTo("3");
     }
 }

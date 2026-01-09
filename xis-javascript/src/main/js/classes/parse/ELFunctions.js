@@ -150,17 +150,17 @@ class ELFunctions {
         
         const pathParts = doSplit(path, '.');
         let results = value;
-        
+
         // Navigate through each path segment
         for (const pathPart of pathParts) {
             const nextResults = [];
-            
+
             for (const item of results) {
                 if (item == null) continue;
-                
+
                 const data = new Data(item);
                 const val = data.getValue([pathPart]);
-                
+
                 // If value is array, flatten it
                 if (Array.isArray(val)) {
                     nextResults.push(...val);
@@ -168,7 +168,7 @@ class ELFunctions {
                     nextResults.push(val);
                 }
             }
-            
+
             results = nextResults;
         }
         

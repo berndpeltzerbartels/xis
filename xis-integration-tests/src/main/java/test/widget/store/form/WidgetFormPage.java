@@ -1,4 +1,4 @@
-package test.widget.store;
+package test.widget.store.form;
 
 import one.xis.Page;
 

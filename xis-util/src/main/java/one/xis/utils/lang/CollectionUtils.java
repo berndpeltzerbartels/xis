@@ -96,5 +96,4 @@ public class CollectionUtils {
         }
         throw new UnsupportedOperationException("unable to instantiate " + clazz);
     }
-
 }

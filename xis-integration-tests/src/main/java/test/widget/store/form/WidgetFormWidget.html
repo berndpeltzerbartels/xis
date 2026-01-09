@@ -1,6 +1,7 @@
 <xis:template xmlns:xis="http://xis.one/schema">
     <div>
-        <p>Counter in Widget: <span id="counter-value-widget">${sessionStorage.counterValue}</span></p>
+        <p>Counter in Widget: <span id="counter-value-widget" xis:storage-binding="sessionStorage">${defaultValue(sessionStorage.counter.value, '0')}</span>
+        </p>
         <form xis:binding="formData">
             <input type="text" xis:binding="incrementValue" id="increment-input"/>
             <button xis:action="increment-form" type="submit" id="increment-form-button">Add Value</button>

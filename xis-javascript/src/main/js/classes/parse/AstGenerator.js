@@ -389,7 +389,7 @@ class AstGenerator {
             } else {
                 // It's property access - create a new Variable with compound path
                 const basePath = result.type === 'VARIABLE' ? result.path : result.toString();
-                result = new Variable(basePath + '.' + propertyOrMethodName);
+                result = this.createVariableByPath(basePath + '.' + propertyOrMethodName);
             }
         }
 
@@ -448,42 +448,33 @@ class AstGenerator {
         }
     }
 
-    /**
+    createVariable(token) {
+        var path = token.value;
+        return this.createVariableByPath(path);
+    }
+        /**
      * 
      * @param {string} token 
      * @returns 
      */
-    createVariable(token) {
-        const path = token.value;
-
+    createVariableByPath(path) {
         // Check if this is a special state or localStorage variable
         if (path.startsWith('sessionStorage.')) {
-            const variablePath = path.substring(15); // Remove 'sessionStorage.' prefix
-            return this.createSessionStorageVariable(variablePath);
+            return this.createSessionStorageVariable(path);
         }
-
         if (path.startsWith('localStorage.')) {
-            const variablePath = path.substring(13); // Remove 'localStorage.' prefix
-            return this.createLocalStoreVariable(variablePath);
+            return this.createLocalStoreVariable(path);
         }
-
         if (path.startsWith('clientStorage.')) {
-            const variablePath = path.substring(14); // Remove 'clientStorage.' prefix
-            return this.createClientStoreVariable(variablePath);
+            return this.createClientStoreVariable(path);
         }
-
-        if (path.startsWith('global.')) {
-            const variablePath = path.substring(7); // Remove 'global.' prefix
-            return this.createGlobalVariable(variablePath);
-        }
-
         // Default variable for regular data access
         return new Variable(path);
     }
 
     /**
      * Creates a SessionStorageVariable for direct access to sessionStorage.
-     * @param {string} path - The state path without 'sessionStorage.' prefix
+     * @param {string} path - The path starting with 'sessionStorage.' prefix
      * @returns {SessionStorageVariable}
      */
     createSessionStorageVariable(path) {
@@ -492,7 +483,7 @@ class AstGenerator {
 
     /**
      * Creates a LocalStoreVariable for direct access to localStorage.
-     * @param {string} path - The localStorage path without 'localStorage.' prefix  
+     * @param {string} path - The path starting with 'localStorage.' prefix
      * @returns {LocalStoreVariable}
      */
     createLocalStoreVariable(path) {
@@ -501,7 +492,7 @@ class AstGenerator {
 
     /**
      * Creates a ClientStoreVariable for direct access to server-side clientStorage.
-     * @param {string} path - The clientStorage path without 'clientStorage.' prefix  
+     * @param {string} path - The path starting with 'clientStorage.' prefix
      * @returns {ClientStoreVariable}
      */
     createClientStoreVariable(path) {
@@ -769,6 +760,7 @@ class Variable {
      * @param {string} path 
      */
     constructor(path) {
+    debugger;
         this.type = 'VARIABLE';
         this.path = path;
         this.negated = false;
@@ -879,6 +871,7 @@ class ObjectProperty {
      * @param {string} key
      */
     constructor(path, key) {
+    debugger;
         this.type = 'OBJECT_PROPERTY';
         this.path = path;
         this.key = key;
@@ -971,17 +964,23 @@ class TernaryOperator {
  * This bypasses the Data object configuration and allows access to any client state value.
  */
 class SessionStorageVariable {
+
     constructor(path) {
-        this.path = path;
+    debugger;
+      this.type = 'SESSION_STORAGE_VARIABLE';
+      this.path = path;
+      this.negated = false;
     }
 
     evaluate(data) {
-        return app.sessionStorage.getValue(this.path);
+    debugger;
+        const subpath = this.path.substring('sessionStorage.'.length);
+        return app.sessionStorage.getValue(subpath);
     }
 
-    toString() {
-        return `\${sessionStorage.${this.path}}`;
-    }
+     toString() {
+       return this.path;
+     }
 }
 
 /**
@@ -989,16 +988,20 @@ class SessionStorageVariable {
  * This bypasses the Data object configuration and allows access to any localStorage value.
  */
 class LocalStoreVariable {
+
     constructor(path) {
-        this.path = path;
+      this.type = 'LOCAL_STORAGE_VARIABLE';
+      this.path = path;
+      this.negated = false;
     }
 
     evaluate(data) {
-        return app.localStorage.getValue(this.path);
+        const subpath = this.path.substring('localStorage.'.length);
+        return app.localStorage.getValue(subpath);
     }
 
     toString() {
-        return `\${localStorage.${this.path}}`;
+       return this.path;
     }
 }
 
@@ -1008,38 +1011,22 @@ class LocalStoreVariable {
  * This allows storing sensitive data that should not be accessible via browser DevTools.
  */
 class ClientStoreVariable {
-    constructor(path) {
-        this.path = path;
-    }
+
+     constructor(path) {
+      this.type = 'CLIENT_STORAGE_VARIABLE';
+      this.path = path;
+      this.negated = false;
+     }
 
     evaluate(data) {
-        return app.clientStorage.getValue(this.path);
+        const subpath = this.path.substring('clientStorage.'.length);
+        return app.clientStorage.getValue(subpath);
     }
 
     toString() {
-        return `\${clientStorage.${this.path}}`;
+      return this.path;
     }
 }
-
-/**
- * Variable that accesses global variables directly from the global store.
- * Global variables are temporary and cleared at the end of each request processing.
- * This allows sharing data between widgets during a single request.
- */
-class GlobalVariable {
-    constructor(path) {
-        this.path = path;
-    }
-
-    evaluate(data) {
-        return app.globals.getValue(this.path);
-    }
-
-    toString() {
-        return `\${global.${this.path}}`;
-    }
-}
-
 
 function doDebug(conditionFkt) {
     if (conditionFkt()) {

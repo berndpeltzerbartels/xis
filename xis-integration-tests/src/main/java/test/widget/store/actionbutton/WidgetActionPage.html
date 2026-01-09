@@ -4,7 +4,9 @@
     <title>Widget Action Reactive Test</title>
 </head>
 <body>
-<h1>Counter on Page: <span id="counter-value-page">${sessionStorage.counterValue}</span></h1>
+<h1>Counter on Page:
+    <span id="counter-value-page" xis:storage-binding="sessionStorage">${defaultValue(sessionStorage.counter.value, '0')}</span>
+</h1>
 <div xis:widget-container="widget-area" xis:default-widget="WidgetActionWidget" id="widget-container"></div>
 </body>
 </html>

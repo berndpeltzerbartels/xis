@@ -82,13 +82,13 @@ class Store {
             return;
         }
         for (const textContent of textContentSet) {
-            textContent.doRefresh(); // initialtes reloading stored data
+            textContent.doRefresh(); // initiates reloading stored data
         }
     }
 
 
     /**
-     * Saves a value to the storage area.  We can not refesh the text, content here, 
+     * Saves a value to the storage area.  We can not refresh the text, content here,
      * because the data from server is not yet stored !
      * 
      * @public
@@ -107,7 +107,7 @@ class Store {
                 this.saveValue(path, this.toStoreString(val));
             }
             this.startUpdate(path);
-            this.eventPublisher.publish(this.eventKey, new StorageUpdateEvent(path, val, !val));
+            this.eventPublisher.publish(this.eventKey, {});
         }
        
     }

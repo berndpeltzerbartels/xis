@@ -9,15 +9,13 @@ import one.xis.deserialize.PostProcessingResults;
 import one.xis.http.HttpRequest;
 import one.xis.http.HttpResponse;
 import one.xis.http.RequestContext;
-import one.xis.utils.lang.CollectionUtils;
+import one.xis.utils.lang.ClassUtils;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -177,15 +175,10 @@ class ControllerMethodParameter {
         return !parameter.isAnnotationPresent(NullAllowed.class);
     }
 
-
-    @SuppressWarnings("unchecked")
+    
     private Object createDefault(Parameter parameter) {
-        if (Collections.class.isAssignableFrom(parameter.getType())) {
-            Class<Collection<?>> collectionType = (Class<Collection<?>>) parameter.getType();
-            return CollectionUtils.emptyInstance(collectionType);
-        }
         try {
-            return parameter.getType().getDeclaredConstructor().newInstance();
+            return ClassUtils.newInstance(parameter.getType());
         } catch (Exception e) {
             throw new IllegalStateException("Cannot create default instance of type " + parameter.getType());
         }
