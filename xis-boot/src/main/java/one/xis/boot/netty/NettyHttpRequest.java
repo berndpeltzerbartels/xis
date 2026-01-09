@@ -119,6 +119,11 @@ public final class NettyHttpRequest implements HttpRequest {
         return "unknown";
     }
 
+    @Override
+    public void addHeader(String name, String value) {
+        request.headers().add(name, value);
+    }
+
     private Map<String, String> parseQueryParameters(String uri) {
         QueryStringDecoder decoder = new QueryStringDecoder(uri, StandardCharsets.UTF_8);
         Map<String, List<String>> params = decoder.parameters();

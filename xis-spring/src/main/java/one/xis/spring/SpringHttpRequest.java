@@ -100,4 +100,9 @@ public class SpringHttpRequest implements HttpRequest {
     public String getRemoteHost() {
         return request.getRemoteHost();
     }
+
+    @Override
+    public void addHeader(String name, String value) {
+        throw new UnsupportedOperationException("Cannot add header to HttpServletRequest");
+    }
 }

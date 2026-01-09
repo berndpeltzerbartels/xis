@@ -7,6 +7,10 @@ public interface HttpResponse {
 
     void setBody(byte[] body);
 
+    default void setBody(String body) {
+        setBody(body.getBytes());
+    }
+
     void setContentType(ContentType contentType);
 
     Integer getStatusCode();

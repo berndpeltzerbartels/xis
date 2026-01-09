@@ -124,4 +124,9 @@ public class HttpTestRequest implements HttpRequest {
     public String getRemoteHost() {
         return "localhost";
     }
+
+    @Override
+    public void addHeader(String name, String value) {
+        headers.put(name, value);
+    }
 }

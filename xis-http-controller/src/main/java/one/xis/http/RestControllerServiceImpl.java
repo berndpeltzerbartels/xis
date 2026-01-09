@@ -24,6 +24,9 @@ public class RestControllerServiceImpl implements RestControllerService {
     private Collection<Object> controllers;
 
     @Inject
+    private SortedSet<HttpFilter> httpFilters;
+
+    @Inject
     private Collection<ControllerExceptionHandler<?>> exceptionHandlers;
 
     @Inject
@@ -141,11 +144,15 @@ public class RestControllerServiceImpl implements RestControllerService {
 
     @Override
     public void doInvocation(HttpRequest request, HttpResponse response) {
+        createFilterChain().doFilter(request, response);
+    }
+
+    private void doControllerInvocation(HttpRequest request, HttpResponse response) {
         eventEmitter.emitEvent(new BeforeRequestProcessingEvent(request));
 
-        Optional<InvocationContext> ctxOpt = findInvocationContext(request);
+        Optional<ControllerInvocationContext> ctxOpt = findInvocationContext(request);
         if (ctxOpt.isPresent()) {
-            doInvoke(ctxOpt.get(), request, response);
+            doInvokeController(ctxOpt.get(), request, response);
             ensureDefaultStatusCode(response);
             eventEmitter.emitEvent(new RequestProcessedEvent(request, response));
             return;
@@ -159,6 +166,13 @@ public class RestControllerServiceImpl implements RestControllerService {
         eventEmitter.emitEvent(new RequestProcessedEvent(request, response));
     }
 
+    private FilterChain createFilterChain() {
+        return new FilterChainImpl(
+                new ArrayList<>(httpFilters),
+                this::doControllerInvocation
+        );
+    }
+
     private void ensureDefaultStatusCode(HttpResponse response) {
         if (response.getStatusCode() == null || response.getStatusCode() == 0) {
             response.setStatusCode(200);
@@ -170,7 +184,7 @@ public class RestControllerServiceImpl implements RestControllerService {
         methods.put(matcher, method);
     }
 
-    private void doInvoke(InvocationContext context, HttpRequest request, HttpResponse response) {
+    private void doInvokeController(ControllerInvocationContext context, HttpRequest request, HttpResponse response) {
         Method method = context.method();
         Object controllerInstance = context.controllerInstance();
         MethodMatchResult match = context.matchResult();
@@ -191,6 +205,7 @@ public class RestControllerServiceImpl implements RestControllerService {
 
         responseWriter.write(result, method, request, response);
     }
+
 
     private Object handleControllerException(InvocationTargetException e, Method method, Object[] args) {
         Throwable t = unwrapInvocationTarget(e);
@@ -430,7 +445,7 @@ public class RestControllerServiceImpl implements RestControllerService {
         return cookies;
     }
 
-    private Optional<InvocationContext> findInvocationContext(HttpRequest request) {
+    private Optional<ControllerInvocationContext> findInvocationContext(HttpRequest request) {
         for (Map.Entry<MethodMatcher, Method> entry : methods.entrySet()) {
             MethodMatcher matcher = entry.getKey();
             Method method = entry.getValue();
@@ -445,8 +460,7 @@ public class RestControllerServiceImpl implements RestControllerService {
                 // Should not happen, but keep it safe.
                 return Optional.empty();
             }
-
-            return Optional.of(new InvocationContext(controllerInstance, method, result));
+            return Optional.of(new ControllerInvocationContext(controllerInstance, method, result));
         }
         return Optional.empty();
     }
@@ -464,7 +478,7 @@ public class RestControllerServiceImpl implements RestControllerService {
         return combined.replaceAll("//+", "/");
     }
 
-    private record InvocationContext(Object controllerInstance, Method method, MethodMatchResult matchResult) {
+    record ControllerInvocationContext(Object controllerInstance, Method method, MethodMatchResult matchResult) {
     }
 
     private record FormFieldBinding(Field field, String paramName) {

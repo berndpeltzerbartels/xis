@@ -67,4 +67,7 @@ public interface HttpRequest {
     }
 
     String getRemoteHost();
+
+
+    void addHeader(String name, String value);
 }
