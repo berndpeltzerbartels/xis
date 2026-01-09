@@ -1,5 +1,6 @@
 package one.xis.validation;
 
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import one.xis.UserContext;
 import one.xis.context.Component;
@@ -21,7 +22,7 @@ class ValidationPostProcessor implements DeserializationPostProcessor {
     private final List<Validator<?>> validators;
 
     @Override
-    public void postProcess(DeserializationContext deserializationContext, Object value, PostProcessingResults postProcessingResults) {
+    public void postProcess(@NonNull DeserializationContext deserializationContext, @NonNull Object value, @NonNull PostProcessingResults postProcessingResults) {
         var validateAnnotation = deserializationContext.getAnnotationClass().getAnnotation(Validate.class);
         var validatorClass = validateAnnotation.validatorClass();
         var validator = getValidator(validatorClass);

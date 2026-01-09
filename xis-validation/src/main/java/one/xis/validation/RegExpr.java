@@ -6,13 +6,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * In case the annotated field is of type collection, it will get validated
- * to contain at least the give number of elements.
- * <p>
- * Otherwise the corresponding field is validated to be filled.
+ * Annotation for fields and parameters to validate against a regular expression.
  */
 @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.RECORD_COMPONENT})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface MinLength {
-    int value() default -1;
+@Validate(validatorClass = MinLengthValidator.class, messageKey = "validation.invalid", globalMessageKey = "validation.invalid.global")
+public @interface RegExpr {
+    String value();
 }

@@ -1,5 +1,6 @@
 package one.xis.theme.example.contact;
 
+import lombok.NonNull;
 import one.xis.UserContext;
 import one.xis.context.Component;
 import one.xis.validation.Validator;
@@ -20,11 +21,7 @@ public class PhoneNumberValidator implements Validator<String> {
     private static final Pattern PHONE_PATTERN = Pattern.compile("^[+]?[0-9\\s().-]{7,20}$");
 
     @Override
-    public void validate(String value, AnnotatedElement annotatedElement, UserContext userContext) throws ValidatorException {
-        if (value == null || value.isBlank()) {
-            return; // null/empty handled by @Mandatory if needed
-        }
-        
+    public void validate(@NonNull String value, @NonNull AnnotatedElement annotatedElement, @NonNull UserContext userContext) throws ValidatorException {
         if (!PHONE_PATTERN.matcher(value).matches()) {
             throw new ValidatorException();
         }

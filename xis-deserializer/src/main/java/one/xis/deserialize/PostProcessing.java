@@ -1,5 +1,6 @@
 package one.xis.deserialize;
 
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import one.xis.UserContext;
 import one.xis.context.Component;
@@ -15,11 +16,12 @@ public class PostProcessing {
 
     private final List<DeserializationPostProcessor> postProcessors;
 
-    void postProcess(String path, Object value, AnnotatedElement target, UserContext userContext, PostProcessingResults results) {
+    void postProcess(@NonNull String path,
+                     @NonNull Object value,
+                     @NonNull AnnotatedElement target,
+                     @NonNull UserContext userContext,
+                     @NonNull PostProcessingResults results) {
         doRecursiveProcess(path, target, value, userContext, results);
-        if (value == null) {
-            return;
-        }
         doRecursiveProcessClass(path, target, value, userContext, results);
 
     }
@@ -44,7 +46,7 @@ public class PostProcessing {
         }
     }
 
-    private void recursiveProcess(DeserializationContext context, AnnotatedElement currentElement, Object value, PostProcessingResults results) {
+    private void recursiveProcess(@NonNull DeserializationContext context, @NonNull AnnotatedElement currentElement, @NonNull Object value, @NonNull PostProcessingResults results) {
         for (var annotation : currentElement.getAnnotations()) {
             if (isJavaAnnotation(annotation)) {
                 continue;

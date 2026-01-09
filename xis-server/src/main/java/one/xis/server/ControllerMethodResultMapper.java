@@ -7,13 +7,11 @@ import one.xis.context.Component;
 import one.xis.context.Inject;
 import one.xis.deserialize.PostProcessingResult;
 import one.xis.utils.lang.MethodUtils;
+import one.xis.utils.lang.StringUtils;
 import one.xis.validation.ValidatorMessageResolver;
 
 import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyMap;
@@ -170,12 +168,17 @@ class ControllerMethodResultMapper {
 
     private Map<String, String> mapErrors(Collection<PostProcessingResult> errors) {
         var errorMessageMap = new HashMap<String, String>();
-        errors.forEach(error -> mapError(error, errorMessageMap));
+        errors.stream()
+                .filter(e -> StringUtils.isNotEmpty(e.getMessageKey()))
+                .forEach(error -> mapError(error, errorMessageMap));
         return errorMessageMap;
     }
 
     private List<String> mapGlobalErrors(Collection<PostProcessingResult> errors) {
-        return errors.stream().map(this::globalErrorMessages).toList();
+        return errors.stream()
+                .map(this::globalErrorMessages)
+                .filter(Optional::isPresent)
+                .map(Optional::get).toList();
     }
 
     private void mapError(PostProcessingResult error, Map<String, String> errorMessageMap) {
@@ -192,11 +195,14 @@ class ControllerMethodResultMapper {
         errorMessageMap.put(key, message);
     }
 
-    private String globalErrorMessages(PostProcessingResult error) {
-        return validatorMessageResolver.createMessage(error.getGlobalMessageKey(),
+    private Optional<String> globalErrorMessages(PostProcessingResult error) {
+        if (error.getGlobalMessageKey() == null || error.getGlobalMessageKey().isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(validatorMessageResolver.createMessage(error.getGlobalMessageKey(),
                 error.getMessageParameters(),
                 error.getDeserializationContext().getTarget(),
-                error.getDeserializationContext().getUserContext());
+                error.getDeserializationContext().getUserContext()));
     }
 
     private String getModelDataKey(Method method) {
