@@ -87,6 +87,7 @@ class HandlerBuilder {
                 handler = this.createWidgetContainerHandler(element);
                 this.tagHandlers.mapHandler(element, handler);
                 parentHandler.addDescendantHandler(handler);
+                this.validateNoParentStorageBinding(handler);
                 this.createChildNodeHandlers(element, handler);
                 return;
             case 'xis:parameter':
@@ -312,5 +313,16 @@ class HandlerBuilder {
             this.widgetContainers,
             this.tagHandlers
         );
+    }
+
+    validateNoParentStorageBinding(handler) {
+        let parent = handler.parentHandler;
+        while (parent) {
+            if (parent instanceof StorageBindingHandler) {
+                console.error('Storage binding on parent element is not allowed for widget containers.', handler.tag, parent.tag);
+                throw new Error('Storage binding on parent element is not allowed for widget containers.');
+            }
+            parent = parent.parentHandler;
+        }
     }
 }
