@@ -1,5 +1,6 @@
 package one.xis.context;
 
+import lombok.extern.slf4j.Slf4j;
 import one.xis.utils.lang.ClassUtils;
 
 import java.lang.annotation.Annotation;
@@ -8,6 +9,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+@Slf4j
 public class AppContextBuilderImpl implements AppContextBuilder {
 
     private final Set<Class<?>> singletonClasses = new HashSet<>();
@@ -20,14 +22,17 @@ public class AppContextBuilderImpl implements AppContextBuilder {
 
     @Override
     public AppContextBuilder withSingletonClass(Class<?> clazz) {
+        if (clazz.isInterface()) {
+            log.warn("Ignoring interface {} - interfaces cannot be instantiated", clazz.getName());
+            return this;
+        }
         singletonClasses.add(clazz);
         return this;
     }
 
     @Override
     public AppContextBuilder withSingletonClass(String clazz) {
-        singletonClasses.add(ClassUtils.classForName(clazz));
-        return this;
+        return withSingletonClass(ClassUtils.classForName(clazz));
     }
 
     @Override
@@ -37,7 +42,9 @@ public class AppContextBuilderImpl implements AppContextBuilder {
 
     @Override
     public AppContextBuilder withSingletonClasses(Class<?>... classes) {
-        singletonClasses.addAll(Arrays.asList(classes));
+        for (Class<?> clazz : classes) {
+            withSingletonClass(clazz);
+        }
         return this;
     }
 
