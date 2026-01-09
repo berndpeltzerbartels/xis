@@ -45,6 +45,9 @@ class AppContextFactory implements SingletonCreationListener {
         evaluateAdditionalSingletons();
         long t1 = System.currentTimeMillis();
         log.info("Evaluating singletons took {} ms", t1 - t0);
+        removeDefaultProducersIfNonDefaultExists();
+        long t1a = System.currentTimeMillis();
+        log.info("Removing default producers took {} ms", t1a - t1);
         mapProducers();
         long t2 = System.currentTimeMillis();
         log.info("Mapping producers took {} ms", t2 - t1);
@@ -148,6 +151,49 @@ class AppContextFactory implements SingletonCreationListener {
             return constructor.getSingletonClass().isAnnotationPresent(DefaultComponent.class);
         }
         return false;
+    }
+
+    private void removeDefaultProducersIfNonDefaultExists() {
+        // Gruppiere Producers nach ihrer Klasse/Interface-Hierarchie
+        var producersByType = new HashMap<Class<?>, List<SingletonProducer>>();
+        
+        // Nur SingletonConstructor (annotierte Components) betrachten
+        for (var producer : singletonProducers) {
+            if (producer instanceof SingletonConstructor constructor) {
+                var producedClass = constructor.getSingletonClass();
+                
+                // Füge zu allen Typen hinzu (Klasse selbst + alle Interfaces + Superklassen)
+                var types = new HashSet<Class<?>>();
+                types.add(producedClass);
+                types.addAll(ClassUtils.getAllInterfaces(producedClass));
+                types.addAll(ClassUtils.getSuperClasses(producedClass));
+                
+                for (var type : types) {
+                    producersByType.computeIfAbsent(type, k -> new ArrayList<>()).add(producer);
+                }
+            }
+        }
+        
+        // Für jeden Typ: Wenn non-default existiert, entferne alle defaults
+        var producersToRemove = new HashSet<SingletonProducer>();
+        for (var entry : producersByType.entrySet()) {
+            var producers = entry.getValue();
+            var hasNonDefault = producers.stream().anyMatch(p -> !isDefaultProducer(p));
+            if (hasNonDefault) {
+                producers.stream()
+                    .filter(this::isDefaultProducer)
+                    .forEach(producersToRemove::add);
+            }
+        }
+        
+        // Entferne die DefaultProducers aus allen Listen
+        singletonProducers.removeAll(producersToRemove);
+        initialProducers.removeAll(producersToRemove);
+        
+        if (!producersToRemove.isEmpty()) {
+            log.info("Removed {} default component producer(s) because non-default implementations exist", 
+                producersToRemove.size());
+        }
     }
 
     private void evaluateAnnotatedComponents() {
