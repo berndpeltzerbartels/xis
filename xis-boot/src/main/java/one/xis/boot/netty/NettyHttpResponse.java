@@ -80,7 +80,7 @@ public final class NettyHttpResponse implements HttpResponse {
 
     /**
      * Builds the Netty FullHttpResponse.
-     * Called exactly once by NettyServerHandler.
+     * Called exactly once by NettyHttpServerHandler.
      */
     public FullHttpResponse toNettyResponse() {
         HttpResponseStatus status = HttpResponseStatus.valueOf(

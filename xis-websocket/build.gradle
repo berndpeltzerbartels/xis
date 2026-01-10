@@ -40,15 +40,11 @@ var slf4jLog4j12Version = "2.0.3"
 dependencies {
 
     // Local project dependencies
-    implementation project(":xis-deserializer")
     implementation project(":xis-context")
     implementation project(":xis-util")
-    implementation project(":xis-server")
     implementation project(":xis-adapter-spi")
-
-    api project(":xis-controller-api")
-    api project(":xis-validation")
-    api project(':xis-http-controller')
+    implementation project(':xis-gson')
+    implementation project(':xis-resources')
 
 
     // Compile-only dependencies
@@ -65,6 +61,7 @@ dependencies {
     testImplementation "org.mockito:mockito-core:$mockitoVersion"
     testImplementation "org.mockito:mockito-junit-jupiter:$mockitoVersion"
     testImplementation "org.assertj:assertj-core:$assertjVersion"
+    testImplementation project(':xis-gson')
     testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"
 }
 

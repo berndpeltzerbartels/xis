@@ -1,7 +1,7 @@
 package one.xis.gson;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class JsonMap extends LinkedHashMap<String, String> {
 
@@ -17,7 +17,7 @@ public class JsonMap extends LinkedHashMap<String, String> {
         super(initialCapacity, loadFactor);
     }
 
-    public JsonMap(HashMap<String, String> map) {
+    public JsonMap(Map<String, String> map) {
         super(map);
     }
 

@@ -16,7 +16,13 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class GsonFactory {
 
-    @Bean // TODO Wrapper verwenden um Konflikte zu vermeiden
+    @Bean
+    public GsonProvider gsonProvider(Gson gson) {
+        return new GsonProviderImpl(gson);
+    }
+
+    @Bean
+    @Deprecated// TODO alle Injektionen von Gson durch Wrapper ersetzen und diese Bean löschen
     public Gson gson() {
         return new GsonConfiguration().builder()
                 .serializeNulls() // Enable null serialization for SessionStorage deletion behavior

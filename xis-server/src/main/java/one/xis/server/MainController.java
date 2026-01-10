@@ -24,7 +24,7 @@ public class MainController {
     public ResponseEntity<?> getComponentConfig() {
         return ResponseEntity.ok(frontendService.getConfig());
     }
-    
+
     @Post("/xis/page/model")
     public ResponseEntity<?> getPageModel(@RequestBody ClientRequest request, @CookieValue("access_token") String accessToken, @CookieValue("refresh_token") String renewToken, HttpRequest httpRequest) {
         request.setAccessToken(accessToken);
@@ -83,13 +83,15 @@ public class MainController {
                 return (ResponseEntity<T>) ResponseEntity.status(304)
                         .addHeader("Last-Modified", formatHttpDate(lastModifiedResource))
                         .addHeader("Cache-Control", cacheControl);
-
             }
         }
         T body = contentExtractor.apply(resource);
-        return ResponseEntity.ok(body)
-                .addHeader("Last-Modified", formatHttpDate(lastModifiedResource))
+        var response = ResponseEntity.ok(body)
                 .addHeader("Cache-Control", cacheControl);
+        if (lastModifiedResource != null) {
+            response.addHeader("Last-Modified", formatHttpDate(lastModifiedResource));
+        }
+        return response;
     }
 
     @Get("/xis/page/head")

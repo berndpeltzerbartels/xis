@@ -36,7 +36,6 @@ dependencies {
 
     // Local project dependencies
     implementation project(':xis-context')
-    implementation project(':xis-controller-api')
 
     // Gson dependencies
     implementation "io.goodforgod:gson-configuration:$gsonConfigurationVersion"

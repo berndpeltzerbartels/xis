@@ -25,6 +25,11 @@ java {
     withJavadocJar()
 }
 
+// Skip javadoc task for modules with no public classes
+tasks.named('javadoc') {
+    enabled = false
+}
+
 // Local variables for versions
 var lombokVersion = rootProject.ext.libraryVersions.lombok
 var junitVersion = rootProject.ext.libraryVersions.junit
@@ -38,7 +43,9 @@ var nettyVersion = rootProject.ext.libraryVersions.netty
 dependencies {
 
     // Local project dependencies
-
+    implementation project(":xis-boot")
+    implementation project(":xis-websocket")
+    implementation project(":xis-gson")
 
     // api project(":xis-context")
 
