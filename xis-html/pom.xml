@@ -9,7 +9,7 @@
     <artifactId>xis-html</artifactId>
     <packaging>jar</packaging>
 
-    <name>XIS IDP-Server API</name>
+    <name>XIS-HTML</name>
     <description>Public API for HTML-Parsing and HTML-Rendering in XIS
     </description>
     <url>https://github.com/berndpeltzerbartels/xis</url>

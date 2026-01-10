@@ -6,11 +6,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>one.xis</groupId>
-    <artifactId>xis-test</artifactId>
+    <artifactId>xis-spring-websocket</artifactId>
     <packaging>jar</packaging>
 
-    <name>XIS-Test</name>
-    <description>Testing utilities and test framework support for XIS applications.</description>
+    <name>XIS-Spring-Websocket</name>
+    <description>Spring WebSocket integration for real-time communication in XIS.</description>
     <url>https://github.com/berndpeltzerbartels/xis</url>
 
     <licenses>

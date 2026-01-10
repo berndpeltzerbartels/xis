@@ -10,7 +10,7 @@
     <packaging>jar</packaging>
 
     <name>Controller API</name>
-    <description>Public API for defining declarative web controllers in XIS applications.</description>
+    <description>Public API for creating controllers for XIS components.</description>
     <url>https://github.com/berndpeltzerbartels/xis</url>
 
     <licenses>

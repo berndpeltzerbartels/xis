@@ -10,7 +10,7 @@
     <packaging>jar</packaging>
 
     <name>XIS-Micronaut</name>
-    <description>Public API for defining declarative web controllers in XIS applications.</description>
+    <description>Micronaut framework integration for XIS applications.</description>
     <url>https://github.com/berndpeltzerbartels/xis</url>
 
     <licenses>

@@ -60,6 +60,6 @@ class XisThemeMessageHandler {
 }
 
 
-eventListenerRegistry.addEventListener(EventType.APP_INITIALIZED , app => {
+eventListenerRegistry.addEventListener(EventType.APP_INSTANCE_CREATED, app => {
     app.messageHandler = new XisThemeMessageHandler();
 });

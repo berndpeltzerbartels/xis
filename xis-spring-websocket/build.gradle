@@ -27,11 +27,9 @@ java {
 
 // Local variables for versions
 var lombokVersion = rootProject.ext.libraryVersions.lombok
-var reflectionsVersion = rootProject.ext.libraryVersions.reflections
 var junitVersion = rootProject.ext.libraryVersions.junit
 var assertjVersion = rootProject.ext.libraryVersions.assertj
 var gsonVersion = rootProject.ext.libraryVersions.gson
-var jacksonVersion = rootProject.ext.libraryVersions.jackson
 var mockitoVersion = rootProject.ext.libraryVersions.mockito
 var slf4jVersion = rootProject.ext.libraryVersions.slf4j
 var nettyVersion = rootProject.ext.libraryVersions.netty
@@ -40,33 +38,17 @@ var nettyVersion = rootProject.ext.libraryVersions.netty
 dependencies {
 
     // Local project dependencies
-    implementation project(":xis-deserializer")
-    implementation project(":xis-util")
-    implementation project(":xis-resources")
-    implementation project(":xis-server")
-    implementation project(":xis-validation")
-    implementation project(":xis-token")
-    implementation project(":xis-http-controller")
 
-    api project(":xis-context")
-    api project(":xis-controller-api")
-    api project(":xis-adapter-spi")
+
+    // api project(":xis-context")
 
     // Compile-only dependencies
-    compileOnly project(":xis-deserializer")
 
     // Alle Dependencies für Netty
     implementation("io.netty:netty-all:$nettyVersion")
-    implementation "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
-    implementation "com.fasterxml.jackson.core:jackson-core:$jacksonVersion"
-    implementation "com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion"
-
 
     // SLF4J API + Tinylog implementation for xis-boot applications
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
-    implementation("org.tinylog:tinylog-api:2.7.0")
-    implementation("org.tinylog:tinylog-impl:2.7.0")
-    implementation("org.tinylog:slf4j-tinylog:2.7.0")
 
 
     // Annotation processors
@@ -74,7 +56,7 @@ dependencies {
 
     // Implementation dependencies
     implementation "org.projectlombok:lombok:$lombokVersion"
-    implementation "org.reflections:reflections:$reflectionsVersion"
+
 
     implementation 'com.sun.activation:javax.activation:1.2.0'
 
@@ -88,7 +70,6 @@ dependencies {
     testImplementation project(":xis-test")
     testImplementation project(":xis-adapter-spi")
     testImplementation "com.google.code.gson:gson:$gsonVersion"
-    testImplementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion"
     testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"
 }
 

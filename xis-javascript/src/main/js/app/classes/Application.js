@@ -9,7 +9,6 @@ class Application {
         this.localStorage = new LocalStore(this.eventPublisher);
         this.clientStorage = new ClientStore(this.eventPublisher);
         this.httpConnector = new HttpConnector();
-        this.httpConnector = new HttpConnector();
         this.domAccessor = new DomAccessor();
         this.client = new HttpClient(this.httpConnector);
         this.pages = new Pages(this.client);
@@ -38,7 +37,7 @@ class Application {
 
 
     start() {
-        this.eventPublisher.publish(EventType.APP_INITIALIZED, this);
+        this.eventPublisher.publish(EventType.APP_INSTANCE_CREATED, this);
         this.client.loadConfig()
             .then(config => this.pageController.setConfig(config))
             .then(config => this.widgetContainers.setConfig(config))
@@ -47,6 +46,7 @@ class Application {
             .then(config => this.pages.loadPages(config))
             .then(() => this.pageController.displayPageForUrl(document.location.pathname + document.location.search))
             .then(() => this.setupLinkInterceptor())
+            .then(() => this.eventPublisher.publish(EventType.APP_INITIALIZED, this))
             .catch(e => handleError(e));
     }
 

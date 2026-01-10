@@ -10,7 +10,7 @@
     <packaging>jar</packaging>
 
     <name>Context</name>
-    <description>Public API for defining declarative web controllers in XIS applications.</description>
+    <description>Dependency injection and application context management for XIS.</description>
     <url>https://github.com/berndpeltzerbartels/xis</url>
 
     <licenses>

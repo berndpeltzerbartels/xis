@@ -10,7 +10,7 @@
     <packaging>jar</packaging>
 
     <name>Utils</name>
-    <description>Public API for defining declarative web controllers in XIS applications.</description>
+    <description>Utility classes and helper functions for XIS framework.</description>
     <url>https://github.com/berndpeltzerbartels/xis</url>
 
     <licenses>

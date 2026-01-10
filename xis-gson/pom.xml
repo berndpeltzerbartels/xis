@@ -10,7 +10,7 @@
     <packaging>jar</packaging>
 
     <name>XIS-Gson</name>
-    <description>Public API for defining declarative web controllers in XIS applications.</description>
+    <description>GSON integration for JSON serialization/deserialization in XIS.</description>
     <url>https://github.com/berndpeltzerbartels/xis</url>
 
     <licenses>

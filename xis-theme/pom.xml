@@ -6,11 +6,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>one.xis</groupId>
-    <artifactId>xis-test</artifactId>
+    <artifactId>xis-theme</artifactId>
     <packaging>jar</packaging>
 
-    <name>XIS-Test</name>
-    <description>Public API for defining declarative web controllers in XIS applications.</description>
+    <name>XIS-Theme</name>
+    <description>Default theme and UI components for XIS web applications.</description>
     <url>https://github.com/berndpeltzerbartels/xis</url>
 
     <licenses>

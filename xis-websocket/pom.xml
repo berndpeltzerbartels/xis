@@ -6,11 +6,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>one.xis</groupId>
-    <artifactId>xis-socket-io</artifactId>
+    <artifactId>xis-websocket</artifactId>
     <packaging>jar</packaging>
 
-    <name>XIS-Socket-IO</name>
-    <description>Public API for defining declarative web controllers in XIS applications.</description>
+    <name>XIS-Websocket</name>
+    <description>Websocket related functionality for XIS applications for all kinds of servers and javascript client
+        code.
+    </description>
     <url>https://github.com/berndpeltzerbartels/xis</url>
 
     <licenses>

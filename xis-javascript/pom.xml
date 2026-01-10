@@ -10,7 +10,7 @@
     <packaging>jar</packaging>
 
     <name>Javascript</name>
-    <description>Public API for defining declarative web controllers in XIS applications.</description>
+    <description>Client-side JavaScript framework for XIS web applications.</description>
     <url>https://github.com/berndpeltzerbartels/xis</url>
 
     <licenses>

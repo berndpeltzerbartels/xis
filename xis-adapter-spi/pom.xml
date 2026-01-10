@@ -6,11 +6,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>one.xis</groupId>
-    <artifactId>xis-adapter-api</artifactId>
+    <artifactId>xis-adapter-spi</artifactId>
     <packaging>jar</packaging>
 
     <name>Adapter API</name>
-    <description>Public API for defining declarative web controllers in XIS applications.</description>
+    <description>Service Provider Interface (SPI) for XIS framework adapters.</description>
     <url>https://github.com/berndpeltzerbartels/xis</url>
 
     <licenses>

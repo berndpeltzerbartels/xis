@@ -10,7 +10,7 @@
     <packaging>jar</packaging>
 
     <name>XIS-Boot</name>
-    <description>Public API for defining declarative web controllers in XIS applications.</description>
+    <description>Spring Boot integration and auto-configuration for XIS framework.</description>
     <url>https://github.com/berndpeltzerbartels/xis</url>
 
     <licenses>

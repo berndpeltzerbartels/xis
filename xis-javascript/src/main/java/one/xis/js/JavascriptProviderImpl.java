@@ -30,7 +30,7 @@ class JavascriptProviderImpl implements JavascriptProvider {
         sources.put("bundle.min.js", xisJs());
         sources.putAll(extensionLoader.loadExtensions());
         var result = javascriptCompressor.compress(sources);
-        this.compressedJavascript = new StringResource(result.compressed());
+        this.compressedJavascript = new StringResource("(function() {" + result.compressed() + "})();");
         this.sourceMap = new StringResource(result.sourceMap());
     }
 

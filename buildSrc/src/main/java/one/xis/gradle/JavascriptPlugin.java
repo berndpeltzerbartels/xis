@@ -79,12 +79,10 @@ public class JavascriptPlugin implements Plugin<Project> {
     private void writeJsToFileIIFE(Collection<JSFile> jsFiles, File outFile, boolean append) {
         log("js-outfile: '%s'", outFile);
         try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(outFile, append)))) {
-            writer.println("(function() {"); // TODO : Klappt das auch mit GraalVM?
             for (JSFile file : jsFiles) {
                 log("add script content: %s", file.getFile().getName());
                 writer.println(file.getContent());
             }
-            writer.println("})();");
         } catch (IOException e) {
             throw new RuntimeException("Failed to write JS file", e);
         }

@@ -1,5 +1,6 @@
 // enum of event types
 const EventType = {
+    APP_INSTANCE_CREATED: 'app_instance_created',
     APP_INITIALIZED: 'app_initialized',
     PAGE_LOADED: 'page_loaded',
     WIDGET_LOADED: 'widget_loaded',

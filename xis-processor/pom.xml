@@ -10,7 +10,7 @@
     <packaging>jar</packaging>
 
     <name>Processor</name>
-    <description>Public API for defining declarative web controllers in XIS applications.</description>
+    <description>Annotation processor for compile-time code generation in XIS.</description>
     <url>https://github.com/berndpeltzerbartels/xis</url>
 
     <licenses>

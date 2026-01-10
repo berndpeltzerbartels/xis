@@ -41,6 +41,7 @@ class TestApplication {
 
 
     openPage(uri) {
+        this.eventPublisher.publish(EventType.APP_INSTANCE_CREATED, this);
         document.location.pathname = uri;
         return this.client.loadConfig()
             .then(config => this.pageController.setConfig(config))

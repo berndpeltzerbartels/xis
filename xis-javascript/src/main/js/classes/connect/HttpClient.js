@@ -73,7 +73,7 @@ class HttpClient extends Client {
             this.forward(responseObject.redirectUrl);
             return Promise.reject({type: 'redirect'});
         }
-        const globalMessages = this.globalValidatormessges(responseObject);
+        const globalMessages = this.globalValidatorMessges(responseObject);
         if (globalMessages.length > 0) {
             app.messageHandler.addValidationErrors(globalMessages);
         }
@@ -211,7 +211,7 @@ class HttpClient extends Client {
         return app.messageHandler.reportServerError(JSON.parse(response.responseText).message);
     }
 
-    globalValidatormessges(response) {
+    globalValidatorMessges(response) {
         if (response.validatorMessages && response.validatorMessages.globalMessages) {
             return response.validatorMessages.globalMessages.filter(s => s && s.trim().length > 0);
         }

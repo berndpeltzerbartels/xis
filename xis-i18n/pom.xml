@@ -10,7 +10,7 @@
     <packaging>jar</packaging>
 
     <name>I18n</name>
-    <description>Public API for defining declarative web controllers in XIS applications.</description>
+    <description>Internationalization (i18n) and localization support for XIS.</description>
     <url>https://github.com/berndpeltzerbartels/xis</url>
 
     <licenses>
