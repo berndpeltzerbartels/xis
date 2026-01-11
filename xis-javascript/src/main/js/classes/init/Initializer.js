@@ -9,7 +9,7 @@ class Initializer {
     /**
      *
      * @param {DomAccessor} domAccessor
-     * @param {HttpClient} client
+     * @param {Client} client for action and model
      * @param {Widgets} widgets
      * @param {Includes} includes
      * @param {WidgetContainers} widgetContainers

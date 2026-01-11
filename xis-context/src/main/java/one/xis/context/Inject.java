@@ -18,12 +18,6 @@ import java.lang.annotation.*;
  * }
  * </pre>
  *
- * <p>Optional injection (no error if dependency not found):</p>
- * <pre>
- * {@code @Inject}(optional = true)
- * private CacheService cacheService;
- * </pre>
- *
  * <p>Qualified injection (inject component annotated with specific annotation):</p>
  * <pre>
  * {@code @Inject}(annotatedWith = Primary.class)
@@ -42,12 +36,4 @@ public @interface Inject {
      * @return the annotation type to filter by, or {@link None} (default)
      */
     Class<? extends Annotation> annotatedWith() default None.class;
-
-    /**
-     * If true, injection will not fail if no matching component is found.
-     * The field will remain null in that case.
-     *
-     * @return whether the dependency is optional
-     */
-    boolean optional() default false;
 }

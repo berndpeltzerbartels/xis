@@ -8,7 +8,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import one.xis.context.DefaultComponent;
+import one.xis.context.Component;
 import one.xis.http.ContentType;
 import one.xis.http.RestControllerService;
 import one.xis.server.FrontendService;
@@ -21,9 +21,9 @@ import static io.netty.handler.codec.http.HttpHeaderValues.NO_STORE;
 
 @Slf4j
 @ChannelHandler.Sharable
-@DefaultComponent
+@Component
 @RequiredArgsConstructor
-public class NettyHttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> implements NettyServerHandler {
+public class NettyHttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
     private final FrontendService frontendService;
     private final RestControllerService restControllerService;

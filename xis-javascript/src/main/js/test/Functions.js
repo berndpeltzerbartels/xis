@@ -32,11 +32,17 @@ function readBodyChildArray(html) {
     return arr;
 }
 
-function isFloat(n) {
-    return true;
-}
+/**
+ * Check if WebSocket connection is available
+ * @returns {Promise<boolean>}
+ */
+function checkWebSocketAvailable() {
+    return new Promise((resolve) => {
+        if (typeof WebsocketConnectorMock === 'undefined') {
+            resolve(true);
 
-function isInt(n) {
-    return true;
-}
+        } else {
 
+        }
+    });
+}

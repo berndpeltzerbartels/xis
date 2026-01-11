@@ -1,2 +1,2 @@
-js/socket-client.js
-js/socket-client-initializer.js
+js/WebsocketClient.js
+js/WebsocketConnectorMock.js

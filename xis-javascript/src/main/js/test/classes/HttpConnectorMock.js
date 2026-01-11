@@ -52,7 +52,6 @@ class HttpConnectorMock {
     }
 
     logRequest(method, uri, payload, headers) {
-        console.log('method: ' + method);
         if (headers) {
             for (const key in headers) {
                 console.log('header: ' + key + ' : ' + headers[key]);

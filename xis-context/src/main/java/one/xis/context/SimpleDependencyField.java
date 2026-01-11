@@ -13,9 +13,6 @@ class SimpleDependencyField implements DependencyField {
     @Getter
     private final Field field;
     private final SingletonWrapper parent;
-
-    @Getter
-    private final boolean optional;
     private Object fieldValue;
 
     @Getter

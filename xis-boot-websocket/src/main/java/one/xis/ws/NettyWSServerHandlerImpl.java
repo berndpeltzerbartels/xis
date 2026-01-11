@@ -6,7 +6,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import lombok.RequiredArgsConstructor;
-import one.xis.boot.netty.NettyServerHandler;
+import one.xis.boot.netty.NettyWSServerHandler;
 import one.xis.context.Component;
 import one.xis.gson.GsonProvider;
 
@@ -14,7 +14,7 @@ import one.xis.gson.GsonProvider;
 @Component
 @ChannelHandler.Sharable
 @RequiredArgsConstructor
-class NettyWSServerHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> implements NettyServerHandler {
+class NettyWSServerHandlerImpl extends SimpleChannelInboundHandler<TextWebSocketFrame> implements NettyWSServerHandler {
     private final WSService wsService;
     private final GsonProvider gsonProvider;
 
@@ -24,12 +24,7 @@ class NettyWSServerHandler extends SimpleChannelInboundHandler<TextWebSocketFram
         try {
             String requestJson = frame.text();
             var jsonRequest = (JsonObject) gsonProvider.getGson().toJsonTree(requestJson); // Validate JSON
-            var topic = jsonRequest.get("topic").getAsString();
-            switch (topic) {
-                case "client-request" -> wsService.processClientRequest(jsonRequest, emitter);
-                case "resource-request" -> wsService.processResourceRequest(jsonRequest, emitter);
-                default -> throw new IllegalArgumentException("Unknown topic: " + topic);
-            }
+            wsService.processClientRequest(jsonRequest, emitter);
         } catch (Exception e) {
             // TODO emitter...
         }

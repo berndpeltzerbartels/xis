@@ -109,7 +109,7 @@ class SingletonWrapper implements SingletonConsumer, Finalizable {
                 continue;
             }
             if (field instanceof SimpleDependencyField simpleDependencyField) {
-                if (!simpleDependencyField.isValueAssigned() && !simpleDependencyField.isOptional()) {
+                if (!simpleDependencyField.isValueAssigned()) {
                     return false;
                 }
             }

@@ -9,17 +9,22 @@ class Application {
         this.localStorage = new LocalStore(this.eventPublisher);
         this.clientStorage = new ClientStore(this.eventPublisher);
         this.httpConnector = new HttpConnector();
+        this.httpClient = new HttpClient(this.httpConnector);
+        this.websocketConnector = this.createWebsocketConnectorIfPresent();
+        if (this.websocketConnector) {
+            this.websocketClient = new WebsocketClient(this.websocketConnector);
+        }
+        this.client = this.websocketClient ? this.websocketClient : this.httpClient;
         this.domAccessor = new DomAccessor();
-        this.client = new HttpClient(this.httpConnector);
-        this.pages = new Pages(this.client);
+        this.pages = new Pages(this.httpClient);
         this.urlResolver = new URLResolver(this.pages);
         this.widgetContainers = new WidgetContainers();
-        this.widgets = new Widgets(this.client);
+        this.widgets = new Widgets(this.httpClient);
         this.tagHandlers = new TagHandlers();
         this.elFunctions = new ELFunctions();
-        this.includes = new Includes(this.client);
-        this.initializer = new Initializer(this.domAccessor, this.client, this.widgets, this.includes, this.widgetContainers, this.tagHandlers);
-        this.pageController = new PageController(this.client, this.pages, this.initializer, this.urlResolver, this.tagHandlers);
+        this.includes = new Includes(this.httpClient);
+        this.initializer = new Initializer(this.domAccessor, this.httpClient, this.widgets, this.includes, this.widgetContainers, this.tagHandlers);
+        this.pageController = new PageController(this.httpClient, this.pages, this.initializer, this.urlResolver, this.tagHandlers);
         this.history = new PageHistory(this.pageController);
         this.globals = new GlobalStore(this.eventPublisher);
         this.runInitializers();
@@ -38,7 +43,7 @@ class Application {
 
     start() {
         this.eventPublisher.publish(EventType.APP_INSTANCE_CREATED, this);
-        this.client.loadConfig()
+        this.httpClient.loadConfig()
             .then(config => this.pageController.setConfig(config))
             .then(config => this.widgetContainers.setConfig(config))
             .then(config => this.includes.loadIncludes(config))
@@ -110,4 +115,10 @@ class Application {
         return true;
     }
 
+    createWebsocketConnectorIfPresent() {
+        if (typeof Websocket !== 'undefined') {
+            return new WebsocketConnector();
+        }
+        return null;
+    }
 }

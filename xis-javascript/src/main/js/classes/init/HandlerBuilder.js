@@ -6,7 +6,7 @@ class HandlerBuilder {
 
     /**
      * @param {DomAccessor} domAccessor
-     * @param {HttpClient} client
+     * @param {Client} client for actions and model
      * @param {Widgets} widgets
      * @param {Includes} includes
      * @param {WidgetContainers} widgetContainers

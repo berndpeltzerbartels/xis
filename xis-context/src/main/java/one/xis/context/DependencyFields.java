@@ -16,10 +16,6 @@ class DependencyFields {
         if (f.getType().isArray()) {
             return new ArrayDependencyField(f, parent);
         }
-        boolean optional = false;
-        if (f.isAnnotationPresent(Inject.class)) {
-            optional = f.getAnnotation(Inject.class).optional();
-        }
-        return new SimpleDependencyField(f, parent, optional);
+        return new SimpleDependencyField(f, parent);
     }
 }
