@@ -39,7 +39,7 @@ class WidgetContainers {
      */
     setConfig(config) {
         this.config = config;
-        return config;
+        return Promise.resolve(config);
     }
 
     handleUpdateEvents(eventIds) {

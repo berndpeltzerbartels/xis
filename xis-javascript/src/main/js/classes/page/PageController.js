@@ -244,13 +244,11 @@ class PageController {
     /**
      * @public
      * @param {ClientConfig} config
-     * @returns {Promise<ClientConfig>}
+     * @returns {ClientConfig}
      */
     setConfig(config) {
-        return new Promise((resolve, _) => {
-            this.config = config;
-            resolve(config);
-        });
+        this.config = config;
+        return Promise.resolve(config);
     }
 
     /**

@@ -1,6 +1,5 @@
 package one.xis.ws;
 
-import com.google.gson.JsonObject;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -22,9 +21,7 @@ class NettyWSServerHandlerImpl extends SimpleChannelInboundHandler<TextWebSocket
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, TextWebSocketFrame frame) {
         var emitter = new NettyWSResponseEmitter(channelHandlerContext, gsonProvider.getGson());
         try {
-            String requestJson = frame.text();
-            var jsonRequest = (JsonObject) gsonProvider.getGson().toJsonTree(requestJson); // Validate JSON
-            wsService.processClientRequest(jsonRequest, emitter);
+            wsService.processClientRequest(frame.text(), emitter);
         } catch (Exception e) {
             // TODO emitter...
         }

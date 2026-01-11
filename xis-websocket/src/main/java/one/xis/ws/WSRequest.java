@@ -7,7 +7,10 @@ import java.util.Map;
 
 @Data
 abstract class WSRequest {
-    private String uri;
-    private final WSRequestHeaders headers = new WSRequestHeaders();
-    private final Map<String, String> parameters = new HashMap<>();
+    private WSRequestHeaders headers = new WSRequestHeaders();
+    private Map<String, String> parameters = new HashMap<>();
+    private Integer messageId;
+    private String path;
+    private String method;
+    private Map<String, String> queryParameters = new HashMap<>();
 }

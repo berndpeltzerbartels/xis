@@ -51,6 +51,7 @@ class TestApplication {
         document.location.pathname = uri;
         return this.httpClient.loadConfig()
             .then(config => this.pageController.setConfig(config))
+            .then(config => {if (this.websocketClient){ this.websocketClient.setConfig(config);}; return config;})
             .then(config => this.widgetContainers.setConfig(config))
             .then(config => this.includes.loadIncludes(config))
             .then(config => this.widgets.loadWidgets(config))

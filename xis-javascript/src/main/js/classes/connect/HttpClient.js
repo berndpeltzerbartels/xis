@@ -4,6 +4,7 @@
  * @property {ClientConfig} config
  * @property {string} clientId
  * @property {zoneId}
+ * @property {Config} config
  */
 class HttpClient extends Client {
 

@@ -45,6 +45,7 @@ class Application {
         this.eventPublisher.publish(EventType.APP_INSTANCE_CREATED, this);
         this.httpClient.loadConfig()
             .then(config => this.pageController.setConfig(config))
+            .then(config => { if (this.websocketClient) { this.websocketClient.setConfig(config); } return config; })
             .then(config => this.widgetContainers.setConfig(config))
             .then(config => this.includes.loadIncludes(config))
             .then(config => this.widgets.loadWidgets(config))
@@ -116,8 +117,10 @@ class Application {
     }
 
     createWebsocketConnectorIfPresent() {
-        if (typeof Websocket !== 'undefined') {
-            return new WebsocketConnector();
+        if (typeof WebsocketConnector !== 'undefined' &&  typeof WebSocket !== 'undefined') {
+            var connector = new WebsocketConnector();
+            connector.connect("ws://localhost:8080/ws");
+            return connector;
         }
         return null;
     }

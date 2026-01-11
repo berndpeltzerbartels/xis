@@ -9,6 +9,14 @@ class WebsocketClient extends Client {
         this.resolvedURL = undefined;
     }
 
+
+    setConfig(config) {
+        return new Promise((resolve, _) => {
+            this.config = config;
+            resolve(config);
+        });
+    }
+
     async loadPageData(resolvedURL) {
         app.messageHandler.clearMessages();
         this.resolvedURL = resolvedURL;
