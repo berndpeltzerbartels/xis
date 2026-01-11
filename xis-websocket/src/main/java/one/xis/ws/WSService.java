@@ -29,32 +29,36 @@ public class WSService {
     private void processPageModelRequest(WSClientRequest wsClientRequest, WSEmitter emitter) {
         var response = frontendService.processModelDataRequest(wsClientRequest.getBody());
         var wsResponse = new WSServerResponse();
-        wsResponse.setStatusCode(200);
-        wsResponse.setServerResponse(response);
+        wsResponse.setMessageId(wsClientRequest.getMessageId());
+        wsResponse.setStatus(200);
+        wsResponse.setBody(response);
         emitter.send(wsResponse);
     }
 
     private void processFormModelRequest(WSClientRequest wsClientRequest, WSEmitter responder) {
         var response = frontendService.processFormDataRequest(wsClientRequest.getBody());
         var wsResponse = new WSServerResponse();
-        wsResponse.setStatusCode(200);
-        wsResponse.setServerResponse(response);
+        wsResponse.setMessageId(wsClientRequest.getMessageId());
+        wsResponse.setStatus(200);
+        wsResponse.setBody(response);
         responder.send(wsResponse);
     }
 
     private void processWidgetModelRequest(WSClientRequest wsClientRequest, WSEmitter responder) {
         var response = frontendService.processModelDataRequest(wsClientRequest.getBody());
         var wsResponse = new WSServerResponse();
-        wsResponse.setStatusCode(200);
-        wsResponse.setServerResponse(response);
+        wsResponse.setMessageId(wsClientRequest.getMessageId());
+        wsResponse.setStatus(200);
+        wsResponse.setBody(response);
         responder.send(wsResponse);
     }
 
     private void processActionRequest(WSClientRequest wsClientRequest, WSEmitter responder) {
         var response = frontendService.processActionRequest(wsClientRequest.getBody());
         var wsResponse = new WSServerResponse();
-        wsResponse.setStatusCode(200);
-        wsResponse.setServerResponse(response);
+        wsResponse.setMessageId(wsClientRequest.getMessageId());
+        wsResponse.setStatus(200);
+        wsResponse.setBody(response);
         responder.send(wsResponse);
     }
 }

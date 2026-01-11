@@ -45,6 +45,7 @@ dependencies {
     implementation project(":xis-adapter-spi")
     implementation project(':xis-gson')
     implementation project(':xis-resources')
+    implementation project(':xis-http-controller')
 
 
     // Compile-only dependencies

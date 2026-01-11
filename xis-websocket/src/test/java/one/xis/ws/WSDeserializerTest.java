@@ -22,7 +22,7 @@ class WSDeserializerTest {
     void testDeserializeWSClientRequest() {
         String json = """
                 {
-                  "uri": "/xis/page/model",
+                  "path": "/xis/page/model",
                   "headers": {
                     "messageId": "msg-123",
                     "accessToken": "token-abc"
@@ -30,7 +30,7 @@ class WSDeserializerTest {
                   "parameters": {
                     "pageId": "/products/*.html"
                   },
-                  "clientRequest": {
+                  "body": {
                     "pathVariables": {
                       "productId": "12345"
                     },
@@ -44,10 +44,10 @@ class WSDeserializerTest {
         WSClientRequest request = gson.fromJson(json, WSClientRequest.class);
 
         assertNotNull(request);
-        assertEquals("/xis/page/model", request.getUri());
-        assertNotNull(request.getClientRequest());
-        assertEquals("12345", request.getClientRequest().getPathVariables().get("productId"));
-        assertEquals("homepage", request.getClientRequest().getQueryParameters().get("ref"));
+        assertEquals("/xis/page/model", request.getPath());
+        assertNotNull(request.getBody());
+        assertEquals("12345", request.getBody().getPathVariables().get("productId"));
+        assertEquals("homepage", request.getBody().getQueryParameters().get("ref"));
         assertEquals("/products/*.html", request.getParameters().get("pageId"));
     }
 
@@ -55,7 +55,7 @@ class WSDeserializerTest {
     void testDeserializeWSResourceRequest() {
         String json = """
                 {
-                  "uri": "/xis/page/head",
+                  "path": "/xis/page/head",
                   "headers": {
                     "messageId": "msg-456",
                     "lastModifiedEpochMilli": 1609459200000
@@ -69,7 +69,7 @@ class WSDeserializerTest {
         WSResourceRequest request = gson.fromJson(json, WSResourceRequest.class);
 
         assertNotNull(request);
-        assertEquals("/xis/page/head", request.getUri());
+        assertEquals("/xis/page/head", request.getPath());
         assertEquals("main", request.getParameters().get("pageId"));
     }
 
@@ -77,31 +77,31 @@ class WSDeserializerTest {
     void testDeserializeWSClientRequestWithEmptyClientRequest() {
         String json = """
                 {
-                  "uri": "/xis/page/config",
+                  "path": "/xis/page/config",
                   "headers": {},
                   "parameters": {},
-                  "clientRequest": {}
+                  "body": {}
                 }
                 """;
 
         WSClientRequest request = gson.fromJson(json, WSClientRequest.class);
 
         assertNotNull(request);
-        assertEquals("/xis/page/config", request.getUri());
-        assertNotNull(request.getClientRequest());
+        assertEquals("/xis/page/config", request.getPath());
+        assertNotNull(request.getBody());
     }
 
     @Test
     void testDeserializeWSClientRequestWithFormData() {
         String json = """
                 {
-                  "uri": "/xis/form/action",
+                  "path": "/xis/form/action",
                   "headers": {
                     "messageId": "msg-789",
                     "accessToken": "token-xyz"
                   },
                   "parameters": {},
-                  "clientRequest": {
+                  "body": {
                     "formBinding": "userForm",
                     "action": "save",
                     "formData": {
@@ -115,19 +115,19 @@ class WSDeserializerTest {
         WSClientRequest request = gson.fromJson(json, WSClientRequest.class);
 
         assertNotNull(request);
-        assertEquals("/xis/form/action", request.getUri());
-        assertNotNull(request.getClientRequest());
-        assertEquals("userForm", request.getClientRequest().getFormBinding());
-        assertEquals("save", request.getClientRequest().getAction());
-        assertEquals("john_doe", request.getClientRequest().getFormData().get("username"));
-        assertEquals("john@example.com", request.getClientRequest().getFormData().get("email"));
+        assertEquals("/xis/form/action", request.getPath());
+        assertNotNull(request.getBody());
+        assertEquals("userForm", request.getBody().getFormBinding());
+        assertEquals("save", request.getBody().getAction());
+        assertEquals("john_doe", request.getBody().getFormData().get("username"));
+        assertEquals("john@example.com", request.getBody().getFormData().get("email"));
     }
 
     @Test
     void testDeserializeWSResourceRequestWithLastModified() {
         String json = """
                 {
-                  "uri": "/bundle.min.js",
+                  "path": "/bundle.min.js",
                   "headers": {
                     "messageId": "msg-bundle",
                     "lastModifiedEpochMilli": 1609459200000
@@ -139,7 +139,7 @@ class WSDeserializerTest {
         WSResourceRequest request = gson.fromJson(json, WSResourceRequest.class);
 
         assertNotNull(request);
-        assertEquals("/bundle.min.js", request.getUri());
+        assertEquals("/bundle.min.js", request.getPath());
         assertEquals(1609459200000L, request.getHeaders().getLastModifiedAsEpochMilli());
     }
 }

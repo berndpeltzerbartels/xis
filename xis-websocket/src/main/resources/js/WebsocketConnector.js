@@ -58,8 +58,11 @@ class WebsocketConnector {
      */
     handleMessage(data) {
         try {
-            const response = JSON.parse(data);
+            const response = new HttpLikeResponse(data);
             const messageId = response.messageId;
+            if (!messageId) {
+                throw new Error("no message id");
+            }
 
             if (messageId && this.pendingRequests.has(messageId)) {
                 const pending = this.pendingRequests.get(messageId);
@@ -154,4 +157,5 @@ class WebsocketConnector {
     isConnected() {
         return this.connected && this.ws && this.ws.readyState === WebSocket.OPEN;
     }
+
 }

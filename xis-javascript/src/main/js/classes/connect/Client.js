@@ -113,7 +113,7 @@ class Client {
      * @public
      * @param {ResolvedURL} resolvedURL 
      * @param {String} widgetId
-     * @param {sring:string} formData
+     * @param {string:string} formData
      * @param {string} action
      * @param {any} actionParameters
      * @param {string} binding
@@ -131,6 +131,80 @@ class Client {
     sendRenewTokenRequest(renewToken) {
         throw new Error('Not implemented');
     }
+
+
+
+     async handleResponse(response) {
+        if (this.serverError(response)) {
+            this.handleServerError(response);
+            return Promise.reject();
+        }
+        if (this.isAjaxRedirect(response)) {
+            // follow redirect in browser
+            return Promise.reject({type: 'redirect'});
+        }
+        if (this.authorizationRequired(response)) {
+            this.forwardToLoginPage(response);
+            return Promise.reject({type: 'redirect'});
+        }
+        if (this.isBrowserRedirect(response)) {
+            this.doBrowserRedirect(response);
+            return Promise.reject({type: 'redirect'});
+        }
+        var responseObject = this.deserializeResponse(response);
+        if (responseObject.redirectUrl) {
+            this.forward(responseObject.redirectUrl);
+            return Promise.reject({type: 'redirect'});
+        }
+        const globalMessages = this.globalValidatorMessages(responseObject);
+        if (globalMessages.length > 0) {
+            app.messageHandler.addValidationErrors(globalMessages);
+        }
+        return Promise.resolve(responseObject);
+     }
+
+     forwardToLoginPage(response) {
+         var redirectUri = response.getResponseHeader('Location');
+         this.forward(redirectUri);
+     }
+
+     forward(redirectUri) {
+         window.location.href = redirectUri;
+     }
+
+     authorizationRequired(response) {
+         return response.status === 401;
+     }
+
+     serverError(response) {
+         return response.status >= 500 && response.status < 600;
+     }
+
+     isAjaxRedirect(response) {
+         return response.status == 302 || response.status == 303 || response.status == 307 || response.status == 308;
+     }
+
+     doBrowserRedirect(response) {
+         var redirectUri = response.getResponseHeader('Location');
+         this.forward(redirectUri);
+     }
+
+     isBrowserRedirect(response) {
+         return !this.isAjaxRedirect(response) && response.getResponseHeader('Location');
+     }
+
+     handleServerError(response) {
+         console.info('Server error occurred:', response); // do not use reportError(...), here
+         return app.messageHandler.reportServerError(JSON.parse(response.responseText).message);
+     }
+
+     globalValidatorMessages(response) {
+         if (response.validatorMessages && response.validatorMessages.globalMessages) {
+             return response.validatorMessages.globalMessages.filter(s => s && s.trim().length > 0);
+         }
+         return [];
+     }
+
 
     /**
      * @protected
@@ -334,10 +408,10 @@ class Client {
      * @protected
      * @param {Response} content 
      * @param {number} httpStatus
-     * @returns {ServerReponse}
+     * @returns {ServerResponse}
      */
     deserializeResponse(response) {
-        var obj = JSON.parse(response.responseText);
+        var obj = response.body ? response.body : JSON.parse(response.responseText); // for ws, we have a body
         var data = obj.data ? new Data(obj.data) : new Data({});
         var formData = obj.formData ? new Data(obj.formData) : new Data({});
         var serverResponse = new ServerResponse();

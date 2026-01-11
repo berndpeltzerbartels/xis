@@ -9,7 +9,7 @@ import java.util.Map;
 abstract class WSRequest {
     private WSRequestHeaders headers = new WSRequestHeaders();
     private Map<String, String> parameters = new HashMap<>();
-    private Integer messageId;
+    private Long messageId;
     private String path;
     private String method;
     private Map<String, String> queryParameters = new HashMap<>();

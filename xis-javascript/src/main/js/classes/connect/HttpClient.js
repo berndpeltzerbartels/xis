@@ -52,34 +52,6 @@ class HttpClient extends Client {
         return response.responseText;
     }
 
-    async handleResponse(response) {
-        if (this.serverError(response)) {
-            this.handleServerError(response);
-            return Promise.reject();
-        }
-        if (this.isAjaxRedirect(response)) {
-            // follow redirect in browser
-            return Promise.reject({type: 'redirect'});
-        }
-        if (this.authorizationRequired(response)) {
-            this.forwardToLoginPage(response);
-            return Promise.reject({type: 'redirect'});
-        }
-        if (this.isBrowserRedirect(response)) {
-            this.doBrowserRedirect(response);
-            return Promise.reject({type: 'redirect'});
-        }
-        var responseObject = this.deserializeResponse(response);
-        if (responseObject.redirectUrl) {
-            this.forward(responseObject.redirectUrl);
-            return Promise.reject({type: 'redirect'});
-        }
-        const globalMessages = this.globalValidatorMessges(responseObject);
-        if (globalMessages.length > 0) {
-            app.messageHandler.addValidationErrors(globalMessages);
-        }
-        return Promise.resolve(responseObject);
-    }
 
     async loadPageData(resolvedURL) {
         app.messageHandler.clearMessages();
@@ -212,7 +184,7 @@ class HttpClient extends Client {
         return app.messageHandler.reportServerError(JSON.parse(response.responseText).message);
     }
 
-    globalValidatorMessges(response) {
+    globalValidatorMessages(response) {
         if (response.validatorMessages && response.validatorMessages.globalMessages) {
             return response.validatorMessages.globalMessages.filter(s => s && s.trim().length > 0);
         }

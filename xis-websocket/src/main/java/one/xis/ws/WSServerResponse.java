@@ -22,7 +22,7 @@ class WSServerResponse extends WSResponse<ServerResponse> {
     }
 
     WSServerResponse(int statusCode) {
-        setStatusCode(statusCode);
+        setStatus(statusCode);
     }
 
     /**
@@ -51,7 +51,7 @@ class WSServerResponse extends WSResponse<ServerResponse> {
      */
     public static WSServerResponse found(String location) {
         WSServerResponse response = new WSServerResponse(302);
-        response.setLocationHeader(location);
+        response.getHeaders().put("Location", location);
         return response;
     }
 }

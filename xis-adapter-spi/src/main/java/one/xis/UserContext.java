@@ -1,6 +1,7 @@
 package one.xis;
 
 import one.xis.auth.token.SecurityAttributes;
+import one.xis.auth.token.TokenStatus;
 
 import java.time.ZoneId;
 import java.util.Locale;
@@ -19,6 +20,9 @@ public interface UserContext {
     String getUserId();
 
     Set<String> getRoles();
+
+
+    TokenStatus getTokenStatus();
 
     boolean isAuthenticated();
 

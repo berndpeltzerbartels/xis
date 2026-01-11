@@ -22,14 +22,13 @@ class ControllerWrapperTest {
 
     @BeforeEach
     void setUp() {
-        RequestContext.createInstance(mock(), mock());
+        ((UserContextImpl) UserContext.getInstance()).setSecurityAttributes(mock());
         var deserializer = mock(MainDeserializer.class);
         var controllerResultMapper = mock(ControllerResultMapper.class);
         var wrapperFactory = new ControllerWrapperFactory(deserializer, new ControllerMethodResultMapper(mock(), new PathResolver()), controllerResultMapper);
         controller = new ExampleController();
         controllerWrapper = wrapperFactory.createControllerWrapper("test", controller, ControllerWrapper.class);
         RequestContext.createInstance(mock(), mock());
-        RequestContext.getInstance().setAttribute(UserContextImpl.CONTEXT_KEY, mock(UserContext.class));
     }
 
     @Test

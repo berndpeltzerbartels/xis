@@ -10,9 +10,8 @@ import one.xis.auth.AuthenticationException;
 import one.xis.auth.URLForbiddenException;
 import one.xis.auth.token.TokenStatus;
 import one.xis.auth.token.UserSecurityService;
-import one.xis.context.EventEmitter;
 import one.xis.context.Component;
-import one.xis.http.RequestContext;
+import one.xis.context.EventEmitter;
 import one.xis.js.JavascriptProvider;
 import one.xis.resource.Resource;
 
@@ -104,13 +103,12 @@ public class FrontendServiceImpl implements FrontendService {
 
     private void addRequestAttributes(ClientRequest request) throws AuthenticationException {
         var tokenStatus = new TokenStatus(request.getAccessToken(), request.getRenewToken());
-        var userContext = new UserContextImpl();
+        var userContext = (UserContextImpl) UserContext.getInstance();
         userContext.setClientId(request.getClientId());
         userContext.setLocale(request.getLocale());
         userContext.setZoneId(ZoneId.of(request.getZoneId()));
         userContext.setSecurityAttributes(new SecurityAttributesImpl(tokenStatus, userSecurityService));
-        RequestContext.getInstance().setAttribute(UserContext.CONTEXT_KEY, userContext);
-        RequestContext.getInstance().setAttribute(TokenStatus.CONTEXT_KEY, tokenStatus);
+        userContext.setTokenStatus(tokenStatus);
         eventEmitter.emitEvent(new UserContextCreatedEvent(userContext));
     }
 

@@ -126,7 +126,7 @@ class WebsocketClient extends Client {
             this.forward(responseObject.redirectUrl);
             return Promise.reject({type: 'redirect'});
         }
-        const globalMessages = this.globalValidatorMessges(responseObject);
+        const globalMessages = this.globalValidatorMessages(responseObject);
         if (globalMessages.length > 0) {
             app.messageHandler.addValidationErrors(globalMessages);
         }

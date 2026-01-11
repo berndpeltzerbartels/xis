@@ -2,7 +2,7 @@ package one.xis.server;
 
 
 import lombok.RequiredArgsConstructor;
-import one.xis.auth.token.TokenStatus;
+import one.xis.UserContext;
 import one.xis.http.*;
 import one.xis.resource.Resource;
 
@@ -144,7 +144,7 @@ public class MainController {
         if (serverResponse.getRedirectUrl() != null) {
             return ResponseEntity.noContent().addHeader("Location", serverResponse.getRedirectUrl());
         }
-        var tokenStatus = (TokenStatus) RequestContext.getInstance().getAttribute(TokenStatus.CONTEXT_KEY);
+        var tokenStatus = UserContext.getInstance().getTokenStatus();
         var entity = ResponseEntity.status(serverResponse.getStatus()).body(serverResponse);
         if (tokenStatus.isRenewed()) {
             entity.addCookie("access_token", tokenStatus.getAccessToken(), tokenStatus.getExpiresIn())

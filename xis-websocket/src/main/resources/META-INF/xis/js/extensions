@@ -1,3 +1,4 @@
 js/WebsocketClient.js
 js/WebsocketConnector.js
 js/WebsocketConnectorMock.js
+js/HttpLikeResponse.js

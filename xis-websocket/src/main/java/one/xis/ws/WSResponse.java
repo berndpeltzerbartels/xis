@@ -2,17 +2,20 @@ package one.xis.ws;
 
 import lombok.Data;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Data
 public abstract class WSResponse<T> {
 
-    private int statusCode;
-    private T serverResponse;
-    private String locationHeader;
+    private int status;
+    private T body;
+    private Long messageId;
 
-    private final WSResponseHeaders headers = new WSResponseHeaders();
+    private final Map<String, String> headers = new HashMap<>();
 
     WSResponse() {
-        this.statusCode = 200;
+        this.status = 200;
     }
 
 }

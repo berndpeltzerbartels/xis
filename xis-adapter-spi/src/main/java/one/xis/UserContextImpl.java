@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import one.xis.auth.token.SecurityAttributes;
-import one.xis.http.RequestContext;
+import one.xis.auth.token.TokenStatus;
 
 import java.time.ZoneId;
 import java.util.Locale;
@@ -15,10 +15,13 @@ import java.util.Set;
 @NoArgsConstructor
 public class UserContextImpl implements UserContext {
 
+    private static final ThreadLocal<UserContext> USER_CONTEXT_THREAD_LOCAL = ThreadLocal.withInitial(UserContextImpl::new);
+
     private Locale locale;
     private ZoneId zoneId;
     private String clientId;
     private SecurityAttributes securityAttributes;
+    private TokenStatus tokenStatus;
 
 
     @Override
@@ -36,7 +39,11 @@ public class UserContextImpl implements UserContext {
     }
 
     public static UserContext getInstance() {
-        return (UserContext) RequestContext.getInstance().getAttribute(UserContext.CONTEXT_KEY);
+        return USER_CONTEXT_THREAD_LOCAL.get();
+    }
+
+    public static void clear() {
+        USER_CONTEXT_THREAD_LOCAL.remove();
     }
 
 }
