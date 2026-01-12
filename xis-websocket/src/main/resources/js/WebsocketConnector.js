@@ -5,6 +5,10 @@ class WebsocketConnector {
         this.connected = false;
         this.pendingRequests = new Map();
         this.messageId = 0;
+        this.url = null;
+        this.shouldReconnect = true;
+        this.reconnectAttempts = 0;
+        this.reconnectTimeout = null;
     }
 
     /**
@@ -14,6 +18,18 @@ class WebsocketConnector {
      * @returns {Promise<void>}
      */
     connect(url) {
+        this.url = url;
+        this.shouldReconnect = true;
+        this.reconnectAttempts = 0;
+        return this.doConnect();
+    }
+
+    /**
+     * Internal connect implementation
+     * @private
+     * @returns {Promise<void>}
+     */
+    doConnect() {
         return new Promise((resolve, reject) => {
             if (this.connected) {
                 resolve();
@@ -21,11 +37,15 @@ class WebsocketConnector {
             }
 
             try {
-                this.ws = new WebSocket(url);
+                this.ws = new WebSocket(this.url);
 
                 this.ws.onopen = () => {
-                    console.log('WebSocket connected to ' + url);
+                    console.log('WebSocket connected to ' + this.url);
                     this.connected = true;
+                    if (this.reconnectAttempts > 0) {
+                        console.log('Reconnected successfully after ' + this.reconnectAttempts + ' attempts');
+                        this.reconnectAttempts = 0;
+                    }
                     resolve();
                 };
 
@@ -42,13 +62,52 @@ class WebsocketConnector {
                     console.log('WebSocket closed:', event.code, event.reason);
                     this.connected = false;
                     this.ws = null;
+
+                    // Reject all pending requests
+                    this.pendingRequests.forEach((pending, messageId) => {
+                        pending.reject(new Error('WebSocket connection closed'));
+                    });
+                    this.pendingRequests.clear();
+
+                    if (this.shouldReconnect) {
+                        this.scheduleReconnect();
+                    }
                 };
 
             } catch (e) {
-                reportError('Error creating WebSocket connection to ' + url, e);
+                reportError('Error creating WebSocket connection to ' + this.url, e);
                 reject(e);
             }
         });
+    }
+
+    /**
+     * Schedule reconnect with exponential backoff
+     * @private
+     */
+    scheduleReconnect() {
+        if (this.reconnectTimeout) {
+            clearTimeout(this.reconnectTimeout);
+        }
+
+        const delay = Math.min(
+            WebsocketConnector.INITIAL_RECONNECT_DELAY * Math.pow(
+                WebsocketConnector.RECONNECT_BACKOFF_MULTIPLIER,
+                this.reconnectAttempts
+            ),
+            WebsocketConnector.MAX_RECONNECT_DELAY
+        );
+
+        this.reconnectAttempts++;
+        console.log('Reconnecting in ' + delay + 'ms (attempt ' + this.reconnectAttempts + ')');
+
+        this.reconnectTimeout = setTimeout(() => {
+            this.reconnectTimeout = null;
+            this.doConnect().catch((error) => {
+                console.error('Reconnect failed:', error);
+                // Will trigger onclose which schedules next reconnect
+            });
+        }, delay);
     }
 
     /**
@@ -58,18 +117,19 @@ class WebsocketConnector {
      */
     handleMessage(data) {
         try {
-            const response = new HttpLikeResponse(data);
+            const response = new WebsocketServerResponse(data);
             const messageId = response.messageId;
+            
             if (!messageId) {
                 throw new Error("no message id");
             }
 
-            if (messageId && this.pendingRequests.has(messageId)) {
+            if (this.pendingRequests.has(messageId)) {
                 const pending = this.pendingRequests.get(messageId);
                 this.pendingRequests.delete(messageId);
                 pending.resolve(response);
             } else {
-                console.warn('Received message without matching request:', response);
+                console.warn('Received message without matching request. MessageId:', messageId);
             }
         } catch (e) {
             reportError('Error parsing WebSocket message', e);
@@ -79,13 +139,13 @@ class WebsocketConnector {
     /**
      * Send message via WebSocket
      * @public
-     * @param {string} url - Full URL with path and query
+     * @param {string} path, currently query parameters are not supported
      * @param {string} method - HTTP method (GET, POST, etc.)
      * @param {any} body - Request body
      * @param {object} headers - Request headers
      * @returns {Promise<any>}
      */
-    send(url, method, body, headers = {}) {
+    send(path, method, body, headers = {}) {
         return new Promise((resolve, reject) => {
             if (!this.connected || !this.ws) {
                 reject(new Error('WebSocket not connected'));
@@ -95,24 +155,10 @@ class WebsocketConnector {
             try {
                 const messageId = ++this.messageId;
 
-                // Extract path and query parameters
-                const urlParts = url.split('?');
-                const path = urlParts[0];
-                const queryParameters = {};
-
-                if (urlParts[1]) {
-                    const params = urlParts[1].split('&');
-                    for (const param of params) {
-                        const [key, value] = param.split('=');
-                        queryParameters[decodeURIComponent(key)] = decodeURIComponent(value || '');
-                    }
-                }
-
                 const message = {
                     messageId: messageId,
                     path: path,
                     method: method,
-                    queryParameters: queryParameters,
                     headers: headers,
                     body: body
                 };
@@ -137,14 +183,26 @@ class WebsocketConnector {
     }
 
     /**
-     * Close WebSocket connection
+     * Close WebSocket connection and stop reconnecting
      * @public
      */
     close() {
+        this.shouldReconnect = false;
+
+        if (this.reconnectTimeout) {
+            clearTimeout(this.reconnectTimeout);
+            this.reconnectTimeout = null;
+        }
+
         if (this.ws) {
             this.ws.close();
             this.ws = null;
             this.connected = false;
+
+            // Reject all pending requests
+            this.pendingRequests.forEach((pending, messageId) => {
+                pending.reject(new Error('WebSocket closed by client'));
+            });
             this.pendingRequests.clear();
         }
     }
@@ -159,3 +217,9 @@ class WebsocketConnector {
     }
 
 }
+
+// Constants (ES5-compatible)
+WebsocketConnector.INITIAL_RECONNECT_DELAY = 1000; // 1 second
+WebsocketConnector.MAX_RECONNECT_DELAY = 30000; // 30 seconds
+WebsocketConnector.RECONNECT_BACKOFF_MULTIPLIER = 2;
+WebsocketConnector.REQUEST_TIMEOUT = 30000;

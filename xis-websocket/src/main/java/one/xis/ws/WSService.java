@@ -10,7 +10,7 @@ public class WSService {
     private final FrontendService frontendService;
     private final GsonProvider gsonProvider;
 
-    protected void processClientRequest(String message, WSEmitter emitter) {
+    public void processClientRequest(String message, WSEmitter emitter) {
         var wsClientRequest = gsonProvider.getGson().fromJson(message, WSClientRequest.class);
         processClientRequest(wsClientRequest, emitter);
     }

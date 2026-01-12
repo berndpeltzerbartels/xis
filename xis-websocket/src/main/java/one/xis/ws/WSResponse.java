@@ -14,7 +14,7 @@ public abstract class WSResponse<T> {
 
     private final Map<String, String> headers = new HashMap<>();
 
-    WSResponse() {
+    public WSResponse() {
         this.status = 200;
     }
 

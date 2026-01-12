@@ -423,12 +423,12 @@ class Client {
         serverResponse.validatorMessages = new ValidatorMessages(obj.validatorMessages);
         serverResponse.reloadPage = obj.reloadPage;
         serverResponse.reloadWidgets = obj.reloadWidgets;
-        serverResponse.localDatabaseData = obj.localDatabaseData;
-        serverResponse.localStorageData = obj.localStorageData;
-        serverResponse.clientStorageData = obj.clientStorageData;
-        serverResponse.globalVariableData = obj.globalVariableData;
+        serverResponse.localDatabaseData = obj.localDatabaseData || {};
+        serverResponse.localStorageData = obj.localStorageData || {};
+        serverResponse.clientStorageData = obj.clientStorageData || {};
+        serverResponse.globalVariableData = obj.globalVariableData || {};
         serverResponse.sessionStorageData = obj.sessionStorageData;
-        serverResponse.widgetParameters = obj.widgetParameters;
+        serverResponse.widgetParameters = obj.widgetParameters || {};
         serverResponse.widgetContainerId = obj.widgetContainerId;
         serverResponse.redirectUrl = obj.redirectUrl;
         serverResponse.idVariables = obj.idVariables || {};

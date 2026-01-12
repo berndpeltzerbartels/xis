@@ -23,7 +23,15 @@ class NettyWSServerHandlerImpl extends SimpleChannelInboundHandler<TextWebSocket
         try {
             wsService.processClientRequest(frame.text(), emitter);
         } catch (Exception e) {
-            // TODO emitter...
+            System.err.println("Error processing WebSocket request: " + e.getMessage());
+            e.printStackTrace();
+            sendErrorResponse(emitter, e);
         }
+    }
+
+    private void sendErrorResponse(NettyWSResponseEmitter emitter, Exception e) {
+        var errorResponse = new WSServerResponse(500);
+        errorResponse.setBody(null);
+        emitter.send(errorResponse);
     }
 }

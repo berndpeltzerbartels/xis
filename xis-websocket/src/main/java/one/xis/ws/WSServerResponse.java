@@ -11,17 +11,17 @@ import one.xis.server.ServerResponse;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-class WSServerResponse extends WSResponse<ServerResponse> {
+public class WSServerResponse extends WSResponse<ServerResponse> {
 
 
     /**
      * Creates a WSServerResponse with a 200 OK status.
      */
-    WSServerResponse() {
+    public WSServerResponse() {
         super();
     }
 
-    WSServerResponse(int statusCode) {
+    public WSServerResponse(int statusCode) {
         setStatus(statusCode);
     }
 

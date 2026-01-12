@@ -1,4 +1,4 @@
-class HttpLikeResponse {
+class WebsocketServerResponse {
 
     constructor(string) {
         const obj = JSON.parse(string);

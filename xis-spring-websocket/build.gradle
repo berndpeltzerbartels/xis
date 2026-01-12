@@ -25,6 +25,11 @@ java {
     withJavadocJar()
 }
 
+// Skip javadoc task for modules with no public classes
+tasks.named('javadoc') {
+    enabled = false
+}
+
 // Local variables for versions
 var lombokVersion = rootProject.ext.libraryVersions.lombok
 var junitVersion = rootProject.ext.libraryVersions.junit
@@ -32,25 +37,29 @@ var assertjVersion = rootProject.ext.libraryVersions.assertj
 var gsonVersion = rootProject.ext.libraryVersions.gson
 var mockitoVersion = rootProject.ext.libraryVersions.mockito
 var slf4jVersion = rootProject.ext.libraryVersions.slf4j
-var nettyVersion = rootProject.ext.libraryVersions.netty
+var springBootVersion = rootProject.ext.libraryVersions.springBoot
 
 
 dependencies {
 
     // Local project dependencies
+    implementation project(":xis-websocket")
+    implementation project(":xis-gson")
+    implementation project(":xis-spring")
+    implementation project(":xis-context")
+    implementation project(":xis-controller-api")
 
-
-    // api project(":xis-context")
+    // Spring Boot Auto-Configuration
+    implementation("org.springframework.boot:spring-boot-starter-websocket:$springBootVersion")
+    annotationProcessor("org.springframework.boot:spring-boot-autoconfigure-processor:$springBootVersion")
 
     // Compile-only dependencies
-
-    // Alle Dependencies für Netty
-    implementation("io.netty:netty-all:$nettyVersion")
 
     // SLF4J API + Tinylog implementation for xis-boot applications
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
 
-
+    // Implementation dependencies
+    implementation "org.projectlombok:lombok:$lombokVersion"
     // Annotation processors
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
 

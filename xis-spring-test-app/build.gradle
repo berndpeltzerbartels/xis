@@ -1,7 +1,7 @@
 plugins {
     id 'java'
     id 'java-library'
-    // id 'one.xis.spring-plugin' version '1.0.0'
+    id 'one.xis.plugin' version '0.4.1-SNAPSHOT'
 }
 
 group = rootProject.ext.projectGroup
@@ -33,9 +33,10 @@ dependencies {
     // Local project dependencies
 
     implementation project(':xis-spring')
+    implementation project(':xis-spring-websocket')
     implementation project(':xis-test')
     implementation project(':xis-authentication')
-    implementation project(':xis-theme')
+    // implementation project(':xis-theme')
 
     // Annotation processors
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"

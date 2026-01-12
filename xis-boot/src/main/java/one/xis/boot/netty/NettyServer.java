@@ -39,6 +39,9 @@ public class NettyServer {
     @Inject
     private final Collection<NettyWSServerHandler> wsServerHandlers;
 
+    @Inject
+    private final Collection<NettyWSPingHandler> wsPingHandlers;
+
 
     @Setter
     @Getter
@@ -93,6 +96,11 @@ public class NettyServer {
                         READER_IDLE_SECONDS, WRITER_IDLE_SECONDS, ALL_IDLE_SECONDS, TimeUnit.SECONDS
                 ));
                 ch.pipeline().addLast(IdleCloseHandler.INSTANCE);
+
+                // WebSocket ping handler (sends pings on idle)
+                if (!wsPingHandlers.isEmpty()) {
+                    ch.pipeline().addLast(wsPingHandlers.iterator().next());
+                }
 
                 // WebSocket upgrade (conditionally removes HTTP handler after handshake)
                 if (!wsServerHandlers.isEmpty()) {
