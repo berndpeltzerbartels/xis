@@ -48,6 +48,7 @@ dependencies {
     implementation project(":xis-spring")
     implementation project(":xis-context")
     implementation project(":xis-controller-api")
+    implementation project(":xis-adapter-spi")
 
     // Spring Boot Auto-Configuration
     implementation("org.springframework.boot:spring-boot-starter-websocket:$springBootVersion")

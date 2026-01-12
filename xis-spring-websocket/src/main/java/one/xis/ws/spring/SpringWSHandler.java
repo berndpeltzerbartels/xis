@@ -2,6 +2,7 @@ package one.xis.ws.spring;
 
 import com.google.gson.Gson;
 import lombok.NonNull;
+import one.xis.ws.WSClientRequest;
 import one.xis.ws.WSServerResponse;
 import one.xis.ws.WSService;
 import org.springframework.stereotype.Component;
@@ -36,7 +37,7 @@ public class SpringWSHandler extends TextWebSocketHandler implements SpringWSHan
         } catch (Exception e) {
             System.err.println("Error processing WebSocket request: " + e.getMessage());
             e.printStackTrace();
-            sendErrorResponse(emitter, e);
+            sendErrorResponse(emitter, message.getPayload(), e);
         }
     }
 
@@ -58,10 +59,16 @@ public class SpringWSHandler extends TextWebSocketHandler implements SpringWSHan
         exception.printStackTrace();
     }
 
-    private void sendErrorResponse(SpringWSResponseEmitter emitter, Exception e) {
-        var errorResponse = new WSServerResponse(500);
-        errorResponse.setBody(null);
-        emitter.send(errorResponse);
+    private void sendErrorResponse(SpringWSResponseEmitter emitter, String requestJson, Exception e) {
+        try {
+            var request = gson.fromJson(requestJson, WSClientRequest.class);
+            var errorResponse = new WSServerResponse(500);
+            errorResponse.setMessageId(request.getMessageId());
+            errorResponse.setBody(null);
+            emitter.send(errorResponse);
+        } catch (Exception parseError) {
+            System.err.println("Failed to parse request for error response: " + parseError.getMessage());
+        }
     }
 
     void sendPingToAllSessions() {

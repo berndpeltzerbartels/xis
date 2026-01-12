@@ -6,6 +6,6 @@ import one.xis.server.ClientRequest;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-class WSClientRequest extends WSRequest {
+public class WSClientRequest extends WSRequest {
     private ClientRequest body = new ClientRequest();
 }

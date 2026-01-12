@@ -50,6 +50,8 @@ dependencies {
     api project(":xis-validation")
     api project(':xis-http-controller')
 
+    // Optional WebSocket support
+    compileOnly project(":xis-websocket")
 
     // Compile-only dependencies
 

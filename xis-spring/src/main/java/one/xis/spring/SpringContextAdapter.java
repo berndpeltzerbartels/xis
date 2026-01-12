@@ -67,11 +67,7 @@ public class SpringContextAdapter implements BeanPostProcessor, ApplicationConte
         springFilter.setRestControllerService(controllerService);
         context.getSingletons(PushClientProxy.class).forEach(this::addToSpringContext);
     }
-
-
-    public void importInstances() {
-
-    }
+    
 
     private AppContext createXisContext() {
         return AppContextBuilder.createInstance()

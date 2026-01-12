@@ -24,7 +24,7 @@ class Application {
         this.elFunctions = new ELFunctions();
         this.includes = new Includes(this.httpClient);
         this.initializer = new Initializer(this.domAccessor, this.httpClient, this.widgets, this.includes, this.widgetContainers, this.tagHandlers);
-        this.pageController = new PageController(this.httpClient, this.pages, this.initializer, this.urlResolver, this.tagHandlers);
+        this.pageController = new PageController(this.client, this.pages, this.initializer, this.urlResolver, this.tagHandlers);
         this.history = new PageHistory(this.pageController);
         this.globals = new GlobalStore(this.eventPublisher);
         this.runInitializers();

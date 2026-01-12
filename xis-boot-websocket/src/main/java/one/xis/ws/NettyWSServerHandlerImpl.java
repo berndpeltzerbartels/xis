@@ -25,13 +25,19 @@ class NettyWSServerHandlerImpl extends SimpleChannelInboundHandler<TextWebSocket
         } catch (Exception e) {
             System.err.println("Error processing WebSocket request: " + e.getMessage());
             e.printStackTrace();
-            sendErrorResponse(emitter, e);
+            sendErrorResponse(emitter, frame.text(), e);
         }
     }
 
-    private void sendErrorResponse(NettyWSResponseEmitter emitter, Exception e) {
-        var errorResponse = new WSServerResponse(500);
-        errorResponse.setBody(null);
-        emitter.send(errorResponse);
+    private void sendErrorResponse(NettyWSResponseEmitter emitter, String requestJson, Exception e) {
+        try {
+            var request = gsonProvider.getGson().fromJson(requestJson, WSClientRequest.class);
+            var errorResponse = new WSServerResponse(500);
+            errorResponse.setMessageId(request.getMessageId());
+            errorResponse.setBody(null);
+            emitter.send(errorResponse);
+        } catch (Exception parseError) {
+            System.err.println("Failed to parse request for error response: " + parseError.getMessage());
+        }
     }
 }
