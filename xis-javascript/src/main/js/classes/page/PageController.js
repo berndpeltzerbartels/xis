@@ -39,6 +39,7 @@ class PageController {
      * @returns {Promise<void>}
      */
     initBuffer() {
+        console.log("init buffer");
         return this.htmlTagHandler.bodyTagHandler.initBuffer();
     }
 
@@ -47,6 +48,7 @@ class PageController {
      * @returns {Promise<void>}
      */
     commitBuffer() {
+        console.log("commit buffer");
         this.htmlTagHandler.bodyTagHandler.commitBuffer();
     }
 

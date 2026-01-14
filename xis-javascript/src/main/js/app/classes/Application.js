@@ -8,11 +8,14 @@ class Application {
         this.sessionStorage = new SessionStore(this.eventPublisher);
         this.localStorage = new LocalStore(this.eventPublisher);
         this.clientStorage = new ClientStore(this.eventPublisher);
-        this.httpConnector = new HttpConnector();
-        this.httpClient = new HttpClient(this.httpConnector);
-        this.websocketConnector = this.createWebsocketConnectorIfPresent();
+        this.clientId = this.clientId();
+        this.httpConnector = new HttpConnector(this.clientId);
+        this.httpClient = new HttpClient(this.httpConnector, this.clientId);
+        this.httpClient.clientId = this.clientId;
+        this.websocketConnector = this.createWebsocketConnectorIfPresent(this.clientId);
         if (this.websocketConnector) {
-            this.websocketClient = new WebsocketClient(this.websocketConnector);
+            this.websocketClient = new WebsocketClient(this.websocketConnector, this.clientId);
+            this.websocketClient.clientId = this.clientId;
         }
         this.client = this.websocketClient ? this.websocketClient : this.httpClient;
         this.domAccessor = new DomAccessor();
@@ -116,12 +119,22 @@ class Application {
         return true;
     }
 
-    createWebsocketConnectorIfPresent() {
+    createWebsocketConnectorIfPresent(clientId) {
         if (typeof WebsocketConnector !== 'undefined' &&  typeof WebSocket !== 'undefined') {
-            var connector = new WebsocketConnector();
+            var connector = new WebsocketConnector(clientId);
             connector.connect("ws://localhost:8080/ws");
             return connector;
         }
         return null;
     }
+
+    clientId() {
+        var clientId = localStorage .getItem('xis.clientId');
+        if (!clientId) {
+            clientId = randomString();
+            localStorage.setItem('xis.clientId', clientId);
+        }
+        return clientId;
+    }
+
 }

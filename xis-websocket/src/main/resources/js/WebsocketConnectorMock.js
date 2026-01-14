@@ -1,9 +1,10 @@
 class WebsocketConnectorMock {
 
-    constructor() {
+    constructor(clientId) {
         this.ws = null;
         this.messageId = 0;
         this.connected = false;
+        this.clientId = clientId;
     }
 
     /**
@@ -74,6 +75,8 @@ class WebsocketConnectorMock {
                 }
 
                 const message = {
+                    'request-type': 'client-request',
+                    clientId: this.clientId,
                     messageId: messageId,
                     path: path,
                     method: method,

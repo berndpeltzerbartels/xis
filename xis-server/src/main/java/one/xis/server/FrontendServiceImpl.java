@@ -60,9 +60,7 @@ public class FrontendServiceImpl implements FrontendService {
 
     @Override
     public Resource getPageHead(String id) {
-        var head = resourceService.getPageHead(id);
-        log.debug("Page head: {}", head);
-        return head;
+        return resourceService.getPageHead(id);
     }
 
     @Override

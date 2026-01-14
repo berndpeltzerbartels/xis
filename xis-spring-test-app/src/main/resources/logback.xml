@@ -1,0 +1,20 @@
+<configuration>
+
+    <!-- Konsole -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Standard: INFO -->
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+    </root>
+
+    <!-- DEBUG für ein bestimmtes Package oder eine Klasse -->
+    <logger name="one.xis" level="DEBUG"/>
+    <!-- oder -->
+    <!-- <logger name="com.example.service.MyClass" level="DEBUG"/> -->
+
+</configuration>

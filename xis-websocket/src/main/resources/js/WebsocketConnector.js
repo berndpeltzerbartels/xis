@@ -1,11 +1,12 @@
 class WebsocketConnector {
 
-    constructor() {
+    constructor(clientId) {
         this.ws = null;
         this.connected = false;
         this.pendingRequests = new Map();
         this.messageId = 0;
         this.url = null;
+        this.clientId = clientId;
         this.shouldReconnect = true;
         this.reconnectAttempts = 0;
         this.reconnectTimeout = null;
@@ -32,6 +33,7 @@ class WebsocketConnector {
     doConnect() {
         return new Promise((resolve, reject) => {
             if (this.connected) {
+              console.debug('websocket already connected');
                 resolve();
                 return;
             }
@@ -40,11 +42,12 @@ class WebsocketConnector {
                 this.ws = new WebSocket(this.url);
 
                 this.ws.onopen = () => {
-                    console.log('WebSocket connected to ' + this.url);
+                    console.debug('websocket connected to ' + this.url);
                     this.connected = true;
                     if (this.reconnectAttempts > 0) {
-                        console.log('Reconnected successfully after ' + this.reconnectAttempts + ' attempts');
+                        console.log('reconnected successfully after ' + this.reconnectAttempts + ' attempts');
                         this.reconnectAttempts = 0;
+                        this.sendReconnectMessage();
                     }
                     resolve();
                 };
@@ -55,17 +58,19 @@ class WebsocketConnector {
                 };
 
                 this.ws.onmessage = (event) => {
+                    console.debug("message received");
                     this.handleMessage(event.data);
                 };
 
                 this.ws.onclose = (event) => {
-                    console.log('WebSocket closed:', event.code, event.reason);
+                    console.debug('websocket closed:', event.code, event.reason);
                     this.connected = false;
                     this.ws = null;
 
                     // Reject all pending requests
                     this.pendingRequests.forEach((pending, messageId) => {
-                        pending.reject(new Error('WebSocket connection closed'));
+                        console.debug("removinf pending request");
+                        pending.reject(new Error('websocket connection closed'));
                     });
                     this.pendingRequests.clear();
 
@@ -79,6 +84,24 @@ class WebsocketConnector {
                 reject(e);
             }
         });
+    }
+
+    /**
+     * Send RECONNECT message to server
+     * @private
+     */
+    sendReconnectMessage() {
+        try {
+            var reconnectMessage = {
+                'request-type': 'reconnect',
+                clientId: this.clientId,
+                messageId: 0
+            };
+            this.ws.send(JSON.stringify(reconnectMessage));
+            console.log('Sent RECONNECT message with clientId: ' + this.clientId);
+        } catch (e) {
+            console.error('Failed to send RECONNECT message:', e);
+        }
     }
 
     /**
@@ -128,8 +151,6 @@ class WebsocketConnector {
                 const pending = this.pendingRequests.get(messageId);
                 this.pendingRequests.delete(messageId);
                 pending.resolve(response);
-            } else {
-                console.warn('Received message without matching request. MessageId:', messageId);
             }
         } catch (e) {
             reportError('Error parsing WebSocket message', e);
@@ -146,40 +167,64 @@ class WebsocketConnector {
      * @returns {Promise<any>}
      */
     send(path, method, body, headers = {}) {
-        return new Promise((resolve, reject) => {
-            if (!this.connected || !this.ws) {
-                reject(new Error('WebSocket not connected'));
+        var self = this;
+        return new Promise(function(resolve, reject) {
+            if (!self.connected || !self.ws) {
+                // Wait for reconnect and retry
+                var retryAttempts = 0;
+                var maxRetries = 50; // 5 seconds total (50 * 100ms)
+                var retryInterval = setInterval(function() {
+                    retryAttempts++;
+                    if (self.connected && self.ws) {
+                        clearInterval(retryInterval);
+                        self.doSend(path, method, body, headers, resolve, reject);
+                    } else if (retryAttempts >= maxRetries) {
+                        clearInterval(retryInterval);
+                        reject(new Error('WebSocket not connected'));
+                    }
+                }, 100);
                 return;
             }
 
-            try {
-                const messageId = ++this.messageId;
-
-                const message = {
-                    messageId: messageId,
-                    path: path,
-                    method: method,
-                    headers: headers,
-                    body: body
-                };
-
-                this.pendingRequests.set(messageId, { resolve, reject });
-
-                // Set timeout for request
-                setTimeout(() => {
-                    if (this.pendingRequests.has(messageId)) {
-                        this.pendingRequests.delete(messageId);
-                        reject(new Error('WebSocket request timeout'));
-                    }
-                }, 30000); // 30 second timeout
-
-                this.ws.send(JSON.stringify(message));
-
-            } catch (e) {
-                reportError('Error sending WebSocket message', e);
-                reject(e);
-            }
+            self.doSend(path, method, body, headers, resolve, reject);
         });
+    }
+
+    /**
+     * Internal method to actually send the message
+     * @private
+     */
+    doSend(path, method, body, headers, resolve, reject) {
+        try {
+            var messageId = ++this.messageId;
+
+            var message = {
+                'request-type': 'client-request',
+                clientId: this.clientId,
+                messageId: messageId,
+                path: path,
+                method: method,
+                headers: headers,
+                body: body
+            };
+
+            this.pendingRequests.set(messageId, { resolve: resolve, reject: reject });
+
+            // Set timeout for request
+            var self = this;
+            setTimeout(function() {
+                if (self.pendingRequests.has(messageId)) {
+                    self.pendingRequests.delete(messageId);
+                    reject(new Error('WebSocket request timeout'));
+                }
+            }, 30000); // 30 second timeout
+
+            this.ws.send(JSON.stringify(message));
+
+        } catch (e) {
+            reportError('Error sending WebSocket message', e);
+            reject(e);
+        }
     }
 
     /**

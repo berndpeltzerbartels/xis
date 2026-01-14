@@ -3,6 +3,7 @@ package one.xis.ws.spring;
 import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import one.xis.ws.WSEmitter;
+import org.springframework.web.socket.PingMessage;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -25,5 +26,19 @@ class SpringWSResponseEmitter implements WSEmitter {
     @Override
     public void send(Object response) {
         send(gson.toJson(response));
+    }
+
+    void sendPing() {
+        try {
+            if (session.isOpen()) {
+                session.sendMessage(new PingMessage());
+            }
+        } catch (IOException e) {
+            System.err.println("Failed to send ping to session " + session.getId() + ": " + e.getMessage());
+        }
+    }
+
+    boolean isOpen() {
+        return session.isOpen();
     }
 }

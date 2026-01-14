@@ -34,7 +34,7 @@ var gsonVersion = rootProject.ext.libraryVersions.gson
 var jacksonVersion = rootProject.ext.libraryVersions.jackson
 var mockitoVersion = rootProject.ext.libraryVersions.mockito
 var springBootVersion = rootProject.ext.libraryVersions.springBoot
-var slf4jLog4j12Version = "2.0.3"
+var slf4jVersion = rootProject.ext.libraryVersions.slf4j
 
 
 dependencies {
@@ -55,6 +55,9 @@ dependencies {
 
     // Implementation dependencies
     implementation "org.projectlombok:lombok:$lombokVersion"
+
+    // SLF4J API + Tinylog implementation for xis-boot applications
+    implementation("org.slf4j:slf4j-api:$slf4jVersion")
 
     // Test dependencies
     testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"

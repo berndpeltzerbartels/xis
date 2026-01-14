@@ -7,9 +7,9 @@ class Client {
      * This class serves as a base for HTTP clients that interact with the server.
      * It provides methods to load configuration, page data, widget data, and handle server responses
      */
-    constructor() {
+    constructor(clientId) {
         this.config = undefined;
-        this.clientId = randomString();
+        this.clientId = clientId;
         this.zoneId = timeZone();
     }
 

@@ -1,36 +1,85 @@
 package one.xis.ws;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import one.xis.context.Component;
 import one.xis.gson.GsonProvider;
 import one.xis.server.FrontendService;
 import one.xis.utils.lang.ClassUtils;
 
 import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
 
+@Slf4j
+@Component
 @RequiredArgsConstructor
 public class WSService {
 
     private final FrontendService frontendService;
     private final GsonProvider gsonProvider;
     private final Collection<WSExceptionHandler<?>> exceptionHandlers;
+    private final Map<String, WSEmitter> emitterMap = new ConcurrentHashMap<>();
 
-    public void processClientRequest(String message, WSEmitter emitter) {
-        WSClientRequest wsClientRequest = null;
+    public void processRequest(String message, WSEmitter emitter) {
+        var requestJsonObject = gsonProvider.getGson().fromJson(message, JsonObject.class);
+
+        var clientId = Optional.ofNullable(requestJsonObject.get("clientId"))
+                .map(JsonElement::getAsString)
+                .orElseThrow(WSMessageFormatException::new);
+
+        var messageId = Optional.ofNullable(requestJsonObject.get("messageId"))
+                .map(JsonElement::getAsLong)
+                .orElseThrow(WSMessageFormatException::new);
+        log.debug("processing request. clientId: {}, messageId: {}", clientId, messageId);
+        // Register/update emitter for this clientId
+        emitterMap.put(clientId, emitter);
+
+        var requestType = WSRequestType.fromValue(requestJsonObject.get("request-type").getAsString());
         try {
-            wsClientRequest = gsonProvider.getGson().fromJson(message, WSClientRequest.class);
-            processClientRequest(wsClientRequest, emitter);
+            switch (requestType) {
+                case RECONNECT -> precessReconnectMessage(clientId, emitter);
+                case CLIENT_REQUEST -> processClientRequest(requestJsonObject, clientId, emitter);
+                default -> throw new IllegalArgumentException("requestType: " + requestType);
+            }
         } catch (Exception e) {
-            handleException(wsClientRequest, e, emitter);
+            handleException(messageId, e, emitter);
         }
     }
 
+    public Optional<WSEmitter> getEmitter(String clientId) {
+        return Optional.ofNullable(emitterMap.get(clientId));
+    }
+
+    public Collection<WSEmitter> getAllEmitters() {
+        return emitterMap.values();
+    }
+
+    public void unregisterSession(String clientId) {
+        emitterMap.remove(clientId);
+    }
+
+    public void removeClosedSessions(Predicate<WSEmitter> isClosed) {
+        log.debug("removing closed sessions");
+        emitterMap.entrySet().removeIf(entry -> isClosed.test(entry.getValue()));
+    }
+
+    private void precessReconnectMessage(String clientId, WSEmitter emitter) {
+        log.debug("processing reconnect for clientId: {}", clientId);
+        emitterMap.put(clientId, emitter);
+    }
+
     @SuppressWarnings("unchecked")
-    private void handleException(WSClientRequest request, Exception exception, WSEmitter emitter) {
+    private void handleException(Long messageId, Exception exception, WSEmitter emitter) {
         for (WSExceptionHandler<?> handler : exceptionHandlers) {
             if (ClassUtils.getGenericInterfacesTypeParameter(handler.getClass(), WSExceptionHandler.class, 0).isInstance(exception)) {
                 var typedHandler = (WSExceptionHandler<Exception>) handler;
-                var response = typedHandler.handleException(request, exception);
-                response.setMessageId(request.getMessageId());
+                var response = typedHandler.handleException(exception);
+                response.setMessageId(messageId);
                 emitter.send(response);
                 return;
             }
@@ -38,14 +87,17 @@ public class WSService {
 
         // No handler found - send generic 500 error
         var errorResponse = new WSServerResponse(500);
-        if (request != null) {
-            errorResponse.setMessageId(request.getMessageId());
-        }
+        errorResponse.setMessageId(messageId);
         errorResponse.setBody(null);
         emitter.send(errorResponse);
     }
 
-    private void processClientRequest(WSClientRequest wsClientRequest, WSEmitter emitter) {
+    private void processClientRequest(JsonObject wsClientRequestJsonObject, String clientId, WSEmitter emitter) {
+        log.debug("processing ClientRequest: {}", clientId);
+        var wsClientRequest = gsonProvider.getGson().fromJson(wsClientRequestJsonObject, WSClientRequest.class);
+        if (!wsClientRequest.getClientId().equals(clientId)) {
+            throw new IllegalStateException("client-id values  are not equal");
+        }
         switch (wsClientRequest.getPath()) {
             case "/xis/page/model" -> processPageModelRequest(wsClientRequest, emitter);
             case "/xis/form/model" -> processFormModelRequest(wsClientRequest, emitter);

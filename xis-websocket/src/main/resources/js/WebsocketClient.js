@@ -3,9 +3,10 @@ class WebsocketClient extends Client {
     /**
      * @param {WebsocketConnector} wsConnector
      */
-    constructor(wsConnector) {
-        super();
+    constructor(wsConnector, clientId) {
+        super(clientId);
         this.wsConnector = wsConnector;
+        this.clientId = clientId;
         this.resolvedURL = undefined;
     }
 
@@ -22,6 +23,7 @@ class WebsocketClient extends Client {
         this.resolvedURL = resolvedURL;
         const request = this.createPageRequest(resolvedURL, null, null);
         try {
+            console.debug("loading page data");
             const response = await this.wsConnector.send('/xis/page/model', 'POST', request, {});
             return this.handleResponse(response);
         } catch (error) {
@@ -35,6 +37,7 @@ class WebsocketClient extends Client {
         app.messageHandler.clearMessages();
         const request = this.createWidgetRequest(widgetInstance, widgetState, null, null, null);
         try {
+            console.debug("loading widget data");
             const response = await this.wsConnector.send('/xis/widget/model', 'POST', request, {});
             return this.handleResponse(response);
         } catch (error) {
@@ -47,6 +50,7 @@ class WebsocketClient extends Client {
     async loadFormData(resolvedURL, widgetId, formBindingKey, widgetParameters) {
         const request = this.createFormRequest(resolvedURL, widgetId, {}, null, formBindingKey, widgetParameters);
         try {
+            console.debug("loading form data");
             const response = await this.wsConnector.send('/xis/form/model', 'POST', request, {});
             return this.handleResponse(response);
         } catch (error) {
@@ -60,6 +64,7 @@ class WebsocketClient extends Client {
         app.messageHandler.clearMessages();
         const request = this.createWidgetRequest(widgetInstance, widgetState, action, {}, actionParameters);
         try {
+            console.debug("submitting link-action");
             const response = await this.wsConnector.send('/xis/widget/action', 'POST', request, {});
             return this.handleResponse(response);
         } catch (error) {
@@ -73,6 +78,7 @@ class WebsocketClient extends Client {
         app.messageHandler.clearMessages();
         const request = this.createPageRequest(resolvedURL, {}, action, actionParameters);
         try {
+           console.debug("submitting link-action");
             const response = await this.wsConnector.send('/xis/page/action', 'POST', request, {});
             return this.handleResponse(response);
         } catch (error) {
@@ -85,6 +91,7 @@ class WebsocketClient extends Client {
         app.messageHandler.clearMessages();
         const request = this.createFormRequest(resolvedURL, widgetId, formData, action, formBindigKey, formBindingParameters);
         try {
+           console.debug("submitting form-action");
             const response = await this.wsConnector.send('/xis/form/action', 'POST', request, {});
             return this.handleResponse(response);
         } catch (error) {
@@ -106,11 +113,14 @@ class WebsocketClient extends Client {
     }
 
     async handleResponse(response) {
+        console.debug("handle response");
         if (this.serverError(response)) {
+            console.error("server error");
             this.handleServerError(response);
             return Promise.reject();
         }
         if (this.isAjaxRedirect(response)) {
+            console.debug("redirect");
             return Promise.reject({type: 'redirect'});
         }
         if (this.authorizationRequired(response)) {
@@ -123,13 +133,16 @@ class WebsocketClient extends Client {
         }
         var responseObject = this.deserializeResponse(response);
         if (responseObject.redirectUrl) {
+            console.debug("redirect in deserialized response");
             this.forward(responseObject.redirectUrl);
             return Promise.reject({type: 'redirect'});
         }
         const globalMessages = this.globalValidatorMessages(responseObject);
         if (globalMessages.length > 0) {
+            console.debug("place global validator messages");
             app.messageHandler.addValidationErrors(globalMessages);
         }
+        console.debug("delegating response");
         return Promise.resolve(responseObject);
     }
 }

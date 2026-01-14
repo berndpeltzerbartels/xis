@@ -7,11 +7,12 @@ class TestApplication {
         this.sessionStorage = new SessionStore(this.eventPublisher);
         this.localStorage = new LocalStore(this.eventPublisher);
         this.clientStorage = new ClientStore(this.eventPublisher);
-        this.httpConnector = new HttpConnectorMock();
-        this.httpClient = new HttpClient(this.httpConnector);
-        this.websocketConnector = this.createWebsocketConnectorIfPresent();
+        this.clientId = this.clientId();
+        this.httpConnector = new HttpConnectorMock(this.clientId);
+        this.httpClient = new HttpClient(this.httpConnector, this.clientId);
+        this.websocketConnector = this.createWebsocketConnectorIfPresent(this.clientId);
         if (this.websocketConnector) {
-            this.websocketClient = new WebsocketClient(this.websocketConnector);
+            this.websocketClient = new WebsocketClient(this.websocketConnector, this.clientId);
         }
         this.client = this.websocketClient ? this.websocketClient : this.httpClient;
         this.domAccessor = new DomAccessor();
@@ -26,6 +27,16 @@ class TestApplication {
         this.history = new PageHistory(this.pageController);
         this.globals = new GlobalStore(this.eventPublisher);
         this.runInitializers();
+    }
+
+
+    clientId() {
+        var clientId = localStorage .getItem('xis.clientId');
+        if (!clientId) {
+            clientId = randomString();
+            localStorage.setItem('xis.clientId', clientId);
+        }
+        return clientId;
     }
 
 
@@ -78,9 +89,9 @@ class TestApplication {
         sessionStorage.reset();
     }
 
-     createWebsocketConnectorIfPresent() {
+     createWebsocketConnectorIfPresent(clientId) {
         if (typeof WebsocketConnectorMock !== 'undefined') {
-            return new WebsocketConnectorMock();
+            return new WebsocketConnectorMock(clientId);
         }
         return null;
     }

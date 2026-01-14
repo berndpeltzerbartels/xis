@@ -1,5 +1,9 @@
 class HttpConnectorMock {
 
+    constructor(clientId) {
+        this.clientId = clientId;
+    }
+
     /**
      * @public
      * @param {string} uri

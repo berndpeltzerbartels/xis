@@ -10,10 +10,12 @@ class HttpClient extends Client {
 
     /**
      * @param {HttpConnector} httpConnector
+     * @param {string} clientId
      */
-    constructor(httpConnector) {
-        super();
+    constructor(httpConnector, clientId) {
+        super(clientId);
         this.httpConnector = httpConnector;
+        this.clientId = clientId;
         this.resolvedURL = undefined;
     }
 

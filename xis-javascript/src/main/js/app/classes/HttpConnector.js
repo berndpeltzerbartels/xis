@@ -1,10 +1,10 @@
 class HttpConnector {
 
     /**
-     * @param {Function} errorHandler
+     * @param {string} clientId
      */
-    constructor(errorHandler) {
-        this.errorHandler = errorHandler;
+    constructor(clientId) {
+        this.clientId = clientId;
     }
 
     /**
