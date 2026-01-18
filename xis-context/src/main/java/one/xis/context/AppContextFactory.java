@@ -247,6 +247,11 @@ class AppContextFactory implements SingletonCreationListener {
         var dependencyFields = unassignedDependencyFields(singleton, singletonWrapper);
         singletonWrapper.setSingletonFields(dependencyFields);
         singletonConsumers.addAll(dependencyFields);
+        
+        // Extract and set @Value fields
+        var valueFields = extractValueFields(singleton.getClass(), singleton);
+        singletonWrapper.setValueFields(valueFields);
+        
         if (isProxyFactory(singleton.getClass())) {
             evaluateProxyFactory(singletonWrapper);
         }
@@ -261,6 +266,11 @@ class AppContextFactory implements SingletonCreationListener {
         var dependencyFields = dependencyFields(singleton);
         singleton.setSingletonFields(dependencyFields);
         singletonConsumers.addAll(dependencyFields);
+        
+        // Extract and set @Value fields
+        var valueFields = extractValueFields(singleton.getBeanClass(), null);
+        singleton.setValueFields(valueFields);
+        
         if (isProxyFactory(singleton.getBeanClass())) {
             evaluateProxyFactory(singleton);
         }
@@ -273,6 +283,16 @@ class AppContextFactory implements SingletonCreationListener {
     private Collection<DependencyField> dependencyFields(SingletonWrapper singleton) {
         return FieldUtil.getFields(singleton.getBeanClass(), annotations::isDependencyField).stream()
                 .map(field -> DependencyFields.createField(field, singleton)).collect(Collectors.toList());
+    }
+    
+    private Collection<ValueField> extractValueFields(Class<?> beanClass, Object bean) {
+        return FieldUtil.getFields(beanClass, field -> field.isAnnotationPresent(Value.class)).stream()
+                .map(field -> {
+                    Value annotation = field.getAnnotation(Value.class);
+                    String propertyKey = ValueField.extractPropertyKey(annotation.value());
+                    return new ValueField(field, bean, propertyKey);
+                })
+                .collect(Collectors.toList());
     }
 
     private Collection<DependencyField> unassignedDependencyFields(Object bean, SingletonWrapper wrapper) {
