@@ -41,6 +41,7 @@ class SingletonWrapper implements SingletonConsumer, Finalizable {
         this.bean = bean;
         this.additionalClass = additionalClass;
         beanClass = bean.getClass();
+        injectValueFields();
     }
 
 
@@ -50,10 +51,10 @@ class SingletonWrapper implements SingletonConsumer, Finalizable {
         if (beanClass.isAssignableFrom(o.getClass())) {
             this.bean = o;
             log.debug("{}: bean assigned", this);
-            
+
             // Inject @Value fields FIRST, before dependencies
             injectValueFields();
-            
+
             log.debug("{}: unassigned field count: {}", this, this.singletonFields.size());
             for (var singletonField : new ArrayList<>(singletonFields)) {
                 log.debug("{}: field {}, assigned={}", this, singletonField, singletonField.isValueAssigned());
@@ -66,12 +67,12 @@ class SingletonWrapper implements SingletonConsumer, Finalizable {
             log.debug("{}: {} bean not assignable", o, this);
         }
     }
-    
+
     private void injectValueFields() {
-        if (!valueFields.isEmpty()) {
+        if (bean != null && !valueFields.isEmpty()) {
             log.debug("{}: injecting {} @Value fields", this, valueFields.size());
             for (ValueField valueField : valueFields) {
-                valueField.inject();
+                valueField.inject(bean);
             }
         }
     }

@@ -290,7 +290,7 @@ class AppContextFactory implements SingletonCreationListener {
                 .map(field -> {
                     Value annotation = field.getAnnotation(Value.class);
                     String propertyKey = ValueField.extractPropertyKey(annotation.value());
-                    return new ValueField(field, bean, propertyKey);
+                    return new ValueField(field, propertyKey);
                 })
                 .collect(Collectors.toList());
     }

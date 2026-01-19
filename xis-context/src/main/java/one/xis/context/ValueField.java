@@ -10,10 +10,9 @@ import java.lang.reflect.Field;
 @RequiredArgsConstructor
 class ValueField {
     private final Field field;
-    private final Object bean;
     private final String propertyKey;
 
-    void inject() {
+    void inject(Object bean) {
         String value = ApplicationProperties.getProperty(propertyKey);
         if (value == null) {
             throw new IllegalStateException("Property '" + propertyKey + "' not found for field " + field.getName() + " in " + bean.getClass().getName());
