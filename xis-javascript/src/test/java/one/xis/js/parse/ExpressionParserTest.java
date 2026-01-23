@@ -281,6 +281,36 @@ class ExpressionParserTest {
         assertThat(result.asInt()).isEqualTo(14);
     }
 
+    @Test
+    void simpleArrayTest() throws ScriptException {
+        var result = evaluate("[1,2,3]", "{}");
+        assertThat(result.getArraySize()).isEqualTo(3);
+        assertThat(result.getArrayElement(0).asInt()).isEqualTo(1);
+        assertThat(result.getArrayElement(1).asInt()).isEqualTo(2);
+        assertThat(result.getArrayElement(2).asInt()).isEqualTo(3);
+    }
+
+    @Test
+    void arrayInFunctionTest() throws ScriptException {
+        var result = evaluate("sum([1,2,3])", "{}");
+        assertThat(result.asInt()).isEqualTo(6);
+    }
+
+
+    @Test
+    void simpleNumberTest() throws ScriptException {
+        var result = evaluate("123", "{}");
+        assertThat(result.asInt()).isEqualTo(123);
+    }
+
+
+    @Test
+    void simpleStringTest() throws ScriptException {
+        var result = evaluate("'123'", "{}");
+        assertThat(result.asString()).isEqualTo("123");
+    }
+
+
     @Nested
     @DisplayName("a > 2 || b > 3")
     class GreaterAndOrTest {
@@ -544,8 +574,16 @@ class ExpressionParserTest {
                           return p1 > p2;
                      }
                 
+                     function arraySum(arr){
+                         var sum = 0;
+                         for(var i=0; i<arr.length; i++){
+                             sum += arr[i];
+                         }
+                         return sum;
+                     }
+                
                     var data = new Data(${data});
-                    var expressionParser = new ExpressionParser({xyz: testFunction, bool: boolFunction});
+                    var expressionParser = new ExpressionParser({xyz: testFunction, bool: boolFunction, sum: arraySum});
                     var expression = expressionParser.parse("${expression}");
                     expression.evaluate(data);
                 """).replace("${expression}", expression).replace("${data}", data);

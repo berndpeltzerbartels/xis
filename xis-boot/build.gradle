@@ -45,7 +45,7 @@ dependencies {
     implementation project(":xis-resources")
     implementation project(":xis-server")
     implementation project(":xis-validation")
-    implementation project(":xis-token")
+    implementation project(":xis-security-common")
     implementation project(":xis-http-controller")
 
     api project(":xis-context")

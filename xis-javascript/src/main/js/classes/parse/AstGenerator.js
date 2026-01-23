@@ -286,7 +286,7 @@ class AstGenerator {
             }
         }
         this.consumeToken(CLOSING_SQUARE_BRACKET);
-        return array;
+        return new ArrayLiteral(array);
     }
 
     parseParameters() {
@@ -954,6 +954,36 @@ class TernaryOperator {
      */
     toString() {
         return this.condition.toString() + ' ? ' + this.trueExpression.toString() + ' : ' + this.falseExpression.toString();
+    }
+}
+
+/**
+ * @class ArrayLiteral
+ * @description Represents a literal array in the AST (e.g., [1, 2, 3])
+ */
+class ArrayLiteral {
+    constructor(elements) {
+        this.type = 'ARRAY_LITERAL';
+        this.elements = elements;
+        this.negated = false;
+    }
+
+    /**
+     * @public
+     * @param {Data} data
+     * @returns {Array}
+     */
+    evaluate(data) {
+        const array = this.elements.map(element => element.evaluate(data));
+        return this.negated ? !array : array;
+    }
+
+    /**
+     * @public
+     * @returns {string}
+     */
+    toString() {
+        return '[' + this.elements.map(e => e.toString()).join(', ') + ']';
     }
 }
 

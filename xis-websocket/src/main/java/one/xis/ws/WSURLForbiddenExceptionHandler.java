@@ -1,9 +1,8 @@
-package one.xis.auth;
+package one.xis.ws;
 
 import lombok.RequiredArgsConstructor;
+import one.xis.auth.URLForbiddenException;
 import one.xis.context.Component;
-import one.xis.ws.WSExceptionHandler;
-import one.xis.ws.WSServerResponse;
 
 @Component
 @RequiredArgsConstructor

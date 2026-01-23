@@ -5,11 +5,7 @@ class ForeachHandler extends TagHandler {
 
         this.tagHandlers = tagHandlers;
 
-        this.arrayPathExpression =
-            this.createExpression(
-                this.variableToKey(this.getAttribute('array')),
-                '.'
-            );
+        this.arrayExpression = new ExpressionParser(elFunctions).parse(this.getAttribute('array'));
 
         this.varName = this.getAttribute('var');
         this.type = 'foreach-handler';
@@ -36,12 +32,8 @@ class ForeachHandler extends TagHandler {
     }
 
     refresh(data) {
-        let arrayPath = this.doSplit(
-            this.arrayPathExpression.evaluate(data),
-            '.'
-        );
 
-        let arr = data.getValue(arrayPath);
+        let arr = this.arrayExpression.evaluate(data);
 
         // indirect array reference
         if (typeof arr === 'string') {

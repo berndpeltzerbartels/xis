@@ -45,7 +45,6 @@ dependencies {
     compileOnly project(":xis-adapter-spi")
     compileOnly project(":xis-http-controller")
     compileOnly project(':xis-controller-api')
-    compileOnly project(':xis-websocket')
 
     compileOnly "org.projectlombok:lombok:$lombokVersion"
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
