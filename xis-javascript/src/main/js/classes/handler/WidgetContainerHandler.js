@@ -77,14 +77,16 @@ class WidgetContainerHandler extends TagHandler {
         var data = response.data;
         data.setValue(['widgetParameters'], this.widgetParameters);
         this.refreshContainerId(data);
-        return this.initBuffer()
-            .then(() => this.bindNextWidgetIfNeeded(response))
-            .then(() => this.refreshDescendantHandlers(data))
-            .then(() => this.updatePageMetadata(response))
-            .then(() => app.pageController.handleUpdateEvents(response.updateEventKeys))
-            .then(pageUpdated => this.handleWidgetContainerUpdates(pageUpdated, response.updateEventKeys))
-            .then(() => updateStores(response))
-            .then(() => this.commitBuffer());
+        return PageController.enqueue(() =>
+            this.initBuffer()
+                .then(() => this.bindNextWidgetIfNeeded(response))
+                .then(() => this.refreshDescendantHandlers(data))
+                .then(() => this.updatePageMetadata(response))
+                .then(() => app.pageController.handleUpdateEvents(response.updateEventKeys))
+                .then(pageUpdated => this.handleWidgetContainerUpdates(pageUpdated, response.updateEventKeys))
+                .then(() => updateStores(response))
+                .then(() => this.commitBuffer())
+        );
     }
 
     /**
@@ -110,7 +112,11 @@ class WidgetContainerHandler extends TagHandler {
     }
 
     handleUpdateEvent() {
-        this.refresh(this.data);
+        return PageController.enqueue(() =>
+            this.initBuffer()
+                .then(() => this.refresh(this.data))
+                .then(() => this.commitBuffer())
+        );
     }
 
     /**
@@ -124,7 +130,11 @@ class WidgetContainerHandler extends TagHandler {
         this.widgetState = widgetState;
         this.ensureWidgetBound(widgetId, true);
         this.widgetState = widgetState;
-        return this.reloadDataAndRefresh(this.parentData());
+        return PageController.enqueue(() =>
+            this.initBuffer()
+                .then(() => this.reloadDataAndRefresh(this.parentData()))
+                .then(() => this.commitBuffer())
+        );
     }
     /**
      * @public

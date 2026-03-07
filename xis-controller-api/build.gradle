@@ -28,8 +28,8 @@ java {
 // Local variables for versions
 var lombokVersion = rootProject.ext.libraryVersions.lombok
 var reflectionsVersion = rootProject.ext.libraryVersions.reflections
-var springContextVersion = "5.3.20"
-var jakartaInjectVersion = "2.0.1"
+var springContextVersion = rootProject.ext.libraryVersions.springContext
+var jakartaInjectVersion = rootProject.ext.libraryVersions.jakartaInject
 var junitVersion = "5.9.0"
 
 

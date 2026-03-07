@@ -36,6 +36,7 @@ class ELFunctions {
         this.functions['contains'] = this.contains.bind(this);
         this.functions['flatMap'] = this.flatMap.bind(this);
         this.functions['filter'] = this.filter.bind(this);
+        this.functions['arrayOf'] = this.arrayOf.bind(this);
 
         // Object/Array
         this.functions['keys'] = this.keys.bind(this);
@@ -345,6 +346,14 @@ class ELFunctions {
             const propValue = data.getValue(pathParts);
             return propValue === value;
         });
+    }
+
+    arrayOf(first, last) {
+        const result = [];
+        for (let i = first; i <= last; i++) {
+            result.push(i);
+        }
+        return result;
     }
 
 }

@@ -141,8 +141,15 @@ class WebsocketConnector {
     handleMessage(data) {
         try {
             const response = new WebsocketServerResponse(data);
+
+            // Server-push message (no pending request, dispatched by response-type)
+            if (response.isPushMessage()) {
+                this.handlePushMessage(response);
+                return;
+            }
+
             const messageId = response.messageId;
-            
+
             if (!messageId) {
                 throw new Error("no message id");
             }
@@ -154,6 +161,29 @@ class WebsocketConnector {
             }
         } catch (e) {
             reportError('Error parsing WebSocket message', e);
+        }
+    }
+
+    /**
+     * Handle server-initiated push messages.
+     * Currently supports response-type "update-event" which triggers the same
+     * refresh logic as @Action(updateEventKeys=…) / @RefreshOnUpdateEvents.
+     * @private
+     * @param {WebsocketServerResponse} response
+     */
+    handlePushMessage(response) {
+        switch (response.responseType) {
+            case 'update-event':
+                console.debug('push: update-event', response.updateEventKey);
+                app.pageController.handleUpdateEvents([response.updateEventKey])
+                    .then(pageUpdated => {
+                        if (!pageUpdated) {
+                            app.widgetContainers.handleUpdateEvents([response.updateEventKey]);
+                        }
+                    });
+                break;
+            default:
+                console.warn('unknown push response-type:', response.responseType);
         }
     }
 

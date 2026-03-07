@@ -75,6 +75,7 @@ class BodyTagHandler extends TagHandler {
      * @returns {Promise}
      */
     refresh(data) {
+    console.log('Refreshing body with data:', data);
         this.data = data;
         return this.refreshAttributes(this.data)
             .then(() => this.refreshDescendantHandlers(data));

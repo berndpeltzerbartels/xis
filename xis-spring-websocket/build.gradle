@@ -38,7 +38,8 @@ var gsonVersion = rootProject.ext.libraryVersions.gson
 var mockitoVersion = rootProject.ext.libraryVersions.mockito
 var slf4jVersion = rootProject.ext.libraryVersions.slf4j
 var springBootVersion = rootProject.ext.libraryVersions.springBoot
-
+var springContextVersion = rootProject.ext.libraryVersions.springContext
+var jakartaInjectVersion = rootProject.ext.libraryVersions.jakartaInject
 
 dependencies {
 
@@ -49,6 +50,14 @@ dependencies {
     implementation project(":xis-context")
     implementation project(":xis-controller-api")
     implementation project(":xis-adapter-spi")
+
+
+    // Spring Context dependency
+    compileOnly("org.springframework:spring-context:$springContextVersion")
+    // Jakarta Inject dependency
+    implementation("jakarta.inject:jakarta.inject-api:$jakartaInjectVersion")
+
+    api project(":xis-websocket-api")
 
     // Spring Boot Auto-Configuration
     implementation("org.springframework.boot:spring-boot-starter-websocket:$springBootVersion")

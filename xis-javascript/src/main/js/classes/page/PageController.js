@@ -35,6 +35,19 @@ class PageController {
     }
 
     /**
+     * Enqueues a render task on the global render queue so that concurrent render
+     * operations (page refresh, widget refresh, push events) never overlap.
+     * @param {function(): Promise} task
+     * @returns {Promise}
+     */
+    static enqueue(task) {
+        app.renderQueue = app.renderQueue
+            .then(() => task())
+            .catch(error => handleError(error));
+        return app.renderQueue;
+    }
+
+    /**
      * @public
      * @returns {Promise<void>}
      */
@@ -95,25 +108,27 @@ class PageController {
      * @returns {Promise<void>}
      */
     handleActionResponse(response) {
-        this.handleActionResponseNoContent(response);
+        const noContent = this.handleActionResponseNoContent(response);
         if (response.status == 204) {
-            return Promise.resolve(rv);
+            return Promise.resolve(noContent);
         }
-        var data = response.data;
-        const pathname = this.resolvedURL.url.split('?')[0]; // Remove query string
-        data.setValue(['pathVariables'], this.resolvedURL.pathVariablesAsMap());
-        data.setValue(['urlParameters'], this.resolvedURL.urlParameters);
-        data.setValue(['url'], this.resolvedURL.url);
-        data.setValue(['pathname'], pathname);
-        data.setValue(['queryParams'], this.resolvedURL.urlParameters);
-        this.page.data = data;
+        return PageController.enqueue(() => {
+            var data = response.data;
+            const pathname = this.resolvedURL.url.split('?')[0];
+            data.setValue(['pathVariables'], this.resolvedURL.pathVariablesAsMap());
+            data.setValue(['urlParameters'], this.resolvedURL.urlParameters);
+            data.setValue(['url'], this.resolvedURL.url);
+            data.setValue(['pathname'], pathname);
+            data.setValue(['queryParams'], this.resolvedURL.urlParameters);
+            this.page.data = data;
 
-        return this.initBuffer()
-            .then(() => this.htmlTagHandler.refresh(this.page.data))
-            .then(() => {if (isSet(response.annotatedTitle)) this.setTitle(response.annotatedTitle);})
-            .then(() => {if (isSet(response.annotatedAddress)) this.setAddress(response.annotatedAddress);})
-            .then(() => updateStores(response))
-            .then(() => this.commitBuffer());
+            return this.initBuffer()
+                .then(() => this.htmlTagHandler.refresh(this.page.data))
+                .then(() => {if (isSet(response.annotatedTitle)) this.setTitle(response.annotatedTitle);})
+                .then(() => {if (isSet(response.annotatedAddress)) this.setAddress(response.annotatedAddress);})
+                .then(() => updateStores(response))
+                .then(() => this.commitBuffer());
+        });
     }
 
     /** 
@@ -162,11 +177,39 @@ class PageController {
     }
 
     /**
+     * Refreshes the current page after a server-push update event.
+     * Does NOT unbind/rebind the page – only fetches new data and re-renders in place.
+     * If the server signals a page change via nextURL, falls back to a full displayPageForResolvedURL.
      * @private
      * @returns {Promise<void>}
      */
     handleUpdateEvent() {
-        return this.displayPageForResolvedURL(this.resolvedURL, /* skipHistoryUpdate */ true);
+        return PageController.enqueue(() =>
+            this.client.loadPageData(this.resolvedURL).then(response => {
+                if (response.nextURL) {
+                    const nextResolved = this.urlResolver.resolve(response.nextURL);
+                    if (nextResolved && nextResolved.normalizedPath !== this.resolvedURL.normalizedPath) {
+                        return this.displayPageForResolvedURL(nextResolved, /* skipHistoryUpdate */ true);
+                    }
+                }
+
+                const data = response.data;
+                const pathname = this.resolvedURL.url.split('?')[0];
+                data.setValue(['pathVariables'], this.resolvedURL.pathVariablesAsMap());
+                data.setValue(['urlParameters'], this.resolvedURL.urlParameters);
+                data.setValue(['url'], this.resolvedURL.url);
+                data.setValue(['pathname'], pathname);
+                data.setValue(['queryParams'], this.resolvedURL.urlParameters);
+                this.page.data = data;
+
+                return this.initBuffer()
+                    .then(() => this.htmlTagHandler.refresh(data))
+                    .then(() => { if (response.annotatedTitle) this.setTitle(response.annotatedTitle); })
+                    .then(() => updateStores(response))
+                    .then(() => this.commitBuffer())
+                    .then(() => app.eventPublisher.publish(EventType.BUFFER_COMMITTED));
+            })
+        );
     }
 
     getData() {
@@ -205,42 +248,43 @@ class PageController {
      * @returns {Promise<void>}
      */
     displayPageForResolvedURL(resolved, skipHistoryUpdate = false) {
-        return this.client.loadPageData(resolved).then(response => {
-            if (response.nextURL) {
-                const nextResolved = this.urlResolver.resolve(response.nextURL);
-                if (resolved.normalizedPath !== nextResolved.normalizedPath) {
-                    // Redirect – do not pollute browser history
-                    return this.displayPageForUrl(response.nextURL, true);
-                }
-            }
-            this.resolvedURL = resolved;
-            this.page = resolved.page;
-
-            const data = response.data;
-            const pathname = resolved.url.split('?')[0]; // Remove query string
-            data.setValue(['pathVariables'], this.resolvedURL.pathVariablesAsMap());
-            data.setValue(['urlParameters'], this.resolvedURL.urlParameters);
-            data.setValue(['url'], this.resolvedURL.url);
-            data.setValue(['pathname'], pathname);
-            data.setValue(['queryParams'], this.resolvedURL.urlParameters);
-            this.page.data = data;
-
-            this.htmlTagHandler.unbindPage();
-            this.htmlTagHandler.bindPage(this.page);
-
-            this.initBuffer()
-                .then(() => this.htmlTagHandler.refresh(data))
-                .then(() => {if (response.annotatedTitle) this.setTitle(response.annotatedTitle);})
-                .then(() => updateStores(response))
-                .then(() => this.commitBuffer())
-                .then(() =>  app.eventPublisher.publish(EventType.BUFFER_COMMITTED))
-                .then(() => {
-                    if (!skipHistoryUpdate && response.status < 300) {
-                        this.updateHistory(this.resolvedURL, response.annotatedTitle);
+        return PageController.enqueue(() =>
+            this.client.loadPageData(resolved).then(response => {
+                if (response.nextURL) {
+                    const nextResolved = this.urlResolver.resolve(response.nextURL);
+                    if (resolved.normalizedPath !== nextResolved.normalizedPath) {
+                        return this.displayPageForUrl(response.nextURL, true);
                     }
-                    app.eventPublisher.publish(EventType.PAGE_LOADED, { page: this.page, url: this.resolvedURL });
-                });
-        }).catch(error => handleError(error));
+                }
+                this.resolvedURL = resolved;
+                this.page = resolved.page;
+
+                const data = response.data;
+                const pathname = resolved.url.split('?')[0];
+                data.setValue(['pathVariables'], this.resolvedURL.pathVariablesAsMap());
+                data.setValue(['urlParameters'], this.resolvedURL.urlParameters);
+                data.setValue(['url'], this.resolvedURL.url);
+                data.setValue(['pathname'], pathname);
+                data.setValue(['queryParams'], this.resolvedURL.urlParameters);
+                this.page.data = data;
+
+                this.htmlTagHandler.unbindPage();
+                this.htmlTagHandler.bindPage(this.page);
+
+                return this.initBuffer()
+                    .then(() => this.htmlTagHandler.refresh(data))
+                    .then(() => { if (response.annotatedTitle) this.setTitle(response.annotatedTitle); })
+                    .then(() => updateStores(response))
+                    .then(() => this.commitBuffer())
+                    .then(() => app.eventPublisher.publish(EventType.BUFFER_COMMITTED))
+                    .then(() => {
+                        if (!skipHistoryUpdate && response.status < 300) {
+                            this.updateHistory(this.resolvedURL, response.annotatedTitle);
+                        }
+                        app.eventPublisher.publish(EventType.PAGE_LOADED, { page: this.page, url: this.resolvedURL });
+                    });
+            })
+        );
     }
 
     /**

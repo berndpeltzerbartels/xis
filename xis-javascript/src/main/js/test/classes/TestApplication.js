@@ -23,6 +23,8 @@ class TestApplication {
         this.tagHandlers = new TagHandlers();
         this.includes = new Includes(this.httpClient);
         this.initializer = new Initializer(this.domAccessor, this.client, this.widgets, this.includes, this.widgetContainers, this.tagHandlers);
+        /** Serializes all render operations (page + widget refreshes) so they never overlap. */
+        this.renderQueue = Promise.resolve();
         this.pageController = new PageController(this.client, this.pages, this.initializer, this.urlResolver, this.tagHandlers);
         this.history = new PageHistory(this.pageController);
         this.globals = new GlobalStore(this.eventPublisher);
@@ -94,6 +96,20 @@ class TestApplication {
             return new WebsocketConnectorMock(clientId);
         }
         return null;
+    }
+
+    submitForm(id, action) {
+        const form = document.getElementById(id);
+        if (form) {
+            const formHandler = this.tagHandlers.getHandler(form);
+            if (formHandler && formHandler.type === 'form-handler') {
+                formHandler.submit(action);
+            } else {
+                console.error('No form handler found for form with id: ' + id);
+            }
+        } else {
+            console.error('No form found with id: ' + id);
+        }
     }
 
 }

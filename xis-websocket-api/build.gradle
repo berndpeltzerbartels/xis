@@ -1,82 +1,27 @@
 plugins {
     id 'java'
-    id 'java-library'
     id 'maven-publish'
-    // id 'signing'
 }
-
-group = rootProject.ext.projectGroup
-version = rootProject.ext.projectVersion
-
 repositories {
     mavenCentral()
 }
 
-tasks.withType(JavaCompile) {
-    sourceCompatibility = rootProject.ext.javaVersion.toString()
-    targetCompatibility = rootProject.ext.javaVersion.toString()
-}
-
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(rootProject.ext.javaVersionInt)
-    }
-    withSourcesJar()
-    withJavadocJar()
-}
-
-// Local variables for versions
 var lombokVersion = rootProject.ext.libraryVersions.lombok
-var reflectionsVersion = rootProject.ext.libraryVersions.reflections
-var junitVersion = rootProject.ext.libraryVersions.junit
-var assertjVersion = rootProject.ext.libraryVersions.assertj
-var gsonVersion = rootProject.ext.libraryVersions.gson
-var jacksonVersion = rootProject.ext.libraryVersions.jackson
-var mockitoVersion = rootProject.ext.libraryVersions.mockito
-var springBootVersion = rootProject.ext.libraryVersions.springBoot
-var slf4jVersion = rootProject.ext.libraryVersions.slf4j
-
 
 dependencies {
 
-    // Local project dependencies
     implementation project(":xis-context")
-    implementation project(":xis-util")
-    implementation project(":xis-adapter-spi")
-    implementation project(':xis-gson')
-    implementation project(':xis-resources')
-    implementation project(':xis-http-controller')
-    implementation project(':xis-security-common')
-    api project(':xis-websocket-api')
-
-
-    // Compile-only dependencies
-
     // Annotation processors
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
 
     // Implementation dependencies
     implementation "org.projectlombok:lombok:$lombokVersion"
-
-    // SLF4J API + Tinylog implementation for xis-boot applications
-    implementation("org.slf4j:slf4j-api:$slf4jVersion")
-
-    // Test dependencies
-    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
-    testImplementation "org.mockito:mockito-core:$mockitoVersion"
-    testImplementation "org.mockito:mockito-junit-jupiter:$mockitoVersion"
-    testImplementation "org.assertj:assertj-core:$assertjVersion"
-    testImplementation project(':xis-gson')
-    testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"
 }
 
 test {
     useJUnitPlatform()
-    afterTest { desc, result ->
-        logger.quiet "${desc.className} - ${desc.name}: ${result.resultType}"
-    }
 }
+
 
 publishing {
     publications {

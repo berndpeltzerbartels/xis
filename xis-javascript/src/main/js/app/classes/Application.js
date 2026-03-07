@@ -27,6 +27,8 @@ class Application {
         this.elFunctions = new ELFunctions();
         this.includes = new Includes(this.httpClient);
         this.initializer = new Initializer(this.domAccessor, this.httpClient, this.widgets, this.includes, this.widgetContainers, this.tagHandlers);
+        /** Serializes all render operations (page + widget refreshes) so they never overlap. */
+        this.renderQueue = Promise.resolve();
         this.pageController = new PageController(this.client, this.pages, this.initializer, this.urlResolver, this.tagHandlers);
         this.history = new PageHistory(this.pageController);
         this.globals = new GlobalStore(this.eventPublisher);
@@ -135,6 +137,20 @@ class Application {
             localStorage.setItem('xis.clientId', clientId);
         }
         return clientId;
+    }
+
+    submitForm(id, action) {
+        const form = document.getElementById(id);
+        if (form) {
+            const formHandler = this.tagHandlers.getHandler(form);
+            if (formHandler && formHandler.type === 'form-handler') {
+                formHandler.submit(action);
+            } else {
+                console.error('No form handler found for form with id: ' + id);
+            }
+        } else {
+            console.error('No form found with id: ' + id);
+        }
     }
 
 }

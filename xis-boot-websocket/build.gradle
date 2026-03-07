@@ -47,6 +47,8 @@ dependencies {
     implementation project(":xis-websocket")
     implementation project(":xis-gson")
 
+    api project(":xis-websocket-api")
+
     // api project(":xis-context")
 
     // Compile-only dependencies

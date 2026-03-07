@@ -53,7 +53,17 @@ class ControllerMethodParameter {
             return deserializeParameter(paramValue, request, parameter, postProcessingResults);
         } else if (parameter.isAnnotationPresent(SharedValue.class)) {
             var key = parameter.getAnnotation(SharedValue.class).value();
-            return requestScope.get(key);
+            var sharedValue = requestScope.get(key);
+            if (sharedValue == null) {
+                if (isMandatory(parameter)) {
+                    var defaultValue = createDefault(parameter);
+                    requestScope.put(key, defaultValue);
+                    return defaultValue;
+                } else {
+                    return null;
+                }
+            }
+            return sharedValue;
         } else if (parameter.isAnnotationPresent(SessionStorage.class)) {
             var key = parameter.getAnnotation(SessionStorage.class).value();
             var paramValue = request.getSessionStorageData().get(key);
@@ -99,8 +109,6 @@ class ControllerMethodParameter {
             controllerMethodResult.getLocalStorage().put(parameter.getAnnotation(LocalStorage.class).value(), parameterValue);
         } else if (parameter.isAnnotationPresent(ClientStorage.class)) {
             controllerMethodResult.getClientStorage().put(parameter.getAnnotation(ClientStorage.class).value(), parameterValue);
-        } else {
-            throw new IllegalStateException(method + ": parameter without annotation=" + parameter);
         }
     }
 
@@ -175,7 +183,7 @@ class ControllerMethodParameter {
         return !parameter.isAnnotationPresent(NullAllowed.class);
     }
 
-    
+
     private Object createDefault(Parameter parameter) {
         try {
             return ClassUtils.newInstance(parameter.getType());

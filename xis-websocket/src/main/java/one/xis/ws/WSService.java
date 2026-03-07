@@ -68,6 +68,45 @@ public class WSService {
         emitterMap.entrySet().removeIf(entry -> isClosed.test(entry.getValue()));
     }
 
+    /**
+     * Sends an update-event push message to a specific client.
+     * The client will reload all pages/widgets annotated with
+     * {@code @RefreshOnUpdateEvents} for the given key.
+     *
+     * @param clientId       the target client
+     * @param updateEventKey the event key to fire
+     */
+    public void sendUpdateEvent(String clientId, String updateEventKey) {
+        var emitter = emitterMap.get(clientId);
+        if (emitter == null) {
+            log.warn("sendUpdateEvent: no emitter found for clientId {}", clientId);
+            return;
+        }
+        emitter.send(new WSUpdateEventMessage(updateEventKey));
+    }
+
+    /**
+     * Broadcasts an update-event push message to ALL connected clients.
+     *
+     * @param refreshEvent the event containing the updateEventKey and the list of clientIds to send the event to
+     */
+    public void broadcastUpdateEvent(RefreshEvent refreshEvent) {
+        refreshEvent.getClientIds().parallelStream()
+                .filter(emitterMap::containsKey)
+                .map(emitterMap::get)
+                .forEach(emitter -> broadcastUpdateEvent(emitter, refreshEvent.getEventKey()));
+    }
+
+    public void broadcastToAllClients(String updateEventKey) {
+        emitterMap.values().parallelStream()
+                .forEach(emitter -> broadcastUpdateEvent(emitter, updateEventKey));
+    }
+
+    public void broadcastUpdateEvent(WSEmitter emitter, String updateEventKey) {
+        var message = new WSUpdateEventMessage(updateEventKey);
+        emitter.send(message);
+    }
+
     private void precessReconnectMessage(String clientId, WSEmitter emitter) {
         log.debug("processing reconnect for clientId: {}", clientId);
         emitterMap.put(clientId, emitter);
