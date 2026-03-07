@@ -42,11 +42,15 @@ dependencies {
     implementation project(':xis-util')
     implementation project(':xis-validation')
     implementation project(':xis-adapter-spi')
+    // RefreshEventPublisher is used in src/main by MatchService
+    implementation project(':xis-websocket-api')
 
     // Local test dependencies
     testImplementation project(":xis-test")
     testImplementation project(":xis-gson")
     testImplementation project(":xis-http-controller")
+    // WebSocket test support: TestRefreshEventPublisher, WsTestScriptExtension
+    testImplementation project(":xis-websocket")
 
     // Lombok dependencies
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
@@ -73,19 +77,19 @@ dependencies {
 test {
     maxParallelForks = 4
     useJUnitPlatform()
-    
+
     // Allow debug mode to be controlled via multiple methods:
     // 1. Gradle project property: -Pdebug=true
     // 2. System property: -Ddebug=true
     // 3. Environment variable: export debug=true
     def debugEnabled = project.hasProperty('debug') && project.property('debug') == 'true' ||
-                       System.getProperty('debug') == 'true' ||
-                       System.getenv('debug') == 'true'
-    
+            System.getProperty('debug') == 'true' ||
+            System.getenv('debug') == 'true'
+
     if (debugEnabled) {
         environment 'debug', 'true'
     }
-    
+
     afterTest { desc, result ->
         logger.quiet "${desc.className} - ${desc.name}: ${result.resultType}"
     }

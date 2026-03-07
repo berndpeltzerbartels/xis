@@ -32,8 +32,8 @@ public class IntegrationTestContext {
         return new Builder();
     }
 
-    IntegrationTestContext(Collection<String> packages, UserInfo userInfo, Object... controllers) {
-        this.appContext = internalContext(packages, controllers);
+    IntegrationTestContext(Collection<String> packages, UserInfo userInfo, Collection<Object> singletons) {
+        this.appContext = internalContext(packages, singletons);
         this.environment = new IntegrationTestEnvironment(new BackendBridge(appContext.getSingleton(RestControllerService.class)));
         this.userInfo = userInfo;
     }
@@ -86,17 +86,22 @@ public class IntegrationTestContext {
      * Requires xis-websocket on the test classpath – if not present, the JS function
      * will throw an error explaining what is missing.
      *
+     * <p>Returns an {@link OpenPageResult} so the test can immediately inspect the
+     * updated DOM state after the push event has been processed.
+     *
      * @param updateEventKey the event key, e.g. "gameUpdated"
+     * @return the updated DOM state
      */
-    public void simulatePushEvent(String updateEventKey) {
+    public OpenPageResult simulatePushEvent(String updateEventKey) {
         synchronized (SYNC_LOCK) {
             environment.getIntegrationTestScript()
                     .getIntegrationTestFunctions()
                     .getSimulatePushEvent()
                     .execute(updateEventKey);
+            return new OpenPageResult(appContext, environment);
         }
     }
-    
+
     public LocalStorage getLocalStorage() {
         return environment.getHtmlObjects().getLocalStorage();
     }
@@ -123,12 +128,18 @@ public class IntegrationTestContext {
         return appContext.getSingletons().stream().filter(type::isInstance).toList();
     }
 
-    private AppContext internalContext(Collection<String> packages, Object... controllers) {
+    private AppContext internalContext(Collection<String> packages, Collection<Object> singletons) {
         var builder = AppContextBuilder.createInstance()
                 .withXIS()
                 .withSingletonClass(TestUserInfoService.class)
-                .withSingleton(new UserContextFaker())
-                .withSingletons(controllers);
+                .withSingleton(new UserContextFaker());
+        for (var s : singletons) {
+            if (s instanceof Class<?> clazz) {
+                builder.withSingletonClass(clazz);
+            } else {
+                builder.withSingleton(s);
+            }
+        }
         packages.forEach(builder::withPackage);
         return builder.build();
     }
@@ -147,12 +158,21 @@ public class IntegrationTestContext {
             return this;
         }
 
+        /**
+         * Registers a class as a singleton. The class is instantiated by the DI container,
+         * so constructor injection, {@code @Inject} fields and {@code @Init} methods all work.
+         */
+        public Builder withSingleton(Class<?> clazz) {
+            singletons.add(clazz);
+            return this;
+        }
+
         public Builder withMock(Object o) {
             return withSingleton(o);
         }
 
         public IntegrationTestContext build() {
-            var context = new IntegrationTestContext(packages, userInfo, singletons.toArray());
+            var context = new IntegrationTestContext(packages, userInfo, singletons);
             context.environment.getIntegrationTestScript().reset();
             context.wirePushEventSimulator();
             return context;
