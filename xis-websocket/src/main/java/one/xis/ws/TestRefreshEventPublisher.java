@@ -32,6 +32,13 @@ public class TestRefreshEventPublisher implements RefreshEventPublisher, PushEve
         this.simulator = simulator;
     }
 
+    /**
+     * Triggers the push event in the JS mock.
+     *
+     * <p><b>Note:</b> {@code clientIds} and {@code userIds} in the {@link RefreshEvent}
+     * are ignored in tests – there is always exactly one (virtual) client, so the event
+     * always reaches the running page/widget regardless of which IDs are set.
+     */
     @Override
     public void publishRefreshEvent(RefreshEvent refreshEvent) {
         assertSimulatorPresent();
