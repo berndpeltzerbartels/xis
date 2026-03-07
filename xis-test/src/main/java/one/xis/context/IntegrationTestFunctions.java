@@ -8,4 +8,5 @@ import lombok.RequiredArgsConstructor;
 class IntegrationTestFunctions {
     private final JavascriptFunction invoker;
     private final JavascriptFunction reset;
+    private final JavascriptFunction simulatePushEvent;
 }

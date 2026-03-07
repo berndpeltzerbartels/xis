@@ -38,6 +38,27 @@ public class IntegrationTestContext {
         this.userInfo = userInfo;
     }
 
+    /**
+     * After the JS context is ready, wires all {@link PushEventSimulatorAware} singletons
+     * (e.g. TestRefreshEventPublisher from xis-websocket) with the active
+     * {@link PushEventSimulator} extension (e.g. WsTestScriptExtension).
+     * Called by the Builder after reset().
+     */
+    void wirePushEventSimulator() {
+        var simulator = environment.getIntegrationTestScript().getExtensions().stream()
+                .filter(ext -> ext instanceof PushEventSimulator)
+                .map(ext -> (PushEventSimulator) ext)
+                .findFirst()
+                .orElse(null);
+        if (simulator == null) {
+            return;
+        }
+        appContext.getSingletons().stream()
+                .filter(s -> s instanceof PushEventSimulatorAware)
+                .map(s -> (PushEventSimulatorAware) s)
+                .forEach(aware -> aware.setPushEventSimulator(simulator));
+    }
+
     public OpenPageResult openPage(String uri, Map<String, Object> parameters) {
         synchronized (SYNC_LOCK) {
             if (!parameters.isEmpty()) {
@@ -60,6 +81,22 @@ public class IntegrationTestContext {
         return openPage(PageUtil.getUrl(pageController), Collections.emptyMap());
     }
 
+    /**
+     * Simulates a server-push update-event arriving via WebSocket.
+     * Requires xis-websocket on the test classpath – if not present, the JS function
+     * will throw an error explaining what is missing.
+     *
+     * @param updateEventKey the event key, e.g. "gameUpdated"
+     */
+    public void simulatePushEvent(String updateEventKey) {
+        synchronized (SYNC_LOCK) {
+            environment.getIntegrationTestScript()
+                    .getIntegrationTestFunctions()
+                    .getSimulatePushEvent()
+                    .execute(updateEventKey);
+        }
+    }
+    
     public LocalStorage getLocalStorage() {
         return environment.getHtmlObjects().getLocalStorage();
     }
@@ -117,6 +154,7 @@ public class IntegrationTestContext {
         public IntegrationTestContext build() {
             var context = new IntegrationTestContext(packages, userInfo, singletons.toArray());
             context.environment.getIntegrationTestScript().reset();
+            context.wirePushEventSimulator();
             return context;
         }
 

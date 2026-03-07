@@ -51,6 +51,8 @@ dependencies {
 
 
     // Compile-only dependencies
+    // xis-test is optional – only needed to provide the TestScriptExtension SPI impl
+    compileOnly project(':xis-test')
 
     // Annotation processors
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
