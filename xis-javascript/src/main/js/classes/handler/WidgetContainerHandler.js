@@ -77,16 +77,29 @@ class WidgetContainerHandler extends TagHandler {
         var data = response.data;
         data.setValue(['widgetParameters'], this.widgetParameters);
         this.refreshContainerId(data);
-        return PageController.enqueue(() =>
-            this.initBuffer()
-                .then(() => this.bindNextWidgetIfNeeded(response))
-                .then(() => this.refreshDescendantHandlers(data))
-                .then(() => this.updatePageMetadata(response))
-                .then(() => app.pageController.handleUpdateEvents(response.updateEventKeys))
-                .then(pageUpdated => this.handleWidgetContainerUpdates(pageUpdated, response.updateEventKeys))
-                .then(() => updateStores(response))
-                .then(() => this.commitBuffer())
-        );
+
+        const widgetChanges = !!response.nextWidgetId && response.nextWidgetId !== this.currentWidgetId();
+
+        return PageController.enqueue(() => {
+            if (widgetChanges) {
+                // Widget-Wechsel: Buffer verwenden damit Container nicht kurz leer erscheint
+                return this.initBuffer()
+                    .then(() => this.bindNextWidgetIfNeeded(response))
+                    .then(() => this.refreshDescendantHandlers(data))
+                    .then(() => this.updatePageMetadata(response))
+                    .then(() => app.pageController.handleUpdateEvents(response.updateEventKeys))
+                    .then(pageUpdated => this.handleWidgetContainerUpdates(pageUpdated, response.updateEventKeys))
+                    .then(() => updateStores(response))
+                    .then(() => this.commitBuffer());
+            } else {
+                // Kein Widget-Wechsel: in-place refresh, kein DOM-Flackern
+                return this.refreshDescendantHandlers(data)
+                    .then(() => this.updatePageMetadata(response))
+                    .then(() => app.pageController.handleUpdateEvents(response.updateEventKeys))
+                    .then(pageUpdated => this.handleWidgetContainerUpdates(pageUpdated, response.updateEventKeys))
+                    .then(() => updateStores(response));
+            }
+        });
     }
 
     /**
@@ -112,11 +125,7 @@ class WidgetContainerHandler extends TagHandler {
     }
 
     handleUpdateEvent() {
-        return PageController.enqueue(() =>
-            this.initBuffer()
-                .then(() => this.refresh(this.data))
-                .then(() => this.commitBuffer())
-        );
+        return PageController.enqueue(() => this.refresh(this.data));
     }
 
     /**
@@ -130,11 +139,7 @@ class WidgetContainerHandler extends TagHandler {
         this.widgetState = widgetState;
         this.ensureWidgetBound(widgetId, true);
         this.widgetState = widgetState;
-        return PageController.enqueue(() =>
-            this.initBuffer()
-                .then(() => this.reloadDataAndRefresh(this.parentData()))
-                .then(() => this.commitBuffer())
-        );
+        return PageController.enqueue(() => this.reloadDataAndRefresh(this.parentData()));
     }
     /**
      * @public

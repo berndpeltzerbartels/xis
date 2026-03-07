@@ -61,8 +61,7 @@ class PageController {
      * @returns {Promise<void>}
      */
     commitBuffer() {
-        console.log("commit buffer");
-        this.htmlTagHandler.bodyTagHandler.commitBuffer();
+        return this.htmlTagHandler.bodyTagHandler.commitBuffer();
     }
 
     /**
@@ -122,12 +121,10 @@ class PageController {
             data.setValue(['queryParams'], this.resolvedURL.urlParameters);
             this.page.data = data;
 
-            return this.initBuffer()
-                .then(() => this.htmlTagHandler.refresh(this.page.data))
-                .then(() => {if (isSet(response.annotatedTitle)) this.setTitle(response.annotatedTitle);})
-                .then(() => {if (isSet(response.annotatedAddress)) this.setAddress(response.annotatedAddress);})
-                .then(() => updateStores(response))
-                .then(() => this.commitBuffer());
+            return this.htmlTagHandler.refresh(this.page.data)
+                .then(() => { if (isSet(response.annotatedTitle)) this.setTitle(response.annotatedTitle); })
+                .then(() => { if (isSet(response.annotatedAddress)) this.setAddress(response.annotatedAddress); })
+                .then(() => updateStores(response));
         });
     }
 
@@ -202,11 +199,9 @@ class PageController {
                 data.setValue(['queryParams'], this.resolvedURL.urlParameters);
                 this.page.data = data;
 
-                return this.initBuffer()
-                    .then(() => this.htmlTagHandler.refresh(data))
+                return this.htmlTagHandler.refresh(data)
                     .then(() => { if (response.annotatedTitle) this.setTitle(response.annotatedTitle); })
                     .then(() => updateStores(response))
-                    .then(() => this.commitBuffer())
                     .then(() => app.eventPublisher.publish(EventType.BUFFER_COMMITTED));
             })
         );
