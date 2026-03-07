@@ -4,4 +4,6 @@ public interface WSEmitter {
     void send(String response);
 
     void send(Object response);
+
+    boolean isOpen();
 }

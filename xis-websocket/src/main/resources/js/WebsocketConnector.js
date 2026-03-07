@@ -10,6 +10,14 @@ class WebsocketConnector {
         this.shouldReconnect = true;
         this.reconnectAttempts = 0;
         this.reconnectTimeout = null;
+        /**
+         * Resolved when the connection is fully ready to accept application messages.
+         * During reconnect, this stays unresolved until sendReconnectMessage() has been sent,
+         * so that queued sends don't race ahead of the reconnect handshake.
+         * @private
+         */
+        this._readyPromise = Promise.resolve();
+        this._readyResolve = null;
     }
 
     /**
@@ -33,9 +41,17 @@ class WebsocketConnector {
     doConnect() {
         return new Promise((resolve, reject) => {
             if (this.connected) {
-              console.debug('websocket already connected');
+                console.debug('websocket already connected');
                 resolve();
                 return;
+            }
+
+            // Fresh reconnect: hold sends until the reconnect handshake is done
+            if (this.reconnectAttempts > 0) {
+                this._readyPromise = new Promise(res => { this._readyResolve = res; });
+            } else {
+                this._readyPromise = Promise.resolve();
+                this._readyResolve = null;
             }
 
             try {
@@ -48,6 +64,11 @@ class WebsocketConnector {
                         console.log('reconnected successfully after ' + this.reconnectAttempts + ' attempts');
                         this.reconnectAttempts = 0;
                         this.sendReconnectMessage();
+                        // Unblock queued sends only after the reconnect message is on the wire
+                        if (this._readyResolve) {
+                            this._readyResolve();
+                            this._readyResolve = null;
+                        }
                     }
                     resolve();
                 };
@@ -68,8 +89,7 @@ class WebsocketConnector {
                     this.ws = null;
 
                     // Reject all pending requests
-                    this.pendingRequests.forEach((pending, messageId) => {
-                        console.debug("removinf pending request");
+                    this.pendingRequests.forEach((pending) => {
                         pending.reject(new Error('websocket connection closed'));
                     });
                     this.pendingRequests.clear();
@@ -199,24 +219,28 @@ class WebsocketConnector {
     send(path, method, body, headers = {}) {
         var self = this;
         return new Promise(function(resolve, reject) {
-            if (!self.connected || !self.ws) {
-                // Wait for reconnect and retry
+            // Wait until the connection is fully ready (incl. reconnect handshake)
+            self._readyPromise.then(() => {
+                if (self.isConnected()) {
+                    self.doSend(path, method, body, headers, resolve, reject);
+                    return;
+                }
+
+                // Not connected yet – poll until ready or timeout
                 var retryAttempts = 0;
                 var maxRetries = 50; // 5 seconds total (50 * 100ms)
                 var retryInterval = setInterval(function() {
                     retryAttempts++;
-                    if (self.connected && self.ws) {
+                    if (self.isConnected()) {
                         clearInterval(retryInterval);
-                        self.doSend(path, method, body, headers, resolve, reject);
+                        // Re-check readyPromise in case a reconnect started while we were polling
+                        self._readyPromise.then(() => self.doSend(path, method, body, headers, resolve, reject));
                     } else if (retryAttempts >= maxRetries) {
                         clearInterval(retryInterval);
                         reject(new Error('WebSocket not connected'));
                     }
                 }, 100);
-                return;
-            }
-
-            self.doSend(path, method, body, headers, resolve, reject);
+            });
         });
     }
 
@@ -226,6 +250,11 @@ class WebsocketConnector {
      */
     doSend(path, method, body, headers, resolve, reject) {
         try {
+            if (!this.isConnected()) {
+                reject(new Error('WebSocket not connected'));
+                return;
+            }
+
             var messageId = ++this.messageId;
 
             var message = {

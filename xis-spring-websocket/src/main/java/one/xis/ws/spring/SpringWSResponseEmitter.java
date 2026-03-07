@@ -16,6 +16,9 @@ class SpringWSResponseEmitter implements WSEmitter {
 
     @Override
     public void send(String responseJson) {
+        if (!isOpen()) {
+            return;
+        }
         try {
             session.sendMessage(new TextMessage(responseJson));
         } catch (IOException e) {
@@ -28,17 +31,18 @@ class SpringWSResponseEmitter implements WSEmitter {
         send(gson.toJson(response));
     }
 
+    @Override
+    public boolean isOpen() {
+        return session.isOpen();
+    }
+
     void sendPing() {
         try {
-            if (session.isOpen()) {
+            if (isOpen()) {
                 session.sendMessage(new PingMessage());
             }
         } catch (IOException e) {
             System.err.println("Failed to send ping to session " + session.getId() + ": " + e.getMessage());
         }
-    }
-
-    boolean isOpen() {
-        return session.isOpen();
     }
 }

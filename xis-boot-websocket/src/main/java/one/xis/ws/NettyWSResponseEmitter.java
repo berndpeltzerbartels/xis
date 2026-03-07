@@ -13,11 +13,19 @@ class NettyWSResponseEmitter implements WSEmitter {
 
     @Override
     public void send(String responseJson) {
+        if (!isOpen()) {
+            return;
+        }
         channelHandlerContext.channel().writeAndFlush(new TextWebSocketFrame(responseJson));
     }
 
     @Override
     public void send(Object response) {
         send(gson.toJson(response));
+    }
+
+    @Override
+    public boolean isOpen() {
+        return channelHandlerContext.channel().isActive();
     }
 }

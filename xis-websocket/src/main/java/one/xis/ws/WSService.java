@@ -12,6 +12,7 @@ import one.xis.utils.lang.ClassUtils;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
@@ -24,6 +25,14 @@ public class WSService {
     private final GsonProvider gsonProvider;
     private final Collection<WSExceptionHandler<?>> exceptionHandlers;
     private final Map<String, WSEmitter> emitterMap = new ConcurrentHashMap<>();
+
+    /**
+     * Pending update-event keys per clientId.
+     * Events are buffered here when the client is temporarily disconnected
+     * and flushed on reconnect. Using a Set automatically deduplicates
+     * multiple events with the same key that arrive while the client is offline.
+     */
+    private final Map<String, Set<String>> pendingEvents = new ConcurrentHashMap<>();
 
     public void processRequest(String message, WSEmitter emitter) {
         var requestJsonObject = gsonProvider.getGson().fromJson(message, JsonObject.class);
@@ -61,6 +70,7 @@ public class WSService {
 
     public void unregisterSession(String clientId) {
         emitterMap.remove(clientId);
+        pendingEvents.remove(clientId);
     }
 
     public void removeClosedSessions(Predicate<WSEmitter> isClosed) {
@@ -78,8 +88,9 @@ public class WSService {
      */
     public void sendUpdateEvent(String clientId, String updateEventKey) {
         var emitter = emitterMap.get(clientId);
-        if (emitter == null) {
-            log.warn("sendUpdateEvent: no emitter found for clientId {}", clientId);
+        if (emitter == null || !emitter.isOpen()) {
+            log.debug("sendUpdateEvent: client {} offline, buffering event '{}'", clientId, updateEventKey);
+            pendingEvents.computeIfAbsent(clientId, k -> ConcurrentHashMap.newKeySet()).add(updateEventKey);
             return;
         }
         emitter.send(new WSUpdateEventMessage(updateEventKey));
@@ -87,29 +98,44 @@ public class WSService {
 
     /**
      * Broadcasts an update-event push message to ALL connected clients.
+     * Clients that are currently offline receive the event buffered and
+     * get it delivered on their next reconnect.
      *
      * @param refreshEvent the event containing the updateEventKey and the list of clientIds to send the event to
      */
     public void broadcastUpdateEvent(RefreshEvent refreshEvent) {
         refreshEvent.getClientIds().parallelStream()
-                .filter(emitterMap::containsKey)
-                .map(emitterMap::get)
-                .forEach(emitter -> broadcastUpdateEvent(emitter, refreshEvent.getEventKey()));
+                .forEach(clientId -> sendUpdateEvent(clientId, refreshEvent.getEventKey()));
     }
 
     public void broadcastToAllClients(String updateEventKey) {
-        emitterMap.values().parallelStream()
-                .forEach(emitter -> broadcastUpdateEvent(emitter, updateEventKey));
+        emitterMap.keySet().parallelStream()
+                .forEach(clientId -> sendUpdateEvent(clientId, updateEventKey));
     }
 
     public void broadcastUpdateEvent(WSEmitter emitter, String updateEventKey) {
-        var message = new WSUpdateEventMessage(updateEventKey);
-        emitter.send(message);
+        if (emitter.isOpen()) {
+            emitter.send(new WSUpdateEventMessage(updateEventKey));
+        }
     }
 
     private void precessReconnectMessage(String clientId, WSEmitter emitter) {
         log.debug("processing reconnect for clientId: {}", clientId);
         emitterMap.put(clientId, emitter);
+        flushPendingEvents(clientId, emitter);
+    }
+
+    /**
+     * Sends all buffered update-events for a client that reconnected,
+     * then clears the buffer.
+     */
+    private void flushPendingEvents(String clientId, WSEmitter emitter) {
+        var pending = pendingEvents.remove(clientId);
+        if (pending == null || pending.isEmpty()) {
+            return;
+        }
+        log.debug("flushing {} pending event(s) to reconnected client {}: {}", pending.size(), clientId, pending);
+        pending.forEach(key -> emitter.send(new WSUpdateEventMessage(key)));
     }
 
     @SuppressWarnings("unchecked")
