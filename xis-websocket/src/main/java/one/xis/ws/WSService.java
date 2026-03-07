@@ -28,6 +28,12 @@ public class WSService {
     private final Map<String, WSEmitter> emitterMap = new ConcurrentHashMap<>();
 
     /**
+     * Per-clientId lock objects. Used to synchronize sendUpdateEvent and
+     * precessReconnectMessage so that buffering and flushing never race.
+     */
+    private final Map<String, Object> clientLocks = new ConcurrentHashMap<>();
+
+    /**
      * Pending update-event keys per clientId.
      * Events are buffered here when the client is temporarily disconnected
      * and flushed on reconnect. Using a Set automatically deduplicates
@@ -45,11 +51,14 @@ public class WSService {
         var messageId = Optional.ofNullable(requestJsonObject.get("messageId"))
                 .map(JsonElement::getAsLong)
                 .orElseThrow(WSMessageFormatException::new);
-        log.debug("processing request. clientId: {}, messageId: {}", clientId, messageId);
+
+        var requestType = WSRequestType.fromValue(requestJsonObject.get("request-type").getAsString());
+        log.debug("processRequest: clientId={} messageId={} type={} emitterOpen={}",
+                clientId, messageId, requestType, emitter.isOpen());
+
         // Register/update emitter for this clientId
         emitterMap.put(clientId, emitter);
 
-        var requestType = WSRequestType.fromValue(requestJsonObject.get("request-type").getAsString());
         try {
             switch (requestType) {
                 case RECONNECT -> precessReconnectMessage(clientId, emitter);
@@ -57,6 +66,7 @@ public class WSService {
                 default -> throw new IllegalArgumentException("requestType: " + requestType);
             }
         } catch (Exception e) {
+            log.error("processRequest: error clientId={} messageId={}: {}", clientId, messageId, e.getMessage(), e);
             handleException(messageId, e, emitter);
         }
     }
@@ -70,8 +80,13 @@ public class WSService {
     }
 
     public void unregisterSession(String clientId) {
-        emitterMap.remove(clientId);
-        pendingEvents.remove(clientId);
+        log.debug("unregisterSession: clientId={} pendingEvents={}", clientId, pendingEvents.get(clientId));
+        var lock = clientLocks.computeIfAbsent(clientId, k -> new Object());
+        synchronized (lock) {
+            emitterMap.remove(clientId);
+            pendingEvents.remove(clientId);
+        }
+        clientLocks.remove(clientId);
     }
 
     public void removeClosedSessions(Predicate<WSEmitter> isClosed) {
@@ -88,13 +103,26 @@ public class WSService {
      * @param updateEventKey the event key to fire
      */
     public void sendUpdateEvent(String clientId, String updateEventKey) {
-        var emitter = emitterMap.get(clientId);
-        if (emitter == null || !emitter.isOpen()) {
-            log.debug("sendUpdateEvent: client {} offline, buffering event '{}'", clientId, updateEventKey);
-            pendingEvents.computeIfAbsent(clientId, k -> ConcurrentHashMap.newKeySet()).add(updateEventKey);
-            return;
+        var lock = clientLocks.computeIfAbsent(clientId, k -> new Object());
+        synchronized (lock) {
+            var emitter = emitterMap.get(clientId);
+            log.debug("sendUpdateEvent: clientId={} key='{}' emitter={} open={}",
+                    clientId, updateEventKey,
+                    emitter != null ? "present" : "null",
+                    emitter != null ? emitter.isOpen() : false);
+            if (emitter == null || !emitter.isOpen()) {
+                log.debug("sendUpdateEvent: client {} offline – buffering event '{}'", clientId, updateEventKey);
+                pendingEvents.computeIfAbsent(clientId, k -> ConcurrentHashMap.newKeySet()).add(updateEventKey);
+                return;
+            }
+            emitter.send(new WSUpdateEventMessage(updateEventKey));
+            if (!emitter.isOpen()) {
+                log.warn("sendUpdateEvent: client {} channel closed DURING send – buffering event '{}'", clientId, updateEventKey);
+                pendingEvents.computeIfAbsent(clientId, k -> ConcurrentHashMap.newKeySet()).add(updateEventKey);
+            } else {
+                log.debug("sendUpdateEvent: event '{}' delivered to client {}", updateEventKey, clientId);
+            }
         }
-        emitter.send(new WSUpdateEventMessage(updateEventKey));
     }
 
     /**
@@ -110,6 +138,7 @@ public class WSService {
     }
 
     public void broadcastToAllClients(String updateEventKey) {
+        log.debug("broadcastToAllClients: key='{}' connectedClients={}", updateEventKey, emitterMap.size());
         emitterMap.keySet().parallelStream()
                 .forEach(clientId -> sendUpdateEvent(clientId, updateEventKey));
     }
@@ -121,9 +150,14 @@ public class WSService {
     }
 
     private void precessReconnectMessage(String clientId, WSEmitter emitter) {
-        log.debug("processing reconnect for clientId: {}", clientId);
-        emitterMap.put(clientId, emitter);
-        flushPendingEvents(clientId, emitter);
+        var pending = pendingEvents.get(clientId);
+        log.debug("precessReconnectMessage: clientId={} pendingEvents={}",
+                clientId, pending != null ? pending : "[]");
+        var lock = clientLocks.computeIfAbsent(clientId, k -> new Object());
+        synchronized (lock) {
+            emitterMap.put(clientId, emitter);
+            flushPendingEvents(clientId, emitter);
+        }
     }
 
     /**
@@ -133,10 +167,21 @@ public class WSService {
     private void flushPendingEvents(String clientId, WSEmitter emitter) {
         var pending = pendingEvents.remove(clientId);
         if (pending == null || pending.isEmpty()) {
+            log.debug("flushPendingEvents: clientId={} – nothing to flush", clientId);
             return;
         }
-        log.debug("flushing {} pending event(s) to reconnected client {}: {}", pending.size(), clientId, pending);
-        pending.forEach(key -> emitter.send(new WSUpdateEventMessage(key)));
+        log.debug("flushPendingEvents: clientId={} flushing {} event(s): {}", clientId, pending.size(), pending);
+        for (var key : pending) {
+            log.debug("flushPendingEvents: clientId={} sending buffered event '{}'", clientId, key);
+            emitter.send(new WSUpdateEventMessage(key));
+            if (!emitter.isOpen()) {
+                log.warn("flushPendingEvents: clientId={} channel closed during flush – re-buffering all events: {}", clientId, pending);
+                pending.forEach(k ->
+                        pendingEvents.computeIfAbsent(clientId, id -> ConcurrentHashMap.newKeySet()).add(k));
+                return;
+            }
+        }
+        log.debug("flushPendingEvents: clientId={} all events flushed successfully", clientId);
     }
 
     @SuppressWarnings("unchecked")

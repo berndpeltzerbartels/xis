@@ -118,9 +118,9 @@ class WebsocketConnector {
                 messageId: 0
             };
             this.ws.send(JSON.stringify(reconnectMessage));
-            console.log('Sent RECONNECT message with clientId: ' + this.clientId);
+            console.log('[WS] sent RECONNECT message clientId=' + this.clientId);
         } catch (e) {
-            console.error('Failed to send RECONNECT message:', e);
+            console.error('[WS] failed to send RECONNECT message:', e);
         }
     }
 
@@ -161,9 +161,14 @@ class WebsocketConnector {
     handleMessage(data) {
         try {
             const response = new WebsocketServerResponse(data);
+            console.debug('[WS] handleMessage: status=' + response.status
+                + ' messageId=' + response.messageId
+                + ' responseType=' + response.responseType
+                + ' pendingCount=' + this.pendingRequests.size);
 
             // Server-push message (no pending request, dispatched by response-type)
             if (response.isPushMessage()) {
+                console.debug('[WS] push message received: type=' + response.responseType + ' key=' + response.updateEventKey);
                 this.handlePushMessage(response);
                 return;
             }
@@ -175,9 +180,12 @@ class WebsocketConnector {
             }
 
             if (this.pendingRequests.has(messageId)) {
+                console.debug('[WS] resolving pending request messageId=' + messageId);
                 const pending = this.pendingRequests.get(messageId);
                 this.pendingRequests.delete(messageId);
                 pending.resolve(response);
+            } else {
+                console.warn('[WS] handleMessage: no pending request found for messageId=' + messageId);
             }
         } catch (e) {
             reportError('Error parsing WebSocket message', e);
@@ -194,16 +202,18 @@ class WebsocketConnector {
     handlePushMessage(response) {
         switch (response.responseType) {
             case 'update-event':
-                console.debug('push: update-event', response.updateEventKey);
+                console.log('[WS] push update-event: key=' + response.updateEventKey);
                 app.pageController.handleUpdateEvents([response.updateEventKey])
                     .then(pageUpdated => {
+                        console.debug('[WS] push update-event: pageUpdated=' + pageUpdated + ' key=' + response.updateEventKey);
                         if (!pageUpdated) {
+                            console.debug('[WS] push update-event: delegating to widgetContainers key=' + response.updateEventKey);
                             app.widgetContainers.handleUpdateEvents([response.updateEventKey]);
                         }
                     });
                 break;
             default:
-                console.warn('unknown push response-type:', response.responseType);
+                console.warn('[WS] unknown push response-type:', response.responseType);
         }
     }
 
@@ -256,6 +266,7 @@ class WebsocketConnector {
             }
 
             var messageId = ++this.messageId;
+            console.debug('[WS] doSend: path=' + path + ' messageId=' + messageId + ' pendingCount=' + this.pendingRequests.size);
 
             var message = {
                 'request-type': 'client-request',
@@ -273,10 +284,11 @@ class WebsocketConnector {
             var self = this;
             setTimeout(function() {
                 if (self.pendingRequests.has(messageId)) {
+                    console.warn('[WS] request timeout: path=' + path + ' messageId=' + messageId);
                     self.pendingRequests.delete(messageId);
                     reject(new Error('WebSocket request timeout'));
                 }
-            }, 30000); // 30 second timeout
+            }, 30000);
 
             this.ws.send(JSON.stringify(message));
 
