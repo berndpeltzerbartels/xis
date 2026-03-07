@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import one.xis.UserContextImpl;
 import one.xis.context.Component;
 import one.xis.gson.GsonProvider;
 import one.xis.server.FrontendService;
@@ -173,12 +174,41 @@ public class WSService {
         }
     }
 
+    /**
+     * After calling frontendService the TokenStatus may have been renewed (new tokens issued).
+     * We write the new tokens into custom response headers so the JS client can update its cookies.
+     * If nothing was renewed the headers stay empty and the client keeps its existing cookies.
+     * No-op when security is not configured (TokenStatus is null or SecurityAttributes absent).
+     */
+    private void applyRenewedTokensToResponse(WSServerResponse wsResponse) {
+        try {
+            var tokenStatus = UserContextImpl.getInstance().getTokenStatus();
+            if (tokenStatus != null && tokenStatus.isRenewed()) {
+                wsResponse.getHeaders().put("X-Access-Token", tokenStatus.getAccessToken());
+                wsResponse.getHeaders().put("X-Renew-Token", tokenStatus.getRenewToken());
+                if (tokenStatus.getExpiresIn() != null) {
+                    wsResponse.getHeaders().put("X-Token-Expires-In",
+                            String.valueOf(tokenStatus.getExpiresIn().getSeconds()));
+                }
+                if (tokenStatus.getRenewExpiresIn() != null) {
+                    wsResponse.getHeaders().put("X-Renew-Token-Expires-In",
+                            String.valueOf(tokenStatus.getRenewExpiresIn().getSeconds()));
+                }
+                log.debug("applyRenewedTokensToResponse: renewed tokens written to WS response headers");
+            }
+        } catch (Exception e) {
+            // UserContext not available (e.g. no security configured) – safe to ignore
+            log.debug("applyRenewedTokensToResponse: skipped – {}", e.getMessage());
+        }
+    }
+
     private void processPageModelRequest(WSClientRequest wsClientRequest, WSEmitter emitter) {
         var response = frontendService.processModelDataRequest(wsClientRequest.getBody());
         var wsResponse = new WSServerResponse();
         wsResponse.setMessageId(wsClientRequest.getMessageId());
         wsResponse.setStatus(200);
         wsResponse.setBody(response);
+        applyRenewedTokensToResponse(wsResponse);
         emitter.send(wsResponse);
     }
 
@@ -188,6 +218,7 @@ public class WSService {
         wsResponse.setMessageId(wsClientRequest.getMessageId());
         wsResponse.setStatus(200);
         wsResponse.setBody(response);
+        applyRenewedTokensToResponse(wsResponse);
         responder.send(wsResponse);
     }
 
@@ -197,6 +228,7 @@ public class WSService {
         wsResponse.setMessageId(wsClientRequest.getMessageId());
         wsResponse.setStatus(200);
         wsResponse.setBody(response);
+        applyRenewedTokensToResponse(wsResponse);
         responder.send(wsResponse);
     }
 
@@ -206,6 +238,7 @@ public class WSService {
         wsResponse.setMessageId(wsClientRequest.getMessageId());
         wsResponse.setStatus(200);
         wsResponse.setBody(response);
+        applyRenewedTokensToResponse(wsResponse);
         responder.send(wsResponse);
     }
 }

@@ -10,6 +10,60 @@ class WebsocketClient extends Client {
         this.resolvedURL = undefined;
     }
 
+    /**
+     * Reads a cookie value by name.
+     * Returns null if not present (no token = anonymous/no security configured).
+     * @private
+     */
+    getTokenFromCookie(name) {
+        const match = document.cookie && document.cookie.split(';')
+            .map(c => c.trim())
+            .find(c => c.startsWith(name + '='));
+        return match ? decodeURIComponent(match.substring(name.length + 1)) : null;
+    }
+
+    /**
+     * Writes a cookie. maxAge in seconds.
+     * @private
+     */
+    setTokenCookie(name, value, maxAge) {
+        let cookie = name + '=' + encodeURIComponent(value) + '; path=/; SameSite=Strict';
+        if (maxAge != null) {
+            cookie += '; Max-Age=' + maxAge;
+        }
+        document.cookie = cookie;
+    }
+
+    /**
+     * Appends accessToken and renewToken from cookies to the request body.
+     * No-op if cookies are absent (security not configured).
+     * @private
+     */
+    applyTokens(request) {
+        const accessToken = this.getTokenFromCookie('access_token');
+        const renewToken = this.getTokenFromCookie('renew_token');
+        if (accessToken) request.accessToken = accessToken;
+        if (renewToken) request.renewToken = renewToken;
+        return request;
+    }
+
+    /**
+     * If the server renewed the tokens, update the cookies.
+     * @private
+     */
+    handleRenewedTokens(response) {
+        if (!response || !response.headers) return;
+        const newAccessToken = response.headers['X-Access-Token'];
+        const newRenewToken  = response.headers['X-Renew-Token'];
+        const expiresIn      = response.headers['X-Token-Expires-In'];
+        const renewExpiresIn = response.headers['X-Renew-Token-Expires-In'];
+        if (newAccessToken) {
+            this.setTokenCookie('access_token', newAccessToken, expiresIn ? parseInt(expiresIn) : null);
+        }
+        if (newRenewToken) {
+            this.setTokenCookie('renew_token', newRenewToken, renewExpiresIn ? parseInt(renewExpiresIn) : null);
+        }
+    }
 
     setConfig(config) {
         return new Promise((resolve, _) => {
@@ -21,10 +75,11 @@ class WebsocketClient extends Client {
     async loadPageData(resolvedURL) {
         app.messageHandler.clearMessages();
         this.resolvedURL = resolvedURL;
-        const request = this.createPageRequest(resolvedURL, null, null);
+        const request = this.applyTokens(this.createPageRequest(resolvedURL, null, null));
         try {
             console.debug("loading page data");
             const response = await this.wsConnector.send('/xis/page/model', 'POST', request, {});
+            this.handleRenewedTokens(response);
             return this.handleResponse(response);
         } catch (error) {
             reportError('Error during WebSocket request to /xis/page/model', error);
@@ -35,10 +90,11 @@ class WebsocketClient extends Client {
 
     async loadWidgetData(widgetInstance, widgetState) {
         app.messageHandler.clearMessages();
-        const request = this.createWidgetRequest(widgetInstance, widgetState, null, null, null);
+        const request = this.applyTokens(this.createWidgetRequest(widgetInstance, widgetState, null, null, null));
         try {
             console.debug("loading widget data");
             const response = await this.wsConnector.send('/xis/widget/model', 'POST', request, {});
+            this.handleRenewedTokens(response);
             return this.handleResponse(response);
         } catch (error) {
             reportError('Error during WebSocket request to /xis/widget/model', error);
@@ -48,10 +104,11 @@ class WebsocketClient extends Client {
     }
 
     async loadFormData(resolvedURL, widgetId, formBindingKey, widgetParameters) {
-        const request = this.createFormRequest(resolvedURL, widgetId, {}, null, formBindingKey, widgetParameters);
+        const request = this.applyTokens(this.createFormRequest(resolvedURL, widgetId, {}, null, formBindingKey, widgetParameters));
         try {
             console.debug("loading form data");
             const response = await this.wsConnector.send('/xis/form/model', 'POST', request, {});
+            this.handleRenewedTokens(response);
             return this.handleResponse(response);
         } catch (error) {
             reportError('Error during WebSocket request to /xis/form/model', error);
@@ -62,10 +119,11 @@ class WebsocketClient extends Client {
 
     async widgetLinkAction(widgetInstance, widgetState, action, actionParameters) {
         app.messageHandler.clearMessages();
-        const request = this.createWidgetRequest(widgetInstance, widgetState, action, {}, actionParameters);
+        const request = this.applyTokens(this.createWidgetRequest(widgetInstance, widgetState, action, {}, actionParameters));
         try {
             console.debug("submitting link-action");
             const response = await this.wsConnector.send('/xis/widget/action', 'POST', request, {});
+            this.handleRenewedTokens(response);
             return this.handleResponse(response);
         } catch (error) {
             reportError('Error during WebSocket request to /xis/widget/action', error);
@@ -76,10 +134,11 @@ class WebsocketClient extends Client {
 
     async pageLinkAction(resolvedURL, action, actionParameters) {
         app.messageHandler.clearMessages();
-        const request = this.createPageRequest(resolvedURL, {}, action, actionParameters);
+        const request = this.applyTokens(this.createPageRequest(resolvedURL, {}, action, actionParameters));
         try {
-           console.debug("submitting link-action");
+            console.debug("submitting link-action");
             const response = await this.wsConnector.send('/xis/page/action', 'POST', request, {});
+            this.handleRenewedTokens(response);
             return this.handleResponse(response);
         } catch (error) {
             reportError('Error during WebSocket request to /xis/page/action', error);
@@ -89,10 +148,11 @@ class WebsocketClient extends Client {
 
     async formAction(resolvedURL, widgetId, formData, action, formBindigKey, formBindingParameters) {
         app.messageHandler.clearMessages();
-        const request = this.createFormRequest(resolvedURL, widgetId, formData, action, formBindigKey, formBindingParameters);
+        const request = this.applyTokens(this.createFormRequest(resolvedURL, widgetId, formData, action, formBindigKey, formBindingParameters));
         try {
-           console.debug("submitting form-action");
+            console.debug("submitting form-action");
             const response = await this.wsConnector.send('/xis/form/action', 'POST', request, {});
+            this.handleRenewedTokens(response);
             return this.handleResponse(response);
         } catch (error) {
             reportError('Error during WebSocket request to /xis/form/action', error);
@@ -104,6 +164,7 @@ class WebsocketClient extends Client {
     async sendRenewTokenRequest(renewToken) {
         try {
             const response = await this.wsConnector.send('/xis/token/renew', 'POST', {}, {});
+            this.handleRenewedTokens(response);
             return this.deserializeResponse(response);
         } catch (error) {
             reportError('Error during WebSocket request to /xis/token/renew', error);
@@ -146,3 +207,5 @@ class WebsocketClient extends Client {
         return Promise.resolve(responseObject);
     }
 }
+
+
