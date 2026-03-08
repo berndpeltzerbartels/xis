@@ -76,101 +76,60 @@ class WebsocketClient extends Client {
         app.messageHandler.clearMessages();
         this.resolvedURL = resolvedURL;
         const request = this.applyTokens(this.createPageRequest(resolvedURL, null, null));
-        try {
-            console.debug("loading page data");
-            const response = await this.wsConnector.send('/xis/page/model', 'POST', request, {});
-            this.handleRenewedTokens(response);
-            return this.handleResponse(response);
-        } catch (error) {
-            reportError('Error during WebSocket request to /xis/page/model', error);
-            app.messageHandler.reportServerError('connection problem');
-            return Promise.reject(error);
-        }
+        console.debug("loading page data");
+        const response = await this.wsConnector.send('/xis/page/model', 'POST', request, {});
+        this.handleRenewedTokens(response);
+        return this.handleResponse(response);
     }
 
     async loadWidgetData(widgetInstance, widgetState) {
         app.messageHandler.clearMessages();
         const request = this.applyTokens(this.createWidgetRequest(widgetInstance, widgetState, null, null, null));
-        try {
-            console.debug("loading widget data");
-            const response = await this.wsConnector.send('/xis/widget/model', 'POST', request, {});
-            this.handleRenewedTokens(response);
-            return this.handleResponse(response);
-        } catch (error) {
-            reportError('Error during WebSocket request to /xis/widget/model', error);
-            app.messageHandler.reportServerError('connection problem');
-            return Promise.reject(error);
-        }
+        console.debug("loading widget data");
+        const response = await this.wsConnector.send('/xis/widget/model', 'POST', request, {});
+        this.handleRenewedTokens(response);
+        return this.handleResponse(response);
     }
 
     async loadFormData(resolvedURL, widgetId, formBindingKey, widgetParameters) {
         const request = this.applyTokens(this.createFormRequest(resolvedURL, widgetId, {}, null, formBindingKey, widgetParameters));
-        try {
-            console.debug("loading form data");
-            const response = await this.wsConnector.send('/xis/form/model', 'POST', request, {});
-            this.handleRenewedTokens(response);
-            return this.handleResponse(response);
-        } catch (error) {
-            reportError('Error during WebSocket request to /xis/form/model', error);
-            app.messageHandler.reportServerError('connection problem');
-            return Promise.reject(error);
-        }
+        console.debug("loading form data");
+        const response = await this.wsConnector.send('/xis/form/model', 'POST', request, {});
+        this.handleRenewedTokens(response);
+        return this.handleResponse(response);
     }
 
     async widgetLinkAction(widgetInstance, widgetState, action, actionParameters) {
         app.messageHandler.clearMessages();
         const request = this.applyTokens(this.createWidgetRequest(widgetInstance, widgetState, action, {}, actionParameters));
-        try {
-            console.debug("submitting link-action");
-            const response = await this.wsConnector.send('/xis/widget/action', 'POST', request, {});
-            this.handleRenewedTokens(response);
-            return this.handleResponse(response);
-        } catch (error) {
-            reportError('Error during WebSocket request to /xis/widget/action', error);
-            app.messageHandler.reportServerError('connection problem');
-            return Promise.reject(error);
-        }
+        console.debug("submitting link-action");
+        const response = await this.wsConnector.send('/xis/widget/action', 'POST', request, {});
+        this.handleRenewedTokens(response);
+        return this.handleResponse(response);
     }
 
     async pageLinkAction(resolvedURL, action, actionParameters) {
         app.messageHandler.clearMessages();
         const request = this.applyTokens(this.createPageRequest(resolvedURL, {}, action, actionParameters));
-        try {
-            console.debug("submitting link-action");
-            const response = await this.wsConnector.send('/xis/page/action', 'POST', request, {});
-            this.handleRenewedTokens(response);
-            return this.handleResponse(response);
-        } catch (error) {
-            reportError('Error during WebSocket request to /xis/page/action', error);
-            return Promise.reject(error);
-        }
+        console.debug("submitting link-action");
+        const response = await this.wsConnector.send('/xis/page/action', 'POST', request, {});
+        this.handleRenewedTokens(response);
+        return this.handleResponse(response);
     }
 
     async formAction(resolvedURL, widgetId, formData, action, formBindigKey, formBindingParameters) {
         app.messageHandler.clearMessages();
         const request = this.applyTokens(this.createFormRequest(resolvedURL, widgetId, formData, action, formBindigKey, formBindingParameters));
-        try {
-            console.debug("submitting form-action");
-            const response = await this.wsConnector.send('/xis/form/action', 'POST', request, {});
-            this.handleRenewedTokens(response);
-            return this.handleResponse(response);
-        } catch (error) {
-            reportError('Error during WebSocket request to /xis/form/action', error);
-            app.messageHandler.reportServerError('connection problem');
-            return Promise.reject(error);
-        }
+        console.debug("submitting form-action");
+        const response = await this.wsConnector.send('/xis/form/action', 'POST', request, {});
+        this.handleRenewedTokens(response);
+        return this.handleResponse(response);
     }
 
     async sendRenewTokenRequest(renewToken) {
-        try {
-            const response = await this.wsConnector.send('/xis/token/renew', 'POST', {}, {});
-            this.handleRenewedTokens(response);
-            return this.deserializeResponse(response);
-        } catch (error) {
-            reportError('Error during WebSocket request to /xis/token/renew', error);
-            app.messageHandler.reportServerError('connection problem');
-            return Promise.reject(error);
-        }
+        const response = await this.wsConnector.send('/xis/token/renew', 'POST', {}, {});
+        this.handleRenewedTokens(response);
+        return this.deserializeResponse(response);
     }
 
     async handleResponse(response) {
@@ -207,5 +166,4 @@ class WebsocketClient extends Client {
         return Promise.resolve(responseObject);
     }
 }
-
 

@@ -54,7 +54,7 @@ public class SpringWSHandler extends TextWebSocketHandler implements SpringWSHan
         // Get clientId from session attribute (set during first message)
         var clientId = (String) session.getAttributes().get("clientId");
         if (clientId != null) {
-            wsService.unregisterSession(clientId);
+            wsService.unregisterSession(clientId, session);
         }
         log.info("WebSocket connection closed: clientId:  {}, status: {} ", clientId, status);
     }

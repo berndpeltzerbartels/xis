@@ -45,4 +45,18 @@ class SpringWSResponseEmitter implements WSEmitter {
             System.err.println("Failed to send ping to session " + session.getId() + ": " + e.getMessage());
         }
     }
+
+    @Override
+    public void close() {
+        try {
+            session.close();
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to close WebSocket session", e);
+        }
+    }
+
+    @Override
+    public boolean isChannel(Object channel) {
+        return this.session == channel;
+    }
 }

@@ -9,7 +9,10 @@ import java.util.Arrays;
  */
 @RequiredArgsConstructor
 enum WSRequestType {
+    CONNECT("connect"),
     RECONNECT("reconnect"),
+    PING("ping"),
+    PUSH_ACK("push-ack"),
     CLIENT_REQUEST("client-request");
     private final String value;
 

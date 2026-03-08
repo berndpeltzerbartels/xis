@@ -124,7 +124,7 @@ class Application {
     createWebsocketConnectorIfPresent(clientId) {
         if (typeof WebsocketConnector !== 'undefined' &&  typeof WebSocket !== 'undefined') {
             var connector = new WebsocketConnector(clientId);
-            connector.connect("ws://localhost:8080/ws");
+            connector.connect("ws://localhost:8080/ws"); // TODO
             return connector;
         }
         return null;
