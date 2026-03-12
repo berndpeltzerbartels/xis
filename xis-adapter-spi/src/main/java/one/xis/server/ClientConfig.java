@@ -20,7 +20,13 @@ public class ClientConfig {
     private final Collection<String> widgetIds;
     private final Collection<String> pageIds;
     private final Collection<String> includeIds;
-    private final boolean useWebsockets; // TODO remove this, use websockets only if configured in server config
+    /**
+     * TTL in seconds for buffered push events on the server.
+     * The WebSocket client uses this to decide whether to reload the page
+     * after a reconnect (events may have been discarded server-side).
+     * 0 means WebSocket push is not configured.
+     */
+    private final long pendingEventTtlSeconds;
     /**
      * Normalized path of the welcome-page.
      */
@@ -45,7 +51,7 @@ public class ClientConfig {
         private Collection<String> widgetIds = List.of();
         private Collection<String> pageIds = List.of();
         private Collection<String> includeIds = List.of();
-        private boolean useWebsockets = false;
+        private long pendingEventTtlSeconds = 0;
 
         @Getter
         private String welcomePageId;
@@ -67,8 +73,8 @@ public class ClientConfig {
             return this;
         }
 
-        ClientConfigBuilder useWebsockets(boolean useWebsockets) {
-            this.useWebsockets = useWebsockets;
+        ClientConfigBuilder pendingEventTtlSeconds(long pendingEventTtlSeconds) {
+            this.pendingEventTtlSeconds = pendingEventTtlSeconds;
             return this;
         }
 
@@ -86,13 +92,13 @@ public class ClientConfig {
             this.widgetAttributes = widgetAttributes;
             return this;
         }
-        
+
         ClientConfig build() {
             return new ClientConfig(
                     widgetIds,
                     pageIds,
                     includeIds,
-                    useWebsockets,
+                    pendingEventTtlSeconds,
                     welcomePageId,
                     pageAttributes,
                     widgetAttributes

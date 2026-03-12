@@ -4,8 +4,7 @@ import lombok.RequiredArgsConstructor;
 import one.xis.context.Component;
 import one.xis.context.Init;
 import one.xis.gson.GsonProvider;
-import one.xis.server.FrontendService;
-import one.xis.ws.WSExceptionHandler;
+import one.xis.server.ClientConfigService;
 import one.xis.ws.WSService;
 
 import java.util.Collection;
@@ -16,13 +15,12 @@ class SpringWebSocketInitializer {
 
     private final Collection<SpringWSHandlerSPI> wsHandlers;
 
-    private final FrontendService frontendService;
     private final GsonProvider gsonProvider;
-    private final Collection<WSExceptionHandler<?>> exceptionHandlers;
+    private final ClientConfigService clientConfigService;
 
     @Init
     public void init() {
-        WSService service = new WSService(frontendService, gsonProvider, exceptionHandlers);
+        WSService service = new WSService(gsonProvider, clientConfigService);
         for (SpringWSHandlerSPI handler : wsHandlers) {
             handler.setWSService(service);
         }

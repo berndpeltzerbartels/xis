@@ -13,11 +13,7 @@ class Application {
         this.httpClient = new HttpClient(this.httpConnector, this.clientId);
         this.httpClient.clientId = this.clientId;
         this.websocketConnector = this.createWebsocketConnectorIfPresent(this.clientId);
-        if (this.websocketConnector) {
-            this.websocketClient = new WebsocketClient(this.websocketConnector, this.clientId);
-            this.websocketClient.clientId = this.clientId;
-        }
-        this.client = this.websocketClient ? this.websocketClient : this.httpClient;
+        this.client = this.httpClient;
         this.domAccessor = new DomAccessor();
         this.pages = new Pages(this.httpClient);
         this.urlResolver = new URLResolver(this.pages);
@@ -50,7 +46,7 @@ class Application {
         this.eventPublisher.publish(EventType.APP_INSTANCE_CREATED, this);
         this.httpClient.loadConfig()
             .then(config => this.pageController.setConfig(config))
-            .then(config => { if (this.websocketClient) { this.websocketClient.setConfig(config); } return config; })
+            .then(config => { if (this.websocketConnector) { this.websocketConnector.setPendingEventTtlMs(config.pendingEventTtlSeconds * 1000); } return config; })
             .then(config => this.widgetContainers.setConfig(config))
             .then(config => this.includes.loadIncludes(config))
             .then(config => this.widgets.loadWidgets(config))

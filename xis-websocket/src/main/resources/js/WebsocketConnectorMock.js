@@ -25,6 +25,14 @@ class WebsocketConnectorMock {
     }
 
     /**
+     * No-op – TTL is irrelevant in tests (no real reconnect happens).
+     * @public
+     */
+    setPendingEventTtlMs(ms) {
+        // no-op
+    }
+
+    /**
      * Delegates the WebSocket message to backendBridge (same transport as HttpConnectorMock).
      * @public
      * @param {string} path

@@ -21,9 +21,7 @@ public class WsTestScriptExtension implements TestScriptExtension, PushEventSimu
     @Override
     public String getAdditionalScript() {
         var resources = new Resources();
-        return resources.getByPath("js/WebsocketServerResponse.js").getContent() + "\n"
-                + resources.getByPath("js/WebsocketClient.js").getContent() + "\n"
-                + resources.getByPath("js/WebsocketConnectorMock.js").getContent() + "\n";
+        return resources.getByPath("js/WebsocketConnectorMock.js").getContent() + "\n";
     }
 
     @Override

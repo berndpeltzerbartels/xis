@@ -4,16 +4,20 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import one.xis.UserContextImpl;
 import one.xis.context.Component;
+import one.xis.context.Init;
 import one.xis.gson.GsonProvider;
-import one.xis.server.FrontendService;
-import one.xis.utils.lang.ClassUtils;
+import one.xis.server.ClientConfigService;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 
@@ -22,9 +26,14 @@ import java.util.function.Predicate;
 @RequiredArgsConstructor
 public class WSService {
 
-    private final FrontendService frontendService;
+    /**
+     * How long unacknowledged push events are kept in memory for offline clients.
+     * After this duration the events are discarded – the client is considered gone.
+     */
+    static final Duration PENDING_EVENT_TTL = Duration.ofMinutes(30);
+
     private final GsonProvider gsonProvider;
-    private final Collection<WSExceptionHandler<?>> exceptionHandlers;
+    private final ClientConfigService clientConfigService;
     private final Map<String, WSEmitter> emitterMap = new ConcurrentHashMap<>();
 
     /**
@@ -35,28 +44,66 @@ public class WSService {
      */
     private final Map<String, Map<String, WSUpdateEventMessage>> pendingRefreshEvents = new ConcurrentHashMap<>();
 
+    private final ScheduledExecutorService cleanupScheduler =
+            Executors.newSingleThreadScheduledExecutor(r -> {
+                var t = new Thread(r, "ws-pending-cleanup");
+                t.setDaemon(true);
+                return t;
+            });
+
+    @Init
+    void startCleanupScheduler() {
+        clientConfigService.setPendingEventTtlSeconds(PENDING_EVENT_TTL.getSeconds());
+        cleanupScheduler.scheduleWithFixedDelay(
+                this::cleanupStalePendingEvents,
+                1, 1, TimeUnit.HOURS);
+        log.debug("startCleanupScheduler: pending-event TTL cleanup started (TTL={})", PENDING_EVENT_TTL);
+    }
+
+    /**
+     * Removes push events that have exceeded {@link #PENDING_EVENT_TTL}.
+     * If all events for a client are expired the client entry itself is removed.
+     * Called periodically by the cleanup scheduler.
+     */
+    void cleanupStalePendingEvents() {
+        var cutoff = Instant.now().minus(PENDING_EVENT_TTL);
+        var removedEvents = 0;
+        var removedClients = 0;
+        for (var entry : pendingRefreshEvents.entrySet()) {
+            var clientId = entry.getKey();
+            var events = entry.getValue();
+            var before = events.size();
+            events.values().removeIf(msg -> msg.getCreatedAt().isBefore(cutoff));
+            removedEvents += before - events.size();
+            if (events.isEmpty()) {
+                pendingRefreshEvents.remove(clientId);
+                removedClients++;
+            }
+        }
+        if (removedEvents > 0) {
+            log.info("cleanupStalePendingEvents: removed {} expired event(s) for {} client(s)",
+                    removedEvents, removedClients);
+        } else {
+            log.debug("cleanupStalePendingEvents: nothing to remove");
+        }
+    }
+
     public void processRequest(String message, WSEmitter emitter) {
         var requestJsonObject = gsonProvider.getGson().fromJson(message, JsonObject.class);
-
         var clientId = clientId(requestJsonObject);
         var requestType = requestType(requestJsonObject);
-
         log.debug("processRequest: clientId={} type={} emitterOpen={}",
                 clientId, requestType, emitter.isOpen());
-
         try {
             switch (requestType) {
                 case CONNECT -> processConnectMessage(clientId, emitter);
                 case RECONNECT -> processReconnectMessage(clientId, emitter);
                 case PING -> processPing(clientId, emitter);
                 case PUSH_ACK -> processPushAck(clientId, requestJsonObject);
-                case CLIENT_REQUEST -> processClientRequest(requestJsonObject, clientId, emitter);
                 default -> throw new IllegalArgumentException("requestType: " + requestType);
             }
         } catch (Exception e) {
-            var messageId = optionalMessageId(requestJsonObject);
-            log.error("processRequest: error clientId={} messageId={}: {}", clientId, messageId, e.getMessage(), e);
-            messageId.ifPresent(id -> handleException(id, e, emitter));
+            log.error("processRequest: error clientId={}: {}", clientId, e.getMessage(), e);
         }
     }
 
@@ -64,11 +111,6 @@ public class WSService {
         return Optional.ofNullable(requestJsonObject.get("clientId"))
                 .map(JsonElement::getAsString)
                 .orElseThrow(WSMessageFormatException::new);
-    }
-
-    private Optional<Long> optionalMessageId(JsonObject requestJsonObject) {
-        return Optional.ofNullable(requestJsonObject.get("messageId"))
-                .map(JsonElement::getAsLong);
     }
 
     private WSRequestType requestType(JsonObject requestJsonObject) {
@@ -190,120 +232,14 @@ public class WSService {
     private void flushPendingRefreshEvents(String clientId, WSEmitter emitter) {
         var pending = pendingRefreshEvents.get(clientId);
         if (pending == null || pending.isEmpty()) {
-            log.debug("flushPendingEvents: clientId={} emitter=@{} – nothing to flush",
-                    clientId, Integer.toHexString(System.identityHashCode(emitter)));
+            log.debug("flushPendingEvents: clientId={} – nothing to flush", clientId);
             return;
         }
-        log.debug("flushPendingEvents: clientId={} emitter=@{} re-sending {} unacknowledged event(s)",
-                clientId, Integer.toHexString(System.identityHashCode(emitter)), pending.size());
+        log.debug("flushPendingEvents: clientId={} re-sending {} unacknowledged event(s)", clientId, pending.size());
         for (var message : pending.values()) {
-            log.debug("flushPendingEvents: clientId={} emitter=@{} re-sending key='{}' eventId={}",
-                    clientId, Integer.toHexString(System.identityHashCode(emitter)),
-                    message.getUpdateEventKey(), message.getEventId());
+            log.debug("flushPendingEvents: clientId={} re-sending key='{}' eventId={}",
+                    clientId, message.getUpdateEventKey(), message.getEventId());
             emitter.send(message);
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    private void handleException(Long messageId, Exception exception, WSEmitter emitter) {
-        for (WSExceptionHandler<?> handler : exceptionHandlers) {
-            if (ClassUtils.getGenericInterfacesTypeParameter(handler.getClass(), WSExceptionHandler.class, 0).isInstance(exception)) {
-                var typedHandler = (WSExceptionHandler<Exception>) handler;
-                var response = typedHandler.handleException(exception);
-                response.setMessageId(messageId);
-                emitter.send(response);
-                return;
-            }
-        }
-
-        // No handler found - send generic 500 error
-        var errorResponse = new WSServerResponse(500);
-        errorResponse.setMessageId(messageId);
-        errorResponse.setBody(null);
-        emitter.send(errorResponse);
-    }
-
-    private void processClientRequest(JsonObject wsClientRequestJsonObject, String clientId, WSEmitter emitter) {
-        log.debug("processClientRequest: clientId={}", clientId);
-        var wsClientRequest = gsonProvider.getGson().fromJson(wsClientRequestJsonObject, WSClientRequest.class);
-        if (!wsClientRequest.getClientId().equals(clientId)) {
-            throw new IllegalStateException("clientId mismatch in client-request");
-        }
-        switch (wsClientRequest.getPath()) {
-            case "/xis/page/model" -> processPageModelRequest(wsClientRequest, emitter);
-            case "/xis/form/model" -> processFormModelRequest(wsClientRequest, emitter);
-            case "/xis/widget/model" -> processWidgetModelRequest(wsClientRequest, emitter);
-            case "/xis/page/action", "/xis/widget/action", "/xis/form/action" ->
-                    processActionRequest(wsClientRequest, emitter);
-            default -> throw new IllegalArgumentException("unknown path: " + wsClientRequest.getPath());
-        }
-    }
-
-    /**
-     * After calling frontendService the TokenStatus may have been renewed (new tokens issued).
-     * We write the new tokens into custom response headers so the JS client can update its cookies.
-     * If nothing was renewed the headers stay empty and the client keeps its existing cookies.
-     * No-op when security is not configured (TokenStatus is null or SecurityAttributes absent).
-     */
-    private void applyRenewedTokensToResponse(WSServerResponse wsResponse) {
-        try {
-            var tokenStatus = UserContextImpl.getInstance().getTokenStatus();
-            if (tokenStatus != null && tokenStatus.isRenewed()) {
-                wsResponse.getHeaders().put("X-Access-Token", tokenStatus.getAccessToken());
-                wsResponse.getHeaders().put("X-Renew-Token", tokenStatus.getRenewToken());
-                if (tokenStatus.getExpiresIn() != null) {
-                    wsResponse.getHeaders().put("X-Token-Expires-In",
-                            String.valueOf(tokenStatus.getExpiresIn().getSeconds()));
-                }
-                if (tokenStatus.getRenewExpiresIn() != null) {
-                    wsResponse.getHeaders().put("X-Renew-Token-Expires-In",
-                            String.valueOf(tokenStatus.getRenewExpiresIn().getSeconds()));
-                }
-                log.debug("applyRenewedTokensToResponse: renewed tokens written to WS response headers");
-            }
-        } catch (Exception e) {
-            // UserContext not available (e.g. no security configured) – safe to ignore
-            log.debug("applyRenewedTokensToResponse: skipped – {}", e.getMessage());
-        }
-    }
-
-    private void processPageModelRequest(WSClientRequest wsClientRequest, WSEmitter emitter) {
-        var response = frontendService.processModelDataRequest(wsClientRequest.getBody());
-        var wsResponse = new WSServerResponse();
-        wsResponse.setMessageId(wsClientRequest.getMessageId());
-        wsResponse.setStatus(200);
-        wsResponse.setBody(response);
-        applyRenewedTokensToResponse(wsResponse);
-        emitter.send(wsResponse);
-    }
-
-    private void processFormModelRequest(WSClientRequest wsClientRequest, WSEmitter responder) {
-        var response = frontendService.processFormDataRequest(wsClientRequest.getBody());
-        var wsResponse = new WSServerResponse();
-        wsResponse.setMessageId(wsClientRequest.getMessageId());
-        wsResponse.setStatus(200);
-        wsResponse.setBody(response);
-        applyRenewedTokensToResponse(wsResponse);
-        responder.send(wsResponse);
-    }
-
-    private void processWidgetModelRequest(WSClientRequest wsClientRequest, WSEmitter responder) {
-        var response = frontendService.processModelDataRequest(wsClientRequest.getBody());
-        var wsResponse = new WSServerResponse();
-        wsResponse.setMessageId(wsClientRequest.getMessageId());
-        wsResponse.setStatus(200);
-        wsResponse.setBody(response);
-        applyRenewedTokensToResponse(wsResponse);
-        responder.send(wsResponse);
-    }
-
-    private void processActionRequest(WSClientRequest wsClientRequest, WSEmitter responder) {
-        var response = frontendService.processActionRequest(wsClientRequest.getBody());
-        var wsResponse = new WSServerResponse();
-        wsResponse.setMessageId(wsClientRequest.getMessageId());
-        wsResponse.setStatus(200);
-        wsResponse.setBody(response);
-        applyRenewedTokensToResponse(wsResponse);
-        responder.send(wsResponse);
     }
 }

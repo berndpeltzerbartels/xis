@@ -2,6 +2,7 @@ package one.xis.ws;
 
 import lombok.Getter;
 
+import java.time.Instant;
 import java.util.UUID;
 
 /**
@@ -24,6 +25,11 @@ public class WSUpdateEventMessage {
     private final String eventId = UUID.randomUUID().toString();
 
     private final String updateEventKey;
+
+    /**
+     * Wall-clock time when this message was created – used for TTL-based cleanup.
+     */
+    private final Instant createdAt = Instant.now();
 
     public WSUpdateEventMessage(String updateEventKey) {
         this.updateEventKey = updateEventKey;

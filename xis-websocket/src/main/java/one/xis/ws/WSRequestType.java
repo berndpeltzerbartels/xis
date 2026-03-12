@@ -12,8 +12,7 @@ enum WSRequestType {
     CONNECT("connect"),
     RECONNECT("reconnect"),
     PING("ping"),
-    PUSH_ACK("push-ack"),
-    CLIENT_REQUEST("client-request");
+    PUSH_ACK("push-ack");
     private final String value;
 
     static WSRequestType fromValue(String value) {

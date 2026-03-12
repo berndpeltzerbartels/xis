@@ -11,10 +11,7 @@ class TestApplication {
         this.httpConnector = new HttpConnectorMock(this.clientId);
         this.httpClient = new HttpClient(this.httpConnector, this.clientId);
         this.websocketConnector = this.createWebsocketConnectorIfPresent(this.clientId);
-        if (this.websocketConnector) {
-            this.websocketClient = new WebsocketClient(this.websocketConnector, this.clientId);
-        }
-        this.client = this.websocketClient ? this.websocketClient : this.httpClient;
+        this.client = this.httpClient;
         this.domAccessor = new DomAccessor();
         this.pages = new Pages(this.httpClient);
         this.urlResolver = new URLResolver(this.pages);
@@ -64,7 +61,7 @@ class TestApplication {
         document.location.pathname = uri;
         return this.httpClient.loadConfig()
             .then(config => this.pageController.setConfig(config))
-            .then(config => {if (this.websocketClient){ this.websocketClient.setConfig(config);}; return config;})
+            .then(config => { if (this.websocketConnector) { this.websocketConnector.setPendingEventTtlMs(config.pendingEventTtlSeconds * 1000); } return config; })
             .then(config => this.widgetContainers.setConfig(config))
             .then(config => this.includes.loadIncludes(config))
             .then(config => this.widgets.loadWidgets(config))

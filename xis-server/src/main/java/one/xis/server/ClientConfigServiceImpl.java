@@ -2,7 +2,6 @@ package one.xis.server;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import one.xis.Include;
 import one.xis.Page;
@@ -34,16 +33,20 @@ class ClientConfigServiceImpl implements ClientConfigService {
     @Inject(annotatedWith = Include.class)
     private Collection<Object> includes;
 
-    @Setter
-    private boolean useWebsockets;
+    private long pendingEventTtlSeconds = 0;
 
     @Getter
     private ClientConfig config;
 
+    @Override
+    public void setPendingEventTtlSeconds(long seconds) {
+        this.pendingEventTtlSeconds = seconds;
+    }
+
     @Init
     void init() {
         var configBuilder = ClientConfig.builder()
-                .useWebsockets(useWebsockets);
+                .pendingEventTtlSeconds(pendingEventTtlSeconds);
         addPageAttributes(configBuilder);
         addWidgetAttributes(configBuilder);
         addIncludeIds(configBuilder);

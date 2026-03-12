@@ -387,6 +387,7 @@ class Client {
         config.pageIds = obj.pageIds ? obj.pageIds : [];
         config.widgetIds = obj.widgetIds ? obj.widgetIds : [];
         config.includeIds = obj.includeIds ? obj.includeIds : [];
+        config.pendingEventTtlSeconds = obj.pendingEventTtlSeconds || 0;
         config.pageAttributes = {};
         if (obj.pageAttributes) {
             for (var key of Object.keys(obj.pageAttributes)) {
