@@ -14,6 +14,7 @@ class ClientConfig {
         this.welcomePageId = undefined;
         this.pageAttributes = {}
         this.widgetAttributes = {};
+        this.pendingEventTtlSeconds = 0;
     }
 
     /**
