@@ -1,0 +1,42 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>one.xis</groupId>
+    <artifactId>xis-distributed</artifactId>
+    <packaging>jar</packaging>
+
+    <name>XIS-Distributed</name>
+    <description>Micro-frontend / distributed deployment support for the XIS web framework.
+        Allows pages and widgets to be hosted on separate servers.
+        Server hosts are configured via application.properties or a custom XisDistributedConfig bean.
+    </description>
+    <url>https://github.com/berndpeltzerbartels/xis</url>
+
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <scm>
+        <url>https://github.com/berndpeltzerbartels/xis</url>
+        <connection>scm:git:https://github.com/berndpeltzerbartels/xis.git</connection>
+        <developerConnection>scm:git:git@github.com:berndpeltzerbartels/xis.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+
+    <developers>
+        <developer>
+            <id>bernd</id>
+            <name>Bernd Peltzer-Bartels</name>
+            <email>bernd@xis.one</email>
+        </developer>
+    </developers>
+
+</project>

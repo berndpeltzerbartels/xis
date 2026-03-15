@@ -13,6 +13,7 @@ class PageAttributesFactory extends AttributesFactory {
 
     private final PathResolver pathResolver;
     private final Resources resources;
+    private final ComponentHostResolver hostResolver;
 
     PageAttributes attributes(@NonNull Object controller) {
         var attributes = new PageAttributes();
@@ -23,10 +24,9 @@ class PageAttributesFactory extends AttributesFactory {
         if (attributes.isWelcomePage() && path.hasPathVariables()) {
             throw new IllegalStateException("WelcomePage cannot have path variables: " + controller.getClass());
         }
+        attributes.setHost(hostResolver.getPageHost(path.normalized()));
         addParameterAttributes(controller.getClass(), attributes);
         addUpdateEventKeys(controller.getClass(), attributes);
         return attributes;
     }
-
-
 }

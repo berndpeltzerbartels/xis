@@ -1,4 +1,3 @@
-
 /**
  * @property {array<string>} pageIds
  * @property {array<string>} widgetIds
@@ -18,20 +17,24 @@ class ClientConfig {
     }
 
     /**
+     * Returns the remote host for the given page (normalised path), or undefined if local.
      * @public
-     * @param {string} id
-     * @returns {string}
+     * @param {string} normalizedPath
+     * @returns {string|undefined}
      */
-    getPageHost(id) {
-        return this.pageAttributes[id];
+    getPageHost(normalizedPath) {
+        const attrs = this.pageAttributes[normalizedPath];
+        return attrs ? attrs.host : undefined;
     }
 
     /**
+     * Returns the remote host for the given widget-id, or undefined if local.
      * @public
-     * @param {string} id
-     * @returns {string}
+     * @param {string} widgetId
+     * @returns {string|undefined}
      */
-    getWidgetHost(id) {
-        return this.hostsByWidgetId[id].getHost();
+    getWidgetHost(widgetId) {
+        const attrs = this.widgetAttributes[widgetId];
+        return attrs ? attrs.host : undefined;
     }
 }

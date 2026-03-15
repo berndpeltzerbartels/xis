@@ -71,3 +71,5 @@ include 'xis-websocket'
 include 'xis-boot-websocket'
 include 'xis-spring-websocket'
 include 'xis-websocket-api'
+
+include 'xis-distributed'

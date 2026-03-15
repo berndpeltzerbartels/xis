@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
-class ApplicationProperties {
+public class ApplicationProperties {
 
     private static final Map<String, String> PROPERTIES;
 
