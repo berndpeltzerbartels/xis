@@ -1,4 +1,4 @@
-package test.page.ws;
+package test.page.refresh;
 
 import one.xis.ModelData;
 import one.xis.Page;

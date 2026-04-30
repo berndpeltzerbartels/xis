@@ -1,4 +1,4 @@
-package test.page.ws;
+package test.page.refresh;
 
 import lombok.RequiredArgsConstructor;
 import one.xis.context.Component;
