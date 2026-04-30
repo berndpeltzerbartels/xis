@@ -20,6 +20,6 @@ class PathVariablePageTest {
     @Test
     void test() {
         var client = testContext.openPage("/url-parameter/bla/123.html");
-        assertThat(client.getDocument().getElementById("client").getInnerText()).isEqualTo("bla123");
+        assertThat(client.getDocument().getElementById("result").getInnerText()).isEqualTo("bla123");
     }
 }
