@@ -11,27 +11,27 @@ import one.xis.server.RefreshEventPublisher;
  */
 public class TestRefreshEventPublisher implements RefreshEventPublisher, PushEventSimulatorAware {
 
-    private PushEventSimulator simulator;
+    private final java.util.List<PushEventSimulator> simulators = new java.util.ArrayList<>();
 
     @Override
     public void setPushEventSimulator(PushEventSimulator simulator) {
-        this.simulator = simulator;
+        simulators.add(simulator);
     }
 
     @Override
     public void publish(RefreshEvent refreshEvent) {
         assertSimulatorPresent();
-        simulator.simulatePushEvent(refreshEvent.getEventKey());
+        simulators.forEach(simulator -> simulator.simulatePushEvent(refreshEvent.getEventKey()));
     }
 
     @Override
     public void publishToAll(String eventKey) {
         assertSimulatorPresent();
-        simulator.simulatePushEvent(eventKey);
+        simulators.forEach(simulator -> simulator.simulatePushEvent(eventKey));
     }
 
     private void assertSimulatorPresent() {
-        if (simulator == null) {
+        if (simulators.isEmpty()) {
             throw new IllegalStateException(
                     "TestRefreshEventPublisher: PushEventSimulator not set. " +
                             "Build the IntegrationTestContext before publishing refresh events."

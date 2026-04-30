@@ -70,6 +70,22 @@ class RefreshEventTest {
                 .isEqualTo("0");
     }
 
+    @Test
+    @DisplayName("Refresh events update all open clients of the same context")
+    void refreshEventsUpdateAllOpenClients() {
+        var clientA = context.openPage(MatchPage.class);
+        var clientB = context.openPage(MatchPage.class);
+
+        var matchService = context.getSingleton(MatchService.class);
+        matchService.homeGoal();
+
+        assertThat(clientA.getDocument().getElementById("home-goals").getInnerText())
+                .isEqualTo("1");
+
+        assertThat(clientB.getDocument().getElementById("home-goals").getInnerText())
+                .isEqualTo("1");
+    }
+
 
     @Test
     @DisplayName("Multiple goals accumulate correctly via refresh events")

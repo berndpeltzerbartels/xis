@@ -1,38 +1,12 @@
 package one.xis.context;
 
-import lombok.Data;
-import one.xis.test.dom.Document;
-import one.xis.test.dom.Window;
-import one.xis.test.js.LocalStorage;
-import one.xis.test.js.SessionStorage;
+/**
+ * @deprecated Use {@link TestClient}. This alias remains for compatibility.
+ */
+@Deprecated
+public class OpenPageResult extends TestClient {
 
-@Data
-public class OpenPageResult {
-    private final AppContext appContext;
-    private final IntegrationTestEnvironment testEnvironment;
-
-    public Document getDocument() {
-        return testEnvironment.getHtmlObjects().getDocument();
+    public OpenPageResult(AppContext appContext, IntegrationTestEnvironment testEnvironment) {
+        super(appContext, testEnvironment);
     }
-
-    public LocalStorage getLocalStorage() {
-        return testEnvironment.getHtmlObjects().getLocalStorage();
-    }
-
-    public SessionStorage getSessionStorage() {
-        return testEnvironment.getHtmlObjects().getSessionStorage();
-    }
-
-    public Window getWindow() {
-        return testEnvironment.getHtmlObjects().getWindow();
-    }
-
-    /*
-    public Console getConsole() {
-        return testEnvironment.getHTML_OBJECTS().getConsole();
-    }
-
-     */
 }
-
-
