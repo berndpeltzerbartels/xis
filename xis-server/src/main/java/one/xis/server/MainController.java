@@ -2,6 +2,8 @@ package one.xis.server;
 
 
 import lombok.RequiredArgsConstructor;
+import one.xis.auth.token.TokenStatus;
+import one.xis.auth.token.UserSecurityService;
 import one.xis.UserContext;
 import one.xis.http.*;
 import one.xis.resource.Resource;
@@ -19,6 +21,33 @@ import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 public class MainController {
 
     private final FrontendService frontendService;
+    private final SseEndpoint sseEndpoint;
+    private final UserSecurityService userSecurityService;
+
+    @Get("/xis/events")
+    public void subscribeToEvents(@RequestHeader("X-Client-Id") String clientIdHeader,
+                                  @UrlParameter("clientId") String clientIdParameter,
+                                  @CookieValue("access_token") String accessToken,
+                                  @CookieValue("refresh_token") String renewToken,
+                                  HttpRequest request,
+                                  HttpResponse response) {
+        String clientId = clientIdHeader;
+        if (clientId == null || clientId.isBlank()) {
+            clientId = clientIdParameter;
+        }
+        if (clientId == null || clientId.isBlank()) {
+            response.setStatusCode(400);
+            response.setBody("Missing clientId");
+            return;
+        }
+        String userId = resolveUserId(accessToken, renewToken);
+        sseEndpoint.open(clientId, userId, request, response);
+    }
+
+    private String resolveUserId(String accessToken, String renewToken) {
+        var securityAttributes = new SecurityAttributesImpl(new TokenStatus(accessToken, renewToken), userSecurityService);
+        return securityAttributes.getUserId();
+    }
 
     @Get("/xis/config")
     public ResponseEntity<?> getComponentConfig() {

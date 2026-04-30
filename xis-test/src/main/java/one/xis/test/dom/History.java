@@ -26,7 +26,7 @@ public class History {
     private int currentIndex = -1;
 
     public void pushState(Map<String, Object> state, String title, String id) {
-        // Entferne alle „zukünftigen“ Einträge
+        // Remove all future entries
         while (entries.size() > currentIndex + 1) {
             entries.remove(entries.size() - 1);
         }
@@ -42,7 +42,7 @@ public class History {
         if (currentIndex >= 0) {
             entries.set(currentIndex, new Entry(state, title, id));
         } else {
-            pushState(state, title, id); // keine aktuelle → als push behandeln
+            pushState(state, title, id); // no current entry -> treat as push
         }
     }
 

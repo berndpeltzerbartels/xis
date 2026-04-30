@@ -2,11 +2,11 @@ package test.page.ws;
 
 import lombok.RequiredArgsConstructor;
 import one.xis.context.Component;
-import one.xis.ws.RefreshEventPublisher;
+import one.xis.server.RefreshEventPublisher;
 
 /**
  * Simulates a backend service that updates the score and notifies
- * all clients via a WebSocket push event.
+ * all clients via a refresh event.
  */
 @Component
 @RequiredArgsConstructor

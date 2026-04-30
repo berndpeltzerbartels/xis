@@ -47,7 +47,7 @@ public abstract class NodeImpl extends GraalVMProxy implements Node {
             parentNode.updateChildNodes();
         }
 
-        // 2) jsoup-Back­ing (falls vorhanden) mitziehen
+        // 2) keep the jsoup backing node in sync when present
         if (jsoupNode != null) {
             jsoupNode.remove(); // jsoup entfernt sich selbst aus dem Parent
         }
@@ -75,9 +75,9 @@ public abstract class NodeImpl extends GraalVMProxy implements Node {
         nodeImpl.setNextSibling(null);
         updateChildNodes();
 
-        // 2) jsoup-Back­ing (falls vorhanden) synchronisieren
+        // 2) synchronize the jsoup backing node when present
         if (this.jsoupNode instanceof org.jsoup.nodes.Element parentJsoup && nodeImpl.jsoupNode != null) {
-            // jsoup: an Parent anhängen (Node wird ggf. automatisch aus altem Parent entfernt)
+            // jsoup: attach to parent, removing it from the old parent if needed
             parentJsoup.appendChild(nodeImpl.jsoupNode);
         }
     }
@@ -159,7 +159,7 @@ public abstract class NodeImpl extends GraalVMProxy implements Node {
     }
 
     /**
-     * Unterklassen rendern ihre HTML-Repräsentation (Fallback, wenn kein jsoup vorhanden ist).
+     * Subclasses render their HTML representation when no jsoup backing node exists.
      */
     protected abstract void evaluateContent(StringBuilder builder, int indent);
 

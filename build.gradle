@@ -47,6 +47,7 @@ subprojects {
     tasks.withType(JavaCompile) {
         sourceCompatibility = rootProject.ext.javaVersion.toString()
         targetCompatibility = rootProject.ext.javaVersion.toString()
+        options.encoding = "UTF-8"
     }
 
 }
@@ -88,6 +89,7 @@ task createReleaseZip(type: JavaExec) {
 
 test {
     useJUnitPlatform()
+    systemProperty "file.encoding", "UTF-8"
     testLogging {
         events "passed", "skipped", "failed"
     }

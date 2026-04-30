@@ -9,6 +9,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 class IntegrationTestContextTest {
 
     @Test
+    @DisplayName("Building the integration test context works for a simple page")
+    void buildContext() {
+        var context = IntegrationTestContext.builder()
+                .withSingleton(TitlePage.class)
+                .build();
+
+        assertThat(context).isNotNull();
+    }
+
+    @Test
     @DisplayName("Reusing compiled script does not throw an exception")
     void openPage() {
         var context = IntegrationTestContext.builder()

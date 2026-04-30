@@ -24,7 +24,7 @@ class JSFileSorter {
 
         var rv = new ArrayList<>(functionFiles);
 
-        // 2. Übrige Dateien behandeln wie bisher (Klassenabhängigkeiten)
+        // 2. Remaining files are handled as before (class dependencies)
         var classFiles = files.stream()
                 .filter(f -> !functionFiles.contains(f))
                 .collect(Collectors.toSet());

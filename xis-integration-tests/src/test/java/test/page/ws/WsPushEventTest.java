@@ -1,7 +1,7 @@
 package test.page.ws;
 
 import one.xis.context.IntegrationTestContext;
-import one.xis.ws.TestRefreshEventPublisher;
+import one.xis.context.TestRefreshEventPublisher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -9,18 +9,13 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests WebSocket push-event support in integration tests.
+ * Tests refresh-event support in integration tests.
  * <p>
  * Two variants are demonstrated:
- * 1. simulatePushEvent() – directly from IntegrationTestContext
- * 2. TestRefreshEventPublisher injected into a service – the push event
+ * 1. simulatePushEvent() - directly from IntegrationTestContext
+ * 2. TestRefreshEventPublisher injected into a service - the push event
  * arrives as a side-effect of calling the service method, exactly as
  * it would in production.
- * <p>
- * Required dependencies (testImplementation):
- * - xis-test
- * - xis-websocket       (provides TestRefreshEventPublisher, WsTestScriptExtension)
- * - xis-websocket-api   (provides RefreshEventPublisher, RefreshEvent)
  */
 class WsPushEventTest {
 
@@ -46,7 +41,7 @@ class WsPushEventTest {
         assertThat(result.getDocument().getElementById("match-title").getInnerText())
                 .isEqualTo("Home FC vs. Away United");
 
-        // Simulate a server push – MatchPage has @RefreshOnUpdateEvents("score-updated")
+        // Simulate a server push - MatchPage has @RefreshOnUpdateEvents("score-updated")
         var updated = context.simulatePushEvent("score-updated");
 
         assertThat(updated.getDocument().getElementById("match-title").getInnerText())
@@ -65,8 +60,8 @@ class WsPushEventTest {
                 .isEqualTo("0");
 
         // Directly manipulate the ScoreBoard state and push
-        context.getSingleton(MatchService.class).homeGoal();
-        // var updated = context.simulatePushEvent("score-updated");
+        context.getSingleton(ScoreBoard.class).setScore(1, 0);
+        context.simulatePushEvent("score-updated");
 
         assertThat(result.getDocument().getElementById("home-goals").getInnerText())
                 .isEqualTo("1");
@@ -103,7 +98,7 @@ class WsPushEventTest {
         // "other-event" is not in @RefreshOnUpdateEvents("score-updated")
         context.simulatePushEvent("other-event");
 
-        // Score should still show 0:0 – widget was not refreshed
+        // Score should still show 0:0 - widget was not refreshed
         assertThat(result.getDocument().getElementById("home-goals").getInnerText())
                 .isEqualTo("0");
 

@@ -22,9 +22,9 @@ public class ClientConfig {
     private final Collection<String> includeIds;
     /**
      * TTL in seconds for buffered push events on the server.
-     * The WebSocket client uses this to decide whether to reload the page
-     * after a reconnect (events may have been discarded server-side).
-     * 0 means WebSocket push is not configured.
+     * The browser runtime may use this to decide whether to reload the page
+     * after a disconnected period when buffered refresh events may have expired.
+     * 0 means no buffering is configured.
      */
     private final long pendingEventTtlSeconds;
     /**

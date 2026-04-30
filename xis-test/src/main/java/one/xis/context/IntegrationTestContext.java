@@ -40,19 +40,14 @@ public class IntegrationTestContext {
 
     /**
      * After the JS context is ready, wires all {@link PushEventSimulatorAware} singletons
-     * (e.g. TestRefreshEventPublisher from xis-websocket) with the active
-     * {@link PushEventSimulator} extension (e.g. WsTestScriptExtension).
+     * with a transport-neutral push-event simulator backed by the active JS test runtime.
      * Called by the Builder after reset().
      */
     void wirePushEventSimulator() {
-        var simulator = environment.getIntegrationTestScript().getExtensions().stream()
-                .filter(ext -> ext instanceof PushEventSimulator)
-                .map(ext -> (PushEventSimulator) ext)
-                .findFirst()
-                .orElse(null);
-        if (simulator == null) {
-            return;
-        }
+        PushEventSimulator simulator = updateEventKey -> environment.getIntegrationTestScript()
+                .getIntegrationTestFunctions()
+                .getSimulatePushEvent()
+                .execute(updateEventKey);
         appContext.getSingletons().stream()
                 .filter(s -> s instanceof PushEventSimulatorAware)
                 .map(s -> (PushEventSimulatorAware) s)
@@ -82,9 +77,7 @@ public class IntegrationTestContext {
     }
 
     /**
-     * Simulates a server-push update-event arriving via WebSocket.
-     * Requires xis-websocket on the test classpath – if not present, the JS function
-     * will throw an error explaining what is missing.
+     * Simulates a server-push update-event.
      *
      * <p>Returns an {@link OpenPageResult} so the test can immediately inspect the
      * updated DOM state after the push event has been processed.

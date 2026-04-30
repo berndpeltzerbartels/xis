@@ -8,15 +8,16 @@ function reset() {
 }
 
 /**
- * Simulates a server-push update-event arriving via WebSocket.
- * Requires WebsocketConnectorMock to be present (i.e. xis-websocket on classpath).
+ * Simulates a server-push update-event in tests.
+ * Requires a test connector mock to be present on the classpath.
  * @param {string} updateEventKey
  */
 function simulatePushEvent(updateEventKey) {
-    if (!app.websocketConnector || typeof app.websocketConnector.simulatePushEvent !== 'function') {
-        throw new Error('simulatePushEvent requires xis-websocket on the test classpath');
+    const connector = app.eventConnector;
+    if (!connector || typeof connector.simulatePushEvent !== 'function') {
+        throw new Error('simulatePushEvent requires a push-event test connector on the test classpath');
     }
-    return app.websocketConnector.simulatePushEvent(updateEventKey);
+    return connector.simulatePushEvent(updateEventKey);
 }
 
 function readHeadChildArray(html) {
@@ -41,19 +42,4 @@ function readBodyChildArray(html) {
         }
     }
     return arr;
-}
-
-/**
- * Check if WebSocket connection is available
- * @returns {Promise<boolean>}
- */
-function checkWebSocketAvailable() {
-    return new Promise((resolve) => {
-        if (typeof WebsocketConnectorMock === 'undefined') {
-            resolve(true);
-
-        } else {
-
-        }
-    });
 }

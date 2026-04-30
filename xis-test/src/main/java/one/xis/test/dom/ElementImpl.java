@@ -238,7 +238,7 @@ public class ElementImpl extends NodeImpl implements Element {
             return el;
         }
         // Andere Knotentypen (Kommentare etc.) optional: hier ignorieren
-        return new TextNodeImpl(""); // oder: return null und beim Aufrufer überspringen
+        return new TextNodeImpl(""); // or return null and skip it in the caller
     }
 
     @Override
@@ -363,7 +363,7 @@ public class ElementImpl extends NodeImpl implements Element {
         try {
             String html = this.asString();
 
-            // ⬇️ WICHTIG: Parser nach Root-Typ wählen
+            // IMPORTANT: choose parser based on root type
             org.jsoup.nodes.Document doc;
             if ("html".equalsIgnoreCase(this.getLocalName())) {
                 // Volles Dokument parsen (head/body bleiben korrekt erhalten)

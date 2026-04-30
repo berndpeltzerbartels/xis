@@ -1,3 +1,60 @@
+class SseConnector {
+
+    constructor(clientId) {
+        this.clientId = clientId;
+        this.eventSource = null;
+        this.connected = false;
+        this.url = null;
+    }
+
+    connect(url) {
+        this.url = appendQueryParameters(url, { clientId: this.clientId });
+        if (this.eventSource) {
+            this.close();
+        }
+        this.eventSource = new EventSource(this.url);
+        this.eventSource.onopen = () => {
+            this.connected = true;
+            console.debug('[SSE] connected to ' + this.url);
+        };
+        this.eventSource.onmessage = (event) => {
+            this.handleMessage(event.data);
+        };
+        this.eventSource.onerror = () => {
+            this.connected = false;
+            console.warn('[SSE] connection error for ' + this.url);
+        };
+        return this;
+    }
+
+    close() {
+        if (this.eventSource) {
+            this.eventSource.close();
+            this.eventSource = null;
+        }
+        this.connected = false;
+    }
+
+    isConnected() {
+        return this.connected && this.eventSource !== null;
+    }
+
+    handleMessage(data) {
+        const eventKey = typeof data === 'string' ? data.trim() : '';
+        if (!eventKey) {
+            return;
+        }
+        console.debug('[SSE] update-event: key=' + eventKey);
+        app.pageController.handleUpdateEvents([eventKey])
+            .then(pageUpdated => {
+                if (!pageUpdated) {
+                    app.widgetContainers.handleUpdateEvents([eventKey]);
+                }
+            })
+            .catch(e => reportError('[SSE] error handling update-event key=' + eventKey, e));
+    }
+}
+
 class Application {
 
     constructor() {
@@ -12,7 +69,7 @@ class Application {
         this.httpConnector = new HttpConnector(this.clientId);
         this.httpClient = new HttpClient(this.httpConnector, this.clientId);
         this.httpClient.clientId = this.clientId;
-        this.websocketConnector = this.createWebsocketConnectorIfPresent(this.clientId);
+        this.eventConnector = this.createEventConnectorIfSupported(this.clientId);
         this.client = this.httpClient;
         this.domAccessor = new DomAccessor();
         this.pages = new Pages(this.httpClient);
@@ -46,7 +103,12 @@ class Application {
         this.eventPublisher.publish(EventType.APP_INSTANCE_CREATED, this);
         this.httpClient.loadConfig()
             .then(config => this.pageController.setConfig(config))
-            .then(config => { if (this.websocketConnector) { this.websocketConnector.setPendingEventTtlMs(config.pendingEventTtlSeconds * 1000); } return config; })
+            .then(config => {
+                if (this.eventConnector && typeof this.eventConnector.setPendingEventTtlMs === 'function') {
+                    this.eventConnector.setPendingEventTtlMs(config.pendingEventTtlSeconds * 1000);
+                }
+                return config;
+            })
             .then(config => this.widgetContainers.setConfig(config))
             .then(config => this.includes.loadIncludes(config))
             .then(config => this.widgets.loadWidgets(config))
@@ -117,13 +179,21 @@ class Application {
         return true;
     }
 
-    createWebsocketConnectorIfPresent(clientId) {
-        if (typeof WebsocketConnector !== 'undefined' &&  typeof WebSocket !== 'undefined') {
-            var connector = new WebsocketConnector(clientId);
-            connector.connect("ws://localhost:8080/ws"); // TODO
+    createEventConnectorIfSupported(clientId) {
+        if (typeof EventSource !== 'undefined') {
+            var connector = new SseConnector(clientId);
+            connector.connect(this.sseEndpointUrl());
             return connector;
         }
         return null;
+    }
+
+    sseEndpointUrl() {
+        if (window.location && window.location.origin) {
+            return window.location.origin + "/xis/events";
+        }
+        const protocol = window.location.protocol === 'https:' ? 'https://' : 'http://';
+        return protocol + window.location.host + "/xis/events";
     }
 
     clientId() {
