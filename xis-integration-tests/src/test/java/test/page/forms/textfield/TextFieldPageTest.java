@@ -27,17 +27,17 @@ class TextFieldPageTest {
         var initialModel = new TextFieldFormModel();
         when(service.getTextFieldFormModel()).thenReturn(initialModel);
 
-        var result = context.openPage(TextFieldPage.class);
-        var textField = result.getDocument().getInputElementById("theTextField");
-        var submitButton = result.getDocument().getElementById("submitButton");
+        var client = context.openPage(TextFieldPage.class);
+        var textField = client.getDocument().getInputElementById("theTextField");
+        var submitButton = client.getDocument().getElementById("submitButton");
 
         textField.setValue(""); // leer lassen
         submitButton.click();
 
         // Feldspezifische Nachricht aus dem passenden <div> unter dem Textfeld
-        var liError = result.getDocument().getElementByTagName("li");
+        var liError = client.getDocument().getElementByTagName("li");
         assertThat(liError.getInnerHTML()).contains("Benutzerdefinierte globale Pflichtfeldmeldung");
-        assertThat(result.getDocument().getElementById("fieldMessage").getInnerText()).isEqualTo("Benutzerdefinierte Pflichtfeldmeldung");
+        assertThat(client.getDocument().getElementById("fieldMessage").getInnerText()).isEqualTo("Benutzerdefinierte Pflichtfeldmeldung");
     }
 
     @Test
@@ -45,15 +45,15 @@ class TextFieldPageTest {
         var initialModel = new TextFieldFormModel();
         when(service.getTextFieldFormModel()).thenReturn(initialModel);
 
-        var result = context.openPage(TextFieldPage.class);
-        var textField = result.getDocument().getInputElementById("theTextField");
-        var submitButton = result.getDocument().getElementById("submitButton");
+        var client = context.openPage(TextFieldPage.class);
+        var textField = client.getDocument().getInputElementById("theTextField");
+        var submitButton = client.getDocument().getElementById("submitButton");
 
         textField.setValue("!@#");
         submitButton.click();
 
         // Feldspezifische Nachricht aus dem passenden <div> unter dem Textfeld
-        var fieldMessage = result.getDocument()
+        var fieldMessage = client.getDocument()
                 .getElementByTagName("xis:message")
                 .getTextContent();
 
@@ -65,14 +65,14 @@ class TextFieldPageTest {
         var initialModel = new TextFieldFormModel();
         when(service.getTextFieldFormModel()).thenReturn(initialModel);
 
-        var result = context.openPage(TextFieldPage.class);
-        var textField = result.getDocument().getInputElementById("theTextField");
-        var submitButton = result.getDocument().getElementById("submitButton");
+        var client = context.openPage(TextFieldPage.class);
+        var textField = client.getDocument().getInputElementById("theTextField");
+        var submitButton = client.getDocument().getElementById("submitButton");
         textField.setValue(""); // leer lassen
 
         submitButton.click();
 
-        var liError = result.getDocument().getElementByTagName("li");
+        var liError = client.getDocument().getElementByTagName("li");
         assertThat(liError.getInnerHTML()).contains("Benutzerdefinierte globale Pflichtfeldmeldung");
     }
 }

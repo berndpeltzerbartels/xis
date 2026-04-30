@@ -22,8 +22,8 @@ class ForeachAttributePageTest {
     @Test
     @DisplayName("foreach-attribute with simple data")
     void test() {
-        var result = testContext.openPage("/foreachAttribute.html");
-        var items = result.getDocument().getElementsByClass("item")
+        var client = testContext.openPage("/foreachAttribute.html");
+        var items = client.getDocument().getElementsByClass("item")
                 .stream().map(Element::getInnerText).toList();
 
         assertThat(items).containsExactly("Item1", "Item2", "Item3");

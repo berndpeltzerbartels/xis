@@ -28,38 +28,38 @@ class WidgetMetadataTest {
 
     @Test
     void widgetMetadataIsExtractedFromAnnotation() {
-        var pageResult = testContext.openPage(WidgetMetadataPage.class);
+        var client = testContext.openPage(WidgetMetadataPage.class);
         
         // Verify that widget content was loaded via default-widget
-        var messageElement = pageResult.getDocument().getElementById("message");
+        var messageElement = client.getDocument().getElementById("message");
         assertThat(messageElement).isNotNull();
         assertThat(messageElement.getTextContent()).isEqualTo("Widget with metadata");
         
         // Verify document title was updated with widget's annotatedTitle
-        assertThat(pageResult.getDocument().getTitle()).isEqualTo("Custom Widget Title");
+        assertThat(client.getDocument().getTitle()).isEqualTo("Custom Widget Title");
     }
 
     @Test
     void widgetMetadataChangesAfterAction() {
-        var pageResult = testContext.openPage(WidgetMetadataPage.class);
+        var client = testContext.openPage(WidgetMetadataPage.class);
         
         // Verify initial widget is loaded
-        var messageElement = pageResult.getDocument().getElementById("message");
+        var messageElement = client.getDocument().getElementById("message");
         assertThat(messageElement).isNotNull();
-        assertThat(pageResult.getDocument().getTitle()).isEqualTo("Custom Widget Title");
+        assertThat(client.getDocument().getTitle()).isEqualTo("Custom Widget Title");
         
         // Click button to load second widget
-        var loadSecondButton = pageResult.getDocument().getElementById("loadSecond");
+        var loadSecondButton = client.getDocument().getElementById("loadSecond");
         assertThat(loadSecondButton).isNotNull();
         loadSecondButton.click();
         
         // Verify second widget is loaded
-        var secondMessageElement = pageResult.getDocument().getElementById("secondMessage");
+        var secondMessageElement = client.getDocument().getElementById("secondMessage");
         assertThat(secondMessageElement).isNotNull();
         assertThat(secondMessageElement.getTextContent()).isEqualTo("Second widget loaded");
         
         // Verify metadata was updated from second widget's annotation
-        assertThat(pageResult.getDocument().getTitle()).isEqualTo("Second Widget Title");
+        assertThat(client.getDocument().getTitle()).isEqualTo("Second Widget Title");
     }
 
     @Test
@@ -75,22 +75,22 @@ class WidgetMetadataTest {
         // Expected: When DeepLinkWidget is loaded via action, it should go to containerB
         //           (annotation wins), not containerA (default-widget)
         
-        var pageResult = deepLinkContext.openPage(DeepLinkingPage.class);
+        var client = deepLinkContext.openPage(DeepLinkingPage.class);
         
         // Container A should have WidgetMetadata (from default-widget attribute)
-        var containerA = pageResult.getDocument().getElementById("containerA");
+        var containerA = client.getDocument().getElementById("containerA");
         assertThat(containerA).isNotNull();
         var messageInA = containerA.querySelector("#message");
         assertThat(messageInA).isNotNull();
         assertThat(messageInA.getTextContent()).isEqualTo("Widget with metadata");
         
         // Container B should be empty initially
-        var containerB = pageResult.getDocument().getElementById("containerB");
+        var containerB = client.getDocument().getElementById("containerB");
         assertThat(containerB).isNotNull();
         assertThat(containerB.getTextContent().trim()).isEmpty();
         
         // Click button to load DeepLinkWidget
-        var loadDeepLinkButton = pageResult.getDocument().getElementById("loadDeepLink");
+        var loadDeepLinkButton = client.getDocument().getElementById("loadDeepLink");
         assertThat(loadDeepLinkButton).isNotNull();
         loadDeepLinkButton.click();
         
@@ -105,6 +105,6 @@ class WidgetMetadataTest {
         assertThat(messageInA.getTextContent()).isEqualTo("Widget with metadata");
         
         // Verify document title was updated from DeepLinkWidget annotation
-        assertThat(pageResult.getDocument().getTitle()).isEqualTo("Deep Link Title");
+        assertThat(client.getDocument().getTitle()).isEqualTo("Deep Link Title");
     }
 }

@@ -27,16 +27,16 @@ class CheckboxListPageTest {
         var initialModel = new CheckboxListFormModel();
         service.setModel(initialModel);
 
-        var result = context.openPage(CheckboxListPage.class);
-        var checkbox1 = result.getDocument().getInputElementById("checkbox-1");
-        var checkbox2 = result.getDocument().getInputElementById("checkbox-2");
+        var client = context.openPage(CheckboxListPage.class);
+        var checkbox1 = client.getDocument().getInputElementById("checkbox-1");
+        var checkbox2 = client.getDocument().getInputElementById("checkbox-2");
 
         // User checks the first box and submits
         checkbox1.click();
         assertThat(checkbox1.isChecked()).isTrue();
         assertThat(checkbox2.isChecked()).isFalse();
 
-        result.getDocument().getElementById("submitButton").click();
+        client.getDocument().getElementById("submitButton").click();
 
         // Verify the state in the service
         var savedModel = service.getModel();
@@ -44,8 +44,8 @@ class CheckboxListPageTest {
         assertThat(savedModel.getValues().get(0)).isEqualTo(1);
 
         // Verify the re-rendered page state
-        var newCheckbox1 = result.getDocument().getInputElementById("checkbox-1");
-        var newCheckbox2 = result.getDocument().getInputElementById("checkbox-2");
+        var newCheckbox1 = client.getDocument().getInputElementById("checkbox-1");
+        var newCheckbox2 = client.getDocument().getInputElementById("checkbox-2");
         assertThat(newCheckbox1.isChecked()).isTrue();
         assertThat(newCheckbox2.isChecked()).isFalse();
     }
@@ -57,9 +57,9 @@ class CheckboxListPageTest {
         var initialModel = new CheckboxListFormModel();
         service.setModel(initialModel);
 
-        var result = context.openPage(CheckboxListPage.class);
-        var checkbox1 = result.getDocument().getInputElementById("checkbox-1");
-        var checkbox2 = result.getDocument().getInputElementById("checkbox-2");
+        var client = context.openPage(CheckboxListPage.class);
+        var checkbox1 = client.getDocument().getInputElementById("checkbox-1");
+        var checkbox2 = client.getDocument().getInputElementById("checkbox-2");
 
         // User checks the first box and submits
         checkbox1.click();
@@ -67,7 +67,7 @@ class CheckboxListPageTest {
         assertThat(checkbox1.isChecked()).isTrue();
         assertThat(checkbox2.isChecked()).isTrue();
 
-        result.getDocument().getElementById("submitButton").click();
+        client.getDocument().getElementById("submitButton").click();
 
         // Verify the state in the service
         var savedModel = service.getModel();
@@ -76,8 +76,8 @@ class CheckboxListPageTest {
         assertThat(savedModel.getValues().get(1)).isEqualTo(2);
 
         // Verify the re-rendered page state
-        var newCheckbox1 = result.getDocument().getInputElementById("checkbox-1");
-        var newCheckbox2 = result.getDocument().getInputElementById("checkbox-2");
+        var newCheckbox1 = client.getDocument().getInputElementById("checkbox-1");
+        var newCheckbox2 = client.getDocument().getInputElementById("checkbox-2");
         assertThat(newCheckbox1.isChecked()).isTrue();
         assertThat(newCheckbox2.isChecked()).isTrue();
     }
@@ -88,8 +88,8 @@ class CheckboxListPageTest {
         var initialModel = new CheckboxListFormModel();
         service.setModel(initialModel);
 
-        var result = context.openPage(CheckboxListPage.class);
-        result.getDocument().getElementById("submitButton").click();
+        var client = context.openPage(CheckboxListPage.class);
+        client.getDocument().getElementById("submitButton").click();
 
         // Verify the state in the service
         var savedModel = service.getModel();

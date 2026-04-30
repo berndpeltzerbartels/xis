@@ -22,7 +22,7 @@ class SharedValueOrderTest {
 
     @Test
     void testExecutionOrder() {
-        var result = testContext.openPage("/requestScopeOrder.html");
+        var client = testContext.openPage("/requestScopeOrder.html");
         var calls = service.getRecorder().getCalls();
         // check the first three calls are a, b, c, this order is mandatory
         assertThat(calls).containsSubsequence("a", "b", "c");

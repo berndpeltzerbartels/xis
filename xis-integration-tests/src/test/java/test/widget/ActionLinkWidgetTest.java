@@ -32,9 +32,9 @@ class ActionLinkWidgetTest {
 
     @Test
     void action1() {
-        var result = testContext.openPage(WidgetPage.class);
+        var client = testContext.openPage(WidgetPage.class);
 
-        result.getDocument().getElementById("action-link1").click();
+        client.getDocument().getElementById("action-link1").click();
         // Model data is loaded once initially, and once after action
         verify(service, times(2)).getData();
         verify(service, times(1)).action("value1");
@@ -43,8 +43,8 @@ class ActionLinkWidgetTest {
 
     @Test
     void action2() {
-        var result = testContext.openPage(WidgetPage.class);
-        result.getDocument().getElementById("action-link2").click();
+        var client = testContext.openPage(WidgetPage.class);
+        client.getDocument().getElementById("action-link2").click();
 
         verify(service, times(2)).getData();
         verify(service, times(1)).action(new Object[]{101, "bla"});
@@ -53,23 +53,23 @@ class ActionLinkWidgetTest {
     @Test
     @DisplayName("Action is a variable and link of a widget is clicked, but the result demands displaying a new page")
     void action3() {
-        var result = testContext.openPage(WidgetPage.class);
-        result.getDocument().getElementById("action-link3").click(); // "action-link3"is set by model variable "action3"
+        var client = testContext.openPage(WidgetPage.class);
+        client.getDocument().getElementById("action-link3").click(); // "action-link3"is set by model variable "action3"
 
 
         verify(service, times(1)).getData(); // once, because a new page was loaded after action
         // redirect to index
-        assertThat(result.getDocument().getElementByTagName("title").getInnerText()).isEqualTo("Index");
+        assertThat(client.getDocument().getElementByTagName("title").getInnerText()).isEqualTo("Index");
         assertThat(testContext.getSingleton(IndexPage.class).getInvocations()).isEqualTo(1); // model from next page has to be loaded;
     }
 
     @Test
     @DisplayName("Action demands displaying another widget")
     void action4() {
-        var result = testContext.openPage(WidgetPage.class);
-        result.getDocument().getElementById("action-link4").click(); // "action-link3"is set by model variable "action3"
+        var client = testContext.openPage(WidgetPage.class);
+        client.getDocument().getElementById("action-link4").click(); // "action-link3"is set by model variable "action3"
 
-        assertThat(result.getDocument().getElementById("greeting").getInnerText()).isEqualTo("Huhu !");
+        assertThat(client.getDocument().getElementById("greeting").getInnerText()).isEqualTo("Huhu !");
 
     }
 }

@@ -22,25 +22,25 @@ class ActionFormWidgetTest {
 
     @Test
     void stayHereAction() {
-        var result = context.openPage(ActionFormPage.class);
-        result.getDocument().getElementById("radio-1").click();
-        result.getDocument().getElementById("submitButton").click();
-        assertThat(result.getDocument().getElementById("submitButton")).isNotNull();
+        var client = context.openPage(ActionFormPage.class);
+        client.getDocument().getElementById("radio-1").click();
+        client.getDocument().getElementById("submitButton").click();
+        assertThat(client.getDocument().getElementById("submitButton")).isNotNull();
     }
 
     @Test
     void anotherWidgetAction() {
-        var result = context.openPage(ActionFormPage.class);
-        result.getDocument().getElementById("radio-2").click();
-        result.getDocument().getElementById("submitButton").click();
-        assertThat(result.getDocument().getTextContent()).contains("Another Widget Content");
+        var client = context.openPage(ActionFormPage.class);
+        client.getDocument().getElementById("radio-2").click();
+        client.getDocument().getElementById("submitButton").click();
+        assertThat(client.getDocument().getTextContent()).contains("Another Widget Content");
     }
 
     @Test
     void anotherPageAction() {
-        var result = context.openPage(ActionFormPage.class);
-        result.getDocument().getElementById("radio-3").click();
-        result.getDocument().getElementById("submitButton").click();
-        assertThat(result.getDocument().getTextContent()).contains("Another Page Content");
+        var client = context.openPage(ActionFormPage.class);
+        client.getDocument().getElementById("radio-3").click();
+        client.getDocument().getElementById("submitButton").click();
+        assertThat(client.getDocument().getTextContent()).contains("Another Page Content");
     }
 }

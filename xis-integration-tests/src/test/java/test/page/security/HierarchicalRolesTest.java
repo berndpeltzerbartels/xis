@@ -31,8 +31,8 @@ public class HierarchicalRolesTest {
                     .withLoggedInUser(userInfo, "passwd")
                     .build();
 
-            var result = testContext.openPage("/hierarchical-roles.html");
-            assertThat(result.getDocument().getElementById("pageData").getInnerText())
+            var client = testContext.openPage("/hierarchical-roles.html");
+            assertThat(client.getDocument().getElementById("pageData").getInnerText())
                     .isEqualTo("Page accessible");
         }
 
@@ -48,8 +48,8 @@ public class HierarchicalRolesTest {
                     .withLoggedInUser(userInfo, "passwd")
                     .build();
 
-            var result = testContext.openPage("/hierarchical-roles.html");
-            assertThat(result.getDocument().getElementById("pageData").getInnerText())
+            var client = testContext.openPage("/hierarchical-roles.html");
+            assertThat(client.getDocument().getElementById("pageData").getInnerText())
                     .isEqualTo("Page accessible");
         }
 
@@ -67,8 +67,8 @@ public class HierarchicalRolesTest {
 
             // User with only ADMIN role cannot access page requiring USER or VERIFIED
             // Should redirect to login page
-            var result = testContext.openPage("/hierarchical-roles.html");
-            assertThat(result.getWindow().location.href).contains("/login.html");
+            var client = testContext.openPage("/hierarchical-roles.html");
+            assertThat(client.getWindow().location.href).contains("/login.html");
         }
     }
 
@@ -88,8 +88,8 @@ public class HierarchicalRolesTest {
                     .withLoggedInUser(userInfo, "passwd")
                     .build();
 
-            var result = testContext.openPage("/hierarchical-roles.html");
-            var button = result.getDocument().getElementById("actionWithControllerRoleOnly");
+            var client = testContext.openPage("/hierarchical-roles.html");
+            var button = client.getDocument().getElementById("actionWithControllerRoleOnly");
 
             // Should not throw
             button.click();
@@ -107,8 +107,8 @@ public class HierarchicalRolesTest {
                     .withLoggedInUser(userInfo, "passwd")
                     .build();
 
-            var result = testContext.openPage("/hierarchical-roles.html");
-            var button = result.getDocument().getElementById("actionWithControllerAndMethodRoles");
+            var client = testContext.openPage("/hierarchical-roles.html");
+            var button = client.getDocument().getElementById("actionWithControllerAndMethodRoles");
 
             // Should not throw
             button.click();
@@ -126,12 +126,12 @@ public class HierarchicalRolesTest {
                     .withLoggedInUser(userInfo, "passwd")
                     .build();
 
-            var result = testContext.openPage("/hierarchical-roles.html");
-            var button = result.getDocument().getElementById("actionWithControllerAndMethodRoles");
+            var client = testContext.openPage("/hierarchical-roles.html");
+            var button = client.getDocument().getElementById("actionWithControllerAndMethodRoles");
 
             // Should redirect to login page when method role is missing
             button.click();
-            assertThat(result.getWindow().location.href).contains("/login.html");
+            assertThat(client.getWindow().location.href).contains("/login.html");
         }
 
         @Test
@@ -146,8 +146,8 @@ public class HierarchicalRolesTest {
                     .withLoggedInUser(userInfo, "passwd")
                     .build();
 
-            var result = testContext.openPage("/hierarchical-roles.html");
-            var button = result.getDocument().getElementById("actionWithControllerAndMethodRoles");
+            var client = testContext.openPage("/hierarchical-roles.html");
+            var button = client.getDocument().getElementById("actionWithControllerAndMethodRoles");
 
             // Should not throw (VERIFIED satisfies controller, MODERATOR satisfies method)
             button.click();
@@ -165,8 +165,8 @@ public class HierarchicalRolesTest {
                     .withLoggedInUser(userInfo, "passwd")
                     .build();
 
-            var result = testContext.openPage("/no-controller-roles.html");
-            var button = result.getDocument().getElementById("actionWithMethodRolesOnly");
+            var client = testContext.openPage("/no-controller-roles.html");
+            var button = client.getDocument().getElementById("actionWithMethodRolesOnly");
 
             // Should not throw - only method role required
             button.click();
@@ -189,8 +189,8 @@ public class HierarchicalRolesTest {
                     .withLoggedInUser(userInfo, "passwd")
                     .build();
 
-            var result = testContext.openPage("/hierarchical-roles.html");
-            var button = result.getDocument().getElementById("actionWithAllThreeLevels");
+            var client = testContext.openPage("/hierarchical-roles.html");
+            var button = client.getDocument().getElementById("actionWithAllThreeLevels");
 
             // Should not throw
             button.click();
@@ -208,12 +208,12 @@ public class HierarchicalRolesTest {
                     .withLoggedInUser(userInfo, "passwd")
                     .build();
 
-            var result = testContext.openPage("/hierarchical-roles.html");
-            var button = result.getDocument().getElementById("actionWithAllThreeLevels");
+            var client = testContext.openPage("/hierarchical-roles.html");
+            var button = client.getDocument().getElementById("actionWithAllThreeLevels");
 
             // Should redirect to login page when DTO role is missing
             button.click();
-            assertThat(result.getWindow().location.href).contains("/login.html");
+            assertThat(client.getWindow().location.href).contains("/login.html");
         }
 
         @Test
@@ -228,8 +228,8 @@ public class HierarchicalRolesTest {
                     .withLoggedInUser(userInfo, "passwd")
                     .build();
 
-            var result = testContext.openPage("/hierarchical-roles.html");
-            var button = result.getDocument().getElementById("actionWithAllThreeLevels");
+            var client = testContext.openPage("/hierarchical-roles.html");
+            var button = client.getDocument().getElementById("actionWithAllThreeLevels");
 
             // Should not throw (VERIFIED + SUPPORT + CONTENT_MANAGER)
             button.click();
@@ -247,8 +247,8 @@ public class HierarchicalRolesTest {
                     .withLoggedInUser(userInfo, "passwd")
                     .build();
 
-            var result = testContext.openPage("/hierarchical-roles.html");
-            var button = result.getDocument().getElementById("actionWithControllerAndDtoRoles");
+            var client = testContext.openPage("/hierarchical-roles.html");
+            var button = client.getDocument().getElementById("actionWithControllerAndDtoRoles");
 
             // Should not throw (USER + DATA_EDITOR, no method role required)
             button.click();
@@ -266,8 +266,8 @@ public class HierarchicalRolesTest {
                     .withLoggedInUser(userInfo, "passwd")
                     .build();
 
-            var result = testContext.openPage("/no-controller-roles.html");
-            var button = result.getDocument().getElementById("actionWithDtoRolesOnly");
+            var client = testContext.openPage("/no-controller-roles.html");
+            var button = client.getDocument().getElementById("actionWithDtoRolesOnly");
 
             // Should not throw - only DTO role required
             button.click();
@@ -290,13 +290,13 @@ public class HierarchicalRolesTest {
                     .withLoggedInUser(userInfo, "passwd")
                     .build();
 
-            var result = testContext.openPage("/hierarchical-roles.html");
+            var client = testContext.openPage("/hierarchical-roles.html");
 
             // All actions should succeed
-            result.getDocument().getElementById("actionWithControllerRoleOnly").click();
-            result.getDocument().getElementById("actionWithControllerAndMethodRoles").click();
-            result.getDocument().getElementById("actionWithAllThreeLevels").click();
-            result.getDocument().getElementById("actionWithControllerAndDtoRoles").click();
+            client.getDocument().getElementById("actionWithControllerRoleOnly").click();
+            client.getDocument().getElementById("actionWithControllerAndMethodRoles").click();
+            client.getDocument().getElementById("actionWithAllThreeLevels").click();
+            client.getDocument().getElementById("actionWithControllerAndDtoRoles").click();
         }
 
         @Test

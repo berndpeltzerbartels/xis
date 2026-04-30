@@ -59,8 +59,8 @@ class CheckboxCompatibilityTest {
 
         @Test
         void testCheckboxCheckedWhenValueIsTrue() {
-            var result = context.openPage(CheckboxPage.class);
-            var checkbox = result.getDocument().getInputElementById("theCheckbox");
+            var client = context.openPage(CheckboxPage.class);
+            var checkbox = client.getDocument().getInputElementById("theCheckbox");
             assertThat(checkbox.isChecked()).isTrue();
         }
 
@@ -106,8 +106,8 @@ class CheckboxCompatibilityTest {
 
         @Test
         void testCheckboxUncheckedWhenValueIsNull() {
-            var result = context.openPage(CheckboxPage.class);
-            var checkbox = result.getDocument().getInputElementById("theCheckbox");
+            var client = context.openPage(CheckboxPage.class);
+            var checkbox = client.getDocument().getInputElementById("theCheckbox");
 
             assertThat(checkbox.isChecked()).isFalse();
         }
@@ -153,8 +153,8 @@ class CheckboxCompatibilityTest {
 
         @Test
         void testCheckboxUncheckedWhenValueIsNull() {
-            var result = context.openPage(CheckboxPage.class);
-            var checkbox = result.getDocument().getInputElementById("theCheckbox");
+            var client = context.openPage(CheckboxPage.class);
+            var checkbox = client.getDocument().getInputElementById("theCheckbox");
 
             assertThat(checkbox.isChecked()).isTrue();
         }
@@ -202,8 +202,8 @@ class CheckboxCompatibilityTest {
 
         @Test
         void testCheckboxUncheckedWhenValueIsNotEqual() {
-            var result = context.openPage(CheckboxPage.class);
-            var checkbox = result.getDocument().getInputElementById("theCheckbox");
+            var client = context.openPage(CheckboxPage.class);
+            var checkbox = client.getDocument().getInputElementById("theCheckbox");
 
             assertThat(checkbox.isChecked()).isFalse();
         }

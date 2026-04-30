@@ -21,10 +21,10 @@ class ActionAndModelTest {
     @Test
     @DisplayName("In case a methode has @Action and @ModelData, the model data is provided to the page after the action is executed.")
     void testModelAction() {
-        var result = testContext.openPage("/actionAndModel.html");
-        result.getDocument().getElementById("action-link").click();
+        var client = testContext.openPage("/actionAndModel.html");
+        client.getDocument().getElementById("action-link").click();
         // Retrieve the value provided as model data. The key corresponds to the @ModelData annotation.
-        String modelData = result.getDocument().getElementById("result").getInnerText();
+        String modelData = client.getDocument().getElementById("result").getInnerText();
         assertThat(modelData).isEqualTo("Processed: input");
     }
 }

@@ -19,21 +19,21 @@ class WidgetActionTest {
 
     @Test
     void actionInWidgetUpdatesPageAndWidget() {
-        var result = context.openPage("/widgetAction.html");
+        var client = context.openPage("/widgetAction.html");
 
         // Initial values should be 5
-        var counterOnPage = result.getDocument().getElementById("counter-value-page").getInnerText();
-        var counterOnWidget = result.getDocument().getElementById("counter-value-widget").getInnerText();
+        var counterOnPage = client.getDocument().getElementById("counter-value-page").getInnerText();
+        var counterOnWidget = client.getDocument().getElementById("counter-value-widget").getInnerText();
 
         //  assertThat(counterOnPage).isEqualTo("5");
         assertThat(counterOnWidget).isEqualTo("0");
 
         // Click button in widget - this should trigger reactive state update
-        result.getDocument().getElementById("increment-button").click();
+        client.getDocument().getElementById("increment-button").click();
 
         // Both page and widget should now show 6
-        counterOnPage = result.getDocument().getElementById("counter-value-page").getInnerText();
-        counterOnWidget = result.getDocument().getElementById("counter-value-widget").getInnerText();
+        counterOnPage = client.getDocument().getElementById("counter-value-page").getInnerText();
+        counterOnWidget = client.getDocument().getElementById("counter-value-widget").getInnerText();
 
         assertThat(counterOnPage).isEqualTo("1");
         assertThat(counterOnWidget).isEqualTo("1");

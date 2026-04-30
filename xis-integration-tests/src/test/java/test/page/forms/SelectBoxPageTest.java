@@ -45,8 +45,8 @@ class SelectBoxPageTest {
 
         @Test
         void options() {
-            var result = context.openPage(SelectBoxPage.class);
-            var form = result.getDocument().getElementByTagName("form");
+            var client = context.openPage(SelectBoxPage.class);
+            var form = client.getDocument().getElementByTagName("form");
             var selectBox = form.findDescendant(this::isSelect);
 
             assertThat(((Element) selectBox).findDescendants(this::isOption)).singleElement().satisfies(
@@ -57,7 +57,7 @@ class SelectBoxPageTest {
             );
 
             var submitButton = form.querySelector("button");
-            var option = (OptionElement) result.getDocument().getElementByTagName("option");
+            var option = (OptionElement) client.getDocument().getElementByTagName("option");
             option.select();
             submitButton.click();
 

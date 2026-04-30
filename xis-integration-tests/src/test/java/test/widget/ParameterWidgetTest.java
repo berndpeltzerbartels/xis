@@ -28,9 +28,9 @@ class ParameterWidgetTest {
     @Test
     @DisplayName("Widget returns url-parameter for model and is displayed in widget")
     void urlParameter() {
-        var result = testContext.openPage("/3/parameterWidgetPage.html?b=8");
+        var client = testContext.openPage("/3/parameterWidgetPage.html?b=8");
 
-        assertThat(result.getDocument().getElementById("urlParameter").getInnerText()).isEqualTo("8");
+        assertThat(client.getDocument().getElementById("urlParameter").getInnerText()).isEqualTo("8");
 
     }
 
@@ -38,18 +38,18 @@ class ParameterWidgetTest {
     @Test
     @DisplayName("Widget returns path-variable for model and is displayed in widget")
     void pathVariable() {
-        var result = testContext.openPage("/3/parameterWidgetPage.html");
+        var client = testContext.openPage("/3/parameterWidgetPage.html");
 
-        assertThat(result.getDocument().getElementById("pathVariable").getInnerText()).isEqualTo("3");
+        assertThat(client.getDocument().getElementById("pathVariable").getInnerText()).isEqualTo("3");
     }
 
     @Test
     @DisplayName("Action-method in widget is always called with the same parameters")
     void action() {
-        var result = testContext.openPage("/3/parameterWidgetPage.html?b=8");
-        result.getDocument().getElementByTagName("a").click();
-        result.getDocument().getElementByTagName("a").click();
-        result.getDocument().getElementByTagName("a").click();
+        var client = testContext.openPage("/3/parameterWidgetPage.html?b=8");
+        client.getDocument().getElementByTagName("a").click();
+        client.getDocument().getElementByTagName("a").click();
+        client.getDocument().getElementByTagName("a").click();
 
         verify(service, times(3)).action(eq(3), eq(8), eq(42));
 

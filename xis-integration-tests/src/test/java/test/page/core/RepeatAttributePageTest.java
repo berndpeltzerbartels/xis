@@ -19,8 +19,8 @@ class RepeatAttributePageTest {
 
     @Test
     void test() {
-        var result = testContext.openPage("/repeatAttr.html");
-        var items = result.getDocument().getElementsByClass("item")
+        var client = testContext.openPage("/repeatAttr.html");
+        var items = client.getDocument().getElementsByClass("item")
                 .stream().map(Element::getInnerText).toList();
 
         assertThat(items).containsExactly("Item1", "Item2", "Item3");

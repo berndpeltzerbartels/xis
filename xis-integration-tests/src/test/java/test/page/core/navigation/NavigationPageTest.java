@@ -23,8 +23,8 @@ class NavigationPageTest {
     @Test
     @DisplayName("Return value of the action is a page class.")
     void simpleNavigationAction() {
-        var result = testContext.openPage("/page1.html");
-        var document = result.getDocument();
+        var client = testContext.openPage("/page1.html");
+        var document = client.getDocument();
         document.getElementById("action-link1").click();
 
         assertThat(document.getElementByTagName("title").getInnerText()).isEqualTo("Page 3");
@@ -34,8 +34,8 @@ class NavigationPageTest {
     @Test
     @DisplayName("Action is triggered by form submission  and return value is another page's class.")
     void formAction() {
-        var result = testContext.openPage("/page1.html");
-        var document = result.getDocument();
+        var client = testContext.openPage("/page1.html");
+        var document = client.getDocument();
         document.getElementById("action-link2").click();
 
         assertThat(document.getElementByTagName("title").getInnerText()).isEqualTo("Page 3");
@@ -44,8 +44,8 @@ class NavigationPageTest {
     @Test
     @DisplayName("Return value of the action is a url with path-variable and parameter.")
     void urlAction() {
-        var result = testContext.openPage("/page1.html");
-        var document = result.getDocument();
+        var client = testContext.openPage("/page1.html");
+        var document = client.getDocument();
         document.getElementById("action-link3").click();
 
         assertThat(document.getElementByTagName("title").getInnerText()).isEqualTo("Page 2");

@@ -36,9 +36,9 @@ class RefreshEventTest {
     @Test
     @DisplayName("simulatePushEvent() refreshes page that listens to the event key")
     void simulatePushEventRefreshesPage() {
-        var result = context.openPage(MatchPage.class);
+        var client = context.openPage(MatchPage.class);
 
-        assertThat(result.getDocument().getElementById("match-title").getInnerText())
+        assertThat(client.getDocument().getElementById("match-title").getInnerText())
                 .isEqualTo("Home FC vs. Away United");
 
         // Simulate a server refresh event - MatchPage listens to "score-updated"
@@ -51,22 +51,22 @@ class RefreshEventTest {
     @Test
     @DisplayName("simulatePushEvent() refreshes widget that listens to the event key")
     void simulatePushEventRefreshesWidget() {
-        var result = context.openPage(MatchPage.class);
+        var client = context.openPage(MatchPage.class);
 
-        assertThat(result.getDocument().getElementById("home-goals").getInnerText())
+        assertThat(client.getDocument().getElementById("home-goals").getInnerText())
                 .isEqualTo("0");
 
-        assertThat(result.getDocument().getElementById("away-goals").getInnerText())
+        assertThat(client.getDocument().getElementById("away-goals").getInnerText())
                 .isEqualTo("0");
 
         // Directly manipulate the ScoreBoard state and trigger the refresh event.
         context.getSingleton(ScoreBoard.class).setScore(1, 0);
         context.simulatePushEvent("score-updated");
 
-        assertThat(result.getDocument().getElementById("home-goals").getInnerText())
+        assertThat(client.getDocument().getElementById("home-goals").getInnerText())
                 .isEqualTo("1");
 
-        assertThat(result.getDocument().getElementById("away-goals").getInnerText())
+        assertThat(client.getDocument().getElementById("away-goals").getInnerText())
                 .isEqualTo("0");
     }
 
@@ -90,7 +90,7 @@ class RefreshEventTest {
     @Test
     @DisplayName("Multiple goals accumulate correctly via refresh events")
     void multipleGoalsAccumulateCorrectly() {
-        var result = context.openPage(MatchPage.class);
+        var client = context.openPage(MatchPage.class);
 
         var matchService = context.getSingleton(MatchService.class);
         matchService.homeGoal();
@@ -98,17 +98,17 @@ class RefreshEventTest {
         matchService.awayGoal();
         context.simulatePushEvent("score-updated");
 
-        assertThat(result.getDocument().getElementById("home-goals").getInnerText())
+        assertThat(client.getDocument().getElementById("home-goals").getInnerText())
                 .isEqualTo("2");
 
-        assertThat(result.getDocument().getElementById("away-goals").getInnerText())
+        assertThat(client.getDocument().getElementById("away-goals").getInnerText())
                 .isEqualTo("1");
     }
 
     @Test
     @DisplayName("Refresh event with wrong key does not refresh the widget")
     void wrongEventKeyDoesNotRefreshWidget() {
-        var result = context.openPage(MatchPage.class);
+        var client = context.openPage(MatchPage.class);
 
         context.getSingleton(ScoreBoard.class).setScore(3, 2);
 
@@ -116,24 +116,24 @@ class RefreshEventTest {
         context.simulatePushEvent("other-event");
 
         // Score should still show 0:0 - widget was not refreshed
-        assertThat(result.getDocument().getElementById("home-goals").getInnerText())
+        assertThat(client.getDocument().getElementById("home-goals").getInnerText())
                 .isEqualTo("0");
 
-        assertThat(result.getDocument().getElementById("away-goals").getInnerText())
+        assertThat(client.getDocument().getElementById("away-goals").getInnerText())
                 .isEqualTo("0");
     }
 
     @Test
     @DisplayName("Refresh event fired by simulation method is received by the page")
     void refreshEventFiredBySimulationMethodIsReceivedByPage() {
-        var result = context.openPage(MatchPage.class);
+        var client = context.openPage(MatchPage.class);
 
         var scoreBoard = context.getSingleton(ScoreBoard.class);
         scoreBoard.setMinutes(10);
 
         context.simulatePushEvent("minutes-updated");
 
-        assertThat(result.getDocument().getElementById("minutes").getInnerText())
+        assertThat(client.getDocument().getElementById("minutes").getInnerText())
                 .isEqualTo("10");
 
     }

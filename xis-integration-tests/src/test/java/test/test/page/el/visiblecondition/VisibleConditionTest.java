@@ -27,18 +27,18 @@ class VisibleConditionTest {
     @Test
     void testVisibleConditionFalse() {
         when(service.getData()).thenReturn("123");
-        var result = testContext.openPage("/visibleCondition.html");
+        var client = testContext.openPage("/visibleCondition.html");
 
-        Element tagEmpty = result.getDocument().getElementById("visible-empty");
+        Element tagEmpty = client.getDocument().getElementById("visible-empty");
         assertThat(tagEmpty).isNull();
     }
 
     @Test
     void testVisibleConditionTrue() {
         when(service.getData()).thenReturn("");
-        var result = testContext.openPage("/visibleCondition.html");
+        var client = testContext.openPage("/visibleCondition.html");
 
-        Element tagEmpty = result.getDocument().getElementById("visible-empty");
+        Element tagEmpty = client.getDocument().getElementById("visible-empty");
         assertThat(tagEmpty).isNotNull();
         assertThat(tagEmpty.getInnerText()).isEqualTo("Inner text");
     }

@@ -22,14 +22,14 @@ class ForeachTagPageTest {
     @Test
     @DisplayName("foreach-tag with simple data")
     void test() {
-        var result = testContext.openPage("/foreachTag.html");
+        var client = testContext.openPage("/foreachTag.html");
         
         // Debug: print document to see what's happening
         System.out.println("=== DOCUMENT HTML ===");
-        System.out.println(result.getDocument().asString());
+        System.out.println(client.getDocument().asString());
         System.out.println("=== END DOCUMENT ===");
         
-        var items = result.getDocument().getElementsByClass("item")
+        var items = client.getDocument().getElementsByClass("item")
                 .stream().map(Element::getInnerText).toList();
 
         assertThat(items).containsExactly("Item1", "Item2", "Item3");

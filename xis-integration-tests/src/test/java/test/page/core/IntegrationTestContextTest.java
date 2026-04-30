@@ -25,15 +25,15 @@ class IntegrationTestContextTest {
                 .withSingleton(TitlePage.class)
                 .build();
 
-        var result = context.openPage(TitlePage.class);
-        assertThat(result.getDocument().getElementByTagName("title").getInnerText()).isEqualTo("Hello ! I am the title");
+        var client = context.openPage(TitlePage.class);
+        assertThat(client.getDocument().getElementByTagName("title").getInnerText()).isEqualTo("Hello ! I am the title");
 
         context = IntegrationTestContext.builder()
                 .withSingleton(IndexPage.class)
                 .build();
-        result = context.openPage(IndexPage.class);
+        client = context.openPage(IndexPage.class);
 
-        assertThat(result.getDocument().getElementByTagName("title").getInnerText()).isEqualTo("Index");
+        assertThat(client.getDocument().getElementByTagName("title").getInnerText()).isEqualTo("Index");
 
 
     }

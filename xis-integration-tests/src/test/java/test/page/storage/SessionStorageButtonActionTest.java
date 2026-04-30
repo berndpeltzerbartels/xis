@@ -23,45 +23,45 @@ class SessionStorageButtonActionTest {
     @Test
     void standaloneButtonActionsWork() {
         // Open the test page
-        var result = context.openPage(SessionStorageButtonActionTestPage.class);
+        var client = context.openPage(SessionStorageButtonActionTestPage.class);
 
         // Check initial state
-        var counterSpan = result.getDocument().getElementById("counter-value");
+        var counterSpan = client.getDocument().getElementById("counter-value");
         assertThat(counterSpan.getInnerText()).isEqualTo("0");
 
         // Click increment button (should add 5)
-        var incrementButton = result.getDocument().getElementById("increment-button");
+        var incrementButton = client.getDocument().getElementById("increment-button");
         incrementButton.click();
 
         // Verify counter was incremented
-        counterSpan = result.getDocument().getElementById("counter-value");
+        counterSpan = client.getDocument().getElementById("counter-value");
         assertThat(counterSpan.getInnerText()).isEqualTo("5");
 
         // Click decrement button (should subtract 3)
-        var decrementButton = result.getDocument().getElementById("decrement-button");
+        var decrementButton = client.getDocument().getElementById("decrement-button");
         decrementButton.click();
 
         // Verify counter was decremented
-        counterSpan = result.getDocument().getElementById("counter-value");
+        counterSpan = client.getDocument().getElementById("counter-value");
         assertThat(counterSpan.getInnerText()).isEqualTo("2");
 
         // Click increment again
-        incrementButton = result.getDocument().getElementById("increment-button");
+        incrementButton = client.getDocument().getElementById("increment-button");
         incrementButton.click();
 
         // Final verification
-        counterSpan = result.getDocument().getElementById("counter-value");
+        counterSpan = client.getDocument().getElementById("counter-value");
         assertThat(counterSpan.getInnerText()).isEqualTo("7");
     }
 
     @Test
     void standaloneButtonsHaveCorrectType() {
         // Open the test page
-        var result = context.openPage(SessionStorageButtonActionTestPage.class);
+        var client = context.openPage(SessionStorageButtonActionTestPage.class);
 
         // Verify buttons have type="button" to prevent form submission
-        var incrementButton = result.getDocument().getElementById("increment-button");
-        var decrementButton = result.getDocument().getElementById("decrement-button");
+        var incrementButton = client.getDocument().getElementById("increment-button");
+        var decrementButton = client.getDocument().getElementById("decrement-button");
 
         // The ActionButtonHandler should have set type="button"
         assertThat(incrementButton.getAttribute("type")).isEqualTo("button");

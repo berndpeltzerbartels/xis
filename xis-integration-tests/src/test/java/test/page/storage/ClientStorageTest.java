@@ -20,13 +20,13 @@ class ClientStorageTest {
 
     @Test
     void clientStorageLinkTest() {
-        var result = testContext.openPage(ClientStoragePage.class);
+        var client = testContext.openPage(ClientStoragePage.class);
         var page = testContext.getAppContext().getSingleton(ClientStoragePage.class);
 
-        result.getDocument().getElementById("action-link").click();
+        client.getDocument().getElementById("action-link").click();
         assertThat(page.getStoreData().getItems()).containsExactly("linkAction");
 
-        result.getDocument().getElementById("save-button").click();
+        client.getDocument().getElementById("save-button").click();
         assertThat(page.getStoreData().getItems()).containsExactly("linkAction", "formInput");
     }
 

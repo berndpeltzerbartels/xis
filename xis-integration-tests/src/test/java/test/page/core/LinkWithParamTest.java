@@ -20,11 +20,11 @@ class LinkWithParamTest {
 
     @Test
     void clickLink() {
-        var result = context.openPage("/linkWithParamPage1.html"); // open link 1 first time
-        result.getDocument().getElementById("page-link").click();
+        var client = context.openPage("/linkWithParamPage1.html"); // open link 1 first time
+        client.getDocument().getElementById("page-link").click();
 
-        assertThat(result.getDocument().getElementByTagName("title").getInnerText()).isEqualTo("The title is 'bla'");
-        assertThat(result.getDocument().getElementByTagName("h1").getInnerText()).isEqualTo("The title is 'bla'");
+        assertThat(client.getDocument().getElementByTagName("title").getInnerText()).isEqualTo("The title is 'bla'");
+        assertThat(client.getDocument().getElementByTagName("h1").getInnerText()).isEqualTo("The title is 'bla'");
 
     }
 }

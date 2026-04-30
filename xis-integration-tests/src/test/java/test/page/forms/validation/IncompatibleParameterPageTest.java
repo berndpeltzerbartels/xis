@@ -36,8 +36,8 @@ class IncompatibleParameterPageTest {
 
         @Test
         void test() {
-            var result = appContext.openPage(IncompatibleParameterPage.class);
-            var document = result.getDocument();
+            var client = appContext.openPage(IncompatibleParameterPage.class);
+            var document = client.getDocument();
             var button = document.getElementByTagName("button");
 
             button.click();
@@ -68,8 +68,8 @@ class IncompatibleParameterPageTest {
 
         @Test
         void test() {
-            var result = appContext.openPage(IncompatibleParameterPage.class);
-            var document = result.getDocument();
+            var client = appContext.openPage(IncompatibleParameterPage.class);
+            var document = client.getDocument();
             integerFieldMandatory(document).setValue("abc");
             integerField(document).setValue("def");
             var button = document.getElementByTagName("button");
@@ -104,8 +104,8 @@ class IncompatibleParameterPageTest {
 
         @Test
         void test() {
-            var result = appContext.openPage(IncompatibleParameterPage.class);
-            var document = result.getDocument();
+            var client = appContext.openPage(IncompatibleParameterPage.class);
+            var document = client.getDocument();
             var button = document.getElementByTagName("button");
 
             // Submit empty form to trigger validation error

@@ -22,8 +22,8 @@ class SimpleRecordFormTest {
     @Test
     void testRecordAsFormData() {
         // Open page - should display form with initial record values
-        var result = testContext.openPage("/simpleRecordForm/new.html");
-        var document = result.getDocument();
+        var client = testContext.openPage("/simpleRecordForm/new.html");
+        var document = client.getDocument();
 
 
         var firstNameInput = document.getInputElementById("firstName");

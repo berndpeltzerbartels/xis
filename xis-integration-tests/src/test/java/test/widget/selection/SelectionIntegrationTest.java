@@ -11,9 +11,9 @@ public class SelectionIntegrationTest {
         var context = IntegrationTestContext.builder()
                 .withSingleton(SelectionPage.class)
                 .build();
-        var result = context.openPage(SelectionPage.class);
+        var client = context.openPage(SelectionPage.class);
 
-        var doc = result.getDocument();
+        var doc = client.getDocument();
         var ul1 = doc.getElementById("item1");
         var ul2 = doc.getElementById("item2");
         var ul3 = doc.getElementById("item3");

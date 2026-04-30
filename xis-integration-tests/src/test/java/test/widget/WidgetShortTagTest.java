@@ -21,9 +21,9 @@ class WidgetShortTagTest {
     @Test
     void test() {
         testContext.getSingleton(WidgetShortTagPage.class).setWidgetId("SimpleWidget");
-        var result = testContext.openPage(WidgetPage.class);
+        var client = testContext.openPage(WidgetPage.class);
 
-        System.out.println(result.getDocument().asString());
-        assertThat(result.getDocument().getElementById("greeting").getInnerText()).isEqualTo("Huhu !");
+        System.out.println(client.getDocument().asString());
+        assertThat(client.getDocument().getElementById("greeting").getInnerText()).isEqualTo("Huhu !");
     }
 }

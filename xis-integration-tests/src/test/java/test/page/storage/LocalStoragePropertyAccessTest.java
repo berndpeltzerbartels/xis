@@ -22,10 +22,10 @@ class LocalStoragePropertyAccessTest {
         // Set darkMode in localStorage before opening the page
         testContext.getLocalStorage().setItem("darkMode", "{\"value\":\"true\"}");
 
-        var result = testContext.openPage(LocalStoragePropertyAccessPage.class);
+        var client = testContext.openPage(LocalStoragePropertyAccessPage.class);
 
         // Check if the darkMode div is displayed
-        var darkModeDiv = result.getDocument().getElementById("darkModeDisplay");
+        var darkModeDiv = client.getDocument().getElementById("darkModeDisplay");
         assertThat(darkModeDiv).isNotNull();
         assertThat(darkModeDiv.getInnerText()).contains("Dark mode is active");
     }
@@ -35,10 +35,10 @@ class LocalStoragePropertyAccessTest {
         // Set theme in localStorage before opening the page
         testContext.getLocalStorage().setItem("theme", "{\"value\":\"dark\"}");
 
-        var result = testContext.openPage(LocalStoragePropertyAccessPage.class);
+        var client = testContext.openPage(LocalStoragePropertyAccessPage.class);
 
         // Check if theme is displayed
-        var themeDiv = result.getDocument().getElementById("themeDisplay");
+        var themeDiv = client.getDocument().getElementById("themeDisplay");
         assertThat(themeDiv).isNotNull();
         assertThat(themeDiv.getInnerText()).contains("Theme: dark");
     }
@@ -48,15 +48,15 @@ class LocalStoragePropertyAccessTest {
         // Set user object in localStorage with nested properties before opening the page
         testContext.getLocalStorage().setItem("user", "{\"value\":{\"name\":\"John\",\"age\":30}}");
 
-        var result = testContext.openPage(LocalStoragePropertyAccessPage.class);
+        var client = testContext.openPage(LocalStoragePropertyAccessPage.class);
 
         // Check if user name is displayed
-        var userNameDiv = result.getDocument().getElementById("userNameDisplay");
+        var userNameDiv = client.getDocument().getElementById("userNameDisplay");
         assertThat(userNameDiv).isNotNull();
         assertThat(userNameDiv.getInnerText()).contains("User: John");
 
         // Check if user age is displayed
-        var userAgeDiv = result.getDocument().getElementById("userAgeDisplay");
+        var userAgeDiv = client.getDocument().getElementById("userAgeDisplay");
         assertThat(userAgeDiv).isNotNull();
         assertThat(userAgeDiv.getInnerText()).contains("Age: 30");
     }
@@ -65,9 +65,9 @@ class LocalStoragePropertyAccessTest {
     void testLocalStorageDarkModeNotSet() {
         // Don't set darkMode - div should not be displayed
         testContext.getLocalStorage().reset();
-        var result = testContext.openPage(LocalStoragePropertyAccessPage.class);
+        var client = testContext.openPage(LocalStoragePropertyAccessPage.class);
 
-        var darkModeDiv = result.getDocument().getElementById("darkModeDisplay");
+        var darkModeDiv = client.getDocument().getElementById("darkModeDisplay");
         // The div should not exist when condition is false
         assertThat(darkModeDiv).isNull();
     }

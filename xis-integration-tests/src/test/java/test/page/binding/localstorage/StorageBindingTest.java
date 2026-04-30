@@ -20,10 +20,10 @@ class StorageBindingTest {
 
     @Test
     void testInitialEmptyShoppingCard() {
-        var result = testContext.openPage(StorageBindingPage.class);
+        var client = testContext.openPage(StorageBindingPage.class);
 
-        var spanItemCount = result.getDocument().getElementById("item-count");
-        var spanTotalPrice = result.getDocument().getElementById("total-price");
+        var spanItemCount = client.getDocument().getElementById("item-count");
+        var spanTotalPrice = client.getDocument().getElementById("total-price");
 
         assertThat(spanItemCount).isNotNull();
         assertThat(spanTotalPrice).isNotNull();
@@ -34,10 +34,10 @@ class StorageBindingTest {
 
     @Test
     void testAddSingleProduct() {
-        var result = testContext.openPage(StorageBindingPage.class);
+        var client = testContext.openPage(StorageBindingPage.class);
 
-        var spanItemCount = result.getDocument().getElementById("item-count");
-        var spanTotalPrice = result.getDocument().getElementById("total-price");
+        var spanItemCount = client.getDocument().getElementById("item-count");
+        var spanTotalPrice = client.getDocument().getElementById("total-price");
 
         assertThat(spanItemCount).isNotNull();
         assertThat(spanTotalPrice).isNotNull();
@@ -46,7 +46,7 @@ class StorageBindingTest {
         assertThat(spanTotalPrice.getInnerText()).isEqualTo("€0");
 
         // Click first product link
-        var link1 = result.getDocument().getElementById("add-product-1");
+        var link1 = client.getDocument().getElementById("add-product-1");
         link1.click();
 
         // Check updated cart
@@ -56,19 +56,19 @@ class StorageBindingTest {
 
     @Test
     void testAddMultipleProducts() {
-        var result = testContext.openPage(StorageBindingPage.class);
+        var client = testContext.openPage(StorageBindingPage.class);
 
         // Click first product link
-        var link1 = result.getDocument().getElementById("add-product-1");
-        var link2 = result.getDocument().getElementById("add-product-2");
-        var link3 = result.getDocument().getElementById("add-product-3");
+        var link1 = client.getDocument().getElementById("add-product-1");
+        var link2 = client.getDocument().getElementById("add-product-2");
+        var link3 = client.getDocument().getElementById("add-product-3");
 
         link1.click();
         link2.click();
         link3.click();
 
-        var spanItemCount = result.getDocument().getElementById("item-count");
-        var spanTotalPrice = result.getDocument().getElementById("total-price");
+        var spanItemCount = client.getDocument().getElementById("item-count");
+        var spanTotalPrice = client.getDocument().getElementById("total-price");
 
 
         assertThat(spanItemCount.getInnerText()).contains("3 items");
@@ -79,10 +79,10 @@ class StorageBindingTest {
 
     @Test
     void testAddSameProductMultipleTimes() {
-        var result = testContext.openPage(StorageBindingPage.class);
+        var client = testContext.openPage(StorageBindingPage.class);
 
-        var spanItemCount = result.getDocument().getElementById("item-count");
-        var spanTotalPrice = result.getDocument().getElementById("total-price");
+        var spanItemCount = client.getDocument().getElementById("item-count");
+        var spanTotalPrice = client.getDocument().getElementById("total-price");
 
         assertThat(spanItemCount).isNotNull();
         assertThat(spanTotalPrice).isNotNull();
@@ -91,7 +91,7 @@ class StorageBindingTest {
         assertThat(spanTotalPrice.getInnerText()).isEqualTo("€0");
 
         // Click first product link
-        var link1 = result.getDocument().getElementById("add-product-1");
+        var link1 = client.getDocument().getElementById("add-product-1");
         link1.click();
 
         assertThat(spanItemCount.getInnerText()).contains("1 items");
