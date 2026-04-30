@@ -44,12 +44,12 @@ dependencies {
     implementation project(":xis-util")
     implementation project(":xis-resources")
     implementation project(":xis-server")
-    implementation project(":xis-validation")
     implementation project(":xis-security-common")
     implementation project(":xis-http-controller")
 
     api project(":xis-context")
     api project(":xis-controller-api")
+    api project(":xis-validation")
     api project(":xis-adapter-spi")
 
     // Compile-only dependencies
@@ -157,4 +157,3 @@ tasks.withType(Javadoc) {
     options.addBooleanOption('Xdoclint:none', true)
     options.addStringOption('encoding', 'UTF-8')
 }
-

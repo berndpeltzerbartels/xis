@@ -112,6 +112,21 @@ The first major XIS release focuses on two actively supported runtime models:
 
 A Micronaut module still exists in the repository, but it is currently not actively maintained.
 
+## Controller API
+
+The public controller annotations live in [`xis-controller-api`](xis-controller-api/README.md).
+
+This module is not a primary runtime choice, but it is part of the core programming model. Applications normally receive
+it transitively through `xis-boot` or `xis-spring`, so users can import annotations such as `@Page`, `@ModelData`,
+`@Action`, and `@PathVariable` without adding `xis-controller-api` separately.
+
+## Validation API
+
+The public validation annotations live in [`xis-validation`](xis-validation/README.md).
+
+This module follows the same dependency model: it is not a primary runtime choice, but users normally receive it through
+`xis-boot` or `xis-spring` and can import annotations such as `@EMail`, `@MinLength`, `@RegExpr`, and `@LabelKey`.
+
 ## Refresh Events
 
 XIS can refresh pages and widgets when something changes on the server.
@@ -188,6 +203,8 @@ public class ProductDetailPage {
 
 ## Learn More
 
+- [Controller API annotations](xis-controller-api/README.md)
+- [Validation annotations](xis-validation/README.md)
 - [Documentation](https://xis.one/docs/introduction.html)
 - [Quickstart](https://xis.one/quickstart/installation.html)
 

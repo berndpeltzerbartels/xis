@@ -16,6 +16,7 @@ import one.xis.server.FrontendServiceImpl;
 import one.xis.validation.EMail;
 import one.xis.validation.LabelKey;
 import one.xis.validation.Mandatory;
+import one.xis.validation.RegExpr;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -104,6 +105,25 @@ class ValidationPostProcessorIntegrationTest {
         assertThat(response.getStatus()).isEqualTo(422);
         assertThat(response.getValidatorMessages().getMessages()).containsEntry("/person/email", "Ungültig");
         assertThat(response.getValidatorMessages().getGlobalMessages()).containsExactly("Ungültige E-Mail-Adresse");
+    }
+
+    @Test
+    void validateRegularExpressionFailed() throws JsonProcessingException {
+        // given
+        var personData = new PersonData();
+        personData.setName("Max Mustermann");
+        personData.setEmail("bla@bla.de");
+        personData.setDateOfBirth(LocalDate.of(2000, 1, 1));
+        personData.setPostalCode("abcde");
+        var request = createPersonRequest(personData);
+
+        // when
+        var response = frontendService.processActionRequest(request);
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(422);
+        assertThat(response.getValidatorMessages().getMessages()).containsEntry("/person/postalCode", "Ungültige Eingabe");
+        assertThat(response.getValidatorMessages().getGlobalMessages()).containsExactly("Bitte überprüfen Sie Ihre Eingabe für das Feld \"[postalCode]\"");
     }
 
     @Test
@@ -229,6 +249,9 @@ class ValidationPostProcessorIntegrationTest {
 
         @Mandatory // No @LabelKey annotation to check if the default message-key is used
         private LocalDate dateOfBirth;
+
+        @RegExpr("[0-9]{5}")
+        private String postalCode;
     }
 
 

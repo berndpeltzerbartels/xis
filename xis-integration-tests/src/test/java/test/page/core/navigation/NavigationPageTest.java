@@ -52,4 +52,5 @@ class NavigationPageTest {
         assertThat(document.getElementById("pathVariable").getInnerText()).isEqualTo("xyz");
         assertThat(document.getElementById("queryParameter").getInnerText()).isEqualTo("123");
     }
+
 }
