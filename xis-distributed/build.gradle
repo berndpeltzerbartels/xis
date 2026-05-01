@@ -39,9 +39,6 @@ dependencies {
     implementation project(':xis-server')
     implementation project(':xis-resources')
 
-    // xis-test is optional – only needed for the TestScriptExtension SPI impl
-    compileOnly project(':xis-test')
-
     // Annotation processors
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
     implementation "org.projectlombok:lombok:$lombokVersion"

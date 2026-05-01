@@ -14,9 +14,6 @@ import java.util.Map;
  * <p>
  * Property format:
  * <pre>
- * # Mandatory: host of this server (used as fallback for all local components)
- * xis.host=https://app.example.com
- *
  * # Optional: explicit remote hosts per widget-id or normalised page path
  * xis.remote.widget.ProductWidget=https://shop.example.com
  * xis.remote.widget.CartWidget=https://shop.example.com
@@ -31,47 +28,55 @@ import java.util.Map;
 @DefaultComponent
 public class PropertiesXisDistributedConfig implements XisDistributedConfig {
 
-    private static final String HOST_KEY = "xis.host";
     private static final String WIDGET_PREFIX = "xis.remote.widget.";
     private static final String PAGE_PREFIX = "xis.remote.page.";
 
-    private final String defaultHost;
     private final Map<String, String> widgetHosts = new HashMap<>();
     private final Map<String, String> pageHosts = new HashMap<>();
 
     public PropertiesXisDistributedConfig() {
         var all = ApplicationProperties.getAllProperties();
 
-        defaultHost = all.get(HOST_KEY);
-        if (defaultHost == null || defaultHost.isBlank()) {
-            throw new IllegalStateException(
-                    "xis-distributed is on the classpath but 'xis.host' is not configured. " +
-                            "Add 'xis.host=https://your-server.example.com' to application.properties.");
-        }
-        log.info("Distributed config: default host = {}", defaultHost);
-
         for (var entry : all.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
             if (key.startsWith(WIDGET_PREFIX)) {
                 String widgetId = key.substring(WIDGET_PREFIX.length());
+                validateHostValue(key, value);
                 widgetHosts.put(widgetId, value);
                 log.debug("Distributed config: widget '{}' → {}", widgetId, value);
             } else if (key.startsWith(PAGE_PREFIX)) {
                 String normalizedPath = key.substring(PAGE_PREFIX.length());
+                validateHostValue(key, value);
                 pageHosts.put(normalizedPath, value);
                 log.debug("Distributed config: page '{}' → {}", normalizedPath, value);
             }
         }
     }
 
+    private void validateHostValue(String key, String value) {
+        if (value == null || value.isBlank()) {
+            throw new IllegalStateException("Distributed host mapping '" + key + "' must not be blank.");
+        }
+    }
+
+    @Override
+    public boolean isRemoteWidget(String widgetId) {
+        return widgetHosts.containsKey(widgetId);
+    }
+
+    @Override
+    public boolean isRemotePage(String normalizedPath) {
+        return pageHosts.containsKey(normalizedPath);
+    }
+
     @Override
     public String getWidgetHost(String widgetId) {
-        return widgetHosts.getOrDefault(widgetId, defaultHost);
+        return widgetHosts.get(widgetId);
     }
 
     @Override
     public String getPageHost(String normalizedPath) {
-        return pageHosts.getOrDefault(normalizedPath, defaultHost);
+        return pageHosts.get(normalizedPath);
     }
 }

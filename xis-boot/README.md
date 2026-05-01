@@ -13,6 +13,23 @@ It is meant for applications that want to run XIS without Spring Boot. The goal 
 
 `xis-boot` is intentionally much smaller than Spring Boot. It does not try to provide the same breadth of configuration formats, auto-configuration layers, or infrastructure abstractions.
 
+## Relationship to `xis-context`
+
+`xis-boot` uses `xis-context` as its dependency injection and bean model.
+
+That means concepts such as:
+
+- `@Component`
+- `@Bean`
+- `@Inject`
+- `@Value`
+- `@DefaultComponent`
+
+belong conceptually to `xis-context`, even when they are commonly used from a `xis-boot` application.
+
+This README focuses on the standalone runtime behavior of `xis-boot`.
+For context and DI rules, see [xis-context/README.md](/Users/bernd/projects/xis/xis-context/README.md).
+
 ## When to use it
 
 Use `xis-boot` when you want:
@@ -139,6 +156,8 @@ public class AppConfiguration {
     }
 }
 ```
+
+The exact bean and replacement semantics come from `xis-context`, not from a separate `xis-boot` model.
 
 ## Spring Compatibility
 

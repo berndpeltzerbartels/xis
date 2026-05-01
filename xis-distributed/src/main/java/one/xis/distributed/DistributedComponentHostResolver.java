@@ -15,11 +15,25 @@ public class DistributedComponentHostResolver implements ComponentHostResolver {
 
     @Override
     public String getWidgetHost(String widgetId) {
-        return config.getWidgetHost(widgetId);
+        if (!config.isRemoteWidget(widgetId)) {
+            return null;
+        }
+        String host = config.getWidgetHost(widgetId);
+        if (host == null || host.isBlank()) {
+            throw new IllegalStateException("Missing remote host mapping for widget '" + widgetId + "'.");
+        }
+        return host;
     }
 
     @Override
     public String getPageHost(String normalizedPath) {
-        return config.getPageHost(normalizedPath);
+        if (!config.isRemotePage(normalizedPath)) {
+            return null;
+        }
+        String host = config.getPageHost(normalizedPath);
+        if (host == null || host.isBlank()) {
+            throw new IllegalStateException("Missing remote host mapping for page '" + normalizedPath + "'.");
+        }
+        return host;
     }
 }
