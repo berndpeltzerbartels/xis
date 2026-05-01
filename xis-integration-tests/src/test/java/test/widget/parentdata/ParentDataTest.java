@@ -11,8 +11,8 @@ public class ParentDataTest {
     void parentDataIsAvailableInPageAndWidgets() {
         var context = IntegrationTestContext.builder()
                 .withSingleton(TestPage.class)
-                .withSingleton(DefaultWidget.class)
-                .withSingleton(SecondWidget.class)
+                .withSingleton(DefaultFrontlet.class)
+                .withSingleton(SecondFrontlet.class)
                 .build();
         var client = context.openPage(TestPage.class);
         // Check data on page

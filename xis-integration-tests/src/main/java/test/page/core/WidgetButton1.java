@@ -2,10 +2,10 @@ package test.page.core;
 
 import lombok.Getter;
 import one.xis.ModelData;
-import one.xis.Widget;
+import one.xis.Frontlet;
 
 @Getter
-@Widget
+@Frontlet
 class WidgetButton1 {
 
     private int invocations;
@@ -13,6 +13,6 @@ class WidgetButton1 {
     @ModelData("content")
     String content() {
         invocations++;
-        return "Widget 1 Content";
+        return "Frontlet 1 Content";
     }
 }

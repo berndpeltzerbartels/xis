@@ -20,13 +20,13 @@ class ParameterWidgetTest {
 
         testContext = IntegrationTestContext.builder()
                 .withSingleton(ParameterWidgetPage.class)
-                .withSingleton(ParameterWidget.class)
+                .withSingleton(ParameterFrontlet.class)
                 .withSingleton(service)
                 .build();
     }
 
     @Test
-    @DisplayName("Widget returns url-parameter for model and is displayed in widget")
+    @DisplayName("Frontlet returns url-parameter for model and is displayed in widget")
     void urlParameter() {
         var client = testContext.openPage("/3/parameterWidgetPage.html?b=8");
 
@@ -36,7 +36,7 @@ class ParameterWidgetTest {
 
 
     @Test
-    @DisplayName("Widget returns path-variable for model and is displayed in widget")
+    @DisplayName("Frontlet returns path-variable for model and is displayed in widget")
     void pathVariable() {
         var client = testContext.openPage("/3/parameterWidgetPage.html");
 

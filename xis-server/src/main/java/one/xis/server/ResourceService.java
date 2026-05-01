@@ -3,7 +3,7 @@ package one.xis.server;
 import lombok.RequiredArgsConstructor;
 import one.xis.Include;
 import one.xis.Page;
-import one.xis.Widget;
+import one.xis.Frontlet;
 import one.xis.context.Component;
 import one.xis.context.Init;
 import one.xis.context.Inject;
@@ -27,7 +27,7 @@ class ResourceService {
     private final Resources resources;
     private final PathResolver pathResolver;
     private final HtmlParser htmlParser = new HtmlParser();
-    @Inject(annotatedWith = Widget.class)
+    @Inject(annotatedWith = Frontlet.class)
     private Collection<Object> widgetControllers;
     @Inject(annotatedWith = Page.class)
     private Collection<Object> pageControllers;
@@ -45,7 +45,7 @@ class ResourceService {
     void initWidgetResources() {
         widgetDocumentCache = widgetControllers.stream()
                 .collect(Collectors.toMap(
-                        WidgetUtil::getId,
+                        FrontletUtil::getId,
                         controller -> {
                             HtmlDocument doc = parseAndValidate(controller, "Widget");
                             return toResource(controller, doc);
@@ -81,7 +81,7 @@ class ResourceService {
 
     Resource getWidgetHtml(String id) {
         GenericResource<HtmlDocument> docResource = widgetDocumentCache.get(id);
-        if (docResource == null) throw new IllegalArgumentException("Widget not found: " + id);
+        if (docResource == null) throw new IllegalArgumentException("Frontlet not found: " + id);
         return new GenericResource<>(docResource.getObjectContent().toHtml(), docResource.getLastModified(), docResource.getResourcePath());
     }
 

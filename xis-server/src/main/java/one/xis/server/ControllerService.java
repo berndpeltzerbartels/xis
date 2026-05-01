@@ -18,7 +18,7 @@ class ControllerService {
     private PageControllerWrappers pageControllerWrappers;
 
     @Inject
-    private WidgetControllerWrappers widgetControllerWrappers;
+    private FrontletControllerWrappers widgetControllerWrappers;
 
     @Inject
     private ControllerResultMapper controllerResultMapper;

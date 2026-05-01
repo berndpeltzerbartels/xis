@@ -2,9 +2,9 @@ package test.widget;
 
 import one.xis.Action;
 import one.xis.ModelData;
-import one.xis.Widget;
+import one.xis.Frontlet;
 
-@Widget
+@Frontlet
 class ActionLinkWithTargetWidget1 {
 
     @ModelData("target")

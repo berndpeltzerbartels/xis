@@ -27,8 +27,8 @@ class SimpleObjectFormWidgetTest {
             testContext = IntegrationTestContext.builder()
                     .withSingleton(service)
                     .withSingleton(WidgetPage.class)
-                    .withSingleton(SimpleObjectNewWidget.class)
-                    .withSingleton(SimpleObjectDetailsWidget.class)
+                    .withSingleton(SimpleObjectNewFrontlet.class)
+                    .withSingleton(SimpleObjectDetailsFrontlet.class)
                     .build();
 
             doAnswer(inv -> {
@@ -46,7 +46,7 @@ class SimpleObjectFormWidgetTest {
         @Test
         void test() {
             var widgetPage = testContext.getSingleton(WidgetPage.class);
-            widgetPage.setWidgetId(SimpleObjectNewWidget.class.getSimpleName());
+            widgetPage.setWidgetId(SimpleObjectNewFrontlet.class.getSimpleName());
             // Display form
             var client = testContext.openPage(WidgetPage.class);
 

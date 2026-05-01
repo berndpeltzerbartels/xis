@@ -2,9 +2,9 @@ package test.page.refresh;
 
 import one.xis.ModelData;
 import one.xis.RefreshOnUpdateEvents;
-import one.xis.Widget;
+import one.xis.Frontlet;
 
-@Widget
+@Frontlet
 @RefreshOnUpdateEvents({"score-updated", "minutes-updated"})
 class ScoreBoard {
 

@@ -98,7 +98,7 @@ public class ContactService {
         save(createContact("Jane", "Smith", "jane.smith@techstart.com", "+1-555-0102",
             "TechStart Inc", "CTO", ContactType.PARTNER, ContactStatus.ACTIVE));
         save(createContact("Bob", "Johnson", "bob.j@widgets.com", "+1-555-0103",
-            "Widget Factory", "Sales Director", ContactType.LEAD, ContactStatus.PENDING));
+            "Frontlet Factory", "Sales Director", ContactType.LEAD, ContactStatus.PENDING));
         save(createContact("Alice", "Williams", "alice.w@designs.com", "+1-555-0104",
             "Creative Designs", "Creative Director", ContactType.CUSTOMER, ContactStatus.ACTIVE));
         save(createContact("Charlie", "Brown", "charlie@oldcorp.com", "+1-555-0105",

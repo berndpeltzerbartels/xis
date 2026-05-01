@@ -40,7 +40,7 @@ public class ClientConfig {
     /**
      * Hosts by widget-id. Must contain all widgets.
      */
-    private final Map<String, WidgetAttributes> widgetAttributes;
+    private final Map<String, FrontletAttributes> widgetAttributes;
 
     static ClientConfig.ClientConfigBuilder builder() {
         return new ClientConfig.ClientConfigBuilder();
@@ -56,7 +56,7 @@ public class ClientConfig {
         @Getter
         private String welcomePageId;
         private Map<String, PageAttributes> pageAttributes = Map.of();
-        private Map<String, WidgetAttributes> widgetAttributes = Map.of();
+        private Map<String, FrontletAttributes> widgetAttributes = Map.of();
 
         ClientConfigBuilder widgetIds(Collection<String> widgetIds) {
             this.widgetIds = widgetIds;
@@ -88,7 +88,7 @@ public class ClientConfig {
             return this;
         }
 
-        ClientConfigBuilder widgetAttributes(Map<String, WidgetAttributes> widgetAttributes) {
+        ClientConfigBuilder widgetAttributes(Map<String, FrontletAttributes> widgetAttributes) {
             this.widgetAttributes = widgetAttributes;
             return this;
         }

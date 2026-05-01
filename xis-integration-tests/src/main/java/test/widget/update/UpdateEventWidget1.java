@@ -2,9 +2,9 @@ package test.widget.update;
 
 import one.xis.Action;
 import one.xis.ModelData;
-import one.xis.Widget;
+import one.xis.Frontlet;
 
-@Widget
+@Frontlet
 class UpdateEventWidget1 {
 
     private int loadCounter = 0;

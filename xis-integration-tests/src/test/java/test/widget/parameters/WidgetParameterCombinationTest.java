@@ -15,30 +15,30 @@ class WidgetParameterCombinationTest {
     void init() {
         testContext = IntegrationTestContext.builder()
                 .withSingleton(ParameterTestPage.class)
-                .withSingleton(FirstWidget.class)
-                .withSingleton(SecondWidget.class)
+                .withSingleton(FirstFrontlet.class)
+                .withSingleton(SecondFrontlet.class)
                 .build();
     }
 
     @Test
-    @DisplayName("Widget receives both action parameter and container parameter")
+    @DisplayName("Frontlet receives both action parameter and container parameter")
     void widgetReceivesBothParameters() {
         // Open page with FirstWidget
         var client = testContext.openPage("/parameterTest.html");
 
-        // Verify FirstWidget is loaded
+        // Verify FirstFrontlet is loaded
         assertThat(client.getDocument().getElementByTagName("h2").getInnerText())
                 .isEqualTo("First Widget");
 
-        // Click action to switch to SecondWidget with actionParam
+        // Click action to switch to SecondFrontlet with actionParam
         var button = client.getDocument().getElementByTagName("button");
         button.click();
 
-        // Verify SecondWidget is now loaded
+        // Verify SecondFrontlet is now loaded
         assertThat(client.getDocument().getElementByTagName("h2").getInnerText())
                 .isEqualTo("Second Widget");
 
-        // Verify action parameter from WidgetResponse
+        // Verify action parameter from FrontletResponse
         assertThat(client.getDocument().getElementById("actionParam").getInnerText())
                 .isEqualTo("Action Parameter: actionValue");
 

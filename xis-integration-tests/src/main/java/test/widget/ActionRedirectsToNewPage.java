@@ -2,10 +2,10 @@ package test.widget;
 
 
 import one.xis.Action;
-import one.xis.Widget;
+import one.xis.Frontlet;
 import test.page.core.IndexPage;
 
-@Widget
+@Frontlet
 class ActionRedirectsToNewPage {
 
     @Action("test-action")

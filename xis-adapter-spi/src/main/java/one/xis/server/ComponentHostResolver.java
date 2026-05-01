@@ -4,7 +4,7 @@ package one.xis.server;
  * SPI for resolving host addresses in distributed / micro-frontend deployments.
  * <p>
  * When {@code xis-distributed} is on the classpath it contributes an implementation
- * of this interface. {@link WidgetAttributesFactory} and {@link PageAttributesFactory}
+ * of this interface. {@link FrontletAttributesFactory} and {@link PageAttributesFactory}
  * use it to fill the {@code host} field so the JavaScript client knows which server
  * to contact for each component.
  * <p>

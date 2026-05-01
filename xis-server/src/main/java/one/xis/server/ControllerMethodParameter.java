@@ -45,7 +45,7 @@ class ControllerMethodParameter {
             return deserializeUrlParameter(parameter, request, postProcessingResults);
         } else if (parameter.isAnnotationPresent(one.xis.PathVariable.class)) {
             return deserializePathVariable(parameter, request, postProcessingResults);
-        } else if (parameter.isAnnotationPresent(WidgetParameter.class)) {
+        } else if (parameter.isAnnotationPresent(FrontletParameter.class)) {
             return deserializeWidgetParameter(parameter, request, postProcessingResults);
         } else if (parameter.isAnnotationPresent(ActionParameter.class)) {
             var key = parameter.getAnnotation(ActionParameter.class).value();
@@ -99,8 +99,8 @@ class ControllerMethodParameter {
             controllerMethodResult.getUrlParameters().put(parameter.getAnnotation(QueryParameter.class).value(), parameterValue);
         } else if (parameter.isAnnotationPresent(PathVariable.class)) {
             controllerMethodResult.getPathVariables().put(parameter.getAnnotation(PathVariable.class).value(), parameterValue);
-        } else if (parameter.isAnnotationPresent(WidgetParameter.class)) {
-            controllerMethodResult.getWidgetParameters().put(parameter.getAnnotation(WidgetParameter.class).value(), parameterValue);
+        } else if (parameter.isAnnotationPresent(FrontletParameter.class)) {
+            controllerMethodResult.getWidgetParameters().put(parameter.getAnnotation(FrontletParameter.class).value(), parameterValue);
         } else if (parameter.isAnnotationPresent(SharedValue.class)) {
             controllerMethodResult.getRequestScope().put(parameter.getAnnotation(SharedValue.class).value(), parameterValue);
         } else if (parameter.isAnnotationPresent(SessionStorage.class)) {
@@ -163,7 +163,7 @@ class ControllerMethodParameter {
     }
 
     private Object deserializeWidgetParameter(Parameter parameter, ClientRequest request, PostProcessingResults postProcessingResults) throws IOException {
-        var key = parameter.getAnnotation(WidgetParameter.class).value();
+        var key = parameter.getAnnotation(FrontletParameter.class).value();
         if (isMandatory(parameter) && !request.getWidgetParameters().containsKey(key)) {
             throw new IllegalStateException("No widget parameter found for key " + key);
         }

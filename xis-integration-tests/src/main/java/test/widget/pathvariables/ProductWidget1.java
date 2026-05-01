@@ -2,9 +2,9 @@ package test.widget.pathvariables;
 
 import one.xis.ModelData;
 import one.xis.PathVariable;
-import one.xis.Widget;
+import one.xis.Frontlet;
 
-@Widget(url = "/products/{category}.html", containerId = "container1")
+@Frontlet(url = "/products/{category}.html", containerId = "container1")
 class ProductWidget1 {
 
     @ModelData("category")

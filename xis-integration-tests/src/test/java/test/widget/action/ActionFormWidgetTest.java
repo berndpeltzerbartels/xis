@@ -14,8 +14,8 @@ class ActionFormWidgetTest {
     void setUp() {
         context = IntegrationTestContext.builder()
                 .withSingleton(ActionFormPage.class)
-                .withSingleton(ActionFormWidget.class)
-                .withSingleton(AnotherWidget.class)
+                .withSingleton(ActionFormFrontlet.class)
+                .withSingleton(AnotherFrontlet.class)
                 .withSingleton(AnotherPage.class)
                 .build();
     }
@@ -33,7 +33,7 @@ class ActionFormWidgetTest {
         var client = context.openPage(ActionFormPage.class);
         client.getDocument().getElementById("radio-2").click();
         client.getDocument().getElementById("submitButton").click();
-        assertThat(client.getDocument().getTextContent()).contains("Another Widget Content");
+        assertThat(client.getDocument().getTextContent()).contains("Another Frontlet Content");
     }
 
     @Test

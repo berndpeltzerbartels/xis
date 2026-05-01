@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import one.xis.Page;
 import one.xis.RefreshOnUpdateEvents;
-import one.xis.Widget;
+import one.xis.Frontlet;
 import one.xis.auth.token.DefaultUserSecurityService;
 import one.xis.auth.token.UserSecurityService;
 import one.xis.context.Component;
@@ -42,7 +42,7 @@ public class SseService implements RefreshEventPublisher {
     @Inject(annotatedWith = Page.class)
     private Collection<Object> pageControllers;
 
-    @Inject(annotatedWith = Widget.class)
+    @Inject(annotatedWith = Frontlet.class)
     private Collection<Object> widgetControllers;
 
     // -------------------------------------------------------------------------
@@ -184,7 +184,7 @@ public class SseService implements RefreshEventPublisher {
         if (!knownEventKeys.isEmpty() && !knownEventKeys.contains(eventKey)) {
             throw new IllegalArgumentException(
                     "Unknown SSE event key '" + eventKey + "'. " +
-                            "Declare it via @RefreshOnUpdateEvents on a @Page or @Widget controller. " +
+                            "Declare it via @RefreshOnUpdateEvents on a @Page or @Frontlet controller. " +
                             "Known keys: " + knownEventKeys);
         }
     }

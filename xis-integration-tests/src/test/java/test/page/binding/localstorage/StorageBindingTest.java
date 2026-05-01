@@ -14,7 +14,7 @@ class StorageBindingTest {
     void init() {
         testContext = IntegrationTestContext.builder()
                 .withSingleton(StorageBindingPage.class)
-                .withSingleton(ProductWidget.class)
+                .withSingleton(ProductFrontlet.class)
                 .build();
     }
 

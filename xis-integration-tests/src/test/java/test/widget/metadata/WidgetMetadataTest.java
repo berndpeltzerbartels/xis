@@ -15,14 +15,14 @@ class WidgetMetadataTest {
     void init() {
         testContext = IntegrationTestContext.builder()
                 .withSingleton(WidgetMetadataPage.class)
-                .withSingleton(WidgetMetadataWidget.class)
-                .withSingleton(SecondWidget.class)
+                .withSingleton(WidgetMetadataFrontlet.class)
+                .withSingleton(SecondFrontlet.class)
                 .build();
         
         deepLinkContext = IntegrationTestContext.builder()
                 .withSingleton(DeepLinkingPage.class)
-                .withSingleton(WidgetMetadataWidget.class)
-                .withSingleton(DeepLinkWidget.class)
+                .withSingleton(WidgetMetadataFrontlet.class)
+                .withSingleton(DeepLinkFrontlet.class)
                 .build();
     }
 
@@ -33,10 +33,10 @@ class WidgetMetadataTest {
         // Verify that widget content was loaded via default-widget
         var messageElement = client.getDocument().getElementById("message");
         assertThat(messageElement).isNotNull();
-        assertThat(messageElement.getTextContent()).isEqualTo("Widget with metadata");
+        assertThat(messageElement.getTextContent()).isEqualTo("Frontlet with metadata");
         
         // Verify document title was updated with widget's annotatedTitle
-        assertThat(client.getDocument().getTitle()).isEqualTo("Custom Widget Title");
+        assertThat(client.getDocument().getTitle()).isEqualTo("Custom Frontlet Title");
     }
 
     @Test
@@ -46,7 +46,7 @@ class WidgetMetadataTest {
         // Verify initial widget is loaded
         var messageElement = client.getDocument().getElementById("message");
         assertThat(messageElement).isNotNull();
-        assertThat(client.getDocument().getTitle()).isEqualTo("Custom Widget Title");
+        assertThat(client.getDocument().getTitle()).isEqualTo("Custom Frontlet Title");
         
         // Click button to load second widget
         var loadSecondButton = client.getDocument().getElementById("loadSecond");
@@ -59,7 +59,7 @@ class WidgetMetadataTest {
         assertThat(secondMessageElement.getTextContent()).isEqualTo("Second widget loaded");
         
         // Verify metadata was updated from second widget's annotation
-        assertThat(client.getDocument().getTitle()).isEqualTo("Second Widget Title");
+        assertThat(client.getDocument().getTitle()).isEqualTo("Second Frontlet Title");
     }
 
     @Test
@@ -70,9 +70,9 @@ class WidgetMetadataTest {
         // Scenario:
         // - HTML has containerA with default-widget="WidgetMetadata"
         // - HTML has containerB with no default-widget
-        // - DeepLinkWidget has @Widget(containerId="containerB")
+        // - DeepLinkFrontlet has @Frontlet(containerId="containerB")
         // 
-        // Expected: When DeepLinkWidget is loaded via action, it should go to containerB
+        // Expected: When DeepLinkFrontlet is loaded via action, it should go to containerB
         //           (annotation wins), not containerA (default-widget)
         
         var client = deepLinkContext.openPage(DeepLinkingPage.class);
@@ -82,7 +82,7 @@ class WidgetMetadataTest {
         assertThat(containerA).isNotNull();
         var messageInA = containerA.querySelector("#message");
         assertThat(messageInA).isNotNull();
-        assertThat(messageInA.getTextContent()).isEqualTo("Widget with metadata");
+        assertThat(messageInA.getTextContent()).isEqualTo("Frontlet with metadata");
         
         // Container B should be empty initially
         var containerB = client.getDocument().getElementById("containerB");
@@ -94,7 +94,7 @@ class WidgetMetadataTest {
         assertThat(loadDeepLinkButton).isNotNull();
         loadDeepLinkButton.click();
         
-        // Verify DeepLinkWidget loaded into containerB (annotation wins over default-widget)
+        // Verify DeepLinkFrontlet loaded into containerB (annotation wins over default-widget)
         var deepLinkMessage = containerB.querySelector("#deepLinkMessage");
         assertThat(deepLinkMessage).isNotNull();
         assertThat(deepLinkMessage.getTextContent()).isEqualTo("Deep link widget in container B");
@@ -102,9 +102,9 @@ class WidgetMetadataTest {
         // Verify containerA still has original widget (not replaced)
         messageInA = containerA.querySelector("#message");
         assertThat(messageInA).isNotNull();
-        assertThat(messageInA.getTextContent()).isEqualTo("Widget with metadata");
+        assertThat(messageInA.getTextContent()).isEqualTo("Frontlet with metadata");
         
-        // Verify document title was updated from DeepLinkWidget annotation
+        // Verify document title was updated from DeepLinkFrontlet annotation
         assertThat(client.getDocument().getTitle()).isEqualTo("Deep Link Title");
     }
 }

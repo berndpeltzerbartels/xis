@@ -9,7 +9,7 @@ public class TitleWidgetIntegrationTest {
     @Test
     void widgetChangesPageTitle() {
         var context = IntegrationTestContext.builder()
-                .withSingleton(TitleWidget.class)
+                .withSingleton(TitleFrontlet.class)
                 .withSingleton(TitlePage.class)
                 .build();
         var client = context.openPage(TitlePage.class);

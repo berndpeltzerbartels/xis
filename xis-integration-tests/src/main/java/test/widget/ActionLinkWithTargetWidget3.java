@@ -1,8 +1,8 @@
 package test.widget;
 
-import one.xis.Widget;
+import one.xis.Frontlet;
 
-@Widget
+@Frontlet
 class ActionLinkWithTargetWidget3 {
 
 }

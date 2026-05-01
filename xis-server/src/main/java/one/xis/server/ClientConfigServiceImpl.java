@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import one.xis.Include;
 import one.xis.Page;
-import one.xis.Widget;
+import one.xis.Frontlet;
 import one.xis.context.Component;
 import one.xis.context.Init;
 import one.xis.context.Inject;
@@ -22,12 +22,12 @@ import java.util.stream.Collectors;
 class ClientConfigServiceImpl implements ClientConfigService {
 
     private final PageAttributesFactory pageAttributesFactory;
-    private final WidgetAttributesFactory widgetAttributesFactory;
+    private final FrontletAttributesFactory widgetAttributesFactory;
 
     @Inject(annotatedWith = Page.class)
     private Collection<Object> pageControllers;
 
-    @Inject(annotatedWith = Widget.class)
+    @Inject(annotatedWith = Frontlet.class)
     private Collection<Object> widgetControllers;
 
     @Inject(annotatedWith = Include.class)
@@ -48,7 +48,7 @@ class ClientConfigServiceImpl implements ClientConfigService {
         var configBuilder = ClientConfig.builder()
                 .pendingEventTtlSeconds(pendingEventTtlSeconds);
         addPageAttributes(configBuilder);
-        addWidgetAttributes(configBuilder);
+        addFrontletAttributes(configBuilder);
         addIncludeIds(configBuilder);
         config = configBuilder.build();
         log.info("configuration : {}", config);
@@ -79,9 +79,9 @@ class ClientConfigServiceImpl implements ClientConfigService {
     }
 
 
-    private void addWidgetAttributes(ClientConfig.ClientConfigBuilder configBuilder) {
+    private void addFrontletAttributes(ClientConfig.ClientConfigBuilder configBuilder) {
         var widgetIds = new HashSet<String>();
-        var widgetAttributesHashMap = new HashMap<String, WidgetAttributes>();
+        var widgetAttributesHashMap = new HashMap<String, FrontletAttributes>();
         for (Object widgetController : widgetControllers) {
             var attributes = widgetAttributesFactory.attributes(widgetController);
             widgetIds.add(attributes.getId());

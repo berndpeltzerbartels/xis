@@ -1,11 +1,11 @@
 package test.widget;
 
 import one.xis.ModelData;
-import one.xis.Widget;
+import one.xis.Frontlet;
 
 import java.util.List;
 
-@Widget
+@Frontlet
 class PushWidget2 {
 
     @ModelData("items")

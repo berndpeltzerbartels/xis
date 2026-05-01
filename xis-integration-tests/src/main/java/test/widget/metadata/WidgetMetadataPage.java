@@ -8,6 +8,6 @@ class WidgetMetadataPage {
 
     @ModelData("title")
     String getTitle() {
-        return "Widget Metadata Test Page";
+        return "Frontlet Metadata Test Page";
     }
 }

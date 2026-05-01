@@ -13,7 +13,7 @@ class WidgetShortTagTest {
     @BeforeEach
     void init() {
         testContext = IntegrationTestContext.builder()
-                .withSingleton(SimpleWidget.class)
+                .withSingleton(SimpleFrontlet.class)
                 .withSingleton(WidgetShortTagPage.class)
                 .build();
     }

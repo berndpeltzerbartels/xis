@@ -20,8 +20,8 @@ class ActionLinkWidgetTest {
         when(service.getData()).thenReturn(new ActionLinkWidgetData(101, "bla"));
 
         testContext = IntegrationTestContext.builder()
-                .withSingleton(ActionLinkWidget.class)
-                .withSingleton(SimpleWidget.class)
+                .withSingleton(ActionLinkFrontlet.class)
+                .withSingleton(SimpleFrontlet.class)
                 .withSingleton(WidgetPage.class)
                 .withSingleton(service)
                 .withSingleton(IndexPage.class) // new page in action3

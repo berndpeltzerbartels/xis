@@ -13,6 +13,6 @@ class WidgetButtonPage {
     @ModelData("title")
     String title() {
         invocations++;
-        return "Widget Button Test";
+        return "Frontlet Button Test";
     }
 }

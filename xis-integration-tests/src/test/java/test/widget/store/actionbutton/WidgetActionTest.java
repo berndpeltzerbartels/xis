@@ -13,7 +13,7 @@ class WidgetActionTest {
     void init() {
         context = IntegrationTestContext.builder()
                 .withSingleton(WidgetActionPage.class)
-                .withSingleton(WidgetActionWidget.class)
+                .withSingleton(WidgetActionFrontlet.class)
                 .build();
     }
 
@@ -23,7 +23,7 @@ class WidgetActionTest {
 
         // Initial values should be 5
         var counterOnPage = client.getDocument().getElementById("counter-value-page").getInnerText();
-        var counterOnWidget = client.getDocument().getElementById("counter-value-widget").getInnerText();
+        var counterOnFrontlet = client.getDocument().getElementById("counter-value-widget").getInnerText();
 
         //  assertThat(counterOnPage).isEqualTo("5");
         assertThat(counterOnWidget).isEqualTo("0");
@@ -33,7 +33,7 @@ class WidgetActionTest {
 
         // Both page and widget should now show 6
         counterOnPage = client.getDocument().getElementById("counter-value-page").getInnerText();
-        counterOnWidget = client.getDocument().getElementById("counter-value-widget").getInnerText();
+        counterOnFrontlet = client.getDocument().getElementById("counter-value-widget").getInnerText();
 
         assertThat(counterOnPage).isEqualTo("1");
         assertThat(counterOnWidget).isEqualTo("1");

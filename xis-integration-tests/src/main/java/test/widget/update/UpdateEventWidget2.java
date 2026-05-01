@@ -2,9 +2,9 @@ package test.widget.update;
 
 import one.xis.ModelData;
 import one.xis.RefreshOnUpdateEvents;
-import one.xis.Widget;
+import one.xis.Frontlet;
 
-@Widget
+@Frontlet
 @RefreshOnUpdateEvents("widget2-update")
 class UpdateEventWidget2 {
 

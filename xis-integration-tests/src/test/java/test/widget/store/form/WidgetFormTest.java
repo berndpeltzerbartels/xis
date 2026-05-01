@@ -14,7 +14,7 @@ class WidgetFormTest {
     void init() {
         context = IntegrationTestContext.builder()
                 .withSingleton(WidgetFormPage.class)
-                .withSingleton(WidgetFormWidget.class)
+                .withSingleton(WidgetFormFrontlet.class)
                 .build();
     }
 
@@ -24,7 +24,7 @@ class WidgetFormTest {
 
         // Initial values should be 10
         var counterOnPage = client.getDocument().getElementById("counter-value-page").getInnerText();
-        var counterOnWidget = client.getDocument().getElementById("counter-value-widget").getInnerText();
+        var counterOnFrontlet = client.getDocument().getElementById("counter-value-widget").getInnerText();
 
         assertThat(counterOnPage).isEqualTo("0");
         assertThat(counterOnWidget).isEqualTo("0");
@@ -39,7 +39,7 @@ class WidgetFormTest {
 
         // Both page and widget should now show 13 (10 + 3)
         counterOnPage = client.getDocument().getElementById("counter-value-page").getInnerText();
-        counterOnWidget = client.getDocument().getElementById("counter-value-widget").getInnerText();
+        counterOnFrontlet = client.getDocument().getElementById("counter-value-widget").getInnerText();
 
         assertThat(counterOnPage).isEqualTo("3");
         assertThat(counterOnWidget).isEqualTo("3");

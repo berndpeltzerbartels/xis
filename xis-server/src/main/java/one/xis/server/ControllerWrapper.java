@@ -3,7 +3,7 @@ package one.xis.server;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import one.xis.UserContextImpl;
-import one.xis.Widget;
+import one.xis.Frontlet;
 import one.xis.auth.AuthenticationException;
 import one.xis.security.SecurityUtil;
 import one.xis.validation.ValidatorMessages;
@@ -66,7 +66,7 @@ public class ControllerWrapper {
     }
 
     boolean isWidgetController() {
-        return controller.getClass().isAnnotationPresent(Widget.class);
+        return controller.getClass().isAnnotationPresent(Frontlet.class);
     }
 
     Class<?> getControllerClass() {

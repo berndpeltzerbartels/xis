@@ -20,13 +20,13 @@ class WidgetContainerParameterTest {
 
         testContext = IntegrationTestContext.builder()
                 .withSingleton(WidgetContainerParameterPage.class)
-                .withSingleton(WidgetContainerParameterWidget.class)
+                .withSingleton(WidgetContainerParameterFrontlet.class)
                 .withSingleton(service)
                 .build();
     }
 
     @Test
-    @DisplayName("Widget container with xis:parameter tags passes parameters to widget")
+    @DisplayName("Frontlet container with xis:parameter tags passes parameters to widget")
     void widgetContainerWithParameterTags() {
         var client = testContext.openPage("/widgetContainerParameterPage.html");
 
@@ -35,7 +35,7 @@ class WidgetContainerParameterTest {
     }
 
     @Test
-    @DisplayName("Widget container parameters are available in action methods")
+    @DisplayName("Frontlet container parameters are available in action methods")
     void widgetContainerParametersInAction() {
         var client = testContext.openPage("/widgetContainerParameterPage.html");
         client.getDocument().getElementByTagName("a").click();

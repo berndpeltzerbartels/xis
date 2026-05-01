@@ -40,10 +40,10 @@ class ControllerMethodResultMapper {
             mapPageResponse(pageResponse, controllerMethodResult);
         } else if (returnValue instanceof PageUrlResponse pageUrlResponse) {
             controllerMethodResult.setRedirectUrl(pageUrlResponse.getUrl());
-        } else if (returnValue instanceof WidgetResponse widgetResponse && widgetResponse.getControllerClass() == null) {
-            mapWidgetResponse(widgetResponse, controllerMethodResult);
-        } else if (returnValue instanceof WidgetResponse widgetResponse) {
-            mapWidgetResponse(widgetResponse, controllerMethodResult);
+        } else if (returnValue instanceof FrontletResponse widgetResponse && widgetResponse.getControllerClass() == null) {
+            mapFrontletResponse(widgetResponse, controllerMethodResult);
+        } else if (returnValue instanceof FrontletResponse widgetResponse) {
+            mapFrontletResponse(widgetResponse, controllerMethodResult);
         } else if (returnValue instanceof Class<?> controllerClass) {
             updateController(controllerMethodResult, controllerClass, emptyMap());
         } else if (returnValue instanceof RedirectControllerResponse redirectControllerResponse) {
@@ -105,7 +105,7 @@ class ControllerMethodResultMapper {
         controllerMethodResult.getFormData().put(key, value);
     }
 
-    private void mapWidgetResponse(WidgetResponse widgetResponse, ControllerMethodResult result) {
+    private void mapFrontletResponse(FrontletResponse widgetResponse, ControllerMethodResult result) {
         if (widgetResponse.getControllerClass() != null) {
             updateController(result, widgetResponse.getControllerClass(), widgetResponse.getPathVariables());
         }
@@ -138,17 +138,17 @@ class ControllerMethodResultMapper {
     }
 
     private void updateController(@NonNull ControllerMethodResult result, @NonNull Class<?> controllerClass, Map<String, Object> pathVariables) {
-        if (controllerClass.isAnnotationPresent(Widget.class)) {
-            result.setNextWidgetId(WidgetUtil.getId(controllerClass));
-            var url = WidgetUtil.getUrl(controllerClass);
+        if (controllerClass.isAnnotationPresent(Frontlet.class)) {
+            result.setNextWidgetId(FrontletUtil.getId(controllerClass));
+            var url = FrontletUtil.getUrl(controllerClass);
             if (!url.isEmpty()) {
                 result.setAnnotatedAddress(url);
             }
-            var title = WidgetUtil.getTitle(controllerClass);
+            var title = FrontletUtil.getTitle(controllerClass);
             if (!title.isEmpty()) {
                 result.setAnnotatedTitle(title);
             }
-            var containerId = WidgetUtil.getContainerId(controllerClass);
+            var containerId = FrontletUtil.getContainerId(controllerClass);
             if (!containerId.isEmpty()) {
                 result.setWidgetContainerId(containerId);
             }

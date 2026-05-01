@@ -11,7 +11,7 @@ class WidgetContainerScrollTest {
     void widgetContainerWithScrollToTop() {
         var context = IntegrationTestContext.builder()
                 .withSingleton(ScrollTestPage.class)
-                .withSingleton(ScrollTestWidget.class)
+                .withSingleton(ScrollTestFrontlet.class)
                 .withSingleton(ScrollTestWidget2.class)
                 .build();
 
@@ -33,7 +33,7 @@ class WidgetContainerScrollTest {
     void widgetContainerWithoutScrollToTop() {
         var context = IntegrationTestContext.builder()
                 .withSingleton(NoScrollTestPage.class)
-                .withSingleton(ScrollTestWidget.class)
+                .withSingleton(ScrollTestFrontlet.class)
                 .build();
 
         var client = context.openPage(NoScrollTestPage.class);

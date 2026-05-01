@@ -51,7 +51,7 @@ class UpdateEventTest {
         // Click action on Page - should emit "widget2-update" event
         client.getDocument().getElementById("page-action-link").click();
 
-        // Widget1 should reload (because WidgetResponse targets container1)
+        // Widget1 should reload (because FrontletResponse targets container1)
         assertThat(client.getDocument().getElementById("widget1-load-count").getInnerText()).isEqualTo("2");
         
         // Widget2 should also reload (because it listens to "widget2-update" event)
