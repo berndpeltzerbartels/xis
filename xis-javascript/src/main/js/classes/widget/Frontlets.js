@@ -5,17 +5,17 @@ class Frontlets {
      * @param {HttpClient} client
      */
     constructor(client) {
-        this.widgets = {};
-        this.widgetInstances = {};
+        this.frontlets = {};
+        this.frontletInstances = {};
         this.client = client;
-        this.widgetAttributes = {};
+        this.frontletAttributes = {};
     }
 
     loadWidgets(config) {
         var _this = this;
         var promises = [];
-        this.widgetAttributes = config.widgetAttributes;
-        config.widgetIds.forEach(id => _this.widgets[id] = {});
+        this.frontletAttributes = config.widgetAttributes;
+        config.widgetIds.forEach(id => _this.frontlets[id] = {});
         config.widgetIds.forEach(id => promises.push(_this.loadWidget(id)));
         return Promise.all(promises).then(() => config);
     }
@@ -25,21 +25,21 @@ class Frontlets {
     loadWidget(widgetId) {
         var _this = this;
         return this.client.loadWidget(widgetId).then(widgetHtml => {
-            var widget = new Frontlet();
-            widget.id = widgetId;
-            widget.html = widgetHtml;
-            widget.widgetAttributes = _this.widgetAttributes[widgetId];
-            _this.addWidget(widgetId, widget);
+            var frontlet = new Frontlet();
+            frontlet.id = widgetId;
+            frontlet.html = widgetHtml;
+            frontlet.frontletAttributes = _this.frontletAttributes[widgetId];
+            _this.addWidget(widgetId, frontlet);
         });
     }
 
     /**
      * @public
      * @param {string} widgetId 
-     * @param {Frontlet} widget
+     * @param {Frontlet} frontlet
      */
-    addWidget(widgetId, widget) {
-        this.widgets[widgetId] = widget;
+    addWidget(widgetId, frontlet) {
+        this.frontlets[widgetId] = frontlet;
     }
 
     /**
@@ -48,35 +48,35 @@ class Frontlets {
     * @returns {FrontletInstance}
     */
     getWidgetInstance(widgetId) {
-        if (!this.widgetInstances[widgetId]) {
-            this.widgetInstances[widgetId] = [];
+        if (!this.frontletInstances[widgetId]) {
+            this.frontletInstances[widgetId] = [];
         }
-        var instances = this.widgetInstances[widgetId];
-        var widgetInstance = instances.shift();
-        if (!widgetInstance) {
-            var widget = this.widgets[widgetId];
-            if (!widget) {
+        var instances = this.frontletInstances[widgetId];
+        var frontletInstance = instances.shift();
+        if (!frontletInstance) {
+            var frontlet = this.frontlets[widgetId];
+            if (!frontlet) {
                 throw new Error('no such widget: ' + widgetId);
             }
-            widgetInstance = new FrontletInstance(widget, this);
+            frontletInstance = new FrontletInstance(frontlet, this);
         }
-        return widgetInstance;
+        return frontletInstance;
     }
 
     /**
      * @public
-     * @param {FrontletInstance} widgetInstance
+     * @param {FrontletInstance} frontletInstance
      */
-    disposeInstance(widgetInstance) {
-        var instances = this.widgetInstances[widgetInstance.widget.id];
-        widgetInstance.containerHandler = undefined;
-        instances.push(widgetInstance);
+    disposeInstance(frontletInstance) {
+        var instances = this.frontletInstances[frontletInstance.frontlet.id];
+        frontletInstance.containerHandler = undefined;
+        instances.push(frontletInstance);
     }
 
     reset() {
-        this.widgets = {};
-        this.widgetInstances = {};
-        this.widgetAttributes = {};
+        this.frontlets = {};
+        this.frontletInstances = {};
+        this.frontletAttributes = {};
     }
 
 }

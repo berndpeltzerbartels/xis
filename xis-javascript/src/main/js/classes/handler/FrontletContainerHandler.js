@@ -5,10 +5,10 @@
  * @access public
  * @description This handler is responsible for handling a tag for presenting widgets.
  * 
- * @property {Frontlets} widgets
- * @property {FrontletContainers} widgetContainers
+ * @property {Frontlets} frontlets
+ * @property {FrontletContainers} frontletContainers
  * @property {TagHandlers} tagHandlers
- * @property {FrontletInstance} widgetInstance
+ * @property {FrontletInstance} frontletInstance
  * @property {String} containerId
  * @property {Expression} containerIdExpression
  * @property {Expression} defaultWidgetExpression
@@ -19,22 +19,22 @@ class FrontletContainerHandler extends TagHandler {
     /**
      *
      * @param {Element} tag
-     * @param {Frontlets} widgets
-     * @param {FrontletContainers} widgetContainers
+     * @param {Frontlets} frontlets
+     * @param {FrontletContainers} frontletContainers
      */
-    constructor(tag, widgets, widgetContainers, tagHandlers) {
+    constructor(tag, frontlets, frontletContainers, tagHandlers) {
         super(tag);
-        this.widgets = widgets;
-        this.widgetContainers = widgetContainers;
+        this.frontlets = frontlets;
+        this.frontletContainers = frontletContainers;
         this.tagHandlers = tagHandlers;
-        this.widgetInstance = undefined;
+        this.frontletInstance = undefined;
         this.containerId = undefined;
         this.containerIdExpression = this.variableTextContentFromAttribute('container-id');
         this.defaultWidgetExpression = this.variableTextContentFromAttribute('default-widget');
         this.type = 'widget-container-handler';
         this.scrollToTop = tag.getAttribute('scroll-to-top') === 'true';
         this.buffer = undefined;
-        this.widgetParameters = {};
+        this.frontletParameters = {};
     }
 
     /**
@@ -43,7 +43,7 @@ class FrontletContainerHandler extends TagHandler {
      * @param {String} value 
      */
     addParameter(name, value) {
-       this.widgetParameters[name] = value;
+       this.frontletParameters[name] = value;
     }
 
     /**
@@ -64,24 +64,24 @@ class FrontletContainerHandler extends TagHandler {
     */
     handleActionResponse(response) {
         if (this.shouldDelegateToTargetContainer(response)) {
-            var targetContainer = app.widgetContainers.get(response.widgetContainerId);
+            var targetContainer = app.frontletContainers.get(response.widgetContainerId);
             if (targetContainer) {
                 return targetContainer.handleActionResponse(response);
             }
             console.warn('Target container not found:', response.widgetContainerId);
         }
-        this.widgetParameters = mergeObjects(this.widgetParameters, response.widgetParameters);
-        if (!this.widgetState) {
-            this.widgetState = new FrontletState(app.pageController.resolvedURL, this.widgetParameters);
+        this.frontletParameters = mergeObjects(this.frontletParameters, response.widgetParameters);
+        if (!this.frontletState) {
+            this.frontletState = new FrontletState(app.pageController.resolvedURL, this.frontletParameters);
         }
         var data = response.data;
-        data.setValue(['widgetParameters'], this.widgetParameters);
+        data.setValue(['widgetParameters'], this.frontletParameters);
         this.refreshContainerId(data);
 
-        const widgetChanges = !!response.nextWidgetId && response.nextWidgetId !== this.currentWidgetId();
+        const frontletChanges = !!response.nextWidgetId && response.nextWidgetId !== this.currentWidgetId();
 
         return PageController.enqueue(() => {
-            if (widgetChanges) {
+            if (frontletChanges) {
                 // Widget-Wechsel: Buffer verwenden damit Container nicht kurz leer erscheint
                 return this.initBuffer()
                     .then(() => this.bindNextWidgetIfNeeded(response))
@@ -108,17 +108,17 @@ class FrontletContainerHandler extends TagHandler {
      */
     refresh(data) {
         this.data = data;
-        this.widgetParameters = {};
+        this.frontletParameters = {};
         this.refreshContainerId(data);
         if (!this.bindByWidgetAnnotation()) {
             this.bindWidgetInitial(data);
         }
-        this.widgetParameters = mergeObjects(this.widgetParameters, data.getValue(['widgetParameters']));
-        this.widgetState = new FrontletState(app.pageController.resolvedURL, this.widgetParameters);
-        data.setValue(['widgetParameters'], this.widgetParameters);
+        this.frontletParameters = mergeObjects(this.frontletParameters, data.getValue(['widgetParameters']));
+        this.frontletState = new FrontletState(app.pageController.resolvedURL, this.frontletParameters);
+        data.setValue(['widgetParameters'], this.frontletParameters);
         const descendantPromise = this.refreshDescendantHandlers(data); // xis:parameter tags will call addParameter
         var promises = [];
-        if (this.widgetInstance) {
+        if (this.frontletInstance) {
             promises.push(this.reloadDataAndRefresh(data));
         }
         return Promise.all(promises.concat([descendantPromise]));
@@ -132,13 +132,13 @@ class FrontletContainerHandler extends TagHandler {
     /**
      * @public
      * @param {string} widgetId 
-     * @param {FrontletState} widgetState
+     * @param {FrontletState} frontletState
      * @returns {Promise<void>}
      */
-    showWidget(widgetId, widgetState) {
-        this.widgetState = widgetState;
+    showWidget(widgetId, frontletState) {
+        this.frontletState = frontletState;
         this.ensureWidgetBound(widgetId, true);
-        this.widgetState = widgetState;
+        this.frontletState = frontletState;
         return PageController.enqueue(() => this.reloadDataAndRefresh(this.parentData()));
     }
     /**
@@ -170,11 +170,11 @@ class FrontletContainerHandler extends TagHandler {
 
 
     currentWidgetId() {
-        return this.widgetInstance ? this.widgetInstance.widget.id : undefined;
+        return this.frontletInstance ? this.frontletInstance.frontlet.id : undefined;
     }
 
     currentWidgetParameters() {
-        return this.widgetParameters;
+        return this.frontletParameters;
     }
 
 
@@ -186,9 +186,9 @@ class FrontletContainerHandler extends TagHandler {
         if (this.containerIdExpression) {
             var containerId = this.containerIdExpression.evaluate(parentData);
             if (this.containerId) {
-                this.widgetContainers.updateContainerId(this.containerId, containerId);
+                this.frontletContainers.updateContainerId(this.containerId, containerId);
             } else {
-                this.widgetContainers.addContainer(this.tag, containerId);
+                this.frontletContainers.addContainer(this.tag, containerId);
             }
             this.containerId = containerId;
         }
@@ -200,7 +200,7 @@ class FrontletContainerHandler extends TagHandler {
      * @param {Data} parentData
      */
     bindWidgetInitial(parentData) {
-        if (this.widgetInstance) {
+        if (this.frontletInstance) {
             return; // Already bound, only run once
         }
         this.bindDefaultWidget(parentData);
@@ -208,10 +208,10 @@ class FrontletContainerHandler extends TagHandler {
 
     bindByWidgetAnnotation() {
         var response = app.currentResponse;
-        for (var defaultWidget of response.defaultWidgets) {
-            if (defaultWidget.containerId === this.containerId) {
-                this.ensureWidgetBound(defaultWidget.widgetId);
-                this.widgetState = new FrontletState(app.pageController.resolvedURL, this.widgetParameters);
+        for (var defaultFrontlet of response.defaultWidgets) {
+            if (defaultFrontlet.containerId === this.containerId) {
+                this.ensureWidgetBound(defaultFrontlet.widgetId);
+                this.frontletState = new FrontletState(app.pageController.resolvedURL, this.frontletParameters);
                 return true;
             }
         }
@@ -228,20 +228,20 @@ class FrontletContainerHandler extends TagHandler {
             return;
         }
 
-        var widgetUrl = this.defaultWidgetExpression.evaluate(parentData);
-        if (!widgetUrl) {
+        var frontletUrl = this.defaultWidgetExpression.evaluate(parentData);
+        if (!frontletUrl) {
             return;
         }
 
         // Extract and merge URL parameters with xis:parameter tag parameters
-        var widgetParametersInUrl = urlParameters(widgetUrl);
-        for (var key of Object.keys(widgetParametersInUrl)) {
-            this.widgetParameters[key] = widgetParametersInUrl[key];
+        var frontletParametersInUrl = urlParameters(frontletUrl);
+        for (var key of Object.keys(frontletParametersInUrl)) {
+            this.frontletParameters[key] = frontletParametersInUrl[key];
         }
 
-        var widgetId = stripQuery(widgetUrl);
+        var widgetId = stripQuery(frontletUrl);
         this.ensureWidgetBound(widgetId);
-        this.widgetState = new FrontletState(app.pageController.resolvedURL, this.widgetParameters);
+        this.frontletState = new FrontletState(app.pageController.resolvedURL, this.frontletParameters);
     }
 
     /**
@@ -253,28 +253,28 @@ class FrontletContainerHandler extends TagHandler {
         if (shouldScroll === undefined) {
             shouldScroll = false;
         }
-        if (this.widgetInstance) {
-            if (this.widgetInstance.widget.id == widgetId) {
+        if (this.frontletInstance) {
+            if (this.frontletInstance.frontlet.id == widgetId) {
                 return;
             } else {
-                var parent = this.widgetInstance.root.parentNode;
+                var parent = this.frontletInstance.root.parentNode;
                 if (parent == this.tag || parent == this.buffer) {
-                    parent.removeChild(this.widgetInstance.root);
+                    parent.removeChild(this.frontletInstance.root);
                 }
-                this.removeDescendantHandler(this.widgetInstance.rootHandler);
-                this.widgetInstance.dispose();
+                this.removeDescendantHandler(this.frontletInstance.rootHandler);
+                this.frontletInstance.dispose();
             }
         }
-        this.widgetInstance = assertNotNull(this.widgets.getWidgetInstance(widgetId), 'no such widget: ' + widgetId);
-        this.widgetInstance.containerHandler = this;
-        var widgetRoot = assertNotNull(this.widgetInstance.root, 'no widget root: ' + widgetId);
+        this.frontletInstance = assertNotNull(this.frontlets.getWidgetInstance(widgetId), 'no such widget: ' + widgetId);
+        this.frontletInstance.containerHandler = this;
+        var frontletRoot = assertNotNull(this.frontletInstance.root, 'no widget root: ' + widgetId);
         var target = this.buffer ? this.buffer : this.tag;
-        target.appendChild(widgetRoot);
-        var widgetHandler = assertNotNull(this.widgetInstance.rootHandler, 'no widget handler: ' + widgetId);
+        target.appendChild(frontletRoot);
+        var frontletHandler = assertNotNull(this.frontletInstance.rootHandler, 'no widget handler: ' + widgetId);
         if (shouldScroll && this.scrollToTop) {
             window.scrollTo(0, 0);
         }
-        this.addDescendantHandler(widgetHandler);
+        this.addDescendantHandler(frontletHandler);
     }
     /**
      * @private
@@ -310,7 +310,7 @@ class FrontletContainerHandler extends TagHandler {
         if (pageUpdated) {
             return Promise.resolve();
         }
-        return app.widgetContainers.handleUpdateEvents(updateEventKeys);
+        return app.frontletContainers.handleUpdateEvents(updateEventKeys);
     }
 
     /**
@@ -330,7 +330,7 @@ class FrontletContainerHandler extends TagHandler {
      * @returns {Data}
      */
     updateWidgetStateData(data) {
-        this.widgetState.data = data;
+        this.frontletState.data = data;
         return data;
     }
 
@@ -340,9 +340,9 @@ class FrontletContainerHandler extends TagHandler {
      * @returns {Data}
      */
     mergeWidgetParameters(data) {
-        this.widgetParameters = mergeObjects(this.widgetParameters, data.getValue(['widgetParameters']));
-        this.widgetState.widgetParameters = this.widgetParameters;
-        data.setValue(['widgetParameters'], this.widgetParameters);
+        this.frontletParameters = mergeObjects(this.frontletParameters, data.getValue(['widgetParameters']));
+        this.frontletState.frontletParameters = this.frontletParameters;
+        data.setValue(['widgetParameters'], this.frontletParameters);
         return data;
     }
 
@@ -354,9 +354,9 @@ class FrontletContainerHandler extends TagHandler {
     }
 
     doLoad(parentData) {
-        if (this.widgetInstance) {
+        if (this.frontletInstance) {
             const response = app.currentResponse;
-            return app.client.loadWidgetData(this.widgetInstance, this.widgetState, this)
+            return app.client.loadWidgetData(this.frontletInstance, this.frontletState, this)
                 .then(response => this.updatePageMetadata(response))
                 .then(response => this.enrichResponseDataWithUrlInfo(response))
                 .then(data => this.attachParentData(data, parentData))
@@ -377,12 +377,12 @@ class FrontletContainerHandler extends TagHandler {
      */
     enrichResponseDataWithUrlInfo(response) {
         const data = response.data;
-        if (this.widgetState && this.widgetState.resolvedURL) {
-            const url = this.widgetState.resolvedURL.url;
+        if (this.frontletState && this.frontletState.resolvedURL) {
+            const url = this.frontletState.resolvedURL.url;
             const pathname = url.split('?')[0]; // Remove query string
             data.setValue(['url'], url);
             data.setValue(['pathname'], pathname);
-            data.setValue(['queryParams'], this.widgetState.resolvedURL.urlParameters);
+            data.setValue(['queryParams'], this.frontletState.resolvedURL.urlParameters);
         }
         return data;
     }

@@ -5,10 +5,10 @@ class FrontletState {
     /**
      * 
      * @param {ResolvedURL} resolvedURL 
-     * @param {{string: string}} widgetParameters 
+     * @param {{string: string}} frontletParameters
      */
-    constructor(resolvedURL, widgetParameters) {
+    constructor(resolvedURL, frontletParameters) {
         this.resolvedURL = resolvedURL;
-        this.widgetParameters = widgetParameters;
+        this.frontletParameters = frontletParameters;
     }
 }

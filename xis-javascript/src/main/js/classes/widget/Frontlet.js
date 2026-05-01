@@ -2,14 +2,14 @@
  * @typedef Frontlet
  * @property {string} id
  * @property {Element}
- * @property {FrontletAttributes} widgetAttributes
+ * @property {FrontletAttributes} frontletAttributes
  */
 class Frontlet {
 
     constructor() {
         this.id = undefined;
         this.html = '';
-        this.widgetAttributes = {};
+        this.frontletAttributes = {};
         this.urlParameters = {};
     }
 }

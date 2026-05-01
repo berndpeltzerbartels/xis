@@ -7,18 +7,18 @@ class HandlerBuilder {
     /**
      * @param {DomAccessor} domAccessor
      * @param {Client} client for actions and model
-     * @param {Frontlets} widgets
+     * @param {Frontlets} frontlets
      * @param {Includes} includes
-     * @param {FrontletContainers} widgetContainers
+     * @param {FrontletContainers} frontletContainers
      * @param {TagHandlers} tagHandlers
      * @param {Initializer} initializer
      */
-    constructor(domAccessor, client, widgets, includes, widgetContainers, tagHandlers, initializer) {
+    constructor(domAccessor, client, frontlets, includes, frontletContainers, tagHandlers, initializer) {
         this.domAccessor = domAccessor;
         this.client = client;
-        this.widgets = widgets;
+        this.frontlets = frontlets;
         this.includes = includes;
-        this.widgetContainers = widgetContainers;
+        this.frontletContainers = frontletContainers;
         this.tagHandlers = tagHandlers;
         this.initializer = initializer;
     }
@@ -247,9 +247,9 @@ class HandlerBuilder {
             handler = new PageLinkHandler(element);
         }
         if (element.getAttribute('xis:widget')) {
-            handler = new FrontletLinkHandler(element, this.widgetContainers);
+            handler = new FrontletLinkHandler(element, this.frontletContainers);
         } else if (element.getAttribute('xis:action')) {
-            handler = new ActionLinkHandler(element, this.client, this.widgetContainers);
+            handler = new ActionLinkHandler(element, this.client, this.frontletContainers);
         }
         return handler;
     }
@@ -280,13 +280,13 @@ class HandlerBuilder {
      */
     createButtonHandler(element) {
         if (element.getAttribute('xis:action')) {
-            return new ActionButtonHandler(element, this.client, this.widgetContainers);
+            return new ActionButtonHandler(element, this.client, this.frontletContainers);
         }
         if (element.getAttribute('xis:page')) {
             return new PageButtonHandler(element);
         }
         if (element.getAttribute('xis:widget')) {
-            return new FrontletButtonHandler(element, this.widgetContainers);
+            return new FrontletButtonHandler(element, this.frontletContainers);
         }
     }
 
@@ -309,8 +309,8 @@ class HandlerBuilder {
     createFrontletContainerHandler(container) {
         return new FrontletContainerHandler(
             container,
-            this.widgets,
-            this.widgetContainers,
+            this.frontlets,
+            this.frontletContainers,
             this.tagHandlers
         );
     }

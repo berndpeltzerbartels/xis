@@ -8,7 +8,7 @@
  * @property {String} type
  * @property {Object} parameters
  * @property {String} targetPageUrl
- * @property {String} targetWidgetUrl
+ * @property {String} targetFrontletUrl
  * @property {String} targetContainerId
  */
 class PageLinkHandlerBase extends TagHandler {
@@ -22,7 +22,7 @@ class PageLinkHandlerBase extends TagHandler {
         this.type = 'page-link-handler-base';
         this.parameters = {};
         this.targetPageUrl = undefined;
-        this.targetWidgetUrl = undefined;
+        this.targetFrontletUrl = undefined;
         this.targetContainerId = undefined;
         element.addEventListener('click', event => {
             event.preventDefault();
@@ -39,7 +39,7 @@ class PageLinkHandlerBase extends TagHandler {
         this.parameters = {};
         const descendantPromise = this.refreshDescendantHandlers(data); // attributes might have variables !
         this.targetPageUrl = this.tag.getAttribute('xis:page');
-        this.targetWidgetUrl = this.tag.getAttribute('xis:widget');
+        this.targetFrontletUrl = this.tag.getAttribute('xis:widget');
         this.targetContainerId = this.tag.getAttribute('xis:target-container');
         return descendantPromise;
     }

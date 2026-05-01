@@ -6,10 +6,10 @@
  * @description Base class for handling links to widgets. Backend is not involved.
  * 
  * @property {String} type
- * @property {FrontletContainers} widgetContainers
- * @property {Object} widgetParameters
+ * @property {FrontletContainers} frontletContainers
+ * @property {Object} frontletParameters
  * @property {String} targetPageUrl
- * @property {String} targetWidgetUrl
+ * @property {String} targetFrontletUrl
  * @property {String} targetContainerId
  */
 class FrontletLinkHandlerBase extends TagHandler {
@@ -17,15 +17,15 @@ class FrontletLinkHandlerBase extends TagHandler {
     /**
      * 
      * @param {Element} element 
-     * @param {FrontletContainers} widgetContainers
+     * @param {FrontletContainers} frontletContainers
      */
-    constructor(element, widgetContainers) {
+    constructor(element, frontletContainers) {
         super(element);
         this.type = 'widget-link-handler-base';
-        this.widgetContainers = widgetContainers;
-        this.widgetParameters = {};
+        this.frontletContainers = frontletContainers;
+        this.frontletParameters = {};
         this.targetPageUrl = undefined;
-        this.targetWidgetUrl = undefined;
+        this.targetFrontletUrl = undefined;
         this.targetContainerId = undefined;
         element.addEventListener('click', event => {
             event.preventDefault();
@@ -39,10 +39,10 @@ class FrontletLinkHandlerBase extends TagHandler {
      */
     refresh(data) {
         this.data = data;
-        this.widgetParameters = {};
+        this.frontletParameters = {};
         const descendantPromise = this.refreshDescendantHandlers(data); // attributes might have variables !
         this.targetPageUrl = this.tag.getAttribute('xis:page');
-        this.targetWidgetUrl = this.tag.getAttribute('xis:widget');
+        this.targetFrontletUrl = this.tag.getAttribute('xis:widget');
         this.targetContainerId = this.tag.getAttribute('xis:target-container');
         return descendantPromise;
     }
@@ -53,7 +53,7 @@ class FrontletLinkHandlerBase extends TagHandler {
      * @param {String} value 
      */
     addParameter(name, value) {
-        this.widgetParameters[name] = value;
+        this.frontletParameters[name] = value;
     }
 
 
@@ -70,14 +70,14 @@ class FrontletLinkHandlerBase extends TagHandler {
                 var containerId = this.targetContainerId || 'parent container';
                 throw new Error('No widget container handler found for "' + containerId + '". This should not happen - please report this as a bug.');
             }
-            var widgetParametersInUrl = urlParameters(this.targetWidgetUrl);
-            for (var key of Object.keys(widgetParametersInUrl)) {
-                this.widgetParameters[key] = widgetParametersInUrl[key];
+            var frontletParametersInUrl = urlParameters(this.targetFrontletUrl);
+            for (var key of Object.keys(frontletParametersInUrl)) {
+                this.frontletParameters[key] = frontletParametersInUrl[key];
             }
-            var widgetState = new FrontletState(app.pageController.resolvedURL, this.widgetParameters);
-            var widgetId = stripQuery(this.targetWidgetUrl);
+            var frontletState = new FrontletState(app.pageController.resolvedURL, this.frontletParameters);
+            var widgetId = stripQuery(this.targetFrontletUrl);
             handler.initBuffer()
-                .then(() => handler.showWidget(widgetId, widgetState))
+                .then(() => handler.showWidget(widgetId, frontletState))
                 .then(() => handler.commitBuffer())
                 .then(() => resolve());
         });
@@ -89,7 +89,7 @@ class FrontletLinkHandlerBase extends TagHandler {
      */
     getTargetContainer() {
         if (this.targetContainerId) {
-            var container = this.widgetContainers.findContainer(this.targetContainerId);
+            var container = this.frontletContainers.findContainer(this.targetContainerId);
             if (!container) {
                 throw new Error('Widget container with id "' + this.targetContainerId + '" not found. Make sure a widget-container with this container-id exists on the page.');
             }

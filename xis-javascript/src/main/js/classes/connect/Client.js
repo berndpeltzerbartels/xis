@@ -69,10 +69,10 @@ class Client {
 
     /**
     * @public
-    * @param {FrontletInstance} widgetInstance
+    * @param {FrontletInstance} frontletInstance
     * @returns {Promise<ServerReponse>}
     */
-    loadWidgetData(widgetInstance, widgetState) {
+    loadWidgetData(frontletInstance, frontletState) {
         throw new Error('Not implemented');
     }
 
@@ -89,12 +89,12 @@ class Client {
 
     /**
      * @public
-     * @param {FrontletInstance} widgetInstance
+     * @param {FrontletInstance} frontletInstance
      * @param {string} action
      * @param {string} actionParameters
      * @returns {Promise<ServerReponse>}
      */
-    widgetLinkAction(widgetInstance, widgetState, action, actionParameters) {
+    widgetLinkAction(frontletInstance, frontletState, action, actionParameters) {
         throw new Error('Not implemented');
     }
 
@@ -243,7 +243,7 @@ class Client {
      * @param {String} action 
      * @param {any} actionParameters 
      */
-    createFormRequest(resolvedURL, widgetId, formData, action, formBindingKey, widgetParameters) {
+    createFormRequest(resolvedURL, widgetId, formData, action, formBindingKey, frontletParameters) {
         var mappedFormData = {};
         if (formBindingKey) {
             mappedFormData[formBindingKey] = formData;
@@ -259,7 +259,7 @@ class Client {
         request.formData = mappedFormData;
         request.urlParameters = resolvedURL.urlParameters;
         request.pathVariables = resolvedURL.pathVariablesAsMap();
-        request.widgetParameters = widgetParameters;
+        request.widgetParameters = frontletParameters;
         request.zoneId = this.zoneId;
         request.type = request.widgetId ? 'widget' : 'page';
         if (widgetId) { // TODO write a test
@@ -280,28 +280,28 @@ class Client {
     /**
     * @protected
     * @param {string} widgetId 
-    * @param {FrontletInstance} widgetInstance
-    * @param {FrontletState} widgetState
+    * @param {FrontletInstance} frontletInstance
+    * @param {FrontletState} frontletState
     * @param {string} action (nullable)
     * @param {Data} formData (nullable)
     * @param {string} actionParameters (nullable)
     * @returns {ClientRequest}
     */
-    createWidgetRequest(widgetInstance, widgetState, action, formData, actionParameters) {
+    createWidgetRequest(frontletInstance, frontletState, action, formData, actionParameters) {
         var request = new ClientRequest();
         request.clientId = this.clientId;
-        request.widgetId = widgetInstance.widget.id;
+        request.widgetId = frontletInstance.frontlet.id;
         request.action = action;
         request.formData = formData ? formData.values : {};
-        request.urlParameters = widgetState.resolvedURL.urlParameters;
-        request.pathVariables = widgetState.resolvedURL.pathVariablesAsMap();
-        request.widgetParameters = widgetState.widgetParameters;
+        request.urlParameters = frontletState.resolvedURL.urlParameters;
+        request.pathVariables = frontletState.resolvedURL.pathVariablesAsMap();
+        request.widgetParameters = frontletState.frontletParameters;
         request.actionParameters = actionParameters ? actionParameters : {};
         request.zoneId = this.zoneId;         // TODO locale ?
-        request.sessionStorageData = this.sessionStorageDataWidget(widgetInstance.widget.id);
-        request.localStorageData = this.localStorageDataWidget(widgetInstance.widget.id);
-        request.clientStorageData = this.clientStorageDataWidget(widgetInstance.widget.id);
-        request.globalVariableData = this.globalVariableDataWidget(widgetInstance.widget.id);
+        request.sessionStorageData = this.sessionStorageDataWidget(frontletInstance.frontlet.id);
+        request.localStorageData = this.localStorageDataWidget(frontletInstance.frontlet.id);
+        request.clientStorageData = this.clientStorageDataWidget(frontletInstance.frontlet.id);
+        request.globalVariableData = this.globalVariableDataWidget(frontletInstance.frontlet.id);
         request.localDatabaseData = {};
         request.type = 'widget';
         return request;

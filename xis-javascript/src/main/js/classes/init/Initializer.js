@@ -10,13 +10,13 @@ class Initializer {
      *
      * @param {DomAccessor} domAccessor
      * @param {Client} client for action and model
-     * @param {Frontlets} widgets
+     * @param {Frontlets} frontlets
      * @param {Includes} includes
-     * @param {FrontletContainers} widgetContainers
+     * @param {FrontletContainers} frontletContainers
      * @param {TagHandlers} tagHandlers
      */
-    constructor(domAccessor, client, widgets, includes, widgetContainers, tagHandlers) {
-        this.handlerBuilder = new HandlerBuilder(domAccessor, client, widgets, includes, widgetContainers, tagHandlers, this);
+    constructor(domAccessor, client, frontlets, includes, frontletContainers, tagHandlers) {
+        this.handlerBuilder = new HandlerBuilder(domAccessor, client, frontlets, includes, frontletContainers, tagHandlers, this);
         this.domAccessor = domAccessor;
     }
 

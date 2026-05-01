@@ -56,8 +56,8 @@ class FrontletContainers {
     widgetIdForUpdateEvent(eventId) {
         var widgetIds = [];
         for (var widgetId of Object.keys(this.config.widgetAttributes)) {
-            var widgetAttributes = this.config.widgetAttributes[widgetId];
-            if (widgetAttributes.updateEventKeys.includes(eventId)) {
+            var frontletAttributes = this.config.widgetAttributes[widgetId];
+            if (frontletAttributes.updateEventKeys.includes(eventId)) {
                 widgetIds.push(widgetId);
             }
         }
@@ -75,7 +75,7 @@ class FrontletContainers {
         for (var key in this.containers) {
             var container = this.containers[key];
             var handler = app.tagHandlers.getHandler(container);
-            if (handler.widgetInstance && handler.widgetInstance.widget.id === widgetId) {
+            if (handler.frontletInstance && handler.frontletInstance.frontlet.id === widgetId) {
                 handlers.push(handler);
             }
         }

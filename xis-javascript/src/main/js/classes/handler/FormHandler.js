@@ -62,13 +62,13 @@ class FormHandler extends TagHandler {
     refresh(data) {
         this.data = data;
         this.binding = this.bindingExpression.evaluate(data);
-        var widgetParameters = data.getValue(['widgetParameters']) || {};
+        var frontletParameters = data.getValue(['widgetParameters']) || {};
         var formBindingKey = stripQuery(this.binding);
         this.formElementHandlers = {};
         data.validationPath = '/' + formBindingKey;
         this.clearMessageHandlers();
         const descendantPromise = this.refreshDescendantHandlers(data);
-        const formDataPromise = this.client.loadFormData(app.pageController.resolvedURL, this.widgetId(), formBindingKey, widgetParameters, this)
+        const formDataPromise = this.client.loadFormData(app.pageController.resolvedURL, this.widgetId(), formBindingKey, frontletParameters, this)
             .then(response => this.refreshFormData(this.subData(response, formBindingKey)));
         return Promise.all([descendantPromise, formDataPromise]);
     }

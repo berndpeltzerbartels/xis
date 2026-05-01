@@ -1,18 +1,18 @@
 class FrontletInstance {
 
     /**
-     * @param {Frontlet} widget
-     * @param {Frontlets} widgets
+     * @param {Frontlet} frontlet
+     * @param {Frontlets} frontlets
      */
-    constructor(widget, widgets) {
-        this.widget = widget;
-        this.widgets = widgets;
-        this.root = assertNotNull(normalizeElement(htmlToElement(widget.html)));
+    constructor(frontlet, frontlets) {
+        this.frontlet = frontlet;
+        this.frontlets = frontlets;
+        this.root = assertNotNull(normalizeElement(htmlToElement(frontlet.html)));
         this.rootHandler = assertNotNull(initializeElement(this.root));
     }
 
     dispose() {
-        this.widgets.disposeInstance(this);
+        this.frontlets.disposeInstance(this);
     }
 
 

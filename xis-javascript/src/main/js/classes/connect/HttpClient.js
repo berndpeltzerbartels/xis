@@ -70,15 +70,15 @@ class HttpClient extends Client {
     }
 
     /**
-     * @param {FrontletInstance} widgetInstance
-     * @param {FrontletState} widgetState
+     * @param {FrontletInstance} frontletInstance
+     * @param {FrontletState} frontletState
      * @returns {Promise<ServerResponse>}
      */
-    async loadWidgetData(widgetInstance, widgetState) {
+    async loadWidgetData(frontletInstance, frontletState) {
         app.messageHandler.clearMessages();
-        const request = this.createWidgetRequest(widgetInstance, widgetState, null, null, null);
+        const request = this.createWidgetRequest(frontletInstance, frontletState, null, null, null);
         try {
-            const response = await this.httpConnector.post(this.resolveWidgetUri('/xis/widget/model', widgetInstance.widget.id), request, {});
+            const response = await this.httpConnector.post(this.resolveWidgetUri('/xis/widget/model', frontletInstance.frontlet.id), request, {});
             return this.handleResponse(response);
         } catch (error) {
             reportError('Error during HTTP request to /xis/widget/model', error);
@@ -87,8 +87,8 @@ class HttpClient extends Client {
         }
     }
 
-    async loadFormData(resolvedURL, widgetId, formBindingKey, widgetParameters) {
-        const request = this.createFormRequest(resolvedURL, widgetId, {}, null, formBindingKey, widgetParameters);
+    async loadFormData(resolvedURL, widgetId, formBindingKey, frontletParameters) {
+        const request = this.createFormRequest(resolvedURL, widgetId, {}, null, formBindingKey, frontletParameters);
         try {
             const response = await this.httpConnector.post(this.resolveFormUri('/xis/form/model', resolvedURL, widgetId), request, {});
             return this.handleResponse(response);
@@ -100,11 +100,11 @@ class HttpClient extends Client {
         return this.handleResponse(response);
     }
 
-    async widgetLinkAction(widgetInstance, widgetState, action, actionParameters) {
+    async widgetLinkAction(frontletInstance, frontletState, action, actionParameters) {
         app.messageHandler.clearMessages();
-        const request = this.createWidgetRequest(widgetInstance, widgetState, action, {}, actionParameters);
+        const request = this.createWidgetRequest(frontletInstance, frontletState, action, {}, actionParameters);
         try {
-            const response = await this.httpConnector.post(this.resolveWidgetUri('/xis/widget/action', widgetInstance.widget.id), request, {});
+            const response = await this.httpConnector.post(this.resolveWidgetUri('/xis/widget/action', frontletInstance.frontlet.id), request, {});
             return this.handleResponse(response);
         } catch (error) {
             reportError('Error during HTTP request to /xis/widget/action', error);

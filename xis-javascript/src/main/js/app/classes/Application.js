@@ -48,7 +48,7 @@ class SseConnector {
         app.pageController.handleUpdateEvents([eventKey])
             .then(pageUpdated => {
                 if (!pageUpdated) {
-                    app.widgetContainers.handleUpdateEvents([eventKey]);
+                    app.frontletContainers.handleUpdateEvents([eventKey]);
                 }
             })
             .catch(e => reportError('[SSE] error handling update-event key=' + eventKey, e));
@@ -74,12 +74,12 @@ class Application {
         this.domAccessor = new DomAccessor();
         this.pages = new Pages(this.httpClient);
         this.urlResolver = new URLResolver(this.pages);
-        this.widgetContainers = new FrontletContainers();
-        this.widgets = new Frontlets(this.httpClient);
+        this.frontletContainers = new FrontletContainers();
+        this.frontlets = new Frontlets(this.httpClient);
         this.tagHandlers = new TagHandlers();
         this.elFunctions = new ELFunctions();
         this.includes = new Includes(this.httpClient);
-        this.initializer = new Initializer(this.domAccessor, this.httpClient, this.widgets, this.includes, this.widgetContainers, this.tagHandlers);
+        this.initializer = new Initializer(this.domAccessor, this.httpClient, this.frontlets, this.includes, this.frontletContainers, this.tagHandlers);
         /** Serializes all render operations (page + widget refreshes) so they never overlap. */
         this.renderQueue = Promise.resolve();
         this.pageController = new PageController(this.client, this.pages, this.initializer, this.urlResolver, this.tagHandlers);
@@ -109,9 +109,9 @@ class Application {
                 }
                 return config;
             })
-            .then(config => this.widgetContainers.setConfig(config))
+            .then(config => this.frontletContainers.setConfig(config))
             .then(config => this.includes.loadIncludes(config))
-            .then(config => this.widgets.loadWidgets(config))
+            .then(config => this.frontlets.loadWidgets(config))
             .then(config => this.pages.loadPages(config))
             .then(() => this.pageController.displayPageForUrl(document.location.pathname + document.location.search))
             .then(() => this.setupLinkInterceptor())

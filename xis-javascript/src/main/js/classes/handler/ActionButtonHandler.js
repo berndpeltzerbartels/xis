@@ -3,13 +3,13 @@ class ActionButtonHandler extends TagHandler {
     /**
      * @param {Element} element
      * @param {HttpClient} client
-     * @param {FrontletContainers} widgetContainers
+     * @param {FrontletContainers} frontletContainers
      */
-    constructor(element, client, widgetContainers) {
+    constructor(element, client, frontletContainers) {
         super(element);
         this.type = 'action-button-handler';
         this.client = client;
-        this.widgetContainers = widgetContainers;
+        this.frontletContainers = frontletContainers;
         this.actionParameters = {};
         this.actionExpression = this.variableTextContentFromAttribute('xis:action'); // mandatory
         this.targetContainerId = element.getAttribute('xis:target-container');
@@ -60,22 +60,22 @@ class ActionButtonHandler extends TagHandler {
         if (formHandler) {
             formHandler.submit(this.action);
         } else {
-            const widgetcontainerHandler = this.findParentWidgetContainerHandler();
-            const targetContainerHandler = this.targetContainerId ? app.tagHandlers.getHandler(this.widgetContainers.findContainer(this.targetContainerId)) : null;
-            if (widgetcontainerHandler || targetContainerHandler) {
-                this.widgetAction(widgetcontainerHandler, targetContainerHandler);
+            const frontletContainerHandler = this.findParentWidgetContainerHandler();
+            const targetContainerHandler = this.targetContainerId ? app.tagHandlers.getHandler(this.frontletContainers.findContainer(this.targetContainerId)) : null;
+            if (frontletContainerHandler || targetContainerHandler) {
+                this.widgetAction(frontletContainerHandler, targetContainerHandler);
             } else {
                 this.pageAction();
             }
         }
     }
 
-    widgetAction(widgetcontainerHandler, targetContainerHandler) {
+    widgetAction(frontletContainerHandler, targetContainerHandler) {
         if (!targetContainerHandler) {
             // if taget container is not set explicitly, use the parent container
-            targetContainerHandler = widgetcontainerHandler;
+            targetContainerHandler = frontletContainerHandler;
         }
-        this.client.widgetLinkAction(widgetcontainerHandler.widgetInstance, widgetcontainerHandler.widgetState, this.action, this.actionParameters)
+        this.client.widgetLinkAction(frontletContainerHandler.frontletInstance, frontletContainerHandler.frontletState, this.action, this.actionParameters)
             .then(response => this.handleActionResponse(response, targetContainerHandler));
     }
 

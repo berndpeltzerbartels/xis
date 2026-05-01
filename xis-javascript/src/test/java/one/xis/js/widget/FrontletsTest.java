@@ -21,8 +21,8 @@ class FrontletsTest {
     void loadWidgets() throws ScriptException {
         var script = Javascript.getScript(JavascriptSource.CLASSES);
         script += IOUtils.getResourceAsString("one/xis/widget/WidgetsTestMocks.js");
-        script += "var widgets = new Frontlets(client);\n";
-        script += "widgets.loadWidgets(config);widgets.widgets";
+        script += "var frontlets = new Frontlets(client);\n";
+        script += "frontlets.loadWidgets(config);frontlets.frontlets";
 
         Function<String, ElementImpl> createElement = name -> {
             var element = new ElementImpl(name);
@@ -46,7 +46,7 @@ class FrontletsTest {
 
         assertThat(widgetData.getMember("id").asString()).isEqualTo("widgetId");
         assertThat(widgetData.getMember("html").asString()).startsWith("<xis:template");
-        assertThat(widgetData.getMember("widgetAttributes")).isNotNull();
+        assertThat(widgetData.getMember("frontletAttributes")).isNotNull();
     }
 
     public ElementImpl htmlToElement(String content) {
