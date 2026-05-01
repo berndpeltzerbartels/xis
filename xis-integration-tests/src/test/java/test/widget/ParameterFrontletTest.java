@@ -9,7 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-class ParameterWidgetTest {
+class ParameterFrontletTest {
 
     private ParameterWidgetService service;
     private IntegrationTestContext testContext;

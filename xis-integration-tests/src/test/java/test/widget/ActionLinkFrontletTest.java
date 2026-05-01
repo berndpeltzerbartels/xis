@@ -9,7 +9,7 @@ import test.page.core.IndexPage;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-class ActionLinkWidgetTest {
+class ActionLinkFrontletTest {
 
     private ActionLinkWidgetService service;
     private IntegrationTestContext testContext;

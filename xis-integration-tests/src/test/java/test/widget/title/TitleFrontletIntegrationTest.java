@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class TitleWidgetIntegrationTest {
+public class TitleFrontletIntegrationTest {
     @Test
     void widgetChangesPageTitle() {
         var context = IntegrationTestContext.builder()

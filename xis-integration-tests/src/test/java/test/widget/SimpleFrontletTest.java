@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class WidgetShortTagTest {
+class SimpleFrontletTest {
 
     private IntegrationTestContext testContext;
 
@@ -14,13 +14,13 @@ class WidgetShortTagTest {
     void init() {
         testContext = IntegrationTestContext.builder()
                 .withSingleton(SimpleFrontlet.class)
-                .withSingleton(WidgetShortTagPage.class)
+                .withSingleton(WidgetPage.class)
                 .build();
     }
 
     @Test
     void test() {
-        testContext.getSingleton(WidgetShortTagPage.class).setWidgetId("SimpleFrontlet");
+        testContext.getSingleton(WidgetPage.class).setWidgetId("SimpleFrontlet");
         var client = testContext.openPage(WidgetPage.class);
 
         System.out.println(client.getDocument().asString());
