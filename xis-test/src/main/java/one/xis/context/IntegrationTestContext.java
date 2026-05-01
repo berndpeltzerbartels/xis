@@ -23,6 +23,7 @@ public class IntegrationTestContext {
     @Getter
     private final AppContext appContext;
     private final UserInfo userInfo;
+    private final BackendBridge backendBridge;
     private final TestClient primaryClient;
     private final List<TestClient> clients = new ArrayList<>();
     private boolean primaryClientOpened;
@@ -36,6 +37,7 @@ public class IntegrationTestContext {
     IntegrationTestContext(Collection<String> packages, UserInfo userInfo, Collection<Object> singletons) {
         this.appContext = internalContext(packages, singletons);
         this.userInfo = userInfo;
+        this.backendBridge = new BackendBridge(appContext.getSingleton(RestControllerService.class));
         this.primaryClient = createClient();
     }
 
@@ -60,7 +62,7 @@ public class IntegrationTestContext {
     }
 
     private TestClient createClient() {
-        var environment = new IntegrationTestEnvironment(new BackendBridge(appContext.getSingleton(RestControllerService.class)));
+        var environment = new IntegrationTestEnvironment(backendBridge);
         environment.getIntegrationTestScript().reset();
         var client = new TestClient(appContext, environment);
         clients.add(client);
@@ -128,6 +130,22 @@ public class IntegrationTestContext {
 
     public SessionStorage getSessionStorage() {
         return primaryClient.getSessionStorage();
+    }
+
+    public JavascriptResponse invokeBackend(String httpMethod, String uri) {
+        return invokeBackend(httpMethod, uri, Collections.emptyMap(), null);
+    }
+
+    public JavascriptResponse invokeBackend(String httpMethod, String uri, Map<String, String> headers) {
+        return invokeBackend(httpMethod, uri, headers, null);
+    }
+
+    public JavascriptResponse invokeBackend(String httpMethod, String uri, Map<String, String> headers, String body) {
+        synchronized (SYNC_LOCK) {
+            var userInfoFaker = appContext.getSingleton(UserContextFaker.class);
+            userInfoFaker.setUserInfo(userInfo);
+            return backendBridge.invokeBackend(httpMethod, uri, headers, body);
+        }
     }
 
     public <T> T getSingleton(Class<T> type) {

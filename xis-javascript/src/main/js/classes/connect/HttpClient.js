@@ -29,23 +29,23 @@ class HttpClient extends Client {
     async loadPageHead(pageId) {
         // pageId kann Umlaute, Leerzeichen, Sonderzeichen enthalten
         // encodeURIComponent ist robust für alle Fälle
-        const response = await this.httpConnector.get('/xis/page/head?pageId='+encodeURIComponent(pageId), {});
+        const response = await this.httpConnector.get(this.resolvePageUri('/xis/page/head?pageId='+encodeURIComponent(pageId), pageId), {});
         return response.responseText;
     }
 
     async loadPageBody(pageId) {
-        const response = await this.httpConnector.get('/xis/page/body?pageId='+encodeURIComponent(pageId), {});
+        const response = await this.httpConnector.get(this.resolvePageUri('/xis/page/body?pageId='+encodeURIComponent(pageId), pageId), {});
         return response.responseText;
     }
 
     async loadPageBodyAttributes(pageId) {
-        const response = await this.httpConnector.get('/xis/page/body-attributes?pageId='+encodeURIComponent(pageId), {});
+        const response = await this.httpConnector.get(this.resolvePageUri('/xis/page/body-attributes?pageId='+encodeURIComponent(pageId), pageId), {});
         return JSON.parse(response.responseText);
     }
 
     async loadWidget(widgetId) {
         // widgetId kann ebenfalls Sonderzeichen enthalten
-        const response = await this.httpConnector.get('/xis/widget/html?widgetId='+encodeURIComponent(widgetId), {});
+        const response = await this.httpConnector.get(this.resolveWidgetUri('/xis/widget/html?widgetId='+encodeURIComponent(widgetId), widgetId), {});
         return response.responseText;
     }
 
@@ -60,7 +60,7 @@ class HttpClient extends Client {
         this.resolvedURL = resolvedURL;
         const request = this.createPageRequest(resolvedURL, null, null);
         try {
-            const response = await this.httpConnector.post('/xis/page/model', request, {});
+            const response = await this.httpConnector.post(this.resolvePageUri('/xis/page/model', resolvedURL.normalizedPath), request, {});
             return this.handleResponse(response);
         } catch (error) {
             reportError('Error during HTTP request to /xis/page/model', error);
@@ -78,7 +78,7 @@ class HttpClient extends Client {
         app.messageHandler.clearMessages();
         const request = this.createWidgetRequest(widgetInstance, widgetState, null, null, null);
         try {
-            const response = await this.httpConnector.post('/xis/widget/model', request, {});
+            const response = await this.httpConnector.post(this.resolveWidgetUri('/xis/widget/model', widgetInstance.widget.id), request, {});
             return this.handleResponse(response);
         } catch (error) {
             reportError('Error during HTTP request to /xis/widget/model', error);
@@ -90,7 +90,7 @@ class HttpClient extends Client {
     async loadFormData(resolvedURL, widgetId, formBindingKey, widgetParameters) {
         const request = this.createFormRequest(resolvedURL, widgetId, {}, null, formBindingKey, widgetParameters);
         try {
-            const response = await this.httpConnector.post('/xis/form/model', request, {});
+            const response = await this.httpConnector.post(this.resolveFormUri('/xis/form/model', resolvedURL, widgetId), request, {});
             return this.handleResponse(response);
         } catch (error) {
             reportError('Error during HTTP request to /xis/form/model', error);
@@ -104,7 +104,7 @@ class HttpClient extends Client {
         app.messageHandler.clearMessages();
         const request = this.createWidgetRequest(widgetInstance, widgetState, action, {}, actionParameters);
         try {
-            const response = await this.httpConnector.post('/xis/widget/action', request, {});
+            const response = await this.httpConnector.post(this.resolveWidgetUri('/xis/widget/action', widgetInstance.widget.id), request, {});
             return this.handleResponse(response);
         } catch (error) {
             reportError('Error during HTTP request to /xis/widget/action', error);
@@ -117,7 +117,7 @@ class HttpClient extends Client {
         app.messageHandler.clearMessages();
         const request = this.createPageRequest(resolvedURL, {}, action, actionParameters);
         try {
-            const response = await this.httpConnector.post('/xis/page/action', request, {});
+            const response = await this.httpConnector.post(this.resolvePageUri('/xis/page/action', resolvedURL.normalizedPath), request, {});
             return this.handleResponse(response);
         } catch (error) {
             reportError('Error during HTTP request to /xis/page/action', error);
@@ -130,7 +130,7 @@ class HttpClient extends Client {
         app.messageHandler.clearMessages();
         const request = this.createFormRequest(resolvedURL, widgetId, formData, action, formBindigKey, formBindingParameters);
         try {
-            const response = await this.httpConnector.post('/xis/form/action', request, {});
+            const response = await this.httpConnector.post(this.resolveFormUri('/xis/form/action', resolvedURL, widgetId), request, {});
             return this.handleResponse(response);
         } catch (error) {
             reportError('Error during HTTP request to /xis/form/action', error);
@@ -191,5 +191,33 @@ class HttpClient extends Client {
             return response.validatorMessages.globalMessages.filter(s => s && s.trim().length > 0);
         }
         return [];
+    }
+
+    resolvePageUri(path, normalizedPath) {
+        return this.resolveUri(this.config.getPageHost(normalizedPath), path);
+    }
+
+    resolveWidgetUri(path, widgetId) {
+        return this.resolveUri(this.config.getWidgetHost(widgetId), path);
+    }
+
+    resolveFormUri(path, resolvedURL, widgetId) {
+        if (widgetId) {
+            return this.resolveWidgetUri(path, widgetId);
+        }
+        return this.resolvePageUri(path, resolvedURL.normalizedPath);
+    }
+
+    resolveUri(host, path) {
+        if (!host) {
+            return path;
+        }
+        if (host.endsWith('/') && path.startsWith('/')) {
+            return host.substring(0, host.length - 1) + path;
+        }
+        if (!host.endsWith('/') && !path.startsWith('/')) {
+            return host + '/' + path;
+        }
+        return host + path;
     }
 }
