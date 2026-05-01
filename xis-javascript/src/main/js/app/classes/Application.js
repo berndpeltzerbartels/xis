@@ -74,8 +74,8 @@ class Application {
         this.domAccessor = new DomAccessor();
         this.pages = new Pages(this.httpClient);
         this.urlResolver = new URLResolver(this.pages);
-        this.widgetContainers = new WidgetContainers();
-        this.widgets = new Widgets(this.httpClient);
+        this.widgetContainers = new FrontletContainers();
+        this.widgets = new Frontlets(this.httpClient);
         this.tagHandlers = new TagHandlers();
         this.elFunctions = new ELFunctions();
         this.includes = new Includes(this.httpClient);

@@ -69,7 +69,7 @@ class Client {
 
     /**
     * @public
-    * @param {WidgetInstance} widgetInstance
+    * @param {FrontletInstance} widgetInstance
     * @returns {Promise<ServerReponse>}
     */
     loadWidgetData(widgetInstance, widgetState) {
@@ -89,7 +89,7 @@ class Client {
 
     /**
      * @public
-     * @param {WidgetInstance} widgetInstance
+     * @param {FrontletInstance} widgetInstance
      * @param {string} action
      * @param {string} actionParameters
      * @returns {Promise<ServerReponse>}
@@ -280,8 +280,8 @@ class Client {
     /**
     * @protected
     * @param {string} widgetId 
-    * @param {WidgetInstance} widgetInstance
-    * @param {WidgetState} widgetState
+    * @param {FrontletInstance} widgetInstance
+    * @param {FrontletState} widgetState
     * @param {string} action (nullable)
     * @param {Data} formData (nullable)
     * @param {string} actionParameters (nullable)
@@ -397,7 +397,7 @@ class Client {
         config.widgetAttributes = {};
         if (obj.widgetAttributes) {
             for (var key of Object.keys(obj.widgetAttributes)) {
-                config.widgetAttributes[key] = new WidgetAttributes(obj.widgetAttributes[key]);
+                config.widgetAttributes[key] = new FrontletAttributes(obj.widgetAttributes[key]);
             }
         }
         return config;

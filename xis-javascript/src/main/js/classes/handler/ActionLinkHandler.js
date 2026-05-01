@@ -3,7 +3,7 @@ class ActionLinkHandler extends TagHandler {
     /**
      * @param {Element} element
      * @param {HttpClient} client
-     * @param {WidgetContainers} widgetContainers
+     * @param {FrontletContainers} widgetContainers
      */
     constructor(element, client, widgetContainers) {
         super(element);
@@ -118,5 +118,4 @@ class ActionLinkHandler extends TagHandler {
 
 
 }
-
 

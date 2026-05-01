@@ -114,7 +114,7 @@ class FormHandler extends TagHandler {
     /**
      * @private
      * @param {ServerResponse} response 
-     * @param {WidgetContainerHandler} targetContainerHandler 
+     * @param {FrontletContainerHandler} targetContainerHandler
      */
     handleActionResponse(response, targetContainerHandler) {
         this.refreshValidatorMessages(response.validatorMessages);

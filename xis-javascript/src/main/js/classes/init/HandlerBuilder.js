@@ -7,9 +7,9 @@ class HandlerBuilder {
     /**
      * @param {DomAccessor} domAccessor
      * @param {Client} client for actions and model
-     * @param {Widgets} widgets
+     * @param {Frontlets} widgets
      * @param {Includes} includes
-     * @param {WidgetContainers} widgetContainers
+     * @param {FrontletContainers} widgetContainers
      * @param {TagHandlers} tagHandlers
      * @param {Initializer} initializer
      */
@@ -84,7 +84,7 @@ class HandlerBuilder {
                 this.tagHandlers.mapHandler(element, handler);
                 return; // Do not evaluate child nodes here!
             case 'xis:widget-container':
-                handler = this.createWidgetContainerHandler(element);
+                handler = this.createFrontletContainerHandler(element);
                 this.tagHandlers.mapHandler(element, handler);
                 parentHandler.addDescendantHandler(handler);
                 this.validateNoParentStorageBinding(handler);
@@ -247,7 +247,7 @@ class HandlerBuilder {
             handler = new PageLinkHandler(element);
         }
         if (element.getAttribute('xis:widget')) {
-            handler = new WidgetLinkHandler(element, this.widgetContainers);
+            handler = new FrontletLinkHandler(element, this.widgetContainers);
         } else if (element.getAttribute('xis:action')) {
             handler = new ActionLinkHandler(element, this.client, this.widgetContainers);
         }
@@ -286,7 +286,7 @@ class HandlerBuilder {
             return new PageButtonHandler(element);
         }
         if (element.getAttribute('xis:widget')) {
-            return new WidgetButtonHandler(element, this.widgetContainers);
+            return new FrontletButtonHandler(element, this.widgetContainers);
         }
     }
 
@@ -301,13 +301,13 @@ class HandlerBuilder {
     }
 
     /**
-     * Creates a WidgetContainerHandler.
+     * Creates a FrontletContainerHandler.
      * @private
      * @param {Element} container 
      * @returns {TagHandler}
      */
-    createWidgetContainerHandler(container) {
-        return new WidgetContainerHandler(
+    createFrontletContainerHandler(container) {
+        return new FrontletContainerHandler(
             container,
             this.widgets,
             this.widgetContainers,

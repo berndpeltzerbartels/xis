@@ -2,7 +2,7 @@
  * @property {array<string>} pageIds
  * @property {array<string>} widgetIds
  * @property {string: PageAttributes} pageAttributes
- * @property {string: WidgetAttributes} widgetAttributes
+ * @property {string: FrontletAttributes} widgetAttributes
  */
 
 class ClientConfig {

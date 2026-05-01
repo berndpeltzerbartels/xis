@@ -10,9 +10,9 @@ class Initializer {
      *
      * @param {DomAccessor} domAccessor
      * @param {Client} client for action and model
-     * @param {Widgets} widgets
+     * @param {Frontlets} widgets
      * @param {Includes} includes
-     * @param {WidgetContainers} widgetContainers
+     * @param {FrontletContainers} widgetContainers
      * @param {TagHandlers} tagHandlers
      */
     constructor(domAccessor, client, widgets, includes, widgetContainers, tagHandlers) {

@@ -70,8 +70,8 @@ class HttpClient extends Client {
     }
 
     /**
-     * @param {WidgetInstance} widgetInstance 
-     * @param {WidgetState} widgetState 
+     * @param {FrontletInstance} widgetInstance
+     * @param {FrontletState} widgetState
      * @returns {Promise<ServerResponse>}
      */
     async loadWidgetData(widgetInstance, widgetState) {
