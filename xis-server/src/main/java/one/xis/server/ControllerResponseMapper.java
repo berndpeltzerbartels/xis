@@ -15,16 +15,16 @@ class ControllerResponseMapper {
         response.setNextURL(result.getNextURL());
         response.setData(result.getModelData());
         response.setFormData(result.getFormData());
-        response.setNextWidgetId(result.getNextWidgetId());
+        response.setNextFrontletId(result.getNextFrontletId());
         response.setValidatorMessages(result.getValidatorMessages());
-        response.setWidgetContainerId(result.getWidgetContainerId());
-        response.setReloadWidgets(result.getWidgetsToReload());
+        response.setFrontletContainerId(result.getFrontletContainerId());
+        response.setReloadFrontlets(result.getFrontletsToReload());
         response.getSessionStorageData().putAll(result.getSessionStorage());
         response.getLocalStorageData().putAll(result.getLocalStorage());
         response.getClientStorageData().putAll(result.getClientStorage());
         response.setRedirectUrl(result.getRedirectUrl());
         response.getIdVariables().putAll(result.getIdVariables());
-        response.getWidgetParameters().putAll(result.getWidgetParameters());
+        response.getFrontletParameters().putAll(result.getFrontletParameters());
         if (result.getAnnotatedTitle() != null) {
             response.setAnnotatedTitle(result.getAnnotatedTitle());
         }

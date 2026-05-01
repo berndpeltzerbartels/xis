@@ -55,8 +55,8 @@ class FrontletContainers {
 
     widgetIdForUpdateEvent(eventId) {
         var widgetIds = [];
-        for (var widgetId of Object.keys(this.config.widgetAttributes)) {
-            var frontletAttributes = this.config.widgetAttributes[widgetId];
+        for (var widgetId of Object.keys(this.config.frontletAttributes)) {
+            var frontletAttributes = this.config.frontletAttributes[widgetId];
             if (frontletAttributes.updateEventKeys.includes(eventId)) {
                 widgetIds.push(widgetId);
             }

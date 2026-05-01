@@ -84,9 +84,9 @@ class ControllerMethodResultMapper {
     }
 
     void mapRequestToResult(ClientRequest request, ControllerMethodResult controllerMethodResult) {
-        // Do not map widgetId or pageURL here !
-        controllerMethodResult.setWidgetContainerId(request.getWidgetContainerId());
-        controllerMethodResult.getWidgetParameters().putAll(castStringMap(request.getWidgetParameters()));
+        // Do not map frontletId or pageURL here !
+        controllerMethodResult.setFrontletContainerId(request.getFrontletContainerId());
+        controllerMethodResult.getFrontletParameters().putAll(castStringMap(request.getFrontletParameters()));
         controllerMethodResult.getPathVariables().putAll(castStringMap(request.getPathVariables()));
         controllerMethodResult.getUrlParameters().putAll(castStringMap(request.getUrlParameters()));
     }
@@ -113,14 +113,14 @@ class ControllerMethodResultMapper {
             result.getPathVariables().putAll(frontletResponse.getPathVariables());
         }
         if (frontletResponse.getTargetContainer() != null) {
-            result.setWidgetContainerId(frontletResponse.getTargetContainer());
+            result.setFrontletContainerId(frontletResponse.getTargetContainer());
         }
-        if (frontletResponse.getWidgetsToReload() != null) {
-            result.getWidgetsToReload().addAll(frontletResponse.getWidgetsToReload());
+        if (frontletResponse.getFrontletsToReload() != null) {
+            result.getFrontletsToReload().addAll(frontletResponse.getFrontletsToReload());
         }
 
-        if (frontletResponse.getWidgetParameters() != null) {
-            result.getWidgetParameters().putAll(frontletResponse.getWidgetParameters());
+        if (frontletResponse.getFrontletParameters() != null) {
+            result.getFrontletParameters().putAll(frontletResponse.getFrontletParameters());
         }
 
     }
@@ -139,7 +139,7 @@ class ControllerMethodResultMapper {
 
     private void updateController(@NonNull ControllerMethodResult result, @NonNull Class<?> controllerClass, Map<String, Object> pathVariables) {
         if (controllerClass.isAnnotationPresent(Frontlet.class)) {
-            result.setNextWidgetId(FrontletUtil.getId(controllerClass));
+            result.setNextFrontletId(FrontletUtil.getId(controllerClass));
             var url = FrontletUtil.getUrl(controllerClass);
             if (!url.isEmpty()) {
                 result.setAnnotatedAddress(url);
@@ -150,7 +150,7 @@ class ControllerMethodResultMapper {
             }
             var containerId = FrontletUtil.getContainerId(controllerClass);
             if (!containerId.isEmpty()) {
-                result.setWidgetContainerId(containerId);
+                result.setFrontletContainerId(containerId);
             }
         } else if (controllerClass.isAnnotationPresent(Page.class)) {
             var realPath = pathResolver.createPath(PageUtil.getUrl(controllerClass));

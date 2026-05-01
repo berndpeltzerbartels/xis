@@ -47,7 +47,7 @@ class HttpClientDistributedRoutingTest {
         var script = Javascript.getScript(CLASSES) + """
                 function timeZone() { return 'Europe/Berlin'; }
                 var config = new ClientConfig();
-                config.widgetAttributes['scoreboard'] = { host: 'https://widgets.example.com/' };
+                config.frontletAttributes['scoreboard'] = { host: 'https://widgets.example.com/' };
                 var client = new HttpClient({ post: function(){}, get: function(){} }, 'test-client');
                 client.config = config;
                 client.resolveFrontletUri('/xis/widget/model', 'scoreboard');

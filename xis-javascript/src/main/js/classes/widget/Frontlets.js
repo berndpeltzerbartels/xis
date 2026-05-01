@@ -14,9 +14,9 @@ class Frontlets {
     loadWidgets(config) {
         var _this = this;
         var promises = [];
-        this.frontletAttributes = config.widgetAttributes;
-        config.widgetIds.forEach(id => _this.frontlets[id] = {});
-        config.widgetIds.forEach(id => promises.push(_this.loadFrontlet(id)));
+        this.frontletAttributes = config.frontletAttributes;
+        config.frontletIds.forEach(id => _this.frontlets[id] = {});
+        config.frontletIds.forEach(id => promises.push(_this.loadFrontlet(id)));
         return Promise.all(promises).then(() => config);
     }
     /**
@@ -56,7 +56,7 @@ class Frontlets {
         if (!frontletInstance) {
             var frontlet = this.frontlets[widgetId];
             if (!frontlet) {
-                throw new Error('no such widget: ' + widgetId);
+                throw new Error('no such frontlet: ' + widgetId);
             }
             frontletInstance = new FrontletInstance(frontlet, this);
         }

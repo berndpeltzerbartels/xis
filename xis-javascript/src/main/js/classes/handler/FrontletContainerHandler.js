@@ -53,8 +53,8 @@ class FrontletContainerHandler extends TagHandler {
      * @returns {boolean}
      */
     shouldDelegateToTargetContainer(response) {
-        return response.widgetContainerId && 
-               response.widgetContainerId !== this.containerId;
+        return response.frontletContainerId &&
+               response.frontletContainerId !== this.containerId;
     }
 
     /**
@@ -64,21 +64,21 @@ class FrontletContainerHandler extends TagHandler {
     */
     handleActionResponse(response) {
         if (this.shouldDelegateToTargetContainer(response)) {
-            var targetContainer = app.frontletContainers.get(response.widgetContainerId);
+            var targetContainer = app.frontletContainers.get(response.frontletContainerId);
             if (targetContainer) {
                 return targetContainer.handleActionResponse(response);
             }
-            console.warn('Target container not found:', response.widgetContainerId);
+            console.warn('Target container not found:', response.frontletContainerId);
         }
-        this.frontletParameters = mergeObjects(this.frontletParameters, response.widgetParameters);
+        this.frontletParameters = mergeObjects(this.frontletParameters, response.frontletParameters);
         if (!this.frontletState) {
             this.frontletState = new FrontletState(app.pageController.resolvedURL, this.frontletParameters);
         }
         var data = response.data;
-        data.setValue(['widgetParameters'], this.frontletParameters);
+        data.setValue(['frontletParameters'], this.frontletParameters);
         this.refreshContainerId(data);
 
-        const frontletChanges = !!response.nextWidgetId && response.nextWidgetId !== this.currentFrontletId();
+        const frontletChanges = !!response.nextFrontletId && response.nextFrontletId !== this.currentFrontletId();
 
         return PageController.enqueue(() => {
             if (frontletChanges) {
@@ -113,9 +113,9 @@ class FrontletContainerHandler extends TagHandler {
         if (!this.bindByFrontletAnnotation()) {
             this.bindFrontletInitial(data);
         }
-        this.frontletParameters = mergeObjects(this.frontletParameters, data.getValue(['widgetParameters']));
+        this.frontletParameters = mergeObjects(this.frontletParameters, data.getValue(['frontletParameters']));
         this.frontletState = new FrontletState(app.pageController.resolvedURL, this.frontletParameters);
-        data.setValue(['widgetParameters'], this.frontletParameters);
+        data.setValue(['frontletParameters'], this.frontletParameters);
         const descendantPromise = this.refreshDescendantHandlers(data); // xis:parameter tags will call addParameter
         var promises = [];
         if (this.frontletInstance) {
@@ -208,9 +208,9 @@ class FrontletContainerHandler extends TagHandler {
 
     bindByFrontletAnnotation() {
         var response = app.currentResponse;
-        for (var defaultFrontlet of response.defaultWidgets) {
+        for (var defaultFrontlet of response.defaultFrontlets) {
             if (defaultFrontlet.containerId === this.containerId) {
-                this.ensureFrontletBound(defaultFrontlet.widgetId);
+                this.ensureFrontletBound(defaultFrontlet.frontletId);
                 this.frontletState = new FrontletState(app.pageController.resolvedURL, this.frontletParameters);
                 return true;
             }
@@ -239,8 +239,8 @@ class FrontletContainerHandler extends TagHandler {
             this.frontletParameters[key] = frontletParametersInUrl[key];
         }
 
-        var widgetId = stripQuery(frontletUrl);
-        this.ensureFrontletBound(widgetId);
+        var frontletId = stripQuery(frontletUrl);
+        this.ensureFrontletBound(frontletId);
         this.frontletState = new FrontletState(app.pageController.resolvedURL, this.frontletParameters);
     }
 
@@ -265,12 +265,12 @@ class FrontletContainerHandler extends TagHandler {
                 this.frontletInstance.dispose();
             }
         }
-        this.frontletInstance = assertNotNull(this.frontlets.getFrontletInstance(widgetId), 'no such widget: ' + widgetId);
+        this.frontletInstance = assertNotNull(this.frontlets.getFrontletInstance(widgetId), 'no such frontlet: ' + widgetId);
         this.frontletInstance.containerHandler = this;
-        var frontletRoot = assertNotNull(this.frontletInstance.root, 'no widget root: ' + widgetId);
+        var frontletRoot = assertNotNull(this.frontletInstance.root, 'no frontlet root: ' + widgetId);
         var target = this.buffer ? this.buffer : this.tag;
         target.appendChild(frontletRoot);
-        var frontletHandler = assertNotNull(this.frontletInstance.rootHandler, 'no widget handler: ' + widgetId);
+        var frontletHandler = assertNotNull(this.frontletInstance.rootHandler, 'no frontlet handler: ' + widgetId);
         if (shouldScroll && this.scrollToTop) {
             window.scrollTo(0, 0);
         }
@@ -281,8 +281,8 @@ class FrontletContainerHandler extends TagHandler {
      * @param {ServerResponse} response
      */
     bindNextFrontletIfNeeded(response) {
-        if (response.nextWidgetId) {
-            this.ensureFrontletBound(response.nextWidgetId, true);
+        if (response.nextFrontletId) {
+            this.ensureFrontletBound(response.nextFrontletId, true);
         }
     }
 
@@ -340,9 +340,9 @@ class FrontletContainerHandler extends TagHandler {
      * @returns {Data}
      */
     mergeFrontletParameters(data) {
-        this.frontletParameters = mergeObjects(this.frontletParameters, data.getValue(['widgetParameters']));
+        this.frontletParameters = mergeObjects(this.frontletParameters, data.getValue(['frontletParameters']));
         this.frontletState.frontletParameters = this.frontletParameters;
-        data.setValue(['widgetParameters'], this.frontletParameters);
+        data.setValue(['frontletParameters'], this.frontletParameters);
         return data;
     }
 

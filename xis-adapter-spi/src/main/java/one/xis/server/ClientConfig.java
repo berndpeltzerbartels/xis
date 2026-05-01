@@ -17,7 +17,7 @@ import java.util.Map;
 @AllArgsConstructor
 public class ClientConfig {
 
-    private final Collection<String> widgetIds;
+    private final Collection<String> frontletIds;
     private final Collection<String> pageIds;
     private final Collection<String> includeIds;
     /**
@@ -40,7 +40,7 @@ public class ClientConfig {
     /**
      * Hosts by widget-id. Must contain all widgets.
      */
-    private final Map<String, FrontletAttributes> widgetAttributes;
+    private final Map<String, FrontletAttributes> frontletAttributes;
 
     static ClientConfig.ClientConfigBuilder builder() {
         return new ClientConfig.ClientConfigBuilder();
@@ -48,7 +48,7 @@ public class ClientConfig {
 
 
     static class ClientConfigBuilder {
-        private Collection<String> widgetIds = List.of();
+        private Collection<String> frontletIds = List.of();
         private Collection<String> pageIds = List.of();
         private Collection<String> includeIds = List.of();
         private long pendingEventTtlSeconds = 0;
@@ -56,10 +56,10 @@ public class ClientConfig {
         @Getter
         private String welcomePageId;
         private Map<String, PageAttributes> pageAttributes = Map.of();
-        private Map<String, FrontletAttributes> widgetAttributes = Map.of();
+        private Map<String, FrontletAttributes> frontletAttributes = Map.of();
 
-        ClientConfigBuilder widgetIds(Collection<String> widgetIds) {
-            this.widgetIds = widgetIds;
+        ClientConfigBuilder frontletIds(Collection<String> frontletIds) {
+            this.frontletIds = frontletIds;
             return this;
         }
 
@@ -88,20 +88,20 @@ public class ClientConfig {
             return this;
         }
 
-        ClientConfigBuilder widgetAttributes(Map<String, FrontletAttributes> widgetAttributes) {
-            this.widgetAttributes = widgetAttributes;
+        ClientConfigBuilder frontletAttributes(Map<String, FrontletAttributes> frontletAttributes) {
+            this.frontletAttributes = frontletAttributes;
             return this;
         }
 
         ClientConfig build() {
             return new ClientConfig(
-                    widgetIds,
+                    frontletIds,
                     pageIds,
                     includeIds,
                     pendingEventTtlSeconds,
                     welcomePageId,
                     pageAttributes,
-                    widgetAttributes
+                    frontletAttributes
             );
         }
     }

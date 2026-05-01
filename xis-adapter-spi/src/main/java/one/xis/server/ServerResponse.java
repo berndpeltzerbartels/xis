@@ -24,32 +24,32 @@ public class ServerResponse {
     private Map<String, Object> localDatabaseData = new HashMap<>();
     private Map<String, Object> sessionStorageData = new HashMap<>();
     private Map<String, Object> clientStorageData = new HashMap<>();
-    private Map<String, Object> widgetParameters = new HashMap<>();
+    private Map<String, Object> frontletParameters = new HashMap<>();
     private Collection<String> updateEventKeys = new ArrayList<>();
-    private Collection<String> reloadWidgets = new ArrayList<>(); // TODO remove?
+    private Collection<String> reloadFrontlets = new ArrayList<>(); // TODO remove?
     private String nextURL;
-    private String nextWidgetId;
+    private String nextFrontletId;
     private ValidatorMessages validatorMessages = new ValidatorMessages();
     private boolean reloadPage; // TODO do we need this?
-    private String widgetContainerId;
+    private String frontletContainerId;
     private String redirectUrl;
     private ActionProcessing actionProcessing = ActionProcessing.NONE;
     private String annotatedTitle;
     private String annotatedAddress;
-    private Collection<DefaultWidget> defaultWidgets = new HashSet<>();
+    private Collection<DefaultFrontlet> defaultFrontlets = new HashSet<>();
 
     void clear() {
         // do not clear store data
         status = 0;
         data.clear();
         formData.clear();
-        reloadWidgets.clear();
-        widgetParameters.clear();
+        reloadFrontlets.clear();
+        frontletParameters.clear();
         nextURL = null;
-        nextWidgetId = null;
+        nextFrontletId = null;
         validatorMessages = new ValidatorMessages();
         reloadPage = false;
-        widgetContainerId = null;
-        defaultWidgets.clear();
+        frontletContainerId = null;
+        defaultFrontlets.clear();
     }
 }

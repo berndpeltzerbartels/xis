@@ -13,12 +13,12 @@ class ControllerMethodResult {
 
     private String nextURL;
     private String nextPageId;
-    private String nextWidgetId;
-    private String widgetContainerId;
+    private String nextFrontletId;
+    private String frontletContainerId;
     private ActionProcessing actionProcessing;
-    private final Collection<String> widgetsToReload = new HashSet<>();
+    private final Collection<String> frontletsToReload = new HashSet<>();
     private Collection<String> updateEventKeys = new HashSet<>();
-    private final Map<String, Object> widgetParameters = new HashMap<>();
+    private final Map<String, Object> frontletParameters = new HashMap<>();
     private final Map<String, Object> urlParameters = new HashMap<>();
     private final Map<String, Object> pathVariables = new HashMap<>();
     private final Map<String, Object> modelData = new HashMap<>();

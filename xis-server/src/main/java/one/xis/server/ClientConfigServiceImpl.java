@@ -80,15 +80,15 @@ class ClientConfigServiceImpl implements ClientConfigService {
 
 
     private void addFrontletAttributes(ClientConfig.ClientConfigBuilder configBuilder) {
-        var widgetIds = new HashSet<String>();
-        var widgetAttributesHashMap = new HashMap<String, FrontletAttributes>();
+        var frontletIds = new HashSet<String>();
+        var frontletAttributes = new HashMap<String, FrontletAttributes>();
         for (Object frontletController : frontletControllers) {
             var attributes = frontletAttributesFactory.attributes(frontletController);
-            widgetIds.add(attributes.getId());
-            widgetAttributesHashMap.put(attributes.getId(), attributes); // TODO host
+            frontletIds.add(attributes.getId());
+            frontletAttributes.put(attributes.getId(), attributes); // TODO host
         }
-        configBuilder.widgetIds(Collections.unmodifiableSet(widgetIds))
-                .widgetAttributes(widgetAttributesHashMap);
+        configBuilder.frontletIds(Collections.unmodifiableSet(frontletIds))
+                .frontletAttributes(frontletAttributes);
     }
 
     private void addIncludeIds(ClientConfig.ClientConfigBuilder configBuilder) {

@@ -12,18 +12,18 @@ import java.util.Map;
 class ControllerResult {
 
     private String currentPageURL;
-    private String currentWidgetId;
+    private String currentFrontletId;
     private String nextURL;
     private String nextPageId;
     private Class<?> nextPageControllerClass;
-    private String nextWidgetId;
-    private String widgetContainerId;
+    private String nextFrontletId;
+    private String frontletContainerId;
     private String annotatedTitle;
     private String annotatedAddress;
     private ActionProcessing actionProcessing = ActionProcessing.NONE;
-    private Collection<String> widgetsToReload = new HashSet<>();
+    private Collection<String> frontletsToReload = new HashSet<>();
     private Collection<String> updateEventKeys = new HashSet<>();
-    private final Map<String, Object> widgetParameters = new HashMap<>();
+    private final Map<String, Object> frontletParameters = new HashMap<>();
     private final Map<String, Object> urlParameters = new HashMap<>();
     private final Map<String, Object> pathVariables = new HashMap<>();
     private final Map<String, Object> modelData = new HashMap<>();

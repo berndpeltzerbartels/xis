@@ -100,7 +100,7 @@ class ControllerMethodParameter {
         } else if (parameter.isAnnotationPresent(PathVariable.class)) {
             controllerMethodResult.getPathVariables().put(parameter.getAnnotation(PathVariable.class).value(), parameterValue);
         } else if (parameter.isAnnotationPresent(FrontletParameter.class)) {
-            controllerMethodResult.getWidgetParameters().put(parameter.getAnnotation(FrontletParameter.class).value(), parameterValue);
+            controllerMethodResult.getFrontletParameters().put(parameter.getAnnotation(FrontletParameter.class).value(), parameterValue);
         } else if (parameter.isAnnotationPresent(SharedValue.class)) {
             controllerMethodResult.getRequestScope().put(parameter.getAnnotation(SharedValue.class).value(), parameterValue);
         } else if (parameter.isAnnotationPresent(SessionStorage.class)) {
@@ -164,10 +164,10 @@ class ControllerMethodParameter {
 
     private Object deserializeWidgetParameter(Parameter parameter, ClientRequest request, PostProcessingResults postProcessingResults) throws IOException {
         var key = parameter.getAnnotation(FrontletParameter.class).value();
-        if (isMandatory(parameter) && !request.getWidgetParameters().containsKey(key)) {
-            throw new IllegalStateException("No widget parameter found for key " + key);
+        if (isMandatory(parameter) && !request.getFrontletParameters().containsKey(key)) {
+            throw new IllegalStateException("No frontlet parameter found for key " + key);
         }
-        var paramValue = request.getWidgetParameters().get(key);
+        var paramValue = request.getFrontletParameters().get(key);
         return deserializeParameter(paramValue, request, parameter, postProcessingResults);
     }
 

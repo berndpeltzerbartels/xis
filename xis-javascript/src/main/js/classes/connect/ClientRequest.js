@@ -2,7 +2,7 @@
  * @property {string} clientId
  * @property {string} pageId
  * @property {string} pageUrl
- * @property {string} widgetId 
+ * @property {string} frontletId 
  * @property {string} action
  * @property {string: string} pathVariables
  * @property {string: string} urlParameters
@@ -20,7 +20,7 @@ class ClientRequest {
         this.clientId = '';
         this.pageId = '';
         this.pageUrl = '';
-        this.widgetId = '';
+        this.frontletId = '';
         this.action = '';
         this.pathVariables = {};
         this.urlParameters = {};
@@ -32,5 +32,7 @@ class ClientRequest {
         this.localStorageData = {};
         this.globalVariableData = {};
         this.localDatabaseData = {}; // TODO
+        this.frontletParameters = {};
+        this.frontletContainerId = '';
     }
 }

@@ -251,7 +251,7 @@ class Client {
         var normalizedPath = resolvedURL.normalizedPath;
         var request = new ClientRequest();
         request.clientId = this.clientId;
-        request.widgetId = widgetId;
+        request.frontletId = widgetId;
         request.pageId = normalizedPath;
         request.pageUrl = resolvedURL.url;
         request.formBinding = formBindingKey;
@@ -259,9 +259,9 @@ class Client {
         request.formData = mappedFormData;
         request.urlParameters = resolvedURL.urlParameters;
         request.pathVariables = resolvedURL.pathVariablesAsMap();
-        request.widgetParameters = frontletParameters;
+        request.frontletParameters = frontletParameters;
         request.zoneId = this.zoneId;
-        request.type = request.widgetId ? 'widget' : 'page';
+        request.type = request.frontletId ? 'frontlet' : 'page';
         if (widgetId) { // TODO write a test
             request.sessionStorageData = this.sessionStorageDataWidget(widgetId);
             request.localStorageData = this.localStorageDataWidget(widgetId);
@@ -290,12 +290,12 @@ class Client {
     createFrontletRequest(frontletInstance, frontletState, action, formData, actionParameters) {
         var request = new ClientRequest();
         request.clientId = this.clientId;
-        request.widgetId = frontletInstance.frontlet.id;
+        request.frontletId = frontletInstance.frontlet.id;
         request.action = action;
         request.formData = formData ? formData.values : {};
         request.urlParameters = frontletState.resolvedURL.urlParameters;
         request.pathVariables = frontletState.resolvedURL.pathVariablesAsMap();
-        request.widgetParameters = frontletState.frontletParameters;
+        request.frontletParameters = frontletState.frontletParameters;
         request.actionParameters = actionParameters ? actionParameters : {};
         request.zoneId = this.zoneId;         // TODO locale ?
         request.sessionStorageData = this.sessionStorageDataWidget(frontletInstance.frontlet.id);
@@ -303,7 +303,7 @@ class Client {
         request.clientStorageData = this.clientStorageDataWidget(frontletInstance.frontlet.id);
         request.globalVariableData = this.globalVariableDataWidget(frontletInstance.frontlet.id);
         request.localDatabaseData = {};
-        request.type = 'widget';
+        request.type = 'frontlet';
         return request;
     }
 
@@ -316,11 +316,11 @@ class Client {
     }
 
     sessionStorageDataWidget(widgetId) {
-        return this.sessionStorageData(this.config.widgetAttributes[widgetId]);
+        return this.sessionStorageData(this.config.frontletAttributes[widgetId]);
     }
 
     localStorageDataWidget(widgetId) {
-        return this.localStorageData(this.config.widgetAttributes[widgetId]);
+        return this.localStorageData(this.config.frontletAttributes[widgetId]);
     }
 
     clientStorageDataPage(pageId) {
@@ -328,7 +328,7 @@ class Client {
     }
 
     clientStorageDataWidget(widgetId) {
-        return this.clientStorageData(this.config.widgetAttributes[widgetId]);
+        return this.clientStorageData(this.config.frontletAttributes[widgetId]);
     }
 
     globalVariableDataPage(pageId) {
@@ -336,7 +336,7 @@ class Client {
     }
 
     globalVariableDataWidget(widgetId) {
-        return this.globalVariableData(this.config.widgetAttributes[widgetId]);
+        return this.globalVariableData(this.config.frontletAttributes[widgetId]);
     }
 
 
@@ -385,7 +385,7 @@ class Client {
         var config = new ClientConfig();
         config.welcomePageId = obj.welcomePageId;
         config.pageIds = obj.pageIds ? obj.pageIds : [];
-        config.widgetIds = obj.widgetIds ? obj.widgetIds : [];
+        config.frontletIds = obj.frontletIds ? obj.frontletIds : (obj.widgetIds ? obj.widgetIds : []);
         config.includeIds = obj.includeIds ? obj.includeIds : [];
         config.pendingEventTtlSeconds = obj.pendingEventTtlSeconds || 0;
         config.pageAttributes = {};
@@ -394,10 +394,11 @@ class Client {
                 config.pageAttributes[key] = new PageAttributes(obj.pageAttributes[key]);
             }
         }
-        config.widgetAttributes = {};
-        if (obj.widgetAttributes) {
-            for (var key of Object.keys(obj.widgetAttributes)) {
-                config.widgetAttributes[key] = new FrontletAttributes(obj.widgetAttributes[key]);
+        config.frontletAttributes = {};
+        var frontletAttributes = obj.frontletAttributes ? obj.frontletAttributes : obj.widgetAttributes;
+        if (frontletAttributes) {
+            for (var key of Object.keys(frontletAttributes)) {
+                config.frontletAttributes[key] = new FrontletAttributes(frontletAttributes[key]);
             }
         }
         return config;
@@ -419,24 +420,24 @@ class Client {
         serverResponse.data = data;
         serverResponse.formData = formData;
         serverResponse.nextURL = obj.nextURL;
-        serverResponse.nextWidgetId = obj.nextWidgetId;
+        serverResponse.nextFrontletId = obj.nextFrontletId ? obj.nextFrontletId : obj.nextWidgetId;
         serverResponse.status = response.status;
         serverResponse.validatorMessages = new ValidatorMessages(obj.validatorMessages);
         serverResponse.reloadPage = obj.reloadPage;
-        serverResponse.reloadWidgets = obj.reloadWidgets;
+        serverResponse.reloadFrontlets = obj.reloadFrontlets ? obj.reloadFrontlets : obj.reloadWidgets;
         serverResponse.localDatabaseData = obj.localDatabaseData || {};
         serverResponse.localStorageData = obj.localStorageData || {};
         serverResponse.clientStorageData = obj.clientStorageData || {};
         serverResponse.globalVariableData = obj.globalVariableData || {};
         serverResponse.sessionStorageData = obj.sessionStorageData;
-        serverResponse.widgetParameters = obj.widgetParameters || {};
-        serverResponse.widgetContainerId = obj.widgetContainerId;
+        serverResponse.frontletParameters = obj.frontletParameters ? obj.frontletParameters : (obj.widgetParameters || {});
+        serverResponse.frontletContainerId = obj.frontletContainerId ? obj.frontletContainerId : obj.widgetContainerId;
         serverResponse.redirectUrl = obj.redirectUrl;
         serverResponse.idVariables = obj.idVariables || {};
         serverResponse.actionProcessing = obj.actionProcessing || 'NONE';
         serverResponse.updateEventKeys = obj.updateEventKeys || [];
         serverResponse.annotatedTitle = obj.annotatedTitle; // difference between null and '' is important
-        serverResponse.defaultWidgets = obj.defaultWidgets || [];
+        serverResponse.defaultFrontlets = obj.defaultFrontlets ? obj.defaultFrontlets : (obj.defaultWidgets || []);
         data.setValue(['sessionStorage'], app.sessionStorage);
         data.setValue(['localStorage'], app.localStorage);
         data.setValue(['clientStorage'], serverResponse.clientStorageData);
@@ -444,7 +445,7 @@ class Client {
         data.setValue(['validation'], obj.validatorMessages);
         data.setValue(['validation','globalMessages'], obj.validatorMessages.globalMessages);
         data.setValue(['origin'], window.location.origin);
-        data.setValue(['widgetParameters'], obj.widgetParameters);
+        data.setValue(['frontletParameters'], serverResponse.frontletParameters);
        // this.storeData(serverResponse);
         this.setTitle(serverResponse);
         app.currentResponse = serverResponse;

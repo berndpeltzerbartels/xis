@@ -29,14 +29,14 @@ class ControllerService {
     void processModelDataRequest(@NonNull ClientRequest request, @NonNull ServerResponse response) {
         var controllerResult = new ControllerResult();
         controllerResult.setCurrentPageURL(request.getPageId());
-        controllerResult.setCurrentWidgetId(request.getWidgetId());
+        controllerResult.setCurrentFrontletId(request.getFrontletId());
         var wrapper = controllerWrapper(request);
         wrapper.invokeGetModelMethods(request, controllerResult);
-        if (controllerResult.getNextWidgetId() == null) {
-            controllerResult.setNextWidgetId(request.getWidgetId());
+        if (controllerResult.getNextFrontletId() == null) {
+            controllerResult.setNextFrontletId(request.getFrontletId());
         }
         //       if (request.getType() == RequestType.page) {
-        response.getDefaultWidgets().addAll(frontletControllerWrappers.findDefaultWidgetsByPageUrl(request.getPageUrl()));
+        response.getDefaultFrontlets().addAll(frontletControllerWrappers.findDefaultFrontletsByPageUrl(request.getPageUrl()));
         //     }
         mapResultToResponse(request, response, controllerResult);
     }
@@ -44,11 +44,11 @@ class ControllerService {
     void processFormDataRequest(@NonNull ClientRequest request, @NonNull ServerResponse response) {
         var controllerResult = new ControllerResult();
         controllerResult.setCurrentPageURL(request.getPageId());
-        controllerResult.setCurrentWidgetId(request.getWidgetId());
+        controllerResult.setCurrentFrontletId(request.getFrontletId());
         var wrapper = controllerWrapper(request);
         wrapper.invokeFormDataMethods(request, controllerResult);
-        if (controllerResult.getNextWidgetId() == null) {
-            controllerResult.setNextWidgetId(request.getWidgetId());
+        if (controllerResult.getNextFrontletId() == null) {
+            controllerResult.setNextFrontletId(request.getFrontletId());
         }
         mapResultToResponse(request, response, controllerResult);
     }
@@ -59,7 +59,7 @@ class ControllerService {
         }
         var controllerResult = new ControllerResult();
         controllerResult.setCurrentPageURL(request.getPageId());
-        controllerResult.setCurrentWidgetId(request.getWidgetId());
+        controllerResult.setCurrentFrontletId(request.getFrontletId());
         var invokerControllerWrapper = controllerWrapper(request);
         invokerControllerWrapper.invokeActionMethod(request, controllerResult);
         if (!resultContainsNextController(controllerResult)) {
@@ -88,7 +88,7 @@ class ControllerService {
         var nextControllerResult = new ControllerResult();
         // one of these 2 values changed
         if (nextControllerWrapper.isWidgetController()) {
-            nextControllerResult.setNextWidgetId(nextControllerWrapper.getId());
+            nextControllerResult.setNextFrontletId(nextControllerWrapper.getId());
         } else {
             var path = pathResolver.createPath(nextControllerWrapper.getController().getClass().getAnnotation(Page.class).value());
             nextControllerResult.setNextURL(this.pathResolver.evaluateRealPath(path, controllerResult.getPathVariables(), controllerResult.getUrlParameters()));
@@ -101,8 +101,8 @@ class ControllerService {
     }
 
     private ControllerWrapper controllerWrapper(ClientRequest request) {
-        if (request.getType() == RequestType.widget) {
-            return frontletControllerWrapperById(request.getWidgetId());
+        if (request.getType() == RequestType.frontlet) {
+            return frontletControllerWrapperById(request.getFrontletId());
         } else if (request.getType() == RequestType.page) {
             return pageControllerWrapperById(request.getPageId());
         }
@@ -110,13 +110,13 @@ class ControllerService {
     }
 
     private boolean resultContainsNextController(ControllerResult controllerResult) {
-        return StringUtils.isNotEmpty(controllerResult.getNextWidgetId()) || StringUtils.isNotEmpty(controllerResult.getNextURL());
+        return StringUtils.isNotEmpty(controllerResult.getNextFrontletId()) || StringUtils.isNotEmpty(controllerResult.getNextURL());
     }
 
 
     private void usePreviousControllerAfterAction(ControllerResult controllerResult, ControllerWrapper controllerWrapper, ClientRequest request) {
         if (controllerWrapper.isWidgetController()) {
-            controllerResult.setNextWidgetId(controllerWrapper.getId());
+            controllerResult.setNextFrontletId(controllerWrapper.getId());
             controllerResult.setActionProcessing(ActionProcessing.WIDGET);
         } else {
             controllerResult.setNextURL(request.getPageUrl());
@@ -126,8 +126,8 @@ class ControllerService {
     }
 
     private ControllerWrapper nextControllerWrapperAfterAction(@NonNull ControllerResult controllerResult) {
-        if (StringUtils.isNotEmpty(controllerResult.getNextWidgetId())) {
-            return frontletControllerWrapperById(controllerResult.getNextWidgetId());
+        if (StringUtils.isNotEmpty(controllerResult.getNextFrontletId())) {
+            return frontletControllerWrapperById(controllerResult.getNextFrontletId());
         }
         if (controllerResult.getNextPageControllerClass() != null) {
             return pageControllerWrapperByClass(controllerResult.getNextPageControllerClass());
@@ -157,7 +157,7 @@ class ControllerService {
     }
 
     protected ControllerWrapper frontletControllerWrapperById(@NonNull String id) {
-        return frontletControllerWrappers.findWidgetById(id)
+        return frontletControllerWrappers.findFrontletById(id)
                 .orElseThrow(() -> new IllegalStateException("not a frontlet-controller:" + id));
     }
 

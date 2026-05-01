@@ -35,9 +35,9 @@ class FrontletControllerWrappers {
         frontletControllerWrappers = frontletControllerWrappers();
     }
 
-    Optional<ControllerWrapper> findWidgetById(String widgetId) {
+    Optional<ControllerWrapper> findFrontletById(String frontletId) {
         return frontletControllerWrappers.stream()
-                .filter(controller -> controller.getId().equals(widgetId))
+                .filter(controller -> controller.getId().equals(frontletId))
                 .findFirst();
     }
 
@@ -45,11 +45,11 @@ class FrontletControllerWrappers {
         return frontletControllerWrappers.stream().filter(c -> c.getControllerClass().equals(cl)).findFirst();
     }
 
-    Collection<ControllerWrapper> getAllWidgets() {
+    Collection<ControllerWrapper> getAllFrontlets() {
         return frontletControllerWrappers;
     }
 
-    Optional<ControllerWrapper> findWidgetByUrl(String url) {
+    Optional<ControllerWrapper> findFrontletByUrl(String url) {
         return frontletControllerWrappers.stream()
                 .filter(wrapper -> {
                     var frontletUrl = FrontletUtil.getUrl(wrapper.getControllerClass());
@@ -58,10 +58,10 @@ class FrontletControllerWrappers {
                 .findFirst();
     }
 
-    Collection<DefaultWidget> findDefaultWidgetsByPageUrl(String url) {
+    Collection<DefaultFrontlet> findDefaultFrontletsByPageUrl(String url) {
         return frontletControllerWrappers.stream()
                 .filter(wrapper -> matchesUrl(wrapper, url))
-                .map(wrapper -> new DefaultWidget(wrapper.getId(), containerId(wrapper)))
+                .map(wrapper -> new DefaultFrontlet(wrapper.getId(), containerId(wrapper)))
                 .toList();
     }
 

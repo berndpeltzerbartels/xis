@@ -15,8 +15,8 @@ public class FrontletResponse implements Response {
     private Class<?> controllerClass;
     private String targetContainer;
     private final Map<String, Object> pathVariables = new HashMap<>();
-    private final Map<String, Object> widgetParameters = new HashMap<>();
-    private final Collection<String> widgetsToReload = new HashSet<>();
+    private final Map<String, Object> frontletParameters = new HashMap<>();
+    private final Collection<String> frontletsToReload = new HashSet<>();
 
     public FrontletResponse(@NonNull Class<?> controllerClass) {
         this.controllerClass = controllerClass;
@@ -35,8 +35,8 @@ public class FrontletResponse implements Response {
         return this;
     }
 
-    public FrontletResponse widgetParameter(@NonNull String name, @NonNull Object value) {
-        widgetParameters.put(name, asString(value));
+    public FrontletResponse frontletParameter(@NonNull String name, @NonNull Object value) {
+        frontletParameters.put(name, asString(value));
         return this;
     }
 
@@ -50,17 +50,17 @@ public class FrontletResponse implements Response {
             throw new IllegalArgumentException("not a frontlet: " + frontletController);
         }
         var frontletAnnotation = frontletController.getAnnotation(Frontlet.class);
-        String widgetId = frontletAnnotation.value().equals("") ? frontletController.getSimpleName() : frontletAnnotation.value();
-        return reloadWidget(widgetId);
+        String frontletId = frontletAnnotation.value().equals("") ? frontletController.getSimpleName() : frontletAnnotation.value();
+        return reloadFrontlet(frontletId);
     }
 
-    public FrontletResponse reloadWidget(String widgetId) {
-        widgetsToReload.add(widgetId);
+    public FrontletResponse reloadFrontlet(String frontletId) {
+        frontletsToReload.add(frontletId);
         return this;
     }
 
     public static FrontletResponse of(@NonNull Class<?> controllerClass, @NonNull String paramName, @NonNull Object paramValue) {
-        return new FrontletResponse(controllerClass).widgetParameter(paramName, asString(paramValue));
+        return new FrontletResponse(controllerClass).frontletParameter(paramName, asString(paramValue));
     }
 
     private static String asString(@NonNull Object o) {

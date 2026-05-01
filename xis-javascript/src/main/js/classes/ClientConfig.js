@@ -1,18 +1,18 @@
 /**
  * @property {array<string>} pageIds
- * @property {array<string>} widgetIds
+ * @property {array<string>} frontletIds
  * @property {string: PageAttributes} pageAttributes
- * @property {string: FrontletAttributes} widgetAttributes
+ * @property {string: FrontletAttributes} frontletAttributes
  */
 
 class ClientConfig {
 
     constructor() {
         this.pageIds = [];
-        this.widgetIds = [];
+        this.frontletIds = [];
         this.welcomePageId = undefined;
         this.pageAttributes = {}
-        this.widgetAttributes = {};
+        this.frontletAttributes = {};
         this.pendingEventTtlSeconds = 0;
     }
 
@@ -30,11 +30,15 @@ class ClientConfig {
     /**
      * Returns the remote host for the given widget-id, or undefined if local.
      * @public
-     * @param {string} widgetId
+     * @param {string} frontletId
      * @returns {string|undefined}
      */
-    getWidgetHost(widgetId) {
-        const attrs = this.widgetAttributes[widgetId];
+    getFrontletHost(frontletId) {
+        const attrs = this.frontletAttributes[frontletId];
         return attrs ? attrs.host : undefined;
+    }
+
+    getWidgetHost(frontletId) {
+        return this.getFrontletHost(frontletId);
     }
 }

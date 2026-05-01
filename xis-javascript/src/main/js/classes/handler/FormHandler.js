@@ -62,7 +62,7 @@ class FormHandler extends TagHandler {
     refresh(data) {
         this.data = data;
         this.binding = this.bindingExpression.evaluate(data);
-        var frontletParameters = data.getValue(['widgetParameters']) || {};
+        var frontletParameters = data.getValue(['frontletParameters']) || {};
         var formBindingKey = stripQuery(this.binding);
         this.formElementHandlers = {};
         data.validationPath = '/' + formBindingKey;

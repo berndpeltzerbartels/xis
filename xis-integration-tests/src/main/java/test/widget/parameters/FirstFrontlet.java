@@ -10,6 +10,6 @@ public class FirstFrontlet {
     @Action("switchWidget")
     public FrontletResponse switchWidget() {
         return new FrontletResponse(SecondFrontlet.class)
-                .widgetParameter("actionParam", "actionValue");
+                .frontletParameter("actionParam", "actionValue");
     }
 }

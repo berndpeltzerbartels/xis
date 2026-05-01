@@ -13,8 +13,8 @@ var client = {
 }
 
 var config = {
-    widgetIds: ['widgetId'],
-    widgetAttributes: {
+    frontletIds: ['widgetId'],
+    frontletAttributes: {
         'widgetId': {}
     }
 }
