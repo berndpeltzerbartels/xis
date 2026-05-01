@@ -1,9 +1,9 @@
 package one.xis.server;
 
 import one.xis.Action;
+import one.xis.Frontlet;
 import one.xis.ModelData;
 import one.xis.Page;
-import one.xis.Widget;
 import one.xis.deserialize.MainDeserializer;
 import org.junit.jupiter.api.Test;
 
@@ -37,7 +37,7 @@ class ControllerWrapperFactoryTest {
         }
     }
 
-    @Widget
+    @Frontlet
     class TestWidgetController {
         @ModelData("x")
         String getX() {

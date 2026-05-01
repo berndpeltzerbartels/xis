@@ -3,7 +3,9 @@ package one.xis.spring;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import one.xis.*;
+import one.xis.Frontlet;
+import one.xis.Include;
+import one.xis.Page;
 import one.xis.context.AppContext;
 import one.xis.context.AppContextBuilder;
 import one.xis.http.RestControllerServiceImpl;
@@ -60,7 +62,7 @@ public class SpringContextAdapter implements BeanPostProcessor, ApplicationConte
         springFilter.setLocalUrlHolder(localUrlHolder);
         springFilter.setRestControllerService(controllerService);
     }
-    
+
 
     private AppContext createXisContext() {
         return AppContextBuilder.createInstance()
@@ -71,7 +73,7 @@ public class SpringContextAdapter implements BeanPostProcessor, ApplicationConte
 
     private boolean isFrameworkBeanClass(Class<?> clazz) {
         return clazz.isAnnotationPresent(Page.class)
-                || clazz.isAnnotationPresent(Widget.class)
+                || clazz.isAnnotationPresent(Frontlet.class)
                 || clazz.isAnnotationPresent(Include.class)
                 || isTypeForImport(clazz);
     }
