@@ -29,9 +29,9 @@ class CheckBoxPageTest {
         initialModel.setAccepted(false);
         when(checkBoxFormService.getCheckBoxFormModel()).thenReturn(initialModel);
 
-        var result = context.openPage(CheckBoxPage.class);
-        var checkbox = result.getDocument().getInputElementById("theCheckbox");
-        var submitButton = result.getDocument().getElementById("submitButton");
+        var client = context.openPage(CheckBoxPage.class);
+        var checkbox = client.getDocument().getInputElementById("theCheckbox");
+        var submitButton = client.getDocument().getElementById("submitButton");
 
         assertThat(checkbox.isChecked()).isFalse();
 
@@ -57,9 +57,9 @@ class CheckBoxPageTest {
         initialModel.setAccepted(true);
         when(checkBoxFormService.getCheckBoxFormModel()).thenReturn(initialModel);
 
-        var result = context.openPage(CheckBoxPage.class);
-        var checkbox = result.getDocument().getInputElementById("theCheckbox");
-        var submitButton = result.getDocument().getElementById("submitButton");
+        var client = context.openPage(CheckBoxPage.class);
+        var checkbox = client.getDocument().getInputElementById("theCheckbox");
+        var submitButton = client.getDocument().getElementById("submitButton");
 
         assertThat(checkbox.isChecked()).isTrue();
 

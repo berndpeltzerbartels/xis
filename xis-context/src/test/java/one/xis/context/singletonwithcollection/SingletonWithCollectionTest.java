@@ -13,11 +13,11 @@ class SingletonWithCollectionTest {
 
     @Test
     void shouldInjectPreExistingSingletonIntoCollectionDependency() {
-        // Reproduziert das Spring-Problem:
-        // 1. Spring Bean (SpringWSHandler) implementiert @ImportInstances Interface (SpringWSHandlerSPI)
-        // 2. Diese Bean wird in singletons Collection gestopft
-        // 3. XIS Component (SpringWebSocketInitializer) braucht Collection<SpringWSHandlerSPI>
-        // 4. Der XIS Context wird gebaut - sollte die Spring Bean finden
+        // Reproduces the Spring collection-injection problem:
+        // 1. A pre-existing Spring bean implements an interface collected by XIS.
+        // 2. The bean is added to the singletons collection.
+        // 3. An XIS component depends on Collection<MySPI>.
+        // 4. Building the XIS context should still expose the pre-existing bean.
         
         MyImplementation preExistingBean = new MyImplementation("spring-bean");
         

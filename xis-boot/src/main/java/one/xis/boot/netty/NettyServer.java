@@ -12,7 +12,6 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.HttpServerExpectContinueHandler;
-import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.concurrent.DefaultThreadFactory;
 import lombok.Getter;
@@ -21,7 +20,6 @@ import lombok.Setter;
 import one.xis.context.Component;
 import one.xis.context.Inject;
 
-import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -35,13 +33,6 @@ public class NettyServer {
 
     @Inject
     private final NettyHttpServerHandler httpServerHandler;
-
-    @Inject
-    private final Collection<NettyWSServerHandler> wsServerHandlers;
-
-    @Inject
-    private final Collection<NettyWSPingHandler> wsPingHandlers;
-
 
     @Setter
     @Getter
@@ -91,29 +82,12 @@ public class NettyServer {
                 ch.pipeline().addLast(new HttpObjectAggregator(MAX_AGGREGATED_REQUEST_BYTES));
                 ch.pipeline().addLast(new HttpServerExpectContinueHandler());
 
-                // Idle detection BEFORE any handlers (works for HTTP + WebSocket)
+                // Idle detection BEFORE the HTTP handler
                 ch.pipeline().addLast(new IdleStateHandler(
                         READER_IDLE_SECONDS, WRITER_IDLE_SECONDS, ALL_IDLE_SECONDS, TimeUnit.SECONDS
                 ));
                 ch.pipeline().addLast(IdleCloseHandler.INSTANCE);
-
-                // WebSocket ping handler (sends pings on idle)
-                if (!wsPingHandlers.isEmpty()) {
-                    ch.pipeline().addLast(wsPingHandlers.iterator().next());
-                }
-
-                // WebSocket upgrade (conditionally removes HTTP handler after handshake)
-                if (!wsServerHandlers.isEmpty()) {
-                    ch.pipeline().addLast(new WebSocketServerProtocolHandler("/ws"));
-                }
-
-                // HTTP handler (removed automatically if WebSocket upgrade happens)
                 ch.pipeline().addLast(httpServerHandler);
-
-                // WebSocket handler (only active after handshake)
-                if (!wsServerHandlers.isEmpty()) {
-                    ch.pipeline().addLast(wsServerHandlers.iterator().next());
-                }
             }
         };
     }

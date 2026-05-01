@@ -14,16 +14,16 @@ public class ParentDataTest {
                 .withSingleton(DefaultWidget.class)
                 .withSingleton(SecondWidget.class)
                 .build();
-        var result = context.openPage(TestPage.class);
+        var client = context.openPage(TestPage.class);
         // Check data on page
-        assertThat(result.getDocument().getElementById("page-data").getInnerText()).isEqualTo("parent123");
+        assertThat(client.getDocument().getElementById("page-data").getInnerText()).isEqualTo("parent123");
         // Check data on default widget
-        assertThat(result.getDocument().getElementById("default-widget-data").getInnerText()).isEqualTo("parent123");
+        assertThat(client.getDocument().getElementById("default-widget-data").getInnerText()).isEqualTo("parent123");
         // Click link to load second widget
-        result.getDocument().getElementById("widget-link").click();
+        client.getDocument().getElementById("widget-link").click();
         // Check data on second widget
-        assertThat(result.getDocument().getElementById("second-widget-data").getInnerText()).isEqualTo("parent123");
+        assertThat(client.getDocument().getElementById("second-widget-data").getInnerText()).isEqualTo("parent123");
         // Ensure second widget is loaded
-        assertThat(result.getDocument().getElementById("second-widget-data")).isNotNull();
+        assertThat(client.getDocument().getElementById("second-widget-data")).isNotNull();
     }
 }

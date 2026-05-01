@@ -29,7 +29,7 @@ public class NodeList {
     }
 
     /**
-     * Führt die gegebene Aktion für jedes Node aus.
+     * Executes the given action for each node.
      */
     public void forEach(Consumer<? super Node> action) {
         nodes.forEach(action);

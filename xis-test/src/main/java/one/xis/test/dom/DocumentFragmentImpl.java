@@ -1,12 +1,12 @@
 package one.xis.test.dom;
 
 /**
- * DocumentFragment-Implementierung für DOM- und GraalVM-Tests.
+ * DocumentFragment implementation for DOM and GraalVM tests.
  * Kein Element, keine Attribute, nur Kindverwaltung.
  */
 public class DocumentFragmentImpl extends NodeImpl {
     public DocumentFragmentImpl() {
-        super(Node.DOCUMENT_FRAGMENT_NODE); // Typisch: Node.DOCUMENT_FRAGMENT_NODE, aber für Kompatibilität
+        super(Node.DOCUMENT_FRAGMENT_NODE); // Typical node type, kept for compatibility
     }
 
 

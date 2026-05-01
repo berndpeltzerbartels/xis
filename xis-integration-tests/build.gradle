@@ -42,16 +42,12 @@ dependencies {
     implementation project(':xis-util')
     implementation project(':xis-validation')
     implementation project(':xis-adapter-spi')
-    // RefreshEventPublisher is used in src/main by MatchService
-    implementation project(':xis-websocket-api')
+    implementation project(':xis-server')
 
     // Local test dependencies
     testImplementation project(":xis-test")
     testImplementation project(":xis-gson")
     testImplementation project(":xis-http-controller")
-    // WebSocket test support: TestRefreshEventPublisher, WsTestScriptExtension
-    testImplementation project(":xis-websocket")
-
     // Lombok dependencies
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
     implementation "org.projectlombok:lombok:$lombokVersion"

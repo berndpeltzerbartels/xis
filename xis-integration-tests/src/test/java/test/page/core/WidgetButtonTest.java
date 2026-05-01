@@ -27,18 +27,18 @@ class WidgetButtonTest {
         var widget1 = testContext.getSingleton(WidgetButton1.class);
         var widget2 = testContext.getSingleton(WidgetButton2.class);
 
-        var result = testContext.openPage("/widgetButtonPage.html");
-        assertThat(result.getDocument().getElementByTagName("title").getInnerText()).isEqualTo("Widget Button Test");
+        var client = testContext.openPage("/widgetButtonPage.html");
+        assertThat(client.getDocument().getElementByTagName("title").getInnerText()).isEqualTo("Widget Button Test");
         assertThat(pageController.getInvocations()).isEqualTo(1);
 
         // Click button to load widget1
-        result.getDocument().getElementById("loadWidget1").click();
+        client.getDocument().getElementById("loadWidget1").click();
         assertThat(widget1.getInvocations()).isEqualTo(1);
-        assertThat(result.getDocument().getElementById("widgetContent").getInnerText()).contains("Widget 1 Content");
+        assertThat(client.getDocument().getElementById("widgetContent").getInnerText()).contains("Widget 1 Content");
 
         // Click button to load widget2
-        result.getDocument().getElementById("loadWidget2").click();
+        client.getDocument().getElementById("loadWidget2").click();
         assertThat(widget2.getInvocations()).isEqualTo(1);
-        assertThat(result.getDocument().getElementById("widgetContent").getInnerText()).contains("Widget 2 Content");
+        assertThat(client.getDocument().getElementById("widgetContent").getInnerText()).contains("Widget 2 Content");
     }
 }

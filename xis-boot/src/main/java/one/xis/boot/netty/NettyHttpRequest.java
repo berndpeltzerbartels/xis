@@ -1,5 +1,6 @@
 package one.xis.boot.netty;
 
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.QueryStringDecoder;
@@ -31,6 +32,10 @@ public final class NettyHttpRequest implements HttpRequest {
     @Override
     public HttpMethod getHttpMethod() {
         return HttpMethod.valueOf(request.method().name());
+    }
+
+    public Channel getChannel() {
+        return ctx.channel();
     }
 
     @Override

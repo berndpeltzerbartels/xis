@@ -20,26 +20,26 @@ class WidgetFormTest {
 
     @Test
     void formActionInWidgetUpdatesPageAndWidget() {
-        var result = context.openPage("/widgetForm.html");
+        var client = context.openPage("/widgetForm.html");
 
         // Initial values should be 10
-        var counterOnPage = result.getDocument().getElementById("counter-value-page").getInnerText();
-        var counterOnWidget = result.getDocument().getElementById("counter-value-widget").getInnerText();
+        var counterOnPage = client.getDocument().getElementById("counter-value-page").getInnerText();
+        var counterOnWidget = client.getDocument().getElementById("counter-value-widget").getInnerText();
 
         assertThat(counterOnPage).isEqualTo("0");
         assertThat(counterOnWidget).isEqualTo("0");
 
         // Enter a value in the input field before submitting
-        var inputField = result.getDocument().getElementById("increment-input");
+        var inputField = client.getDocument().getElementById("increment-input");
         inputField.setAttribute("value", "3");
 
         // Submit form in widget - this should trigger reactive state update
         // Form has input value "3", so counter should become 13
-        result.getDocument().getElementById("increment-form-button").click();
+        client.getDocument().getElementById("increment-form-button").click();
 
         // Both page and widget should now show 13 (10 + 3)
-        counterOnPage = result.getDocument().getElementById("counter-value-page").getInnerText();
-        counterOnWidget = result.getDocument().getElementById("counter-value-widget").getInnerText();
+        counterOnPage = client.getDocument().getElementById("counter-value-page").getInnerText();
+        counterOnWidget = client.getDocument().getElementById("counter-value-widget").getInnerText();
 
         assertThat(counterOnPage).isEqualTo("3");
         assertThat(counterOnWidget).isEqualTo("3");

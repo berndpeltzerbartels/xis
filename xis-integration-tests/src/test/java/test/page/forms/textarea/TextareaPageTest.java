@@ -28,17 +28,17 @@ class TextareaPageTest {
         var initialModel = new TextareaFormModel();
         when(service.getTextareaFormModel()).thenReturn(initialModel);
 
-        var result = context.openPage(TextareaPage.class);
-        var textarea = (TextareaElement) result.getDocument().getElementById("theTextarea");
-        var submitButton = result.getDocument().getElementById("submitButton");
+        var client = context.openPage(TextareaPage.class);
+        var textarea = (TextareaElement) client.getDocument().getElementById("theTextarea");
+        var submitButton = client.getDocument().getElementById("submitButton");
 
         textarea.setValue(""); // leer lassen
         submitButton.click();
 
-        var liError = result.getDocument().getElementByTagName("li");
+        var liError = client.getDocument().getElementByTagName("li");
         assertThat(liError.getInnerHTML()).contains("Benutzerdefinierte globale Pflichtfeldmeldung");
 
-        assertThat(result.getDocument().getElementById("fieldMessage").getInnerText()).isEqualTo("Benutzerdefinierte Pflichtfeldmeldung");
+        assertThat(client.getDocument().getElementById("fieldMessage").getInnerText()).isEqualTo("Benutzerdefinierte Pflichtfeldmeldung");
     }
 
     @Test
@@ -46,14 +46,14 @@ class TextareaPageTest {
         var initialModel = new TextareaFormModel();
         when(service.getTextareaFormModel()).thenReturn(initialModel);
 
-        var result = context.openPage(TextareaPage.class);
-        var textarea = (TextareaElement) result.getDocument().getElementById("theTextarea");
-        var submitButton = result.getDocument().getElementById("submitButton");
+        var client = context.openPage(TextareaPage.class);
+        var textarea = (TextareaElement) client.getDocument().getElementById("theTextarea");
+        var submitButton = client.getDocument().getElementById("submitButton");
 
         textarea.setValue("\u0000\u0001"); // ungültige Eingabe
         submitButton.click();
 
-        var liError = result.getDocument().getElementByTagName("li");
+        var liError = client.getDocument().getElementByTagName("li");
         assertThat(liError.getInnerHTML()).contains("Benutzerdefinierte globale Pflichtfeldmeldung");
     }
 
@@ -62,14 +62,14 @@ class TextareaPageTest {
         var initialModel = new TextareaFormModel();
         when(service.getTextareaFormModel()).thenReturn(initialModel);
 
-        var result = context.openPage(TextareaPage.class);
-        var textarea = (TextareaElement) result.getDocument().getElementById("theTextarea");
-        var submitButton = result.getDocument().getElementById("submitButton");
+        var client = context.openPage(TextareaPage.class);
+        var textarea = (TextareaElement) client.getDocument().getElementById("theTextarea");
+        var submitButton = client.getDocument().getElementById("submitButton");
         textarea.setValue(""); // leer lassen
 
         submitButton.click();
 
-        var liError = result.getDocument().getElementByTagName("li");
+        var liError = client.getDocument().getElementByTagName("li");
         assertThat(liError.getInnerHTML()).contains("Benutzerdefinierte globale Pflichtfeldmeldung");
     }
 }

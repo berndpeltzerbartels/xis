@@ -26,8 +26,8 @@ public class ProtectedModelDataTest {
 
         @Test
         void test() {
-            var result = testContext.openPage("/page1.html");
-            var document = result.getDocument();
+            var client = testContext.openPage("/page1.html");
+            var document = client.getDocument();
             var link = document.getElementById("link");
 
             link.click();
@@ -57,8 +57,8 @@ public class ProtectedModelDataTest {
 
         @Test
         void test() {
-            var result = testContext.openPage("/page1.html");
-            var document = result.getDocument();
+            var client = testContext.openPage("/page1.html");
+            var document = client.getDocument();
             var link = document.getElementById("link");
 
             link.click();
@@ -87,8 +87,8 @@ public class ProtectedModelDataTest {
 
         @Test
         void test() {
-            var result = testContext.openPage("/page1.html");
-            var document = result.getDocument();
+            var client = testContext.openPage("/page1.html");
+            var document = client.getDocument();
             var link = document.getElementById("link");
             System.err.println(document.asString());
             assertThat(document.getElementByTagName("title").getInnerText()).isEqualTo("Page 1");

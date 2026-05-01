@@ -24,26 +24,26 @@ class WidgetParameterCombinationTest {
     @DisplayName("Widget receives both action parameter and container parameter")
     void widgetReceivesBothParameters() {
         // Open page with FirstWidget
-        var result = testContext.openPage("/parameterTest.html");
+        var client = testContext.openPage("/parameterTest.html");
 
         // Verify FirstWidget is loaded
-        assertThat(result.getDocument().getElementByTagName("h2").getInnerText())
+        assertThat(client.getDocument().getElementByTagName("h2").getInnerText())
                 .isEqualTo("First Widget");
 
         // Click action to switch to SecondWidget with actionParam
-        var button = result.getDocument().getElementByTagName("button");
+        var button = client.getDocument().getElementByTagName("button");
         button.click();
 
         // Verify SecondWidget is now loaded
-        assertThat(result.getDocument().getElementByTagName("h2").getInnerText())
+        assertThat(client.getDocument().getElementByTagName("h2").getInnerText())
                 .isEqualTo("Second Widget");
 
         // Verify action parameter from WidgetResponse
-        assertThat(result.getDocument().getElementById("actionParam").getInnerText())
+        assertThat(client.getDocument().getElementById("actionParam").getInnerText())
                 .isEqualTo("Action Parameter: actionValue");
 
         // Verify container parameter from widget-container
-        assertThat(result.getDocument().getElementById("containerParam").getInnerText())
+        assertThat(client.getDocument().getElementById("containerParam").getInnerText())
                 .isEqualTo("Container Parameter: containerValue");
 
     }

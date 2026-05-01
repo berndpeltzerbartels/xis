@@ -32,7 +32,7 @@ class PageUrl {
             lastIndex = matcher.end();
         }
 
-        // FIX: matcher.start() → pattern.length()
+        // FIX: matcher.start() -> pattern.length()
         regex.append(Pattern.quote(pattern.substring(lastIndex)));
 
         regex.insert(0, "^");

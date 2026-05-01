@@ -33,7 +33,6 @@ dependencies {
     // Local project dependencies
 
     implementation project(':xis-spring')
-    implementation project(':xis-spring-websocket')
     implementation project(':xis-test')
     implementation project(':xis-authentication')
     // implementation project(':xis-theme')

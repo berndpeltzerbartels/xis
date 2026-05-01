@@ -23,8 +23,8 @@ class SubmitFormWithoutDataTest {
     @Test
     void testEmptyFormShowsValidationErrors() {
         // Seite öffnen
-        var result = testContext.openPage("/submitFormWithoutData.html");
-        var document = result.getDocument();
+        var client = testContext.openPage("/submitFormWithoutData.html");
+        var document = client.getDocument();
 
         document.getElementById("save").click();
 

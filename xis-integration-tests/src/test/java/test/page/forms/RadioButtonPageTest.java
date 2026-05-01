@@ -26,24 +26,24 @@ class RadioButtonPageTest {
         var initialModel = new RadioButtonFormModel();
         service.setModel(initialModel);
 
-        var result = context.openPage(RadioButtonPage.class);
-        var radio1 = result.getDocument().getInputElementById("radio-1");
-        var radio2 = result.getDocument().getInputElementById("radio-2");
+        var client = context.openPage(RadioButtonPage.class);
+        var radio1 = client.getDocument().getInputElementById("radio-1");
+        var radio2 = client.getDocument().getInputElementById("radio-2");
 
         // User wählt radio1 und submitted
         radio1.click();
         assertThat(radio1.isChecked()).isTrue();
         assertThat(radio2.isChecked()).isFalse();
 
-        result.getDocument().getElementById("submitButton").click();
+        client.getDocument().getElementById("submitButton").click();
 
         // Service prüfen
         var savedModel = service.getModel();
         assertThat(savedModel.getValue()).isEqualTo(1);
 
         // Seite neu prüfen
-        var newRadio1 = result.getDocument().getInputElementById("radio-1");
-        var newRadio2 = result.getDocument().getInputElementById("radio-2");
+        var newRadio1 = client.getDocument().getInputElementById("radio-1");
+        var newRadio2 = client.getDocument().getInputElementById("radio-2");
         assertThat(newRadio1.isChecked()).isTrue();
         assertThat(newRadio2.isChecked()).isFalse();
     }
@@ -53,13 +53,13 @@ class RadioButtonPageTest {
         var initialModel = new RadioButtonFormModel();
         service.setModel(initialModel);
 
-        var result = context.openPage(RadioButtonPage.class);
-        var radio2 = result.getDocument().getInputElementById("radio-2");
+        var client = context.openPage(RadioButtonPage.class);
+        var radio2 = client.getDocument().getInputElementById("radio-2");
 
         radio2.click();
         assertThat(radio2.isChecked()).isTrue();
 
-        result.getDocument().getElementById("submitButton").click();
+        client.getDocument().getElementById("submitButton").click();
 
         var savedModel = service.getModel();
         assertThat(savedModel.getValue()).isEqualTo(2);
@@ -70,8 +70,8 @@ class RadioButtonPageTest {
         var initialModel = new RadioButtonFormModel();
         service.setModel(initialModel);
 
-        var result = context.openPage(RadioButtonPage.class);
-        result.getDocument().getElementById("submitButton").click();
+        var client = context.openPage(RadioButtonPage.class);
+        client.getDocument().getElementById("submitButton").click();
 
         var savedModel = service.getModel();
         assertThat(savedModel.getValue()).isNull();

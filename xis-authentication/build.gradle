@@ -62,6 +62,7 @@ dependencies {
     testImplementation project(":xis-http-controller")
     testImplementation project(':xis-controller-api')
     testImplementation project(':xis-html')
+    testImplementation project(':xis-test')
     testImplementation "org.mockito:mockito-core:$mockitoVersion"
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0' // TOO use properties from root project
@@ -137,4 +138,3 @@ tasks.withType(Javadoc) {
     options.addBooleanOption('Xdoclint:none', true)
     options.addStringOption('encoding', 'UTF-8')
 }
-

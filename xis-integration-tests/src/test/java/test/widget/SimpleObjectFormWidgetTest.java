@@ -48,9 +48,9 @@ class SimpleObjectFormWidgetTest {
             var widgetPage = testContext.getSingleton(WidgetPage.class);
             widgetPage.setWidgetId(SimpleObjectNewWidget.class.getSimpleName());
             // Display form
-            var result = testContext.openPage(WidgetPage.class);
+            var client = testContext.openPage(WidgetPage.class);
 
-            var document = result.getDocument();
+            var document = client.getDocument();
             var inputField1 = document.getInputElementById("field1");
             var inputField2 = document.getInputElementById("field2");
 

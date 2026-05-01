@@ -10,7 +10,7 @@ class TestApplication {
         this.clientId = this.clientId();
         this.httpConnector = new HttpConnectorMock(this.clientId);
         this.httpClient = new HttpClient(this.httpConnector, this.clientId);
-        this.websocketConnector = this.createWebsocketConnectorIfPresent(this.clientId);
+        this.eventConnector = this.createEventConnectorIfPresent(this.clientId);
         this.client = this.httpClient;
         this.domAccessor = new DomAccessor();
         this.pages = new Pages(this.httpClient);
@@ -52,7 +52,7 @@ class TestApplication {
 
 
     start() {
-        // TODO Hier scheint es Probleme zu geben, wenn meherer Tests ausgeführt werden.
+        // TODO There seem to be issues when multiple tests are executed.
     }
 
 
@@ -61,7 +61,12 @@ class TestApplication {
         document.location.pathname = uri;
         return this.httpClient.loadConfig()
             .then(config => this.pageController.setConfig(config))
-            .then(config => { if (this.websocketConnector) { this.websocketConnector.setPendingEventTtlMs(config.pendingEventTtlSeconds * 1000); } return config; })
+            .then(config => {
+                if (this.eventConnector && typeof this.eventConnector.setPendingEventTtlMs === 'function') {
+                    this.eventConnector.setPendingEventTtlMs(config.pendingEventTtlSeconds * 1000);
+                }
+                return config;
+            })
             .then(config => this.widgetContainers.setConfig(config))
             .then(config => this.includes.loadIncludes(config))
             .then(config => this.widgets.loadWidgets(config))
@@ -88,11 +93,8 @@ class TestApplication {
         sessionStorage.reset();
     }
 
-     createWebsocketConnectorIfPresent(clientId) {
-        if (typeof WebsocketConnectorMock !== 'undefined') {
-            return new WebsocketConnectorMock(clientId);
-        }
-        return null;
+     createEventConnectorIfPresent(clientId) {
+        return new TestEventConnector(clientId);
     }
 
     submitForm(id, action) {
@@ -109,4 +111,25 @@ class TestApplication {
         }
     }
 
+}
+
+class TestEventConnector {
+
+    constructor(clientId) {
+        this.clientId = clientId;
+    }
+
+    setPendingEventTtlMs(_) {
+    }
+
+    simulatePushEvent(updateEventKey) {
+        return app.pageController.handleUpdateEvents([updateEventKey])
+            .then(pageUpdated => {
+                if (!pageUpdated) {
+                    return app.widgetContainers.handleUpdateEvents([updateEventKey]);
+                }
+                return pageUpdated;
+            })
+            .catch(e => reportError('TestEventConnector failed for update-event key=' + updateEventKey, e));
+    }
 }

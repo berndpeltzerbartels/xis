@@ -28,17 +28,17 @@ class WidgetContainerParameterTest {
     @Test
     @DisplayName("Widget container with xis:parameter tags passes parameters to widget")
     void widgetContainerWithParameterTags() {
-        var result = testContext.openPage("/widgetContainerParameterPage.html");
+        var client = testContext.openPage("/widgetContainerParameterPage.html");
 
-        assertThat(result.getDocument().getElementById("categoryId").getInnerText()).isEqualTo("electronics");
-        assertThat(result.getDocument().getElementById("sortBy").getInnerText()).isEqualTo("price");
+        assertThat(client.getDocument().getElementById("categoryId").getInnerText()).isEqualTo("electronics");
+        assertThat(client.getDocument().getElementById("sortBy").getInnerText()).isEqualTo("price");
     }
 
     @Test
     @DisplayName("Widget container parameters are available in action methods")
     void widgetContainerParametersInAction() {
-        var result = testContext.openPage("/widgetContainerParameterPage.html");
-        result.getDocument().getElementByTagName("a").click();
+        var client = testContext.openPage("/widgetContainerParameterPage.html");
+        client.getDocument().getElementByTagName("a").click();
 
         verify(service, times(1)).action(eq("electronics"), eq("price"));
     }

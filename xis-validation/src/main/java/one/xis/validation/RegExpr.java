@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
  */
 @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.RECORD_COMPONENT})
 @Retention(RetentionPolicy.RUNTIME)
-@Validate(validatorClass = MinLengthValidator.class, messageKey = "validation.invalid", globalMessageKey = "validation.invalid.global")
+@Validate(validatorClass = RegExprValidator.class, messageKey = "validation.invalid", globalMessageKey = "validation.invalid.global")
 public @interface RegExpr {
     String value();
 }

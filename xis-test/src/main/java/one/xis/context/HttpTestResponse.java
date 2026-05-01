@@ -4,6 +4,7 @@ import lombok.Getter;
 import one.xis.http.ContentType;
 import one.xis.http.HttpResponse;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,7 +27,7 @@ public class HttpTestResponse implements HttpResponse {
 
     @Override
     public void setBody(byte[] body) {
-        this.body = new String(body);
+        this.body = new String(body, StandardCharsets.UTF_8);
     }
 
     @Override

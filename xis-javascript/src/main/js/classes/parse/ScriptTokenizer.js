@@ -123,7 +123,7 @@ class ScriptTokenizer {
                     this.index++;
                 }
             } else if (c === quoteChar) {
-                this.index++; // Schließendes Anführungszeichen überspringen
+                this.index++; // Skip closing quote
                 break;
             } else {
                 str += c;
@@ -163,7 +163,7 @@ class ScriptTokenizer {
         return { value, isFloat };
     }
 
-    // Identifier und Literale (z. B. true, false)
+    // Identifiers and literals (for example true, false)
     isIdentifierStart(c) {
         return /[a-zA-Z_]/.test(c);
     }
@@ -262,7 +262,7 @@ class ScriptTokenizer {
     }
 }
 
-// Konstanten für die Token-Typen
+// Constants for token types
 const STRING = 1;
 const INTEGER = 2;
 const FLOAT = 3;

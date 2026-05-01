@@ -20,12 +20,12 @@ public class MultipleAttributesPageTest {
 
     @Test
     void test() {
-        var result = testContext.openPage(MultipleAttributesPage.class);
+        var client = testContext.openPage(MultipleAttributesPage.class);
         var page = testContext.getAppContext().getSingleton(MultipleAttributesPage.class);
 
-        var actionLink1 = result.getDocument().getElementById("id1");
-        var actionLink2 = result.getDocument().getElementById("id2");
-        var actionLink3 = result.getDocument().getElementById("id3");
+        var actionLink1 = client.getDocument().getElementById("id1");
+        var actionLink2 = client.getDocument().getElementById("id2");
+        var actionLink3 = client.getDocument().getElementById("id3");
 
         assertThat(actionLink1).isNotNull();
         assertThat(actionLink2).isNotNull();

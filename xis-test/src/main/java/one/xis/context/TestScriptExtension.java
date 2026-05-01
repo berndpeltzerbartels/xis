@@ -3,7 +3,7 @@ package one.xis.context;
 import java.util.Map;
 
 /**
- * SPI for optional modules (e.g. xis-websocket) to contribute additional
+ * SPI for optional modules to contribute additional
  * JavaScript source code and GraalVM bindings to the integration-test script.
  * <p>
  * Implementations are discovered via {@link java.util.ServiceLoader}.
@@ -12,8 +12,7 @@ import java.util.Map;
 public interface TestScriptExtension {
 
     /**
-     * Additional JavaScript to prepend to the test script
-     * (e.g. WebsocketConnectorMock.js, WebsocketClient.js, …).
+     * Additional JavaScript to prepend to the test script.
      * The returned string is inserted BEFORE test-main.js so that
      * TestApplication can already use the classes defined here.
      */
@@ -21,7 +20,7 @@ public interface TestScriptExtension {
 
     /**
      * Additional GraalVM bindings to expose to the JS context
-     * (e.g. wsBackendBridge → WsBackendBridge instance).
+     * (for example wsBackendBridge to a WsBackendBridge instance).
      *
      * @param environment the current test environment (gives access to BackendBridge etc.)
      */

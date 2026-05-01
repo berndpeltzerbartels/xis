@@ -22,9 +22,10 @@ public class IntegrationTestContext {
 
     @Getter
     private final AppContext appContext;
-    @Getter
-    private final IntegrationTestEnvironment environment;
     private final UserInfo userInfo;
+    private final TestClient primaryClient;
+    private final List<TestClient> clients = new ArrayList<>();
+    private boolean primaryClientOpened;
 
     private static final Object SYNC_LOCK = new Object();
 
@@ -34,32 +35,48 @@ public class IntegrationTestContext {
 
     IntegrationTestContext(Collection<String> packages, UserInfo userInfo, Collection<Object> singletons) {
         this.appContext = internalContext(packages, singletons);
-        this.environment = new IntegrationTestEnvironment(new BackendBridge(appContext.getSingleton(RestControllerService.class)));
         this.userInfo = userInfo;
+        this.primaryClient = createClient();
     }
 
     /**
      * After the JS context is ready, wires all {@link PushEventSimulatorAware} singletons
-     * (e.g. TestRefreshEventPublisher from xis-websocket) with the active
-     * {@link PushEventSimulator} extension (e.g. WsTestScriptExtension).
+     * with a transport-neutral push-event simulator backed by the active JS test runtime.
      * Called by the Builder after reset().
      */
     void wirePushEventSimulator() {
-        var simulator = environment.getIntegrationTestScript().getExtensions().stream()
-                .filter(ext -> ext instanceof PushEventSimulator)
-                .map(ext -> (PushEventSimulator) ext)
-                .findFirst()
-                .orElse(null);
-        if (simulator == null) {
-            return;
-        }
+        clients.forEach(this::wirePushEventSimulator);
+    }
+
+    private void wirePushEventSimulator(TestClient client) {
+        PushEventSimulator simulator = updateEventKey -> client.getTestEnvironment().getIntegrationTestScript()
+                .getIntegrationTestFunctions()
+                .getSimulatePushEvent()
+                .execute(updateEventKey);
         appContext.getSingletons().stream()
                 .filter(s -> s instanceof PushEventSimulatorAware)
                 .map(s -> (PushEventSimulatorAware) s)
                 .forEach(aware -> aware.setPushEventSimulator(simulator));
     }
 
-    public OpenPageResult openPage(String uri, Map<String, Object> parameters) {
+    private TestClient createClient() {
+        var environment = new IntegrationTestEnvironment(new BackendBridge(appContext.getSingleton(RestControllerService.class)));
+        environment.getIntegrationTestScript().reset();
+        var client = new TestClient(appContext, environment);
+        clients.add(client);
+        wirePushEventSimulator(client);
+        return client;
+    }
+
+    private TestClient nextClient() {
+        if (!primaryClientOpened) {
+            primaryClientOpened = true;
+            return primaryClient;
+        }
+        return createClient();
+    }
+
+    public TestClient openPage(String uri, Map<String, Object> parameters) {
         synchronized (SYNC_LOCK) {
             if (!parameters.isEmpty()) {
                 uri += "?";
@@ -67,47 +84,50 @@ public class IntegrationTestContext {
             }
             var userInfoFaker = appContext.getSingleton(UserContextFaker.class);
             userInfoFaker.setUserInfo(userInfo);
-            environment.openPage(uri);
-            return new OpenPageResult(appContext, environment);
+            var client = nextClient();
+            client.getTestEnvironment().openPage(uri);
+            return client;
         }
     }
 
-    public OpenPageResult openPage(String uri) {
+    public TestClient openPage(String uri) {
         return openPage(uri, Collections.emptyMap());
     }
 
 
-    public OpenPageResult openPage(Class<?> pageController) {
+    public TestClient openPage(Class<?> pageController) {
         return openPage(PageUtil.getUrl(pageController), Collections.emptyMap());
     }
 
     /**
-     * Simulates a server-push update-event arriving via WebSocket.
-     * Requires xis-websocket on the test classpath – if not present, the JS function
-     * will throw an error explaining what is missing.
+     * Simulates a refresh event for all open test clients.
      *
-     * <p>Returns an {@link OpenPageResult} so the test can immediately inspect the
-     * updated DOM state after the push event has been processed.
+     * <p>Returns the most recently opened client so the test can immediately inspect the
+     * updated DOM state after the refresh event has been processed.
      *
      * @param updateEventKey the event key, e.g. "gameUpdated"
      * @return the updated DOM state
      */
-    public OpenPageResult simulatePushEvent(String updateEventKey) {
+    public TestClient simulatePushEvent(String updateEventKey) {
         synchronized (SYNC_LOCK) {
-            environment.getIntegrationTestScript()
+            if (clients.isEmpty()) {
+                throw new IllegalStateException("No test client available. Call openPage(...) before simulating refresh events.");
+            }
+            clients.forEach(client -> client.getTestEnvironment()
+                    .getIntegrationTestScript()
                     .getIntegrationTestFunctions()
                     .getSimulatePushEvent()
-                    .execute(updateEventKey);
-            return new OpenPageResult(appContext, environment);
+                    .execute(updateEventKey));
+            return clients.get(clients.size() - 1);
         }
     }
 
     public LocalStorage getLocalStorage() {
-        return environment.getHtmlObjects().getLocalStorage();
+        return primaryClient.getLocalStorage();
     }
 
     public SessionStorage getSessionStorage() {
-        return environment.getHtmlObjects().getSessionStorage();
+        return primaryClient.getSessionStorage();
     }
 
     public <T> T getSingleton(Class<T> type) {
@@ -172,10 +192,7 @@ public class IntegrationTestContext {
         }
 
         public IntegrationTestContext build() {
-            var context = new IntegrationTestContext(packages, userInfo, singletons);
-            context.environment.getIntegrationTestScript().reset();
-            context.wirePushEventSimulator();
-            return context;
+            return new IntegrationTestContext(packages, userInfo, singletons);
         }
 
         public Builder withPackage(String packageName) {

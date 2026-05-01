@@ -29,6 +29,7 @@ public class NettyHttpServerHandler extends SimpleChannelInboundHandler<FullHttp
     private final RestControllerService restControllerService;
     private final NettyResourceHandler resourceHandler;
 
+
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest nettyRequest) {
         FullHttpResponse response;
@@ -78,9 +79,9 @@ public class NettyHttpServerHandler extends SimpleChannelInboundHandler<FullHttp
         if (isFrontendRequest(path)) {
             return handleFrontendRequest();
         }
-
         return handleApiOrStaticResourceRequest(request);
     }
+
 
     private boolean isFrontendRequest(String path) {
         return path.equals("/") || path.isEmpty() || path.endsWith(".html");
@@ -169,6 +170,7 @@ public class NettyHttpServerHandler extends SimpleChannelInboundHandler<FullHttp
         response.headers().set(CACHE_CONTROL, NO_STORE);
         return response;
     }
+
 
     private FullHttpResponse notFound() {
         byte[] body = "Not Found".getBytes(java.nio.charset.StandardCharsets.UTF_8);

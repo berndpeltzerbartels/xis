@@ -24,9 +24,9 @@ class ListOfPageLinksPageTest {
 
     @Test
     void test() {
-        var result = testContext.openPage("/listOfLinks.html");
+        var client = testContext.openPage("/listOfLinks.html");
 
-        var document = result.getDocument();
+        var document = client.getDocument();
         var titleElement = document.getElementByTagName("title");
 
         assertThat(titleElement.getInnerText()).isEqualTo("List of links");

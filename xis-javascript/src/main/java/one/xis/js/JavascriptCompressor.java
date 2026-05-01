@@ -27,7 +27,7 @@ class JavascriptCompressor {
         Compiler compiler = new Compiler();
         CompilerOptions options = new CompilerOptions();
 
-        // SIMPLE oder ADVANCED – wie du magst
+        // SIMPLE or ADVANCED - choose as needed
         CompilationLevel.SIMPLE_OPTIMIZATIONS.setOptionsForCompilationLevel(options);
 
         // Map ERZEUGEN (Schalter) + Kommentar-Ziel
@@ -45,7 +45,7 @@ class JavascriptCompressor {
         options.setRenamingPolicy(VariableRenamingPolicy.OFF, PropertyRenamingPolicy.OFF);
 
         // Bessere Fehlerberichte
-        options.setPrettyPrint(false);  // false = kompakt, true = lesbarer aber größer
+        options.setPrettyPrint(false);  // false = compact, true = more readable but larger
 
         List<SourceFile> inputs = new ArrayList<>();
         sources.forEach((name, code) -> inputs.add(SourceFile.fromCode(name, code)));
@@ -56,10 +56,10 @@ class JavascriptCompressor {
             throw new RuntimeException("JavaScript-Komprimierung fehlgeschlagen:\n" + sb);
         }
 
-        // Minified JS holen …
+        // Get minified JS
         String js = compiler.toSource();
 
-        // … optional den automatisch angehängten Kommentar entfernen,
+        // Optionally remove the automatically appended comment,
         // weil du den HTTP-Header 'SourceMap' nutzt:
         js = js.replaceFirst("(?m)\\R?//#\\s*sourceMappingURL=.*$", "");
 

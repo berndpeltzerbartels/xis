@@ -96,7 +96,7 @@ public class JSUtil {
                 .option("inspect.Path", path)
                 .option("inspect.WaitAttached", "true")
 
-                .option("js.stack-trace-limit", "100") // Erhöht die Stacktrace-Limitierung
+                .option("js.stack-trace-limit", "100") // Increase stack trace limit
                 //        .option("js.print-interop-exceptions", "true")
                 // .option("js.trace", "true")
                 .option("js.debug-builtin", "true")
@@ -116,7 +116,7 @@ public class JSUtil {
                 .allowPolyglotAccess(PolyglotAccess.ALL)
                 .allowNativeAccess(true)
                 .allowAllAccess(true)
-                .option("js.stack-trace-limit", "100") // Erhöht die Stacktrace-Limitierung
+                .option("js.stack-trace-limit", "100") // Increase stack trace limit
                 //  .option("js.print-interop-exceptions", "true")
                 // .option("js.trace", "true")
                 .option("js.debug-builtin", "true")

@@ -20,10 +20,10 @@ class ForeachWithExprArrayTest {
 
     @Test
     void test() {
-        var result = testContext.openPage(ForeachWithExprArray.class);
+        var client = testContext.openPage(ForeachWithExprArray.class);
 
-        var div1 = result.getDocument().getElementById("list1");
-        var div2 = result.getDocument().getElementById("list2");
+        var div1 = client.getDocument().getElementById("list1");
+        var div2 = client.getDocument().getElementById("list2");
         var list1 = div1.getElementsByClass("item1");
         var list2 = div2.getElementsByClass("item2");
 

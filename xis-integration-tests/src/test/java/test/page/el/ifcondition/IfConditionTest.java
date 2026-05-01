@@ -22,9 +22,9 @@ class IfConditionTest {
     @Test
     @DisplayName("Test aller Bedingungen auf IfConditionPage")
     void testConditions() {
-        var result = testContext.openPage("/ifCondition.html");
+        var client = testContext.openPage("/ifCondition.html");
 
-        var body = result.getDocument().getElementByTagName("body");
+        var body = client.getDocument().getElementByTagName("body");
         assertThat(body).isNotNull();
 
         // 1. <xis:if condition="true">
@@ -37,12 +37,12 @@ class IfConditionTest {
         assertThat(body.getInnerText()).contains("True with function and variable");
 
         // 4. <div id="condition-tag1" xis:if="notEmpty(data)">
-        Element tag1 = result.getDocument().getElementById("condition-tag1");
+        Element tag1 = client.getDocument().getElementById("condition-tag1");
         assertThat(tag1).isNotNull();
         assertThat(tag1.getInnerText()).isEqualTo("True with function and variable in attribute style");
 
         // 5. <div id="condition-tag2" xis:if="empty(data)"> - should not exist because data is not empty
-        Element tag2 = result.getDocument().getElementById("condition-tag2");
+        Element tag2 = client.getDocument().getElementById("condition-tag2");
         assertThat(tag2).isNull();
     }
 }

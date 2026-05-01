@@ -23,10 +23,10 @@ class AnchorReplaceTest {
     @Test
     @DisplayName("xis:a is getting replaced by html-a-element")
     void test() {
-        var result = testContext.openPage(AnchorReplaceTestPage.class);
+        var client = testContext.openPage(AnchorReplaceTestPage.class);
 
-        var pageLink = (ElementImpl) result.getDocument().getElementById("page-link");
-        var widgetLink = ((ElementImpl) result.getDocument().getElementById("widget-link"));
+        var pageLink = (ElementImpl) client.getDocument().getElementById("page-link");
+        var widgetLink = ((ElementImpl) client.getDocument().getElementById("widget-link"));
 
         assertThat(pageLink.getChildElements()).isEmpty();
         assertThat(widgetLink.getChildElements()).isEmpty();

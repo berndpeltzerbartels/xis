@@ -26,10 +26,10 @@ class ActionLinkWithTargetWidgetTest {
 
     @Test
     void action() {
-        var result = testContext.openPage(ActionLinkWithTargetPage.class);
+        var client = testContext.openPage(ActionLinkWithTargetPage.class);
 
-        var container1 = (ElementImpl) ((DocumentImpl) result.getDocument()).getDocumentElement().findDescendant(e -> e instanceof Element element && "container1".equals(element.getAttribute("container-id")));
-        var container2 = (ElementImpl) ((DocumentImpl) result.getDocument()).getDocumentElement().findDescendant(e -> e instanceof Element element && "container2".equals(element.getAttribute("container-id")));
+        var container1 = (ElementImpl) ((DocumentImpl) client.getDocument()).getDocumentElement().findDescendant(e -> e instanceof Element element && "container1".equals(element.getAttribute("container-id")));
+        var container2 = (ElementImpl) ((DocumentImpl) client.getDocument()).getDocumentElement().findDescendant(e -> e instanceof Element element && "container2".equals(element.getAttribute("container-id")));
 
         assertThat(container1).isNotNull();
         assertThat(container2).isNotNull();

@@ -12,7 +12,7 @@ public class TitleWidgetIntegrationTest {
                 .withSingleton(TitleWidget.class)
                 .withSingleton(TitlePage.class)
                 .build();
-        var result = context.openPage(TitlePage.class);
-        assertThat(result.getDocument().getTitle()).isEqualTo("Mein neuer Titel");
+        var client = context.openPage(TitlePage.class);
+        assertThat(client.getDocument().getTitle()).isEqualTo("Mein neuer Titel");
     }
 }

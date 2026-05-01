@@ -45,9 +45,9 @@ class SimpleObjectFormPageTest {
         @Test
         void test() {
             // Display form
-            var result = testContext.openPage("/simpleObject/new.html");
+            var client = testContext.openPage("/simpleObject/new.html");
 
-            var document = result.getDocument();
+            var document = client.getDocument();
             var titleElement = document.getElementByTagName("title");
             var inputField1 = document.getInputElementById("field1");
             var inputField2 = document.getInputElementById("field2");
