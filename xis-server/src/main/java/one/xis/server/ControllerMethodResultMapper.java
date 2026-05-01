@@ -40,10 +40,10 @@ class ControllerMethodResultMapper {
             mapPageResponse(pageResponse, controllerMethodResult);
         } else if (returnValue instanceof PageUrlResponse pageUrlResponse) {
             controllerMethodResult.setRedirectUrl(pageUrlResponse.getUrl());
-        } else if (returnValue instanceof FrontletResponse widgetResponse && widgetResponse.getControllerClass() == null) {
-            mapFrontletResponse(widgetResponse, controllerMethodResult);
-        } else if (returnValue instanceof FrontletResponse widgetResponse) {
-            mapFrontletResponse(widgetResponse, controllerMethodResult);
+        } else if (returnValue instanceof FrontletResponse frontletResponse && frontletResponse.getControllerClass() == null) {
+            mapFrontletResponse(frontletResponse, controllerMethodResult);
+        } else if (returnValue instanceof FrontletResponse frontletResponse) {
+            mapFrontletResponse(frontletResponse, controllerMethodResult);
         } else if (returnValue instanceof Class<?> controllerClass) {
             updateController(controllerMethodResult, controllerClass, emptyMap());
         } else if (returnValue instanceof RedirectControllerResponse redirectControllerResponse) {
@@ -105,22 +105,22 @@ class ControllerMethodResultMapper {
         controllerMethodResult.getFormData().put(key, value);
     }
 
-    private void mapFrontletResponse(FrontletResponse widgetResponse, ControllerMethodResult result) {
-        if (widgetResponse.getControllerClass() != null) {
-            updateController(result, widgetResponse.getControllerClass(), widgetResponse.getPathVariables());
+    private void mapFrontletResponse(FrontletResponse frontletResponse, ControllerMethodResult result) {
+        if (frontletResponse.getControllerClass() != null) {
+            updateController(result, frontletResponse.getControllerClass(), frontletResponse.getPathVariables());
         }
-        if (widgetResponse.getPathVariables() != null) {
-            result.getPathVariables().putAll(widgetResponse.getPathVariables());
+        if (frontletResponse.getPathVariables() != null) {
+            result.getPathVariables().putAll(frontletResponse.getPathVariables());
         }
-        if (widgetResponse.getTargetContainer() != null) {
-            result.setWidgetContainerId(widgetResponse.getTargetContainer());
+        if (frontletResponse.getTargetContainer() != null) {
+            result.setWidgetContainerId(frontletResponse.getTargetContainer());
         }
-        if (widgetResponse.getWidgetsToReload() != null) {
-            result.getWidgetsToReload().addAll(widgetResponse.getWidgetsToReload());
+        if (frontletResponse.getWidgetsToReload() != null) {
+            result.getWidgetsToReload().addAll(frontletResponse.getWidgetsToReload());
         }
 
-        if (widgetResponse.getWidgetParameters() != null) {
-            result.getWidgetParameters().putAll(widgetResponse.getWidgetParameters());
+        if (frontletResponse.getWidgetParameters() != null) {
+            result.getWidgetParameters().putAll(frontletResponse.getWidgetParameters());
         }
 
     }
@@ -158,7 +158,7 @@ class ControllerMethodResultMapper {
             result.setNextURL(pathString);
             result.setNextPageId(realPath.normalized());
         } else {
-            throw new IllegalStateException("not a widget-controller or page-controller:" + controllerClass);
+            throw new IllegalStateException("not a frontlet-controller or page-controller:" + controllerClass);
         }
     }
 

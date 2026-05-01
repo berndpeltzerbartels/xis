@@ -10,9 +10,9 @@
     <!-- Navigation 123 -->
     <nav class="nav">
         <ul>
-            <li><a xis:widget="DashboardWidget" xis:target-container="main">Dashboard</a></li>
-            <li><a xis:widget="ContactListWidget" xis:target-container="main">Contacts</a></li>
-            <li><a xis:widget="ContactFormWidget" xis:target-container="main">Add Contact</a></li>
+            <li><a xis:widget="DashboardFrontlet" xis:target-container="main">Dashboard</a></li>
+            <li><a xis:widget="ContactListFrontlet" xis:target-container="main">Contacts</a></li>
+            <li><a xis:widget="ContactFormFrontlet" xis:target-container="main">Add Contact</a></li>
             <li><a href="#">More</a>
                 <ul>
                     <li><a href="#">Companies</a></li>
@@ -25,7 +25,7 @@
 
     <!-- Main Content Area -->
     <div class="maincontent">
-        <xis:widget-container container-id="main" default-widget="DashboardWidget"/>
+        <xis:widget-container container-id="main" default-widget="DashboardFrontlet"/>
     </div>
 
 </div>

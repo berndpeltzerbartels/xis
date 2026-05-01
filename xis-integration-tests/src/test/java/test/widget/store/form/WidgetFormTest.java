@@ -27,7 +27,7 @@ class WidgetFormTest {
         var counterOnFrontlet = client.getDocument().getElementById("counter-value-widget").getInnerText();
 
         assertThat(counterOnPage).isEqualTo("0");
-        assertThat(counterOnWidget).isEqualTo("0");
+        assertThat(counterOnFrontlet).isEqualTo("0");
 
         // Enter a value in the input field before submitting
         var inputField = client.getDocument().getElementById("increment-input");
@@ -42,6 +42,6 @@ class WidgetFormTest {
         counterOnFrontlet = client.getDocument().getElementById("counter-value-widget").getInnerText();
 
         assertThat(counterOnPage).isEqualTo("3");
-        assertThat(counterOnWidget).isEqualTo("3");
+        assertThat(counterOnFrontlet).isEqualTo("3");
     }
 }

@@ -22,13 +22,13 @@ import java.util.stream.Collectors;
 class ClientConfigServiceImpl implements ClientConfigService {
 
     private final PageAttributesFactory pageAttributesFactory;
-    private final FrontletAttributesFactory widgetAttributesFactory;
+    private final FrontletAttributesFactory frontletAttributesFactory;
 
     @Inject(annotatedWith = Page.class)
     private Collection<Object> pageControllers;
 
     @Inject(annotatedWith = Frontlet.class)
-    private Collection<Object> widgetControllers;
+    private Collection<Object> frontletControllers;
 
     @Inject(annotatedWith = Include.class)
     private Collection<Object> includes;
@@ -82,8 +82,8 @@ class ClientConfigServiceImpl implements ClientConfigService {
     private void addFrontletAttributes(ClientConfig.ClientConfigBuilder configBuilder) {
         var widgetIds = new HashSet<String>();
         var widgetAttributesHashMap = new HashMap<String, FrontletAttributes>();
-        for (Object widgetController : widgetControllers) {
-            var attributes = widgetAttributesFactory.attributes(widgetController);
+        for (Object frontletController : frontletControllers) {
+            var attributes = frontletAttributesFactory.attributes(frontletController);
             widgetIds.add(attributes.getId());
             widgetAttributesHashMap.put(attributes.getId(), attributes); // TODO host
         }

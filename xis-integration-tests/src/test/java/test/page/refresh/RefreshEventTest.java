@@ -6,6 +6,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Field;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -28,9 +30,19 @@ class RefreshEventTest {
                 .withSingleton(ScoreBoard.class)
                 // TestRefreshEventPublisher replaces the real RefreshEventPublisherImpl.
                 // It is wired automatically by IntegrationTestContext with the JS mock.
-                .withSingleton(new TestRefreshEventPublisher())
+                .withSingleton(TestRefreshEventPublisher.class)
                 .withSingleton(MatchService.class)
                 .build();
+    }
+
+    @Test
+    @DisplayName("Test refresh publisher replaces the default framework publisher in integration tests")
+    void testRefreshPublisherIsInjectedIntoTheService() throws Exception {
+        var publisherField = MatchService.class.getDeclaredField("refreshEventPublisher");
+        publisherField.setAccessible(true);
+        var injectedPublisher = publisherField.get(context.getSingleton(MatchService.class));
+
+        assertThat(injectedPublisher).isInstanceOf(TestRefreshEventPublisher.class);
     }
 
     @Test

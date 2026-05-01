@@ -8,6 +8,7 @@ import one.xis.Frontlet;
 import one.xis.auth.token.DefaultUserSecurityService;
 import one.xis.auth.token.UserSecurityService;
 import one.xis.context.Component;
+import one.xis.context.DefaultComponent;
 import one.xis.context.Init;
 import one.xis.context.Inject;
 import one.xis.http.SseEmitter;
@@ -22,7 +23,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Slf4j
-@Component
+@DefaultComponent
 @RequiredArgsConstructor
 public class SseService implements RefreshEventPublisher {
 
@@ -43,7 +44,7 @@ public class SseService implements RefreshEventPublisher {
     private Collection<Object> pageControllers;
 
     @Inject(annotatedWith = Frontlet.class)
-    private Collection<Object> widgetControllers;
+    private Collection<Object> frontletControllers;
 
     // -------------------------------------------------------------------------
     // Lifecycle
@@ -51,7 +52,7 @@ public class SseService implements RefreshEventPublisher {
 
     @Init
     void initKnownEventKeys() {
-        knownEventKeys = Stream.concat(pageControllers.stream(), widgetControllers.stream())
+        knownEventKeys = Stream.concat(pageControllers.stream(), frontletControllers.stream())
                 .map(Object::getClass)
                 .filter(c -> c.isAnnotationPresent(RefreshOnUpdateEvents.class))
                 .flatMap(c -> Arrays.stream(c.getAnnotation(RefreshOnUpdateEvents.class).value()))

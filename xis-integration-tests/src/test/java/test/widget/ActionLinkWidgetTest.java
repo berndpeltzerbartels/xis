@@ -27,7 +27,7 @@ class ActionLinkWidgetTest {
                 .withSingleton(IndexPage.class) // new page in action3
                 .build();
 
-        testContext.getSingleton(WidgetPage.class).setWidgetId("ActionLinkWidget");
+        testContext.getSingleton(WidgetPage.class).setWidgetId("ActionLinkFrontlet");
     }
 
     @Test

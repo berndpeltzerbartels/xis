@@ -20,7 +20,7 @@ class SimpleWidgetTest {
 
     @Test
     void test() {
-        testContext.getSingleton(WidgetPage.class).setWidgetId("SimpleWidget");
+        testContext.getSingleton(WidgetPage.class).setWidgetId("SimpleFrontlet");
         var client = testContext.openPage(WidgetPage.class);
 
         System.out.println(client.getDocument().asString());

@@ -52,8 +52,8 @@ class FrontletControllerWrappers {
     Optional<ControllerWrapper> findWidgetByUrl(String url) {
         return frontletControllerWrappers.stream()
                 .filter(wrapper -> {
-                    var widgetUrl = FrontletUtil.getUrl(wrapper.getControllerClass());
-                    return !widgetUrl.isEmpty() && widgetUrl.equals(url);
+                    var frontletUrl = FrontletUtil.getUrl(wrapper.getControllerClass());
+                    return !frontletUrl.isEmpty() && frontletUrl.equals(url);
                 })
                 .findFirst();
     }
@@ -66,11 +66,11 @@ class FrontletControllerWrappers {
     }
 
     private boolean matchesUrl(ControllerWrapper controllerWrapper, String url) {
-        var widgetUrl = FrontletUtil.getUrl(controllerWrapper.getControllerClass());
-        if (widgetUrl.isEmpty()) {
+        var frontletUrl = FrontletUtil.getUrl(controllerWrapper.getControllerClass());
+        if (frontletUrl.isEmpty()) {
             return false;
         }
-        var pattern = pathResolver.createPath(widgetUrl);
+        var pattern = pathResolver.createPath(frontletUrl);
         return pattern.matches(url);
     }
 

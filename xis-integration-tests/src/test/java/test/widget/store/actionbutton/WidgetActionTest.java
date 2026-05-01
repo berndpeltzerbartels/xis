@@ -26,7 +26,7 @@ class WidgetActionTest {
         var counterOnFrontlet = client.getDocument().getElementById("counter-value-widget").getInnerText();
 
         //  assertThat(counterOnPage).isEqualTo("5");
-        assertThat(counterOnWidget).isEqualTo("0");
+        assertThat(counterOnFrontlet).isEqualTo("0");
 
         // Click button in widget - this should trigger reactive state update
         client.getDocument().getElementById("increment-button").click();
@@ -36,6 +36,6 @@ class WidgetActionTest {
         counterOnFrontlet = client.getDocument().getElementById("counter-value-widget").getInnerText();
 
         assertThat(counterOnPage).isEqualTo("1");
-        assertThat(counterOnWidget).isEqualTo("1");
+        assertThat(counterOnFrontlet).isEqualTo("1");
     }
 }

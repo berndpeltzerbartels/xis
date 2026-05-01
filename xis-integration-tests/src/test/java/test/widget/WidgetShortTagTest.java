@@ -20,7 +20,7 @@ class WidgetShortTagTest {
 
     @Test
     void test() {
-        testContext.getSingleton(WidgetShortTagPage.class).setWidgetId("SimpleWidget");
+        testContext.getSingleton(WidgetShortTagPage.class).setWidgetId("SimpleFrontlet");
         var client = testContext.openPage(WidgetPage.class);
 
         System.out.println(client.getDocument().asString());

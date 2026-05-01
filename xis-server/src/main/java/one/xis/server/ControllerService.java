@@ -18,7 +18,7 @@ class ControllerService {
     private PageControllerWrappers pageControllerWrappers;
 
     @Inject
-    private FrontletControllerWrappers widgetControllerWrappers;
+    private FrontletControllerWrappers frontletControllerWrappers;
 
     @Inject
     private ControllerResultMapper controllerResultMapper;
@@ -36,7 +36,7 @@ class ControllerService {
             controllerResult.setNextWidgetId(request.getWidgetId());
         }
         //       if (request.getType() == RequestType.page) {
-        response.getDefaultWidgets().addAll(widgetControllerWrappers.findDefaultWidgetsByPageUrl(request.getPageUrl()));
+        response.getDefaultWidgets().addAll(frontletControllerWrappers.findDefaultWidgetsByPageUrl(request.getPageUrl()));
         //     }
         mapResultToResponse(request, response, controllerResult);
     }
@@ -102,7 +102,7 @@ class ControllerService {
 
     private ControllerWrapper controllerWrapper(ClientRequest request) {
         if (request.getType() == RequestType.widget) {
-            return widgetControllerWrapperById(request.getWidgetId());
+            return frontletControllerWrapperById(request.getWidgetId());
         } else if (request.getType() == RequestType.page) {
             return pageControllerWrapperById(request.getPageId());
         }
@@ -127,7 +127,7 @@ class ControllerService {
 
     private ControllerWrapper nextControllerWrapperAfterAction(@NonNull ControllerResult controllerResult) {
         if (StringUtils.isNotEmpty(controllerResult.getNextWidgetId())) {
-            return widgetControllerWrapperById(controllerResult.getNextWidgetId());
+            return frontletControllerWrapperById(controllerResult.getNextWidgetId());
         }
         if (controllerResult.getNextPageControllerClass() != null) {
             return pageControllerWrapperByClass(controllerResult.getNextPageControllerClass());
@@ -156,9 +156,9 @@ class ControllerService {
         responseMapper.mapResultToResponse(response, controllerResult);
     }
 
-    protected ControllerWrapper widgetControllerWrapperById(@NonNull String id) {
-        return widgetControllerWrappers.findWidgetById(id)
-                .orElseThrow(() -> new IllegalStateException("not a widget-controller:" + id));
+    protected ControllerWrapper frontletControllerWrapperById(@NonNull String id) {
+        return frontletControllerWrappers.findWidgetById(id)
+                .orElseThrow(() -> new IllegalStateException("not a frontlet-controller:" + id));
     }
 
     protected ControllerWrapper pageControllerWrapperByClass(@NonNull Class<?> controllerClass) {

@@ -28,7 +28,7 @@ class ResourceService {
     private final PathResolver pathResolver;
     private final HtmlParser htmlParser = new HtmlParser();
     @Inject(annotatedWith = Frontlet.class)
-    private Collection<Object> widgetControllers;
+    private Collection<Object> frontletControllers;
     @Inject(annotatedWith = Page.class)
     private Collection<Object> pageControllers;
     @Inject(annotatedWith = Include.class)
@@ -37,17 +37,17 @@ class ResourceService {
     private RootPageService rootPageService;
     @Inject
     private HtmlResourcePathResolver htmlResourcePathResolver;
-    private Map<String, GenericResource<HtmlDocument>> widgetDocumentCache;
+    private Map<String, GenericResource<HtmlDocument>> frontletDocumentCache;
     private Map<String, GenericResource<HtmlDocument>> pageDocumentCache;
     private ResourceCache<Resource> includeHtmlResourceCache;
 
     @Init
-    void initWidgetResources() {
-        widgetDocumentCache = widgetControllers.stream()
+    void initFrontletResources() {
+        frontletDocumentCache = frontletControllers.stream()
                 .collect(Collectors.toMap(
                         FrontletUtil::getId,
                         controller -> {
-                            HtmlDocument doc = parseAndValidate(controller, "Widget");
+                            HtmlDocument doc = parseAndValidate(controller, "Frontlet");
                             return toResource(controller, doc);
                         }
                 ));
@@ -80,7 +80,7 @@ class ResourceService {
     }
 
     Resource getWidgetHtml(String id) {
-        GenericResource<HtmlDocument> docResource = widgetDocumentCache.get(id);
+        GenericResource<HtmlDocument> docResource = frontletDocumentCache.get(id);
         if (docResource == null) throw new IllegalArgumentException("Frontlet not found: " + id);
         return new GenericResource<>(docResource.getObjectContent().toHtml(), docResource.getLastModified(), docResource.getResourcePath());
     }
