@@ -54,7 +54,7 @@ class Client {
     * @param {string} pageId
     * @return {Promise<string>}
     */
-    loadWidget(widgetId) {
+    loadFrontlet(widgetId) {
         throw new Error('Not implemented');
     }
 
@@ -72,7 +72,7 @@ class Client {
     * @param {FrontletInstance} frontletInstance
     * @returns {Promise<ServerReponse>}
     */
-    loadWidgetData(frontletInstance, frontletState) {
+    loadFrontletData(frontletInstance, frontletState) {
         throw new Error('Not implemented');
     }
 
@@ -94,7 +94,7 @@ class Client {
      * @param {string} actionParameters
      * @returns {Promise<ServerReponse>}
      */
-    widgetLinkAction(frontletInstance, frontletState, action, actionParameters) {
+    frontletLinkAction(frontletInstance, frontletState, action, actionParameters) {
         throw new Error('Not implemented');
     }
 
@@ -287,7 +287,7 @@ class Client {
     * @param {string} actionParameters (nullable)
     * @returns {ClientRequest}
     */
-    createWidgetRequest(frontletInstance, frontletState, action, formData, actionParameters) {
+    createFrontletRequest(frontletInstance, frontletState, action, formData, actionParameters) {
         var request = new ClientRequest();
         request.clientId = this.clientId;
         request.widgetId = frontletInstance.frontlet.id;

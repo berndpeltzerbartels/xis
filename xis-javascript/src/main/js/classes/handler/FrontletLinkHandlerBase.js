@@ -77,7 +77,7 @@ class FrontletLinkHandlerBase extends TagHandler {
             var frontletState = new FrontletState(app.pageController.resolvedURL, this.frontletParameters);
             var widgetId = stripQuery(this.targetFrontletUrl);
             handler.initBuffer()
-                .then(() => handler.showWidget(widgetId, frontletState))
+                .then(() => handler.showFrontlet(widgetId, frontletState))
                 .then(() => handler.commitBuffer())
                 .then(() => resolve());
         });

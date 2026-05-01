@@ -1,5 +1,5 @@
 var client = {
-    loadWidget: function(id) {
+    loadFrontlet: function(id) {
          return new Promise((resolve, reject) => {
             resolve(`<xis:template>
                         <h5>Widget</h5>

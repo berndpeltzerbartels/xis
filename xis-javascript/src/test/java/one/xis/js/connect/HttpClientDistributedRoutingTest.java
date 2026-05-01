@@ -50,7 +50,7 @@ class HttpClientDistributedRoutingTest {
                 config.widgetAttributes['scoreboard'] = { host: 'https://widgets.example.com/' };
                 var client = new HttpClient({ post: function(){}, get: function(){} }, 'test-client');
                 client.config = config;
-                client.resolveWidgetUri('/xis/widget/model', 'scoreboard');
+                client.resolveFrontletUri('/xis/widget/model', 'scoreboard');
                 """;
 
         var result = JSUtil.execute(script).asString();

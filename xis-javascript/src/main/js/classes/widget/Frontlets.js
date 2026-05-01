@@ -16,20 +16,20 @@ class Frontlets {
         var promises = [];
         this.frontletAttributes = config.widgetAttributes;
         config.widgetIds.forEach(id => _this.frontlets[id] = {});
-        config.widgetIds.forEach(id => promises.push(_this.loadWidget(id)));
+        config.widgetIds.forEach(id => promises.push(_this.loadFrontlet(id)));
         return Promise.all(promises).then(() => config);
     }
     /**
     * @returns {Promise<string>}
     */
-    loadWidget(widgetId) {
+    loadFrontlet(widgetId) {
         var _this = this;
-        return this.client.loadWidget(widgetId).then(widgetHtml => {
+        return this.client.loadFrontlet(widgetId).then(widgetHtml => {
             var frontlet = new Frontlet();
             frontlet.id = widgetId;
             frontlet.html = widgetHtml;
             frontlet.frontletAttributes = _this.frontletAttributes[widgetId];
-            _this.addWidget(widgetId, frontlet);
+            _this.addFrontlet(widgetId, frontlet);
         });
     }
 
@@ -38,7 +38,7 @@ class Frontlets {
      * @param {string} widgetId 
      * @param {Frontlet} frontlet
      */
-    addWidget(widgetId, frontlet) {
+    addFrontlet(widgetId, frontlet) {
         this.frontlets[widgetId] = frontlet;
     }
 
@@ -47,7 +47,7 @@ class Frontlets {
     * @param {string} widgetId
     * @returns {FrontletInstance}
     */
-    getWidgetInstance(widgetId) {
+    getFrontletInstance(widgetId) {
         if (!this.frontletInstances[widgetId]) {
             this.frontletInstances[widgetId] = [];
         }

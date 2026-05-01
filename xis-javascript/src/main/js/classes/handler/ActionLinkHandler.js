@@ -60,7 +60,7 @@ class ActionLinkHandler extends TagHandler {
             const frontletContainerHandler = this.findParentWidgetContainerHandler();
             const targetContainerHandler = this.targetContainerId ? app.tagHandlers.getHandler(this.frontletContainers.findContainer(this.targetContainerId)) : null;
             if (frontletContainerHandler || targetContainerHandler) {
-                this.widgetAction(frontletContainerHandler, targetContainerHandler);
+                this.frontletAction(frontletContainerHandler, targetContainerHandler);
             } else {
                 this.pageAction();
             }
@@ -68,11 +68,11 @@ class ActionLinkHandler extends TagHandler {
     }
 
 
-    widgetAction(frontletContainerHandler, targetContainerHandler) {
+    frontletAction(frontletContainerHandler, targetContainerHandler) {
         if (!targetContainerHandler) {
             targetContainerHandler = frontletContainerHandler;
         }
-        this.client.widgetLinkAction(frontletContainerHandler.frontletInstance, frontletContainerHandler.frontletState, this.action, this.actionParameters)
+        this.client.frontletLinkAction(frontletContainerHandler.frontletInstance, frontletContainerHandler.frontletState, this.action, this.actionParameters)
             .then(response => this.handleActionResponse(response, targetContainerHandler));
     }
 

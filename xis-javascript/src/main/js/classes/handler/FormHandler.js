@@ -46,7 +46,7 @@ class FormHandler extends TagHandler {
         if (!handler) {
             return null;
         }
-        return handler.currentWidgetId();
+        return handler.currentFrontletId();
     }
 
     targetContainerHandler() {
