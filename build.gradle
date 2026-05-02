@@ -50,6 +50,12 @@ subprojects {
         options.encoding = "UTF-8"
     }
 
+    tasks.withType(Javadoc) {
+        options.encoding = "UTF-8"
+        options.addStringOption("charset", "UTF-8")
+        options.addStringOption("docencoding", "UTF-8")
+    }
+
 }
 // In der root build.gradle Datei
 

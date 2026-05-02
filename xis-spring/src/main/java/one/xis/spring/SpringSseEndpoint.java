@@ -5,11 +5,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import one.xis.context.Component;
 import one.xis.http.HttpRequest;
 import one.xis.http.HttpResponse;
 import one.xis.http.SseEndpoint;
 import one.xis.server.SseService;
-import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
