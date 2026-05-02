@@ -17,7 +17,7 @@ Typical flow:
 
 1. Server publishes an event key such as `score-updated`.
 2. Browser receives the key.
-3. XIS reloads the page or widget data through the normal request flow.
+3. XIS reloads the page or frontlet data through the normal request flow.
 
 This keeps server push simple and avoids building a second application protocol next to the regular XIS rendering flow.
 

@@ -1,0 +1,55 @@
+# XIS Agent Notes
+
+This repository treats Markdown documentation as the canonical knowledge source.
+
+## Documentation Layers
+
+- `README.md` is the public GitHub entry point for XIS users.
+- `docs/user/*` is user-facing documentation. Organize it by public API behavior and workflows.
+- `docs/user/advanced/*` is for optional or specialized capabilities. Do not present client-side storage as a core
+  requirement; it is a convenience feature because applications can also keep state on the server.
+- Module README files are mostly for framework developers and maintainers.
+- `docs/framework/*` is cross-module maintainer documentation.
+- `docs/agent/*` contains agent-specific rules.
+
+## Source Material
+
+The old documentation app lives in `docs-app` or `/Users/bernd/projects/xis-docs`. It is source material only. Do not
+copy its structure blindly into Markdown.
+
+## Runtime Sources For Template Documentation
+
+When documenting XIS template behavior, verify the current runtime sources before treating old docs as authoritative:
+
+- `xis-javascript/src/main/js/classes/init/DomNormalizer.js`: framework elements, attribute syntax, and normalization
+  between tag and attribute forms.
+- `xis-javascript/src/main/js/classes/init/HandlerBuilder.js`: which normalized elements and attributes receive runtime
+  behavior, such as page links, frontlet links, action links, action buttons, forms, inputs, and submit controls.
+- `xis-javascript/src/main/js/classes/parse/ELFunctions.js`: built-in expression-language functions.
+
+Use the old documentation app for editorial structure and examples, but use these runtime files to confirm what actually
+exists.
+
+## Example Discipline
+
+Documentation examples are part of the public API.
+
+When documenting public behavior:
+
+- include copyable Java examples
+- include matching HTML templates when relevant
+- prefer examples that can become tests
+- avoid pseudocode for annotation names, template attributes, and file locations
+
+The long-term goal is that documented examples are executable or covered by the test suite.
+
+## Collaboration Discipline
+
+Treat user statements about desired documentation structure as strong input, not as unquestioned final architecture.
+Check them against the codebase, the old documentation, and the reader's path. If the user points out a missing concept,
+make sure it appears where a reader would naturally look, even if the detailed material lives on a separate page.
+
+## Website Policy
+
+A documentation website may be built later, including a project wizard. The website should render or import the
+Markdown documentation instead of becoming a second manually maintained copy.

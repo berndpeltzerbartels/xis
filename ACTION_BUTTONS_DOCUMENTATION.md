@@ -52,7 +52,7 @@ Buttons innerhalb von Formularen führen Form-Submit mit der angegebenen Action 
 - User muss nicht über HTML-Button-Semantik nachdenken
 
 ### Kontextabhängiges Verhalten
-- **Außerhalb Form**: Direkte Widget/Page-Action (wie ActionLink)
+- **Außerhalb Form**: Direkte Frontlet/Page-Action (wie ActionLink)
 - **Innerhalb Form**: Form-Submit mit Action (wie Submit-Button)
 
 ### Handler-Architektur
@@ -75,7 +75,7 @@ Buttons innerhalb von Formularen führen Form-Submit mit der angegebenen Action 
 
 <!-- Gut: Navigation als Links -->
 <a xis:page="/details.html">Details ansehen</a>
-<a xis:widget="DetailWidget">Details laden</a>
+<a xis:frontlet="DetailFrontlet">Details laden</a>
 ```
 
 ## Integration mit Reactive State

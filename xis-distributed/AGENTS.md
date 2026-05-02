@@ -6,7 +6,7 @@
 
 Its job is narrow:
 
-- decide whether a page or widget is remote
+- decide whether a page or frontlet is remote
 - provide the remote host for remote components
 - leave local components as same-origin
 

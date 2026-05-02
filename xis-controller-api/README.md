@@ -1,7 +1,7 @@
 # XIS Controller API
 
 `xis-controller-api` contains the public annotations and small helper types that application code uses to describe XIS
-pages, widgets, actions, model data, parameters, storage access, formatting, authorization, and refresh behavior.
+pages, frontlets, actions, model data, parameters, storage access, formatting, authorization, and refresh behavior.
 
 This module is not one of the primary runtime choices, but it is part of the core programming model. Applications
 usually receive it transitively through the selected runtime:
@@ -139,28 +139,28 @@ as the asset pipeline evolves.
 | --- | --- | --- | --- | --- |
 | `value` | `String` | Yes | none | CSS resource path. |
 
-## Widgets And Includes
+## Frontlets And Includes
 
-### `@Widget`
+### `@Frontlet`
 
-`@Widget` marks a class as a reusable UI widget controller. Widgets can be embedded in pages or other widgets and have
+`@Frontlet` marks a class as a reusable UI frontlet controller. Frontlets can be embedded in pages or other frontlets and have
 their own model data and actions.
 
-If no explicit widget id is provided, XIS uses the Java class simple name. In larger applications, an explicit id avoids
-collisions between widget classes with the same simple name in different packages.
+If no explicit frontlet id is provided, XIS uses the Java class simple name. In larger applications, an explicit id avoids
+collisions between frontlet classes with the same simple name in different packages.
 
 | Attribute | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
-| `value` | `String` | No | `""` | Widget id. If empty, the class simple name is used. |
+| `value` | `String` | No | `""` | Frontlet id. If empty, the class simple name is used. |
 | `id` | `String` | No | `""` | Alternative id attribute. Intended as an alias for `value`. |
-| `url` | `String` | No | `""` | Optional widget URL metadata. |
-| `title` | `String` | No | `""` | Optional widget title metadata. |
+| `url` | `String` | No | `""` | Optional frontlet URL metadata. |
+| `title` | `String` | No | `""` | Optional frontlet title metadata. |
 | `containerId` | `String` | No | `""` | Optional target container metadata. |
 
-### `@WidgetParameter`
+### `@FrontletParameter`
 
-`@WidgetParameter` injects a widget parameter into a widget method or action parameter. Widget parameters are supplied
-by the template, widget container, or a `WidgetResponse`.
+`@FrontletParameter` injects a frontlet parameter into a frontlet method or action parameter. Frontlet parameters are supplied
+by the template, frontlet container, or a `FrontletResponse`.
 
 | Attribute | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
@@ -181,7 +181,7 @@ Classes annotated with `@Include` must be concrete classes. They are registered 
 
 ### `@ModelData`
 
-`@ModelData` marks a method as a source of data for the current page or widget. The return value is exposed to the
+`@ModelData` marks a method as a source of data for the current page or frontlet. The return value is exposed to the
 template and can be used in expressions such as `${product.name}`.
 
 If `value` is empty, XIS derives the model name from the method name. Getter-style names are converted to property
@@ -208,9 +208,9 @@ In the current API, the `value` attribute is required by Java. Use the same bind
 `<a xis:action="delete">Delete</a>` or buttons/forms using `xis:action`.
 
 If `value` is empty, the Java method name is used as the action name. Page actions receive path variables and query
-parameters from the current page URL. Widget actions receive the widget state and widget parameters.
+parameters from the current page URL. Frontlet actions receive the frontlet state and frontlet parameters.
 
-`updateEventKeys` can be used to publish refresh event keys after the action, allowing other pages or widgets to reload
+`updateEventKeys` can be used to publish refresh event keys after the action, allowing other pages or frontlets to reload
 when relevant data changes.
 
 | Attribute | Type | Required | Default | Description |
@@ -304,10 +304,10 @@ This annotation exists in the public API, but the exact higher-level usage is st
 
 ### `@RefreshOnUpdateEvents`
 
-`@RefreshOnUpdateEvents` declares event keys that should refresh a page or widget when the server publishes matching
+`@RefreshOnUpdateEvents` declares event keys that should refresh a page or frontlet when the server publishes matching
 update events. This is the receiving side of the refresh-event model.
 
-Use it on a page or widget controller that should reload when a related action emits one of the configured event keys.
+Use it on a page or frontlet controller that should reload when a related action emits one of the configured event keys.
 
 | Attribute | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
@@ -508,22 +508,22 @@ constructor.
 Use `PageResponse` when the destination is a known XIS page controller. Use `PageUrlResponse` when the action already
 has a URL.
 
-### `WidgetResponse`
+### `FrontletResponse`
 
-`WidgetResponse` targets widget updates from an action result. It can select a widget controller, pass widget
-parameters, target a container, or request that a widget reload.
+`FrontletResponse` targets frontlet updates from an action result. It can select a frontlet controller, pass frontlet
+parameters, target a container, or request that a frontlet reload.
 
 Common usage:
 
 ```java
-return WidgetResponse.of(ProductWidget.class, "productId", productId);
+return FrontletResponse.of(ProductFrontlet.class, "productId", productId);
 ```
 
 or:
 
 ```java
-return new WidgetResponse(ProductWidget.class)
-        .widgetParameter("productId", productId)
+return new FrontletResponse(ProductFrontlet.class)
+        .frontletParameter("productId", productId)
         .targetContainer("details");
 ```
 
@@ -538,8 +538,8 @@ return new WidgetResponse(ProductWidget.class)
 | `@HtmlFile` | class | `value` | Binds a controller to an explicit HTML template. |
 | `@DefaultHtmlFile` | class | `value` | Provides a default template for library controllers. |
 | `@CssFile` | class | `value` | Associates a CSS file with a controller. |
-| `@Widget` | class | none | Declares a reusable widget controller. |
-| `@WidgetParameter` | parameter | `value` | Injects a widget parameter. |
+| `@Frontlet` | class | none | Declares a reusable frontlet controller. |
+| `@FrontletParameter` | parameter | `value` | Injects a frontlet parameter. |
 | `@Include` | class | `value` | Registers a reusable HTML include. |
 | `@ModelData` | method | none | Exposes data to the template model. |
 | `@FormData` | method, parameter | `value` | Binds form data. |
@@ -575,4 +575,4 @@ return new WidgetResponse(ProductWidget.class)
 | `Response` | Common contract for controller-targeted response helper types. |
 | `PageResponse` | Navigates to a page controller with optional path variables and query parameters. |
 | `PageUrlResponse` | Navigates to a concrete URL string. |
-| `WidgetResponse` | Targets widget updates, widget parameters, target containers, or widget reloads. |
+| `FrontletResponse` | Targets frontlet updates, frontlet parameters, target containers, or frontlet reloads. |

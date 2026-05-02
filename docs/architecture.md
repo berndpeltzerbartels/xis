@@ -6,8 +6,8 @@ This document describes the current target architecture of XIS with a focus on:
 
 - normal same-origin deployments
 - optional distributed applications
-- multi-server delivery of pages and widgets
-- page and widget host resolution
+- multi-server delivery of pages and frontlets
+- page and frontlet host resolution
 - SSE refresh events
 - practical deployment guidance for cloud environments
 
@@ -19,30 +19,30 @@ XIS is a server-driven UI framework.
 
 The browser does not own application routing or backend contracts. Instead:
 
-- Java page and widget controllers define behavior
+- Java page and frontlet controllers define behavior
 - HTML templates define structure
 - XIS JavaScript performs transport, rendering, navigation, and refresh handling
 
-The browser may contact different servers for different pages or widgets, but this remains an implementation detail of XIS, not of application code.
+The browser may contact different servers for different pages or frontlets, but this remains an implementation detail of XIS, not of application code.
 
 ## Distributed Goal
 
 The distributed-application goal is:
 
 - pages may be delivered by different servers
-- widgets may be delivered by different servers
+- frontlets may be delivered by different servers
 - the browser still presents one coherent XIS application
-- XIS JavaScript decides which server to call for each page or widget
+- XIS JavaScript decides which server to call for each page or frontlet
 - application code should not manually orchestrate cross-server transport
 
 In other words:
 
 - a page may come from server A
-- a widget inside that page may come from server B
+- a frontlet inside that page may come from server B
 - another page may come from server C
 - the browser must still assemble these parts into one running UI
 
-This is the architectural reason why XIS needs optional host metadata for pages and widgets.
+This is the architectural reason why XIS needs optional host metadata for pages and frontlets.
 
 ## Deployment Modes
 
@@ -52,7 +52,7 @@ This is the default mode.
 
 In same-origin mode:
 
-- pages and widgets are served from the same host as the main application
+- pages and frontlets are served from the same host as the main application
 - XIS JavaScript uses relative `/xis/...` URLs
 - no host metadata is required
 - no distributed module is required
@@ -66,9 +66,9 @@ This mode is optional.
 In distributed mode:
 
 - different pages may live on different hosts
-- different widgets may live on different hosts
+- different frontlets may live on different hosts
 - the browser still runs one XIS application
-- XIS JavaScript chooses the correct target host per page or widget
+- XIS JavaScript chooses the correct target host per page or frontlet
 
 Distributed mode must not make same-origin mode harder.
 
@@ -79,7 +79,7 @@ Distributed mode must not make same-origin mode harder.
 Host information is optional.
 
 - If distributed deployment support is not active, `host` must be omitted or `null`.
-- If distributed deployment support is active, `host` may be set per page and per widget.
+- If distributed deployment support is active, `host` may be set per page and per frontlet.
 
 ### Reason
 
@@ -95,24 +95,24 @@ Benefits:
 
 This is the right default and should be preserved.
 
-## Page and Widget Addressing
+## Page and Frontlet Addressing
 
 XIS uses two main identifiers:
 
 - `pageId`
   Usually the normalized page path, for example `/product/*.html`
-- `widgetId`
-  The widget identifier used by the client and server
+- `frontletId`
+  The frontlet identifier used by the client and server
 
 In distributed mode, resolution works like this:
 
 - `pageId -> host`
-- `widgetId -> host`
+- `frontletId -> host`
 
 The host must contain scheme and authority, for example:
 
 - `https://shop.example.com`
-- `https://widgets.example.com`
+- `https://frontlets.example.com`
 
 It should not be only a path fragment.
 
@@ -124,7 +124,7 @@ The authoritative mapping should remain server-side.
 
 That means:
 
-- each participating XIS server instance knows the page/widget-to-host mapping
+- each participating XIS server instance knows the page/frontlet-to-host mapping
 - the server exposes resolved host metadata to the browser as part of normal XIS configuration
 - the browser uses this metadata when it must call another host
 
@@ -144,7 +144,7 @@ So the better split is:
 
 ### Practical Interpretation
 
-Each XIS instance that serves pages or widgets in a distributed deployment should have access to the same logical mapping.
+Each XIS instance that serves pages or frontlets in a distributed deployment should have access to the same logical mapping.
 
 That mapping can come from:
 
@@ -172,7 +172,7 @@ public interface DistributedComponentMapping {
 
     String getPageHost(String normalizedPageId);
 
-    String getWidgetHost(String widgetId);
+    String getFrontletHost(String frontletId);
 }
 ```
 
@@ -186,7 +186,7 @@ This configuration must express:
 
 - default local or public host
 - page host mappings
-- widget host mappings
+- frontlet host mappings
 
 ### Why Java configuration is the preferred default
 
@@ -237,9 +237,9 @@ xis:
     pageHosts:
       "/products/*.html": "https://shop.example.com"
       "/orders/*.html": "https://orders.example.com"
-    widgetHosts:
-      "StockTickerWidget": "https://widgets.example.com"
-      "CartSummaryWidget": "https://shop.example.com"
+    frontletHosts:
+      "StockTickerFrontlet": "https://frontlets.example.com"
+      "CartSummaryFrontlet": "https://shop.example.com"
 ```
 
 This YAML is not the architecture itself. It is only one possible runtime-level way to create the Java mapping bean.
@@ -349,7 +349,7 @@ Users should configure stable browser-visible base URLs, not internal node addre
 Good examples:
 
 - `https://shop.company.com`
-- `https://widgets.company.com`
+- `https://frontlets.company.com`
 - `https://orders.company.com`
 
 Bad examples:
@@ -400,7 +400,7 @@ The XIS browser client should:
 
 - load the normal XIS configuration
 - keep the same-origin fast path when no host is present
-- prepend scheme + host only when a page or widget has an explicit remote host
+- prepend scheme + host only when a page or frontlet has an explicit remote host
 - continue using relative URLs for same-origin components
 
 This keeps the distributed feature additive instead of invasive.
@@ -413,7 +413,7 @@ Refresh events:
 
 - send only event keys
 - do not transport business payloads
-- trigger reload of affected pages or widgets through normal XIS requests
+- trigger reload of affected pages or frontlets through normal XIS requests
 
 In distributed deployments this means:
 
@@ -439,7 +439,7 @@ A list of hosts per component may be possible later, but it is not needed for th
 - Same-origin mode is the default.
 - In same-origin mode, `host` is omitted or `null`.
 - Distributed mode is optional.
-- Distributed mode resolves `pageId -> host` and `widgetId -> host`.
+- Distributed mode resolves `pageId -> host` and `frontletId -> host`.
 - Host values must be browser-reachable base URLs.
 - The server remains the source of truth for host resolution.
 - The browser performs the actual cross-host requests.
@@ -452,6 +452,6 @@ The next implementation step should be:
 
 1. Finalize the distributed host resolver and Java extension contract.
 2. Keep `host` absent in same-origin mode.
-3. Expose resolved page/widget hosts through normal client configuration.
+3. Expose resolved page/frontlet hosts through normal client configuration.
 4. Extend the JavaScript transport path so requests use `host + /xis/...` when a remote host is defined.
 5. Add runtime-specific adapters, for example Spring bean binding from `application.yml`.

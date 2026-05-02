@@ -9,12 +9,12 @@
  * - ClientState exists: app.clientState.getValue(path)
  * - ClientStateVariable evaluates state.* expressions in templates
  * - PageController.handleActionResponse() refreshes entire tree
- * - WidgetContainerHandler has refresh mechanism
+ * - FrontletContainerHandler has refresh mechanism
  * 
  * New Requirements:
  * 1. Page-level actions update state → full tree refresh
- * 2. Widget-level actions update state → page refresh, but invoker stops recursion
- * 3. Form actions behave like widgets
+ * 2. Frontlet-level actions update state → page refresh, but invoker stops recursion
+ * 3. Form actions behave like frontlets
  * 4. State updates trigger reactive template updates
  */
 
@@ -30,7 +30,7 @@ class ReactiveStateManager {
     /**
      * Update state and trigger reactive updates
      * @param {Object} stateUpdates - Key-value pairs to update
-     * @param {Object} context - {source: 'page'|'widget'|'form', invoker: handler}
+     * @param {Object} context - {source: 'page'|'frontlet'|'form', invoker: handler}
      */
     updateState(stateUpdates, context) {
         // Update the actual state
@@ -52,12 +52,12 @@ class ReactiveStateManager {
                     // Full tree refresh from page level
                     this.refreshPageTree(context.invoker);
                     break;
-                case 'widget':
-                    // Page refresh, but stop at invoking widget
+                case 'frontlet':
+                    // Page refresh, but stop at invoking frontlet
                     this.refreshPageExceptInvoker(context.invoker);
                     break;
                 case 'form':
-                    // Same as widget
+                    // Same as frontlet
                     this.refreshPageExceptInvoker(context.invoker);
                     break;
             }
@@ -73,11 +73,11 @@ class ReactiveStateManager {
         app.pageController.doRefresh(data);
     }
 
-    refreshPageExceptInvoker(invokerWidget) {
+    refreshPageExceptInvoker(invokerFrontlet) {
         // Refresh page but mark invoker as "skip refresh"
         let data = app.pageController.getData();
         data.scope = 'TREE_EXCEPT_INVOKER';
-        data.skipInvoker = invokerWidget?.widgetInstance?.widget?.id;
+        data.skipInvoker = invokerFrontlet?.frontletInstance?.frontlet?.id;
         app.pageController.doRefresh(data);
     }
 }
@@ -111,16 +111,16 @@ class ReactivePageController extends PageController {
     }
 }
 
-// === Phase 3: Widget Handler Modifications ===
+// === Phase 3: Frontlet Handler Modifications ===
 
-// Extend WidgetContainerHandler to handle reactive state
-class ReactiveWidgetContainerHandler extends WidgetContainerHandler {
+// Extend FrontletContainerHandler to handle reactive state
+class ReactiveFrontletContainerHandler extends FrontletContainerHandler {
 
     handleActionResponse(response) {
         // Handle reactive state first
         if (response.clientStateData) {
             app.reactiveState.updateState(response.clientStateData, {
-                source: 'widget',
+                source: 'frontlet',
                 invoker: this
             });
         }
@@ -131,14 +131,14 @@ class ReactiveWidgetContainerHandler extends WidgetContainerHandler {
         if (response.nextURL) {
             app.pageController.handleActionResponse(response);
         }
-        if (response.nextWidgetId) {
-            this.ensureWidgetBound(response.nextWidgetId);
+        if (response.nextFrontletId) {
+            this.ensureFrontletBound(response.nextFrontletId);
         }
         
         // Skip refresh if reactive state handled it
         if (!response.clientStateData) {
-            if (!this.widgetState) {
-                this.widgetState = new WidgetState(app.pageController.resolvedURL, {});
+            if (!this.frontletState) {
+                this.frontletState = new FrontletState(app.pageController.resolvedURL, {});
             }
             var data = response.data;
             this.refreshContainerId(data);
@@ -147,18 +147,18 @@ class ReactiveWidgetContainerHandler extends WidgetContainerHandler {
     }
 
     refresh(data) {
-        // Check if this widget should skip refresh (anti-recursion)
+        // Check if this frontlet should skip refresh (anti-recursion)
         if (data.scope === 'TREE_EXCEPT_INVOKER' && 
-            data.skipInvoker === this.currentWidgetId()) {
-            return; // Skip refresh for invoking widget
+            data.skipInvoker === this.currentFrontletId()) {
+            return; // Skip refresh for invoking frontlet
         }
 
         // Continue with normal refresh
         this.refreshContainerId(data);
-        this.bindDefaultWidgetInitial(data);
-        var widgetParameters = this.widgetState ? this.widgetState.widgetParameters : {};
-        this.widgetState = new WidgetState(app.pageController.resolvedURL, widgetParameters);
-        if (this.widgetInstance) {
+        this.bindDefaultFrontletInitial(data);
+        var frontletParameters = this.frontletState ? this.frontletState.frontletParameters : {};
+        this.frontletState = new FrontletState(app.pageController.resolvedURL, frontletParameters);
+        if (this.frontletInstance) {
             this.reloadDataAndRefresh(data);
         }
     }
@@ -208,21 +208,21 @@ public @interface ReactiveState {
  *     }
  * }
  * 
- * // Widget-level reactive state (prevents recursion)
- * @Widget
- * public class CounterWidget {
+ * // Frontlet-level reactive state (prevents recursion)
+ * @Frontlet
+ * public class CounterFrontlet {
  *     
  *     @Action("increment")
- *     @ReactiveState("widgetCounter")
- *     public Integer increment(@ClientState("widgetCounter") Integer current) {
+ *     @ReactiveState("frontletCounter")
+ *     public Integer increment(@ClientState("frontletCounter") Integer current) {
  *         return current + 1;
  *     }
  * }
  * 
  * // HTML template using reactive state
  * <div>Global Counter: ${state.globalCounter}</div>
- * <div>Widget Counter: ${state.widgetCounter}</div>
- * <xis:widget-container container-id="counter" default-widget="CounterWidget"/>
+ * <div>Frontlet Counter: ${state.frontletCounter}</div>
+ * <xis:frontlet-container container-id="counter" default-frontlet="CounterFrontlet"/>
  */
 
 // === Implementation Steps ===
@@ -230,7 +230,7 @@ public @interface ReactiveState {
 1. Add ReactiveStateManager to main app
 2. Modify ClientRequest/ServerResponse to include reactive context
 3. Update ControllerMethodResultMapper for @ReactiveState annotation
-4. Extend PageController and WidgetContainerHandler with reactive logic
+4. Extend PageController and FrontletContainerHandler with reactive logic
 5. Add recursion prevention in refresh() methods
 6. Test with simple counter example
 7. Add documentation to copilot-instructions.md

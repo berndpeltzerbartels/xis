@@ -2,7 +2,7 @@
 
 `xis-distributed` adds distributed routing support to XIS applications.
 
-It is intended for applications where pages and widgets may be served by different servers, while the browser still behaves like one coherent XIS application.
+It is intended for applications where pages and frontlets may be served by different servers, while the browser still behaves like one coherent XIS application.
 
 ## What the module does
 
@@ -11,7 +11,7 @@ The module contributes a `ComponentHostResolver` implementation.
 That resolver fills the optional `host` field in:
 
 - page attributes
-- widget attributes
+- frontlet attributes
 
 The JavaScript client then uses that information to decide how to send requests:
 
@@ -65,13 +65,13 @@ So the architectural contract is the interface, not the properties-based impleme
 
 If you use the built-in properties-based implementation, it reads explicit remote mappings from:
 
-- `xis.remote.widget.<widgetId>`
+- `xis.remote.frontlet.<frontletId>`
 - `xis.remote.page.<normalizedPath>`
 
 Example:
 
 ```properties
-xis.remote.widget.ProductWidget=https://shop.example.com
+xis.remote.frontlet.ProductFrontlet=https://shop.example.com
 xis.remote.page./product/*.html=https://shop.example.com
 ```
 
@@ -90,7 +90,7 @@ Unmapped components are treated as local by that default implementation.
 The module is covered by unit tests for:
 
 - explicit page mappings
-- explicit widget mappings
+- explicit frontlet mappings
 - local components
 - missing host errors for declared remote components
 

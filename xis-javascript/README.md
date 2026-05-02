@@ -11,7 +11,7 @@ The JavaScript runtime is responsible for:
 
 - SPA-style navigation without full page reloads
 - invoking XIS actions and loading model data
-- updating pages and widgets in the browser
+- updating pages and frontlets in the browser
 - reacting to server-triggered refresh events
 
 ## Refresh Events
@@ -23,7 +23,7 @@ Important design rule:
 - refresh events only carry event keys
 - they do not carry application data payloads
 
-When the browser receives such an event, it reloads the affected page or widget data through the regular XIS HTTP
+When the browser receives such an event, it reloads the affected page or frontlet data through the regular XIS HTTP
 flow.
 
 This means the push channel stays simple and does not become a second API layer.

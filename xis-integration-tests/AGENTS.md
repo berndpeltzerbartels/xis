@@ -5,7 +5,7 @@ This module contains framework-level integration tests for XIS behavior.
 Testing focus:
 - Prefer end-to-end behavior over implementation details.
 - Keep tests transport-neutral where possible; assertions should focus on DOM updates and navigation outcomes.
-- When refactoring names such as `Widget` to `Frontlet`, remember that runtime references may still live in HTML templates, `xis:widget`, `default-widget`, and test setup values even when Java code already compiles.
+- When finishing the terminology refactor to `Frontlet`, remember that runtime references may still live in HTML templates, `xis:frontlet`, `default-frontlet`, and test setup values even when Java code already compiles.
 
 Framework override rules:
 - Tests should assume that XIS infrastructure is already present through the normal `IntegrationTestContext` bootstrap.
@@ -15,5 +15,5 @@ Framework override rules:
 
 Relevant areas:
 - `src/test/java/test/page/refresh`: refresh-event and multi-client behavior.
-- `src/test/java/test/widget`: frontlet/widget interaction coverage.
+- frontlet interaction coverage.
 - `src/test/java/test/page/core`: basic bootstrap and navigation safety checks.
