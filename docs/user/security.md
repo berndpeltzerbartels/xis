@@ -108,8 +108,53 @@ If the application also offers external OpenID Connect providers, the login cont
 </div>
 ```
 
-With exactly one external provider and no local user service, XIS redirects directly to that provider. With multiple
-providers, or with local login plus providers, XIS opens `/login.html` so the user can choose.
+## Login Variants
+
+### Local Authentication Only
+
+Use `xis-authentication` and provide a real `UserInfoService`. `xis-idp-client` is not needed. When a protected page is
+opened without a valid login, XIS redirects to:
+
+```text
+/login.html?redirect_uri=...
+```
+
+The login page renders the local form. A custom `login.html` only needs the `login` form binding, the `username`,
+`password`, and hidden `state` fields, and the `login` action.
+
+### Local Authentication And One External OpenID Connect Provider
+
+Use `xis-authentication`, provide a real `UserInfoService`, add `xis-idp-client`, and provide one `ExternalIDPConfig`.
+When a protected page is opened without a valid login, XIS still redirects to `/login.html` instead of redirecting
+directly to the provider.
+
+The login page renders the local form and one provider link. A custom `login.html` should render both the local form and
+the `externalIdpIds` / `externalIdpUrls` provider link.
+
+### Local Authentication And Multiple External OpenID Connect Providers
+
+Use `xis-authentication`, provide a real `UserInfoService`, add `xis-idp-client`, and provide multiple
+`ExternalIDPConfig` instances. When a protected page is opened without a valid login, XIS redirects to `/login.html`.
+
+The login page renders the local form and one link per provider. A custom template should render the local form and loop
+over `externalIdpIds`, using `externalIdpUrls[idpId]` as the link target.
+
+### One External OpenID Connect Provider Without Local Authentication
+
+Use `xis-authentication` and `xis-idp-client`, provide one `ExternalIDPConfig`, and do not provide a custom
+`UserInfoService`. XIS then redirects directly to that provider when a protected page is opened without a valid login.
+
+`/login.html` is normally skipped in this setup. If it is opened explicitly, the local form is not rendered because the
+framework placeholder `UserInfoService` does not validate local credentials.
+
+### Multiple External OpenID Connect Providers Without Local Authentication
+
+Use `xis-authentication` and `xis-idp-client`, provide multiple `ExternalIDPConfig` instances, and do not provide a
+custom `UserInfoService`. When a protected page is opened without a valid login, XIS redirects to `/login.html` so the
+user can choose the provider.
+
+The login page renders only provider links. A custom `login.html` must render `externalIdpIds` and `externalIdpUrls`; it
+should not show a local username/password form unless the application also provides a real `UserInfoService`.
 
 `UserInfoService` is optional when the application only uses external providers. XIS provides a default placeholder that
 does not validate local credentials and does not render the local login form.
@@ -245,14 +290,6 @@ URL. If the application has local authentication or multiple external IDPs, XIS 
 or use the local login form. The provider must issue JWT access tokens that contain the user id in `sub` and roles in
 `realm_access.roles` or `resource_access.account.roles`.
 
-The redirect behavior is:
-
-- local login only: `/login.html`
-- local login and one external provider: `/login.html`
-- local login and multiple external providers: `/login.html`
-- one external provider and no local login: direct redirect to that provider
-- multiple external providers and no local login: `/login.html`
-
 ### Keycloak
 
 For Keycloak, create a realm and a confidential OpenID Connect client. The client must allow this redirect URI:
@@ -297,5 +334,36 @@ management or use a provider that emits role claims in the access token.
 
 No Google-specific XIS artifact is needed. Google also uses the standard OpenID Connect discovery document.
 
-XIS as an IDP is a separate advanced setup and uses additional dependencies. Treat it as a different topic from normal
-application authentication.
+## XIS As An OpenID Connect Provider
+
+XIS can also run as an OpenID Connect provider. This is an advanced setup and uses `xis-idp-server`, not
+`xis-idp-client`. Use it when one application should own authentication and issue tokens for other applications.
+
+This is useful when authentication is more than a simple password check. For example, an account may need a
+pre-registration step, documents may need to be checked, or a human reviewer may need to approve the account before the
+user can log in. In that case the IDP application can own the registration and approval workflow. The consuming
+applications only need to trust the tokens issued by the XIS IDP.
+
+It is also useful for SSO across multiple applications. Several XIS applications, or applications written in other
+languages, can use the same XIS IDP as their OpenID Connect provider. The application-specific login logic stays in one
+place, while every client application receives standard access, refresh, and ID tokens.
+
+Another reason is token normalization. The IDP application can decide how users are authenticated and which claims are
+issued. Client applications then see one predictable token format from the XIS IDP. For example, an organization could
+centralize external identity checks in the IDP application and expose application roles through the XIS-issued access
+token.
+
+To implement a XIS IDP, add `xis-idp-server` and provide an `IDPService`. The service is responsible for:
+
+- validating user credentials
+- returning user information
+- returning access-token and ID-token claims
+- registering allowed clients through `IDPClientInfo`
+- validating client secrets
+
+The IDP publishes the OpenID Connect discovery document, JWKS, login page, and token endpoint. Client applications then
+configure the XIS IDP like any other external OpenID Connect provider by using `ExternalIDPConfig` and the IDP base URL.
+
+The built-in IDP login flow is still a XIS login flow backed by `IDPService`. If the IDP application needs a more complex
+interactive process, such as multi-step registration or manual account approval, model that process in the IDP
+application and allow credential validation only after the account is ready.
