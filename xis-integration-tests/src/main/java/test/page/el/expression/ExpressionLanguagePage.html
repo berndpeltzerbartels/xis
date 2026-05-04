@@ -6,6 +6,7 @@
 <body>
 <div id="computed-key-text">${lookup[prefix + '_item'].label}</div>
 <div id="computed-key-attribute" data-label="${lookup[prefix + '_item'].label}">attribute</div>
+<div id="custom-function">${surround('[', lookup[prefix + '_item'].label, ']')}</div>
 <div id="comparison-condition" xis:if="items[1] == 'beta' && notEmpty(lookup[prefix + '_item'].label)">comparison</div>
 <xis:if condition="enabled ? true : false"><span id="tag-if-result">tag-if</span></xis:if>
 <div id="default-value">${defaultValue(emptyValue, 'fallback')}</div>

@@ -161,8 +161,9 @@ Examples:
 <p>Created: ${formatDateTime(order.createdAt, "en-US")}</p>
 ```
 
-Custom EL functions are an advanced extension topic. See [Advanced topics](advanced/README.md) when you need
-project-specific template functions.
+Custom EL functions are an advanced extension topic. Project code can register browser-side functions with
+`elFunctions.addFunction(name, functionRef)` before templates using that function are initialized. See
+[Advanced topics](advanced/README.md) when you need project-specific template functions.
 
 ## Iteration
 

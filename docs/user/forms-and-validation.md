@@ -322,7 +322,8 @@ Common annotations:
 | `@RegExpr` | String must match a regular expression. |
 | `@LabelKey` | Supplies a context-specific label for validation messages. |
 
-Field messages are shown with `xis:message-for`. Global messages are shown with `<xis:global-messages/>`.
+Field messages are shown with `xis:message-for`. Global validation messages are shown with
+`<xis:global-messages/>`.
 
 ```html
 <form xis:binding="user">
@@ -331,12 +332,31 @@ Field messages are shown with `xis:message-for`. Global messages are shown with 
 </form>
 ```
 
+`<xis:global-messages/>` belongs to the form validation result. Use it for validation messages that are not attached to
+one field, for example a cross-field rule or a custom validator that reports a form-level problem. It is not the general
+application error area.
+
 Element syntax for field messages:
 
 ```html
 <xis:message message-for="email"/>
 <xis:global-messages/>
 ```
+
+The same field message can be written as an attribute or as a XIS element. These two snippets are equivalent:
+
+```html
+<div xis:message-for="email"></div>
+```
+
+```html
+<xis:message message-for="email"/>
+```
+
+General server errors are handled separately by the browser-side message handler. If a page contains an element with
+`id="system-messages"`, XIS can render server errors there. Validation messages may also be copied into that general
+message area, but form templates should still use `xis:message-for` and `<xis:global-messages/>` when the user needs to
+see the errors next to the form.
 
 Validation messages are resolved from message property files on the classpath. Application files override the XIS
 defaults.

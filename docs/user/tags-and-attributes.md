@@ -276,11 +276,15 @@ Element syntax:
 <xis:message message-for="name"/>
 ```
 
-Use global messages for validation errors that are not attached to one field:
+Use global messages for validation errors that are not attached to one field. These are still validation messages from
+the current form result, not the general system-error area:
 
 ```html
 <xis:global-messages/>
 ```
+
+General server errors are rendered by the browser-side message handler into an element with `id="system-messages"` when
+that element exists on the page.
 
 Use `xis:error-class` together with `xis:binding` when a field or label should receive a CSS class on validation error:
 

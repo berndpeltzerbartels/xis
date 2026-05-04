@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:xis="http://xis.one/schema" lang="de">
+<head>
+    <title>Complex form flow</title>
+</head>
+<body>
+<form xis:binding="product">
+    <input type="hidden" xis:binding="id" id="id"/>
+
+    <label for="name">Name</label>
+    <input type="text" xis:binding="name" id="name"/>
+    <span xis:message-for="name" id="name-message"></span>
+
+    <label for="stock">Stock</label>
+    <input type="text" xis:binding="stock" id="stock"/>
+    <span xis:message-for="stock" id="stock-message"></span>
+
+    <button xis:action="save" id="save">Save</button>
+    <xis:global-messages/>
+</form>
+
+<div id="loaded-context">${loadedContext}</div>
+<div id="saved-context">${savedContext}</div>
+</body>
+</html>

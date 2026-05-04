@@ -36,6 +36,13 @@ class ExpressionLanguageTest {
     }
 
     @Test
+    void evaluatesCustomElFunctionRegisteredInBrowserRuntime() {
+        var client = testContext.openPage("/expressionLanguage.html");
+
+        assertThat(client.getDocument().getElementById("custom-function").getInnerText()).isEqualTo("[First]");
+    }
+
+    @Test
     void evaluatesTagAndAttributeForeachSyntax() {
         var client = testContext.openPage("/expressionLanguage.html");
         var bodyText = client.getDocument().getElementByTagName("body").getInnerText();
