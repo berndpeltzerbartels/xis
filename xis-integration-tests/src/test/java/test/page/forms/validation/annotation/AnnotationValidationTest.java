@@ -20,8 +20,16 @@ class AnnotationValidationTest {
 
     static class TestModel {
         @NotNegative
-        @LabelKey("amountLabel")
-        int amount = -5; // ungültiger Wert
+        @LabelKey("order.total")
+        int total = -5;
+
+        @NotNegative
+        @LabelKey("order.vat")
+        int vat = -2;
+
+        @NotNegative
+        @LabelKey("order.springDiscount")
+        int springDiscount = -1;
     }
 
 
@@ -50,6 +58,10 @@ class AnnotationValidationTest {
         assertThat(response.getStatus()).isEqualTo(422);
         assertThat(response.getValidatorMessages().getMessages().values())
                 .contains("negativ");
-        assertThat(response.getValidatorMessages().getGlobalMessages()).contains("Der Wert für \"Betrag\" darf nicht negativ sein");
+        assertThat(response.getValidatorMessages().getGlobalMessages()).containsExactlyInAnyOrder(
+                "Der Wert für \"Gesamtpreis\" darf nicht negativ sein",
+                "Der Wert für \"Umsatzsteuer\" darf nicht negativ sein",
+                "Der Wert für \"aktueller Frühlingsrabatt\" darf nicht negativ sein"
+        );
     }
 }

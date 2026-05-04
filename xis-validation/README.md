@@ -125,21 +125,37 @@ For a request locale such as Polish, messages are resolved in this order:
 The first matching key wins. Application `messages*.properties` files are the normal extension point; the
 `default-messages*.properties` files are framework fallbacks.
 
-`@LabelKey` can point to a label entry that is substituted into validation messages via the `${label}` placeholder.
+`@LabelKey` can point to a label entry that is substituted into validation messages via the `${label}` placeholder. This
+keeps validators reusable: one annotation can validate several fields, while the message names the field in its current
+business context.
 
 ```java
-public record UserForm(
-        @EMail
-        @LabelKey("user.email")
-        String email
+public record OrderForm(
+        @NotNegative
+        @LabelKey("order.total")
+        BigDecimal total,
+
+        @NotNegative
+        @LabelKey("order.vat")
+        BigDecimal vat,
+
+        @NotNegative
+        @LabelKey("order.springDiscount")
+        BigDecimal springDiscount
 ) {
 }
 ```
 
 ```properties
-user.email=Email address
-validation.email=The ${label} is not a valid email address.
+validation.notNegative=${label} must not be negative
+validation.notNegative.global=Please check ${label}
+
+order.total=total price
+order.vat=VAT
+order.springDiscount=current spring discount
 ```
+
+If no `@LabelKey` is present, XIS uses the Java field, parameter, or record component name as the label key.
 
 ## Minimal Example
 

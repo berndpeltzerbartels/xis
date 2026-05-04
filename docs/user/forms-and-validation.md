@@ -317,7 +317,7 @@ Common annotations:
 | `@EMail` | String must be an email address. |
 | `@MinLength` | String, collection, array, or map must have a minimum length or size. |
 | `@RegExpr` | String must match a regular expression. |
-| `@LabelKey` | Supplies a user-facing label for validation messages. |
+| `@LabelKey` | Supplies a context-specific label for validation messages. |
 
 Field messages are shown with `xis:message-for`. Global messages are shown with `<xis:global-messages/>`.
 
@@ -361,6 +361,39 @@ For a request locale such as Polish, messages are resolved in this order:
 
 The first matching key wins. Application files are the normal place for user-facing text. Default files are framework
 fallbacks. Message templates can use `${label}` and validator-specific parameters such as `${minLength}`.
+
+`@LabelKey` lets one validation annotation produce context-specific messages. Without it, a reusable validator such as
+`@NotNegative` would need different annotations or different message keys for "total price", "VAT", or "current spring
+discount". With `@LabelKey`, the validator stays generic and only the label changes.
+
+```java
+public record OrderForm(
+        @NotNegative
+        @LabelKey("order.total")
+        BigDecimal total,
+
+        @NotNegative
+        @LabelKey("order.vat")
+        BigDecimal vat,
+
+        @NotNegative
+        @LabelKey("order.springDiscount")
+        BigDecimal springDiscount
+) {
+}
+```
+
+```properties
+validation.notNegative=${label} must not be negative
+validation.notNegative.global=Please check ${label}
+
+order.total=total price
+order.vat=VAT
+order.springDiscount=current spring discount
+```
+
+If `vat` is invalid, `${label}` resolves to `VAT`. If no `@LabelKey` is present, XIS uses the Java field, parameter, or
+record component name as the label key.
 
 ## Custom Validators
 
