@@ -29,27 +29,10 @@ class ValidatorMessagePropertiesLoader {
 
     private Properties propertiesForLocale(Locale locale) {
         Properties props = new Properties();
-
-        // 1. Benutzerdefinierte Datei für das Land
-        String userFile = "messages_" + locale.getLanguage();
-        Properties userProps = loadProperties(userFile);
-
-        if (!userProps.isEmpty()) {
-            props.putAll(userProps);
-
-            // 2. Default für das Land
-            String defaultFile = "default-messages_" + locale.getLanguage();
-            Properties defaultProps = loadProperties(defaultFile);
-
-            // Fehlende Keys aus Default ergänzen
-            defaultProps.forEach(props::putIfAbsent);
-            return props;
-        }
-
-        // 3. Nur Default-Dateien (wenn keine User-Datei existiert)
         props.putAll(loadProperties("default-messages"));
-        props.putAll(loadProperties("messages"));
         props.putAll(loadProperties("default-messages_" + locale.getLanguage()));
+        props.putAll(loadProperties("messages"));
+        props.putAll(loadProperties("messages_" + locale.getLanguage()));
         return props;
     }
 

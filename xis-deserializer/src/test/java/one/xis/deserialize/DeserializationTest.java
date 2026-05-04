@@ -16,6 +16,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Parameter;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -51,6 +52,58 @@ class DeserializationTest {
         var json = "{\"intField\":123}";
         var testBean = (TestBean) mainDeserializer.deserialize(json, parameter, userContext, new PostProcessingResults());
         assertThat(testBean.getIntField()).isEqualTo(123);
+    }
+
+    @Test
+    void deserializeCanonicalDecimalStringWithGermanLocale() throws NoSuchMethodException {
+        var parameter = getClass().getDeclaredMethod("testMethodBeanParameter", TestBean.class).getParameters()[0];
+        var json = "{\"doubleField\":\"1234.56\", \"bigDecimalField\":\"1234.56\"}";
+        var testBean = (TestBean) mainDeserializer.deserialize(json, parameter, userContext, new PostProcessingResults());
+        assertThat(testBean.getDoubleField()).isEqualTo(1234.56);
+        assertThat(testBean.getBigDecimalField()).isEqualByComparingTo("1234.56");
+    }
+
+    @Test
+    void deserializeGermanDecimalString() throws NoSuchMethodException {
+        var parameter = getClass().getDeclaredMethod("testMethodBeanParameter", TestBean.class).getParameters()[0];
+        var json = "{\"doubleField\":\"1.234,56\", \"bigDecimalField\":\"1.234,56\"}";
+        var testBean = (TestBean) mainDeserializer.deserialize(json, parameter, userContext, new PostProcessingResults());
+        assertThat(testBean.getDoubleField()).isEqualTo(1234.56);
+        assertThat(testBean.getBigDecimalField()).isEqualByComparingTo("1234.56");
+    }
+
+    @Test
+    void deserializeLocalizedIntegerString() throws NoSuchMethodException {
+        var parameter = getClass().getDeclaredMethod("testMethodBeanParameter", TestBean.class).getParameters()[0];
+        var json = "{\"integerObjectField\":\"1.234\"}";
+        var testBean = (TestBean) mainDeserializer.deserialize(json, parameter, userContext, new PostProcessingResults());
+        assertThat(testBean.getIntegerObjectField()).isEqualTo(1234);
+    }
+
+    @Test
+    void deserializeEnglishDecimalString() throws NoSuchMethodException {
+        when(userContext.getLocale()).thenReturn(Locale.US);
+        try {
+            var parameter = getClass().getDeclaredMethod("testMethodBeanParameter", TestBean.class).getParameters()[0];
+            var json = "{\"doubleField\":\"1,234.56\", \"bigDecimalField\":\"1,234.56\"}";
+            var testBean = (TestBean) mainDeserializer.deserialize(json, parameter, userContext, new PostProcessingResults());
+            assertThat(testBean.getDoubleField()).isEqualTo(1234.56);
+            assertThat(testBean.getBigDecimalField()).isEqualByComparingTo("1234.56");
+        } finally {
+            when(userContext.getLocale()).thenReturn(Locale.GERMAN);
+        }
+    }
+
+    @Test
+    void deserializeFractionalStringToIntegerFails() throws NoSuchMethodException {
+        var parameter = getClass().getDeclaredMethod("testMethodBeanParameter", TestBean.class).getParameters()[0];
+        var ppObjects = new PostProcessingResults();
+        var json = "{\"integerObjectField\":\"1,5\"}";
+        mainDeserializer.deserialize(json, parameter, userContext, ppObjects);
+        assertThat(ppObjects.postProcessingResults(InvalidValueError.class).stream()
+                .map(InvalidValueError::getDeserializationContext)
+                .map(DeserializationContext::getPath))
+                .anyMatch("/testObject/integerObjectField"::equals);
     }
 
     @Test
@@ -464,6 +517,9 @@ class DeserializationTest {
     @Data
     static class TestBean {
         private int intField;
+        private Integer integerObjectField;
+        private Double doubleField;
+        private BigDecimal bigDecimalField;
         private String stringField;
         private LocalDate localDateField;
         private boolean booleanField;

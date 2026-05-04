@@ -157,6 +157,94 @@ Element syntax:
 
 If the user selects `new` and `sale`, the action receives both values in `ProductForm.tags`.
 
+## Type Conversion
+
+XIS deserializes submitted form values into the Java types used by the `@FormData` object. Empty strings are treated as
+missing values; with `@Mandatory`, that becomes a validation error.
+
+Numbers are parsed in two steps. XIS first accepts the canonical Java/JSON representation, then falls back to the
+request locale. That means a German user can enter `1.234,56` for `BigDecimal`, `Double`, or `Float`, while `1234.56`
+still works as a canonical value. Integer types also accept locale grouping, such as `1.234` in German or `1,234` in
+English, but reject fractional values like `1,5`.
+
+```java
+public record ProductForm(
+        String name,
+        BigDecimal price,
+        Integer stock
+) {
+}
+```
+
+```html
+<form xis:binding="product">
+    <input type="text" xis:binding="name"/>
+    <input type="text" xis:binding="price"/>
+    <input type="text" xis:binding="stock"/>
+    <button type="submit" xis:action="save">Save</button>
+</form>
+```
+
+Element syntax:
+
+```html
+<xis:form binding="product">
+    <xis:input type="text" binding="name"/>
+    <xis:input type="text" binding="price"/>
+    <xis:input type="text" binding="stock"/>
+    <xis:submit action="save">Save</xis:submit>
+</xis:form>
+```
+
+Use a formatter when the displayed string is application-specific, for example money with a currency symbol,
+percentages, coordinates, or a date format that differs from the built-in conversion.
+
+```java
+import one.xis.Formatter;
+
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.text.ParsePosition;
+import java.time.ZoneId;
+import java.util.Locale;
+
+public class MoneyFormatter implements Formatter<BigDecimal> {
+
+    @Override
+    public String format(BigDecimal value, Locale locale, ZoneId zoneId) {
+        return NumberFormat.getCurrencyInstance(locale).format(value);
+    }
+
+    @Override
+    public BigDecimal parse(String text, Locale locale, ZoneId zoneId) {
+        var format = NumberFormat.getCurrencyInstance(locale);
+        if (format instanceof DecimalFormat decimalFormat) {
+            decimalFormat.setParseBigDecimal(true);
+        }
+        var position = new ParsePosition(0);
+        var number = format.parse(text, position);
+        if (number == null || position.getIndex() != text.length()) {
+            throw new IllegalArgumentException("Invalid money value");
+        }
+        if (number instanceof BigDecimal bigDecimal) {
+            return bigDecimal;
+        }
+        return BigDecimal.valueOf(number.doubleValue());
+    }
+}
+```
+
+```java
+import one.xis.UseFormatter;
+
+public record ProductForm(
+        @UseFormatter(MoneyFormatter.class)
+        BigDecimal price
+) {
+}
+```
+
 ## Validation
 
 XIS validates submitted form data before the action method executes. If validation fails, the action is not called and
@@ -231,8 +319,38 @@ Common annotations:
 | `@RegExpr` | String must match a regular expression. |
 | `@LabelKey` | Supplies a user-facing label for validation messages. |
 
-Validation messages are resolved from message property files on the classpath, such as `messages.properties` and
-`messages_de.properties`.
+Field messages are shown with `xis:message-for`. Global messages are shown with `<xis:global-messages/>`.
+
+```html
+<form xis:binding="user">
+    <div xis:message-for="email"></div>
+    <xis:global-messages/>
+</form>
+```
+
+Element syntax for field messages:
+
+```html
+<xis:message message-for="email"/>
+<xis:global-messages/>
+```
+
+Validation messages are resolved from message property files on the classpath. Application files override the XIS
+defaults.
+
+```properties
+# messages.properties
+validation.email=Please enter a valid email address
+validation.mandatory=${label} is required
+validation.sku=SKU must look like ABC-1234
+
+user.email=Email
+user.password=Password
+```
+
+Locale-specific files use the Java language suffix, for example `messages_de.properties`, `messages_fr.properties`,
+`messages_es.properties`, or `messages_pl.properties`. XIS ships default messages for English, German, French, Spanish,
+and Polish. Message templates can use `${label}` and validator-specific parameters such as `${minLength}`.
 
 ## Custom Validators
 
@@ -264,16 +382,39 @@ package example.validation;
 import one.xis.UserContext;
 import one.xis.validation.Validator;
 import one.xis.validation.ValidatorException;
+import one.xis.context.Component;
 
 import java.lang.reflect.AnnotatedElement;
 
+@Component
 public class SkuValidator implements Validator<String> {
+
+    private final ProductCatalog catalog;
+
+    public SkuValidator(ProductCatalog catalog) {
+        this.catalog = catalog;
+    }
 
     @Override
     public void validate(String value, AnnotatedElement target, UserContext userContext) throws ValidatorException {
         if (value == null || !value.matches("[A-Z]{3}-[0-9]{4}")) {
             throw new ValidatorException();
         }
+        if (!catalog.exists(value)) {
+            throw new ValidatorException();
+        }
     }
+}
+```
+
+Custom validation is annotation-based: the form field, record component, or parameter receives your annotation, and the
+annotation points to the validator through `@Validate`. Validators can be normal XIS components, so constructor-injected
+services or repositories are available for checks that need application state, such as a database lookup.
+
+```java
+public record ProductForm(
+        @Sku
+        String sku
+) {
 }
 ```

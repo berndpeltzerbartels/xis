@@ -10,6 +10,10 @@ import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.text.ParsePosition;
+import java.util.Locale;
 import java.util.Optional;
 
 
@@ -43,7 +47,7 @@ class NumberDeserializer implements JsonDeserializer<Number> {
             }
             if (reader.peek().equals(JsonToken.STRING)) {
                 value = reader.nextString();
-                return Optional.of(parseNumber((String) value, target));
+                return Optional.of(parseNumber((String) value, target, userContext.getLocale()));
             }
             if (reader.peek().equals(JsonToken.NULL)) {
                 reader.nextNull();
@@ -94,7 +98,15 @@ class NumberDeserializer implements JsonDeserializer<Number> {
     }
 
 
-    private Number parseNumber(String value, AnnotatedElement target) {
+    private Number parseNumber(String value, AnnotatedElement target, Locale locale) {
+        try {
+            return parseCanonicalNumber(value, target);
+        } catch (RuntimeException ignored) {
+            return parseLocalizedNumber(value, target, locale);
+        }
+    }
+
+    private Number parseCanonicalNumber(String value, AnnotatedElement target) {
         var type = getType(target);
         if (type.equals(Integer.class) || type.equals(int.class)) {
             return Integer.parseInt(value);
@@ -121,6 +133,60 @@ class NumberDeserializer implements JsonDeserializer<Number> {
             return new BigDecimal(value);
         }
         throw new IllegalArgumentException("Unsupported number type: " + type);
+    }
+
+    private Number parseLocalizedNumber(String value, AnnotatedElement target, Locale locale) {
+        var parsed = localizedBigDecimal(value, locale);
+        var type = getType(target);
+        if (type.equals(Integer.class) || type.equals(int.class)) {
+            return integerValue(parsed).intValueExact();
+        }
+        if (type.equals(Double.class) || type.equals(double.class)) {
+            return parsed.doubleValue();
+        }
+        if (type.equals(Long.class) || type.equals(long.class)) {
+            return integerValue(parsed).longValueExact();
+        }
+        if (type.equals(Float.class) || type.equals(float.class)) {
+            return parsed.floatValue();
+        }
+        if (type.equals(Short.class) || type.equals(short.class)) {
+            return integerValue(parsed).shortValueExact();
+        }
+        if (type.equals(Byte.class) || type.equals(byte.class)) {
+            return integerValue(parsed).byteValueExact();
+        }
+        if (type.equals(BigInteger.class)) {
+            return integerValue(parsed).toBigIntegerExact();
+        }
+        if (type.equals(BigDecimal.class)) {
+            return parsed;
+        }
+        throw new IllegalArgumentException("Unsupported number type: " + type);
+    }
+
+    private BigDecimal localizedBigDecimal(String value, Locale locale) {
+        var text = value.trim();
+        var format = NumberFormat.getNumberInstance(locale == null ? Locale.getDefault() : locale);
+        if (format instanceof DecimalFormat decimalFormat) {
+            decimalFormat.setParseBigDecimal(true);
+        }
+        var position = new ParsePosition(0);
+        var parsed = format.parse(text, position);
+        if (parsed == null || position.getIndex() != text.length()) {
+            throw new IllegalArgumentException("Invalid localized number: " + value);
+        }
+        if (parsed instanceof BigDecimal bigDecimal) {
+            return bigDecimal;
+        }
+        if (parsed instanceof BigInteger bigInteger) {
+            return new BigDecimal(bigInteger);
+        }
+        return BigDecimal.valueOf(parsed.doubleValue());
+    }
+
+    private BigDecimal integerValue(BigDecimal value) {
+        return value.stripTrailingZeros();
     }
 
 
