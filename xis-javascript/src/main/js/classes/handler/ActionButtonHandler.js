@@ -72,7 +72,7 @@ class ActionButtonHandler extends TagHandler {
 
     frontletAction(frontletContainerHandler, targetContainerHandler) {
         if (!targetContainerHandler) {
-            // if taget container is not set explicitly, use the parent container
+            // if target container is not set explicitly, use the parent container
             targetContainerHandler = frontletContainerHandler;
         }
         this.client.frontletLinkAction(frontletContainerHandler.frontletInstance, frontletContainerHandler.frontletState, this.action, this.actionParameters)

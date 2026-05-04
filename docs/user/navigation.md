@@ -123,6 +123,16 @@ They are not used by plain page links or frontlet links.
 Think about action results by target, not by where the action method lives. A page action can load a page or replace a
 frontlet. A frontlet action can replace a frontlet or navigate the whole page.
 
+When an action control has no explicit `xis:target-container`, its surrounding context decides which controller receives
+the action:
+
+- Inside a frontlet container, the action is sent to the current frontlet.
+- Outside a frontlet container, the action is sent to the current page.
+
+If a frontlet action returns another frontlet and no target container is specified, the current frontlet container is
+updated. To update a different frontlet container, set `xis:target-container` on the action control or
+`targetContainer(...)` on the `FrontletResponse`.
+
 ## Form Actions
 
 Forms use `xis:binding` for their data object and `xis:action` on the submit control.
@@ -409,6 +419,8 @@ public class ProductPage {
 | Trigger server logic from a link | `<a xis:action="...">` or `<xis:action action="...">` |
 | Trigger server logic from a button | `<button xis:action="...">` |
 | Trigger server logic from a form | submit control with `xis:action` |
+| Let context choose the action controller | omit `xis:target-container` |
+| Send a frontlet result to a specific container | add `xis:target-container="containerId"` or return `FrontletResponse.targetContainer(...)` |
 | Stay on current page/frontlet | action returns `void` |
 | Navigate to a known page without parameters | return `ProductListPage.class` |
 | Navigate to a known page with parameters | return `PageResponse` |
