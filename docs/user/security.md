@@ -369,15 +369,10 @@ application and allow credential validation only after the account is ready.
 
 ### XIS IDP And Upstream Providers
 
-The current `xis-idp-server` module is an OpenID Connect provider, but it is not a built-in OpenID Connect broker. It
-does not automatically show upstream provider links on `/idp/login.html`, redirect to Google or Keycloak from the IDP
-login page, handle an upstream callback inside the IDP, and then issue a XIS token for the downstream application.
+The current `xis-idp-server` module is an OpenID Connect provider, but it is not an OpenID Connect broker. It does not
+show upstream provider links on `/idp/login.html`, redirect to Google or Keycloak from the IDP login page, handle an
+upstream callback inside the IDP, and then issue a XIS token for the downstream application.
 
 The external-provider support documented above belongs to applications that use `xis-authentication` together with
 `xis-idp-client`. In that setup the application itself redirects to an external OpenID Connect provider and processes
 the callback at `/xis/auth/callback/{providerId}`.
-
-XIS as IDP can still be the right place for a later broker design: the IDP could authenticate against one or more
-upstream OpenID Connect providers, map the external identity to its own account and approval model, and then issue its
-own tokens to client applications. That requires additional IDP-side code for provider selection, upstream callback
-handling, state mapping, and user/claim mapping. It is therefore not documented as a ready-to-use feature yet.
