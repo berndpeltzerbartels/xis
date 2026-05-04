@@ -1,15 +1,16 @@
 package one.xis.auth.ipdclient;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import one.xis.auth.JsonWebKey;
 
 import java.util.Collection;
 
 @Data
+@NoArgsConstructor
 public class IDPPublicKeyResponse {
 
-    private final Collection<JsonWebKey> keys;
+    private Collection<JsonWebKey> keys;
 
 }
-
 

@@ -174,9 +174,100 @@ The `save` action requires both `USER` and `DATA_EDITOR`: `USER` from the page a
 
 ## External IDP
 
+External identity providers are supported through OpenID Connect. XIS uses the provider discovery document at
+`/.well-known/openid-configuration`, the authorization code flow, the token endpoint, and the provider JWKS endpoint.
+Other login protocols such as SAML are not supported by this module.
+
+Add `xis-idp-client` in addition to `xis-authentication`, then provide one or more `ExternalIDPConfig` instances.
+
+```java
+package example.security;
+
+import one.xis.auth.idp.ExternalIDPConfig;
+import one.xis.context.Component;
+
+@Component
+public class KeycloakLogin implements ExternalIDPConfig {
+
+    @Override
+    public String getIdpId() {
+        return "keycloak";
+    }
+
+    @Override
+    public String getIdpServerUrl() {
+        return "http://localhost:8080/realms/xis";
+    }
+
+    @Override
+    public String getClientId() {
+        return "xis-app";
+    }
+
+    @Override
+    public String getClientSecret() {
+        return "change-me";
+    }
+}
+```
+
+In a Spring application the same class should be a Spring bean:
+
+```java
+package example.security;
+
+import one.xis.auth.idp.ExternalIDPConfig;
+import org.springframework.stereotype.Component;
+
+@Component
+public class KeycloakLogin implements ExternalIDPConfig {
+    // same methods as above
+}
+```
+
 If the application has exactly one external IDP and no custom `UserInfoService`, XIS redirects directly to that IDP login
 URL. If the application has local authentication or multiple external IDPs, XIS uses `/login.html` so the user can choose
-or use the local login form.
+or use the local login form. The provider must issue JWT access tokens that contain the user id in `sub` and roles in
+`realm_access.roles` or `resource_access.account.roles`.
+
+### Keycloak
+
+For Keycloak, create a realm and a confidential OpenID Connect client. The client must allow this redirect URI:
+
+```text
+http://localhost:8080/xis/auth/callback/keycloak
+```
+
+Use the actual application origin instead of `http://localhost:8080` and the same provider id that `getIdpId()` returns
+instead of `keycloak`.
+
+The Keycloak issuer URL is the realm URL:
+
+```text
+http://localhost:8080/realms/xis
+```
+
+That is the value for `getIdpServerUrl()`. XIS reads the discovery document from:
+
+```text
+http://localhost:8080/realms/xis/.well-known/openid-configuration
+```
+
+For local development, Keycloak can be started in Docker and import a realm on startup. Mount the realm export into
+`/opt/keycloak/data/import` and start Keycloak with `start-dev --import-realm`.
+
+### Google
+
+Google can also be used as an external OpenID Connect provider. Configure the Google OAuth client as a web application,
+add the XIS callback URL as an authorized redirect URI, and use the Google issuer URL:
+
+```text
+https://accounts.google.com
+```
+
+The client id and client secret from Google are returned by `getClientId()` and `getClientSecret()`. Google roles are not
+application roles; for role-based pages and actions, map the authenticated user to application roles in your own user
+management or use a provider that emits role claims in the access token.
 
 XIS as an IDP is a separate advanced setup and uses additional dependencies. Treat it as a different topic from normal
 application authentication.

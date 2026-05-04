@@ -1,6 +1,7 @@
 package one.xis.auth.ipdclient;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonParser;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -9,7 +10,6 @@ import one.xis.http.client.HttpClientException;
 import one.xis.http.client.RestClient;
 import one.xis.idp.IDPResponse;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -137,7 +137,16 @@ class IDPClientImpl implements IDPClient {
                 throw new AuthenticationException("Failed to fetch public keys (JWKS) from IDP. Status: " + response.getStatusCode() + ", Body: " + response.getContent());
             }
 
-            return new IDPPublicKeyResponse(Arrays.asList(gson.fromJson(response.getContent(), JsonWebKey[].class)));
+            var json = JsonParser.parseString(response.getContent());
+            if (json.isJsonObject()) {
+                return gson.fromJson(json, IDPPublicKeyResponse.class);
+            }
+            var keyResponse = new IDPPublicKeyResponse();
+            if (json.isJsonArray()) {
+                keyResponse.setKeys(java.util.Arrays.asList(gson.fromJson(json, JsonWebKey[].class)));
+                return keyResponse;
+            }
+            throw new AuthenticationException("Invalid JWKS response: " + response.getContent());
         } catch (HttpClientException e) {
             throw new AuthenticationException("Failed to fetch public keys (JWKS) from IDP", e);
         }
