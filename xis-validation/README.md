@@ -111,6 +111,19 @@ XIS also ships default messages:
 - `default-messages.properties`
 - `default-messages_en.properties`
 - `default-messages_de.properties`
+- `default-messages_fr.properties`
+- `default-messages_es.properties`
+- `default-messages_pl.properties`
+
+For a request locale such as Polish, messages are resolved in this order:
+
+1. `messages_pl.properties`
+2. `default-messages_pl.properties`
+3. `messages.properties`
+4. `default-messages.properties`
+
+The first matching key wins. Application `messages*.properties` files are the normal extension point; the
+`default-messages*.properties` files are framework fallbacks.
 
 `@LabelKey` can point to a label entry that is substituted into validation messages via the `${label}` placeholder.
 

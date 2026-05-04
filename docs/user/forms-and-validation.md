@@ -350,7 +350,17 @@ user.password=Password
 
 Locale-specific files use the Java language suffix, for example `messages_de.properties`, `messages_fr.properties`,
 `messages_es.properties`, or `messages_pl.properties`. XIS ships default messages for English, German, French, Spanish,
-and Polish. Message templates can use `${label}` and validator-specific parameters such as `${minLength}`.
+and Polish.
+
+For a request locale such as Polish, messages are resolved in this order:
+
+1. `messages_pl.properties`
+2. `default-messages_pl.properties`
+3. `messages.properties`
+4. `default-messages.properties`
+
+The first matching key wins. Application files are the normal place for user-facing text. Default files are framework
+fallbacks. Message templates can use `${label}` and validator-specific parameters such as `${minLength}`.
 
 ## Custom Validators
 
