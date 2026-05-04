@@ -348,10 +348,9 @@ It is also useful for SSO across multiple applications. Several XIS applications
 languages, can use the same XIS IDP as their OpenID Connect provider. The application-specific login logic stays in one
 place, while every client application receives standard access, refresh, and ID tokens.
 
-Another reason is token normalization. The IDP application can decide how users are authenticated and which claims are
-issued. Client applications then see one predictable token format from the XIS IDP. For example, an organization could
-centralize external identity checks in the IDP application and expose application roles through the XIS-issued access
-token.
+Another reason is token normalization. The IDP application decides how users are authenticated and which claims are
+issued. Client applications then see one predictable token format from the XIS IDP instead of having to know the
+application-specific account model behind it.
 
 To implement a XIS IDP, add `xis-idp-server` and provide an `IDPService`. The service is responsible for:
 
@@ -367,3 +366,18 @@ configure the XIS IDP like any other external OpenID Connect provider by using `
 The built-in IDP login flow is still a XIS login flow backed by `IDPService`. If the IDP application needs a more complex
 interactive process, such as multi-step registration or manual account approval, model that process in the IDP
 application and allow credential validation only after the account is ready.
+
+### XIS IDP And Upstream Providers
+
+The current `xis-idp-server` module is an OpenID Connect provider, but it is not a built-in OpenID Connect broker. It
+does not automatically show upstream provider links on `/idp/login.html`, redirect to Google or Keycloak from the IDP
+login page, handle an upstream callback inside the IDP, and then issue a XIS token for the downstream application.
+
+The external-provider support documented above belongs to applications that use `xis-authentication` together with
+`xis-idp-client`. In that setup the application itself redirects to an external OpenID Connect provider and processes
+the callback at `/xis/auth/callback/{providerId}`.
+
+XIS as IDP can still be the right place for a later broker design: the IDP could authenticate against one or more
+upstream OpenID Connect providers, map the external identity to its own account and approval model, and then issue its
+own tokens to client applications. That requires additional IDP-side code for provider selection, upstream callback
+handling, state mapping, and user/claim mapping. It is therefore not documented as a ready-to-use feature yet.
