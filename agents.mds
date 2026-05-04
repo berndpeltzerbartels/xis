@@ -30,6 +30,25 @@ When documenting XIS template behavior, verify the current runtime sources befor
 Use the old documentation app for editorial structure and examples, but use these runtime files to confirm what actually
 exists.
 
+## Template Completion Rule
+
+Template behavior is only really done when all three layers agree:
+
+- runtime code supports the behavior
+- integration tests cover what the Java action/model side receives or renders
+- `docs/user/*` explains the public behavior with copyable examples
+
+For template features that exist in both forms, always think in pairs:
+
+- attribute syntax, for example `<input xis:binding="name">`
+- element syntax, for example `<xis:input binding="name">`
+
+Both forms are worth testing because `DomNormalizer.js` can break one while the other still works.
+
+For form controls, tests should assert what reaches the `@Action` method through `@FormData`, not merely that a DOM value
+changed or a request-like payload was assembled. Repeated bindings are intentional: multiple controls with the same
+binding can submit multiple values into a Java collection.
+
 ## Example Discipline
 
 Documentation examples are part of the public API.

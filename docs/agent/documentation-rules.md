@@ -30,6 +30,8 @@ Do not document a tag, attribute, or EL function as stable only because it appea
 - Prefer adding copyable examples over adding prose.
 - Keep examples realistic and small.
 - Include both Java and HTML when documenting page, frontlet, action, form, or validation behavior.
+- For template features with attribute and element syntax, document both and test both when the behavior is public.
+- For form controls, tests should check the object received by the Java `@Action` method through `@FormData`.
 - Do not make the website a separate manual documentation source.
 - If behavior is uncertain, inspect source and tests before documenting it as stable.
 - If no test exists for a public example, leave the example useful anyway and consider adding a test next.
