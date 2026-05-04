@@ -4,9 +4,13 @@ import one.xis.context.IntegrationTestContext;
 import one.xis.test.dom.TextareaElement;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class TextareaPageTest {
@@ -38,11 +42,12 @@ class TextareaPageTest {
         var liError = client.getDocument().getElementByTagName("li");
         assertThat(liError.getInnerHTML()).contains("Benutzerdefinierte globale Pflichtfeldmeldung");
 
-        assertThat(client.getDocument().getElementById("fieldMessage").getInnerText()).isEqualTo("Benutzerdefinierte Pflichtfeldmeldung");
+        assertThat(client.getDocument().getElementById("fieldMessage").getInnerText())
+                .isEqualTo("Benutzerdefinierte Pflichtfeldmeldung");
     }
 
     @Test
-    void incompatibleValueMessageIsShown() {
+    void textareaValueIsSubmittedToAction() {
         var initialModel = new TextareaFormModel();
         when(service.getTextareaFormModel()).thenReturn(initialModel);
 
@@ -50,11 +55,12 @@ class TextareaPageTest {
         var textarea = (TextareaElement) client.getDocument().getElementById("theTextarea");
         var submitButton = client.getDocument().getElementById("submitButton");
 
-        textarea.setValue("\u0000\u0001"); // ungültige Eingabe
+        textarea.setValue("Submitted text");
         submitButton.click();
 
-        var liError = client.getDocument().getElementByTagName("li");
-        assertThat(liError.getInnerHTML()).contains("Benutzerdefinierte globale Pflichtfeldmeldung");
+        var formCaptor = ArgumentCaptor.forClass(TextareaFormModel.class);
+        verify(service).saveTextareaFormModel(formCaptor.capture());
+        assertThat(formCaptor.getValue().getText()).isEqualTo("Submitted text");
     }
 
     @Test
@@ -71,5 +77,6 @@ class TextareaPageTest {
 
         var liError = client.getDocument().getElementByTagName("li");
         assertThat(liError.getInnerHTML()).contains("Benutzerdefinierte globale Pflichtfeldmeldung");
+        verify(service, never()).saveTextareaFormModel(any());
     }
 }

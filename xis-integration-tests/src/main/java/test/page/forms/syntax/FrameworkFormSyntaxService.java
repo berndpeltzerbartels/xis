@@ -1,5 +1,7 @@
 package test.page.forms.syntax;
 
+import java.util.ArrayList;
+
 class FrameworkFormSyntaxService {
 
     private final FrameworkFormSyntaxModel form = new FrameworkFormSyntaxModel();
@@ -8,9 +10,10 @@ class FrameworkFormSyntaxService {
     FrameworkFormSyntaxModel form() {
         form.setName("Original");
         form.setDescription("Existing description");
-        form.setCategoryId(1);
+        form.setCategoryId(0);
         form.setActive(false);
         form.setStatus(null);
+        form.setChoices(new ArrayList<>());
         return form;
     }
 

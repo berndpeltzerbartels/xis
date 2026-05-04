@@ -114,6 +114,11 @@ class HandlerBuilder {
                     handler = this.createInputHandler(element);
                 }
                 break;
+            case 'textarea':
+                if (element.getAttribute('xis:binding')) {
+                    handler = new InputTagHandler(element);
+                }
+                break;
             case 'select':
                 if (element.getAttribute('xis:binding')) {
                     handler = this.createSelectHandler(element);

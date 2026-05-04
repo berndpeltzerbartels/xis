@@ -11,6 +11,8 @@
         <option xis:repeat="category:categories" value="${category.id}">${category.label}</option>
     </xis:select>
     <xis:checkbox binding="active" id="active"/>
+    <xis:checkbox binding="choices" value="alpha" id="choice-alpha"/>
+    <xis:checkbox binding="choices" value="beta" id="choice-beta"/>
     <xis:radio binding="status" value="DRAFT" name="status" id="draft"/>
     <xis:radio binding="status" value="PUBLISHED" name="status" id="published"/>
     <xis:submit action="save" id="save">Save</xis:submit>

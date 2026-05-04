@@ -192,15 +192,22 @@ Includes are for markup reuse. Use frontlets when the fragment needs its own con
 
 ## Forms
 
-Use `xis:binding` on a form to load and submit form data.
+Use `xis:binding` on a form to load and submit form data. The standard HTML controls and the `xis:*` element syntax
+below are equivalent. Prefer the attribute syntax when you want good previews in HTML design tools; prefer the element
+syntax when you want stricter XIS-specific markup.
 
 ```html
 <form xis:binding="product">
     <input type="text" xis:binding="name"/>
     <textarea xis:binding="description"></textarea>
-    <select xis:binding="category">
+    <select xis:binding="categoryId">
         <option value="${category.id}" xis:repeat="category:categories">${category.name}</option>
     </select>
+    <input type="checkbox" xis:binding="active"/>
+    <input type="checkbox" xis:binding="tags" value="new"/>
+    <input type="checkbox" xis:binding="tags" value="sale"/>
+    <input type="radio" xis:binding="status" name="status" value="DRAFT"/>
+    <input type="radio" xis:binding="status" name="status" value="PUBLISHED"/>
     <button xis:action="save">Save</button>
 </form>
 ```
@@ -211,25 +218,48 @@ Element syntax:
 <xis:form binding="product">
     <xis:input type="text" binding="name"/>
     <xis:textarea binding="description"/>
-    <xis:select binding="category">
+    <xis:select binding="categoryId">
         <option value="${category.id}" xis:repeat="category:categories">${category.name}</option>
     </xis:select>
+    <xis:checkbox binding="active"/>
+    <xis:checkbox binding="tags" value="new"/>
+    <xis:checkbox binding="tags" value="sale"/>
+    <xis:radio binding="status" name="status" value="DRAFT"/>
+    <xis:radio binding="status" name="status" value="PUBLISHED"/>
     <xis:submit action="save">Save</xis:submit>
 </xis:form>
 ```
 
-Checkbox and radio fields are ordinary form controls with `xis:binding`:
+`xis:submit` starts a form action without requiring a separate `xis:action` attribute. The action receives the submitted
+form object through `@FormData`.
+
+When multiple controls use the same binding, XIS submits all selected values for that binding. Use that for checkbox
+groups or any repeated form value that should arrive as a collection:
 
 ```html
-<input type="checkbox" xis:binding="active"/>
-<input type="radio" xis:binding="status" value="DRAFT"/>
+<input type="checkbox" xis:binding="tags" value="new"/>
+<input type="checkbox" xis:binding="tags" value="sale"/>
 ```
 
-Element syntax exists as a convenience:
+Equivalent element syntax:
 
 ```html
-<xis:checkbox binding="active"/>
-<xis:radio binding="status" value="DRAFT"/>
+<xis:checkbox binding="tags" value="new"/>
+<xis:checkbox binding="tags" value="sale"/>
+```
+
+```java
+public class ProductForm {
+    private List<String> tags;
+
+    public List<String> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<String> tags) {
+        this.tags = tags;
+    }
+}
 ```
 
 ## Validation Messages

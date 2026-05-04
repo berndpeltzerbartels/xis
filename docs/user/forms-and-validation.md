@@ -85,6 +85,18 @@ public Class<?> publish(@FormData("document") DocumentForm document) {
 </form>
 ```
 
+Element syntax:
+
+```html
+<xis:form binding="document">
+    <xis:input type="text" binding="title"/>
+    <xis:textarea binding="content"/>
+
+    <xis:submit action="saveDraft">Save draft</xis:submit>
+    <xis:submit action="publish">Publish</xis:submit>
+</xis:form>
+```
+
 ## Nested Objects and Lists
 
 Use dot notation for nested objects:
@@ -103,6 +115,47 @@ Use indexed notation for lists:
     <input type="number" xis:binding="items[${itemIndex}].quantity"/>
 </div>
 ```
+
+Use repeated bindings when several controls should contribute values to the same Java property. This is common for
+checkbox groups:
+
+```java
+public class ProductForm {
+    private List<String> tags;
+
+    public List<String> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<String> tags) {
+        this.tags = tags;
+    }
+}
+```
+
+```html
+<form xis:binding="product">
+    <input type="checkbox" xis:binding="tags" value="new"/>
+    <input type="checkbox" xis:binding="tags" value="sale"/>
+    <input type="checkbox" xis:binding="tags" value="archived"/>
+
+    <button type="submit" xis:action="save">Save</button>
+</form>
+```
+
+Element syntax:
+
+```html
+<xis:form binding="product">
+    <xis:checkbox binding="tags" value="new"/>
+    <xis:checkbox binding="tags" value="sale"/>
+    <xis:checkbox binding="tags" value="archived"/>
+
+    <xis:submit action="save">Save</xis:submit>
+</xis:form>
+```
+
+If the user selects `new` and `sale`, the action receives both values in `ProductForm.tags`.
 
 ## Validation
 

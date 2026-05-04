@@ -1,5 +1,7 @@
 package test.page.forms.syntax;
 
+import java.util.List;
+
 public class FrameworkFormSyntaxModel {
 
     private String name;
@@ -7,6 +9,7 @@ public class FrameworkFormSyntaxModel {
     private int categoryId;
     private boolean active;
     private String status;
+    private List<String> choices;
 
     public String getName() {
         return name;
@@ -46,5 +49,13 @@ public class FrameworkFormSyntaxModel {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public List<String> getChoices() {
+        return choices;
+    }
+
+    public void setChoices(List<String> choices) {
+        this.choices = choices;
     }
 }

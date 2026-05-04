@@ -7,12 +7,12 @@ import one.xis.Page;
 
 import java.util.List;
 
-@Page("/frameworkFormSyntax.html")
-class FrameworkFormSyntaxPage {
+@Page("/attributeFormSyntax.html")
+class AttributeFormSyntaxPage {
 
     private final FrameworkFormSyntaxService service;
 
-    FrameworkFormSyntaxPage(FrameworkFormSyntaxService service) {
+    AttributeFormSyntaxPage(FrameworkFormSyntaxService service) {
         this.service = service;
     }
 
