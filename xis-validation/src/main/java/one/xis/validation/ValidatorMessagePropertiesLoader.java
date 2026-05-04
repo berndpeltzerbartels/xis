@@ -30,8 +30,8 @@ class ValidatorMessagePropertiesLoader {
     private Properties propertiesForLocale(Locale locale) {
         Properties props = new Properties();
         props.putAll(loadProperties("default-messages"));
-        props.putAll(loadProperties("default-messages_" + locale.getLanguage()));
         props.putAll(loadProperties("messages"));
+        props.putAll(loadProperties("default-messages_" + locale.getLanguage()));
         props.putAll(loadProperties("messages_" + locale.getLanguage()));
         return props;
     }

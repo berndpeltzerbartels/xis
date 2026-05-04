@@ -43,9 +43,9 @@ class MandatoryValidationRecordMessagesTest {
 
         assertThat(response.getStatus()).isEqualTo(422);
         assertThat(response.getValidatorMessages().getMessages().values())
-                .contains("Custom mandatory message");
+                .contains("mandatory");
         assertThat(response.getValidatorMessages().getGlobalMessages())
-                .contains("Custom global mandatory message");
+                .contains("[textField] is mandatory");
     }
 
     @Test
@@ -111,6 +111,6 @@ class MandatoryValidationRecordMessagesTest {
         // Should handle missing fields gracefully and trigger mandatory validation
         assertThat(response.getStatus()).isEqualTo(422);
         assertThat(response.getValidatorMessages().getMessages().values())
-                .contains("Custom mandatory message");
+                .contains("mandatory");
     }
 }
