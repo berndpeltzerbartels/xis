@@ -153,10 +153,10 @@ Embed it:
 <xis:frontlet name="ProductSummaryFrontlet"/>
 ```
 
-or:
+or with a named container:
 
 ```html
-<div xis:frontlet="ProductSummaryFrontlet"></div>
+<div xis:frontlet-container="summary" xis:default-frontlet="ProductSummaryFrontlet"></div>
 ```
 
 Frontlet IDs default to the simple class name. Use an explicit ID if two frontlets would otherwise have the same name:

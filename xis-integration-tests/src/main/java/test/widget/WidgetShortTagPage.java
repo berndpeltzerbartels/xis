@@ -5,7 +5,7 @@ import lombok.Setter;
 import one.xis.ModelData;
 import one.xis.Page;
 
-@Page("/widgetPage.html")
+@Page("/frontletShortTagPage.html")
 @Setter
 @RequiredArgsConstructor
 class WidgetShortTagPage {

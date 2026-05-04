@@ -57,19 +57,30 @@ class HandlerBuilder {
             case 'xis:raw': {
                 // Insert content as HTML (default) or as text if text="true"
                 const isText = element.getAttribute('text') === 'true';
-                const rawContent = Array.from(element.childNodes).map(n => n.nodeType === 3 ? n.nodeValue : n.outerHTML).join('');
+                const rawContent = nodeListToArray(element.childNodes).map(n => {
+                    if (n.nodeType === 3) {
+                        return n.nodeValue;
+                    }
+                    if (n.outerHTML !== undefined) {
+                        return n.outerHTML;
+                    }
+                    if (typeof n.asString === 'function') {
+                        return n.asString();
+                    }
+                    return '';
+                }).join('');
                 if (isText) {
                     // Insert as plain text node
                     const textNode = document.createTextNode(rawContent);
-                    element.parentNode.replaceChild(textNode, element);
+                    const parent = element.parentNode;
+                    parent.insertBefore(textNode, element);
+                    parent.removeChild(element);
                 } else {
                     // Insert as HTML, but keep DOM structure and listeners
                     const parent = element.parentNode;
-                    // Füge alle ChildNodes von <xis:raw> vor dem Element ein
                     while (element.firstChild) {
                         parent.insertBefore(element.firstChild, element);
                     }
-                    // Entferne das <xis:raw>-Element selbst
                     parent.removeChild(element);
                 }
                 return;

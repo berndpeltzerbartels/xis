@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:xis="https://xis.one/xsd">
+<head>
+    <title>Framework Form Syntax</title>
+</head>
+<body>
+<xis:form binding="form" id="form">
+    <xis:input type="text" binding="name" id="name"/>
+    <xis:textarea binding="description" id="description"></xis:textarea>
+    <xis:select binding="categoryId" id="category">
+        <option xis:repeat="category:categories" value="${category.id}">${category.label}</option>
+    </xis:select>
+    <xis:checkbox binding="active" id="active"/>
+    <xis:radio binding="status" value="DRAFT" name="status" id="draft"/>
+    <xis:radio binding="status" value="PUBLISHED" name="status" id="published"/>
+    <xis:submit action="save" id="save">Save</xis:submit>
+</xis:form>
+</body>
+</html>

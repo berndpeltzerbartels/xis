@@ -269,10 +269,10 @@ Short frontlet tag:
 <xis:frontlet name="CartFrontlet"/>
 ```
 
-Attribute syntax:
+Container attribute syntax:
 
 ```html
-<div xis:frontlet="CartFrontlet"></div>
+<div xis:frontlet-container="cart" xis:default-frontlet="CartFrontlet"></div>
 ```
 
 Includes:

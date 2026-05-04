@@ -80,6 +80,7 @@ Element syntax:
 
 ```html
 <xis:a page="/products.html">Products</xis:a>
+<xis:button page="/products.html">Products</xis:button>
 ```
 
 Plain page links and buttons navigate directly. They do not call a server-side action.
@@ -93,10 +94,19 @@ Use `xis:action` to call an `@Action` method.
 <button xis:action="save">Save</button>
 ```
 
+Action links and action buttons are standalone controls. They call an action directly; you do not have to wrap them in a
+`<form>` unless you want to submit form data.
+
 Element syntax for an action link:
 
 ```html
 <xis:action action="save">Save</xis:action>
+```
+
+Element syntax for an action button:
+
+```html
+<xis:button action="save">Save</xis:button>
 ```
 
 `xis:action` is supported on action links and action buttons. Outside a form, the action is a page or frontlet action.
@@ -149,6 +159,10 @@ Element syntax:
 <xis:a frontlet="ProductDetailsFrontlet" target-container="main">
     Details
 </xis:a>
+
+<xis:button frontlet="ProductDetailsFrontlet" target-container="main">
+    Details
+</xis:button>
 ```
 
 Pass frontlet parameters with `xis:parameter`. The target frontlet receives them with `@FrontletParameter`.
@@ -293,11 +307,12 @@ Use `text="true"` to insert the raw content as plain text:
 | Iterate content | `xis:foreach="item:items"` | `<xis:foreach var="item" array="items">` |
 | Repeat element | `xis:repeat="item:items"` | use `<xis:foreach>` around the element |
 | Page link | `<a xis:page="/page.html">` | `<xis:a page="/page.html">` |
-| Page button | `<button xis:page="/page.html">` | none needed |
+| Page button | `<button xis:page="/page.html">` | `<xis:button page="/page.html">` |
 | Action link | `<a xis:action="save">` | `<xis:action action="save">` |
-| Action button | `<button xis:action="save">` | none needed |
+| Action button | `<button xis:action="save">` | `<xis:button action="save">` |
 | Parameter | `<xis:parameter name="id" value="${id}">` | same |
-| Frontlet link | `xis:frontlet="DetailsFrontlet"` | `<xis:a frontlet="DetailsFrontlet">` |
+| Frontlet link | `<a xis:frontlet="DetailsFrontlet">` | `<xis:a frontlet="DetailsFrontlet">` |
+| Frontlet button | `<button xis:frontlet="DetailsFrontlet">` | `<xis:button frontlet="DetailsFrontlet">` |
 | Frontlet container | `xis:frontlet-container="main"` | `<xis:frontlet-container container-id="main">` |
 | Default frontlet | `xis:default-frontlet="ListFrontlet"` | `default-frontlet="ListFrontlet"` |
 | Include | `xis:include="header"` | `<xis:include name="header">` |
@@ -307,7 +322,7 @@ Use `text="true"` to insert the raw content as plain text:
 | Select | `<select xis:binding="category">` | `<xis:select binding="category">` |
 | Checkbox | `<input type="checkbox" xis:binding="active">` | `<xis:checkbox binding="active">` |
 | Radio | `<input type="radio" xis:binding="status">` | `<xis:radio binding="status">` |
-| Submit | `<button xis:action="save">` | `<xis:submit action="save">` |
+| Submit form | `<button xis:action="save">` | `<xis:submit action="save">` |
 | Field message | `xis:message-for="name"` | `<xis:message message-for="name">` |
 | Global messages | none | `<xis:global-messages>` |
 | Error class | `xis:error-class="error"` | none |

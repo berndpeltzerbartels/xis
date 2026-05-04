@@ -19,11 +19,10 @@ class FrontletShortTagTest {
     }
 
     @Test
-    void test() {
+    void frontletShortTagLoadsDefaultFrontlet() {
         testContext.getSingleton(WidgetShortTagPage.class).setWidgetId("SimpleFrontlet");
-        var client = testContext.openPage(WidgetPage.class);
+        var client = testContext.openPage(WidgetShortTagPage.class);
 
-        System.out.println(client.getDocument().asString());
         assertThat(client.getDocument().getElementById("greeting").getInnerText()).isEqualTo("Huhu !");
     }
 }

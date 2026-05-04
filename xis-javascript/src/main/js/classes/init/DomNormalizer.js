@@ -336,7 +336,11 @@ class DomNormalizer {
     }
 
     replaceFrameworkSubmitByHtml(frameworkSubmit) {
-        return this.replaceFrameworkElementByHtml(frameworkSubmit, 'submit');
+        const submit = this.replaceFrameworkElementByHtml(frameworkSubmit, 'button');
+        if (!submit.getAttribute('type')) {
+            submit.setAttribute('type', 'submit');
+        }
+        return submit;
     }
     replaceFrameworkButtonByHtml(frameworkButton) {
         return this.replaceFrameworkElementByHtml(frameworkButton, 'button');
