@@ -12,7 +12,9 @@ import one.xis.context.Component;
 import one.xis.http.ContentType;
 import one.xis.http.RestControllerService;
 import one.xis.server.FrontendService;
+import one.xis.server.LocalUrlHolder;
 
+import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
@@ -28,12 +30,14 @@ public class NettyHttpServerHandler extends SimpleChannelInboundHandler<FullHttp
     private final FrontendService frontendService;
     private final RestControllerService restControllerService;
     private final NettyResourceHandler resourceHandler;
+    private final LocalUrlHolder localUrlHolder;
 
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest nettyRequest) {
         FullHttpResponse response;
         try {
+            assignLocalUrl(nettyRequest);
             response = routeRequest(nettyRequest, ctx);
             writeResponse(ctx, nettyRequest, response);
         } catch (Throwable t) {
@@ -47,6 +51,12 @@ public class NettyHttpServerHandler extends SimpleChannelInboundHandler<FullHttp
             log.error("Request handling failed: {}", t.getMessage(), t);
             FullHttpResponse errorResponse = createInternalServerError(t);
             writeResponse(ctx, nettyRequest, errorResponse);
+        }
+    }
+
+    private void assignLocalUrl(FullHttpRequest nettyRequest) {
+        if (!localUrlHolder.localUrlIsSet()) {
+            localUrlHolder.setLocalUrl(NettyHttpUtils.getLocalUrl(nettyRequest));
         }
     }
 
@@ -69,6 +79,11 @@ public class NettyHttpServerHandler extends SimpleChannelInboundHandler<FullHttp
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+        if (cause instanceof SocketException && "Connection reset".equals(cause.getMessage())) {
+            log.debug("Client connection reset");
+            ctx.close();
+            return;
+        }
         log.error("Uncaught channel exception: {} ", cause.getMessage(), cause);
         ctx.close();
     }

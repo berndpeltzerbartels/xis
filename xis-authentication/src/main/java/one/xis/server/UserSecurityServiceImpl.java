@@ -60,12 +60,14 @@ public class UserSecurityServiceImpl implements UserSecurityService {
     }
 
     private void renewTokensAndUpdateContext(TokenStatus tokenStatus, SecurityAttributes securityAttributes) {
-        String issuer = tokenService.extractIssuer(tokenStatus.getAccessToken());
-        if ("local".equals(issuer)) {
+        try {
             renewLocalTokens(tokenStatus, securityAttributes);
-        } else {
-            renewExternalTokens(tokenStatus, securityAttributes, issuer);
+            return;
+        } catch (InvalidTokenException ignored) {
+            // The refresh token is not signed by the local key; renew through the configured external issuer.
         }
+        String issuer = tokenService.extractIssuer(tokenStatus.getAccessToken());
+        renewExternalTokens(tokenStatus, securityAttributes, issuer);
     }
 
     private void renewLocalTokens(TokenStatus tokenStatus, SecurityAttributes securityAttributes) {
@@ -104,10 +106,12 @@ public class UserSecurityServiceImpl implements UserSecurityService {
     }
 
     private AccessTokenClaims decodeAccessToken(String token) {
-        var issuer = tokenService.extractIssuer(token);
-        if (issuer.equals("local")) {
+        try {
             return localTokenService.decodeAccessToken(token);
+        } catch (InvalidTokenException ignored) {
+            // Token is not signed by the local key; try configured external IDPs below.
         }
+        var issuer = tokenService.extractIssuer(token);
         var externalIdpService = externalIDPServices.getServiceForIssuer(issuer);
         if (externalIdpService == null) {
             throw new InvalidTokenException("No external IDP service found for issuer: " + issuer);
@@ -119,10 +123,12 @@ public class UserSecurityServiceImpl implements UserSecurityService {
 
 
     private RenewTokenClaims decodeRenewToken(String token) {
-        var issuer = tokenService.extractIssuer(token);
-        if (issuer.equals("local")) {
+        try {
             return localTokenService.decodeRenewToken(token);
+        } catch (InvalidTokenException ignored) {
+            // Token is not signed by the local key; try configured external IDPs below.
         }
+        var issuer = tokenService.extractIssuer(token);
         var externalIdpService = externalIDPServices.getServiceForIssuer(issuer);
         if (externalIdpService == null) {
             throw new IllegalStateException("No external IDP service found for issuer: " + issuer);

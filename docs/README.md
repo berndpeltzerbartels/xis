@@ -18,6 +18,7 @@ Read these to build normal XIS applications:
 - [Template syntax](user/templates.md)
 - [Tags and attributes](user/tags-and-attributes.md)
 - [Forms and validation](user/forms-and-validation.md)
+- [Security](user/security.md)
 - [Runtime and dependency model](user/runtime-and-dependencies.md)
 - [Examples and tests](user/examples-and-tests.md)
 

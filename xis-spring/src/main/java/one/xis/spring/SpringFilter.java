@@ -30,6 +30,10 @@ class SpringFilter extends HttpFilter {
 
     @Override
     protected void doFilter(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain chain) throws IOException, ServletException {
+        if (!isInitialized()) {
+            httpServletResponse.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+            return;
+        }
         if (!localUrlHolder.localUrlIsSet()) {
             String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
             localUrlHolder.setLocalUrl(baseUrl);
@@ -54,6 +58,12 @@ class SpringFilter extends HttpFilter {
             commit(response, httpServletResponse);
         }
 
+    }
+
+    private boolean isInitialized() {
+        return frontendService != null
+                && restControllerService != null
+                && localUrlHolder != null;
     }
 
 

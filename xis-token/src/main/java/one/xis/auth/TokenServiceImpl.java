@@ -37,6 +37,7 @@ class TokenServiceImpl implements TokenService {
         Duration renewExpiresIn = Duration.ofMinutes(30);
 
         AccessTokenClaims accessTokenClaims = new AccessTokenClaims();
+        accessTokenClaims.setUserId(userInfo.getUserId());
         accessTokenClaims.setUsername(userInfo.getUserId());
         accessTokenClaims.setJwtId(SecurityUtil.createRandomKey(12));
         accessTokenClaims.setIssuer(issuer);
@@ -153,7 +154,7 @@ class TokenServiceImpl implements TokenService {
                 throw new InvalidTokenException("Invalid signature");
             }
             return claims;
-        } catch (InvalidTokenException e) {
+        } catch (InvalidTokenException | TokenExpiredException e) {
             throw e;
         } catch (Exception e) {
             throw new InvalidTokenException("Failed to decode accessToken", e);

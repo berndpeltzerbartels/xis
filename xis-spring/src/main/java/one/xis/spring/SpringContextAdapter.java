@@ -41,7 +41,7 @@ public class SpringContextAdapter implements BeanPostProcessor, ApplicationConte
     private ApplicationContext applicationContext;
     private final Collection<Object> singletons = new HashSet<>();
 
-    private static final Set<Class<?>> FRAMEWORK_BEAN_CLASSES = ImportedTypes.getImportedTypes();
+    private Set<Class<?>> frameworkBeanClasses;
 
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
@@ -78,7 +78,14 @@ public class SpringContextAdapter implements BeanPostProcessor, ApplicationConte
                 || isTypeForImport(clazz);
     }
 
-    private static boolean isTypeForImport(Class<?> clazz) {
-        return FRAMEWORK_BEAN_CLASSES.stream().anyMatch(c -> c.isAssignableFrom(clazz));
+    private boolean isTypeForImport(Class<?> clazz) {
+        return getFrameworkBeanClasses().stream().anyMatch(c -> c.isAssignableFrom(clazz));
+    }
+
+    private Set<Class<?>> getFrameworkBeanClasses() {
+        if (frameworkBeanClasses == null) {
+            frameworkBeanClasses = ImportedTypes.getImportedTypes();
+        }
+        return frameworkBeanClasses;
     }
 }

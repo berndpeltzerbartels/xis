@@ -94,6 +94,7 @@ The canonical user documentation lives in this repository:
 - [Template syntax](docs/user/templates.md)
 - [Tags and attributes](docs/user/tags-and-attributes.md)
 - [Forms and validation](docs/user/forms-and-validation.md)
+- [Security](docs/user/security.md)
 - [Runtime and dependency model](docs/user/runtime-and-dependencies.md)
 - [Examples and tests](docs/user/examples-and-tests.md)
 - [Advanced topics](docs/user/advanced/README.md)
