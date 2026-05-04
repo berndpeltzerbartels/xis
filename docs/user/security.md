@@ -360,6 +360,95 @@ To implement a XIS IDP, add `xis-idp-server` and provide an `IDPService`. The se
 - registering allowed clients through `IDPClientInfo`
 - validating client secrets
 
+In a Spring application, the service can be a Spring bean. In a XIS Boot application, use a XIS component instead.
+
+```java
+package example.idp;
+
+import one.xis.auth.AccessTokenClaims;
+import one.xis.auth.IDPClientInfo;
+import one.xis.auth.IDPClientInfoImpl;
+import one.xis.auth.IDPService;
+import one.xis.auth.IDPUserInfo;
+import one.xis.auth.IDPUserInfoImpl;
+import one.xis.auth.IDTokenClaims;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+
+@Component
+public class AppIDPService implements IDPService {
+
+    private final Map<String, String> passwords = Map.of("alice", "secret");
+    private final Map<String, IDPClientInfo> clients = Map.of(
+            "orders-app",
+            new IDPClientInfoImpl(
+                    "orders-app",
+                    "orders-secret",
+                    Set.of("http://localhost:8080/xis/auth/callback/xis-idp")
+            )
+    );
+
+    @Override
+    public boolean validateCredentials(String username, String password) {
+        return Objects.equals(passwords.get(username), password);
+    }
+
+    @Override
+    public Optional<IDPUserInfo> userInfo(String userId) {
+        if (!passwords.containsKey(userId)) {
+            return Optional.empty();
+        }
+        return Optional.of(new IDPUserInfoImpl(userId, "orders-app"));
+    }
+
+    @Override
+    public Optional<AccessTokenClaims> accessTokenClaims(String userId) {
+        if (!passwords.containsKey(userId)) {
+            return Optional.empty();
+        }
+        var claims = new AccessTokenClaims();
+        claims.setUsername(userId);
+        claims.setRoles(List.of("USER"));
+        return Optional.of(claims);
+    }
+
+    @Override
+    public Optional<IDTokenClaims> idTokenClaims(String userId) {
+        if (!passwords.containsKey(userId)) {
+            return Optional.empty();
+        }
+        var claims = new IDTokenClaims();
+        claims.setPreferredUsername(userId);
+        return Optional.of(claims);
+    }
+
+    @Override
+    public Optional<IDPClientInfo> findClientInfo(String clientId) {
+        return Optional.ofNullable(clients.get(clientId));
+    }
+
+    @Override
+    public boolean validateClientSecret(String clientId, String clientSecret) {
+        return findClientInfo(clientId)
+                .map(client -> Objects.equals(client.getClientSecret(), clientSecret))
+                .orElse(false);
+    }
+}
+```
+
+`IDPUserInfo` connects the authenticated user to the client application. `IDPClientInfo` registers a client id, client
+secret, and the exact callback URLs that may receive authorization codes. The consuming XIS application uses the matching
+client id, client secret, and callback URL in its `ExternalIDPConfig`.
+
+`accessTokenClaims` and `idTokenClaims` only need to fill the application-specific claims, such as username, display
+name, email, and roles. XIS fills the technical token fields such as `sub`, `iss`, `iat`, `exp`, `nbf`, and `client_id`
+when the token is issued.
+
 The IDP publishes the OpenID Connect discovery document, JWKS, login page, and token endpoint. Client applications then
 configure the XIS IDP like any other external OpenID Connect provider by using `ExternalIDPConfig` and the IDP base URL.
 

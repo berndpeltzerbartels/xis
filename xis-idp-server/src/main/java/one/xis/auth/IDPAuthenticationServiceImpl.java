@@ -90,7 +90,7 @@ class IDPAuthenticationServiceImpl implements IDPAuthenticationService {
             throw new AuthenticationException("Invalid redirect URI: " + request.getRedirectUri() + ". It must start with 'http(s)'.");
         }
         var clientInfo = idpService.findClientInfo(request.getClientId()).orElseThrow(() -> new AuthenticationException("Client not found: " + request.getClientId()));
-        if (!clientInfo.getClientSecret().equals(request.getClientSecret())) {
+        if (!idpService.validateClientSecret(request.getClientId(), request.getClientSecret())) {
             throw new AuthenticationException("Invalid client secret for client: " + request.getClientId());
         }
         if (request.getCode() == null || request.getCode().isEmpty()) {

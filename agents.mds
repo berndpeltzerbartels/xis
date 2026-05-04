@@ -49,6 +49,23 @@ For form controls, tests should assert what reaches the `@Action` method through
 changed or a request-like payload was assembled. Repeated bindings are intentional: multiple controls with the same
 binding can submit multiple values into a Java collection.
 
+## Security Documentation Rules
+
+Security documentation must describe the concrete interfaces users implement, not only the concept. For local
+authentication this means `UserInfoService`. For XIS as an OpenID Connect provider this means `IDPService`, including
+client registration through `IDPClientInfo` and user/client linkage through `IDPUserInfo`.
+
+Keep these module boundaries explicit:
+
+- applications consume external OpenID Connect providers with `xis-authentication` plus `xis-idp-client` and
+  `ExternalIDPConfig`
+- XIS as an OpenID Connect provider uses `xis-idp-server` plus `IDPService`
+- `xis-idp-server` is not an OpenID Connect broker; do not document upstream Google/Keycloak brokering inside the XIS
+  IDP unless the code exists
+
+When documenting XIS as IDP, mention that user code fills application claims while XIS fills technical token fields such
+as `sub`, `iss`, `iat`, `exp`, `nbf`, and `client_id` during token creation.
+
 ## Example Discipline
 
 Documentation examples are part of the public API.
