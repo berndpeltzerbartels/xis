@@ -1,0 +1,15 @@
+<xis:template xmlns:xis="https://xis.one/xsd">
+    <section id="frontlet-one">
+        <div id="frontlet-section">${frontletSection}</div>
+        <div id="frontlet-mode">${frontletMode}</div>
+        <div id="frontlet-message">${frontletMessage}</div>
+        <div id="frontlet-refresh-count">${frontletRefreshCount}</div>
+
+        <button xis:action="frontletPageClass" id="frontlet-page-class">Frontlet page class</button>
+        <button xis:action="frontletPageResponse" id="frontlet-page-response">Frontlet page response</button>
+        <button xis:action="frontletClass" id="frontlet-class">Frontlet class</button>
+        <button xis:action="frontletResponse" id="frontlet-response">Frontlet response</button>
+        <button xis:action="changeSideContainer" xis:target-container="side" id="frontlet-side-container">Frontlet side container</button>
+        <button xis:action="frontletVoid" id="frontlet-void">Frontlet void</button>
+    </section>
+</xis:template>

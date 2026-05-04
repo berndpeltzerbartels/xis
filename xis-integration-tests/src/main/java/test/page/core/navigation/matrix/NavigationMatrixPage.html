@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:xis="https://xis.one/xsd">
+<head>
+    <title>Navigation Matrix</title>
+</head>
+<body>
+<h1>Navigation Matrix</h1>
+<div id="page-section">${section}</div>
+<div id="page-mode">${mode}</div>
+<div id="page-refresh-count">${pageRefreshCount}</div>
+
+<button xis:action="pageClass" id="page-class">Page class</button>
+<button xis:action="pageResponse" id="page-response">Page response</button>
+<button xis:action="pageString" id="page-string">Page string</button>
+<button xis:action="pageVoid" id="page-void">Page void</button>
+<button xis:action="pageFrontletClass" xis:target-container="main" id="page-frontlet-class">Page frontlet class</button>
+<button xis:action="pageFrontletResponse" xis:target-container="main" id="page-frontlet-response">Page frontlet response</button>
+
+<main xis:frontlet-container="main" xis:default-frontlet="NavigationMatrixFrontletOne">
+    <xis:parameter name="message" value="initial"/>
+</main>
+<aside xis:frontlet-container="side" xis:default-frontlet="NavigationMatrixSideInitialFrontlet"></aside>
+</body>
+</html>

@@ -120,6 +120,9 @@ public void deleteProduct(@ActionParameter("productId") long productId) {
 Return types such as `PageResponse` and `FrontletResponse` are only evaluated after a server-side action invocation.
 They are not used by plain page links or frontlet links.
 
+Think about action results by target, not by where the action method lives. A page action can load a page or replace a
+frontlet. A frontlet action can replace a frontlet or navigate the whole page.
+
 ## Form Actions
 
 Forms use `xis:binding` for their data object and `xis:action` on the submit control.
@@ -156,6 +159,8 @@ public Class<?> save(@FormData("product") ProductForm product) {
 
 Use this when the destination page does not need path variables or query parameters.
 
+The action may live on a page or on a frontlet. Returning a page class always navigates the page.
+
 ## Return `PageResponse`
 
 Use `PageResponse` when the target page has path variables or query parameters.
@@ -181,6 +186,20 @@ public PageResponse search(@FormData("search") SearchForm search) {
 ```
 
 `PageResponse` is the explicit, type-oriented way to navigate to a known XIS page.
+
+`PageResponse` can also be returned by a frontlet action. The result is still page navigation:
+
+```java
+@Frontlet
+public class CartFrontlet {
+
+    @Action
+    public PageResponse checkout(@ActionParameter("cartId") long cartId) {
+        return PageResponse.of(CheckoutPage.class, "cartId", cartId)
+                .queryParameter("step", "address");
+    }
+}
+```
 
 ## Return a Page URL
 
@@ -278,6 +297,23 @@ public Class<?> showCreateForm() {
 This updates the current target container. If the frontlet declares `containerId`, XIS can use that metadata to select
 the container.
 
+A page action can also replace a frontlet. In that case, give the triggering element a target container:
+
+```html
+<button xis:action="showDetails" xis:target-container="main">
+    Details
+</button>
+```
+
+```java
+@Action
+public Class<?> showDetails() {
+    return ProductDetailsFrontlet.class;
+}
+```
+
+The `xis:target-container` value must match a frontlet container ID on the current page.
+
 ## Return `FrontletResponse`
 
 Use `FrontletResponse` when you need to pass parameters, choose a container, or reload frontlets.
@@ -313,6 +349,25 @@ public FrontletResponse save(@FormData("product") ProductForm product) {
             .reloadFrontlet("ProductListFrontlet");
 }
 ```
+
+A frontlet action can also update another frontlet container. Use a target container on the action control, or set it in
+the response:
+
+```html
+<button xis:action="showPreview" xis:target-container="preview">
+    Preview
+</button>
+```
+
+```java
+@Action
+public FrontletResponse showPreview(@ActionParameter("productId") long productId) {
+    return FrontletResponse.of(ProductPreviewFrontlet.class, "productId", productId)
+            .targetContainer("preview");
+}
+```
+
+This replaces the frontlet in container `preview`; the frontlet that triggered the action can stay where it is.
 
 ## Deep Linking
 
@@ -361,6 +416,51 @@ public class ProductPage {
 | Load a frontlet into a container from HTML | `xis:frontlet` with `xis:target-container` |
 | Load a frontlet from Java | return frontlet class |
 | Load a frontlet with parameters/container control | return `FrontletResponse` |
+
+## `void` Actions
+
+A `void` action does not mean "nothing changes". It means: stay on the current page or frontlet and refresh the current
+model data.
+
+For page actions, XIS keeps the current URL. Path variables and query parameters from that URL are still available:
+
+```java
+@Page("/products/{category}.html")
+public class ProductPage {
+
+    @Action
+    public void refreshList() {
+        productService.refresh();
+    }
+
+    @ModelData
+    public List<Product> products(
+            @PathVariable("category") String category,
+            @QueryParameter("sort") String sort) {
+        return productService.find(category, sort);
+    }
+}
+```
+
+For frontlet actions, XIS keeps the current page URL and the current frontlet parameters:
+
+```java
+@Frontlet
+public class ProductListFrontlet {
+
+    @Action
+    public void refresh() {
+    }
+
+    @ModelData
+    public List<Product> products(
+            @PathVariable("category") String category,
+            @QueryParameter("sort") String sort,
+            @FrontletParameter("filter") String filter) {
+        return productService.find(category, sort, filter);
+    }
+}
+```
 
 Internal authentication or authorization flows may use lower-level redirect responses. Application code should normally
 use the navigation types above.

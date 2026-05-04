@@ -59,10 +59,10 @@ class ActionLinkHandler extends TagHandler {
         } else {
             const frontletContainerHandler = this.findParentWidgetContainerHandler();
             const targetContainerHandler = this.targetContainerId ? app.tagHandlers.getHandler(this.frontletContainers.findContainer(this.targetContainerId)) : null;
-            if (frontletContainerHandler || targetContainerHandler) {
+            if (frontletContainerHandler) {
                 this.frontletAction(frontletContainerHandler, targetContainerHandler);
             } else {
-                this.pageAction();
+                this.pageAction(targetContainerHandler);
             }
         }
     }
@@ -80,8 +80,9 @@ class ActionLinkHandler extends TagHandler {
      * @private
      * @returns {Promise<void>}
      */
-    pageAction() {
-        return app.pageController.submitPageLinkAction(this.action, this.actionParameters);
+    pageAction(targetContainerHandler) {
+        return this.client.pageLinkAction(app.pageController.resolvedURL, this.action, this.actionParameters)
+            .then(response => this.handleActionResponse(response, targetContainerHandler));
     }
 
 
