@@ -456,12 +456,12 @@ The built-in IDP login flow is still a XIS login flow backed by `IDPService`. If
 interactive process, such as multi-step registration or manual account approval, model that process in the IDP
 application and allow credential validation only after the account is ready.
 
-### XIS IDP And Upstream Providers
+### No Built-In Provider Brokering
 
-The current `xis-idp-server` module is an OpenID Connect provider, but it is not an OpenID Connect broker. It does not
-show upstream provider links on `/idp/login.html`, redirect to Google or Keycloak from the IDP login page, handle an
-upstream callback inside the IDP, and then issue a XIS token for the downstream application.
+`xis-idp-server` is the provider that client applications log in to. It does not log in to another provider on behalf of
+the user. In other words, the built-in IDP login page only uses `IDPService`; it does not offer buttons such as "Sign in
+with Google" or "Sign in with Keycloak".
 
-The external-provider support documented above belongs to applications that use `xis-authentication` together with
-`xis-idp-client`. In that setup the application itself redirects to an external OpenID Connect provider and processes
-the callback at `/xis/auth/callback/{providerId}`.
+If an application should use Google, Keycloak, or another external OpenID Connect provider directly, configure that
+application with `xis-authentication`, `xis-idp-client`, and `ExternalIDPConfig`. That application then redirects to the
+external provider and receives the callback at `/xis/auth/callback/{providerId}`.
