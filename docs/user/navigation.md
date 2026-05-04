@@ -155,6 +155,39 @@ Framework element syntax is also available for form controls. It normalizes to n
 
 The action method can then return `void`, a page class, `PageResponse`, a frontlet class, or `FrontletResponse`.
 
+Form actions follow the same navigation rules as action links and action buttons. Validation is the important
+difference: XIS validates the submitted `@FormData` object before the action method runs. If validation fails, the action
+method is not called, the user stays in the current page or frontlet, and the submitted values plus validation messages
+remain available in the form.
+
+After a valid submit, a page form can navigate to a detail page:
+
+```java
+import one.xis.Action;
+import one.xis.FormData;
+import one.xis.PageResponse;
+
+@Action
+public PageResponse save(@FormData("product") ProductForm product) {
+    productService.save(product);
+    return PageResponse.of(ProductDetailsPage.class, "id", product.id());
+}
+```
+
+A form inside a frontlet can also replace the current frontlet with a detail frontlet:
+
+```java
+import one.xis.Action;
+import one.xis.FormData;
+import one.xis.FrontletResponse;
+
+@Action
+public FrontletResponse save(@FormData("product") ProductForm product) {
+    productService.save(product);
+    return FrontletResponse.of(ProductDetailsFrontlet.class, "id", product.id());
+}
+```
+
 ## Return a Page Class
 
 An action can return a page controller class.

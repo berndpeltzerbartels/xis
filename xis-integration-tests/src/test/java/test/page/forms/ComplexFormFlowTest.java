@@ -5,6 +5,7 @@ import one.xis.FormData;
 import one.xis.HtmlFile;
 import one.xis.ModelData;
 import one.xis.Page;
+import one.xis.PageResponse;
 import one.xis.PathVariable;
 import one.xis.QueryParameter;
 import one.xis.context.IntegrationTestContext;
@@ -27,6 +28,7 @@ class ComplexFormFlowTest {
         context = IntegrationTestContext.builder()
                 .withSingleton(service)
                 .withSingleton(ProductEditPage.class)
+                .withSingleton(ProductDetailsPage.class)
                 .build();
     }
 
@@ -60,7 +62,8 @@ class ComplexFormFlowTest {
         assertThat(service.savedTenant).isEqualTo("acme");
         assertThat(service.savedId).isEqualTo(42);
         assertThat(service.savedMode).isEqualTo("quick");
-        assertThat(document.getElementById("saved-context").getInnerText()).isEqualTo("acme:42:quick:Espresso:21");
+        assertThat(document.getElementByTagName("title").getInnerText()).isEqualTo("Product details");
+        assertThat(document.getElementById("detail-context").getInnerText()).isEqualTo("acme:42:quick:Espresso:21");
     }
 
     record ProductForm(
@@ -84,6 +87,10 @@ class ComplexFormFlowTest {
 
         ProductForm load(String tenant, Integer id, String mode) {
             return new ProductForm(id, "Coffee", "12");
+        }
+
+        ProductForm get(String tenant, Integer id, String mode) {
+            return saved != null && saved.id().equals(id) ? saved : load(tenant, id, mode);
         }
 
         void save(String tenant, Integer id, String mode, ProductForm form) {
@@ -126,12 +133,34 @@ class ComplexFormFlowTest {
         }
 
         @Action
-        void save(@PathVariable("tenant") String tenant,
-                  @PathVariable("id") Integer id,
-                  @QueryParameter("mode") String mode,
-                  @FormData("product") ProductForm product) {
+        PageResponse save(@PathVariable("tenant") String tenant,
+                          @PathVariable("id") Integer id,
+                          @QueryParameter("mode") String mode,
+                          @FormData("product") ProductForm product) {
             service.save(tenant, id, mode, product);
             savedContext = tenant + ":" + id + ":" + mode + ":" + product.name() + ":" + product.stock();
+            return PageResponse.of(ProductDetailsPage.class, "tenant", tenant)
+                    .pathVariable("id", id)
+                    .queryParameter("mode", mode);
+        }
+    }
+
+    @Page("/shops/{tenant}/products/{id}/details.html")
+    @HtmlFile("/ComplexFormFlowDetailsPage.html")
+    static class ProductDetailsPage {
+
+        private final ProductService service;
+
+        ProductDetailsPage(ProductService service) {
+            this.service = service;
+        }
+
+        @ModelData("detailContext")
+        String detailContext(@PathVariable("tenant") String tenant,
+                             @PathVariable("id") Integer id,
+                             @QueryParameter("mode") String mode) {
+            var product = service.get(tenant, id, mode);
+            return tenant + ":" + product.id() + ":" + mode + ":" + product.name() + ":" + product.stock();
         }
     }
 }

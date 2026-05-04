@@ -1,0 +1,16 @@
+<div xmlns:xis="http://xis.one/schema">
+    <form xis:binding="product">
+        <input type="hidden" xis:binding="id" id="frontlet-id"/>
+
+        <label for="frontlet-name">Name</label>
+        <input type="text" xis:binding="name" id="frontlet-name"/>
+        <span xis:message-for="name" id="frontlet-name-message"></span>
+
+        <label for="frontlet-stock">Stock</label>
+        <input type="text" xis:binding="stock" id="frontlet-stock"/>
+        <span xis:message-for="stock" id="frontlet-stock-message"></span>
+
+        <button xis:action="save" id="frontlet-save">Save</button>
+        <xis:global-messages/>
+    </form>
+</div>
