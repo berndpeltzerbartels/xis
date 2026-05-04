@@ -99,6 +99,21 @@ The login controller is part of `xis-authentication`, but the HTML template is i
 The form binding, field bindings, hidden `state`, and `login` action name belong to the framework contract. The
 surrounding markup, labels, layout, CSS classes, and text are application design.
 
+If the application also offers external OpenID Connect providers, the login controller exposes `externalIdpIds` and
+`externalIdpUrls`. A custom template can render them next to the local login form:
+
+```html
+<div xis:repeat="idpId:externalIdpIds">
+    <a href="${externalIdpUrls[idpId]}">${idpId}</a>
+</div>
+```
+
+With exactly one external provider and no local user service, XIS redirects directly to that provider. With multiple
+providers, or with local login plus providers, XIS opens `/login.html` so the user can choose.
+
+`UserInfoService` is optional when the application only uses external providers. XIS provides a default placeholder that
+does not validate local credentials and does not render the local login form.
+
 ## Page And Action Roles
 
 Use `@Roles` on pages, frontlets, and action methods.
@@ -230,6 +245,14 @@ URL. If the application has local authentication or multiple external IDPs, XIS 
 or use the local login form. The provider must issue JWT access tokens that contain the user id in `sub` and roles in
 `realm_access.roles` or `resource_access.account.roles`.
 
+The redirect behavior is:
+
+- local login only: `/login.html`
+- local login and one external provider: `/login.html`
+- local login and multiple external providers: `/login.html`
+- one external provider and no local login: direct redirect to that provider
+- multiple external providers and no local login: `/login.html`
+
 ### Keycloak
 
 For Keycloak, create a realm and a confidential OpenID Connect client. The client must allow this redirect URI:
@@ -256,6 +279,9 @@ http://localhost:8080/realms/xis/.well-known/openid-configuration
 For local development, Keycloak can be started in Docker and import a realm on startup. Mount the realm export into
 `/opt/keycloak/data/import` and start Keycloak with `start-dev --import-realm`.
 
+No Keycloak-specific XIS artifact is needed. Keycloak publishes the standard OpenID Connect discovery document, so
+`ExternalIDPConfig` is enough.
+
 ### Google
 
 Google can also be used as an external OpenID Connect provider. Configure the Google OAuth client as a web application,
@@ -268,6 +294,8 @@ https://accounts.google.com
 The client id and client secret from Google are returned by `getClientId()` and `getClientSecret()`. Google roles are not
 application roles; for role-based pages and actions, map the authenticated user to application roles in your own user
 management or use a provider that emits role claims in the access token.
+
+No Google-specific XIS artifact is needed. Google also uses the standard OpenID Connect discovery document.
 
 XIS as an IDP is a separate advanced setup and uses additional dependencies. Treat it as a different topic from normal
 application authentication.

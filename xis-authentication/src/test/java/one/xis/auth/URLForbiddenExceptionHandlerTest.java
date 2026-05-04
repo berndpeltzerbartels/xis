@@ -29,6 +29,37 @@ class URLForbiddenExceptionHandlerTest {
     }
 
     @Test
+    void loginPageIsUsedWhenLocalLoginAndSingleExternalIdpExist() {
+        var appContext = mock(AppContext.class);
+        var userInfoService = mock(UserInfoService.class);
+        when(appContext.getOptionalSingleton(UserInfoService.class)).thenReturn(Optional.of(userInfoService));
+
+        var externalIdp = externalIdp("https://idp.example/login");
+        var handler = new URLForbiddenExceptionHandler(externalIdps(externalIdp), appContext);
+
+        var response = handler.handleException(null, new Object[0], new URLForbiddenException("/protected.html"));
+
+        assertThat(response.getStatusCode()).isEqualTo(401);
+        assertThat(response.getHeader("Location")).isEqualTo("/login.html?redirect_uri=%2Fprotected.html");
+    }
+
+    @Test
+    void loginPageIsUsedWhenLocalLoginAndMultipleExternalIdpsExist() {
+        var appContext = mock(AppContext.class);
+        var userInfoService = mock(UserInfoService.class);
+        when(appContext.getOptionalSingleton(UserInfoService.class)).thenReturn(Optional.of(userInfoService));
+
+        var firstIdp = externalIdp("https://first-idp.example/login");
+        var secondIdp = externalIdp("https://second-idp.example/login");
+        var handler = new URLForbiddenExceptionHandler(externalIdps(firstIdp, secondIdp), appContext);
+
+        var response = handler.handleException(null, new Object[0], new URLForbiddenException("/protected.html"));
+
+        assertThat(response.getStatusCode()).isEqualTo(401);
+        assertThat(response.getHeader("Location")).isEqualTo("/login.html?redirect_uri=%2Fprotected.html");
+    }
+
+    @Test
     void singleExternalIdpIsUsedDirectlyWhenNoLocalUserInfoServiceExists() {
         var appContext = mock(AppContext.class);
         when(appContext.getOptionalSingleton(UserInfoService.class)).thenReturn(Optional.empty());
@@ -40,6 +71,21 @@ class URLForbiddenExceptionHandlerTest {
 
         assertThat(response.getStatusCode()).isEqualTo(401);
         assertThat(response.getHeader("Location")).isEqualTo("https://idp.example/login?redirect=%2Fprotected.html");
+    }
+
+    @Test
+    void loginPageIsUsedWhenMultipleExternalIdpsExist() {
+        var appContext = mock(AppContext.class);
+        when(appContext.getOptionalSingleton(UserInfoService.class)).thenReturn(Optional.empty());
+
+        var firstIdp = externalIdp("https://first-idp.example/login");
+        var secondIdp = externalIdp("https://second-idp.example/login");
+        var handler = new URLForbiddenExceptionHandler(externalIdps(firstIdp, secondIdp), appContext);
+
+        var response = handler.handleException(null, new Object[0], new URLForbiddenException("/protected.html?mode=edit"));
+
+        assertThat(response.getStatusCode()).isEqualTo(401);
+        assertThat(response.getHeader("Location")).isEqualTo("/login.html?redirect_uri=%2Fprotected.html%3Fmode%3Dedit");
     }
 
     private static ExternalIDPServices noExternalIdps() {
