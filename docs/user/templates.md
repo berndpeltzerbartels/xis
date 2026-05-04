@@ -23,6 +23,49 @@ Expressions use `${...}`.
 ```
 
 Expressions can access model data, loop variables, action parameters, and selected framework context values.
+They can be used in text content and in ordinary HTML attributes. XIS does not give HTML attributes such as `data-id`
+special meaning; it only replaces the `${...}` expression in the attribute value.
+
+```html
+<li data-id="${product.id}">${product.name}</li>
+```
+
+The documented public EL surface is:
+
+- literals: strings, numbers, booleans, `null`, and `undefined`
+- model values, loop variables, action parameters, and selected framework context values
+- property and index access with dot and bracket syntax
+- arithmetic, comparison, boolean operators, parentheses, and ternary expressions
+- built-in EL functions listed below, including nested function calls
+- text interpolation and attribute interpolation with `${...}`
+
+### Property and Index Access
+
+Use dot notation for ordinary Java bean properties and bracket notation when the key or index is dynamic.
+
+```html
+<p>${user.name}</p>
+<p>${user['name']}</p>
+<p>${items[1]}</p>
+<p>${items[index + 1]}</p>
+<p>${lookup[selectedKey]}</p>
+<p>${lookup[prefix + '_item'].label}</p>
+```
+
+Bracket expressions are useful when a map key is built from other model values. The result can be chained with normal
+property access, as in `${lookup[prefix + '_item'].label}`.
+
+### Operators and Conditions
+
+Template expressions support arithmetic, comparison, boolean operators, parentheses, and ternary expressions.
+
+```html
+<p>${price * quantity}</p>
+<p>${count > 0 ? count + " items" : "No items"}</p>
+<section xis:if="items[1] == 'beta' && notEmpty(user.name)">
+    Content
+</section>
+```
 
 Useful examples:
 
@@ -31,6 +74,13 @@ Useful examples:
 <p>${default(user.email, "No email")}</p>
 <p>${round(order.total, 2)}</p>
 <p>${formatDate(order.createdAt, "en-US")}</p>
+```
+
+Function parameters can be expressions, and function calls can be nested:
+
+```html
+<p>${defaultValue(user.displayName, toUpperCase(user.login))}</p>
+<p>${join(split(tagsText, ","), " / ")}</p>
 ```
 
 Keep complex business rules in Java `@ModelData` methods. Use template expressions for presentation logic.
@@ -124,12 +174,14 @@ Use `xis:foreach` to repeat the content of an element. Attribute syntax:
 </ul>
 ```
 
+In attribute syntax, the content of the host element is repeated. The host element itself is not repeated.
+
 Element syntax:
 
 ```html
 <ul>
     <xis:foreach var="product" array="${products}">
-        <li>${productIndex + 1}. ${product.name}</li>
+        <li data-id="${product.id}">${productIndex + 1}. ${product.name}</li>
     </xis:foreach>
 </ul>
 ```
@@ -137,7 +189,7 @@ Element syntax:
 XIS adds an index variable by appending `Index` to the loop variable name. In the example above, the index is
 `productIndex`.
 
-Use `xis:repeat` to repeat the element itself:
+Use element syntax or `xis:repeat` when attributes of the repeated element depend on the loop item:
 
 ```html
 <li xis:repeat="product:${products}">

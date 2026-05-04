@@ -84,6 +84,7 @@ class HandlerBuilder {
                 this.tagHandlers.mapHandler(element, handler);
                 return; // Do not evaluate child nodes here!
             case 'xis:widget-container':
+            case 'xis:frontlet-container':
                 handler = this.createFrontletContainerHandler(element);
                 this.tagHandlers.mapHandler(element, handler);
                 parentHandler.addDescendantHandler(handler);
@@ -118,12 +119,12 @@ class HandlerBuilder {
                 }
                 break;
             case 'button':
-                  if (element.getAttribute('xis:page') || element.getAttribute('xis:widget') || element.getAttribute('xis:action')) {
+                  if (element.getAttribute('xis:page') || element.getAttribute('xis:widget') || element.getAttribute('xis:frontlet') || element.getAttribute('xis:action')) {
                     handler = this.createButtonHandler(element);
                 }
                 break;
             case 'a':
-                if (element.getAttribute('xis:page') || element.getAttribute('xis:widget') || element.getAttribute('xis:action')) {
+                if (element.getAttribute('xis:page') || element.getAttribute('xis:widget') || element.getAttribute('xis:frontlet') || element.getAttribute('xis:action')) {
                     handler = this.createLinkHandler(element);
                 }
                 break;
@@ -236,7 +237,7 @@ class HandlerBuilder {
 
     /**
      * Creates a link handler depending on the attribute.
-     * <a xis:page..> or <a xis:widget..> or <a xis:action..>
+     * <a xis:page..> or <a xis:frontlet..> or <a xis:action..>
      * @private
      * @param {Element} element
      * @returns {TagHandler}
@@ -246,7 +247,7 @@ class HandlerBuilder {
         if (element.getAttribute('xis:page')) {
             handler = new PageLinkHandler(element);
         }
-        if (element.getAttribute('xis:widget')) {
+        if (element.getAttribute('xis:widget') || element.getAttribute('xis:frontlet')) {
             handler = new FrontletLinkHandler(element, this.frontletContainers);
         } else if (element.getAttribute('xis:action')) {
             handler = new ActionLinkHandler(element, this.client, this.frontletContainers);
@@ -285,7 +286,7 @@ class HandlerBuilder {
         if (element.getAttribute('xis:page')) {
             return new PageButtonHandler(element);
         }
-        if (element.getAttribute('xis:widget')) {
+        if (element.getAttribute('xis:widget') || element.getAttribute('xis:frontlet')) {
             return new FrontletButtonHandler(element, this.frontletContainers);
         }
     }

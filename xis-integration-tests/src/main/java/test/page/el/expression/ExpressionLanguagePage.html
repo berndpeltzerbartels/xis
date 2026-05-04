@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:xis="http://xis.one/html">
+<head>
+    <title>ExpressionLanguagePage</title>
+</head>
+<body>
+<div id="computed-key-text">${lookup[prefix + '_item'].label}</div>
+<div id="computed-key-attribute" data-label="${lookup[prefix + '_item'].label}">attribute</div>
+<div id="comparison-condition" xis:if="items[1] == 'beta' && notEmpty(lookup[prefix + '_item'].label)">comparison</div>
+<xis:if condition="enabled ? true : false"><span id="tag-if-result">tag-if</span></xis:if>
+<div id="default-value">${defaultValue(emptyValue, 'fallback')}</div>
+<div id="joined-items">${join(items, ', ')}</div>
+<ul id="tag-foreach">
+    <xis:foreach var="product" array="products">
+        <li data-id="${product.id}">${product.label}</li>
+    </xis:foreach>
+</ul>
+<ul id="attribute-foreach">
+    <li xis:foreach="item:items">${item}</li>
+</ul>
+</body>
+</html>

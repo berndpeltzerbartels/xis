@@ -30,7 +30,8 @@ class FrontletContainerHandler extends TagHandler {
         this.frontletInstance = undefined;
         this.containerId = undefined;
         this.containerIdExpression = this.variableTextContentFromAttribute('container-id');
-        this.defaultWidgetExpression = this.variableTextContentFromAttribute('default-widget');
+        this.defaultWidgetExpression = this.variableTextContentFromAttribute('default-frontlet')
+                || this.variableTextContentFromAttribute('default-widget');
         this.type = 'widget-container-handler';
         this.scrollToTop = tag.getAttribute('scroll-to-top') === 'true';
         this.buffer = undefined;

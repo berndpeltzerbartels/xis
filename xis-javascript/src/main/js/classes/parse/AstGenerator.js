@@ -57,7 +57,9 @@ class AstGenerator {
                         // Function call
                         row.push(this.parseFunctionCall());
                     } else if (this.nextToken().type === OPENING_SQUARE_BRACKET) {
-                        row.push(this.createPropertyVariable());
+                        let variable = this.createPropertyVariable();
+                        variable = this.parsePropertyOrMethodChain(variable);
+                        row.push(variable);
                     } else {
                         // Variable - might have method calls or property access after it
                         const identifierToken = this.consumeToken(IDENTIFIER);
@@ -388,8 +390,11 @@ class AstGenerator {
                 result = new MethodCall(result, propertyOrMethodName, parameters);
             } else {
                 // It's property access - create a new Variable with compound path
-                const basePath = result.type === 'VARIABLE' ? result.path : result.toString();
-                result = this.createVariableByPath(basePath + '.' + propertyOrMethodName);
+                if (result.type === 'VARIABLE') {
+                    result = this.createVariableByPath(result.path + '.' + propertyOrMethodName);
+                } else {
+                    result = new PropertyAccess(result, propertyOrMethodName);
+                }
             }
         }
 
@@ -781,6 +786,42 @@ class Variable {
      */
     toString() {
         return this.path;
+    }
+}
+
+/**
+ * @class PropertyAccess
+ * @description Represents property access on an arbitrary expression result.
+ */
+class PropertyAccess {
+    /**
+     * @param {object} objectExpression
+     * @param {string} propertyName
+     */
+    constructor(objectExpression, propertyName) {
+        this.type = 'PROPERTY_ACCESS';
+        this.object = objectExpression;
+        this.propertyName = propertyName;
+        this.negated = false;
+    }
+
+    /**
+     * @public
+     * @param {Data} data
+     * @returns {any}
+     */
+    evaluate(data) {
+        const obj = this.object.evaluate(data);
+        const rv = obj == null ? undefined : obj[this.propertyName];
+        return this.negated ? !rv : rv;
+    }
+
+    /**
+     * @public
+     * @returns {string}
+     */
+    toString() {
+        return this.object.toString() + '.' + this.propertyName;
     }
 }
 

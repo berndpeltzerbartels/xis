@@ -66,8 +66,8 @@ class DomNormalizer {
             normalizedElement = this.replaceFrameworkCheckboxByHtml(element);
         } else if (this.isFrameworkRadio(element)) {
             normalizedElement = this.replaceFrameworkRadioByHtml(element);
-        } else if (this.isShortWidgetTag(element)) {
-            normalizedElement = this.initializeWidgetContainerByShortWidgetTag(element)
+        } else if (this.isFrameworkFrontletContainer(element)) {
+            normalizedElement = this.replaceFrameworkFrontletContainerByWidgetContainer(element);
         } else if (this.isShortWidgetTag(element)) {
             normalizedElement = this.initializeWidgetContainerByShortWidgetTag(element)
         } else {
@@ -112,9 +112,18 @@ class DomNormalizer {
             this.replaceIncludeAttributeByTag(element);
             element.removeAttribute('xis:include');
         }
-        if (element.getAttribute('xis:widget-container')) {
+        if (element.getAttribute('xis:frontlet')) {
+            element.setAttribute('xis:widget', element.getAttribute('xis:frontlet'));
+            element.removeAttribute('xis:frontlet');
+        }
+        if (element.getAttribute('xis:default-frontlet')) {
+            element.setAttribute('xis:default-widget', element.getAttribute('xis:default-frontlet'));
+            element.removeAttribute('xis:default-frontlet');
+        }
+        if (element.getAttribute('xis:widget-container') || element.getAttribute('xis:frontlet-container')) {
             this.initializeWidgetContainerByAttribute(element);
             element.removeAttribute('xis:widget-container');
+            element.removeAttribute('xis:frontlet-container');
         }
         if (element.getAttribute('xis:message-for')) {
             this.replaceMessageAttributeByChildMessageElement(element);
@@ -166,6 +175,15 @@ class DomNormalizer {
    */
     isFrameworkForm(element) {
         return element.localName == 'xis:form';
+    }
+
+    /**
+   * @private
+   * @param {Element} element
+   * @returns {boolean}
+   */
+    isFrameworkFrontletContainer(element) {
+        return element.localName == 'xis:frontlet-container';
     }
 
     /**
@@ -237,7 +255,7 @@ class DomNormalizer {
     * @returns {boolean}
     */
     isShortWidgetTag(element) {
-        return element.localName == 'xis:widget';
+        return element.localName == 'xis:widget' || element.localName == 'xis:frontlet';
     }
 
     /**
@@ -324,6 +342,10 @@ class DomNormalizer {
         return this.replaceFrameworkElementByHtml(frameworkButton, 'button');
     }
 
+    replaceFrameworkFrontletContainerByWidgetContainer(frameworkContainer) {
+        return this.replaceFrameworkElementByHtml(frameworkContainer, 'xis:widget-container');
+    }
+
     /**
      * Replaces a framework element by a valid HTML element.
      * Optionally sets additional attributes (e.g. type).
@@ -339,7 +361,6 @@ class DomNormalizer {
             switch (attrName) {
                 case 'page':
                 case 'binding':
-                case 'widget':
                 case 'foreach':
                 case 'repeat':
                 case 'target-container':
@@ -348,6 +369,15 @@ class DomNormalizer {
                 case 'selection-class':
                 case 'selection-group':
                     element.setAttribute('xis:' + attrName, attrValue);
+                    break;
+                case 'widget':
+                    element.setAttribute('xis:widget', attrValue);
+                    break;
+                case 'frontlet':
+                    element.setAttribute('xis:widget', attrValue);
+                    break;
+                case 'default-frontlet':
+                    element.setAttribute('default-widget', attrValue);
                     break;
                 default:
                     element.setAttribute(attrName, attrValue);
@@ -452,10 +482,10 @@ class DomNormalizer {
      * @param {Element} foreach 
      */
     initializeWidgetContainerByAttribute(element) {
-        var id = element.getAttribute('xis:widget-container');
+        var id = element.getAttribute('xis:frontlet-container') || element.getAttribute('xis:widget-container');
         var container = createElement('xis:widget-container');
         container.setAttribute('container-id', id);
-        var defaultWidget = element.getAttribute('xis:default-widget');
+        var defaultWidget = element.getAttribute('xis:default-frontlet') || element.getAttribute('xis:default-widget');
         if (defaultWidget) {
             container.setAttribute('default-widget', defaultWidget);
         }

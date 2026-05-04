@@ -42,7 +42,7 @@ class FrontletLinkHandlerBase extends TagHandler {
         this.frontletParameters = {};
         const descendantPromise = this.refreshDescendantHandlers(data); // attributes might have variables !
         this.targetPageUrl = this.tag.getAttribute('xis:page');
-        this.targetFrontletUrl = this.tag.getAttribute('xis:widget');
+        this.targetFrontletUrl = this.tag.getAttribute('xis:frontlet') || this.tag.getAttribute('xis:widget');
         this.targetContainerId = this.tag.getAttribute('xis:target-container');
         return descendantPromise;
     }

@@ -251,6 +251,20 @@ class ExpressionParserTest {
             assertThat(result.asInt()).isEqualTo(20);
         }
 
+        @Test
+        @DisplayName("Object property access by computed string key")
+        void objectPropertyAccessByComputedStringKey() throws ScriptException {
+            var result = evaluate("xyz[x + '_item']", "{xyz: {first_item: 'value'}, x: 'first'}");
+            assertThat(result.asString()).isEqualTo("value");
+        }
+
+        @Test
+        @DisplayName("Nested object property access after computed string key")
+        void nestedObjectPropertyAccessAfterComputedStringKey() throws ScriptException {
+            var result = evaluate("xyz[x + '_item'].label", "{xyz: {first_item: {label: 'First'}}, x: 'first'}");
+            assertThat(result.asString()).isEqualTo("First");
+        }
+
     }
 
     @Test
@@ -273,6 +287,13 @@ class ExpressionParserTest {
         var result = evaluate("xyz(a,xyz(a,b))", "{a: 1, b: 2}");
 
         assertThat(result.asInt()).isEqualTo(4);
+    }
+
+    @Test
+    @DisplayName("Nested function calls with expression parameter")
+    void nestedFunctionCallsWithExpressionParameter() throws ScriptException {
+        var result = evaluate("xyz(a + 1, xyz(b, c + 1))", "{a: 1, b: 2, c: 3}");
+        assertThat(result.asInt()).isEqualTo(8);
     }
 
     @Test
