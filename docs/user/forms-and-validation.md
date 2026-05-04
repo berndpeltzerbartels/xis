@@ -250,6 +250,9 @@ public record ProductForm(
 XIS validates submitted form data before the action method executes. If validation fails, the action is not called and
 validation messages are available to the template.
 
+Form DTOs can be Java classes or records. On records, put validation annotations directly on the record components; XIS
+reads those component annotations during deserialization and validation.
+
 ```java
 package example.users;
 

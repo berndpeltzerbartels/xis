@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Retention(RUNTIME)
-@Target({ElementType.FIELD, ElementType.PARAMETER})
+@Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.RECORD_COMPONENT})
 @Validate(validatorClass = NotNegativeValidator.class, messageKey = "validation.notNegative", globalMessageKey = "validation.notNegative.global")
 public @interface NotNegative {
 }

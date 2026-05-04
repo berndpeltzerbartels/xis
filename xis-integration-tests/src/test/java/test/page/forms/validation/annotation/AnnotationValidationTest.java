@@ -3,6 +3,10 @@ package test.page.forms.validation.annotation;
 import one.xis.context.IntegrationTestContext;
 import one.xis.gson.GsonFactory;
 import one.xis.http.RequestContext;
+import one.xis.Action;
+import one.xis.FormData;
+import one.xis.HtmlFile;
+import one.xis.Page;
 import one.xis.server.FrontendServiceImpl;
 import one.xis.validation.LabelKey;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,6 +41,7 @@ class AnnotationValidationTest {
     void setUp() {
         context = IntegrationTestContext.builder()
                 .withSingleton(TestPage.class)
+                .withSingleton(TestRecordPage.class)
                 .build();
         frontendService = context.getSingleton(FrontendServiceImpl.class);
         RequestContext.createInstance(null, null);
@@ -63,5 +68,53 @@ class AnnotationValidationTest {
                 "Der Wert für \"Umsatzsteuer\" darf nicht negativ sein",
                 "Der Wert für \"aktueller Frühlingsrabatt\" darf nicht negativ sein"
         );
+    }
+
+    @Test
+    void customValidationAnnotationAndLabelKeyWorkOnRecordComponents() {
+        var model = new TestRecordModel(-5, -2, -1);
+        var request = new one.xis.server.ClientRequest();
+        request.setPageId("/record-test.html");
+        request.setPageUrl("/record-test.html");
+        request.setAction("save");
+        request.setFormData(of("formObject", new GsonFactory().gson().toJson(model)));
+        request.setZoneId("Europe/Berlin");
+        request.setLocale(Locale.GERMAN);
+
+        var response = frontendService.processActionRequest(request);
+
+        assertThat(response.getStatus()).isEqualTo(422);
+        assertThat(response.getValidatorMessages().getMessages().values())
+                .contains("negativ");
+        assertThat(response.getValidatorMessages().getGlobalMessages()).containsExactlyInAnyOrder(
+                "Der Wert für \"Gesamtpreis\" darf nicht negativ sein",
+                "Der Wert für \"Umsatzsteuer\" darf nicht negativ sein",
+                "Der Wert für \"aktueller Frühlingsrabatt\" darf nicht negativ sein"
+        );
+    }
+
+    record TestRecordModel(
+            @NotNegative
+            @LabelKey("order.total")
+            int total,
+
+            @NotNegative
+            @LabelKey("order.vat")
+            int vat,
+
+            @NotNegative
+            @LabelKey("order.springDiscount")
+            int springDiscount
+    ) {
+    }
+
+    @Page("/record-test.html")
+    @HtmlFile("/TestPage.html")
+    static class TestRecordPage {
+
+        @Action
+        void save(@FormData("formObject") TestRecordModel model) {
+            // Validation happens before this action can use the record DTO.
+        }
     }
 }
