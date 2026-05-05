@@ -5,9 +5,17 @@ import java.lang.annotation.*;
 /**
  * Binds a value from the browser's sessionStorage to an action method parameter.
  *
- * <p>The client sends only the specified sessionStorage key to the server.
- * The server deserializes the value, passes it to the method, and any modifications
- * made to the object are automatically saved back to sessionStorage after method execution.</p>
+ * <p>This is a parameter annotation. XIS scans controller method parameters and
+ * writes the referenced storage keys into the client configuration for the
+ * current page or frontlet. The browser sends only those configured keys to the
+ * server, not the whole sessionStorage. The configured keys are sent for the
+ * page/frontlet request even when the currently invoked action does not use
+ * every key.</p>
+ *
+ * <p>The server deserializes the value for the key, passes it to the parameter,
+ * and writes the parameter value back to sessionStorage after method execution.
+ * This makes the annotation most useful for mutable DTO-like values whose fields
+ * are changed inside the action.</p>
  *
  * <p><strong>Example:</strong></p>
  * <pre>{@code
@@ -15,7 +23,7 @@ import java.lang.annotation.*;
  * public void updateStep(@SessionStorage("wizardData") WizardData data,
  *                        @ActionParameter("step") int step) {
  *     data.setCurrentStep(step);
- *     // data is automatically saved back to sessionStorage
+ *     // the mutated data parameter is saved back to sessionStorage
  * }
  * }</pre>
  *
@@ -40,7 +48,8 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface SessionStorage {
     /**
-     * The sessionStorage key to read from and write to.
+     * The sessionStorage key to read from the browser and write back after
+     * method execution.
      *
      * @return the storage key
      */

@@ -8,9 +8,17 @@ import java.lang.annotation.Target;
 /**
  * Binds a value from client-side memory storage to an action method parameter.
  *
- * <p>The client sends the specified storage key to the server.
- * The server deserializes the value, passes it to the method, and any modifications
- * made to the object are automatically saved back to client storage after method execution.</p>
+ * <p>This is a parameter annotation. XIS scans controller method parameters and
+ * writes the referenced storage keys into the client configuration for the
+ * current page or frontlet. The browser sends only those configured keys to the
+ * server, not the whole client storage. The configured keys are sent for the
+ * page/frontlet request even when the currently invoked action does not use
+ * every key.</p>
+ *
+ * <p>The server deserializes the value for the key, passes it to the parameter,
+ * and writes the parameter value back to client storage after method execution.
+ * This makes the annotation most useful for mutable DTO-like values whose fields
+ * are changed inside the action.</p>
  *
  * <p><strong>Example:</strong></p>
  * <pre>{@code
@@ -18,7 +26,7 @@ import java.lang.annotation.Target;
  * public void updatePreferences(@ClientStorage("userPreferences") UserPreferences prefs,
  *                               @ActionParameter("theme") String theme) {
  *     prefs.setTheme(theme);
- *     // prefs is automatically saved back to client storage
+ *     // the mutated prefs parameter is saved back to client storage
  * }
  * }</pre>
  *
@@ -54,7 +62,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ClientStorage {
     /**
-     * The key under which the value is stored in server-side client storage.
+     * The client-storage key to read from the browser and write back after
+     * method execution.
      *
      * @return the storage key
      */
