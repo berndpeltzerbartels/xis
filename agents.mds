@@ -17,6 +17,11 @@ This repository treats Markdown documentation as the canonical knowledge source.
 The old documentation app lives in `docs-app` or `/Users/bernd/projects/xis-docs`. It is source material only. Do not
 copy its structure blindly into Markdown.
 
+When reconciling old and new documentation, merge them. The old documentation often has the better learning order and
+contains explanatory material that must not disappear. The newer Markdown documentation may already contain corrected,
+expanded, or newly tested behavior. Preserve newer correct material while restoring missing explanations and a
+reader-friendly sequence from the old documentation.
+
 ## Runtime Sources For Template Documentation
 
 When documenting XIS template behavior, verify the current runtime sources before treating old docs as authoritative:

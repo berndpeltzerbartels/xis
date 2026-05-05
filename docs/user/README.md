@@ -10,13 +10,14 @@ Read the [Quickstart](quickstart.md) when you want a minimal running application
 
 Read these chapters to build normal XIS applications:
 
+- [Runtime and dependency model](runtime-and-dependencies.md)
+- [Template location and mapping](template-location-and-mapping.md)
 - [Core model](core-model.md)
-- [Navigation and responses](navigation.md)
 - [Template syntax](templates.md)
 - [Tags and attributes](tags-and-attributes.md)
+- [Navigation and responses](navigation.md)
 - [Forms and validation](forms-and-validation.md)
 - [Security](security.md)
-- [Runtime and dependency model](runtime-and-dependencies.md)
 - [Examples and tests](examples-and-tests.md)
 
 ## Advanced Documentation

@@ -68,6 +68,33 @@ public class Application {
 }
 ```
 
+## Where Templates Go
+
+XIS templates normally live next to the Java controller in the same package. If the controller is:
+
+```text
+src/main/java/example/dashboard/DashboardPage.java
+```
+
+then the matching template is:
+
+```text
+src/main/java/example/dashboard/DashboardPage.html
+```
+
+This is intentional. You usually work on the controller and template together, and keeping them side by side makes that
+relationship visible in the project tree. The XIS Gradle plugin copies these HTML files into the application resources
+during the build.
+
+The plugin can generate missing templates for page and frontlet controllers:
+
+```bash
+./gradlew templates
+```
+
+Run this after adding a controller when you want XIS to create the template file in the right package. Generated
+templates are starting points; edit them like normal HTML.
+
 ## First Page
 
 `src/main/java/example/dashboard/DashboardPage.java`
@@ -89,6 +116,8 @@ public class DashboardPage {
     }
 }
 ```
+
+Create the template manually or run `./gradlew templates` and replace the generated content:
 
 `src/main/java/example/dashboard/DashboardPage.html`
 
@@ -166,14 +195,3 @@ public class CounterPage {
 ```
 
 The action is invoked through XIS. You do not create a REST endpoint for it.
-
-## Generate Templates
-
-The Gradle plugin can generate missing template files for page and frontlet controllers:
-
-```bash
-./gradlew templates
-```
-
-Generated templates are a starting point. Keep the Java controller and the HTML template in the same package unless you
-explicitly configure another template location.

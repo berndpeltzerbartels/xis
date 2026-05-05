@@ -89,13 +89,14 @@ The selected runtime brings the controller annotations such as `@Page`, `@Frontl
 The canonical user documentation lives in this repository:
 
 - [Quickstart](docs/user/quickstart.md)
+- [Runtime and dependency model](docs/user/runtime-and-dependencies.md)
+- [Template location and mapping](docs/user/template-location-and-mapping.md)
 - [Core model: pages, frontlets, includes, actions](docs/user/core-model.md)
-- [Navigation and responses](docs/user/navigation.md)
 - [Template syntax](docs/user/templates.md)
 - [Tags and attributes](docs/user/tags-and-attributes.md)
+- [Navigation and responses](docs/user/navigation.md)
 - [Forms and validation](docs/user/forms-and-validation.md)
 - [Security](docs/user/security.md)
-- [Runtime and dependency model](docs/user/runtime-and-dependencies.md)
 - [Examples and tests](docs/user/examples-and-tests.md)
 - [Advanced topics](docs/user/advanced/README.md)
 - [Documentation map](docs/README.md)
