@@ -6,6 +6,9 @@ import java.lang.annotation.Target;
 
 import static java.lang.annotation.ElementType.TYPE;
 
+/**
+ * Marks the entry point of a standalone XIS Boot application.
+ */
 @Target(TYPE)
 @Retention(RetentionPolicy.SOURCE)
 public @interface XISBootApplication {

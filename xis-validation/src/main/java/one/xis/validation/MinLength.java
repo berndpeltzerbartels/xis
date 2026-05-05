@@ -6,10 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * In case the annotated field is of type collection, it will get validated
- * to contain at least the give number of elements.
- * <p>
- * Otherwise the corresponding field is validated to be filled.
+ * Requires a string to contain at least the configured number of characters or
+ * a collection/array to contain at least the configured number of elements.
  */
 @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.RECORD_COMPONENT})
 @Retention(RetentionPolicy.RUNTIME)

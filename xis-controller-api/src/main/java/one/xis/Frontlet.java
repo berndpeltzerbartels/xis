@@ -19,9 +19,8 @@ import java.lang.annotation.*;
  * with the same simple name in different packages cannot be used in the same project unless
  * at least one of them specifies a unique ID explicitly.</p>
  *
- * <p>This annotation also enables integration with dependency injection frameworks.
- * It is compatible with Micronaut and includes {@code @Singleton} and {@code @Qualifier}
- * for proper registration as a bean.</p>
+ * <p>This annotation also enables integration with the dependency injection
+ * runtime used by the selected XIS integration.</p>
  *
  * <p>This annotation is itself marked with {@link Component}, so classes annotated
  * with {@code @Frontlet} are automatically discovered and registered for dependency injection.

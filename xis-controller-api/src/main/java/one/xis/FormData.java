@@ -3,7 +3,7 @@ package one.xis;
 import java.lang.annotation.*;
 
 /**
- * Binds a Java object to a form in the associated HTML page or widget.
+ * Binds a Java object to a form in the associated HTML page or frontlet.
  *
  * <p>When used on a method, the return value is used to pre-fill the form.
  * When used on a method parameter, the submitted form data is injected into
@@ -25,7 +25,7 @@ import java.lang.annotation.*;
  * }</pre>
  * <p>
  * If the value of the annotation is empty, the model will be accessible under the method name.
- * * If the method is a getter (e.g. {@code getUser()}), the model will be accessible under the property name.
+ * If the method is a getter (e.g. {@code getUser()}), the model will be accessible under the property name.
  */
 @Documented
 @Target({ElementType.METHOD, ElementType.PARAMETER})

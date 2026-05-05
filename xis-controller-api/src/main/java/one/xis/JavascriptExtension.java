@@ -14,8 +14,8 @@ import java.lang.annotation.*;
  * <p>
  * Classes annotated with @JavascriptExtension can not be interfaces or abstract classes.
  */
-@Qualifier // for micronaut
-@Singleton // for micronaut
+@Qualifier
+@Singleton
 @org.springframework.stereotype.Component // for spring
 @Component
 @Documented

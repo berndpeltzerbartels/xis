@@ -2,6 +2,9 @@
 
 XIS applications are built from pages, frontlets, includes, model data, form data, and actions.
 
+For a complete map of class, method, field, record-component, and parameter annotations, see the
+[Annotation reference](annotations.md).
+
 ## Pages
 
 A page is a Java controller annotated with `@Page`. It maps to a browser URL and renders a complete HTML document.
@@ -192,8 +195,8 @@ An action can target a container:
 
 ## Includes
 
-Includes are reusable HTML fragments. Use them for static or mostly-presentational shared markup such as headers,
-footers, and navigation.
+Includes are reusable HTML fragments. Use them for shared markup such as headers, footers, and navigation when the
+fragment does not need an independent frontlet controller.
 
 ```java
 package example.layout;
@@ -220,5 +223,12 @@ Use it:
 <xis:include name="header"/>
 ```
 
-Choose includes when you need shared markup. Choose frontlets when you need controller logic, independent model data, or
-dynamic updates.
+Attribute syntax is equivalent:
+
+```html
+<header xis:include="header"></header>
+```
+
+The included markup is initialized inside the surrounding page or frontlet. It may therefore contain XIS links, action
+buttons, parameters, and model expressions that belong to that surrounding controller. Choose frontlets when the fragment
+needs its own controller logic, independent model data, or dynamic updates.

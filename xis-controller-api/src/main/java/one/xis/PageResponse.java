@@ -9,7 +9,7 @@ import java.util.Map;
 
 /**
  * Represents a response that navigates to a specific page (controller) with optional path variables and query parameters.
- * Can be used within pages or widgets.
+ * Can be used within pages or frontlets.
  */
 @Getter
 @RequiredArgsConstructor

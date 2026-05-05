@@ -2,30 +2,20 @@ package one.xis;
 
 import java.lang.annotation.*;
 
-// TODO Kommentar und Umsetzung sind falsch. QueryParameter ist fuer Query-Parameter, nicht fuer Path-Parameter
-
 /**
- * Annotation  for url-parameters {@link QueryParameter}. url parameters
- * are defined in value of {@link Page} annotation.
- * <p>
- * Example:
- * <pre>
- *     <code>
- *         @Page("/{a}/xyz.html")
- *         class ExamplePage {
- *         ...
- *     </code>
- * </pre>
- * <p>
- * The name of the parameter in the example is "a".
- * To use this url-parameter as a method parameter, it has to be annotated with {@link QueryParameter} like this:
- * <pre>
- *     <code>
- *         public void method(@QueryParameter("a") String a) {
- *         ...
- *         }
- *         </code>
- *  </pre>
+ * Injects a query-string parameter into a model or action method.
+ *
+ * <p>For a request such as {@code /products.html?filter=active}, the value can
+ * be read with {@code @QueryParameter("filter")}.</p>
+ *
+ * <pre>{@code
+ * @ModelData
+ * List<Product> products(@QueryParameter("filter") String filter) {
+ *     return productService.findByFilter(filter);
+ * }
+ * }</pre>
+ *
+ * <p>Use {@link PathVariable} for variables declared in a {@link Page} path.</p>
  */
 @Documented
 @Target(ElementType.PARAMETER)

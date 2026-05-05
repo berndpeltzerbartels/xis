@@ -13,6 +13,7 @@ Read these chapters to build normal XIS applications:
 - [Runtime and dependency model](runtime-and-dependencies.md)
 - [Template location and mapping](template-location-and-mapping.md)
 - [Core model](core-model.md)
+- [Annotation reference](annotations.md)
 - [Template syntax](templates.md)
 - [Tags and attributes](tags-and-attributes.md)
 - [Navigation and responses](navigation.md)

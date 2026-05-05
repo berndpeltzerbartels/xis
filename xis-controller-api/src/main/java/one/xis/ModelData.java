@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Marks a method as the primary data source for a page or widget.
+ * Marks a method as a data source for a page or frontlet.
  *
  * <p>The returned object will be made available as the model during rendering,
  * and is typically used to populate the corresponding HTML template.</p>
@@ -14,8 +14,10 @@ import java.lang.annotation.Target;
  * <p>The {@code value()} specifies the name under which the model object will be
  * accessible in the template. This should match the data-binding expression in the HTML.</p>
  *
- * <p>Each page or widget must have exactly one {@code @ModelData} method.
- * The method can take parameters (e.g. {@code @SharedValue} or {@code @LocalStorage})
+ * <p>A page or frontlet can have zero or more {@code @ModelData} methods.
+ * Each method exposes one value. The method can take parameters
+ * (for example {@code @PathVariable}, {@code @QueryParameter},
+ * {@code @SharedValue}, or {@code @LocalStorage})
  * which are resolved before rendering.</p>
  *
  * <pre>{@code

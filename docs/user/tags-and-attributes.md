@@ -176,7 +176,7 @@ Pass frontlet parameters with `xis:parameter`. The target frontlet receives them
 
 ## Includes
 
-Use includes for shared static markup fragments.
+Use includes for shared markup fragments when the fragment does not need its own frontlet controller.
 
 ```html
 <header xis:include="header"></header>
@@ -188,7 +188,9 @@ Element syntax:
 <xis:include name="header"/>
 ```
 
-Includes are for markup reuse. Use frontlets when the fragment needs its own controller, model data, or actions.
+The included markup is initialized in the surrounding page or frontlet. It may contain XIS links, action buttons,
+parameters, and model expressions that belong to that surrounding controller. Use frontlets when the fragment needs its
+own controller, model data, or independently replaceable state.
 
 ## Forms
 

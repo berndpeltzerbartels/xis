@@ -92,6 +92,7 @@ The canonical user documentation lives in this repository:
 - [Runtime and dependency model](docs/user/runtime-and-dependencies.md)
 - [Template location and mapping](docs/user/template-location-and-mapping.md)
 - [Core model: pages, frontlets, includes, actions](docs/user/core-model.md)
+- [Annotation reference](docs/user/annotations.md)
 - [Template syntax](docs/user/templates.md)
 - [Tags and attributes](docs/user/tags-and-attributes.md)
 - [Navigation and responses](docs/user/navigation.md)

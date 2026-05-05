@@ -9,7 +9,7 @@ import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * Annotation for local login form objects fo binding a validator to them.
+ * Validation marker for the built-in local login form object.
  */
 @Retention(RUNTIME)
 @Target(TYPE)
