@@ -362,8 +362,10 @@ may be revised as local database support matures.
 
 ### `@SharedValue`
 
-`@SharedValue` exposes or injects a named value shared within the request/controller processing flow. On a method, the
-returned value is stored under the given key. On a parameter, the value with that key is injected.
+`@SharedValue` provides or injects a named value within one request/controller processing flow. Use it when several
+controller methods need the same loaded object or intermediate context and you do not want to repeat the lookup logic.
+On a method, the returned value is stored under the given key for the current processing flow. On a parameter, the value
+with that key is injected. It is not persisted across requests.
 
 | Attribute | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
@@ -557,7 +559,7 @@ return new FrontletResponse(ProductFrontlet.class)
 | `@SessionStorage` | parameter | `value` | Binds browser `sessionStorage`. |
 | `@ClientStorage` | parameter | `value` | Binds XIS client-side memory storage. |
 | `@LocalDatabase` | method, parameter | `value` | Binds local database data. |
-| `@SharedValue` | method, parameter | `value` | Exposes or injects named request/controller state. |
+| `@SharedValue` | method, parameter | `value` | Provides or injects a named value inside one controller processing flow. |
 | `@Title` | method, parameter | none | Provides or receives the page title. |
 | `@Address` | method | none | Provides browser address metadata. |
 | `@JavascriptExtension` | class | `value` | Registers JavaScript extension resources. |

@@ -34,13 +34,50 @@ and [Security](security.md) for complete examples.
 | `@FormData` | Loads form data for a named form binding. |
 | `@Action` | Marks a method that can be called from an action link, action button, or form submit. |
 | `@Title` | Supplies a page or frontlet title from Java. |
-| `@SharedValue` | Reads or writes a server-side value shared across requests in the current XIS scope. |
+| `@SharedValue` | Provides a named value for other controller methods during the same request/action processing flow. |
 | `@LocalStorage`, `@SessionStorage`, `@ClientStorage` | Reads or writes browser-side state. Use only when client state is actually useful. |
 | `@LocalDatabase` | Reads or writes browser-side database state. This is an advanced client-state feature. |
 | `@Bean` | Creates a XIS context bean from a method. |
 | `@Init` | Runs initialization code after dependency injection. |
 | `@EventListener` | Handles XIS context events. |
 | `@Scheduled` | Runs scheduled work in the XIS context. This is not needed for normal page development. |
+
+### Shared Values
+
+Use `@SharedValue` when one controller processing flow needs the same object in several methods. A typical case is
+loading an aggregate once and then using it for display and for an action without duplicating the lookup code.
+
+```java
+@Page("/products/{id}.html")
+public class ProductPage {
+
+    private final ProductService productService;
+
+    public ProductPage(ProductService productService) {
+        this.productService = productService;
+    }
+
+    @SharedValue("product")
+    Product product(@PathVariable("id") long id) {
+        return productService.findById(id);
+    }
+
+    @ModelData("product")
+    Product productModel(@SharedValue("product") Product product) {
+        return product;
+    }
+
+    @Action
+    void rename(@SharedValue("product") Product product,
+                @ActionParameter("name") String name) {
+        product.renameTo(name);
+        productService.save(product);
+    }
+}
+```
+
+The shared value is only a controller execution context for the current request or action. It is not session state,
+application state, or browser storage.
 
 ## Parameter, Field, And Record Component Annotations
 
@@ -54,7 +91,7 @@ purpose.
 | `@ActionParameter("name")` | Reads a value supplied by `<xis:parameter>`. |
 | `@FrontletParameter("name")` | Reads a parameter supplied when a frontlet is loaded. |
 | `@FormData("name")` | Injects submitted form data into an action method. |
-| `@SharedValue("name")` | Injects a server-side shared value or stores a returned value under that name. |
+| `@SharedValue("name")` | Injects a value produced by another `@SharedValue` method in the same controller processing flow. |
 | `@LocalStorage`, `@SessionStorage`, `@ClientStorage` | Injects browser-side state into an action method parameter. |
 | `@LocalDatabase` | Injects browser-side database state. This is an advanced client-state feature. |
 | `@ClientId` | Injects the browser client id. |

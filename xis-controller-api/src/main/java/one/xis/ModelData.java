@@ -22,7 +22,7 @@ import java.lang.annotation.Target;
  *
  * <pre>{@code
  * @ModelData("product")
- * public Product loadProduct(@SharedValue Product product) {
+ * public Product loadProduct(@SharedValue("product") Product product) {
  *     return product;
  * }
  * }</pre>
