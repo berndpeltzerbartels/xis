@@ -124,6 +124,13 @@ class PageController {
             return this.htmlTagHandler.refresh(this.page.data)
                 .then(() => { if (isSet(response.annotatedTitle)) this.setTitle(response.annotatedTitle); })
                 .then(() => { if (isSet(response.annotatedAddress)) this.setAddress(response.annotatedAddress); })
+                .then(() => app.frontletContainers.handleReloadFrontlets(response.reloadFrontlets))
+                .then(() => this.handleUpdateEventsNow(response.updateEventKeys))
+                .then(pageUpdated => {
+                    if (!pageUpdated) {
+                        return app.frontletContainers.handleUpdateEventsNow(response.updateEventKeys);
+                    }
+                })
                 .then(() => updateStores(response));
         });
     }
@@ -173,6 +180,18 @@ class PageController {
         return Promise.resolve(false);
     }
 
+    handleUpdateEventsNow(eventIds) {
+        if (!this.resolvedURL) {
+            return Promise.resolve(false);
+        }
+        for (const eventId of eventIds) {
+            if (this.resolvedURL.page.updateEventKeys.includes(eventId)) {
+                return this.handleUpdateEventNow().then(() => true);
+            }
+        }
+        return Promise.resolve(false);
+    }
+
     /**
      * Refreshes the current page after a server-push update event.
      * Does NOT unbind/rebind the page – only fetches new data and re-renders in place.
@@ -182,29 +201,33 @@ class PageController {
      */
     handleUpdateEvent() {
         return PageController.enqueue(() =>
-            this.client.loadPageData(this.resolvedURL).then(response => {
-                if (response.nextURL) {
-                    const nextResolved = this.urlResolver.resolve(response.nextURL);
-                    if (nextResolved && nextResolved.normalizedPath !== this.resolvedURL.normalizedPath) {
-                        return this.displayPageForResolvedURL(nextResolved, /* skipHistoryUpdate */ true);
-                    }
-                }
-
-                const data = response.data;
-                const pathname = this.resolvedURL.url.split('?')[0];
-                data.setValue(['pathVariables'], this.resolvedURL.pathVariablesAsMap());
-                data.setValue(['urlParameters'], this.resolvedURL.urlParameters);
-                data.setValue(['url'], this.resolvedURL.url);
-                data.setValue(['pathname'], pathname);
-                data.setValue(['queryParams'], this.resolvedURL.urlParameters);
-                this.page.data = data;
-
-                return this.htmlTagHandler.refresh(data)
-                    .then(() => { if (response.annotatedTitle) this.setTitle(response.annotatedTitle); })
-                    .then(() => updateStores(response))
-                    .then(() => app.eventPublisher.publish(EventType.BUFFER_COMMITTED));
-            })
+            this.handleUpdateEventNow()
         );
+    }
+
+    handleUpdateEventNow() {
+        return this.client.loadPageData(this.resolvedURL).then(response => {
+            if (response.nextURL) {
+                const nextResolved = this.urlResolver.resolve(response.nextURL);
+                if (nextResolved && nextResolved.normalizedPath !== this.resolvedURL.normalizedPath) {
+                    return this.displayPageForResolvedURL(nextResolved, /* skipHistoryUpdate */ true);
+                }
+            }
+
+            const data = response.data;
+            const pathname = this.resolvedURL.url.split('?')[0];
+            data.setValue(['pathVariables'], this.resolvedURL.pathVariablesAsMap());
+            data.setValue(['urlParameters'], this.resolvedURL.urlParameters);
+            data.setValue(['url'], this.resolvedURL.url);
+            data.setValue(['pathname'], pathname);
+            data.setValue(['queryParams'], this.resolvedURL.urlParameters);
+            this.page.data = data;
+
+            return this.htmlTagHandler.refresh(data)
+                .then(() => { if (response.annotatedTitle) this.setTitle(response.annotatedTitle); })
+                .then(() => updateStores(response))
+                .then(() => app.eventPublisher.publish(EventType.BUFFER_COMMITTED));
+        });
     }
 
     getData() {

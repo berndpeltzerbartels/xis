@@ -94,6 +94,31 @@ the normal external provider flow. The multiple-provider case combines that XIS 
 and must verify that the provider selection page offers both links and that choosing XIS completes the protected-page
 login.
 
+## Refresh Event Rules
+
+Refresh events are a general UI refresh feature, not an SSO feature. SSO can use the same transport internally, but user
+documentation and E2E tests should explain the normal application case first, such as a cart counter, dashboard tile, or
+notification badge.
+
+Keep these cases distinct in code, docs, and tests:
+
+- `publishToAll` targets every connected client, anonymous or authenticated.
+- `publishToClient` targets one browser client. This is not the same as a user.
+- `publishToUser` targets all connected clients of one authenticated user and therefore requires authentication.
+- `publishToAllUsers` targets authenticated clients only.
+
+`FrontletResponse.reloadFrontlet(...)` is not a broadcast event. It is an action-response special case for refreshing
+another already visible frontlet in the current browser. Do not describe it as needed for the current page or the
+frontlet that handled the action; those are updated by the normal action response. Use it for a separate frontlet that is
+not otherwise refreshed, for example a header cart summary after an action in a product-list frontlet.
+
+When changing refresh behavior, inspect both sides:
+
+- server: `RefreshEventPublisher`, `RefreshEvent`, `RefreshTarget`, `SseService`, `MainController`, and
+  `ControllerWrapper`
+- browser: `SseConnector`, `PageController.handleUpdateEvents`, `FrontletContainers.handleUpdateEvents`,
+  `FrontletContainerHandler.handleActionResponse`, and `FrontletResponse.reloadFrontlet` handling
+
 ## Example Discipline
 
 Documentation examples are part of the public API.

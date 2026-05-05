@@ -96,7 +96,8 @@ public class ControllerWrapper {
             var controllerMethodResult = method.invoke(request, controller, controllerResult.getRequestScope());
             if (controllerMethodResult.getNextURL() != null) {
                 controllerResult.setActionProcessing(ActionProcessing.PAGE);
-            } else if (controllerMethodResult.getNextFrontletId() != null) {
+            } else if (controllerMethodResult.getNextFrontletId() != null
+                    || !controllerMethodResult.getFrontletsToReload().isEmpty()) {
                 controllerResult.setActionProcessing(ActionProcessing.WIDGET);
             }
             controllerResultMapper.mapMethodResultToControllerResult(controllerMethodResult, controllerResult);

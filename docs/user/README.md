@@ -24,4 +24,5 @@ Read these chapters to build normal XIS applications:
 ## Advanced Documentation
 
 Read [Advanced topics](advanced/README.md) when you need optional or specialized capabilities such as security, SSO,
-distributed applications, refresh events, custom JavaScript, themes, or client-side storage.
+distributed applications, [refresh events](advanced/refresh-events.md), custom JavaScript, themes, or client-side
+storage.

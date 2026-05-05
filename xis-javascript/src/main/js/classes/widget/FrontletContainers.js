@@ -43,15 +43,41 @@ class FrontletContainers {
     }
 
     handleUpdateEvents(eventIds) {
+        const promises = [];
         eventIds.forEach(eventId => {
             const widgetIds = this.widgetIdForUpdateEvent(eventId);
             widgetIds.forEach(widgetId => {
                 const handlers = this.findContainerHandlersByWidgetId(widgetId);
-                handlers.forEach(handler => handler.handleUpdateEvent());
+                handlers.forEach(handler => promises.push(handler.handleUpdateEvent()));
             });
         });
-
+        return Promise.all(promises);
     }
+
+    handleUpdateEventsNow(eventIds) {
+        const promises = [];
+        eventIds.forEach(eventId => {
+            const widgetIds = this.widgetIdForUpdateEvent(eventId);
+            widgetIds.forEach(widgetId => {
+                const handlers = this.findContainerHandlersByWidgetId(widgetId);
+                handlers.forEach(handler => promises.push(handler.refresh(handler.data)));
+            });
+        });
+        return Promise.all(promises);
+    }
+
+    handleReloadFrontlets(frontletIds) {
+        if (!frontletIds || frontletIds.length === 0) {
+            return Promise.resolve([]);
+        }
+        const promises = [];
+        frontletIds.forEach(frontletId => {
+            const handlers = this.findContainerHandlersByWidgetId(frontletId);
+            handlers.forEach(handler => promises.push(handler.refresh(handler.data)));
+        });
+        return Promise.all(promises);
+    }
+
 
     widgetIdForUpdateEvent(eventId) {
         var widgetIds = [];

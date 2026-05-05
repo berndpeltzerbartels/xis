@@ -46,6 +46,24 @@ class SseServiceTest {
     }
 
     @Test
+    void publishToClientSendsOnlyToThatClientEvenWhenUserHasSeveralClients() {
+        var service = new SseService(mock(UserSecurityService.class));
+        var emitter1 = openEmitter();
+        var emitter2 = openEmitter();
+        var emitterOther = openEmitter();
+
+        service.registerEmitter("client-1", "user-1", emitter1);
+        service.registerEmitter("client-2", "user-1", emitter2);
+        service.registerEmitter("client-3", "user-2", emitterOther);
+
+        service.publishToClient("score-updated", "client-2");
+
+        verify(emitter1, never()).send(anyString());
+        verify(emitter2).send("data:score-updated\n\n");
+        verify(emitterOther, never()).send(anyString());
+    }
+
+    @Test
     void publishToAllUsersSendsOnlyToAuthenticatedClients() {
         var service = new SseService(mock(UserSecurityService.class));
         var emitter1 = openEmitter();

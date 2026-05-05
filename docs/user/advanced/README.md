@@ -12,6 +12,10 @@ If you want quick results, start with the [Quickstart](../quickstart.md). Then r
 - [Forms and validation](../forms-and-validation.md)
 - [Runtime and dependency model](../runtime-and-dependencies.md)
 
+## Available Advanced Pages
+
+- [Refresh events](refresh-events.md)
+
 ## Planned Advanced Pages
 
 These pages should be migrated carefully from the old documentation app and checked against code/tests before being
@@ -21,7 +25,6 @@ treated as complete:
 | --- | --- |
 | Security, roles, SSO, XIS as IDP, external IDP | Many applications need security, but the IDP/SSO details are integration-specific and should not complicate the first app. |
 | Distributed applications and micro-frontends | Important architecture topic, but not needed for same-origin applications. |
-| Refresh events | Useful for dashboards, games, collaborative UI, and server-triggered updates. |
 | Frontlet containers, parameters, and update events | Needed for richer composition, but the basics belong in core/navigation first. |
 | Custom JavaScript | Optional escape hatch for specialized browser behavior. |
 | Custom expression-language functions | Optional extension point for project-specific template helpers. Built-in EL functions are part of core template syntax. |

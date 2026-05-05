@@ -19,7 +19,7 @@ and [Security](security.md) for complete examples.
 | `@HtmlFile` | Uses a template file whose name does not follow the default class-name convention. |
 | `@DefaultHtmlFile` | Defines a default template file for a package or type. |
 | `@Roles` | Protects a page or frontlet by role. See [Security](security.md). |
-| `@RefreshOnUpdateEvents` | Refreshes a page or frontlet when one of the configured update events is fired. |
+| `@RefreshOnUpdateEvents` | Refreshes a page or frontlet when one of the configured update events is fired. See [Refresh events](advanced/refresh-events.md). |
 | `@JavascriptExtension` | Adds a JavaScript extension class for advanced client behavior. |
 | `@CssFile` | Adds a CSS file for a page or component. |
 | `@XISBootApplication` | Marks the application entry point for standalone XIS Boot applications. |

@@ -88,7 +88,8 @@ class FrontletContainerHandler extends TagHandler {
                     .then(() => this.bindNextFrontletIfNeeded(response))
                     .then(() => this.refreshDescendantHandlers(data))
                     .then(() => this.updatePageMetadata(response))
-                    .then(() => app.pageController.handleUpdateEvents(response.updateEventKeys))
+                    .then(() => app.frontletContainers.handleReloadFrontlets(response.reloadFrontlets))
+                    .then(() => app.pageController.handleUpdateEventsNow(response.updateEventKeys))
                     .then(pageUpdated => this.handleFrontletContainerUpdates(pageUpdated, response.updateEventKeys))
                     .then(() => updateStores(response))
                     .then(() => this.commitBuffer());
@@ -96,7 +97,8 @@ class FrontletContainerHandler extends TagHandler {
                 // Kein Widget-Wechsel: in-place refresh, kein DOM-Flackern
                 return this.refreshDescendantHandlers(data)
                     .then(() => this.updatePageMetadata(response))
-                    .then(() => app.pageController.handleUpdateEvents(response.updateEventKeys))
+                    .then(() => app.frontletContainers.handleReloadFrontlets(response.reloadFrontlets))
+                    .then(() => app.pageController.handleUpdateEventsNow(response.updateEventKeys))
                     .then(pageUpdated => this.handleFrontletContainerUpdates(pageUpdated, response.updateEventKeys))
                     .then(() => updateStores(response));
             }
@@ -311,7 +313,7 @@ class FrontletContainerHandler extends TagHandler {
         if (pageUpdated) {
             return Promise.resolve();
         }
-        return app.frontletContainers.handleUpdateEvents(updateEventKeys);
+        return app.frontletContainers.handleUpdateEventsNow(updateEventKeys);
     }
 
     /**
