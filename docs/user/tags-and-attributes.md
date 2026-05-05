@@ -312,11 +312,15 @@ state should intentionally live in the browser.
 
 ```html
 <section xis:storage-binding="localStorage">
-    <span>${localStorage.cart.count}</span>
+    <span>${defaultValue(localStorage.cart.count, '0')}</span>
 </section>
 ```
 
 Supported stores are `localStorage`, `sessionStorage`, and `clientStorage`.
+
+XIS does not send the whole browser store to the server. It sends the keys that the current page or frontlet declares
+through controller parameters such as `@LocalStorage("cart")` or `@SessionStorage("wizard")`. Storage parameters are
+written back after an action, so mutable DTO-like values can be updated in the action and persisted in the browser.
 
 ## Raw Content
 

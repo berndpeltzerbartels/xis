@@ -108,6 +108,38 @@ purpose.
 | `@Inject` | Injects a XIS context bean into a field or constructor. |
 | `@Value` | Injects a property value into a field. |
 
+### Browser Storage Parameters
+
+`@LocalStorage`, `@SessionStorage`, and `@ClientStorage` do not send the whole browser store to the server. XIS scans the
+controller methods, collects the storage keys used by annotated parameters, and writes those keys into the client
+configuration for the page or frontlet. The browser then sends those configured keys with requests for that page or
+frontlet.
+
+Use storage parameters for values that intentionally live in the browser:
+
+```java
+public class CartPage {
+
+    @Action("addToCart")
+    void addToCart(@LocalStorage("cart") Cart cart,
+                   @ActionParameter("productId") String productId) {
+        cart.add(productId);
+    }
+}
+```
+
+After the action finishes, XIS writes the storage parameter value back to the browser. This is most useful for mutable
+DTO-like values. Do not use browser storage as the default place for application state; server-side state is usually
+simpler and easier to control.
+
+Template expressions can read the same storage values, usually inside a storage binding:
+
+```html
+<section xis:storage-binding="localStorage">
+    <span>${defaultValue(localStorage.cart.count, '0')}</span>
+</section>
+```
+
 ## Plain HTTP Endpoint Annotations
 
 Normal XIS pages do not need these annotations. Use them only when you create plain HTTP endpoints next to the XIS UI.

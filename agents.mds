@@ -54,6 +54,19 @@ For form controls, tests should assert what reaches the `@Action` method through
 changed or a request-like payload was assembled. Repeated bindings are intentional: multiple controls with the same
 binding can submit multiple values into a Java collection.
 
+## Client Storage Rule
+
+`@LocalStorage`, `@SessionStorage`, and `@ClientStorage` are parameter annotations in the controller API. They are meant
+for key-based exchange of selected browser-state values, not for sending the whole browser storage to the server.
+
+The server derives the relevant storage keys from controller method parameters and writes those keys into the client
+configuration. The client sends all configured keys for the current page/frontlet with a request, independent of whether
+the currently invoked action actually uses every key. This avoids predicting controller behavior in JavaScript.
+
+After a controller method runs, storage parameters are written back to the response so object mutations made inside the
+action are stored in the browser. This is most natural for mutable DTO-like values; do not assume method return values
+annotated with storage annotations are part of the public API unless the annotation target and tests confirm it.
+
 ## Security Documentation Rules
 
 Security documentation must describe the concrete interfaces users implement, not only the concept. For local

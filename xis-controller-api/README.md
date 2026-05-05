@@ -324,6 +324,10 @@ action.
 Local storage persists across browser sessions. Use `@NullAllowed` if a missing value should be passed as `null`
 instead of initialized with a default value.
 
+Storage annotations are parameter annotations. XIS discovers the used keys from controller parameters and sends only
+those keys for the current page or frontlet. After method invocation, the parameter value is written back to browser
+storage. This is most useful for mutable DTO-like values.
+
 | Attribute | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
 | `value` | `String` | Yes | none | Browser `localStorage` key. |
@@ -335,6 +339,9 @@ to the current browser tab/session and is cleared by the browser when the sessio
 
 Use it for workflows such as multi-step forms where state should survive reloads inside one tab but not persist as long
 as `localStorage`.
+
+Like `@LocalStorage`, this is a parameter annotation. XIS sends only configured keys for the current page or frontlet and
+writes the parameter value back after method invocation.
 
 | Attribute | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
