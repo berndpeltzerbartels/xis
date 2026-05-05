@@ -18,6 +18,9 @@ For a controller class named `ProductPage`, XIS looks for `ProductPage.html` in 
 kept under `src/main/java` because the XIS Gradle plugin copies HTML templates into the application resources during the
 build.
 
+This side-by-side layout is the recommended XIS style. Most changes touch the controller and template together, and the
+project tree immediately shows which Java class owns which HTML file.
+
 The same package can also be mirrored under `src/main/resources`:
 
 ```text
@@ -42,7 +45,9 @@ tree shows which template belongs to which controller.
 
 ## Explicit Template With `@HtmlFile`
 
-Use `@HtmlFile` when the template name or location should not follow the default convention.
+Use `@HtmlFile` when the template name or location should not follow the default convention. The annotation works for
+templates copied from `src/main/java` and for templates kept directly in `src/main/resources`; at runtime both are
+classpath resources.
 
 ```java
 package example.products;
@@ -81,6 +86,10 @@ This looks for:
 ```text
 templates/ProductList.html
 ```
+
+Use an absolute path when a template should live in a shared folder independent of the controller package. Use a relative
+path when the template should still be organized near the controller package, but should not use the controller class
+name.
 
 ## Shared Templates
 

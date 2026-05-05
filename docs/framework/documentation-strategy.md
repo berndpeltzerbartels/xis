@@ -98,3 +98,5 @@ Template documentation must be checked against runtime behavior:
 - Use `ELFunctions.js` to confirm built-in expression-language functions.
 
 The old documentation app is useful for content and reader flow, but runtime files decide the current public surface.
+Use [old-docs-coverage.md](old-docs-coverage.md) as the checklist for this comparison so missing chapters do not
+resurface as scattered TODOs.

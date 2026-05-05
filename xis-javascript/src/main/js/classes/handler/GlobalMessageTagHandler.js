@@ -12,8 +12,10 @@ class GlobalMessageTagHandler extends TagHandler {
         const messages = validatorMessages.globalMessages;
         if (messages.length > 0) {
             const ul = document.createElement('ul');
+            ul.classList.add('error');
             for (const message of messages) {
                 const li = document.createElement('li');
+                li.classList.add('error');
                 li.innerText = message;
                 ul.appendChild(li);
             }

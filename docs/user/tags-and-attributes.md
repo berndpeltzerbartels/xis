@@ -285,6 +285,10 @@ the current form result, not the general system-error area:
 <xis:global-messages/>
 ```
 
+When messages are present, XIS inserts a generated `<ul class="error">` with one `<li class="error">` per message into
+the element. Style `.error` or use selectors such as `xis\:global-messages ul.error` when you want to target the
+generated list specifically.
+
 General server errors are rendered by the browser-side message handler into an element with `id="system-messages"` when
 that element exists on the page.
 

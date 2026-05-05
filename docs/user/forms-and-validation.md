@@ -336,6 +336,27 @@ Field messages are shown with `xis:message-for`. Global validation messages are 
 one field, for example a cross-field rule or a custom validator that reports a form-level problem. It is not the general
 application error area.
 
+When global messages exist, XIS renders this structure inside the `<xis:global-messages/>` element:
+
+```html
+<ul class="error">
+    <li class="error">Message text</li>
+</ul>
+```
+
+Style the wrapper element, the generated list, or the shared `error` class in your CSS:
+
+```css
+.error {
+    color: #b00020;
+}
+
+xis\:global-messages ul.error {
+    margin: 0;
+    padding-left: 1.25rem;
+}
+```
+
 Element syntax for field messages:
 
 ```html
