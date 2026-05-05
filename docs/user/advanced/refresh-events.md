@@ -44,6 +44,69 @@ the key.
 Event keys must be declared. Publishing an unknown key is treated as a programming error, because otherwise a typo would
 look like a refresh that simply never arrives.
 
+## Page Content Or Frontlet
+
+A value such as a cart counter can live directly in the page template:
+
+```java
+@Page("/products.html")
+@RefreshOnUpdateEvents("cart-updated")
+public class ProductsPage {
+
+    private final CartService cartService;
+
+    public ProductsPage(CartService cartService) {
+        this.cartService = cartService;
+    }
+
+    @ModelData("cartItemCount")
+    int cartItemCount() {
+        return cartService.currentItemCount();
+    }
+}
+```
+
+```html
+<header>
+    <span id="cart-count">${cartItemCount}</span>
+</header>
+```
+
+That is fine code style when the value belongs to the page and a page refresh is acceptable. Every page that renders the
+counter directly must declare the refresh key and expose the model data.
+
+If the same counter should be refreshed as an independent fragment across pages, model it as a frontlet instead:
+
+```java
+import one.xis.Frontlet;
+import one.xis.ModelData;
+import one.xis.RefreshOnUpdateEvents;
+
+@Frontlet
+@RefreshOnUpdateEvents("cart-updated")
+public class CartSummaryFrontlet {
+
+    private final CartService cartService;
+
+    public CartSummaryFrontlet(CartService cartService) {
+        this.cartService = cartService;
+    }
+
+    @ModelData("cartItemCount")
+    int cartItemCount() {
+        return cartService.currentItemCount();
+    }
+}
+```
+
+```html
+<xis:frontlet-container container-id="cart-summary" default-frontlet="CartSummaryFrontlet"/>
+```
+
+XIS does not provide a targeted partial reload for arbitrary page markup. A targeted fragment refresh needs a frontlet.
+Do not use `PageResponse` from a frontlet action just to force the whole page to reload for a header counter; that makes
+the action depend on page navigation when the actual intent is only to refresh a small UI fragment.
+
 ## Publish To All Clients
 
 Inject `RefreshEventPublisher` into a service or controller and publish the declared key.
