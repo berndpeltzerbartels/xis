@@ -50,7 +50,7 @@ class IDPClientImpl implements IDPClient {
             }
             return IDPResponse.fromOAuth2Json(response.getContent());
         } catch (HttpClientException e) {
-            throw new AuthenticationException("Failed to request tokens from IDP", e);
+            throw new AuthenticationException("Failed to request tokens from IDP: " + e.getMessage(), e);
         }
     }
 

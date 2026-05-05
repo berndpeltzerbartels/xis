@@ -75,6 +75,12 @@ Do not tell users to add transitive implementation modules such as `xis-idp-clie
 When documenting XIS as IDP, mention that user code fills application claims while XIS fills technical token fields such
 as `sub`, `iss`, `iat`, `exp`, `nbf`, and `client_id` during token creation.
 
+Security changes should stay coupled to E2E coverage in `/Users/bernd/projects/xis-end-to-end-tests`. XIS-as-IDP is
+covered there by a two-process setup: one XIS app runs as an OpenID Connect provider, another XIS app consumes it through
+the normal external provider flow. The multiple-provider case combines that XIS IDP with a mock OpenID Connect provider
+and must verify that the provider selection page offers both links and that choosing XIS completes the protected-page
+login.
+
 ## Example Discipline
 
 Documentation examples are part of the public API.

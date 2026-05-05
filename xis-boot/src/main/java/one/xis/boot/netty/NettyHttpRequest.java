@@ -152,7 +152,7 @@ public final class NettyHttpRequest implements HttpRequest {
         }
 
         String lower = ct.toLowerCase(Locale.ROOT);
-        boolean isFormUrlEncoded = lower.startsWith(ContentType.FORM_URLENCODED.toString());
+        boolean isFormUrlEncoded = lower.startsWith(ContentType.FORM_URLENCODED.getValue());
         if (!isFormUrlEncoded) {
             return Map.of();
         }
