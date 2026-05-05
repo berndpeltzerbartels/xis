@@ -27,9 +27,7 @@ an embedded HTTP runtime.
 
 ## Controller API
 
-The controller annotations live in `xis-controller-api`.
-
-Most applications should not add `xis-controller-api` directly. They receive it through `xis-spring` or `xis-boot`.
+The selected runtime brings the controller annotations into the application.
 
 Important annotations include:
 
@@ -45,13 +43,9 @@ Important annotations include:
 | `@PathVariable` | Binds a value from the current page URL. |
 | `@FrontletParameter` | Binds a parameter passed to a frontlet. |
 
-For complete annotation details, see [../xis-controller-api/README.md](../../xis-controller-api/README.md).
-
 ## Validation API
 
-Validation annotations live in `xis-validation` and are normally received through the selected runtime.
-
-For complete validation details, see [../xis-validation/README.md](../../xis-validation/README.md).
+The selected runtime also brings validation support into the application.
 
 ## XIS Boot
 
@@ -75,13 +69,11 @@ public class Application {
 `xis-boot` supports:
 
 - package scanning
-- dependency injection through `xis-context`
+- dependency injection
 - `@Component`, `@Bean`, `@Inject`, `@Value`
 - `application.properties`
 - `application-<profile>.properties`
 - profiles through `xis.profiles` or `XIS_PROFILES`
-
-For runtime details, see [../xis-boot/README.md](../../xis-boot/README.md).
 
 ## Static Resources
 
@@ -103,6 +95,5 @@ Reference them from HTML without the `public` segment:
 The default deployment mode is same-origin: pages, frontlets, static assets, and XIS endpoints are served from the same
 host.
 
-Distributed page and frontlet delivery is an architectural goal and has dedicated design notes in
-[Architecture](../architecture.md). Treat distributed and micro-frontend features as advanced unless the module README
-or tests for the target release explicitly document them as supported.
+Distributed page and frontlet delivery is an architectural goal. Treat distributed and micro-frontend features as
+advanced unless the user documentation or tests for the target release explicitly document them as supported.

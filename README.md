@@ -81,8 +81,8 @@ Most applications should choose one runtime:
 - `xis-spring` for Spring Boot applications
 - `xis-boot` for standalone XIS applications without Spring Boot
 
-The controller annotations such as `@Page`, `@Frontlet`, `@ModelData`, `@FormData`, `@Action`, and `@PathVariable` live
-in `xis-controller-api`, but application projects normally receive them transitively through the selected runtime.
+The selected runtime brings the controller annotations such as `@Page`, `@Frontlet`, `@ModelData`, `@FormData`,
+`@Action`, and `@PathVariable`.
 
 ## Documentation
 
@@ -115,9 +115,8 @@ When changing public XIS behavior, update the user documentation and add or adap
 
 ## Current Status
 
-XIS is actively evolving. Spring Boot and XIS Boot are the main supported runtime paths. Some modules exist for planned
-or experimental architecture, including distributed and micro-frontend scenarios, but the default deployment model is a
-same-origin application.
+XIS is actively evolving. Spring Boot and XIS Boot are the main supported runtime paths. The default deployment model is
+a same-origin application.
 
 ## License
 

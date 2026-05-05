@@ -1,7 +1,7 @@
 # Security
 
-XIS security is role-based. Add `xis-authentication` to the application runtime when pages or actions should require a
-login. The normal page, frontlet, action, form, and navigation APIs stay the same.
+XIS security is role-based. Add `xis-authentication` when pages or actions should require a login. The normal page,
+frontlet, action, form, and navigation APIs stay the same.
 
 ## Local Authentication
 
@@ -73,8 +73,8 @@ After a successful login, XIS redirects back to the original page.
 
 ## Custom Login Template
 
-The login controller is part of `xis-authentication`, but the HTML template is intentionally replaceable. Add a
-`login.html` resource to the application classpath to override the framework default template.
+The login controller is provided by XIS, but the HTML template is intentionally replaceable. Add a `login.html` resource
+to the application classpath to override the framework default template.
 
 ```html
 <!DOCTYPE html>
@@ -112,8 +112,7 @@ If the application also offers external OpenID Connect providers, the login cont
 
 ### Local Authentication Only
 
-Use `xis-authentication` and provide a real `UserInfoService`. `xis-idp-client` is not needed. When a protected page is
-opened without a valid login, XIS redirects to:
+Provide a real `UserInfoService`. When a protected page is opened without a valid login, XIS redirects to:
 
 ```text
 /login.html?redirect_uri=...
@@ -124,34 +123,32 @@ The login page renders the local form. A custom `login.html` only needs the `log
 
 ### Local Authentication And One External OpenID Connect Provider
 
-Use `xis-authentication`, provide a real `UserInfoService`, add `xis-idp-client`, and provide one `ExternalIDPConfig`.
-When a protected page is opened without a valid login, XIS still redirects to `/login.html` instead of redirecting
-directly to the provider.
+Provide a real `UserInfoService` and one `ExternalIDPConfig`. When a protected page is opened without a valid login, XIS
+still redirects to `/login.html` instead of redirecting directly to the provider.
 
 The login page renders the local form and one provider link. A custom `login.html` should render both the local form and
 the `externalIdpIds` / `externalIdpUrls` provider link.
 
 ### Local Authentication And Multiple External OpenID Connect Providers
 
-Use `xis-authentication`, provide a real `UserInfoService`, add `xis-idp-client`, and provide multiple
-`ExternalIDPConfig` instances. When a protected page is opened without a valid login, XIS redirects to `/login.html`.
+Provide a real `UserInfoService` and multiple `ExternalIDPConfig` instances. When a protected page is opened without a
+valid login, XIS redirects to `/login.html`.
 
 The login page renders the local form and one link per provider. A custom template should render the local form and loop
 over `externalIdpIds`, using `externalIdpUrls[idpId]` as the link target.
 
 ### One External OpenID Connect Provider Without Local Authentication
 
-Use `xis-authentication` and `xis-idp-client`, provide one `ExternalIDPConfig`, and do not provide a custom
-`UserInfoService`. XIS then redirects directly to that provider when a protected page is opened without a valid login.
+Provide one `ExternalIDPConfig` and do not provide a custom `UserInfoService`. XIS then redirects directly to that
+provider when a protected page is opened without a valid login.
 
 `/login.html` is normally skipped in this setup. If it is opened explicitly, the local form is not rendered because the
 framework placeholder `UserInfoService` does not validate local credentials.
 
 ### Multiple External OpenID Connect Providers Without Local Authentication
 
-Use `xis-authentication` and `xis-idp-client`, provide multiple `ExternalIDPConfig` instances, and do not provide a
-custom `UserInfoService`. When a protected page is opened without a valid login, XIS redirects to `/login.html` so the
-user can choose the provider.
+Provide multiple `ExternalIDPConfig` instances and do not provide a custom `UserInfoService`. When a protected page is
+opened without a valid login, XIS redirects to `/login.html` so the user can choose the provider.
 
 The login page renders only provider links. A custom `login.html` must render `externalIdpIds` and `externalIdpUrls`; it
 should not show a local username/password form unless the application also provides a real `UserInfoService`.
@@ -236,9 +233,9 @@ The `save` action requires both `USER` and `DATA_EDITOR`: `USER` from the page a
 
 External identity providers are supported through OpenID Connect. XIS uses the provider discovery document at
 `/.well-known/openid-configuration`, the authorization code flow, the token endpoint, and the provider JWKS endpoint.
-Other login protocols such as SAML are not supported by this module.
+Other login protocols such as SAML are not supported.
 
-Add `xis-idp-client` in addition to `xis-authentication`, then provide one or more `ExternalIDPConfig` instances.
+Provide one or more `ExternalIDPConfig` instances.
 
 ```java
 package example.security;
@@ -316,8 +313,7 @@ http://localhost:8080/realms/xis/.well-known/openid-configuration
 For local development, Keycloak can be started in Docker and import a realm on startup. Mount the realm export into
 `/opt/keycloak/data/import` and start Keycloak with `start-dev --import-realm`.
 
-No Keycloak-specific XIS artifact is needed. Keycloak publishes the standard OpenID Connect discovery document, so
-`ExternalIDPConfig` is enough.
+Keycloak publishes the standard OpenID Connect discovery document, so `ExternalIDPConfig` is enough.
 
 ### Google
 
@@ -332,12 +328,12 @@ The client id and client secret from Google are returned by `getClientId()` and 
 application roles; for role-based pages and actions, map the authenticated user to application roles in your own user
 management or use a provider that emits role claims in the access token.
 
-No Google-specific XIS artifact is needed. Google also uses the standard OpenID Connect discovery document.
+Google also uses the standard OpenID Connect discovery document.
 
 ## XIS As An OpenID Connect Provider
 
-XIS can also run as an OpenID Connect provider. This is an advanced setup and uses `xis-idp-server`, not
-`xis-idp-client`. Use it when one application should own authentication and issue tokens for other applications.
+XIS can also run as an OpenID Connect provider. Use this setup when one application should own authentication and issue
+tokens for other applications.
 
 This is useful when authentication is more than a simple password check. For example, an account may need a
 pre-registration step, documents may need to be checked, or a human reviewer may need to approve the account before the

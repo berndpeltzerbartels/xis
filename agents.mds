@@ -55,13 +55,17 @@ Security documentation must describe the concrete interfaces users implement, no
 authentication this means `UserInfoService`. For XIS as an OpenID Connect provider this means `IDPService`, including
 client registration through `IDPClientInfo` and user/client linkage through `IDPUserInfo`.
 
-Keep these module boundaries explicit:
+Keep user documentation focused on direct user dependencies only:
 
-- applications consume external OpenID Connect providers with `xis-authentication` plus `xis-idp-client` and
-  `ExternalIDPConfig`
-- XIS as an OpenID Connect provider uses `xis-idp-server` plus `IDPService`
-- `xis-idp-server` is not an OpenID Connect broker; do not document upstream Google/Keycloak brokering inside the XIS
-  IDP unless the code exists
+- `xis-spring` for Spring applications
+- `xis-boot` for standalone applications
+- `xis-test` for user-facing tests
+- `xis-authentication` for protected pages, local login, and external OpenID Connect login
+- `xis-idp-server` for running XIS as an OpenID Connect provider
+
+Do not tell users to add transitive implementation modules such as `xis-idp-client`, `xis-controller-api`,
+`xis-validation`, or `xis-context`. Those names belong in module README files or framework documentation, not in
+`docs/user/*`.
 
 When documenting XIS as IDP, mention that user code fills application claims while XIS fills technical token fields such
 as `sub`, `iss`, `iat`, `exp`, `nbf`, and `client_id` during token creation.
