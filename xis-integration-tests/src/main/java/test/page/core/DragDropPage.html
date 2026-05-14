@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html xmlns:xis="https://xis.one/xsd">
+<head>
+    <title>DragDropPage</title>
+</head>
+<body>
+<div id="source" xis:drag="from:${source}">Source</div>
+<div id="target" xis:drop="move(from, to='${target}')">Target</div>
+<div id="target-explicit-index" xis:drop="moveExplicitIndex(from, '${target}')">Target explicit index</div>
+</body>
+</html>

@@ -1,0 +1,135 @@
+plugins {
+    id 'java'
+    id 'java-gradle-plugin'
+    id 'groovy'
+    id 'maven-publish'
+    id 'signing' // <-- 1. Signatur-Plugin aktivieren
+    id 'com.gradle.plugin-publish' version '1.1.0'
+}
+
+group = rootProject.ext.projectGroup
+version = rootProject.ext.projectVersion
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+tasks.withType(JavaCompile) {
+    sourceCompatibility = rootProject.ext.javaVersion.toString()
+    targetCompatibility = rootProject.ext.javaVersion.toString()
+    options.encoding = 'UTF-8'
+}
+
+tasks.withType(PublishToMavenLocal) {
+    onlyIf { !name.contains('sign') }
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(rootProject.ext.javaVersionInt)
+    }
+    withSourcesJar()
+    withJavadocJar()
+}
+
+processResources {
+    expand(project.properties)
+}
+
+dependencies {
+    implementation gradleApi()
+    implementation localGroovy()
+}
+
+
+gradlePlugin {
+    website = 'https://github.com/berndpeltzerbartels/xis' // URL zur Projekt-Webseite
+    vcsUrl = 'https://github.com/berndpeltzerbartels/xis.git' // URL zum Git-Repository
+    plugins {
+        xisPlugin {
+            id = 'one.xis.plugin'
+            implementationClass = 'one.xis.plugin.XISPlugin'
+            displayName = 'XIS Framework Plugin' // Angezeigter Name im Portal
+            description = 'Gradle plugin module for the XIS declarative web framework manages the version number and allows to place html templates in java source folder additional to main/resources.'
+            tags = ['xis', 'web', 'framework', 'declarative'] // Such-Tags
+        }
+    }
+}
+
+publishing {
+    publications {
+        withType(MavenPublication).configureEach {
+            pom {
+                name = 'XIS Plugin'
+                description = 'Gradle plugin module for the XIS declarative web framework.'
+                url = 'https://github.com/berndpeltzerbartels/xis'
+
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = 'bernd'
+                        name = 'Bernd Peltzer-Bartels'
+                        email = 'bernd@xis.one'
+                    }
+                }
+
+                scm {
+                    connection = 'scm:git:https://github.com/berndpeltzerbartels/xis.git'
+                    developerConnection = 'scm:git:git@github.com/berndpeltzerbartels/xis.git'
+                    url = 'https://github.com/berndpeltzerbartels/xis'
+                }
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            name = "OSSRH"
+            url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2")
+            credentials {
+                username = project.findProperty("ossrhUsername") ?: ""
+                password = project.findProperty("ossrhPassword") ?: ""
+            }
+        }
+    }
+}
+
+signing {
+    // Prüft, ob die GPG-Properties gesetzt sind, bevor die Signierung versucht wird.
+    def signingKeyId = findProperty("signing.keyId")
+    def signingKey = findProperty("signing.secretKeyRingFile")
+    def signingPassword = findProperty("signing.password")
+    def skipSigning = findProperty("skipSigning") == "true"
+
+    required = signingKeyId && signingKey && signingPassword && !skipSigning
+    
+    if (required) {
+        useGpgCmd() // Verwendet das gpg Kommandozeilen-Tool, was oft zuverlässiger ist
+        sign publishing.publications
+    }
+}
+
+def mainResourcesDir = sourceSets.main.output.resourcesDir
+
+task writeVersionToFile {
+    def versionValue = project.version.toString()
+    inputs.property("version", versionValue)
+
+    def versionFile = file("$mainResourcesDir/plugin-version.txt")
+    outputs.file(versionFile)
+
+    doLast {
+        versionFile.parentFile.mkdirs()
+        versionFile.text = versionValue
+        println "Plugin version written to: " + versionFile
+    }
+}
+
+classes.dependsOn writeVersionToFile

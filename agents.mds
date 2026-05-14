@@ -1,0 +1,270 @@
+# XIS Agent Notes
+
+This repository treats Markdown documentation as the canonical knowledge source.
+
+## Documentation Layers
+
+- `README.md` is the public GitHub entry point for XIS users.
+- `docs/user/*` is user-facing documentation. Organize it by public API behavior and workflows.
+- `docs/user/advanced/*` is for optional or specialized capabilities. Do not present client-side storage as a core
+  requirement; it is a convenience feature because applications can also keep state on the server.
+- Module README files are mostly for framework developers and maintainers.
+- `docs/framework/*` is cross-module maintainer documentation.
+- `docs/agent/*` contains agent-specific rules.
+
+## Source Material
+
+The old documentation app lives in `docs-app` or `/Users/bernd/projects/xis-docs`. It is source material only. Do not
+copy its structure blindly into Markdown.
+
+When reconciling old and new documentation, merge them. The old documentation often has the better learning order and
+contains explanatory material that must not disappear. The newer Markdown documentation may already contain corrected,
+expanded, or newly tested behavior. Preserve newer correct material while restoring missing explanations and a
+reader-friendly sequence from the old documentation.
+
+Use `docs/framework/old-docs-coverage.md` as the migration checklist. After comparing an old chapter, do not leave a
+generic `needs review` behind; mark the topic covered, deferred, obsolete, or record the concrete remaining product
+decision.
+
+## Runtime Sources For Template Documentation
+
+When documenting XIS template behavior, verify the current runtime sources before treating old docs as authoritative:
+
+- `xis-javascript/src/main/js/classes/init/DomNormalizer.js`: framework elements, attribute syntax, and normalization
+  between tag and attribute forms.
+- `xis-javascript/src/main/js/classes/init/HandlerBuilder.js`: which normalized elements and attributes receive runtime
+  behavior, such as page links, frontlet links, action links, action buttons, forms, inputs, and submit controls.
+- `xis-javascript/src/main/js/classes/parse/ELFunctions.js`: built-in expression-language functions.
+
+Use the old documentation app for editorial structure and examples, but use these runtime files to confirm what actually
+exists.
+
+## Template Completion Rule
+
+Template behavior is only really done when all three layers agree:
+
+- runtime code supports the behavior
+- integration tests cover what the Java action/model side receives or renders
+- `docs/user/*` explains the public behavior with copyable examples
+
+For template features that exist in both forms, always think in pairs:
+
+- attribute syntax, for example `<input xis:binding="name">`
+- element syntax, for example `<xis:input binding="name">`
+
+Both forms are worth testing because `DomNormalizer.js` can break one while the other still works.
+
+For form controls, tests should assert what reaches the `@Action` method through `@FormData`, not merely that a DOM value
+changed or a request-like payload was assembled. Repeated bindings are intentional: multiple controls with the same
+binding can submit multiple values into a Java collection.
+
+Validation styling is part of the template contract. `xis:error-class` can be used with `xis:binding`; labels and wrapper
+elements can use `xis:error-binding` to point at a field without becoming form controls. `xis:error-style` applies an
+inline style during the same error state. Selection highlighting uses a parent `xis:selection-group` (or plain
+`selection-group`) and child `xis:selection-class` (or plain `selection-class`); multiple groups must remain independent.
+
+Drag and drop is intentionally small: `xis:drag="from:${field}"` defines one named drag value, and
+`xis:drop="move(from, target='${targetField}')"` calls a normal `@Action`. Prefer named Java parameters with
+`@Parameter("from")` and `@Parameter("target")`. If users need multiple values, they should encode a simple
+string themselves or write custom JavaScript. Keep docs and tests focused on this 80-percent case. In integration tests,
+use `one.xis.test.dom.DragAndDrop(source, target).doDragAndDrop()` so tests exercise `dragstart`, `dragover`, `drop`,
+and the shared `DataTransfer` payload.
+
+For dynamic resource attributes that a browser loads immediately, use XIS-prefixed attributes such as `xis:src`.
+`AttributeHandler` evaluates `xis:src`, removes the framework attribute, and writes the result to the real `src`; this
+prevents requests for raw template expressions before XIS has initialized the page.
+
+## Gradle Generation Tasks
+
+The XIS Gradle plugin exposes two user-facing scaffolding tasks:
+
+- `./gradlew xisTemplates` runs `XISTemplateProcessor` and creates missing HTML templates for `@Page` and `@Frontlet`
+  controllers under `src/main/java`.
+- `./gradlew xisTests` runs `XISTestProcessor` and creates missing `xis-test` integration-test skeletons for `@Page`
+  controllers under `src/test/java`.
+- `./gradlew xisValidate` runs `XISValidateProcessor` for XIS validation checks.
+
+The plugin adds `one.xis:xis-test` as a real `testImplementation` dependency and configures Gradle `Test` tasks to use
+JUnit Platform. `xis-test` exposes the JUnit API and AssertJ because generated tests import them. Both generation tasks
+are safe to run repeatedly because processors do not overwrite existing files. Keep the processors and docs on current
+public names: `Frontlet`, not the old `Widget` terminology.
+
+The intended quickstart/TDD path is: create a page class, run `./gradlew xisTemplates xisTests`, edit the generated test to
+describe the desired UI behavior, then implement controller/model/action/template code until the test passes.
+
+For XIS Boot projects, keep the Gradle plugin tasks aligned: `xisJar` creates
+`build/libs/<project-name>-<version>.jar`, and `xisRun` depends on that task and starts the generated jar.
+
+When user docs show XIS dependencies in a build that applies `one.xis.plugin`, prefer versionless XIS dependency
+coordinates such as `implementation "one.xis:xis-spring"`. The plugin aligns supported XIS module versions to its own
+version. Keep explicit XIS versions only for examples that intentionally do not use the plugin.
+
+## Client Storage Rule
+
+`@LocalStorage`, `@SessionStorage`, and `@ClientStorage` are parameter annotations in the controller API. They are meant
+for key-based exchange of selected browser-state values, not for sending the whole browser storage to the server.
+
+The server derives the relevant storage keys from controller method parameters and writes those keys into the client
+configuration. The client sends all configured keys for the current page/frontlet with a request, independent of whether
+the currently invoked action actually uses every key. This avoids predicting controller behavior in JavaScript.
+
+After a controller method runs, storage parameters are written back to the response so object mutations made inside the
+action are stored in the browser. This is most natural for mutable DTO-like values; do not assume method return values
+annotated with storage annotations are part of the public API unless the annotation target and tests confirm it.
+
+## Security Documentation Rules
+
+Security documentation must describe the concrete interfaces users implement, not only the concept. For local
+authentication this means `UserInfoService`. For XIS as an OpenID Connect provider this means `IDPService`, including
+client registration through `IDPClientInfo` and user/client linkage through `IDPUserInfo`.
+
+Keep user documentation focused on direct user dependencies only:
+
+- `xis-spring` for Spring applications
+- `xis-boot` for standalone applications
+- `xis-test` for lower-level user-facing integration tests only when the application does not use the XIS Gradle plugin
+- `xis-boot-starter-test` for `@XisBootTest` and generated tests only when the application does not use the XIS Gradle plugin
+- `xis-authentication` for protected pages, local login, and external OpenID Connect login
+- `xis-idp-server` for running XIS as an OpenID Connect provider
+- `xis-theme` for the optional default CSS/theme
+- `xis-distributed` for Microfrontend Architecture and remote page/frontlet delivery
+- `xis-sql` for JDBC repositories and SQL mapping
+- `xis-mongodb` for MongoDB document repositories and change streams
+
+Do not tell users to add transitive implementation modules such as `xis-idp-client`, `xis-controller-api`,
+`xis-validation`, or `xis-context`. Those names belong in module README files or framework documentation, not in
+`docs/user/*`.
+When the XIS Gradle plugin is used, do not tell users to add `xis-test` or `xis-boot-starter-test`; the plugin configures
+the matching test dependency.
+
+When documenting XIS as IDP, mention that user code fills application claims while XIS fills technical token fields such
+as `sub`, `iss`, `iat`, `exp`, `nbf`, and `client_id` during token creation.
+
+Security changes should stay coupled to E2E coverage in `/Users/bernd/projects/xis-end-to-end-tests`. XIS-as-IDP is
+covered there by a two-process setup: one XIS app runs as an OpenID Connect provider, another XIS app consumes it through
+the normal external provider flow. The multiple-provider case combines that XIS IDP with a mock OpenID Connect provider
+and must verify that the provider selection page offers both links and that choosing XIS completes the protected-page
+login.
+
+## Refresh Event Rules
+
+Refresh events are a general UI refresh feature, not an SSO feature. SSO can use the same transport internally, but user
+documentation and E2E tests should explain the normal application case first, such as a cart counter, dashboard tile, or
+notification badge.
+
+Keep these cases distinct in code, docs, and tests:
+
+- `publishToAll` targets every connected client, anonymous or authenticated.
+- `publishToClient` targets one browser client. This is not the same as a user.
+- `publishToUser` targets all connected clients of one authenticated user and therefore requires authentication.
+- `publishToAllUsers` targets authenticated clients only.
+
+`FrontletResponse.reloadFrontlet(...)` is not a broadcast event. It is an action-response special case for refreshing
+another already visible frontlet in the current browser. Do not describe it as needed for the current page or the
+frontlet that handled the action; those are updated by the normal action response. Use it for a separate frontlet that is
+not otherwise refreshed, for example a header cart summary after an action in a product-list frontlet.
+
+For page actions, the normal action response refreshes the page and its visible frontlets. Do not process action
+`updateEventKeys` or explicit frontlet reloads again after that page refresh, otherwise frontlets can load twice. For
+frontlet actions, update events still matter because only the handling frontlet is refreshed automatically.
+
+When changing refresh behavior, inspect both sides:
+
+- controller-api/server: `RefreshEventPublisher`, `RefreshEvent`, and `RefreshTarget` are public controller API;
+  `SseService`, `MainController`, and
+  `ControllerWrapper`
+- browser: `SseConnector`, `PageController.handleUpdateEvents`, `FrontletContainers.handleUpdateEvents`,
+  `FrontletContainerHandler.handleActionResponse`, and `FrontletResponse.reloadFrontlet` handling
+
+SSE connections must not silently stay dead. The browser reconnects closed `/xis/events` streams with backoff and also
+checks configured event streams before normal XIS HTTP requests. A failed SSE reconnect must not swallow the HTTP
+request; the normal request is still needed for the standard authentication/login flow. On the server, `/xis/events`
+renews XIS tokens when possible and writes updated `access_token` and `refresh_token` cookies before opening the stream.
+If token handling raises `AuthenticationException`, the SSE endpoint returns `401` and does not open a stream; do not
+catch unrelated exceptions here, because real backend failures must remain visible.
+If a terminal SSE error suggests that authentication may have expired, `SseConnector` asks the application for a
+throttled authentication check. The application refreshes the current page, so only the normal HTTP `401 + Location`
+handling can redirect to login. Do not redirect directly from `EventSource.onerror`; SSE errors can also be caused by
+network sleep, reloads, or temporary server restarts.
+Refresh event delivery is not allowed to silently drop events during short reconnect gaps. `SseService` tracks recently
+known clients for a small TTL and queues events for `publishToClient`, `publishToUser`, and `publishToAll` when an
+emitter is temporarily missing or closed. The TTL should stay aligned with the browser reconnect backoff: long enough
+for reconnect, short enough to forget truly closed clients. The authoritative value is
+`ClientConfigService.PENDING_EVENT_TTL_SECONDS`; the server queue window and the value sent to the browser in
+`ClientConfig.pendingEventTtlSeconds` must not diverge.
+
+## Distributed Application Rules
+
+Distributed XIS applications route in two steps: the URL resolves to a page/frontlet entry in the client config, and that
+entry may carry a remote host. The JavaScript client then calls the matching `/xis/*` endpoint on that host. Same-origin
+components have no host and keep using relative URLs.
+
+`xis-distributed` must own distributed runtime behavior. It provides the `ComponentHostResolver` bridge and a
+configuration-aware CORS filter. Do not make the generic default CORS filter guess distributed topology; the distributed
+filter should allow only origins that belong to `XisDistributedConfig.getAllowedOrigins()` or the current local URL.
+
+The properties implementation uses public `frontlet` wording:
+
+- `xis.remote.frontlet.<frontletId>=<host>`
+- `xis.remote.frontlet-url.<frontletId>=<url>`
+- `xis.remote.page.<normalizedPath>=<host>`
+- `xis.remote.origin.<name>=<origin>`
+
+Distributed topology should be exposed as maps (`getFrontletHosts`, `getFrontletUrls`, `getPageHosts`, and
+`getAllowedOrigins`). The framework derives remote/local decisions from those maps. Do not write examples that require
+the user to implement both maps and boolean checks. `DistributedComponentHostResolver` and `DistributedCorsFilter` copy
+the configured maps/origins once at startup, so configuration implementations may perform expensive discovery there
+without turning every request into a repeated lookup.
+
+Page host mappings use normalized URLs as keys, for example `/product/*/details.html`, not page class names. This is
+intentional because distributed applications should depend on public URLs rather than package names from another team.
+
+Distributed SSO requires credentialed browser requests on both paths: XHR/fetch-style XIS calls and SSE event streams.
+The client must open `/xis/events` not only on the shell origin but also on configured remote hosts, and all of those
+connections must include credentials so remote `publishToUser(...)` events can identify the user.
+
+End-to-end coverage lives in `/Users/bernd/projects/xis-end-to-end-tests` as
+`:e2e-tests-core:distributedTest`. It starts two Boot runtimes, one shell/page process and one remote process, and
+verifies a remote frontlet, remote-frontlet-to-remote-frontlet navigation by URL, and a remote page including actions
+executed on the remote server.
+
+## Theme Rules
+
+`xis-theme` is a user-facing convenience module for developers with only basic HTML/CSS knowledge. Its promise is:
+add the dependency and get acceptable prototype styling without explicit stylesheet links. Keep user documentation and
+tests focused on that promise, not on internal theme implementation modules.
+
+The theme resource contract is:
+
+- `default-theme.css` provides the default CSS variables.
+- `xis.css` provides structural CSS such as navigation, forms, and grid classes.
+- application `theme.css` overrides variables and must be loaded after `xis.css`.
+- application `theme-logo.svg` wins over `default-theme-logo.svg`.
+
+E2E coverage for this lives in `/Users/bernd/projects/xis-end-to-end-tests` and should verify browser-observable
+behavior: automatic CSS links, override order, custom logo loading, and grid positioning. Do not make these tests
+pixel-perfect design snapshots; check the public contract.
+
+## Example Discipline
+
+Documentation examples are part of the public API.
+
+When documenting public behavior:
+
+- include copyable Java examples
+- include matching HTML templates when relevant
+- prefer examples that can become tests
+- avoid pseudocode for annotation names, template attributes, and file locations
+
+The long-term goal is that documented examples are executable or covered by the test suite.
+
+## Collaboration Discipline
+
+Treat user statements about desired documentation structure as strong input, not as unquestioned final architecture.
+Check them against the codebase, the old documentation, and the reader's path. If the user points out a missing concept,
+make sure it appears where a reader would naturally look, even if the detailed material lives on a separate page.
+
+## Website Policy
+
+A documentation website may be built later, including a project wizard. The website should render or import the
+Markdown documentation instead of becoming a second manually maintained copy.

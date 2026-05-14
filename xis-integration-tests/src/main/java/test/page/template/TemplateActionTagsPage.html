@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:xis="https://xis.one/xsd">
+<head>
+    <title>Template Action Tags</title>
+</head>
+<body>
+<span id="action-result">${actionResult}</span>
+<span id="button-clicks">${buttonClicks}</span>
+
+<xis:action action="tag-action" id="action-tag">
+    Run action
+    <xis:parameter name="value" value="from-action-tag"/>
+</xis:action>
+
+<xis:button action="button-action" id="action-button-tag">Run button action</xis:button>
+<xis:button page="/template-target.html" id="page-button-tag">Go to target</xis:button>
+</body>
+</html>

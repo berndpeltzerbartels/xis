@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:xis="https://xis.one/xsd">
+<head>
+    <title>Template Message Tag</title>
+</head>
+<body>
+<xis:form binding="formData" id="form">
+    <xis:input binding="name" id="name"/>
+    <xis:message message-for="name" id="name-message"/>
+    <button xis:action="save" id="save">Save</button>
+</xis:form>
+</body>
+</html>

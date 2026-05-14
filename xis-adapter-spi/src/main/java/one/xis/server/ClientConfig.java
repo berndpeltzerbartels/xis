@@ -1,0 +1,110 @@
+package one.xis.server;
+
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.Getter;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Every field is annotated to avoid micronaut ignores
+ * empty arrays etc.
+ */
+@Data
+@AllArgsConstructor
+public class ClientConfig {
+
+    private final Collection<String> frontletIds;
+    private final Collection<String> pageIds;
+    private final Collection<String> includeIds;
+    /**
+     * TTL in seconds for buffered push events on the server.
+     * The browser runtime may use this to decide whether to reload the page
+     * after a disconnected period when buffered refresh events may have expired.
+     * 0 means no buffering is configured.
+     */
+    private final long pendingEventTtlSeconds;
+    /**
+     * Normalized path of the welcome-page.
+     */
+    private final String welcomePageId;
+
+    /**
+     * Page attributes by normalized path. Must contain all pages.
+     */
+    private final Map<String, PageAttributes> pageAttributes;
+
+    /**
+     * Hosts by frontlet-id. Must contain all frontlets.
+     */
+    private final Map<String, FrontletAttributes> frontletAttributes;
+
+    static ClientConfig.ClientConfigBuilder builder() {
+        return new ClientConfig.ClientConfigBuilder();
+    }
+
+
+    static class ClientConfigBuilder {
+        private Collection<String> frontletIds = List.of();
+        private Collection<String> pageIds = List.of();
+        private Collection<String> includeIds = List.of();
+        private long pendingEventTtlSeconds = 0;
+
+        @Getter
+        private String welcomePageId;
+        private Map<String, PageAttributes> pageAttributes = Map.of();
+        private Map<String, FrontletAttributes> frontletAttributes = Map.of();
+
+        ClientConfigBuilder frontletIds(Collection<String> frontletIds) {
+            this.frontletIds = frontletIds;
+            return this;
+        }
+
+        ClientConfigBuilder pageIds(Collection<String> pageIds) {
+            this.pageIds = pageIds;
+            return this;
+        }
+
+        ClientConfigBuilder includeIds(Collection<String> includeIds) {
+            this.includeIds = includeIds;
+            return this;
+        }
+
+        ClientConfigBuilder pendingEventTtlSeconds(long pendingEventTtlSeconds) {
+            this.pendingEventTtlSeconds = pendingEventTtlSeconds;
+            return this;
+        }
+
+        ClientConfigBuilder welcomePageId(String welcomePageId) {
+            this.welcomePageId = welcomePageId;
+            return this;
+        }
+
+        ClientConfigBuilder pageAttributes(Map<String, PageAttributes> pageAttributes) {
+            this.pageAttributes = pageAttributes;
+            return this;
+        }
+
+        ClientConfigBuilder frontletAttributes(Map<String, FrontletAttributes> frontletAttributes) {
+            this.frontletAttributes = frontletAttributes;
+            return this;
+        }
+
+        ClientConfig build() {
+            return new ClientConfig(
+                    frontletIds,
+                    pageIds,
+                    includeIds,
+                    pendingEventTtlSeconds,
+                    welcomePageId,
+                    pageAttributes,
+                    frontletAttributes
+            );
+        }
+    }
+
+
+}

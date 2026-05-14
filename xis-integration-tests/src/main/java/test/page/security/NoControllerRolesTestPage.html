@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:xis="http://xis.one/schema" lang="en" xml:lang="en">
+<head>
+    <title>No Controller Roles Test</title>
+</head>
+<body>
+    <h1>No Controller Roles Test Page</h1>
+    
+    <div id="pageData">${pageData}</div>
+    
+    <button id="actionWithoutRoles" xis:action="actionWithoutRoles">Action Without Roles</button>
+    <button id="actionWithMethodRolesOnly" xis:action="actionWithMethodRolesOnly">Action With Method Roles Only</button>
+    <button id="actionWithDtoRolesOnly" xis:action="actionWithDtoRolesOnly">Action With DTO Roles Only</button>
+</body>
+</html>

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:xis="https://xis.one/xsd">
+<head>
+    <title>User Record Controller</title>
+</head>
+<body>
+    <h1>User Record Controller</h1>
+    <form xis:binding="user">
+        <div>
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" value="${user.name}" />
+            <span class="error">${errors.get('user.name')}</span>
+        </div>
+        <div>
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" value="${user.email}" />
+            <span class="error">${errors.get('user.email')}</span>
+        </div>
+        <div>
+            <label for="dateOfBirth">Date of Birth:</label>
+            <input type="date" id="dateOfBirth" name="dateOfBirth" value="${user.dateOfBirth}" />
+            <span class="error">${errors.get('user.dateOfBirth')}</span>
+        </div>
+        <button xis:action="save">Save</button>
+    </form>
+</body>
+</html>

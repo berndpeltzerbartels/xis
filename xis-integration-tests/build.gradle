@@ -1,0 +1,105 @@
+import one.xis.gradle.XISPlugin
+
+plugins {
+    id 'java'
+    id 'groovy'
+    id 'maven-publish'
+    // id 'signing'
+    id 'xis'
+}
+
+
+group = rootProject.ext.projectGroup
+version = rootProject.ext.projectVersion
+
+repositories {
+    mavenCentral()
+}
+
+tasks.withType(JavaCompile) {
+    sourceCompatibility = rootProject.ext.javaVersion.toString()
+    targetCompatibility = rootProject.ext.javaVersion.toString()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(rootProject.ext.javaVersionInt)
+    }
+}
+// Local variables for versions
+var lombokVersion = rootProject.ext.libraryVersions.lombok
+var mockitoVersion = "5.2.0"
+var junitVersion = "5.7.0"
+var assertjVersion = rootProject.ext.libraryVersions.assertj
+var groovyVersion = rootProject.ext.libraryVersions.groovy
+
+
+dependencies {
+
+    // Local project dependencies
+    implementation project(':xis-context')
+    implementation project(':xis-server')
+    implementation project(':xis-resources')
+    implementation project(':xis-controller-api')
+    implementation project(':xis-util')
+    implementation project(':xis-validation')
+    implementation project(':xis-adapter-spi')
+    implementation project(':xis-server')
+
+    // Local test dependencies
+    testImplementation project(":xis-test")
+    testImplementation project(":xis-gson")
+    testImplementation project(":xis-http-controller")
+    // Lombok dependencies
+    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+    implementation "org.projectlombok:lombok:$lombokVersion"
+
+    testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"
+    testImplementation "org.projectlombok:lombok:$lombokVersion"
+
+    // JUnit dependencies
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+
+    // Mockito dependencies
+    testImplementation "org.mockito:mockito-core:$mockitoVersion"
+    testImplementation "org.mockito:mockito-junit-jupiter:4.5.1"
+
+
+    // AssertJ dependencies
+    testImplementation group: 'org.assertj', name: 'assertj-core', version: assertjVersion
+    testImplementation project(":xis-authentication-api")
+    testImplementation "org.apache.groovy:groovy:$groovyVersion"
+
+}
+
+test {
+    maxParallelForks = 4
+    useJUnitPlatform()
+
+    // Allow debug mode to be controlled via multiple methods:
+    // 1. Gradle project property: -Pdebug=true
+    // 2. System property: -Ddebug=true
+    // 3. Environment variable: export debug=true
+    def debugEnabled = project.hasProperty('debug') && project.property('debug') == 'true' ||
+            System.getProperty('debug') == 'true' ||
+            System.getenv('debug') == 'true'
+
+    if (debugEnabled) {
+        environment 'debug', 'true'
+    }
+
+    afterTest { desc, result ->
+        logger.quiet "${desc.className} - ${desc.name}: ${result.resultType}"
+    }
+}
+
+apply plugin: XISPlugin
+
+sourceSets {
+    main {
+        resources {
+            srcDir 'src/main/java'
+        }
+    }
+}

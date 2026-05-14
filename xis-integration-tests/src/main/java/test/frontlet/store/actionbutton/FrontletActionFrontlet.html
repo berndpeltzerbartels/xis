@@ -1,0 +1,7 @@
+<xis:template xmlns:xis="http://xis.one/schema">
+    <div>
+        <p>Counter in Frontlet: <span id="counter-value-frontlet" xis:storage-binding="sessionStorage">${defaultValue(sessionStorage.counter.value, '0')}</span>
+        </p>
+        <a xis:action="increment-from-frontlet" id="increment-button" href="#">Increment from Frontlet</a>
+    </div>
+</xis:template>

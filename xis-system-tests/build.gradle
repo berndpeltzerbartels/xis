@@ -1,0 +1,53 @@
+plugins {
+    id "java"
+}
+
+dependencies {
+    testImplementation project(":xis-context")
+    testImplementation project(":xis-sql")
+    testImplementation project(":xis-mongodb")
+
+    testImplementation "org.junit.jupiter:junit-jupiter-api:${rootProject.ext.libraryVersions.junit}"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${rootProject.ext.libraryVersions.junit}"
+    testImplementation "org.assertj:assertj-core:${rootProject.ext.libraryVersions.assertj}"
+
+    testImplementation platform("org.testcontainers:testcontainers-bom:${rootProject.ext.libraryVersions.testcontainers}")
+    testImplementation "org.testcontainers:junit-jupiter"
+    testImplementation "org.testcontainers:postgresql"
+    testImplementation "org.testcontainers:mariadb"
+    testImplementation "org.testcontainers:mongodb"
+
+    testImplementation "org.postgresql:postgresql:${rootProject.ext.libraryVersions.postgresql}"
+    testImplementation "org.mariadb.jdbc:mariadb-java-client:${rootProject.ext.libraryVersions.mariadb}"
+    testImplementation "org.mongodb:mongodb-driver-sync:${rootProject.ext.libraryVersions.mongodb}"
+
+    testImplementation "org.springframework.boot:spring-boot-starter:${rootProject.ext.libraryVersions.springBoot}"
+    testImplementation "org.springframework.boot:spring-boot-starter-jdbc:${rootProject.ext.libraryVersions.springBoot}"
+    testImplementation "org.springframework.boot:spring-boot-starter-data-mongodb:${rootProject.ext.libraryVersions.springBoot}"
+}
+
+test {
+    enabled = false
+}
+
+tasks.register("systemTest", Test) {
+    group = "verification"
+    description = "Runs Docker-backed system tests."
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    useJUnitPlatform()
+    shouldRunAfter test
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+    def colimaSocket = new File(System.getProperty("user.home"), ".colima/default/docker.sock")
+    if (!System.getenv("DOCKER_HOST") && colimaSocket.exists()) {
+        def dockerHost = "unix://${colimaSocket.absolutePath}"
+        environment "DOCKER_HOST", dockerHost
+        environment "DOCKER_API_VERSION", "1.44"
+        systemProperty "docker.host", dockerHost
+        systemProperty "api.version", "1.44"
+        systemProperty "docker.client.strategy", "org.testcontainers.dockerclient.EnvironmentAndSystemPropertyClientProviderStrategy"
+        environment "TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE", "/var/run/docker.sock"
+    }
+}

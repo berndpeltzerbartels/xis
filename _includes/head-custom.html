@@ -1,0 +1,5 @@
+It's a bit late, but it might still help someone: have a 'favicon.ico' in your repository root (if not, push one first). Then on GitHub in your repository: Settings/Pages Build and deployment/Source: Github Actions Select the first suggested standard-workflow (Jekyll with GitHub Pages dependencies preinstalled workflow). Then create a folder _includes/ and there a file head-custom.html with the following content:
+
+<head>
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.svg">
+</head>

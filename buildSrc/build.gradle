@@ -1,0 +1,62 @@
+plugins {
+    id "java-gradle-plugin"
+}
+
+repositories {
+    mavenCentral()
+}
+
+tasks.withType(JavaCompile) {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+// Local variables for versions
+var graalVersion = "23.0.1"
+var lombokVersion = "1.18.34"
+var junitVersion = "5.7.0"
+var assertjVersion = "3.16.1"
+var mockitoVersion = "5.2.0"
+
+
+dependencies {
+
+    // GraalVM dependencies
+    implementation "org.graalvm.js:js-scriptengine:$graalVersion"
+    implementation "org.graalvm.sdk:graal-sdk:$graalVersion"
+    implementation "org.graalvm.truffle:truffle-api:$graalVersion"
+    implementation "org.graalvm.js:js:$graalVersion"
+
+    // Lombok dependencies
+    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+    implementation "org.projectlombok:lombok:$lombokVersion"
+
+    // JUnit dependencies
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+
+    // Mockito dependencies
+    testImplementation "org.mockito:mockito-core:$mockitoVersion"
+    testImplementation "org.mockito:mockito-junit-jupiter:$mockitoVersion"
+
+    // AssertJ dependencies
+    testImplementation"org.assertj:assertj-core:$assertjVersion"
+
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+    afterTest { desc, result ->
+        logger.quiet "${desc.className} - ${desc.name}: ${result.resultType}"
+    }
+    maxParallelForks = 4
+}

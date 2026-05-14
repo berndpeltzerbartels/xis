@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:xis="https://xis.one/xsd" lang="en">
+<head>
+    <title>Modal integration</title>
+</head>
+<body>
+<p id="page-version">${pageVersion}</p>
+<p id="saved-value">${savedValue}</p>
+
+<xis:form binding="parent">
+    <input id="parent-form-value" xis:binding="value"/>
+</xis:form>
+
+<button id="open-modal-button" xis:modal="EditModal">
+    <xis:parameter name="source" value="button"/>
+    Open modal
+</button>
+
+<a id="open-modal-link" href="/wrong.html" xis:modal="EditModal">
+    <xis:parameter name="source" value="link"/>
+    Open modal link
+</a>
+
+<button id="open-modal-query" xis:modal="/modal-integration/edit?source=query parameter">
+    Open modal query
+</button>
+
+<button id="open-modal-action" xis:action="openFromAction">Open modal action</button>
+
+<button id="open-modal-action-parameter" xis:action="openFromParameter">
+    <xis:parameter name="source" value="action parameter"/>
+    Open modal action parameter
+</button>
+
+<button id="open-form-only-modal-action-parameter" xis:action="openFormOnlyModalFromParameter">
+    <xis:parameter name="source" value="form only action parameter"/>
+    Open form-only modal action parameter
+</button>
+</body>
+</html>

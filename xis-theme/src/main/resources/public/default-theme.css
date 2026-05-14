@@ -1,0 +1,28 @@
+/* XIS theme tokens.
+   Copy this file to public/theme.css in your application and override only the
+   variables you want to change. The structural CSS lives in xis.css. */
+:root {
+  /* Sizing */
+  --base-font: 18px;
+  --form-font: 16px;
+  --line-height: 1.6;
+  --container-pad: 16px;
+  --grid-gap: 16px;
+  --radius: 8px;
+  --ctrl-h: 48px;
+
+  /* Colors */
+  --text: #202020;
+  --muted: #555;
+  --border: #e5e7eb;
+  --field-border: #ccc;
+  --accent: #f00;
+  --bg: #fff;
+  --bg-secondary: #f9fafb;
+  --hover: #f3f4f6;
+
+  /* Navigation */
+  --nav-h: 56px;
+  --submenu-minw: 180px;
+  --submenu-maxw: 320px;
+}

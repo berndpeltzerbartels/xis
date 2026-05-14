@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:xis="http://xis.one/schema" lang="us-en" xml:lang="us-en">
+<head>
+    <title>Radio Button Test</title>
+</head>
+<body>
+<xis:form binding="form" id="form">
+    <div xis:foreach="item:items">
+        <input type="radio" xis:binding="value" value="${item.id}" id="radio-${item.id}" name="radioGroup"/>
+        <label for="radio-${item.id}">${item.label}</label>
+    </div>
+    <button xis:action="submit" id="submitButton">Submit</button>
+</xis:form>
+</body>
+</html>

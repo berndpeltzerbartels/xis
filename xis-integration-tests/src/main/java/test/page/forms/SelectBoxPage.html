@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:xis="http://xis.one/schema" lang="us-en" xml:lang="us-en">
+<head>
+    <title>ActionAndModel</title>
+</head>
+<body>
+<xis:form binding="formData" id="form">
+
+    <select xis:binding="selectedValue" id="selectBox">
+        <option value="${option.value}" xis:repeat="option:options">${option.label}</option>
+    </select>
+
+    <button xis:action="submit" id="submitButton">Submit</button>
+</xis:form>
+</body>
+</html>

@@ -1,0 +1,105 @@
+plugins {
+    id 'java'
+    id 'java-library'
+    id 'maven-publish'
+    // id 'signing'
+}
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(rootProject.ext.javaVersionInt)
+    }
+    withSourcesJar()
+    withJavadocJar()
+}
+
+
+var lombokVersion = rootProject.ext.libraryVersions.lombok
+var gsonVersion = rootProject.ext.libraryVersions.gson
+var mockitoVersion = rootProject.ext.libraryVersions.mockito
+def junitVersion = "5.7.0"
+def assertjVersion = "3.16.1"
+
+dependencies {
+
+    implementation(project(":xis-context"))
+    implementation(project(":xis-util"))
+    runtimeOnly(project(":xis-gson"))
+
+    // Lombok dependencies
+    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+    implementation "org.projectlombok:lombok:$lombokVersion"
+    testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"
+
+    implementation "com.google.code.gson:gson:$gsonVersion"
+
+
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+    implementation "org.mockito:mockito-core:$mockitoVersion"
+    testImplementation "org.assertj:assertj-core:$assertjVersion"
+
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.12.0' // Oder eine neuere Version
+}
+
+test {
+    useJUnitPlatform()
+}
+
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifactId = project.name
+
+            pom {
+                name = 'XIS ' + project.name.capitalize()
+                description = 'Module ' + project.name + ' of the XIS declarative web framework.'
+                url = 'https://github.com/berndpeltzerbartels/xis'
+
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = 'bernd'
+                        name = 'Bernd Peltzer-Bartels'
+                        email = 'bernd@xis.one'
+                    }
+                }
+
+                scm {
+                    connection = 'scm:git:https://github.com/berndpeltzerbartels/xis.git'
+                    developerConnection = 'scm:git:git@github.com:berndpeltzerbartels/xis.git'
+                    url = 'https://github.com/berndpeltzerbartels/xis'
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = "OSSRH"
+            url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2")
+            credentials {
+                username = project.findProperty("ossrhUsername") ?: ""
+                password = project.findProperty("ossrhPassword") ?: ""
+            }
+        }
+    }
+}
+
+/*
+signing {
+    sign publishing.publications.mavenJava
+    useGpgCmd()
+}
+*/

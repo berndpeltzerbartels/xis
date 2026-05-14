@@ -1,0 +1,73 @@
+pluginManagement {
+
+    def props = new Properties()
+    def propertiesFile = new File(settingsDir, "gradle.properties")
+    if (!propertiesFile.exists()) {
+        throw new GradleException("Konnte gradle.properties im Verzeichnis ${settingsDir} nicht finden.")
+    }
+    propertiesFile.withReader('UTF-8') { reader ->
+        props.load(reader)
+    }
+    def versionFromProperties = props.getProperty('projectVersion')
+    if (versionFromProperties == null) {
+        throw new GradleException("Eigenschaft 'projectVersion' nicht in gradle.properties gefunden.")
+    }
+
+
+    plugins {
+        // Definiere hier die Version für dein Plugin.
+        // Alle subprojects können es dann ohne Versionsangabe anwenden.
+        id 'one.xis.spring-plugin' version versionFromProperties
+    }
+    repositories {
+        mavenLocal()
+        gradlePluginPortal()
+    }
+}
+
+rootProject.name = 'xis'
+include 'xis-controller-api'
+include 'xis-validation'
+include 'xis-processor'
+include 'xis-util'
+include 'xis-resources'
+include 'xis-spring'
+include 'xis-context'
+include 'xis-test'
+include 'xis-boot-test-jupiter'
+//include 'xis-micronaut'
+//include 'xis-micronaut-test-app'
+include 'xis-server'
+include 'xis-javascript'
+include 'xis-integration-tests'
+include 'xis-gson'
+include 'xis-i18n'
+include 'xis-deserializer'
+include 'xis-adapter-spi'
+include 'xis-plugin'
+include 'xis-boot'
+include 'xis-boot-starter-test'
+
+include 'xis-http-client'
+include 'xis-http-controller'
+include 'xis-token'
+include 'xis-idp-server'
+include 'xis-authentication'
+
+
+include 'xis-security-common'
+include 'xis-idp-client'
+include 'xis-authentication-api'
+include 'xis-bootstrap'
+include 'xis-theme'
+include 'xis-theme-example'
+
+
+include 'xis-html'
+include 'xis-apt'
+include 'xis-docs'
+include 'xis-distributed'
+
+include 'xis-sql'
+include 'xis-mongodb'
+include 'xis-system-tests'

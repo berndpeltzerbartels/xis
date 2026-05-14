@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:xis="https://xis.one/xsd">
+<head>
+    <title>Attribute Form Syntax</title>
+</head>
+<body>
+<form xis:binding="form" id="form">
+    <input type="text" xis:binding="name" id="name"/>
+    <textarea xis:binding="description" id="description"></textarea>
+    <select xis:binding="categoryId" id="category">
+        <option xis:repeat="category:categories" value="${category.id}">${category.label}</option>
+    </select>
+    <input type="checkbox" xis:binding="active" id="active"/>
+    <input type="checkbox" xis:binding="choices" value="alpha" id="choice-alpha"/>
+    <input type="checkbox" xis:binding="choices" value="beta" id="choice-beta"/>
+    <input type="radio" xis:binding="status" value="DRAFT" name="status" id="draft"/>
+    <input type="radio" xis:binding="status" value="PUBLISHED" name="status" id="published"/>
+    <button xis:action="save" id="save">Save</button>
+</form>
+</body>
+</html>

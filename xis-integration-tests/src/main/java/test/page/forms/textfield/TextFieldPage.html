@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:xis="http://xis.one/schema" lang="de">
+<head>
+    <title>TextField Test</title>
+</head>
+<body>
+<xis:form binding="formData" id="form">
+    <input type="text" xis:binding="number" id="theTextField"/>
+    <span xis:message-for="number" id="fieldMessage"/>
+    <button xis:action="submit" id="submitButton">Submit</button>
+    <div>
+        <xis:global-messages/>
+    </div>
+</xis:form>
+
+</body>
+</html>

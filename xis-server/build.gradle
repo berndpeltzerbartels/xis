@@ -1,0 +1,141 @@
+plugins {
+    id 'java'
+    id 'maven-publish'
+    // id 'signing'
+}
+
+group = rootProject.ext.projectGroup
+version = rootProject.ext.projectVersion
+
+repositories {
+    mavenCentral()
+}
+
+tasks.withType(JavaCompile) {
+    sourceCompatibility = rootProject.ext.javaVersion.toString()
+    targetCompatibility = rootProject.ext.javaVersion.toString()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(rootProject.ext.javaVersionInt)
+    }
+    withSourcesJar()
+    withJavadocJar()
+}
+
+// Local variables for versions
+var lombokVersion = rootProject.ext.libraryVersions.lombok
+var dom4jVersion = rootProject.ext.libraryVersions.dom4j
+var slf4jVersion = rootProject.ext.libraryVersions.slf4j
+var jacksonDatabindVersion = rootProject.ext.libraryVersions.jackson
+var gsonVersion = rootProject.ext.libraryVersions.gson
+var junitVersion = rootProject.ext.libraryVersions.junit
+var mockitoVersion = rootProject.ext.libraryVersions.mockito
+var assertjVersion = rootProject.ext.libraryVersions.assertj
+
+dependencies {
+
+    // Local project dependencies
+    implementation project(':xis-context')
+    implementation project(':xis-util')
+    implementation project(':xis-controller-api')
+    implementation project(':xis-javascript')
+    implementation project(':xis-deserializer')
+    implementation project(':xis-gson')
+    implementation project(':xis-validation')
+    implementation project(':xis-adapter-spi')
+//    implementation project(':xis-security:xis-token')
+    implementation(project(":xis-http-controller"))
+    implementation(project(":xis-security-common"))
+    // Compile-only dependencies
+    implementation project(":xis-resources")
+    implementation project(":xis-html")
+
+
+    implementation 'com.github.ben-manes.caffeine:caffeine:3.1.8'
+
+    // Annotation processors
+    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+
+    // Implementation dependencies
+    implementation "org.projectlombok:lombok:$lombokVersion"
+    implementation "dom4j:dom4j:$dom4jVersion" // TODO: Version
+    implementation "org.slf4j:slf4j-api:$slf4jVersion"
+    implementation "com.fasterxml.jackson.core:jackson-databind:$jacksonDatabindVersion"
+    implementation "org.slf4j:slf4j-api:$slf4jVersion"
+    implementation "com.google.code.gson:gson:$gsonVersion"
+
+    // Test dependencies
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+    testImplementation "org.mockito:mockito-core:$mockitoVersion"
+    testImplementation "org.assertj:assertj-core:$assertjVersion"
+    testImplementation project(':xis-resources')
+}
+
+test {
+    useJUnitPlatform()
+    afterTest { desc, result ->
+        logger.quiet "${desc.className} - ${desc.name}: ${result.resultType}"
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifactId = project.name
+
+            pom {
+                name = 'XIS ' + project.name.capitalize()
+                description = 'Module ' + project.name + ' of the XIS declarative web framework.'
+                url = 'https://github.com/berndpeltzerbartels/xis'
+
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = 'bernd'
+                        name = 'Bernd Peltzer-Bartels'
+                        email = 'bernd@xis.one'
+                    }
+                }
+
+                scm {
+                    connection = 'scm:git:https://github.com/berndpeltzerbartels/xis.git'
+                    developerConnection = 'scm:git:git@github.com:berndpeltzerbartels/xis.git'
+                    url = 'https://github.com/berndpeltzerbartels/xis'
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = "OSSRH"
+            url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2")
+            credentials {
+                username = project.findProperty("ossrhUsername") ?: ""
+                password = project.findProperty("ossrhPassword") ?: ""
+            }
+        }
+    }
+}
+
+/*
+signing {
+    sign publishing.publications.mavenJava
+    useGpgCmd()
+}
+*/
+
+
+tasks.withType(Javadoc) {
+    options.addBooleanOption('Xdoclint:none', true)
+    options.addStringOption('encoding', 'UTF-8')
+}

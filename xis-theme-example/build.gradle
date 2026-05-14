@@ -1,0 +1,51 @@
+plugins {
+    id 'java'
+    id 'java-library'
+}
+
+group = rootProject.ext.projectGroup
+version = rootProject.ext.projectVersion
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+tasks.withType(JavaCompile) {
+    sourceCompatibility = rootProject.ext.javaVersion.toString()
+    targetCompatibility = rootProject.ext.javaVersion.toString()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(rootProject.ext.javaVersionInt)
+    }
+}
+
+// Local variables for versions
+var lombokVersion = rootProject.ext.libraryVersions.lombok
+
+dependencies {
+    // XIS Framework
+    implementation project(':xis-boot')
+    implementation project(':xis-theme')
+    implementation project(':xis-test')
+
+    // Annotation processors
+    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+    
+    // Lombok
+    implementation "org.projectlombok:lombok:$lombokVersion"
+    compileOnly "org.projectlombok:lombok:$lombokVersion"
+}
+
+// Copy HTML files from src/main/java to build/resources/main
+task copyHtmlFiles(type: Copy) {
+    from('src/main/java') {
+        include '**/*.html'
+    }
+    into 'build/resources/main'
+}
+
+// Make sure HTML files are copied before classes are compiled
+classes.dependsOn copyHtmlFiles

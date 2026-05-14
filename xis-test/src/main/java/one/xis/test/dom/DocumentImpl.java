@@ -1,0 +1,242 @@
+package one.xis.test.dom;
+
+import lombok.Getter;
+import org.graalvm.polyglot.proxy.ProxyExecutable;
+
+import java.net.URI;
+import java.util.List;
+import java.util.Optional;
+
+@Getter
+public class DocumentImpl extends GraalVMProxy implements one.xis.test.dom.Document {
+
+    /**
+     * Dein eigenes Root-Element (kein jsoup-Backer nötig)
+     */
+    public final ElementImpl documentElement;
+
+    /**
+     * wie gehabt
+     */
+    public Location location = new Location();
+    private Window defaultView;
+    private String cookie = "";
+
+    /* ------------------------------------------
+     * Konstruktoren / Fabriken
+     * ------------------------------------------ */
+
+    /**
+     * Baut ein leeres Dokument mit einem Root-OpeningTag deiner Wahl.
+     */
+    public DocumentImpl(String rootTagName) {
+        this.documentElement = new ElementImpl(rootTagName);
+        // Location bleibt leer
+    }
+
+    /**
+     * Baut ein Dokument aus einem vorhandenen (Wrapper-)Root.
+     */
+    public DocumentImpl(ElementImpl documentElement) {
+        this.documentElement = documentElement;
+    }
+
+
+    /**
+     * Creates a DocumentFragment like in the DOM-API.
+     */
+    @Override
+    public DocumentFragmentImpl createDocumentFragment() {
+        return new DocumentFragmentImpl();
+    }
+
+
+    @Override
+    public Element createElement(String name) {
+        return Element.createElement(name);
+    }
+
+    @Override
+    public CommentNode createComment(String content) {
+        return new CommentNodeImpl(content);
+    }
+
+    @Override
+    public Element querySelector(String selector) {
+        return documentElement.querySelector(selector);
+    }
+
+    @Override
+    public List<Element> querySelectorAll(String selector) {
+        return documentElement.querySelectorAll(selector);
+    }
+
+    @Override
+    public TextNode createTextNode(String content) {
+        return new TextNodeImpl(content);
+    }
+
+
+    public String getInnerText() {
+        return documentElement != null ? documentElement.getInnerText() : null;
+    }
+
+    @Override
+    public Element getBody() {
+        var body = documentElement.getElementByTagName("body");
+        if (body == null && "html".equalsIgnoreCase(documentElement.getLocalName())) {
+            body = createElement("body");
+            documentElement.appendChild(body);
+        }
+        return body;
+    }
+
+    @Override
+    public Element getHead() {
+        var head = documentElement.getElementByTagName("head");
+        if (head == null && "html".equalsIgnoreCase(documentElement.getLocalName())) {
+            head = createElement("head");
+            documentElement.insertBefore(head, getBody());
+        }
+        return head;
+    }
+
+    @Override
+    public String getTitle() {
+        return Optional.ofNullable((ElementImpl) getHead())
+                .map(head -> (ElementImpl) head.getElementByTagName("title"))
+                .map(ElementImpl::getInnerText)
+                .orElse(null);
+    }
+
+    @Override
+    public void setTitle(String title) {
+        var head = (ElementImpl) getHead();
+        if (head == null) {
+            head = (ElementImpl) createElement("head");
+            documentElement.insertBefore(head, getBody());
+        }
+        var titleElement = (ElementImpl) head.getElementByTagName("title");
+        if (titleElement == null) {
+            titleElement = (ElementImpl) createElement("title");
+            head.appendChild(titleElement);
+        }
+        titleElement.setInnerText(title);
+    }
+
+    @Override
+    public String getCookie() {
+        return cookie;
+    }
+
+    @Override
+    public void setCookie(String cookie) {
+        this.cookie = cookie;
+    }
+
+    @Override
+    public String getCookies() {
+        return cookie;
+    }
+
+    @Override
+    public void setCookies(String cookies) {
+        this.cookie = cookies;
+    }
+
+    @Override
+    public Window getDefaultView() {
+        return defaultView;
+    }
+
+    public void setDefaultView(Window defaultView) {
+        this.defaultView = defaultView;
+    }
+
+    @Override
+    public NodeList getElementsByTagName(String name) {
+        return documentElement.getElementsByTagName(name);
+    }
+
+    @Override
+    public Element getElementById(String id) {
+        return documentElement.getElementById(id);
+    }
+
+    @Override
+    public Object getMember(String key) {
+        if ("getElementById".equals(key)) {
+            ProxyExecutable executable = arguments -> getElementById(arguments[0].asString());
+            return executable;
+        }
+        return super.getMember(key);
+    }
+
+    @Override
+    public <E extends Element> E getElementById(String id, Class<E> elementClass) {
+        return elementClass.cast(getElementById(id));
+    }
+
+    @Override
+    public InputElement getInputElementById(String id) {
+        var e = getElementById(id);
+        return e instanceof InputElement inputElement ? inputElement : null;
+    }
+
+    @Override
+    public Element getElementByTagName(String name) {
+        var list = getElementsByTagName(name);
+        return switch (list.length) {
+            case 0 -> null;
+            case 1 -> (ElementImpl) list.item(0);
+            default -> throw new IllegalStateException("too many results for " + name);
+        };
+    }
+
+    @Override
+    public String asString() {
+        return documentElement != null ? documentElement.asString() : null;
+    }
+
+    @Override
+    public List<Element> getElementsByClass(String clazz) {
+        return documentElement.getElementsByClass(clazz);
+    }
+
+    @Override
+    public String getTextContent() {
+        return getDocumentElement().asString();
+    }
+
+    /* ------------------------------------------
+     * intern
+     * ------------------------------------------ */
+
+    private void setLocationFromHref(String href) {
+        if (href == null || href.isEmpty()) {
+            this.location = new Location("/", "");
+            return;
+        }
+        URI u = URI.create(href);
+        String path = (u.getPath() == null || u.getPath().isEmpty()) ? "/" : u.getPath();
+        this.location = new Location(path, u.toString());
+    }
+
+    /**
+     * Tiefe Konvertierung: jsoup-Element -> ElementImpl (+ Kinder/Attribute).
+     */
+    private static ElementImpl convertFromJsoupElement(org.jsoup.nodes.Element e) {
+        ElementImpl el = Element.createElement(e.tagName());
+        // Attribute übernehmen
+        e.attributes().forEach(a -> el.setAttribute(a.getKey(), a.getValue()));
+        // Kinder rekursiv übernehmen
+        e.childNodes().forEach(n -> {
+            if (n instanceof org.jsoup.nodes.TextNode tn) {
+                el.appendChild(new TextNodeImpl(tn.text()));
+            } else if (n instanceof org.jsoup.nodes.Element ce) {
+                el.appendChild(convertFromJsoupElement(ce));
+            } // Kommentare/andere Knotentypen: optional ignorieren
+        });
+        return el;
+    }
+}

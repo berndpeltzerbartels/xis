@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:xis="https://xis.one/xsd">
+<head>
+    <title>LocalStorage Property Access Test</title>
+</head>
+<body>
+    <h1>LocalStorage Property Access Test</h1>
+    
+    <div id="darkModeDisplay" xis:if="localStorage.darkMode == 'true'">
+        Dark mode is active
+    </div>
+    
+    <div id="themeDisplay">
+        Theme: ${localStorage.theme}
+    </div>
+    
+    <div id="userNameDisplay" xis:if="localStorage.user.name">
+        User: ${localStorage.user.name}
+    </div>
+    
+    <div id="userAgeDisplay" xis:if="localStorage.user.age > 0">
+        Age: ${localStorage.user.age}
+    </div>
+</body>
+</html>

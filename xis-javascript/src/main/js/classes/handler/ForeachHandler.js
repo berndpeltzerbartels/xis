@@ -1,0 +1,115 @@
+class ForeachHandler extends TagHandler {
+
+    constructor(tag, tagHandlers) {
+        super(tag);
+
+        this.tagHandlers = tagHandlers;
+
+        this.arrayExpression = new ExpressionParser(elFunctions).parse(this.getAttribute('array'));
+
+        this.varName = this.getAttribute('var');
+        this.type = 'foreach-handler';
+        this.priority = 'high';
+
+        // --- Anchors ---
+        this.startAnchor = document.createComment('xis:foreach');
+        this.endAnchor   = document.createComment('/xis:foreach');
+
+        const parent = tag.parentNode;
+        parent.insertBefore(this.startAnchor, tag);
+        parent.insertBefore(this.endAnchor, tag.nextSibling);
+
+        // --- Template snapshot ---
+        const templateNodes = nodeListToArray(tag.childNodes);
+
+        this.cache = new ForEachNodeCache(templateNodes);
+
+        // remove tag completely
+        tag.remove();
+
+        // Note: We don't store parentElement because it can change (e.g., when moved to DocumentFragment buffer).
+        // Instead, we always derive it from the anchors.
+    }
+
+    refresh(data) {
+
+        let arr = this.arrayExpression.evaluate(data);
+
+        // indirect array reference
+        if (typeof arr === 'string') {
+            arr = data.getValue(this.doSplit(arr, '.'));
+        }
+
+        if (!Array.isArray(arr)) {
+            this.clearRange();
+            return;
+        }
+
+        this.cache.sizeUp(arr.length);
+
+        for (let i = 0; i < this.cache.length; i++) {
+
+            const children = this.cache.getChildren(i);
+
+            if (i < arr.length) {
+
+                const subData = new Data({}, data);
+                this.setValidationPath(subData, this.varName, i);
+
+                subData.setValue([this.varName + 'Index'], i);
+                subData.setValue([this.varName], arr[i]);
+
+                for (const child of children) {
+
+                    // Get current parent from anchor (handles DocumentFragment buffer case)
+                    const currentParent = this.startAnchor.parentNode;
+                    
+                    if (child.parentNode !== currentParent) {
+                        currentParent.insertBefore(child, this.endAnchor);
+                    }
+
+                    const handler = this.tagHandlers.getRootHandler(child);
+                    handler.parentHandler = this;
+                    this.descendantHandlers.push(handler);
+
+                    handler.refresh(subData);
+                }
+
+            } else {
+                // cache too long → detach unused nodes
+                const currentParent = this.startAnchor.parentNode;
+                for (const child of children) {
+                    if (child.parentNode === currentParent) {
+                        child.remove();
+                    }
+                }
+            }
+        }
+    }
+
+    stateRefresh(data, invoker) {
+        if (this === invoker) return;
+        this.refresh(data);
+    }
+
+    clearRange() {
+        let n = this.startAnchor.nextSibling;
+        while (n && n !== this.endAnchor) {
+            const next = n.nextSibling;
+            n.remove();
+            n = next;
+        }
+    }
+
+    setValidationPath(subData, varName, index) {
+        if (!subData.validationPath) return;
+        subData.validationPath += '/' + varName + '[' + index + ']';
+    }
+
+    variableToKey(variable) {
+        if (variable.startsWith('${') && variable.endsWith('}')) {
+            return variable.slice(2, -1);
+        }
+        return variable;
+    }
+}

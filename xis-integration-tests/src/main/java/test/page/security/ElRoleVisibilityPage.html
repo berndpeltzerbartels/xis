@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html xmlns:xis="http://xis.one/html">
+<head>
+    <title>EL role visibility</title>
+</head>
+<body>
+<div id="admin-action" xis:if="isUserInRole('ADMIN')">Admin</div>
+<div id="support-or-admin-action" xis:if="isUserInRoles('SUPPORT', 'ADMIN')">Support or admin</div>
+<div id="array-role-action" xis:if="isUserInRoles(visibleRoles)">Visible by array</div>
+<div id="user-action" xis:if="isUserInRole('USER')">User</div>
+</body>
+</html>

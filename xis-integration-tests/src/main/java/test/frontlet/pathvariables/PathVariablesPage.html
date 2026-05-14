@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html xmlns:xis="https://xis.one/xsd" lang="en">
+<head>
+    <title>${title}</title>
+</head>
+<body>
+<h1>${title}</h1>
+<!-- Note: default-frontlets are intentionally swapped to show that @Frontlet annotation wins -->
+<div id="container1" xis:frontlet-container="container1" xis:default-frontlet="ProductFrontlet2"></div>
+<div id="container2" xis:frontlet-container="container2" xis:default-frontlet="ProductFrontlet1"></div>
+</body>
+</html>

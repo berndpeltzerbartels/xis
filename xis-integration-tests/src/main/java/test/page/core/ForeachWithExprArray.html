@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:xis="https://xis.one/xsd">
+<head>
+    <title>ForeachTag</title>
+</head>
+<body>
+
+<div id="list1">
+    <xis:foreach var="item" array="${arrayName1}">
+        <div class="item1">${item}</div>
+    </xis:foreach>
+</div>
+
+<div id="list2">
+    <div class="item2" xis:repeat="item:${arrayName2}">${item}</div>
+</div>
+</body>
+</html>

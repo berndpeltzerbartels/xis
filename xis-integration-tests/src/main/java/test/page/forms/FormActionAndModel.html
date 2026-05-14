@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:xis="http://xis.one/schema" lang="us-en" xml:lang="us-en">
+<head>
+    <title>ActionAndModel</title>
+</head>
+<body>
+<xis:form binding="formObject">
+
+    <div>
+        <input type="text" xis:binding="property1" id="field1" value="input"/>
+        <label for="field1">Property 1</label>
+
+    </div>
+
+    <div id="result">${result}</div>
+
+    <div>
+        <button xis:action="save" id="save" type="submit">Save</button>
+    </div>
+
+</xis:form>
+</body>
+</html>

@@ -1,0 +1,157 @@
+plugins {
+    id "java"
+    id "maven-publish"
+}
+
+ext {
+    // Java-Version für alle Projekte
+    javaVersion = JavaVersion.VERSION_17
+    javaVersionInt = 17
+
+    // Zentrale Abhängigkeitsversionen
+    libraryVersions = [
+            junit            : "5.8.2",
+            assertj          : "3.26.0",
+            lombok           : "1.18.22",
+            reflections      : "0.10.2",
+            guava            : "31.1-jre",
+            "tinylog"        : "2.6.1",
+            "dom4j"          : "1.6.1",
+            "slf4j"          : "2.0.3",
+            "mockito"        : "5.2.0",
+            "gson"           : "2.10.1",
+            "jackson"        : "2.17.2",
+            "jacksonDatabind": "2.17.2",
+            "springBoot"     : "3.3.0",
+            "netty"          : "4.2.9.Final",
+            "springContext"  : "5.3.20",
+            "groovy"         : "4.0.24",
+            "jakartaInject"  : "2.0.1",
+            "mongodb"        : "5.6.1",
+            "testcontainers" : "1.20.6",
+            "postgresql"     : "42.7.4",
+            "mariadb"        : "3.5.1",
+            "hikariCP"       : "5.1.0"
+    ]
+
+    // Zentrale Gruppen- und Versionsdefinition
+    projectGroup = "one.xis"
+}
+
+allprojects {
+    group = rootProject.ext.projectGroup
+    version = project.projectVersion
+
+    repositories {
+        mavenCentral()
+    }
+}
+
+subprojects {
+    apply plugin: "java"
+
+    tasks.withType(JavaCompile) {
+        sourceCompatibility = rootProject.ext.javaVersion.toString()
+        targetCompatibility = rootProject.ext.javaVersion.toString()
+        options.encoding = "UTF-8"
+    }
+
+    tasks.withType(Javadoc) {
+        options.encoding = "UTF-8"
+        options.addStringOption("charset", "UTF-8")
+        options.addStringOption("docencoding", "UTF-8")
+    }
+
+}
+if (gradle.startParameter.taskNames.any { it.endsWith('createReleaseZip') }) {
+    println "Release mode activated by 'createReleaseZip' task."
+    subprojects {
+        ext.profile = 'release'
+    }
+}
+
+def releaseCoordinates = {
+    def coordinates = []
+    subprojects.each { subproject ->
+        def publishing = subproject.extensions.findByType(PublishingExtension)
+        if (publishing != null) {
+            publishing.publications.withType(MavenPublication).each { publication ->
+                coordinates << "${publication.groupId}:${publication.artifactId}"
+            }
+        }
+    }
+    coordinates.unique().sort()
+}
+
+def localReleaseArtifactDir = { String coordinate ->
+    def parts = coordinate.split(':')
+    if (parts.length != 2) {
+        throw new GradleException("Invalid release coordinate: ${coordinate}")
+    }
+    def groupPath = parts[0].replace('.', File.separator)
+    new File(System.getProperty("user.home"), ".m2/repository/${groupPath}/${parts[1]}/${project.projectVersion}")
+}
+
+task cleanLocalReleaseArtifacts {
+    group = 'distribution'
+    description = 'Removes local Maven artifacts for the current release coordinates before publishing them again.'
+
+    doLast {
+        releaseCoordinates().each { coordinate ->
+            delete localReleaseArtifactDir(coordinate)
+        }
+    }
+}
+
+task systemTest {
+    group = 'verification'
+    description = 'Runs Docker-backed system tests.'
+    dependsOn ':xis-system-tests:systemTest'
+}
+
+task createReleaseZip(type: JavaExec) {
+    group = 'distribution'
+    description = 'Creates a zip file with all release artifacts for Maven Central.'
+
+    dependsOn cleanLocalReleaseArtifacts
+    dependsOn systemTest
+
+    dependsOn {
+        subprojects.collect { it.tasks.withType(PublishToMavenLocal) }
+    }
+
+    mustRunAfter {
+        subprojects.collect { it.tasks.withType(PublishToMavenLocal) }
+    }
+
+    subprojects.each { subproject ->
+        subproject.tasks.withType(PublishToMavenLocal).configureEach {
+            mustRunAfter cleanLocalReleaseArtifacts
+        }
+    }
+
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'ReleaseZip'
+
+    doFirst {
+        setArgs([
+                project.group.toString(),
+                project.projectVersion.toString(),
+                (findProperty('skipSigning') ?: 'false').toString(),
+                *releaseCoordinates()
+        ])
+    }
+}
+
+
+test {
+    useJUnitPlatform()
+    systemProperty "file.encoding", "UTF-8"
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+    afterTest { desc, result ->
+        logger.quiet "${desc.className} - ${desc.name}: ${result.resultType}"
+    }
+    maxParallelForks = 4
+}

@@ -1,0 +1,34 @@
+package test.page.core;
+
+import one.xis.context.IntegrationTestContext;
+import one.xis.test.dom.Element;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+class ForeachWithExprArrayTest {
+
+    private IntegrationTestContext testContext;
+
+    @BeforeEach
+    void init() {
+        testContext = IntegrationTestContext.builder()
+                .withSingleton(ForeachWithExprArray.class)
+                .build();
+    }
+
+    @Test
+    void test() {
+        var client = testContext.openPage(ForeachWithExprArray.class);
+
+        var div1 = client.getDocument().getElementById("list1");
+        var div2 = client.getDocument().getElementById("list2");
+        var list1 = div1.getElementsByClass("item1");
+        var list2 = div2.getElementsByClass("item2");
+
+        assertThat(list1.stream().map(Element::getInnerText)).containsExactly("1", "2", "3");
+        assertThat(list2.stream().map(Element::getInnerText)).containsExactly("4", "5", "6");
+    }
+
+}

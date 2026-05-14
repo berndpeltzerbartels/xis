@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:xis="http://xis.one/html">
+<head>
+    <title>Groovy</title>
+</head>
+<body>
+<h1 id="headline">${headline}</h1>
+<p id="saved">${saved}</p>
+
+<form xis:binding="form">
+    <input id="name" xis:binding="name" xis:error-class="error"/>
+    <div xis:message-for="name"></div>
+    <input id="amount" xis:binding="amount" xis:error-class="error"/>
+    <div xis:message-for="amount"></div>
+    <button id="save" xis:action="save">Save</button>
+</form>
+</body>
+</html>

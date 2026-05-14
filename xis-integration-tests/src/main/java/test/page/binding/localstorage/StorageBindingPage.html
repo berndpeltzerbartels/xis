@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:xis="https://xis.one/xsd">
+<head>
+    <title>Storage Binding Test</title>
+</head>
+<body>
+<h1>Storage Binding Test</h1>
+
+
+<p>
+    Items in cart (via products):
+    <span id="item-count" xis:storage-binding="localStorage">
+            ${count(localStorage.shoppingCard.products)} items
+        </span>
+</p>
+
+
+<!-- Storage binding for total price -->
+<p>
+    Total price:
+    <span id="total-price" xis:storage-binding="localStorage">
+        €${sum(flatMap(localStorage.shoppingCard,'products.price'))}
+        </span>
+</p>
+
+<!-- Frontlet with product links -->
+<div id="product-frontlet-container" xis:frontlet-container="product-frontlet-container" xis:default-frontlet="ProductFrontlet">
+</div>
+</body>
+</html>

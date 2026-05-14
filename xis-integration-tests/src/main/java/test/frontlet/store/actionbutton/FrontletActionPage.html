@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="us-en" xmlns:xis="http://xis.one/schema">
+<head>
+    <title>Frontlet Action Reactive Test</title>
+</head>
+<body>
+<h1>Counter on Page:
+    <span id="counter-value-page" xis:storage-binding="sessionStorage">${defaultValue(sessionStorage.counter.value, '0')}</span>
+</h1>
+<div xis:frontlet-container="frontlet-area" xis:default-frontlet="FrontletActionFrontlet" id="frontlet-container"></div>
+</body>
+</html>

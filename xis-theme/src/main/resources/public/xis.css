@@ -1,0 +1,632 @@
+/* =========================================
+   XIS Base UI – clean optimized
+   - Crisp typography
+   - Navigation with dropdowns
+   - Grid system
+   - Form controls incl. buttons
+========================================= */
+
+*,*::before,*::after{ box-sizing:border-box; }
+
+html,body{
+  margin:0;
+  font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Arial,sans-serif;
+  font-size: var(--base-font);
+  line-height: var(--line-height);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body{ padding-inline: 15px; }
+
+h1, h2{
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin: 1.5rem 0 1rem;
+  letter-spacing: -0.01em;
+}
+h3 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 1.5rem 0 1rem;
+}
+h4 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 1.3rem 0 1rem;
+  text-transform: uppercase;
+}
+h5 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 1.2rem 0 1rem;
+  text-transform: uppercase;
+}
+h6 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 1.2rem 0 1rem;
+  color: var(--accent);
+  text-transform: uppercase;
+}
+p {
+  font-size: var(--form-font);
+}
+
+/* =========================================
+   Links (Content)
+========================================= */
+a {
+  color: var(--text);
+  text-decoration: underline;
+}
+a:hover {
+  color: var(--accent);
+}
+
+/* =========================================
+   Navigation
+========================================= */
+.nav{
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 0;
+  min-height: var(--nav-h);
+  display:flex; align-items:center; justify-content:space-between;
+}
+.nav .logo{ display:flex; align-items:center; gap:8px; }
+.nav .logo img{ height:32px; width:auto; }
+
+.nav ul{
+  display:flex; gap:24px; list-style:none; margin:0; padding:0; align-items:center;
+}
+.nav li{ position:relative; display:flex; align-items:center; }
+.nav a{
+  text-decoration:none; color:#333; font-weight:500; font-size:1rem;
+  padding:0 4px; height:var(--nav-h); display:flex; align-items:center;
+  border-radius:4px; transition:color .2s ease;
+}
+.nav a:hover,.nav a.active{ color:var(--accent); }
+.nav a.active{ border-bottom:2px solid var(--accent); padding-bottom:0; }
+
+/* --- Dropdowns (Untermenüs) --- */
+.nav li ul{
+  position:absolute; top:100%; left:0;
+  background:var(--bg);
+  border:1px solid var(--border);
+  border-radius:6px;
+  list-style:none; margin:0; padding:8px 0;
+  min-width:var(--submenu-minw);
+  max-width:min(90vw,var(--submenu-maxw));
+  display:none; flex-direction:column; z-index:1000;
+  box-shadow:0 6px 20px rgba(0,0,0,.08);
+}
+
+.nav li:hover>ul,
+.nav li:focus-within>ul{ display:flex; }
+
+/* Right-edge protection: last two items align dropdown to the right */
+.nav>ul>li:last-child>ul,
+.nav>ul>li:nth-last-child(2)>ul{ left:auto; right:0; }
+
+.nav li ul li{ display:block; }
+.nav li ul a{
+  height:auto; padding:8px 16px; font-size:.95rem; display:block;
+  color:#333; border-radius:0; line-height:1.4;
+}
+.nav li ul a:hover,
+.nav li ul a:focus{ background:var(--hover); color:var(--accent); outline:none; }
+
+/* Nested submenus: open to the side.
+   For rightmost items, open to the left to avoid overflow */
+.nav li li{ position:relative; }
+.nav li li>ul{ top:0; left:100%; }
+.nav>ul>li:last-child li>ul,
+.nav>ul>li:nth-last-child(2) li>ul{ left:auto; right:100%; }
+
+/* Reduced motion: no shadows/animations for sensitive users */
+@media (prefers-reduced-motion: reduce){
+  .nav a{ transition:none; }
+  .nav li ul{ box-shadow:none; }
+}
+
+/* Mobile: stack menu; dropdowns flow inline */
+@media (max-width: 900px){
+  .nav ul{ gap:12px; flex-wrap:wrap; }
+  .nav li ul{
+    position:static; border:none; box-shadow:none;
+    display:none; padding:4px 0; min-width:0; max-width:100%;
+  }
+  .nav li:hover>ul, .nav li:focus-within>ul{ display:block; }
+}
+
+/* =========================================
+   Grid System (2–11 cols) – aligned tops
+========================================= */
+.wrapper {
+    width: 100%;
+    max-width: 1300px;
+    padding: 0 25px;
+    margin: 0 auto;
+}
+.col2,.col3,.col4,.col5,.col6,.col7,.col8,.col9,.col10,.col11{
+    padding: var(--container-pad) calc(var(--container-pad)/2);
+    display:grid; gap:var(--grid-gap); align-items:start;
+}
+.col2  { grid-template-columns: repeat(2, minmax(0,1fr)); }
+.col3  { grid-template-columns: repeat(3, minmax(0,1fr)); }
+.col4  { grid-template-columns: repeat(4, minmax(0,1fr)); }
+.col5  { grid-template-columns: repeat(5, minmax(0,1fr)); }
+.col6  { grid-template-columns: repeat(6, minmax(0,1fr)); }
+.col7  { grid-template-columns: repeat(7, minmax(0,1fr)); }
+.col8  { grid-template-columns: repeat(8, minmax(0,1fr)); }
+.col9  { grid-template-columns: repeat(9, minmax(0,1fr)); }
+.col10 { grid-template-columns: repeat(10, minmax(0,1fr)); }
+.col11 { grid-template-columns: repeat(11, minmax(0,1fr)); }
+
+.span1{ grid-column:span 1; }
+.span2{ grid-column:span 2; }
+.span3{ grid-column:span 3; }
+.span4{ grid-column:span 4; }
+.span5{ grid-column:span 5; }
+.span6{ grid-column:span 6; }
+.span7{ grid-column:span 7; }
+.span8{ grid-column:span 8; }
+.span9{ grid-column:span 9; }
+
+[class^="col"] > :not(input):not(select):not(textarea){
+  display:flex; flex-direction:column; gap:8px; margin:0; align-items:stretch;
+}
+[class^="col"] > input,
+[class^="col"] > select,
+[class^="col"] > textarea{ margin:0; }
+
+/* =========================================
+   Form Controls (inkl. Buttons)
+========================================= */
+form {
+  font-size: var(--form-font);
+}
+legend {
+    color: var(--muted);
+    font-size: var(--form-font);
+}
+input,select,textarea{
+  display:block;
+  font-size:1rem; line-height:1.2;
+  height:var(--ctrl-h);
+  padding:10px 12px;
+  border:1px solid var(--field-border);
+  border-radius:var(--radius);
+  background:var(--bg); color:var(--text);
+  width:100%;
+  font-size: var(--form-font);
+}
+textarea {
+    height:auto; 
+    min-height: 120px; 
+    resize:vertical;
+}
+fieldset {
+    border: 1px solid var(--field-border);
+    border-radius:var(--radius);
+    font-size: var(--form-font);
+}
+label{
+    display: inline-block;
+    font-size:.8rem; 
+    font-weight: 700;
+    line-height:1.25; 
+    color:var(--muted); 
+    margin: 0 0 15px 0;
+}
+
+/* Checkboxes & Radio Buttons */
+input[type="checkbox"], 
+input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    background-color: #000;
+    border: 1px solid #fff;
+    border-radius: 2px;
+    display: inline-block;
+    cursor: pointer;
+    vertical-align: middle;
+    flex-shrink: 0;
+}
+
+input[type="radio"] {
+    border-radius: 50%;
+}
+
+/* Labels next to checkboxes/radios: horizontal alignment */
+input[type="checkbox"] + label, 
+input[type="radio"] + label {
+    display: inline-block;
+    margin: 0 0 0 8px;
+    font-size: 1rem; 
+    font-weight: 400;
+    color: var(--text);
+    cursor: pointer;
+    vertical-align: middle;
+    line-height: 1.4;
+}
+
+/* Checkbox/Radio Groups with optional title and border */
+.checkbox-group,
+.radio-group {
+    border: 1px solid var(--field-border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 32px;
+    background: var(--bg);
+}
+
+/* First child as group title (if not an input) */
+.checkbox-group > :first-child:not(input):not(:has(input)),
+.radio-group > :first-child:not(input):not(:has(input)) {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 8px;
+}
+
+/* Container with checkboxes - larger top margin for spacing from title */
+.checkbox-group > .col2,
+.checkbox-group > .col3,
+.checkbox-group > .col4,
+.radio-group > .col2,
+.radio-group > .col3,
+.radio-group > .col4 {
+    margin-top: 4px;
+    row-gap: 12px !important;
+}
+
+/* All children after title - includes the checkbox containers */
+.checkbox-group > :not(:first-child),
+.radio-group > :not(:first-child) {
+    margin-bottom: 0;
+}
+
+/* Checkbox/Radio items inside groups - indented */
+.checkbox-group > :has(> input[type="checkbox"]),
+.radio-group > :has(> input[type="radio"]) {
+    padding-left: 12px;
+    margin-bottom: 12px;
+}
+
+.checkbox-group > :has(> input[type="checkbox"]):last-child,
+.radio-group > :has(> input[type="radio"]):last-child {
+    margin-bottom: 0;
+}
+
+/* Container auto-styling for checkbox/radio + label pairs */
+:has(> input[type="checkbox"]), 
+:has(> input[type="radio"]) {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Outside of groups, add vertical spacing */
+:not(.checkbox-group):not(.radio-group) > :has(> input[type="checkbox"]),
+:not(.checkbox-group):not(.radio-group) > :has(> input[type="radio"]) {
+    margin-bottom: 16px;
+}
+
+:has(> input[type="checkbox"]) label,
+:has(> input[type="radio"]) label {
+    margin: 0;
+}
+
+input:focus,select:focus,textarea:focus{
+  outline:none;
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px color-mix(in oklab, var(--accent) 15%, transparent);
+  transition:border-color .15s, box-shadow .15s;
+}
+
+/* Buttons */
+button,
+input[type="submit"],
+input[type="button"],
+input[type="reset"] {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  height: var(--ctrl-h);
+  padding: 0 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .2s, box-shadow .2s;
+}
+button:hover,
+input[type="submit"]:hover,
+input[type="button"]:hover,
+input[type="reset"]:hover {
+  background: color-mix(in srgb, var(--accent) 85%, black);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+button:active,
+input[type="submit"]:active {
+  background: color-mix(in srgb, var(--accent) 75%, black);
+}
+button:disabled,
+input[type="submit"]:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+/* Neutraler Sekundär-Button */
+.button-secondary {
+  background: #e5e7eb;
+  color: #111;
+}
+.button-secondary:hover {
+  background: #d1d5db;
+}
+
+/* =========================================
+   Code
+========================================= */
+    code {
+      display: block;
+      width: 100%;
+      margin: 15px 0;
+      padding: 15px !important;
+      color: var(--text);
+      hyphens: auto !important;
+      /*font-size: var(--form-font);
+      background-color: #eee;
+      border:1px solid var(--field-border);
+      border-radius: var(--radius);*/
+    }
+
+/* =========================================
+   Tables
+========================================= */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      background: var(--bg);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      border: 1px solid var(--border);
+    }
+    
+    table thead {
+      background: var(--bg-secondary);
+      border-bottom: 2px solid var(--border);
+    }
+    
+    table th {
+      padding: 12px 16px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 0.875rem;
+      color: var(--text);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+      font-size: var(--form-font);
+    }
+    
+    table tbody tr:hover {
+      background: var(--hover);
+    }
+    
+    table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+/* =========================================
+   Sidebar
+========================================= */
+    .contenttable {
+      width: 250px;
+      padding: 20px 50px 0 0;
+      float: left;
+    }
+    .contenttable ul {
+      margin: 0 0 30px 0;
+      padding: 0;
+    }
+    .contenttable ul li {
+      margin: 0 0 8px 0;
+      list-style: none;
+      font-size: 0.8rem;
+    }
+    .contenttable ul li a {
+      text-decoration: none;
+      color: var(--text);
+    }
+    .contenttable ul li a:hover {
+        color: var(--accent);
+    }
+    .maincontent {
+      width: calc(100% - 300px);
+      font-size: var(--form-font);
+      float: right;
+    }
+
+/* =========================================
+   Panels
+========================================= */
+    .warning, .tipp, .message {
+      width: calc(100%-20px);
+      margin: 20px 0;
+      padding: 20px 20px 20px 30px;
+      color: var(--text);
+      border: 1px solid #ccc;
+      border-left: 10px solid var(--accent);
+      background-color: #fff5f5;
+      border-radius: var(--radius);
+      font-size: 0.8rem;
+      font-weight: 400;
+    }
+    .tipp {
+      border-left: 10px solid green;
+      background-color: #f6fcf7;
+    }
+    .message {
+      border-left: 10px solid #000d86;
+      background-color: #f4f5ff;
+    }
+
+/* =========================================
+   Responsive
+========================================= */
+@media (max-width:640px){
+  :root{ --base-font: 17px; }
+  h1{ font-size: 2rem; }
+  .contenttable {
+    display: none
+  }
+}
+/* Container für jedes Feld */
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 1rem;
+}
+
+/* Standard Input */
+.form-field input {
+  border: 1px solid var(--field-border);
+}
+
+/* Fehlerzustand */
+.form-field.error input {
+  border-color: #dc2626; /* Rot */
+  background: #fef2f2;   /* zartes Rot */
+}
+.form-field.error label {
+  color: #dc2626;
+}
+
+/* Kurztext unter dem Feld */
+.form-error {
+  font-size: 0.8rem;
+  color: #dc2626;
+  line-height: 1;
+  margin: 0 0 -6px 0;
+}
+
+/* Globale Meldung oben im Formular */
+.form-error-global {
+  /*background: #fef2f2;
+  border: 1px solid #dc2626;*/
+  color: #b91c1c;
+  /*padding: 12px 16px;*/
+  border-radius: var(--radius);
+  margin: 20px 0 0 0;
+  font-size: 0.95rem;
+}
+
+/* Container fixiert oben rechts */
+.toast-container {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 2000;
+  pointer-events: none;
+}
+
+/* Toast-Grundstil */
+.toast {
+  padding: 12px 16px;
+  border-radius: var(--radius);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  color: #fff;
+  font-size: 0.95rem;
+  animation: fadein 0.3s ease, fadeout 0.3s ease 4.7s forwards;
+  min-width: 240px;
+  max-width: 340px;
+}
+
+/* Fehler-Toast */
+.toast.error {
+  background: #dc2626;
+}
+
+/* Erfolg (falls du es nutzen willst) */
+.toast.success {
+  background: #16a34a;
+}
+
+/* Warnung */
+.toast.warning {
+  background: #d97706;
+}
+
+/* Modal dialogs */
+.xis-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1600;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.xis-modal-backdrop[hidden] {
+  display: none;
+}
+
+.xis-modal-shell {
+  position: relative;
+  width: min(720px, 100%);
+  max-height: min(780px, calc(100vh - 48px));
+  overflow: auto;
+  padding: 28px;
+  border: 1px solid var(--field-border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: 0 24px 64px rgba(15, 23, 42, 0.28);
+}
+
+.xis-modal-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.xis-modal-close:hover,
+.xis-modal-close:focus {
+  color: var(--text);
+}
+
+/* Keyframes für sanftes Ein-/Ausblenden */
+@keyframes fadein {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeout {
+  to { opacity: 0; transform: translateY(-10px); }
+}

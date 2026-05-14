@@ -1,0 +1,97 @@
+package one.xis.js.tags;
+
+import one.xis.js.Javascript;
+import one.xis.test.dom.*;
+import one.xis.test.js.JSUtil;
+import one.xis.test.js.LocalStorage;
+import one.xis.test.js.SessionStorage;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import javax.script.ScriptException;
+import java.util.HashMap;
+import java.util.Map;
+
+import static one.xis.js.JavascriptSource.*;
+import static org.assertj.core.api.Assertions.assertThat;
+
+class ForeachHandlerTest {
+
+    private DocumentImpl document;
+    private ElementImpl foreach;
+    private Map<String, Object> nodeMock;
+
+
+    @BeforeEach
+    void initDocument() {
+        nodeMock = new HashMap<>();
+        nodeMock.put("ELEMENT_NODE", 1);
+        document = (DocumentImpl) Document.of("<html><body><div id=\"system-messages\"></div></body></html>");
+
+        var body = document.getElementByTagName("body");
+        var div1 = document.createElement("div");
+        var div2 = document.createElement("div");
+
+        div1.setAttribute("class", "div1");
+        div2.setAttribute("class", "div2");
+
+        foreach = new ElementImpl("xis:foreach");
+        foreach.setAttribute("array", "a.b.c");
+        foreach.setAttribute("var", "x");
+        foreach.appendChild(div1);
+        foreach.appendChild(div2);
+
+        body.appendChild(foreach);
+    }
+
+    @Test
+    void iterate() throws ScriptException {
+        var script = Javascript.getScript(CLASSES, FUNCTIONS, TEST, TEST_APP_INSTANCE);
+        script += "var Node = { ELEMENT_NODE:1 };"; // Mock Node class for testing
+        script += "var data = new Data({\"a\": {\"b\": {\"c\": [{\"id\": 1, \"title\": \"title1\"}, {\"id\": 2, \"title\": \"title2\"}, {\"id\": 3, \"title\": \"title3\"}]}}});";
+        script += "var tagHandlers = {getRootHandler(e) { return { refresh(data){} };}};";
+        script += "var initializer = new Initializer(new DomAccessor(), null, null, null, tagHandlers);";
+        script += "var handler = new ForeachHandler(foreach, tagHandlers);";
+        script += "handler.refresh(data);";
+
+        JSUtil.execute(script, Map.of("foreach", foreach, "document", document, "window", new Window(new Location()), "Node", nodeMock,
+                "localStorage", new LocalStorage(), "sessionStorage", new SessionStorage()));
+
+        var body = document.getElementByTagName("body");
+        var childElementClasses = body.getChildElements().stream()
+                .filter(e -> !"system-messages".equals(e.getAttribute("id"))) // String literal first to avoid NPE
+                .map(Element::getCssClasses)
+                .map(cl -> String.join(" ", cl))
+                .toList();
+
+        // Body should contain: system-messages div + 6 generated elements + 2 comment anchors
+        assertThat(body.getChildNodes().length).isEqualTo(9); // 1 system-messages + 6 elements + 2 comments
+
+        assertThat(childElementClasses.get(0)).isEqualTo("div1");
+        assertThat(childElementClasses.get(1)).isEqualTo("div2");
+        assertThat(childElementClasses.get(2)).isEqualTo("div1");
+        assertThat(childElementClasses.get(3)).isEqualTo("div2");
+        assertThat(childElementClasses.get(4)).isEqualTo("div1");
+        assertThat(childElementClasses.get(5)).isEqualTo("div2");
+    }
+
+    @Test
+    void decreaseElementCount() throws ScriptException {
+        var script = Javascript.getScript(CLASSES, FUNCTIONS, TEST, TEST_APP_INSTANCE);
+        script += "var Node = { ELEMENT_NODE:1 };"; // Mock Node class for testing
+        script += "var data1 = new Data({\"a\": {\"b\": {\"c\": [{\"id\": 1, \"title\": \"title1\"}, {\"id\": 2, \"title\": \"title2\"}, {\"id\": 3, \"title\": \"title3\"}]}}});";
+        script += "var data2 = new Data({\"a\": {\"b\": {\"c\": [{\"id\": 1, \"title\": \"title1\"}]}}});";
+        script += "var tagHandlers = {getRootHandler(e) { return { refresh(data){} };}};";
+        script += "var initializer = new Initializer(new DomAccessor(), null, null, null, tagHandlers);";
+        script += "var handler = new ForeachHandler(foreach, tagHandlers);";
+        script += "handler.refresh(data1);"; // length = 3
+        script += "handler.refresh(data2);";// length = 1
+        JSUtil.execute(script, Map.of("foreach", foreach, "document", document, "window", new Window(new Location()), "Node", nodeMock,
+                "localStorage", new LocalStorage(), "sessionStorage", new SessionStorage()));
+        
+        var body = document.getElementByTagName("body");
+        // Body should contain: system-messages div + 2 generated elements (1 iteration) + 2 comment anchors
+        assertThat(body.getChildNodes().length).isEqualTo(5); // 1 system-messages + 2 elements + 2 comments
+    }
+
+}
