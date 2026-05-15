@@ -11,6 +11,7 @@ import one.xis.UserContext;
 import one.xis.server.ClientRequest;
 import one.xis.server.FrontendServiceImpl;
 import one.xis.validation.LabelKey;
+import one.xis.validation.MinLength;
 import one.xis.validation.Validate;
 import one.xis.validation.Validator;
 import one.xis.validation.ValidatorException;
@@ -53,6 +54,7 @@ class AnnotationValidationTest {
                 .withSingleton(TestPage.class)
                 .withSingleton(TestRecordPage.class)
                 .withSingleton(DiscountPage.class)
+                .withSingleton(MinLengthPage.class)
                 .build();
         frontendService = context.getSingleton(FrontendServiceImpl.class);
         RequestContext.createInstance(null, null);
@@ -124,6 +126,24 @@ class AnnotationValidationTest {
                 .containsExactly("Discount must not exceed subtotal");
     }
 
+    @Test
+    void minLengthValidationMessageInterpolatesConfiguredLength() {
+        var model = new MinLengthForm("short");
+        var request = new ClientRequest();
+        request.setPageId("/min-length-test.html");
+        request.setPageUrl("/min-length-test.html");
+        request.setAction("save");
+        request.setFormData(of("formObject", new GsonFactory().gson().toJson(model)));
+        request.setZoneId("Europe/Berlin");
+        request.setLocale(Locale.GERMAN);
+
+        var response = frontendService.processActionRequest(request);
+
+        assertThat(response.getStatus()).isEqualTo(422);
+        assertThat(response.getValidatorMessages().getMessages())
+                .containsEntry("/formObject/description", "Mindestlänge ist 8");
+    }
+
     record TestRecordModel(
             @NotNegative
             @LabelKey("order.total")
@@ -153,6 +173,9 @@ class AnnotationValidationTest {
     record DiscountForm(int subtotal, int discount) {
     }
 
+    record MinLengthForm(@MinLength(8) String description) {
+    }
+
     static class DiscountValidator implements Validator<DiscountForm> {
         @Override
         public void validate(DiscountForm value, AnnotatedElement target, UserContext userContext)
@@ -180,6 +203,16 @@ class AnnotationValidationTest {
         @Action
         void save(@FormData("formObject") DiscountForm form) {
             // Object validation happens before this action can use the DTO.
+        }
+    }
+
+    @Page("/min-length-test.html")
+    @HtmlFile("/TestPage.html")
+    static class MinLengthPage {
+
+        @Action
+        void save(@FormData("formObject") MinLengthForm form) {
+            // Validation happens before this action can use the DTO.
         }
     }
 }

@@ -3,6 +3,7 @@ package one.xis.sql;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
+import java.sql.Connection;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -75,6 +76,42 @@ class SimpleDataSourceTest {
     }
 
     @Test
+    void keepsPhysicalConnectionOpenForH2FileDatabase() throws Exception {
+        SimpleDataSource dataSource = new SimpleDataSource();
+        set(dataSource, "url", "jdbc:h2:file:./build/test-db/simple-datasource-h2-file");
+
+        Connection first = dataSource.getConnection();
+        try (var statement = first.createStatement()) {
+            statement.execute("create table if not exists h2_file_keep_open (id int primary key)");
+        }
+        first.close();
+
+        Connection physical = h2FileConnection(dataSource);
+        assertTrue(physical.isValid(1));
+
+        try (var second = dataSource.getConnection()) {
+            assertTrue(second.isValid(1));
+        }
+
+        assertEquals(physical, h2FileConnection(dataSource));
+        assertTrue(physical.isValid(1));
+
+        dataSource.closeH2FileConnection();
+    }
+
+    @Test
+    void doesNotKeepPhysicalConnectionOpenForH2MemoryDatabase() throws Exception {
+        SimpleDataSource dataSource = new SimpleDataSource();
+        set(dataSource, "url", "jdbc:h2:mem:simple-datasource-h2-memory;DB_CLOSE_DELAY=-1");
+
+        try (var connection = dataSource.getConnection()) {
+            assertTrue(connection.isValid(1));
+        }
+
+        assertEquals(null, h2FileConnection(dataSource));
+    }
+
+    @Test
     void reusesConnectionInRequestOnlyWithoutPooling() throws Exception {
         SimpleDataSource simpleDataSource = new SimpleDataSource();
         SimpleDataSource pooledDataSource = new SimpleDataSource();
@@ -93,6 +130,12 @@ class SimpleDataSourceTest {
             throw new IllegalStateException("No pooled DataSource was created");
         }
         return value;
+    }
+
+    private static Connection h2FileConnection(SimpleDataSource dataSource) throws Exception {
+        Field field = SimpleDataSource.class.getDeclaredField("h2FileConnection");
+        field.setAccessible(true);
+        return (Connection) field.get(dataSource);
     }
 
     private static int invokeInt(Object target, String methodName) throws Exception {

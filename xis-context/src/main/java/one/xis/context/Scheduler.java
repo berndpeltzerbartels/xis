@@ -66,10 +66,10 @@ public class Scheduler {
 
         private ScheduledFuture<?> schedule(ScheduledExecutorService executor) {
             long initialDelay = Math.max(0, scheduled.initialDelay());
-            if (scheduled.fixedRateMillis() > 0) {
-                return executor.scheduleAtFixedRate(this::invoke, initialDelay, scheduled.fixedRateMillis(), TimeUnit.MILLISECONDS);
+            if (scheduled.fixedRate() > 0) {
+                return executor.scheduleAtFixedRate(this::invoke, initialDelay, scheduled.fixedRate(), scheduled.timeUnit());
             }
-            return executor.scheduleWithFixedDelay(this::invoke, initialDelay, scheduled.fixedDelayMillis(), TimeUnit.MILLISECONDS);
+            return executor.scheduleWithFixedDelay(this::invoke, initialDelay, scheduled.fixedDelay(), scheduled.timeUnit());
         }
 
         private void invoke() {

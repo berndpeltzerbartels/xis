@@ -31,7 +31,7 @@ class TestApplication {
 
 
     clientId() {
-        var clientId = localStorage .getItem('xis.clientId');
+        var clientId = localStorage.getItem('xis.clientId');
         if (!clientId) {
             clientId = randomString();
             localStorage.setItem('xis.clientId', clientId);

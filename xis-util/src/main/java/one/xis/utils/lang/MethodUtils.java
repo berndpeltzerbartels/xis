@@ -15,7 +15,7 @@ public class MethodUtils {
     public static final Predicate<Method> NON_PRIVATE = method -> !Modifier.isPrivate(method.getModifiers());
 
     public static Optional<String> propertyNameByGetter(@NonNull Method method) {
-        if (isGetter(method)) {
+        if (isGetterLikeMethodName(method)) {
             return Optional.of(toFieldName(method));
         }
         return Optional.empty();
@@ -68,6 +68,17 @@ public class MethodUtils {
             return method.getParameterCount() == 0;
         }
         return false;
+    }
+
+    private static boolean isGetterLikeMethodName(Method method) {
+        String name = method.getName();
+        if (isGetter(method)) {
+            return true;
+        }
+        if (!name.startsWith("get")) {
+            return false;
+        }
+        return name.length() > 3 && Character.isUpperCase(name.charAt(3));
     }
 
 

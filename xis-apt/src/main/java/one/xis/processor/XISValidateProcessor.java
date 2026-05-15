@@ -10,12 +10,21 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.RecordComponentElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.ArrayType;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -36,6 +45,7 @@ public class XISValidateProcessor extends AbstractProcessor {
     private static final String HTML_FILE_ANNOTATION = "one.xis.HtmlFile";
     private static final String MODEL_DATA_ANNOTATION = "one.xis.ModelData";
     private static final String FORM_DATA_ANNOTATION = "one.xis.FormData";
+    private static final int MAX_PROPERTY_DEPTH = 6;
 
     private boolean processed;
 
@@ -108,22 +118,143 @@ public class XISValidateProcessor extends AbstractProcessor {
     }
 
     private ControllerTemplateModel controllerModel(Path projectDir, TypeElement controllerType) {
-        Set<String> modelDataNames = new LinkedHashSet<>();
-        Set<String> formDataNames = new LinkedHashSet<>();
+        Map<String, TemplateDataModel> modelData = new LinkedHashMap<>();
+        Map<String, TemplateDataModel> formData = new LinkedHashMap<>();
         for (Element enclosedElement : controllerType.getEnclosedElements()) {
             if (enclosedElement.getKind() == ElementKind.METHOD) {
-                collectDataMethodNames((ExecutableElement) enclosedElement, modelDataNames, formDataNames);
+                collectDataMethodNames((ExecutableElement) enclosedElement, modelData, formData);
             }
         }
         Path templateFile = templateFile(projectDir, controllerType);
-        return new ControllerTemplateModel(controllerType.getQualifiedName().toString(), templateFile, modelDataNames, formDataNames);
+        return new ControllerTemplateModel(controllerType.getQualifiedName().toString(), templateFile, modelData, formData);
     }
 
-    private void collectDataMethodNames(ExecutableElement method, Set<String> modelDataNames, Set<String> formDataNames) {
+    private void collectDataMethodNames(ExecutableElement method,
+                                        Map<String, TemplateDataModel> modelData,
+                                        Map<String, TemplateDataModel> formData) {
         Optional<String> modelDataName = annotationStringValue(method, MODEL_DATA_ANNOTATION, "value");
         Optional<String> formDataName = annotationStringValue(method, FORM_DATA_ANNOTATION, "value");
-        modelDataName.map(value -> dataName(method, value)).ifPresent(modelDataNames::add);
-        formDataName.map(value -> dataName(method, value)).ifPresent(formDataNames::add);
+        modelDataName.map(value -> dataName(method, value))
+                .ifPresent(name -> modelData.put(name, dataModel(name, method.getReturnType())));
+        formDataName.map(value -> dataName(method, value))
+                .ifPresent(name -> formData.put(name, dataModel(name, method.getReturnType())));
+    }
+
+    private TemplateDataModel dataModel(String name, TypeMirror type) {
+        return dataModel(name, type, MAX_PROPERTY_DEPTH);
+    }
+
+    private TemplateDataModel dataModel(String name, TypeMirror type, int depth) {
+        if (depth <= 0) {
+            return new TemplateDataModel(name, Map.of(), null);
+        }
+        return new TemplateDataModel(name, fieldsFor(type, depth), elementModelFor(type, depth));
+    }
+
+    private TemplateDataModel elementModelFor(TypeMirror type, int depth) {
+        if (type instanceof ArrayType arrayType) {
+            return dataModel("element", arrayType.getComponentType(), depth - 1);
+        }
+        TypeElement iterableType = processingEnv.getElementUtils().getTypeElement("java.lang.Iterable");
+        if (iterableType == null || !(type instanceof DeclaredType declaredType)) {
+            return null;
+        }
+        if (!processingEnv.getTypeUtils().isAssignable(processingEnv.getTypeUtils().erasure(type), processingEnv.getTypeUtils().erasure(iterableType.asType()))) {
+            return null;
+        }
+        List<? extends TypeMirror> typeArguments = declaredType.getTypeArguments();
+        if (typeArguments.isEmpty()) {
+            return null;
+        }
+        return dataModel("element", typeArguments.get(0), depth - 1);
+    }
+
+    private Set<String> fieldsFor(TypeMirror type) {
+        return fieldsFor(type, MAX_PROPERTY_DEPTH).keySet();
+    }
+
+    private Map<String, TemplateDataModel> fieldsFor(TypeMirror type, int depth) {
+        TypeElement typeElement = asTypeElement(type);
+        if (typeElement == null) {
+            return Map.of("value", new TemplateDataModel("value", Map.of(), null));
+        }
+        Map<String, TemplateDataModel> fields = new LinkedHashMap<>();
+        collectTypeFields(typeElement, fields, depth);
+        if (fields.isEmpty()) {
+            fields.put("value", new TemplateDataModel("value", Map.of(), null));
+        }
+        return fields;
+    }
+
+    private void collectTypeFields(TypeElement type, Map<String, TemplateDataModel> fields, int depth) {
+        if (type == null || "java.lang.Object".contentEquals(type.getQualifiedName())) {
+            return;
+        }
+        collectRecordFields(type, fields, depth);
+        collectMemberFields(type, fields, depth);
+        collectBeanProperties(type, fields, depth);
+        TypeElement superType = asTypeElement(type.getSuperclass());
+        collectTypeFields(superType, fields, depth);
+    }
+
+    private void collectRecordFields(TypeElement type, Map<String, TemplateDataModel> fields, int depth) {
+        for (RecordComponentElement component : type.getRecordComponents()) {
+            String name = component.getSimpleName().toString();
+            fields.putIfAbsent(name, dataModel(name, component.asType(), depth - 1));
+        }
+    }
+
+    private void collectMemberFields(TypeElement type, Map<String, TemplateDataModel> fields, int depth) {
+        for (Element enclosedElement : type.getEnclosedElements()) {
+            if (enclosedElement.getKind() == ElementKind.FIELD && !enclosedElement.getModifiers().contains(Modifier.STATIC)) {
+                String name = enclosedElement.getSimpleName().toString();
+                fields.putIfAbsent(name, dataModel(name, enclosedElement.asType(), depth - 1));
+            }
+        }
+    }
+
+    private void collectBeanProperties(TypeElement type, Map<String, TemplateDataModel> fields, int depth) {
+        for (Element enclosedElement : type.getEnclosedElements()) {
+            if (enclosedElement.getKind() == ElementKind.METHOD) {
+                ExecutableElement method = (ExecutableElement) enclosedElement;
+                propertyName(method).ifPresent(name -> fields.putIfAbsent(name, dataModel(name, propertyType(method), depth - 1)));
+            }
+        }
+    }
+
+    private TypeMirror propertyType(ExecutableElement method) {
+        if (method.getParameters().size() == 1) {
+            VariableElement parameter = method.getParameters().get(0);
+            return parameter.asType();
+        }
+        return method.getReturnType();
+    }
+
+    private Optional<String> propertyName(ExecutableElement method) {
+        if (method.getModifiers().contains(Modifier.STATIC)) {
+            return Optional.empty();
+        }
+        if (method.getReturnType().getKind() == TypeKind.VOID && method.getParameters().isEmpty()) {
+            return Optional.empty();
+        }
+        String methodName = method.getSimpleName().toString();
+        if (method.getParameters().isEmpty() && methodName.startsWith("get") && methodName.length() > 3) {
+            return Optional.of(decapitalize(methodName.substring(3)));
+        }
+        if (method.getParameters().isEmpty() && methodName.startsWith("is") && methodName.length() > 2) {
+            return Optional.of(decapitalize(methodName.substring(2)));
+        }
+        if (method.getParameters().size() == 1 && methodName.startsWith("set") && methodName.length() > 3) {
+            return Optional.of(decapitalize(methodName.substring(3)));
+        }
+        return Optional.empty();
+    }
+
+    private TypeElement asTypeElement(TypeMirror type) {
+        if (type instanceof DeclaredType declaredType && declaredType.asElement() instanceof TypeElement typeElement) {
+            return typeElement;
+        }
+        return null;
     }
 
     private String dataName(ExecutableElement method, String annotationValue) {
@@ -132,9 +263,16 @@ public class XISValidateProcessor extends AbstractProcessor {
         }
         String methodName = method.getSimpleName().toString();
         if (methodName.startsWith("get") && methodName.length() > 3) {
-            return Character.toLowerCase(methodName.charAt(3)) + methodName.substring(4);
+            return decapitalize(methodName.substring(3));
         }
         return methodName;
+    }
+
+    private String decapitalize(String value) {
+        if (value.isEmpty()) {
+            return value;
+        }
+        return Character.toLowerCase(value.charAt(0)) + value.substring(1);
     }
 
     private Path templateFile(Path projectDir, TypeElement controllerType) {

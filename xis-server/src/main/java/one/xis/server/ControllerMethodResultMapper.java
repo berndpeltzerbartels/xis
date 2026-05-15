@@ -14,6 +14,7 @@ import one.xis.validation.ValidatorMessageResolver;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.Collections.emptyMap;
 
@@ -130,11 +131,23 @@ class ControllerMethodResultMapper {
     }
 
     private void mapModelResult(String key, Object value, ControllerMethodResult controllerMethodResult) {
-        controllerMethodResult.getModelData().put(key, value);
+        controllerMethodResult.getModelData().put(key, normalizeDataValue(value));
     }
 
     private void mapFormData(String key, Object value, ControllerMethodResult controllerMethodResult) {
-        controllerMethodResult.getFormData().put(key, value);
+        controllerMethodResult.getFormData().put(key, normalizeDataValue(value));
+    }
+
+    private Object normalizeDataValue(Object value) {
+        if (value instanceof Optional<?> optional) {
+            return optional.orElse(null);
+        }
+        if (value instanceof Stream<?> stream) {
+            try (stream) {
+                return stream.toList();
+            }
+        }
+        return value;
     }
 
     private void mapFrontletResponse(FrontletResponse frontletResponse, ControllerMethodResult result) {
@@ -363,7 +376,7 @@ class ControllerMethodResultMapper {
         if (errorMessageMap.containsKey(key)) {
             return;
         }
-        var parameterMap = new HashMap<String, Object>(errorMessageMap);
+        var parameterMap = new HashMap<>(error.getMessageParameters());
         parameterMap.put("value", error.getValue());
         var message = validatorMessageResolver.createMessage(error.getMessageKey(),
                 parameterMap,

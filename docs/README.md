@@ -31,9 +31,18 @@ Read these to build normal XIS applications:
 - [Security](user/security.md)
 - [Examples and tests](user/examples-and-tests.md)
 
-Optional or specialized capabilities live under:
+## Advanced Topics
 
-- [Advanced topics](user/advanced/README.md)
+Optional or specialized capabilities are still important enough to be visible:
+
+- [Microfrontend Architecture and distributed mode](user/advanced/microfrontend-architecture.md)
+- [Reusable web artifacts with replaceable templates](user/advanced/reusable-web-artifacts.md)
+- [Aspects and interface advice](user/advanced/aspects.md), including the native-image-friendly AOP model
+- [Custom proxies](user/advanced/custom-proxies.md)
+- [Explicit SQL transactions](user/advanced/sql-transactions.md)
+- [Custom JavaScript and custom EL functions](user/advanced/custom-javascript.md)
+- [Integration-test browser model](user/advanced/integration-test-browser.md)
+- [XIS theme](user/advanced/theme.md)
 
 User documentation should be organized around public API behavior and copyable examples, not around repository modules.
 
@@ -77,6 +86,7 @@ complete and intentionally detailed.
 - [Frontlet parameters with `@Parameter`](user/annotations.md#parameter-field-and-record-component-annotations)
 - [Client id with `@ClientId`](user/annotations.md#parameter-field-and-record-component-annotations)
 - [User id with `@UserId`](user/annotations.md#parameter-field-and-record-component-annotations)
+- [Current user context with `UserContext`](user/annotations.md#parameter-field-and-record-component-annotations)
 
 ### Navigation And Responses
 
@@ -387,6 +397,7 @@ shown in the link text.
 - [`@Save`](user/sql.md#save)
 - [`@Select`](user/sql.md#select)
 - [`@StoredProcedure`](user/sql.md#functions-and-stored-procedures)
+- [`@Transactional`](user/sql.md#transactions)
 - [`@Update`](user/sql.md#insert-and-update)
 
 ### MongoDB

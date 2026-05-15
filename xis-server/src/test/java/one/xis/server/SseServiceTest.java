@@ -102,6 +102,53 @@ class SseServiceTest {
     }
 
     @Test
+    void registerEmitterKeepsExistingEmitterForSameClientIdOpen() {
+        var service = new SseService(mock(UserSecurityService.class));
+        var firstWindowEmitter = openEmitter();
+        var secondWindowEmitter = openEmitter();
+
+        service.registerEmitter("client-1", "user-1", firstWindowEmitter);
+        service.registerEmitter("client-1", "user-1", secondWindowEmitter);
+
+        service.publishToClient("score-updated", "client-1");
+
+        verify(firstWindowEmitter, never()).close();
+        verify(secondWindowEmitter, never()).close();
+        verify(firstWindowEmitter).send("data:score-updated\n\n");
+        verify(secondWindowEmitter).send("data:score-updated\n\n");
+    }
+
+    @Test
+    void unregisterEmitterRemovesOnlyThatEmitterForSameClientId() {
+        var service = new SseService(mock(UserSecurityService.class));
+        var closedWindowEmitter = openEmitter();
+        var remainingWindowEmitter = openEmitter();
+
+        service.registerEmitter("client-1", "user-1", closedWindowEmitter);
+        service.registerEmitter("client-1", "user-1", remainingWindowEmitter);
+        service.unregisterEmitter("client-1", closedWindowEmitter);
+
+        service.publishToClient("score-updated", "client-1");
+
+        verify(closedWindowEmitter, never()).send(anyString());
+        verify(remainingWindowEmitter).send("data:score-updated\n\n");
+    }
+
+    @Test
+    void pendingClientEventIsFlushedOnceWhenSeveralEmittersReconnect() {
+        var service = new SseService(mock(UserSecurityService.class));
+        var firstWindowEmitter = openEmitter();
+        var secondWindowEmitter = openEmitter();
+
+        service.publishToClient("score-updated", "client-1");
+        service.registerEmitter("client-1", "user-1", firstWindowEmitter);
+        service.registerEmitter("client-1", "user-1", secondWindowEmitter);
+
+        verify(firstWindowEmitter).send("data:score-updated\n\n");
+        verify(secondWindowEmitter, never()).send(anyString());
+    }
+
+    @Test
     void publishToClientQueuesEventUntilClientReconnects() {
         var service = new SseService(mock(UserSecurityService.class));
         var emitter = openEmitter();

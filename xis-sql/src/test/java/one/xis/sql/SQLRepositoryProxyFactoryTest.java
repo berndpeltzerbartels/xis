@@ -109,6 +109,16 @@ class SQLRepositoryProxyFactoryTest {
     }
 
     @Test
+    void rollsBackDefaultRepositoryMethodTransactionDeclaredOnRepositoryType() {
+        var repository = SQLRepositoryProxyFactory.<TypeAnnotatedPersonRepository>standalone(dataSource)
+                .createProxy(TypeAnnotatedPersonRepository.class);
+
+        assertThrows(RuntimeException.class, repository::insertPersonAndFail);
+
+        assertEquals(1, this.repository.count());
+    }
+
+    @Test
     void defaultRepositoryMethodWithoutTransactionKeepsPreviousStatements() {
         assertThrows(RuntimeException.class, repository::insertPersonAndFailWithoutTransaction);
 
@@ -243,6 +253,19 @@ class SQLRepositoryProxyFactoryTest {
         var service = context.getSingleton(PersonWriteService.class);
 
         assertThrows(RuntimeException.class, service::createPersonAndFail);
+
+        assertEquals(1, repository.count());
+    }
+
+    @Test
+    void rollsBackTransactionalServiceMethodDeclaredOnInterfaceType() {
+        var context = AppContext.builder()
+                .withSingleton(dataSource)
+                .withPackage(SQLRepositoryProxyFactoryTest.class.getPackageName())
+                .build();
+        var service = context.getSingleton(TypeAnnotatedPersonWriteService.class);
+
+        assertThrows(RuntimeException.class, service::createPersonAndFailOnInterfaceType);
 
         assertEquals(1, repository.count());
     }
@@ -431,6 +454,26 @@ class SQLRepositoryProxyFactoryTest {
         }
     }
 
+    @Transactional
+    interface TypeAnnotatedPersonWriteService {
+        void createPersonAndFailOnInterfaceType();
+    }
+
+    @Component
+    static class TypeAnnotatedPersonWriteServiceImpl implements TypeAnnotatedPersonWriteService {
+        private final PersonRepository repository;
+
+        TypeAnnotatedPersonWriteServiceImpl(PersonRepository repository) {
+            this.repository = repository;
+        }
+
+        @Override
+        public void createPersonAndFailOnInterfaceType() {
+            repository.insertPerson(2L, "Grace");
+            repository.insertPerson(1L, "Duplicate Ada");
+        }
+    }
+
     interface ImplementationAnnotatedPersonWriteService {
         void createPersonAndFailOnImplementation();
     }
@@ -473,6 +516,19 @@ class SQLRepositoryProxyFactoryTest {
         }
 
         default void insertPersonAndFailWithoutTransaction() {
+            insertPerson(2L, "Grace");
+            insertPerson(1L, "Duplicate Ada");
+        }
+    }
+
+    @Transactional
+    @Repository
+    interface TypeAnnotatedPersonRepository extends CrudRepository<Person, Long> {
+
+        @Insert("insert into people (id, first_name) values ({id}, {firstName})")
+        int insertPerson(@Param("id") long id, @Param("firstName") String firstName);
+
+        default void insertPersonAndFail() {
             insertPerson(2L, "Grace");
             insertPerson(1L, "Duplicate Ada");
         }

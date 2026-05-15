@@ -26,7 +26,7 @@ class ResponseWriter {
             response.setStatusCode(responseEntity.getStatusCode());
             for (var headerName : responseEntity.getHeaderNames()) {
                 for (var headerValue : responseEntity.getHeaders(headerName)) {
-                    response.addHeader(headerName, headerValue);
+                    response.addHeader(headerName, adaptHeader(headerName, headerValue, request));
                 }
             }
 
@@ -56,6 +56,35 @@ class ResponseWriter {
         }
         // may be it contains content type information. So we do this after checking the suffix
         setResponseBody(returnValue, response);
+    }
+
+    private String adaptHeader(String headerName, String headerValue, HttpRequest request) {
+        if (!"Set-Cookie".equalsIgnoreCase(headerName) || request.isSecure()) {
+            return headerValue;
+        }
+        return removeSecureCookieFlag(headerValue);
+    }
+
+    /**
+     * Keeps authentication cookies usable for plain HTTP development.
+     * <p>
+     * {@link ResponseEntity} cannot know whether the current request is HTTPS,
+     * so secure cookie headers are normalized at the last framework-owned point
+     * before the adapter writes them. Without this, Safari ignores local login
+     * cookies carrying the {@code Secure} flag on {@code http://localhost}; the
+     * server-side login succeeds, but the browser never sends the token cookies
+     * afterwards.
+     * <p>
+     * The normalization is deliberately narrow: it removes only the
+     * {@code Secure} cookie attribute and only when {@link HttpRequest#isSecure()}
+     * is {@code false}. HTTPS requests keep the attribute, so production
+     * deployments do not lose the intended cookie protection.
+     */
+    private String removeSecureCookieFlag(String headerValue) {
+        return java.util.Arrays.stream(headerValue.split(";"))
+                .map(String::trim)
+                .filter(part -> !"Secure".equalsIgnoreCase(part))
+                .collect(Collectors.joining("; "));
     }
 
     private void determineContentType(Object returnValue, Method method, HttpRequest request, HttpResponse response) {

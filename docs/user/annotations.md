@@ -132,6 +132,9 @@ purpose.
 | `@Inject` | Injects a XIS context bean into a field or constructor. |
 | `@Value` | Injects a property value into a field. |
 
+Controller methods may also receive framework objects without an annotation: `UserContext` for the current browser,
+authentication, and role state, plus `HttpRequest`, `HttpResponse`, and `RequestContext` for lower-level request access.
+
 ### UI Parameters
 
 Use `@Parameter` for values that belong to the XIS UI interaction itself. The same annotation is used for action

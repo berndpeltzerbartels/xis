@@ -60,6 +60,207 @@ class XISValidateProcessorTest {
     }
 
     @Test
+    void acceptsFrameworkFormBindingAsFormDataUsage() throws IOException {
+        Path templateFile = tempDir.resolve("src/main/java/example/ProbePage.html");
+        Files.createDirectories(templateFile.getParent());
+        Files.writeString(templateFile, """
+                <!DOCTYPE html>
+                <html>
+                  <body>
+                    <xis:form binding="contact">
+                      <xis:input binding="description"/>
+                    </xis:form>
+                  </body>
+                </html>
+                """, StandardCharsets.UTF_8);
+
+        DiagnosticCollector<JavaFileObject> diagnostics = compilePageSourceWithProcessor(true, """
+                package example;
+
+                import one.xis.FormData;
+                import one.xis.Page;
+
+                @Page("/probe.html")
+                class ProbePage {
+                    @FormData("contact")
+                    ContactForm contact() {
+                        return new ContactForm();
+                    }
+
+                    static class ContactForm {
+                        String description;
+                    }
+                }
+                """);
+
+        assertThat(errorMessages(diagnostics)).isEmpty();
+    }
+
+    @Test
+    void validatesFormFieldBindingsAgainstFormObject() throws IOException {
+        Path templateFile = tempDir.resolve("src/main/java/example/ProbePage.html");
+        Files.createDirectories(templateFile.getParent());
+        Files.writeString(templateFile, """
+                <!DOCTYPE html>
+                <html>
+                  <body>
+                    <form xis:binding="customer">
+                      <input xis:binding="name"/>
+                      <input xis:binding="missing"/>
+                    </form>
+                  </body>
+                </html>
+                """, StandardCharsets.UTF_8);
+
+        DiagnosticCollector<JavaFileObject> diagnostics = compilePageSourceWithProcessor(false, """
+                package example;
+
+                import one.xis.FormData;
+                import one.xis.Page;
+
+                @Page("/probe.html")
+                class ProbePage {
+                    @FormData("customer")
+                    CustomerForm customer() {
+                        return new CustomerForm();
+                    }
+
+                    static class CustomerForm {
+                        String name;
+                    }
+                }
+                """);
+
+        List<String> errors = errorMessages(diagnostics);
+        assertThat(errors).hasSize(1);
+        assertThat(errors.get(0))
+                .contains("ProbePage.html:6")
+                .contains("Template binds field \"missing\" on @FormData \"customer\"");
+    }
+
+    @Test
+    void doesNotUseFormDataAsTemplateExpressionRoot() throws IOException {
+        Path templateFile = tempDir.resolve("src/main/java/example/ProbePage.html");
+        Files.createDirectories(templateFile.getParent());
+        Files.writeString(templateFile, """
+                <!DOCTYPE html>
+                <html>
+                  <body>
+                    <xis:form binding="customer">
+                      <xis:input binding="name"/>
+                    </xis:form>
+                    <p>${customer.name}</p>
+                  </body>
+                </html>
+                """, StandardCharsets.UTF_8);
+
+        DiagnosticCollector<JavaFileObject> diagnostics = compilePageSourceWithProcessor(false, """
+                package example;
+
+                import one.xis.FormData;
+                import one.xis.Page;
+
+                @Page("/probe.html")
+                class ProbePage {
+                    @FormData("customer")
+                    CustomerForm customer() {
+                        return new CustomerForm();
+                    }
+
+                    static class CustomerForm {
+                        String name;
+                    }
+                }
+                """);
+
+        List<String> errors = errorMessages(diagnostics);
+        assertThat(errors).hasSize(1);
+        assertThat(errors.get(0))
+                .contains("Template uses \"customer\"")
+                .contains("no @ModelData");
+    }
+
+    @Test
+    void acceptsBeanPropertiesAsFormFields() throws IOException {
+        Path templateFile = tempDir.resolve("src/main/java/example/ProbePage.html");
+        Files.createDirectories(templateFile.getParent());
+        Files.writeString(templateFile, """
+                <!DOCTYPE html>
+                <html>
+                  <body>
+                    <xis:form binding="customer">
+                      <xis:input binding="firstName"/>
+                      <xis:checkbox binding="active"/>
+                    </xis:form>
+                  </body>
+                </html>
+                """, StandardCharsets.UTF_8);
+
+        DiagnosticCollector<JavaFileObject> diagnostics = compilePageSourceWithProcessor(true, """
+                package example;
+
+                import one.xis.FormData;
+                import one.xis.Page;
+
+                @Page("/probe.html")
+                class ProbePage {
+                    @FormData("customer")
+                    CustomerForm customer() {
+                        return new CustomerForm();
+                    }
+
+                    static class CustomerForm {
+                        String getFirstName() {
+                            return "";
+                        }
+
+                        boolean isActive() {
+                            return true;
+                        }
+                    }
+                }
+                """);
+
+        assertThat(errorMessages(diagnostics)).isEmpty();
+    }
+
+    @Test
+    void acceptsRecordComponentsAsFormFields() throws IOException {
+        Path templateFile = tempDir.resolve("src/main/java/example/ProbePage.html");
+        Files.createDirectories(templateFile.getParent());
+        Files.writeString(templateFile, """
+                <!DOCTYPE html>
+                <html>
+                  <body>
+                    <xis:form binding="customer">
+                      <xis:input binding="name"/>
+                    </xis:form>
+                  </body>
+                </html>
+                """, StandardCharsets.UTF_8);
+
+        DiagnosticCollector<JavaFileObject> diagnostics = compilePageSourceWithProcessor(true, """
+                package example;
+
+                import one.xis.FormData;
+                import one.xis.Page;
+
+                @Page("/probe.html")
+                class ProbePage {
+                    @FormData("customer")
+                    CustomerForm customer() {
+                        return new CustomerForm("");
+                    }
+
+                    record CustomerForm(String name) {
+                    }
+                }
+                """);
+
+        assertThat(errorMessages(diagnostics)).isEmpty();
+    }
+
+    @Test
     void validatesIterationExpressionsAgainstModelData() throws IOException {
         Path templateFile = tempDir.resolve("src/main/java/example/ProbePage.html");
         Files.createDirectories(templateFile.getParent());
@@ -90,6 +291,189 @@ class XISValidateProcessorTest {
                 """);
 
         assertThat(errorMessages(diagnostics)).isEmpty();
+    }
+
+    @Test
+    void validatesModelDataPropertyPaths() throws IOException {
+        Path templateFile = tempDir.resolve("src/main/java/example/ProbePage.html");
+        Files.createDirectories(templateFile.getParent());
+        Files.writeString(templateFile, """
+                <!DOCTYPE html>
+                <html>
+                  <body>
+                    <p>${customer.address.city}</p>
+                    <p>${customer.address.IHMehl}</p>
+                  </body>
+                </html>
+                """, StandardCharsets.UTF_8);
+
+        DiagnosticCollector<JavaFileObject> diagnostics = compilePageSourceWithProcessor(false, """
+                package example;
+
+                import one.xis.ModelData;
+                import one.xis.Page;
+
+                @Page("/probe.html")
+                class ProbePage {
+                    @ModelData("customer")
+                    Customer customer() {
+                        return new Customer();
+                    }
+
+                    static class Customer {
+                        Address address;
+                    }
+
+                    static class Address {
+                        String city;
+                    }
+                }
+                """);
+
+        List<String> errors = errorMessages(diagnostics);
+        assertThat(errors).hasSize(1);
+        assertThat(errors.get(0))
+                .contains("Template uses property \"IHMehl\"")
+                .contains("customer.address.IHMehl");
+    }
+
+    @Test
+    void validatesRepeatVariablePropertyPaths() throws IOException {
+        Path templateFile = tempDir.resolve("src/main/java/example/ProbePage.html");
+        Files.createDirectories(templateFile.getParent());
+        Files.writeString(templateFile, """
+                <!DOCTYPE html>
+                <html>
+                  <body>
+                    <article xis:repeat="customer:customers">
+                      <strong>${customer.name}</strong>
+                      <span>${customer.IHMehl}</span>
+                    </article>
+                  </body>
+                </html>
+                """, StandardCharsets.UTF_8);
+
+        DiagnosticCollector<JavaFileObject> diagnostics = compilePageSourceWithProcessor(false, """
+                package example;
+
+                import one.xis.ModelData;
+                import one.xis.Page;
+                import java.util.List;
+
+                @Page("/probe.html")
+                class ProbePage {
+                    @ModelData("customers")
+                    List<Customer> customers() {
+                        return List.of();
+                    }
+
+                    static class Customer {
+                        String name;
+                    }
+                }
+                """);
+
+        List<String> errors = errorMessages(diagnostics);
+        assertThat(errors).hasSize(1);
+        assertThat(errors.get(0))
+                .contains("Template uses property \"IHMehl\"")
+                .contains("customer.IHMehl");
+    }
+
+    @Test
+    void validatesInheritedModelDataProperties() throws IOException {
+        Path templateFile = tempDir.resolve("src/main/java/example/ProbePage.html");
+        Files.createDirectories(templateFile.getParent());
+        Files.writeString(templateFile, """
+                <!DOCTYPE html>
+                <html>
+                  <body>
+                    <p>${customer.inheritedName}</p>
+                  </body>
+                </html>
+                """, StandardCharsets.UTF_8);
+
+        DiagnosticCollector<JavaFileObject> diagnostics = compilePageSourceWithProcessor(true, """
+                package example;
+
+                import one.xis.ModelData;
+                import one.xis.Page;
+
+                @Page("/probe.html")
+                class ProbePage {
+                    @ModelData("customer")
+                    Customer customer() {
+                        return new Customer();
+                    }
+
+                    static class BaseCustomer {
+                        String inheritedName;
+                    }
+
+                    static class Customer extends BaseCustomer {
+                    }
+                }
+                """);
+
+        assertThat(errorMessages(diagnostics)).isEmpty();
+    }
+
+    @Test
+    void validatesRepeatExpressionsAgainstModelData() throws IOException {
+        Path templateFile = tempDir.resolve("src/main/java/example/ProbePage.html");
+        Files.createDirectories(templateFile.getParent());
+        Files.writeString(templateFile, """
+                <!DOCTYPE html>
+                <html>
+                  <body>
+                    <article xis:repeat="customer:customers" class="${customer.active ? 'active' : ''}">
+                      <strong>${customer.name}</strong>
+                    </article>
+                  </body>
+                </html>
+                """, StandardCharsets.UTF_8);
+
+        DiagnosticCollector<JavaFileObject> diagnostics = compilePageSourceWithProcessor(true, """
+                package example;
+
+                import one.xis.ModelData;
+                import one.xis.Page;
+
+                @Page("/probe.html")
+                class ProbePage {
+                    @ModelData("customers")
+                    Object customers() {
+                        return new Object();
+                    }
+                }
+                """);
+
+        assertThat(errorMessages(diagnostics)).isEmpty();
+    }
+
+    @Test
+    void reportsTemplateDataErrorsAtTheElementLine() throws IOException {
+        Path templateFile = tempDir.resolve("src/main/java/example/ProbePage.html");
+        Files.createDirectories(templateFile.getParent());
+        Files.writeString(templateFile, """
+                <!DOCTYPE html>
+                <html>
+                  <head>
+                    <link rel="stylesheet" href="/probe.css"/>
+                  </head>
+                  <body>
+                    <li>${missing.name}</li>
+                  </body>
+                </html>
+                """, StandardCharsets.UTF_8);
+
+        DiagnosticCollector<JavaFileObject> diagnostics = compilePageWithProcessor(false);
+
+        List<String> errors = errorMessages(diagnostics);
+        assertThat(errors).hasSize(1);
+        assertThat(errors.get(0))
+                .contains("ProbePage.html:7")
+                .contains("Template uses \"missing\"");
     }
 
     @Test
@@ -301,6 +685,8 @@ class XISValidateProcessorTest {
                     }
 
                     static class CustomerForm {
+                        String price;
+                        String name;
                     }
                 }
                 """;

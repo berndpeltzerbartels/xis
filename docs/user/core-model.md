@@ -77,7 +77,33 @@ public List<Product> products() {
 </ul>
 ```
 
-The method name is the default model key. If a method is named `products`, the template can read `${products}`.
+The model key can be chosen in three ways:
+
+```java
+@ModelData("customer")
+Customer selectedCustomer() {
+    return customerService.currentCustomer();
+}
+
+@ModelData
+Customer customer() {
+    return customerService.currentCustomer();
+}
+
+@ModelData
+Customer getCustomer() {
+    return customerService.currentCustomer();
+}
+```
+
+All three variants expose `${customer}`. With no explicit annotation value, XIS uses the method name as the key. If the
+method name starts with `get` followed by an uppercase character, XIS uses the property name instead, so `getCustomer()`
+becomes `customer`. This also applies when the controller method has XIS parameters such as `@SharedValue`,
+`@PathVariable`, or `@QueryParameter`.
+
+`@ModelData` and `@FormData` methods may return `Optional<T>` or `Stream<T>`. XIS unwraps `Optional` values and
+materializes streams immediately as lists during controller processing; a stream is not transported lazily to the
+browser.
 
 ## Actions
 

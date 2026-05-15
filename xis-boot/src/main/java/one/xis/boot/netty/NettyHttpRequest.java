@@ -129,6 +129,11 @@ public final class NettyHttpRequest implements HttpRequest {
         request.headers().add(name, value);
     }
 
+    @Override
+    public boolean isSecure() {
+        return HttpRequest.super.isSecure();
+    }
+
     private Map<String, String> parseQueryParameters(String uri) {
         QueryStringDecoder decoder = new QueryStringDecoder(uri, StandardCharsets.UTF_8);
         Map<String, List<String>> params = decoder.parameters();

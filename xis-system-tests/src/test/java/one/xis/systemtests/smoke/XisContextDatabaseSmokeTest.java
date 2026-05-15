@@ -44,24 +44,26 @@ class XisContextDatabaseSmokeTest {
 
     @Test
     void xisContextUsesPostgresRepository() {
-        AppContext context = AppContext.builder()
-                .withPackage(getClass().getPackageName())
-                .withSingletonClass("one.xis.sql.SQLRepositoryProxyFactory")
-                .withSingleton(postgresDataSource)
-                .build();
+        AppContext context = sqlContext(postgresDataSource);
 
         assertThat(context.getSingleton(SqlSmokeRepository.class).one()).isEqualTo(1);
     }
 
     @Test
     void xisContextUsesMariaDbRepository() {
-        AppContext context = AppContext.builder()
-                .withPackage(getClass().getPackageName())
-                .withSingletonClass("one.xis.sql.SQLRepositoryProxyFactory")
-                .withSingleton(mariaDbDataSource)
-                .build();
+        AppContext context = sqlContext(mariaDbDataSource);
 
         assertThat(context.getSingleton(SqlSmokeRepository.class).one()).isEqualTo(1);
+    }
+
+    private AppContext sqlContext(DataSource dataSource) {
+        return AppContext.builder()
+                .withPackage(getClass().getPackageName())
+                .withSingletonClass("one.xis.sql.SqlConnectionProvider")
+                .withSingletonClass("one.xis.sql.TransactionManager")
+                .withSingletonClass("one.xis.sql.SQLRepositoryProxyFactory")
+                .withSingleton(dataSource)
+                .build();
     }
 
     @Test

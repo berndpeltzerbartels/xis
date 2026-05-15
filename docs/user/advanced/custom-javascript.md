@@ -138,6 +138,10 @@ Reference them from templates without the `public` segment:
 <img src="/images/logo.png" alt="Logo">
 ```
 
+CSS and JavaScript files under classpath `public` resources are also added to the root page automatically. Use
+`META-INF/xis/js/extensions` instead when JavaScript should become part of the XIS browser runtime bundle. See
+[Runtime and dependencies](../runtime-and-dependencies.md#static-resources).
+
 If you use `xis-theme`, prefer `public/theme.css` for small variable overrides. See [XIS theme](theme.md).
 
 ## When To Use This

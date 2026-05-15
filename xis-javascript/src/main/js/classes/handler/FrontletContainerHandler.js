@@ -76,6 +76,7 @@ class FrontletContainerHandler extends TagHandler {
             this.frontletState = new FrontletState(app.pageController.resolvedURL, this.frontletParameters);
         }
         var data = response.data;
+        updateStores(response);
         this.mergeParametersFromResponseTarget(response);
         data.setValue(['frontletParameters'], this.frontletParameters);
         this.refreshContainerId(data);
@@ -93,7 +94,6 @@ class FrontletContainerHandler extends TagHandler {
                     .then(() => app.frontletContainers.handleReloadFrontlets(response.reloadFrontlets))
                     .then(() => app.pageController.handleUpdateEventsNow(response.updateEventKeys))
                     .then(pageUpdated => this.handleFrontletContainerUpdates(pageUpdated, response.updateEventKeys))
-                    .then(() => updateStores(response))
                     .then(() => this.commitBuffer());
             } else {
                 // Kein Frontlet-Wechsel: in-place refresh, kein DOM-Flackern
@@ -101,8 +101,7 @@ class FrontletContainerHandler extends TagHandler {
                     .then(() => this.updatePageMetadata(response))
                     .then(() => app.frontletContainers.handleReloadFrontlets(response.reloadFrontlets))
                     .then(() => app.pageController.handleUpdateEventsNow(response.updateEventKeys))
-                    .then(pageUpdated => this.handleFrontletContainerUpdates(pageUpdated, response.updateEventKeys))
-                    .then(() => updateStores(response));
+                    .then(pageUpdated => this.handleFrontletContainerUpdates(pageUpdated, response.updateEventKeys));
             }
         });
     }
@@ -307,9 +306,6 @@ class FrontletContainerHandler extends TagHandler {
         if (response.annotatedTitle) {
             app.pageController.setTitle(response.annotatedTitle);
         }
-        if (response.annotatedAddress) {
-            app.pageController.setAddress(response.annotatedAddress);
-        }
         return response;
     }
 
@@ -371,12 +367,15 @@ class FrontletContainerHandler extends TagHandler {
             const response = app.currentResponse;
             return app.client.loadFrontletData(this.frontletInstance, this.frontletState, this)
                 .then(response => this.updatePageMetadata(response))
+                .then(response => {
+                    updateStores(response);
+                    return response;
+                })
                 .then(response => this.enrichResponseDataWithUrlInfo(response))
                 .then(data => this.attachParentData(data, parentData))
                 .then(data => this.updateFrontletStateData(data))
                 .then(data => this.mergeParameters(data))
                 .then(data => this.refreshDescendantHandlers(data).then(() => data))
-                .then(() => updateStores(response))
                 .catch(e => reportError(e));
         }
         return Promise.resolve();

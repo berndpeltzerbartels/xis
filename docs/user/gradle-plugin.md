@@ -11,7 +11,7 @@ Use the plugin when you want the usual XIS layout:
 ```groovy
 plugins {
     id "java"
-    id "one.xis.plugin" version "0.9.3"
+    id "one.xis.plugin" version "0.10.0"
 }
 ```
 
@@ -187,10 +187,14 @@ The current checks cover the places where mistakes are easy to miss in a browser
 | Framework element syntax | `<xis:a>` and `<xis:button>` need a navigation or action target; `<xis:parameter>` needs `name`; storage bindings need a supported store. |
 | Attribute placement | navigation attributes belong on links or buttons; form bindings belong on form controls or labels. |
 | Selection styling | `xis:selection-class` needs a surrounding `xis:selection-group`. |
-| Template data | expressions such as `${customer.firstName}` must have matching `@ModelData` or `@FormData`, and exposed model/form data must be used by the template. |
+| Template data | expressions such as `${customer.firstName}` must have matching `@ModelData`; exposed model/form data must be used by the template. |
+| Template properties | property paths such as `${customer.address.city}` are checked against fields, record components, getters, setters, and inherited members where the type is known. Repeat variables are checked against the element type of the repeated model data. |
+| Form fields | bindings inside `<form xis:binding="...">` or `<xis:form binding="...">` are checked against the matching `@FormData` object. |
 
-The validation is intentionally a preflight check, not a replacement for tests. It catches structural template mistakes
-early, while integration and e2e tests still cover behavior.
+The validation is intentionally a preflight check, not a replacement for tests. It catches most common mistakes around
+template variables, form bindings, missing attributes, and misspelled properties before the application starts. A
+successful validation run does not prove that the page is behaviorally correct: dynamic expressions, custom JavaScript,
+EL function semantics, database state, permissions, and browser behavior still belong in integration and e2e tests.
 
 ## `xisJar`
 
@@ -261,7 +265,7 @@ Without the plugin, add the dependency that matches the style of test you want:
 
 ```groovy
 dependencies {
-    testImplementation "one.xis:xis-boot-starter-test:0.9.3"
+    testImplementation "one.xis:xis-boot-starter-test:0.10.0"
 }
 ```
 

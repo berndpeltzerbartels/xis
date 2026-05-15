@@ -6,9 +6,8 @@ import one.xis.http.ContentType;
 import one.xis.http.HttpResponse;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
 
+import static io.netty.handler.codec.http.cookie.CookieHeaderNames.SameSite.Lax;
 import static io.netty.handler.codec.http.cookie.ServerCookieEncoder.STRICT;
 
 /**
@@ -24,10 +23,27 @@ public final class NettyHttpResponse implements HttpResponse {
     private ContentType contentType;
 
     private final HttpHeaders headers = new DefaultHttpHeaders();
-    private final List<String> setCookieHeaders = new ArrayList<>();
+    private final boolean secureRequest;
 
     private boolean redirect;
     private boolean handledExternally;
+
+    /**
+     * Creates a response bound to the transport security of the current request.
+     * <p>
+     * The flag is used only for cookie attributes. It must represent the
+     * externally visible scheme, not just the local socket, so deployments behind
+     * TLS-terminating proxies still emit {@code Secure} cookies when
+     * {@code X-Forwarded-Proto} says {@code https}.
+     * <p>
+     * For plain {@code http://localhost}, especially in Safari, the flag must be
+     * {@code false}; otherwise Safari drops authentication cookies marked
+     * {@code Secure} and local login appears broken. This is safe for production
+     * because HTTPS requests still pass {@code true}.
+     */
+    public NettyHttpResponse(boolean secureRequest) {
+        this.secureRequest = secureRequest;
+    }
 
     @Override
     public void setStatusCode(int code) {
@@ -64,8 +80,8 @@ public final class NettyHttpResponse implements HttpResponse {
     public void addSecureCookie(String name, String value, Duration maxAge) {
         DefaultCookie cookie = new DefaultCookie(name, value);
         cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setSameSite(cookie.sameSite()); // Should be Lax by default in modern Netty
+        cookie.setSecure(secureRequest);
+        cookie.setSameSite(Lax);
         cookie.setMaxAge(maxAge.getSeconds());
         cookie.setPath("/");
         headers.add(HttpHeaderNames.SET_COOKIE, STRICT.encode(cookie));
@@ -114,11 +130,6 @@ public final class NettyHttpResponse implements HttpResponse {
 
         // Custom headers
         response.headers().set(this.headers);
-
-        // Cookies
-        for (String cookie : setCookieHeaders) {
-            nettyHeaders.add(HttpHeaderNames.SET_COOKIE, cookie);
-        }
 
         // Redirects should not be cached
         if (redirect) {

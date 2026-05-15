@@ -42,6 +42,22 @@ class ScheduledTest {
     }
 
     @Test
+    void scheduledMethodCanUseExplicitTimeUnit() throws InterruptedException {
+        TimeUnitComponent.latch = new CountDownLatch(1);
+
+        AppContext context = AppContext.builder()
+                .withSingletonClass(TimeUnitComponent.class)
+                .build();
+        Scheduler scheduler = context.getSingleton(Scheduler.class);
+
+        try {
+            assertTrue(TimeUnitComponent.latch.await(1, TimeUnit.SECONDS));
+        } finally {
+            scheduler.shutdown();
+        }
+    }
+
+    @Test
     void scheduledMethodMustDefineExactlyOneInterval() {
         IllegalStateException exception = assertThrows(IllegalStateException.class, () -> AppContext.builder()
                 .withSingletonClass(MissingIntervalComponent.class)
@@ -62,7 +78,7 @@ class ScheduledTest {
     static class InvokedComponent {
         static CountDownLatch latch;
 
-        @Scheduled(fixedDelayMillis = 10)
+        @Scheduled(fixedDelay = 10, timeUnit = TimeUnit.MILLISECONDS)
         void tick() {
             latch.countDown();
         }
@@ -73,14 +89,23 @@ class ScheduledTest {
         Scheduler scheduler;
     }
 
+    static class TimeUnitComponent {
+        static CountDownLatch latch;
+
+        @Scheduled(initialDelay = 1, fixedDelay = 1, timeUnit = TimeUnit.MILLISECONDS)
+        void tick() {
+            latch.countDown();
+        }
+    }
+
     static class MissingIntervalComponent {
-        @Scheduled
+        @Scheduled(timeUnit = TimeUnit.MILLISECONDS)
         void tick() {
         }
     }
 
     static class ParameterComponent {
-        @Scheduled(fixedDelayMillis = 100)
+        @Scheduled(fixedDelay = 100, timeUnit = TimeUnit.MILLISECONDS)
         void tick(String value) {
         }
     }

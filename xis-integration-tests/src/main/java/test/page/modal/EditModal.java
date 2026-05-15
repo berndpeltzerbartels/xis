@@ -1,6 +1,7 @@
 package test.page.modal;
 
 import one.xis.Action;
+import one.xis.Address;
 import one.xis.FormData;
 import one.xis.Parameter;
 import one.xis.ModelData;
@@ -21,6 +22,11 @@ class EditModal {
     String modalSource(@Parameter("source") String source) {
         service.modalLoaded(source);
         return source;
+    }
+
+    @Address
+    String address() {
+        return "/modal-address-should-not-reach-browser.html";
     }
 
     @FormData("edit")

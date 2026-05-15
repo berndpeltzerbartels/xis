@@ -18,7 +18,7 @@ the database by itself, not even inside a transaction. Database writes happen on
 ```groovy
 plugins {
     id "java"
-    id "one.xis.plugin" version "0.9.3"
+    id "one.xis.plugin" version "0.10.0"
 }
 
 repositories {
@@ -58,7 +58,7 @@ XIS can create a HikariCP-backed pool when HikariCP is on the application classp
 ```groovy
 plugins {
     id "java"
-    id "one.xis.plugin" version "0.9.3"
+    id "one.xis.plugin" version "0.10.0"
 }
 
 repositories {
@@ -381,21 +381,21 @@ This form does not inspect entity metadata and does not cascade through object r
 ## Transactions
 
 XIS Boot uses interface-based advice for cross-cutting behavior. It does not modify concrete classes and does not use
-bytecode generation. This keeps the runtime simple, fast, easy to debug, and friendly to native-image builds. For SQL
-transactions this means: method-level transaction advice can only work when the advised object is used through an
-interface.
+bytecode generation. This keeps the runtime simple, fast, easy to debug, and friendly to native-image builds.
 
-For application code, the recommended shape is a service interface with `@Transactional` on the write operation:
+**`@Transactional`, like other XIS AOP annotations, only works when the component has an application interface and is
+called through that interface. XIS intentionally avoids bytecode enhancement.**
 
-```java
-public interface CustomerService {
+`@Transactional` is `one.xis.sql.Transactional`. It is advice, not a marker that repository handlers inspect directly.
+That is important: XIS can only apply it when it creates an interface proxy. Calling a concrete implementation directly is
+just a normal Java method call and will not open a transaction.
 
-    @Transactional
-    void createCustomer(Customer customer);
-}
-```
+For application code, the most common shape is the Spring-like one: put `@Transactional` on the implementing service
+method, but inject and call the service through its interface:
 
 ```java
+import one.xis.sql.Transactional;
+
 @Service
 class CustomerServiceImpl implements CustomerService {
     private final CustomerRepository customers;
@@ -407,6 +407,7 @@ class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    @Transactional
     public void createCustomer(Customer customer) {
         customers.save(customer);
         auditLog.insert("created customer " + customer.id());
@@ -414,9 +415,34 @@ class CustomerServiceImpl implements CustomerService {
 }
 ```
 
-The annotation can also be placed on the implementing method, the service interface, or the implementing class. Type-level
-`@Transactional` applies to all methods called through the proxied interface. In all cases, inject and call the service
-through the interface. Injecting the concrete implementation bypasses interface advice.
+You may also put the annotation on the interface method:
+
+```java
+public interface CustomerService {
+
+    @Transactional
+    void createCustomer(Customer customer);
+}
+```
+
+The same type-level variant also works on the service interface itself.
+
+If every method of a service should run in a transaction, annotate the implementing class:
+
+```java
+@Transactional
+@Service
+class CustomerServiceImpl implements CustomerService {
+
+    public void createCustomer(Customer customer) {
+        customers.save(customer);
+        auditLog.insert("created customer " + customer.id());
+    }
+}
+```
+
+Type-level `@Transactional` applies to all methods called through the proxied interface. In all cases, inject and call the
+service through the interface. Injecting `CustomerServiceImpl` instead of `CustomerService` bypasses interface advice.
 
 The JDBC connection is opened lazily. Entering a transactional method only marks the current request/thread as
 transactional. The connection is opened when the first repository method actually needs it.

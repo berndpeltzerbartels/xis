@@ -25,7 +25,7 @@ class SqlConnectionProvider {
     Connection getConnection(DataSource dataSource) throws SQLException {
         SqlConnectionState state = existingState();
         if (state == null && !shouldReuseConnectionInRequest(dataSource)) {
-            return dataSource.getConnection();
+            return statementLoggingConnection(dataSource.getConnection());
         }
         return currentState().getConnection(new ConnectionKey(dataSource, null, null));
     }
@@ -33,7 +33,7 @@ class SqlConnectionProvider {
     Connection getConnection(DataSource dataSource, String username, String password) throws SQLException {
         SqlConnectionState state = existingState();
         if (state == null && !shouldReuseConnectionInRequest(dataSource)) {
-            return dataSource.getConnection(username, password);
+            return statementLoggingConnection(dataSource.getConnection(username, password));
         }
         return currentState().getConnection(new ConnectionKey(dataSource, username, password));
     }
@@ -105,21 +105,41 @@ class SqlConnectionProvider {
         return null;
     }
 
+    private static Connection statementLoggingConnection(Connection connection) {
+        return connectionProxy(connection, false);
+    }
+
     private static Connection nonClosingConnection(Connection connection) {
+        return connectionProxy(connection, true);
+    }
+
+    private static Connection connectionProxy(Connection connection, boolean ignoreClose) {
         return (Connection) Proxy.newProxyInstance(
                 connection.getClass().getClassLoader(),
                 new Class[]{Connection.class},
-                (proxy, method, args) -> invoke(connection, method, args));
+                (proxy, method, args) -> invoke(connection, method, args, ignoreClose));
     }
 
-    private static Object invoke(Connection connection, Method method, Object[] args) throws Throwable {
-        if (method.getName().equals("close")) {
+    private static Object invoke(Connection connection, Method method, Object[] args, boolean ignoreClose) throws Throwable {
+        if (ignoreClose && method.getName().equals("close")) {
             return null;
         }
+        logSqlStatement(method, args);
         try {
             return method.invoke(connection, args);
         } catch (InvocationTargetException e) {
             throw e.getCause();
+        }
+    }
+
+    private static void logSqlStatement(Method method, Object[] args) {
+        if (!log.isDebugEnabled() || args == null || args.length == 0 || !(args[0] instanceof String sql)) {
+            return;
+        }
+        if (method.getName().equals("prepareStatement")) {
+            log.debug("Preparing SQL statement: {}", sql);
+        } else if (method.getName().equals("prepareCall")) {
+            log.debug("Preparing SQL call: {}", sql);
         }
     }
 

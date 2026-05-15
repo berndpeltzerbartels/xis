@@ -111,6 +111,7 @@ class PageController {
             return Promise.resolve(noContent);
         }
         return PageController.enqueue(() => {
+            updateStores(response);
             var data = response.data;
             const pathname = this.resolvedURL.url.split('?')[0];
             data.setValue(['pathVariables'], this.resolvedURL.pathVariablesAsMap());
@@ -122,8 +123,7 @@ class PageController {
 
             return this.htmlTagHandler.refresh(this.page.data)
                 .then(() => { if (isSet(response.annotatedTitle)) this.setTitle(response.annotatedTitle); })
-                .then(() => { if (isSet(response.annotatedAddress)) this.setAddress(response.annotatedAddress); })
-                .then(() => updateStores(response));
+                .then(() => { if (isSet(response.annotatedAddress)) this.setAddress(response.annotatedAddress); });
         });
     }
 
@@ -200,6 +200,7 @@ class PageController {
 
     handleUpdateEventNow() {
         return this.client.loadPageData(this.resolvedURL).then(response => {
+            updateStores(response);
             if (response.nextURL) {
                 const nextResolved = this.urlResolver.resolve(response.nextURL);
                 if (nextResolved && nextResolved.normalizedPath !== this.resolvedURL.normalizedPath) {
@@ -218,7 +219,6 @@ class PageController {
 
             return this.htmlTagHandler.refresh(data)
                 .then(() => { if (response.annotatedTitle) this.setTitle(response.annotatedTitle); })
-                .then(() => updateStores(response))
                 .then(() => app.eventPublisher.publish(EventType.BUFFER_COMMITTED));
         });
     }
@@ -262,6 +262,7 @@ class PageController {
         app.frontletContainers.deactivateAll();
         return PageController.enqueue(() =>
             this.client.loadPageData(resolved).then(response => {
+                updateStores(response);
                 if (response.nextURL) {
                     const nextResolved = this.urlResolver.resolve(response.nextURL);
                     if (resolved.normalizedPath !== nextResolved.normalizedPath) {
@@ -286,7 +287,6 @@ class PageController {
                 return this.initBuffer()
                     .then(() => this.htmlTagHandler.refresh(data))
                     .then(() => { if (response.annotatedTitle) this.setTitle(response.annotatedTitle); })
-                    .then(() => updateStores(response))
                     .then(() => this.commitBuffer())
                     .then(() => app.eventPublisher.publish(EventType.BUFFER_COMMITTED))
                     .then(() => {

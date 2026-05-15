@@ -21,6 +21,7 @@ java {
 var lombokVersion = rootProject.ext.libraryVersions.lombok
 var gsonVersion = rootProject.ext.libraryVersions.gson
 var mockitoVersion = rootProject.ext.libraryVersions.mockito
+var slf4jVersion = rootProject.ext.libraryVersions.slf4j
 def junitVersion = "5.7.0"
 def assertjVersion = "3.16.1"
 
@@ -29,6 +30,7 @@ dependencies {
     implementation(project(":xis-context"))
     implementation(project(":xis-util"))
     runtimeOnly(project(":xis-gson"))
+    implementation "org.slf4j:slf4j-api:$slf4jVersion"
 
     // Lombok dependencies
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"

@@ -359,8 +359,8 @@ class AppContextFactory implements SingletonCreationListener {
         }
 
         var scheduled = method.getAnnotation(Scheduled.class);
-        boolean hasFixedRate = scheduled.fixedRateMillis() > 0;
-        boolean hasFixedDelay = scheduled.fixedDelayMillis() > 0;
+        boolean hasFixedRate = scheduled.fixedRate() > 0;
+        boolean hasFixedDelay = scheduled.fixedDelay() > 0;
         if (hasFixedRate == hasFixedDelay) {
             throw new IllegalStateException("Scheduled method must define exactly one positive interval: " + method);
         }

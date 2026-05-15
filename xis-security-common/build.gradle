@@ -19,6 +19,7 @@ java {
 
 
 var lombokVersion = rootProject.ext.libraryVersions.lombok
+var slf4jVersion = rootProject.ext.libraryVersions.slf4j
 var junitVersion = rootProject.ext.libraryVersions.junit
 var assertjVersion = rootProject.ext.libraryVersions.assertj
 
@@ -29,6 +30,7 @@ dependencies {
     compileOnly(project(':xis-gson'))
     compileOnly(project(':xis-util'))
     compileOnly "org.projectlombok:lombok:$lombokVersion"
+    implementation "org.slf4j:slf4j-api:$slf4jVersion"
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
 
     testImplementation project(':xis-controller-api')

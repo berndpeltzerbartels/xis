@@ -22,7 +22,7 @@ Add `xis-theme` next to your runtime dependency.
 ```groovy
 plugins {
     id "java"
-    id "one.xis.plugin" version "0.9.3"
+    id "one.xis.plugin" version "0.10.0"
 }
 
 repositories {
@@ -42,7 +42,7 @@ plugins {
     id "java"
     id "org.springframework.boot" version "3.3.0"
     id "io.spring.dependency-management" version "1.1.5"
-    id "one.xis.plugin" version "0.9.3"
+    id "one.xis.plugin" version "0.10.0"
 }
 
 repositories {
@@ -57,12 +57,15 @@ dependencies {
 ```
 
 You do not have to add `<link rel="stylesheet">` tags. XIS automatically adds CSS files from classpath `public`
-resources to the root page. The theme provides:
+resources to the root page. XIS itself provides `public/xis-runtime.css` with required runtime styles such as modal
+layout. The optional theme provides:
 
 - `public/default-theme.css`: simple variables for colors, spacing, font sizes, and control sizes
 - `public/xis.css`: layout, navigation, forms, tables, messages, and component styling
 
-`default-theme.css` is loaded before `xis.css`.
+`default-theme.css` is loaded before `xis.css`. `xis-runtime.css` is loaded between them and is also present when
+`xis-theme` is not used. See [Runtime and dependencies](../runtime-and-dependencies.md#static-resources) for the full
+automatic resource order.
 
 ## Customize The Theme
 

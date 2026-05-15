@@ -5,6 +5,7 @@ import one.xis.test.dom.Element;
 import one.xis.test.dom.ElementImpl;
 import one.xis.test.dom.Node;
 import one.xis.test.dom.OptionElement;
+import one.xis.test.dom.SelectElement;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -60,6 +61,28 @@ class SelectBoxPageTest {
             var option = (OptionElement) client.getDocument().getElementByTagName("option");
             option.select();
             submitButton.click();
+
+            var formModelCaptor = ArgumentCaptor.forClass(SelectBoxFormModel.class);
+            verify(selectBoxFormService).saveSelectBoxFormModel(formModelCaptor.capture());
+
+            assertThat(formModelCaptor.getValue().getSelectedValue()).isEqualTo(2);
+        }
+
+        @Test
+        void setValueReplacesPreviousSingleSelection() {
+            when(selectBoxFormService.options()).thenReturn(List.of(
+                    new SelectBoxFormOption(1, "one"),
+                    new SelectBoxFormOption(2, "two")
+            ));
+            var formModel = new SelectBoxFormModel();
+            formModel.setSelectedValue(1);
+            when(selectBoxFormService.getSelectBoxFormModel()).thenReturn(formModel);
+
+            var client = context.openPage(SelectBoxPage.class);
+            var select = (SelectElement) client.getDocument().getElementById("selectBox");
+
+            select.setValue("2");
+            client.getDocument().getElementById("submitButton").click();
 
             var formModelCaptor = ArgumentCaptor.forClass(SelectBoxFormModel.class);
             verify(selectBoxFormService).saveSelectBoxFormModel(formModelCaptor.capture());

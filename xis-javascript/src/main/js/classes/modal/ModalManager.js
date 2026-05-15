@@ -38,11 +38,14 @@ class ModalManager {
         if (response.closeModal) {
             const parent = this.current ? this.current.parentContainerHandler : parentContainerHandler;
             this.close();
+            updateStores(response);
             if (response.reloadModalParent) {
                 promise = this.reloadParent(parent);
             }
+        } else {
+            updateStores(response);
         }
-        return promise.then(() => updateStores(response));
+        return promise;
     }
 
     reloadParent(parentContainerHandler) {
@@ -108,10 +111,11 @@ class ModalManager {
         document.body.appendChild(overlay);
 
         this.initializer.initialize(overlay);
+        const containerHandler = this.tagHandlers.getHandler(container);
         return {
             overlay: overlay,
             container: container,
-            containerHandler: this.tagHandlers.getHandler(container),
+            containerHandler: containerHandler,
             parentContainerHandler: parentContainerHandler
         };
     }

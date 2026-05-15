@@ -32,7 +32,8 @@ import java.lang.annotation.Target;
  * {@link #value() name}. XIS then consumes the next positional action value,
  * independent of other injected method parameters such as {@link SharedValue},
  * {@link ClientId}, {@link UserId}, {@link PathVariable}, or
- * {@link QueryParameter}. If an explicit {@link #index()} is used, the index is
+ * {@link QueryParameter}, and unannotated framework parameters such as
+ * {@link UserContext}. If an explicit {@link #index()} is used, the index is
  * 1-based and also counts only action values, not Java method parameters.</p>
  *
  * <p>A parameter of type {@code Map<String, String>} with an unnamed

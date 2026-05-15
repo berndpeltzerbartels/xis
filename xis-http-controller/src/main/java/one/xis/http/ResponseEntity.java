@@ -85,6 +85,21 @@ public class ResponseEntity<T> {
         return response;
     }
 
+    /**
+     * Adds a cookie header intended for authentication tokens.
+     * <p>
+     * The cookie is created with the {@code Secure} attribute here because a
+     * {@code ResponseEntity} does not know the transport scheme. The concrete
+     * response writer removes that attribute only for plain HTTP requests.
+     * <p>
+     * This extra step exists for Safari: when a local XIS application runs on
+     * {@code http://localhost}, Safari silently ignores token cookies that carry
+     * {@code Secure}. The login endpoint then creates valid tokens, redirects to
+     * the target page, and the next request still looks anonymous. On HTTPS,
+     * including production systems behind a correctly configured reverse proxy,
+     * the {@code Secure} attribute is preserved. The development fallback is
+     * therefore not a production security downgrade.
+     */
     public ResponseEntity<T> addSecureCookie(String name, String value, Long maxAgeSeconds) {
         StringJoiner cookieValue = new StringJoiner("; ");
         cookieValue.add(name + "=" + value);

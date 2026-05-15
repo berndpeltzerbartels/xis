@@ -43,12 +43,16 @@ class ModalIntegrationTest {
     @Test
     void modalLinkLoadsModalControllerWithoutFollowingHref() {
         var client = context.openPage("/modal-integration.html");
+        var historySize = client.getDocument().getDefaultView().getHistory().getEntries().size();
+        var href = client.getDocument().getLocation().getHref();
 
         client.getDocument().getElementById("open-modal-link").click();
 
         assertThat(service.modalLoadCount()).isEqualTo(1);
         assertThat(service.modalSource()).isEqualTo("link");
         assertThat(client.getDocument().getLocation().getPathname()).isEqualTo("/modal-integration.html");
+        assertThat(client.getDocument().getLocation().getHref()).isEqualTo(href);
+        assertThat(client.getDocument().getDefaultView().getHistory().getEntries()).hasSize(historySize);
     }
 
     @Test

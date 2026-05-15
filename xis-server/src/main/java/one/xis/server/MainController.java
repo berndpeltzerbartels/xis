@@ -188,9 +188,6 @@ public class MainController {
 
 
     private ResponseEntity<?> responseEntity(ServerResponse serverResponse) {
-        if (serverResponse.getRedirectUrl() != null) {
-            return ResponseEntity.noContent().addHeader("Location", serverResponse.getRedirectUrl());
-        }
         var tokenStatus = UserContextImpl.getInstance().getTokenStatus();
         var entity = ResponseEntity.status(serverResponse.getStatus()).body(serverResponse);
         if (tokenStatus.isRenewed()) {

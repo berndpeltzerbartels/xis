@@ -13,6 +13,8 @@ with `@Scheduled`.
 import one.xis.context.Component;
 import one.xis.context.Scheduled;
 
+import java.util.concurrent.TimeUnit;
+
 @Component
 public class ReminderJob {
 
@@ -22,7 +24,7 @@ public class ReminderJob {
         this.reminderService = reminderService;
     }
 
-    @Scheduled(initialDelay = 1_000, fixedDelayMillis = 60_000)
+    @Scheduled(initialDelay = 1, fixedDelay = 1, timeUnit = TimeUnit.MINUTES)
     void sendDueReminders() {
         reminderService.sendDueReminders();
     }
@@ -36,13 +38,14 @@ injection, field injection, `@Value`, and `@Init` are already available when the
 
 Define exactly one interval:
 
-- `fixedDelayMillis`: waits after one invocation has finished before starting the next one.
-- `fixedRateMillis`: starts invocations at a regular interval measured from start to start.
+- `fixedDelay`: waits after one invocation has finished before starting the next one.
+- `fixedRate`: starts invocations at a regular interval measured from start to start.
 
-`initialDelay` delays only the first invocation.
+`initialDelay` delays only the first invocation. `timeUnit` is required intentionally, so the unit is visible at the
+call site.
 
 ```java
-@Scheduled(initialDelay = 5_000, fixedRateMillis = 10_000)
+@Scheduled(initialDelay = 5, fixedRate = 10, timeUnit = TimeUnit.SECONDS)
 void refreshDashboardCache() {
 }
 ```
@@ -69,4 +72,4 @@ public class ShutdownHook {
 }
 ```
 
-Cron-style schedules are not implemented yet. Use `fixedDelayMillis` or `fixedRateMillis` for now.
+Cron-style schedules are not implemented yet. Use `fixedDelay` or `fixedRate` for now.

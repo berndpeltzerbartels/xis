@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
@@ -38,9 +39,9 @@ import java.util.stream.Stream;
 public class SseService implements RefreshEventPublisher {
 
     /**
-     * clientId -> active SSE emitter
+     * clientId -> active SSE emitters. A browser can have several windows that share the same client id.
      */
-    private final Map<String, SseEmitter> emitters = new ConcurrentHashMap<>();
+    private final Map<String, Set<SseEmitter>> emittersByClientId = new ConcurrentHashMap<>();
     private final Map<String, String> userIdByClientId = new ConcurrentHashMap<>();
     private final Map<String, Set<String>> clientIdsByUserId = new ConcurrentHashMap<>();
     private final Map<String, Queue<PendingEvent>> pendingEventsByClientId = new ConcurrentHashMap<>();
@@ -78,11 +79,7 @@ public class SseService implements RefreshEventPublisher {
     // -------------------------------------------------------------------------
 
     public void registerEmitter(String clientId, String userId, SseEmitter emitter) {
-        SseEmitter old = emitters.put(clientId, emitter);
-        if (old != null && old.isOpen()) {
-            log.debug("registerEmitter: closing stale emitter for clientId={}", clientId);
-            old.close();
-        }
+        emittersByClientId.computeIfAbsent(clientId, ignored -> ConcurrentHashMap.newKeySet()).add(emitter);
         rememberClient(clientId);
         updateUserRegistration(clientId, userId);
         log.debug("registerEmitter: clientId={}", clientId);
@@ -90,7 +87,7 @@ public class SseService implements RefreshEventPublisher {
     }
 
     public void unregisterEmitter(String clientId, SseEmitter emitter) {
-        if (emitters.remove(clientId, emitter)) {
+        if (removeEmitter(clientId, emitter)) {
             rememberClient(clientId);
             log.debug("unregisterEmitter: clientId={}", clientId);
         } else {
@@ -123,18 +120,12 @@ public class SseService implements RefreshEventPublisher {
     private void sendToAll(String payload) {
         pruneKnownClients();
         Set<String> attemptedClients = new HashSet<>();
-        emitters.forEach((clientId, emitter) -> {
+        emittersByClientId.forEach((clientId, emitters) -> {
             attemptedClients.add(clientId);
-            if (emitter.isOpen()) {
-                sendToEmitter(clientId, emitter, payload, () -> log.debug("sendToAll: sent event to clientId={}", clientId));
-            } else {
-                emitters.remove(clientId, emitter);
-                rememberClient(clientId);
-                queuePendingEvent(clientId, payload, "emitter is closed");
-            }
+            sendToClient(clientId, payload);
         });
         knownClientExpiresAt.keySet().stream()
-                .filter(clientId -> !emitters.containsKey(clientId))
+                .filter(clientId -> !hasEmitters(clientId))
                 .filter(clientId -> !attemptedClients.contains(clientId))
                 .forEach(clientId -> queuePendingEvent(clientId, payload, "no emitter registered"));
     }
@@ -163,18 +154,25 @@ public class SseService implements RefreshEventPublisher {
     // -------------------------------------------------------------------------
 
     private void sendToClient(String clientId, String payload) {
-        SseEmitter emitter = emitters.get(clientId);
-        if (emitter == null) {
+        Set<SseEmitter> emitters = emittersByClientId.get(clientId);
+        if (emitters == null || emitters.isEmpty()) {
             queuePendingEvent(clientId, payload, "no emitter registered");
             return;
         }
-        if (!emitter.isOpen()) {
-            emitters.remove(clientId, emitter);
-            rememberClient(clientId);
+
+        List<SseEmitter> openEmitters = emitters.stream()
+                .filter(this::isOpenEmitter)
+                .toList();
+        if (openEmitters.isEmpty()) {
+            removeClosedEmitters(clientId, emitters);
             queuePendingEvent(clientId, payload, "emitter is closed");
             return;
         }
-        sendToEmitter(clientId, emitter, payload, () -> log.debug("sendToClient: sent event to clientId={}", clientId));
+
+        boolean queueOnSendFailure = openEmitters.size() == 1;
+        openEmitters.forEach(emitter -> sendToEmitter(clientId, emitter, payload,
+                () -> log.debug("sendToClient: sent event to clientId={}", clientId),
+                throwable -> handleSendFailure(clientId, emitter, payload, throwable, queueOnSendFailure)));
     }
 
     private void sendToEmitter(String clientId, SseEmitter emitter, String payload, Runnable successCallback) {
@@ -203,11 +201,17 @@ public class SseService implements RefreshEventPublisher {
     }
 
     private void handleSendFailure(String clientId, SseEmitter emitter, String payload, Throwable throwable) {
+        handleSendFailure(clientId, emitter, payload, throwable, true);
+    }
+
+    private void handleSendFailure(String clientId, SseEmitter emitter, String payload, Throwable throwable, boolean queueEvent) {
         Throwable cause = unwrapCompletionException(throwable);
-        emitters.remove(clientId, emitter);
+        removeEmitter(clientId, emitter);
         rememberClient(clientId);
         closeQuietly(emitter);
-        queuePendingEvent(clientId, payload, "send failed: " + cause.getMessage());
+        if (queueEvent) {
+            queuePendingEvent(clientId, payload, "send failed: " + cause.getMessage());
+        }
     }
 
     private void closeQuietly(SseEmitter emitter) {
@@ -248,7 +252,7 @@ public class SseService implements RefreshEventPublisher {
             log.debug("flushPendingEvents: sent pending event to clientId={}", clientId);
             if (pendingEvents.isEmpty()) {
                 pendingEventsByClientId.remove(clientId, pendingEvents);
-            } else if (emitters.get(clientId) == emitter && emitter.isOpen()) {
+            } else if (hasEmitter(clientId, emitter) && emitter.isOpen()) {
                 flushPendingEvents(clientId, emitter);
             }
         }, throwable -> handleFlushSendFailure(clientId, emitter, throwable));
@@ -256,7 +260,7 @@ public class SseService implements RefreshEventPublisher {
 
     private void handleFlushSendFailure(String clientId, SseEmitter emitter, Throwable throwable) {
         Throwable cause = unwrapCompletionException(throwable);
-        emitters.remove(clientId, emitter);
+        removeEmitter(clientId, emitter);
         rememberClient(clientId);
         closeQuietly(emitter);
         log.debug("flushPendingEvents: send failed for clientId={}, keeping pending event for reconnect: {}",
@@ -286,6 +290,40 @@ public class SseService implements RefreshEventPublisher {
             entry.getValue().removeIf(clientId -> !knownClientExpiresAt.containsKey(clientId));
             return entry.getValue().isEmpty();
         });
+    }
+
+    private boolean isOpenEmitter(SseEmitter emitter) {
+        return emitter != null && emitter.isOpen();
+    }
+
+    private void removeClosedEmitters(String clientId, Set<SseEmitter> emitters) {
+        emitters.removeIf(emitter -> !isOpenEmitter(emitter));
+        if (emitters.isEmpty()) {
+            emittersByClientId.remove(clientId, emitters);
+            rememberClient(clientId);
+        }
+    }
+
+    private boolean removeEmitter(String clientId, SseEmitter emitter) {
+        Set<SseEmitter> emitters = emittersByClientId.get(clientId);
+        if (emitters == null) {
+            return false;
+        }
+        boolean removed = emitters.remove(emitter);
+        if (emitters.isEmpty()) {
+            emittersByClientId.remove(clientId, emitters);
+        }
+        return removed;
+    }
+
+    private boolean hasEmitter(String clientId, SseEmitter emitter) {
+        Set<SseEmitter> emitters = emittersByClientId.get(clientId);
+        return emitters != null && emitters.contains(emitter);
+    }
+
+    private boolean hasEmitters(String clientId) {
+        Set<SseEmitter> emitters = emittersByClientId.get(clientId);
+        return emitters != null && !emitters.isEmpty();
     }
 
     private String buildPayload(String eventKey) {

@@ -122,6 +122,35 @@ class MethodUtilsTest {
         assertThat(result.get("name").getDeclaringClass()).isEqualTo(TestClass2.class);
     }
 
+    @Test
+    void propertyNameByGetterAllowsGetterLikeMethodWithParameters() throws NoSuchMethodException {
+        class TestClass {
+            String getPipelineCustomers(List<String> customers) {
+                return null;
+            }
+        }
+
+        var method = TestClass.class.getDeclaredMethod("getPipelineCustomers", List.class);
+
+        assertThat(MethodUtils.propertyNameByGetter(method)).contains("pipelineCustomers");
+    }
+
+    @Test
+    void propertyNameByGetterKeepsStrictGetterNameShape() throws NoSuchMethodException {
+        class TestClass {
+            String get() {
+                return null;
+            }
+
+            String gettyImages() {
+                return null;
+            }
+        }
+
+        assertThat(MethodUtils.propertyNameByGetter(TestClass.class.getDeclaredMethod("get"))).isEmpty();
+        assertThat(MethodUtils.propertyNameByGetter(TestClass.class.getDeclaredMethod("gettyImages"))).isEmpty();
+    }
+
 
     @Test
     void getGenericTypeParameter() throws NoSuchMethodException {

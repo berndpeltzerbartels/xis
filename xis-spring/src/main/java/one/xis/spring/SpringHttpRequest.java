@@ -105,4 +105,9 @@ public class SpringHttpRequest implements HttpRequest {
     public void addHeader(String name, String value) {
         throw new UnsupportedOperationException("Cannot add header to HttpServletRequest");
     }
+
+    @Override
+    public boolean isSecure() {
+        return request.isSecure() || HttpRequest.super.isSecure();
+    }
 }

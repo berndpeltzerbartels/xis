@@ -20,17 +20,21 @@ public class SelectElementImpl extends ElementImpl implements SelectElement {
     }
 
 
-    @SuppressWarnings("unused")
+    @Override
     public void setValue(String value) {
-        this.value = value;
         var options = this.getElementsByTagName("option");
         for (var i = 0; i < options.length; i++) {
             var option = (OptionElementImpl) options.item(i);
-            if (value.equals(option.getAttribute("value"))) {
-                option.setSelected(true);
+            if (!isMultiple()) {
+                option.selected = false;
+            }
+            if (value.equals(option.getValue())) {
+                option.selected = true;
+                updateSelectionState(option);
                 return;
             }
         }
+        this.value = value;
     }
 
 

@@ -67,6 +67,7 @@ class ControllerMethod {
         return parameter.getType().equals(HttpRequest.class)
                 || parameter.getType().equals(HttpResponse.class)
                 || parameter.getType().equals(RequestContext.class)
+                || UserContext.class.isAssignableFrom(parameter.getType())
                 || parameter.isAnnotationPresent(FormData.class)
                 || parameter.isAnnotationPresent(UserId.class)
                 || parameter.isAnnotationPresent(ClientId.class)

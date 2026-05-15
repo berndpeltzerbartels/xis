@@ -46,6 +46,7 @@ class RootPageService {
     private int cssOrder(Resource resource) {
         return switch (resource.getResourcePath()) {
             case "public/default-theme.css" -> 0;
+            case "public/xis-runtime.css" -> 5;
             case "public/xis.css" -> 10;
             case "public/theme.css" -> 100;
             default -> 50;

@@ -66,32 +66,22 @@ class ControllerMethodParameter {
             return sharedValue;
         } else if (parameter.isAnnotationPresent(SessionStorage.class)) {
             var key = parameter.getAnnotation(SessionStorage.class).value();
-            var paramValue = request.getSessionStorageData().get(key);
-            if (paramValue == null) {
-                return isMandatory(parameter) ? createDefault(parameter) : null;
-            }
-            return deserializeParameter(paramValue, request, parameter, postProcessingResults);
+            return storageParameter(StorageParameterScope.SESSION, key, request.getSessionStorageData(), request, postProcessingResults, requestScope);
         } else if (parameter.isAnnotationPresent(LocalStorage.class)) {
             var key = parameter.getAnnotation(LocalStorage.class).value();
-            var paramValue = request.getLocalStorageData().get(key);
-            if (paramValue == null) {
-                return isMandatory(parameter) ? createDefault(parameter) : null;
-            }
-            return deserializeParameter(paramValue, request, parameter, postProcessingResults);
+            return storageParameter(StorageParameterScope.LOCAL, key, request.getLocalStorageData(), request, postProcessingResults, requestScope);
         } else if (parameter.isAnnotationPresent(ClientStorage.class)) {
             var key = parameter.getAnnotation(ClientStorage.class).value();
-            var paramValue = request.getClientStorageData().get(key);
-            if (paramValue == null) {
-                return isMandatory(parameter) ? createDefault(parameter) : null;
-            }
-            return deserializeParameter(paramValue, request, parameter, postProcessingResults);
+            return storageParameter(StorageParameterScope.CLIENT, key, request.getClientStorageData(), request, postProcessingResults, requestScope);
+        } else if (UserContext.class.isAssignableFrom(parameter.getType())) {
+            return UserContext.getInstance();
         } else if (method.isAnnotationPresent(Action.class)
                 && positionalParameterIndex >= 0
                 && request.getActionParameters().containsKey("$" + positionalParameterIndex)) {
             var paramValue = request.getActionParameters().get("$" + positionalParameterIndex);
             return deserializeParameter(paramValue, request, parameter, postProcessingResults);
         } else {
-            throw new IllegalStateException(method + ": parameter without annotation=" + parameter);
+            throw new IllegalStateException(method + ": illegal parameter=" + parameter);
         }
     }
 
@@ -191,6 +181,36 @@ class ControllerMethodParameter {
         }
         var paramValue = request.getPathVariables().get(key);
         return deserializeParameter(paramValue, request, parameter, postProcessingResults);
+    }
+
+    private Object storageParameter(StorageParameterScope storageScope,
+                                    String key,
+                                    Map<String, String> storageData,
+                                    ClientRequest request,
+                                    PostProcessingResults postProcessingResults,
+                                    Map<String, Object> requestScope) throws IOException {
+        var storageParameters = storageParameterValues(requestScope);
+        var existingValue = storageParameters.value(storageScope, key);
+        if (existingValue.isPresent()) {
+            return existingValue.get();
+        }
+        var paramValue = storageData.get(key);
+        if (paramValue == null) {
+            if (!isMandatory(parameter)) {
+                return null;
+            }
+            var defaultValue = createDefault(parameter);
+            storageParameters.put(storageScope, key, defaultValue);
+            return defaultValue;
+        }
+        var value = deserializeParameter(paramValue, request, parameter, postProcessingResults);
+        storageParameters.put(storageScope, key, value);
+        return value;
+    }
+
+    private StorageParameterValues storageParameterValues(Map<String, Object> requestScope) {
+        return (StorageParameterValues) requestScope.computeIfAbsent(StorageParameterValues.REQUEST_SCOPE_KEY,
+                ignored -> new StorageParameterValues());
     }
 
     private Object deserializeParameter(Parameter parameter, ClientRequest request, PostProcessingResults postProcessingResults) throws IOException {

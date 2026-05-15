@@ -35,6 +35,13 @@ Read these chapters to build normal XIS applications:
 
 ## Advanced Documentation
 
-Read [Advanced topics](advanced/README.md) when you need optional or specialized capabilities such as SSO,
-Microfrontend Architecture, reusable web artifacts, interface advice/aspects, custom JavaScript,
-[themes](advanced/theme.md), or client-side storage.
+Optional or specialized capabilities are still important enough to be visible:
+
+- [Microfrontend Architecture and distributed mode](advanced/microfrontend-architecture.md)
+- [Reusable web artifacts with replaceable templates](advanced/reusable-web-artifacts.md)
+- [Aspects and interface advice](advanced/aspects.md), including the native-image-friendly AOP model
+- [Custom proxies](advanced/custom-proxies.md)
+- [Explicit SQL transactions](advanced/sql-transactions.md)
+- [Custom JavaScript and custom EL functions](advanced/custom-javascript.md)
+- [Integration-test browser model](advanced/integration-test-browser.md)
+- [XIS theme](advanced/theme.md)

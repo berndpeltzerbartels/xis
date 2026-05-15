@@ -18,7 +18,7 @@ The module is intentionally modest. It focuses on three things:
 ```groovy
 plugins {
     id "java"
-    id "one.xis.plugin" version "0.9.3"
+    id "one.xis.plugin" version "0.10.0"
 }
 
 repositories {

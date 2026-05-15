@@ -1,5 +1,6 @@
 package one.xis.security;
 
+import lombok.extern.slf4j.Slf4j;
 import one.xis.Authenticated;
 import one.xis.Roles;
 import one.xis.UserContext;
@@ -15,6 +16,7 @@ import java.security.SecureRandom;
 import java.util.*;
 
 
+@Slf4j
 public class SecurityUtil {
 
     public static String createRandomKey(int length) {
@@ -59,7 +61,7 @@ public class SecurityUtil {
             return;
         }
         if (!roleRequirement.isSatisfiedBy(presentRoles, authenticated)) {
-            throwExceptionForUnsatisfiedRequirement(authenticated, "method: " + method.getName(), roleRequirement);
+            throwExceptionForUnsatisfiedRequirement(authenticated, presentRoles, "method: " + method.toGenericString(), roleRequirement);
         }
     }
 
@@ -74,11 +76,13 @@ public class SecurityUtil {
             return;
         }
         if (!roleRequirement.isSatisfiedBy(presentRoles, authenticated)) {
-            throwExceptionForUnsatisfiedRequirement(authenticated, "class: " + c.getName(), roleRequirement);
+            throwExceptionForUnsatisfiedRequirement(authenticated, presentRoles, "class: " + c.getName(), roleRequirement);
         }
     }
 
-    private static void throwExceptionForUnsatisfiedRequirement(boolean authenticated, String target, RoleRequirement roleRequirement) {
+    private static void throwExceptionForUnsatisfiedRequirement(boolean authenticated, Set<String> presentRoles, String target, RoleRequirement roleRequirement) {
+        log.warn("xis-security-denied: target={} authenticated={} presentRoles={} required={}",
+                target, authenticated, presentRoles, roleRequirement);
         if (!authenticated && roleRequirement.hasAuthenticationRequirement()) {
             throw new AuthenticationException("User is not authenticated for " + target + ". Required: " + roleRequirement);
         }

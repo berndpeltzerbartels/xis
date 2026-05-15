@@ -3,12 +3,16 @@ package one.xis.server;
 import one.xis.Action;
 import one.xis.Parameter;
 import one.xis.SharedValue;
+import one.xis.UserContext;
+import one.xis.UserContextImpl;
+import one.xis.auth.token.SecurityAttributes;
 import one.xis.deserialize.MainDeserializer;
 import one.xis.deserialize.PostProcessingResults;
 import one.xis.gson.JsonMap;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -60,6 +64,24 @@ class ControllerMethodParameterTest {
                 .hasMessageContaining("index is 1-based");
     }
 
+    @Test
+    void userContextDoesNotCountAsPositionalActionArgument() throws Exception {
+        var method = TestActions.class.getDeclaredMethod("moveWithUserContext", UserContext.class, String.class, String.class);
+        var controllerMethod = new ControllerMethod(method, mockDeserializer(), mock(ControllerMethodResultMapper.class));
+        var request = new ClientRequest();
+        request.setActionParameters(JsonMap.of("$0", "\"a2\"", "$1", "\"a4\""));
+        var controller = new TestActions();
+        var securityAttributes = mock(SecurityAttributes.class);
+        when(securityAttributes.getRoles()).thenReturn(Set.of());
+        UserContextImpl.getInstance().setSecurityAttributes(securityAttributes);
+
+        controllerMethod.invoke(request, controller, new HashMap<>());
+
+        assertThat(controller.userContext).isSameAs(UserContext.getInstance());
+        assertThat(controller.from).isEqualTo("a2");
+        assertThat(controller.to).isEqualTo("a4");
+    }
+
     private MainDeserializer mockDeserializer() {
         var deserializer = mock(MainDeserializer.class);
         when(deserializer.deserialize(eq("\"a2\""), any(), any(), any())).thenReturn("a2");
@@ -69,8 +91,19 @@ class ControllerMethodParameterTest {
 
     static class TestActions {
 
+        UserContext userContext;
+        String from;
+        String to;
+
         @Action
         void move(@SharedValue("game") Object game, @Parameter String from, @Parameter String to) {
+        }
+
+        @Action
+        void moveWithUserContext(UserContext userContext, @Parameter String from, @Parameter String to) {
+            this.userContext = userContext;
+            this.from = from;
+            this.to = to;
         }
 
         @Action

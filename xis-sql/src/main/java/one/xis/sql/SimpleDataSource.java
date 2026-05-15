@@ -5,10 +5,14 @@ import one.xis.context.Value;
 
 import javax.sql.DataSource;
 import java.io.PrintWriter;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
+import java.util.Locale;
 import java.util.logging.Logger;
 
 /**
@@ -65,6 +69,8 @@ public class SimpleDataSource implements DataSource {
     private PrintWriter logWriter;
     private int loginTimeout;
     private volatile DataSource pooledDataSource;
+    private volatile Connection h2FileConnection;
+    private volatile boolean h2FileShutdownHookRegistered;
 
     public void setUrl(String url) {
         this.url = url;
@@ -117,6 +123,9 @@ public class SimpleDataSource implements DataSource {
         }
         requireUrl();
         loadDriverIfConfigured();
+        if (isH2FileUrl()) {
+            return nonClosingConnection(h2FileConnection());
+        }
         return openDriverManagerConnection(effectiveUser(), password);
     }
 
@@ -127,6 +136,9 @@ public class SimpleDataSource implements DataSource {
         }
         requireUrl();
         loadDriverIfConfigured();
+        if (isH2FileUrl() && sameCredentials(username, password)) {
+            return nonClosingConnection(h2FileConnection());
+        }
         return DriverManager.getConnection(url, username, password);
     }
 
@@ -202,6 +214,82 @@ public class SimpleDataSource implements DataSource {
             return DriverManager.getConnection(url);
         }
         return DriverManager.getConnection(url, user, password);
+    }
+
+    private Connection h2FileConnection() throws SQLException {
+        Connection current = h2FileConnection;
+        if (isUsable(current)) {
+            return current;
+        }
+        synchronized (this) {
+            if (!isUsable(h2FileConnection)) {
+                closeQuietly(h2FileConnection);
+                h2FileConnection = openDriverManagerConnection(effectiveUser(), password);
+                registerH2FileShutdownHook();
+            }
+            return h2FileConnection;
+        }
+    }
+
+    private boolean isUsable(Connection connection) throws SQLException {
+        return connection != null && !connection.isClosed() && connection.isValid(validationTimeoutSeconds());
+    }
+
+    private int validationTimeoutSeconds() {
+        return loginTimeout > 0 ? loginTimeout : 1;
+    }
+
+    private boolean isH2FileUrl() {
+        return url != null && url.toLowerCase(Locale.ROOT).startsWith("jdbc:h2:file:");
+    }
+
+    private boolean sameCredentials(String username, String password) {
+        return java.util.Objects.equals(effectiveUser(), username)
+                && java.util.Objects.equals(this.password, password);
+    }
+
+    private void registerH2FileShutdownHook() {
+        if (h2FileShutdownHookRegistered) {
+            return;
+        }
+        h2FileShutdownHookRegistered = true;
+        Runtime.getRuntime().addShutdownHook(new Thread(this::closeH2FileConnection, "xis-h2-file-datasource-close"));
+    }
+
+    void closeH2FileConnection() {
+        synchronized (this) {
+            closeQuietly(h2FileConnection);
+            h2FileConnection = null;
+        }
+    }
+
+    private static Connection nonClosingConnection(Connection connection) {
+        return (Connection) Proxy.newProxyInstance(
+                Connection.class.getClassLoader(),
+                new Class[]{Connection.class},
+                (proxy, method, args) -> invokeConnection(connection, method, args));
+    }
+
+    private static Object invokeConnection(Connection connection, Method method, Object[] args) throws Throwable {
+        if (method.getName().equals("close")) {
+            return null;
+        }
+        try {
+            return method.invoke(connection, args);
+        } catch (InvocationTargetException e) {
+            throw e.getCause();
+        }
+    }
+
+    private static void closeQuietly(Connection connection) {
+        if (connection == null) {
+            return;
+        }
+        try {
+            connection.close();
+        } catch (SQLException ignored) {
+            // Best-effort cleanup for the development H2 file connection.
+        }
     }
 
     private DataSource getPooledDataSource() {

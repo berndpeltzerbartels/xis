@@ -25,6 +25,7 @@ class FormHandler extends TagHandler {
         var formBindingParameters = urlParameters(this.binding);
         var formBindingKey = stripQuery(this.binding);
         var parameters = mergeObjects(this.frontletParameters || {}, formBindingParameters);
+        this.resetMessageHandlers();
         return this.client.formAction(resolvedUrl, this.frontletId(), this.formData(), action, formBindingKey, parameters)
             .then(response => this.handleActionResponse(response, this.targetContainerHandler()));
     }
@@ -207,6 +208,11 @@ class FormHandler extends TagHandler {
     resetMessageHandlers(binding) {
         this.globalMessageHandlers.forEach(handler => handler.reset());
         if (!binding || !this.messageHandlers[binding]) {
+            if (!binding) {
+                for (const handlers of Object.values(this.messageHandlers)) {
+                    handlers.forEach(handler => handler.reset());
+                }
+            }
             return;
         }
         this.messageHandlers[binding].forEach(handler => handler.reset());

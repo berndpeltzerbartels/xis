@@ -70,4 +70,38 @@ public interface HttpRequest {
 
 
     void addHeader(String name, String value);
+
+    /**
+     * Returns whether the request reached XIS through a secure HTTPS connection.
+     * <p>
+     * This is intentionally based on the externally visible scheme, not merely
+     * on an internal socket detail. A production deployment may terminate TLS in
+     * a proxy and forward the request to XIS over plain HTTP; in that case
+     * {@code X-Forwarded-Proto: https} still means the browser sees HTTPS and
+     * authentication cookies must keep their {@code Secure} attribute. For the
+     * boot adapter, {@code X-Internal-Scheme} is used as the local fallback when
+     * no proxy header is present.
+     * <p>
+     * The distinction matters for local development: Safari does not store
+     * cookies marked {@code Secure} when they are received from
+     * {@code http://localhost}. The login callback can therefore succeed on the
+     * server while Safari silently drops the token cookies and redirects back to
+     * the login page. Returning {@code false} for plain HTTP lets the response
+     * writer omit only the {@code Secure} attribute in that development setup.
+     * This is not a production security reduction, because HTTPS requests still
+     * return {@code true} and production token cookies remain {@code Secure}.
+     * <p>
+     * Adapters should override this method when their native request object can
+     * answer the question more directly.
+     *
+     * @return {@code true} if secure cookies may be emitted with the Secure flag
+     */
+    default boolean isSecure() {
+        String forwardedProto = getHeader("X-Forwarded-Proto");
+        if (forwardedProto != null && !forwardedProto.isBlank()) {
+            return "https".equalsIgnoreCase(forwardedProto);
+        }
+        String internalScheme = getHeader("X-Internal-Scheme");
+        return internalScheme != null && "https".equalsIgnoreCase(internalScheme);
+    }
 }

@@ -50,7 +50,7 @@ class SpringFilter extends HttpFilter {
             return;
         }
         var request = new SpringHttpRequest(httpServletRequest);
-        var response = new HttpResponseImpl();
+        var response = new HttpResponseImpl(request.isSecure());
         restControllerService.doInvocation(request, response);
         if (response.getStatusCode() != null && response.getStatusCode() == 404) {
             chain.doFilter(httpServletRequest, httpServletResponse);
@@ -110,6 +110,11 @@ class SpringFilter extends HttpFilter {
         private Integer contentLength;
         private final java.util.Map<String, java.util.List<String>> headers = new java.util.HashMap<>();
         private String redirectLocation;
+        private final boolean secureRequest;
+
+        HttpResponseImpl(boolean secureRequest) {
+            this.secureRequest = secureRequest;
+        }
 
         @Override
         public void setStatusCode(int i) {
@@ -141,11 +146,19 @@ class SpringFilter extends HttpFilter {
             this.headers.computeIfAbsent(name, k -> new java.util.ArrayList<>()).add(value);
         }
 
+        /**
+         * Adds an HTTP-only token cookie and only marks it {@code Secure} when
+         * the original request is HTTPS. Safari drops Secure cookies on
+         * {@code http://localhost}, so local login would otherwise succeed on
+         * the server and immediately disappear in the browser. HTTPS requests,
+         * including production traffic behind a proxy that reports HTTPS
+         * correctly, still receive {@code Secure} token cookies.
+         */
         @Override
         public void addSecureCookie(String name, String value, Duration maxAge) {
-            // Baut einen einfachen Set-Cookie-Header-String
-            String cookie = String.format("%s=%s; Max-Age=%d; Path=/; Secure; HttpOnly; SameSite=Lax",
-                    name, value, maxAge.getSeconds());
+            String secureAttribute = secureRequest ? "; Secure" : "";
+            String cookie = String.format("%s=%s; Max-Age=%d; Path=/%s; HttpOnly; SameSite=Lax",
+                    name, value, maxAge.getSeconds(), secureAttribute);
             addHeader("Set-Cookie", cookie);
         }
 

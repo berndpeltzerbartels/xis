@@ -85,6 +85,8 @@ class SpringBootDatabaseSmokeTest {
     private SqlSmokeRepository sqlRepository(DataSource dataSource) {
         AppContext context = AppContext.builder()
                 .withPackage(getClass().getPackageName())
+                .withSingletonClass("one.xis.sql.SqlConnectionProvider")
+                .withSingletonClass("one.xis.sql.TransactionManager")
                 .withSingletonClass("one.xis.sql.SQLRepositoryProxyFactory")
                 .withSingleton(dataSource)
                 .build();

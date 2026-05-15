@@ -111,7 +111,7 @@ public class NettyHttpServerHandler extends SimpleChannelInboundHandler<FullHttp
 
     private FullHttpResponse handleApiOrStaticResourceRequest(NettyHttpRequest request) {
         // Keep this usage as required.
-        NettyHttpResponse response = new NettyHttpResponse();
+        NettyHttpResponse response = new NettyHttpResponse(request.isSecure());
         restControllerService.doInvocation(request, response);
 
         if (response.isHandledExternally()) {

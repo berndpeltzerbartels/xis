@@ -15,4 +15,18 @@ public class TitleFrontletIntegrationTest {
         var client = context.openPage(TitlePage.class);
         assertThat(client.getDocument().getTitle()).isEqualTo("Mein neuer Titel");
     }
+
+    @Test
+    void frontletDoesNotChangeBrowserAddress() {
+        var context = IntegrationTestContext.builder()
+                .withSingleton(TitleFrontlet.class)
+                .withSingleton(TitlePage.class)
+                .build();
+
+        var client = context.openPage(TitlePage.class);
+
+        assertThat(client.getDocument().getLocation().getHref()).isEqualTo("http://testserver/TitlePage.html");
+        assertThat(client.getDocument().getDefaultView().getHistory().getEntries()).hasSize(1);
+        assertThat(client.getDocument().getDefaultView().getHistory().getCurrentId()).isEqualTo("/TitlePage.html");
+    }
 }

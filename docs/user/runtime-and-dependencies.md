@@ -15,7 +15,7 @@ plugins {
     id "java"
     id "org.springframework.boot" version "3.3.0"
     id "io.spring.dependency-management" version "1.1.5"
-    id "one.xis.plugin" version "0.9.3"
+    id "one.xis.plugin" version "0.10.0"
 }
 
 repositories {
@@ -33,7 +33,7 @@ dependencies {
 ```groovy
 plugins {
     id "java"
-    id "one.xis.plugin" version "0.9.3"
+    id "one.xis.plugin" version "0.10.0"
 }
 
 repositories {
@@ -119,9 +119,35 @@ Reference them from HTML without the `public` segment:
 <img src="/images/logo.png" alt="Logo"/>
 ```
 
+XIS also uses classpath `public` resources when it builds the root page:
+
+- every `public/**/*.css` resource is added to the root page as a stylesheet
+- every `public/**/*.js` resource is added to the root page as a script
+- `public/xis-runtime.css` is provided by XIS itself and contains structural styles required by framework-owned DOM
+  elements, for example modal dialogs
+
+You normally do not need to add stylesheet links for application CSS under `public`. Put app-specific CSS there and let
+XIS add it to the root page. The generated URLs omit the `public` segment, for example
+`src/main/resources/public/css/app.css` becomes `/css/app.css`.
+
+Stylesheets are loaded in a predictable order for common XIS files:
+
+1. `public/default-theme.css`
+2. `public/xis-runtime.css`
+3. `public/xis.css`
+4. other CSS files
+5. `public/theme.css`
+
+`xis-runtime.css` is not a theme. It is part of the runtime contract and is loaded even when the optional `xis-theme`
+dependency is not used.
+
 In XIS Boot development runs, public assets under `src/main/resources/public` are read from the source file when it is
 available. CSS edits therefore become visible after a browser reload without rebuilding the application. Packaged jar
 resources remain static.
+
+For JavaScript, prefer [Custom JavaScript and custom EL functions](advanced/custom-javascript.md) when you want to extend
+the XIS browser runtime. Files listed through `META-INF/xis/js/extensions` are bundled into `/bundle.min.js`; files under
+`public` are loaded as normal root-page scripts.
 
 ## Distributed Mode
 
