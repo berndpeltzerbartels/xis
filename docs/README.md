@@ -1,5 +1,12 @@
 # XIS Documentation
 
+**XIS is a lightweight SPA framework for Java and Groovy: annotation-driven, fast, and built around backend controllers
+plus plain HTML templates. XIS provides ready-to-use client-server transport, state synchronization, navigation, form
+handling, validation feedback, and partial UI refreshes without extra work and without any boilerplate code. It runs
+standalone with XIS Boot or inside Spring, supports distributed Microfrontend Architecture, and in most applications you
+write just annotated POJO controllers and templates. Coding is as simple as in the old days of request-response, but the
+result is a modern and fast SPA application.**
+
 This directory is the canonical documentation source for users, framework developers, and coding agents.
 
 The old documentation application in `docs-app` / `/Users/bernd/projects/xis-docs` is source material, not the target
