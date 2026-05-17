@@ -1,0 +1,57 @@
+package one.xis.boot.nativeimage;
+
+import one.xis.boot.netty.NettyServer;
+import one.xis.context.AppContext;
+
+/**
+ * Starts a XIS Boot application from generated native component catalogs.
+ * <p>
+ * This runner is intended for native images and other closed-world runtimes.
+ * It avoids application package scanning and uses generated direct class
+ * references instead.
+ */
+public final class XISNativeBootRunner {
+
+    private XISNativeBootRunner() {
+    }
+
+    public static void run(Class<?> applicationClass, String[] args, NativeComponentRegistry... applicationRegistries) {
+        var builder = new NativeAppContextBuilder()
+                .withRegistry(new XisGeneratedBootFrameworkComponents());
+        builder.withRegistries(applicationRegistries);
+        startServer(builder.build(), args);
+    }
+
+    /**
+     * Creates a context that contains only the generated XIS Boot framework
+     * components.
+     * <p>
+     * This method is mainly useful while bootstrapping native support. A real
+     * application should pass its generated application registry via
+     * {@link #run(Class, String[], NativeComponentRegistry...)}.
+     */
+    public static void runFrameworkOnly(String[] args) {
+        var context = new NativeAppContextBuilder()
+                .withRegistry(new XisGeneratedBootFrameworkComponents())
+                .build();
+        startServer(context, args);
+    }
+
+    private static void startServer(AppContext context, String[] args) {
+        NettyServer server = context.getSingleton(NettyServer.class);
+        if (args != null && args.length > 0) {
+            try {
+                int port = Integer.parseInt(args[0]);
+                server.setPort(port);
+            } catch (NumberFormatException ignored) {
+                throw new RuntimeException("Invalid port number: " + args[0]);
+            }
+        }
+        System.out.println("Starting server on port " + server.getPort());
+        try {
+            server.start();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+}

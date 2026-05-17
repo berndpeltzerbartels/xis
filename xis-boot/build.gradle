@@ -62,11 +62,10 @@ dependencies {
     implementation "com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion"
 
 
-    // SLF4J API + Tinylog implementation for xis-boot applications
+    // XIS Boot is an application runtime, so it ships a small default SLF4J provider.
+    // Applications can still exclude or replace it with their own logging backend.
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
-    implementation("org.tinylog:tinylog-api:2.7.0")
-    implementation("org.tinylog:tinylog-impl:2.7.0")
-    implementation("org.tinylog:slf4j-tinylog:2.7.0")
+    runtimeOnly("org.slf4j:slf4j-simple:$slf4jVersion")
 
 
     // Annotation processors

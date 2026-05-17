@@ -3,24 +3,25 @@ package one.xis.mongodb;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.changestream.ChangeStreamDocument;
 import com.mongodb.client.model.changestream.FullDocument;
-import lombok.RequiredArgsConstructor;
+import one.xis.context.AppContextInitializedEvent;
 import one.xis.context.Component;
-import one.xis.context.Init;
+import one.xis.context.EventListener;
 import org.bson.Document;
 
 import java.lang.reflect.Method;
-import java.util.Collection;
 
 @Component
-@RequiredArgsConstructor
 class MongoWatchDispatcher {
     private final MongoDatabase database;
-    private final Collection<Object> components;
     private final MongoMapper mapper = new MongoMapper();
 
-    @Init
-    void startWatchers() {
-        for (Object component : components) {
+    MongoWatchDispatcher(MongoDatabase database) {
+        this.database = database;
+    }
+
+    @EventListener
+    void startWatchers(AppContextInitializedEvent event) {
+        for (Object component : event.getAppContext().getSingletons()) {
             for (Method method : component.getClass().getDeclaredMethods()) {
                 MongoWatch watch = method.getAnnotation(MongoWatch.class);
                 if (watch != null) {

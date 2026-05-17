@@ -4,6 +4,7 @@ import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Dependency;
+import org.gradle.api.artifacts.ProjectDependency;
 import org.gradle.api.file.SourceDirectorySet;
 import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.tasks.bundling.AbstractArchiveTask;
@@ -31,10 +32,12 @@ public class XISPlugin implements Plugin<Project> {
 
         configureDependencyManagement(project);
         configureResources(project);
+        configureFrameworkComponentGeneration(project);
         configureTemplatesTask(project);
         configureTestsTask(project);
         configureValidateTask(project);
         configureFatJarCreation(project);
+        configureNativeSupport(project);
         configureGroovySupport(project);
     }
 
@@ -80,6 +83,11 @@ public class XISPlugin implements Plugin<Project> {
                 "xis-authentication",
                 "xis-authentication-api",
                 "xis-boot",
+                "xis-boot-native",
+                "xis-boot-native-h2",
+                "xis-boot-native-mariadb",
+                "xis-boot-native-mongodb",
+                "xis-boot-native-postgresql",
                 "xis-boot-starter-test",
                 "xis-boot-test-jupiter",
                 "xis-bootstrap",
@@ -115,10 +123,8 @@ public class XISPlugin implements Plugin<Project> {
      * Keep HTML templates next to Java controllers while still placing them on the runtime classpath.
      */
     private void configureResources(Project project) {
-        SourceSet main = mainSourceSet(project);
         project.getTasks().withType(ProcessResources.class).configureEach(sync ->
-                main.getJava().getSrcDirs().forEach(javaSrcDir ->
-                        sync.from(javaSrcDir, copy -> copy.include("**/*.html"))));
+                sync.from(project.file("src/main/java"), copy -> copy.include("**/*.html")));
     }
 
 
@@ -142,6 +148,204 @@ public class XISPlugin implements Plugin<Project> {
                 });
             }
         });
+    }
+
+    private void configureNativeSupport(Project project) {
+        project.afterEvaluate(p -> {
+            if (!usesXisModule(project, "xis-boot-native")) {
+                return;
+            }
+            configureNativeClassCatalogGeneration(project);
+            configureNativeCatalogGeneration(project);
+            configureNativeTasks(project);
+        });
+    }
+
+    private void configureFrameworkComponentGeneration(Project project) {
+        var main = mainSourceSet(project);
+        var generatedFrameworkComponentsDir = project.getLayout().getBuildDirectory()
+                .dir("generated/sources/xisFrameworkComponents/java/main");
+        var generatedFrameworkComponentIndexDir = project.getLayout().getBuildDirectory()
+                .dir("generated/resources/xisFrameworkComponents/main");
+        var generateFrameworkComponents = project.getTasks().register("xisGenerateFrameworkComponents",
+                XISGenerateFrameworkComponentsTask.class, task -> {
+                    task.getSourceFiles().from(project.fileTree("src/main/java", tree -> tree.include("**/*.java")));
+                    task.getOutputDirectory().set(generatedFrameworkComponentsDir);
+                    task.getRegistryIndexOutputDirectory().set(generatedFrameworkComponentIndexDir);
+                    task.getProjectName().set(project.getName());
+                });
+
+        main.getJava().srcDir(generatedFrameworkComponentsDir);
+        main.getResources().srcDir(generatedFrameworkComponentIndexDir);
+        project.getTasks().named("compileJava").configure(task -> task.dependsOn(generateFrameworkComponents));
+        project.getTasks().named("processResources").configure(task -> task.dependsOn(generateFrameworkComponents));
+    }
+
+    private void configureNativeClassCatalogGeneration(Project project) {
+        var main = mainSourceSet(project);
+        var generatedNativeClassCatalogDir = project.getLayout().getBuildDirectory()
+                .dir("generated/resources/xisNativeClassCatalog/main");
+        var generateNativeClassCatalog = project.getTasks().register("xisGenerateNativeClassCatalog",
+                XISGenerateNativeClassCatalogTask.class, task -> {
+                    task.getSourceFiles().from(project.fileTree("src/main/java", tree -> tree.include("**/*.java")));
+                    task.getOutputDirectory().set(generatedNativeClassCatalogDir);
+                    task.getProjectName().set(project.getName());
+                });
+        main.getResources().srcDir(generatedNativeClassCatalogDir);
+        project.getTasks().named("processResources").configure(task -> task.dependsOn(generateNativeClassCatalog));
+    }
+
+    private void configureNativeCatalogGeneration(Project project) {
+        var main = mainSourceSet(project);
+        var generateFrameworkComponents = project.getTasks().named("xisGenerateFrameworkComponents",
+                XISGenerateFrameworkComponentsTask.class);
+
+        var generatedApplicationComponentsDir = project.getLayout().getBuildDirectory()
+                .dir("generated/sources/xisApplicationComponents/java/main");
+        var applicationComponentGeneratorTasks = project.getConfigurations()
+                .getByName("compileClasspath")
+                .getAllDependencies()
+                .stream()
+                .filter(ProjectDependency.class::isInstance)
+                .map(ProjectDependency.class::cast)
+                .map(ProjectDependency::getDependencyProject)
+                .filter(dependencyProject -> dependencyProject.getTasks().findByName("xisGenerateFrameworkComponents") != null)
+                .map(dependencyProject -> dependencyProject.getTasks().named("xisGenerateFrameworkComponents"))
+                .toList();
+        var generateApplicationComponents = project.getTasks().register("xisGenerateApplicationComponents",
+                XISGenerateApplicationComponentCatalogTask.class, task -> {
+                    task.getRegistryIndexFiles().from(generateFrameworkComponents.flatMap(XISGenerateFrameworkComponentsTask::getRegistryIndexOutputDirectory));
+                    task.dependsOn(applicationComponentGeneratorTasks);
+                    task.getRegistryIndexFiles().from(project.getConfigurations()
+                            .getByName("compileClasspath")
+                            .getAllDependencies()
+                            .stream()
+                            .filter(ProjectDependency.class::isInstance)
+                            .map(ProjectDependency.class::cast)
+                            .map(ProjectDependency::getDependencyProject)
+                            .map(dependencyProject -> dependencyProject.getLayout().getBuildDirectory()
+                                    .dir("generated/resources/xisFrameworkComponents/main"))
+                            .toList());
+                    task.getRegistryIndexFiles().from(project.getConfigurations().getByName("compileClasspath"));
+                    task.getOutputDirectory().set(generatedApplicationComponentsDir);
+                });
+
+        var generatedNativeRunnerDir = project.getLayout().getBuildDirectory()
+                .dir("generated/sources/xisNativeRunner/java/main");
+        var generateNativeRunner = project.getTasks().register("xisGenerateNativeRunner",
+                XISGenerateNativeRunnerTask.class, task -> {
+                    task.getSourceFiles().from(project.fileTree("src/main/java", tree -> tree.include("**/*.java")));
+                    task.getOutputDirectory().set(generatedNativeRunnerDir);
+                });
+
+        main.getJava().srcDir(generatedApplicationComponentsDir);
+        main.getJava().srcDir(generatedNativeRunnerDir);
+        project.getTasks().named("compileJava").configure(task -> {
+            task.dependsOn(generateApplicationComponents);
+            task.dependsOn(generateNativeRunner);
+        });
+
+        var generateNativeClassCatalog = project.getTasks().named("xisGenerateNativeClassCatalog",
+                XISGenerateNativeClassCatalogTask.class);
+
+        var generatedNativeReflectionConfigDir = project.getLayout().getBuildDirectory()
+                .dir("generated/resources/xisNativeReflectionConfig/main");
+        var nativeClassCatalogGeneratorTasks = project.getConfigurations()
+                .getByName("compileClasspath")
+                .getAllDependencies()
+                .stream()
+                .filter(ProjectDependency.class::isInstance)
+                .map(ProjectDependency.class::cast)
+                .map(ProjectDependency::getDependencyProject)
+                .filter(dependencyProject -> dependencyProject.getTasks().findByName("xisGenerateNativeClassCatalog") != null)
+                .map(dependencyProject -> dependencyProject.getTasks().named("xisGenerateNativeClassCatalog"))
+                .toList();
+        var generateNativeReflectionConfig = project.getTasks().register("xisGenerateNativeReflectionConfig",
+                XISGenerateNativeReflectionConfigTask.class, task -> {
+                    task.getClassCatalogFiles().from(generateNativeClassCatalog.flatMap(XISGenerateNativeClassCatalogTask::getOutputDirectory));
+                    task.dependsOn(nativeClassCatalogGeneratorTasks);
+                    task.getClassCatalogFiles().from(project.getConfigurations()
+                            .getByName("compileClasspath")
+                            .getAllDependencies()
+                            .stream()
+                            .filter(ProjectDependency.class::isInstance)
+                            .map(ProjectDependency.class::cast)
+                            .map(ProjectDependency::getDependencyProject)
+                            .map(dependencyProject -> dependencyProject.getLayout().getBuildDirectory()
+                                    .dir("generated/resources/xisNativeClassCatalog/main"))
+                            .toList());
+                    task.getClassCatalogFiles().from(project.getConfigurations().getByName("runtimeClasspath"));
+                    task.getOutputDirectory().set(generatedNativeReflectionConfigDir);
+                });
+
+        var generatedNativeProxyConfigDir = project.getLayout().getBuildDirectory()
+                .dir("generated/resources/xisNativeProxyConfig/main");
+        var generateNativeProxyConfig = project.getTasks().register("xisGenerateNativeProxyConfig",
+                XISGenerateNativeProxyConfigTask.class, task -> {
+                    task.getSourceFiles().from(project.fileTree("src/main/java", tree -> tree.include("**/*.java")));
+                    task.getOutputDirectory().set(generatedNativeProxyConfigDir);
+                });
+
+        var generatedNativeResourceCatalogDir = project.getLayout().getBuildDirectory()
+                .dir("generated/resources/xisNativeResourceCatalog/main");
+        var generateNativeResourceCatalog = project.getTasks().register("xisGenerateNativeResourceCatalog",
+                XISGenerateNativeResourceCatalogTask.class, task -> {
+                    task.getApplicationResourceRoots().from(project.getLayout().getProjectDirectory().dir("src/main/resources"));
+                    task.getApplicationResourceRoots().from(project.getLayout().getProjectDirectory().dir("src/main/java"));
+                    task.getClasspathFiles().from(project.getConfigurations().getByName("runtimeClasspath"));
+                    task.getOutputDirectory().set(generatedNativeResourceCatalogDir);
+                });
+
+        main.getResources().srcDir(generatedNativeReflectionConfigDir);
+        main.getResources().srcDir(generatedNativeResourceCatalogDir);
+        project.getTasks().named("processResources").configure(task -> {
+            task.dependsOn(generateNativeReflectionConfig);
+            task.dependsOn(generateNativeResourceCatalog);
+        });
+    }
+
+    private void configureNativeTasks(Project project) {
+        var main = mainSourceSet(project);
+        var executable = project.getLayout().getBuildDirectory()
+                .file("native/" + project.getName());
+        var graalVmHome = project.getProviders().gradleProperty("graalVmHome")
+                .orElse(project.getProviders().environmentVariable("GRAALVM_HOME"));
+
+        var nativeCompile = project.getTasks().register("xisNativeCompile", XISNativeCompileTask.class, task -> {
+            task.dependsOn(project.getTasks().named("classes"));
+            task.dependsOn(project.getTasks().named("xisGenerateNativeReflectionConfig"));
+            task.dependsOn(project.getTasks().named("xisGenerateNativeProxyConfig"));
+            task.getNativeClasspath().from(main.getOutput());
+            task.getNativeClasspath().from(project.getConfigurations().getByName("runtimeClasspath"));
+            task.getGraalVmHome().set(graalVmHome);
+            task.getMainClass().set("one.xis.boot.nativeimage.NativeRunner");
+            task.getExecutableFile().set(executable);
+            task.getReflectionConfig().set(project.getLayout().getBuildDirectory()
+                    .file("generated/resources/xisNativeReflectionConfig/main/META-INF/native-image/one.xis/"
+                            + project.getName() + "/reflect-config.json"));
+            task.getProxyConfig().set(project.getLayout().getBuildDirectory()
+                    .file("generated/resources/xisNativeProxyConfig/main/META-INF/native-image/one.xis/"
+                            + project.getName() + "/proxy-config.json"));
+        });
+
+        project.getTasks().register("xisNativeRun", XISNativeRunTask.class, task -> {
+            task.dependsOn(nativeCompile);
+            task.getExecutableFile().set(executable);
+        });
+
+        project.getTasks().register("xisNativeSmokeTest", XISNativeSmokeTestTask.class, task -> {
+            task.dependsOn(nativeCompile);
+            task.getExecutableFile().set(executable);
+            task.getPort().convention(8098);
+        });
+    }
+
+    private boolean usesXisModule(Project project, String moduleName) {
+        return project.getConfigurations()
+                .getByName("implementation")
+                .getAllDependencies()
+                .stream()
+                .anyMatch(dep -> dep.getGroup() != null && dep.getGroup().equals("one.xis") && dep.getName().equals(moduleName));
     }
 
     private void configureGroovySupport(Project project) {

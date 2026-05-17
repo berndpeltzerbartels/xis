@@ -2,6 +2,7 @@ package one.xis.resource;
 
 import lombok.NonNull;
 import one.xis.context.Component;
+import one.xis.context.DefaultComponent;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,7 +15,7 @@ import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-@Component
+@DefaultComponent
 public class Resources {
     private List<Path> developmentResourceRoots;
 

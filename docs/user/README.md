@@ -13,6 +13,8 @@ Read the [Quickstart](quickstart.md) when you want a minimal running application
 Read these chapters to build normal XIS applications:
 
 - [Runtime and dependency model](runtime-and-dependencies.md)
+- [XIS Boot Native and cloud-native native-image builds](runtime-and-dependencies.md#xis-boot-native)
+- [Cloud Native and native images](cloud-native.md)
 - [Gradle plugin and tools](gradle-plugin.md)
 - [Groovy support](groovy.md)
 - [Template location and mapping](template-location-and-mapping.md)

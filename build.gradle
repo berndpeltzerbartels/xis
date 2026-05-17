@@ -12,12 +12,11 @@ ext {
     libraryVersions = [
             junit            : "5.8.2",
             assertj          : "3.26.0",
-            lombok           : "1.18.22",
+            lombok           : "1.18.34",
             reflections      : "0.10.2",
             guava            : "31.1-jre",
-            "tinylog"        : "2.6.1",
             "dom4j"          : "1.6.1",
-            "slf4j"          : "2.0.3",
+            "slf4j"          : "2.0.9",
             "mockito"        : "5.2.0",
             "gson"           : "2.10.1",
             "jackson"        : "2.17.2",
@@ -31,6 +30,7 @@ ext {
             "testcontainers" : "1.20.6",
             "postgresql"     : "42.7.4",
             "mariadb"        : "3.5.1",
+            "h2"             : "2.2.224",
             "hikariCP"       : "5.1.0"
     ]
 
@@ -62,6 +62,163 @@ subprojects {
         options.addStringOption("docencoding", "UTF-8")
     }
 
+    def generatedFrameworkComponentsDir = layout.buildDirectory.dir("generated/sources/xisFrameworkComponents/java/main")
+    def generatedFrameworkComponentIndexDir = layout.buildDirectory.dir("generated/resources/xisFrameworkComponents/main")
+    def generateFrameworkComponents = tasks.register("xisGenerateFrameworkComponents", one.xis.gradle.GenerateFrameworkComponentsTask) {
+        sourceFiles.from(fileTree("src/main/java") {
+            include "**/*.java"
+        })
+        outputDirectory.set(generatedFrameworkComponentsDir)
+        registryIndexOutputDirectory.set(generatedFrameworkComponentIndexDir)
+        projectName.set(project.name)
+    }
+
+    sourceSets.main.java.srcDir(generatedFrameworkComponentsDir)
+    sourceSets.main.resources.srcDir(generatedFrameworkComponentIndexDir)
+    tasks.named("compileJava") {
+        dependsOn generateFrameworkComponents
+    }
+    tasks.named("processResources") {
+        dependsOn generateFrameworkComponents
+    }
+
+    def generatedNativeClassCatalogDir = layout.buildDirectory.dir("generated/resources/xisNativeClassCatalog/main")
+    def generateNativeClassCatalog = tasks.register("xisGenerateNativeClassCatalog", one.xis.gradle.GenerateNativeClassCatalogTask) {
+        sourceFiles.from(fileTree("src/main/java") {
+            include "**/*.java"
+        })
+        outputDirectory.set(generatedNativeClassCatalogDir)
+        projectName.set(project.name)
+    }
+
+    sourceSets.main.resources.srcDir(generatedNativeClassCatalogDir)
+    tasks.named("processResources") {
+        dependsOn generateNativeClassCatalog
+    }
+    tasks.matching { it.name == "sourcesJar" }.configureEach {
+        dependsOn generateFrameworkComponents
+        dependsOn generateNativeClassCatalog
+    }
+
+}
+
+tasks.register("xisGenerateAllFrameworkComponents") {
+    group = "build"
+    description = "Generates XIS framework component registries for all Java modules."
+    dependsOn subprojects.collect { it.tasks.named("xisGenerateFrameworkComponents") }
+}
+
+tasks.register("xisGenerateAllNativeClassCatalogs") {
+    group = "build"
+    description = "Generates XIS native class catalogs for all Java modules."
+    dependsOn subprojects.collect { it.tasks.named("xisGenerateNativeClassCatalog") }
+}
+
+project(":xis-boot-native") {
+    def generatedBootFrameworkCatalogDir = layout.buildDirectory.dir("generated/sources/xisBootFrameworkCatalog/java/main")
+    def generateBootFrameworkCatalog = tasks.register("xisGenerateBootFrameworkCatalog", one.xis.gradle.GenerateBootFrameworkCatalogTask) {
+        outputDirectory.set(generatedBootFrameworkCatalogDir)
+    }
+
+    sourceSets.main.java.srcDir(generatedBootFrameworkCatalogDir)
+    tasks.matching { it.name == "sourcesJar" }.configureEach {
+        dependsOn generateBootFrameworkCatalog
+    }
+    afterEvaluate {
+        def bootFrameworkModules = configurations.runtimeClasspath.allDependencies
+                .withType(org.gradle.api.artifacts.ProjectDependency)
+                .collect { it.dependencyProject }
+                .findAll { it.plugins.hasPlugin("java") }
+                .unique()
+                .sort { left, right -> left.path <=> right.path }
+        if (!bootFrameworkModules.contains(project)) {
+            bootFrameworkModules << project
+        }
+        def bootFrameworkGeneratorTasks = bootFrameworkModules.collect { it.tasks.named("xisGenerateFrameworkComponents") }
+        generateBootFrameworkCatalog.configure {
+            registrySourceRoots.from(bootFrameworkGeneratorTasks.collect { it.flatMap { task -> task.outputDirectory } })
+        }
+        tasks.named("compileJava") {
+            dependsOn generateBootFrameworkCatalog
+            dependsOn bootFrameworkGeneratorTasks
+        }
+    }
+}
+
+subprojects {
+    afterEvaluate {
+        def implementationConfiguration = configurations.findByName("implementation")
+        if (implementationConfiguration == null) {
+            return
+        }
+        def usesXisBootNative = implementationConfiguration.allDependencies.stream().anyMatch { dependency ->
+            if (dependency instanceof org.gradle.api.artifacts.ProjectDependency) {
+                return dependency.dependencyProject.path == ":xis-boot-native"
+            }
+            return dependency.group == "one.xis" && dependency.name == "xis-boot-native"
+        }
+        if (!usesXisBootNative) {
+            return
+        }
+
+        def generatedApplicationComponentsDir = layout.buildDirectory.dir("generated/sources/xisApplicationComponents/java/main")
+        def applicationComponentModules = configurations.compileClasspath.allDependencies
+                .withType(org.gradle.api.artifacts.ProjectDependency)
+                .collect { it.dependencyProject }
+                .findAll { it.plugins.hasPlugin("java") }
+                .unique()
+        def applicationComponentGeneratorTasks = applicationComponentModules.collect { it.tasks.named("xisGenerateFrameworkComponents") }
+        def generateApplicationComponents = tasks.register("xisGenerateApplicationComponents", one.xis.gradle.GenerateApplicationComponentCatalogTask) {
+            registryIndexFiles.from(tasks.named("xisGenerateFrameworkComponents").flatMap { task -> task.registryIndexOutputDirectory })
+            registryIndexFiles.from(applicationComponentGeneratorTasks.collect { it.flatMap { task -> task.registryIndexOutputDirectory } })
+            registryIndexFiles.from(configurations.compileClasspath)
+            outputDirectory.set(generatedApplicationComponentsDir)
+        }
+
+        def generatedNativeRunnerDir = layout.buildDirectory.dir("generated/sources/xisNativeRunner/java/main")
+        def generateNativeRunner = tasks.register("xisGenerateNativeRunner", one.xis.gradle.GenerateNativeRunnerTask) {
+            sourceFiles.from(fileTree(layout.projectDirectory.dir("src/main/java")) {
+                include "**/*.java"
+            })
+            outputDirectory.set(generatedNativeRunnerDir)
+        }
+
+        def generatedNativeReflectionConfigDir = layout.buildDirectory.dir("generated/resources/xisNativeReflectionConfig/main")
+        def generateNativeReflectionConfig = tasks.register("xisGenerateNativeReflectionConfig", one.xis.gradle.GenerateNativeReflectionConfigTask) {
+            classCatalogFiles.from(tasks.named("xisGenerateNativeClassCatalog").flatMap { task -> task.outputDirectory })
+            classCatalogFiles.from(configurations.runtimeClasspath)
+            outputDirectory.set(generatedNativeReflectionConfigDir)
+        }
+
+        def generatedNativeProxyConfigDir = layout.buildDirectory.dir("generated/resources/xisNativeProxyConfig/main")
+        def generateNativeProxyConfig = tasks.register("xisGenerateNativeProxyConfig", one.xis.gradle.GenerateNativeProxyConfigTask) {
+            sourceFiles.from(fileTree(layout.projectDirectory.dir("src/main/java")) {
+                include "**/*.java"
+            })
+            outputDirectory.set(generatedNativeProxyConfigDir)
+        }
+
+        def generatedNativeResourceCatalogDir = layout.buildDirectory.dir("generated/resources/xisNativeResourceCatalog/main")
+        def generateNativeResourceCatalog = tasks.register("xisGenerateNativeResourceCatalog", one.xis.gradle.GenerateNativeResourceCatalogTask) {
+            applicationResourceRoots.from(layout.projectDirectory.dir("src/main/resources"))
+            applicationResourceRoots.from(layout.projectDirectory.dir("src/main/java"))
+            classpathFiles.from(configurations.runtimeClasspath)
+            outputDirectory.set(generatedNativeResourceCatalogDir)
+        }
+
+        sourceSets.main.java.srcDir(generatedApplicationComponentsDir)
+        sourceSets.main.java.srcDir(generatedNativeRunnerDir)
+        sourceSets.main.resources.srcDir(generatedNativeReflectionConfigDir)
+        sourceSets.main.resources.srcDir(generatedNativeResourceCatalogDir)
+        tasks.named("compileJava") {
+            dependsOn generateApplicationComponents
+            dependsOn generateNativeRunner
+        }
+        tasks.named("processResources") {
+            dependsOn generateNativeReflectionConfig
+            dependsOn generateNativeResourceCatalog
+        }
+    }
 }
 if (gradle.startParameter.taskNames.any { it.endsWith('createReleaseZip') }) {
     println "Release mode activated by 'createReleaseZip' task."

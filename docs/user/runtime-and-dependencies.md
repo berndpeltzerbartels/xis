@@ -1,10 +1,11 @@
-# Runtime and Dependency Model
+# Runtime And Dependency Model
 
 [Documentation map](../README.md)
 
-XIS separates the public programming model from runtime integration.
+XIS separates the public programming model from runtime integration. Most controller code and templates look the same
+whether the application runs inside Spring, standalone on the JVM, or as a GraalVM native image.
 
-## Application Runtime
+## Runtime Choice
 
 Choose one application runtime:
 
@@ -28,7 +29,7 @@ dependencies {
 }
 ```
 
-`build.gradle` for XIS Boot:
+`build.gradle` for XIS Boot on the JVM:
 
 ```groovy
 plugins {
@@ -52,6 +53,10 @@ Use `xis-spring` when the application already uses Spring Boot or needs Spring i
 
 Use `xis-boot` when you want a small standalone runtime with XIS dependency injection, properties, package scanning, and
 an embedded HTTP runtime.
+
+Use `xis-boot-native` when you want the XIS Boot programming model and want to build a GraalVM native executable for
+small containers, fast startup, and cloud-native deployment. Continue with [Cloud Native And Native Images](cloud-native.md)
+for Gradle examples, native database modules, build requirements, and current limitations.
 
 ## Controller API
 

@@ -3,9 +3,10 @@
 **XIS is a lightweight SPA framework for Java and Groovy: annotation-driven, fast, and built around backend controllers
 plus plain HTML templates. XIS provides ready-to-use client-server transport, state synchronization, navigation, form
 handling, validation feedback, and partial UI refreshes without extra work and without any boilerplate code. It runs
-standalone with XIS Boot or inside Spring, supports distributed Microfrontend Architecture, and in most applications you
-write just annotated POJO controllers and templates. Coding is as simple as in the old days of request-response, but the
-result is a modern and fast SPA application.**
+standalone on the JVM with XIS Boot, as a GraalVM native executable for cloud-native deployment with XIS Boot Native,
+or inside Spring. It supports distributed Microfrontend Architecture, and in most applications you write just annotated POJO
+controllers and templates. Coding is as simple as in the old days of request-response, but the result is a modern and
+fast SPA application.**
 
 This directory is the canonical documentation source for users, framework developers, and coding agents.
 
@@ -21,6 +22,8 @@ Start here if you want quick results:
 Read these to build normal XIS applications:
 
 - [Runtime and dependency model](user/runtime-and-dependencies.md)
+- [XIS Boot Native and cloud-native native-image builds](user/runtime-and-dependencies.md#xis-boot-native)
+- [Cloud Native and native images](user/cloud-native.md)
 - [Gradle plugin and tools](user/gradle-plugin.md)
 - [Groovy support](user/groovy.md)
 - [Template location and mapping](user/template-location-and-mapping.md)
@@ -61,8 +64,9 @@ complete and intentionally detailed.
 ### Application Structure
 
 - [Runtime choices and dependencies](user/runtime-and-dependencies.md)
+- [Cloud Native and native images](user/cloud-native.md)
 - [XIS Boot applications with `@XISBootApplication`](user/annotations.md#class-annotations)
-- [Spring Boot integration](user/runtime-and-dependencies.md#application-runtime)
+- [Spring Boot integration](user/runtime-and-dependencies.md#runtime-choice)
 - [Groovy 4+ controllers and forms](user/groovy.md)
 - [Template location, `@HtmlFile`, `@DefaultHtmlFile`, generated templates, generated tests](user/template-location-and-mapping.md)
 - [Static resources](user/runtime-and-dependencies.md#static-resources)
