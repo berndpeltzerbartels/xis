@@ -2,6 +2,11 @@ package one.xis.sql;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -113,6 +118,49 @@ abstract class SqlSystemTestSupport {
         assertThat(repository.findById(1L).orElseThrow().notes).isEqualTo("First note from clob");
     }
 
+    @Test
+    void mapsDatabaseDateTypesToJavaDateTypes() {
+        DateRow row = repository.findDateRow(1L);
+
+        assertThat(row.localDate).isEqualTo(LocalDate.of(2026, 5, 18));
+        assertThat(row.localTime).isEqualTo(LocalTime.of(10, 15, 30));
+        assertThat(row.localDateTime).isEqualTo(LocalDateTime.of(2026, 5, 18, 10, 15, 30));
+        assertThat(row.instantValue).isEqualTo(Instant.parse("2026-05-18T10:15:30Z"));
+        assertThat(row.utilDate.toInstant()).isEqualTo(Instant.parse("2026-05-18T10:15:30Z"));
+        assertThat(row.sqlDate.toLocalDate()).isEqualTo(LocalDate.of(2026, 5, 18));
+        assertThat(row.sqlTime.toLocalTime()).isEqualTo(LocalTime.of(10, 15, 30));
+        assertThat(row.sqlTimestamp.toInstant()).isEqualTo(Instant.parse("2026-05-18T10:15:30Z"));
+    }
+
+    void insertDateRows() throws SQLException {
+        try (var connection = dataSource().getConnection();
+             var insert = connection.prepareStatement("""
+                     insert into date_rows (
+                         id,
+                         local_date,
+                         local_time,
+                         local_date_time,
+                         instant_value,
+                         util_date,
+                         sql_date,
+                         sql_time,
+                         sql_timestamp
+                     ) values (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                     """)) {
+            Instant instant = Instant.parse("2026-05-18T10:15:30Z");
+            insert.setLong(1, 1L);
+            insert.setDate(2, java.sql.Date.valueOf(LocalDate.of(2026, 5, 18)));
+            insert.setTime(3, java.sql.Time.valueOf(LocalTime.of(10, 15, 30)));
+            insert.setTimestamp(4, Timestamp.valueOf(LocalDateTime.of(2026, 5, 18, 10, 15, 30)));
+            insert.setTimestamp(5, Timestamp.from(instant));
+            insert.setTimestamp(6, Timestamp.from(instant));
+            insert.setDate(7, java.sql.Date.valueOf(LocalDate.of(2026, 5, 18)));
+            insert.setTime(8, java.sql.Time.valueOf(LocalTime.of(10, 15, 30)));
+            insert.setTimestamp(9, Timestamp.from(instant));
+            insert.executeUpdate();
+        }
+    }
+
     @Repository
     interface PersonRepository extends CrudRepository<Person, Long> {
         @Select("select first_name from people where id = {id}")
@@ -132,6 +180,9 @@ abstract class SqlSystemTestSupport {
 
         @StoredProcedure(value = "add_five", out = "result")
         int addFive(@Param("value") int value);
+
+        @Select("select * from date_rows where id = {id}")
+        DateRow findDateRow(@Param("id") long id);
     }
 
     @Entity("people")
@@ -139,5 +190,17 @@ abstract class SqlSystemTestSupport {
         long id;
         String firstName;
         String notes;
+    }
+
+    static class DateRow {
+        long id;
+        LocalDate localDate;
+        LocalTime localTime;
+        LocalDateTime localDateTime;
+        Instant instantValue;
+        java.util.Date utilDate;
+        java.sql.Date sqlDate;
+        java.sql.Time sqlTime;
+        Timestamp sqlTimestamp;
     }
 }

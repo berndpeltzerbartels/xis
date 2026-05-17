@@ -31,12 +31,27 @@ class PostgresSqlSystemTest extends SqlSystemTestSupport {
              var statement = connection.createStatement()) {
             statement.execute("drop procedure if exists add_five(integer)");
             statement.execute("drop function if exists double_value(integer)");
+            statement.execute("drop table if exists date_rows");
             statement.execute("drop table if exists people");
             statement.execute("create table people (id bigint primary key, first_name varchar(100) not null, notes text not null)");
+            statement.execute("""
+                    create table date_rows (
+                        id bigint primary key,
+                        local_date date not null,
+                        local_time time not null,
+                        local_date_time timestamp not null,
+                        instant_value timestamp not null,
+                        util_date timestamp not null,
+                        sql_date date not null,
+                        sql_time time not null,
+                        sql_timestamp timestamp not null
+                    )
+                    """);
             statement.execute("insert into people (id, first_name, notes) values (1, 'Ada', 'First note from clob'), (2, 'Grace', 'Second note')");
             statement.execute("create function double_value(value integer) returns integer language sql as 'select value * 2'");
             statement.execute("create procedure add_five(value integer, out result integer) language plpgsql as 'begin result := value + 5; end;'");
         }
+        insertDateRows();
     }
 
 }
