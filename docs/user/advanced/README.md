@@ -17,7 +17,7 @@ If you want quick results, start with the [Quickstart](../quickstart.md). Then r
 ## Available Advanced Pages
 
 - [Events](../events.md): declare refresh keys and publish events with `RefreshEventPublisher`.
-- [XIS theme](theme.md)
+- [XIS theme](theme.md): generated standard pages, forms, navigation, layout, and theme customization.
 - [Microfrontend Architecture](microfrontend-architecture.md)
 - [Reusable web artifacts](reusable-web-artifacts.md)
 - [Aspects and interface advice](aspects.md)

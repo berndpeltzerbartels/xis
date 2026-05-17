@@ -4,6 +4,7 @@ import one.xis.html.HtmlParser;
 import one.xis.html.document.Element;
 import one.xis.html.document.Node;
 import one.xis.html.document.TextNode;
+import one.xis.html.validation.TemplateValidationExtension;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -15,6 +16,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -33,9 +35,19 @@ class XisTemplateValidator {
     private final boolean failFast;
     private final HtmlParser htmlParser = new HtmlParser();
     private final TemplateValidationRules rules = new TemplateValidationRules();
+    private final List<TemplateValidationExtension> extensions;
 
     XisTemplateValidator(boolean failFast) {
         this.failFast = failFast;
+        this.extensions = ServiceLoader.load(TemplateValidationExtension.class)
+                .stream()
+                .map(ServiceLoader.Provider::get)
+                .toList();
+    }
+
+    XisTemplateValidator(boolean failFast, List<TemplateValidationExtension> extensions) {
+        this.failFast = failFast;
+        this.extensions = List.copyOf(extensions);
     }
 
     List<ValidationError> validate(Path projectDir, List<ControllerTemplateModel> controllers) {
@@ -96,6 +108,7 @@ class XisTemplateValidator {
         int line = lineNumberResolver.lineNumber(element);
         TemplateElement templateElement = new TemplateElement(element, line);
         rules.validateElement(templateElement, errors);
+        validateExtensionRules(templateElement, errors);
         collectElementUsage(element, controller, usage, localVariables, localVariableModels, line, currentFormDataName);
         if (errors.shouldStop()) {
             return;
@@ -164,6 +177,11 @@ class XisTemplateValidator {
         if (frameworkFormBinding != null && "xis:form".equals(element.getLocalName())) {
             usage.consumeData(firstPathSegment(frameworkFormBinding), line);
         }
+        extensions.stream()
+                .map(extension -> extension.formDataBinding(element))
+                .flatMap(java.util.Optional::stream)
+                .map(this::firstPathSegment)
+                .forEach(extensionBinding -> usage.consumeData(extensionBinding, line));
     }
 
     private void collectFieldBindingUsage(Element element, TemplateUsage usage, int line, String currentFormDataName) {
@@ -191,11 +209,19 @@ class XisTemplateValidator {
         if ("xis:form".equals(element.getLocalName())) {
             return element.getAttributes().get("binding");
         }
+        for (TemplateValidationExtension extension : extensions) {
+            var binding = extension.formDataBinding(element);
+            if (binding.isPresent()) {
+                return binding.get();
+            }
+        }
         return null;
     }
 
     private boolean isFormElement(Element element) {
-        return "form".equals(element.getLocalName()) || "xis:form".equals(element.getLocalName());
+        return "form".equals(element.getLocalName())
+                || "xis:form".equals(element.getLocalName())
+                || extensions.stream().anyMatch(extension -> extension.formDataBinding(element).isPresent());
     }
 
     private String fieldBinding(Element element) {
@@ -205,8 +231,18 @@ class XisTemplateValidator {
         }
         return switch (element.getLocalName()) {
             case "xis:input", "xis:textarea", "xis:select", "xis:checkbox", "xis:radio" -> element.getAttributes().get("binding");
-            default -> null;
+            default -> extensionFieldBinding(element);
         };
+    }
+
+    private String extensionFieldBinding(Element element) {
+        for (TemplateValidationExtension extension : extensions) {
+            var binding = extension.formFieldBinding(element);
+            if (binding.isPresent()) {
+                return binding.get();
+            }
+        }
+        return null;
     }
 
     private void collectAttributeExpressions(Element element,
@@ -232,6 +268,21 @@ class XisTemplateValidator {
                 collectDragExpression(attributeValue, usage, elementLocalVariables, elementLocalVariableModels, line);
             } else if ("xis:drop".equals(attributeName)) {
                 collectDropExpression(attributeValue, usage, elementLocalVariables, elementLocalVariableModels, line);
+            }
+        }
+        extensions.stream()
+                .flatMap(extension -> extension.modelDataBindings(element).stream())
+                .map(this::firstPathSegment)
+                .forEach(binding -> usage.consumeData(binding, line));
+    }
+
+    private void validateExtensionRules(TemplateElement element, ValidationErrorCollector errors) {
+        for (TemplateValidationExtension extension : extensions) {
+            for (String message : extension.validate(element.raw())) {
+                errors.add(element.line(), message);
+                if (errors.shouldStop()) {
+                    return;
+                }
             }
         }
     }

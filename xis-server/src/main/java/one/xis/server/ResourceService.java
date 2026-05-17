@@ -45,6 +45,8 @@ class ResourceService {
     private RootPageService rootPageService;
     @Inject
     private HtmlResourcePathResolver htmlResourcePathResolver;
+    @Inject
+    private Collection<HtmlDocumentTransformer> htmlDocumentTransformers;
     private Map<String, HtmlDocumentResource> frontletDocumentCache;
     private Map<String, HtmlDocumentResource> pageDocumentCache;
     private ResourceCache<Resource> includeHtmlResourceCache;
@@ -126,7 +128,7 @@ class ResourceService {
     private HtmlDocumentResource htmlDocumentResource(Object controller, String type) {
         var path = htmlResourcePathResolver.htmlResourcePath(controller.getClass());
         var resource = resources.getByPath(path);
-        return new HtmlDocumentResource(resource, htmlParser, controller.getClass(), type);
+        return new HtmlDocumentResource(resource, htmlParser, controller.getClass(), type, htmlDocumentTransformers);
     }
 
     private HtmlDocumentResource emptyRouterPageResource(String path) {

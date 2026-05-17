@@ -54,22 +54,22 @@ import one.xis.WelcomePage;
 
 @WelcomePage
 @Page("/hello.html")
-public class HelloPage {
+class HelloPage {
 
     private int counter;
 
     @ModelData
-    public String greeting() {
+    String greeting() {
         return "Hello XIS";
     }
 
     @ModelData
-    public int count() {
+    int count() {
         return counter;
     }
 
     @Action
-    public void increment() {
+    void increment() {
         counter++;
     }
 }
@@ -135,7 +135,7 @@ path; Groovy support does not add runtime overhead to Java applications.
 - [Integration tests, generated tests, E2E tests, and the integration-test browser model](docs/user/examples-and-tests.md)
 - [Custom JavaScript extensions, custom EL functions, global browser behavior, and form submission from JavaScript](docs/user/advanced/custom-javascript.md)
 - [Custom proxies for generated clients, repositories, and infrastructure extensions](docs/user/advanced/custom-proxies.md)
-- [XIS Theme for quick prototypes, forms, dashboards, panels, messages, and basic layout](docs/user/advanced/theme.md)
+- [XIS Theme for generated standard pages, forms, navigation, dashboards, panels, messages, and basic layout](docs/user/advanced/theme.md)
 
 ## Documentation
 

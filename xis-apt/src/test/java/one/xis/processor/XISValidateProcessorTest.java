@@ -97,6 +97,309 @@ class XISValidateProcessorTest {
     }
 
     @Test
+    void acceptsThemeStandardFieldsAsFormAndModelDataUsage() throws IOException {
+        Path templateFile = tempDir.resolve("src/main/java/example/ProbePage.html");
+        Files.createDirectories(templateFile.getParent());
+        Files.writeString(templateFile, """
+                <!DOCTYPE html>
+                <html>
+                  <body>
+                    <theme:form binding="contact" action="saveContact">
+                      <theme:input binding="description" title="Description"/>
+                      <theme:select binding="stage" title="Stage" options="stages"/>
+                      <theme:textarea binding="notes" title="Notes"/>
+                      <theme:checkbox binding="newsletter" title="Newsletter"/>
+                      <theme:radio binding="preferredContact" title="Preferred contact" options="contactTypes" option-value="code" option-label="label"/>
+                    </theme:form>
+                  </body>
+                </html>
+                """, StandardCharsets.UTF_8);
+
+        DiagnosticCollector<JavaFileObject> diagnostics = compilePageSourceWithProcessor(true, """
+                package example;
+
+                import one.xis.FormData;
+                import one.xis.ModelData;
+                import one.xis.Page;
+                import java.util.List;
+
+                @Page("/probe.html")
+                class ProbePage {
+                    @FormData("contact")
+                    ContactForm contact() {
+                        return new ContactForm();
+                    }
+
+                    @ModelData("stages")
+                    List<String> stages() {
+                        return List.of();
+                    }
+
+                    @ModelData("contactTypes")
+                    List<String> contactTypes() {
+                        return List.of();
+                    }
+
+                    static class ContactForm {
+                        String description;
+                        String stage;
+                        String notes;
+                        boolean newsletter;
+                        String preferredContact;
+                    }
+                }
+                """);
+
+        assertThat(errorMessages(diagnostics)).isEmpty();
+    }
+
+    @Test
+    void acceptsThemeFormPageAsFormDataUsage() throws IOException {
+        Path templateFile = tempDir.resolve("src/main/java/example/ProbePage.html");
+        Files.createDirectories(templateFile.getParent());
+        Files.writeString(templateFile, """
+                <!DOCTYPE html>
+                <html>
+                  <body>
+                    <theme:form-page title="Contact" binding="contact" action="saveContact">
+                      <theme:input binding="description" title="Description"/>
+                    </theme:form-page>
+                  </body>
+                </html>
+                """, StandardCharsets.UTF_8);
+
+        DiagnosticCollector<JavaFileObject> diagnostics = compilePageSourceWithProcessor(true, """
+                package example;
+
+                import one.xis.FormData;
+                import one.xis.Page;
+
+                @Page("/probe.html")
+                class ProbePage {
+                    @FormData("contact")
+                    ContactForm contact() {
+                        return new ContactForm();
+                    }
+
+                    static class ContactForm {
+                        String description;
+                    }
+                }
+                """);
+
+        assertThat(errorMessages(diagnostics)).isEmpty();
+    }
+
+    @Test
+    void requiresThemeFieldTitles() throws IOException {
+        Path templateFile = tempDir.resolve("src/main/java/example/ProbePage.html");
+        Files.createDirectories(templateFile.getParent());
+        Files.writeString(templateFile, """
+                <!DOCTYPE html>
+                <html>
+                  <body>
+                    <theme:form binding="contact">
+                      <theme:input binding="description"/>
+                      <theme:select binding="stage" options="stages"/>
+                      <theme:textarea binding="notes"/>
+                      <theme:checkbox binding="newsletter"/>
+                      <theme:radio binding="preferredContact" options="contactTypes"/>
+                    </theme:form>
+                  </body>
+                </html>
+                """, StandardCharsets.UTF_8);
+
+        DiagnosticCollector<JavaFileObject> diagnostics = compilePageSourceWithProcessor(false, """
+                package example;
+
+                import one.xis.FormData;
+                import one.xis.ModelData;
+                import one.xis.Page;
+                import java.util.List;
+
+                @Page("/probe.html")
+                class ProbePage {
+                    @FormData("contact")
+                    ContactForm contact() {
+                        return new ContactForm();
+                    }
+
+                    @ModelData("stages")
+                    List<String> stages() {
+                        return List.of();
+                    }
+
+                    @ModelData("contactTypes")
+                    List<String> contactTypes() {
+                        return List.of();
+                    }
+
+                    static class ContactForm {
+                        String description;
+                        String stage;
+                        String notes;
+                        boolean newsletter;
+                        String preferredContact;
+                    }
+                }
+                """, "-Axis.allErrors=true");
+
+        List<String> errors = errorMessages(diagnostics);
+        assertThat(errors).hasSize(5);
+        assertThat(errors.get(0)).contains("ProbePage.html:5").contains("theme:input requires title.");
+        assertThat(errors.get(1)).contains("ProbePage.html:6").contains("theme:select requires title.");
+        assertThat(errors.get(2)).contains("ProbePage.html:7").contains("theme:textarea requires title.");
+        assertThat(errors.get(3)).contains("ProbePage.html:8").contains("theme:checkbox requires title.");
+        assertThat(errors.get(4)).contains("ProbePage.html:9").contains("theme:radio requires title.");
+    }
+
+    @Test
+    void validatesThemeGridAndFieldSpans() throws IOException {
+        Path templateFile = tempDir.resolve("src/main/java/example/ProbePage.html");
+        Files.createDirectories(templateFile.getParent());
+        Files.writeString(templateFile, """
+                <!DOCTYPE html>
+                <html>
+                  <body>
+                    <theme:form binding="contact">
+                      <theme:grid columns="1">
+                        <theme:input binding="description" title="Description" span="0"/>
+                        <theme:select binding="stage" title="Stage" options="stages" span="10"/>
+                        <theme:textarea binding="notes" title="Notes" span="0"/>
+                        <theme:checkbox binding="newsletter" title="Newsletter" span="10"/>
+                        <theme:radio binding="preferredContact" title="Preferred contact" options="contactTypes" span="0"/>
+                      </theme:grid>
+                    </theme:form>
+                  </body>
+                </html>
+                """, StandardCharsets.UTF_8);
+
+        DiagnosticCollector<JavaFileObject> diagnostics = compilePageSourceWithProcessor(false, """
+                package example;
+
+                import one.xis.FormData;
+                import one.xis.ModelData;
+                import one.xis.Page;
+                import java.util.List;
+
+                @Page("/probe.html")
+                class ProbePage {
+                    @FormData("contact")
+                    ContactForm contact() {
+                        return new ContactForm();
+                    }
+
+                    @ModelData("stages")
+                    List<String> stages() {
+                        return List.of();
+                    }
+
+                    @ModelData("contactTypes")
+                    List<String> contactTypes() {
+                        return List.of();
+                    }
+
+                    static class ContactForm {
+                        String description;
+                        String stage;
+                        String notes;
+                        boolean newsletter;
+                        String preferredContact;
+                    }
+                }
+                """, "-Axis.allErrors=true");
+
+        List<String> errors = errorMessages(diagnostics);
+        assertThat(errors).hasSize(6);
+        assertThat(errors.get(0)).contains("ProbePage.html:5").contains("theme:grid columns must be a number between 2 and 11.");
+        assertThat(errors.get(1)).contains("ProbePage.html:6").contains("theme:input span must be a number between 1 and 9.");
+        assertThat(errors.get(2)).contains("ProbePage.html:7").contains("theme:select span must be a number between 1 and 9.");
+        assertThat(errors.get(3)).contains("ProbePage.html:8").contains("theme:textarea span must be a number between 1 and 9.");
+        assertThat(errors.get(4)).contains("ProbePage.html:9").contains("theme:checkbox span must be a number between 1 and 9.");
+        assertThat(errors.get(5)).contains("ProbePage.html:10").contains("theme:radio span must be a number between 1 and 9.");
+    }
+
+    @Test
+    void acceptsMixedThemeAndRegularFormFields() throws IOException {
+        Path templateFile = tempDir.resolve("src/main/java/example/ProbePage.html");
+        Files.createDirectories(templateFile.getParent());
+        Files.writeString(templateFile, """
+                <!DOCTYPE html>
+                <html>
+                  <body>
+                    <form xis:binding="contact">
+                      <input xis:binding="description"/>
+                      <theme:input binding="email" title="E-mail"/>
+                    </form>
+                  </body>
+                </html>
+                """, StandardCharsets.UTF_8);
+
+        DiagnosticCollector<JavaFileObject> diagnostics = compilePageSourceWithProcessor(true, """
+                package example;
+
+                import one.xis.FormData;
+                import one.xis.Page;
+
+                @Page("/probe.html")
+                class ProbePage {
+                    @FormData("contact")
+                    ContactForm contact() {
+                        return new ContactForm();
+                    }
+
+                    static class ContactForm {
+                        String description;
+                        String email;
+                    }
+                }
+                """);
+
+        assertThat(errorMessages(diagnostics)).isEmpty();
+    }
+
+    @Test
+    void validatesThemeFormFieldBindingsAgainstFormObject() throws IOException {
+        Path templateFile = tempDir.resolve("src/main/java/example/ProbePage.html");
+        Files.createDirectories(templateFile.getParent());
+        Files.writeString(templateFile, """
+                <!DOCTYPE html>
+                <html>
+                  <body>
+                    <theme:form binding="contact">
+                      <theme:input binding="missing" title="Missing"/>
+                    </theme:form>
+                  </body>
+                </html>
+                """, StandardCharsets.UTF_8);
+
+        DiagnosticCollector<JavaFileObject> diagnostics = compilePageSourceWithProcessor(false, """
+                package example;
+
+                import one.xis.FormData;
+                import one.xis.Page;
+
+                @Page("/probe.html")
+                class ProbePage {
+                    @FormData("contact")
+                    ContactForm contact() {
+                        return new ContactForm();
+                    }
+
+                    static class ContactForm {
+                        String description;
+                    }
+                }
+                """);
+
+        List<String> errors = errorMessages(diagnostics);
+        assertThat(errors).hasSize(1);
+        assertThat(errors.get(0))
+                .contains("ProbePage.html:5")
+                .contains("Template binds field \"missing\" on @FormData \"contact\"");
+    }
+
+    @Test
     void validatesFormFieldBindingsAgainstFormObject() throws IOException {
         Path templateFile = tempDir.resolve("src/main/java/example/ProbePage.html");
         Files.createDirectories(templateFile.getParent());

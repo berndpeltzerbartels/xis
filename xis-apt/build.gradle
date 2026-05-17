@@ -27,6 +27,7 @@ dependencies {
     testImplementation "org.assertj:assertj-core:$assertjVersion"
     testImplementation "org.apache.groovy:groovy:$groovyVersion"
     testImplementation project(':xis-boot-starter-test')
+    testImplementation project(':xis-theme')
 }
 
 java {

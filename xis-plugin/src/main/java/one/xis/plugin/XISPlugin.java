@@ -457,7 +457,7 @@ public class XISPlugin implements Plugin<Project> {
             task.setDescription("Validates XIS controllers and templates.");
             task.setSource(main.getAllJava());
             task.setClasspath(main.getCompileClasspath());
-            task.getOptions().setAnnotationProcessorPath(apClasspath);
+            task.getOptions().setAnnotationProcessorPath(apClasspath.plus(main.getCompileClasspath()));
             task.getProcessorFqcn().set("one.xis.processor.XISValidateProcessor");
             lockValidateTask(task);
             task.getOutputs().upToDateWhen(t -> false);

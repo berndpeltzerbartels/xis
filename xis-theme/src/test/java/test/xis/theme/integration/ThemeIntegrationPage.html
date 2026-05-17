@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Theme integration</title>
+</head>
+<body>
+<theme:form-page title="Customer"
+                 binding="customer"
+                 action="save"
+                 submit-label="Save">
+    <theme:grid columns="2">
+        <theme:input id="name" binding="name" title="Name"/>
+        <theme:select id="stage"
+                      binding="stage"
+                      title="Stage"
+                      options="stages"
+                      option-value="code"
+                      option-label="label"/>
+    </theme:grid>
+</theme:form-page>
+</body>
+</html>

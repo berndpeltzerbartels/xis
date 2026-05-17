@@ -31,8 +31,23 @@ repositories {
 }
 
 dependencies {
+    implementation project(':xis-context')
+    implementation project(':xis-html')
+    implementation project(':xis-server')
+
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation project(':xis-controller-api')
+    testImplementation project(':xis-test')
+}
+
+sourceSets {
+    test {
+        resources {
+            srcDir 'src/test/java'
+            include '**/*.html'
+        }
+    }
 }
 
 test {
