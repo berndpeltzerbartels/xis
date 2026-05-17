@@ -179,6 +179,8 @@ public class XISPlugin implements Plugin<Project> {
         main.getResources().srcDir(generatedFrameworkComponentIndexDir);
         project.getTasks().named("compileJava").configure(task -> task.dependsOn(generateFrameworkComponents));
         project.getTasks().named("processResources").configure(task -> task.dependsOn(generateFrameworkComponents));
+        project.getTasks().matching(task -> task.getName().equals("sourcesJar"))
+                .configureEach(task -> task.dependsOn(generateFrameworkComponents));
     }
 
     private void configureNativeClassCatalogGeneration(Project project) {
@@ -190,9 +192,11 @@ public class XISPlugin implements Plugin<Project> {
                     task.getSourceFiles().from(project.fileTree("src/main/java", tree -> tree.include("**/*.java")));
                     task.getOutputDirectory().set(generatedNativeClassCatalogDir);
                     task.getProjectName().set(project.getName());
-                });
+        });
         main.getResources().srcDir(generatedNativeClassCatalogDir);
         project.getTasks().named("processResources").configure(task -> task.dependsOn(generateNativeClassCatalog));
+        project.getTasks().matching(task -> task.getName().equals("sourcesJar"))
+                .configureEach(task -> task.dependsOn(generateNativeClassCatalog));
     }
 
     private void configureNativeCatalogGeneration(Project project) {
@@ -302,6 +306,13 @@ public class XISPlugin implements Plugin<Project> {
             task.dependsOn(generateNativeReflectionConfig);
             task.dependsOn(generateNativeResourceCatalog);
         });
+        project.getTasks().matching(task -> task.getName().equals("sourcesJar"))
+                .configureEach(task -> {
+                    task.dependsOn(generateApplicationComponents);
+                    task.dependsOn(generateNativeRunner);
+                    task.dependsOn(generateNativeReflectionConfig);
+                    task.dependsOn(generateNativeResourceCatalog);
+                });
     }
 
     private void configureNativeTasks(Project project) {

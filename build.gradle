@@ -218,6 +218,12 @@ subprojects {
             dependsOn generateNativeReflectionConfig
             dependsOn generateNativeResourceCatalog
         }
+        tasks.matching { it.name == "sourcesJar" }.configureEach {
+            dependsOn generateApplicationComponents
+            dependsOn generateNativeRunner
+            dependsOn generateNativeReflectionConfig
+            dependsOn generateNativeResourceCatalog
+        }
     }
 }
 if (gradle.startParameter.taskNames.any { it.endsWith('createReleaseZip') }) {
@@ -271,7 +277,12 @@ task createReleaseZip(type: JavaExec) {
     description = 'Creates a zip file with all release artifacts for Maven Central.'
 
     dependsOn cleanLocalReleaseArtifacts
+    dependsOn check
     dependsOn systemTest
+
+    dependsOn {
+        subprojects.collect { it.tasks.named('check') }
+    }
 
     dependsOn {
         subprojects.collect { it.tasks.withType(PublishToMavenLocal) }

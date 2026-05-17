@@ -18,6 +18,12 @@ public class NativeAppContextBuilderImpl extends AppContextBuilderImpl {
 
     private final Set<Class<? extends Annotation>> proxyAnnotations = new LinkedHashSet<>();
     private final Map<Class<ProxyFactory<?>>, Set<Class<?>>> proxyInterfacesByFactory = new LinkedHashMap<>();
+    private final Set<Class<?>> componentClasses = new LinkedHashSet<>();
+
+    public NativeAppContextBuilderImpl withComponentClass(Class<?> componentClass) {
+        componentClasses.add(componentClass);
+        return this;
+    }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public NativeAppContextBuilderImpl withProxyInterface(Class<? extends Annotation> proxyAnnotation,
@@ -31,7 +37,20 @@ public class NativeAppContextBuilderImpl extends AppContextBuilderImpl {
     @Override
     protected PackageScanResult scanResult(Annotations annotations) {
         annotations.addProxyAnnotations(proxyAnnotations);
-        return appendExplicitProxyInterfaces(super.scanResult(annotations));
+        return appendExplicitComponents(appendExplicitProxyInterfaces(super.scanResult(annotations)));
+    }
+
+    private PackageScanResult appendExplicitComponents(PackageScanResult scanResult) {
+        if (componentClasses.isEmpty()) {
+            return scanResult;
+        }
+        var mergedComponents = new LinkedHashSet<>(scanResult.getAnnotatedComponentClasses());
+        mergedComponents.addAll(componentClasses);
+        return new PackageScanResult(
+                scanResult.getAnnotations(),
+                mergedComponents,
+                scanResult.getProxyInterfacesByFactory()
+        );
     }
 
     private PackageScanResult appendExplicitProxyInterfaces(PackageScanResult scanResult) {

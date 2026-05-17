@@ -45,7 +45,7 @@ public class NativeAppContextBuilder {
             registerProxyInterface(componentClass);
             return;
         }
-        delegate.withSingletonClass(componentClass);
+        delegate.withComponentClass(componentClass);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
