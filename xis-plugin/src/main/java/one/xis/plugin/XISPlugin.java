@@ -83,6 +83,7 @@ public class XISPlugin implements Plugin<Project> {
                 "xis-authentication",
                 "xis-authentication-api",
                 "xis-boot",
+                "xis-boot-http",
                 "xis-boot-native",
                 "xis-boot-native-h2",
                 "xis-boot-native-mariadb",
