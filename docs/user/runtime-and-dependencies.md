@@ -46,6 +46,23 @@ dependencies {
 }
 ```
 
+`build.gradle` for standalone HTTP controllers on XIS Boot:
+
+```groovy
+plugins {
+    id "java"
+    id "one.xis.plugin" version "0.11.0"
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "one.xis:xis-boot-http"
+}
+```
+
 When the XIS Gradle plugin is used, it aligns XIS dependency versions to the plugin version. Add explicit versions only
 in builds that do not use the plugin.
 
@@ -53,6 +70,11 @@ Use `xis-spring` when the application already uses Spring Boot or needs Spring i
 
 Use `xis-boot` when you want a small standalone runtime with XIS dependency injection, properties, package scanning, and
 an embedded HTTP runtime.
+
+Use `xis-boot-http` when you want a standalone XIS Boot application that exposes plain HTTP endpoints with
+`one.xis.http.Controller`, `@Get`, `@Post`, and the other HTTP controller annotations. This module is a convenience
+dependency that brings both `xis-boot` and `xis-http-controller` into the application API. It is intentionally named
+HTTP rather than REST because XIS does not try to define or enforce the full REST architectural style.
 
 Use `xis-boot-native` when you want the XIS Boot programming model and want to build a GraalVM native executable for
 small containers, fast startup, and cloud-native deployment. Continue with [Cloud Native And Native Images](cloud-native.md)
