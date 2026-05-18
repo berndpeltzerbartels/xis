@@ -20,11 +20,14 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
 public class XISPlugin implements Plugin<Project> {
+
+    private Set<String> xisModuleNames;
 
     @Override
     public void apply(@NotNull Project project) {
@@ -68,56 +71,34 @@ public class XISPlugin implements Plugin<Project> {
     }
 
     private boolean containsXisModule(String moduleName) {
-        for (String module : xisModules()) {
-            if (module.equals(moduleName)) {
-                return true;
-            }
-        }
-        return false;
+        return xisModules().contains(moduleName);
     }
 
-    private String[] xisModules() {
-        return new String[]{
-                "xis-adapter-spi",
-                "xis-apt",
-                "xis-authentication",
-                "xis-authentication-api",
-                "xis-boot",
-                "xis-boot-http",
-                "xis-boot-native",
-                "xis-boot-native-h2",
-                "xis-boot-native-mariadb",
-                "xis-boot-native-mongodb",
-                "xis-boot-native-postgresql",
-                "xis-boot-starter-test",
-                "xis-boot-test-jupiter",
-                "xis-bootstrap",
-                "xis-context",
-                "xis-controller-api",
-                "xis-deserializer",
-                "xis-distributed",
-                "xis-gson",
-                "xis-html",
-                "xis-http-client",
-                "xis-http-controller",
-                "xis-i18n",
-                "xis-idp-client",
-                "xis-idp-server",
-                "xis-javascript",
-                "xis-mongodb",
-                "xis-plugin",
-                "xis-processor",
-                "xis-resources",
-                "xis-security-common",
-                "xis-server",
-                "xis-spring",
-                "xis-sql",
-                "xis-test",
-                "xis-theme",
-                "xis-token",
-                "xis-util",
-                "xis-validation"
-        };
+    private Set<String> xisModules() {
+        if (xisModuleNames == null) {
+            xisModuleNames = loadXisModules();
+        }
+        return xisModuleNames;
+    }
+
+    private Set<String> loadXisModules() {
+        try (InputStream input = getClass().getResourceAsStream("/xis-modules.txt")) {
+            if (input == null) {
+                throw new IllegalStateException("Unable to find 'xis-modules.txt' in classpath.");
+            }
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8))) {
+                var modules = reader.lines()
+                        .map(String::trim)
+                        .filter(line -> !line.isEmpty())
+                        .collect(Collectors.toCollection(LinkedHashSet::new));
+                if (modules.isEmpty()) {
+                    throw new IllegalStateException("'xis-modules.txt' does not contain any XIS modules.");
+                }
+                return modules;
+            }
+        } catch (IOException ex) {
+            throw new RuntimeException("Error reading 'xis-modules.txt' from classpath.", ex);
+        }
     }
 
     /**
