@@ -16,11 +16,11 @@ import one.xis.context.Scheduled;
 import java.util.concurrent.TimeUnit;
 
 @Component
-public class ReminderJob {
+class ReminderJob {
 
     private final ReminderService reminderService;
 
-    public ReminderJob(ReminderService reminderService) {
+    ReminderJob(ReminderService reminderService) {
         this.reminderService = reminderService;
     }
 
@@ -61,7 +61,7 @@ when infrastructure code wants to stop scheduled work explicitly.
 import one.xis.context.Inject;
 import one.xis.context.Scheduler;
 
-public class ShutdownHook {
+class ShutdownHook {
 
     @Inject
     Scheduler scheduler;

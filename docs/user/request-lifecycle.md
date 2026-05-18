@@ -11,7 +11,7 @@ When the browser opens a page URL, XIS matches the URL to a `@Page` controller.
 
 ```java
 @Page("/products/{id}.html")
-public class ProductPage {
+class ProductPage {
 
     @ModelData("product")
     Product product(@PathVariable("id") long id) {
@@ -50,7 +50,7 @@ An action is a user-triggered call to a Java method annotated with `@Action`.
 
 ```java
 @Action
-public PageResponse delete(@Parameter("productId") long productId) {
+PageResponse delete(@Parameter("productId") long productId) {
     productService.delete(productId);
     return new PageResponse(ProductListPage.class);
 }
@@ -104,7 +104,7 @@ A form action adds binding and validation before the action method runs.
 
 ```java
 @Action
-public PageResponse save(@FormData("product") ProductForm product) {
+PageResponse save(@FormData("product") ProductForm product) {
     productService.save(product);
     return new PageResponse(ProductDetailsPage.class)
             .pathVariable("id", product.id());

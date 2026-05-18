@@ -16,9 +16,9 @@ import one.xis.ModalResponse;
 import one.xis.validation.Mandatory;
 
 @Modal("/customers/edit")
-public class EditCustomerModal {
+class EditCustomerModal {
 
-    public static class CustomerForm {
+    static class CustomerForm {
         @Mandatory
         public String name;
     }

@@ -24,7 +24,7 @@ import one.xis.Page;
 @Page("/account/login.html")
 @HtmlFile("/account/login.html")
 @DefaultHtmlFile("/company-default-login.html")
-public class CompanyLoginController {
+class CompanyLoginController {
 }
 ```
 

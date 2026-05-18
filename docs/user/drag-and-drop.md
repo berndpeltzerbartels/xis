@@ -58,11 +58,11 @@ such as `@SharedValue` or `@ClientId`, do not affect action-parameter binding.
 
 ```java
 @Page("/board.html")
-public class BoardPage {
+class BoardPage {
 
     private final BoardService boardService;
 
-    public BoardPage(BoardService boardService) {
+    BoardPage(BoardService boardService) {
         this.boardService = boardService;
     }
 

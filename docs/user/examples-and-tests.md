@@ -163,16 +163,16 @@ import one.xis.Page;
 import one.xis.PathVariable;
 
 @Page("/products/{id}.html")
-public class ProductPage {
+class ProductPage {
 
     private final ProductService productService;
 
-    public ProductPage(ProductService productService) {
+    ProductPage(ProductService productService) {
         this.productService = productService;
     }
 
     @ModelData("product")
-    public Product product(@PathVariable("id") long id) {
+    Product product(@PathVariable("id") long id) {
         return productService.findById(id);
     }
 }
@@ -358,10 +358,10 @@ It shows the complete public API interaction:
 
 ```java
 @Page("/products/{id}.html")
-public class ProductPage {
+class ProductPage {
 
     @ModelData
-    public Product product(@PathVariable("id") long id) {
+    Product product(@PathVariable("id") long id) {
         return productService.findById(id);
     }
 }

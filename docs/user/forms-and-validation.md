@@ -15,20 +15,20 @@ import one.xis.FormData;
 import one.xis.Page;
 
 @Page("/users/new.html")
-public class NewUserPage {
+class NewUserPage {
 
     @FormData("user")
-    public UserForm user() {
+    UserForm user() {
         return new UserForm("", "");
     }
 
     @Action
-    public Class<?> saveUser(@FormData("user") UserForm user) {
+    Class<?> saveUser(@FormData("user") UserForm user) {
         userService.save(user);
         return UserListPage.class;
     }
 
-    public record UserForm(String firstName, String email) {
+    record UserForm(String firstName, String email) {
     }
 }
 ```
@@ -66,12 +66,12 @@ One form can have multiple actions.
 
 ```java
 @Action("saveDraft")
-public void saveDraft(@FormData("document") DocumentForm document) {
+void saveDraft(@FormData("document") DocumentForm document) {
     documentService.saveDraft(document);
 }
 
 @Action("publish")
-public Class<?> publish(@FormData("document") DocumentForm document) {
+Class<?> publish(@FormData("document") DocumentForm document) {
     documentService.publish(document);
     return PublishedDocumentsPage.class;
 }
@@ -122,14 +122,14 @@ Use repeated bindings when several controls should contribute values to the same
 checkbox groups:
 
 ```java
-public class ProductForm {
+class ProductForm {
     private List<String> tags;
 
-    public List<String> getTags() {
+    List<String> getTags() {
         return tags;
     }
 
-    public void setTags(List<String> tags) {
+    void setTags(List<String> tags) {
         this.tags = tags;
     }
 }
@@ -175,19 +175,19 @@ import one.xis.Upload;
 import one.xis.UploadedFile;
 
 @Page("/documents/new.html")
-public class NewDocumentPage {
+class NewDocumentPage {
 
     @FormData("document")
-    public DocumentForm document() {
+    DocumentForm document() {
         return new DocumentForm();
     }
 
     @Action
-    public void save(@FormData("document") DocumentForm document) {
+    void save(@FormData("document") DocumentForm document) {
         documentService.store(document.title, document.attachment);
     }
 
-    public static class DocumentForm {
+    static class DocumentForm {
         public String title;
 
         @Upload(maxSize = 5 * 1024 * 1024)
@@ -234,7 +234,7 @@ import one.xis.UploadConfiguration;
 import one.xis.context.Component;
 
 @Component
-public class DocumentUploadConfiguration implements UploadConfiguration {
+class DocumentUploadConfiguration implements UploadConfiguration {
 
     @Override
     public long getMaxFileSize() {
@@ -259,7 +259,7 @@ still works as a canonical value. Integer types also accept locale grouping, suc
 English, but reject fractional values like `1,5`.
 
 ```java
-public record ProductForm(
+record ProductForm(
         String name,
         BigDecimal price,
         Integer stock
@@ -300,7 +300,7 @@ import java.text.ParsePosition;
 import java.time.ZoneId;
 import java.util.Locale;
 
-public class MoneyFormatter implements Formatter<BigDecimal> {
+class MoneyFormatter implements Formatter<BigDecimal> {
 
     @Override
     public String format(BigDecimal value, Locale locale, ZoneId zoneId) {
@@ -329,7 +329,7 @@ public class MoneyFormatter implements Formatter<BigDecimal> {
 ```java
 import one.xis.UseFormatter;
 
-public record ProductForm(
+record ProductForm(
         @UseFormatter(MoneyFormatter.class)
         BigDecimal price
 ) {
@@ -356,19 +356,19 @@ import one.xis.validation.Mandatory;
 import one.xis.validation.MinLength;
 
 @Page("/register.html")
-public class RegisterPage {
+class RegisterPage {
 
     @FormData("user")
-    public UserForm user() {
+    UserForm user() {
         return new UserForm("", "");
     }
 
     @Action
-    public void register(@FormData("user") UserForm user) {
+    void register(@FormData("user") UserForm user) {
         userService.register(user);
     }
 
-    public record UserForm(
+    record UserForm(
             @Mandatory
             @LabelKey("user.email")
             @EMail
@@ -529,7 +529,7 @@ fallbacks. Message templates can use `${label}` and validator-specific parameter
 discount". With `@LabelKey`, the validator stays generic and only the label changes.
 
 ```java
-public record OrderForm(
+record OrderForm(
         @NotNegative
         @LabelKey("order.total")
         BigDecimal total,
@@ -577,7 +577,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Retention(RUNTIME)
 @Target({FIELD, PARAMETER, RECORD_COMPONENT})
 @Validate(validatorClass = SkuValidator.class, messageKey = "validation.sku")
-public @interface Sku {
+@interface Sku {
 }
 ```
 
@@ -592,11 +592,11 @@ import one.xis.context.Component;
 import java.lang.reflect.AnnotatedElement;
 
 @Component
-public class SkuValidator implements Validator<String> {
+class SkuValidator implements Validator<String> {
 
     private final ProductCatalog catalog;
 
-    public SkuValidator(ProductCatalog catalog) {
+    SkuValidator(ProductCatalog catalog) {
         this.catalog = catalog;
     }
 
@@ -617,7 +617,7 @@ annotation points to the validator through `@Validate`. Validators can be normal
 services or repositories are available for checks that need application state, such as a database lookup.
 
 ```java
-public record ProductForm(
+record ProductForm(
         @Sku
         String sku
 ) {
@@ -645,7 +645,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
         messageKey = "validation.discount",
         globalMessageKey = "validation.discount.global"
 )
-public @interface ValidDiscount {
+@interface ValidDiscount {
 }
 ```
 
@@ -655,7 +655,7 @@ package example.orders;
 import example.validation.ValidDiscount;
 
 @ValidDiscount
-public record DiscountForm(int subtotal, int discount) {
+record DiscountForm(int subtotal, int discount) {
 }
 ```
 
@@ -669,7 +669,7 @@ import one.xis.validation.ValidatorException;
 
 import java.lang.reflect.AnnotatedElement;
 
-public class DiscountValidator implements Validator<DiscountForm> {
+class DiscountValidator implements Validator<DiscountForm> {
 
     @Override
     public void validate(DiscountForm form, AnnotatedElement target, UserContext userContext)

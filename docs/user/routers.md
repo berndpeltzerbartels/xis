@@ -35,16 +35,16 @@ import one.xis.Route;
 import one.xis.Router;
 
 @Router("/products")
-public class ProductRouter {
+class ProductRouter {
 
     private final ProductService productService;
 
-    public ProductRouter(ProductService productService) {
+    ProductRouter(ProductService productService) {
         this.productService = productService;
     }
 
     @Route("/{id}.html")
-    public FrontletResponse product(@PathVariable("id") long id) {
+    FrontletResponse product(@PathVariable("id") long id) {
         var product = productService.findById(id);
         if (product.isSoldOut()) {
             return FrontletResponse.of(SoldOutNotificationFrontlet.class, "id", id)
@@ -60,7 +60,7 @@ The same pattern can also return a page:
 
 ```java
 @Route("/{id}/edit.html")
-public PageResponse editProduct(@PathVariable("id") long id) {
+PageResponse editProduct(@PathVariable("id") long id) {
     if (productService.requiresApproval(id)) {
         return PageResponse.of(ProductApprovalPage.class, "id", id);
     }
@@ -77,10 +77,10 @@ The class-level `@Router` path and method-level `@Route` path are joined:
 
 ```java
 @Router("/products")
-public class ProductRouter {
+class ProductRouter {
 
     @Route("/{id}.html")
-    public PageResponse product(@PathVariable("id") long id) {
+    PageResponse product(@PathVariable("id") long id) {
         return PageResponse.of(ProductPage.class, "id", id);
     }
 }

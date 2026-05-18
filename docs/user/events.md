@@ -28,11 +28,11 @@ import one.xis.RefreshOnUpdateEvents;
 
 @Page("/cart.html")
 @RefreshOnUpdateEvents("cart-updated")
-public class CartPage {
+class CartPage {
 
     private final CartService cartService;
 
-    public CartPage(CartService cartService) {
+    CartPage(CartService cartService) {
         this.cartService = cartService;
     }
 
@@ -61,11 +61,11 @@ A value such as a cart counter can live directly in the page template:
 ```java
 @Page("/products.html")
 @RefreshOnUpdateEvents("cart-updated")
-public class ProductsPage {
+class ProductsPage {
 
     private final CartService cartService;
 
-    public ProductsPage(CartService cartService) {
+    ProductsPage(CartService cartService) {
         this.cartService = cartService;
     }
 
@@ -94,11 +94,11 @@ import one.xis.RefreshOnUpdateEvents;
 
 @Frontlet
 @RefreshOnUpdateEvents("cart-updated")
-public class CartSummaryFrontlet {
+class CartSummaryFrontlet {
 
     private final CartService cartService;
 
-    public CartSummaryFrontlet(CartService cartService) {
+    CartSummaryFrontlet(CartService cartService) {
         this.cartService = cartService;
     }
 
@@ -127,12 +127,12 @@ import one.xis.Page;
 import one.xis.RefreshEventPublisher;
 
 @Page("/cart.html")
-public class CartPage {
+class CartPage {
 
     private final CartService cartService;
     private final RefreshEventPublisher refreshEvents;
 
-    public CartPage(CartService cartService, RefreshEventPublisher refreshEvents) {
+    CartPage(CartService cartService, RefreshEventPublisher refreshEvents) {
         this.cartService = cartService;
         this.refreshEvents = refreshEvents;
     }
@@ -160,11 +160,11 @@ import one.xis.Page;
 import one.xis.RefreshEventPublisher;
 
 @Page("/cart.html")
-public class CartPage {
+class CartPage {
 
     private final RefreshEventPublisher refreshEvents;
 
-    public CartPage(RefreshEventPublisher refreshEvents) {
+    CartPage(RefreshEventPublisher refreshEvents) {
         this.refreshEvents = refreshEvents;
     }
 
@@ -193,12 +193,12 @@ import one.xis.RefreshEventPublisher;
 @Page("/account/cart.html")
 @Roles("USER")
 @RefreshOnUpdateEvents("cart-updated")
-public class UserCartPage {
+class UserCartPage {
 
     private final CartService cartService;
     private final RefreshEventPublisher refreshEvents;
 
-    public UserCartPage(CartService cartService, RefreshEventPublisher refreshEvents) {
+    UserCartPage(CartService cartService, RefreshEventPublisher refreshEvents) {
         this.cartService = cartService;
         this.refreshEvents = refreshEvents;
     }
@@ -250,7 +250,7 @@ import one.xis.Frontlet;
 import one.xis.FrontletResponse;
 
 @Frontlet
-public class CartEditorFrontlet {
+class CartEditorFrontlet {
 
     @Action
     FrontletResponse save() {

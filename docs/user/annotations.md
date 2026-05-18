@@ -55,11 +55,11 @@ loading an aggregate once and then using it for display and for an action withou
 
 ```java
 @Page("/products/{id}.html")
-public class ProductPage {
+class ProductPage {
 
     private final ProductService productService;
 
-    public ProductPage(ProductService productService) {
+    ProductPage(ProductService productService) {
         this.productService = productService;
     }
 
@@ -92,7 +92,7 @@ on the current page or frontlet.
 
 ```java
 @Page("/quote.html")
-public class QuotePage {
+class QuotePage {
 
     @Action
     @ModelData("calculationResult")
@@ -189,7 +189,7 @@ file:
 
 ```java
 @Component
-public class MailSettings {
+class MailSettings {
 
     @Value("mail.host")
     String host;
@@ -212,7 +212,7 @@ frontlet.
 Use storage parameters for values that intentionally live in the browser:
 
 ```java
-public class CartPage {
+class CartPage {
 
     @Action("addToCart")
     void addToCart(@LocalStorage("cart") Cart cart,
@@ -269,7 +269,7 @@ An include always has an annotation and a template:
 
 ```java
 @Include("header")
-public class Header {
+class Header {
 }
 ```
 

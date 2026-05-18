@@ -118,7 +118,7 @@ import one.xis.boot.XISBootApplication;
 import one.xis.boot.XISBootRunner;
 
 @XISBootApplication
-public class Application {
+class Application {
 
     public static void main(String[] args) {
         XISBootRunner.run(Application.class, args);

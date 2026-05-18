@@ -59,10 +59,10 @@ import one.xis.Action;
 import one.xis.Page;
 
 @Page("/cart.html")
-public class CartPage {
+class CartPage {
 
     @Action
-    public String checkout() {
+    String checkout() {
         return "/checkout.html";
     }
 }
@@ -83,10 +83,10 @@ Path variables stay part of the concrete URL returned by your action. Only the c
 
 ```java
 @Page("/cart.html")
-public class CartPage {
+class CartPage {
 
     @Action
-    public String openProductDetails() {
+    String openProductDetails() {
         return "/product/42/details.html";
     }
 }
@@ -111,7 +111,7 @@ import one.xis.Action;
 import one.xis.FrontletResponse;
 
 @Action
-public FrontletResponse openCartSummary() {
+FrontletResponse openCartSummary() {
     return new FrontletResponse("/cart-summary?mode=compact")
             .targetContainer("header-cart");
 }
@@ -148,7 +148,7 @@ Path variables are normalized to `*`. A page declared as:
 
 ```java
 @Page("/product/{id}/details.html")
-public class ProductDetailsPage {
+class ProductDetailsPage {
 }
 ```
 
@@ -185,7 +185,7 @@ import java.util.Map;
 import java.util.Set;
 
 @Component
-public class DistributedConfig implements XisDistributedConfig {
+class DistributedConfig implements XisDistributedConfig {
 
     @Override
     public Map<String, String> getFrontletHosts() {

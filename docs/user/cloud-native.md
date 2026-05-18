@@ -59,7 +59,7 @@ package example;
 import one.xis.boot.XISBootApplication;
 
 @XISBootApplication
-public class Application {
+class Application {
 }
 ```
 
@@ -209,7 +209,7 @@ predictable in cloud deployments.
 If a component needs advice, use an interface:
 
 ```java
-public interface CustomerService {
+interface CustomerService {
     void createCustomer(Customer customer);
 }
 ```

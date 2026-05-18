@@ -168,7 +168,7 @@ The distributed module should define an interface such as:
 
 ```java
 @ImportInstances
-public interface DistributedComponentMapping {
+interface DistributedComponentMapping {
 
     String getPageHost(String normalizedPageId);
 

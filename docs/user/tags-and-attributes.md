@@ -319,14 +319,14 @@ Equivalent element syntax:
 ```
 
 ```java
-public class ProductForm {
+class ProductForm {
     private List<String> tags;
 
-    public List<String> getTags() {
+    List<String> getTags() {
         return tags;
     }
 
-    public void setTags(List<String> tags) {
+    void setTags(List<String> tags) {
         this.tags = tags;
     }
 }

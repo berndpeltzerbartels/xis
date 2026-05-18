@@ -104,7 +104,7 @@ underscore column names.
 
 ```java
 @Entity("customers")
-public record Customer(long id, String firstName, String lastName) {
+record Customer(long id, String firstName, String lastName) {
 }
 ```
 
@@ -130,7 +130,7 @@ another loads them from a separate role table in its `UserInfoService`.
 
 ```java
 @Entity("employees")
-public class Employee extends UserInfoImpl {
+class Employee extends UserInfoImpl {
     long id;
     String password;
 }
@@ -175,7 +175,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Entity("customers")
-public class Customer {
+class Customer {
     long id;
     String firstName;
     String lastName;
@@ -183,7 +183,7 @@ public class Customer {
 }
 
 @Entity("orders")
-public class Order {
+class Order {
     long id;
     BigDecimal total;
 }
@@ -204,7 +204,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface CustomerRepository extends CrudRepository<Customer, Long> {
+interface CustomerRepository extends CrudRepository<Customer, Long> {
 
     @Select("""
             select c.id, c.first_name, c.last_name,
@@ -244,7 +244,7 @@ single-column primary key.
 
 ```java
 @Repository
-public interface CustomerRepository extends CrudRepository<Customer, Long> {
+interface CustomerRepository extends CrudRepository<Customer, Long> {
 
     @Select("select * from customers where last_name = {lastName}")
     List<Customer> findByLastName(@Param("lastName") String lastName);
@@ -418,7 +418,7 @@ class CustomerServiceImpl implements CustomerService {
 You may also put the annotation on the interface method:
 
 ```java
-public interface CustomerService {
+interface CustomerService {
 
     @Transactional
     void createCustomer(Customer customer);

@@ -74,7 +74,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @Component
-public class AppUsers implements UserInfoService<UserInfo> {
+class AppUsers implements UserInfoService<UserInfo> {
 
     @Override
     public boolean validateCredentials(String userId, String password) {
@@ -110,7 +110,7 @@ import one.xis.auth.UserInfoService;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AppUsers implements UserInfoService<UserInfo> {
+class AppUsers implements UserInfoService<UserInfo> {
     // same methods as above
 }
 ```
@@ -276,7 +276,7 @@ import java.util.OptionalLong;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
-public class AppTotpStore implements TOTPStore {
+class AppTotpStore implements TOTPStore {
 
     private final ConcurrentHashMap<String, String> secrets = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Long> acceptedSteps = new ConcurrentHashMap<>();
@@ -341,7 +341,7 @@ Use `@Authenticated` when a page, frontlet, action method, action parameter, or 
 ```java
 @Page("/community.html")
 @Authenticated
-public class CommunityPage {
+class CommunityPage {
 }
 ```
 
@@ -356,7 +356,7 @@ import one.xis.UserId;
 
 @Page("/account.html")
 @Roles("USER")
-public class AccountPage {
+class AccountPage {
 
     @ModelData("message")
     String message(@UserId String userId) {
@@ -425,7 +425,7 @@ import one.xis.Roles;
 
 @Page("/editor.html")
 @Roles("USER")
-public class EditorPage {
+class EditorPage {
 
     @Action
     void save(@FormData("article") ArticleForm article) {
@@ -440,7 +440,7 @@ package example.security;
 import one.xis.Roles;
 
 @Roles("DATA_EDITOR")
-public record ArticleForm(String title, String body) {
+record ArticleForm(String title, String body) {
 }
 ```
 
@@ -466,11 +466,11 @@ import one.xis.UserContext;
 import one.xis.context.Component;
 
 @Component
-public class CustomerOwnershipGuard implements OwnershipGuard<CustomerForm> {
+class CustomerOwnershipGuard implements OwnershipGuard<CustomerForm> {
 
     private final CustomerService customerService;
 
-    public CustomerOwnershipGuard(CustomerService customerService) {
+    CustomerOwnershipGuard(CustomerService customerService) {
         this.customerService = customerService;
     }
 
@@ -482,7 +482,7 @@ public class CustomerOwnershipGuard implements OwnershipGuard<CustomerForm> {
 
 @Page("/customers.html")
 @Roles("USER")
-public class CustomerPage {
+class CustomerPage {
 
     @Action
     void save(@FormData("customer") CustomerForm form) {
@@ -491,7 +491,7 @@ public class CustomerPage {
 }
 
 @OwnedBy(CustomerOwnershipGuard.class)
-public record CustomerForm(String customerId, String name) {
+record CustomerForm(String customerId, String name) {
 }
 ```
 
@@ -534,7 +534,7 @@ import one.xis.auth.idp.ExternalIDPConfig;
 import one.xis.context.Component;
 
 @Component
-public class KeycloakLogin implements ExternalIDPConfig {
+class KeycloakLogin implements ExternalIDPConfig {
 
     @Override
     public String getIdpId() {
@@ -567,7 +567,7 @@ import one.xis.auth.idp.ExternalIDPConfig;
 import org.springframework.stereotype.Component;
 
 @Component
-public class KeycloakLogin implements ExternalIDPConfig {
+class KeycloakLogin implements ExternalIDPConfig {
     // same methods as above
 }
 ```
@@ -664,7 +664,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
-public class GoogleUsers implements UserInfoService<UserInfoImpl> {
+class GoogleUsers implements UserInfoService<UserInfoImpl> {
 
     private final Map<String, UserInfoImpl> users = new ConcurrentHashMap<>();
 
@@ -756,7 +756,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @Component
-public class AppIDPService implements IDPService {
+class AppIDPService implements IDPService {
 
     private final Map<String, String> passwords = Map.of("alice", "secret");
     private final Map<String, IDPClientInfo> clients = Map.of(

@@ -87,7 +87,7 @@ package example.dashboard;
 import one.xis.Page;
 
 @Page("/dashboard.html")
-public class DashboardPage {
+class DashboardPage {
 }
 ```
 
