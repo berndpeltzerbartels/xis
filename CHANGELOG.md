@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.11.1 - 2026-05-18
+
+### Fixed
+
+- Published `xis-boot-http` as part of the release so versionless XIS dependencies managed by the Gradle plugin resolve
+  correctly for external consumers.
+- Added release artifact validation and an isolated external-consumer smoke test so Maven Central release zips are checked
+  without relying on `mavenLocal()`.
+
 ## 0.11.0 - 2026-05-18
 
 ### Added
