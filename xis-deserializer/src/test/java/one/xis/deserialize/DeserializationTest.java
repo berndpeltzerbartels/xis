@@ -393,6 +393,93 @@ class DeserializationTest {
         assertThat(testBean.getCharField()).isEqualTo('\u0000');
     }
 
+    @Nested
+    class OwnershipTest {
+
+        @Test
+        void guardOnClassAcceptsObject() throws NoSuchMethodException {
+            var results = new PostProcessingResults();
+            mainDeserializer.deserialize("{\"customerId\":\"customer-1\",\"name\":\"Customer\"}",
+                    parameter(GuardedCustomerForm.class), ownerUserContext("mara"), results);
+
+            assertThat(results.postProcessingResults(AccessDeniedError.class)).isEmpty();
+        }
+
+        @Test
+        void guardOnParameterAcceptsObject() throws NoSuchMethodException {
+            var results = new PostProcessingResults();
+            mainDeserializer.deserialize("{\"customerId\":\"customer-1\",\"name\":\"Customer\"}",
+                    parameter(PlainCustomerForm.class), ownerUserContext("mara"), results);
+
+            assertThat(results.postProcessingResults(AccessDeniedError.class)).isEmpty();
+        }
+
+        @Test
+        void guardRejectionRequiresAuthorization() throws NoSuchMethodException {
+            var results = new PostProcessingResults();
+            mainDeserializer.deserialize("{\"customerId\":\"customer-1\",\"name\":\"Customer\"}",
+                    parameter(GuardedCustomerForm.class), ownerUserContext("juju"), results);
+
+            assertThat(results.postProcessingResults(AccessDeniedError.class))
+                    .singleElement()
+                    .satisfies(error -> {
+                        assertThat(error.authenticate()).isTrue();
+                        assertThat(error.reject()).isFalse();
+                        assertThat(error.isAuthenticationRequired()).isFalse();
+                        assertThat(error.getDeserializationContext().getAnnotationClass()).isEqualTo(OwnedBy.class);
+                    });
+        }
+
+        @Test
+        void unauthenticatedUserCannotSubmitGuardedObject() throws NoSuchMethodException {
+            var results = new PostProcessingResults();
+            mainDeserializer.deserialize("{\"customerId\":\"customer-1\",\"name\":\"Customer\"}",
+                    parameter(GuardedCustomerForm.class), unauthenticatedUserContext(), results);
+
+            assertThat(results.postProcessingResults(AccessDeniedError.class))
+                    .singleElement()
+                    .extracting(AccessDeniedError::isAuthenticationRequired)
+                    .isEqualTo(true);
+        }
+
+        @Test
+        void nestedGuardedObjectsAreCheckedIndividually() throws NoSuchMethodException {
+            var results = new PostProcessingResults();
+            mainDeserializer.deserialize("""
+                            {
+                              "customerId": "customer-1",
+                              "name": "outer",
+                              "detail": {
+                                "customerId": "customer-2",
+                                "name": "nested"
+                              }
+                            }
+                            """,
+                    parameter(NestedGuardedCustomerForm.class), ownerUserContext("mara"), results);
+
+            assertThat(results.postProcessingResults(AccessDeniedError.class))
+                    .singleElement()
+                    .extracting(error -> error.getDeserializationContext().getPath())
+                    .isEqualTo("/model/detail");
+        }
+
+        private Parameter parameter(Class<?> modelClass) throws NoSuchMethodException {
+            return getClass().getDeclaredMethod("ownedForm", modelClass).getParameters()[0];
+        }
+
+        @SuppressWarnings("unused")
+        void ownedForm(@FormData("model") GuardedCustomerForm form) {
+        }
+
+        @SuppressWarnings("unused")
+        void ownedForm(@OwnedBy(CustomerOwnershipGuard.class) @FormData("model") PlainCustomerForm form) {
+        }
+
+        @SuppressWarnings("unused")
+        void ownedForm(@FormData("model") NestedGuardedCustomerForm form) {
+        }
+    }
+
 
     @Nested
     class PostProcessorTest {
@@ -543,6 +630,54 @@ class DeserializationTest {
     @SuppressWarnings("unused")
     void testMethodPostProcessing(@FormData("model") @PostProcessorTestAnnotation PostProcessorTestBean1 bean) {
 
+    }
+
+    private UserContext ownerUserContext(String userId) {
+        var context = mock(UserContext.class);
+        when(context.isAuthenticated()).thenReturn(true);
+        when(context.getUserId()).thenReturn(userId);
+        when(context.getLocale()).thenReturn(Locale.GERMAN);
+        when(context.getZoneId()).thenReturn(ZoneId.of("Europe/Berlin"));
+        return context;
+    }
+
+    private UserContext unauthenticatedUserContext() {
+        var context = mock(UserContext.class);
+        when(context.isAuthenticated()).thenReturn(false);
+        when(context.getLocale()).thenReturn(Locale.GERMAN);
+        when(context.getZoneId()).thenReturn(ZoneId.of("Europe/Berlin"));
+        return context;
+    }
+
+    @OwnedBy(CustomerOwnershipGuard.class)
+    @Data
+    static class GuardedCustomerForm implements CustomerFormContract {
+        private String customerId;
+        private String name;
+    }
+
+    @Data
+    static class PlainCustomerForm implements CustomerFormContract {
+        private String customerId;
+        private String name;
+    }
+
+    @Data
+    static class NestedGuardedCustomerForm implements CustomerFormContract {
+        private String customerId;
+        private String name;
+        private GuardedCustomerForm detail;
+    }
+
+    interface CustomerFormContract {
+        String getCustomerId();
+    }
+
+    public static class CustomerOwnershipGuard implements OwnershipGuard<CustomerFormContract> {
+        @Override
+        public boolean mayAccess(CustomerFormContract value, UserContext userContext) {
+            return "mara".equals(userContext.getUserId()) && "customer-1".equals(value.getCustomerId());
+        }
     }
 
 

@@ -92,10 +92,9 @@ class LocalAuthenticationIntegrationTest {
         void processModelDataRequest_shouldReturnForbidden() {
             FrontendService frontendService = context.getSingleton(FrontendService.class);
 
-            assertThrows(URLForbiddenException.class, () -> frontendService.processModelDataRequest(clientRequest));
+            assertThrows(AccessForbiddenException.class, () -> frontendService.processModelDataRequest(clientRequest));
         }
     }
-
 
     @Nested
     @DisplayName("Local token renewal")

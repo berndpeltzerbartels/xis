@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class URLForbiddenExceptionHandlerTest {
+class AccessForbiddenExceptionHandlerTest {
 
     @Test
     void localLoginIsUsedWhenApplicationProvidesUserInfoService() {
@@ -21,9 +21,9 @@ class URLForbiddenExceptionHandlerTest {
         when(userInfoService.supportsLocalLogin()).thenReturn(true);
         when(appContext.getOptionalSingleton(UserInfoService.class)).thenReturn(Optional.of(userInfoService));
 
-        var handler = new URLForbiddenExceptionHandler(noExternalIdps(), appContext);
+        var handler = new AccessForbiddenExceptionHandler(noExternalIdps(), appContext);
 
-        var response = handler.handleException(null, new Object[0], new URLForbiddenException("/protected.html?mode=edit"));
+        var response = handler.handleException(null, new Object[0], new AccessForbiddenException("/protected.html?mode=edit"));
 
         assertThat(response.getStatusCode()).isEqualTo(401);
         assertThat(response.getHeader("Location")).isEqualTo("/login.html?redirect_uri=%2Fprotected.html%3Fmode%3Dedit");
@@ -37,9 +37,9 @@ class URLForbiddenExceptionHandlerTest {
         when(appContext.getOptionalSingleton(UserInfoService.class)).thenReturn(Optional.of(userInfoService));
 
         var externalIdp = externalIdp("https://idp.example/login");
-        var handler = new URLForbiddenExceptionHandler(externalIdps(externalIdp), appContext);
+        var handler = new AccessForbiddenExceptionHandler(externalIdps(externalIdp), appContext);
 
-        var response = handler.handleException(null, new Object[0], new URLForbiddenException("/protected.html"));
+        var response = handler.handleException(null, new Object[0], new AccessForbiddenException("/protected.html"));
 
         assertThat(response.getStatusCode()).isEqualTo(401);
         assertThat(response.getHeader("Location")).isEqualTo("/login.html?redirect_uri=%2Fprotected.html");
@@ -54,9 +54,9 @@ class URLForbiddenExceptionHandlerTest {
 
         var firstIdp = externalIdp("https://first-idp.example/login");
         var secondIdp = externalIdp("https://second-idp.example/login");
-        var handler = new URLForbiddenExceptionHandler(externalIdps(firstIdp, secondIdp), appContext);
+        var handler = new AccessForbiddenExceptionHandler(externalIdps(firstIdp, secondIdp), appContext);
 
-        var response = handler.handleException(null, new Object[0], new URLForbiddenException("/protected.html"));
+        var response = handler.handleException(null, new Object[0], new AccessForbiddenException("/protected.html"));
 
         assertThat(response.getStatusCode()).isEqualTo(401);
         assertThat(response.getHeader("Location")).isEqualTo("/login.html?redirect_uri=%2Fprotected.html");
@@ -68,9 +68,9 @@ class URLForbiddenExceptionHandlerTest {
         when(appContext.getOptionalSingleton(UserInfoService.class)).thenReturn(Optional.empty());
 
         var externalIdp = externalIdp("https://idp.example/login");
-        var handler = new URLForbiddenExceptionHandler(externalIdps(externalIdp), appContext);
+        var handler = new AccessForbiddenExceptionHandler(externalIdps(externalIdp), appContext);
 
-        var response = handler.handleException(null, new Object[0], new URLForbiddenException("/protected.html"));
+        var response = handler.handleException(null, new Object[0], new AccessForbiddenException("/protected.html"));
 
         assertThat(response.getStatusCode()).isEqualTo(401);
         assertThat(response.getHeader("Location")).isEqualTo("https://idp.example/login?redirect=%2Fprotected.html");
@@ -84,9 +84,9 @@ class URLForbiddenExceptionHandlerTest {
         when(appContext.getOptionalSingleton(UserInfoService.class)).thenReturn(Optional.of(userInfoService));
 
         var externalIdp = externalIdp("https://idp.example/login");
-        var handler = new URLForbiddenExceptionHandler(externalIdps(externalIdp), appContext);
+        var handler = new AccessForbiddenExceptionHandler(externalIdps(externalIdp), appContext);
 
-        var response = handler.handleException(null, new Object[0], new URLForbiddenException("/protected.html"));
+        var response = handler.handleException(null, new Object[0], new AccessForbiddenException("/protected.html"));
 
         assertThat(response.getStatusCode()).isEqualTo(401);
         assertThat(response.getHeader("Location")).isEqualTo("https://idp.example/login?redirect=%2Fprotected.html");
@@ -99,9 +99,9 @@ class URLForbiddenExceptionHandlerTest {
 
         var firstIdp = externalIdp("https://first-idp.example/login");
         var secondIdp = externalIdp("https://second-idp.example/login");
-        var handler = new URLForbiddenExceptionHandler(externalIdps(firstIdp, secondIdp), appContext);
+        var handler = new AccessForbiddenExceptionHandler(externalIdps(firstIdp, secondIdp), appContext);
 
-        var response = handler.handleException(null, new Object[0], new URLForbiddenException("/protected.html?mode=edit"));
+        var response = handler.handleException(null, new Object[0], new AccessForbiddenException("/protected.html?mode=edit"));
 
         assertThat(response.getStatusCode()).isEqualTo(401);
         assertThat(response.getHeader("Location")).isEqualTo("/login.html?redirect_uri=%2Fprotected.html%3Fmode%3Dedit");

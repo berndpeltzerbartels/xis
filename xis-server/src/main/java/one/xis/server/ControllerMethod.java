@@ -5,7 +5,9 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import one.xis.*;
 import one.xis.auth.AuthenticationException;
-import one.xis.auth.URLForbiddenException;
+import one.xis.auth.AuthorizationException;
+import one.xis.auth.AccessForbiddenException;
+import one.xis.deserialize.AccessDeniedError;
 import one.xis.deserialize.MainDeserializer;
 import one.xis.deserialize.PostProcessingResults;
 import one.xis.http.HttpRequest;
@@ -89,7 +91,7 @@ class ControllerMethod {
         var postProcessingResults = new PostProcessingResults();
         var args = prepareArgs(method, request, postProcessingResults, requestScope);
         if (postProcessingResults.authenticate()) {
-            // TODO
+            throwAccessDenied(postProcessingResults);
         }
         var controllerMethodResult = new ControllerMethodResult();
         controllerMethodResultMapper.mapRequestToResult(request, controllerMethodResult);
@@ -103,8 +105,8 @@ class ControllerMethod {
         } catch (InvocationTargetException e) {
             if (e.getCause() instanceof AuthenticationException) {
                 throw (AuthenticationException) e.getCause();
-            } else if (e.getCause() instanceof URLForbiddenException) {
-                throw (URLForbiddenException) e.getCause();
+            } else if (e.getCause() instanceof AccessForbiddenException) {
+                throw (AccessForbiddenException) e.getCause();
             } else {
                 log.error("Error invoking controller method: " + method.getName(), e);
                 throw new RuntimeException("Error invoking controller method: " + method.getName(), e);
@@ -156,5 +158,17 @@ class ControllerMethod {
             args[i] = controllerMethodParameters[i].prepareParameter(request, postProcessingResults, requestScope);
         }
         return args;
+    }
+
+    private void throwAccessDenied(PostProcessingResults postProcessingResults) {
+        var accessDenied = postProcessingResults.postProcessingResults(AccessDeniedError.class).stream().findFirst();
+        if (accessDenied.isEmpty()) {
+            throw new AuthenticationException();
+        }
+        var error = accessDenied.get();
+        if (error.isAuthenticationRequired()) {
+            throw new AuthenticationException(error.getMessage());
+        }
+        throw new AuthorizationException(error.getMessage());
     }
 }

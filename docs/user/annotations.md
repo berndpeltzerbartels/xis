@@ -24,6 +24,7 @@ and [Security](security.md) for complete examples.
 | `@DefaultHtmlFile` | Defines a default template file for a package or type. |
 | `@Authenticated` | Protects a page, frontlet, action, or action DTO by login without requiring a named role. See [Security](security.md). |
 | `@Roles` | Protects a page or frontlet by role. See [Security](security.md). |
+| `@OwnedBy` | Runs an application-defined ownership guard for a submitted DTO. See [Security](security.md#ownership-checks). |
 | `@RefreshOnUpdateEvents` | Refreshes a page or frontlet when one of the configured update events is fired. See [Events](events.md). |
 | `@JavascriptExtension` | Adds a JavaScript extension class for advanced client behavior. Most applications should use the classpath extension file described in [Custom JavaScript](advanced/custom-javascript.md). |
 | `@CssFile` | Adds a CSS file for a page or component. |
@@ -121,6 +122,7 @@ purpose.
 | `@LocalDatabase` | Injects browser-side database state. This is an advanced client-state feature. |
 | `@ClientId` | Injects the browser client id. |
 | `@UserId` | Injects the authenticated user id. |
+| `@OwnedBy` | Runs an application-defined ownership guard for a submitted DTO, parameter, field, or record component. See [Security](security.md#ownership-checks). |
 | `@UseFormatter` | Selects a formatter for converting form values between strings and Java values. |
 | `@Mandatory` | Requires a value. |
 | `@AllElementsMandatory` | Requires all elements of an array or collection value. |

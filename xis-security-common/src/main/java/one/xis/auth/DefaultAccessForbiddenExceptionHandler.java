@@ -7,9 +7,9 @@ import one.xis.http.ResponseEntity;
 import java.lang.reflect.Method;
 
 @DefaultComponent
-class DefaultURLForbiddenExceptionHandler implements ControllerExceptionHandler<URLForbiddenException> {
+class DefaultAccessForbiddenExceptionHandler implements ControllerExceptionHandler<AccessForbiddenException> {
     @Override
-    public ResponseEntity<?> handleException(Method method, Object[] args, URLForbiddenException exception) {
+    public ResponseEntity<?> handleException(Method method, Object[] args, AccessForbiddenException exception) {
         return ResponseEntity.status(401).body("Authentication failed: " + exception.getMessage());
     }
 }

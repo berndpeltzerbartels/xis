@@ -13,13 +13,13 @@ import java.nio.charset.StandardCharsets;
 
 @Component
 @RequiredArgsConstructor
-class URLForbiddenExceptionHandler implements ControllerExceptionHandler<URLForbiddenException> {
+class AccessForbiddenExceptionHandler implements ControllerExceptionHandler<AccessForbiddenException> {
 
     private final ExternalIDPServices externalIDPServices;
     private final AppContext appContext;
 
     @Override
-    public ResponseEntity<?> handleException(Method method, Object[] args, URLForbiddenException exception) {
+    public ResponseEntity<?> handleException(Method method, Object[] args, AccessForbiddenException exception) {
         return ResponseEntity.status(401)
                 .addHeader("Location", loginUrl(exception.getUrl()))
                 .body("Authentication failed: " + exception.getMessage());

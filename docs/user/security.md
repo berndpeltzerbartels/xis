@@ -349,6 +349,79 @@ public record ArticleForm(String title, String body) {
 
 The `save` action requires both `USER` and `DATA_EDITOR`: `USER` from the page and `DATA_EDITOR` from the DTO.
 
+## Ownership Checks
+
+Use `@OwnedBy` when submitted form/action data references an object that must belong to the currently authenticated
+user. XIS runs the configured `OwnershipGuard` after the object has been deserialized and before the action method is
+called. The guard receives the submitted object and the trusted `UserContext`; the application owns the actual lookup or
+policy decision.
+
+```java
+package example.security;
+
+import one.xis.Action;
+import one.xis.FormData;
+import one.xis.OwnedBy;
+import one.xis.OwnershipGuard;
+import one.xis.Page;
+import one.xis.Roles;
+import one.xis.UserContext;
+import one.xis.context.Component;
+
+@Component
+public class CustomerOwnershipGuard implements OwnershipGuard<CustomerForm> {
+
+    private final CustomerService customerService;
+
+    public CustomerOwnershipGuard(CustomerService customerService) {
+        this.customerService = customerService;
+    }
+
+    @Override
+    public boolean mayAccess(CustomerForm form, UserContext userContext) {
+        return customerService.customerBelongsToUser(form.customerId(), userContext.getUserId());
+    }
+}
+
+@Page("/customers.html")
+@Roles("USER")
+public class CustomerPage {
+
+    @Action
+    void save(@FormData("customer") CustomerForm form) {
+        customerService.save(form);
+    }
+}
+
+@OwnedBy(CustomerOwnershipGuard.class)
+public record CustomerForm(String customerId, String name) {
+}
+```
+
+In Spring applications, make the guard a Spring bean, for example with `org.springframework.stereotype.Component`,
+instead of `one.xis.context.Component`.
+
+Ownership violations behave like role violations. The action is not called. In a frontend request XIS turns the
+security failure into the same login redirect flow used by `@Roles` and `@Authenticated`, so the browser opens the login
+page with the current page as `redirect_uri`.
+
+`@OwnedBy` can be placed on the DTO class or on the concrete action parameter:
+
+```java
+@Action
+void save(@OwnedBy(CustomerOwnershipGuard.class)
+          @FormData("customer") CustomerForm form) {
+    customerService.save(form);
+}
+```
+
+Nested objects are checked individually while they are deserialized. If a nested object or field has its own `@OwnedBy`,
+that nested object must also pass its guard.
+
+XIS does not cache ownership decisions. The framework does not know which fields identify the protected resource, and
+all other submitted values may legally change. If a guard needs caching, keep that cache inside the application code
+where the stable resource id and operation are known.
+
 ## External IDP
 
 External identity providers are supported through OpenID Connect. XIS uses the provider discovery document at

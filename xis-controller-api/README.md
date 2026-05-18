@@ -334,6 +334,19 @@ still requires an authenticated user but no named role; prefer `@Authenticated` 
 | --- | --- | --- | --- | --- |
 | `value` | `String[]` | No | `{}` | Required role names. Empty is kept as authenticated-only compatibility. |
 
+### `@OwnedBy`
+
+`@OwnedBy` connects a submitted object to an application-defined `OwnershipGuard`. XIS calls the guard after
+deserialization and before the controller action is invoked. The guard receives the deserialized object and the trusted
+`UserContext`, so application code can load the referenced resource and decide whether the current user may access it.
+
+Ownership violations follow the same security response path as `@Roles`: the controller action is not called and the
+frontend is redirected to login.
+
+| Attribute | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `value` | `Class<? extends OwnershipGuard<?>>` | Yes | none | Guard used for the ownership decision. |
+
 ### `@RefreshOnUpdateEvents`
 
 `@RefreshOnUpdateEvents` declares event keys that should refresh a page or frontlet when the server publishes matching
@@ -583,6 +596,7 @@ return new FrontletResponse(ProductFrontlet.class)
 | `@UserId` | parameter | none | Injects the authenticated user id. |
 | `@Authenticated` | class, method | none | Declares authenticated-only access. |
 | `@Roles` | class, method | none | Declares required roles. |
+| `@OwnedBy` | class, parameter, field, record component | `value` | Runs an ownership guard for a submitted object. |
 | `@RefreshOnUpdateEvents` | class | none | Declares refresh event keys this controller reacts to. |
 | `@LocalStorage` | parameter | `value` | Binds browser `localStorage`. |
 | `@SessionStorage` | parameter | `value` | Binds browser `sessionStorage`. |
