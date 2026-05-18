@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:xis="http://xis.one/schema" lang="en">
+<head>
+    <title>File Upload</title>
+</head>
+<body>
+<xis:form binding="upload" id="upload-form">
+    <input type="text" xis:binding="description" id="description"/>
+    <input type="file" xis:binding="attachment" xis:error-class="error" id="attachment"/>
+    <span xis:message-for="attachment" id="attachment-message"></span>
+    <input type="file" xis:binding="secondAttachment" id="secondAttachment"/>
+    <button xis:action="save" id="save" type="submit">Save</button>
+</xis:form>
+<div id="result">${result}</div>
+</body>
+</html>

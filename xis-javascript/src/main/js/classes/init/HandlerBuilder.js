@@ -190,7 +190,7 @@ class HandlerBuilder {
             case 'radio':
                 return new RadioTagHandler(element);
             case 'file':
-                return null; // TODO new FileInputHandler(element);
+                return new FileInputHandler(element);
             default:
                 return new InputTagHandler(element);
         }

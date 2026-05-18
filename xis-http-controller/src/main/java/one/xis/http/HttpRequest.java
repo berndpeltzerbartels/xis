@@ -1,6 +1,9 @@
 package one.xis.http;
 
+import one.xis.UploadedFile;
+
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -45,6 +48,19 @@ public interface HttpRequest {
     HttpMethod getHttpMethod();
 
     Map<String, String> getFormParameters();
+
+    default Map<String, List<UploadedFile>> getUploadedFiles() {
+        return Map.of();
+    }
+
+    default List<UploadedFile> getUploadedFiles(String fieldName) {
+        return getUploadedFiles().getOrDefault(fieldName, List.of());
+    }
+
+    default UploadedFile getUploadedFile(String fieldName) {
+        List<UploadedFile> files = getUploadedFiles(fieldName);
+        return files.isEmpty() ? null : files.get(0);
+    }
 
     Locale getLocale();
 

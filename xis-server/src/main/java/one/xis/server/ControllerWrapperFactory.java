@@ -23,6 +23,7 @@ class ControllerWrapperFactory {
     private final MainDeserializer deserializer;
     private final ControllerMethodResultMapper controllerMethodResultMapper;
     private final ControllerResultMapper controllerResultMapper;
+    private final UploadConfiguration uploadConfiguration;
 
     <W extends ControllerWrapper> W createControllerWrapper(@NonNull String id, @NonNull Object controller, Class<W> wrapperClass) {
         try {
@@ -141,7 +142,7 @@ class ControllerWrapperFactory {
     private ControllerMethod createControllerMethod(Method method) {
         method.setAccessible(true);
         try {
-            return new ControllerMethod(method, deserializer, controllerMethodResultMapper);
+            return new ControllerMethod(method, deserializer, controllerMethodResultMapper, uploadConfiguration);
         } catch (Exception e) {
             throw new RuntimeException("Failed to initialize " + method, e);
         }

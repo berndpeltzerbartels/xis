@@ -4,10 +4,18 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.QueryStringDecoder;
+import io.netty.handler.codec.http.multipart.Attribute;
+import io.netty.handler.codec.http.multipart.DefaultHttpDataFactory;
+import io.netty.handler.codec.http.multipart.FileUpload;
+import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
+import io.netty.handler.codec.http.multipart.InterfaceHttpData;
+import one.xis.UploadConfiguration;
+import one.xis.UploadedFile;
 import one.xis.http.ContentType;
 import one.xis.http.HttpMethod;
 import one.xis.http.HttpRequest;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -17,15 +25,18 @@ public final class NettyHttpRequest implements HttpRequest {
     private final FullHttpRequest request;
     private final ChannelHandlerContext ctx;
     private final QueryStringDecoder queryStringDecoder;
+    private final UploadConfiguration uploadConfiguration;
 
 
     private String cachedBody;
     private Map<String, String> queryParameters;
     private Map<String, String> formParameters;
+    private Map<String, List<UploadedFile>> uploadedFiles;
 
-    public NettyHttpRequest(FullHttpRequest request, ChannelHandlerContext ctx) {
+    public NettyHttpRequest(FullHttpRequest request, ChannelHandlerContext ctx, UploadConfiguration uploadConfiguration) {
         this.request = Objects.requireNonNull(request, "request");
         this.ctx = Objects.requireNonNull(ctx, "ctx");
+        this.uploadConfiguration = Objects.requireNonNull(uploadConfiguration, "uploadConfiguration");
         queryStringDecoder = new QueryStringDecoder(request.uri(), StandardCharsets.UTF_8);
     }
 
@@ -85,15 +96,25 @@ public final class NettyHttpRequest implements HttpRequest {
 
     @Override
     public byte[] getBody() {
-        return request.content().array();
+        byte[] bytes = new byte[request.content().readableBytes()];
+        request.content().getBytes(request.content().readerIndex(), bytes);
+        return bytes;
     }
 
     @Override
     public Map<String, String> getFormParameters() {
         if (formParameters == null) {
-            formParameters = parseFormParametersIfPresent();
+            parseBodyDataIfPresent();
         }
         return formParameters;
+    }
+
+    @Override
+    public Map<String, List<UploadedFile>> getUploadedFiles() {
+        if (uploadedFiles == null) {
+            parseBodyDataIfPresent();
+        }
+        return uploadedFiles;
     }
 
     @Override
@@ -149,21 +170,26 @@ public final class NettyHttpRequest implements HttpRequest {
         return Collections.unmodifiableMap(flat);
     }
 
-    private Map<String, String> parseFormParametersIfPresent() {
-        // Only parse form params when content-type is actually form-urlencoded.
+    private void parseBodyDataIfPresent() {
+        formParameters = Map.of();
+        uploadedFiles = Map.of();
         String ct = request.headers().get("Content-Type");
         if (ct == null) {
-            return Map.of();
+            return;
         }
 
         String lower = ct.toLowerCase(Locale.ROOT);
         boolean isFormUrlEncoded = lower.startsWith(ContentType.FORM_URLENCODED.getValue());
-        if (!isFormUrlEncoded) {
-            return Map.of();
+        if (isFormUrlEncoded) {
+            formParameters = parseFormUrlEncodedParameters();
+            return;
         }
+        if (lower.startsWith("multipart/form-data")) {
+            parseMultipartData();
+        }
+    }
 
-        // Body is small/aggregated (your pipeline uses HttpObjectAggregator).
-        // If you later switch to streaming, this logic must be changed.
+    private Map<String, String> parseFormUrlEncodedParameters() {
         String body = getBodyAsString();
         if (body.isBlank()) {
             return Map.of();
@@ -182,5 +208,33 @@ public final class NettyHttpRequest implements HttpRequest {
             flat.put(e.getKey(), (values == null || values.isEmpty()) ? null : values.get(0));
         }
         return Collections.unmodifiableMap(flat);
+    }
+
+    private void parseMultipartData() {
+        Map<String, String> textParts = new HashMap<>();
+        Map<String, List<UploadedFile>> files = new HashMap<>();
+        var factory = new DefaultHttpDataFactory(false);
+        HttpPostRequestDecoder decoder = null;
+        try {
+            decoder = new HttpPostRequestDecoder(factory, request);
+            for (InterfaceHttpData data : decoder.getBodyHttpDatas()) {
+                if (data instanceof Attribute attribute) {
+                    textParts.put(attribute.getName(), attribute.getValue());
+                } else if (data instanceof FileUpload upload && upload.isCompleted()) {
+                    byte[] bytes = upload.get();
+                    var uploadedFile = new UploadedFile(upload.getName(), upload.getFilename(), upload.getContentType(), bytes);
+                    files.computeIfAbsent(upload.getName(), ignored -> new ArrayList<>()).add(uploadedFile);
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Could not parse multipart request", e);
+        } finally {
+            if (decoder != null) {
+                decoder.destroy();
+            }
+        }
+        formParameters = Collections.unmodifiableMap(textParts);
+        uploadedFiles = files.entrySet().stream()
+                .collect(java.util.stream.Collectors.toUnmodifiableMap(Map.Entry::getKey, entry -> List.copyOf(entry.getValue())));
     }
 }

@@ -30,12 +30,14 @@ class ControllerMethod {
     protected final MainDeserializer deserializer;
     protected final ControllerMethodResultMapper controllerMethodResultMapper;
     protected final ControllerMethodParameter[] controllerMethodParameters;
+    protected final UploadConfiguration uploadConfiguration;
     private Collection<String> updateEventKeys = new HashSet<>();
 
-    ControllerMethod(Method method, MainDeserializer deserializer, ControllerMethodResultMapper controllerMethodResultMapper) {
+    ControllerMethod(Method method, MainDeserializer deserializer, ControllerMethodResultMapper controllerMethodResultMapper, UploadConfiguration uploadConfiguration) {
         this.method = method;
         this.deserializer = deserializer;
         this.controllerMethodResultMapper = controllerMethodResultMapper;
+        this.uploadConfiguration = uploadConfiguration;
         this.controllerMethodParameters = new ControllerMethodParameter[method.getParameterCount()];
         var positionalParameterIndex = 0;
         for (var i = 0; i < method.getParameterCount(); i++) {
@@ -44,7 +46,7 @@ class ControllerMethod {
             if (isImplicitPositionalParameter(parameter)) {
                 assignedPositionalIndex = positionalParameterIndex++;
             }
-            controllerMethodParameters[i] = new ControllerMethodParameter(method, parameter, deserializer, i, assignedPositionalIndex);
+            controllerMethodParameters[i] = new ControllerMethodParameter(method, parameter, deserializer, i, assignedPositionalIndex, uploadConfiguration);
         }
         if (method.isAnnotationPresent(Action.class)) {
             this.updateEventKeys.addAll(Arrays.asList(method.getAnnotation(Action.class).updateEventKeys()));
@@ -69,6 +71,7 @@ class ControllerMethod {
                 || parameter.getType().equals(RequestContext.class)
                 || UserContext.class.isAssignableFrom(parameter.getType())
                 || parameter.isAnnotationPresent(FormData.class)
+                || parameter.isAnnotationPresent(Upload.class)
                 || parameter.isAnnotationPresent(UserId.class)
                 || parameter.isAnnotationPresent(ClientId.class)
                 || parameter.isAnnotationPresent(QueryParameter.class)

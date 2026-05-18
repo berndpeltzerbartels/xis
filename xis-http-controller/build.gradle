@@ -27,6 +27,7 @@ def assertjVersion = "3.16.1"
 
 dependencies {
 
+    api(project(":xis-controller-api"))
     implementation(project(":xis-context"))
     implementation(project(":xis-util"))
     runtimeOnly(project(":xis-gson"))

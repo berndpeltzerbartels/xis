@@ -117,11 +117,11 @@ class HttpClient extends Client {
 
     }
 
-    async formAction(resolvedURL, frontletId, formData, action, formBindigKey, formBindingParameters) {
+    async formAction(resolvedURL, frontletId, formData, action, formBindigKey, formBindingParameters, uploads) {
         app.messageHandler.clearMessages();
         const request = this.createFormRequest(resolvedURL, frontletId, formData, action, formBindigKey, formBindingParameters);
         try {
-            const response = await this.httpConnector.post(this.resolveFormUri('/xis/form/action', resolvedURL, frontletId), request, {});
+            const response = await this.httpConnector.post(this.resolveFormUri('/xis/form/action', resolvedURL, frontletId), request, {}, uploads);
             return this.handleResponse(response);
         } catch (error) {
             return this.handleRequestError('Error during HTTP request to /xis/form/action', error);

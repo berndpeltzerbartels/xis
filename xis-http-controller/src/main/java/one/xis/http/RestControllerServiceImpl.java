@@ -3,6 +3,9 @@ package one.xis.http;
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 import lombok.extern.java.Log;
+import one.xis.Upload;
+import one.xis.UploadConfiguration;
+import one.xis.UploadedFile;
 import one.xis.context.*;
 import one.xis.utils.lang.ClassUtils;
 import one.xis.utils.lang.FieldUtil;
@@ -13,6 +16,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.logging.Level;
 
@@ -37,6 +41,9 @@ public class RestControllerServiceImpl implements RestControllerService {
 
     @Inject
     private EventEmitter eventEmitter;
+
+    @Inject
+    private UploadConfiguration uploadConfiguration;
 
     private Map<MethodMatcher, Method> methods;
     private Map<Class<? extends Exception>, ControllerExceptionHandler<?>> exceptionHandlerMap;
@@ -153,6 +160,9 @@ public class RestControllerServiceImpl implements RestControllerService {
     private void doControllerInvocation(HttpRequest request, HttpResponse response) {
         eventEmitter.emitEvent(new BeforeRequestProcessingEvent(request));
         try {
+            if (request.getContentType() == ContentType.MULTIPART_FORM_DATA) {
+                UploadLimits.validateRequestSize(request, uploadConfiguration);
+            }
             Optional<ControllerInvocationContext> ctxOpt = findInvocationContext(request);
             if (ctxOpt.isPresent()) {
                 doInvokeController(ctxOpt.get(), request, response);
@@ -164,6 +174,10 @@ public class RestControllerServiceImpl implements RestControllerService {
             if (publicResourceHandler == null || !publicResourceHandler.handle(request, response)) {
                 response.setStatusCode(404);
             }
+        } catch (UploadLimitExceededException e) {
+            response.setStatusCode(413);
+            response.setContentType(ContentType.TEXT_PLAIN);
+            response.setBody(e.getMessage());
         } finally {
             eventEmitter.emitEvent(new RequestProcessedEvent(request, response));
         }
@@ -287,6 +301,9 @@ public class RestControllerServiceImpl implements RestControllerService {
         if (param.isAnnotationPresent(RequestBody.class)) {
             return handleRequestBody(param, request);
         }
+        if (param.isAnnotationPresent(Upload.class)) {
+            return handleUpload(param, request);
+        }
         if (param.isAnnotationPresent(RequestHeader.class)) {
             return handleHeader(param, request);
         }
@@ -350,7 +367,10 @@ public class RestControllerServiceImpl implements RestControllerService {
         Class<?> targetType = param.getType();
 
         // Read once to avoid repeated allocations.
-        String bodyString = (request.getContentLength() == 0) ? "" : request.getBodyAsString();
+        String bodyString = request.getFormParameters().get("xis-request");
+        if (bodyString == null) {
+            bodyString = (request.getContentLength() == 0) ? "" : request.getBodyAsString();
+        }
 
         return switch (bodyType) {
             case JSON -> handleJsonBody(targetType, bodyString);
@@ -358,6 +378,45 @@ public class RestControllerServiceImpl implements RestControllerService {
             case FORM_URLENCODED -> handleFormUrlEncodedBody(targetType, request.getFormParameters());
             default -> throw new UnsupportedOperationException("Unsupported BodyType: " + bodyType);
         };
+    }
+
+    private Object handleUpload(Parameter param, HttpRequest request) {
+        String fieldName = uploadFieldName(param.getAnnotation(Upload.class), param.getName());
+        validateUploadSize(param.getAnnotation(Upload.class), request.getUploadedFiles(fieldName));
+        return convertUploadValue(param.getType(), request.getUploadedFiles(fieldName));
+    }
+
+    private String uploadFieldName(Upload upload, String fallback) {
+        if (upload.value() != null && !upload.value().isBlank()) {
+            return upload.value();
+        }
+        return fallback;
+    }
+
+    private void validateUploadSize(Upload upload, List<UploadedFile> files) {
+        long maxSize = upload.maxSize() >= 0 ? upload.maxSize() : uploadConfiguration.getMaxFileSize();
+        for (UploadedFile file : files) {
+            if (file.getSize() > maxSize) {
+                throw new UploadLimitExceededException("Uploaded file '" + file.getFileName() + "' exceeds the maximum size of " + maxSize + " bytes");
+            }
+        }
+    }
+
+    private Object convertUploadValue(Class<?> targetType, List<UploadedFile> files) {
+        if (List.class.isAssignableFrom(targetType)) {
+            return files;
+        }
+        UploadedFile file = files.isEmpty() ? null : files.get(0);
+        if (UploadedFile.class.equals(targetType)) {
+            return file;
+        }
+        if (byte[].class.equals(targetType)) {
+            return file == null ? null : file.getBytes();
+        }
+        if (String.class.equals(targetType)) {
+            return file == null ? null : new String(file.getBytes(), StandardCharsets.UTF_8);
+        }
+        throw new IllegalArgumentException("@Upload supports only UploadedFile, List<UploadedFile>, byte[], and String. Unsupported type: " + targetType.getName());
     }
 
     private Object handleJsonBody(Class<?> targetType, String bodyString) {

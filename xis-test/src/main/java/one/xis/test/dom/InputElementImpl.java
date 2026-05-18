@@ -11,6 +11,7 @@ public class InputElementImpl extends ElementImpl implements InputElement {
     private String value;
     private boolean checked;
     private String type;
+    private final TestFileList files = new TestFileList();
 
     public InputElementImpl() {
         super("input");
@@ -25,6 +26,17 @@ public class InputElementImpl extends ElementImpl implements InputElement {
         this.value = value;
         // Fire change event when value is set programmatically (like user typing)
         fireEvent("change", new Event("change"));
+    }
+
+    @Override
+    public void setFile(String fileName, String contentType, byte[] bytes) {
+        this.files.setFile(new TestFile(fileName, contentType, bytes));
+        fireEvent("change", new Event("change"));
+    }
+
+    @Override
+    public void setFile(String fileName, byte[] bytes) {
+        setFile(fileName, "application/octet-stream", bytes);
     }
 
     private void onClick() {

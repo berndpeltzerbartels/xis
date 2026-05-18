@@ -159,6 +159,95 @@ Element syntax:
 
 If the user selects `new` and `sale`, the action receives both values in `ProductForm.tags`.
 
+## File Uploads
+
+Use a normal file input in the form and mark the matching form field with `@Upload`. XIS switches the submitted request
+to `multipart/form-data`, binds the uploaded file to the form object, and runs upload size checks before the action
+method is called.
+
+```java
+package example.documents;
+
+import one.xis.Action;
+import one.xis.FormData;
+import one.xis.Page;
+import one.xis.Upload;
+import one.xis.UploadedFile;
+
+@Page("/documents/new.html")
+public class NewDocumentPage {
+
+    @FormData("document")
+    public DocumentForm document() {
+        return new DocumentForm();
+    }
+
+    @Action
+    public void save(@FormData("document") DocumentForm document) {
+        documentService.store(document.title, document.attachment);
+    }
+
+    public static class DocumentForm {
+        public String title;
+
+        @Upload(maxSize = 5 * 1024 * 1024)
+        public UploadedFile attachment;
+    }
+}
+```
+
+```html
+<form xis:binding="document">
+    <input type="text" xis:binding="title"/>
+    <input type="file" xis:binding="attachment"/>
+    <span xis:message-for="attachment"></span>
+    <button type="submit" xis:action="save">Save</button>
+</form>
+```
+
+Element syntax:
+
+```html
+<xis:form binding="document">
+    <xis:input type="text" binding="title"/>
+    <xis:input type="file" binding="attachment"/>
+    <xis:message message-for="attachment"/>
+    <xis:submit action="save">Save</xis:submit>
+</xis:form>
+```
+
+`@Upload` supports `UploadedFile`, `List<UploadedFile>`, `byte[]`, and `String`. `String` uploads are decoded as UTF-8.
+Use `List<UploadedFile>` when the input allows several selected files.
+
+Upload limits deliberately have two layers:
+
+- `UploadConfiguration.getMaxRequestSize()` is the early HTTP limit for the complete multipart request. It protects the
+  runtime before controller validation starts. When this limit is exceeded, the request can be rejected with HTTP 413.
+- `UploadConfiguration.getMaxFileSize()` is the default validation limit for one uploaded file.
+- `@Upload(maxSize = ...)` overrides the per-file validation limit for one field or controller parameter.
+
+For user-friendly validation messages, configure the request limit high enough for the largest form submission that
+should still reach validation. Keep it finite: it is still the transport-level protection against oversized requests.
+
+```java
+import one.xis.UploadConfiguration;
+import one.xis.context.Component;
+
+@Component
+public class DocumentUploadConfiguration implements UploadConfiguration {
+
+    @Override
+    public long getMaxFileSize() {
+        return 2 * 1024 * 1024;
+    }
+
+    @Override
+    public long getMaxRequestSize() {
+        return 20 * 1024 * 1024;
+    }
+}
+```
+
 ## Type Conversion
 
 XIS deserializes submitted form values into the Java types used by the `@FormData` object. Empty strings are treated as

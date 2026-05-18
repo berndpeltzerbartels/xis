@@ -11,6 +11,7 @@ class FormHandler extends TagHandler {
         this.type = 'form-handler';
         this.client = client;
         this.formElementHandlers = {};
+        this.fileInputHandlers = [];
         this.globalMessageHandlers = [];
         this.messageHandlers = {};
         if (!formTag.getAttribute('xis:binding')) {
@@ -26,7 +27,7 @@ class FormHandler extends TagHandler {
         var formBindingKey = stripQuery(this.binding);
         var parameters = mergeObjects(this.frontletParameters || {}, formBindingParameters);
         this.resetMessageHandlers();
-        return this.client.formAction(resolvedUrl, this.frontletId(), this.formData(), action, formBindingKey, parameters)
+        return this.client.formAction(resolvedUrl, this.frontletId(), this.formData(), action, formBindingKey, parameters, this.uploads())
             .then(response => this.handleActionResponse(response, this.targetContainerHandler()));
     }
 
@@ -83,6 +84,14 @@ class FormHandler extends TagHandler {
         return data;
     }
 
+    uploads() {
+        const uploads = [];
+        for (const handler of this.fileInputHandlers) {
+            uploads.push(...handler.getUploads());
+        }
+        return uploads;
+    }
+
     frontletId() {
         const handler = this.findParentFrontletContainerHandler();
         if (!handler) {
@@ -108,6 +117,7 @@ class FormHandler extends TagHandler {
         this.frontletParameters = frontletParameters;
         var formBindingKey = stripQuery(this.binding);
         this.formElementHandlers = {};
+        this.fileInputHandlers = [];
         data.validationPath = '/' + formBindingKey;
         this.clearMessageHandlers();
         const descendantPromise = this.refreshDescendantHandlers(data);

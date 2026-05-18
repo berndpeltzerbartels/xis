@@ -119,7 +119,7 @@ class Client {
      * @param {string} binding
      * @returns {Promise<ServerReponse>}
      */
-    formAction(resolvedURL, frontletId, formData, action, formBindigKey, formBindingParameters) {
+    formAction(resolvedURL, frontletId, formData, action, formBindigKey, formBindingParameters, uploads) {
         throw new Error('Not implemented');
     }
 

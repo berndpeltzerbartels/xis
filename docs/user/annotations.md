@@ -115,6 +115,7 @@ purpose.
 | `@QueryParameter("name")` | Reads a query parameter from the current page URL, such as `/orders.html?status=open`. |
 | `@Parameter("name")` | Reads an action, frontlet, or modal parameter supplied by `<xis:parameter>`, `FrontletResponse`, `ModalResponse`, or a frontlet/modal target URL such as `ProductSummary?productId=42`. |
 | `@FormData("name")` | Injects submitted form data into an action method. |
+| `@Upload` | Binds an uploaded multipart file to a form field or controller parameter. |
 | `@SharedValue("name")` | Injects a value produced by another `@SharedValue` method in the same controller processing flow. |
 | `@LocalStorage`, `@SessionStorage`, `@ClientStorage` | Injects browser-side state into an action method parameter. |
 | `@LocalDatabase` | Injects browser-side database state. This is an advanced client-state feature. |
@@ -244,6 +245,7 @@ clients, webhooks, scripts, or integration partners.
 | `@RequestBody` | Injects the request body. |
 | `@RequestHeader`, `@ResponseHeader`, `@CookieValue`, `@BearerToken` | Reads or writes HTTP metadata. |
 | `@UrlParameter`, `one.xis.http.PathVariable` | Reads URL/query data for plain HTTP controllers. |
+| `@Upload` | Reads a multipart file from a plain HTTP controller request. |
 | `@Produces` | Declares the response content type. |
 | `@PublicResources` | Exposes public static resources. |
 

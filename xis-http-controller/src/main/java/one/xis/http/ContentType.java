@@ -4,6 +4,7 @@ public enum ContentType {
     JSON("application/json"),
     JSON_UTF8("application/json; charset=utf-8"),
     FORM_URLENCODED("application/x-www-form-urlencoded"),
+    MULTIPART_FORM_DATA("multipart/form-data"),
     TEXT_PLAIN("text/plain"),
     TEXT_HTML_UTF8("text/html; charset=utf-8"),
     APPLICATION_OCTET_STREAM("application/octet-stream"),
@@ -24,8 +25,11 @@ public enum ContentType {
     }
 
     public static ContentType fromValue(String contentType) {
+        if (contentType == null) {
+            return null;
+        }
         for (ContentType type : ContentType.values()) {
-            if (type.value.equalsIgnoreCase(contentType)) {
+            if (contentType.toLowerCase().startsWith(type.value.toLowerCase())) {
                 return type;
             }
         }

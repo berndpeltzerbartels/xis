@@ -3,11 +3,13 @@ package one.xis.context;
 import one.xis.http.ContentType;
 import one.xis.http.HttpMethod;
 import one.xis.http.HttpRequest;
+import one.xis.UploadedFile;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -19,14 +21,22 @@ public class HttpTestRequest implements HttpRequest {
     private final byte[] body;
     private final Map<String, String> headers;
     private final ContentType contentType;
+    private final Map<String, List<UploadedFile>> uploadedFiles;
 
     public HttpTestRequest(HttpMethod method, String uri, String requestJson, Map<String, String> headers) {
+        this(method, uri, requestJson, headers, Map.of());
+    }
+
+    public HttpTestRequest(HttpMethod method, String uri, String requestJson, Map<String, String> headers, Map<String, List<UploadedFile>> uploadedFiles) {
         this.method = method;
         this.headers = headers != null ? new HashMap<>(headers) : new HashMap<>();
         this.body = requestJson != null ? requestJson.getBytes(StandardCharsets.UTF_8) : new byte[0];
         if (this.getHeader("Content-Type") == null) {
-            this.headers.put("Content-Type", ContentType.JSON_UTF8.getValue());
+            this.headers.put("Content-Type", uploadedFiles == null || uploadedFiles.isEmpty()
+                    ? ContentType.JSON_UTF8.getValue()
+                    : ContentType.MULTIPART_FORM_DATA.getValue());
         }
+        this.uploadedFiles = uploadedFiles == null ? Map.of() : Map.copyOf(uploadedFiles);
         String tempPath = uri;
         int queryIndex = uri.indexOf('?');
         if (queryIndex != -1) {
@@ -37,7 +47,6 @@ public class HttpTestRequest implements HttpRequest {
             this.queryParameters = Map.of();
         }
         this.path = tempPath;
-        // ContentType.fromString wurde in der Enum-Datei zu fromValue geändert
         this.contentType = ContentType.fromValue(getHeader("Content-Type"));
     }
 
@@ -106,7 +115,15 @@ public class HttpTestRequest implements HttpRequest {
         if (contentType == ContentType.FORM_URLENCODED) {
             return Collections.unmodifiableMap(parseUrlEncoded(new String(body, StandardCharsets.UTF_8)));
         }
+        if (contentType == ContentType.MULTIPART_FORM_DATA) {
+            return Map.of("xis-request", new String(body, StandardCharsets.UTF_8));
+        }
         return Map.of();
+    }
+
+    @Override
+    public Map<String, List<UploadedFile>> getUploadedFiles() {
+        return uploadedFiles;
     }
 
     @Override

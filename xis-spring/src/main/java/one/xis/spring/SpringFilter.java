@@ -14,6 +14,8 @@ import one.xis.server.FrontendService;
 import one.xis.server.LocalUrlHolder;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
@@ -27,9 +29,26 @@ class SpringFilter extends HttpFilter {
     private FrontendService frontendService;
     private RestControllerService restControllerService;
     private LocalUrlHolder localUrlHolder;
+    private final StandardServletMultipartResolver multipartResolver = new StandardServletMultipartResolver();
 
     @Override
     protected void doFilter(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain chain) throws IOException, ServletException {
+        MultipartHttpServletRequest multipartRequest = null;
+        HttpServletRequest request = httpServletRequest;
+        if (multipartResolver.isMultipart(httpServletRequest)) {
+            multipartRequest = multipartResolver.resolveMultipart(httpServletRequest);
+            request = multipartRequest;
+        }
+        try {
+            doXisFilter(request, httpServletResponse, chain);
+        } finally {
+            if (multipartRequest != null) {
+                multipartResolver.cleanupMultipart(multipartRequest);
+            }
+        }
+    }
+
+    private void doXisFilter(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain chain) throws IOException, ServletException {
         if (!isInitialized()) {
             httpServletResponse.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
             return;

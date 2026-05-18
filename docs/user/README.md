@@ -26,6 +26,7 @@ Read these chapters to build normal XIS applications:
 - [Navigation and responses](navigation.md)
 - [Routers](routers.md)
 - [Forms and validation](forms-and-validation.md)
+- [File uploads](forms-and-validation.md#file-uploads)
 - [Modals](modals.md)
 - [SQL](sql.md)
 - [MongoDB](mongodb.md)
