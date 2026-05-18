@@ -35,11 +35,17 @@ public class ControllerWrapper {
     private ControllerResultMapper controllerResultMapper;
 
     void invokeGetModelMethods(ClientRequest request, ControllerResult controllerResult) {
+        invokeGetModelMethods(request, controllerResult, Set.of());
+    }
+
+    void invokeGetModelMethods(ClientRequest request, ControllerResult controllerResult, Set<String> modelDataKeysToKeep) {
         SecurityUtil.checkRoles(controller.getClass(), UserContextImpl.getInstance());
         var methodsToExecute = new ArrayList<>(modelMethods);
         methodsToExecute.addAll(titleOnlyMethods);
         var methods = MethodSorter.sortMethods(methodsToExecute, sharedValueMethods);
-        methods.forEach(m -> invokeModelDataMethod(request, controllerResult, m));
+        methods.stream()
+                .filter(m -> !m.getModelDataKey().map(modelDataKeysToKeep::contains).orElse(false))
+                .forEach(m -> invokeModelDataMethod(request, controllerResult, m));
     }
 
     void invokeFormDataMethods(ClientRequest request, ControllerResult controllerResult) {

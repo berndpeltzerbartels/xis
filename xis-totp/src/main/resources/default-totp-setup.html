@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:xis="http://xis.one/html">
+<head>
+    <title>${totpSetupTitle}</title>
+</head>
+<body>
+<main class="container">
+    <h1>${totpSetupTitle}</h1>
+    <p>${totpSetupIntro}</p>
+
+    <form xis:binding="totpSetup" xis:if="${!totpSetupResult.hasQrCode}">
+        <div xis:if="${totpSetupResult.hasError}" class="error">${totpSetupResult.error}</div>
+
+        <div class="form-group">
+            <label for="totp-setup-username">${totpSetupUsernameLabel}</label>
+            <input xis:binding="username" type="text" id="totp-setup-username" autocomplete="username"/>
+        </div>
+
+        <div class="form-group">
+            <label for="totp-setup-password">${totpSetupPasswordLabel}</label>
+            <input xis:binding="password" type="password" id="totp-setup-password" autocomplete="current-password"/>
+        </div>
+
+        <button xis:action="setup" type="submit" id="totp-setup-button">${totpSetupButtonLabel}</button>
+    </form>
+
+    <section xis:if="${totpSetupResult.hasQrCode}">
+        <h2>${totpSetupQrTitle} ${totpSetupResult.userId}</h2>
+        <p>${totpSetupQrInstructions}</p>
+        <img src="${totpSetupResult.qrCodeDataUrl}" alt="TOTP QR code"/>
+    </section>
+
+    <nav>
+        <a href="/login.html">${totpSetupLoginLink}</a>
+    </nav>
+</main>
+</body>
+</html>

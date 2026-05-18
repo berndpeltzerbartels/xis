@@ -34,6 +34,7 @@ Read these chapters to build normal XIS applications:
 - [Events](events.md)
 - [Scheduled jobs](scheduled-jobs.md)
 - [Security](security.md)
+- [TOTP two-factor login](security.md#totp-two-factor-login)
 - [Examples and tests](examples-and-tests.md)
 
 ## Advanced Documentation

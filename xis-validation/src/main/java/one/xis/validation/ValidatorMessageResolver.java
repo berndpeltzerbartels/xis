@@ -119,7 +119,7 @@ public class ValidatorMessageResolver {
         return field.isAnnotationPresent(LabelKey.class) ? field.getAnnotation(LabelKey.class).value() : field.getName();
     }
 
-    private String getMessage(String messageKey, UserContext userContext) {
+    public String getMessage(String messageKey, UserContext userContext) {
         return messagePropertiesLoader.getMessage(messageKey, userContext.getLocale());
     }
 

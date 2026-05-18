@@ -11,5 +11,13 @@ import lombok.NoArgsConstructor;
 class LoginData {
     private String username;
     private String password;
+    private String totpCode;
     private String state;
+
+    String additionalFactorValue(String fieldName) {
+        if ("totpCode".equals(fieldName)) {
+            return totpCode;
+        }
+        return null;
+    }
 }

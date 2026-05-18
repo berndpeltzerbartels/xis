@@ -14,6 +14,7 @@ import one.xis.http.HttpRequest;
 import one.xis.http.HttpResponse;
 import one.xis.http.RequestContext;
 import one.xis.security.SecurityUtil;
+import one.xis.utils.lang.MethodUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -21,6 +22,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -143,6 +145,17 @@ class ControllerMethod {
             return method.getAnnotation(SharedValue.class).value();
         }
         return null;
+    }
+
+    Optional<String> getModelDataKey() {
+        if (!method.isAnnotationPresent(ModelData.class)) {
+            return Optional.empty();
+        }
+        var modelData = method.getAnnotation(ModelData.class);
+        if (!modelData.value().isEmpty()) {
+            return Optional.of(modelData.value());
+        }
+        return Optional.of(MethodUtils.propertyNameByGetter(method).orElse(method.getName()));
     }
 
     Collection<String> getParameterRequestScopeKeys() {
