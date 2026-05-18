@@ -70,6 +70,16 @@ For native images, the generated runner uses generated catalogs instead of runti
 Native database support is explicit. Add the normal persistence module plus the native driver module for the DBMS used by
 the application.
 
+This is different from a normal JVM build. On the JVM, a JDBC driver can often be added as `runtimeOnly` and discovered
+later through `DriverManager` or the Java service loader. A GraalVM native image is closed at build time: the driver
+classes, service registrations, resources, reflection needs, and initialization behavior must be known while the
+executable is built. If a driver is only treated as an ordinary late runtime dependency, the application may compile and
+even work on the JVM but fail during `native-image` or inside the native executable.
+
+The `xis-boot-native-*` database modules make that dependency explicit. They provide tested default driver versions and
+put the driver on the native build path in the way XIS expects. Applications may still override the driver version with
+normal Gradle dependency management, but that replacement driver then belongs to the application's native test scope.
+
 ### H2
 
 H2 is useful for local development, tests, small embedded applications, and smoke tests:
@@ -110,10 +120,6 @@ dependencies {
     implementation "one.xis:xis-boot-native-mongodb"
 }
 ```
-
-The native database modules provide tested default driver versions. Applications may override driver versions through
-normal Gradle dependency management. If a driver is replaced, native-image compatibility of that driver version belongs
-to the application test scope.
 
 ## Component Discovery
 
