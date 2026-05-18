@@ -258,7 +258,7 @@ complete and intentionally detailed.
 - [SSO in distributed XIS applications](user/security.md#sso-in-distributed-xis-applications)
 - [Authentication helper annotations such as `@Login` and `@IDPLoginData`](user/security.md)
 
-### Plain HTTP Endpoints
+### Plain HTTP Endpoints For External Clients
 
 - [Plain endpoint annotations](user/annotations.md#plain-http-endpoint-annotations)
 - [`@Controller`](user/annotations.md#plain-http-endpoint-annotations)
@@ -368,7 +368,7 @@ shown in the link text.
 - [`@Value`](user/annotations.md#configuration-values)
 - [`@XISBootApplication`](user/annotations.md#class-annotations)
 
-### Plain HTTP Controller API
+### Plain HTTP Controller API For External Clients
 
 - [`@Controller`](user/annotations.md#plain-http-endpoint-annotations)
 - [`@Get`](user/annotations.md#plain-http-endpoint-annotations)

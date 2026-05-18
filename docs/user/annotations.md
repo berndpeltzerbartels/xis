@@ -233,7 +233,9 @@ Template expressions can read the same storage values, usually inside a storage 
 
 ## Plain HTTP Endpoint Annotations
 
-Normal XIS pages do not need these annotations. Use them only when you create plain HTTP endpoints next to the XIS UI.
+**Normal XIS pages, frontlets, modals, forms, and actions do not need these annotations.** XIS already handles their
+browser/server communication. Use these annotations only when you create plain HTTP endpoints for external non-XIS
+clients, webhooks, scripts, or integration partners.
 
 | Annotation | Use |
 | --- | --- |
