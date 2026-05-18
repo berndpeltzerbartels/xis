@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.11.0 - 2026-05-18
+
+### Added
+
+- Added XIS Boot Native support for GraalVM native images, including generated native runners, component catalogs,
+  reflection/proxy/resource metadata, and native smoke coverage.
+- Added native database support modules for H2, PostgreSQL, MariaDB, and MongoDB.
+- Added XIS Theme DSL support for standard application layouts, forms, navigation, validation-aware generated markup,
+  and theme validation integration.
+- Added SQL date/time mapping coverage for real PostgreSQL and MariaDB system tests.
+
+### Fixed
+
+- Improved SSE emitter registration so multiple browser windows with the same client id can coexist without reconnect
+  storms.
+- Improved Safari-compatible local authentication callback handling.
+
 ## 0.10.0 - 2026-05-16
 
 ### Added
