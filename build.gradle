@@ -255,6 +255,91 @@ def localReleaseArtifactDir = { String coordinate ->
     new File(System.getProperty("user.home"), ".m2/repository/${groupPath}/${parts[1]}/${project.projectVersion}")
 }
 
+def releasePomFile = { String coordinate ->
+    def parts = coordinate.split(':')
+    def artifactId = parts[1]
+    new File(localReleaseArtifactDir(coordinate), "${artifactId}-${project.projectVersion}.pom")
+}
+
+def releaseJarFile = { String coordinate ->
+    def parts = coordinate.split(':')
+    def artifactId = parts[1]
+    new File(localReleaseArtifactDir(coordinate), "${artifactId}-${project.projectVersion}.jar")
+}
+
+def releaseModuleFile = { String coordinate ->
+    def parts = coordinate.split(':')
+    def artifactId = parts[1]
+    new File(localReleaseArtifactDir(coordinate), "${artifactId}-${project.projectVersion}.module")
+}
+
+def releaseModuleDependencies = { File moduleFile ->
+    if (!moduleFile.exists()) {
+        return []
+    }
+    def module = new groovy.json.JsonSlurper().parse(moduleFile)
+    def dependencies = []
+    module.variants.each { variant ->
+        variant.dependencies.each { dependency ->
+            dependencies << [
+                    groupId   : dependency.group,
+                    artifactId: dependency.module,
+                    version   : dependency.version?.requires
+            ]
+        }
+        variant.dependencyConstraints.each { dependency ->
+            dependencies << [
+                    groupId   : dependency.group,
+                    artifactId: dependency.module,
+                    version   : dependency.version?.requires
+            ]
+        }
+    }
+    dependencies
+}
+
+def releasePluginModules = { File pluginJar ->
+    if (!pluginJar.exists()) {
+        throw new GradleException("Missing plugin jar: ${pluginJar.absolutePath}")
+    }
+    def jar = new java.util.jar.JarFile(pluginJar)
+    try {
+        def entry = jar.getEntry('xis-modules.txt')
+        if (entry == null) {
+            throw new GradleException("Missing xis-modules.txt in ${pluginJar.name}")
+        }
+        def modules = jar.getInputStream(entry).withReader('UTF-8') { reader ->
+            reader.readLines()
+                    .collect { it.trim() }
+                    .findAll { !it.isEmpty() }
+        }
+        if (modules.isEmpty()) {
+            throw new GradleException("Empty xis-modules.txt in ${pluginJar.name}")
+        }
+        modules
+    } finally {
+        jar.close()
+    }
+}
+
+def copyReleaseArtifacts = { File repositoryDir ->
+    delete repositoryDir
+    releaseCoordinates().each { coordinate ->
+        def sourceDir = localReleaseArtifactDir(coordinate)
+        if (!sourceDir.exists()) {
+            throw new GradleException("Missing release artifact directory: ${sourceDir.absolutePath}")
+        }
+        def relativePath = new File(System.getProperty("user.home"), ".m2/repository")
+                .toPath()
+                .relativize(sourceDir.toPath())
+                .toString()
+        copy {
+            from sourceDir
+            into new File(repositoryDir, relativePath)
+        }
+    }
+}
+
 task cleanLocalReleaseArtifacts {
     group = 'distribution'
     description = 'Removes local Maven artifacts for the current release coordinates before publishing them again.'
@@ -272,6 +357,162 @@ task systemTest {
     dependsOn ':xis-system-tests:systemTest'
 }
 
+task validateReleaseArtifacts {
+    group = 'verification'
+    description = 'Validates that the release artifacts and metadata are self-contained before creating the Maven Central zip.'
+
+    dependsOn {
+        subprojects.collect { it.tasks.withType(PublishToMavenLocal) }
+    }
+
+    doLast {
+        def coordinates = releaseCoordinates() as Set
+        def currentVersion = project.projectVersion.toString()
+        def currentGroup = project.group.toString()
+        def missingArtifacts = []
+        def missingDependencies = []
+
+        coordinates.each { coordinate ->
+            def pomFile = releasePomFile(coordinate)
+            if (!pomFile.exists()) {
+                missingArtifacts << "${coordinate}:${currentVersion} is missing ${pomFile.name}"
+                return
+            }
+
+            releaseModuleDependencies(releaseModuleFile(coordinate))
+                    .findAll { it.groupId == currentGroup && it.version == currentVersion }
+                    .collect { "${it.groupId}:${it.artifactId}" }
+                    .unique()
+                    .each { dependencyCoordinate ->
+                        if (!coordinates.contains(dependencyCoordinate)) {
+                            missingDependencies << "${coordinate}:${currentVersion} references missing ${dependencyCoordinate}:${currentVersion}"
+                        }
+                    }
+        }
+
+        if (!missingArtifacts.isEmpty() || !missingDependencies.isEmpty()) {
+            throw new GradleException((missingArtifacts + missingDependencies).join(System.lineSeparator()))
+        }
+
+        def pluginCoordinate = "${currentGroup}:xis-plugin"
+        if (coordinates.contains(pluginCoordinate)) {
+            def pluginModules = releasePluginModules(releaseJarFile(pluginCoordinate))
+            def releaseModules = coordinates
+                    .findAll { it.startsWith("${currentGroup}:xis-") }
+                    .collect { it.split(':')[1] }
+                    .sort()
+            def missingPluginModules = pluginModules
+                    .collect { "${currentGroup}:${it}" }
+                    .findAll { !coordinates.contains(it) }
+            def unlistedReleaseModules = releaseModules.findAll { !pluginModules.contains(it) }
+            if (!missingPluginModules.isEmpty()) {
+                throw new GradleException("xis-plugin lists modules that are not part of the release: ${missingPluginModules.join(', ')}")
+            }
+            if (!unlistedReleaseModules.isEmpty()) {
+                throw new GradleException("xis-plugin does not list published modules: ${unlistedReleaseModules.join(', ')}")
+            }
+        }
+    }
+}
+
+task prepareReleaseSmokeRepository {
+    group = 'verification'
+    description = 'Copies the exact locally published release artifacts into an isolated Maven repository.'
+
+    dependsOn validateReleaseArtifacts
+
+    doLast {
+        copyReleaseArtifacts(layout.buildDirectory.dir('release-smoke-repository').get().asFile)
+    }
+}
+
+task releaseConsumerSmokeTest {
+    group = 'verification'
+    description = 'Verifies that an external Gradle consumer can resolve XIS artifacts without mavenLocal().'
+
+    dependsOn prepareReleaseSmokeRepository
+
+    doLast {
+        def smokeDir = layout.buildDirectory.dir('release-consumer-smoke').get().asFile
+        def smokeRepo = layout.buildDirectory.dir('release-smoke-repository').get().asFile
+        delete smokeDir
+        smokeDir.mkdirs()
+
+        new File(smokeDir, 'settings.gradle').text = """
+pluginManagement {
+    repositories {
+        maven { url = uri('${smokeRepo.toURI()}') }
+        gradlePluginPortal()
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        maven { url = uri('${smokeRepo.toURI()}') }
+        mavenCentral()
+    }
+}
+
+rootProject.name = 'xis-release-consumer-smoke'
+""".stripIndent()
+
+        new File(smokeDir, 'build.gradle').text = """
+plugins {
+    id 'java'
+    id 'application'
+    id 'one.xis.plugin' version '${project.projectVersion}'
+}
+
+group = 'one.xis.release.smoke'
+version = '1.0-SNAPSHOT'
+
+dependencies {
+    implementation 'one.xis:xis-boot-native'
+    implementation 'one.xis:xis-boot-http'
+    implementation 'one.xis:xis-theme'
+    runtimeOnly 'org.slf4j:slf4j-simple:2.0.13'
+}
+
+application {
+    mainClass = 'smoke.ReleaseSmokeApp'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(${rootProject.ext.javaVersionInt})
+    }
+}
+""".stripIndent()
+
+        def sourceDir = new File(smokeDir, 'src/main/java/smoke')
+        sourceDir.mkdirs()
+        new File(sourceDir, 'ReleaseSmokeApp.java').text = """
+package smoke;
+
+public class ReleaseSmokeApp {
+    public static void main(String[] args) {
+        System.out.println("xis release smoke");
+    }
+}
+""".stripIndent()
+
+        def gradleExecutable = gradle.gradleHomeDir != null
+                ? new File(gradle.gradleHomeDir, "bin/gradle").absolutePath
+                : new File(rootDir, 'gradlew').absolutePath
+
+        exec {
+            workingDir smokeDir
+            commandLine gradleExecutable,
+                    '--no-daemon',
+                    'compileJava',
+                    'dependencies',
+                    '--configuration',
+                    'runtimeClasspath'
+        }
+    }
+}
+
 task createReleaseZip(type: JavaExec) {
     group = 'distribution'
     description = 'Creates a zip file with all release artifacts for Maven Central.'
@@ -279,6 +520,8 @@ task createReleaseZip(type: JavaExec) {
     dependsOn cleanLocalReleaseArtifacts
     dependsOn check
     dependsOn systemTest
+    dependsOn validateReleaseArtifacts
+    dependsOn releaseConsumerSmokeTest
 
     dependsOn {
         subprojects.collect { it.tasks.named('check') }
