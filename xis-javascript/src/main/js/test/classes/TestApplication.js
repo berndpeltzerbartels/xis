@@ -10,6 +10,7 @@ class TestApplication {
         this.clientId = this.clientId();
         this.httpConnector = new HttpConnectorMock(this.clientId);
         this.httpClient = new HttpClient(this.httpConnector, this.clientId);
+        this.messages = {};
         this.eventConnector = this.createEventConnectorIfPresent(this.clientId);
         this.client = this.httpClient;
         this.domAccessor = new DomAccessor();
@@ -62,6 +63,7 @@ class TestApplication {
         document.location.pathname = uri;
         return this.httpClient.loadConfig()
             .then(config => this.pageController.setConfig(config))
+            .then(config => this.httpClient.loadMessages().then(() => config))
             .then(config => {
                 if (this.eventConnector && typeof this.eventConnector.setPendingEventTtlMs === 'function') {
                     this.eventConnector.setPendingEventTtlMs(config.pendingEventTtlSeconds * 1000);

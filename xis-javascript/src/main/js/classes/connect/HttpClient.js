@@ -26,6 +26,13 @@ class HttpClient extends Client {
         return config;
     }
 
+    async loadMessages(locale) {
+        const uri = locale ? '/xis/messages?locale=' + encodeURIComponent(locale) : '/xis/messages';
+        const response = await this.httpConnector.get(uri, {});
+        app.messages = response.responseText ? JSON.parse(response.responseText) : {};
+        return app.messages;
+    }
+
     async loadPageHead(pageId) {
         // pageId kann Umlaute, Leerzeichen, Sonderzeichen enthalten
         // encodeURIComponent ist robust für alle Fälle

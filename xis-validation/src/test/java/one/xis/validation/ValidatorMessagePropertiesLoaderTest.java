@@ -54,6 +54,39 @@ class ValidatorMessagePropertiesLoaderTest {
         }
     }
 
+    @Test
+    void messageBundleUsesSameDefaultAndLocaleOverrideOrder() throws Exception {
+        Path root = resourceRoot("bundle",
+                "default-messages.properties",
+                """
+                        shared=default
+                        only.default=from default
+                        """);
+        Files.writeString(root.resolve("messages.properties"), """
+                shared=application
+                only.application=from application
+                """);
+        Files.writeString(root.resolve("default-messages_de.properties"), """
+                shared=default deutsch
+                only.localized.default=from localized default
+                """);
+        Files.writeString(root.resolve("messages_de.properties"), """
+                shared=anwendung deutsch
+                only.localized.application=from localized application
+                """);
+
+        try (var classLoader = new URLClassLoader(new java.net.URL[]{root.toUri().toURL()}, null)) {
+            var loader = loaderWithContextClassLoader(classLoader);
+
+            assertThat(loader.getMessages(Locale.GERMAN))
+                    .containsEntry("shared", "anwendung deutsch")
+                    .containsEntry("only.default", "from default")
+                    .containsEntry("only.application", "from application")
+                    .containsEntry("only.localized.default", "from localized default")
+                    .containsEntry("only.localized.application", "from localized application");
+        }
+    }
+
     private ValidatorMessagePropertiesLoader loaderWithContextClassLoader(ClassLoader classLoader) {
         var original = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(classLoader);

@@ -497,7 +497,8 @@ message area, but form templates should still use `xis:message-for` and `<xis:gl
 see the errors next to the form.
 
 Validation messages are resolved from message property files on the classpath. Application files override the XIS
-defaults.
+defaults. The same resolved bundle is also available in templates as `messages`, so ordinary UI text can use
+`${messages.title}` or `${messages['customer.form.title']}`.
 
 ```properties
 # messages.properties

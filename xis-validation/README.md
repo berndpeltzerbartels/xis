@@ -123,7 +123,8 @@ For a request locale such as Polish, messages are resolved in this order:
 4. `default-messages.properties`
 
 The first matching key wins. Application `messages*.properties` files are the normal extension point; the
-`default-messages*.properties` files are framework fallbacks.
+`default-messages*.properties` files are framework fallbacks. The resolved bundle is also exposed to XIS templates as
+`messages`, for example `${messages.title}` or `${messages['customer.form.title']}`.
 
 `@LabelKey` can point to a label entry that is substituted into validation messages via the `${label}` placeholder. This
 keeps validators reusable: one annotation can validate several fields, while the message names the field in its current

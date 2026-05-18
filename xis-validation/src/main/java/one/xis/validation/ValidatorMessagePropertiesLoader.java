@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
+import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -31,9 +32,20 @@ class ValidatorMessagePropertiesLoader {
     }
 
     public String getMessage(String messageKey, Locale locale) {
-        Properties props = propertiesCache.computeIfAbsent(locale, this::propertiesForLocale);
+        Properties props = propertiesForLocaleCached(locale);
         String message = props.getProperty(messageKey);
         return message == null ? "[" + messageKey + "]" : message;
+    }
+
+    public Map<String, String> getMessages(Locale locale) {
+        Properties props = propertiesForLocaleCached(locale);
+        Map<String, String> messages = new LinkedHashMap<>();
+        props.forEach((key, value) -> messages.put(String.valueOf(key), String.valueOf(value)));
+        return messages;
+    }
+
+    private Properties propertiesForLocaleCached(Locale locale) {
+        return propertiesCache.computeIfAbsent(locale == null ? Locale.ROOT : locale, this::propertiesForLocale);
     }
 
     private Properties propertiesForLocale(Locale locale) {

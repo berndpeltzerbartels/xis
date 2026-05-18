@@ -41,6 +41,28 @@ the raw template expression before XIS has initialized the page:
 
 XIS removes `xis:src` during initialization and writes the evaluated value to the real `src` attribute.
 
+### Client-Side Messages
+
+XIS loads the resolved message bundle during application startup and exposes it in templates as `messages`.
+
+```html
+<h1>${messages.customerListTitle}</h1>
+<button>${messages['customer.form.save']}</button>
+```
+
+Use dot notation for simple keys and bracket notation for keys that contain dots or are computed dynamically.
+Messages come from the same classpath property files that validation uses:
+
+```properties
+# messages.properties
+customerListTitle=Customers
+customer.form.save=Save customer
+```
+
+Locale-specific files use the Java language suffix, for example `messages_de.properties`.
+Application `messages*.properties` files override the framework `default-messages*.properties` fallbacks with the same
+rules as validation messages.
+
 The documented public EL surface is:
 
 - literals: strings, numbers, booleans, `null`, and `undefined`
