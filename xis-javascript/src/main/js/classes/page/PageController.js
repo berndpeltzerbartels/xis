@@ -368,7 +368,7 @@ class PageController {
     /**
      * Updates value displayed in browser's address-input.
      * @param {ResolvedURL} resolvedURL
-     * @param {string} annotatedAddress - Optional custom address from @Address annotation
+     * @param {string} annotatedTitle - Optional custom title from @Title annotation
      * @param {string} annotatedTitle - Optional custom title from @Title annotation
      * @private
      */

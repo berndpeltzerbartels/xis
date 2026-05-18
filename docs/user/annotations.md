@@ -252,8 +252,6 @@ normal first application path.
 
 | Annotation | Use |
 | --- | --- |
-| `@Address` | Identifies an addressable component in distributed or messaging-oriented scenarios. |
-| `@PushRecipients` | Selects recipients for push/update delivery. |
 | `@ImportInstances` | Imports component instances into the XIS runtime. |
 | `@MainClass` | Legacy application metadata; normal applications should use the runtime setup instead. |
 | `@Proxy` | Marks an annotation as a context proxy annotation. See [Custom proxies](advanced/custom-proxies.md). |

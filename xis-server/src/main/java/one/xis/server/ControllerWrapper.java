@@ -32,14 +32,12 @@ public class ControllerWrapper {
     private Map<String, ControllerMethod> actionMethods;
     private Collection<ControllerMethod> formDataMethods;
     private Collection<ControllerMethod> titleOnlyMethods;
-    private Collection<ControllerMethod> addressOnlyMethods;
     private ControllerResultMapper controllerResultMapper;
 
     void invokeGetModelMethods(ClientRequest request, ControllerResult controllerResult) {
         SecurityUtil.checkRoles(controller.getClass(), UserContextImpl.getInstance());
         var methodsToExecute = new ArrayList<>(modelMethods);
         methodsToExecute.addAll(titleOnlyMethods);
-        methodsToExecute.addAll(addressOnlyMethods);
         var methods = MethodSorter.sortMethods(methodsToExecute, sharedValueMethods);
         methods.forEach(m -> invokeModelDataMethod(request, controllerResult, m));
     }

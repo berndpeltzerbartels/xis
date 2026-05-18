@@ -203,7 +203,6 @@ complete and intentionally detailed.
 - [`RefreshEventPublisher`](user/events.md)
 - [Publishing to all clients](user/events.md)
 - [Publishing to one client](user/events.md)
-- [Publishing with selected recipients and `@PushRecipients`](user/annotations.md#advanced-and-rarely-needed-annotations)
 - [Visible page and frontlet refresh behavior](user/events.md)
 - [Scheduled jobs with `@Scheduled`](user/scheduled-jobs.md)
 
@@ -282,7 +281,6 @@ complete and intentionally detailed.
 - [`@Proxy`](user/advanced/custom-proxies.md)
 - [`@UseAdvice`](user/advanced/aspects.md)
 - [`@ImportInstances`](user/annotations.md#advanced-and-rarely-needed-annotations)
-- [`@Address`](user/annotations.md#advanced-and-rarely-needed-annotations)
 - [Custom proxies](user/advanced/custom-proxies.md)
 - [Aspects and interface advice](user/advanced/aspects.md)
 - [`@JavascriptExtension`](user/annotations.md#class-annotations)
@@ -313,7 +311,6 @@ shown in the link text.
 
 - [`@Action`](user/annotations.md#method-annotations)
 - [`@Parameter`](user/annotations.md#parameter-field-and-record-component-annotations)
-- [`@Address`](user/annotations.md#advanced-and-rarely-needed-annotations)
 - [`@Authenticated`](user/annotations.md#class-annotations)
 - [`@ClientId`](user/annotations.md#parameter-field-and-record-component-annotations)
 - [`@ClientStorage`](user/annotations.md#browser-storage-parameters)
@@ -334,7 +331,6 @@ shown in the link text.
 - [`@NullAllowed`](user/annotations.md#parameter-field-and-record-component-annotations)
 - [`@Page`](user/core-model.md#pages)
 - [`@PathVariable`](user/annotations.md#parameter-field-and-record-component-annotations)
-- [`@PushRecipients`](user/annotations.md#advanced-and-rarely-needed-annotations)
 - [`@QueryParameter`](user/annotations.md#parameter-field-and-record-component-annotations)
 - [`@RefreshOnUpdateEvents`](user/events.md)
 - [`@Roles`](user/security.md#page-and-action-roles)
