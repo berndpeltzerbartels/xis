@@ -37,7 +37,7 @@ class TOTPSetupPageIntegrationTest {
         var document = context.openPage("/totp-setup.html").getDocument();
         assertThat(qrCodes(document)).isZero();
 
-        submitSetup(document, "totpSetupAlice");
+        submitSetup(document, "totpSetupAlice", "secret");
 
         assertThat(qrCodes(document)).isEqualTo(1);
         assertThat(document.getBody().getInnerText()).contains("totpSetupAlice");
@@ -46,16 +46,26 @@ class TOTPSetupPageIntegrationTest {
         assertThat(qrCodes(freshDocument)).isZero();
         assertThat(freshDocument.getBody().getInnerText()).doesNotContain("totpSetupAlice");
 
-        submitSetup(freshDocument, "totpSetupBob");
+        submitSetup(freshDocument, "totpSetupBob", "secret");
 
         assertThat(qrCodes(freshDocument)).isEqualTo(1);
         assertThat(freshDocument.getBody().getInnerText()).contains("totpSetupBob");
         assertThat(freshDocument.getBody().getInnerText()).doesNotContain("totpSetupAlice");
     }
 
-    private void submitSetup(Document document, String username) {
+    @Test
+    void invalidSetupCredentialsDoNotPublishQrCode() {
+        var document = context.openPage("/totp-setup.html").getDocument();
+
+        submitSetup(document, "totpSetupAlice", "wrong");
+
+        assertThat(qrCodes(document)).isZero();
+        assertThat(document.getBody().getInnerText()).contains("Benutzername oder Passwort ist ungültig.");
+    }
+
+    private void submitSetup(Document document, String username, String password) {
         document.getInputElementById("totp-setup-username").setValue(username);
-        document.getInputElementById("totp-setup-password").setValue("secret");
+        document.getInputElementById("totp-setup-password").setValue(password);
         document.getElementById("totp-setup-button").click();
     }
 
