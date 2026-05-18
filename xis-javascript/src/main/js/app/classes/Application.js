@@ -12,6 +12,7 @@ class Application {
         this.httpConnector = new HttpConnector(this.clientId);
         this.httpClient = new HttpClient(this.httpConnector, this.clientId);
         this.httpClient.clientId = this.clientId;
+        this.messages = {};
         this.eventConnector = this.createEventConnectorIfSupported(this.clientId);
         this.client = this.httpClient;
         this.domAccessor = new DomAccessor();
@@ -75,6 +76,7 @@ class Application {
         this.httpClient.loadConfig()
             .then(config => this.connectEventSources(config))
             .then(config => this.pageController.setConfig(config))
+            .then(config => this.httpClient.loadMessages().then(() => config))
             .then(config => {
                 if (this.eventConnector && typeof this.eventConnector.setPendingEventTtlMs === 'function') {
                     this.eventConnector.setPendingEventTtlMs(config.pendingEventTtlSeconds * 1000);
