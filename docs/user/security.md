@@ -325,6 +325,12 @@ The endpoint requires an authenticated user. It creates a secret for that user i
 secret through `TOTPStore`, and returns an SVG QR code containing the standard `otpauth://` URI. Applications can show
 that SVG on their own account/security page.
 
+`xis-totp` also provides `/totp-setup.html` as a default setup page. It uses the same basic CSS hooks as the default
+login page (`container`, `form_container`, `form-group`, `form-control`, `btn`, `btn-primary`) plus TOTP-specific hooks
+such as `totp-setup-container`, `totp-setup-form`, `totp-setup-error`, `totp-setup-qr-code`, and
+`totp-setup-login-link`. Applications can usually style the built-in page with CSS; add a `totp-setup.html` resource only
+when the page structure itself should be replaced.
+
 ## Page And Action Roles
 
 Use `@Authenticated` when a page, frontlet, action method, action parameter, or action DTO requires a login but no named role. Use
