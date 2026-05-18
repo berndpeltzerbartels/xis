@@ -7,6 +7,8 @@ import one.xis.context.Component;
 import one.xis.context.Inject;
 import one.xis.utils.lang.StringUtils;
 
+import java.util.Set;
+
 @Slf4j
 @Component
 class ControllerService {
@@ -96,6 +98,7 @@ class ControllerService {
         controllerResult.setCurrentFrontletId(request.getFrontletId());
         var invokerControllerWrapper = controllerWrapper(request);
         invokerControllerWrapper.invokeActionMethod(request, controllerResult);
+        Set<String> actionModelDataKeys = Set.copyOf(controllerResult.getModelData().keySet());
         if (!resultContainsNextController(controllerResult)) {
             usePreviousControllerAfterAction(controllerResult, invokerControllerWrapper, request);
         }
@@ -105,7 +108,7 @@ class ControllerService {
             return;
         }
         if (nextControllerWrapper.equals(invokerControllerWrapper)) {
-            invokerControllerWrapper.invokeGetModelMethods(request, controllerResult);
+            invokerControllerWrapper.invokeGetModelMethods(request, controllerResult, actionModelDataKeys);
             mapResultToResponse(request, response, controllerResult);
         } else {
             processNextController(request, controllerResult, response, nextControllerWrapper);

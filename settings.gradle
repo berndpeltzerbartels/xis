@@ -59,6 +59,7 @@ include 'xis-http-controller'
 include 'xis-token'
 include 'xis-idp-server'
 include 'xis-authentication'
+include 'xis-totp'
 
 
 include 'xis-security-common'

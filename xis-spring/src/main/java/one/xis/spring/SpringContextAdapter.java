@@ -11,24 +11,30 @@ import one.xis.RefreshEvent;
 import one.xis.RefreshEventPublisher;
 import one.xis.context.AppContext;
 import one.xis.context.AppContextBuilder;
+import one.xis.http.Controller;
 import one.xis.http.RestControllerServiceImpl;
 import one.xis.server.FrontendService;
 import one.xis.server.ImportedTypes;
 import one.xis.server.LocalUrlHolder;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.boot.autoconfigure.AutoConfigurationPackages;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.core.type.filter.AnnotationTypeFilter;
 
 import javax.sql.DataSource;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 
@@ -77,6 +83,7 @@ public class SpringContextAdapter implements BeanPostProcessor, ApplicationConte
     private AppContext createXisContext() {
         return AppContextBuilder.createInstance()
                 .withSingletons(singletons)
+                .withSingletonClasses(httpControllerClasses())
                 .withXIS()
                 .build();
     }
@@ -106,5 +113,34 @@ public class SpringContextAdapter implements BeanPostProcessor, ApplicationConte
             frameworkBeanClasses = ImportedTypes.getImportedTypes();
         }
         return frameworkBeanClasses;
+    }
+
+    private Set<Class<?>> httpControllerClasses() {
+        var scanner = new ClassPathScanningCandidateComponentProvider(false);
+        scanner.setResourceLoader(applicationContext);
+        scanner.addIncludeFilter(new AnnotationTypeFilter(Controller.class));
+        var classes = new LinkedHashSet<Class<?>>();
+        springBootBasePackages().forEach(basePackage -> scanner.findCandidateComponents(basePackage).stream()
+                .map(this::classForBeanDefinition)
+                .filter(clazz -> singletons.stream().noneMatch(singleton -> singleton.getClass().equals(clazz)))
+                .forEach(classes::add));
+        return classes;
+    }
+
+    private Set<String> springBootBasePackages() {
+        var packages = new LinkedHashSet<String>();
+        var beanFactory = applicationContext.getAutowireCapableBeanFactory();
+        if (AutoConfigurationPackages.has(beanFactory)) {
+            packages.addAll(AutoConfigurationPackages.get(beanFactory));
+        }
+        return packages;
+    }
+
+    private Class<?> classForBeanDefinition(BeanDefinition beanDefinition) {
+        try {
+            return Class.forName(beanDefinition.getBeanClassName());
+        } catch (ClassNotFoundException e) {
+            throw new IllegalStateException("Could not load XIS HTTP controller class " + beanDefinition.getBeanClassName(), e);
+        }
     }
 }

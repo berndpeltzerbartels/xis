@@ -31,7 +31,8 @@ ext {
             "postgresql"     : "42.7.4",
             "mariadb"        : "3.5.1",
             "h2"             : "2.2.224",
-            "hikariCP"       : "5.1.0"
+            "hikariCP"       : "5.1.0",
+            "zxing"          : "3.5.3"
     ]
 
     // Zentrale Gruppen- und Versionsdefinition

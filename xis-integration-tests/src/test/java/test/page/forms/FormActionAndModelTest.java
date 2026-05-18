@@ -22,11 +22,14 @@ class FormActionAndModelTest {
         var client = context.openPage("/formActionAndModel.html");
         var inputElement = client.getDocument().getInputElementById("field1");
         inputElement.setValue("input");
+        assertThat(client.getDocument().getElementById("result").getInnerText()).isEqualTo("Loaded from model method");
+        assertThat(client.getDocument().getElementById("other").getInnerText()).isEqualTo("Other model call 1");
+
         client.getDocument().getElementById("save").click();
-        // Retrieve the value provided as model data. The key corresponds to the @ModelData annotation.
 
         String modelData = client.getDocument().getElementById("result").getInnerText();
         assertThat(modelData).isEqualTo("Processed: input");
+        assertThat(client.getDocument().getElementById("other").getInnerText()).isEqualTo("Other model call 2");
     }
 
     @Test
@@ -39,5 +42,6 @@ class FormActionAndModelTest {
 
         String modelData = client.getDocument().getElementById("result").getInnerText();
         assertThat(modelData).isEqualTo("Processed: input from submit");
+        assertThat(client.getDocument().getElementById("other").getInnerText()).isEqualTo("Other model call 2");
     }
 }

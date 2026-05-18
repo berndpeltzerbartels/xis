@@ -170,6 +170,17 @@ This is also the pattern for reusable application libraries. A library can provi
 classpath resources, while applications keep the option to replace those templates with resources of the same name. The
 login page is simply the built-in example of that mechanism.
 
+When optional login factors are active, the default login page renders their fields automatically. A custom `login.html`
+must render the matching field itself. For TOTP, add a field bound to `totpCode` and guard it with `totpLoginEnabled`:
+
+```html
+<div xis:if="${totpLoginEnabled}">
+    <label for="totpCode" xis:binding="totpCode" xis:error-class="error">Authenticator code</label>
+    <input xis:binding="totpCode" id="totpCode" type="text" inputmode="numeric" autocomplete="one-time-code"/>
+    <xis:message message-for="totpCode"/>
+</div>
+```
+
 If the application also offers external OpenID Connect providers, the login controller exposes `externalIdpIds` and
 `externalIdpUrls`. A custom template can render them next to the local login form:
 
@@ -233,6 +244,92 @@ after the callback and issues its own local application token. If no `UserInfoSe
 or `resource_access.account.roles`, XIS copies those roles into the local token. Providers such as Google usually issue
 access tokens for their own APIs instead; in that case the local token has no named roles unless the application maps
 the account through a `UserInfoService`.
+
+## TOTP Two-Factor Login
+
+Add `xis-totp` when local username/password login should support authenticator-app codes:
+
+```groovy
+dependencies {
+    implementation "one.xis:xis-authentication"
+    implementation "one.xis:xis-totp"
+}
+```
+
+The module is optional. If it is present, XIS validates the application at startup:
+
+- exactly one `TOTPStore` implementation must exist
+- `xis.totp.encryption-key` must be configured
+
+The store belongs to the application because only the application knows where user security data should live. XIS never
+hands raw authenticator secrets to the store. It encrypts a generated Base32 secret first and stores only the encrypted
+value.
+
+```java
+package example.security;
+
+import one.xis.context.Component;
+import one.xis.totp.TOTPStore;
+
+import java.util.Optional;
+import java.util.OptionalLong;
+import java.util.concurrent.ConcurrentHashMap;
+
+@Component
+public class AppTotpStore implements TOTPStore {
+
+    private final ConcurrentHashMap<String, String> secrets = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, Long> acceptedSteps = new ConcurrentHashMap<>();
+
+    @Override
+    public Optional<String> getEncryptedSecret(String userId) {
+        return Optional.ofNullable(secrets.get(userId));
+    }
+
+    @Override
+    public void saveEncryptedSecret(String userId, String encryptedSecret) {
+        secrets.put(userId, encryptedSecret);
+    }
+
+    @Override
+    public OptionalLong getLastAcceptedTimeStep(String userId) {
+        Long step = acceptedSteps.get(userId);
+        return step == null ? OptionalLong.empty() : OptionalLong.of(step);
+    }
+
+    @Override
+    public void saveLastAcceptedTimeStep(String userId, long timeStep) {
+        acceptedSteps.put(userId, timeStep);
+    }
+}
+```
+
+Configure a stable encryption key and, optionally, the issuer shown in authenticator apps:
+
+```properties
+xis.totp.encryption-key=replace-with-a-stable-secret-from-your-environment
+xis.totp.issuer=Example CRM
+```
+
+When a user has no stored TOTP secret, password login stays password-only. When a secret exists, the login validator
+requires the `totpCode` field before it creates the local login code. If the store persists the last accepted time step,
+XIS rejects a repeated code from the same 30-second window.
+
+`xis-totp` also contributes an HTTP controller for provisioning:
+
+```text
+/xis/totp/qr.svg
+```
+
+The endpoint requires an authenticated user. It creates a secret for that user if none exists yet, stores the encrypted
+secret through `TOTPStore`, and returns an SVG QR code containing the standard `otpauth://` URI. Applications can show
+that SVG on their own account/security page.
+
+`xis-totp` also provides `/totp-setup.html` as a default setup page. It uses the same basic CSS hooks as the default
+login page (`container`, `form_container`, `form-group`, `form-control`, `btn`, `btn-primary`) plus TOTP-specific hooks
+such as `totp-setup-container`, `totp-setup-form`, `totp-setup-error`, `totp-setup-qr-code`, and
+`totp-setup-login-link`. Applications can usually style the built-in page with CSS; add a `totp-setup.html` resource only
+when the page structure itself should be replaced.
 
 ## Page And Action Roles
 

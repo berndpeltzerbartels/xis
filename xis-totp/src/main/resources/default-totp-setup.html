@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:xis="http://xis.one/html">
+<head>
+    <title>${totpSetupTitle}</title>
+</head>
+<body>
+<main class="container totp-setup-container">
+    <div class="form_container totp-setup-form-container" xis:if="${!totpSetupResult.hasQrCode}">
+        <form xis:binding="totpSetup" class="totp-setup-form">
+            <h1 class="totp-setup-title">${totpSetupTitle}</h1>
+            <p class="totp-setup-intro">${totpSetupIntro}</p>
+
+            <div xis:if="${totpSetupResult.hasError}" class="error totp-setup-error">${totpSetupResult.error}</div>
+
+            <div class="form-group totp-setup-field totp-setup-username-field">
+                <label xis:binding="username" xis:error-class="error" for="totp-setup-username">${totpSetupUsernameLabel}</label>
+                <input xis:binding="username" type="text" id="totp-setup-username" name="username" autocomplete="username" class="form-control totp-setup-input totp-setup-username"/>
+                <xis:message message-for="username"/>
+            </div>
+
+            <div class="form-group totp-setup-field totp-setup-password-field">
+                <label xis:binding="password" xis:error-class="error" for="totp-setup-password">${totpSetupPasswordLabel}</label>
+                <input xis:binding="password" type="password" id="totp-setup-password" name="password" autocomplete="current-password" class="form-control totp-setup-input totp-setup-password"/>
+                <xis:message message-for="password"/>
+            </div>
+
+            <button xis:action="setup" type="submit" id="totp-setup-button" class="btn btn-primary totp-setup-button">${totpSetupButtonLabel}</button>
+        </form>
+    </div>
+
+    <section xis:if="${totpSetupResult.hasQrCode}" class="form_container totp-setup-result">
+        <h1 class="totp-setup-title">${totpSetupTitle}</h1>
+        <h2 class="totp-setup-qr-title">${totpSetupQrTitle} ${totpSetupResult.userId}</h2>
+        <p class="totp-setup-qr-instructions">${totpSetupQrInstructions}</p>
+        <img src="${totpSetupResult.qrCodeDataUrl}" alt="TOTP QR code" class="totp-setup-qr-code"/>
+    </section>
+
+    <nav class="totp-setup-navigation">
+        <a href="/login.html" class="totp-setup-login-link">${totpSetupLoginLink}</a>
+    </nav>
+</main>
+</body>
+</html>

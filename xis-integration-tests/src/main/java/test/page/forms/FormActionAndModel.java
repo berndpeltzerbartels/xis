@@ -8,6 +8,8 @@ import one.xis.Page;
 @Page("/formActionAndModel.html")
 class FormActionAndModel {
 
+    private int otherCalls;
+
     @FormData("formObject")
     FormActionAndModelObject formActionAndModelObject() {
         var formObject = new FormActionAndModelObject();
@@ -26,5 +28,14 @@ class FormActionAndModel {
         return "Processed: " + formObject.getProperty1();
     }
 
+    @ModelData("result")
+    String result() {
+        return "Loaded from model method";
+    }
+
+    @ModelData("other")
+    String other() {
+        return "Other model call " + ++otherCalls;
+    }
 
 }
