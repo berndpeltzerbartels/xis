@@ -40,6 +40,14 @@ processResources {
 dependencies {
     implementation gradleApi()
     implementation localGroovy()
+
+    testImplementation gradleTestKit()
+    testImplementation "org.junit.jupiter:junit-jupiter-api:${rootProject.ext.libraryVersions.junit}"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${rootProject.ext.libraryVersions.junit}"
+}
+
+test {
+    useJUnitPlatform()
 }
 
 

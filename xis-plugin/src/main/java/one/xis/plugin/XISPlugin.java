@@ -102,11 +102,14 @@ public class XISPlugin implements Plugin<Project> {
     }
 
     /**
-     * Keep HTML templates next to Java controllers while still placing them on the runtime classpath.
+     * Keep HTML templates next to JVM controllers while still placing them on the runtime classpath.
      */
     private void configureResources(Project project) {
-        project.getTasks().withType(ProcessResources.class).configureEach(sync ->
-                sync.from(project.file("src/main/java"), copy -> copy.include("**/*.html")));
+        project.getTasks().withType(ProcessResources.class).configureEach(sync -> {
+            sync.from(project.file("src/main/java"), copy -> copy.include("**/*.html"));
+            project.getPlugins().withId("groovy", plugin ->
+                    sync.from(project.file("src/main/groovy"), copy -> copy.include("**/*.html")));
+        });
     }
 
 
@@ -278,6 +281,8 @@ public class XISPlugin implements Plugin<Project> {
                 XISGenerateNativeResourceCatalogTask.class, task -> {
                     task.getApplicationResourceRoots().from(project.getLayout().getProjectDirectory().dir("src/main/resources"));
                     task.getApplicationResourceRoots().from(project.getLayout().getProjectDirectory().dir("src/main/java"));
+                    project.getPlugins().withId("groovy", plugin ->
+                            task.getApplicationResourceRoots().from(project.getLayout().getProjectDirectory().dir("src/main/groovy")));
                     task.getClasspathFiles().from(project.getConfigurations().getByName("runtimeClasspath"));
                     task.getOutputDirectory().set(generatedNativeResourceCatalogDir);
                 });

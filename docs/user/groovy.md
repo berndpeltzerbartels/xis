@@ -119,8 +119,13 @@ controllers.
 
 ## Template Location And Scaffolding
 
-For Groovy controllers, the most explicit option is to place templates under `src/main/resources` using the controller
-package path, as shown above. `@HtmlFile('GroovyPage.html')` resolves the template relative to the controller package.
+For Groovy controllers, you can place templates next to the controller under `src/main/groovy` or under
+`src/main/resources` using the controller package path. XIS copies `*.html` files from `src/main/groovy` to the runtime
+resources when the Gradle Groovy plugin is applied.
+
+You normally do not need `@HtmlFile` when the template follows the default name and package location. Use
+`@HtmlFile('GroovyPage.html')` only when you want to name the template explicitly; the file name is then resolved relative
+to the controller package in both source layouts.
 
 When the Gradle project applies both the Groovy plugin and the XIS plugin, the normal XIS scaffolding tasks also scan
 Groovy controllers:
@@ -144,6 +149,16 @@ Java annotation processing for Groovy compilation when the Groovy plugin is pres
 the boot runner.
 
 The resulting jar contains Java classes, Groovy classes, resources, and the generated `one.xis.boot.Runner`.
+
+## Native Images
+
+Groovy applications are currently supported on the JVM path, not on the XIS Boot Native path. Even statically compiled
+Groovy code brings parts of the Groovy runtime into the GraalVM native-image analysis, including Groovy's meta-class and
+dynamic call-site infrastructure. That currently makes native builds fail before the application can be treated like a
+normal XIS native application.
+
+Use Java for applications that should be compiled with `xis-boot-native`. Groovy support may become possible later, but
+it needs dedicated Groovy/GraalVM work and is not part of the supported native workflow today.
 
 ## Tested Behavior
 

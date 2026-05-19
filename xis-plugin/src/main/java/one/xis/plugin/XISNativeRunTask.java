@@ -29,8 +29,8 @@ public abstract class XISNativeRunTask extends Exec {
         this.port = port;
     }
 
-    @Option(option = "args", description = "Additional arguments passed to the native application.")
-    public void setArgs(String args) {
+    @Option(option = "application-args", description = "Additional arguments passed to the native application.")
+    public void setApplicationArgs(String args) {
         applicationArgs.clear();
         if (args != null && !args.isBlank()) {
             applicationArgs.addAll(List.of(args.split("\\s+")));

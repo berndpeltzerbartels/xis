@@ -65,6 +65,14 @@ class Application {
 
 For native images, the generated runner uses generated catalogs instead of runtime package scanning.
 
+## Java And Groovy
+
+XIS Boot Native currently supports Java applications. Groovy controllers and forms are supported on the JVM path, but
+not as GraalVM native images. Even with static Groovy compilation, the Groovy runtime can make dynamic call-site and
+meta-class infrastructure reachable during native-image analysis.
+
+If an application must be compiled with `xis-boot-native`, write the native application code in Java.
+
 ## Database Modules
 
 Native database support is explicit. Add the normal persistence module plus the native driver module for the DBMS used by
