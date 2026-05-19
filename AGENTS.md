@@ -44,7 +44,7 @@ The EL functions `isUserInRole(role)` and `isUserInRoles(role, ...)` are browser
 be used in `xis:if`, including with separate role arguments or an array, but examples must still protect the server-side
 controller, frontlet, action, parameter, or DTO with `@Authenticated`/`@Roles`.
 For custom browser interactions that need to submit an existing XIS form, use the public JavaScript helper
-`app.submitForm(htmlFormId, actionName)`. Do not point users at internal handler APIs such as
+`XIS.submitForm(htmlFormId, actionName)`. Do not point users at internal handler APIs such as
 `app.tagHandlers.getHandler(...)`.
 
 Simple drag and drop is a public template feature, not a full browser DnD abstraction. Use

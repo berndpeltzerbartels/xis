@@ -386,3 +386,26 @@ class ELFunctions {
 }
 
 const elFunctions = new ELFunctions();
+var XIS = typeof window !== 'undefined' && window['XIS'] ? window['XIS'] : {};
+
+if (typeof window !== 'undefined') {
+    const installer = typeof installXisPublicApi === 'function'
+        ? installXisPublicApi
+        : function(methods) {
+            const currentApi = window['XIS'] || {};
+            const api = {};
+            for (const key in currentApi) {
+                api[key] = currentApi[key];
+            }
+            for (const key in methods) {
+                api[key] = methods[key];
+            }
+            XIS = api;
+            window['XIS'] = Object.freeze ? Object.freeze(api) : api;
+        };
+    installer({
+        addElFunction(name, func) {
+            return elFunctions.addFunction(name, func);
+        }
+    });
+}

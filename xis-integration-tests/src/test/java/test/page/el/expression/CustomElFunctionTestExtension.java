@@ -10,7 +10,7 @@ public class CustomElFunctionTestExtension implements TestScriptExtension {
     @Override
     public String getAdditionalScript() {
         return """
-                elFunctions.addFunction('surround', function(left, value, right) {
+                XIS.addElFunction('surround', function(left, value, right) {
                     return left + value + right;
                 });
                 """;

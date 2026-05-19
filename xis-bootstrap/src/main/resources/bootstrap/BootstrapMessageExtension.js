@@ -133,4 +133,4 @@ function initializeBootstrap(app) {
    app.messageHandler = new BootstrapMessageHandler();
 }
 
-window.app.initializers.push(initializeBootstrap);
+eventListenerRegistry.addEventListener(EventType.APP_INSTANCE_CREATED, initializeBootstrap);

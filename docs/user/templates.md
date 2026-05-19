@@ -207,7 +207,7 @@ Examples:
 ```
 
 Custom EL functions are an advanced extension topic. Project code can register browser-side functions with
-`elFunctions.addFunction(name, functionRef)` before templates using that function are initialized. See
+`XIS.addElFunction(name, functionRef)` before templates using that function are initialized. See
 [Custom JavaScript and custom EL functions](advanced/custom-javascript.md) when you need project-specific template
 functions.
 
