@@ -20,6 +20,16 @@ function installPublicApi() {
 
         openPage(url) {
             return app.pageController.displayPageForUrl(url);
+        },
+
+        isEventStreamConnected() {
+            return !!(app.eventConnector && app.eventConnector.isConnected());
+        },
+
+        closeEventStreams() {
+            if (app.eventConnector) {
+                app.eventConnector.close();
+            }
         }
     });
 }

@@ -283,7 +283,57 @@ class ApplicationSseTest {
     }
 
     @Test
-    void ensureEventConnectionDoesNotWaitForReconnectPromise() throws ScriptException {
+    void reconnectEndpointRestoresPrimaryEventSourceReference() throws ScriptException {
+        var localStorage = new LocalStorage();
+        localStorage.setItem("xis.clientId", "test-client");
+
+        var location = new Location();
+        location.setOrigin("http://example.com");
+        var window = new Window(location);
+        var document = Document.of("<html><body></body></html>");
+
+        var applicationScript = new Resources().getByPath("app.js").getContent();
+        var script = applicationScript + "\n"
+                + Javascript.getScript(EVENT_REGISTRY, CLASSES, FUNCTIONS) + "\n"
+
+                + """
+                class EventSource {
+                    static CLOSED = 2;
+
+                    constructor(url, options) {
+                        this.url = url;
+                        this.readyState = 1;
+                        this.onopen = null;
+                        this.onmessage = null;
+                        this.onerror = null;
+                    }
+
+                    close() {
+                        this.readyState = EventSource.CLOSED;
+                    }
+                }
+
+                var connector = new SseConnector('test-client');
+                connector.connectAll(['http://example.com/xis/events']);
+                var first = connector.eventSource;
+                connector.close();
+                connector.connectEndpoint('http://example.com/xis/events');
+                (first !== connector.eventSource) + '|' + (connector.eventSource !== null);
+                """;
+
+        var result = JSUtil.execute(script, Map.of(
+                "window", window,
+                "document", document,
+                "localStorage", localStorage,
+                "sessionStorage", new SessionStorage(),
+                "console", new Console()
+        )).asString();
+
+        assertThat(result).isEqualTo("true|true");
+    }
+
+    @Test
+    void ensureEventConnectionReturnsReconnectPromise() throws ScriptException {
         var localStorage = new LocalStorage();
         localStorage.setItem("xis.clientId", "test-client");
 
@@ -298,17 +348,18 @@ class ApplicationSseTest {
 
                 + """
                 var ensureCalls = 0;
+                var reconnectPromise = new Promise(resolve => {});
                 var app = {
                     eventConnector: {
                         ensureConnected: function() {
                             ensureCalls++;
-                            return new Promise(resolve => {});
+                            return reconnectPromise;
                         }
                     }
                 };
                 var connector = new HttpConnector('test-client');
                 var promise = connector.ensureEventConnection();
-                ensureCalls + '|' + (promise instanceof Promise);
+                ensureCalls + '|' + (promise === reconnectPromise);
                 """;
 
         var result = JSUtil.execute(script, Map.of(

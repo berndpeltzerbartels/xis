@@ -114,8 +114,7 @@ class HttpConnector {
             return Promise.resolve();
         }
         if (typeof app.eventConnector.ensureConnected === 'function') {
-            app.eventConnector.ensureConnected();
-            return Promise.resolve();
+            return app.eventConnector.ensureConnected();
         } else if (typeof app.eventConnector.isConnected === 'function'
                 && typeof app.eventConnector.reconnect === 'function'
                 && !app.eventConnector.isConnected()) {

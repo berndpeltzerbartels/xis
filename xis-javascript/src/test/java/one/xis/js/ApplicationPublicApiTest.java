@@ -28,6 +28,15 @@ class ApplicationPublicApiTest {
                     constructor() {
                         this.eventPublisher = {};
                         this.history = { onPopState(event) {} };
+                        this.eventConnector = {
+                            closed: false,
+                            isConnected() {
+                                return !this.closed;
+                            },
+                            close() {
+                                this.closed = true;
+                            }
+                        };
                         this.pageController = {
                             displayPageForUrl(url) {
                                 opened = url;
@@ -63,6 +72,9 @@ class ApplicationPublicApiTest {
                     window.XIS.addElFunction !== undefined,
                     window.XIS.submitForm('moveForm', 'doMove'),
                     window.XIS.openPage('/customers.html'),
+                    window.XIS.isEventStreamConnected(),
+                    window.XIS.closeEventStreams(),
+                    window.XIS.isEventStreamConnected(),
                     customFunctionResult,
                     submitted,
                     opened
@@ -71,6 +83,6 @@ class ApplicationPublicApiTest {
 
         var result = JSUtil.execute(script, Map.of("window", window)).asString();
 
-        assertThat(result).isEqualTo("true|true|true|true|true|moveForm:doMove|opened:/customers.html|M|moveForm:doMove|/customers.html");
+        assertThat(result).isEqualTo("true|true|true|true|true|moveForm:doMove|opened:/customers.html|true||false|M|moveForm:doMove|/customers.html");
     }
 }
