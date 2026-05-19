@@ -10,8 +10,9 @@ template, and action model; only the application entry point and dependencies di
 - Java 17 or newer
 - Gradle 8 or newer
 
-Java is the shortest path through this quickstart. XIS also supports Groovy 4+ controllers and form DTOs; see
-[Groovy support](groovy.md) when you want to write the server-side code in Groovy.
+Java is the shortest path through this quickstart. XIS also supports Groovy 4+ and Kotlin controllers and form DTOs; see
+[Groovy support](groovy.md) and [Kotlin support](kotlin.md) when you want to write the server-side code in another JVM
+language.
 
 ## Gradle Setup
 

@@ -119,8 +119,9 @@ the form gets a neutral `save` action name that you can edit.
 The generator intentionally produces plain HTML. It does not try to design the page, choose domain wording, or decide
 the final layout for you. Treat the result as a first executable template that already knows the controller contract.
 
-When the project also applies the Groovy plugin, `xisTemplates` scans Groovy page and frontlet controllers too. For Groovy
-controllers, generated templates are written under `src/main/resources` with the controller package path.
+When the project also applies the Groovy or Kotlin plugin, `xisTemplates` scans those page and frontlet controllers too.
+For Groovy and Kotlin controllers, generated templates are written under `src/main/resources` with the controller package
+path.
 
 ## `xisTests`
 
@@ -164,7 +165,8 @@ The test starter needed for this generated code is added automatically by the pl
 `xis-boot-starter-test` again in a normal plugin-based build.
 
 When the project also applies the Groovy plugin, `xisTests` scans Groovy page controllers too and writes Groovy starter
-tests under `src/test/groovy`.
+tests under `src/test/groovy`. Kotlin controllers are scanned for template validation and runtime catalogs; write Kotlin
+tests manually or use generated Java tests as a starting point.
 
 This supports a TDD-style workflow:
 
@@ -238,9 +240,9 @@ java -jar build/libs/my-app-1.0-SNAPSHOT.jar
 `xisJar` requires exactly one application class annotated with `@XISBootApplication`. The XIS annotation processor
 uses that class to generate the executable entry point.
 
-When the project also applies the Groovy plugin, the `@XISBootApplication` class may be Groovy. The XIS plugin enables
-annotation processing for Groovy compilation and packages Java classes, Groovy classes, resources, and the generated
-runner into the XIS jar.
+When the project also applies the Groovy or Kotlin plugin, the `@XISBootApplication` class may be written in that
+language. The XIS plugin packages Java, Groovy, or Kotlin classes, templates, resources, and the generated runner into
+the XIS jar.
 
 ## `xisRun`
 

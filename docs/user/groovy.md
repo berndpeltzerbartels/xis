@@ -8,7 +8,8 @@ controllers declare pages, model data, form data, and actions; HTML templates de
 This can be useful when a team wants a lighter JVM syntax while keeping the XIS model: no separate client build, no
 hand-written REST layer for normal interactions, and the same validation and form handling used by Java applications.
 
-Java remains the primary and fastest path. Groovy support does not change the runtime path for Java applications.
+Groovy support does not change the runtime path for Java or Kotlin applications. For GraalVM native executables, use
+Java or Kotlin; Groovy is supported on the JVM path.
 
 ## Requirements
 
@@ -157,8 +158,8 @@ Groovy code brings parts of the Groovy runtime into the GraalVM native-image ana
 dynamic call-site infrastructure. That currently makes native builds fail before the application can be treated like a
 normal XIS native application.
 
-Use Java for applications that should be compiled with `xis-boot-native`. Groovy support may become possible later, but
-it needs dedicated Groovy/GraalVM work and is not part of the supported native workflow today.
+Use Java or Kotlin for applications that should be compiled with `xis-boot-native`. Groovy support may become possible
+later, but it needs dedicated Groovy/GraalVM work and is not part of the supported native workflow today.
 
 ## Tested Behavior
 

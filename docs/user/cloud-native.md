@@ -65,13 +65,16 @@ class Application {
 
 For native images, the generated runner uses generated catalogs instead of runtime package scanning.
 
-## Java And Groovy
+## Java, Kotlin, And Groovy
 
-XIS Boot Native currently supports Java applications. Groovy controllers and forms are supported on the JVM path, but
-not as GraalVM native images. Even with static Groovy compilation, the Groovy runtime can make dynamic call-site and
-meta-class infrastructure reachable during native-image analysis.
+XIS Boot Native supports Java and Kotlin applications. The Gradle plugin generates component catalogs, resource
+metadata, reflection/proxy configuration, and the native runner for both source layouts.
 
-If an application must be compiled with `xis-boot-native`, write the native application code in Java.
+Groovy controllers and forms are supported on the JVM path, but not as GraalVM native images. Even with static Groovy
+compilation, the Groovy runtime can make dynamic call-site and meta-class infrastructure reachable during native-image
+analysis.
+
+If an application must be compiled with `xis-boot-native`, write the native application code in Java or Kotlin.
 
 ## Database Modules
 
