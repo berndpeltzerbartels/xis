@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.12.0 - 2026-05-19
+
 ### Added
 
 - Added Kotlin support for XIS Boot applications, including component catalog generation, Kotlin-side template resources,

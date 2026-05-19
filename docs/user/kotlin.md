@@ -19,7 +19,7 @@ Use the Kotlin JVM plugin together with the XIS Gradle plugin:
 plugins {
     id "java"
     id "org.jetbrains.kotlin.jvm" version "2.0.21"
-    id "one.xis.plugin" version "0.11.2"
+    id "one.xis.plugin" version "0.12.0"
 }
 
 repositories {
@@ -115,6 +115,11 @@ class KotlinForm(
 The action receives a deserialized `KotlinForm`. XIS validates the form before the action runs. If validation fails, the
 action is not called, the submitted values stay visible, and validation messages/classes are rendered like in Java and
 Groovy controllers.
+
+For form and model DTOs, prefer mutable properties with defaults or nullable properties. XIS creates and fills these
+objects from Java-side framework code. Kotlin non-null types are compile-time contracts for Kotlin callers, but Java
+reflection can still leave a property unset or pass `null` into generated accessors. Defaults like `var name: String = ""`
+are therefore friendlier than `lateinit var name: String` or constructor-only DTOs without defaults.
 
 ## Template Location
 

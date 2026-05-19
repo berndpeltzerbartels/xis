@@ -16,7 +16,7 @@ Use `xis-boot-native` instead of `xis-boot`:
 ```groovy
 plugins {
     id "java"
-    id "one.xis.plugin" version "0.11.2"
+    id "one.xis.plugin" version "0.12.0"
 }
 
 repositories {
