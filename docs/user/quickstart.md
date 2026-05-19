@@ -237,13 +237,46 @@ class CounterPage {
 </head>
 <body>
     <h1>Counter</h1>
-    <p>Current count: ${count}</p>
-    <button xis:action="increment">Increment</button>
+    <p>Current count: <span id="count">${count}</span></p>
+    <button id="increment" xis:action="increment">Increment</button>
 </body>
 </html>
 ```
 
 The action is invoked through XIS. You do not create a REST endpoint for it.
+
+You can generate the test file with `./gradlew xisTests`; you do not have to create the boilerplate yourself. The
+generated file is intentionally small, so make the behavior explicit by adding the click and assertions:
+
+`src/test/java/example/dashboard/CounterPageTest.java`
+
+```java
+package example.dashboard;
+
+import one.xis.boot.test.XisBootTest;
+import one.xis.context.IntegrationTestContext;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+@XisBootTest
+class CounterPageTest {
+
+    private IntegrationTestContext context;
+
+    @Test
+    void incrementUpdatesCounter() {
+        var client = context.openPage("/counter.html");
+        var document = client.getDocument();
+
+        assertEquals("0", document.getElementById("count").getInnerText());
+
+        document.getElementById("increment").click();
+
+        assertEquals("1", document.getElementById("count").getInnerText());
+    }
+}
+```
 
 ## Add a Form With Validation
 
