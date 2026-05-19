@@ -11,7 +11,7 @@ Use the plugin when you want the usual XIS layout:
 ```groovy
 plugins {
     id "java"
-    id "one.xis.plugin" version "0.11.1"
+    id "one.xis.plugin" version "0.11.2"
 }
 ```
 
@@ -136,20 +136,26 @@ For the same page controller, the task creates:
 src/test/java/example/dashboard/DashboardPageTest.java
 ```
 
-The generated test uses `@XisBootTest`, receives an `IntegrationTestContext` field, and opens the page through its
-`@Page` URL. It is meant as a first executable sketch, not as a finished test suite:
+The generated test creates an `IntegrationTestContext` in `@BeforeEach`, explicitly registers the page controller, and
+opens the page through its `@Page` URL. It is meant as a first executable sketch, not as a finished test suite:
 
 ```java
-import one.xis.boot.test.XisBootTest;
 import one.xis.context.IntegrationTestContext;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@XisBootTest
 class DashboardPageTest {
 
     private IntegrationTestContext context;
+
+    @BeforeEach
+    void setUp() {
+        context = IntegrationTestContext.builder()
+                .withSingleton(DashboardPage.class)
+                .build();
+    }
 
     @Test
     void test() {
@@ -281,7 +287,7 @@ Without the plugin, add the dependency that matches the style of test you want:
 
 ```groovy
 dependencies {
-    testImplementation "one.xis:xis-boot-starter-test:0.11.1"
+    testImplementation "one.xis:xis-boot-starter-test:0.11.2"
 }
 ```
 

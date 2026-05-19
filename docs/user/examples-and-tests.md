@@ -33,22 +33,28 @@ the task creates:
 src/test/java/example/dashboard/DashboardPageTest.java
 ```
 
-The generated test uses `@XisBootTest`, gets an `IntegrationTestContext` field, opens the page URL from `@Page`, and
-starts with a minimal document assertion. It does not overwrite an existing test file:
+The generated test creates an `IntegrationTestContext` in `@BeforeEach`, registers the page controller explicitly, opens
+the page URL from `@Page`, and starts with a minimal document assertion. It does not overwrite an existing test file:
 
 ```java
 package example.dashboard;
 
-import one.xis.boot.test.XisBootTest;
 import one.xis.context.IntegrationTestContext;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@XisBootTest
 class DashboardPageTest {
 
     private IntegrationTestContext context;
+
+    @BeforeEach
+    void setUp() {
+        context = IntegrationTestContext.builder()
+                .withSingleton(DashboardPage.class)
+                .build();
+    }
 
     @Test
     void test() {
@@ -316,12 +322,12 @@ repositories {
 }
 
 dependencies {
-    testImplementation "one.xis:xis-boot-starter-test:0.11.1"
+    testImplementation "one.xis:xis-boot-starter-test:0.11.2"
 }
 ```
 
-Use this for `@XisBootTest` and generated-test style. If you only use the lower-level `IntegrationTestContext` builder
-and configure JUnit yourself, `one.xis:xis-test` is enough.
+Use this for `@XisBootTest`, generated-test style, and JUnit Jupiter. If you only use the lower-level
+`IntegrationTestContext` builder and configure JUnit yourself, `one.xis:xis-test` is enough.
 
 ## What To Test Where
 

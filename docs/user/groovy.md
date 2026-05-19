@@ -20,7 +20,7 @@ Use Groovy 4 or newer:
 plugins {
     id "java"
     id "groovy"
-    id "one.xis.plugin" version "0.11.1"
+    id "one.xis.plugin" version "0.11.2"
 }
 
 repositories {
@@ -135,8 +135,9 @@ Groovy controllers:
 ```
 
 For Groovy controllers, generated templates are written below `src/main/resources` using the controller package path.
-Generated starter integration tests are Groovy tests below `src/test/groovy`. They use the same `@XisBootTest` test
-starter as generated Java tests; the XIS Gradle plugin adds that dependency automatically.
+Generated starter integration tests are Groovy tests below `src/test/groovy`. They create an `IntegrationTestContext` in
+`@BeforeEach`, register the Groovy page controller explicitly, and use the test starter dependency that the XIS Gradle
+plugin adds automatically.
 
 The same controller-first workflow applies to Groovy: sketch the page or frontlet class and its `@ModelData`,
 `@FormData`, and `@Action` methods before running `xisTemplates`. The generated template then reflects that controller
