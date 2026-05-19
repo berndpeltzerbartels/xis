@@ -372,12 +372,21 @@ task validateReleaseArtifacts {
         def currentGroup = project.group.toString()
         def missingArtifacts = []
         def missingDependencies = []
+        def invalidPomMetadata = []
 
         coordinates.each { coordinate ->
             def pomFile = releasePomFile(coordinate)
             if (!pomFile.exists()) {
                 missingArtifacts << "${coordinate}:${currentVersion} is missing ${pomFile.name}"
                 return
+            }
+
+            def pom = new XmlSlurper(false, false).parse(pomFile)
+            if (pom.developers.developer.size() == 0) {
+                invalidPomMetadata << "${coordinate}:${currentVersion} is missing developer information"
+            }
+            if (pom.scm.size() == 0 || pom.scm.connection.text().trim().isEmpty() || pom.scm.url.text().trim().isEmpty()) {
+                invalidPomMetadata << "${coordinate}:${currentVersion} is missing SCM information"
             }
 
             releaseModuleDependencies(releaseModuleFile(coordinate))
@@ -391,8 +400,8 @@ task validateReleaseArtifacts {
                     }
         }
 
-        if (!missingArtifacts.isEmpty() || !missingDependencies.isEmpty()) {
-            throw new GradleException((missingArtifacts + missingDependencies).join(System.lineSeparator()))
+        if (!missingArtifacts.isEmpty() || !missingDependencies.isEmpty() || !invalidPomMetadata.isEmpty()) {
+            throw new GradleException((missingArtifacts + missingDependencies + invalidPomMetadata).join(System.lineSeparator()))
         }
 
         def pluginCoordinate = "${currentGroup}:xis-plugin"
