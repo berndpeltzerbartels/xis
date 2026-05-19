@@ -21,8 +21,8 @@ import java.util.stream.Collectors;
 
 public class XISGenerateNativeProxyConfigTask extends DefaultTask {
 
-    private static final Pattern PACKAGE_PATTERN = Pattern.compile("^\\s*package\\s+([a-zA-Z0-9_.]+)\\s*;", Pattern.MULTILINE);
-    private static final Pattern INTERFACE_PATTERN = Pattern.compile("(?:(?:public|protected|private|abstract|static|sealed|non-sealed|strictfp)\\s+)*interface\\s+([A-Za-z_$][A-Za-z0-9_$]*)\\b");
+    private static final Pattern PACKAGE_PATTERN = Pattern.compile("^\\s*package\\s+([a-zA-Z0-9_.]+)\\s*;?", Pattern.MULTILINE);
+    private static final Pattern INTERFACE_PATTERN = Pattern.compile("(?:(?:public|protected|private|abstract|static|sealed|non-sealed|strictfp|internal)\\s+)*interface\\s+([A-Za-z_$][A-Za-z0-9_$]*)\\b");
 
     private final ConfigurableFileCollection sourceFiles = getProject().files();
     private final DirectoryProperty outputDirectory = getProject().getObjects().directoryProperty();
@@ -50,7 +50,7 @@ public class XISGenerateNativeProxyConfigTask extends DefaultTask {
     private Set<String> scanProxyInterfaces() throws IOException {
         var proxyInterfaces = new LinkedHashSet<String>();
         for (File sourceFile : sourceFiles.getFiles().stream().sorted(Comparator.comparing(File::getPath)).toList()) {
-            if (!sourceFile.isFile() || !sourceFile.getName().endsWith(".java")) {
+            if (!sourceFile.isFile() || !(sourceFile.getName().endsWith(".java") || sourceFile.getName().endsWith(".kt"))) {
                 continue;
             }
             var source = Files.readString(sourceFile.toPath(), StandardCharsets.UTF_8);

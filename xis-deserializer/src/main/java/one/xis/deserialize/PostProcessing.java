@@ -8,7 +8,9 @@ import one.xis.utils.lang.ClassUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
@@ -32,7 +34,7 @@ public class PostProcessing {
                 continue;
             }
             var context = new DeserializationContext(path, target, annotation.annotationType(), userContext);
-            recursiveProcess(context, annotation.annotationType(), value, results);
+            recursiveProcess(context, annotation.annotationType(), value, results, new HashSet<>());
         }
     }
 
@@ -42,13 +44,20 @@ public class PostProcessing {
                 continue;
             }
             var context = new DeserializationContext(path, target, annotation.annotationType(), userContext);
-            recursiveProcess(context, annotation.annotationType(), value, results);
+            recursiveProcess(context, annotation.annotationType(), value, results, new HashSet<>());
         }
     }
 
-    private void recursiveProcess(@NonNull DeserializationContext context, @NonNull AnnotatedElement currentElement, @NonNull Object value, @NonNull PostProcessingResults results) {
+    private void recursiveProcess(@NonNull DeserializationContext context,
+                                  @NonNull AnnotatedElement currentElement,
+                                  @NonNull Object value,
+                                  @NonNull PostProcessingResults results,
+                                  @NonNull Set<Class<? extends Annotation>> visitedAnnotationTypes) {
         for (var annotation : currentElement.getAnnotations()) {
             if (isJavaAnnotation(annotation)) {
+                continue;
+            }
+            if (!visitedAnnotationTypes.add(annotation.annotationType())) {
                 continue;
             }
             if (annotation.annotationType().equals(PostProcessor.class)) {
@@ -59,7 +68,7 @@ public class PostProcessing {
                 var postProcessor = getPostProcessor(postProcessorClass);
                 postProcessor.postProcess(context, value, results);
             }
-            recursiveProcess(context, annotation.annotationType(), value, results);
+            recursiveProcess(context, annotation.annotationType(), value, results, visitedAnnotationTypes);
         }
     }
 

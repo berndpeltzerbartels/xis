@@ -109,6 +109,8 @@ public class XISPlugin implements Plugin<Project> {
             sync.from(project.file("src/main/java"), copy -> copy.include("**/*.html"));
             project.getPlugins().withId("groovy", plugin ->
                     sync.from(project.file("src/main/groovy"), copy -> copy.include("**/*.html")));
+            project.getPlugins().withId("org.jetbrains.kotlin.jvm", plugin ->
+                    sync.from(project.file("src/main/kotlin"), copy -> copy.include("**/*.html")));
         });
     }
 
@@ -155,6 +157,7 @@ public class XISPlugin implements Plugin<Project> {
         var generateFrameworkComponents = project.getTasks().register("xisGenerateFrameworkComponents",
                 XISGenerateFrameworkComponentsTask.class, task -> {
                     task.getSourceFiles().from(project.fileTree("src/main/java", tree -> tree.include("**/*.java")));
+                    task.getSourceFiles().from(project.fileTree("src/main/kotlin", tree -> tree.include("**/*.kt")));
                     task.getOutputDirectory().set(generatedFrameworkComponentsDir);
                     task.getRegistryIndexOutputDirectory().set(generatedFrameworkComponentIndexDir);
                     task.getProjectName().set(project.getName());
@@ -163,6 +166,8 @@ public class XISPlugin implements Plugin<Project> {
         main.getJava().srcDir(generatedFrameworkComponentsDir);
         main.getResources().srcDir(generatedFrameworkComponentIndexDir);
         project.getTasks().named("compileJava").configure(task -> task.dependsOn(generateFrameworkComponents));
+        project.getTasks().matching(task -> task.getName().equals("compileKotlin"))
+                .configureEach(task -> task.dependsOn(generateFrameworkComponents));
         project.getTasks().named("processResources").configure(task -> task.dependsOn(generateFrameworkComponents));
         project.getTasks().matching(task -> task.getName().equals("sourcesJar"))
                 .configureEach(task -> task.dependsOn(generateFrameworkComponents));
@@ -175,6 +180,7 @@ public class XISPlugin implements Plugin<Project> {
         var generateNativeClassCatalog = project.getTasks().register("xisGenerateNativeClassCatalog",
                 XISGenerateNativeClassCatalogTask.class, task -> {
                     task.getSourceFiles().from(project.fileTree("src/main/java", tree -> tree.include("**/*.java")));
+                    task.getSourceFiles().from(project.fileTree("src/main/kotlin", tree -> tree.include("**/*.kt")));
                     task.getOutputDirectory().set(generatedNativeClassCatalogDir);
                     task.getProjectName().set(project.getName());
         });
@@ -224,6 +230,7 @@ public class XISPlugin implements Plugin<Project> {
         var generateNativeRunner = project.getTasks().register("xisGenerateNativeRunner",
                 XISGenerateNativeRunnerTask.class, task -> {
                     task.getSourceFiles().from(project.fileTree("src/main/java", tree -> tree.include("**/*.java")));
+                    task.getSourceFiles().from(project.fileTree("src/main/kotlin", tree -> tree.include("**/*.kt")));
                     task.getOutputDirectory().set(generatedNativeRunnerDir);
                 });
 
@@ -272,6 +279,7 @@ public class XISPlugin implements Plugin<Project> {
         var generateNativeProxyConfig = project.getTasks().register("xisGenerateNativeProxyConfig",
                 XISGenerateNativeProxyConfigTask.class, task -> {
                     task.getSourceFiles().from(project.fileTree("src/main/java", tree -> tree.include("**/*.java")));
+                    task.getSourceFiles().from(project.fileTree("src/main/kotlin", tree -> tree.include("**/*.kt")));
                     task.getOutputDirectory().set(generatedNativeProxyConfigDir);
                 });
 
@@ -283,6 +291,8 @@ public class XISPlugin implements Plugin<Project> {
                     task.getApplicationResourceRoots().from(project.getLayout().getProjectDirectory().dir("src/main/java"));
                     project.getPlugins().withId("groovy", plugin ->
                             task.getApplicationResourceRoots().from(project.getLayout().getProjectDirectory().dir("src/main/groovy")));
+                    project.getPlugins().withId("org.jetbrains.kotlin.jvm", plugin ->
+                            task.getApplicationResourceRoots().from(project.getLayout().getProjectDirectory().dir("src/main/kotlin")));
                     task.getClasspathFiles().from(project.getConfigurations().getByName("runtimeClasspath"));
                     task.getOutputDirectory().set(generatedNativeResourceCatalogDir);
                 });
