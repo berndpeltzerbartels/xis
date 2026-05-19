@@ -54,7 +54,7 @@ class XisThemeMessageHandler {
         toastDiv.classList.add('toast');
         toastDiv.classList.add(level);
         toastContainer.appendChild(toastDiv);
-        toastDiv.innerHTML = message;
+        toastDiv.textContent = message == null ? '' : String(message);
         setTimeout(() => toastDiv.remove(), 5000);
     }
 }

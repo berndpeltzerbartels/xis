@@ -68,7 +68,7 @@ repositories {
 dependencies {
     implementation "one.xis:xis-boot" // or xis-spring
     implementation "one.xis:xis-sql"
-    runtimeOnly "org.postgresql:postgresql:42.7.4" // or another JDBC driver
+    runtimeOnly "org.postgresql:postgresql:42.7.11" // or another JDBC driver
     runtimeOnly "com.zaxxer:HikariCP:5.1.0"
 }
 ```

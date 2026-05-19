@@ -60,7 +60,7 @@ dependencies {
 
     // Implementation dependencies
     implementation "org.projectlombok:lombok:$lombokVersion"
-    implementation "dom4j:dom4j:$dom4jVersion" // TODO: Version
+    implementation "org.dom4j:dom4j:$dom4jVersion"
     implementation "org.slf4j:slf4j-api:$slf4jVersion"
     implementation "com.fasterxml.jackson.core:jackson-databind:$jacksonDatabindVersion"
     implementation "org.slf4j:slf4j-api:$slf4jVersion"

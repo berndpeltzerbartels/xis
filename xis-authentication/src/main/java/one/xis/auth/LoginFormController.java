@@ -84,11 +84,21 @@ class LoginFormController<U extends UserInfo> {
     }
 
     private String redirectUrl(String redirectUrl) {
-        if (redirectUrl != null && !redirectUrl.isBlank()) {
-            return redirectUrl;
+        if (isSafeLocalRedirect(redirectUrl)) {
+            return redirectUrl.trim();
         }
         String welcomePageId = clientConfigService.getConfig().getWelcomePageId();
         return welcomePageId == null || welcomePageId.isBlank() ? "/" : welcomePageId;
+    }
+
+    private boolean isSafeLocalRedirect(String redirectUrl) {
+        if (redirectUrl == null || redirectUrl.isBlank()) {
+            return false;
+        }
+        String value = redirectUrl.trim();
+        return value.startsWith("/")
+                && !value.startsWith("//")
+                && value.chars().noneMatch(ch -> ch < 0x20 || ch == 0x7f);
     }
 
     record LoginFactorRegistrationLink(String url, String text) {
