@@ -240,6 +240,11 @@ public class XISPlugin implements Plugin<Project> {
             task.dependsOn(generateApplicationComponents);
             task.dependsOn(generateNativeRunner);
         });
+        project.getTasks().matching(task -> task.getName().equals("compileKotlin"))
+                .configureEach(task -> {
+                    task.dependsOn(generateApplicationComponents);
+                    task.dependsOn(generateNativeRunner);
+                });
 
         var generateNativeClassCatalog = project.getTasks().named("xisGenerateNativeClassCatalog",
                 XISGenerateNativeClassCatalogTask.class);
