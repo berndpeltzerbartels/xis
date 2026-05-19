@@ -433,6 +433,7 @@ public class XISPlugin implements Plugin<Project> {
         project.getTasks().register("xisTests", XISTestTask.class, task -> {
             task.setGroup("xis");
             task.setDescription("Scaffolds missing XIS integration tests for page controllers.");
+            task.dependsOn(project.getTasks().named("xisGenerateFrameworkComponents"));
 
             // inputs for javac/AP
             task.setSource(main.getAllJava());
@@ -515,6 +516,7 @@ public class XISPlugin implements Plugin<Project> {
         var groovyTests = project.getTasks().register("xisGroovyTests", XISGroovyTestTask.class, task -> {
             task.setGroup("xis");
             task.setDescription("Scaffolds missing XIS integration tests for Groovy page controllers.");
+            task.dependsOn(project.getTasks().named("xisGenerateFrameworkComponents"));
             task.setSource(groovySources);
             task.setClasspath(main.getCompileClasspath());
             task.getOptions().setAnnotationProcessorPath(apClasspath);

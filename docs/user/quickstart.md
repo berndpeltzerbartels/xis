@@ -113,8 +113,8 @@ The plugin can also generate starter integration tests for page controllers:
 ./gradlew xisTests
 ```
 
-Generated tests use `@XisBootTest`, get an `IntegrationTestContext` field, and open the page through its URL. The
-required XIS test starter is added automatically by the plugin. Generated tests compile before the full page behavior is
+Generated tests create an `IntegrationTestContext` in `@BeforeEach`, register the page controller explicitly, and open
+the page through its URL. The required XIS test starter is added automatically by the plugin. Generated tests compile before the full page behavior is
 implemented, so you can use them for a TDD-style workflow: sketch the page class and its model/form/action methods, run
 `./gradlew xisTemplates xisTests`, edit the generated test until it describes the UI behavior you want, then implement
 the services and refine the template until the test passes.
@@ -195,8 +195,8 @@ To generate a first test skeleton for the page, run:
 ```
 
 This creates `src/test/java/example/dashboard/DashboardPageTest.java` if the file does not already exist. The generated
-test is intentionally small: it uses `@XisBootTest`, receives an `IntegrationTestContext` field, opens `/index.html`,
-and leaves space for assertions against the rendered document.
+test is intentionally small: it creates an `IntegrationTestContext` in `@BeforeEach`, registers the page controller,
+opens `/index.html`, and leaves space for assertions against the rendered document.
 
 ## Add an Action
 

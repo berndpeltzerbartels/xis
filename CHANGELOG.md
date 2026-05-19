@@ -13,6 +13,10 @@
 
 ### Fixed
 
+- Fixed generated XIS starter tests so they create their integration context in `@BeforeEach` and explicitly register the
+  page controller.
+- Added plugin functional coverage that generates starter tests in an external Gradle consumer and runs `gradle test` for
+  Java and Groovy page setups.
 - Fixed SSE reconnect handling after JavaScript encapsulation so actions wait for the restored event stream before
   publishing client events.
 - Kept the internal `window.app` object private while exposing small public `window.XIS` hooks for supported event-stream
