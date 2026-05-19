@@ -10,9 +10,9 @@ import one.xis.context.AppContext;
  * It avoids application package scanning and uses generated direct class
  * references instead.
  */
-public final class XISNativeBootRunner {
+public final class XISBootNativeRunner {
 
-    private XISNativeBootRunner() {
+    private XISBootNativeRunner() {
     }
 
     public static void run(Class<?> applicationClass, String[] args, NativeComponentRegistry... applicationRegistries) {

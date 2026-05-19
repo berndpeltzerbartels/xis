@@ -85,7 +85,7 @@ public class GenerateNativeRunnerTask extends DefaultTask {
                     }
 
                     public static void main(String[] args) {
-                        one.xis.boot.nativeimage.XISNativeBootRunner.run(
+                        one.xis.boot.nativeimage.XISBootNativeRunner.run(
                                 %s.class,
                                 args,
                                 new one.xis.generated.XisGeneratedApplicationComponents());
