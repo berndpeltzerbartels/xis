@@ -28,7 +28,7 @@ plugins {
     id "java"
     id "org.springframework.boot" version "3.3.0"
     id "io.spring.dependency-management" version "1.1.5"
-    id "one.xis.plugin" version "0.11.1"
+    id "one.xis.plugin" version "0.11.2"
 }
 
 group = "example"

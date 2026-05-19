@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.11.2 - 2026-05-19
+
+### Fixed
+
+- Fixed SSE reconnect handling after JavaScript encapsulation so actions wait for the restored event stream before
+  publishing client events.
+- Kept the internal `window.app` object private while exposing small public `window.XIS` hooks for supported event-stream
+  checks.
+- Fixed and documented Groovy template handling so HTML files next to Groovy controllers are copied into runtime
+  resources, while native images remain documented as Java-only for now.
+
 ## 0.11.1 - 2026-05-18
 
 ### Fixed
