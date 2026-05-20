@@ -23,6 +23,7 @@ class ControllerWrapperFactory {
     private final MainDeserializer deserializer;
     private final ControllerMethodResultMapper controllerMethodResultMapper;
     private final ControllerResultMapper controllerResultMapper;
+    private final UploadConfiguration uploadConfiguration;
 
     <W extends ControllerWrapper> W createControllerWrapper(@NonNull String id, @NonNull Object controller, Class<W> wrapperClass) {
         try {
@@ -35,7 +36,6 @@ class ControllerWrapperFactory {
             controllerWrapper.setActionMethods(actionMethodMap(controller));
             controllerWrapper.setSharedValueMethods(sharedValueMethods(controller));
             controllerWrapper.setTitleOnlyMethods(titleOnlyMethods(controller));
-            controllerWrapper.setAddressOnlyMethods(addressOnlyMethods(controller));
             controllerWrapper.setControllerResultMapper(controllerResultMapper);
             return controllerWrapper;
         } catch (Exception e) {
@@ -142,7 +142,7 @@ class ControllerWrapperFactory {
     private ControllerMethod createControllerMethod(Method method) {
         method.setAccessible(true);
         try {
-            return new ControllerMethod(method, deserializer, controllerMethodResultMapper);
+            return new ControllerMethod(method, deserializer, controllerMethodResultMapper, uploadConfiguration);
         } catch (Exception e) {
             throw new RuntimeException("Failed to initialize " + method, e);
         }
@@ -157,12 +157,4 @@ class ControllerWrapperFactory {
                 .collect(Collectors.toSet());
     }
 
-    private Collection<ControllerMethod> addressOnlyMethods(@NonNull Object controller) {
-        return annotatedMethods(controller, Address.class)
-                .filter(m -> !m.isAnnotationPresent(Action.class))
-                .filter(method -> !method.isAnnotationPresent(ModelData.class))
-                .filter(method -> !method.isAnnotationPresent(FormData.class))
-                .map(this::createControllerMethod)
-                .collect(Collectors.toSet());
-    }
 }

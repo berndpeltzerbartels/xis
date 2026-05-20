@@ -30,10 +30,10 @@ public abstract class XISBootRunTask extends JavaExec {
         this.port = port;
     }
 
-    @Option(option = "args", description = "Additional arguments passed to the XIS Boot application.")
-    public void setArgs(String args) {
+    @Option(option = "application-args", description = "Additional arguments passed to the XIS Boot application.")
+    public void setApplicationArgs(String args) {
         applicationArgs.clear();
-        if (!args.isBlank()) {
+        if (args != null && !args.isBlank()) {
             applicationArgs.addAll(List.of(args.split("\\s+")));
         }
     }

@@ -1,17 +1,24 @@
 package one.xis.server;
 
 import one.xis.Action;
+import one.xis.OwnedBy;
 import one.xis.Parameter;
 import one.xis.SharedValue;
+import one.xis.UploadConfiguration;
 import one.xis.UserContext;
 import one.xis.UserContextImpl;
+import one.xis.auth.AuthenticationException;
+import one.xis.auth.AuthorizationException;
 import one.xis.auth.token.SecurityAttributes;
+import one.xis.deserialize.AccessDeniedError;
+import one.xis.deserialize.DeserializationContext;
 import one.xis.deserialize.MainDeserializer;
 import one.xis.deserialize.PostProcessingResults;
 import one.xis.gson.JsonMap;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,8 +37,8 @@ class ControllerMethodParameterTest {
         var request = new ClientRequest();
         request.setActionParameters(JsonMap.of("$0", "\"a2\"", "$1", "\"a4\""));
 
-        var fromParameter = new ControllerMethodParameter(method, method.getParameters()[1], deserializer, 1, 0);
-        var toParameter = new ControllerMethodParameter(method, method.getParameters()[2], deserializer, 2, 1);
+        var fromParameter = new ControllerMethodParameter(method, method.getParameters()[1], deserializer, 1, 0, mock(UploadConfiguration.class));
+        var toParameter = new ControllerMethodParameter(method, method.getParameters()[2], deserializer, 2, 1, mock(UploadConfiguration.class));
 
         assertThat(fromParameter.prepareParameter(request, new PostProcessingResults(), new HashMap<>())).isEqualTo("a2");
         assertThat(toParameter.prepareParameter(request, new PostProcessingResults(), new HashMap<>())).isEqualTo("a4");
@@ -44,8 +51,8 @@ class ControllerMethodParameterTest {
         var request = new ClientRequest();
         request.setActionParameters(JsonMap.of("$0", "\"a2\"", "$1", "\"a4\""));
 
-        var toParameter = new ControllerMethodParameter(method, method.getParameters()[0], deserializer, 0, -1);
-        var fromParameter = new ControllerMethodParameter(method, method.getParameters()[1], deserializer, 1, -1);
+        var toParameter = new ControllerMethodParameter(method, method.getParameters()[0], deserializer, 0, -1, mock(UploadConfiguration.class));
+        var fromParameter = new ControllerMethodParameter(method, method.getParameters()[1], deserializer, 1, -1, mock(UploadConfiguration.class));
 
         assertThat(toParameter.prepareParameter(request, new PostProcessingResults(), new HashMap<>())).isEqualTo("a4");
         assertThat(fromParameter.prepareParameter(request, new PostProcessingResults(), new HashMap<>())).isEqualTo("a2");
@@ -57,7 +64,7 @@ class ControllerMethodParameterTest {
         var deserializer = mockDeserializer();
         var request = new ClientRequest();
         request.setActionParameters(JsonMap.of("$0", "\"a2\""));
-        var parameter = new ControllerMethodParameter(method, method.getParameters()[0], deserializer, 0, -1);
+        var parameter = new ControllerMethodParameter(method, method.getParameters()[0], deserializer, 0, -1, mock(UploadConfiguration.class));
 
         assertThatThrownBy(() -> parameter.prepareParameter(request, new PostProcessingResults(), new HashMap<>()))
                 .isInstanceOf(IllegalStateException.class)
@@ -67,7 +74,7 @@ class ControllerMethodParameterTest {
     @Test
     void userContextDoesNotCountAsPositionalActionArgument() throws Exception {
         var method = TestActions.class.getDeclaredMethod("moveWithUserContext", UserContext.class, String.class, String.class);
-        var controllerMethod = new ControllerMethod(method, mockDeserializer(), mock(ControllerMethodResultMapper.class));
+        var controllerMethod = new ControllerMethod(method, mockDeserializer(), mock(ControllerMethodResultMapper.class), mock(UploadConfiguration.class));
         var request = new ClientRequest();
         request.setActionParameters(JsonMap.of("$0", "\"a2\"", "$1", "\"a4\""));
         var controller = new TestActions();
@@ -82,6 +89,50 @@ class ControllerMethodParameterTest {
         assertThat(controller.to).isEqualTo("a4");
     }
 
+    @Test
+    void accessDeniedPostProcessingResultStopsInvocationWithAuthorizationException() throws Exception {
+        var method = TestActions.class.getDeclaredMethod("secured");
+        var controller = new TestActions();
+        var controllerMethod = accessDeniedControllerMethod(method, false);
+        setAuthenticatedContext();
+
+        assertThatThrownBy(() -> controllerMethod.invoke(new ClientRequest(), controller, new HashMap<>()))
+                .isInstanceOf(AuthorizationException.class)
+                .hasMessageContaining("not owned");
+        assertThat(controller.invoked).isFalse();
+    }
+
+    @Test
+    void authenticationRequiredPostProcessingResultStopsInvocationWithAuthenticationException() throws Exception {
+        var method = TestActions.class.getDeclaredMethod("secured");
+        var controller = new TestActions();
+        var controllerMethod = accessDeniedControllerMethod(method, true);
+        setAuthenticatedContext();
+
+        assertThatThrownBy(() -> controllerMethod.invoke(new ClientRequest(), controller, new HashMap<>()))
+                .isInstanceOf(AuthenticationException.class)
+                .isNotInstanceOf(AuthorizationException.class)
+                .hasMessageContaining("not authenticated");
+        assertThat(controller.invoked).isFalse();
+    }
+
+    private ControllerMethod accessDeniedControllerMethod(java.lang.reflect.Method method, boolean authenticationRequired) {
+        return new ControllerMethod(method, mockDeserializer(), mock(ControllerMethodResultMapper.class), mock(UploadConfiguration.class)) {
+            @Override
+            protected Object[] prepareArgs(java.lang.reflect.Method method, ClientRequest request, PostProcessingResults postProcessingResults, Map<String, Object> requestScope) {
+                var message = authenticationRequired ? "not authenticated" : "not owned";
+                postProcessingResults.add(new AccessDeniedError(new DeserializationContext("/model", method, OwnedBy.class, UserContext.getInstance()), message, authenticationRequired));
+                return new Object[0];
+            }
+        };
+    }
+
+    private void setAuthenticatedContext() {
+        var securityAttributes = mock(SecurityAttributes.class);
+        when(securityAttributes.getRoles()).thenReturn(Set.of());
+        UserContextImpl.getInstance().setSecurityAttributes(securityAttributes);
+    }
+
     private MainDeserializer mockDeserializer() {
         var deserializer = mock(MainDeserializer.class);
         when(deserializer.deserialize(eq("\"a2\""), any(), any(), any())).thenReturn("a2");
@@ -94,6 +145,7 @@ class ControllerMethodParameterTest {
         UserContext userContext;
         String from;
         String to;
+        boolean invoked;
 
         @Action
         void move(@SharedValue("game") Object game, @Parameter String from, @Parameter String to) {
@@ -112,6 +164,11 @@ class ControllerMethodParameterTest {
 
         @Action
         void invalidZeroIndex(@Parameter(index = 0) String ignored) {
+        }
+
+        @Action
+        void secured() {
+            invoked = true;
         }
     }
 }

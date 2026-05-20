@@ -4,21 +4,27 @@ import one.xis.html.HtmlParser;
 import one.xis.html.document.HtmlDocument;
 import one.xis.resource.Resource;
 
+import java.util.Collection;
+import java.util.List;
+
 class HtmlDocumentResource implements Resource {
     private final Resource source;
     private final HtmlParser htmlParser;
     private final Class<?> controllerClass;
     private final String type;
     private final String resourcePath;
+    private final Collection<HtmlDocumentTransformer> transformers;
     private volatile HtmlDocument document;
     private volatile long lastModified;
 
-    HtmlDocumentResource(Resource source, HtmlParser htmlParser, Class<?> controllerClass, String type) {
+    HtmlDocumentResource(Resource source, HtmlParser htmlParser, Class<?> controllerClass, String type,
+                         Collection<HtmlDocumentTransformer> transformers) {
         this.source = source;
         this.htmlParser = htmlParser;
         this.controllerClass = controllerClass;
         this.type = type;
         this.resourcePath = source.getResourcePath();
+        this.transformers = transformers;
         reload();
     }
 
@@ -28,6 +34,7 @@ class HtmlDocumentResource implements Resource {
         this.controllerClass = null;
         this.type = null;
         this.resourcePath = resourcePath;
+        this.transformers = List.of();
         this.document = document;
     }
 
@@ -72,7 +79,7 @@ class HtmlDocumentResource implements Resource {
             return;
         }
         try {
-            document = htmlParser.parse(source.getContent());
+            document = transform(htmlParser.parse(source.getContent()));
             lastModified = source.getLastModified();
         } catch (Exception e) {
             throw new IllegalStateException(
@@ -85,5 +92,13 @@ class HtmlDocumentResource implements Resource {
                     e
             );
         }
+    }
+
+    private HtmlDocument transform(HtmlDocument parsedDocument) {
+        var transformedDocument = parsedDocument;
+        for (var transformer : transformers) {
+            transformedDocument = transformer.transform(transformedDocument);
+        }
+        return transformedDocument;
     }
 }

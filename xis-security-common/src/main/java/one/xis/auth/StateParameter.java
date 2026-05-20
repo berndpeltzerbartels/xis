@@ -44,7 +44,7 @@ public class StateParameter {
         String payloadJson = new String(SecurityUtil.decodeBase64UrlSafe(encodedPayload), StandardCharsets.UTF_8);
         StateParameterPayload payload = gson.fromJson(payloadJson, StateParameterPayload.class);
         String expectedSignature = SecurityUtil.signHmacSHA256(encodedPayload, stateSignatureKey);
-        if (!expectedSignature.equals(signature)) {
+        if (!SecurityUtil.secureEquals(expectedSignature, signature)) {
             throw new InvalidStateParameterException("Invalid state parameter signature", payload);
         }
         return payload;
@@ -62,7 +62,7 @@ public class StateParameter {
 
     private StateParameterPayload verifyStateParameter(@NonNull String encodedPayload, String signature) {
         String expectedSignature = SecurityUtil.signHmacSHA256(encodedPayload, stateSignatureKey);
-        if (!expectedSignature.equals(signature)) {
+        if (!SecurityUtil.secureEquals(expectedSignature, signature)) {
             throw new InvalidStateParameterException();
         }
         String payloadJson = new String(SecurityUtil.decodeBase64UrlSafe(encodedPayload));

@@ -5,13 +5,16 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import one.xis.*;
 import one.xis.auth.AuthenticationException;
-import one.xis.auth.URLForbiddenException;
+import one.xis.auth.AuthorizationException;
+import one.xis.auth.AccessForbiddenException;
+import one.xis.deserialize.AccessDeniedError;
 import one.xis.deserialize.MainDeserializer;
 import one.xis.deserialize.PostProcessingResults;
 import one.xis.http.HttpRequest;
 import one.xis.http.HttpResponse;
 import one.xis.http.RequestContext;
 import one.xis.security.SecurityUtil;
+import one.xis.utils.lang.MethodUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -19,6 +22,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -30,12 +34,14 @@ class ControllerMethod {
     protected final MainDeserializer deserializer;
     protected final ControllerMethodResultMapper controllerMethodResultMapper;
     protected final ControllerMethodParameter[] controllerMethodParameters;
+    protected final UploadConfiguration uploadConfiguration;
     private Collection<String> updateEventKeys = new HashSet<>();
 
-    ControllerMethod(Method method, MainDeserializer deserializer, ControllerMethodResultMapper controllerMethodResultMapper) {
+    ControllerMethod(Method method, MainDeserializer deserializer, ControllerMethodResultMapper controllerMethodResultMapper, UploadConfiguration uploadConfiguration) {
         this.method = method;
         this.deserializer = deserializer;
         this.controllerMethodResultMapper = controllerMethodResultMapper;
+        this.uploadConfiguration = uploadConfiguration;
         this.controllerMethodParameters = new ControllerMethodParameter[method.getParameterCount()];
         var positionalParameterIndex = 0;
         for (var i = 0; i < method.getParameterCount(); i++) {
@@ -44,7 +50,7 @@ class ControllerMethod {
             if (isImplicitPositionalParameter(parameter)) {
                 assignedPositionalIndex = positionalParameterIndex++;
             }
-            controllerMethodParameters[i] = new ControllerMethodParameter(method, parameter, deserializer, i, assignedPositionalIndex);
+            controllerMethodParameters[i] = new ControllerMethodParameter(method, parameter, deserializer, i, assignedPositionalIndex, uploadConfiguration);
         }
         if (method.isAnnotationPresent(Action.class)) {
             this.updateEventKeys.addAll(Arrays.asList(method.getAnnotation(Action.class).updateEventKeys()));
@@ -69,6 +75,7 @@ class ControllerMethod {
                 || parameter.getType().equals(RequestContext.class)
                 || UserContext.class.isAssignableFrom(parameter.getType())
                 || parameter.isAnnotationPresent(FormData.class)
+                || parameter.isAnnotationPresent(Upload.class)
                 || parameter.isAnnotationPresent(UserId.class)
                 || parameter.isAnnotationPresent(ClientId.class)
                 || parameter.isAnnotationPresent(QueryParameter.class)
@@ -86,7 +93,7 @@ class ControllerMethod {
         var postProcessingResults = new PostProcessingResults();
         var args = prepareArgs(method, request, postProcessingResults, requestScope);
         if (postProcessingResults.authenticate()) {
-            // TODO
+            throwAccessDenied(postProcessingResults);
         }
         var controllerMethodResult = new ControllerMethodResult();
         controllerMethodResultMapper.mapRequestToResult(request, controllerMethodResult);
@@ -100,8 +107,8 @@ class ControllerMethod {
         } catch (InvocationTargetException e) {
             if (e.getCause() instanceof AuthenticationException) {
                 throw (AuthenticationException) e.getCause();
-            } else if (e.getCause() instanceof URLForbiddenException) {
-                throw (URLForbiddenException) e.getCause();
+            } else if (e.getCause() instanceof AccessForbiddenException) {
+                throw (AccessForbiddenException) e.getCause();
             } else {
                 log.error("Error invoking controller method: " + method.getName(), e);
                 throw new RuntimeException("Error invoking controller method: " + method.getName(), e);
@@ -140,6 +147,17 @@ class ControllerMethod {
         return null;
     }
 
+    Optional<String> getModelDataKey() {
+        if (!method.isAnnotationPresent(ModelData.class)) {
+            return Optional.empty();
+        }
+        var modelData = method.getAnnotation(ModelData.class);
+        if (!modelData.value().isEmpty()) {
+            return Optional.of(modelData.value());
+        }
+        return Optional.of(MethodUtils.propertyNameByGetter(method).orElse(method.getName()));
+    }
+
     Collection<String> getParameterRequestScopeKeys() {
         return Stream.of(method.getParameters())
                 .filter(p -> p.isAnnotationPresent(SharedValue.class))
@@ -153,5 +171,17 @@ class ControllerMethod {
             args[i] = controllerMethodParameters[i].prepareParameter(request, postProcessingResults, requestScope);
         }
         return args;
+    }
+
+    private void throwAccessDenied(PostProcessingResults postProcessingResults) {
+        var accessDenied = postProcessingResults.postProcessingResults(AccessDeniedError.class).stream().findFirst();
+        if (accessDenied.isEmpty()) {
+            throw new AuthenticationException();
+        }
+        var error = accessDenied.get();
+        if (error.isAuthenticationRequired()) {
+            throw new AuthenticationException(error.getMessage());
+        }
+        throw new AuthorizationException(error.getMessage());
     }
 }

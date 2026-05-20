@@ -11,7 +11,7 @@ Use the plugin when you want the usual XIS layout:
 ```groovy
 plugins {
     id "java"
-    id "one.xis.plugin" version "0.10.0"
+    id "one.xis.plugin" version "0.11.2"
 }
 ```
 
@@ -41,6 +41,7 @@ The plugin applies the Java plugin and configures the normal XIS build support:
 | Annotation processing | `xis-apt` is added as annotation processor with the same version as the plugin. |
 | Integration tests | `xis-boot-starter-test` is added for tests and JUnit Platform is enabled. The starter brings `xis-test`, `@XisBootTest`, and JUnit Jupiter. |
 | Dependency versions | XIS dependencies used by the plugin are aligned to the plugin version. |
+| XIS catalogs | The plugin generates component catalogs for reusable XIS libraries. Projects that also declare `xis-boot-native` generate native catalogs. |
 | XIS validation | `xisValidate` runs XIS validation checks. The task is intended for local development and CI pipelines. |
 | XIS Boot jars | Projects that use `xis-boot` get `xisJar` and `xisRun` tasks. |
 
@@ -48,6 +49,21 @@ This means a normal application does not need to wire the XIS annotation process
 `xis-boot-starter-test` manually.
 It also means XIS runtime dependencies can normally be declared without a version. The plugin version selects the
 matching XIS artifact version.
+
+## XIS Catalogs For Libraries
+
+Applying `one.xis.plugin` marks the project as a XIS artifact. The plugin therefore generates catalog resources for
+framework-managed classes such as components, pages, frontlets, modals, repositories, and proxy interfaces.
+
+Those catalogs are especially important for XIS Boot Native. A native application can consume a reusable XIS library
+without source access when the library jar contains the generated XIS catalog resources. If the library contributes XIS
+components to a native executable, it must also declare `xis-boot-native`; that explicit dependency opts the library into
+native catalog generation.
+
+A plain Java library without the XIS plugin does not automatically contribute XIS components to a native application.
+That is fine for ordinary helper classes. If the library contains classes that XIS should manage on the JVM, build it as
+a XIS artifact by applying `one.xis.plugin`. If those classes should also be available in a native executable, add
+`xis-boot-native` as well.
 
 ## `xisTemplates`
 
@@ -71,7 +87,7 @@ package example.dashboard;
 import one.xis.Page;
 
 @Page("/dashboard.html")
-public class DashboardPage {
+class DashboardPage {
 }
 ```
 
@@ -265,7 +281,7 @@ Without the plugin, add the dependency that matches the style of test you want:
 
 ```groovy
 dependencies {
-    testImplementation "one.xis:xis-boot-starter-test:0.10.0"
+    testImplementation "one.xis:xis-boot-starter-test:0.11.2"
 }
 ```
 
@@ -274,3 +290,21 @@ Use this when you want `@XisBootTest`, generated-test style, and JUnit Jupiter. 
 plugin, use the same XIS version for all XIS modules.
 
 See [Examples and tests](examples-and-tests.md) for the testing API and examples.
+
+## Builds Without The Plugin
+
+XIS can be used without the Gradle plugin, but then the build is explicit. You must add versions to XIS dependencies
+yourself and wire the parts that the plugin normally configures:
+
+- the XIS annotation processor
+- copying HTML templates from `src/main/java` into runtime resources, if you use that layout
+- XIS test dependencies and JUnit Platform configuration
+- executable XIS Boot jar or run tasks, if you want plugin-like convenience
+
+For normal JVM applications this is possible, just more verbose. It can be useful in builds that already have their own
+strict build conventions.
+
+For XIS Boot Native, the Gradle plugin is the supported path. Native images need generated component catalogs, native
+class catalogs, resource catalogs, reflection configuration, proxy configuration, and a generated native runner. Without
+the plugin, all of that metadata would have to be produced and wired into `native-image` manually. That is intentionally
+not documented as a normal user workflow.

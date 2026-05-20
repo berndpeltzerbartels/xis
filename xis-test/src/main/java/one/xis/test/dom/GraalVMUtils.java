@@ -15,6 +15,9 @@ class GraalVMUtils {
             }
             return null; // Null oder Undefined kann direkt in Referenztypen konvertiert werden
         }
+        if (targetType == Value.class) {
+            return (T) value;
+        }
         // Host-Objekt: direkter Java-Typ
         if (value.isHostObject()) {
             Object hostObj = value.asHostObject();

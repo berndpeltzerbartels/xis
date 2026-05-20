@@ -30,24 +30,39 @@ test {
     enabled = false
 }
 
-tasks.register("systemTest", Test) {
-    group = "verification"
-    description = "Runs Docker-backed system tests."
-    testClassesDirs = sourceSets.test.output.classesDirs
-    classpath = sourceSets.test.runtimeClasspath
-    useJUnitPlatform()
-    shouldRunAfter test
-    testLogging {
+def configureDockerBackedTest = { Test task ->
+    task.useJUnitPlatform()
+    task.shouldRunAfter test
+    task.outputs.upToDateWhen { false }
+    task.testLogging {
         events "passed", "skipped", "failed"
     }
+    group = "verification"
     def colimaSocket = new File(System.getProperty("user.home"), ".colima/default/docker.sock")
     if (!System.getenv("DOCKER_HOST") && colimaSocket.exists()) {
         def dockerHost = "unix://${colimaSocket.absolutePath}"
-        environment "DOCKER_HOST", dockerHost
-        environment "DOCKER_API_VERSION", "1.44"
-        systemProperty "docker.host", dockerHost
-        systemProperty "api.version", "1.44"
-        systemProperty "docker.client.strategy", "org.testcontainers.dockerclient.EnvironmentAndSystemPropertyClientProviderStrategy"
-        environment "TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE", "/var/run/docker.sock"
+        task.environment "DOCKER_HOST", dockerHost
+        task.environment "DOCKER_API_VERSION", "1.44"
+        task.systemProperty "docker.host", dockerHost
+        task.systemProperty "api.version", "1.44"
+        task.systemProperty "docker.client.strategy", "org.testcontainers.dockerclient.EnvironmentAndSystemPropertyClientProviderStrategy"
+        task.environment "TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE", "/var/run/docker.sock"
     }
+}
+
+tasks.register("infraCheck", Test) {
+    description = "Verifies that Docker, Testcontainers, Ryuk, and host port mapping are usable."
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    include "**/TestcontainersInfrastructureTest.class"
+    configureDockerBackedTest(delegate)
+}
+
+tasks.register("systemTest", Test) {
+    description = "Runs Docker-backed system tests."
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    exclude "**/TestcontainersInfrastructureTest.class"
+    dependsOn tasks.named("infraCheck")
+    configureDockerBackedTest(delegate)
 }

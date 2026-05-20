@@ -1,5 +1,13 @@
 # XIS Documentation
 
+**XIS is a lightweight SPA framework for Java and Groovy: annotation-driven, fast, and built around backend controllers
+plus plain HTML templates. XIS provides ready-to-use client-server transport, state synchronization, navigation, form
+handling, validation feedback, and partial UI refreshes without extra work and without any boilerplate code. It runs
+standalone on the JVM with XIS Boot, as a GraalVM native executable for cloud-native deployment with XIS Boot Native,
+or inside Spring. It supports distributed Microfrontend Architecture, and in most applications you write just annotated POJO
+controllers and templates. Coding is as simple as in the old days of request-response, but the result is a modern and
+fast SPA application.**
+
 This directory is the canonical documentation source for users, framework developers, and coding agents.
 
 The old documentation application in `docs-app` / `/Users/bernd/projects/xis-docs` is source material, not the target
@@ -14,6 +22,8 @@ Start here if you want quick results:
 Read these to build normal XIS applications:
 
 - [Runtime and dependency model](user/runtime-and-dependencies.md)
+- [XIS Boot Native and cloud-native native-image builds](user/runtime-and-dependencies.md#xis-boot-native)
+- [Cloud Native and native images](user/cloud-native.md)
 - [Gradle plugin and tools](user/gradle-plugin.md)
 - [Groovy support](user/groovy.md)
 - [Template location and mapping](user/template-location-and-mapping.md)
@@ -54,8 +64,9 @@ complete and intentionally detailed.
 ### Application Structure
 
 - [Runtime choices and dependencies](user/runtime-and-dependencies.md)
+- [Cloud Native and native images](user/cloud-native.md)
 - [XIS Boot applications with `@XISBootApplication`](user/annotations.md#class-annotations)
-- [Spring Boot integration](user/runtime-and-dependencies.md#application-runtime)
+- [Spring Boot integration](user/runtime-and-dependencies.md#runtime-choice)
 - [Groovy 4+ controllers and forms](user/groovy.md)
 - [Template location, `@HtmlFile`, `@DefaultHtmlFile`, generated templates, generated tests](user/template-location-and-mapping.md)
 - [Static resources](user/runtime-and-dependencies.md#static-resources)
@@ -178,6 +189,7 @@ complete and intentionally detailed.
 - [Basic form binding](user/forms-and-validation.md#basic-form-binding)
 - [Multiple submit actions](user/forms-and-validation.md#multiple-submit-actions)
 - [Nested objects and lists](user/forms-and-validation.md#nested-objects-and-lists)
+- [File uploads with `@Upload`](user/forms-and-validation.md#file-uploads)
 - [Type conversion](user/forms-and-validation.md#type-conversion)
 - [Custom formatters with `@UseFormatter`](user/forms-and-validation.md#custom-formatters)
 - [Validation annotations `@Mandatory`, `@AllElementsMandatory`, `@EMail`, `@MinLength`, `@RegExpr`, `@Validate`, `@LabelKey`, `@NullAllowed`](user/annotations.md#parameter-field-and-record-component-annotations)
@@ -192,7 +204,6 @@ complete and intentionally detailed.
 - [`RefreshEventPublisher`](user/events.md)
 - [Publishing to all clients](user/events.md)
 - [Publishing to one client](user/events.md)
-- [Publishing with selected recipients and `@PushRecipients`](user/annotations.md#advanced-and-rarely-needed-annotations)
 - [Visible page and frontlet refresh behavior](user/events.md)
 - [Scheduled jobs with `@Scheduled`](user/scheduled-jobs.md)
 
@@ -238,6 +249,7 @@ complete and intentionally detailed.
 - [Local authentication](user/security.md#local-authentication)
 - [`@Authenticated`](user/security.md#page-and-action-roles)
 - [`@Roles`](user/security.md#page-and-action-roles)
+- [`@OwnedBy`](user/security.md#ownership-checks)
 - [Role-based template visibility](user/security.md#role-based-visibility-in-templates)
 - [DTO roles](user/security.md#dto-roles)
 - [Custom login template](user/security.md#custom-login-template)
@@ -248,7 +260,7 @@ complete and intentionally detailed.
 - [SSO in distributed XIS applications](user/security.md#sso-in-distributed-xis-applications)
 - [Authentication helper annotations such as `@Login` and `@IDPLoginData`](user/security.md)
 
-### Plain HTTP Endpoints
+### Plain HTTP Endpoints For External Clients
 
 - [Plain endpoint annotations](user/annotations.md#plain-http-endpoint-annotations)
 - [`@Controller`](user/annotations.md#plain-http-endpoint-annotations)
@@ -271,7 +283,6 @@ complete and intentionally detailed.
 - [`@Proxy`](user/advanced/custom-proxies.md)
 - [`@UseAdvice`](user/advanced/aspects.md)
 - [`@ImportInstances`](user/annotations.md#advanced-and-rarely-needed-annotations)
-- [`@Address`](user/annotations.md#advanced-and-rarely-needed-annotations)
 - [Custom proxies](user/advanced/custom-proxies.md)
 - [Aspects and interface advice](user/advanced/aspects.md)
 - [`@JavascriptExtension`](user/annotations.md#class-annotations)
@@ -302,7 +313,6 @@ shown in the link text.
 
 - [`@Action`](user/annotations.md#method-annotations)
 - [`@Parameter`](user/annotations.md#parameter-field-and-record-component-annotations)
-- [`@Address`](user/annotations.md#advanced-and-rarely-needed-annotations)
 - [`@Authenticated`](user/annotations.md#class-annotations)
 - [`@ClientId`](user/annotations.md#parameter-field-and-record-component-annotations)
 - [`@ClientStorage`](user/annotations.md#browser-storage-parameters)
@@ -321,9 +331,9 @@ shown in the link text.
 - [`@Modal`](user/modals.md)
 - [`@ModelData`](user/core-model.md#model-data)
 - [`@NullAllowed`](user/annotations.md#parameter-field-and-record-component-annotations)
+- [`@OwnedBy`](user/security.md#ownership-checks)
 - [`@Page`](user/core-model.md#pages)
 - [`@PathVariable`](user/annotations.md#parameter-field-and-record-component-annotations)
-- [`@PushRecipients`](user/annotations.md#advanced-and-rarely-needed-annotations)
 - [`@QueryParameter`](user/annotations.md#parameter-field-and-record-component-annotations)
 - [`@RefreshOnUpdateEvents`](user/events.md)
 - [`@Roles`](user/security.md#page-and-action-roles)
@@ -332,6 +342,7 @@ shown in the link text.
 - [`@SessionStorage`](user/annotations.md#browser-storage-parameters)
 - [`@SharedValue`](user/annotations.md#shared-values)
 - [`@Title`](user/annotations.md#method-annotations)
+- [`@Upload`](user/forms-and-validation.md#file-uploads)
 - [`@UseFormatter`](user/forms-and-validation.md#custom-formatters)
 - [`@UserId`](user/annotations.md#parameter-field-and-record-component-annotations)
 - [`@WelcomePage`](user/core-model.md#pages)
@@ -361,7 +372,7 @@ shown in the link text.
 - [`@Value`](user/annotations.md#configuration-values)
 - [`@XISBootApplication`](user/annotations.md#class-annotations)
 
-### Plain HTTP Controller API
+### Plain HTTP Controller API For External Clients
 
 - [`@Controller`](user/annotations.md#plain-http-endpoint-annotations)
 - [`@Get`](user/annotations.md#plain-http-endpoint-annotations)

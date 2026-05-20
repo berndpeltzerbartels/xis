@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import one.xis.UserContextCreatedEvent;
 import one.xis.UserContextImpl;
 import one.xis.auth.AuthenticationException;
-import one.xis.auth.URLForbiddenException;
+import one.xis.auth.AccessForbiddenException;
 import one.xis.auth.token.TokenStatus;
 import one.xis.auth.token.UserSecurityService;
 import one.xis.context.Component;
@@ -117,7 +117,7 @@ public class FrontendServiceImpl implements FrontendService {
         try {
             requestHandler.accept(request, response);
         } catch (AuthenticationException e) {
-            throw new URLForbiddenException(request.getPageUrl());
+            throw new AccessForbiddenException(request.getPageUrl());
         }
         return response;
     }

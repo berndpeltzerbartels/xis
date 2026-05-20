@@ -334,16 +334,18 @@ still requires an authenticated user but no named role; prefer `@Authenticated` 
 | --- | --- | --- | --- | --- |
 | `value` | `String[]` | No | `{}` | Required role names. Empty is kept as authenticated-only compatibility. |
 
-### `@PushRecipients`
+### `@OwnedBy`
 
-`@PushRecipients` marks a parameter that supplies recipients for a push or refresh-related operation. The parameter is
-intended to be a collection or array of `String` values.
+`@OwnedBy` connects a submitted object to an application-defined `OwnershipGuard`. XIS calls the guard after
+deserialization and before the controller action is invoked. The guard receives the deserialized object and the trusted
+`UserContext`, so application code can load the referenced resource and decide whether the current user may access it.
 
-This annotation exists in the public API, but the exact higher-level usage is still evolving.
+Ownership violations follow the same security response path as `@Roles`: the controller action is not called and the
+frontend is redirected to login.
 
 | Attribute | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
-| none | - | - | - | Marker annotation. |
+| `value` | `Class<? extends OwnershipGuard<?>>` | Yes | none | Guard used for the ownership decision. |
 
 ### `@RefreshOnUpdateEvents`
 
@@ -421,21 +423,12 @@ with that key is injected. It is not persisted across requests.
 | --- | --- | --- | --- | --- |
 | `value` | `String` | Yes | none | Shared value key. |
 
-## Titles, Addresses, Assets, And Extensions
+## Titles, Assets, And Extensions
 
 ### `@Title`
 
 `@Title` marks a method or parameter that provides or receives the page title. A method annotated with `@Title` can
 produce the title used by the browser after rendering or action processing.
-
-| Attribute | Type | Required | Default | Description |
-| --- | --- | --- | --- | --- |
-| none | - | - | - | Marker annotation. |
-
-### `@Address`
-
-`@Address` marks a method that provides an address for the browser address bar. This API exists in the controller API
-but is currently marked in code as a candidate for removal.
 
 | Attribute | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
@@ -603,7 +596,7 @@ return new FrontletResponse(ProductFrontlet.class)
 | `@UserId` | parameter | none | Injects the authenticated user id. |
 | `@Authenticated` | class, method | none | Declares authenticated-only access. |
 | `@Roles` | class, method | none | Declares required roles. |
-| `@PushRecipients` | parameter | none | Marks push/refresh recipients. |
+| `@OwnedBy` | class, parameter, field, record component | `value` | Runs an ownership guard for a submitted object. |
 | `@RefreshOnUpdateEvents` | class | none | Declares refresh event keys this controller reacts to. |
 | `@LocalStorage` | parameter | `value` | Binds browser `localStorage`. |
 | `@SessionStorage` | parameter | `value` | Binds browser `sessionStorage`. |
@@ -611,7 +604,6 @@ return new FrontletResponse(ProductFrontlet.class)
 | `@LocalDatabase` | method, parameter | `value` | Binds local database data. |
 | `@SharedValue` | method, parameter | `value` | Provides or injects a named value inside one controller processing flow. |
 | `@Title` | method, parameter | none | Provides or receives the page title. |
-| `@Address` | method | none | Provides browser address metadata. |
 | `@JavascriptExtension` | class | `value` | Registers JavaScript extension resources. |
 | `@UseFormatter` | field, parameter, annotation, record component | `value` | Applies a formatter. |
 | `@Mandatory` | field, parameter, record component | none | Marks a value as required. |

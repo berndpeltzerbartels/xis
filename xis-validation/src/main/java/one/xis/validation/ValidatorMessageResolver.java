@@ -10,6 +10,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.RecordComponent;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 @Component
@@ -17,6 +18,14 @@ import java.util.Map;
 public class ValidatorMessageResolver {
 
     private final ValidatorMessagePropertiesLoader messagePropertiesLoader;
+
+    public Map<String, String> getMessages(Locale locale) {
+        return messagePropertiesLoader.getMessages(locale);
+    }
+
+    public Map<String, String> getMessages(@NonNull UserContext userContext) {
+        return getMessages(userContext.getLocale());
+    }
 
     public String createMessage(@NonNull String messageKey, @NonNull Map<String, Object> messageParameters, @NonNull AnnotatedElement annotatedElement, @NonNull UserContext userContext) {
         var labelKey = getLabelKey(annotatedElement);
@@ -119,7 +128,7 @@ public class ValidatorMessageResolver {
         return field.isAnnotationPresent(LabelKey.class) ? field.getAnnotation(LabelKey.class).value() : field.getName();
     }
 
-    private String getMessage(String messageKey, UserContext userContext) {
+    public String getMessage(String messageKey, UserContext userContext) {
         return messagePropertiesLoader.getMessage(messageKey, userContext.getLocale());
     }
 

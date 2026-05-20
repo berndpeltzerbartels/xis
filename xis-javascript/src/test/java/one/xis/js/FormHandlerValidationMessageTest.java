@@ -18,6 +18,7 @@ class FormHandlerValidationMessageTest {
                 var formHandler = Object.create(FormHandler.prototype);
                 formHandler.binding = 'customer';
                 formHandler.frontletParameters = {};
+                formHandler.fileInputHandlers = [];
                 formHandler.formData = function() {
                     events.push('formData');
                     return {};

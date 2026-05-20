@@ -8,8 +8,10 @@ import one.xis.auth.idp.ExternalIDPServices;
 import one.xis.context.AppContext;
 import one.xis.security.SecurityUtil;
 import one.xis.server.ClientConfigService;
+import one.xis.validation.ValidatorMessageResolver;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -25,6 +27,8 @@ class LoginFormController<U extends UserInfo> {
     private final ExternalIDPServices externalIDPServices;
     private final AppContext appContext;
     private final ClientConfigService clientConfigService;
+    private final Collection<AdditionalLoginFactor> additionalLoginFactors;
+    private final ValidatorMessageResolver messageResolver;
 
     @ModelData("externalIdpIds")
     Collection<String> getExternalIdpIds() {
@@ -47,9 +51,26 @@ class LoginFormController<U extends UserInfo> {
                 .anyMatch(c -> !(c instanceof UserServicePlaceholder) && c.supportsLocalLogin());
     }
 
+    @ModelData("totpLoginEnabled")
+    boolean isTotpLoginEnabled() {
+        return additionalLoginFactors.stream()
+                .anyMatch(factor -> "totpCode".equals(factor.fieldName()));
+    }
+
+    @ModelData("loginFactorRegistrations")
+    List<LoginFactorRegistrationLink> loginFactorRegistrations(UserContext userContext) {
+        return additionalLoginFactors.stream()
+                .map(AdditionalLoginFactor::registration)
+                .flatMap(java.util.Optional::stream)
+                .map(registration -> new LoginFactorRegistrationLink(
+                        registration.url(),
+                        messageResolver.getMessage(registration.messageKey(), userContext)))
+                .toList();
+    }
+
     @FormData("login")
     LoginData createLoginFormData(@QueryParameter("redirect_uri") @NullAllowed String redirectUrl) {
-        return new LoginData(null, null, StateParameter.create(redirectUrl(redirectUrl), "local"));
+        return new LoginData(null, null, null, StateParameter.create(redirectUrl(redirectUrl), "local"));
     }
 
     @Action("login")
@@ -63,11 +84,24 @@ class LoginFormController<U extends UserInfo> {
     }
 
     private String redirectUrl(String redirectUrl) {
-        if (redirectUrl != null && !redirectUrl.isBlank()) {
-            return redirectUrl;
+        if (isSafeLocalRedirect(redirectUrl)) {
+            return redirectUrl.trim();
         }
         String welcomePageId = clientConfigService.getConfig().getWelcomePageId();
         return welcomePageId == null || welcomePageId.isBlank() ? "/" : welcomePageId;
+    }
+
+    private boolean isSafeLocalRedirect(String redirectUrl) {
+        if (redirectUrl == null || redirectUrl.isBlank()) {
+            return false;
+        }
+        String value = redirectUrl.trim();
+        return value.startsWith("/")
+                && !value.startsWith("//")
+                && value.chars().noneMatch(ch -> ch < 0x20 || ch == 0x7f);
+    }
+
+    record LoginFactorRegistrationLink(String url, String text) {
     }
 
 }

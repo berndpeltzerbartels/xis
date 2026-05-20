@@ -62,10 +62,10 @@ import one.xis.Page;
 import one.xis.PathVariable;
 
 @Page("/products/{id}.html")
-public class ProductPage {
+class ProductPage {
 
     @ModelData
-    public Product product(@PathVariable("id") long id) {
+    Product product(@PathVariable("id") long id) {
         return productService.findById(id);
     }
 }
@@ -112,7 +112,7 @@ import one.xis.Action;
 import one.xis.Parameter;
 
 @Action
-public void deleteProduct(@Parameter("productId") long productId) {
+void deleteProduct(@Parameter("productId") long productId) {
     productService.delete(productId);
 }
 ```
@@ -171,7 +171,7 @@ import one.xis.FormData;
 import one.xis.PageResponse;
 
 @Action
-public PageResponse save(@FormData("product") ProductForm product) {
+PageResponse save(@FormData("product") ProductForm product) {
     productService.save(product);
     return PageResponse.of(ProductDetailsPage.class, "id", product.id());
 }
@@ -185,7 +185,7 @@ import one.xis.FormData;
 import one.xis.FrontletResponse;
 
 @Action
-public FrontletResponse save(@FormData("product") ProductForm product) {
+FrontletResponse save(@FormData("product") ProductForm product) {
     productService.save(product);
     return FrontletResponse.of(ProductDetailsFrontlet.class, "id", product.id());
 }
@@ -200,7 +200,7 @@ An action can return a page controller class.
 
 ```java
 @Action
-public Class<?> save(@FormData("product") ProductForm product) {
+Class<?> save(@FormData("product") ProductForm product) {
     productService.save(product);
     return ProductListPage.class;
 }
@@ -218,7 +218,7 @@ Use `PageResponse` when the target page has path variables or query parameters.
 import one.xis.PageResponse;
 
 @Action
-public PageResponse openProduct(@Parameter("productId") long productId) {
+PageResponse openProduct(@Parameter("productId") long productId) {
     return PageResponse.of(ProductPage.class, "id", productId);
 }
 ```
@@ -227,7 +227,7 @@ With query parameters:
 
 ```java
 @Action
-public PageResponse search(@FormData("search") SearchForm search) {
+PageResponse search(@FormData("search") SearchForm search) {
     return new PageResponse(ProductSearchPage.class)
             .queryParameter("q", search.query())
             .queryParameter("page", 1);
@@ -240,10 +240,10 @@ public PageResponse search(@FormData("search") SearchForm search) {
 
 ```java
 @Frontlet
-public class CartFrontlet {
+class CartFrontlet {
 
     @Action
-    public PageResponse checkout(@Parameter("cartId") long cartId) {
+    PageResponse checkout(@Parameter("cartId") long cartId) {
         return PageResponse.of(CheckoutPage.class, "cartId", cartId)
                 .queryParameter("step", "address");
     }
@@ -256,7 +256,7 @@ For page actions, returning a string that resolves to a known XIS page URL can n
 
 ```java
 @Action
-public String openProductUrl(@Parameter("productId") long productId) {
+String openProductUrl(@Parameter("productId") long productId) {
     return "/products/" + productId + ".html";
 }
 ```
@@ -272,7 +272,7 @@ Use `PageUrlResponse` when the action already has a concrete URL string.
 import one.xis.PageUrlResponse;
 
 @Action
-public PageUrlResponse openReport(@Parameter("reportId") String reportId) {
+PageUrlResponse openReport(@Parameter("reportId") String reportId) {
     return new PageUrlResponse("/reports/" + reportId + ".html");
 }
 ```
@@ -323,10 +323,10 @@ import one.xis.Parameter;
 import one.xis.ModelData;
 
 @Frontlet
-public class ProductDetailsFrontlet {
+class ProductDetailsFrontlet {
 
     @ModelData
-    public Product product(@Parameter("productId") long productId) {
+    Product product(@Parameter("productId") long productId) {
         return productService.findById(productId);
     }
 }
@@ -338,7 +338,7 @@ An action can return a frontlet controller class.
 
 ```java
 @Action
-public Class<?> showCreateForm() {
+Class<?> showCreateForm() {
     return ProductFormFrontlet.class;
 }
 ```
@@ -356,7 +356,7 @@ A page action can also replace a frontlet. In that case, give the triggering ele
 
 ```java
 @Action
-public Class<?> showDetails() {
+Class<?> showDetails() {
     return ProductDetailsFrontlet.class;
 }
 ```
@@ -371,7 +371,7 @@ Use `FrontletResponse` when you need to pass parameters, choose a container, or 
 import one.xis.FrontletResponse;
 
 @Action
-public FrontletResponse showProduct(@Parameter("productId") long productId) {
+FrontletResponse showProduct(@Parameter("productId") long productId) {
     return new FrontletResponse(ProductDetailsFrontlet.class)
             .frontletParameter("productId", productId)
             .targetContainer("main");
@@ -382,7 +382,7 @@ Shortcut:
 
 ```java
 @Action
-public FrontletResponse showProduct(@Parameter("productId") long productId) {
+FrontletResponse showProduct(@Parameter("productId") long productId) {
     return FrontletResponse.of(ProductDetailsFrontlet.class, "productId", productId)
             .targetContainer("main");
 }
@@ -393,7 +393,7 @@ distributed applications, because the caller does not need the target frontlet c
 
 ```java
 @Action
-public FrontletResponse showProductByUrl(@Parameter("productId") long productId) {
+FrontletResponse showProductByUrl(@Parameter("productId") long productId) {
     return new FrontletResponse("/product-summary?productId=" + productId)
             .targetContainer("main");
 }
@@ -403,10 +403,10 @@ The target frontlet declares the URL:
 
 ```java
 @Frontlet(url = "/product-summary", containerId = "main")
-public class ProductSummaryFrontlet {
+class ProductSummaryFrontlet {
 
     @ModelData
-    public Product product(@Parameter("productId") long productId) {
+    Product product(@Parameter("productId") long productId) {
         return productService.findById(productId);
     }
 }
@@ -423,7 +423,7 @@ parent.
 
 ```java
 @Action
-public FrontletResponse save(@FormData("product") ProductForm product) {
+FrontletResponse save(@FormData("product") ProductForm product) {
     productService.save(product);
     return new FrontletResponse()
             .reloadFrontlet("ProductListFrontlet");
@@ -445,7 +445,7 @@ clients, use [events](events.md).
 
 ```java
 @Action
-public FrontletResponse showPreview(@Parameter("productId") long productId) {
+FrontletResponse showPreview(@Parameter("productId") long productId) {
     return FrontletResponse.of(ProductPreviewFrontlet.class, "productId", productId)
             .targetContainer("preview");
 }
@@ -463,7 +463,7 @@ import one.xis.Parameter;
 import one.xis.ModalResponse;
 
 @Action
-public ModalResponse editCustomer(@Parameter("customerId") long customerId) {
+ModalResponse editCustomer(@Parameter("customerId") long customerId) {
     return ModalResponse.open(EditCustomerModal.class)
             .parameter("customerId", customerId);
 }
@@ -473,7 +473,7 @@ To save and close a modal:
 
 ```java
 @Action
-public ModalResponse save(@FormData("customer") CustomerForm customer) {
+ModalResponse save(@FormData("customer") CustomerForm customer) {
     customerService.save(customer);
     return ModalResponse.close().reloadParent();
 }
@@ -496,15 +496,15 @@ Example: a product page controls which frontlet loads and passes the product ID 
 
 ```java
 @Page("/products/{id}.html")
-public class ProductPage {
+class ProductPage {
 
     @ModelData
-    public String detailsFrontlet() {
+    String detailsFrontlet() {
         return "ProductDetailsFrontlet";
     }
 
     @ModelData
-    public long productId(@PathVariable("id") long id) {
+    long productId(@PathVariable("id") long id) {
         return id;
     }
 }
@@ -546,15 +546,15 @@ For page actions, XIS keeps the current URL. Path variables and query parameters
 
 ```java
 @Page("/products/{category}.html")
-public class ProductPage {
+class ProductPage {
 
     @Action
-    public void refreshList() {
+    void refreshList() {
         productService.refresh();
     }
 
     @ModelData
-    public List<Product> products(
+    List<Product> products(
             @PathVariable("category") String category,
             @QueryParameter("sort") String sort) {
         return productService.find(category, sort);
@@ -566,14 +566,14 @@ For frontlet actions, XIS keeps the current page URL and the current frontlet pa
 
 ```java
 @Frontlet
-public class ProductListFrontlet {
+class ProductListFrontlet {
 
     @Action
-    public void refresh() {
+    void refresh() {
     }
 
     @ModelData
-    public List<Product> products(
+    List<Product> products(
             @PathVariable("category") String category,
             @QueryParameter("sort") String sort,
             @Parameter("filter") String filter) {

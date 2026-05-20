@@ -6,13 +6,14 @@ import one.xis.UserContextImpl;
 import one.xis.auth.AuthenticationException;
 import one.xis.auth.token.TokenStatus;
 import one.xis.auth.token.UserSecurityService;
-import one.xis.UserContext;
 import one.xis.http.*;
 import one.xis.resource.Resource;
+import one.xis.validation.ValidatorMessageResolver;
 
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Locale;
 import java.util.function.Function;
 
 import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
@@ -25,6 +26,7 @@ public class MainController {
     private final FrontendService frontendService;
     private final SseEndpoint sseEndpoint;
     private final UserSecurityService userSecurityService;
+    private final ValidatorMessageResolver validatorMessageResolver;
 
     @Get("/xis/events")
     public void subscribeToEvents(@RequestHeader("X-Client-Id") String clientIdHeader,
@@ -70,6 +72,18 @@ public class MainController {
     @Get("/xis/config")
     public ResponseEntity<?> getComponentConfig() {
         return ResponseEntity.ok(frontendService.getConfig());
+    }
+
+    @Get("/xis/messages")
+    public ResponseEntity<?> getMessages(@UrlParameter("locale") String locale, HttpRequest request) {
+        return ResponseEntity.ok(validatorMessageResolver.getMessages(resolveLocale(locale, request)));
+    }
+
+    private Locale resolveLocale(String locale, HttpRequest request) {
+        if (locale != null && !locale.isBlank()) {
+            return Locale.forLanguageTag(locale.replace('_', '-'));
+        }
+        return request.getLocale();
     }
 
     @Post("/xis/page/model")

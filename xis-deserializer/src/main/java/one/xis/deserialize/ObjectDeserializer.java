@@ -3,6 +3,7 @@ package one.xis.deserialize;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import lombok.RequiredArgsConstructor;
+import one.xis.OwnershipGuard;
 import one.xis.UserContext;
 import one.xis.context.Component;
 import one.xis.utils.lang.ClassUtils;
@@ -21,6 +22,8 @@ import static one.xis.deserialize.DefaultDeserializationErrorType.MISSING_MANDAT
 @Component
 @RequiredArgsConstructor
 class ObjectDeserializer implements JsonDeserializer<Object> {
+
+    private final List<OwnershipGuard<?>> ownershipGuards;
 
     @Override
     public boolean matches(JsonToken token, AnnotatedElement target) {
@@ -45,13 +48,14 @@ class ObjectDeserializer implements JsonDeserializer<Object> {
                 throw new RuntimeException(e);
             }
         } else {
-            return deserializeObject(objectType, reader, path, userContext, mainDeserializer, results);
+            return deserializeObject(objectType, reader, path, target, userContext, mainDeserializer, results);
         }
     }
 
     private Optional<Object> deserializeObject(Class<?> objectType,
                                                JsonReader reader,
                                                String path,
+                                               AnnotatedElement target,
                                                UserContext userContext,
                                                MainDeserializer mainDeserializer,
                                                PostProcessingResults results) throws IOException {
@@ -78,7 +82,9 @@ class ObjectDeserializer implements JsonDeserializer<Object> {
             var context = new DeserializationContext(path(path, field), field, Mandatory.class, userContext);
             results.add(new InvalidValueError(context, MISSING_MANDATORY_PROPERTY.getMessageKey(), MISSING_MANDATORY_PROPERTY.getGlobalMessageKey(), o));
         });
-        return Optional.of(fixEmptyArrays(o));
+        var object = fixEmptyArrays(o);
+        new OwnershipCheck(ownershipGuards).checkObject(path, target, object, userContext, results);
+        return Optional.of(object);
     }
 
 
@@ -151,7 +157,9 @@ class ObjectDeserializer implements JsonDeserializer<Object> {
 
         Constructor<?> constructor = clazz.getDeclaredConstructor(types);
         constructor.setAccessible(true);
-        return Optional.of(constructor.newInstance(args));
+        var record = constructor.newInstance(args);
+        new OwnershipCheck(ownershipGuards).checkObject(path, target, record, userContext, results);
+        return Optional.of(record);
     }
 
 

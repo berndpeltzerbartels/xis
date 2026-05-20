@@ -28,7 +28,7 @@ plugins {
     id "java"
     id "org.springframework.boot" version "3.3.0"
     id "io.spring.dependency-management" version "1.1.5"
-    id "one.xis.plugin" version "0.10.0"
+    id "one.xis.plugin" version "0.11.2"
 }
 
 group = "example"
@@ -68,7 +68,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class Application {
+class Application {
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
@@ -145,10 +145,10 @@ import one.xis.WelcomePage;
 
 @WelcomePage
 @Page("/index.html")
-public class DashboardPage {
+class DashboardPage {
 
     @ModelData
-    public String title() {
+    String title() {
         return "Dashboard";
     }
 }
@@ -209,17 +209,17 @@ import one.xis.ModelData;
 import one.xis.Page;
 
 @Page("/counter.html")
-public class CounterPage {
+class CounterPage {
 
     private int count;
 
     @ModelData
-    public int count() {
+    int count() {
         return count;
     }
 
     @Action
-    public void increment() {
+    void increment() {
         count++;
     }
 }
@@ -263,26 +263,26 @@ import one.xis.validation.LabelKey;
 import one.xis.validation.Mandatory;
 
 @Page("/customer.html")
-public class CustomerPage {
+class CustomerPage {
 
     private CustomerForm saved;
 
     @FormData("customer")
-    public CustomerForm customer() {
+    CustomerForm customer() {
         return saved != null ? saved : new CustomerForm("", "");
     }
 
     @ModelData("savedMessage")
-    public String savedMessage() {
+    String savedMessage() {
         return saved == null ? "" : "Saved " + saved.name();
     }
 
     @Action
-    public void save(@FormData("customer") CustomerForm customer) {
+    void save(@FormData("customer") CustomerForm customer) {
         this.saved = customer;
     }
 
-    public record CustomerForm(
+    record CustomerForm(
             @Mandatory @LabelKey("customer.name") String name,
             @Mandatory @EMail @LabelKey("customer.email") String email
     ) {
@@ -347,7 +347,7 @@ package example.customer;
 import one.xis.Page;
 
 @Page("/customer-frontlet.html")
-public class CustomerFrontletPage {
+class CustomerFrontletPage {
 }
 ```
 
@@ -382,21 +382,21 @@ import one.xis.validation.LabelKey;
 import one.xis.validation.Mandatory;
 
 @Frontlet(containerId = "customer-main")
-public class CustomerFormFrontlet {
+class CustomerFormFrontlet {
 
     @FormData("customer")
-    public CustomerForm customer() {
+    CustomerForm customer() {
         return new CustomerForm("", "");
     }
 
     @Action
-    public FrontletResponse save(@FormData("customer") CustomerForm customer) {
+    FrontletResponse save(@FormData("customer") CustomerForm customer) {
         return new FrontletResponse(CustomerDetailsFrontlet.class)
                 .frontletParameter("name", customer.name())
                 .frontletParameter("email", customer.email());
     }
 
-    public record CustomerForm(
+    record CustomerForm(
             @Mandatory @LabelKey("customer.name") String name,
             @Mandatory @EMail @LabelKey("customer.email") String email
     ) {
@@ -434,10 +434,10 @@ import one.xis.Parameter;
 import one.xis.ModelData;
 
 @Frontlet(containerId = "customer-main")
-public class CustomerDetailsFrontlet {
+class CustomerDetailsFrontlet {
 
     @ModelData("summary")
-    public String summary(@Parameter("name") String name,
+    String summary(@Parameter("name") String name,
                           @Parameter("email") String email) {
         return name + " <" + email + ">";
     }
@@ -485,7 +485,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @Component
-public class DemoUserInfoService implements UserInfoService {
+class DemoUserInfoService implements UserInfoService {
 
     @Override
     public Optional<UserInfo> getUserInfo(String userId) {
@@ -518,16 +518,16 @@ import one.xis.Roles;
 
 @Page("/admin.html")
 @Roles({"ADMIN", "SUPPORT"})
-public class AdminPage {
+class AdminPage {
 
     @ModelData("status")
-    public String status() {
+    String status() {
         return "Admin/support area";
     }
 
     @Action
     @Roles("ADMIN")
-    public void rebuildIndex() {
+    void rebuildIndex() {
         // call application service here
     }
 }

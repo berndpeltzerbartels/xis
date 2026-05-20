@@ -40,6 +40,14 @@ processResources {
 dependencies {
     implementation gradleApi()
     implementation localGroovy()
+
+    testImplementation gradleTestKit()
+    testImplementation "org.junit.jupiter:junit-jupiter-api:${rootProject.ext.libraryVersions.junit}"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${rootProject.ext.libraryVersions.junit}"
+}
+
+test {
+    useJUnitPlatform()
 }
 
 
@@ -132,4 +140,26 @@ task writeVersionToFile {
     }
 }
 
+task writeXisModulesToFile {
+    def moduleFile = file("$mainResourcesDir/xis-modules.txt")
+    outputs.file(moduleFile)
+    outputs.upToDateWhen { false }
+
+    doLast {
+        def modules = rootProject.subprojects
+                .findAll { subproject ->
+                    subproject.name.startsWith('xis-')
+                            && subproject.plugins.hasPlugin('maven-publish')
+                            && subproject.extensions.getByName('publishing').publications.size() > 0
+                }
+                .collect { it.name }
+                .sort()
+
+        moduleFile.parentFile.mkdirs()
+        moduleFile.text = modules.join(System.lineSeparator()) + System.lineSeparator()
+        println "XIS module list written to: " + moduleFile
+    }
+}
+
 classes.dependsOn writeVersionToFile
+classes.dependsOn writeXisModulesToFile

@@ -124,7 +124,9 @@ class MongoDocumentMetadata {
         @Override
         public Object get(Object object) {
             try {
-                return component.getAccessor().invoke(object);
+                var accessor = component.getAccessor();
+                accessor.setAccessible(true);
+                return accessor.invoke(object);
             } catch (ReflectiveOperationException e) {
                 throw new RuntimeException("Could not read record component " + component.getName(), e);
             }

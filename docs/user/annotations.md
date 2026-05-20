@@ -24,6 +24,7 @@ and [Security](security.md) for complete examples.
 | `@DefaultHtmlFile` | Defines a default template file for a package or type. |
 | `@Authenticated` | Protects a page, frontlet, action, or action DTO by login without requiring a named role. See [Security](security.md). |
 | `@Roles` | Protects a page or frontlet by role. See [Security](security.md). |
+| `@OwnedBy` | Runs an application-defined ownership guard for a submitted DTO. See [Security](security.md#ownership-checks). |
 | `@RefreshOnUpdateEvents` | Refreshes a page or frontlet when one of the configured update events is fired. See [Events](events.md). |
 | `@JavascriptExtension` | Adds a JavaScript extension class for advanced client behavior. Most applications should use the classpath extension file described in [Custom JavaScript](advanced/custom-javascript.md). |
 | `@CssFile` | Adds a CSS file for a page or component. |
@@ -54,11 +55,11 @@ loading an aggregate once and then using it for display and for an action withou
 
 ```java
 @Page("/products/{id}.html")
-public class ProductPage {
+class ProductPage {
 
     private final ProductService productService;
 
-    public ProductPage(ProductService productService) {
+    ProductPage(ProductService productService) {
         this.productService = productService;
     }
 
@@ -91,7 +92,7 @@ on the current page or frontlet.
 
 ```java
 @Page("/quote.html")
-public class QuotePage {
+class QuotePage {
 
     @Action
     @ModelData("calculationResult")
@@ -115,11 +116,13 @@ purpose.
 | `@QueryParameter("name")` | Reads a query parameter from the current page URL, such as `/orders.html?status=open`. |
 | `@Parameter("name")` | Reads an action, frontlet, or modal parameter supplied by `<xis:parameter>`, `FrontletResponse`, `ModalResponse`, or a frontlet/modal target URL such as `ProductSummary?productId=42`. |
 | `@FormData("name")` | Injects submitted form data into an action method. |
+| `@Upload` | Binds an uploaded multipart file to a form field or controller parameter. |
 | `@SharedValue("name")` | Injects a value produced by another `@SharedValue` method in the same controller processing flow. |
 | `@LocalStorage`, `@SessionStorage`, `@ClientStorage` | Injects browser-side state into an action method parameter. |
 | `@LocalDatabase` | Injects browser-side database state. This is an advanced client-state feature. |
 | `@ClientId` | Injects the browser client id. |
 | `@UserId` | Injects the authenticated user id. |
+| `@OwnedBy` | Runs an application-defined ownership guard for a submitted DTO, parameter, field, or record component. See [Security](security.md#ownership-checks). |
 | `@UseFormatter` | Selects a formatter for converting form values between strings and Java values. |
 | `@Mandatory` | Requires a value. |
 | `@AllElementsMandatory` | Requires all elements of an array or collection value. |
@@ -186,7 +189,7 @@ file:
 
 ```java
 @Component
-public class MailSettings {
+class MailSettings {
 
     @Value("mail.host")
     String host;
@@ -209,7 +212,7 @@ frontlet.
 Use storage parameters for values that intentionally live in the browser:
 
 ```java
-public class CartPage {
+class CartPage {
 
     @Action("addToCart")
     void addToCart(@LocalStorage("cart") Cart cart,
@@ -233,7 +236,9 @@ Template expressions can read the same storage values, usually inside a storage 
 
 ## Plain HTTP Endpoint Annotations
 
-Normal XIS pages do not need these annotations. Use them only when you create plain HTTP endpoints next to the XIS UI.
+**Normal XIS pages, frontlets, modals, forms, and actions do not need these annotations.** XIS already handles their
+browser/server communication. Use these annotations only when you create plain HTTP endpoints for external non-XIS
+clients, webhooks, scripts, or integration partners.
 
 | Annotation | Use |
 | --- | --- |
@@ -242,6 +247,7 @@ Normal XIS pages do not need these annotations. Use them only when you create pl
 | `@RequestBody` | Injects the request body. |
 | `@RequestHeader`, `@ResponseHeader`, `@CookieValue`, `@BearerToken` | Reads or writes HTTP metadata. |
 | `@UrlParameter`, `one.xis.http.PathVariable` | Reads URL/query data for plain HTTP controllers. |
+| `@Upload` | Reads a multipart file from a plain HTTP controller request. |
 | `@Produces` | Declares the response content type. |
 | `@PublicResources` | Exposes public static resources. |
 
@@ -252,8 +258,6 @@ normal first application path.
 
 | Annotation | Use |
 | --- | --- |
-| `@Address` | Identifies an addressable component in distributed or messaging-oriented scenarios. |
-| `@PushRecipients` | Selects recipients for push/update delivery. |
 | `@ImportInstances` | Imports component instances into the XIS runtime. |
 | `@MainClass` | Legacy application metadata; normal applications should use the runtime setup instead. |
 | `@Proxy` | Marks an annotation as a context proxy annotation. See [Custom proxies](advanced/custom-proxies.md). |
@@ -265,7 +269,7 @@ An include always has an annotation and a template:
 
 ```java
 @Include("header")
-public class Header {
+class Header {
 }
 ```
 

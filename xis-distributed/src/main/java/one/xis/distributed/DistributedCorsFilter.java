@@ -16,9 +16,9 @@ import java.util.stream.Stream;
 /**
  * CORS policy for distributed XIS deployments.
  * <p>
- * The default HTTP controller filter mirrors the request origin. In a distributed
- * XIS application the allowed origins are part of the deployment topology, so
- * they are resolved from {@link XisDistributedConfig}.
+ * The default HTTP controller filter only allows same-origin requests. In a
+ * distributed XIS application the allowed cross origins are part of the
+ * deployment topology, so they are resolved from {@link XisDistributedConfig}.
  */
 @Component
 public class DistributedCorsFilter implements HttpFilter {

@@ -59,6 +59,9 @@ class SseConnector {
         this.url = eventUrl;
         const eventSource = new EventSource(eventUrl, { withCredentials: true });
         this.eventSources[endpointUrl] = eventSource;
+        if (endpointUrl === this.endpointUrl) {
+            this.eventSource = eventSource;
+        }
         const connectionPromise = new Promise(resolve => {
             const timeout = setTimeout(() => {
                 if (this.eventSources[endpointUrl] !== eventSource) {

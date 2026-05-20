@@ -7,6 +7,10 @@ public interface InputElement extends Element {
 
     void setValue(String v1);
 
+    void setFile(String fileName, String contentType, byte[] bytes);
+
+    void setFile(String fileName, byte[] bytes);
+
     // Non standard methods
     
 }

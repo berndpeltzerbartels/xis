@@ -119,7 +119,7 @@ class Client {
      * @param {string} binding
      * @returns {Promise<ServerReponse>}
      */
-    formAction(resolvedURL, frontletId, formData, action, formBindigKey, formBindingParameters) {
+    formAction(resolvedURL, frontletId, formData, action, formBindigKey, formBindingParameters, uploads) {
         throw new Error('Not implemented');
     }
 
@@ -479,6 +479,7 @@ class Client {
         data.setValue(['localStorage'], app.localStorage);
         data.setValue(['clientStorage'], serverResponse.clientStorageData);
         data.setValue(['global'], serverResponse.globalVariableData);
+        data.setValue(['messages'], app.messages || {});
         data.setValue(['validation'], validatorMessages);
         data.setValue(['validation','globalMessages'], Array.isArray(validatorMessages.globalMessages) ? validatorMessages.globalMessages : []);
         data.setValue(['_xis', 'authenticated'], serverResponse.authenticated);

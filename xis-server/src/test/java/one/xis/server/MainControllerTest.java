@@ -8,6 +8,7 @@ import one.xis.auth.token.SecurityAttributes;
 import one.xis.auth.token.TokenStatus;
 import one.xis.auth.token.UserSecurityService;
 import org.junit.jupiter.api.Test;
+import one.xis.validation.ValidatorMessageResolver;
 
 import java.time.Duration;
 
@@ -23,7 +24,7 @@ class MainControllerTest {
         var userSecurityService = mock(UserSecurityService.class);
         var request = mock(HttpRequest.class);
         var response = mock(HttpResponse.class);
-        var controller = new MainController(frontendService, sseEndpoint, userSecurityService);
+        var controller = controller(frontendService, sseEndpoint, userSecurityService);
 
         controller.subscribeToEvents(null, "client-123", null, null, request, response);
 
@@ -38,7 +39,7 @@ class MainControllerTest {
         var userSecurityService = mock(UserSecurityService.class);
         var request = mock(HttpRequest.class);
         var response = mock(HttpResponse.class);
-        var controller = new MainController(frontendService, sseEndpoint, userSecurityService);
+        var controller = controller(frontendService, sseEndpoint, userSecurityService);
 
         controller.subscribeToEvents("  ", null, null, null, request, response);
 
@@ -54,7 +55,7 @@ class MainControllerTest {
         var userSecurityService = mock(UserSecurityService.class);
         var request = mock(HttpRequest.class);
         var response = mock(HttpResponse.class);
-        var controller = new MainController(frontendService, sseEndpoint, userSecurityService);
+        var controller = controller(frontendService, sseEndpoint, userSecurityService);
 
         doAnswer(invocation -> {
             TokenStatus tokenStatus = invocation.getArgument(0);
@@ -81,7 +82,7 @@ class MainControllerTest {
         var userSecurityService = mock(UserSecurityService.class);
         var request = mock(HttpRequest.class);
         var response = mock(HttpResponse.class);
-        var controller = new MainController(frontendService, sseEndpoint, userSecurityService);
+        var controller = controller(frontendService, sseEndpoint, userSecurityService);
 
         doThrow(new AuthenticationException()).when(userSecurityService).update(any(), any());
 
@@ -89,5 +90,9 @@ class MainControllerTest {
 
         verify(response).setStatusCode(401);
         verifyNoInteractions(sseEndpoint);
+    }
+
+    private MainController controller(FrontendService frontendService, SseEndpoint sseEndpoint, UserSecurityService userSecurityService) {
+        return new MainController(frontendService, sseEndpoint, userSecurityService, mock(ValidatorMessageResolver.class));
     }
 }

@@ -12,6 +12,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.*;
 
@@ -35,6 +36,13 @@ public class SecurityUtil {
         } catch (Exception e) {
             throw new RuntimeException("Failed to compute HMAC", e);
         }
+    }
+
+    public static boolean secureEquals(String expected, String actual) {
+        if (expected == null || actual == null) {
+            return false;
+        }
+        return MessageDigest.isEqual(expected.getBytes(StandardCharsets.UTF_8), actual.getBytes(StandardCharsets.UTF_8));
     }
 
     public static String encodeBase64UrlSafe(String s) {

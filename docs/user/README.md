@@ -13,6 +13,8 @@ Read the [Quickstart](quickstart.md) when you want a minimal running application
 Read these chapters to build normal XIS applications:
 
 - [Runtime and dependency model](runtime-and-dependencies.md)
+- [XIS Boot Native and cloud-native native-image builds](runtime-and-dependencies.md#xis-boot-native)
+- [Cloud Native and native images](cloud-native.md)
 - [Gradle plugin and tools](gradle-plugin.md)
 - [Groovy support](groovy.md)
 - [Template location and mapping](template-location-and-mapping.md)
@@ -24,6 +26,7 @@ Read these chapters to build normal XIS applications:
 - [Navigation and responses](navigation.md)
 - [Routers](routers.md)
 - [Forms and validation](forms-and-validation.md)
+- [File uploads](forms-and-validation.md#file-uploads)
 - [Modals](modals.md)
 - [SQL](sql.md)
 - [MongoDB](mongodb.md)
@@ -31,6 +34,7 @@ Read these chapters to build normal XIS applications:
 - [Events](events.md)
 - [Scheduled jobs](scheduled-jobs.md)
 - [Security](security.md)
+- [TOTP two-factor login](security.md#totp-two-factor-login)
 - [Examples and tests](examples-and-tests.md)
 
 ## Advanced Documentation

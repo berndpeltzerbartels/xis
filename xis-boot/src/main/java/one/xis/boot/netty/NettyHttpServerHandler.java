@@ -6,8 +6,10 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
+import io.netty.handler.codec.TooLongFrameException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import one.xis.UploadConfiguration;
 import one.xis.context.Component;
 import one.xis.http.ContentType;
 import one.xis.http.RestControllerService;
@@ -31,6 +33,7 @@ public class NettyHttpServerHandler extends SimpleChannelInboundHandler<FullHttp
     private final RestControllerService restControllerService;
     private final NettyResourceHandler resourceHandler;
     private final LocalUrlHolder localUrlHolder;
+    private final UploadConfiguration uploadConfiguration;
 
 
     @Override
@@ -86,12 +89,17 @@ public class NettyHttpServerHandler extends SimpleChannelInboundHandler<FullHttp
             ctx.close();
             return;
         }
+        if (cause instanceof TooLongFrameException) {
+            log.warn("Request content exceeded configured maximum size: {}", cause.getMessage());
+            writeResponse(ctx, null, createPayloadTooLarge(cause));
+            return;
+        }
         log.error("Uncaught channel exception: {} ", cause.getMessage(), cause);
         ctx.close();
     }
 
     private FullHttpResponse routeRequest(FullHttpRequest nettyRequest, ChannelHandlerContext ctx) {
-        NettyHttpRequest request = new NettyHttpRequest(nettyRequest, ctx);
+        NettyHttpRequest request = new NettyHttpRequest(nettyRequest, ctx, uploadConfiguration);
         String path = request.getPath();
         if (isFrontendRequest(path)) {
             return handleFrontendRequest();
@@ -135,7 +143,7 @@ public class NettyHttpServerHandler extends SimpleChannelInboundHandler<FullHttp
         ensureDateAndServerHeaders(res);
         ensureContentLength(res);
 
-        boolean keepAlive = HttpUtil.isKeepAlive(req);
+        boolean keepAlive = req != null && HttpUtil.isKeepAlive(req);
         if (keepAlive) {
             HttpUtil.setKeepAlive(res, true);
         } else {
@@ -173,6 +181,22 @@ public class NettyHttpServerHandler extends SimpleChannelInboundHandler<FullHttp
 
         response.headers().set(CONTENT_TYPE, ContentType.TEXT_HTML_UTF8.getValue());
         response.headers().set(CONTENT_LENGTH, bytes.length);
+        return response;
+    }
+
+    private FullHttpResponse createPayloadTooLarge(Throwable e) {
+        String body = safeMessage(e);
+        byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
+
+        FullHttpResponse response = new DefaultFullHttpResponse(
+                HttpVersion.HTTP_1_1,
+                HttpResponseStatus.REQUEST_ENTITY_TOO_LARGE,
+                Unpooled.wrappedBuffer(bytes)
+        );
+
+        response.headers().set(CONTENT_TYPE, ContentType.TEXT_PLAIN.getValue());
+        response.headers().set(CONTENT_LENGTH, bytes.length);
+        response.headers().set(CACHE_CONTROL, NO_STORE);
         return response;
     }
 

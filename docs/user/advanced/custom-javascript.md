@@ -15,6 +15,10 @@ simple DOM manipulation, but it is not a full Web Platform implementation. See
 Write extension files as strict, browser-compatible plain JavaScript. XIS bundles extension files into the generated
 browser runtime; they are not loaded as JavaScript modules. Do not use `export` / `import` syntax in these files.
 
+XIS exposes only a small public browser API as `window.XIS`. The internal application runtime is intentionally not
+published as `window.app`, so separate static scripts cannot mutate framework internals by accident. JavaScript extension
+files can use this API while the bundle is loaded, for example to register expression-language functions.
+
 ## Register Extension Files
 
 Create this file:
@@ -47,7 +51,7 @@ Custom expression-language functions are JavaScript functions registered in the 
 `src/main/resources/js/app-functions.js`
 
 ```javascript
-elFunctions.addFunction('initials', function(value) {
+XIS.addElFunction('initials', function(value) {
     if (!value) {
         return '';
     }
@@ -116,7 +120,7 @@ submit an existing XIS form by its ordinary HTML `id`:
 function submitMove(from, to) {
     document.getElementById('fromField').value = from;
     document.getElementById('toField').value = to;
-    app.submitForm('moveForm', 'doMove');
+    XIS.submitForm('moveForm', 'doMove');
 }
 ```
 

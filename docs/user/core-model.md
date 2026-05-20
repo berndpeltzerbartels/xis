@@ -23,16 +23,16 @@ import one.xis.Page;
 import one.xis.PathVariable;
 
 @Page("/products/{id}.html")
-public class ProductPage {
+class ProductPage {
 
     private final ProductService productService;
 
-    public ProductPage(ProductService productService) {
+    ProductPage(ProductService productService) {
         this.productService = productService;
     }
 
     @ModelData
-    public Product product(@PathVariable("id") long id) {
+    Product product(@PathVariable("id") long id) {
         return productService.findById(id);
     }
 }
@@ -66,7 +66,7 @@ Rules:
 
 ```java
 @ModelData
-public List<Product> products() {
+List<Product> products() {
     return productService.findAll();
 }
 ```
@@ -111,7 +111,7 @@ browser.
 
 ```java
 @Action
-public Class<?> delete(@PathVariable("id") long id) {
+Class<?> delete(@PathVariable("id") long id) {
     productService.delete(id);
     return ProductListPage.class;
 }
@@ -136,10 +136,10 @@ Path variables from a page URL are available to model and action methods.
 
 ```java
 @Page("/orders/{orderId}.html")
-public class OrderPage {
+class OrderPage {
 
     @ModelData
-    public Order order(@PathVariable("orderId") long orderId) {
+    Order order(@PathVariable("orderId") long orderId) {
         return orderService.findById(orderId);
     }
 }
@@ -166,10 +166,10 @@ import one.xis.ModelData;
 import one.xis.Frontlet;
 
 @Frontlet
-public class ProductSummaryFrontlet {
+class ProductSummaryFrontlet {
 
     @ModelData
-    public String headline() {
+    String headline() {
         return "Products";
     }
 }
@@ -199,7 +199,7 @@ Frontlet IDs default to the simple class name. Use an explicit ID if two frontle
 
 ```java
 @Frontlet("AdminProductSummary")
-public class ProductSummaryFrontlet {
+class ProductSummaryFrontlet {
 }
 ```
 
@@ -237,7 +237,7 @@ package example.layout;
 import one.xis.Include;
 
 @Include("header")
-public class Header {
+class Header {
 }
 ```
 

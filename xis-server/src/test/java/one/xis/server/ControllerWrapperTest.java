@@ -2,6 +2,7 @@ package one.xis.server;
 
 import one.xis.ModelData;
 import one.xis.SharedValue;
+import one.xis.UploadConfiguration;
 import one.xis.UserContextImpl;
 import one.xis.deserialize.MainDeserializer;
 import one.xis.http.RequestContext;
@@ -24,7 +25,7 @@ class ControllerWrapperTest {
         UserContextImpl.getInstance().setSecurityAttributes(mock());
         var deserializer = mock(MainDeserializer.class);
         var controllerResultMapper = mock(ControllerResultMapper.class);
-        var wrapperFactory = new ControllerWrapperFactory(deserializer, new ControllerMethodResultMapper(mock(), new PathResolver()), controllerResultMapper);
+        var wrapperFactory = new ControllerWrapperFactory(deserializer, new ControllerMethodResultMapper(mock(), new PathResolver()), controllerResultMapper, mock(UploadConfiguration.class));
         controller = new ExampleController();
         controllerWrapper = wrapperFactory.createControllerWrapper("test", controller, ControllerWrapper.class);
         RequestContext.createInstance(mock(), mock());

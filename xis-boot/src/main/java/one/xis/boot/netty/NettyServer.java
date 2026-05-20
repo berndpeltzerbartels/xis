@@ -17,6 +17,7 @@ import io.netty.util.concurrent.DefaultThreadFactory;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import one.xis.UploadConfiguration;
 import one.xis.context.Component;
 import one.xis.context.Inject;
 
@@ -26,13 +27,13 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class NettyServer {
 
-    private static final int MAX_AGGREGATED_REQUEST_BYTES = 1 * 1024 * 1024; // 1MB
     private static final int READER_IDLE_SECONDS = 30; // close idle keep-alive connections
     private static final int WRITER_IDLE_SECONDS = 0;
     private static final int ALL_IDLE_SECONDS = 0;
 
     @Inject
     private final NettyHttpServerHandler httpServerHandler;
+    private final UploadConfiguration uploadConfiguration;
 
     @Setter
     @Getter
@@ -79,7 +80,7 @@ public class NettyServer {
                         8192,   // maxHeaderSize
                         8192    // maxChunkSize
                 ));
-                ch.pipeline().addLast(new HttpObjectAggregator(MAX_AGGREGATED_REQUEST_BYTES));
+                ch.pipeline().addLast(new HttpObjectAggregator(maxAggregatedRequestBytes()));
                 ch.pipeline().addLast(new HttpServerExpectContinueHandler());
 
                 // Idle detection BEFORE the HTTP handler
@@ -90,6 +91,11 @@ public class NettyServer {
                 ch.pipeline().addLast(httpServerHandler);
             }
         };
+    }
+
+    private int maxAggregatedRequestBytes() {
+        long configured = uploadConfiguration.getMaxRequestSize();
+        return configured > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) configured;
     }
 
     private void addShutdownHook(NioEventLoopGroup bossGroup, NioEventLoopGroup workerGroup) {

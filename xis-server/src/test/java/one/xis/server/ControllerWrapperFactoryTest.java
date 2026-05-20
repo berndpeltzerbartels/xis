@@ -4,6 +4,7 @@ import one.xis.Action;
 import one.xis.Frontlet;
 import one.xis.ModelData;
 import one.xis.Page;
+import one.xis.UploadConfiguration;
 import one.xis.deserialize.MainDeserializer;
 import org.junit.jupiter.api.Test;
 
@@ -64,13 +65,13 @@ class ControllerWrapperFactoryTest {
     @Test
     void noExceptionPage() {
         var controller = new TestPageController();
-        new ControllerWrapperFactory(mock(MainDeserializer.class), mock(ControllerMethodResultMapper.class), mock(ControllerResultMapper.class)).createControllerWrapper("/page.html", controller, PageControllerWrapper.class);
+        new ControllerWrapperFactory(mock(MainDeserializer.class), mock(ControllerMethodResultMapper.class), mock(ControllerResultMapper.class), mock(UploadConfiguration.class)).createControllerWrapper("/page.html", controller, PageControllerWrapper.class);
     }
 
     @Test
     void noExceptionFrontlet() {
         var controller = new TestFrontletController();
-        new ControllerWrapperFactory(mock(MainDeserializer.class), mock(ControllerMethodResultMapper.class), mock(ControllerResultMapper.class)).createControllerWrapper("TestFrontletController", controller, PageControllerWrapper.class);
+        new ControllerWrapperFactory(mock(MainDeserializer.class), mock(ControllerMethodResultMapper.class), mock(ControllerResultMapper.class), mock(UploadConfiguration.class)).createControllerWrapper("TestFrontletController", controller, PageControllerWrapper.class);
     }
 
 

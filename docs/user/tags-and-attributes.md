@@ -268,6 +268,7 @@ syntax when you want stricter XIS-specific markup.
     <select xis:binding="categoryId">
         <option value="${category.id}" xis:repeat="category:categories">${category.name}</option>
     </select>
+    <input type="file" xis:binding="attachment"/>
     <input type="checkbox" xis:binding="active"/>
     <input type="checkbox" xis:binding="tags" value="new"/>
     <input type="checkbox" xis:binding="tags" value="sale"/>
@@ -286,6 +287,7 @@ Element syntax:
     <xis:select binding="categoryId">
         <option value="${category.id}" xis:repeat="category:categories">${category.name}</option>
     </xis:select>
+    <xis:input type="file" binding="attachment"/>
     <xis:checkbox binding="active"/>
     <xis:checkbox binding="tags" value="new"/>
     <xis:checkbox binding="tags" value="sale"/>
@@ -297,6 +299,9 @@ Element syntax:
 
 `xis:submit` starts a form action without requiring a separate `xis:action` attribute. The action receives the submitted
 form object through `@FormData`.
+
+A file input is submitted as multipart form data. The matching Java form field or action parameter must be annotated
+with `@Upload`; see [File uploads](forms-and-validation.md#file-uploads) for supported Java types and upload limits.
 
 When multiple controls use the same binding, XIS submits all selected values for that binding. Use that for checkbox
 groups or any repeated form value that should arrive as a collection:
@@ -314,14 +319,14 @@ Equivalent element syntax:
 ```
 
 ```java
-public class ProductForm {
+class ProductForm {
     private List<String> tags;
 
-    public List<String> getTags() {
+    List<String> getTags() {
         return tags;
     }
 
-    public void setTags(List<String> tags) {
+    void setTags(List<String> tags) {
         this.tags = tags;
     }
 }

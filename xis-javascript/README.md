@@ -87,10 +87,10 @@ If you want a predictable result today, prefer `META-INF/xis/js/extensions`.
 
 There is a special case for extending the XIS expression language (EL).
 
-The browser runtime provides a global EL function registry based on `ELFunctions`. Custom functions can be added with:
+The browser runtime provides a small public XIS API for registering custom functions:
 
 ```javascript
-elFunctions.addFunction("myFunction", function(value) {
+XIS.addElFunction("myFunction", function(value) {
     return value;
 });
 ```
@@ -100,7 +100,7 @@ This is useful when you want to call custom functions from XIS expressions in te
 Example:
 
 ```javascript
-elFunctions.addFunction("greet", function(name) {
+XIS.addElFunction("greet", function(name) {
     return "Hello " + name;
 });
 ```

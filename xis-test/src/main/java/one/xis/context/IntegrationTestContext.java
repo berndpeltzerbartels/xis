@@ -8,6 +8,7 @@ import one.xis.UserContextCreatedEvent;
 import one.xis.UserContextImpl;
 import one.xis.auth.UserInfo;
 import one.xis.auth.UserInfoImpl;
+import one.xis.auth.UserInfoService;
 import one.xis.auth.token.SecurityAttributes;
 import one.xis.http.RequestContext;
 import one.xis.http.RestControllerService;
@@ -169,8 +170,10 @@ public class IntegrationTestContext {
     private AppContext internalContext(Collection<String> packages, Collection<Object> singletons) {
         var builder = AppContextBuilder.createInstance()
                 .withXIS()
-                .withSingletonClass(TestUserInfoService.class)
                 .withSingleton(new UserContextFaker());
+        if (!containsUserInfoService(singletons)) {
+            builder.withSingletonClass(TestUserInfoService.class);
+        }
         for (var s : singletons) {
             if (s instanceof Class<?> clazz) {
                 builder.withSingletonClass(clazz);
@@ -180,6 +183,15 @@ public class IntegrationTestContext {
         }
         packages.forEach(builder::withPackage);
         return builder.build();
+    }
+
+    private boolean containsUserInfoService(Collection<Object> singletons) {
+        return singletons.stream().anyMatch(singleton -> {
+            if (singleton instanceof Class<?> clazz) {
+                return UserInfoService.class.isAssignableFrom(clazz);
+            }
+            return singleton instanceof UserInfoService<?>;
+        });
     }
 
     @SuppressWarnings("unused")

@@ -6,17 +6,23 @@ import one.xis.*;
 import one.xis.PathVariable;
 import one.xis.auth.AuthenticationException;
 import one.xis.deserialize.MainDeserializer;
+import one.xis.deserialize.DeserializationContext;
+import one.xis.deserialize.InvalidValueError;
 import one.xis.deserialize.PostProcessingResults;
 import one.xis.http.HttpRequest;
 import one.xis.http.HttpResponse;
 import one.xis.http.RequestContext;
 import one.xis.utils.lang.ClassUtils;
+import one.xis.utils.lang.FieldUtil;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.LinkedHashMap;
 import java.util.function.Supplier;
@@ -28,6 +34,7 @@ class ControllerMethodParameter {
     private final MainDeserializer deserializer;
     private final int parameterIndex;
     private final int positionalParameterIndex;
+    private final UploadConfiguration uploadConfiguration;
 
     // TODO Validation: only one of these annotation in parameter
     Object prepareParameter(ClientRequest request, PostProcessingResults postProcessingResults, Map<String, Object> requestScope) throws Exception {
@@ -40,6 +47,8 @@ class ControllerMethodParameter {
             return RequestContext.getInstance();
         } else if (parameter.isAnnotationPresent(FormData.class)) {
             return deserializeFormDataParameter(parameter, request, postProcessingResults);
+        } else if (parameter.isAnnotationPresent(Upload.class)) {
+            return uploadParameter(parameter, postProcessingResults);
         } else if (parameter.isAnnotationPresent(UserId.class)) {
             checkAuthenticated();
             return validateAndRetrieve(userContext::getUserId, "UserId expected, but it was null");
@@ -153,7 +162,79 @@ class ControllerMethodParameter {
         if (!isMandatory(parameter) && paramValue == null) {
             return null;
         }
-        return deserializeParameter(paramValue, request, parameter, postProcessingResults);
+        Object formData = deserializeParameter(paramValue, request, parameter, postProcessingResults);
+        injectUploadedFiles(formData, postProcessingResults, key);
+        return formData;
+    }
+
+    private Object uploadParameter(Parameter parameter, PostProcessingResults postProcessingResults) {
+        Upload upload = parameter.getAnnotation(Upload.class);
+        String fieldName = uploadFieldName(upload, parameter.getName());
+        List<UploadedFile> files = RequestContext.getInstance().getRequest().getUploadedFiles(fieldName);
+        validateUploadSize(upload, files, parameter, "/" + fieldName, postProcessingResults);
+        return convertUploadValue(parameter.getType(), files);
+    }
+
+    private void injectUploadedFiles(Object formData, PostProcessingResults postProcessingResults, String formKey) {
+        if (formData == null) {
+            return;
+        }
+        for (Field field : FieldUtil.getAllFields(formData.getClass())) {
+            if (!field.isAnnotationPresent(Upload.class)) {
+                continue;
+            }
+            Upload upload = field.getAnnotation(Upload.class);
+            String fieldName = uploadFieldName(upload, field.getName());
+            List<UploadedFile> files = RequestContext.getInstance().getRequest().getUploadedFiles(fieldName);
+            validateUploadSize(upload, files, field, "/" + formKey + "/" + field.getName(), postProcessingResults);
+            FieldUtil.setFieldValue(formData, field, convertUploadValue(field.getType(), files));
+        }
+    }
+
+    private String uploadFieldName(Upload upload, String fallback) {
+        if (upload.value() != null && !upload.value().isBlank()) {
+            return upload.value();
+        }
+        return fallback;
+    }
+
+    private void validateUploadSize(Upload upload, List<UploadedFile> files, java.lang.reflect.AnnotatedElement target, String path, PostProcessingResults postProcessingResults) {
+        long maxSize = upload.maxSize() >= 0 ? upload.maxSize() : uploadConfiguration.getMaxFileSize();
+        for (UploadedFile file : files) {
+            if (file.getSize() > maxSize) {
+                postProcessingResults.add(uploadTooLargeError(target, path, file, maxSize));
+            }
+        }
+    }
+
+    private InvalidValueError uploadTooLargeError(java.lang.reflect.AnnotatedElement target, String path, UploadedFile file, long maxSize) {
+        var error = new InvalidValueError(
+                new DeserializationContext(path, target, Upload.class, UserContext.getInstance()),
+                "validation.upload.max-size",
+                "validation.upload.max-size.global",
+                file.getFileName()
+        );
+        error.addMessageParameter("fileName", file.getFileName());
+        error.addMessageParameter("maxSize", maxSize);
+        error.addMessageParameter("size", file.getSize());
+        return error;
+    }
+
+    private Object convertUploadValue(Class<?> targetType, List<UploadedFile> files) {
+        if (Collection.class.isAssignableFrom(targetType)) {
+            return files;
+        }
+        UploadedFile file = files.isEmpty() ? null : files.get(0);
+        if (UploadedFile.class.equals(targetType)) {
+            return file;
+        }
+        if (byte[].class.equals(targetType)) {
+            return file == null ? null : file.getBytes();
+        }
+        if (String.class.equals(targetType)) {
+            return file == null ? null : file.getUtf8Text();
+        }
+        throw new IllegalArgumentException("@Upload supports only UploadedFile, List<UploadedFile>, byte[], and String. Unsupported type: " + targetType.getName());
     }
 
     private Object deserializeUrlParameter(Parameter parameter, ClientRequest request, PostProcessingResults postProcessingResults) throws IOException {

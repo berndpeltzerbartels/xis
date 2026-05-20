@@ -23,10 +23,11 @@ var gsonVersion = rootProject.ext.libraryVersions.gson
 var mockitoVersion = rootProject.ext.libraryVersions.mockito
 var slf4jVersion = rootProject.ext.libraryVersions.slf4j
 def junitVersion = "5.7.0"
-def assertjVersion = "3.16.1"
+def assertjVersion = rootProject.ext.libraryVersions.assertj
 
 dependencies {
 
+    api(project(":xis-controller-api"))
     implementation(project(":xis-context"))
     implementation(project(":xis-util"))
     runtimeOnly(project(":xis-gson"))

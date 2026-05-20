@@ -18,7 +18,7 @@ The module is intentionally modest. It focuses on three things:
 ```groovy
 plugins {
     id "java"
-    id "one.xis.plugin" version "0.10.0"
+    id "one.xis.plugin" version "0.11.2"
 }
 
 repositories {
@@ -52,7 +52,7 @@ Annotate document classes or records with `@MongoDocument`:
 
 ```java
 @MongoDocument("customers")
-public record Customer(String id, String firstName, String lastName) {
+record Customer(String id, String firstName, String lastName) {
 }
 ```
 
@@ -60,7 +60,7 @@ The field or record component named `id` maps to MongoDB `_id`. Use `@MongoId` w
 
 ```java
 @MongoDocument("customers")
-public class Customer {
+class Customer {
     @MongoId
     String customerId;
 
@@ -80,7 +80,7 @@ A repository is an interface annotated with `@MongoRepository` and extending `Mo
 
 ```java
 @MongoRepository
-public interface CustomerRepository extends MongoCrudRepository<Customer, String> {
+interface CustomerRepository extends MongoCrudRepository<Customer, String> {
 
     @MongoQuery("{ lastName: ?0 }")
     List<Customer> findByLastName(String lastName);
@@ -105,10 +105,10 @@ MongoDB change streams can be connected to XIS components with `@MongoWatch`:
 
 ```java
 @Component
-public class CustomerChanges {
+class CustomerChanges {
     private final RefreshEventPublisher refreshEvents;
 
-    public CustomerChanges(RefreshEventPublisher refreshEvents) {
+    CustomerChanges(RefreshEventPublisher refreshEvents) {
         this.refreshEvents = refreshEvents;
     }
 

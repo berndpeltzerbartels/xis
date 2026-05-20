@@ -28,6 +28,7 @@ java {
 // Local variables for versions
 var lombokVersion = rootProject.ext.libraryVersions.lombok
 var mockitoVersion = rootProject.ext.libraryVersions.mockito
+var assertjVersion = rootProject.ext.libraryVersions.assertj
 
 dependencies {
 
@@ -66,7 +67,7 @@ dependencies {
     testImplementation "org.mockito:mockito-core:$mockitoVersion"
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0' // TOO use properties from root project
-    testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.16.1'
+    testImplementation "org.assertj:assertj-core:$assertjVersion"
 
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
 

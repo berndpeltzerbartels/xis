@@ -14,8 +14,19 @@ class HttpConnector {
      * @return {Promise<any, int>}
      *
      */
-    post(uri, payload, headers) {
+    post(uri, payload, headers, uploads) {
         if (!headers) headers = {};
+        if (uploads && uploads.length > 0) {
+            const formData = new FormData();
+            formData.append('xis-request', JSON.stringify(payload || {}));
+            for (const upload of uploads) {
+                if (!upload || !upload.file || !upload.fieldName) {
+                    continue;
+                }
+                formData.append(upload.fieldName, upload.file);
+            }
+            return this.doRequest(uri, headers, 'POST', formData);
+        }
         var payloadJson = JSON.stringify(payload);
         headers['Content-type'] = 'application/json';
         return this.doRequest(uri, headers, 'POST', payloadJson);
@@ -103,8 +114,7 @@ class HttpConnector {
             return Promise.resolve();
         }
         if (typeof app.eventConnector.ensureConnected === 'function') {
-            app.eventConnector.ensureConnected();
-            return Promise.resolve();
+            return app.eventConnector.ensureConnected();
         } else if (typeof app.eventConnector.isConnected === 'function'
                 && typeof app.eventConnector.reconnect === 'function'
                 && !app.eventConnector.isConnected()) {

@@ -97,7 +97,7 @@ import one.xis.Page;
 
 @Page("/products.html")
 @HtmlFile("ProductList.html")
-public class ProductPage {
+class ProductPage {
 }
 ```
 
@@ -117,7 +117,7 @@ import one.xis.Page;
 
 @Page("/products.html")
 @HtmlFile("/templates/ProductList.html")
-public class ProductPage {
+class ProductPage {
 }
 ```
 
@@ -143,7 +143,7 @@ import one.xis.Page;
 
 @Page("/products.html")
 @HtmlFile("/templates/catalog.html")
-public class ProductPage {
+class ProductPage {
 }
 ```
 
@@ -155,7 +155,7 @@ import one.xis.Page;
 
 @Page("/offers.html")
 @HtmlFile("/templates/catalog.html")
-public class OfferPage {
+class OfferPage {
 }
 ```
 
@@ -175,7 +175,7 @@ import one.xis.Page;
 
 @Page("/profile.html")
 @DefaultHtmlFile("/default-profile.html")
-public class ProfilePage {
+class ProfilePage {
 }
 ```
 

@@ -31,7 +31,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Proxy(factory = AuditClientProxyFactory.class)
-public @interface AuditClient {
+@interface AuditClient {
 }
 ```
 
@@ -39,7 +39,7 @@ public @interface AuditClient {
 package com.example.audit;
 
 @AuditClient
-public interface CustomerAudit {
+interface CustomerAudit {
 
     void changed(long customerId, String message);
 }
@@ -50,11 +50,11 @@ package com.example.audit;
 
 import one.xis.context.ProxyFactory;
 
-public class AuditClientProxyFactory implements ProxyFactory<CustomerAudit> {
+class AuditClientProxyFactory implements ProxyFactory<CustomerAudit> {
 
     private final AuditTransport transport;
 
-    public AuditClientProxyFactory(AuditTransport transport) {
+    AuditClientProxyFactory(AuditTransport transport) {
         this.transport = transport;
     }
 
@@ -77,15 +77,15 @@ Once the interface is annotated, application code uses it like any other depende
 import one.xis.Service;
 
 @Service
-public class CustomerService {
+class CustomerService {
 
     private final CustomerAudit audit;
 
-    public CustomerService(CustomerAudit audit) {
+    CustomerService(CustomerAudit audit) {
         this.audit = audit;
     }
 
-    public void renameCustomer(long customerId, String name) {
+    void renameCustomer(long customerId, String name) {
         audit.changed(customerId, "renamed to " + name);
     }
 }
@@ -105,7 +105,7 @@ If the factory type should not be loaded directly from the annotation, use `fact
 
 ```java
 @Proxy(factoryName = "com.example.audit.AuditClientProxyFactory")
-public @interface AuditClient {
+@interface AuditClient {
 }
 ```
 

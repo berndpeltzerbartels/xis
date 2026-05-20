@@ -22,6 +22,7 @@ var lombokVersion = rootProject.ext.libraryVersions.lombok
 var slf4jVersion = rootProject.ext.libraryVersions.slf4j
 var junitVersion = rootProject.ext.libraryVersions.junit
 var assertjVersion = rootProject.ext.libraryVersions.assertj
+var gsonVersion = rootProject.ext.libraryVersions.gson
 
 dependencies {
     compileOnly(project(':xis-context'))
@@ -34,6 +35,7 @@ dependencies {
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
 
     testImplementation project(':xis-controller-api')
+    testImplementation "com.google.code.gson:gson:$gsonVersion"
     testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
     testImplementation "org.assertj:assertj-core:$assertjVersion"

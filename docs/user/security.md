@@ -10,7 +10,7 @@ frontlet, action, form, and navigation APIs stay the same.
 ```groovy
 plugins {
     id "java"
-    id "one.xis.plugin" version "0.10.0"
+    id "one.xis.plugin" version "0.11.2"
 }
 
 repositories {
@@ -30,7 +30,7 @@ plugins {
     id "java"
     id "org.springframework.boot" version "3.3.0"
     id "io.spring.dependency-management" version "1.1.5"
-    id "one.xis.plugin" version "0.10.0"
+    id "one.xis.plugin" version "0.11.2"
 }
 
 repositories {
@@ -74,7 +74,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @Component
-public class AppUsers implements UserInfoService<UserInfo> {
+class AppUsers implements UserInfoService<UserInfo> {
 
     @Override
     public boolean validateCredentials(String userId, String password) {
@@ -110,7 +110,7 @@ import one.xis.auth.UserInfoService;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AppUsers implements UserInfoService<UserInfo> {
+class AppUsers implements UserInfoService<UserInfo> {
     // same methods as above
 }
 ```
@@ -169,6 +169,17 @@ generated `ul.error` and `li.error` without bullets.
 This is also the pattern for reusable application libraries. A library can provide controllers and default templates as
 classpath resources, while applications keep the option to replace those templates with resources of the same name. The
 login page is simply the built-in example of that mechanism.
+
+When optional login factors are active, the default login page renders their fields automatically. A custom `login.html`
+must render the matching field itself. For TOTP, add a field bound to `totpCode` and guard it with `totpLoginEnabled`:
+
+```html
+<div xis:if="${totpLoginEnabled}">
+    <label for="totpCode" xis:binding="totpCode" xis:error-class="error">Authenticator code</label>
+    <input xis:binding="totpCode" id="totpCode" type="text" inputmode="numeric" autocomplete="one-time-code"/>
+    <xis:message message-for="totpCode"/>
+</div>
+```
 
 If the application also offers external OpenID Connect providers, the login controller exposes `externalIdpIds` and
 `externalIdpUrls`. A custom template can render them next to the local login form:
@@ -234,6 +245,92 @@ or `resource_access.account.roles`, XIS copies those roles into the local token.
 access tokens for their own APIs instead; in that case the local token has no named roles unless the application maps
 the account through a `UserInfoService`.
 
+## TOTP Two-Factor Login
+
+Add `xis-totp` when local username/password login should support authenticator-app codes:
+
+```groovy
+dependencies {
+    implementation "one.xis:xis-authentication"
+    implementation "one.xis:xis-totp"
+}
+```
+
+The module is optional. If it is present, XIS validates the application at startup:
+
+- exactly one `TOTPStore` implementation must exist
+- `xis.totp.encryption-key` must be configured
+
+The store belongs to the application because only the application knows where user security data should live. XIS never
+hands raw authenticator secrets to the store. It encrypts a generated Base32 secret first and stores only the encrypted
+value.
+
+```java
+package example.security;
+
+import one.xis.context.Component;
+import one.xis.totp.TOTPStore;
+
+import java.util.Optional;
+import java.util.OptionalLong;
+import java.util.concurrent.ConcurrentHashMap;
+
+@Component
+class AppTotpStore implements TOTPStore {
+
+    private final ConcurrentHashMap<String, String> secrets = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, Long> acceptedSteps = new ConcurrentHashMap<>();
+
+    @Override
+    public Optional<String> getEncryptedSecret(String userId) {
+        return Optional.ofNullable(secrets.get(userId));
+    }
+
+    @Override
+    public void saveEncryptedSecret(String userId, String encryptedSecret) {
+        secrets.put(userId, encryptedSecret);
+    }
+
+    @Override
+    public OptionalLong getLastAcceptedTimeStep(String userId) {
+        Long step = acceptedSteps.get(userId);
+        return step == null ? OptionalLong.empty() : OptionalLong.of(step);
+    }
+
+    @Override
+    public void saveLastAcceptedTimeStep(String userId, long timeStep) {
+        acceptedSteps.put(userId, timeStep);
+    }
+}
+```
+
+Configure a stable encryption key and, optionally, the issuer shown in authenticator apps:
+
+```properties
+xis.totp.encryption-key=replace-with-a-stable-secret-from-your-environment
+xis.totp.issuer=Example CRM
+```
+
+When a user has no stored TOTP secret, password login stays password-only. When a secret exists, the login validator
+requires the `totpCode` field before it creates the local login code. If the store persists the last accepted time step,
+XIS rejects a repeated code from the same 30-second window.
+
+`xis-totp` also contributes an HTTP controller for provisioning:
+
+```text
+/xis/totp/qr.svg
+```
+
+The endpoint requires an authenticated user. It creates a secret for that user if none exists yet, stores the encrypted
+secret through `TOTPStore`, and returns an SVG QR code containing the standard `otpauth://` URI. Applications can show
+that SVG on their own account/security page.
+
+`xis-totp` also provides `/totp-setup.html` as a default setup page. It uses the same basic CSS hooks as the default
+login page (`container`, `form_container`, `form-group`, `form-control`, `btn`, `btn-primary`) plus TOTP-specific hooks
+such as `totp-setup-container`, `totp-setup-form`, `totp-setup-error`, `totp-setup-qr-code`, and
+`totp-setup-login-link`. Applications can usually style the built-in page with CSS; add a `totp-setup.html` resource only
+when the page structure itself should be replaced.
+
 ## Page And Action Roles
 
 Use `@Authenticated` when a page, frontlet, action method, action parameter, or action DTO requires a login but no named role. Use
@@ -244,7 +341,7 @@ Use `@Authenticated` when a page, frontlet, action method, action parameter, or 
 ```java
 @Page("/community.html")
 @Authenticated
-public class CommunityPage {
+class CommunityPage {
 }
 ```
 
@@ -259,7 +356,7 @@ import one.xis.UserId;
 
 @Page("/account.html")
 @Roles("USER")
-public class AccountPage {
+class AccountPage {
 
     @ModelData("message")
     String message(@UserId String userId) {
@@ -328,7 +425,7 @@ import one.xis.Roles;
 
 @Page("/editor.html")
 @Roles("USER")
-public class EditorPage {
+class EditorPage {
 
     @Action
     void save(@FormData("article") ArticleForm article) {
@@ -343,11 +440,84 @@ package example.security;
 import one.xis.Roles;
 
 @Roles("DATA_EDITOR")
-public record ArticleForm(String title, String body) {
+record ArticleForm(String title, String body) {
 }
 ```
 
 The `save` action requires both `USER` and `DATA_EDITOR`: `USER` from the page and `DATA_EDITOR` from the DTO.
+
+## Ownership Checks
+
+Use `@OwnedBy` when submitted form/action data references an object that must belong to the currently authenticated
+user. XIS runs the configured `OwnershipGuard` after the object has been deserialized and before the action method is
+called. The guard receives the submitted object and the trusted `UserContext`; the application owns the actual lookup or
+policy decision.
+
+```java
+package example.security;
+
+import one.xis.Action;
+import one.xis.FormData;
+import one.xis.OwnedBy;
+import one.xis.OwnershipGuard;
+import one.xis.Page;
+import one.xis.Roles;
+import one.xis.UserContext;
+import one.xis.context.Component;
+
+@Component
+class CustomerOwnershipGuard implements OwnershipGuard<CustomerForm> {
+
+    private final CustomerService customerService;
+
+    CustomerOwnershipGuard(CustomerService customerService) {
+        this.customerService = customerService;
+    }
+
+    @Override
+    public boolean mayAccess(CustomerForm form, UserContext userContext) {
+        return customerService.customerBelongsToUser(form.customerId(), userContext.getUserId());
+    }
+}
+
+@Page("/customers.html")
+@Roles("USER")
+class CustomerPage {
+
+    @Action
+    void save(@FormData("customer") CustomerForm form) {
+        customerService.save(form);
+    }
+}
+
+@OwnedBy(CustomerOwnershipGuard.class)
+record CustomerForm(String customerId, String name) {
+}
+```
+
+In Spring applications, make the guard a Spring bean, for example with `org.springframework.stereotype.Component`,
+instead of `one.xis.context.Component`.
+
+Ownership violations behave like role violations. The action is not called. In a frontend request XIS turns the
+security failure into the same login redirect flow used by `@Roles` and `@Authenticated`, so the browser opens the login
+page with the current page as `redirect_uri`.
+
+`@OwnedBy` can be placed on the DTO class or on the concrete action parameter:
+
+```java
+@Action
+void save(@OwnedBy(CustomerOwnershipGuard.class)
+          @FormData("customer") CustomerForm form) {
+    customerService.save(form);
+}
+```
+
+Nested objects are checked individually while they are deserialized. If a nested object or field has its own `@OwnedBy`,
+that nested object must also pass its guard.
+
+XIS does not cache ownership decisions. The framework does not know which fields identify the protected resource, and
+all other submitted values may legally change. If a guard needs caching, keep that cache inside the application code
+where the stable resource id and operation are known.
 
 ## External IDP
 
@@ -364,7 +534,7 @@ import one.xis.auth.idp.ExternalIDPConfig;
 import one.xis.context.Component;
 
 @Component
-public class KeycloakLogin implements ExternalIDPConfig {
+class KeycloakLogin implements ExternalIDPConfig {
 
     @Override
     public String getIdpId() {
@@ -397,7 +567,7 @@ import one.xis.auth.idp.ExternalIDPConfig;
 import org.springframework.stereotype.Component;
 
 @Component
-public class KeycloakLogin implements ExternalIDPConfig {
+class KeycloakLogin implements ExternalIDPConfig {
     // same methods as above
 }
 ```
@@ -494,7 +664,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
-public class GoogleUsers implements UserInfoService<UserInfoImpl> {
+class GoogleUsers implements UserInfoService<UserInfoImpl> {
 
     private final Map<String, UserInfoImpl> users = new ConcurrentHashMap<>();
 
@@ -586,7 +756,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @Component
-public class AppIDPService implements IDPService {
+class AppIDPService implements IDPService {
 
     private final Map<String, String> passwords = Map.of("alice", "secret");
     private final Map<String, IDPClientInfo> clients = Map.of(

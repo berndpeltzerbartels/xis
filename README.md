@@ -1,10 +1,16 @@
 # XIS
 
-XIS is a JVM web framework for building interactive single page applications (SPAs) with plain Java or Groovy and plain HTML.
-Its main focus is reducing boilerplate: unlike many SPA frameworks, XIS does not require a separate client build,
-hand-written REST endpoints, or application-specific client-side script code for typical use cases. Most application
-features are built from server-side controllers and HTML templates, much like request/response applications, while XIS still
-provides SPA-style navigation, updates, and form handling in the browser.
+**XIS is a lightweight SPA framework for Java and Groovy: annotation-driven, fast, and built around backend controllers
+plus plain HTML templates. XIS provides ready-to-use client-server transport, state synchronization, navigation, form
+handling, validation feedback, and partial UI refreshes without extra work and without any boilerplate code. It runs
+standalone on the JVM with XIS Boot, as a GraalVM native executable for cloud-native deployment with XIS Boot Native,
+or inside Spring. It supports distributed Microfrontend Architecture, and in most applications you write just annotated POJO
+controllers and templates. Coding is as simple as in the old days of request-response, but the result is a modern and
+fast SPA application.**
+
+The framework keeps application code close to the feature it implements. Instead of maintaining REST endpoints, DTOs,
+frontend API clients, client-side state management, and duplicated validation rules, most features are built from a
+server-side controller and the HTML template that presents it.
 
 The programming model is server-driven: Java or Groovy controllers describe pages, frontlets, actions, form data, and model data.
 HTML templates describe the UI. XIS handles browser-server communication, navigation, form submission, validation
@@ -14,7 +20,7 @@ feedback, frontlet updates, and SPA-style page transitions.
 
 Many web applications end up with the same split:
 
-- Java or Kotlin backend controllers
+- Java or Groovy backend controllers
 - REST endpoints and DTOs
 - JavaScript or TypeScript API clients
 - frontend state management
@@ -48,22 +54,22 @@ import one.xis.WelcomePage;
 
 @WelcomePage
 @Page("/hello.html")
-public class HelloPage {
+class HelloPage {
 
     private int counter;
 
     @ModelData
-    public String greeting() {
+    String greeting() {
         return "Hello XIS";
     }
 
     @ModelData
-    public int count() {
+    int count() {
         return counter;
     }
 
     @Action
-    public void increment() {
+    void increment() {
         counter++;
     }
 }
@@ -95,9 +101,13 @@ Most applications should choose one runtime:
 
 - `xis-spring` for Spring Boot applications
 - `xis-boot` for standalone XIS applications without Spring Boot
+- `xis-boot-native` for XIS Boot applications that should be built and deployed as GraalVM native executables
 
 The selected runtime brings the controller annotations such as `@Page`, `@Frontlet`, `@ModelData`, `@FormData`,
 `@Action`, and `@PathVariable`.
+
+`xis-boot-native` is the cloud-native path for small containers, fast startup, and deployments where you want a native
+binary without building your own discovery, reflection, resource, and proxy infrastructure.
 
 XIS also supports Groovy 4+ controllers and form DTOs. This is useful when a team wants a lighter JVM syntax while still
 using the same XIS annotations, templates, forms, validation, and runtime behavior. Java remains the primary and fastest
@@ -121,10 +131,11 @@ path; Groovy support does not add runtime overhead to Java applications.
 - [Microfrontend Architecture for distributed XIS applications](docs/user/advanced/microfrontend-architecture.md)
 - [Groovy 4+ support for controllers and forms](docs/user/groovy.md)
 - [Gradle tools for template generation, test generation, validation, runnable jars, and local runs](docs/user/gradle-plugin.md)
+- [Cloud Native deployment with XIS Boot Native, GraalVM native-image, and native database modules](docs/user/cloud-native.md)
 - [Integration tests, generated tests, E2E tests, and the integration-test browser model](docs/user/examples-and-tests.md)
 - [Custom JavaScript extensions, custom EL functions, global browser behavior, and form submission from JavaScript](docs/user/advanced/custom-javascript.md)
 - [Custom proxies for generated clients, repositories, and infrastructure extensions](docs/user/advanced/custom-proxies.md)
-- [XIS Theme for quick prototypes, forms, dashboards, panels, messages, and basic layout](docs/user/advanced/theme.md)
+- [XIS Theme for generated standard pages, forms, navigation, dashboards, panels, messages, and basic layout](docs/user/advanced/theme.md)
 
 ## Documentation
 

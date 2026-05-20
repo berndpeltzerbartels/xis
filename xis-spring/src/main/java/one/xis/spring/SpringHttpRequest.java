@@ -2,12 +2,16 @@ package one.xis.spring;
 
 
 import jakarta.servlet.http.HttpServletRequest;
+import one.xis.UploadedFile;
 import one.xis.http.ContentType;
 import one.xis.http.HttpMethod;
 import one.xis.http.HttpRequest;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -80,10 +84,30 @@ public class SpringHttpRequest implements HttpRequest {
 
     @Override
     public Map<String, String> getFormParameters() {
-        if (ContentType.FORM_URLENCODED.getValue().equalsIgnoreCase(request.getContentType())) {
+        ContentType contentType = getContentType();
+        if (contentType == ContentType.FORM_URLENCODED || contentType == ContentType.MULTIPART_FORM_DATA) {
             return getQueryParameters(); // Servlet API combines query and form params in getParameterMap
         }
         return Map.of();
+    }
+
+    @Override
+    public Map<String, List<UploadedFile>> getUploadedFiles() {
+        if (!(request instanceof MultipartHttpServletRequest multipartRequest)) {
+            return Map.of();
+        }
+        return multipartRequest.getMultiFileMap().entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().stream()
+                        .map(this::toUploadedFile)
+                        .toList()));
+    }
+
+    private UploadedFile toUploadedFile(MultipartFile file) {
+        try {
+            return new UploadedFile(file.getName(), file.getOriginalFilename(), file.getContentType(), file.getBytes());
+        } catch (IOException e) {
+            throw new RuntimeException("Could not read uploaded file '" + file.getOriginalFilename() + "'", e);
+        }
     }
 
     @Override

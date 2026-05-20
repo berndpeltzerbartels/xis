@@ -30,7 +30,7 @@ import static java.lang.annotation.ElementType.TYPE;
 @UseAdvice(TimedAdvice.class)
 @Target({TYPE, METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Timed {
+@interface Timed {
 }
 ```
 
@@ -41,7 +41,7 @@ and then call `proceed()`.
 import one.xis.context.Advice;
 import one.xis.context.AdviceInvocation;
 
-public class TimedAdvice implements Advice {
+class TimedAdvice implements Advice {
 
     @Override
     public Object around(AdviceInvocation invocation) throws Throwable {
@@ -61,7 +61,7 @@ public class TimedAdvice implements Advice {
 Apply the annotation to an implementation method and inject the service through its interface:
 
 ```java
-public interface CustomerService {
+interface CustomerService {
     void update(Customer customer);
 }
 ```
@@ -70,7 +70,7 @@ public interface CustomerService {
 import one.xis.context.Service;
 
 @Service
-public class CustomerServiceImpl implements CustomerService {
+class CustomerServiceImpl implements CustomerService {
 
     @Timed
     public void update(Customer customer) {
@@ -81,11 +81,11 @@ public class CustomerServiceImpl implements CustomerService {
 
 ```java
 @Service
-public class CustomerPageService {
+class CustomerPageService {
 
     private final CustomerService customerService;
 
-    public CustomerPageService(CustomerService customerService) {
+    CustomerPageService(CustomerService customerService) {
         this.customerService = customerService;
     }
 }

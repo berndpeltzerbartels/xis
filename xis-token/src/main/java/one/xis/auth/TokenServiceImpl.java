@@ -141,7 +141,8 @@ class TokenServiceImpl implements TokenService {
 
     private <C extends TokenClaims> C decodeToken(String token, Class<C> claimsClass, JsonWebKey jwk) throws InvalidTokenException {
         try {
-            JsonObject header = extractHeader(token); // TODO validate header
+            JsonObject header = extractHeader(token);
+            validateHeader(header);
             C claims = extractClaims(token, claimsClass);
             validateClaims(claims);
             PublicKey publicKey = createPublicKey(jwk);
@@ -162,6 +163,29 @@ class TokenServiceImpl implements TokenService {
         } catch (Exception e) {
             throw new InvalidTokenException("Failed to decode accessToken", e);
         }
+    }
+
+    private void validateHeader(JsonObject header) {
+        if (header == null) {
+            throw new InvalidTokenException("Token header is missing");
+        }
+        if (!hasStringValue(header, "kid")) {
+            throw new InvalidTokenException("Token header does not contain 'kid'");
+        }
+        if (!"RS256".equals(stringValue(header, "alg"))) {
+            throw new InvalidTokenException("Unsupported token algorithm");
+        }
+        if (header.has("typ") && !"JWT".equalsIgnoreCase(stringValue(header, "typ"))) {
+            throw new InvalidTokenException("Unsupported token type");
+        }
+    }
+
+    private boolean hasStringValue(JsonObject object, String name) {
+        return object.has(name) && object.get(name).isJsonPrimitive() && !object.get(name).getAsString().isBlank();
+    }
+
+    private String stringValue(JsonObject object, String name) {
+        return hasStringValue(object, name) ? object.get(name).getAsString() : null;
     }
 
     private <C extends TokenClaims> void validateClaims(C claims) throws InvalidTokenException {

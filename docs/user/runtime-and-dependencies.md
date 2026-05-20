@@ -1,10 +1,11 @@
-# Runtime and Dependency Model
+# Runtime And Dependency Model
 
 [Documentation map](../README.md)
 
-XIS separates the public programming model from runtime integration.
+XIS separates the public programming model from runtime integration. Most controller code and templates look the same
+whether the application runs inside Spring, standalone on the JVM, or as a GraalVM native image.
 
-## Application Runtime
+## Runtime Choice
 
 Choose one application runtime:
 
@@ -15,7 +16,7 @@ plugins {
     id "java"
     id "org.springframework.boot" version "3.3.0"
     id "io.spring.dependency-management" version "1.1.5"
-    id "one.xis.plugin" version "0.10.0"
+    id "one.xis.plugin" version "0.11.2"
 }
 
 repositories {
@@ -28,12 +29,12 @@ dependencies {
 }
 ```
 
-`build.gradle` for XIS Boot:
+`build.gradle` for XIS Boot on the JVM:
 
 ```groovy
 plugins {
     id "java"
-    id "one.xis.plugin" version "0.10.0"
+    id "one.xis.plugin" version "0.11.2"
 }
 
 repositories {
@@ -45,6 +46,23 @@ dependencies {
 }
 ```
 
+`build.gradle` for standalone HTTP endpoints on XIS Boot:
+
+```groovy
+plugins {
+    id "java"
+    id "one.xis.plugin" version "0.11.2"
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "one.xis:xis-boot-http"
+}
+```
+
 When the XIS Gradle plugin is used, it aligns XIS dependency versions to the plugin version. Add explicit versions only
 in builds that do not use the plugin.
 
@@ -52,6 +70,19 @@ Use `xis-spring` when the application already uses Spring Boot or needs Spring i
 
 Use `xis-boot` when you want a small standalone runtime with XIS dependency injection, properties, package scanning, and
 an embedded HTTP runtime.
+
+**XIS pages, frontlets, modals, forms, and actions do not need `xis-boot-http`.** XIS already provides the browser/server
+transport for normal XIS applications. Use `xis-boot-http` only when you want a standalone XIS Boot application to expose
+plain HTTP endpoints for external non-XIS clients, webhooks, scripts, or integration partners.
+
+`xis-boot-http` brings `xis-boot` and `xis-http-controller` into the application API. It provides
+`one.xis.http.Controller`, `@Get`, `@Post`, and the other HTTP controller annotations through one dependency. It is
+intentionally named HTTP rather than REST because XIS does not try to define or enforce the full REST architectural
+style.
+
+Use `xis-boot-native` when you want the XIS Boot programming model and want to build a GraalVM native executable for
+small containers, fast startup, and cloud-native deployment. Continue with [Cloud Native And Native Images](cloud-native.md)
+for Gradle examples, native database modules, build requirements, and current limitations.
 
 ## Controller API
 
@@ -87,7 +118,7 @@ import one.xis.boot.XISBootApplication;
 import one.xis.boot.XISBootRunner;
 
 @XISBootApplication
-public class Application {
+class Application {
 
     public static void main(String[] args) {
         XISBootRunner.run(Application.class, args);
