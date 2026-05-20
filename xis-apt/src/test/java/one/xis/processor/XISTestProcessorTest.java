@@ -37,10 +37,12 @@ class XISTestProcessorTest {
         assertThat(outputDir.resolve("example/ProbePageTest.groovy")).doesNotExist();
         assertThat(Files.readString(generatedTest))
                 .contains("package example;")
-                .contains("import one.xis.boot.test.XisBootTest;")
+                .contains("import org.junit.jupiter.api.BeforeEach;")
                 .contains("class ProbePageTest")
-                .contains("@XisBootTest")
                 .contains("private IntegrationTestContext context;")
+                .contains("@BeforeEach")
+                .contains("void setUp()")
+                .contains(".withSingleton(ProbePage.class)")
                 .contains("void test()")
                 .contains("var client = context.openPage(\"/probe.html\");")
                 .contains("assertNotNull(client.getDocument());");
@@ -59,10 +61,12 @@ class XISTestProcessorTest {
         assertThat(outputDir.resolve("example/ProbePageTest.java")).doesNotExist();
         assertThat(Files.readString(generatedTest))
                 .contains("package example")
-                .contains("import one.xis.boot.test.XisBootTest")
+                .contains("import org.junit.jupiter.api.BeforeEach")
                 .contains("class ProbePageTest")
-                .contains("@XisBootTest")
                 .contains("private IntegrationTestContext context")
+                .contains("@BeforeEach")
+                .contains("void setUp()")
+                .contains(".withSingleton(ProbePage)")
                 .contains("void test()")
                 .contains("def client = context.openPage('/probe.html')")
                 .contains("assertNotNull(client.document)");

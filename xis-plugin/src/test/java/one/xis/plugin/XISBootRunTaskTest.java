@@ -14,6 +14,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class XISBootRunTaskTest {
 
+    private static final String XIS_VERSION = System.getProperty("xis.version", "0.12.0");
+
     @TempDir
     Path projectDir;
 
@@ -32,9 +34,9 @@ class XISBootRunTaskTest {
                 }
 
                 dependencies {
-                    implementation 'one.xis:xis-boot:0.11.1'
+                    implementation 'one.xis:xis-boot:%s'
                 }
-                """);
+                """.formatted(XIS_VERSION));
 
         var result = GradleRunner.create()
                 .withProjectDir(projectDir.toFile())

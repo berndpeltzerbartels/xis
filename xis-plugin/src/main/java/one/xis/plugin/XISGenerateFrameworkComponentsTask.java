@@ -31,8 +31,8 @@ import java.util.stream.Collectors;
 
 public class XISGenerateFrameworkComponentsTask extends DefaultTask {
 
-    private static final Pattern PACKAGE_PATTERN = Pattern.compile("^\\s*package\\s+([a-zA-Z0-9_.]+)\\s*;", Pattern.MULTILINE);
-    private static final Pattern TYPE_PATTERN = Pattern.compile("(?:(?:public|protected|private|abstract|final|static|sealed|non-sealed|strictfp)\\s+)*(class|record|enum|interface)\\s+([A-Za-z_$][A-Za-z0-9_$]*)\\b");
+    private static final Pattern PACKAGE_PATTERN = Pattern.compile("^\\s*package\\s+([a-zA-Z0-9_.]+)\\s*;?", Pattern.MULTILINE);
+    private static final Pattern TYPE_PATTERN = Pattern.compile("(?:(?:public|protected|private|abstract|final|static|sealed|non-sealed|strictfp|data|open|internal)\\s+)*(class|record|enum|interface|object)\\s+([A-Za-z_$][A-Za-z0-9_$]*)\\b");
 
     private final ConfigurableFileCollection sourceFiles = getProject().files();
     private final DirectoryProperty outputDirectory = getProject().getObjects().directoryProperty();
@@ -114,7 +114,7 @@ public class XISGenerateFrameworkComponentsTask extends DefaultTask {
                 .collect(Collectors.toCollection(LinkedHashSet::new));
         var componentsByPackage = new LinkedHashMap<String, Set<String>>();
         for (File sourceFile : sourceFiles.getFiles().stream().sorted(Comparator.comparing(File::getPath)).toList()) {
-            if (!sourceFile.isFile() || !sourceFile.getName().endsWith(".java")) {
+            if (!sourceFile.isFile() || !(sourceFile.getName().endsWith(".java") || sourceFile.getName().endsWith(".kt"))) {
                 continue;
             }
             var source = Files.readString(sourceFile.toPath(), StandardCharsets.UTF_8);

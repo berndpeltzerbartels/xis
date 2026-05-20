@@ -10,8 +10,9 @@ template, and action model; only the application entry point and dependencies di
 - Java 17 or newer
 - Gradle 8 or newer
 
-Java is the shortest path through this quickstart. XIS also supports Groovy 4+ controllers and form DTOs; see
-[Groovy support](groovy.md) when you want to write the server-side code in Groovy.
+Java is the shortest path through this quickstart. XIS also supports Groovy 4+ and Kotlin controllers and form DTOs; see
+[Groovy support](groovy.md) and [Kotlin support](kotlin.md) when you want to write the server-side code in another JVM
+language.
 
 ## Gradle Setup
 
@@ -28,7 +29,7 @@ plugins {
     id "java"
     id "org.springframework.boot" version "3.3.0"
     id "io.spring.dependency-management" version "1.1.5"
-    id "one.xis.plugin" version "0.11.2"
+    id "one.xis.plugin" version "0.12.0"
 }
 
 group = "example"
@@ -112,8 +113,8 @@ The plugin can also generate starter integration tests for page controllers:
 ./gradlew xisTests
 ```
 
-Generated tests use `@XisBootTest`, get an `IntegrationTestContext` field, and open the page through its URL. The
-required XIS test starter is added automatically by the plugin. Generated tests compile before the full page behavior is
+Generated tests create an `IntegrationTestContext` in `@BeforeEach`, register the page controller explicitly, and open
+the page through its URL. The required XIS test starter is added automatically by the plugin. Generated tests compile before the full page behavior is
 implemented, so you can use them for a TDD-style workflow: sketch the page class and its model/form/action methods, run
 `./gradlew xisTemplates xisTests`, edit the generated test until it describes the UI behavior you want, then implement
 the services and refine the template until the test passes.
@@ -194,8 +195,8 @@ To generate a first test skeleton for the page, run:
 ```
 
 This creates `src/test/java/example/dashboard/DashboardPageTest.java` if the file does not already exist. The generated
-test is intentionally small: it uses `@XisBootTest`, receives an `IntegrationTestContext` field, opens `/index.html`,
-and leaves space for assertions against the rendered document.
+test is intentionally small: it creates an `IntegrationTestContext` in `@BeforeEach`, registers the page controller,
+opens `/index.html`, and leaves space for assertions against the rendered document.
 
 ## Add an Action
 
@@ -236,13 +237,46 @@ class CounterPage {
 </head>
 <body>
     <h1>Counter</h1>
-    <p>Current count: ${count}</p>
-    <button xis:action="increment">Increment</button>
+    <p>Current count: <span id="count">${count}</span></p>
+    <button id="increment" xis:action="increment">Increment</button>
 </body>
 </html>
 ```
 
 The action is invoked through XIS. You do not create a REST endpoint for it.
+
+You can generate the test file with `./gradlew xisTests`; you do not have to create the boilerplate yourself. The
+generated file is intentionally small, so make the behavior explicit by adding the click and assertions:
+
+`src/test/java/example/dashboard/CounterPageTest.java`
+
+```java
+package example.dashboard;
+
+import one.xis.boot.test.XisBootTest;
+import one.xis.context.IntegrationTestContext;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+@XisBootTest
+class CounterPageTest {
+
+    private IntegrationTestContext context;
+
+    @Test
+    void incrementUpdatesCounter() {
+        var client = context.openPage("/counter.html");
+        var document = client.getDocument();
+
+        assertEquals("0", document.getElementById("count").getInnerText());
+
+        document.getElementById("increment").click();
+
+        assertEquals("1", document.getElementById("count").getInnerText());
+    }
+}
+```
 
 ## Add a Form With Validation
 

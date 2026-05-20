@@ -1,15 +1,28 @@
 # Changelog
 
+## Unreleased
+
+## 0.12.0 - 2026-05-19
+
+### Added
+
+- Added Kotlin support for XIS Boot applications, including component catalog generation, Kotlin-side template resources,
+  form/action handling, and XIS Boot Native compilation.
+
 ## 0.11.2 - 2026-05-19
 
 ### Fixed
 
+- Fixed generated XIS starter tests so they create their integration context in `@BeforeEach` and explicitly register the
+  page controller.
+- Added plugin functional coverage that generates starter tests in an external Gradle consumer and runs `gradle test` for
+  Java and Groovy page setups.
 - Fixed SSE reconnect handling after JavaScript encapsulation so actions wait for the restored event stream before
   publishing client events.
 - Kept the internal `window.app` object private while exposing small public `window.XIS` hooks for supported event-stream
   checks.
 - Fixed and documented Groovy template handling so HTML files next to Groovy controllers are copied into runtime
-  resources, while native images remain documented as Java-only for now.
+  resources.
 
 ## 0.11.1 - 2026-05-18
 

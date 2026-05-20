@@ -17,6 +17,7 @@ Read these chapters to build normal XIS applications:
 - [Cloud Native and native images](cloud-native.md)
 - [Gradle plugin and tools](gradle-plugin.md)
 - [Groovy support](groovy.md)
+- [Kotlin support](kotlin.md)
 - [Template location and mapping](template-location-and-mapping.md)
 - [Core model](core-model.md)
 - [Annotation reference](annotations.md)

@@ -113,8 +113,8 @@ public class XISTestProcessor extends AbstractProcessor {
         }
 
         // Imports
-        sb.append("import one.xis.boot.test.XisBootTest;\n");
         sb.append("import one.xis.context.IntegrationTestContext;\n");
+        sb.append("import org.junit.jupiter.api.BeforeEach;\n");
         sb.append("import org.junit.jupiter.api.Test;\n\n");
         sb.append("import static org.junit.jupiter.api.Assertions.assertNotNull;\n");
 
@@ -129,10 +129,15 @@ public class XISTestProcessor extends AbstractProcessor {
         sb.append(" * Integration test for ").append(className).append("\n");
         sb.append(" * @generated\n");
         sb.append(" */\n");
-        sb.append("@XisBootTest\n");
         sb.append("class ").append(testClassName).append(" {\n\n");
 
         sb.append("    private IntegrationTestContext context;\n\n");
+        sb.append("    @BeforeEach\n");
+        sb.append("    void setUp() {\n");
+        sb.append("        context = IntegrationTestContext.builder()\n");
+        sb.append("                .withSingleton(").append(className).append(".class)\n");
+        sb.append("                .build();\n");
+        sb.append("    }\n\n");
 
         sb.append("    @Test\n");
         sb.append("    void test() {\n");
@@ -169,8 +174,8 @@ public class XISTestProcessor extends AbstractProcessor {
             sb.append("package ").append(testPackage).append("\n\n");
         }
 
-        sb.append("import one.xis.boot.test.XisBootTest\n");
         sb.append("import one.xis.context.IntegrationTestContext\n");
+        sb.append("import org.junit.jupiter.api.BeforeEach\n");
         sb.append("import org.junit.jupiter.api.Test\n\n");
         sb.append("import static org.junit.jupiter.api.Assertions.assertNotNull\n");
         if (needsImport) {
@@ -182,10 +187,15 @@ public class XISTestProcessor extends AbstractProcessor {
         sb.append(" * Integration test for ").append(className).append("\n");
         sb.append(" * @generated\n");
         sb.append(" */\n");
-        sb.append("@XisBootTest\n");
         sb.append("class ").append(testClassName).append(" {\n\n");
 
         sb.append("    private IntegrationTestContext context\n\n");
+        sb.append("    @BeforeEach\n");
+        sb.append("    void setUp() {\n");
+        sb.append("        context = IntegrationTestContext.builder()\n");
+        sb.append("                .withSingleton(").append(className).append(")\n");
+        sb.append("                .build()\n");
+        sb.append("    }\n\n");
 
         sb.append("    @Test\n");
         sb.append("    void test() {\n");

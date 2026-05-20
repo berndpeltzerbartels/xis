@@ -8,7 +8,8 @@ controllers declare pages, model data, form data, and actions; HTML templates de
 This can be useful when a team wants a lighter JVM syntax while keeping the XIS model: no separate client build, no
 hand-written REST layer for normal interactions, and the same validation and form handling used by Java applications.
 
-Java remains the primary and fastest path. Groovy support does not change the runtime path for Java applications.
+Groovy support does not change the runtime path for Java or Kotlin applications. For GraalVM native executables, use
+Java or Kotlin; Groovy is supported on the JVM path.
 
 ## Requirements
 
@@ -20,7 +21,7 @@ Use Groovy 4 or newer:
 plugins {
     id "java"
     id "groovy"
-    id "one.xis.plugin" version "0.11.2"
+    id "one.xis.plugin" version "0.12.0"
 }
 
 repositories {
@@ -135,8 +136,9 @@ Groovy controllers:
 ```
 
 For Groovy controllers, generated templates are written below `src/main/resources` using the controller package path.
-Generated starter integration tests are Groovy tests below `src/test/groovy`. They use the same `@XisBootTest` test
-starter as generated Java tests; the XIS Gradle plugin adds that dependency automatically.
+Generated starter integration tests are Groovy tests below `src/test/groovy`. They create an `IntegrationTestContext` in
+`@BeforeEach`, register the Groovy page controller explicitly, and use the test starter dependency that the XIS Gradle
+plugin adds automatically.
 
 The same controller-first workflow applies to Groovy: sketch the page or frontlet class and its `@ModelData`,
 `@FormData`, and `@Action` methods before running `xisTemplates`. The generated template then reflects that controller
@@ -157,8 +159,8 @@ Groovy code brings parts of the Groovy runtime into the GraalVM native-image ana
 dynamic call-site infrastructure. That currently makes native builds fail before the application can be treated like a
 normal XIS native application.
 
-Use Java for applications that should be compiled with `xis-boot-native`. Groovy support may become possible later, but
-it needs dedicated Groovy/GraalVM work and is not part of the supported native workflow today.
+Use Java or Kotlin for applications that should be compiled with `xis-boot-native`. Groovy support may become possible
+later, but it needs dedicated Groovy/GraalVM work and is not part of the supported native workflow today.
 
 ## Tested Behavior
 

@@ -11,7 +11,7 @@ Use the plugin when you want the usual XIS layout:
 ```groovy
 plugins {
     id "java"
-    id "one.xis.plugin" version "0.11.2"
+    id "one.xis.plugin" version "0.12.0"
 }
 ```
 
@@ -119,8 +119,9 @@ the form gets a neutral `save` action name that you can edit.
 The generator intentionally produces plain HTML. It does not try to design the page, choose domain wording, or decide
 the final layout for you. Treat the result as a first executable template that already knows the controller contract.
 
-When the project also applies the Groovy plugin, `xisTemplates` scans Groovy page and frontlet controllers too. For Groovy
-controllers, generated templates are written under `src/main/resources` with the controller package path.
+When the project also applies the Groovy or Kotlin plugin, `xisTemplates` scans those page and frontlet controllers too.
+For Groovy and Kotlin controllers, generated templates are written under `src/main/resources` with the controller package
+path.
 
 ## `xisTests`
 
@@ -136,20 +137,26 @@ For the same page controller, the task creates:
 src/test/java/example/dashboard/DashboardPageTest.java
 ```
 
-The generated test uses `@XisBootTest`, receives an `IntegrationTestContext` field, and opens the page through its
-`@Page` URL. It is meant as a first executable sketch, not as a finished test suite:
+The generated test creates an `IntegrationTestContext` in `@BeforeEach`, explicitly registers the page controller, and
+opens the page through its `@Page` URL. It is meant as a first executable sketch, not as a finished test suite:
 
 ```java
-import one.xis.boot.test.XisBootTest;
 import one.xis.context.IntegrationTestContext;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@XisBootTest
 class DashboardPageTest {
 
     private IntegrationTestContext context;
+
+    @BeforeEach
+    void setUp() {
+        context = IntegrationTestContext.builder()
+                .withSingleton(DashboardPage.class)
+                .build();
+    }
 
     @Test
     void test() {
@@ -164,7 +171,8 @@ The test starter needed for this generated code is added automatically by the pl
 `xis-boot-starter-test` again in a normal plugin-based build.
 
 When the project also applies the Groovy plugin, `xisTests` scans Groovy page controllers too and writes Groovy starter
-tests under `src/test/groovy`.
+tests under `src/test/groovy`. Kotlin controllers are scanned for template validation and runtime catalogs; write Kotlin
+tests manually or use generated Java tests as a starting point.
 
 This supports a TDD-style workflow:
 
@@ -238,9 +246,9 @@ java -jar build/libs/my-app-1.0-SNAPSHOT.jar
 `xisJar` requires exactly one application class annotated with `@XISBootApplication`. The XIS annotation processor
 uses that class to generate the executable entry point.
 
-When the project also applies the Groovy plugin, the `@XISBootApplication` class may be Groovy. The XIS plugin enables
-annotation processing for Groovy compilation and packages Java classes, Groovy classes, resources, and the generated
-runner into the XIS jar.
+When the project also applies the Groovy or Kotlin plugin, the `@XISBootApplication` class may be written in that
+language. The XIS plugin packages Java, Groovy, or Kotlin classes, templates, resources, and the generated runner into
+the XIS jar.
 
 ## `xisRun`
 
@@ -281,7 +289,7 @@ Without the plugin, add the dependency that matches the style of test you want:
 
 ```groovy
 dependencies {
-    testImplementation "one.xis:xis-boot-starter-test:0.11.2"
+    testImplementation "one.xis:xis-boot-starter-test:0.12.0"
 }
 ```
 

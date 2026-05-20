@@ -5,6 +5,9 @@
 XIS separates the public programming model from runtime integration. Most controller code and templates look the same
 whether the application runs inside Spring, standalone on the JVM, or as a GraalVM native image.
 
+Controllers, components, and form/data objects can be written in Java, Groovy, or Kotlin. Java and Kotlin are supported
+on the JVM and with XIS Boot Native; Groovy is supported on the JVM path.
+
 ## Runtime Choice
 
 Choose one application runtime:
@@ -16,7 +19,7 @@ plugins {
     id "java"
     id "org.springframework.boot" version "3.3.0"
     id "io.spring.dependency-management" version "1.1.5"
-    id "one.xis.plugin" version "0.11.2"
+    id "one.xis.plugin" version "0.12.0"
 }
 
 repositories {
@@ -34,7 +37,7 @@ dependencies {
 ```groovy
 plugins {
     id "java"
-    id "one.xis.plugin" version "0.11.2"
+    id "one.xis.plugin" version "0.12.0"
 }
 
 repositories {
@@ -51,7 +54,7 @@ dependencies {
 ```groovy
 plugins {
     id "java"
-    id "one.xis.plugin" version "0.11.2"
+    id "one.xis.plugin" version "0.12.0"
 }
 
 repositories {
