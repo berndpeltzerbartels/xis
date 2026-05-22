@@ -322,7 +322,7 @@ repositories {
 }
 
 dependencies {
-    testImplementation "one.xis:xis-boot-starter-test:0.12.0"
+    testImplementation "one.xis:xis-boot-starter-test:0.12.1"
 }
 ```
 

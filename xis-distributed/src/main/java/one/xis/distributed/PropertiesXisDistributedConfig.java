@@ -5,23 +5,18 @@ import one.xis.context.ApplicationProperties;
 import one.xis.context.Component;
 import one.xis.context.DefaultComponent;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.net.URI;
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
- * Default implementation of {@link XisDistributedConfig} that reads host
- * mappings from {@code application.properties} (or a profile-specific variant).
+ * Default implementation of {@link XisDistributedConfig} that reads distributed
+ * hosts from {@code application.properties} (or a profile-specific variant).
  * <p>
  * Property format:
  * <pre>
- * # Optional: explicit remote hosts per frontlet-id or normalised page path
- * xis.remote.frontlet.ProductFrontlet=https://shop.example.com
- * xis.remote.frontlet.CartFrontlet=https://shop.example.com
- * xis.remote.page./product/*.html=https://shop.example.com
- * xis.remote.origin.shell=https://app.example.com
+ * xis.distributed.hosts=https://shop.example.com,https://catalog.example.com
  * </pre>
  * <p>
  * This bean is annotated {@link DefaultComponent}: if the application provides
@@ -32,71 +27,40 @@ import java.util.stream.Stream;
 @DefaultComponent
 public class PropertiesXisDistributedConfig implements XisDistributedConfig {
 
-    private static final String FRONTLET_PREFIX = "xis.remote.frontlet.";
-    private static final String FRONTLET_URL_PREFIX = "xis.remote.frontlet-url.";
-    private static final String PAGE_PREFIX = "xis.remote.page.";
-    private static final String ORIGIN_PREFIX = "xis.remote.origin.";
+    private static final String HOSTS_PROPERTY = "xis.distributed.hosts";
 
-    private final Map<String, String> frontletHosts = new HashMap<>();
-    private final Map<String, String> frontletUrls = new HashMap<>();
-    private final Map<String, String> pageHosts = new HashMap<>();
-    private final Map<String, String> allowedOrigins = new HashMap<>();
+    private final List<String> hosts;
 
     public PropertiesXisDistributedConfig() {
-        var all = ApplicationProperties.getAllProperties();
-
-        for (var entry : all.entrySet()) {
-            String key = entry.getKey();
-            String value = entry.getValue();
-            if (key.startsWith(FRONTLET_PREFIX)) {
-                String frontletId = key.substring(FRONTLET_PREFIX.length());
-                validateHostValue(key, value);
-                frontletHosts.put(frontletId, value);
-                log.debug("Distributed config: frontlet '{}' → {}", frontletId, value);
-            } else if (key.startsWith(FRONTLET_URL_PREFIX)) {
-                String frontletId = key.substring(FRONTLET_URL_PREFIX.length());
-                validateHostValue(key, value);
-                frontletUrls.put(frontletId, value);
-                log.debug("Distributed config: frontlet-url '{}' → {}", frontletId, value);
-            } else if (key.startsWith(PAGE_PREFIX)) {
-                String normalizedPath = key.substring(PAGE_PREFIX.length());
-                validateHostValue(key, value);
-                pageHosts.put(normalizedPath, value);
-                log.debug("Distributed config: page '{}' → {}", normalizedPath, value);
-            } else if (key.startsWith(ORIGIN_PREFIX)) {
-                String originId = key.substring(ORIGIN_PREFIX.length());
-                validateHostValue(key, value);
-                allowedOrigins.put(originId, value);
-                log.debug("Distributed config: allowed origin '{}' → {}", originId, value);
-            }
-        }
-    }
-
-    private void validateHostValue(String key, String value) {
+        var value = ApplicationProperties.getProperty(HOSTS_PROPERTY);
         if (value == null || value.isBlank()) {
-            throw new IllegalStateException("Distributed host mapping '" + key + "' must not be blank.");
+            throw new IllegalStateException("Missing distributed host configuration '" + HOSTS_PROPERTY + "'.");
         }
+        this.hosts = Arrays.stream(value.split(","))
+                .map(String::trim)
+                .filter(host -> !host.isEmpty())
+                .map(this::normalizeHost)
+                .distinct()
+                .collect(Collectors.toList());
+        if (hosts.isEmpty()) {
+            throw new IllegalStateException("Distributed host configuration '" + HOSTS_PROPERTY + "' must contain at least one host.");
+        }
+        log.debug("Distributed config: hosts {}", hosts);
     }
 
     @Override
-    public Map<String, String> getFrontletHosts() {
-        return Map.copyOf(frontletHosts);
+    public List<String> getHosts() {
+        return List.copyOf(hosts);
     }
 
-    @Override
-    public Map<String, String> getFrontletUrls() {
-        return Map.copyOf(frontletUrls);
-    }
-
-    @Override
-    public Map<String, String> getPageHosts() {
-        return Map.copyOf(pageHosts);
-    }
-
-    @Override
-    public Set<String> getAllowedOrigins() {
-        return Stream.of(frontletHosts.values().stream(), pageHosts.values().stream(), allowedOrigins.values().stream())
-                .flatMap(stream -> stream)
-                .collect(Collectors.toUnmodifiableSet());
+    private String normalizeHost(String value) {
+        URI uri = URI.create(value);
+        String scheme = uri.getScheme();
+        String host = uri.getHost();
+        int port = uri.getPort();
+        if (scheme == null || host == null) {
+            throw new IllegalStateException("Distributed host must include scheme and host: " + value);
+        }
+        return scheme + "://" + host + (port >= 0 ? ":" + port : "");
     }
 }

@@ -10,7 +10,7 @@ frontlet, action, form, and navigation APIs stay the same.
 ```groovy
 plugins {
     id "java"
-    id "one.xis.plugin" version "0.12.0"
+    id "one.xis.plugin" version "0.12.1"
 }
 
 repositories {
@@ -30,7 +30,7 @@ plugins {
     id "java"
     id "org.springframework.boot" version "3.3.0"
     id "io.spring.dependency-management" version "1.1.5"
-    id "one.xis.plugin" version "0.12.0"
+    id "one.xis.plugin" version "0.12.1"
 }
 
 repositories {
@@ -43,293 +43,6 @@ dependencies {
     implementation "one.xis:xis-authentication"
 }
 ```
-
-## Local Authentication
-
-For a single application with local users, provide a `UserInfoService`. XIS uses it to validate credentials and load the
-user roles. In a XIS Boot application this can be a XIS component. In a Spring application it must be a Spring bean,
-because `UserInfoService` implementations are imported from the host framework.
-
-`saveUserInfo` is mainly used by XIS itself after an external OpenID Connect login. If the application provides a custom
-`UserInfoService`, XIS decodes the external `id_token`, calls `getUserInfo`, and then calls `saveUserInfo` for new or
-updated users before it issues its own local application token. Use that method to map community accounts to local
-application accounts, store approval state, or assign application roles. You may also call it from your own user
-management code, but it is not only a "manual save" hook.
-
-`UserInfoImpl` is shaped for this handoff. Besides the required local `userId` and optional roles, it contains common
-OpenID Connect profile fields such as `email`, `name`, `preferredUsername`, `givenName`, `familyName`, `locale`, and
-`pictureUrl`. XIS copies those values from the external provider's `id_token` into `UserInfoImpl` before calling
-`saveUserInfo`, so an application can persist Google, Keycloak, or XIS-IDP profile attributes without defining a custom
-user class first. Local XIS tokens still use only the stable user id and roles.
-
-```java
-package example.security;
-
-import one.xis.auth.UserInfo;
-import one.xis.auth.UserInfoImpl;
-import one.xis.auth.UserInfoService;
-import one.xis.context.Component;
-
-import java.util.Optional;
-import java.util.Set;
-
-@Component
-class AppUsers implements UserInfoService<UserInfo> {
-
-    @Override
-    public boolean validateCredentials(String userId, String password) {
-        return userId.equals("alice") && password.equals("secret");
-    }
-
-    @Override
-    public Optional<UserInfo> getUserInfo(String userId) {
-        if (!userId.equals("alice")) {
-            return Optional.empty();
-        }
-        var user = new UserInfoImpl();
-        user.setUserId("alice");
-        user.setPreferredUsername("alice");
-        user.setRoles(Set.of("USER"));
-        return Optional.of(user);
-    }
-
-    @Override
-    public void saveUserInfo(UserInfo userInfo) {
-        throw new UnsupportedOperationException();
-    }
-}
-```
-
-The same service in a Spring application uses the Spring stereotype instead:
-
-```java
-package example.security;
-
-import one.xis.auth.UserInfo;
-import one.xis.auth.UserInfoService;
-import org.springframework.stereotype.Component;
-
-@Component
-class AppUsers implements UserInfoService<UserInfo> {
-    // same methods as above
-}
-```
-
-When an unauthenticated user opens a protected page, XIS returns a `401` response with a `Location` header. The browser
-client follows that location and opens the login page. With local authentication the target is:
-
-```text
-/login.html?redirect_uri=...
-```
-
-After a successful login, XIS redirects back to the original page.
-
-## Custom Login Template
-
-The login page is a normal XIS template. The only special part is that XIS already provides the controller, form object,
-and action behind it. Add a `login.html` resource to the application classpath to override the framework default
-template.
-
-```html
-<!DOCTYPE html>
-<html xmlns:xis="https://xis.one/xsd" lang="en">
-<head><title>Login</title></head>
-<body>
-<form xis:binding="login">
-    <h1>Sign in</h1>
-    <xis:global-messages/>
-
-    <label for="username" xis:binding="username" xis:error-class="error">Username</label>
-    <input xis:binding="username" id="username" type="text"/>
-    <xis:message message-for="username"/>
-
-    <label for="password" xis:binding="password" xis:error-class="error">Password</label>
-    <input xis:binding="password" id="password" type="password"/>
-    <xis:message message-for="password"/>
-
-    <input xis:binding="state" type="hidden"/>
-    <button xis:action="login" type="submit">Login</button>
-</form>
-</body>
-</html>
-```
-
-The form binding, field bindings, hidden `state`, and `login` action name belong to the framework contract. The
-surrounding markup, labels, layout, CSS classes, and text are application design.
-
-Local login uses normal XIS validation. The built-in login form object is annotated with `@Login`; when credentials are
-wrong, the login action is not executed and a global validation message is returned. Render it with
-`<xis:global-messages/>` inside the `login` form. Field messages and error highlighting use the same tags and attributes
-as any other form: `xis:message-for`, `xis:error-class`, `xis:error-style`, and `xis:error-binding`.
-
-`<xis:global-messages/>` always renders a list structure when messages exist, even if there is only one message. This
-keeps the DOM shape predictable for templates and CSS. If the login page should look like a single alert, style the
-generated `ul.error` and `li.error` without bullets.
-
-This is also the pattern for reusable application libraries. A library can provide controllers and default templates as
-classpath resources, while applications keep the option to replace those templates with resources of the same name. The
-login page is simply the built-in example of that mechanism.
-
-When optional login factors are active, the default login page renders their fields automatically. A custom `login.html`
-must render the matching field itself. For TOTP, add a field bound to `totpCode` and guard it with `totpLoginEnabled`:
-
-```html
-<div xis:if="${totpLoginEnabled}">
-    <label for="totpCode" xis:binding="totpCode" xis:error-class="error">Authenticator code</label>
-    <input xis:binding="totpCode" id="totpCode" type="text" inputmode="numeric" autocomplete="one-time-code"/>
-    <xis:message message-for="totpCode"/>
-</div>
-```
-
-If the application also offers external OpenID Connect providers, the login controller exposes `externalIdpIds` and
-`externalIdpUrls`. A custom template can render them next to the local login form:
-
-```html
-<div xis:repeat="idpId:externalIdpIds">
-    <a href="${externalIdpUrls[idpId]}">${idpId}</a>
-</div>
-```
-
-## Login Variants
-
-### Local Authentication Only
-
-Provide a real `UserInfoService`. When a protected page is opened without a valid login, XIS redirects to:
-
-```text
-/login.html?redirect_uri=...
-```
-
-The login page renders the local form. A custom `login.html` only needs the `login` form binding, the `username`,
-`password`, and hidden `state` fields, and the `login` action.
-
-### Local Authentication And One External OpenID Connect Provider
-
-Provide a real `UserInfoService` and one `ExternalIDPConfig`. When a protected page is opened without a valid login, XIS
-still redirects to `/login.html` instead of redirecting directly to the provider.
-
-The login page renders the local form and one provider link. A custom `login.html` should render both the local form and
-the `externalIdpIds` / `externalIdpUrls` provider link.
-
-### Local Authentication And Multiple External OpenID Connect Providers
-
-Provide a real `UserInfoService` and multiple `ExternalIDPConfig` instances. When a protected page is opened without a
-valid login, XIS redirects to `/login.html`.
-
-The login page renders the local form and one link per provider. A custom template should render the local form and loop
-over `externalIdpIds`, using `externalIdpUrls[idpId]` as the link target.
-
-### One External OpenID Connect Provider Without Local Authentication
-
-Provide one `ExternalIDPConfig` and either no `UserInfoService`, or a `UserInfoService` whose `supportsLocalLogin()`
-method returns `false`. XIS then redirects directly to that provider when a protected page is opened without a valid
-login.
-
-`/login.html` is normally skipped in this setup. If it is opened explicitly, the local form is not rendered because the
-active `UserInfoService` does not support local credentials.
-
-### Multiple External OpenID Connect Providers Without Local Authentication
-
-Provide multiple `ExternalIDPConfig` instances and either do not provide a custom `UserInfoService`, or provide one whose
-`supportsLocalLogin()` method returns `false`. When a protected page is opened without a valid login, XIS redirects to
-`/login.html` so the user can choose the provider.
-
-The login page renders only provider links. A custom `login.html` must render `externalIdpIds` and `externalIdpUrls`; it
-should not show a local username/password form unless the application also provides a `UserInfoService` with
-`supportsLocalLogin() == true`.
-
-`UserInfoService` is optional when the application only uses external providers. XIS reads the OpenID Connect `id_token`
-after the callback and issues its own local application token. If no `UserInfoService` is present, the OpenID Connect
-`sub` claim becomes the XIS user id. If the provider access token is a readable JWT with roles in `realm_access.roles`
-or `resource_access.account.roles`, XIS copies those roles into the local token. Providers such as Google usually issue
-access tokens for their own APIs instead; in that case the local token has no named roles unless the application maps
-the account through a `UserInfoService`.
-
-## TOTP Two-Factor Login
-
-Add `xis-totp` when local username/password login should support authenticator-app codes:
-
-```groovy
-dependencies {
-    implementation "one.xis:xis-authentication"
-    implementation "one.xis:xis-totp"
-}
-```
-
-The module is optional. If it is present, XIS validates the application at startup:
-
-- exactly one `TOTPStore` implementation must exist
-- `xis.totp.encryption-key` must be configured
-
-The store belongs to the application because only the application knows where user security data should live. XIS never
-hands raw authenticator secrets to the store. It encrypts a generated Base32 secret first and stores only the encrypted
-value.
-
-```java
-package example.security;
-
-import one.xis.context.Component;
-import one.xis.totp.TOTPStore;
-
-import java.util.Optional;
-import java.util.OptionalLong;
-import java.util.concurrent.ConcurrentHashMap;
-
-@Component
-class AppTotpStore implements TOTPStore {
-
-    private final ConcurrentHashMap<String, String> secrets = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<String, Long> acceptedSteps = new ConcurrentHashMap<>();
-
-    @Override
-    public Optional<String> getEncryptedSecret(String userId) {
-        return Optional.ofNullable(secrets.get(userId));
-    }
-
-    @Override
-    public void saveEncryptedSecret(String userId, String encryptedSecret) {
-        secrets.put(userId, encryptedSecret);
-    }
-
-    @Override
-    public OptionalLong getLastAcceptedTimeStep(String userId) {
-        Long step = acceptedSteps.get(userId);
-        return step == null ? OptionalLong.empty() : OptionalLong.of(step);
-    }
-
-    @Override
-    public void saveLastAcceptedTimeStep(String userId, long timeStep) {
-        acceptedSteps.put(userId, timeStep);
-    }
-}
-```
-
-Configure a stable encryption key and, optionally, the issuer shown in authenticator apps:
-
-```properties
-xis.totp.encryption-key=replace-with-a-stable-secret-from-your-environment
-xis.totp.issuer=Example CRM
-```
-
-When a user has no stored TOTP secret, password login stays password-only. When a secret exists, the login validator
-requires the `totpCode` field before it creates the local login code. If the store persists the last accepted time step,
-XIS rejects a repeated code from the same 30-second window.
-
-`xis-totp` also contributes an HTTP controller for provisioning:
-
-```text
-/xis/totp/qr.svg
-```
-
-The endpoint requires an authenticated user. It creates a secret for that user if none exists yet, stores the encrypted
-secret through `TOTPStore`, and returns an SVG QR code containing the standard `otpauth://` URI. Applications can show
-that SVG on their own account/security page.
-
-`xis-totp` also provides `/totp-setup.html` as a default setup page. It uses the same basic CSS hooks as the default
-login page (`container`, `form_container`, `form-group`, `form-control`, `btn`, `btn-primary`) plus TOTP-specific hooks
-such as `totp-setup-container`, `totp-setup-form`, `totp-setup-error`, `totp-setup-qr-code`, and
-`totp-setup-login-link`. Applications can usually style the built-in page with CSS; add a `totp-setup.html` resource only
-when the page structure itself should be replaced.
 
 ## Page And Action Roles
 
@@ -519,6 +232,249 @@ XIS does not cache ownership decisions. The framework does not know which fields
 all other submitted values may legally change. If a guard needs caching, keep that cache inside the application code
 where the stable resource id and operation are known.
 
+## Local Authentication
+
+For a single application with local users, provide a `UserInfoService`. XIS uses it to validate credentials and load the
+user roles. In a XIS Boot application this can be a XIS component. In a Spring application it must be a Spring bean,
+because `UserInfoService` implementations are imported from the host framework.
+
+```java
+package example.security;
+
+import one.xis.auth.UserInfo;
+import one.xis.auth.UserInfoService;
+import one.xis.context.Component;
+
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+
+@Component
+class AppUsers implements UserInfoService<AppUser> {
+
+    private final Map<String, AppUser> users = Map.of("alice", createAlice());
+
+    @Override
+    public boolean validateCredentials(String userId, String password) {
+        return userId.equals("alice") && password.equals("secret");
+    }
+
+    @Override
+    public Optional<AppUser> getUserInfo(String userId) {
+        return Optional.ofNullable(users.get(userId));
+    }
+
+    private static AppUser createAlice() {
+        var user = new AppUser();
+        user.setUserId("alice");
+        user.setPreferredUsername("alice");
+        user.setRoles(Set.of("USER"));
+        return user;
+    }
+
+    @Override
+    public void saveUserInfo(AppUser userInfo) {
+        throw new UnsupportedOperationException();
+    }
+}
+
+class AppUser implements UserInfo {
+
+    private String userId;
+    private Set<String> roles = Set.of();
+    private String email;
+    private String name;
+    private String preferredUsername;
+    private String givenName;
+    private String familyName;
+    private String locale;
+    private String pictureUrl;
+    private boolean emailVerified;
+
+    // getters and setters
+}
+```
+
+In a local-only application XIS does not call `saveUserInfo`; throwing `UnsupportedOperationException` makes an
+accidental call visible. For external OpenID Connect logins this is different: `saveUserInfo` is part of the successful
+login flow and must not throw.
+
+The same service in a Spring application uses the Spring stereotype instead:
+
+```java
+package example.security;
+
+import one.xis.auth.UserInfo;
+import one.xis.auth.UserInfoService;
+import org.springframework.stereotype.Component;
+
+@Component
+class AppUsers implements UserInfoService<AppUser> {
+    // same methods as above
+}
+```
+
+When an unauthenticated user opens a protected page, XIS returns a `401` response with a `Location` header. The browser
+client follows that location and opens the login page. With local authentication the target is:
+
+```text
+/login.html?redirect_uri=...
+```
+
+After a successful login, XIS redirects back to the original page.
+
+## Custom Login Template
+
+The login page is a normal XIS template. The only special part is that XIS already provides the controller, form object,
+and action behind it. Add a `login.html` resource to the application classpath to override the framework default
+template.
+
+```html
+<!DOCTYPE html>
+<html xmlns:xis="https://xis.one/xsd" lang="en">
+<head><title>Login</title></head>
+<body>
+<form xis:binding="login">
+    <h1>Sign in</h1>
+    <xis:global-messages/>
+
+    <label for="username" xis:binding="username" xis:error-class="error">Username</label>
+    <input xis:binding="username" id="username" type="text"/>
+    <xis:message message-for="username"/>
+
+    <label for="password" xis:binding="password" xis:error-class="error">Password</label>
+    <input xis:binding="password" id="password" type="password"/>
+    <xis:message message-for="password"/>
+
+    <input xis:binding="state" type="hidden"/>
+    <button xis:action="login" type="submit">Login</button>
+</form>
+</body>
+</html>
+```
+
+The form binding, field bindings, hidden `state`, and `login` action name belong to the framework contract. The
+surrounding markup, labels, layout, CSS classes, and text are application design.
+
+Local login uses normal XIS validation. The built-in login form object is annotated with `@Login`; when credentials are
+wrong, the login action is not executed and a global validation message is returned. Render it with
+`<xis:global-messages/>` inside the `login` form. Field messages and error highlighting use the same tags and attributes
+as any other form: `xis:message-for`, `xis:error-class`, `xis:error-style`, and `xis:error-binding`.
+
+`<xis:global-messages/>` always renders a list structure when messages exist, even if there is only one message. This
+keeps the DOM shape predictable for templates and CSS. If the login page should look like a single alert, style the
+generated `ul.error` and `li.error` without bullets.
+
+This is also the pattern for reusable application libraries. A library can provide controllers and default templates as
+classpath resources, while applications keep the option to replace those templates with resources of the same name. The
+login page is simply the built-in example of that mechanism.
+
+When optional login factors are active, the default login page renders their fields automatically. A custom `login.html`
+must render the matching field itself. For TOTP, add a field bound to `totpCode` and guard it with `totpLoginEnabled`:
+
+```html
+<div xis:if="${totpLoginEnabled}">
+    <label for="totpCode" xis:binding="totpCode" xis:error-class="error">Authenticator code</label>
+    <input xis:binding="totpCode" id="totpCode" type="text" inputmode="numeric" autocomplete="one-time-code"/>
+    <xis:message message-for="totpCode"/>
+</div>
+```
+
+If the application also offers external OpenID Connect providers, the login controller exposes `externalIdpIds` and
+`externalIdpUrls`. A custom template can render them next to the local login form:
+
+```html
+<div xis:repeat="idpId:externalIdpIds">
+    <a href="${externalIdpUrls[idpId]}">${idpId}</a>
+</div>
+```
+
+## TOTP Two-Factor Login
+
+Add `xis-totp` when local username/password login should support authenticator-app codes:
+
+```groovy
+dependencies {
+    implementation "one.xis:xis-authentication"
+    implementation "one.xis:xis-totp"
+}
+```
+
+The module is optional. If it is present, XIS validates the application at startup:
+
+- exactly one `TOTPStore` implementation must exist
+- `xis.totp.encryption-key` must be configured
+
+The store belongs to the application because only the application knows where user security data should live. XIS never
+hands raw authenticator secrets to the store. It encrypts a generated Base32 secret first and stores only the encrypted
+value.
+
+```java
+package example.security;
+
+import one.xis.context.Component;
+import one.xis.totp.TOTPStore;
+
+import java.util.Optional;
+import java.util.OptionalLong;
+import java.util.concurrent.ConcurrentHashMap;
+
+@Component
+class AppTotpStore implements TOTPStore {
+
+    private final ConcurrentHashMap<String, String> secrets = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, Long> acceptedSteps = new ConcurrentHashMap<>();
+
+    @Override
+    public Optional<String> getEncryptedSecret(String userId) {
+        return Optional.ofNullable(secrets.get(userId));
+    }
+
+    @Override
+    public void saveEncryptedSecret(String userId, String encryptedSecret) {
+        secrets.put(userId, encryptedSecret);
+    }
+
+    @Override
+    public OptionalLong getLastAcceptedTimeStep(String userId) {
+        Long step = acceptedSteps.get(userId);
+        return step == null ? OptionalLong.empty() : OptionalLong.of(step);
+    }
+
+    @Override
+    public void saveLastAcceptedTimeStep(String userId, long timeStep) {
+        acceptedSteps.put(userId, timeStep);
+    }
+}
+```
+
+Configure a stable encryption key and, optionally, the issuer shown in authenticator apps:
+
+```properties
+xis.totp.encryption-key=replace-with-a-stable-secret-from-your-environment
+xis.totp.issuer=Example CRM
+```
+
+When a user has no stored TOTP secret, password login stays password-only. When a secret exists, the login validator
+requires the `totpCode` field before it creates the local login code. If the store persists the last accepted time step,
+XIS rejects a repeated code from the same 30-second window.
+
+`xis-totp` also contributes an HTTP controller for provisioning:
+
+```text
+/xis/totp/qr.svg
+```
+
+The endpoint requires an authenticated user. It creates a secret for that user if none exists yet, stores the encrypted
+secret through `TOTPStore`, and returns an SVG QR code containing the standard `otpauth://` URI. Applications can show
+that SVG on their own account/security page.
+
+`xis-totp` also provides `/totp-setup.html` as a default setup page. It uses the same basic CSS hooks as the default
+login page (`container`, `form_container`, `form-group`, `form-control`, `btn`, `btn-primary`) plus TOTP-specific hooks
+such as `totp-setup-container`, `totp-setup-form`, `totp-setup-error`, `totp-setup-qr-code`, and
+`totp-setup-login-link`. Applications can usually style the built-in page with CSS; add a `totp-setup.html` resource only
+when the page structure itself should be replaced.
+
 ## External IDP
 
 External identity providers are supported through OpenID Connect. XIS uses the provider discovery document at
@@ -648,25 +604,33 @@ simple community login, no `UserInfoService` is required: the Google `sub` claim
 token has no named roles.
 
 Use a `UserInfoService` only when the application wants to store or enrich the Google user, for example for an approval
-workflow, profile data, or application roles. Use a concrete `UserInfo` implementation such as `UserInfoImpl` as the
-generic type. During the callback, XIS copies Google profile claims from the `id_token` into that object before
-`saveUserInfo` is called.
+workflow, profile data, or application roles. Use the application's own concrete `UserInfo` implementation as the generic
+type. During the callback, XIS copies Google profile claims from the `id_token` into that object before `saveUserInfo` is
+called.
+
+`saveUserInfo` is called after the external provider has successfully authenticated the user and before XIS creates its
+own local application token. This is the hook for creating or updating the application's account for that external user:
+store profile data, attach approval state, or assign application roles. If the application does not need local user data
+at all, leave the `UserInfoService` out. If it provides one, `saveUserInfo` must be able to accept the externally loaded
+user. A no-op implementation is acceptable when the application deliberately keeps no local copy, but throwing an
+exception is not: the method is part of the successful external login flow.
 
 ```java
 package example.security;
 
-import one.xis.auth.UserInfoImpl;
+import one.xis.auth.UserInfo;
 import one.xis.auth.UserInfoService;
 import one.xis.context.Component;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
-class GoogleUsers implements UserInfoService<UserInfoImpl> {
+class GoogleUsers implements UserInfoService<AppUser> {
 
-    private final Map<String, UserInfoImpl> users = new ConcurrentHashMap<>();
+    private final Map<String, AppUser> users = new ConcurrentHashMap<>();
 
     @Override
     public boolean supportsLocalLogin() {
@@ -679,14 +643,30 @@ class GoogleUsers implements UserInfoService<UserInfoImpl> {
     }
 
     @Override
-    public Optional<UserInfoImpl> getUserInfo(String userId) {
+    public Optional<AppUser> getUserInfo(String userId) {
         return Optional.ofNullable(users.get(userId));
     }
 
     @Override
-    public void saveUserInfo(UserInfoImpl userInfo) {
+    public void saveUserInfo(AppUser userInfo) {
         users.put(userInfo.getUserId(), userInfo);
     }
+}
+
+class AppUser implements UserInfo {
+
+    private String userId;
+    private Set<String> roles = Set.of();
+    private String email;
+    private String name;
+    private String preferredUsername;
+    private String givenName;
+    private String familyName;
+    private String locale;
+    private String pictureUrl;
+    private boolean emailVerified;
+
+    // getters and setters
 }
 ```
 
@@ -708,6 +688,61 @@ public String getScope() {
 ```
 
 Google also uses the standard OpenID Connect discovery document.
+
+## Login Variants
+
+### Local Authentication Only
+
+Provide a real `UserInfoService`. When a protected page is opened without a valid login, XIS redirects to:
+
+```text
+/login.html?redirect_uri=...
+```
+
+The login page renders the local form. A custom `login.html` only needs the `login` form binding, the `username`,
+`password`, and hidden `state` fields, and the `login` action.
+
+### Local Authentication And One External OpenID Connect Provider
+
+Provide a real `UserInfoService` and one `ExternalIDPConfig`. When a protected page is opened without a valid login, XIS
+still redirects to `/login.html` instead of redirecting directly to the provider.
+
+The login page renders the local form and one provider link. A custom `login.html` should render both the local form and
+the `externalIdpIds` / `externalIdpUrls` provider link.
+
+### Local Authentication And Multiple External OpenID Connect Providers
+
+Provide a real `UserInfoService` and multiple `ExternalIDPConfig` instances. When a protected page is opened without a
+valid login, XIS redirects to `/login.html`.
+
+The login page renders the local form and one link per provider. A custom template should render the local form and loop
+over `externalIdpIds`, using `externalIdpUrls[idpId]` as the link target.
+
+### One External OpenID Connect Provider Without Local Authentication
+
+Provide one `ExternalIDPConfig` and either no `UserInfoService`, or a `UserInfoService` whose `supportsLocalLogin()`
+method returns `false`. XIS then redirects directly to that provider when a protected page is opened without a valid
+login.
+
+`/login.html` is normally skipped in this setup. If it is opened explicitly, the local form is not rendered because the
+active `UserInfoService` does not support local credentials.
+
+### Multiple External OpenID Connect Providers Without Local Authentication
+
+Provide multiple `ExternalIDPConfig` instances and either do not provide a custom `UserInfoService`, or provide one whose
+`supportsLocalLogin()` method returns `false`. When a protected page is opened without a valid login, XIS redirects to
+`/login.html` so the user can choose the provider.
+
+The login page renders only provider links. A custom `login.html` must render `externalIdpIds` and `externalIdpUrls`; it
+should not show a local username/password form unless the application also provides a `UserInfoService` with
+`supportsLocalLogin() == true`.
+
+`UserInfoService` is optional when the application only uses external providers. XIS reads the OpenID Connect `id_token`
+after the callback and issues its own local application token. If no `UserInfoService` is present, the OpenID Connect
+`sub` claim becomes the XIS user id. If the provider access token is a readable JWT with roles in `realm_access.roles`
+or `resource_access.account.roles`, XIS copies those roles into the local token. Providers such as Google usually issue
+access tokens for their own APIs instead; in that case the local token has no named roles unless the application maps
+the account through a `UserInfoService`.
 
 ## XIS As An OpenID Connect Provider
 
@@ -775,17 +810,11 @@ class AppIDPService implements IDPService {
 
     @Override
     public Optional<IDPUserInfo> userInfo(String userId) {
-        if (!passwords.containsKey(userId)) {
-            return Optional.empty();
-        }
         return Optional.of(new IDPUserInfoImpl(userId, "orders-app"));
     }
 
     @Override
     public Optional<AccessTokenClaims> accessTokenClaims(String userId) {
-        if (!passwords.containsKey(userId)) {
-            return Optional.empty();
-        }
         var claims = new AccessTokenClaims();
         claims.setUsername(userId);
         claims.setRoles(List.of("USER"));
@@ -794,9 +823,6 @@ class AppIDPService implements IDPService {
 
     @Override
     public Optional<IDTokenClaims> idTokenClaims(String userId) {
-        if (!passwords.containsKey(userId)) {
-            return Optional.empty();
-        }
         var claims = new IDTokenClaims();
         claims.setPreferredUsername(userId);
         return Optional.of(claims);

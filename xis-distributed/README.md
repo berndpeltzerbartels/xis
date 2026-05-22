@@ -2,54 +2,38 @@
 
 `xis-distributed` adds distributed routing support to XIS applications.
 
-It is intended for applications where pages and frontlets may be served by different servers, while the browser still behaves like one coherent XIS application.
+It is intended for applications where pages and frontlets may be served by different servers, while the browser still
+behaves like one coherent XIS application.
 
-## What the module does
+## What The Module Does
 
-The module contributes a `ComponentHostResolver` implementation.
+The module contributes:
 
-That resolver fills the optional `host` field in:
+- a `XisDistributedConfig` contract for the remote host list
+- a default `application.properties` based implementation for XIS Boot
+- a `/xis/distributed/hosts` endpoint that exposes the host list to the browser
+- a distributed CORS policy based on that host list
 
-- page attributes
-- frontlet attributes
+The browser first loads the local `/xis/config`, then asks `/xis/distributed/hosts` for remote hosts. For every listed
+remote host it loads the normal `/xis/config` from that host and merges the returned pages and frontlets into the local
+client config. Requests for those merged pages and frontlets are then sent to the host they came from.
 
-The JavaScript client then uses that information to decide how to send requests:
-
-- `host == null`: same-origin, normal relative XIS requests
-- `host != null`: send the request to the configured remote host
-
-The module also contributes the distributed CORS policy. Cross-origin XIS calls are allowed only for origins that belong
-to the configured distributed application.
-
-## Important contract
-
-`xis-distributed` is only about **remote** components.
-
-That means:
-
-- local components stay local
-- local components do not need a host mapping
-- local components return `null` as host
-
-There is deliberately:
-
-- no default host
-- no implicit fallback
-- no hidden routing behavior
-
-If a component is declared as remote, it must have an explicit host mapping.
+There are no server-side page or frontlet host mappings in this module. The remote applications describe their own
+pages and frontlets through their normal XIS client config.
 
 ## Main API
 
-The central contract is `XisDistributedConfig`.
+The central contract is `XisDistributedConfig`:
 
-Applications can provide their own implementation when they want full control over distributed routing.
+```java
+interface XisDistributedConfig {
+    List<String> getHosts();
+}
+```
 
-Applications normally provide maps of remote frontlet and page hosts. XIS derives whether a component is remote from
-those maps, copies them once when the distributed resolver starts, and uses that copy for routing. User implementations
-should not perform expensive per-request checks in this API.
+Applications can provide their own implementation when they want full control over host discovery.
 
-## Default implementation
+## Default Implementation
 
 The module also contains `PropertiesXisDistributedConfig`.
 
@@ -61,49 +45,38 @@ This is a `@DefaultComponent`, which means:
 
 So the architectural contract is the interface, not the properties-based implementation.
 
-## Properties format
+## Properties Format
 
-If you use the built-in properties-based implementation, it reads explicit remote mappings from:
-
-- `xis.remote.frontlet.<frontletId>`
-- `xis.remote.frontlet-url.<frontletId>`
-- `xis.remote.page.<normalizedPath>`
-- `xis.remote.origin.<name>`
-
-For page mappings, `<normalizedPath>` is the page URL normalized by XIS, not the Java class name. Static page URLs are
-used as-is, for example `/checkout.html`. Path variables become `*`, so `@Page("/product/{id}/details.html")` is mapped
-as `/product/*/details.html`. The concrete navigation URL still contains the real value: an action may return
-`/product/42/details.html`, while the host mapping remains `/product/*/details.html`. This keeps distributed
-applications coupled through public URLs instead of package and class names that another team may refactor.
-
-Example:
+If you use the built-in properties-based implementation, it reads a comma-separated list of remote hosts from:
 
 ```properties
-xis.remote.frontlet.ProductFrontlet=https://shop.example.com
-xis.remote.frontlet-url.ProductFrontlet=/product-summary
-xis.remote.page./product/*.html=https://shop.example.com
-xis.remote.page./product/*/details.html=https://catalog.example.com
-xis.remote.origin.shell=https://app.example.com
+xis.distributed.hosts=https://shop.example.com,https://catalog.example.com
 ```
 
-There is no `xis.host` fallback.
+Hosts must include protocol and host, for example `http://localhost:9000` or `https://shop.example.com`.
 
-Unmapped components are treated as local by that default implementation.
+The list is interpreted from the point of view of the current runtime:
 
-## Relationship to other modules
+- in the shell runtime it is the list of remote runtimes whose `/xis/config` should be loaded
+- in a remote runtime it is also used as the list of allowed distributed browser origins for CORS
 
-- `xis-server` provides the no-op fallback resolver used when `xis-distributed` is not present
-- `xis-javascript` performs the actual request routing based on the `host` value in client config
+That means a remote runtime normally lists the shell host that may call it.
+
+When `xis-distributed` is on the classpath, this property is required unless the application provides its own
+`XisDistributedConfig` implementation.
+
+## Relationship To Other Modules
+
+- `xis-server` provides the no-op same-origin behavior used when `xis-distributed` is not present
+- `xis-javascript` performs the actual request routing after merging remote client configs
 - `xis-context` provides `@DefaultComponent`
 
-## Testing status
+## Testing Status
 
 The module is covered by unit tests for:
 
-- explicit page mappings
-- explicit frontlet mappings
-- configured distributed CORS origins
-- local components
-- startup validation for blank remote host mappings
+- host-list properties
+- distributed CORS origins
+- the host-list endpoint
 
-Browser-level end-to-end coverage lives in `xis-end-to-end-tests` and starts separate page and remote runtimes.
+Browser-level end-to-end coverage can live in `xis-end-to-end-tests` with separate shell and remote runtimes.

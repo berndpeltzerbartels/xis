@@ -18,7 +18,7 @@ the database by itself, not even inside a transaction. Database writes happen on
 ```groovy
 plugins {
     id "java"
-    id "one.xis.plugin" version "0.12.0"
+    id "one.xis.plugin" version "0.12.1"
 }
 
 repositories {
@@ -58,7 +58,7 @@ XIS can create a HikariCP-backed pool when HikariCP is on the application classp
 ```groovy
 plugins {
     id "java"
-    id "one.xis.plugin" version "0.12.0"
+    id "one.xis.plugin" version "0.12.1"
 }
 
 repositories {

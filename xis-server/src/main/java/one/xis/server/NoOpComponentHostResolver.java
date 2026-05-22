@@ -10,8 +10,9 @@ import one.xis.context.DefaultComponent;
  * Always returns {@code null}, meaning every component is served from the same
  * origin as the main application – the JavaScript client uses relative URLs.
  * <p>
- * When {@code xis-distributed} is added as a dependency its
- * {@code DistributedComponentHostResolver} replaces this default.
+ * When {@code xis-distributed} is added as a dependency, the browser discovers
+ * remote hosts from that module and fills these host values while merging the
+ * remote client configs.
  */
 @Component
 @DefaultComponent

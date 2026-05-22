@@ -6,9 +6,9 @@
 
 Its job is narrow:
 
-- accept maps of remote page/frontlet hosts from user configuration
-- derive whether a page or frontlet is remote from those cached maps
-- provide the remote host for remote components through the internal resolver
+- accept a list of remote hosts from user configuration
+- expose that host list to the browser
+- let the browser load and merge each host's normal XIS client config
 - leave local components as same-origin
 
 It does not implement load balancing, service discovery, or config-server behavior.
@@ -16,14 +16,10 @@ It does not implement load balancing, service discovery, or config-server behavi
 ## Current contract
 
 - `XisDistributedConfig` is the main contract
-- local components return `null` host through the resolver path
-- remote components must have an explicit host
-- missing host for a remote component is an error
+- it exposes only remote hosts
+- missing hosts are an error when the module is on the classpath
 - there is no default host and no fallback host
-- `XisDistributedConfig` should stay map-based; do not make users implement separate `isRemote...` methods
-- `DistributedComponentHostResolver` copies the user-provided maps once at startup, because a config implementation may
-  perform expensive discovery behind those map methods
-- page host map keys are normalized page URLs such as `/product/*/details.html`, not fully qualified Java class names
+- page/frontlet routing is derived from the remote `/xis/config` responses, not from server-side maps
 
 ## Important implementation notes
 
@@ -34,8 +30,6 @@ It does not implement load balancing, service discovery, or config-server behavi
 
 ## JavaScript integration
 
-Do not reintroduce a second distributed routing path in this module.
-
 The active request-routing logic lives centrally in `xis-javascript` `HttpClient`.
 
 If distributed behavior changes, prefer changing the shared routing logic there instead of adding another JS patch layer here.
@@ -45,8 +39,8 @@ If distributed behavior changes, prefer changing the shared routing logic there 
 Current repo tests here should stay focused on:
 
 - config semantics
-- resolver semantics
-- strict remote-vs-local behavior
+- host-list endpoint semantics
+- distributed CORS behavior
 
 Do not overbuild multi-runtime distributed scenarios inside this module.
 

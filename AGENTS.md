@@ -15,10 +15,10 @@ are mostly for framework development and internal orientation.
 Use `frontlet`, not `widget`, in user-facing documentation, public API explanations, and new tests. Remaining `widget`
 names should only exist where legacy compatibility or generated output makes that unavoidable.
 
-Distributed application configuration should stay map-based. Users provide maps such as frontlet hosts, frontlet URLs,
-page hosts, and allowed origins; XIS derives remote/local decisions from those maps and caches them in its resolver.
-Avoid asking users to implement separate boolean lookup methods, because those lookups may hide expensive discovery.
-For page host maps, keys are normalized page URLs such as `/product/*/details.html`, not Java class names.
+Distributed application configuration is host-list based. Users provide remote hosts through
+`XisDistributedConfig#getHosts()` or the `xis.distributed.hosts` property. The browser loads `/xis/config` from those
+hosts, merges the remote client configs, and derives remote page/frontlet routing from the merged metadata. Do not
+reintroduce server-side page/frontlet host maps such as frontlet hosts, frontlet URLs, or page hosts.
 For distributed SSO, the browser must send XIS token cookies to remote XIS runtimes for both XHR and SSE. The JavaScript
 client uses credentialed XHR and opens SSE streams for all configured remote hosts. External OIDC callbacks are normalized
 to local XIS tokens, so distributed XIS runtimes must share local token verification keys (for example via a shared
@@ -123,7 +123,8 @@ plausible.
 
 Use E2E tests for browser-visible behavior, distributed app behavior, authentication redirects, and cases where the real
 client/runtime interaction matters. Use `xis-integration-tests` for fast framework-level behavior and custom JavaScript
-runtime coverage.
+runtime coverage. Distributed routing changes should run the distributed E2E suite, because the behavior spans Boot
+runtimes, the host-list endpoint, client config merging, CORS, page routing, and frontlet routing.
 
 ## Release Rules
 

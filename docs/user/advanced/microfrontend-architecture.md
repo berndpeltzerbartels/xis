@@ -19,7 +19,7 @@ Add `xis-distributed` to each participating XIS application.
 ```groovy
 plugins {
     id "java"
-    id "one.xis.plugin" version "0.12.0"
+    id "one.xis.plugin" version "0.12.1"
 }
 
 repositories {
@@ -34,14 +34,55 @@ dependencies {
 
 ## Routing Model
 
-The browser receives the normal XIS client configuration. For every page and frontlet the configuration may contain a
-host:
+Each participating XIS runtime still exposes its normal `/xis/config`. The shell additionally asks its own runtime for
+the distributed host list and then loads `/xis/config` from every listed host. The browser merges those configs.
 
-- no host means same-origin
-- a host means requests for that page or frontlet go to that remote XIS runtime
+After merging:
 
-This applies to rendering and actions. If a frontlet is remote, its action requests are sent to the remote frontlet host.
-If a page is remote, page rendering and page actions are sent to the remote page host.
+- local pages and frontlets still use same-origin requests
+- pages and frontlets from a remote config use that remote host
+- page and frontlet ownership comes from the runtime that exposes the config
+
+There are no page or frontlet mappings in `application.properties`.
+
+## Properties Configuration
+
+For simple XIS Boot deployments, configure the remote host list in `application.properties`:
+
+```properties
+xis.distributed.hosts=https://components.example.com,https://checkout.example.com
+```
+
+Hosts must include protocol and host, for example `http://localhost:9000` or `https://checkout.example.com`.
+
+The list is interpreted from the point of view of the current runtime. In a shell application it lists the remote
+runtimes whose `/xis/config` should be loaded. In a remote runtime the same contract is used for CORS, so that runtime
+normally lists the shell host that may call it.
+
+When `xis-distributed` is on the classpath, this property is required unless the application provides its own
+`XisDistributedConfig` implementation.
+
+## Java Configuration
+
+For dynamic deployments, implement `XisDistributedConfig` as a normal XIS component:
+
+```java
+import one.xis.context.Component;
+import one.xis.distributed.XisDistributedConfig;
+
+import java.util.List;
+
+@Component
+class DistributedConfig implements XisDistributedConfig {
+
+    @Override
+    public List<String> getHosts() {
+        return List.of("https://components.example.com", "https://checkout.example.com");
+    }
+}
+```
+
+Return stable host values. Future versions may use the same contract for host selection or availability checks.
 
 ## Navigation By URL
 
@@ -51,8 +92,8 @@ pages and frontlets.
 
 The reason is classpath ownership. If an action in the shell application returns a remote page class, the shell
 application must have that remote application class on its classpath. That couples the applications at Java level. If the
-action returns a URL string instead, the contract is only the public page URL. The client resolves that URL to the page
-entry in its configuration and uses the configured host for that page.
+action returns a URL string instead, the contract is only the public page URL. The browser resolves that URL to the page
+entry in the merged client config and uses the host that provided that page.
 
 ```java
 import one.xis.Action;
@@ -68,18 +109,11 @@ class CartPage {
 }
 ```
 
-With this configuration, `/checkout.html` is loaded from the checkout runtime:
+If `/checkout.html` belongs to the config loaded from `https://checkout.example.com`, rendering and later page actions
+for that page go to `https://checkout.example.com`.
 
-```properties
-xis.remote.page./checkout.html=https://checkout.example.com
-xis.remote.origin.shell=https://shop.example.com
-```
-
-The action returns only the URL. XIS then resolves the URL to the configured page metadata in the browser. Because that
-metadata contains `https://checkout.example.com` as host, the browser loads the page and its later page actions from the
-checkout application.
-
-Path variables stay part of the concrete URL returned by your action. Only the configuration key is normalized:
+Path variables stay part of the concrete URL returned by your action. The remote runtime exposes the normalized page
+path in its own config:
 
 ```java
 @Page("/cart.html")
@@ -92,12 +126,7 @@ class CartPage {
 }
 ```
 
-```properties
-xis.remote.page./product/*/details.html=https://catalog.example.com
-```
-
-The browser resolves `/product/42/details.html` against the page configuration entry for
-`/product/*/details.html` and sends the request to the catalog runtime.
+The browser resolves `/product/42/details.html` against the merged page config entry for `/product/*/details.html`.
 
 Use Java class returns or `PageResponse` when the target page belongs to the same application or when you deliberately
 share the target page classes. Use strings or `PageUrlResponse` when the target page belongs to another distributed
@@ -117,104 +146,5 @@ FrontletResponse openCartSummary() {
 }
 ```
 
-The client resolves `/cart-summary` to the configured frontlet entry and then uses that entry's host. The shell
-application therefore does not need the remote `CartSummaryFrontlet` class on its classpath.
-
-## Properties Configuration
-
-For simple deployments, configure explicit mappings in `application.properties`:
-
-```properties
-xis.remote.frontlet.CartSummaryFrontlet=https://shop-components.example.com
-xis.remote.frontlet-url.CartSummaryFrontlet=/cart-summary
-xis.remote.page./checkout.html=https://checkout.example.com
-xis.remote.origin.shell=https://shop.example.com
-```
-
-`xis.remote.frontlet.*` maps a frontlet id to a remote host.
-
-`xis.remote.frontlet-url.*` maps a frontlet id to its public frontlet URL.
-
-`xis.remote.page.*` maps a normalized page path to a remote host.
-
-For pages, the key is not the Java class name. It is the normalized page URL that also appears in the XIS client
-configuration. Static URLs are used as-is:
-
-```properties
-xis.remote.page./checkout.html=https://checkout.example.com
-```
-
-Path variables are normalized to `*`. A page declared as:
-
-```java
-@Page("/product/{id}/details.html")
-class ProductDetailsPage {
-}
-```
-
-is configured like this:
-
-```properties
-xis.remote.page./product/*/details.html=https://catalog.example.com
-```
-
-The user-facing URL still contains the real path value. For example, an action can return
-`/product/42/details.html`; only the host map uses `/product/*/details.html`.
-
-This is deliberate. In a distributed application, the stable contract between applications should be the public URL. A
-fully qualified Java class name would make the shell application depend on another team's package names and refactorings.
-
-`xis.remote.origin.*` declares browser origins that are allowed to call remote XIS endpoints. This is required because a
-distributed application uses cross-origin `/xis/*` requests.
-
-There is no default host. Unmapped pages and frontlets stay local.
-
-XIS derives the remote/local decision from these mappings. You do not implement a second `isRemote...` decision in
-normal application code. At startup, XIS copies the configured maps into its resolver and then uses that copy for
-request routing and client configuration.
-
-## Java Configuration
-
-For dynamic deployments, implement `XisDistributedConfig` as a normal XIS component:
-
-```java
-import one.xis.context.Component;
-import one.xis.distributed.XisDistributedConfig;
-
-import java.util.Map;
-import java.util.Set;
-
-@Component
-class DistributedConfig implements XisDistributedConfig {
-
-    @Override
-    public Map<String, String> getFrontletHosts() {
-        return Map.of("CartSummaryFrontlet", "https://shop-components.example.com");
-    }
-
-    @Override
-    public Map<String, String> getFrontletUrls() {
-        return Map.of("CartSummaryFrontlet", "/cart-summary");
-    }
-
-    @Override
-    public Map<String, String> getPageHosts() {
-        return Map.of(
-                "/checkout.html", "https://checkout.example.com",
-                "/product/*/details.html", "https://catalog.example.com"
-        );
-    }
-
-    @Override
-    public Set<String> getAllowedOrigins() {
-        return Set.of("https://shop.example.com", "https://shop-components.example.com", "https://checkout.example.com");
-    }
-}
-```
-
-The method names still use the internal `Frontlet` wording for compatibility. In user-facing templates and documentation,
-the public concept is a frontlet.
-
-Return stable maps from this component. XIS reads them when the distributed resolver is created, validates that remote
-hosts are not blank, and stores its own copy. That keeps routing predictable and prevents expensive lookup code from
-running on every request.
+The client resolves `/cart-summary` to the configured frontlet entry from the merged remote config and then uses that
+entry's host. The shell application therefore does not need the remote `CartSummaryFrontlet` class on its classpath.

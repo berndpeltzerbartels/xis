@@ -7,9 +7,8 @@ import one.xis.http.HttpResponse;
 import one.xis.server.LocalUrlHolder;
 import org.junit.jupiter.api.Test;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -77,9 +76,9 @@ class DistributedCorsFilterTest {
     @Test
     void usesAllowedOriginsCopiedAtStartup() {
         var mutableConfig = new MutableConfig();
-        mutableConfig.allowedOrigins.add("http://shell.example.test");
+        mutableConfig.hosts.add("http://shell.example.test");
         var cachedFilter = new DistributedCorsFilter(mutableConfig, localUrlHolder);
-        mutableConfig.allowedOrigins.clear();
+        mutableConfig.hosts.clear();
         var request = mock(HttpRequest.class);
         var response = mock(HttpResponse.class);
         var chain = mock(FilterChain.class);
@@ -95,24 +94,19 @@ class DistributedCorsFilterTest {
     }
 
     private static class MutableConfig implements XisDistributedConfig {
-        private final Set<String> allowedOrigins = new HashSet<>();
+        private final List<String> hosts = new ArrayList<>();
 
         @Override
-        public Set<String> getAllowedOrigins() {
-            return allowedOrigins;
+        public List<String> getHosts() {
+            return hosts;
         }
     }
 
     private static class TestConfig implements XisDistributedConfig {
 
         @Override
-        public Map<String, String> getFrontletHosts() {
-            return Map.of();
-        }
-
-        @Override
-        public Set<String> getAllowedOrigins() {
-            return Set.of("http://shell.example.test");
+        public List<String> getHosts() {
+            return List.of("http://shell.example.test");
         }
     }
 }

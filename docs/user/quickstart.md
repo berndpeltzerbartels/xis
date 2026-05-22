@@ -29,7 +29,7 @@ plugins {
     id "java"
     id "org.springframework.boot" version "3.3.0"
     id "io.spring.dependency-management" version "1.1.5"
-    id "one.xis.plugin" version "0.12.0"
+    id "one.xis.plugin" version "0.12.1"
 }
 
 group = "example"
@@ -253,16 +253,22 @@ generated file is intentionally small, so make the behavior explicit by adding t
 ```java
 package example.dashboard;
 
-import one.xis.boot.test.XisBootTest;
 import one.xis.context.IntegrationTestContext;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@XisBootTest
 class CounterPageTest {
 
     private IntegrationTestContext context;
+
+    @BeforeEach
+    void setUp() {
+        context = IntegrationTestContext.builder()
+                .withSingleton(CounterPage.class)
+                .build();
+    }
 
     @Test
     void incrementUpdatesCounter() {
