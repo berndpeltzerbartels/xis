@@ -17,6 +17,7 @@ class SaveMethodHandler implements SQLMethodHandler {
     private final SQLValueConverter valueConverter = new SQLValueConverter();
     private final SQLMethodSupport methodSupport = new SQLMethodSupport();
     private final ModificationReturnMapper returnMapper = new ModificationReturnMapper();
+    private final GeneratedPrimaryKey generatedPrimaryKey = new GeneratedPrimaryKey();
     private Method method;
     private boolean sqlSave;
     private String sql;
@@ -29,6 +30,7 @@ class SaveMethodHandler implements SQLMethodHandler {
     private String existsSql;
     private String insertSql;
     private String updateSql;
+    private List<EntitySQLMapping.Property> generatedKeys = List.of();
 
     SaveMethodHandler(DataSource dataSource) {
         this(dataSource, null);
@@ -58,6 +60,13 @@ class SaveMethodHandler implements SQLMethodHandler {
                     .map(CollectionSavePlan::new)
                     .toList()
                     : List.of();
+            var generated = new java.util.ArrayList<EntitySQLMapping.Property>();
+            for (EntitySQLMapping.Property primaryKey : primaryKeys) {
+                if (generatedPrimaryKey.isAutoIncrement(connection, mapping, primaryKey)) {
+                    generated.add(primaryKey);
+                }
+            }
+            this.generatedKeys = List.copyOf(generated);
         } catch (SQLException e) {
             throw new RuntimeException("Could not read save metadata for " + mapping.tableName(), e);
         }
@@ -79,7 +88,9 @@ class SaveMethodHandler implements SQLMethodHandler {
         }
         Object entity = safeArgs[0];
         try (var connection = dataSource.getConnection()) {
-            int updateCount = exists(connection, entity, existsSql) ? update(connection, entity) : insert(connection, entity);
+            int updateCount = generatedKeyInsert(entity) || !exists(connection, entity, existsSql)
+                    ? insert(connection, entity)
+                    : update(connection, entity);
             updateCount += saveCollections(connection, entity);
             return returnMapper.map(updateCount, safeArgs);
         } catch (SQLException e) {
@@ -161,13 +172,33 @@ class SaveMethodHandler implements SQLMethodHandler {
     }
 
     private int insert(Connection connection, Object entity) throws SQLException {
-        try (var statement = connection.prepareStatement(insertSql)) {
+        List<EntitySQLMapping.Property> unsetGeneratedKeys = generatedPrimaryKey.unsetGeneratedKeys(generatedKeys, entity);
+        boolean generatedInsert = !unsetGeneratedKeys.isEmpty();
+        List<EntitySQLMapping.Property> insertProperties = generatedInsert
+                ? saveProperties.stream()
+                .filter(property -> !unsetGeneratedKeys.contains(property))
+                .toList()
+                : saveProperties;
+        try (var statement = generatedInsert
+                ? connection.prepareStatement(insertSql(mapping, insertProperties),
+                generatedPrimaryKey.columnNames(unsetGeneratedKeys))
+                : connection.prepareStatement(insertSql)) {
             int index = 1;
-            for (EntitySQLMapping.Property property : saveProperties) {
+            for (EntitySQLMapping.Property property : insertProperties) {
                 statement.setObject(index++, valueConverter.toSqlValue(property.get(entity)));
             }
-            return statement.executeUpdate();
+            int updateCount = statement.executeUpdate();
+            if (generatedInsert) {
+                try (var keys = statement.getGeneratedKeys()) {
+                    generatedPrimaryKey.applyGeneratedKeys(keys, unsetGeneratedKeys, entity);
+                }
+            }
+            return updateCount;
         }
+    }
+
+    private boolean generatedKeyInsert(Object entity) {
+        return !generatedPrimaryKey.unsetGeneratedKeys(generatedKeys, entity).isEmpty();
     }
 
     private int update(Connection connection, Object entity) throws SQLException {

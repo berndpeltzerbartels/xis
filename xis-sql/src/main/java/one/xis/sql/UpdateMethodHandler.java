@@ -16,11 +16,13 @@ class UpdateMethodHandler implements SQLMethodHandler {
     private final SQLValueConverter valueConverter = new SQLValueConverter();
     private final SQLMethodSupport methodSupport = new SQLMethodSupport();
     private final ModificationReturnMapper returnMapper = new ModificationReturnMapper();
+    private final GeneratedPrimaryKey generatedPrimaryKey = new GeneratedPrimaryKey();
     private Method method;
     private String sql;
     private List<SQLMethodSupport.BindParameter> bindParameterIndexes;
     private EntitySQLMapping mapping;
     private List<EntitySQLMapping.Property> autoBindProperties;
+    private List<EntitySQLMapping.Property> generatedKeys = List.of();
 
     @Override
     public boolean matches(Method method) {
@@ -46,29 +48,66 @@ class UpdateMethodHandler implements SQLMethodHandler {
     public Object invoke(Object[] args) {
         ensureInitialized();
         Object[] safeArgs = args == null ? new Object[0] : args;
+        List<EntitySQLMapping.Property> unsetGeneratedKeys = unsetGeneratedKeys(safeArgs);
+        boolean generatedKeyInsert = !unsetGeneratedKeys.isEmpty();
+        List<SQLMethodSupport.BindParameter> statementBindParameters = generatedKeyInsert
+                ? generatedKeyBindParameters(unsetGeneratedKeys)
+                : bindParameterIndexes;
+        String statementSql = generatedKeyInsert ? insertSql(mapping, generatedInsertProperties(unsetGeneratedKeys)) : sql;
         try (var connection = dataSource.getConnection();
-            var statement = connection.prepareStatement(sql)) {
-            bind(statement, safeArgs);
-            return returnMapper.map(statement.executeUpdate(), safeArgs);
+            var statement = generatedKeyInsert
+                    ? connection.prepareStatement(statementSql, generatedPrimaryKey.columnNames(unsetGeneratedKeys))
+                    : connection.prepareStatement(statementSql)) {
+            bind(statement, safeArgs, statementBindParameters);
+            int updateCount = statement.executeUpdate();
+            if (generatedKeyInsert) {
+                try (var keys = statement.getGeneratedKeys()) {
+                    generatedPrimaryKey.applyGeneratedKeys(keys, unsetGeneratedKeys, safeArgs[0]);
+                }
+            }
+            return returnMapper.map(updateCount, safeArgs);
         } catch (SQLException e) {
             throw new RuntimeException("Could not execute modification method " + method.getName(), e);
         }
     }
 
-    private void ensureInitialized() {
-        if (method == null) {
-            throw new IllegalStateException("UpdateMethodHandler was not initialized");
+    private List<EntitySQLMapping.Property> unsetGeneratedKeys(Object[] args) {
+        if (args.length == 0) {
+            return List.of();
         }
+        return generatedPrimaryKey.unsetGeneratedKeys(generatedKeys, args[0]);
     }
 
-    private void bind(PreparedStatement statement, Object[] args) throws SQLException {
-        for (int i = 0; i < bindParameterIndexes.size(); i++) {
-            SQLMethodSupport.BindParameter bindParameter = bindParameterIndexes.get(i);
+    private List<EntitySQLMapping.Property> generatedInsertProperties(List<EntitySQLMapping.Property> unsetGeneratedKeys) {
+        return autoBindProperties.stream()
+                .filter(property -> !unsetGeneratedKeys.contains(property))
+                .toList();
+    }
+
+    private List<SQLMethodSupport.BindParameter> generatedKeyBindParameters(List<EntitySQLMapping.Property> unsetGeneratedKeys) {
+        return generatedInsertProperties(unsetGeneratedKeys).stream()
+                .map(property -> new SQLMethodSupport.BindParameter(0, property.name()))
+                .toList();
+    }
+
+    private void bind(PreparedStatement statement, Object[] args, List<SQLMethodSupport.BindParameter> bindParameters) throws SQLException {
+        for (int i = 0; i < bindParameters.size(); i++) {
+            SQLMethodSupport.BindParameter bindParameter = bindParameters.get(i);
             Object value = args[bindParameter.parameterIndex()];
             if (bindParameter.propertyName() != null) {
                 value = property(mapping(value.getClass()), bindParameter.propertyName()).get(value);
             }
             statement.setObject(i + 1, valueConverter.toSqlValue(value));
+        }
+    }
+
+    private void bind(PreparedStatement statement, Object[] args) throws SQLException {
+        bind(statement, args, bindParameterIndexes);
+    }
+
+    private void ensureInitialized() {
+        if (method == null) {
+            throw new IllegalStateException("UpdateMethodHandler was not initialized");
         }
     }
 
@@ -85,6 +124,13 @@ class UpdateMethodHandler implements SQLMethodHandler {
             if (method.isAnnotationPresent(Insert.class)) {
                 this.autoBindProperties = persistedProperties;
                 this.sql = insertSql(mapping, autoBindProperties);
+                var generated = new ArrayList<EntitySQLMapping.Property>();
+                for (EntitySQLMapping.Property primaryKey : primaryKeys) {
+                    if (generatedPrimaryKey.isAutoIncrement(connection, mapping, primaryKey)) {
+                        generated.add(primaryKey);
+                    }
+                }
+                this.generatedKeys = List.copyOf(generated);
             } else {
                 this.autoBindProperties = updateBindProperties(persistedProperties, primaryKeys);
                 this.sql = updateSql(mapping, persistedProperties, primaryKeys);

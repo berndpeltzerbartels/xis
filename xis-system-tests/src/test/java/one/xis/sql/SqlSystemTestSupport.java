@@ -20,6 +20,10 @@ abstract class SqlSystemTestSupport {
 
     abstract void createSchema() throws SQLException;
 
+    boolean supportsStoredProcedureOutParameters() {
+        return true;
+    }
+
     @BeforeEach
     void setUp() throws SQLException {
         createSchema();
@@ -81,6 +85,85 @@ abstract class SqlSystemTestSupport {
     }
 
     @Test
+    void insertsGeneratedPrimaryKeyAndWritesItBack() {
+        GeneratedPerson person = new GeneratedPerson();
+        person.firstName = "Katherine";
+
+        GeneratedPerson returned = repository.insertGenerated(person);
+
+        assertThat(returned).isSameAs(person);
+        assertThat(person.id).isPositive();
+        assertThat(repository.findGeneratedById(person.id).firstName).isEqualTo("Katherine");
+    }
+
+    @Test
+    void savesGeneratedPrimaryKeyAndWritesItBack() {
+        GeneratedPerson person = new GeneratedPerson();
+        person.firstName = "Katherine";
+
+        GeneratedPerson returned = repository.saveGenerated(person);
+
+        assertThat(returned).isSameAs(person);
+        assertThat(person.id).isPositive();
+        assertThat(repository.findGeneratedById(person.id).firstName).isEqualTo("Katherine");
+    }
+
+    @Test
+    void insertsGeneratedPartOfCompositePrimaryKeyAndWritesItBack() {
+        GeneratedMembership membership = new GeneratedMembership();
+        membership.tenantId = "tenant-a";
+        membership.label = "Admin";
+
+        GeneratedMembership returned = repository.insertGeneratedMembership(membership);
+
+        assertThat(returned).isSameAs(membership);
+        assertThat(membership.id).isPositive();
+        assertThat(repository.findGeneratedMembershipById(membership.tenantId, membership.id).label).isEqualTo("Admin");
+    }
+
+    @Test
+    void savesGeneratedPartOfCompositePrimaryKeyAndWritesItBack() {
+        GeneratedMembership membership = new GeneratedMembership();
+        membership.tenantId = "tenant-a";
+        membership.label = "Admin";
+
+        GeneratedMembership returned = repository.saveGeneratedMembership(membership);
+
+        assertThat(returned).isSameAs(membership);
+        assertThat(membership.id).isPositive();
+        assertThat(repository.findGeneratedMembershipById(membership.tenantId, membership.id).label).isEqualTo("Admin");
+    }
+
+    @Test
+    void selectsRecordEntity() {
+        PersonRecord person = repository.findRecordById(1L);
+
+        assertThat(person.id()).isEqualTo(1L);
+        assertThat(person.firstName()).isEqualTo("Ada");
+        assertThat(person.notes()).isEqualTo("First note from clob");
+    }
+
+    @Test
+    void insertsRecordEntityWhenPrimaryKeyIsProvided() {
+        var person = new PersonRecord(3L, "Katherine", "Inserted record");
+
+        PersonRecord returned = repository.insertRecord(person);
+
+        assertThat(returned).isSameAs(person);
+        assertThat(repository.findRecordById(3L)).isEqualTo(person);
+    }
+
+    @Test
+    void savesRecordEntityWhenPrimaryKeyIsProvided() {
+        var person = new PersonRecord(3L, "Katherine", "Saved record");
+
+        PersonRecord returned = repository.saveRecord(person);
+
+        assertThat(returned).isSameAs(person);
+        assertThat(repository.findRecordById(3L)).isEqualTo(person);
+    }
+
+    @Test
     void deletesEntity() {
         Person person = repository.findById(1L).orElseThrow();
 
@@ -110,6 +193,8 @@ abstract class SqlSystemTestSupport {
 
     @Test
     void callsStoredProcedureWithOutParameter() {
+        org.junit.jupiter.api.Assumptions.assumeTrue(supportsStoredProcedureOutParameters());
+
         assertThat(repository.addFive(7)).isEqualTo(12);
     }
 
@@ -183,6 +268,33 @@ abstract class SqlSystemTestSupport {
 
         @Select("select * from date_rows where id = {id}")
         DateRow findDateRow(@Param("id") long id);
+
+        @Insert
+        GeneratedPerson insertGenerated(GeneratedPerson person);
+
+        @Save
+        GeneratedPerson saveGenerated(GeneratedPerson person);
+
+        @Select("select * from generated_people where id = {id}")
+        GeneratedPerson findGeneratedById(@Param("id") long id);
+
+        @Insert
+        GeneratedMembership insertGeneratedMembership(GeneratedMembership membership);
+
+        @Save
+        GeneratedMembership saveGeneratedMembership(GeneratedMembership membership);
+
+        @Select("select * from generated_memberships where tenant_id = {tenantId} and id = {id}")
+        GeneratedMembership findGeneratedMembershipById(@Param("tenantId") String tenantId, @Param("id") long id);
+
+        @Select("select * from people where id = {id}")
+        PersonRecord findRecordById(@Param("id") long id);
+
+        @Insert
+        PersonRecord insertRecord(PersonRecord person);
+
+        @Save
+        PersonRecord saveRecord(PersonRecord person);
     }
 
     @Entity("people")
@@ -190,6 +302,23 @@ abstract class SqlSystemTestSupport {
         long id;
         String firstName;
         String notes;
+    }
+
+    @Entity("people")
+    record PersonRecord(long id, String firstName, String notes) {
+    }
+
+    @Entity("generated_people")
+    static class GeneratedPerson {
+        long id;
+        String firstName;
+    }
+
+    @Entity("generated_memberships")
+    static class GeneratedMembership {
+        String tenantId;
+        long id;
+        String label;
     }
 
     static class DateRow {

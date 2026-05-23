@@ -269,6 +269,11 @@ class EntityRelationGraph {
             Object referenced = accessor.get(object);
             return referenced == null ? null : referencedPrimaryKey.get(referenced);
         }
+
+        @Override
+        public Class<?> type() {
+            return referencedPrimaryKey.type();
+        }
     }
 
     private interface EntityAccessor {
