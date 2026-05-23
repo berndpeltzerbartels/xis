@@ -7,6 +7,7 @@ import one.xis.context.Init;
 import one.xis.context.IntegrationTestContext;
 import one.xis.context.Value;
 import one.xis.test.Captor;
+import one.xis.test.InTestContext;
 import one.xis.test.Mock;
 import org.mockito.ArgumentCaptor;
 import org.junit.jupiter.api.Test;
@@ -32,6 +33,15 @@ class XisBootTestExtensionTest {
     @Inject
     private ProducedBean producedBean;
 
+    @InTestContext
+    private RealDependency realDependency;
+
+    @Inject
+    private RealDependency injectedRealDependency;
+
+    @InTestContext
+    private RealService realService;
+
     @Value("app.name")
     private String appName;
 
@@ -50,13 +60,17 @@ class XisBootTestExtensionTest {
     }
 
     @Test
-    void createsTestClassThroughXisContextAndRegistersMockAsSingleton(IntegrationTestContext context) {
+    void createsTestClassThroughXisContextAndRegistersTestFields(IntegrationTestContext context) {
         assertNotNull(context);
         assertSame(context, this.context);
         assertNotNull(captor);
         assertSame(dependencyMock, dependency);
         assertSame(dependencyMock, context.getSingleton(Dependency.class));
         assertSame(mockitoDependencyMock, mockitoDependency);
+        assertSame(realDependency, injectedRealDependency);
+        assertSame(realDependency, context.getSingleton(RealDependency.class));
+        assertSame(realDependency, realService.realDependency);
+        assertSame(realService, context.getSingleton(RealService.class));
         assertSame(producedBean, context.getSingleton(ProducedBean.class));
         assertSame(context.getSingleton(BeanDependency.class), producedBean.dependency);
         assertEquals("TestApp", appName);
@@ -67,6 +81,17 @@ class XisBootTestExtensionTest {
     }
 
     interface MockitoDependency {
+    }
+
+    static class RealDependency {
+    }
+
+    static class RealService {
+        private final RealDependency realDependency;
+
+        RealService(RealDependency realDependency) {
+            this.realDependency = realDependency;
+        }
     }
 
     @Component

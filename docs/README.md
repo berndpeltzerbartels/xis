@@ -428,6 +428,7 @@ shown in the link text.
 - [`@Login`](user/security.md)
 - [`@IDPLoginData`](user/security.md)
 - [`@XisBootTest`](user/examples-and-tests.md)
+- [`one.xis.test.@InTestContext`](user/examples-and-tests.md)
 - [`one.xis.test.@Mock`](user/examples-and-tests.md)
 - [`one.xis.test.@Spy`](user/examples-and-tests.md)
 - [`one.xis.test.@Captor`](user/examples-and-tests.md)

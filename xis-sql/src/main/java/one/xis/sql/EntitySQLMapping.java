@@ -124,6 +124,16 @@ class EntitySQLMapping {
         }
 
         Object get(Object object);
+
+        default void set(Object object, Object value) {
+            throw new IllegalStateException("Property " + name() + " is not writable");
+        }
+
+        default boolean writable() {
+            return false;
+        }
+
+        Class<?> type();
     }
 
     private record FieldProperty(String name, String columnName, boolean optionalColumn, Field field) implements Property {
@@ -131,6 +141,21 @@ class EntitySQLMapping {
         @Override
         public Object get(Object object) {
             return FieldUtil.getFieldValue(object, field);
+        }
+
+        @Override
+        public void set(Object object, Object value) {
+            FieldUtil.setFieldValue(object, field, value);
+        }
+
+        @Override
+        public boolean writable() {
+            return true;
+        }
+
+        @Override
+        public Class<?> type() {
+            return field.getType();
         }
     }
 
@@ -144,6 +169,11 @@ class EntitySQLMapping {
             } catch (ReflectiveOperationException e) {
                 throw new RuntimeException("Could not read record component " + component.getName(), e);
             }
+        }
+
+        @Override
+        public Class<?> type() {
+            return component.getType();
         }
     }
 }

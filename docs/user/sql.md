@@ -120,9 +120,15 @@ XIS distinguishes three mapped property kinds:
 - Properties annotated with `@JsonColumn` are mapped to one SQL column containing JSON. Use this for small value objects
   or collections of values that belong to the owning row and should not become their own table.
 
-XIS does not need an `@Id` annotation. It reads primary keys from database metadata. Generated `CrudRepository`
-methods are intentionally limited to tables with exactly one primary-key column. For composite primary keys, define the
-needed repository methods explicitly with `@Select`, `@Insert`, `@Update`, `@Save`, or `@Delete`.
+XIS does not need an `@Id` annotation or another primary-key marker. XIS does not generate tables, so the database is
+already the source of truth for table structure. Its metadata tells XIS which columns form the primary key, and that
+information does not have to be repeated in Java. Generated `CrudRepository` methods are intentionally limited to
+tables with exactly one primary-key column. For composite primary keys, define the needed repository methods explicitly
+with `@Select`, `@Insert`, `@Update`, `@Save`, or `@Delete`.
+
+Records can be annotated with `@Entity` too. This is useful for immutable read models or for inserts and saves where
+all primary-key values are already present. Records cannot receive generated primary-key values after an insert, because
+record components are not writable. Use a normal class when XIS should write generated keys back to the entity instance.
 
 `@OptionalColumn` marks a property as mapped only when the column exists. It is mainly intended for reusable entities:
 for example a library class may expose roles as a JSON column while one application persists them in the same table and
@@ -313,6 +319,11 @@ int insert(Customer customer);
 boolean update(Customer customer);
 ```
 
+For generated primary-key columns, `@Insert` without SQL omits each generated key column whose current value is unset
+(`null` for wrapper types, `0` for primitive numeric types), reads the JDBC generated keys, and writes them back to the
+entity. This also works when only one part of a composite primary key is generated and the other key values are supplied
+by the entity. Explicit SQL statements are not modified this way.
+
 For `@Update`, all non-primary-key columns are written and all primary-key columns are used in the `where` clause. This
 works for single-column and composite primary keys.
 
@@ -335,6 +346,11 @@ entity parameter and the SQL uses its properties, those properties are still bou
 Without SQL, `@Save` is metadata-driven. It has exactly one entity parameter. XIS reads the table primary key from
 database metadata, checks whether a row with that key already exists, and then inserts or updates. Single-column and
 composite primary keys are supported for the saved root entity.
+
+For generated primary-key columns, unset key values (`null` for wrapper types, `0` for primitive numeric types) mean
+that `@Save` inserts without those generated columns, reads the JDBC generated keys, and writes them back to the entity
+before saving child collections. If all key values are set, `@Save` checks for an existing row and updates it when
+present.
 
 Single entity fields are stored through foreign-key columns on the saved table. Collection fields are saved as child
 rows: the parent row is saved first, then each collection element is inserted or updated and receives the parent's
@@ -519,3 +535,8 @@ call calculate_discount(?, ?)
 
 The first placeholder is the `customerId` IN parameter. The second placeholder is the registered OUT parameter. The
 `out` name documents the database procedure parameter and must not duplicate a method `@Param` name.
+
+H2 supports Java functions registered with `CREATE ALIAS`, and these functions can also be called as stored procedures.
+However, H2 does not model JDBC OUT parameters like server databases such as PostgreSQL or MariaDB. A procedure call
+that registers an OUT parameter can therefore fail on H2 with an invalid parameter-index error. Use `@Function` for H2
+aliases that return a value, or test real OUT-parameter procedures with the target DBMS.

@@ -20,6 +20,7 @@ dependencies {
     testImplementation "org.postgresql:postgresql:${rootProject.ext.libraryVersions.postgresql}"
     testImplementation "org.mariadb.jdbc:mariadb-java-client:${rootProject.ext.libraryVersions.mariadb}"
     testImplementation "org.mongodb:mongodb-driver-sync:${rootProject.ext.libraryVersions.mongodb}"
+    testImplementation "com.h2database:h2:${rootProject.ext.libraryVersions.h2}"
 
     testImplementation "org.springframework.boot:spring-boot-starter:${rootProject.ext.libraryVersions.springBoot}"
     testImplementation "org.springframework.boot:spring-boot-starter-jdbc:${rootProject.ext.libraryVersions.springBoot}"

@@ -32,8 +32,19 @@ class MariaDbSqlSystemTest extends SqlSystemTestSupport {
             statement.execute("drop procedure if exists add_five");
             statement.execute("drop function if exists double_value");
             statement.execute("drop table if exists date_rows");
+            statement.execute("drop table if exists generated_memberships");
+            statement.execute("drop table if exists generated_people");
             statement.execute("drop table if exists people");
             statement.execute("create table people (id bigint primary key, first_name varchar(100) not null, notes text not null)");
+            statement.execute("create table generated_people (id bigint not null auto_increment primary key, first_name varchar(100) not null)");
+            statement.execute("""
+                    create table generated_memberships (
+                        tenant_id varchar(100) not null,
+                        id bigint not null auto_increment,
+                        label varchar(100) not null,
+                        primary key (id, tenant_id)
+                    )
+                    """);
             statement.execute("""
                     create table date_rows (
                         id bigint primary key,

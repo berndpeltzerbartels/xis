@@ -33,28 +33,26 @@ the task creates:
 src/test/java/example/dashboard/DashboardPageTest.java
 ```
 
-The generated test creates an `IntegrationTestContext` in `@BeforeEach`, registers the page controller explicitly, opens
-the page URL from `@Page`, and starts with a minimal document assertion. It does not overwrite an existing test file:
+The generated test uses `@XisBootTest`, registers the page controller in the XIS test context, opens the page URL from
+`@Page`, and starts with a minimal document assertion. It does not overwrite an existing test file:
 
 ```java
 package example.dashboard;
 
+import one.xis.boot.test.XisBootTest;
 import one.xis.context.IntegrationTestContext;
-import org.junit.jupiter.api.BeforeEach;
+import one.xis.test.InTestContext;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@XisBootTest
 class DashboardPageTest {
 
     private IntegrationTestContext context;
 
-    @BeforeEach
-    void setUp() {
-        context = IntegrationTestContext.builder()
-                .withSingleton(DashboardPage.class)
-                .build();
-    }
+    @InTestContext
+    private DashboardPage dashboardPage;
 
     @Test
     void test() {
@@ -115,6 +113,34 @@ class ProductPageTest {
     }
 }
 ```
+
+Test fields annotated with `one.xis.test.@InTestContext` are created once, registered in the XIS context, and injected into
+the test instance. Use this when the test needs a real, inspectable collaborator instead of a mock.
+
+```java
+@XisBootTest
+class ProductPageTest {
+
+    private IntegrationTestContext context;
+
+    @InTestContext
+    private ProductService productService;
+
+    @Test
+    void savesProduct() {
+        var client = context.openPage("/products.html");
+
+        client.getDocument().getInputElementById("name").setValue("Desk");
+        client.getDocument().getElementById("save").click();
+
+        assertEquals("Desk", productService.savedName());
+    }
+}
+```
+
+Use `one.xis.test.@Mock`, `@Spy`, and `@Captor` for Mockito-style test doubles. `@InTestContext`, `@Mock`, and `@Spy`
+all register their field value in the XIS context, so constructor injection in controllers and services sees the same
+instance as the test.
 
 For small explicit tests, or for builds that do not use the plugin test starter, create an `IntegrationTestContext`
 yourself with the page controller and the services it needs. You can pass classes, which XIS will instantiate, or
