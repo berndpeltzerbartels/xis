@@ -24,4 +24,9 @@ class FrontletContainerParameterFrontlet {
                    @Parameter("sortBy") String sortBy) {
         service.action(categoryId, sortBy);
     }
+
+    @Action("showSecond")
+    Class<?> showSecond() {
+        return SecondFrontletContainerParameterFrontlet.class;
+    }
 }

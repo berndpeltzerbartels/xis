@@ -114,6 +114,9 @@ class FrontletContainerHandler extends TagHandler {
         this.data = data;
         this.frontletParameters = {};
         this.refreshContainerId(data);
+        if (this.isInitialDefaultFrontletLoad()) {
+            return this.refreshInitialDefaultFrontlet(data);
+        }
         if (!this.bindByFrontletAnnotation()) {
             this.bindFrontletInitial(data);
         }
@@ -126,6 +129,37 @@ class FrontletContainerHandler extends TagHandler {
             promises.push(this.reloadDataAndRefresh(data));
         }
         return Promise.all(promises.concat([descendantPromise]));
+    }
+
+    isInitialDefaultFrontletLoad() {
+        return !!this.defaultFrontletExpression && !this.frontletInstance;
+    }
+
+    refreshInitialDefaultFrontlet(data) {
+        this.frontletParameters = mergeObjects(this.frontletParameters, data.getValue(['frontletParameters']));
+        if (!this.bindByFrontletAnnotation()) {
+            this.bindFrontletInitial(data);
+        }
+        return this.refreshContainerParameterHandlers(data)
+            .then(() => {
+                // The default frontlet is already bound, but its first model request has
+                // not happened yet. Container-level parameters must now override any
+                // inherited page/frontlet parameters, otherwise two default containers on
+                // the same page can accidentally reuse each other's parameter values.
+                this.frontletState = new FrontletState(app.pageController.resolvedURL, this.frontletParameters);
+                data.setValue(['frontletParameters'], this.frontletParameters);
+                return this.frontletInstance ? this.reloadDataAndRefresh(data) : Promise.resolve();
+            });
+    }
+
+    refreshContainerParameterHandlers(data) {
+        // Container-level <xis:parameter> tags are part of the container state, not of
+        // the default frontlet's DOM. During the initial default-frontlet load the
+        // model request needs those values before the default frontlet is bound and
+        // refreshed. For all later refreshes the normal descendant refresh keeps the
+        // existing order and avoids refreshing an already mounted frontlet too early.
+        var parameterHandlers = this.descendantHandlers.filter(handler => handler.type === 'parameter-handler');
+        return Promise.all(parameterHandlers.map(handler => handler.refresh(data)));
     }
 
     handleUpdateEvent() {
