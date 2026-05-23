@@ -68,8 +68,8 @@ The same plugin can generate missing integration-test skeletons for page control
 ./gradlew xisTests
 ```
 
-The generated tests are written under `src/test/java` in the same package as the page controller. They create an
-`IntegrationTestContext` in `@BeforeEach`, register the page controller explicitly, and open the page by URL. The XIS
+The generated tests are written under `src/test/java` in the same package as the page controller. They use
+`@XisBootTest`, register the page controller in the XIS test context, and open the page by URL. The XIS
 Gradle plugin adds the required test starter automatically; do not add `xis-test` or `xis-boot-starter-test` again in a
 normal plugin-based build. Existing files are never overwritten, so both tasks are safe to run repeatedly while you add
 controllers.

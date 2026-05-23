@@ -32,6 +32,7 @@ public class XisBootTestExtension implements TestInstanceFactory, ParameterResol
         var testClass = factoryContext.getTestClass();
         var testFields = createTestFields(testClass);
         var context = createContext(testClass, testFields.singletons());
+        addInTestContextFields(testFields.fields(), testFields.inTestContextFields(), context);
         addFrameworkFields(testClass, testFields.fields(), context);
         extensionContext.getRoot().getStore(NAMESPACE).put(testClass, context);
         var testInstance = context.getSingleton(testClass);
@@ -84,11 +85,14 @@ public class XisBootTestExtension implements TestInstanceFactory, ParameterResol
     private TestFields createTestFields(Class<?> testClass) {
         var fields = new HashMap<Field, Object>();
         var singletons = new ArrayList<Object>();
+        var inTestContextFields = new ArrayList<Field>();
         for (Field field : fields(testClass)) {
             var mock = isMockField(field);
             var spy = isSpyField(field);
-            if (mock && spy) {
-                throw new TestInstantiationException("Field may not be annotated with both @Mock and @Spy: " + field);
+            var inTestContext = isInTestContextField(field);
+            var instanceProducerAnnotations = List.of(mock, spy, inTestContext).stream().filter(Boolean::booleanValue).count();
+            if (instanceProducerAnnotations > 1) {
+                throw new TestInstantiationException("Field may only use one of @Mock, @Spy, or @InTestContext: " + field);
             }
             if (mock) {
                 var instance = Mockito.mock(field.getType());
@@ -102,11 +106,15 @@ public class XisBootTestExtension implements TestInstanceFactory, ParameterResol
                 fields.put(field, instance);
                 singletons.add(instance);
             }
+            if (inTestContext) {
+                singletons.add(field.getType());
+                inTestContextFields.add(field);
+            }
             if (isCaptorField(field)) {
                 fields.put(field, ArgumentCaptor.forClass(captorType(field)));
             }
         }
-        return new TestFields(fields, singletons);
+        return new TestFields(fields, singletons, inTestContextFields);
     }
 
     private void addFrameworkFields(Class<?> testClass, Map<Field, Object> fields, IntegrationTestContext context) {
@@ -114,6 +122,12 @@ public class XisBootTestExtension implements TestInstanceFactory, ParameterResol
             if (field.getType().equals(IntegrationTestContext.class)) {
                 fields.putIfAbsent(field, context);
             }
+        }
+    }
+
+    private void addInTestContextFields(Map<Field, Object> fields, Collection<Field> inTestContextFields, IntegrationTestContext context) {
+        for (Field field : inTestContextFields) {
+            fields.put(field, context.getSingleton(field.getType()));
         }
     }
 
@@ -127,6 +141,10 @@ public class XisBootTestExtension implements TestInstanceFactory, ParameterResol
 
     private boolean isCaptorField(Field field) {
         return hasAnnotation(field, one.xis.test.Captor.class, "org.mockito.Captor");
+    }
+
+    private boolean isInTestContextField(Field field) {
+        return field.isAnnotationPresent(one.xis.test.InTestContext.class);
     }
 
     private boolean hasAnnotation(Field field, Class<? extends Annotation> xisAnnotation, String optionalAnnotationName) {
@@ -173,6 +191,7 @@ public class XisBootTestExtension implements TestInstanceFactory, ParameterResol
         return fields;
     }
 
-    private record TestFields(Map<Field, Object> fields, Collection<Object> singletons) {
+    private record TestFields(Map<Field, Object> fields, Collection<Object> singletons,
+                              Collection<Field> inTestContextFields) {
     }
 }

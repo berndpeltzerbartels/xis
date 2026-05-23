@@ -113,8 +113,8 @@ The plugin can also generate starter integration tests for page controllers:
 ./gradlew xisTests
 ```
 
-Generated tests create an `IntegrationTestContext` in `@BeforeEach`, register the page controller explicitly, and open
-the page through its URL. The required XIS test starter is added automatically by the plugin. Generated tests compile before the full page behavior is
+Generated tests use `@XisBootTest`, register the page controller in the XIS test context, and open the page through its
+URL. The required XIS test starter is added automatically by the plugin. Generated tests compile before the full page behavior is
 implemented, so you can use them for a TDD-style workflow: sketch the page class and its model/form/action methods, run
 `./gradlew xisTemplates xisTests`, edit the generated test until it describes the UI behavior you want, then implement
 the services and refine the template until the test passes.
@@ -195,8 +195,8 @@ To generate a first test skeleton for the page, run:
 ```
 
 This creates `src/test/java/example/dashboard/DashboardPageTest.java` if the file does not already exist. The generated
-test is intentionally small: it creates an `IntegrationTestContext` in `@BeforeEach`, registers the page controller,
-opens `/index.html`, and leaves space for assertions against the rendered document.
+test is intentionally small: it uses `@XisBootTest`, registers the page controller in the test context, opens
+`/index.html`, and leaves space for assertions against the rendered document.
 
 ## Add an Action
 
@@ -253,22 +253,20 @@ generated file is intentionally small, so make the behavior explicit by adding t
 ```java
 package example.dashboard;
 
+import one.xis.boot.test.XisBootTest;
 import one.xis.context.IntegrationTestContext;
-import org.junit.jupiter.api.BeforeEach;
+import one.xis.test.InTestContext;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@XisBootTest
 class CounterPageTest {
 
     private IntegrationTestContext context;
 
-    @BeforeEach
-    void setUp() {
-        context = IntegrationTestContext.builder()
-                .withSingleton(CounterPage.class)
-                .build();
-    }
+    @InTestContext
+    private CounterPage counterPage;
 
     @Test
     void incrementUpdatesCounter() {
@@ -305,21 +303,14 @@ import one.xis.validation.Mandatory;
 @Page("/customer.html")
 class CustomerPage {
 
-    private CustomerForm saved;
-
     @FormData("customer")
     CustomerForm customer() {
-        return saved != null ? saved : new CustomerForm("", "");
-    }
-
-    @ModelData("savedMessage")
-    String savedMessage() {
-        return saved == null ? "" : "Saved " + saved.name();
+        return new CustomerForm("", "");
     }
 
     @Action
     void save(@FormData("customer") CustomerForm customer) {
-        this.saved = customer;
+        // Store the customer in your service or repository.
     }
 
     record CustomerForm(
@@ -355,8 +346,6 @@ class CustomerPage {
 
         <button type="submit" xis:action="save">Save</button>
     </form>
-
-    <p>${savedMessage}</p>
 </body>
 </html>
 ```
@@ -416,7 +405,6 @@ package example.customer;
 import one.xis.Action;
 import one.xis.FormData;
 import one.xis.Frontlet;
-import one.xis.FrontletResponse;
 import one.xis.validation.EMail;
 import one.xis.validation.LabelKey;
 import one.xis.validation.Mandatory;
@@ -430,10 +418,8 @@ class CustomerFormFrontlet {
     }
 
     @Action
-    FrontletResponse save(@FormData("customer") CustomerForm customer) {
-        return new FrontletResponse(CustomerDetailsFrontlet.class)
-                .frontletParameter("name", customer.name())
-                .frontletParameter("email", customer.email());
+    void save(@FormData("customer") CustomerForm customer) {
+        // Store the customer in your service or repository.
     }
 
     record CustomerForm(
@@ -463,38 +449,6 @@ class CustomerFormFrontlet {
     </form>
 </xis:template>
 ```
-
-`src/main/java/example/customer/CustomerDetailsFrontlet.java`
-
-```java
-package example.customer;
-
-import one.xis.Frontlet;
-import one.xis.Parameter;
-import one.xis.ModelData;
-
-@Frontlet(containerId = "customer-main")
-class CustomerDetailsFrontlet {
-
-    @ModelData("summary")
-    String summary(@Parameter("name") String name,
-                          @Parameter("email") String email) {
-        return name + " <" + email + ">";
-    }
-}
-```
-
-`src/main/java/example/customer/CustomerDetailsFrontlet.html`
-
-```html
-<xis:template xmlns:xis="https://xis.one/xsd">
-    <h2>Saved customer</h2>
-    <p>${summary}</p>
-</xis:template>
-```
-
-The `save` action runs in the form frontlet. Returning `FrontletResponse` replaces the frontlet in the current
-container with `CustomerDetailsFrontlet` and passes the submitted values as frontlet parameters.
 
 Frontlets also become useful when an application grows beyond one deployment unit. Pages and frontlets can be served by
 different XIS applications, so teams can split a shell page and selected UI fragments across runtimes. That is an

@@ -137,26 +137,24 @@ For the same page controller, the task creates:
 src/test/java/example/dashboard/DashboardPageTest.java
 ```
 
-The generated test creates an `IntegrationTestContext` in `@BeforeEach`, explicitly registers the page controller, and
-opens the page through its `@Page` URL. It is meant as a first executable sketch, not as a finished test suite:
+The generated test uses `@XisBootTest`, registers the page controller in the XIS test context, and opens the page
+through its `@Page` URL. It is meant as a first executable sketch, not as a finished test suite:
 
 ```java
+import one.xis.boot.test.XisBootTest;
 import one.xis.context.IntegrationTestContext;
-import org.junit.jupiter.api.BeforeEach;
+import one.xis.test.InTestContext;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@XisBootTest
 class DashboardPageTest {
 
     private IntegrationTestContext context;
 
-    @BeforeEach
-    void setUp() {
-        context = IntegrationTestContext.builder()
-                .withSingleton(DashboardPage.class)
-                .build();
-    }
+    @InTestContext
+    private DashboardPage dashboardPage;
 
     @Test
     void test() {
