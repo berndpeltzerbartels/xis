@@ -21,6 +21,7 @@ class FrontletContainerParameterTest {
         testContext = IntegrationTestContext.builder()
                 .withSingleton(FrontletContainerParameterPage.class)
                 .withSingleton(FrontletContainerParameterFrontlet.class)
+                .withSingleton(SecondFrontletContainerParameterFrontlet.class)
                 .withSingleton(service)
                 .build();
     }
@@ -41,5 +42,15 @@ class FrontletContainerParameterTest {
         client.getDocument().getElementByTagName("a").click();
 
         verify(service, times(1)).action(eq("electronics"), eq("price"));
+    }
+
+    @Test
+    @DisplayName("Frontlet container parameters survive frontlet changes")
+    void frontletContainerParametersSurviveFrontletChanges() {
+        var client = testContext.openPage("/frontletContainerParameterPage.html");
+
+        client.getDocument().getElementById("showSecond").click();
+
+        assertThat(client.getDocument().getElementById("secondCategoryId").getInnerText()).isEqualTo("electronics");
     }
 }

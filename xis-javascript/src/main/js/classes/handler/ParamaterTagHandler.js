@@ -1,6 +1,7 @@
 class ParameterTagHandler extends TagHandler {
     constructor(element, parentHandler) {
         super(element);
+        this.type = 'parameter-handler';
         if(!parentHandler) {
             throw new Error("ParameterTagHandler must have a parent handler.");
         }
