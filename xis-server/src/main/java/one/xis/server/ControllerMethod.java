@@ -124,7 +124,7 @@ class ControllerMethod {
 
     @Override
     public String toString() {
-        return "ControllerMethod(" + method.getName() + ")";
+        return "ControllerMethod:" + method.getDeclaringClass()+"."+method.getName();
     }
 
     @Override
