@@ -36,6 +36,7 @@ class FrontletContainerHandler extends TagHandler {
         this.scrollToTop = tag.getAttribute('scroll-to-top') === 'true';
         this.buffer = undefined;
         this.frontletParameters = {};
+        this.collectingDefaultParameters = false;
     }
 
     /**
@@ -44,7 +45,9 @@ class FrontletContainerHandler extends TagHandler {
      * @param {String} value 
      */
     addParameter(name, value) {
-       this.frontletParameters[name] = value;
+       if (this.collectingDefaultParameters) {
+           this.frontletParameters[name] = value;
+       }
     }
 
     /**
@@ -71,18 +74,20 @@ class FrontletContainerHandler extends TagHandler {
             }
             console.warn('Target container not found:', response.frontletContainerId);
         }
-        this.frontletParameters = mergeObjects(this.frontletParameters, response.frontletParameters);
-        if (!this.frontletState) {
-            this.frontletState = new FrontletState(app.pageController.resolvedURL, this.frontletParameters);
-        }
         var data = response.data;
         updateStores(response);
-        this.mergeParametersFromResponseTarget(response);
-        data.setValue(['frontletParameters'], this.frontletParameters);
         this.refreshContainerId(data);
 
         const nextFrontletId = response.nextFrontletId ? app.client.config.getFrontletId(response.nextFrontletId) : undefined;
         const frontletChanges = !!nextFrontletId && nextFrontletId !== this.currentFrontletId();
+        this.frontletParameters = frontletChanges
+            ? this.parametersForNewFrontlet(response)
+            : mergeObjects(this.frontletParameters, response.frontletParameters);
+        if (!this.frontletState) {
+            this.frontletState = new FrontletState(app.pageController.resolvedURL, this.frontletParameters);
+        }
+        this.frontletState.frontletParameters = this.frontletParameters;
+        data.setValue(['frontletParameters'], this.frontletParameters);
 
         return PageController.enqueue(() => {
             if (frontletChanges) {
@@ -153,13 +158,14 @@ class FrontletContainerHandler extends TagHandler {
     }
 
     refreshContainerParameterHandlers(data) {
-        // Container-level <xis:parameter> tags are part of the container state, not of
-        // the default frontlet's DOM. During the initial default-frontlet load the
-        // model request needs those values before the default frontlet is bound and
-        // refreshed. For all later refreshes the normal descendant refresh keeps the
-        // existing order and avoids refreshing an already mounted frontlet too early.
+        // Container-level <xis:parameter> tags configure only the default frontlet.
+        // Once a different frontlet is opened explicitly, these values must no
+        // longer be applied to the container. Otherwise stale default parameters can
+        // override the parameters of the newly opened frontlet.
         var parameterHandlers = this.descendantHandlers.filter(handler => handler.type === 'parameter-handler');
-        return Promise.all(parameterHandlers.map(handler => handler.refresh(data)));
+        this.collectingDefaultParameters = true;
+        return Promise.all(parameterHandlers.map(handler => handler.refresh(data)))
+            .finally(() => this.collectingDefaultParameters = false);
     }
 
     handleUpdateEvent() {
@@ -175,6 +181,7 @@ class FrontletContainerHandler extends TagHandler {
      */
     showFrontlet(frontletId, frontletState) {
         this.frontletState = frontletState;
+        this.frontletParameters = frontletState.frontletParameters || {};
         this.ensureFrontletBound(frontletId, true);
         this.frontletState = frontletState;
         return PageController.enqueue(() => this.reloadDataAndRefresh(this.parentData()));
@@ -324,12 +331,11 @@ class FrontletContainerHandler extends TagHandler {
         }
     }
 
-    mergeParametersFromResponseTarget(response) {
-        if (!response.nextFrontletId) {
-            return;
-        }
-        response.frontletParameters = mergeObjects(response.frontletParameters, urlParameters(response.nextFrontletId));
-        this.frontletParameters = mergeObjects(this.frontletParameters, response.frontletParameters);
+    parametersForNewFrontlet(response) {
+        // A frontlet switch starts a new parameter scope. Parameters declared on the
+        // container belong only to its default frontlet; reusing them here would let
+        // stale default values override the explicitly opened frontlet.
+        return mergeObjects(response.frontletParameters, urlParameters(response.nextFrontletId));
     }
 
     /**

@@ -237,6 +237,11 @@ Pass frontlet parameters with `xis:parameter`. The target frontlet receives them
 Frontlet targets can also carry query parameters, for example `xis:frontlet="/product-summary?productId=42"`. These
 values are frontlet parameters and are also read with `@Parameter`.
 
+For `xis:default-frontlet`, prefer query parameters such as
+`xis:default-frontlet="ProductDetailsFrontlet?productId=${product.id}"`. This makes it clear that the parameters belong
+only to that default frontlet. Child `<xis:parameter>` elements are still supported, but they are interpreted as default
+frontlet parameters and are not reused when another frontlet is opened in the same container.
+
 ## Includes
 
 Use includes for shared markup fragments when the fragment does not need its own frontlet controller.

@@ -45,12 +45,12 @@ class FrontletContainerParameterTest {
     }
 
     @Test
-    @DisplayName("Frontlet container parameters survive frontlet changes")
-    void frontletContainerParametersSurviveFrontletChanges() {
+    @DisplayName("Frontlet container parameters only configure default frontlet")
+    void frontletContainerParametersOnlyConfigureDefaultFrontlet() {
         var client = testContext.openPage("/frontletContainerParameterPage.html");
 
         client.getDocument().getElementById("showSecond").click();
 
-        assertThat(client.getDocument().getElementById("secondCategoryId").getInnerText()).isEqualTo("electronics");
+        assertThat(client.getDocument().getElementById("secondCategoryId").getInnerText()).isEqualTo("replacement");
     }
 }

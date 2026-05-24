@@ -26,7 +26,8 @@ class FrontletContainerParameterFrontlet {
     }
 
     @Action("showSecond")
-    Class<?> showSecond() {
-        return SecondFrontletContainerParameterFrontlet.class;
+    FrontletResponse showSecond() {
+        return new FrontletResponse(SecondFrontletContainerParameterFrontlet.class)
+                .frontletParameter("categoryId", "replacement");
     }
 }

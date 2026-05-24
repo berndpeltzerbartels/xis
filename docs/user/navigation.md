@@ -511,9 +511,8 @@ class ProductPage {
 ```
 
 ```html
-<main xis:frontlet-container="main" xis:default-frontlet="${detailsFrontlet}">
-    <xis:parameter name="productId" value="${productId}"/>
-</main>
+<main xis:frontlet-container="main"
+      xis:default-frontlet="${detailsFrontlet}?productId=${productId}"></main>
 ```
 
 ## Choosing the Right Tool
