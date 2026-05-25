@@ -359,6 +359,69 @@ class XISValidateProcessorTest {
     }
 
     @Test
+    void acceptsSharedValueParameterWithProviderMethod() throws IOException {
+        writeTemplateUsingName();
+
+        DiagnosticCollector<JavaFileObject> diagnostics = compilePageSourceWithProcessor(true, """
+                package example;
+
+                import one.xis.ModelData;
+                import one.xis.Page;
+                import one.xis.SharedValue;
+
+                @Page("/probe.html")
+                class ProbePage {
+                    @SharedValue("customer")
+                    Customer customer() {
+                        return new Customer();
+                    }
+
+                    @ModelData("name")
+                    String name(@SharedValue("customer") Customer customer) {
+                        return customer.name;
+                    }
+
+                    static class Customer {
+                        String name;
+                    }
+                }
+                """);
+
+        assertThat(errorMessages(diagnostics)).isEmpty();
+    }
+
+    @Test
+    void rejectsSharedValueParameterWithoutProviderMethod() throws IOException {
+        writeTemplateUsingName();
+
+        DiagnosticCollector<JavaFileObject> diagnostics = compilePageSourceWithProcessor(false, """
+                package example;
+
+                import one.xis.ModelData;
+                import one.xis.Page;
+                import one.xis.SharedValue;
+
+                @Page("/probe.html")
+                class ProbePage {
+                    @ModelData("name")
+                    String name(@SharedValue("customer") Customer customer) {
+                        return customer.name;
+                    }
+
+                    static class Customer {
+                        String name;
+                    }
+                }
+                """);
+
+        List<String> errors = errorMessages(diagnostics);
+        assertThat(errors).hasSize(1);
+        assertThat(errors.get(0))
+                .contains("@SharedValue parameter \"customer\"")
+                .contains("has no matching @SharedValue method");
+    }
+
+    @Test
     void validatesThemeFormFieldBindingsAgainstFormObject() throws IOException {
         Path templateFile = tempDir.resolve("src/main/java/example/ProbePage.html");
         Files.createDirectories(templateFile.getParent());
@@ -930,6 +993,17 @@ class XISValidateProcessorTest {
                       <label xis:error-binding="name" xis:error-class="error">Name</label>
                     </form>
                   </body>
+                </html>
+                """, StandardCharsets.UTF_8);
+    }
+
+    private void writeTemplateUsingName() throws IOException {
+        Path templateFile = tempDir.resolve("src/main/java/example/ProbePage.html");
+        Files.createDirectories(templateFile.getParent());
+        Files.writeString(templateFile, """
+                <!DOCTYPE html>
+                <html>
+                  <body>${name}</body>
                 </html>
                 """, StandardCharsets.UTF_8);
     }

@@ -45,6 +45,7 @@ public class XISValidateProcessor extends AbstractProcessor {
     private static final String HTML_FILE_ANNOTATION = "one.xis.HtmlFile";
     private static final String MODEL_DATA_ANNOTATION = "one.xis.ModelData";
     private static final String FORM_DATA_ANNOTATION = "one.xis.FormData";
+    private static final String SHARED_VALUE_ANNOTATION = "one.xis.SharedValue";
     private static final int MAX_PROPERTY_DEPTH = 6;
 
     private boolean processed;
@@ -120,13 +121,34 @@ public class XISValidateProcessor extends AbstractProcessor {
     private ControllerTemplateModel controllerModel(Path projectDir, TypeElement controllerType) {
         Map<String, TemplateDataModel> modelData = new LinkedHashMap<>();
         Map<String, TemplateDataModel> formData = new LinkedHashMap<>();
+        Set<String> sharedValues = new LinkedHashSet<>();
+        List<ExecutableElement> methods = new ArrayList<>();
         for (Element enclosedElement : controllerType.getEnclosedElements()) {
             if (enclosedElement.getKind() == ElementKind.METHOD) {
-                collectDataMethodNames((ExecutableElement) enclosedElement, modelData, formData);
+                var method = (ExecutableElement) enclosedElement;
+                methods.add(method);
+                collectDataMethodNames(method, modelData, formData);
+                annotationStringValue(method, SHARED_VALUE_ANNOTATION, "value")
+                        .filter(value -> !value.isBlank())
+                        .ifPresent(sharedValues::add);
             }
         }
+        validateSharedValueParameters(methods, sharedValues);
         Path templateFile = templateFile(projectDir, controllerType);
         return new ControllerTemplateModel(controllerType.getQualifiedName().toString(), templateFile, modelData, formData);
+    }
+
+    private void validateSharedValueParameters(List<ExecutableElement> methods, Set<String> sharedValues) {
+        for (ExecutableElement method : methods) {
+            for (VariableElement parameter : method.getParameters()) {
+                annotationStringValue(parameter, SHARED_VALUE_ANNOTATION, "value")
+                        .filter(value -> !value.isBlank())
+                        .filter(value -> !sharedValues.contains(value))
+                        .ifPresent(value -> processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
+                                "@SharedValue parameter \"" + value + "\" has no matching @SharedValue method in this controller.",
+                                parameter));
+            }
+        }
     }
 
     private void collectDataMethodNames(ExecutableElement method,
