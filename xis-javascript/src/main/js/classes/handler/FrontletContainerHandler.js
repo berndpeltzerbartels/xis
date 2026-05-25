@@ -186,6 +186,10 @@ class FrontletContainerHandler extends TagHandler {
         this.frontletState = frontletState;
         return PageController.enqueue(() => this.reloadDataAndRefresh(this.parentData()));
     }
+
+    changesFrontlet(frontletId) {
+        return frontletId && frontletId !== this.currentFrontletId();
+    }
     /**
      * @public
      * @returns {Promise<void>}
