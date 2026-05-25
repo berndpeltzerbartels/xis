@@ -10,6 +10,7 @@ class ModelDataLifecyclePage {
     private int alwaysCalls;
     private int initialCalls;
     private int afterActionCalls;
+    private int actionOnlyCalls;
 
     @ModelData("always")
     String always() {
@@ -37,6 +38,12 @@ class ModelDataLifecyclePage {
         return "second";
     }
 
+    @Action
+    @ModelData("actionOnly")
+    String actionOnly() {
+        return "action-only-" + ++actionOnlyCalls;
+    }
+
     int getAlwaysCalls() {
         return alwaysCalls;
     }
@@ -47,5 +54,9 @@ class ModelDataLifecyclePage {
 
     int getAfterActionCalls() {
         return afterActionCalls;
+    }
+
+    int getActionOnlyCalls() {
+        return actionOnlyCalls;
     }
 }

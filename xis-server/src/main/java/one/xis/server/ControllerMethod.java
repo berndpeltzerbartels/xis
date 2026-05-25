@@ -14,6 +14,7 @@ import one.xis.http.HttpRequest;
 import one.xis.http.HttpResponse;
 import one.xis.http.RequestContext;
 import one.xis.security.SecurityUtil;
+import one.xis.utils.lang.MethodUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -151,6 +152,17 @@ class ControllerMethod {
             return Optional.empty();
         }
         return Optional.of(ModelDataName.forMethod(method));
+    }
+
+    Optional<String> getFormDataKey() {
+        if (!method.isAnnotationPresent(FormData.class)) {
+            return Optional.empty();
+        }
+        var formData = method.getAnnotation(FormData.class);
+        if (!formData.value().isEmpty()) {
+            return Optional.of(formData.value());
+        }
+        return Optional.of(MethodUtils.propertyNameByGetter(method).orElse(method.getName()));
     }
 
     boolean shouldLoadModelData(ModelDataLoad load) {

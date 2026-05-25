@@ -60,9 +60,11 @@ class ModelCallCountTest {
         assertThat(client.getDocument().getElementById("initial").getInnerText()).isEqualTo("initial-1");
         assertThat(client.getDocument().getElementById("after-action").getInnerText()).isEmpty();
         assertThat(client.getDocument().getElementById("selected").getInnerText()).isEqualTo("first");
+        assertThat(client.getDocument().getElementById("action-only").getInnerText()).isEmpty();
         assertThat(page.getAlwaysCalls()).isEqualTo(1);
         assertThat(page.getInitialCalls()).isEqualTo(1);
         assertThat(page.getAfterActionCalls()).isZero();
+        assertThat(page.getActionOnlyCalls()).isZero();
 
         client.getDocument().getElementById("select-second").click();
 
@@ -70,9 +72,16 @@ class ModelCallCountTest {
         assertThat(client.getDocument().getElementById("initial").getInnerText()).isEmpty();
         assertThat(client.getDocument().getElementById("after-action").getInnerText()).isEqualTo("after-action-1");
         assertThat(client.getDocument().getElementById("selected").getInnerText()).isEqualTo("second");
+        assertThat(client.getDocument().getElementById("action-only").getInnerText()).isEmpty();
         assertThat(page.getAlwaysCalls()).isEqualTo(2);
         assertThat(page.getInitialCalls()).isEqualTo(1);
         assertThat(page.getAfterActionCalls()).isEqualTo(1);
+        assertThat(page.getActionOnlyCalls()).isZero();
+
+        client.getDocument().getElementById("action-only-button").click();
+
+        assertThat(client.getDocument().getElementById("action-only").getInnerText()).isEqualTo("action-only-1");
+        assertThat(page.getActionOnlyCalls()).isEqualTo(1);
     }
 
     @Test
@@ -122,14 +131,23 @@ class ModelCallCountTest {
         var page = context.getSingleton(ActionFormDataLifecyclePage.class);
 
         assertThat(client.getDocument().getInputElementById("action-form-value").getValue()).isEqualTo("initial-step-1");
+        assertThat(client.getDocument().getInputElementById("named-action-form-value").getValue()).isEmpty();
         assertThat(page.getInitialCalls()).isEqualTo(1);
         assertThat(page.getActionCalls()).isZero();
+        assertThat(page.getNamedActionCalls()).isZero();
 
         client.getDocument().getElementById("select-step").click();
 
         assertThat(client.getDocument().getInputElementById("action-form-value").getValue()).isEqualTo("selected-step-1");
+        assertThat(client.getDocument().getInputElementById("named-action-form-value").getValue()).isEmpty();
         assertThat(page.getInitialCalls()).isEqualTo(1);
         assertThat(page.getActionCalls()).isEqualTo(1);
+        assertThat(page.getNamedActionCalls()).isZero();
+
+        client.getDocument().getElementById("named-action").click();
+
+        assertThat(client.getDocument().getInputElementById("named-action-form-value").getValue()).isEqualTo("named-step-1");
+        assertThat(page.getNamedActionCalls()).isEqualTo(1);
     }
 
     @Test

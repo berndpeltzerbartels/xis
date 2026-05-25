@@ -8,6 +8,7 @@ import one.xis.Page;
 class ActionFormDataLifecyclePage {
     private int initialCalls;
     private int actionCalls;
+    private int namedActionCalls;
 
     @FormData("step")
     FormDataLifecycleForm initialStep() {
@@ -22,11 +23,22 @@ class ActionFormDataLifecyclePage {
         return new FormDataLifecycleForm("selected-step-" + actionCalls);
     }
 
+    @Action("namedAction")
+    @FormData("namedStep")
+    FormDataLifecycleForm namedStep() {
+        namedActionCalls++;
+        return new FormDataLifecycleForm("named-step-" + namedActionCalls);
+    }
+
     int getInitialCalls() {
         return initialCalls;
     }
 
     int getActionCalls() {
         return actionCalls;
+    }
+
+    int getNamedActionCalls() {
+        return namedActionCalls;
     }
 }
