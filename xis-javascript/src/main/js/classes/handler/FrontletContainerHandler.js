@@ -196,10 +196,9 @@ class FrontletContainerHandler extends TagHandler {
      */
     initBuffer() {
         return new Promise((resolve, _) => {
+            // Keep the current frontlet visible while the next one is built off-DOM.
+            // commitBuffer() performs the visible replacement only after refresh finished.
             this.buffer = document.createDocumentFragment();
-            while (this.tag.firstChild) {
-                this.buffer.appendChild(this.tag.firstChild);
-            }
             resolve();
         });
     }
@@ -210,9 +209,13 @@ class FrontletContainerHandler extends TagHandler {
      */
     commitBuffer() {
         return new Promise((resolve, _) => {
+            while (this.tag.firstChild) {
+                this.tag.removeChild(this.tag.firstChild);
+            }
             while (this.buffer.firstChild) {
                 this.tag.appendChild(this.buffer.firstChild);
             }
+            this.buffer = undefined;
             resolve();
         });
     }
@@ -307,7 +310,9 @@ class FrontletContainerHandler extends TagHandler {
                 return;
             } else {
                 var parent = this.frontletInstance.root.parentNode;
-                if (parent == this.tag || parent == this.buffer) {
+                // During a buffered switch the old root stays in the visible container
+                // until commitBuffer(); only roots already attached to the buffer are removed here.
+                if (parent == this.buffer || (!this.buffer && parent == this.tag)) {
                     parent.removeChild(this.frontletInstance.root);
                 }
                 this.removeDescendantHandler(this.frontletInstance.rootHandler);
