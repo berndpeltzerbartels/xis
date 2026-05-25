@@ -1,0 +1,14 @@
+<section xmlns:xis="https://xis.one/xsd" data-step="${step}">
+    <div class="pipeline">${pipeline}</div>
+    <div class="step">${step}</div>
+    <button id="select-step" xis:action="selectStep" type="button">
+        <xis:parameter name="pipelineId" value="1"/>
+        <xis:parameter name="stepId" value="2"/>
+        Select step
+    </button>
+    <button id="select-tagged-step" xis:action="selectTaggedStep" type="button">
+        <xis:parameter name="pipelineId" value="1"/>
+        <xis:parameter name="stepId" value="20"/>
+        Select tagged step
+    </button>
+</section>

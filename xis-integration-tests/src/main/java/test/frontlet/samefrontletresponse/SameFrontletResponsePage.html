@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:xis="https://xis.one/xsd">
+<head>
+    <title>Same frontlet response</title>
+</head>
+<body>
+<div id="query">
+    <xis:frontlet-container container-id="query" default-frontlet="${queryDefaultFrontlet}"/>
+</div>
+<div id="tag">
+<xis:frontlet-container container-id="tag" default-frontlet="${tagDefaultFrontlet}">
+    <xis:parameter name="pipelineId" value="1"/>
+    <xis:parameter name="stepId" value="1"/>
+</xis:frontlet-container>
+</div>
+</body>
+</html>

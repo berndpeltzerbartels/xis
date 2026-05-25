@@ -109,7 +109,7 @@ class ControllerService {
             return;
         }
         if (nextControllerWrapper.equals(invokerControllerWrapper)) {
-            invokerControllerWrapper.invokeGetModelMethods(request, controllerResult, actionModelDataKeys, ModelDataLoad.AFTER_ACTION);
+            invokerControllerWrapper.invokeGetModelMethods(nextRequest(request, controllerResult), controllerResult, actionModelDataKeys, ModelDataLoad.AFTER_ACTION);
             mapResultToResponse(request, response, controllerResult);
         } else {
             processNextController(request, controllerResult, response, nextControllerWrapper);
@@ -117,15 +117,7 @@ class ControllerService {
     }
 
     private void processNextController(ClientRequest request, ControllerResult controllerResult, ServerResponse response, ControllerWrapper nextControllerWrapper) {
-        var nextRequest = new ClientRequest();
-        // userdata is the same
-        nextRequest.setLocale(request.getLocale());
-        nextRequest.setZoneId(request.getZoneId());
-        nextRequest.setClientId(request.getClientId());
-        nextRequest.getLocalStorageData().putAll(request.getLocalStorageData());
-        nextRequest.getSessionStorageData().putAll(request.getSessionStorageData());
-        nextRequest.setAccessToken(request.getAccessToken());
-        controllerResultMapper.mapControllerResultToNextRequest(controllerResult, nextRequest);
+        var nextRequest = nextRequest(request, controllerResult);
         var nextControllerResult = new ControllerResult();
         // one of these 2 values changed
         if (nextControllerWrapper.isFrontletController()) {
@@ -143,6 +135,19 @@ class ControllerService {
         // map result to response
         response.clear();
         mapResultToResponse(request, response, nextControllerResult);
+    }
+
+    private ClientRequest nextRequest(ClientRequest request, ControllerResult controllerResult) {
+        var nextRequest = new ClientRequest();
+        // userdata is the same
+        nextRequest.setLocale(request.getLocale());
+        nextRequest.setZoneId(request.getZoneId());
+        nextRequest.setClientId(request.getClientId());
+        nextRequest.getLocalStorageData().putAll(request.getLocalStorageData());
+        nextRequest.getSessionStorageData().putAll(request.getSessionStorageData());
+        nextRequest.setAccessToken(request.getAccessToken());
+        controllerResultMapper.mapControllerResultToNextRequest(controllerResult, nextRequest);
+        return nextRequest;
     }
 
     private ControllerWrapper controllerWrapper(ClientRequest request) {
