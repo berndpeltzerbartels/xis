@@ -21,13 +21,13 @@ class FormHandler extends TagHandler {
         formTag.addEventListener('submit', event => Promise.resolve(this.onSubmit(event)).catch(error => handleError(error)));
     }
 
-    submit(action) {
+    submit(action, actionParameters = {}) {
         var resolvedUrl = app.pageController.resolvedURL;
         var formBindingParameters = urlParameters(this.binding);
         var formBindingKey = stripQuery(this.binding);
         var parameters = mergeObjects(this.frontletParameters || {}, formBindingParameters);
         this.resetMessageHandlers();
-        return this.client.formAction(resolvedUrl, this.frontletId(), this.formData(), action, formBindingKey, parameters, this.uploads())
+        return this.client.formAction(resolvedUrl, this.frontletId(), this.formData(), action, formBindingKey, parameters, actionParameters, this.uploads())
             .then(response => this.handleActionResponse(response, this.targetContainerHandler()));
     }
 
@@ -39,7 +39,7 @@ class FormHandler extends TagHandler {
         }
         const handler = app.tagHandlers.getHandler(submitter);
         if (handler && handler.action) {
-            return this.submit(handler.action);
+            return this.submit(handler.action, handler.actionParameters || {});
         }
         const action = submitter.getAttribute('xis:action');
         if (action) {

@@ -94,12 +94,14 @@ One form can have multiple actions.
 
 ```java
 @Action("saveDraft")
-void saveDraft(@FormData("document") DocumentForm document) {
+void saveDraft(@FormData("document") DocumentForm document,
+               @Parameter("mode") String mode) {
     documentService.saveDraft(document);
 }
 
 @Action("publish")
-Class<?> publish(@FormData("document") DocumentForm document) {
+Class<?> publish(@FormData("document") DocumentForm document,
+                 @Parameter("mode") String mode) {
     documentService.publish(document);
     return PublishedDocumentsPage.class;
 }
@@ -110,8 +112,14 @@ Class<?> publish(@FormData("document") DocumentForm document) {
     <input type="text" xis:binding="title"/>
     <textarea xis:binding="content"></textarea>
 
-    <button type="submit" xis:action="saveDraft">Save draft</button>
-    <button type="submit" xis:action="publish">Publish</button>
+    <button type="submit" xis:action="saveDraft">
+        <xis:parameter name="mode" value="draft"/>
+        Save draft
+    </button>
+    <button type="submit" xis:action="publish">
+        <xis:parameter name="mode" value="publish"/>
+        Publish
+    </button>
 </form>
 ```
 
@@ -122,10 +130,19 @@ Element syntax:
     <xis:input type="text" binding="title"/>
     <xis:textarea binding="content"/>
 
-    <xis:submit action="saveDraft">Save draft</xis:submit>
-    <xis:submit action="publish">Publish</xis:submit>
+    <xis:submit action="saveDraft">
+        <xis:parameter name="mode" value="draft"/>
+        Save draft
+    </xis:submit>
+    <xis:submit action="publish">
+        <xis:parameter name="mode" value="publish"/>
+        Publish
+    </xis:submit>
 </xis:form>
 ```
+
+Form submit actions support the same child `<xis:parameter>` syntax as action links and action buttons. The submitted
+form object is read with `@FormData`; submitter-specific values are read with `@Parameter`.
 
 ## Nested Objects and Lists
 

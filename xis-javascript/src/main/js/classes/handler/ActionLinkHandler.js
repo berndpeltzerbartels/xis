@@ -55,7 +55,7 @@ class ActionLinkHandler extends TagHandler {
     onClick(e) {
         const formHandler = this.findParentFormHandler();
         if (formHandler) {
-            return formHandler.submit(this.action);
+            return formHandler.submit(this.action, this.actionParameters);
         } else {
             const frontletContainerHandler = this.findParentFrontletContainerHandler();
             const targetContainerHandler = this.targetContainerId ? app.tagHandlers.getHandler(this.frontletContainers.findContainer(this.targetContainerId)) : null;
@@ -91,7 +91,7 @@ class ActionLinkHandler extends TagHandler {
         if (!handler) {
             throw new Error('no form handler for ' + form);
         }
-        return handler.submit(this.action);
+        return handler.submit(this.action, this.actionParameters);
     }
 
 

@@ -32,6 +32,7 @@ class FrameworkFormSyntaxTest {
         submitChangedValues(document);
 
         assertSubmittedValues();
+        assertThat(service.submitMode()).isEqualTo("attribute-submit");
     }
 
     @Test
@@ -42,6 +43,7 @@ class FrameworkFormSyntaxTest {
         submitChangedValues(document);
 
         assertSubmittedValues();
+        assertThat(service.submitMode()).isEqualTo("framework-submit");
     }
 
     private void assertHtmlFormControls(Document document) {

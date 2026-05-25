@@ -173,9 +173,9 @@ class HttpClient extends Client {
 
     }
 
-    async formAction(resolvedURL, frontletId, formData, action, formBindigKey, formBindingParameters, uploads) {
+    async formAction(resolvedURL, frontletId, formData, action, formBindigKey, formBindingParameters, actionParameters, uploads) {
         app.messageHandler.clearMessages();
-        const request = this.createFormRequest(resolvedURL, frontletId, formData, action, formBindigKey, formBindingParameters);
+        const request = this.createFormRequest(resolvedURL, frontletId, formData, action, formBindigKey, formBindingParameters, undefined, actionParameters);
         try {
             const response = await this.httpConnector.post(this.resolveFormUri('/xis/form/action', resolvedURL, frontletId), request, {}, uploads);
             return this.handleResponse(response);

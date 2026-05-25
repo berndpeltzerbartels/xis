@@ -3,6 +3,7 @@ package test.page.forms.syntax;
 import one.xis.Action;
 import one.xis.FormData;
 import one.xis.ModelData;
+import one.xis.Parameter;
 import one.xis.Page;
 
 import java.util.List;
@@ -27,7 +28,8 @@ class FrameworkFormSyntaxPage {
     }
 
     @Action
-    public void save(@FormData("form") FrameworkFormSyntaxModel form) {
-        service.save(form);
+    public void save(@FormData("form") FrameworkFormSyntaxModel form,
+                     @Parameter("submitMode") String submitMode) {
+        service.save(form, submitMode);
     }
 }

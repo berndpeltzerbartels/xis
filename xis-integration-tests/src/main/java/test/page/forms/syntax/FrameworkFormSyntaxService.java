@@ -6,6 +6,7 @@ class FrameworkFormSyntaxService {
 
     private final FrameworkFormSyntaxModel form = new FrameworkFormSyntaxModel();
     private FrameworkFormSyntaxModel saved;
+    private String submitMode;
 
     FrameworkFormSyntaxModel form() {
         form.setName("Original");
@@ -17,11 +18,16 @@ class FrameworkFormSyntaxService {
         return form;
     }
 
-    void save(FrameworkFormSyntaxModel form) {
+    void save(FrameworkFormSyntaxModel form, String submitMode) {
         saved = form;
+        this.submitMode = submitMode;
     }
 
     FrameworkFormSyntaxModel saved() {
         return saved;
+    }
+
+    String submitMode() {
+        return submitMode;
     }
 }

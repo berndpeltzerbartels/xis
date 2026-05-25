@@ -119,7 +119,7 @@ class Client {
      * @param {string} binding
      * @returns {Promise<ServerReponse>}
      */
-    formAction(resolvedURL, frontletId, formData, action, formBindigKey, formBindingParameters, uploads) {
+    formAction(resolvedURL, frontletId, formData, action, formBindigKey, formBindingParameters, actionParameters, uploads) {
         throw new Error('Not implemented');
     }
 
@@ -259,7 +259,7 @@ class Client {
      * @param {String} action
      * @param {any} actionParameters
      */
-    createFormRequest(resolvedURL, frontletId, formData, action, formBindingKey, frontletParameters, load) {
+    createFormRequest(resolvedURL, frontletId, formData, action, formBindingKey, frontletParameters, load, actionParameters) {
         var mappedFormData = {};
         if (formBindingKey) {
             mappedFormData[formBindingKey] = formData;
@@ -273,6 +273,7 @@ class Client {
         request.formBinding = formBindingKey;
         request.action = action;
         request.formData = mappedFormData;
+        request.actionParameters = this.serializeParameterMap(actionParameters);
         request.urlParameters = resolvedURL.urlParameters;
         request.pathVariables = resolvedURL.pathVariablesAsMap();
         request.frontletParameters = this.serializeParameterMap(frontletParameters);

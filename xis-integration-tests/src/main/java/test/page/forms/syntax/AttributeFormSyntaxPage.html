@@ -15,7 +15,10 @@
     <input type="checkbox" xis:binding="choices" value="beta" id="choice-beta"/>
     <input type="radio" xis:binding="status" value="DRAFT" name="status" id="draft"/>
     <input type="radio" xis:binding="status" value="PUBLISHED" name="status" id="published"/>
-    <button xis:action="save" id="save">Save</button>
+    <button xis:action="save" id="save">
+        Save
+        <xis:parameter name="submitMode" value="attribute-submit"/>
+    </button>
 </form>
 </body>
 </html>

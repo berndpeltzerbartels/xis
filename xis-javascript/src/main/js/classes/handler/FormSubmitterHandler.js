@@ -3,6 +3,7 @@ class FormSubmitterHandler extends TagHandler {
     constructor(element) {
         super(element);
         this.actionExpression = this.variableTextContentFromAttribute('xis:action'); // mandatory
+        this.actionParameters = {};
         element.addEventListener('click', event => {
             event.preventDefault();
             return Promise.resolve(this.onClick(event)).catch(error => handleError(error));
@@ -32,8 +33,12 @@ class FormSubmitterHandler extends TagHandler {
         return Promise.resolve();
     }
 
+    addParameter(name, value) {
+        this.actionParameters[name] = value;
+    }
+
     onClick(event) {
-        return this.getParentFormHandler().submit(this.action);
+        return this.getParentFormHandler().submit(this.action, this.actionParameters);
     }
 
 }

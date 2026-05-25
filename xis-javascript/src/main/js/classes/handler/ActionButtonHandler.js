@@ -58,7 +58,7 @@ class ActionButtonHandler extends TagHandler {
     onClick(e) {
         const formHandler = this.findParentFormHandler();
         if (formHandler) {
-            return formHandler.submit(this.action);
+            return formHandler.submit(this.action, this.actionParameters);
         } else {
             const frontletContainerHandler = this.findParentFrontletContainerHandler();
             const targetContainerHandler = this.targetContainerId ? app.tagHandlers.getHandler(this.frontletContainers.findContainer(this.targetContainerId)) : null;
