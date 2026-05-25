@@ -1,3 +1,5 @@
 <section xmlns:xis="https://xis.one/xsd">
-    <xis:frontlet-container container-id="inner" default-frontlet="${innerFrontlet}"/>
+    <span id="reloads">${reloads}</span>
+    <button id="reload" type="button" xis:action="reload">Reload</button>
+    <xis:frontlet-container container-id="inner" default-frontlet="${innerFrontletId}?pipelineId=${selectedPipelineId}&stepId=${selectedStepId}"/>
 </section>

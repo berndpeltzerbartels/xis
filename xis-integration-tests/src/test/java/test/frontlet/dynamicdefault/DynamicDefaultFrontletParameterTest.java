@@ -26,4 +26,15 @@ class DynamicDefaultFrontletParameterTest {
         assertThat(client.getDocument().getInputElementById("pipelineId").getValue()).isEqualTo("42");
         assertThat(client.getDocument().getInputElementById("stepId").getValue()).isEqualTo("7");
     }
+
+    @Test
+    void nestedDefaultFrontletKeepsOwnQueryParametersWhenParentRefreshes() {
+        var client = context.openPage("/dynamic-default-frontlet.html");
+
+        client.getDocument().getElementById("reload").click();
+
+        assertThat(client.getDocument().getElementById("reloads").getInnerText()).isEqualTo("1");
+        assertThat(client.getDocument().getInputElementById("pipelineId").getValue()).isEqualTo("42");
+        assertThat(client.getDocument().getInputElementById("stepId").getValue()).isEqualTo("7");
+    }
 }

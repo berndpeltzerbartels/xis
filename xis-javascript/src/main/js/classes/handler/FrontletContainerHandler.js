@@ -117,6 +117,8 @@ class FrontletContainerHandler extends TagHandler {
      */
     refresh(data) {
         this.data = data;
+        const hasBoundFrontlet = !!this.frontletInstance;
+        const currentFrontletParameters = this.frontletParameters || {};
         this.frontletParameters = {};
         this.refreshContainerId(data);
         if (this.isInitialDefaultFrontletLoad()) {
@@ -125,7 +127,7 @@ class FrontletContainerHandler extends TagHandler {
         if (!this.bindByFrontletAnnotation()) {
             this.bindFrontletInitial(data);
         }
-        this.frontletParameters = mergeObjects(this.frontletParameters, data.getValue(['frontletParameters']));
+        this.frontletParameters = this.parametersForRefresh(hasBoundFrontlet, currentFrontletParameters, data);
         this.frontletState = new FrontletState(app.pageController.resolvedURL, this.frontletParameters);
         data.setValue(['frontletParameters'], this.frontletParameters);
         const descendantPromise = this.refreshDescendantHandlers(data); // xis:parameter tags will call addParameter
@@ -138,6 +140,17 @@ class FrontletContainerHandler extends TagHandler {
 
     isInitialDefaultFrontletLoad() {
         return !!this.defaultFrontletExpression && !this.frontletInstance;
+    }
+
+    parametersForRefresh(hasBoundFrontlet, currentFrontletParameters, data) {
+        if (hasBoundFrontlet) {
+            // Parent data is only the starting scope for binding a default frontlet.
+            // After a frontlet exists, its container owns the parameter scope. Reusing
+            // parent parameters here would overwrite nested default-frontlet query
+            // values whenever the parent refreshes.
+            return currentFrontletParameters;
+        }
+        return mergeObjects(this.frontletParameters, data.getValue(['frontletParameters']));
     }
 
     refreshInitialDefaultFrontlet(data) {
