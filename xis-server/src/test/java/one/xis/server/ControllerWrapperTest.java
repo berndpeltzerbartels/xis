@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
@@ -43,6 +44,17 @@ class ControllerWrapperTest {
         assertThat(invocationOrder.poll()).isEqualTo("generateModel");
     }
 
+    @Test
+    void modelDataValueAndVarNameMustNotDiffer() {
+        var deserializer = mock(MainDeserializer.class);
+        var controllerResultMapper = mock(ControllerResultMapper.class);
+        var wrapperFactory = new ControllerWrapperFactory(deserializer, new ControllerMethodResultMapper(mock(), new PathResolver()), controllerResultMapper, mock(UploadConfiguration.class));
+        var wrapper = wrapperFactory.createControllerWrapper("test", new InvalidModelDataNameController(), ControllerWrapper.class);
+
+        assertThatThrownBy(() -> wrapper.invokeGetModelMethods(new ClientRequest(), new ControllerResult()))
+                .hasMessageContaining("@ModelData value and varName differ");
+    }
+
     static class ExampleController {
 
         private final Queue<String> invocationOrder = new LinkedList<>();
@@ -68,6 +80,14 @@ class ControllerWrapperTest {
 
         public Queue<String> getInvocationOrder() {
             return invocationOrder;
+        }
+    }
+
+    static class InvalidModelDataNameController {
+
+        @ModelData(value = "one", varName = "two")
+        public String invalid() {
+            return "invalid";
         }
     }
 }

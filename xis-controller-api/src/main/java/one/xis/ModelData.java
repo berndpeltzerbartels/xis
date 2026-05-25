@@ -28,9 +28,23 @@ import java.lang.annotation.Target;
  * }</pre>
  * If the value of the annotation is empty, the model will be accessible under the method name.
  * If the method is a getter (e.g. {@code getUser()}), the model will be accessible under the property name.
+ *
+ * <p>{@link #load()} can narrow when the method is called. The default is
+ * {@link ModelDataLoad#ALWAYS}.</p>
  */
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ModelData {
     String value() default ""; // The name under which the model object will be accessible in the template
+
+    /**
+     * Alias for {@link #value()} with a more explicit name for examples where the
+     * model key represents a template variable.
+     */
+    String varName() default "";
+
+    /**
+     * Defines in which controller lifecycle phase this model value is loaded.
+     */
+    ModelDataLoad load() default ModelDataLoad.ALWAYS;
 }

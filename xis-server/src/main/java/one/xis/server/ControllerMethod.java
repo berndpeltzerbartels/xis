@@ -14,7 +14,6 @@ import one.xis.http.HttpRequest;
 import one.xis.http.HttpResponse;
 import one.xis.http.RequestContext;
 import one.xis.security.SecurityUtil;
-import one.xis.utils.lang.MethodUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -151,11 +150,15 @@ class ControllerMethod {
         if (!method.isAnnotationPresent(ModelData.class)) {
             return Optional.empty();
         }
-        var modelData = method.getAnnotation(ModelData.class);
-        if (!modelData.value().isEmpty()) {
-            return Optional.of(modelData.value());
+        return Optional.of(ModelDataName.forMethod(method));
+    }
+
+    boolean shouldLoadModelData(ModelDataLoad load) {
+        if (!method.isAnnotationPresent(ModelData.class)) {
+            return true;
         }
-        return Optional.of(MethodUtils.propertyNameByGetter(method).orElse(method.getName()));
+        var configuredLoad = method.getAnnotation(ModelData.class).load();
+        return configuredLoad == ModelDataLoad.ALWAYS || configuredLoad == load;
     }
 
     Collection<String> getParameterRequestScopeKeys() {

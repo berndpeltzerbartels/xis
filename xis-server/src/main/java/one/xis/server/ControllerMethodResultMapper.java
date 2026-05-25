@@ -396,11 +396,7 @@ class ControllerMethodResultMapper {
     }
 
     private String getModelDataKey(Method method) {
-        var modelData = method.getAnnotation(ModelData.class);
-        if (!modelData.value().isEmpty()) {
-            return modelData.value();
-        }
-        return MethodUtils.propertyNameByGetter(method).orElse(method.getName());
+        return ModelDataName.forMethod(method);
     }
 
     private String getFormDataKey(Method method) {

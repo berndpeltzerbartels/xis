@@ -23,6 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import javax.tools.Diagnostic;
 import java.util.*;
 
 @SupportedOptions({"xis.outputDir"})
@@ -260,9 +261,22 @@ public class XISTemplateProcessor extends AbstractProcessor {
     }
 
     private void collectModelData(ExecutableElement method, List<TemplateModelData> modelData) {
-        findAnnotationStringValue(method, ANN_MODEL_DATA, "value")
+        findModelDataName(method)
                 .map(value -> dataName(method, value))
                 .ifPresent(name -> modelData.add(new TemplateModelData(name, isIterable(method.getReturnType()))));
+    }
+
+    private Optional<String> findModelDataName(ExecutableElement method) {
+        if (!hasAnnotation(method, ANN_MODEL_DATA)) {
+            return Optional.empty();
+        }
+        var value = findAnnotationStringValue(method, ANN_MODEL_DATA, "value").orElse("");
+        var varName = findAnnotationStringValue(method, ANN_MODEL_DATA, "varName").orElse("");
+        if (!value.isEmpty() && !varName.isEmpty() && !value.equals(varName)) {
+            processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
+                    "@ModelData value and varName must be equal when both are set.", method);
+        }
+        return Optional.of(value.isEmpty() ? varName : value);
     }
 
     private void collectFormData(TypeElement controllerType,
@@ -522,6 +536,17 @@ public class XISTemplateProcessor extends AbstractProcessor {
             }
         }
         return Optional.empty();
+    }
+
+    private boolean hasAnnotation(Element type, String annotationFqcn) {
+        for (var mirror : type.getAnnotationMirrors()) {
+            var annType = mirror.getAnnotationType();
+            var annElement = (TypeElement) annType.asElement();
+            if (annElement.getQualifiedName().contentEquals(annotationFqcn)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

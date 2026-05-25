@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import one.xis.UserContextImpl;
 import one.xis.Frontlet;
 import one.xis.Modal;
+import one.xis.ModelDataLoad;
 import one.xis.auth.AuthenticationException;
 import one.xis.security.SecurityUtil;
 import one.xis.validation.ValidatorMessages;
@@ -35,15 +36,20 @@ public class ControllerWrapper {
     private ControllerResultMapper controllerResultMapper;
 
     void invokeGetModelMethods(ClientRequest request, ControllerResult controllerResult) {
-        invokeGetModelMethods(request, controllerResult, Set.of());
+        invokeGetModelMethods(request, controllerResult, Set.of(), ModelDataLoad.INITIAL);
     }
 
     void invokeGetModelMethods(ClientRequest request, ControllerResult controllerResult, Set<String> modelDataKeysToKeep) {
+        invokeGetModelMethods(request, controllerResult, modelDataKeysToKeep, ModelDataLoad.INITIAL);
+    }
+
+    void invokeGetModelMethods(ClientRequest request, ControllerResult controllerResult, Set<String> modelDataKeysToKeep, ModelDataLoad load) {
         SecurityUtil.checkRoles(controller.getClass(), UserContextImpl.getInstance());
         var methodsToExecute = new ArrayList<>(modelMethods);
         methodsToExecute.addAll(titleOnlyMethods);
         var methods = MethodSorter.sortMethods(methodsToExecute, sharedValueMethods);
         methods.stream()
+                .filter(m -> m.shouldLoadModelData(load))
                 .filter(m -> !m.getModelDataKey().map(modelDataKeysToKeep::contains).orElse(false))
                 .forEach(m -> invokeModelDataMethod(request, controllerResult, m));
     }

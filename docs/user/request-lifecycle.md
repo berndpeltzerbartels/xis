@@ -91,6 +91,82 @@ String calculateDiscount(@Parameter("productId") long productId) {
 }
 ```
 
+If an action method and a regular model method both write the same model key, the action result is kept for the current
+response. This lets an action replace an initial default value without being overwritten by the default model method.
+
+```java
+@ModelData(varName = "selectedStepId", load = ModelDataLoad.INITIAL)
+Long selectedStepId() {
+    return pipelineService.firstStepId().orElse(null);
+}
+
+@Action
+@ModelData("selectedStepId")
+Long selectStep(@Parameter("stepId") long stepId) {
+    return stepId;
+}
+```
+
+Use `ModelDataLoad.INITIAL` for values that should only be calculated when a page or frontlet is opened. Use
+`ModelDataLoad.AFTER_ACTION` for values that should only be calculated while rendering the same page or frontlet after
+an action. `ModelDataLoad.ALWAYS` is the default.
+
+### Initial Model Data For Default Selection
+
+A common frontlet pattern is a list with a detail area: when the frontlet is opened, the first item should be selected.
+After the user clicks another item, that explicit choice must win and must not be replaced by the initial default again.
+
+```html
+<button xis:repeat="step:pipelineSteps"
+        xis:action="selectStep"
+        type="button">
+    <xis:parameter name="stepId" value="${step.id}"/>
+    ${step.name}
+</button>
+
+<section>${selectedStep.name}</section>
+```
+
+```java
+@Frontlet
+class PipelineFrontlet {
+    private final PipelineService pipelineService;
+
+    PipelineFrontlet(PipelineService pipelineService) {
+        this.pipelineService = pipelineService;
+    }
+
+    @SharedValue("pipelineSteps")
+    List<PipelineStep> pipelineSteps(@Parameter("pipelineId") long pipelineId) {
+        return pipelineService.stepsForPipeline(pipelineId);
+    }
+
+    @ModelData(varName = "pipelineSteps")
+    List<PipelineStep> pipelineStepsModel(@SharedValue("pipelineSteps") List<PipelineStep> pipelineSteps) {
+        return pipelineSteps;
+    }
+
+    @ModelData(varName = "selectedStep", load = ModelDataLoad.INITIAL)
+    PipelineStep initiallySelectedStep(@SharedValue("pipelineSteps") List<PipelineStep> pipelineSteps) {
+        return pipelineSteps.isEmpty() ? null : pipelineSteps.get(0);
+    }
+
+    @Action
+    @ModelData(varName = "selectedStep")
+    PipelineStep selectStep(@Parameter("stepId") long stepId,
+                            @SharedValue("pipelineSteps") List<PipelineStep> pipelineSteps) {
+        return pipelineSteps.stream()
+                .filter(step -> step.id() == stepId)
+                .findFirst()
+                .orElseThrow();
+    }
+}
+```
+
+The shared value keeps the list loading in one place for the current request. `INITIAL` chooses the default only when the
+frontlet is opened. The action return value uses the same model key and therefore replaces the default selection in the
+current response.
+
 ## Forms
 
 A form action adds binding and validation before the action method runs.

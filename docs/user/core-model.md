@@ -85,6 +85,11 @@ Customer selectedCustomer() {
     return customerService.currentCustomer();
 }
 
+@ModelData(varName = "customer")
+Customer selectedCustomer() {
+    return customerService.currentCustomer();
+}
+
 @ModelData
 Customer customer() {
     return customerService.currentCustomer();
@@ -96,7 +101,10 @@ Customer getCustomer() {
 }
 ```
 
-All three variants expose `${customer}`. With no explicit annotation value, XIS uses the method name as the key. If the
+All four variants expose `${customer}`. `varName` is an explicit alias for `value` when you prefer a more readable
+attribute name in examples or application code. Do not set both to different values.
+
+With no explicit annotation value, XIS uses the method name as the key. If the
 method name starts with `get` followed by an uppercase character, XIS uses the property name instead, so `getCustomer()`
 becomes `customer`. This also applies when the controller method has XIS parameters such as `@SharedValue`,
 `@PathVariable`, or `@QueryParameter`.
@@ -104,6 +112,24 @@ becomes `customer`. This also applies when the controller method has XIS paramet
 `@ModelData` and `@FormData` methods may return `Optional<T>` or `Stream<T>`. XIS unwraps `Optional` values and
 materializes streams immediately as lists during controller processing; a stream is not transported lazily to the
 browser.
+
+`@ModelData` is loaded both when a page or frontlet is opened and after actions by default. Use `load` when a value is
+only meaningful in one phase:
+
+```java
+@ModelData(value = "selectedStepId", load = ModelDataLoad.INITIAL)
+Long selectedStepId() {
+    return pipelineService.firstStepId().orElse(null);
+}
+
+@ModelData(value = "summary", load = ModelDataLoad.AFTER_ACTION)
+Summary summary() {
+    return pipelineService.currentSummary();
+}
+```
+
+`INITIAL` is useful for default selections such as the first tab, first row, or first pipeline step. `AFTER_ACTION` is
+useful for values that should only be calculated after a user action. `ALWAYS` is the default.
 
 ## Actions
 

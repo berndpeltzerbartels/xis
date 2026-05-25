@@ -2,6 +2,7 @@ package one.xis.server;
 
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import one.xis.ModelDataLoad;
 import one.xis.Page;
 import one.xis.context.Component;
 import one.xis.context.Inject;
@@ -108,7 +109,7 @@ class ControllerService {
             return;
         }
         if (nextControllerWrapper.equals(invokerControllerWrapper)) {
-            invokerControllerWrapper.invokeGetModelMethods(request, controllerResult, actionModelDataKeys);
+            invokerControllerWrapper.invokeGetModelMethods(request, controllerResult, actionModelDataKeys, ModelDataLoad.AFTER_ACTION);
             mapResultToResponse(request, response, controllerResult);
         } else {
             processNextController(request, controllerResult, response, nextControllerWrapper);

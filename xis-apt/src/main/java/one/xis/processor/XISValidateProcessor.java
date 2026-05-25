@@ -132,12 +132,25 @@ public class XISValidateProcessor extends AbstractProcessor {
     private void collectDataMethodNames(ExecutableElement method,
                                         Map<String, TemplateDataModel> modelData,
                                         Map<String, TemplateDataModel> formData) {
-        Optional<String> modelDataName = annotationStringValue(method, MODEL_DATA_ANNOTATION, "value");
+        Optional<String> modelDataName = modelDataName(method);
         Optional<String> formDataName = annotationStringValue(method, FORM_DATA_ANNOTATION, "value");
         modelDataName.map(value -> dataName(method, value))
                 .ifPresent(name -> modelData.put(name, dataModel(name, method.getReturnType())));
         formDataName.map(value -> dataName(method, value))
                 .ifPresent(name -> formData.put(name, dataModel(name, method.getReturnType())));
+    }
+
+    private Optional<String> modelDataName(ExecutableElement method) {
+        if (!hasAnnotation(method, MODEL_DATA_ANNOTATION)) {
+            return Optional.empty();
+        }
+        var value = annotationStringValue(method, MODEL_DATA_ANNOTATION, "value").orElse("");
+        var varName = annotationStringValue(method, MODEL_DATA_ANNOTATION, "varName").orElse("");
+        if (!value.isEmpty() && !varName.isEmpty() && !value.equals(varName)) {
+            processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
+                    "@ModelData value and varName must be equal when both are set.", method);
+        }
+        return Optional.of(value.isEmpty() ? varName : value);
     }
 
     private TemplateDataModel dataModel(String name, TypeMirror type) {
@@ -333,5 +346,15 @@ public class XISValidateProcessor extends AbstractProcessor {
             }
         }
         return Optional.empty();
+    }
+
+    private boolean hasAnnotation(Element element, String annotationName) {
+        for (var mirror : element.getAnnotationMirrors()) {
+            var annotationElement = (TypeElement) mirror.getAnnotationType().asElement();
+            if (annotationElement.getQualifiedName().contentEquals(annotationName)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -105,6 +105,9 @@ class QuotePage {
 The method is still an action: it is only called by an action link, action button, or form submit. `@ModelData` only says
 where the return value should be placed in the response model.
 
+For normal model methods, `@ModelData(varName = "customer")` is equivalent to `@ModelData("customer")`. The explicit
+`varName` form can make examples easier to read when the value names a template variable.
+
 ## Parameter, Field, And Record Component Annotations
 
 These annotations can appear on action/model/form parameters, DTO fields, or record components depending on their
