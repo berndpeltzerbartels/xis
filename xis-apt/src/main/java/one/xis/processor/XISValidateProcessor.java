@@ -136,6 +136,7 @@ public class XISValidateProcessor extends AbstractProcessor {
             }
         }
         validateSharedValueParameters(methods, sharedValues);
+        validateSharedValueMethods(methods);
         validateActionFormDataLoad(methods);
         validateActionParameters(methods);
         Path templateFile = templateFile(projectDir, controllerType);
@@ -152,6 +153,17 @@ public class XISValidateProcessor extends AbstractProcessor {
                                 "@SharedValue parameter \"" + value + "\" has no matching @SharedValue method in this controller.",
                                 parameter));
             }
+        }
+    }
+
+    private void validateSharedValueMethods(List<ExecutableElement> methods) {
+        for (ExecutableElement method : methods) {
+            if (!hasAnnotation(method, ACTION_ANNOTATION) || !hasAnnotation(method, SHARED_VALUE_ANNOTATION)) {
+                continue;
+            }
+            processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
+                    "@SharedValue methods must not be annotated with @Action. Shared values are called when another method needs them.",
+                    method);
         }
     }
 

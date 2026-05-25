@@ -52,6 +52,8 @@ and [Security](security.md) for complete examples.
 
 Use `@SharedValue` when one controller processing flow needs the same object in several methods. A typical case is
 loading an aggregate once and then using it for display and for an action without duplicating the lookup code.
+The provider method must not be annotated with `@Action`: XIS calls shared-value providers when another method needs
+their value, not because a user triggered them directly.
 
 ```java
 @Page("/products/{id}.html")

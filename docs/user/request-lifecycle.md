@@ -251,6 +251,8 @@ void rename(@SharedValue("product") Product product,
 
 This avoids repeating database or service lookups and lets an action work with the same contextual object that was
 loaded for rendering.
+Shared-value provider methods must not be annotated with `@Action`. They are dependency providers and run whenever a
+method in the same processing flow needs their value.
 
 ## Client State
 

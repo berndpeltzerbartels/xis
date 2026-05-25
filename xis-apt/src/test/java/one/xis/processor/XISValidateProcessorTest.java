@@ -422,6 +422,43 @@ class XISValidateProcessorTest {
     }
 
     @Test
+    void rejectsActionSharedValueProviderMethod() throws IOException {
+        writeTemplateUsingName();
+
+        DiagnosticCollector<JavaFileObject> diagnostics = compilePageSourceWithProcessor(false, """
+                package example;
+
+                import one.xis.Action;
+                import one.xis.ModelData;
+                import one.xis.Page;
+                import one.xis.SharedValue;
+
+                @Page("/probe.html")
+                class ProbePage {
+                    @Action
+                    @SharedValue("customer")
+                    Customer customer() {
+                        return new Customer();
+                    }
+
+                    @ModelData("name")
+                    String name(@SharedValue("customer") Customer customer) {
+                        return customer.name;
+                    }
+
+                    static class Customer {
+                        String name;
+                    }
+                }
+                """);
+
+        List<String> errors = errorMessages(diagnostics);
+        assertThat(errors).hasSize(1);
+        assertThat(errors.get(0))
+                .contains("@SharedValue methods must not be annotated with @Action");
+    }
+
+    @Test
     void validatesThemeFormFieldBindingsAgainstFormObject() throws IOException {
         Path templateFile = tempDir.resolve("src/main/java/example/ProbePage.html");
         Files.createDirectories(templateFile.getParent());
