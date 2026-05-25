@@ -113,6 +113,7 @@ class PageController {
         return PageController.enqueue(() => {
             updateStores(response);
             var data = response.data;
+            data.load = noContent ? 'INITIAL' : 'AFTER_ACTION';
             const pathname = this.resolvedURL.url.split('?')[0];
             data.setValue(['pathVariables'], this.resolvedURL.pathVariablesAsMap());
             data.setValue(['urlParameters'], this.resolvedURL.urlParameters);

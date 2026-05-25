@@ -161,6 +161,14 @@ class ControllerMethod {
         return configuredLoad == ModelDataLoad.ALWAYS || configuredLoad == load;
     }
 
+    boolean shouldLoadFormData(ModelDataLoad load) {
+        if (!method.isAnnotationPresent(FormData.class)) {
+            return true;
+        }
+        var configuredLoad = method.getAnnotation(FormData.class).load();
+        return configuredLoad == ModelDataLoad.ALWAYS || configuredLoad == load;
+    }
+
     Collection<String> getParameterRequestScopeKeys() {
         return Stream.of(method.getParameters())
                 .filter(p -> p.isAnnotationPresent(SharedValue.class))

@@ -57,7 +57,9 @@ public class ControllerWrapper {
     void invokeFormDataMethods(ClientRequest request, ControllerResult controllerResult) {
         SecurityUtil.checkRoles(controller.getClass(), UserContextImpl.getInstance());
         var methods = MethodSorter.sortMethods(formDataMethods, sharedValueMethods);
-        methods.forEach(m -> invokeModelDataMethod(request, controllerResult, m));
+        methods.stream()
+                .filter(m -> m.shouldLoadFormData(request.getLoad()))
+                .forEach(m -> invokeModelDataMethod(request, controllerResult, m));
     }
 
     void invokeActionMethod(ClientRequest request, ControllerResult controllerResult) {

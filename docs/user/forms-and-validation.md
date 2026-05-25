@@ -60,6 +60,21 @@ class NewUserPage {
 
 The form binding name and `@FormData` name must match.
 
+`@FormData` methods can use the same lifecycle `load` attribute as `@ModelData`. This only affects methods that
+initialize a form, not action parameters that receive submitted form data.
+
+```java
+@FormData(value = "user", load = ModelDataLoad.INITIAL)
+UserForm emptyUser() {
+    return new UserForm("", "");
+}
+
+@FormData(value = "user", load = ModelDataLoad.AFTER_ACTION)
+UserForm userAfterSave() {
+    return new UserForm("Saved", "");
+}
+```
+
 ## Multiple Submit Actions
 
 One form can have multiple actions.

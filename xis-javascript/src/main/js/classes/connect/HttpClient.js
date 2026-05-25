@@ -139,8 +139,8 @@ class HttpClient extends Client {
         }
     }
 
-    async loadFormData(resolvedURL, frontletId, formBindingKey, frontletParameters) {
-        const request = this.createFormRequest(resolvedURL, frontletId, {}, null, formBindingKey, frontletParameters);
+    async loadFormData(resolvedURL, frontletId, formBindingKey, frontletParameters, load) {
+        const request = this.createFormRequest(resolvedURL, frontletId, {}, null, formBindingKey, frontletParameters, load);
         try {
             const response = await this.httpConnector.post(this.resolveFormUri('/xis/form/model', resolvedURL, frontletId), request, {});
             return this.handleResponse(response);

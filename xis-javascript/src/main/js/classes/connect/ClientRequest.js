@@ -34,6 +34,7 @@ class ClientRequest {
         this.localDatabaseData = {}; // TODO
         this.frontletParameters = {};
         this.frontletContainerId = '';
+        this.load = 'INITIAL';
     }
 
     toJSON() {

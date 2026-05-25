@@ -33,4 +33,13 @@ import java.lang.annotation.*;
 public @interface FormData {
 
     String value();
+
+    /**
+     * Defines in which controller lifecycle phase this form value is loaded.
+     *
+     * <p>This attribute is only evaluated when {@code @FormData} is used on a
+     * method to initialize a form. Action parameters annotated with
+     * {@code @FormData} always receive submitted form values.</p>
+     */
+    ModelDataLoad load() default ModelDataLoad.ALWAYS;
 }

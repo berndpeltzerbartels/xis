@@ -118,7 +118,7 @@ purpose.
 | `@PathVariable("name")` | Reads a value from a `@Page` path such as `/orders/{id}.html`. |
 | `@QueryParameter("name")` | Reads a query parameter from the current page URL, such as `/orders.html?status=open`. |
 | `@Parameter("name")` | Reads an action, frontlet, or modal parameter supplied by `<xis:parameter>`, `FrontletResponse`, `ModalResponse`, or a frontlet/modal target URL such as `ProductSummary?productId=42`. |
-| `@FormData("name")` | Injects submitted form data into an action method. |
+| `@FormData("name")` | Initializes form data on methods or injects submitted form data into action parameters. Method usage supports `load`. |
 | `@Upload` | Binds an uploaded multipart file to a form field or controller parameter. |
 | `@SharedValue("name")` | Injects a value produced by another `@SharedValue` method in the same controller processing flow. |
 | `@LocalStorage`, `@SessionStorage`, `@ClientStorage` | Injects browser-side state into an action method parameter. |

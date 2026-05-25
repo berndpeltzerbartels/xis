@@ -121,9 +121,13 @@ class FormHandler extends TagHandler {
         data.validationPath = '/' + formBindingKey;
         this.clearMessageHandlers();
         const descendantPromise = this.refreshDescendantHandlers(data);
-        const formDataPromise = this.client.loadFormData(app.pageController.resolvedURL, this.frontletId(), formBindingKey, frontletParameters, this)
+        const formDataPromise = this.client.loadFormData(app.pageController.resolvedURL, this.frontletId(), formBindingKey, frontletParameters, this.formDataLoad(data))
             .then(response => this.refreshFormData(this.subData(response, formBindingKey)));
         return Promise.all([descendantPromise, formDataPromise]);
+    }
+
+    formDataLoad(data) {
+        return data.load || 'INITIAL';
     }
 
     /**

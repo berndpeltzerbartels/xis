@@ -1,7 +1,7 @@
 package one.xis;
 
 /**
- * Controls when a {@link ModelData} method is called.
+ * Controls when a {@link ModelData} or {@link FormData} method is called.
  */
 public enum ModelDataLoad {
     /**

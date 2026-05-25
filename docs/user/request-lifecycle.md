@@ -109,7 +109,8 @@ Long selectStep(@Parameter("stepId") long stepId) {
 
 Use `ModelDataLoad.INITIAL` for values that should only be calculated when a page or frontlet is opened. Use
 `ModelDataLoad.AFTER_ACTION` for values that should only be calculated while rendering the same page or frontlet after
-an action. `ModelDataLoad.ALWAYS` is the default.
+an action. `ModelDataLoad.ALWAYS` is the default. The same `load` attribute is available on `@FormData` methods that
+initialize forms.
 
 ### Initial Model Data For Default Selection
 
@@ -189,6 +190,22 @@ PageResponse save(@FormData("product") ProductForm product) {
 
 XIS deserializes submitted values into the `@FormData` object and validates its annotations. If validation fails, the
 action method is not called. The page or frontlet is rendered again with the submitted values and validation messages.
+
+Like `@ModelData`, form initialization can be limited to a lifecycle phase. This is useful when an initial form should
+be built from the current selection, but after a successful action the form should show a fresh post-action state instead
+of being overwritten by the initial default again.
+
+```java
+@FormData(value = "step", load = ModelDataLoad.INITIAL)
+PipelineStepForm initiallySelectedStep(@SharedValue("selectedStep") PipelineStep selectedStep) {
+    return PipelineStepForm.from(selectedStep);
+}
+
+@FormData(value = "step", load = ModelDataLoad.AFTER_ACTION)
+PipelineStepForm emptyStepForm(@SharedValue("pipeline") Pipeline pipeline) {
+    return PipelineStepForm.newStep(pipeline.id());
+}
+```
 
 See [Forms and validation](forms-and-validation.md) for message rendering, custom validators, records, and formatters.
 

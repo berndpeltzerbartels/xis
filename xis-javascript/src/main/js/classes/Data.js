@@ -12,6 +12,7 @@ class Data {
         this.values = values;
         this.parentData = parentData;
         this.validationPath = '';
+        this.load = 'INITIAL';
     }
     /**
      * @public
@@ -143,4 +144,3 @@ class Data {
     return parts;
 }
 }
-

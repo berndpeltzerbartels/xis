@@ -2,6 +2,7 @@ package one.xis.server;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
+import one.xis.ModelDataLoad;
 import one.xis.gson.JsonMap;
 
 import java.util.Locale;
@@ -21,6 +22,7 @@ public class ClientRequest {
     private RequestType type;
     private String accessToken;
     private String renewToken;
+    private ModelDataLoad load = ModelDataLoad.INITIAL;
 
     private JsonMap formData = new JsonMap();
     private JsonMap pathVariables = new JsonMap();

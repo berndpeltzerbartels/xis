@@ -83,7 +83,7 @@ class Client {
      * @param {String} formBindingKey
      * @param {any} formBindingParameters
      */
-    loadFormData(resolvedURL, frontletId, formBindingKey, formBindingParameters) {
+    loadFormData(resolvedURL, frontletId, formBindingKey, formBindingParameters, load) {
         throw new Error('Not implemented');
     }
 
@@ -259,7 +259,7 @@ class Client {
      * @param {String} action
      * @param {any} actionParameters
      */
-    createFormRequest(resolvedURL, frontletId, formData, action, formBindingKey, frontletParameters) {
+    createFormRequest(resolvedURL, frontletId, formData, action, formBindingKey, frontletParameters, load) {
         var mappedFormData = {};
         if (formBindingKey) {
             mappedFormData[formBindingKey] = formData;
@@ -276,6 +276,7 @@ class Client {
         request.urlParameters = resolvedURL.urlParameters;
         request.pathVariables = resolvedURL.pathVariablesAsMap();
         request.frontletParameters = this.serializeParameterMap(frontletParameters);
+        request.load = load || 'INITIAL';
         request.zoneId = this.zoneId;
         request.type = request.frontletId ? 'frontlet' : 'page';
         if (frontletId) { // TODO write a test

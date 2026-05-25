@@ -76,11 +76,12 @@ class FrontletContainerHandler extends TagHandler {
             console.warn('Target container not found:', response.frontletContainerId);
         }
         var data = response.data;
+        const nextFrontletId = response.nextFrontletId ? app.client.config.getFrontletId(response.nextFrontletId) : undefined;
+        const frontletChanges = !!nextFrontletId && nextFrontletId !== this.currentFrontletId();
+        data.load = frontletChanges ? 'INITIAL' : 'AFTER_ACTION';
         updateStores(response);
         this.refreshContainerId(data);
 
-        const nextFrontletId = response.nextFrontletId ? app.client.config.getFrontletId(response.nextFrontletId) : undefined;
-        const frontletChanges = !!nextFrontletId && nextFrontletId !== this.currentFrontletId();
         this.frontletParameters = frontletChanges
             ? this.parametersForNewFrontlet(response)
             : mergeObjects(this.frontletParameters, response.frontletParameters);

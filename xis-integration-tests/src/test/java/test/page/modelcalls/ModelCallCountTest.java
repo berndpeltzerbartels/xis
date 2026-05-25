@@ -76,6 +76,44 @@ class ModelCallCountTest {
     }
 
     @Test
+    void formDataLoadControlsInitialAndAfterActionCalls() {
+        var context = IntegrationTestContext.builder()
+                .withPackage("test.page.modelcalls")
+                .build();
+        var client = context.openPage(FormDataLifecyclePage.class);
+        var page = context.getSingleton(FormDataLifecyclePage.class);
+
+        assertThat(client.getDocument().getInputElementById("value").getValue()).isEqualTo("initial-1");
+        assertThat(page.getInitialCalls()).isEqualTo(1);
+        assertThat(page.getAfterActionCalls()).isZero();
+
+        client.getDocument().getElementById("save").click();
+
+        assertThat(client.getDocument().getInputElementById("value").getValue()).isEqualTo("after-action-1");
+        assertThat(page.getInitialCalls()).isEqualTo(1);
+        assertThat(page.getAfterActionCalls()).isEqualTo(1);
+    }
+
+    @Test
+    void frontletFormDataLoadControlsInitialAndAfterActionCalls() {
+        var context = IntegrationTestContext.builder()
+                .withPackage("test.page.modelcalls")
+                .build();
+        var client = context.openPage(FormDataLifecycleFrontletPage.class);
+        var frontlet = context.getSingleton(FormDataLifecycleFrontlet.class);
+
+        assertThat(client.getDocument().getInputElementById("frontlet-value").getValue()).isEqualTo("frontlet-initial-1");
+        assertThat(frontlet.getInitialCalls()).isEqualTo(1);
+        assertThat(frontlet.getAfterActionCalls()).isZero();
+
+        client.getDocument().getElementById("frontlet-save").click();
+
+        assertThat(client.getDocument().getInputElementById("frontlet-value").getValue()).isEqualTo("frontlet-after-action-1");
+        assertThat(frontlet.getInitialCalls()).isEqualTo(1);
+        assertThat(frontlet.getAfterActionCalls()).isEqualTo(1);
+    }
+
+    @Test
     void embeddedDefaultFrontletCallsInitialSharedModelData() {
         var context = IntegrationTestContext.builder()
                 .withPackage("test.page.modelcalls")

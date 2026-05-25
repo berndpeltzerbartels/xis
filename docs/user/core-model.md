@@ -113,8 +113,8 @@ becomes `customer`. This also applies when the controller method has XIS paramet
 materializes streams immediately as lists during controller processing; a stream is not transported lazily to the
 browser.
 
-`@ModelData` is loaded both when a page or frontlet is opened and after actions by default. Use `load` when a value is
-only meaningful in one phase:
+`@ModelData` and form-initializing `@FormData` methods are loaded both when a page or frontlet is opened and after
+actions by default. Use `load` when a value is only meaningful in one phase:
 
 ```java
 @ModelData(value = "selectedStepId", load = ModelDataLoad.INITIAL)
@@ -129,7 +129,8 @@ Summary summary() {
 ```
 
 `INITIAL` is useful for default selections such as the first tab, first row, or first pipeline step. `AFTER_ACTION` is
-useful for values that should only be calculated after a user action. `ALWAYS` is the default.
+useful for values that should only be calculated after a user action. `ALWAYS` is the default. On `@FormData`, `load`
+only affects methods that initialize forms; action parameters still receive submitted form values normally.
 
 ## Actions
 
