@@ -74,4 +74,47 @@ class ModelCallCountTest {
         assertThat(page.getInitialCalls()).isEqualTo(1);
         assertThat(page.getAfterActionCalls()).isEqualTo(1);
     }
+
+    @Test
+    void embeddedDefaultFrontletCallsInitialSharedModelData() {
+        var context = IntegrationTestContext.builder()
+                .withPackage("test.page.modelcalls")
+                .build();
+        var client = context.openPage(EmbeddedInitialSharedValuePage.class);
+        var frontlet = context.getSingleton(EmbeddedInitialSharedValueFrontlet.class);
+
+        assertThat(client.getDocument().getElementById("selected").getInnerText()).isEqualTo("root-selected");
+        assertThat(client.getDocument().getElementById("title").getInnerText()).isEqualTo("title-root-selected");
+        assertThat(frontlet.getRootCalls()).isEqualTo(1);
+        assertThat(frontlet.getInitialSelectionCalls()).isEqualTo(1);
+        assertThat(frontlet.getTitleCalls()).isEqualTo(1);
+    }
+
+    @Test
+    void nestedEmbeddedDefaultFrontletCallsInitialSharedModelData() {
+        var context = IntegrationTestContext.builder()
+                .withPackage("test.page.modelcalls")
+                .build();
+        var client = context.openPage(EmbeddedInitialSharedValuePage.class);
+        var frontlet = context.getSingleton(EmbeddedInitialSharedValueNestedFrontlet.class);
+
+        assertThat(client.getDocument().getElementById("nested-selected").getInnerText()).isEqualTo("nested-root-selected");
+        assertThat(client.getDocument().getElementById("nested-title").getInnerText()).isEqualTo("title-nested-root-selected");
+        assertThat(frontlet.getRootCalls()).isEqualTo(1);
+        assertThat(frontlet.getInitialSelectionCalls()).isEqualTo(1);
+        assertThat(frontlet.getTitleCalls()).isEqualTo(1);
+    }
+
+    @Test
+    void embeddedDefaultFrontletCallsInitialSharedModelDataWhenItReturnsNull() {
+        var context = IntegrationTestContext.builder()
+                .withPackage("test.page.modelcalls")
+                .build();
+        var client = context.openPage(EmbeddedInitialSharedValuePage.class);
+        var frontlet = context.getSingleton(EmbeddedInitialNullSharedValueFrontlet.class);
+
+        assertThat(client.getDocument().getElementById("null-title").getInnerText()).isEqualTo("new");
+        assertThat(frontlet.getInitialSelectionCalls()).isEqualTo(1);
+        assertThat(frontlet.getTitleCalls()).isEqualTo(1);
+    }
 }
