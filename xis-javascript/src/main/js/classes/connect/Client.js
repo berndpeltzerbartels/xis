@@ -450,6 +450,7 @@ class Client {
         var serverResponse = new ServerResponse();
         serverResponse.data = data;
         serverResponse.formData = formData;
+        serverResponse.returnedFormDataKeys = Array.isArray(obj.returnedFormDataKeys) ? obj.returnedFormDataKeys : [];
         serverResponse.nextURL = obj.nextURL;
         serverResponse.nextFrontletId = obj.nextFrontletId ? obj.nextFrontletId : obj.nextFrontletId;
         serverResponse.nextModalId = obj.nextModalId;

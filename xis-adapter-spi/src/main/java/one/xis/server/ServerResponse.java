@@ -23,6 +23,7 @@ public class ServerResponse {
     private Map<String, Object> data = new HashMap<>();
     private Map<String, String> idVariables = new HashMap<>();
     private Map<String, Object> formData = new HashMap<>();
+    private Collection<String> returnedFormDataKeys = new HashSet<>();
     private Map<String, Object> localStorageData = new HashMap<>();
     private Map<String, Object> localDatabaseData = new HashMap<>();
     private Map<String, Object> sessionStorageData = new HashMap<>();
@@ -51,6 +52,7 @@ public class ServerResponse {
         status = 0;
         data.clear();
         formData.clear();
+        returnedFormDataKeys.clear();
         reloadFrontlets.clear();
         frontletParameters.clear();
         nextURL = null;

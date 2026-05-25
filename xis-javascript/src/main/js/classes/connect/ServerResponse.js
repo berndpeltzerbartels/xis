@@ -7,6 +7,7 @@
  * @property {boolean} closeModal
  * @property {boolean} reloadModalParent
  * @property {any} formData
+ * @property {Array<string>} returnedFormDataKeys
  * @property {any} localStorageData
  * @property {any} localDatabaseData
  * @property {any} globalVariableData
@@ -35,6 +36,7 @@ class ServerResponse {
         this.closeModal = false;
         this.reloadModalParent = false;
         this.formData = {};
+        this.returnedFormDataKeys = [];
         this.localStorageData = {};
         this.globalVariableData = {};
         this.localDatabaseData = {};

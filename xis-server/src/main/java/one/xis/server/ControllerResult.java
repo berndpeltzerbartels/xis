@@ -31,6 +31,7 @@ class ControllerResult {
     private final Map<String, Object> pathVariables = new HashMap<>();
     private final Map<String, Object> modelData = new HashMap<>();
     private final Map<String, Object> formData = new HashMap<>();
+    private final Collection<String> returnedFormDataKeys = new HashSet<>();
     private boolean validationFailed;
     private final ValidatorMessages validatorMessages = new ValidatorMessages();
     private final Map<String, Object> requestScope = new HashMap<>();

@@ -66,7 +66,11 @@ class ControllerMethodResultMapper {
             mapModelResult(getModelDataKey(method), originalReturnValue, controllerMethodResult);
         }
         if (method.isAnnotationPresent(FormData.class)) {
-            mapFormData(getFormDataKey(method), originalReturnValue, controllerMethodResult);
+            var key = getFormDataKey(method);
+            mapFormData(key, originalReturnValue, controllerMethodResult);
+            if (method.isAnnotationPresent(Action.class)) {
+                controllerMethodResult.getReturnedFormDataKeys().add(key);
+            }
         }
         if (method.isAnnotationPresent(SharedValue.class)) {
             var key = method.getAnnotation(SharedValue.class).value();

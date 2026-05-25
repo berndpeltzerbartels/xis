@@ -79,6 +79,8 @@ class FrontletContainerHandler extends TagHandler {
         const nextFrontletId = response.nextFrontletId ? app.client.config.getFrontletId(response.nextFrontletId) : undefined;
         const frontletChanges = !!nextFrontletId && nextFrontletId !== this.currentFrontletId();
         data.load = frontletChanges ? 'INITIAL' : 'AFTER_ACTION';
+        data.actionFormData = response.formData;
+        data.actionFormDataKeys = response.returnedFormDataKeys;
         updateStores(response);
         this.refreshContainerId(data);
 

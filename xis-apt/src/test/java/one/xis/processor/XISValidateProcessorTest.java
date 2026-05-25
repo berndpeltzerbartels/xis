@@ -818,6 +818,231 @@ class XISValidateProcessorTest {
     }
 
     @Test
+    void rejectsComplexActionParameterValues() throws IOException {
+        Path templateFile = tempDir.resolve("src/main/java/example/ProbePage.html");
+        Files.createDirectories(templateFile.getParent());
+        Files.writeString(templateFile, """
+                <!DOCTYPE html>
+                <html>
+                  <body>
+                    <button xis:action="select">Select</button>
+                  </body>
+                </html>
+                """, StandardCharsets.UTF_8);
+
+        DiagnosticCollector<JavaFileObject> diagnostics = compilePageSourceWithProcessor(false, """
+                package example;
+
+                import one.xis.Action;
+                import one.xis.Page;
+                import one.xis.Parameter;
+
+                @Page("/probe.html")
+                class ProbePage {
+                    @Action
+                    void select(@Parameter("step") StepId step) {
+                    }
+
+                    static class StepId {
+                        String value;
+                    }
+                }
+                """);
+
+        List<String> errors = errorMessages(diagnostics);
+        assertThat(errors).hasSize(1);
+        assertThat(errors.get(0)).contains("@Parameter supports only simple values");
+    }
+
+    @Test
+    void allowsSimpleActionParameterValues() throws IOException {
+        Path templateFile = tempDir.resolve("src/main/java/example/ProbePage.html");
+        Files.createDirectories(templateFile.getParent());
+        Files.writeString(templateFile, """
+                <!DOCTYPE html>
+                <html>
+                  <body>
+                    <button xis:action="select">Select</button>
+                  </body>
+                </html>
+                """, StandardCharsets.UTF_8);
+
+        DiagnosticCollector<JavaFileObject> diagnostics = compilePageSourceWithProcessor(true, """
+                package example;
+
+                import java.math.BigDecimal;
+                import java.time.LocalDate;
+                import one.xis.Action;
+                import one.xis.Page;
+                import one.xis.Parameter;
+
+                @Page("/probe.html")
+                class ProbePage {
+                    @Action
+                    void select(@Parameter("id") long id,
+                                @Parameter("name") String name,
+                                @Parameter("amount") BigDecimal amount,
+                                @Parameter("date") LocalDate date,
+                                @Parameter("stage") Stage stage) {
+                    }
+
+                    enum Stage {
+                        TODO
+                    }
+                }
+                """);
+
+        assertThat(errorMessages(diagnostics)).isEmpty();
+    }
+
+    @Test
+    void allowsUnnamedParameterMapWithSimpleValues() throws IOException {
+        Path templateFile = tempDir.resolve("src/main/java/example/ProbePage.html");
+        Files.createDirectories(templateFile.getParent());
+        Files.writeString(templateFile, """
+                <!DOCTYPE html>
+                <html>
+                  <body>
+                    <button xis:action="select">Select</button>
+                  </body>
+                </html>
+                """, StandardCharsets.UTF_8);
+
+        DiagnosticCollector<JavaFileObject> diagnostics = compilePageSourceWithProcessor(true, """
+                package example;
+
+                import java.util.Map;
+                import one.xis.Action;
+                import one.xis.Page;
+                import one.xis.Parameter;
+
+                @Page("/probe.html")
+                class ProbePage {
+                    @Action
+                    void select(@Parameter Map<String, Integer> parameters) {
+                    }
+                }
+                """);
+
+        assertThat(errorMessages(diagnostics)).isEmpty();
+    }
+
+    @Test
+    void rejectsUnnamedParameterMapWithoutStringKeys() throws IOException {
+        Path templateFile = tempDir.resolve("src/main/java/example/ProbePage.html");
+        Files.createDirectories(templateFile.getParent());
+        Files.writeString(templateFile, """
+                <!DOCTYPE html>
+                <html>
+                  <body>
+                    <button xis:action="select">Select</button>
+                  </body>
+                </html>
+                """, StandardCharsets.UTF_8);
+
+        DiagnosticCollector<JavaFileObject> diagnostics = compilePageSourceWithProcessor(false, """
+                package example;
+
+                import java.util.Map;
+                import one.xis.Action;
+                import one.xis.Page;
+                import one.xis.Parameter;
+
+                @Page("/probe.html")
+                class ProbePage {
+                    @Action
+                    void select(@Parameter Map<Integer, String> parameters) {
+                    }
+                }
+                """);
+
+        List<String> errors = errorMessages(diagnostics);
+        assertThat(errors).hasSize(1);
+        assertThat(errors.get(0)).contains("Unnamed @Parameter maps must use String keys.");
+    }
+
+    @Test
+    void rejectsUnnamedParameterMapWithComplexValues() throws IOException {
+        Path templateFile = tempDir.resolve("src/main/java/example/ProbePage.html");
+        Files.createDirectories(templateFile.getParent());
+        Files.writeString(templateFile, """
+                <!DOCTYPE html>
+                <html>
+                  <body>
+                    <button xis:action="select">Select</button>
+                  </body>
+                </html>
+                """, StandardCharsets.UTF_8);
+
+        DiagnosticCollector<JavaFileObject> diagnostics = compilePageSourceWithProcessor(false, """
+                package example;
+
+                import java.util.Map;
+                import one.xis.Action;
+                import one.xis.Page;
+                import one.xis.Parameter;
+
+                @Page("/probe.html")
+                class ProbePage {
+                    @Action
+                    void select(@Parameter Map<String, StepId> parameters) {
+                    }
+
+                    static class StepId {
+                        String value;
+                    }
+                }
+                """);
+
+        List<String> errors = errorMessages(diagnostics);
+        assertThat(errors).hasSize(1);
+        assertThat(errors.get(0)).contains("Unnamed @Parameter maps support only simple value types.");
+    }
+
+    @Test
+    void rejectsLoadAttributeOnActionFormDataReturnValue() throws IOException {
+        Path templateFile = tempDir.resolve("src/main/java/example/ProbePage.html");
+        Files.createDirectories(templateFile.getParent());
+        Files.writeString(templateFile, """
+                <!DOCTYPE html>
+                <html>
+                  <body>
+                    <form xis:binding="step">
+                      <input xis:binding="name">
+                      <button xis:action="select">Select</button>
+                    </form>
+                  </body>
+                </html>
+                """, StandardCharsets.UTF_8);
+
+        DiagnosticCollector<JavaFileObject> diagnostics = compilePageSourceWithProcessor(false, """
+                package example;
+
+                import one.xis.Action;
+                import one.xis.FormData;
+                import one.xis.ModelDataLoad;
+                import one.xis.Page;
+
+                @Page("/probe.html")
+                class ProbePage {
+                    @Action
+                    @FormData(value = "step", load = ModelDataLoad.INITIAL)
+                    StepForm select() {
+                        return new StepForm();
+                    }
+
+                    static class StepForm {
+                        String name;
+                    }
+                }
+                """);
+
+        List<String> errors = errorMessages(diagnostics);
+        assertThat(errors).hasSize(1);
+        assertThat(errors.get(0)).contains("@FormData load is only supported on form initialization methods");
+    }
+
+    @Test
     void reportsTemplateDataErrorsAtTheElementLine() throws IOException {
         Path templateFile = tempDir.resolve("src/main/java/example/ProbePage.html");
         Files.createDirectories(templateFile.getParent());

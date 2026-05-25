@@ -121,13 +121,23 @@ class FormHandler extends TagHandler {
         data.validationPath = '/' + formBindingKey;
         this.clearMessageHandlers();
         const descendantPromise = this.refreshDescendantHandlers(data);
-        const formDataPromise = this.client.loadFormData(app.pageController.resolvedURL, this.frontletId(), formBindingKey, frontletParameters, this.formDataLoad(data))
-            .then(response => this.refreshFormData(this.subData(response, formBindingKey)));
+        const actionFormData = this.actionFormData(data, formBindingKey);
+        const formDataPromise = actionFormData !== undefined
+            ? Promise.resolve(this.refreshFormData(new Data(actionFormData || {})))
+            : this.client.loadFormData(app.pageController.resolvedURL, this.frontletId(), formBindingKey, frontletParameters, this.formDataLoad(data))
+                .then(response => this.refreshFormData(this.subData(response, formBindingKey)));
         return Promise.all([descendantPromise, formDataPromise]);
     }
 
     formDataLoad(data) {
         return data.load || 'INITIAL';
+    }
+
+    actionFormData(data, formBindingKey) {
+        if (!data.actionFormDataKeys || !data.actionFormDataKeys.includes(formBindingKey) || !data.actionFormData) {
+            return undefined;
+        }
+        return data.actionFormData.getValue([formBindingKey]);
     }
 
     /**

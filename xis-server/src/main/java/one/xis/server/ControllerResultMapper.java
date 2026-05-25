@@ -49,6 +49,7 @@ class ControllerResultMapper {
         controllerResult.getUpdateEventKeys().addAll(controllerMethodResult.getUpdateEventKeys());
         controllerResult.getModelData().putAll(controllerMethodResult.getModelData());
         controllerResult.getFormData().putAll(controllerMethodResult.getFormData());
+        controllerResult.getReturnedFormDataKeys().addAll(controllerMethodResult.getReturnedFormDataKeys());
         controllerResult.getFrontletParameters().putAll(controllerMethodResult.getFrontletParameters());
         controllerResult.getPathVariables().putAll(controllerMethodResult.getPathVariables());
         controllerResult.getUrlParameters().putAll(controllerMethodResult.getUrlParameters());

@@ -18,6 +18,7 @@ class ControllerResponseMapper {
         response.setNextURL(result.getNextURL());
         response.setData(result.getModelData());
         response.setFormData(result.getFormData());
+        response.setReturnedFormDataKeys(result.getReturnedFormDataKeys());
         response.setNextFrontletId(result.getNextFrontletId());
         response.setNextModalId(result.getNextModalId());
         response.setCloseModal(result.isCloseModal());

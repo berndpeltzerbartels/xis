@@ -207,6 +207,17 @@ PipelineStepForm emptyStepForm(@SharedValue("pipeline") Pipeline pipeline) {
 }
 ```
 
+An action can also return the form data for the next render by combining `@Action` and `@FormData`. The returned value
+is used for that form directly; XIS does not issue a second form-model request for the same form binding.
+
+```java
+@Action
+@FormData("step")
+PipelineStepForm selectStep(@Parameter("stepId") long stepId) {
+    return PipelineStepForm.from(pipelineService.step(stepId));
+}
+```
+
 See [Forms and validation](forms-and-validation.md) for message rendering, custom validators, records, and formatters.
 
 ## Shared Values

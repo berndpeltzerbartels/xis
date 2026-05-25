@@ -145,6 +145,8 @@ authentication, and role state, plus `HttpRequest`, `HttpResponse`, and `Request
 
 Use `@Parameter` for values that belong to the XIS UI interaction itself. The same annotation is used for action
 parameters and for parameters scoped to a frontlet or modal.
+`@Parameter` is for simple values such as strings, numbers, booleans, dates, and enums. Use `@FormData` for complex
+objects.
 
 ```html
 <button xis:action="delete">
@@ -183,7 +185,8 @@ void move(@Parameter(index = 1) String from, @Parameter(index = 2) String to) {
 ```
 
 The explicit index is 1-based and counts only action values, not Java method parameters. An unnamed
-`@Parameter Map<String, String>` receives all current frontlet or modal parameters.
+`@Parameter Map<String, Integer>` or `Map<String, T>` receives all current frontlet or modal parameters when `T` is a
+simple value type. Map keys must be `String`; values may be strings, numbers, booleans, dates, or enums.
 
 ### Configuration Values
 

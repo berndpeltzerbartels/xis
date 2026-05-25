@@ -75,6 +75,16 @@ UserForm userAfterSave() {
 }
 ```
 
+An action may return form data directly when the action is meant to select or replace the currently edited object.
+
+```java
+@Action
+@FormData("user")
+UserForm selectUser(@Parameter("userId") long userId) {
+    return UserForm.from(userService.findById(userId));
+}
+```
+
 ## Multiple Submit Actions
 
 One form can have multiple actions.

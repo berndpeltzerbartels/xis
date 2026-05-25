@@ -114,6 +114,44 @@ class ModelCallCountTest {
     }
 
     @Test
+    void actionCanReturnFormDataForPageRefresh() {
+        var context = IntegrationTestContext.builder()
+                .withPackage("test.page.modelcalls")
+                .build();
+        var client = context.openPage(ActionFormDataLifecyclePage.class);
+        var page = context.getSingleton(ActionFormDataLifecyclePage.class);
+
+        assertThat(client.getDocument().getInputElementById("action-form-value").getValue()).isEqualTo("initial-step-1");
+        assertThat(page.getInitialCalls()).isEqualTo(1);
+        assertThat(page.getActionCalls()).isZero();
+
+        client.getDocument().getElementById("select-step").click();
+
+        assertThat(client.getDocument().getInputElementById("action-form-value").getValue()).isEqualTo("selected-step-1");
+        assertThat(page.getInitialCalls()).isEqualTo(1);
+        assertThat(page.getActionCalls()).isEqualTo(1);
+    }
+
+    @Test
+    void actionCanReturnFormDataForFrontletRefresh() {
+        var context = IntegrationTestContext.builder()
+                .withPackage("test.page.modelcalls")
+                .build();
+        var client = context.openPage(ActionFormDataLifecycleFrontletPage.class);
+        var frontlet = context.getSingleton(ActionFormDataLifecycleFrontlet.class);
+
+        assertThat(client.getDocument().getInputElementById("frontlet-action-form-value").getValue()).isEqualTo("frontlet-initial-step-1");
+        assertThat(frontlet.getInitialCalls()).isEqualTo(1);
+        assertThat(frontlet.getActionCalls()).isZero();
+
+        client.getDocument().getElementById("frontlet-select-step").click();
+
+        assertThat(client.getDocument().getInputElementById("frontlet-action-form-value").getValue()).isEqualTo("frontlet-selected-step-1");
+        assertThat(frontlet.getInitialCalls()).isEqualTo(1);
+        assertThat(frontlet.getActionCalls()).isEqualTo(1);
+    }
+
+    @Test
     void embeddedDefaultFrontletCallsInitialSharedModelData() {
         var context = IntegrationTestContext.builder()
                 .withPackage("test.page.modelcalls")
