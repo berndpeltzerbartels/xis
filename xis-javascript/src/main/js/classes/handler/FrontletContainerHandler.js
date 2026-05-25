@@ -37,6 +37,7 @@ class FrontletContainerHandler extends TagHandler {
         this.buffer = undefined;
         this.frontletParameters = {};
         this.collectingDefaultParameters = false;
+        this.defaultFrontletActive = false;
     }
 
     /**
@@ -143,14 +144,27 @@ class FrontletContainerHandler extends TagHandler {
     }
 
     parametersForRefresh(hasBoundFrontlet, currentFrontletParameters, data) {
+        if (hasBoundFrontlet && this.defaultFrontletActive) {
+            return this.parametersForBoundDefaultFrontlet(data, currentFrontletParameters);
+        }
         if (hasBoundFrontlet) {
-            // Parent data is only the starting scope for binding a default frontlet.
-            // After a frontlet exists, its container owns the parameter scope. Reusing
-            // parent parameters here would overwrite nested default-frontlet query
-            // values whenever the parent refreshes.
+            // Explicitly opened frontlets own their parameter scope. Reusing parent
+            // parameters here would overwrite link/action parameters on every refresh.
             return currentFrontletParameters;
         }
         return mergeObjects(this.frontletParameters, data.getValue(['frontletParameters']));
+    }
+
+    parametersForBoundDefaultFrontlet(data, currentFrontletParameters) {
+        var defaultFrontletUrl = this.defaultFrontletUrl(data);
+        if (!defaultFrontletUrl) {
+            return currentFrontletParameters;
+        }
+        // A bound default frontlet still follows the container's default-frontlet
+        // expression. If the parent model changes that expression, the next model
+        // request must use the newly evaluated query parameters.
+        this.ensureFrontletBound(app.client.config.getFrontletId(defaultFrontletUrl));
+        return urlParameters(defaultFrontletUrl);
     }
 
     refreshInitialDefaultFrontlet(data) {
@@ -195,6 +209,7 @@ class FrontletContainerHandler extends TagHandler {
     showFrontlet(frontletId, frontletState) {
         this.frontletState = frontletState;
         this.frontletParameters = frontletState.frontletParameters || {};
+        this.defaultFrontletActive = false;
         this.ensureFrontletBound(frontletId, true);
         this.frontletState = frontletState;
         return PageController.enqueue(() => this.reloadDataAndRefresh(this.parentData()));
@@ -277,6 +292,7 @@ class FrontletContainerHandler extends TagHandler {
             if (defaultFrontlet.containerId === this.containerId) {
                 this.ensureFrontletBound(defaultFrontlet.frontletId);
                 this.frontletState = new FrontletState(app.pageController.resolvedURL, this.frontletParameters);
+                this.defaultFrontletActive = true;
                 return true;
             }
         }
@@ -293,7 +309,7 @@ class FrontletContainerHandler extends TagHandler {
             return;
         }
 
-        var frontletUrl = this.defaultFrontletExpression.evaluate(parentData);
+        var frontletUrl = this.defaultFrontletUrl(parentData);
         if (!frontletUrl) {
             return;
         }
@@ -307,6 +323,11 @@ class FrontletContainerHandler extends TagHandler {
         var frontletId = app.client.config.getFrontletId(frontletUrl);
         this.ensureFrontletBound(frontletId);
         this.frontletState = new FrontletState(app.pageController.resolvedURL, this.frontletParameters);
+        this.defaultFrontletActive = true;
+    }
+
+    defaultFrontletUrl(parentData) {
+        return this.defaultFrontletExpression ? this.defaultFrontletExpression.evaluate(parentData) : undefined;
     }
 
     /**
@@ -349,6 +370,7 @@ class FrontletContainerHandler extends TagHandler {
      */
     bindNextFrontletIfNeeded(nextFrontletId) {
         if (nextFrontletId) {
+            this.defaultFrontletActive = false;
             this.ensureFrontletBound(nextFrontletId, true);
         }
     }

@@ -7,6 +7,8 @@ import one.xis.ModelData;
 @Frontlet
 class DynamicOuterFrontlet {
     private int reloads;
+    private long selectedPipelineId = 42L;
+    private long selectedStepId = 7L;
 
     @ModelData
     String innerFrontletId() {
@@ -15,12 +17,12 @@ class DynamicOuterFrontlet {
 
     @ModelData
     long selectedPipelineId() {
-        return 42L;
+        return selectedPipelineId;
     }
 
     @ModelData
     long selectedStepId() {
-        return 7L;
+        return selectedStepId;
     }
 
     @ModelData
@@ -31,5 +33,11 @@ class DynamicOuterFrontlet {
     @Action
     void reload() {
         reloads++;
+    }
+
+    @Action
+    void selectOther() {
+        selectedPipelineId = 43L;
+        selectedStepId = 8L;
     }
 }
