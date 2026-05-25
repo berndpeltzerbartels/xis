@@ -38,7 +38,7 @@ and [Security](security.md) for complete examples.
 | --- | --- |
 | `@ModelData` | Exposes a value to the template. The default key is the method/property name. |
 | `@FormData` | Loads form data for a named form binding. |
-| `@Action` | Marks a method that can be called from an action link, action button, or form submit. May be combined with `@ModelData` when the action return value should be rendered as model data in the current response. |
+| `@Action` | Marks a method that can be called from an action link, action button, or form submit. May be combined with `@ModelData` or `@FormData` when the action return value should be rendered in the current response. The method still runs only when that action is triggered. |
 | `@Route` | Marks a method on a `@Router`. Route methods run before a page controller is selected and must return a navigation value. |
 | `@Title` | Supplies a page or frontlet title from Java. |
 | `@SharedValue` | Provides a named value for other controller methods during the same request/action processing flow. |

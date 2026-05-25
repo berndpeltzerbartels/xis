@@ -76,6 +76,9 @@ UserForm userAfterSave() {
 ```
 
 An action may return form data directly when the action is meant to select or replace the currently edited object.
+`@Action` acts as a lifecycle filter here: the method is not a form initializer and is not called by the normal form
+model request. It runs only when the matching action is triggered, and then its return value becomes the form data for
+the next render.
 
 ```java
 @Action

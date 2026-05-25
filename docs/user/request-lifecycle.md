@@ -70,6 +70,11 @@ The action return type decides what happens next:
 For the full matrix, including container rules, frontlet-to-frontlet replacement, and modal responses, see
 [Navigation and responses](navigation.md).
 
+`@Action` is also a lifecycle filter. A method annotated with `@Action` runs only when that exact action is triggered,
+no matter which other XIS annotations are present on the same method. For example, `@Action @ModelData` is not part of
+the initial model load, and `@Action @FormData` is not a normal form initializer. The additional annotation only tells
+XIS how to use the return value after the action has actually run.
+
 An action method may also be annotated with `@ModelData`. In that case the action still runs because the user triggered
 it, and its return value is also written into the model data of the current response. This is useful for small UI
 results that should appear immediately without adding another model method.
@@ -209,6 +214,8 @@ PipelineStepForm emptyStepForm(@SharedValue("pipeline") Pipeline pipeline) {
 
 An action can also return the form data for the next render by combining `@Action` and `@FormData`. The returned value
 is used for that form directly; XIS does not issue a second form-model request for the same form binding.
+Because `@Action` is a lifecycle filter, this method is not called when XIS initializes the form. It runs only when
+`selectStep` is triggered.
 
 ```java
 @Action
