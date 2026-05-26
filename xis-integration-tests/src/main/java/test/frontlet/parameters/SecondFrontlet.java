@@ -2,25 +2,25 @@ package test.frontlet.parameters;
 
 import one.xis.ModelData;
 import one.xis.Frontlet;
-import one.xis.Parameter;
+import one.xis.FrontletParameter;
 
 @Frontlet
 public class SecondFrontlet {
 
     @ModelData
     public String combinedParams(
-            @Parameter("actionParam") String actionParam,
-            @Parameter("containerParam") String containerParam) {
+            @FrontletParameter("actionParam") String actionParam,
+            @FrontletParameter("containerParam") String containerParam) {
         return "Action: " + actionParam + ", Container: " + containerParam;
     }
 
     @ModelData
-    public String actionParam(@Parameter("actionParam") String actionParam) {
+    public String actionParam(@FrontletParameter("actionParam") String actionParam) {
         return actionParam;
     }
 
     @ModelData
-    public String containerParam(@Parameter("containerParam") String containerParam) {
+    public String containerParam(@FrontletParameter("containerParam") String containerParam) {
         return containerParam;
     }
 }

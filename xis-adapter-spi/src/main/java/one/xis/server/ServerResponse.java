@@ -29,6 +29,7 @@ public class ServerResponse {
     private Map<String, Object> sessionStorageData = new HashMap<>();
     private Map<String, Object> clientStorageData = new HashMap<>();
     private Map<String, Object> frontletParameters = new HashMap<>();
+    private Map<String, Object> modalParameters = new HashMap<>();
     private boolean authenticated;
     private Collection<String> userRoles = new HashSet<>();
     private Collection<String> updateEventKeys = new ArrayList<>();
@@ -55,6 +56,7 @@ public class ServerResponse {
         returnedFormDataKeys.clear();
         reloadFrontlets.clear();
         frontletParameters.clear();
+        modalParameters.clear();
         nextURL = null;
         nextFrontletId = null;
         nextModalId = null;

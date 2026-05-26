@@ -22,6 +22,7 @@ class ControllerMethodResult {
     private final Collection<String> frontletsToReload = new HashSet<>();
     private Collection<String> updateEventKeys = new HashSet<>();
     private final Map<String, Object> frontletParameters = new HashMap<>();
+    private final Map<String, Object> modalParameters = new HashMap<>();
     private final Map<String, Object> urlParameters = new HashMap<>();
     private final Map<String, Object> pathVariables = new HashMap<>();
     private final Map<String, Object> modelData = new HashMap<>();

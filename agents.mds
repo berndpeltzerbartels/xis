@@ -65,7 +65,7 @@ inline style during the same error state. Selection highlighting uses a parent `
 
 Drag and drop is intentionally small: `xis:drag="from:${field}"` defines one named drag value, and
 `xis:drop="move(from, target='${targetField}')"` calls a normal `@Action`. Prefer named Java parameters with
-`@Parameter("from")` and `@Parameter("target")`. If users need multiple values, they should encode a simple
+`@ActionParameter("from")` and `@ActionParameter("target")`. If users need multiple values, they should encode a simple
 string themselves or write custom JavaScript. Keep docs and tests focused on this 80-percent case. In integration tests,
 use `one.xis.test.dom.DragAndDrop(source, target).doDragAndDrop()` so tests exercise `dragstart`, `dragover`, `drop`,
 and the shared `DataTransfer` payload.

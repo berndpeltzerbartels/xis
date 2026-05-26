@@ -33,7 +33,7 @@ public class ContactFormFrontlet {
     }
 
     @FormData("contact")
-    public Contact contact(@Parameter("contactId") @NullAllowed Long contactId) {
+    public Contact contact(@FrontletParameter("contactId") @NullAllowed Long contactId) {
         if (contactId != null) {
             return contactService.findById(contactId).orElseGet(Contact::new);
         }

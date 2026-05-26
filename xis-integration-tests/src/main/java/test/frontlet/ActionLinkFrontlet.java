@@ -2,7 +2,7 @@ package test.frontlet;
 
 import lombok.RequiredArgsConstructor;
 import one.xis.Action;
-import one.xis.Parameter;
+import one.xis.ActionParameter;
 import one.xis.ModelData;
 import one.xis.Frontlet;
 import test.page.core.IndexPage;
@@ -27,12 +27,12 @@ class ActionLinkFrontlet {
     }
 
     @Action("test-action1")
-    void action1(@Parameter("param") String value) {
+    void action1(@ActionParameter("param") String value) {
         service.action(value);
     }
 
     @Action("test-action2")
-    Class<?> action2(@Parameter("id") Integer id, @Parameter("value") String value) {
+    Class<?> action2(@ActionParameter("id") Integer id, @ActionParameter("value") String value) {
         service.action(new Object[]{id, value});
         return ActionLinkFrontlet.class;
     }
@@ -44,11 +44,10 @@ class ActionLinkFrontlet {
 
 
     @Action("test-action4")
-    Class<?> action4(@Parameter("greeting") String greeting) {
+    Class<?> action4(@ActionParameter("greeting") String greeting) {
         return SimpleFrontlet.class;
     }
 
 
 }
-
 

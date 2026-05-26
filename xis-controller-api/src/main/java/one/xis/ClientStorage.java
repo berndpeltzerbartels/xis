@@ -24,7 +24,7 @@ import java.lang.annotation.Target;
  * <pre>{@code
  * @Action("updatePreferences")
  * public void updatePreferences(@ClientStorage("userPreferences") UserPreferences prefs,
- *                               @Parameter("theme") String theme) {
+ *                               @ActionParameter("theme") String theme) {
  *     prefs.setTheme(theme);
  *     // the mutated prefs parameter is saved back to client storage
  * }

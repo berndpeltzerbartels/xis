@@ -50,7 +50,7 @@ An action is a user-triggered call to a Java method annotated with `@Action`.
 
 ```java
 @Action
-PageResponse delete(@Parameter("productId") long productId) {
+PageResponse delete(@ActionParameter("productId") long productId) {
     productService.delete(productId);
     return new PageResponse(ProductListPage.class);
 }
@@ -91,7 +91,7 @@ results that should appear immediately without adding another model method.
 ```java
 @Action
 @ModelData("discountMessage")
-String calculateDiscount(@Parameter("productId") long productId) {
+String calculateDiscount(@ActionParameter("productId") long productId) {
     return discountService.discountMessageFor(productId);
 }
 ```
@@ -107,7 +107,7 @@ Long selectedStepId() {
 
 @Action
 @ModelData("selectedStepId")
-Long selectStep(@Parameter("stepId") long stepId) {
+Long selectStep(@ActionParameter("stepId") long stepId) {
     return stepId;
 }
 ```
@@ -143,7 +143,7 @@ class PipelineFrontlet {
     }
 
     @SharedValue("pipelineSteps")
-    List<PipelineStep> pipelineSteps(@Parameter("pipelineId") long pipelineId) {
+    List<PipelineStep> pipelineSteps(@FrontletParameter("pipelineId") long pipelineId) {
         return pipelineService.stepsForPipeline(pipelineId);
     }
 
@@ -159,7 +159,7 @@ class PipelineFrontlet {
 
     @Action
     @ModelData(varName = "selectedStep")
-    PipelineStep selectStep(@Parameter("stepId") long stepId,
+    PipelineStep selectStep(@ActionParameter("stepId") long stepId,
                             @SharedValue("pipelineSteps") List<PipelineStep> pipelineSteps) {
         return pipelineSteps.stream()
                 .filter(step -> step.id() == stepId)
@@ -220,7 +220,7 @@ Because `@Action` is a lifecycle filter, this method is not called when XIS init
 ```java
 @Action
 @FormData("step")
-PipelineStepForm selectStep(@Parameter("stepId") long stepId) {
+PipelineStepForm selectStep(@ActionParameter("stepId") long stepId) {
     return PipelineStepForm.from(pipelineService.step(stepId));
 }
 ```
@@ -244,7 +244,7 @@ Product productModel(@SharedValue("product") Product product) {
 
 @Action
 void rename(@SharedValue("product") Product product,
-            @Parameter("name") String name) {
+            @ActionParameter("name") String name) {
     product.rename(name);
 }
 ```
@@ -263,7 +263,7 @@ current controller.
 ```java
 @Action
 void addToCart(@LocalStorage("cart") Cart cart,
-               @Parameter("productId") String productId) {
+               @ActionParameter("productId") String productId) {
     cart.add(productId);
 }
 ```

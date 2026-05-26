@@ -10,18 +10,18 @@ class FrontletContainerParameterFrontlet {
     private final FrontletContainerParameterService service;
 
     @ModelData("categoryId")
-    String categoryId(@Parameter("categoryId") String categoryId) {
+    String categoryId(@FrontletParameter("categoryId") String categoryId) {
         return categoryId;
     }
 
     @ModelData("sortBy")
-    String sortBy(@Parameter("sortBy") String sortBy) {
+    String sortBy(@FrontletParameter("sortBy") String sortBy) {
         return sortBy;
     }
 
     @Action("testAction")
-    void testAction(@Parameter("categoryId") String categoryId,
-                   @Parameter("sortBy") String sortBy) {
+    void testAction(@FrontletParameter("categoryId") String categoryId,
+                    @FrontletParameter("sortBy") String sortBy) {
         service.action(categoryId, sortBy);
     }
 

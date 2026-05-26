@@ -36,6 +36,7 @@ class FrontletContainerHandler extends TagHandler {
         this.scrollToTop = tag.getAttribute('scroll-to-top') === 'true';
         this.buffer = undefined;
         this.frontletParameters = {};
+        this.modalParameters = {};
         this.collectingDefaultParameters = false;
         this.defaultFrontletActive = false;
     }
@@ -88,10 +89,12 @@ class FrontletContainerHandler extends TagHandler {
             ? this.parametersForNewFrontlet(response)
             : mergeObjects(this.frontletParameters, response.frontletParameters);
         if (!this.frontletState) {
-            this.frontletState = new FrontletState(app.pageController.resolvedURL, this.frontletParameters);
+            this.frontletState = new FrontletState(app.pageController.resolvedURL, this.frontletParameters, this.modalParameters);
         }
         this.frontletState.frontletParameters = this.frontletParameters;
+        this.frontletState.modalParameters = this.modalParameters;
         data.setValue(['frontletParameters'], this.frontletParameters);
+        data.setValue(['modalParameters'], this.modalParameters);
 
         return PageController.enqueue(() => {
             if (frontletChanges) {
@@ -123,7 +126,9 @@ class FrontletContainerHandler extends TagHandler {
         this.data = data;
         const hasBoundFrontlet = !!this.frontletInstance;
         const currentFrontletParameters = this.frontletParameters || {};
+        const currentModalParameters = this.modalParameters || {};
         this.frontletParameters = {};
+        this.modalParameters = currentModalParameters;
         this.refreshContainerId(data);
         if (this.isInitialDefaultFrontletLoad()) {
             return this.refreshInitialDefaultFrontlet(data);
@@ -131,9 +136,13 @@ class FrontletContainerHandler extends TagHandler {
         if (!this.bindByFrontletAnnotation()) {
             this.bindFrontletInitial(data);
         }
+        if (hasBoundFrontlet && this.defaultFrontletActive) {
+            return this.refreshBoundDefaultFrontlet(data, currentFrontletParameters);
+        }
         this.frontletParameters = this.parametersForRefresh(hasBoundFrontlet, currentFrontletParameters, data);
-        this.frontletState = new FrontletState(app.pageController.resolvedURL, this.frontletParameters);
+        this.frontletState = new FrontletState(app.pageController.resolvedURL, this.frontletParameters, this.modalParameters);
         data.setValue(['frontletParameters'], this.frontletParameters);
+        data.setValue(['modalParameters'], this.modalParameters);
         const descendantPromise = this.refreshDescendantHandlers(data); // xis:parameter tags will call addParameter
         var promises = [];
         if (this.frontletInstance) {
@@ -142,32 +151,37 @@ class FrontletContainerHandler extends TagHandler {
         return Promise.all(promises.concat([descendantPromise]));
     }
 
+    refreshBoundDefaultFrontlet(data, currentFrontletParameters) {
+        var defaultFrontletUrl = this.defaultFrontletUrl(data);
+        if (defaultFrontletUrl) {
+            this.ensureFrontletBound(app.client.config.getFrontletId(defaultFrontletUrl));
+            this.frontletParameters = urlParameters(defaultFrontletUrl);
+        } else {
+            this.frontletParameters = currentFrontletParameters;
+        }
+        return this.refreshContainerParameterHandlers(data)
+            .then(() => {
+                // A default frontlet can receive parameters both from the default-frontlet
+                // URL and from child xis:parameter tags. Both must be evaluated before
+                // the model request, especially when a modal reloads the opening frontlet.
+                this.frontletState = new FrontletState(app.pageController.resolvedURL, this.frontletParameters, this.modalParameters);
+                data.setValue(['frontletParameters'], this.frontletParameters);
+                data.setValue(['modalParameters'], this.modalParameters);
+                return this.frontletInstance ? this.reloadDataAndRefresh(data) : Promise.resolve();
+            });
+    }
+
     isInitialDefaultFrontletLoad() {
         return !!this.defaultFrontletExpression && !this.frontletInstance;
     }
 
     parametersForRefresh(hasBoundFrontlet, currentFrontletParameters, data) {
-        if (hasBoundFrontlet && this.defaultFrontletActive) {
-            return this.parametersForBoundDefaultFrontlet(data, currentFrontletParameters);
-        }
         if (hasBoundFrontlet) {
             // Explicitly opened frontlets own their parameter scope. Reusing parent
             // parameters here would overwrite link/action parameters on every refresh.
             return currentFrontletParameters;
         }
         return mergeObjects(this.frontletParameters, data.getValue(['frontletParameters']));
-    }
-
-    parametersForBoundDefaultFrontlet(data, currentFrontletParameters) {
-        var defaultFrontletUrl = this.defaultFrontletUrl(data);
-        if (!defaultFrontletUrl) {
-            return currentFrontletParameters;
-        }
-        // A bound default frontlet still follows the container's default-frontlet
-        // expression. If the parent model changes that expression, the next model
-        // request must use the newly evaluated query parameters.
-        this.ensureFrontletBound(app.client.config.getFrontletId(defaultFrontletUrl));
-        return urlParameters(defaultFrontletUrl);
     }
 
     refreshInitialDefaultFrontlet(data) {
@@ -181,8 +195,9 @@ class FrontletContainerHandler extends TagHandler {
                 // not happened yet. Container-level parameters must now override any
                 // inherited page/frontlet parameters, otherwise two default containers on
                 // the same page can accidentally reuse each other's parameter values.
-                this.frontletState = new FrontletState(app.pageController.resolvedURL, this.frontletParameters);
+                this.frontletState = new FrontletState(app.pageController.resolvedURL, this.frontletParameters, this.modalParameters);
                 data.setValue(['frontletParameters'], this.frontletParameters);
+                data.setValue(['modalParameters'], this.modalParameters);
                 return this.frontletInstance ? this.reloadDataAndRefresh(data) : Promise.resolve();
             });
     }
@@ -212,6 +227,7 @@ class FrontletContainerHandler extends TagHandler {
     showFrontlet(frontletId, frontletState) {
         this.frontletState = frontletState;
         this.frontletParameters = frontletState.frontletParameters || {};
+        this.modalParameters = frontletState.modalParameters || {};
         this.defaultFrontletActive = false;
         this.ensureFrontletBound(frontletId, true);
         this.frontletState = frontletState;
@@ -294,7 +310,7 @@ class FrontletContainerHandler extends TagHandler {
         for (var defaultFrontlet of response.defaultFrontlets) {
             if (defaultFrontlet.containerId === this.containerId) {
                 this.ensureFrontletBound(defaultFrontlet.frontletId);
-                this.frontletState = new FrontletState(app.pageController.resolvedURL, this.frontletParameters);
+                this.frontletState = new FrontletState(app.pageController.resolvedURL, this.frontletParameters, this.modalParameters);
                 this.defaultFrontletActive = true;
                 return true;
             }
@@ -325,7 +341,7 @@ class FrontletContainerHandler extends TagHandler {
 
         var frontletId = app.client.config.getFrontletId(frontletUrl);
         this.ensureFrontletBound(frontletId);
-        this.frontletState = new FrontletState(app.pageController.resolvedURL, this.frontletParameters);
+        this.frontletState = new FrontletState(app.pageController.resolvedURL, this.frontletParameters, this.modalParameters);
         this.defaultFrontletActive = true;
     }
 
@@ -437,8 +453,11 @@ class FrontletContainerHandler extends TagHandler {
      */
     mergeParameters(data) {
         this.frontletParameters = mergeObjects(this.frontletParameters, data.getValue(['frontletParameters']));
+        this.modalParameters = mergeObjects(this.modalParameters, data.getValue(['modalParameters']));
         this.frontletState.frontletParameters = this.frontletParameters;
+        this.frontletState.modalParameters = this.modalParameters;
         data.setValue(['frontletParameters'], this.frontletParameters);
+        data.setValue(['modalParameters'], this.modalParameters);
         return data;
     }
 

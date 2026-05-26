@@ -183,17 +183,26 @@ collisions between frontlet classes with the same simple name in different packa
 | `title` | `String` | No | `""` | Optional frontlet title metadata. |
 | `containerId` | `String` | No | `""` | Optional target container metadata. |
 
-### `@Parameter`
+### `@FrontletParameter`
 
-`@Parameter` injects a parameter into a page, frontlet, or modal method. Frontlet and modal parameters are supplied by
-child `<xis:parameter>` tags, by `FrontletResponse` or `ModalResponse`, or by query strings on frontlet and modal
-targets such as `/product-summary?productId=42`. These target query strings are still read with `@Parameter`;
+`@FrontletParameter` injects a stable parameter of the current frontlet instance. Frontlet parameters are supplied by
+child `<xis:parameter>` tags, by `FrontletResponse`, or by query strings on frontlet targets such as
+`/product-summary?productId=42`. These target query strings are still read with `@FrontletParameter`;
 `@QueryParameter` is reserved for the query string of the current page URL.
 
 | Attribute | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
-| `value` | `String` | No | `""` | Parameter name. Empty means all frontlet/modal parameters when the Java parameter is a `Map<String, String>`. |
-| `index` | `int` | No | `-1` | Explicit 1-based positional action argument index. |
+| `value` | `String` | No | `""` | Parameter name. Empty means all frontlet parameters when the Java parameter is a `Map<String, String>`. |
+
+### `@ModalParameter`
+
+`@ModalParameter` injects a stable parameter of the current modal instance. Modal parameters are supplied by child
+`<xis:parameter>` tags on modal openers, by `ModalResponse`, or by query strings on modal targets such as
+`/customers/edit?customerId=42`.
+
+| Attribute | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `value` | `String` | No | `""` | Parameter name. Empty means all modal parameters when the Java parameter is a `Map<String, String>`. |
 
 ### `@Include`
 
@@ -247,14 +256,15 @@ when relevant data changes.
 | `value` | `String` | No | `""` | Action name used from templates. Empty means use the Java method name. |
 | `updateEventKeys` | `String[]` | No | `{}` | Refresh event keys emitted after the action. |
 
-### `@Parameter`
+### `@ActionParameter`
 
-`@Parameter` injects a parameter supplied by an action link, button, form submitter, or drag-and-drop action.
+`@ActionParameter` injects a parameter supplied by an action link, button, form submitter, or drag-and-drop action.
 In templates, named values are typically sent with `xis:parameter` elements or named drop arguments such as
 `xis:drop="move(from, target='${field}')"`.
 
-When an action belongs to a frontlet or modal, a named `@Parameter` first reads the submitted action parameter. If that
-name is not present in the action request, XIS reads the current frontlet or modal parameter with the same name.
+Action parameters are scoped to the exact element that triggered the action. They do not fall back to frontlet or modal
+parameters with the same name; use `@FrontletParameter` or `@ModalParameter` when a method also needs that stable
+context.
 
 | Attribute | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
@@ -584,7 +594,9 @@ return new FrontletResponse(ProductFrontlet.class)
 | `@DefaultHtmlFile` | class | `value` | Provides a default template for library controllers. |
 | `@CssFile` | class | `value` | Associates a CSS file with a controller. |
 | `@Frontlet` | class | none | Declares a reusable frontlet controller. |
-| `@Parameter` | parameter | none | Injects an action, frontlet, or modal parameter. |
+| `@ActionParameter` | parameter | none | Injects a parameter from the triggering action element. |
+| `@FrontletParameter` | parameter | none | Injects a stable parameter of the current frontlet. |
+| `@ModalParameter` | parameter | none | Injects a stable parameter of the current modal. |
 | `@Include` | class | `value` | Registers a reusable HTML include. |
 | `@ModelData` | method | none | Exposes data to the template model. |
 | `@FormData` | method, parameter | `value` | Binds form data. |

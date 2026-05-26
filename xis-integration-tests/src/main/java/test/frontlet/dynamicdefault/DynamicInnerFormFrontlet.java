@@ -2,13 +2,13 @@ package test.frontlet.dynamicdefault;
 
 import one.xis.FormData;
 import one.xis.Frontlet;
-import one.xis.Parameter;
+import one.xis.FrontletParameter;
 
 @Frontlet
 class DynamicInnerFormFrontlet {
 
     @FormData("step")
-    StepForm step(@Parameter("pipelineId") long pipelineId, @Parameter("stepId") long stepId) {
+    StepForm step(@FrontletParameter("pipelineId") long pipelineId, @FrontletParameter("stepId") long stepId) {
         var form = new StepForm();
         form.pipelineId = pipelineId;
         form.stepId = stepId;

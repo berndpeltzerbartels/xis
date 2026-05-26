@@ -19,7 +19,7 @@ plugins {
     id "java"
     id "org.springframework.boot" version "3.3.0"
     id "io.spring.dependency-management" version "1.1.5"
-    id "one.xis.plugin" version "0.12.1"
+    id "one.xis.plugin" version "0.13.1"
 }
 
 repositories {
@@ -37,7 +37,7 @@ dependencies {
 ```groovy
 plugins {
     id "java"
-    id "one.xis.plugin" version "0.12.1"
+    id "one.xis.plugin" version "0.13.1"
 }
 
 repositories {
@@ -54,7 +54,7 @@ dependencies {
 ```groovy
 plugins {
     id "java"
-    id "one.xis.plugin" version "0.12.1"
+    id "one.xis.plugin" version "0.13.1"
 }
 
 repositories {
@@ -104,7 +104,10 @@ Important annotations include:
 | `@FormData` | Provides or receives form-bound data. |
 | `@Action` | Exposes a method to template-triggered interactions. |
 | `@PathVariable` | Binds a value from the current page URL. |
-| `@Parameter` | Binds a parameter passed to a frontlet. |
+| `@QueryParameter` | Binds a query parameter from the current page URL. |
+| `@ActionParameter` | Binds a parameter sent by the triggering action element. |
+| `@FrontletParameter` | Binds a stable parameter of the current frontlet. |
+| `@ModalParameter` | Binds a stable parameter of the current modal. |
 
 ## Validation API
 

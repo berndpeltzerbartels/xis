@@ -124,6 +124,7 @@ class ControllerMethodResultMapper {
         // Do not map frontletId or pageURL here !
         controllerMethodResult.setFrontletContainerId(request.getFrontletContainerId());
         controllerMethodResult.getFrontletParameters().putAll(parameterMap(request.getFrontletParameters()));
+        controllerMethodResult.getModalParameters().putAll(parameterMap(request.getModalParameters()));
         controllerMethodResult.getPathVariables().putAll(castStringMap(request.getPathVariables()));
         controllerMethodResult.getUrlParameters().putAll(castStringMap(request.getUrlParameters()));
     }
@@ -224,7 +225,7 @@ class ControllerMethodResultMapper {
             result.getPathVariables().putAll(modalResponse.getPathVariables());
         }
         if (modalResponse.getParameters() != null) {
-            result.getFrontletParameters().putAll(modalResponse.getParameters());
+            result.getModalParameters().putAll(modalResponse.getParameters());
         }
         if (modalResponse.isClose()) {
             result.setCloseModal(true);
@@ -254,7 +255,7 @@ class ControllerMethodResultMapper {
     }
 
     private void updateModal(@NonNull ControllerMethodResult result, @NonNull String modal) {
-        result.getFrontletParameters().putAll(queryParameters(modal));
+        result.getModalParameters().putAll(queryParameters(modal));
         var target = stripQuery(modal);
         if (target.startsWith("/")) {
             var localMatch = frontletControllerWrappers.findFrontletByRealPath(target);

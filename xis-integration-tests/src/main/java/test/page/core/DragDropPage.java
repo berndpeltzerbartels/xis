@@ -2,7 +2,7 @@ package test.page.core;
 
 import lombok.RequiredArgsConstructor;
 import one.xis.Action;
-import one.xis.Parameter;
+import one.xis.ActionParameter;
 import one.xis.ClientId;
 import one.xis.ModelData;
 import one.xis.Page;
@@ -24,12 +24,12 @@ class DragDropPage {
     }
 
     @Action
-    void move(@ClientId String clientId, @Parameter("from") String from, @Parameter("to") String to) {
+    void move(@ClientId String clientId, @ActionParameter("from") String from, @ActionParameter("to") String to) {
         service.move(from, to);
     }
 
     @Action
-    void moveExplicitIndex(@Parameter(index = 2) String to, @Parameter(index = 1) String from) {
+    void moveExplicitIndex(@ActionParameter(index = 2) String to, @ActionParameter(index = 1) String from) {
         service.move(from, to);
     }
 }

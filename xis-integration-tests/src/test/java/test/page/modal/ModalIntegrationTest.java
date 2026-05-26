@@ -17,7 +17,9 @@ class ModalIntegrationTest {
         context = IntegrationTestContext.builder()
                 .withSingleton(service)
                 .withSingleton(ModalIntegrationPage.class)
+                .withSingleton(ModalIntegrationPage.ModalCard.class)
                 .withSingleton(EditModal.class)
+                .withSingleton(EditCardModal.class)
                 .withSingleton(FormOnlyModal.class)
                 .build();
     }
@@ -94,5 +96,24 @@ class ModalIntegrationTest {
         assertThat(service.modalLoadCount()).isEqualTo(1);
         assertThat(service.modalSource()).isEqualTo("query parameter");
         assertThat(client.getDocument().getInputElementById("modal-value").getValue()).isEqualTo("query parameter");
+    }
+
+    @Test
+    void modalReloadParentKeepsDefaultFrontletParameterTags() {
+        var client = context.openPage("/modal-integration.html");
+
+        assertThat(client.getDocument().getElementById("card-one-value").getInnerText()).isEqualTo("empty");
+        assertThat(client.getDocument().getElementById("card-one-version").getInnerText()).isEqualTo("0");
+        assertThat(client.getDocument().getElementById("card-two-value").getInnerText()).isEqualTo("empty");
+        assertThat(client.getDocument().getElementById("card-two-version").getInnerText()).isEqualTo("0");
+
+        client.getDocument().getElementById("open-card-one-modal").click();
+        client.getDocument().getInputElementById("card-modal-value").setValue("first card");
+        client.getDocument().getElementById("card-modal-save").click();
+
+        assertThat(client.getDocument().getElementById("card-one-value").getInnerText()).isEqualTo("first card");
+        assertThat(client.getDocument().getElementById("card-one-version").getInnerText()).isEqualTo("1");
+        assertThat(client.getDocument().getElementById("card-two-value").getInnerText()).isEqualTo("empty");
+        assertThat(client.getDocument().getElementById("card-two-version").getInnerText()).isEqualTo("0");
     }
 }

@@ -3,7 +3,7 @@ package test.frontlet;
 import one.xis.Action;
 import one.xis.FormData;
 import one.xis.Frontlet;
-import one.xis.Parameter;
+import one.xis.FrontletParameter;
 import one.xis.FrontletResponse;
 import one.xis.HtmlFile;
 import one.xis.ModelData;
@@ -128,7 +128,7 @@ class ComplexFrontletFormFlowTest {
         }
 
         @ModelData("detail")
-        String detail(@Parameter("id") Integer id) {
+        String detail(@FrontletParameter("id") Integer id) {
             var product = service.get(id);
             return product.id() + ":" + product.name() + ":" + product.stock();
         }

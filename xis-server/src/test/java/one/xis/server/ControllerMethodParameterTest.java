@@ -1,8 +1,8 @@
 package one.xis.server;
 
 import one.xis.Action;
+import one.xis.ActionParameter;
 import one.xis.OwnedBy;
-import one.xis.Parameter;
 import one.xis.SharedValue;
 import one.xis.UploadConfiguration;
 import one.xis.UserContext;
@@ -148,22 +148,22 @@ class ControllerMethodParameterTest {
         boolean invoked;
 
         @Action
-        void move(@SharedValue("game") Object game, @Parameter String from, @Parameter String to) {
+        void move(@SharedValue("game") Object game, @ActionParameter String from, @ActionParameter String to) {
         }
 
         @Action
-        void moveWithUserContext(UserContext userContext, @Parameter String from, @Parameter String to) {
+        void moveWithUserContext(UserContext userContext, @ActionParameter String from, @ActionParameter String to) {
             this.userContext = userContext;
             this.from = from;
             this.to = to;
         }
 
         @Action
-        void moveWithExplicitIndexes(@Parameter(index = 2) String to, @Parameter(index = 1) String from) {
+        void moveWithExplicitIndexes(@ActionParameter(index = 2) String to, @ActionParameter(index = 1) String from) {
         }
 
         @Action
-        void invalidZeroIndex(@Parameter(index = 0) String ignored) {
+        void invalidZeroIndex(@ActionParameter(index = 0) String ignored) {
         }
 
         @Action

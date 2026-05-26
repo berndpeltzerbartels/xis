@@ -32,12 +32,12 @@ public class ContactListFrontlet {
     }
 
     @Action("edit")
-    public FrontletResponse editContact(@Parameter("contactId") Long contactId) {
+    public FrontletResponse editContact(@ActionParameter("contactId") Long contactId) {
         return FrontletResponse.of(ContactFormFrontlet.class, "contactId", contactId);
     }
 
     @Action("delete")
-    public void deleteContact(@Parameter("contactId") Long contactId) {
+    public void deleteContact(@ActionParameter("contactId") Long contactId) {
         contactService.delete(contactId);
     }
 }

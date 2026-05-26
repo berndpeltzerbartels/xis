@@ -12,17 +12,22 @@
  * @property {any} localDatabaseData
  * @property {any} globalVariableData
  * @property {Object} frontletParameters
+ * @property {Object} modalParameters
  * @property {string} frontletContainerId
  * @property {Array} reloadFrontlets
+ * @property {Array} updateEventKeys
  * @property {any} sessionStorageData
  * @property {any} clientStorageData
  * @property {any} validatorMessages
  * @property {boolean} authenticated
  * @property {Array<string>} userRoles
  * @property {Object} idVariables
+ * @property {boolean} reloadPage
+ * @property {string} redirectUrl
  * @property {string} actionProcessing
- * @property {string} title
- * @property {string} address
+ * @property {string} annotatedTitle
+ * @property {string} annotatedAddress
+ * @property {Array} defaultFrontlets
  */
 
 class ServerResponse {
@@ -41,6 +46,7 @@ class ServerResponse {
         this.globalVariableData = {};
         this.localDatabaseData = {};
         this.frontletParameters = {};
+        this.modalParameters = {};
         this.frontletContainerId = '';
         this.reloadFrontlets = [];
         this.sessionStorageData = {};
@@ -48,6 +54,9 @@ class ServerResponse {
         this.validatorMessages = { };
         this.authenticated = false;
         this.userRoles = [];
+        this.idVariables = {};
+        this.reloadPage = false;
+        this.redirectUrl = '';
         this.actionProcessing = 'NONE';
         this.updateEventKeys = [];
         this.annotatedTitle = undefined;

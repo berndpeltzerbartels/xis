@@ -24,7 +24,7 @@ import java.lang.annotation.Target;
  * <pre>{@code
  * @Action("addToCart")
  * public void addToCart(@LocalStorage("cart") ShoppingCart cart,
- *                       @Parameter("productId") String productId) {
+ *                       @ActionParameter("productId") String productId) {
  *     cart.addProduct(productId);
  *     // the mutated cart parameter is saved back to localStorage
  * }

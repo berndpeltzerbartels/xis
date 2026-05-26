@@ -21,7 +21,7 @@ import java.lang.annotation.*;
  * <pre>{@code
  * @Action("updateWizardStep")
  * public void updateStep(@SessionStorage("wizardData") WizardData data,
- *                        @Parameter("step") int step) {
+ *                        @ActionParameter("step") int step) {
  *     data.setCurrentStep(step);
  *     // the mutated data parameter is saved back to sessionStorage
  * }

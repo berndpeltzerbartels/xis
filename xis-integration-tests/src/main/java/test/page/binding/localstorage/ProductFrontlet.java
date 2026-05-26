@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import one.xis.Action;
-import one.xis.Parameter;
+import one.xis.ActionParameter;
 import one.xis.LocalStorage;
 import one.xis.Frontlet;
 
@@ -38,7 +38,7 @@ public class ProductFrontlet {
 
 
     @Action("addProduct")
-    ShoppingCard addProduct(@LocalStorage("shoppingCard") ShoppingCard card, @Parameter("index") int productIndex) {
+    ShoppingCard addProduct(@LocalStorage("shoppingCard") ShoppingCard card, @ActionParameter("index") int productIndex) {
         card.getProducts().add(products.get(productIndex));
         return card;
     }

@@ -46,7 +46,9 @@ public class XISValidateProcessor extends AbstractProcessor {
     private static final String ACTION_ANNOTATION = "one.xis.Action";
     private static final String MODEL_DATA_ANNOTATION = "one.xis.ModelData";
     private static final String FORM_DATA_ANNOTATION = "one.xis.FormData";
-    private static final String PARAMETER_ANNOTATION = "one.xis.Parameter";
+    private static final String ACTION_PARAMETER_ANNOTATION = "one.xis.ActionParameter";
+    private static final String FRONTLET_PARAMETER_ANNOTATION = "one.xis.FrontletParameter";
+    private static final String MODAL_PARAMETER_ANNOTATION = "one.xis.ModalParameter";
     private static final String SHARED_VALUE_ANNOTATION = "one.xis.SharedValue";
     private static final int MAX_PROPERTY_DEPTH = 6;
 
@@ -184,47 +186,72 @@ public class XISValidateProcessor extends AbstractProcessor {
     private void validateActionParameters(List<ExecutableElement> methods) {
         for (ExecutableElement method : methods) {
             for (VariableElement parameter : method.getParameters()) {
-                if (!hasAnnotation(parameter, PARAMETER_ANNOTATION)) {
+                var parameterAnnotation = parameterAnnotation(parameter);
+                if (parameterAnnotation.isEmpty()) {
                     continue;
                 }
-                Optional<String> mapError = parameterMapError(parameter);
+                Optional<String> mapError = parameterMapError(parameter, parameterAnnotation.get());
                 if (mapError.isPresent()) {
                     processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, mapError.get(), parameter);
                     continue;
                 }
-                if (!isParameterMap(parameter) && !isSimpleParameterType(parameter.asType())) {
+                if (!isParameterMap(parameter, parameterAnnotation.get()) && !isSimpleParameterType(parameter.asType())) {
                     processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
-                            "@Parameter supports only simple values. Use @FormData for complex objects.",
+                            simpleParameterError(parameterAnnotation.get()),
                             parameter);
                 }
             }
         }
     }
 
-    private boolean isParameterMap(VariableElement parameter) {
-        return isUnnamedParameterMapType(parameter) && parameterMapError(parameter).isEmpty();
+    private Optional<String> parameterAnnotation(VariableElement parameter) {
+        if (hasAnnotation(parameter, ACTION_PARAMETER_ANNOTATION)) {
+            return Optional.of(ACTION_PARAMETER_ANNOTATION);
+        }
+        if (hasAnnotation(parameter, FRONTLET_PARAMETER_ANNOTATION)) {
+            return Optional.of(FRONTLET_PARAMETER_ANNOTATION);
+        }
+        if (hasAnnotation(parameter, MODAL_PARAMETER_ANNOTATION)) {
+            return Optional.of(MODAL_PARAMETER_ANNOTATION);
+        }
+        return Optional.empty();
     }
 
-    private Optional<String> parameterMapError(VariableElement parameter) {
-        var value = annotationStringValue(parameter, PARAMETER_ANNOTATION, "value").orElse("");
+    private boolean isParameterMap(VariableElement parameter, String annotationName) {
+        return isUnnamedParameterMapType(parameter) && parameterMapError(parameter, annotationName).isEmpty();
+    }
+
+    private Optional<String> parameterMapError(VariableElement parameter, String annotationName) {
+        var value = annotationStringValue(parameter, annotationName, "value").orElse("");
         if (!value.isBlank()) {
             return Optional.empty();
         }
         if (!isUnnamedParameterMapType(parameter)) {
             return Optional.empty();
         }
+        if (ACTION_PARAMETER_ANNOTATION.equals(annotationName)) {
+            return Optional.of("Unnamed @ActionParameter maps are not supported.");
+        }
         if (!(parameter.asType() instanceof DeclaredType declaredType) || declaredType.getTypeArguments().size() != 2) {
-            return Optional.of("Unnamed @Parameter maps must be declared as Map<String, simple value>.");
+            return Optional.of(simpleAnnotationName(annotationName) + " maps must be declared as Map<String, simple value>.");
         }
         TypeMirror keyType = declaredType.getTypeArguments().get(0);
         TypeMirror valueType = declaredType.getTypeArguments().get(1);
         if (!isStringType(keyType)) {
-            return Optional.of("Unnamed @Parameter maps must use String keys.");
+            return Optional.of(simpleAnnotationName(annotationName) + " maps must use String keys.");
         }
         if (!isSimpleParameterType(valueType)) {
-            return Optional.of("Unnamed @Parameter maps support only simple value types.");
+            return Optional.of(simpleAnnotationName(annotationName) + " maps support only simple value types.");
         }
         return Optional.empty();
+    }
+
+    private String simpleParameterError(String annotationName) {
+        return simpleAnnotationName(annotationName) + " supports only simple values. Use @FormData for complex objects.";
+    }
+
+    private String simpleAnnotationName(String annotationName) {
+        return "@" + annotationName.substring(annotationName.lastIndexOf('.') + 1);
     }
 
     private boolean isUnnamedParameterMapType(VariableElement parameter) {

@@ -1,7 +1,7 @@
 package test.page.core;
 
 import one.xis.Action;
-import one.xis.Parameter;
+import one.xis.ActionParameter;
 import one.xis.ModelData;
 import one.xis.Page;
 
@@ -14,7 +14,7 @@ public class ActionAndModel {
      */
     @Action("test-action-model")
     @ModelData("modelActionData")
-    public String modelAction(@Parameter("value") String value) {
+    public String modelAction(@ActionParameter("value") String value) {
         return "Processed: " + value;
     }
 }

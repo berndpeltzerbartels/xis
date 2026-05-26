@@ -62,8 +62,8 @@ class ControllerMethod {
         if (!method.isAnnotationPresent(Action.class)) {
             return false;
         }
-        if (parameter.isAnnotationPresent(one.xis.Parameter.class)) {
-            var actionParameter = parameter.getAnnotation(one.xis.Parameter.class);
+        if (parameter.isAnnotationPresent(ActionParameter.class)) {
+            var actionParameter = parameter.getAnnotation(ActionParameter.class);
             return actionParameter.value().isEmpty() && actionParameter.index() < 0;
         }
         return !isFrameworkInjectedParameter(parameter);
@@ -80,7 +80,9 @@ class ControllerMethod {
                 || parameter.isAnnotationPresent(ClientId.class)
                 || parameter.isAnnotationPresent(QueryParameter.class)
                 || parameter.isAnnotationPresent(one.xis.PathVariable.class)
-                || parameter.isAnnotationPresent(one.xis.Parameter.class)
+                || parameter.isAnnotationPresent(ActionParameter.class)
+                || parameter.isAnnotationPresent(FrontletParameter.class)
+                || parameter.isAnnotationPresent(ModalParameter.class)
                 || parameter.isAnnotationPresent(SharedValue.class)
                 || parameter.isAnnotationPresent(SessionStorage.class)
                 || parameter.isAnnotationPresent(LocalStorage.class)

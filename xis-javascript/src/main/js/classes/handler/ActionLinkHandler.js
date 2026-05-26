@@ -28,8 +28,10 @@ class ActionLinkHandler extends TagHandler {
      */
     refresh(data) {
         this.data = data;
+        this.actionParameters = {};
         return this.refreshDescendantHandlers(data).then(() => {
             this.refreshWithData(data);
+            this.applyActionQueryParameters();
         });
     }
 
@@ -41,6 +43,14 @@ class ActionLinkHandler extends TagHandler {
         this.data = data;
         this.targetContainerId = this.tag.getAttribute('xis:target-container');
         this.action = this.tag.getAttribute('xis:action');
+    }
+
+    applyActionQueryParameters() {
+        var queryParameters = urlParameters(this.action);
+        for (var key of Object.keys(queryParameters)) {
+            this.actionParameters[key] = queryParameters[key];
+        }
+        this.action = stripQuery(this.action);
     }
 
 

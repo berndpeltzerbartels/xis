@@ -139,8 +139,8 @@ class HttpClient extends Client {
         }
     }
 
-    async loadFormData(resolvedURL, frontletId, formBindingKey, frontletParameters, load) {
-        const request = this.createFormRequest(resolvedURL, frontletId, {}, null, formBindingKey, frontletParameters, load);
+    async loadFormData(resolvedURL, frontletId, formBindingKey, frontletParameters, modalParameters, load) {
+        const request = this.createFormRequest(resolvedURL, frontletId, {}, null, formBindingKey, frontletParameters, modalParameters, load);
         try {
             const response = await this.httpConnector.post(this.resolveFormUri('/xis/form/model', resolvedURL, frontletId), request, {});
             return this.handleResponse(response);
@@ -173,9 +173,9 @@ class HttpClient extends Client {
 
     }
 
-    async formAction(resolvedURL, frontletId, formData, action, formBindigKey, formBindingParameters, actionParameters, uploads) {
+    async formAction(resolvedURL, frontletId, formData, action, formBindigKey, formBindingParameters, modalParameters, actionParameters, uploads) {
         app.messageHandler.clearMessages();
-        const request = this.createFormRequest(resolvedURL, frontletId, formData, action, formBindigKey, formBindingParameters, undefined, actionParameters);
+        const request = this.createFormRequest(resolvedURL, frontletId, formData, action, formBindigKey, formBindingParameters, modalParameters, undefined, actionParameters);
         try {
             const response = await this.httpConnector.post(this.resolveFormUri('/xis/form/action', resolvedURL, frontletId), request, {}, uploads);
             return this.handleResponse(response);

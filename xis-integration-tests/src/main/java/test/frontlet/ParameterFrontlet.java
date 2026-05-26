@@ -10,7 +10,7 @@ class ParameterFrontlet {
     private final ParameterFrontletService service;
 
     @Action("action")
-    void action(@PathVariable("a") Integer a, @QueryParameter("b") Integer b, @Parameter("c") int c) {
+    void action(@PathVariable("a") Integer a, @QueryParameter("b") Integer b, @FrontletParameter("c") int c) {
         service.action(a, b, c);
     }
 }

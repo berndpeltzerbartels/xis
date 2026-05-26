@@ -27,7 +27,7 @@ class FormHandler extends TagHandler {
         var formBindingKey = stripQuery(this.binding);
         var parameters = mergeObjects(this.frontletParameters || {}, formBindingParameters);
         this.resetMessageHandlers();
-        return this.client.formAction(resolvedUrl, this.frontletId(), this.formData(), action, formBindingKey, parameters, actionParameters, this.uploads())
+        return this.client.formAction(resolvedUrl, this.frontletId(), this.formData(), action, formBindingKey, parameters, this.modalParameters || {}, actionParameters, this.uploads())
             .then(response => this.handleActionResponse(response, this.targetContainerHandler()));
     }
 
@@ -115,6 +115,7 @@ class FormHandler extends TagHandler {
         this.binding = this.bindingExpression.evaluate(data);
         var frontletParameters = data.getValue(['frontletParameters']) || {};
         this.frontletParameters = frontletParameters;
+        this.modalParameters = data.getValue(['modalParameters']) || {};
         var formBindingKey = stripQuery(this.binding);
         this.formElementHandlers = {};
         this.fileInputHandlers = [];
@@ -124,7 +125,7 @@ class FormHandler extends TagHandler {
         const actionFormData = this.actionFormData(data, formBindingKey);
         const formDataPromise = actionFormData !== undefined
             ? Promise.resolve(this.refreshFormData(new Data(actionFormData || {})))
-            : this.client.loadFormData(app.pageController.resolvedURL, this.frontletId(), formBindingKey, frontletParameters, this.formDataLoad(data))
+            : this.client.loadFormData(app.pageController.resolvedURL, this.frontletId(), formBindingKey, frontletParameters, this.modalParameters, this.formDataLoad(data))
                 .then(response => this.refreshFormData(this.subData(response, formBindingKey)));
         return Promise.all([descendantPromise, formDataPromise]);
     }

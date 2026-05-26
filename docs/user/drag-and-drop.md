@@ -30,7 +30,7 @@ The action method receives the evaluated arguments:
 
 ```java
 @Action
-void move(@Parameter("from") String from, @Parameter("target") String target) {
+void move(@ActionParameter("from") String from, @ActionParameter("target") String target) {
     chessService.move(from, target);
 }
 ```
@@ -67,7 +67,7 @@ class BoardPage {
     }
 
     @Action
-    void move(@Parameter("itemId") String itemId, @Parameter("listId") String listId) {
+    void move(@ActionParameter("itemId") String itemId, @ActionParameter("listId") String listId) {
         boardService.move(itemId, listId);
     }
 }

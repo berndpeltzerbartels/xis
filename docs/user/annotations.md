@@ -77,7 +77,7 @@ class ProductPage {
 
     @Action
     void rename(@SharedValue("product") Product product,
-                @Parameter("name") String name) {
+                @ActionParameter("name") String name) {
         product.renameTo(name);
         productService.save(product);
     }
@@ -98,7 +98,7 @@ class QuotePage {
 
     @Action
     @ModelData("calculationResult")
-    String calculate(@Parameter("productId") long productId) {
+    String calculate(@ActionParameter("productId") long productId) {
         return quoteService.calculate(productId).displayText();
     }
 }
@@ -119,7 +119,9 @@ purpose.
 | --- | --- |
 | `@PathVariable("name")` | Reads a value from a `@Page` path such as `/orders/{id}.html`. |
 | `@QueryParameter("name")` | Reads a query parameter from the current page URL, such as `/orders.html?status=open`. |
-| `@Parameter("name")` | Reads an action, frontlet, or modal parameter supplied by `<xis:parameter>`, `FrontletResponse`, `ModalResponse`, or a frontlet/modal target URL such as `ProductSummary?productId=42`. |
+| `@ActionParameter("name")` | Reads a one-shot parameter submitted by the action element that triggered the current action. |
+| `@FrontletParameter("name")` | Reads a stable parameter of the current frontlet instance, supplied by a frontlet target URL, `<xis:parameter>` on a frontlet link/container, or `FrontletResponse`. |
+| `@ModalParameter("name")` | Reads a stable parameter of the current modal instance, supplied by a modal target URL, `<xis:parameter>` on the opener, or `ModalResponse`. |
 | `@FormData("name")` | Initializes form data on methods or injects submitted form data into action parameters. Method usage supports `load`. |
 | `@Upload` | Binds an uploaded multipart file to a form field or controller parameter. |
 | `@SharedValue("name")` | Injects a value produced by another `@SharedValue` method in the same controller processing flow. |
@@ -145,10 +147,11 @@ authentication, and role state, plus `HttpRequest`, `HttpResponse`, and `Request
 
 ### UI Parameters
 
-Use `@Parameter` for values that belong to the XIS UI interaction itself. The same annotation is used for action
-parameters and for parameters scoped to a frontlet or modal.
-`@Parameter` is for simple values such as strings, numbers, booleans, dates, and enums. Use `@FormData` for complex
-objects.
+XIS keeps action, frontlet, and modal parameters separate because they have different lifetimes.
+Use `@ActionParameter` for values submitted by the exact action element the user clicked. Use `@FrontletParameter` for
+the stable context of the currently loaded frontlet. Use `@ModalParameter` for the stable context of the currently open
+modal. These annotations are for simple values such as strings, numbers, booleans, dates, and enums. Use `@FormData`
+for complex objects.
 
 ```html
 <button xis:action="delete">
@@ -161,34 +164,35 @@ objects.
 
 ```java
 @Action
-void delete(@Parameter("productId") long productId) {
+void delete(@ActionParameter("productId") long productId) {
     productService.delete(productId);
 }
 
 @FormData("customer")
-CustomerForm customer(@Parameter("customerId") long customerId) {
+CustomerForm customer(@ModalParameter("customerId") long customerId) {
     return customerService.form(customerId);
 }
 ```
 
 Frontlet and modal target URLs may contain query strings. Those values are still frontlet or modal parameters and are
-therefore read with `@Parameter`. `@QueryParameter` is only for the query string of the current page URL. Use
+therefore read with `@FrontletParameter` or `@ModalParameter`. `@QueryParameter` is only for the query string of the current page URL. Use
 `@PathVariable` for values embedded in a page, frontlet, or modal path. Use `@SharedValue`, `@LocalStorage`,
 `@SessionStorage`, and `@ClientStorage` when the value comes from a different source than the current UI parameter set.
 
-In action methods, named `@Parameter` values first read parameters submitted by the action element. If that name is not
-present there, XIS reads the current frontlet or modal parameter with the same name. Positional action parameters are
-also supported:
+Action parameters never implicitly fall back to frontlet or modal parameters. If a method needs both values, name both
+parameters explicitly. Positional action parameters are also supported:
 
 ```java
 @Action
-void move(@Parameter(index = 1) String from, @Parameter(index = 2) String to) {
+void move(@ActionParameter(index = 1) String from, @ActionParameter(index = 2) String to) {
 }
 ```
 
 The explicit index is 1-based and counts only action values, not Java method parameters. An unnamed
-`@Parameter Map<String, Integer>` or `Map<String, T>` receives all current frontlet or modal parameters when `T` is a
-simple value type. Map keys must be `String`; values may be strings, numbers, booleans, dates, or enums.
+`@FrontletParameter Map<String, Integer>` or `@ModalParameter Map<String, T>` receives all current frontlet or modal
+parameters when `T` is a simple value type. Map keys must be `String`; values may be strings, numbers, booleans, dates,
+or enums. `@ActionParameter` does not support an unnamed map because action parameters are scoped to one triggering
+element.
 
 ### Configuration Values
 
@@ -224,7 +228,7 @@ class CartPage {
 
     @Action("addToCart")
     void addToCart(@LocalStorage("cart") Cart cart,
-                   @Parameter("productId") String productId) {
+                   @ActionParameter("productId") String productId) {
         cart.add(productId);
     }
 }

@@ -317,7 +317,7 @@ Simple drag-and-drop actions use `xis:drag` and `xis:drop`:
 
 ```java
 @Action
-void move(@Parameter("from") String from, @Parameter("target") String target) {
+void move(@ActionParameter("from") String from, @ActionParameter("target") String target) {
 }
 ```
 

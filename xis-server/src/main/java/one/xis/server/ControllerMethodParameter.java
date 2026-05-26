@@ -58,8 +58,12 @@ class ControllerMethodParameter {
             return deserializeUrlParameter(parameter, request, postProcessingResults);
         } else if (parameter.isAnnotationPresent(one.xis.PathVariable.class)) {
             return deserializePathVariable(parameter, request, postProcessingResults);
-        } else if (parameter.isAnnotationPresent(one.xis.Parameter.class)) {
-            return deserializeParameter(parameter, request, postProcessingResults);
+        } else if (parameter.isAnnotationPresent(ActionParameter.class)) {
+            return deserializeActionParameter(parameter, request, postProcessingResults);
+        } else if (parameter.isAnnotationPresent(FrontletParameter.class)) {
+            return deserializeComponentParameter(parameter, request, postProcessingResults, parameter.getAnnotation(FrontletParameter.class).value(), request.getFrontletParameters(), "frontlet");
+        } else if (parameter.isAnnotationPresent(ModalParameter.class)) {
+            return deserializeComponentParameter(parameter, request, postProcessingResults, parameter.getAnnotation(ModalParameter.class).value(), request.getModalParameters(), "modal");
         } else if (parameter.isAnnotationPresent(SharedValue.class)) {
             var key = parameter.getAnnotation(SharedValue.class).value();
             var sharedValue = requestScope.get(key);
@@ -95,8 +99,12 @@ class ControllerMethodParameter {
     }
 
     void addParameterValueToResult(ControllerMethodResult controllerMethodResult, Object parameterValue, ClientRequest request) {
-        if (parameter.isAnnotationPresent(one.xis.Parameter.class)) {
-            addControllerParameterValueToResult(controllerMethodResult, parameterValue, request);
+        if (parameter.isAnnotationPresent(ActionParameter.class)) {
+            addActionParameterValueToResult(controllerMethodResult, parameterValue);
+        } else if (parameter.isAnnotationPresent(FrontletParameter.class)) {
+            addFrontletParameterValueToResult(controllerMethodResult, parameterValue, parameter.getAnnotation(FrontletParameter.class).value());
+        } else if (parameter.isAnnotationPresent(ModalParameter.class)) {
+            addModalParameterValueToResult(controllerMethodResult, parameterValue, parameter.getAnnotation(ModalParameter.class).value());
         } else if (parameter.isAnnotationPresent(FormData.class)) {
             controllerMethodResult.getFormData().put(parameter.getAnnotation(FormData.class).value(), parameterValue);
         } else if (parameter.isAnnotationPresent(QueryParameter.class)) {
@@ -112,14 +120,14 @@ class ControllerMethodParameter {
         }
     }
 
-    private void addControllerParameterValueToResult(ControllerMethodResult controllerMethodResult, Object parameterValue, ClientRequest request) {
-        var key = parameter.getAnnotation(one.xis.Parameter.class).value();
-        if (isActionParameter(request)) {
-            if (!key.isEmpty()) {
-                controllerMethodResult.getModelData().put(key, parameterValue);
-            }
-            return;
+    private void addActionParameterValueToResult(ControllerMethodResult controllerMethodResult, Object parameterValue) {
+        var key = parameter.getAnnotation(ActionParameter.class).value();
+        if (!key.isEmpty()) {
+            controllerMethodResult.getModelData().put(key, parameterValue);
         }
+    }
+
+    private void addFrontletParameterValueToResult(ControllerMethodResult controllerMethodResult, Object parameterValue, String key) {
         if (key.isEmpty() && parameterValue instanceof Map<?, ?> map) {
             map.forEach((name, value) -> controllerMethodResult.getFrontletParameters().put(String.valueOf(name), value));
         } else if (!key.isEmpty()) {
@@ -127,17 +135,25 @@ class ControllerMethodParameter {
         }
     }
 
+    private void addModalParameterValueToResult(ControllerMethodResult controllerMethodResult, Object parameterValue, String key) {
+        if (key.isEmpty() && parameterValue instanceof Map<?, ?> map) {
+            map.forEach((name, value) -> controllerMethodResult.getModalParameters().put(String.valueOf(name), value));
+        } else if (!key.isEmpty()) {
+            controllerMethodResult.getModalParameters().put(key, parameterValue);
+        }
+    }
+
     private String actionParameterKey() {
-        var actionParameter = parameter.getAnnotation(one.xis.Parameter.class);
+        var actionParameter = parameter.getAnnotation(ActionParameter.class);
         if (!actionParameter.value().isEmpty()) {
             return actionParameter.value();
         }
         if (actionParameter.index() == 0) {
-            throw new IllegalStateException(method + ": @Parameter index is 1-based; use index=1 for the first action argument");
+            throw new IllegalStateException(method + ": @ActionParameter index is 1-based; use index=1 for the first action argument");
         }
         var index = actionParameter.index() > 0 ? actionParameter.index() - 1 : positionalParameterIndex;
         if (index < 0) {
-            throw new IllegalStateException(method + ": positional @Parameter cannot be resolved for " + parameter);
+            throw new IllegalStateException(method + ": positional @ActionParameter cannot be resolved for " + parameter);
         }
         return "$" + index;
     }
@@ -294,34 +310,24 @@ class ControllerMethodParameter {
                 ignored -> new StorageParameterValues());
     }
 
-    private Object deserializeParameter(Parameter parameter, ClientRequest request, PostProcessingResults postProcessingResults) throws IOException {
-        if (isActionParameter(request)) {
-            var paramValue = request.getActionParameters().get(actionParameterKey());
-            return deserializeParameter(paramValue, request, parameter, postProcessingResults);
+    private Object deserializeActionParameter(Parameter parameter, ClientRequest request, PostProcessingResults postProcessingResults) throws IOException {
+        var key = actionParameterKey();
+        if (isMandatory(parameter) && !request.getActionParameters().containsKey(key)) {
+            throw new IllegalStateException("No action parameter found for key " + key);
         }
-        var key = parameter.getAnnotation(one.xis.Parameter.class).value();
-        if (key.isEmpty() && Map.class.isAssignableFrom(parameter.getType())) {
-            return deserializeParameterMap(request.getFrontletParameters());
-        }
-        if (isMandatory(parameter) && !request.getFrontletParameters().containsKey(key)) {
-            throw new IllegalStateException("No parameter found for key " + key);
-        }
-        var paramValue = request.getFrontletParameters().get(key);
+        var paramValue = request.getActionParameters().get(key);
         return deserializeParameter(paramValue, request, parameter, postProcessingResults);
     }
 
-    private boolean isActionParameter(ClientRequest request) {
-        if (!method.isAnnotationPresent(Action.class)) {
-            return false;
+    private Object deserializeComponentParameter(Parameter parameter, ClientRequest request, PostProcessingResults postProcessingResults, String key, Map<String, String> parameters, String source) throws IOException {
+        if (key.isEmpty() && Map.class.isAssignableFrom(parameter.getType())) {
+            return deserializeParameterMap(parameters);
         }
-        if (!parameter.isAnnotationPresent(one.xis.Parameter.class)) {
-            return false;
+        if (isMandatory(parameter) && !parameters.containsKey(key)) {
+            throw new IllegalStateException("No " + source + " parameter found for key " + key);
         }
-        var annotation = parameter.getAnnotation(one.xis.Parameter.class);
-        if (annotation.value().isEmpty()) {
-            return annotation.index() >= 0 || positionalParameterIndex >= 0;
-        }
-        return request.getActionParameters().containsKey(annotation.value());
+        var paramValue = parameters.get(key);
+        return deserializeParameter(paramValue, request, parameter, postProcessingResults);
     }
 
     private Map<String, String> deserializeParameterMap(Map<String, String> parameters) {

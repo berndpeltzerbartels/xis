@@ -51,6 +51,7 @@ class ControllerResultMapper {
         controllerResult.getFormData().putAll(controllerMethodResult.getFormData());
         controllerResult.getReturnedFormDataKeys().addAll(controllerMethodResult.getReturnedFormDataKeys());
         controllerResult.getFrontletParameters().putAll(controllerMethodResult.getFrontletParameters());
+        controllerResult.getModalParameters().putAll(controllerMethodResult.getModalParameters());
         controllerResult.getPathVariables().putAll(controllerMethodResult.getPathVariables());
         controllerResult.getUrlParameters().putAll(controllerMethodResult.getUrlParameters());
         controllerResult.getValidatorMessages().getGlobalMessages().addAll(controllerMethodResult.getValidatorMessages().getGlobalMessages());
@@ -70,6 +71,7 @@ class ControllerResultMapper {
         nextRequest.setPathVariables(toJsonMap(controllerResult.getPathVariables()));
         nextRequest.setFrontletContainerId(controllerResult.getFrontletContainerId());
         nextRequest.setFrontletParameters(toJsonValueMap(controllerResult.getFrontletParameters()));
+        nextRequest.setModalParameters(toJsonValueMap(controllerResult.getModalParameters()));
         nextRequest.setFrontletId(controllerResult.getNextFrontletId() != null ? controllerResult.getNextFrontletId() : controllerResult.getNextModalId());
     }
 

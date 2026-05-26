@@ -1,9 +1,9 @@
 package test.page.forms.syntax;
 
 import one.xis.Action;
+import one.xis.ActionParameter;
 import one.xis.FormData;
 import one.xis.ModelData;
-import one.xis.Parameter;
 import one.xis.Page;
 
 import java.util.List;
@@ -29,7 +29,7 @@ class AttributeFormSyntaxPage {
 
     @Action
     public void save(@FormData("form") FrameworkFormSyntaxModel form,
-                     @Parameter("submitMode") String submitMode) {
+                     @ActionParameter("submitMode") String submitMode) {
         service.save(form, submitMode);
     }
 }

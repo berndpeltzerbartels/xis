@@ -2,7 +2,7 @@ package test.page.modal;
 
 import one.xis.Action;
 import one.xis.FormData;
-import one.xis.Parameter;
+import one.xis.ModalParameter;
 import one.xis.ModelData;
 import one.xis.Modal;
 import one.xis.ModalResponse;
@@ -18,13 +18,13 @@ class EditModal {
     }
 
     @ModelData("modalSource")
-    String modalSource(@Parameter("source") String source) {
+    String modalSource(@ModalParameter("source") String source) {
         service.modalLoaded(source);
         return source;
     }
 
     @FormData("edit")
-    EditForm edit(@Parameter("source") String source) {
+    EditForm edit(@ModalParameter("source") String source) {
         return new EditForm(source);
     }
 

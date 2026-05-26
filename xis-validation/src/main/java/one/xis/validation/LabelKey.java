@@ -170,12 +170,12 @@ import java.lang.annotation.Target;
  * </ul>
  * 
  * <h2>Usage on Action Parameters</h2>
- * <p>{@code @LabelKey} can also be used with {@code @Parameter} for validating action method parameters:</p>
+ * <p>{@code @LabelKey} can also be used with {@code @ActionParameter} for validating action method parameters:</p>
  * 
  * <pre>{@code
  * @Action
  * void transferMoney(
- *     @Parameter("amount")
+ *     @ActionParameter("amount")
  *     @Money(maxValue = 10000)
  *     @LabelKey("transferAmount")
  *     BigDecimal amount

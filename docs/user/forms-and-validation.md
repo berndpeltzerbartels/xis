@@ -83,7 +83,7 @@ the next render.
 ```java
 @Action
 @FormData("user")
-UserForm selectUser(@Parameter("userId") long userId) {
+UserForm selectUser(@ActionParameter("userId") long userId) {
     return UserForm.from(userService.findById(userId));
 }
 ```
@@ -95,13 +95,13 @@ One form can have multiple actions.
 ```java
 @Action("saveDraft")
 void saveDraft(@FormData("document") DocumentForm document,
-               @Parameter("mode") String mode) {
+               @ActionParameter("mode") String mode) {
     documentService.saveDraft(document);
 }
 
 @Action("publish")
 Class<?> publish(@FormData("document") DocumentForm document,
-                 @Parameter("mode") String mode) {
+                 @ActionParameter("mode") String mode) {
     documentService.publish(document);
     return PublishedDocumentsPage.class;
 }
@@ -142,7 +142,7 @@ Element syntax:
 ```
 
 Form submit actions support the same child `<xis:parameter>` syntax as action links and action buttons. The submitted
-form object is read with `@FormData`; submitter-specific values are read with `@Parameter`.
+form object is read with `@FormData`; submitter-specific values are read with `@ActionParameter`.
 
 ## Nested Objects and Lists
 

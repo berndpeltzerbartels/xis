@@ -130,6 +130,7 @@ class ControllerService {
             nextControllerResult.setNextURL(this.pathResolver.evaluateRealPath(path, controllerResult.getPathVariables(), controllerResult.getUrlParameters()));
         }
         nextControllerResult.getFrontletParameters().putAll(controllerResult.getFrontletParameters());
+        nextControllerResult.getModalParameters().putAll(controllerResult.getModalParameters());
         // get model data for next controller
         nextControllerWrapper.invokeGetModelMethods(nextRequest, nextControllerResult);
         // map result to response

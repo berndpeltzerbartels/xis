@@ -29,6 +29,7 @@ public class ClientRequest {
     private JsonMap urlParameters = new JsonMap();
     private JsonMap queryParameters = new JsonMap();
     private JsonMap frontletParameters = new JsonMap();
+    private JsonMap modalParameters = new JsonMap();
     private JsonMap actionParameters = new JsonMap();
     private final JsonMap sessionStorageData = new JsonMap();
     private final JsonMap localStorageData = new JsonMap();

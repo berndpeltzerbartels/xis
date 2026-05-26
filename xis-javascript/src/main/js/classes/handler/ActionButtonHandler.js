@@ -32,8 +32,11 @@ class ActionButtonHandler extends TagHandler {
      */
     refresh(data) {
         this.data = data;
+        this.actionParameters = {};
         this.renderWithData(data);
-        return this.refreshDescendantHandlers(data);
+        return this.refreshDescendantHandlers(data).then(() => {
+            this.applyActionQueryParameters();
+        });
     }
 
     /**
@@ -45,6 +48,14 @@ class ActionButtonHandler extends TagHandler {
         this.data = data;
         this.action = this.actionExpression.evaluate(data);
         return Promise.resolve();
+    }
+
+    applyActionQueryParameters() {
+        var queryParameters = urlParameters(this.action);
+        for (var key of Object.keys(queryParameters)) {
+            this.actionParameters[key] = queryParameters[key];
+        }
+        this.action = stripQuery(this.action);
     }
 
     addParameter(name, value) {

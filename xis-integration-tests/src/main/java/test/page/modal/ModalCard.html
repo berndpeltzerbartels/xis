@@ -1,0 +1,8 @@
+<div id="card-${card}" xmlns:xis="https://xis.one/xsd">
+    <span id="card-${card}-value">${cardValue}</span>
+    <span id="card-${card}-version">${cardVersion}</span>
+    <button id="open-card-${card}-modal" xis:modal="EditCardModal">
+        <xis:parameter name="card" value="${card}"/>
+        Edit card
+    </button>
+</div>

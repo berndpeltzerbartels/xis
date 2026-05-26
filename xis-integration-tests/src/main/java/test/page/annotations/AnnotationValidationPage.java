@@ -2,7 +2,7 @@ package test.page.annotations;
 
 import lombok.Getter;
 import one.xis.Action;
-import one.xis.Parameter;
+import one.xis.ActionParameter;
 import one.xis.FormData;
 import one.xis.Formatter;
 import one.xis.ModelData;
@@ -32,7 +32,7 @@ class AnnotationValidationPage {
 
     @Action("optional")
     @ModelData("optionalResult")
-    String optional(@Parameter("optional") @NullAllowed Integer optional) {
+    String optional(@ActionParameter("optional") @NullAllowed Integer optional) {
         return optional == null ? "missing" : String.valueOf(optional);
     }
 

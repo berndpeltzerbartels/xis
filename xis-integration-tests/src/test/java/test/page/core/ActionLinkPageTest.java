@@ -72,4 +72,26 @@ class ActionLinkPageTest {
         assertThat(captor.getValue().getValue()).isEqualTo("value-test-action3");
 
     }
+
+    @Test
+    void actionLinkCanUseQueryParameters() {
+        var client = testContext.openPage("/actionPage.html");
+        client.getDocument().getElementById("action-link4").click();
+
+        var captor = ArgumentCaptor.forClass(ActionLinkPageData.class);
+        verify(service).update(captor.capture());
+        assertThat(captor.getValue().getId()).isEqualTo(202);
+        assertThat(captor.getValue().getValue()).isEqualTo("value4");
+    }
+
+    @Test
+    void actionButtonCanUseQueryParametersWithExpressions() {
+        var client = testContext.openPage("/actionPage.html");
+        client.getDocument().getElementById("action-button5").click();
+
+        var captor = ArgumentCaptor.forClass(ActionLinkPageData.class);
+        verify(service).update(captor.capture());
+        assertThat(captor.getValue().getId()).isEqualTo(303);
+        assertThat(captor.getValue().getValue()).isEqualTo("value-303");
+    }
 }

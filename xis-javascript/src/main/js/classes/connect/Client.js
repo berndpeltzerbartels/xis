@@ -83,7 +83,7 @@ class Client {
      * @param {String} formBindingKey
      * @param {any} formBindingParameters
      */
-    loadFormData(resolvedURL, frontletId, formBindingKey, formBindingParameters, load) {
+    loadFormData(resolvedURL, frontletId, formBindingKey, formBindingParameters, modalParameters, load) {
         throw new Error('Not implemented');
     }
 
@@ -119,7 +119,7 @@ class Client {
      * @param {string} binding
      * @returns {Promise<ServerReponse>}
      */
-    formAction(resolvedURL, frontletId, formData, action, formBindigKey, formBindingParameters, actionParameters, uploads) {
+    formAction(resolvedURL, frontletId, formData, action, formBindigKey, formBindingParameters, modalParameters, actionParameters, uploads) {
         throw new Error('Not implemented');
     }
 
@@ -259,7 +259,7 @@ class Client {
      * @param {String} action
      * @param {any} actionParameters
      */
-    createFormRequest(resolvedURL, frontletId, formData, action, formBindingKey, frontletParameters, load, actionParameters) {
+    createFormRequest(resolvedURL, frontletId, formData, action, formBindingKey, frontletParameters, modalParameters, load, actionParameters) {
         var mappedFormData = {};
         if (formBindingKey) {
             mappedFormData[formBindingKey] = formData;
@@ -277,6 +277,7 @@ class Client {
         request.urlParameters = resolvedURL.urlParameters;
         request.pathVariables = resolvedURL.pathVariablesAsMap();
         request.frontletParameters = this.serializeParameterMap(frontletParameters);
+        request.modalParameters = this.serializeParameterMap(modalParameters);
         request.load = load || 'INITIAL';
         request.zoneId = this.zoneId;
         request.type = request.frontletId ? 'frontlet' : 'page';
@@ -317,6 +318,7 @@ class Client {
         request.urlParameters = frontletState.resolvedURL.urlParameters;
         request.pathVariables = frontletState.resolvedURL.pathVariablesAsMap();
         request.frontletParameters = this.serializeParameterMap(frontletState.frontletParameters);
+        request.modalParameters = this.serializeParameterMap(frontletState.modalParameters);
         request.actionParameters = this.serializeParameterMap(actionParameters);
         request.zoneId = this.zoneId;         // TODO locale ?
         request.sessionStorageData = this.sessionStorageDataFrontlet(frontletInstance.frontlet.id);
@@ -469,6 +471,7 @@ class Client {
         serverResponse.authenticated = obj.authenticated === true;
         serverResponse.userRoles = Array.isArray(obj.userRoles) ? obj.userRoles : [];
         serverResponse.frontletParameters = obj.frontletParameters ? obj.frontletParameters : (obj.frontletParameters || {});
+        serverResponse.modalParameters = obj.modalParameters ? obj.modalParameters : (obj.modalParameters || {});
         serverResponse.frontletContainerId = obj.frontletContainerId ? obj.frontletContainerId : obj.frontletContainerId;
         serverResponse.redirectUrl = obj.redirectUrl;
         serverResponse.idVariables = obj.idVariables || {};
@@ -489,6 +492,7 @@ class Client {
         data.setValue(['_xis', 'roles'], serverResponse.userRoles);
         data.setValue(['origin'], window.location.origin);
         data.setValue(['frontletParameters'], serverResponse.frontletParameters);
+        data.setValue(['modalParameters'], serverResponse.modalParameters);
        // this.storeData(serverResponse);
         this.setTitle(serverResponse);
         app.currentResponse = serverResponse;

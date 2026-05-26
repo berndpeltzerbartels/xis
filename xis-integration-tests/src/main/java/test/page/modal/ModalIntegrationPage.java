@@ -1,7 +1,9 @@
 package test.page.modal;
 
 import one.xis.Action;
-import one.xis.Parameter;
+import one.xis.ActionParameter;
+import one.xis.Frontlet;
+import one.xis.FrontletParameter;
 import one.xis.FormData;
 import one.xis.ModelData;
 import one.xis.ModalResponse;
@@ -37,15 +39,40 @@ class ModalIntegrationPage {
     }
 
     @Action
-    ModalResponse openFromParameter(@Parameter("source") String source) {
+    ModalResponse openFromParameter(@ActionParameter("source") String source) {
         return ModalResponse.open(EditModal.class).parameter("source", source);
     }
 
     @Action
-    ModalResponse openFormOnlyModalFromParameter(@Parameter("source") String source) {
+    ModalResponse openFormOnlyModalFromParameter(@ActionParameter("source") String source) {
         return ModalResponse.open(FormOnlyModal.class).parameter("source", source);
     }
 
     record ParentForm(String value) {
+    }
+
+    @Frontlet("ModalCard")
+    static class ModalCard {
+
+        private final ModalIntegrationService service;
+
+        ModalCard(ModalIntegrationService service) {
+            this.service = service;
+        }
+
+        @ModelData("card")
+        String card(@FrontletParameter("card") String card) {
+            return card;
+        }
+
+        @ModelData("cardValue")
+        String cardValue(@FrontletParameter("card") String card) {
+            return service.cardValue(card);
+        }
+
+        @ModelData("cardVersion")
+        int cardVersion(@FrontletParameter("card") String card) {
+            return service.cardVersion(card);
+        }
     }
 }

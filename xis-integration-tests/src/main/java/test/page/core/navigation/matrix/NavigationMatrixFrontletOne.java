@@ -2,7 +2,7 @@ package test.page.core.navigation.matrix;
 
 import one.xis.Action;
 import one.xis.Frontlet;
-import one.xis.Parameter;
+import one.xis.FrontletParameter;
 import one.xis.FrontletResponse;
 import one.xis.ModelData;
 import one.xis.PageResponse;
@@ -29,7 +29,7 @@ class NavigationMatrixFrontletOne {
     }
 
     @ModelData
-    String frontletMessage(@Parameter("message") String message) {
+    String frontletMessage(@FrontletParameter("message") String message) {
         return message;
     }
 

@@ -872,12 +872,12 @@ class XISValidateProcessorTest {
 
                 import one.xis.Action;
                 import one.xis.Page;
-                import one.xis.Parameter;
+                import one.xis.ActionParameter;
 
                 @Page("/probe.html")
                 class ProbePage {
                     @Action
-                    void select(@Parameter("step") StepId step) {
+                    void select(@ActionParameter("step") StepId step) {
                     }
 
                     static class StepId {
@@ -888,7 +888,7 @@ class XISValidateProcessorTest {
 
         List<String> errors = errorMessages(diagnostics);
         assertThat(errors).hasSize(1);
-        assertThat(errors.get(0)).contains("@Parameter supports only simple values");
+        assertThat(errors.get(0)).contains("@ActionParameter supports only simple values");
     }
 
     @Test
@@ -911,16 +911,16 @@ class XISValidateProcessorTest {
                 import java.time.LocalDate;
                 import one.xis.Action;
                 import one.xis.Page;
-                import one.xis.Parameter;
+                import one.xis.ActionParameter;
 
                 @Page("/probe.html")
                 class ProbePage {
                     @Action
-                    void select(@Parameter("id") long id,
-                                @Parameter("name") String name,
-                                @Parameter("amount") BigDecimal amount,
-                                @Parameter("date") LocalDate date,
-                                @Parameter("stage") Stage stage) {
+                    void select(@ActionParameter("id") long id,
+                                @ActionParameter("name") String name,
+                                @ActionParameter("amount") BigDecimal amount,
+                                @ActionParameter("date") LocalDate date,
+                                @ActionParameter("stage") Stage stage) {
                     }
 
                     enum Stage {
@@ -933,7 +933,7 @@ class XISValidateProcessorTest {
     }
 
     @Test
-    void allowsUnnamedParameterMapWithSimpleValues() throws IOException {
+    void allowsUnnamedFrontletParameterMapWithSimpleValues() throws IOException {
         Path templateFile = tempDir.resolve("src/main/java/example/ProbePage.html");
         Files.createDirectories(templateFile.getParent());
         Files.writeString(templateFile, """
@@ -951,12 +951,12 @@ class XISValidateProcessorTest {
                 import java.util.Map;
                 import one.xis.Action;
                 import one.xis.Page;
-                import one.xis.Parameter;
+                import one.xis.FrontletParameter;
 
                 @Page("/probe.html")
                 class ProbePage {
                     @Action
-                    void select(@Parameter Map<String, Integer> parameters) {
+                    void select(@FrontletParameter Map<String, Integer> parameters) {
                     }
                 }
                 """);
@@ -965,7 +965,7 @@ class XISValidateProcessorTest {
     }
 
     @Test
-    void rejectsUnnamedParameterMapWithoutStringKeys() throws IOException {
+    void rejectsUnnamedFrontletParameterMapWithoutStringKeys() throws IOException {
         Path templateFile = tempDir.resolve("src/main/java/example/ProbePage.html");
         Files.createDirectories(templateFile.getParent());
         Files.writeString(templateFile, """
@@ -983,23 +983,23 @@ class XISValidateProcessorTest {
                 import java.util.Map;
                 import one.xis.Action;
                 import one.xis.Page;
-                import one.xis.Parameter;
+                import one.xis.FrontletParameter;
 
                 @Page("/probe.html")
                 class ProbePage {
                     @Action
-                    void select(@Parameter Map<Integer, String> parameters) {
+                    void select(@FrontletParameter Map<Integer, String> parameters) {
                     }
                 }
                 """);
 
         List<String> errors = errorMessages(diagnostics);
         assertThat(errors).hasSize(1);
-        assertThat(errors.get(0)).contains("Unnamed @Parameter maps must use String keys.");
+        assertThat(errors.get(0)).contains("@FrontletParameter maps must use String keys.");
     }
 
     @Test
-    void rejectsUnnamedParameterMapWithComplexValues() throws IOException {
+    void rejectsUnnamedFrontletParameterMapWithComplexValues() throws IOException {
         Path templateFile = tempDir.resolve("src/main/java/example/ProbePage.html");
         Files.createDirectories(templateFile.getParent());
         Files.writeString(templateFile, """
@@ -1017,12 +1017,12 @@ class XISValidateProcessorTest {
                 import java.util.Map;
                 import one.xis.Action;
                 import one.xis.Page;
-                import one.xis.Parameter;
+                import one.xis.FrontletParameter;
 
                 @Page("/probe.html")
                 class ProbePage {
                     @Action
-                    void select(@Parameter Map<String, StepId> parameters) {
+                    void select(@FrontletParameter Map<String, StepId> parameters) {
                     }
 
                     static class StepId {
@@ -1033,7 +1033,7 @@ class XISValidateProcessorTest {
 
         List<String> errors = errorMessages(diagnostics);
         assertThat(errors).hasSize(1);
-        assertThat(errors.get(0)).contains("Unnamed @Parameter maps support only simple value types.");
+        assertThat(errors.get(0)).contains("@FrontletParameter maps support only simple value types.");
     }
 
     @Test

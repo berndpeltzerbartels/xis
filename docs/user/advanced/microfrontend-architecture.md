@@ -19,7 +19,7 @@ Add `xis-distributed` to each participating XIS application.
 ```groovy
 plugins {
     id "java"
-    id "one.xis.plugin" version "0.12.1"
+    id "one.xis.plugin" version "0.13.1"
 }
 
 repositories {

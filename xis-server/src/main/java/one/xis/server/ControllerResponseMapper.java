@@ -33,6 +33,7 @@ class ControllerResponseMapper {
         response.setRedirectUrl(result.getRedirectUrl());
         response.getIdVariables().putAll(result.getIdVariables());
         response.getFrontletParameters().putAll(result.getFrontletParameters());
+        response.getModalParameters().putAll(result.getModalParameters());
         if (result.getAnnotatedTitle() != null) {
             response.setAnnotatedTitle(result.getAnnotatedTitle());
         }

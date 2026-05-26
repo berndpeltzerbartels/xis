@@ -9,8 +9,9 @@ XIS controller with its own template fragment, model data, form data, actions, v
 
 ```java
 import one.xis.Action;
+import one.xis.ActionParameter;
 import one.xis.FormData;
-import one.xis.Parameter;
+import one.xis.ModalParameter;
 import one.xis.Modal;
 import one.xis.ModalResponse;
 import one.xis.validation.Mandatory;
@@ -62,7 +63,7 @@ Use `xis:modal` on a button or link when the click can open the modal directly. 
 <button xis:modal="EditCustomerModal">Edit</button>
 ```
 
-Pass modal parameters with `xis:parameter`. The modal receives them with `@Parameter`.
+Pass modal parameters with `xis:parameter`. The modal receives them with `@ModalParameter`.
 
 ```html
 <button xis:modal="EditCustomerModal">
@@ -73,7 +74,7 @@ Pass modal parameters with `xis:parameter`. The modal receives them with `@Param
 
 ```java
 @FormData("customer")
-CustomerForm customer(@Parameter("customerId") long customerId) {
+CustomerForm customer(@ModalParameter("customerId") long customerId) {
     return customerService.form(customerId);
 }
 ```
@@ -87,7 +88,7 @@ Modal paths may also contain query parameters:
 <button xis:modal="/customers/edit?customerId=${customer.id}">Edit</button>
 ```
 
-These values are modal parameters, not page URL query parameters, so the modal reads them with `@Parameter`.
+These values are modal parameters, not page URL query parameters, so the modal reads them with `@ModalParameter`.
 
 ## Open Or Close From Java
 
@@ -97,14 +98,14 @@ parameters first, or when an action inside a modal should close it. If a button 
 
 ```java
 @Action
-ModalResponse edit(@Parameter("customerId") long customerId) {
+ModalResponse edit(@ActionParameter("customerId") long customerId) {
     return ModalResponse.open(EditCustomerModal.class)
             .parameter("customerId", customerId);
 }
 ```
 
 `ModalResponse.open("/customers/edit?customerId=42")` follows the same rule: the query string is available in the modal
-as `@Parameter("customerId")`.
+as `@ModalParameter("customerId")`.
 
 Return `void` when the action should stay in the modal and simply refresh its data. Return `ModalResponse` when the
 action should open another modal, close the current modal, or close it and reload the parent UI.

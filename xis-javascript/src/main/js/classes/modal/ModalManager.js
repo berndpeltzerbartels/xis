@@ -10,7 +10,7 @@ class ModalManager {
 
     open(modal, parameters, parentContainerHandler) {
         const modalId = app.client.config.getFrontletId(modal);
-        const frontletParameters = mergeObjects(urlParameters(modal), parameters || {});
+        const modalParameters = mergeObjects(urlParameters(modal), parameters || {});
         if (!this.current) {
             this.current = this.createModal(parentContainerHandler);
         } else {
@@ -18,10 +18,10 @@ class ModalManager {
         }
         this.current.overlay.classList.add('xis-modal-open');
         this.current.overlay.removeAttribute('hidden');
-        this.current.containerHandler.frontletParameters = frontletParameters;
+        this.current.containerHandler.modalParameters = modalParameters;
         return this.current.containerHandler.showFrontlet(
             modalId,
-            new FrontletState(app.pageController.resolvedURL, frontletParameters)
+            new FrontletState(app.pageController.resolvedURL, {}, modalParameters)
         );
     }
 
@@ -43,6 +43,9 @@ class ModalManager {
                 promise = this.reloadParent(parent);
             }
         } else {
+            if (this.current && response.modalParameters) {
+                this.current.containerHandler.modalParameters = mergeObjects(this.current.containerHandler.modalParameters || {}, response.modalParameters);
+            }
             updateStores(response);
         }
         return promise;
@@ -63,7 +66,7 @@ class ModalManager {
         }
         this.current.overlay.classList.add('xis-modal-open');
         this.current.overlay.removeAttribute('hidden');
-        this.current.containerHandler.frontletParameters = response.frontletParameters || {};
+        this.current.containerHandler.modalParameters = response.modalParameters || {};
         response.nextFrontletId = response.nextModalId;
         return this.current.containerHandler.handleActionResponse(response);
     }

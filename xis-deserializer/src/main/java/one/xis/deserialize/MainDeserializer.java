@@ -99,8 +99,14 @@ public class MainDeserializer {
         if (target.isAnnotationPresent(QueryParameter.class)) {
             return target.getAnnotation(QueryParameter.class).value();
         }
-        if (target.isAnnotationPresent(Parameter.class)) {
-            return target.getAnnotation(Parameter.class).value();
+        if (target.isAnnotationPresent(ActionParameter.class)) {
+            return target.getAnnotation(ActionParameter.class).value();
+        }
+        if (target.isAnnotationPresent(FrontletParameter.class)) {
+            return target.getAnnotation(FrontletParameter.class).value();
+        }
+        if (target.isAnnotationPresent(ModalParameter.class)) {
+            return target.getAnnotation(ModalParameter.class).value();
         }
         if (target instanceof Field field) {
             return field.getName();

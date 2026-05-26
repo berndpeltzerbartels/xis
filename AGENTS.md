@@ -50,13 +50,13 @@ For custom browser interactions that need to submit an existing XIS form, use th
 Simple drag and drop is a public template feature, not a full browser DnD abstraction. Use
 `xis:drag="from:${field}"` on the source and `xis:drop="move(from, target='${targetField}')"` on the target. The drag
 side publishes one named value; the drop side calls a normal `@Action`. Prefer named action parameters in examples, for
-example `@Parameter("from") String from` and `@Parameter("target") String target`. Integration tests should
+example `@ActionParameter("from") String from` and `@ActionParameter("target") String target`. Integration tests should
 use `one.xis.test.dom.DragAndDrop`, not hidden `Element` convenience methods.
 
 Modals are public API through `@Modal` and `ModalResponse`. Internally they reuse the frontlet rendering pipeline, but
 user-facing docs should present them as modal dialogs, not as a frontlet variant. For dynamic values in HTML, prefer
 `xis:modal="EditCustomerModal"` plus nested `xis:parameter`; modal controllers receive those values with
-`@Parameter`. E2E coverage should include validation staying inside the modal and `reloadParent()` reloading the
+`@ModalParameter`. E2E coverage should include validation staying inside the modal and `reloadParent()` reloading the
 page or exactly the frontlet instance that opened the modal.
 
 For dynamic browser resource attributes, prefer XIS-prefixed attributes such as

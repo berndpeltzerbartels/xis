@@ -1,7 +1,7 @@
 package test.page.template;
 
 import one.xis.Action;
-import one.xis.Parameter;
+import one.xis.ActionParameter;
 import one.xis.ModelData;
 import one.xis.Page;
 
@@ -22,7 +22,7 @@ class TemplateActionTagsPage {
     }
 
     @Action("tag-action")
-    void tagAction(@Parameter("value") String value) {
+    void tagAction(@ActionParameter("value") String value) {
         actionResult = value;
     }
 

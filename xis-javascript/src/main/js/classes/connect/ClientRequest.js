@@ -3,16 +3,27 @@
  * @property {string} pageId
  * @property {string} pageUrl
  * @property {string} frontletId 
+ * @property {string} frontletContainerId
  * @property {string} action
+ * @property {string} formBinding
+ * @property {any} formData
  * @property {string: string} pathVariables
  * @property {string: string} urlParameters
- * @property {string: string} bindingParameters
+ * @property {string: string} queryParameters
  * @property {string: string} actionParameters
+ * @property {string: string} frontletParameters
+ * @property {string: string} modalParameters
+ * @property {string} load
+ * @property {string} zoneId
+ * @property {string} locale
+ * @property {string} accessToken
+ * @property {string} renewToken
  * @property {string: string} type;
  * @property {string: string} sessionStorageData
  * @property {string: string} clientStorageData
- * @property {string: string} localStorage
- * @property {string: string} localDatabase
+ * @property {string: string} localStorageData
+ * @property {string: string} globalVariableData
+ * @property {string: string} localDatabaseData
 */
 class ClientRequest {
 
@@ -21,20 +32,27 @@ class ClientRequest {
         this.pageId = '';
         this.pageUrl = '';
         this.frontletId = '';
+        this.frontletContainerId = '';
         this.action = '';
+        this.formBinding = '';
+        this.formData = {};
         this.pathVariables = {};
         this.urlParameters = {};
-        this.bindingParameters = {};
+        this.queryParameters = {};
         this.actionParameters = {};
+        this.frontletParameters = {};
+        this.modalParameters = {};
+        this.load = 'INITIAL';
+        this.zoneId = '';
+        this.locale = '';
+        this.accessToken = '';
+        this.renewToken = '';
         this.type = '';
         this.sessionStorageData = {};
         this.clientStorageData = {};
         this.localStorageData = {};
         this.globalVariableData = {};
-        this.localDatabaseData = {}; // TODO
-        this.frontletParameters = {};
-        this.frontletContainerId = '';
-        this.load = 'INITIAL';
+        this.localDatabaseData = {};
     }
 
     toJSON() {

@@ -144,7 +144,7 @@ The drop element calls an action and can use that name as an action argument.
 
 ```java
 @Action
-void move(@Parameter("from") String from, @Parameter("target") String target) {}
+void move(@ActionParameter("from") String from, @ActionParameter("target") String target) {}
 ```
 
 Read [Drag and drop](drag-and-drop.md) for the full behavior, examples, and integration-test support.
@@ -157,7 +157,7 @@ Use `xis:modal` on a button or link to open a modal dialog.
 <button xis:modal="EditCustomerModal">Edit</button>
 ```
 
-Pass modal parameters with child `xis:parameter` elements. The modal receives them with `@Parameter`.
+Pass modal parameters with child `xis:parameter` elements. The modal receives them with `@ModalParameter`.
 
 ```html
 <button xis:modal="EditCustomerModal">
@@ -172,7 +172,7 @@ Simple modal paths are also supported:
 <a xis:modal="/customers/edit">Edit customer</a>
 ```
 
-If a modal path contains a query string, the values are modal parameters and the modal reads them with `@Parameter`:
+If a modal path contains a query string, the values are modal parameters and the modal reads them with `@ModalParameter`:
 
 ```html
 <a xis:modal="/customers/edit?customerId=${customer.id}">Edit customer</a>
@@ -225,7 +225,7 @@ Element syntax:
 </xis:button>
 ```
 
-Pass frontlet parameters with `xis:parameter`. The target frontlet receives them with `@Parameter`.
+Pass frontlet parameters with `xis:parameter`. The target frontlet receives them with `@FrontletParameter`.
 
 ```html
 <a xis:frontlet="ProductDetailsFrontlet" xis:target-container="main">
@@ -235,7 +235,7 @@ Pass frontlet parameters with `xis:parameter`. The target frontlet receives them
 ```
 
 Frontlet targets can also carry query parameters, for example `xis:frontlet="/product-summary?productId=42"`. These
-values are frontlet parameters and are also read with `@Parameter`.
+values are frontlet parameters and are also read with `@FrontletParameter`.
 
 For `xis:default-frontlet`, prefer query parameters such as
 `xis:default-frontlet="ProductDetailsFrontlet?productId=${product.id}"`. This makes it clear that the parameters belong
