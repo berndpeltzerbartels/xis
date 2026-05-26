@@ -122,7 +122,7 @@ purpose.
 | `@ActionParameter("name")` | Reads a one-shot parameter submitted by the action element that triggered the current action. |
 | `@FrontletParameter("name")` | Reads a stable parameter of the current frontlet instance, supplied by a frontlet target URL, `<xis:parameter>` on a frontlet link/container, or `FrontletResponse`. |
 | `@ModalParameter("name")` | Reads a stable parameter of the current modal instance, supplied by a modal target URL, `<xis:parameter>` on the opener, or `ModalResponse`. |
-| `@FormData("name")` | Initializes form data on methods or injects submitted form data into action parameters. Method usage supports `load`. |
+| `@FormData("name")` | Initializes form data on methods or injects submitted form data into `@Action` method parameters. Method usage supports `load`. |
 | `@Upload` | Binds an uploaded multipart file to a form field or controller parameter. |
 | `@SharedValue("name")` | Injects a value produced by another `@SharedValue` method in the same controller processing flow. |
 | `@LocalStorage`, `@SessionStorage`, `@ClientState` | Injects browser-side state into an action method parameter. |

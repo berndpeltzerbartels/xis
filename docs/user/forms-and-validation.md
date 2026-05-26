@@ -61,7 +61,8 @@ class NewUserPage {
 The form binding name and `@FormData` name must match.
 
 `@FormData` methods can use the same lifecycle `load` attribute as `@ModelData`. This only affects methods that
-initialize a form, not action parameters that receive submitted form data.
+initialize a form, not action parameters that receive submitted form data. `@FormData` on a parameter is only valid on
+an `@Action` method, because submitted form values exist only while that action is processed.
 
 ```java
 @FormData(value = "user", load = ModelDataLoad.INITIAL)

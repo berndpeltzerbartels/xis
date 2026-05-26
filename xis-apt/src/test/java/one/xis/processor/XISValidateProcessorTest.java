@@ -1080,6 +1080,42 @@ class XISValidateProcessorTest {
     }
 
     @Test
+    void rejectsFormDataParameterOutsideActionMethod() throws IOException {
+        Path templateFile = tempDir.resolve("src/main/java/example/ProbePage.html");
+        Files.createDirectories(templateFile.getParent());
+        Files.writeString(templateFile, """
+                <!DOCTYPE html>
+                <html>
+                  <body>${name}</body>
+                </html>
+                """, StandardCharsets.UTF_8);
+
+        DiagnosticCollector<JavaFileObject> diagnostics = compilePageSourceWithProcessor(false, """
+                package example;
+
+                import one.xis.FormData;
+                import one.xis.ModelData;
+                import one.xis.Page;
+
+                @Page("/probe.html")
+                class ProbePage {
+                    @ModelData("name")
+                    String name(@FormData("step") StepForm form) {
+                        return form.name;
+                    }
+
+                    static class StepForm {
+                        String name;
+                    }
+                }
+                """);
+
+        List<String> errors = errorMessages(diagnostics);
+        assertThat(errors).hasSize(1);
+        assertThat(errors.get(0)).contains("@FormData parameters are only supported on @Action methods.");
+    }
+
+    @Test
     void reportsTemplateDataErrorsAtTheElementLine() throws IOException {
         Path templateFile = tempDir.resolve("src/main/java/example/ProbePage.html");
         Files.createDirectories(templateFile.getParent());

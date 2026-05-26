@@ -140,6 +140,7 @@ public class XISValidateProcessor extends AbstractProcessor {
         validateSharedValueParameters(methods, sharedValues);
         validateSharedValueMethods(methods);
         validateActionFormDataLoad(methods);
+        validateFormDataParameters(methods);
         validateActionParameters(methods);
         Path templateFile = templateFile(projectDir, controllerType);
         return new ControllerTemplateModel(controllerType.getQualifiedName().toString(), templateFile, modelData, formData);
@@ -179,6 +180,22 @@ public class XISValidateProcessor extends AbstractProcessor {
                 processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
                         "@FormData load is only supported on form initialization methods, not on @Action methods.",
                         method);
+            }
+        }
+    }
+
+    private void validateFormDataParameters(List<ExecutableElement> methods) {
+        for (ExecutableElement method : methods) {
+            if (hasAnnotation(method, ACTION_ANNOTATION)) {
+                continue;
+            }
+            for (VariableElement parameter : method.getParameters()) {
+                if (!hasAnnotation(parameter, FORM_DATA_ANNOTATION)) {
+                    continue;
+                }
+                processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
+                        "@FormData parameters are only supported on @Action methods.",
+                        parameter);
             }
         }
     }
