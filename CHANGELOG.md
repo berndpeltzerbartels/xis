@@ -2,6 +2,35 @@
 
 ## Unreleased
 
+## 0.14.0 - 2026-05-27
+
+### Added
+
+- Added explicit parameter scope annotations for controller methods, including `@ActionParameter`, `@FrontletParameter`,
+  and `@ModalParameter`, so action, frontlet, and modal values are no longer mixed through one generic parameter channel.
+- Added `@ClientState` as the renamed client-side state API, replacing the former client storage naming while keeping the
+  request lifecycle explicit.
+- Added action-specific business validation through `ValidationFailedException`. Actions can now report global and
+  field-bound validation messages without inventing a dedicated validation annotation for one-off business rules.
+- Added coverage for repeated anonymous frontlet containers so several instances of the same default frontlet keep their
+  own parameters and refresh independently.
+- Added an SQL proxy context build regression test for contexts that scan the SQL infrastructure package together with a
+  separate application package.
+
+### Fixed
+
+- Fixed frontlet container refresh handling for repeated anonymous containers, especially when update events target all
+  instances of one frontlet type.
+- Fixed propagation of update event keys when an action response continues into a next controller.
+- Improved missing validation message keys by rendering them as `[message.key]` instead of silently returning `null`.
+- Tightened template validation around scoped frontend parameters while allowing methods with frontend-provided form data
+  and model data to bypass impossible compile-time key checks.
+
+### Documentation
+
+- Documented `ValidationFailedException` as the special-case validation path for action-specific business rules.
+- Updated the client state and parameter-scope documentation to match the 0.14.0 API names.
+
 ## 0.12.0 - 2026-05-19
 
 ### Added
