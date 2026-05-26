@@ -6,7 +6,7 @@
  * @property {array<string>} localDatabaseKeys
  * @property {array<string>} localStorageKeys
  * @property {array<string>} sessionStorageKeys
- * @property {array<string>} clientStorageKeys
+ * @property {array<string>} clientStateKeys
  * @property {array<string>} globalVariableKeys
  * @property {array<string>} updateEventKeys
  */
@@ -21,7 +21,7 @@ class FrontletAttributes {
         this.localDatabaseKeys = obj.localDatabaseKeys || [];
         this.localStorageKeys = obj.localStorageKeys || [];
         this.sessionStorageKeys = obj.sessionStorageKeys || [];
-        this.clientStorageKeys = obj.clientStorageKeys || [];
+        this.clientStateKeys = obj.clientStateKeys || [];
         this.globalVariableKeys = obj.globalVariableKeys || [];
         this.updateEventKeys = obj.updateEventKeys || [];
     }

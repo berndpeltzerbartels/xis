@@ -40,7 +40,7 @@ import java.lang.annotation.*;
  * and is isolated per tab/window.</p>
  *
  * @see LocalStorage
- * @see ClientStorage
+ * @see ClientState
  * @see NullAllowed
  */
 @Documented

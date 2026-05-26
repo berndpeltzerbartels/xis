@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class ClientStorageStoreData {
+public class ClientStateStoreData {
     private final List<String> items = new ArrayList<>();
 
     void addItem(String item) {

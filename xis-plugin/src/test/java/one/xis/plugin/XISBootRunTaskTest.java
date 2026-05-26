@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class XISBootRunTaskTest {
 
-    private static final String XIS_VERSION = System.getProperty("xis.version", "0.13.0");
+    private static final String XIS_VERSION = System.getProperty("xis.version", "0.14.0");
 
     @TempDir
     Path projectDir;

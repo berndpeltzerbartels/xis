@@ -3,5 +3,5 @@ package one.xis.server;
 enum StorageParameterScope {
     SESSION,
     LOCAL,
-    CLIENT
+    CLIENT_STATE
 }

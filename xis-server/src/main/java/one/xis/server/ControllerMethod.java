@@ -86,7 +86,7 @@ class ControllerMethod {
                 || parameter.isAnnotationPresent(SharedValue.class)
                 || parameter.isAnnotationPresent(SessionStorage.class)
                 || parameter.isAnnotationPresent(LocalStorage.class)
-                || parameter.isAnnotationPresent(ClientStorage.class)
+                || parameter.isAnnotationPresent(ClientState.class)
                 || parameter.isAnnotationPresent(LocalDatabase.class);
     }
 

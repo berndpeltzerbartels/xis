@@ -11,7 +11,7 @@ Use the plugin when you want the usual XIS layout:
 ```groovy
 plugins {
     id "java"
-    id "one.xis.plugin" version "0.13.0"
+    id "one.xis.plugin" version "0.14.0"
 }
 ```
 
@@ -287,7 +287,7 @@ Without the plugin, add the dependency that matches the style of test you want:
 
 ```groovy
 dependencies {
-    testImplementation "one.xis:xis-boot-starter-test:0.13.0"
+    testImplementation "one.xis:xis-boot-starter-test:0.14.0"
 }
 ```
 

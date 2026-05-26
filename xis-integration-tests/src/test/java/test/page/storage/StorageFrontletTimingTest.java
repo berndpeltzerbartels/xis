@@ -21,13 +21,13 @@ class StorageFrontletTimingTest {
     }
 
     @Test
-    void clientStorageFromPageResponseIsVisibleToFrontletLoadedDuringRendering() {
+    void clientStateFromPageResponseIsVisibleToFrontletLoadedDuringRendering() {
         var context = IntegrationTestContext.builder()
-                .withSingleton(ClientStorageFrontletTimingPage.class)
-                .withSingleton(ClientStorageFrontletTimingFrontlet.class)
+                .withSingleton(ClientStateFrontletTimingPage.class)
+                .withSingleton(ClientStateFrontletTimingFrontlet.class)
                 .build();
 
-        var client = context.openPage(ClientStorageFrontletTimingPage.class);
+        var client = context.openPage(ClientStateFrontletTimingPage.class);
 
         assertThat(client.getDocument().getElementById("frontlet-value").getInnerText()).isEqualTo("76");
     }

@@ -23,7 +23,7 @@ class StoreUpdaterTest {
                 var app = {
                     localStorage: new LocalStore(eventPublisher),
                     sessionStorage: new SessionStore(eventPublisher),
-                    clientStorage: new ClientStore(eventPublisher)
+                    clientState: new ClientStateStore(eventPublisher)
                 };
                 var updater = new StoreUpdater();
                 updater.updateStores({ data: {} });

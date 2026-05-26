@@ -1221,7 +1221,7 @@ class XISValidateProcessorTest {
         assertThat(errors).anyMatch(error -> error.contains("xis:a requires page, frontlet, or modal"));
         assertThat(errors).anyMatch(error -> error.contains("xis:button requires page, frontlet, modal, or action"));
         assertThat(errors).anyMatch(error -> error.contains("xis:parameter requires name"));
-        assertThat(errors).anyMatch(error -> error.contains("xis:storage-binding must be one of localStorage, sessionStorage, or clientStorage"));
+        assertThat(errors).anyMatch(error -> error.contains("xis:storage-binding must be one of localStorage, sessionStorage, or clientState"));
         assertThat(errors).anyMatch(error -> error.contains("xis:form requires binding"));
         assertThat(errors).anyMatch(error -> error.contains("xis:message requires message-for"));
         assertThat(errors).anyMatch(error -> error.contains("xis:default-frontlet requires xis:frontlet-container"));

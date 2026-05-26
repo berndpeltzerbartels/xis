@@ -38,7 +38,7 @@ class ControllerResult {
     private final Map<String, Object> requestScope = new HashMap<>();
     private final Map<String, Object> sessionStorage = new HashMap<>();
     private final Map<String, Object> localStorage = new HashMap<>();
-    private final Map<String, Object> clientStorage = new HashMap<>();
+    private final Map<String, Object> clientState = new HashMap<>();
     private final Map<String, Object> globalVariables = new HashMap<>();
     private String redirectUrl;
     private final Map<String, String> tagVariables = new HashMap<>();

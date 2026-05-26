@@ -402,9 +402,9 @@ writes the parameter value back after method invocation.
 | --- | --- | --- | --- | --- |
 | `value` | `String` | Yes | none | Browser `sessionStorage` key. |
 
-### `@ClientStorage`
+### `@ClientState`
 
-`@ClientStorage` binds a controller parameter to XIS client-side memory storage. Unlike browser `localStorage` and
+`@ClientState` binds a controller parameter to short-lived XIS client-side state. Unlike browser `localStorage` and
 `sessionStorage`, this state is held by the JavaScript runtime and is not meant as durable browser storage.
 
 Use it for short-lived interaction state that should not be persisted across browser sessions.
@@ -612,7 +612,7 @@ return new FrontletResponse(ProductFrontlet.class)
 | `@RefreshOnUpdateEvents` | class | none | Declares refresh event keys this controller reacts to. |
 | `@LocalStorage` | parameter | `value` | Binds browser `localStorage`. |
 | `@SessionStorage` | parameter | `value` | Binds browser `sessionStorage`. |
-| `@ClientStorage` | parameter | `value` | Binds XIS client-side memory storage. |
+| `@ClientState` | parameter | `value` | Binds XIS client-side state. |
 | `@LocalDatabase` | method, parameter | `value` | Binds local database data. |
 | `@SharedValue` | method, parameter | `value` | Provides or injects a named value inside one controller processing flow. |
 | `@Title` | method, parameter | none | Provides or receives the page title. |

@@ -6,32 +6,32 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Binds a value from client-side memory storage to an action method parameter.
+ * Binds a value from client-side state to an action method parameter.
  *
  * <p>This is a parameter annotation. XIS scans controller method parameters and
  * writes the referenced storage keys into the client configuration for the
  * current page or frontlet. The browser sends only those configured keys to the
- * server, not the whole client storage. The configured keys are sent for the
+ * server, not the whole client state. The configured keys are sent for the
  * page/frontlet request even when the currently invoked action does not use
  * every key.</p>
  *
  * <p>The server deserializes the value for the key, passes it to the parameter,
- * and writes the parameter value back to client storage after method execution.
+ * and writes the parameter value back to client state after method execution.
  * This makes the annotation most useful for mutable DTO-like values whose fields
  * are changed inside the action.</p>
  *
  * <p><strong>Example:</strong></p>
  * <pre>{@code
  * @Action("updatePreferences")
- * public void updatePreferences(@ClientStorage("userPreferences") UserPreferences prefs,
+ * public void updatePreferences(@ClientState("userPreferences") UserPreferences prefs,
  *                               @ActionParameter("theme") String theme) {
  *     prefs.setTheme(theme);
- *     // the mutated prefs parameter is saved back to client storage
+ *     // the mutated prefs parameter is saved back to client state
  * }
  * }</pre>
  *
  * <p><strong>Initialization:</strong><br>
- * If no value exists in storage, the parameter will be initialized with a default value.
+ * If no value exists in client state, the parameter will be initialized with a default value.
  * For objects, this is typically a new instance. Use {@link NullAllowed} to allow null values instead.</p>
  *
  * <p><strong>Storage Location:</strong><br>
@@ -44,7 +44,7 @@ import java.lang.annotation.Target;
  * <ul>
  *   <li>{@link LocalStorage}: Browser localStorage - persists across browser sessions</li>
  *   <li>{@link SessionStorage}: Browser sessionStorage - persists within tab, survives page reloads</li>
- *   <li>{@link ClientStorage}: JavaScript field - not visible in DevTools, may not survive page reloads</li>
+ *   <li>{@link ClientState}: JavaScript field - not visible in DevTools, may not survive page reloads</li>
  * </ul>
  *
  * <p><strong>Use Cases:</strong></p>
@@ -60,9 +60,9 @@ import java.lang.annotation.Target;
  */
 @Target({ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ClientStorage {
+public @interface ClientState {
     /**
-     * The client-storage key to read from the browser and write back after
+     * The client-state key to read from the browser and write back after
      * method execution.
      *
      * @return the storage key

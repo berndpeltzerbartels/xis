@@ -420,7 +420,7 @@ state should intentionally live in the browser.
 </section>
 ```
 
-Supported stores are `localStorage`, `sessionStorage`, and `clientStorage`.
+Supported stores are `localStorage`, `sessionStorage`, and `clientState`.
 
 XIS does not send the whole browser store to the server. It sends the keys that the current page or frontlet declares
 through controller parameters such as `@LocalStorage("cart")` or `@SessionStorage("wizard")`. Storage parameters are

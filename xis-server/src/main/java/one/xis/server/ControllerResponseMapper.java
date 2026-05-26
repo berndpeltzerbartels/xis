@@ -29,7 +29,7 @@ class ControllerResponseMapper {
         mapSecurityContext(response);
         response.getSessionStorageData().putAll(result.getSessionStorage());
         response.getLocalStorageData().putAll(result.getLocalStorage());
-        response.getClientStorageData().putAll(result.getClientStorage());
+        response.getClientStateData().putAll(result.getClientState());
         response.setRedirectUrl(result.getRedirectUrl());
         response.getIdVariables().putAll(result.getIdVariables());
         response.getFrontletParameters().putAll(result.getFrontletParameters());

@@ -244,7 +244,7 @@ class Client {
         request.zoneId = this.zoneId;
         request.sessionStorageData = this.sessionStorageDataPage(normalizedPath);
         request.localStorageData = this.localStorageDataPage(normalizedPath);
-        request.clientStorageData = this.clientStorageDataPage(normalizedPath);
+        request.clientStateData = this.clientStateDataPage(normalizedPath);
         request.globalVariableData = this.globalVariableDataPage(normalizedPath);
         request.localDatabaseData = {};
         request.type = 'page';
@@ -284,13 +284,13 @@ class Client {
         if (frontletId) { // TODO write a test
             request.sessionStorageData = this.sessionStorageDataFrontlet(frontletId);
             request.localStorageData = this.localStorageDataFrontlet(frontletId);
-            request.clientStorageData = this.clientStorageDataFrontlet(frontletId);
+            request.clientStateData = this.clientStateDataFrontlet(frontletId);
             request.globalVariableData = this.globalVariableDataFrontlet(frontletId);
         }
         if (normalizedPath) {// TODO write a test
             request.sessionStorageData = this.sessionStorageDataPage(normalizedPath);
             request.localStorageData = this.localStorageDataPage(normalizedPath);
-            request.clientStorageData = this.clientStorageDataPage(normalizedPath);
+            request.clientStateData = this.clientStateDataPage(normalizedPath);
             request.globalVariableData = this.globalVariableDataPage(normalizedPath);
         }
         return request;
@@ -323,7 +323,7 @@ class Client {
         request.zoneId = this.zoneId;         // TODO locale ?
         request.sessionStorageData = this.sessionStorageDataFrontlet(frontletInstance.frontlet.id);
         request.localStorageData = this.localStorageDataFrontlet(frontletInstance.frontlet.id);
-        request.clientStorageData = this.clientStorageDataFrontlet(frontletInstance.frontlet.id);
+        request.clientStateData = this.clientStateDataFrontlet(frontletInstance.frontlet.id);
         request.globalVariableData = this.globalVariableDataFrontlet(frontletInstance.frontlet.id);
         request.localDatabaseData = {};
         request.type = 'frontlet';
@@ -357,12 +357,12 @@ class Client {
         return this.localStorageData(this.config.frontletAttributes[frontletId]);
     }
 
-    clientStorageDataPage(pageId) {
-        return this.clientStorageData(this.config.pageAttributes[pageId]);
+    clientStateDataPage(pageId) {
+        return this.clientStateData(this.config.pageAttributes[pageId]);
     }
 
-    clientStorageDataFrontlet(frontletId) {
-        return this.clientStorageData(this.config.frontletAttributes[frontletId]);
+    clientStateDataFrontlet(frontletId) {
+        return this.clientStateData(this.config.frontletAttributes[frontletId]);
     }
 
     globalVariableDataPage(pageId) {
@@ -391,10 +391,10 @@ class Client {
         return data;
     }
 
-    clientStorageData(attributes) {
+    clientStateData(attributes) {
         var data = {};
-        for (var key of attributes.clientStorageKeys) {
-            data[key] = app.clientStorage.getValue(key);
+        for (var key of attributes.clientStateKeys) {
+            data[key] = app.clientState.getValue(key);
         }
         return data;
     }
@@ -465,7 +465,7 @@ class Client {
         serverResponse.reloadFrontlets = obj.reloadFrontlets ? obj.reloadFrontlets : obj.reloadFrontlets;
         serverResponse.localDatabaseData = obj.localDatabaseData || {};
         serverResponse.localStorageData = obj.localStorageData || {};
-        serverResponse.clientStorageData = obj.clientStorageData || {};
+        serverResponse.clientStateData = obj.clientStateData || {};
         serverResponse.globalVariableData = obj.globalVariableData || {};
         serverResponse.sessionStorageData = obj.sessionStorageData || {};
         serverResponse.authenticated = obj.authenticated === true;
@@ -483,7 +483,7 @@ class Client {
         const validatorMessages = obj.validatorMessages || {};
         data.setValue(['sessionStorage'], app.sessionStorage);
         data.setValue(['localStorage'], app.localStorage);
-        data.setValue(['clientStorage'], serverResponse.clientStorageData);
+        data.setValue(['clientState'], serverResponse.clientStateData);
         data.setValue(['global'], serverResponse.globalVariableData);
         data.setValue(['messages'], app.messages || {});
         data.setValue(['validation'], validatorMessages);
@@ -512,7 +512,7 @@ class Client {
     storeData(response) {
         this.storeLocalStorageData(response.localStorageData);
         this.storeSessionStorageData(response.sessionStorageData);
-        this.storeClientStorageData(response.clientStorageData);
+        this.storeClientStateData(response.clientStateData);
         this.storeGlobalVariableData(response.globalVariableData);
         this.storeLocalDatabaseData(response.localDatabaseData);
     }
@@ -531,11 +531,11 @@ class Client {
         app.sessionStorage.saveData(sessionStorageData);
     }
 
-    storeClientStorageData(clientStorageData) {
-        if (!clientStorageData) {
+    storeClientStateData(clientStateData) {
+        if (!clientStateData) {
             return;
         }
-        app.clientStorage.saveData(clientStorageData);
+        app.clientState.saveData(clientStateData);
     }
 
     storeGlobalVariableData(globalVariableData) {

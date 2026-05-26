@@ -17,7 +17,7 @@ import java.lang.annotation.Target;
  *
  * <p>The value is scoped to the current request/action processing flow. It is
  * not persisted across requests and is not browser-side storage. Use
- * {@link LocalStorage}, {@link SessionStorage}, or {@link ClientStorage} for
+ * {@link LocalStorage}, {@link SessionStorage}, or {@link ClientState} for
  * explicit client-side state.</p>
  */
 @Target({ElementType.PARAMETER, ElementType.METHOD})

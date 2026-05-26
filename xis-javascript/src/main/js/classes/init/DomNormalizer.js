@@ -419,7 +419,7 @@ class DomNormalizer {
 
 
     validateStoreName(storeName) {
-        const validStoreNames = ['localStorage', 'sessionStorage','clientStorage'];
+        const validStoreNames = ['localStorage', 'sessionStorage','clientState'];
         if (!validStoreNames.includes(storeName)) {
             throw new Error(`Unsupported store name: ${storeName}`);
         }

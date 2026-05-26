@@ -44,7 +44,7 @@ class ClientRequestSerializationTest {
                 var client = new Client('client-1');
                 client.sessionStorageDataFrontlet = function() { return {}; };
                 client.localStorageDataFrontlet = function() { return {}; };
-                client.clientStorageDataFrontlet = function() { return {}; };
+                client.clientStateDataFrontlet = function() { return {}; };
                 client.globalVariableDataFrontlet = function() { return {}; };
                 var frontletInstance = { frontlet: { id: 'ReminderFrontlet' } };
                 var frontletState = {

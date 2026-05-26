@@ -20,12 +20,12 @@ class StorageSameRequestTest {
     }
 
     @Test
-    void clientStorageKeyUsesSameInstanceWithinOneRequest() {
+    void clientStateKeyUsesSameInstanceWithinOneRequest() {
         var context = IntegrationTestContext.builder()
-                .withSingleton(ClientStorageSameRequestPage.class)
+                .withSingleton(ClientStateSameRequestPage.class)
                 .build();
 
-        var client = context.openPage(ClientStorageSameRequestPage.class);
+        var client = context.openPage(ClientStateSameRequestPage.class);
 
         assertThat(client.getDocument().getElementById("value-from-same-request").getInnerText()).isEqualTo("44");
     }

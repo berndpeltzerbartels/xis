@@ -8,7 +8,7 @@ class TemplateValidationRules {
 
     private static final Set<String> LINK_TAGS = Set.of("a", "button");
     private static final Set<String> FORM_FIELD_TAGS = Set.of("input", "textarea", "select", "form", "label");
-    private static final Set<String> STORE_NAMES = Set.of("localStorage", "sessionStorage", "clientStorage");
+    private static final Set<String> STORE_NAMES = Set.of("localStorage", "sessionStorage", "clientState");
 
     void validateElement(TemplateElement element, ValidationErrorCollector errors) {
         validateRequiredAttributes(element, errors);
@@ -65,11 +65,11 @@ class TemplateValidationRules {
     private void validateKnownValueSets(TemplateElement element, ValidationErrorCollector errors) {
         String storageBinding = element.raw().getAttributes().get("xis:storage-binding");
         if (storageBinding != null && !STORE_NAMES.contains(storageBinding)) {
-            errors.add(element.line(), "xis:storage-binding must be one of localStorage, sessionStorage, or clientStorage.");
+            errors.add(element.line(), "xis:storage-binding must be one of localStorage, sessionStorage, or clientState.");
         }
         String storageTagStore = element.raw().getAttributes().get("store");
         if ("xis:storage-binding".equals(element.raw().getLocalName()) && storageTagStore != null && !STORE_NAMES.contains(storageTagStore)) {
-            errors.add(element.line(), "<xis:storage-binding> store must be one of localStorage, sessionStorage, or clientStorage.");
+            errors.add(element.line(), "<xis:storage-binding> store must be one of localStorage, sessionStorage, or clientState.");
         }
     }
 

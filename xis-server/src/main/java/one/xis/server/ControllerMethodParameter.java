@@ -83,9 +83,9 @@ class ControllerMethodParameter {
         } else if (parameter.isAnnotationPresent(LocalStorage.class)) {
             var key = parameter.getAnnotation(LocalStorage.class).value();
             return storageParameter(StorageParameterScope.LOCAL, key, request.getLocalStorageData(), request, postProcessingResults, requestScope);
-        } else if (parameter.isAnnotationPresent(ClientStorage.class)) {
-            var key = parameter.getAnnotation(ClientStorage.class).value();
-            return storageParameter(StorageParameterScope.CLIENT, key, request.getClientStorageData(), request, postProcessingResults, requestScope);
+        } else if (parameter.isAnnotationPresent(ClientState.class)) {
+            var key = parameter.getAnnotation(ClientState.class).value();
+            return storageParameter(StorageParameterScope.CLIENT_STATE, key, request.getClientStateData(), request, postProcessingResults, requestScope);
         } else if (UserContext.class.isAssignableFrom(parameter.getType())) {
             return UserContext.getInstance();
         } else if (method.isAnnotationPresent(Action.class)
@@ -115,8 +115,8 @@ class ControllerMethodParameter {
             controllerMethodResult.getSessionStorage().put(parameter.getAnnotation(SessionStorage.class).value(), parameterValue);
         } else if (parameter.isAnnotationPresent(LocalStorage.class)) {
             controllerMethodResult.getLocalStorage().put(parameter.getAnnotation(LocalStorage.class).value(), parameterValue);
-        } else if (parameter.isAnnotationPresent(ClientStorage.class)) {
-            controllerMethodResult.getClientStorage().put(parameter.getAnnotation(ClientStorage.class).value(), parameterValue);
+        } else if (parameter.isAnnotationPresent(ClientState.class)) {
+            controllerMethodResult.getClientState().put(parameter.getAnnotation(ClientState.class).value(), parameterValue);
         }
     }
 

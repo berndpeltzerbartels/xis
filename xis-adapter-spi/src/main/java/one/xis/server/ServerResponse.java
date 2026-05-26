@@ -27,7 +27,7 @@ public class ServerResponse {
     private Map<String, Object> localStorageData = new HashMap<>();
     private Map<String, Object> localDatabaseData = new HashMap<>();
     private Map<String, Object> sessionStorageData = new HashMap<>();
-    private Map<String, Object> clientStorageData = new HashMap<>();
+    private Map<String, Object> clientStateData = new HashMap<>();
     private Map<String, Object> frontletParameters = new HashMap<>();
     private Map<String, Object> modalParameters = new HashMap<>();
     private boolean authenticated;

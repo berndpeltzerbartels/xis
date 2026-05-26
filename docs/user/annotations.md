@@ -125,7 +125,7 @@ purpose.
 | `@FormData("name")` | Initializes form data on methods or injects submitted form data into action parameters. Method usage supports `load`. |
 | `@Upload` | Binds an uploaded multipart file to a form field or controller parameter. |
 | `@SharedValue("name")` | Injects a value produced by another `@SharedValue` method in the same controller processing flow. |
-| `@LocalStorage`, `@SessionStorage`, `@ClientStorage` | Injects browser-side state into an action method parameter. |
+| `@LocalStorage`, `@SessionStorage`, `@ClientState` | Injects browser-side state into an action method parameter. |
 | `@LocalDatabase` | Injects browser-side database state. This is an advanced client-state feature. |
 | `@ClientId` | Injects the browser client id. |
 | `@UserId` | Injects the authenticated user id. |
@@ -177,7 +177,7 @@ CustomerForm customer(@ModalParameter("customerId") long customerId) {
 Frontlet and modal target URLs may contain query strings. Those values are still frontlet or modal parameters and are
 therefore read with `@FrontletParameter` or `@ModalParameter`. `@QueryParameter` is only for the query string of the current page URL. Use
 `@PathVariable` for values embedded in a page, frontlet, or modal path. Use `@SharedValue`, `@LocalStorage`,
-`@SessionStorage`, and `@ClientStorage` when the value comes from a different source than the current UI parameter set.
+`@SessionStorage`, and `@ClientState` when the value comes from a different source than the current UI parameter set.
 
 Action parameters never implicitly fall back to frontlet or modal parameters. If a method needs both values, name both
 parameters explicitly. Positional action parameters are also supported:
@@ -216,7 +216,7 @@ keeps its Java default value when the property is absent.
 
 ### Browser Storage Parameters
 
-`@LocalStorage`, `@SessionStorage`, and `@ClientStorage` do not send the whole browser store to the server. XIS scans the
+`@LocalStorage`, `@SessionStorage`, and `@ClientState` do not send the whole browser state to the server. XIS scans the
 controller methods, collects the storage keys used by annotated parameters, and writes those keys into the client
 configuration for the page or frontlet. The browser then sends those configured keys with requests for that page or
 frontlet.

@@ -19,7 +19,7 @@ Use the Kotlin JVM plugin together with the XIS Gradle plugin:
 plugins {
     id "java"
     id "org.jetbrains.kotlin.jvm" version "2.0.21"
-    id "one.xis.plugin" version "0.13.0"
+    id "one.xis.plugin" version "0.14.0"
 }
 
 repositories {

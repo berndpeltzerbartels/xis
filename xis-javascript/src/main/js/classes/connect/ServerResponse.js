@@ -17,7 +17,7 @@
  * @property {Array} reloadFrontlets
  * @property {Array} updateEventKeys
  * @property {any} sessionStorageData
- * @property {any} clientStorageData
+ * @property {any} clientStateData
  * @property {any} validatorMessages
  * @property {boolean} authenticated
  * @property {Array<string>} userRoles
@@ -50,7 +50,7 @@ class ServerResponse {
         this.frontletContainerId = '';
         this.reloadFrontlets = [];
         this.sessionStorageData = {};
-        this.clientStorageData = {};
+        this.clientStateData = {};
         this.validatorMessages = { };
         this.authenticated = false;
         this.userRoles = [];
@@ -78,7 +78,7 @@ class ServerResponse {
        if (this.sessionStorageData && Object.keys(this.sessionStorageData).length > 0) {
            return true;
        }
-       if (this.clientStorageData && Object.keys(this.clientStorageData).length > 0) {
+       if (this.clientStateData && Object.keys(this.clientStateData).length > 0) {
            return true;
        }
        return false;
