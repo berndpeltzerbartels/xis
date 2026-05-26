@@ -39,6 +39,41 @@ class RootPageServiceTest {
         }
     }
 
+    @Test
+    void addsReplaceableDefaultMainCssOnlyOnce() throws Exception {
+        var artifactRoot = resourceRoot("default-css-artifact");
+        Files.writeString(artifactRoot.resolve("index.html"), """
+                <!DOCTYPE html>
+                <html>
+                <head><title>Test</title></head>
+                <body></body>
+                </html>
+                """);
+        write(artifactRoot, "public/default-main.css", "body { color: black; }\n");
+
+        try (var classLoader = new URLClassLoader(new java.net.URL[]{artifactRoot.toUri().toURL()},
+                Thread.currentThread().getContextClassLoader())) {
+            var rootPageHtml = withContextClassLoader(classLoader, () -> {
+                var service = new RootPageService(new Resources());
+                service.init();
+                return service.getRootPageHtml();
+            });
+
+            assertThat(rootPageHtml).contains("href=\"/default-main.css\"");
+            assertThat(countOccurrences(rootPageHtml, "href=\"/default-main.css\"")).isEqualTo(1);
+        }
+    }
+
+    private int countOccurrences(String value, String needle) {
+        var count = 0;
+        var index = value.indexOf(needle);
+        while (index >= 0) {
+            count++;
+            index = value.indexOf(needle, index + needle.length());
+        }
+        return count;
+    }
+
     private Path resourceRoot(String directory) throws Exception {
         var root = tempDir.resolve(directory);
         Files.createDirectories(root);

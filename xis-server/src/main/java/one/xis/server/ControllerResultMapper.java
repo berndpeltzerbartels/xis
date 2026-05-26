@@ -60,6 +60,7 @@ class ControllerResultMapper {
         controllerResult.getSessionStorage().putAll(controllerMethodResult.getSessionStorage());
         controllerResult.getLocalStorage().putAll(controllerMethodResult.getLocalStorage());
         controllerResult.getClientState().putAll(controllerMethodResult.getClientState());
+        controllerResult.getToastMessages().addAll(controllerMethodResult.getToastMessages());
         if (controllerMethodResult.isValidationFailed()) {
             controllerResult.setValidationFailed(true);
         }

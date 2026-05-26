@@ -30,6 +30,8 @@ class ControllerResponseMapper {
         response.getSessionStorageData().putAll(result.getSessionStorage());
         response.getLocalStorageData().putAll(result.getLocalStorage());
         response.getClientStateData().putAll(result.getClientState());
+        response.getToastMessages().clear();
+        response.getToastMessages().addAll(result.getToastMessages());
         response.setRedirectUrl(result.getRedirectUrl());
         response.getIdVariables().putAll(result.getIdVariables());
         response.getFrontletParameters().putAll(result.getFrontletParameters());

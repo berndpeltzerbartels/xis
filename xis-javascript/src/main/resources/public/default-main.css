@@ -1,0 +1,200 @@
+/* XIS runtime CSS.
+   This file contains structural styles needed by framework-owned DOM nodes.
+   Application styling and optional themes can override visual details. */
+
+.xis-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1600;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.xis-modal-backdrop[hidden] {
+  display: none;
+}
+
+.xis-modal-shell {
+  position: relative;
+  width: min(720px, 100%);
+  max-height: min(780px, calc(100vh - 48px));
+  overflow: auto;
+  background: #fff;
+  box-shadow: 0 24px 64px rgba(15, 23, 42, 0.28);
+}
+
+.xis-modal-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: #64748b;
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.xis-modal-close:hover,
+.xis-modal-close:focus {
+  color: #0f172a;
+}
+
+.xis-auth-page {
+  min-height: 100vh;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 18px;
+  padding: 32px 18px;
+  box-sizing: border-box;
+}
+
+.xis-auth-card {
+  width: min(420px, 100%);
+  padding: 28px;
+  box-sizing: border-box;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.10);
+}
+
+.xis-auth-form {
+  display: grid;
+  gap: 16px;
+}
+
+.xis-auth-title {
+  margin: 0;
+  color: #111827;
+  font: 650 1.55rem/1.2 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.xis-auth-intro {
+  margin: -4px 0 2px;
+  color: #4b5563;
+  font: 400 0.95rem/1.5 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.xis-auth-field {
+  display: grid;
+  gap: 6px;
+}
+
+.xis-auth-field label {
+  color: #374151;
+  font: 600 0.88rem/1.35 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.xis-auth-field label.error,
+.xis-auth-field .error {
+  color: #b91c1c;
+}
+
+.xis-auth-field input,
+.xis-auth-field select,
+.xis-auth-field textarea {
+  width: 100%;
+  min-height: 40px;
+  box-sizing: border-box;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 8px 10px;
+  background: #fff;
+  color: #111827;
+  font: 400 0.95rem/1.4 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.xis-auth-field input:focus,
+.xis-auth-field select:focus,
+.xis-auth-field textarea:focus {
+  outline: 2px solid rgba(37, 99, 235, 0.22);
+  border-color: #2563eb;
+}
+
+.xis-auth-form button,
+.xis-auth-form .btn {
+  min-height: 42px;
+  border: 0;
+  border-radius: 6px;
+  padding: 9px 14px;
+  background: #2563eb;
+  color: #fff;
+  font: 650 0.95rem/1.35 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  cursor: pointer;
+}
+
+.xis-auth-form button:hover,
+.xis-auth-form .btn:hover {
+  background: #1d4ed8;
+}
+
+.xis-auth-link-row,
+.xis-auth-idp-list,
+.totp-setup-navigation {
+  font: 500 0.92rem/1.45 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.xis-auth-link-row a,
+.xis-auth-idp-list a,
+.totp-setup-navigation a {
+  color: #2563eb;
+}
+
+.totp-setup-result {
+  display: grid;
+  gap: 14px;
+  justify-items: center;
+  text-align: center;
+}
+
+.totp-setup-qr-code {
+  width: min(240px, 100%);
+  height: auto;
+}
+
+.xis-toast-container {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 1700;
+  display: grid;
+  gap: 10px;
+  width: min(360px, calc(100vw - 36px));
+  pointer-events: none;
+}
+
+.xis-toast {
+  pointer-events: auto;
+  padding: 12px 14px;
+  border-radius: 6px;
+  border: 1px solid rgba(15, 23, 42, 0.14);
+  background: #fff;
+  color: #172033;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.18);
+  font: 500 0.92rem/1.4 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.xis-toast.info {
+  border-left: 4px solid #2563eb;
+}
+
+.xis-toast.success {
+  border-left: 4px solid #16a34a;
+}
+
+.xis-toast.warning {
+  border-left: 4px solid #d97706;
+}
+
+.xis-toast.error {
+  border-left: 4px solid #dc2626;
+}

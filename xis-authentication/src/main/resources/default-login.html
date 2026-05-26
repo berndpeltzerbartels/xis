@@ -4,38 +4,38 @@
     <title>Login</title>
 </head>
 <body>
-<div class="container">
-    <div class="form_container" xis:if="${displayLoginForm}">
-        <form xis:binding="login">
-            <h1>Login ${externalIdpIds}</h1>
+<main class="container xis-auth-page">
+    <div class="form_container xis-auth-card" xis:if="${displayLoginForm}">
+        <form xis:binding="login" class="xis-auth-form">
+            <h1 class="xis-auth-title">Login ${externalIdpIds}</h1>
             <xis:global-messages/>
-            <div class="form-group">
+            <div class="form-group xis-auth-field">
                 <label xis:binding="username" xis:error-class="error" for="username">Username:</label>
                 <input xis:binding="username" type="text" id="username" name="username" class="form-control"/>
                 <xis:message message-for="username"/>
             </div>
-            <div class="form-group">
+            <div class="form-group xis-auth-field">
                 <label xis:binding="password" xis:error-class="error" for="password">Password:</label>
                 <input xis:binding="password" type="password" id="password" name="password" class="form-control"/>
                 <xis:message message-for="password"/>
             </div>
-            <div class="form-group" xis:if="${totpLoginEnabled}">
+            <div class="form-group xis-auth-field" xis:if="${totpLoginEnabled}">
                 <label xis:binding="totpCode" xis:error-class="error" for="totpCode">Authenticator code:</label>
                 <input xis:binding="totpCode" type="text" inputmode="numeric" autocomplete="one-time-code" id="totpCode" name="totpCode" class="form-control"/>
                 <xis:message message-for="totpCode"/>
             </div>
-            <div class="form-group" xis:repeat="registration:loginFactorRegistrations">
+            <div class="form-group xis-auth-link-row" xis:repeat="registration:loginFactorRegistrations">
                 <a href="${registration.url}">${registration.text}</a>
             </div>
             <input type="hidden" name="state" xis:binding="state" id="state"/>
             <button xis:action="login" type="submit" class="btn btn-primary">Login</button>
         </form>
     </div>
-    <div class="idp_container">
+    <div class="idp_container xis-auth-idp-list">
         <div xis:repeat="idpId:externalIdpIds">
             <a href="${externalIdpUrls[idpId]}">${idpId}</a>
         </div>
     </div>
-</div>
+</main>
 </body>
 </html>

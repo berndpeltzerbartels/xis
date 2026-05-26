@@ -54,6 +54,7 @@ class MessageHandler {
         this.errorMessages = [];
         this.infoMessages = [];
         this.warningMessages = [];
+        this._clearToastContainer();
         this._cancelTimer('error');
         this._cancelTimer('warning');
         this._cancelTimer('info');
@@ -92,7 +93,41 @@ class MessageHandler {
         }
     }
 
+    showToast(message, level = 'info') {
+        const toastContainer = this._toastContainer();
+        const normalizedLevel = String(level || 'info').toLowerCase();
+        const toast = document.createElement('div');
+        toast.classList.add('xis-toast');
+        toast.classList.add(normalizedLevel);
+        toast.setAttribute('role', normalizedLevel === 'error' ? 'alert' : 'status');
+        toast.setAttribute('aria-live', normalizedLevel === 'error' ? 'assertive' : 'polite');
+        toast.textContent = message == null ? '' : String(message);
+        toastContainer.appendChild(toast);
+        setTimeout(() => toast.remove(), 5000);
+    }
+
     /* --------------------------- Internal helpers --------------------------- */
+
+    _toastContainer() {
+        let container = document.getElementById('xis-toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'xis-toast-container';
+            container.className = 'xis-toast-container';
+            document.body.appendChild(container);
+        }
+        return container;
+    }
+
+    _clearToastContainer() {
+        const container = document.getElementById('xis-toast-container');
+        if (!container) {
+            return;
+        }
+        while (container.firstChild) {
+            container.removeChild(container.firstChild);
+        }
+    }
 
     _normalizeAddOptions(level, renderOrOptions) {
         if (typeof renderOrOptions === 'boolean') {

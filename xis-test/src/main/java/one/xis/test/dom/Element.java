@@ -72,6 +72,10 @@ public interface Element extends Node {
 
     Collection<String> getCssClasses();
 
+    String getId();
+
+    void setId(String id);
+
     void setClassName(String className);
 
 

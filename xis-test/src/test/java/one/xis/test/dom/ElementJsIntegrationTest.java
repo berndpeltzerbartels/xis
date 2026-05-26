@@ -77,6 +77,17 @@ class ElementJsIntegrationTest {
     }
 
     @Test
+    void testElementAttributePropertyAssignment() {
+        Value result = JSUtil.execute("""
+                var div = document.createElement('div');
+                div.id = 'customer-form';
+                div.id;
+                """, context);
+
+        assertThat(result.asString()).isEqualTo("customer-form");
+    }
+
+    @Test
     void testInnerHTML() {
         JSUtil.execute("var div = document.getElementById('main'); div.innerHTML = '<span>Text</span>';", context);
         Value result = JSUtil.execute("document.getElementById('main').innerHTML;", context);

@@ -10,6 +10,7 @@ import one.xis.resource.Resource;
 import one.xis.resource.Resources;
 
 import java.util.Comparator;
+import java.util.LinkedHashSet;
 
 
 @Component
@@ -17,8 +18,6 @@ import java.util.Comparator;
 class RootPageService {
 
     private static final String CUSTOM_PUBLIC_RESOURCE_PATH = "public";
-    private static final String DEFAULT_DEVELOP_ROOT_PAGE = "default-develop-index.html";
-    private static final String DEVELOP_ROOT_PAGE = "develop-index.html";
     private static final String DEFAULT_ROOT_PAGE = "default-index.html";
     private static final String ROOT_PAGE = "index.html";
     private final Resources resources;
@@ -37,16 +36,19 @@ class RootPageService {
     }
 
     private void addCssLinks(HtmlDocument rootPageDocument) {
+        var cssPaths = new LinkedHashSet<String>();
         resources.getClassPathResources(CUSTOM_PUBLIC_RESOURCE_PATH, ".css")
                 .stream()
                 .sorted(Comparator.comparingInt(this::cssOrder).thenComparing(Resource::getResourcePath))
-                .forEach(resource -> addCssLink(resource.getResourcePath().substring(CUSTOM_PUBLIC_RESOURCE_PATH.length()), rootPageDocument));
+                .map(resource -> resource.getResourcePath().substring(CUSTOM_PUBLIC_RESOURCE_PATH.length()))
+                .filter(cssPaths::add)
+                .forEach(cssPath -> addCssLink(cssPath, rootPageDocument));
     }
 
     private int cssOrder(Resource resource) {
         return switch (resource.getResourcePath()) {
             case "public/default-theme.css" -> 0;
-            case "public/xis-runtime.css" -> 5;
+            case "public/default-main.css" -> 5;
             case "public/xis.css" -> 10;
             case "public/theme.css" -> 100;
             default -> 50;
@@ -75,19 +77,12 @@ class RootPageService {
     }
 
     private String getRootPageResourcePath() {
-        if (Boolean.parseBoolean(System.getProperty("develop"))) {
-            if (resources.exists(DEVELOP_ROOT_PAGE)) {
-                return DEVELOP_ROOT_PAGE;
-            } else if (resources.exists(DEFAULT_DEVELOP_ROOT_PAGE)) {
-                return DEFAULT_DEVELOP_ROOT_PAGE;
-            }
-        }
         if (resources.exists(ROOT_PAGE)) {
             return ROOT_PAGE;
         } else if (resources.exists(DEFAULT_ROOT_PAGE)) {
             return DEFAULT_ROOT_PAGE;
         }
-        throw new IllegalStateException("No root page found. Please provide a 'default-develop-index.html' or 'default-default-develop-index.html' in the resources directory.");
+        throw new IllegalStateException("No root page found. Please provide an 'index.html' or use the XIS default root page.");
     }
 
 

@@ -6,6 +6,7 @@ import com.google.gson.annotations.JsonAdapter;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import one.xis.ToastMessage;
 import one.xis.validation.ValidatorMessages;
 
 import java.util.*;
@@ -28,6 +29,7 @@ public class ServerResponse {
     private Map<String, Object> localDatabaseData = new HashMap<>();
     private Map<String, Object> sessionStorageData = new HashMap<>();
     private Map<String, Object> clientStateData = new HashMap<>();
+    private Collection<ToastMessage> toastMessages = new ArrayList<>();
     private Map<String, Object> frontletParameters = new HashMap<>();
     private Map<String, Object> modalParameters = new HashMap<>();
     private boolean authenticated;
@@ -55,6 +57,7 @@ public class ServerResponse {
         formData.clear();
         returnedFormDataKeys.clear();
         reloadFrontlets.clear();
+        toastMessages.clear();
         frontletParameters.clear();
         modalParameters.clear();
         nextURL = null;

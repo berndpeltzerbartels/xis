@@ -1241,6 +1241,50 @@ class XISValidateProcessorTest {
     }
 
     @Test
+    void acceptsTemplateDataProvidedThroughFrontendParameter() throws IOException {
+        Path templateFile = tempDir.resolve("src/main/java/example/ProbePage.html");
+        Files.createDirectories(templateFile.getParent());
+        Files.writeString(templateFile, """
+                <!DOCTYPE html>
+                <html>
+                  <body>
+                    <p>${dynamicModel.name}</p>
+                    <form xis:binding="dynamicForm">
+                      <input xis:binding="description"/>
+                    </form>
+                  </body>
+                </html>
+                """, StandardCharsets.UTF_8);
+
+        DiagnosticCollector<JavaFileObject> diagnostics = compilePageSourceWithProcessor(true, """
+                package example;
+
+                import one.xis.Action;
+                import one.xis.Frontend;
+                import one.xis.Page;
+
+                @Page("/probe.html")
+                class ProbePage {
+                    @Action("save")
+                    void save(Frontend frontend) {
+                        frontend.addModelData("dynamicModel", new Customer())
+                                .addFormData("dynamicForm", new CustomerForm());
+                    }
+
+                    static class Customer {
+                        String name;
+                    }
+
+                    static class CustomerForm {
+                        String description;
+                    }
+                }
+                """);
+
+        assertThat(errorMessages(diagnostics)).isEmpty();
+    }
+
+    @Test
     void validatesDragDropAndSelectionRules() throws IOException {
         Path templateFile = tempDir.resolve("src/main/java/example/ProbePage.html");
         Files.createDirectories(templateFile.getParent());

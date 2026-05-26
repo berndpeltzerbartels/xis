@@ -161,7 +161,14 @@ public class MethodUtils {
         try {
             return invoke(o, method, args);
         } catch (InvocationTargetException e) {
-            throw new RuntimeException(e.getTargetException());
+            var targetException = e.getTargetException();
+            if (targetException instanceof RuntimeException runtimeException) {
+                throw runtimeException;
+            }
+            if (targetException instanceof Error error) {
+                throw error;
+            }
+            throw new RuntimeException(targetException);
         }
     }
 

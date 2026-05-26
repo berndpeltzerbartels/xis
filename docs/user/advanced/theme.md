@@ -57,15 +57,25 @@ dependencies {
 ```
 
 You do not have to add `<link rel="stylesheet">` tags. XIS automatically adds CSS files from classpath `public`
-resources to the root page. XIS itself provides `public/xis-runtime.css` with required runtime styles such as modal
-layout. The optional theme provides:
+resources to the root page. XIS itself provides replaceable `public/default-main.css` with basic runtime styles such as
+modal layout, toast messages, and built-in login form layout.
+
+When you add `xis-theme`, the theme module contributes these additional public CSS resources:
 
 - `public/default-theme.css`: simple variables for colors, spacing, font sizes, and control sizes
 - `public/xis.css`: layout, navigation, forms, tables, messages, and component styling
 
-`default-theme.css` is loaded before `xis.css`. `xis-runtime.css` is loaded between them and is also present when
-`xis-theme` is not used. See [Runtime and dependencies](../runtime-and-dependencies.md#static-resources) for the full
-automatic resource order.
+Applications that use `xis-theme` can additionally create `src/main/resources/public/theme.css` for small local
+overrides. The common order is:
+
+1. `public/default-theme.css`
+2. `public/default-main.css`
+3. `public/xis.css`
+4. other application CSS files
+5. `public/theme.css`
+
+`default-main.css` is not part of the optional theme and is also present when `xis-theme` is not used. See
+[Runtime and dependencies](../runtime-and-dependencies.md#static-resources) for the general public-resource rules.
 
 ## Navigation
 

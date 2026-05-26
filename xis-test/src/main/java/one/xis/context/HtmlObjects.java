@@ -10,10 +10,11 @@ import one.xis.test.dom.Window;
 import one.xis.test.js.Console;
 import one.xis.test.js.LocalStorage;
 import one.xis.test.js.SessionStorage;
+import org.graalvm.polyglot.Value;
+import org.graalvm.polyglot.proxy.ProxyExecutable;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import static java.net.URLEncoder.encode;
@@ -30,7 +31,7 @@ class HtmlObjects {
     private final Function<String, Element> htmlToElement;
     private final Function<String, String> atob;
     private final Function<String, String> encodeURIComponent = HtmlObjects::encodeURIComponent;
-    private final BiConsumer<Runnable, Integer> setTimeout = HtmlObjects::setTimeout;
+    private final ProxyExecutable setTimeout = HtmlObjects::setTimeout;
 
     HtmlObjects() {
         this.htmlToElement = HtmlObjects::htmlToElement;
@@ -47,15 +48,13 @@ class HtmlObjects {
         return ElementMapper.map(htmlDoc.getDocumentElement());
     }
 
-    public static void setTimeout(Runnable func, int time) {
-        new Thread(() -> {
-            try {
-                Thread.sleep(time);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            func.run();
-        }).start();
+    public static Object setTimeout(Value... args) {
+        var func = args[0];
+        var time = args.length > 1 ? args[1].asInt() : 0;
+        if (time <= 0) {
+            func.executeVoid();
+        }
+        return 1;
     }
 
     public static String atob(String base64) {
@@ -77,7 +76,7 @@ class HtmlObjects {
 
     private void init() {
         String content = new Resources()
-                .getByPath("default-develop-index.html")
+                .getByPath("default-index.html")
                 .getContent();
 
         // Toleranter HTML5-Parser, keine hübsche Formatierung (beibehaltung der Eingabe-Struktur)

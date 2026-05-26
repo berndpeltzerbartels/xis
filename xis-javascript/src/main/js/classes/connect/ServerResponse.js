@@ -18,6 +18,7 @@
  * @property {Array} updateEventKeys
  * @property {any} sessionStorageData
  * @property {any} clientStateData
+ * @property {Array} toastMessages
  * @property {any} validatorMessages
  * @property {boolean} authenticated
  * @property {Array<string>} userRoles
@@ -51,6 +52,7 @@ class ServerResponse {
         this.reloadFrontlets = [];
         this.sessionStorageData = {};
         this.clientStateData = {};
+        this.toastMessages = [];
         this.validatorMessages = { };
         this.authenticated = false;
         this.userRoles = [];

@@ -160,23 +160,33 @@ XIS also uses classpath `public` resources when it builds the root page:
 
 - every `public/**/*.css` resource is added to the root page as a stylesheet
 - every `public/**/*.js` resource is added to the root page as a script
-- `public/xis-runtime.css` is provided by XIS itself and contains structural styles required by framework-owned DOM
-  elements, for example modal dialogs
+- `public/default-main.css` is provided by XIS itself and contains default structural styles for framework-owned DOM
+  elements and built-in pages, for example modal dialogs, toast messages, and login forms
 
 You normally do not need to add stylesheet links for application CSS under `public`. Put app-specific CSS there and let
 XIS add it to the root page. The generated URLs omit the `public` segment, for example
 `src/main/resources/public/css/app.css` becomes `/css/app.css`.
 
-Stylesheets are loaded in a predictable order for common XIS files:
+If you want to replace the XIS default styling completely, provide your own `src/main/resources/public/default-main.css`.
+An empty file is enough when you want no default styling at all.
 
-1. `public/default-theme.css`
-2. `public/xis-runtime.css`
-3. `public/xis.css`
-4. other CSS files
-5. `public/theme.css`
+If you want to start from the XIS default file instead of an empty replacement, copy it from the resolved dependency:
 
-`xis-runtime.css` is not a theme. It is part of the runtime contract and is loaded even when the optional `xis-theme`
-dependency is not used.
+```groovy
+tasks.register("copyXisDefaultMainCss", Copy) {
+    from {
+        configurations.runtimeClasspath
+                .filter { it.name.startsWith("xis-javascript-") }
+                .collect { zipTree(it) }
+    }
+    include "public/default-main.css"
+    into "src/main/resources"
+}
+```
+
+`default-main.css` is not the optional theme. It is the replaceable XIS default stylesheet and is loaded even when the
+optional `xis-theme` dependency is not used. Additional theme stylesheets are only relevant when you add `xis-theme`;
+see [XIS theme](advanced/theme.md).
 
 In XIS Boot development runs, public assets under `src/main/resources/public` are read from the source file when it is
 available. CSS edits therefore become visible after a browser reload without rebuilding the application. Packaged jar

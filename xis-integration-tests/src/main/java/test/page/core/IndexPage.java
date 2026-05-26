@@ -5,7 +5,7 @@ import one.xis.ModelData;
 import one.xis.Page;
 
 @Getter
-@Page("/default-develop-index.html")
+@Page("/index.html")
 public class IndexPage {
 
     private int invocations;

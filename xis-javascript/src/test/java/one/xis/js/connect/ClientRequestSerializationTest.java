@@ -87,4 +87,34 @@ class ClientRequestSerializationTest {
         assertThat(json).contains("\"emptyMessagesKeys\":0");
         assertThat(json).contains("\"compactIsEmpty\":true");
     }
+
+    @Test
+    void clientShowsToastMessagesFromServerResponse() throws ScriptException {
+        var script = Javascript.getScript(CLASSES) + """
+                function timeZone() { return 'Europe/Berlin'; }
+                var shown = [];
+                var app = {
+                    messageHandler: {
+                        showToast(message, level) {
+                            shown.push({ message: message, level: level });
+                        }
+                    }
+                };
+                var client = new Client('client-1');
+                client.showToastMessages({
+                    toastMessages: [
+                        { message: 'Saved', level: 'SUCCESS' },
+                        { message: 'Careful', level: 'WARNING' }
+                    ]
+                });
+                JSON.stringify(shown);
+                """;
+
+        var json = JSUtil.execute(script).asString();
+
+        assertThat(json).contains("\"message\":\"Saved\"");
+        assertThat(json).contains("\"level\":\"success\"");
+        assertThat(json).contains("\"message\":\"Careful\"");
+        assertThat(json).contains("\"level\":\"warning\"");
+    }
 }

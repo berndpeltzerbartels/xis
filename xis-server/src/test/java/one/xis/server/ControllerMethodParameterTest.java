@@ -2,8 +2,10 @@ package one.xis.server;
 
 import one.xis.Action;
 import one.xis.ActionParameter;
+import one.xis.Frontend;
 import one.xis.OwnedBy;
 import one.xis.SharedValue;
+import one.xis.ToastLevel;
 import one.xis.UploadConfiguration;
 import one.xis.UserContext;
 import one.xis.UserContextImpl;
@@ -90,6 +92,25 @@ class ControllerMethodParameterTest {
     }
 
     @Test
+    void frontendParameterAddsModelFormDataAndToastMessagesToResult() throws Exception {
+        var method = TestActions.class.getDeclaredMethod("frontend", Frontend.class);
+        var parameter = new ControllerMethodParameter(method, method.getParameters()[0], mockDeserializer(), 0, -1, mock(UploadConfiguration.class));
+        var frontend = (Frontend) parameter.prepareParameter(new ClientRequest(), new PostProcessingResults(), new HashMap<>());
+        frontend.addModelData("pipeline", "Pipeline")
+                .addFormData("step", "Step")
+                .showToast("Saved", ToastLevel.SUCCESS);
+        var result = new ControllerMethodResult();
+
+        parameter.addParameterValueToResult(result, frontend, new ClientRequest());
+
+        assertThat(result.getModelData()).containsEntry("pipeline", "Pipeline");
+        assertThat(result.getFormData()).containsEntry("step", "Step");
+        assertThat(result.getReturnedFormDataKeys()).containsExactly("step");
+        assertThat(result.getToastMessages()).extracting("message").containsExactly("Saved");
+        assertThat(result.getToastMessages()).extracting("level").containsExactly(ToastLevel.SUCCESS);
+    }
+
+    @Test
     void accessDeniedPostProcessingResultStopsInvocationWithAuthorizationException() throws Exception {
         var method = TestActions.class.getDeclaredMethod("secured");
         var controller = new TestActions();
@@ -169,6 +190,10 @@ class ControllerMethodParameterTest {
         @Action
         void secured() {
             invoked = true;
+        }
+
+        @Action
+        void frontend(Frontend frontend) {
         }
     }
 }

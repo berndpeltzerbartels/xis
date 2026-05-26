@@ -6,7 +6,6 @@ import one.xis.context.PolyglotPromises;
 import one.xis.test.js.Event;
 import one.xis.utils.lang.MethodUtils;
 import one.xis.utils.lang.TypeUtils;
-import org.graalvm.polyglot.Value;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -146,6 +145,16 @@ public class ElementImpl extends NodeImpl implements Element {
     }
 
     @Override
+    public String getId() {
+        return getAttribute("id");
+    }
+
+    @Override
+    public void setId(String id) {
+        attributes.put("id", id);
+    }
+
+    @Override
     public void setClassName(String className) {
         this.classList.clear();
         for (String item : className.split(" ")) {
@@ -161,12 +170,6 @@ public class ElementImpl extends NodeImpl implements Element {
             return classList.length > 0;
         }
         return attributes.containsKey(name);
-    }
-
-    @Override
-    public void putMember(String key, Value value) {
-        attributes.put(key, GraalVMUtils.convertValue(String.class, value));
-        super.putMember(key, value);
     }
 
     public void removeAttribute(String name) {
@@ -416,13 +419,7 @@ public class ElementImpl extends NodeImpl implements Element {
     protected void evaluateContent(StringBuilder builder, int indent) {
         for (int i = 0; i < indent; i++) builder.append('\t');
         builder.append('<').append(localName);
-        attributes.forEach((key, value) -> {
-            builder.append(' ')
-                    .append(key)
-                    .append("=\"")
-                    .append(value)
-                    .append('"');
-        });
+        appendAttributes(builder);
 
         boolean hasChildren = !getChildNodes().list().isEmpty();
         String ln = localName.toLowerCase();
@@ -446,6 +443,14 @@ public class ElementImpl extends NodeImpl implements Element {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append('<').append(localName);
+        appendAttributes(builder);
+        if (HTML_VOID.contains(localName.toLowerCase())) {
+            return builder.append('>').toString();
+        }
+        return builder.append("/>").toString(); // nur Debug (Einzeiler)
+    }
+
+    private void appendAttributes(StringBuilder builder) {
         attributes.forEach((key, value) -> {
             builder.append(' ')
                     .append(key)
@@ -453,10 +458,11 @@ public class ElementImpl extends NodeImpl implements Element {
                     .append(value)
                     .append('"');
         });
-        if (HTML_VOID.contains(localName.toLowerCase())) {
-            return builder.append('>').toString();
+        if (!attributes.containsKey("class") && classList.length > 0) {
+            builder.append(" class=\"")
+                    .append(getAttribute("class"))
+                    .append('"');
         }
-        return builder.append("/>").toString(); // nur Debug (Einzeiler)
     }
 
     public void setInnerText(String text) {

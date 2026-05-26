@@ -1,12 +1,10 @@
 package one.xis.server;
 
 import lombok.Data;
+import one.xis.ToastMessage;
 import one.xis.validation.ValidatorMessages;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 
 @Data
 class ControllerMethodResult {
@@ -34,6 +32,7 @@ class ControllerMethodResult {
     private final Map<String, Object> sessionStorage = new HashMap<>();
     private final Map<String, Object> localStorage = new HashMap<>();
     private final Map<String, Object> clientState = new HashMap<>();
+    private final Collection<ToastMessage> toastMessages = new ArrayList<>();
     private String redirectUrl;
     private final Map<String, String> idVariables = new HashMap<>();
     private String annotatedTitle;

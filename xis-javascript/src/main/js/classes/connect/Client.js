@@ -160,7 +160,21 @@ class Client {
         if (globalMessages.length > 0) {
             app.messageHandler.addValidationErrors(globalMessages);
         }
+        this.showToastMessages(responseObject);
         return Promise.resolve(responseObject);
+     }
+
+     showToastMessages(response) {
+         if (!response || !Array.isArray(response.toastMessages) || !app.messageHandler || typeof app.messageHandler.showToast !== 'function') {
+             return;
+         }
+         response.toastMessages.forEach(toast => {
+             if (!toast) {
+                 return;
+             }
+             const level = toast.level ? String(toast.level).toLowerCase() : 'info';
+             app.messageHandler.showToast(toast.message, level);
+         });
      }
 
      forwardToLoginPage(response) {
@@ -466,6 +480,7 @@ class Client {
         serverResponse.localDatabaseData = obj.localDatabaseData || {};
         serverResponse.localStorageData = obj.localStorageData || {};
         serverResponse.clientStateData = obj.clientStateData || {};
+        serverResponse.toastMessages = Array.isArray(obj.toastMessages) ? obj.toastMessages : [];
         serverResponse.globalVariableData = obj.globalVariableData || {};
         serverResponse.sessionStorageData = obj.sessionStorageData || {};
         serverResponse.authenticated = obj.authenticated === true;

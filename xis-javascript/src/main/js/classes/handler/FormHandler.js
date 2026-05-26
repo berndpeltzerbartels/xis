@@ -120,6 +120,7 @@ class FormHandler extends TagHandler {
         this.formElementHandlers = {};
         this.fileInputHandlers = [];
         data.validationPath = '/' + formBindingKey;
+        this.resetMessageHandlers();
         this.clearMessageHandlers();
         const descendantPromise = this.refreshDescendantHandlers(data);
         const actionFormData = this.actionFormData(data, formBindingKey);

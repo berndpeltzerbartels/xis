@@ -7,14 +7,15 @@ import java.util.Set;
 record ControllerTemplateModel(String controllerName,
                                Path templateFile,
                                Map<String, TemplateDataModel> modelData,
-                               Map<String, TemplateDataModel> formData) {
+                               Map<String, TemplateDataModel> formData,
+                               boolean dynamicFrontendData) {
 
     boolean providesData(String name) {
-        return modelData.containsKey(name) || formData.containsKey(name);
+        return modelData.containsKey(name) || formData.containsKey(name) || dynamicFrontendData;
     }
 
     boolean providesModelData(String name) {
-        return modelData.containsKey(name);
+        return modelData.containsKey(name) || dynamicFrontendData;
     }
 
     Set<String> modelDataNames() {
