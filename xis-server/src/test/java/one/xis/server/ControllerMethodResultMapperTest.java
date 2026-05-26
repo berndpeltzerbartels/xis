@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 
 class ControllerMethodResultMapperTest {
@@ -56,6 +57,24 @@ class ControllerMethodResultMapperTest {
         assertThat(result.getFormData()).containsEntry("customer", "form");
     }
 
+    @Test
+    void rejectsNullFormDataReturnValue() throws Exception {
+        var result = new ControllerMethodResult();
+
+        assertThatThrownBy(() -> mapper.mapReturnValueToResult(result, method("form"), null, new java.util.HashMap<>()))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("@FormData method must not return null for key: customer");
+    }
+
+    @Test
+    void rejectsEmptyOptionalFormDataReturnValue() throws Exception {
+        var result = new ControllerMethodResult();
+
+        assertThatThrownBy(() -> mapper.mapReturnValueToResult(result, method("optionalForm"), Optional.empty(), new java.util.HashMap<>()))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("@FormData method must not return null for key: customer");
+    }
+
     private Method method(String name) throws NoSuchMethodException {
         return Methods.class.getDeclaredMethod(name);
     }
@@ -75,6 +94,11 @@ class ControllerMethodResultMapperTest {
         @FormData("customer")
         Optional<String> optionalForm() {
             return Optional.empty();
+        }
+
+        @FormData("customer")
+        String form() {
+            return "";
         }
     }
 }

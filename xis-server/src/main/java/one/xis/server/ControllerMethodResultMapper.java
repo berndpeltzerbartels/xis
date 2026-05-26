@@ -140,7 +140,11 @@ class ControllerMethodResultMapper {
     }
 
     private void mapFormData(String key, Object value, ControllerMethodResult controllerMethodResult) {
-        controllerMethodResult.getFormData().put(key, normalizeDataValue(value));
+        var normalizedValue = normalizeDataValue(value);
+        if (normalizedValue == null) {
+            throw new IllegalStateException("@FormData method must not return null for key: " + key);
+        }
+        controllerMethodResult.getFormData().put(key, normalizedValue);
     }
 
     private Object normalizeDataValue(Object value) {

@@ -233,7 +233,7 @@ names, for example `getUser()` becomes `user`.
 
 `@FormData` binds a Java object to a form. On a method, the return value initializes or refreshes form data. On an action
 method parameter, the submitted form data is deserialized and passed into the controller method. `@FormData` parameters
-are only supported on `@Action` methods.
+are only supported on `@Action` methods. `@FormData` methods must not return `null`.
 
 In the current API, the `value` attribute is required by Java. Use the same binding key in the template and controller.
 
