@@ -10,9 +10,16 @@ import one.xis.Page;
 public class SubmitFormWithoutData {
     
     private boolean invoked = false;
+    private SimpleObject submittedObject;
 
     @Action("save")
     void save(@FormData("formObject") SimpleObject simpleObject) {
         invoked = true;
+        submittedObject = simpleObject;
+    }
+
+    void reset() {
+        invoked = false;
+        submittedObject = null;
     }
 }

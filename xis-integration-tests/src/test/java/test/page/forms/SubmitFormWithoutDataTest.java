@@ -3,6 +3,7 @@ package test.page.forms;
 
 import one.xis.context.IntegrationTestContext;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
@@ -20,14 +21,38 @@ class SubmitFormWithoutDataTest {
                 .build();
     }
 
+    @BeforeEach
+    void resetPage() {
+        testContext.getSingleton(SubmitFormWithoutData.class).reset();
+    }
+
     @Test
-    void testEmptyFormShowsValidationErrors() {
-        // Seite öffnen
+    void actionReceivesFormDataObjectWithoutFormDataInitializerWhenSubmittedEmpty() {
         var client = testContext.openPage("/submitFormWithoutData.html");
         var document = client.getDocument();
 
         document.getElementById("save").click();
 
-        assertThat(testContext.getSingleton(SubmitFormWithoutData.class).isInvoked()).isTrue();
+        var page = testContext.getSingleton(SubmitFormWithoutData.class);
+        assertThat(page.isInvoked()).isTrue();
+        assertThat(page.getSubmittedObject()).isNotNull();
+        assertThat(page.getSubmittedObject().getProperty1()).isNull();
+        assertThat(page.getSubmittedObject().getProperty2()).isNull();
+    }
+
+    @Test
+    void actionReceivesFormDataObjectWithoutFormDataInitializerWhenSubmittedWithValues() {
+        var client = testContext.openPage("/submitFormWithoutData.html");
+        var document = client.getDocument();
+
+        document.getInputElementById("field1").setValue("first");
+        document.getInputElementById("field2").setValue("second");
+        document.getElementById("save").click();
+
+        var page = testContext.getSingleton(SubmitFormWithoutData.class);
+        assertThat(page.isInvoked()).isTrue();
+        assertThat(page.getSubmittedObject()).isNotNull();
+        assertThat(page.getSubmittedObject().getProperty1()).isEqualTo("first");
+        assertThat(page.getSubmittedObject().getProperty2()).isEqualTo("second");
     }
 }
