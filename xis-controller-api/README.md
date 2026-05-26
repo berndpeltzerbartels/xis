@@ -188,7 +188,8 @@ collisions between frontlet classes with the same simple name in different packa
 `@FrontletParameter` injects a stable parameter of the current frontlet instance. Frontlet parameters are supplied by
 child `<xis:parameter>` tags, by `FrontletResponse`, or by query strings on frontlet targets such as
 `/product-summary?productId=42`. These target query strings are still read with `@FrontletParameter`;
-`@QueryParameter` is reserved for the query string of the current page URL.
+`@QueryParameter` is reserved for the query string of the current page URL. Nested frontlets can also read frontlet
+parameters from their containing frontlet; parameters supplied directly to the nested frontlet win on name conflicts.
 
 | Attribute | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |

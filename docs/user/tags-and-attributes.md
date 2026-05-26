@@ -237,6 +237,9 @@ Pass frontlet parameters with `xis:parameter`. The target frontlet receives them
 Frontlet targets can also carry query parameters, for example `xis:frontlet="/product-summary?productId=42"`. These
 values are frontlet parameters and are also read with `@FrontletParameter`.
 
+A nested frontlet can read frontlet parameters from its containing frontlet as well as its own parameters. If both define
+the same key, the parameter supplied directly to the nested frontlet is used.
+
 For `xis:default-frontlet`, prefer query parameters such as
 `xis:default-frontlet="ProductDetailsFrontlet?productId=${product.id}"`. This makes it clear that the parameters belong
 only to that default frontlet. Child `<xis:parameter>` elements are still supported, but they are interpreted as default
