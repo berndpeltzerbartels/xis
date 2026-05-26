@@ -2,7 +2,7 @@ class StoreUpdater {
     updateStores(response) {
         this.storeLocalStorageData(response.localStorageData);
         this.storeSessionStorageData(response.sessionStorageData);
-        this.storeClientStorageData(response.clientStorageData);
+        this.storeClientStateData(response.clientStateData);
         this.storeLocalDatabaseData(response.localDatabaseData);
     }
 
@@ -20,11 +20,11 @@ class StoreUpdater {
         app.sessionStorage.saveData(sessionStorageData);
     }
 
-    storeClientStorageData(clientStorageData) {
-        if (!clientStorageData) {
+    storeClientStateData(clientStateData) {
+        if (!clientStateData) {
             return;
         }
-        app.clientStorage.saveData(clientStorageData);
+        app.clientState.saveData(clientStateData);
     }
 
 

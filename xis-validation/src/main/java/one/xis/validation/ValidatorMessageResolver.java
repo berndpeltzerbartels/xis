@@ -39,10 +39,10 @@ public class ValidatorMessageResolver {
         return message;
     }
 
-    private String createMessage(@NonNull String messageKey, @NonNull Map<String, Object> messageParameters, @NonNull UserContext userContext) {
+    public String createMessage(@NonNull String messageKey, @NonNull Map<String, Object> messageParameters, @NonNull UserContext userContext) {
         var message = getMessage(messageKey, userContext);
         if (message == null) {
-            return null;
+            return "[" + messageKey + "]";
         }
         for (var key : messageParameters.keySet()) {
             var valueStr = messageParameters.get(key);

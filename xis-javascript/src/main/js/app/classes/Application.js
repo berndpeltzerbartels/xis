@@ -7,7 +7,7 @@ class Application {
         this.eventPublisher = new EventPublisher();
         this.sessionStorage = new SessionStore(this.eventPublisher);
         this.localStorage = new LocalStore(this.eventPublisher);
-        this.clientStorage = new ClientStore(this.eventPublisher);
+        this.clientState = new ClientStateStore(this.eventPublisher);
         this.clientId = this.clientId();
         this.httpConnector = new HttpConnector(this.clientId);
         this.httpClient = new HttpClient(this.httpConnector, this.clientId);

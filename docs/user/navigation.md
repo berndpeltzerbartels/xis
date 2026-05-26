@@ -415,6 +415,10 @@ class ProductSummaryFrontlet {
 The query parameters in the frontlet URL become frontlet parameters. The target frontlet reads them with `@FrontletParameter`,
 not `@QueryParameter`, because they belong to the frontlet instance rather than the current page URL.
 
+Nested frontlets can also read frontlet parameters from their containing frontlet. This is useful when an outer frontlet
+establishes the surrounding context, such as the currently selected project or pipeline, and an inner frontlet only adds
+its own more specific parameters.
+
 Reload another frontlet by ID:
 
 This is only needed for another already visible frontlet that would not be refreshed by the normal action response. You

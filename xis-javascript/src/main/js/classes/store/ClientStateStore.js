@@ -1,6 +1,6 @@
-class ClientStore extends Store {
+class ClientStateStore extends Store {
     constructor(eventPublisher) {
-        super(eventPublisher, undefined, 'clientStorageUpdated');
+        super(eventPublisher, undefined, 'clientStateUpdated');
         this.data = new Map();
     }
 
@@ -36,7 +36,7 @@ class ClientStore extends Store {
     }
 
     /**
-     * Clear all client storage data
+     * Clear all client state data
      */
     clear() {
         this.data.clear();

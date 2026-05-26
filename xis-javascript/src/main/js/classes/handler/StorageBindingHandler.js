@@ -22,7 +22,7 @@ class StorageBindingHandler extends TagHandler {
     }
 
     validateStoreName(storeName) {
-        const validStoreNames = ['localStorage', 'sessionStorage', 'clientStorage'];
+        const validStoreNames = ['localStorage', 'sessionStorage', 'clientState'];
         if (!validStoreNames.includes(storeName)) {
             throw new Error(`Invalid store name: ${storeName}. Valid names are: ${validStoreNames.join(', ')}`);
         }

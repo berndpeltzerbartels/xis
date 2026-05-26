@@ -933,6 +933,71 @@ class XISValidateProcessorTest {
     }
 
     @Test
+    void rejectsActionParameterWithoutNameOrIndex() throws IOException {
+        Path templateFile = tempDir.resolve("src/main/java/example/ProbePage.html");
+        Files.createDirectories(templateFile.getParent());
+        Files.writeString(templateFile, """
+                <!DOCTYPE html>
+                <html>
+                  <body>
+                    <button xis:action="select">Select</button>
+                  </body>
+                </html>
+                """, StandardCharsets.UTF_8);
+
+        DiagnosticCollector<JavaFileObject> diagnostics = compilePageSourceWithProcessor(false, """
+                package example;
+
+                import one.xis.Action;
+                import one.xis.ActionParameter;
+                import one.xis.Page;
+
+                @Page("/probe.html")
+                class ProbePage {
+                    @Action
+                    void select(@ActionParameter String id) {
+                    }
+                }
+                """);
+
+        List<String> errors = errorMessages(diagnostics);
+        assertThat(errors).hasSize(1);
+        assertThat(errors.get(0)).contains("@ActionParameter must define value or index.");
+    }
+
+    @Test
+    void allowsIndexedActionParameterValues() throws IOException {
+        Path templateFile = tempDir.resolve("src/main/java/example/ProbePage.html");
+        Files.createDirectories(templateFile.getParent());
+        Files.writeString(templateFile, """
+                <!DOCTYPE html>
+                <html>
+                  <body>
+                    <button xis:action="select">Select</button>
+                  </body>
+                </html>
+                """, StandardCharsets.UTF_8);
+
+        DiagnosticCollector<JavaFileObject> diagnostics = compilePageSourceWithProcessor(true, """
+                package example;
+
+                import one.xis.Action;
+                import one.xis.ActionParameter;
+                import one.xis.Page;
+
+                @Page("/probe.html")
+                class ProbePage {
+                    @Action
+                    void select(@ActionParameter(index = 1) String from,
+                                @ActionParameter(index = 2) String to) {
+                    }
+                }
+                """);
+
+        assertThat(errorMessages(diagnostics)).isEmpty();
+    }
+
+    @Test
     void allowsUnnamedFrontletParameterMapWithSimpleValues() throws IOException {
         Path templateFile = tempDir.resolve("src/main/java/example/ProbePage.html");
         Files.createDirectories(templateFile.getParent());
@@ -1080,6 +1145,42 @@ class XISValidateProcessorTest {
     }
 
     @Test
+    void rejectsFormDataParameterOutsideActionMethod() throws IOException {
+        Path templateFile = tempDir.resolve("src/main/java/example/ProbePage.html");
+        Files.createDirectories(templateFile.getParent());
+        Files.writeString(templateFile, """
+                <!DOCTYPE html>
+                <html>
+                  <body>${name}</body>
+                </html>
+                """, StandardCharsets.UTF_8);
+
+        DiagnosticCollector<JavaFileObject> diagnostics = compilePageSourceWithProcessor(false, """
+                package example;
+
+                import one.xis.FormData;
+                import one.xis.ModelData;
+                import one.xis.Page;
+
+                @Page("/probe.html")
+                class ProbePage {
+                    @ModelData("name")
+                    String name(@FormData("step") StepForm form) {
+                        return form.name;
+                    }
+
+                    static class StepForm {
+                        String name;
+                    }
+                }
+                """);
+
+        List<String> errors = errorMessages(diagnostics);
+        assertThat(errors).hasSize(1);
+        assertThat(errors.get(0)).contains("@FormData parameters are only supported on @Action methods.");
+    }
+
+    @Test
     void reportsTemplateDataErrorsAtTheElementLine() throws IOException {
         Path templateFile = tempDir.resolve("src/main/java/example/ProbePage.html");
         Files.createDirectories(templateFile.getParent());
@@ -1221,7 +1322,7 @@ class XISValidateProcessorTest {
         assertThat(errors).anyMatch(error -> error.contains("xis:a requires page, frontlet, or modal"));
         assertThat(errors).anyMatch(error -> error.contains("xis:button requires page, frontlet, modal, or action"));
         assertThat(errors).anyMatch(error -> error.contains("xis:parameter requires name"));
-        assertThat(errors).anyMatch(error -> error.contains("xis:storage-binding must be one of localStorage, sessionStorage, or clientStorage"));
+        assertThat(errors).anyMatch(error -> error.contains("xis:storage-binding must be one of localStorage, sessionStorage, or clientState"));
         assertThat(errors).anyMatch(error -> error.contains("xis:form requires binding"));
         assertThat(errors).anyMatch(error -> error.contains("xis:message requires message-for"));
         assertThat(errors).anyMatch(error -> error.contains("xis:default-frontlet requires xis:frontlet-container"));

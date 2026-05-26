@@ -12,6 +12,10 @@ import java.lang.annotation.Target;
  * <p>Use this annotation for values passed by {@code xis:action} query strings,
  * child {@code <xis:parameter>} tags inside action links or buttons, drag and
  * drop action arguments, and form submitter parameters.</p>
+ *
+ * <p>Set either {@link #value()} for a named action parameter or {@link #index()}
+ * for a positional action argument. Positional indexes are mainly useful for
+ * function-style template expressions such as drag-and-drop action arguments.</p>
  */
 @Documented
 @Target(ElementType.PARAMETER)
@@ -20,8 +24,7 @@ public @interface ActionParameter {
     String value() default "";
 
     /**
-     * Explicit 1-based positional action argument index. Leave at {@code -1}
-     * to consume the next positional action value.
+     * Explicit 1-based positional action argument index.
      */
     int index() default -1;
 }

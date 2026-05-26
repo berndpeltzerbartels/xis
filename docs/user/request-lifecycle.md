@@ -256,8 +256,8 @@ method in the same processing flow needs their value.
 
 ## Client State
 
-`@LocalStorage`, `@SessionStorage`, and `@ClientStorage` read named values that XIS knows the controller may need. XIS
-does not send the whole browser store. It scans controller annotations and only transfers keys that may be used by the
+`@LocalStorage`, `@SessionStorage`, and `@ClientState` read named values that XIS knows the controller may need. XIS
+does not send the whole browser state. It scans controller annotations and only transfers keys that may be used by the
 current controller.
 
 ```java

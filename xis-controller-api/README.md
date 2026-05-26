@@ -188,7 +188,8 @@ collisions between frontlet classes with the same simple name in different packa
 `@FrontletParameter` injects a stable parameter of the current frontlet instance. Frontlet parameters are supplied by
 child `<xis:parameter>` tags, by `FrontletResponse`, or by query strings on frontlet targets such as
 `/product-summary?productId=42`. These target query strings are still read with `@FrontletParameter`;
-`@QueryParameter` is reserved for the query string of the current page URL.
+`@QueryParameter` is reserved for the query string of the current page URL. Nested frontlets can also read frontlet
+parameters from their containing frontlet; parameters supplied directly to the nested frontlet win on name conflicts.
 
 | Attribute | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
@@ -232,7 +233,8 @@ names, for example `getUser()` becomes `user`.
 ### `@FormData`
 
 `@FormData` binds a Java object to a form. On a method, the return value initializes or refreshes form data. On an action
-method parameter, the submitted form data is deserialized and passed into the controller method.
+method parameter, the submitted form data is deserialized and passed into the controller method. `@FormData` parameters
+are only supported on `@Action` methods. `@FormData` methods must not return `null`.
 
 In the current API, the `value` attribute is required by Java. Use the same binding key in the template and controller.
 
@@ -268,7 +270,7 @@ context.
 
 | Attribute | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
-| `value` | `String` | No | `""` | Action parameter name. Empty means the next positional action argument. |
+| `value` | `String` | No | `""` | Action parameter name. Either `value` or `index` must be set. |
 | `index` | `int` | No | `-1` | Explicit 1-based positional action argument index. |
 
 ### `@PathVariable`
@@ -402,16 +404,20 @@ writes the parameter value back after method invocation.
 | --- | --- | --- | --- | --- |
 | `value` | `String` | Yes | none | Browser `sessionStorage` key. |
 
-### `@ClientStorage`
+### `@ClientState`
 
-`@ClientStorage` binds a controller parameter to XIS client-side memory storage. Unlike browser `localStorage` and
+`@ClientState` binds a controller parameter to short-lived XIS client-side state. Unlike browser `localStorage` and
 `sessionStorage`, this state is held by the JavaScript runtime and is not meant as durable browser storage.
 
-Use it for short-lived interaction state that should not be persisted across browser sessions.
+Use it for short-lived interaction state that should not be persisted across browser sessions. Good examples are
+selected items, expanded panels, temporary form context, and small UI flags that would otherwise require extra
+controller plumbing. Do not treat client state as the standard place for every variable. XIS is not a frontend-only
+framework; model data, frontlet parameters, modal parameters, action parameters, shared values, and server-side flow
+remain the normal tools when they describe the interaction directly.
 
 | Attribute | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
-| `value` | `String` | Yes | none | Client-storage key. |
+| `value` | `String` | Yes | none | Client-state key. |
 
 ### `@LocalDatabase`
 
@@ -612,7 +618,7 @@ return new FrontletResponse(ProductFrontlet.class)
 | `@RefreshOnUpdateEvents` | class | none | Declares refresh event keys this controller reacts to. |
 | `@LocalStorage` | parameter | `value` | Binds browser `localStorage`. |
 | `@SessionStorage` | parameter | `value` | Binds browser `sessionStorage`. |
-| `@ClientStorage` | parameter | `value` | Binds XIS client-side memory storage. |
+| `@ClientState` | parameter | `value` | Binds XIS client-side state. |
 | `@LocalDatabase` | method, parameter | `value` | Binds local database data. |
 | `@SharedValue` | method, parameter | `value` | Provides or injects a named value inside one controller processing flow. |
 | `@Title` | method, parameter | none | Provides or receives the page title. |

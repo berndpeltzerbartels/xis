@@ -1,16 +1,16 @@
 package test.page.storage;
 
-import one.xis.ClientStorage;
+import one.xis.ClientState;
 import one.xis.ModelData;
 import one.xis.Page;
 import one.xis.SharedValue;
 
-@Page("/client-storage-same-request.html")
-class ClientStorageSameRequestPage {
+@Page("/client-state-same-request.html")
+class ClientStateSameRequestPage {
 
     @ModelData
     @SharedValue("stateInitialized")
-    int initializeState(@ClientStorage("data") SessionStoragePageData data) {
+    int initializeState(@ClientState("data") SessionStoragePageData data) {
         data.setId(44);
         data.setValue("initialized");
         return 1;
@@ -18,7 +18,7 @@ class ClientStorageSameRequestPage {
 
     @ModelData("valueFromSameRequest")
     int valueFromSameRequest(@SharedValue("stateInitialized") int ignored,
-                             @ClientStorage("data") SessionStoragePageData data) {
+                             @ClientState("data") SessionStoragePageData data) {
         return data.getId();
     }
 }

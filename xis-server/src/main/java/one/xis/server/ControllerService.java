@@ -4,9 +4,12 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import one.xis.ModelDataLoad;
 import one.xis.Page;
+import one.xis.UserContext;
 import one.xis.context.Component;
 import one.xis.context.Inject;
 import one.xis.utils.lang.StringUtils;
+import one.xis.validation.ValidationFailedException;
+import one.xis.validation.ValidatorMessageResolver;
 
 import java.util.Set;
 
@@ -34,6 +37,9 @@ class ControllerService {
 
     @Inject
     private ComponentHostResolver hostResolver;
+
+    @Inject
+    private ValidatorMessageResolver validatorMessageResolver;
 
     void processModelDataRequest(@NonNull ClientRequest request, @NonNull ServerResponse response) {
         if (request.getType() == RequestType.page && processRouterRequest(request, response)) {
@@ -98,7 +104,11 @@ class ControllerService {
         controllerResult.setCurrentPageURL(request.getPageId());
         controllerResult.setCurrentFrontletId(request.getFrontletId());
         var invokerControllerWrapper = controllerWrapper(request);
-        invokerControllerWrapper.invokeActionMethod(request, controllerResult);
+        try {
+            invokerControllerWrapper.invokeActionMethod(request, controllerResult);
+        } catch (ValidationFailedException e) {
+            mapValidationFailedException(e, controllerResult);
+        }
         Set<String> actionModelDataKeys = Set.copyOf(controllerResult.getModelData().keySet());
         if (!resultContainsNextController(controllerResult)) {
             usePreviousControllerAfterAction(controllerResult, invokerControllerWrapper, request);
@@ -116,6 +126,16 @@ class ControllerService {
         }
     }
 
+    private void mapValidationFailedException(ValidationFailedException exception, ControllerResult controllerResult) {
+        var userContext = UserContext.getInstance();
+        exception.getGlobalMessages().stream()
+                .map(message -> validatorMessageResolver.createMessage(message.messageKey(), message.messageParameters(), userContext))
+                .forEach(controllerResult.getValidatorMessages().getGlobalMessages()::add);
+        exception.getFieldMessages().forEach((field, message) -> controllerResult.getValidatorMessages().getMessages().put(field,
+                validatorMessageResolver.createMessage(message.messageKey(), message.messageParameters(), userContext)));
+        controllerResult.setValidationFailed(true);
+    }
+
     private void processNextController(ClientRequest request, ControllerResult controllerResult, ServerResponse response, ControllerWrapper nextControllerWrapper) {
         var nextRequest = nextRequest(request, controllerResult);
         var nextControllerResult = new ControllerResult();
@@ -131,6 +151,7 @@ class ControllerService {
         }
         nextControllerResult.getFrontletParameters().putAll(controllerResult.getFrontletParameters());
         nextControllerResult.getModalParameters().putAll(controllerResult.getModalParameters());
+        nextControllerResult.getUpdateEventKeys().addAll(controllerResult.getUpdateEventKeys());
         // get model data for next controller
         nextControllerWrapper.invokeGetModelMethods(nextRequest, nextControllerResult);
         // map result to response

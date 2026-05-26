@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class ClientStorageTest {
+class ClientStateTest {
 
 
     private IntegrationTestContext testContext;
@@ -14,14 +14,14 @@ class ClientStorageTest {
     @BeforeEach
     void init() {
         testContext = IntegrationTestContext.builder()
-                .withSingleton(ClientStoragePage.class)
+                .withSingleton(ClientStatePage.class)
                 .build();
     }
 
     @Test
-    void clientStorageLinkTest() {
-        var client = testContext.openPage(ClientStoragePage.class);
-        var page = testContext.getAppContext().getSingleton(ClientStoragePage.class);
+    void clientStateLinkTest() {
+        var client = testContext.openPage(ClientStatePage.class);
+        var page = testContext.getAppContext().getSingleton(ClientStatePage.class);
 
         client.getDocument().getElementById("action-link").click();
         assertThat(page.getStoreData().getItems()).containsExactly("linkAction");

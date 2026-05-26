@@ -39,6 +39,7 @@ class FrontletContainerHandler extends TagHandler {
         this.modalParameters = {};
         this.collectingDefaultParameters = false;
         this.defaultFrontletActive = false;
+        this.containerRegistered = false;
     }
 
     /**
@@ -290,6 +291,10 @@ class FrontletContainerHandler extends TagHandler {
                 this.frontletContainers.addContainer(this.tag, containerId);
             }
             this.containerId = containerId;
+            this.containerRegistered = true;
+        } else if (!this.containerRegistered) {
+            this.frontletContainers.addContainer(this.tag);
+            this.containerRegistered = true;
         }
     }
 

@@ -8,6 +8,7 @@ import one.xis.Modal;
 import one.xis.ModelDataLoad;
 import one.xis.auth.AuthenticationException;
 import one.xis.security.SecurityUtil;
+import one.xis.validation.ValidationFailedException;
 import one.xis.validation.ValidatorMessages;
 
 import java.util.*;
@@ -149,6 +150,8 @@ public class ControllerWrapper {
             }
             controllerResultMapper.mapMethodResultToControllerResult(controllerMethodResult, controllerResult);
         } catch (AuthenticationException e) {
+            throw e;
+        } catch (ValidationFailedException e) {
             throw e;
         } catch (Exception e) {
             throw new RuntimeException("Failed to invoke " + kind + "-method: " + method, e);

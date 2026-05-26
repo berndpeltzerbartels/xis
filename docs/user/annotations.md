@@ -122,10 +122,10 @@ purpose.
 | `@ActionParameter("name")` | Reads a one-shot parameter submitted by the action element that triggered the current action. |
 | `@FrontletParameter("name")` | Reads a stable parameter of the current frontlet instance, supplied by a frontlet target URL, `<xis:parameter>` on a frontlet link/container, or `FrontletResponse`. |
 | `@ModalParameter("name")` | Reads a stable parameter of the current modal instance, supplied by a modal target URL, `<xis:parameter>` on the opener, or `ModalResponse`. |
-| `@FormData("name")` | Initializes form data on methods or injects submitted form data into action parameters. Method usage supports `load`. |
+| `@FormData("name")` | Initializes form data on methods or injects submitted form data into `@Action` method parameters. Method usage supports `load`. |
 | `@Upload` | Binds an uploaded multipart file to a form field or controller parameter. |
 | `@SharedValue("name")` | Injects a value produced by another `@SharedValue` method in the same controller processing flow. |
-| `@LocalStorage`, `@SessionStorage`, `@ClientStorage` | Injects browser-side state into an action method parameter. |
+| `@LocalStorage`, `@SessionStorage`, `@ClientState` | Injects browser-side state into an action method parameter. |
 | `@LocalDatabase` | Injects browser-side database state. This is an advanced client-state feature. |
 | `@ClientId` | Injects the browser client id. |
 | `@UserId` | Injects the authenticated user id. |
@@ -177,7 +177,7 @@ CustomerForm customer(@ModalParameter("customerId") long customerId) {
 Frontlet and modal target URLs may contain query strings. Those values are still frontlet or modal parameters and are
 therefore read with `@FrontletParameter` or `@ModalParameter`. `@QueryParameter` is only for the query string of the current page URL. Use
 `@PathVariable` for values embedded in a page, frontlet, or modal path. Use `@SharedValue`, `@LocalStorage`,
-`@SessionStorage`, and `@ClientStorage` when the value comes from a different source than the current UI parameter set.
+`@SessionStorage`, and `@ClientState` when the value comes from a different source than the current UI parameter set.
 
 Action parameters never implicitly fall back to frontlet or modal parameters. If a method needs both values, name both
 parameters explicitly. Positional action parameters are also supported:
@@ -188,7 +188,9 @@ void move(@ActionParameter(index = 1) String from, @ActionParameter(index = 2) S
 }
 ```
 
-The explicit index is 1-based and counts only action values, not Java method parameters. An unnamed
+Use indexes for positional action values, for example function-style template expressions such as drag-and-drop
+arguments. The explicit index is 1-based and counts only action values, not Java method parameters. Every
+`@ActionParameter` must set either `value` or `index`. An unnamed
 `@FrontletParameter Map<String, Integer>` or `@ModalParameter Map<String, T>` receives all current frontlet or modal
 parameters when `T` is a simple value type. Map keys must be `String`; values may be strings, numbers, booleans, dates,
 or enums. `@ActionParameter` does not support an unnamed map because action parameters are scoped to one triggering
@@ -216,7 +218,7 @@ keeps its Java default value when the property is absent.
 
 ### Browser Storage Parameters
 
-`@LocalStorage`, `@SessionStorage`, and `@ClientStorage` do not send the whole browser store to the server. XIS scans the
+`@LocalStorage`, `@SessionStorage`, and `@ClientState` do not send the whole browser state to the server. XIS scans the
 controller methods, collects the storage keys used by annotated parameters, and writes those keys into the client
 configuration for the page or frontlet. The browser then sends those configured keys with requests for that page or
 frontlet.
@@ -237,6 +239,13 @@ class CartPage {
 After the action finishes, XIS writes the storage parameter value back to the browser. This is most useful for mutable
 DTO-like values. Do not use browser storage as the default place for application state; server-side state is usually
 simpler and easier to control.
+
+`@ClientState` is intentionally lighter than browser storage. It is useful for short-lived UI state such as selected
+items, expanded panels, temporary form context, or other values that would otherwise force extra controller plumbing.
+It is not XIS's default model for variables. Prefer model data, frontlet parameters, modal parameters, action
+parameters, and shared values when those describe the flow directly. In particular, do not copy the usual pattern from
+pure frontend frameworks and put every variable into client state. XIS is not a frontend-only framework; controller
+model data and server-side flow are first-class parts of the programming model.
 
 Template expressions can read the same storage values, usually inside a storage binding:
 

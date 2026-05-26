@@ -124,7 +124,7 @@ supported by XIS Boot Native; Groovy is supported on the JVM path.
 - [Modal dialogs with their own controller, template, model data, form data, actions, validation, and parent reload behavior](docs/user/modals.md)
 - [Drag and drop actions with integration-test support](docs/user/drag-and-drop.md)
 - [Refresh and push events for already open pages and frontlets, including targeted client updates](docs/user/events.md)
-- [Client state with localStorage, sessionStorage, clientStorage, and storage bindings](docs/user/annotations.md#browser-storage-parameters)
+- [Client state with localStorage, sessionStorage, clientState, and storage bindings](docs/user/annotations.md#browser-storage-parameters)
 - [SQL repositories, entity mapping, relations, CRUD, explicit SQL, transactions, save/delete cascades, functions, and stored procedures](docs/user/sql.md)
 - [MongoDB document repositories, JSON queries, document mapping, and change streams](docs/user/mongodb.md)
 - [Security with local authentication, roles, template visibility, external OpenID Connect providers, XIS as IDP, and distributed SSO](docs/user/security.md)

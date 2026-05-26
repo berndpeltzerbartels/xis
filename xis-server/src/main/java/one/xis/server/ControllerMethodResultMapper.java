@@ -84,9 +84,9 @@ class ControllerMethodResultMapper {
             var key = method.getAnnotation(LocalStorage.class).value();
             controllerMethodResult.getLocalStorage().put(key, originalReturnValue);
         }
-        if (method.isAnnotationPresent(ClientStorage.class)) {
-            var key = method.getAnnotation(ClientStorage.class).value();
-            controllerMethodResult.getClientStorage().put(key, originalReturnValue);
+        if (method.isAnnotationPresent(ClientState.class)) {
+            var key = method.getAnnotation(ClientState.class).value();
+            controllerMethodResult.getClientState().put(key, originalReturnValue);
         }
         if (method.isAnnotationPresent(Title.class)) {
             controllerMethodResult.setAnnotatedTitle(originalReturnValue != null ? originalReturnValue.toString() : "");
@@ -110,7 +110,7 @@ class ControllerMethodResultMapper {
                 || method.isAnnotationPresent(SharedValue.class)
                 || method.isAnnotationPresent(SessionStorage.class)
                 || method.isAnnotationPresent(LocalStorage.class)
-                || method.isAnnotationPresent(ClientStorage.class)
+                || method.isAnnotationPresent(ClientState.class)
                 || method.isAnnotationPresent(Title.class);
     }
 
@@ -140,7 +140,11 @@ class ControllerMethodResultMapper {
     }
 
     private void mapFormData(String key, Object value, ControllerMethodResult controllerMethodResult) {
-        controllerMethodResult.getFormData().put(key, normalizeDataValue(value));
+        var normalizedValue = normalizeDataValue(value);
+        if (normalizedValue == null) {
+            throw new IllegalStateException("@FormData method must not return null for key: " + key);
+        }
+        controllerMethodResult.getFormData().put(key, normalizedValue);
     }
 
     private Object normalizeDataValue(Object value) {

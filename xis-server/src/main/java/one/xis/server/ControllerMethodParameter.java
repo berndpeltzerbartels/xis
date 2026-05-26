@@ -83,9 +83,9 @@ class ControllerMethodParameter {
         } else if (parameter.isAnnotationPresent(LocalStorage.class)) {
             var key = parameter.getAnnotation(LocalStorage.class).value();
             return storageParameter(StorageParameterScope.LOCAL, key, request.getLocalStorageData(), request, postProcessingResults, requestScope);
-        } else if (parameter.isAnnotationPresent(ClientStorage.class)) {
-            var key = parameter.getAnnotation(ClientStorage.class).value();
-            return storageParameter(StorageParameterScope.CLIENT, key, request.getClientStorageData(), request, postProcessingResults, requestScope);
+        } else if (parameter.isAnnotationPresent(ClientState.class)) {
+            var key = parameter.getAnnotation(ClientState.class).value();
+            return storageParameter(StorageParameterScope.CLIENT_STATE, key, request.getClientStateData(), request, postProcessingResults, requestScope);
         } else if (UserContext.class.isAssignableFrom(parameter.getType())) {
             return UserContext.getInstance();
         } else if (method.isAnnotationPresent(Action.class)
@@ -115,8 +115,8 @@ class ControllerMethodParameter {
             controllerMethodResult.getSessionStorage().put(parameter.getAnnotation(SessionStorage.class).value(), parameterValue);
         } else if (parameter.isAnnotationPresent(LocalStorage.class)) {
             controllerMethodResult.getLocalStorage().put(parameter.getAnnotation(LocalStorage.class).value(), parameterValue);
-        } else if (parameter.isAnnotationPresent(ClientStorage.class)) {
-            controllerMethodResult.getClientStorage().put(parameter.getAnnotation(ClientStorage.class).value(), parameterValue);
+        } else if (parameter.isAnnotationPresent(ClientState.class)) {
+            controllerMethodResult.getClientState().put(parameter.getAnnotation(ClientState.class).value(), parameterValue);
         }
     }
 
@@ -151,7 +151,10 @@ class ControllerMethodParameter {
         if (actionParameter.index() == 0) {
             throw new IllegalStateException(method + ": @ActionParameter index is 1-based; use index=1 for the first action argument");
         }
-        var index = actionParameter.index() > 0 ? actionParameter.index() - 1 : positionalParameterIndex;
+        if (actionParameter.index() < 0) {
+            throw new IllegalStateException(method + ": @ActionParameter must define value or index");
+        }
+        var index = actionParameter.index() - 1;
         if (index < 0) {
             throw new IllegalStateException(method + ": positional @ActionParameter cannot be resolved for " + parameter);
         }

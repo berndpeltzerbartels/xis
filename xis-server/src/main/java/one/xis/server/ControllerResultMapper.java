@@ -59,7 +59,7 @@ class ControllerResultMapper {
         controllerResult.getFrontletsToReload().addAll(controllerMethodResult.getFrontletsToReload());
         controllerResult.getSessionStorage().putAll(controllerMethodResult.getSessionStorage());
         controllerResult.getLocalStorage().putAll(controllerMethodResult.getLocalStorage());
-        controllerResult.getClientStorage().putAll(controllerMethodResult.getClientStorage());
+        controllerResult.getClientState().putAll(controllerMethodResult.getClientState());
         if (controllerMethodResult.isValidationFailed()) {
             controllerResult.setValidationFailed(true);
         }

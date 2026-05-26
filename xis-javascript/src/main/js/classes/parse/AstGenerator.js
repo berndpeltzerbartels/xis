@@ -470,8 +470,8 @@ class AstGenerator {
         if (path.startsWith('localStorage.')) {
             return this.createLocalStoreVariable(path);
         }
-        if (path.startsWith('clientStorage.')) {
-            return this.createClientStoreVariable(path);
+        if (path.startsWith('clientState.')) {
+            return this.createClientStateVariable(path);
         }
         // Default variable for regular data access
         return new Variable(path);
@@ -496,12 +496,12 @@ class AstGenerator {
     }
 
     /**
-     * Creates a ClientStoreVariable for direct access to server-side clientStorage.
-     * @param {string} path - The path starting with 'clientStorage.' prefix
-     * @returns {ClientStoreVariable}
+     * Creates a ClientStateVariable for direct access to clientState.
+     * @param {string} path - The path starting with 'clientState.' prefix
+     * @returns {ClientStateVariable}
      */
-    createClientStoreVariable(path) {
-        return new ClientStoreVariable(path);
+    createClientStateVariable(path) {
+        return new ClientStateVariable(path);
     }
 
     /**
@@ -1073,11 +1073,11 @@ class LocalStoreVariable {
 }
 
 /**
- * Variable that accesses clientStorage directly from the server-side store.
- * Client storage is kept on the server and never exposed to the browser.
+ * Variable that accesses clientState directly from the client state.
+ * Client state is kept on the server and never exposed to the browser.
  * This allows storing sensitive data that should not be accessible via browser DevTools.
  */
-class ClientStoreVariable {
+class ClientStateVariable {
 
      constructor(path) {
       this.type = 'CLIENT_STORAGE_VARIABLE';
@@ -1086,8 +1086,8 @@ class ClientStoreVariable {
      }
 
     evaluate(data) {
-        const subpath = this.path.substring('clientStorage.'.length);
-        return app.clientStorage.getValue(subpath);
+        const subpath = this.path.substring('clientState.'.length);
+        return app.clientState.getValue(subpath);
     }
 
     toString() {

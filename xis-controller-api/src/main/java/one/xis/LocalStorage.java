@@ -39,7 +39,7 @@ import java.lang.annotation.Target;
  * All values are serialized as JSON.</p>
  *
  * @see SessionStorage
- * @see ClientStorage
+ * @see ClientState
  * @see NullAllowed
  */
 @Target({ElementType.PARAMETER})

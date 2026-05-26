@@ -5,7 +5,7 @@ import java.lang.annotation.*;
 /**
  * Binds a Java object to a form in the associated HTML page or frontlet.
  *
- * <p>When used on a method, the return value is used to pre-fill the form.
+ * <p>When used on a method, the non-null return value is used to pre-fill the form.
  * When used on a method parameter, the submitted form data is injected into
  * the argument.</p>
  *

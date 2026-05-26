@@ -214,7 +214,7 @@ complete and intentionally detailed.
 
 - [`@LocalStorage`](user/annotations.md#browser-storage-parameters)
 - [`@SessionStorage`](user/annotations.md#browser-storage-parameters)
-- [`@ClientStorage`](user/annotations.md#browser-storage-parameters)
+- [`@ClientState`](user/annotations.md#browser-storage-parameters)
 - [`@LocalDatabase`](user/annotations.md#method-annotations)
 - [Storage bindings in templates](user/tags-and-attributes.md#client-state)
 - [Integration-test browser storage](user/advanced/integration-test-browser.md#storage)
@@ -318,7 +318,7 @@ shown in the link text.
 - [`@ActionParameter`](user/annotations.md#parameter-field-and-record-component-annotations)
 - [`@Authenticated`](user/annotations.md#class-annotations)
 - [`@ClientId`](user/annotations.md#parameter-field-and-record-component-annotations)
-- [`@ClientStorage`](user/annotations.md#browser-storage-parameters)
+- [`@ClientState`](user/annotations.md#browser-storage-parameters)
 - [`@CssFile`](user/annotations.md#class-annotations)
 - [`@DefaultHtmlFile`](user/template-location-and-mapping.md#default-templates)
 - [`@FormData`](user/forms-and-validation.md#basic-form-binding)

@@ -7,6 +7,7 @@ import one.xis.*;
 import one.xis.auth.AuthenticationException;
 import one.xis.auth.AuthorizationException;
 import one.xis.auth.AccessForbiddenException;
+import one.xis.validation.ValidationFailedException;
 import one.xis.deserialize.AccessDeniedError;
 import one.xis.deserialize.MainDeserializer;
 import one.xis.deserialize.PostProcessingResults;
@@ -63,8 +64,7 @@ class ControllerMethod {
             return false;
         }
         if (parameter.isAnnotationPresent(ActionParameter.class)) {
-            var actionParameter = parameter.getAnnotation(ActionParameter.class);
-            return actionParameter.value().isEmpty() && actionParameter.index() < 0;
+            return false;
         }
         return !isFrameworkInjectedParameter(parameter);
     }
@@ -86,7 +86,7 @@ class ControllerMethod {
                 || parameter.isAnnotationPresent(SharedValue.class)
                 || parameter.isAnnotationPresent(SessionStorage.class)
                 || parameter.isAnnotationPresent(LocalStorage.class)
-                || parameter.isAnnotationPresent(ClientStorage.class)
+                || parameter.isAnnotationPresent(ClientState.class)
                 || parameter.isAnnotationPresent(LocalDatabase.class);
     }
 
@@ -111,6 +111,8 @@ class ControllerMethod {
                 throw (AuthenticationException) e.getCause();
             } else if (e.getCause() instanceof AccessForbiddenException) {
                 throw (AccessForbiddenException) e.getCause();
+            } else if (e.getCause() instanceof ValidationFailedException) {
+                throw (ValidationFailedException) e.getCause();
             } else {
                 log.error("Error invoking controller method: " + method.getName(), e);
                 throw new RuntimeException("Error invoking controller method: " + method.getName(), e);

@@ -61,7 +61,9 @@ class NewUserPage {
 The form binding name and `@FormData` name must match.
 
 `@FormData` methods can use the same lifecycle `load` attribute as `@ModelData`. This only affects methods that
-initialize a form, not action parameters that receive submitted form data.
+initialize a form, not action parameters that receive submitted form data. `@FormData` on a parameter is only valid on
+an `@Action` method, because submitted form values exist only while that action is processed. A `@FormData` method must
+return a form object; returning `null` is rejected.
 
 ```java
 @FormData(value = "user", load = ModelDataLoad.INITIAL)
@@ -729,3 +731,45 @@ class DiscountValidator implements Validator<DiscountForm> {
 Object validation usually belongs in `<xis:global-messages/>`, because the problem is attached to the submitted form as a
 whole rather than to one input field. You can still provide both a field message key and a global message key; the global
 message is the one users normally see for cross-field rules.
+
+## Action Validation Failures
+
+Most validation should happen before the action method runs: use `@Mandatory`, built-in validation annotations, or custom
+annotations based on `@Validate`. There are cases where the rule belongs to the action itself, for example when a delete
+action is only allowed while related data is still empty. Creating a special validation annotation just for that action
+would add a lot of ceremony and would hide the rule in the wrong place.
+
+For this special case, throw `ValidationFailedException` from an `@Action` method or from a service called by that
+action. XIS catches it during action processing and returns normal validation messages. The same exception thrown while
+loading model data is treated as an application error, because model data loading should not be a user-correctable
+validation flow.
+
+```java
+import one.xis.Action;
+import one.xis.ActionParameter;
+import one.xis.validation.ValidationFailedException;
+
+class ProjectActions {
+
+    private final ProjectService projects;
+
+    @Action
+    void deleteProject(@ActionParameter("projectId") long projectId) {
+        if (!projects.pipelineIsEmpty(projectId)) {
+            throw new ValidationFailedException("project.delete.pipelineNotEmpty");
+        }
+        projects.delete(projectId);
+    }
+}
+```
+
+The exception can add global messages, field messages, or both. Message keys are resolved with the same message resolver
+used by normal validation.
+
+```java
+throw new ValidationFailedException("project.delete.pipelineNotEmpty")
+        .addFieldMessage("/project/name", "project.name.notDeletable");
+```
+
+Use this exception sparingly. It is a bridge for action-specific business validation, not a replacement for ordinary form
+validation annotations.

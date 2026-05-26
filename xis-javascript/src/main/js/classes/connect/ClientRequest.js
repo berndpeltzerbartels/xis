@@ -20,7 +20,7 @@
  * @property {string} renewToken
  * @property {string: string} type;
  * @property {string: string} sessionStorageData
- * @property {string: string} clientStorageData
+ * @property {string: string} clientStateData
  * @property {string: string} localStorageData
  * @property {string: string} globalVariableData
  * @property {string: string} localDatabaseData
@@ -49,7 +49,7 @@ class ClientRequest {
         this.renewToken = '';
         this.type = '';
         this.sessionStorageData = {};
-        this.clientStorageData = {};
+        this.clientStateData = {};
         this.localStorageData = {};
         this.globalVariableData = {};
         this.localDatabaseData = {};
