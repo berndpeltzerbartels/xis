@@ -238,6 +238,13 @@ After the action finishes, XIS writes the storage parameter value back to the br
 DTO-like values. Do not use browser storage as the default place for application state; server-side state is usually
 simpler and easier to control.
 
+`@ClientState` is intentionally lighter than browser storage. It is useful for short-lived UI state such as selected
+items, expanded panels, temporary form context, or other values that would otherwise force extra controller plumbing.
+It is not XIS's default model for variables. Prefer model data, frontlet parameters, modal parameters, action
+parameters, and shared values when those describe the flow directly. In particular, do not copy the usual pattern from
+pure frontend frameworks and put every variable into client state. XIS is not a frontend-only framework; controller
+model data and server-side flow are first-class parts of the programming model.
+
 Template expressions can read the same storage values, usually inside a storage binding:
 
 ```html

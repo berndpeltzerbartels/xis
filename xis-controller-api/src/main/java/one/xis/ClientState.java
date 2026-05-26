@@ -20,6 +20,12 @@ import java.lang.annotation.Target;
  * This makes the annotation most useful for mutable DTO-like values whose fields
  * are changed inside the action.</p>
  *
+ * <p>{@code @ClientState} is a convenience for short-lived UI state such as a
+ * selected item, an expanded panel, or temporary form context. It is not the
+ * default place for application variables. Prefer model data, UI parameters,
+ * shared values, and normal server-side state when those express the flow
+ * directly.</p>
+ *
  * <p><strong>Example:</strong></p>
  * <pre>{@code
  * @Action("updatePreferences")

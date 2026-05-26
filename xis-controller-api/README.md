@@ -407,11 +407,15 @@ writes the parameter value back after method invocation.
 `@ClientState` binds a controller parameter to short-lived XIS client-side state. Unlike browser `localStorage` and
 `sessionStorage`, this state is held by the JavaScript runtime and is not meant as durable browser storage.
 
-Use it for short-lived interaction state that should not be persisted across browser sessions.
+Use it for short-lived interaction state that should not be persisted across browser sessions. Good examples are
+selected items, expanded panels, temporary form context, and small UI flags that would otherwise require extra
+controller plumbing. Do not treat client state as the standard place for every variable. XIS is not a frontend-only
+framework; model data, frontlet parameters, modal parameters, action parameters, shared values, and server-side flow
+remain the normal tools when they describe the interaction directly.
 
 | Attribute | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
-| `value` | `String` | Yes | none | Client-storage key. |
+| `value` | `String` | Yes | none | Client-state key. |
 
 ### `@LocalDatabase`
 
