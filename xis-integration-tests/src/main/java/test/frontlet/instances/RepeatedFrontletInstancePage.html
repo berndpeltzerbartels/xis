@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html xmlns:xis="https://xis.one/xsd">
+<head>
+    <title>Repeated Frontlet Instance Page</title>
+</head>
+<body>
+<button id="refresh-items" type="button" xis:action="refreshItems">Refresh</button>
+<section>
+    <div class="item-row" xis:repeat="item:items">
+        <xis:frontlet-container default-frontlet="RepeatedItemFrontlet?itemId=${item}"/>
+    </div>
+</section>
+</body>
+</html>

@@ -7,6 +7,7 @@ import one.xis.*;
 import one.xis.auth.AuthenticationException;
 import one.xis.auth.AuthorizationException;
 import one.xis.auth.AccessForbiddenException;
+import one.xis.validation.ValidationFailedException;
 import one.xis.deserialize.AccessDeniedError;
 import one.xis.deserialize.MainDeserializer;
 import one.xis.deserialize.PostProcessingResults;
@@ -110,6 +111,8 @@ class ControllerMethod {
                 throw (AuthenticationException) e.getCause();
             } else if (e.getCause() instanceof AccessForbiddenException) {
                 throw (AccessForbiddenException) e.getCause();
+            } else if (e.getCause() instanceof ValidationFailedException) {
+                throw (ValidationFailedException) e.getCause();
             } else {
                 log.error("Error invoking controller method: " + method.getName(), e);
                 throw new RuntimeException("Error invoking controller method: " + method.getName(), e);

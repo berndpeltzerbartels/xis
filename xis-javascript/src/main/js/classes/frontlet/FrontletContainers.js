@@ -3,6 +3,7 @@ class FrontletContainers {
 
     constructor() {
         this.containers = {};
+        this.anonymousContainers = [];
     }
 
     updateContainerId(oldId, newId) {
@@ -101,15 +102,22 @@ class FrontletContainers {
         const handlers = [];
         for (var key in this.containers) {
             var entry = this.containers[key];
-            if (!entry || !entry.active) {
-                continue;
-            }
-            var handler = app.tagHandlers.getHandler(entry.element);
-            if (handler.frontletInstance && handler.frontletInstance.frontlet.id === frontletId) {
+            this.addHandlerIfMatching(handlers, entry, frontletId);
+        }
+        this.anonymousContainers.forEach(entry => this.addHandlerIfMatching(handlers, entry, frontletId));
+        return handlers;
+    }
+
+    addHandlerIfMatching(handlers, entry, frontletId) {
+        if (!entry || !entry.active || !entry.element.parentNode) {
+            return;
+        }
+        var handler = app.tagHandlers.getHandler(entry.element);
+        if (handler && handler.frontletInstance && handler.frontletInstance.frontlet.id === frontletId) {
+            if (handlers.indexOf(handler) < 0) {
                 handlers.push(handler);
             }
         }
-        return handlers;
     }
 
     /**
@@ -117,6 +125,10 @@ class FrontletContainers {
      * @param {String} id
      */
     addContainer(element, id) {
+        if (!id) {
+            this.anonymousContainers.push({ element: element, active: true });
+            return;
+        }
         this.containers[id] = { element: element, active: true };
     }
 
@@ -124,9 +136,11 @@ class FrontletContainers {
         for (var id of Object.keys(this.containers)) {
             this.containers[id].active = false;
         }
+        this.anonymousContainers.forEach(entry => entry.active = false);
     }
 
     reset() {
         this.containers = {};
+        this.anonymousContainers = [];
     }
 }
