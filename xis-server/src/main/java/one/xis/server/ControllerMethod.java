@@ -63,8 +63,7 @@ class ControllerMethod {
             return false;
         }
         if (parameter.isAnnotationPresent(ActionParameter.class)) {
-            var actionParameter = parameter.getAnnotation(ActionParameter.class);
-            return actionParameter.value().isEmpty() && actionParameter.index() < 0;
+            return false;
         }
         return !isFrameworkInjectedParameter(parameter);
     }

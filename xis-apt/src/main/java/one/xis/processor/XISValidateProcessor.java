@@ -207,6 +207,11 @@ public class XISValidateProcessor extends AbstractProcessor {
                 if (parameterAnnotation.isEmpty()) {
                     continue;
                 }
+                Optional<String> actionParameterError = actionParameterAddressingError(parameter, parameterAnnotation.get());
+                if (actionParameterError.isPresent()) {
+                    processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, actionParameterError.get(), parameter);
+                    continue;
+                }
                 Optional<String> mapError = parameterMapError(parameter, parameterAnnotation.get());
                 if (mapError.isPresent()) {
                     processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, mapError.get(), parameter);
@@ -232,6 +237,23 @@ public class XISValidateProcessor extends AbstractProcessor {
             return Optional.of(MODAL_PARAMETER_ANNOTATION);
         }
         return Optional.empty();
+    }
+
+    private Optional<String> actionParameterAddressingError(VariableElement parameter, String annotationName) {
+        if (!ACTION_PARAMETER_ANNOTATION.equals(annotationName)) {
+            return Optional.empty();
+        }
+        var value = annotationStringValue(parameter, annotationName, "value").orElse("");
+        var index = annotationStringValue(parameter, annotationName, "index")
+                .map(Integer::parseInt)
+                .orElse(-1);
+        if (!value.isBlank() || index > 0) {
+            return Optional.empty();
+        }
+        if (index == 0) {
+            return Optional.of("@ActionParameter index is 1-based; use index=1 for the first action argument.");
+        }
+        return Optional.of("@ActionParameter must define value or index.");
     }
 
     private boolean isParameterMap(VariableElement parameter, String annotationName) {

@@ -270,7 +270,7 @@ context.
 
 | Attribute | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
-| `value` | `String` | No | `""` | Action parameter name. Empty means the next positional action argument. |
+| `value` | `String` | No | `""` | Action parameter name. Either `value` or `index` must be set. |
 | `index` | `int` | No | `-1` | Explicit 1-based positional action argument index. |
 
 ### `@PathVariable`

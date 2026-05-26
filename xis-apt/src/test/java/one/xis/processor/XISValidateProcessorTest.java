@@ -933,6 +933,71 @@ class XISValidateProcessorTest {
     }
 
     @Test
+    void rejectsActionParameterWithoutNameOrIndex() throws IOException {
+        Path templateFile = tempDir.resolve("src/main/java/example/ProbePage.html");
+        Files.createDirectories(templateFile.getParent());
+        Files.writeString(templateFile, """
+                <!DOCTYPE html>
+                <html>
+                  <body>
+                    <button xis:action="select">Select</button>
+                  </body>
+                </html>
+                """, StandardCharsets.UTF_8);
+
+        DiagnosticCollector<JavaFileObject> diagnostics = compilePageSourceWithProcessor(false, """
+                package example;
+
+                import one.xis.Action;
+                import one.xis.ActionParameter;
+                import one.xis.Page;
+
+                @Page("/probe.html")
+                class ProbePage {
+                    @Action
+                    void select(@ActionParameter String id) {
+                    }
+                }
+                """);
+
+        List<String> errors = errorMessages(diagnostics);
+        assertThat(errors).hasSize(1);
+        assertThat(errors.get(0)).contains("@ActionParameter must define value or index.");
+    }
+
+    @Test
+    void allowsIndexedActionParameterValues() throws IOException {
+        Path templateFile = tempDir.resolve("src/main/java/example/ProbePage.html");
+        Files.createDirectories(templateFile.getParent());
+        Files.writeString(templateFile, """
+                <!DOCTYPE html>
+                <html>
+                  <body>
+                    <button xis:action="select">Select</button>
+                  </body>
+                </html>
+                """, StandardCharsets.UTF_8);
+
+        DiagnosticCollector<JavaFileObject> diagnostics = compilePageSourceWithProcessor(true, """
+                package example;
+
+                import one.xis.Action;
+                import one.xis.ActionParameter;
+                import one.xis.Page;
+
+                @Page("/probe.html")
+                class ProbePage {
+                    @Action
+                    void select(@ActionParameter(index = 1) String from,
+                                @ActionParameter(index = 2) String to) {
+                    }
+                }
+                """);
+
+        assertThat(errorMessages(diagnostics)).isEmpty();
+    }
+
+    @Test
     void allowsUnnamedFrontletParameterMapWithSimpleValues() throws IOException {
         Path templateFile = tempDir.resolve("src/main/java/example/ProbePage.html");
         Files.createDirectories(templateFile.getParent());

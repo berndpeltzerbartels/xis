@@ -31,17 +31,17 @@ import static org.mockito.Mockito.when;
 class ControllerMethodParameterTest {
 
     @Test
-    void unnamedParameterUsesPositionalActionArgumentsOnly() throws Exception {
+    void actionParameterRequiresNameOrIndex() throws Exception {
         var method = TestActions.class.getDeclaredMethod("move", Object.class, String.class, String.class);
         var deserializer = mockDeserializer();
         var request = new ClientRequest();
         request.setActionParameters(JsonMap.of("$0", "\"a2\"", "$1", "\"a4\""));
 
         var fromParameter = new ControllerMethodParameter(method, method.getParameters()[1], deserializer, 1, 0, mock(UploadConfiguration.class));
-        var toParameter = new ControllerMethodParameter(method, method.getParameters()[2], deserializer, 2, 1, mock(UploadConfiguration.class));
 
-        assertThat(fromParameter.prepareParameter(request, new PostProcessingResults(), new HashMap<>())).isEqualTo("a2");
-        assertThat(toParameter.prepareParameter(request, new PostProcessingResults(), new HashMap<>())).isEqualTo("a4");
+        assertThatThrownBy(() -> fromParameter.prepareParameter(request, new PostProcessingResults(), new HashMap<>()))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("@ActionParameter must define value or index");
     }
 
     @Test
@@ -152,7 +152,7 @@ class ControllerMethodParameterTest {
         }
 
         @Action
-        void moveWithUserContext(UserContext userContext, @ActionParameter String from, @ActionParameter String to) {
+        void moveWithUserContext(UserContext userContext, @ActionParameter(index = 1) String from, @ActionParameter(index = 2) String to) {
             this.userContext = userContext;
             this.from = from;
             this.to = to;

@@ -151,7 +151,10 @@ class ControllerMethodParameter {
         if (actionParameter.index() == 0) {
             throw new IllegalStateException(method + ": @ActionParameter index is 1-based; use index=1 for the first action argument");
         }
-        var index = actionParameter.index() > 0 ? actionParameter.index() - 1 : positionalParameterIndex;
+        if (actionParameter.index() < 0) {
+            throw new IllegalStateException(method + ": @ActionParameter must define value or index");
+        }
+        var index = actionParameter.index() - 1;
         if (index < 0) {
             throw new IllegalStateException(method + ": positional @ActionParameter cannot be resolved for " + parameter);
         }

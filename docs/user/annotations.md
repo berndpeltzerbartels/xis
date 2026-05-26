@@ -188,7 +188,9 @@ void move(@ActionParameter(index = 1) String from, @ActionParameter(index = 2) S
 }
 ```
 
-The explicit index is 1-based and counts only action values, not Java method parameters. An unnamed
+Use indexes for positional action values, for example function-style template expressions such as drag-and-drop
+arguments. The explicit index is 1-based and counts only action values, not Java method parameters. Every
+`@ActionParameter` must set either `value` or `index`. An unnamed
 `@FrontletParameter Map<String, Integer>` or `@ModalParameter Map<String, T>` receives all current frontlet or modal
 parameters when `T` is a simple value type. Map keys must be `String`; values may be strings, numbers, booleans, dates,
 or enums. `@ActionParameter` does not support an unnamed map because action parameters are scoped to one triggering
