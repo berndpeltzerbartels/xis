@@ -51,8 +51,8 @@ class UpdateEventTest {
         // Click action on Page - should emit "frontlet2-update" event
         client.getDocument().getElementById("page-action-link").click();
 
-        // Frontlet1 should reload (because FrontletResponse targets container1)
-        assertThat(client.getDocument().getElementById("frontlet1-load-count").getInnerText()).isEqualTo("2");
+        // Frontlet1 should stay unchanged; the page action only emits the update event.
+        assertThat(client.getDocument().getElementById("frontlet1-load-count").getInnerText()).isEqualTo("1");
         
         // Frontlet2 should also reload (because it listens to "frontlet2-update" event)
         assertThat(client.getDocument().getElementById("frontlet2-load-count").getInnerText()).isEqualTo("2");

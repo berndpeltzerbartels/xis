@@ -123,10 +123,15 @@ class PageController {
             data.setValue(['pathname'], pathname);
             data.setValue(['queryParams'], this.resolvedURL.urlParameters);
             this.page.data = data;
+            app.frontletLoadGeneration = (app.frontletLoadGeneration || 0) + 1;
+            const frontletLoadGeneration = app.frontletLoadGeneration;
 
             return this.htmlTagHandler.refresh(this.page.data)
                 .then(() => { if (isSet(response.annotatedTitle)) this.setTitle(response.annotatedTitle); })
-                .then(() => { if (isSet(response.annotatedAddress)) this.setAddress(response.annotatedAddress); });
+                .then(() => { if (isSet(response.annotatedAddress)) this.setAddress(response.annotatedAddress); })
+                .then(() => app.frontletContainers.handleReloadFrontlets(response.reloadFrontlets))
+                .then(() => this.handleUpdateEventsNow(response.updateEventKeys))
+                .then(pageUpdated => pageUpdated ? Promise.resolve() : app.frontletContainers.handleUpdateEventsNow(response.updateEventKeys, frontletLoadGeneration));
         });
     }
 

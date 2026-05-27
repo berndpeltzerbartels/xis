@@ -100,9 +100,10 @@ class FrontletContainerHandler extends TagHandler {
         return PageController.enqueue(() => {
             if (frontletChanges) {
                 // Frontlet-Wechsel: Buffer verwenden damit Container nicht kurz leer erscheint
+                const parentData = this.parentData() || data;
                 return this.initBuffer()
                     .then(() => this.bindNextFrontletIfNeeded(nextFrontletId))
-                    .then(() => this.refreshDescendantHandlers(data))
+                    .then(() => this.reloadDataAndRefresh(parentData))
                     .then(() => this.updatePageMetadata(response))
                     .then(() => app.frontletContainers.handleReloadFrontlets(response.reloadFrontlets))
                     .then(() => app.pageController.handleUpdateEventsNow(response.updateEventKeys))
@@ -141,9 +142,15 @@ class FrontletContainerHandler extends TagHandler {
             return this.refreshBoundDefaultFrontlet(data, currentFrontletParameters);
         }
         this.frontletParameters = this.parametersForRefresh(hasBoundFrontlet, currentFrontletParameters, data);
+        var currentFrontletData = this.frontletState ? this.frontletState.data : undefined;
         this.frontletState = new FrontletState(app.pageController.resolvedURL, this.frontletParameters, this.modalParameters);
+        this.frontletState.data = currentFrontletData;
         data.setValue(['frontletParameters'], this.frontletParameters);
         data.setValue(['modalParameters'], this.modalParameters);
+        if (this.frontletInstance && this.isAfterActionRefresh(data)) {
+            return this.refreshContainerParameterHandlers(data)
+                .then(() => this.refreshCurrentFrontletWithParentData(data));
+        }
         const descendantPromise = this.refreshDescendantHandlers(data); // xis:parameter tags will call addParameter
         var promises = [];
         if (this.frontletInstance) {
@@ -153,6 +160,8 @@ class FrontletContainerHandler extends TagHandler {
     }
 
     refreshBoundDefaultFrontlet(data, currentFrontletParameters) {
+        var previousFrontletId = this.currentFrontletId();
+        var previousFrontletParameters = currentFrontletParameters || {};
         var defaultFrontletUrl = this.defaultFrontletUrl(data);
         if (defaultFrontletUrl) {
             this.ensureFrontletBound(app.client.config.getFrontletId(defaultFrontletUrl));
@@ -165,11 +174,56 @@ class FrontletContainerHandler extends TagHandler {
                 // A default frontlet can receive parameters both from the default-frontlet
                 // URL and from child xis:parameter tags. Both must be evaluated before
                 // the model request, especially when a modal reloads the opening frontlet.
+                var currentFrontletData = this.frontletState ? this.frontletState.data : undefined;
                 this.frontletState = new FrontletState(app.pageController.resolvedURL, this.frontletParameters, this.modalParameters);
+                this.frontletState.data = currentFrontletData;
                 data.setValue(['frontletParameters'], this.frontletParameters);
                 data.setValue(['modalParameters'], this.modalParameters);
-                return this.frontletInstance ? this.reloadDataAndRefresh(data) : Promise.resolve();
+                if (!this.frontletInstance) {
+                    return Promise.resolve();
+                }
+                var frontletChanged = previousFrontletId !== this.currentFrontletId();
+                var parametersChanged = !this.sameParameters(previousFrontletParameters, this.frontletParameters);
+                if (this.isAfterActionRefresh(data) && !frontletChanged && !parametersChanged) {
+                    return this.refreshCurrentFrontletWithParentData(data);
+                }
+                return this.reloadDataAndRefresh(data);
             });
+    }
+
+    isAfterActionRefresh(data) {
+        return data && data.load === 'AFTER_ACTION';
+    }
+
+    sameParameters(left, right) {
+        left = left || {};
+        right = right || {};
+        var leftKeys = Object.keys(left);
+        var rightKeys = Object.keys(right);
+        if (leftKeys.length !== rightKeys.length) {
+            return false;
+        }
+        for (var key of leftKeys) {
+            if (!right.hasOwnProperty(key)) {
+                return false;
+            }
+            if (String(left[key]) !== String(right[key])) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    refreshCurrentFrontletWithParentData(parentData) {
+        if (!this.frontletState || !this.frontletState.data || !this.frontletInstance) {
+            return this.reloadDataAndRefresh(parentData);
+        }
+        var data = this.frontletState.data;
+        data.parentData = parentData;
+        data.load = parentData.load || 'INITIAL';
+        data.setValue(['frontletParameters'], this.frontletParameters);
+        data.setValue(['modalParameters'], this.modalParameters);
+        return this.frontletInstance.rootHandler.refresh(data);
     }
 
     isInitialDefaultFrontletLoad() {
@@ -215,7 +269,11 @@ class FrontletContainerHandler extends TagHandler {
     }
 
     handleUpdateEvent() {
-        return PageController.enqueue(() => this.refresh(this.data));
+        return PageController.enqueue(() => this.refreshForUpdateEvent());
+    }
+
+    refreshForUpdateEvent() {
+        return this.reloadDataAndRefresh(this.parentData() || this.data);
     }
 
     /**
@@ -382,6 +440,7 @@ class FrontletContainerHandler extends TagHandler {
         var frontletRoot = assertNotNull(this.frontletInstance.root, 'no frontlet root: ' + frontletId);
         var target = this.buffer ? this.buffer : this.tag;
         target.appendChild(frontletRoot);
+        this.lastModelLoadGeneration = typeof app !== 'undefined' ? app.frontletLoadGeneration : undefined;
         var frontletHandler = assertNotNull(this.frontletInstance.rootHandler, 'no frontlet handler: ' + frontletId);
         if (shouldScroll && this.scrollToTop) {
             window.scrollTo(0, 0);
@@ -476,6 +535,7 @@ class FrontletContainerHandler extends TagHandler {
     doLoad(parentData) {
         if (this.frontletInstance) {
             const response = app.currentResponse;
+            this.lastModelLoadGeneration = app.frontletLoadGeneration;
             return app.client.loadFrontletData(this.frontletInstance, this.frontletState, this)
                 .then(response => this.updatePageMetadata(response))
                 .then(response => {

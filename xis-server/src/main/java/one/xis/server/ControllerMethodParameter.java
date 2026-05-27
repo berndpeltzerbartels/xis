@@ -37,7 +37,7 @@ class ControllerMethodParameter {
     private final UploadConfiguration uploadConfiguration;
 
     // TODO Validation: only one of these annotation in parameter
-    Object prepareParameter(ClientRequest request, PostProcessingResults postProcessingResults, Map<String, Object> requestScope) throws Exception {
+    Object prepareParameter(ClientRequest request, PostProcessingResults postProcessingResults, ControllerResult controllerResult) throws Exception {
         var userContext = UserContextImpl.getInstance();
         if (parameter.getType().equals(HttpRequest.class)) {
             return RequestContext.getInstance().getRequest();
@@ -45,8 +45,8 @@ class ControllerMethodParameter {
             return RequestContext.getInstance().getResponse();
         } else if (parameter.getType().equals(RequestContext.class)) {
             return RequestContext.getInstance();
-        } else if (parameter.getType().equals(Frontend.class)) {
-            return new Frontend();
+        } else if (parameter.getType().equals(ToastMessages.class)) {
+            return new ToastMessages();
         } else if (parameter.isAnnotationPresent(FormData.class)) {
             return deserializeFormDataParameter(parameter, request, postProcessingResults);
         } else if (parameter.isAnnotationPresent(Upload.class)) {
@@ -68,11 +68,11 @@ class ControllerMethodParameter {
             return deserializeComponentParameter(parameter, request, postProcessingResults, parameter.getAnnotation(ModalParameter.class).value(), request.getModalParameters(), "modal");
         } else if (parameter.isAnnotationPresent(SharedValue.class)) {
             var key = parameter.getAnnotation(SharedValue.class).value();
-            var sharedValue = requestScope.get(key);
+            var sharedValue = controllerResult.getSharedValues().get(key);
             if (sharedValue == null) {
                 if (isMandatory(parameter)) {
                     var defaultValue = createDefault(parameter);
-                    requestScope.put(key, defaultValue);
+                    controllerResult.getSharedValues().put(key, defaultValue);
                     return defaultValue;
                 } else {
                     return null;
@@ -81,13 +81,13 @@ class ControllerMethodParameter {
             return sharedValue;
         } else if (parameter.isAnnotationPresent(SessionStorage.class)) {
             var key = parameter.getAnnotation(SessionStorage.class).value();
-            return storageParameter(StorageParameterScope.SESSION, key, request.getSessionStorageData(), request, postProcessingResults, requestScope);
+            return storageParameter(key, request.getSessionStorageData(), request, postProcessingResults, controllerResult.getSessionStorage());
         } else if (parameter.isAnnotationPresent(LocalStorage.class)) {
             var key = parameter.getAnnotation(LocalStorage.class).value();
-            return storageParameter(StorageParameterScope.LOCAL, key, request.getLocalStorageData(), request, postProcessingResults, requestScope);
+            return storageParameter(key, request.getLocalStorageData(), request, postProcessingResults, controllerResult.getLocalStorage());
         } else if (parameter.isAnnotationPresent(ClientState.class)) {
             var key = parameter.getAnnotation(ClientState.class).value();
-            return storageParameter(StorageParameterScope.CLIENT_STATE, key, request.getClientStateData(), request, postProcessingResults, requestScope);
+            return storageParameter(key, request.getClientStateData(), request, postProcessingResults, controllerResult.getClientState());
         } else if (UserContext.class.isAssignableFrom(parameter.getType())) {
             return UserContext.getInstance();
         } else if (method.isAnnotationPresent(Action.class)
@@ -119,11 +119,8 @@ class ControllerMethodParameter {
             controllerMethodResult.getLocalStorage().put(parameter.getAnnotation(LocalStorage.class).value(), parameterValue);
         } else if (parameter.isAnnotationPresent(ClientState.class)) {
             controllerMethodResult.getClientState().put(parameter.getAnnotation(ClientState.class).value(), parameterValue);
-        } else if (parameterValue instanceof Frontend frontend) {
-            controllerMethodResult.getModelData().putAll(frontend.getModelData());
-            controllerMethodResult.getFormData().putAll(frontend.getFormData());
-            controllerMethodResult.getReturnedFormDataKeys().addAll(frontend.getFormData().keySet());
-            controllerMethodResult.getToastMessages().addAll(frontend.getToastMessages());
+        } else if (parameterValue instanceof ToastMessages toastMessages) {
+            controllerMethodResult.getToastMessages().addAll(toastMessages.getMessages());
         }
     }
 
@@ -158,14 +155,13 @@ class ControllerMethodParameter {
         if (actionParameter.index() == 0) {
             throw new IllegalStateException(method + ": @ActionParameter index is 1-based; use index=1 for the first action argument");
         }
-        if (actionParameter.index() < 0) {
+        if (actionParameter.index() > 0) {
+            return "$" + (actionParameter.index() - 1);
+        }
+        if (positionalParameterIndex < 0) {
             throw new IllegalStateException(method + ": @ActionParameter must define value or index");
         }
-        var index = actionParameter.index() - 1;
-        if (index < 0) {
-            throw new IllegalStateException(method + ": positional @ActionParameter cannot be resolved for " + parameter);
-        }
-        return "$" + index;
+        return "$" + positionalParameterIndex;
     }
 
     private void checkAuthenticated() {
@@ -290,16 +286,13 @@ class ControllerMethodParameter {
         return deserializeParameter(paramValue, request, parameter, postProcessingResults);
     }
 
-    private Object storageParameter(StorageParameterScope storageScope,
-                                    String key,
+    private Object storageParameter(String key,
                                     Map<String, String> storageData,
                                     ClientRequest request,
                                     PostProcessingResults postProcessingResults,
-                                    Map<String, Object> requestScope) throws IOException {
-        var storageParameters = storageParameterValues(requestScope);
-        var existingValue = storageParameters.value(storageScope, key);
-        if (existingValue.isPresent()) {
-            return existingValue.get();
+                                    Map<String, Object> storageParameterValues) throws IOException {
+        if (storageParameterValues.containsKey(key)) {
+            return storageParameterValues.get(key);
         }
         var paramValue = storageData.get(key);
         if (paramValue == null) {
@@ -307,17 +300,12 @@ class ControllerMethodParameter {
                 return null;
             }
             var defaultValue = createDefault(parameter);
-            storageParameters.put(storageScope, key, defaultValue);
+            storageParameterValues.put(key, defaultValue);
             return defaultValue;
         }
         var value = deserializeParameter(paramValue, request, parameter, postProcessingResults);
-        storageParameters.put(storageScope, key, value);
+        storageParameterValues.put(key, value);
         return value;
-    }
-
-    private StorageParameterValues storageParameterValues(Map<String, Object> requestScope) {
-        return (StorageParameterValues) requestScope.computeIfAbsent(StorageParameterValues.REQUEST_SCOPE_KEY,
-                ignored -> new StorageParameterValues());
     }
 
     private Object deserializeActionParameter(Parameter parameter, ClientRequest request, PostProcessingResults postProcessingResults) throws IOException {

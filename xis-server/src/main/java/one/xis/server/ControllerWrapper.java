@@ -2,10 +2,13 @@ package one.xis.server;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import one.xis.ClientState;
 import one.xis.UserContextImpl;
 import one.xis.Frontlet;
+import one.xis.LocalStorage;
 import one.xis.Modal;
 import one.xis.ModelDataLoad;
+import one.xis.SessionStorage;
 import one.xis.auth.AuthenticationException;
 import one.xis.security.SecurityUtil;
 import one.xis.validation.ValidationFailedException;
@@ -33,6 +36,8 @@ public class ControllerWrapper {
     private Collection<ControllerMethod> modelMethods;
     private Map<String, ControllerMethod> actionMethods;
     private Collection<ControllerMethod> formDataMethods;
+    private Collection<ControllerMethod> storageOnlyMethods;
+    private Collection<ControllerMethod> allStorageMethods;
     private Collection<ControllerMethod> titleOnlyMethods;
     private ControllerResultMapper controllerResultMapper;
 
@@ -47,12 +52,32 @@ public class ControllerWrapper {
     void invokeGetModelMethods(ClientRequest request, ControllerResult controllerResult, Set<String> modelDataKeysToKeep, ModelDataLoad load) {
         SecurityUtil.checkRoles(controller.getClass(), UserContextImpl.getInstance());
         var methodsToExecute = new ArrayList<>(modelMethods);
+        methodsToExecute.addAll(storageOnlyMethods);
         methodsToExecute.addAll(titleOnlyMethods);
         var methods = MethodSorter.sortMethods(methodsToExecute, sharedValueMethods);
         methods.stream()
-                .filter(m -> m.shouldLoadModelData(load))
+                .filter(m -> m.getModelDataKey().isEmpty() || m.shouldLoadModelData(load))
                 .filter(m -> !m.getModelDataKey().map(modelDataKeysToKeep::contains).orElse(false))
+                .filter(m -> !storageValueAlreadyReturned(m, controllerResult))
                 .forEach(m -> invokeModelDataMethod(request, controllerResult, m));
+    }
+
+    void invokeStorageMethods(ClientRequest request, ControllerResult controllerResult) {
+        SecurityUtil.checkRoles(controller.getClass(), UserContextImpl.getInstance());
+        var methods = MethodSorter.sortMethods(allStorageMethods, sharedValueMethods);
+        methods.stream()
+                .filter(m -> !storageValueAlreadyReturned(m, controllerResult))
+                .forEach(m -> invokeModelDataMethod(request, controllerResult, m));
+    }
+
+    private boolean storageValueAlreadyReturned(ControllerMethod method, ControllerResult controllerResult) {
+        var javaMethod = method.getMethod();
+        return javaMethod.isAnnotationPresent(SessionStorage.class)
+                && controllerResult.getSessionStorage().containsKey(javaMethod.getAnnotation(SessionStorage.class).value())
+                || javaMethod.isAnnotationPresent(LocalStorage.class)
+                && controllerResult.getLocalStorage().containsKey(javaMethod.getAnnotation(LocalStorage.class).value())
+                || javaMethod.isAnnotationPresent(ClientState.class)
+                && controllerResult.getClientState().containsKey(javaMethod.getAnnotation(ClientState.class).value());
     }
 
     void invokeFormDataMethods(ClientRequest request, ControllerResult controllerResult) {
@@ -111,11 +136,11 @@ public class ControllerWrapper {
 
     private void invokeModelDataMethod(ClientRequest request, ControllerResult controllerResult, ControllerMethod method) {
         try {
-            var requestScopeKey = method.getReturnValueRequestScopeKey();
-            if (requestScopeKey != null && controllerResult.getRequestScope().containsKey(requestScopeKey)) {
+            var sharedValueKey = method.getReturnValueSharedValueKey();
+            if (sharedValueKey != null && controllerResult.getSharedValues().containsKey(sharedValueKey)) {
                 return;
             }
-            var controllerMethodResult = method.invoke(request, controller, controllerResult.getRequestScope());
+            var controllerMethodResult = method.invoke(request, controller, controllerResult);
             if (controllerMethodResult.isValidationFailed()) {
                 // these validation errors are unexpected, so we throw an exception
                 throw exceptionForValidationErrors(controllerMethodResult.getValidatorMessages());
@@ -137,7 +162,7 @@ public class ControllerWrapper {
 
     private void invokeNavigationMethod(ClientRequest request, ControllerResult controllerResult, ControllerMethod method, String kind) {
         try {
-            var controllerMethodResult = method.invoke(request, controller, controllerResult.getRequestScope());
+            var controllerMethodResult = method.invoke(request, controller, controllerResult);
             if (controllerMethodResult.getNextURL() != null) {
                 controllerResult.setActionProcessing(ActionProcessing.PAGE);
             } else if (controllerMethodResult.getNextFrontletId() != null
@@ -174,9 +199,9 @@ public class ControllerWrapper {
         public static List<ControllerMethod> sortMethods(Collection<ControllerMethod> mandatoryMethods, Collection<ControllerMethod> conditionalMethods) {
             Map<String, ControllerMethod> providedBy = new HashMap<>();
             for (ControllerMethod method : conditionalMethods) {
-                String retScope = method.getReturnValueRequestScopeKey();
-                if (retScope != null) {
-                    providedBy.put(retScope, method);
+                String sharedValue = method.getReturnValueSharedValueKey();
+                if (sharedValue != null) {
+                    providedBy.put(sharedValue, method);
                 }
             }
             Set<ControllerMethod> allRequired = new HashSet<>();
@@ -185,7 +210,7 @@ public class ControllerWrapper {
                 allRequired.addAll(resolveDependencies(method, providedBy));
             }
             Set<ControllerMethod> needed = allRequired.stream()
-                    .flatMap(m -> m.getParameterRequestScopeKeys().stream())
+                    .flatMap(m -> m.getParameterSharedValueKeys().stream())
                     .map(providedBy::get)
                     .filter(Objects::nonNull)
                     .collect(Collectors.toSet());
@@ -198,8 +223,8 @@ public class ControllerWrapper {
 
         private static Set<ControllerMethod> resolveDependencies(ControllerMethod method, Map<String, ControllerMethod> providedBy) {
             Set<ControllerMethod> deps = new HashSet<>();
-            for (String paramScope : method.getParameterRequestScopeKeys()) {
-                ControllerMethod provider = providedBy.get(paramScope);
+            for (String sharedValue : method.getParameterSharedValueKeys()) {
+                ControllerMethod provider = providedBy.get(sharedValue);
                 if (provider != null) {
                     deps.add(provider);
                     deps.addAll(resolveDependencies(provider, providedBy));

@@ -33,7 +33,7 @@ class ControllerResult {
     private final Collection<String> returnedFormDataKeys = new HashSet<>();
     private boolean validationFailed;
     private final ValidatorMessages validatorMessages = new ValidatorMessages();
-    private final Map<String, Object> requestScope = new HashMap<>();
+    private final Map<String, Object> sharedValues = new HashMap<>();
     private final Map<String, Object> sessionStorage = new HashMap<>();
     private final Map<String, Object> localStorage = new HashMap<>();
     private final Map<String, Object> clientState = new HashMap<>();
@@ -42,5 +42,9 @@ class ControllerResult {
     private String redirectUrl;
     private final Map<String, String> tagVariables = new HashMap<>();
     private final Map<String, String> idVariables = new HashMap<>();
+
+    void clearSharedValues() {
+        sharedValues.clear();
+    }
 
 }

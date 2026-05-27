@@ -34,7 +34,7 @@ class ControllerMethodResultMapper {
     @Inject
     private ComponentHostResolver hostResolver;
 
-    void mapReturnValueToResult(ControllerMethodResult controllerMethodResult, Method method, Object returnValue, Map<String, Object> requestScope) {
+    void mapReturnValueToResult(ControllerMethodResult controllerMethodResult, Method method, Object returnValue, Map<String, Object> sharedValues) {
         var originalReturnValue = returnValue;
         if (returnValue instanceof String str && isStringNavigationMethod(method)) {
             var match = pageControllerWrappers.findByRealPath(str);
@@ -74,7 +74,7 @@ class ControllerMethodResultMapper {
         }
         if (method.isAnnotationPresent(SharedValue.class)) {
             var key = method.getAnnotation(SharedValue.class).value();
-            requestScope.put(key, originalReturnValue);
+            sharedValues.put(key, originalReturnValue);
         }
         if (method.isAnnotationPresent(SessionStorage.class)) {
             var key = method.getAnnotation(SessionStorage.class).value();
@@ -165,6 +165,9 @@ class ControllerMethodResultMapper {
         }
         if (frontletResponse.getFrontlet() != null) {
             updateFrontlet(result, frontletResponse.getFrontlet());
+        }
+        if (result.getNextFrontletId() != null) {
+            result.setActionProcessing(ActionProcessing.FRONTLET);
         }
         if (frontletResponse.getPathVariables() != null) {
             result.getPathVariables().putAll(frontletResponse.getPathVariables());

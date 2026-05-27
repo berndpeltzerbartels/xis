@@ -138,6 +138,10 @@ not currently the goal.
 Create the feature branch as soon as the work topic is known. Do not keep topic work on `develop`, `main`, or a release
 branch while deciding what to do with it.
 
+After a feature branch has been merged into `develop`, delete that feature branch locally and remotely unless there is
+an explicit reason to keep it. Keeping merged topic branches around creates avoidable archaeology later, especially
+after squash merges make commit identity a poor signal for whether the work is already contained.
+
 Do not treat uncommitted work in the active branch as a cautious holding area. It is dangerous because local experiments
 then run against a different state than the one that can be pushed, merged, or released. When work is created, stage it
 promptly; commits should normally cover the whole repository state instead of hand-picked partial changes. Only make
@@ -154,7 +158,10 @@ The release flow is:
 2. Merge all intended feature branches into `develop`, or explicitly record why a branch is excluded.
 3. Create the release branch from `develop`.
 4. Run the full available test suite without waiting for a special reminder. Phrases such as "full test" mean all
-   framework, integration, JavaScript, plugin, and end-to-end tests that are available for the release.
+   framework, integration, JavaScript, plugin, and end-to-end tests that are available for the release. This includes
+   manually started E2E repositories that are not wired into the main Gradle build, currently including
+   `/Users/bernd/projects/xis-end-to-end-tests`, `/Users/bernd/projects/xis-chess-example-simple-e2e`, and
+   `/Users/bernd/projects/xis-crm-example-e2e` when they exist locally.
 5. Only after the full suite is green, consider that release branch state confirmed.
 6. Build the release ZIP from that confirmed release branch.
 7. Bring the confirmed release state to `main` with a squash merge.

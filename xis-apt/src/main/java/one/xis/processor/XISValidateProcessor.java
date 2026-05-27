@@ -46,7 +46,6 @@ public class XISValidateProcessor extends AbstractProcessor {
     private static final String ACTION_ANNOTATION = "one.xis.Action";
     private static final String MODEL_DATA_ANNOTATION = "one.xis.ModelData";
     private static final String FORM_DATA_ANNOTATION = "one.xis.FormData";
-    private static final String FRONTEND_TYPE = "one.xis.Frontend";
     private static final String ACTION_PARAMETER_ANNOTATION = "one.xis.ActionParameter";
     private static final String FRONTLET_PARAMETER_ANNOTATION = "one.xis.FrontletParameter";
     private static final String MODAL_PARAMETER_ANNOTATION = "one.xis.ModalParameter";
@@ -128,12 +127,10 @@ public class XISValidateProcessor extends AbstractProcessor {
         Map<String, TemplateDataModel> formData = new LinkedHashMap<>();
         Set<String> sharedValues = new LinkedHashSet<>();
         List<ExecutableElement> methods = new ArrayList<>();
-        boolean dynamicFrontendData = false;
         for (Element enclosedElement : controllerType.getEnclosedElements()) {
             if (enclosedElement.getKind() == ElementKind.METHOD) {
                 var method = (ExecutableElement) enclosedElement;
                 methods.add(method);
-                dynamicFrontendData = dynamicFrontendData || hasFrontendParameter(method);
                 collectDataMethodNames(method, modelData, formData);
                 annotationStringValue(method, SHARED_VALUE_ANNOTATION, "value")
                         .filter(value -> !value.isBlank())
@@ -146,17 +143,7 @@ public class XISValidateProcessor extends AbstractProcessor {
         validateFormDataParameters(methods);
         validateActionParameters(methods);
         Path templateFile = templateFile(projectDir, controllerType);
-        return new ControllerTemplateModel(controllerType.getQualifiedName().toString(), templateFile, modelData, formData, dynamicFrontendData);
-    }
-
-    private boolean hasFrontendParameter(ExecutableElement method) {
-        for (VariableElement parameter : method.getParameters()) {
-            TypeElement typeElement = asTypeElement(parameter.asType());
-            if (typeElement != null && typeElement.getQualifiedName().contentEquals(FRONTEND_TYPE)) {
-                return true;
-            }
-        }
-        return false;
+        return new ControllerTemplateModel(controllerType.getQualifiedName().toString(), templateFile, modelData, formData);
     }
 
     private void validateSharedValueParameters(List<ExecutableElement> methods, Set<String> sharedValues) {
@@ -260,13 +247,10 @@ public class XISValidateProcessor extends AbstractProcessor {
         var index = annotationStringValue(parameter, annotationName, "index")
                 .map(Integer::parseInt)
                 .orElse(-1);
-        if (!value.isBlank() || index > 0) {
-            return Optional.empty();
-        }
         if (index == 0) {
             return Optional.of("@ActionParameter index is 1-based; use index=1 for the first action argument.");
         }
-        return Optional.of("@ActionParameter must define value or index.");
+        return Optional.empty();
     }
 
     private boolean isParameterMap(VariableElement parameter, String annotationName) {

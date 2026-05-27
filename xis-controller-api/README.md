@@ -374,16 +374,16 @@ Use it on a page or frontlet controller that should reload when a related action
 
 ### `@LocalStorage`
 
-`@LocalStorage` binds a controller parameter to a value stored in the browser's `localStorage`. The client sends the
-configured key to the server, XIS deserializes the value, and changes made to the object can be written back after the
-action.
+`@LocalStorage` binds a controller parameter or method return value to a value stored in the browser's `localStorage`.
+For parameters, the client sends the configured key to the server, XIS deserializes the value, and changes made to the
+object can be written back after the action. For methods, the return value is written to the configured key.
 
 Local storage persists across browser sessions. Use `@NullAllowed` if a missing value should be passed as `null`
 instead of initialized with a default value.
 
-Storage annotations are parameter annotations. XIS discovers the used keys from controller parameters and sends only
-those keys for the current page or frontlet. After method invocation, the parameter value is written back to browser
-storage. This is most useful for mutable DTO-like values.
+XIS discovers the used keys from controller parameters and storage methods and sends only those keys for the current
+page or frontlet. After method invocation, parameter values and annotated method return values are written back to
+browser storage. Returning `null` removes the value on the client.
 
 | Attribute | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
@@ -391,14 +391,15 @@ storage. This is most useful for mutable DTO-like values.
 
 ### `@SessionStorage`
 
-`@SessionStorage` binds a controller parameter to a value stored in the browser's `sessionStorage`. The value is scoped
-to the current browser tab/session and is cleared by the browser when the session ends.
+`@SessionStorage` binds a controller parameter or method return value to a value stored in the browser's
+`sessionStorage`. The value is scoped to the current browser tab/session and is cleared by the browser when the session
+ends.
 
 Use it for workflows such as multi-step forms where state should survive reloads inside one tab but not persist as long
 as `localStorage`.
 
-Like `@LocalStorage`, this is a parameter annotation. XIS sends only configured keys for the current page or frontlet and
-writes the parameter value back after method invocation.
+Like `@LocalStorage`, XIS sends only configured keys for the current page or frontlet and writes parameter values or
+annotated method return values back after method invocation. Returning `null` removes the value on the client.
 
 | Attribute | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
@@ -406,14 +407,18 @@ writes the parameter value back after method invocation.
 
 ### `@ClientState`
 
-`@ClientState` binds a controller parameter to short-lived XIS client-side state. Unlike browser `localStorage` and
-`sessionStorage`, this state is held by the JavaScript runtime and is not meant as durable browser storage.
+`@ClientState` binds a controller parameter or method return value to short-lived XIS client-side state. Unlike browser
+`localStorage` and `sessionStorage`, this state is held by the JavaScript runtime and is not meant as durable browser
+storage.
 
 Use it for short-lived interaction state that should not be persisted across browser sessions. Good examples are
 selected items, expanded panels, temporary form context, and small UI flags that would otherwise require extra
 controller plumbing. Do not treat client state as the standard place for every variable. XIS is not a frontend-only
 framework; model data, frontlet parameters, modal parameters, action parameters, shared values, and server-side flow
 remain the normal tools when they describe the interaction directly.
+
+Returning `null` from an annotated method, or writing back a nullable parameter value, removes the value from client
+state.
 
 | Attribute | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
@@ -616,9 +621,9 @@ return new FrontletResponse(ProductFrontlet.class)
 | `@Roles` | class, method | none | Declares required roles. |
 | `@OwnedBy` | class, parameter, field, record component | `value` | Runs an ownership guard for a submitted object. |
 | `@RefreshOnUpdateEvents` | class | none | Declares refresh event keys this controller reacts to. |
-| `@LocalStorage` | parameter | `value` | Binds browser `localStorage`. |
-| `@SessionStorage` | parameter | `value` | Binds browser `sessionStorage`. |
-| `@ClientState` | parameter | `value` | Binds XIS client-side state. |
+| `@LocalStorage` | method, parameter | `value` | Binds browser `localStorage`. |
+| `@SessionStorage` | method, parameter | `value` | Binds browser `sessionStorage`. |
+| `@ClientState` | method, parameter | `value` | Binds XIS client-side state. |
 | `@LocalDatabase` | method, parameter | `value` | Binds local database data. |
 | `@SharedValue` | method, parameter | `value` | Provides or injects a named value inside one controller processing flow. |
 | `@Title` | method, parameter | none | Provides or receives the page title. |

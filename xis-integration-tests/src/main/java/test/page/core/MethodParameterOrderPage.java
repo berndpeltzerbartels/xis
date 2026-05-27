@@ -5,7 +5,7 @@ import one.xis.ModelData;
 import one.xis.Page;
 import one.xis.SharedValue;
 
-@Page("/requestScopeOrder.html")
+@Page("/sharedValueOrder.html")
 @RequiredArgsConstructor
 class MethodParameterOrderPage {
 

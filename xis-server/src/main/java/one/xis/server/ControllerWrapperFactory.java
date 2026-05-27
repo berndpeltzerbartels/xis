@@ -35,6 +35,8 @@ class ControllerWrapperFactory {
             controllerWrapper.setFormDataMethods(formDataMethods(controller));
             controllerWrapper.setActionMethods(actionMethodMap(controller));
             controllerWrapper.setSharedValueMethods(sharedValueMethods(controller));
+            controllerWrapper.setStorageOnlyMethods(storageOnlyMethods(controller));
+            controllerWrapper.setAllStorageMethods(allStorageMethods(controller));
             controllerWrapper.setTitleOnlyMethods(titleOnlyMethods(controller));
             controllerWrapper.setControllerResultMapper(controllerResultMapper);
             return controllerWrapper;
@@ -67,6 +69,32 @@ class ControllerWrapperFactory {
                 .filter(m -> !m.isAnnotationPresent(Action.class))
                 .map(this::createControllerMethod)
                 .collect(Collectors.toSet());
+    }
+
+    private Collection<ControllerMethod> storageOnlyMethods(Object controller) {
+        return MethodUtils.allMethods(controller).stream()
+                .filter(this::isStorageMethod)
+                .filter(method -> !method.isAnnotationPresent(Action.class))
+                .filter(method -> !method.isAnnotationPresent(ModelData.class))
+                .filter(method -> !method.isAnnotationPresent(FormData.class))
+                .filter(method -> !method.isAnnotationPresent(SharedValue.class))
+                .filter(method -> !method.isAnnotationPresent(Title.class))
+                .map(this::createControllerMethod)
+                .collect(Collectors.toSet());
+    }
+
+    private Collection<ControllerMethod> allStorageMethods(Object controller) {
+        return MethodUtils.allMethods(controller).stream()
+                .filter(this::isStorageMethod)
+                .filter(method -> !method.isAnnotationPresent(Action.class))
+                .map(this::createControllerMethod)
+                .collect(Collectors.toSet());
+    }
+
+    private boolean isStorageMethod(Method method) {
+        return method.isAnnotationPresent(SessionStorage.class)
+                || method.isAnnotationPresent(LocalStorage.class)
+                || method.isAnnotationPresent(ClientState.class);
     }
 
     private <A extends Annotation> Stream<Method> annotatedMethods(Object controller, Class<A> annotation) {

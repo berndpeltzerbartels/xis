@@ -33,4 +33,5 @@ public class ModelCallCounter {
     public int getFrontletModelCalls() {
         return frontletModelCalls.get();
     }
+
 }

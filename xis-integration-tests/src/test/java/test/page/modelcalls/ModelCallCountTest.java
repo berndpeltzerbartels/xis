@@ -27,7 +27,7 @@ class ModelCallCountTest {
     }
 
     @Test
-    void pageActionReloadsFrontletModelDataOnce() {
+    void pageActionDoesNotReloadUnchangedFrontletModelData() {
         var context = IntegrationTestContext.builder()
                 .withPackage("test.page.modelcalls")
                 .build();
@@ -42,10 +42,10 @@ class ModelCallCountTest {
         client.getDocument().getElementById("touch").click();
 
         assertThat(client.getDocument().getElementById("page-calls").getInnerText()).isEqualTo("2");
-        assertThat(client.getDocument().getElementById("frontlet-calls").getInnerText()).isEqualTo("2");
+        assertThat(client.getDocument().getElementById("frontlet-calls").getInnerText()).isEqualTo("1");
         assertThat(counter.getPageModelCalls()).isEqualTo(2);
         assertThat(counter.getPageActionCalls()).isEqualTo(1);
-        assertThat(counter.getFrontletModelCalls()).isEqualTo(2);
+        assertThat(counter.getFrontletModelCalls()).isEqualTo(1);
     }
 
     @Test
