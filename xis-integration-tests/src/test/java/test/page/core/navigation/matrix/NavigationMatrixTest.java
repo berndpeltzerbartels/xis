@@ -56,6 +56,8 @@ class NavigationMatrixTest {
         assertThat(client.getDocument().getElementById("frontlet-parameterized")).isNotNull();
         assertThat(client.getDocument().getElementById("frontlet-parameterized-message").getInnerText())
                 .isEqualTo("from-page-response");
+        assertThat(client.getDocument().getElementById("frontlet-parameterized-state").getInnerText())
+                .isEqualTo("state-from-page-response");
     }
 
     @Test
@@ -69,6 +71,8 @@ class NavigationMatrixTest {
                 .isEqualTo("from-page-url");
         assertThat(client.getDocument().getElementById("frontlet-parameterized-all-parameters").getInnerText())
                 .isEqualTo("message=from-page-url,source=page");
+        assertThat(client.getDocument().getElementById("frontlet-parameterized-state").getInnerText())
+                .isEqualTo("state-from-page-url");
     }
 
     @Test
@@ -83,6 +87,8 @@ class NavigationMatrixTest {
         assertThat(client.getDocument().getElementById("frontlet-parameterized")).isNotNull();
         assertThat(client.getDocument().getElementById("frontlet-parameterized-message").getInnerText())
                 .isEqualTo("from-frontlet-response");
+        assertThat(client.getDocument().getElementById("frontlet-parameterized-state").getInnerText())
+                .isEqualTo("state-from-frontlet-response");
     }
 
     @Test
@@ -96,6 +102,8 @@ class NavigationMatrixTest {
                 .isEqualTo("from-frontlet-url");
         assertThat(client.getDocument().getElementById("frontlet-parameterized-all-parameters").getInnerText())
                 .isEqualTo("message=from-frontlet-url,source=frontlet");
+        assertThat(client.getDocument().getElementById("frontlet-parameterized-state").getInnerText())
+                .isEqualTo("state-from-frontlet-url");
     }
 
     @Test

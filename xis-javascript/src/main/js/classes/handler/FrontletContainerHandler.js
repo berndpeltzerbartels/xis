@@ -100,9 +100,10 @@ class FrontletContainerHandler extends TagHandler {
         return PageController.enqueue(() => {
             if (frontletChanges) {
                 // Frontlet-Wechsel: Buffer verwenden damit Container nicht kurz leer erscheint
+                const parentData = this.parentData() || data;
                 return this.initBuffer()
                     .then(() => this.bindNextFrontletIfNeeded(nextFrontletId))
-                    .then(() => this.refreshDescendantHandlers(data))
+                    .then(() => this.reloadDataAndRefresh(parentData))
                     .then(() => this.updatePageMetadata(response))
                     .then(() => app.frontletContainers.handleReloadFrontlets(response.reloadFrontlets))
                     .then(() => app.pageController.handleUpdateEventsNow(response.updateEventKeys))
