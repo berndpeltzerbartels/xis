@@ -166,6 +166,9 @@ class ControllerMethodResultMapper {
         if (frontletResponse.getFrontlet() != null) {
             updateFrontlet(result, frontletResponse.getFrontlet());
         }
+        if (result.getNextFrontletId() != null) {
+            result.setActionProcessing(ActionProcessing.FRONTLET);
+        }
         if (frontletResponse.getPathVariables() != null) {
             result.getPathVariables().putAll(frontletResponse.getPathVariables());
         }
