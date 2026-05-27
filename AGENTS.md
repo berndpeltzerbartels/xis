@@ -135,10 +135,14 @@ checksums/signatures.
 Do not change the release mechanism just because ZIP upload feels old-fashioned. Replacing it already cost time and is
 not currently the goal.
 
+Create the feature branch as soon as the work topic is known. Do not keep topic work on `develop`, `main`, or a release
+branch while deciding what to do with it.
+
 Do not treat uncommitted work in the active branch as a cautious holding area. It is dangerous because local experiments
 then run against a different state than the one that can be pushed, merged, or released. When work is created, stage it
-promptly; commits should normally cover the whole repository state instead of hand-picked partial changes. If the tree
-is puzzling or dirty, clarify the state before continuing rather than building release assumptions on uncommitted files.
+promptly; commits should normally cover the whole repository state instead of hand-picked partial changes. Only make
+partial commits when that has been explicitly agreed for the current task. If the tree is puzzling or dirty, clarify the
+state before continuing rather than building release assumptions on uncommitted files.
 
 A release candidate always starts from an up-to-date `develop`, not from a feature branch. Before creating a release
 branch, make sure all intended feature branches have been merged into `develop`; any exception must be explicit. Do not
