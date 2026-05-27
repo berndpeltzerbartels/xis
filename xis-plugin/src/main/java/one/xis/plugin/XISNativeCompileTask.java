@@ -19,6 +19,8 @@ import java.util.Locale;
 
 public abstract class XISNativeCompileTask extends DefaultTask {
 
+    static final String NATIVE_RESOURCE_INCLUDE_PATTERN = "(?i)^(?!.*\\.class$).*$";
+
     private final ConfigurableFileCollection nativeClasspath = getProject().files();
     private final Property<String> graalVmHome = getProject().getObjects().property(String.class);
 
@@ -81,7 +83,7 @@ public abstract class XISNativeCompileTask extends DefaultTask {
                     "--initialize-at-build-time=org.slf4j",
                     "--initialize-at-run-time=one.xis.context.ApplicationProperties",
                     "--initialize-at-run-time=org.mariadb.jdbc",
-                    "-H:IncludeResources=.*\\.(html|css|js|properties|json|txt)$",
+                    "-H:IncludeResources=" + NATIVE_RESOURCE_INCLUDE_PATTERN,
                     "-H:ReflectionConfigurationFiles=" + getReflectionConfig().get().getAsFile().getAbsolutePath(),
                     "-H:DynamicProxyConfigurationFiles=" + getProxyConfig().get().getAsFile().getAbsolutePath(),
                     "-cp", classpath,
