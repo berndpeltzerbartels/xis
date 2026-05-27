@@ -27,6 +27,7 @@ class Application {
         this.modals = new ModalManager(this.frontlets, this.initializer, this.tagHandlers);
         /** Serializes all render operations (page + frontlet refreshes) so they never overlap. */
         this.renderQueue = Promise.resolve();
+        this.frontletLoadGeneration = 0;
         this.pageController = new PageController(this.client, this.pages, this.initializer, this.urlResolver, this.tagHandlers);
         this.history = new PageHistory(this.pageController);
         this.globals = new GlobalStore(this.eventPublisher);

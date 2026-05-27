@@ -196,7 +196,22 @@ class FrontletContainerHandler extends TagHandler {
     }
 
     sameParameters(left, right) {
-        return JSON.stringify(left || {}) === JSON.stringify(right || {});
+        left = left || {};
+        right = right || {};
+        var leftKeys = Object.keys(left);
+        var rightKeys = Object.keys(right);
+        if (leftKeys.length !== rightKeys.length) {
+            return false;
+        }
+        for (var key of leftKeys) {
+            if (!right.hasOwnProperty(key)) {
+                return false;
+            }
+            if (String(left[key]) !== String(right[key])) {
+                return false;
+            }
+        }
+        return true;
     }
 
     refreshCurrentFrontletWithParentData(parentData) {
@@ -254,7 +269,11 @@ class FrontletContainerHandler extends TagHandler {
     }
 
     handleUpdateEvent() {
-        return PageController.enqueue(() => this.refresh(this.data));
+        return PageController.enqueue(() => this.refreshForUpdateEvent());
+    }
+
+    refreshForUpdateEvent() {
+        return this.reloadDataAndRefresh(this.parentData() || this.data);
     }
 
     /**
@@ -421,6 +440,7 @@ class FrontletContainerHandler extends TagHandler {
         var frontletRoot = assertNotNull(this.frontletInstance.root, 'no frontlet root: ' + frontletId);
         var target = this.buffer ? this.buffer : this.tag;
         target.appendChild(frontletRoot);
+        this.lastModelLoadGeneration = typeof app !== 'undefined' ? app.frontletLoadGeneration : undefined;
         var frontletHandler = assertNotNull(this.frontletInstance.rootHandler, 'no frontlet handler: ' + frontletId);
         if (shouldScroll && this.scrollToTop) {
             window.scrollTo(0, 0);
@@ -515,6 +535,7 @@ class FrontletContainerHandler extends TagHandler {
     doLoad(parentData) {
         if (this.frontletInstance) {
             const response = app.currentResponse;
+            this.lastModelLoadGeneration = app.frontletLoadGeneration;
             return app.client.loadFrontletData(this.frontletInstance, this.frontletState, this)
                 .then(response => this.updatePageMetadata(response))
                 .then(response => {

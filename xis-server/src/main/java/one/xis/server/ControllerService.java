@@ -183,6 +183,7 @@ class ControllerService {
         }
         nextControllerResult.getFrontletParameters().putAll(controllerResult.getFrontletParameters());
         nextControllerResult.getModalParameters().putAll(controllerResult.getModalParameters());
+        nextControllerResult.setFrontletContainerId(controllerResult.getFrontletContainerId());
         nextControllerResult.getUpdateEventKeys().addAll(controllerResult.getUpdateEventKeys());
         return nextControllerResult;
     }
