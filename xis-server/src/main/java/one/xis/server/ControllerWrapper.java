@@ -36,7 +36,8 @@ public class ControllerWrapper {
     private Collection<ControllerMethod> modelMethods;
     private Map<String, ControllerMethod> actionMethods;
     private Collection<ControllerMethod> formDataMethods;
-    private Collection<ControllerMethod> storageMethods;
+    private Collection<ControllerMethod> storageOnlyMethods;
+    private Collection<ControllerMethod> allStorageMethods;
     private Collection<ControllerMethod> titleOnlyMethods;
     private ControllerResultMapper controllerResultMapper;
 
@@ -51,12 +52,20 @@ public class ControllerWrapper {
     void invokeGetModelMethods(ClientRequest request, ControllerResult controllerResult, Set<String> modelDataKeysToKeep, ModelDataLoad load) {
         SecurityUtil.checkRoles(controller.getClass(), UserContextImpl.getInstance());
         var methodsToExecute = new ArrayList<>(modelMethods);
-        methodsToExecute.addAll(storageMethods);
+        methodsToExecute.addAll(storageOnlyMethods);
         methodsToExecute.addAll(titleOnlyMethods);
         var methods = MethodSorter.sortMethods(methodsToExecute, sharedValueMethods);
         methods.stream()
                 .filter(m -> m.getModelDataKey().isEmpty() || m.shouldLoadModelData(load))
                 .filter(m -> !m.getModelDataKey().map(modelDataKeysToKeep::contains).orElse(false))
+                .filter(m -> !storageValueAlreadyReturned(m, controllerResult))
+                .forEach(m -> invokeModelDataMethod(request, controllerResult, m));
+    }
+
+    void invokeStorageMethods(ClientRequest request, ControllerResult controllerResult) {
+        SecurityUtil.checkRoles(controller.getClass(), UserContextImpl.getInstance());
+        var methods = MethodSorter.sortMethods(allStorageMethods, sharedValueMethods);
+        methods.stream()
                 .filter(m -> !storageValueAlreadyReturned(m, controllerResult))
                 .forEach(m -> invokeModelDataMethod(request, controllerResult, m));
     }

@@ -121,6 +121,8 @@ class ControllerService {
         if (nextControllerWrapper.equals(invokerControllerWrapper)) {
             invokerControllerWrapper.invokeGetModelMethods(nextRequest(request, controllerResult), controllerResult, actionModelDataKeys, ModelDataLoad.AFTER_ACTION);
             mapResultToResponse(request, response, controllerResult);
+        } else if (nextControllerWrapper.isFrontletController() || nextControllerWrapper.isModalController()) {
+            processNextFrontletOrModalController(request, controllerResult, response, nextControllerWrapper);
         } else {
             processNextController(request, controllerResult, response, nextControllerWrapper);
         }
@@ -159,6 +161,32 @@ class ControllerService {
         mapResultToResponse(request, response, nextControllerResult);
     }
 
+    private void processNextFrontletOrModalController(ClientRequest request, ControllerResult controllerResult, ServerResponse response, ControllerWrapper nextControllerWrapper) {
+        var nextRequest = nextRequest(request, controllerResult);
+        var nextControllerResult = nextControllerResult(controllerResult, nextControllerWrapper);
+        nextControllerWrapper.invokeStorageMethods(nextRequest, nextControllerResult);
+        response.clear();
+        mapResultToResponse(request, response, nextControllerResult);
+    }
+
+    private ControllerResult nextControllerResult(ControllerResult controllerResult, ControllerWrapper nextControllerWrapper) {
+        var nextControllerResult = new ControllerResult();
+        if (nextControllerWrapper.isFrontletController()) {
+            nextControllerResult.setNextFrontletId(nextControllerWrapper.getId());
+            nextControllerResult.setActionProcessing(ActionProcessing.FRONTLET);
+        } else if (nextControllerWrapper.isModalController()) {
+            nextControllerResult.setNextModalId(nextControllerWrapper.getId());
+            nextControllerResult.setActionProcessing(ActionProcessing.MODAL);
+        } else {
+            var path = pathResolver.createPath(nextControllerWrapper.getController().getClass().getAnnotation(Page.class).value());
+            nextControllerResult.setNextURL(this.pathResolver.evaluateRealPath(path, controllerResult.getPathVariables(), controllerResult.getUrlParameters()));
+        }
+        nextControllerResult.getFrontletParameters().putAll(controllerResult.getFrontletParameters());
+        nextControllerResult.getModalParameters().putAll(controllerResult.getModalParameters());
+        nextControllerResult.getUpdateEventKeys().addAll(controllerResult.getUpdateEventKeys());
+        return nextControllerResult;
+    }
+
     private ClientRequest nextRequest(ClientRequest request, ControllerResult controllerResult) {
         var nextRequest = new ClientRequest();
         // userdata is the same
@@ -167,6 +195,9 @@ class ControllerService {
         nextRequest.setClientId(request.getClientId());
         nextRequest.getLocalStorageData().putAll(request.getLocalStorageData());
         nextRequest.getSessionStorageData().putAll(request.getSessionStorageData());
+        nextRequest.getClientStateData().putAll(request.getClientStateData());
+        nextRequest.getGlobalVariableData().putAll(request.getGlobalVariableData());
+        nextRequest.getLocalDatabaseData().putAll(request.getLocalDatabaseData());
         nextRequest.setAccessToken(request.getAccessToken());
         controllerResultMapper.mapControllerResultToNextRequest(controllerResult, nextRequest);
         return nextRequest;
