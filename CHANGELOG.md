@@ -2,6 +2,32 @@
 
 ## Unreleased
 
+## 0.16.0 - 2026-05-27
+
+### Added
+
+- Added method-level `@ClientState`, `@LocalStorage`, and `@SessionStorage` support so simple client-side values can be
+  provided and cleared without a dedicated action parameter or form field.
+- Added `ToastMessages` as the explicit action response type for toast output.
+
+### Changed
+
+- Removed the experimental `Frontend` response object because mixing frontend state with targeted frontlet responses made
+  action refresh behavior ambiguous.
+- Split storage-only lifecycle invocation from model/form-data lifecycle invocation so actions no longer trigger redundant
+  model reloads when the current frontlet stays in place.
+
+### Fixed
+
+- Fixed shared value refresh after actions by clearing action-phase shared values before follow-up model/form-data
+  invocation.
+- Fixed frontlet update event refresh handling and remote frontlet response processing.
+- Fixed field clearing for client state and browser storage method values when a returned value contains `null` fields.
+
+### Documentation
+
+- Documented the manual release E2E suites and updated the documented XIS Gradle plugin version to `0.16.0`.
+
 ## 0.15.0 - 2026-05-27
 
 ### Maintenance
