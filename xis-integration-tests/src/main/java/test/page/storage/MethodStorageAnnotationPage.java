@@ -24,11 +24,35 @@ class MethodStorageAnnotationPage {
         return "client-start";
     }
 
+    @LocalStorage("localComplex")
+    MethodStorageData localComplex() {
+        return new MethodStorageData("local-kept", "local-removed");
+    }
+
+    @SessionStorage("sessionComplex")
+    MethodStorageData sessionComplex() {
+        return new MethodStorageData("session-kept", "session-removed");
+    }
+
+    @ClientState("clientComplex")
+    MethodStorageData clientComplex() {
+        return new MethodStorageData("client-kept", "client-removed");
+    }
+
     @Action("clear-all")
     @LocalStorage("localSimple")
     @SessionStorage("sessionSimple")
     @ClientState("clientSimple")
     String clearAll() {
         return null;
+    }
+
+    @Action("clear-complex-fields")
+    void clearComplexFields(@LocalStorage("localComplex") MethodStorageData localComplex,
+                            @SessionStorage("sessionComplex") MethodStorageData sessionComplex,
+                            @ClientState("clientComplex") MethodStorageData clientComplex) {
+        localComplex.setRemoved(null);
+        sessionComplex.setRemoved(null);
+        clientComplex.setRemoved(null);
     }
 }

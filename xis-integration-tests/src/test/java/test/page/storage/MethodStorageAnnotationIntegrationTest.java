@@ -23,6 +23,9 @@ class MethodStorageAnnotationIntegrationTest {
         assertThat(response.getLocalStorageData()).containsEntry("localSimple", "local-start");
         assertThat(response.getSessionStorageData()).containsEntry("sessionSimple", "session-start");
         assertThat(response.getClientStateData()).containsEntry("clientSimple", "client-start");
+        assertThat((MethodStorageData) response.getLocalStorageData().get("localComplex"))
+                .extracting(MethodStorageData::getKept, MethodStorageData::getRemoved)
+                .containsExactly("local-kept", "local-removed");
     }
 
     @Test
@@ -54,6 +57,37 @@ class MethodStorageAnnotationIntegrationTest {
         assertThat(client.getSessionStorage().getItem("sessionSimple")).isNull();
     }
 
+    @Test
+    void storageMethodParametersCanClearSingleFieldsInComplexValues() {
+        var context = IntegrationTestContext.builder()
+                .withSingleton(MethodStorageAnnotationPage.class)
+                .build();
+
+        var response = context.getSingleton(FrontendService.class).processActionRequest(actionRequestWithComplexStorage("clear-complex-fields"));
+
+        assertComplexValue(response.getLocalStorageData().get("localComplex"), "local-kept");
+        assertComplexValue(response.getSessionStorageData().get("sessionComplex"), "session-kept");
+        assertComplexValue(response.getClientStateData().get("clientComplex"), "client-kept");
+    }
+
+    @Test
+    void browserStoresComplexValuesWithNullFieldsFromStorageMethodParameters() {
+        var context = IntegrationTestContext.builder()
+                .withSingleton(MethodStorageAnnotationPage.class)
+                .build();
+
+        var client = context.openPage(MethodStorageAnnotationPage.class);
+
+        client.getDocument().getElementById("clear-complex-fields").click();
+
+        assertThat(client.getLocalStorage().getItem("localComplex"))
+                .contains("\"kept\":\"local-kept\"")
+                .contains("\"removed\":null");
+        assertThat(client.getSessionStorage().getItem("sessionComplex"))
+                .contains("\"kept\":\"session-kept\"")
+                .contains("\"removed\":null");
+    }
+
     private ClientRequest pageRequest() {
         var request = new ClientRequest();
         request.setClientId("method-storage-test-client");
@@ -68,5 +102,20 @@ class MethodStorageAnnotationIntegrationTest {
         var request = pageRequest();
         request.setAction(action);
         return request;
+    }
+
+    private ClientRequest actionRequestWithComplexStorage(String action) {
+        var request = actionRequest(action);
+        request.getLocalStorageData().put("localComplex", "{\"kept\":\"local-kept\",\"removed\":\"local-removed\"}");
+        request.getSessionStorageData().put("sessionComplex", "{\"kept\":\"session-kept\",\"removed\":\"session-removed\"}");
+        request.getClientStateData().put("clientComplex", "{\"kept\":\"client-kept\",\"removed\":\"client-removed\"}");
+        return request;
+    }
+
+    private void assertComplexValue(Object value, String kept) {
+        assertThat(value).isInstanceOf(MethodStorageData.class);
+        var storageData = (MethodStorageData) value;
+        assertThat(storageData.getKept()).isEqualTo(kept);
+        assertThat(storageData.getRemoved()).isNull();
     }
 }

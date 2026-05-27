@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:xis="https://xis.one/xsd">
+<head>
+    <title>Repeated Action Frontlet Instance Page</title>
+</head>
+<body>
+<button id="refresh-action-items" type="button" xis:action="refreshItems">Refresh</button>
+<section>
+    <div class="item-row" xis:repeat="item:items">
+        <button id="item-${item}" type="button" xis:action="selectItem?itemId=${item}">
+            <span class="item-title">Item ${item}
+                <xis:frontlet-container default-frontlet="RepeatedActionItemFrontlet?itemId=${item}"/>
+            </span>
+        </button>
+    </div>
+</section>
+</body>
+</html>
