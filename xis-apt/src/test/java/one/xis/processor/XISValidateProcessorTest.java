@@ -1241,7 +1241,7 @@ class XISValidateProcessorTest {
     }
 
     @Test
-    void acceptsTemplateDataProvidedThroughFrontendParameter() throws IOException {
+    void rejectsTemplateDataNotDeclaredByModelOrFormDataMethods() throws IOException {
         Path templateFile = tempDir.resolve("src/main/java/example/ProbePage.html");
         Files.createDirectories(templateFile.getParent());
         Files.writeString(templateFile, """
@@ -1256,19 +1256,16 @@ class XISValidateProcessorTest {
                 </html>
                 """, StandardCharsets.UTF_8);
 
-        DiagnosticCollector<JavaFileObject> diagnostics = compilePageSourceWithProcessor(true, """
+        DiagnosticCollector<JavaFileObject> diagnostics = compilePageSourceWithProcessor(false, """
                 package example;
 
                 import one.xis.Action;
-                import one.xis.Frontend;
                 import one.xis.Page;
 
                 @Page("/probe.html")
                 class ProbePage {
                     @Action("save")
-                    void save(Frontend frontend) {
-                        frontend.addModelData("dynamicModel", new Customer())
-                                .addFormData("dynamicForm", new CustomerForm());
+                    void save() {
                     }
 
                     static class Customer {
@@ -1279,9 +1276,11 @@ class XISValidateProcessorTest {
                         String description;
                     }
                 }
-                """);
+                """, "-Axis.allErrors=true");
 
-        assertThat(errorMessages(diagnostics)).isEmpty();
+        var errors = errorMessages(diagnostics);
+        assertThat(errors).anyMatch(error -> error.contains("dynamicModel"));
+        assertThat(errors).anyMatch(error -> error.contains("dynamicForm"));
     }
 
     @Test

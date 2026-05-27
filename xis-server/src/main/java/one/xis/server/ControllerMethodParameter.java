@@ -45,8 +45,8 @@ class ControllerMethodParameter {
             return RequestContext.getInstance().getResponse();
         } else if (parameter.getType().equals(RequestContext.class)) {
             return RequestContext.getInstance();
-        } else if (parameter.getType().equals(Frontend.class)) {
-            return new Frontend();
+        } else if (parameter.getType().equals(ToastMessages.class)) {
+            return new ToastMessages();
         } else if (parameter.isAnnotationPresent(FormData.class)) {
             return deserializeFormDataParameter(parameter, request, postProcessingResults);
         } else if (parameter.isAnnotationPresent(Upload.class)) {
@@ -119,11 +119,8 @@ class ControllerMethodParameter {
             controllerMethodResult.getLocalStorage().put(parameter.getAnnotation(LocalStorage.class).value(), parameterValue);
         } else if (parameter.isAnnotationPresent(ClientState.class)) {
             controllerMethodResult.getClientState().put(parameter.getAnnotation(ClientState.class).value(), parameterValue);
-        } else if (parameterValue instanceof Frontend frontend) {
-            controllerMethodResult.getModelData().putAll(frontend.getModelData());
-            controllerMethodResult.getFormData().putAll(frontend.getFormData());
-            controllerMethodResult.getReturnedFormDataKeys().addAll(frontend.getFormData().keySet());
-            controllerMethodResult.getToastMessages().addAll(frontend.getToastMessages());
+        } else if (parameterValue instanceof ToastMessages toastMessages) {
+            controllerMethodResult.getToastMessages().addAll(toastMessages.getMessages());
         }
     }
 
