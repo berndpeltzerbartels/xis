@@ -1,6 +1,6 @@
 # Forms and Validation
 
-[Documentation map](../README.md)
+[Documentation map](../../README.md)
 
 XIS binds form data to Java objects with `@FormData`. Actions receive typed form objects instead of manually parsing
 request parameters.

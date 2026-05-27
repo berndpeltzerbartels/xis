@@ -1,6 +1,6 @@
 # XIS Theme
 
-[Documentation map](../../README.md) | [Advanced topics](README.md)
+[Documentation map](../../../README.md) | [Advanced topics](README.md)
 
 `xis-theme` is the optional default design layer for XIS applications. It is meant for developers who want a presentable
 application quickly without designing navigation, forms, grid layout, labels, and validation messages by hand.

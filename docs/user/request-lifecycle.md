@@ -1,6 +1,6 @@
 # Request Lifecycle
 
-[Documentation map](../README.md)
+[Documentation map](../../README.md)
 
 This chapter gives you the mental model for when XIS calls controller methods and how a browser interaction becomes a
 new rendered page or frontlet.

@@ -1,6 +1,6 @@
 # Template Location And Mapping
 
-[Documentation map](../README.md)
+[Documentation map](../../README.md)
 
 Every page, frontlet, and include has Java code and an HTML template. XIS looks for the template by convention first, and
 you only need an annotation when you want to override that convention.

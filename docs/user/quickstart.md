@@ -1,6 +1,6 @@
 # Quickstart
 
-[Documentation map](../README.md)
+[Documentation map](../../README.md)
 
 This quickstart creates a small XIS application with Spring Boot. The standalone XIS Boot runtime follows the same page,
 template, and action model; only the application entry point and dependencies differ.

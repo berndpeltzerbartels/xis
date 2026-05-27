@@ -1,6 +1,6 @@
 # Modals
 
-[Documentation map](../README.md)
+[Documentation map](../../README.md)
 
 Use a modal when the user should edit or confirm something without leaving the current page context. A modal is a normal
 XIS controller with its own template fragment, model data, form data, actions, validation, and parameters.

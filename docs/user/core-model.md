@@ -1,6 +1,6 @@
 # Core Model
 
-[Documentation map](../README.md)
+[Documentation map](../../README.md)
 
 XIS applications are built from pages, frontlets, includes, model data, form data, and actions.
 

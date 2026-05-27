@@ -1,6 +1,6 @@
 # Cloud Native And Native Images
 
-[Documentation map](../README.md)
+[Documentation map](../../README.md)
 
 XIS Boot Native is the cloud-native deployment path for standalone XIS applications. It is meant for applications that
 should be compiled to a GraalVM native executable and deployed as a small container or directly as a native process.

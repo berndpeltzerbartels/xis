@@ -1,6 +1,6 @@
 # Microfrontend Architecture
 
-[Documentation map](../../README.md)
+[Documentation map](../../../README.md)
 
 Microfrontend Architecture means that a service does not only own business logic and data access; it can also own the
 frontend fragment that presents that part of the domain. In XIS, those fragments are pages and frontlets. A browser

@@ -1,6 +1,6 @@
 # Template Syntax
 
-[Documentation map](../README.md)
+[Documentation map](../../README.md)
 
 XIS templates are plain HTML with XIS attributes, XIS tags, and expression language.
 

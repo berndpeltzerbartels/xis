@@ -1,6 +1,6 @@
 # Groovy Support
 
-[Documentation map](../README.md)
+[Documentation map](../../README.md)
 
 XIS supports Groovy 4+ for controller classes and form/data objects. The same server-driven programming model applies:
 controllers declare pages, model data, form data, and actions; HTML templates declare the UI.

@@ -1,6 +1,6 @@
 # Navigation and Responses
 
-[Documentation map](../README.md)
+[Documentation map](../../README.md)
 
 Navigation is core XIS behavior. Pages, frontlets, links, forms, and actions all participate in the same navigation
 model.
