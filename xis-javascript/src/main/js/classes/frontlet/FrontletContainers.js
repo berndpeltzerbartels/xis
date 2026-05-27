@@ -56,13 +56,15 @@ class FrontletContainers {
         return Promise.all(promises);
     }
 
-    handleUpdateEventsNow(eventIds) {
+    handleUpdateEventsNow(eventIds, skipGeneration) {
         const promises = [];
         eventIds.forEach(eventId => {
             const frontletIds = this.frontletIdForUpdateEvent(eventId);
             frontletIds.forEach(frontletId => {
                 const handlers = this.findActiveContainerHandlersByFrontletId(frontletId);
-                handlers.forEach(handler => promises.push(handler.refresh(handler.data)));
+                handlers
+                    .filter(handler => skipGeneration === undefined || handler.lastModelLoadGeneration !== skipGeneration)
+                    .forEach(handler => promises.push(handler.refreshForUpdateEvent()));
             });
         });
         return Promise.all(promises);
@@ -75,7 +77,7 @@ class FrontletContainers {
         const promises = [];
         frontletIds.forEach(frontletId => {
             const handlers = this.findActiveContainerHandlersByFrontletId(frontletId);
-            handlers.forEach(handler => promises.push(handler.refresh(handler.data)));
+            handlers.forEach(handler => promises.push(handler.refreshForUpdateEvent()));
         });
         return Promise.all(promises);
     }
