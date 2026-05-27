@@ -135,6 +135,38 @@ checksums/signatures.
 Do not change the release mechanism just because ZIP upload feels old-fashioned. Replacing it already cost time and is
 not currently the goal.
 
+Create the feature branch as soon as the work topic is known. Do not keep topic work on `develop`, `main`, or a release
+branch while deciding what to do with it.
+
+Do not treat uncommitted work in the active branch as a cautious holding area. It is dangerous because local experiments
+then run against a different state than the one that can be pushed, merged, or released. When work is created, stage it
+promptly; commits should normally cover the whole repository state instead of hand-picked partial changes. Only make
+partial commits when that has been explicitly agreed for the current task. If the tree is puzzling or dirty, clarify the
+state before continuing rather than building release assumptions on uncommitted files.
+
+A release candidate always starts from an up-to-date `develop`, not from a feature branch. Before creating a release
+branch, make sure all intended feature branches have been merged into `develop`; any exception must be explicit. Do not
+declare a feature branch to be the release candidate by convenience.
+
+The release flow is:
+
+1. Update `develop` and verify that the working tree is clean.
+2. Merge all intended feature branches into `develop`, or explicitly record why a branch is excluded.
+3. Create the release branch from `develop`.
+4. Run the full available test suite without waiting for a special reminder. Phrases such as "full test" mean all
+   framework, integration, JavaScript, plugin, and end-to-end tests that are available for the release.
+5. Only after the full suite is green, consider that release branch state confirmed.
+6. Build the release ZIP from that confirmed release branch.
+7. Bring the confirmed release state to `main` with a squash merge.
+8. Upload the release ZIP.
+9. Bump `main` to the next development version.
+10. Make `develop` match `main` for the next cycle. If rewriting or recreating `develop` could lose useful history,
+    create a backup branch first or keep the existing history deliberately. `develop` is public too.
+
+After a correct release, the only intended difference between the release branch and `main` is the post-release version
+change on `main`. There should be no intended difference between `main` and `develop` after `develop` has been prepared
+for the next cycle.
+
 ## Open To-dos
 
 - Consider adding navigation and a small frontlet example to the Quickstart if that improves the "read and build along"
