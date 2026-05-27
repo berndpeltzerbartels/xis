@@ -138,6 +138,10 @@ not currently the goal.
 Create the feature branch as soon as the work topic is known. Do not keep topic work on `develop`, `main`, or a release
 branch while deciding what to do with it.
 
+After a feature branch has been merged into `develop`, delete that feature branch locally and remotely unless there is
+an explicit reason to keep it. Keeping merged topic branches around creates avoidable archaeology later, especially
+after squash merges make commit identity a poor signal for whether the work is already contained.
+
 Do not treat uncommitted work in the active branch as a cautious holding area. It is dangerous because local experiments
 then run against a different state than the one that can be pushed, merged, or released. When work is created, stage it
 promptly; commits should normally cover the whole repository state instead of hand-picked partial changes. Only make
