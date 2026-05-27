@@ -22,6 +22,15 @@ class AttributesFactory {
     }
 
     void addParameterAttributes(Method method, ComponentAttributes attributes) {
+        if (method.isAnnotationPresent(SessionStorage.class)) {
+            attributes.getSessionStorageKeys().add(method.getAnnotation(SessionStorage.class).value());
+        }
+        if (method.isAnnotationPresent(LocalStorage.class)) {
+            attributes.getLocalStorageKeys().add(method.getAnnotation(LocalStorage.class).value());
+        }
+        if (method.isAnnotationPresent(ClientState.class)) {
+            attributes.getClientStateKeys().add(method.getAnnotation(ClientState.class).value());
+        }
         for (var parameter : method.getParameters()) {
             if (parameter.isAnnotationPresent(SessionStorage.class)) {
                 attributes.getSessionStorageKeys().add(parameter.getAnnotation(SessionStorage.class).value());

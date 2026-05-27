@@ -3,17 +3,18 @@ package one.xis;
 import java.lang.annotation.*;
 
 /**
- * Binds a value from the browser's sessionStorage to an action method parameter.
+ * Binds a value from the browser's sessionStorage to an action method parameter or method return value.
  *
- * <p>This is a parameter annotation. XIS scans controller method parameters and
- * writes the referenced storage keys into the client configuration for the
+ * <p>XIS scans controller method parameters and annotated methods and writes
+ * the referenced storage keys into the client configuration for the
  * current page or frontlet. The browser sends only those configured keys to the
  * server, not the whole sessionStorage. The configured keys are sent for the
  * page/frontlet request even when the currently invoked action does not use
  * every key.</p>
  *
  * <p>The server deserializes the value for the key, passes it to the parameter,
- * and writes the parameter value back to sessionStorage after method execution.
+ * and writes the parameter value or annotated method return value back to
+ * sessionStorage after method execution.
  * This makes the annotation most useful for mutable DTO-like values whose fields
  * are changed inside the action.</p>
  *
@@ -31,6 +32,9 @@ import java.lang.annotation.*;
  * If no value exists in sessionStorage, the parameter will be initialized with a default value.
  * For objects, this is typically a new instance. Use {@link NullAllowed} to allow null values instead.</p>
  *
+ * <p>Returning {@code null} from an annotated method, or writing back a nullable
+ * parameter value, removes the value from sessionStorage.</p>
+ *
  * <p><strong>Storage Location:</strong><br>
  * Data is stored client-side in the browser's sessionStorage and persists only for the current
  * browser tab/window session. Data is cleared when the tab is closed. All values are serialized as JSON.</p>
@@ -44,7 +48,7 @@ import java.lang.annotation.*;
  * @see NullAllowed
  */
 @Documented
-@Target({ElementType.PARAMETER})
+@Target({ElementType.PARAMETER, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface SessionStorage {
     /**

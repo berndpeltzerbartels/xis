@@ -1,7 +1,10 @@
 package one.xis.server;
 
 import one.xis.FormData;
+import one.xis.ClientState;
+import one.xis.LocalStorage;
 import one.xis.ModelData;
+import one.xis.SessionStorage;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
@@ -75,6 +78,28 @@ class ControllerMethodResultMapperTest {
                 .hasMessageContaining("@FormData method must not return null for key: customer");
     }
 
+    @Test
+    void mapsSimpleStorageMethodReturnValues() throws Exception {
+        var result = new ControllerMethodResult();
+
+        mapper.mapReturnValueToResult(result, method("simpleStorage"), "selected", new java.util.HashMap<>());
+
+        assertThat(result.getLocalStorage()).containsEntry("local", "selected");
+        assertThat(result.getSessionStorage()).containsEntry("session", "selected");
+        assertThat(result.getClientState()).containsEntry("client", "selected");
+    }
+
+    @Test
+    void mapsNullStorageMethodReturnValueAsRemovalSignal() throws Exception {
+        var result = new ControllerMethodResult();
+
+        mapper.mapReturnValueToResult(result, method("simpleStorage"), null, new java.util.HashMap<>());
+
+        assertThat(result.getLocalStorage()).containsEntry("local", null);
+        assertThat(result.getSessionStorage()).containsEntry("session", null);
+        assertThat(result.getClientState()).containsEntry("client", null);
+    }
+
     private Method method(String name) throws NoSuchMethodException {
         return Methods.class.getDeclaredMethod(name);
     }
@@ -98,6 +123,13 @@ class ControllerMethodResultMapperTest {
 
         @FormData("customer")
         String form() {
+            return "";
+        }
+
+        @LocalStorage("local")
+        @SessionStorage("session")
+        @ClientState("client")
+        String simpleStorage() {
             return "";
         }
     }

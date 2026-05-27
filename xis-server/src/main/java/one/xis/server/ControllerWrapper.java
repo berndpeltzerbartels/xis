@@ -2,10 +2,13 @@ package one.xis.server;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import one.xis.ClientState;
 import one.xis.UserContextImpl;
 import one.xis.Frontlet;
+import one.xis.LocalStorage;
 import one.xis.Modal;
 import one.xis.ModelDataLoad;
+import one.xis.SessionStorage;
 import one.xis.auth.AuthenticationException;
 import one.xis.security.SecurityUtil;
 import one.xis.validation.ValidationFailedException;
@@ -33,6 +36,7 @@ public class ControllerWrapper {
     private Collection<ControllerMethod> modelMethods;
     private Map<String, ControllerMethod> actionMethods;
     private Collection<ControllerMethod> formDataMethods;
+    private Collection<ControllerMethod> storageMethods;
     private Collection<ControllerMethod> titleOnlyMethods;
     private ControllerResultMapper controllerResultMapper;
 
@@ -47,12 +51,24 @@ public class ControllerWrapper {
     void invokeGetModelMethods(ClientRequest request, ControllerResult controllerResult, Set<String> modelDataKeysToKeep, ModelDataLoad load) {
         SecurityUtil.checkRoles(controller.getClass(), UserContextImpl.getInstance());
         var methodsToExecute = new ArrayList<>(modelMethods);
+        methodsToExecute.addAll(storageMethods);
         methodsToExecute.addAll(titleOnlyMethods);
         var methods = MethodSorter.sortMethods(methodsToExecute, sharedValueMethods);
         methods.stream()
-                .filter(m -> m.shouldLoadModelData(load))
+                .filter(m -> m.getModelDataKey().isEmpty() || m.shouldLoadModelData(load))
                 .filter(m -> !m.getModelDataKey().map(modelDataKeysToKeep::contains).orElse(false))
+                .filter(m -> !storageValueAlreadyReturned(m, controllerResult))
                 .forEach(m -> invokeModelDataMethod(request, controllerResult, m));
+    }
+
+    private boolean storageValueAlreadyReturned(ControllerMethod method, ControllerResult controllerResult) {
+        var javaMethod = method.getMethod();
+        return javaMethod.isAnnotationPresent(SessionStorage.class)
+                && controllerResult.getSessionStorage().containsKey(javaMethod.getAnnotation(SessionStorage.class).value())
+                || javaMethod.isAnnotationPresent(LocalStorage.class)
+                && controllerResult.getLocalStorage().containsKey(javaMethod.getAnnotation(LocalStorage.class).value())
+                || javaMethod.isAnnotationPresent(ClientState.class)
+                && controllerResult.getClientState().containsKey(javaMethod.getAnnotation(ClientState.class).value());
     }
 
     void invokeFormDataMethods(ClientRequest request, ControllerResult controllerResult) {

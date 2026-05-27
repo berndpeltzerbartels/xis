@@ -2,6 +2,8 @@ package one.xis.server;
 
 import one.xis.Action;
 import one.xis.ActionParameter;
+import one.xis.ClientState;
+import one.xis.NullAllowed;
 import one.xis.OwnedBy;
 import one.xis.SharedValue;
 import one.xis.ToastLevel;
@@ -109,6 +111,21 @@ class ControllerMethodParameterTest {
     }
 
     @Test
+    void nullStorageParameterValueIsWrittenBackAsRemovalSignal() throws Exception {
+        var method = TestActions.class.getDeclaredMethod("clearClientState", String.class);
+        var parameter = new ControllerMethodParameter(method, method.getParameters()[0], mockDeserializer(), 0, -1, mock(UploadConfiguration.class));
+        var request = new ClientRequest();
+        request.getClientStateData().put("selected", null);
+        var result = new ControllerMethodResult();
+
+        var value = parameter.prepareParameter(request, new PostProcessingResults(), new HashMap<>());
+        parameter.addParameterValueToResult(result, value, request);
+
+        assertThat(value).isNull();
+        assertThat(result.getClientState()).containsEntry("selected", null);
+    }
+
+    @Test
     void accessDeniedPostProcessingResultStopsInvocationWithAuthorizationException() throws Exception {
         var method = TestActions.class.getDeclaredMethod("secured");
         var controller = new TestActions();
@@ -192,6 +209,10 @@ class ControllerMethodParameterTest {
 
         @Action
         void toastMessages(ToastMessages toastMessages) {
+        }
+
+        @Action
+        void clearClientState(@NullAllowed @ClientState("selected") String selected) {
         }
     }
 }
