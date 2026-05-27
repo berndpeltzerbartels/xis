@@ -247,13 +247,10 @@ public class XISValidateProcessor extends AbstractProcessor {
         var index = annotationStringValue(parameter, annotationName, "index")
                 .map(Integer::parseInt)
                 .orElse(-1);
-        if (!value.isBlank() || index > 0) {
-            return Optional.empty();
-        }
         if (index == 0) {
             return Optional.of("@ActionParameter index is 1-based; use index=1 for the first action argument.");
         }
-        return Optional.of("@ActionParameter must define value or index.");
+        return Optional.empty();
     }
 
     private boolean isParameterMap(VariableElement parameter, String annotationName) {

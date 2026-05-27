@@ -64,7 +64,8 @@ class ControllerMethod {
             return false;
         }
         if (parameter.isAnnotationPresent(ActionParameter.class)) {
-            return false;
+            var actionParameter = parameter.getAnnotation(ActionParameter.class);
+            return actionParameter.value().isEmpty() && actionParameter.index() < 0;
         }
         return !isFrameworkInjectedParameter(parameter);
     }
@@ -81,7 +82,6 @@ class ControllerMethod {
                 || parameter.isAnnotationPresent(ClientId.class)
                 || parameter.isAnnotationPresent(QueryParameter.class)
                 || parameter.isAnnotationPresent(one.xis.PathVariable.class)
-                || parameter.isAnnotationPresent(ActionParameter.class)
                 || parameter.isAnnotationPresent(FrontletParameter.class)
                 || parameter.isAnnotationPresent(ModalParameter.class)
                 || parameter.isAnnotationPresent(SharedValue.class)
@@ -91,10 +91,10 @@ class ControllerMethod {
                 || parameter.isAnnotationPresent(LocalDatabase.class);
     }
 
-    ControllerMethodResult invoke(@NonNull ClientRequest request, @NonNull Object controller, Map<String, Object> requestScope) throws Exception {
+    ControllerMethodResult invoke(@NonNull ClientRequest request, @NonNull Object controller, ControllerResult controllerResult) throws Exception {
         SecurityUtil.checkRoles(method, UserContextImpl.getInstance());
         var postProcessingResults = new PostProcessingResults();
-        var args = prepareArgs(method, request, postProcessingResults, requestScope);
+        var args = prepareArgs(method, request, postProcessingResults, controllerResult);
         if (postProcessingResults.authenticate()) {
             throwAccessDenied(postProcessingResults);
         }
@@ -123,7 +123,7 @@ class ControllerMethod {
         // let parameters override request values
         controllerMethodResultMapper.mapMethodParameterToResultAfterInvocation(controllerMethodResult, controllerMethodParameters, args, request);
         // let return values override parameters
-        controllerMethodResultMapper.mapReturnValueToResult(controllerMethodResult, method, returnValue, requestScope);
+        controllerMethodResultMapper.mapReturnValueToResult(controllerMethodResult, method, returnValue, controllerResult.getSharedValues());
         return controllerMethodResult;
     }
 
@@ -145,7 +145,7 @@ class ControllerMethod {
         return method.hashCode();
     }
 
-    String getReturnValueRequestScopeKey() {
+    String getReturnValueSharedValueKey() {
         if (method.isAnnotationPresent(SharedValue.class)) {
             return method.getAnnotation(SharedValue.class).value();
         }
@@ -186,17 +186,17 @@ class ControllerMethod {
         return configuredLoad == ModelDataLoad.ALWAYS || configuredLoad == load;
     }
 
-    Collection<String> getParameterRequestScopeKeys() {
+    Collection<String> getParameterSharedValueKeys() {
         return Stream.of(method.getParameters())
                 .filter(p -> p.isAnnotationPresent(SharedValue.class))
                 .map(p -> p.getAnnotation(SharedValue.class).value())
                 .collect(Collectors.toSet());
     }
 
-    protected Object[] prepareArgs(Method method, ClientRequest request, PostProcessingResults postProcessingResults, Map<String, Object> requestScope) throws Exception {
+    protected Object[] prepareArgs(Method method, ClientRequest request, PostProcessingResults postProcessingResults, ControllerResult controllerResult) throws Exception {
         var args = new Object[method.getParameterCount()];
         for (var i = 0; i < method.getParameterCount(); i++) {
-            args[i] = controllerMethodParameters[i].prepareParameter(request, postProcessingResults, requestScope);
+            args[i] = controllerMethodParameters[i].prepareParameter(request, postProcessingResults, controllerResult);
         }
         return args;
     }

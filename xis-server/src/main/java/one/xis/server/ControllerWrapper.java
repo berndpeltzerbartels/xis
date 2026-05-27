@@ -136,11 +136,11 @@ public class ControllerWrapper {
 
     private void invokeModelDataMethod(ClientRequest request, ControllerResult controllerResult, ControllerMethod method) {
         try {
-            var requestScopeKey = method.getReturnValueRequestScopeKey();
-            if (requestScopeKey != null && controllerResult.getRequestScope().containsKey(requestScopeKey)) {
+            var sharedValueKey = method.getReturnValueSharedValueKey();
+            if (sharedValueKey != null && controllerResult.getSharedValues().containsKey(sharedValueKey)) {
                 return;
             }
-            var controllerMethodResult = method.invoke(request, controller, controllerResult.getRequestScope());
+            var controllerMethodResult = method.invoke(request, controller, controllerResult);
             if (controllerMethodResult.isValidationFailed()) {
                 // these validation errors are unexpected, so we throw an exception
                 throw exceptionForValidationErrors(controllerMethodResult.getValidatorMessages());
@@ -162,7 +162,7 @@ public class ControllerWrapper {
 
     private void invokeNavigationMethod(ClientRequest request, ControllerResult controllerResult, ControllerMethod method, String kind) {
         try {
-            var controllerMethodResult = method.invoke(request, controller, controllerResult.getRequestScope());
+            var controllerMethodResult = method.invoke(request, controller, controllerResult);
             if (controllerMethodResult.getNextURL() != null) {
                 controllerResult.setActionProcessing(ActionProcessing.PAGE);
             } else if (controllerMethodResult.getNextFrontletId() != null
@@ -199,9 +199,9 @@ public class ControllerWrapper {
         public static List<ControllerMethod> sortMethods(Collection<ControllerMethod> mandatoryMethods, Collection<ControllerMethod> conditionalMethods) {
             Map<String, ControllerMethod> providedBy = new HashMap<>();
             for (ControllerMethod method : conditionalMethods) {
-                String retScope = method.getReturnValueRequestScopeKey();
-                if (retScope != null) {
-                    providedBy.put(retScope, method);
+                String sharedValue = method.getReturnValueSharedValueKey();
+                if (sharedValue != null) {
+                    providedBy.put(sharedValue, method);
                 }
             }
             Set<ControllerMethod> allRequired = new HashSet<>();
@@ -210,7 +210,7 @@ public class ControllerWrapper {
                 allRequired.addAll(resolveDependencies(method, providedBy));
             }
             Set<ControllerMethod> needed = allRequired.stream()
-                    .flatMap(m -> m.getParameterRequestScopeKeys().stream())
+                    .flatMap(m -> m.getParameterSharedValueKeys().stream())
                     .map(providedBy::get)
                     .filter(Objects::nonNull)
                     .collect(Collectors.toSet());
@@ -223,8 +223,8 @@ public class ControllerWrapper {
 
         private static Set<ControllerMethod> resolveDependencies(ControllerMethod method, Map<String, ControllerMethod> providedBy) {
             Set<ControllerMethod> deps = new HashSet<>();
-            for (String paramScope : method.getParameterRequestScopeKeys()) {
-                ControllerMethod provider = providedBy.get(paramScope);
+            for (String sharedValue : method.getParameterSharedValueKeys()) {
+                ControllerMethod provider = providedBy.get(sharedValue);
                 if (provider != null) {
                     deps.add(provider);
                     deps.addAll(resolveDependencies(provider, providedBy));

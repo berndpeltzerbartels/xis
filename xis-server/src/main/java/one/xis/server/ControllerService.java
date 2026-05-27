@@ -109,6 +109,7 @@ class ControllerService {
         } catch (ValidationFailedException e) {
             mapValidationFailedException(e, controllerResult);
         }
+        controllerResult.clearSharedValues();
         Set<String> actionModelDataKeys = Set.copyOf(controllerResult.getModelData().keySet());
         if (!resultContainsNextController(controllerResult)) {
             usePreviousControllerAfterAction(controllerResult, invokerControllerWrapper, request);

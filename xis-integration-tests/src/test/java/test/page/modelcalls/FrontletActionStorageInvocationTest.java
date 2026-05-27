@@ -17,7 +17,7 @@ class FrontletActionStorageInvocationTest {
     @Test
     void voidFrontletActionInvokesOwnModelAndStorageMethodsOnce() {
         var context = IntegrationTestContext.builder()
-                .withPackage("test.page.modelcalls.actionstorageinvocation")
+                .withBasePackageClass(ActionStorageInvocationCounter.class)
                 .build();
         var response = context.getSingleton(FrontendService.class).processActionRequest(frontletActionRequest("voidAction"));
         var counter = context.getSingleton(ActionStorageInvocationCounter.class);
@@ -26,13 +26,13 @@ class FrontletActionStorageInvocationTest {
                 .containsEntry("sourceModelAndState", "model-and-state");
         assertThat(response.getClientStateData()).containsEntry("sourceState", "state")
                 .containsEntry("sourceModelAndState", "model-and-state");
-        assertSourceActionInvocations(counter, "source.voidAction:source-token");
+        assertSourceActionInvocations(counter, "source.voidAction:source-token", 2);
     }
 
     @Test
     void frontletActionReturningSameFrontletInvokesOwnModelAndStorageMethodsOnce() {
         var context = IntegrationTestContext.builder()
-                .withPackage("test.page.modelcalls.actionstorageinvocation")
+                .withBasePackageClass(ActionStorageInvocationCounter.class)
                 .build();
         var response = context.getSingleton(FrontendService.class).processActionRequest(frontletActionRequest("sameFrontlet"));
         var counter = context.getSingleton(ActionStorageInvocationCounter.class);
@@ -41,13 +41,13 @@ class FrontletActionStorageInvocationTest {
                 .containsEntry("sourceModelAndState", "model-and-state");
         assertThat(response.getClientStateData()).containsEntry("sourceState", "state")
                 .containsEntry("sourceModelAndState", "model-and-state");
-        assertSourceActionInvocations(counter, "source.sameFrontlet:source-token");
+        assertSourceActionInvocations(counter, "source.sameFrontlet:source-token", 2);
     }
 
     @Test
     void frontletActionReturningOtherFrontletInvokesOnlyTargetStorageMethods() {
         var context = IntegrationTestContext.builder()
-                .withPackage("test.page.modelcalls.actionstorageinvocation")
+                .withBasePackageClass(ActionStorageInvocationCounter.class)
                 .build();
         var response = context.getSingleton(FrontendService.class).processActionRequest(frontletActionRequest("otherFrontlet"));
         var counter = context.getSingleton(ActionStorageInvocationCounter.class);
@@ -64,8 +64,8 @@ class FrontletActionStorageInvocationTest {
         assertInvocationCount(counter, "target.model:target-token", 0);
     }
 
-    private void assertSourceActionInvocations(ActionStorageInvocationCounter counter, String actionInvocation) {
-        assertInvocationCount(counter, "source.shared", 1);
+    private void assertSourceActionInvocations(ActionStorageInvocationCounter counter, String actionInvocation, int sharedInvocationCount) {
+        assertInvocationCount(counter, "source.shared", sharedInvocationCount);
         assertInvocationCount(counter, actionInvocation, 1);
         assertInvocationCount(counter, "source.model:source-token", 1);
         assertInvocationCount(counter, "source.state:source-token", 1);

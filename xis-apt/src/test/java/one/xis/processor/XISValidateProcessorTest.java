@@ -933,7 +933,7 @@ class XISValidateProcessorTest {
     }
 
     @Test
-    void rejectsActionParameterWithoutNameOrIndex() throws IOException {
+    void allowsUnnamedActionParameterValues() throws IOException {
         Path templateFile = tempDir.resolve("src/main/java/example/ProbePage.html");
         Files.createDirectories(templateFile.getParent());
         Files.writeString(templateFile, """
@@ -945,7 +945,7 @@ class XISValidateProcessorTest {
                 </html>
                 """, StandardCharsets.UTF_8);
 
-        DiagnosticCollector<JavaFileObject> diagnostics = compilePageSourceWithProcessor(false, """
+        DiagnosticCollector<JavaFileObject> diagnostics = compilePageSourceWithProcessor(true, """
                 package example;
 
                 import one.xis.Action;
@@ -960,9 +960,7 @@ class XISValidateProcessorTest {
                 }
                 """);
 
-        List<String> errors = errorMessages(diagnostics);
-        assertThat(errors).hasSize(1);
-        assertThat(errors.get(0)).contains("@ActionParameter must define value or index.");
+        assertThat(errorMessages(diagnostics)).isEmpty();
     }
 
     @Test

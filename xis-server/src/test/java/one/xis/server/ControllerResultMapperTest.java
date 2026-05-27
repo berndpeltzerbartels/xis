@@ -9,11 +9,11 @@ class ControllerResultMapperTest {
     @Test
     void sharedValuesStayRequestInternal() {
         var methodResult = new ControllerMethodResult();
-        methodResult.getRequestScope().put("game", new Object());
 
         var controllerResult = new ControllerResult();
+        controllerResult.getSharedValues().put("game", new Object());
         new ControllerResultMapper().mapMethodResultToControllerResult(methodResult, controllerResult);
 
-        assertThat(controllerResult.getRequestScope()).isEmpty();
+        assertThat(controllerResult.getSharedValues()).containsKey("game");
     }
 }

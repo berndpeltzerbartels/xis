@@ -28,7 +28,6 @@ class ControllerMethodResult {
     private final Collection<String> returnedFormDataKeys = new HashSet<>();
     private boolean validationFailed;
     private final ValidatorMessages validatorMessages = new ValidatorMessages();
-    private final Map<String, Object> requestScope = new HashMap<>();
     private final Map<String, Object> sessionStorage = new HashMap<>();
     private final Map<String, Object> localStorage = new HashMap<>();
     private final Map<String, Object> clientState = new HashMap<>();

@@ -26,6 +26,6 @@ class SharedValueActionStorageTest {
 
         assertThat(client.getDocument().getElementById("moves").getInnerText()).isEqualTo("e2e4");
         assertThat(client.getLocalStorage().getItem("state")).contains("e2e4");
-        assertThat(page.getInvocations()).containsExactly("state", "moves", "state", "add", "moves");
+        assertThat(page.getInvocations()).containsExactly("state", "moves", "state", "add", "state", "moves");
     }
 }
