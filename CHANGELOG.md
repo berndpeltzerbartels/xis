@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.15.0 - 2026-05-27
+
+### Maintenance
+
+- Documented the release workflow and Git discipline for future agent-driven release work.
+
 ## 0.14.0 - 2026-05-27
 
 ### Added
