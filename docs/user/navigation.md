@@ -332,6 +332,40 @@ class ProductDetailsFrontlet {
 }
 ```
 
+## URL-Mounted Frontlets
+
+A frontlet can also declare a URL and a container id:
+
+```java
+import one.xis.Frontlet;
+import one.xis.ModelData;
+import one.xis.PathVariable;
+
+@Frontlet(url = "/employees/{group}/list.html", containerId = "employees-list")
+class EmployeeListFrontlet {
+
+    @ModelData
+    String group(@PathVariable("group") String group) {
+        return group;
+    }
+}
+```
+
+When the current browser URL matches the frontlet URL, XIS can mount that frontlet into the annotated container without a
+`default-frontlet` attribute:
+
+```html
+<main xis:frontlet-container="employees-list"></main>
+```
+
+For example, `/employees/workers/list.html` and `/employees/consultants/list.html` can load different matching
+frontlets into the same page region, or one generic frontlet can read `group` with `@PathVariable`.
+
+This is different from passing data to a frontlet link. Frontlets can read path variables from the current page URL even
+without their own `url`. Use `@FrontletParameter` for values that belong to one frontlet instance, such as the selected
+row id in a list. Use `@Frontlet(url = ..., containerId = ...)` when the browser URL itself decides which frontlet should
+occupy a page region.
+
 ## Return a Frontlet Class
 
 An action can return a frontlet controller class.
