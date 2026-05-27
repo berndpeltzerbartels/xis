@@ -1,14 +1,18 @@
 package one.xis.server;
 
+import one.xis.Action;
 import one.xis.FormData;
+import one.xis.FrontletResponse;
 import one.xis.ClientState;
 import one.xis.LocalStorage;
 import one.xis.ModelData;
 import one.xis.SessionStorage;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
@@ -16,6 +20,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class ControllerMethodResultMapperTest {
 
@@ -100,8 +105,31 @@ class ControllerMethodResultMapperTest {
         assertThat(result.getClientState()).containsEntry("client", null);
     }
 
+    @Test
+    void mapsRemoteFrontletUrlResponseAsFrontletNavigation() throws Exception {
+        var result = new ControllerMethodResult();
+        var hostResolver = mock(ComponentHostResolver.class);
+        var frontletControllerWrappers = mock(FrontletControllerWrappers.class);
+        when(hostResolver.getFrontletUrls()).thenReturn(Map.of("RemoteFrontlet", "/remote/frontlet"));
+        when(frontletControllerWrappers.findFrontletByRealPath("/remote/frontlet")).thenReturn(Optional.empty());
+        setField(mapper, "hostResolver", hostResolver);
+        setField(mapper, "frontletControllerWrappers", frontletControllerWrappers);
+
+        mapper.mapReturnValueToResult(result, method("remoteFrontlet"), new FrontletResponse("/remote/frontlet?message=hello"), new java.util.HashMap<>());
+
+        assertThat(result.getNextFrontletId()).isEqualTo("RemoteFrontlet");
+        assertThat(result.getActionProcessing()).isEqualTo(ActionProcessing.FRONTLET);
+        assertThat(result.getFrontletParameters()).containsEntry("message", "hello");
+    }
+
     private Method method(String name) throws NoSuchMethodException {
         return Methods.class.getDeclaredMethod(name);
+    }
+
+    private void setField(Object target, String name, Object value) throws Exception {
+        Field field = target.getClass().getDeclaredField(name);
+        field.setAccessible(true);
+        field.set(target, value);
     }
 
     static class Methods {
@@ -131,6 +159,11 @@ class ControllerMethodResultMapperTest {
         @ClientState("client")
         String simpleStorage() {
             return "";
+        }
+
+        @Action
+        FrontletResponse remoteFrontlet() {
+            return new FrontletResponse("/remote/frontlet");
         }
     }
 }

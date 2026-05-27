@@ -13,9 +13,11 @@ import java.lang.annotation.Target;
  * child {@code <xis:parameter>} tags inside action links or buttons, drag and
  * drop action arguments, and form submitter parameters.</p>
  *
- * <p>Set either {@link #value()} for a named action parameter or {@link #index()}
- * for a positional action argument. Positional indexes are mainly useful for
- * function-style template expressions such as drag-and-drop action arguments.</p>
+ * <p>Set {@link #value()} for a named action parameter. For positional action
+ * arguments, either leave the annotation unnamed and let XIS assign the
+ * expression argument position, or set {@link #index()} explicitly. Explicit
+ * positional indexes are 1-based and mainly useful for function-style template
+ * expressions such as drag-and-drop action arguments.</p>
  */
 @Documented
 @Target(ElementType.PARAMETER)
