@@ -11,7 +11,7 @@ Use the plugin when you want the usual XIS layout:
 ```groovy
 plugins {
     id "java"
-    id "one.xis.plugin" version "0.14.0"
+    id "one.xis.plugin" version "0.16.0"
 }
 ```
 
