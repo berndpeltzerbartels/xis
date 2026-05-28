@@ -296,11 +296,9 @@ import one.xis.validation.EMail;
 import one.xis.validation.LabelKey;
 import one.xis.validation.Mandatory;
 
-record CustomerForm(
-        Long id,
+record CustomerForm(Long id,
         @Mandatory @LabelKey("customer.name") String name,
-        @Mandatory @EMail @LabelKey("customer.email") String email
-) {
+        @Mandatory @EMail @LabelKey("customer.email") String email) {
 }
 ```
 

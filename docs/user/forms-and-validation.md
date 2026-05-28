@@ -306,11 +306,9 @@ still works as a canonical value. Integer types also accept locale grouping, suc
 English, but reject fractional values like `1,5`.
 
 ```java
-record ProductForm(
-        String name,
+record ProductForm(String name,
         BigDecimal price,
-        Integer stock
-) {
+        Integer stock) {
 }
 ```
 
@@ -376,10 +374,7 @@ class MoneyFormatter implements Formatter<BigDecimal> {
 ```java
 import one.xis.UseFormatter;
 
-record ProductForm(
-        @UseFormatter(MoneyFormatter.class)
-        BigDecimal price
-) {
+record ProductForm(@UseFormatter(MoneyFormatter.class) BigDecimal price) {
 }
 ```
 
@@ -415,8 +410,7 @@ class RegisterPage {
         userService.register(user);
     }
 
-    record UserForm(
-            @Mandatory
+    record UserForm(@Mandatory
             @LabelKey("user.email")
             @EMail
             String email,
@@ -424,8 +418,7 @@ class RegisterPage {
             @Mandatory
             @LabelKey("user.password")
             @MinLength(8)
-            String password
-    ) {
+            String password) {
     }
 }
 ```
@@ -576,8 +569,7 @@ fallbacks. Message templates can use `${label}` and validator-specific parameter
 discount". With `@LabelKey`, the validator stays generic and only the label changes.
 
 ```java
-record OrderForm(
-        @NotNegative
+record OrderForm(@NotNegative
         @LabelKey("order.total")
         BigDecimal total,
 
@@ -587,8 +579,7 @@ record OrderForm(
 
         @NotNegative
         @LabelKey("order.springDiscount")
-        BigDecimal springDiscount
-) {
+        BigDecimal springDiscount) {
 }
 ```
 
@@ -664,10 +655,7 @@ annotation points to the validator through `@Validate`. Validators can be normal
 services or repositories are available for checks that need application state, such as a database lookup.
 
 ```java
-record ProductForm(
-        @Sku
-        String sku
-) {
+record ProductForm(@Sku String sku) {
 }
 ```
 
