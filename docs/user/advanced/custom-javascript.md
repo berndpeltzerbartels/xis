@@ -51,15 +51,8 @@ Custom expression-language functions are JavaScript functions registered in the 
 `src/main/resources/js/app-functions.js`
 
 ```javascript
-XIS.addElFunction('initials', function(value) {
-    if (!value) {
-        return '';
-    }
-    return String(value)
-        .split(/\s+/)
-        .filter(Boolean)
-        .map(part => part.substring(0, 1).toUpperCase())
-        .join('');
+XIS.addElFunction('pluralize', function(count, singular, plural) {
+    return Number(count) === 1 ? singular : plural;
 });
 ```
 
@@ -73,13 +66,13 @@ js/app-functions.js
 Use the function in a template:
 
 ```html
-<span>${initials(user.displayName)}</span>
+<span>${taskCount} ${pluralize(taskCount, 'task', 'tasks')}</span>
 ```
 
 Function arguments can be expressions, just like built-in EL functions:
 
 ```html
-<span>${initials(trim(user.displayName))}</span>
+<span>${openTasks.size()} ${pluralize(openTasks.size(), 'open task', 'open tasks')}</span>
 ```
 
 ## Global Browser Behavior
