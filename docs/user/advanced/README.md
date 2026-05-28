@@ -1,6 +1,6 @@
 # Advanced Topics
 
-[Documentation map](../../README.md)
+[Documentation map](../../../README.md)
 
 Advanced topics are optional or specialized XIS capabilities. They are important, but they should not block a developer
 who wants to build a minimal application.

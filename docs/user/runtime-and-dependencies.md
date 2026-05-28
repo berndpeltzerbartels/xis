@@ -1,6 +1,6 @@
 # Runtime And Dependency Model
 
-[Documentation map](../README.md)
+[Documentation map](../../README.md)
 
 XIS separates the public programming model from runtime integration. Most controller code and templates look the same
 whether the application runs inside Spring, standalone on the JVM, or as a GraalVM native image.

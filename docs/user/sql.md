@@ -1,6 +1,6 @@
 # SQL
 
-[Documentation map](../README.md)
+[Documentation map](../../README.md)
 
 `xis-sql` provides a small repository layer for applications that want direct SQL instead of a full ORM.
 

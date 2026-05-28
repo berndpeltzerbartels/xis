@@ -1,6 +1,6 @@
 # Aspects And Interface Advice
 
-[Documentation map](../../README.md) | [Advanced topics](README.md)
+[Documentation map](../../../README.md) | [Advanced topics](README.md)
 
 XIS Boot has a small AOP-style mechanism for cross-cutting behavior. It is deliberately narrower than AspectJ or Spring
 AOP: advice is applied only to components that are used through an interface. XIS does not modify classes and does not

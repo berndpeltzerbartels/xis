@@ -1,6 +1,6 @@
 # Security
 
-[Documentation map](../README.md)
+[Documentation map](../../README.md)
 
 XIS security is role-based. Add `xis-authentication` when pages or actions should require a login. The normal page,
 frontlet, action, form, and navigation APIs stay the same.

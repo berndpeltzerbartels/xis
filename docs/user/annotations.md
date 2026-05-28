@@ -1,6 +1,6 @@
 # Annotation Reference
 
-[Documentation map](../README.md)
+[Documentation map](../../README.md)
 
 This page is the compact map of the public annotations a XIS user can meet while building an application. The workflow
 chapters explain the details; this page makes sure class, method, field, record-component, and parameter annotations are

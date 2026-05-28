@@ -1,6 +1,6 @@
 # Custom JavaScript
 
-[Documentation map](../../README.md)
+[Documentation map](../../../README.md)
 
 XIS applications are single-page applications. Do not rely on `<script>` tags inside page or frontlet templates:
 browsers do not execute script tags that are inserted into the DOM later as part of a page/frontlet update.

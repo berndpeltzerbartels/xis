@@ -1,6 +1,6 @@
 # Gradle Plugin And Tools
 
-[Documentation map](../README.md)
+[Documentation map](../../README.md)
 
 The XIS Gradle plugin keeps the normal project workflow small. It adds the annotation processor, copies HTML templates
 that live next to Java controllers into the application resources, configures the XIS integration-test starter, and

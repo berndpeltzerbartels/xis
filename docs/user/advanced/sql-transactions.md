@@ -1,6 +1,6 @@
 # Explicit SQL Transactions
 
-[Documentation map](../../README.md) | [Advanced topics](README.md)
+[Documentation map](../../../README.md) | [Advanced topics](README.md)
 
 Most application code should use `@Transactional` on a service interface method. That keeps the transaction boundary
 close to the business operation and lets XIS Boot open, commit, and roll back the transaction through interface advice.

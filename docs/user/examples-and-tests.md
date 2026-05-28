@@ -1,6 +1,6 @@
 # Examples and Tests
 
-[Documentation map](../README.md)
+[Documentation map](../../README.md)
 
 XIS documentation examples are part of the public API. A user should be able to copy a documented example into an
 application and use it as a starting point.

@@ -1,6 +1,6 @@
 # User Documentation
 
-[Documentation map](../README.md)
+[Documentation map](../../README.md)
 
 This is the user-facing XIS documentation.
 

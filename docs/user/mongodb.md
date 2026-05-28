@@ -1,6 +1,6 @@
 # MongoDB
 
-[Documentation map](../README.md)
+[Documentation map](../../README.md)
 
 `xis-mongodb` provides a small MongoDB integration for XIS Boot applications and for applications that want to use MongoDB
 without Spring Data.

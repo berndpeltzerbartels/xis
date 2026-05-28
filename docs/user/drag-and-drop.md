@@ -1,6 +1,6 @@
 # Drag And Drop
 
-[Documentation map](../README.md)
+[Documentation map](../../README.md)
 
 Use `xis:drag` and `xis:drop` when a user should drag one value onto a target and the drop should call a normal
 server-side `@Action` method.

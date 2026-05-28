@@ -1,6 +1,6 @@
 # Scheduled Jobs
 
-[Documentation map](../README.md)
+[Documentation map](../../README.md)
 
 Use `@Scheduled` when a XIS Boot application needs periodic background work. Typical examples are reminder delivery,
 cleanup jobs, polling small external systems, or cache refreshes.

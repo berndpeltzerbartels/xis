@@ -1,6 +1,6 @@
 # Custom Proxies
 
-[Documentation map](../../README.md) | [Advanced topics](README.md)
+[Documentation map](../../../README.md) | [Advanced topics](README.md)
 
 Custom proxies are an advanced extension point for libraries that want to expose interface-based components without
 making application code construct them by hand. XIS SQL repositories use this mechanism: an interface is annotated, XIS

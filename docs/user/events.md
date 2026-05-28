@@ -1,6 +1,6 @@
 # Events
 
-[Documentation map](../README.md)
+[Documentation map](../../README.md)
 
 Events let server-side application code update already open browser clients after something changes. The main public
 event mechanism is a refresh event: a page or frontlet declares an event key, and application code publishes that key

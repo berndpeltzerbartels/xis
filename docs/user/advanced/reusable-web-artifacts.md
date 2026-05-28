@@ -1,6 +1,6 @@
 # Reusable Web Artifacts
 
-[Documentation map](../../README.md)
+[Documentation map](../../../README.md)
 
 XIS libraries can ship usable web functionality, not only Java classes. A reusable artifact can contain controllers,
 default templates, static resources, CSS, and JavaScript extensions. The application gets a working default UI from the

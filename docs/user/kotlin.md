@@ -1,6 +1,6 @@
 # Kotlin Support
 
-[Documentation map](../README.md)
+[Documentation map](../../README.md)
 
 XIS supports Kotlin for controller classes, components, form objects, and standalone XIS Boot applications. The same
 server-driven programming model applies: controllers declare pages, model data, form data, and actions; HTML templates

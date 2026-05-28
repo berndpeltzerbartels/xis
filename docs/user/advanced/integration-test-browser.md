@@ -1,6 +1,6 @@
 # Integration-Test Browser Model
 
-[Documentation map](../../README.md)
+[Documentation map](../../../README.md)
 
 XIS integration tests run the XIS JavaScript runtime in GraalVM JavaScript, but they do not start a real browser.
 The test module provides a small Java implementation of common browser objects so tests can render templates, click

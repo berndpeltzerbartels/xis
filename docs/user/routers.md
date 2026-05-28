@@ -1,6 +1,6 @@
 # Routers
 
-[Documentation map](../README.md)
+[Documentation map](../../README.md)
 
 Routers are an optional navigation tool. They are not a core concept that every XIS application has to use. Unlike
 frameworks where every route has to be declared in a router, XIS normally maps pages directly through `@Page`. Most

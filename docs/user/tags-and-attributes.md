@@ -1,6 +1,6 @@
 # Tags and Attributes
 
-[Documentation map](../README.md)
+[Documentation map](../../README.md)
 
 XIS templates are HTML plus framework attributes, framework elements, and expression language. Most framework behavior
 has an attribute form and an element form.
