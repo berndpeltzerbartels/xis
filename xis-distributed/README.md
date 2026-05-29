@@ -10,7 +10,7 @@ behaves like one coherent XIS application.
 The module contributes:
 
 - a `XisDistributedConfig` contract for the remote host list
-- a default `application.properties` based implementation for XIS Boot
+- a default `application.properties` based implementation for XIS Boot and Spring Boot
 - a `/xis/distributed/hosts` endpoint that exposes the host list to the browser
 - a distributed CORS policy based on that host list
 
@@ -32,6 +32,27 @@ interface XisDistributedConfig {
 ```
 
 Applications can provide their own implementation when they want full control over host discovery.
+
+## Dependencies
+
+For standalone XIS Boot:
+
+```groovy
+dependencies {
+    implementation "one.xis:xis-boot"
+    implementation "one.xis:xis-distributed"
+}
+```
+
+For Spring Boot:
+
+```groovy
+dependencies {
+    implementation "org.springframework.boot:spring-boot-starter-web"
+    implementation "one.xis:xis-spring"
+    implementation "one.xis:xis-distributed"
+}
+```
 
 ## Default Implementation
 
@@ -64,6 +85,45 @@ That means a remote runtime normally lists the shell host that may call it.
 
 When `xis-distributed` is on the classpath, this property is required unless the application provides its own
 `XisDistributedConfig` implementation.
+
+## Java Configuration
+
+For dynamic XIS Boot deployments, implement `XisDistributedConfig` as a normal XIS component:
+
+```java
+import one.xis.context.Component;
+import one.xis.distributed.XisDistributedConfig;
+
+import java.util.List;
+
+@Component
+class DistributedConfig implements XisDistributedConfig {
+
+    @Override
+    public List<String> getHosts() {
+        return List.of("https://shop.example.com", "https://catalog.example.com");
+    }
+}
+```
+
+For Spring Boot, provide `XisDistributedConfig` as a Spring bean:
+
+```java
+import one.xis.distributed.XisDistributedConfig;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import java.util.List;
+
+@Configuration
+class DistributedConfiguration {
+
+    @Bean
+    XisDistributedConfig xisDistributedConfig() {
+        return () -> List.of("https://shop.example.com", "https://catalog.example.com");
+    }
+}
+```
 
 ## Relationship To Other Modules
 

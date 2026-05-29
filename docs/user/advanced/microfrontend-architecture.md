@@ -10,11 +10,11 @@ main page while selected pages or frontlets are served by another process.
 Most applications do not need this. The normal mode is same-origin: the page, its frontlets, and all XIS endpoints come
 from the same host.
 
-## Dependency
+## Dependencies
 
 Add `xis-distributed` to each participating XIS application.
 
-`build.gradle`
+For standalone XIS Boot:
 
 ```groovy
 plugins {
@@ -27,7 +27,28 @@ repositories {
 }
 
 dependencies {
-    implementation "one.xis:xis-boot" // or xis-spring
+    implementation "one.xis:xis-boot"
+    implementation "one.xis:xis-distributed"
+}
+```
+
+For Spring Boot:
+
+```groovy
+plugins {
+    id "java"
+    id "org.springframework.boot" version "3.5.0"
+    id "io.spring.dependency-management" version "1.1.7"
+    id "one.xis.plugin" version "0.16.0"
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "org.springframework.boot:spring-boot-starter-web"
+    implementation "one.xis:xis-spring"
     implementation "one.xis:xis-distributed"
 }
 ```
@@ -47,7 +68,7 @@ There are no page or frontlet mappings in `application.properties`.
 
 ## Properties Configuration
 
-For simple XIS Boot deployments, configure the remote host list in `application.properties`:
+For simple XIS Boot and Spring Boot deployments, configure the remote host list in `application.properties`:
 
 ```properties
 xis.distributed.hosts=https://components.example.com,https://checkout.example.com
@@ -64,7 +85,7 @@ When `xis-distributed` is on the classpath, this property is required unless the
 
 ## Java Configuration
 
-For dynamic deployments, implement `XisDistributedConfig` as a normal XIS component:
+For dynamic XIS Boot deployments, implement `XisDistributedConfig` as a normal XIS component:
 
 ```java
 import one.xis.context.Component;
@@ -78,6 +99,25 @@ class DistributedConfig implements XisDistributedConfig {
     @Override
     public List<String> getHosts() {
         return List.of("https://components.example.com", "https://checkout.example.com");
+    }
+}
+```
+
+For Spring Boot, provide `XisDistributedConfig` as a Spring bean:
+
+```java
+import one.xis.distributed.XisDistributedConfig;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import java.util.List;
+
+@Configuration
+class DistributedConfiguration {
+
+    @Bean
+    XisDistributedConfig xisDistributedConfig() {
+        return () -> List.of("https://components.example.com", "https://checkout.example.com");
     }
 }
 ```
