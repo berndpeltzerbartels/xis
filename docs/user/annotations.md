@@ -26,8 +26,6 @@ and [Security](security.md) for complete examples.
 | `@Roles` | Protects a page or frontlet by role. See [Security](security.md). |
 | `@OwnedBy` | Runs an application-defined ownership guard for a submitted DTO. See [Security](security.md#ownership-checks). |
 | `@RefreshOnUpdateEvents` | Refreshes a page or frontlet when one of the configured update events is fired. See [Events](events.md). |
-| `@JavascriptExtension` | Adds a JavaScript extension class for advanced client behavior. Most applications should use the classpath extension file described in [Custom JavaScript](advanced/custom-javascript.md). |
-| `@CssFile` | Adds a CSS file for a page or component. |
 | `@XISBootApplication` | Marks the application entry point for standalone XIS Boot applications. The main reason is build-time generation: the annotation processor uses this class to generate the `one.xis.boot.Runner` entry point needed by the Gradle plugin's `xisJar` task. |
 | `@Component`, `@Service` | Registers ordinary application services in the XIS context. |
 | `@DefaultComponent` | Registers a replaceable default component, mostly useful for libraries and framework extensions. |
@@ -42,7 +40,6 @@ and [Security](security.md) for complete examples.
 | `@Route` | Marks a method on a `@Router`. Route methods run before a page controller is selected and must return a navigation value. |
 | `@Title` | Supplies a page or frontlet title from Java. |
 | `@SharedValue` | Provides a named value for other controller methods during the same request/action processing flow. |
-| `@LocalDatabase` | Reads or writes browser-side database state. This is an advanced client-state feature. |
 | `@Bean` | Creates a XIS context bean from a method. |
 | `@Init` | Runs initialization code after dependency injection. |
 | `@EventListener` | Handles XIS context events. |
@@ -126,7 +123,6 @@ purpose.
 | `@Upload` | Binds an uploaded multipart file to a form field or controller parameter. |
 | `@SharedValue("name")` | Injects a value produced by another `@SharedValue` method in the same controller processing flow. |
 | `@LocalStorage`, `@SessionStorage`, `@ClientState` | Injects browser-side state into an action method parameter. |
-| `@LocalDatabase` | Injects browser-side database state. This is an advanced client-state feature. |
 | `@ClientId` | Injects the browser client id. |
 | `@UserId` | Injects the authenticated user id. |
 | `@OwnedBy` | Runs an application-defined ownership guard for a submitted DTO, parameter, field, or record component. See [Security](security.md#ownership-checks). |
@@ -272,6 +268,99 @@ clients, webhooks, scripts, or integration partners.
 | `@Produces` | Declares the response content type. |
 | `@PublicResources` | Exposes public static resources. |
 
+Plain HTTP controllers are still XIS components, so constructor injection works as usual. They do not render templates
+and they do not participate in page/frontlet model loading. The method return value is written as the HTTP response body.
+
+```java
+package example.api;
+
+import one.xis.http.Controller;
+import one.xis.http.ContentType;
+import one.xis.http.Get;
+import one.xis.http.PathVariable;
+import one.xis.http.Post;
+import one.xis.http.Produces;
+import one.xis.http.RequestBody;
+import one.xis.http.RequestHeader;
+import one.xis.http.ResponseEntity;
+
+@Controller
+class CustomerApi {
+    private final CustomerService customers;
+
+    CustomerApi(CustomerService customers) {
+        this.customers = customers;
+    }
+
+    @Get("/api/customers/{id}")
+    @Produces(ContentType.JSON)
+    CustomerDto find(@PathVariable("id") long id,
+                     @RequestHeader("Accept-Language") String language) {
+        return customers.findDto(id, language);
+    }
+
+    @Post("/api/customers")
+    @Produces(ContentType.JSON)
+    ResponseEntity<CustomerDto> create(@RequestBody CustomerForm form) {
+        var customer = customers.create(form);
+        return ResponseEntity.created(customer)
+                .addHeader("Location", "/api/customers/" + customer.id());
+    }
+}
+```
+
+Use `@UrlParameter("name")` for query parameters, `one.xis.http.PathVariable` for placeholders in the HTTP route, and
+`@RequestBody` for JSON-like request bodies. `@CookieValue` and `@BearerToken` are convenience annotations for common
+metadata. Use `ResponseEntity` when the endpoint needs a specific status or dynamic response headers. Use
+`@ResponseHeader(name = "...", value = "...")` only for fixed headers declared on a method. The action/page
+`one.xis.PathVariable` annotation is a different type and should not be imported for plain HTTP controllers.
+
+## Persistence Annotation Index
+
+SQL and MongoDB annotations live in their own modules. They are listed here so text search finds them from the central
+annotation reference; the full behavior belongs in the persistence chapters.
+
+### SQL
+
+| Annotation | Use |
+| --- | --- |
+| `@Entity` | Maps a class or record to a database table. See [SQL entity mapping](sql.md#entity-mapping). |
+| `@Column` | Maps a property to a differently named database column. |
+| `@JsonColumn` | Stores a property as JSON in one SQL column. |
+| `@NoColumn`, `@Ignore` | Excludes a property from SQL mapping. |
+| `@OptionalColumn` | Maps a reusable property only when the column exists. |
+| `@Repository` | Marks a SQL repository interface. See [SQL repositories](sql.md#repositories). |
+| `@Select` | Executes a query and maps the result. |
+| `@Insert`, `@Update`, `@Save`, `one.xis.sql.@Delete` | Execute or derive write operations. |
+| `@Param` | Names a repository method parameter for SQL placeholders. |
+| `@Transactional` | Opens a transaction through XIS interface advice. See [Transactions](sql.md#transactions). |
+| `@Function`, `@StoredProcedure` | Calls database functions and stored procedures. |
+
+### MongoDB
+
+| Annotation | Use |
+| --- | --- |
+| `@MongoDocument` | Maps a class or record to a MongoDB collection. See [MongoDB documents](mongodb.md#documents). |
+| `@MongoId` | Marks a property as the MongoDB `_id` when it is not named `id`. |
+| `@MongoField` | Maps a property to a differently named document field. |
+| `@MongoIgnore` | Excludes a property from MongoDB mapping. |
+| `@MongoRepository` | Marks a MongoDB repository interface. See [MongoDB repositories](mongodb.md#repositories). |
+| `@MongoQuery` | Defines an explicit MongoDB JSON query. |
+| `@MongoWatch` | Registers a MongoDB change-stream listener. |
+
+## Test Annotation Index
+
+These annotations belong to XIS integration tests, not application runtime code. See [Examples and tests](examples-and-tests.md)
+for complete setup examples.
+
+| Annotation | Use |
+| --- | --- |
+| `@XisBootTest` | Creates a JUnit integration-test context for a XIS page test. |
+| `one.xis.test.@InTestContext` | Registers a real field value in the XIS test context and injects it into the test. |
+| `one.xis.test.@Mock` | Creates a Mockito mock and registers it in the XIS test context. |
+| `one.xis.test.@Spy` | Creates a Mockito-style spy and registers it in the XIS test context. |
+| `one.xis.test.@Captor` | Creates a Mockito argument captor for assertions. |
+
 ## Advanced And Rarely Needed Annotations
 
 These are public because framework extensions or specialized applications may need them. They are not part of the
@@ -280,7 +369,6 @@ normal first application path.
 | Annotation | Use |
 | --- | --- |
 | `@ImportInstances` | Imports component instances into the XIS runtime. |
-| `@MainClass` | Legacy application metadata; normal applications should use the runtime setup instead. |
 | `@Proxy` | Marks an annotation as a context proxy annotation. See [Custom proxies](advanced/custom-proxies.md). |
 | `@UseAdvice` | Marks an annotation as an interface advice annotation. See [Aspects and interface advice](advanced/aspects.md). |
 
@@ -303,6 +391,11 @@ The attribute form is equivalent:
 ```html
 <header xis:include="header"></header>
 ```
+
+The string is an include key. It may contain path-like characters if you choose keys such as `layout/header`, but it is
+not resolved as a resource path from the template. Only classes annotated with `@Include` are available. This keeps
+includes explicit by design: the application decides which fragments may be reused, and templates cannot include
+arbitrary files by walking through resource directories.
 
 An include is for markup reuse, not for its own controller state. The included markup is still initialized as part of the
 surrounding page or frontlet, so it may use model expressions, XIS links, action buttons, and parameters that belong to

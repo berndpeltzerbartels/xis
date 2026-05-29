@@ -136,6 +136,12 @@ public class RestControllerServiceImpl implements RestControllerService {
                 register(method, HttpMethod.PUT, combinePaths(basePath, method.getAnnotation(Put.class).value()));
             } else if (method.isAnnotationPresent(Delete.class)) {
                 register(method, HttpMethod.DELETE, combinePaths(basePath, method.getAnnotation(Delete.class).value()));
+            } else if (method.isAnnotationPresent(Head.class)) {
+                register(method, HttpMethod.HEAD, combinePaths(basePath, method.getAnnotation(Head.class).value()));
+            } else if (method.isAnnotationPresent(Options.class)) {
+                register(method, HttpMethod.OPTIONS, combinePaths(basePath, method.getAnnotation(Options.class).value()));
+            } else if (method.isAnnotationPresent(Trace.class)) {
+                register(method, HttpMethod.TRACE, combinePaths(basePath, method.getAnnotation(Trace.class).value()));
             }
         }
     }

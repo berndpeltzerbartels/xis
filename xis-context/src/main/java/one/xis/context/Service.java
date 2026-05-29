@@ -6,13 +6,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates that an annotated class is a service.
- * <p>
- * Such classes are considered as candidates for auto-detection
- * when using annotation-based configuration and classpath scanning.
- * <p>
- * Similar to spring's @Service annotation, this is just an alias
- * for @{@link Component}
+ * Marks a class or composed annotation as an application service.
+ *
+ * <p>{@code @Service} is a semantic stereotype for {@link Component}. Use it for business services and other
+ * non-UI components that should be discovered by package scanning and injected into other components.</p>
  */
 
 @Retention(RetentionPolicy.RUNTIME)

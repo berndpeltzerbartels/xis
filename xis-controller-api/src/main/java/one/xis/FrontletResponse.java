@@ -4,11 +4,28 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
 
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 
+/**
+ * Action result that loads or parameterizes frontlets.
+ *
+ * <p>Return this type from an {@link Action} method when the action should open a
+ * frontlet in a container or pass {@link FrontletParameter frontlet parameters}.
+ * A response can identify the target frontlet either by controller class or by
+ * frontlet id/path. Use {@link #targetContainer(String)} when the target
+ * container cannot be inferred from the current frontlet context or the frontlet
+ * annotation.</p>
+ *
+ * <pre>{@code
+ * @Action
+ * FrontletResponse edit(@ActionParameter("id") long id) {
+ *     return new FrontletResponse(CustomerFormFrontlet.class)
+ *             .targetContainer("main")
+ *             .frontletParameter("customerId", id);
+ * }
+ * }</pre>
+ */
 @Getter
 @EqualsAndHashCode
 public class FrontletResponse implements Response {
@@ -17,7 +34,6 @@ public class FrontletResponse implements Response {
     private String targetContainer;
     private final Map<String, Object> pathVariables = new HashMap<>();
     private final Map<String, Object> frontletParameters = new HashMap<>();
-    private final Collection<String> frontletsToReload = new HashSet<>();
 
     public FrontletResponse(@NonNull Class<?> controllerClass) {
         this.controllerClass = controllerClass;
@@ -40,37 +56,36 @@ public class FrontletResponse implements Response {
     public FrontletResponse() {
     }
 
+    /**
+     * Sets the frontlet controller class to load.
+     */
     public FrontletResponse controllerClass(@NonNull Class<?> controllerClass) {
         this.controllerClass = controllerClass;
         return this;
     }
 
+    /**
+     * Sets the frontlet id or frontlet path to load.
+     */
     public FrontletResponse frontlet(@NonNull String frontlet) {
         this.frontlet = frontlet;
         return this;
     }
 
+    /**
+     * Adds a parameter for the target frontlet instance. The receiving frontlet
+     * reads it with {@link FrontletParameter}.
+     */
     public FrontletResponse frontletParameter(@NonNull String name, @NonNull Object value) {
         frontletParameters.put(name, asString(value));
         return this;
     }
 
+    /**
+     * Sets the id of the frontlet container that should receive this response.
+     */
     public FrontletResponse targetContainer(String targetContainer) {
         this.targetContainer = targetContainer;
-        return this;
-    }
-
-    public FrontletResponse reloadFrontlet(Class<?> frontletController) {
-        if (!frontletController.isAnnotationPresent(Frontlet.class)) {
-            throw new IllegalArgumentException("not a frontlet: " + frontletController);
-        }
-        var frontletAnnotation = frontletController.getAnnotation(Frontlet.class);
-        String frontletId = frontletAnnotation.value().equals("") ? frontletController.getSimpleName() : frontletAnnotation.value();
-        return reloadFrontlet(frontletId);
-    }
-
-    public FrontletResponse reloadFrontlet(String frontletId) {
-        frontletsToReload.add(frontletId);
         return this;
     }
 

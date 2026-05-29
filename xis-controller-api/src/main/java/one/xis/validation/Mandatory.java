@@ -6,10 +6,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * In case the annotated field is of type collection, it will get validated
- * to contain elements.
- * <p>
- * Otherwise the corresponding field is validated to be filled.
+ * Requires a submitted value to be present.
+ *
+ * <p>For strings, the value must contain non-blank text. For collections and arrays, the value must contain at least one
+ * element. For other reference types, the value must be non-null.</p>
  */
 @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.RECORD_COMPONENT})
 @Retention(RetentionPolicy.RUNTIME)

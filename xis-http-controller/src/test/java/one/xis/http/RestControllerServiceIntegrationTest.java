@@ -114,6 +114,29 @@ class RestControllerServiceIntegrationTest {
         }
 
         @Test
+        @DisplayName("should invoke less common HTTP method annotations")
+        void shouldInvokeLessCommonHttpMethodAnnotations() {
+            when(request.getPath()).thenReturn("/api/users");
+            when(request.getHttpMethod()).thenReturn(HttpMethod.HEAD);
+            restControllerService.doInvocation(request, response);
+
+            when(request.getPath()).thenReturn("/api/users");
+            when(request.getHttpMethod()).thenReturn(HttpMethod.OPTIONS);
+            restControllerService.doInvocation(request, response);
+
+            when(request.getPath()).thenReturn("/api/trace");
+            when(request.getHttpMethod()).thenReturn(HttpMethod.TRACE);
+            restControllerService.doInvocation(request, response);
+
+            verify(testController).headUsers();
+            verify(testController).optionsUsers();
+            verify(testController).trace();
+            verify(responseWriter).write(eq("head-users"), any(Method.class), eq(request), eq(response));
+            verify(responseWriter).write(eq("options-users"), any(Method.class), eq(request), eq(response));
+            verify(responseWriter).write(eq("trace"), any(Method.class), eq(request), eq(response));
+        }
+
+        @Test
         @DisplayName("should set 404 for non-existing path")
         void shouldSet404ForNonExistingPath() {
             when(request.getHttpMethod()).thenReturn(HttpMethod.GET);

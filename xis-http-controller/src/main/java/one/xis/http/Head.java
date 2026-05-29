@@ -7,11 +7,15 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation to indicate that a method should handle HTTP HEAD requests.
- * This is typically used in RESTful web services to retrieve resources.
+ * Maps a plain HTTP controller method to an HTTP {@code HEAD} route.
+ *
+ * <p>Use this for metadata-only checks, for example to expose whether a resource exists without returning its body.</p>
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface Head {
+    /**
+     * Route path relative to the controller base path.
+     */
     String value();
 }

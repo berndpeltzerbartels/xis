@@ -69,18 +69,6 @@ The relevant loader is:
 
 - `one.xis.js.JavascriptExtensionLoader`
 
-### Annotation-Based Variant
-
-There is also an annotation:
-
-- `@JavascriptExtension("path/to/file.js")`
-
-This indicates that an annotation-based registration path was planned.
-
-However, based on the current code, this path is less clearly wired into the final generated JavaScript bundle than the
-`META-INF/xis/js/extensions` mechanism. For that reason it should currently be treated as secondary or experimental
-unless verified in the specific application setup.
-
 If you want a predictable result today, prefer `META-INF/xis/js/extensions`.
 
 ## Extending The EL
@@ -90,25 +78,24 @@ There is a special case for extending the XIS expression language (EL).
 The browser runtime provides a small public XIS API for registering custom functions:
 
 ```javascript
-XIS.addElFunction("myFunction", function(value) {
-    return value;
+XIS.addElFunction("formatCurrency", function(value, currency, locale) {
+    const number = Number(value);
+    if (Number.isNaN(number)) {
+        return "";
+    }
+    return new Intl.NumberFormat(locale || undefined, {
+        style: "currency",
+        currency: currency || "EUR"
+    }).format(number);
 });
 ```
 
-This is useful when you want to call custom functions from XIS expressions in templates.
-
-Example:
-
-```javascript
-XIS.addElFunction("greet", function(name) {
-    return "Hello " + name;
-});
-```
+This is useful when you want to call project-specific presentation helpers from XIS expressions in templates.
 
 Then in HTML:
 
 ```html
-<span>${greet(user.name)}</span>
+<span>${formatCurrency(order.total, "EUR", "de-DE")}</span>
 ```
 
 Relevant implementation files:

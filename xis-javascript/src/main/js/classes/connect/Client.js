@@ -260,7 +260,6 @@ class Client {
         request.localStorageData = this.localStorageDataPage(normalizedPath);
         request.clientStateData = this.clientStateDataPage(normalizedPath);
         request.globalVariableData = this.globalVariableDataPage(normalizedPath);
-        request.localDatabaseData = {};
         request.type = 'page';
         return request;
     }
@@ -339,7 +338,6 @@ class Client {
         request.localStorageData = this.localStorageDataFrontlet(frontletInstance.frontlet.id);
         request.clientStateData = this.clientStateDataFrontlet(frontletInstance.frontlet.id);
         request.globalVariableData = this.globalVariableDataFrontlet(frontletInstance.frontlet.id);
-        request.localDatabaseData = {};
         request.type = 'frontlet';
         return request;
     }
@@ -476,8 +474,6 @@ class Client {
         serverResponse.status = response.status;
         serverResponse.validatorMessages = new ValidatorMessages(obj.validatorMessages);
         serverResponse.reloadPage = obj.reloadPage;
-        serverResponse.reloadFrontlets = obj.reloadFrontlets ? obj.reloadFrontlets : obj.reloadFrontlets;
-        serverResponse.localDatabaseData = obj.localDatabaseData || {};
         serverResponse.localStorageData = obj.localStorageData || {};
         serverResponse.clientStateData = obj.clientStateData || {};
         serverResponse.toastMessages = Array.isArray(obj.toastMessages) ? obj.toastMessages : [];
@@ -529,7 +525,6 @@ class Client {
         this.storeSessionStorageData(response.sessionStorageData);
         this.storeClientStateData(response.clientStateData);
         this.storeGlobalVariableData(response.globalVariableData);
-        this.storeLocalDatabaseData(response.localDatabaseData);
     }
 
     storeLocalStorageData(localStorageData) {
@@ -559,18 +554,6 @@ class Client {
         }
         app.globals.saveData(globalVariableData);
     }
-
-    storeLocalDatabaseData(localDatabaseData) {
-        if (!localDatabaseData) {
-            return;
-        }
-        // TODO create and configure db
-        for (var key of Object.keys(localDatabaseData)) {
-            this.localDatabase.setItem(key, localDatabaseData[key]);
-        }
-    }
-
-
     queryToObject(queryString) {
         if (!queryString) {
             return {};

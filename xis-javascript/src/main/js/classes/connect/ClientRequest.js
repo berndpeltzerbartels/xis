@@ -23,7 +23,6 @@
  * @property {string: string} clientStateData
  * @property {string: string} localStorageData
  * @property {string: string} globalVariableData
- * @property {string: string} localDatabaseData
 */
 class ClientRequest {
 
@@ -52,7 +51,6 @@ class ClientRequest {
         this.clientStateData = {};
         this.localStorageData = {};
         this.globalVariableData = {};
-        this.localDatabaseData = {};
     }
 
     toJSON() {

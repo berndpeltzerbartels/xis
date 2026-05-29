@@ -3,20 +3,26 @@ package one.xis;
 import java.lang.annotation.*;
 
 /**
- * Used to map a html-template to a controller in case, the name is different. Intention is to
- * allow sharing html-files with different controllers. In case the names are equal and the html-file
- * is located in the controller's package (e.g. Xyz.java / Xyz.html), there is no need to use this annotation.
- * <p>
- * if (path starts with a slash, it is considered absolute, otherwise relative to the controller's package.
- * For example:
- * <pre>
- * &#064;HtmlFile("TestPage.html") // file is inside controller's package
- * &#064;HtmlFile("/test/TestPage.html")  // absolute path
- * </pre>
+ * Maps a page, frontlet, modal, or include controller to an explicit HTML template.
+ *
+ * <p>You do not need this annotation when the template follows the default convention: the HTML file has the same simple
+ * name as the controller class and is located in the same package. Use {@code @HtmlFile} when the name differs, when
+ * several controllers share one template, or when the template lives in a shared resource folder.</p>
+ *
+ * <p>Values starting with {@code /} are absolute classpath resource paths. Other values are resolved relative to the
+ * controller package. The {@code .html} suffix may be omitted.</p>
+ *
+ * <pre>{@code
+ * @HtmlFile("CustomerForm.html")        // relative to the controller package
+ * @HtmlFile("/templates/customer.html") // absolute classpath resource path
+ * }</pre>
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface HtmlFile {
+    /**
+     * Template path.
+     */
     String value();
 }

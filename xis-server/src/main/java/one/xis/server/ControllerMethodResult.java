@@ -17,7 +17,6 @@ class ControllerMethodResult {
     private boolean reloadModalParent;
     private String frontletContainerId;
     private ActionProcessing actionProcessing;
-    private final Collection<String> frontletsToReload = new HashSet<>();
     private Collection<String> updateEventKeys = new HashSet<>();
     private final Map<String, Object> frontletParameters = new HashMap<>();
     private final Map<String, Object> modalParameters = new HashMap<>();

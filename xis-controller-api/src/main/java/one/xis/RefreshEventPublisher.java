@@ -2,10 +2,23 @@ package one.xis;
 
 import java.util.Set;
 
+/**
+ * Publishes refresh events to connected browser clients.
+ *
+ * <p>Inject this interface into application services when server-side state
+ * changes outside the current browser action and interested pages/frontlets
+ * should update through the XIS event channel.</p>
+ */
 public interface RefreshEventPublisher {
 
+    /**
+     * Publishes the given refresh event.
+     */
     void publish(RefreshEvent refreshEvent);
 
+    /**
+     * Publishes one event key to one target.
+     */
     default void publish(String eventKey, RefreshTarget target) {
         publish(new RefreshEvent(eventKey, Set.of(target)));
     }

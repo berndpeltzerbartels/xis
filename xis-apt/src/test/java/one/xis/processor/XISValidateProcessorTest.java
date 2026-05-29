@@ -34,7 +34,7 @@ class XISValidateProcessorTest {
         assertThat(errors).hasSize(1);
         assertThat(errors.get(0))
                 .contains("src/main/java/example/ProbePage.html:5")
-                .contains("xis:format requires xis:binding");
+                .contains("xis:error-class requires xis:binding or xis:error-binding");
     }
 
     @Test
@@ -44,10 +44,9 @@ class XISValidateProcessorTest {
         DiagnosticCollector<JavaFileObject> diagnostics = compilePageWithProcessor(false, "-Axis.allErrors=true");
 
         List<String> errors = errorMessages(diagnostics);
-        assertThat(errors).hasSize(3);
-        assertThat(errors.get(0)).contains("xis:format requires xis:binding");
-        assertThat(errors.get(1)).contains("xis:error-class requires xis:binding or xis:error-binding");
-        assertThat(errors.get(2)).contains("Template binds \"customer\", but no @ModelData or @FormData");
+        assertThat(errors).hasSize(2);
+        assertThat(errors.get(0)).contains("xis:error-class requires xis:binding or xis:error-binding");
+        assertThat(errors.get(1)).contains("Template binds \"customer\", but no @ModelData or @FormData");
     }
 
     @Test
@@ -1377,7 +1376,6 @@ class XISValidateProcessorTest {
                 <html>
                   <body>
                     <form xis:binding="customer">
-                      <span xis:format="currency">12.00</span>
                       <label xis:error-class="error">Name</label>
                     </form>
                   </body>
@@ -1393,7 +1391,7 @@ class XISValidateProcessorTest {
                 <html>
                   <body>
                     <form xis:binding="customer">
-                      <input xis:binding="price" xis:format="currency"/>
+                      <input xis:binding="price"/>
                       <label xis:error-binding="name" xis:error-class="error">Name</label>
                     </form>
                   </body>

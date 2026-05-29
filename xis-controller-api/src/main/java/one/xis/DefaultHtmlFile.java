@@ -4,17 +4,21 @@ package one.xis;
 import java.lang.annotation.*;
 
 /**
- * Annotation for Libraries providing a default HTML file for controllers, but allows overriding it
- * by using the using {@link HtmlFile} annotation on specific controller classes.
- * <p>
- * Intension is to create libraries with default HTML files that can be customized by the user.
- * <p>
- * If the value starts with a slash, it is considered an absolute path; otherwise, it
- * is relative to the controller's package.
+ * Provides a fallback HTML template for a controller.
+ *
+ * <p>This is mainly useful for reusable libraries that ship a default template while still allowing an application to
+ * override it with {@link HtmlFile} on the concrete controller class. If both annotations are present and the
+ * {@code @HtmlFile} resource exists, the explicit template wins.</p>
+ *
+ * <p>Values starting with {@code /} are absolute classpath resource paths. Other values are resolved relative to the
+ * controller package. The {@code .html} suffix may be omitted.</p>
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface DefaultHtmlFile {
+    /**
+     * Default template path.
+     */
     String value();
 }

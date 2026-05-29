@@ -3,7 +3,6 @@ class StoreUpdater {
         this.storeLocalStorageData(response.localStorageData);
         this.storeSessionStorageData(response.sessionStorageData);
         this.storeClientStateData(response.clientStateData);
-        this.storeLocalDatabaseData(response.localDatabaseData);
     }
 
     storeLocalStorageData(localStorageData) {
@@ -27,14 +26,4 @@ class StoreUpdater {
         app.clientState.saveData(clientStateData);
     }
 
-
-    storeLocalDatabaseData(localDatabaseData) {
-        if (!localDatabaseData) {
-            return;
-        }
-        // TODO create and configure db
-        for (var key of Object.keys(localDatabaseData)) {
-            this.localDatabase.setItem(key, localDatabaseData[key]);
-        }
-    }
 }

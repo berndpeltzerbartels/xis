@@ -51,8 +51,15 @@ Custom expression-language functions are JavaScript functions registered in the 
 `src/main/resources/js/app-functions.js`
 
 ```javascript
-XIS.addElFunction('pluralize', function(count, singular, plural) {
-    return Number(count) === 1 ? singular : plural;
+XIS.addElFunction('formatCurrency', function(value, currency, locale) {
+    const number = Number(value);
+    if (Number.isNaN(number)) {
+        return '';
+    }
+    return new Intl.NumberFormat(locale || undefined, {
+        style: 'currency',
+        currency: currency || 'EUR'
+    }).format(number);
 });
 ```
 
@@ -66,14 +73,17 @@ js/app-functions.js
 Use the function in a template:
 
 ```html
-<span>${taskCount} ${pluralize(taskCount, 'task', 'tasks')}</span>
+<span>${formatCurrency(order.total, 'EUR', 'de-DE')}</span>
 ```
 
 Function arguments can be expressions, just like built-in EL functions:
 
 ```html
-<span>${openTasks.size()} ${pluralize(openTasks.size(), 'open task', 'open tasks')}</span>
+<span>${formatCurrency(sum(order.lines), customer.currency, customer.locale)}</span>
 ```
+
+Custom functions run in the browser. Use them for presentation helpers such as formatting, labels, or small display
+decisions. Keep validation, permissions, persistence, and business decisions in Java.
 
 ## Global Browser Behavior
 

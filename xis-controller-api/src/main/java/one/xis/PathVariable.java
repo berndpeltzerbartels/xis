@@ -3,23 +3,28 @@ package one.xis;
 import java.lang.annotation.*;
 
 /**
- * Annotation to bind a method parameter to a path variable in a URL.
- * Requires the corresponding page defines the variable in it's {@link Page} annotation.
- * <p>
- * Example:
- * <p>
- * <pre>
- * &#064;Page("/users/{id}")
+ * Injects a variable from the current page URL into a page, frontlet, modal, model, or action method parameter.
+ *
+ * <p>The variable must be declared in the active {@link Page} path, for example
+ * {@code @Page("/users/{id}.html")}. Frontlets on that page can also read the page path variables without declaring a
+ * separate frontlet URL. For plain HTTP controllers, use {@code one.xis.http.PathVariable} instead.</p>
+ *
+ * <pre>{@code
+ * @Page("/users/{id}.html")
  * class UserPage {
- *     public Response getUser(@PathVariable("id") String userId) {
- *         // ...
+ *     @ModelData("user")
+ *     User user(@PathVariable("id") long userId) {
+ *         return users.find(userId);
  *     }
  * }
- * </pre>
+ * }</pre>
  */
 @Documented
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface PathVariable {
+    /**
+     * Name of the placeholder in the page URL.
+     */
     String value();
 }

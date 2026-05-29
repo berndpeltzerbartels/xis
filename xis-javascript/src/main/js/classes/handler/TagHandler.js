@@ -108,6 +108,7 @@ class TagHandler {
     }
 
     appendAttribute(attrName, appendValue) {
+        // TODO Decide whether this should become a supported form-field feature, likely on blur or input instead.
         if (this.tag.getAttribute('xis:submit-onkeyup')) {
             var attr = '';
             if (element.getAttribute(attrName)) {
