@@ -296,8 +296,7 @@ import one.xis.validation.EMail;
 import one.xis.validation.LabelKey;
 import one.xis.validation.Mandatory;
 
-record CustomerForm(Long id,
-        @Mandatory @LabelKey("customer.name") String name,
+record CustomerForm(@Mandatory @LabelKey("customer.name") String name,
         @Mandatory @EMail @LabelKey("customer.email") String email) {
 }
 ```
@@ -318,7 +317,7 @@ class CustomerNewPage {
 
     @FormData("customer")
     CustomerForm customer() {
-        return new CustomerForm(null, "", "");
+        return new CustomerForm("", "");
     }
 
     @Action
@@ -342,8 +341,6 @@ class CustomerNewPage {
 
     <form xis:binding="customer">
         <xis:global-messages/>
-
-        <input type="hidden" xis:binding="id"/>
 
         <label for="name" xis:error-binding="name" xis:error-style="color: #b00020">Name</label>
         <input id="name" xis:binding="name" xis:error-class="error"/>
@@ -454,7 +451,7 @@ interface CustomerService {
 
     CustomerForm editForm(long id);
 
-    void save(CustomerForm form);
+    void save(Long id, CustomerForm form);
 }
 ```
 
@@ -483,19 +480,19 @@ class CustomerServiceImpl implements CustomerService {
 
     @Override
     public CustomerForm newForm() {
-        return new CustomerForm(null, "", "");
+        return new CustomerForm("", "");
     }
 
     @Override
     public CustomerForm editForm(long id) {
         var customer = customers.findById(id).orElseThrow();
-        return new CustomerForm(customer.id, customer.name, customer.email);
+        return new CustomerForm(customer.name, customer.email);
     }
 
     @Override
-    public void save(CustomerForm form) {
+    public void save(Long id, CustomerForm form) {
         var customer = new Customer();
-        customer.id = form.id();
+        customer.id = id;
         customer.name = form.name();
         customer.email = form.email();
         customers.save(customer);
@@ -532,7 +529,7 @@ class CustomerNewPage {
 
     @Action
     Class<?> save(@FormData("customer") CustomerForm customer) {
-        customerService.save(customer);
+        customerService.save(null, customer);
         return CustomerListPage.class;
     }
 }
@@ -640,14 +637,14 @@ class CustomerEditPage {
     }
 
     @Action
-    Class<?> save(@FormData("customer") CustomerForm customer) {
-        customerService.save(customer);
+    Class<?> save(@PathVariable("id") long id, @FormData("customer") CustomerForm customer) {
+        customerService.save(id, customer);
         return CustomerListPage.class;
     }
 }
 ```
 
-The HTML template does not change. The hidden `id` field keeps the existing customer id in the submitted form.
+The HTML template does not change. The existing customer id comes from the page URL, not from a hidden form field.
 
 ## Move The Customer UI Into Frontlets
 
@@ -772,8 +769,9 @@ class CustomerFormFrontlet {
     }
 
     @Action
-    Class<?> save(@FormData("customer") CustomerForm customer) {
-        customerService.save(customer);
+    Class<?> save(@FrontletParameter("customerId") @NullAllowed Long customerId,
+            @FormData("customer") CustomerForm customer) {
+        customerService.save(customerId, customer);
         return CustomerListFrontlet.class;
     }
 }
@@ -785,8 +783,6 @@ class CustomerFormFrontlet {
 <xis:template xmlns:xis="https://xis.one/xsd">
     <form xis:binding="customer">
         <xis:global-messages/>
-
-        <input type="hidden" xis:binding="id"/>
 
         <label for="name" xis:error-binding="name" xis:error-style="color: #b00020">Name</label>
         <input id="name" xis:binding="name" xis:error-class="error"/>
@@ -809,7 +805,8 @@ container. If validation fails, the action is not called and the form stays visi
 
 Frontlets can read `@PathVariable` values from the current page URL, even when the frontlet itself has no URL. Use
 `@FrontletParameter` for values that belong to a specific frontlet instance, such as the `customerId` passed from the
-list to the form above.
+list to the form above. The frontlet action can read the same parameter, so the edit id does not need a hidden form
+field.
 
 Frontlets also become useful when an application grows beyond one deployment unit. Pages and frontlets can be served by
 different XIS applications, so teams can split a shell page and selected UI fragments across runtimes. That is an
@@ -906,8 +903,9 @@ class CustomerFormFrontlet {
 
     @Action
     @Roles("ADMIN")
-    Class<?> save(@FormData("customer") CustomerForm customer) {
-        customerService.save(customer);
+    Class<?> save(@FrontletParameter("customerId") @NullAllowed Long customerId,
+            @FormData("customer") CustomerForm customer) {
+        customerService.save(customerId, customer);
         return CustomerListFrontlet.class;
     }
 }
