@@ -199,7 +199,6 @@ class ControllerService {
         nextRequest.getSessionStorageData().putAll(request.getSessionStorageData());
         nextRequest.getClientStateData().putAll(request.getClientStateData());
         nextRequest.getGlobalVariableData().putAll(request.getGlobalVariableData());
-        nextRequest.getLocalDatabaseData().putAll(request.getLocalDatabaseData());
         nextRequest.setAccessToken(request.getAccessToken());
         controllerResultMapper.mapControllerResultToNextRequest(controllerResult, nextRequest);
         return nextRequest;

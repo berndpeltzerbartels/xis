@@ -289,6 +289,10 @@ Attribute syntax is equivalent:
 <header xis:include="header"></header>
 ```
 
+The value is an include key, not a free resource path. A template can only include fragments that an application has
+explicitly registered with `@Include`. This is intentional: the annotation is the point where application code makes the
+conscious decision that a fragment may be included, instead of allowing templates to walk arbitrary resource paths.
+
 The included markup is initialized inside the surrounding page or frontlet. It may therefore contain XIS links, action
 buttons, parameters, and model expressions that belong to that surrounding controller. Choose frontlets when the fragment
 needs its own controller logic, independent model data, or dynamic updates.

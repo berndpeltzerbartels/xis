@@ -6,12 +6,17 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation to indicate the content type that a method produces in response to an HTTP request.
- * This is typically used in RESTful web services to specify the format of the response body,
- * such as JSON or XML.
+ * Declares the response content type for a plain HTTP controller method.
+ *
+ * <p>If this annotation is absent, XIS infers a content type from the request suffix when possible and otherwise uses
+ * the default response serialization rules. Use {@link ResponseEntity} when the content type is only one part of a
+ * response that also needs a status code or dynamic headers.</p>
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface Produces {
+    /**
+     * Content type written to the HTTP response.
+     */
     ContentType value();
 }

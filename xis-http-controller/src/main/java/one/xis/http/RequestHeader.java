@@ -8,12 +8,16 @@ import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * Annotation to indicate that a method parameter should be bound to a specific HTTP header.
- * This is typically used in RESTful web services to retrieve values from HTTP headers.
+ * Injects an HTTP request header value into a plain HTTP controller method parameter.
+ *
+ * <p>The value is converted to the parameter type with XIS simple type conversion.</p>
  */
 @Retention(RUNTIME)
 @Target({PARAMETER, METHOD})
 public @interface RequestHeader {
+    /**
+     * Name of the request header to read.
+     */
     String value();
 
 }

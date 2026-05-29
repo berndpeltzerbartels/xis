@@ -23,4 +23,19 @@ class TestController {
     public String getInfo(@RequestHeader("X-Test-Header") String headerValue, @CookieValue("test_cookie") String cookieValue) {
         return "header:" + headerValue + ";cookie:" + cookieValue;
     }
+
+    @Head("/users")
+    public String headUsers() {
+        return "head-users";
+    }
+
+    @Options("/users")
+    public String optionsUsers() {
+        return "options-users";
+    }
+
+    @Trace("/trace")
+    public String trace() {
+        return "trace";
+    }
 }

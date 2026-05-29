@@ -2,8 +2,7 @@ package one.xis.http;
 
 public interface RestControllerService {
     /**
-     * Adds a controller to the service, which is not annotated with @RestController.
-     * This is intended to allow dynamic registration of controllers
+     * Dynamically registers a plain HTTP controller instance under the given base path.
      *
      * @param basePath   the base path for the controller
      * @param controller the controller object
@@ -11,8 +10,7 @@ public interface RestControllerService {
     void addController(String basePath, Object controller);
 
     /**
-     * Adds a controller to the service, which is annotated with @RestController.
-     * This is intended to allow dynamic registration of controllers
+     * Dynamically registers an exception handler for plain HTTP controller invocations.
      *
      * @param handler the controller exception handler
      */

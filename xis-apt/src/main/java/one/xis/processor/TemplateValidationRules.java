@@ -9,14 +9,45 @@ class TemplateValidationRules {
     private static final Set<String> LINK_TAGS = Set.of("a", "button");
     private static final Set<String> FORM_FIELD_TAGS = Set.of("input", "textarea", "select", "form", "label");
     private static final Set<String> STORE_NAMES = Set.of("localStorage", "sessionStorage", "clientState");
+    private static final Set<String> FRAMEWORK_ELEMENTS = Set.of(
+            "xis:a",
+            "xis:action",
+            "xis:button",
+            "xis:checkbox",
+            "xis:foreach",
+            "xis:form",
+            "xis:frontlet",
+            "xis:frontlet-container",
+            "xis:global-messages",
+            "xis:if",
+            "xis:include",
+            "xis:input",
+            "xis:message",
+            "xis:parameter",
+            "xis:radio",
+            "xis:raw",
+            "xis:select",
+            "xis:storage-binding",
+            "xis:submit",
+            "xis:template",
+            "xis:textarea"
+    );
 
     void validateElement(TemplateElement element, ValidationErrorCollector errors) {
+        validateKnownFrameworkElement(element, errors);
         validateRequiredAttributes(element, errors);
         validateRequiredAlternativeAttributes(element, errors);
         validateRequiredAttributeValues(element, errors);
         validateAttributeDependencies(element, errors);
         validateAttributePlacement(element, errors);
         validateKnownValueSets(element, errors);
+    }
+
+    private void validateKnownFrameworkElement(TemplateElement element, ValidationErrorCollector errors) {
+        String localName = element.raw().getLocalName();
+        if (localName.startsWith("xis:") && !FRAMEWORK_ELEMENTS.contains(localName)) {
+            errors.add(element.line(), "Unknown XIS element <" + localName + ">.");
+        }
     }
 
     private void validateRequiredAttributes(TemplateElement element, ValidationErrorCollector errors) {
@@ -92,7 +123,6 @@ class TemplateValidationRules {
     }
 
     private enum RequiredPeerAttribute {
-        FORMAT_BINDING("xis:format", Set.of("xis:binding"), "xis:format requires xis:binding on the same element."),
         ERROR_CLASS_BINDING("xis:error-class", Set.of("xis:binding", "xis:error-binding"), "xis:error-class requires xis:binding or xis:error-binding on the same element."),
         ERROR_STYLE_BINDING("xis:error-style", Set.of("xis:binding", "xis:error-binding"), "xis:error-style requires xis:binding or xis:error-binding on the same element."),
         DEFAULT_FRONTLET_CONTAINER("xis:default-frontlet", Set.of("xis:frontlet-container"), "xis:default-frontlet requires xis:frontlet-container on the same element."),

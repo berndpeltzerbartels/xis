@@ -25,7 +25,6 @@ class ControllerResponseMapper {
         response.setReloadModalParent(result.isReloadModalParent());
         response.setValidatorMessages(result.getValidatorMessages());
         response.setFrontletContainerId(result.getFrontletContainerId());
-        response.setReloadFrontlets(result.getFrontletsToReload());
         mapSecurityContext(response);
         response.getSessionStorageData().putAll(result.getSessionStorage());
         response.getLocalStorageData().putAll(result.getLocalStorage());

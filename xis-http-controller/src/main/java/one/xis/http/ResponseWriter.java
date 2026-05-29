@@ -54,7 +54,10 @@ class ResponseWriter {
         if (response.getContentType() == null) {
             determineContentType(returnValue, method, request, response);
         }
-        // may be it contains content type information. So we do this after checking the suffix
+        // Some values carry content-type information, so this happens after suffix/content negotiation.
+        if (request.getHttpMethod() == HttpMethod.HEAD) {
+            return;
+        }
         setResponseBody(returnValue, response);
     }
 

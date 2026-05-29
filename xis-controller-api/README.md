@@ -156,15 +156,6 @@ controller package.
 | --- | --- | --- | --- | --- |
 | `value` | `String` | Yes | none | Default HTML template resource path. |
 
-### `@CssFile`
-
-`@CssFile` associates a CSS file with a controller. It is currently a lightweight mapping annotation and may be revised
-as the asset pipeline evolves.
-
-| Attribute | Type | Required | Default | Description |
-| --- | --- | --- | --- | --- |
-| `value` | `String` | Yes | none | CSS resource path. |
-
 ## Frontlets And Includes
 
 ### `@Frontlet`
@@ -208,13 +199,14 @@ parameters from their containing frontlet; parameters supplied directly to the n
 ### `@Include`
 
 `@Include` makes a reusable HTML include available to templates. If the annotation value is `navigation`, templates can
-reference it as an include named `navigation`.
+reference it as an include named `navigation`. The value is an include key, not a resource path. This is intentional:
+templates can only use fragments that application code has explicitly exposed with `@Include`.
 
 Classes annotated with `@Include` must be concrete classes. They are registered as framework components.
 
 | Attribute | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
-| `value` | `String` | Yes | none | Include name used from templates. |
+| `value` | `String` | Yes | none | Include key used from templates. |
 
 ## Model, Form, And Action Methods
 
@@ -424,15 +416,6 @@ state.
 | --- | --- | --- | --- | --- |
 | `value` | `String` | Yes | none | Client-state key. |
 
-### `@LocalDatabase`
-
-`@LocalDatabase` marks a method or parameter as using local-database backed data. This API is currently lightweight and
-may be revised as local database support matures.
-
-| Attribute | Type | Required | Default | Description |
-| --- | --- | --- | --- | --- |
-| `value` | `String` | Yes | none | Local database key or binding name. |
-
 ### `@SharedValue`
 
 `@SharedValue` provides or injects a named value within one request/controller processing flow. Use it when several
@@ -454,18 +437,6 @@ produce the title used by the browser after rendering or action processing.
 | Attribute | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
 | none | - | - | - | Marker annotation. |
-
-### `@JavascriptExtension`
-
-`@JavascriptExtension` registers a JavaScript classpath resource that should be included in the generated application
-JavaScript. Because XIS runs as a single-page application in the browser, extensions are loaded as part of the generated
-runtime instead of being fetched on demand.
-
-Classes annotated with `@JavascriptExtension` must be concrete classes and are registered as framework components.
-
-| Attribute | Type | Required | Default | Description |
-| --- | --- | --- | --- | --- |
-| `value` | `String` | Yes | none | JavaScript resource path. |
 
 ## Formatting And Validation Markers
 
@@ -501,15 +472,6 @@ non-null. Primitive element types are already non-null by nature.
 | none | - | - | - | Marker annotation. |
 
 ## Framework-Level Annotations
-
-### `@MainClass`
-
-`@MainClass` marks an application main class for runtime bootstrapping. It is currently retained in the API for runtime
-support and may be revised.
-
-| Attribute | Type | Required | Default | Description |
-| --- | --- | --- | --- | --- |
-| none | - | - | - | Marker annotation. |
 
 ### `@ImportInstances`
 
@@ -603,7 +565,6 @@ return new FrontletResponse(ProductFrontlet.class)
 | `@WelcomePage` | class | none | Declares the fallback/default page. |
 | `@HtmlFile` | class | `value` | Binds a controller to an explicit HTML template. |
 | `@DefaultHtmlFile` | class | `value` | Provides a default template for library controllers. |
-| `@CssFile` | class | `value` | Associates a CSS file with a controller. |
 | `@Frontlet` | class | none | Declares a reusable frontlet controller. |
 | `@ActionParameter` | parameter | none | Injects a parameter from the triggering action element. |
 | `@FrontletParameter` | parameter | none | Injects a stable parameter of the current frontlet. |
@@ -624,14 +585,11 @@ return new FrontletResponse(ProductFrontlet.class)
 | `@LocalStorage` | method, parameter | `value` | Binds browser `localStorage`. |
 | `@SessionStorage` | method, parameter | `value` | Binds browser `sessionStorage`. |
 | `@ClientState` | method, parameter | `value` | Binds XIS client-side state. |
-| `@LocalDatabase` | method, parameter | `value` | Binds local database data. |
 | `@SharedValue` | method, parameter | `value` | Provides or injects a named value inside one controller processing flow. |
 | `@Title` | method, parameter | none | Provides or receives the page title. |
-| `@JavascriptExtension` | class | `value` | Registers JavaScript extension resources. |
 | `@UseFormatter` | field, parameter, annotation, record component | `value` | Applies a formatter. |
 | `@Mandatory` | field, parameter, record component | none | Marks a value as required. |
 | `@AllElementsMandatory` | field, parameter, record component | none | Requires all collection/array elements to be non-null. |
-| `@MainClass` | class | none | Marks an application main class for runtime bootstrapping. |
 | `@ImportInstances` | class/interface | none | Imports host-framework implementations into the XIS context. |
 
 ### Helper Types

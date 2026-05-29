@@ -34,6 +34,21 @@ class ResponseWriterCookieTest {
                 cookie.contains("access_token=abc") && cookie.contains("Secure")));
     }
 
+    @Test
+    void headRequestsDoNotWriteResponseBody() throws NoSuchMethodException {
+        HttpRequest request = mock(HttpRequest.class);
+        HttpResponse response = mock(HttpResponse.class);
+        when(request.getHttpMethod()).thenReturn(HttpMethod.HEAD);
+        when(request.getSuffix()).thenReturn("");
+        when(response.getStatusCode()).thenReturn(null);
+
+        responseWriter.write("metadata", method(), request, response);
+
+        verify(response).setStatusCode(200);
+        verify(response, never()).setBody(any(byte[].class));
+        verify(response, never()).setBody(anyString());
+    }
+
     private ResponseEntity<?> secureCookieResponse() {
         return ResponseEntity.noContent()
                 .addSecureCookie("access_token", "abc", Duration.ofMinutes(5));

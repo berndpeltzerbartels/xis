@@ -349,6 +349,10 @@ Include attribute syntax:
 <header xis:include="header"></header>
 ```
 
+The include value is a registered include key, not a free resource path. Only fragments exposed by an `@Include`
+controller can be referenced from templates. This is intentional: application code has to explicitly allow a fragment to
+be included, and templates cannot browse to arbitrary HTML resources.
+
 Includes are initialized inside the surrounding page or frontlet. They are for markup reuse, but the included markup may
 still contain XIS links, action buttons, parameters, and model expressions that belong to that surrounding controller.
 Use frontlets when the fragment needs its own controller, model data, or independently replaceable state.

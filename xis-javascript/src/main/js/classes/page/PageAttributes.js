@@ -6,7 +6,6 @@
  * @property {Path} path
  * @property {string} normalizedPath
  * @property {boolean} welcomePage
- * @property {array<string>} localDatabaseKeys
  * @property {array<string>} localStorageKeys
  * @property {array<string>} sessionStorageKeys
  * @property {array<string>} clientStateKeys
@@ -24,7 +23,6 @@ class PageAttributes {
         this.path = new Path(new PathElement(obj.path.pathElement));
         this.normalizedPath = obj.normalizedPath;
         this.welcomePage = obj.welcomePage;
-        this.localDatabaseKeys = obj.localDatabaseKeys || [];
         this.localStorageKeys = obj.localStorageKeys || [];
         this.sessionStorageKeys = obj.sessionStorageKeys || [];
         this.clientStateKeys = obj.clientStateKeys || [];

@@ -35,6 +35,5 @@ public class ClientRequest {
     private final JsonMap localStorageData = new JsonMap();
     private final JsonMap clientStateData = new JsonMap();
     private final JsonMap globalVariableData = new JsonMap();
-    private final JsonMap localDatabaseData = new JsonMap();
 
 }

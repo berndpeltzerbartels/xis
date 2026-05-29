@@ -11,7 +11,7 @@ Use the plugin when you want the usual XIS layout:
 ```groovy
 plugins {
     id "java"
-    id "one.xis.plugin" version "0.16.0"
+    id "one.xis.plugin" version "0.16.1"
 }
 ```
 
@@ -213,10 +213,11 @@ The current checks cover the places where mistakes are easy to miss in a browser
 
 | Area | Examples |
 | --- | --- |
-| Attribute dependencies | `xis:format` requires `xis:binding`; `xis:error-class` and `xis:error-style` require `xis:binding` or `xis:error-binding`. |
-| Mandatory attributes | `<xis:foreach>` requires `var` and `array`; `<xis:if>` requires `condition`; `<xis:include>` requires `name`; `<xis:frontlet-container>` requires `container-id`. |
+| Attribute dependencies | `xis:error-class` and `xis:error-style` require `xis:binding` or `xis:error-binding`. |
+| Mandatory attributes | Framework elements such as `<xis:foreach>`, `<xis:if>`, `<xis:form>`, `<xis:input>`, `<xis:submit>`, and `<xis:parameter>` must declare the attributes that identify their data, action, or target. See [Element required attributes](tags-and-attributes.md#element-required-attributes). |
 | Attribute syntax | `xis:foreach`, `xis:repeat`, and `xis:drag` use `name:expression`; `xis:drop` uses `actionName(...)`. |
 | Framework element syntax | `<xis:a>` and `<xis:button>` need a navigation or action target; `<xis:parameter>` needs `name`; storage bindings need a supported store. |
+| Unknown framework elements | Unknown `xis:*` elements fail validation so typos such as `<xis:for-each>` do not silently render as inert HTML. |
 | Attribute placement | navigation attributes belong on links or buttons; form bindings belong on form controls or labels. |
 | Selection styling | `xis:selection-class` needs a surrounding `xis:selection-group`. |
 | Template data | expressions such as `${customer.firstName}` must have matching `@ModelData`; exposed model/form data must be used by the template. |
@@ -297,7 +298,7 @@ Without the plugin, add the dependency that matches the style of test you want:
 
 ```groovy
 dependencies {
-    testImplementation "one.xis:xis-boot-starter-test:0.14.0"
+    testImplementation "one.xis:xis-boot-starter-test:0.16.1"
 }
 ```
 

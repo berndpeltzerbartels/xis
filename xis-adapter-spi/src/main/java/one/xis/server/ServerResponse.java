@@ -26,7 +26,6 @@ public class ServerResponse {
     private Map<String, Object> formData = new HashMap<>();
     private Collection<String> returnedFormDataKeys = new HashSet<>();
     private Map<String, Object> localStorageData = new HashMap<>();
-    private Map<String, Object> localDatabaseData = new HashMap<>();
     private Map<String, Object> sessionStorageData = new HashMap<>();
     private Map<String, Object> clientStateData = new HashMap<>();
     private Collection<ToastMessage> toastMessages = new ArrayList<>();
@@ -35,7 +34,6 @@ public class ServerResponse {
     private boolean authenticated;
     private Collection<String> userRoles = new HashSet<>();
     private Collection<String> updateEventKeys = new ArrayList<>();
-    private Collection<String> reloadFrontlets = new ArrayList<>(); // TODO remove?
     private String nextURL;
     private String nextFrontletId;
     private String nextModalId;
@@ -56,7 +54,6 @@ public class ServerResponse {
         data.clear();
         formData.clear();
         returnedFormDataKeys.clear();
-        reloadFrontlets.clear();
         toastMessages.clear();
         frontletParameters.clear();
         modalParameters.clear();

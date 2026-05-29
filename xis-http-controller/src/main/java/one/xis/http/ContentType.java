@@ -1,5 +1,11 @@
 package one.xis.http;
 
+/**
+ * Content types understood by the plain HTTP controller layer.
+ *
+ * <p>Use these values with {@link Produces}, {@link ResponseEntity}, and
+ * adapter responses when the content type should be explicit.</p>
+ */
 public enum ContentType {
     JSON("application/json"),
     JSON_UTF8("application/json; charset=utf-8"),
@@ -24,6 +30,13 @@ public enum ContentType {
         this.value = value;
     }
 
+    /**
+     * Resolves a header value such as {@code application/json; charset=utf-8}
+     * to a known content type.
+     *
+     * @param contentType raw HTTP header value
+     * @return matching content type, or {@code null} when the input is {@code null}
+     */
     public static ContentType fromValue(String contentType) {
         if (contentType == null) {
             return null;

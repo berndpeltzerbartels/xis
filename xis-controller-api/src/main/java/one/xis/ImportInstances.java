@@ -4,12 +4,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * All implementations of the annotated interface will be imported from other
- * the host framework e.g. Spring into xis private context.
- * <p>
- * Internal use only.
- * <p>
- * TODO: Move to another module. This is a framework internal annotation.
+ * Imports host-framework instances that implement the annotated interface into the private XIS context.
+ *
+ * <p>This is an advanced integration hook for libraries that bridge XIS with a host framework such as Spring. Normal
+ * applications should prefer ordinary XIS components, constructor injection, and explicit configuration.</p>
  */
 @Target({java.lang.annotation.ElementType.TYPE})
 @Retention(java.lang.annotation.RetentionPolicy.RUNTIME)

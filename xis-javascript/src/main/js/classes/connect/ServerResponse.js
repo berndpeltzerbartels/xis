@@ -9,12 +9,10 @@
  * @property {any} formData
  * @property {Array<string>} returnedFormDataKeys
  * @property {any} localStorageData
- * @property {any} localDatabaseData
  * @property {any} globalVariableData
  * @property {Object} frontletParameters
  * @property {Object} modalParameters
  * @property {string} frontletContainerId
- * @property {Array} reloadFrontlets
  * @property {Array} updateEventKeys
  * @property {any} sessionStorageData
  * @property {any} clientStateData
@@ -45,11 +43,9 @@ class ServerResponse {
         this.returnedFormDataKeys = [];
         this.localStorageData = {};
         this.globalVariableData = {};
-        this.localDatabaseData = {};
         this.frontletParameters = {};
         this.modalParameters = {};
         this.frontletContainerId = '';
-        this.reloadFrontlets = [];
         this.sessionStorageData = {};
         this.clientStateData = {};
         this.toastMessages = [];
@@ -72,9 +68,6 @@ class ServerResponse {
            return true;
        }
        if (this.localStorageData && Object.keys(this.localStorageData).length > 0) {
-           return true;
-       }
-       if (this.localDatabaseData && Object.keys(this.localDatabaseData).length > 0) {
            return true;
        }
        if (this.sessionStorageData && Object.keys(this.sessionStorageData).length > 0) {

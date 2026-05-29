@@ -229,41 +229,6 @@ void publishAccountNotice() {
 Use this for state that only makes sense after login. Use `publishToAll(...)` when anonymous clients should also receive
 the refresh.
 
-## Reload Other Frontlets After An Action
-
-`FrontletResponse.reloadFrontlet(...)` is a related action-response feature. It does not broadcast to other clients. It
-reloads matching frontlets in the current browser after the action completes.
-
-This is a special case. You do not need it to refresh the page or frontlet that handled the action:
-
-- A page action refreshes the current page response.
-- A frontlet action refreshes the current frontlet response.
-- A child frontlet is refreshed when its parent frontlet is refreshed.
-
-Use `reloadFrontlet(...)` only when an action should also refresh another already visible frontlet that is not refreshed
-through that normal action response. A common example is a separate cart-summary frontlet in the page header while the
-action itself runs in a product-list or cart-editor frontlet.
-
-```java
-import one.xis.Action;
-import one.xis.Frontlet;
-import one.xis.FrontletResponse;
-
-@Frontlet
-class CartEditorFrontlet {
-
-    @Action
-    FrontletResponse save() {
-        return new FrontletResponse()
-                .reloadFrontlet("CartSummaryFrontlet");
-    }
-}
-```
-
-If the current page contains a `CartSummaryFrontlet`, XIS reloads that frontlet's model data and renders it again. The
-frontlet can be in another container. You do not need this call for `CartEditorFrontlet` itself; the action response
-already updates the frontlet that handled the action.
-
 ## Choosing The Right Target
 
 | Need | Use |
@@ -272,4 +237,3 @@ already updates the frontlet that handled the action.
 | Only the current browser client should refresh | `publishToClient("key", clientId)` with `@ClientId` |
 | All clients of one logged-in user should refresh | `publishToUser("key", userId)` with `@UserId` |
 | All authenticated clients should refresh | `publishToAllUsers("key")` |
-| Only the current browser should reload one visible frontlet after an action | `new FrontletResponse().reloadFrontlet("FrontletId")` |
