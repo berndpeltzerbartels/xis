@@ -171,8 +171,10 @@ The test starter needed for this generated code is added automatically by the pl
 `xis-boot-starter-test` again in a normal plugin-based build.
 
 For additional collaborators, keep the generated style and add test fields with `@InTestContext`, `@Mock`, or `@Spy`.
-If a collaborator should be produced by a factory method, put a XIS `@Bean` method on a scanned test component. For
-fully explicit object graphs or prebuilt instances, use `IntegrationTestContext.builder()` manually instead.
+If a collaborator should be produced by a factory method, put a XIS `one.xis.context.Bean` method on a scanned test
+component. The generated test uses the XIS integration-test context; it does not start Spring and does not automatically
+use Spring `org.springframework.context.annotation.Bean` methods. For fully explicit object graphs, Spring-created
+objects, or prebuilt instances, use `IntegrationTestContext.builder()` manually instead.
 
 When the project also applies the Groovy plugin, `xisTests` scans Groovy page controllers too and writes Groovy starter
 tests under `src/test/groovy`. Kotlin controllers are scanned for template validation and runtime catalogs; write Kotlin

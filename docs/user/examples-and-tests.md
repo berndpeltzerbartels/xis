@@ -145,8 +145,10 @@ all register their field value in the XIS context, so constructor injection in c
 instance as the test.
 
 If the test needs an object produced by a factory method, register a configuration class in the scanned test package and
-use XIS `@Bean` methods. The test class itself is part of the XIS context, and scanned test components participate in
-normal constructor injection and bean creation.
+use XIS `one.xis.context.Bean` methods. The generated test runs against the XIS integration-test context, not a Spring
+`ApplicationContext`, so Spring `org.springframework.context.annotation.Bean` methods are not picked up here unless you
+configure that annotation explicitly on a manually built context. The test class itself is part of the XIS context, and
+scanned test components participate in normal constructor injection and bean creation.
 
 ```java
 package example.products;
@@ -182,7 +184,7 @@ class ProductPageTest {
 For small explicit tests, or for builds that do not use the plugin test starter, create an `IntegrationTestContext`
 yourself with the page controller and the services it needs. You can pass classes, which XIS will instantiate, or
 ready-made instances such as mocks, test containers, or objects that cannot be created by a no-argument constructor or
-an ordinary `@Bean` method.
+an ordinary XIS `@Bean` method.
 
 ```java
 package example.products;
