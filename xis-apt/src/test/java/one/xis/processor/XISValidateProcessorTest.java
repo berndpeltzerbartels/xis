@@ -1368,6 +1368,44 @@ class XISValidateProcessorTest {
         assertThat(errors).anyMatch(error -> error.contains("xis:default-frontlet requires xis:frontlet-container"));
     }
 
+    @Test
+    void rejectsUnknownFrameworkElements() throws IOException {
+        Path templateFile = tempDir.resolve("src/main/java/example/ProbePage.html");
+        Files.createDirectories(templateFile.getParent());
+        Files.writeString(templateFile, """
+                <!DOCTYPE html>
+                <html>
+                  <body>
+                    <xis:foreach var="customer" array="customers">
+                      <xis:unknown name="customer-card"/>
+                    </xis:foreach>
+                  </body>
+                </html>
+                """, StandardCharsets.UTF_8);
+
+        DiagnosticCollector<JavaFileObject> diagnostics = compilePageSourceWithProcessor(false, """
+                package example;
+
+                import java.util.List;
+                import one.xis.ModelData;
+                import one.xis.Page;
+
+                @Page("/probe.html")
+                class ProbePage {
+                    @ModelData("customers")
+                    List<Customer> customers() {
+                        return List.of(new Customer("Ada"));
+                    }
+                }
+
+                record Customer(String name) {
+                }
+                """, "-Axis.allErrors=true");
+
+        List<String> errors = errorMessages(diagnostics);
+        assertThat(errors).anyMatch(error -> error.contains("Unknown XIS element <xis:unknown>"));
+    }
+
     private void writeInvalidTemplate() throws IOException {
         Path templateFile = tempDir.resolve("src/main/java/example/ProbePage.html");
         Files.createDirectories(templateFile.getParent());
