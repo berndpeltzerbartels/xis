@@ -76,9 +76,17 @@ xis.distributed.hosts=https://components.example.com,https://checkout.example.co
 
 Hosts must include protocol and host, for example `http://localhost:9000` or `https://checkout.example.com`.
 
-The list is interpreted from the point of view of the current runtime. In a shell application it lists the remote
-runtimes whose `/xis/config` should be loaded. In a remote runtime the same contract is used for CORS, so that runtime
-normally lists the shell host that may call it.
+The host list is interpreted from the point of view of the current runtime. In a shell application it lists the remote
+runtimes whose `/xis/config` should be loaded. If no separate CORS origins are configured, the same list is also used as
+the list of browser origins that may call this runtime.
+
+Use `xis.distributed.allowed-origins` when config discovery and CORS are not the same list. A remote runtime commonly
+lists the shell as an allowed origin, even though the shell is not a remote component host for that runtime:
+
+```properties
+xis.distributed.hosts=https://components.example.com,https://checkout.example.com
+xis.distributed.allowed-origins=https://app.example.com
+```
 
 When `xis-distributed` is on the classpath, this property is required unless the application provides its own
 `XisDistributedConfig` implementation.
@@ -118,6 +126,31 @@ class DistributedConfiguration {
     @Bean
     XisDistributedConfig xisDistributedConfig() {
         return () -> List.of("https://components.example.com", "https://checkout.example.com");
+    }
+}
+```
+
+Override `getAllowedOrigins()` when the browser origins allowed by CORS differ from the remote hosts used for config
+discovery:
+
+```java
+import one.xis.context.Component;
+import one.xis.distributed.XisDistributedConfig;
+
+import java.util.List;
+import java.util.Set;
+
+@Component
+class RemoteDistributedConfig implements XisDistributedConfig {
+
+    @Override
+    public List<String> getHosts() {
+        return List.of("https://components.example.com", "https://checkout.example.com");
+    }
+
+    @Override
+    public Set<String> getAllowedOrigins() {
+        return Set.of("https://app.example.com");
     }
 }
 ```

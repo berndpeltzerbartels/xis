@@ -76,12 +76,20 @@ xis.distributed.hosts=https://shop.example.com,https://catalog.example.com
 
 Hosts must include protocol and host, for example `http://localhost:9000` or `https://shop.example.com`.
 
-The list is interpreted from the point of view of the current runtime:
+The host list is interpreted from the point of view of the current runtime:
 
 - in the shell runtime it is the list of remote runtimes whose `/xis/config` should be loaded
-- in a remote runtime it is also used as the list of allowed distributed browser origins for CORS
+- if no separate CORS origins are configured, it is also used as the list of allowed distributed browser origins for CORS
 
-That means a remote runtime normally lists the shell host that may call it.
+Use `xis.distributed.allowed-origins` when config discovery and CORS are not the same list:
+
+```properties
+xis.distributed.hosts=https://shop.example.com,https://catalog.example.com
+xis.distributed.allowed-origins=https://app.example.com
+```
+
+That means a remote runtime can list other component runtimes as hosts while allowing only the shell origin to call it
+from the browser.
 
 When `xis-distributed` is on the classpath, this property is required unless the application provides its own
 `XisDistributedConfig` implementation.
@@ -121,6 +129,31 @@ class DistributedConfiguration {
     @Bean
     XisDistributedConfig xisDistributedConfig() {
         return () -> List.of("https://shop.example.com", "https://catalog.example.com");
+    }
+}
+```
+
+Override `getAllowedOrigins()` when the browser origins allowed by CORS differ from the remote hosts used for config
+discovery:
+
+```java
+import one.xis.context.Component;
+import one.xis.distributed.XisDistributedConfig;
+
+import java.util.List;
+import java.util.Set;
+
+@Component
+class RemoteDistributedConfig implements XisDistributedConfig {
+
+    @Override
+    public List<String> getHosts() {
+        return List.of("https://shop.example.com", "https://catalog.example.com");
+    }
+
+    @Override
+    public Set<String> getAllowedOrigins() {
+        return Set.of("https://app.example.com");
     }
 }
 ```
