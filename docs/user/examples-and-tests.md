@@ -85,8 +85,10 @@ page still has missing behavior.
 
 ## Test A Page
 
-For plugin-based builds, the most compact style is `@XisBootTest`. The extension creates the integration-test context,
-injects it into an `IntegrationTestContext` field, and supports XIS context annotations on the test class.
+For plugin-based builds, the most compact style is `@XisBootTest`. The extension creates the XIS integration-test
+context, injects it into an `IntegrationTestContext` field, and supports XIS context annotations on the test class. This
+test style is independent of the application runtime: generated tests use the XIS test context for XIS Boot and Spring
+Boot applications alike.
 
 ```java
 package example.products;
@@ -142,9 +144,45 @@ Use `one.xis.test.@Mock`, `@Spy`, and `@Captor` for Mockito-style test doubles. 
 all register their field value in the XIS context, so constructor injection in controllers and services sees the same
 instance as the test.
 
+If the test needs an object produced by a factory method, register a configuration class in the scanned test package and
+use XIS `@Bean` methods. The test class itself is part of the XIS context, and scanned test components participate in
+normal constructor injection and bean creation.
+
+```java
+package example.products;
+
+import one.xis.boot.test.XisBootTest;
+import one.xis.context.Bean;
+import one.xis.context.Component;
+import one.xis.context.IntegrationTestContext;
+import org.junit.jupiter.api.Test;
+
+@XisBootTest
+class ProductPageTest {
+
+    private IntegrationTestContext context;
+
+    @Test
+    void opensProductPage() {
+        var client = context.openPage("/products.html");
+        // assertions here
+    }
+
+    @Component
+    static class ProductTestConfig {
+
+        @Bean
+        ProductCatalog productCatalog() {
+            return ProductCatalog.inMemory();
+        }
+    }
+}
+```
+
 For small explicit tests, or for builds that do not use the plugin test starter, create an `IntegrationTestContext`
 yourself with the page controller and the services it needs. You can pass classes, which XIS will instantiate, or
-ready-made instances such as mocks.
+ready-made instances such as mocks, test containers, or objects that cannot be created by a no-argument constructor or
+an ordinary `@Bean` method.
 
 ```java
 package example.products;

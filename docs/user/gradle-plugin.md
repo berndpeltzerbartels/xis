@@ -138,7 +138,9 @@ src/test/java/example/dashboard/DashboardPageTest.java
 ```
 
 The generated test uses `@XisBootTest`, registers the page controller in the XIS test context, and opens the page
-through its `@Page` URL. It is meant as a first executable sketch, not as a finished test suite:
+through its `@Page` URL. The generator does not need separate Spring Boot and XIS Boot variants because the generated
+test runs against the XIS integration-test context in both cases. It is meant as a first executable sketch, not as a
+finished test suite:
 
 ```java
 import one.xis.boot.test.XisBootTest;
@@ -167,6 +169,10 @@ class DashboardPageTest {
 
 The test starter needed for this generated code is added automatically by the plugin. Do not add `xis-test` or
 `xis-boot-starter-test` again in a normal plugin-based build.
+
+For additional collaborators, keep the generated style and add test fields with `@InTestContext`, `@Mock`, or `@Spy`.
+If a collaborator should be produced by a factory method, put a XIS `@Bean` method on a scanned test component. For
+fully explicit object graphs or prebuilt instances, use `IntegrationTestContext.builder()` manually instead.
 
 When the project also applies the Groovy plugin, `xisTests` scans Groovy page controllers too and writes Groovy starter
 tests under `src/test/groovy`. Kotlin controllers are scanned for template validation and runtime catalogs; write Kotlin
