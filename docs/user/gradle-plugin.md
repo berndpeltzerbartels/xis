@@ -174,7 +174,9 @@ For additional collaborators, keep the generated style and add test fields with 
 If a collaborator should be produced by a factory method, put a XIS `one.xis.context.Bean` method on a scanned test
 component. The generated test uses the XIS integration-test context; it does not start Spring and does not automatically
 use Spring `org.springframework.context.annotation.Bean` methods. For fully explicit object graphs, Spring-created
-objects, or prebuilt instances, use `IntegrationTestContext.builder()` manually instead.
+objects, or prebuilt instances, use `IntegrationTestContext.builder()` manually instead. See
+[Test A Page](examples-and-tests.md#test-a-page) for copy/paste examples, including Spring `@Configuration` and
+Spring `@Bean` support in a manually built test context.
 
 When the project also applies the Groovy plugin, `xisTests` scans Groovy page controllers too and writes Groovy starter
 tests under `src/test/groovy`. Kotlin controllers are scanned for template validation and runtime catalogs; write Kotlin

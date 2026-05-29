@@ -181,6 +181,51 @@ class ProductPageTest {
 }
 ```
 
+If the application already has a small Spring-style test configuration that you want to reuse, build the test context
+explicitly and tell XIS which annotations should mark configuration classes and factory methods:
+
+```java
+package example.products;
+
+import one.xis.context.IntegrationTestContext;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+class ProductPageTest {
+
+    private IntegrationTestContext context;
+
+    @BeforeEach
+    void setUp() {
+        context = IntegrationTestContext.builder()
+                .withBasePackageClass(ProductPageTest.class)
+                .withComponentAnnotation(Configuration.class)
+                .withBeanMethodAnnotation(Bean.class)
+                .build();
+    }
+
+    @Test
+    void opensProductPage() {
+        var client = context.openPage("/products.html");
+
+        assertEquals("Desk", client.getDocument().getElementById("name").getInnerText());
+    }
+
+    @Configuration
+    static class ProductTestConfig {
+
+        @Bean
+        ProductCatalog productCatalog() {
+            return ProductCatalog.inMemory();
+        }
+    }
+}
+```
+
 For small explicit tests, or for builds that do not use the plugin test starter, create an `IntegrationTestContext`
 yourself with the page controller and the services it needs. You can pass classes, which XIS will instantiate, or
 ready-made instances such as mocks, test containers, or objects that cannot be created by a no-argument constructor or
