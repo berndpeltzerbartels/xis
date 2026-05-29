@@ -11,7 +11,7 @@ Use the plugin when you want the usual XIS layout:
 ```groovy
 plugins {
     id "java"
-    id "one.xis.plugin" version "0.16.0"
+    id "one.xis.plugin" version "0.16.1"
 }
 ```
 
@@ -138,7 +138,9 @@ src/test/java/example/dashboard/DashboardPageTest.java
 ```
 
 The generated test uses `@XisBootTest`, registers the page controller in the XIS test context, and opens the page
-through its `@Page` URL. It is meant as a first executable sketch, not as a finished test suite:
+through its `@Page` URL. The generator does not need separate Spring Boot and XIS Boot variants because the generated
+test runs against the XIS integration-test context in both cases. It is meant as a first executable sketch, not as a
+finished test suite:
 
 ```java
 import one.xis.boot.test.XisBootTest;
@@ -167,6 +169,14 @@ class DashboardPageTest {
 
 The test starter needed for this generated code is added automatically by the plugin. Do not add `xis-test` or
 `xis-boot-starter-test` again in a normal plugin-based build.
+
+For additional collaborators, keep the generated style and add test fields with `@InTestContext`, `@Mock`, or `@Spy`.
+If a collaborator should be produced by a factory method, put a XIS `one.xis.context.Bean` method on a scanned test
+component. The generated test uses the XIS integration-test context; it does not start Spring and does not automatically
+use Spring `org.springframework.context.annotation.Bean` methods. For fully explicit object graphs, Spring-created
+objects, or prebuilt instances, use `IntegrationTestContext.builder()` manually instead. See
+[Test A Page](examples-and-tests.md#test-a-page) for copy/paste examples, including Spring `@Configuration` and
+Spring `@Bean` support in a manually built test context.
 
 When the project also applies the Groovy plugin, `xisTests` scans Groovy page controllers too and writes Groovy starter
 tests under `src/test/groovy`. Kotlin controllers are scanned for template validation and runtime catalogs; write Kotlin
@@ -203,10 +213,11 @@ The current checks cover the places where mistakes are easy to miss in a browser
 
 | Area | Examples |
 | --- | --- |
-| Attribute dependencies | `xis:format` requires `xis:binding`; `xis:error-class` and `xis:error-style` require `xis:binding` or `xis:error-binding`. |
-| Mandatory attributes | `<xis:foreach>` requires `var` and `array`; `<xis:if>` requires `condition`; `<xis:include>` requires `name`; `<xis:frontlet-container>` requires `container-id`. |
+| Attribute dependencies | `xis:error-class` and `xis:error-style` require `xis:binding` or `xis:error-binding`. |
+| Mandatory attributes | Framework elements such as `<xis:foreach>`, `<xis:if>`, `<xis:form>`, `<xis:input>`, `<xis:submit>`, and `<xis:parameter>` must declare the attributes that identify their data, action, or target. See [Element required attributes](tags-and-attributes.md#element-required-attributes). |
 | Attribute syntax | `xis:foreach`, `xis:repeat`, and `xis:drag` use `name:expression`; `xis:drop` uses `actionName(...)`. |
 | Framework element syntax | `<xis:a>` and `<xis:button>` need a navigation or action target; `<xis:parameter>` needs `name`; storage bindings need a supported store. |
+| Unknown framework elements | Unknown `xis:*` elements fail validation so typos such as `<xis:for-each>` do not silently render as inert HTML. |
 | Attribute placement | navigation attributes belong on links or buttons; form bindings belong on form controls or labels. |
 | Selection styling | `xis:selection-class` needs a surrounding `xis:selection-group`. |
 | Template data | expressions such as `${customer.firstName}` must have matching `@ModelData`; exposed model/form data must be used by the template. |
@@ -287,7 +298,7 @@ Without the plugin, add the dependency that matches the style of test you want:
 
 ```groovy
 dependencies {
-    testImplementation "one.xis:xis-boot-starter-test:0.14.0"
+    testImplementation "one.xis:xis-boot-starter-test:0.16.1"
 }
 ```
 

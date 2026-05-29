@@ -10,7 +10,7 @@ frontlet, action, form, and navigation APIs stay the same.
 ```groovy
 plugins {
     id "java"
-    id "one.xis.plugin" version "0.16.0"
+    id "one.xis.plugin" version "0.16.1"
 }
 
 repositories {
@@ -30,7 +30,7 @@ plugins {
     id "java"
     id "org.springframework.boot" version "3.3.0"
     id "io.spring.dependency-management" version "1.1.5"
-    id "one.xis.plugin" version "0.16.0"
+    id "one.xis.plugin" version "0.16.1"
 }
 
 repositories {
@@ -356,10 +356,10 @@ template.
 The form binding, field bindings, hidden `state`, and `login` action name belong to the framework contract. The
 surrounding markup, labels, layout, CSS classes, and text are application design.
 
-Local login uses normal XIS validation. The built-in login form object is annotated with `@Login`; when credentials are
-wrong, the login action is not executed and a global validation message is returned. Render it with
-`<xis:global-messages/>` inside the `login` form. Field messages and error highlighting use the same tags and attributes
-as any other form: `xis:message-for`, `xis:error-class`, `xis:error-style`, and `xis:error-binding`.
+Local login uses normal XIS validation. When credentials are wrong, the login action is not executed and a global
+validation message is returned. Render it with `<xis:global-messages/>` inside the `login` form. Field messages and error
+highlighting use the same tags and attributes as any other form: `xis:message-for`, `xis:error-class`,
+`xis:error-style`, and `xis:error-binding`.
 
 `<xis:global-messages/>` always renders a list structure when messages exist, even if there is only one message. This
 keeps the DOM shape predictable for templates and CSS. If the login page should look like a single alert, style the

@@ -29,7 +29,7 @@ plugins {
     id "java"
     id "org.springframework.boot" version "3.3.0"
     id "io.spring.dependency-management" version "1.1.5"
-    id "one.xis.plugin" version "0.16.0"
+    id "one.xis.plugin" version "0.16.1"
 }
 
 group = "example"
@@ -296,11 +296,9 @@ import one.xis.validation.EMail;
 import one.xis.validation.LabelKey;
 import one.xis.validation.Mandatory;
 
-record CustomerForm(
-        Long id,
+record CustomerForm(Long id,
         @Mandatory @LabelKey("customer.name") String name,
-        @Mandatory @EMail @LabelKey("customer.email") String email
-) {
+        @Mandatory @EMail @LabelKey("customer.email") String email) {
 }
 ```
 

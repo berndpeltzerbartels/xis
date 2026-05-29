@@ -41,9 +41,6 @@ class AttributesFactory {
             if (parameter.isAnnotationPresent(ClientState.class)) {
                 attributes.getClientStateKeys().add(parameter.getAnnotation(ClientState.class).value());
             }
-            if (parameter.isAnnotationPresent(LocalDatabase.class)) {
-                attributes.getLocalDatabaseKeys().add(parameter.getAnnotation(LocalDatabase.class).value());
-            }
         }
     }
 

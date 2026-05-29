@@ -2,6 +2,30 @@
 
 ## Unreleased
 
+## 0.16.1 - 2026-05-29
+
+### Changed
+
+- Removed unused public API annotations and hooks that were not fully supported, including `@MainClass`, `@CssFile`,
+  `@JavascriptExtension`, and `@LocalDatabase`.
+- Removed the unused `FrontletResponse.reloadFrontlet` shortcut to avoid confusion with targeted container/frontlet
+  reloads.
+- Clarified distributed configuration by documenting the current `hosts` and `origins` setup for XIS Boot and Spring
+  Boot applications.
+
+### Fixed
+
+- Server-side action errors are now surfaced through the built-in toast message UI instead of being left only in the
+  rendered page markup.
+- `@XisBootTest` integration contexts now support custom annotations in scanned test applications.
+- Template validation now rejects unknown `xis:*` elements instead of silently accepting misspelled framework tags.
+
+### Documentation
+
+- Expanded the annotation, tag, attribute, EL function, include, HTTP controller, and response API documentation.
+- Documented generated test setup, Spring bean handling in XIS tests, and release E2E expectations.
+- Updated documented Gradle plugin and dependency examples to `0.16.1`.
+
 ## 0.16.0 - 2026-05-27
 
 ### Added

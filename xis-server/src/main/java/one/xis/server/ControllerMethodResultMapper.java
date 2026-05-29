@@ -175,10 +175,6 @@ class ControllerMethodResultMapper {
         if (frontletResponse.getTargetContainer() != null) {
             result.setFrontletContainerId(frontletResponse.getTargetContainer());
         }
-        if (frontletResponse.getFrontletsToReload() != null) {
-            result.getFrontletsToReload().addAll(frontletResponse.getFrontletsToReload());
-        }
-
         if (frontletResponse.getFrontletParameters() != null) {
             result.getFrontletParameters().putAll(frontletResponse.getFrontletParameters());
         }

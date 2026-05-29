@@ -87,8 +87,7 @@ class ControllerMethod {
                 || parameter.isAnnotationPresent(SharedValue.class)
                 || parameter.isAnnotationPresent(SessionStorage.class)
                 || parameter.isAnnotationPresent(LocalStorage.class)
-                || parameter.isAnnotationPresent(ClientState.class)
-                || parameter.isAnnotationPresent(LocalDatabase.class);
+                || parameter.isAnnotationPresent(ClientState.class);
     }
 
     ControllerMethodResult invoke(@NonNull ClientRequest request, @NonNull Object controller, ControllerResult controllerResult) throws Exception {

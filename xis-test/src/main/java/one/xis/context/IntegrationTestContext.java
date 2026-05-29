@@ -16,6 +16,7 @@ import one.xis.server.PageUtil;
 import one.xis.test.js.LocalStorage;
 import one.xis.test.js.SessionStorage;
 
+import java.lang.annotation.Annotation;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -35,8 +36,13 @@ public class IntegrationTestContext {
         return new Builder();
     }
 
-    IntegrationTestContext(Collection<String> packages, UserInfo userInfo, Collection<Object> singletons) {
-        this.appContext = internalContext(packages, singletons);
+    IntegrationTestContext(Collection<String> packages, UserInfo userInfo, Collection<Object> singletons,
+                           Collection<Class<? extends Annotation>> componentAnnotations,
+                           Collection<Class<? extends Annotation>> beanMethodAnnotations,
+                           Collection<Class<? extends Annotation>> beanInitAnnotations,
+                           Collection<Class<? extends Annotation>> dependencyFieldAnnotations) {
+        this.appContext = internalContext(packages, singletons, componentAnnotations, beanMethodAnnotations,
+                beanInitAnnotations, dependencyFieldAnnotations);
         this.userInfo = userInfo;
         this.backendBridge = new BackendBridge(appContext.getSingleton(RestControllerService.class));
         this.primaryClient = createClient();
@@ -167,10 +173,18 @@ public class IntegrationTestContext {
         return appContext.getSingletons().stream().filter(type::isInstance).toList();
     }
 
-    private AppContext internalContext(Collection<String> packages, Collection<Object> singletons) {
+    private AppContext internalContext(Collection<String> packages, Collection<Object> singletons,
+                                       Collection<Class<? extends Annotation>> componentAnnotations,
+                                       Collection<Class<? extends Annotation>> beanMethodAnnotations,
+                                       Collection<Class<? extends Annotation>> beanInitAnnotations,
+                                       Collection<Class<? extends Annotation>> dependencyFieldAnnotations) {
         var builder = AppContextBuilder.createInstance()
                 .withXIS()
                 .withSingleton(new UserContextFaker());
+        componentAnnotations.forEach(builder::withComponentAnnotation);
+        beanMethodAnnotations.forEach(builder::withBeanMethodAnnotation);
+        beanInitAnnotations.forEach(builder::withBeanInitAnnotation);
+        dependencyFieldAnnotations.forEach(builder::withDependencyFieldAnnotation);
         if (!containsUserInfoService(singletons)) {
             builder.withSingletonClass(TestUserInfoService.class);
         }
@@ -200,6 +214,10 @@ public class IntegrationTestContext {
         private final Collection<Object> singletons = new HashSet<>();
         private final Collection<String> packages = new HashSet<>();
         private final Collection<String> ignorePackages = new HashSet<>();
+        private final Collection<Class<? extends Annotation>> componentAnnotations = new HashSet<>();
+        private final Collection<Class<? extends Annotation>> beanMethodAnnotations = new HashSet<>();
+        private final Collection<Class<? extends Annotation>> beanInitAnnotations = new HashSet<>();
+        private final Collection<Class<? extends Annotation>> dependencyFieldAnnotations = new HashSet<>();
         private UserInfo userInfo;
         private String userPassword;
 
@@ -222,7 +240,8 @@ public class IntegrationTestContext {
         }
 
         public IntegrationTestContext build() {
-            return new IntegrationTestContext(packages, userInfo, singletons);
+            return new IntegrationTestContext(packages, userInfo, singletons, componentAnnotations,
+                    beanMethodAnnotations, beanInitAnnotations, dependencyFieldAnnotations);
         }
 
         public Builder withPackage(String packageName) {
@@ -242,6 +261,38 @@ public class IntegrationTestContext {
 
         public Builder withoutBasePackageClass(Class<?> type) {
             ignorePackages.add(type.getPackageName());
+            return this;
+        }
+
+        /**
+         * Adds an annotation that marks scanned classes as XIS context components.
+         */
+        public Builder withComponentAnnotation(Class<? extends Annotation> annotation) {
+            componentAnnotations.add(annotation);
+            return this;
+        }
+
+        /**
+         * Adds an annotation that marks methods as bean factory methods.
+         */
+        public Builder withBeanMethodAnnotation(Class<? extends Annotation> annotation) {
+            beanMethodAnnotations.add(annotation);
+            return this;
+        }
+
+        /**
+         * Adds an annotation that marks methods as initialization callbacks.
+         */
+        public Builder withBeanInitAnnotation(Class<? extends Annotation> annotation) {
+            beanInitAnnotations.add(annotation);
+            return this;
+        }
+
+        /**
+         * Adds an annotation that marks fields as dependency injection points.
+         */
+        public Builder withDependencyFieldAnnotation(Class<? extends Annotation> annotation) {
+            dependencyFieldAnnotations.add(annotation);
             return this;
         }
 

@@ -6,13 +6,21 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation to indicate that a method parameter or method return value should be bound to a specific HTTP response header.
- * This is typically used in RESTful web services to set values in HTTP response headers.
+ * Adds a fixed HTTP response header to a plain HTTP controller method.
+ *
+ * <p>This annotation is for static method-level headers. Use {@link ResponseEntity#addHeader(String, String)} when the
+ * header value depends on the request or on computed data.</p>
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD})
 public @interface ResponseHeader {
+    /**
+     * Header name.
+     */
     String name();
 
+    /**
+     * Header value.
+     */
     String value();
 }

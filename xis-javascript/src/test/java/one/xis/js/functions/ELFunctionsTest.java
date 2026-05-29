@@ -68,6 +68,20 @@ class ELFunctionsTest {
             var result = evaluate("length(value)", "{}");
             assertThat(result.asInt()).isEqualTo(0);
         }
+
+        @Test
+        @DisplayName("size is alias for length")
+        void sizeAlias() throws ScriptException {
+            var result = evaluate("size(items)", "{items: [1, 2, 3]}");
+            assertThat(result.asInt()).isEqualTo(3);
+        }
+
+        @Test
+        @DisplayName("count is alias for length")
+        void countAlias() throws ScriptException {
+            var result = evaluate("count(text)", "{text: 'hello'}");
+            assertThat(result.asInt()).isEqualTo(5);
+        }
     }
 
     @Nested
@@ -306,11 +320,18 @@ class ELFunctionsTest {
             var result = evaluate("formatDate(date)", "{date: null}");
             assertThat(result.asString()).isEqualTo("");
         }
+
+        @Test
+        @DisplayName("format time")
+        void formatTime() throws ScriptException {
+            var result = evaluate("formatTime(date, locale)", "{date: new Date('2026-01-07T12:30:00'), locale: 'de-DE'}");
+            assertThat(result.asString()).isEqualTo("12:30");
+        }
     }
 
     @Nested
-    @DisplayName("join()")
-    class JoinTest {
+    @DisplayName("string and array functions")
+    class StringArrayFunctionsTest {
 
         @Test
         @DisplayName("join with comma")
@@ -345,6 +366,63 @@ class ELFunctionsTest {
         void joinNumbers() throws ScriptException {
             var result = evaluate("join(numbers, '-')", "{numbers: [1, 2, 3, 4, 5]}");
             assertThat(result.asString()).isEqualTo("1-2-3-4-5");
+        }
+
+        @Test
+        @DisplayName("split string")
+        void splitString() throws ScriptException {
+            var result = evaluate("split(text, ',')", "{text: 'a,b,c'}");
+            assertThat(result.hasArrayElements()).isTrue();
+            assertThat(result.getArraySize()).isEqualTo(3);
+            assertThat(result.getArrayElement(0).asString()).isEqualTo("a");
+            assertThat(result.getArrayElement(2).asString()).isEqualTo("c");
+        }
+
+        @Test
+        @DisplayName("substring string")
+        void substringString() throws ScriptException {
+            var result = evaluate("substring(text, 1, 4)", "{text: 'abcdef'}");
+            assertThat(result.asString()).isEqualTo("bcd");
+        }
+
+        @Test
+        @DisplayName("trim string")
+        void trimString() throws ScriptException {
+            var result = evaluate("trim(text)", "{text: '  hello  '}");
+            assertThat(result.asString()).isEqualTo("hello");
+        }
+    }
+
+    @Nested
+    @DisplayName("number functions")
+    class NumberFunctionsTest {
+
+        @Test
+        @DisplayName("round with digits")
+        void roundWithDigits() throws ScriptException {
+            var result = evaluate("round(value, 2)", "{value: 12.345}");
+            assertThat(result.asDouble()).isEqualTo(12.35);
+        }
+
+        @Test
+        @DisplayName("floor value")
+        void floorValue() throws ScriptException {
+            var result = evaluate("floor(value)", "{value: 12.9}");
+            assertThat(result.asInt()).isEqualTo(12);
+        }
+
+        @Test
+        @DisplayName("ceil value")
+        void ceilValue() throws ScriptException {
+            var result = evaluate("ceil(value)", "{value: 12.1}");
+            assertThat(result.asInt()).isEqualTo(13);
+        }
+
+        @Test
+        @DisplayName("absolute value")
+        void absoluteValue() throws ScriptException {
+            var result = evaluate("abs(value)", "{value: -7}");
+            assertThat(result.asInt()).isEqualTo(7);
         }
     }
 
@@ -432,6 +510,20 @@ class ELFunctionsTest {
             var result = evaluate("isEmpty(value)", "{}");
             assertThat(result.asBoolean()).isTrue();
         }
+
+        @Test
+        @DisplayName("empty is alias for isEmpty")
+        void emptyAlias() throws ScriptException {
+            var result = evaluate("empty(items)", "{items: []}");
+            assertThat(result.asBoolean()).isTrue();
+        }
+
+        @Test
+        @DisplayName("notEmpty returns true for non-empty values")
+        void notEmptyValue() throws ScriptException {
+            var result = evaluate("notEmpty(items)", "{items: [1]}");
+            assertThat(result.asBoolean()).isTrue();
+        }
     }
 
     @Nested
@@ -471,6 +563,72 @@ class ELFunctionsTest {
         void defaultValueReturnsZero() throws ScriptException {
             var result = evaluate("defaultValue(number, defaultValue)", "{number: 0, defaultValue: 42}");
             assertThat(result.asInt()).isEqualTo(0);
+        }
+
+        @Test
+        @DisplayName("default is alias for defaultValue")
+        void defaultAlias() throws ScriptException {
+            var result = evaluate("default(text, 'fallback')", "{text: ''}");
+            assertThat(result.asString()).isEqualTo("fallback");
+        }
+    }
+
+    @Nested
+    @DisplayName("object and array functions")
+    class ObjectAndArrayFunctionsTest {
+
+        @Test
+        @DisplayName("arrayOf creates inclusive integer range")
+        void arrayOfCreatesRange() throws ScriptException {
+            var result = evaluate("arrayOf(2, 5)", "{}");
+            assertThat(result.hasArrayElements()).isTrue();
+            assertThat(result.getArraySize()).isEqualTo(4);
+            assertThat(result.getArrayElement(0).asInt()).isEqualTo(2);
+            assertThat(result.getArrayElement(3).asInt()).isEqualTo(5);
+        }
+
+        @Test
+        @DisplayName("keys returns object keys")
+        void keysReturnsObjectKeys() throws ScriptException {
+            var result = evaluate("keys(user)", "{user: {id: 7, name: 'Ada'}}");
+            assertThat(result.hasArrayElements()).isTrue();
+            assertThat(result.getArraySize()).isEqualTo(2);
+            assertThat(result.getArrayElement(0).asString()).isEqualTo("id");
+            assertThat(result.getArrayElement(1).asString()).isEqualTo("name");
+        }
+
+        @Test
+        @DisplayName("values returns object values")
+        void valuesReturnsObjectValues() throws ScriptException {
+            var result = evaluate("values(user)", "{user: {id: 7, name: 'Ada'}}");
+            assertThat(result.hasArrayElements()).isTrue();
+            assertThat(result.getArraySize()).isEqualTo(2);
+            assertThat(result.getArrayElement(0).asInt()).isEqualTo(7);
+            assertThat(result.getArrayElement(1).asString()).isEqualTo("Ada");
+        }
+
+        @Test
+        @DisplayName("hasKey checks own object keys")
+        void hasKeyChecksOwnKeys() throws ScriptException {
+            var result = evaluate("hasKey(user, 'name')", "{user: {id: 7, name: 'Ada'}}");
+            assertThat(result.asBoolean()).isTrue();
+        }
+    }
+
+    @Nested
+    @DisplayName("date extractor functions")
+    class DateExtractorFunctionsTest {
+
+        @Test
+        @DisplayName("extract date parts")
+        void extractDateParts() throws ScriptException {
+            var data = "{date: new Date('2026-01-07T12:30:00')}";
+
+            assertThat(evaluate("year(date)", data).asInt()).isEqualTo(2026);
+            assertThat(evaluate("month(date)", data).asInt()).isEqualTo(1);
+            assertThat(evaluate("day(date)", data).asInt()).isEqualTo(7);
+            assertThat(evaluate("hour(date)", data).asInt()).isEqualTo(12);
+            assertThat(evaluate("minute(date)", data).asInt()).isEqualTo(30);
         }
     }
 

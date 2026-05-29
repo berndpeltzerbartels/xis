@@ -165,8 +165,7 @@ public class ControllerWrapper {
             var controllerMethodResult = method.invoke(request, controller, controllerResult);
             if (controllerMethodResult.getNextURL() != null) {
                 controllerResult.setActionProcessing(ActionProcessing.PAGE);
-            } else if (controllerMethodResult.getNextFrontletId() != null
-                    || !controllerMethodResult.getFrontletsToReload().isEmpty()) {
+            } else if (controllerMethodResult.getNextFrontletId() != null) {
                 controllerResult.setActionProcessing(ActionProcessing.FRONTLET);
             } else if (controllerMethodResult.getNextModalId() != null
                     || controllerMethodResult.isCloseModal()

@@ -6,11 +6,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates that an annotated class is a component, originally
- * defined by the XIS framework.
- * <p>
- * Such classes are considered as candidates for auto-detection
- * when using annotation-based configuration and classpath scanning.
+ * Marks a class or composed annotation as a XIS context component.
+ *
+ * <p>Component classes are candidates for package scanning, dependency injection, lifecycle callbacks, and constructor
+ * injection. Higher-level stereotypes such as {@link Service} and controller annotations build on this annotation.</p>
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.ANNOTATION_TYPE})

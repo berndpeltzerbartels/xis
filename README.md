@@ -215,7 +215,6 @@ complete and intentionally detailed.
 - [Modals with `@Modal`](docs/user/modals.md)
 - [Routers with `@Router` and `@Route`](docs/user/routers.md)
 - [Page and frontlet titles with `@Title`](docs/user/annotations.md#method-annotations)
-- [CSS files with `@CssFile`](docs/user/annotations.md#class-annotations)
 
 ### Controller Data And Actions
 
@@ -281,6 +280,7 @@ complete and intentionally detailed.
 - [`xis:modal`](docs/user/tags-and-attributes.md#modals)
 - [`xis:frontlet-container`](docs/user/tags-and-attributes.md#frontlets)
 - [`xis:default-frontlet`](docs/user/tags-and-attributes.md#frontlets)
+- [`xis:scroll-to-top`](docs/user/tags-and-attributes.md#frontlets)
 - [`xis:frontlet`](docs/user/tags-and-attributes.md#frontlets)
 - [`xis:target-container`](docs/user/tags-and-attributes.md#frontlets)
 - [`xis:include`](docs/user/tags-and-attributes.md#includes)
@@ -346,7 +346,6 @@ complete and intentionally detailed.
 - [`@LocalStorage`](docs/user/annotations.md#browser-storage-parameters)
 - [`@SessionStorage`](docs/user/annotations.md#browser-storage-parameters)
 - [`@ClientState`](docs/user/annotations.md#browser-storage-parameters)
-- [`@LocalDatabase`](docs/user/annotations.md#method-annotations)
 - [Storage bindings in templates](docs/user/tags-and-attributes.md#client-state)
 - [Integration-test browser storage](docs/user/advanced/integration-test-browser.md#storage)
 
@@ -392,7 +391,6 @@ complete and intentionally detailed.
 - [Google](docs/user/security.md#google)
 - [XIS as an OpenID Connect provider](docs/user/security.md#xis-as-an-openid-connect-provider)
 - [SSO in distributed XIS applications](docs/user/security.md#sso-in-distributed-xis-applications)
-- [Authentication helper annotations such as `@Login` and `@IDPLoginData`](docs/user/security.md)
 
 ### Plain HTTP Endpoints For External Clients
 
@@ -419,7 +417,6 @@ complete and intentionally detailed.
 - [`@ImportInstances`](docs/user/annotations.md#advanced-and-rarely-needed-annotations)
 - [Custom proxies](docs/user/advanced/custom-proxies.md)
 - [Aspects and interface advice](docs/user/advanced/aspects.md)
-- [`@JavascriptExtension`](docs/user/annotations.md#class-annotations)
 - [Custom JavaScript extension files](docs/user/advanced/custom-javascript.md#register-extension-files)
 - [Custom EL functions](docs/user/advanced/custom-javascript.md#add-custom-el-functions)
 - [Submitting XIS forms from JavaScript](docs/user/advanced/custom-javascript.md#submit-a-xis-form-from-javascript)
@@ -450,7 +447,6 @@ shown in the link text.
 - [`@Authenticated`](docs/user/annotations.md#class-annotations)
 - [`@ClientId`](docs/user/annotations.md#parameter-field-and-record-component-annotations)
 - [`@ClientState`](docs/user/annotations.md#browser-storage-parameters)
-- [`@CssFile`](docs/user/annotations.md#class-annotations)
 - [`@DefaultHtmlFile`](docs/user/template-location-and-mapping.md#default-templates)
 - [`@FormData`](docs/user/forms-and-validation.md#basic-form-binding)
 - [`@Frontlet`](docs/user/core-model.md#frontlets)
@@ -458,10 +454,7 @@ shown in the link text.
 - [`@HtmlFile`](docs/user/template-location-and-mapping.md#explicit-template-with-htmlfile)
 - [`@ImportInstances`](docs/user/annotations.md#advanced-and-rarely-needed-annotations)
 - [`@Include`](docs/user/core-model.md#includes)
-- [`@JavascriptExtension`](docs/user/advanced/custom-javascript.md#register-extension-files)
-- [`@LocalDatabase`](docs/user/annotations.md#method-annotations)
 - [`@LocalStorage`](docs/user/annotations.md#browser-storage-parameters)
-- [`@MainClass`](docs/user/annotations.md#advanced-and-rarely-needed-annotations)
 - [`@Modal`](docs/user/modals.md)
 - [`@ModelData`](docs/user/core-model.md#model-data)
 - [`@NullAllowed`](docs/user/annotations.md#parameter-field-and-record-component-annotations)
@@ -555,10 +548,8 @@ shown in the link text.
 - [`@MongoRepository`](docs/user/mongodb.md#repositories)
 - [`@MongoWatch`](docs/user/mongodb.md#change-streams)
 
-### Security And Test Support
+### Test Support
 
-- [`@Login`](docs/user/security.md)
-- [`@IDPLoginData`](docs/user/security.md)
 - [`@XisBootTest`](docs/user/examples-and-tests.md)
 - [`one.xis.test.@InTestContext`](docs/user/examples-and-tests.md)
 - [`one.xis.test.@Mock`](docs/user/examples-and-tests.md)

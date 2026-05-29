@@ -453,27 +453,8 @@ Nested frontlets can also read frontlet parameters from their containing frontle
 establishes the surrounding context, such as the currently selected project or pipeline, and an inner frontlet only adds
 its own more specific parameters.
 
-Reload another frontlet by ID:
-
-This is only needed for another already visible frontlet that would not be refreshed by the normal action response. You
-do not need it for the current page, the current frontlet, or a child frontlet that is already refreshed through its
-parent.
-
-```java
-@Action
-FrontletResponse save(@FormData("product") ProductForm product) {
-    productService.save(product);
-    return new FrontletResponse()
-            .reloadFrontlet("ProductListFrontlet");
-}
-```
-
 A frontlet action can also update another frontlet container. Use a target container on the action control, or set it in
 the response:
-
-`reloadFrontlet(...)` affects the current browser after the action response. It is not the mechanism for refreshing the
-frontlet that handled the action; that happens automatically. For server-triggered updates across several browser
-clients, use [events](events.md).
 
 ```html
 <button xis:action="showPreview" xis:target-container="preview">

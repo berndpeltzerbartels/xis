@@ -56,7 +56,6 @@ class ControllerResultMapper {
         controllerResult.getUrlParameters().putAll(controllerMethodResult.getUrlParameters());
         controllerResult.getValidatorMessages().getGlobalMessages().addAll(controllerMethodResult.getValidatorMessages().getGlobalMessages());
         controllerResult.getValidatorMessages().getMessages().putAll(controllerMethodResult.getValidatorMessages().getMessages());
-        controllerResult.getFrontletsToReload().addAll(controllerMethodResult.getFrontletsToReload());
         controllerResult.getSessionStorage().putAll(controllerMethodResult.getSessionStorage());
         controllerResult.getLocalStorage().putAll(controllerMethodResult.getLocalStorage());
         controllerResult.getClientState().putAll(controllerMethodResult.getClientState());

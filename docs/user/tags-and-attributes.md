@@ -132,6 +132,16 @@ Pass action parameters with child tags:
 </button>
 ```
 
+When `value` is omitted, XIS uses the text content of `<xis:parameter>` as the value. Use the `value` attribute for
+short expressions and the text form when the value is easier to read as element content.
+
+```html
+<xis:action action="search">
+    <xis:parameter name="query">${searchText}</xis:parameter>
+    Search
+</xis:action>
+```
+
 ### Drag and Drop Actions
 
 Use `xis:drag` and `xis:drop` for simple drag-and-drop actions. The drag element defines one value and gives it a name.
@@ -194,6 +204,18 @@ Element syntax:
 ```html
 <xis:frontlet-container container-id="main" default-frontlet="ProductListFrontlet"/>
 ```
+
+Add `xis:scroll-to-top="true"` to an attribute-style frontlet container when switching the container to another
+frontlet should scroll the browser window back to the top. The initial default-frontlet load does not scroll; the scroll
+happens when the user opens another frontlet in that container.
+
+```html
+<main xis:frontlet-container="main"
+      xis:default-frontlet="ProductListFrontlet"
+      xis:scroll-to-top="true"></main>
+```
+
+With element syntax the same option is written as `scroll-to-top="true"` on `<xis:frontlet-container>`.
 
 Short frontlet include syntax creates a container whose default frontlet is the given frontlet:
 
@@ -258,6 +280,10 @@ Element syntax:
 ```html
 <xis:include name="header"/>
 ```
+
+The value is the key of an include registered with `@Include`, not an arbitrary resource path. Templates cannot include
+files by moving through resource directories; application code must explicitly expose each reusable fragment with the
+annotation.
 
 The included markup is initialized in the surrounding page or frontlet. It may contain XIS links, action buttons,
 parameters, and model expressions that belong to that surrounding controller. Use frontlets when the fragment needs its
@@ -423,6 +449,14 @@ state should intentionally live in the browser.
 </section>
 ```
 
+Element syntax wraps the content that should be refreshed when that store changes:
+
+```html
+<xis:storage-binding store="localStorage">
+    <span>${defaultValue(localStorage.cart.count, '0')}</span>
+</xis:storage-binding>
+```
+
 Supported stores are `localStorage`, `sessionStorage`, and `clientState`.
 
 XIS does not send the whole browser store to the server. It sends the keys that the current page or frontlet declares
@@ -446,6 +480,35 @@ Use `text="true"` to insert the raw content as plain text:
 <xis:raw text="true"><strong>Shown as text</strong></xis:raw>
 ```
 
+## Element Required Attributes
+
+Some framework elements need one or more attributes so XIS can bind them to a controller method, model value, or target
+container. The template validator reports these cases during the build.
+
+| Element | Required attributes |
+| --- | --- |
+| `<xis:a>` | One of `page`, `frontlet`, or `modal` |
+| `<xis:action>` | `action` |
+| `<xis:button>` | One of `page`, `frontlet`, `modal`, or `action` |
+| `<xis:checkbox>` | `binding` |
+| `<xis:foreach>` | `var` and `array` |
+| `<xis:form>` | `binding` |
+| `<xis:frontlet>` | `name` |
+| `<xis:frontlet-container>` | `container-id` |
+| `<xis:if>` | `condition` |
+| `<xis:include>` | `name` |
+| `<xis:input>` | `binding` |
+| `<xis:message>` | `message-for` |
+| `<xis:parameter>` | `name`; `value` is optional because the element text can be used as the value |
+| `<xis:radio>` | `binding` |
+| `<xis:select>` | `binding` |
+| `<xis:storage-binding>` | `store`, one of `localStorage`, `sessionStorage`, or `clientState` |
+| `<xis:submit>` | `action` |
+| `<xis:textarea>` | `binding` |
+
+`<xis:global-messages>` and `<xis:raw>` do not require attributes. `<xis:raw>` supports optional `text="true"` when the
+content should be inserted as plain text instead of trusted HTML.
+
 ## Quick Reference
 
 | Behavior | Attribute syntax | Element syntax |
@@ -462,6 +525,7 @@ Use `text="true"` to insert the raw content as plain text:
 | Frontlet button | `<button xis:frontlet="DetailsFrontlet">` | `<xis:button frontlet="DetailsFrontlet">` |
 | Frontlet container | `xis:frontlet-container="main"` | `<xis:frontlet-container container-id="main">` |
 | Default frontlet | `xis:default-frontlet="ListFrontlet"` | `default-frontlet="ListFrontlet"` |
+| Scroll frontlet container to top on frontlet switch | `xis:scroll-to-top="true"` | `scroll-to-top="true"` |
 | Include | `xis:include="header"` | `<xis:include name="header">` |
 | Form | `<form xis:binding="product">` | `<xis:form binding="product">` |
 | Input | `<input xis:binding="name">` | `<xis:input binding="name">` |

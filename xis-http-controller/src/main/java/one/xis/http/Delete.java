@@ -7,11 +7,16 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation to indicate that a method should handle HTTP DELETE requests.
- * This is typically used in RESTful web services to retrieve resources.
+ * Maps a plain HTTP controller method to an HTTP {@code DELETE} route.
+ *
+ * <p>Use this for endpoints that remove or cancel resources for external applications or scripts. The value is the
+ * route path, optionally containing path variables such as {@code /api/customers/{id}}.</p>
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface Delete {
+    /**
+     * Route path relative to the controller base path.
+     */
     String value();
 }

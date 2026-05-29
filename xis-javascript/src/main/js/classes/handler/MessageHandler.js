@@ -23,7 +23,7 @@ class MessageHandler {
     }
 
     reportServerError(message) {
-        this.addErrorMessage(message);
+        this.showToast(message, 'error');
     }
 
     /**

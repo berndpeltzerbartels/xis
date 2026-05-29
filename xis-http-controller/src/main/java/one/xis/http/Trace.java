@@ -7,11 +7,16 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation to indicate that a method should handle HTTP TRACE requests.
- * This is typically used in RESTful web services to retrieve resources.
+ * Maps a plain HTTP controller method to an HTTP {@code TRACE} route.
+ *
+ * <p>TRACE is rarely needed in application code. Expose it only when an integration or diagnostic endpoint explicitly
+ * requires it.</p>
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface Trace {
+    /**
+     * Route path relative to the controller base path.
+     */
     String value();
 }

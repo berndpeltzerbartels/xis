@@ -70,19 +70,6 @@ class FrontletContainers {
         return Promise.all(promises);
     }
 
-    handleReloadFrontlets(frontletIds) {
-        if (!frontletIds || frontletIds.length === 0) {
-            return Promise.resolve([]);
-        }
-        const promises = [];
-        frontletIds.forEach(frontletId => {
-            const handlers = this.findActiveContainerHandlersByFrontletId(frontletId);
-            handlers.forEach(handler => promises.push(handler.refreshForUpdateEvent()));
-        });
-        return Promise.all(promises);
-    }
-
-
     frontletIdForUpdateEvent(eventId) {
         var frontletIds = [];
         for (var frontletId of Object.keys(this.config.frontletAttributes)) {

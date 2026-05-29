@@ -3,9 +3,9 @@ package one.xis;
 import java.lang.annotation.*;
 
 /**
- * Exactly one of the pages of the app has to be annotated with
- * this one. That page will be displayed as a default if no other
- * url-mapping matches.
+ * Marks the page that should be shown when no more specific page URL matches.
+ *
+ * <p>An application should have at most one welcome page. The annotated class must also be a {@link Page} controller.</p>
  */
 @Documented
 @Target(ElementType.TYPE)

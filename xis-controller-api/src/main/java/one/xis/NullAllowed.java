@@ -4,7 +4,11 @@ import java.lang.annotation.*;
 
 
 /**
- * Annotation to indicate that a parameter of a controller method is allowed to be null.
+ * Allows XIS to inject {@code null} into a controller method parameter.
+ *
+ * <p>By default, framework-supplied parameters and storage values are usually created or converted before invocation.
+ * Add this annotation when {@code null} is a meaningful value, for example when a missing client-side storage value
+ * should be handled explicitly by the action method.</p>
  */
 @Documented
 @Target(ElementType.PARAMETER)

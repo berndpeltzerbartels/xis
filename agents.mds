@@ -159,14 +159,9 @@ Keep these cases distinct in code, docs, and tests:
 - `publishToUser` targets all connected clients of one authenticated user and therefore requires authentication.
 - `publishToAllUsers` targets authenticated clients only.
 
-`FrontletResponse.reloadFrontlet(...)` is not a broadcast event. It is an action-response special case for refreshing
-another already visible frontlet in the current browser. Do not describe it as needed for the current page or the
-frontlet that handled the action; those are updated by the normal action response. Use it for a separate frontlet that is
-not otherwise refreshed, for example a header cart summary after an action in a product-list frontlet.
-
 For page actions, the normal action response refreshes the page and its visible frontlets. Do not process action
-`updateEventKeys` or explicit frontlet reloads again after that page refresh, otherwise frontlets can load twice. For
-frontlet actions, update events still matter because only the handling frontlet is refreshed automatically.
+`updateEventKeys` again after that page refresh, otherwise frontlets can load twice. For frontlet actions, update events
+still matter because only the handling frontlet is refreshed automatically.
 
 When changing refresh behavior, inspect both sides:
 
@@ -174,7 +169,7 @@ When changing refresh behavior, inspect both sides:
   `SseService`, `MainController`, and
   `ControllerWrapper`
 - browser: `SseConnector`, `PageController.handleUpdateEvents`, `FrontletContainers.handleUpdateEvents`,
-  `FrontletContainerHandler.handleActionResponse`, and `FrontletResponse.reloadFrontlet` handling
+  and `FrontletContainerHandler.handleActionResponse`
 
 SSE connections must not silently stay dead. The browser reconnects closed `/xis/events` streams with backoff and also
 checks configured event streams before normal XIS HTTP requests. A failed SSE reconnect must not swallow the HTTP

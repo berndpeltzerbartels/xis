@@ -105,7 +105,6 @@ class FrontletContainerHandler extends TagHandler {
                     .then(() => this.bindNextFrontletIfNeeded(nextFrontletId))
                     .then(() => this.reloadDataAndRefresh(parentData))
                     .then(() => this.updatePageMetadata(response))
-                    .then(() => app.frontletContainers.handleReloadFrontlets(response.reloadFrontlets))
                     .then(() => app.pageController.handleUpdateEventsNow(response.updateEventKeys))
                     .then(pageUpdated => this.handleFrontletContainerUpdates(pageUpdated, response.updateEventKeys))
                     .then(() => this.commitBuffer());
@@ -113,7 +112,6 @@ class FrontletContainerHandler extends TagHandler {
                 // Kein Frontlet-Wechsel: in-place refresh, kein DOM-Flackern
                 return this.refreshDescendantHandlers(data)
                     .then(() => this.updatePageMetadata(response))
-                    .then(() => app.frontletContainers.handleReloadFrontlets(response.reloadFrontlets))
                     .then(() => app.pageController.handleUpdateEventsNow(response.updateEventKeys))
                     .then(pageUpdated => this.handleFrontletContainerUpdates(pageUpdated, response.updateEventKeys));
             }

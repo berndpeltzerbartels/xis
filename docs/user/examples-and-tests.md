@@ -85,8 +85,10 @@ page still has missing behavior.
 
 ## Test A Page
 
-For plugin-based builds, the most compact style is `@XisBootTest`. The extension creates the integration-test context,
-injects it into an `IntegrationTestContext` field, and supports XIS context annotations on the test class.
+For plugin-based builds, the most compact style is `@XisBootTest`. The extension creates the XIS integration-test
+context, injects it into an `IntegrationTestContext` field, and supports XIS context annotations on the test class. This
+test style is independent of the application runtime: generated tests use the XIS test context for XIS Boot and Spring
+Boot applications alike.
 
 ```java
 package example.products;
@@ -142,9 +144,92 @@ Use `one.xis.test.@Mock`, `@Spy`, and `@Captor` for Mockito-style test doubles. 
 all register their field value in the XIS context, so constructor injection in controllers and services sees the same
 instance as the test.
 
+If the test needs an object produced by a factory method, register a configuration class in the scanned test package and
+use XIS `one.xis.context.Bean` methods. The generated test runs against the XIS integration-test context, not a Spring
+`ApplicationContext`, so Spring `org.springframework.context.annotation.Bean` methods are not picked up here unless you
+configure that annotation explicitly on a manually built context. The test class itself is part of the XIS context, and
+scanned test components participate in normal constructor injection and bean creation.
+
+```java
+package example.products;
+
+import one.xis.boot.test.XisBootTest;
+import one.xis.context.Bean;
+import one.xis.context.Component;
+import one.xis.context.IntegrationTestContext;
+import org.junit.jupiter.api.Test;
+
+@XisBootTest
+class ProductPageTest {
+
+    private IntegrationTestContext context;
+
+    @Test
+    void opensProductPage() {
+        var client = context.openPage("/products.html");
+        // assertions here
+    }
+
+    @Component
+    static class ProductTestConfig {
+
+        @Bean
+        ProductCatalog productCatalog() {
+            return ProductCatalog.inMemory();
+        }
+    }
+}
+```
+
+If the application already has a small Spring-style test configuration that you want to reuse, build the test context
+explicitly and tell XIS which annotations should mark configuration classes and factory methods:
+
+```java
+package example.products;
+
+import one.xis.context.IntegrationTestContext;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+class ProductPageTest {
+
+    private IntegrationTestContext context;
+
+    @BeforeEach
+    void setUp() {
+        context = IntegrationTestContext.builder()
+                .withBasePackageClass(ProductPageTest.class)
+                .withComponentAnnotation(Configuration.class)
+                .withBeanMethodAnnotation(Bean.class)
+                .build();
+    }
+
+    @Test
+    void opensProductPage() {
+        var client = context.openPage("/products.html");
+
+        assertEquals("Desk", client.getDocument().getElementById("name").getInnerText());
+    }
+
+    @Configuration
+    static class ProductTestConfig {
+
+        @Bean
+        ProductCatalog productCatalog() {
+            return ProductCatalog.inMemory();
+        }
+    }
+}
+```
+
 For small explicit tests, or for builds that do not use the plugin test starter, create an `IntegrationTestContext`
 yourself with the page controller and the services it needs. You can pass classes, which XIS will instantiate, or
-ready-made instances such as mocks.
+ready-made instances such as mocks, test containers, or objects that cannot be created by a no-argument constructor or
+an ordinary XIS `@Bean` method.
 
 ```java
 package example.products;
@@ -348,7 +433,7 @@ repositories {
 }
 
 dependencies {
-    testImplementation "one.xis:xis-boot-starter-test:0.14.0"
+    testImplementation "one.xis:xis-boot-starter-test:0.16.1"
 }
 ```
 

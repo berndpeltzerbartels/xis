@@ -10,6 +10,7 @@ class FrontletMetadataTest {
 
     private IntegrationTestContext testContext;
     private IntegrationTestContext deepLinkContext;
+    private IntegrationTestContext urlMountedContext;
 
     @BeforeEach
     void init() {
@@ -23,6 +24,11 @@ class FrontletMetadataTest {
                 .withSingleton(DeepLinkingPage.class)
                 .withSingleton(FrontletMetadataFrontlet.class)
                 .withSingleton(DeepLinkFrontlet.class)
+                .build();
+
+        urlMountedContext = IntegrationTestContext.builder()
+                .withSingleton(UrlMountedFrontletPage.class)
+                .withSingleton(UrlMountedFrontlet.class)
                 .build();
     }
 
@@ -106,5 +112,17 @@ class FrontletMetadataTest {
         
         // Verify document title was updated from DeepLinkFrontlet annotation
         assertThat(client.getDocument().getTitle()).isEqualTo("Deep Link Title");
+    }
+
+    @Test
+    void frontletUrlAndContainerIdMountFrontletWithoutDefaultFrontletAttribute() {
+        var client = urlMountedContext.openPage("/frontlet-url/workers.html");
+
+        var container = client.getDocument().getElementById("url-mounted-container");
+        assertThat(container).isNotNull();
+
+        var frontlet = container.querySelector("#url-mounted-frontlet");
+        assertThat(frontlet).isNotNull();
+        assertThat(frontlet.getTextContent()).isEqualTo("workers");
     }
 }

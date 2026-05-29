@@ -2,6 +2,9 @@ package one.xis.http;
 
 import java.util.concurrent.CompletionStage;
 
+/**
+ * Open server-sent-events connection for one browser client.
+ */
 public interface SseEmitter {
 
     /**
@@ -9,7 +12,13 @@ public interface SseEmitter {
      */
     CompletionStage<Void> send(String data);
 
+    /**
+     * Closes the SSE connection.
+     */
     void close();
 
+    /**
+     * @return {@code true} while the connection can still accept events
+     */
     boolean isOpen();
 }
