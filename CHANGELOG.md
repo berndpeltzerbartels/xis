@@ -2,6 +2,33 @@
 
 ## Unreleased
 
+## 0.16.2 - 2026-05-30
+
+### Changed
+
+- Renamed the public XIS Theme template namespace from `theme:` to `xt:` so themed templates stay compact without using a
+  broad or ambiguous prefix.
+- Improved themed navigation styling, including clearer nested navigation groups and more stable hover behavior.
+- Clarified the release workflow for agent-driven releases, including ZIP verification, changelog updates, documentation
+  version checks, and post-release development version bumps.
+
+### Fixed
+
+- Fixed same-page navigation so clicking a link to the current page refreshes page data without replacing the page with
+  incomplete markup.
+- Fixed frontend error toasts so core server and connection errors use the active theme styling and avoid duplicate
+  theme/core handlers.
+- Fixed JavaScript error formatting so unhandled XHR-style values are reported with useful status details instead of
+  `[object XMLHttpRequest]`.
+- Fixed theme namespace validation tests and E2E theme fixtures for the new `xt:` namespace.
+- Made the frontlet E2E click counter wait for the asynchronously loaded frontlet model data before parsing the value.
+
+### Documentation
+
+- Documented reusable JavaScript extension artifacts and noted that the same artifact pattern can ship a custom EL
+  function library.
+- Updated documented Gradle plugin and dependency examples to `0.16.2`.
+
 ## 0.16.1 - 2026-05-29
 
 ### Changed
