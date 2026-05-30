@@ -4,19 +4,19 @@
     <title>Theme integration</title>
 </head>
 <body>
-<theme:form-page title="Customer"
+<xt:form-page title="Customer"
                  binding="customer"
                  action="save"
                  submit-label="Save">
-    <theme:grid columns="2">
-        <theme:input id="name" binding="name" title="Name"/>
-        <theme:select id="stage"
+    <xt:grid columns="2">
+        <xt:input id="name" binding="name" title="Name"/>
+        <xt:select id="stage"
                       binding="stage"
                       title="Stage"
                       options="stages"
                       option-value="code"
                       option-label="label"/>
-    </theme:grid>
-</theme:form-page>
+    </xt:grid>
+</xt:form-page>
 </body>
 </html>

@@ -11,7 +11,7 @@ public class ThemeTemplateValidationExtension implements TemplateValidationExten
 
     @Override
     public Optional<String> formDataBinding(Element element) {
-        if ("theme:form".equals(element.getLocalName()) || "theme:form-page".equals(element.getLocalName())) {
+        if ("xt:form".equals(element.getLocalName()) || "xt:form-page".equals(element.getLocalName())) {
             return Optional.ofNullable(element.getAttributes().get("binding"));
         }
         return Optional.empty();
@@ -20,7 +20,7 @@ public class ThemeTemplateValidationExtension implements TemplateValidationExten
     @Override
     public Optional<String> formFieldBinding(Element element) {
         return switch (element.getLocalName()) {
-            case "theme:input", "theme:select", "theme:textarea", "theme:checkbox", "theme:radio" ->
+            case "xt:input", "xt:select", "xt:textarea", "xt:checkbox", "xt:radio" ->
                     Optional.ofNullable(element.getAttributes().get("binding"));
             default -> Optional.empty();
         };
@@ -28,7 +28,7 @@ public class ThemeTemplateValidationExtension implements TemplateValidationExten
 
     @Override
     public List<String> modelDataBindings(Element element) {
-        if ("theme:select".equals(element.getLocalName()) || "theme:radio".equals(element.getLocalName())) {
+        if ("xt:select".equals(element.getLocalName()) || "xt:radio".equals(element.getLocalName())) {
             var options = element.getAttributes().get("options");
             if (options != null && !options.isBlank()) {
                 return List.of(options);
@@ -41,16 +41,16 @@ public class ThemeTemplateValidationExtension implements TemplateValidationExten
     public List<String> validate(Element element) {
         List<String> messages = new ArrayList<>();
         switch (element.getLocalName()) {
-            case "theme:form-page" -> require(element, messages, "binding", "theme:form-page requires binding.");
-            case "theme:form" -> require(element, messages, "binding", "theme:form requires binding.");
-            case "theme:input" -> validateField(element, messages, "theme:input");
-            case "theme:textarea" -> validateField(element, messages, "theme:textarea");
-            case "theme:checkbox" -> validateField(element, messages, "theme:checkbox");
-            case "theme:select" -> validateOptionField(element, messages, "theme:select");
-            case "theme:radio" -> validateOptionField(element, messages, "theme:radio");
-            case "theme:grid" -> requireNumber(element, messages, "columns", 2, 11, "theme:grid columns must be a number between 2 and 11.");
-            case "theme:nav-group" -> require(element, messages, "label", "theme:nav-group requires label.");
-            case "theme:nav-item" -> requireOneOf(element, messages, List.of("page", "frontlet", "modal", "href"), "theme:nav-item requires page, frontlet, modal, or href.");
+            case "xt:form-page" -> require(element, messages, "binding", "xt:form-page requires binding.");
+            case "xt:form" -> require(element, messages, "binding", "xt:form requires binding.");
+            case "xt:input" -> validateField(element, messages, "xt:input");
+            case "xt:textarea" -> validateField(element, messages, "xt:textarea");
+            case "xt:checkbox" -> validateField(element, messages, "xt:checkbox");
+            case "xt:select" -> validateOptionField(element, messages, "xt:select");
+            case "xt:radio" -> validateOptionField(element, messages, "xt:radio");
+            case "xt:grid" -> requireNumber(element, messages, "columns", 2, 11, "xt:grid columns must be a number between 2 and 11.");
+            case "xt:nav-group" -> require(element, messages, "label", "xt:nav-group requires label.");
+            case "xt:nav-item" -> requireOneOf(element, messages, List.of("page", "frontlet", "modal", "href"), "xt:nav-item requires page, frontlet, modal, or href.");
             default -> {
             }
         }
@@ -87,7 +87,7 @@ public class ThemeTemplateValidationExtension implements TemplateValidationExten
     private void requireNumber(Element element, List<String> messages, String attribute, int min, int max, String message) {
         var value = element.getAttributes().get(attribute);
         if (value == null || value.isBlank()) {
-            messages.add("theme:grid requires columns.");
+            messages.add("xt:grid requires columns.");
             return;
         }
         try {

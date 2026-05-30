@@ -92,7 +92,7 @@ class HttpConnector {
             }
             xmlHttp.onerror = function (e) {
                 reportError('Error during HTTP request to ' + uri, e);
-                reject(xmlHttp);
+                reject(new Error('HTTP request failed: ' + method + ' ' + uri));
             };
 
         });

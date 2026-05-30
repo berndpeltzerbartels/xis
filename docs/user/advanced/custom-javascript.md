@@ -51,7 +51,7 @@ artifact:
 
 ```groovy
 dependencies {
-    implementation "one.xis:xis-javascript-jquery:0.16.1"
+    implementation "one.xis:xis-javascript-jquery:0.16.2"
 }
 ```
 

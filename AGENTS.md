@@ -154,20 +154,31 @@ declare a feature branch to be the release candidate by convenience.
 
 The release flow is:
 
-1. Update `develop` and verify that the working tree is clean.
-2. Merge all intended feature branches into `develop`, or explicitly record why a branch is excluded.
-3. Create the release branch from `develop`.
-4. Run the full available test suite without waiting for a special reminder. Phrases such as "full test" mean all
+1. Commit the current feature branch as one whole-project state and push it, even if the push may become redundant
+   because the branch is merged immediately afterwards.
+2. Update `develop`, merge the feature branch into `develop`, push `develop`, and delete the merged feature branch
+   locally and remotely. Local `develop` and `origin/develop` should not diverge.
+3. Inspect local and remote branches for any remaining unmerged work branches. Merge and delete all intended work
+   branches before continuing, or explicitly record why a branch is excluded. Do not create the release branch until
+   this check is complete.
+4. Create the release branch directly from `develop` and push it immediately. Local and remote release branches should
+   not diverge.
+5. Verify that the intended release version is set everywhere the release uses it, then run `./gradlew clean build
+   publishToMavenLocal`.
+6. Run the full available test suite without waiting for a special reminder. Phrases such as "full test" mean all
    framework, integration, JavaScript, plugin, and end-to-end tests that are available for the release. This includes
    manually started E2E repositories that are not wired into the main Gradle build, currently including
    `/Users/bernd/projects/xis-end-to-end-tests`, `/Users/bernd/projects/xis-chess-example-simple-e2e`, and
    `/Users/bernd/projects/xis-crm-example-e2e` when they exist locally.
-5. Only after the full suite is green, consider that release branch state confirmed.
-6. Build the release ZIP from that confirmed release branch.
-7. Bring the confirmed release state to `main` with a squash merge.
-8. Upload the release ZIP.
-9. Bump `main` to the next development version.
-10. Make `develop` match `main` for the next cycle. If rewriting or recreating `develop` could lose useful history,
+7. Build the release ZIP from that confirmed release branch. The ZIP task also runs the system tests that verify the
+   supported platform variants.
+8. If any failure requires a code change, rerun the test that found the failure and every release check that had already
+   succeeded before that change. In the end, the ZIP must represent a state that passed the full release check sequence
+   without later code changes invalidating earlier results.
+9. Bring the confirmed release state to `main` with a squash merge.
+10. Upload the release ZIP.
+11. Bump `main` to the next development version.
+12. Make `develop` match `main` for the next cycle. If rewriting or recreating `develop` could lose useful history,
     create a backup branch first or keep the existing history deliberately. `develop` is public too.
 
 After a correct release, the only intended difference between the release branch and `main` is the post-release version

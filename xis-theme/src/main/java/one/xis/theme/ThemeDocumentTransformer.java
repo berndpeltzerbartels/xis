@@ -13,10 +13,10 @@ import java.util.Set;
 @Component
 public class ThemeDocumentTransformer implements HtmlDocumentTransformer {
 
-    private static final String THEME_WRAPPER = "theme:wrapper";
-    private static final String THEME_GRID = "theme:grid";
-    private static final String THEME_SPAN = "theme:span";
-    private static final String THEME_FIELD = "theme:field";
+    private static final String THEME_WRAPPER = "xt:wrapper";
+    private static final String THEME_GRID = "xt:grid";
+    private static final String THEME_SPAN = "xt:span";
+    private static final String THEME_FIELD = "xt:field";
     private static final Set<String> THEME_FORM_ATTRIBUTES = Set.of("binding", "action", "submit-label");
     private static final Set<String> THEME_FORM_PAGE_ATTRIBUTES = Set.of("title", "binding", "action", "submit-label");
     private static final Set<String> THEME_INPUT_ATTRIBUTES = Set.of("binding", "title", "label", "span");
@@ -50,17 +50,17 @@ public class ThemeDocumentTransformer implements HtmlDocumentTransformer {
 
     private Element replaceThemeTag(Element element) {
         Element replacement = switch (element.getLocalName()) {
-            case "theme:form" -> form(element);
-            case "theme:form-page" -> formPage(element);
-            case "theme:input" -> inputField(element);
-            case "theme:textarea" -> textareaField(element);
-            case "theme:checkbox" -> checkboxField(element);
-            case "theme:radio" -> radioField(element);
-            case "theme:select" -> selectField(element);
-            case "theme:grid" -> grid(element);
-            case "theme:navigation" -> navigation(element);
-            case "theme:nav-item" -> navItem(element);
-            case "theme:nav-group" -> navGroup(element);
+            case "xt:form" -> form(element);
+            case "xt:form-page" -> formPage(element);
+            case "xt:input" -> inputField(element);
+            case "xt:textarea" -> textareaField(element);
+            case "xt:checkbox" -> checkboxField(element);
+            case "xt:radio" -> radioField(element);
+            case "xt:select" -> selectField(element);
+            case "xt:grid" -> grid(element);
+            case "xt:navigation" -> navigation(element);
+            case "xt:nav-item" -> navItem(element);
+            case "xt:nav-group" -> navGroup(element);
             default -> null;
         };
         if (replacement == null) {
@@ -73,7 +73,7 @@ public class ThemeDocumentTransformer implements HtmlDocumentTransformer {
     private Element form(Element source) {
         var binding = requiredAttribute(source, "binding");
         var form = new Element("form");
-        copyAttributes(source, form, "theme:form-page".equals(source.getLocalName()) ? THEME_FORM_PAGE_ATTRIBUTES : THEME_FORM_ATTRIBUTES);
+        copyAttributes(source, form, "xt:form-page".equals(source.getLocalName()) ? THEME_FORM_PAGE_ATTRIBUTES : THEME_FORM_ATTRIBUTES);
         form.setAttribute("xis:binding", binding);
         moveChildren(source, form);
         var action = source.getAttributes().get("action");
@@ -429,7 +429,7 @@ public class ThemeDocumentTransformer implements HtmlDocumentTransformer {
     private void copyAttributes(Element source, Element target, Set<String> themeAttributes) {
         for (Map.Entry<String, String> entry : source.getAttributes().entrySet()) {
             var name = entry.getKey();
-            if (themeAttributes.contains(name) || name.startsWith("theme:")) {
+            if (themeAttributes.contains(name) || name.startsWith("xt:")) {
                 continue;
             }
             target.setAttribute(name, entry.getValue());
