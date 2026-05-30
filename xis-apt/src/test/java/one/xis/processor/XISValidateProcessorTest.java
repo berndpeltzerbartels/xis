@@ -103,13 +103,13 @@ class XISValidateProcessorTest {
                 <!DOCTYPE html>
                 <html>
                   <body>
-                    <theme:form binding="contact" action="saveContact">
-                      <theme:input binding="description" title="Description"/>
-                      <theme:select binding="stage" title="Stage" options="stages"/>
-                      <theme:textarea binding="notes" title="Notes"/>
-                      <theme:checkbox binding="newsletter" title="Newsletter"/>
-                      <theme:radio binding="preferredContact" title="Preferred contact" options="contactTypes" option-value="code" option-label="label"/>
-                    </theme:form>
+                    <xt:form binding="contact" action="saveContact">
+                      <xt:input binding="description" title="Description"/>
+                      <xt:select binding="stage" title="Stage" options="stages"/>
+                      <xt:textarea binding="notes" title="Notes"/>
+                      <xt:checkbox binding="newsletter" title="Newsletter"/>
+                      <xt:radio binding="preferredContact" title="Preferred contact" options="contactTypes" option-value="code" option-label="label"/>
+                    </xt:form>
                   </body>
                 </html>
                 """, StandardCharsets.UTF_8);
@@ -160,9 +160,9 @@ class XISValidateProcessorTest {
                 <!DOCTYPE html>
                 <html>
                   <body>
-                    <theme:form-page title="Contact" binding="contact" action="saveContact">
-                      <theme:input binding="description" title="Description"/>
-                    </theme:form-page>
+                    <xt:form-page title="Contact" binding="contact" action="saveContact">
+                      <xt:input binding="description" title="Description"/>
+                    </xt:form-page>
                   </body>
                 </html>
                 """, StandardCharsets.UTF_8);
@@ -197,13 +197,13 @@ class XISValidateProcessorTest {
                 <!DOCTYPE html>
                 <html>
                   <body>
-                    <theme:form binding="contact">
-                      <theme:input binding="description"/>
-                      <theme:select binding="stage" options="stages"/>
-                      <theme:textarea binding="notes"/>
-                      <theme:checkbox binding="newsletter"/>
-                      <theme:radio binding="preferredContact" options="contactTypes"/>
-                    </theme:form>
+                    <xt:form binding="contact">
+                      <xt:input binding="description"/>
+                      <xt:select binding="stage" options="stages"/>
+                      <xt:textarea binding="notes"/>
+                      <xt:checkbox binding="newsletter"/>
+                      <xt:radio binding="preferredContact" options="contactTypes"/>
+                    </xt:form>
                   </body>
                 </html>
                 """, StandardCharsets.UTF_8);
@@ -245,11 +245,11 @@ class XISValidateProcessorTest {
 
         List<String> errors = errorMessages(diagnostics);
         assertThat(errors).hasSize(5);
-        assertThat(errors.get(0)).contains("ProbePage.html:5").contains("theme:input requires title.");
-        assertThat(errors.get(1)).contains("ProbePage.html:6").contains("theme:select requires title.");
-        assertThat(errors.get(2)).contains("ProbePage.html:7").contains("theme:textarea requires title.");
-        assertThat(errors.get(3)).contains("ProbePage.html:8").contains("theme:checkbox requires title.");
-        assertThat(errors.get(4)).contains("ProbePage.html:9").contains("theme:radio requires title.");
+        assertThat(errors.get(0)).contains("ProbePage.html:5").contains("xt:input requires title.");
+        assertThat(errors.get(1)).contains("ProbePage.html:6").contains("xt:select requires title.");
+        assertThat(errors.get(2)).contains("ProbePage.html:7").contains("xt:textarea requires title.");
+        assertThat(errors.get(3)).contains("ProbePage.html:8").contains("xt:checkbox requires title.");
+        assertThat(errors.get(4)).contains("ProbePage.html:9").contains("xt:radio requires title.");
     }
 
     @Test
@@ -260,15 +260,15 @@ class XISValidateProcessorTest {
                 <!DOCTYPE html>
                 <html>
                   <body>
-                    <theme:form binding="contact">
-                      <theme:grid columns="1">
-                        <theme:input binding="description" title="Description" span="0"/>
-                        <theme:select binding="stage" title="Stage" options="stages" span="10"/>
-                        <theme:textarea binding="notes" title="Notes" span="0"/>
-                        <theme:checkbox binding="newsletter" title="Newsletter" span="10"/>
-                        <theme:radio binding="preferredContact" title="Preferred contact" options="contactTypes" span="0"/>
-                      </theme:grid>
-                    </theme:form>
+                    <xt:form binding="contact">
+                      <xt:grid columns="1">
+                        <xt:input binding="description" title="Description" span="0"/>
+                        <xt:select binding="stage" title="Stage" options="stages" span="10"/>
+                        <xt:textarea binding="notes" title="Notes" span="0"/>
+                        <xt:checkbox binding="newsletter" title="Newsletter" span="10"/>
+                        <xt:radio binding="preferredContact" title="Preferred contact" options="contactTypes" span="0"/>
+                      </xt:grid>
+                    </xt:form>
                   </body>
                 </html>
                 """, StandardCharsets.UTF_8);
@@ -310,12 +310,12 @@ class XISValidateProcessorTest {
 
         List<String> errors = errorMessages(diagnostics);
         assertThat(errors).hasSize(6);
-        assertThat(errors.get(0)).contains("ProbePage.html:5").contains("theme:grid columns must be a number between 2 and 11.");
-        assertThat(errors.get(1)).contains("ProbePage.html:6").contains("theme:input span must be a number between 1 and 9.");
-        assertThat(errors.get(2)).contains("ProbePage.html:7").contains("theme:select span must be a number between 1 and 9.");
-        assertThat(errors.get(3)).contains("ProbePage.html:8").contains("theme:textarea span must be a number between 1 and 9.");
-        assertThat(errors.get(4)).contains("ProbePage.html:9").contains("theme:checkbox span must be a number between 1 and 9.");
-        assertThat(errors.get(5)).contains("ProbePage.html:10").contains("theme:radio span must be a number between 1 and 9.");
+        assertThat(errors.get(0)).contains("ProbePage.html:5").contains("xt:grid columns must be a number between 2 and 11.");
+        assertThat(errors.get(1)).contains("ProbePage.html:6").contains("xt:input span must be a number between 1 and 9.");
+        assertThat(errors.get(2)).contains("ProbePage.html:7").contains("xt:select span must be a number between 1 and 9.");
+        assertThat(errors.get(3)).contains("ProbePage.html:8").contains("xt:textarea span must be a number between 1 and 9.");
+        assertThat(errors.get(4)).contains("ProbePage.html:9").contains("xt:checkbox span must be a number between 1 and 9.");
+        assertThat(errors.get(5)).contains("ProbePage.html:10").contains("xt:radio span must be a number between 1 and 9.");
     }
 
     @Test
@@ -328,7 +328,7 @@ class XISValidateProcessorTest {
                   <body>
                     <form xis:binding="contact">
                       <input xis:binding="description"/>
-                      <theme:input binding="email" title="E-mail"/>
+                      <xt:input binding="email" title="E-mail"/>
                     </form>
                   </body>
                 </html>
@@ -465,9 +465,9 @@ class XISValidateProcessorTest {
                 <!DOCTYPE html>
                 <html>
                   <body>
-                    <theme:form binding="contact">
-                      <theme:input binding="missing" title="Missing"/>
-                    </theme:form>
+                    <xt:form binding="contact">
+                      <xt:input binding="missing" title="Missing"/>
+                    </xt:form>
                   </body>
                 </html>
                 """, StandardCharsets.UTF_8);
