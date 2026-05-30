@@ -44,6 +44,23 @@ src/main/resources/js/analytics.js
 XIS reads every `META-INF/xis/js/extensions` file on the classpath, loads the listed JavaScript files, and bundles them
 with the XIS browser runtime. This also works from dependency JARs.
 
+## Add A JavaScript Extension Dependency
+
+Some browser libraries can be added as ordinary dependencies. For example, XIS provides a small jQuery extension
+artifact:
+
+```groovy
+dependencies {
+    implementation "one.xis:xis-javascript-jquery:0.16.1"
+}
+```
+
+That artifact depends on the jQuery WebJar and registers the minified jQuery file as a XIS JavaScript extension. The
+application does not need to copy `jquery.min.js` into its own resources.
+
+Use this style when a library should be shared by several applications or when you want a dependency to bring its own
+browser integration. The JavaScript is still bundled into the XIS browser runtime; it is not loaded from a CDN.
+
 ## Add Custom EL Functions
 
 Custom expression-language functions are JavaScript functions registered in the browser runtime.
@@ -84,6 +101,59 @@ Function arguments can be expressions, just like built-in EL functions:
 
 Custom functions run in the browser. Use them for presentation helpers such as formatting, labels, or small display
 decisions. Keep validation, permissions, persistence, and business decisions in Java.
+
+## Publish Your Own JavaScript Extension Artifact
+
+XIS searches the whole classpath for JavaScript extension registries. That makes it easy to create your own artifact
+that adds JavaScript to every application that depends on it. A reusable JavaScript extension artifact is just a JAR with
+normal resources. The artifact can contain application code, a company-specific helper library, or a small wrapper around
+a browser library. It can also be a reusable EL function library for templates used across several applications.
+
+For example, a company could publish an internal browser-behavior artifact:
+
+```groovy
+plugins {
+    id "java-library"
+}
+
+group = "com.example"
+version = "1.0.0"
+```
+
+Add the extension registry:
+
+```text
+src/main/resources/META-INF/xis/js/extensions
+```
+
+List the classpath resource that should be bundled:
+
+```text
+company/browser/company-ui.js
+company/browser/usage-tracking.js
+```
+
+Put the referenced files into the same artifact:
+
+```text
+src/main/resources/company/browser/company-ui.js
+src/main/resources/company/browser/usage-tracking.js
+```
+
+When an application adds this artifact as a dependency, `JavascriptExtensionLoader` finds the registry file, reads the
+listed JavaScript resources, and appends them to the XIS browser runtime.
+
+Use the artifact from an application like any other dependency:
+
+```groovy
+dependencies {
+    implementation "com.example:company-browser-extensions:1.0.0"
+}
+```
+
+The artifact must be available through the application's normal dependency resolution: for example from an internal
+Maven repository such as Artifactory or Nexus, from another configured Maven repository, or from the local Maven
+repository after running `publishToMavenLocal`.
 
 ## Global Browser Behavior
 

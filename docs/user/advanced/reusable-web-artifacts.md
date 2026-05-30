@@ -67,6 +67,25 @@ src/main/resources/META-INF/xis/js/extensions
 and list JavaScript resource paths in that file. XIS reads every extension declaration on the classpath and bundles the
 listed scripts into the browser runtime.
 
+This makes company-specific or product-specific browser behavior easy to ship as a dependency:
+
+```groovy
+dependencies {
+    implementation "com.example:company-browser-extensions:1.0.0"
+}
+```
+
+Inside that artifact, the extension registry can point to ordinary classpath resources:
+
+```text
+# src/main/resources/META-INF/xis/js/extensions
+company/browser/company-ui.js
+company/browser/usage-tracking.js
+```
+
+The listed scripts may also come from transitive dependencies. XIS' `xis-javascript-jquery` module uses that variant: it
+depends on the jQuery WebJar and registers the WebJar's `jquery.min.js` resource.
+
 This allows a library to deliver several layers together:
 
 - Java controllers and services

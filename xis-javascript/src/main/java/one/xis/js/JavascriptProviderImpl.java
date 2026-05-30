@@ -8,14 +8,14 @@ import one.xis.resource.Resource;
 import one.xis.resource.Resources;
 import one.xis.resource.StringResource;
 
-import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
 class JavascriptProviderImpl implements JavascriptProvider {
 
     private final JavascriptExtensionLoader extensionLoader;
-    private final JavascriptCompressor javascriptCompressor;
     private final Resources resources;
 
     @Getter
@@ -26,16 +26,25 @@ class JavascriptProviderImpl implements JavascriptProvider {
 
     @Init
     public void init() {
-        var sources = new LinkedHashMap<String, String>();
-        sources.put("bundle.min.js", xisJs());
-        sources.putAll(extensionLoader.loadExtensions());
-        var result = javascriptCompressor.compress(sources);
-        this.compressedJavascript = new StringResource("(function() {" + result.compressed() + "})();");
-        this.sourceMap = new StringResource(result.sourceMap());
+        this.compressedJavascript = new StringResource("(function() {\n"
+                + xisMinJs()
+                + extensionJavascript()
+                + "\n})();");
+        this.sourceMap = resources.getByPath("xis.min.js.map");
     }
 
 
-    private String xisJs() {
-        return resources.getByPath("xis.js").getContent();
+    private String xisMinJs() {
+        return resources.getByPath("xis.min.js").getContent();
+    }
+
+    private String extensionJavascript() {
+        Map<String, String> extensions = extensionLoader.loadExtensions();
+        if (extensions.isEmpty()) {
+            return "";
+        }
+        return extensions.entrySet().stream()
+                .map(entry -> "\n;\n/* " + entry.getKey() + " */\n" + entry.getValue())
+                .collect(Collectors.joining());
     }
 }
