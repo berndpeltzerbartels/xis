@@ -32,6 +32,7 @@ dependencies {
     implementation "org.graalvm.sdk:graal-sdk:$graalVersion"
     implementation "org.graalvm.truffle:truffle-api:$graalVersion"
     implementation "org.graalvm.js:js:$graalVersion"
+    implementation "com.google.javascript:closure-compiler:v20240317"
 
     // Lombok dependencies
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"

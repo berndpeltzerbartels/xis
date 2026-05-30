@@ -196,6 +196,9 @@ For JavaScript, prefer [Custom JavaScript and custom EL functions](advanced/cust
 the XIS browser runtime. Files listed through `META-INF/xis/js/extensions` are bundled into `/bundle.min.js`; files under
 `public` are loaded as normal root-page scripts.
 
+Optional JavaScript extension artifacts can register browser libraries through the same mechanism. For example,
+`one.xis:xis-javascript-jquery` adds the jQuery WebJar and registers `jquery.min.js` as a XIS JavaScript extension.
+
 ## Distributed Mode
 
 The default deployment mode is same-origin: pages, frontlets, static assets, and XIS endpoints are served from the same

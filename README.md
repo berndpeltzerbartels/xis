@@ -418,6 +418,7 @@ complete and intentionally detailed.
 - [Custom proxies](docs/user/advanced/custom-proxies.md)
 - [Aspects and interface advice](docs/user/advanced/aspects.md)
 - [Custom JavaScript extension files](docs/user/advanced/custom-javascript.md#register-extension-files)
+- [JavaScript extension dependency artifacts, including `xis-javascript-jquery`](docs/user/advanced/custom-javascript.md#add-a-javascript-extension-dependency)
 - [Custom EL functions](docs/user/advanced/custom-javascript.md#add-custom-el-functions)
 - [Submitting XIS forms from JavaScript](docs/user/advanced/custom-javascript.md#submit-a-xis-form-from-javascript)
 

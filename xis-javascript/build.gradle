@@ -75,10 +75,6 @@ dependencies {
     testImplementation project(':xis-test')
     testImplementation project(':xis-util')
 
-// https://mvnrepository.com/artifact/com.google.javascript/closure-compiler
-// https://mvnrepository.com/artifact/com.google.javascript/closure-compiler
-    implementation("com.google.javascript:closure-compiler:v20240317")
-
     testImplementation project(':xis-resources')
 
     testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"

@@ -1,20 +1,35 @@
 package one.xis.gradle;
 
+import com.google.javascript.jscomp.CompilationLevel;
+import com.google.javascript.jscomp.Compiler;
+import com.google.javascript.jscomp.CompilerOptions;
+import com.google.javascript.jscomp.JSError;
+import com.google.javascript.jscomp.PropertyRenamingPolicy;
+import com.google.javascript.jscomp.Result;
+import com.google.javascript.jscomp.SourceFile;
+import com.google.javascript.jscomp.SourceMap;
+import com.google.javascript.jscomp.VariableRenamingPolicy;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.PolyglotAccess;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.logging.Level;
 
 public class JavascriptPlugin implements Plugin<Project> {
 
     private static final String RELEASE_JS_OUTFILE = "xis.js";
+    private static final String RELEASE_MIN_JS_OUTFILE = "xis.min.js";
+    private static final String RELEASE_MIN_JS_MAP_OUTFILE = "xis.min.js.map";
+    private static final String SERVED_JS_OUTFILE = "bundle.min.js";
+    private static final String SERVED_JS_MAP_OUTFILE = "bundle.min.js.map";
 
     @Override
     public void apply(Project project) {
@@ -24,14 +39,56 @@ public class JavascriptPlugin implements Plugin<Project> {
 
     private void process(Project project) {
         File releaseJsFile = getReleaseOutFile(project);
+        File releaseMinJsFile = getReleaseMinOutFile(project);
+        File releaseMinJsMapFile = getReleaseMinMapOutFile(project);
         deleteIfExists(releaseJsFile);
+        deleteIfExists(releaseMinJsFile);
+        deleteIfExists(releaseMinJsMapFile);
 
         List<JSFile> releaseJsFiles = getReleaseJsFiles(project);
         List<JSFile> allJsFiles = getAllJsFiles(project);
 
         writeGroupedFiles(project, allJsFiles);
         writeJsToFileIIFE(JSFileSorter.sort(releaseJsFiles), releaseJsFile, false);
+        writeMinifiedJs(releaseJsFile, releaseMinJsFile, releaseMinJsMapFile);
         evalWithGraalVM(releaseJsFile);
+    }
+
+    private void writeMinifiedJs(File sourceFile, File minFile, File sourceMapFile) {
+        log("js-outfile: '%s'", minFile);
+        log("js-outfile: '%s'", sourceMapFile);
+
+        Compiler.setLoggingLevel(Level.OFF);
+        Compiler compiler = new Compiler();
+        CompilerOptions options = new CompilerOptions();
+        CompilationLevel.SIMPLE_OPTIMIZATIONS.setOptionsForCompilationLevel(options);
+        options.setSourceMapOutputPath(SERVED_JS_MAP_OUTFILE);
+        options.setSourceMapFormat(SourceMap.Format.V3);
+        options.setSourceMapIncludeSourcesContent(true);
+        options.setGenerateExports(false);
+        options.setRenamingPolicy(VariableRenamingPolicy.OFF, PropertyRenamingPolicy.OFF);
+        options.setPrettyPrint(false);
+
+        SourceFile input = SourceFile.fromCode(RELEASE_JS_OUTFILE, FileUtils.getContent(sourceFile, "utf-8"));
+        Result result = compiler.compile(List.of(), List.of(input), options);
+        if (!result.success) {
+            StringBuilder sb = new StringBuilder();
+            for (JSError error : result.errors) {
+                sb.append(error).append('\n');
+            }
+            throw new RuntimeException("JavaScript minification failed:\n" + sb);
+        }
+
+        try {
+            String js = compiler.toSource().replaceFirst("(?m)\\R?//#\\s*sourceMappingURL=.*$", "");
+            java.nio.file.Files.writeString(minFile.toPath(), js, StandardCharsets.UTF_8);
+            try (var writer = new StringWriter()) {
+                compiler.getSourceMap().appendTo(writer, SERVED_JS_OUTFILE);
+                java.nio.file.Files.writeString(sourceMapFile.toPath(), writer.toString(), StandardCharsets.UTF_8);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to write minified JavaScript files", e);
+        }
     }
 
     private void writeGroupedFiles(Project project, List<JSFile> jsFiles) {
@@ -132,6 +189,14 @@ public class JavascriptPlugin implements Plugin<Project> {
 
     private File getReleaseOutFile(Project project) {
         return new File(getOutDir(project), RELEASE_JS_OUTFILE);
+    }
+
+    private File getReleaseMinOutFile(Project project) {
+        return new File(getOutDir(project), RELEASE_MIN_JS_OUTFILE);
+    }
+
+    private File getReleaseMinMapOutFile(Project project) {
+        return new File(getOutDir(project), RELEASE_MIN_JS_MAP_OUTFILE);
     }
 
     private Stream<File> sourceDirs(Project project) {
