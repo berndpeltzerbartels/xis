@@ -34,6 +34,7 @@
                     <xs:attribute name="page" type="xs:string"/>
                     <xs:attribute name="frontlet" type="xs:string"/>
                     <xs:attribute name="modal" type="xs:string"/>
+                    <xs:attribute name="action" type="xs:string"/>
                     <xs:attribute name="target-container" type="xs:string"/>
                 </xs:extension>
             </xs:complexContent>
