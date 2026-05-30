@@ -1,68 +1,211 @@
-<?xml version='1.0' encoding='UTF-8'?>
+<?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-           targetNamespace="http://xis.one/schema" elementFormDefault="qualified">
+           xmlns:tns="http://xis.one/schema"
+           targetNamespace="http://xis.one/schema"
+           elementFormDefault="qualified"
+           attributeFormDefault="unqualified">
+
+    <xs:annotation>
+        <xs:documentation>
+            XIS template authoring schema. It is intended as IDE metadata for xis:* elements and attributes.
+            Runtime template validation remains authoritative for rules that cannot be expressed well in XSD.
+        </xs:documentation>
+    </xs:annotation>
+
+    <xs:complexType name="anyContent" mixed="true">
+        <xs:sequence>
+            <xs:any minOccurs="0" maxOccurs="unbounded" processContents="lax"/>
+        </xs:sequence>
+        <xs:anyAttribute processContents="lax"/>
+    </xs:complexType>
+
+    <xs:complexType name="boundControl" mixed="true">
+        <xs:complexContent>
+            <xs:extension base="tns:anyContent">
+                <xs:attribute name="binding" type="xs:string" use="required"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:element name="a">
+        <xs:complexType mixed="true">
+            <xs:complexContent>
+                <xs:extension base="tns:anyContent">
+                    <xs:attribute name="page" type="xs:string"/>
+                    <xs:attribute name="frontlet" type="xs:string"/>
+                    <xs:attribute name="modal" type="xs:string"/>
+                    <xs:attribute name="target-container" type="xs:string"/>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="action">
+        <xs:complexType mixed="true">
+            <xs:complexContent>
+                <xs:extension base="tns:anyContent">
+                    <xs:attribute name="action" type="xs:string" use="required"/>
+                    <xs:attribute name="target-container" type="xs:string"/>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="button">
+        <xs:complexType mixed="true">
+            <xs:complexContent>
+                <xs:extension base="tns:anyContent">
+                    <xs:attribute name="page" type="xs:string"/>
+                    <xs:attribute name="frontlet" type="xs:string"/>
+                    <xs:attribute name="modal" type="xs:string"/>
+                    <xs:attribute name="action" type="xs:string"/>
+                    <xs:attribute name="target-container" type="xs:string"/>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="checkbox" type="tns:boundControl"/>
+
+    <xs:element name="foreach">
+        <xs:complexType mixed="true">
+            <xs:complexContent>
+                <xs:extension base="tns:anyContent">
+                    <xs:attribute name="var" type="xs:string" use="required"/>
+                    <xs:attribute name="array" type="xs:string" use="required"/>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+
     <xs:element name="form">
-        <xs:complexType>
-            <xs:sequence/>
-            <xs:attribute name="binding" type="xs:string" use="required"/>
+        <xs:complexType mixed="true">
+            <xs:complexContent>
+                <xs:extension base="tns:anyContent">
+                    <xs:attribute name="binding" type="xs:string" use="required"/>
+                </xs:extension>
+            </xs:complexContent>
         </xs:complexType>
     </xs:element>
-    <xs:element name="if">
-        <xs:complexType>
-            <xs:sequence/>
-            <xs:attribute name="condition" type="xs:string" use="required"/>
-        </xs:complexType>
-    </xs:element>
-    <xs:element name="parameter">
+
+    <xs:element name="frontlet">
         <xs:complexType>
             <xs:sequence/>
             <xs:attribute name="name" type="xs:string" use="required"/>
-            <xs:attribute name="value" type="xs:string" use="optional"/>
+            <xs:attribute name="scroll-to-top" type="xs:boolean"/>
         </xs:complexType>
     </xs:element>
+
     <xs:element name="frontlet-container">
-        <xs:complexType>
-            <xs:sequence/>
-            <xs:attribute name="id" type="xs:string" use="required"/>
+        <xs:complexType mixed="true">
+            <xs:complexContent>
+                <xs:extension base="tns:anyContent">
+                    <xs:attribute name="container-id" type="xs:string" use="required"/>
+                    <xs:attribute name="default-frontlet" type="xs:string"/>
+                    <xs:attribute name="scroll-to-top" type="xs:boolean"/>
+                </xs:extension>
+            </xs:complexContent>
         </xs:complexType>
     </xs:element>
-    <xs:element name="default-frontlet">
+
+    <xs:element name="global-messages">
         <xs:complexType>
             <xs:sequence/>
-            <xs:attribute name="name" type="xs:string" use="optional"/>
         </xs:complexType>
     </xs:element>
-    <xs:element name="foreach">
+
+    <xs:element name="if">
+        <xs:complexType mixed="true">
+            <xs:complexContent>
+                <xs:extension base="tns:anyContent">
+                    <xs:attribute name="condition" type="xs:string" use="required"/>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="include">
         <xs:complexType>
             <xs:sequence/>
-            <xs:attribute name="items" type="xs:string" use="required"/>
-            <xs:attribute name="var" type="xs:string" use="required"/>
+            <xs:attribute name="name" type="xs:string" use="required"/>
         </xs:complexType>
     </xs:element>
+
+    <xs:element name="input" type="tns:boundControl"/>
+
     <xs:element name="message">
         <xs:complexType>
             <xs:sequence/>
+            <xs:attribute name="message-for" type="xs:string" use="required"/>
         </xs:complexType>
     </xs:element>
-    <xs:element name="messages">
-        <xs:complexType>
-            <xs:sequence/>
+
+    <xs:element name="parameter">
+        <xs:complexType mixed="true">
+            <xs:sequence>
+                <xs:any minOccurs="0" maxOccurs="unbounded" processContents="lax"/>
+            </xs:sequence>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="value" type="xs:string"/>
         </xs:complexType>
     </xs:element>
-    <xs:element name="label">
-        <xs:complexType>
-            <xs:sequence/>
-            <xs:attribute name="for" type="xs:string" use="optional"/>
-            <xs:attribute name="error-class" type="xs:string" use="optional"/>
+
+    <xs:element name="radio" type="tns:boundControl"/>
+
+    <xs:element name="raw">
+        <xs:complexType mixed="true">
+            <xs:sequence>
+                <xs:any minOccurs="0" maxOccurs="unbounded" processContents="skip"/>
+            </xs:sequence>
+            <xs:attribute name="text" type="xs:boolean"/>
         </xs:complexType>
     </xs:element>
+
+    <xs:element name="select" type="tns:boundControl"/>
+
+    <xs:element name="storage-binding">
+        <xs:complexType mixed="true">
+            <xs:complexContent>
+                <xs:extension base="tns:anyContent">
+                    <xs:attribute name="store" type="xs:string" use="required"/>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="submit">
+        <xs:complexType mixed="true">
+            <xs:complexContent>
+                <xs:extension base="tns:anyContent">
+                    <xs:attribute name="action" type="xs:string" use="required"/>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="textarea" type="tns:boundControl"/>
+
     <xs:attribute name="action" type="xs:string"/>
     <xs:attribute name="binding" type="xs:string"/>
-    <xs:attribute name="parameter" type="xs:string"/>
-    <xs:attribute name="repeat" type="xs:string"/>
-    <xs:attribute name="if" type="xs:string"/>
-    <xs:attribute name="frontlet-container" type="xs:string"/>
     <xs:attribute name="default-frontlet" type="xs:string"/>
-    <xs:attribute name="for" type="xs:string"/>
+    <xs:attribute name="drag" type="xs:string"/>
+    <xs:attribute name="drop" type="xs:string"/>
+    <xs:attribute name="error-binding" type="xs:string"/>
     <xs:attribute name="error-class" type="xs:string"/>
+    <xs:attribute name="error-style" type="xs:string"/>
+    <xs:attribute name="foreach" type="xs:string"/>
+    <xs:attribute name="frontlet" type="xs:string"/>
+    <xs:attribute name="frontlet-container" type="xs:string"/>
+    <xs:attribute name="if" type="xs:string"/>
+    <xs:attribute name="include" type="xs:string"/>
+    <xs:attribute name="message-for" type="xs:string"/>
+    <xs:attribute name="modal" type="xs:string"/>
+    <xs:attribute name="page" type="xs:string"/>
+    <xs:attribute name="repeat" type="xs:string"/>
+    <xs:attribute name="scroll-to-top" type="xs:boolean"/>
+    <xs:attribute name="selection-class" type="xs:string"/>
+    <xs:attribute name="selection-group" type="xs:string"/>
+    <xs:attribute name="src" type="xs:string"/>
+    <xs:attribute name="storage-binding" type="xs:string"/>
+    <xs:attribute name="target-container" type="xs:string"/>
 </xs:schema>
