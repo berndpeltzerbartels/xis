@@ -175,15 +175,17 @@ The release flow is:
 8. If any failure requires a code change, rerun the test that found the failure and every release check that had already
    succeeded before that change. In the end, the ZIP must represent a state that passed the full release check sequence
    without later code changes invalidating earlier results.
-9. Bring the confirmed release state to `main` with a squash merge.
-10. Upload the release ZIP.
-11. Bump `main` to the next development version.
-12. Make `develop` match `main` for the next cycle. If rewriting or recreating `develop` could lose useful history,
-    create a backup branch first or keep the existing history deliberately. `develop` is public too.
+9. After the ZIP has been confirmed, write the changelog for the release.
+10. After the ZIP has been confirmed, verify and update the release version in the docs. The docs must describe the
+    released coordinates, not the previous patch version.
+11. Bring the confirmed release state from `develop` to `main` and push `main`. At this point `main` must still contain
+    the release version, so the uploaded ZIP and `main` describe the same release.
+12. Upload the release ZIP.
+13. Only after the release has really been uploaded and confirmed, bump `develop` to the next development version,
+    preferably the next minor `-SNAPSHOT`, and push `develop`. Do not make this post-release version bump earlier.
 
-After a correct release, the only intended difference between the release branch and `main` is the post-release version
-change on `main`. There should be no intended difference between `main` and `develop` after `develop` has been prepared
-for the next cycle.
+After a correct release, `main` represents the uploaded release version. `develop` should match `main` until the
+post-release development version bump is made deliberately.
 
 ## Open To-dos
 
