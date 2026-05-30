@@ -244,9 +244,75 @@ function handleError(error) {
     if (error && error.type === 'redirect') {
         return {redirected: true};
     }
-    const msg = error && error.message ? error.message : String(error);
+    const msg = errorMessage(error);
     reportError('Unhandled error: ' + msg, error);
     throw error; // Fehler weiterwerfen, damit er nicht verschluckt wird
+}
+
+function errorMessage(error) {
+    if (!error) {
+        return 'unknown error';
+    }
+    if (error.message) {
+        return error.message;
+    }
+    var httpMessage = httpErrorMessage(error);
+    if (httpMessage) {
+        return httpMessage;
+    }
+    if (error.target) {
+        httpMessage = httpErrorMessage(error.target);
+        if (httpMessage) {
+            return httpMessage;
+        }
+    }
+    if (error.type) {
+        return error.type + ' event';
+    }
+    var text = String(error);
+    if (text && text.indexOf('[object ') !== 0) {
+        return text;
+    }
+    return 'unexpected ' + objectTypeName(error);
+}
+
+function httpErrorMessage(error) {
+    if (!error) {
+        return null;
+    }
+    var hasHttpFields = isSet(error.status) || isSet(error.statusText) || isSet(error.responseText);
+    if (!hasHttpFields) {
+        return null;
+    }
+    var responseMessage = responseErrorMessage(error.responseText);
+    if (responseMessage) {
+        return responseMessage;
+    }
+    var status = isSet(error.status) ? error.status : '?';
+    var statusText = error.statusText ? ' ' + error.statusText : '';
+    var responseUrl = error.responseURL || error.url;
+    return responseUrl
+        ? 'HTTP request failed (' + status + statusText + '): ' + responseUrl
+        : 'HTTP request failed (' + status + statusText + ')';
+}
+
+function responseErrorMessage(responseText) {
+    if (!responseText) {
+        return null;
+    }
+    try {
+        var parsed = JSON.parse(responseText);
+        return parsed.message || parsed.error || responseText;
+    } catch (e) {
+        return responseText;
+    }
+}
+
+function objectTypeName(error) {
+    if (error.constructor && error.constructor.name) {
+        return error.constructor.name;
+    }
+    return 'error';
 }
 
 function isSet(value) {

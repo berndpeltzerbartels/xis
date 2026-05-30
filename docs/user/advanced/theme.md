@@ -8,7 +8,7 @@ application quickly without designing navigation, forms, grid layout, labels, an
 The preferred path is:
 
 - add one dependency
-- write `theme:*` tags for standard pages
+- write `xt:*` tags for standard pages
 - customize colors, radius, spacing, or logo only when needed
 
 Write normal HTML only when the generated standard structure is not enough.
@@ -22,7 +22,7 @@ Add `xis-theme` next to your runtime dependency.
 ```groovy
 plugins {
     id "java"
-    id "one.xis.plugin" version "0.16.1"
+    id "one.xis.plugin" version "0.16.2"
 }
 
 repositories {
@@ -42,7 +42,7 @@ plugins {
     id "java"
     id "org.springframework.boot" version "3.3.0"
     id "io.spring.dependency-management" version "1.1.5"
-    id "one.xis.plugin" version "0.16.1"
+    id "one.xis.plugin" version "0.16.2"
 }
 
 repositories {
@@ -79,20 +79,20 @@ overrides. The common order is:
 
 ## Navigation
 
-Use `theme:navigation` for the standard theme navigation. It creates the logo, `<nav>`, and list structure used by
+Use `xt:navigation` for the standard theme navigation. It creates the logo, `<nav>`, and list structure used by
 `xis.css`. Navigation supports two visible levels: top-level items and dropdown groups.
 
 Original:
 
 ```html
-<theme:navigation logo="/theme-logo.svg" logo-alt="Acme CRM">
-    <theme:nav-item page="/dashboard.html" label="Dashboard"/>
-    <theme:nav-group label="Customers">
-        <theme:nav-item page="/customers.html" label="All customers"/>
-        <theme:nav-item page="/pipeline.html" label="Pipeline"/>
-    </theme:nav-group>
-    <theme:nav-item modal="HelpModal" label="Help"/>
-</theme:navigation>
+<xt:navigation logo="/theme-logo.svg" logo-alt="Acme CRM">
+    <xt:nav-item page="/dashboard.html" label="Dashboard"/>
+    <xt:nav-group label="Customers">
+        <xt:nav-item page="/customers.html" label="All customers"/>
+        <xt:nav-item page="/pipeline.html" label="Pipeline"/>
+    </xt:nav-group>
+    <xt:nav-item modal="HelpModal" label="Help"/>
+</xt:navigation>
 ```
 
 Generated:
@@ -116,30 +116,30 @@ Generated:
 </nav>
 ```
 
-`theme:nav-item` supports `page`, `frontlet`, `modal`, and `href`. Use `theme:nav-group` for dropdowns.
+`xt:nav-item` supports `page`, `frontlet`, `modal`, and `href`. Use `xt:nav-group` for dropdowns.
 
 ## Standard Form Page
 
-For a standard form page, write `theme:form-page`. It creates the wrapper, heading, form, fields, messages, and submit
+For a standard form page, write `xt:form-page`. It creates the wrapper, heading, form, fields, messages, and submit
 button.
 
-`theme:input`, `theme:textarea`, `theme:checkbox`, `theme:radio`, and `theme:select` require `title`. `binding` stays a
+`xt:input`, `xt:textarea`, `xt:checkbox`, `xt:radio`, and `xt:select` require `title`. `binding` stays a
 technical field name; `title` is the text shown to the user.
 
 Original:
 
 ```html
-<theme:form-page title="Edit customer"
+<xt:form-page title="Edit customer"
                  binding="customer"
                  action="saveCustomer"
                  submit-label="Save">
-    <theme:input binding="firstName" title="First name"/>
-    <theme:input binding="lastName" title="Last name"/>
-    <theme:select binding="stage" title="Stage" options="stages"/>
-    <theme:radio binding="preferredContact" title="Preferred contact" options="contactTypes"/>
-    <theme:checkbox binding="newsletter" title="Newsletter"/>
-    <theme:textarea binding="notes" title="Notes"/>
-</theme:form-page>
+    <xt:input binding="firstName" title="First name"/>
+    <xt:input binding="lastName" title="Last name"/>
+    <xt:select binding="stage" title="Stage" options="stages"/>
+    <xt:radio binding="preferredContact" title="Preferred contact" options="contactTypes"/>
+    <xt:checkbox binding="newsletter" title="Newsletter"/>
+    <xt:textarea binding="notes" title="Notes"/>
+</xt:form-page>
 ```
 
 Generated:
@@ -203,18 +203,18 @@ class CustomersPage {
 
 ## Form Fragments
 
-`theme:form` is the smaller variant of `theme:form-page`. Use it when the page already has its own surrounding
-structure and only the form itself should be generated. The field syntax is the same: `theme:input`, `theme:textarea`,
-`theme:checkbox`, `theme:radio`, `theme:select`, field messages, and the submit action are handled exactly like in a
+`xt:form` is the smaller variant of `xt:form-page`. Use it when the page already has its own surrounding
+structure and only the form itself should be generated. The field syntax is the same: `xt:input`, `xt:textarea`,
+`xt:checkbox`, `xt:radio`, `xt:select`, field messages, and the submit action are handled exactly like in a
 standard form page.
 
 Original:
 
 ```html
-<theme:form binding="customer" action="saveCustomer" submit-label="Save">
-    <theme:input binding="firstName" title="First name"/>
-    <theme:input binding="lastName" title="Last name"/>
-</theme:form>
+<xt:form binding="customer" action="saveCustomer" submit-label="Save">
+    <xt:input binding="firstName" title="First name"/>
+    <xt:input binding="lastName" title="Last name"/>
+</xt:form>
 ```
 
 Generated:
@@ -239,12 +239,12 @@ Generated:
 
 ## Input
 
-Use `theme:input` for a complete field with label, input, error class hook, and message.
+Use `xt:input` for a complete field with label, input, error class hook, and message.
 
 Original:
 
 ```html
-<theme:input binding="email" title="E-mail address" type="email"/>
+<xt:input binding="email" title="E-mail address" type="email"/>
 ```
 
 Generated:
@@ -260,7 +260,7 @@ Generated:
 Normal input attributes are kept:
 
 ```html
-<theme:input binding="amount" title="Amount" type="number" min="0" step="0.01" placeholder="0.00"/>
+<xt:input binding="amount" title="Amount" type="number" min="0" step="0.01" placeholder="0.00"/>
 ```
 
 Use `span` when the generated field wrapper should span several grid columns. The attribute is applied to the generated
@@ -269,7 +269,7 @@ Use `span` when the generated field wrapper should span several grid columns. Th
 Original:
 
 ```html
-<theme:input binding="notes" title="Notes" span="2"/>
+<xt:input binding="notes" title="Notes" span="2"/>
 ```
 
 Generated:
@@ -284,13 +284,13 @@ Generated:
 
 ## Select
 
-Use `theme:select` for a complete select field. `options` names the `@ModelData` value used to create `<option>`
+Use `xt:select` for a complete select field. `options` names the `@ModelData` value used to create `<option>`
 elements.
 
 Original:
 
 ```html
-<theme:select binding="stage" title="Stage" options="stages"/>
+<xt:select binding="stage" title="Stage" options="stages"/>
 ```
 
 Generated:
@@ -305,14 +305,14 @@ Generated:
 </div>
 ```
 
-`theme:select` also supports `span` with the same wrapper behavior as `theme:input`.
+`xt:select` also supports `span` with the same wrapper behavior as `xt:input`.
 
 For option objects, use `option-value` and `option-label`.
 
 Original:
 
 ```html
-<theme:select binding="stage" title="Stage" options="stages" option-value="code" option-label="label"/>
+<xt:select binding="stage" title="Stage" options="stages" option-value="code" option-label="label"/>
 ```
 
 Generated option:
@@ -324,7 +324,7 @@ Generated option:
 Use `option-var` when another variable name reads better:
 
 ```html
-<theme:select binding="stage"
+<xt:select binding="stage"
               title="Stage"
               options="stages"
               option-var="stage"
@@ -340,13 +340,13 @@ This becomes:
 
 ## Textarea, Checkbox, And Radio
 
-Use `theme:textarea` for longer text values. It creates the label, textarea, error class hook, and message in the same
-way as `theme:input`.
+Use `xt:textarea` for longer text values. It creates the label, textarea, error class hook, and message in the same
+way as `xt:input`.
 
 Original:
 
 ```html
-<theme:textarea binding="notes" title="Notes" rows="5" span="2"/>
+<xt:textarea binding="notes" title="Notes" rows="5" span="2"/>
 ```
 
 Generated:
@@ -359,19 +359,19 @@ Generated:
 </div>
 ```
 
-Use `theme:checkbox` for boolean values:
+Use `xt:checkbox` for boolean values:
 
 ```html
-<theme:checkbox binding="newsletter" title="Newsletter"/>
+<xt:checkbox binding="newsletter" title="Newsletter"/>
 ```
 
-Radio groups are intentionally closer to `theme:select` than to raw `<input type="radio">`. The options come from
+Radio groups are intentionally closer to `xt:select` than to raw `<input type="radio">`. The options come from
 `@ModelData`, and labels are generated by the theme.
 
 Original:
 
 ```html
-<theme:radio binding="preferredContact"
+<xt:radio binding="preferredContact"
              title="Preferred contact"
              options="contactTypes"
              option-value="code"
@@ -387,22 +387,22 @@ Generated choice:
 </label>
 ```
 
-`theme:radio` also supports `option-var`, `option-value`, and `option-label` with the same meaning as `theme:select`.
+`xt:radio` also supports `option-var`, `option-value`, and `option-label` with the same meaning as `xt:select`.
 
 ## Grid
 
-Use `theme:grid` when you only want to say how many columns the theme should use.
+Use `xt:grid` when you only want to say how many columns the theme should use.
 `columns="3"` generates the CSS class `col3`. In the default theme, `col3` means a CSS grid with three equal columns.
 Likewise, `columns="2"` generates `col2`, `columns="4"` generates `col4`, and so on up to `col11`.
 
 Original:
 
 ```html
-<theme:grid columns="3">
-    <theme:input binding="firstName" title="First name"/>
-    <theme:input binding="lastName" title="Last name"/>
-    <theme:select binding="stage" title="Stage" options="stages" span="3"/>
-</theme:grid>
+<xt:grid columns="3">
+    <xt:input binding="firstName" title="First name"/>
+    <xt:input binding="lastName" title="Last name"/>
+    <xt:select binding="stage" title="Stage" options="stages" span="3"/>
+</xt:grid>
 ```
 
 Generated:
@@ -426,27 +426,27 @@ Generated:
 `columns` accepts `2` through `11`. The generated element is a `<section>` by default. Use `as` for another element:
 
 ```html
-<theme:grid as="div" columns="2">
+<xt:grid as="div" columns="2">
     ...
-</theme:grid>
+</xt:grid>
 ```
 
 ## Validation
 
-The validator treats `theme:form-page`, `theme:form`, `theme:input`, `theme:textarea`, `theme:checkbox`,
-`theme:radio`, and `theme:select` as theme syntax, not as generated markup. The extension is loaded from `xis-theme`,
-so validation errors point to the `theme:*` line written by the user.
+The validator treats `xt:form-page`, `xt:form`, `xt:input`, `xt:textarea`, `xt:checkbox`,
+`xt:radio`, and `xt:select` as theme syntax, not as generated markup. The extension is loaded from `xis-theme`,
+so validation errors point to the `xt:*` line written by the user.
 
 Form field bindings are checked against the `@FormData` object. Theme field tags must have `title`, and the `options`
-value of `theme:select` and `theme:radio` is checked as model data usage.
+value of `xt:select` and `xt:radio` is checked as model data usage.
 
 Theme tags and normal XIS markup can be mixed when that makes a page clearer:
 
 ```html
 <form xis:binding="customer">
     <input xis:binding="id" type="hidden">
-    <theme:input binding="firstName" title="First name"/>
-    <theme:input binding="lastName" title="Last name"/>
+    <xt:input binding="firstName" title="First name"/>
+    <xt:input binding="lastName" title="Last name"/>
 </form>
 ```
 
@@ -489,12 +489,12 @@ Add your own logo here:
 src/main/resources/public/theme-logo.svg
 ```
 
-Use it from `theme:navigation`:
+Use it from `xt:navigation`:
 
 ```html
-<theme:navigation logo="/theme-logo.svg" logo-alt="Acme CRM">
+<xt:navigation logo="/theme-logo.svg" logo-alt="Acme CRM">
     ...
-</theme:navigation>
+</xt:navigation>
 ```
 
 If no custom logo is provided, use `/default-theme-logo.svg`.

@@ -17,9 +17,9 @@ class ThemeDocumentTransformerTest {
         var document = parser.parse("""
                 <html>
                   <body>
-                    <main theme:wrapper>
-                      <section class="customers" theme:grid="3">
-                        <div theme:span="2" theme:field>
+                    <main xt:wrapper>
+                      <section class="customers" xt:grid="3">
+                        <div xt:span="2" xt:field>
                           <input>
                         </div>
                       </section>
@@ -33,15 +33,15 @@ class ThemeDocumentTransformerTest {
         assertTrue(html.contains("class=\"wrapper\""));
         assertTrue(html.contains("class=\"customers col3\""));
         assertTrue(html.contains("class=\"form-field span2\""));
-        assertFalse(html.contains("theme:wrapper"));
-        assertFalse(html.contains("theme:grid"));
-        assertFalse(html.contains("theme:span"));
-        assertFalse(html.contains("theme:field"));
+        assertFalse(html.contains("xt:wrapper"));
+        assertFalse(html.contains("xt:grid"));
+        assertFalse(html.contains("xt:span"));
+        assertFalse(html.contains("xt:field"));
     }
 
     @Test
     void rejectsUnsupportedGridWidths() {
-        var document = parser.parse("<div theme:grid=\"12\"></div>");
+        var document = parser.parse("<div xt:grid=\"12\"></div>");
 
         assertThrows(IllegalArgumentException.class, () -> transformer.transform(document));
     }
@@ -51,9 +51,9 @@ class ThemeDocumentTransformerTest {
         var document = parser.parse("""
                 <html>
                   <body>
-                    <theme:form binding="customer" action="saveCustomer" submit-label="Save">
-                      <theme:input binding="firstName" title="First name" span="2"/>
-                    </theme:form>
+                    <xt:form binding="customer" action="saveCustomer" submit-label="Save">
+                      <xt:input binding="firstName" title="First name" span="2"/>
+                    </xt:form>
                   </body>
                 </html>
                 """);
@@ -67,8 +67,8 @@ class ThemeDocumentTransformerTest {
         assertFalse(html.contains("span=\"2\""));
         assertTrue(html.contains("<div xis:message-for=\"firstName\"></div>"));
         assertTrue(html.contains("<button type=\"submit\" xis:action=\"saveCustomer\">Save</button>"));
-        assertFalse(html.contains("theme:form"));
-        assertFalse(html.contains("theme:input"));
+        assertFalse(html.contains("xt:form"));
+        assertFalse(html.contains("xt:input"));
     }
 
     @Test
@@ -76,7 +76,7 @@ class ThemeDocumentTransformerTest {
         var document = parser.parse("""
                 <html>
                   <body>
-                    <theme:select binding="stage" title="Stage" span="2" options="stages" option-value="code" option-label="label"/>
+                    <xt:select binding="stage" title="Stage" span="2" options="stages" option-value="code" option-label="label"/>
                   </body>
                 </html>
                 """);
@@ -89,7 +89,7 @@ class ThemeDocumentTransformerTest {
         assertFalse(html.contains("span=\"2\""));
         assertTrue(html.contains("<option xis:repeat=\"option:stages\" value=\"${option.code}\">${option.label}</option>"));
         assertTrue(html.contains("<div xis:message-for=\"stage\"></div>"));
-        assertFalse(html.contains("theme:select"));
+        assertFalse(html.contains("xt:select"));
     }
 
     @Test
@@ -97,9 +97,9 @@ class ThemeDocumentTransformerTest {
         var document = parser.parse("""
                 <html>
                   <body>
-                    <theme:textarea binding="notes" title="Notes" rows="5" span="2"/>
-                    <theme:checkbox binding="newsletter" title="Newsletter"/>
-                    <theme:radio binding="contactType" title="Preferred contact" options="contactTypes" option-value="code" option-label="label" span="3"/>
+                    <xt:textarea binding="notes" title="Notes" rows="5" span="2"/>
+                    <xt:checkbox binding="newsletter" title="Newsletter"/>
+                    <xt:radio binding="contactType" title="Preferred contact" options="contactTypes" option-value="code" option-label="label" span="3"/>
                   </body>
                 </html>
                 """);
@@ -117,9 +117,9 @@ class ThemeDocumentTransformerTest {
         assertTrue(html.contains("<input type=\"radio\" xis:binding=\"contactType\" value=\"${option.code}\">"));
         assertTrue(html.contains("<span>${option.label}</span>"));
         assertTrue(html.contains("<div xis:message-for=\"contactType\"></div>"));
-        assertFalse(html.contains("theme:textarea"));
-        assertFalse(html.contains("theme:checkbox"));
-        assertFalse(html.contains("theme:radio"));
+        assertFalse(html.contains("xt:textarea"));
+        assertFalse(html.contains("xt:checkbox"));
+        assertFalse(html.contains("xt:radio"));
     }
 
     @Test
@@ -127,9 +127,9 @@ class ThemeDocumentTransformerTest {
         var document = parser.parse("""
                 <html>
                   <body>
-                    <theme:form-page title="Edit customer" binding="customer" action="saveCustomer" submit-label="Save">
-                      <theme:input binding="firstName" title="First name"/>
-                    </theme:form-page>
+                    <xt:form-page title="Edit customer" binding="customer" action="saveCustomer" submit-label="Save">
+                      <xt:input binding="firstName" title="First name"/>
+                    </xt:form-page>
                   </body>
                 </html>
                 """);
@@ -141,7 +141,7 @@ class ThemeDocumentTransformerTest {
         assertTrue(html.contains("<form xis:binding=\"customer\">"));
         assertTrue(html.contains("<input id=\"firstName\" type=\"text\" xis:binding=\"firstName\" xis:error-class=\"error\">"));
         assertTrue(html.contains("<button type=\"submit\" xis:action=\"saveCustomer\">Save</button>"));
-        assertFalse(html.contains("theme:form-page"));
+        assertFalse(html.contains("xt:form-page"));
     }
 
     @Test
@@ -149,16 +149,16 @@ class ThemeDocumentTransformerTest {
         var document = parser.parse("""
                 <html>
                   <body>
-                    <theme:navigation logo="/logo.svg" logo-alt="Acme">
-                      <theme:nav-item page="/dashboard.html" label="Dashboard"/>
-                      <theme:nav-group label="Customers">
-                        <theme:nav-item page="/customers.html" label="All customers"/>
-                      </theme:nav-group>
-                    </theme:navigation>
-                    <theme:grid columns="3">
+                    <xt:navigation logo="/logo.svg" logo-alt="Acme">
+                      <xt:nav-item page="/dashboard.html" label="Dashboard"/>
+                      <xt:nav-group label="Customers">
+                        <xt:nav-item page="/customers.html" label="All customers"/>
+                      </xt:nav-group>
+                    </xt:navigation>
+                    <xt:grid columns="3">
                       <div>One</div>
                       <div>Two</div>
-                    </theme:grid>
+                    </xt:grid>
                   </body>
                 </html>
                 """);
@@ -171,8 +171,8 @@ class ThemeDocumentTransformerTest {
         assertTrue(html.contains("<a href=\"#\">Customers</a>"));
         assertTrue(html.contains("<a xis:page=\"/customers.html\">All customers</a>"));
         assertTrue(html.contains("<section class=\"col3\">"));
-        assertFalse(html.contains("theme:navigation"));
-        assertFalse(html.contains("theme:grid"));
+        assertFalse(html.contains("xt:navigation"));
+        assertFalse(html.contains("xt:grid"));
     }
 
     @Test
@@ -180,11 +180,11 @@ class ThemeDocumentTransformerTest {
         var document = parser.parse("""
                 <html>
                   <body>
-                    <theme:grid id="customer-grid" columns="3">
-                      <theme:input id="name" binding="name" title="Name" span="2"/>
-                      <theme:input id="city" binding="city" title="City"/>
-                      <theme:select id="stage" binding="stage" title="Stage" options="stages" span="3"/>
-                    </theme:grid>
+                    <xt:grid id="customer-grid" columns="3">
+                      <xt:input id="name" binding="name" title="Name" span="2"/>
+                      <xt:input id="city" binding="city" title="City"/>
+                      <xt:select id="stage" binding="stage" title="Stage" options="stages" span="3"/>
+                    </xt:grid>
                   </body>
                 </html>
                 """);
@@ -199,8 +199,8 @@ class ThemeDocumentTransformerTest {
         assertTrue(html.contains("<select id=\"stage\" xis:binding=\"stage\" xis:error-class=\"error\">"));
         assertFalse(html.contains("span=\"2\""));
         assertFalse(html.contains("span=\"3\""));
-        assertFalse(html.contains("theme:grid"));
-        assertFalse(html.contains("theme:input"));
-        assertFalse(html.contains("theme:select"));
+        assertFalse(html.contains("xt:grid"));
+        assertFalse(html.contains("xt:input"));
+        assertFalse(html.contains("xt:select"));
     }
 }

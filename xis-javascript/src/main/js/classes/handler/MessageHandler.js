@@ -45,9 +45,9 @@ class MessageHandler {
         this._render();
     }
 
-    addInfoMessage(message)    { this.addMessage(message, 'info'); }
-    addWarningMessage(message) { this.addMessage(message, 'warning'); }
-    addErrorMessage(message)   { this.addMessage(message, 'error'); }
+    addInfoMessage(message)    { this.addMessageOrToast(message, 'info'); }
+    addWarningMessage(message) { this.addMessageOrToast(message, 'warning'); }
+    addErrorMessage(message)   { this.addMessageOrToast(message, 'error'); }
 
     /** Clears all levels and cancels timers. */
     clearMessages() {
@@ -93,15 +93,28 @@ class MessageHandler {
         }
     }
 
+    addMessageOrToast(message, level) {
+        this.addMessage(message, level);
+        if (!this.messageTag) {
+            this.showToast(message, level);
+        }
+    }
+
     showToast(message, level = 'info') {
         const toastContainer = this._toastContainer();
         const normalizedLevel = String(level || 'info').toLowerCase();
+        const normalizedMessage = message == null ? '' : String(message);
+        if (this._findToast(toastContainer, normalizedMessage, normalizedLevel)) {
+            return;
+        }
         const toast = document.createElement('div');
         toast.classList.add('xis-toast');
         toast.classList.add(normalizedLevel);
+        toast.setAttribute('data-message', normalizedMessage);
+        toast.setAttribute('data-level', normalizedLevel);
         toast.setAttribute('role', normalizedLevel === 'error' ? 'alert' : 'status');
         toast.setAttribute('aria-live', normalizedLevel === 'error' ? 'assertive' : 'polite');
-        toast.textContent = message == null ? '' : String(message);
+        toast.textContent = normalizedMessage;
         toastContainer.appendChild(toast);
         setTimeout(() => toast.remove(), 5000);
     }
@@ -127,6 +140,18 @@ class MessageHandler {
         while (container.firstChild) {
             container.removeChild(container.firstChild);
         }
+    }
+
+    _findToast(container, message, level) {
+        for (var i = 0; i < container.childNodes.length; i++) {
+            const child = container.childNodes.item(i);
+            if (child.classList.contains('xis-toast')
+                    && child.getAttribute('data-message') === message
+                    && child.getAttribute('data-level') === level) {
+                return child;
+            }
+        }
+        return null;
     }
 
     _normalizeAddOptions(level, renderOrOptions) {

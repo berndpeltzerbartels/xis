@@ -266,6 +266,9 @@ class PageController {
      * @returns {Promise<void>}
      */
     displayPageForResolvedURL(resolved, skipHistoryUpdate = false) {
+        if (this.page === resolved.page) {
+            return PageController.enqueue(() => this.refreshResolvedPage(resolved, skipHistoryUpdate));
+        }
         app.frontletContainers.deactivateAll();
         return PageController.enqueue(() =>
             this.client.loadPageData(resolved).then(response => {
@@ -304,6 +307,40 @@ class PageController {
                     });
             })
         );
+    }
+
+    refreshResolvedPage(resolved, skipHistoryUpdate = false) {
+        return this.client.loadPageData(resolved).then(response => {
+            updateStores(response);
+            if (response.nextURL) {
+                const nextResolved = this.urlResolver.resolve(response.nextURL);
+                if (nextResolved && nextResolved.normalizedPath !== resolved.normalizedPath) {
+                    return this.displayPageForResolvedURL(nextResolved, true);
+                }
+            }
+
+            this.resolvedURL = resolved;
+            this.page = resolved.page;
+
+            const data = response.data;
+            const pathname = resolved.url.split('?')[0];
+            data.setValue(['pathVariables'], this.resolvedURL.pathVariablesAsMap());
+            data.setValue(['urlParameters'], this.resolvedURL.urlParameters);
+            data.setValue(['url'], this.resolvedURL.url);
+            data.setValue(['pathname'], pathname);
+            data.setValue(['queryParams'], this.resolvedURL.urlParameters);
+            this.page.data = data;
+
+            return this.htmlTagHandler.refresh(data)
+                .then(() => { if (response.annotatedTitle) this.setTitle(response.annotatedTitle); })
+                .then(() => app.eventPublisher.publish(EventType.BUFFER_COMMITTED))
+                .then(() => {
+                    if (!skipHistoryUpdate && response.status < 300) {
+                        this.updateHistory(this.resolvedURL, response.annotatedTitle);
+                    }
+                    app.eventPublisher.publish(EventType.PAGE_LOADED, { page: this.page, url: this.resolvedURL });
+                });
+        });
     }
 
     /**
