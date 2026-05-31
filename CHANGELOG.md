@@ -14,6 +14,10 @@
 - Moved XIS template schema resources out of `xis-javascript`, removed the obsolete generated HTML schema, and refreshed
   the XIS schema metadata for current template elements and attributes.
 
+### Documentation
+
+- Clarified the generated-test documentation example by showing an `@InTestContext` collaborator with its import.
+
 ## 0.16.2 - 2026-05-30
 
 ### Changed
