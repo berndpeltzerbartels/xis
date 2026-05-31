@@ -9,6 +9,8 @@
 
 ### Changed
 
+- IDP token generation now applies the configured access, refresh, and ID token validities separately and reports token
+  response expiration values as relative durations.
 - Moved XIS template schema resources out of `xis-javascript`, removed the obsolete generated HTML schema, and refreshed
   the XIS schema metadata for current template elements and attributes.
 
