@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+### Added
+
+- Added the `xis-language-metadata` module to publish XIS template schema metadata separately for IDE and tooling
+  integrations.
+
+### Changed
+
+- Moved XIS template schema resources out of `xis-javascript`, removed the obsolete generated HTML schema, and refreshed
+  the XIS schema metadata for current template elements and attributes.
+
 ## 0.16.2 - 2026-05-30
 
 ### Changed
