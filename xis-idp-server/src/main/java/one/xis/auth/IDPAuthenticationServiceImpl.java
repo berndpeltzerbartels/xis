@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import one.xis.context.DefaultComponent;
 import one.xis.server.LocalUrlHolder;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Optional;
@@ -117,15 +118,16 @@ class IDPAuthenticationServiceImpl implements IDPAuthenticationService {
 
     private IDPTokenResponse generateTokenResponse(String userId) throws AuthenticationException {
         IDPUserInfo userInfo = idpService.userInfo(userId).orElseThrow(() -> new AuthenticationException("User not found: " + userId));
+        IDPConfig config = idpService.getConfig();
 
         AccessTokenClaims accessTokenClaims = idpService.accessTokenClaims(userId)
-                .map(claims -> completeTokenClaims(claims, userInfo))
+                .map(claims -> completeTokenClaims(claims, userInfo, config.getAccessTokenValidity()))
                 .orElseThrow(() -> new AuthenticationException("Access token claims not found for user: " + userId));
 
         IDTokenClaims idTokenClaims = idpService.idTokenClaims(userId)
-                .map(claims -> completeTokenClaims(claims, userInfo))
+                .map(claims -> completeTokenClaims(claims, userInfo, config.getIdTokenValidity()))
                 .orElseThrow(() -> new AuthenticationException("ID token claims not found for user: " + userId));
-        RenewTokenClaims renewTokenClaims = completeTokenClaims(idpService.renewTokenClaims(userId), userInfo);
+        RenewTokenClaims renewTokenClaims = completeTokenClaims(idpService.renewTokenClaims(userId), userInfo, config.getRefreshTokenValidity());
 
         String accessToken = localTokenService.createToken(accessTokenClaims);
         String idToken = localTokenService.createToken(idTokenClaims);
@@ -135,16 +137,17 @@ class IDPAuthenticationServiceImpl implements IDPAuthenticationService {
         tokenResponse.setAccessToken(accessToken);
         tokenResponse.setIdToken(idToken);
         tokenResponse.setRefreshToken(refreshToken);
-        tokenResponse.setExpiresIn(accessTokenClaims.getExpiresAtSeconds());
-        tokenResponse.setRefreshExpiresIn(renewTokenClaims.getExpiresAtSeconds());
+        tokenResponse.setExpiresIn(config.getAccessTokenValidity().getSeconds());
+        tokenResponse.setRefreshExpiresIn(config.getRefreshTokenValidity().getSeconds());
         return tokenResponse;
     }
 
-    private <C extends TokenClaims> C completeTokenClaims(C tokenClaims, IDPUserInfo userInfo) {
+    private <C extends TokenClaims> C completeTokenClaims(C tokenClaims, IDPUserInfo userInfo, Duration validity) {
+        long issuedAtSeconds = Instant.now().getEpochSecond();
         tokenClaims.setUserId(userInfo.getUserId());
-        tokenClaims.setIssuedAtSeconds(Instant.now().getEpochSecond());
-        tokenClaims.setExpiresAtSeconds(tokenClaims.getIssuedAtSeconds() + idpService.getConfig().getAccessTokenValidity().getSeconds());
-        tokenClaims.setNotBeforeSeconds(tokenClaims.getIssuedAtSeconds());
+        tokenClaims.setIssuedAtSeconds(issuedAtSeconds);
+        tokenClaims.setExpiresAtSeconds(issuedAtSeconds + validity.getSeconds());
+        tokenClaims.setNotBeforeSeconds(issuedAtSeconds);
         tokenClaims.setClientId(userInfo.getClientId());
         tokenClaims.setIssuer(localUrlHolder.getUrl());
         return tokenClaims;

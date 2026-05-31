@@ -142,6 +142,13 @@ After a feature branch has been merged into `develop`, delete that feature branc
 an explicit reason to keep it. Keeping merged topic branches around creates avoidable archaeology later, especially
 after squash merges make commit identity a poor signal for whether the work is already contained.
 
+Normal development work happens on a topic branch. When the topic branch is clean and the agreed integration or full
+test picture has passed, treat that as the working confirmation for the topic, then merge the topic branch into
+`develop`, complete the changelog entry for the work now present on `develop`, push `develop`, and delete the topic
+branch. Keep repeating that branch-to-develop cycle until it is time to create a release branch.
+If the flow is healthy, there should normally be at most one active topic branch. When more than one exists, inspect and
+merge the older or prerequisite branch first instead of stacking unrelated work invisibly.
+
 Do not treat uncommitted work in the active branch as a cautious holding area. It is dangerous because local experiments
 then run against a different state than the one that can be pushed, merged, or released. When work is created, stage it
 promptly; commits should normally cover the whole repository state instead of hand-picked partial changes. Only make
