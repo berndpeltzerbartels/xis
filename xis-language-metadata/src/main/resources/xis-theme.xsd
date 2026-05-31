@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:tns="https://xis.one/theme"
+           targetNamespace="https://xis.one/theme"
+           elementFormDefault="qualified"
+           attributeFormDefault="unqualified">
+
+    <xs:annotation>
+        <xs:documentation>
+            XIS theme authoring schema. It is intended as IDE metadata for xt:* elements and attributes.
+            Runtime validation remains authoritative for rules that cannot be expressed well in XSD.
+        </xs:documentation>
+    </xs:annotation>
+
+    <xs:complexType name="anyContent">
+        <xs:sequence>
+            <xs:any minOccurs="0" maxOccurs="unbounded" processContents="lax"/>
+        </xs:sequence>
+        <xs:anyAttribute processContents="lax"/>
+    </xs:complexType>
+
+    <xs:element name="form">
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="tns:anyContent">
+                    <xs:attribute name="binding" type="xs:string" use="required"/>
+                    <xs:attribute name="action" type="xs:string"/>
+                    <xs:attribute name="submit-label" type="xs:string"/>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="form-page">
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="tns:anyContent">
+                    <xs:attribute name="title" type="xs:string"/>
+                    <xs:attribute name="binding" type="xs:string" use="required"/>
+                    <xs:attribute name="action" type="xs:string"/>
+                    <xs:attribute name="submit-label" type="xs:string"/>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="field">
+        <xs:complexContent>
+            <xs:extension base="tns:anyContent">
+                <xs:attribute name="binding" type="xs:string" use="required"/>
+                <xs:attribute name="title" type="xs:string" use="required"/>
+                <xs:attribute name="label" type="xs:string"/>
+                <xs:attribute name="span" type="xs:positiveInteger"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="optionField">
+        <xs:complexContent>
+            <xs:extension base="tns:field">
+                <xs:attribute name="options" type="xs:string" use="required"/>
+                <xs:attribute name="option-var" type="xs:string"/>
+                <xs:attribute name="option-value" type="xs:string"/>
+                <xs:attribute name="option-label" type="xs:string"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:element name="input" type="tns:field"/>
+    <xs:element name="textarea" type="tns:field"/>
+    <xs:element name="checkbox" type="tns:field"/>
+    <xs:element name="select" type="tns:optionField"/>
+    <xs:element name="radio" type="tns:optionField"/>
+
+    <xs:element name="grid">
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="tns:anyContent">
+                    <xs:attribute name="as" type="xs:string"/>
+                    <xs:attribute name="columns" type="xs:positiveInteger" use="required"/>
+                    <xs:attribute name="rows" type="xs:positiveInteger"/>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="navigation">
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="tns:anyContent">
+                    <xs:attribute name="logo" type="xs:string"/>
+                    <xs:attribute name="logo-alt" type="xs:string"/>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="nav-group">
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="tns:anyContent">
+                    <xs:attribute name="label" type="xs:string" use="required"/>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="nav-item">
+        <xs:complexType>
+            <xs:sequence/>
+            <xs:attribute name="page" type="xs:string"/>
+            <xs:attribute name="frontlet" type="xs:string"/>
+            <xs:attribute name="modal" type="xs:string"/>
+            <xs:attribute name="href" type="xs:string"/>
+            <xs:attribute name="label" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:attribute name="wrapper" type="xs:string"/>
+    <xs:attribute name="grid" type="xs:string"/>
+    <xs:attribute name="span" type="xs:positiveInteger"/>
+    <xs:attribute name="field" type="xs:string"/>
+</xs:schema>
