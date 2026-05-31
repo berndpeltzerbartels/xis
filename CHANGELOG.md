@@ -6,6 +6,14 @@
 
 - Added the `xis-language-metadata` module to publish XIS template schema metadata separately for IDE and tooling
   integrations.
+- Added a portable `xis-sql` DDL builder for H2, MariaDB, and PostgreSQL with `createTableIfNotExists`, primary keys,
+  indexes, unique constraints, foreign keys, generated identities, raw SQL execution, and validation for common schema
+  mistakes.
+- Added fluent `xis-sql` DDL column shortcuts for common field types and single-column primary key, unique, and index
+  declarations.
+- Added fast-failing `Table.getColumn(String)` and `Column.foreignKey(Column)` shortcuts for single-column SQL DDL
+  foreign keys.
+- Added dialect-specific quoting for reserved SQL identifiers in the `xis-sql` DDL builder.
 
 ### Changed
 
