@@ -95,6 +95,7 @@ package example.products;
 
 import one.xis.boot.test.XisBootTest;
 import one.xis.context.IntegrationTestContext;
+import one.xis.test.InTestContext;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -104,6 +105,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class ProductPageTest {
 
     private IntegrationTestContext context;
+
+    @InTestContext
+    private ProductService productService;
 
     @Test
     void opensProductPage() {
