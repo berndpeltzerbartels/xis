@@ -16,6 +16,7 @@
 - Added dialect-specific quoting for reserved SQL identifiers in the `xis-sql` DDL builder.
 - Added `@WelcomePage` support for router routes, including method-level `@WelcomePage` on `@Route` methods and
   class-level `@WelcomePage` on routers with exactly one route.
+- Clarified router navigation as page navigation and reject frontlet/modal route return types during startup.
 
 ### Changed
 

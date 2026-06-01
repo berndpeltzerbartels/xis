@@ -15,7 +15,7 @@ and [Security](security.md) for complete examples.
 | Annotation | Use |
 | --- | --- |
 | `@Page("/path.html")` | Marks a class as a page controller and maps it to a browser URL. |
-| `@Router("/path")` | Marks an optional route-only controller. A router has no template and delegates matching URLs to pages, frontlets, or modals from `@Route` methods. See [Routers](routers.md). |
+| `@Router("/path")` | Marks an optional route-only controller. A router has no template and delegates matching URLs to pages from `@Route` methods. See [Routers](routers.md). |
 | `@WelcomePage` | Marks the page or single router route that should be used for `/`. |
 | `@Frontlet` | Marks a reusable UI controller that renders a replaceable HTML fragment. |
 | `@Modal` | Marks a modal dialog controller. See [Modals](modals.md). |

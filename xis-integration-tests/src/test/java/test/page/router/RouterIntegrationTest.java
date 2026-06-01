@@ -83,6 +83,28 @@ class RouterIntegrationTest {
     }
 
     @Test
+    void routeMethodsRejectFrontletResponses() {
+        assertThatThrownBy(() -> IntegrationTestContext.builder()
+                .withSingleton(InvalidFrontletRouteRouter.class)
+                .build())
+                .isInstanceOf(RuntimeException.class)
+                .hasRootCauseMessage("@Route method return type is not supported: one.xis.FrontletResponse test.page.router.InvalidFrontletRouteRouter.frontlet()");
+    }
+
+    @Test
+    void routeMethodsRejectFrontletClassesAtRuntime() {
+        context = IntegrationTestContext.builder()
+                .withSingleton(InvalidFrontletClassRouteRouter.class)
+                .withSingleton(RouterTargetFrontlet.class)
+                .build();
+
+        assertThatThrownBy(() -> processRouterRequest("/invalid-frontlet-class-route/frontlet.html", "/invalid-frontlet-class-route/frontlet.html"))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("Failed to invoke route-method: ControllerMethod:class test.page.router.InvalidFrontletClassRouteRouter.frontletClass")
+                .hasRootCauseMessage("@Route methods must navigate to pages, but returned: class test.page.router.RouterTargetFrontlet");
+    }
+
+    @Test
     void welcomePageMethodsAreRejectedOutsideRouterControllers() {
         assertThatThrownBy(() -> IntegrationTestContext.builder()
                 .withSingleton(InvalidWelcomeMethodPage.class)

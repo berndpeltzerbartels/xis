@@ -192,8 +192,6 @@ class ControllerWrapperFactory {
                 || returnType.equals(Class.class)
                 || PageResponse.class.isAssignableFrom(returnType)
                 || PageUrlResponse.class.isAssignableFrom(returnType)
-                || FrontletResponse.class.isAssignableFrom(returnType)
-                || ModalResponse.class.isAssignableFrom(returnType)
                 || RedirectControllerResponse.class.isAssignableFrom(returnType)) {
             return;
         }

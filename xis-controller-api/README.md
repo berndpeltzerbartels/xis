@@ -124,9 +124,8 @@ public class ProductRouter {
 }
 ```
 
-Route methods must return a navigation value such as `String`, `PageResponse`, `PageUrlResponse`, `FrontletResponse`,
-`ModalResponse`, or a page/frontlet class. `@Route` is only valid inside `@Router` controllers and must not be combined
-with `@Action`.
+Route methods must return a page navigation value such as `String`, `PageResponse`, `PageUrlResponse`, or a page class.
+`@Route` is only valid inside `@Router` controllers and must not be combined with `@Action`.
 
 | Annotation | Attribute | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- | --- |
