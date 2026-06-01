@@ -35,8 +35,13 @@ class PageAttributesFactory extends AttributesFactory {
     PageAttributes routerAttributes(@NonNull Object controller, @NonNull Method method) {
         var attributes = new PageAttributes();
         var path = pathResolver.createPath(RouterUtil.getRouteUrl(controller, method));
+        attributes.setWelcomePage(controller.getClass().isAnnotationPresent(WelcomePage.class)
+                || method.isAnnotationPresent(WelcomePage.class));
         attributes.setPath(path);
         attributes.setNormalizedPath(path.normalized());
+        if (attributes.isWelcomePage() && path.hasPathVariables()) {
+            throw new IllegalStateException("WelcomePage cannot have path variables: " + method);
+        }
         attributes.setHost(hostResolver.getPageHost(path.normalized()));
         addParameterAttributes(method, attributes);
         return attributes;

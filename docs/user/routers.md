@@ -91,6 +91,26 @@ This matches `/products/42.html`. If the combined route does not end with `.html
 Route methods may use the same injected request data as ordinary controller methods, such as `@PathVariable`,
 `@QueryParameter`, `@ClientId`, `UserContext`, and storage parameters.
 
+## Welcome Routes
+
+A router can provide the application's welcome entry when the first request should be decided by backend logic.
+Annotate the selected `@Route` method with `@WelcomePage`:
+
+```java
+@Router("/entry")
+class EntryRouter {
+
+    @WelcomePage
+    @Route("/start.html")
+    PageResponse start(@ClientId String clientId) {
+        return PageResponse.of(HomePage.class);
+    }
+}
+```
+
+If a router has exactly one route, `@WelcomePage` may also be placed on the router class. XIS fails during startup if
+that would be ambiguous, for example when a class-level welcome router declares more than one `@Route`.
+
 ## Return Values
 
 Route methods must return a navigation value:

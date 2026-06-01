@@ -14,6 +14,8 @@
 - Added fast-failing `Table.getColumn(String)` and `Column.foreignKey(Column)` shortcuts for single-column SQL DDL
   foreign keys.
 - Added dialect-specific quoting for reserved SQL identifiers in the `xis-sql` DDL builder.
+- Added `@WelcomePage` support for router routes, including method-level `@WelcomePage` on `@Route` methods and
+  class-level `@WelcomePage` on routers with exactly one route.
 
 ### Changed
 

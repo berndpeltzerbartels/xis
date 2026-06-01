@@ -7,7 +7,9 @@ import one.xis.Include;
 import one.xis.Modal;
 import one.xis.Page;
 import one.xis.Frontlet;
+import one.xis.Route;
 import one.xis.Router;
+import one.xis.WelcomePage;
 import one.xis.context.Component;
 import one.xis.context.Init;
 import one.xis.context.Inject;
@@ -70,23 +72,16 @@ class ClientConfigServiceImpl implements ClientConfigService {
         var pageAttributes = new HashMap<String, PageAttributes>();
         for (Object pageController : pageControllers) {
             var attributes = pageAttributesFactory.attributes(pageController);
-            pageAttributes.put(attributes.getNormalizedPath(), attributes);
-            pageIds.add(attributes.getNormalizedPath());
-            if (attributes.isWelcomePage()) {
-                if (welcomePageId != null) {
-                    throw new IllegalStateException("There must be exactly one welcome-page (annotated with @WelcomePage). More than one found: " + welcomePageId + ", " + attributes.getNormalizedPath());
-                }
-                welcomePageId = attributes.getNormalizedPath();
-            }
+            welcomePageId = addPageAttributes(pageIds, pageAttributes, welcomePageId, attributes);
         }
         for (Object routerController : routerControllers) {
+            validateRouterWelcomePage(routerController);
             for (var method : MethodUtils.allMethods(routerController)) {
-                if (!method.isAnnotationPresent(one.xis.Route.class)) {
+                if (!method.isAnnotationPresent(Route.class)) {
                     continue;
                 }
                 var attributes = pageAttributesFactory.routerAttributes(routerController, method);
-                pageAttributes.put(attributes.getNormalizedPath(), attributes);
-                pageIds.add(attributes.getNormalizedPath());
+                welcomePageId = addPageAttributes(pageIds, pageAttributes, welcomePageId, attributes);
             }
         }
         if (welcomePageId == null) {
@@ -96,6 +91,36 @@ class ClientConfigServiceImpl implements ClientConfigService {
         configBuilder.pageIds(Collections.unmodifiableSet(pageIds))
                 .pageAttributes(pageAttributes)
                 .welcomePageId(welcomePageId);
+    }
+
+    private String addPageAttributes(HashSet<String> pageIds,
+                                     HashMap<String, PageAttributes> pageAttributes,
+                                     String welcomePageId,
+                                     PageAttributes attributes) {
+        pageAttributes.put(attributes.getNormalizedPath(), attributes);
+        pageIds.add(attributes.getNormalizedPath());
+        if (!attributes.isWelcomePage()) {
+            return welcomePageId;
+        }
+        if (welcomePageId != null) {
+            throw new IllegalStateException("There must be exactly one welcome-page (annotated with @WelcomePage). More than one found: " + welcomePageId + ", " + attributes.getNormalizedPath());
+        }
+        return attributes.getNormalizedPath();
+    }
+
+    private void validateRouterWelcomePage(Object routerController) {
+        var routeMethods = MethodUtils.allMethods(routerController).stream()
+                .filter(method -> method.isAnnotationPresent(Route.class))
+                .toList();
+        if (routerController.getClass().isAnnotationPresent(WelcomePage.class) && routeMethods.size() != 1) {
+            throw new IllegalStateException("@WelcomePage on @Router controllers requires exactly one @Route method: " + routerController.getClass());
+        }
+        var welcomeRouteCount = routeMethods.stream()
+                .filter(method -> method.isAnnotationPresent(WelcomePage.class))
+                .count();
+        if (welcomeRouteCount > 1) {
+            throw new IllegalStateException("@Router controllers must not declare more than one @WelcomePage route: " + routerController.getClass());
+        }
     }
 
 

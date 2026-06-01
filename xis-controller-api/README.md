@@ -99,8 +99,9 @@ A page controller is also registered as a framework component for the supported 
 
 ### `@WelcomePage`
 
-`@WelcomePage` marks the default page used when no other URL mapping matches. An application should have at most one
-welcome page.
+`@WelcomePage` marks the default page or router route used when no other URL mapping matches. An application should
+have at most one welcome page. On routers it can be placed on one `@Route` method, or on a `@Router` class that declares
+exactly one route.
 
 | Attribute | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
@@ -131,6 +132,8 @@ with `@Action`.
 | --- | --- | --- | --- | --- | --- |
 | `@Router` | `value` | `String` | Yes | none | Base route path. |
 | `@Route` | `value` | `String` | No | `""` | Method route path appended to the router base path. |
+
+`@WelcomePage` may mark one route as the application entry point when a router should decide the final destination.
 
 ### `@HtmlFile`
 
@@ -562,7 +565,7 @@ return new FrontletResponse(ProductFrontlet.class)
 | Annotation | Target | Required Attributes | Purpose |
 | --- | --- | --- | --- |
 | `@Page` | class | `value` | Declares a page controller and maps it to a URL pattern. |
-| `@WelcomePage` | class | none | Declares the fallback/default page. |
+| `@WelcomePage` | class, method | none | Declares the fallback/default page or router route. |
 | `@HtmlFile` | class | `value` | Binds a controller to an explicit HTML template. |
 | `@DefaultHtmlFile` | class | `value` | Provides a default template for library controllers. |
 | `@Frontlet` | class | none | Declares a reusable frontlet controller. |
