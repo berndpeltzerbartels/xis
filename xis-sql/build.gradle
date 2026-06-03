@@ -31,12 +31,16 @@ var gsonVersion = rootProject.ext.libraryVersions.gson
 var mockitoVersion = rootProject.ext.libraryVersions.mockito
 var hikariVersion = rootProject.ext.libraryVersions.hikariCP
 var slf4jVersion = rootProject.ext.libraryVersions.slf4j
+var springContextVersion = rootProject.ext.libraryVersions.springContext
+var jakartaInjectVersion = rootProject.ext.libraryVersions.jakartaInject
 
 dependencies {
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
 
     implementation "org.projectlombok:lombok:$lombokVersion"
     implementation "org.slf4j:slf4j-api:$slf4jVersion"
+    implementation "jakarta.inject:jakarta.inject-api:$jakartaInjectVersion"
+    compileOnly "org.springframework:spring-context:$springContextVersion"
     implementation "com.google.code.gson:gson:$gsonVersion"
     implementation project(':xis-context')
     implementation project(':xis-http-controller')

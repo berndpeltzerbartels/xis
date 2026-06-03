@@ -28,6 +28,7 @@ class ControllerWrapperFactory {
     <W extends ControllerWrapper> W createControllerWrapper(@NonNull String id, @NonNull Object controller, Class<W> wrapperClass) {
         try {
             validateRouteAnnotations(controller);
+            validateWelcomePageAnnotations(controller);
             var controllerWrapper = ClassUtils.newInstance(wrapperClass);
             controllerWrapper.setId(id);
             controllerWrapper.setController(controller);
@@ -147,6 +148,38 @@ class ControllerWrapperFactory {
         });
     }
 
+    private void validateWelcomePageAnnotations(Object controller) {
+        var welcomeMethods = MethodUtils.allMethods(controller).stream()
+                .filter(method -> method.isAnnotationPresent(WelcomePage.class))
+                .toList();
+        if (!controller.getClass().isAnnotationPresent(Router.class)) {
+            welcomeMethods.stream()
+                    .findFirst()
+                    .ifPresent(method -> {
+                        throw new IllegalStateException("@WelcomePage methods are only supported on @Route methods inside @Router controllers: " + method);
+                    });
+            return;
+        }
+        welcomeMethods.stream()
+                .filter(method -> !method.isAnnotationPresent(Route.class))
+                .findFirst()
+                .ifPresent(method -> {
+                    throw new IllegalStateException("@WelcomePage methods must also be annotated with @Route: " + method);
+                });
+        var welcomeRouteCount = welcomeMethods.size();
+        if (welcomeRouteCount > 1) {
+            throw new IllegalStateException("@Router controllers must not declare more than one @WelcomePage route: " + controller.getClass());
+        }
+        if (controller.getClass().isAnnotationPresent(WelcomePage.class)) {
+            var routeCount = MethodUtils.allMethods(controller).stream()
+                    .filter(method -> method.isAnnotationPresent(Route.class))
+                    .count();
+            if (routeCount != 1) {
+                throw new IllegalStateException("@WelcomePage on @Router controllers requires exactly one @Route method: " + controller.getClass());
+            }
+        }
+    }
+
     private void validateRouteMethod(Method method) {
         if (method.isAnnotationPresent(Action.class)) {
             throw new IllegalStateException("@Route methods must not be annotated with @Action: " + method);
@@ -159,8 +192,6 @@ class ControllerWrapperFactory {
                 || returnType.equals(Class.class)
                 || PageResponse.class.isAssignableFrom(returnType)
                 || PageUrlResponse.class.isAssignableFrom(returnType)
-                || FrontletResponse.class.isAssignableFrom(returnType)
-                || ModalResponse.class.isAssignableFrom(returnType)
                 || RedirectControllerResponse.class.isAssignableFrom(returnType)) {
             return;
         }

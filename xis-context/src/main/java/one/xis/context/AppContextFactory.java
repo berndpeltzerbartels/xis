@@ -156,6 +156,9 @@ class AppContextFactory implements SingletonCreationListener {
         if (producer instanceof SingletonConstructor constructor) {
             return constructor.getSingletonClass().isAnnotationPresent(DefaultComponent.class);
         }
+        if (producer instanceof BeanCreationMethod beanMethod) {
+            return beanMethod.getParent().getBeanClass().isAnnotationPresent(DefaultComponent.class);
+        }
         return false;
     }
 
@@ -199,6 +202,10 @@ class AppContextFactory implements SingletonCreationListener {
         // Entferne die DefaultProducers aus allen Listen
         singletonProducers.removeAll(producersToRemove);
         initialProducers.removeAll(producersToRemove);
+        producersToRemove.stream()
+                .filter(BeanCreationMethod.class::isInstance)
+                .map(BeanCreationMethod.class::cast)
+                .forEach(beanMethod -> beanMethod.getParent().getBeanCreationMethods().remove(beanMethod));
 
         if (!producersToRemove.isEmpty()) {
             log.info("Removed {} default component producer(s) because non-default implementations exist",

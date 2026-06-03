@@ -29,7 +29,7 @@ Read these chapters to build normal XIS applications:
 - [Forms and validation](forms-and-validation.md)
 - [File uploads](forms-and-validation.md#file-uploads)
 - [Modals](modals.md)
-- [SQL](sql.md)
+- [SQL repositories and DDL change sets](sql.md)
 - [MongoDB](mongodb.md)
 - [Drag and drop](drag-and-drop.md)
 - [Events](events.md)

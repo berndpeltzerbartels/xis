@@ -15,8 +15,8 @@ and [Security](security.md) for complete examples.
 | Annotation | Use |
 | --- | --- |
 | `@Page("/path.html")` | Marks a class as a page controller and maps it to a browser URL. |
-| `@Router("/path")` | Marks an optional route-only controller. A router has no template and delegates matching URLs to pages, frontlets, or modals from `@Route` methods. See [Routers](routers.md). |
-| `@WelcomePage` | Marks the page that should be used for `/`. |
+| `@Router("/path")` | Marks an optional route-only controller. A router has no template and delegates matching URLs to pages from `@Route` methods. See [Routers](routers.md). |
+| `@WelcomePage` | Marks the page or single router route that should be used for `/`. |
 | `@Frontlet` | Marks a reusable UI controller that renders a replaceable HTML fragment. |
 | `@Modal` | Marks a modal dialog controller. See [Modals](modals.md). |
 | `@Include("name")` | Registers a reusable HTML fragment that can be inserted with `xis:include` or `<xis:include>`. |
@@ -38,6 +38,7 @@ and [Security](security.md) for complete examples.
 | `@FormData` | Loads form data for a named form binding. |
 | `@Action` | Marks a method that can be called from an action link, action button, or form submit. May be combined with `@ModelData` or `@FormData` when the action return value should be rendered in the current response. The method still runs only when that action is triggered. |
 | `@Route` | Marks a method on a `@Router`. Route methods run before a page controller is selected and must return a navigation value. |
+| `@WelcomePage` | Can mark one `@Route` method as the application's welcome route. |
 | `@Title` | Supplies a page or frontlet title from Java. |
 | `@SharedValue` | Provides a named value for other controller methods during the same request/action processing flow. |
 | `@Bean` | Creates a XIS context bean from a method. |
@@ -335,6 +336,8 @@ annotation reference; the full behavior belongs in the persistence chapters.
 | `@Param` | Names a repository method parameter for SQL placeholders. |
 | `@Transactional` | Opens a transaction through XIS interface advice. See [Transactions](sql.md#transactions). |
 | `@Function`, `@StoredProcedure` | Calls database functions and stored procedures. |
+| `one.xis.ddl.@ChangeSet` | Defines a stable, persisted DDL migration group and marks the class as a XIS/Spring component. See [DDL builder and change sets](sql.md#ddl-builder-and-change-sets). |
+| `one.xis.ddl.@Change` | Marks one DDL migration method inside a change set. See [DDL builder and change sets](sql.md#ddl-builder-and-change-sets). |
 
 ### MongoDB
 

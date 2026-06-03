@@ -58,6 +58,7 @@ class ControllerMethodResultMapper {
         } else if (returnValue instanceof ModalResponse modalResponse) {
             mapModalResponse(modalResponse, controllerMethodResult);
         } else if (returnValue instanceof Class<?> controllerClass) {
+            validateRouterControllerClass(method, controllerClass);
             updateController(controllerMethodResult, controllerClass, emptyMap());
         } else if (returnValue instanceof RedirectControllerResponse redirectControllerResponse) {
             controllerMethodResult.setRedirectUrl(redirectControllerResponse.getRedirectUrl());
@@ -112,6 +113,12 @@ class ControllerMethodResultMapper {
                 || method.isAnnotationPresent(LocalStorage.class)
                 || method.isAnnotationPresent(ClientState.class)
                 || method.isAnnotationPresent(Title.class);
+    }
+
+    private void validateRouterControllerClass(Method method, Class<?> controllerClass) {
+        if (method.getDeclaringClass().isAnnotationPresent(Router.class) && !controllerClass.isAnnotationPresent(Page.class)) {
+            throw new IllegalStateException("@Route methods must navigate to pages, but returned: " + controllerClass);
+        }
     }
 
     void mapMethodParameterToResultAfterInvocation(ControllerMethodResult controllerMethodResult, ControllerMethodParameter[] parameters, Object[] args, ClientRequest request) {

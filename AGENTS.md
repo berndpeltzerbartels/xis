@@ -146,6 +146,8 @@ Normal development work happens on a topic branch. When the topic branch is clea
 test picture has passed, treat that as the working confirmation for the topic, then merge the topic branch into
 `develop`, complete the changelog entry for the work now present on `develop`, push `develop`, and delete the topic
 branch. Keep repeating that branch-to-develop cycle until it is time to create a release branch.
+At the end of each completed development task, run `./gradlew publishToMavenLocal` so local consumer projects can use
+the freshly confirmed snapshot immediately.
 If the flow is healthy, there should normally be at most one active topic branch. When more than one exists, inspect and
 merge the older or prerequisite branch first instead of stacking unrelated work invisibly.
 

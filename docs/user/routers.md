@@ -20,16 +20,16 @@ A shop links to a product detail route. The URL is stable:
 <a xis:page="/products/${product.id}.html">${product.name}</a>
 ```
 
-But the product state decides which view is useful:
+But the product state decides which page URL is useful:
 
-- the product is available, so the page should show an order frontlet
-- the product is sold out, so the page should show a notification frontlet
-- the product needs age confirmation, so the page should show a confirmation frontlet first
+- the product is available, so the normal product page should open
+- the product is sold out, so a sold-out page should open
+- the product needs age confirmation, so an age-confirmation page should open first
 
-The link still points to one product destination. The router owns the decision about the concrete page or frontlet.
+The link still points to one product destination. The router owns the decision about the concrete page.
 
 ```java
-import one.xis.FrontletResponse;
+import one.xis.PageResponse;
 import one.xis.PathVariable;
 import one.xis.Route;
 import one.xis.Router;
@@ -44,14 +44,15 @@ class ProductRouter {
     }
 
     @Route("/{id}.html")
-    FrontletResponse product(@PathVariable("id") long id) {
+    PageResponse product(@PathVariable("id") long id) {
         var product = productService.findById(id);
         if (product.isSoldOut()) {
-            return FrontletResponse.of(SoldOutNotificationFrontlet.class, "id", id)
-                    .targetContainer("product-area");
+            return PageResponse.of(SoldOutProductPage.class, "id", id);
         }
-        return FrontletResponse.of(OrderProductFrontlet.class, "id", id)
-                .targetContainer("product-area");
+        if (product.requiresAgeConfirmation()) {
+            return PageResponse.of(AgeConfirmationPage.class, "id", id);
+        }
+        return PageResponse.of(ProductPage.class, "id", id);
     }
 }
 ```
@@ -91,17 +92,38 @@ This matches `/products/42.html`. If the combined route does not end with `.html
 Route methods may use the same injected request data as ordinary controller methods, such as `@PathVariable`,
 `@QueryParameter`, `@ClientId`, `UserContext`, and storage parameters.
 
+## Welcome Routes
+
+A router can provide the application's welcome entry when the first request should be decided by backend logic.
+Annotate the selected `@Route` method with `@WelcomePage`:
+
+```java
+@Router("/entry")
+class EntryRouter {
+
+    @WelcomePage
+    @Route("/start.html")
+    PageResponse start(@ClientId String clientId) {
+        return PageResponse.of(HomePage.class);
+    }
+}
+```
+
+If a router has exactly one route, `@WelcomePage` may also be placed on the router class. XIS fails during startup if
+that would be ambiguous, for example when a class-level welcome router declares more than one `@Route`.
+
 ## Return Values
 
-Route methods must return a navigation value:
+Route methods must return a page navigation value:
 
 - `String` or `PageUrlResponse` for URL-based page navigation
 - a page class or `PageResponse` for type-oriented page navigation
-- a frontlet class or `FrontletResponse` for frontlet navigation
-- `ModalResponse` for modal navigation
 
 Use `String` or URL responses when you intentionally want to decouple modules. For example, in a distributed application
 a router can return a URL without requiring the target page class on the classpath.
+
+Routers are matched from page URLs and should not be used to select frontlets directly. If a page URL should decide
+which frontlet is mounted, model that through the target page, query/path parameters, or URL-mounted frontlets.
 
 ## Validation
 

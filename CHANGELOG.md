@@ -6,6 +6,19 @@
 
 - Added the `xis-language-metadata` module to publish XIS template schema metadata separately for IDE and tooling
   integrations.
+- Added a portable `xis-sql` DDL builder for H2, MariaDB, and PostgreSQL with `createTableIfNotExists`, primary keys,
+  indexes, unique constraints, foreign keys, generated identities, raw SQL execution, and validation for common schema
+  mistakes.
+- Added fluent `xis-sql` DDL column shortcuts for common field types and single-column primary key, unique, and index
+  declarations.
+- Added fast-failing `Table.getColumn(String)` and `Column.foreignKey(Column)` shortcuts for single-column SQL DDL
+  foreign keys.
+- Added dialect-specific quoting for reserved SQL identifiers in the `xis-sql` DDL builder.
+- Added `one.xis.ddl.@ChangeSet` and `one.xis.ddl.@Change` for automatic linear SQL DDL change-set execution with a
+  persistent migration history table. `@ChangeSet` is now also a XIS/Spring component stereotype.
+- Added `@WelcomePage` support for router routes, including method-level `@WelcomePage` on `@Route` methods and
+  class-level `@WelcomePage` on routers with exactly one route.
+- Clarified router navigation as page navigation and reject frontlet/modal route return types during startup.
 
 ### Changed
 
@@ -17,6 +30,7 @@
 ### Documentation
 
 - Clarified the generated-test documentation example by showing an `@InTestContext` collaborator with its import.
+- Documented SQL DDL change sets in the SQL guide, annotation reference, persistence index, and documentation maps.
 
 ## 0.16.2 - 2026-05-30
 
