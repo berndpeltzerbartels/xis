@@ -59,6 +59,8 @@ class XisContextDatabaseSmokeTest {
     private AppContext sqlContext(DataSource dataSource) {
         return AppContext.builder()
                 .withPackage(getClass().getPackageName())
+                .withSingletonClass("one.xis.sql.DataSourceFactory")
+                .withSingletonClass("one.xis.sql.DataSourceConfiguration")
                 .withSingletonClass("one.xis.sql.SqlConnectionProvider")
                 .withSingletonClass("one.xis.sql.TransactionManager")
                 .withSingletonClass("one.xis.sql.SQLRepositoryProxyFactory")

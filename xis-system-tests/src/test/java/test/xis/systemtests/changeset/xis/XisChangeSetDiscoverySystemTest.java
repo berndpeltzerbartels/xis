@@ -20,6 +20,8 @@ class XisChangeSetDiscoverySystemTest {
         var context = AppContext.builder()
                 .withComponentAnnotation(Component.class)
                 .withSingleton(dataSource)
+                .withSingletonClass("one.xis.sql.DataSourceFactory")
+                .withSingletonClass("one.xis.sql.DataSourceConfiguration")
                 .withPackage(ChangeSet.class.getPackageName())
                 .withPackage(getClass().getPackageName())
                 .build();
