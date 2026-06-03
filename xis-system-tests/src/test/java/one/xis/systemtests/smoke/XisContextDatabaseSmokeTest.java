@@ -3,6 +3,7 @@ package one.xis.systemtests.smoke;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
 import one.xis.context.AppContext;
+import one.xis.sql.DataSourceProvider;
 import one.xis.sql.DriverManagerDataSource;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -59,11 +60,7 @@ class XisContextDatabaseSmokeTest {
     private AppContext sqlContext(DataSource dataSource) {
         return AppContext.builder()
                 .withPackage(getClass().getPackageName())
-                .withSingletonClass("one.xis.sql.DataSourceFactory")
-                .withSingletonClass("one.xis.sql.DataSourceConfiguration")
-                .withSingletonClass("one.xis.sql.SqlConnectionProvider")
-                .withSingletonClass("one.xis.sql.TransactionManager")
-                .withSingletonClass("one.xis.sql.SQLRepositoryProxyFactory")
+                .withBasePackageClass(DataSourceProvider.class)
                 .withSingleton(dataSource)
                 .build();
     }

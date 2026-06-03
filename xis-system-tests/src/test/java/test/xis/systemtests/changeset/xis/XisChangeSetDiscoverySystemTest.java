@@ -7,6 +7,7 @@ import one.xis.ddl.ChangeSet;
 import one.xis.ddl.DDL;
 import org.h2.jdbcx.JdbcDataSource;
 import org.junit.jupiter.api.Test;
+import org.springframework.jdbc.datasource.embedded.DataSourceFactory;
 
 import java.sql.SQLException;
 
@@ -20,8 +21,7 @@ class XisChangeSetDiscoverySystemTest {
         var context = AppContext.builder()
                 .withComponentAnnotation(Component.class)
                 .withSingleton(dataSource)
-                .withSingletonClass("one.xis.sql.DataSourceFactory")
-                .withSingletonClass("one.xis.sql.DataSourceConfiguration")
+                .withBasePackageClass(DataSourceFactory.class)
                 .withPackage(ChangeSet.class.getPackageName())
                 .withPackage(getClass().getPackageName())
                 .build();
