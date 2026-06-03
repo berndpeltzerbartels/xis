@@ -130,7 +130,7 @@ class SQLRepositoryProxyFactoryTest {
     void requestScopedTransactionCommitsAtRequestEnd() {
         var provider = new SqlConnectionProvider();
         var manager = new TransactionManager(provider);
-        var repository = new SQLRepositoryProxyFactory<PersonRepository>(dataSource, provider, manager).createProxy(PersonRepository.class);
+        var repository = repository(dataSource, provider, manager);
         var transaction = new SqlTransaction(manager);
 
         RequestContext.createInstance(null, null);
@@ -149,7 +149,7 @@ class SQLRepositoryProxyFactoryTest {
     void requestScopedTransactionRollsBackAtRequestEndWhenRequestFails() {
         var provider = new SqlConnectionProvider();
         var manager = new TransactionManager(provider);
-        var repository = new SQLRepositoryProxyFactory<PersonRepository>(dataSource, provider, manager).createProxy(PersonRepository.class);
+        var repository = repository(dataSource, provider, manager);
         var transaction = new SqlTransaction(manager);
 
         RequestContext.createInstance(null, null);
@@ -170,7 +170,7 @@ class SQLRepositoryProxyFactoryTest {
         DataSource countingDataSource = countingDataSource(closeCount);
         var provider = new SqlConnectionProvider();
         var manager = new TransactionManager(provider);
-        var repository = new SQLRepositoryProxyFactory<PersonRepository>(countingDataSource, provider, manager).createProxy(PersonRepository.class);
+        var repository = repository(countingDataSource, provider, manager);
 
         RequestContext.createInstance(null, null);
         try {
@@ -197,7 +197,7 @@ class SQLRepositoryProxyFactoryTest {
         DataSource countingDataSource = countingDataSource(simpleDataSource, closeCount);
         var provider = new SqlConnectionProvider();
         var manager = new TransactionManager(provider);
-        var repository = new SQLRepositoryProxyFactory<PersonRepository>(countingDataSource, provider, manager).createProxy(PersonRepository.class);
+        var repository = repository(countingDataSource, provider, manager);
 
         RequestContext.createInstance(null, null);
         try {
@@ -216,7 +216,7 @@ class SQLRepositoryProxyFactoryTest {
     void failedRepositoryCallMarksRequestTransactionForRollback() {
         var provider = new SqlConnectionProvider();
         var manager = new TransactionManager(provider);
-        var repository = new SQLRepositoryProxyFactory<PersonRepository>(dataSource, provider, manager).createProxy(PersonRepository.class);
+        var repository = repository(dataSource, provider, manager);
         var transaction = new SqlTransaction(manager);
 
         RequestContext.createInstance(null, null);
@@ -327,7 +327,7 @@ class SQLRepositoryProxyFactoryTest {
     @Test
     void validatesMissingUrlOnlyForSimpleDataSource() {
         var dataSource = new SimpleDataSource();
-        var validator = new DataSourceValidator(dataSource);
+        var validator = new DataSourceValidator(new DataSourceProvider(dataSource));
 
         var exception = assertThrows(IllegalStateException.class, validator::validate);
 
@@ -336,7 +336,7 @@ class SQLRepositoryProxyFactoryTest {
 
     @Test
     void ignoresExternalDataSource() {
-        var validator = new DataSourceValidator(dataSource);
+        var validator = new DataSourceValidator(new DataSourceProvider(dataSource));
 
         assertDoesNotThrow(validator::validate);
     }
@@ -371,6 +371,11 @@ class SQLRepositoryProxyFactoryTest {
                 });
     }
 
+    private PersonRepository repository(DataSource dataSource, SqlConnectionProvider provider, TransactionManager manager) {
+        return new SQLRepositoryProxyFactory<PersonRepository>(new DataSourceProvider(dataSource), provider, manager)
+                .createProxy(PersonRepository.class);
+    }
+
     private static Connection countingConnection(Connection connection, AtomicInteger closeCount) {
         return (Connection) Proxy.newProxyInstance(
                 Connection.class.getClassLoader(),
@@ -399,15 +404,15 @@ class SQLRepositoryProxyFactoryTest {
 
     @Component
     static class LateSchemaInitializer {
-        private final DataSource dataSource;
+        private final DataSourceProvider dataSourceProvider;
 
-        LateSchemaInitializer(DataSource dataSource) {
-            this.dataSource = dataSource;
+        LateSchemaInitializer(DataSourceProvider dataSourceProvider) {
+            this.dataSourceProvider = dataSourceProvider;
         }
 
         @Init
         void initialize() throws SQLException {
-            try (var connection = dataSource.getConnection();
+            try (var connection = dataSourceProvider.dataSource().getConnection();
                  var statement = connection.createStatement()) {
                 statement.execute("drop table if exists late_people");
                 statement.execute("create table late_people (id bigint primary key, first_name varchar(100))");

@@ -3,6 +3,7 @@ package one.xis.ddl;
 import one.xis.context.Component;
 import one.xis.context.Init;
 import one.xis.context.Inject;
+import one.xis.sql.DataSourceProvider;
 
 import javax.sql.DataSource;
 import java.lang.reflect.InvocationTargetException;
@@ -28,13 +29,13 @@ import java.util.stream.Collectors;
 class DDLChangeSetRunner {
     static final String HISTORY_TABLE = "__xis_schema_change";
 
-    private final DataSource dataSource;
+    private final DataSourceProvider dataSourceProvider;
 
     @Inject(annotatedWith = ChangeSet.class)
     private Collection<Object> changeSets = List.of();
 
-    DDLChangeSetRunner(DataSource dataSource) {
-        this.dataSource = Objects.requireNonNull(dataSource, "dataSource must not be null");
+    DDLChangeSetRunner(DataSourceProvider dataSourceProvider) {
+        this.dataSourceProvider = Objects.requireNonNull(dataSourceProvider, "dataSourceProvider must not be null");
     }
 
     @Init
@@ -47,7 +48,7 @@ class DDLChangeSetRunner {
         if (plan.changeSets().isEmpty()) {
             return;
         }
-        try (var connection = dataSource.getConnection()) {
+        try (var connection = dataSourceProvider.dataSource().getConnection()) {
             var autoCommit = connection.getAutoCommit();
             connection.setAutoCommit(false);
             try {

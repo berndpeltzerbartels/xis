@@ -6,7 +6,6 @@ import com.mongodb.client.MongoDatabase;
 import one.xis.context.AppContext;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.WebApplicationType;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.SpringBootConfiguration;
@@ -60,7 +59,8 @@ class SpringBootDatabaseSmokeTest {
                 .web(WebApplicationType.NONE)
                 .properties(
                         "spring.data.mongodb.uri=" + MONGODB.getReplicaSetUrl(),
-                        "spring.data.mongodb.database=xis_spring_smoke")
+                        "spring.data.mongodb.database=xis_spring_smoke",
+                        "spring.datasource.url=jdbc:h2:mem:xis-spring-mongo-smoke")
                 .run()) {
             MongoClient client = spring.getBean(MongoClient.class);
             MongoDatabase database = client.getDatabase("xis_spring_smoke");
@@ -85,6 +85,8 @@ class SpringBootDatabaseSmokeTest {
     private SqlSmokeRepository sqlRepository(DataSource dataSource) {
         AppContext context = AppContext.builder()
                 .withPackage(getClass().getPackageName())
+                .withSingletonClass("one.xis.sql.DataSourceFactory")
+                .withSingletonClass("one.xis.sql.DataSourceConfiguration")
                 .withSingletonClass("one.xis.sql.SqlConnectionProvider")
                 .withSingletonClass("one.xis.sql.TransactionManager")
                 .withSingletonClass("one.xis.sql.SQLRepositoryProxyFactory")
@@ -108,7 +110,7 @@ class SpringBootDatabaseSmokeTest {
     }
 
     @SpringBootConfiguration
-    @EnableAutoConfiguration(exclude = DataSourceAutoConfiguration.class)
+    @EnableAutoConfiguration
     static class MongoSpringApplication {
         @Bean
         MongoClient mongoClient(Environment environment) {

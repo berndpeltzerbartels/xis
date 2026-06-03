@@ -1,14 +1,13 @@
 package one.xis.sql;
 
-import one.xis.context.Bean;
-import one.xis.context.DefaultComponent;
+import one.xis.context.Component;
 import one.xis.context.Value;
 
 import javax.sql.DataSource;
 import java.util.Locale;
 
-@DefaultComponent
-public class DataSourceFactory {
+@Component
+class DataSourceFactory {
 
     @Value(value = "xis.sql.url", mandatory = false)
     private String url;
@@ -33,8 +32,7 @@ public class DataSourceFactory {
     @Value(value = "xis.sql.pool.max-lifetime", mandatory = false)
     private Long maxLifetime;
 
-    @Bean
-    public DataSource dataSource() {
+    DataSource dataSource() {
         var dataSource = simpleDataSource(effectiveUrl());
         dataSource.validateConfiguration();
         if (isH2MemoryUrl() && !isPoolEnabled()) {

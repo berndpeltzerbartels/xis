@@ -3,6 +3,7 @@ package one.xis.ddl;
 import org.h2.jdbcx.JdbcDataSource;
 import org.junit.jupiter.api.Test;
 
+import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -17,7 +18,7 @@ class DDLChangeSetRunnerTest {
         BaseSchema.invocations = 0;
         CustomerSchema.invocations = 0;
         var dataSource = dataSource("ddl-changeset-order");
-        var runner = new DDLChangeSetRunner(dataSource);
+        var runner = runner(dataSource);
 
         runner.run(List.of(new CustomerSchema(), new BaseSchema()));
         runner.run(List.of(new CustomerSchema(), new BaseSchema()));
@@ -31,7 +32,7 @@ class DDLChangeSetRunnerTest {
     @Test
     void rejectsExecutedChangesThatNoLongerExist() {
         var dataSource = dataSource("ddl-changeset-history");
-        var runner = new DDLChangeSetRunner(dataSource);
+        var runner = runner(dataSource);
         runner.run(List.of(new BaseSchema()));
 
         var exception = assertThrows(IllegalStateException.class, () -> runner.run(List.of(new RenamedBaseSchema())));
@@ -42,7 +43,7 @@ class DDLChangeSetRunnerTest {
 
     @Test
     void rejectsMultipleRootChangeSets() {
-        var runner = new DDLChangeSetRunner(dataSource("ddl-changeset-roots"));
+        var runner = runner(dataSource("ddl-changeset-roots"));
 
         var exception = assertThrows(IllegalStateException.class,
                 () -> runner.run(List.of(new BaseSchema(), new OtherRootSchema())));
@@ -52,7 +53,7 @@ class DDLChangeSetRunnerTest {
 
     @Test
     void rejectsForkingChangeSetChain() {
-        var runner = new DDLChangeSetRunner(dataSource("ddl-changeset-fork"));
+        var runner = runner(dataSource("ddl-changeset-fork"));
 
         var exception = assertThrows(IllegalStateException.class,
                 () -> runner.run(List.of(new BaseSchema(), new FirstChildSchema(), new SecondChildSchema())));
@@ -62,7 +63,7 @@ class DDLChangeSetRunnerTest {
 
     @Test
     void rejectsCyclicChangeSetChain() {
-        var runner = new DDLChangeSetRunner(dataSource("ddl-changeset-cycle"));
+        var runner = runner(dataSource("ddl-changeset-cycle"));
 
         var exception = assertThrows(IllegalStateException.class,
                 () -> runner.run(List.of(new CycleASchema(), new CycleBSchema())));
@@ -72,7 +73,7 @@ class DDLChangeSetRunnerTest {
 
     @Test
     void rejectsDuplicateChangeIdsInSameChangeSet() {
-        var runner = new DDLChangeSetRunner(dataSource("ddl-changeset-duplicate-change"));
+        var runner = runner(dataSource("ddl-changeset-duplicate-change"));
 
         var exception = assertThrows(IllegalStateException.class, () -> runner.run(List.of(new DuplicateChangeIdSchema())));
 
@@ -81,7 +82,7 @@ class DDLChangeSetRunnerTest {
 
     @Test
     void rejectsInvalidChangeMethodSignature() {
-        var runner = new DDLChangeSetRunner(dataSource("ddl-changeset-signature"));
+        var runner = runner(dataSource("ddl-changeset-signature"));
 
         var exception = assertThrows(IllegalStateException.class, () -> runner.run(List.of(new InvalidSignatureSchema())));
 
@@ -92,6 +93,10 @@ class DDLChangeSetRunnerTest {
         var dataSource = new JdbcDataSource();
         dataSource.setURL("jdbc:h2:mem:" + name + ";DB_CLOSE_DELAY=-1");
         return dataSource;
+    }
+
+    private DDLChangeSetRunner runner(DataSource dataSource) {
+        return new DDLChangeSetRunner(new one.xis.sql.DataSourceProvider(dataSource));
     }
 
     private int count(JdbcDataSource dataSource, String sql) throws SQLException {

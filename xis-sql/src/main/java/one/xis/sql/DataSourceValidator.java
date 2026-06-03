@@ -4,15 +4,14 @@ import lombok.RequiredArgsConstructor;
 import one.xis.context.Component;
 import one.xis.context.Init;
 
-import javax.sql.DataSource;
-
 @Component
 @RequiredArgsConstructor
 class DataSourceValidator {
-    private final DataSource dataSource;
+    private final DataSourceProvider dataSourceProvider;
 
     @Init
     void validate() {
+        var dataSource = dataSourceProvider.dataSource();
         if (dataSource instanceof SimpleDataSource simpleDataSource) {
             simpleDataSource.validateConfiguration();
             return;
