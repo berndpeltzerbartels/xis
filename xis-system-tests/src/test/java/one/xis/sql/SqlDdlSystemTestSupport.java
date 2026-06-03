@@ -1,10 +1,10 @@
 package one.xis.sql;
 
-import one.xis.sql.ddl.Column;
-import one.xis.sql.ddl.ColumnType;
-import one.xis.sql.ddl.DDL;
-import one.xis.sql.ddl.PrimaryKey;
-import one.xis.sql.ddl.Table;
+import one.xis.ddl.Column;
+import one.xis.ddl.ColumnType;
+import one.xis.ddl.DDL;
+import one.xis.ddl.PrimaryKey;
+import one.xis.ddl.Table;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

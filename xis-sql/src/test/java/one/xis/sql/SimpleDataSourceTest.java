@@ -3,7 +3,7 @@ package one.xis.sql;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
-import java.sql.Connection;
+import javax.sql.DataSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -76,39 +76,79 @@ class SimpleDataSourceTest {
     }
 
     @Test
-    void keepsPhysicalConnectionOpenForH2FileDatabase() throws Exception {
-        SimpleDataSource dataSource = new SimpleDataSource();
-        set(dataSource, "url", "jdbc:h2:file:./build/test-db/simple-datasource-h2-file");
+    void createsPlainSimpleDataSourceForH2FileDatabase() throws Exception {
+        var dataSource = dataSource("jdbc:h2:file:./build/test-db/simple-datasource-h2-file");
 
-        Connection first = dataSource.getConnection();
-        try (var statement = first.createStatement()) {
-            statement.execute("create table if not exists h2_file_keep_open (id int primary key)");
-        }
-        first.close();
-
-        Connection physical = h2FileConnection(dataSource);
-        assertTrue(physical.isValid(1));
-
-        try (var second = dataSource.getConnection()) {
-            assertTrue(second.isValid(1));
-        }
-
-        assertEquals(physical, h2FileConnection(dataSource));
-        assertTrue(physical.isValid(1));
-
-        dataSource.closeH2FileConnection();
+        assertEquals(SimpleDataSource.class, dataSource.getClass());
     }
 
     @Test
-    void doesNotKeepPhysicalConnectionOpenForH2MemoryDatabase() throws Exception {
+    void createsH2MemoryDataSourceForH2MemoryDatabase() throws Exception {
+        var dataSource = dataSource("jdbc:h2:mem:simple-datasource-h2-memory");
+
+        assertEquals(H2MemoryDataSource.class, dataSource.getClass());
+
+        try (var connection = dataSource.getConnection()) {
+            try (var statement = connection.createStatement()) {
+                statement.execute("create table h2_memory_keep_open (id int primary key)");
+                statement.execute("insert into h2_memory_keep_open values (1)");
+            }
+            assertTrue(connection.isValid(1));
+        }
+
+        try (var connection = dataSource.getConnection();
+             var statement = connection.createStatement();
+             var resultSet = statement.executeQuery("select count(*) from h2_memory_keep_open")) {
+            assertTrue(resultSet.next());
+            assertEquals(1, resultSet.getInt(1));
+        }
+
+        ((H2MemoryDataSource) dataSource).closeKeepAliveConnection();
+    }
+
+    @Test
+    void keepsH2MemoryDatabaseAfterPhysicalConnectionWasClosed() throws Exception {
+        var dataSource = dataSource("jdbc:h2:mem:simple-datasource-h2-memory-close");
+
+        try (var connection = dataSource.getConnection()) {
+            try (var statement = connection.createStatement()) {
+                statement.execute("create table h2_memory_close_delay (id int primary key)");
+                statement.execute("insert into h2_memory_close_delay values (1)");
+            }
+        }
+
+        ((H2MemoryDataSource) dataSource).closeKeepAliveConnection();
+
+        try (var connection = dataSource.getConnection();
+             var statement = connection.createStatement();
+             var resultSet = statement.executeQuery("select count(*) from h2_memory_close_delay")) {
+            assertTrue(resultSet.next());
+            assertEquals(1, resultSet.getInt(1));
+        }
+
+        ((H2MemoryDataSource) dataSource).closeKeepAliveConnection();
+    }
+
+    @Test
+    void createsSimpleDataSourceForPooledH2MemoryDatabase() throws Exception {
+        var factory = factory("jdbc:h2:mem:pooled-h2-memory");
+        factory.setPoolEnabled(true);
+
+        var dataSource = factory.dataSource();
+
+        assertEquals(SimpleDataSource.class, dataSource.getClass());
+        dataSource.getConnection().close();
+        closePooledDataSource((SimpleDataSource) dataSource);
+    }
+
+    @Test
+    void stillUsesDriverManagerForSimpleDataSource() throws Exception {
         SimpleDataSource dataSource = new SimpleDataSource();
-        set(dataSource, "url", "jdbc:h2:mem:simple-datasource-h2-memory;DB_CLOSE_DELAY=-1");
+        set(dataSource, "url", "jdbc:h2:mem:simple-data-source-driver-manager;DB_CLOSE_DELAY=-1");
 
         try (var connection = dataSource.getConnection()) {
             assertTrue(connection.isValid(1));
         }
-
-        assertEquals(null, h2FileConnection(dataSource));
     }
 
     @Test
@@ -132,10 +172,14 @@ class SimpleDataSourceTest {
         return value;
     }
 
-    private static Connection h2FileConnection(SimpleDataSource dataSource) throws Exception {
-        Field field = SimpleDataSource.class.getDeclaredField("h2FileConnection");
-        field.setAccessible(true);
-        return (Connection) field.get(dataSource);
+    private static DataSource dataSource(String url) {
+        return factory(url).dataSource();
+    }
+
+    private static DataSourceFactory factory(String url) {
+        var factory = new DataSourceFactory();
+        factory.setUrl(url);
+        return factory;
     }
 
     private static int invokeInt(Object target, String methodName) throws Exception {

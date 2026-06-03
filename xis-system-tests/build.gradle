@@ -6,6 +6,7 @@ dependencies {
     testImplementation project(":xis-context")
     testImplementation project(":xis-sql")
     testImplementation project(":xis-mongodb")
+    testImplementation project(":xis-spring")
 
     testImplementation "org.junit.jupiter:junit-jupiter-api:${rootProject.ext.libraryVersions.junit}"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${rootProject.ext.libraryVersions.junit}"
@@ -23,6 +24,7 @@ dependencies {
     testImplementation "com.h2database:h2:${rootProject.ext.libraryVersions.h2}"
 
     testImplementation "org.springframework.boot:spring-boot-starter:${rootProject.ext.libraryVersions.springBoot}"
+    testImplementation "org.springframework.boot:spring-boot-starter-web:${rootProject.ext.libraryVersions.springBoot}"
     testImplementation "org.springframework.boot:spring-boot-starter-jdbc:${rootProject.ext.libraryVersions.springBoot}"
     testImplementation "org.springframework.boot:spring-boot-starter-data-mongodb:${rootProject.ext.libraryVersions.springBoot}"
 }

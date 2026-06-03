@@ -76,7 +76,13 @@ class PackageScan {
     private <A extends Annotation, F extends ProxyFactory<?>> Map<Class<F>, Collection<Class<?>>> proxyInterfacesByFactory() {
         return proxyAnnotations()
                 .map(annotation -> (Class<A>) annotation)
-                .collect(Collectors.toMap(this::getFactoryClass, this::interfaceClassesForProxyAnnotation));
+                .collect(Collectors.toMap(
+                        this::getFactoryClass,
+                        annotation -> new HashSet<>(interfaceClassesForProxyAnnotation(annotation)),
+                        (left, right) -> {
+                            left.addAll(right);
+                            return left;
+                        }));
     }
 
     private <A extends Annotation> Collection<Class<?>> interfaceClassesForProxyAnnotation(Class<A> annotation) {

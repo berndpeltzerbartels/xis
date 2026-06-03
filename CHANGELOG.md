@@ -14,6 +14,8 @@
 - Added fast-failing `Table.getColumn(String)` and `Column.foreignKey(Column)` shortcuts for single-column SQL DDL
   foreign keys.
 - Added dialect-specific quoting for reserved SQL identifiers in the `xis-sql` DDL builder.
+- Added `one.xis.ddl.@ChangeSet` and `one.xis.ddl.@Change` for automatic linear SQL DDL change-set execution with a
+  persistent migration history table. `@ChangeSet` is now also a XIS/Spring component stereotype.
 - Added `@WelcomePage` support for router routes, including method-level `@WelcomePage` on `@Route` methods and
   class-level `@WelcomePage` on routers with exactly one route.
 - Clarified router navigation as page navigation and reject frontlet/modal route return types during startup.
@@ -28,6 +30,7 @@
 ### Documentation
 
 - Clarified the generated-test documentation example by showing an `@InTestContext` collaborator with its import.
+- Documented SQL DDL change sets in the SQL guide, annotation reference, persistence index, and documentation maps.
 
 ## 0.16.2 - 2026-05-30
 

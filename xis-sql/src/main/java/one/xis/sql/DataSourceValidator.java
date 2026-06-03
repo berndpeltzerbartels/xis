@@ -15,6 +15,14 @@ class DataSourceValidator {
     void validate() {
         if (dataSource instanceof SimpleDataSource simpleDataSource) {
             simpleDataSource.validateConfiguration();
+            return;
+        }
+        try {
+            if (dataSource.isWrapperFor(SimpleDataSource.class)) {
+                dataSource.unwrap(SimpleDataSource.class).validateConfiguration();
+            }
+        } catch (Exception e) {
+            throw new IllegalStateException("Could not inspect SQL DataSource", e);
         }
     }
 }

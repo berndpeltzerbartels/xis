@@ -50,6 +50,7 @@ public class XISGenerateFrameworkComponentsTask extends DefaultTask {
                 "Modal",
                 "Router",
                 "Include",
+                "ChangeSet",
                 "Repository",
                 "MongoRepository"
         ));

@@ -336,6 +336,8 @@ annotation reference; the full behavior belongs in the persistence chapters.
 | `@Param` | Names a repository method parameter for SQL placeholders. |
 | `@Transactional` | Opens a transaction through XIS interface advice. See [Transactions](sql.md#transactions). |
 | `@Function`, `@StoredProcedure` | Calls database functions and stored procedures. |
+| `one.xis.ddl.@ChangeSet` | Defines a stable, persisted DDL migration group and marks the class as a XIS/Spring component. See [DDL builder and change sets](sql.md#ddl-builder-and-change-sets). |
+| `one.xis.ddl.@Change` | Marks one DDL migration method inside a change set. See [DDL builder and change sets](sql.md#ddl-builder-and-change-sets). |
 
 ### MongoDB
 

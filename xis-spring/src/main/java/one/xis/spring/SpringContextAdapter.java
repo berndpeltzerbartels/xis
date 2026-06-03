@@ -11,6 +11,7 @@ import one.xis.RefreshEvent;
 import one.xis.RefreshEventPublisher;
 import one.xis.context.AppContext;
 import one.xis.context.AppContextBuilder;
+import one.xis.ddl.ChangeSet;
 import one.xis.http.Controller;
 import one.xis.http.RestControllerServiceImpl;
 import one.xis.server.FrontendService;
@@ -100,6 +101,7 @@ public class SpringContextAdapter implements BeanPostProcessor, ApplicationConte
                 || clazz.isAnnotationPresent(Frontlet.class)
                 || clazz.isAnnotationPresent(Modal.class)
                 || clazz.isAnnotationPresent(Include.class)
+                || clazz.isAnnotationPresent(ChangeSet.class)
                 || DataSource.class.isAssignableFrom(clazz)
                 || isTypeForImport(clazz);
     }

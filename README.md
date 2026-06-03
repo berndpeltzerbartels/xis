@@ -36,8 +36,8 @@ The Gradle plugin adds comfortable tools for that workflow: it can generate star
 tests, configure the matching XIS test starter automatically, run XIS-specific validation checks for local development
 or Jenkins pipelines, and build or run standalone XIS Boot applications.
 
-Optional persistence modules add the same lightweight style to data access: `xis-sql` provides JDBC repository support
-with transactions, and `xis-mongodb` provides MongoDB document repositories plus change-stream callbacks for
+Optional persistence modules add the same lightweight style to data access: `xis-sql` provides JDBC repository support,
+transactions, and DDL change sets, and `xis-mongodb` provides MongoDB document repositories plus change-stream callbacks for
 event-driven UI refreshes.
 
 ## Minimal Page
@@ -125,7 +125,7 @@ supported by XIS Boot Native; Groovy is supported on the JVM path.
 - [Drag and drop actions with integration-test support](docs/user/drag-and-drop.md)
 - [Refresh and push events for already open pages and frontlets, including targeted client updates](docs/user/events.md)
 - [Client state with localStorage, sessionStorage, clientState, and storage bindings](docs/user/annotations.md#browser-storage-parameters)
-- [SQL repositories, entity mapping, relations, CRUD, explicit SQL, transactions, save/delete cascades, functions, and stored procedures](docs/user/sql.md)
+- [SQL repositories, entity mapping, relations, CRUD, explicit SQL, DDL change sets, transactions, save/delete cascades, functions, and stored procedures](docs/user/sql.md)
 - [MongoDB document repositories, JSON queries, document mapping, and change streams](docs/user/mongodb.md)
 - [Security with local authentication, roles, template visibility, external OpenID Connect providers, XIS as IDP, and distributed SSO](docs/user/security.md)
 - [Microfrontend Architecture for distributed XIS applications](docs/user/advanced/microfrontend-architecture.md)
@@ -169,6 +169,8 @@ Read these to build normal XIS applications:
 - [Modals](docs/user/modals.md)
 - [Drag and drop](docs/user/drag-and-drop.md)
 - [Events](docs/user/events.md)
+- [SQL](docs/user/sql.md)
+- [MongoDB](docs/user/mongodb.md)
 - [Scheduled jobs](docs/user/scheduled-jobs.md)
 - [Security](docs/user/security.md)
 - [Examples and tests](docs/user/examples-and-tests.md)
@@ -352,6 +354,10 @@ complete and intentionally detailed.
 ### Persistence
 
 - [SQL overview](docs/user/sql.md)
+- [SQL DDL builder and change sets](docs/user/sql.md#ddl-builder-and-change-sets)
+- [SQL `one.xis.ddl.DDL`](docs/user/sql.md#ddl-builder-and-change-sets)
+- [SQL `one.xis.ddl.@ChangeSet`](docs/user/sql.md#ddl-builder-and-change-sets)
+- [SQL `one.xis.ddl.@Change`](docs/user/sql.md#ddl-builder-and-change-sets)
 - [SQL `@Entity`](docs/user/sql.md#entity-mapping)
 - [SQL `@Column`](docs/user/sql.md#entity-mapping)
 - [SQL `@Ignore`](docs/user/sql.md#entity-mapping)
@@ -522,8 +528,11 @@ shown in the link text.
 
 ### SQL
 
+- [`one.xis.ddl.@Change`](docs/user/sql.md#ddl-builder-and-change-sets)
+- [`one.xis.ddl.@ChangeSet`](docs/user/sql.md#ddl-builder-and-change-sets)
 - [`@Column`](docs/user/sql.md#entity-mapping)
 - [`one.xis.sql.@Delete`](docs/user/sql.md#delete)
+- [`one.xis.ddl.DDL`](docs/user/sql.md#ddl-builder-and-change-sets)
 - [`@Entity`](docs/user/sql.md#entity-mapping)
 - [`@Function`](docs/user/sql.md#functions-and-stored-procedures)
 - [`@Ignore`](docs/user/sql.md#entity-mapping)

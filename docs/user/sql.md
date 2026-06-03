@@ -97,6 +97,73 @@ must be greater than zero.
 In Spring applications, a Spring-managed `DataSource` is imported into the XIS context. XIS does not create a second
 `DataSource` in that case.
 
+## DDL Builder And Change Sets
+
+`xis-sql` also contains a small DDL API in `one.xis.ddl`. It can create portable schema changes for H2, MariaDB, and
+PostgreSQL without writing dialect-specific SQL for common table, column, primary-key, index, unique-constraint,
+foreign-key, generated-identity, and raw SQL operations.
+
+For one-off setup code, create a `DDL` object and execute it against the configured `DataSource`:
+
+```java
+import one.xis.ddl.DDL;
+
+import javax.sql.DataSource;
+
+class SchemaSetup {
+
+    void createSchema(DataSource dataSource) {
+        var ddl = new DDL(dataSource);
+        var customers = ddl.createTableIfNotExists("customers");
+        customers.addColumn("id").bigint().generatedIdentity().primaryKey();
+        customers.addColumn("name").varchar(100).notNull();
+        customers.addColumn("email").varchar(200).unique();
+        ddl.execute();
+    }
+}
+```
+
+For application schema evolution, prefer change sets. A change set class is annotated with `@ChangeSet`. Each change
+method is annotated with `@Change`, returns `void`, and receives exactly one `DDL` parameter. The change-set id and
+change id are persisted and should be treated as stable identifiers.
+`@ChangeSet` is a component stereotype for XIS and Spring applications. There is no need to add `@Component`,
+`@Service`, or a Spring component annotation to the same class.
+
+```java
+import one.xis.ddl.Change;
+import one.xis.ddl.ChangeSet;
+import one.xis.ddl.DDL;
+
+@ChangeSet("base")
+class BaseSchema {
+
+    @Change("001-create-customers")
+    void createCustomers(DDL ddl) {
+        var customers = ddl.createTableIfNotExists("customers");
+        customers.addColumn("id").bigint().generatedIdentity().primaryKey();
+        customers.addColumn("name").varchar(100).notNull();
+        customers.addColumn("email").varchar(200).unique();
+    }
+}
+
+@ChangeSet(value = "customer-status", previous = BaseSchema.class)
+class CustomerStatusSchema {
+
+    @Change("001-add-status")
+    void addStatus(DDL ddl) {
+        ddl.sql("alter table customers add column status varchar(20) not null");
+    }
+}
+```
+
+XIS discovers change-set classes as normal application components and executes them automatically during context startup
+when `xis-sql` and a `DataSource` are present. The internal runner creates and uses the history table
+`__xis_schema_change`. It runs only changes that are not yet recorded there. Change sets form one linear chain: exactly
+one `@ChangeSet` has no `previous`, every following change set points to its predecessor, and forks or cycles fail fast.
+Inside one change set, methods are executed alphabetically by their `@Change` id. If a previously executed
+`(changeSetId, changeId)` no longer exists in the discovered change sets, startup fails so accidental refactoring does
+not silently create a second migration history.
+
 ## Entity Mapping
 
 Annotate entities with `@Entity`. Field names map directly to column names, and camel-case field names also map to
