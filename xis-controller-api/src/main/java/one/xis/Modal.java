@@ -28,6 +28,7 @@ import java.lang.annotation.*;
 @Singleton
 @org.springframework.stereotype.Component
 @Component
+@ImportInstances
 public @interface Modal {
     @AliasFor(annotation = org.springframework.stereotype.Component.class)
     String value() default "";

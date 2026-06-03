@@ -3,15 +3,10 @@ package one.xis.spring;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import one.xis.Frontlet;
-import one.xis.Include;
-import one.xis.Modal;
-import one.xis.Page;
 import one.xis.RefreshEvent;
 import one.xis.RefreshEventPublisher;
 import one.xis.context.AppContext;
 import one.xis.context.AppContextBuilder;
-import one.xis.ddl.ChangeSet;
 import one.xis.http.Controller;
 import one.xis.http.RestControllerServiceImpl;
 import one.xis.server.FrontendService;
@@ -33,6 +28,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 
 import javax.sql.DataSource;
+import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -54,6 +50,7 @@ public class SpringContextAdapter implements BeanPostProcessor, ApplicationConte
     private final Collection<Object> singletons = new HashSet<>();
 
     private Set<Class<?>> frameworkBeanClasses;
+    private Set<Class<? extends Annotation>> frameworkBeanAnnotations;
 
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
@@ -97,13 +94,13 @@ public class SpringContextAdapter implements BeanPostProcessor, ApplicationConte
     }
 
     private boolean isFrameworkBeanClass(Class<?> clazz) {
-        return clazz.isAnnotationPresent(Page.class)
-                || clazz.isAnnotationPresent(Frontlet.class)
-                || clazz.isAnnotationPresent(Modal.class)
-                || clazz.isAnnotationPresent(Include.class)
-                || clazz.isAnnotationPresent(ChangeSet.class)
+        return isAnnotatedForImport(clazz)
                 || DataSource.class.isAssignableFrom(clazz)
                 || isTypeForImport(clazz);
+    }
+
+    private boolean isAnnotatedForImport(Class<?> clazz) {
+        return getFrameworkBeanAnnotations().stream().anyMatch(clazz::isAnnotationPresent);
     }
 
     private boolean isTypeForImport(Class<?> clazz) {
@@ -115,6 +112,13 @@ public class SpringContextAdapter implements BeanPostProcessor, ApplicationConte
             frameworkBeanClasses = ImportedTypes.getImportedTypes();
         }
         return frameworkBeanClasses;
+    }
+
+    private Set<Class<? extends Annotation>> getFrameworkBeanAnnotations() {
+        if (frameworkBeanAnnotations == null) {
+            frameworkBeanAnnotations = ImportedTypes.getImportedAnnotations();
+        }
+        return frameworkBeanAnnotations;
     }
 
     private Set<Class<?>> httpControllerClasses() {

@@ -16,13 +16,16 @@ class ModalManager {
         } else {
             this.current.parentContainerHandler = parentContainerHandler;
         }
-        this.current.overlay.classList.add('xis-modal-open');
-        this.current.overlay.removeAttribute('hidden');
         this.current.containerHandler.modalParameters = modalParameters;
-        return this.current.containerHandler.showFrontlet(
+        return Promise.resolve(this.current.containerHandler.showFrontlet(
             modalId,
             new FrontletState(app.pageController.resolvedURL, {}, modalParameters)
-        );
+        )).then(() => {
+            if (this.current) {
+                this.current.overlay.classList.add('xis-modal-open');
+                this.current.overlay.removeAttribute('hidden');
+            }
+        });
     }
 
     handleActionResponse(response, parentContainerHandler) {
@@ -64,11 +67,14 @@ class ModalManager {
         } else {
             this.current.parentContainerHandler = parentContainerHandler;
         }
-        this.current.overlay.classList.add('xis-modal-open');
-        this.current.overlay.removeAttribute('hidden');
         this.current.containerHandler.modalParameters = response.modalParameters || {};
         response.nextFrontletId = response.nextModalId;
-        return this.current.containerHandler.handleActionResponse(response);
+        return Promise.resolve(this.current.containerHandler.handleActionResponse(response)).then(() => {
+            if (this.current) {
+                this.current.overlay.classList.add('xis-modal-open');
+                this.current.overlay.removeAttribute('hidden');
+            }
+        });
     }
 
     close() {

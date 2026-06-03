@@ -24,6 +24,7 @@ import java.lang.annotation.*;
 @Singleton
 @org.springframework.stereotype.Component // for spring
 @Component
+@ImportInstances
 @Documented
 public @interface Page {
     @AliasFor(annotation = org.springframework.stereotype.Component.class)

@@ -38,6 +38,7 @@ import java.lang.annotation.*;
 @Singleton
 @org.springframework.stereotype.Component // for spring
 @Component
+@ImportInstances
 @Documented
 public @interface Include {
     String value();

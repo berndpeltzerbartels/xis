@@ -48,6 +48,7 @@ import java.lang.annotation.*;
 @Singleton
 @org.springframework.stereotype.Component
 @Component
+@ImportInstances
 public @interface Frontlet {
     /**
      * Frontlet id shortcut, for example {@code @Frontlet("CustomerList")}. If this

@@ -2,6 +2,7 @@ package one.xis.ddl;
 
 import jakarta.inject.Qualifier;
 import jakarta.inject.Singleton;
+import one.xis.ImportInstances;
 import one.xis.context.Component;
 
 import java.lang.annotation.ElementType;
@@ -24,6 +25,7 @@ import java.lang.annotation.Target;
 @Singleton
 @org.springframework.stereotype.Component
 @Component
+@ImportInstances
 public @interface ChangeSet {
     String value();
 
