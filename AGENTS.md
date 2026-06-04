@@ -26,13 +26,15 @@ to local XIS tokens, so distributed XIS runtimes must share local token verifica
 `ExternalIDPConfig` still matters when that runtime starts or renews an external login flow itself.
 
 External OpenID Connect login is normalized after the callback: XIS reads the ID token and issues local XIS application
-tokens. Without a `UserInfoService`, the OIDC `sub` claim becomes the XIS user id; if the provider access token is a
+tokens. Without a `UserAccountService`, the OIDC `sub` claim becomes the XIS user id; if the provider access token is a
 readable JWT with roles in `realm_access.roles` or `resource_access.account.roles`, those roles are copied into the local
 XIS token. Opaque provider tokens, such as common Google access tokens, yield empty local roles unless the application
-maps the account through `UserInfoService.saveUserInfo`. When a custom `UserInfoService` exists, XIS saves or updates
-user info before issuing the local token; this is for profile storage, approval workflows, or role enrichment.
-`UserInfoService.supportsLocalLogin()` controls whether XIS offers the local username/password form. A single external
-IDP can redirect directly to the provider when no local login is supported.
+maps the account through `UserAccountService.saveUserAccount`. When a custom `UserAccountService` exists, XIS saves or updates
+the user account before issuing the local token; this is for profile storage, approval workflows, or role enrichment.
+Local username/password login is separate from account mapping: `LocalCredentialService` controls whether XIS offers the
+local form and validates credentials. `xis-local-credentials` provides the Password4j/Argon2id implementation;
+`xis-local-credentials-sql` provides the SQL password-hash repository. A single external IDP can redirect directly to the
+provider when no local credentials service is present.
 Use `@Authenticated` for "authenticated user required, no named role required". Empty `@Roles` remains compatible but
 should not be shown in new docs or examples. Missing `@Authenticated`/`@Roles` means public access. Authenticated-only
 access is the preferred model for community-login applications such as Google sign-in without app-specific roles.
@@ -72,6 +74,8 @@ Only mention artifacts that end users should normally declare directly:
 - `xis-test` only when the application does not use the XIS Gradle plugin and wants the lower-level integration-test API
 - `xis-boot-starter-test` only when the application does not use the XIS Gradle plugin and wants `@XisBootTest` or generated-test style
 - `xis-authentication`
+- `xis-local-credentials`
+- `xis-local-credentials-sql`
 - `xis-idp-server`
 - `xis-theme`
 - `xis-distributed`

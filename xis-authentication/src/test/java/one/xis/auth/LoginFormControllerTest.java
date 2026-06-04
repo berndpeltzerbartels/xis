@@ -40,7 +40,7 @@ class LoginFormControllerTest {
         assertThat(StateParameter.decode(login.getState()).getRedirect()).isEqualTo("/home.html");
     }
 
-    private LoginFormController<UserInfo> controllerWithWelcomePage(String welcomePageId) {
+    private LoginFormController<UserAccount> controllerWithWelcomePage(String welcomePageId) {
         ClientConfigService clientConfigService = mock(ClientConfigService.class);
         when(clientConfigService.getConfig()).thenReturn(new ClientConfig(
                 List.of(),
@@ -52,7 +52,6 @@ class LoginFormControllerTest {
                 Map.of()
         ));
         return new LoginFormController<>(
-                mock(),
                 mock(),
                 mock(),
                 mock(),

@@ -6,9 +6,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import one.xis.UserContextCreatedEvent;
 import one.xis.UserContextImpl;
-import one.xis.auth.UserInfo;
-import one.xis.auth.UserInfoImpl;
-import one.xis.auth.UserInfoService;
+import one.xis.auth.LocalCredentialService;
+import one.xis.auth.UserAccount;
+import one.xis.auth.UserAccountImpl;
+import one.xis.auth.UserAccountService;
 import one.xis.auth.token.SecurityAttributes;
 import one.xis.http.RequestContext;
 import one.xis.http.RestControllerService;
@@ -24,7 +25,8 @@ public class IntegrationTestContext {
 
     @Getter
     private final AppContext appContext;
-    private final UserInfo userInfo;
+    private final UserAccount userAccount;
+    private final String userPassword;
     private final BackendBridge backendBridge;
     private final TestClient primaryClient;
     private final List<TestClient> clients = new ArrayList<>();
@@ -36,14 +38,16 @@ public class IntegrationTestContext {
         return new Builder();
     }
 
-    IntegrationTestContext(Collection<String> packages, UserInfo userInfo, Collection<Object> singletons,
+    IntegrationTestContext(Collection<String> packages, UserAccount userAccount, String userPassword, Collection<Object> singletons,
                            Collection<Class<? extends Annotation>> componentAnnotations,
                            Collection<Class<? extends Annotation>> beanMethodAnnotations,
                            Collection<Class<? extends Annotation>> beanInitAnnotations,
                            Collection<Class<? extends Annotation>> dependencyFieldAnnotations) {
         this.appContext = internalContext(packages, singletons, componentAnnotations, beanMethodAnnotations,
                 beanInitAnnotations, dependencyFieldAnnotations);
-        this.userInfo = userInfo;
+        this.userAccount = userAccount;
+        this.userPassword = userPassword;
+        storeLoggedInUserCredentials();
         this.backendBridge = new BackendBridge(appContext.getSingleton(RestControllerService.class));
         this.primaryClient = createClient();
     }
@@ -91,8 +95,8 @@ public class IntegrationTestContext {
                 uri += "?";
                 uri += parameters.entrySet().stream().map(e -> e.getKey() + "=" + e.getValue()).collect(Collectors.joining("&"));
             }
-            var userInfoFaker = appContext.getSingleton(UserContextFaker.class);
-            userInfoFaker.setUserInfo(userInfo);
+            var userAccountFaker = appContext.getSingleton(UserContextFaker.class);
+            userAccountFaker.setUserAccount(userAccount);
             var client = nextClient();
             client.getTestEnvironment().openPage(uri);
             return client;
@@ -149,8 +153,8 @@ public class IntegrationTestContext {
 
     public JavascriptResponse invokeBackend(String httpMethod, String uri, Map<String, String> headers, String body) {
         synchronized (SYNC_LOCK) {
-            var userInfoFaker = appContext.getSingleton(UserContextFaker.class);
-            userInfoFaker.setUserInfo(userInfo);
+            var userAccountFaker = appContext.getSingleton(UserContextFaker.class);
+            userAccountFaker.setUserAccount(userAccount);
             return backendBridge.invokeBackend(httpMethod, uri, headers, body);
         }
     }
@@ -185,8 +189,11 @@ public class IntegrationTestContext {
         beanMethodAnnotations.forEach(builder::withBeanMethodAnnotation);
         beanInitAnnotations.forEach(builder::withBeanInitAnnotation);
         dependencyFieldAnnotations.forEach(builder::withDependencyFieldAnnotation);
-        if (!containsUserInfoService(singletons)) {
-            builder.withSingletonClass(TestUserInfoService.class);
+        if (!containsUserAccountService(singletons)) {
+            builder.withSingletonClass(TestUserAccountService.class);
+        }
+        if (!containsLocalCredentialService(singletons)) {
+            builder.withSingletonClass(TestLocalCredentialService.class);
         }
         for (var s : singletons) {
             if (s instanceof Class<?> clazz) {
@@ -199,13 +206,32 @@ public class IntegrationTestContext {
         return builder.build();
     }
 
-    private boolean containsUserInfoService(Collection<Object> singletons) {
+    private boolean containsUserAccountService(Collection<Object> singletons) {
         return singletons.stream().anyMatch(singleton -> {
             if (singleton instanceof Class<?> clazz) {
-                return UserInfoService.class.isAssignableFrom(clazz);
+                return UserAccountService.class.isAssignableFrom(clazz);
             }
-            return singleton instanceof UserInfoService<?>;
+            return singleton instanceof UserAccountService<?>;
         });
+    }
+
+    private boolean containsLocalCredentialService(Collection<Object> singletons) {
+        return singletons.stream().anyMatch(singleton -> {
+            if (singleton instanceof Class<?> clazz) {
+                return LocalCredentialService.class.isAssignableFrom(clazz);
+            }
+            return singleton instanceof LocalCredentialService;
+        });
+    }
+
+    private void storeLoggedInUserCredentials() {
+        if (userAccount == null || userPassword == null) {
+            return;
+        }
+        appContext.getOptionalSingleton(UserAccountService.class)
+                .ifPresent(service -> ((UserAccountService<UserAccount>) service).saveUserAccount(userAccount));
+        appContext.getOptionalSingleton(LocalCredentialService.class)
+                .ifPresent(service -> service.setPassword(userAccount.getUserId(), userPassword));
     }
 
     @SuppressWarnings("unused")
@@ -218,7 +244,7 @@ public class IntegrationTestContext {
         private final Collection<Class<? extends Annotation>> beanMethodAnnotations = new HashSet<>();
         private final Collection<Class<? extends Annotation>> beanInitAnnotations = new HashSet<>();
         private final Collection<Class<? extends Annotation>> dependencyFieldAnnotations = new HashSet<>();
-        private UserInfo userInfo;
+        private UserAccount userAccount;
         private String userPassword;
 
         public Builder withSingleton(Object o) {
@@ -240,7 +266,7 @@ public class IntegrationTestContext {
         }
 
         public IntegrationTestContext build() {
-            return new IntegrationTestContext(packages, userInfo, singletons, componentAnnotations,
+            return new IntegrationTestContext(packages, userAccount, userPassword, singletons, componentAnnotations,
                     beanMethodAnnotations, beanInitAnnotations, dependencyFieldAnnotations);
         }
 
@@ -296,27 +322,27 @@ public class IntegrationTestContext {
             return this;
         }
 
-        public Builder withLoggedInUser(UserInfo userInfo, String userPassword) {
-            this.userInfo = userInfo;
+        public Builder withLoggedInUser(UserAccount userAccount, String userPassword) {
+            this.userAccount = userAccount;
             this.userPassword = userPassword;
             return this;
         }
 
-        private static void bindUser(UserInfoImpl userInfo) {
+        private static void bindUser(UserAccountImpl userAccount) {
             RequestContext.getInstance();
         }
     }
 
     @Setter
     static class UserContextFaker {
-        private UserInfo userInfo;
+        private UserAccount userAccount;
 
         @EventListener
         public void onUserContextCreated(UserContextCreatedEvent event) {
-            if (userInfo == null) {
+            if (userAccount == null) {
                 return;
             }
-            ((UserContextImpl) event.getUserContext()).setSecurityAttributes(new TestSecurityAttributes(userInfo));
+            ((UserContextImpl) event.getUserContext()).setSecurityAttributes(new TestSecurityAttributes(userAccount));
 
         }
     }
@@ -324,16 +350,16 @@ public class IntegrationTestContext {
     @RequiredArgsConstructor
     static class TestSecurityAttributes implements SecurityAttributes {
 
-        private final UserInfo userInfo;
+        private final UserAccount userAccount;
 
         @Override
         public String getUserId() {
-            return userInfo.getUserId();
+            return userAccount.getUserId();
         }
 
         @Override
         public Set<String> getRoles() {
-            return userInfo.getRoles();
+            return userAccount.getRoles();
         }
 
         @Override

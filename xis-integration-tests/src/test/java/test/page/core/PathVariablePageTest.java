@@ -40,4 +40,13 @@ class PathVariablePageTest {
 
         assertThat(client.getDocument().getElementById("action-result").getInnerText()).isEqualTo("active7");
     }
+
+    @Test
+    void actionLinkReceivesQueryParameterWithSlash() {
+        var client = testContext.openPage("/url-parameter/bla/123.html?filter=/after-login.html&page=7");
+
+        client.getDocument().getElementById("delete-with-query-link").click();
+
+        assertThat(client.getDocument().getElementById("action-result").getInnerText()).isEqualTo("/after-login.html7");
+    }
 }

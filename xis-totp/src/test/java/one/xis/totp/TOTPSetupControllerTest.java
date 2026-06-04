@@ -1,9 +1,7 @@
 package one.xis.totp;
 
 import one.xis.UserContext;
-import one.xis.auth.UserInfo;
-import one.xis.auth.UserInfoImpl;
-import one.xis.auth.UserInfoService;
+import one.xis.auth.LocalCredentialService;
 import one.xis.context.AppContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,7 +28,7 @@ class TOTPSetupControllerTest {
         context = AppContext.builder()
                 .withXIS()
                 .withPackage("one.xis.totp")
-                .withSingletonClass(Users.class)
+                .withSingletonClass(Credentials.class)
                 .withSingletonClass(Store.class)
                 .build();
         controller = context.getSingleton(TOTPSetupController.class);
@@ -122,22 +120,19 @@ class TOTPSetupControllerTest {
         };
     }
 
-    static class Users implements UserInfoService<UserInfo> {
+    static class Credentials implements LocalCredentialService {
         @Override
         public boolean validateCredentials(String userId, String password) {
             return Set.of("alice", "bob").contains(userId) && "secret".equals(password);
         }
 
         @Override
-        public Optional<UserInfo> getUserInfo(String userId) {
-            var user = new UserInfoImpl();
-            user.setUserId(userId);
-            user.setRoles(Set.of("USER"));
-            return Optional.of(user);
+        public void setPassword(String userId, String password) {
         }
 
         @Override
-        public void saveUserInfo(UserInfo userInfo) {
+        public boolean needsRehash(String userId) {
+            return false;
         }
     }
 

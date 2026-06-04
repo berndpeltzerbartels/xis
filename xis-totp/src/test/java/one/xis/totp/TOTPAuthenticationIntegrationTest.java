@@ -1,10 +1,11 @@
 package one.xis.totp;
 
 import one.xis.UserContext;
-import one.xis.auth.UserInfo;
-import one.xis.auth.UserInfoImpl;
-import one.xis.auth.UserInfoService;
+import one.xis.auth.LocalCredentialService;
+import one.xis.auth.CodeStore;
 import one.xis.context.AppContext;
+import one.xis.context.IntegrationTestContext;
+import one.xis.context.TestClient;
 import one.xis.validation.ValidatorException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,9 +13,11 @@ import org.junit.jupiter.api.Test;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import java.net.URLDecoder;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -23,6 +26,7 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class TOTPAuthenticationIntegrationTest {
 
@@ -35,7 +39,7 @@ class TOTPAuthenticationIntegrationTest {
         context = AppContext.builder()
                 .withXIS()
                 .withPackage("one.xis.totp")
-                .withSingletonClass(Users.class)
+                .withSingletonClass(Credentials.class)
                 .withSingletonClass(Store.class)
                 .build();
     }
@@ -60,6 +64,43 @@ class TOTPAuthenticationIntegrationTest {
 
         assertThatThrownBy(() -> validate("alice", "secret", "000000"))
                 .isInstanceOf(ValidatorException.class);
+    }
+
+    @Test
+    void loginFormRedirectsToLocalCallbackWithValidPasswordAndTotpCode() {
+        var testContext = loginTestContext();
+        var client = testContext.openPage("/login.html?redirect_uri=/after-login.html");
+        String code = currentCode(testContext.getSingleton(TOTPProvisioningService.class).provisioningUri("alice"));
+
+        submitLogin(client, "alice", "secret", code);
+
+        assertThat(client.getWindow().location.href)
+                .startsWith("/xis/auth/callback/local?state=")
+                .contains("&code=");
+        assertThat(testContext.getSingleton(CodeStore.class).getUserIdForCode(callbackCode(client)))
+                .isEqualTo("alice");
+    }
+
+    @Test
+    void loginFormRejectsWrongPasswordBeforeTotp() {
+        var testContext = loginTestContext();
+        var client = testContext.openPage("/login.html?redirect_uri=/after-login.html");
+        String code = currentCode(testContext.getSingleton(TOTPProvisioningService.class).provisioningUri("alice"));
+
+        submitLogin(client, "alice", "wrong", code);
+
+        assertThat(client.getWindow().location.href).isEqualTo("http://testserver/login.html?redirect_uri=/after-login.html");
+    }
+
+    @Test
+    void loginFormRejectsWrongTotpCode() {
+        var testContext = loginTestContext();
+        var client = testContext.openPage("/login.html?redirect_uri=/after-login.html");
+        testContext.getSingleton(TOTPProvisioningService.class).provisioningUri("alice");
+
+        submitLogin(client, "alice", "secret", "000000");
+
+        assertThat(client.getWindow().location.href).isEqualTo("http://testserver/login.html?redirect_uri=/after-login.html");
     }
 
     private void validate(String username, String password, String totpCode) throws ValidatorException {
@@ -93,6 +134,38 @@ class TOTPAuthenticationIntegrationTest {
 
     private String provisioningUri(String userId) {
         return context.getSingleton(TOTPProvisioningService.class).provisioningUri(userId);
+    }
+
+    private IntegrationTestContext loginTestContext() {
+        System.setProperty("xis.totp.encryption-key", "login-flow-test-key");
+        System.setProperty("xis.totp.issuer", "XIS Login Flow Test");
+        return IntegrationTestContext.builder()
+                .withPackage("one.xis.auth")
+                .withPackage("one.xis.totp")
+                .withSingleton(Credentials.class)
+                .withSingleton(Store.class)
+                .build();
+    }
+
+    private void submitLogin(TestClient client, String username, String password, String totpCode) {
+        var document = client.getDocument();
+        document.getInputElementById("username").setValue(username);
+        document.getInputElementById("password").setValue(password);
+        document.getInputElementById("totpCode").setValue(totpCode);
+        document.getElementByTagName("button").click();
+    }
+
+    private String callbackCode(TestClient client) {
+        String href = client.getWindow().location.href;
+        int queryStart = href.indexOf('?');
+        assertThat(queryStart).isGreaterThanOrEqualTo(0);
+        for (String parameter : href.substring(queryStart + 1).split("&")) {
+            String[] pair = parameter.split("=", 2);
+            if ("code".equals(pair[0])) {
+                return URLDecoder.decode(pair[1], StandardCharsets.UTF_8);
+            }
+        }
+        throw new AssertionError("No code parameter in " + href);
     }
 
     private String currentCode(String provisioningUri) {
@@ -159,22 +232,19 @@ class TOTPAuthenticationIntegrationTest {
         };
     }
 
-    static class Users implements UserInfoService<UserInfo> {
+    static class Credentials implements LocalCredentialService {
         @Override
         public boolean validateCredentials(String userId, String password) {
             return "alice".equals(userId) && "secret".equals(password);
         }
 
         @Override
-        public Optional<UserInfo> getUserInfo(String userId) {
-            var user = new UserInfoImpl();
-            user.setUserId(userId);
-            user.setRoles(Set.of("USER"));
-            return Optional.of(user);
+        public void setPassword(String userId, String password) {
         }
 
         @Override
-        public void saveUserInfo(UserInfo userInfo) {
+        public boolean needsRehash(String userId) {
+            return false;
         }
     }
 

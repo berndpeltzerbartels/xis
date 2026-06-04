@@ -9,24 +9,24 @@ import one.xis.sql.OptionalColumn;
 import java.util.Set;
 
 /**
- * Default {@link UserInfo} implementation for local and OpenID Connect users.
+ * Default {@link UserAccount} implementation for local and OpenID Connect users.
  *
  * <p>{@code userId} is the required stable local user id. The profile fields follow
  * common OpenID Connect claims such as {@code email}, {@code name}, and
  * {@code preferred_username}. After an external login, XIS maps those claims from
- * the provider's {@code id_token} into {@code UserInfoImpl} before it creates local
+ * the provider's {@code id_token} into {@code UserAccountImpl} before it creates local
  * XIS tokens, so applications can persist or enrich provider profile data in their
- * {@link UserInfoService}.</p>
+ * {@link UserAccountService}.</p>
  *
  * <p>The profile fields are optional for SQL mapping, so applications can persist
  * only the columns they need. {@code roles} is mapped as an optional JSON column
  * when XIS SQL is used; applications may also load roles separately in their
- * {@link UserInfoService}.</p>
+ * {@link UserAccountService}.</p>
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserInfoImpl implements UserInfo {
+public class UserAccountImpl implements UserAccount {
 
     /**
      * The unique identifier for the user (Subject). Corresponds to the 'sub' claim.

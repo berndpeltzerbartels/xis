@@ -12,13 +12,13 @@ public interface TokenService {
     /**
      * Creates new API tokens (access and renew tokens) for the given user information.
      *
-     * @param userInfo details about the user for whom the tokens are being created
+     * @param userAccount details about the user for whom the tokens are being created
      * @param issuer   the issuer identifier for the tokens
      * @param keyId    the key identifier used for signing the tokens required because we may have multiple keys
      * @param keyPair  the key pair used to sign the tokens
      * @return the newly created API tokens
      */
-    ApiTokens newTokens(UserInfo userInfo, String issuer, String keyId, KeyPair keyPair);
+    ApiTokens newTokens(UserAccount userAccount, String issuer, String keyId, KeyPair keyPair);
 
 
     /**

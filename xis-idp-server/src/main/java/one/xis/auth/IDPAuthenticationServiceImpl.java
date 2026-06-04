@@ -62,7 +62,7 @@ class IDPAuthenticationServiceImpl implements IDPAuthenticationService {
      */
     @Override
     public void checkRedirectUrl(String userId, String redirectUrl) throws InvalidRedirectUrlException {
-        if (!idpService.userInfo(userId)
+        if (!idpService.userAccount(userId)
                 .map(IDPUserInfo::getClientId)
                 .map(idpService::findClientInfo)
                 .filter(Optional::isPresent)
@@ -117,17 +117,17 @@ class IDPAuthenticationServiceImpl implements IDPAuthenticationService {
      */
 
     private IDPTokenResponse generateTokenResponse(String userId) throws AuthenticationException {
-        IDPUserInfo userInfo = idpService.userInfo(userId).orElseThrow(() -> new AuthenticationException("User not found: " + userId));
+        IDPUserInfo userAccount = idpService.userAccount(userId).orElseThrow(() -> new AuthenticationException("User not found: " + userId));
         IDPConfig config = idpService.getConfig();
 
         AccessTokenClaims accessTokenClaims = idpService.accessTokenClaims(userId)
-                .map(claims -> completeTokenClaims(claims, userInfo, config.getAccessTokenValidity()))
+                .map(claims -> completeTokenClaims(claims, userAccount, config.getAccessTokenValidity()))
                 .orElseThrow(() -> new AuthenticationException("Access token claims not found for user: " + userId));
 
         IDTokenClaims idTokenClaims = idpService.idTokenClaims(userId)
-                .map(claims -> completeTokenClaims(claims, userInfo, config.getIdTokenValidity()))
+                .map(claims -> completeTokenClaims(claims, userAccount, config.getIdTokenValidity()))
                 .orElseThrow(() -> new AuthenticationException("ID token claims not found for user: " + userId));
-        RenewTokenClaims renewTokenClaims = completeTokenClaims(idpService.renewTokenClaims(userId), userInfo, config.getRefreshTokenValidity());
+        RenewTokenClaims renewTokenClaims = completeTokenClaims(idpService.renewTokenClaims(userId), userAccount, config.getRefreshTokenValidity());
 
         String accessToken = localTokenService.createToken(accessTokenClaims);
         String idToken = localTokenService.createToken(idTokenClaims);
@@ -142,13 +142,13 @@ class IDPAuthenticationServiceImpl implements IDPAuthenticationService {
         return tokenResponse;
     }
 
-    private <C extends TokenClaims> C completeTokenClaims(C tokenClaims, IDPUserInfo userInfo, Duration validity) {
+    private <C extends TokenClaims> C completeTokenClaims(C tokenClaims, IDPUserInfo userAccount, Duration validity) {
         long issuedAtSeconds = Instant.now().getEpochSecond();
-        tokenClaims.setUserId(userInfo.getUserId());
+        tokenClaims.setUserId(userAccount.getUserId());
         tokenClaims.setIssuedAtSeconds(issuedAtSeconds);
         tokenClaims.setExpiresAtSeconds(issuedAtSeconds + validity.getSeconds());
         tokenClaims.setNotBeforeSeconds(issuedAtSeconds);
-        tokenClaims.setClientId(userInfo.getClientId());
+        tokenClaims.setClientId(userAccount.getClientId());
         tokenClaims.setIssuer(localUrlHolder.getUrl());
         return tokenClaims;
     }

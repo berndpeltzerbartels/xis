@@ -8,8 +8,7 @@ import one.xis.ModelData;
 import one.xis.Page;
 import one.xis.Title;
 import one.xis.UserContext;
-import one.xis.auth.UserInfo;
-import one.xis.auth.UserInfoService;
+import one.xis.auth.LocalCredentialService;
 import one.xis.validation.ValidatorMessageResolver;
 
 @Page("/totp-setup.html")
@@ -17,14 +16,14 @@ import one.xis.validation.ValidatorMessageResolver;
 @DefaultHtmlFile("/default-totp-setup.html")
 class TOTPSetupController {
 
-    private final UserInfoService<UserInfo> userInfoService;
+    private final LocalCredentialService localCredentialService;
     private final TOTPEnrollmentService enrollmentService;
     private final ValidatorMessageResolver messageResolver;
 
-    TOTPSetupController(UserInfoService<UserInfo> userInfoService,
+    TOTPSetupController(LocalCredentialService localCredentialService,
                         TOTPEnrollmentService enrollmentService,
                         ValidatorMessageResolver messageResolver) {
-        this.userInfoService = userInfoService;
+        this.localCredentialService = localCredentialService;
         this.enrollmentService = enrollmentService;
         this.messageResolver = messageResolver;
     }
@@ -43,7 +42,7 @@ class TOTPSetupController {
     @ModelData("totpSetupResult")
     TOTPSetupResult setup(@FormData("totpSetup") TOTPSetupCredentials credentials,
                           UserContext userContext) {
-        if (!userInfoService.validateCredentials(credentials.getUsername(), credentials.getPassword())) {
+        if (!localCredentialService.validateCredentials(credentials.getUsername(), credentials.getPassword())) {
             return TOTPSetupResult.error(message("totp.setup.invalidCredentials", userContext));
         }
         return TOTPSetupResult.qrCode(credentials.getUsername(), enrollmentService.qrCodeDataUrl(credentials.getUsername()));

@@ -1,6 +1,7 @@
 package one.xis.auth;
 
 import one.xis.UserContext;
+import one.xis.context.AppContext;
 import one.xis.validation.ValidatorException;
 import org.junit.jupiter.api.Test;
 
@@ -14,7 +15,7 @@ class LoginValidatorTest {
 
     @Test
     void acceptsPasswordWhenNoAdditionalFactorIsRequired() {
-        LoginValidator validator = new LoginValidator(new Users(true), List.of(new Factor(false, false)));
+        LoginValidator validator = new LoginValidator(appContext(new Credentials(true)), List.of(new Factor(false, false)));
 
         assertThatCode(() -> validator.validate(new LoginData("mara", "secret", null, "state"), getClass(), userContext()))
                 .doesNotThrowAnyException();
@@ -22,7 +23,7 @@ class LoginValidatorTest {
 
     @Test
     void rejectsWhenAdditionalFactorIsRequiredAndInvalid() {
-        LoginValidator validator = new LoginValidator(new Users(true), List.of(new Factor(true, false)));
+        LoginValidator validator = new LoginValidator(appContext(new Credentials(true)), List.of(new Factor(true, false)));
 
         var login = new LoginData("mara", "secret", "000000", "state");
 
@@ -32,7 +33,7 @@ class LoginValidatorTest {
 
     @Test
     void acceptsWhenAdditionalFactorIsRequiredAndValid() {
-        LoginValidator validator = new LoginValidator(new Users(true), List.of(new Factor(true, true)));
+        LoginValidator validator = new LoginValidator(appContext(new Credentials(true)), List.of(new Factor(true, true)));
 
         assertThatCode(() -> validator.validate(new LoginData("mara", "secret", "123456", "state"), getClass(), userContext()))
                 .doesNotThrowAnyException();
@@ -89,19 +90,25 @@ class LoginValidatorTest {
         }
     }
 
-    private record Users(boolean credentialsValid) implements UserInfoService<UserInfo> {
+    private AppContext appContext(LocalCredentialService credentialService) {
+        var appContext = org.mockito.Mockito.mock(AppContext.class);
+        org.mockito.Mockito.when(appContext.getOptionalSingleton(LocalCredentialService.class)).thenReturn(Optional.of(credentialService));
+        return appContext;
+    }
+
+    private record Credentials(boolean credentialsValid) implements LocalCredentialService {
         @Override
         public boolean validateCredentials(String userId, String password) {
             return credentialsValid;
         }
 
         @Override
-        public Optional<UserInfo> getUserInfo(String userId) {
-            return Optional.empty();
+        public void setPassword(String userId, String password) {
         }
 
         @Override
-        public void saveUserInfo(UserInfo userInfo) {
+        public boolean needsRehash(String userId) {
+            return false;
         }
     }
 }

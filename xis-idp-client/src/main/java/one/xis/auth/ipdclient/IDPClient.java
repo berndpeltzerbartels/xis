@@ -34,7 +34,7 @@ public interface IDPClient {
      * @return Die Informationen des Benutzers.
      * @throws AuthenticationException wenn der Access-Token ungültig oder abgelaufen ist.
      */
-    UserInfo fetchUserInfo(@NonNull String accessToken) throws AuthenticationException;
+    UserAccount fetchUserInfo(@NonNull String accessToken) throws AuthenticationException;
 
     /**
      * Returns the IDP's unique identifier.

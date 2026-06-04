@@ -1,6 +1,6 @@
 package test.page.security;
 
-import one.xis.auth.UserInfoImpl;
+import one.xis.auth.UserAccountImpl;
 import one.xis.context.IntegrationTestContext;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,13 +14,13 @@ class ElRoleVisibilityTest {
     @Test
     @DisplayName("EL role functions can show frontend-only controls for matching roles")
     void elRoleFunctionsShowMatchingControls() {
-        var userInfo = new UserInfoImpl();
-        userInfo.setUserId("admin-user");
-        userInfo.setRoles(Set.of("ADMIN"));
+        var userAccount = new UserAccountImpl();
+        userAccount.setUserId("admin-user");
+        userAccount.setRoles(Set.of("ADMIN"));
 
         var testContext = IntegrationTestContext.builder()
                 .withSingleton(ElRoleVisibilityPage.class)
-                .withLoggedInUser(userInfo, "passwd")
+                .withLoggedInUser(userAccount, "passwd")
                 .build();
 
         var document = testContext.openPage("/el-role-visibility.html").getDocument();

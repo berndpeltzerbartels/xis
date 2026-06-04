@@ -1,6 +1,6 @@
 package test.page.security;
 
-import one.xis.auth.UserInfoImpl;
+import one.xis.auth.UserAccountImpl;
 import one.xis.context.IntegrationTestContext;
 import org.junit.jupiter.api.*;
 
@@ -43,15 +43,15 @@ public class ProtectedModelDataTest {
 
         @BeforeEach
         void init() {
-            var userInfo = new UserInfoImpl();
-            userInfo.setUserId("user1");
-            userInfo.setRoles(Set.of("simple-user"));
+            var userAccount = new UserAccountImpl();
+            userAccount.setUserId("user1");
+            userAccount.setRoles(Set.of("simple-user"));
 
 
             testContext = IntegrationTestContext.builder()
                     .withSingleton(ProtectedModelDataPage1.class)
                     .withSingleton(ProtectedModelDataPage2.class)
-                    .withLoggedInUser(userInfo, "passwd")
+                    .withLoggedInUser(userAccount, "passwd")
                     .build();
         }
 
@@ -74,14 +74,14 @@ public class ProtectedModelDataTest {
 
         @BeforeEach
         void init() {
-            var userInfo = new UserInfoImpl();
-            userInfo.setUserId("user1");
-            userInfo.setRoles(Set.of("simple-user", "admin"));
+            var userAccount = new UserAccountImpl();
+            userAccount.setUserId("user1");
+            userAccount.setRoles(Set.of("simple-user", "admin"));
 
             testContext = IntegrationTestContext.builder()
                     .withSingleton(ProtectedModelDataPage1.class)
                     .withSingleton(ProtectedModelDataPage2.class)
-                    .withLoggedInUser(userInfo, "passwd")
+                    .withLoggedInUser(userAccount, "passwd")
                     .build();
         }
 

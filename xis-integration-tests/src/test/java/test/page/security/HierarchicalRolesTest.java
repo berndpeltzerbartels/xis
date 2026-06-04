@@ -1,6 +1,6 @@
 package test.page.security;
 
-import one.xis.auth.UserInfoImpl;
+import one.xis.auth.UserAccountImpl;
 import one.xis.context.IntegrationTestContext;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -21,13 +21,13 @@ public class HierarchicalRolesTest {
         @Test
         @DisplayName("@Authenticated requires login but no named role")
         void authenticatedUserWithoutRolesCanOpenAuthenticatedOnlyPage() {
-            var userInfo = new UserInfoImpl();
-            userInfo.setUserId("community-user");
-            userInfo.setRoles(Set.of());
+            var userAccount = new UserAccountImpl();
+            userAccount.setUserId("community-user");
+            userAccount.setRoles(Set.of());
 
             var testContext = IntegrationTestContext.builder()
                     .withSingleton(AuthenticatedOnlyPage.class)
-                    .withLoggedInUser(userInfo, "passwd")
+                    .withLoggedInUser(userAccount, "passwd")
                     .build();
 
             var client = testContext.openPage("/authenticated-only.html");
@@ -58,13 +58,13 @@ public class HierarchicalRolesTest {
         @Test
         @DisplayName("Access granted with USER role")
         void testAccessWithUserRole() {
-            var userInfo = new UserInfoImpl();
-            userInfo.setUserId("user1");
-            userInfo.setRoles(Set.of("USER"));
+            var userAccount = new UserAccountImpl();
+            userAccount.setUserId("user1");
+            userAccount.setRoles(Set.of("USER"));
 
             var testContext = IntegrationTestContext.builder()
                     .withSingleton(HierarchicalRolesTestPage.class)
-                    .withLoggedInUser(userInfo, "passwd")
+                    .withLoggedInUser(userAccount, "passwd")
                     .build();
 
             var client = testContext.openPage("/hierarchical-roles.html");
@@ -75,13 +75,13 @@ public class HierarchicalRolesTest {
         @Test
         @DisplayName("Access granted with VERIFIED role (alternative)")
         void testAccessWithVerifiedRole() {
-            var userInfo = new UserInfoImpl();
-            userInfo.setUserId("user1");
-            userInfo.setRoles(Set.of("VERIFIED"));
+            var userAccount = new UserAccountImpl();
+            userAccount.setUserId("user1");
+            userAccount.setRoles(Set.of("VERIFIED"));
 
             var testContext = IntegrationTestContext.builder()
                     .withSingleton(HierarchicalRolesTestPage.class)
-                    .withLoggedInUser(userInfo, "passwd")
+                    .withLoggedInUser(userAccount, "passwd")
                     .build();
 
             var client = testContext.openPage("/hierarchical-roles.html");
@@ -92,13 +92,13 @@ public class HierarchicalRolesTest {
         @Test
         @DisplayName("Access denied without required controller roles")
         void testAccessDeniedWithoutControllerRoles() {
-            var userInfo = new UserInfoImpl();
-            userInfo.setUserId("user1");
-            userInfo.setRoles(Set.of("ADMIN"));
+            var userAccount = new UserAccountImpl();
+            userAccount.setUserId("user1");
+            userAccount.setRoles(Set.of("ADMIN"));
 
             var testContext = IntegrationTestContext.builder()
                     .withSingleton(HierarchicalRolesTestPage.class)
-                    .withLoggedInUser(userInfo, "passwd")
+                    .withLoggedInUser(userAccount, "passwd")
                     .build();
 
             // User with only ADMIN role cannot access page requiring USER or VERIFIED
@@ -115,13 +115,13 @@ public class HierarchicalRolesTest {
         @Test
         @DisplayName("Action requires only controller role")
         void testActionWithControllerRoleOnly() {
-            var userInfo = new UserInfoImpl();
-            userInfo.setUserId("user1");
-            userInfo.setRoles(Set.of("USER"));
+            var userAccount = new UserAccountImpl();
+            userAccount.setUserId("user1");
+            userAccount.setRoles(Set.of("USER"));
 
             var testContext = IntegrationTestContext.builder()
                     .withSingleton(HierarchicalRolesTestPage.class)
-                    .withLoggedInUser(userInfo, "passwd")
+                    .withLoggedInUser(userAccount, "passwd")
                     .build();
 
             var client = testContext.openPage("/hierarchical-roles.html");
@@ -134,13 +134,13 @@ public class HierarchicalRolesTest {
         @Test
         @DisplayName("Action requires controller AND method role")
         void testActionWithBothRoles() {
-            var userInfo = new UserInfoImpl();
-            userInfo.setUserId("user1");
-            userInfo.setRoles(Set.of("USER", "ADMIN"));
+            var userAccount = new UserAccountImpl();
+            userAccount.setUserId("user1");
+            userAccount.setRoles(Set.of("USER", "ADMIN"));
 
             var testContext = IntegrationTestContext.builder()
                     .withSingleton(HierarchicalRolesTestPage.class)
-                    .withLoggedInUser(userInfo, "passwd")
+                    .withLoggedInUser(userAccount, "passwd")
                     .build();
 
             var client = testContext.openPage("/hierarchical-roles.html");
@@ -153,13 +153,13 @@ public class HierarchicalRolesTest {
         @Test
         @DisplayName("Action denied with only controller role")
         void testActionDeniedWithOnlyControllerRole() {
-            var userInfo = new UserInfoImpl();
-            userInfo.setUserId("user1");
-            userInfo.setRoles(Set.of("USER"));
+            var userAccount = new UserAccountImpl();
+            userAccount.setUserId("user1");
+            userAccount.setRoles(Set.of("USER"));
 
             var testContext = IntegrationTestContext.builder()
                     .withSingleton(HierarchicalRolesTestPage.class)
-                    .withLoggedInUser(userInfo, "passwd")
+                    .withLoggedInUser(userAccount, "passwd")
                     .build();
 
             var client = testContext.openPage("/hierarchical-roles.html");
@@ -173,13 +173,13 @@ public class HierarchicalRolesTest {
         @Test
         @DisplayName("Action with alternative method role (MODERATOR)")
         void testActionWithAlternativeMethodRole() {
-            var userInfo = new UserInfoImpl();
-            userInfo.setUserId("user1");
-            userInfo.setRoles(Set.of("VERIFIED", "MODERATOR"));
+            var userAccount = new UserAccountImpl();
+            userAccount.setUserId("user1");
+            userAccount.setRoles(Set.of("VERIFIED", "MODERATOR"));
 
             var testContext = IntegrationTestContext.builder()
                     .withSingleton(HierarchicalRolesTestPage.class)
-                    .withLoggedInUser(userInfo, "passwd")
+                    .withLoggedInUser(userAccount, "passwd")
                     .build();
 
             var client = testContext.openPage("/hierarchical-roles.html");
@@ -192,13 +192,13 @@ public class HierarchicalRolesTest {
         @Test
         @DisplayName("Method-only role requirement without controller roles")
         void testMethodRoleOnlyWithoutControllerRoles() {
-            var userInfo = new UserInfoImpl();
-            userInfo.setUserId("user1");
-            userInfo.setRoles(Set.of("ADMIN"));
+            var userAccount = new UserAccountImpl();
+            userAccount.setUserId("user1");
+            userAccount.setRoles(Set.of("ADMIN"));
 
             var testContext = IntegrationTestContext.builder()
                     .withSingleton(NoControllerRolesTestPage.class)
-                    .withLoggedInUser(userInfo, "passwd")
+                    .withLoggedInUser(userAccount, "passwd")
                     .build();
 
             var client = testContext.openPage("/no-controller-roles.html");
@@ -216,13 +216,13 @@ public class HierarchicalRolesTest {
         @Test
         @DisplayName("Action with DTO requires all three levels")
         void testActionWithDtoRequiresAllLevels() {
-            var userInfo = new UserInfoImpl();
-            userInfo.setUserId("user1");
-            userInfo.setRoles(Set.of("USER", "SUPPORT", "DATA_EDITOR"));
+            var userAccount = new UserAccountImpl();
+            userAccount.setUserId("user1");
+            userAccount.setRoles(Set.of("USER", "SUPPORT", "DATA_EDITOR"));
 
             var testContext = IntegrationTestContext.builder()
                     .withSingleton(HierarchicalRolesTestPage.class)
-                    .withLoggedInUser(userInfo, "passwd")
+                    .withLoggedInUser(userAccount, "passwd")
                     .build();
 
             var client = testContext.openPage("/hierarchical-roles.html");
@@ -235,13 +235,13 @@ public class HierarchicalRolesTest {
         @Test
         @DisplayName("Action with DTO denied without DTO role")
         void testActionWithDtoDeniedWithoutDtoRole() {
-            var userInfo = new UserInfoImpl();
-            userInfo.setUserId("user1");
-            userInfo.setRoles(Set.of("USER", "SUPPORT"));
+            var userAccount = new UserAccountImpl();
+            userAccount.setUserId("user1");
+            userAccount.setRoles(Set.of("USER", "SUPPORT"));
 
             var testContext = IntegrationTestContext.builder()
                     .withSingleton(HierarchicalRolesTestPage.class)
-                    .withLoggedInUser(userInfo, "passwd")
+                    .withLoggedInUser(userAccount, "passwd")
                     .build();
 
             var client = testContext.openPage("/hierarchical-roles.html");
@@ -255,13 +255,13 @@ public class HierarchicalRolesTest {
         @Test
         @DisplayName("Action with DTO using alternative DTO role (CONTENT_MANAGER)")
         void testActionWithDtoAlternativeDtoRole() {
-            var userInfo = new UserInfoImpl();
-            userInfo.setUserId("user1");
-            userInfo.setRoles(Set.of("VERIFIED", "SUPPORT", "CONTENT_MANAGER"));
+            var userAccount = new UserAccountImpl();
+            userAccount.setUserId("user1");
+            userAccount.setRoles(Set.of("VERIFIED", "SUPPORT", "CONTENT_MANAGER"));
 
             var testContext = IntegrationTestContext.builder()
                     .withSingleton(HierarchicalRolesTestPage.class)
-                    .withLoggedInUser(userInfo, "passwd")
+                    .withLoggedInUser(userAccount, "passwd")
                     .build();
 
             var client = testContext.openPage("/hierarchical-roles.html");
@@ -274,13 +274,13 @@ public class HierarchicalRolesTest {
         @Test
         @DisplayName("Action with DTO but no method roles requires controller AND DTO roles")
         void testActionWithDtoNoMethodRoles() {
-            var userInfo = new UserInfoImpl();
-            userInfo.setUserId("user1");
-            userInfo.setRoles(Set.of("USER", "DATA_EDITOR"));
+            var userAccount = new UserAccountImpl();
+            userAccount.setUserId("user1");
+            userAccount.setRoles(Set.of("USER", "DATA_EDITOR"));
 
             var testContext = IntegrationTestContext.builder()
                     .withSingleton(HierarchicalRolesTestPage.class)
-                    .withLoggedInUser(userInfo, "passwd")
+                    .withLoggedInUser(userAccount, "passwd")
                     .build();
 
             var client = testContext.openPage("/hierarchical-roles.html");
@@ -293,13 +293,13 @@ public class HierarchicalRolesTest {
         @Test
         @DisplayName("DTO-only role requirement without controller or method roles")
         void testDtoRoleOnlyWithoutControllerOrMethodRoles() {
-            var userInfo = new UserInfoImpl();
-            userInfo.setUserId("user1");
-            userInfo.setRoles(Set.of("DATA_EDITOR"));
+            var userAccount = new UserAccountImpl();
+            userAccount.setUserId("user1");
+            userAccount.setRoles(Set.of("DATA_EDITOR"));
 
             var testContext = IntegrationTestContext.builder()
                     .withSingleton(NoControllerRolesTestPage.class)
-                    .withLoggedInUser(userInfo, "passwd")
+                    .withLoggedInUser(userAccount, "passwd")
                     .build();
 
             var client = testContext.openPage("/no-controller-roles.html");
@@ -317,13 +317,13 @@ public class HierarchicalRolesTest {
         @Test
         @DisplayName("User with all roles can access everything")
         void testUserWithAllRoles() {
-            var userInfo = new UserInfoImpl();
-            userInfo.setUserId("superuser");
-            userInfo.setRoles(Set.of("USER", "VERIFIED", "ADMIN", "MODERATOR", "SUPPORT", "DATA_EDITOR", "CONTENT_MANAGER"));
+            var userAccount = new UserAccountImpl();
+            userAccount.setUserId("superuser");
+            userAccount.setRoles(Set.of("USER", "VERIFIED", "ADMIN", "MODERATOR", "SUPPORT", "DATA_EDITOR", "CONTENT_MANAGER"));
 
             var testContext = IntegrationTestContext.builder()
                     .withSingleton(HierarchicalRolesTestPage.class)
-                    .withLoggedInUser(userInfo, "passwd")
+                    .withLoggedInUser(userAccount, "passwd")
                     .build();
 
             var client = testContext.openPage("/hierarchical-roles.html");
@@ -339,39 +339,39 @@ public class HierarchicalRolesTest {
         @DisplayName("Minimal role sets for each action")
         void testMinimalRoleSets() {
             // actionWithControllerRoleOnly: USER
-            var userInfo1 = new UserInfoImpl();
-            userInfo1.setUserId("user1");
-            userInfo1.setRoles(Set.of("USER"));
+            var userAccount1 = new UserAccountImpl();
+            userAccount1.setUserId("user1");
+            userAccount1.setRoles(Set.of("USER"));
 
             var testContext1 = IntegrationTestContext.builder()
                     .withSingleton(HierarchicalRolesTestPage.class)
-                    .withLoggedInUser(userInfo1, "passwd")
+                    .withLoggedInUser(userAccount1, "passwd")
                     .build();
 
             testContext1.openPage("/hierarchical-roles.html")
                     .getDocument().getElementById("actionWithControllerRoleOnly").click();
 
             // actionWithControllerAndMethodRoles: VERIFIED + MODERATOR
-            var userInfo2 = new UserInfoImpl();
-            userInfo2.setUserId("user2");
-            userInfo2.setRoles(Set.of("VERIFIED", "MODERATOR"));
+            var userAccount2 = new UserAccountImpl();
+            userAccount2.setUserId("user2");
+            userAccount2.setRoles(Set.of("VERIFIED", "MODERATOR"));
 
             var testContext2 = IntegrationTestContext.builder()
                     .withSingleton(HierarchicalRolesTestPage.class)
-                    .withLoggedInUser(userInfo2, "passwd")
+                    .withLoggedInUser(userAccount2, "passwd")
                     .build();
 
             testContext2.openPage("/hierarchical-roles.html")
                     .getDocument().getElementById("actionWithControllerAndMethodRoles").click();
 
             // actionWithAllThreeLevels: VERIFIED + SUPPORT + CONTENT_MANAGER
-            var userInfo3 = new UserInfoImpl();
-            userInfo3.setUserId("user3");
-            userInfo3.setRoles(Set.of("VERIFIED", "SUPPORT", "CONTENT_MANAGER"));
+            var userAccount3 = new UserAccountImpl();
+            userAccount3.setUserId("user3");
+            userAccount3.setRoles(Set.of("VERIFIED", "SUPPORT", "CONTENT_MANAGER"));
 
             var testContext3 = IntegrationTestContext.builder()
                     .withSingleton(HierarchicalRolesTestPage.class)
-                    .withLoggedInUser(userInfo3, "passwd")
+                    .withLoggedInUser(userAccount3, "passwd")
                     .build();
 
             testContext3.openPage("/hierarchical-roles.html")

@@ -81,7 +81,7 @@ class IDPAuthenticationServiceImplTest {
                 new IDPClientInfoImpl("tv-app", "tv-secret", Set.of(REDIRECT_URI))
         ));
         when(idpService.validateClientSecret("tv-app", "tv-secret")).thenReturn(true);
-        when(idpService.userInfo("alice")).thenReturn(Optional.of(new IDPUserInfoImpl("alice", "tv-app")));
+        when(idpService.userAccount("alice")).thenReturn(Optional.of(new IDPUserInfoImpl("alice", "tv-app")));
         when(idpService.accessTokenClaims("alice")).thenReturn(Optional.of(new AccessTokenClaims()));
         when(idpService.idTokenClaims("alice")).thenReturn(Optional.of(new IDTokenClaims()));
         when(idpService.renewTokenClaims("alice")).thenReturn(new RenewTokenClaims());

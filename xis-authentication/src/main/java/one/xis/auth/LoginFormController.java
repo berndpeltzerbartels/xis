@@ -20,9 +20,8 @@ import java.util.stream.Collectors;
 @HtmlFile("/login.html")
 @DefaultHtmlFile("/default-login.html")
 @RequiredArgsConstructor
-class LoginFormController<U extends UserInfo> {
+class LoginFormController<U extends UserAccount> {
 
-    private final UserInfoService<U> userInfoService;
     private final CodeStore codeStore;
     private final ExternalIDPServices externalIDPServices;
     private final AppContext appContext;
@@ -46,9 +45,7 @@ class LoginFormController<U extends UserInfo> {
 
     @ModelData("displayLoginForm")
     boolean isDisplayLoginForm() {
-        return appContext.getSingletons(UserInfoService.class).stream()
-                .map(UserInfoService.class::cast)
-                .anyMatch(c -> !(c instanceof UserServicePlaceholder) && c.supportsLocalLogin());
+        return appContext.getOptionalSingleton(LocalCredentialService.class).isPresent();
     }
 
     @ModelData("totpLoginEnabled")
@@ -75,7 +72,9 @@ class LoginFormController<U extends UserInfo> {
 
     @Action("login")
     public LoginResponse login(@FormData("login") LoginData login) {
-        if (userInfoService.validateCredentials(login.getUsername(), login.getPassword())) {
+        var credentialService = appContext.getOptionalSingleton(LocalCredentialService.class)
+                .orElseThrow(() -> new IllegalStateException("Local credentials are not configured"));
+        if (credentialService.validateCredentials(login.getUsername(), login.getPassword())) {
             var code = SecurityUtil.createRandomKey(12);
             codeStore.store(code, login.getUsername());
             return new LoginResponse(login.getState(), code);

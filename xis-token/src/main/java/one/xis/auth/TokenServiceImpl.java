@@ -30,18 +30,18 @@ class TokenServiceImpl implements TokenService {
     private final Gson gson;
 
     /**
-     * @param userInfo
+     * @param userAccount
      * @return
      */
     @Override
-    public ApiTokens newTokens(UserInfo userInfo, String issuer, String keyId, KeyPair keyPair) {
+    public ApiTokens newTokens(UserAccount userAccount, String issuer, String keyId, KeyPair keyPair) {
         Duration expiresIn = Duration.ofMinutes(5);
         Duration renewExpiresIn = Duration.ofMinutes(30);
-        var roles = userInfo.getRoles() != null ? userInfo.getRoles() : Set.<String>of();
+        var roles = userAccount.getRoles() != null ? userAccount.getRoles() : Set.<String>of();
 
         AccessTokenClaims accessTokenClaims = new AccessTokenClaims();
-        accessTokenClaims.setUserId(userInfo.getUserId());
-        accessTokenClaims.setUsername(userInfo.getUserId());
+        accessTokenClaims.setUserId(userAccount.getUserId());
+        accessTokenClaims.setUsername(userAccount.getUserId());
         accessTokenClaims.setJwtId(SecurityUtil.createRandomKey(12));
         accessTokenClaims.setIssuer(issuer);
         accessTokenClaims.setResourceAccess(new AccessTokenClaims.ResourceAccess(new AccessTokenClaims.ResourceAccess.Account(roles)));
@@ -52,7 +52,7 @@ class TokenServiceImpl implements TokenService {
         accessTokenClaims.setClientId("xis-api");
 
         RenewTokenClaims renewTokenClaims = new RenewTokenClaims();
-        renewTokenClaims.setUserId(userInfo.getUserId());
+        renewTokenClaims.setUserId(userAccount.getUserId());
         renewTokenClaims.setIssuer(issuer);
         renewTokenClaims.setClientId("xis-api");
         renewTokenClaims.setExpiresAtSeconds(Instant.now().plus(renewExpiresIn).getEpochSecond());

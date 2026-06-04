@@ -120,42 +120,42 @@ class AuthenticationController {
     }
 
     private ApiTokens createLocalTokensFromExternalIdentity(ExternalIDPTokens externalTokens, String issuer) {
-        var userInfo = appContext.getOptionalSingleton(UserInfoService.class)
-                .filter(userInfoService -> !(userInfoService instanceof UserServicePlaceholder))
-                .map(userInfoService -> saveUserInfo(externalTokens.getIdToken(), userInfoService, issuer))
-                .orElseGet(() -> createTransientUserInfo(externalTokens, issuer));
-        return localTokenService.newTokens(userInfo);
+        var userAccount = appContext.getOptionalSingleton(UserAccountService.class)
+                .filter(userAccountService -> !(userAccountService instanceof UserServicePlaceholder))
+                .map(userAccountService -> saveUserAccount(externalTokens.getIdToken(), userAccountService, issuer))
+                .orElseGet(() -> createTransientUserAccount(externalTokens, issuer));
+        return localTokenService.newTokens(userAccount);
     }
 
 
     /**
-     * Saves the user information based on the provided ID token.
-     * It retrieves the user info from the ID token claims and saves it using the UserInfoService.
-     * If the user info already exists, it updates it; otherwise, it creates a new user info object.
+     * Saves the user account based on the provided ID token.
+     * It retrieves the account from the ID token claims and saves it using the UserAccountService.
+     * If the account already exists, it updates it; otherwise, it creates a new user account object.
      *
      * @param idToken         The ID token containing user information.
-     * @param userInfoService The service used to manage user information.
-     * @param <U>             The type of UserInfo.
+     * @param userAccountService The service used to manage user information.
+     * @param <U>             The type of UserAccount.
      * @param issuer          The issuer
      */
-    private <U extends UserInfo> U saveUserInfo(String idToken, UserInfoService<U> userInfoService, String issuer) {
+    private <U extends UserAccount> U saveUserAccount(String idToken, UserAccountService<U> userAccountService, String issuer) {
         var keyId = tokenService.extractKeyId(idToken);
         var jsonWebKey = externalIDPServices.getExternalIDPService(issuer).getJsonWebKey(keyId);
         var idTokenClaims = tokenService.decodeIdToken(idToken, jsonWebKey);
-        return userInfoService.getUserInfo(idTokenClaims.getUserId())
-                .map(userInfo -> updateUserInfo(idTokenClaims, userInfo, userInfoService))
-                .orElseGet(() -> saveNewUserInfo(idTokenClaims, userInfoService));
+        return userAccountService.getUserAccount(idTokenClaims.getUserId())
+                .map(userAccount -> updateUserAccount(idTokenClaims, userAccount, userAccountService))
+                .orElseGet(() -> saveNewUserAccount(idTokenClaims, userAccountService));
     }
 
-    private UserInfo createTransientUserInfo(ExternalIDPTokens externalTokens, String issuer) {
+    private UserAccount createTransientUserAccount(ExternalIDPTokens externalTokens, String issuer) {
         var idToken = externalTokens.getIdToken();
         var keyId = tokenService.extractKeyId(idToken);
         var jsonWebKey = externalIDPServices.getExternalIDPService(issuer).getJsonWebKey(keyId);
         var idTokenClaims = tokenService.decodeIdToken(idToken, jsonWebKey);
-        var userInfo = new UserInfoImpl();
-        mapToUserInfo(idTokenClaims, userInfo);
-        userInfo.setRoles(readRolesFromExternalAccessToken(externalTokens.getAccessToken(), issuer));
-        return userInfo;
+        var userAccount = new UserAccountImpl();
+        mapToUserAccount(idTokenClaims, userAccount);
+        userAccount.setRoles(readRolesFromExternalAccessToken(externalTokens.getAccessToken(), issuer));
+        return userAccount;
     }
 
     private Set<String> readRolesFromExternalAccessToken(String accessToken, String issuer) {
@@ -189,70 +189,70 @@ class AuthenticationController {
 
 
     /**
-     * Saves a new user info object based on the provided ID token claims.
-     * This method maps the ID token claims to a new user info object and saves it using the provided UserInfoService.
+     * Saves a new user account object based on the provided ID token claims.
+     * This method maps the ID token claims to a new user account object and saves it using the provided UserAccountService.
      * It is used to create a new user profile after successful authentication.
      *
      * @param idTokenClaims
-     * @param userInfoService
+     * @param userAccountService
      * @param <U>
      */
-    <U extends UserInfo> U saveNewUserInfo(IDTokenClaims idTokenClaims, UserInfoService<U> userInfoService) {
-        var userInfoImplementationClass = getUserInfoClass(userInfoService);
-        if (userInfoImplementationClass.isInterface() || Modifier.isAbstract(userInfoImplementationClass.getModifiers())) {
-            throw new IllegalStateException("Type parameter of UserInfoService implementation class must be a concrete implementation of UserInfo : " + userInfoImplementationClass.getName());
+    <U extends UserAccount> U saveNewUserAccount(IDTokenClaims idTokenClaims, UserAccountService<U> userAccountService) {
+        var userAccountImplementationClass = getUserAccountClass(userAccountService);
+        if (userAccountImplementationClass.isInterface() || Modifier.isAbstract(userAccountImplementationClass.getModifiers())) {
+            throw new IllegalStateException("Type parameter of UserAccountService implementation class must be a concrete implementation of UserAccount : " + userAccountImplementationClass.getName());
         }
-        var userInfo = ClassUtils.newInstance(userInfoImplementationClass);
-        mapToUserInfo(idTokenClaims, userInfo);
-        userInfoService.saveUserInfo(userInfo);
-        return userInfo;
+        var userAccount = ClassUtils.newInstance(userAccountImplementationClass);
+        mapToUserAccount(idTokenClaims, userAccount);
+        userAccountService.saveUserAccount(userAccount);
+        return userAccount;
     }
 
     /**
-     * Updates the user info with the provided ID token claims.
-     * This method maps the ID token claims to the user info object and saves it using the provided UserInfoService.
+     * Updates the user account with the provided ID token claims.
+     * This method maps the ID token claims to the user account object and saves it using the provided UserAccountService.
      * It is used to update the user profile information after successful authentication.
      *
      * @param idTokenClaims
-     * @param userInfo
-     * @param userInfoService
+     * @param userAccount
+     * @param userAccountService
      * @param <U>
      */
-    <U extends UserInfo> U updateUserInfo(IDTokenClaims idTokenClaims, U userInfo, UserInfoService<U> userInfoService) {
-        mapToUserInfo(idTokenClaims, userInfo);
-        userInfoService.saveUserInfo(userInfo);
-        return userInfo;
+    <U extends UserAccount> U updateUserAccount(IDTokenClaims idTokenClaims, U userAccount, UserAccountService<U> userAccountService) {
+        mapToUserAccount(idTokenClaims, userAccount);
+        userAccountService.saveUserAccount(userAccount);
+        return userAccount;
     }
 
 
     /**
-     * Retrieves the class of the UserInfo object from the UserInfoService.
+     * Retrieves the class of the UserAccount object from the UserAccountService.
      *
-     * @param userInfoService The UserInfoService instance.
-     * @return The class of the UserInfo object.
+     * @param userAccountService The UserAccountService instance.
+     * @return The class of the UserAccount object.
      */
     @SuppressWarnings("unchecked")
-    private <U extends UserInfo> Class<U> getUserInfoClass(UserInfoService<U> userInfoService) {
-        return (Class<U>) ClassUtils.getGenericInterfacesTypeParameter(userInfoService.getClass(), UserInfoService.class, 0);
+    private <U extends UserAccount> Class<U> getUserAccountClass(UserAccountService<U> userAccountService) {
+        return (Class<U>) ClassUtils.getGenericInterfacesTypeParameter(userAccountService.getClass(), UserAccountService.class, 0);
     }
 
     /**
-     * Maps the ID token claims to the user info object.
+     * Maps the ID token claims to the user account object.
      *
      * @param claims   The ID token claims containing user information.
-     * @param userInfo The user info object to be populated with the claims.
+     * @param userAccount The user account object to be populated with the claims.
      */
-    private void mapToUserInfo(IDTokenClaims claims, UserInfo userInfo) {
-        userInfo.setUserId(claims.getUserId());
-        userInfo.setEmail(claims.getEmail());
+    private void mapToUserAccount(IDTokenClaims claims, UserAccount userAccount) {
+        userAccount.setUserId(claims.getUserId());
+        userAccount.setEmail(claims.getEmail());
         if (claims.getEmailVerified() != null) {
-            userInfo.setEmailVerified(claims.getEmailVerified());
+            userAccount.setEmailVerified(claims.getEmailVerified());
         }
-        userInfo.setLocale(claims.getLocale());
-        userInfo.setName(claims.getName());
-        userInfo.setPreferredUsername(claims.getPreferredUsername());
-        userInfo.setGivenName(claims.getGivenName());
-        userInfo.setFamilyName(claims.getFamilyName());
-        userInfo.setPictureUrl(claims.getPictureUrl());
+        userAccount.setLocale(claims.getLocale());
+        userAccount.setName(claims.getName());
+        userAccount.setPreferredUsername(claims.getPreferredUsername());
+        userAccount.setGivenName(claims.getGivenName());
+        userAccount.setFamilyName(claims.getFamilyName());
+        userAccount.setPictureUrl(claims.getPictureUrl());
     }
 }

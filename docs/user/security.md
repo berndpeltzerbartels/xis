@@ -234,15 +234,28 @@ where the stable resource id and operation are known.
 
 ## Local Authentication
 
-For a single application with local users, provide a `UserInfoService`. XIS uses it to validate credentials and load the
-user roles. In a XIS Boot application this can be a XIS component. In a Spring application it must be a Spring bean,
-because `UserInfoService` implementations are imported from the host framework.
+For a single application with local users, use `xis-local-credentials` for password validation and provide a
+`UserAccountService` for account data and roles. The split is intentional: password hashes are managed by
+`LocalCredentialService`, while `UserAccountService` maps the authenticated user id to the application's account.
+
+Add `xis-local-credentials` and one repository implementation. `xis-local-credentials-sql` stores password hashes in SQL
+and uses Argon2id through Password4j:
+
+```groovy
+dependencies {
+    implementation "one.xis:xis-authentication"
+    implementation "one.xis:xis-local-credentials"
+    implementation "one.xis:xis-local-credentials-sql"
+}
+```
+
+The account service can stay focused on profile data and roles:
 
 ```java
 package example.security;
 
-import one.xis.auth.UserInfo;
-import one.xis.auth.UserInfoService;
+import one.xis.auth.UserAccount;
+import one.xis.auth.UserAccountService;
 import one.xis.context.Component;
 
 import java.util.Map;
@@ -250,17 +263,12 @@ import java.util.Optional;
 import java.util.Set;
 
 @Component
-class AppUsers implements UserInfoService<AppUser> {
+class AppUsers implements UserAccountService<AppUser> {
 
     private final Map<String, AppUser> users = Map.of("alice", createAlice());
 
     @Override
-    public boolean validateCredentials(String userId, String password) {
-        return userId.equals("alice") && password.equals("secret");
-    }
-
-    @Override
-    public Optional<AppUser> getUserInfo(String userId) {
+    public Optional<AppUser> getUserAccount(String userId) {
         return Optional.ofNullable(users.get(userId));
     }
 
@@ -273,12 +281,12 @@ class AppUsers implements UserInfoService<AppUser> {
     }
 
     @Override
-    public void saveUserInfo(AppUser userInfo) {
+    public void saveUserAccount(AppUser userAccount) {
         throw new UnsupportedOperationException();
     }
 }
 
-class AppUser implements UserInfo {
+class AppUser implements UserAccount {
 
     private String userId;
     private Set<String> roles = Set.of();
@@ -295,8 +303,8 @@ class AppUser implements UserInfo {
 }
 ```
 
-In a local-only application XIS does not call `saveUserInfo`; throwing `UnsupportedOperationException` makes an
-accidental call visible. For external OpenID Connect logins this is different: `saveUserInfo` is part of the successful
+In a local-only application XIS does not call `saveUserAccount`; throwing `UnsupportedOperationException` makes an
+accidental call visible. For external OpenID Connect logins this is different: `saveUserAccount` is part of the successful
 login flow and must not throw.
 
 The same service in a Spring application uses the Spring stereotype instead:
@@ -304,15 +312,18 @@ The same service in a Spring application uses the Spring stereotype instead:
 ```java
 package example.security;
 
-import one.xis.auth.UserInfo;
-import one.xis.auth.UserInfoService;
+import one.xis.auth.UserAccount;
+import one.xis.auth.UserAccountService;
 import org.springframework.stereotype.Component;
 
 @Component
-class AppUsers implements UserInfoService<AppUser> {
+class AppUsers implements UserAccountService<AppUser> {
     // same methods as above
 }
 ```
+
+Applications that do not use the SQL default can implement `LocalCredentialRepository` or replace
+`LocalCredentialService` entirely. A replacement service is responsible for secure password storage and verification.
 
 When an unauthenticated user opens a protected page, XIS returns a `401` response with a `Location` header. The browser
 client follows that location and opens the login page. With local authentication the target is:
@@ -535,11 +546,11 @@ local login form.
 `@UserId` receives the OpenID Connect `sub` claim for external providers. That value is usually a stable provider id,
 not necessarily the visible login name or email address.
 
-After the callback, XIS always issues its own local application token. With no custom `UserInfoService`, XIS uses the
+After the callback, XIS always issues its own local application token. With no custom `UserAccountService`, XIS uses the
 external `sub` as the local user id. If the provider access token is a readable JWT with roles in `realm_access.roles` or
 `resource_access.account.roles`, those roles are copied into the local XIS token. If the provider token is opaque or does
-not carry application roles, protect pages with `@Authenticated` or provide a `UserInfoService` that maps the external user
-to local roles in `saveUserInfo`.
+not carry application roles, protect pages with `@Authenticated` or provide a `UserAccountService` that maps the external user
+to local roles in `saveUserAccount`.
 
 By default XIS requests the `openid` scope. Providers may require additional scopes for role claims. Override
 `getScope()` in `ExternalIDPConfig` when the provider needs them:
@@ -600,26 +611,26 @@ instead of `google`.
 
 Google's token response contains an `id_token`, which is the OpenID Connect identity JWT. The `access_token` is meant for
 Google APIs. XIS therefore reads the Google `id_token` after the callback and issues its own application token. For a
-simple community login, no `UserInfoService` is required: the Google `sub` claim becomes the XIS user id and the local
+simple community login, no `UserAccountService` is required: the Google `sub` claim becomes the XIS user id and the local
 token has no named roles.
 
-Use a `UserInfoService` only when the application wants to store or enrich the Google user, for example for an approval
-workflow, profile data, or application roles. Use the application's own concrete `UserInfo` implementation as the generic
-type. During the callback, XIS copies Google profile claims from the `id_token` into that object before `saveUserInfo` is
+Use a `UserAccountService` only when the application wants to store or enrich the Google user, for example for an approval
+workflow, profile data, or application roles. Use the application's own concrete `UserAccount` implementation as the generic
+type. During the callback, XIS copies Google profile claims from the `id_token` into that object before `saveUserAccount` is
 called.
 
-`saveUserInfo` is called after the external provider has successfully authenticated the user and before XIS creates its
+`saveUserAccount` is called after the external provider has successfully authenticated the user and before XIS creates its
 own local application token. This is the hook for creating or updating the application's account for that external user:
 store profile data, attach approval state, or assign application roles. If the application does not need local user data
-at all, leave the `UserInfoService` out. If it provides one, `saveUserInfo` must be able to accept the externally loaded
+at all, leave the `UserAccountService` out. If it provides one, `saveUserAccount` must be able to accept the externally loaded
 user. A no-op implementation is acceptable when the application deliberately keeps no local copy, but throwing an
 exception is not: the method is part of the successful external login flow.
 
 ```java
 package example.security;
 
-import one.xis.auth.UserInfo;
-import one.xis.auth.UserInfoService;
+import one.xis.auth.UserAccount;
+import one.xis.auth.UserAccountService;
 import one.xis.context.Component;
 
 import java.util.Map;
@@ -628,32 +639,22 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
-class GoogleUsers implements UserInfoService<AppUser> {
+class GoogleUsers implements UserAccountService<AppUser> {
 
     private final Map<String, AppUser> users = new ConcurrentHashMap<>();
 
     @Override
-    public boolean supportsLocalLogin() {
-        return false;
-    }
-
-    @Override
-    public boolean validateCredentials(String userId, String password) {
-        return false;
-    }
-
-    @Override
-    public Optional<AppUser> getUserInfo(String userId) {
+    public Optional<AppUser> getUserAccount(String userId) {
         return Optional.ofNullable(users.get(userId));
     }
 
     @Override
-    public void saveUserInfo(AppUser userInfo) {
-        users.put(userInfo.getUserId(), userInfo);
+    public void saveUserAccount(AppUser userAccount) {
+        users.put(userAccount.getUserId(), userAccount);
     }
 }
 
-class AppUser implements UserInfo {
+class AppUser implements UserAccount {
 
     private String userId;
     private Set<String> roles = Set.of();
@@ -670,11 +671,10 @@ class AppUser implements UserInfo {
 }
 ```
 
-For a real application, replace the in-memory map with your user database or approval workflow. `supportsLocalLogin()`
-returns `false` here because Google is the only login method; XIS should not render a local username/password form. If
-the application only needs a community login, leave the `UserInfoService` out and protect pages with `@Authenticated`. If
-the application needs named roles, provide a `UserInfoService` and assign roles in `saveUserInfo`. XIS calls
-`saveUserInfo` during the Google callback before it creates the local XIS token, so role assignments made there are part
+For a real application, replace the in-memory map with your user database or approval workflow. If the application only
+needs a community login, leave the `UserAccountService` out and protect pages with `@Authenticated`. If the application
+needs named roles, provide a `UserAccountService` and assign roles in `saveUserAccount`. XIS calls
+`saveUserAccount` during the Google callback before it creates the local XIS token, so role assignments made there are part
 of the token used for the redirected page.
 
 The client id and client secret from Google are returned by `getClientId()` and `getClientSecret()`. For normal Google
@@ -693,7 +693,8 @@ Google also uses the standard OpenID Connect discovery document.
 
 ### Local Authentication Only
 
-Provide a real `UserInfoService`. When a protected page is opened without a valid login, XIS redirects to:
+Provide a `LocalCredentialService` and a real `UserAccountService`. The default `LocalCredentialService` is available
+through `xis-local-credentials`. When a protected page is opened without a valid login, XIS redirects to:
 
 ```text
 /login.html?redirect_uri=...
@@ -704,45 +705,42 @@ The login page renders the local form. A custom `login.html` only needs the `log
 
 ### Local Authentication And One External OpenID Connect Provider
 
-Provide a real `UserInfoService` and one `ExternalIDPConfig`. When a protected page is opened without a valid login, XIS
-still redirects to `/login.html` instead of redirecting directly to the provider.
+Provide a `LocalCredentialService`, a real `UserAccountService`, and one `ExternalIDPConfig`. When a protected page is
+opened without a valid login, XIS still redirects to `/login.html` instead of redirecting directly to the provider.
 
 The login page renders the local form and one provider link. A custom `login.html` should render both the local form and
 the `externalIdpIds` / `externalIdpUrls` provider link.
 
 ### Local Authentication And Multiple External OpenID Connect Providers
 
-Provide a real `UserInfoService` and multiple `ExternalIDPConfig` instances. When a protected page is opened without a
-valid login, XIS redirects to `/login.html`.
+Provide a `LocalCredentialService`, a real `UserAccountService`, and multiple `ExternalIDPConfig` instances. When a
+protected page is opened without a valid login, XIS redirects to `/login.html`.
 
 The login page renders the local form and one link per provider. A custom template should render the local form and loop
 over `externalIdpIds`, using `externalIdpUrls[idpId]` as the link target.
 
 ### One External OpenID Connect Provider Without Local Authentication
 
-Provide one `ExternalIDPConfig` and either no `UserInfoService`, or a `UserInfoService` whose `supportsLocalLogin()`
-method returns `false`. XIS then redirects directly to that provider when a protected page is opened without a valid
-login.
+Provide one `ExternalIDPConfig` and no `LocalCredentialService`. XIS then redirects directly to that provider when a
+protected page is opened without a valid login.
 
 `/login.html` is normally skipped in this setup. If it is opened explicitly, the local form is not rendered because the
-active `UserInfoService` does not support local credentials.
+application has no local credentials service.
 
 ### Multiple External OpenID Connect Providers Without Local Authentication
 
-Provide multiple `ExternalIDPConfig` instances and either do not provide a custom `UserInfoService`, or provide one whose
-`supportsLocalLogin()` method returns `false`. When a protected page is opened without a valid login, XIS redirects to
-`/login.html` so the user can choose the provider.
+Provide multiple `ExternalIDPConfig` instances and no `LocalCredentialService`. When a protected page is opened without a
+valid login, XIS redirects to `/login.html` so the user can choose the provider.
 
 The login page renders only provider links. A custom `login.html` must render `externalIdpIds` and `externalIdpUrls`; it
-should not show a local username/password form unless the application also provides a `UserInfoService` with
-`supportsLocalLogin() == true`.
+should not show a local username/password form unless the application also provides a `LocalCredentialService`.
 
-`UserInfoService` is optional when the application only uses external providers. XIS reads the OpenID Connect `id_token`
-after the callback and issues its own local application token. If no `UserInfoService` is present, the OpenID Connect
+`UserAccountService` is optional when the application only uses external providers. XIS reads the OpenID Connect `id_token`
+after the callback and issues its own local application token. If no `UserAccountService` is present, the OpenID Connect
 `sub` claim becomes the XIS user id. If the provider access token is a readable JWT with roles in `realm_access.roles`
 or `resource_access.account.roles`, XIS copies those roles into the local token. Providers such as Google usually issue
 access tokens for their own APIs instead; in that case the local token has no named roles unless the application maps
-the account through a `UserInfoService`.
+the account through a `UserAccountService`.
 
 ## XIS As An OpenID Connect Provider
 
@@ -809,7 +807,7 @@ class AppIDPService implements IDPService {
     }
 
     @Override
-    public Optional<IDPUserInfo> userInfo(String userId) {
+    public Optional<IDPUserInfo> userAccount(String userId) {
         return Optional.of(new IDPUserInfoImpl(userId, "orders-app"));
     }
 
