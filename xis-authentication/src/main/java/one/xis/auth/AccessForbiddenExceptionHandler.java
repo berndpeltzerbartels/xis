@@ -38,9 +38,6 @@ class AccessForbiddenExceptionHandler implements ControllerExceptionHandler<Acce
     }
 
     private boolean hasLocalLogin() {
-        return appContext.getOptionalSingleton(UserInfoService.class)
-                .filter(service -> !(service instanceof UserServicePlaceholder))
-                .filter(UserInfoService::supportsLocalLogin)
-                .isPresent();
+        return appContext.getOptionalSingleton(LocalCredentialService.class).isPresent();
     }
 }

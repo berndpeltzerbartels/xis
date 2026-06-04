@@ -22,7 +22,7 @@ public interface IDPService {
      * @param userId The ID of the user.
      * @return An Optional containing the user information if found, otherwise empty.
      */
-    Optional<IDPUserInfo> userInfo(String userId);
+    Optional<IDPUserInfo> userAccount(String userId);
 
     /**
      * Returns the payload of the access token for the given user ID.
@@ -56,7 +56,7 @@ public interface IDPService {
      * @throws IllegalArgumentException if the user does not exist.
      */
     default RenewTokenClaims renewTokenClaims(String userId) {
-        if (userInfo(userId).isEmpty()) {
+        if (userAccount(userId).isEmpty()) {
             throw new IllegalArgumentException("User not found: " + userId);
         }
         RenewTokenClaims claims = new RenewTokenClaims();

@@ -265,16 +265,10 @@ class ControllerMethodParameter {
         if (!isMandatory(parameter) && paramValue == null) {
             return null;
         }
-        var deserialized = deserializeParameter(paramValue, request, parameter, postProcessingResults);
-        if (deserialized instanceof String str) {
-            try {
-                return URLDecoder.decode(str, StandardCharsets.UTF_8);
-            } catch (Exception e) {
-                throw new IllegalStateException("Failed to decode URL parameter '" + key + "' with value '" + str + "'", e);
-            }
-        } else {
-            return deserialized;
+        if (String.class.equals(parameter.getType())) {
+            return decodeUrlParameter(key, paramValue);
         }
+        return deserializeParameter(paramValue, request, parameter, postProcessingResults);
     }
 
     private Object deserializePathVariable(Parameter parameter, ClientRequest request, PostProcessingResults postProcessingResults) throws IOException {
@@ -283,7 +277,18 @@ class ControllerMethodParameter {
             throw new IllegalStateException("No path variable found for key " + key);
         }
         var paramValue = request.getPathVariables().get(key);
+        if (String.class.equals(parameter.getType())) {
+            return decodeUrlParameter(key, paramValue);
+        }
         return deserializeParameter(paramValue, request, parameter, postProcessingResults);
+    }
+
+    private String decodeUrlParameter(String key, String value) {
+        try {
+            return URLDecoder.decode(value, StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to decode URL parameter '" + key + "' with value '" + value + "'", e);
+        }
     }
 
     private Object storageParameter(String key,

@@ -35,7 +35,7 @@ class LocalAuthenticationIntegrationTest {
         @BeforeEach
         void init() {
             context = AppContext.builder()
-                    .withSingletonClass(TestUserInfoService.class)
+                    .withSingletonClass(TestUserAccountService.class)
                     .withXIS().build();
         }
 
@@ -71,7 +71,7 @@ class LocalAuthenticationIntegrationTest {
         @BeforeEach
         void init() {
             context = AppContext.builder()
-                    .withSingletonClass(TestUserInfoService.class)
+                    .withSingletonClass(TestUserAccountService.class)
                     .withXIS().build();
         }
 
@@ -105,13 +105,13 @@ class LocalAuthenticationIntegrationTest {
         @BeforeEach
         void init() {
             context = AppContext.builder()
-                    .withSingletonClass(TestUserInfoService.class)
+                    .withSingletonClass(TestUserAccountService.class)
                     .withXIS().build();
             context.getSingleton(LocalUrlHolder.class).setLocalUrl("http://localhost:4711");
-            var userInfo = new UserInfoImpl();
-            userInfo.setUserId("alice");
-            userInfo.setRoles(Set.of("USER"));
-            context.getSingleton(TestUserInfoService.class).saveUserInfo(userInfo, "secret");
+            var userAccount = new UserAccountImpl();
+            userAccount.setUserId("alice");
+            userAccount.setRoles(Set.of("USER"));
+            context.getSingleton(TestUserAccountService.class).saveUserAccount(userAccount);
         }
 
         @Test
@@ -179,32 +179,21 @@ class LocalAuthenticationIntegrationTest {
     }
 
 
-    static class TestUserInfoService implements UserInfoService<UserInfo> {
+    static class TestUserAccountService implements UserAccountService<UserAccount> {
 
-        private final Collection<UserInfo> userInfos = new HashSet<>();
-        private final Map<String, String> userPasswords = new HashMap<>();
-
-        @Override
-        public boolean validateCredentials(String userId, String password) {
-            return userPasswords.getOrDefault(userId, "").equals(password);
-        }
+        private final Collection<UserAccount> userAccounts = new HashSet<>();
 
         @Override
-        public Optional<UserInfo> getUserInfo(String userId) {
-            return userInfos.stream()
-                    .filter(userInfo -> userInfo.getUserId().equals(userId))
+        public Optional<UserAccount> getUserAccount(String userId) {
+            return userAccounts.stream()
+                    .filter(userAccount -> userAccount.getUserId().equals(userId))
                     .findFirst();
         }
 
-        public void saveUserInfo(UserInfo userInfo, String password) {
-            saveUserInfo(userInfo);
-            userPasswords.put(userInfo.getUserId(), password);
-        }
-
-        public void saveUserInfo(UserInfo userInfo) {
-            getUserInfo(userInfo.getUserId()).map(UserInfoImpl.class::cast).ifPresentOrElse(
-                    existingUserInfo -> existingUserInfo.setRoles(userInfo.getRoles()),
-                    () -> userInfos.add(userInfo)
+        public void saveUserAccount(UserAccount userAccount) {
+            getUserAccount(userAccount.getUserId()).map(UserAccountImpl.class::cast).ifPresentOrElse(
+                    existingUserAccount -> existingUserAccount.setRoles(userAccount.getRoles()),
+                    () -> userAccounts.add(userAccount)
             );
         }
     }

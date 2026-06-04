@@ -821,41 +821,43 @@ dependencies {
     implementation "one.xis:xis-spring"
     implementation "one.xis:xis-sql"
     implementation "one.xis:xis-authentication"
+    implementation "one.xis:xis-local-credentials"
+    implementation "one.xis:xis-local-credentials-sql"
     runtimeOnly "org.postgresql:postgresql:42.7.11"
 }
 ```
 
-Provide a `UserInfoService`. The smallest local setup can keep users in memory:
+Provide a `UserAccountService` for the account and roles. `xis-local-credentials` validates the password separately and
+`xis-local-credentials-sql` stores the password hash in SQL:
 
 ```java
 package example.security;
 
-import one.xis.auth.UserInfo;
-import one.xis.auth.UserInfoImpl;
-import one.xis.auth.UserInfoService;
+import one.xis.auth.UserAccount;
+import one.xis.auth.UserAccountImpl;
+import one.xis.auth.UserAccountService;
 import one.xis.context.Component;
 
 import java.util.Optional;
 import java.util.Set;
 
 @Component
-class DemoUserInfoService implements UserInfoService {
+class DemoUserAccountService implements UserAccountService<UserAccount> {
 
     @Override
-    public Optional<UserInfo> getUserInfo(String userId) {
+    public Optional<UserAccount> getUserAccount(String userId) {
         if (!"admin".equals(userId)) {
             return Optional.empty();
         }
-        var user = new UserInfoImpl();
+        var user = new UserAccountImpl();
         user.setUserId("admin");
-        user.setPassword("admin");
         user.setRoles(Set.of("ADMIN"));
         return Optional.of(user);
     }
 
     @Override
-    public boolean supportsLocalLogin() {
-        return true;
+    public void saveUserAccount(UserAccount userAccount) {
+        // Store account profile data here if the application needs it.
     }
 }
 ```

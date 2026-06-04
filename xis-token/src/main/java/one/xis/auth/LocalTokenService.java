@@ -26,10 +26,10 @@ public interface LocalTokenService {
     /**
      * Generates new API tokens for the specified user information.
      *
-     * @param userInfo the user information to encode into the tokens
+     * @param userAccount the user information to encode into the tokens
      * @return the newly generated API tokens
      */
-    ApiTokens newTokens(UserInfo userInfo);
+    ApiTokens newTokens(UserAccount userAccount);
 
     /**
      * Renews API tokens using the provided renew token.

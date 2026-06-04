@@ -1,7 +1,7 @@
 package one.xis.auth.ipdclient;
 
 import one.xis.auth.ApiTokens;
-import one.xis.auth.UserInfoImpl;
+import one.xis.auth.UserAccountImpl;
 
 public interface IDPClientService {
     String loginFormUrl(String idpId, String redirectUri);
@@ -10,7 +10,7 @@ public interface IDPClientService {
 
     ApiTokens fetchRenewedTokens(String idpId, String refreshToken);
 
-    UserInfoImpl fetchUserInfoFromIdp(String idpId, String accessToken);
+    UserAccountImpl fetchUserInfoFromIdp(String idpId, String accessToken);
 
-    UserInfoImpl verifyAndDecodeToken(String idpId, String accessToken);
+    UserAccountImpl verifyAndDecodeToken(String idpId, String accessToken);
 }

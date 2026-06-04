@@ -5,24 +5,14 @@ import one.xis.context.DefaultComponent;
 import java.util.Optional;
 
 @DefaultComponent
-public class UserServicePlaceholder implements UserInfoService<UserInfoImpl> {
+public class UserServicePlaceholder implements UserAccountService<UserAccountImpl> {
     @Override
-    public boolean supportsLocalLogin() {
-        return false;
-    }
-
-    @Override
-    public boolean validateCredentials(String userId, String password) {
-        return false;
-    }
-
-    @Override
-    public Optional<UserInfoImpl> getUserInfo(String userId) {
+    public Optional<UserAccountImpl> getUserAccount(String userId) {
         return Optional.empty();
     }
 
     @Override
-    public void saveUserInfo(UserInfoImpl userInfo) {
+    public void saveUserAccount(UserAccountImpl userAccount) {
 
     }
 }

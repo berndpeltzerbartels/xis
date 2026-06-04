@@ -1,6 +1,6 @@
 package test.page.annotations;
 
-import one.xis.auth.UserInfoImpl;
+import one.xis.auth.UserAccountImpl;
 import one.xis.context.IntegrationTestContext;
 import one.xis.gson.JsonMap;
 import one.xis.http.RequestContext;
@@ -17,10 +17,10 @@ class AnnotationIntegrationTest {
 
     @Test
     void welcomePageDefaultHtmlFileAndUserIdAreUsedByBrowserLifecycle() {
-        var userInfo = new UserInfoImpl();
-        userInfo.setUserId("annotation-user");
+        var userAccount = new UserAccountImpl();
+        userAccount.setUserId("annotation-user");
         var context = IntegrationTestContext.builder()
-                .withLoggedInUser(userInfo, "secret")
+                .withLoggedInUser(userAccount, "secret")
                 .withSingleton(AnnotationWelcomePage.class)
                 .build();
 

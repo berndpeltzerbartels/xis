@@ -1,8 +1,6 @@
 package one.xis.totp;
 
-import one.xis.auth.UserInfo;
-import one.xis.auth.UserInfoImpl;
-import one.xis.auth.UserInfoService;
+import one.xis.auth.LocalCredentialService;
 import one.xis.context.IntegrationTestContext;
 import one.xis.test.dom.Document;
 import one.xis.test.dom.Element;
@@ -27,7 +25,7 @@ class TOTPSetupPageIntegrationTest {
         System.setProperty("xis.totp.issuer", "XIS Setup Page Integration Test");
         context = IntegrationTestContext.builder()
                 .withPackage("one.xis.totp")
-                .withSingleton(Users.class)
+                .withSingleton(Credentials.class)
                 .withSingleton(Store.class)
                 .build();
     }
@@ -78,22 +76,19 @@ class TOTPSetupPageIntegrationTest {
                 .count();
     }
 
-    static class Users implements UserInfoService<UserInfo> {
+    static class Credentials implements LocalCredentialService {
         @Override
         public boolean validateCredentials(String userId, String password) {
             return Set.of("totpSetupAlice", "totpSetupBob").contains(userId) && "secret".equals(password);
         }
 
         @Override
-        public Optional<UserInfo> getUserInfo(String userId) {
-            var user = new UserInfoImpl();
-            user.setUserId(userId);
-            user.setRoles(Set.of("USER"));
-            return Optional.of(user);
+        public void setPassword(String userId, String password) {
         }
 
         @Override
-        public void saveUserInfo(UserInfo userInfo) {
+        public boolean needsRehash(String userId) {
+            return false;
         }
     }
 

@@ -16,7 +16,7 @@ class LocalTokenServiceImpl implements LocalTokenService {
     private final TokenService tokenService;
     private final LocalKeyProvider localKeyProvider;
     private final LocalUrlHolder localUrlHolder;
-    private final UserInfoService<UserInfo> userInfoService;
+    private final UserAccountService<UserAccount> userAccountService;
 
     private final AtomicInteger keyIdCounter = new AtomicInteger(-1);
 
@@ -27,22 +27,22 @@ class LocalTokenServiceImpl implements LocalTokenService {
 
     @Override
     public ApiTokens newTokens(String userId) {
-        UserInfo userInfo = userInfoService.getUserInfo(userId).orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
-        return newTokens(userInfo);
+        UserAccount userAccount = userAccountService.getUserAccount(userId).orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
+        return newTokens(userAccount);
     }
 
     @Override
-    public ApiTokens newTokens(UserInfo userInfo) {
+    public ApiTokens newTokens(UserAccount userAccount) {
         String keyId = nextKeyId();
         KeyPair keyPair = localKeyProvider.getKeyPair(keyId);
-        return tokenService.newTokens(userInfo, localUrlHolder.getUrl(), keyId, keyPair);
+        return tokenService.newTokens(userAccount, localUrlHolder.getUrl(), keyId, keyPair);
     }
 
     @Override
     public ApiTokens renewTokens(String renewToken) throws InvalidTokenException {
         RenewTokenClaims oldRenewTokenClaims = decodeRenewToken(renewToken);
-        if (UserServicePlaceholder.class.isInstance(userInfoService)) {
-            return newTokens(transientUserInfo(oldRenewTokenClaims.getUserId()));
+        if (UserServicePlaceholder.class.isInstance(userAccountService)) {
+            return newTokens(transientUserAccount(oldRenewTokenClaims.getUserId()));
         }
         return newTokens(oldRenewTokenClaims.getUserId());
     }
@@ -85,10 +85,10 @@ class LocalTokenServiceImpl implements LocalTokenService {
         return keyIds.get(index);
     }
 
-    private UserInfo transientUserInfo(String userId) {
-        var userInfo = new UserInfoImpl();
-        userInfo.setUserId(userId);
-        userInfo.setRoles(Set.of());
-        return userInfo;
+    private UserAccount transientUserAccount(String userId) {
+        var userAccount = new UserAccountImpl();
+        userAccount.setUserId(userId);
+        userAccount.setRoles(Set.of());
+        return userAccount;
     }
 }

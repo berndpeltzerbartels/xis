@@ -15,11 +15,9 @@ import static org.mockito.Mockito.when;
 class AccessForbiddenExceptionHandlerTest {
 
     @Test
-    void localLoginIsUsedWhenApplicationProvidesUserInfoService() {
+    void localLoginIsUsedWhenApplicationProvidesLocalCredentials() {
         var appContext = mock(AppContext.class);
-        var userInfoService = mock(UserInfoService.class);
-        when(userInfoService.supportsLocalLogin()).thenReturn(true);
-        when(appContext.getOptionalSingleton(UserInfoService.class)).thenReturn(Optional.of(userInfoService));
+        when(appContext.getOptionalSingleton(LocalCredentialService.class)).thenReturn(Optional.of(mock(LocalCredentialService.class)));
 
         var handler = new AccessForbiddenExceptionHandler(noExternalIdps(), appContext);
 
@@ -32,9 +30,7 @@ class AccessForbiddenExceptionHandlerTest {
     @Test
     void loginPageIsUsedWhenLocalLoginAndSingleExternalIdpExist() {
         var appContext = mock(AppContext.class);
-        var userInfoService = mock(UserInfoService.class);
-        when(userInfoService.supportsLocalLogin()).thenReturn(true);
-        when(appContext.getOptionalSingleton(UserInfoService.class)).thenReturn(Optional.of(userInfoService));
+        when(appContext.getOptionalSingleton(LocalCredentialService.class)).thenReturn(Optional.of(mock(LocalCredentialService.class)));
 
         var externalIdp = externalIdp("https://idp.example/login");
         var handler = new AccessForbiddenExceptionHandler(externalIdps(externalIdp), appContext);
@@ -48,9 +44,7 @@ class AccessForbiddenExceptionHandlerTest {
     @Test
     void loginPageIsUsedWhenLocalLoginAndMultipleExternalIdpsExist() {
         var appContext = mock(AppContext.class);
-        var userInfoService = mock(UserInfoService.class);
-        when(userInfoService.supportsLocalLogin()).thenReturn(true);
-        when(appContext.getOptionalSingleton(UserInfoService.class)).thenReturn(Optional.of(userInfoService));
+        when(appContext.getOptionalSingleton(LocalCredentialService.class)).thenReturn(Optional.of(mock(LocalCredentialService.class)));
 
         var firstIdp = externalIdp("https://first-idp.example/login");
         var secondIdp = externalIdp("https://second-idp.example/login");
@@ -63,9 +57,9 @@ class AccessForbiddenExceptionHandlerTest {
     }
 
     @Test
-    void singleExternalIdpIsUsedDirectlyWhenNoLocalUserInfoServiceExists() {
+    void singleExternalIdpIsUsedDirectlyWhenNoLocalCredentialsExists() {
         var appContext = mock(AppContext.class);
-        when(appContext.getOptionalSingleton(UserInfoService.class)).thenReturn(Optional.empty());
+        when(appContext.getOptionalSingleton(LocalCredentialService.class)).thenReturn(Optional.empty());
 
         var externalIdp = externalIdp("https://idp.example/login");
         var handler = new AccessForbiddenExceptionHandler(externalIdps(externalIdp), appContext);
@@ -77,11 +71,9 @@ class AccessForbiddenExceptionHandlerTest {
     }
 
     @Test
-    void singleExternalIdpIsUsedDirectlyWhenUserInfoServiceDoesNotSupportLocalLogin() {
+    void singleExternalIdpIsUsedDirectlyWhenOnlyUserAccountServiceExists() {
         var appContext = mock(AppContext.class);
-        var userInfoService = mock(UserInfoService.class);
-        when(userInfoService.supportsLocalLogin()).thenReturn(false);
-        when(appContext.getOptionalSingleton(UserInfoService.class)).thenReturn(Optional.of(userInfoService));
+        when(appContext.getOptionalSingleton(LocalCredentialService.class)).thenReturn(Optional.empty());
 
         var externalIdp = externalIdp("https://idp.example/login");
         var handler = new AccessForbiddenExceptionHandler(externalIdps(externalIdp), appContext);
@@ -95,7 +87,7 @@ class AccessForbiddenExceptionHandlerTest {
     @Test
     void loginPageIsUsedWhenMultipleExternalIdpsExist() {
         var appContext = mock(AppContext.class);
-        when(appContext.getOptionalSingleton(UserInfoService.class)).thenReturn(Optional.empty());
+        when(appContext.getOptionalSingleton(LocalCredentialService.class)).thenReturn(Optional.empty());
 
         var firstIdp = externalIdp("https://first-idp.example/login");
         var secondIdp = externalIdp("https://second-idp.example/login");

@@ -32,7 +32,8 @@ ext {
             "mariadb"        : "3.5.1",
             "h2"             : "2.2.224",
             "hikariCP"       : "5.1.0",
-            "zxing"          : "3.5.3"
+            "zxing"          : "3.5.3",
+            "password4j"     : "1.8.4"
     ]
 
     // Zentrale Gruppen- und Versionsdefinition

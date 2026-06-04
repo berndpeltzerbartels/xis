@@ -407,7 +407,7 @@ For protected pages, provide a logged-in user in the test context:
 ```java
 @BeforeEach
 void setUp() {
-    var user = new UserInfoImpl();
+    var user = new UserAccountImpl();
     user.setUserId("u-1");
     user.setName("Ada");
     user.setRoles(Set.of("USER", "ADMIN"));

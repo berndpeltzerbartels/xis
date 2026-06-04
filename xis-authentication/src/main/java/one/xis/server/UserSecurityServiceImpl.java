@@ -67,16 +67,16 @@ public class UserSecurityServiceImpl implements UserSecurityService {
 
     private void renewLocalTokens(TokenStatus tokenStatus, SecurityAttributes securityAttributes) {
         String userId = tokenService.extractUserId(tokenStatus.getAccessToken());
-        var userInfoService = appContext.getOptionalSingleton(UserInfoService.class)
-                .orElseThrow(() -> new IllegalStateException("UserInfoService not found in AppContext"));
-        var userInfo = (UserInfo) userInfoService.getUserInfo(userId).orElseThrow();
+        var userAccountService = appContext.getOptionalSingleton(UserAccountService.class)
+                .orElseThrow(() -> new IllegalStateException("UserAccountService not found in AppContext"));
+        var userAccount = (UserAccount) userAccountService.getUserAccount(userId).orElseThrow();
         var tokens = localTokenService.renewTokens(tokenStatus.getRenewToken());
         tokenStatus.setAccessToken(tokens.getAccessToken());
         tokenStatus.setRenewToken(tokens.getRenewToken());
         tokenStatus.setExpiresIn(tokens.getAccessTokenExpiresIn());
         tokenStatus.setRenewExpiresIn(tokens.getRenewTokenExpiresIn());
         securityAttributes.setUserId(userId);
-        securityAttributes.setRoles(userInfo.getRoles());
+        securityAttributes.setRoles(userAccount.getRoles());
     }
 
     private void renewExternalTokens(TokenStatus tokenStatus, SecurityAttributes securityAttributes, String issuer) {

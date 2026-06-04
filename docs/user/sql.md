@@ -199,17 +199,17 @@ record components are not writable. Use a normal class when XIS should write gen
 
 `@OptionalColumn` marks a property as mapped only when the column exists. It is mainly intended for reusable entities:
 for example a library class may expose roles as a JSON column while one application persists them in the same table and
-another loads them from a separate role table in its `UserInfoService`.
+another loads them from a separate role table in its `UserAccountService`.
 
 ```java
 @Entity("employees")
-class Employee extends UserInfoImpl {
+class Employee extends UserAccountImpl {
     long id;
     String password;
 }
 ```
 
-`UserInfoImpl` already marks its OpenID Connect profile fields as optional SQL columns. Its `roles` property is both
+`UserAccountImpl` already marks its OpenID Connect profile fields as optional SQL columns. Its `roles` property is both
 `@OptionalColumn` and `@JsonColumn`: if `employees.roles` exists, XIS reads and writes it as JSON. If the column is
 missing, generated `@Insert`, `@Update`, and `@Save` statements omit it and result mapping leaves the property unchanged.
 `userId` is not optional because it is the stable local user id used for authentication tokens. This is intentionally

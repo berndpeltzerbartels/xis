@@ -81,7 +81,7 @@ class IDPClientImpl implements IDPClient {
     }
 
     @Override
-    public UserInfo fetchUserInfo(@NonNull String accessToken) throws AuthenticationException {
+    public UserAccount fetchUserInfo(@NonNull String accessToken) throws AuthenticationException {
         try {
             var httpClient = restClient.getHttpClient();
             var headers = new HashMap<String, String>();
@@ -94,7 +94,7 @@ class IDPClientImpl implements IDPClient {
                 throw new AuthenticationException("Failed to fetch user info from IDP. Status: " + response.getStatusCode() + ", Body: " + response.getContent());
             }
 
-            return gson.fromJson(response.getContent(), UserInfoImpl.class);
+            return gson.fromJson(response.getContent(), UserAccountImpl.class);
         } catch (HttpClientException e) {
             throw new AuthenticationException("Failed to fetch user info from IDP", e);
         }

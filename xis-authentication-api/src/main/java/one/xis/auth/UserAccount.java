@@ -2,7 +2,7 @@ package one.xis.auth;
 
 import java.util.Set;
 
-public interface UserInfo {
+public interface UserAccount {
     String getUserId();
 
     Set<String> getRoles();
