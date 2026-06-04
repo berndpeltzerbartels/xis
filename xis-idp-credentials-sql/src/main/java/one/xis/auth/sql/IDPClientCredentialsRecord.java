@@ -1,15 +1,16 @@
-package one.xis.auth;
+package one.xis.auth.sql;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import one.xis.sql.Entity;
 
-import java.util.Set;
-
+@Entity("xis_idp_client_credentials")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class IDPClientInfoImpl implements IDPClientInfo {
+class IDPClientCredentialsRecord {
+
     private String clientId;
-    private Set<String> permittedRedirectUrls;
+    private String clientSecretHash;
 }

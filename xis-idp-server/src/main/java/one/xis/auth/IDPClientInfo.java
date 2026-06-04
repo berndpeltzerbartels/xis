@@ -6,8 +6,6 @@ public interface IDPClientInfo {
 
     String getClientId();
 
-    String getClientSecret();
-
     Set<String> getPermittedRedirectUrls();
 
 }

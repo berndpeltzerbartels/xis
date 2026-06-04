@@ -35,6 +35,9 @@ Local username/password login is separate from account mapping: `LocalCredential
 local form and validates credentials. `xis-local-credentials` provides the Password4j/Argon2id implementation;
 `xis-local-credentials-sql` provides the SQL password-hash repository. A single external IDP can redirect directly to the
 provider when no local credentials service is present.
+For XIS as an IDP server, user passwords and client secrets are also separate from `IDPService`: use
+`IDPCredentialService`. `xis-idp-credentials` provides the Password4j/Argon2id implementation; `xis-idp-credentials-sql`
+provides SQL hash storage for IDP user passwords and client secrets.
 Use `@Authenticated` for "authenticated user required, no named role required". Empty `@Roles` remains compatible but
 should not be shown in new docs or examples. Missing `@Authenticated`/`@Roles` means public access. Authenticated-only
 access is the preferred model for community-login applications such as Google sign-in without app-specific roles.
@@ -77,6 +80,8 @@ Only mention artifacts that end users should normally declare directly:
 - `xis-local-credentials`
 - `xis-local-credentials-sql`
 - `xis-idp-server`
+- `xis-idp-credentials`
+- `xis-idp-credentials-sql`
 - `xis-theme`
 - `xis-distributed`
 - `xis-sql`
