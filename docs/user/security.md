@@ -762,11 +762,18 @@ application-specific account model behind it.
 
 To implement a XIS IDP, add `xis-idp-server` and provide an `IDPService`. The service is responsible for:
 
-- validating user credentials
 - returning user information
 - returning access-token and ID-token claims
 - registering allowed clients through `IDPClientInfo`
-- validating client secrets
+
+Add `xis-idp-credentials` and one repository implementation to validate user passwords and client secrets. The SQL
+default is available through `xis-idp-credentials-sql`.
+
+```groovy
+implementation "one.xis:xis-idp-server:${xisVersion}"
+implementation "one.xis:xis-idp-credentials:${xisVersion}"
+implementation "one.xis:xis-idp-credentials-sql:${xisVersion}"
+```
 
 In a Spring application, the service can be a Spring bean. In a XIS Boot application, use a XIS component instead.
 
@@ -784,27 +791,19 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
 @Component
 class AppIDPService implements IDPService {
 
-    private final Map<String, String> passwords = Map.of("alice", "secret");
     private final Map<String, IDPClientInfo> clients = Map.of(
             "orders-app",
             new IDPClientInfoImpl(
                     "orders-app",
-                    "orders-secret",
                     Set.of("http://localhost:8080/xis/auth/callback/xis-idp")
             )
     );
-
-    @Override
-    public boolean validateCredentials(String username, String password) {
-        return Objects.equals(passwords.get(username), password);
-    }
 
     @Override
     public Optional<IDPUserInfo> userAccount(String userId) {
@@ -830,19 +829,13 @@ class AppIDPService implements IDPService {
     public Optional<IDPClientInfo> findClientInfo(String clientId) {
         return Optional.ofNullable(clients.get(clientId));
     }
-
-    @Override
-    public boolean validateClientSecret(String clientId, String clientSecret) {
-        return findClientInfo(clientId)
-                .map(client -> Objects.equals(client.getClientSecret(), clientSecret))
-                .orElse(false);
-    }
 }
 ```
 
 `IDPUserInfo` connects the authenticated user to the client application. `IDPClientInfo` registers a client id, client
-secret, and the exact callback URLs that may receive authorization codes. The consuming XIS application uses the matching
-client id, client secret, and callback URL in its `ExternalIDPConfig`.
+id and the exact callback URLs that may receive authorization codes. User passwords and client secrets are owned by
+`IDPCredentialService`; the default implementation stores Password4j Argon2id hashes through `IDPCredentialRepository`.
+The consuming XIS application uses the matching client id, client secret, and callback URL in its `ExternalIDPConfig`.
 
 `accessTokenClaims` and `idTokenClaims` only need to fill the application-specific claims, such as username, display
 name, email, and roles. XIS fills the technical token fields such as `sub`, `iss`, `iat`, `exp`, `nbf`, and `client_id`
@@ -850,6 +843,34 @@ when the token is issued.
 
 The IDP publishes the OpenID Connect discovery document, JWKS, login page, and token endpoint. Client applications then
 configure the XIS IDP like any other external OpenID Connect provider by using `ExternalIDPConfig` and the IDP base URL.
+
+To create or update credentials, inject `IDPCredentialService` and call `setUserPassword` or `setClientSecret`. Do this
+from an application setup flow, an admin UI, or a controlled bootstrap component. The service hashes the submitted secret
+before it reaches the repository.
+
+```java
+package example.idp;
+
+import one.xis.auth.IDPCredentialService;
+import one.xis.context.Component;
+import one.xis.context.Init;
+
+@Component
+class IDPBootstrapCredentials {
+
+    private final IDPCredentialService credentials;
+
+    IDPBootstrapCredentials(IDPCredentialService credentials) {
+        this.credentials = credentials;
+    }
+
+    @Init
+    void init() {
+        credentials.setUserPassword("alice", "secret");
+        credentials.setClientSecret("orders-app", "orders-secret");
+    }
+}
+```
 
 ## SSO In Distributed XIS Applications
 

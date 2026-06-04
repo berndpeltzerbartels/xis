@@ -25,6 +25,7 @@ class IDPAuthenticationServiceImplTest {
     private LocalUrlHolder localUrlHolder;
     private IDPCodeStore idpCodeStore;
     private LocalTokenService localTokenService;
+    private IDPCredentialService credentialService;
     private IDPAuthenticationServiceImpl service;
 
     @BeforeEach
@@ -33,16 +34,42 @@ class IDPAuthenticationServiceImplTest {
         localUrlHolder = mock(LocalUrlHolder.class);
         idpCodeStore = new IDPCodeStore();
         localTokenService = mock(LocalTokenService.class);
+        credentialService = mock(IDPCredentialService.class);
         service = new IDPAuthenticationServiceImpl(
                 idpService,
                 localUrlHolder,
                 idpCodeStore,
-                localTokenService
+                localTokenService,
+                credentialService
         );
     }
 
     @Test
-    void provideTokensUsesIDPServiceToValidateClientSecret() {
+    void loginUsesCredentialServiceToValidateUserPassword() throws InvalidCredentialsException {
+        var login = new IDPServerLogin();
+        login.setUsername("alice");
+        login.setPassword("secret");
+
+        when(credentialService.validateUserCredentials("alice", "secret")).thenReturn(true);
+
+        var code = service.login(login);
+
+        assertThat(idpCodeStore.getUserIdForCode(code)).isEqualTo("alice");
+    }
+
+    @Test
+    void loginRejectsInvalidUserPassword() {
+        var login = new IDPServerLogin();
+        login.setUsername("alice");
+        login.setPassword("wrong");
+
+        when(credentialService.validateUserCredentials("alice", "wrong")).thenReturn(false);
+
+        assertThrows(InvalidCredentialsException.class, () -> service.login(login));
+    }
+
+    @Test
+    void provideTokensUsesCredentialServiceToValidateClientSecret() {
         var request = new IDPTokenRequest();
         request.setClientId("orders-app");
         request.setClientSecret("orders-secret");
@@ -52,11 +79,10 @@ class IDPAuthenticationServiceImplTest {
         when(idpService.findClientInfo("orders-app")).thenReturn(Optional.of(
                 new IDPClientInfoImpl(
                         "orders-app",
-                        "orders-secret",
                         Set.of(REDIRECT_URI)
                 )
         ));
-        when(idpService.validateClientSecret("orders-app", "orders-secret")).thenReturn(false);
+        when(credentialService.validateClientSecret("orders-app", "orders-secret")).thenReturn(false);
 
         assertThrows(AuthenticationException.class, () -> service.provideTokens(request));
     }
@@ -78,9 +104,9 @@ class IDPAuthenticationServiceImplTest {
         when(localUrlHolder.getUrl()).thenReturn("https://idp.example");
         when(idpService.getConfig()).thenReturn(config);
         when(idpService.findClientInfo("tv-app")).thenReturn(Optional.of(
-                new IDPClientInfoImpl("tv-app", "tv-secret", Set.of(REDIRECT_URI))
+                new IDPClientInfoImpl("tv-app", Set.of(REDIRECT_URI))
         ));
-        when(idpService.validateClientSecret("tv-app", "tv-secret")).thenReturn(true);
+        when(credentialService.validateClientSecret("tv-app", "tv-secret")).thenReturn(true);
         when(idpService.userAccount("alice")).thenReturn(Optional.of(new IDPUserInfoImpl("alice", "tv-app")));
         when(idpService.accessTokenClaims("alice")).thenReturn(Optional.of(new AccessTokenClaims()));
         when(idpService.idTokenClaims("alice")).thenReturn(Optional.of(new IDTokenClaims()));
