@@ -5,7 +5,6 @@ import one.xis.utils.lang.ClassUtils;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -104,6 +103,7 @@ public class AppContextBuilderImpl implements AppContextBuilder {
     private Annotations annotations() {
         var annotations = new Annotations()
                 .addComponentClassAnnotation(Component.class)
+                .addComponentClassAnnotation(Service.class)
                 .addComponentClassAnnotation(DefaultComponent.class)
                 .addDependencyFieldAnnotation(Inject.class)
                 .addInitAnnotation(Init.class)
