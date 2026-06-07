@@ -5,7 +5,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import one.xis.http.HttpRequest;
 import one.xis.http.HttpResponse;
-import one.xis.server.SseService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -14,11 +13,11 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 class SpringSseEndpointTest {
@@ -40,14 +39,15 @@ class SpringSseEndpointTest {
         when(request.getHeader("Host")).thenReturn("app.example");
         when(request.isSecure()).thenReturn(true);
 
-        var sseService = mock(SseService.class);
+        var opened = new AtomicBoolean(false);
 
-        new SpringSseEndpoint(sseService).open("client-1", "user-1", request, response);
+        new SpringSseEndpoint().open(request, response, emitter -> opened.set(true), emitter -> {
+        });
 
         verify(servletResponse).setStatus(403);
         verify(response).setStatusCode(403);
         verify(servletRequest, never()).startAsync();
-        verifyNoInteractions(sseService);
+        org.assertj.core.api.Assertions.assertThat(opened).isFalse();
     }
 
     @Test
@@ -75,13 +75,13 @@ class SpringSseEndpointTest {
         when(request.getHeader(org.mockito.ArgumentMatchers.anyString()))
                 .thenAnswer(invocation -> headers.getOrDefault(invocation.getArgument(0), ""));
 
-        var sseService = mock(SseService.class);
+        var opened = new AtomicBoolean(false);
 
-        new SpringSseEndpoint(sseService).open("client-1", "user-1", request, response);
+        new SpringSseEndpoint().open(request, response, emitter -> opened.set(true), emitter -> {
+        });
 
         verify(servletRequest).startAsync();
         verify(servletResponse).setHeader("Access-Control-Allow-Origin", "https://app.example");
-        verify(sseService).registerEmitter(org.mockito.ArgumentMatchers.eq("client-1"),
-                org.mockito.ArgumentMatchers.eq("user-1"), org.mockito.ArgumentMatchers.any());
+        org.assertj.core.api.Assertions.assertThat(opened).isTrue();
     }
 }

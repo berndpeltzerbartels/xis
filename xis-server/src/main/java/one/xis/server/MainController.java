@@ -25,6 +25,7 @@ public class MainController {
 
     private final FrontendService frontendService;
     private final SseEndpoint sseEndpoint;
+    private final SseService sseService;
     private final UserSecurityService userSecurityService;
     private final ValidatorMessageResolver validatorMessageResolver;
 
@@ -53,7 +54,15 @@ public class MainController {
             return;
         }
         addTokenCookiesIfRenewed(response, tokenStatus);
-        sseEndpoint.open(clientId, userId, request, response);
+        String finalClientId = clientId;
+        sseEndpoint.open(request, response, emitter -> {
+            sseService.registerEmitter(finalClientId, userId, emitter);
+            emitter.send(": connected\n\n").whenComplete((ignored, throwable) -> {
+                if (throwable != null) {
+                    sseService.unregisterEmitter(finalClientId, emitter);
+                }
+            });
+        }, emitter -> sseService.unregisterEmitter(finalClientId, emitter));
     }
 
     private String resolveUserId(TokenStatus tokenStatus) {

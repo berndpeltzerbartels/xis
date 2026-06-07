@@ -3,27 +3,24 @@ package one.xis.spring;
 import jakarta.servlet.AsyncContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import one.xis.context.Component;
 import one.xis.http.HttpRequest;
 import one.xis.http.HttpResponse;
+import one.xis.http.SseEmitter;
 import one.xis.http.SseEndpoint;
-import one.xis.server.SseService;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.net.URI;
+import java.util.function.Consumer;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 class SpringSseEndpoint implements SseEndpoint {
 
-    private final SseService sseService;
-
     @Override
-    public void open(String clientId, String userId, HttpRequest request, HttpResponse response) {
+    public void open(HttpRequest request, HttpResponse response, Consumer<SseEmitter> onOpen, Consumer<SseEmitter> onClose) {
         ServletRequestAttributes attrs =
                 (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
         HttpServletRequest servletRequest = attrs.getRequest();
@@ -53,33 +50,28 @@ class SpringSseEndpoint implements SseEndpoint {
         asyncContext.setTimeout(0); // no timeout
 
         SpringSseEmitter emitter = new SpringSseEmitter(asyncContext);
-        sseService.registerEmitter(clientId, userId, emitter);
-        emitter.send(": connected\n\n").whenComplete((ignored, throwable) -> {
-            if (throwable != null) {
-                sseService.unregisterEmitter(clientId, emitter);
-            }
-        });
+        onOpen.accept(emitter);
         asyncContext.addListener(new jakarta.servlet.AsyncListener() {
             @Override
             public void onComplete(jakarta.servlet.AsyncEvent e) {
-                sseService.unregisterEmitter(clientId, emitter);
+                onClose.accept(emitter);
             }
 
             @Override
             public void onTimeout(jakarta.servlet.AsyncEvent e) {
                 emitter.close();
-                sseService.unregisterEmitter(clientId, emitter);
+                onClose.accept(emitter);
             }
 
             @Override
             public void onError(jakarta.servlet.AsyncEvent e) {
                 if (SpringSseEmitter.isClientDisconnect(e.getThrowable())) {
-                    log.debug("open: SSE connection closed by client for clientId={}", clientId);
+                    log.debug("open: SSE connection closed by client");
                 } else {
-                    log.error("open: SSE connection failed for clientId={}", clientId, e.getThrowable());
+                    log.error("open: SSE connection failed", e.getThrowable());
                 }
                 emitter.close();
-                sseService.unregisterEmitter(clientId, emitter);
+                onClose.accept(emitter);
             }
 
             @Override
@@ -87,7 +79,7 @@ class SpringSseEndpoint implements SseEndpoint {
             }
         });
 
-        log.debug("open: SSE connection opened for clientId={}", clientId);
+        log.debug("open: SSE connection opened");
         response.setStatusCode(200);
     }
 
