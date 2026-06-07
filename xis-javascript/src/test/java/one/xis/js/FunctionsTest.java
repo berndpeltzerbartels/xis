@@ -56,6 +56,14 @@ class FunctionsTest {
     }
 
     @Test
+    void randomStringUsesFixedLengthAlphanumericCharacters() throws ScriptException {
+        var result = JSUtil.execute(functions + "randomString()").asString();
+
+        assertThat(result).hasSize(24);
+        assertThat(result).matches("[A-Za-z0-9]+");
+    }
+
+    @Test
     void handleErrorDisplaysHttpObjectWithoutLosingOriginalError() throws ScriptException {
         var script = functions + """
                 var shown = [];

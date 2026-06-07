@@ -205,8 +205,30 @@ function stripQuery(url) {
 }
 
 
-function randomString() {
-    return Math.random().toString(36).slice(2);
+function randomString(length = 24) {
+    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+        const result = [];
+        const maxAcceptedByte = Math.floor(256 / alphabet.length) * alphabet.length;
+        while (result.length < length) {
+            const bytes = new Uint8Array(length - result.length);
+            crypto.getRandomValues(bytes);
+            for (const byte of bytes) {
+                if (byte < maxAcceptedByte) {
+                    result.push(alphabet.charAt(byte % alphabet.length));
+                    if (result.length === length) {
+                        break;
+                    }
+                }
+            }
+        }
+        return result.join('');
+    }
+    var value = '';
+    while (value.length < length) {
+        value += Math.random().toString(36).slice(2);
+    }
+    return value.slice(0, length);
 }
 
 function timeZone() {
