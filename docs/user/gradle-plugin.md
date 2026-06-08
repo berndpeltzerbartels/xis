@@ -240,6 +240,10 @@ When the project declares `xis-boot`, the plugin adds:
 The task creates an executable XIS Boot jar with the XIS Boot runner as main class. Spring Boot applications normally use
 the Spring Boot plugin tasks instead.
 
+For the advanced HTTP-controller-only runtime, the same task is available when the project declares
+`xis-http-controller` or `xis-http-controller-native`. In that case the generated main class uses the HTTP-controller
+runner instead of the XIS Boot page/frontend runner.
+
 The jar is written to `build/libs` and uses Gradle's normal archive name:
 
 ```text
@@ -252,8 +256,9 @@ For example:
 java -jar build/libs/my-app-1.0-SNAPSHOT.jar
 ```
 
-`xisJar` requires exactly one application class annotated with `@XISBootApplication`. The XIS annotation processor
-uses that class to generate the executable entry point.
+`xisJar` requires exactly one application class annotated with `@XISBootApplication` for XIS Boot projects, or exactly
+one `@XISHttpApplication` class for HTTP-controller-only projects. The XIS annotation processor uses that class to
+generate the executable entry point.
 
 When the project also applies the Groovy or Kotlin plugin, the `@XISBootApplication` class may be written in that
 language. The XIS plugin packages Java, Groovy, or Kotlin classes, templates, resources, and the generated runner into
@@ -261,15 +266,15 @@ the XIS jar.
 
 ## `xisRun`
 
-When the project declares `xis-boot`, the plugin also adds:
+When the project declares `xis-boot`, `xis-http-controller`, or `xis-http-controller-native`, the plugin also adds:
 
 ```bash
 ./gradlew xisRun
 ```
 
-`xisRun` always depends on `xisJar` and starts the jar created by that task. It runs `one.xis.boot.Runner` with
-the XIS jar on the classpath, so Gradle and IDEs can treat it like a normal Java run task. You do not need to
-configure the jar dependency yourself.
+`xisRun` always depends on `xisJar` and starts the jar created by that task. It runs the generated XIS runner with the
+XIS jar on the classpath, so Gradle and IDEs can treat it like a normal Java run task. You do not need to configure the
+jar dependency yourself.
 
 To run on a specific port, pass the port option:
 

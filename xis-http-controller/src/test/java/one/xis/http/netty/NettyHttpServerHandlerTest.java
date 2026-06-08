@@ -1,4 +1,4 @@
-package one.xis.boot.netty;
+package one.xis.http.netty;
 
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.buffer.Unpooled;
@@ -15,7 +15,6 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import one.xis.UploadConfiguration;
 import one.xis.http.ContentType;
 import one.xis.http.RestControllerService;
-import one.xis.server.FrontendService;
 import one.xis.server.LocalUrlHolder;
 import org.junit.jupiter.api.Test;
 
@@ -43,7 +42,7 @@ class NettyHttpServerHandlerTest {
         }).when(restControllerService).doInvocation(any(), any());
 
         var handler = new NettyHttpServerHandler(
-                mock(FrontendService.class),
+                mock(one.xis.http.HttpFrontendHandler.class),
                 restControllerService,
                 mock(NettyResourceHandler.class),
                 mock(LocalUrlHolder.class),
@@ -63,7 +62,7 @@ class NettyHttpServerHandlerTest {
     @Test
     void internalServerErrorFallbackUsesJsonErrorFormat() throws Exception {
         var handler = new NettyHttpServerHandler(
-                mock(FrontendService.class),
+                mock(one.xis.http.HttpFrontendHandler.class),
                 mock(RestControllerService.class),
                 mock(NettyResourceHandler.class),
                 mock(LocalUrlHolder.class),
@@ -82,7 +81,7 @@ class NettyHttpServerHandlerTest {
     @Test
     void oversizedAggregatedRequestIsRejectedWithPayloadTooLarge() {
         var handler = new NettyHttpServerHandler(
-                mock(FrontendService.class),
+                mock(one.xis.http.HttpFrontendHandler.class),
                 mock(RestControllerService.class),
                 mock(NettyResourceHandler.class),
                 mock(LocalUrlHolder.class),

@@ -117,29 +117,43 @@ public class XISPlugin implements Plugin<Project> {
 
     private void configureFatJarCreation(Project project) {
         project.afterEvaluate(p -> {
-            boolean usesXisBoot = project.getConfigurations()
-                    .getByName("implementation")
-                    .getAllDependencies()
-                    .stream()
-                    .anyMatch(dep -> dep.getGroup() != null && dep.getGroup().equals("one.xis") && dep.getName().equals("xis-boot"));
+            boolean usesXisBoot = usesXisImplementation(project, "xis-boot");
+            boolean usesXisHttpController = usesXisImplementation(project, "xis-http-controller")
+                    || usesXisImplementation(project, "xis-http-controller-native");
 
-            if (usesXisBoot) {
+            if (usesXisBoot || usesXisHttpController) {
+                String mainClass = usesXisBoot ? "one.xis.boot.Runner" : "one.xis.http.Runner";
+                String runnerClassPath = usesXisBoot ? "one/xis/boot/Runner.class" : "one/xis/http/Runner.class";
+                String errorMessage = usesXisBoot
+                        ? "xisJar requires exactly one application class annotated with @XISBootApplication. "
+                        + "The annotation processor generates one.xis.boot.Runner from that class."
+                        : "xisJar requires exactly one application class annotated with @XISHttpApplication. "
+                        + "The annotation processor generates one.xis.http.Runner from that class.";
                 var xisJar = project.getTasks().register("xisJar", XISBootJarTask.class, jar -> {
-                    jar.getManifest().getAttributes().put("Main-Class", "one.xis.boot.Runner");
+                    jar.useRunner(mainClass, runnerClassPath, errorMessage);
                     jar.configure(project);
                     jar.dependsOn(project.getTasks().getByName("classes"));
                 });
                 project.getTasks().register("xisRun", XISBootRunTask.class, run -> {
                     run.dependsOn(xisJar);
+                    run.useMainClass(mainClass);
                     run.getJarFile().set(xisJar.flatMap(AbstractArchiveTask::getArchiveFile));
                 });
             }
         });
     }
 
+    private boolean usesXisImplementation(Project project, String moduleName) {
+        return project.getConfigurations()
+                .getByName("implementation")
+                .getAllDependencies()
+                .stream()
+                .anyMatch(dep -> dep.getGroup() != null && dep.getGroup().equals("one.xis") && dep.getName().equals(moduleName));
+    }
+
     private void configureNativeSupport(Project project) {
         project.afterEvaluate(p -> {
-            if (!usesXisModule(project, "xis-boot-native")) {
+            if (!usesXisModule(project, "xis-boot-native") && !usesXisModule(project, "xis-http-controller-native")) {
                 return;
             }
             configureNativeClassCatalogGeneration(project);
@@ -209,6 +223,7 @@ public class XISPlugin implements Plugin<Project> {
                 .toList();
         var generateApplicationComponents = project.getTasks().register("xisGenerateApplicationComponents",
                 XISGenerateApplicationComponentCatalogTask.class, task -> {
+                    task.getNativeRuntimePackage().set(nativeRuntimePackageFor(project));
                     task.getRegistryIndexFiles().from(generateFrameworkComponents.flatMap(XISGenerateFrameworkComponentsTask::getRegistryIndexOutputDirectory));
                     task.dependsOn(applicationComponentGeneratorTasks);
                     task.getRegistryIndexFiles().from(project.getConfigurations()
@@ -227,11 +242,24 @@ public class XISPlugin implements Plugin<Project> {
 
         var generatedNativeRunnerDir = project.getLayout().getBuildDirectory()
                 .dir("generated/sources/xisNativeRunner/java/main");
+        String nativeRuntimePackage = usesXisModule(project, "xis-http-controller-native")
+                ? "one.xis.http.nativeimage"
+                : "one.xis.boot.nativeimage";
+        String applicationAnnotation = usesXisModule(project, "xis-http-controller-native")
+                ? "XISHttpApplication"
+                : "XISBootApplication";
+        String fullyQualifiedApplicationAnnotation = usesXisModule(project, "xis-http-controller-native")
+                ? "one.xis.http.XISHttpApplication"
+                : "one.xis.boot.XISBootApplication";
+
         var generateNativeRunner = project.getTasks().register("xisGenerateNativeRunner",
                 XISGenerateNativeRunnerTask.class, task -> {
                     task.getSourceFiles().from(project.fileTree("src/main/java", tree -> tree.include("**/*.java")));
                     task.getSourceFiles().from(project.fileTree("src/main/kotlin", tree -> tree.include("**/*.kt")));
                     task.getOutputDirectory().set(generatedNativeRunnerDir);
+                    task.getNativeRuntimePackage().set(nativeRuntimePackage);
+                    task.getApplicationAnnotationName().set(applicationAnnotation);
+                    task.getFullyQualifiedApplicationAnnotationName().set(fullyQualifiedApplicationAnnotation);
                 });
 
         main.getJava().srcDir(generatedApplicationComponentsDir);
@@ -331,7 +359,7 @@ public class XISPlugin implements Plugin<Project> {
             task.getNativeClasspath().from(main.getOutput());
             task.getNativeClasspath().from(project.getConfigurations().getByName("runtimeClasspath"));
             task.getGraalVmHome().set(graalVmHome);
-            task.getMainClass().set("one.xis.boot.nativeimage.NativeRunner");
+            task.getMainClass().set(nativeMainClass(project));
             task.getExecutableFile().set(executable);
             task.getReflectionConfig().set(project.getLayout().getBuildDirectory()
                     .file("generated/resources/xisNativeReflectionConfig/main/META-INF/native-image/one.xis/"
@@ -351,6 +379,18 @@ public class XISPlugin implements Plugin<Project> {
             task.getExecutableFile().set(executable);
             task.getPort().convention(8098);
         });
+    }
+
+    private String nativeMainClass(Project project) {
+        return usesXisModule(project, "xis-http-controller-native")
+                ? "one.xis.http.nativeimage.NativeRunner"
+                : "one.xis.boot.nativeimage.NativeRunner";
+    }
+
+    private String nativeRuntimePackageFor(Project project) {
+        return usesXisModule(project, "xis-http-controller-native")
+                ? "one.xis.http.nativeimage"
+                : "one.xis.boot.nativeimage";
     }
 
     private boolean usesXisModule(Project project, String moduleName) {

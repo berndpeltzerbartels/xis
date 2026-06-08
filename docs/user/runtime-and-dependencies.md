@@ -49,7 +49,7 @@ dependencies {
 }
 ```
 
-`build.gradle` for standalone HTTP endpoints on XIS Boot:
+`build.gradle` for the advanced case of a standalone HTTP-controller-only application:
 
 ```groovy
 plugins {
@@ -62,7 +62,7 @@ repositories {
 }
 
 dependencies {
-    implementation "one.xis:xis-boot-http"
+    implementation "one.xis:xis-http-controller"
 }
 ```
 
@@ -74,14 +74,18 @@ Use `xis-spring` when the application already uses Spring Boot or needs Spring i
 Use `xis-boot` when you want a small standalone runtime with XIS dependency injection, properties, package scanning, and
 an embedded HTTP runtime.
 
-**XIS pages, frontlets, modals, forms, and actions do not need `xis-boot-http`.** XIS already provides the browser/server
-transport for normal XIS applications. Use `xis-boot-http` only when you want a standalone XIS Boot application to expose
-plain HTTP endpoints for external non-XIS clients, webhooks, scripts, or integration partners.
+**XIS pages, frontlets, modals, forms, and actions do not need plain HTTP controllers.** XIS already provides the
+browser/server transport for normal XIS applications. Use `xis-http-controller` as an application runtime only for the
+special case where you deliberately do not use the XIS page/frontend layer and want a standalone application made of
+plain HTTP endpoints and your own static resources.
 
-`xis-boot-http` brings `xis-boot` and `xis-http-controller` into the application API. It provides
-`one.xis.http.Controller`, `@Get`, `@Post`, and the other HTTP controller annotations through one dependency. It is
-intentionally named HTTP rather than REST because XIS does not try to define or enforce the full REST architectural
-style.
+`xis-http-controller` provides `one.xis.http.Controller`, `@Get`, `@Post`, the other HTTP controller annotations, SSE,
+static public resources, and the embedded Netty HTTP runtime. It is intentionally named HTTP rather than REST because XIS
+does not try to define or enforce the full REST architectural style.
+
+If this HTTP-controller-only special case should be built as a GraalVM native executable, add
+`xis-http-controller-native` instead of `xis-http-controller`. This opt-in enables the native build tasks without making
+native class catalogs part of ordinary HTTP-controller applications.
 
 Use `xis-boot-native` when you want the XIS Boot programming model and want to build a GraalVM native executable for
 small containers, fast startup, and cloud-native deployment. Continue with [Cloud Native And Native Images](cloud-native.md)

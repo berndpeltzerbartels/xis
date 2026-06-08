@@ -27,6 +27,7 @@ and [Security](security.md) for complete examples.
 | `@OwnedBy` | Runs an application-defined ownership guard for a submitted DTO. See [Security](security.md#ownership-checks). |
 | `@RefreshOnUpdateEvents` | Refreshes a page or frontlet when one of the configured update events is fired. See [Events](events.md). |
 | `@XISBootApplication` | Marks the application entry point for standalone XIS Boot applications. The main reason is build-time generation: the annotation processor uses this class to generate the `one.xis.boot.Runner` entry point needed by the Gradle plugin's `xisJar` task. |
+| `@XISHttpApplication` | Marks the application entry point for the advanced HTTP-controller-only runtime. Use it only for applications that deliberately skip the XIS page/frontend layer; the annotation processor uses this class to generate the `one.xis.http.Runner` entry point for `xisJar`. |
 | `@Component`, `@Service` | Registers ordinary application services in the XIS context. |
 | `@DefaultComponent` | Registers a replaceable default component, mostly useful for libraries and framework extensions. |
 

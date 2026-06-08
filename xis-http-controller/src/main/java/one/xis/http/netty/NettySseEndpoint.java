@@ -1,4 +1,4 @@
-package one.xis.boot.netty;
+package one.xis.http.netty;
 
 import lombok.extern.slf4j.Slf4j;
 import one.xis.context.Component;

@@ -24,6 +24,7 @@ dependencies {
     api project(":xis-authentication-api")
     compileOnly(project(":xis-gson"))
     compileOnly(project(":xis-adapter-spi"))
+    compileOnly(project(":xis-http-controller"))
 
     // Gson dependency
     implementation "com.google.code.gson:gson:$gsonVersion"

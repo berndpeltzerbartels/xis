@@ -57,6 +57,7 @@ dependencies {
     testImplementation "org.mockito:mockito-core:$mockitoVersion"
     testImplementation("org.assertj:assertj-core:$assertjVersion")
     testImplementation(project(":xis-adapter-spi"))
+    testImplementation(project(":xis-http-controller"))
 }
 
 test {

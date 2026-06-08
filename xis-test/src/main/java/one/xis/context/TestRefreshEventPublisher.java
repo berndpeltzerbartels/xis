@@ -9,6 +9,7 @@ import one.xis.RefreshEventPublisher;
  * <p>Instead of opening a real network transport, this publisher triggers the
  * active JS-side push simulation directly.
  */
+@DefaultComponent
 public class TestRefreshEventPublisher implements RefreshEventPublisher, PushEventSimulatorAware {
 
     private final java.util.List<PushEventSimulator> simulators = new java.util.ArrayList<>();

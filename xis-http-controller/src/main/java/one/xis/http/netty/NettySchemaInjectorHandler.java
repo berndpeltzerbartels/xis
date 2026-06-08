@@ -1,4 +1,4 @@
-package one.xis.boot.netty;
+package one.xis.http.netty;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;

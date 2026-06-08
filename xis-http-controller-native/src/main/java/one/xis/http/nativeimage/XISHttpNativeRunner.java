@@ -1,29 +1,29 @@
-package one.xis.boot.nativeimage;
+package one.xis.http.nativeimage;
 
 import one.xis.context.AppContext;
 import one.xis.http.netty.NettyServer;
 
 /**
- * Starts a XIS Boot application from generated native component catalogs.
+ * Starts a XIS HTTP Controller application from generated native component catalogs.
  * <p>
  * This runner is intended for native images and other closed-world runtimes.
  * It avoids application package scanning and uses generated direct class
  * references instead.
  */
-public final class XISBootNativeRunner {
+public final class XISHttpNativeRunner {
 
-    private XISBootNativeRunner() {
+    private XISHttpNativeRunner() {
     }
 
     public static void run(Class<?> applicationClass, String[] args, NativeComponentRegistry... applicationRegistries) {
         var builder = new NativeAppContextBuilder()
-                .withRegistry(new XisGeneratedBootFrameworkComponents());
+                .withRegistry(new XisGeneratedHttpFrameworkComponents());
         builder.withRegistries(applicationRegistries);
         startServer(builder.build(), args);
     }
 
     /**
-     * Creates a context that contains only the generated XIS Boot framework
+     * Creates a context that contains only the generated XIS HTTP Controller framework
      * components.
      * <p>
      * This method is mainly useful while bootstrapping native support. A real
@@ -32,7 +32,7 @@ public final class XISBootNativeRunner {
      */
     public static void runFrameworkOnly(String[] args) {
         var context = new NativeAppContextBuilder()
-                .withRegistry(new XisGeneratedBootFrameworkComponents())
+                .withRegistry(new XisGeneratedHttpFrameworkComponents())
                 .build();
         startServer(context, args);
     }

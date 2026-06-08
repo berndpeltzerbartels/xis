@@ -1,4 +1,4 @@
-package one.xis.boot.netty;
+package one.xis.http.netty;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
@@ -13,6 +13,7 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.HttpServerExpectContinueHandler;
 import io.netty.handler.timeout.IdleStateHandler;
+import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.DefaultThreadFactory;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ public class NettyServer {
     private static final int READER_IDLE_SECONDS = 30; // close idle keep-alive connections
     private static final int WRITER_IDLE_SECONDS = 0;
     private static final int ALL_IDLE_SECONDS = 0;
+    private static final long SHUTDOWN_TIMEOUT_SECONDS = 5;
 
     @Inject
     private final NettyHttpServerHandler httpServerHandler;
@@ -40,13 +42,16 @@ public class NettyServer {
     private int port = 8080;
 
     public void start() throws InterruptedException {
+        preloadNettyShutdownClasses();
+
         var bossFactory = new DefaultThreadFactory("netty-boss", false);
         var workerFactory = new DefaultThreadFactory("netty-worker", false);
 
         var bossGroup = new NioEventLoopGroup(1, bossFactory);
         var workerGroup = new NioEventLoopGroup(0, workerFactory);
 
-        addShutdownHook(bossGroup, workerGroup);
+        var serverChannelRef = new java.util.concurrent.atomic.AtomicReference<io.netty.channel.Channel>();
+        addShutdownHook(serverChannelRef, bossGroup, workerGroup);
 
         try {
             ServerBootstrap bootstrap = new ServerBootstrap()
@@ -62,12 +67,12 @@ public class NettyServer {
                     .childHandler(newChannelInitializer());
 
             ChannelFuture bindFuture = bootstrap.bind(port).sync();
+            serverChannelRef.set(bindFuture.channel());
             System.out.println("Server started on port " + port);
 
             bindFuture.channel().closeFuture().sync();
         } finally {
-            workerGroup.shutdownGracefully(0, 5, TimeUnit.SECONDS);
-            bossGroup.shutdownGracefully(0, 5, TimeUnit.SECONDS);
+            shutdownNetty(serverChannelRef.get(), bossGroup, workerGroup);
         }
     }
 
@@ -98,11 +103,46 @@ public class NettyServer {
         return configured > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) configured;
     }
 
-    private void addShutdownHook(NioEventLoopGroup bossGroup, NioEventLoopGroup workerGroup) {
+    private void preloadNettyShutdownClasses() {
+        // Netty loads DefaultPromise listener helpers lazily during shutdown.
+        // When a running executable jar is replaced by a rebuild, late class loading can fail.
+        for (var className : new String[]{
+                DefaultPromise.class.getName() + "$1",
+                DefaultPromise.class.getName() + "$2",
+                DefaultPromise.class.getName() + "$3",
+                DefaultPromise.class.getName() + "$4"
+        }) {
+            try {
+                Class.forName(className, true, DefaultPromise.class.getClassLoader());
+            } catch (ClassNotFoundException exception) {
+                throw new IllegalStateException("Required Netty shutdown class is missing: " + className, exception);
+            }
+        }
+    }
+
+    private void addShutdownHook(java.util.concurrent.atomic.AtomicReference<io.netty.channel.Channel> serverChannelRef,
+                                 NioEventLoopGroup bossGroup,
+                                 NioEventLoopGroup workerGroup) {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println("Shutting down server...");
-            workerGroup.shutdownGracefully();
-            bossGroup.shutdownGracefully();
+            shutdownNetty(serverChannelRef.get(), bossGroup, workerGroup);
         }, "netty-shutdown"));
+    }
+
+    private void shutdownNetty(io.netty.channel.Channel serverChannel,
+                               NioEventLoopGroup bossGroup,
+                               NioEventLoopGroup workerGroup) {
+        try {
+            if (serverChannel != null && serverChannel.isOpen()) {
+                serverChannel.close().awaitUninterruptibly(SHUTDOWN_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            }
+            workerGroup.shutdownGracefully(0, SHUTDOWN_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+                    .awaitUninterruptibly(SHUTDOWN_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            bossGroup.shutdownGracefully(0, SHUTDOWN_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+                    .awaitUninterruptibly(SHUTDOWN_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        } catch (Throwable throwable) {
+            System.err.println("Netty shutdown failed: " + throwable.getMessage());
+            throwable.printStackTrace(System.err);
+        }
     }
 }

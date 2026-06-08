@@ -1,4 +1,4 @@
-package one.xis.boot.netty;
+package one.xis.http.netty;
 
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;

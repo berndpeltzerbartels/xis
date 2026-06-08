@@ -1,13 +1,14 @@
-package one.xis.server;
+package one.xis.http;
 
 import lombok.RequiredArgsConstructor;
+import one.xis.context.DefaultComponent;
 import one.xis.context.EventEmitter;
-import one.xis.context.Component;
+import one.xis.server.LocalUrlAssignedEvent;
+import one.xis.server.LocalUrlHolder;
 
-
-@Component
+@DefaultComponent
 @RequiredArgsConstructor
-class LocalUrlHolderImpl implements LocalUrlHolder {
+public class DefaultLocalUrlHolder implements LocalUrlHolder {
 
     private final EventEmitter eventEmitter;
     private String localUrl;
@@ -35,5 +36,4 @@ class LocalUrlHolderImpl implements LocalUrlHolder {
     public boolean isSecure() {
         return localUrl != null && localUrl.startsWith("https://");
     }
-
 }

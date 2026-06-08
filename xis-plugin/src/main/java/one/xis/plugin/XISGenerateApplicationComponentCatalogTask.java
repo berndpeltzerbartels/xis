@@ -4,6 +4,8 @@ import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.DirectoryProperty;
+import org.gradle.api.provider.Property;
+import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.PathSensitive;
@@ -26,6 +28,11 @@ public class XISGenerateApplicationComponentCatalogTask extends DefaultTask {
 
     private final ConfigurableFileCollection registryIndexFiles = getProject().files();
     private final DirectoryProperty outputDirectory = getProject().getObjects().directoryProperty();
+    private final Property<String> nativeRuntimePackage = getProject().getObjects().property(String.class);
+
+    public XISGenerateApplicationComponentCatalogTask() {
+        nativeRuntimePackage.convention("one.xis.boot.nativeimage");
+    }
 
     @InputFiles
     @PathSensitive(PathSensitivity.RELATIVE)
@@ -36,6 +43,11 @@ public class XISGenerateApplicationComponentCatalogTask extends DefaultTask {
     @OutputDirectory
     public DirectoryProperty getOutputDirectory() {
         return outputDirectory;
+    }
+
+    @Input
+    public Property<String> getNativeRuntimePackage() {
+        return nativeRuntimePackage;
     }
 
     @TaskAction
@@ -120,11 +132,11 @@ public class XISGenerateApplicationComponentCatalogTask extends DefaultTask {
         }
     }
 
-    private static String source(Collection<String> registryClassNames) {
+    private String source(Collection<String> registryClassNames) {
         return """
                 package one.xis.generated;
 
-                import one.xis.boot.nativeimage.NativeComponentRegistry;
+                import %s.NativeComponentRegistry;
 
                 import java.util.Collection;
                 import java.util.List;
@@ -145,7 +157,7 @@ public class XISGenerateApplicationComponentCatalogTask extends DefaultTask {
                                 .toList();
                     }
                 }
-                """.formatted(registryClassNames.stream()
+                """.formatted(nativeRuntimePackage.get(), registryClassNames.stream()
                 .sorted()
                 .map(className -> "            new " + className + "().componentClasses()")
                 .collect(Collectors.joining(",\n")));

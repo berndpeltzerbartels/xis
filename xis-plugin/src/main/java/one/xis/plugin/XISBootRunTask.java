@@ -17,13 +17,17 @@ public abstract class XISBootRunTask extends JavaExec {
 
     public XISBootRunTask() {
         setGroup("xis");
-        setDescription("Builds and starts the XIS Boot jar.");
+        setDescription("Builds and starts the XIS jar.");
         getMainClass().set("one.xis.boot.Runner");
     }
 
     @InputFile
     @PathSensitive(PathSensitivity.NONE)
     public abstract RegularFileProperty getJarFile();
+
+    public void useMainClass(String mainClass) {
+        getMainClass().set(mainClass);
+    }
 
     @Option(option = "port", description = "Server port passed as first argument to XIS Boot.")
     public void setPort(String port) {

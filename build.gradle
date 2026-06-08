@@ -147,6 +147,39 @@ project(":xis-boot-native") {
     }
 }
 
+project(":xis-http-controller-native") {
+    def generatedHttpFrameworkCatalogDir = layout.buildDirectory.dir("generated/sources/xisHttpFrameworkCatalog/java/main")
+    def generateHttpFrameworkCatalog = tasks.register("xisGenerateHttpFrameworkCatalog", one.xis.gradle.GenerateBootFrameworkCatalogTask) {
+        outputDirectory.set(generatedHttpFrameworkCatalogDir)
+        nativeRuntimePackage.set("one.xis.http.nativeimage")
+        generatedClassName.set("XisGeneratedHttpFrameworkComponents")
+    }
+
+    sourceSets.main.java.srcDir(generatedHttpFrameworkCatalogDir)
+    tasks.matching { it.name == "sourcesJar" }.configureEach {
+        dependsOn generateHttpFrameworkCatalog
+    }
+    afterEvaluate {
+        def httpFrameworkModules = configurations.runtimeClasspath.allDependencies
+                .withType(org.gradle.api.artifacts.ProjectDependency)
+                .collect { it.dependencyProject }
+                .findAll { it.plugins.hasPlugin("java") }
+                .unique()
+                .sort { left, right -> left.path <=> right.path }
+        if (!httpFrameworkModules.contains(project)) {
+            httpFrameworkModules << project
+        }
+        def httpFrameworkGeneratorTasks = httpFrameworkModules.collect { it.tasks.named("xisGenerateFrameworkComponents") }
+        generateHttpFrameworkCatalog.configure {
+            registrySourceRoots.from(httpFrameworkGeneratorTasks.collect { it.flatMap { task -> task.outputDirectory } })
+        }
+        tasks.named("compileJava") {
+            dependsOn generateHttpFrameworkCatalog
+            dependsOn httpFrameworkGeneratorTasks
+        }
+    }
+}
+
 subprojects {
     afterEvaluate {
         def implementationConfiguration = configurations.findByName("implementation")
@@ -159,7 +192,13 @@ subprojects {
             }
             return dependency.group == "one.xis" && dependency.name == "xis-boot-native"
         }
-        if (!usesXisBootNative) {
+        def usesXisHttpControllerNative = implementationConfiguration.allDependencies.stream().anyMatch { dependency ->
+            if (dependency instanceof org.gradle.api.artifacts.ProjectDependency) {
+                return dependency.dependencyProject.path == ":xis-http-controller-native"
+            }
+            return dependency.group == "one.xis" && dependency.name == "xis-http-controller-native"
+        }
+        if (!usesXisBootNative && !usesXisHttpControllerNative) {
             return
         }
 
@@ -171,6 +210,7 @@ subprojects {
                 .unique()
         def applicationComponentGeneratorTasks = applicationComponentModules.collect { it.tasks.named("xisGenerateFrameworkComponents") }
         def generateApplicationComponents = tasks.register("xisGenerateApplicationComponents", one.xis.gradle.GenerateApplicationComponentCatalogTask) {
+            nativeRuntimePackage.set(usesXisHttpControllerNative ? "one.xis.http.nativeimage" : "one.xis.boot.nativeimage")
             registryIndexFiles.from(tasks.named("xisGenerateFrameworkComponents").flatMap { task -> task.registryIndexOutputDirectory })
             registryIndexFiles.from(applicationComponentGeneratorTasks.collect { it.flatMap { task -> task.registryIndexOutputDirectory } })
             registryIndexFiles.from(configurations.compileClasspath)
@@ -178,11 +218,19 @@ subprojects {
         }
 
         def generatedNativeRunnerDir = layout.buildDirectory.dir("generated/sources/xisNativeRunner/java/main")
+        def selectedNativeRuntimePackage = usesXisHttpControllerNative ? "one.xis.http.nativeimage" : "one.xis.boot.nativeimage"
+        def selectedApplicationAnnotationName = usesXisHttpControllerNative ? "XISHttpApplication" : "XISBootApplication"
+        def selectedFullyQualifiedApplicationAnnotationName = usesXisHttpControllerNative
+                ? "one.xis.http.XISHttpApplication"
+                : "one.xis.boot.XISBootApplication"
         def generateNativeRunner = tasks.register("xisGenerateNativeRunner", one.xis.gradle.GenerateNativeRunnerTask) {
             sourceFiles.from(fileTree(layout.projectDirectory.dir("src/main/java")) {
                 include "**/*.java"
             })
             outputDirectory.set(generatedNativeRunnerDir)
+            nativeRuntimePackage.set(selectedNativeRuntimePackage)
+            applicationAnnotationName.set(selectedApplicationAnnotationName)
+            fullyQualifiedApplicationAnnotationName.set(selectedFullyQualifiedApplicationAnnotationName)
         }
 
         def generatedNativeReflectionConfigDir = layout.buildDirectory.dir("generated/resources/xisNativeReflectionConfig/main")

@@ -19,17 +19,15 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Generates one.xis.xisboot.Runner and a META-INF/MANIFEST.MF
- * when a type annotated with @one.xis.boot.XISBootApplication is present.
+ * Generates a runtime runner when a type annotated with @one.xis.boot.XISBootApplication
+ * or @one.xis.http.XISHttpApplication is present.
  */
 @AutoService(Processor.class)
 public class XISBootRunnerProcessor extends AbstractProcessor {
 
     private static final String ANN_XIS_BOOT_APPLICATION = "one.xis.boot.XISBootApplication";
-    private static final String RUNNER_FQCN = "one.xis.boot.Runner";
-    private static final String RUNNER_PKG = "one.xis.boot";
+    private static final String ANN_XIS_HTTP_APPLICATION = "one.xis.http.XISHttpApplication";
     private static final String RUNNER_SIMPLE = "Runner";
-    private static final String INTERNAL_RUNNER_FQCN = "one.xis.boot.XISBootRunner";
 
     private Elements elements;
     private boolean generated;
@@ -42,7 +40,7 @@ public class XISBootRunnerProcessor extends AbstractProcessor {
 
     @Override
     public Set<String> getSupportedAnnotationTypes() {
-        return Set.of(ANN_XIS_BOOT_APPLICATION);
+        return Set.of(ANN_XIS_BOOT_APPLICATION, ANN_XIS_HTTP_APPLICATION);
     }
 
     @Override
@@ -54,7 +52,7 @@ public class XISBootRunnerProcessor extends AbstractProcessor {
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         if (generated || roundEnv.processingOver()) return false;
 
-        Optional<TypeElement> appType = findApplicationType(roundEnv);
+        Optional<ApplicationType> appType = findApplicationType(roundEnv);
         if (appType.isEmpty()) return false;
 
         try {
@@ -67,8 +65,23 @@ public class XISBootRunnerProcessor extends AbstractProcessor {
         return false;
     }
 
-    private Optional<TypeElement> findApplicationType(RoundEnvironment roundEnv) {
-        TypeElement ann = elements.getTypeElement(ANN_XIS_BOOT_APPLICATION);
+    private Optional<ApplicationType> findApplicationType(RoundEnvironment roundEnv) {
+        Optional<TypeElement> bootApp = findSingleApplicationType(roundEnv, ANN_XIS_BOOT_APPLICATION);
+        Optional<TypeElement> httpApp = findSingleApplicationType(roundEnv, ANN_XIS_HTTP_APPLICATION);
+        if (bootApp.isPresent() && httpApp.isPresent()) {
+            error("Use either @XISBootApplication or @XISHttpApplication, not both");
+            return Optional.empty();
+        }
+        if (bootApp.isPresent()) {
+            return Optional.of(new ApplicationType(bootApp.get(), "one.xis.boot.Runner", "one.xis.boot",
+                    "one.xis.boot.XISBootRunner", "@XISBootApplication"));
+        }
+        return httpApp.map(type -> new ApplicationType(type, "one.xis.http.Runner", "one.xis.http",
+                "one.xis.http.XISHttpRunner", "@XISHttpApplication"));
+    }
+
+    private Optional<TypeElement> findSingleApplicationType(RoundEnvironment roundEnv, String annotationName) {
+        TypeElement ann = elements.getTypeElement(annotationName);
         if (ann == null) return Optional.empty();
 
         Set<TypeElement> candidates = roundEnv.getElementsAnnotatedWith(ann).stream()
@@ -80,26 +93,26 @@ public class XISBootRunnerProcessor extends AbstractProcessor {
             case 0 -> Optional.empty();
             case 1 -> Optional.of(candidates.iterator().next());
             default -> {
-                error("Multiple @XISBootApplication types found");
+                error("Multiple " + ann.getSimpleName() + " types found");
                 yield Optional.empty();
             }
         };
     }
 
-    private void generateRunner(TypeElement appType) throws IOException {
-        String src = buildRunnerSource(appType.getQualifiedName().toString());
-        writeJava(RUNNER_FQCN, src, appType);
+    private void generateRunner(ApplicationType appType) throws IOException {
+        String src = buildRunnerSource(appType);
+        writeJava(appType.runnerFqcn(), src, appType.applicationClass());
     }
 
-    private String buildRunnerSource(String appFqcn) {
-        String pkg = RUNNER_PKG.isEmpty() ? "" : "package " + RUNNER_PKG + ";\n\n";
+    private String buildRunnerSource(ApplicationType appType) {
+        String pkg = appType.runnerPackage().isEmpty() ? "" : "package " + appType.runnerPackage() + ";\n\n";
         return new StringBuilder()
                 .append(pkg)
                 .append("public final class ").append(RUNNER_SIMPLE).append(" {\n")
                 .append("  private ").append(RUNNER_SIMPLE).append("() {}\n")
                 .append("  public static void main(String[] args) {\n")
-                .append("    ").append(INTERNAL_RUNNER_FQCN)
-                .append(".run(").append(appFqcn).append(".class, args);\n")
+                .append("    ").append(appType.internalRunnerFqcn())
+                .append(".run(").append(appType.applicationClass().getQualifiedName()).append(".class, args);\n")
                 .append("  }\n")
                 .append("}\n")
                 .toString();
@@ -122,5 +135,9 @@ public class XISBootRunnerProcessor extends AbstractProcessor {
 
     private void error(String msg) {
         processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, msg);
+    }
+
+    private record ApplicationType(TypeElement applicationClass, String runnerFqcn, String runnerPackage,
+                                   String internalRunnerFqcn, String annotationName) {
     }
 }

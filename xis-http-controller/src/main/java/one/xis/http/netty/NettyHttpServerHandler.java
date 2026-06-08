@@ -1,4 +1,4 @@
-package one.xis.boot.netty;
+package one.xis.http.netty;
 
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
@@ -12,8 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import one.xis.UploadConfiguration;
 import one.xis.context.Component;
 import one.xis.http.ContentType;
+import one.xis.http.HttpFrontendHandler;
 import one.xis.http.RestControllerService;
-import one.xis.server.FrontendService;
 import one.xis.server.LocalUrlHolder;
 
 import java.net.SocketException;
@@ -29,7 +29,7 @@ import static io.netty.handler.codec.http.HttpHeaderValues.NO_STORE;
 @RequiredArgsConstructor
 public class NettyHttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
-    private final FrontendService frontendService;
+    private final HttpFrontendHandler frontendHandler;
     private final RestControllerService restControllerService;
     private final NettyResourceHandler resourceHandler;
     private final LocalUrlHolder localUrlHolder;
@@ -100,11 +100,7 @@ public class NettyHttpServerHandler extends SimpleChannelInboundHandler<FullHttp
 
     private FullHttpResponse routeRequest(FullHttpRequest nettyRequest, ChannelHandlerContext ctx) {
         NettyHttpRequest request = new NettyHttpRequest(nettyRequest, ctx, uploadConfiguration);
-        String path = request.getPath();
-        if (isFrontendRequest(path)) {
-            return handleFrontendRequest();
-        }
-        return handleApiOrStaticResourceRequest(request);
+        return handleRequest(request);
     }
 
 
@@ -112,12 +108,7 @@ public class NettyHttpServerHandler extends SimpleChannelInboundHandler<FullHttp
         return path.equals("/") || path.isEmpty() || path.endsWith(".html");
     }
 
-    private FullHttpResponse handleFrontendRequest() {
-        String html = frontendService.getRootPageHtml();
-        return okHtml(html);
-    }
-
-    private FullHttpResponse handleApiOrStaticResourceRequest(NettyHttpRequest request) {
+    private FullHttpResponse handleRequest(NettyHttpRequest request) {
         // Keep this usage as required.
         NettyHttpResponse response = new NettyHttpResponse(request.isSecure());
         restControllerService.doInvocation(request, response);
@@ -126,12 +117,20 @@ public class NettyHttpServerHandler extends SimpleChannelInboundHandler<FullHttp
             return null;
         }
 
-        if (isNotFound(response)) {
-            Optional<FullHttpResponse> resourceResponse = resourceHandler.handle(request.getPath());
-            return resourceResponse.orElseGet(this::notFound);
+        if (!isNotFound(response)) {
+            return response.toNettyResponse();
         }
 
-        return response.toNettyResponse();
+        String path = request.getPath();
+        if (isFrontendRequest(path)) {
+            Optional<FullHttpResponse> frontendResponse = frontendHandler.getRootPageHtml(path).map(this::okHtml);
+            if (frontendResponse.isPresent()) {
+                return frontendResponse.get();
+            }
+        }
+
+        Optional<FullHttpResponse> resourceResponse = resourceHandler.handle(path);
+        return resourceResponse.orElseGet(this::notFound);
     }
 
     private boolean isNotFound(NettyHttpResponse response) {

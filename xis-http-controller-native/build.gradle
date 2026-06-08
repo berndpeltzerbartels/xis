@@ -1,12 +1,19 @@
 plugins {
     id 'java'
+    id 'java-library'
     id 'maven-publish'
-    // id 'signing'
 }
 
+group = rootProject.ext.projectGroup
+version = rootProject.ext.projectVersion
 
 repositories {
     mavenCentral()
+}
+
+tasks.withType(JavaCompile) {
+    sourceCompatibility = rootProject.ext.javaVersion.toString()
+    targetCompatibility = rootProject.ext.javaVersion.toString()
 }
 
 java {
@@ -17,28 +24,19 @@ java {
     withJavadocJar()
 }
 
-
-var lombokVersion = rootProject.ext.libraryVersions.lombok
+var junitVersion = rootProject.ext.libraryVersions.junit
+var assertjVersion = rootProject.ext.libraryVersions.assertj
 
 dependencies {
-    // Lombok dependencies
-    annotationProcessor("org.projectlombok:lombok:$lombokVersion")
-    implementation("org.projectlombok:lombok:$lombokVersion")
-    compileOnly(project(":xis-context"))
-    compileOnly(project(":xis-security-common"))
-    compileOnly(project(":xis-token"))
-    compileOnly(project(":xis-adapter-spi"))
-    compileOnly(project(":xis-controller-api"))
-    compileOnly(project(":xis-http-controller"))
-    compileOnly(project(":xis-gson"))
-    compileOnly(project(":xis-util"))
-    compileOnly project(":xis-authentication-api")
-    implementation project(':xis-http-client')
+    api project(":xis-http-controller")
+    api project(":xis-context")
+    api project(":xis-controller-api")
+    api project(":xis-resources")
+    api project(":xis-util")
 
-    implementation 'com.nimbusds:nimbus-jose-jwt:9.39.1'
-
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+    testImplementation "org.assertj:assertj-core:$assertjVersion"
 }
 
 test {
@@ -53,7 +51,7 @@ publishing {
 
             pom {
                 name = 'XIS ' + project.name.capitalize()
-                description = 'Module ' + project.name + ' of the XIS declarative web framework.'
+                description = 'Native-image support for standalone XIS HTTP controller applications.'
                 url = 'https://github.com/berndpeltzerbartels/xis'
 
                 licenses {
@@ -79,21 +77,4 @@ publishing {
             }
         }
     }
-    repositories {
-        maven {
-            name = "OSSRH"
-            url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2")
-            credentials {
-                username = project.findProperty("ossrhUsername") ?: ""
-                password = project.findProperty("ossrhPassword") ?: ""
-            }
-        }
-    }
 }
-
-/*
-signing {
-    sign publishing.publications.mavenJava
-    useGpgCmd()
-}
-*/

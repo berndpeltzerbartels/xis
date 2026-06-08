@@ -1,7 +1,7 @@
 package one.xis.boot;
 
-import one.xis.boot.netty.NettyServer;
 import one.xis.context.AppContext;
+import one.xis.http.netty.NettyServer;
 
 public class XISBootRunner {
 

@@ -1,4 +1,4 @@
-package one.xis.boot.netty;
+package one.xis.http.netty;
 
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
@@ -46,8 +46,12 @@ class NettySseEmitter implements SseEmitter {
     @Override
     public void close() {
         if (channel.isActive()) {
-            channel.writeAndFlush(LastHttpContent.EMPTY_LAST_CONTENT)
-                    .addListener(ChannelFutureListener.CLOSE);
+            if (channel.isWritable()) {
+                channel.writeAndFlush(LastHttpContent.EMPTY_LAST_CONTENT)
+                        .addListener(ChannelFutureListener.CLOSE);
+            } else {
+                channel.close();
+            }
         }
     }
 
