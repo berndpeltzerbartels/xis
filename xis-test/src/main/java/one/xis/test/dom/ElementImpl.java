@@ -3,6 +3,7 @@ package one.xis.test.dom;
 import lombok.Getter;
 import lombok.NonNull;
 import one.xis.context.PolyglotPromises;
+import one.xis.html.HtmlParser;
 import one.xis.test.js.Event;
 import one.xis.utils.lang.MethodUtils;
 import one.xis.utils.lang.TypeUtils;
@@ -223,12 +224,50 @@ public class ElementImpl extends NodeImpl implements Element {
             return;
         }
         getChildNodes().clear();
-        Document doc = Jsoup.parseBodyFragment(html);
-        var body = doc.body();
-        for (var child : body.childNodes()) {
-            appendChild(convertFromJsoup(child)); // tief rekursiv
+        if (needsXisParserForSelectContent(html)) {
+            appendChildrenParsedAsElementContent(html);
+        } else {
+            Document doc = Jsoup.parseBodyFragment(html);
+            var body = doc.body();
+            for (var child : body.childNodes()) {
+                appendChild(convertFromJsoup(child)); // tief rekursiv
+            }
         }
         updateChildNodes();
+    }
+
+    private boolean needsXisParserForSelectContent(String html) {
+        return html.contains("<xis:foreach") && ("select".equals(localName) || html.contains("<select"));
+    }
+
+    private void appendChildrenParsedAsElementContent(String html) {
+        var parsed = new HtmlParser().parse(htmlForCurrentElement(html));
+        var root = parsed.getDocumentElement();
+        if (!localName.equals(root.getLocalName())) {
+            root = root.getElementByTagName(localName);
+        }
+        if (root == null) {
+            return;
+        }
+        var child = root.getFirstChild();
+        while (child != null) {
+            if (child instanceof one.xis.html.document.Element element) {
+                appendChild((NodeImpl) ElementMapper.map(element));
+            } else if (child instanceof one.xis.html.document.TextNode textNode) {
+                appendChild(new TextNodeImpl(textNode.getText()));
+            } else if (child instanceof one.xis.html.document.CommentNode commentNode) {
+                appendChild(new CommentNodeImpl(commentNode.getText()));
+            }
+            child = child.getNextSibling();
+        }
+    }
+
+    private String htmlForCurrentElement(String html) {
+        var trimmed = html.stripLeading();
+        if ("html".equals(localName) && (trimmed.startsWith("<html") || trimmed.startsWith("<!DOCTYPE"))) {
+            return html;
+        }
+        return "<" + localName + ">" + html + "</" + localName + ">";
     }
 
     /**

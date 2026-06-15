@@ -39,7 +39,9 @@ class ExpressionLanguageTest {
         var client = testContext.openPage("/expressionLanguage.html");
 
         assertThat(client.getDocument().getElementById("comparison-condition")).isNotNull();
+        assertThat(client.getDocument().getElementById("attribute-if-expression")).isNotNull();
         assertThat(client.getDocument().getElementById("tag-if-result")).isNotNull();
+        assertThat(client.getDocument().getElementById("tag-if-expression-result")).isNotNull();
         assertThat(client.getDocument().getElementById("default-value").getInnerText()).isEqualTo("fallback");
         assertThat(client.getDocument().getElementById("joined-items").getInnerText()).isEqualTo("alpha, beta, gamma");
     }
@@ -59,5 +61,9 @@ class ExpressionLanguageTest {
         assertThat(bodyText).contains("alpha", "beta", "gamma");
         assertThat(client.getDocument().getElementById("tag-foreach").getInnerHTML())
                 .contains("Keyboard", "Monitor", "data-id=\"p3\"");
+        assertThat(client.getDocument().getElementById("tag-foreach-expression-array").getInnerHTML())
+                .contains("0:Keyboard", "2:Monitor", "data-id=\"p3\"");
+        assertThat(client.getDocument().getElementById("repeat-items").getInnerHTML())
+                .contains("0:Keyboard", "2:Monitor", "data-id=\"p3\"");
     }
 }

@@ -204,6 +204,45 @@ class ElementBuilderTest {
         assertThat(((NodeImpl) p1).getParentElement()).isSameAs(a);
         assertThat(((NodeImpl) p2).getParentElement()).isSameAs(a);
     }
+
+    @Test
+    void setInnerHtmlPreservesForeachTagInsideSelect() {
+        var select = new SelectElementImpl();
+
+        select.setInnerHTML("""
+                <xis:foreach var="option" array="options">
+                    <option value="${option.value}">${option.label}</option>
+                </xis:foreach>
+                """);
+
+        assertThat(select.getChildElements()).singleElement().satisfies(foreach -> {
+            assertThat(foreach.getTagName()).isEqualTo("XIS:FOREACH");
+            assertThat(foreach.getAttribute("var")).isEqualTo("option");
+            assertThat(foreach.getAttribute("array")).isEqualTo("options");
+            assertThat(foreach.getChildElements()).singleElement().satisfies(option -> {
+                assertThat(option.getTagName()).isEqualTo("OPTION");
+                assertThat(option.getAttribute("value")).isEqualTo("${option.value}");
+                assertThat(option.getInnerText()).isEqualTo("${option.label}");
+            });
+        });
+    }
+
+    @Test
+    void setInnerHtmlKeepsRegularFrameworkMarkupInBodyFragmentShape() {
+        var body = new ElementImpl("body");
+
+        body.setInnerHTML("""
+                <xis:if condition="${enabled}">
+                    <span id="visible">Visible</span>
+                </xis:if>
+                """);
+
+        assertThat(body.getChildElements()).singleElement().satisfies(ifTag -> {
+            assertThat(ifTag.getTagName()).isEqualTo("XIS:IF");
+            assertThat(ifTag.getAttribute("condition")).isEqualTo("${enabled}");
+        });
+        assertThat(body.getElementByTagName("body")).isNull();
+    }
     // --- Helper ------------------------------------------------------------------
 
     /**

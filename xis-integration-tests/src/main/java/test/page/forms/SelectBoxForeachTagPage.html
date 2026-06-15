@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:xis="http://xis.one/schema" lang="us-en" xml:lang="us-en">
+<head>
+    <title>SelectBoxForeachTag</title>
+</head>
+<body>
+<xis:form binding="formData" id="form">
+
+    <select xis:binding="selectedValue" id="selectBox">
+        <xis:foreach var="option" array="options">
+            <option value="${option.value}">${option.label}</option>
+        </xis:foreach>
+    </select>
+
+    <button xis:action="submit" id="submitButton">Submit</button>
+</xis:form>
+</body>
+</html>

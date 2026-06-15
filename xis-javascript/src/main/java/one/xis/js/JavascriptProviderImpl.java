@@ -26,10 +26,10 @@ class JavascriptProviderImpl implements JavascriptProvider {
 
     @Init
     public void init() {
-        this.compressedJavascript = new StringResource("(function() {\n"
-                + xisMinJs()
-                + extensionJavascript()
-                + "\n})();");
+        String extensions = extensionJavascript();
+        this.compressedJavascript = new StringResource(extensions.isEmpty()
+                ? xisMinJs()
+                : "(function() {\n" + xisMinJs() + extensions + "\n})();");
         this.sourceMap = resources.getByPath("xis.min.js.map");
     }
 

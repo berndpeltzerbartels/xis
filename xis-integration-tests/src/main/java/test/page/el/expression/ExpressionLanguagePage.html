@@ -9,7 +9,9 @@
 <img id="deferred-src" xis:src="/assets/${lookup[prefix + '_item'].id}.png" alt="deferred source"/>
 <div id="custom-function">${surround('[', lookup[prefix + '_item'].label, ']')}</div>
 <div id="comparison-condition" xis:if="items[1] == 'beta' && notEmpty(lookup[prefix + '_item'].label)">comparison</div>
+<div id="attribute-if-expression" xis:if="${enabled}">attribute-if-expression</div>
 <xis:if condition="enabled ? true : false"><span id="tag-if-result">tag-if</span></xis:if>
+<xis:if condition="${enabled}"><span id="tag-if-expression-result">tag-if-expression</span></xis:if>
 <div id="default-value">${defaultValue(emptyValue, 'fallback')}</div>
 <div id="joined-items">${join(items, ', ')}</div>
 <ul id="tag-foreach">
@@ -17,8 +19,16 @@
         <li data-id="${product.id}">${product.label}</li>
     </xis:foreach>
 </ul>
+<ul id="tag-foreach-expression-array">
+    <xis:foreach var="product" array="${products}">
+        <li data-id="${product.id}">${productIndex}:${product.label}</li>
+    </xis:foreach>
+</ul>
 <ul id="attribute-foreach">
     <li xis:foreach="item:items">${item}</li>
+</ul>
+<ul id="repeat-items">
+    <li xis:repeat="product:products" data-id="${product.id}">${productIndex}:${product.label}</li>
 </ul>
 </body>
 </html>
