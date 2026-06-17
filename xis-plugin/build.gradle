@@ -33,10 +33,6 @@ java {
     withJavadocJar()
 }
 
-processResources {
-    expand(project.properties)
-}
-
 dependencies {
     implementation gradleApi()
     implementation localGroovy()

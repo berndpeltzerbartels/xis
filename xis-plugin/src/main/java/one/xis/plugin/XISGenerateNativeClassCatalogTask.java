@@ -71,10 +71,7 @@ public class XISGenerateNativeClassCatalogTask extends DefaultTask {
             if (packageName == null) {
                 continue;
             }
-            var typeName = readTopLevelTypeName(source);
-            if (typeName != null) {
-                result.add(packageName + "." + typeName);
-            }
+            readTypeNames(source).forEach(typeName -> result.add(packageName + "." + typeName));
         }
         return result.stream().sorted().toList();
     }
@@ -84,23 +81,42 @@ public class XISGenerateNativeClassCatalogTask extends DefaultTask {
         return matcher.find() ? matcher.group(1) : null;
     }
 
-    private static String readTopLevelTypeName(String source) {
+    private static List<String> readTypeNames(String source) {
+        var typeNames = new ArrayList<String>();
+        var typeStack = new ArrayList<MemberType>();
         var braceDepth = 0;
         for (var rawLine : source.split("\\R")) {
             var line = rawLine.strip();
+            while (!typeStack.isEmpty() && last(typeStack).bodyDepth() > braceDepth) {
+                typeStack.remove(typeStack.size() - 1);
+            }
             if (line.isEmpty() || line.startsWith("//") || line.startsWith("*") || line.startsWith("@")) {
                 braceDepth += braceDelta(line);
                 continue;
             }
-            if (braceDepth == 0) {
+            if (braceDepth == 0 || isDirectMemberDepth(typeStack, braceDepth)) {
                 var matcher = TOP_LEVEL_TYPE_PATTERN.matcher(line);
                 if (matcher.find()) {
-                    return matcher.group(2);
+                    var simpleName = matcher.group(2);
+                    var typeName = typeStack.isEmpty()
+                            ? simpleName
+                            : last(typeStack).qualifiedName() + "$" + simpleName;
+                    typeNames.add(typeName);
+                    var bodyDepth = braceDepth + Math.max(1, braceDelta(line));
+                    typeStack.add(new MemberType(typeName, bodyDepth));
                 }
             }
             braceDepth += braceDelta(line);
         }
-        return null;
+        return typeNames;
+    }
+
+    private static boolean isDirectMemberDepth(List<MemberType> typeStack, int braceDepth) {
+        return !typeStack.isEmpty() && last(typeStack).bodyDepth() == braceDepth;
+    }
+
+    private static MemberType last(List<MemberType> typeStack) {
+        return typeStack.get(typeStack.size() - 1);
     }
 
     private static int braceDelta(String line) {
@@ -114,5 +130,8 @@ public class XISGenerateNativeClassCatalogTask extends DefaultTask {
             }
         }
         return delta;
+    }
+
+    private record MemberType(String qualifiedName, int bodyDepth) {
     }
 }
