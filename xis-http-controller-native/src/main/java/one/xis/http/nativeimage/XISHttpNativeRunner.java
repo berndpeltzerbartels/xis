@@ -10,7 +10,7 @@ import one.xis.http.netty.NettyServer;
  * It avoids application package scanning and uses generated direct class
  * references instead.
  */
-public final class XISHttpNativeRunner {
+final class XISHttpNativeRunner {
 
     private XISHttpNativeRunner() {
     }

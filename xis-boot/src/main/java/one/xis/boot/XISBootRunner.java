@@ -40,7 +40,7 @@ public class XISBootRunner {
         if (System.getProperty(NATIVE_IMAGE_PROPERTY) != null) {
             throw new IllegalStateException("XISBootRunner is the JVM runner and must not be used inside a GraalVM "
                     + "native image. Add xis-boot-native and build the application with the XIS Gradle plugin "
-                    + "native tasks so the generated one.xis.boot.nativeimage.NativeRunner is used.");
+                    + "native tasks so the generated one.xis.boot.nativeimage.NativeApp is used.");
         }
     }
 }

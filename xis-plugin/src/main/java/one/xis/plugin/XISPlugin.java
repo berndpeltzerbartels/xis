@@ -383,8 +383,8 @@ public class XISPlugin implements Plugin<Project> {
 
     private String nativeMainClass(Project project) {
         return usesXisModule(project, "xis-http-controller-native")
-                ? "one.xis.http.nativeimage.NativeRunner"
-                : "one.xis.boot.nativeimage.NativeRunner";
+                ? "one.xis.http.nativeimage.NativeApp"
+                : "one.xis.boot.nativeimage.NativeApp";
     }
 
     private String nativeRuntimePackageFor(Project project) {

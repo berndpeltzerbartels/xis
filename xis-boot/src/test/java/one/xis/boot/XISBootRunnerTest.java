@@ -21,6 +21,6 @@ class XISBootRunnerTest {
         assertThatThrownBy(XISBootRunner::rejectNativeImageRuntime)
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("XISBootRunner is the JVM runner")
-                .hasMessageContaining("one.xis.boot.nativeimage.NativeRunner");
+                .hasMessageContaining("one.xis.boot.nativeimage.NativeApp");
     }
 }
