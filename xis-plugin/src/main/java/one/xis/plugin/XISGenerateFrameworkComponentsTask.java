@@ -43,6 +43,7 @@ public class XISGenerateFrameworkComponentsTask extends DefaultTask {
     public XISGenerateFrameworkComponentsTask() {
         componentAnnotationNames.convention(List.of(
                 "Component",
+                "Service",
                 "DefaultComponent",
                 "Controller",
                 "Page",

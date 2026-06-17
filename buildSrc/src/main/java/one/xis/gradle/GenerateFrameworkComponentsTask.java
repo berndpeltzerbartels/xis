@@ -43,6 +43,7 @@ public class GenerateFrameworkComponentsTask extends DefaultTask {
     public GenerateFrameworkComponentsTask() {
         componentAnnotationNames.convention(List.of(
                 "Component",
+                "Service",
                 "DefaultComponent",
                 "Controller",
                 "Page",
