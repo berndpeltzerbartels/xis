@@ -28,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class NettyServer {
 
+    private static final String NATIVE_IMAGE_PROPERTY = "org.graalvm.nativeimage.imagecode";
     private static final int READER_IDLE_SECONDS = 30; // close idle keep-alive connections
     private static final int WRITER_IDLE_SECONDS = 0;
     private static final int ALL_IDLE_SECONDS = 0;
@@ -104,6 +105,11 @@ public class NettyServer {
     }
 
     private void preloadNettyShutdownClasses() {
+        if (isNativeImageRuntime()) {
+            // Native images cannot resolve these anonymous Netty helper classes via Class.forName
+            // unless they are registered for reflection. Direct Netty bytecode references remain reachable.
+            return;
+        }
         // Netty loads DefaultPromise listener helpers lazily during shutdown.
         // When a running executable jar is replaced by a rebuild, late class loading can fail.
         for (var className : new String[]{
@@ -118,6 +124,10 @@ public class NettyServer {
                 throw new IllegalStateException("Required Netty shutdown class is missing: " + className, exception);
             }
         }
+    }
+
+    static boolean isNativeImageRuntime() {
+        return System.getProperty(NATIVE_IMAGE_PROPERTY) != null;
     }
 
     private void addShutdownHook(java.util.concurrent.atomic.AtomicReference<io.netty.channel.Channel> serverChannelRef,
