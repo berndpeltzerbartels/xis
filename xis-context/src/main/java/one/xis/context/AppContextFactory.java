@@ -186,6 +186,19 @@ class AppContextFactory implements SingletonCreationListener {
                             constructorsToRemove.add(constructor);
                         }
                     });
+            } else {
+                var hasAdditionalDefault = producers.stream().anyMatch(this::isAdditionalDefaultProducer);
+                if (hasAdditionalDefault) {
+                    producers.stream()
+                            .filter(this::isDefaultProducer)
+                            .filter(p -> !isAdditionalDefaultProducer(p))
+                            .forEach(p -> {
+                                producersToRemove.add(p);
+                                if (p instanceof SingletonConstructor constructor) {
+                                    constructorsToRemove.add(constructor);
+                                }
+                            });
+                }
             }
         }
 
@@ -224,6 +237,12 @@ class AppContextFactory implements SingletonCreationListener {
             }
         }
         return types;
+    }
+
+    private boolean isAdditionalDefaultProducer(SingletonProducer producer) {
+        return producer instanceof SingletonConstructor constructor
+                && constructor.isAdditionalClass()
+                && isDefaultProducer(producer);
     }
 
     private void evaluateAnnotatedComponents() {
@@ -387,7 +406,8 @@ class AppContextFactory implements SingletonCreationListener {
     }
 
     private void evaluateConstructor(SingletonWrapper singleton) {
-        var singletonConstructor = new SingletonConstructor(ClassUtils.getUniqueConstructor(singleton.getBeanClass()), parameterFactory);
+        var singletonConstructor = new SingletonConstructor(ClassUtils.getUniqueConstructor(singleton.getBeanClass()), parameterFactory,
+                singleton.isAdditionalClass());
         singletonConstructor.addListener(this);
         singletonProducers.add(singletonConstructor);
         singletonConsumers.addAll(singletonConstructor.getParameters());

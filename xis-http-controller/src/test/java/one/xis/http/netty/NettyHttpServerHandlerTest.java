@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -28,6 +29,35 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class NettyHttpServerHandlerTest {
+
+    @Test
+    void rootPathFallsBackToFrontendShellWhenNoControllerMatches() {
+        var restControllerService = mock(RestControllerService.class);
+        doAnswer(invocation -> {
+            NettyHttpResponse response = invocation.getArgument(1);
+            response.setStatusCode(404);
+            return null;
+        }).when(restControllerService).doInvocation(any(), any());
+
+        var frontendHandler = mock(one.xis.http.HttpFrontendHandler.class);
+        when(frontendHandler.getRootPageHtml("/")).thenReturn(Optional.of("<html>shell</html>"));
+
+        var handler = new NettyHttpServerHandler(
+                frontendHandler,
+                restControllerService,
+                mock(NettyResourceHandler.class),
+                mock(LocalUrlHolder.class),
+                uploadConfiguration()
+        );
+        var channel = new EmbeddedChannel(handler);
+        var request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/");
+
+        channel.writeInbound(request);
+
+        FullHttpResponse response = channel.readOutbound();
+        assertThat(response.status()).isEqualTo(HttpResponseStatus.OK);
+        assertThat(response.content().toString(StandardCharsets.UTF_8)).isEqualTo("<html>shell</html>");
+    }
 
     @Test
     void externallyHandledStreamingResponseIsNotWrittenAgain() {

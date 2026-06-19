@@ -9,13 +9,16 @@ public class SingletonConstructor extends SingletonProducerImpl {
 
 
     private final Constructor<?> constructor;
+    @Getter
+    private final boolean additionalClass;
 
     @Getter
     private boolean invoked;
 
-    SingletonConstructor(@NonNull Constructor<?> constructor, @NonNull ParameterFactory parameterFactory) {
+    SingletonConstructor(@NonNull Constructor<?> constructor, @NonNull ParameterFactory parameterFactory, boolean additionalClass) {
         super(constructor.getParameters(), parameterFactory);
         this.constructor = constructor;
+        this.additionalClass = additionalClass;
     }
 
     @Override

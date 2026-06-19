@@ -16,19 +16,25 @@ public class TestRefreshEventPublisher implements RefreshEventPublisher, PushEve
 
     @Override
     public void setPushEventSimulator(PushEventSimulator simulator) {
-        simulators.add(simulator);
+        synchronized (IntegrationTestContext.SYNC_LOCK) {
+            simulators.add(simulator);
+        }
     }
 
     @Override
     public void publish(RefreshEvent refreshEvent) {
-        assertSimulatorPresent();
-        simulators.forEach(simulator -> simulator.simulatePushEvent(refreshEvent.getEventKey()));
+        synchronized (IntegrationTestContext.SYNC_LOCK) {
+            assertSimulatorPresent();
+            simulators.forEach(simulator -> simulator.simulatePushEvent(refreshEvent.getEventKey()));
+        }
     }
 
     @Override
     public void publishToAll(String eventKey) {
-        assertSimulatorPresent();
-        simulators.forEach(simulator -> simulator.simulatePushEvent(eventKey));
+        synchronized (IntegrationTestContext.SYNC_LOCK) {
+            assertSimulatorPresent();
+            simulators.forEach(simulator -> simulator.simulatePushEvent(eventKey));
+        }
     }
 
     private void assertSimulatorPresent() {

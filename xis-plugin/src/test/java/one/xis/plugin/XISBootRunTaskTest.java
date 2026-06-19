@@ -49,6 +49,66 @@ class XISBootRunTaskTest {
         assertTrue(result.getOutput().contains("--application-args"));
     }
 
+    @Test
+    void xisBootHttpProjectsGetRunnableJarTasks() throws IOException {
+        write("settings.gradle", "rootProject.name = 'xis-boot-http-jar-task-test'\n");
+        write("build.gradle", """
+                plugins {
+                    id 'java'
+                    id 'one.xis.plugin'
+                }
+
+                repositories {
+                    mavenLocal()
+                    mavenCentral()
+                }
+
+                dependencies {
+                    implementation 'one.xis:xis-boot-http:%s'
+                }
+                """.formatted(XIS_VERSION));
+
+        var result = GradleRunner.create()
+                .withProjectDir(projectDir.toFile())
+                .withPluginClasspath()
+                .withArguments("tasks", "--all")
+                .build();
+
+        assertEquals(SUCCESS, result.task(":tasks").getOutcome());
+        assertTrue(result.getOutput().contains("xisJar"));
+        assertTrue(result.getOutput().contains("xisRun"));
+    }
+
+    @Test
+    void nativeProjectsGetCompileForHostTask() throws IOException {
+        write("settings.gradle", "rootProject.name = 'xis-native-host-task-test'\n");
+        write("build.gradle", """
+                plugins {
+                    id 'java'
+                    id 'one.xis.plugin'
+                }
+
+                repositories {
+                    mavenLocal()
+                    mavenCentral()
+                }
+
+                dependencies {
+                    implementation 'one.xis:xis-boot-native:%s'
+                }
+                """.formatted(XIS_VERSION));
+
+        var result = GradleRunner.create()
+                .withProjectDir(projectDir.toFile())
+                .withPluginClasspath()
+                .withArguments("tasks", "--all")
+                .build();
+
+        assertEquals(SUCCESS, result.task(":tasks").getOutcome());
+        assertTrue(result.getOutput().contains("xisNativeCompile"));
+        assertTrue(result.getOutput().contains("xisNativeCompileForHost"));
+    }
+
     private void write(String relativePath, String content) throws IOException {
         var path = projectDir.resolve(relativePath);
         Files.createDirectories(path.getParent() == null ? projectDir : path.getParent());

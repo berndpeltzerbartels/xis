@@ -11,7 +11,7 @@ Use the plugin when you want the usual XIS layout:
 ```groovy
 plugins {
     id "java"
-    id "one.xis.plugin" version "0.16.2"
+    id "one.xis.plugin" version "0.18.0"
 }
 ```
 
@@ -43,7 +43,7 @@ The plugin applies the Java plugin and configures the normal XIS build support:
 | Dependency versions | XIS dependencies used by the plugin are aligned to the plugin version. |
 | XIS catalogs | The plugin generates component catalogs for reusable XIS libraries. Projects that also declare `xis-boot-native` generate native catalogs. |
 | XIS validation | `xisValidate` runs XIS validation checks. The task is intended for local development and CI pipelines. |
-| XIS Boot jars | Projects that use `xis-boot` get `xisJar` and `xisRun` tasks. |
+| XIS Boot jars | Projects that use `xis-boot` or `xis-boot-http` get `xisJar` and `xisRun` tasks. |
 
 This means a normal application does not need to wire the XIS annotation processor, `xis-test`, or
 `xis-boot-starter-test` manually.
@@ -231,7 +231,7 @@ EL function semantics, database state, permissions, and browser behavior still b
 
 ## `xisJar`
 
-When the project declares `xis-boot`, the plugin adds:
+When the project declares `xis-boot` or `xis-boot-http`, the plugin adds:
 
 ```bash
 ./gradlew xisJar
@@ -266,7 +266,7 @@ the XIS jar.
 
 ## `xisRun`
 
-When the project declares `xis-boot`, `xis-http-controller`, or `xis-http-controller-native`, the plugin also adds:
+When the project declares `xis-boot`, `xis-boot-http`, `xis-http-controller`, or `xis-http-controller-native`, the plugin also adds:
 
 ```bash
 ./gradlew xisRun
@@ -303,7 +303,7 @@ Without the plugin, add the dependency that matches the style of test you want:
 
 ```groovy
 dependencies {
-    testImplementation "one.xis:xis-boot-starter-test:0.16.2"
+    testImplementation "one.xis:xis-boot-starter-test:0.18.0"
 }
 ```
 

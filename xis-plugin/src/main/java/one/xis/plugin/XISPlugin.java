@@ -5,8 +5,10 @@ import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.ProjectDependency;
+import org.gradle.api.file.RegularFile;
 import org.gradle.api.file.SourceDirectorySet;
 import org.gradle.api.plugins.JavaPlugin;
+import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.bundling.AbstractArchiveTask;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
@@ -21,6 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -117,7 +120,8 @@ public class XISPlugin implements Plugin<Project> {
 
     private void configureFatJarCreation(Project project) {
         project.afterEvaluate(p -> {
-            boolean usesXisBoot = usesXisImplementation(project, "xis-boot");
+            boolean usesXisBoot = usesXisImplementation(project, "xis-boot")
+                    || usesXisImplementation(project, "xis-boot-http");
             boolean usesXisHttpController = usesXisImplementation(project, "xis-http-controller")
                     || usesXisImplementation(project, "xis-http-controller-native");
 
@@ -349,24 +353,22 @@ public class XISPlugin implements Plugin<Project> {
         var main = mainSourceSet(project);
         var executable = project.getLayout().getBuildDirectory()
                 .file("native/" + project.getName());
+        var hostExecutable = project.getLayout().getBuildDirectory()
+                .file("native/" + project.getName() + "-host");
         var graalVmHome = project.getProviders().gradleProperty("graalVmHome")
                 .orElse(project.getProviders().environmentVariable("GRAALVM_HOME"));
+        var nativeImageArgs = project.getProviders().gradleProperty("xisNativeImageArgs")
+                .map(XISNativeCompileTask::parseNativeImageArgs)
+                .orElse(XISNativeCompileTask.DEFAULT_NATIVE_IMAGE_ARGS);
+        var hostNativeImageArgs = nativeImageArgs.map(XISNativeCompileTask::forHostNativeImageArgs);
 
         var nativeCompile = project.getTasks().register("xisNativeCompile", XISNativeCompileTask.class, task -> {
-            task.dependsOn(project.getTasks().named("classes"));
-            task.dependsOn(project.getTasks().named("xisGenerateNativeReflectionConfig"));
-            task.dependsOn(project.getTasks().named("xisGenerateNativeProxyConfig"));
-            task.getNativeClasspath().from(main.getOutput());
-            task.getNativeClasspath().from(project.getConfigurations().getByName("runtimeClasspath"));
-            task.getGraalVmHome().set(graalVmHome);
-            task.getMainClass().set(nativeMainClass(project));
-            task.getExecutableFile().set(executable);
-            task.getReflectionConfig().set(project.getLayout().getBuildDirectory()
-                    .file("generated/resources/xisNativeReflectionConfig/main/META-INF/native-image/one.xis/"
-                            + project.getName() + "/reflect-config.json"));
-            task.getProxyConfig().set(project.getLayout().getBuildDirectory()
-                    .file("generated/resources/xisNativeProxyConfig/main/META-INF/native-image/one.xis/"
-                            + project.getName() + "/proxy-config.json"));
+            configureNativeCompileTask(project, main, graalVmHome, nativeImageArgs, executable, task);
+        });
+
+        project.getTasks().register("xisNativeCompileForHost", XISNativeCompileTask.class, task -> {
+            task.setDescription("Compiles the XIS Boot Native application for the current build host with GraalVM native-image.");
+            configureNativeCompileTask(project, main, graalVmHome, hostNativeImageArgs, hostExecutable, task);
         });
 
         project.getTasks().register("xisNativeRun", XISNativeRunTask.class, task -> {
@@ -379,6 +381,29 @@ public class XISPlugin implements Plugin<Project> {
             task.getExecutableFile().set(executable);
             task.getPort().convention(8098);
         });
+    }
+
+    private void configureNativeCompileTask(Project project,
+                                           SourceSet main,
+                                           Provider<String> graalVmHome,
+                                           Provider<List<String>> nativeImageArgs,
+                                           Provider<RegularFile> executable,
+                                           XISNativeCompileTask task) {
+        task.dependsOn(project.getTasks().named("classes"));
+        task.dependsOn(project.getTasks().named("xisGenerateNativeReflectionConfig"));
+        task.dependsOn(project.getTasks().named("xisGenerateNativeProxyConfig"));
+        task.getNativeClasspath().from(main.getOutput());
+        task.getNativeClasspath().from(project.getConfigurations().getByName("runtimeClasspath"));
+        task.getGraalVmHome().set(graalVmHome);
+        task.getNativeImageArgs().set(nativeImageArgs);
+        task.getMainClass().set(nativeMainClass(project));
+        task.getExecutableFile().set(executable);
+        task.getReflectionConfig().set(project.getLayout().getBuildDirectory()
+                .file("generated/resources/xisNativeReflectionConfig/main/META-INF/native-image/one.xis/"
+                        + project.getName() + "/reflect-config.json"));
+        task.getProxyConfig().set(project.getLayout().getBuildDirectory()
+                .file("generated/resources/xisNativeProxyConfig/main/META-INF/native-image/one.xis/"
+                        + project.getName() + "/proxy-config.json"));
     }
 
     private String nativeMainClass(Project project) {

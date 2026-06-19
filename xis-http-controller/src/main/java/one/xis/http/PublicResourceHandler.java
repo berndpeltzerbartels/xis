@@ -26,6 +26,9 @@ public class PublicResourceHandler {
 
     public boolean handle(HttpRequest request, HttpResponse response) {
         String requestPath = request.getPath();
+        if (isRootPath(requestPath)) {
+            return false;
+        }
         if (isPathTraversal(requestPath)) {
             handleForbidden(response);
             return true;
@@ -48,6 +51,10 @@ public class PublicResourceHandler {
             handleError(response, e);
             return true;
         }
+    }
+
+    private boolean isRootPath(String path) {
+        return path == null || path.isBlank() || "/".equals(path);
     }
 
     /**

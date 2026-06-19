@@ -16,7 +16,7 @@ Use `xis-boot-native` instead of `xis-boot`:
 ```groovy
 plugins {
     id "java"
-    id "one.xis.plugin" version "0.16.2"
+    id "one.xis.plugin" version "0.18.0"
 }
 
 repositories {
@@ -38,16 +38,45 @@ A native build needs:
 - a generated runner that starts the XIS Boot Native context
 - a local GraalVM installation with `native-image`
 
+The plugin looks for `native-image` in this order: an explicitly configured GraalVM home (`-PgraalVmHome=...` or
+`--graal-vm-home=...`), `GRAALVM_HOME`, `JAVA_HOME`, `PATH`, and then common local JDK installation directories. It does
+not require a specific GraalVM distribution. If Oracle GraalVM is installed and selected through one of those mechanisms,
+the plugin uses it.
+
+Native Image performance depends noticeably on the GraalVM distribution, version, CPU, and build options. In XIS'
+server-throughput benchmarks, native executables have not consistently beaten the JVM; the strongest reason to choose
+native images has been lower memory use, fast startup, and compact deployment. For throughput-sensitive services, test
+the exact target environment before assuming a native executable is faster. If Oracle GraalVM performs better for your
+workload than another Native Image distribution, point the plugin at that installation explicitly.
+
 The native plugin tasks are:
 
 ```bash
 ./gradlew xisNativeCompile
+./gradlew xisNativeCompileForHost
 ./gradlew xisNativeRun
 ./gradlew xisNativeSmokeTest
 ```
 
 `xisNativeCompile` builds the executable, `xisNativeRun` starts it locally, and `xisNativeSmokeTest` builds the executable,
 starts it on a temporary port, verifies that the HTTP server answers, and stops it again.
+
+`xisNativeCompileForHost` builds a second executable optimized for the current build host and passes `-march=native` to
+`native-image`. Use it when the build runs on the same machine, VM, or container type that will later run the binary.
+The executable is written next to the portable binary with a `-host` suffix.
+
+XIS leaves the GraalVM optimization level at the documented native-image default. Additional GraalVM `native-image`
+arguments, such as `-O3`, can be passed either as a task option or as a Gradle property:
+
+```bash
+./gradlew xisNativeCompile --native-image-args="-O3"
+./gradlew xisNativeCompile -PxisNativeImageArgs="-O3"
+./gradlew xisNativeCompileForHost -PxisNativeImageArgs="-O3"
+```
+
+These arguments affect the executable at build time. Runtime arguments for the application still belong to
+`xisNativeRun --application-args`. CPU-specific options such as `-march=native` are intentionally isolated in
+`xisNativeCompileForHost` because the resulting executable is tied more closely to the build machine.
 
 ## Application Entry Point
 

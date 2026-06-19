@@ -57,13 +57,6 @@ class SpringFilter extends HttpFilter {
             String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
             localUrlHolder.setLocalUrl(baseUrl);
         }
-        if (isRootPageRequest(httpServletRequest)) {
-            httpServletResponse.setContentType("text/html");
-            try (var writer = httpServletResponse.getWriter()) {
-                writer.println(frontendService.getRootPageHtml());
-            }
-            return;
-        }
         if (httpServletRequest.getRequestURI().startsWith("/public/")) {
             chain.doFilter(httpServletRequest, httpServletResponse);
             return;
@@ -72,6 +65,10 @@ class SpringFilter extends HttpFilter {
         var response = new HttpResponseImpl(request.isSecure());
         restControllerService.doInvocation(request, response);
         if (response.getStatusCode() != null && response.getStatusCode() == 404) {
+            if (isFrontendRequest(httpServletRequest)) {
+                writeFrontendShell(httpServletResponse);
+                return;
+            }
             chain.doFilter(httpServletRequest, httpServletResponse);
         } else {
             commit(response, httpServletResponse);
@@ -86,9 +83,16 @@ class SpringFilter extends HttpFilter {
     }
 
 
-    private boolean isRootPageRequest(HttpServletRequest request) {
+    private boolean isFrontendRequest(HttpServletRequest request) {
         String path = request.getRequestURI();
         return (path.equals("/") || path.isEmpty() || path.endsWith(".html")) && !path.startsWith("/xis");
+    }
+
+    private void writeFrontendShell(HttpServletResponse response) throws IOException {
+        response.setContentType("text/html");
+        try (var writer = response.getWriter()) {
+            writer.println(frontendService.getRootPageHtml());
+        }
     }
 
     private void commit(HttpResponseImpl response, HttpServletResponse httpServletResponse) throws IOException {

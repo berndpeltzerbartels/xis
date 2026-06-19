@@ -2,6 +2,7 @@ package one.xis.http.netty;
 
 import lombok.extern.slf4j.Slf4j;
 import one.xis.context.Component;
+import one.xis.context.DefaultComponent;
 import one.xis.http.HttpRequest;
 import one.xis.http.HttpResponse;
 import one.xis.http.SseEmitter;
@@ -11,6 +12,7 @@ import java.util.function.Consumer;
 
 @Slf4j
 @Component
+@DefaultComponent
 public class NettySseEndpoint implements SseEndpoint {
 
     @Override

@@ -2,6 +2,7 @@ package one.xis.plugin;
 
 import org.gradle.api.GradleException;
 import org.gradle.api.file.ConfigurableFileCollection;
+import org.gradle.api.provider.ListProperty;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Classpath;
@@ -14,15 +15,20 @@ import org.gradle.api.tasks.options.Option;
 import org.gradle.api.DefaultTask;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Locale;
 
 public abstract class XISNativeCompileTask extends DefaultTask {
 
     static final String NATIVE_RESOURCE_INCLUDE_PATTERN = "(?i)^(?!.*\\.class$).*$";
+    static final List<String> DEFAULT_NATIVE_IMAGE_ARGS = List.of();
+    static final List<String> HOST_NATIVE_IMAGE_ARGS = List.of("-march=native");
 
     private final ConfigurableFileCollection nativeClasspath = getProject().files();
     private final Property<String> graalVmHome = getProject().getObjects().property(String.class);
+    private final ListProperty<String> nativeImageArgs = getProject().getObjects().listProperty(String.class);
 
     public XISNativeCompileTask() {
         setGroup("xis");
@@ -41,6 +47,11 @@ public abstract class XISNativeCompileTask extends DefaultTask {
     }
 
     @Input
+    public ListProperty<String> getNativeImageArgs() {
+        return nativeImageArgs;
+    }
+
+    @Input
     public abstract Property<String> getMainClass();
 
     @InputFile
@@ -55,6 +66,11 @@ public abstract class XISNativeCompileTask extends DefaultTask {
     @Option(option = "graal-vm-home", description = "Path to the GraalVM home used for native-image.")
     public void setGraalVmHome(String graalVmHome) {
         getGraalVmHome().set(graalVmHome);
+    }
+
+    @Option(option = "native-image-args", description = "Additional arguments passed to native-image.")
+    public void setNativeImageArgs(String args) {
+        getNativeImageArgs().set(parseNativeImageArgs(args));
     }
 
     @TaskAction
@@ -76,21 +92,40 @@ public abstract class XISNativeCompileTask extends DefaultTask {
                 .reduce((left, right) -> left + File.pathSeparator + right)
                 .orElseThrow(() -> new GradleException("Native classpath is empty."));
 
+        var nativeImageCommand = new ArrayList<String>();
+        nativeImageCommand.add("--no-fallback");
+        nativeImageCommand.add("--initialize-at-build-time=org.slf4j");
+        nativeImageCommand.add("--initialize-at-run-time=one.xis.context.ApplicationProperties");
+        nativeImageCommand.add("--initialize-at-run-time=org.mariadb.jdbc");
+        nativeImageCommand.add("-H:IncludeResources=" + NATIVE_RESOURCE_INCLUDE_PATTERN);
+        nativeImageCommand.add("-H:ReflectionConfigurationFiles=" + getReflectionConfig().get().getAsFile().getAbsolutePath());
+        nativeImageCommand.add("-H:DynamicProxyConfigurationFiles=" + getProxyConfig().get().getAsFile().getAbsolutePath());
+        nativeImageCommand.addAll(getNativeImageArgs().get());
+        nativeImageCommand.add("-cp");
+        nativeImageCommand.add(classpath);
+        nativeImageCommand.add(getMainClass().get());
+        nativeImageCommand.add(outputFile.getAbsolutePath());
+
         getProject().exec(exec -> {
             exec.executable(nativeImage.getAbsolutePath());
-            exec.args(
-                    "--no-fallback",
-                    "--initialize-at-build-time=org.slf4j",
-                    "--initialize-at-run-time=one.xis.context.ApplicationProperties",
-                    "--initialize-at-run-time=org.mariadb.jdbc",
-                    "-H:IncludeResources=" + NATIVE_RESOURCE_INCLUDE_PATTERN,
-                    "-H:ReflectionConfigurationFiles=" + getReflectionConfig().get().getAsFile().getAbsolutePath(),
-                    "-H:DynamicProxyConfigurationFiles=" + getProxyConfig().get().getAsFile().getAbsolutePath(),
-                    "-cp", classpath,
-                    getMainClass().get(),
-                    outputFile.getAbsolutePath()
-            );
+            exec.args(nativeImageCommand);
         });
+    }
+
+    static List<String> parseNativeImageArgs(String args) {
+        if (args == null || args.isBlank()) {
+            return List.of();
+        }
+        return List.of(args.trim().split("\\s+"));
+    }
+
+    static List<String> forHostNativeImageArgs(List<String> args) {
+        var result = new ArrayList<String>();
+        if (args != null) {
+            result.addAll(args);
+        }
+        result.addAll(HOST_NATIVE_IMAGE_ARGS);
+        return List.copyOf(result);
     }
 
     private File findNativeImage() {

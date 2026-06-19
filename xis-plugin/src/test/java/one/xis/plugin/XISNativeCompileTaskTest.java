@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.regex.Pattern;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -24,5 +25,29 @@ class XISNativeCompileTaskTest {
 
         assertFalse(pattern.matcher("one/xis/App.class").matches());
         assertFalse(pattern.matcher("META-INF/versions/21/one/xis/App.class").matches());
+    }
+
+    @Test
+    void nativeImageArgsAreSplitByWhitespace() {
+        assertEquals(
+                java.util.List.of("-O3", "-march=native", "--pgo=profile.iprof"),
+                XISNativeCompileTask.parseNativeImageArgs("  -O3   -march=native --pgo=profile.iprof  "));
+    }
+
+    @Test
+    void blankNativeImageArgsAreIgnored() {
+        assertEquals(java.util.List.of(), XISNativeCompileTask.parseNativeImageArgs("  "));
+    }
+
+    @Test
+    void defaultNativeImageArgsUseGraalVmDefaults() {
+        assertEquals(java.util.List.of(), XISNativeCompileTask.DEFAULT_NATIVE_IMAGE_ARGS);
+    }
+
+    @Test
+    void hostNativeImageArgsAppendNativeMarch() {
+        assertEquals(
+                java.util.List.of("-O3", "-march=native"),
+                XISNativeCompileTask.forHostNativeImageArgs(java.util.List.of("-O3")));
     }
 }

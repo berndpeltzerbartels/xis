@@ -10,7 +10,7 @@ on the JVM and with XIS Boot Native; Groovy is supported on the JVM path.
 
 ## Runtime Choice
 
-Choose one application runtime:
+Choose one main application runtime:
 
 `build.gradle` for Spring:
 
@@ -19,7 +19,7 @@ plugins {
     id "java"
     id "org.springframework.boot" version "3.3.0"
     id "io.spring.dependency-management" version "1.1.5"
-    id "one.xis.plugin" version "0.16.2"
+    id "one.xis.plugin" version "0.18.0"
 }
 
 repositories {
@@ -37,7 +37,7 @@ dependencies {
 ```groovy
 plugins {
     id "java"
-    id "one.xis.plugin" version "0.16.2"
+    id "one.xis.plugin" version "0.18.0"
 }
 
 repositories {
@@ -54,7 +54,7 @@ dependencies {
 ```groovy
 plugins {
     id "java"
-    id "one.xis.plugin" version "0.16.2"
+    id "one.xis.plugin" version "0.18.0"
 }
 
 repositories {
@@ -69,7 +69,9 @@ dependencies {
 When the XIS Gradle plugin is used, it aligns XIS dependency versions to the plugin version. Add explicit versions only
 in builds that do not use the plugin.
 
-Use `xis-spring` when the application already uses Spring Boot or needs Spring integration.
+Use `xis-spring` when the application already uses Spring Boot or needs Spring integration. `xis-spring` also brings the
+plain HTTP-controller API onto the classpath, so Spring applications can expose advanced plain HTTP endpoints next to XIS
+pages when they deliberately need that lower-level API.
 
 Use `xis-boot` when you want a small standalone runtime with XIS dependency injection, properties, package scanning, and
 an embedded HTTP runtime.
@@ -82,6 +84,10 @@ plain HTTP endpoints and your own static resources.
 `xis-http-controller` provides `one.xis.http.Controller`, `@Get`, `@Post`, the other HTTP controller annotations, SSE,
 static public resources, and the embedded Netty HTTP runtime. It is intentionally named HTTP rather than REST because XIS
 does not try to define or enforce the full REST architectural style.
+
+This API is still an advanced tool. In a normal XIS application, prefer pages, frontlets, forms, actions, and model data.
+Use plain HTTP controllers for external clients, webhooks, custom static-resource handling, or intentionally framework-light
+applications such as a small API plus hand-written browser assets.
 
 If this HTTP-controller-only special case should be built as a GraalVM native executable, add
 `xis-http-controller-native` instead of `xis-http-controller`. This opt-in enables the native build tasks without making

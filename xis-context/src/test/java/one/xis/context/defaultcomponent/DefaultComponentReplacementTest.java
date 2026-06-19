@@ -2,6 +2,7 @@ package one.xis.context.defaultcomponent;
 
 import one.xis.context.AppContext;
 import one.xis.context.defaultcomponent.beanmethod.Config;
+import one.xis.context.defaultcomponent.explicit.ExplicitDefaultProcessor;
 import one.xis.context.defaultcomponent.fallback.DefaultProcessor;
 import one.xis.context.defaultcomponent.fallback.FallbackCollectionConsumer;
 import one.xis.context.defaultcomponent.fallback.FallbackConsumer;
@@ -61,6 +62,19 @@ class DefaultComponentReplacementTest {
         assertThat(consumer).isNotNull();
         assertThat(consumer.getProcessors()).hasSize(1);
         assertThat(consumer.getProcessors()).hasOnlyElementsOfType(DefaultProcessor.class);
+    }
+
+    @Test
+    void shouldPreferExplicitDefaultComponentOverScannedDefaultComponent() {
+        var context = AppContext.builder()
+                .withPackage("one.xis.context.defaultcomponent.fallback")
+                .withSingletonClass(ExplicitDefaultProcessor.class)
+                .build();
+
+        var consumer = context.getSingleton(FallbackConsumer.class);
+        assertThat(consumer).isNotNull();
+        assertThat(consumer.getProcessor()).isInstanceOf(ExplicitDefaultProcessor.class);
+        assertThat(consumer.getProcessor()).isNotInstanceOf(DefaultProcessor.class);
     }
 
     @Test

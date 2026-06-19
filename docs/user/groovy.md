@@ -21,7 +21,7 @@ Use Groovy 4 or newer:
 plugins {
     id "java"
     id "groovy"
-    id "one.xis.plugin" version "0.16.2"
+    id "one.xis.plugin" version "0.18.0"
 }
 
 repositories {

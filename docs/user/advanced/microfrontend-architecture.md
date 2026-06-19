@@ -19,7 +19,7 @@ For standalone XIS Boot:
 ```groovy
 plugins {
     id "java"
-    id "one.xis.plugin" version "0.16.2"
+    id "one.xis.plugin" version "0.18.0"
 }
 
 repositories {
@@ -39,7 +39,7 @@ plugins {
     id "java"
     id "org.springframework.boot" version "3.5.0"
     id "io.spring.dependency-management" version "1.1.7"
-    id "one.xis.plugin" version "0.16.2"
+    id "one.xis.plugin" version "0.18.0"
 }
 
 repositories {

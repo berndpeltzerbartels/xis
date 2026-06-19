@@ -34,6 +34,7 @@ var gsonVersion = rootProject.ext.libraryVersions.gson
 var jacksonVersion = rootProject.ext.libraryVersions.jackson
 var mockitoVersion = rootProject.ext.libraryVersions.mockito
 var springBootVersion = rootProject.ext.libraryVersions.springBoot
+var springContextVersion = rootProject.ext.libraryVersions.springContext
 var slf4jLog4j12Version = "2.0.3"
 
 
@@ -72,6 +73,7 @@ dependencies {
     testImplementation project(":xis-adapter-spi")
     testImplementation project(":xis-sql")
     testImplementation "org.springframework.boot:spring-boot-starter-web:$springBootVersion"
+    testImplementation "org.springframework:spring-test:$springContextVersion"
     testImplementation "com.google.code.gson:gson:$gsonVersion"
     testImplementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion"
     testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"

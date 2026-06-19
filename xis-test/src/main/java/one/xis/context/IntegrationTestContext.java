@@ -32,7 +32,7 @@ public class IntegrationTestContext {
     private final List<TestClient> clients = new ArrayList<>();
     private boolean primaryClientOpened;
 
-    private static final Object SYNC_LOCK = new Object();
+    static final Object SYNC_LOCK = new Object();
 
     public static Builder builder() {
         return new Builder();
