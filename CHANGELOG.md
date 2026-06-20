@@ -19,6 +19,16 @@
 - Added `@WelcomePage` support for router routes, including method-level `@WelcomePage` on `@Route` methods and
   class-level `@WelcomePage` on routers with exactly one route.
 - Clarified router navigation as page navigation and reject frontlet/modal route return types during startup.
+- Added the standalone HTTP Controller runtime with `@XISHttpApplication`, `XISHttpRunner`, public resource handling, and
+  `xis-http-controller-native` for HTTP-controller-only native executables.
+- Added a generic SSE endpoint layer shared by Netty/XIS Boot and Spring, including connection key handling and hub
+  tests for multiple browser clients.
+- Added local credential modules backed by Password4j, including in-memory abstractions and SQL persistence support.
+- Added secure IDP credential storage modules for client and user credentials, including SQL-backed storage.
+- Added SQL `DataSourceProvider` support so datasource creation can be supplied consistently in XIS Boot, Spring, and
+  tests.
+- Added native build support for HTTP-controller-only applications and host-oriented native compilation options through
+  the Gradle plugin.
 
 ### Changed
 
@@ -26,11 +36,37 @@
   response expiration values as relative durations.
 - Moved XIS template schema resources out of `xis-javascript`, removed the obsolete generated HTML schema, and refreshed
   the XIS schema metadata for current template elements and attributes.
+- Renamed the public user-account abstraction from `UserInfo`/`UserInfoService` to `UserAccount`/`UserAccountService`.
+- Kept native runner implementation types out of the user-facing application API; generated code now invokes the native
+  runner infrastructure internally.
+- Moved the Netty HTTP runtime classes into the HTTP controller module so the HTTP API can run without `xis-boot`.
+- Reworked Spring/XIS HTTP filtering so public resources and XIS controller handling can coexist more predictably.
+- Improved the Gradle plugin's native tasks and generated catalogs, including framework component catalogs and
+  configurable native-image arguments.
 
 ### Documentation
 
 - Clarified the generated-test documentation example by showing an `@InTestContext` collaborator with its import.
 - Documented SQL DDL change sets in the SQL guide, annotation reference, persistence index, and documentation maps.
+- Documented the HTTP Controller API as an advanced path, including SSE support and HTTP-controller-only native builds.
+- Expanded the cloud-native documentation with generated native runners, native metadata catalogs, nested DTO handling,
+  and native database modules.
+- Updated security documentation for local credentials, secure IDP credentials, user-account naming, TOTP, and
+  distributed SSO behavior.
+
+### Fixed
+
+- Fixed browser parsing of structural XIS tags inside `<select>` elements by rewriting `xis:foreach` and `xis:if` before
+  browser parsing can drop unknown child tags. This covers direct `<select>` usage and select markup inside templates.
+- Fixed native component catalog generation so `@Service` classes and generated service components are included.
+- Fixed native class catalog generation for nested DTOs, records, validation objects, and inner classes used by
+  controller responses and request models.
+- Fixed native Netty shutdown handling by avoiding shutdown-class preloading paths that are not available in native
+  images.
+- Fixed imported-type handling for annotations and model types used by generated metadata.
+- Fixed default component replacement behavior and added coverage for explicit default component processors.
+- Fixed integration-test DOM behavior for form/select handling and element building.
+- Fixed authentication and TOTP tests after the user-account and credential-service changes.
 
 ## 0.16.2 - 2026-05-30
 

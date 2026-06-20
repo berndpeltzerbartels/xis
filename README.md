@@ -40,6 +40,11 @@ Optional persistence modules add the same lightweight style to data access: `xis
 transactions, and DDL change sets, and `xis-mongodb` provides MongoDB document repositories plus change-stream callbacks for
 event-driven UI refreshes.
 
+The SQL DDL API is part of that model. Instead of hiding schema changes behind an ORM session, XIS lets applications
+declare explicit, ordered Java change sets with `one.xis.ddl.@ChangeSet`, `one.xis.ddl.@Change`, and
+`one.xis.ddl.DDL`. The same change-set mechanism can create portable schema changes for H2, MariaDB, and PostgreSQL and
+records executed changes in the database.
+
 ## Minimal Page
 
 `src/main/java/example/HelloPage.java`

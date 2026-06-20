@@ -8,6 +8,10 @@ close to the business operation and lets XIS Boot open, commit, and roll back th
 Explicit transactions are available for special cases: infrastructure code, code that does not naturally sit behind an
 interface, or code that must end a transaction before request processing ends.
 
+In ordinary application code, prefer `@Transactional`. It is the better default because the transaction boundary is
+declared on the business method and XIS opens, commits, or rolls back the transaction automatically through interface
+advice. Manual `SqlTransaction` use should be the exception, not the normal style.
+
 ```java
 @Page("/customers.html")
 class CustomerPage {
@@ -23,9 +27,12 @@ class CustomerPage {
 
     @Action("create")
     void createCustomer(@FormData("customer") Customer customer) {
+        // Prefer @Transactional on a service method when the work fits that model.
+        // Manual begin() is for special cases that need an explicit request-scoped transaction.
         transaction.begin();
         customers.save(customer);
         auditLog.insert("created customer " + customer.id());
+        // In an HTTP request this open transaction is committed when request processing ends.
     }
 }
 ```
@@ -41,3 +48,15 @@ During an HTTP request, an open explicit transaction is completed automatically 
 
 Call `transaction.commit()` or `transaction.rollback()` only when the transaction must end before the request ends, or
 when using XIS SQL outside an HTTP request.
+
+```java
+transaction.begin();
+try {
+    customers.save(customer);
+    auditLog.insert("created customer " + customer.id());
+    transaction.commit(); // Explicit early end of the transaction.
+} catch (RuntimeException e) {
+    transaction.rollback();
+    throw e;
+}
+```

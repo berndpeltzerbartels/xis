@@ -103,8 +103,8 @@ class EntryRouter {
 
     @WelcomePage
     @Route("/start.html")
-    PageResponse start(@ClientId String clientId) {
-        return PageResponse.of(HomePage.class);
+    Class<?> start(@ClientId String clientId) {
+        return HomePage.class;
     }
 }
 ```
