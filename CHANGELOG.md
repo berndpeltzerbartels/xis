@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.19.0 - 2026-06-27
+
+### Changed
+
+- `xis-local-credentials-sql` now exposes `xis-local-credentials` and `xis-sql` transitively, so applications using the
+  SQL-backed local credential store do not need to declare the lower-level modules separately.
+- `xis-idp-credentials-sql` now exposes `xis-idp-credentials` and `xis-sql` transitively for the same reason.
+- Updated documented Gradle plugin and dependency examples to `0.19.0`.
+
+### Fixed
+
+- Fixed XIS Boot Netty shutdown handling so applications respond promptly to normal JVM shutdown and Ctrl-C.
+
 ## 0.18.0 - 2026-06-17
 
 ### Added
