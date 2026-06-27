@@ -838,16 +838,14 @@ Add authentication when the customer screen should require a login:
 ```groovy
 dependencies {
     implementation "one.xis:xis-spring"
-    implementation "one.xis:xis-sql"
     implementation "one.xis:xis-authentication"
-    implementation "one.xis:xis-local-credentials"
     implementation "one.xis:xis-local-credentials-sql"
     runtimeOnly "org.postgresql:postgresql:42.7.11"
 }
 ```
 
-Provide a `UserAccountService` for the account and roles. `xis-local-credentials` validates the password separately and
-`xis-local-credentials-sql` stores the password hash in SQL:
+Provide a `UserAccountService` for the account and roles. `xis-local-credentials-sql` brings the local credential
+service and `xis-sql` transitively, validates the password, and stores the password hash in SQL:
 
 ```java
 package example.security;

@@ -26,8 +26,8 @@ var h2Version = rootProject.ext.libraryVersions.h2
 
 dependencies {
     api project(':xis-idp-credentials')
+    api project(':xis-sql')
     implementation project(':xis-context')
-    implementation project(':xis-sql')
 
     compileOnly "org.projectlombok:lombok:$lombokVersion"
     annotationProcessor "org.projectlombok:lombok:$lombokVersion"
