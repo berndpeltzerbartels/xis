@@ -238,13 +238,12 @@ For a single application with local users, use `xis-local-credentials` for passw
 `UserAccountService` for account data and roles. The split is intentional: password hashes are managed by
 `LocalCredentialService`, while `UserAccountService` maps the authenticated user id to the application's account.
 
-Add `xis-local-credentials` and one repository implementation. `xis-local-credentials-sql` stores password hashes in SQL
-and uses Argon2id through Password4j:
+Add one repository implementation. `xis-local-credentials-sql` brings `xis-local-credentials` and `xis-sql`
+transitively, stores password hashes in SQL, and uses Argon2id through Password4j:
 
 ```groovy
 dependencies {
     implementation "one.xis:xis-authentication"
-    implementation "one.xis:xis-local-credentials"
     implementation "one.xis:xis-local-credentials-sql"
 }
 ```
@@ -766,12 +765,11 @@ To implement a XIS IDP, add `xis-idp-server` and provide an `IDPService`. The se
 - returning access-token and ID-token claims
 - registering allowed clients through `IDPClientInfo`
 
-Add `xis-idp-credentials` and one repository implementation to validate user passwords and client secrets. The SQL
-default is available through `xis-idp-credentials-sql`.
+Add one repository implementation to validate user passwords and client secrets. The SQL default is available through
+`xis-idp-credentials-sql`; it brings `xis-idp-credentials` and `xis-sql` transitively.
 
 ```groovy
 implementation "one.xis:xis-idp-server:${xisVersion}"
-implementation "one.xis:xis-idp-credentials:${xisVersion}"
 implementation "one.xis:xis-idp-credentials-sql:${xisVersion}"
 ```
 
