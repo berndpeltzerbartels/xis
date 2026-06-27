@@ -23,6 +23,7 @@ import one.xis.context.Component;
 import one.xis.context.Inject;
 
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Component
 @RequiredArgsConstructor
@@ -32,8 +33,6 @@ public class NettyServer {
     private static final int READER_IDLE_SECONDS = 30; // close idle keep-alive connections
     private static final int WRITER_IDLE_SECONDS = 0;
     private static final int ALL_IDLE_SECONDS = 0;
-    private static final long SHUTDOWN_TIMEOUT_SECONDS = 5;
-
     @Inject
     private final NettyHttpServerHandler httpServerHandler;
     private final UploadConfiguration uploadConfiguration;
@@ -41,6 +40,11 @@ public class NettyServer {
     @Setter
     @Getter
     private int port = 8080;
+    private final AtomicReference<io.netty.channel.Channel> serverChannelRef = new AtomicReference<>();
+    private volatile NioEventLoopGroup bossGroup;
+    private volatile NioEventLoopGroup workerGroup;
+    private volatile NettyShutdown shutdown;
+    private volatile Thread shutdownHook;
 
     public void start() throws InterruptedException {
         preloadNettyShutdownClasses();
@@ -48,11 +52,11 @@ public class NettyServer {
         var bossFactory = new DefaultThreadFactory("netty-boss", false);
         var workerFactory = new DefaultThreadFactory("netty-worker", false);
 
-        var bossGroup = new NioEventLoopGroup(1, bossFactory);
-        var workerGroup = new NioEventLoopGroup(0, workerFactory);
+        bossGroup = new NioEventLoopGroup(1, bossFactory);
+        workerGroup = new NioEventLoopGroup(0, workerFactory);
+        shutdown = new NettyShutdown();
 
-        var serverChannelRef = new java.util.concurrent.atomic.AtomicReference<io.netty.channel.Channel>();
-        addShutdownHook(serverChannelRef, bossGroup, workerGroup);
+        addShutdownHook();
 
         try {
             ServerBootstrap bootstrap = new ServerBootstrap()
@@ -73,8 +77,19 @@ public class NettyServer {
 
             bindFuture.channel().closeFuture().sync();
         } finally {
-            shutdownNetty(serverChannelRef.get(), bossGroup, workerGroup);
+            stop();
+            removeShutdownHook();
         }
+    }
+
+    public void stop() {
+        var currentShutdown = shutdown;
+        var currentBossGroup = bossGroup;
+        var currentWorkerGroup = workerGroup;
+        if (currentShutdown == null || currentBossGroup == null || currentWorkerGroup == null) {
+            return;
+        }
+        currentShutdown.shutdown(serverChannelRef.get(), currentBossGroup, currentWorkerGroup);
     }
 
     private ChannelInitializer<SocketChannel> newChannelInitializer() {
@@ -130,29 +145,27 @@ public class NettyServer {
         return System.getProperty(NATIVE_IMAGE_PROPERTY) != null;
     }
 
-    private void addShutdownHook(java.util.concurrent.atomic.AtomicReference<io.netty.channel.Channel> serverChannelRef,
-                                 NioEventLoopGroup bossGroup,
-                                 NioEventLoopGroup workerGroup) {
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            System.out.println("Shutting down server...");
-            shutdownNetty(serverChannelRef.get(), bossGroup, workerGroup);
-        }, "netty-shutdown"));
+    private void addShutdownHook() {
+        shutdownHook = new Thread(() -> {
+            if (shutdown == null || !shutdown.isShutdownStarted()) {
+                System.out.println("Shutting down server...");
+            }
+            stop();
+        }, "netty-shutdown");
+        Runtime.getRuntime().addShutdownHook(shutdownHook);
     }
 
-    private void shutdownNetty(io.netty.channel.Channel serverChannel,
-                               NioEventLoopGroup bossGroup,
-                               NioEventLoopGroup workerGroup) {
+    private void removeShutdownHook() {
+        var hook = shutdownHook;
+        if (hook == null) {
+            return;
+        }
         try {
-            if (serverChannel != null && serverChannel.isOpen()) {
-                serverChannel.close().awaitUninterruptibly(SHUTDOWN_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-            }
-            workerGroup.shutdownGracefully(0, SHUTDOWN_TIMEOUT_SECONDS, TimeUnit.SECONDS)
-                    .awaitUninterruptibly(SHUTDOWN_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-            bossGroup.shutdownGracefully(0, SHUTDOWN_TIMEOUT_SECONDS, TimeUnit.SECONDS)
-                    .awaitUninterruptibly(SHUTDOWN_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-        } catch (Throwable throwable) {
-            System.err.println("Netty shutdown failed: " + throwable.getMessage());
-            throwable.printStackTrace(System.err);
+            Runtime.getRuntime().removeShutdownHook(hook);
+        } catch (IllegalStateException ignored) {
+            // The JVM is already running shutdown hooks.
+        } finally {
+            shutdownHook = null;
         }
     }
 }
